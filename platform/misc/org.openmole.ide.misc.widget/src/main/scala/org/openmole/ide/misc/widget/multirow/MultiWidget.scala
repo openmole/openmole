@@ -22,8 +22,7 @@ import scala.collection.mutable.HashSet
 import scala.swing.Action
 import scala.swing.Label
 import javax.swing.ImageIcon
-import org.openmole.ide.misc.image.ImageTool
-import org.openmole.ide.misc.widget.MainLinkLabel
+import org.openmole.ide.misc.widget.ImageLinkLabel
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 
@@ -45,8 +44,7 @@ class MultiWidget[T<:IRowWidget](title: String = "",
   val rowWidgets = new HashSet[T]
   val panel =  new PluginPanel("wrap "+{if(rWidgets.head.plusAllowed == ADD) 1 else 0}.toString +", insets 0 5 0 5")
   val titleLabel = new Label(title){foreground = new Color(0,113,187)}
-  val addButton = new MainLinkLabel("",new Action("") { def apply = addRow }) {
-    icon = new ImageIcon(ImageTool.loadImage("img/add.png",15,15))}
+  val addButton = new ImageLinkLabel("img/add.png",15,15,new Action("") { def apply = addRow })
   
   rWidgets.foreach {
     r => 
@@ -61,10 +59,10 @@ class MultiWidget[T<:IRowWidget](title: String = "",
     rowWidgets += rowWidget
     panel.contents.insert(panel.contents.size-1,rowWidget.panel)
     
-    rowWidget.panel.removeButton.action_=( new Action("") {def apply = {
+    rowWidget.panel.removeButton.action =  new Action("") {def apply = {
           if (allowEmpty == CLOSE_IF_EMPTY || (allowEmpty == NO_EMPTY && rowWidgets.size > 1)) {
             removeRow(rowWidget)
-            rowWidget.doOnClose}}})
+            rowWidget.doOnClose}}}
     refresh
     rowWidget
   }

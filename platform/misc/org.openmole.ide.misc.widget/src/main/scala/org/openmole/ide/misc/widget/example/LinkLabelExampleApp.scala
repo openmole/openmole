@@ -18,7 +18,7 @@
 package org.openmole.ide.misc.widget.example
 
 import java.awt.Dimension
-import org.openmole.ide.misc.widget.{PluginPanel,ContentAction,MainLinkLabel,LinkLabel,EditableLinkLabel}
+import org.openmole.ide.misc.widget.{PluginPanel,ContentAction,MainLinkLabel,LinkLabel,EditableLinkLabel,ImageLinkLabel}
 import scala.collection.JavaConversions._
 import scala.swing.{ComboBox,Action,MainFrame,SimpleSwingApplication}
 import javax.swing.JComboBox
@@ -35,6 +35,7 @@ object LinkLabelExampleApp extends SimpleSwingApplication
       
       val li = List(new ContentAction("one",new Fake){override def apply = content.fakemethod(title)},new ContentAction("two",new Fake){def apply = content.fakemethod(title)})
       contents += new EditableLinkLabel(li.head,li)
+      contents += new ImageLinkLabel("img/add.png",30,30,new Action(""){def apply = println("My image link !")} )
     }
     size = new Dimension(250,200)
   }

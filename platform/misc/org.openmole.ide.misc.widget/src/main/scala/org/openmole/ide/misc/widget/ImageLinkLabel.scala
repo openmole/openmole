@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 leclaire
+ * Copyright (C) 2012 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,14 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.misc.widget.multirow
-
-import javax.swing.JPanel
-import org.openmole.ide.misc.widget.ImageLinkLabel
+package org.openmole.ide.misc.widget
+import java.awt.Cursor
+import javax.swing.ImageIcon
 import scala.swing.Action
-import scala.swing.Panel
+import scala.swing.Label
+import scala.swing.event.MousePressed
+import org.openmole.ide.misc.image.ImageTool
 
-trait IRowPanel extends Panel{
-  val removeButton = new ImageLinkLabel("img/del.png",15,15,new Action("") { def apply = {} })
-  def extend(extendedPanel: JPanel): Unit
+class ImageLinkLabel(imagePath : String,
+                     width : Int,
+                     height : Int,
+                     var action: Action) extends Label {
+  icon = new ImageIcon(ImageTool.loadImage(imagePath,width,height))
+  cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+  
+  listenTo(this.mouse.clicks)
+  reactions += {
+    case e: MousePressed => action.apply
+  }
 }
