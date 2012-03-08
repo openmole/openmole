@@ -59,5 +59,8 @@ class ExplorationTaskPanelUI (pud: ExplorationTaskDataUI) extends PluginPanel("w
   def contentAction(proxy : ISamplingDataProxyUI)  = new ContentAction(proxy.dataUI.name,proxy){
     override def apply = TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.displayExtraProperty(proxy)}
 
-  override def saveContent(name: String) = new ExplorationTaskDataUI(name,Some(samplingComboBox.selection.item))
+  override def saveContent(name: String) = new ExplorationTaskDataUI(name,
+                                                                     if (samplingComboBox.peer.getItemCount > 0)
+                                                                       Some(samplingComboBox.selection.item)
+                                                                     else None)
 }
