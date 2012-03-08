@@ -104,7 +104,7 @@ class CapsuleUI(val scene: IMoleScene,
     }
     environment match {
       case Some(x : IEnvironmentDataProxyUI) => 
-        environmentWidget = Some(new LinkedImageWidget(scene,x.dataUI.imagePath,30,30,TASK_CONTAINER_WIDTH - 10,0,
+        environmentWidget = Some(new LinkedImageWidget(scene,x.dataUI.imagePath,TASK_CONTAINER_WIDTH - 10,TASK_CONTAINER_HEIGHT -3,
                                                        new Action("") {def apply = scene.displayPropertyPanel(x,EDIT)}))
         addChild(environmentWidget.get)
       case None=> environmentWidget = None
@@ -126,7 +126,9 @@ class CapsuleUI(val scene: IMoleScene,
 
   def removeInputSlot= {
     nbInputSlots-= 1
-    removeFirstInputSlot
+    val toBeRemoved = islots.tail.last
+    removeChild(toBeRemoved.widget)
+    islots-= toBeRemoved
   }
   
   def setDataProxy(dpu: ITaskDataProxyUI)={
@@ -141,10 +143,6 @@ class CapsuleUI(val scene: IMoleScene,
   def x = convertLocalToScene(getLocation).getX
   
   def y = convertLocalToScene(getLocation).getY
-  
-  def addInputSlot(iw: InputSlotWidget) {}
-    
-  def removeFirstInputSlot = {}
   
   def addSampling = {
     samplingWidget = Some(new SamplingWidget(scene,this))
