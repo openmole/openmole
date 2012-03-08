@@ -29,6 +29,6 @@ class LinkedImageWidget(scene : IMoleScene,
                         y : Int,
                         width : Int,
                         height : Int,
-                        action : Action) extends ComponentWidget(scene.graphScene,new ImageLinkLabel(imagePath,20,20,action).peer) {
+                        action : Action) extends ComponentWidget(scene.graphScene,new ImageLinkLabel(imagePath,action).peer) {
   setPreferredLocation(new Point(x,y))
 }

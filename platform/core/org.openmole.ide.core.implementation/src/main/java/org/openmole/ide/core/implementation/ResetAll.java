@@ -40,6 +40,5 @@ public final class ResetAll implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         TopComponentsManager.closeOpenedTopComponents();
         Proxys.clearAll();
-        Displays.propertyPanel().cleanViewport();
     }
 }

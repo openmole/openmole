@@ -23,10 +23,10 @@ import java.awt.Dimension
 import javax.swing.BorderFactory
 import javax.swing.ImageIcon
 import org.openmole.ide.core.model.panel.IPanelUI
+import org.openide.util.ImageUtilities
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.misc.image.ImageTool
 import org.openmole.ide.misc.widget.ImageLinkLabel
 import org.openmole.ide.misc.widget._
 import scala.swing.Action
@@ -40,7 +40,7 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
                            mode : Value,
                            borderColor : Color = new Color(200,200,200)) extends Panel {
   peer.setLayout(new BorderLayout)
-  val iconLabel = new Label{ icon = new ImageIcon(ImageTool.loadImage("img/empty.png",50,50))}
+  val iconLabel = new Label{ icon = new ImageIcon(ImageUtilities.loadImage("img/empty.png"))}
   val nameTextField = new TextField(15) {text = proxy.dataUI.name; tooltip = Help.tooltip("Name of the concept instance")}
   val createLabelLink = new MainLinkLabel("create",new Action("") { def apply = baseCreate})
   val mainLinksPanel = new PluginPanel("") {contents += createLabelLink}
@@ -53,7 +53,7 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
       contents += new PluginPanel("wrap"){
         contents += new PluginPanel("wrap 2"){
           contents += nameTextField
-          contents += new ImageLinkLabel("img/close.png",20,20,new Action("") { def apply = BasePanelUI.this.hide })
+          contents += new ImageLinkLabel("img/close.png",new Action("") { def apply = BasePanelUI.this.hide })
         }
         contents += mainLinksPanel
       }

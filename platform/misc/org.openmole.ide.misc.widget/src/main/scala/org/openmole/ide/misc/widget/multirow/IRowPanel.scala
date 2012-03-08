@@ -23,6 +23,6 @@ import scala.swing.Action
 import scala.swing.Panel
 
 trait IRowPanel extends Panel{
-  val removeButton = new ImageLinkLabel("img/del.png",15,15,new Action("") { def apply = {} })
+  val removeButton = new ImageLinkLabel("img/del.png",new Action("") { def apply = {} })
   def extend(extendedPanel: JPanel): Unit
 }

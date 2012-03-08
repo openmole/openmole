@@ -99,7 +99,7 @@ class CapsuleUI(val scene: IMoleScene,
     
   private def updateEnvironmentWidget = {
     environmentWidget match {
-      case y : LinkedImageWidget => removeChild(y)
+      case Some(y : LinkedImageWidget) => removeChild(y)
       case None =>
     }
     environment match {
@@ -107,7 +107,7 @@ class CapsuleUI(val scene: IMoleScene,
         environmentWidget = Some(new LinkedImageWidget(scene,x.dataUI.imagePath,30,30,TASK_CONTAINER_WIDTH - 10,0,
                                                        new Action("") {def apply = scene.displayPropertyPanel(x,EDIT)}))
         addChild(environmentWidget.get)
-      case None=>
+      case None=> environmentWidget = None
     }
     scene.refresh
   }

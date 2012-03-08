@@ -19,8 +19,10 @@ package org.openmole.ide.misc.widget
 
 import java.awt.Cursor
 import javax.swing.ImageIcon
-import org.openmole.ide.misc.image.ImageTool
+
+
 import org.openmole.misc.tools.groovy.GroovyProxy
+import org.openide.util.ImageUtilities
 import org.openmole.ide.misc.widget.dialog.DialogFactory
 import scala.swing.Action
 
@@ -37,21 +39,21 @@ class GroovyTextFieldEditor[A](val title : String,
   
   private def setIcon(code : String) = {
     icon = code.isEmpty match {
-      case true => new ImageIcon(ImageTool.loadImage("img/edit_empty.png",20,20))
+      case true => new ImageIcon(ImageUtilities.loadImage("img/edit_empty.png"))
       case false => 
         try {
           new GroovyProxy(code).execute() match {
             case x: A => 
               tooltip = "Valid Groovy script : " + x
-              new ImageIcon(ImageTool.loadImage("img/edit.png",20,20))
+              new ImageIcon(ImageUtilities.loadImage("img/edit.png"))
             case _ => 
               tooltip = "No default value"
-              new ImageIcon(ImageTool.loadImage("img/edit_error.png",20,20))
+              new ImageIcon(ImageUtilities.loadImage("img/edit_error.png"))
           }
         } catch { 
           case e => 
             tooltip = e.getMessage
-            new ImageIcon(ImageTool.loadImage("img/edit_error.png",20,20))
+            new ImageIcon(ImageUtilities.loadImage("img/edit_error.png"))
         }
     }
     repaint

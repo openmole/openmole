@@ -26,7 +26,7 @@ import javax.swing.ImageIcon
 import javax.swing.UIManager
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
-import org.openmole.ide.misc.image.ImageTool
+import org.openide.util.ImageUtilities
 import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor
@@ -38,7 +38,7 @@ object MultiRowExample extends SimpleSwingApplication {
     val fake1 = new Fake("fake1")
     val fake2 = new Fake("fake2")
     val action = new ContentAction("Action " , fake1) { override def apply = println("view " + fake1.toString)}
-    val image = new ImageIcon(ImageTool.loadImage("img/eye.png",20,20))
+    val image = new ImageIcon(ImageUtilities.loadImage("img/eye.png"))
     peer.add(new MultiComboLinkLabelGroovyTextFieldEditor("My title",
                                                           List((fake1,action,"one"),(fake2,action,"")),
                                                           List((fake1,action),(fake2,action)),image).panel.peer,BorderLayout.WEST)

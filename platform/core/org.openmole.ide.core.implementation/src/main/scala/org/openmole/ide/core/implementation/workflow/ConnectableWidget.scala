@@ -25,7 +25,8 @@ import java.awt.Font
 import java.awt.Graphics2D
 import javax.swing.ImageIcon
 import scala.swing.Label
-import org.openmole.ide.misc.image.ImageTool
+
+
 import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.netbeans.api.visual.widget.ComponentWidget
@@ -44,7 +45,7 @@ class ConnectableWidget(scene: IMoleScene, val capsule: ICapsuleUI) extends MyWi
   var samplingWidget: Option[SamplingWidget] = None
   
   val nameLabel = new Label(capsule.toString) {
-     icon = new ImageIcon(ImageTool.loadImage("img/edit.png",50,50))
+  //   icon = new ImageIcon(ImageTool.loadImage("img/edit.png",50,50))
     preferredSize = new Dimension(TASK_CONTAINER_WIDTH,TASK_TITLE_HEIGHT)
     foreground = Color.RED
     background = Color.BLUE}
@@ -107,11 +108,12 @@ class ConnectableWidget(scene: IMoleScene, val capsule: ICapsuleUI) extends MyWi
       case _=>
     }
            
-    capsule.environment match {
-      case Some(x:IEnvironmentDataProxyUI) => graphics.drawImage(ImageTool.loadImage(x.dataUI.imagePath,30,30), TASK_CONTAINER_WIDTH - 10, -10, new Container)
-      case _=>
-    }            
-    revalidate
-                        
-  }
+//    capsule.environment match {
+//      case Some(x:IEnvironmentDataProxyUI) => graphics.drawImage(ImageTool.loadImage(x.dataUI.imagePath,30,30), TASK_CONTAINER_WIDTH - 10, -10, new Container)
+//      case _=>
+//    }            
+//    revalidate
+//                        
+//  }
+}
 }

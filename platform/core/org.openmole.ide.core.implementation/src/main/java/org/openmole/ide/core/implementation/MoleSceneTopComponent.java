@@ -140,7 +140,6 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
         } else {
             etc.open();
         }
-        Displays.propertyPanel().editable_$eq(b);
         repaint();
     }
 
@@ -181,7 +180,6 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
     public void componentActivated() {
         TopComponentsManager.setCurrentMoleSceneTopComponent(this);
         refresh(moleScene.isBuildScene());
-        Displays.propertyPanel().cleanViewport();
         TopComponentsManager.displayExecutionView(moleComponent);
         if (!moleScene.isBuildScene()) {
             etc.open();

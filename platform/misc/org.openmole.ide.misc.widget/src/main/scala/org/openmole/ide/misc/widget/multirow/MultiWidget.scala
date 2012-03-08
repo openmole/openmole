@@ -44,7 +44,7 @@ class MultiWidget[T<:IRowWidget](title: String = "",
   val rowWidgets = new HashSet[T]
   val panel =  new PluginPanel("wrap "+{if(rWidgets.head.plusAllowed == ADD) 1 else 0}.toString +", insets 0 5 0 5")
   val titleLabel = new Label(title){foreground = new Color(0,113,187)}
-  val addButton = new ImageLinkLabel("img/add.png",15,15,new Action("") { def apply = addRow })
+  val addButton = new ImageLinkLabel("img/add.png",new Action("") { def apply = addRow })
   
   rWidgets.foreach {
     r => 

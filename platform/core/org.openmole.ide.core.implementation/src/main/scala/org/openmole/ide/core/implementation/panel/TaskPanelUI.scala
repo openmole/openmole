@@ -19,13 +19,13 @@ package org.openmole.ide.core.implementation.panel
 
 import java.awt.BorderLayout
 import javax.swing.ImageIcon
+import org.openide.util.ImageUtilities
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
-import org.openmole.ide.misc.image.ImageTool
 import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget.ImageLinkLabel
 import org.openmole.ide.misc.widget.PluginPanel
@@ -38,7 +38,7 @@ import scala.swing.Separator
 class TaskPanelUI(proxy: ITaskDataProxyUI,
                   scene: IMoleScene,
                   mode: Value = CREATION) extends BasePanelUI(proxy, scene,mode,proxy.dataUI.borderColor){
-  iconLabel.icon = new ImageIcon(ImageTool.loadImage(proxy.dataUI.fatImagePath,50,50))
+  iconLabel.icon = new ImageIcon(ImageUtilities.loadImage(proxy.dataUI.fatImagePath))
   var panelUI = proxy.dataUI.buildPanelUI
   var protoPanel = Proxys.prototypes.isEmpty match {
     case true => new PluginPanel("")
@@ -74,7 +74,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     switch    
     panelUI = proxy.dataUI.buildPanelUI
     mainPanel.contents += panelUI.peer
-    mainLinksPanel.contents +=  new ImageLinkLabel("img/next.png",20,20,new Action("") { def apply = protos })
+    mainLinksPanel.contents +=  new ImageLinkLabel("img/next.png",new Action("") { def apply = protos })
     revalidate
     repaint
   }
@@ -83,12 +83,12 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     switch
     mainPanel.contents += protoPanel.peer
     
-    mainLinksPanel.contents +=  new ImageLinkLabel("img/previous.png",20,20,new Action("") { def apply = properties })
+    mainLinksPanel.contents +=  new ImageLinkLabel("img/previous.png",new Action("") { def apply = properties })
   }
   
   class IOPrototypePanel extends Panel{
     peer.setLayout(new BorderLayout)
-    val image = new ImageIcon(ImageTool.loadImage("img/eye.png",20,20))
+    val image = new ImageIcon(ImageUtilities.loadImage("img/eye.png"))
       
     val protoIn = new MultiComboLinkLabelGroovyTextFieldEditor("Inputs",
                                                                TaskPanelUI.this.proxy.dataUI.prototypesIn.map{case(proto,v) => (proto,contentAction(proto),v)}.toList,

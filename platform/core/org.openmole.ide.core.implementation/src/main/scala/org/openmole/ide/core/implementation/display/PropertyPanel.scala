@@ -37,157 +37,157 @@ import org.openmole.ide.misc.widget.PopupMenu
 import org.openmole.ide.core.model.commons.Constants._
 
 class PropertyPanel extends MigPanel("fillx,wrap 4","[][grow,fill][][]", "[fill]30[]rel[grow,fill]rel[grow,fill]"){
-  Displays.currentType = TASK
-  var editable = true
-    
-//  val environmentMenu = new Menu("Environment")
-//  EnvironmentDisplay.implementationClasses.toList.sortBy(_.factory.displayName).foreach(
-//    d => environmentMenu.contents += new MenuItem(new EnvironmentDisplayAction(d, ENVIRONMENT))
-//  )
-  
-//  val taskMenu = new Menu("Task")
-//  TaskDisplay.implementationClasses.toList.sortBy(_.factory.displayName).foreach(
-//    d => taskMenu.contents += new MenuItem(new TaskDisplayAction(d, TASK))
-//  )
-//  val prototypeMenu = new Menu("Prototype")
-//  PrototypeDisplay.implementationClasses.toList.sortBy(_.factory.displayName).foreach(
-//    d => prototypeMenu.contents += new MenuItem(new PrototypeDisplayAction(d, PROTOTYPE))
-//  )
-//  
-//  val samplingMenu = new Menu("Sampling")
-//  SamplingDisplay.implementationClasses.toList.sortBy(_.factory.displayName).foreach(
-//    d => samplingMenu.contents += new MenuItem(new SamplingDisplayAction(d, SAMPLING))
-//  )
-    
-  val fakeToggleButton = new MenuToggleButton(Some(new ImageIcon(ImageTool.loadImage("img/empty.png",30,30))))
-  val saveButton = new Button("Apply")
-  val cancelButton = new Button("Cancel")
-  val nameTextField = new TextField(15) 
-//  val menuBar = new MenuBar{contents.append(prototypeMenu,taskMenu,samplingMenu,environmentMenu)}
- // menuBar.minimumSize = new Dimension(size.width,30)
-  
-  listenTo(saveButton,cancelButton)
-  reactions += {
-    case ButtonClicked(`saveButton`) =>  save
-    case ButtonClicked(`cancelButton`) =>  cancel}
-
-  val propertyScrollPane = new ScrollPane{verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded}
-  var taskPropertyComponent = new ScrollPane{verticalScrollBarPolicy = ScrollPane.BarPolicy.Never}
- // contents+= (menuBar,"span 4, growx")
-  contents+= fakeToggleButton
-  contents+= nameTextField
-  contents+= saveButton
-  contents+= cancelButton
-  
-  contents+= (propertyScrollPane,"span 4,growx, growy")
-  contents+= (taskPropertyComponent,"span 4,growx")
-  
-  def displayCurrentTypeIcon: Unit = displayCurrentTypeIcon(Displays.dataProxy.get)
-  
-  def displayCurrentTypeIcon(p: IDataProxyUI):Unit = {
-//    contents.remove(1) 
-//    contents.insert(1,new MenuToggleButton(
-//        Some(new ImageIcon(ImageTool.loadImage(p.dataUI.imagePath,30,30))))
-//      {popup= Displays.firstManagementMenu})
-//    revalidate
-  }
-  
-  def displayCurrentEntity: Unit = displayCurrentEntity(Displays.dataProxy.get)
-  
-  def displayCurrentEntity(p: IDataProxyUI): Unit = {
-//    nameTextField.text = p.dataUI.name
-//    val pui = Displays.buildPanelUI
-//    updateViewport(pui.peer)
-//    displayCurrentTypeIcon(p)
+//  Displays.currentType = TASK
+//  var editable = true
 //    
-//    pui.peer.getComponents.foreach(_.setEnabled(editable))
-//    pui.peer.getComponents.foreach(_.setEnabled(editable))
-//    peer.getComponents.foreach(_.setEnabled(editable))
-//    menuBar.peer.getComponents.foreach(_.setVisible(editable))
-  }
-  
-  def cleanViewport = {
-//    removeViewport
+////  val environmentMenu = new Menu("Environment")
+////  EnvironmentDisplay.implementationClasses.toList.sortBy(_.factory.displayName).foreach(
+////    d => environmentMenu.contents += new MenuItem(new EnvironmentDisplayAction(d, ENVIRONMENT))
+////  )
+//  
+////  val taskMenu = new Menu("Task")
+////  TaskDisplay.implementationClasses.toList.sortBy(_.factory.displayName).foreach(
+////    d => taskMenu.contents += new MenuItem(new TaskDisplayAction(d, TASK))
+////  )
+////  val prototypeMenu = new Menu("Prototype")
+////  PrototypeDisplay.implementationClasses.toList.sortBy(_.factory.displayName).foreach(
+////    d => prototypeMenu.contents += new MenuItem(new PrototypeDisplayAction(d, PROTOTYPE))
+////  )
+////  
+////  val samplingMenu = new Menu("Sampling")
+////  SamplingDisplay.implementationClasses.toList.sortBy(_.factory.displayName).foreach(
+////    d => samplingMenu.contents += new MenuItem(new SamplingDisplayAction(d, SAMPLING))
+////  )
+//    
+//  val fakeToggleButton = new MenuToggleButton(Some(new ImageIcon(ImageTool.loadImage("img/empty.png",30,30))))
+//  val saveButton = new Button("Apply")
+//  val cancelButton = new Button("Cancel")
+//  val nameTextField = new TextField(15) 
+////  val menuBar = new MenuBar{contents.append(prototypeMenu,taskMenu,samplingMenu,environmentMenu)}
+// // menuBar.minimumSize = new Dimension(size.width,30)
+//  
+//  listenTo(saveButton,cancelButton)
+//  reactions += {
+//    case ButtonClicked(`saveButton`) =>  save
+//    case ButtonClicked(`cancelButton`) =>  cancel}
+//
+//  val propertyScrollPane = new ScrollPane{verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded}
+//  var taskPropertyComponent = new ScrollPane{verticalScrollBarPolicy = ScrollPane.BarPolicy.Never}
+// // contents+= (menuBar,"span 4, growx")
+//  contents+= fakeToggleButton
+//  contents+= nameTextField
+//  contents+= saveButton
+//  contents+= cancelButton
+//  
+//  contents+= (propertyScrollPane,"span 4,growx, growy")
+//  contents+= (taskPropertyComponent,"span 4,growx")
+//  
+//  def displayCurrentTypeIcon: Unit = displayCurrentTypeIcon(Displays.dataProxy.get)
+//  
+//  def displayCurrentTypeIcon(p: IDataProxyUI):Unit = {
+////    contents.remove(1) 
+////    contents.insert(1,new MenuToggleButton(
+////        Some(new ImageIcon(ImageTool.loadImage(p.dataUI.imagePath,30,30))))
+////      {popup= Displays.firstManagementMenu})
+////    revalidate
+//  }
+//  
+//  def displayCurrentEntity: Unit = displayCurrentEntity(Displays.dataProxy.get)
+//  
+//  def displayCurrentEntity(p: IDataProxyUI): Unit = {
+////    nameTextField.text = p.dataUI.name
+////    val pui = Displays.buildPanelUI
+////    updateViewport(pui.peer)
+////    displayCurrentTypeIcon(p)
+////    
+////    pui.peer.getComponents.foreach(_.setEnabled(editable))
+////    pui.peer.getComponents.foreach(_.setEnabled(editable))
+////    peer.getComponents.foreach(_.setEnabled(editable))
+////    menuBar.peer.getComponents.foreach(_.setVisible(editable))
+//  }
+//  
+//  def cleanViewport = {
+////    removeViewport
+////    nameTextField.text = ""
+////    repaint
+////    revalidate
+//  }
+//  
+//  def removeViewport = {
+////    propertyScrollPane.peer.getViewport.removeAll
+////    contents.remove(1) 
+////    contents.insert(1,fakeToggleButton)
+//    }
+//    
+//  
+//  def updateViewport(panel: JPanel)= {
+////    removeViewport
+////    updateTaskViewport
+////    propertyScrollPane.peer.setViewportView(panel)
+////    revalidate
+//  }
+//  
+//  def updateTaskViewport = {
+////    taskPropertyComponent.peer.getViewport.removeAll
+////    Displays.dataProxy match {
+////      case Some(x: ITaskDataProxyUI)=> {
+////          taskPropertyComponent.peer.setViewportView(buildTaskPropertyPanel(x).peer)
+////          taskPropertyComponent.visible =  true
+////        }
+////      case _=> taskPropertyComponent.visible = false
+////    }
+////    taskPropertyComponent.revalidate
+//  }
+//  
+//  def save = {
+//    Displays.saveContent
+//    Displays.initMode = false
+//  }
+//  
+//  def cancel = displayCurrentEntity
+//  
+//  def initNewEntity = {
+//    Displays.initMode = true
 //    nameTextField.text = ""
-//    repaint
-//    revalidate
-  }
-  
-  def removeViewport = {
-//    propertyScrollPane.peer.getViewport.removeAll
-//    contents.remove(1) 
-//    contents.insert(1,fakeToggleButton)
-    }
-    
-  
-  def updateViewport(panel: JPanel)= {
-//    removeViewport
-//    updateTaskViewport
-//    propertyScrollPane.peer.setViewportView(panel)
-//    revalidate
-  }
-  
-  def updateTaskViewport = {
-//    taskPropertyComponent.peer.getViewport.removeAll
-//    Displays.dataProxy match {
-//      case Some(x: ITaskDataProxyUI)=> {
-//          taskPropertyComponent.peer.setViewportView(buildTaskPropertyPanel(x).peer)
-//          taskPropertyComponent.visible =  true
-//        }
-//      case _=> taskPropertyComponent.visible = false
-//    }
-//    taskPropertyComponent.revalidate
-  }
-  
-  def save = {
-    Displays.saveContent
-    Displays.initMode = false
-  }
-  
-  def cancel = displayCurrentEntity
-  
-  def initNewEntity = {
-    Displays.initMode = true
-    nameTextField.text = ""
-   // updateViewport(Displays.buildPanelUI.peer)
-    displayCurrentTypeIcon
-  }
-  
- 
-  def buildTaskPropertyPanel(dpu: ITaskDataProxyUI) = {
-//    var empty = true
-//    val mp = new MigPanel("wrap 4","[]5[]","[]5[]") {
-//      if (dpu.dataUI.prototypesIn.size>0){
-//        empty= false
-//        contents+= new Label("In")
-//        contents+= (new MigPanel(""){
-//            dpu.dataUI.prototypesIn.foreach(p=> contents+= 
-//                                            secondManagementMenu(p.dataUI.imagePath,p.dataUI.name,PrototypeDisplay.secondManagementMenu(dpu,p,IOType.INPUT)))},"wrap")}
-//      if (dpu.dataUI.prototypesOut.size>0){
-//        empty= false
-//        contents+= new Label("Out")
-//        contents+= (new MigPanel(""){
-//            dpu.dataUI.prototypesOut.foreach(p=> contents+= 
-//                                             secondManagementMenu(p.dataUI.imagePath,p.dataUI.name,PrototypeDisplay.secondManagementMenu(dpu,p,IOType.OUTPUT)))},"wrap")}
-//      if (dpu.dataUI.sampling.isDefined) {
-//        empty= false
-//        contents+= new Label("Sampling")
-//        contents+= new MigPanel(""){contents+= secondManagementMenu(dpu.dataUI.sampling.get.dataUI.imagePath,
-//                                                                    dpu.dataUI.sampling.get.dataUI.name,
-//                                                                    SamplingDisplay.secondManagementMenu(dpu,dpu.dataUI.sampling.get))}}
-////      if (dpu.dataUI.environment.isDefined) {
+//   // updateViewport(Displays.buildPanelUI.peer)
+//    displayCurrentTypeIcon
+//  }
+//  
+// 
+//  def buildTaskPropertyPanel(dpu: ITaskDataProxyUI) = {
+////    var empty = true
+////    val mp = new MigPanel("wrap 4","[]5[]","[]5[]") {
+////      if (dpu.dataUI.prototypesIn.size>0){
 ////        empty= false
-////        contents+= new Label("Environment")
-////        contents+= new MigPanel(""){contents+= secondManagementMenu(dpu.dataUI.environment.get.dataUI.imagePath,
-////                                                                    dpu.dataUI.environment.get.dataUI.name,
-////                                                                    EnvironmentDisplay.secondManagementMenu(dpu,dpu.dataUI.environment.get))}}
-//    }
-//    taskPropertyComponent.visible = !empty
-//    if (empty) taskPropertyComponent.size.height = 0
-//    mp.peer.getComponents.foreach(_.setEnabled(editable))
-//    mp
-  }
-     
-//  def secondManagementMenu(impath: String, displayname: String,p: PopupMenu) = new MenuToggleButton(
-//    Some(new ImageIcon(ImageTool.loadImage(impath,30,30))),displayname){popup= p; popup.peer.getComponents.foreach(_.setEnabled(editable))}
+////        contents+= new Label("In")
+////        contents+= (new MigPanel(""){
+////            dpu.dataUI.prototypesIn.foreach(p=> contents+= 
+////                                            secondManagementMenu(p.dataUI.imagePath,p.dataUI.name,PrototypeDisplay.secondManagementMenu(dpu,p,IOType.INPUT)))},"wrap")}
+////      if (dpu.dataUI.prototypesOut.size>0){
+////        empty= false
+////        contents+= new Label("Out")
+////        contents+= (new MigPanel(""){
+////            dpu.dataUI.prototypesOut.foreach(p=> contents+= 
+////                                             secondManagementMenu(p.dataUI.imagePath,p.dataUI.name,PrototypeDisplay.secondManagementMenu(dpu,p,IOType.OUTPUT)))},"wrap")}
+////      if (dpu.dataUI.sampling.isDefined) {
+////        empty= false
+////        contents+= new Label("Sampling")
+////        contents+= new MigPanel(""){contents+= secondManagementMenu(dpu.dataUI.sampling.get.dataUI.imagePath,
+////                                                                    dpu.dataUI.sampling.get.dataUI.name,
+////                                                                    SamplingDisplay.secondManagementMenu(dpu,dpu.dataUI.sampling.get))}}
+//////      if (dpu.dataUI.environment.isDefined) {
+//////        empty= false
+//////        contents+= new Label("Environment")
+//////        contents+= new MigPanel(""){contents+= secondManagementMenu(dpu.dataUI.environment.get.dataUI.imagePath,
+//////                                                                    dpu.dataUI.environment.get.dataUI.name,
+//////                                                                    EnvironmentDisplay.secondManagementMenu(dpu,dpu.dataUI.environment.get))}}
+////    }
+////    taskPropertyComponent.visible = !empty
+////    if (empty) taskPropertyComponent.size.height = 0
+////    mp.peer.getComponents.foreach(_.setEnabled(editable))
+////    mp
+//  }
+//     
+////  def secondManagementMenu(impath: String, displayname: String,p: PopupMenu) = new MenuToggleButton(
+////    Some(new ImageIcon(ImageTool.loadImage(impath,30,30))),displayname){popup= p; popup.peer.getComponents.foreach(_.setEnabled(editable))}
 }

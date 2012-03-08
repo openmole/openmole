@@ -18,18 +18,19 @@
 package org.openmole.ide.core.implementation.panel
 
 import java.awt.Color
-import javax.swing.BorderFactory
 import javax.swing.ImageIcon
+import org.openide.util.ImageUtilities
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
-import org.openmole.ide.misc.image.ImageTool
+
+
 
 class SamplingPanelUI(proxy: ISamplingDataProxyUI,
                          scene: IMoleScene,
                          mode: Value = CREATION) extends BasePanelUI(proxy, scene,mode,new Color(80,118,152)){
-  iconLabel.icon = new ImageIcon(ImageTool.loadImage(proxy.dataUI.fatImagePath,50,50))
+  iconLabel.icon = new ImageIcon(ImageUtilities.loadImage(proxy.dataUI.fatImagePath))
   val panelUI = proxy.dataUI.buildPanelUI
   mainPanel.contents += panelUI.peer
   

@@ -16,7 +16,8 @@
  */
 
 package org.openmole.ide.plugin.task.exploration
-import org.openmole.ide.misc.image.ImageTool
+
+
 import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.LinkLabel
@@ -25,6 +26,7 @@ import scala.swing._
 import scala.swing.event.SelectionChanged
 import swing.Swing._
 import javax.swing.ImageIcon
+import org.openide.util.ImageUtilities
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
@@ -38,7 +40,7 @@ class ExplorationTaskPanelUI (pud: ExplorationTaskDataUI) extends PluginPanel("w
   contents += new Label("Sampling")
   contents += samplingComboBox
   val linkLabel : LinkLabel = new LinkLabel("",viewAction(pud.sampling)) {
-    icon = new ImageIcon(ImageTool.loadImage("img/eye.png",20,20))
+    icon = new ImageIcon(ImageUtilities.loadImage("img/eye.png"))
   }
     
   listenTo(`samplingComboBox`)
