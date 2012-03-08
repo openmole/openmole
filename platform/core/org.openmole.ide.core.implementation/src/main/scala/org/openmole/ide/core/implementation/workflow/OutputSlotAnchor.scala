@@ -24,8 +24,8 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 
 class OutputSlotAnchor(relatedWidget: ICapsuleUI) extends SlotAnchor(relatedWidget) {
 
-  val x= Constants.TASK_CONTAINER_WIDTH + 10
-  val y= Constants.TASK_TITLE_HEIGHT + 22
+  val x= Constants.TASK_CONTAINER_WIDTH + 17
+  val y= Constants.TASK_TITLE_HEIGHT + 32
   
   override def compute(entry: Anchor.Entry)= 
     new Result(relatedWidget.widget.convertLocalToScene(new Point(x, y)), Anchor.Direction.RIGHT)

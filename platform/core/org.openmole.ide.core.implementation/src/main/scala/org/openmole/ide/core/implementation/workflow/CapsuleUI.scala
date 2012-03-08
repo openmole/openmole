@@ -17,11 +17,11 @@
 
 package org.openmole.ide.core.implementation.workflow
 
-import java.awt.Color
+import java.awt.Dimension
+import java.awt.Point
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.widget.Widget
-import scala.swing.Component
 import org.openmole.ide.core.implementation.provider.CapsuleMenuProvider
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.commons.CapsuleType._
@@ -29,15 +29,11 @@ import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
-import org.openmole.ide.misc.widget.MigPanel
 import scala.collection.mutable.HashMap
-import scala.swing.Action
-import scala.swing.Label
 import scala.collection.mutable.ListBuffer
 
 class CapsuleUI(val scene: IMoleScene, 
@@ -49,6 +45,8 @@ class CapsuleUI(val scene: IMoleScene,
   
   val taskComponentWidget = new TaskComponentWidget(scene,new TaskWidget(scene,this))
   addChild(taskComponentWidget)
+  setPreferredSize(new Dimension(TASK_CONTAINER_WIDTH+20,TASK_CONTAINER_HEIGHT+20))
+  taskComponentWidget.setPreferredLocation(new Point(10,10))
   createActions(MOVE).addAction (ActionFactory.createMoveAction)
   
   
@@ -56,9 +54,8 @@ class CapsuleUI(val scene: IMoleScene,
   val oslot= new OutputSlotWidget(scene,this)
   var samplingWidget: Option[SamplingWidget] = None
   var nbInputSlots = 0
-//  val connectableWidget= new ConnectableWidget(scene,this)
-  //val connectableWidget= new TaskComponentWidget(scene,new TaskWidget(scene,this))
-//  addChild(connectableWidget)
+  
+  addChild(oslot)
   val capsuleMenuProvider= new CapsuleMenuProvider(scene, this)
   
   scene.refresh
@@ -89,8 +86,6 @@ class CapsuleUI(val scene: IMoleScene,
   def encapsule(dpu: ITaskDataProxyUI)= {
     setDataProxy(dpu)
     capsuleMenuProvider.addTaskMenus
-//    titleLabel = new LinkLabel(dpu.dataUI.name,new Action(""){
-//        def apply = scene.displayPropertyPanel(dpu, EDIT)})
   }
   
   
@@ -101,7 +96,7 @@ class CapsuleUI(val scene: IMoleScene,
     val im = new InputSlotWidget(scene,this,nbInputSlots,on)
    // addInputSlot(im)
     islots += im
-    taskComponentWidget.addChild(im)
+    addChild(im)
     scene.validate
     scene.refresh
     im

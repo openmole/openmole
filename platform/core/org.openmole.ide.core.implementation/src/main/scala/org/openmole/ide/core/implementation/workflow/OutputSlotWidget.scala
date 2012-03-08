@@ -18,18 +18,15 @@
 package org.openmole.ide.core.implementation.workflow
 
 import java.awt.Point
-import org.openmole.ide.core.model.commons.Constants
+import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 
 class OutputSlotWidget(scene: IMoleScene,val capsule: ICapsuleUI)   extends SlotWidget(scene.graphScene){
+  setPreferredLocation(new Point(TASK_CONTAINER_WIDTH,24 + TASK_TITLE_HEIGHT))
+  
   scene match {
     case x: ExecutionMoleScene=> setImage(Images.IMAGE_OUTPUT_EXE_SLOT)
     case _=>setImage(Images.IMAGE_OUTPUT_SLOT)
   }
-  
-  setDetailedView(Constants.TASK_CONTAINER_WIDTH)
-  
-  def setDetailedView(w: Int)= setPreferredLocation(new Point(w - 6, 14 + Constants.TASK_TITLE_HEIGHT))
-  
 }

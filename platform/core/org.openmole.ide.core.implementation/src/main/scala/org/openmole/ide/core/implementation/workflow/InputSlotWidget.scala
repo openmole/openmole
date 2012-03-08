@@ -23,7 +23,7 @@ import org.openmole.ide.core.model.workflow._
 class InputSlotWidget(scene: IMoleScene,val capsule: ICapsuleUI, val index: Int,var startingSlot: Boolean) extends SlotWidget(scene.graphScene) with IInputSlotWidget{
   
   setStartingSlot(startingSlot)
-  setPreferredLocation(new Point(-12, 14 + index * 20))
+  setPreferredLocation(new Point(2, 24 + index * 20))
 
   def widget = this
   

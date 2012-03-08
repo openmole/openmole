@@ -36,14 +36,7 @@ import org.openmole.ide.core.model.panel.PanelMode._
 class TaskWidget(scene: IMoleScene,
                  val capsule : ICapsuleUI) extends Panel {
   peer.setLayout(new BorderLayout)
-  if(capsule.dataProxy.isDefined) println("capsule name " + capsule.dataProxy.get.dataUI.name)
-  val widgetArea = new Rectangle
-  widgetArea.setBounds(new Rectangle(-10, -10, TASK_CONTAINER_WIDTH + 20,TASK_CONTAINER_HEIGHT + 20)) 
-   
-  val taskArea = new Rectangle
-  taskArea.setBounds(new Rectangle(0, 0, TASK_CONTAINER_WIDTH,TASK_CONTAINER_HEIGHT)) 
-  preferredSize = new Dimension(widgetArea.getBounds.width,widgetArea.getBounds.height)
-  
+  preferredSize = new Dimension(TASK_CONTAINER_WIDTH,TASK_CONTAINER_HEIGHT)
   val titleLabel = new LinkLabel(capsule.toString, new Action(""){ 
       def apply = {
         capsule.dataProxy match {
