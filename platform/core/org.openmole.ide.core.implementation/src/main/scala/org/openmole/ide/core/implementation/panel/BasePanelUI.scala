@@ -27,6 +27,7 @@ import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.image.ImageTool
+import org.openmole.ide.misc.widget.ImageLinkLabel
 import org.openmole.ide.misc.widget._
 import scala.swing.Action
 import scala.swing.Label
@@ -52,9 +53,7 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
       contents += new PluginPanel("wrap"){
         contents += new PluginPanel("wrap 2"){
           contents += nameTextField
-          contents += new MainLinkLabel("",
-                                        new Action("") { def apply = BasePanelUI.this.hide }) {
-            icon = new ImageIcon(ImageTool.loadImage("img/close.png",20,20))}
+          contents += new ImageLinkLabel("img/close.png",20,20,new Action("") { def apply = BasePanelUI.this.hide })
         }
         contents += mainLinksPanel
       }

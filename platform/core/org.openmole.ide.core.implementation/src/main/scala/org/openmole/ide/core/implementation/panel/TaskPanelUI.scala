@@ -27,7 +27,7 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.image.ImageTool
 import org.openmole.ide.misc.widget.ContentAction
-import org.openmole.ide.misc.widget.MainLinkLabel
+import org.openmole.ide.misc.widget.ImageLinkLabel
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor
@@ -74,8 +74,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     switch    
     panelUI = proxy.dataUI.buildPanelUI
     mainPanel.contents += panelUI.peer
-    mainLinksPanel.contents +=  new MainLinkLabel("",new Action("") { def apply = protos }) {
-      icon = new ImageIcon(ImageTool.loadImage("img/next.png",20,20))}
+    mainLinksPanel.contents +=  new ImageLinkLabel("img/next.png",20,20,new Action("") { def apply = protos })
     revalidate
     repaint
   }
@@ -84,8 +83,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     switch
     mainPanel.contents += protoPanel.peer
     
-    mainLinksPanel.contents +=  new MainLinkLabel("",new Action("") { def apply = properties }) {
-      icon = new ImageIcon(ImageTool.loadImage("img/previous.png",20,20))}
+    mainLinksPanel.contents +=  new ImageLinkLabel("img/previous.png",20,20,new Action("") { def apply = properties })
   }
   
   class IOPrototypePanel extends Panel{
