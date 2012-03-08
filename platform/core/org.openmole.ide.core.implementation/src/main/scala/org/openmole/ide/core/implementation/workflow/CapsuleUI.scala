@@ -35,6 +35,7 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
+import scala.swing.Action
 
 class CapsuleUI(val scene: IMoleScene, 
                 var dataProxy: Option[ITaskDataProxyUI],
@@ -44,6 +45,9 @@ class CapsuleUI(val scene: IMoleScene,
   def this(sc: IMoleScene) = this (sc,None,CAPSULE,sc.manager.capsules.size == 0,None)
   
   val taskComponentWidget = new TaskComponentWidget(scene,new TaskWidget(scene,this))
+  var environmentWidget : Option[LinkedImageWidget] = None
+  addEnvironment(environment)
+  
   addChild(taskComponentWidget)
   setPreferredSize(new Dimension(TASK_CONTAINER_WIDTH+20,TASK_CONTAINER_HEIGHT+20))
   taskComponentWidget.setPreferredLocation(new Point(10,10))
@@ -88,16 +92,34 @@ class CapsuleUI(val scene: IMoleScene,
     capsuleMenuProvider.addTaskMenus
   }
   
+  def addEnvironment(envdataproxy : Option[IEnvironmentDataProxyUI]) = {
+    environment = envdataproxy
+    updateEnvironmentWidget
+  }
+    
+  private def updateEnvironmentWidget = {
+    environmentWidget match {
+      case y : LinkedImageWidget => removeChild(y)
+      case None =>
+    }
+    environment match {
+      case Some(x : IEnvironmentDataProxyUI) => 
+        environmentWidget = Some(new LinkedImageWidget(scene,x.dataUI.imagePath,30,30,TASK_CONTAINER_WIDTH - 10,0,
+                                                       new Action("") {def apply = scene.displayPropertyPanel(x,EDIT)}))
+        addChild(environmentWidget.get)
+      case None=>
+    }
+    scene.refresh
+  }
+  
+  
   
   def addInputSlot(on: Boolean): IInputSlotWidget =  {
     if (on) startingCapsule = on
-    
     nbInputSlots+= 1
     val im = new InputSlotWidget(scene,this,nbInputSlots,on)
-   // addInputSlot(im)
     islots += im
     addChild(im)
-    scene.validate
     scene.refresh
     im
   }
@@ -124,5 +146,10 @@ class CapsuleUI(val scene: IMoleScene,
     
   def removeFirstInputSlot = {}
   
-  def addSampling = {}
+  def addSampling = {
+    samplingWidget = Some(new SamplingWidget(scene,this))
+    samplingWidget.get.setPreferredLocation(new Point(TASK_CONTAINER_WIDTH / 2 - 15,TASK_CONTAINER_HEIGHT - 15 ))
+    addChild(samplingWidget.get) 
+    scene.refresh
+  }
 }

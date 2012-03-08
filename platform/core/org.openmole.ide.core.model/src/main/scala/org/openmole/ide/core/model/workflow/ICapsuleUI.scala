@@ -26,8 +26,6 @@ trait ICapsuleUI {
   
   def scene: IMoleScene
   
-  //def connectableWidget: IConnectableWidget
-  
   def encapsule(dpu: ITaskDataProxyUI)
   
   def addInputSlot(startingCapsule: Boolean): IInputSlotWidget
@@ -44,7 +42,7 @@ trait ICapsuleUI {
   
   def environment: Option[IEnvironmentDataProxyUI]
   
-  def environment_=(s: Option[IEnvironmentDataProxyUI])
+  def addEnvironment(env : Option[IEnvironmentDataProxyUI])
   
   def x: Double
   
