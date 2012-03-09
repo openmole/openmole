@@ -21,9 +21,11 @@ import java.awt.BorderLayout
 import javax.swing.ImageIcon
 import org.openide.util.ImageUtilities
 import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.widget.ContentAction
@@ -59,7 +61,15 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   def save = {
     protoPanel match {
       case x:IOPrototypePanel => proxy.dataUI = panelUI.save(nameTextField.text,x.protoIn.content,x.protoOut.content)
-      case _ => proxy.dataUI = panelUI.saveContent(nameTextField.text)
+      case _ => 
+        proxy.dataUI = panelUI.saveContent(nameTextField.text)
+        proxy.dataUI match {
+          case x : AbstractExplorationTaskDataUI => TopComponentsManager.capsules.filter(_.dataProxy == proxy) match {
+            case y : List[Nothing]=> 
+            case y : List[ICapsuleUI] => y.head.addSampling(x.sampling)
+          }
+          case _ =>
+        }
     }
   }
   

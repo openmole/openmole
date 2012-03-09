@@ -23,6 +23,7 @@ import org.openide.windows.TopComponent
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
+import org.openmole.ide.core.model.workflow.ICapsuleUI
 import scala.collection.JavaConversions._
 
 object TopComponentsManager {
@@ -44,6 +45,8 @@ object TopComponentsManager {
   def setCurrentMoleSceneTopComponent(ms: MoleSceneTopComponent) = currentMoleSceneTopComponent = Some(ms)
   
   def moleScenes = topComponents.map{_.getMoleScene}
+  
+  def capsules : List[ICapsuleUI] = moleScenes.map{_.manager.capsules.values}.toList.flatten
   
   def topComponents = TopComponent.getRegistry.getOpened.
   filter(_.isInstanceOf[MoleSceneTopComponent]).

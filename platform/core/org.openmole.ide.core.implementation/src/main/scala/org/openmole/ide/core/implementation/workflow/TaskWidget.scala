@@ -28,7 +28,6 @@ import javax.swing.BorderFactory
 import java.awt.Color
 import java.awt.BorderLayout
 import java.awt.Graphics2D
-import java.awt.Rectangle
 import java.awt.Dimension
 import java.awt.RenderingHints
 import org.openmole.ide.core.model.panel.PanelMode._

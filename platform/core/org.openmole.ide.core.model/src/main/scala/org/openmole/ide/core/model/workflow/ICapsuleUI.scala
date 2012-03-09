@@ -44,6 +44,8 @@ trait ICapsuleUI {
   
   def addEnvironment(env : Option[IEnvironmentDataProxyUI])
   
+  def addSampling(env : Option[ISamplingDataProxyUI])
+  
   def x: Double
   
   def y: Double

@@ -34,6 +34,7 @@ import scala.swing.Label
 import scala.swing.Panel
 import scala.swing.event.UIElementResized
 import scala.swing.TextField
+import org.netbeans.api.visual.widget.ComponentWidget
 
 abstract class BasePanelUI(proxy: IDataProxyUI,
                            scene: IMoleScene,
@@ -63,14 +64,13 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
   preferredSize.width = 300
   foreground = Color.white
   
-  mainPanel.contents.foreach { c =>
-    listenTo(c)
-    reactions += {
-      case x:UIElementResized =>
-        this.preferredSize =new Dimension(mainPanel.size.width + 30,mainPanel.size.height + 30)
+  listenTo(this)
+  reactions += {
+    case x:UIElementResized => 
+        scene.propertyWidget.revalidate
         scene.refresh
-    }
   }
+  
   
   def hide = {
     baseSave

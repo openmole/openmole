@@ -19,4 +19,6 @@ package org.openmole.ide.core.implementation.data
 
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 
-abstract class AbstractExplorationTaskDataUI(val sampling : Option[ISamplingDataProxyUI] = None) extends TaskDataUI
+abstract class AbstractExplorationTaskDataUI(val sampling : Option[ISamplingDataProxyUI] = None) extends TaskDataUI {
+  
+}

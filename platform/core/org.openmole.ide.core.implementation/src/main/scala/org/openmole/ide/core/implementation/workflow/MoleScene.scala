@@ -21,6 +21,7 @@ import java.awt.Color
 import java.awt.Dimension
 import org.netbeans.api.visual.graph.layout.GraphLayoutFactory
 import org.netbeans.api.visual.layout.LayoutFactory
+import java.awt.Graphics2D
 import java.awt.Point
 import java.awt.Rectangle
 import java.awt.RenderingHints
@@ -49,35 +50,7 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.widget.PropertyPanel
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.model.panel.PanelMode._
-import scala.swing.Component
-import scala.swing.ScrollPane
- 
-//object MoleScene {
-//  
-//  val selectAction = ActionFactory.createSelectAction(new ObjectSelectProvider)
-//  
-//  class ObjectSelectProvider extends SelectProvider {
-//        
-//    override def isAimingAllowed(w: Widget,localLocation: Point,invertSelection: Boolean) = false
-//                
-//    override def isSelectionAllowed(w: Widget,localLocation: Point,invertSelection: Boolean) = true
-//        
-//    override def select(w: Widget,localLocation: Point,invertSelection: Boolean) = {
-//      w match {
-//        case x : Any => println ("Any " + x)
-////        case x: ICapsuleUI=> { 
-////            if(x.dataProxy.isDefined)
-////              x.dataProxy.get match{
-////                case y: ITaskDataProxyUI=> x.scene.displayPropertyPanel(y,EDIT)
-////                case _=>
-////              }
-////          }
-//      }
-//    }
-//  }
-//}
-//
-//import MoleScene._
+
 abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   
   val manager = new MoleSceneManager
@@ -109,6 +82,16 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   val connectAction = ActionFactory.createExtendedConnectAction(connectLayer, new MoleSceneConnectProvider)
   val reconnectAction = ActionFactory.createReconnectAction(new MoleSceneReconnectProvider)
   
+  
+  def displayPropertyPanelPrototypeView (proxy: IDataProxyUI,
+                                         mode: PanelMode.Value) = {
+    displayPropertyPanel(proxy,mode)                         
+    currentPanel match {
+      case Some(x : TaskPanelUI) => x.protos
+      case _=>
+    }
+  }
+  
   def displayPropertyPanel(proxy: IDataProxyUI,
                            mode: PanelMode.Value) = {
     removePropertyPanel
@@ -123,8 +106,6 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
     currentPanel match {
       case Some(x:BasePanelUI)=> 
         propertyWidget.addChild(new ComponentWidget(this,x.peer))
-        //  propertyWidget.setPreferredSize(new Dimension(800,500))
-        //  propertyWidget.setPreferredBounds(new Rectangle(0,0,800,500))
       case _=>
     }
     
@@ -177,7 +158,6 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
     createEdge(sourceNodeID,targetNodeID,manager.getDataChannelID)
   
   override def createEdge(sourceNodeID:String, targetNodeID: String, id: String)= {
-    // val ed= manager.getEdgeID
     addEdge(id)
     setEdgeSource(id,sourceNodeID)
     setEdgeTarget(id,targetNodeID)
@@ -196,13 +176,14 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   }
   
   override def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String) = {
-    if (findWidget(targetNode)!=null){TopComponentsManager.connectMode match {
-        case true => 
-          findWidget(edge).asInstanceOf[ConnectorWidget].setTargetAnchor(new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex))
-        case false=> 
-          findWidget(edge).asInstanceOf[DataChannelConnectionWidget].setTargetAnchor(new InputDataChannelAnchor(findWidget(targetNode).asInstanceOf[ICapsuleUI]))
+    val targetWidget = 
+      if (findWidget(targetNode)!=null){TopComponentsManager.connectMode match {
+          case true => 
+            findWidget(edge).asInstanceOf[ConnectorWidget].setTargetAnchor(new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex))
+          case false=> 
+            findWidget(edge).asInstanceOf[DataChannelConnectionWidget].setTargetAnchor(new InputDataChannelAnchor(findWidget(targetNode).asInstanceOf[ICapsuleUI]))
+        }
       }
-    }
   }
   
   override def attachNodeWidget(n: String)= {
@@ -221,7 +202,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
       if (isNode(o)) source= Some(o.asInstanceOf[String])        
       var res= false
       sourceWidget match {
-        case x: CapsuleUI=> {res = source.isDefined}
+        case x: ICapsuleUI=> {res = source.isDefined}
       }
       res
     }
@@ -231,7 +212,11 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
       target= None
       if(isNode(o)) target= Some(o.asInstanceOf[String])
       TopComponentsManager.connectMode match {
-        case false => if (targetWidget.getClass.equals(classOf[CapsuleUI])) return ConnectorState.ACCEPT
+        case false => 
+          targetWidget match {
+            case x : TaskComponentWidget => return ConnectorState.ACCEPT
+            case _: Any => ConnectorState.REJECT
+          }
         case true=> 
           if (targetWidget.getClass.equals(classOf[InputSlotWidget])){
             val iw= targetWidget.asInstanceOf[InputSlotWidget]
@@ -255,7 +240,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
           if (manager.registerTransition(sourceCapsuleUI, targetWidget.asInstanceOf[InputSlotWidget],if(sourceCapsuleUI.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION,None))
             createConnectEdge(source.get, target.get)
         case false=> 
-          if (manager.registerDataChannel(sourceCapsuleUI, targetWidget.asInstanceOf[CapsuleUI]))
+          if (manager.registerDataChannel(sourceCapsuleUI, targetWidget.asInstanceOf[TaskComponentWidget].capsule))
             createDataChannelEdge(source.get, target.get  )
       }
     }
@@ -335,26 +320,5 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
       }
       repaint
     }
-  }
-  
-  
-  import java.awt.event.ComponentListener
-  class PropertyWidget (scene: IMoleScene,wi: BasePanelUI) extends ComponentWidget(scene.graphScene,wi.peer){
-    setPreferredBounds(new Rectangle(0,0,wi.preferredSize.width,wi.preferredSize.height))
-    wi.mainPanel.peer.addComponentListener(new PropertyWidgetListener)
-    override def paintBackground = {
-      val g = scene.graphScene.getGraphics
-      g.fill(wi.bounds)
-      revalidate
-    }
-    
-    import java.awt.event.ComponentEvent
-    class PropertyWidgetListener extends ComponentListener {
-      def componentResized (e: ComponentEvent) {println("resijed " + e.getSource);revalidate}
-      def componentMoved (e: ComponentEvent) {println("move " + e.getSource);revalidate}
-      def componentShown (e: ComponentEvent) {}
-      def componentHidden (e: ComponentEvent) {}
-    }
-
   }
 }

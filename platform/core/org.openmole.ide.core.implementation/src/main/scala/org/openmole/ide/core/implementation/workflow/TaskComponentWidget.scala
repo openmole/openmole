@@ -17,17 +17,14 @@
 
 package org.openmole.ide.core.implementation.workflow
 
-import java.awt.Rectangle
-import java.awt.Color
 import java.awt.Dimension
-import javax.swing.BorderFactory
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.core.model.commons.Constants._
 
 class TaskComponentWidget(scene: IMoleScene, 
+                          val capsule : ICapsuleUI,
                           panel : TaskWidget) extends ComponentWidget(scene.graphScene, panel.peer) {
- // setPreferredBounds(new Rectangle(-10,-10,TASK_CONTAINER_WIDTH+20,TASK_CONTAINER_HEIGHT+20))
   setPreferredSize(new Dimension(TASK_CONTAINER_WIDTH,TASK_CONTAINER_HEIGHT))
   setOpaque(true)
 }
