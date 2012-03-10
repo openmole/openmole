@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.environment.desktopgrid
 
+import fr.in2p3.jsaga.impl.context.ContextImpl
 import org.ogf.saga.context.Context
 import org.openmole.core.batch.environment.Authentication
 import org.openmole.core.batch.jsaga.JSAGASessionService
@@ -32,6 +33,7 @@ class SFTPAuthentication(host: String, port:Int, login: String, password: String
     ctx.setAttribute(Context.TYPE, "UserPass")
     ctx.setAttribute(Context.USERID, login)
     ctx.setAttribute(Context.USERPASS, password)
+    ctx.setVectorAttribute(ContextImpl.BASE_URL_INCLUDES, Array("sftp->sftp2://*"))
     JSAGASessionService.addContext("sftp://"+ login + "@" + host + ":" + port + "/.*", ctx)
     if(port == 22) JSAGASessionService.addContext("sftp://" + login + "@" + host + "/.*", ctx)
   }

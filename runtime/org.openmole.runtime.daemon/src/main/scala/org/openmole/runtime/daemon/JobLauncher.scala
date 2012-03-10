@@ -18,12 +18,9 @@
 package org.openmole.runtime.daemon
 
 import java.io.File
-import java.net.URI
-import java.net.URL
 import java.util.Random
 import java.util.UUID
 import java.util.concurrent.Executors
-import org.apache.commons.exec.CommandLine
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.RelativePath
 import org.openmole.core.batch.file.URIFile
