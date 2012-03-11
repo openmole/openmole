@@ -15,16 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.jsaga;
+package org.openmole.plugin.environment.glite
 
-import org.ogf.saga.job.JobDescription;
-
-/**
- *
- * @author reuillon
- */
-public class Requirement {
-  public static final String MEMORY = JobDescription.TOTALPHYSICALMEMORY;
-  public static final String CPU_TIME = JobDescription.TOTALCPUTIME;
-  public static final String CPU_ARCHITECTURE = JobDescription.CPUARCHITECTURE;
+object Requirement {
+  val REQUIREMENTS = "GLITE.REQUIREMENTS"
+  
+  val MEMORY = org.openmole.plugin.environment.jsaga.Requirement.MEMORY
+  val CPU_TIME = org.openmole.plugin.environment.jsaga.Requirement.CPU_TIME
+  val CPU_ARCHITECTURE = org.openmole.plugin.environment.jsaga.Requirement.CPU_ARCHITECTURE
 }
