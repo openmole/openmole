@@ -15,9 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.glite
+package org.openmole.plugin.environment.jsaga
 
-package object `package` {
-  val REQUIREMENTS = "GLITE.REQUIREMENTS"
-  val values = Seq(REQUIREMENTS)
+import org.ogf.saga.job.JobDescription
+
+object Requirement {
+  val MEMORY = JobDescription.TOTALPHYSICALMEMORY
+  val CPU_TIME = JobDescription.TOTALCPUTIME
+  val CPU_ARCHITECTURE = JobDescription.CPUARCHITECTURE
 }

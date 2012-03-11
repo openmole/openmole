@@ -22,7 +22,7 @@ import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import scala.math._
 import org.openmole.plugin.environment.jsaga._
-import `package`._
+import Requirement._
 
 object JSAGAEnvironment {
   val DefaultRequieredMemory  = new ConfigurationLocation("JSAGAEnvironment", "RequieredMemory")

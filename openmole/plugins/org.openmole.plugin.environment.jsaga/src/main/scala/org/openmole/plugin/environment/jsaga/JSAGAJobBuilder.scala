@@ -21,7 +21,7 @@ import org.joda.time.format.ISOPeriodFormat
 
 import org.ogf.saga.job.JobDescription
 import org.ogf.saga.job.JobFactory
-import `package`._
+import Requirement._
 
 object JSAGAJobBuilder {
   
