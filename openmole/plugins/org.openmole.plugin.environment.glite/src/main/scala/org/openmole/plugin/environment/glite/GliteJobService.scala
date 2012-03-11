@@ -38,6 +38,7 @@ import org.openmole.core.batch.control.AccessToken
 import org.openmole.misc.tools.io.FileUtil._
 import scala.collection.JavaConversions._
 import scala.io.Source
+import `package`._
 
 object GliteJobService extends Logger {
   val LCGCPTimeOut = new ConfigurationLocation("GliteJobService", "RuntimeCopyOnWNTimeOut")
@@ -150,7 +151,7 @@ class GliteJobService(jobServiceURI: URI, val environment: GliteEnvironment, ove
                                                                               {if(script.getAbsolutePath.startsWith("/")) script.getAbsolutePath.tail else script.getAbsolutePath} +
                                                                               ">" + script.getName))
 
-    attributes.get(GliteAttributes.REQUIREMENTS) match {
+    attributes.get(REQUIREMENTS) match {
       case Some(requirement) => val requirements = new StringBuilder
         requirements.append("JDLRequirements=(")
         requirements.append(requirement)

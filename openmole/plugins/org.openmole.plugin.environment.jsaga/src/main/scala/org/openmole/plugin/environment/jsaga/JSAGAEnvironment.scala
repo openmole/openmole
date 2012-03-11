@@ -20,8 +20,9 @@ package org.openmole.plugin.environment.jsaga
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
-import org.openmole.plugin.environment.jsaga.JSAGAAttributes._
 import scala.math._
+import org.openmole.plugin.environment.jsaga._
+import `package`._
 
 object JSAGAEnvironment {
   val DefaultRequieredMemory  = new ConfigurationLocation("JSAGAEnvironment", "RequieredMemory")
@@ -34,6 +35,7 @@ abstract class JSAGAEnvironment(val inAttributes: Option[Map[String, String]]) e
   import JSAGAEnvironment._
     
   val memory = max(Workspace.preferenceAsInt(DefaultRequieredMemory), memorySizeForRuntime).toString
+  
   val attributes = inAttributes match {
     case Some(map) => if(map.contains(MEMORY)) map else map + {MEMORY -> memory}
     case None => Map(MEMORY -> memory)
