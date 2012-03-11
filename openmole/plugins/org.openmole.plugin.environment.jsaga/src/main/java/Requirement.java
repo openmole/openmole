@@ -15,12 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.jsaga
+package org.openmole.plugin.environment.jsaga;
 
-import org.ogf.saga.job.JobDescription
+import org.ogf.saga.job.JobDescription;
 
-object Requirement {
-  val MEMORY = JobDescription.TOTALPHYSICALMEMORY
-  val CPU_TIME = JobDescription.TOTALCPUTIME
-  val CPU_ARCHITECTURE = JobDescription.CPUARCHITECTURE
+/**
+ *
+ * @author reuillon
+ */
+public class Requirement {
+  public static final String MEMORY = JobDescription.TOTALPHYSICALMEMORY;
+  public static final String CPU_TIME = JobDescription.TOTALCPUTIME;
+  public static final String CPU_ARCHITECTURE = JobDescription.CPUARCHITECTURE;
 }

@@ -14,15 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.plugin.environment.glite;
 
-package org.openmole.plugin.environment.glite
-
-import org.openmole.plugin.environment.jsaga.{Requirement => JR} 
-
-object Requirement {
-  val REQUIREMENTS: String = "GLITE.REQUIREMENTS"
+/**
+ *
+ * @author reuillon
+ */
+public class Requirement {
+    
+  public static final String REQUIREMENTS = "GLITE.REQUIREMENTS";
   
-  val MEMORY = JR.MEMORY
-  val CPU_TIME = JR.CPU_TIME
-  val CPU_ARCHITECTURE = JR.CPU_ARCHITECTURE
+  public static final String MEMORY = org.openmole.plugin.environment.jsaga.Requirement.MEMORY;
+  public static final String CPU_TIME = org.openmole.plugin.environment.jsaga.Requirement.CPU_TIME;
+  public static final String CPU_ARCHITECTURE = org.openmole.plugin.environment.jsaga.Requirement.CPU_ARCHITECTURE;
 }
