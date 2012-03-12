@@ -19,7 +19,6 @@ package org.openmole.misc.tools.service
 
 import java.util.UUID
 import org.apache.commons.math3.random.{RandomGenerator, Well44497b, RandomAdaptor}
-import scala.collection.mutable.IndexedSeq
 
 object Random {
   implicit def uuid2long(uuid: UUID) = uuid.getMostSignificantBits ^ uuid.getLeastSignificantBits
@@ -49,8 +48,9 @@ object Random {
   }
   
   
+
   implicit def randomDecorator(rng: java.util.Random) = new {
-    def shuffle[T](a: IndexedSeq[T]) ={
+    def shuffle[T](a: Array[T]) = {
       for (i <- 1 until a.size reverse) {
         val j = rng.nextInt (i + 1)
         val t = a(i)
@@ -65,6 +65,14 @@ object Random {
       ((v - Long.MinValue) * (BigDecimal(max) / longInterval)).toLong
     }
   }
+  
+  implicit def iterableShuffleDecorator[T](a: Iterable[T]) = new {
+    def shuffled(implicit rng: java.util.Random): Seq[T] = {
+      val indexed = a.toIndexedSeq
+      rng.shuffle((0 until a.size).toArray).map(i => indexed(i))
+    }
+  }
+  
   
 }
 

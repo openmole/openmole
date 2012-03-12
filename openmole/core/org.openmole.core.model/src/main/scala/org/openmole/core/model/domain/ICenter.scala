@@ -19,13 +19,6 @@ package org.openmole.core.model.domain
 
 import org.openmole.core.model.data.IContext
 
-trait IWithRange[+T]  {
-    @throws(classOf[Throwable])
-    def range(context: IContext): T
-    
-    @throws(classOf[Throwable])
-    def min(context: IContext): T
-    
-    @throws(classOf[Throwable])
-    def max(context: IContext): T
+trait ICenter[+T] {
+  def center(context: IContext): T
 }

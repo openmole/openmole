@@ -19,15 +19,15 @@ package org.openmole.plugin.domain.range
 
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IFiniteDomain
-import org.openmole.core.model.domain.IWithRange
+import org.openmole.core.model.domain.IBounded
 import org.openmole.core.implementation.tools.VariableExpansion._
 import math._
 
-class DoubleLogarithmRange(val min: String, val max: String, val nbStep: String) extends IFiniteDomain[Double] with IWithRange[Double] {
+class DoubleLogarithmRange(val min: String, val max: String, val nbStep: String) extends IFiniteDomain[Double] with IBounded[Double] {
   
   def this(min: Double, max: Double, nbStep: Int) = this(min.toString, max.toString, nbStep.toString)
   
-  override def range(context: IContext): Double = {max(context).doubleValue - min(context).doubleValue}
+//  override def range(context: IContext): Double = {max(context).doubleValue - min(context).doubleValue}
 
   override def computeValues(context: IContext): Iterable[Double] = {
      val mi = log(min(context).doubleValue)

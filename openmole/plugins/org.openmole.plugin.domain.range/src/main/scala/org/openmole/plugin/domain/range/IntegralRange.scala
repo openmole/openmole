@@ -39,7 +39,4 @@ abstract class IntegralRange[T](val min: String, val max: String, val step: Stri
     mi + ((max(context) - mi) / fromInt(2))
   }
 
-  override def range(context: IContext): T = {
-    max(context) - min(context)
-  }
 }

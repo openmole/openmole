@@ -19,10 +19,10 @@ package org.openmole.plugin.domain.range
 
 import org.openmole.core.model.domain.IFiniteDomain
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.domain.IWithCenter
-import org.openmole.core.model.domain.IWithRange
+import org.openmole.core.model.domain.ICenter
+import org.openmole.core.model.domain.IBounded
 
-trait IRange[+T] extends IFiniteDomain[T] with IWithCenter[T] with IWithRange[T] {
+trait IRange[+T] extends IFiniteDomain[T] with ICenter[T] with IBounded[T] {
   def min: String
   def max: String
   def step: String

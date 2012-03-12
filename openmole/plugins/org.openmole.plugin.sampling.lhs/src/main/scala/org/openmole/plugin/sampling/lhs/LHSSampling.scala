@@ -18,60 +18,34 @@
 package org.openmole.plugin.sampling.lhs
 
 import org.openmole.core.model.sampling.ISampling
+import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.service.Random._
-import org.openmole.misc.tools.service.Random.randomDecorator
 import java.util.Random
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IWithRange
+import org.openmole.core.model.domain.IBounded
 import org.openmole.core.model.sampling.IFactor
-import scala.collection.mutable.ArrayBuffer
 import org.openmole.misc.workspace.Workspace
-import scala.collection.mutable.ListBuffer
 
-class LHSSampling(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IWithRange[Double]]], rng: Random) extends ISampling {
+class LHSSampling(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]], rng: Random) extends ISampling {
 
-  def this(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IWithRange[Double]]], seed: Long) = this(samples, factors, buildSynchronized(seed))
-  def this(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IWithRange[Double]]]) = this(samples, factors, Workspace.newRNG)
+  def this(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]], seed: Long) = this(samples, factors, buildSynchronized(seed))
+  def this(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]]) = this(samples, factors, Workspace.newRNG)
 
   override def prototypes = factors.map{_.prototype}
   
   override def build(context: IContext): Iterator[Iterable[IVariable[Double]]] = {
-    
-    //Inititalize a temp structure
-    val TempFactors = new Array[ArrayBuffer[Double]](factors.size)//(ArrayList<Double>[])new ArrayList[nbOfExperiments]; //new  List<Double>[nbOfExperiments] ;  //ArrayList<Double>(nbOfExperiments)[nbOfExperiments]; //= new double[getExperimentalDesign().getFactors().size()][nbOfExperiments] ;
-    for(i <- 0 until factors.size) {
-      TempFactors(i) = new ArrayBuffer[Double](samples)
-    }
-
-    for (j <- 0 until samples) {
-      var i = 0
-      for (f <- factors) {
-        val tempMin = f.domain.min(context)
-        val tempMax = f.domain.max(context)
-        TempFactors(i) += ( ((j + rng.nextDouble) / samples) * (tempMax - tempMin) + tempMin)
-        i += 1
-      }
-    }
-
-    for (i <- 0 until factors.size) rng.shuffle(TempFactors(i))
-    
-    // TODO : TempFactors is now centered and reduced. It must be corrected according to factor's parameters.
-    // affect computed values and names to the plan
-    val listOfListOfValues = new Array[Iterable[IVariable[Double]]](samples)
-
-    for (j <- 0 until  samples) {
-      val factorValues = new ListBuffer[IVariable[Double]]
-      var i = 0
-            
-      for (f <- factors) {
-        factorValues += new Variable(f.prototype, TempFactors(i)(j))
-        i += 1
-      }
-      listOfListOfValues(j) = factorValues
-    }
-    listOfListOfValues.iterator
-  }
+    (for (j <- 0 until samples) yield {
+        for(i<- 0 until factors.size) yield (i + rng.nextDouble) / samples}.shuffled(rng)).
+          map ( _.zip(factors). map {
+            case (v, f) => 
+              new Variable(
+                f.prototype,
+                v.scale(f.domain.min(context), f.domain.max(context))
+              )
+          })
+  }.toIterator
+  
 }

@@ -19,7 +19,7 @@ package org.openmole.plugin.domain.range
 
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IFiniteDomain
-import org.openmole.core.model.domain.IWithRange
+import org.openmole.core.model.domain.IBounded
 import java.math.MathContext
 import java.math.RoundingMode
 import java.util.logging.Logger
@@ -32,10 +32,8 @@ object BigDecimalLogarithmRange {
 }
 
 
-class BigDecimalLogarithmRange(val min: String, val max: String, val nbStep: String) extends IFiniteDomain[BigDecimal] with IWithRange[BigDecimal] {
+class BigDecimalLogarithmRange(val min: String, val max: String, val nbStep: String) extends IFiniteDomain[BigDecimal] with IBounded[BigDecimal] {
   import BigDecimalLogarithmRange._
-  
-  override def range(context: IContext): BigDecimal = {max(context).subtract(min(context))}
     
   override def computeValues(context: IContext): Iterable[BigDecimal] = {
     val minValue = min(context)

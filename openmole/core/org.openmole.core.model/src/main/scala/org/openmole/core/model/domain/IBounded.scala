@@ -15,18 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.domain.range
+package org.openmole.core.model.domain
 
 import org.openmole.core.model.data.IContext
 
-trait IRangeConverter[A, B] extends IRange[B] {
-  def convert(e: A): B
-  def underlyingRange: IRange[A]
-  
-  override def computeValues(context: IContext): Iterable[B] = underlyingRange.computeValues(context).map{convert(_)}
-  override def step(context: IContext): B = convert(underlyingRange.step(context))
-  override def min(context: IContext): B = convert(underlyingRange.min(context))
-  override def max(context: IContext): B = convert(underlyingRange.max(context))
-  //override def range(context: IContext): B = convert(underlyingRange.range(context))
-  override def center(context: IContext): B = convert(underlyingRange.center(context))
+trait IBounded[+T]  {    
+  def min(context: IContext): T
+  def max(context: IContext): T
 }
