@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.implementation.sampling.DiscretFactor
+import org.openmole.core.implementation.sampling.DiscreteFactor
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.domain.IDomain
@@ -31,7 +31,7 @@ class ReplicationSampling[T](sampling: ISampling, seederFactor: IFactor[T, IDoma
   override def prototypes = seederFactor.prototype :: sampling.prototypes.toList
   
   override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
-    new CompleteSampling(sampling, new DiscretFactor(seederFactor.prototype, new SlicedDomain(seederFactor.domain, nbReplication))).build(context)
+    new CompleteSampling(sampling, new DiscreteFactor(seederFactor.prototype, new SlicedDomain(seederFactor.domain, nbReplication))).build(context)
  
  
 }
