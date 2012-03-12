@@ -25,6 +25,7 @@ import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.batch.control.JobServiceControl
 import org.openmole.core.batch.control.UsageControl
+import org.openmole.core.batch.environment.GetResultFromEnvironment.JobRemoteExecutionException
 import org.openmole.core.batch.file.URIFileCleaner
 import org.openmole.core.implementation.execution.ExecutionJob
 import org.openmole.core.model.execution.ExecutionState
@@ -67,15 +68,15 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) e
       case Some(batchJob) =>
         batchJob.updateState
         state
-      }
+    }
   }
   
   override def state =
     if (killed.get) KILLED 
-    else batchJob match {
-      case None => READY
-      case Some(batchJob) => batchJob.state
-    }
+  else batchJob match {
+    case None => READY
+    case Some(batchJob) => batchJob.state
+  }
 
   override def update: Boolean = synchronized {
     val oldState = state
@@ -117,7 +118,14 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) e
       case e =>
         EventDispatcher.trigger(executionEnvironment: IEnvironment, new IEnvironment.ExceptionRaised(this, e, WARNING))
         logger.log(WARNING, "Error in job update: " + e.getMessage)
-        logger.log(FINE, "Stack of the error in job update" , e)
+        
+        val level = 
+          e match {
+            case _: JobRemoteExecutionException => WARNING
+            case _ => FINE
+          }
+      
+        logger.log(level, "Stack of the error in job update" , e)
         kill
     }
     val newState = state

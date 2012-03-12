@@ -41,7 +41,11 @@ import org.openmole.misc.tools.service.Logger
 import scala.Boolean._
 import BatchEnvironment._
 
-object GetResultFromEnvironment extends Logger
+object GetResultFromEnvironment extends Logger {
+  
+  class JobRemoteExecutionException(e: Throwable, msg: String) extends InternalProcessingError(e, msg)
+  
+}
 
 class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: String, job: IJob, environment: BatchEnvironment, batchExecutionJob: BatchExecutionJob) extends Callable[Unit] {
   import GetResultFromEnvironment._
@@ -57,7 +61,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
       display(runtimeResult.stdErr, "Error output", token)
       
       runtimeResult.result match {
-        case Right(exception) => throw new InternalProcessingError(exception, "Fatal exception thrown durring the execution of the job execution on the excution node")
+        case Right(exception) => throw new JobRemoteExecutionException(exception, "Fatal exception thrown durring the execution of the job execution on the excution node")
         case Left(result) => 
           val contextResults = getContextResults(result, token)
 
