@@ -22,6 +22,9 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.implementation.tools.VariableExpansion._
 
 class DoubleBounded(val min: String, val max: String) extends IBounded[Double] {
+  
+  def this(min: Double, max: Double) = this(min.toString, max.toString)
+  
   def min(context: IContext) = min.expand(context).toDouble
   def max(context: IContext) = max.expand(context).toDouble
 }
