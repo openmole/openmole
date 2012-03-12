@@ -20,4 +20,4 @@ package org.openmole.core.model.sampling
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IIterable
 
-trait IDiscretFactor[T, +D <: IDomain[T] with IIterable[T]] extends IFactor[T, D] with ISampling
+trait IDiscreteFactor[T, +D <: IDomain[T] with IIterable[T]] extends IFactor[T, D] with ISampling

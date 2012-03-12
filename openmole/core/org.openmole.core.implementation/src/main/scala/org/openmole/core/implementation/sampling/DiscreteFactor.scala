@@ -23,9 +23,9 @@ import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IIterable
 import org.openmole.core.implementation.data.Variable
-import org.openmole.core.model.sampling.IDiscretFactor
+import org.openmole.core.model.sampling.IDiscreteFactor
 
-object DiscretFactor {
+object DiscreteFactor {
   
   implicit def iterableFactorConversion[T, D <: IDomain[T] with IIterable[T]](f: Factor[T,D]) = this(f)
   
@@ -34,12 +34,14 @@ object DiscretFactor {
       iterableFactorConversion(f).build(context)
   }
   
-  def apply[T, D <: IDomain[T] with IIterable[T]](f: Factor[T, D]) = new DiscretFactor(f.prototype, f.domain)
+  def apply[T, D <: IDomain[T] with IIterable[T]](f: Factor[T, D]) = new DiscreteFactor(f.prototype, f.domain)
    
 }
 
 
-class DiscretFactor[T, +D <: IDomain[T] with IIterable[T]](prototype: IPrototype[T], domain: D) extends Factor[T, D](prototype, domain) with IDiscretFactor[T, D] {
+class DiscreteFactor[T, +D <: IDomain[T] with IIterable[T]](
+  prototype: IPrototype[T],
+  domain: D) extends Factor[T, D](prototype, domain) with IDiscreteFactor[T, D] {
   
   override def prototypes = List(prototype)
   
