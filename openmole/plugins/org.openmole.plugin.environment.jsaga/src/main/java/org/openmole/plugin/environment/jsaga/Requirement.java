@@ -1,3 +1,8 @@
+package org.openmole.plugin.environment.jsaga;
+
+
+import org.ogf.saga.job.JobDescription;
+
 /*
  * Copyright (C) 2012 reuillon
  *
@@ -15,12 +20,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.glite
-
-object Requirement {
-  val REQUIREMENTS = "GLITE.REQUIREMENTS"
-  
-  val MEMORY = org.openmole.plugin.environment.jsaga.Requirement.MEMORY
-  val CPU_TIME = org.openmole.plugin.environment.jsaga.Requirement.CPU_TIME
-  val CPU_ARCHITECTURE = org.openmole.plugin.environment.jsaga.Requirement.CPU_ARCHITECTURE
+/**
+ *
+ * @author reuillon
+ */
+public class Requirement {
+  public static final String MEMORY = JobDescription.TOTALPHYSICALMEMORY;
+  public static final String CPU_TIME = JobDescription.TOTALCPUTIME;
+  public static final String CPU_ARCHITECTURE = JobDescription.CPUARCHITECTURE;
 }

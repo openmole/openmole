@@ -138,7 +138,7 @@ class GliteAuthentication(val voName: String, val vomsURL: String, val myProxy: 
   }
   
   def reinit(context: Context, duration: Option[Int]) = {
-    logger.fine("Reinit proxy")
+    logger.fine("Reinit proxy " + context.getAttribute(Context.TYPE))
     duration match {
       case Some(t) => _proxyExpiresTime = System.currentTimeMillis + t
       case None =>
