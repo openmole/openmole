@@ -40,7 +40,7 @@ import scala.collection.mutable.ListBuffer
 class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
   
   "Aggregation transition" should "turn results of exploration into a array of values" in {      
-    var endCapsExecuted = 0
+    @volatile var endCapsExecuted = 0
     
     val data = List("A","A","B","C")
     val i = new Prototype("i", classOf[String])
