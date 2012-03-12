@@ -78,7 +78,7 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
   }
   
   "Aggregation transition" should "should also work for native types" in {      
-    var endCapsExecuted = 0
+    @volatile var endCapsExecuted = 0
     
     val data = List(1,2,3,2)
     val i = new Prototype("i", classOf[Int])
@@ -116,7 +116,7 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
   }
   
   "Aggregation transition" should "support cancel and start of a new execution" in {      
-    var endCapsExecuted = 0
+    @volatile var endCapsExecuted = 0
     
     val data = 0 to 1000
     val i = new Prototype("i", classOf[Int])

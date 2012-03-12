@@ -37,10 +37,7 @@ import org.openmole.core.model.mole.IGroupingStrategy
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.job.State._
 import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.eventdispatcher.Event
-import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.misc.tools.service.Priority
 import org.openmole.core.implementation.job.MoleJob
 import org.openmole.core.implementation.job.MoleJob._
 import scala.collection.immutable.TreeMap
@@ -80,7 +77,7 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
     _nbJobGrouping + childs.map{_.nbJobGrouping}.sum
   }
   
-  override def submitting_=(b: Boolean) = {
+  override def submitting_=(b: Boolean) = synchronized {
     _submitting = b
     if(allJobsWaitingInGroup) submitJobs
   }
@@ -94,11 +91,11 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
   
   override def childs = _childs.toList
   
-  def +=(submoleExecution: SubMoleExecution) = {
+  private def +=(submoleExecution: SubMoleExecution) = {
     _childs += submoleExecution
   }
 
-  def -=(submoleExecution: SubMoleExecution) = {
+  private def -=(submoleExecution: SubMoleExecution) = {
     _childs -= submoleExecution
   }
   
@@ -137,7 +134,7 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
     if(allJobsWaitingInGroup) submitJobs
   }
   
-  def checkFinished(ticket: ITicket) = 
+  private def checkFinished(ticket: ITicket) = 
     if (nbJobInProgress == 0) {
       EventDispatcher.trigger(this, new ISubMoleExecution.Finished(ticket))
       parrentApply(_.-=(this))

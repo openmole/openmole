@@ -107,7 +107,6 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
     if(!hasBeenPerformed(subMole, parentTicket)) {
       subMole.aggregationTransitionRegistry.consult(this, parentTicket) match {
         case Some(resultContexts) =>
-          //Store the result context
           resultContexts ++= context
     
           trigger match {
