@@ -41,6 +41,7 @@
 	<module>org.openmole.plugin.hook.file</module>
         <module>org.openmole.plugin.hook.csvprofiler</module>
         <module>org.openmole.plugin.hook.display</module>
+        <module>org.openmole.plugin.domain.bounded</module>
         <module>org.openmole.plugin.domain.range</module>
         <module>org.openmole.plugin.domain.relative</module>
         <module>org.openmole.plugin.domain.distribution</module>

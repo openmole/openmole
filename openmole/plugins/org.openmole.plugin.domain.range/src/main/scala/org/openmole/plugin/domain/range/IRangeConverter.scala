@@ -27,6 +27,5 @@ trait IRangeConverter[A, B] extends IRange[B] {
   override def step(context: IContext): B = convert(underlyingRange.step(context))
   override def min(context: IContext): B = convert(underlyingRange.min(context))
   override def max(context: IContext): B = convert(underlyingRange.max(context))
-  //override def range(context: IContext): B = convert(underlyingRange.range(context))
   override def center(context: IContext): B = convert(underlyingRange.center(context))
 }
