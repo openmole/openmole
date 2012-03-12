@@ -19,9 +19,10 @@ package org.openmole.plugin.domain.collection
 
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.domain.IIterable
 import scala.collection.JavaConversions._
 
-class IteratorDomain[T](iterator: Iterator[T]) extends IDomain[T] {
+class IteratorDomain[T](iterator: Iterator[T]) extends IDomain[T] with IIterable[T] {
 
   def this(iterator: java.util.Iterator[_ <: T]) = this(asScalaIterator(iterator))
 

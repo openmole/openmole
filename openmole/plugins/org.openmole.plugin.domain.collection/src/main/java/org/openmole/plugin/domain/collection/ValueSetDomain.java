@@ -20,7 +20,6 @@ import scala.collection.Iterator;
 import java.util.Arrays;
 import java.util.List;
 import org.openmole.core.model.data.IContext;
-import org.openmole.core.model.domain.IFiniteDomain;
 import scala.collection.Iterable;
 import static scala.collection.JavaConversions.*;
 
@@ -28,7 +27,7 @@ import static scala.collection.JavaConversions.*;
  *
  * @author reuillon
  */
-public class ValueSetDomain<T> implements IFiniteDomain<T> {
+public class ValueSetDomain<T> implements IValueSetDomain<T> {
 
     private final List<T> values;
 

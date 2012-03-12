@@ -20,14 +20,15 @@ package org.openmole.plugin.domain.file
 
 import java.io.File
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.domain.IFiniteDomain
+import org.openmole.core.model.domain.IDomain
 import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
+import org.openmole.core.model.domain.IFinite
 import org.openmole.misc.tools.io.FileUtil._
 
 object ListFilesDomain extends Logger
 
-class ListFilesDomain(dir: File, filter: File => Boolean) extends IFiniteDomain[File] {
+class ListFilesDomain(dir: File, filter: File => Boolean) extends IDomain[File] with IFinite[File] {
 
   import ListFilesDomain._
   

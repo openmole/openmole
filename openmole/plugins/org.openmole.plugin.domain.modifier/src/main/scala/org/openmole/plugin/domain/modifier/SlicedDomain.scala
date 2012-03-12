@@ -20,9 +20,10 @@ package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IFiniteDomain
+import org.openmole.core.model.domain.IFinite
+import org.openmole.core.model.domain.IIterable
 
-class SlicedDomain[+T](val domain: IDomain[T], val size: Int) extends IFiniteDomain[T] {
+class SlicedDomain[+T](val domain: IDomain[T] with IIterable[T], val size: Int) extends IDomain[T] with IFinite[T] {
 
   override def computeValues(context: IContext): Iterable[T] = domain.iterator(context).slice(0, size).toIterable
 

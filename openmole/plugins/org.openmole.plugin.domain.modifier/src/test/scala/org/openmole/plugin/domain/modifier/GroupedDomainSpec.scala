@@ -22,6 +22,7 @@ import org.openmole.core.model.domain.IDomain
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Context
 
+import org.openmole.core.model.domain.IIterable
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
@@ -33,7 +34,7 @@ class GroupedDomainSpec extends FlatSpec with ShouldMatchers {
   "SlicedIterablesDomain" should "change the values of a domain to iterables" in {
     val r1 = (1 to 10)
     
-    val d1 = new IDomain[Int] {
+    val d1 = new IDomain[Int] with IIterable[Int] {
       override def iterator(context: IContext) = r1.iterator
     }
     

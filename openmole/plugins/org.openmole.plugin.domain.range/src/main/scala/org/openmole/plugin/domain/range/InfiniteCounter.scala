@@ -17,10 +17,11 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.model.domain.IInfiniteDomain
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.domain.IDomain
+import org.openmole.core.model.domain.IIterable
 
-class InfiniteCounter(counter: Iterable[Long]) extends IInfiniteDomain[Long] {
+class InfiniteCounter(counter: Iterable[Long]) extends IDomain[Long] with IIterable[Long] {
 
   def this(start: Long, step: Long) = {
     this(new Iterable[Long]() {

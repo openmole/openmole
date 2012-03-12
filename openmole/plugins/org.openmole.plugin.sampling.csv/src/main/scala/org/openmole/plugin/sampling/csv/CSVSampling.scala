@@ -28,7 +28,7 @@ import org.openmole.core.model.sampling.ISampling
 import au.com.bytecode.opencsv.CSVReader
 import collection.JavaConversions._
 
-class CSVSampling(val csvFile: File) extends ISampling{
+class CSVSampling(val csvFile: File) extends ISampling {
   /**
    * Creates an intstance of CSVPlan.
    *

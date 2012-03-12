@@ -17,11 +17,4 @@
 
 package org.openmole.core.model.domain
 
-import org.openmole.core.model.data.IContext
-
-trait IDomain[+T] {
-  
-  @throws(classOf[Throwable])
-  def iterator(context: IContext): Iterator[T] 
-
-}
+trait IDomain[+T]

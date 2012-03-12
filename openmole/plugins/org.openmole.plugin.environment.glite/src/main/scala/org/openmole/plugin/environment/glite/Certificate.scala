@@ -60,6 +60,7 @@ abstract class Certificate(cypheredPassword: String) extends GliteAuthentication
         ctx.setAttribute(VOMSContext.MYPROXYSERVER, proxy.url)
         ctx.setAttribute(VOMSContext.MYPROXYUSERID, proxy.userId)
         ctx.setAttribute(VOMSContext.MYPROXYPASS, proxy.pass)
+        //ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME, getTimeString)
         None
       case None =>
         ctx.setAttribute(Context.TYPE, "VOMS")

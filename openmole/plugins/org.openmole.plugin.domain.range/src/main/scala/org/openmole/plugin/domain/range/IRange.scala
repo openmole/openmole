@@ -17,12 +17,13 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.model.domain.IFiniteDomain
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.ICenter
 import org.openmole.core.model.domain.IBounded
+import org.openmole.core.model.domain.IDomain
+import org.openmole.core.model.domain.IFinite
 
-trait IRange[+T] extends IFiniteDomain[T] with ICenter[T] with IBounded[T] {
+trait IRange[+T] extends IDomain[T] with IFinite[T] with ICenter[T] with IBounded[T] {
   def min: String
   def max: String
   def step: String

@@ -18,12 +18,13 @@
 package org.openmole.plugin.domain.range
 
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.domain.IFiniteDomain
 import org.openmole.core.model.domain.IBounded
 import org.openmole.core.implementation.tools.VariableExpansion._
 import math._
+import org.openmole.core.model.domain.IDomain
+import org.openmole.core.model.domain.IFinite
 
-class DoubleLogarithmRange(val min: String, val max: String, val nbStep: String) extends IFiniteDomain[Double] with IBounded[Double] {
+class DoubleLogarithmRange(val min: String, val max: String, val nbStep: String) extends IDomain[Double] with IFinite[Double] with IBounded[Double] {
   
   def this(min: Double, max: Double, nbStep: Int) = this(min.toString, max.toString, nbStep.toString)
   

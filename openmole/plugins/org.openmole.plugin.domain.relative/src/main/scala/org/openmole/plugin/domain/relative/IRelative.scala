@@ -17,9 +17,10 @@
 
 package org.openmole.plugin.domain.relative
 
-import org.openmole.core.model.domain.IFiniteDomain
+import org.openmole.core.model.domain.IDomain
+import org.openmole.core.model.domain.IFinite
 
-trait IRelative[T] extends IFiniteDomain[T]{
+trait IRelative[T] extends IDomain[T] with IFinite[T]{
   def nominal: String 
   def percent: String
   def size: String

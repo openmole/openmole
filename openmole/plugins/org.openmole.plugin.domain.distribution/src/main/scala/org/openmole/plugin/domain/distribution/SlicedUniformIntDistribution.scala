@@ -18,9 +18,10 @@
 package org.openmole.plugin.domain.distribution
 
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.domain.IFiniteDomain
+import org.openmole.core.model.domain.IDomain
+import org.openmole.core.model.domain.IFinite
 
-class SlicedUniformIntDistribution(domain: UniformIntDistribution, size: Int, topBound: Option[Int]= None) extends IFiniteDomain[Int]{
+class SlicedUniformIntDistribution(domain: UniformIntDistribution, size: Int, topBound: Option[Int]= None) extends IDomain[Int] with IFinite[Int] {
     
   def this(seed: Long, size: Int) = this(new UniformIntDistribution(seed), size, None)
   def this(seed: Long, size: Int, b: Int) = this(new UniformIntDistribution(seed), size,Some(b))

@@ -18,12 +18,13 @@
 package org.openmole.plugin.domain.range
 
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.domain.IFiniteDomain
+import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IBounded
 import java.math.MathContext
 import java.math.RoundingMode
 import java.util.logging.Logger
 import org.openmole.core.implementation.tools.VariableExpansion._
+import org.openmole.core.model.domain.IFinite
 import org.openmole.misc.math.BigDecimalOperations._
 import java.math.BigDecimal
 
@@ -32,7 +33,7 @@ object BigDecimalLogarithmRange {
 }
 
 
-class BigDecimalLogarithmRange(val min: String, val max: String, val nbStep: String) extends IFiniteDomain[BigDecimal] with IBounded[BigDecimal] {
+class BigDecimalLogarithmRange(val min: String, val max: String, val nbStep: String) extends IDomain[BigDecimal] with IFinite[BigDecimal] with IBounded[BigDecimal] {
   import BigDecimalLogarithmRange._
     
   override def computeValues(context: IContext): Iterable[BigDecimal] = {

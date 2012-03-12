@@ -17,16 +17,16 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.sampling.Factor
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.domain.IInfiniteDomain
+import org.openmole.core.model.domain.IDomain
+import org.openmole.core.model.domain.IIterable
 import org.openmole.core.model.sampling.IFactor
 import org.openmole.core.model.sampling.ISampling
 import org.openmole.plugin.domain.modifier.SlicedDomain
 
-class ReplicationSampling[T](sampling: ISampling, seederFactor: IFactor[T, IInfiniteDomain[T]], nbReplication: Int) extends ISampling {
+class ReplicationSampling[T](sampling: ISampling, seederFactor: IFactor[T, IDomain[T] with IIterable[T]], nbReplication: Int) extends ISampling {
 
   override def prototypes = seederFactor.prototype :: sampling.prototypes.toList
   

@@ -23,10 +23,11 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.domain.IDomain
+import org.openmole.core.model.domain.IIterable
 import org.openmole.core.model.sampling.IFactor
 import org.openmole.core.model.sampling.ISampling
 
-class ZipWithName(factor: IFactor[File, IDomain[File]], prototype: IPrototype[String]) extends ISampling {
+class ZipWithName(factor: IFactor[File, IDomain[File] with IIterable[File]], prototype: IPrototype[String]) extends ISampling {
 
   override def prototypes = List(factor.prototype, prototype)
   

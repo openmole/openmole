@@ -19,11 +19,12 @@ package org.openmole.plugin.domain.distribution
 
 import java.util.Random
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.domain.IInfiniteDomain
 import org.openmole.misc.workspace.Workspace
+import org.openmole.core.model.domain.IDomain
+import org.openmole.core.model.domain.IIterable
 import org.openmole.misc.tools.service.Random._
 
-class UniformIntDistribution(generator: Random, topBound: Option[Int]) extends IInfiniteDomain[Int] {
+class UniformIntDistribution(generator: Random, topBound: Option[Int]) extends IDomain[Int] with IIterable[Int] {
  
   def this(seed: Long) = this(buildSynchronized(seed), None)
   def this(seed: Long, b: Int) = this(buildSynchronized(seed), Some(b))

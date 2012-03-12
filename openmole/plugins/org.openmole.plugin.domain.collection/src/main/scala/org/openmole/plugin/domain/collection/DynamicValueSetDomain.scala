@@ -20,11 +20,12 @@ package org.openmole.plugin.domain.collection
 import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.core.model.data.IContext
 import scala.collection.mutable.ArrayBuffer
-import org.openmole.core.model.domain.IFiniteDomain
+import org.openmole.core.model.domain.IDomain
+import org.openmole.core.model.domain.IFinite
 import scala.collection.JavaConversions
 import scala.collection.mutable.ListBuffer
 
-class DynamicValueSetDomain[+T](val values: Iterable[String]) extends IFiniteDomain[T] {
+class DynamicValueSetDomain[+T](val values: Iterable[String]) extends IDomain[T] with IFinite[T] {
 
   def this (head: String, vals: Array[String]) = this(ListBuffer(head) ++ vals)
 
