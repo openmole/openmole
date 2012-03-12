@@ -17,21 +17,7 @@
 
 package org.openmole.ide.misc.widget
 
-import java.awt.Color
-import java.awt.Graphics2D
-import javax.swing.BorderFactory
-import scala.swing.event.UIElementResized
+import scala.swing.Component
+import scala.swing.event.ActionEvent
 
-class PropertyPanel(borderColor: Color,
-                    mig1: String, 
-                    mig2: String ="", 
-                    mig3: String="") extends MyMigPanel(mig1,mig2,mig3) {
-  
-  override def paintComponent(g: Graphics2D) = {
-  border = BorderFactory.createLineBorder(borderColor, 5)
-    super.paintComponent(g)
-    g.setColor(new Color(77,77,77))
-    g.fillRect(0, 0, size.width, size.height)
-    g.drawRect(1,1,size.width,size.height)  
-  }
-}
+  class PluginPanelResizedEvent(c : Component) extends ActionEvent(c) 

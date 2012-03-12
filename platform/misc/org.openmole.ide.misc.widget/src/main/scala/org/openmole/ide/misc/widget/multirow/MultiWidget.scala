@@ -52,7 +52,7 @@ class MultiWidget[T<:IRowWidget](title: String = "",
   }
   panel.contents.insert(0,titleLabel)
   panel.contents += addButton
-    
+  
   def addRow: T = addRow(factory.apply(specimen,panel))
  
   def addRow(rowWidget: T):T = {

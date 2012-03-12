@@ -20,15 +20,24 @@ package org.openmole.ide.misc.widget.example
 import com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel
 import java.awt.Color
 import java.awt.Dimension
+import javax.swing.JScrollPane
 import javax.swing.UIManager
+import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget._
 import scala.swing._
+import org.netbeans.api.visual.widget.ComponentWidget
+import org.netbeans.api.visual.widget.Scene
 
 object PropertyPanelExample extends SimpleSwingApplication
 {
   def top = new MainFrame {
     UIManager.setLookAndFeel(new NimbusLookAndFeel)
     title = "Link Label Demo"
+    
+    val scene = new Scene
+    
+    
+    
     contents = new PropertyPanel(Color.green,"wrap"){
       contents +=new Label("first")
       contents += new TextField("TextField")
@@ -36,7 +45,29 @@ object PropertyPanelExample extends SimpleSwingApplication
       contents += new PluginPanel("wrap"){
         contents += new MainLinkLabel("second",new Action(""){def apply = println("My link")})
         contents += new Label("Tranparent panel")}
+      
+     // val sp = new ScrollPane(scene.createView)
+     // contents += sp
+      
+      val pp = new PluginPanel("wrap"){
+        contents += new MultiCombo("",List("un","deux"),List("un","un")).panel}
+      
+      val compow = new ComponentWidget(scene,pp.peer)
+      scene.addChild(compow)
+      compow.setPreferredLocation(new Point(10,10))
+      listenTo(pp)
+      reactions += {
+        case x : PluginPanelResizedEvent => 
+          println("XXXXXXXXXXXXXXXX property resized :: " + size.height)
+          revalidate
+          repaint
+          
+        case x : Any => println ("yYYYYYYYYYYYYY " + size.height)
+          revalidate
+          repaint
+      }
+  
     }
-    size = new Dimension(250,200)
+    minimumSize = new Dimension(100,100)
   }
 }
