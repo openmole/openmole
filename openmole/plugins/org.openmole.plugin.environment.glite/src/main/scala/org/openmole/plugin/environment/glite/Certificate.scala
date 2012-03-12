@@ -17,30 +17,20 @@
 
 package org.openmole.plugin.environment.glite
 
-import java.io.File
 import org.ogf.saga.context.Context
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.workspace.Workspace
 import fr.in2p3.jsaga.adaptor.security.VOMSContext
-import fr.in2p3.jsaga.generated.parser.ParseException
-import fr.in2p3.jsaga.adaptor.base.usage.UDuration
 import org.openmole.core.batch.jsaga.JSAGASessionService
 import GliteAuthentication._
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.executorservice.ExecutorType
 import scala.ref.WeakReference
 
+import GliteAuthentication._
+
 abstract class Certificate(cypheredPassword: String) extends GliteAuthenticationMethod {
   
   //@transient lazy val proxy = Workspace.newFile("proxy", ".x509")
-  
-  private def getTimeString: String = Workspace.preference(GliteEnvironment.TimeLocation)
-  
-  private def getTime =
-    try  UDuration.toInt(getTimeString) * 1000
-    catch {
-      case (ex: ParseException) => throw new UserBadDataError(ex)
-    }
   
   def password =  
     if(cypheredPassword == null) ""

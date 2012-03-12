@@ -22,6 +22,12 @@ import org.ogf.saga.context.Context
 import org.openmole.core.batch.jsaga.JSAGASessionService
 import fr.in2p3.jsaga.adaptor.security.VOMSContext
 
+import GliteAuthentication._
+import org.openmole.misc.executorservice.ExecutorType
+import org.openmole.misc.updater.Updater
+import org.openmole.misc.workspace.Workspace
+import scala.ref.WeakReference
+
 class GlobusProxyFile(val proxyFile: String) extends GliteAuthenticationMethod {
   
   override def init(authentication: GliteAuthentication): (Context, Option[Int]) = {
@@ -32,6 +38,9 @@ class GlobusProxyFile(val proxyFile: String) extends GliteAuthenticationMethod {
     ctx.setAttribute(Context.USERPROXY, proxyFile)
     ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
     ctx.setAttribute(VOMSContext.VOMSDIR, "")
+     
+    Updater.delay(new ProxyChecker(ctx, None, new WeakReference(authentication)), ExecutorType.OWN, authentication.reloadProxyOnWorkerNodeInterval)
+   
     (ctx, None)
   }
   

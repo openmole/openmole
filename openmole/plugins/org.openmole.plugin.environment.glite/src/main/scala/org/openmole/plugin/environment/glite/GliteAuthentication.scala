@@ -18,8 +18,10 @@
 package org.openmole.plugin.environment.glite
 
 import com.ice.tar.TarInputStream
+import fr.in2p3.jsaga.adaptor.base.usage.UDuration
 import fr.in2p3.jsaga.adaptor.security.VOMSContext
 
+import fr.in2p3.jsaga.generated.parser.ParseException
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -81,15 +83,15 @@ object GliteAuthentication extends Logger {
         try {
           val links = Iterator.continually(tis.getNextEntry).drop(1).takeWhile(_ != null).flatMap {
             tarEntry =>
-              val destForName = new File(dir, tarEntry.getName)
-              val dest = new File(dir, destForName.getName)
+            val destForName = new File(dir, tarEntry.getName)
+            val dest = new File(dir, destForName.getName)
 
-              if (dest.exists) dest.delete
-              if(!tarEntry.getLinkName.isEmpty) Some(dest -> tarEntry.getLinkName)
-              else {
-                tis.copy(dest)
-                None
-              }
+            if (dest.exists) dest.delete
+            if(!tarEntry.getLinkName.isEmpty) Some(dest -> tarEntry.getLinkName)
+            else {
+              tis.copy(dest)
+              None
+            }
           }.toList
           
           links.foreach {
@@ -109,6 +111,15 @@ object GliteAuthentication extends Logger {
     JSAGASessionService.addContext("srm://.*", ctx)
   }
   
+  def getTimeString: String = Workspace.preference(GliteEnvironment.TimeLocation)
+  
+  def getTime =
+    try  UDuration.toInt(getTimeString) * 1000
+    catch {
+      case (ex: ParseException) => throw new UserBadDataError(ex)
+    }
+  
+  
 }
 
 
@@ -116,10 +127,10 @@ class GliteAuthentication(val voName: String, val vomsURL: String, val myProxy: 
 
   import GliteAuthentication._
     
-  @transient
-  private var proxy: File = null
-    
+  @transient private var proxy: File = null
   @transient private var _proxyExpiresTime = Long.MaxValue
+  
+  val reloadProxyOnWorkerNodeInterval = Workspace.preferenceAsDurationInMs(GliteEnvironment.ReloadProxyOnWorkerNodeInterval)
   
   override def key = "glite:" + (voName, vomsURL).toString
   
@@ -128,10 +139,10 @@ class GliteAuthentication(val voName: String, val vomsURL: String, val myProxy: 
   override def initialize = {
     val authenticationMethod: GliteAuthenticationMethod = 
       if (System.getenv.containsKey("X509_USER_PROXY") && new File(System.getenv.get("X509_USER_PROXY")).exists) new GlobusProxyFile(System.getenv.get("X509_USER_PROXY"))
-      else Workspace.persistentList(classOf[GliteAuthenticationMethod]).headOption match {
-        case Some((i,a)) => a
-        case None => throw new UserBadDataError("Preferences not set for grid authentication")
-      }
+    else Workspace.persistentList(classOf[GliteAuthenticationMethod]).headOption match {
+      case Some((i,a)) => a
+      case None => throw new UserBadDataError("Preferences not set for grid authentication")
+    }
     
     val (ctx, time) = authenticationMethod.init(this)
     reinit(ctx, time)
