@@ -18,15 +18,11 @@
 package org.openmole.plugin.hook.file
 
 import org.openmole.core.implementation.hook.CapsuleExecutionHook
-import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.data.IContext
 import java.io.File
 import org.openmole.misc.tools.io.FileUtil._
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.exception.UserBadDataError
