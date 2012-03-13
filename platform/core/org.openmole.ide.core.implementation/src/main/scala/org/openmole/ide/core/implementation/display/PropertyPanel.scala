@@ -23,7 +23,7 @@ import swing.ListView._
 import javax.swing.ImageIcon
 import javax.swing.JPanel
 import org.openmole.ide.core.model.panel.IPanelUI
-import org.openmole.ide.misc.image._
+//import org.openmole.ide.misc.image._
 import org.openmole.ide.misc.widget.MigPanel
 import scala.swing._
 import org.openmole.ide.core.model.commons.IOType

@@ -106,7 +106,6 @@
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-api-visual</artifactId>
             <version>${netbeans.version}</version>
-           <!-- <type>jar</type> -->
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
@@ -156,11 +155,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.misc.widget</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.ide.misc.image</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
