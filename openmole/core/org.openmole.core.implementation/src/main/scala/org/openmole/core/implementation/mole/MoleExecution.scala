@@ -23,6 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.implementation.validation.Validation
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.job.IJob
@@ -32,6 +33,7 @@ import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.mole.IEnvironmentSelection
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.exception.MultipleException
 import org.openmole.misc.eventdispatcher.EventDispatcher
@@ -107,7 +109,11 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   }
   
   override def start = {
-    if(!_started.getAndSet(true)) start(Context.empty) 
+    if(!_started.getAndSet(true)) {
+      val validationErrors = Validation(mole)
+      if(!validationErrors.isEmpty) throw new UserBadDataError("Formal validation of you mole has failed, several errors have been found: " + validationErrors.mkString("; "))
+      start(Context.empty) 
+    }
     this
   }
   

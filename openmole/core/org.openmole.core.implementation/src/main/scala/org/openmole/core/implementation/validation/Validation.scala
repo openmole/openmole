@@ -22,7 +22,6 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
 import TypeUtil.receivedTypes
 import org.openmole.core.model.data.DataModeMask._
-import scala.annotation.tailrec
 import scala.collection.immutable.TreeMap
 import org.openmole.core.model.task.IMoleTask
 import org.openmole.misc.tools.obj.ClassUtils._
