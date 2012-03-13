@@ -104,5 +104,21 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val errors = Validation.topologyErrors(new Mole(c1))
     errors.isEmpty should equal (false) 
   }
-
+  
+  
+  "Validation" should "detect a duplicated transition" in {
+    val p = new Prototype("t", classOf[String])
+    
+    val t1 = new EmptyTask("t1")
+    val t2 = new EmptyTask("t2")
+    
+    val c1 = new Capsule(t1)
+    val c2 = new Capsule(t2)
+    
+    new Transition(c1, c2)
+    new Transition(c1, c2)
+    
+    val errors = Validation.duplicatedTransitions(new Mole(c1))
+    errors.isEmpty should equal (false) 
+  }
 }
