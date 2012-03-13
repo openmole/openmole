@@ -8,7 +8,7 @@ package org.openmole.ide.plugin.environment.glite
 import org.openmole.plugin.environment.glite.GliteEnvironment
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.data.IEnvironmentDataUI
-import org.openmole.plugin.environment.jsaga.JSAGAAttributes._
+import org.openmole.plugin.environment.jsaga.Requirement._
 import org.openmole.plugin.environment.glite.MyProxy
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.misc.exception.UserBadDataError
