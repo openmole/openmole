@@ -36,16 +36,14 @@ class LHSSampling(samples: Int, factors: Array[IFactor[Double, IDomain[Double] w
 
   override def prototypes = factors.map{_.prototype}
   
-  override def build(context: IContext): Iterator[Iterable[IVariable[Double]]] = {
-    (for (j <- 0 until samples) yield {
-        for(i<- 0 until factors.size) yield (i + rng.nextDouble) / samples}.shuffled(rng)).
-          map ( _.zip(factors). map {
-            case (v, f) => 
-              new Variable(
-                f.prototype,
-                v.scale(f.domain.min(context), f.domain.max(context))
-              )
-          })
-  }.toIterator
+  override def build(context: IContext): Iterator[Iterable[IVariable[Double]]] = 
+    (0 until samples).map {
+      _ =>
+      (0 until factors.size).map {
+        i => (i + rng.nextDouble) / factors.size
+      }.shuffled(rng).zip(factors).map {
+        case (v, f) => new Variable(f.prototype, v.scale(f.domain.min(context), f.domain.max(context)))
+      }
+    }.toIterator
   
 }
