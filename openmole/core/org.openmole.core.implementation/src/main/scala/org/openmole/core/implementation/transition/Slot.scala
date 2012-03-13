@@ -24,6 +24,7 @@ import scala.collection.mutable.HashSet
 import org.openmole.misc.tools.io.StringUtil._
 
 class Slot(val capsule: ICapsule) extends ISlot {
+  
   capsule.addInputSlot(this)
   
   private val _transitions = new HashSet[ITransition]

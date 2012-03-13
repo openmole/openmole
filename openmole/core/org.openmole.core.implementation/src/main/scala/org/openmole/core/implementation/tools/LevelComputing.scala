@@ -50,14 +50,18 @@ object LevelComputing {
     throw new UserBadDataError("No connection found from capsule " + from + " to capsule " + to)
   }
   
-  def nextCaspules(from: ICapsule, lvl: Int) = 
+  def nextCaspules(from: ICapsule, lvl: Int) =
+    nextTransitions(from, lvl).map{ case (t, lvl) => t.end.capsule -> lvl }
+   
+  def nextTransitions(from: ICapsule, lvl: Int) = 
     from.outputTransitions.map {
-      case t: IAggregationTransition => t.end.capsule -> (lvl - 1)
-      case t: IEndExplorationTransition => t.end.capsule -> (lvl - 1)
-      case t: IExplorationTransition => t.end.capsule -> (lvl + 1)
-      case t: ITransition => t.end.capsule -> lvl
+      case t: IAggregationTransition => t -> (lvl - 1)
+      case t: IEndExplorationTransition => t -> (lvl - 1)
+      case t: IExplorationTransition => t -> (lvl + 1)
+      case t: ITransition => t -> lvl
     }
- 
+  
+  
 }
 
 class LevelComputing(root: ICapsule) {

@@ -18,11 +18,25 @@
 package org.openmole.core.implementation.validation
 
 import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.transition.ITransition
 import org.openmole.misc.tools.io.StringUtil._
 
-case class TopologyProblem(
-  capsule: ICapsule,
-  paths: List[(List[ICapsule], Int)]) extends Problem {
+object TopologyProblem {
   
-  override def toString = "TopologyProblem: " + capsule + ", " + paths.map{case(p, l) => "Folowing the path (" + p.toCSV + " has level " + l + ")"}.toCSV
+  case class DuplicatedTransition (val transitions: Iterable[ITransition]) extends TopologyProblem {
+    
+    override def toString = "DuplicatedTransition: from " + transitions.head.start + " to " + transitions.head.end.capsule + " has been found " + transitions.size + " times."
+  }
+  
+  
+  case class LevelProblem (
+    val capsule: ICapsule,
+    val paths: List[(List[ICapsule], Int)]) extends TopologyProblem {
+  
+    override def toString = "LevelProblem: " + capsule + ", " + paths.map{case(p, l) => "Folowing the path (" + p.toCSV + " has level " + l + ")"}.toCSV
+  }
+  
 }
+
+
+trait TopologyProblem extends Problem
