@@ -26,16 +26,6 @@ import scala.swing.event.UIElementResized
 
 class PluginPanel (mig1: String, mig2: String ="", mig3: String="") extends MyMigPanel(mig1,mig2,mig3) {
   
-  
-  listenTo(this)
-  reactions += {
-    case x : UIElementResized => 
-     // println("el resized " + x.source+ ", "+x.source.size.width + ", " + x.source.size.height)
-      publish(new PluginPanelResizedEvent(this))
-    case _=>
-  }
-    
-  
   override def paintComponent(g: Graphics2D) = {
     super.paintComponent(g)
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,

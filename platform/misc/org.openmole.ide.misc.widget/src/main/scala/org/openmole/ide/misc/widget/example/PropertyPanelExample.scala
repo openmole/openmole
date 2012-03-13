@@ -18,6 +18,7 @@
 package org.openmole.ide.misc.widget.example
 
 import com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel
+import javax.swing.BorderFactory
 import java.awt.Color
 import java.awt.Dimension
 import javax.swing.JScrollPane
@@ -26,7 +27,9 @@ import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget._
 import scala.swing._
 import org.netbeans.api.visual.widget.ComponentWidget
-import org.netbeans.api.visual.widget.Scene
+import org.netbeans.api.visual.widget._
+import org.netbeans.api.visual.graph.GraphScene
+import scala.swing.event.UIElementResized
 
 object PropertyPanelExample extends SimpleSwingApplication
 {
@@ -34,40 +37,66 @@ object PropertyPanelExample extends SimpleSwingApplication
     UIManager.setLookAndFeel(new NimbusLookAndFeel)
     title = "Link Label Demo"
     
-    val scene = new Scene
+    val scene = new MyScene
     
-    
-    
-    contents = new PropertyPanel(Color.green,"wrap"){
-      contents +=new Label("first")
-      contents += new TextField("TextField")
-      contents += new ComboBox(List.empty)
-      contents += new PluginPanel("wrap"){
-        contents += new MainLinkLabel("second",new Action(""){def apply = println("My link")})
-        contents += new Label("Tranparent panel")}
+    val pp : Panel = new PluginPanel("wrap"){
+      contents += new MultiCombo("",List("un","deux"),List("un","un")).panel
+      preferredSize = new Dimension(200,200)
       
-     // val sp = new ScrollPane(scene.createView)
-     // contents += sp
-      
-      val pp = new PluginPanel("wrap"){
-        contents += new MultiCombo("",List("un","deux"),List("un","un")).panel}
-      
-      val compow = new ComponentWidget(scene,pp.peer)
-      scene.addChild(compow)
-      compow.setPreferredLocation(new Point(10,10))
-      listenTo(pp)
+      listenTo(this)
       reactions += {
-        case x : PluginPanelResizedEvent => 
-          println("XXXXXXXXXXXXXXXX property resized :: " + size.height)
-          revalidate
-          repaint
-          
-        case x : Any => println ("yYYYYYYYYYYYYY " + size.height)
-          revalidate
-          repaint
+        case x : UIElementResized => 
+          println(" UIElementResized:: " + size.height)
+          scene.compow.revalidate()
+          scene.compow.repaint()
+//          
       }
-  
     }
-    minimumSize = new Dimension(100,100)
+    
+//    contents = new PropertyPanel(Color.green,"wrap"){
+//      contents +=new Label("first")
+//      contents += new TextField("TextField")
+//      contents += new ComboBox(List.empty)
+//      contents += new PluginPanel("wrap"){
+//        contents += new MainLinkLabel("second",new Action(""){def apply = println("My link")})
+//        contents += new Label("Tranparent panel")}
+//        
+//        
+      
+   peer.setContentPane(scene.createView)
+   scene.updatePanel(pp)
+//    peer.setContentPane(new PluginPanel("wrap"){
+//        contents+= new Label("yo")
+//        contents += pp}.peer)
+    minimumSize = new Dimension(400,400)
+    
+  
+  }
+  
+  class MyScene extends GraphScene.StringGraph {
+    
+    
+    val layer = new LayerWidget(this)
+    addChild(layer)
+    var compow = new ComponentWidget(this,new PluginPanel("").peer){
+      setBorder(BorderFactory.createLineBorder(Color.red,2))
+      setOpaque(true)
+      setPreferredLocation(new Point(10,10))
+    }
+    
+    layer.addChild(compow)
+      
+    def updatePanel(p : Panel) = {
+      compow.removeChildren
+      compow.addChild(new ComponentWidget(this,p.peer))
+      compow.setPreferredLocation(new Point(10,10))
+      repaint
+      revalidate
+    }
+      
+    def attachEdgeSourceAnchor(edge: String, oldSourceNode: String,sourceNode: String)= {}
+    def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String) = {}
+    def attachNodeWidget(n: String)= new Widget(this)
+    def attachEdgeWidget(n: String)= new Widget(this)
   }
 }
