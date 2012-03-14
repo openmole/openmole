@@ -42,12 +42,14 @@ class GliteJob(val jobId: String, resultPath: String, jobService: GliteJobServic
           Workspace.preferenceAsDouble(GliteEnvironment.JobShakingProbabilitySubmitted)
         else Workspace.preferenceAsDouble(GliteEnvironment.JobShakingProbabilityQueued)
       }
-      
+
       val nbInterval = ((System.currentTimeMillis - lastUpdate.toDouble) / jobShakingInterval)
-      if(nbInterval < 1) if(Workspace.rng.nextDouble < nbInterval * probability) {
-        throw new ShouldBeKilledException("Killed in shaking process")
-      } else for(i <- 0 to nbInterval.toInt) if(Workspace.rng.nextDouble < probability){
-        throw new ShouldBeKilledException("Killed in shaking process")
+
+      if(nbInterval < 1) {
+        if(Workspace.rng.nextDouble < nbInterval * probability) throw new ShouldBeKilledException("Killed in shaking process")
+      } else {
+        for(i <- 0 to nbInterval.toInt ; if Workspace.rng.nextDouble < probability) 
+          throw new ShouldBeKilledException("Killed in shaking process")
       }
     }
     
