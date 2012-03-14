@@ -37,17 +37,20 @@ object PrototypeWidget {
     new PrototypeWidget(scene, x=>taskproxy.dataUI.prototypesIn.size.toString, 
                         new LinkLabel(taskproxy.dataUI.prototypesIn.size.toString,new Action("") { def apply = 
                           scene.displayPropertyPanelPrototypeView(taskproxy,EDIT)})) {
-      setPreferredLocation(new Point(22, TASK_CONTAINER_HEIGHT / 2))
+      setPreferredLocation(new Point(19, TASK_CONTAINER_HEIGHT / 2))
     }
   
   def buildOutput(scene : IMoleScene, taskproxy : ITaskDataProxyUI) = 
     new PrototypeWidget(scene, x=>taskproxy.dataUI.prototypesOut.size.toString, 
                         new LinkLabel(taskproxy.dataUI.prototypesOut.size.toString,new Action("") { def apply = 
                           scene.displayPropertyPanelPrototypeView(taskproxy,EDIT)})) {
-      setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 37, TASK_CONTAINER_HEIGHT / 2))
+      setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 34, TASK_CONTAINER_HEIGHT / 2))
   }
+   val green = new Color(180,200,7,180)
+   val red = new Color(212,0,0)                                                                                                                                   
 }
-
+                                                                                                                      
+import PrototypeWidget._
 class PrototypeWidget(scene: IMoleScene, 
                       f : Unit=>String,
                       link : Label) extends ComponentWidget(scene.graphScene,link.peer) {
@@ -55,14 +58,16 @@ class PrototypeWidget(scene: IMoleScene,
   val dim = 30
   val pos = link.size.width / 2 + 1
   setPreferredBounds(new Rectangle(dim,dim))
-    
+  setOpaque(true)
+  
   override def paintChildren = link.text = f.apply()
   
   override def paintBackground = {
+    println("paintBackground")
     val g = scene.graphScene.getGraphics
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                        RenderingHints.VALUE_ANTIALIAS_ON)
-    g.setColor(new Color(0, 255, 0))
+    g.setColor(green)
     g.fillOval(pos,pos, dim, dim)
     revalidate
   }
@@ -72,7 +77,7 @@ class PrototypeWidget(scene: IMoleScene,
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                        RenderingHints.VALUE_ANTIALIAS_ON)
     g.setStroke(new BasicStroke(3f))
-    g.setColor(new Color(200,200,200))
+    g.setColor(new Color(77,77,77,150))
     g.drawOval(pos,pos, dim-2,dim-2)
     revalidate
   }
