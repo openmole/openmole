@@ -63,22 +63,17 @@ object PropertyPanelExample extends SimpleSwingApplication
 //        
 //        
       
-   peer.setContentPane(scene.createView)
-   scene.updatePanel(pp)
-//    peer.setContentPane(new PluginPanel("wrap"){
-//        contents+= new Label("yo")
-//        contents += pp}.peer)
+    peer.setContentPane(scene.createView)
+    scene.updatePanel(pp)
     minimumSize = new Dimension(400,400)
-    
-  
   }
   
   class MyScene extends GraphScene.StringGraph {
     
-    
+    val panel = new PluginPanel("")
     val layer = new LayerWidget(this)
     addChild(layer)
-    var compow = new ComponentWidget(this,new PluginPanel("").peer){
+    var compow = new ComponentWidget(this,panel.peer){
       setBorder(BorderFactory.createLineBorder(Color.red,2))
       setOpaque(true)
       setPreferredLocation(new Point(10,10))
@@ -87,8 +82,7 @@ object PropertyPanelExample extends SimpleSwingApplication
     layer.addChild(compow)
       
     def updatePanel(p : Panel) = {
-      compow.removeChildren
-      compow.addChild(new ComponentWidget(this,p.peer))
+      panel.contents += p
       compow.setPreferredLocation(new Point(10,10))
       repaint
       revalidate
