@@ -19,5 +19,5 @@ package org.openmole.ide.core.model.panel
 
 object PanelMode extends Enumeration {
     type PanelMode = Value
-    val CREATION,EDIT= Value
+    val CREATION,EDIT,EXTRA= Value
 }

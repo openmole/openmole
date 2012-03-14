@@ -47,13 +47,15 @@ trait IMoleScene {
   
   def displayPropertyPanelPrototypeView(proxy: IDataProxyUI, mode: PanelMode.Value)
   
-  def displayExtraProperty(proxy: IDataProxyUI)
+  def displayExtraPropertyPanel(proxy: IDataProxyUI)
   
-  def closeExtraProperty
+  def closeExtraPropertyPanel
   
-  def removePropertyPanel
+  def closePropertyPanel
   
   def propertyWidget : ComponentWidget
+  
+  def extraPropertyWidget : ComponentWidget
   
   override def toString = manager.name.getOrElse("")
 }

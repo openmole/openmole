@@ -33,11 +33,12 @@ class MigPanel(constraints: String, colConst: String, rowConst: String) extends 
   override lazy val peer = new javax.swing.JPanel(new MigLayout(constraints, colConst, rowConst)) with SuperMixin
 
   override def contents: MigContent = new MigContent
-
   protected class MigContent extends Content { 
     def +=(c: Component, l: Constraints) = add(c, l) 
     def +=(p: JPanel) = peer.add(p)
-    def -=(p: JPanel) = peer.remove(p)}
+    def -=(p: JPanel) = peer.remove(p)
+    def removeAll = peer.removeAll
+  }
 
   protected def constraintsFor(comp: Component) =
     layoutManager.getConstraintMap.get(comp.peer).toString

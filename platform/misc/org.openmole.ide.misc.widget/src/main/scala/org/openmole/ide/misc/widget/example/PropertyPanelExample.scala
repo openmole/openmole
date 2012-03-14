@@ -46,9 +46,8 @@ object PropertyPanelExample extends SimpleSwingApplication
       listenTo(this)
       reactions += {
         case x : UIElementResized => 
-          println(" UIElementResized:: " + size.height)
-          scene.compow.revalidate()
-          scene.compow.repaint()
+          scene.compow.revalidate
+          scene.compow.repaint
 //          
       }
     }

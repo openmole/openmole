@@ -77,7 +77,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     save
     if(mainPanel.contents.size == 2) mainPanel.contents.remove(1)
     if(mainLinksPanel.contents.size == 2) mainLinksPanel.contents.remove(1)
-    TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.closeExtraProperty
+    TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.closeExtraPropertyPanel
   }
   
   def properties = {
@@ -118,6 +118,6 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     peer.add(protoOut.panel.peer,BorderLayout.EAST)
   
     def contentAction(proto : IPrototypeDataProxyUI) = new ContentAction(proto.dataUI.displayName,proto){
-      override def apply = TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.displayExtraProperty(proto)} 
+      override def apply = TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.displayExtraPropertyPanel(proto)} 
   }
 }

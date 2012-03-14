@@ -34,7 +34,6 @@ import scala.swing.Label
 import scala.swing.Panel
 import scala.swing.event.UIElementResized
 import scala.swing.TextField
-import org.netbeans.api.visual.widget.ComponentWidget
 
 abstract class BasePanelUI(proxy: IDataProxyUI,
                            scene: IMoleScene,
@@ -45,16 +44,21 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
   val nameTextField = new TextField(15) {text = proxy.dataUI.name; tooltip = Help.tooltip("Name of the concept instance")}
   val createLabelLink = new MainLinkLabel("create",new Action("") { def apply = baseCreate})
   val mainLinksPanel = new PluginPanel("") {contents += createLabelLink}
-  if (mode == EDIT) deleteLink
+  if (mode != CREATION) deleteLink
   border = BorderFactory.createEmptyBorder
 
-  val mainPanel = new PropertyPanel(borderColor,"wrap"){
+  val mainPanel = new PluginPanel("wrap"){
     contents += new PluginPanel("wrap 2") {
       contents += iconLabel
       contents += new PluginPanel("wrap"){
         contents += new PluginPanel("wrap 2"){
           contents += nameTextField
-          contents += new ImageLinkLabel("img/close.png",new Action("") { def apply = BasePanelUI.this.hide })
+          contents += new ImageLinkLabel("img/close.png",new Action("") { def apply = {
+                mode match {
+                  case EXTRA => scene.closeExtraPropertyPanel
+                  case _ => scene.closePropertyPanel
+                }}
+          })
         }
         contents += mainLinksPanel
       }
@@ -63,11 +67,13 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
   peer.add(mainPanel.peer,BorderLayout.CENTER)
   preferredSize.width = 300
   foreground = Color.white
+  background = borderColor
   
   listenTo(this)
   reactions += {
     case x:UIElementResized => 
         scene.propertyWidget.revalidate
+        scene.extraPropertyWidget.revalidate
         scene.refresh
   }
   
@@ -92,7 +98,7 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
   
   def baseDelete: Unit = {
     delete
-    scene.removePropertyPanel
+    scene.closePropertyPanel
   }
   
   def baseSave : Unit = {

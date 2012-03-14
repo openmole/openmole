@@ -47,6 +47,8 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.PropertyPanel
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.model.panel.PanelMode._
@@ -60,7 +62,9 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   val propertyLayer= new LayerWidget(this)
   val extraPropertyLayer= new LayerWidget(this)
   var currentSlotIndex= 1
-  var currentPanel : Option[BasePanelUI] = None
+  
+  val currentPanel = new MigPanel("")
+  val currentExtraPanel = new MigPanel("")
   
   val moveAction = ActionFactory.createMoveAction
     
@@ -69,8 +73,8 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   addChild(propertyLayer)
   addChild(extraPropertyLayer)
   
-  val extraPropertyWidget = new ComponentWidget(this,new PropertyPanel(Color.WHITE,""){visible = false}.peer) 
-  val propertyWidget = new ComponentWidget(this,new PropertyPanel(Color.WHITE,""){visible = false}.peer) 
+  val extraPropertyWidget = new ComponentWidget(this,currentExtraPanel.peer){setVisible(false)} 
+  val propertyWidget = new ComponentWidget(this,currentPanel.peer){setVisible(false)} 
   extraPropertyLayer.addChild(extraPropertyWidget)
   propertyLayer.addChild(propertyWidget)
   
@@ -85,58 +89,64 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   
   def displayPropertyPanelPrototypeView (proxy: IDataProxyUI,
                                          mode: PanelMode.Value) = {
-    displayPropertyPanel(proxy,mode)                         
-    currentPanel match {
-      case Some(x : TaskPanelUI) => x.protos
-      case _=>
+    if (currentPanel.contents.size > 0 ) {
+      displayPropertyPanel(proxy,mode)                         
+      currentPanel.contents(0) match {
+        case x : TaskPanelUI => x.protos
+        case _=>
+      }
+      propertyWidget.revalidate
     }
   }
   
   def displayPropertyPanel(proxy: IDataProxyUI,
                            mode: PanelMode.Value) = {
-    removePropertyPanel
-    closeExtraProperty
+    closePropertyPanel
+    currentPanel.contents.removeAll
     proxy match {
-      case x: ITaskDataProxyUI=> currentPanel = Some(new TaskPanelUI(x,this,mode))
-      case x: IPrototypeDataProxyUI=> currentPanel = Some(new PrototypePanelUI(x,this,mode))
-      case x: IEnvironmentDataProxyUI=> currentPanel = Some(new EnvironmentPanelUI(x,this,mode))
-      case x: ISamplingDataProxyUI=> currentPanel = Some(new SamplingPanelUI(x,this,mode))
+      case x: ITaskDataProxyUI=> currentPanel.contents += new TaskPanelUI(x,this,mode)
+      case x: IPrototypeDataProxyUI=> currentPanel.contents += new PrototypePanelUI(x,this,mode)
+      case x: IEnvironmentDataProxyUI=> currentPanel.contents += new EnvironmentPanelUI(x,this,mode)
+      case x: ISamplingDataProxyUI=> currentPanel.contents += new SamplingPanelUI(x,this,mode)
       case _=>
     }
-    currentPanel match {
-      case Some(x:BasePanelUI)=> 
-        propertyWidget.addChild(new ComponentWidget(this,x.peer))
-      case _=>
-    }
-    
-    propertyWidget.setPreferredLocation(new Point(getView.getBounds().x.toInt - currentPanel.get.size.width, 20))
-    getSceneAnimator.animatePreferredLocation(propertyWidget, new Point(getView.getBounds().x.toInt + currentPanel.get.bounds.width +20, 20))
+    propertyWidget.setPreferredLocation(new Point(getView.getBounds().x.toInt +20, 20))
+    propertyWidget.revalidate
+    propertyWidget.setVisible(true)
     refresh
   } 
   
-  def closeExtraProperty = {
-    if (extraPropertyWidget.getChildren.size == 1) extraPropertyWidget.removeChildren
-    refresh
-  }
+  def displayExtraPropertyPanel(dproxy: IDataProxyUI) = {
+    currentExtraPanel.contents.removeAll
+    currentExtraPanel.contents.add(dproxy match {
+        case x: IPrototypeDataProxyUI=> new PrototypePanelUI(x,this,EXTRA)
+        case x: ISamplingDataProxyUI=> new SamplingPanelUI(x,this,EXTRA)
+      })
+    extraPropertyWidget.setVisible(true)
+    extraPropertyWidget.setPreferredLocation(new Point(propertyWidget.getBounds.x.toInt + currentPanel.bounds.width + 40,20))
     
-  def displayExtraProperty(dproxy: IDataProxyUI) = {
-    extraPropertyWidget.removeChildren
-    extraPropertyWidget.addChild(new ComponentWidget(this,dproxy match {
-          case x: IPrototypeDataProxyUI=> new PrototypePanelUI(x,this,EDIT).peer
-          case x: ISamplingDataProxyUI=> new SamplingPanelUI(x,this,EDIT).peer
-        }))
-    extraPropertyWidget.setPreferredLocation(propertyWidget.getLocation)
-    getSceneAnimator.animatePreferredLocation(extraPropertyWidget, new Point(propertyWidget.getBounds.x.toInt + currentPanel.get.bounds.width +40, 20))
+    
     refresh
   }
   
-  def removePropertyPanel : Unit = {
-    currentPanel match {
-      case Some(x:BasePanelUI)=> x.baseSave
-      case _=>
+  def closeExtraPropertyPanel = {
+    currentExtraPanel.contents.removeAll
+    extraPropertyWidget.setVisible(false)
+    refresh
+  }
+    
+  
+  def closePropertyPanel : Unit = {
+    if (currentPanel.contents.size > 0 ) {
+      currentPanel.contents(0) match {
+        case x:BasePanelUI=> x.baseSave
+        case _=> 
+      }
     }
-    closeExtraProperty
-    propertyWidget.removeChildren
+    
+    currentPanel.contents.removeAll
+    closeExtraPropertyPanel
+    propertyWidget.setVisible(false)
     refresh
   }
     
