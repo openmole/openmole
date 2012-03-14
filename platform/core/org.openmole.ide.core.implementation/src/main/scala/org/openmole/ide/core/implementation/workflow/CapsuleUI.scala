@@ -129,7 +129,6 @@ class CapsuleUI(val scene: IMoleScene,
     sampling match {
       case None=> samplingWidget = None
       case Some(x : ISamplingDataProxyUI) => 
-        println("add sampling child")
         samplingWidget = Some(new LinkedImageWidget(scene,x.dataUI.imagePath,0,TASK_CONTAINER_HEIGHT - 3,
                                                     new Action("") {def apply = scene.displayPropertyPanel(x,EDIT)}))
         addChild(samplingWidget.get)

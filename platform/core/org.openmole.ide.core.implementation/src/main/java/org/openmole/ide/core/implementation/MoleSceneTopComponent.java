@@ -32,7 +32,6 @@ import org.openide.windows.WindowManager;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
-import org.openmole.ide.core.implementation.display.Displays;
 import org.openmole.ide.core.implementation.control.TopComponentsManager;
 import org.openide.awt.ActionID;
 import org.openide.util.ImageUtilities;

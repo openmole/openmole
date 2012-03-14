@@ -24,7 +24,6 @@ import swing.ListView._
 import au.com.bytecode.opencsv.CSVReader
 import java.io.File
 import java.io.FileReader
-import org.openmole.ide.core.model.display._
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
