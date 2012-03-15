@@ -16,19 +16,12 @@
  */
 package org.openmole.ide.core.implementation.workflow
 
-import java.awt.BasicStroke
-import java.awt.Color
-import java.awt.Dimension
 import org.netbeans.api.visual.graph.layout.GraphLayoutFactory
 import org.netbeans.api.visual.layout.LayoutFactory
-import java.awt.Graphics2D
 import java.awt.Point
-import java.awt.Rectangle
-import java.awt.RenderingHints
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.action.ConnectProvider
 import org.netbeans.api.visual.action.ReconnectProvider
-import org.netbeans.api.visual.action.SelectProvider
 import org.netbeans.api.visual.graph.GraphScene
 import org.openmole.ide.core.model.commons.Constants
 import org.netbeans.api.visual.widget.ComponentWidget
@@ -48,8 +41,6 @@ import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.widget.MigPanel
-import org.openmole.ide.misc.widget.PluginPanel
-import org.openmole.ide.misc.widget.PropertyPanel
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.model.panel.PanelMode._
 
@@ -78,27 +69,12 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   extraPropertyLayer.addChild(extraPropertyWidget)
   propertyLayer.addChild(propertyWidget)
   
-  setPreferredSize(new Dimension((Constants.SCREEN_WIDTH * 0.8).toInt, (Constants.SCREEN_HEIGHT * 0.8).toInt))
   setActiveTool(CONNECT)  
   
   getActions.addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)))
   
   val connectAction = ActionFactory.createExtendedConnectAction(connectLayer, new MoleSceneConnectProvider)
   val reconnectAction = ActionFactory.createReconnectAction(new MoleSceneReconnectProvider)
-  
-  
-//  def displayPropertyPanelPrototypeView (proxy: IDataProxyUI,
-//                                         mode: PanelMode.Value) = {
-//    println("proto view")                                       
-//    if (currentPanel.contents.size > 0 ) {
-//      displayPropertyPanel(proxy,mode)                         
-//      currentPanel.contents(0) match {
-//        case x : TaskPanelUI => x.protos
-//        case _=>
-//      }
-//      propertyWidget.revalidate
-//    }
-//  }
   
   def displayPropertyPanel(proxy: IDataProxyUI,
                            mode: PanelMode.Value) = {
