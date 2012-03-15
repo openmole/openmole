@@ -30,9 +30,7 @@ object DialogFactory {
     val editor = new GroovyEditor
     editor.preferredSize = new Dimension(150,150)
     editor.editor.text = content
-    if (DialogDisplayer.getDefault.notify(new DialogDescriptor(editor.peer, title)).equals(NotifyDescriptor.OK_OPTION)) editor.editor.text
+    if (DialogDisplayer.getDefault.notify(new DialogDescriptor(editor.peer, title)).equals(NotifyDescriptor.OK_OPTION)) editor.editor.text 
     else content
   }
-  
-  
 }
