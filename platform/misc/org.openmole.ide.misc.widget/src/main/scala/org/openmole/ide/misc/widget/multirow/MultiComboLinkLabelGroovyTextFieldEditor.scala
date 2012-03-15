@@ -58,7 +58,7 @@ object MultiComboLinkLabelGroovyTextFieldEditor {
         }
       }
     
-    override def content: (A,String) = (comboBox.selection.item,textField.text)
+    override def content: (A,String) = (comboBox.selection.item,textField.editorText)
   }
 }
 
