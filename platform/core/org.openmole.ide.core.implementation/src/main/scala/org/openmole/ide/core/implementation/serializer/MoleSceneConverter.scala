@@ -26,6 +26,7 @@ import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 import java.awt.Point
 import org.openmole.ide.core.implementation.workflow.SceneItemFactory
+import java.awt.Toolkit
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
@@ -52,8 +53,8 @@ class MoleSceneConverter extends Converter{
     molescene.manager.capsules.values.foreach(view=> {
         writer.startNode("capsule")
         writer.addAttribute("start", view.startingCapsule.toString)
-        writer.addAttribute("x", String.valueOf(view.x))
-        writer.addAttribute("y", String.valueOf(view.y))
+        writer.addAttribute("x", String.valueOf(view.x / 2 / Toolkit.getDefaultToolkit.getScreenSize.width))
+        writer.addAttribute("y", String.valueOf(view.y / 2 / Toolkit.getDefaultToolkit.getScreenSize.height))
 
         //Input slot
         slotcount+= 1
@@ -126,7 +127,8 @@ class MoleSceneConverter extends Converter{
       n0 match {
         case "capsule"=> {
             val p= new Point
-            p.setLocation(reader.getAttribute("x").toDouble, reader.getAttribute("y").toDouble)
+            p.setLocation(reader.getAttribute("x").toDouble * Toolkit.getDefaultToolkit.getScreenSize.width, 
+                          reader.getAttribute("y").toDouble * Toolkit.getDefaultToolkit.getScreenSize.height)
             val caps = SceneItemFactory.createCapsule(scene, p)
             
             val start = reader.getAttribute("start").toBoolean
