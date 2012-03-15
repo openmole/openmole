@@ -63,7 +63,6 @@ class PrototypeWidget(scene: IMoleScene,
   override def paintChildren = link.text = f.apply()
   
   override def paintBackground = {
-    println("paintBackground")
     val g = scene.graphScene.getGraphics
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                        RenderingHints.VALUE_ANTIALIAS_ON)
