@@ -42,6 +42,4 @@ trait ITaskDataUI extends IDataUI{
   def prototypesOut_=(po: List[IPrototypeDataProxyUI])
   
   def buildPanelUI: ITaskPanelUI
-  
-  def fatImagePath: String = imagePath
 }

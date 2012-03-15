@@ -33,6 +33,4 @@ trait IPrototypeDataUI[T] extends IDataUI{
   def buildPanelUI: IPrototypePanelUI[T]
   
   def dim: Int
-  
-  def fatImagePath: String = imagePath
 }

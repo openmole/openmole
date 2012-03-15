@@ -28,6 +28,4 @@ trait IDomainDataUI extends IDataUI{
   def coreObject(proto: IPrototype[_]): IDomain[_]
   
   def buildPanelUI: IDomainPanelUI
-  
-  def fatImagePath: String = imagePath
 }

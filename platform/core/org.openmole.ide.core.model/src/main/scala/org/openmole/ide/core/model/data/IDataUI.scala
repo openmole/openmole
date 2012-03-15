@@ -30,5 +30,7 @@ trait IDataUI{
   
   def imagePath: String 
   
+  def fatImagePath: String = imagePath
+  
   def buildPanelUI: IPanelUI 
 }
