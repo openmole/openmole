@@ -22,6 +22,7 @@ import javax.swing.ImageIcon
 import org.openide.util.ImageUtilities
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
+import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
@@ -94,14 +95,15 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     peer.setLayout(new BorderLayout)
     val image = new ImageIcon(ImageUtilities.loadImage("img/eye.png"))
       
+    val emptyProto = EmptyDataUIs.emptyPrototypeProxy
     val protoIn = new MultiComboLinkLabelGroovyTextFieldEditor("Inputs",
                                                                TaskPanelUI.this.proxy.dataUI.prototypesIn.map{case(proto,v) => (proto,contentAction(proto),v)}.toList,
-                                                               Proxys.prototypes.map{p=>(p,contentAction(p))}.toList,
+                                                               (List(emptyProto):::Proxys.prototypes.toList).map{p=>(p,contentAction(p))}.toList,
                                                                image)        
                                                                       
     val protoOut = new MultiComboLinkLabel("Outputs",
                                            TaskPanelUI.this.proxy.dataUI.prototypesOut.map{proto => (proto,contentAction(proto))}.toList,
-                                           Proxys.prototypes.map{p=>(p,contentAction(p))}.toList,
+                                           (List(emptyProto):::Proxys.prototypes.toList).map{p=>(p,contentAction(p))}.toList,
                                            image)        
     
     if (TaskPanelUI.this.proxy.dataUI.prototypesIn.isEmpty) protoIn.removeAllRows
