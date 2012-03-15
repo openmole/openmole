@@ -45,8 +45,6 @@ trait IMoleScene {
   
   def displayPropertyPanel(proxy: IDataProxyUI, mode: PanelMode.Value)
   
-  def displayPropertyPanelPrototypeView(proxy: IDataProxyUI, mode: PanelMode.Value)
-  
   def displayExtraPropertyPanel(proxy: IDataProxyUI)
   
   def closeExtraPropertyPanel

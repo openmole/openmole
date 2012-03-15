@@ -87,17 +87,18 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
   val reconnectAction = ActionFactory.createReconnectAction(new MoleSceneReconnectProvider)
   
   
-  def displayPropertyPanelPrototypeView (proxy: IDataProxyUI,
-                                         mode: PanelMode.Value) = {
-    if (currentPanel.contents.size > 0 ) {
-      displayPropertyPanel(proxy,mode)                         
-      currentPanel.contents(0) match {
-        case x : TaskPanelUI => x.protos
-        case _=>
-      }
-      propertyWidget.revalidate
-    }
-  }
+//  def displayPropertyPanelPrototypeView (proxy: IDataProxyUI,
+//                                         mode: PanelMode.Value) = {
+//    println("proto view")                                       
+//    if (currentPanel.contents.size > 0 ) {
+//      displayPropertyPanel(proxy,mode)                         
+//      currentPanel.contents(0) match {
+//        case x : TaskPanelUI => x.protos
+//        case _=>
+//      }
+//      propertyWidget.revalidate
+//    }
+//  }
   
   def displayPropertyPanel(proxy: IDataProxyUI,
                            mode: PanelMode.Value) = {

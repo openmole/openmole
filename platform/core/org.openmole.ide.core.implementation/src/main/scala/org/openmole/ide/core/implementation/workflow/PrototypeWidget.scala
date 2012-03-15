@@ -19,6 +19,8 @@ package org.openmole.ide.core.implementation.workflow
 
 import java.awt.BasicStroke
 import java.awt.Color
+import java.awt.Cursor
+import java.awt.Dimension
 import java.awt.Point
 import java.awt.Rectangle
 import java.awt.RenderingHints
@@ -36,15 +38,15 @@ object PrototypeWidget {
   def buildInput(scene : IMoleScene, taskproxy : ITaskDataProxyUI) =
     new PrototypeWidget(scene, x=>taskproxy.dataUI.prototypesIn.size.toString, 
                         new LinkLabel(taskproxy.dataUI.prototypesIn.size.toString,new Action("") { def apply = 
-                          scene.displayPropertyPanelPrototypeView(taskproxy,EDIT)})) {
+                          scene.displayPropertyPanel(taskproxy,IO)})) {
       setPreferredLocation(new Point(19, TASK_CONTAINER_HEIGHT / 2))
     }
   
   def buildOutput(scene : IMoleScene, taskproxy : ITaskDataProxyUI) = 
     new PrototypeWidget(scene, x=>taskproxy.dataUI.prototypesOut.size.toString, 
                         new LinkLabel(taskproxy.dataUI.prototypesOut.size.toString,new Action("") { def apply = 
-                          scene.displayPropertyPanelPrototypeView(taskproxy,EDIT)})) {
-      setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 34, TASK_CONTAINER_HEIGHT / 2))
+                          scene.displayPropertyPanel(taskproxy,IO)})) {
+      setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 30, TASK_CONTAINER_HEIGHT / 2))
   }
    val green = new Color(180,200,7,180)
    val red = new Color(212,0,0)                                                                                                                                   
@@ -57,7 +59,10 @@ class PrototypeWidget(scene: IMoleScene,
   link.foreground = Color.WHITE
   val dim = 30
   val pos = link.size.width / 2 + 1
+  link.preferredSize = new Dimension(dim,dim)
   setPreferredBounds(new Rectangle(dim,dim))
+  setBorder(BorderFactory.createLineBorder(Color.green))
+  setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))
   setOpaque(true)
   
   override def paintChildren = link.text = f.apply()

@@ -46,7 +46,10 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     case true => new PluginPanel("")
     case false => new IOPrototypePanel
   }
-  properties
+  mode match {
+    case IO => protos
+    case _=> properties
+  }
   
   def create = {
     Proxys.tasks += proxy
