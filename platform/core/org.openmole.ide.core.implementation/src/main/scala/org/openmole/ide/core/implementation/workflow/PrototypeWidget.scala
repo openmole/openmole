@@ -24,6 +24,7 @@ import java.awt.Dimension
 import java.awt.Point
 import java.awt.Rectangle
 import java.awt.RenderingHints
+import javax.swing.BorderFactory
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.PanelMode._
@@ -59,9 +60,7 @@ class PrototypeWidget(scene: IMoleScene,
   link.foreground = Color.WHITE
   val dim = 30
   val pos = link.size.width / 2 + 1
-  link.preferredSize = new Dimension(dim,dim)
   setPreferredBounds(new Rectangle(dim,dim))
-  setBorder(BorderFactory.createLineBorder(Color.green))
   setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))
   setOpaque(true)
   
