@@ -30,7 +30,6 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget.ImageLinkLabel
-import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor
 import scala.swing.Action
@@ -41,11 +40,8 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
                   scene: IMoleScene,
                   mode: Value = CREATION) extends BasePanelUI(proxy, scene,mode,proxy.dataUI.borderColor){
   iconLabel.icon = new ImageIcon(ImageUtilities.loadImage(proxy.dataUI.fatImagePath))
-  var panelUI = proxy.dataUI.buildPanelUI
-  var protoPanel = Proxys.prototypes.isEmpty match {
-    case true => new PluginPanel("")
-    case false => new IOPrototypePanel
-  }
+  val panelUI = proxy.dataUI.buildPanelUI
+  val protoPanel = new IOPrototypePanel
   mode match {
     case IO => protos
     case _=> properties
@@ -62,10 +58,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   }
   
   def save = {
-    protoPanel match {
-      case x:IOPrototypePanel => proxy.dataUI = panelUI.save(nameTextField.text,x.protoIn.content,x.protoOut.content)
-      case _ => 
-        proxy.dataUI = panelUI.saveContent(nameTextField.text)
+        proxy.dataUI = panelUI.save(nameTextField.text,protoPanel.protoIn.content,protoPanel.protoOut.content)
         proxy.dataUI match {
           case x : AbstractExplorationTaskDataUI => TopComponentsManager.capsules.filter(_.dataProxy == proxy) match {
             case y : List[Nothing]=> 
@@ -73,7 +66,6 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
           }
           case _ =>
         }
-    }
   }
   
   def switch = {
@@ -85,7 +77,6 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   
   def properties = {
     switch    
-    panelUI = proxy.dataUI.buildPanelUI
     mainPanel.contents += panelUI.peer
     mainLinksPanel.contents +=  new ImageLinkLabel("img/next.png",new Action("") { def apply = protos })
     revalidate
