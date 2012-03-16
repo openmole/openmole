@@ -32,6 +32,7 @@ import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.util.zip.GZIPInputStream
 import org.ogf.saga.context.Context
+import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.batch.environment.Authentication
@@ -44,15 +45,15 @@ import org.openmole.misc.workspace.Workspace
 import GliteEnvironment._
 
 import scala.collection.JavaConversions._
+import scala.ref.WeakReference
 
 object GliteAuthentication extends Logger {
   
   lazy val CACertificatesDir: File = {
     val X509_CERT_DIR = System.getenv("X509_CERT_DIR")
             
-    if (X509_CERT_DIR != null && new File(X509_CERT_DIR).exists){
-      new File(X509_CERT_DIR)
-    } else {
+    if (X509_CERT_DIR != null && new File(X509_CERT_DIR).exists) new File(X509_CERT_DIR)
+    else {
       val caDir = new File("/etc/grid-security/certificates/")
       if (caDir.exists) caDir
       else {
@@ -113,21 +114,23 @@ object GliteAuthentication extends Logger {
   
   def getTimeString: String = Workspace.preference(GliteEnvironment.TimeLocation)
   
-  def getTime =
-    try  UDuration.toInt(getTimeString) * 1000
+  def inMs(time: String) =
+    try  UDuration.toInt(time) * 1000
     catch {
       case (ex: ParseException) => throw new UserBadDataError(ex)
     }
-  
-  
+ 
 }
 
 
-class GliteAuthentication(val voName: String, val vomsURL: String, val myProxy: Option[MyProxy], val fqan: String) extends Authentication {
+class GliteAuthentication(
+  val voName: String,
+  val vomsURL: String,
+  val myProxy: Option[MyProxy],
+  val fqan: String) extends Authentication {
 
   import GliteAuthentication._
     
-  @transient private var proxy: File = null
   @transient private var _proxyExpiresTime = Long.MaxValue
   
   val reloadProxyOnWorkerNodeInterval = Workspace.preferenceAsDurationInMs(GliteEnvironment.ReloadProxyOnWorkerNodeInterval)
@@ -136,25 +139,51 @@ class GliteAuthentication(val voName: String, val vomsURL: String, val myProxy: 
   
   override def expires = _proxyExpiresTime
 
-  override def initialize = {
-    val authenticationMethod: GliteAuthenticationMethod = 
-      if (System.getenv.containsKey("X509_USER_PROXY") && new File(System.getenv.get("X509_USER_PROXY")).exists) new GlobusProxyFile(System.getenv.get("X509_USER_PROXY"))
-    else Workspace.persistentList(classOf[GliteAuthenticationMethod]).headOption match {
-      case Some((i,a)) => a
-      case None => throw new UserBadDataError("Preferences not set for grid authentication")
+  override def initialize(local: Boolean): Unit = {
+    if(!local) {
+      val globusProxy = 
+        if (System.getenv.containsKey("X509_USER_PROXY") && new File(System.getenv.get("X509_USER_PROXY")).exists) System.getenv.get("X509_USER_PROXY")
+        else throw new InternalProcessingError("The X509_USER_PROXY environment variable is not defined or point to an inexisting file." )
+      myProxy match {
+        case Some(myProxy) => {
+            val ctx = JSAGASessionService.createContext
+            ctx.setAttribute(Context.TYPE, "VOMSMyProxy")
+            ctx.setAttribute(Context.USERPROXY, globusProxy)
+            ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
+            ctx.setAttribute(VOMSContext.MYPROXYUSERID, myProxy.userId)
+            ctx.setAttribute(VOMSContext.MYPROXYPASS, myProxy.pass)
+            ctx.setAttribute(VOMSContext.MYPROXYSERVER, myProxy.url)
+            ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME, myProxy.delegationTime)
+            ctx.setAttribute(VOMSContext.VOMSDIR, "")
+            init(ctx, None)
+          }
+        case None => 
+          val (ctx, expires) = new GlobusProxyFile(globusProxy).init(this)
+          init(ctx, expires)
+      }
+    } else {
+      val auth = Workspace.persistentList(classOf[GliteAuthenticationMethod]).headOption match {
+        case Some((i,a)) => a
+        case None => throw new UserBadDataError("Preferences not set for grid authentication")
+      }
+      val (ctx, expires) = auth.init(this)
+      init(ctx, expires)
     }
-    
-    val (ctx, time) = authenticationMethod.init(this)
-    reinit(ctx, time)
-  }
-  
-  def reinit(context: Context, duration: Option[Int]) = {
-    logger.fine("Reinit proxy " + context.getAttribute(Context.TYPE))
-    duration match {
-      case Some(t) => _proxyExpiresTime = System.currentTimeMillis + t
-      case None =>
-    }
-    addContext(context)
+
   }
 
+  def reinit(context: Context, expires: Option[Int]) = {
+    logger.fine("Reinit proxy " + context.getAttribute(Context.TYPE))
+    addContext(context)
+    expires match {
+      case Some(t) => _proxyExpiresTime = System.currentTimeMillis + context.getAttribute(Context.LIFETIME).toLong * 1000
+      case None =>
+    }
+  }
+  
+  
+  def init(context: Context, expires: Option[Int]) = {
+    reinit(context, expires)
+    Updater.delay(new ProxyChecker(context, new WeakReference(this), expires), ExecutorType.OWN)
+  }
 }

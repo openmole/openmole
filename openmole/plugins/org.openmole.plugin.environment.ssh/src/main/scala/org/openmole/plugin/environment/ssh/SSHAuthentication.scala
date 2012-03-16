@@ -41,7 +41,7 @@ class SSHAuthentication(val method: SSHAuthenticationMethod) extends Authenticat
   
   override def key = method.target
 
-  override def initialize = {
+  override def initialize(local: Boolean) = {
     val ctxSSH = method.context
     ctxSSH.setVectorAttribute(ContextImpl.BASE_URL_INCLUDES, Array("ssh->ssh2://*"))
     JSAGASessionService.addContext("ssh://" + method.target, ctxSSH)

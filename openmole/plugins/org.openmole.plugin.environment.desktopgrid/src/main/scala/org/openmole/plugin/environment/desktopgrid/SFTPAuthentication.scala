@@ -28,7 +28,7 @@ class SFTPAuthentication(host: String, port:Int, login: String, password: String
   
   override def expires = Long.MaxValue
 
-  override def initialize = {
+  override def initialize(local: Boolean) = {
     val ctx = JSAGASessionService.createContext
     ctx.setAttribute(Context.TYPE, "UserPass")
     ctx.setAttribute(Context.USERID, login)

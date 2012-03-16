@@ -39,7 +39,7 @@ class GlobusProxyFile(val proxyFile: String) extends GliteAuthenticationMethod {
     ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
     ctx.setAttribute(VOMSContext.VOMSDIR, "")
      
-    Updater.delay(new ProxyChecker(ctx, None, new WeakReference(authentication)), ExecutorType.OWN, authentication.reloadProxyOnWorkerNodeInterval)
+    //Updater.delay(new ProxyChecker(ctx, None, new WeakReference(authentication)), ExecutorType.OWN, authentication.reloadProxyOnWorkerNodeInterval)
    
     (ctx, None)
   }

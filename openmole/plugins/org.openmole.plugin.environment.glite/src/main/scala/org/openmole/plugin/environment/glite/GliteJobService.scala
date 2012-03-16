@@ -66,7 +66,9 @@ class GliteJobService(jobServiceURI: URI, val environment: GliteEnvironment, ove
       val jobDescription = buildJobDescription(runtime, script, environment.attributes)
       val job = jobServiceCache.createJob(jobDescription)
       job.run
-            
+      
+      //logger.fine(Source.fromFile(script).getLines.mkString)
+      
       new GliteJob(JSAGAJob.id(job), outputFilePath, this, environment.authentication.expires)
     } finally script.delete
   }
@@ -161,6 +163,11 @@ class GliteJobService(jobServiceURI: URI, val environment: GliteEnvironment, ove
       case None =>
     }
 
+    /*environment.authentication.myProxy match {
+      case Some(myProxy) => description.setAttribute("MyProxyServer", myProxy.url)
+      case None =>
+    }*/
+    
     description
   }
 }

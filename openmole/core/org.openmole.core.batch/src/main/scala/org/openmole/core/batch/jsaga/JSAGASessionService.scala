@@ -65,9 +65,11 @@ object JSAGASessionService extends Logger {
     }
   }
   
-  def session(url: String) = sessions.filter{case(p, s) => url.matches(p + ".*")}.headOption match {
-    case Some((p, s)) => s
-    case None => defaultSession //throw new InternalProcessingError("No session available for url " + url)
+  def session(url: String) = synchronized {
+    sessions.filter{case(p, s) => url.matches(p + ".*")}.headOption match {
+      case Some((p, s)) => s
+      case None => defaultSession //throw new InternalProcessingError("No session available for url " + url)
+    }
   }
   
   

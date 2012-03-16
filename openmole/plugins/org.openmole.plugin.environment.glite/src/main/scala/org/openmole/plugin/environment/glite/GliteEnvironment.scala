@@ -83,7 +83,7 @@ object GliteEnvironment {
   Workspace += (JobShakingProbabilitySubmitted, "0.1")
   Workspace += (JobShakingProbabilityQueued, "0.01")
  
-  Workspace += (ReloadProxyOnWorkerNodeInterval, "PT30M")
+  Workspace += (ReloadProxyOnWorkerNodeInterval, "PT4H")
 }
 
 class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String, val myProxy: Option[MyProxy], attributes: Option[Map[String, String]], val memoryForRuntime: Option[Int], val fqan: String = "") extends JSAGAEnvironment(attributes) {

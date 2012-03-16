@@ -22,9 +22,6 @@ import org.openmole.misc.workspace.Workspace
 import fr.in2p3.jsaga.adaptor.security.VOMSContext
 import org.openmole.core.batch.jsaga.JSAGASessionService
 import GliteAuthentication._
-import org.openmole.misc.updater.Updater
-import org.openmole.misc.executorservice.ExecutorType
-import scala.ref.WeakReference
 
 import GliteAuthentication._
 
@@ -54,7 +51,7 @@ abstract class Certificate(cypheredPassword: String) extends GliteAuthentication
         None
       case None =>
         ctx.setAttribute(Context.TYPE, "VOMS")
-        Some(getTime)
+        Some(inMs(getTimeString))
     }
   
     ctx.setAttribute(Context.LIFETIME, getTimeString)
@@ -69,12 +66,7 @@ abstract class Certificate(cypheredPassword: String) extends GliteAuthentication
     ctx.setAttribute(Context.USERVO, voName)
    
     _init(ctx)
-    
-    val interval = (getTime * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong
-    
-    logger.fine("Renew proxy in " + interval)
-    Updater.delay(new ProxyChecker(ctx, proxyDuration, new WeakReference(authentication)), ExecutorType.OWN, interval)
-        
+            
     (ctx, proxyDuration)
   }
   

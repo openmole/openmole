@@ -69,7 +69,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     val host = splitHost(0)
    
     val auth = new SFTPAuthentication(host, port, user, password)
-    auth.initialize
+    auth.initialize(false)
     
     val authFile = Workspace.newFile("auth", ".xml")
     SerializerService.serialize(auth, authFile)

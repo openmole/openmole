@@ -17,24 +17,46 @@
 
 package org.openmole.plugin.environment.glite
 
-import java.util.logging.Level
-import java.util.logging.Logger
 import org.ogf.saga.context.Context
-import org.openmole.misc.updater.IUpdatable
+import org.openmole.misc.tools.service.Logger
+import org.openmole.misc.updater.IUpdatableWithVariableDelay
+import org.openmole.misc.workspace.Workspace
 import scala.ref.WeakReference
 
-class ProxyChecker(context: Context, duration: Option[Int], authentication: WeakReference[GliteAuthentication]) extends IUpdatable {
+object ProxyChecker extends Logger
+
+import ProxyChecker._
+
+class ProxyChecker(
+  context: Context,
+  authentication: WeakReference[GliteAuthentication],
+  expires: Option[Int] = None) extends IUpdatableWithVariableDelay {
 
   override def update: Boolean =
     authentication.get match {
       case Some(auth) => 
-        try auth.reinit(context, duration)
+        try auth.reinit(context, expires)
         catch {
-          case(ex: Throwable) => Logger.getLogger(classOf[ProxyChecker].getName).log(Level.SEVERE, "Error while renewing the proxy.", ex);
+          case(ex: Throwable) => logger.log(SEVERE, "Error while renewing the proxy.", ex)
         } 
         true
       case None =>
         false
     }
+  
+  def delay = {
+    val interval = (context.getAttribute(Context.LIFETIME).toLong  * 1000 * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong
+    logger.fine("Renew proxy in " + interval)
+    interval
+  }
+  /*{
+    val interval = lifeTime match {
+      case Some(time) => time
+      case None => context.getAttribute(Context.LIFETIME).toLong
+    } 
+    val renew = (interval * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio) * 1000).toLong
+    logger.fine("Renew proxy in " + renew)
+    renew
+  }*/
   
 }

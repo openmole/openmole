@@ -18,11 +18,8 @@
 package org.openmole.core.batch.environment
 
 trait Authentication {
-   
-  @throws(classOf[Throwable])
-  def initialize
-  
+  def initialize(local: Boolean): Unit
+  def initialize: Unit = initialize(true)
   def expires: Long = Long.MaxValue
-  
   def key: String
 }

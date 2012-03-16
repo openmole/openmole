@@ -73,10 +73,10 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) e
   
   override def state =
     if (killed.get) KILLED 
-  else batchJob match {
-    case None => READY
-    case Some(batchJob) => batchJob.state
-  }
+    else batchJob match {
+      case None => READY
+      case Some(batchJob) => batchJob.state
+    }
 
   override def update: Boolean = synchronized {
     val oldState = state

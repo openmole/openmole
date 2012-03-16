@@ -41,7 +41,6 @@
             <artifactId>org.openmole.core.batch</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.workspace</artifactId>

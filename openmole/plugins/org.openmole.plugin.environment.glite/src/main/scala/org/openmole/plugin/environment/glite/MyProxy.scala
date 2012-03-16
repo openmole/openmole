@@ -18,7 +18,10 @@
 package org.openmole.plugin.environment.glite
 
 import java.util.UUID
+import org.openmole.misc.workspace.Workspace
 
-class MyProxy(val url: String, val userId: String, val pass: String) {
-  def this(url: String, userId: String) = this(url, userId, UUID.randomUUID.toString)
+class MyProxy(val url: String, val userId: String, val pass: String, val delegationTime: String ) {
+  def this(url: String, userId: String, pass: String) = this(url, userId, pass, "PT12H")
+  def this(url: String, userId: String) = this(url, userId, Workspace.preference(Workspace.UniqueID))
+  def this(url: String) = this(url, UUID.randomUUID.toString, UUID.randomUUID.toString)
 }
