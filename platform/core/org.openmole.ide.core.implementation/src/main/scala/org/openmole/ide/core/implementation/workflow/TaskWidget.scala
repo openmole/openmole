@@ -38,7 +38,7 @@ class TaskWidget(scene: IMoleScene,
   preferredSize = new Dimension(TASK_CONTAINER_WIDTH,TASK_CONTAINER_HEIGHT)
   val titleLabel = new LinkLabel(capsule.toString, new Action(""){ 
       def apply = {
-        capsule.dataProxy match {
+        capsule.dataUI.task match {
           case Some(x : ITaskDataProxyUI) => scene.displayPropertyPanel(x,EDIT)
           case _=>
         }
@@ -63,7 +63,7 @@ class TaskWidget(scene: IMoleScene,
   }
   
   def backColor : Color =  { 
-    capsule.dataProxy match {
+    capsule.dataUI.task match {
       case Some(x : ITaskDataProxyUI) => 
         titleLabel.text = x.dataUI.name
         scene match {
@@ -75,7 +75,7 @@ class TaskWidget(scene: IMoleScene,
   }
   
   def borderColor : Color =  { 
-    capsule.dataProxy match {
+    capsule.dataUI.task match {
       case Some(x : ITaskDataProxyUI) => 
         scene match {
           case y: BuildMoleScene=> x.dataUI.borderColor

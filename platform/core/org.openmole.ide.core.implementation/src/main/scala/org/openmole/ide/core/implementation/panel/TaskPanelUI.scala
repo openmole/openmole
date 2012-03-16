@@ -61,7 +61,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   def save = {
         proxy.dataUI = panelUI.save(nameTextField.text,protoPanel.protoIn.content,protoPanel.protoOut.content)
         proxy.dataUI match {
-          case x : AbstractExplorationTaskDataUI => TopComponentsManager.capsules.filter(_.dataProxy == proxy) match {
+          case x : AbstractExplorationTaskDataUI => TopComponentsManager.capsules.filter(_.dataUI.task == proxy) match {
             case y : List[Nothing]=> 
             case y : List[ICapsuleUI] => y.head.addSampling(x.sampling)
           }

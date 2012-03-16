@@ -33,7 +33,7 @@ import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
+import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.exception.MoleExceptionManagement
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.workflow.ICapsuleUI
@@ -52,7 +52,7 @@ class MoleSceneConverter extends Converter{
     writer.addAttribute("name", molescene.manager.name.get)
     molescene.manager.capsules.values.foreach(view=> {
         writer.startNode("capsule")
-        writer.addAttribute("start", view.startingCapsule.toString)
+        writer.addAttribute("start", view.dataUI.startingCapsule.toString)
         writer.addAttribute("x", String.valueOf(view.x / 2 / Toolkit.getDefaultToolkit.getScreenSize.width))
         writer.addAttribute("y", String.valueOf(view.y / 2 / Toolkit.getDefaultToolkit.getScreenSize.height))
 
@@ -73,7 +73,7 @@ class MoleSceneConverter extends Converter{
         writer.endNode
         
         //Environment
-        view.environment match {
+        view.dataUI.environment match {
           case Some(x:IEnvironmentDataProxyUI)=> 
             writer.startNode("environment")
             writer.addAttribute("id",x.id.toString)
@@ -82,11 +82,14 @@ class MoleSceneConverter extends Converter{
         }
         
         //Task
-        if (view.capsuleType != CAPSULE) {
-          writer.startNode("task");
-          writer.addAttribute("id", view.dataProxy.get.id.toString)
-          writer.endNode
+        view.dataUI.task match {
+          case Some(x:ITaskDataProxyUI)=> 
+            writer.startNode("task");
+            writer.addAttribute("id", x.id.toString)
+            writer.endNode
+          case _=>
         }
+        
         writer.endNode
       })
     

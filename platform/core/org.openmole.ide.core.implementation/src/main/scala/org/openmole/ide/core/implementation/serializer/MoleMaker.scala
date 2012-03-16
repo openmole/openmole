@@ -23,8 +23,7 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.core.model.mole.IGroupingStrategy
 import org.openmole.core.model.mole.IMole
-import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.core.implementation.task._
@@ -53,7 +52,7 @@ object MoleMaker {
       var envs = new HashSet[(IEnvironment,String)]
       val strat = new FixedEnvironmentSelection
       manager.capsules.values.foreach{c=> 
-        c.environment match {
+        c.dataUI.environment match {
           case Some(x : IEnvironmentDataProxyUI) => 
             try {
               val env = x.dataUI.coreObject
@@ -84,23 +83,32 @@ object MoleMaker {
     else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")  
   }
   
-  def buildTask(capsuleUI: ICapsuleUI) = {
-    capsuleUI.capsuleType match {
-      case EXPLORATION_TASK=> addPrototypes(capsuleUI,capsuleUI.dataProxy.get.dataUI.coreObject.asInstanceOf[ExplorationTask])
-      case BASIC_TASK=> addPrototypes(capsuleUI,capsuleUI.dataProxy.get.dataUI.coreObject)
-      case CAPSULE=> throw new UserBadDataError("A capsule without any task can not be run")  
+  def buildTask(capsuleUI: ICapsuleUI) = 
+    capsuleUI.dataUI.task match {
+      case Some(x:ITaskDataProxyUI) => addPrototypes(capsuleUI,x.dataUI.coreObject)
+      case _=> throw new UserBadDataError("A capsule without any task can not be run")  
     }
-  }
+        
+        //x.dataUI match {
+        //  case y : AbstractExplorationTaskDataUI => addPrototypes(capsuleUI,y.coreObject)
+        //  case y : Any => addPrototypes(capsuleUI,y.coreObject)
+     // }
+//    capsuleUI.capsuleType match {
+//      case EXPLORATION_TASK=> addPrototypes(capsuleUI,capsuleUI.task.get.dataUI.coreObject.asInstanceOf[ExplorationTask])
+//      case BASIC_TASK=> addPrototypes(capsuleUI,capsuleUI.task.get.dataUI.coreObject)
+//      case CAPSULE=> throw new UserBadDataError("A capsule without any task can not be run")  
+//    }
+ // }
   
   def addPrototypes(capsuleUI: ICapsuleUI, task: ITask): ITask = {
-    capsuleUI.dataProxy.get.dataUI.prototypesIn.foreach{case (pui,v)=> { 
+    capsuleUI.dataUI.task.get.dataUI.prototypesIn.foreach{case (pui,v)=> { 
           val proto = pui.dataUI.coreObject
           v.isEmpty match {
             case true=> task.addInput(proto)
               // case false=> task.addParameter(new Parameter(proto,v))
           }
         }}
-    capsuleUI.dataProxy.get.dataUI.prototypesOut.foreach{pui=> { task.addOutput(pui.dataUI.coreObject)}}
+    capsuleUI.dataUI.task.get.dataUI.prototypesOut.foreach{pui=> { task.addOutput(pui.dataUI.coreObject)}}
     task
   }
   

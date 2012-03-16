@@ -28,6 +28,7 @@ import scala.collection.JavaConversions._
 
 object TopComponentsManager {
 
+  var countBuild = new AtomicInteger  
   var countExec = new AtomicInteger  
   var currentMoleSceneTopComponent: Option[MoleSceneTopComponent] = None  
   var connectMode = true

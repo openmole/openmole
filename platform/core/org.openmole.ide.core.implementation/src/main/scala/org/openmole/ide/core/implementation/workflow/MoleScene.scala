@@ -34,6 +34,7 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.panel._
 import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
 import org.openmole.ide.core.implementation.panel._
 import org.openmole.ide.core.implementation.provider.MoleSceneMenuProvider
 import org.openmole.ide.core.model.commons.Constants._
@@ -224,8 +225,8 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
       val sourceCapsuleUI = sourceWidget.asInstanceOf[CapsuleUI]
       TopComponentsManager.connectMode match {
         case true=>
-          if (manager.registerTransition(sourceCapsuleUI, targetWidget.asInstanceOf[InputSlotWidget],if(sourceCapsuleUI.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION,None))
-            createConnectEdge(source.get, target.get)
+          if (manager.registerTransition(sourceCapsuleUI, targetWidget.asInstanceOf[InputSlotWidget],sourceCapsuleUI.dataUI.transitionType,None))
+                  createConnectEdge(source.get, target.get)
         case false=> 
           if (manager.registerDataChannel(sourceCapsuleUI, targetWidget.asInstanceOf[TaskComponentWidget].capsule))
             createDataChannelEdge(source.get, target.get  )
@@ -297,13 +298,13 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
       else if (reconnectingSource) { 
         setEdgeSource(edge.get, replacementNode.get)
         val sourceW = replacementWidget.asInstanceOf[OutputSlotWidget].capsule
-        manager.registerTransition(edge.get,sourceW, t.target, if (sourceW.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION,None)
+        manager.registerTransition(edge.get,sourceW, t.target, sourceW.dataUI.transitionType,None)
       }
       else {
         val targetView= replacementWidget.asInstanceOf[InputSlotWidget]
         connectionWidget.setTargetAnchor(new InputSlotAnchor(targetView.capsule, currentSlotIndex))
         setEdgeTarget(edge.get, replacementNode.get)   
-        manager.registerTransition(edge.get,t.source, targetView,if (targetView.capsule.capsuleType == EXPLORATION_TASK) EXPLORATION_TRANSITION else BASIC_TRANSITION,None)
+        manager.registerTransition(edge.get,t.source, targetView,targetView.capsule.dataUI.transitionType,None)
       }
       repaint
     }

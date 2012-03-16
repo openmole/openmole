@@ -15,11 +15,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.data
+package org.openmole.ide.core.model.data
 
-import org.openmole.core.implementation.task.ExplorationTask
+import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.model.commons.TransitionType
+import org.openmole.ide.core.model.commons.TransitionType._
 
-abstract class AbstractExplorationTaskDataUI(val sampling : Option[ISamplingDataProxyUI] = None) extends TaskDataUI {
-  def coreObject: ExplorationTask
+trait ICapsuleDataUI {
+  def task : Option[ITaskDataProxyUI]  
+  
+  def task_=(t : Option[ITaskDataProxyUI])
+
+  def sampling : Option[ISamplingDataProxyUI]  
+
+  def sampling_=(s: Option[ISamplingDataProxyUI])
+
+  def environment : Option[IEnvironmentDataProxyUI]  
+
+  def environment_=(e : Option[IEnvironmentDataProxyUI] )
+
+  def startingCapsule : Boolean
+  
+  def startingCapsule_=(sc : Boolean)
+
+  def transitionType : TransitionType.Value 
 }

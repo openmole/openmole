@@ -21,15 +21,14 @@ import java.awt.Dimension
 import java.awt.Point
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.Widget
+import org.openmole.ide.core.implementation.data.CapsuleDataUI
 import org.openmole.ide.core.implementation.provider.CapsuleMenuProvider
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
-import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
+import org.openmole.ide.core.model.data.ICapsuleDataUI
+import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.workflow._
-import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
@@ -38,18 +37,13 @@ import scala.collection.mutable.ListBuffer
 import scala.swing.Action
 
 class CapsuleUI(val scene: IMoleScene, 
-                var dataProxy: Option[ITaskDataProxyUI],
-                var capsuleType:CapsuleType,
-                var startingCapsule: Boolean = false,
-                var environment: Option[IEnvironmentDataProxyUI] = None,
-                var sampling: Option[ISamplingDataProxyUI] = None) extends Widget(scene.graphScene) with ICapsuleUI{
-  def this(sc: IMoleScene) = this (sc,None,CAPSULE,sc.manager.capsules.size == 0,None,None)
+                val dataUI : ICapsuleDataUI = new CapsuleDataUI) extends Widget(scene.graphScene) with ICapsuleUI{
   
   val taskComponentWidget = new TaskComponentWidget(scene,this,new TaskWidget(scene,this))
   var environmentWidget : Option[LinkedImageWidget] = None
   var samplingWidget : Option[LinkedImageWidget] = None
-  addEnvironment(environment)
-  addSampling(sampling)
+  addEnvironment(dataUI.environment)
+  addSampling(dataUI.sampling)
   
   addChild(taskComponentWidget)
   setPreferredSize(new Dimension(TASK_CONTAINER_WIDTH+20,TASK_CONTAINER_HEIGHT+20))
@@ -72,17 +66,17 @@ class CapsuleUI(val scene: IMoleScene,
   
   def copy(sc: IMoleScene) = {
     var slotMapping = new HashMap[IInputSlotWidget,IInputSlotWidget]
-    val c = new CapsuleUI(sc,dataProxy,capsuleType,startingCapsule,environment)
+    val c = new CapsuleUI(sc,dataUI)
     islots.foreach(i=>slotMapping+=i->c.addInputSlot(false))
-    if (dataProxy.isDefined) {
-      c.setDataProxy(dataProxy.get)
-    } 
-    else capsuleType = BASIC_TASK
+    dataUI.task match {
+      case Some(x : ITaskDataProxyUI) =>c.setTask(x)
+      case _=>
+    }
     (c,slotMapping)
   }
   
   def defineAsStartingCapsule(b : Boolean) = {
-    startingCapsule = b
+    dataUI.startingCapsule = b
     islots.foreach{ isw=>
       isw.setStartingSlot(b)}
     scene.validate
@@ -90,14 +84,14 @@ class CapsuleUI(val scene: IMoleScene,
   }
   
   def encapsule(dpu: ITaskDataProxyUI)= {
-    setDataProxy(dpu)
+    setTask(dpu)
     addChild(PrototypeWidget.buildInput(scene, dpu))
     addChild(PrototypeWidget.buildOutput(scene, dpu))
     capsuleMenuProvider.addTaskMenus
   }
   
-  def addEnvironment(envdataproxy : Option[IEnvironmentDataProxyUI]) = {
-    environment = envdataproxy
+  def addEnvironment(envtask : Option[IEnvironmentDataProxyUI]) = {
+    dataUI.environment = envtask
     updateEnvironmentWidget
   }
     
@@ -106,7 +100,7 @@ class CapsuleUI(val scene: IMoleScene,
       case Some(y : LinkedImageWidget) => removeChild(y)
       case None =>
     }
-    environment match {
+    dataUI.environment match {
       case Some(x : IEnvironmentDataProxyUI) => 
         environmentWidget = Some(new LinkedImageWidget(scene,x.dataUI.imagePath,TASK_CONTAINER_WIDTH - 10,TASK_CONTAINER_HEIGHT -3,
                                                        new Action("") {def apply = scene.displayPropertyPanel(x,EDIT)}))
@@ -116,8 +110,8 @@ class CapsuleUI(val scene: IMoleScene,
     scene.refresh
   }
   
-  def addSampling(sampledataproxy : Option[ISamplingDataProxyUI]) = {
-    sampling = sampledataproxy
+  def addSampling(sampletask : Option[ISamplingDataProxyUI]) = {
+    dataUI.sampling = sampletask
     updateSamplingWidget
   }
   
@@ -126,7 +120,7 @@ class CapsuleUI(val scene: IMoleScene,
       case Some(y : LinkedImageWidget) => removeChild(y)
       case None =>
     }
-    sampling match {
+    dataUI.sampling match {
       case None=> samplingWidget = None
       case Some(x : ISamplingDataProxyUI) => 
         samplingWidget = Some(new LinkedImageWidget(scene,x.dataUI.imagePath,0,TASK_CONTAINER_HEIGHT - 3,
@@ -137,7 +131,7 @@ class CapsuleUI(val scene: IMoleScene,
   }
   
   def addInputSlot(on: Boolean): IInputSlotWidget =  {
-    if (on) startingCapsule = on
+    if (on) dataUI.startingCapsule = on
     nbInputSlots+= 1
     val im = new InputSlotWidget(scene,this,nbInputSlots,on)
     islots += im
@@ -153,13 +147,11 @@ class CapsuleUI(val scene: IMoleScene,
     islots-= toBeRemoved
   }
   
-  def setDataProxy(dpu: ITaskDataProxyUI)={
-    dataProxy= Some(dpu)
+  def setTask(dpu: ITaskDataProxyUI)={
+    dataUI.task= Some(dpu)
     dpu.dataUI match {
-      case x : AbstractExplorationTaskDataUI => 
-        addSampling(x.sampling)
-        capsuleType = EXPLORATION_TASK
-      case _=> capsuleType = BASIC_TASK
+      case x : AbstractExplorationTaskDataUI => addSampling(x.sampling)
+      case _=>
     }
   }
   

@@ -17,9 +17,22 @@
 
 package org.openmole.ide.core.implementation.data
 
-import org.openmole.core.implementation.task.ExplorationTask
-import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
+import org.openmole.ide.core.model.commons.TransitionType._
+import org.openmole.ide.core.model.dataproxy._
+import org.openmole.ide.core.model.data.ICapsuleDataUI
 
-abstract class AbstractExplorationTaskDataUI(val sampling : Option[ISamplingDataProxyUI] = None) extends TaskDataUI {
-  def coreObject: ExplorationTask
+class CapsuleDataUI extends ICapsuleDataUI{
+  
+  var task: Option[ITaskDataProxyUI] = None
+  var sampling: Option[ISamplingDataProxyUI] = None
+  var environment: Option[IEnvironmentDataProxyUI] = None
+  var startingCapsule: Boolean = false
+  
+  def transitionType = task match {
+    case Some(y: ITaskDataProxyUI)=> y match {
+        case x: AbstractExplorationTaskDataUI=> EXPLORATION_TRANSITION 
+        case _=> BASIC_TRANSITION
+      }
+    case _=> BASIC_TRANSITION
+  }
 }

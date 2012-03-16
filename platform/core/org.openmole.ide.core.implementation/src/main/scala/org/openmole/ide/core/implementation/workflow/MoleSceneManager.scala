@@ -24,6 +24,7 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
+import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow._
 import scala.collection.JavaConversions._
@@ -31,6 +32,7 @@ import scala.collection.mutable.HashSet
 
 class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IMoleSceneManager{
   
+  val id = TopComponentsManager.countBuild.getAndIncrement
   var capsules= new DualHashBidiMap[String, ICapsuleUI]
   var transitionMap= new DualHashBidiMap[String, ITransitionUI]
   var dataChannelMap = new DualHashBidiMap[String, IDataChannelUI]
