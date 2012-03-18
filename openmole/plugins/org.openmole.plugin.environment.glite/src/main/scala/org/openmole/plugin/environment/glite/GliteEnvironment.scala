@@ -55,9 +55,6 @@ object GliteEnvironment {
   val JobShakingInterval = new ConfigurationLocation("GliteEnvironment", "JobShakingInterval")
   val JobShakingProbabilitySubmitted = new ConfigurationLocation("GliteEnvironment", "JobShakingProbabilitySubmitted")
   val JobShakingProbabilityQueued = new ConfigurationLocation("GliteEnvironment", "JobShakingProbabilityQueued")
-
-  val ReloadProxyOnWorkerNodeInterval = new ConfigurationLocation("GliteEnvironment", "ReloadProxyOnWorkerNodeInterval")
-
   
   Workspace += (TimeLocation, "PT24H")
 
@@ -82,8 +79,6 @@ object GliteEnvironment {
   Workspace += (JobShakingInterval, "PT5M")
   Workspace += (JobShakingProbabilitySubmitted, "0.1")
   Workspace += (JobShakingProbabilityQueued, "0.01")
- 
-  Workspace += (ReloadProxyOnWorkerNodeInterval, "PT4H")
 }
 
 class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String, val myProxy: Option[MyProxy], attributes: Option[Map[String, String]], val memoryForRuntime: Option[Int], val fqan: String = "") extends JSAGAEnvironment(attributes) {

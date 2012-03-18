@@ -32,6 +32,7 @@ import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.TarArchiver._
 import org.openmole.misc.tools.service.Priority
+import org.openmole.core.batch.environment.Authentication
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.RelativePath
 import org.openmole.core.batch.file.URIFile
@@ -56,7 +57,7 @@ class Runtime {
 
   import Runtime._
 
-  def apply(baseURI: String, communicationDirPath: String, executionMessageURI: String, resultMessageURI: String, debug: Boolean) = {
+  def apply(baseURI: String, communicationDirPath: String, executionMessageURI: String, resultMessageURI: String, authentication: Authentication, debug: Boolean) = {
     
     val relativePath = new RelativePath(baseURI)
     import relativePath._

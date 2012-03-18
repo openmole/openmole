@@ -34,6 +34,7 @@ import org.openmole.core.batch.jsaga.JSAGASessionService;
 import org.openmole.misc.pluginmanager.PluginManager;
 import org.openmole.misc.workspace.Workspace;
 import org.openmole.core.serializer.SerializerService;
+import org.openmole.misc.logging.LoggerService;
 
 public class SimExplorer implements IApplication {
 
@@ -53,12 +54,12 @@ public class SimExplorer implements IApplication {
             options.addOption("p", true, "Path for plugin dir to preload.");
             options.addOption("l", true, "Local authentication mode for debug.");
             options.addOption("d", false, "Debug mode.");
-            
+
             CommandLineParser parser = new BasicParser();
             CommandLine cmdLine;
 
             boolean debug = false;
-            
+
             try {
                 cmdLine = parser.parse(options, args);
             } catch (ParseException e) {
@@ -69,7 +70,7 @@ public class SimExplorer implements IApplication {
 
             //init jsaga
             //JSAGASessionService.init();
-            
+
             Workspace.instance_$eq(new Workspace(new File(cmdLine.getOptionValue("w"))));
 
             String environmentPluginDirPath = cmdLine.getOptionValue("p");
@@ -80,26 +81,34 @@ public class SimExplorer implements IApplication {
             //System.out.println("plugin path " + environmentPluginDirPath);
             File environmentPluginDir = new File(environmentPluginDirPath);
             PluginManager.loadDir(environmentPluginDir);
-            
-            if ( cmdLine.hasOption("l") ) {
+
+            if (cmdLine.hasOption("l")) {
                 Workspace.instance().password_$eq(cmdLine.getOptionValue("l"));
                 debug = true;
             }
-            
-            if ( cmdLine.hasOption("d") ) debug = true;
-            
-            if (cmdLine.hasOption("a")) {
-                /* get env and init */
-                File envFile = new File(cmdLine.getOptionValue("a"));
-                Authentication authentication = SerializerService.deserialize(envFile);
-                authentication.initialize(false);
-                //if(!debug) envFile.delete();
+
+            if (cmdLine.hasOption("d")) {
+                debug = true;
             }
+
+            if (debug) {
+                LoggerService.level("ALL");
+            }
+
+            //if (cmdLine.hasOption("a")) {
+                /*
+             * get env and init
+             */
+            File envFile = new File(cmdLine.getOptionValue("a"));
+            Authentication authentication = SerializerService.deserialize(envFile);
+            authentication.initialize(false);
+            //if(!debug) envFile.delete();
+            //}
 
 
             String outMesseageURI = cmdLine.getOptionValue("o");
 
-            new Runtime().apply(baseURI, communicationPath, executionMessageURI, outMesseageURI, debug);
+            new Runtime().apply(baseURI, communicationPath, executionMessageURI, outMesseageURI, authentication, debug);
 
 
         } catch (Throwable t) {

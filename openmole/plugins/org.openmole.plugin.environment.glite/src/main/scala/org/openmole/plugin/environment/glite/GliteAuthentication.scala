@@ -133,8 +133,6 @@ class GliteAuthentication(
     
   @transient private var _proxyExpiresTime = Long.MaxValue
   
-  val reloadProxyOnWorkerNodeInterval = Workspace.preferenceAsDurationInMs(GliteEnvironment.ReloadProxyOnWorkerNodeInterval)
-  
   override def key = "glite:" + (voName, vomsURL).toString
   
   override def expires = _proxyExpiresTime

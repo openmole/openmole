@@ -38,6 +38,11 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.misc.logging</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.scala-lang.scala-library</artifactId>
             <version>${project.version}</version>
         </dependency>
