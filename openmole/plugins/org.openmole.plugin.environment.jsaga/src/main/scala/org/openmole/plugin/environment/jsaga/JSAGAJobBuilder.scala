@@ -27,11 +27,27 @@ object JSAGAJobBuilder {
   
   def description(attributes: Map[String, String]) = {
     val description = JobFactory.createJobDescription
+    
     attributes.get(CPU_TIME) match {
       case Some(value) => 
-        description.setAttribute(CPU_TIME, ISOPeriodFormat.standard.parsePeriod(value).toStandardMinutes.getMinutes.toString)
+        val cpuTime = ISOPeriodFormat.standard.parsePeriod(value).toStandardMinutes.getMinutes
+        description.setAttribute(CPU_TIME, cpuTime.toString)
+        attributes.get(CPU_COUNT) match {
+          case Some(value) => 
+            description.setAttribute(
+              JobDescription.WALLTIMELIMIT,
+              (cpuTime * value.toInt).toString
+            )
+          case None =>
+            description.setAttribute(JobDescription.WALLTIMELIMIT, cpuTime.toString)
+        }
       case None =>
     }
+    
+    attributes.filterNot(_._1 == CPU_TIME).foreach {
+      case(k, v) => description.setAttribute(k, v)
+    }
+    
     description
   }
 

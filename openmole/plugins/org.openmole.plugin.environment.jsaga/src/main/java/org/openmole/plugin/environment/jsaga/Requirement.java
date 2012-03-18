@@ -27,5 +27,6 @@ import org.ogf.saga.job.JobDescription;
 public class Requirement {
   public static final String MEMORY = JobDescription.TOTALPHYSICALMEMORY;
   public static final String CPU_TIME = JobDescription.TOTALCPUTIME;
+  public static final String CPU_COUNT = JobDescription.TOTALCPUCOUNT;
   public static final String CPU_ARCHITECTURE = JobDescription.CPUARCHITECTURE;
 }
