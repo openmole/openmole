@@ -20,6 +20,7 @@ package org.openmole.ide.core.implementation.workflow
 import scala.collection.mutable.HashMap
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
 import org.openmole.ide.core.model.commons.TransitionType
+import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
@@ -30,17 +31,18 @@ import org.openmole.ide.core.model.workflow._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
 
-class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IMoleSceneManager{
+class MoleSceneManager(var name : String,
+                       val id : Int) extends IMoleSceneManager{
   
-  val id = TopComponentsManager.countBuild.getAndIncrement
+  var startingCapsule: Option[ICapsuleUI]= None
   var capsules= new DualHashBidiMap[String, ICapsuleUI]
   var transitionMap= new DualHashBidiMap[String, ITransitionUI]
   var dataChannelMap = new DualHashBidiMap[String, IDataChannelUI]
-  var capsuleConnections= new HashMap[ICapsuleUI, HashSet[ITransitionUI]]
+  var capsuleConnections= new HashMap[ICapsuleDataUI, HashSet[ITransitionUI]]
   var nodeID = 0
   var edgeID = 0
   var dataChannelID = 0
-  var name: Option[String]= None
+ // var name: Option[String]= None
   
   override def setStartingCapsule(stCapsule: ICapsuleUI) = {
     startingCapsule match {
@@ -60,9 +62,8 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
   override def registerCapsuleUI(cv: ICapsuleUI) = {
     nodeID+= 1
     capsules.put(getNodeID,cv)
-    if (capsules.size == 1) {
-      startingCapsule= Some(cv)}
-    capsuleConnections+= cv-> HashSet.empty[ITransitionUI]
+    if (capsules.size == 1) startingCapsule= Some(cv)
+    capsuleConnections+= cv.dataUI -> HashSet.empty[ITransitionUI]
   }
   
   def removeCapsuleUI(nodeID: String) = {
@@ -72,8 +73,8 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
     }
     
     //remove following transitionMap
-    capsuleConnections(capsules.get(nodeID)).foreach{x=>transitionMap.removeValue(x)}
-    capsuleConnections-= capsules.get(nodeID)
+    capsuleConnections(capsules.get(nodeID).dataUI).foreach{x=>transitionMap.removeValue(x)}
+    capsuleConnections-= capsules.get(nodeID).dataUI
     
     //remove incoming transitionMap
     removeIncomingTransitions(capsules.get(nodeID))
@@ -95,7 +96,7 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
   
   private def removeIncomingTransitions(capsule: ICapsuleUI) = transitionMap.foreach(t => {if (t._2.target.capsule.equals(capsule)) {
         removeTransition(t._1)
-        capsuleConnections(t._2.source)-= t._2    
+        capsuleConnections(t._2.source.dataUI)-= t._2    
       }
     })
   
@@ -126,7 +127,7 @@ class MoleSceneManager(var startingCapsule: Option[ICapsuleUI]= None) extends IM
     if (!transitionMap.keys.contains(edgeID)) { 
       val transition = new TransitionUI(s,t,transitionType,cond)
       transitionMap.put(edgeID, transition)
-      capsuleConnections(transition.source)+= transition
+      capsuleConnections(transition.source.dataUI)+= transition
       return true
     }
     false

@@ -26,11 +26,12 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IGroupingStrategy
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.visualization._
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.model.panel._
+import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.control.IExecutionManager
@@ -65,7 +66,7 @@ object ExecutionManager {
 
 class ExecutionManager(manager : IMoleSceneManager,
                        val mole: IMole,
-                       val capsuleMapping: Map[ICapsuleUI, ICapsule],
+                       val capsuleMapping: Map[ICapsuleDataUI, ICapsule],
                        val prototypeMapping: Map[IPrototypeDataProxyUI,IPrototype[_]]) extends TabbedPane with IExecutionManager {
   val logTextArea = new TextArea{columns = 20;rows = 10;editable = false}
   val executionJobExceptionTextArea = new TextArea{columns = 40;rows = 10;editable = false}
@@ -82,7 +83,7 @@ class ExecutionManager(manager : IMoleSceneManager,
                        State.CANCELED-> new AtomicInteger)
   
   val wfPiePlotter = new PiePlotter("Workflow execution")
-  val envBarPanel = new MigPanel("","[][grow,fill]",""){
+  val envBarPanel = new PluginPanel("","[][grow,fill]",""){
     peer.add(wfPiePlotter.panel)
     preferredSize = new Dimension(250,250)}
   val envBarPlotter = new XYPlotter("Environment",5000,120) {preferredSize = new Dimension(400,250)}
@@ -101,7 +102,7 @@ class ExecutionManager(manager : IMoleSceneManager,
   Lookup.getDefault.lookupAll(classOf[IGroupingStrategyFactoryUI]).foreach{f=>groupingMenu.contents+= new MenuItem(new AddGroupingStrategyRowAction(f))}
   val menuBar = new MenuBar{contents.append(hookMenu,groupingMenu)}
   menuBar.minimumSize = new Dimension(menuBar.size.width,30)
-  val hookPanel = new MigPanel(""){contents+= (menuBar,"wrap")}
+  val hookPanel = new PluginPanel(""){contents+= (menuBar,"wrap")}
   
   val splitPane = new SplitPane(Orientation.Vertical) {
     leftComponent = new ScrollPane(envBarPanel)

@@ -38,16 +38,16 @@ import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
 import org.openmole.ide.core.implementation.panel._
 import org.openmole.ide.core.implementation.provider.MoleSceneMenuProvider
 import org.openmole.ide.core.model.commons.Constants._
-import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.widget.MigPanel
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.model.panel.PanelMode._
 
-abstract class MoleScene extends GraphScene.StringGraph with IMoleScene{
+abstract class MoleScene(n: String = "",
+                         id : Int) extends GraphScene.StringGraph with IMoleScene{
   
-  val manager = new MoleSceneManager
+  val manager = new MoleSceneManager(n,id)
   var obUI: Option[Widget]= None
   val capsuleLayer= new LayerWidget(this)
   val connectLayer = new LayerWidget(this)

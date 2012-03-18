@@ -23,9 +23,9 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.core.model.mole.IGroupingStrategy
 import org.openmole.core.model.mole.IMole
+import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.core.implementation.task._
 import org.openide.awt.StatusDisplayer
 import org.openmole.core.implementation.data.DataChannel
@@ -46,7 +46,7 @@ object MoleMaker {
                                             
   def buildMoleExecution(mole: IMole,
                          manager: IMoleSceneManager, 
-                         capsuleMap: Map[ICapsuleUI,ICapsule],
+                         capsuleMap: Map[ICapsuleDataUI,ICapsule],
                          groupingStrategies: List[(IGroupingStrategy,ICapsule)]): (IMoleExecution,Iterable[(IEnvironment, String)]) = 
                            try{
       var envs = new HashSet[(IEnvironment,String)]
@@ -57,7 +57,7 @@ object MoleMaker {
             try {
               val env = x.dataUI.coreObject
               envs += new Tuple2(env,x.dataUI.name)
-              strat.select(capsuleMap(c),env)
+              strat.select(capsuleMap(c.dataUI),env)
             }catch {
               case e: UserBadDataError=> StatusDisplayer.getDefault.setStatusText(e.message)
             }
@@ -72,13 +72,13 @@ object MoleMaker {
   def buildMole(manager: IMoleSceneManager) = {
     if (manager.startingCapsule.isDefined){
       val prototypeMap: Map[IPrototypeDataProxyUI,IPrototype[_]] = Proxys.prototypes.map{p=> p->p.dataUI.coreObject}.toMap
-      val capsuleMap= manager.capsules.map{c=> c._2->new Capsule(buildTask(c._2))}.toMap
+      val capsuleMap= manager.capsules.map{c=> c._2.dataUI->new Capsule(buildTask(c._2))}.toMap
       capsuleMap.foreach{case (cui,ccore)=> 
-          manager.capsuleConnections(cui).foreach(t=>buildTransition(ccore, capsuleMap(t.target.capsule),t))
-          manager.dataChannels.filterNot{_.prototypes.isEmpty}.foreach{dc => new DataChannel(capsuleMap(dc.source),capsuleMap(dc.target),
+          manager.capsuleConnections(cui).foreach(t=>buildTransition(ccore, capsuleMap(t.target.capsule.dataUI),t))
+          manager.dataChannels.filterNot{_.prototypes.isEmpty}.foreach{dc => new DataChannel(capsuleMap(dc.source.dataUI),capsuleMap(dc.target.dataUI),
                                                                                              dc.prototypes.map{_.dataUI.name}.toSet)}}
       
-      (new Mole(capsuleMap(manager.startingCapsule.get)),capsuleMap,prototypeMap)
+      (new Mole(capsuleMap(manager.startingCapsule.get.dataUI)),capsuleMap,prototypeMap)
     }
     else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")  
   }

@@ -31,7 +31,6 @@ import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
-import org.openmole.ide.core.model.commons.CapsuleType._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.exception.MoleExceptionManagement
@@ -49,7 +48,9 @@ class MoleSceneConverter extends Converter{
     val molescene= o.asInstanceOf[IMoleScene]
     var slotcount = 0
     
-    writer.addAttribute("name", molescene.manager.name.get)
+    writer.addAttribute("id", molescene.manager.id.toString)
+    writer.addAttribute("name", molescene.manager.name)
+    
     molescene.manager.capsules.values.foreach(view=> {
         writer.startNode("capsule")
         writer.addAttribute("start", view.dataUI.startingCapsule.toString)
@@ -119,9 +120,8 @@ class MoleSceneConverter extends Converter{
     var oslots = new HashMap[String, ICapsuleUI]
     var islots = new HashMap[String, IInputSlotWidget]
     
-    val scene = new BuildMoleScene
-    scene.manager.name = Some(reader.getAttribute("name"))
-        
+    val scene = new BuildMoleScene(reader.getAttribute("name"),
+                                   reader.getAttribute("id").toInt)
     
     //Capsules
     while (reader.hasMoreChildren) {

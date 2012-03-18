@@ -109,8 +109,8 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
         toolBar.add(stopButton.peer());
         setLayout(new BorderLayout());
         add(toolBar, BorderLayout.NORTH);
-        setDisplayName(moleScene.manager().name().get());
-        setName(moleScene.manager().name().get());
+        setDisplayName(moleScene.manager().name());
+        setName(moleScene.manager().name());
         add(moleScene.graphScene().createView(), BorderLayout.CENTER);
         etc.close();
         repaint();

@@ -6,29 +6,41 @@
 package org.openmole.ide.plugin.task.moletask
 
 import java.awt.Color
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.implementation.mole.Mole
 import org.openmole.ide.core.implementation.serializer.MoleMaker
+import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.core.implementation.task.MoleTask
-import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.model.data.ICapsuleDataUI
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.misc.exception.UserBadDataError
+import scala.collection.JavaConversions._
 
+object MoleTaskDataUI {
+  def manager(i : Int) : Option[IMoleSceneManager] = TopComponentsManager.moleScenes.map{_.manager}.filter{_.id == i}.headOption
+  def capsule(t: ITaskDataProxyUI, manager : IMoleSceneManager) : Option[ICapsuleDataUI] = 
+    manager.capsules.values.map{_.dataUI}.filter{_.task.isDefined}.filter{_.task.get == t}.headOption
+}
+
+import MoleTaskDataUI._
 class MoleTaskDataUI(val name: String="",
-                     val mole: Option[IMoleScene] = None,
-                     val finalCapsule : Option[ICapsuleUI] = None) extends TaskDataUI {
+                     val mole: Option[Int] = None,
+                     val finalCapsule : Option[ITaskDataProxyUI] = None) extends TaskDataUI {
 
   def coreObject = mole match {
-    case Some(x: IMoleScene) => 
-      finalCapsule match {
-        case Some(y: ICapsuleUI) =>
-          //val (m: Mole,capsMap: Map[ICapsuleUI,ICapsule],_) = 
-          val m : Mole = null
-          val capsMap : Map[ICapsuleUI,ICapsule] = Map.empty
-        //  val (m,capsMap) =  MoleMaker.buildMole(x.manager)._1
-          new MoleTask(name, m,capsMap(y))
-        case _ => throw new UserBadDataError("No final Capsule is set ")
+    case Some(x: Int) => MoleTaskDataUI.manager(x) match {
+        case Some(y : IMoleSceneManager) =>
+          finalCapsule match {
+            case Some(z: ITaskDataProxyUI) =>
+              MoleTaskDataUI.capsule(z,y) match {
+                case Some(w:ICapsuleDataUI) =>
+                  val (m,capsMap,protoMap) =  MoleMaker.buildMole(y)
+                  new MoleTask(name, m,capsMap(w))
+                case _ => throw new UserBadDataError("No final Capsule is set")
+              }
+            case _ => throw new UserBadDataError("A capsule without task can not be run")
+          }
+        case _ =>throw new UserBadDataError("No Mole is set ")
       }
     case _=> throw new UserBadDataError("No Mole is set ")
   }

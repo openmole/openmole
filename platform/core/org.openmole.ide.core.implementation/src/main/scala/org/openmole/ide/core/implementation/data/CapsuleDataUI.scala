@@ -28,6 +28,11 @@ class CapsuleDataUI extends ICapsuleDataUI{
   var environment: Option[IEnvironmentDataProxyUI] = None
   var startingCapsule: Boolean = false
   
+  override def toString = task match {
+    case Some(x : ITaskDataProxyUI)=> x.dataUI.name
+    case _=> ""
+  }
+  
   def transitionType = task match {
     case Some(y: ITaskDataProxyUI)=> y match {
         case x: AbstractExplorationTaskDataUI=> EXPLORATION_TRANSITION 

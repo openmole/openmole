@@ -23,13 +23,14 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.commons.Constants._
 import scala.collection.JavaConversions._
 
-class ExecutionMoleScene extends MoleScene{
+class ExecutionMoleScene(id : Int,
+                         name : String) extends MoleScene(name,id){
 
   override val isBuildScene = false
   
   def initCapsuleAdd(w: ICapsuleUI)= {
     obUI= Some(w.asInstanceOf[Widget])
-  //  obUI.get.createActions(SELECT).addAction(MoleScene.selectAction)
+    //  obUI.get.createActions(SELECT).addAction(MoleScene.selectAction)
     obUI.get.createActions(CONNECT).addAction(moveAction)
   }
   

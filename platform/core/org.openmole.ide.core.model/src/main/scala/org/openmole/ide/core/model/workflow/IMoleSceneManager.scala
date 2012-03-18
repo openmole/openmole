@@ -19,14 +19,19 @@ package org.openmole.ide.core.model.workflow
 
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
 import org.openmole.ide.core.model.commons.TransitionType
+import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 
 trait IMoleSceneManager {
-  def name: Option[String]
+  override def toString = name
   
-  def name_=(n:Option[String])
+  def id : Int
+  
+  def name: String
+  
+  def name_=(n:String)
   
   def startingCapsule_=(n:Option[ICapsuleUI])
   
@@ -42,7 +47,7 @@ trait IMoleSceneManager {
   
   def startingCapsule: Option[ICapsuleUI]
   
-  def capsuleConnections:  HashMap[ICapsuleUI, HashSet[ITransitionUI]]
+  def capsuleConnections:  HashMap[ICapsuleDataUI, HashSet[ITransitionUI]]
   
   def removeCapsuleUI(nodeID: String):Unit
   

@@ -17,9 +17,9 @@
 
 package org.openmole.ide.core.model.control
 
+import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.core.model.data.IPrototype
-import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
@@ -32,7 +32,7 @@ trait IExecutionManager {
   
   def prototypeMapping: Map[IPrototypeDataProxyUI,IPrototype[_]]
   
-  def capsuleMapping: Map[ICapsuleUI, ICapsule]
+  def capsuleMapping: Map[ICapsuleDataUI, ICapsule]
   
   def printStream: PrintStream
   

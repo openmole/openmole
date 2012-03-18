@@ -21,19 +21,22 @@ import scala.swing.MainFrame
 import scala.swing.SimpleSwingApplication
 import com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel
 import java.awt.BorderLayout
+import java.awt.Color
 import java.awt.Dimension
 import javax.swing.ImageIcon
 import javax.swing.UIManager
 import org.openmole.ide.misc.widget.multirow.RowWidget._
+import org.openmole.ide.misc.widget.multirow.MultiTextField
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
+import org.netbeans.api.visual.border.BorderFactory
 import org.openide.util.ImageUtilities
 import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor
+import scala.swing.TextField
 
 object MultiRowExample extends SimpleSwingApplication {
   def top = new MainFrame {
-    UIManager.setLookAndFeel(new NimbusLookAndFeel)
     peer.setLayout(new BorderLayout)
     val fake1 = new Fake("fake1")
     val fake2 = new Fake("fake2")
@@ -42,10 +45,8 @@ object MultiRowExample extends SimpleSwingApplication {
     peer.add(new MultiComboLinkLabelGroovyTextFieldEditor("My title",
                                                           List((fake1,action,"one"),(fake2,action,"")),
                                                           List((fake1,action),(fake2,action)),image).panel.peer,BorderLayout.WEST)
-    peer.add(new MultiComboLinkLabel("My title2",
-                                     List((fake1,action),(fake2,action)),
-                                     List((fake1,action),(fake2,action)),
-                                     image).panel.peer,BorderLayout.EAST)
+    peer.add(new MultiTextField("My title2",
+                                List("un","deux")).panel.peer,BorderLayout.EAST)
     size = new Dimension(250,200)
   }
   

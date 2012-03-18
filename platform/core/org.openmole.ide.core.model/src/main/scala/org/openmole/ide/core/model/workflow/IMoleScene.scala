@@ -55,5 +55,5 @@ trait IMoleScene {
   
   def extraPropertyWidget : ComponentWidget
   
-  override def toString = manager.name.getOrElse("")
+  override def toString = manager.name
 }

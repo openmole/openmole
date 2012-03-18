@@ -70,7 +70,7 @@ object TopComponentsManager {
       case x:BuildMoleComponent=>
         MoleMaker.buildMole(x.moleScene.manager) // test wether the mole can be built
         val clone = x.moleScene.copy
-        clone.manager.name = Some({ x.moleScene.manager.name.get+"_"+countExec.incrementAndGet})
+        clone.manager.name = { x.moleScene.manager.name+"_"+countExec.incrementAndGet}
         val ecomp = new ExecutionMoleComponent(clone)
         x.executionMoleSceneComponents += ecomp
         ecomp.moleSceneTopComponent.open

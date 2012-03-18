@@ -12,7 +12,7 @@ import scala.collection.mutable.HashMap
 
 trait ICapsuleUI {
   override def toString = dataUI.task match {
-    case Some(x : ITaskDataProxyUI)=> x.dataUI.name
+    case Some(x : ITaskDataProxyUI)=> x.dataUI.toString
     case _=> ""
   }
   
