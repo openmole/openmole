@@ -87,7 +87,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   def protos : Unit = {
     switch
     mainPanel.contents += protoPanel.peer
-    
+
     mainLinksPanel.contents +=  new ImageLinkLabel("img/previous.png",new Action("") { def apply = properties })
   }
   

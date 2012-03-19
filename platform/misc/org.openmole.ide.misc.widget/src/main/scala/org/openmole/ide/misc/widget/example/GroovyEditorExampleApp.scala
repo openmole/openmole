@@ -19,7 +19,7 @@
 package org.openmole.ide.misc.widget.example
 
 import java.awt.Dimension
-import org.openmole.ide.misc.widget.GroovyTextFieldEditor
+import org.openmole.ide.misc.widget.PrototypeGroovyTextFieldEditor
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.MainFrame
 import scala.swing.SimpleSwingApplication
@@ -28,7 +28,7 @@ object GroovyEditorExampleApp extends SimpleSwingApplication
 {
   def top = new MainFrame {
     title = "Groovy editor Demo"
-    val editor = new GroovyTextFieldEditor[Int]("<h1>Demo</h1>")
+    val editor = new PrototypeGroovyTextFieldEditor[Int]("<h1>Demo</h1>")
     val panel = new PluginPanel("")
     panel.contents += editor
     contents = panel

@@ -19,7 +19,7 @@ package org.openmole.ide.misc.widget.multirow
 
 import javax.swing.Icon
 import org.openmole.ide.misc.widget.ContentAction
-import org.openmole.ide.misc.widget.GroovyTextFieldEditor
+import org.openmole.ide.misc.widget.PrototypeGroovyTextFieldEditor
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget.Plus
@@ -42,7 +42,7 @@ object MultiComboLinkLabelGroovyTextFieldEditor {
                                                         val plus: Plus) extends IRowWidget2[A,String]{
     
     val linkLabel = new LinkLabel("",initValues._2) {icon = image}
-    val textField = new GroovyTextFieldEditor("Default value",initValues._3)
+    val textField = new PrototypeGroovyTextFieldEditor("Default value",initValues._3)
     
     val comboBox = new ComboBox(comboContent.map(c=>c._1)) 
     comboBox.selection.item = initValues._1

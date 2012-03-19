@@ -68,7 +68,6 @@ object MoleMaker {
    
       (new MoleExecution(mole,strat,mgs),envs.toSet)
     }
-  
   def buildMole(manager: IMoleSceneManager) = {
     if (manager.startingCapsule.isDefined){
       val prototypeMap: Map[IPrototypeDataProxyUI,IPrototype[_]] = Proxys.prototypes.map{p=> p->p.dataUI.coreObject}.toMap
@@ -105,7 +104,11 @@ object MoleMaker {
           val proto = pui.dataUI.coreObject
           v.isEmpty match {
             case true=> task.addInput(proto)
-              // case false=> task.addParameter(new Parameter(proto,v))
+            case false=>
+              //v match {
+          //      case proto.coreClass.erasure => println
+           //     task.addParameter(new Parameter(proto,v))
+          //  }
           }
         }}
     capsuleUI.dataUI.task.get.dataUI.prototypesOut.foreach{pui=> { task.addOutput(pui.dataUI.coreObject)}}
