@@ -18,6 +18,7 @@
     <modules>
         <module>org.openmole.ide.misc.widget</module>      
         <module>org.openmole.ide.misc.visualization</module>
+        <module>org.openmole.ide.misc.tools</module>
     </modules>
 
 </project>

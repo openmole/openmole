@@ -48,6 +48,26 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.core.model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.core.implementation</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.apache.commons.configuration</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.apache.log4j</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.tools</artifactId>
             <version>${project.version}</version>
         </dependency>

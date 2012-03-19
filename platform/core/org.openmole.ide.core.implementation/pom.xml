@@ -89,6 +89,16 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
+            <artifactId>org.apache.commons.configuration</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.apache.log4j</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.codehaus.groovy</artifactId>
             <version>${project.version}</version>
         </dependency>
