@@ -31,16 +31,8 @@ object JSAGAJobBuilder {
     attributes.get(CPU_TIME) match {
       case Some(value) => 
         val cpuTime = ISOPeriodFormat.standard.parsePeriod(value).toStandardMinutes.getMinutes
-        description.setAttribute(CPU_TIME, cpuTime.toString)
-        attributes.get(CPU_COUNT) match {
-          case Some(value) => 
-            description.setAttribute(
-              JobDescription.WALLTIMELIMIT,
-              (cpuTime * value.toInt).toString
-            )
-          case None =>
-            description.setAttribute(JobDescription.WALLTIMELIMIT, cpuTime.toString)
-        }
+        description.setAttribute(JobDescription.WALLTIMELIMIT, cpuTime.toString)
+        description.setAttribute(CPU_TIME, (cpuTime * attributes.getOrElse(CPU_COUNT, "1").toInt).toString)
       case None =>
     }
     
