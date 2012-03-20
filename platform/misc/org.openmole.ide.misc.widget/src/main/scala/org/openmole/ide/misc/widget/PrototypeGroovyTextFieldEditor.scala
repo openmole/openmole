@@ -30,6 +30,7 @@ import org.openmole.ide.misc.tools.check.TypeCheck
 class PrototypeGroovyTextFieldEditor(val title : String ,
                                          m : Manifest[_] ,
                                   var editorText : String = "") extends LinkLabel("",new Action("") { def apply = {}}){
+  println("mannifest in groovytfeditor  " + m)
   setIcon(editorText)
   cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
   action = new Action(""){

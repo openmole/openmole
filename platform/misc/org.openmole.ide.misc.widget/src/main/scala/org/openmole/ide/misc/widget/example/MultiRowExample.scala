@@ -42,11 +42,11 @@ object MultiRowExample extends SimpleSwingApplication {
     val fake1 = new Fake("fake1")
     val fake2 = new Fake("fake2")
     val proto1 = new Prototype("proto1",classOf[Int])
-    val proto2 = new Prototype("proto1",classOf[Double])
+    val proto2 = new Prototype("proto2",classOf[Double])
     val action = new ContentAction("Action " , fake1) { override def apply = println("view " + fake1.toString)}
     val image = new ImageIcon(ImageUtilities.loadImage("img/eye.png"))
     peer.add(new MultiComboLinkLabelGroovyTextFieldEditor("My title",
-      List((fake1,proto1.`type`,action,"one"),(fake2,proto2.`type`,action,"")),
+      List((fake1,proto1.`type`,action,"12"),(fake2,proto2.`type`,action,"45.6")),
       List((fake1,proto1.`type`,action),(fake2,proto2.`type`,action)),image).panel.peer,BorderLayout.WEST)
     peer.add(new MultiTextField("My title2",
       List("un","deux")).panel.peer,BorderLayout.EAST)
