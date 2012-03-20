@@ -36,13 +36,13 @@ object MultiComboLinkLabelGroovyTextFieldEditor {
     }
   }
  
-  class ComboLinkLabelGroovyTextFieldEditorRowWidget[A](val comboContent : List[(A,ContentAction[A])], 
-                                                        val initValues : (A,ContentAction[A],String),
+  class ComboLinkLabelGroovyTextFieldEditorRowWidget[A](val comboContent : List[(A,Manifest[_],ContentAction[A])],
+                                                        val initValues : (A,Manifest[_],ContentAction[A],String),
                                                         val image : Icon,
                                                         val plus: Plus) extends IRowWidget2[A,String]{
     
-    val linkLabel = new LinkLabel("",initValues._2) {icon = image}
-    val textField = new PrototypeGroovyTextFieldEditor("Default value",initValues._3)
+    val linkLabel = new LinkLabel("",initValues._3) {icon = image}
+    val textField = new PrototypeGroovyTextFieldEditor("Default value",initValues._2,initValues._4)
     
     val comboBox = new ComboBox(comboContent.map(c=>c._1)) 
     comboBox.selection.item = initValues._1
@@ -53,7 +53,7 @@ object MultiComboLinkLabelGroovyTextFieldEditor {
         comboBox.selection.reactions += {
           case SelectionChanged(`comboBox`)=> 
             linkLabel.action = {
-              comboContent.filter{cc => cc._1 == comboBox.selection.item}.head._2
+              comboContent.filter{cc => cc._1 == comboBox.selection.item}.head._3
             }
         }
       }
@@ -72,23 +72,23 @@ class MultiComboLinkLabelGroovyTextFieldEditor[A](title: String,
 
   
   def this(title: String,
-           comboContent: List[(A,ContentAction[A])],
-           initValues: List[(A,ContentAction[A],String)],
+           comboContent: List[(A,Manifest[_],ContentAction[A])],
+           initValues: List[(A,Manifest[_],ContentAction[A],String)],
            image : Icon,
            factory: IRowWidgetFactory[ComboLinkLabelGroovyTextFieldEditorRowWidget[A]],
            minus: Minus,
            plus: Plus) = this(title,
                               if (initValues.isEmpty) {List(new ComboLinkLabelGroovyTextFieldEditorRowWidget(comboContent,
-                                                                                                             (comboContent(0)._1,comboContent(0)._2,""),
+                                                                                                             (comboContent(0)._1,comboContent(0)._2,comboContent(0)._3,""),
                                                                                                              image,
                                                                                                              plus))
     }
                               else initValues.map{
-      case(a,action,s)=>new ComboLinkLabelGroovyTextFieldEditorRowWidget(comboContent,(a,action,s),image,plus)}
+      case(a,m,action,s)=>new ComboLinkLabelGroovyTextFieldEditorRowWidget(comboContent,(a,m,action,s),image,plus)}
                               ,factory,minus,plus)
   def this(title: String,
-           initValues: List[(A,ContentAction[A],String)],
-           comboContent: List[(A,ContentAction[A])],
+           initValues: List[(A,Manifest[_],ContentAction[A],String)],
+           comboContent: List[(A,Manifest[_],ContentAction[A])],
            image : Icon) = this(title,
                                 comboContent,
                                 initValues,

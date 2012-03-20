@@ -34,19 +34,22 @@ import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor
 import scala.swing.TextField
+import org.openmole.core.implementation.data.Prototype
 
 object MultiRowExample extends SimpleSwingApplication {
   def top = new MainFrame {
     peer.setLayout(new BorderLayout)
     val fake1 = new Fake("fake1")
     val fake2 = new Fake("fake2")
+    val proto1 = new Prototype("proto1",classOf[Int])
+    val proto2 = new Prototype("proto1",classOf[Double])
     val action = new ContentAction("Action " , fake1) { override def apply = println("view " + fake1.toString)}
     val image = new ImageIcon(ImageUtilities.loadImage("img/eye.png"))
     peer.add(new MultiComboLinkLabelGroovyTextFieldEditor("My title",
-                                                          List((fake1,action,"one"),(fake2,action,"")),
-                                                          List((fake1,action),(fake2,action)),image).panel.peer,BorderLayout.WEST)
+      List((fake1,proto1.`type`,action,"one"),(fake2,proto2.`type`,action,"")),
+      List((fake1,proto1.`type`,action),(fake2,proto2.`type`,action)),image).panel.peer,BorderLayout.WEST)
     peer.add(new MultiTextField("My title2",
-                                List("un","deux")).panel.peer,BorderLayout.EAST)
+      List("un","deux")).panel.peer,BorderLayout.EAST)
     size = new Dimension(250,200)
   }
   

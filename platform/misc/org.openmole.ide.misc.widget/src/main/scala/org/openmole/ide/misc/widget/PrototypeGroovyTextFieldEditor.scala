@@ -27,9 +27,9 @@ import org.openmole.ide.misc.widget.dialog.DialogFactory
 import scala.swing.Action
 import org.openmole.ide.misc.tools.check.TypeCheck
 
-class PrototypeGroovyTextFieldEditor[A](val title : String,
-                               var editorText : String = "")
-                                       (implicit m : Manifest[A]) extends LinkLabel("",new Action("") { def apply = {}}){
+class PrototypeGroovyTextFieldEditor(val title : String ,
+                                         m : Manifest[_] ,
+                                  var editorText : String = "") extends LinkLabel("",new Action("") { def apply = {}}){
   setIcon(editorText)
   cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
   action = new Action(""){
@@ -43,7 +43,7 @@ class PrototypeGroovyTextFieldEditor[A](val title : String,
     icon = code.isEmpty match {
       case true => new ImageIcon(ImageUtilities.loadImage("img/edit_empty.png"))
       case false =>
-          val (result,t) = TypeCheck.apply(code,new Prototype("name",m))
+        val (result,t) = TypeCheck.apply(code,new Prototype("name",m))
          tooltip =  t
           result match {
             case true => new ImageIcon(ImageUtilities.loadImage("img/edit.png"))
