@@ -23,12 +23,10 @@ import org.openmole.core.model.data.IPrototype
 
 trait IPrototypeDataUI[T] extends IDataUI{
   override def displayName = if (dim>0) name+"[" + dim +"]" else name
-  
+
   def displayTypedName: String
   
   def coreObject: IPrototype[T]
-  
-  override def entityType: String = PROTOTYPE
   
   def buildPanelUI: IPrototypePanelUI[T]
   

@@ -22,8 +22,7 @@ import org.openmole.core.model.sampling.ISampling
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 
 trait ISamplingDataUI extends IDataUI{
-  override def entityType = SAMPLING
-  
+
   def coreObject: ISampling
   
   def buildPanelUI: ISamplingPanelUI

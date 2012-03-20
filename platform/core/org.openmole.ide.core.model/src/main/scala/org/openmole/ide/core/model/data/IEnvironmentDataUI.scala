@@ -22,7 +22,6 @@ import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.core.model.execution.IEnvironment
 
 trait IEnvironmentDataUI extends IDataUI {
-  override def entityType = Constants.ENVIRONMENT
   
   def coreObject: IEnvironment
   

@@ -23,7 +23,6 @@ import org.openmole.core.model.domain.IDomain
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 
 trait IDomainDataUI extends IDataUI{
-  override def entityType = DOMAIN
   
   def coreObject(proto: IPrototype[_]): IDomain[_]
   

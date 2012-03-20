@@ -25,7 +25,6 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 
 trait ITaskDataUI extends IDataUI{
-  override def entityType = TASK
   
   def borderColor: Color
   
