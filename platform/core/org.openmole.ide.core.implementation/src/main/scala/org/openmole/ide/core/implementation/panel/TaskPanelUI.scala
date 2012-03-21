@@ -97,8 +97,9 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
       
     val emptyProto = EmptyDataUIs.emptyPrototypeProxy
     val protoIn = new MultiComboLinkLabelGroovyTextFieldEditor("Inputs",
-                                                               TaskPanelUI.this.proxy.dataUI.prototypesIn.map{case(proto,v) => (proto,proto.dataUI.coreObject.`type`,contentAction(proto),v)}.toList,
-                                                               (List(emptyProto):::Proxys.prototypes.toList).map{p=>(p,contentAction(p))}.toList,
+                                                               TaskPanelUI.this.proxy.dataUI.prototypesIn.map{case(proto,v) =>
+                                                                 (proto,proto.dataUI.coreObject,contentAction(proto),v)}.toList,
+                                                               (List(emptyProto):::Proxys.prototypes.toList).map{p=>(p,p.dataUI.coreObject,contentAction(p))}.toList,
                                                                image)        
                                                                       
     val protoOut = new MultiComboLinkLabel("Outputs",
