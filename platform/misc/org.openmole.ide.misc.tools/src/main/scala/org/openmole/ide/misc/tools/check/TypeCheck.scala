@@ -22,15 +22,15 @@ import org.openmole.misc.tools.groovy.GroovyProxy
 
 object TypeCheck {
   def apply(code : String,
-             prototype : IPrototype[_]) =  {
-        try {
-    val exe =  new GroovyProxy(code).execute()
-    prototype.accepts(exe) match { 
-      case true => (true,exe.toString)
-      case false => (false,"The default type for the prototype " + prototype.name + " is not valid ( " + prototype.`type` + " is required )")
+            prototype : IPrototype[_]) =  {
+    try {
+      val exe =  new GroovyProxy(code).execute()
+      prototype.accepts(exe) match { 
+        case true => (true,exe.toString)
+        case false => (false,"The default value " + code +" for the prototype " + prototype.name + " is not valid ( " + prototype.`type` + " is required )")
+      }
+    } catch {
+      case e => (false,e.getMessage)
     }
-  } catch {
-          case e =>  (false,e.getMessage)
-        }
   }
 }
