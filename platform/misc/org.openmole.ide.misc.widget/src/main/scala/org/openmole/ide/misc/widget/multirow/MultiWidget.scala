@@ -21,7 +21,6 @@ import java.awt.Color
 import scala.collection.mutable.HashSet
 import scala.swing.Action
 import scala.swing.Label
-import javax.swing.ImageIcon
 import org.openmole.ide.misc.widget.ImageLinkLabel
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.RowWidget._
@@ -46,7 +45,7 @@ class MultiWidget[T<:IRowWidget](title: String = "",
   val titleLabel = new Label(title){foreground = new Color(0,113,187)}
   val addButton = new ImageLinkLabel("img/add.png",new Action("") { def apply = addRow })
   
-  rWidgets.foreach(addRow)
+  rWidgets.foreach(r=>addRow(factory(r,panel)))
   panel.contents.insert(0,titleLabel)
   panel.contents += addButton
   
