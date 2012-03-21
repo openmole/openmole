@@ -113,15 +113,16 @@ abstract class MoleScene(n: String = "",
     refresh
   }
     
-  
-  def closePropertyPanel : Unit = {
+  def savePropertyPanel = 
     if (currentPanel.contents.size > 0 ) {
       currentPanel.contents(0) match {
         case x:BasePanelUI=> x.baseSave
         case _=> 
       }
     }
-    
+  
+  def closePropertyPanel : Unit = {
+    savePropertyPanel
     currentPanel.contents.removeAll
     closeExtraPropertyPanel
     propertyWidget.setVisible(false)
@@ -226,7 +227,7 @@ abstract class MoleScene(n: String = "",
       TopComponentsManager.connectMode match {
         case true=>
           if (manager.registerTransition(sourceCapsuleUI, targetWidget.asInstanceOf[InputSlotWidget],sourceCapsuleUI.dataUI.transitionType,None))
-                  createConnectEdge(source.get, target.get)
+            createConnectEdge(source.get, target.get)
         case false=> 
           if (manager.registerDataChannel(sourceCapsuleUI, targetWidget.asInstanceOf[TaskComponentWidget].capsule))
             createDataChannelEdge(source.get, target.get  )

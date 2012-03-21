@@ -25,6 +25,7 @@ import org.openide.awt.ActionID;
 import org.openide.util.NbBundle.Messages;
 import org.openmole.ide.core.implementation.action.SaveXML;
 import org.openmole.ide.core.implementation.control.Settings;
+import org.openmole.ide.core.implementation.control.TopComponentsManager;
 import org.openmole.ide.core.implementation.serializer.GUISerializer;
 
 @ActionID(category = "File",
@@ -38,6 +39,7 @@ public final class SaveXMLAction implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        TopComponentsManager.saveCurrentPropertyWidget();
         SaveXML.save();
     }
 }

@@ -41,6 +41,11 @@ object TopComponentsManager {
     }
   }
   
+  def saveCurrentPropertyWidget = currentMoleSceneTopComponent match {
+    case Some(x : MoleSceneTopComponent) => x.getMoleScene.savePropertyPanel
+    case _=>
+  }
+  
   def noCurrentMoleSceneTopComponent = if (topComponents.size == 1) currentMoleSceneTopComponent = None
   
   def setCurrentMoleSceneTopComponent(ms: MoleSceneTopComponent) = currentMoleSceneTopComponent = Some(ms)

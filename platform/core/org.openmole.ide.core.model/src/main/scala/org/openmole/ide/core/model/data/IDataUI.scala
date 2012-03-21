@@ -24,8 +24,6 @@ trait IDataUI{
   
   def displayName: String = name
   
-  def entityType: String
-  
   def coreClass: Class[_]
   
   def imagePath: String 
