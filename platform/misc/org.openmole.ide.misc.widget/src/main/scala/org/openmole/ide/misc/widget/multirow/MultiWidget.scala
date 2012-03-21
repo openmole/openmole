@@ -46,10 +46,7 @@ class MultiWidget[T<:IRowWidget](title: String = "",
   val titleLabel = new Label(title){foreground = new Color(0,113,187)}
   val addButton = new ImageLinkLabel("img/add.png",new Action("") { def apply = addRow })
   
-  rWidgets.foreach {
-    r => 
-    addRow(factory(r, panel))
-  }
+  rWidgets.foreach(addRow)
   panel.contents.insert(0,titleLabel)
   panel.contents += addButton
   
