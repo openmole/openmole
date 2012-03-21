@@ -18,7 +18,9 @@
 package org.openmole.ide.misc.widget.multirow
 
 import javax.swing.Icon
+import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.misc.widget.ContentAction
+import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.misc.widget.PrototypeGroovyTextFieldEditor
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
@@ -36,13 +38,12 @@ object MultiComboLinkLabelGroovyTextFieldEditor {
     }
   }
  
-  class ComboLinkLabelGroovyTextFieldEditorRowWidget[A](val comboContent : List[(A,Manifest[_],ContentAction[A])],
-                                                        val initValues : (A,Manifest[_],ContentAction[A],String),
+  class ComboLinkLabelGroovyTextFieldEditorRowWidget[A](val comboContent : List[(A,IPrototype[_],ContentAction[A])],
+                                                        val initValues : (A,IPrototype[_],ContentAction[A],String),
                                                         val image : Icon,
                                                         val plus: Plus) extends IRowWidget2[A,String]{
-    
     val linkLabel = new LinkLabel("",initValues._3) {icon = image}
-    val textField = new PrototypeGroovyTextFieldEditor("Default value",initValues._2,initValues._4)
+    var textField = new PrototypeGroovyTextFieldEditor("Default value",initValues._2,initValues._4)
     
     val comboBox = new ComboBox(comboContent.map(c=>c._1)) 
     comboBox.selection.item = initValues._1
@@ -52,8 +53,14 @@ object MultiComboLinkLabelGroovyTextFieldEditor {
         listenTo(`comboBox`)
         comboBox.selection.reactions += {
           case SelectionChanged(`comboBox`)=> 
-            linkLabel.action = {
-              comboContent.filter{cc => cc._1 == comboBox.selection.item}.head._3
+            println("sel changed")
+            val it = comboContent.filter{cc => cc._1 == comboBox.selection.item}.head
+            linkLabel.action = it._3
+            contents(0) match {
+              case x : MigPanel => 
+                x.contents.remove(2)
+                textField = new PrototypeGroovyTextFieldEditor("Default value",it._2,"")
+                x.contents.insert(2,textField)
             }
         }
       }
@@ -72,8 +79,8 @@ class MultiComboLinkLabelGroovyTextFieldEditor[A](title: String,
 
   
   def this(title: String,
-           comboContent: List[(A,Manifest[_],ContentAction[A])],
-           initValues: List[(A,Manifest[_],ContentAction[A],String)],
+           comboContent: List[(A,IPrototype[_],ContentAction[A])],
+           initValues: List[(A,IPrototype[_],ContentAction[A],String)],
            image : Icon,
            factory: IRowWidgetFactory[ComboLinkLabelGroovyTextFieldEditorRowWidget[A]],
            minus: Minus,
@@ -87,8 +94,8 @@ class MultiComboLinkLabelGroovyTextFieldEditor[A](title: String,
       case(a,m,action,s)=>new ComboLinkLabelGroovyTextFieldEditorRowWidget(comboContent,(a,m,action,s),image,plus)}
                               ,factory,minus,plus)
   def this(title: String,
-           initValues: List[(A,Manifest[_],ContentAction[A],String)],
-           comboContent: List[(A,Manifest[_],ContentAction[A])],
+           initValues: List[(A,IPrototype[_],ContentAction[A],String)],
+           comboContent: List[(A,IPrototype[_],ContentAction[A])],
            image : Icon) = this(title,
                                 comboContent,
                                 initValues,

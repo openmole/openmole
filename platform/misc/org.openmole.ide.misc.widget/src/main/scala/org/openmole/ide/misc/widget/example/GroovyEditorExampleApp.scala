@@ -23,7 +23,6 @@ import org.openmole.ide.misc.widget.PrototypeGroovyTextFieldEditor
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.MainFrame
 import scala.swing.SimpleSwingApplication
-import java.math.BigDecimal
 import org.openmole.core.implementation.data.Prototype
 
 object GroovyEditorExampleApp extends SimpleSwingApplication
@@ -31,7 +30,7 @@ object GroovyEditorExampleApp extends SimpleSwingApplication
   def top = new MainFrame {
     title = "Groovy editor Demo"
     val prototype = new Prototype("proto",classOf[Int])
-    val editor = new PrototypeGroovyTextFieldEditor("<h1>Demo</h1>",prototype.`type`)
+    val editor = new PrototypeGroovyTextFieldEditor("<h1>Demo</h1>",prototype)
     val panel = new PluginPanel("")
     panel.contents += editor
     contents = panel
