@@ -53,7 +53,6 @@ object MultiComboLinkLabelGroovyTextFieldEditor {
         listenTo(`comboBox`)
         comboBox.selection.reactions += {
           case SelectionChanged(`comboBox`)=> 
-            println("sel changed")
             val it = comboContent.filter{cc => cc._1 == comboBox.selection.item}.head
             linkLabel.action = it._3
             contents(0) match {

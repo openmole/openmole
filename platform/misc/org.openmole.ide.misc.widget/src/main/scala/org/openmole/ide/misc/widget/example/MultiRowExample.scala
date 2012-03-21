@@ -41,7 +41,7 @@ object MultiRowExample extends SimpleSwingApplication {
     val action = new ContentAction("Action " , fake1) { override def apply = println("view " + fake1.toString)}
     val image = new ImageIcon(ImageUtilities.loadImage("img/eye.png"))
     peer.add(new MultiComboLinkLabelGroovyTextFieldEditor("My title",
-      List((fake1,proto1,action,"12"),(fake2,proto2,action,"45.6")),
+      List((fake1,proto1,action,"12"),(fake2,proto2,action,"45.6d")),
       List((fake1,proto1,action),(fake2,proto2,action)),image).panel.peer,BorderLayout.WEST)
     peer.add(new MultiTextField("My title2",
       List("un","deux")).panel.peer,BorderLayout.EAST)
