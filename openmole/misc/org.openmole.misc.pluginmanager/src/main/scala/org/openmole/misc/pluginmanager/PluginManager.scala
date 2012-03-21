@@ -19,11 +19,7 @@ package org.openmole.misc.pluginmanager
 
 import java.io.File
 import java.io.FileFilter
-import java.net.URI
-import java.net.URL
 import java.io.FileInputStream
-import org.apache.commons.collections15.bidimap.DualHashBidiMap
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.pluginmanager.internal.Activator
 import org.openmole.misc.tools.service.IHash
 import org.osgi.framework.Bundle
@@ -31,7 +27,6 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 import org.osgi.framework.BundleEvent
-import org.osgi.framework.BundleException
 import org.osgi.framework.BundleListener
 import scala.collection.JavaConversions._
 import org.openmole.misc.exception.UserBadDataError
@@ -118,9 +113,7 @@ object PluginManager {
   def bundle(file: File) = files.get(file.getAbsoluteFile).map{id => Activator.contextOrException.getBundle(id._1)}
   
   private def dependencies(bundles: Iterable[Long]): Iterable[Long] = synchronized {
-    
     val ret = new HashSet[Long]
-    val filtred =  new HashSet[Long]
     var toProceed = new ListBuffer[Long] ++ bundles
     
     while(!toProceed.isEmpty) {
