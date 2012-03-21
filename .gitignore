@@ -13,3 +13,5 @@ release/*
 *.iml
 *.ipr
 *.iws
+.idea/
+.idea/*
