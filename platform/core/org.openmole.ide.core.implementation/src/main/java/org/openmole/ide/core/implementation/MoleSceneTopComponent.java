@@ -181,10 +181,11 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
         TopComponentsManager.setCurrentMoleSceneTopComponent(this);
         refresh(moleScene.isBuildScene());
         TopComponentsManager.displayExecutionView(moleComponent);
-        CheckData.checkMole(moleScene.manager());
         if (!moleScene.isBuildScene()) {
             etc.open();
         }
+        else {
+        CheckData.checkMole(moleScene.manager());}
     }
 
     @Override
