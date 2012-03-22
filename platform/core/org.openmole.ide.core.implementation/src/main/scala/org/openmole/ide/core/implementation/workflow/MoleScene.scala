@@ -35,6 +35,7 @@ import org.openmole.ide.core.model.panel._
 import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
+import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.panel._
 import org.openmole.ide.core.implementation.provider.MoleSceneMenuProvider
 import org.openmole.ide.core.model.commons.Constants._
@@ -230,8 +231,9 @@ abstract class MoleScene(n: String = "",
             createConnectEdge(source.get, target.get)
         case false=> 
           if (manager.registerDataChannel(sourceCapsuleUI, targetWidget.asInstanceOf[TaskComponentWidget].capsule))
-            createDataChannelEdge(source.get, target.get  )
+            createDataChannelEdge(source.get, target.get)
       }
+      CheckData.checkMole(manager)
     }
   }
   
