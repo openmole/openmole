@@ -42,7 +42,7 @@ class MoleSceneManager(var name : String,
   var nodeID = 0
   var edgeID = 0
   var dataChannelID = 0
- // var name: Option[String]= None
+  // var name: Option[String]= None
   
   override def setStartingCapsule(stCapsule: ICapsuleUI) = {
     startingCapsule match {
@@ -69,7 +69,7 @@ class MoleSceneManager(var name : String,
   def removeCapsuleUI(nodeID: String) = {
     startingCapsule match {
       case None=>
-      case Some(caps)=> if (capsules.get(nodeID) == caps) startingCapsule = None
+      case Some(caps : ICapsuleUI)=> if (capsules.get(nodeID) == caps) startingCapsule = None
     }
     
     //remove following transitionMap
@@ -94,11 +94,11 @@ class MoleSceneManager(var name : String,
   
   def dataChannel(dID: String) = dataChannelMap.get(dID)
   
-  private def removeIncomingTransitions(capsule: ICapsuleUI) = transitionMap.foreach(t => {if (t._2.target.capsule.equals(capsule)) {
-        removeTransition(t._1)
-        capsuleConnections(t._2.source.dataUI)-= t._2    
-      }
-    })
+  private def removeIncomingTransitions(capsule: ICapsuleUI) = 
+    transitionMap.filter{_._2.target.capsule == capsule}.foreach{ t =>
+      removeTransition(t._1)
+      capsuleConnections(t._2.source.dataUI)-= t._2 
+    }
   
   def removeTransition(edge: String) = transitionMap.remove(edge)
   
