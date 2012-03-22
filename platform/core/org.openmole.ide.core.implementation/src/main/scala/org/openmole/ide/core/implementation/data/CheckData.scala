@@ -52,5 +52,3 @@ object CheckData {
     }
   }
 }
-//   case x : WrongType => println("wrong type on capsule " + capsuleMap(x.capsule))
-//   case x : MissingInput => println("missing input "+x.data.prototype.name +" on capsule " + capsuleMap(x.capsule).)
