@@ -34,7 +34,7 @@ class CapsuleDataUI extends ICapsuleDataUI{
   }
   
   def transitionType = task match {
-    case Some(y: ITaskDataProxyUI)=> y match {
+    case Some(y: ITaskDataProxyUI)=> y.dataUI match {
         case x: AbstractExplorationTaskDataUI=> EXPLORATION_TRANSITION 
         case _=> BASIC_TRANSITION
       }

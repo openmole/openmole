@@ -24,20 +24,25 @@ import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.core.model.mole.IGroupingStrategy
 import org.openmole.core.model.mole.IMole
 import org.openmole.ide.core.model.data.ICapsuleDataUI
+import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.core.implementation.task._
 import org.openide.awt.StatusDisplayer
 import org.openmole.core.implementation.data.DataChannel
+import org.openmole.core.implementation.data.Parameter
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.transition._
+import org.openmole.ide.misc.tools.check.TypeCheck
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.ITask
+import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.ITransitionUI
+import org.openmole.misc.tools.groovy.GroovyProxy
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
 
@@ -70,7 +75,7 @@ object MoleMaker {
   def buildMole(manager: IMoleSceneManager) = {
     if (manager.startingCapsule.isDefined){
       val prototypeMap: Map[IPrototypeDataProxyUI,IPrototype[_]] = Proxys.prototypes.map{p=> p->p.dataUI.coreObject}.toMap
-      val capsuleMap : Map[ICapsuleUI,ICapsule] = manager.capsules.map{c=> c._2->new Capsule(buildTask(c._2.dataUI))}.toMap
+      val capsuleMap : Map[ICapsuleUI,ICapsule] = manager.capsules.map{c=> c._2->buildCapsule(c._2.dataUI)}.toMap
       capsuleMap.foreach{case (cui,ccore)=> 
           manager.capsuleConnections(cui.dataUI).foreach(t=>buildTransition(ccore, capsuleMap(t.target.capsule),t))
           manager.dataChannels.filterNot{_.prototypes.isEmpty}.foreach{dc => new DataChannel(capsuleMap(dc.source),capsuleMap(dc.target),
@@ -81,22 +86,15 @@ object MoleMaker {
     else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")  
   }
   
-  def buildTask(capsuleDataUI: ICapsuleDataUI) = 
-    capsuleDataUI.task match {
-      case Some(x:ITaskDataProxyUI) => addPrototypes(capsuleDataUI,x.dataUI.coreObject)
-      case _=> throw new UserBadDataError("A capsule without any task can not be run")  
-    }
-        
-        //x.dataUI match {
-        //  case y : AbstractExplorationTaskDataUI => addPrototypes(capsuleUI,y.coreObject)
-        //  case y : Any => addPrototypes(capsuleUI,y.coreObject)
-     // }
-//    capsuleUI.capsuleType match {
-//      case EXPLORATION_TASK=> addPrototypes(capsuleUI,capsuleUI.task.get.dataUI.coreObject.asInstanceOf[ExplorationTask])
-//      case BASIC_TASK=> addPrototypes(capsuleUI,capsuleUI.task.get.dataUI.coreObject)
-//      case CAPSULE=> throw new UserBadDataError("A capsule without any task can not be run")  
-//    }
- // }
+  def buildCapsule(capsuleDataUI: ICapsuleDataUI) = 
+  capsuleDataUI.task match {
+    case Some(x : ITaskDataProxyUI) => 
+      x.dataUI match {
+        case y : AbstractExplorationTaskDataUI => new Capsule(addPrototypes(capsuleDataUI,y.coreObject))
+        case y : ITaskDataUI => new Capsule(addPrototypes(capsuleDataUI,y.coreObject))
+      }
+    case _ => new Capsule
+  }
   
   def addPrototypes(capsuleDataUI: ICapsuleDataUI, task: ITask): ITask = {
     capsuleDataUI.task.get.dataUI.prototypesIn.foreach{case (pui,v)=> { 
@@ -104,10 +102,10 @@ object MoleMaker {
           v.isEmpty match {
             case true=> task.addInput(proto)
             case false=>
-              //v match {
-          //      case proto.coreClass.erasure => println
-           //     task.addParameter(new Parameter(proto,v))
-          //  }
+              val groovyO = new GroovyProxy(v).execute()
+              val (ok,msg) = TypeCheck(groovyO,proto)
+              if (ok) task.addParameter(new Parameter(proto.asInstanceOf[IPrototype[Any]],groovyO))
+              else throw new UserBadDataError(msg) 
           }
         }}
     capsuleDataUI.task.get.dataUI.prototypesOut.foreach{pui=> { task.addOutput(pui.dataUI.coreObject)}}
