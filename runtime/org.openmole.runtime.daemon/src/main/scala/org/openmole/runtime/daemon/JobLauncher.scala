@@ -54,7 +54,7 @@ object JobLauncher extends Logger {
 class JobLauncher(cacheSize: Long, debug: Boolean) {
   import JobLauncher._
   
-  val cache = new FileCache {
+  val localCache = new FileCache {
     val limit = cacheSize
   }
   
@@ -89,9 +89,9 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     val relativePath = new RelativePath(storage)
     import relativePath._
 
-    val resultsDir = resultsDirName.toURIFile
-    val jobsDir = jobsDirName.toURIFile
-    val timeStempsDir = timeStempsDirName.toURIFile
+    val resultsDir = toURIFile(resultsDirName)
+    val jobsDir = toURIFile(jobsDirName)
+    val timeStempsDir = toURIFile(timeStempsDirName)
         
     processJob( background { fetchAJob(jobsDir, timeStempsDir, resultsDir, id, relativePath) })
         
@@ -124,11 +124,11 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
                 localExecutionMessage.delete
                 localResultFile
               } finally {
-                cache.release(cached)
+                localCache.release(cached)
               }
             
             resultUploader.submit({ 
-                uploadResult(localResultFile, executionMessage.communicationDirPath.toURIFile, resultsDir, job)
+                uploadResult(localResultFile, toURIFile(executionMessage.communicationDirPath), resultsDir, job)
                 localCommunicationDirPath.recursiveDelete
                 localResultFile.delete
               })
@@ -250,15 +250,15 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
      
     def getFileUnzipVerifyHash(fileMessage: FileMessage) = {
       import fileMessage._
-      val file =  fileMessage.path.cacheUnziped
+      val file =  cacheUnziped(fileMessage.path)
       if(file.hash.toString != hash) throw new InternalProcessingError("Wrong hash for file " + path + ".")
       file -> hash
     }
 
     def getFile(fileMessage: FileMessage) = {
-      import fileMessage._
-      val file = fileMessage.path.cache
-      file -> hash
+      //import fileMessage.path._
+      val file = /*fileMessage.path.*/cache(fileMessage.path)
+      file -> fileMessage.hash
     }
 
     selectAJob(jobsDir, timeStempsDir, resultsDir, id) match {
@@ -266,7 +266,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
         var cached = List.empty[FileMessage]
         
         try {
-          val runtime = cache.cache(jobMessage.runtime, 
+          val runtime = localCache.cache(jobMessage.runtime,
                                     msg => {
               val dir = Workspace.newDir
               logger.info("Downloading the runtime.")
@@ -281,17 +281,17 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
             
           jobMessage.runtimePlugins.foreach {
             fileMessage =>
-            val plugin = cache.cache(fileMessage, getFileUnzipVerifyHash)
+            val plugin = localCache.cache(fileMessage, getFileUnzipVerifyHash)
             cached ::= fileMessage
             plugin.copy(File.createTempFile("plugin", ".jar", pluginDir))
           }
               
-          val executionMesageFileCache = jobMessage.executionMessagePath.cacheUnziped
+          val executionMesageFileCache = cacheUnziped(jobMessage.executionMessagePath)
           val executionMessage = SerializerService.deserialize[ExecutionMessage](executionMesageFileCache)
           executionMesageFileCache.delete
               
           def localCachedReplicatedFile(replicatedFile: ReplicatedFile) = {
-            val localFile = cache.cache(replicatedFile, getFile)
+            val localFile = localCache.cache(replicatedFile, getFile)
             cached ::= replicatedFile
             import replicatedFile._
             new ReplicatedFile(src, directory, hash, new URIFile(localFile).location, mode)
@@ -299,7 +299,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
           val files = executionMessage.files.map(localCachedReplicatedFile) 
           val plugins = executionMessage.plugins.map(localCachedReplicatedFile) 
-          val jobs = new FileMessage(new URIFile(executionMessage.jobs.path.cache).location, executionMessage.jobs.hash)
+          val jobs = new FileMessage(new URIFile(cache(executionMessage.jobs.path)).location, executionMessage.jobs.hash)
               
           val localCommunicationDirPath = Workspace.newDir
           val localExecutionMessage = Workspace.newFile("executionMessage", ".gz")
@@ -311,7 +311,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
           Some((localExecutionMessage, localCommunicationDirPath, runtime, pluginDir, jobMessage.memory, executionMessage, job, cached))
         } catch {
           case e => 
-            cache.release(cached)
+            localCache.release(cached)
             throw e
         }
       case None => None 

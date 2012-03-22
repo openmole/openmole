@@ -172,7 +172,7 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) e
         val storage = serializedJob.communicationStorage
         import storage._
 
-        ExecutorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(serializedJob.communicationDirPath.toURIFile, true))
+        ExecutorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(path.toURIFile(serializedJob.communicationDirPath), true))
       } catch {
         case e => 
           EventDispatcher.trigger(executionEnvironment: IEnvironment, new IEnvironment.ExceptionRaised(this, e, FINE))

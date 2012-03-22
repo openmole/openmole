@@ -53,11 +53,11 @@ class GliteJobService(jobServiceURI: URI, val environment: GliteEnvironment, ove
   
   override protected def doSubmit(serializedJob: SerializedJob, token: AccessToken) = {
     import serializedJob._
-    import communicationStorage.stringDecorator
+    import communicationStorage.path
     
     val script = Workspace.newFile("script", ".sh")
     try {
-      val outputFilePath = communicationDirPath.toURIFile.newFileInDir("job", ".out").path
+      val outputFilePath = path.toURIFile(communicationDirPath).newFileInDir("job", ".out").path
    
       val os = script.bufferedOutputStream
       try generateScript(serializedJob, outputFilePath, environment.memorySizeForRuntime.intValue, os)
@@ -74,7 +74,7 @@ class GliteJobService(jobServiceURI: URI, val environment: GliteEnvironment, ove
   }
   
   protected def generateScript(serializedJob: SerializedJob, resultPath: String, memorySizeForRuntime: Int, os: OutputStream) = {
-    import serializedJob.communicationStorage.stringDecorator
+    import serializedJob.communicationStorage.path
     import serializedJob._
     
     val writter = new PrintStream(os)
@@ -82,23 +82,23 @@ class GliteJobService(jobServiceURI: URI, val environment: GliteEnvironment, ove
     assert(runtime.runtime.path != null)
     writter.print("BASEPATH=$PWD;CUR=$PWD/ws$RANDOM;while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; ")
     writter.print("if [ `uname -m` = x86_64 ]; then ")
-    writter.print(mkLcgCpGunZipCmd(environment, runtime.jvmLinuxX64.path.toStringURI, "$PWD/jvm.tar.gz"))
+    writter.print(mkLcgCpGunZipCmd(environment, path.toStringURI(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz"))
     writter.print("else ")
-    writter.print(mkLcgCpGunZipCmd(environment, runtime.jvmLinuxI386.path.toStringURI, "$PWD/jvm.tar.gz"))
+    writter.print(mkLcgCpGunZipCmd(environment, path.toStringURI(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz"))
     writter.print("fi; ")
     writter.print("tar -xzf jvm.tar.gz >/dev/null; rm -f jvm.tar.gz; ")
-    writter.print(mkLcgCpGunZipCmd(environment, runtime.runtime.path.toStringURI, "$PWD/openmole.tar.gz"))
+    writter.print(mkLcgCpGunZipCmd(environment, path.toStringURI(runtime.runtime.path), "$PWD/openmole.tar.gz"))
     writter.print("tar -xzf openmole.tar.gz >/dev/null; rm -f openmole.tar.gz; ")
     writter.print("mkdir envplugins; PLUGIN=0;")
     
     for (plugin <- runtime.environmentPlugins) {
       assert(plugin.path != null)
-      writter.print(mkLcgCpGunZipCmd(environment, plugin.path.toStringURI, "$CUR/envplugins/plugin$PLUGIN.jar"))
+      writter.print(mkLcgCpGunZipCmd(environment, path.toStringURI(plugin.path), "$CUR/envplugins/plugin$PLUGIN.jar"))
       writter.print("PLUGIN=`expr $PLUGIN + 1`; ")
     }
     
     assert(runtime.authentication.path != null)
-    writter.print(mkLcgCpGunZipCmd(environment, runtime.authentication.path.toStringURI, "$CUR/authentication.xml"))
+    writter.print(mkLcgCpGunZipCmd(environment, path.toStringURI(runtime.authentication.path), "$CUR/authentication.xml"))
 
     writter.print(" export PATH=$PWD/jre/bin:$PATH; /bin/sh run.sh ")
     writter.print(Integer.toString(memorySizeForRuntime))

@@ -21,17 +21,15 @@ import java.net.URI
 import org.openmole.core.batch.control.AccessToken
 
 class RelativePath(root: URI) {
-  
+
   def this(root: String) = this(new URI(root))
-  
-  implicit def stringDecorator(path: String) = new {
-    def cacheUnziped = toGZURIFile.cache
-    def cache = toURIFile.cache
-    def cacheUnziped(token: AccessToken) = toGZURIFile.cache(token)
-    def cache(token: AccessToken) = toURIFile.cache(token)
-    def toURIFile = new URIFile(toURI)
-    def toGZURIFile = new GZURIFile(toURI)
-    def toURI = root.resolve(path)
-    def toStringURI = toURI.toString
-  }
+
+  def cacheUnziped(path: String) = toGZURIFile(path).cache
+  def cache(path: String) = toURIFile(path).cache
+  def cacheUnziped(path: String, token: AccessToken) = toGZURIFile(path).cache(token)
+  def cache(path: String, token: AccessToken) = toURIFile(path).cache(token)
+  def toURIFile(path: String) = new URIFile(toURI(path))
+  def toGZURIFile(path: String) = new GZURIFile(toURI(path))
+  def toURI(path: String) = root.resolve(path)
+  def toStringURI(path: String) = toURI(path).toString
 }

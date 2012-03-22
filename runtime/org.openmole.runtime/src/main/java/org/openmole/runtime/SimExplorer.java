@@ -108,8 +108,10 @@ public class SimExplorer implements IApplication {
 
             String outMesseageURI = cmdLine.getOptionValue("o");
 
-            new Runtime().apply(baseURI, communicationPath, executionMessageURI, outMesseageURI, authentication, debug);
+            new Runtime().apply(baseURI, communicationPath, executionMessageURI, outMesseageURI, debug);
 
+            //Be sure it is not garbage collected
+            authentication.getClass();
 
         } catch (Throwable t) {
             Logger.getLogger(SimExplorer.class.getName()).log(Level.SEVERE, "Error durring runtime execution", t);
@@ -118,6 +120,5 @@ public class SimExplorer implements IApplication {
     }
 
     @Override
-    public void stop() {
-    }
+    public void stop() {}
 }

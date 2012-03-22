@@ -50,7 +50,7 @@ abstract class Storage(val URI: URI) extends BatchService {
     else new URI(URI.getScheme + ":/")
   def resolve(path: String) = root.resolve(path)
  
-  implicit def stringDecorator(path: String) = new RelativePath(root).stringDecorator(path)
+  def path = new RelativePath(root)
   
   /*def test: Boolean = {
     try {

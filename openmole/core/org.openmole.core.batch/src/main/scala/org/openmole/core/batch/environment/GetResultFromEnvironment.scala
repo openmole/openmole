@@ -100,7 +100,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
 
 
   private def getRuntimeResult(outputFilePath: String, token: AccessToken): RuntimeResult = {
-    val resultFile = signalDownload(outputFilePath.cacheUnziped(token), outputFilePath.toURI, communicationStorage)
+    val resultFile = signalDownload(path.cacheUnziped(outputFilePath, token), path.toURI(outputFilePath), communicationStorage)
     try SerializerService.deserialize(resultFile)
     finally resultFile.delete
   }
@@ -109,7 +109,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
     message match {
       case Some(message) =>
         try {
-          val stdOutFile = signalDownload(message.path.cacheUnziped(token), message.path.toURI, communicationStorage)
+          val stdOutFile = signalDownload(path.cacheUnziped(message.path, token), path.toURI(message.path), communicationStorage)
           try {
             val stdOutHash = HashService.computeHash(stdOutFile)
             if (stdOutHash != message.hash)
@@ -134,7 +134,7 @@ class GetResultFromEnvironment(communicationStorage: Storage, outputFilePath: St
 
   private def getContextResults(resultPath: FileMessage, token: AccessToken): ContextResults = {
     if (resultPath == null) throw new InternalProcessingError("Context results path is null")
-    val contextResutsFileCache = signalDownload(resultPath.path.cacheUnziped(token), resultPath.path.toURI, communicationStorage)
+    val contextResutsFileCache = signalDownload(path.cacheUnziped(resultPath.path, token), path.toURI(resultPath.path), communicationStorage)
     if(HashService.computeHash(contextResutsFileCache) != resultPath.hash) throw new InternalProcessingError("Results have been corrupted durring the transfer.")
     
     try SerializerService.deserializeAndExtractFiles(contextResutsFileCache)

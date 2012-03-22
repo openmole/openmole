@@ -23,7 +23,9 @@ import org.openmole.misc.updater.IUpdatableWithVariableDelay
 import org.openmole.misc.workspace.Workspace
 import scala.ref.WeakReference
 
-object ProxyChecker extends Logger
+object ProxyChecker extends Logger {
+  val defaultCheckTime = 30 * 1000 * 60
+}
 
 import ProxyChecker._
 
@@ -37,18 +39,23 @@ class ProxyChecker(
       case Some(auth) => 
         try auth.reinit(context, expires)
         catch {
-          case(ex: Throwable) => logger.log(SEVERE, "Error while renewing the proxy.", ex)
+          case(ex: Throwable) => logger.log(SEVERE, "Error while renewing the proxy", ex)
         } 
         true
-      case None =>
-        false
+      case None => false
     }
   
-  def delay = {
-    val interval = (context.getAttribute(Context.LIFETIME).toLong  * 1000 * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong
-    logger.fine("Renew proxy in " + interval)
-    interval
-  }
+  def delay =
+    try {
+      val interval = (context.getAttribute(Context.LIFETIME).toLong  * 1000 * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong
+      logger.fine("Renew proxy in " + interval)
+      interval
+    } catch {
+      case e =>
+        logger.log(SEVERE, "Error while getting the check interval", e)
+        defaultCheckTime
+    }
+
   /*{
     val interval = lifeTime match {
       case Some(time) => time
