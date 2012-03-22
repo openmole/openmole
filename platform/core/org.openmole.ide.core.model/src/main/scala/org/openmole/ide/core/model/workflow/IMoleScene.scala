@@ -41,7 +41,9 @@ trait IMoleScene {
   
   def createEdge(sourceNodeID:String, targetNodeID: String, id: String)
   
-  def isBuildScene: Boolean
+  def isBuildScene : Boolean
+  
+  def savePropertyPanel : Unit
   
   def displayPropertyPanel(proxy: IDataProxyUI, mode: PanelMode.Value)
   

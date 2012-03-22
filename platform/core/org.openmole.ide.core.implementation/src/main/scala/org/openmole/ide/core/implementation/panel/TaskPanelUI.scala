@@ -22,6 +22,7 @@ import javax.swing.ImageIcon
 import org.openide.util.ImageUtilities
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
+import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
@@ -59,14 +60,15 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   }
   
   def save = {
-        proxy.dataUI = panelUI.save(nameTextField.text,protoPanel.protoIn.content,protoPanel.protoOut.content)
-        proxy.dataUI match {
-          case x : AbstractExplorationTaskDataUI => TopComponentsManager.capsules.filter(_.dataUI.task == proxy) match {
-            case y : List[Nothing]=> 
-            case y : List[ICapsuleUI] => y.head.addSampling(x.sampling)
-          }
-          case _ =>
+    proxy.dataUI = panelUI.save(nameTextField.text,protoPanel.protoIn.content,protoPanel.protoOut.content)
+    proxy.dataUI match {
+      case x : AbstractExplorationTaskDataUI => TopComponentsManager.capsules.filter(_.dataUI.task == proxy) match {
+          case y : List[Nothing]=> 
+          case y : List[ICapsuleUI] => y.head.addSampling(x.sampling)
         }
+      case _ =>
+    }
+    CheckData.checkMole(TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.manager)
   }
   
   def switch = {
@@ -87,7 +89,6 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   def protos : Unit = {
     switch
     mainPanel.contents += protoPanel.peer
-
     mainLinksPanel.contents +=  new ImageLinkLabel("img/previous.png",new Action("") { def apply = properties })
   }
   
@@ -98,7 +99,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     val emptyProto = EmptyDataUIs.emptyPrototypeProxy
     val protoIn = new MultiComboLinkLabelGroovyTextFieldEditor("Inputs",
                                                                TaskPanelUI.this.proxy.dataUI.prototypesIn.map{case(proto,v) =>
-                                                                 (proto,proto.dataUI.coreObject,contentAction(proto),v)}.toList,
+          (proto,proto.dataUI.coreObject,contentAction(proto),v)}.toList,
                                                                (List(emptyProto):::Proxys.prototypes.toList).map{p=>(p,p.dataUI.coreObject,contentAction(p))}.toList,
                                                                image)        
                                                                       

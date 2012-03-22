@@ -7,6 +7,7 @@ package org.openmole.ide.core.model.workflow
 
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.data.ICapsuleDataUI
+import org.openmole.core.implementation.validation.DataflowProblem
 import org.openmole.ide.core.model.dataproxy._
 import scala.collection.mutable.HashMap
 
@@ -39,6 +40,8 @@ trait ICapsuleUI {
   def addSampling(env : Option[ISamplingDataProxyUI])
   
   def addInputSlot(startingCapsule: Boolean): IInputSlotWidget
+  
+  def updateErrors(errors : List[(IPrototypeDataProxyUI,DataflowProblem)]) : Unit
   
   def x: Double
   

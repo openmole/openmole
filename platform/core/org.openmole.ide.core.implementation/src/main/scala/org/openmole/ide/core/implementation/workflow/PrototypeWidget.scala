@@ -58,19 +58,30 @@ class PrototypeWidget(scene: IMoleScene,
                       f : Unit=>String,
                       link : Label) extends ComponentWidget(scene.graphScene,link.peer) {
   link.foreground = Color.WHITE
+  var validationColor = green
   val dim = 30
   val pos = link.size.width / 2 + 1
   setPreferredBounds(new Rectangle(dim,dim))
   setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))
   setOpaque(true)
   
+  def updateErrors(errorString : String) = {
+    validationColor = errorString.isEmpty match {
+      case true => green
+      case false => 
+        link.tooltip = errorString
+        red
+    }
+    revalidate
+  }
+                  
   override def paintChildren = link.text = f.apply()
-  
+               
   override def paintBackground = {
     val g = scene.graphScene.getGraphics
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                        RenderingHints.VALUE_ANTIALIAS_ON)
-    g.setColor(green)
+    g.setColor(validationColor)
     g.fillOval(pos,pos, dim, dim)
     revalidate
   }

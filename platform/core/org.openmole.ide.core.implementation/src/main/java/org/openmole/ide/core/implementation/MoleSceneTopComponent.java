@@ -44,6 +44,7 @@ import org.openmole.ide.core.implementation.action.StartMoleAction;
 import org.openmole.ide.core.implementation.action.StopMoleAction;
 import org.openmole.ide.core.model.control.IMoleComponent;
 import org.openmole.ide.core.implementation.dialog.DialogFactory;
+import org.openmole.ide.core.implementation.data.CheckData;
 import org.openmole.ide.core.implementation.panel.ConceptMenu;
 import org.openmole.ide.core.model.workflow.IMoleScene;
 import org.openmole.ide.misc.widget.ToolBarButton;
@@ -180,6 +181,7 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
         TopComponentsManager.setCurrentMoleSceneTopComponent(this);
         refresh(moleScene.isBuildScene());
         TopComponentsManager.displayExecutionView(moleComponent);
+        CheckData.checkMole(moleScene.manager());
         if (!moleScene.isBuildScene()) {
             etc.open();
         }

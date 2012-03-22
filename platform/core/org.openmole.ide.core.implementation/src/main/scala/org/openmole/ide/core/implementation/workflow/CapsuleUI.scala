@@ -33,6 +33,7 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
+import org.openmole.core.implementation.validation.DataflowProblem
 import scala.swing.Action
 
 class CapsuleUI(val scene: IMoleScene, 
@@ -41,6 +42,8 @@ class CapsuleUI(val scene: IMoleScene,
   val taskComponentWidget = new TaskComponentWidget(scene,this,new TaskWidget(scene,this))
   var environmentWidget : Option[LinkedImageWidget] = None
   var samplingWidget : Option[LinkedImageWidget] = None
+  var inputPrototypeWidget : Option[PrototypeWidget] = None
+  var outputPrototypeWidget : Option[PrototypeWidget] = None
   addEnvironment(dataUI.environment)
   addSampling(dataUI.sampling)
   
@@ -84,8 +87,10 @@ class CapsuleUI(val scene: IMoleScene,
   
   def encapsule(dpu: ITaskDataProxyUI)= {
     setTask(dpu)
-    addChild(PrototypeWidget.buildInput(scene, dpu))
-    addChild(PrototypeWidget.buildOutput(scene, dpu))
+    inputPrototypeWidget = Some(PrototypeWidget.buildInput(scene, dpu))
+    outputPrototypeWidget = Some(PrototypeWidget.buildOutput(scene, dpu))
+    addChild(inputPrototypeWidget.get)
+    addChild(outputPrototypeWidget.get)
     capsuleMenuProvider.addTaskMenus
   }
   
@@ -127,6 +132,16 @@ class CapsuleUI(val scene: IMoleScene,
         addChild(samplingWidget.get)
     }
     scene.refresh
+  }
+  
+  def updateErrors(problems : List[(IPrototypeDataProxyUI,DataflowProblem)]) = {
+    dataUI.task match {
+      case Some(x : ITaskDataProxyUI) => 
+        val (protoOut,protoIn) = problems.partition{case (proto,problem)=> x.dataUI.prototypesIn.contains(proto)}
+        inputPrototypeWidget.get.updateErrors(protoIn.map{_._2}.mkString("\n"))
+        outputPrototypeWidget.get.updateErrors(protoOut.map{_._2}.mkString("\n"))
+      case _ =>
+    }
   }
   
   def addInputSlot(on: Boolean): IInputSlotWidget =  {

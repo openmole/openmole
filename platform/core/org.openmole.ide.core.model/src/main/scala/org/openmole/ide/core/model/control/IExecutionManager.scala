@@ -17,13 +17,13 @@
 
 package org.openmole.ide.core.model.control
 
-import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
 import java.io.PrintStream
+import org.openmole.ide.core.model.workflow.ICapsuleUI
 
 trait IExecutionManager {
   def mole: IMole
@@ -32,7 +32,7 @@ trait IExecutionManager {
   
   def prototypeMapping: Map[IPrototypeDataProxyUI,IPrototype[_]]
   
-  def capsuleMapping: Map[ICapsuleDataUI, ICapsule]
+  def capsuleMapping: Map[ICapsuleUI, ICapsule]
   
   def printStream: PrintStream
   

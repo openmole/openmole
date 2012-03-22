@@ -66,7 +66,7 @@ object ExecutionManager {
 
 class ExecutionManager(manager : IMoleSceneManager,
                        val mole: IMole,
-                       val capsuleMapping: Map[ICapsuleDataUI, ICapsule],
+                       val capsuleMapping: Map[ICapsuleUI, ICapsule],
                        val prototypeMapping: Map[IPrototypeDataProxyUI,IPrototype[_]]) extends TabbedPane with IExecutionManager {
   val logTextArea = new TextArea{columns = 20;rows = 10;editable = false}
   val executionJobExceptionTextArea = new TextArea{columns = 40;rows = 10;editable = false}

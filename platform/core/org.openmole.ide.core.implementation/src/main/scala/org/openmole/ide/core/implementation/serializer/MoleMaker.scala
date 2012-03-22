@@ -29,7 +29,6 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.core.implementation.task._
 import org.openide.awt.StatusDisplayer
 import org.openmole.core.implementation.data.DataChannel
-import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.transition._
 import org.openmole.misc.exception.UserBadDataError
@@ -46,7 +45,7 @@ object MoleMaker {
                                             
   def buildMoleExecution(mole: IMole,
                          manager: IMoleSceneManager, 
-                         capsuleMap: Map[ICapsuleDataUI,ICapsule],
+                         capsuleMap: Map[ICapsuleUI,ICapsule],
                          groupingStrategies: List[(IGroupingStrategy,ICapsule)]): (IMoleExecution,Iterable[(IEnvironment, String)]) = 
                            try{
       var envs = new HashSet[(IEnvironment,String)]
@@ -57,7 +56,7 @@ object MoleMaker {
             try {
               val env = x.dataUI.coreObject
               envs += new Tuple2(env,x.dataUI.name)
-              strat.select(capsuleMap(c.dataUI),env)
+              strat.select(capsuleMap(c),env)
             }catch {
               case e: UserBadDataError=> StatusDisplayer.getDefault.setStatusText(e.message)
             }
@@ -71,20 +70,20 @@ object MoleMaker {
   def buildMole(manager: IMoleSceneManager) = {
     if (manager.startingCapsule.isDefined){
       val prototypeMap: Map[IPrototypeDataProxyUI,IPrototype[_]] = Proxys.prototypes.map{p=> p->p.dataUI.coreObject}.toMap
-      val capsuleMap= manager.capsules.map{c=> c._2.dataUI->new Capsule(buildTask(c._2))}.toMap
+      val capsuleMap : Map[ICapsuleUI,ICapsule] = manager.capsules.map{c=> c._2->new Capsule(buildTask(c._2.dataUI))}.toMap
       capsuleMap.foreach{case (cui,ccore)=> 
-          manager.capsuleConnections(cui).foreach(t=>buildTransition(ccore, capsuleMap(t.target.capsule.dataUI),t))
-          manager.dataChannels.filterNot{_.prototypes.isEmpty}.foreach{dc => new DataChannel(capsuleMap(dc.source.dataUI),capsuleMap(dc.target.dataUI),
+          manager.capsuleConnections(cui.dataUI).foreach(t=>buildTransition(ccore, capsuleMap(t.target.capsule),t))
+          manager.dataChannels.filterNot{_.prototypes.isEmpty}.foreach{dc => new DataChannel(capsuleMap(dc.source),capsuleMap(dc.target),
                                                                                              dc.prototypes.map{_.dataUI.name}.toSet)}}
       
-      (new Mole(capsuleMap(manager.startingCapsule.get.dataUI)),capsuleMap,prototypeMap)
+      (new Mole(capsuleMap(manager.startingCapsule.get)),capsuleMap,prototypeMap)
     }
     else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")  
   }
   
-  def buildTask(capsuleUI: ICapsuleUI) = 
-    capsuleUI.dataUI.task match {
-      case Some(x:ITaskDataProxyUI) => addPrototypes(capsuleUI,x.dataUI.coreObject)
+  def buildTask(capsuleDataUI: ICapsuleDataUI) = 
+    capsuleDataUI.task match {
+      case Some(x:ITaskDataProxyUI) => addPrototypes(capsuleDataUI,x.dataUI.coreObject)
       case _=> throw new UserBadDataError("A capsule without any task can not be run")  
     }
         
@@ -99,8 +98,8 @@ object MoleMaker {
 //    }
  // }
   
-  def addPrototypes(capsuleUI: ICapsuleUI, task: ITask): ITask = {
-    capsuleUI.dataUI.task.get.dataUI.prototypesIn.foreach{case (pui,v)=> { 
+  def addPrototypes(capsuleDataUI: ICapsuleDataUI, task: ITask): ITask = {
+    capsuleDataUI.task.get.dataUI.prototypesIn.foreach{case (pui,v)=> { 
           val proto = pui.dataUI.coreObject
           v.isEmpty match {
             case true=> task.addInput(proto)
@@ -111,7 +110,7 @@ object MoleMaker {
           //  }
           }
         }}
-    capsuleUI.dataUI.task.get.dataUI.prototypesOut.foreach{pui=> { task.addOutput(pui.dataUI.coreObject)}}
+    capsuleDataUI.task.get.dataUI.prototypesOut.foreach{pui=> { task.addOutput(pui.dataUI.coreObject)}}
     task
   }
   
