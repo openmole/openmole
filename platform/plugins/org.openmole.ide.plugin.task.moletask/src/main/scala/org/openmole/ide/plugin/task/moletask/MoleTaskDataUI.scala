@@ -35,7 +35,7 @@ class MoleTaskDataUI(val name: String="",
               MoleTaskDataUI.capsule(z,y) match {
                 case Some(w:ICapsuleDataUI) =>
                   val (m,capsMap,protoMap) =  MoleMaker.buildMole(y)
-                  new MoleTask(name, m,capsMap(w))
+                  new MoleTask(name, m,capsMap.find{case (k,_) => k.dataUI == w}.get._2)
                 case _ => throw new UserBadDataError("No final Capsule is set")
               }
             case _ => throw new UserBadDataError("A capsule without task can not be run")
