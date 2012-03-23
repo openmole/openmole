@@ -61,7 +61,7 @@ object URIFile extends Logger {
 
   Workspace += (Timeout, "PT2M")
   Workspace += (BufferSize, "32768")
-  Workspace += (CopyTimeout, "PT2M")
+  Workspace += (CopyTimeout, "PT1M")
         
   def child(url: URL, child: String): URL = {
     if (url.toString().endsWith("/") || child.charAt(0) == '/') fromLocation(url.toString() + child)
