@@ -11,6 +11,8 @@ private/*
 release/
 release/*
 *~
-/platform/plugins/org.openmole.ide.plugin.sampling.complete/[?]/.m2/
-/platform/[?]/.m2/
-/platform/misc/org.openmole.ide.misc.widget/.idea/
+*.ipr
+*.iws
+*.iml
+.idea
+.idea/*
