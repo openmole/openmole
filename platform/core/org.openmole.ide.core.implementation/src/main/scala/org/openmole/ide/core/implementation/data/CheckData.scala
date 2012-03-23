@@ -34,6 +34,15 @@ object CheckData {
         val (mole,cMap,pMap) = MoleMaker.buildMole(manager)
         val capsuleMap : Map[ICapsule,ICapsuleUI] = cMap.map{case (k,v) => v -> k}
         val prototypeMap : Map[IPrototype[_],IPrototypeDataProxyUI] = pMap.map{case (k,v) => v -> k}.toMap
+        
+        // Compute implicit input / output
+        capsuleMap.foreach{case(caps,capsUI) => 
+            println("CAPSULE :: " + caps.toString)
+            println(caps.inputs)
+            println(caps.outputs)
+        }
+        
+        // Formal validation
         val errors = Validation.typeErrors(mole) ++ Validation.duplicatedTransitions(mole)
         errors.isEmpty match {
           case false => 
