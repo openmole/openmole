@@ -78,18 +78,8 @@ object Proxys {
   .toList
   
   def isExplorationTaskData(pud: ITaskDataUI) = pud.coreClass.isAssignableFrom(classOf[ExplorationTask]) 
-    
-//  def clearAllTaskElement = {ConceptMenu.taskMenu.foreach{remove};tasks.clear}
-//  def clearAllPrototypeElement = {ConceptMenu.prototypeMenu.peer.removeAll;prototypes.clear}
-//  def clearAllSamplingElement = {samplings.foreach{ConceptMenu.removeItem};samplings.clear}
-//  def clearAllEnvironmentElement = {environments.foreach{ConceptMenu.removeItem};environments.clear}
   
   def clearAll: Unit = {
-//    clearAllTaskElement
-//    clearAllPrototypeElement
-//    clearAllSamplingElement
-//    clearAllEnvironmentElement
-//    ConceptMenu.menuItemMapping.clear
     ConceptMenu.clearAllItems
     List(tasks,prototypes,environments,samplings).foreach{_.clear}
     FrozenProxys.clear
