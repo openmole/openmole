@@ -38,10 +38,7 @@ class MoleSceneMenuProvider(moleScene: IMoleScene) extends GenericMenuProvider {
                        point: Point)= {
     items.clear
     initMenu
-    Proxys.tasks.foreach{p=> 
-      val it = new JMenuItem(p.dataUI.name)
-      it.addActionListener(new AddTaskAction(moleScene,p,this))
-      items+= it  
+    Proxys.tasks.foreach{p=> items+= new JMenuItem(new AddTaskAction(moleScene,p,this).peer)
     }  
     super.getPopupMenu(widget, point)              
   }

@@ -39,6 +39,7 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
     val itRIS = new JMenuItem("Remove an input slot")
     val itR = new JMenuItem("Remove capsule")
     val menuEnv = new JMenu("Set environment")
+    val menuTask = new JMenu("Set task")
     
     itIS.addActionListener(new AddInputSlotAction(capsule))
     itR.addActionListener(new RemoveCapsuleAction(scene,capsule))
@@ -49,7 +50,13 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
             override def apply = capsule.addEnvironment(Some(env))}.peer))}
     menuEnv.insert(new JMenuItem(new Action("None"){
           override def apply = capsule.addEnvironment(None)}.peer),0)
-    items+= (itIS,itRIS,itR,itStart,menuEnv)
+    
+    Proxys.tasks.foreach{p=> menuTask.add(new JMenuItem(new Action(p.dataUI.name){
+            override def apply = {
+              capsule.encapsule(p)
+            }}.peer))}
+    
+    items+= (itIS,itRIS,itR,itStart,menuTask,menuEnv)
   }
   
   def addTaskMenus= encapsulated= true
