@@ -70,7 +70,9 @@ class TaskWidget(scene: IMoleScene,
           case y:BuildMoleScene=> x.dataUI.backgroundColor
           case _=> new Color(215,238,244,64)
         }
-      case _=> new Color(204,204,204,128)
+      case _=> 
+        titleLabel.text = ""
+        new Color(204,204,204,128)
     }
   }
   
