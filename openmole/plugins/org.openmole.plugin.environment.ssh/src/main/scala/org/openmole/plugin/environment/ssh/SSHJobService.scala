@@ -24,7 +24,7 @@ import org.ogf.saga.job.JobDescription
 import org.ogf.saga.job.JobFactory
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.ServiceDescription
-import org.openmole.core.batch.control.UsageControl._
+import org.openmole.core.batch.control.UsageControl.withToken
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.environment.Runtime
 import org.openmole.core.batch.environment.BatchJob
@@ -36,12 +36,17 @@ import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.jsaga.JSAGAJob
 import org.openmole.plugin.environment.jsaga.JSAGAJobService
 import java.net.URI
 import SSHBatchJob._
 import scala.collection.immutable.TreeSet
+
+object SSHJobService extends Logger
+
+import SSHJobService._
 
 class SSHJobService(uri: URI, val environment: SSHEnvironment, nbSlot: Int, override val nbAccess: Int) extends JSAGAJobService(uri) {
 
@@ -91,7 +96,7 @@ class SSHJobService(uri: URI, val environment: SSHEnvironment, nbSlot: Int, over
             " -c " + serializedJob.communicationDirPath + " -p envplugins/ -i " + serializedJob.inputFilePath + " -o " + result.path +
             " -w " + workspace + "; rm -rf " + workspace + ";"
             
-          //println(script.content)
+          logger.fine(script.content)
           val remoteScript = environment.storage.tmpSpace(token).newFileInDir("run", ".sh")
           URIFile.copy(script, remoteScript, token)
           remoteScript

@@ -99,9 +99,13 @@ public class SimExplorer implements IApplication {
                 /*
              * get env and init
              */
-            File envFile = new File(cmdLine.getOptionValue("a"));
-            Authentication authentication = SerializerService.deserialize(envFile);
-            authentication.initialize(false);
+
+            Authentication authentication = null;
+            if (cmdLine.hasOption("a")) {
+                File envFile = new File(cmdLine.getOptionValue("a"));
+                authentication = SerializerService.deserialize(envFile);
+                authentication.initialize(false);
+            }
             //if(!debug) envFile.delete();
             //}
 
@@ -111,7 +115,9 @@ public class SimExplorer implements IApplication {
             new Runtime().apply(baseURI, communicationPath, executionMessageURI, outMesseageURI, debug);
 
             //Be sure it is not garbage collected
-            authentication.getClass();
+            if (authentication != null) {
+                authentication.getClass();
+            }
 
         } catch (Throwable t) {
             Logger.getLogger(SimExplorer.class.getName()).log(Level.SEVERE, "Error durring runtime execution", t);
@@ -120,5 +126,6 @@ public class SimExplorer implements IApplication {
     }
 
     @Override
-    public void stop() {}
+    public void stop() {
+    }
 }
