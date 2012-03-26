@@ -85,6 +85,14 @@ class CapsuleUI(val scene: IMoleScene,
     scene.refresh
   }
   
+  def decapsule = {
+    dataUI.task = None
+    removeChild(inputPrototypeWidget.get)
+    removeChild(outputPrototypeWidget.get)
+    inputPrototypeWidget = None
+    outputPrototypeWidget = None
+  }
+  
   def encapsule(dpu: ITaskDataProxyUI)= {
     setTask(dpu)
     inputPrototypeWidget = Some(PrototypeWidget.buildInput(scene, dpu))

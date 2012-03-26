@@ -25,6 +25,8 @@ trait ICapsuleUI {
   
   def encapsule(dpu: ITaskDataProxyUI)
   
+  def decapsule : Unit
+  
   def removeInputSlot: Unit
   
   def nbInputSlots: Int

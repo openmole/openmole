@@ -55,7 +55,8 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
             override def apply = {
               capsule.encapsule(p)
             }}.peer))}
-    
+    menuTask.insert(new JMenuItem(new Action("None"){
+          override def apply = capsule.decapsule}.peer),0)
     items+= (itIS,itRIS,itR,itStart,menuTask,menuEnv)
   }
   
