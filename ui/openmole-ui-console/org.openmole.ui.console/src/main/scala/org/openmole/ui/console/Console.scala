@@ -47,8 +47,6 @@ object Console {
     } while(!ok)
   }
   
-  initPassword
-  
   val pluginManager = "plugin"
   val workspace = "workspace"
   val registry = "registry"
@@ -58,14 +56,6 @@ object Console {
   val binding = new Binding
   val groovysh = new Groovysh(classOf[Groovy].getClassLoader, binding, new IO())
 
-  val muteGroovysh = new Groovysh(classOf[Groovy].getClassLoader, binding, new IO(new InputStream {
-        override def read: Int =  0
-      }, new OutputStream {
-        override def write(b: Int) = {}
-      }, new OutputStream {
-        override def write(b: Int) = {}
-      }))
-  
   setVariable(pluginManager, PluginManager)
   setVariable(workspace, Workspace)
   setVariable(logger, LoggerService)
@@ -88,4 +78,5 @@ object Console {
   def run(command: String) = groovysh.run(command)
 
   def leftShift(cmnd: Command): Object = groovysh.leftShift(cmnd)
+  
 }

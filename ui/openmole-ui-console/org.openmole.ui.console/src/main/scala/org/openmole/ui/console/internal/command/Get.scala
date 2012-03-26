@@ -26,7 +26,7 @@ import org.openmole.ui.console.internal.command.getter.MoleGetter
 import java.util.List
 import scala.collection.JavaConversions._
 
-class Get(shell: Shell, muteShell: Shell, string: String, string1: String) extends CommandSupport(shell, string, string1) {
+class Get(shell: Shell, string: String, string1: String) extends CommandSupport(shell, string, string1) {
   private val getters = new HierarchicalRegistry[IGetter]
   getters.register(classOf[IMole], new MoleGetter)
   

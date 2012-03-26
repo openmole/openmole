@@ -27,7 +27,7 @@ import java.util.List
 import scala.collection.JavaConversions._
 
 
-class Auth(shell: Shell, muteShell: Shell, string: String, string1: String) extends CommandSupport(shell, string, string1) {
+class Auth(shell: Shell, string: String, string1: String) extends CommandSupport(shell, string, string1) {
 
   override def execute(list: List[_]): Object = {
     if(list.head == "-l") {

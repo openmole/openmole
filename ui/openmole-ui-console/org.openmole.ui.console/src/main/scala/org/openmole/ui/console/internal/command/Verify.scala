@@ -27,7 +27,7 @@ import java.util.List
 import scala.collection.JavaConversions._
 import org.openmole.ui.console.Console
 
-class Verify(shell: Shell, muteShell: Shell, string: String, string1: String) extends CommandSupport(shell, string, string1)  {
+class Verify(shell: Shell, string: String, string1: String) extends CommandSupport(shell, string, string1)  {
 
   override def execute(list: List[_]): Object = {
     val mole = shell.execute(list.head.asInstanceOf[String]).asInstanceOf[IMole]

@@ -32,6 +32,7 @@
 	<module>org.jasypt.encryption</module>
         <module>org.gnu.crypto</module>
         <module>com.ibm.icu</module>
+        <module>com.github.scopt</module>
         <module>net.sourceforge.jline</module>
 	<module>org.joda.time</module>
 	<module>org.scala-lang.scala-library</module>
