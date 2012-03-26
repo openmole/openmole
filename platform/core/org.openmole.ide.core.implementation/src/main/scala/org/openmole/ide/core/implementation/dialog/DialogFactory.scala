@@ -28,6 +28,7 @@ import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.control.ExecutionMoleComponent
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.model.control.IMoleComponent
+import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.misc.widget.GroovyEditor
 import scala.swing.Label
 import scala.swing.TextField
@@ -53,5 +54,12 @@ object DialogFactory {
     if (DialogDisplayer.getDefault.notify(new DialogDescriptor(textField.peer, "Mole name")).equals(NotifyDescriptor.OK_OPTION))
       Some(TopComponentsManager.addTopComponent(textField.text))
     else None
+  }
+  
+  def deleteProxyConfirmation(proxy : IDataProxyUI) : Boolean = {
+    if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new Label("<html>" +proxy.dataUI.name + " is currently used in a scene.<br>" +
+                                                                         "It will be deleted everywher it appears. <br>" +
+                                                                         "Delete anyway ?").peer, "Execution warning")).equals(NotifyDescriptor.OK_OPTION)) true
+    else false 
   }
 }

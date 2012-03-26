@@ -98,7 +98,6 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
   
   def baseDelete: Unit = {
     delete
-    scene.closePropertyPanel
   }
   
   def baseSave : Unit = {
