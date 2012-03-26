@@ -26,7 +26,6 @@ import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.data._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
-import scala.collection.mutable.WeakHashMap
 import java.io.File
 
 object Proxys {
@@ -37,12 +36,6 @@ object Proxys {
   var prototypes = new HashSet[IPrototypeDataProxyUI]
   var samplings = new HashSet[ISamplingDataProxyUI]
   var environments = new HashSet[IEnvironmentDataProxyUI]
-//  
-//  
-//  var tasks = new HashSet[ITaskDataProxyUI]
-//  var prototypes = new HashSet[IPrototypeDataProxyUI]
-//  var samplings = new HashSet[ISamplingDataProxyUI]
-//  var environments = new HashSet[IEnvironmentDataProxyUI]
       
   def task = TopComponentsManager.currentMoleSceneTopComponent match {
     case None => tasks.toSet
@@ -76,8 +69,6 @@ object Proxys {
   
   def filePrototypes: List[IPrototypeDataProxyUI] = prototypes.filter(_.dataUI.coreObject.`type`.erasure == classOf[File])
   .toList
-  
-  def isExplorationTaskData(pud: ITaskDataUI) = pud.coreClass.isAssignableFrom(classOf[ExplorationTask]) 
   
   def clearAll: Unit = {
     ConceptMenu.clearAllItems

@@ -18,6 +18,7 @@
 package org.openmole.ide.plugin.prototype.base
 
 import java.io.File
+import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
 class FilePrototypeFactoryUI extends IPrototypeFactoryUI[File] {
@@ -25,4 +26,7 @@ class FilePrototypeFactoryUI extends IPrototypeFactoryUI[File] {
   override def displayName = "File"
   
   override def buildDataUI = new FilePrototypeDataUI
+  
+  //FIXME :: change 0 by correct value for dimension
+  def buildDataUI(prototype : IPrototype[_]) = new FilePrototypeDataUI(prototype.name,0)
 }

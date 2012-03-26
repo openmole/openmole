@@ -17,6 +17,7 @@
 
 package org.openmole.ide.plugin.prototype.base
 
+import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
 class StringPrototypeFactoryUI extends IPrototypeFactoryUI[String] {
@@ -24,4 +25,7 @@ class StringPrototypeFactoryUI extends IPrototypeFactoryUI[String] {
   override def displayName = "String"
   
   override def buildDataUI = new StringPrototypeDataUI
+  
+  //FIXME :: change 0 by correct value for dimension
+  def buildDataUI(prototype : IPrototype[_]) = new StringPrototypeDataUI(prototype.name,0)
 }

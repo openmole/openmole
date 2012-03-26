@@ -17,6 +17,7 @@
 
 package org.openmole.ide.plugin.prototype.base
 
+import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 import java.math.BigDecimal
 
@@ -25,4 +26,7 @@ class BigDecimalPrototypeFactoryUI extends IPrototypeFactoryUI[BigDecimal] {
   override def displayName = "BigDecimal"
   
   override def buildDataUI = new BigDecimalPrototypeDataUI
+  
+  //FIXME :: change 0 by correct value for dimension
+  def buildDataUI(prototype : IPrototype[_]) = new BigDecimalPrototypeDataUI(prototype.name,0)
 }

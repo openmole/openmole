@@ -40,5 +40,13 @@ trait ITaskDataUI extends IDataUI{
   
   def prototypesOut_=(po: List[IPrototypeDataProxyUI])
   
+  def implicitPrototypesIn: List[IPrototypeDataProxyUI]
+  
+  def implicitPrototypesIn_=(pi: List[IPrototypeDataProxyUI])
+  
+  def implicitPrototypesOut: List[IPrototypeDataProxyUI]
+  
+  def implicitPrototypesOut_=(po: List[IPrototypeDataProxyUI])
+  
   def buildPanelUI: ITaskPanelUI
 }

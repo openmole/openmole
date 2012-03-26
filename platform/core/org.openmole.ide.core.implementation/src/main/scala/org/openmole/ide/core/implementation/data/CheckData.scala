@@ -19,15 +19,23 @@ package org.openmole.ide.core.implementation.data
 
 import org.openmole.core.implementation.validation.DataflowProblem
 import org.openmole.core.implementation.validation.Validation
+import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
+import org.openmole.ide.core.implementation.serializer.KeyGenerator
+import org.openmole.ide.core.implementation.serializer.KeyRegistery
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyFactory
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import scala.collection.JavaConversions._
 
 object CheckData {
+  private def dataProxyFactory(data : IData[_]) =  
+    new PrototypeDataProxyFactory(KeyRegistery.prototypes(KeyGenerator(data.prototype))).buildDataProxyUI(data.prototype)
+  
   def checkMole(manager : IMoleSceneManager) = {
     manager.startingCapsule match {
       case Some(x:ICapsuleUI) => 
@@ -37,9 +45,18 @@ object CheckData {
         
         // Compute implicit input / output
         capsuleMap.foreach{case(caps,capsUI) => 
-            println("CAPSULE :: " + caps.toString)
-            println(caps.inputs)
-            println(caps.outputs)
+            capsUI.dataUI.task match {
+              case Some(x : ITaskDataProxyUI) => 
+                println("CAPSULE :: " + caps.toString)
+                println(caps.inputs)
+                println(caps.outputs)
+                x.dataUI.implicitPrototypesIn = caps.inputs.filterNot{c=> prototypeMap.containsKey(c.prototype)}.toList.map{dataProxyFactory}
+                x.dataUI.implicitPrototypesOut = caps.inputs.filterNot{c=> prototypeMap.containsKey(c.prototype)}.toList.map{dataProxyFactory}
+                println("II :: " + x.dataUI.implicitPrototypesIn.size)
+                println("OO :: " + x.dataUI.implicitPrototypesOut.size)
+                println
+              case _ =>
+            }
         }
         
         // Formal validation

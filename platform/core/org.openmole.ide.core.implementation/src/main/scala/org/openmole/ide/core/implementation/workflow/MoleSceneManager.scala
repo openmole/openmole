@@ -66,7 +66,9 @@ class MoleSceneManager(var name : String,
     capsuleConnections+= cv.dataUI -> HashSet.empty[ITransitionUI]
   }
   
-  def removeCapsuleUI(nodeID: String) = {
+  def removeCapsuleUI(capsule : ICapsuleUI) : String = removeCapsuleUI(capsuleID(capsule))
+  
+  def removeCapsuleUI(nodeID: String) : String = {
     startingCapsule match {
       case None=>
       case Some(caps : ICapsuleUI)=> if (capsules.get(nodeID) == caps) startingCapsule = None
@@ -81,6 +83,7 @@ class MoleSceneManager(var name : String,
     removeDataChannel(capsules.get(nodeID))
     
     capsules.remove(nodeID)
+    nodeID
   }
   
   

@@ -35,6 +35,7 @@ import scala.swing.Menu
 import scala.swing.MenuBar
 import scala.swing.MenuItem
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
+import org.openmole.ide.core.implementation.serializer.KeyRegistery
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.dataproxy.EnvironmentDataProxyFactory
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyFactory
@@ -70,7 +71,7 @@ object ConceptMenu {
   
   
   val prototypeClasses = new Menu("New")
-  Lookup.getDefault.lookupAll(classOf[IPrototypeFactoryUI[_]]).map{f=>new PrototypeDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach(
+  KeyRegistery.prototypes.values.map{f=>new PrototypeDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach(
     d => prototypeClasses.contents += new MenuItem(new Action(d.factory.displayName){
         override def apply = {
           val proxy = d.buildDataProxyUI

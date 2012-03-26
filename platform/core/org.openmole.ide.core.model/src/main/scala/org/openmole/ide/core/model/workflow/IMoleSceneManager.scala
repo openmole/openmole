@@ -41,37 +41,39 @@ trait IMoleSceneManager {
   
   def getDataChannelID : String
   
-  def capsuleID(cv: ICapsuleUI): String
+  def capsuleID(cv : ICapsuleUI) : String
   
-  def capsules:DualHashBidiMap[String, ICapsuleUI]
+  def capsules : DualHashBidiMap[String, ICapsuleUI]
   
-  def startingCapsule: Option[ICapsuleUI]
+  def startingCapsule : Option[ICapsuleUI]
   
-  def capsuleConnections:  HashMap[ICapsuleDataUI, HashSet[ITransitionUI]]
+  def capsuleConnections :  HashMap[ICapsuleDataUI, HashSet[ITransitionUI]]
   
-  def removeCapsuleUI(nodeID: String):Unit
+  def removeCapsuleUI(nodeID: String) : String
   
-  def registerCapsuleUI(cv: ICapsuleUI):Unit
+  def removeCapsuleUI(capslue: ICapsuleUI) : String
   
-  def setStartingCapsule(capsule: ICapsuleUI)
+  def registerCapsuleUI(cv: ICapsuleUI) : Unit
   
-  def transitions: Iterable[ITransitionUI] 
+  def setStartingCapsule(capsule : ICapsuleUI)
   
-  def dataChannels: Iterable[IDataChannelUI]
+  def transitions : Iterable[ITransitionUI] 
   
-  def transition(edgeID: String): ITransitionUI
+  def dataChannels : Iterable[IDataChannelUI]
   
-  def dataChannel(dID: String): IDataChannelUI
+  def transition(edgeID : String): ITransitionUI
   
-  def removeTransition(edgeID: String)
+  def dataChannel(dID : String): IDataChannelUI
   
-  def removeDataChannel(id: String)
+  def removeTransition(edgeID : String)
   
-  def registerTransition(s: ICapsuleUI, t:IInputSlotWidget,transitionType: TransitionType.Value,cond: Option[String]): Boolean
+  def removeDataChannel(id : String)
   
-  def registerTransition(edgeID: String,s: ICapsuleUI, t:IInputSlotWidget,transitionType: TransitionType.Value,cond: Option[String]): Boolean
+  def registerTransition(s : ICapsuleUI, t : IInputSlotWidget,transitionType : TransitionType.Value,cond : Option[String]) : Boolean
   
-  def registerDataChannel(id:String, source: ICapsuleUI, target: ICapsuleUI,prototypes: List[IPrototypeDataProxyUI]): Boolean
+  def registerTransition(edgeID : String,s : ICapsuleUI, t : IInputSlotWidget,transitionType : TransitionType.Value,cond : Option[String]) : Boolean
   
-  def registerDataChannel(source: ICapsuleUI, target: ICapsuleUI,prototypes: List[IPrototypeDataProxyUI]): Boolean
+  def registerDataChannel(id : String, source : ICapsuleUI, target : ICapsuleUI,prototypes : List[IPrototypeDataProxyUI]) : Boolean
+  
+  def registerDataChannel(source : ICapsuleUI, target : ICapsuleUI,prototypes : List[IPrototypeDataProxyUI]) : Boolean
  }

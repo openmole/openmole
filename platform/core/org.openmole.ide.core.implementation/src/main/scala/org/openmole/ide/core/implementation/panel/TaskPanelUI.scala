@@ -18,6 +18,7 @@
 package org.openmole.ide.core.implementation.panel
 
 import java.awt.BorderLayout
+import java.awt.Color
 import javax.swing.ImageIcon
 import org.openide.util.ImageUtilities
 import org.openmole.ide.core.implementation.control.TopComponentsManager
@@ -25,18 +26,24 @@ import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.widget.ContentAction
+import org.openmole.ide.misc.widget.ImplicitLinkLabel
 import org.openmole.ide.misc.widget.ImageLinkLabel
+import org.openmole.ide.misc.widget.LinkLabel
+import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor
 import scala.swing.Action
+import scala.swing.Label
 import scala.swing.Panel
 import scala.swing.Separator
+import scala.collection.JavaConversions._
 
 class TaskPanelUI(proxy: ITaskDataProxyUI,
                   scene: IMoleScene,
@@ -55,12 +62,21 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   }
   
   def delete = {
-    Proxys.tasks -= proxy
-    ConceptMenu.removeItem(proxy)
+    val toBeRemovedCapsules : List[ICapsuleUI] = TopComponentsManager.moleScenes.map{_.manager.capsules.values.filter{_.dataUI.task == Some(proxy)}}.flatten.toList
+    toBeRemovedCapsules match {
+      case Nil => Proxys.tasks -= proxy
+        ConceptMenu.removeItem(proxy)
+      case _ => 
+        if (DialogFactory.deleteProxyConfirmation(proxy)) {
+          toBeRemovedCapsules.foreach{c=>c.scene.graphScene.removeNodeWithEdges(c.scene.manager.removeCapsuleUI(c))}
+          scene.closePropertyPanel
+          delete
+        }
+    }
   }
   
   def save = {
-    proxy.dataUI = panelUI.save(nameTextField.text,protoPanel.protoIn.content,protoPanel.protoOut.content)
+    proxy.dataUI = panelUI.save(nameTextField.text,protoPanel.protoInEditor.content,protoPanel.protoOutEditor.content)
     proxy.dataUI match {
       case x : AbstractExplorationTaskDataUI => TopComponentsManager.capsules.filter(_.dataUI.task == proxy) match {
           case y : List[Nothing]=> 
@@ -97,23 +113,43 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     val image = new ImageIcon(ImageUtilities.loadImage("img/eye.png"))
       
     val emptyProto = EmptyDataUIs.emptyPrototypeProxy
-    val protoIn = new MultiComboLinkLabelGroovyTextFieldEditor("Inputs",
-                                                               TaskPanelUI.this.proxy.dataUI.prototypesIn.map{case(proto,v) =>
+    
+    val protoInEditor = new MultiComboLinkLabelGroovyTextFieldEditor("",
+                                                                     TaskPanelUI.this.proxy.dataUI.prototypesIn.map{case(proto,v) =>
           (proto,proto.dataUI.coreObject,contentAction(proto),v)}.toList,
-                                                               (List(emptyProto):::Proxys.prototypes.toList).map{p=>(p,p.dataUI.coreObject,contentAction(p))}.toList,
-                                                               image)        
+                                                                     (List(emptyProto):::Proxys.prototypes.toList).map{p=>(p,p.dataUI.coreObject,contentAction(p))}.toList,
+                                                                     image)
+    val protoOutEditor = new MultiComboLinkLabel("",
+                                                 TaskPanelUI.this.proxy.dataUI.prototypesOut.map{proto => (proto,contentAction(proto))}.toList,
+                                                 (List(emptyProto):::Proxys.prototypes.toList).map{p=>(p,contentAction(p))}.toList,
+                                                 image)
+
+    val protoIn = new PluginPanel("wrap"){
+      contents += new Label("Inputs") {foreground = Color.WHITE}
+      contents += new PluginPanel("wrap 2"){
+        TaskPanelUI.this.proxy.dataUI.implicitPrototypesIn.foreach{p=> 
+          contents += new ImplicitLinkLabel(p.dataUI.name,contentAction(p))
+        }
+      }
+      contents += protoInEditor.panel    
+    }
                                                                       
-    val protoOut = new MultiComboLinkLabel("Outputs",
-                                           TaskPanelUI.this.proxy.dataUI.prototypesOut.map{proto => (proto,contentAction(proto))}.toList,
-                                           (List(emptyProto):::Proxys.prototypes.toList).map{p=>(p,contentAction(p))}.toList,
-                                           image)        
+    val protoOut =   new PluginPanel("wrap"){
+      contents += new Label("Outputs") {foreground = Color.WHITE}
+      contents += new PluginPanel("wrap 2"){  
+        TaskPanelUI.this.proxy.dataUI.implicitPrototypesOut.foreach{p=> 
+          contents += new ImplicitLinkLabel(p.dataUI.name,contentAction(p))
+        }
+      }
+      contents += protoOutEditor.panel    
+    }    
     
-    if (TaskPanelUI.this.proxy.dataUI.prototypesIn.isEmpty) protoIn.removeAllRows
-    if (TaskPanelUI.this.proxy.dataUI.prototypesOut.isEmpty) protoOut.removeAllRows
+    if (TaskPanelUI.this.proxy.dataUI.prototypesIn.isEmpty) protoInEditor.removeAllRows
+    if (TaskPanelUI.this.proxy.dataUI.prototypesOut.isEmpty) protoOutEditor.removeAllRows
     
-    peer.add(protoIn.panel.peer,BorderLayout.WEST)
+    peer.add(protoIn.peer,BorderLayout.WEST)
     peer.add((new Separator).peer)
-    peer.add(protoOut.panel.peer,BorderLayout.EAST)
+    peer.add(protoOut.peer,BorderLayout.EAST)
   
     def contentAction(proto : IPrototypeDataProxyUI) = new ContentAction(proto.dataUI.displayName,proto){
       override def apply = TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.displayExtraPropertyPanel(proto)} 

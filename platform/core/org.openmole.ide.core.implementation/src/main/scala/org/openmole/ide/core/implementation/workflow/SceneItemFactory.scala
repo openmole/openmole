@@ -18,6 +18,7 @@
 package org.openmole.ide.core.implementation.workflow
 
 import java.awt.Point
+import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
@@ -30,6 +31,7 @@ object SceneItemFactory {
     scene.initCapsuleAdd(caps)
     scene.manager.registerCapsuleUI(caps)
     scene.graphScene.addNode(scene.manager.getNodeID).setPreferredLocation(locationPoint)
+    CheckData.checkMole(scene.manager)
     caps   
   }
   
