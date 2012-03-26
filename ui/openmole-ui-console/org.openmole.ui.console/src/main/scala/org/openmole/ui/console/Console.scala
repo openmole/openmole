@@ -28,23 +28,24 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.logging.LoggerService
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.workspace.Workspace
+import scala.annotation.tailrec
 
 
 object Console {
 
-  def initPassword = {
+  @tailrec def initPassword: Unit = {
     val message = (if(Workspace.passwordChoosen) "Enter your OpenMOLE password" else "OpenMOLE Password has not been set yet, choose a  password") + "  (for preferences encryption):"
-    
-    var ok = false
-    do {
-      val password = new jline.ConsoleReader().readLine(message, '*')
-      try {
-        Workspace.password_=(password)
-        ok = true
-      } catch {
-        case e: UserBadDataError => println("Password incorrect.")
-      }
-    } while(!ok)
+  
+    val password = new jline.ConsoleReader().readLine(message, '*')
+    val success = try {
+      Workspace.password_=(password)
+      true
+    } catch {
+      case e: UserBadDataError => 
+        println("Password incorrect.")
+        false
+    }
+    if(!success) initPassword
   }
   
   val pluginManager = "plugin"
