@@ -58,7 +58,7 @@ object DialogFactory {
   
   def deleteProxyConfirmation(proxy : IDataProxyUI) : Boolean = {
     if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new Label("<html>" +proxy.dataUI.name + " is currently used in a scene.<br>" +
-                                                                         "It will be deleted everywher it appears. <br>" +
+                                                                         "It will be deleted everywhere it appears. <br>" +
                                                                          "Delete anyway ?").peer, "Execution warning")).equals(NotifyDescriptor.OK_OPTION)) true
     else false 
   }

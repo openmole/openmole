@@ -27,4 +27,12 @@ abstract class TaskDataUI extends ITaskDataUI{
   var prototypesOut = List.empty[IPrototypeDataProxyUI]
   var implicitPrototypesIn = List.empty[IPrototypeDataProxyUI]
   var implicitPrototypesOut = List.empty[IPrototypeDataProxyUI]
+  
+  def filterPrototypeOccurencies(pproxy : IPrototypeDataProxyUI) =
+    (prototypesIn.filter(_._1 == pproxy).map{_._1} ++ prototypesOut.filter(_ == pproxy)).distinct
+  
+  def removePrototypeOccurencies(pproxy : IPrototypeDataProxyUI) = {
+    prototypesIn = prototypesIn.filterNot{_._1 == pproxy}
+    prototypesOut = prototypesOut.filterNot{_ == pproxy}
+  }
 }
