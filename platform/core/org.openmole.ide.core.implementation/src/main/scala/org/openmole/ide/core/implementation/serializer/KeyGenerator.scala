@@ -27,8 +27,6 @@ object KeyGenerator {
     else m
   }
   
-  def apply(proto : IPrototype[_]) : Key = {
-    println("XXXXXXXXXXXXXXXx :: " + stripArrays(proto.`type`))
+  def apply(proto : IPrototype[_]) : Key = 
     new PrototypeKey(proto.getClass,stripArrays(proto.`type`))
-  }
 }

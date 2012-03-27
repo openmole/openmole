@@ -23,7 +23,6 @@ import javax.swing.ImageIcon
 import org.openide.util.ImageUtilities
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
-import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dialog.DialogFactory
@@ -35,7 +34,6 @@ import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget.ImplicitLinkLabel
 import org.openmole.ide.misc.widget.ImageLinkLabel
-import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor
@@ -84,7 +82,6 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
         }
       case _ =>
     }
-    CheckData.checkMole(TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.manager)
   }
   
   def switch = {
@@ -117,11 +114,18 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     val protoInEditor = new MultiComboLinkLabelGroovyTextFieldEditor("",
                                                                      TaskPanelUI.this.proxy.dataUI.prototypesIn.map{case(proto,v) =>
           (proto,proto.dataUI.coreObject,contentAction(proto),v)}.toList,
-                                                                     (List(emptyProto):::Proxys.prototypes.toList).map{p=>(p,p.dataUI.coreObject,contentAction(p))}.toList,
+                                                                     (List(emptyProto):::(Proxys.prototypes.toList.filterNot{p=>proxy.dataUI.implicitPrototypesIn.map{
+              _.dataUI.name}.contains(p.dataUI.name)
+          })).map{
+        p=>(p,p.dataUI.coreObject,contentAction(p))
+      }.toList,
                                                                      image)
     val protoOutEditor = new MultiComboLinkLabel("",
                                                  TaskPanelUI.this.proxy.dataUI.prototypesOut.map{proto => (proto,contentAction(proto))}.toList,
-                                                 (List(emptyProto):::Proxys.prototypes.toList).map{p=>(p,contentAction(p))}.toList,
+                                                 (List(emptyProto):::(Proxys.prototypes.toList.filterNot{p=>proxy.dataUI.implicitPrototypesOut.map{
+              _.dataUI.name}.contains(p.dataUI.name)
+          })).map{
+        p=>(p,contentAction(p))}.toList,
                                                  image)
 
     val protoIn = new PluginPanel("wrap"){
