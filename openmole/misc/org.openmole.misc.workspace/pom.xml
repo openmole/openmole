@@ -47,11 +47,6 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>org.apache.log4j</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
             <artifactId>org.joda.time</artifactId>
             <version>${project.version}</version>
         </dependency>
