@@ -44,8 +44,8 @@ class CapsuleUI(val scene: IMoleScene,
   var samplingWidget : Option[LinkedImageWidget] = None
   var inputPrototypeWidget : Option[PrototypeWidget] = None
   var outputPrototypeWidget : Option[PrototypeWidget] = None
-  addEnvironment(dataUI.environment)
-  addSampling(dataUI.sampling)
+  setEnvironment(dataUI.environment)
+  setSampling(dataUI.sampling)
   
   addChild(taskComponentWidget)
   setPreferredSize(new Dimension(TASK_CONTAINER_WIDTH+20,TASK_CONTAINER_HEIGHT+20))
@@ -102,7 +102,7 @@ class CapsuleUI(val scene: IMoleScene,
     capsuleMenuProvider.addTaskMenus
   }
   
-  def addEnvironment(envtask : Option[IEnvironmentDataProxyUI]) = {
+  def setEnvironment(envtask : Option[IEnvironmentDataProxyUI]) = {
     dataUI.environment = envtask
     updateEnvironmentWidget
   }
@@ -122,7 +122,7 @@ class CapsuleUI(val scene: IMoleScene,
     scene.refresh
   }
   
-  def addSampling(sampletask : Option[ISamplingDataProxyUI]) = {
+  def setSampling(sampletask : Option[ISamplingDataProxyUI]) = {
     dataUI.sampling = sampletask
     updateSamplingWidget
   }
@@ -172,7 +172,7 @@ class CapsuleUI(val scene: IMoleScene,
   def setTask(dpu: ITaskDataProxyUI)={
     dataUI.task= Some(dpu)
     dpu.dataUI match {
-      case x : AbstractExplorationTaskDataUI => addSampling(x.sampling)
+      case x : AbstractExplorationTaskDataUI => setSampling(x.sampling)
       case _=>
     }
   }

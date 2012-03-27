@@ -37,9 +37,9 @@ trait ICapsuleUI {
   
   def setTask(dpu: ITaskDataProxyUI)
   
-  def addEnvironment(env : Option[IEnvironmentDataProxyUI])
+  def setEnvironment(env : Option[IEnvironmentDataProxyUI])
   
-  def addSampling(env : Option[ISamplingDataProxyUI])
+  def setSampling(env : Option[ISamplingDataProxyUI])
   
   def addInputSlot(startingCapsule: Boolean): IInputSlotWidget
   

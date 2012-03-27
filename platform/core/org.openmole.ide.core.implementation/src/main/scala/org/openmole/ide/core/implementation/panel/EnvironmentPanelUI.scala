@@ -20,10 +20,14 @@ package org.openmole.ide.core.implementation.panel
 import java.awt.Color
 import javax.swing.ImageIcon
 import org.openide.util.ImageUtilities
+import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
+import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
+import scala.collection.JavaConversions._
 
 class EnvironmentPanelUI(proxy: IEnvironmentDataProxyUI,
                          scene: IMoleScene,
@@ -39,8 +43,17 @@ class EnvironmentPanelUI(proxy: IEnvironmentDataProxyUI,
   }
   
   def delete = {
-    Proxys.environments -= proxy
-    ConceptMenu.removeItem(proxy)
+    val capsulesWithEnv : List[ICapsuleUI] = TopComponentsManager.moleScenes.map{_.manager.capsules.values.filter{_.dataUI.environment == Some(proxy)}}.flatten.toList
+    capsulesWithEnv match {
+      case Nil => Proxys.environments -= proxy
+        ConceptMenu.removeItem(proxy)
+      case _ => 
+        if (DialogFactory.deleteProxyConfirmation(proxy)) {
+          capsulesWithEnv.foreach{_.setEnvironment(None)}
+          scene.closePropertyPanel
+          delete
+        }
+    }
   }
   
   def save = proxy.dataUI = panelUI.saveContent(nameTextField.text)

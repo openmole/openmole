@@ -147,7 +147,7 @@ class MoleSceneConverter extends Converter{
                 case "islot"=> islots.put(reader.getAttribute("id"), caps.addInputSlot(start))
                 case "oslot"=> oslots.put(reader.getAttribute("id"), caps)
                 case "task"=> caps.encapsule(Proxys.tasks.filter(p=> p.id == reader.getAttribute("id").toInt).head)  
-                case "environment"=> caps.addEnvironment(Some(Proxys.environments.filter(e=> e.id == reader.getAttribute("id").toInt).head))
+                case "environment"=> caps.setEnvironment(Some(Proxys.environments.filter(e=> e.id == reader.getAttribute("id").toInt).head))
                 case _=> MoleExceptionManagement.showException("Unknown balise "+ n1)
               }
               reader.moveUp

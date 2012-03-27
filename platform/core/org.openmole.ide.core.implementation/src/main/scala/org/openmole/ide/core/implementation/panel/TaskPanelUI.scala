@@ -80,7 +80,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     proxy.dataUI match {
       case x : AbstractExplorationTaskDataUI => TopComponentsManager.capsules.filter(_.dataUI.task == proxy) match {
           case y : List[Nothing]=> 
-          case y : List[ICapsuleUI] => y.head.addSampling(x.sampling)
+          case y : List[ICapsuleUI] => y.head.setSampling(x.sampling)
         }
       case _ =>
     }

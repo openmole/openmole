@@ -47,9 +47,9 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
     itRIS.addActionListener(new RemoveInputSlot(capsule))
     Proxys.environment.foreach{env =>
       menuEnv.add(new JMenuItem(new Action(env.dataUI.name){
-            override def apply = capsule.addEnvironment(Some(env))}.peer))}
+            override def apply = capsule.setEnvironment(Some(env))}.peer))}
     menuEnv.insert(new JMenuItem(new Action("None"){
-          override def apply = capsule.addEnvironment(None)}.peer),0)
+          override def apply = capsule.setEnvironment(None)}.peer),0)
     
     Proxys.tasks.foreach{p=> menuTask.add(new JMenuItem(new Action(p.dataUI.name){
             override def apply = {
