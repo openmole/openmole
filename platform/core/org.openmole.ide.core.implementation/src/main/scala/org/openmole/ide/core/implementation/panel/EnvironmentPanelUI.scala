@@ -43,7 +43,9 @@ class EnvironmentPanelUI(proxy: IEnvironmentDataProxyUI,
   }
   
   def delete = {
-    val capsulesWithEnv : List[ICapsuleUI] = TopComponentsManager.moleScenes.map{_.manager.capsules.values.filter{_.dataUI.environment == Some(proxy)}}.flatten.toList
+    val capsulesWithEnv = TopComponentsManager.moleScenes.flatMap{
+      _.manager.capsules.values.filter{
+        _.dataUI.environment == Some(proxy)}}.toList
     capsulesWithEnv match {
       case Nil => Proxys.environments -= proxy
         ConceptMenu.removeItem(proxy)

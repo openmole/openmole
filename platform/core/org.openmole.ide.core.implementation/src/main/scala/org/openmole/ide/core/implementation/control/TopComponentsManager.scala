@@ -20,9 +20,11 @@ package org.openmole.ide.core.implementation.control
 import org.openmole.ide.core.model.control.IMoleComponent
 import java.util.concurrent.atomic.AtomicInteger
 import org.openide.windows.TopComponent
+import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import scala.collection.JavaConversions._
 
@@ -53,6 +55,24 @@ object TopComponentsManager {
   def moleScenes = topComponents.map{_.getMoleScene}
   
   def capsules : List[ICapsuleUI] = moleScenes.map{_.manager.capsules.values}.toList.flatten
+  
+  def capsules(p : ITaskDataProxyUI) = moleScenes.flatMap{
+    _.manager.capsules.values
+  }.filter{
+    _.dataUI.task.isDefined
+  }.filter{
+    p == _.dataUI.task.get
+  }
+  
+  def explorationCapsules = moleScenes.flatMap{
+    _.manager.capsules.values
+  }.filter{
+    _.dataUI.task.isDefined
+  }.flatMap{c => c.dataUI.task.get.dataUI match {
+      case x : AbstractExplorationTaskDataUI => List((c,x))
+      case _ => Nil
+    }
+  }.toList
   
   def topComponents = TopComponent.getRegistry.getOpened.
   filter(_.isInstanceOf[MoleSceneTopComponent]).
