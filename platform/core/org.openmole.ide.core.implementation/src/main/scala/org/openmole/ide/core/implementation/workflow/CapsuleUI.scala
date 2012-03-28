@@ -71,7 +71,7 @@ class CapsuleUI(val scene: IMoleScene,
     val c = new CapsuleUI(sc,dataUI)
     islots.foreach(i=>slotMapping+=i->c.addInputSlot(false))
     dataUI.task match {
-      case Some(x : ITaskDataProxyUI) =>c.setTask(x)
+      case Some(x : ITaskDataProxyUI) => c.encapsule(x)
       case _=>
     }
     (c,slotMapping)
@@ -86,6 +86,7 @@ class CapsuleUI(val scene: IMoleScene,
   }
   
   def decapsule = {
+    println("decapsule")
     dataUI.task = None
     removeChild(inputPrototypeWidget.get)
     removeChild(outputPrototypeWidget.get)
@@ -94,6 +95,7 @@ class CapsuleUI(val scene: IMoleScene,
   }
   
   def encapsule(dpu: ITaskDataProxyUI)= {
+    println("encapsule")
     setTask(dpu)
     inputPrototypeWidget = Some(PrototypeWidget.buildInput(scene, dpu))
     outputPrototypeWidget = Some(PrototypeWidget.buildOutput(scene, dpu))
@@ -146,6 +148,7 @@ class CapsuleUI(val scene: IMoleScene,
     dataUI.task match {
       case Some(x : ITaskDataProxyUI) => 
         val (protoOut,protoIn) = problems.partition{case (proto,problem)=> x.dataUI.prototypesIn.contains(proto)}
+        println("inputPrototypeWidget " + inputPrototypeWidget + " in " + x.dataUI.name)
         inputPrototypeWidget.get.updateErrors(protoIn.map{_._2}.mkString("\n"))
         outputPrototypeWidget.get.updateErrors(protoOut.map{_._2}.mkString("\n"))
       case _ =>
