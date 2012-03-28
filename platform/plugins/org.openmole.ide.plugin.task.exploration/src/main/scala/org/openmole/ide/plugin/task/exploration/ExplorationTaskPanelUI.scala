@@ -27,40 +27,42 @@ import scala.swing.event.SelectionChanged
 import swing.Swing._
 import javax.swing.ImageIcon
 import org.openide.util.ImageUtilities
+import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.control.TopComponentsManager
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy._
+import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openide.awt.StatusDisplayer
 
 class ExplorationTaskPanelUI (pud: ExplorationTaskDataUI) extends PluginPanel("wrap 3") with ITaskPanelUI {
-  val samplingComboBox = new ComboBox(Proxys.samplings.toList) 
+  val samplingComboBox = new ComboBox(comboContent) 
   {tooltip = Help.tooltip("The name of the sampling to be executed")}
 
   contents += new Label("Sampling")
   contents += samplingComboBox
-  val linkLabel : LinkLabel = new LinkLabel("",viewAction(pud.sampling)) {
+  val linkLabel : LinkLabel = new LinkLabel("",contentAction(pud.sampling.getOrElse(emptyProxy))) {
     icon = new ImageIcon(ImageUtilities.loadImage("img/eye.png"))
   }
-    
+  
+  samplingComboBox.selection.item = pud.sampling.getOrElse(emptyProxy)
   listenTo(`samplingComboBox`)
   samplingComboBox.selection.reactions += {
     case SelectionChanged(`samplingComboBox`)=> 
-      val proxy = Proxys.samplings.filter{s => s == samplingComboBox.selection.item}.head
-      linkLabel.action = contentAction(proxy) 
+   //   val proxy = Proxys.samplings.filter{s => s == samplingComboBox.selection.item}.head
+      linkLabel.action = contentAction(samplingComboBox.selection.item) 
   }
   contents += linkLabel
-    
-  def viewAction(proxy : Option[ISamplingDataProxyUI]) = proxy match {
-    case Some(x: ISamplingDataProxyUI)=> contentAction(x)
-    case _=> new ContentAction("",Unit){override def apply = StatusDisplayer.getDefault.setStatusText("No sampling to be displayed")}
-  }
   
   def contentAction(proxy : ISamplingDataProxyUI)  = new ContentAction(proxy.dataUI.name,proxy){
     override def apply = TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.displayExtraPropertyPanel(proxy)}
 
-  override def saveContent(name: String) = new ExplorationTaskDataUI(name,
-                                                                     if (samplingComboBox.peer.getItemCount > 0)
-                                                                       Some(samplingComboBox.selection.item)
-                                                                     else None)
+  override def saveContent(name: String) = {
+    println("save :: " + samplingComboBox.selection.item.dataUI.name + " ::")
+    new ExplorationTaskDataUI(name , Some(samplingComboBox.selection.item))
+  }
+  
+  def comboContent: List[ISamplingDataProxyUI] = emptyProxy :: Proxys.sampling.toList
+  
+  def emptyProxy = new SamplingDataProxyUI(new EmptySamplingDataUI)
 }

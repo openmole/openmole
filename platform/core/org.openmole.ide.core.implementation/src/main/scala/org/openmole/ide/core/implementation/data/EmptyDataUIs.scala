@@ -17,19 +17,24 @@
 
 package org.openmole.ide.core.implementation.data
 
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyFactory
+import org.openmole.core.model.data.IVariable
+import org.openmole.core.model.sampling.ISampling
+import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.data.IPrototypeDataUI
+import org.openmole.ide.core.model.data.ISamplingDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
+import org.openmole.ide.core.model.panel.ISamplingPanelUI
 
 object EmptyDataUIs {
   
   def emptyPrototypeProxy : IPrototypeDataProxyUI = new PrototypeDataProxyUI(new EmptyPrototypeDataUI)
   
-  class  EmptyPrototypeDataUI extends IPrototypeDataUI[Any]  {
+  class  EmptyPrototypeDataUI extends IPrototypeDataUI[Any] {
     def name = ""
     def dim = 0
     def coreClass = classOf[IPrototype[_]]
@@ -40,6 +45,27 @@ object EmptyDataUIs {
     
     class EmptyPrototypePanelUI extends IPrototypePanelUI[Any] {
       override def peer = this.peer
-      def saveContent(name: String) = new EmptyPrototypeDataUI}
+      def saveContent(name: String) = new EmptyPrototypeDataUI
+    }
+  }
+  
+  class  EmptySamplingDataUI extends ISamplingDataUI  {
+    def name = ""
+    def dim = 0
+    def coreClass = classOf[ISampling]
+    def coreObject = new EmptySampling
+    def imagePath = "img/empty.png"
+    def buildPanelUI = new EmptySamplingPanelUI
+    def displayTypedName = ""
+  }
+    
+  class EmptySamplingPanelUI extends ISamplingPanelUI {
+    override def peer = new PluginPanel("").peer
+    def saveContent(name: String) = new EmptySamplingDataUI
+  }
+  
+  class EmptySampling extends ISampling {
+    def prototypes = List.empty
+    def build(context : IContext) = List[Iterable[IVariable[_]]]().toIterator
   }
 }

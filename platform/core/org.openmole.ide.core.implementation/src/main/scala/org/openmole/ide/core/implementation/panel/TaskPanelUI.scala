@@ -75,87 +75,93 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   
   def save = {
     proxy.dataUI = panelUI.save(nameTextField.text,protoPanel.protoInEditor.content,protoPanel.protoOutEditor.content)
-    proxy.dataUI match {
-      case x : AbstractExplorationTaskDataUI => TopComponentsManager.capsules.filter(_.dataUI.task == proxy) match {
-          case y : List[Nothing]=> 
-          case y : List[ICapsuleUI] => y.head.setSampling(x.sampling)
-        }
-      case _ =>
+  
+    TopComponentsManager.moleScenes.flatMap{
+      _.manager.capsules.values
+    }.filter{
+      _.dataUI.task.isDefined
+    }.filter{
+      proxy == _.dataUI.task.get
+    }.foreach {c =>
+      proxy.dataUI match {
+        case x : AbstractExplorationTaskDataUI => c.setSampling(x.sampling)
+        case _ => 
+      }
     }
   }
   
-  def switch = {
-    save
-    if(mainPanel.contents.size == 2) mainPanel.contents.remove(1)
-    if(mainLinksPanel.contents.size == 2) mainLinksPanel.contents.remove(1)
-    TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.closeExtraPropertyPanel
-  }
+def switch = {
+  save
+  if(mainPanel.contents.size == 2) mainPanel.contents.remove(1)
+  if(mainLinksPanel.contents.size == 2) mainLinksPanel.contents.remove(1)
+  TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.closeExtraPropertyPanel
+}
   
-  def properties = {
-    switch    
-    mainPanel.contents += panelUI.peer
-    mainLinksPanel.contents +=  new ImageLinkLabel("img/next.png",new Action("") { def apply = protos })
-    revalidate
-    repaint
-  }
+def properties = {
+  switch    
+  mainPanel.contents += panelUI.peer
+  mainLinksPanel.contents +=  new ImageLinkLabel("img/next.png",new Action("") { def apply = protos })
+  revalidate
+  repaint
+}
   
-  def protos : Unit = {
-    switch
-    mainPanel.contents += protoPanel.peer
-    mainLinksPanel.contents +=  new ImageLinkLabel("img/previous.png",new Action("") { def apply = properties })
-  }
+def protos : Unit = {
+  switch
+  mainPanel.contents += protoPanel.peer
+  mainLinksPanel.contents +=  new ImageLinkLabel("img/previous.png",new Action("") { def apply = properties })
+}
   
-  class IOPrototypePanel extends Panel{
-    peer.setLayout(new BorderLayout)
-    val image = new ImageIcon(ImageUtilities.loadImage("img/eye.png"))
+class IOPrototypePanel extends Panel{
+  peer.setLayout(new BorderLayout)
+  val image = new ImageIcon(ImageUtilities.loadImage("img/eye.png"))
       
-    val emptyProto = EmptyDataUIs.emptyPrototypeProxy
+  val emptyProto = EmptyDataUIs.emptyPrototypeProxy
     
-    val protoInEditor = new MultiComboLinkLabelGroovyTextFieldEditor("",
-                                                                     TaskPanelUI.this.proxy.dataUI.prototypesIn.map{case(proto,v) =>
-          (proto,proto.dataUI.coreObject,contentAction(proto),v)}.toList,
-                                                                     (List(emptyProto):::(Proxys.prototypes.toList.filterNot{p=>proxy.dataUI.implicitPrototypesIn.map{
-              _.dataUI.name}.contains(p.dataUI.name)
-          })).map{
-        p=>(p,p.dataUI.coreObject,contentAction(p))
-      }.toList,
-                                                                     image)
-    val protoOutEditor = new MultiComboLinkLabel("",
-                                                 TaskPanelUI.this.proxy.dataUI.prototypesOut.map{proto => (proto,contentAction(proto))}.toList,
-                                                 (List(emptyProto):::(Proxys.prototypes.toList.filterNot{p=>proxy.dataUI.implicitPrototypesOut.map{
-              _.dataUI.name}.contains(p.dataUI.name)
-          })).map{
-        p=>(p,contentAction(p))}.toList,
-                                                 image)
+  val protoInEditor = new MultiComboLinkLabelGroovyTextFieldEditor("",
+                                                                   TaskPanelUI.this.proxy.dataUI.prototypesIn.map{case(proto,v) =>
+        (proto,proto.dataUI.coreObject,contentAction(proto),v)}.toList,
+                                                                   (List(emptyProto):::(Proxys.prototypes.toList.filterNot{p=>proxy.dataUI.implicitPrototypesIn.map{
+            _.dataUI.name}.contains(p.dataUI.name)
+        })).map{
+      p=>(p,p.dataUI.coreObject,contentAction(p))
+    }.toList,
+                                                                   image)
+  val protoOutEditor = new MultiComboLinkLabel("",
+                                               TaskPanelUI.this.proxy.dataUI.prototypesOut.map{proto => (proto,contentAction(proto))}.toList,
+                                               (List(emptyProto):::(Proxys.prototypes.toList.filterNot{p=>proxy.dataUI.implicitPrototypesOut.map{
+            _.dataUI.name}.contains(p.dataUI.name)
+        })).map{
+      p=>(p,contentAction(p))}.toList,
+                                               image)
 
-    val protoIn = new PluginPanel("wrap"){
-      contents += new Label("Inputs") {foreground = Color.WHITE}
-      contents += new PluginPanel("wrap 2"){
-        TaskPanelUI.this.proxy.dataUI.implicitPrototypesIn.foreach{p=> 
-          contents += new ImplicitLinkLabel(p.dataUI.name,contentAction(p))
-        }
+  val protoIn = new PluginPanel("wrap"){
+    contents += new Label("Inputs") {foreground = Color.WHITE}
+    contents += new PluginPanel("wrap 2"){
+      TaskPanelUI.this.proxy.dataUI.implicitPrototypesIn.foreach{p=> 
+        contents += new ImplicitLinkLabel(p.dataUI.name,contentAction(p))
       }
-      contents += protoInEditor.panel    
     }
-                                                                      
-    val protoOut =   new PluginPanel("wrap"){
-      contents += new Label("Outputs") {foreground = Color.WHITE}
-      contents += new PluginPanel("wrap 2"){  
-        TaskPanelUI.this.proxy.dataUI.implicitPrototypesOut.foreach{p=> 
-          contents += new ImplicitLinkLabel(p.dataUI.name,contentAction(p))
-        }
-      }
-      contents += protoOutEditor.panel    
-    }    
-    
-    if (TaskPanelUI.this.proxy.dataUI.prototypesIn.isEmpty) protoInEditor.removeAllRows
-    if (TaskPanelUI.this.proxy.dataUI.prototypesOut.isEmpty) protoOutEditor.removeAllRows
-    
-    peer.add(protoIn.peer,BorderLayout.WEST)
-    peer.add((new Separator).peer)
-    peer.add(protoOut.peer,BorderLayout.EAST)
-  
-    def contentAction(proto : IPrototypeDataProxyUI) = new ContentAction(proto.dataUI.displayName,proto){
-      override def apply = TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.displayExtraPropertyPanel(proto)} 
+    contents += protoInEditor.panel    
   }
+                                                                      
+  val protoOut =   new PluginPanel("wrap"){
+    contents += new Label("Outputs") {foreground = Color.WHITE}
+    contents += new PluginPanel("wrap 2"){  
+      TaskPanelUI.this.proxy.dataUI.implicitPrototypesOut.foreach{p=> 
+        contents += new ImplicitLinkLabel(p.dataUI.name,contentAction(p))
+      }
+    }
+    contents += protoOutEditor.panel    
+  }    
+    
+  if (TaskPanelUI.this.proxy.dataUI.prototypesIn.isEmpty) protoInEditor.removeAllRows
+  if (TaskPanelUI.this.proxy.dataUI.prototypesOut.isEmpty) protoOutEditor.removeAllRows
+    
+  peer.add(protoIn.peer,BorderLayout.WEST)
+  peer.add((new Separator).peer)
+  peer.add(protoOut.peer,BorderLayout.EAST)
+  
+  def contentAction(proto : IPrototypeDataProxyUI) = new ContentAction(proto.dataUI.displayName,proto){
+    override def apply = TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.displayExtraPropertyPanel(proto)} 
+}
 }
