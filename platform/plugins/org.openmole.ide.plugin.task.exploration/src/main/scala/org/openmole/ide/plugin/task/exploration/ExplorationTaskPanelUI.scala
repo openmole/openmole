@@ -33,7 +33,6 @@ import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
-import org.openide.awt.StatusDisplayer
 
 class ExplorationTaskPanelUI (pud: ExplorationTaskDataUI) extends PluginPanel("wrap 3") with ITaskPanelUI {
   val samplingComboBox = new ComboBox(comboContent) 
@@ -57,10 +56,8 @@ class ExplorationTaskPanelUI (pud: ExplorationTaskDataUI) extends PluginPanel("w
   def contentAction(proxy : ISamplingDataProxyUI)  = new ContentAction(proxy.dataUI.name,proxy){
     override def apply = TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.displayExtraPropertyPanel(proxy)}
 
-  override def saveContent(name: String) = {
-    println("save :: " + samplingComboBox.selection.item.dataUI.name + " ::")
+  override def saveContent(name: String) = 
     new ExplorationTaskDataUI(name , Some(samplingComboBox.selection.item))
-  }
   
   def comboContent: List[ISamplingDataProxyUI] = emptyProxy :: Proxys.sampling.toList
   
