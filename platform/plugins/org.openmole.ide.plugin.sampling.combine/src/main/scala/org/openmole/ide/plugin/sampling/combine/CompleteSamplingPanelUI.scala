@@ -31,6 +31,8 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
+import org.openmole.ide.misc.widget.multirow.MultiWidget._
+import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos._
 import scala.collection.mutable.HashMap
 import scala.swing.BorderPanel.Position._
@@ -74,7 +76,10 @@ class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends PluginPanel("
     
     sampleDomainCombos = Some(new MultiTwoCombos[IPrototypeDataProxyUI,String]("Factors",
                                                                                csrs,
-                                                                               rowFactory(this)))
+                                                                               rowFactory(this),
+                                                                               CLOSE_IF_EMPTY,
+                                                                               ADD,
+                                                                               true))
     
     contents+= sampleDomainCombos.get.panel
   }

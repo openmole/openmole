@@ -71,5 +71,5 @@ class MultiComboTextField[A](title: String,
            iValues: List[(A,String)],
            cContent: List[A]) = this (title,iValues,cContent, new Factory[A],NO_EMPTY,ADD)
 
-  def content = rowWidgets.map(_.content).filterNot(_._2.isEmpty).toList 
+  def content = rowWidgets.map(_.content).toList
 }

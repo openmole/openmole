@@ -65,18 +65,19 @@ class ToStringHookPanelUI(val executionManager: IExecutionManager) extends Plugi
     
     if (!capsules.isEmpty && !prototypeMapping.isEmpty) {
       val r =  new TwoCombosRowWidget(//protosFromTask(capsules(0)), //protosFromTask(capsules(0))(0),
-                                      prototypeMapping.values.toList,
-                                      prototypeMapping.values.toList.head,
-                                      capsules,
-                                      capsules(0),
-                                      "from ",
-                                      NO_ADD)
+        prototypeMapping.values.toList,
+        prototypeMapping.values.toList.head,
+        capsules,
+        capsules(0),
+        "from ",
+        NO_ADD)
       
       val multiRow = new MultiTwoCombos("Displaying prototypes",
                                         List(r),
                                         rowFactory(this),
                                         CLOSE_IF_EMPTY,
-                                        NO_ADD)
+                                        NO_ADD,
+                                        false)
       
       contents += multiRow.panel
       Some(multiRow)
@@ -88,8 +89,8 @@ class ToStringHookPanelUI(val executionManager: IExecutionManager) extends Plugi
  
   
     
- /* def protosFromTask(c: ICapsule): List[IPrototype[_]] = 
-    executionManager.prototypeMapping.values.toList*/
+  /* def protosFromTask(c: ICapsule): List[IPrototype[_]] = 
+   executionManager.prototypeMapping.values.toList*/
   
   def saveContent = multiRow match {
     case Some(multiRow) => 

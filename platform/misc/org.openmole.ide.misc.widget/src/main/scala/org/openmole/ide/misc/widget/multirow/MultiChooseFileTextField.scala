@@ -73,6 +73,7 @@ class MultiChooseFileTextField(title: String,
   
   def this(title: String,iValues: List[String],selectionMode: SelectionMode.Value)= 
     this (title,iValues,"",None,selectionMode,None)
+  
   def content = rowWidgets.map(_.content).toList 
 }
 

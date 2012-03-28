@@ -38,14 +38,17 @@ class MultiWidget[T<:IRowWidget](title: String = "",
                                  rWidgets: List[T],
                                  factory: IRowWidgetFactory[T],
                                  nbComponent: Int,
-                                 allowEmpty: Minus= NO_EMPTY){
+                                 allowEmpty: Minus= NO_EMPTY,
+                                 buildRowFromFactory : Boolean = false){
   val specimen = rWidgets.head
   val rowWidgets = new HashSet[T]
   val panel =  new PluginPanel("wrap "+{if(rWidgets.head.plusAllowed == ADD) 1 else 0}.toString +", insets 0 5 0 5")
   val titleLabel = new Label(title){foreground = new Color(0,113,187)}
   val addButton = new ImageLinkLabel("img/add.png",new Action("") { def apply = addRow })
   
-  rWidgets.foreach(r=>addRow(factory(r,panel)))
+  if(buildRowFromFactory) rWidgets.foreach(r=>addRow(factory(r,panel)))
+  else rWidgets.foreach(addRow)
+  
   if(!title.isEmpty) panel.contents.insert(0,titleLabel)
   panel.contents += addButton
   
@@ -56,9 +59,9 @@ class MultiWidget[T<:IRowWidget](title: String = "",
     panel.contents.insert(panel.contents.size-1,rowWidget.panel)
     
     rowWidget.panel.removeButton.action =  new Action("") {def apply = {
-          if (allowEmpty == CLOSE_IF_EMPTY || (allowEmpty == NO_EMPTY && rowWidgets.size > 1)) {
-            removeRow(rowWidget)
-            rowWidget.doOnClose}}}
+        if (allowEmpty == CLOSE_IF_EMPTY || (allowEmpty == NO_EMPTY && rowWidgets.size > 1)) {
+          removeRow(rowWidget)
+          rowWidget.doOnClose}}}
     refresh
     rowWidget
   }

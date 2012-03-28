@@ -24,7 +24,7 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.data._
 
 class ExplorationTaskDataUI(val name: String="",
-                            override val sampling : Option[ISamplingDataProxyUI] = None) extends AbstractExplorationTaskDataUI(sampling){
+                            override var sampling : Option[ISamplingDataProxyUI] = None) extends AbstractExplorationTaskDataUI{
    
   override def coreObject = {
     sampling match {

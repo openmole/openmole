@@ -63,5 +63,6 @@ class MultiTextFieldCombo[B] (title: String,
                                       cContent, 
                                       new Factory[B],
                                       NO_EMPTY)
-  def content = rowWidgets.map(_.content).filterNot(_._1.isEmpty).toList 
+  
+  def content = rowWidgets.map(_.content).toList
 }

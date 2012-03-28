@@ -36,8 +36,8 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("fill
   val workdirTextField = new TextField(ndu.workdir)
   val resourcesMultiTextField = new MultiChooseFileTextField("Resource",ndu.resources,SelectionMode.FilesAndDirectories)
   val outputMapMultiTextFieldCombo = new MultiTextFieldCombo[IPrototypeDataProxyUI]("Output mapping",
-                                                                                   ndu.outputMap,
-                                                                                   comboContent)
+                                                                                    ndu.outputMap,
+                                                                                    comboContent)
    
   val inputMapMultiComboTextField = new MultiComboTextField[IPrototypeDataProxyUI]("Input mapping",
                                                                                    ndu.inputMap,
@@ -56,8 +56,16 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("fill
                                                                                  workdirTextField.text, 
                                                                                  launchingCommandTextArea.text,
                                                                                  resourcesMultiTextField.content,
-                                                                                 inputMapMultiComboTextField.content,
-                                                                                 outputMapMultiTextFieldCombo.content)
+                                                                                 inputMapMultiComboTextField.content.flatMap{p => p._1.dataUI match {
+        case x : EmptyPrototypeDataUI => Nil
+        case _ => List(p)
+      }
+    },
+                                                                                 outputMapMultiTextFieldCombo.content.flatMap{p => p._2.dataUI match {
+        case x : EmptyPrototypeDataUI => Nil
+        case _ => List(p)
+      }
+    })
   
   def comboContent: List[IPrototypeDataProxyUI] = new PrototypeDataProxyUI(new EmptyPrototypeDataUI)::Proxys.filePrototypes
 }

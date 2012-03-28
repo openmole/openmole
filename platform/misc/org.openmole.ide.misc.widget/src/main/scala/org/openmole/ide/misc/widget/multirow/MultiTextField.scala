@@ -50,9 +50,9 @@ class MultiTextField (title: String,
 
   def this(title: String,
            iValues: List[String]) = this (title,
-                                           iValues,
-                                           new Factory,
-                                           NO_EMPTY)
+                                          iValues,
+                                          new Factory,
+                                          NO_EMPTY)
    
   def content = rowWidgets.map(_.content).toList 
 }

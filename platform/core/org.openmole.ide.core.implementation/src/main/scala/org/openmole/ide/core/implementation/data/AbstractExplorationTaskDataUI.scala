@@ -20,6 +20,11 @@ package org.openmole.ide.core.implementation.data
 import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 
-abstract class AbstractExplorationTaskDataUI(var sampling : Option[ISamplingDataProxyUI] = None) extends TaskDataUI {
+abstract class AbstractExplorationTaskDataUI extends TaskDataUI {
+  
+  def sampling : Option[ISamplingDataProxyUI] = None
+  
+  def sampling_=(s: Option[ISamplingDataProxyUI])
+  
   def coreObject: ExplorationTask
 }
