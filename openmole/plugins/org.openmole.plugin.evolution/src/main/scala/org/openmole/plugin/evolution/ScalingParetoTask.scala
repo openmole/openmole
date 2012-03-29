@@ -19,39 +19,45 @@ package org.openmole.plugin.evolution
 
 import fr.iscpif.mgo.Individual
 import fr.iscpif.mgo.ga.GAFitness
-import fr.iscpif.mgo.ga.GAFitness._
 import fr.iscpif.mgo.ga.GAGenome
-import fr.iscpif.mgo.ga.GAIndividual
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
+import org.openmole.core.implementation.data.Prototype.toArray
+import fr.iscpif.mgo.ga.selection.Ranking
+import fr.iscpif.mgo.tools.Scaling._
 
-class ToIndividualTask[T <: GAGenome](
-  name: String, 
-  genome: IPrototype[T], 
-  individual: IPrototype[Individual[T, GAFitness]]) extends Task(name) { task =>
+class ScalingParetoTask[I <: Individual[GAGenome, GAFitness] with Ranking](
+  name: String,
+  archivePrototype: IPrototype[Array[I]]) extends Task(name) {
+
+  addInput(archivePrototype)
   
-  addInput(genome)
-  addOutput(individual)
+  var scaled: List[(IPrototype[Double], Double, Double)] = Nil
+
+  def scale(p: IPrototype[Double], min: Double, max: Double) = {
+    scaled ::= ((p, min, max))
+    addOutput(toArray(p))
+  }
   
   var objectives: List[IPrototype[Double]] = Nil
   
   def objective(p: IPrototype[Double]) = {
     objectives ::= p
-    addInput(p)
+    addOutput(toArray(p))
   }
   
-  override def process(context: IContext) = 
-    context + new Variable(
-      individual, 
-      new GAIndividual[T, GAFitness] {
-        val genome = context.valueOrException(task.genome)
-        val fitness =  new GAFitness {
-          val values = objectives.reverse.map{context.valueOrException(_)}.toIndexedSeq
-        }
+  override def process(context: IContext) = {
+    val pareto = Ranking.pareto[I](context.valueOrException(archivePrototype))
+    
+    context ++ 
+      scaled.reverse.zipWithIndex.map {
+        case((p, min, max), i) => new Variable(toArray(p), pareto.map{_.genome.values(i).scale(min, max)}.toArray)
+      } ++
+      objectives.reverse.zipWithIndex.map {
+        case(p, i) => new Variable(toArray(p), pareto.map{_.fitness.values(i)}.toArray)
       }
-    )
-  
+  }
   
 }

@@ -93,7 +93,7 @@ trait ICapsule {
    * @param dataChannel the datachannel to remove
    * @return the capsule itself
    */
-  def removeInputDataChannel(dataChannel: IDataChannel): this.type
+  //def removeInputDataChannel(dataChannel: IDataChannel): this.type
 
   /**
    * Remove a datachannel in output of this capsule.
@@ -101,7 +101,7 @@ trait ICapsule {
    * @param dataChannel the datachannel to remove
    * @return the capsule itself
    */
-  def removeOutputDataChannel(dataChannel: IDataChannel): this.type
+  //def removeOutputDataChannel(dataChannel: IDataChannel): this.type
 
 
   /**

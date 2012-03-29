@@ -27,35 +27,55 @@ object JobPriorityQueue {
   class JobQueue {
     val minSize = 1000
     val shrinkFactor = 0.5
+    val shrinkCeil = 0.25
     val growthFactor = 2.
     
     var jobs: Array[LocalExecutionJob] = Array.ofDim(minSize)
-    var nextSlot = 0
+    var nextQueue = 0
+    var nextDequeue = 0
+    var size = 0
      
     private def resize(newSize: Int) = 
       if(newSize >= minSize) {
         val newJobs = Array.ofDim[LocalExecutionJob](newSize)
-        for(i <- 0 until nextSlot) newJobs(i) = jobs(i)
+          
+        if(nextDequeue < nextQueue)
+          jobs.slice(nextDequeue, nextQueue).zipWithIndex.foreach {
+            case (j, i) => newJobs(i) = j
+          }
+        else 
+          (jobs.slice(nextDequeue, jobs.size) ++ jobs.slice(0, nextQueue)).zipWithIndex.foreach {
+            case (j, i) => newJobs(i) = j
+          }
+        
         jobs = newJobs
+        nextDequeue = 0
+        nextQueue = size
       }
     
-    def size = nextSlot
-    
     def enqueue(job: LocalExecutionJob) = {
-      if(nextSlot > jobs.size - 1) resize((jobs.size * growthFactor).toInt)
-      jobs(nextSlot) = job
-      nextSlot += 1
+      if(size >= jobs.size) resize((jobs.size * growthFactor).toInt)
+
+      jobs(nextQueue) = job
+      nextQueue = increment(nextQueue)
+      size += 1
     }
     
+    private def increment(i: Int) =if((i + 1) < jobs.size) i + 1 else 0
+    
     def dequeue = {
-      nextSlot -= 1
-      val dequeued = jobs(nextSlot)
-      jobs(nextSlot) = null
-      if(nextSlot < (jobs.size * shrinkFactor)) resize(nextSlot)
+      if(isEmpty) throw new IndexOutOfBoundsException("Dequeing from an empty queue")
+
+      val dequeued = jobs(nextDequeue)
+      jobs(nextDequeue) = null
+      nextDequeue = increment(nextDequeue)
+      size -= 1
+      
+      if(size < (jobs.size * shrinkCeil)) resize((size * shrinkFactor).toInt)
       dequeued
     }
     
-    def isEmpty = nextSlot == 0
+    def isEmpty = size == 0
   }
   
   def priority(job: IJob) = job.moleJobs.count( mj => classOf[IMoleTask].isAssignableFrom( mj.task.getClass) )

@@ -38,17 +38,18 @@ import scala.collection.mutable.HashSet
 
 import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.model.data.IDataSet
+import scala.collection.mutable.ListBuffer
 
 class Capsule(var _task: Option[ITask] = None) extends ICapsule {
 
   def this(t: ITask) = this(Some(t))
   
-  private val _inputSlots = new HashSet[ISlot]
+  private val _inputSlots = new ListBuffer[ISlot]
   private val _defaultInputSlot = new Slot(this)
-  private val _outputTransitions = new HashSet[ITransition]
+  private val _outputTransitions = new ListBuffer[ITransition]
     
-  private val _inputDataChannels = new HashSet[IDataChannel]
-  private val _outputDataChannels = new HashSet[IDataChannel]
+  private val _inputDataChannels = new ListBuffer[IDataChannel]
+  private val _outputDataChannels = new ListBuffer[IDataChannel]
 
   
   override def inputs: IDataSet  = 
@@ -71,7 +72,7 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
   }
 
   override def addInputDataChannel(dataChannel: IDataChannel): this.type = {
-    _inputDataChannels.add(dataChannel)
+    _inputDataChannels += dataChannel
     this
   }
   
@@ -85,15 +86,15 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
     this
   }
 
-  override def removeInputDataChannel(dataChannel: IDataChannel): this.type = {
-    _inputDataChannels -= dataChannel
-    this
-  }
-
-  override def removeOutputDataChannel(dataChannel: IDataChannel): this.type = {
-    _outputDataChannels -= dataChannel
-    this
-  }
+//  override def removeInputDataChannel(dataChannel: IDataChannel): this.type = {
+//    _inputDataChannels -= dataChannel
+//    this
+//  }
+//
+//  override def removeOutputDataChannel(dataChannel: IDataChannel): this.type = {
+//    _outputDataChannels -= dataChannel
+//    this
+//  }
 
   def addOutputTransition(transition: ITransition): this.type = {
     _outputTransitions += transition

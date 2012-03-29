@@ -22,27 +22,28 @@ import org.openmole.core.model.transition.ITransition
 import org.openmole.core.model.transition.ISlot
 import scala.collection.mutable.HashSet
 import org.openmole.misc.tools.io.StringUtil._
+import scala.collection.mutable.ListBuffer
 
 class Slot(val capsule: ICapsule) extends ISlot {
   
   capsule.addInputSlot(this)
   
-  private val _transitions = new HashSet[ITransition]
+  private val _transitions = new ListBuffer[ITransition]
 
   override def +=(transition: ITransition) = {
     _transitions += transition
     this
   }
 
-  override def -=(transition: ITransition) = {
-    _transitions -= transition
-    this
-  }
+//  override def -=(transition: ITransition) = {
+//    _transitions -= transition
+//    this
+//  }
 
   override def transitions: Iterable[ITransition] =  _transitions
     
   override def contains(transition: ITransition) = _transitions.contains(transition)
   
-  override def toString = "Slot from (" + transitions.toCSV + ") to " + capsule.toString
+  override def toString = "slot of capsule " + capsule + " containing transitions from (" + transitions.map{_.start}.mkString(",") + ")"
 
 }

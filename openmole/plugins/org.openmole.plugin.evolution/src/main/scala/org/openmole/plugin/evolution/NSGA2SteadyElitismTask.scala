@@ -35,6 +35,7 @@ class NSGA2SteadyElitismTask[T <: GAGenome](
   individual: IPrototype[Individual[T, GAFitness]],
   archive: IPrototype[Array[Individual[T, GAFitness] with Ranking with Distance]],
   nbGenerationSteady: IPrototype[Int],
+  generation: IPrototype[Int],
   archiveSize: Int,
   dominance: Dominant) extends Task(name) {
 
@@ -43,7 +44,8 @@ class NSGA2SteadyElitismTask[T <: GAGenome](
     individual: IPrototype[Individual[T, GAFitness]],
     archive: IPrototype[Array[Individual[T, GAFitness] with Ranking with Distance]],
     nbGenerationSteady: IPrototype[Int],
-    archiveSize: Int) = this(name, individual, archive, nbGenerationSteady, archiveSize, new StrictDominant)
+    generation: IPrototype[Int],
+    archiveSize: Int) = this(name, individual, archive, nbGenerationSteady, generation, archiveSize, new StrictDominant)
   
   
   addInput(archive)
@@ -51,15 +53,21 @@ class NSGA2SteadyElitismTask[T <: GAGenome](
   addInput(nbGenerationSteady)
   addOutput(archive)
   addOutput(nbGenerationSteady)
+  addOutput(generation)
   
   addParameter(archive, Array.empty[Individual[T, GAFitness] with Ranking with Distance])
   addParameter(nbGenerationSteady, 0)
+  addParameter(generation, 0)
   
   override def process(context: IContext) = {
-    val newArchive = context.valueOrException(individual) :: context.valueOrException(archive).toList
-    context + new Variable( 
-      archive, (NSGAII.elitism(newArchive.toIndexedSeq, archiveSize)(dominance)).toArray
-     )
+    val currentArchive =  context.valueOrException(archive)
+    val globalArchive = context.valueOrException(individual) :: currentArchive.toList
+    val newArchive = (NSGAII.elitism(globalArchive.toIndexedSeq, archiveSize)(dominance)).toArray
+    val steady = if(Ranking.samePareto(currentArchive, newArchive)) context.valueOrException(nbGenerationSteady) + 1 else 0
+    context + 
+    new Variable(archive, newArchive.toArray) + 
+    new Variable(nbGenerationSteady, steady) +
+    new Variable(generation, context.valueOrException(generation) + 1)
   }
   
   

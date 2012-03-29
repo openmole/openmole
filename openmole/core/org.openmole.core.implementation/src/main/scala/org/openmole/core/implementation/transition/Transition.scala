@@ -27,12 +27,16 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.model.transition.{ICondition, ITransition, ISlot}
 import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.misc.tools.service.LockRepository
+import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.ListBuffer
 
 /*object Transition {
-  val lockRepository = new LockRepository[(ISlot, ISubMoleExecution, ITicket)]
-}*/
+ val lockRepository = new LockRepository[(ISlot, ISubMoleExecution, ITicket)]
+ }*/
+object Transition extends Logger
+
+import Transition._
 
 class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition, val filtered: Set[String]) extends ITransition {
 
@@ -65,34 +69,30 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
   }
   
   protected def submitNextJobsIfReady(context: Buffer[IVariable[_]], ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
-    //val lockKey = (end, subMole, ticket)
-    //lockRepository.lock(lockKey)
-   // try {
-      import subMole.moleExecution
-      val registry = subMole.transitionRegistry
-      registry.register(this, ticket, context)
-      //println("submit next if ready")
-      if (nextTaskReady(ticket, subMole)) {   
-        //println("next is ready")
-        
-        val combinaison = end.capsule.inputDataChannels.toList.flatMap{_.consums(ticket, moleExecution)} ++ 
-                          end.transitions.toList.flatMap(registry.remove(_, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable)
+    import subMole.moleExecution
+    val registry = subMole.transitionRegistry
+    registry.register(this, ticket, context)
+    if (nextTaskReady(ticket, subMole)) {
+      logger.fine("Task " + end.capsule + " is ready to submit.")
+      val combinaison = end.capsule.inputDataChannels.toList.flatMap{_.consums(ticket, moleExecution)} ++ 
+      end.transitions.toList.flatMap(registry.remove(_, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable)
                         
-        val newTicket = 
-          if (end.capsule.intputSlots.size <= 1) ticket 
-          else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
+      val newTicket = 
+        if (end.capsule.intputSlots.size <= 1) ticket 
+      else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
 
-        val toAggregate = combinaison.groupBy(_.prototype.name)
+      val toAggregate = combinaison.groupBy(_.prototype.name)
       
-        val toArrayManifests = Map.empty[String, Manifest[_]] ++ computeManifests(end).filter(_.toArray).map(ct => ct.name -> ct.manifest)
-        val newContext = aggregate(end.capsule.inputs, toArrayManifests, combinaison)
-        subMole.submit(end.capsule, newContext, newTicket)
-      }
-  //  } finally lockRepository.unlock(lockKey)
+      val toArrayManifests = Map.empty[String, Manifest[_]] ++ computeManifests(end).filter(_.toArray).map(ct => ct.name -> ct.manifest)
+      val newContext = aggregate(end.capsule.inputs, toArrayManifests, combinaison)
+      subMole.submit(end.capsule, newContext, newTicket)
+    }
   }
 
-  override def perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) =
+  override def perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {
+    logger.fine("Crossing transition " + this)
     if (isConditionTrue(context)) _perform(context -- filtered, ticket, subMole)
+  }
 
   override def isConditionTrue(context: IContext): Boolean = condition.evaluate(context)
 
@@ -100,4 +100,6 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
   
   protected def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = submitNextJobsIfReady(ListBuffer() ++ context, ticket, subMole)
 
+  override def toString = "Transition from " + start + " to " + end
+  
 }

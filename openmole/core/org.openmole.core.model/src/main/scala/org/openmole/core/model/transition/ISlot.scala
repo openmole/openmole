@@ -44,8 +44,8 @@ trait ISlot {
    *
    * @param transition the transition to unplug
    */
-  def -=(transition: ITransition): this.type
-  def remove(transition: ITransition): this.type = { -=(transition)}
+  //def -=(transition: ITransition): this.type
+  //def remove(transition: ITransition): this.type = { -=(transition)}
   
   /**
    *

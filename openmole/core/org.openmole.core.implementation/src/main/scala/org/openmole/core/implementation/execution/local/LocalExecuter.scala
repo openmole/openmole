@@ -47,6 +47,8 @@ class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
 
         for (moleJob <- job.moleJobs) {
           if (moleJob.state != State.CANCELED) {
+            logger.fine("Executing " + moleJob.task)
+            
             if (classOf[IMoleTask].isAssignableFrom(moleJob.task.getClass)) jobGoneIdle
             moleJob.perform
             

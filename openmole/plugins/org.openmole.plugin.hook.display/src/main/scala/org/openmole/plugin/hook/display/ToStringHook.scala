@@ -38,9 +38,10 @@ class ToStringHook(execution: IMoleExecution, capsule: ICapsule, out: PrintStrea
     import moleJob.context
     
     prototypes.map(p => p -> context.variable(p)) foreach {
-      case(prototype, option) => option match {
+      case(prototype, option) => 
+        option match {
           case Some(v) => out.println(prototype.name + " = " + (if(v.value == null) "null" else v.value.prettify))
-          case None => throw new UserBadDataError("No variable " + prototype + " found.")
+          case None => out.println(prototype.name + " variable not found.")
         }
     }
   }

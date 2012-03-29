@@ -24,9 +24,10 @@ import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 
-class ScalingTask(name: String, genome: IPrototype[GAGenome]) extends Task(name) {
+class ScalingGenomeTask[T <: GAGenome](name: String, genome: IPrototype[T]) extends Task(name) {
 
   addInput(genome)
+  addOutput(genome)
   
   var scaled: List[(IPrototype[Double], Double, Double)] = Nil
   
@@ -35,10 +36,10 @@ class ScalingTask(name: String, genome: IPrototype[GAGenome]) extends Task(name)
     addOutput(p)
   }
   
-  override def process(context: IContext) = 
+  override def process(context: IContext) = {
     context ++ 
-      scaled.reverse.zipWithIndex.zip(context.valueOrException(genome).values).map {
-        case(((p, min, max), i), g) => new Variable(p, g.scale(min, max))
+      scaled.reverse.zip(context.valueOrException(genome).values).map {
+        case((p, min, max), g) => new Variable(p, g.scale(min, max))
       }
-
+  }
 }
