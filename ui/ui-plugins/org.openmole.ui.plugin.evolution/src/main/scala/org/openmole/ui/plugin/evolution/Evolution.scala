@@ -117,7 +117,7 @@ object Evolution {
       archiveSize
     )
     
-    val elitismCaps = new MasterCapsule(elitismTask, archivePrototype, steadySinceProto)
+    val elitismCaps = new MasterCapsule(elitismTask, archivePrototype, steadySinceProto, generationProto)
     
     val scalingParetoTask = new ScalingParetoTask("scalingPareto", archivePrototype)
     scaling.scales.foreach { 
