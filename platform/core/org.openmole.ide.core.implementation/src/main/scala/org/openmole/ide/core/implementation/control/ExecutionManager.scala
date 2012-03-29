@@ -18,6 +18,7 @@ import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 import org.openide.awt.StatusDisplayer
 import org.openide.util.Lookup
+import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.model.execution.IEnvironment
@@ -110,6 +111,9 @@ class ExecutionManager(manager : IMoleSceneManager,
     resizeWeight = 0.6
   }
   
+  var downloads = (0,0)
+  var uploads = (0,0)
+  
   System.setOut(new PrintStream(logTextArea.toStream))
   System.setErr(new PrintStream(logTextArea.toStream))
   
@@ -145,6 +149,15 @@ class ExecutionManager(manager : IMoleSceneManager,
       EventDispatcher.listen(moleExecution,new JobSatusListener(this),classOf[IMoleExecution.OneJobStatusChanged])
       EventDispatcher.listen(moleExecution,new JobCreatedListener(this),classOf[IMoleExecution.OneJobSubmitted])
       EventDispatcher.listen(moleExecution,new ExecutionExceptionListener(this),classOf[IMoleExecution.ExceptionRaised])
+      environments.foreach{ e=> e._1 match {
+          case be : BatchEnvironment =>
+            EventDispatcher.listen(be, new UploadFileListener(this),classOf[BatchEnvironment.BeginUpload])
+            EventDispatcher.listen(be, new UploadFileListener(this),classOf[BatchEnvironment.EndUpload])
+            EventDispatcher.listen(be, new UploadFileListener(this),classOf[BatchEnvironment.BeginDownload])
+            EventDispatcher.listen(be, new UploadFileListener(this),classOf[BatchEnvironment.EndDownload])
+          case _ =>
+        }
+      }
       
       environments.foreach {
         case(env, _) => EventDispatcher.listen(env, new EnvironmentExceptionListener(this),classOf[IEnvironment.ExceptionRaised])
@@ -209,6 +222,9 @@ class ExecutionManager(manager : IMoleSceneManager,
     status.keys.foreach(k=>status(k)=new AtomicInteger)
     environments.values.foreach(env=>env._2.keys.foreach(k=> env._2(k) = new AtomicInteger))
   }
+    
+  def displayFileTransfer = 
+    StatusDisplayer.getDefault.setStatusText("Downloads : " + downloads._1 + " / " + downloads._2 + "  Uploads : " + uploads._1 + " / " + uploads._2)
     
   class AddHookRowAction(fui: IHookFactoryUI) extends Action(fui.toString){
     def apply = {
