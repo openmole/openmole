@@ -51,9 +51,9 @@ object Evolution {
   class Scaling {
     var scales = TreeMap.empty[String, (Double, Double)]
     def add(protoName: String, min: Double, max: Double): Unit = scales += (protoName) -> (min, max)
-    def add(proto: IPrototype[Double], min: Double, max: Double): Unit =  scale(proto.name, min, max)
-    def add(protoName: String, max: Double): Unit = scale(protoName, 0, max)
-    def add(proto: IPrototype[Double], max: Double): Unit = scale(proto.name, max)
+    def add(proto: IPrototype[Double], min: Double, max: Double): Unit =  add(proto.name, min, max)
+    def add(protoName: String, max: Double): Unit = add(protoName, 0, max)
+    def add(proto: IPrototype[Double], max: Double): Unit = add(proto.name, max)
   }
   
   class Objectives {
