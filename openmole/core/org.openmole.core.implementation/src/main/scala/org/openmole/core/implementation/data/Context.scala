@@ -24,6 +24,7 @@ object Context {
   
   lazy val empty = new Context(TreeMap.empty)
   
+  def apply(variables: IVariable[_]*): Context = apply(variables.toIterable)
   def apply(variables: Iterable[IVariable[_]]): Context = new Context(TreeMap.empty[String, IVariable[_]] ++ variables.map{v => v.prototype.name -> v})
   def apply(context: IContext, variables: java.lang.Iterable[IVariable[_]]) = {
     import collection.JavaConversions._

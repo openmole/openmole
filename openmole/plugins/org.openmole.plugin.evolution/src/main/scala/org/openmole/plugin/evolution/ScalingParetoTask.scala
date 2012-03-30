@@ -20,6 +20,7 @@ package org.openmole.plugin.evolution
 import fr.iscpif.mgo.Individual
 import fr.iscpif.mgo.ga.GAFitness
 import fr.iscpif.mgo.ga.GAGenome
+import org.openmole.core.implementation.data.Context._
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IContext
@@ -50,14 +51,11 @@ class ScalingParetoTask[I <: Individual[GAGenome, GAFitness] with Ranking](
   
   override def process(context: IContext) = {
     val pareto = Ranking.pareto[I](context.valueOrException(archivePrototype))
-    
-    context ++ 
-      scaled.reverse.zipWithIndex.map {
-        case((p, min, max), i) => new Variable(toArray(p), pareto.map{_.genome.values(i).scale(min, max)}.toArray)
-      } ++
-      objectives.reverse.zipWithIndex.map {
-        case(p, i) => new Variable(toArray(p), pareto.map{_.fitness.values(i)}.toArray)
-      }
+
+    (
+      scaled.reverse.zipWithIndex.map {  case((p, min, max), i) => new Variable(toArray(p), pareto.map{_.genome.values(i).scale(min, max) }.toArray) } ++
+      objectives.reverse.zipWithIndex.map { case(p, i) => new Variable(toArray(p), pareto.map{_.fitness.values(i)}.toArray) }
+    ).toContext
   }
   
 }

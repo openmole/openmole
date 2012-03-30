@@ -97,7 +97,7 @@ abstract class Task(val name: String) extends ITask {
    * @see org.openmole.core.processors.ITask#run(org.openmole.core.processors.ApplicativeContext)
    */
   override def perform(context: IContext) = {
-    try end(process(init(context)))
+    try end(context ++ process(init(context)))
     catch {
       case e => throw new InternalProcessingError(e, "Error in task " + name)
     }

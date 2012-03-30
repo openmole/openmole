@@ -25,6 +25,7 @@ import fr.iscpif.mgo.ga.domination.Dominant
 import fr.iscpif.mgo.ga.domination.StrictDominant
 import fr.iscpif.mgo.ga.selection.Distance
 import fr.iscpif.mgo.ga.selection.Ranking
+import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IContext
@@ -64,10 +65,8 @@ class NSGA2SteadyElitismTask[T <: GAGenome](
     val globalArchive = context.valueOrException(individual) :: currentArchive.toList
     val newArchive = (NSGAII.elitism(globalArchive.toIndexedSeq, archiveSize)(dominance)).toArray
     val steady = if(Ranking.samePareto(currentArchive, newArchive)) context.valueOrException(nbGenerationSteady) + 1 else 0
-    context + 
-    new Variable(archive, newArchive.toArray) + 
-    new Variable(nbGenerationSteady, steady) +
-    new Variable(generation, context.valueOrException(generation) + 1)
+
+    Context(new Variable(archive, newArchive.toArray), new Variable(nbGenerationSteady, steady), new Variable(generation, context.valueOrException(generation) + 1))
   }
   
   
