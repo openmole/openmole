@@ -35,10 +35,10 @@ class ToIndividualTask[T <: GAGenome](
   addInput(genome)
   addOutput(individual)
   
-  var objectives: List[IPrototype[Double]] = Nil
+  var objectives: List[(IPrototype[Double], Double)] = Nil
   
-  def objective(p: IPrototype[Double]) = {
-    objectives ::= p
+  def objective(p: IPrototype[Double], v: Double) = {
+    objectives ::= p -> v
     addInput(p)
   }
   
@@ -48,7 +48,9 @@ class ToIndividualTask[T <: GAGenome](
       new GAIndividual[T, GAFitness] {
         val genome = context.valueOrException(task.genome)
         val fitness =  new GAFitness {
-          val values = objectives.reverse.map{context.valueOrException(_)}.toIndexedSeq
+          val values = objectives.reverse.map{
+            case (o, v) => math.abs(context.valueOrException(o) - v)
+          }.toIndexedSeq
         }
       }
     )

@@ -20,6 +20,7 @@ package org.openmole.ui.plugin.evolution
 import fr.iscpif.mgo.Individual
 import fr.iscpif.mgo.ga.GAFitness
 import fr.iscpif.mgo.ga.algorithm.GAGenomeWithSigma
+import fr.iscpif.mgo.ga.domination.NonStrictDominant
 import fr.iscpif.mgo.ga.selection.Distance
 import fr.iscpif.mgo.ga.selection.Ranking
 import org.openmole.core.implementation.data.DataChannel
@@ -57,8 +58,8 @@ object Evolution {
   }
   
   class Objectives {
-    var objectives = List.empty[IPrototype[Double]]
-    def add(o: IPrototype[Double]) = objectives ::= o
+    var objectives = List.empty[(IPrototype[Double], Double)]
+    def add(o: IPrototype[Double], v: Double) = objectives ::= o -> v
   }
   
   trait NSGA2Sigma extends IPuzzleFirstAndLast {
@@ -103,7 +104,7 @@ object Evolution {
     
     val toIndividualTask = new ToIndividualTask("toIndividualTask", genomeWithSigmaPrototype, individualPrototype)
     objectives.objectives.reverse.foreach {
-      o => toIndividualTask.objective(o)
+      case (o, v) => toIndividualTask.objective(o, v)
     }
     
     val toIndividualCapsule = new Capsule(toIndividualTask)
@@ -126,7 +127,7 @@ object Evolution {
     }
     
     objectives.objectives.reverse.foreach {
-      o => scalingParetoTask.objective(o)
+      case(o, _) => scalingParetoTask.objective(o)
     }
     
     scalingParetoTask.addInput(steadySinceProto)
@@ -162,6 +163,7 @@ object Evolution {
     
     new DataChannel(scalingCaps, toIndividualCapsule, genomeWithSigmaPrototype)
     new DataChannel(elitismCaps, breedingCaps, archivePrototype)
+    
     new NSGA2Sigma {
       def first = explorationCapsule
       def last = endCapsule
