@@ -13,11 +13,12 @@
         <version>0.5-SNAPSHOT</version>
     </parent>
 
-    <artifactId>ui</artifactId>
+    <artifactId>openmole-ui-console</artifactId>
 
     <modules>
-	<module>openmole-ui-console</module>
-	<module>ui-plugins</module>
+        <module>org.openmole.ui.console</module>
+        <module>plugins</module>
+	<module>openmole-ui-console-package</module>
     </modules>
 
     <dependencies>
@@ -40,12 +41,13 @@
         </dependency>
     </dependencies>
 
+ 
     <!-- ************************************************************* -->
     <!-- *** Project Information ************************************* -->
     <!-- ************************************************************* -->
 
-    <name>${project.artifactId}</name>
-    <description>Command line UI for OpenMole</description>
+    <name>${project.artifactId} ${project.version}</name>
+    <description />
 
     <!-- ************************************************************* -->
     <!-- *** Build Settings ****************************************** -->
@@ -53,4 +55,36 @@
 
     <packaging>pom</packaging>
 
+    <!--build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <finalName>product/openmole-plugins</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <descriptors>
+                        <descriptor>src/main/assembly/plugins.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>assembly</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build-->
 </project>
+
+
+
+
+
+
+
+
+
+

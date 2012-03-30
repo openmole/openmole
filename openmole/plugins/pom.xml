@@ -54,8 +54,10 @@
         <module>org.openmole.plugin.sampling.filter</module>
 	<module>org.openmole.plugin.sampling.loader</module>
 	<module>org.openmole.plugin.instantrerun.filesystem</module>
-	<module>org.openmole.plugin.evolution</module>
-	<module>org.openmole.plugin.sensitivity</module>
+	<module>org.openmole.plugin.method.evolution</module>
+	<module>org.openmole.plugin.method.sensitivity</module>
+	<module>org.openmole.plugin.builder</module>
+	<module>org.openmole.plugin.builder.evolution</module>
     </modules>
 
     <!-- ************************************************************* -->
