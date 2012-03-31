@@ -38,6 +38,7 @@ import org.openmole.core.model.IPuzzleFirstAndLast
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
+import org.openmole.plugin.builder.Builder
 import org.openmole.plugin.method.evolution.NSGA2SteadyElitismTask
 import org.openmole.plugin.method.evolution.NSGA2SteadySigmaBreedTask
 import org.openmole.plugin.method.evolution.ScalingParetoTask
@@ -73,7 +74,7 @@ object Evolution {
   def objectives = new Objectives
   
   def nsga2SigmaSteady(
-    model: ICapsule,
+    model: IPuzzleFirstAndLast,
     scaling: Scaling,
     objectives: Objectives,
     populationSize: Int,
@@ -152,8 +153,8 @@ object Evolution {
     val endCapsule = new StrainerCapsule(endTask)
     
     new ExplorationTransition(explorationCapsule, scalingCaps)
-    new Transition(scalingCaps, model)
-    new Transition(model, toIndividualCapsule)
+    new Transition(scalingCaps, model.first)
+    new Transition(model.last, toIndividualCapsule)
     new Transition(toIndividualCapsule, elitismCaps)
     new Transition(elitismCaps, scalingParetoCapsule)
     new Transition(scalingParetoCapsule, breedingCaps)
@@ -174,5 +175,16 @@ object Evolution {
     }
   }
   
-      
+ 
+  def nsga2SigmaSteady(
+    model: ICapsule,
+    scaling: Scaling,
+    objectives: Objectives,
+    populationSize: Int,
+    archiveSize: Int,
+    maxGenerationsSteady: Int,
+    distributionIndex: Double
+  ): NSGA2Sigma = nsga2SigmaSteady(Builder.puzzle(model), scaling, objectives, populationSize, archiveSize, maxGenerationsSteady, distributionIndex)
+  
+  
 }
