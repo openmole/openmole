@@ -64,7 +64,6 @@
     <properties>
         <package.directory>${project.build.directory}/openmole</package.directory>
         <package.openmole.plugins.directory>${package.directory}/openmole-plugins/</package.openmole.plugins.directory>
-        <package.openmole.ui.plugins.directory>${package.directory}/openmole-plugins-ui/</package.openmole.ui.plugins.directory>
     </properties>
 
 
@@ -96,13 +95,6 @@
                                     <version>${project.version}</version>
                                     <type>tar.gz</type>
 				    <outputDirectory>${package.openmole.plugins.directory}</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.openmole.ui.console</groupId>
-                                    <artifactId>plugins-ui</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>tar.gz</type>
-				    <outputDirectory>${package.openmole.ui.plugins.directory}</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
