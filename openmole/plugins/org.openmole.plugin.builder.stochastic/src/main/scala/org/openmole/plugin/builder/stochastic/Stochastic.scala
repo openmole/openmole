@@ -39,7 +39,7 @@ object Stochastic {
 
   class Medians {
     var medians: List[(IPrototype[Double], IPrototype[Double], IPrototype[Double])] = Nil
-    def median(output: IPrototype[Double], median: IPrototype[Double], deviation: IPrototype[Double]) = 
+    def add(output: IPrototype[Double], median: IPrototype[Double], deviation: IPrototype[Double]) = 
       medians ::= (output, median, deviation)
   }
   
