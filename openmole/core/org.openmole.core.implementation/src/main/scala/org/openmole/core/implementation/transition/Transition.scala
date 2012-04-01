@@ -74,16 +74,19 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
     registry.register(this, ticket, context)
     if (nextTaskReady(ticket, subMole)) {
       logger.fine("Task " + end.capsule + " is ready to submit.")
-      val combinaison = end.capsule.inputDataChannels.toList.flatMap{_.consums(ticket, moleExecution)} ++ 
-      end.transitions.toList.flatMap(registry.remove(_, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable)
+      val combinaison = 
+        end.inputDataChannels.toList.flatMap{_.consums(ticket, moleExecution)} ++ 
+        end.transitions.toList.flatMap(registry.remove(_, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable)
                         
       val newTicket = 
         if (end.capsule.intputSlots.size <= 1) ticket 
-      else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
+        else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
 
       val toAggregate = combinaison.groupBy(_.prototype.name)
       
-      val toArrayManifests = Map.empty[String, Manifest[_]] ++ computeManifests(end).filter(_.toArray).map(ct => ct.name -> ct.manifest)
+      val toArrayManifests =
+        Map.empty[String, Manifest[_]] ++ computeManifests(end).filter(_.toArray).map(ct => ct.name -> ct.manifest)
+      
       val newContext = aggregate(end.capsule.inputs, toArrayManifests, combinaison)
       subMole.submit(end.capsule, newContext, newTicket)
     }

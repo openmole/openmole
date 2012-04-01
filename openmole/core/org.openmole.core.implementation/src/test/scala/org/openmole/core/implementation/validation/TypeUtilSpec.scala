@@ -101,7 +101,7 @@ class TypeUtilSpec extends FlatSpec with ShouldMatchers {
     new Transition(testC, noOPC)
     new AggregationTransition(noOPC, aggC)
     
-    new DataChannel(testC, aggC, i)
+    new DataChannel(testC, aggC)
     
     val m = TypeUtil.computeManifests(aggC.defaultInputSlot).head
     m.toArray should equal(true)             

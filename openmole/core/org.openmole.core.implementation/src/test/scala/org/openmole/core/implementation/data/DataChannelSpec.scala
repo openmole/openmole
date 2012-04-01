@@ -62,7 +62,7 @@ class DataChannelSpec extends FlatSpec with ShouldMatchers {
     new Transition(t1c, t2c)
     new Transition(t2c, t3c)
     
-    new DataChannel(t1c, t3c, p)
+    new DataChannel(t1c, t3c)
     
     new MoleExecution(new Mole(t1c)).start.waitUntilEnded
   }
@@ -99,7 +99,7 @@ class DataChannelSpec extends FlatSpec with ShouldMatchers {
     val twc = new Capsule(tw)
     val tc = new Capsule(t)
     
-    new DataChannel(twc, tc, j)
+    new DataChannel(twc, tc)
     
     new Transition(twc, exc)
     new ExplorationTransition(exc, tc)               
@@ -138,7 +138,7 @@ class DataChannelSpec extends FlatSpec with ShouldMatchers {
     val noOPC = new Capsule(noOP)
     val trc = new Capsule(tr)
     
-    new DataChannel(tc, trc, j)
+    new DataChannel(tc, trc)
     
     new ExplorationTransition(exc, tc)  
     new Transition(tc, noOPC)

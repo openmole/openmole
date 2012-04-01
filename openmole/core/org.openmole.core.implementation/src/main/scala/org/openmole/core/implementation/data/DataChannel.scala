@@ -18,6 +18,7 @@
 package org.openmole.core.implementation.data
 
 
+import org.openmole.core.model.transition.ISlot
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.implementation.tools.LevelComputing
 import org.openmole.core.model.mole.ICapsule
@@ -27,26 +28,45 @@ import org.openmole.core.model.mole.IMoleExecution
 import scala.collection.mutable.ListBuffer
 
 object DataChannel {
-  def levelDelta(dataChannel: IDataChannel): Int = LevelComputing.levelDelta(dataChannel.start, dataChannel.end)
+  def levelDelta(dataChannel: IDataChannel): Int = LevelComputing.levelDelta(dataChannel.start, dataChannel.end.capsule)
 }
 
-class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Set[String]) extends IDataChannel {
+class DataChannel(
+  val start: ICapsule,
+  val end:  ISlot, 
+  val filtered: Set[String]) extends IDataChannel {
 
   start.addOutputDataChannel(this)
   end.addInputDataChannel(this)
   
-  def this(start: ICapsule, end: ICapsule, head: String, variables: Array[String]) = 
+  def this(start: ICapsule, end: ISlot) = this(start, end, Set.empty[String])
+ 
+  def this(start: ICapsule, end: ICapsule) = this(start, end.defaultInputSlot, Set.empty[String])
+  
+  def this(start: ICapsule, end: ISlot, head: String, variables: Array[String] = Array.empty) = 
     this(start, end, (ListBuffer(head) ++ variables).toSet[String])
 
-  def this(start: ICapsule, end: ICapsule, head: IPrototype[_], variables: Array[IPrototype[_]]) =
+  def this(start: ICapsule, end: ISlot, head: IPrototype[_], variables: Array[IPrototype[_]]) =
     this(start, end, (ListBuffer(head) ++ variables).map( v => v.name).toSet)
+
+  def this(start: ICapsule, end: ISlot, head: IPrototype[_]) = this(start, end, head, Array.empty[IPrototype[_]])
+
+  def this(start: ICapsule, end: ISlot, dataset: IDataSet) = this(start, end, dataset.map( v => v.prototype.name ).toSet)
+   
+  
+  
+  def this(start: ICapsule, end: ICapsule, head: String, variables: Array[String]) = 
+    this(start, end.defaultInputSlot, (ListBuffer(head) ++ variables).toSet[String])
+
+  def this(start: ICapsule, end: ICapsule, head: IPrototype[_], variables: Array[IPrototype[_]]) =
+    this(start, end.defaultInputSlot, (ListBuffer(head) ++ variables).map( v => v.name).toSet)
 
   def this(start: ICapsule, end: ICapsule, head: IPrototype[_]) = this(start, end, head, Array.empty[IPrototype[_]])
 
-  def this(start: ICapsule, end: ICapsule, dataset: IDataSet) = this(start, end, dataset.map( v => v.prototype.name ).toSet)
+  def this(start: ICapsule, end: ICapsule, dataset: IDataSet) = this(start, end.defaultInputSlot, dataset.map( v => v.prototype.name ).toSet)
    
   override def consums(ticket: ITicket, moleExecution: IMoleExecution): Iterable[IVariable[_]] = moleExecution.synchronized {
-    val levelDelta = LevelComputing(moleExecution).levelDelta(start, end)
+    val levelDelta = LevelComputing(moleExecution).levelDelta(start, end.capsule)
     val dataChannelRegistry = moleExecution.dataChannelRegistry
     
     { if(levelDelta <= 0) dataChannelRegistry.remove(this, ticket).getOrElse(new ListBuffer[IVariable[_]])
@@ -60,10 +80,10 @@ class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Se
   }
 
   override def provides(fromContext: IContext, ticket: ITicket, moleExecution: IMoleExecution) = moleExecution.synchronized {
-    val levelDelta = LevelComputing(moleExecution).levelDelta(start, end)
+    val levelDelta = LevelComputing(moleExecution).levelDelta(start, end.capsule)
     val dataChannelRegistry = moleExecution.dataChannelRegistry
     if (levelDelta >= 0) {
-      val toContext = ListBuffer() ++ fromContext.filter(v => variableNames.contains(v.prototype.name))
+      val toContext = ListBuffer() ++ fromContext.filterNot(v => filtered.contains(v.prototype.name))
       dataChannelRegistry.register(this, ticket, toContext)
     } else {
       val workingOnTicket = (levelDelta until 0).foldLeft(ticket) {
@@ -71,12 +91,11 @@ class DataChannel(val start: ICapsule, val end:  ICapsule, val variableNames: Se
       }
         
       val toContext = dataChannelRegistry.getOrElseUpdate(this, workingOnTicket, new ListBuffer[IVariable[_]]) 
-      toContext ++= fromContext.filter(v => variableNames.contains(v.prototype.name))
+      toContext ++= fromContext.filterNot(v => filtered.contains(v.prototype.name))
     }  
     
   }
   
-  def data: Iterable[IData[_]] =
-    (for (d <- start.outputs ; if (variableNames.contains(d.prototype.name))) yield d)
+  def data = start.outputs.filterNot(d => filtered.contains(d.prototype.name))
     
 }

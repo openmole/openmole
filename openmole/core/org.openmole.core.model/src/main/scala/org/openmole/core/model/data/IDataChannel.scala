@@ -31,6 +31,7 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.ITask
+import org.openmole.core.model.transition.ISlot
 
 trait IDataChannel {
 
@@ -47,18 +48,18 @@ trait IDataChannel {
    *
    * Get the capsule to which the data channel ends.
    *
-   * @return the capsule to which the data channel ends.
+   * @return the slot to which the data channel ends.
    */
-  def end:  ICapsule
+  def end:  ISlot
 
 
   /**
    *
    * Get the names of the variable transported by this data channel.
    *
-   * @return the name of the variable transported by this data channel.
+   * @return the name of the variable not transported by this data channel.
    */
-  def variableNames: Iterable[String]
+  def filtered: Iterable[String]
 
    
   /**

@@ -67,7 +67,7 @@ object TypeUtil {
       }
     }
     
-    for(dc <- slot.capsule.inputDataChannels; d <- dc.data) {
+    for(dc <- slot.inputDataChannels; d <- dc.data) {
       varNames += d.prototype.name
       if(DataChannel.levelDelta(dc) >= 0) direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
       else toArray.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`

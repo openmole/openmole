@@ -17,6 +17,7 @@
 
 package org.openmole.core.model.transition
 
+import org.openmole.core.model.data.IDataChannel
 import org.openmole.core.model.mole.ICapsule
 
 trait ISlot {
@@ -64,4 +65,20 @@ trait ISlot {
    * @return the capsule this slot belongs to
    */
   def capsule: ICapsule
+  
+    
+  /**
+   * Get all data channels ending at this slot.
+   *
+   * @return all of data channels ending at this slot
+   */
+  def inputDataChannels: Iterable[IDataChannel]
+  
+  /**
+   * Add a datachannel to the input data channels of this slot.
+   *
+   * @param dataChannel the datachannel to plug
+   * @return the capsule itself
+   */
+  def addInputDataChannel(dataChannel: IDataChannel): this.type
 }

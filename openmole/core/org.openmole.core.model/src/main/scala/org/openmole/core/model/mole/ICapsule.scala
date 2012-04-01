@@ -56,13 +56,6 @@ trait ICapsule {
    * @return the output of the capsule
    */
   def outputs: IDataSet
-  
-  /**
-   * Get all data channels ending at this capsule.
-   *
-   * @return all of data channels ending at this capsule
-   */
-  def inputDataChannels: Iterable[IDataChannel]
 
   /**
    * Get all data channels starting from this capsule.
@@ -70,14 +63,6 @@ trait ICapsule {
    * @return all data channels starting from this capsule
    */
   def outputDataChannels: Iterable[IDataChannel]
-
-  /**
-   * Add a datachannel to the input data channels of this capsule.
-   *
-   * @param dataChannel the datachannel to plug
-   * @return the capsule itself
-   */
-  def addInputDataChannel(dataChannel: IDataChannel): this.type
 
   /**
    * Add a datachannel in output of this capsule.

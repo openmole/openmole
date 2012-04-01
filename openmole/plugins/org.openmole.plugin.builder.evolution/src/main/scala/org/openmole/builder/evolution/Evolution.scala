@@ -80,7 +80,8 @@ object Evolution {
     populationSize: Int,
     archiveSize: Int,
     maxGenerationsSteady: Int,
-    distributionIndex: Double
+    distributionIndex: Double,
+    toOutput: Array[IPrototype[_]]
   ): NSGA2Sigma = { 
     val genomeWithSigmaPrototype = new Prototype("genome", classOf[GAGenomeWithSigma])
     val individualPrototype = new Prototype("individual", classOf[Individual[GAGenomeWithSigma, GAFitness]])
@@ -90,6 +91,8 @@ object Evolution {
     val generationProto = new Prototype("generation", classOf[Int])
     
     val genomeSize = scaling.scales.size
+    
+    val firstCapsule = new StrainerCapsule(new EmptyTask("first"))
     
     val sampling = new SigmaGenomeSampling(genomeWithSigmaPrototype, genomeSize, populationSize)
     val explorationCapsule = new Capsule(new ExplorationTask("genomeExploration", sampling))
@@ -147,11 +150,12 @@ object Evolution {
       distributionIndex
     )
     
-    val breedingCaps = new Capsule(breedingTask)
+    val breedingCaps = new StrainerCapsule(breedingTask)
     
     val endTask = new EmptyTask("endTask")
     val endCapsule = new StrainerCapsule(endTask)
     
+    new Transition(firstCapsule, explorationCapsule)
     new ExplorationTransition(explorationCapsule, scalingCaps)
     new Transition(scalingCaps, model.first)
     new Transition(model.last, toIndividualCapsule)
@@ -161,11 +165,14 @@ object Evolution {
     new Transition(breedingCaps, new Slot(scalingCaps))
     new EndExplorationTransition("steadySince >= " + maxGenerationsSteady, scalingParetoCapsule, endCapsule)
     
-    new DataChannel(scalingCaps, toIndividualCapsule, genomeWithSigmaPrototype)
-    new DataChannel(elitismCaps, breedingCaps, archivePrototype)
+    new DataChannel(scalingCaps, toIndividualCapsule)
+    new DataChannel(elitismCaps, breedingCaps)
+
+    new DataChannel(firstCapsule, model.first)
+    new DataChannel(explorationCapsule, endCapsule)
     
     new NSGA2Sigma {
-      def first = explorationCapsule
+      def first = firstCapsule
       def last = endCapsule
       def elitismCapsule = elitismCaps
       def breedingCapsule = breedingCaps
@@ -183,8 +190,18 @@ object Evolution {
     populationSize: Int,
     archiveSize: Int,
     maxGenerationsSteady: Int,
-    distributionIndex: Double
-  ): NSGA2Sigma = nsga2SigmaSteady(Builder.puzzle(model), scaling, objectives, populationSize, archiveSize, maxGenerationsSteady, distributionIndex)
+    distributionIndex: Double,
+    toOutput: Array[IPrototype[_]]
+  ): NSGA2Sigma = 
+    nsga2SigmaSteady(
+      Builder.puzzle(model),
+      scaling,
+      objectives,
+      populationSize,
+      archiveSize,
+      maxGenerationsSteady,
+      distributionIndex,
+      toOutput)
   
   
 }

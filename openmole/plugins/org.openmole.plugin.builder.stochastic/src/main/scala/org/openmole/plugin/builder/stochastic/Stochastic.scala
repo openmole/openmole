@@ -26,12 +26,12 @@ import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.core.implementation.transition.AggregationTransition
 import org.openmole.core.implementation.transition.ExplorationTransition
 import org.openmole.core.implementation.transition.Transition
+import org.openmole.core.implementation.data.DataChannel
 import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.IPuzzleFirstAndLast
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.plugin.builder.Builder._
-import org.openmole.plugin.domain.distribution.SlicedUniformLongDistribution
 import org.openmole.plugin.task.stat.MedianAbsoluteDeviationTask
 import org.openmole.plugin.task.stat.MedianTask
 
@@ -48,12 +48,10 @@ object Stochastic {
   def medianAndDeviation(
     puzzle: IPuzzleFirstAndLast,
     replicationFactor: DiscreteFactor[_, _],
-    medians: Medians): IPuzzleFirstAndLast = {
-    
-    
+    medians: Medians
+  ): IPuzzleFirstAndLast = {
     val exploration = new ExplorationTask("replication", replicationFactor)
-                                         // new DiscreteFactor(seed, new SlicedUniformLongDistribution(nbReplications)))
-   
+    
     val explorationCapsule = new StrainerCapsule(exploration)
     
     val medianTask = new MedianTask("median")
@@ -77,13 +75,16 @@ object Stochastic {
     new Transition(medianCapsule, endCapsule)
     new Transition(medianAbsoluteDeviationCapsule, endCapsule)
   
+    new DataChannel(explorationCapsule, endCapsule)
+    
     new PuzzleFirstAndLast(explorationCapsule, endCapsule)
   }
   
   def medianAndDeviation(
     model: ICapsule,
     replicationFactor: DiscreteFactor[_, _],
-    medians: Medians): IPuzzleFirstAndLast = 
+    medians: Medians
+  ): IPuzzleFirstAndLast = 
       medianAndDeviation(puzzle(model), replicationFactor, medians)
   
 }

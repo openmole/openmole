@@ -48,7 +48,6 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
   private val _defaultInputSlot = new Slot(this)
   private val _outputTransitions = new ListBuffer[ITransition]
     
-  private val _inputDataChannels = new ListBuffer[IDataChannel]
   private val _outputDataChannels = new ListBuffer[IDataChannel]
 
   
@@ -71,12 +70,6 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
     this
   }
 
-  override def addInputDataChannel(dataChannel: IDataChannel): this.type = {
-    _inputDataChannels += dataChannel
-    this
-  }
-  
-  def inputDataChannels: Iterable[IDataChannel] = _inputDataChannels
   def outputDataChannels: Iterable[IDataChannel] = _outputDataChannels
     
   override def outputTransitions: Iterable[ITransition] = _outputTransitions
@@ -85,16 +78,6 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
     _outputDataChannels += dataChannel
     this
   }
-
-//  override def removeInputDataChannel(dataChannel: IDataChannel): this.type = {
-//    _inputDataChannels -= dataChannel
-//    this
-//  }
-//
-//  override def removeOutputDataChannel(dataChannel: IDataChannel): this.type = {
-//    _outputDataChannels -= dataChannel
-//    this
-//  }
 
   def addOutputTransition(transition: ITransition): this.type = {
     _outputTransitions += transition

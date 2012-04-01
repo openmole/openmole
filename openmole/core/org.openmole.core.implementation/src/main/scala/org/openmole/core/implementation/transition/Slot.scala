@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation.transition
 
+import org.openmole.core.model.data.IDataChannel
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.transition.ITransition
 import org.openmole.core.model.transition.ISlot
@@ -29,16 +30,21 @@ class Slot(val capsule: ICapsule) extends ISlot {
   capsule.addInputSlot(this)
   
   private val _transitions = new ListBuffer[ITransition]
-
+  private val _inputDataChannels = new ListBuffer[IDataChannel]
+  
   override def +=(transition: ITransition) = {
     _transitions += transition
     this
   }
 
-//  override def -=(transition: ITransition) = {
-//    _transitions -= transition
-//    this
-//  }
+
+  override def addInputDataChannel(dataChannel: IDataChannel): this.type = {
+    _inputDataChannels += dataChannel
+    this
+  }
+  
+  
+  override def inputDataChannels: Iterable[IDataChannel] = _inputDataChannels
 
   override def transitions: Iterable[ITransition] =  _transitions
     

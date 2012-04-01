@@ -53,15 +53,8 @@ trait IMoleExecution {
   
   def finished: Boolean
 
-  //def submit(moleJob: IMoleJob, capsule: ICapsule, subMole: ISubMoleExecution, ticket: ITicket)
-  //def submitToEnvironment(job: IJob, capsule: ICapsule)
-
   def mole: IMole
 
-  //def rootTicket: ITicket
-  
-  //def nextJobId: MoleJobId
-  
   def dataChannelRegistry: IRegistryWithTicket[IDataChannel, Buffer[IVariable[_]]]
 
   def moleJobs: Iterable[IMoleJob]
