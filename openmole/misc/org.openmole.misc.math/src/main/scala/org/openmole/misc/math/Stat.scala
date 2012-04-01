@@ -25,7 +25,7 @@ object Stat {
     if(size % 2 == 0) (sortedSerie(size / 2) + sortedSerie((size / 2) - 1)) / 2 else sortedSerie((size / 2))
   }
   
-  def absoluteMedianDeviation(serie: Iterable[Double]): Double = {
+  def medianAbsoluteDeviation(serie: Iterable[Double]): Double = {
     val m = median(serie)
     median(serie.map{_ - m})
   }

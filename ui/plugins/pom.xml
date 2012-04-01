@@ -127,7 +127,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.plugin.task.templatefilegenerator</artifactId>
+            <artifactId>org.openmole.plugin.task.stat</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
