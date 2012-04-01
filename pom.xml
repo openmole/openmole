@@ -99,13 +99,12 @@
         <lib.com.mrfeinberg.peasycam.version>0.8.3</lib.com.mrfeinberg.peasycam.version>
         <lib.org.junit.version>4.8.1</lib.org.junit.version>
         <lib.org.fusesource.jansi.version>1.2.1</lib.org.fusesource.jansi.version>
-        <lib.org.openmole.tools.distrng.version>1.0-SNAPSHOT</lib.org.openmole.tools.distrng.version>
         <lib.org.nuiton.thirdparty.rengine.version>0.6-0</lib.org.nuiton.thirdparty.rengine.version>
         <lib.org.nuiton.thirdparty.rserve.version>0.6-0</lib.org.nuiton.thirdparty.rserve.version>
         <lib.org.nuiton.thirdparty.jri.version>0.7-0</lib.org.nuiton.thirdparty.jri.version>
         <lib.org.apache.sling.scripting.scala.script.version>0.9.0-SNAPSHOT</lib.org.apache.sling.scripting.scala.script.version>
         <lib.com.github.scopt.version>2.0.0</lib.com.github.scopt.version>
-        <lib.fr.iscpif.mgo.version>1.3</lib.fr.iscpif.mgo.version>
+        <lib.fr.iscpif.mgo.version>1.4</lib.fr.iscpif.mgo.version>
 	<lib.de.erichseifert.gral.version>0.9-SNAPSHOT</lib.de.erichseifert.gral.version>
 	<lib.runtime.jvm.version>7-u3-2.1</lib.runtime.jvm.version>
 	<plugin.org.scala-tools.maven-scala-plugin.version>2.15.2</plugin.org.scala-tools.maven-scala-plugin.version>
