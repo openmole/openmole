@@ -15,21 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.math
+package org.openmole.plugin.domain.distribution
 
-import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
+import java.util.Random
+import org.openmole.core.model.data.IContext
+import org.openmole.core.model.domain.IDomain
+import org.openmole.core.model.domain.IIterable
+import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.tools.service.Random._
 
-@RunWith(classOf[JUnitRunner])
-class StatSpec extends FlatSpec with ShouldMatchers  {
+class UniformLongDistribution (generator: Random) extends IDomain[Long] with IIterable[Long] {
+ 
+  def this(seed: Long) = this(buildSynchronized(seed))
+  def this() = this(Workspace.newRNG)
 
-  "The median" should "be correct" in {
-    Stat.median(List(1.,7,6,9,9)) should equal (7)
-    Stat.median(List(1., 1,1,1)) should equal (1)
-    Stat.median(List(1., 2, 3, 4)) should equal (2.5)
-    Stat.medianAbsoluteDeviation(List(1., 1, 2, 2, 4, 6, 9)) should equal (1)
-  }
+  override def iterator(context: IContext): Iterator[Long] = 
+    Iterator.continually { generator.nextLong }
   
 }

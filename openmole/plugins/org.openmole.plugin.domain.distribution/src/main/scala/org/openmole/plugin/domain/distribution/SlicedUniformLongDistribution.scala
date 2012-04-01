@@ -15,21 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.math
+package org.openmole.plugin.domain.distribution
 
-import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
+import org.openmole.core.model.data.IContext
+import org.openmole.core.model.domain.IDomain
+import org.openmole.core.model.domain.IFinite
 
-@RunWith(classOf[JUnitRunner])
-class StatSpec extends FlatSpec with ShouldMatchers  {
+class SlicedUniformLongDistribution(domain: UniformLongDistribution, size: Int) extends IDomain[Long] with IFinite[Long] {
+    
+  def this(seed: Long, size: Int) = this(new UniformLongDistribution(seed), size)
+  def this(size: Int) = this(new UniformLongDistribution, size)
 
-  "The median" should "be correct" in {
-    Stat.median(List(1.,7,6,9,9)) should equal (7)
-    Stat.median(List(1., 1,1,1)) should equal (1)
-    Stat.median(List(1., 2, 3, 4)) should equal (2.5)
-    Stat.medianAbsoluteDeviation(List(1., 1, 2, 2, 4, 6, 9)) should equal (1)
-  }
-  
+  override def computeValues(context: IContext) = domain.iterator(context).take(size).toIterable
 }

@@ -27,7 +27,7 @@ object Stat {
   
   def medianAbsoluteDeviation(serie: Iterable[Double]): Double = {
     val m = median(serie)
-    median(serie.map{_ - m})
+    median(serie.map{v => math.abs(v - m)})
   }
     
   

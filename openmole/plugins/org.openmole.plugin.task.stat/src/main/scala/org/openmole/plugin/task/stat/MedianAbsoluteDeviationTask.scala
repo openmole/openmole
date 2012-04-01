@@ -26,16 +26,22 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IContext
 
 
-class AbsoluteMedianDeviationTask(
-  name: String,
-  seriePrototype: IPrototype[Array[Double]],
-  medianDeviation: IPrototype[Double]
-) extends Task(name) {
+class MedianAbsoluteDeviationTask(name: String) extends Task(name) {
 
+  var deviations: List[(IPrototype[Array[Double]], IPrototype[Double])] = Nil
 
-  override def process(context: IContext) =    
-    Context(new Variable(medianDeviation, Stat.medianAbsoluteDeviation(context.valueOrException(seriePrototype))))
- 
-    
+  def deviation(serie: IPrototype[Array[Double]], deviation: IPrototype[Double]) = {
+    addInput(serie)
+    addOutput(deviation)
+    deviations ::= (serie, deviation)
+  }
   
+  override def process(context: IContext) =    
+    Context(
+      deviations.map {
+        case(serie, deviation) => 
+          new Variable(deviation, Stat.medianAbsoluteDeviation(context.valueOrException(serie)))
+      }
+    )
+   
 }
