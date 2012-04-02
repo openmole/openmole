@@ -35,7 +35,12 @@
             </plugin>
         </plugins>
     </build>
-    <dependencies>        
+    <dependencies>    
+        <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>fr.in2p3.jsaga</artifactId>
+            <version>${project.version}</version>
+        </dependency>      
         <dependency>
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-netbeans-api-visual</artifactId>
@@ -85,6 +90,7 @@
         <module>org.openmole.ide.plugin.task.exploration</module>
         <module>org.openmole.ide.plugin.task.serialization</module>
         <module>org.openmole.ide.plugin.sampling.combine</module>
+        <!--module>org.openmole.ide.plugin.sampling.lhs</module-->
         <module>org.openmole.ide.plugin.sampling.csv</module>
         <module>org.openmole.ide.plugin.domain.range</module>
         <module>org.openmole.ide.plugin.domain.distribution</module>

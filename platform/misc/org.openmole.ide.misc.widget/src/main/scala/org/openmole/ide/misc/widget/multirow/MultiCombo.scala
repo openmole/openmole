@@ -18,15 +18,15 @@
 package org.openmole.ide.misc.widget.multirow
 
 import java.awt.Dimension
+import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import scala.swing.ComboBox
-import scala.swing.Panel
 
 object MultiCombo {
 
   class Factory[A] extends IRowWidgetFactory[ComboRowWidget[A]]{
-    def apply(row: ComboRowWidget[A], panel: Panel) = {
+    def apply(row: ComboRowWidget[A], panel: MyPanel) = {
       import row._
       new ComboRowWidget(comboContentA,selectedA,plus)
     }

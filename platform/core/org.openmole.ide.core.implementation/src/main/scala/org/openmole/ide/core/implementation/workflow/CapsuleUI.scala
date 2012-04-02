@@ -22,6 +22,7 @@ import java.awt.Point
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.implementation.data.CapsuleDataUI
+import org.openmole.ide.core.implementation.dataproxy.ProxyFreezer
 import org.openmole.ide.core.implementation.provider.CapsuleMenuProvider
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
@@ -68,10 +69,13 @@ class CapsuleUI(val scene: IMoleScene,
   
   def copy(sc: IMoleScene) = {
     var slotMapping = new HashMap[IInputSlotWidget,IInputSlotWidget]
-    val c = new CapsuleUI(sc,dataUI)
+    val c = new CapsuleUI(sc)
     islots.foreach(i=>slotMapping+=i->c.addInputSlot(false))
     dataUI.task match {
-      case Some(x : ITaskDataProxyUI) => c.encapsule(x)
+      case Some(x : ITaskDataProxyUI) => 
+        c.encapsule(ProxyFreezer.freeze(x))
+        if(dataUI.environment.isDefined) c.setEnvironment(ProxyFreezer.freeze(dataUI.environment))
+        if(dataUI.sampling.isDefined) c.setSampling(ProxyFreezer.freeze(dataUI.sampling))
       case _=>
     }
     (c,slotMapping)
@@ -86,7 +90,6 @@ class CapsuleUI(val scene: IMoleScene,
   }
   
   def decapsule = {
-    println("decapsule")
     dataUI.task = None
     removeChild(inputPrototypeWidget.get)
     removeChild(outputPrototypeWidget.get)
@@ -95,7 +98,6 @@ class CapsuleUI(val scene: IMoleScene,
   }
   
   def encapsule(dpu: ITaskDataProxyUI)= {
-    println("encapsule")
     setTask(dpu)
     inputPrototypeWidget = Some(PrototypeWidget.buildInput(scene, dpu))
     outputPrototypeWidget = Some(PrototypeWidget.buildOutput(scene, dpu))
@@ -119,7 +121,7 @@ class CapsuleUI(val scene: IMoleScene,
         environmentWidget = Some(new LinkedImageWidget(scene,x.dataUI.imagePath,TASK_CONTAINER_WIDTH - 10,TASK_CONTAINER_HEIGHT -3,
                                                        new Action("") {def apply = scene.displayPropertyPanel(x,EDIT)}))
         addChild(environmentWidget.get)
-      case None=> environmentWidget = None
+      case None => environmentWidget = None
     }
     scene.refresh
   }
@@ -148,7 +150,6 @@ class CapsuleUI(val scene: IMoleScene,
     dataUI.task match {
       case Some(x : ITaskDataProxyUI) => 
         val (protoOut,protoIn) = problems.partition{case (proto,problem)=> x.dataUI.prototypesIn.contains(proto)}
-        println("inputPrototypeWidget " + inputPrototypeWidget + " in " + x.dataUI.name)
         inputPrototypeWidget.get.updateErrors(protoIn.map{_._2}.mkString("\n"))
         outputPrototypeWidget.get.updateErrors(protoOut.map{_._2}.mkString("\n"))
       case _ =>

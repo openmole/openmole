@@ -48,7 +48,6 @@ class ExplorationTaskPanelUI (pud: ExplorationTaskDataUI) extends PluginPanel("w
   listenTo(`samplingComboBox`)
   samplingComboBox.selection.reactions += {
     case SelectionChanged(`samplingComboBox`)=> 
-   //   val proxy = Proxys.samplings.filter{s => s == samplingComboBox.selection.item}.head
       linkLabel.action = contentAction(samplingComboBox.selection.item) 
   }
   contents += linkLabel
@@ -59,7 +58,7 @@ class ExplorationTaskPanelUI (pud: ExplorationTaskDataUI) extends PluginPanel("w
   override def saveContent(name: String) = 
     new ExplorationTaskDataUI(name , Some(samplingComboBox.selection.item))
   
-  def comboContent: List[ISamplingDataProxyUI] = emptyProxy :: Proxys.sampling.toList
+  def comboContent: List[ISamplingDataProxyUI] = emptyProxy :: Proxys.samplings.toList
   
   def emptyProxy = new SamplingDataProxyUI(new EmptySamplingDataUI)
 }

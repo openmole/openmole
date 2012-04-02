@@ -17,13 +17,13 @@
 
 package org.openmole.ide.misc.widget.multirow
 
+import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
-import scala.swing.Panel
 import scala.swing.TextField
 
 object MultiTextField {
   class Factory extends IRowWidgetFactory[TextFieldRowWidget]{
-    def apply(row: TextFieldRowWidget, panel: Panel) = {
+    def apply(row: TextFieldRowWidget, panel: MyPanel) = {
       import row._
       new TextFieldRowWidget(initValue)
     }

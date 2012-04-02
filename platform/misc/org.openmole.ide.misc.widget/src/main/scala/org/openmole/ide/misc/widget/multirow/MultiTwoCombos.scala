@@ -17,17 +17,17 @@
 
 package org.openmole.ide.misc.widget.multirow
 
+import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget.Plus
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import scala.swing.ComboBox
 import scala.swing.Label
-import scala.swing.Panel
 
 object MultiTwoCombos {
   
   class Factory[A, B] extends IRowWidgetFactory[TwoCombosRowWidget[A,B]]{
-    def apply(row: TwoCombosRowWidget[A,B], panel: Panel) = {
+    def apply(row: TwoCombosRowWidget[A,B], panel: MyPanel) = {
       import row._
       new TwoCombosRowWidget(comboContentA,selectedA,comboContentB,selectedB, inBetweenString,plus)
       

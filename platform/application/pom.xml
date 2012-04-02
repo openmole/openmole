@@ -79,6 +79,11 @@
             <artifactId>org.openmole.ide.plugin.sampling.combine</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!--dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.ide.plugin.sampling.lhs</artifactId>
+            <version>${project.version}</version>
+        </dependency-->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.hook.display</artifactId>

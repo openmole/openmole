@@ -25,12 +25,14 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.serializer.KeyGenerator
 import org.openmole.ide.core.implementation.serializer.KeyRegistery
+import org.openmole.core.model.mole.IMole
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyFactory
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
+import org.openmole.misc.exception.UserBadDataError
 import scala.collection.JavaConversions._
 
 object CheckData {
@@ -48,8 +50,8 @@ object CheckData {
         capsuleMap.foreach{case(caps,capsUI) => 
             capsUI.dataUI.task match {
               case Some(x : ITaskDataProxyUI) => 
-              x.dataUI.implicitPrototypesIn = caps.inputs.filterNot{c=> prototypeMap.containsKey(c.prototype)}.toList.map{dataProxyFactory}
-              x.dataUI.implicitPrototypesOut = caps.outputs.filterNot{c=> prototypeMap.containsKey(c.prototype)}.toList.map{dataProxyFactory}
+                x.dataUI.implicitPrototypesIn = caps.inputs.filterNot{c=> prototypeMap.containsKey(c.prototype)}.toList.map{dataProxyFactory}
+                x.dataUI.implicitPrototypesOut = caps.outputs.filterNot{c=> prototypeMap.containsKey(c.prototype)}.toList.map{dataProxyFactory}
               case _ =>
             }
         }
@@ -69,7 +71,17 @@ object CheckData {
             }
           case true => manager.capsules.values.foreach{_.updateErrors(List.empty)}
         }
-      case _ =>
+        Some(mole,capsuleMap,prototypeMap)
+      case _ => None
     }
   }
+  
+  def fullCheck(manager : IMoleSceneManager) = checkTopology(checkMole(manager))
+  
+  def checkTopology(moleBuild : Option[(IMole,Map[ICapsule,ICapsuleUI],Map[IPrototype[_],IPrototypeDataProxyUI])]) = {
+    println("checkTopo")
+    val st = Validation.topologyErrors(moleBuild.get._1).mkString("\n")
+    if (moleBuild.isDefined) st
+    if (! st.isEmpty) throw new UserBadDataError(st)
+    }
 }

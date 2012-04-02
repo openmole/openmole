@@ -18,16 +18,16 @@
 
 package org.openmole.ide.misc.widget.multirow
 
+import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget.Plus
 import scala.swing.ComboBox
-import scala.swing.Panel
 import scala.swing.TextField
 
 object MultiComboTextField {
   class Factory[A] extends IRowWidgetFactory[ComboTextFieldRowWidget[A]]{
-    def apply(row: ComboTextFieldRowWidget[A], panel: Panel) = {
+    def apply(row: ComboTextFieldRowWidget[A], panel: MyPanel) = {
       import row._
       new ComboTextFieldRowWidget(comboContentA,selectedA,"",plus)
     }

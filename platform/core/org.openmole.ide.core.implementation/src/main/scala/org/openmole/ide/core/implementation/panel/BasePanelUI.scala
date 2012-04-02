@@ -19,7 +19,6 @@ package org.openmole.ide.core.implementation.panel
 
 import java.awt.BorderLayout
 import java.awt.Color
-import java.awt.Dimension
 import javax.swing.BorderFactory
 import javax.swing.ImageIcon
 import org.openmole.ide.core.model.panel.IPanelUI
@@ -27,20 +26,22 @@ import org.openide.util.ImageUtilities
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.ImageLinkLabel
 import org.openmole.ide.misc.widget._
 import scala.swing.Action
 import scala.swing.Label
-import scala.swing.Panel
 import scala.swing.event.UIElementResized
 import scala.swing.TextField
+import org.openmole.ide.core.implementation.data.EmptyDataUIs
+import org.openmole.ide.core.implementation.workflow.ExecutionMoleScene
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.data.CheckData
 
 abstract class BasePanelUI(proxy: IDataProxyUI,
                            scene: IMoleScene,
                            mode : Value,
-                           borderColor : Color = new Color(200,200,200)) extends Panel {
+                           borderColor : Color = new Color(200,200,200)) extends MyPanel {
   peer.setLayout(new BorderLayout)
   val iconLabel = new Label{ icon = new ImageIcon(ImageUtilities.loadImage("img/empty.png"))}
   val nameTextField = new TextField(15) {text = proxy.dataUI.name; tooltip = Help.tooltip("Name of the concept instance")}
@@ -66,6 +67,7 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
       }
     }
   }
+  
   peer.add(mainPanel.peer,BorderLayout.CENTER)
   preferredSize.width = 300
   foreground = Color.white
@@ -78,7 +80,6 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
         scene.extraPropertyWidget.revalidate
         scene.refresh
   }
-  
   
   def hide = {
     baseSave

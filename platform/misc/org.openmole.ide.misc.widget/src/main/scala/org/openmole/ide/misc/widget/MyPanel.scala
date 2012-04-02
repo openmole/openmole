@@ -17,18 +17,27 @@
 
 package org.openmole.ide.misc.widget
 
-import jsyntaxpane.lexers.GroovyLexer
-import jsyntaxpane.DefaultSyntaxKit
-import scala.swing.EditorPane
-import scala.swing.ScrollPane
+import javax.swing.JComponent
+import javax.swing.JPanel
+import scala.swing._
 
-class GroovyEditor extends ScrollPane{
-  val editor = new EditorPane
-  viewportView = editor
-  editor.contentType = "text/groovy"
-  editor.editorKit = new DefaultSyntaxKit(new GroovyLexer)
-  
-  override def enabled_=(b : Boolean) : Unit =
-    editor.enabled = b
+class MyPanel extends Panel{
+  override def enabled_=(b : Boolean) : Unit = 
+    contents.foreach{ c => c match {
+        case x : MyPanel => 
+          println("mypanel " + x.toString)
+          x.enabled = b
+        case null =>
+        case _ => c.peer match {
+            case x : JPanel => 
+          println("jpanel " + x.toString)
+              c.enabled = b
+             // x.getComponents.foreach{_.setEnabled(b)}
+            case x : JComponent => 
+          println("jcomponent " + x.toString)
+              x.setEnabled(b)
+            case _ => 
+          }
+      }
+    }
 }
-

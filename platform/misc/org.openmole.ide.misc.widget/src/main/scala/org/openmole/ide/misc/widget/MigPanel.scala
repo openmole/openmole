@@ -22,7 +22,7 @@ import javax.swing.JPanel
 import net.miginfocom.swing.MigLayout
 import scala.collection.mutable._
 
-class MigPanel(constraints: String, colConst: String, rowConst: String) extends Panel with LayoutContainer {
+class MigPanel(constraints: String, colConst: String, rowConst: String) extends MyPanel with LayoutContainer {
 
   def this(constraints: String) = this(constraints, "", "")
 

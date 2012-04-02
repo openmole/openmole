@@ -17,8 +17,8 @@
 
 package org.openmole.ide.misc.widget.multirow
 
-import scala.swing.Panel
+import org.openmole.ide.misc.widget.MyPanel
 
 trait IRowWidgetFactory[T <: IRowWidget]{
-  def apply(row: T, panel: Panel): T
+  def apply(row: T, panel: MyPanel): T
 }

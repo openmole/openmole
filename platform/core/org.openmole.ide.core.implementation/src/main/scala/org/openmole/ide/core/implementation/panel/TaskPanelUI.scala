@@ -34,12 +34,12 @@ import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget.ImplicitLinkLabel
 import org.openmole.ide.misc.widget.ImageLinkLabel
+import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor
 import scala.swing.Action
 import scala.swing.Label
-import scala.swing.Panel
 import scala.swing.Separator
 import scala.collection.JavaConversions._
 
@@ -105,7 +105,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     mainLinksPanel.contents +=  new ImageLinkLabel("img/previous.png",new Action("") { def apply = properties })
   }
   
-  class IOPrototypePanel extends Panel{
+  class IOPrototypePanel extends MyPanel{
     peer.setLayout(new BorderLayout)
     val image = new ImageIcon(ImageUtilities.loadImage("img/eye.png"))
       

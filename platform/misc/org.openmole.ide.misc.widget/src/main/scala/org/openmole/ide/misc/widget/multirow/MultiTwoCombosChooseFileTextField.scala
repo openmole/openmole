@@ -21,18 +21,18 @@ package org.openmole.ide.misc.widget.multirow
 import javax.swing.ImageIcon
 import org.openide.util.ImageUtilities
 import org.openmole.ide.misc.widget.ChooseFileTextField
+import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget.Plus
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import scala.swing.Button
 import scala.swing.ComboBox
 import scala.swing.Label
-import scala.swing.Panel
 
 object MultiTwoCombosChooseFileTextField
 {
   class Factory[A, B] extends IRowWidgetFactory[TwoCombosChooseFileTextFieldRowWidget[A,B]]{
-    def apply(row: TwoCombosChooseFileTextFieldRowWidget[A,B], panel: Panel) = {
+    def apply(row: TwoCombosChooseFileTextFieldRowWidget[A,B], panel: MyPanel) = {
       import row._
       new TwoCombosChooseFileTextFieldRowWidget(comboContentA,
                                                 selectedA,

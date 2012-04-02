@@ -19,6 +19,8 @@ package org.openmole.ide.core.implementation.workflow
 
 import org.netbeans.api.visual.anchor.PointShape
 import org.netbeans.api.visual.widget.Widget
+import org.openmole.ide.core.model.dataproxy.IDataProxyUI
+import org.openmole.ide.core.model.panel.PanelMode
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.commons.Constants._
 import scala.collection.JavaConversions._
@@ -27,7 +29,38 @@ class ExecutionMoleScene(id : Int,
                          name : String) extends MoleScene(name,id){
 
   override val isBuildScene = false
+      
   
+  override def displayPropertyPanel(proxy: IDataProxyUI,
+                                    mode: PanelMode.Value) = {
+   // super.displayPropertyPanel(proxy, mode)
+    //FIXME : double class loading from netbeans
+//    println("overrided method  ..")
+//    currentPanel.contents.foreach{c=> c match {
+//        case x : BasePanelUI =>
+//          println(" ++ BPanelUI " + x)
+//          x.contents.foreach{_.enabled = false}
+//          println ("  +++ panelUI " + x.panelUI)
+////          x.panelUI match {
+////            case y : MigPanel => 
+////              println("Mig")
+////              y.enabled = false
+////            case y : MyPanel => 
+////              println("MyPanel")
+////              y.enabled = false
+////            case _ => 
+////              
+////              println("Any ")
+////          }
+//        case x : Component => x.enabled = false
+//      }
+//    }
+//    currentExtraPanel.contents.foreach(_.enabled = false)
+//    refresh
+  }
+  
+  def displayExtraPropertyPanel(dproxy: IDataProxyUI) = {}
+    
   def initCapsuleAdd(w: ICapsuleUI)= {
     obUI= Some(w.asInstanceOf[Widget])
     //  obUI.get.createActions(SELECT).addAction(MoleScene.selectAction)

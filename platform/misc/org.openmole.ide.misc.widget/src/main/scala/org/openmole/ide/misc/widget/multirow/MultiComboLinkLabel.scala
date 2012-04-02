@@ -20,17 +20,16 @@ package org.openmole.ide.misc.widget.multirow
 import javax.swing.Icon
 import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget.LinkLabel
+import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget.Plus
 import org.openmole.ide.misc.widget.multirow.RowWidget._
-import scala.swing.Action
 import scala.swing.ComboBox
-import scala.swing.Panel
 import scala.swing.event.SelectionChanged
 
 object MultiComboLinkLabel {
   class Factory[A] extends IRowWidgetFactory[ComboLinkLabelRowWidget[A]]{
-    def apply(row: ComboLinkLabelRowWidget[A], panel: Panel) = {
+    def apply(row: ComboLinkLabelRowWidget[A], panel: MyPanel) = {
       import row._
       new ComboLinkLabelRowWidget(comboContent,initValue,image ,plus)
     }

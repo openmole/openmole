@@ -20,14 +20,25 @@ package org.openmole.ide.core.implementation.workflow
 import java.awt.Point
 import org.netbeans.api.visual.anchor.PointShape
 import org.netbeans.api.visual.widget.Widget
+import org.openmole.ide.core.model.dataproxy.IDataProxyUI
+import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.model.panel.PanelMode
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.netbeans.api.visual.action.ActionFactory
 import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.panel.EnvironmentPanelUI
+import org.openmole.ide.core.implementation.panel.PrototypePanelUI
+import org.openmole.ide.core.implementation.panel.SamplingPanelUI
+import org.openmole.ide.core.implementation.panel.TaskPanelUI
 import org.openmole.ide.core.implementation.provider.TransitionMenuProvider
 import org.openmole.ide.core.model.commons.Constants._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
+import org.openmole.ide.core.model.panel.PanelMode._
 
 class BuildMoleScene(n: String = "",
                      id : Int = TopComponentsManager.countBuild.getAndIncrement) extends MoleScene(n,id) {
@@ -70,5 +81,35 @@ class BuildMoleScene(n: String = "",
     connectionWidget.getActions.addAction(createObjectHoverAction)
     connectionWidget.getActions.addAction(reconnectAction)
     connectionWidget
+  }
+  
+  def displayPropertyPanel(proxy: IDataProxyUI,
+                           mode: PanelMode.Value) = {
+    closePropertyPanel
+    currentPanel.contents.removeAll
+    proxy match {
+      case x: ITaskDataProxyUI=> currentPanel.contents += new TaskPanelUI(x,this,mode)
+      case x: IPrototypeDataProxyUI=> currentPanel.contents += new PrototypePanelUI(x,this,mode)
+      case x: IEnvironmentDataProxyUI=> currentPanel.contents += new EnvironmentPanelUI(x,this,mode)
+      case x: ISamplingDataProxyUI=> currentPanel.contents += new SamplingPanelUI(x,this,mode)
+      case _=>
+    }
+    propertyWidget.setPreferredLocation(new Point(getView.getBounds().x.toInt +20, 20))
+    propertyWidget.revalidate
+    propertyWidget.setVisible(true)
+    refresh
+  } 
+  
+  def displayExtraPropertyPanel(dproxy: IDataProxyUI) = {
+    currentExtraPanel.contents.removeAll
+    currentExtraPanel.contents.add(dproxy match {
+        case x: IPrototypeDataProxyUI=> new PrototypePanelUI(x,this,EXTRA)
+        case x: ISamplingDataProxyUI=> new SamplingPanelUI(x,this,EXTRA)
+      })
+    extraPropertyWidget.setVisible(true)
+    extraPropertyWidget.setPreferredLocation(new Point(propertyWidget.getBounds.x.toInt + currentPanel.bounds.width + 40,20))
+    
+    
+    refresh
   }
 }

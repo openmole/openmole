@@ -18,14 +18,14 @@
 package org.openmole.ide.misc.widget.multirow
 
 import org.openmole.ide.misc.widget.ChooseFileTextField
+import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import scala.swing.FileChooser._
-import scala.swing.Panel
 
 object  MultiChooseFileTextField {
   class Factory extends IRowWidgetFactory[ChooseFileTextFieldRowWidget]{
-    def apply(row: ChooseFileTextFieldRowWidget, panel: Panel) = {
+    def apply(row: ChooseFileTextFieldRowWidget, panel: MyPanel) = {
       import row._
       new ChooseFileTextFieldRowWidget(initValue,chooserTitle,chooserDescription,selectionMode,extensions)
     }

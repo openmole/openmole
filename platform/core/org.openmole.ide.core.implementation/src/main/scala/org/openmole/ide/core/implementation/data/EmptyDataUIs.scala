@@ -42,12 +42,12 @@ object EmptyDataUIs {
     def imagePath = "img/empty.png"
     def buildPanelUI = new EmptyPrototypePanelUI
     def displayTypedName = ""
-    
+  }
+  
     class EmptyPrototypePanelUI extends IPrototypePanelUI[Any] {
-      override def peer = this.peer
+      override def peer  = new PluginPanel("").peer
       def saveContent(name: String) = new EmptyPrototypeDataUI
     }
-  }
   
   class  EmptySamplingDataUI extends ISamplingDataUI  {
     def name = ""

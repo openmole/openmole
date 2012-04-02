@@ -21,18 +21,18 @@ import javax.swing.Icon
 import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.PrototypeGroovyTextFieldEditor
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget.Plus
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import scala.swing.ComboBox
-import scala.swing.Panel
 import scala.swing.event.SelectionChanged
 
 object MultiComboLinkLabelGroovyTextFieldEditor {
   class Factory[A] extends IRowWidgetFactory[ComboLinkLabelGroovyTextFieldEditorRowWidget[A]]{
-    def apply(row: ComboLinkLabelGroovyTextFieldEditorRowWidget[A], panel: Panel) = {
+    def apply(row: ComboLinkLabelGroovyTextFieldEditorRowWidget[A], panel: MyPanel) = {
       import row._
       new ComboLinkLabelGroovyTextFieldEditorRowWidget(comboContent,initValues,image,plus)
     }

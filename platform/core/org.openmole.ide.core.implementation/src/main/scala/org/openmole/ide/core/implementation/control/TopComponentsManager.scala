@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.openide.windows.TopComponent
 import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
-import org.openmole.ide.core.implementation.serializer.MoleMaker
+import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
@@ -93,7 +93,7 @@ object TopComponentsManager {
   def addExecutionTopComponent(mc : IMoleComponent): MoleSceneTopComponent = {
     mc match {
       case x:BuildMoleComponent=>
-        MoleMaker.buildMole(x.moleScene.manager) // test wether the mole can be built
+        CheckData.fullCheck(x.moleScene.manager)
         val clone = x.moleScene.copy
         clone.manager.name = { x.moleScene.manager.name+"_"+countExec.incrementAndGet}
         val ecomp = new ExecutionMoleComponent(clone)
