@@ -20,7 +20,6 @@ package org.openmole.ide.plugin.hook.display
 import org.openide.awt.StatusDisplayer
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
-import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.misc.widget.multirow.RowWidget._
@@ -29,13 +28,13 @@ import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos._
 import java.awt.Font
 import java.awt.Font._
+import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.PluginPanel
-import scala.swing.Panel
 import scala.swing.event.SelectionChanged
 
 object ToStringHookPanelUI{
   def rowFactory(hookpanel: ToStringHookPanelUI) = new Factory[IPrototype[_],ICapsule] {
-    override def apply(row: TwoCombosRowWidget[IPrototype[_],ICapsule], p: Panel) = {
+    override def apply(row: TwoCombosRowWidget[IPrototype[_],ICapsule], p: MyPanel) = {
       import row._
       val twocomborow: TwoCombosRowWidget[IPrototype[_],ICapsule] = 
         new TwoCombosRowWidget(comboContentA,selectedA,comboContentB,selectedB,inBetweenString,plus) {

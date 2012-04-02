@@ -25,19 +25,18 @@ import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.core.model.control.IExecutionManager
 import java.awt.Font
 import java.awt.Font._
+import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombosChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombosChooseFileTextField._
-import scala.swing.Label
-import scala.swing.Panel
 import scala.swing.event.ButtonClicked
 import scala.swing.event.SelectionChanged
 
 object CopyFileHookPanelUI{
   def rowFactory(hookpanel: CopyFileHookPanelUI) = new Factory[IPrototype[File],ICapsule] {
-    override def apply(row: TwoCombosChooseFileTextFieldRowWidget[IPrototype[File],ICapsule], p: Panel) = {
+    override def apply(row: TwoCombosChooseFileTextFieldRowWidget[IPrototype[File],ICapsule], p: MyPanel) = {
       import row._
       val twocombrow= new TwoCombosChooseFileTextFieldRowWidget(comboContentA,
                                                                 selectedA,
