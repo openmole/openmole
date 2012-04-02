@@ -23,9 +23,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver
 import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
-import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.dataproxy._
@@ -65,7 +63,6 @@ object GUISerializer {
     val in = xstream.createObjectInputStream(reader)
    
     Proxys.clearAll
-    FrozenProxys.clear
     TopComponentsManager.closeOpenedTopComponents
     
     try {

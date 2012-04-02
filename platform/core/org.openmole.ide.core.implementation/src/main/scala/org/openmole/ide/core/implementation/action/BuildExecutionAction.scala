@@ -17,7 +17,6 @@
 
 package org.openmole.ide.core.implementation.action
 
-import org.openmole.ide.core.implementation.dataproxy.FrozenProxys
 import org.openide.awt.StatusDisplayer
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.control.TopComponentsManager
@@ -28,8 +27,7 @@ class BuildExecutionAction(tc: MoleSceneTopComponent) extends Action(""){
   override def apply = {
     try {
       val clone = TopComponentsManager.addExecutionTopComponent(tc.getMoleComponent)
-        FrozenProxys.freeze(clone)
-        clone.requestActive
+      clone.requestActive
     } catch {
       case e: UserBadDataError=> StatusDisplayer.getDefault.setStatusText(e.message)
     }

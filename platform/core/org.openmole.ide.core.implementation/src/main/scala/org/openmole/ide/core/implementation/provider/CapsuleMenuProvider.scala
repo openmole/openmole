@@ -24,6 +24,7 @@ import javax.swing.JMenuItem
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.action._
 
@@ -34,30 +35,39 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
   
   def initMenu = {
     items.clear
-    val itStart = new JMenuItem("Define as starting capsule")
-    val itIS= new JMenuItem("Add an input slot")
-    val itRIS = new JMenuItem("Remove an input slot")
-    val itR = new JMenuItem("Remove capsule")
-    val menuEnv = new JMenu("Set environment")
-    val menuTask = new JMenu("Set task")
     
-    itIS.addActionListener(new AddInputSlotAction(capsule))
-    itR.addActionListener(new RemoveCapsuleAction(scene,capsule))
-    itStart.addActionListener(new DefineMoleStartAction(scene, capsule))
-    itRIS.addActionListener(new RemoveInputSlot(capsule))
-    Proxys.environment.foreach{env =>
+    scene match {
+      case x : BuildMoleScene =>
+        val itStart = new JMenuItem("Define as starting capsule")
+        val itIS= new JMenuItem("Add an input slot")
+        val itRIS = new JMenuItem("Remove an input slot")
+        val itR = new JMenuItem("Remove capsule")
+        val menuTask = new JMenu("Set task")
+    
+        itIS.addActionListener(new AddInputSlotAction(capsule))
+        itR.addActionListener(new RemoveCapsuleAction(scene,capsule))
+        itStart.addActionListener(new DefineMoleStartAction(scene, capsule))
+        itRIS.addActionListener(new RemoveInputSlot(capsule))
+    
+        Proxys.tasks.foreach{p=> menuTask.add(new JMenuItem(new Action(p.dataUI.name){
+                override def apply = {
+                  capsule.encapsule(p)
+                }}.peer))}
+        menuTask.insert(new JMenuItem(new Action("None"){
+              override def apply = capsule.decapsule}.peer),0)
+        items += (itIS,itRIS,itR,itStart,menuTask)
+      case _ =>
+    }
+    
+    val menuEnv = new JMenu("Set environment")
+    
+    Proxys.environments.foreach{env =>
       menuEnv.add(new JMenuItem(new Action(env.dataUI.name){
             override def apply = capsule.setEnvironment(Some(env))}.peer))}
     menuEnv.insert(new JMenuItem(new Action("None"){
           override def apply = capsule.setEnvironment(None)}.peer),0)
     
-    Proxys.tasks.foreach{p=> menuTask.add(new JMenuItem(new Action(p.dataUI.name){
-            override def apply = {
-              capsule.encapsule(p)
-            }}.peer))}
-    menuTask.insert(new JMenuItem(new Action("None"){
-          override def apply = capsule.decapsule}.peer),0)
-    items+= (itIS,itRIS,itR,itStart,menuTask,menuEnv)
+    items += menuEnv
   }
   
   def addTaskMenus= encapsulated= true

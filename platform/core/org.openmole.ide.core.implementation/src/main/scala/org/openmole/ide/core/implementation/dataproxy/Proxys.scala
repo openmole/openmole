@@ -18,10 +18,8 @@
 package org.openmole.ide.core.implementation.dataproxy
 
 import java.util.concurrent.atomic.AtomicInteger
-import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory._
-import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.data._
 import scala.collection.JavaConversions._
@@ -36,36 +34,6 @@ object Proxys {
   var prototypes = new HashSet[IPrototypeDataProxyUI]
   var samplings = new HashSet[ISamplingDataProxyUI]
   var environments = new HashSet[IEnvironmentDataProxyUI]
-      
-  def task = TopComponentsManager.currentMoleSceneTopComponent match {
-    case None => tasks.toSet
-    case _=> if (FrozenProxys.maps.contains(TopComponentsManager.currentMoleSceneTopComponent.get)) {
-        FrozenProxys.task(TopComponentsManager.currentMoleSceneTopComponent.get).toSet}
-      else tasks.toSet
-  }
-  
-  
-  def prototype= TopComponentsManager.currentMoleSceneTopComponent match {
-    case None => prototypes.toSet
-    case _=> if (FrozenProxys.maps.contains(TopComponentsManager.currentMoleSceneTopComponent.get)) {
-        FrozenProxys.prototype(TopComponentsManager.currentMoleSceneTopComponent.get).toSet}
-        else prototypes.toSet
-  }
-
-  
-  def sampling = TopComponentsManager.currentMoleSceneTopComponent match {
-    case None => samplings.toSet
-    case _=> if (FrozenProxys.maps.contains(TopComponentsManager.currentMoleSceneTopComponent.get)) {
-      FrozenProxys.sampling(TopComponentsManager.currentMoleSceneTopComponent.get).toSet}
-      else samplings.toSet
-  }
-      
-  def environment = TopComponentsManager.currentMoleSceneTopComponent match {
-    case None => environments.toSet
-    case _=> if (FrozenProxys.maps.contains(TopComponentsManager.currentMoleSceneTopComponent.get)) {
-      FrozenProxys.environment(TopComponentsManager.currentMoleSceneTopComponent.get).toSet}
-      else environments.toSet
-      }
   
   def filePrototypes: List[IPrototypeDataProxyUI] = prototypes.filter(_.dataUI.coreObject.`type`.erasure == classOf[File])
   .toList
@@ -73,7 +41,6 @@ object Proxys {
   def clearAll: Unit = {
     ConceptMenu.clearAllItems
     List(tasks,prototypes,environments,samplings).foreach{_.clear}
-    FrozenProxys.clear
   }
 } 
   
