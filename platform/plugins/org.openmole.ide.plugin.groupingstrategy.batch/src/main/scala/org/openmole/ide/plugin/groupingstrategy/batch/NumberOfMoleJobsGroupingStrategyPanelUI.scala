@@ -28,12 +28,12 @@ import java.awt.Font
 import java.awt.Font._
 import org.openmole.ide.core.model.panel.IGroupingStrategyPanelUI
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.PluginPanel
-import scala.swing.Panel
 
 object NumberOfMoleJobsGroupingStrategyPanelUI {
   def rowFactory(strategypanel: NumberOfMoleJobsGroupingStrategyPanelUI) = new Factory[ICapsule] {
-    override def apply(row: ComboTextFieldRowWidget[ICapsule], p: Panel) = {
+    override def apply(row: ComboTextFieldRowWidget[ICapsule], p: MyPanel) = {
       import row._
      
       val combotfrow: ComboTextFieldRowWidget[ICapsule] = 
