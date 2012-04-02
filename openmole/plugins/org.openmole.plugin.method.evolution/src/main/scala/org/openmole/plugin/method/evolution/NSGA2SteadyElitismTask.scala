@@ -24,6 +24,8 @@ import fr.iscpif.mgo.ga.algorithm.NSGAII
 import fr.iscpif.mgo.ga.domination.Dominant
 import fr.iscpif.mgo.ga.domination.StrictDominant
 import fr.iscpif.mgo.ga.selection.Distance
+import fr.iscpif.mgo.ga.selection.Rank
+import fr.iscpif.mgo.ga.selection.ParetoRank
 import fr.iscpif.mgo.ga.selection.Ranking
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.data.Variable
@@ -38,6 +40,7 @@ class NSGA2SteadyElitismTask[T <: GAGenome](
   nbGenerationSteady: IPrototype[Int],
   generation: IPrototype[Int],
   archiveSize: Int,
+  rank: Rank,
   dominance: Dominant) extends Task(name) {
 
   def this(
@@ -46,8 +49,17 @@ class NSGA2SteadyElitismTask[T <: GAGenome](
     archive: IPrototype[Array[Individual[T, GAFitness] with Ranking with Distance]],
     nbGenerationSteady: IPrototype[Int],
     generation: IPrototype[Int],
-    archiveSize: Int) = this(name, individual, archive, nbGenerationSteady, generation, archiveSize, new StrictDominant)
+    archiveSize: Int,
+    rank: Rank
+  ) = this(name, individual, archive, nbGenerationSteady, generation, archiveSize, rank, new StrictDominant)
   
+  def this(
+    name: String, 
+    individual: IPrototype[Individual[T, GAFitness]],
+    archive: IPrototype[Array[Individual[T, GAFitness] with Ranking with Distance]],
+    nbGenerationSteady: IPrototype[Int],
+    generation: IPrototype[Int],
+    archiveSize: Int) = this(name, individual, archive, nbGenerationSteady, generation, archiveSize, new ParetoRank, new StrictDominant)
   
   addInput(archive)
   addInput(individual)
@@ -63,8 +75,10 @@ class NSGA2SteadyElitismTask[T <: GAGenome](
   override def process(context: IContext) = {
     val currentArchive =  context.valueOrException(archive)
     val globalArchive = context.valueOrException(individual) :: currentArchive.toList
-    val newArchive = (NSGAII.elitism(globalArchive.toIndexedSeq, archiveSize)(dominance)).toArray
-    val steady = if(Ranking.samePareto(currentArchive, newArchive)) context.valueOrException(nbGenerationSteady) + 1 else 0
+    val newArchive = (NSGAII.elitism(globalArchive.toIndexedSeq, archiveSize, rank)(dominance)).toArray
+    
+    val steady = 
+      if(Ranking.sameFirstRanked(currentArchive, newArchive, dominance)) context.valueOrException(nbGenerationSteady) + 1 else 0
 
     Context(new Variable(archive, newArchive.toArray), new Variable(nbGenerationSteady, steady), new Variable(generation, context.valueOrException(generation) + 1))
   }

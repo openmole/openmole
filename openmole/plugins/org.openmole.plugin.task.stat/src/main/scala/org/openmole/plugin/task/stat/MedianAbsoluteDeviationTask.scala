@@ -16,32 +16,10 @@
  */
 package org.openmole.plugin.task.stat
 
-
 import org.openmole.misc.math.Stat
-import org.openmole.misc.tools.io.Prettifier._
-import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.task.Task
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.data.IContext
 
-
-class MedianAbsoluteDeviationTask(name: String) extends Task(name) {
-
-  var deviations: List[(IPrototype[Array[Double]], IPrototype[Double])] = Nil
-
-  def deviation(serie: IPrototype[Array[Double]], deviation: IPrototype[Double]) = {
-    addInput(serie)
-    addOutput(deviation)
-    deviations ::= (serie, deviation)
-  }
+class MedianAbsoluteDeviationTask(name: String) extends DoubleSequenceStatTask(name) {
   
-  override def process(context: IContext) =    
-    Context(
-      deviations.map {
-        case(serie, deviation) => 
-          new Variable(deviation, Stat.medianAbsoluteDeviation(context.valueOrException(serie)))
-      }
-    )
+  override def stat(seq: Array[Double]) = Stat.medianAbsoluteDeviation(seq)
    
 }

@@ -22,6 +22,9 @@ import fr.iscpif.mgo.ga.GAFitness
 import fr.iscpif.mgo.ga.algorithm.GAGenomeWithSigma
 import fr.iscpif.mgo.ga.domination.NonStrictDominant
 import fr.iscpif.mgo.ga.selection.Distance
+import fr.iscpif.mgo.ga.selection.Rank
+import fr.iscpif.mgo.ga.selection.ParetoRank
+import fr.iscpif.mgo.ga.selection.ParetoCrowdingRank
 import fr.iscpif.mgo.ga.selection.Ranking
 import org.openmole.core.implementation.data.DataChannel
 import org.openmole.core.implementation.data.Prototype
@@ -81,7 +84,7 @@ object Evolution {
     archiveSize: Int,
     maxGenerationsSteady: Int,
     distributionIndex: Double,
-    toOutput: Array[IPrototype[_]]
+    rank: Rank
   ): NSGA2Sigma = { 
     val genomeWithSigmaPrototype = new Prototype("genome", classOf[GAGenomeWithSigma])
     val individualPrototype = new Prototype("individual", classOf[Individual[GAGenomeWithSigma, GAFitness]])
@@ -118,7 +121,8 @@ object Evolution {
       archivePrototype, 
       steadySinceProto,
       generationProto,
-      archiveSize
+      archiveSize,
+      rank
     )
     
     val elitismCaps = new MasterCapsule(elitismTask, archivePrototype, steadySinceProto, generationProto)
@@ -158,7 +162,7 @@ object Evolution {
     new Transition(firstCapsule, explorationCapsule)
     new ExplorationTransition(explorationCapsule, scalingCaps)
     new Transition(scalingCaps, model.first)
-    new Transition(model.last, toIndividualCapsule)
+    new Transition(model.last, toIndividualCapsule, Array(genomeWithSigmaPrototype.name))
     new Transition(toIndividualCapsule, elitismCaps)
     new Transition(elitismCaps, scalingParetoCapsule)
     new Transition(scalingParetoCapsule, breedingCaps)
@@ -190,8 +194,7 @@ object Evolution {
     populationSize: Int,
     archiveSize: Int,
     maxGenerationsSteady: Int,
-    distributionIndex: Double,
-    toOutput: Array[IPrototype[_]]
+    distributionIndex: Double
   ): NSGA2Sigma = 
     nsga2SigmaSteady(
       Builder.puzzle(model),
@@ -200,8 +203,65 @@ object Evolution {
       populationSize,
       archiveSize,
       maxGenerationsSteady,
-      distributionIndex,
-      toOutput)
+      distributionIndex)
   
+  
+  def nsga2SigmaSteady(
+    model: IPuzzleFirstAndLast,
+    scaling: Scaling,
+    objectives: Objectives,
+    populationSize: Int,
+    archiveSize: Int,
+    maxGenerationsSteady: Int,
+    distributionIndex: Double
+  ): NSGA2Sigma = 
+   nsga2SigmaSteady(
+      model,
+      scaling,
+      objectives,
+      populationSize,
+      archiveSize,
+      maxGenerationsSteady,
+      distributionIndex,
+      new ParetoRank
+    )
+  
+  def nsga2DiversitySigmaSteady(
+    model: IPuzzleFirstAndLast,
+    scaling: Scaling,
+    objectives: Objectives,
+    populationSize: Int,
+    archiveSize: Int,
+    maxGenerationsSteady: Int,
+    distributionIndex: Double
+  ): NSGA2Sigma = 
+    nsga2SigmaSteady(
+      model,
+      scaling,
+      objectives,
+      populationSize,
+      archiveSize,
+      maxGenerationsSteady,
+      distributionIndex,
+      new ParetoCrowdingRank
+    )
+  
+  def nsga2DiversitySigmaSteady(
+    model: ICapsule,
+    scaling: Scaling,
+    objectives: Objectives,
+    populationSize: Int,
+    archiveSize: Int,
+    maxGenerationsSteady: Int,
+    distributionIndex: Double
+  ): NSGA2Sigma = 
+    nsga2DiversitySigmaSteady(
+      Builder.puzzle(model),
+      scaling,
+      objectives,
+      populationSize,
+      archiveSize,
+      maxGenerationsSteady,
+      distributionIndex)
   
 }

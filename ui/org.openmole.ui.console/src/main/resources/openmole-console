@@ -5,12 +5,12 @@ LOCATION=`dirname $0`
 
 cd $LOCATION
 
-MEM="512m"
+MEM="1G"
 
-if [ $# -gt 0 ]
-then
-	MEM=$1	
-fi
+#if [ $# -gt 0 ]
+#then
+#	MEM=$1	
+#fi
 
 rm -Rf ./configuration/org*
 rm ./configuration/*.log

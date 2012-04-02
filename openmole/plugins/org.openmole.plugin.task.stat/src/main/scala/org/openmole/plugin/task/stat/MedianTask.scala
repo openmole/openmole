@@ -24,22 +24,8 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IContext
 import org.openmole.misc.math.Stat
 
-class MedianTask(name: String) extends Task(name) {
+class MedianTask(name: String) extends DoubleSequenceStatTask(name) {
   
-  var medians: List[(IPrototype[Array[Double]], IPrototype[Double])] = Nil
-
-  def median(serie: IPrototype[Array[Double]], median: IPrototype[Double]) = {
-    addInput(serie)
-    addOutput(median)
-    medians ::= (serie, median)
-  }
+  override def stat(seq: Array[Double]) =  Stat.median(seq)
   
-  override def process(context: IContext) = 
-    Context(
-      medians.map{
-        case(serie, median) => new Variable(median, Stat.median(context.valueOrException(serie)))
-      }
-    )
-  
-
 }

@@ -50,7 +50,7 @@ class ScalingParetoTask[I <: Individual[GAGenome, GAFitness] with Ranking](
   }
   
   override def process(context: IContext) = {
-    val pareto = Ranking.pareto[I](context.valueOrException(archivePrototype))
+    val pareto = Ranking.firstRanked[I](context.valueOrException(archivePrototype))
 
     (
       scaled.reverse.zipWithIndex.map {  case((p, min, max), i) => new Variable(toArray(p), pareto.map{_.genome.values(i).scale(min, max) }.toArray) } ++

@@ -15,45 +15,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution
+package org.openmole.plugin.task.stat
 
-import fr.iscpif.mgo.Individual
-import fr.iscpif.mgo.ga.GAFitness
-import fr.iscpif.mgo.ga.GAFitness._
-import fr.iscpif.mgo.ga.GAGenome
-import fr.iscpif.mgo.ga.GAIndividual
+import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 
-class ToIndividualTask[T <: GAGenome](
-  name: String, 
-  genome: IPrototype[T], 
-  individual: IPrototype[Individual[T, GAFitness]]) extends Task(name) { task =>
-  
-  addInput(genome)
-  addOutput(individual)
-  
-  var objectives: List[(IPrototype[Double], Double)] = Nil
-  
-  def objective(p: IPrototype[Double], v: Double) = {
-    objectives ::= p -> v
-    addInput(p)
+abstract class DoubleSequenceStatTask(name: String) extends Task(name){
+
+  var sequences: List[(IPrototype[Array[Double]], IPrototype[Double])] = Nil
+
+  def add(sequence: IPrototype[Array[Double]], stat: IPrototype[Double]): this.type = {
+    addInput(sequence)
+    addOutput(stat)
+    sequences ::= (sequence, stat)
+    this
   }
   
+  def add(seqs: Iterable[(IPrototype[Array[Double]], IPrototype[Double])]): this.type = {
+    seqs.foreach{ case(sequence, stat) => add(sequence, stat) }
+    this
+  }
   override def process(context: IContext) = 
-    context + new Variable(
-      individual, 
-      new GAIndividual[T, GAFitness] {
-        val genome = context.valueOrException(task.genome)
-        val fitness =  new GAFitness {
-          val values = objectives.reverse.map {
-            case (o, v) => math.abs(context.valueOrException(o) - v)
-          }.toIndexedSeq
-        }
+    Context(
+      sequences.map{
+        case(sequence, statProto) => new Variable(statProto, stat(context.valueOrException(sequence)))
       }
     )
   
-  
+  def stat(seq: Array[Double]): Double
 }

@@ -31,9 +31,6 @@ import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.ListBuffer
 
-/*object Transition {
- val lockRepository = new LockRepository[(ISlot, ISubMoleExecution, ITicket)]
- }*/
 object Transition extends Logger
 
 import Transition._

@@ -27,42 +27,67 @@ import org.openmole.core.implementation.transition.AggregationTransition
 import org.openmole.core.implementation.transition.ExplorationTransition
 import org.openmole.core.implementation.transition.Transition
 import org.openmole.core.implementation.data.DataChannel
-import org.openmole.core.implementation.data.Prototype._
+import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.IPuzzleFirstAndLast
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.plugin.builder.Builder._
+import org.openmole.plugin.task.stat.AverageTask
+import org.openmole.plugin.task.stat.AverageTask
+import org.openmole.plugin.task.stat.MeanSquareErrorTask
 import org.openmole.plugin.task.stat.MedianAbsoluteDeviationTask
 import org.openmole.plugin.task.stat.MedianTask
+import org.openmole.plugin.task.stat.SumTask
 
 object Stochastic {
 
-  class Medians {
-    var medians: List[(IPrototype[Double], IPrototype[Double], IPrototype[Double])] = Nil
-    def add(output: IPrototype[Double], median: IPrototype[Double], deviation: IPrototype[Double]) = 
-      medians ::= (output, median, deviation)
+  class Statistics {
+    var medians: List[(IPrototype[Double], IPrototype[Double])] = Nil
+    var medianAbsoluteDeviations: List[(IPrototype[Double], IPrototype[Double])] = Nil
+    var averages: List[(IPrototype[Double], IPrototype[Double])] = Nil
+    var sums: List[(IPrototype[Double], IPrototype[Double])] = Nil
+    var mses: List[(IPrototype[Double], IPrototype[Double])] = Nil
+    
+    def median(output: IPrototype[Double], median: IPrototype[Double]) = medians ::= (output, median)
+    def medianAbsoluteDeviation(output: IPrototype[Double], deviation: IPrototype[Double]) = medianAbsoluteDeviations ::= (output, deviation)
+    def average(output: IPrototype[Double], average: IPrototype[Double]) = averages ::= (output, average)
+    def sum(output: IPrototype[Double], sum: IPrototype[Double]) = sums ::= (output, sum)
+    def meanSquareError(output: IPrototype[Double], mse: IPrototype[Double]) = mses ::= (output, mse)                                                                
   }
   
-  def medians = new Medians
+  def statistics = new Statistics
+  
+  private def toArray(x: List[(IPrototype[Double], IPrototype[Double])]) =
+    x.map { case(output, stat) => (Prototype.toArray(output), stat)}
   
   def medianAndDeviation(
     puzzle: IPuzzleFirstAndLast,
     replicationFactor: DiscreteFactor[_, _],
-    medians: Medians
+    statistics: Statistics
   ): IPuzzleFirstAndLast = {
     val exploration = new ExplorationTask("replication", replicationFactor)
     
     val explorationCapsule = new StrainerCapsule(exploration)
     
     val medianTask = new MedianTask("median")
-    medians.medians.foreach{ case (output, median, _) => medianTask.median(toArray(output), median) }
-    
+    medianTask.add(toArray(statistics.medians))
     val medianCapsule = new Capsule(medianTask)
     
     val medianAbsoluteDeviationTask = new MedianAbsoluteDeviationTask("medianAbsoluteDeviation")
-    medians.medians.foreach{ case (output, _, deviation) => medianAbsoluteDeviationTask.deviation(toArray(output), deviation) }
-    
+    medianAbsoluteDeviationTask.add(toArray(statistics.medianAbsoluteDeviations))
     val medianAbsoluteDeviationCapsule = new Capsule(medianAbsoluteDeviationTask)
+    
+    val averageTask = new AverageTask("average")
+    averageTask.add(toArray(statistics.averages))
+    val averageCapsule = new Capsule(averageTask)
+    
+    val sumTask = new SumTask("sum")
+    sumTask.add(toArray(statistics.sums))
+    val sumCapsule = new Capsule(sumTask)
+    
+    val mseTask = new MeanSquareErrorTask("meanSquareError")
+    mseTask.add(toArray(statistics.mses))
+    val mseCapsule = new Capsule(mseTask)
     
     val aggregationCapsule = new StrainerCapsule(new EmptyTask("aggregation"))
     
@@ -70,11 +95,19 @@ object Stochastic {
     
     new ExplorationTransition(explorationCapsule, puzzle.first)
     new AggregationTransition(puzzle.last, aggregationCapsule)
+    
     new Transition(aggregationCapsule, medianCapsule)
     new Transition(aggregationCapsule, medianAbsoluteDeviationCapsule)
+    new Transition(aggregationCapsule, averageCapsule)
+    new Transition(aggregationCapsule, sumCapsule)
+    new Transition(aggregationCapsule, mseCapsule)
+    
     new Transition(medianCapsule, endCapsule)
     new Transition(medianAbsoluteDeviationCapsule, endCapsule)
-  
+    new Transition(averageCapsule, endCapsule)
+    new Transition(sumCapsule, endCapsule)
+    new Transition(mseCapsule, endCapsule)
+
     new DataChannel(explorationCapsule, endCapsule)
     
     new PuzzleFirstAndLast(explorationCapsule, endCapsule)
@@ -83,8 +116,8 @@ object Stochastic {
   def medianAndDeviation(
     model: ICapsule,
     replicationFactor: DiscreteFactor[_, _],
-    medians: Medians
+    statistics: Statistics
   ): IPuzzleFirstAndLast = 
-      medianAndDeviation(puzzle(model), replicationFactor, medians)
+      medianAndDeviation(puzzle(model), replicationFactor, statistics)
   
 }

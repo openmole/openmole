@@ -23,7 +23,6 @@ import fr.iscpif.mgo.ga.GAGenome
 import fr.iscpif.mgo.ga.algorithm.GAGenomeWithSigma
 import fr.iscpif.mgo.ga.algorithm.GAGenomeWithSigmaFactory
 import fr.iscpif.mgo.ga.algorithm.NSGAII
-import fr.iscpif.mgo.ga.algorithm.SigmaNSGAII
 import fr.iscpif.mgo.ga.operators.crossover.SBXBoundedCrossover
 import fr.iscpif.mgo.ga.operators.mutation.CoEvolvingSigmaValuesMutation
 import fr.iscpif.mgo.ga.selection.BinaryTournamentNSGA2

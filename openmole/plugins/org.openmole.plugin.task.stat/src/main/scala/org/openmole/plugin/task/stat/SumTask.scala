@@ -15,25 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.math
+package org.openmole.plugin.task.stat
 
-object Stat {
-
-  def median(serie: Iterable[Double]): Double = {
-    val sortedSerie = serie.toArray.sorted
-    val size = sortedSerie.size
-    if(size % 2 == 0) (sortedSerie(size / 2) + sortedSerie((size / 2) - 1)) / 2 else sortedSerie((size / 2))
-  }
+class SumTask(name: String) extends DoubleSequenceStatTask(name) {
   
-  def medianAbsoluteDeviation(serie: Iterable[Double]): Double = {
-    val m = median(serie)
-    median(serie.map{v => math.abs(v - m)})
-  }
+  override def stat(seq: Array[Double]) = seq.sum
   
-  def average(serie: Iterable[Double]) = serie.sum / serie.size
-    
-  def meanSquareError(serie: Iterable[Double]) = {
-    val avg = average(serie)
-    average(serie.map{v => math.pow(v - avg, 2)})
-  }
 }
+
