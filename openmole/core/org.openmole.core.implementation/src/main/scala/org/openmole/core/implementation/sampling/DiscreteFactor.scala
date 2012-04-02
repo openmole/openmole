@@ -41,7 +41,7 @@ object DiscreteFactor {
 
 class DiscreteFactor[T, +D <: IDomain[T] with IIterable[T]](
   prototype: IPrototype[T],
-  domain: D) extends Factor[T, D](prototype, domain) with IDiscreteFactor[T, D] {
+  domain: D) extends Factor[T, D](prototype, domain) with IDiscreteFactor[T, D] with Sampling {
   
   override def prototypes = List(prototype)
   

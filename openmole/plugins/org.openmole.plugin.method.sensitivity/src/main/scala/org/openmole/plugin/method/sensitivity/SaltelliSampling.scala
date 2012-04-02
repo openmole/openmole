@@ -22,6 +22,7 @@ import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.service.Random._
 import java.util.Random
 import org.openmole.core.implementation.data.Variable
+import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
@@ -33,28 +34,38 @@ object SaltelliSampling {
   val aMatrixName = "a"
   val bMatrixName = "b"
   def cMatrixName(p: String) = "c" + p
+  
+  def extractValues(allValues: Array[Double], allNames: Array[String], name: String): Array[Double] = 
+    allValues zip allNames filter { case(_, n) => n == name } map { case(v, _) => v }
+  
+  def extractValues(allValues: Array[Double], allNames: Array[String], input: IPrototype[Double]): (Seq[Double], Seq[Double], Seq[Double]) = {
+    val a = extractValues(allValues, allNames, aMatrixName)
+    val b = extractValues(allValues, allNames, bMatrixName)
+    val c = extractValues(allValues, allNames, cMatrixName(input.name))
+    (a, b, c)      
+  }
+  
 }
 
 import SaltelliSampling._
 
-abstract class SaltelliSampling extends ISampling {
+abstract class SaltelliSampling extends Sampling {
 
-  def samples: Int
-  def factors: Seq[IFactor[Double, IDomain[Double] with IBounded[Double]]]
+  def factorsPrototypes: Seq[IPrototype[Double]] //Seq[IFactor[Double, IDomain[Double] with IBounded[Double]]]
   def matrixName: IPrototype[String]
   
-  override def prototypes = factors.map{_.prototype}
+  override def prototypes = matrixName :: factorsPrototypes.toList 
   
-  def generateMatrix(context: IContext): Iterable[Iterable[Double]]
+  def a(context: IContext): Iterable[Iterable[Double]]
+  def b(context: IContext): Iterable[Iterable[Double]]
   
   override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = {
 
-    val a = generateMatrix(context)
-    val b = generateMatrix(context)
-
+    val a = this.a(context)
+    val b = this.b(context)
 
     val cMatrix = 
-      prototypes.zipWithIndex.flatMap {
+      factorsPrototypes.zipWithIndex.flatMap {
         case(p, i) => toVariables(buildC(i, a, b), cMatrixName(p.name)) 
       }
     
@@ -63,7 +74,7 @@ abstract class SaltelliSampling extends ISampling {
   
   def toVariables(matrix: Iterable[Iterable[Double]], m: String): List[Iterable[IVariable[_]]] = 
       matrix.map {
-        l => new Variable(matrixName, m) :: (l zip factors map {  case(v, f) => new Variable(f.prototype, v) }).toList
+        l => new Variable(matrixName, m) :: (l zip factorsPrototypes map {  case(v, f) => new Variable(f, v) }).toList
       }.toList
   
   def buildC(

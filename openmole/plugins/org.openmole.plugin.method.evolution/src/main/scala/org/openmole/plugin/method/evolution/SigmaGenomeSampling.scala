@@ -21,12 +21,12 @@ import fr.iscpif.mgo.ga.algorithm.GAGenomeWithSigma
 import fr.iscpif.mgo.ga.algorithm.GAGenomeWithSigmaFactory
 import java.util.Random
 import org.openmole.core.implementation.data.Variable
+import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.sampling.ISampling
 import org.openmole.misc.workspace.Workspace
 
-class SigmaGenomeSampling(genome: IPrototype[GAGenomeWithSigma], genomeSize: Int, nbGenome: Int, generator: Random) extends ISampling {
+class SigmaGenomeSampling(genome: IPrototype[GAGenomeWithSigma], genomeSize: Int, nbGenome: Int, generator: Random) extends Sampling {
   
   def this(genome: IPrototype[GAGenomeWithSigma], genomeSize: Int, nbGenome: Int) = this(genome, genomeSize, nbGenome, Workspace.newRNG)
   

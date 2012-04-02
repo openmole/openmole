@@ -43,35 +43,33 @@ class FirstOrderSensitivityTask(name: String, matrixName: IPrototype[String]) ex
     addInput(toArray(p))
   }
   
-  override def process(context: IContext): IContext = 
+  override def process(context: IContext): IContext = {
+    val matrixNames = context.valueOrException(toArray(matrixName))
+    
     modelInput.map {
       input =>
-      val matrixNames = context.valueOrException(toArray(matrixName))
-        
+
       val sensitivity = 
         modelOutput.map {
-          o => computeSensitivity(matrixNames, context.valueOrException(toArray(o)), input)
+          o => computeSensitivity(context.valueOrException(toArray(o)), matrixNames, input)
         }.toArray
       new Variable(toArray(input), sensitivity)
     }.toContext
- 
+  }
   
-  def computeSensitivity(allNames: Array[String], allOutputValues: Array[Double], input: IPrototype[Double]) = {
-    val outputCValues = extractValues(allOutputValues, allNames, cMatrixName(input.name))
-    val outputAValues = extractValues(allOutputValues, allNames, aMatrixName)
-    val outputBValues = extractValues(allOutputValues, allNames, bMatrixName)
-    val n = outputAValues.size
+  def computeSensitivity(allValues: Array[Double], allNames: Array[String], input: IPrototype[Double]) = {
+    val (a, b, c) = extractValues(allValues, allNames, input)
+    val n = a.size
     
-    val axcAvg = (outputAValues zip outputCValues map { case (a, c) => a * c } sum) / n
-    val g0 = (outputAValues zip outputBValues map { case (a, b) => a * b } sum) / n
-    val axaAvg = (outputAValues  map { a => a * a } sum) / n
-    val f0 = (outputAValues sum) / n
+    val axcAvg = (a zip c map { case (a, c) => a * c } sum) / n
+    val g0 = (a zip b map { case (a, b) => a * b } sum) / n
+    val axaAvg = (a  map { a => a * a } sum) / n
+    val f0 = (a sum) / n
     
     (axcAvg - g0) / (axaAvg - math.pow(f0, 2))
   }
     
   
-  def extractValues(allValues: Array[Double], allNames: Array[String], name: String): Array[Double] = 
-    allValues zip allNames filter { case(_, n) => n == name } map { case(v, _) => v }
+
   
 }

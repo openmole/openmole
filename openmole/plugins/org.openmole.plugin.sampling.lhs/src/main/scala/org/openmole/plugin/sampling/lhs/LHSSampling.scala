@@ -22,6 +22,7 @@ import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.service.Random._
 import java.util.Random
 import org.openmole.core.implementation.data.Variable
+import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.domain.IDomain
@@ -29,7 +30,7 @@ import org.openmole.core.model.domain.IBounded
 import org.openmole.core.model.sampling.IFactor
 import org.openmole.misc.workspace.Workspace
 
-class LHSSampling(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]], rng: Random) extends ISampling {
+class LHSSampling(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]], rng: Random) extends Sampling {
 
   def this(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]], seed: Long) = this(samples, factors, buildSynchronized(seed))
   def this(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]]) = this(samples, factors, Workspace.newRNG)

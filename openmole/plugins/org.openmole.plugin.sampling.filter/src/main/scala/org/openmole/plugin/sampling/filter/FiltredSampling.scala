@@ -26,6 +26,7 @@ class FiltredSampling(sampling: ISampling, filters: Array[IFilter]) extends ISam
 
   def this(sampling: ISampling, filters: IFilter*) = this(sampling, filters.toArray)
   
+  override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
   
   override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 

@@ -25,7 +25,7 @@ import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.task.IExplorationTask
 import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.implementation.data.Variable
-import org.openmole.core.model.data.DataModeMask._
+import org.openmole.core.model.data.DataModeMask
 import org.openmole.misc.exception.UserBadDataError
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ArrayBuffer
@@ -36,7 +36,8 @@ object ExplorationTask {
 
 class ExplorationTask(name: String, val sampling: ISampling) extends Task(name) with IExplorationTask {
 
-  sampling.prototypes.foreach{f => addOutput(new Data(toArray(f), explore))}
+  sampling.inputs.foreach{addInput}
+  sampling.prototypes.foreach{ p => addOutput(new Data(toArray(p), DataModeMask.explore)) }
   
   //If input prototype as the same name as the output it is erased
   override protected def process(context: IContext) = {

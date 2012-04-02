@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.sampling.combine
 
+import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.sampling.IFactor
@@ -31,7 +32,8 @@ class Zip(samplings: Iterable[ISampling]) extends ISampling {
   def this(samplings: ISampling*) = this(samplings)
   def this(head: ISampling, samplings: Array[ISampling]) = this(List(head) ++ samplings) 
 
-  override def prototypes = if(samplings.isEmpty) List() else samplings.flatMap(_.prototypes)
+  override def inputs = new DataSet(samplings.flatMap(_.inputs))
+  override def prototypes = samplings.flatMap(_.prototypes)
   
   override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
     samplings.headOption match {

@@ -169,12 +169,6 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.plugin.sampling.loader</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.plugin.domain.range</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>

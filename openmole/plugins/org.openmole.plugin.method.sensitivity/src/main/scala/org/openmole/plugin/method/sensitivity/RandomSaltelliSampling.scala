@@ -43,6 +43,10 @@ class RandomSaltelliSampling(
   def this(samples: Int, matrix: IPrototype[String], factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]]) =
     this(samples, matrix, factors, Workspace.newRNG)
   
+  def a(context: IContext) = generateMatrix(context)
+  def b(context: IContext) = generateMatrix(context)
+  
+  def factorsPrototypes = factors.map{_.prototype}
   
   def generateMatrix(context: IContext) = 
     for(i <- 0 until samples) yield factors.map { f => rng.nextDouble.scale(f.domain.min(context), f.domain.max(context)) }.toSeq

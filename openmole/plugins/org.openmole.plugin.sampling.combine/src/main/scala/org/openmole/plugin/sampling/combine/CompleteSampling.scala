@@ -17,7 +17,9 @@
 
 package org.openmole.plugin.sampling.combine
 
+import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.data.Variable
+import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
@@ -32,6 +34,7 @@ class CompleteSampling(samplings: Iterable[ISampling]) extends ISampling {
 
   def this(samplings: ISampling*) = this(samplings.toIterable)
 
+  override def inputs = new DataSet(samplings.flatMap{_.inputs})
   override def prototypes: Iterable[IPrototype[_]] = samplings.flatMap{_.prototypes}
   
   override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 

@@ -21,6 +21,7 @@ import java.io.File
 import scala.collection.mutable.HashMap
 import scala.collection.immutable.TreeMap
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.core.model.data._
 import java.io.FileReader
 import org.openmole.core.implementation.data._
@@ -28,7 +29,7 @@ import org.openmole.core.model.sampling.ISampling
 import au.com.bytecode.opencsv.CSVReader
 import collection.JavaConversions._
 
-class CSVSampling(val csvFile: File) extends ISampling {
+class CSVSampling(val csvFile: File) extends Sampling {
   /**
    * Creates an intstance of CSVPlan.
    *

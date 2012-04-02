@@ -22,11 +22,13 @@ import scala.collection.Iterator
 import scala.collection.immutable.TreeMap
 
 object DataSet {
-  lazy val empty = new DataSet(Iterable.empty)
+  lazy val empty = new DataSet(Iterable.empty[IData[_]])
   
   implicit def dataIterableDecorator(data: Iterable[IData[_]]) = new {
     def toDataSet = new DataSet(data)
   }
+  
+  def apply(prototypes: Iterable[IPrototype[_]]) = new DataSet(prototypes.map{new Data(_)})
 }
 
 

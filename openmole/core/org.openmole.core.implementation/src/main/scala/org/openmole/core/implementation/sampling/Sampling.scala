@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,23 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.sampling.combine
+package org.openmole.core.implementation.sampling
 
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.sampling.Sampling
-import org.openmole.core.model.data.IContext
+import org.openmole.core.implementation.data.Prototype._
+import org.openmole.core.implementation.data.Data
+import org.openmole.core.implementation.data.DataSet
+import org.openmole.core.model.data.DataModeMask
 import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.sampling.ISampling
 
-class ZipWithIndex(reference: ISampling, index: IPrototype[Int]) extends ISampling {
-  
-  override def inputs = reference.inputs
-  override def prototypes = index :: reference.prototypes.toList
-  
-  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
-    reference.build(context).zipWithIndex.map {
-      case(line, i) => line ++ List(new Variable(index, i))
-    }
-
+trait Sampling extends ISampling {
+  def inputs = DataSet.empty
 }

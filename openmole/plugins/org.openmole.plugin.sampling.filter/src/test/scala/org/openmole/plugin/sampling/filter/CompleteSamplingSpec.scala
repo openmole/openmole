@@ -19,6 +19,7 @@ package org.openmole.plugin.sampling.filter
 
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.domain.IDomain
+import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.core.model.data.IContext
 import org.openmole.core.implementation.sampling.Factor
 import org.openmole.core.implementation.data.Prototype
@@ -42,7 +43,7 @@ class FiltredSamplingSpec extends FlatSpec with ShouldMatchers {
 
     def pList(i: Int,j: Int,k: Int) = List(i,j,k).zip(List(p1,p2,p3)).map{case (v, p) => new Variable(p, v)}
     
-    val sampling = new ISampling {
+    val sampling = new Sampling {
       override def prototypes = List(p1, p2, p3)
       override def build(context: IContext) = List(pList(1,2,3), pList(4,3,4), pList(1,5,3), pList(2,3,4), pList(6,7,8)).iterator
     }
