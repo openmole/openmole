@@ -79,7 +79,7 @@ object MoleMaker {
       capsuleMap.foreach{case (cui,ccore)=> 
           manager.capsuleConnections(cui.dataUI).foreach(t=>buildTransition(ccore, capsuleMap(t.target.capsule),t))
           manager.dataChannels.filterNot{_.prototypes.isEmpty}.foreach{dc => new DataChannel(capsuleMap(dc.source),capsuleMap(dc.target),
-                                                                                             dc.prototypes.map{_.dataUI.name}.toArray)}}
+                                                                                             dc.prototypes.map{p => prototypeMap(p)}.toArray)}}
       
       (new Mole(capsuleMap(manager.startingCapsule.get)),capsuleMap,prototypeMap)
     }
