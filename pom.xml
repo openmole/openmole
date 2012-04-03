@@ -21,7 +21,6 @@
         <module>third-parties</module>
         <module>openmole</module>
         <module>runtime</module>
-        <module>ui</module>
     </modules>
 
     <dependencyManagement>
