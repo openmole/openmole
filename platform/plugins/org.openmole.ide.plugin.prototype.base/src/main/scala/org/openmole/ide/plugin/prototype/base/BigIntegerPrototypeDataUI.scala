@@ -30,5 +30,7 @@ class BigIntegerPrototypeDataUI(val name: String="", d: Int=0) extends GenericPr
   
   def imagePath = "img/biginteger.png"
   
+  override def fatImagePath = "img/biginteger_fat.png"
+  
   def buildPanelUI = new BigIntegerPrototypePanelUI(this)
 }
