@@ -10,17 +10,16 @@
     <artifactId>plugins</artifactId>
     <packaging>pom</packaging>
     
-    
-    <build>
+
+    <!--build>
         <plugins>
             <plugin>
-                <!-- netbeans modules in 6.9+ are 1.6 compatible -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3</version>
+                <version>2.3.2</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
 
@@ -29,13 +28,17 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>2.2</version>
                 <configuration>
-                    <!-- to have the jar plugin pickup the nbm generated manifest -->
                     <useDefaultManifestFile>true</useDefaultManifestFile>
                 </configuration>
             </plugin>
         </plugins>
-    </build>
+    </build-->
     <dependencies>    
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-swing</artifactId>
+            <version>${lib.org.scala-lang.scala.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>fr.in2p3.jsaga</artifactId>
@@ -52,6 +55,11 @@
             <version>${netbeans.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.core.model</artifactId>
             <version>${project.version}</version>
@@ -64,6 +72,16 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.apache.commons.configuration</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.ide.core.model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.misc.exception</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -83,14 +101,19 @@
         </dependency>
     </dependencies>
     <modules>
-        <module>org.openmole.ide.plugin.task.groovy</module>        
-        <!--module>org.openmole.ide.plugin.task.moletask</module-->        
+        <module>org.openmole.ide.plugin.sampling.tools</module>
+        <module>org.openmole.ide.plugin.sampling.lhs</module>  
+        <module>org.openmole.ide.plugin.sampling.combine</module>
+        <module>org.openmole.ide.plugin.domain.range</module>   
+        <module>org.openmole.ide.plugin.domain.bounded</module>
+        <!--module>org.openmole.ide.plugin.task.moletask</module--> 
+        <module>org.openmole.ide.plugin.task.groovy</module>          
         <module>org.openmole.ide.plugin.task.netlogo</module>
         <module>org.openmole.ide.plugin.task.systemexec</module>
         <module>org.openmole.ide.plugin.task.exploration</module>
         <module>org.openmole.ide.plugin.task.serialization</module>
         <module>org.openmole.ide.plugin.sampling.combine</module>
-        <!--module>org.openmole.ide.plugin.sampling.lhs</module-->
+        <module>org.openmole.ide.plugin.sampling.tools</module>
         <module>org.openmole.ide.plugin.sampling.csv</module>
         <module>org.openmole.ide.plugin.domain.range</module>
         <module>org.openmole.ide.plugin.domain.distribution</module>
