@@ -28,7 +28,8 @@ object DataSet {
     def toDataSet = new DataSet(data)
   }
   
-  def apply(prototypes: Iterable[IPrototype[_]]) = new DataSet(prototypes.map{new Data(_)})
+  def apply(prototypes: IPrototype[_]*): DataSet = apply(prototypes.toIterable)
+  def apply(prototypes: Iterable[IPrototype[_]]): DataSet = new DataSet(prototypes.map{new Data(_)})
 }
 
 

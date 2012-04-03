@@ -21,6 +21,9 @@ import org.openmole.core.model.sampling.ISampling
 import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.service.Random._
 import java.util.Random
+import org.openmole.core.implementation.data.Context
+import org.openmole.core.implementation.data.DataSet
+import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.core.model.data.IContext
@@ -29,11 +32,16 @@ import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IBounded
 import org.openmole.core.model.sampling.IFactor
+import org.openmole.misc.workspace.Workspace
 
 object SaltelliSampling {
+  
   val aMatrixName = "a"
   val bMatrixName = "b"
+  
   def cMatrixName(p: String) = "c" + p
+  
+  val matrixNamePrototype = new Prototype("matrixName", classOf[String])
   
   def extractValues(allValues: Array[Double], allNames: Array[String], name: String): Array[Double] = 
     allValues zip allNames filter { case(_, n) => n == name } map { case(v, _) => v }
@@ -45,50 +53,91 @@ object SaltelliSampling {
     (a, b, c)      
   }
   
-}
-
-import SaltelliSampling._
-
-abstract class SaltelliSampling extends Sampling {
-
-  def factorsPrototypes: Seq[IPrototype[Double]] //Seq[IFactor[Double, IDomain[Double] with IBounded[Double]]]
-  def matrixName: IPrototype[String]
-  
-  override def prototypes = matrixName :: factorsPrototypes.toList 
-  
-  def a(context: IContext): Iterable[Iterable[Double]]
-  def b(context: IContext): Iterable[Iterable[Double]]
-  
-  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = {
-
-    val a = this.a(context)
-    val b = this.b(context)
-
-    val cMatrix = 
-      factorsPrototypes.zipWithIndex.flatMap {
-        case(p, i) => toVariables(buildC(i, a, b), cMatrixName(p.name)) 
-      }
-    
-    (toVariables(a, aMatrixName) ++ toVariables(b, bMatrixName) ++ cMatrix).iterator
-  }
-  
-  def toVariables(matrix: Iterable[Iterable[Double]], m: String): List[Iterable[IVariable[_]]] = 
-      matrix.map {
-        l => new Variable(matrixName, m) :: (l zip factorsPrototypes map {  case(v, f) => new Variable(f, v) }).toList
-      }.toList
+  def generateMatrix(
+    context: IContext,
+    samples: Int,
+    factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]],
+    rng: Random): Array[Array[Double]] = 
+      factors.map{
+      f => 
+      (0 until samples).map(i => rng.nextDouble.scale(f.domain.min(context), f.domain.max(context))).toArray
+    }
   
   def buildC(
     i: Int,
-    a: Iterable[Iterable[Double]],
-    b: Iterable[Iterable[Double]]) =
-    a zip b map { 
+    a: Array[Array[Double]],
+    b: Array[Array[Double]]) =
+      a zip b map { 
       case(lineOfA, lineOfB) => buildLineOfC(i, lineOfA, lineOfB)
     }
   
   
-  def buildLineOfC(i: Int, lineOfA: Iterable[Double], lineOfB: Iterable[Double]) = 
+  def buildLineOfC(i: Int, lineOfA: Array[Double], lineOfB: Array[Double]) = 
     (lineOfA zip lineOfB zipWithIndex) map {
       case ((a, b), index) => if(index == i) a else b
     }
+  
+  def toVariables(
+    matrix: Array[Array[Double]], 
+    m: String,
+    prototypes: Iterable[IPrototype[Double]],
+    matrixName: IPrototype[String]): List[Iterable[IVariable[_]]] = 
+    matrix.map {
+      l => new Variable(matrixName, m) :: (l zip prototypes map {case(v, p) => new Variable(p, v) }).toList
+    }.toList
+  
+}
+
+import SaltelliSampling._
+
+class SaltelliSampling(
+  samples: Int,
+  matrixName: IPrototype[String],
+  factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]],
+  rng: Random
+) extends Sampling {
+  
+  def this( 
+    samples: Int,
+    matrixName: IPrototype[String],
+    factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]]
+  ) = this(samples, matrixName, factors, Workspace.newRNG)
+  
+  def this( 
+    samples: Int,
+    matrixName: IPrototype[String],
+    seed: Long,
+    factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]]
+  ) = this(samples, matrixName, factors, Workspace.newRNG(seed))
+
+  def this( 
+    samples: Int,
+    factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]]
+  ) = this(samples, matrixNamePrototype, factors, Workspace.newRNG)
+  
+  def this( 
+    samples: Int,
+    seed: Long,
+    factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]]
+  ) = this(samples, matrixNamePrototype, factors, Workspace.newRNG(seed))
+  
+  override def prototypes = matrixName :: factors.map{_.prototype}.toList 
+  
+  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = {
+    val a = generateMatrix(context, samples, factors, rng)
+    val b = generateMatrix(context, samples, factors, rng)
+    val prototypes = factors.map{_.prototype}
+    
+    val cMatrix = 
+      factors.zipWithIndex.flatMap {
+        case(f, i) => toVariables(buildC(i, a, b), cMatrixName(f.prototype.name), prototypes, matrixName) 
+      }
+    
+    (toVariables(a, aMatrixName, prototypes, matrixName) ++ toVariables(b, bMatrixName, prototypes, matrixName) ++ cMatrix).iterator
+  }
+  
+
+  
+  
   
 }

@@ -28,7 +28,7 @@ import org.openmole.core.model.sampling.ISampling
 import org.openmole.plugin.domain.modifier.SlicedDomain
 
 class ReplicationSampling[T](sampling: ISampling, seederFactor: IFactor[T, IDomain[T] with IIterable[T]], nbReplication: Int) extends ISampling {
-
+  
   override def inputs = sampling.inputs
   override def prototypes = seederFactor.prototype :: sampling.prototypes.toList
   
