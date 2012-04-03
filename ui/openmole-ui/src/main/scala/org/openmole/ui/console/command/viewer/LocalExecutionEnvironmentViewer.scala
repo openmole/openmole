@@ -15,11 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ui.console.internal.command
+package org.openmole.ui.console.command.viewer
 
-import org.codehaus.groovy.tools.shell.CommandSupport
-import org.codehaus.groovy.tools.shell.Shell
+import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 
-abstract class UICommand(shell: Shell, string: String, string1: String) extends CommandSupport(shell, string, string1)  {
-    protected def getArgs(objs: Iterable[String]) = (shell.execute(objs.head), objs.tail.toArray)
+class LocalExecutionEnvironmentViewer extends IViewer {
+
+  override def view(obj: Object, args: Array[String]) {
+    val env = obj.asInstanceOf[LocalExecutionEnvironment]
+    println("Queued jobs: " + env.nbJobInQueue)
+    println("Number of threads: " + env.nbThreads)
+  }
 }

@@ -15,15 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ui.console.internal.command.viewer
+package org.openmole.ui.console.command.viewer
 
-import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
+object IViewer {
+  val Separator = "-----------"
+}
 
-class LocalExecutionEnvironmentViewer extends IViewer {
-
-  override def view(obj: Object, args: Array[String]) {
-    val env = obj.asInstanceOf[LocalExecutionEnvironment]
-    println("Queued jobs: " + env.nbJobInQueue)
-    println("Number of threads: " + env.nbThreads)
-  }
+trait IViewer {
+  def view(obj: Object, args: Array[String])
 }

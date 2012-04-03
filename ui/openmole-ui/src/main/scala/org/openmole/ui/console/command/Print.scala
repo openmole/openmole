@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ui.console.internal.command
+package org.openmole.ui.console.command
 
 import org.codehaus.groovy.tools.shell.Shell
 import org.openmole.misc.tools.service.HierarchicalRegistry
@@ -23,12 +23,12 @@ import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.ui.console.internal.command.viewer.BatchEnvironmentViewer
-import org.openmole.ui.console.internal.command.viewer.LocalExecutionEnvironmentViewer
-import org.openmole.ui.console.internal.command.viewer.IViewer
-import org.openmole.ui.console.internal.command.viewer.MoleExecutionViewer
+import org.openmole.ui.console.command.viewer.BatchEnvironmentViewer
+import org.openmole.ui.console.command.viewer.LocalExecutionEnvironmentViewer
+import org.openmole.ui.console.command.viewer.IViewer
+import org.openmole.ui.console.command.viewer.MoleExecutionViewer
 import java.util.List
-import org.openmole.ui.console.internal.command.viewer.MoleViewer
+import org.openmole.ui.console.command.viewer.MoleViewer
 import scala.collection.JavaConversions._
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 

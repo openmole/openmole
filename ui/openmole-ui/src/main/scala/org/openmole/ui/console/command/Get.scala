@@ -15,14 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ui.console.internal.command
+package org.openmole.ui.console.command
 
 import org.codehaus.groovy.tools.shell.CommandSupport
 import org.codehaus.groovy.tools.shell.Shell
 import org.openmole.core.model.mole.IMole
 import org.openmole.misc.tools.service.HierarchicalRegistry
-import org.openmole.ui.console.internal.command.getter.IGetter
-import org.openmole.ui.console.internal.command.getter.MoleGetter
+import org.openmole.ui.console.command.getter.IGetter
+import org.openmole.ui.console.command.getter.MoleGetter
 import java.util.List
 import scala.collection.JavaConversions._
 

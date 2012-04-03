@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ui.console.internal.command.getter
+package org.openmole.ui.console.command.getter
 
 import org.codehaus.groovy.tools.shell.Shell
 

@@ -8,13 +8,12 @@
     <!-- ************************************************************* -->
 
     <parent>
-        <artifactId>openmole-ui-console</artifactId>
-        <groupId>org.openmole.core</groupId>
+        <artifactId>ui</artifactId>
+        <groupId>org.openmole.ui</groupId>
         <version>0.5-SNAPSHOT</version>
     </parent>
     
-    <groupId>org.openmole.ui.console</groupId>
-    <artifactId>org.openmole.ui.console</artifactId>
+    <artifactId>openmole-ui</artifactId>
 
     <dependencies>
         <dependency>

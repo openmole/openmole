@@ -13,12 +13,13 @@
         <version>0.5-SNAPSHOT</version>
     </parent>
 
-    <artifactId>openmole-ui-console</artifactId>
+    <groupId>org.openmole.ui</groupId>
+    <artifactId>ui</artifactId>
 
     <modules>
-        <module>org.openmole.ui.console</module>
+        <module>openmole-ui</module>
         <module>plugins</module>
-	<module>openmole-ui-console-package</module>
+	<module>openmole-ui-package</module>
     </modules>
 
     <dependencies>

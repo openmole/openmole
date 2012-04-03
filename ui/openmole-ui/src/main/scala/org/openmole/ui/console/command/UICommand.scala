@@ -15,12 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ui.console.internal.command.viewer
+package org.openmole.ui.console.command
 
-object IViewer {
-  val Separator = "-----------"
-}
+import org.codehaus.groovy.tools.shell.CommandSupport
+import org.codehaus.groovy.tools.shell.Shell
 
-trait IViewer {
-  def view(obj: Object, args: Array[String])
+abstract class UICommand(shell: Shell, string: String, string1: String) extends CommandSupport(shell, string, string1)  {
+    protected def getArgs(objs: Iterable[String]) = (shell.execute(objs.head), objs.tail.toArray)
 }

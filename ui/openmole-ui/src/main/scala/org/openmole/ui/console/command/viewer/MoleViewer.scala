@@ -15,15 +15,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ui.console.internal.command.getter
+package org.openmole.ui.console.command.viewer
 
 import org.openmole.core.model.mole.IMole
-import org.openmole.ui.console.Console
+import org.openmole.core.model.transition.IAggregationTransition
+import org.openmole.core.model.transition.IExplorationTransition
 
-class MoleGetter extends IGetter {
-  override def get(variableName: String, obj: Object, args: Array[String]) = {
+class MoleViewer extends IViewer {
+
+  override def view(obj: Object, args: Array[String]) = {
     val mole = obj.asInstanceOf[IMole]
-    val i = args(0).toInt
-    Console.setVariable(variableName, mole.capsules(i))
+    
+    mole.capsules.zipWithIndex.foreach { 
+      case(c, i) => 
+        println(i + " " + c + " (" + c.outputTransitions.map{
+            t =>
+              (t match {
+                case _: IExplorationTransition => "< "
+                case _: IAggregationTransition => "> "
+                case _ => "- "
+              }) + t.end.capsule.toString
+          }.foldLeft("") {
+            (acc, c) => if(acc.isEmpty) c else acc + ", " + c
+          } + ")")
+    }
+    
   }
+  
 }

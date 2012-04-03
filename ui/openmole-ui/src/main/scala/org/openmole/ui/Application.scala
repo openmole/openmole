@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ui.console
+package org.openmole.ui
 
 import java.io.File
 import org.eclipse.equinox.app.IApplication
@@ -23,11 +23,12 @@ import org.eclipse.equinox.app.IApplicationContext
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
-import org.openmole.ui.console.internal.command.Auth
-import org.openmole.ui.console.internal.command.Encrypt
-import org.openmole.ui.console.internal.command.Get
-import org.openmole.ui.console.internal.command.Print
-import org.openmole.ui.console.internal.command.Verify
+import org.openmole.ui.console.Console
+import org.openmole.ui.console.command.Encrypt
+import org.openmole.ui.console.command.Get
+import org.openmole.ui.console.command.Print
+import org.openmole.ui.console.command.Auth
+import org.openmole.ui.console.command.Verify
 import scopt.immutable._
 
 class Application extends IApplication with Logger {

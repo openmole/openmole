@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ui.console.internal.command.viewer
+package org.openmole.ui.console.command.viewer
 
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Level
