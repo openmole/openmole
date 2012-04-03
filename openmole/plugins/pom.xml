@@ -59,6 +59,7 @@
 	<module>org.openmole.plugin.builder</module>
 	<module>org.openmole.plugin.builder.evolution</module>
 	<module>org.openmole.plugin.builder.stochastic</module>
+	<module>org.openmole.plugin.builder.sensitivity</module>
     </modules>
 
     <!-- ************************************************************* -->
