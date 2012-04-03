@@ -18,6 +18,7 @@
 package org.openmole.ui
 
 import java.io.File
+import java.util.concurrent.Semaphore
 import org.eclipse.equinox.app.IApplication
 import org.eclipse.equinox.app.IApplicationContext
 import org.openmole.misc.pluginmanager.PluginManager
@@ -29,10 +30,15 @@ import org.openmole.ui.console.command.Get
 import org.openmole.ui.console.command.Print
 import org.openmole.ui.console.command.Auth
 import org.openmole.ui.console.command.Verify
+import org.openmole.ide.core.test.TestPanel
+import scala.actors.threadpool.locks.ReentrantLock
+import scala.swing.SimpleSwingApplication
+import scopt.generic.OptionDefinition
 import scopt.immutable._
 
 class Application extends IApplication with Logger {
   override def start(context: IApplicationContext) = {
+    
     
     case class Config(
       pluginsDirs: List[String] = Nil,
@@ -40,7 +46,7 @@ class Application extends IApplication with Logger {
     )
     
     
-    val parser = new OptionParser[Config]("openmole-console", "0.x") { 
+    val parser = new OptionParser[Config]("openmole", "0.x") { 
       def options = Seq(
         opt("p", "pluginDirectories" ,"Plugins directories (seperated by \",\")") {
           (v: String, c: Config) => c.copy(pluginsDirs = v.split(',').toList) 
@@ -51,31 +57,51 @@ class Application extends IApplication with Logger {
       )
     }
       
-    parser.parse(context.getArguments.get("application.args").asInstanceOf[Array[String]], Config()) foreach { config =>
+    
+    val args: Array[String] = context.getArguments.get("application.args").asInstanceOf[Array[String]]
+    
+    
+    val gui = args.contains("-gui")
+    val filtredArgs = args.filterNot((_: String) == "-gui")
+    
+    parser.parse(filtredArgs, Config()) foreach { config =>
     
       val workspaceLocation = config.workspaceDir match {
         case Some(w) => new File(w)
         case None => Workspace.defaultLocation
       }
 
-      if(Workspace.anotherIsRunningAt(workspaceLocation)) 
-        logger.severe("Application is already runnig at " + workspaceLocation.getAbsolutePath + ". If it is not the case please remove the file '" + new File(workspaceLocation, Workspace.running).getAbsolutePath() + "'.")  
-      else {       
-        if(config.workspaceDir.isDefined) Workspace.instance = new Workspace(workspaceLocation)
+      if(!gui) {
+        if(Workspace.anotherIsRunningAt(workspaceLocation)) 
+          logger.severe("Application is already runnig at " + workspaceLocation.getAbsolutePath + ". If it is not the case please remove the file '" + new File(workspaceLocation, Workspace.running).getAbsolutePath() + "'.")  
+        else {       
+          if(config.workspaceDir.isDefined) Workspace.instance = new Workspace(workspaceLocation)
  
-        val g = Console.groovysh
-        g.leftShift(new Print(g, "print", "\\pr"))
-        g.leftShift(new Get(g, "get", "\\g"))
-        g.leftShift(new Auth(g, "auth", "\\au"))
-        g.leftShift(new Encrypt(g, "encrypt", "\\en"))
-        g.leftShift(new Verify(g, "verify", "\\vf"))
+          val g = Console.groovysh
+          g.leftShift(new Print(g, "print", "\\pr"))
+          g.leftShift(new Get(g, "get", "\\g"))
+          g.leftShift(new Auth(g, "auth", "\\au"))
+          g.leftShift(new Encrypt(g, "encrypt", "\\en"))
+          g.leftShift(new Verify(g, "verify", "\\vf"))
          
-        config.pluginsDirs.foreach { PluginManager.loadDir }
+          config.pluginsDirs.foreach { PluginManager.loadDir }
         
-        // Run
-        Console.initPassword
-        Console.groovysh.run()
-      } 
+          // Run
+          Console.initPassword
+          Console.groovysh.run()
+        }
+      } else {
+        val waitClose = new Semaphore(0)
+        val pannel = new TestPanel() {
+          override def closeOperation = {
+            super.closeOperation                     
+            waitClose.release(1)
+          }
+        }
+        pannel.visible = true
+        waitClose.acquire(1)
+      }
+
     } 
     IApplication.EXIT_OK
   }

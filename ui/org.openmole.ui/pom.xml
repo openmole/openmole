@@ -153,6 +153,13 @@
             <artifactId>com.github.scopt</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+	<!-- IDE plugins -->
+        <dependency>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.openmole.ide.core.test</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->
@@ -232,9 +239,9 @@
                                 <resource>
                                     <directory>src/main/resources</directory>
                                     <includes>
-                                        <include>openmole-console</include>
+                                        <include>openmole</include>
                                         <include>debug.sh</include>
-                                        <include>openmole-console.bat</include>
+                                        <include>openmole.bat</include>
                                     </includes>
                                 </resource>
                             </resources>
@@ -252,8 +259,8 @@
             <phase>package</phase>
             <configuration>
                 <target>
-                    <chmod file="target/product/openmole-console" perm="755"/>
-                    <chmod file="target/product/openmole-console.bat" perm="755"/>
+                    <chmod file="target/product/openmole" perm="755"/>
+                    <chmod file="target/product/openmole.bat" perm="755"/>
                     <chmod file="target/product/debug.sh" perm="755"/>
                 </target>
             </configuration>
