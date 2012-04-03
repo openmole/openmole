@@ -19,6 +19,7 @@ package org.openmole.ide.core.implementation.data
 
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.data.IPrototypeDataUI
@@ -64,7 +65,7 @@ object EmptyDataUIs {
     def saveContent(name: String) = new EmptySamplingDataUI
   }
   
-  class EmptySampling extends ISampling {
+  class EmptySampling extends Sampling {
     def prototypes = List.empty
     def build(context : IContext) = List[Iterable[IVariable[_]]]().toIterator
   }
