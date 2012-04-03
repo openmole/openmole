@@ -79,11 +79,16 @@
             <artifactId>org.openmole.ide.plugin.sampling.combine</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.ide.plugin.sampling.tools</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.sampling.lhs</artifactId>
             <version>${project.version}</version>
-        </dependency-->
+        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.hook.display</artifactId>
@@ -97,6 +102,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.domain.range</artifactId>
+            <version>${project.version}</version>
+        </dependency>  
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.ide.plugin.domain.bounded</artifactId>
             <version>${project.version}</version>
         </dependency>        
         <dependency>
