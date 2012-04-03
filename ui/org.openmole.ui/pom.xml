@@ -13,7 +13,7 @@
         <version>0.5-SNAPSHOT</version>
     </parent>
     
-    <artifactId>openmole-ui</artifactId>
+    <artifactId>org.openmole.ui</artifactId>
 
     <dependencies>
         <dependency>

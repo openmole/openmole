@@ -17,7 +17,7 @@
     <artifactId>ui</artifactId>
 
     <modules>
-        <module>openmole-ui</module>
+        <module>org.openmole.ui</module>
         <module>plugins</module>
 	<module>openmole-ui-package</module>
     </modules>
