@@ -12,14 +12,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.1</version>
-                <configuration>
-                    <useDefaultManifestFile>true</useDefaultManifestFile>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
                 <extensions>true</extensions>
@@ -75,7 +67,7 @@
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.joda.time</artifactId>
-            <version>1.6</version>
+            <version>${lib.org.joda.time.version}</version>
         </dependency>
         <dependency>
             <groupId>org.netbeans.api</groupId>
