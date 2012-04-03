@@ -24,10 +24,13 @@ import scala.swing.Menu
 import scala.swing.Button
 import scala.swing.MenuItem
 import scala.swing.event.ButtonClicked
+import java.awt.Color
 
 class PopupToolBarPresenter(t: String, basemenu: Menu) extends Button(t){
   val popup = new PopupMenu {contents += basemenu}
+  
   icon = ImageUtilities.loadImageIcon("org/openide/awt/resources/arrow.png", true)
+  background = new Color(204,204,204,128)
   listenTo(mouse.clicks)
   reactions += {
     case x:ButtonClicked => popup.show(this, 0, size.height)
