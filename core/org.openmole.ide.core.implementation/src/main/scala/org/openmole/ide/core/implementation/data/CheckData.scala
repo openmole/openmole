@@ -23,8 +23,7 @@ import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.implementation.dataproxy.Proxys
-import org.openmole.ide.core.implementation.serializer.KeyGenerator
-import org.openmole.ide.core.implementation.serializer.KeyRegistery
+import org.openmole.ide.core.implementation.registry._
 import org.openmole.core.model.mole.IMole
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyFactory
 import org.openmole.ide.core.implementation.serializer.MoleMaker

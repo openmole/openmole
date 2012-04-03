@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.serializer
+package org.openmole.ide.core.implementation.registry
 
 import org.openmole.core.model.data.IPrototype
 import org.openmole.misc.tools.obj.ClassUtils._

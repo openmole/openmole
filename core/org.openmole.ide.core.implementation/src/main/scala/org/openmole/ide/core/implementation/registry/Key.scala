@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.serializer
+package org.openmole.ide.core.implementation.registry
 
 case class PrototypeKey(c : Class[_],m : Manifest[_]) extends Key
 
