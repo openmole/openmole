@@ -13,7 +13,6 @@ import org.openmole.core.implementation.sampling.DiscreteFactor
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IIterable
-import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import scala.collection.JavaConversions._
 
 class CompleteSamplingDataUI(val name: String="", 
@@ -21,7 +20,7 @@ class CompleteSamplingDataUI(val name: String="",
 
   def coreObject = new CompleteSampling(factors.map(f=>new DiscreteFactor(
         f._1.dataUI.coreObject.asInstanceOf[IPrototype[Any]],
-      f._3.coreObject(f._1.dataUI.coreObject).asInstanceOf[IDomain[Any] with IIterable[Any]])))
+        f._3.coreObject(f._1.dataUI.coreObject).asInstanceOf[IDomain[Any] with IIterable[Any]])))
 
   def coreClass = classOf[CompleteSampling] 
   
