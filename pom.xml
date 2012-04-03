@@ -13,12 +13,13 @@
     </parent>
 
     <groupId>org.openmole.ide</groupId>
-    <artifactId>ide</artifactId>
+    <artifactId>gui</artifactId>
     <version>0.5-SNAPSHOT</version>
 
     <modules>
         <module>libraries</module>
-        <module>platform</module>
+        <module>misc</module>
+        <module>core</module>
     </modules>
 
     <!-- ************************************************************* -->
@@ -42,28 +43,6 @@
 
     <packaging>pom</packaging>
 
-    <properties>
-        <netbeans.hint.license>gpl30</netbeans.hint.license>
-        <symbolic.name>${project.artifactId}</symbolic.name>
-        <!-- versions of libraries used -->
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
-    <scm>
-        <connection>scm:git:git://git.openmole.org:openmole-gui</connection>
-        <developerConnection>scm:git:gitosis@git.openmole.org:openmole-gui</developerConnection>
-        <url>git://git.openmole.org:openmole-gui</url>
-    </scm>
-
-<!--    <dependencies>
-        <dependency>
-           <groupId>junit</groupId>
-           <artifactId>junit</artifactId>
-           <version>${lib.org.junit.version}</version>
-           <scope>test</scope>
-        </dependency>
-    </dependencies>-->
-
     <distributionManagement>
         <repository>
             <id>maven.openmole.org</id>
@@ -74,6 +53,16 @@
             <url>http://maven.openmole.org/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
+
+    <!-- ************************************************************* -->
+    <!-- *** Build Environment  ************************************** -->
+    <!-- ************************************************************* -->
+
+    <scm>
+        <connection>scm:git:git://git.openmole.org:openmole-gui</connection>
+        <developerConnection>scm:git:gitosis@git.openmole.org:openmole-gui</developerConnection>
+        <url>git://git.openmole.org:openmole-gui</url>
+    </scm>
 
     <issueManagement>
         <system>redmine</system>
@@ -95,6 +84,23 @@
             <url>http://maven.openmole.org/public/</url>
         </repository>
     </repositories>
+      
+    <properties>
+        <netbeans.version>RELEASE71</netbeans.version>
+        <org.jfree.chart.jfree.version>1.0.13</org.jfree.chart.jfree.version>
+        <org.jfree.chart.jcommon.version>1.0.15</org.jfree.chart.jcommon.version>
+        <com.miglayout.version>3.7.4</com.miglayout.version>
+        <brandingToken>openmole_gui</brandingToken>
+    </properties>
+    
+    <dependencies>         
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-swing</artifactId>
+            <version>${lib.org.scala-lang.scala.version}</version>
+        </dependency>
+    </dependencies>
+
 </project>
 
 

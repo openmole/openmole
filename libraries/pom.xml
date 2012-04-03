@@ -9,7 +9,7 @@
 
     <parent>
         <groupId>org.openmole.ide</groupId>
-        <artifactId>ide</artifactId>
+        <artifactId>gui</artifactId>
         <version>0.5-SNAPSHOT</version>
     </parent>
 

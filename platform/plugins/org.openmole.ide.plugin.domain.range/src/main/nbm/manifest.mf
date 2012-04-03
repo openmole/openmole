@@ -1,4 +1,0 @@
-Manifest-Version: 1.0
-OpenIDE-Module: org.openmole.ide.plugin.domain.range
-OpenIDE-Module-Localizing-Bundle: org/openmole/Bundle.properties
-OpenIDE-Module-Layer: org/openmole/layer.xml

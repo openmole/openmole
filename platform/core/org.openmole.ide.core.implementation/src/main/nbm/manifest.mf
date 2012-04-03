@@ -1,5 +1,0 @@
-Manifest-Version: 1.0
-OpenIDE-Module-Localizing-Bundle: org/openmole/ide/core/Bundle.properties
-OpenIDE-Module-Layer: org/openmole/ide/core/layer.xml
-OpenIDE-Module-Requires: org.openide.windows.WindowManager
-OpenIDE-Module-Provides: org.openmole.ide.core.factory.IPrototypeFactoryUI
