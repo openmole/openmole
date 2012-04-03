@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
@@ -8,43 +8,41 @@
     <!-- ************************************************************* -->
 
     <parent>
+        <artifactId>libraries</artifactId>
         <groupId>org.openmole.ide</groupId>
-	<artifactId>misc</artifactId>    
-    	<version>0.5-SNAPSHOT</version>
+        <version>0.5-SNAPSHOT</version>
     </parent>
 
-    <artifactId>org.openmole.ide.misc.visualization</artifactId>
-    
-    <packaging>bundle</packaging>
-    
-    <dependencies>
+    <!--Used to build the symbolic name of the bundle-->
+    <artifactId>org.scala-lang.scala-swing</artifactId>
+
+    <dependencies>     
         <dependency>
-            <groupId>org.openmole.ide</groupId>
-            <artifactId>de.erichseifert.gral</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-swing</artifactId>
+            <version>${lib.org.scala-lang.scala.version}</version>
+            <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.core.model</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.ide.misc.widget</artifactId>
-            <version>${project.version}</version>
-        </dependency> 
     </dependencies>
 
     <!-- ************************************************************* -->
     <!-- *** Project Information ************************************* -->
     <!-- ************************************************************* -->
 
-    <name>${project.artifactId} ${project.version}</name>
-    <description />
+    <name>${project.artifactId}</name>
 
     <!-- ************************************************************* -->
     <!-- *** Build Settings ****************************************** -->
     <!-- ************************************************************* -->
-            
-</project>
 
+    <packaging>bundle</packaging>
+
+
+    <!--optional. Use this property to tune the exported packages-->
+    <properties>
+        <embed-dep>*;artifactId=!scala-library;type=!pom;inline=true</embed-dep>
+        <libraries.export.packages>scala.swing.*</libraries.export.packages>
+        <import.packages>scala.*,*;resolution:=optional</import.packages>
+    </properties>
+
+</project>

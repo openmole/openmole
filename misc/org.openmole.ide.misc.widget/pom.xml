@@ -19,11 +19,6 @@
     
     <dependencies>
         <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-swing</artifactId>
-            <version>${lib.org.scala-lang.scala.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.workspace</artifactId>
             <version>${project.version}</version>

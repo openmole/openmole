@@ -92,14 +92,6 @@
         <com.miglayout.version>3.7.4</com.miglayout.version>
         <brandingToken>openmole_gui</brandingToken>
     </properties>
-    
-    <dependencies>         
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-swing</artifactId>
-            <version>${lib.org.scala-lang.scala.version}</version>
-        </dependency>
-    </dependencies>
 
 </project>
 

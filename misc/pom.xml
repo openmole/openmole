@@ -21,4 +21,11 @@
         <module>org.openmole.ide.misc.tools</module>
     </modules>
 
+   <dependencies>
+        <dependency>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.scala-lang.scala-swing</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 </project>

@@ -20,4 +20,13 @@
         <module>org.openmole.ide.core.implementation</module>
     </modules>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.scala-lang.scala-swing</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+     </dependencies>
+
+
 </project>

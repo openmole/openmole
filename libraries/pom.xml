@@ -17,6 +17,7 @@
 
     <modules>
 	<module>de.erichseifert.gral</module>
+	<module>org.scala-lang.scala-swing</module>
     </modules>
 
     <!-- ************************************************************* -->
