@@ -20,6 +20,7 @@
         <module>libraries</module>
         <module>misc</module>
         <module>core</module>
+        <module>plugins</module>
     </modules>
 
     <!-- ************************************************************* -->
