@@ -33,7 +33,11 @@ import collection.JavaConversions._
  * into CSV files. It is in particular possible to store data (as prototypes) aggregated in an
  * array. The number of data to store in columns is not limited.
  */
-class StoreIntoCSVTask(name: String, var columns: List[(IPrototype[Array[_]], String)], filePrototype: IPrototype[File], delimiter: Char, quoteChar: Char) extends Task(name) {
+class StoreIntoCSVTask(
+  name: String,
+  var columns: List[(IPrototype[Array[_]], String)],
+  filePrototype: IPrototype[File],
+  delimiter: Char, quoteChar: Char) extends Task(name) {
 
   columns.foreach{case(p,s) => addInput(p)}
   addOutput(filePrototype)

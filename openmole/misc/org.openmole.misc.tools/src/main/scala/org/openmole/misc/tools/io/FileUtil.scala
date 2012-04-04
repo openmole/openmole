@@ -322,6 +322,7 @@ object FileUtil {
     def extractUncompressDirArchiveWithRelativePath(dest: File) =
       new TarInputStream(gzipedBufferedInputStream).extractDirArchiveWithRelativePathAndClose(dest)
     
+    
     def lockAndAppend(content: String) = {
       val fos = new FileOutputStream(file, true)
       try{
