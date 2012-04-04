@@ -24,7 +24,8 @@ class SerializerWithPluginClassListing extends Serializer {
  
   var classes: HashSet[Class[_]] = null
   registerConverter(new PluginConverter(this, reflectionConverter))
-     
+  registerConverter(new PluginClassConverter(this))   
+  
   def classUsed(c: Class[_]) = classes.add(c)
 
   def toXMLAndListPlugableClasses(obj: Object, outputStream: OutputStream) = {

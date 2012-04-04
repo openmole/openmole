@@ -24,20 +24,20 @@ import scala.collection.immutable.TreeSet
 
 class SerializerWithFileAndPluginListing extends SerializerWithPluginClassListing {
 
-    var files: TreeSet[File] = null
-    registerConverter(new FileConverterNotifier(this))
+  var files: TreeSet[File] = null
+  registerConverter(new FileConverterNotifier(this))
 
-    def fileUsed(file: File) = {
-        files += file
-    }
+  def fileUsed(file: File) = {
+    files += file
+  }
 
-    override def toXMLAndListPlugableClasses(obj: Object, outputStream: OutputStream) = {
-        files = new TreeSet[File]
-        super.toXMLAndListPlugableClasses(obj, outputStream)
-    }
+  override def toXMLAndListPlugableClasses(obj: Object, outputStream: OutputStream) = {
+    files = new TreeSet[File]
+    super.toXMLAndListPlugableClasses(obj, outputStream)
+  }
 
-    override def clean = {
-        super.clean
-        files = null
-    }
+  override def clean = {
+    super.clean
+    files = null
+  }
 }

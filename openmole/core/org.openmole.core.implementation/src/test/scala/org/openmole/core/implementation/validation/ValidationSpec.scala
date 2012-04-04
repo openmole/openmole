@@ -160,9 +160,11 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
   }
   
   "Validation" should "detect a missing input in the submole" in {
-     val p = new Prototype("t", classOf[String])
+    val p = new Prototype("t", classOf[String])
+
     
     val t1 = new EmptyTask("t1")
+   
     val t2 = new EmptyTask("t2")
     t2.addInput(p)
     
@@ -179,6 +181,31 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
       case None => sys.error("Error should have been detected")
     }
  
+  }
+  
+  "Validation" should "not detect a missing input" in {
+    val p = new Prototype("t", classOf[String])
+
+    val t1 = 
+      new Task("t1") {
+        override def process(context: IContext) = Context(new Variable(p, "test"))
+      }
+    t1.addOutput(p)
+    
+    val c1 = new Capsule(t1)
+
+    val t2 = new EmptyTask("t2")
+    t2.addInput(p)
+    val c2 = new Capsule(t2)
+
+    val mt = new MoleTask("mt", new Mole(c2), c2)
+    
+    val mtC = new Capsule(mt)
+    
+    new Transition(c1, mtC)
+    
+    val errors = Validation(new Mole(mtC))
+    errors.isEmpty should equal (true)
   }
   
 }

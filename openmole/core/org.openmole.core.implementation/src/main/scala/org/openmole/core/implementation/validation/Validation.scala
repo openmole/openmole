@@ -35,20 +35,20 @@ import org.openmole.core.implementation.tools.LevelComputing._
 object Validation {
   
   def allMoles(mole: IMole) =
-    mole ::
+    (mole, false) ::
       mole.capsules.flatMap {
         _.task match {
           case Some(task) => 
             task match {
-              case mt: IMoleTask => Some(mt.mole)
+              case mt: IMoleTask => Some((mt.mole, true))
               case _ => None
             }
           case _ => None
         }
       }.toList
   
-  def typeErrors(mole: IMole): Iterable[DataflowProblem] = 
-    mole.capsules.flatMap {
+  def typeErrors(mole: IMole, moleTask: Boolean = false): Iterable[DataflowProblem] = 
+    mole.capsules.drop(if(moleTask) 1 else 0).flatMap {
       c => c.intputSlots.map {
         s => (c, s, TreeMap(receivedTypes(s).map{p => p.name -> p}.toSeq: _*), 
               c.task match {
@@ -116,8 +116,8 @@ object Validation {
 
   def apply(mole: IMole) = 
     allMoles(mole).flatMap {
-      m =>
-        typeErrors(m) ++ 
+      case (m, mt) =>
+        typeErrors(m, mt) ++ 
         topologyErrors(m) ++ 
         duplicatedTransitions(m)
     }

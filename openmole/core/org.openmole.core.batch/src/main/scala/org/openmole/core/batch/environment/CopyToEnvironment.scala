@@ -43,11 +43,16 @@ import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.fileservice.FileService
 import org.openmole.misc.hashservice.HashService
 import org.openmole.misc.pluginmanager.PluginManager
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
 import org.openmole.misc.hashservice.HashService._
 import BatchEnvironment._
+
+object CopyToEnvironment extends Logger
+
+import CopyToEnvironment._
 
 class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callable[SerializedJob] {
   
@@ -56,6 +61,9 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
     
     try {
       val (serializationFile, serializatonPlugins) = serializeJob(jobFile)
+      logger.fine("Found plugins: " + serializatonPlugins.mkString(","))
+      logger.fine("Found files: " + serializationFile.mkString(","))
+      
       val serialisationPluginFiles = new TreeSet[File] ++ serializatonPlugins.flatMap{PluginManager.pluginsForClass}
       
       val storage = environment.selectAStorage(serializationFile + 
