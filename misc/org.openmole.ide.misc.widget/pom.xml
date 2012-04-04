@@ -34,29 +34,19 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-netbeans-api-visual</artifactId>
-            <version>${netbeans.version}</version>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.netbeans.api</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.miglayout</groupId>
-            <artifactId>miglayout</artifactId>
-            <version>${com.miglayout.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-util</artifactId>
-           <version>${netbeans.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-dialogs</artifactId>
-            <version>${netbeans.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>jsyntaxpane</groupId>
+            <groupId>org.openmole.ide</groupId>
             <artifactId>jsyntaxpane</artifactId>
-           <version>0.9.6</version>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>net.miginfocom.swing.miglayout</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
