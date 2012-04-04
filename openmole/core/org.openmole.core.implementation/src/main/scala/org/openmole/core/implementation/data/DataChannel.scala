@@ -51,7 +51,7 @@ class DataChannel(
 
   def this(start: ICapsule, end: ISlot, head: IPrototype[_]) = this(start, end, head, Array.empty[IPrototype[_]])
 
-  def this(start: ICapsule, end: ISlot, dataset: IDataSet) = this(start, end, dataset.map( v => v.prototype.name ).toSet)
+  def this(start: ICapsule, end: ISlot, dataset: IDataSet) = this(start, end, dataset.map( _.prototype.name ).toSet)
 
   def this(start: ICapsule, end: ICapsule, head: String, variables: Array[String]) = 
     this(start, end.defaultInputSlot, (ListBuffer(head) ++ variables).toSet[String])

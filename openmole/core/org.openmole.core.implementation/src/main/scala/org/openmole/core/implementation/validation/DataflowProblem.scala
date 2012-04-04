@@ -31,7 +31,7 @@ object DataflowProblem {
     val data: IData[_], 
     val provided: IPrototype[_]) extends DataflowProblem {
     
-    override def toString = "Wrong type from capsule " + capsule + " to slot " + slot + ", data " + data.prototype + " is expected but " + provided + " is provided."
+    override def toString = "Wrong type from capsule " + capsule + " to " + slot + ", data " + data.prototype + " is expected but " + provided + " is provided."
   }
   
   case class MissingInput(
@@ -39,7 +39,7 @@ object DataflowProblem {
     val slot: ISlot, 
     val data: IData[_]) extends DataflowProblem {
     
-    override def toString = "Input " + data + " is missing when reaching the slot " + slot + "."
+    override def toString = "Input " + data + " is missing when reaching the " + slot + "."
   }
 }
 

@@ -18,11 +18,16 @@
 package org.openmole.core.implementation.validation
 
 import org.openmole.core.implementation.mole._
+import org.openmole.core.implementation.task.MoleTask
+import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.transition.ExplorationTransition
 import org.openmole.core.implementation.transition.Transition
 import org.openmole.core.implementation.task.EmptyTask
 import org.openmole.core.implementation.data._
 import DataflowProblem._
+import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.mole.ICapsule
 import org.scalatest.FlatSpec
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers
@@ -121,4 +126,59 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val errors = Validation.duplicatedTransitions(new Mole(c1))
     errors.isEmpty should equal (false) 
   }
+  
+  "Validation" should "detect a missing input error due to datachannel filtering" in {
+    val p = new Prototype("t", classOf[String])
+    
+    val t1 = 
+      new Task("t1") {
+        override def process(context: IContext) = Context(new Variable(p, "test"))
+      }
+    t1.addOutput(p)
+    
+    
+    val t2 = new EmptyTask("t2")
+    
+    val t3 = new EmptyTask("t2")
+    t3.addInput(p)
+
+    val c1 = new Capsule(t1)
+    val c2 = new Capsule(t2)
+    val c3 = new Capsule(t3)
+    
+    new Transition(c1, c2)
+    new Transition(c2, c3)
+    
+    new DataChannel(c1: ICapsule, c3: ICapsule, Array[IPrototype[_]](p))
+    
+    val errors = Validation.typeErrors(new Mole(c1))
+    
+    errors.headOption match {
+      case Some(MissingInput(_,_,d)) => assert(d.prototype == p)
+      case None => sys.error("Error should have been detected")
+    }
+  }
+  
+  "Validation" should "detect a missing input in the submole" in {
+     val p = new Prototype("t", classOf[String])
+    
+    val t1 = new EmptyTask("t1")
+    val t2 = new EmptyTask("t2")
+    t2.addInput(p)
+    
+    val c1 = new Capsule(t1)
+    val c2 = new Capsule(t2)
+    
+    new Transition(c1, c2)
+    
+    val mt = new MoleTask("mt", new Mole(c1), c2)
+    
+    val errors = Validation(new Mole(new Capsule(mt)))
+    errors.headOption match {
+      case Some(MissingInput(_,_,d)) => assert(d.prototype == p)
+      case None => sys.error("Error should have been detected")
+    }
+ 
+  }
+  
 }
