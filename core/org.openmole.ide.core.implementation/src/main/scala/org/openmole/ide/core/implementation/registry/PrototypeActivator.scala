@@ -17,16 +17,18 @@
 
 package org.openmole.ide.core.implementation.registry
 
-import org.openmole.core.model.data.IPrototype
-import org.openmole.misc.tools.obj.ClassUtils._
 
+import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
+import org.osgi.framework.BundleActivator
+import org.osgi.framework.BundleContext
 
-object KeyGenerator {
-  def stripArrays(m : Manifest[_]) : Manifest[_] = {
-    if (m.erasure.isArray) stripArrays(m.erasure.fromArray.toManifest)
-    else m
-  }
+trait PrototypeActivator extends BundleActivator{
   
-  def apply(proto : IPrototype[_]) : PrototypeKey = 
-    new PrototypeKey(proto.getClass,stripArrays(proto.`type`))
+  def prototypeFactories : Iterable[IPrototypeFactoryUI[_]]
+  
+  override def start(context: BundleContext) = 
+    prototypeFactories.foreach{f=> KeyRegistery.prototypes += KeyGenerator(f.buildDataUI.coreObject) -> f}
+
+  override def stop(context: BundleContext) = prototypeFactories.foreach{f => KeyRegistery.prototypes -= KeyGenerator(f.buildDataUI.coreObject)}
+  
 }

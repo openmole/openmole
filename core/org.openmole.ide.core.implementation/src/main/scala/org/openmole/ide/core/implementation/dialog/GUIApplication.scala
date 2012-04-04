@@ -15,18 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.registry
+package org.openmole.ide.core.implementation.dialog
 
-import org.openmole.core.model.data.IPrototype
-import org.openmole.misc.tools.obj.ClassUtils._
-
-
-object KeyGenerator {
-  def stripArrays(m : Manifest[_]) : Manifest[_] = {
-    if (m.erasure.isArray) stripArrays(m.erasure.fromArray.toManifest)
-    else m
+class GUIApplication { application => 
+  val frame = new GUIPanel {override def closeOperations = {
+      super.closeOperation
+      application.closeOperation
+    }
   }
   
-  def apply(proto : IPrototype[_]) : PrototypeKey = 
-    new PrototypeKey(proto.getClass,stripArrays(proto.`type`))
+  def display = frame.visible = true
+  
+  def closeOperation : Unit = {}
 }

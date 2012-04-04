@@ -17,11 +17,14 @@
 
 package org.openmole.ide.core.implementation.registry
 
-import org.openide.util.Lookup
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 import scala.collection.JavaConversions._
+import scala.collection.mutable.HashMap
+import scala.collection.mutable.SynchronizedMap
 
 object KeyRegistery {
   // Map[Key,IPrototypeFactoryUI]
-  val prototypes = Lookup.getDefault.lookupAll(classOf[IPrototypeFactoryUI[_]]).groupBy{f=> KeyGenerator(f.buildDataUI.coreObject)}.map{case(k,v)=>(k,v.head)}
+  val prototypes = new HashMap[PrototypeKey,IPrototypeFactoryUI[_]] with SynchronizedMap[PrototypeKey,IPrototypeFactoryUI[_]]
+  
+ // groupBy{f=> KeyGenerator(f.buildDataUI.coreObject)}.map{case(k,v)=>(k,v.head)}
 }

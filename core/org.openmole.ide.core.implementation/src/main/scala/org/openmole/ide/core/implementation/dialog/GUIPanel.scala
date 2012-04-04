@@ -9,6 +9,7 @@ import scala.swing._
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import java.awt.BorderLayout
+import java.awt.Font
 import org.openmole.ide.core.implementation.control.TabManager
 import org.openmole.ide.core.implementation.control.PasswordListner
 import org.openide.DialogDescriptor
@@ -25,6 +26,7 @@ import org.openmole.ide.core.implementation.dataproxy.Proxys
 
 class GUIPanel extends MainFrame {
   title = "OpenMOLE"
+  font = new Font("Ubuntu",Font.ITALIC,12)
   
   menuBar = new MenuBar{ 
     contents += new Menu("File") {
@@ -77,6 +79,7 @@ class GUIPanel extends MainFrame {
   peer.add((new TabManager).peer,BorderLayout.CENTER)
   
   peer.add((StatusBar).peer,BorderLayout.SOUTH)
+  StatusBar.inform("welcome")
   
   PasswordListner.apply
 }
