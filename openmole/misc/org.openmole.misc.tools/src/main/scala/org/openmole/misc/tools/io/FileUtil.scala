@@ -111,6 +111,7 @@ object FileUtil {
     }
     
     def append(content: String) = new PrintWriter(os).append(content).flush
+    def appendLine(line: String) = append(line + "\n")
   }
   
   implicit def file2FileDecorator(file: File) = new FileDecorator(file)

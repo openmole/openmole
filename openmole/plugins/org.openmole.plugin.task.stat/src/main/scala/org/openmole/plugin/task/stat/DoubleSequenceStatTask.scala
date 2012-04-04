@@ -38,6 +38,7 @@ abstract class DoubleSequenceStatTask(name: String) extends Task(name){
     seqs.foreach{ case(sequence, stat) => add(sequence, stat) }
     this
   }
+  
   override def process(context: IContext) = 
     Context(
       sequences.map{

@@ -28,6 +28,7 @@ import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.Prettifier._
+import scala.annotation.tailrec
 
 class AppendArrayToCSVFileHook(
   moleExecution: IMoleExecution,
@@ -45,21 +46,34 @@ class AppendArrayToCSVFileHook(
     try{
       val lock = fos.getChannel.lock
       try {
-        if(file.size == 0) fos.append(prototypes.map{_.name}.mkString(","))
-        val iterators = prototypes.map {
+        if(file.size == 0) fos.appendLine(prototypes.map{_.name}.mkString(","))
+        
+        
+        val lists = prototypes.map {
           p => 
           context.value(p) match {
             case Some(v) => 
               v match {
-                case v: Array[_] => v.iterator
-                case v => Iterator.continually(v)
+                case v: Array[_] => v.toList
+                case v => List(v)
               }
-            case None => Iterator.continually("not found")
+            case None => List("not found")
           }
-        }
-        Iterator.continually( iterators.map{_.next} ).takeWhile{ e => !(iterators.exists(!_.hasNext)) }.foreach {
-          elements => fos.append(elements.map{_.prettify}.mkString(","))
-        }
+        }.toList
+        
+        @tailrec def write(lists: List[List[_]]): Unit = 
+          if(!lists.exists(_.size > 1)) writeLine(lists.map{_.head})
+          else {
+            writeLine(lists.map{_.head})
+            write(lists.map{ l => if(l.size > 1) l.tail else l})
+          }
+          
+        def writeLine(list: List[_]) = 
+          fos.appendLine(list.map{_.prettify}.mkString(","))
+          
+        
+        
+        write(lists)
       } finally lock.release
     } finally fos.close
     
