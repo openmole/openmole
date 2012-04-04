@@ -11,5 +11,10 @@
     <packaging>bundle</packaging>
     
     <dependencies> 
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-netbeans-api-visual</artifactId>
+            <version>${netbeans.version}</version>
+        </dependency>
     </dependencies>
 </project>

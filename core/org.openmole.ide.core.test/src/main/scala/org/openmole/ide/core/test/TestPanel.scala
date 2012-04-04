@@ -18,8 +18,11 @@ package org.openmole.ide.core.test
 
 import scala.swing.Label
 import scala.swing.MainFrame
+import org.netbeans.api.visual.border.BorderFactory
 
 class TestPanel extends MainFrame {
   title = "OpenMOLE"
   contents = new Label("Paye ta taupe")
+  
+  BorderFactory.createBevelBorder(true)
 }
