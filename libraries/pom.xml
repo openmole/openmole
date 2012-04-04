@@ -21,6 +21,7 @@
 	<module>org.netbeans.api</module>
 	<module>jsyntaxpane</module>
 	<module>net.miginfocom.swing.miglayout</module>
+	<module>org.apache.commons.collections15</module>
     </modules>
 
     <!-- ************************************************************* -->
