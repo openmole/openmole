@@ -9,7 +9,6 @@ import scala.swing._
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import java.awt.BorderLayout
-import java.awt.Font
 import org.openmole.ide.core.implementation.control.TabManager
 import org.openmole.ide.core.implementation.control.PasswordListner
 import org.openide.DialogDescriptor
@@ -26,7 +25,7 @@ import org.openmole.ide.core.implementation.dataproxy.Proxys
 
 class GUIPanel extends MainFrame {
   title = "OpenMOLE"
-  font = new Font("Ubuntu",Font.ITALIC,12)
+  preferredSize = new Dimension(400,200)
   
   menuBar = new MenuBar{ 
     contents += new Menu("File") {
