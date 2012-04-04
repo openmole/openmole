@@ -48,7 +48,7 @@
     <!-- ************************************************************* -->
 
    <properties>
-        <libraries.export.packages>org.openide.*</libraries.export.packages>
+        <libraries.export.packages>org.netbeans.api.*</libraries.export.packages>
     </properties>
 
 
