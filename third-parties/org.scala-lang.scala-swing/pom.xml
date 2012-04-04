@@ -8,7 +8,7 @@
     <!-- ************************************************************* -->
 
     <parent>
-        <artifactId>gui</artifactId>
+        <artifactId>third-parties</artifactId>
         <groupId>org.openmole.ide</groupId>
         <version>0.5-SNAPSHOT</version>
     </parent>
@@ -42,5 +42,4 @@
         <export.packages>scala.swing.*</export.packages>
     </properties>
 
-   
 </project>
