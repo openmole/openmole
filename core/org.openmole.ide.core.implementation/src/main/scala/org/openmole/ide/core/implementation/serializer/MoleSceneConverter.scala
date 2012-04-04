@@ -30,10 +30,10 @@ import java.awt.Toolkit
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
+import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.dataproxy._
-import org.openmole.ide.core.implementation.exception.MoleExceptionManagement
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import scala.collection.immutable.HashSet
@@ -148,7 +148,7 @@ class MoleSceneConverter extends Converter{
                 case "oslot"=> oslots.put(reader.getAttribute("id"), caps)
                 case "task"=> caps.encapsule(Proxys.tasks.filter(p=> p.id == reader.getAttribute("id").toInt).head)  
                 case "environment"=> caps.setEnvironment(Some(Proxys.environments.filter(e=> e.id == reader.getAttribute("id").toInt).head))
-                case _=> MoleExceptionManagement.showException("Unknown balise "+ n1)
+                case _=> StatusBar.block("Unknown balise "+ n1)
               }
               reader.moveUp
             }     
@@ -169,7 +169,7 @@ class MoleSceneConverter extends Converter{
             val p = reader.getNodeName
             p match { 
               case "prototype"=> protoIds += reader.getAttribute("id").toInt
-              case _=> MoleExceptionManagement.showException("Unknown balise "+ p)
+              case _=> StatusBar.block("Unknown balise "+ p)
             }
             reader.moveUp
           }
@@ -178,7 +178,7 @@ class MoleSceneConverter extends Converter{
                                              source,
                                              target,
                                              Proxys.prototypes.filter{p=>protoIds.contains(p.id)}.toList)
-        case _=> MoleExceptionManagement.showException("Unknown balise "+ n0)        
+        case _=> StatusBar.block("Unknown balise "+ n0)        
       }
       reader.moveUp
     }

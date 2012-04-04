@@ -19,7 +19,6 @@ import org.openide.NotifyDescriptor._
 import org.openmole.ide.core.implementation.control.TopComponentsManager
 import org.openmole.ide.core.implementation.preference.PreferenceContent
 import org.openmole.ide.core.implementation.control.TopComponentsManager
-import org.openmole.ide.core.implementation.serializer.GUISerializer
 import org.openmole.ide.core.implementation.action.LoadXML
 import org.openmole.ide.core.implementation.action.SaveXML
 import org.openmole.ide.core.implementation.dataproxy.Proxys
@@ -76,6 +75,8 @@ class GUIPanel extends MainFrame {
       }).peer,BorderLayout.NORTH)
 
   peer.add((new TabManager).peer,BorderLayout.CENTER)
+  
+  peer.add((StatusBar).peer,BorderLayout.SOUTH)
   
   PasswordListner.apply
 }

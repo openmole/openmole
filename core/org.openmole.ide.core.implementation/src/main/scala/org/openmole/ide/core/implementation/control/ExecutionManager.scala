@@ -16,7 +16,6 @@ import javax.swing.Timer
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
-import org.openide.awt.StatusDisplayer
 import org.openide.util.Lookup
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
@@ -25,14 +24,13 @@ import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.hook.IHook
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IGroupingStrategy
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.visualization._
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.model.panel._
-import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.control.IExecutionManager
@@ -224,7 +222,7 @@ class ExecutionManager(manager : IMoleSceneManager,
   }
     
   def displayFileTransfer = 
-    StatusDisplayer.getDefault.setStatusText("Downloads : " + downloads._1 + " / " + downloads._2 + "  Uploads : " + uploads._1 + " / " + uploads._2)
+    StatusBar.inform("Downloads : " + downloads._1 + " / " + downloads._2 + "  Uploads : " + uploads._1 + " / " + uploads._2)
     
   class AddHookRowAction(fui: IHookFactoryUI) extends Action(fui.toString){
     def apply = {

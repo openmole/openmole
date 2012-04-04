@@ -25,13 +25,11 @@ import scala.swing.ScrollPane._
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.workflow.DataChannelConnectionWidget
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
-import org.openide.awt.StatusDisplayer
 
 object DataChannelDialog {
   def display(dcWidget : DataChannelConnectionWidget) = {
@@ -41,7 +39,7 @@ object DataChannelDialog {
         if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel){verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded}.peer,
                                                                    "Set the Data Channel")).equals(NotifyDescriptor.OK_OPTION)) 
           dcWidget.dataChannelUI.prototypes = prototypePanel.multiPrototypeCombo.content
-      case true=> StatusDisplayer.getDefault.setStatusText("No Prototype is defined !")
+      case true=> StatusBar.warn("No Prototype is defined !")
     }
   }
   

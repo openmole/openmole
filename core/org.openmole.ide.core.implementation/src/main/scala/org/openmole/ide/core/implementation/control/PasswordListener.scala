@@ -20,7 +20,7 @@ package org.openmole.ide.core.implementation.control
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
-import org.openmole.ide.core.implementation.exception.MoleExceptionManagement
+import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.EventListener
@@ -46,7 +46,7 @@ class PasswordListener extends EventListener[Workspace] {
           else PasswordDialog.ok(false)
         }
         catch {
-          case e: UserBadDataError => MoleExceptionManagement.giveInformation("The preference password is not set. All the actions requiring encrypted data are unvailable")
+          case e: UserBadDataError => StatusBar.warn("The preference password is not set. All the actions requiring encrypted data are unvailable")
           case x => println(" other exception " + x)
         }
       case _ => 

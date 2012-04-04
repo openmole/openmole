@@ -10,5 +10,5 @@ import scala.swing.SimpleGUIApplication
 import org.openmole.ide.core.implementation.dialog.GUIPanel
 
 object TestApplication extends SimpleGUIApplication {
-    def top = new GUIPanel{preferredSize = new Dimension(400,200)}
-  }
+  def top = new GUIPanel{preferredSize = new Dimension(400,200)}
+}

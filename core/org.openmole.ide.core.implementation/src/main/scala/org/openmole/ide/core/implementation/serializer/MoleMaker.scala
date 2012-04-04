@@ -20,6 +20,7 @@ package org.openmole.ide.core.implementation.serializer
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.mole.ICapsule
+import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.core.model.mole.IGroupingStrategy
 import org.openmole.core.model.mole.IMole
@@ -28,7 +29,6 @@ import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.core.implementation.task._
-import org.openide.awt.StatusDisplayer
 import org.openmole.core.implementation.data.DataChannel
 import org.openmole.core.implementation.data.Parameter
 import org.openmole.core.implementation.mole._
@@ -63,7 +63,7 @@ object MoleMaker {
               envs += new Tuple2(env,x.dataUI.name)
               strat.select(capsuleMap(c),env)
             }catch {
-              case e: UserBadDataError=> StatusDisplayer.getDefault.setStatusText(e.message)
+              case e: UserBadDataError=> StatusBar.warn(e.message)
             }
           case _ =>
         }}
