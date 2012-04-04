@@ -17,12 +17,9 @@
 
 package org.openmole.ide.misc.widget.example
 
-import com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel
 import javax.swing.BorderFactory
 import java.awt.Color
 import java.awt.Dimension
-import javax.swing.JScrollPane
-import javax.swing.UIManager
 import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget._
 import scala.swing._
@@ -34,7 +31,6 @@ import scala.swing.event.UIElementResized
 object PropertyPanelExample extends SimpleSwingApplication
 {
   def top = new MainFrame {
-    UIManager.setLookAndFeel(new NimbusLookAndFeel)
     title = "Link Label Demo"
     
     val scene = new MyScene
