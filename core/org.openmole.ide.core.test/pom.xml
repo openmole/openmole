@@ -12,9 +12,9 @@
     
     <dependencies> 
         <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-netbeans-api-visual</artifactId>
-            <version>${netbeans.version}</version>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.netbeans.api</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>
