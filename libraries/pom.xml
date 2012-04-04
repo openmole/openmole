@@ -24,7 +24,6 @@
         <module>fr.iscpif.mgo</module>
         <module>com.thoughtworks.xstream</module>
         <module>org.codehaus.groovy</module>
-        <module>org.apache.commons.collections15</module>
         <module>org.apache.commons.compress</module>
 	<module>org.apache.log4j</module>
         <module>org.apache.commons.pool</module>
