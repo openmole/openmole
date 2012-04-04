@@ -18,6 +18,7 @@
     <modules>
 	<module>de.erichseifert.gral</module>
 	<module>org.scala-lang.scala-swing</module>
+	<module>org.netbeans.api</module>
     </modules>
 
     <!-- ************************************************************* -->
@@ -35,7 +36,8 @@
 
     <properties>
         <!-- Default properties for bundles creation -->
-        <embed-dep>*;type=!pom;inline=true</embed-dep>
+ 	<embed-dep>*;artifactId=!scala-library;type=!pom;inline=true</embed-dep>
+        <import.packages>scala.*,*;resolution:=optional</import.packages>
         <embed-transitive>true</embed-transitive>
         <import.packages>*;resolution:=optional</import.packages>
         <libraries.export.packages>*,${export.packages}</libraries.export.packages>
