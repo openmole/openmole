@@ -17,14 +17,17 @@
 
 package org.openmole.ide.core.implementation.registry
 
-import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
-import scala.collection.JavaConversions._
-import scala.collection.mutable.HashMap
-import scala.collection.mutable.SynchronizedMap
+import org.openmole.ide.core.model.factory.ITaskFactoryUI
+import org.osgi.framework.BundleActivator
+import org.osgi.framework.BundleContext
 
-object KeyRegistery {
-  // Map[Key,IPrototypeFactoryUI]
-  val prototypes = new HashMap[PrototypeKey,IPrototypeFactoryUI[_]] with SynchronizedMap[PrototypeKey,IPrototypeFactoryUI[_]]
+trait TaskActivator extends BundleActivator{
   
- // groupBy{f=> KeyGenerator(f.buildDataUI.coreObject)}.map{case(k,v)=>(k,v.head)}
+  def taskFactories : Iterable[ITaskFactoryUI]
+  
+  override def start(context: BundleContext) = 
+    taskFactories.foreach{f=> KeyRegistry.tasks += KeyGenerator(f.buildDataUI.coreObject) -> f}
+
+  override def stop(context: BundleContext) = taskFactories.foreach{f => KeyRegistry.tasks -= KeyGenerator(f.buildDataUI.coreObject)}
 }
+

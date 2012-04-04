@@ -16,7 +16,6 @@ import javax.swing.Timer
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
-import org.openide.util.Lookup
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 import org.openmole.core.implementation.mole.MoleExecution
@@ -35,6 +34,7 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
+import org.openmole.ide.core.implementation.registry.KeyRegistry
 import scala.collection.mutable.HashMap
 import scala.swing.Action
 import scala.swing.Label
@@ -97,8 +97,8 @@ class ExecutionManager(manager : IMoleSceneManager,
   
   val hookMenu = new Menu("Hooks")
   val groupingMenu = new Menu("Grouping")
-  Lookup.getDefault.lookupAll(classOf[IHookFactoryUI]).foreach{f=>hookMenu.contents+= new MenuItem(new AddHookRowAction(f))}
-  Lookup.getDefault.lookupAll(classOf[IGroupingStrategyFactoryUI]).foreach{f=>groupingMenu.contents+= new MenuItem(new AddGroupingStrategyRowAction(f))}
+  KeyRegistry.hooks.values.foreach{f=>hookMenu.contents+= new MenuItem(new AddHookRowAction(f))}
+  KeyRegistry.groupingStrategies.values.foreach{f=>groupingMenu.contents+= new MenuItem(new AddGroupingStrategyRowAction(f))}
   val menuBar = new MenuBar{contents.append(hookMenu,groupingMenu)}
   menuBar.minimumSize = new Dimension(menuBar.size.width,30)
   val hookPanel = new PluginPanel(""){contents+= (menuBar,"wrap")}
