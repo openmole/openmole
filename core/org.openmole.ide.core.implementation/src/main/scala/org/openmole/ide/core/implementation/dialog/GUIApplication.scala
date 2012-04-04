@@ -17,7 +17,17 @@
 
 package org.openmole.ide.core.implementation.dialog
 
+import java.awt.Font
+import javax.swing.UIManager
+
 class GUIApplication { application => 
+  
+  val font = new Font("Ubuntu",Font.PLAIN,12)
+  UIManager.put("Menu.font",font)
+  UIManager.put("MenuItem.font",font)
+  UIManager.put("Button.font",font)
+  UIManager.put("Label.font",font)
+  
   val frame = new GUIPanel {override def closeOperation = {
       super.closeOperation
       application.closeOperation
