@@ -60,7 +60,7 @@ object Stochastic {
   private def toArray(x: List[(IPrototype[Double], IPrototype[Double])]) =
     x.map { case(output, stat) => (Prototype.toArray(output), stat)}
   
-  def medianAndDeviation(
+  def statistics(
     puzzle: IPuzzleFirstAndLast,
     replicationFactor: DiscreteFactor[_, _],
     statistics: Statistics
@@ -113,11 +113,11 @@ object Stochastic {
     new PuzzleFirstAndLast(explorationCapsule, endCapsule)
   }
   
-  def medianAndDeviation(
+  def statistics(
     model: ICapsule,
     replicationFactor: DiscreteFactor[_, _],
     statistics: Statistics
   ): IPuzzleFirstAndLast = 
-      medianAndDeviation(puzzle(model), replicationFactor, statistics)
+      Stochastic.statistics(puzzle(model), replicationFactor, statistics)
   
 }

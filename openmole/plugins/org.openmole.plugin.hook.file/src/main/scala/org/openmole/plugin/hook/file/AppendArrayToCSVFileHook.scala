@@ -33,7 +33,7 @@ class AppendArrayToCSVFileHook(
   moleExecution: IMoleExecution,
   capsule: ICapsule,
   fileName: String,
-  prototypes: Array[IPrototype[Array[_]]]) extends CapsuleExecutionHook(moleExecution, capsule) {
+  prototypes: Array[IPrototype[_]]) extends CapsuleExecutionHook(moleExecution, capsule) {
   
   override def process(moleJob: IMoleJob) =  {
     import moleJob.context
@@ -46,7 +46,20 @@ class AppendArrayToCSVFileHook(
       val lock = fos.getChannel.lock
       try {
         if(file.size == 0) fos.append(prototypes.map{_.name}.mkString(","))
-        fos.append(prototypes.map{p => context.value(p).getOrElse("not found").prettify}.mkString(","))
+        val iterators = prototypes.map {
+          p => 
+          context.value(p) match {
+            case Some(v) => 
+              v match {
+                case v: Array[_] => v.iterator
+                case v => Iterator.continually(v)
+              }
+            case None => Iterator.continually("not found")
+          }
+        }
+        Iterator.continually( iterators.map{_.next} ).takeWhile{ e => !(iterators.exists(!_.hasNext)) }.foreach {
+          elements => fos.append(elements.map{_.prettify}.mkString(","))
+        }
       } finally lock.release
     } finally fos.close
     

@@ -343,7 +343,7 @@ object Builder {
  
   def puzzle(singleTask: ITask): IPuzzleFirstAndLast = puzzle(new Capsule(singleTask))
 
-  
+  def puzzle(first: ICapsule, last: ICapsule): IPuzzleFirstAndLast = new PuzzleFirstAndLast(first, last)
   
   
   /**
