@@ -18,7 +18,7 @@
 package org.openmole.ide.core.implementation.dialog
 
 class GUIApplication { application => 
-  val frame = new GUIPanel {override def closeOperations = {
+  val frame = new GUIPanel {override def closeOperation = {
       super.closeOperation
       application.closeOperation
     }
