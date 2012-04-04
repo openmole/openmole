@@ -42,6 +42,7 @@ class Application extends IApplication with Logger {
     
     case class Config(
       pluginsDirs: List[String] = Nil,
+      guiPluginsDirs: List[String] = Nil,
       workspaceDir: Option[String] = None
     )
     
@@ -50,6 +51,9 @@ class Application extends IApplication with Logger {
       def options = Seq(
         opt("p", "pluginDirectories" ,"Plugins directories (seperated by \",\")") {
           (v: String, c: Config) => c.copy(pluginsDirs = v.split(',').toList) 
+        },
+        opt("g", "guiPluginDirectories" ,"GUI plugins directories (seperated by \",\")") {
+          (v: String, c: Config) => c.copy(guiPluginsDirs = v.split(',').toList) 
         },
         opt("w", "Path of the workspace") {
           (v: String, c: Config) => c.copy(workspaceDir = Some(v)) 
@@ -91,6 +95,10 @@ class Application extends IApplication with Logger {
           Console.groovysh.run()
         }
       } else {
+        
+        config.pluginsDirs.foreach { PluginManager.loadDir }
+        config.guiPluginsDirs.foreach { PluginManager.loadDir }
+        
         val waitClose = new Semaphore(0)
         val application = new GUIApplication() {
           override def closeOperation = {

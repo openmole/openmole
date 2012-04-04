@@ -8,42 +8,22 @@
     <!-- ************************************************************* -->
 
     <parent>
-        <groupId>org.openmole</groupId>
-        <artifactId>openmole</artifactId>
+        <artifactId>ui</artifactId>
+        <groupId>org.openmole.ui</groupId>
         <version>0.5-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.openmole.ui</groupId>
-    <artifactId>ui</artifactId>
-
-    <modules>
-        <module>org.openmole.ui</module>
-        <module>plugins</module>
-        <module>plugins-gui</module>
-	<module>openmole-ui-package</module>
-    </modules>
+    <artifactId>plugins-gui</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>org.scala-lang.scala-library</artifactId>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.openmole.ide.plugin.prototype.base</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_${lib.org.scala-lang.scala.version}</artifactId>
-            <version>${lib.org.scalatest.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-           <groupId>junit</groupId>
-           <artifactId>junit</artifactId>
-           <version>${lib.org.junit.version}</version>
-           <scope>test</scope>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 
- 
     <!-- ************************************************************* -->
     <!-- *** Project Information ************************************* -->
     <!-- ************************************************************* -->
@@ -57,36 +37,43 @@
 
     <packaging>pom</packaging>
 
-    <!--build>
+    <build>
         <plugins>
             <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+		<configuration>
+			<excludeTransitive>true</excludeTransitive>
+			<excludeScope>compile</excludeScope>
+			<!--<outputDirectory>${project.parent.build.directory}/openmole/openmole-plugins</outputDirectory>-->
+		</configuration>
+                <executions>
+                    <execution>
+                        <id>copy-bundles</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+			</goals>
+                    </execution>
+                </executions>
+            </plugin>
+	    <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.2</version>
                 <configuration>
-                    <finalName>product/openmole-plugins</finalName>
+                    <descriptor>src/main/assembly/openmole-plugins-gui.xml</descriptor>
                     <appendAssemblyId>false</appendAssemblyId>
-                    <descriptors>
-                        <descriptor>src/main/assembly/plugins.xml</descriptor>
-                    </descriptors>
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>package</phase>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
                         <goals>
-                            <goal>assembly</goal>
+                            <goal>single</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
-    </build-->
+    </build>
 </project>
-
-
-
-
-
-
-
-
-
 

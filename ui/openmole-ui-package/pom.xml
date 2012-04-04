@@ -28,6 +28,12 @@
             <type>tar.gz</type>
         </dependency>
         <dependency>
+            <groupId>org.openmole.ui</groupId>
+            <artifactId>plugins-gui</artifactId>
+            <version>${project.version}</version>
+            <type>tar.gz</type>
+        </dependency>
+        <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.runtime</artifactId>
             <version>${project.version}</version>
@@ -57,6 +63,7 @@
     <properties>
         <package.directory>${project.build.directory}/openmole</package.directory>
         <package.openmole.plugins.directory>${package.directory}/openmole-plugins/</package.openmole.plugins.directory>
+        <package.openmole.plugins-gui.directory>${package.directory}/openmole-plugins-gui/</package.openmole.plugins-gui.directory>
     </properties>
 
 
@@ -88,6 +95,13 @@
                                     <version>${project.version}</version>
                                     <type>tar.gz</type>
 				    <outputDirectory>${package.openmole.plugins.directory}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.openmole.ui</groupId>
+                                    <artifactId>plugins-gui</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>tar.gz</type>
+				    <outputDirectory>${package.openmole.plugins-gui.directory}</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
