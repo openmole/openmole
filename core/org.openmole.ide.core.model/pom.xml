@@ -54,9 +54,9 @@
             <version>${lib.org.joda.time.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-windows</artifactId>
-            <version>${netbeans.version}</version>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.netbeans.api</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
