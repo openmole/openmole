@@ -60,6 +60,7 @@
     <!--optional. Use this property to tune the exported packages-->
     <properties>
 	<libraries.export.packages>org.nlogo.*</libraries.export.packages>
+        <embed-dep>*;type=!pom;inline=true</embed-dep>
     </properties>
 
 </project>

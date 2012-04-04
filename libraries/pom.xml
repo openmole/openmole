@@ -62,7 +62,8 @@
 
     <properties>
         <!-- Default properties for bundles creation -->
-        <embed-dep>*;type=!pom;inline=true</embed-dep>
+        <!--<embed-dep>*;type=!pom;inline=true</embed-dep>-->
+        <embed-dep>*;artifactId=!scala-library;type=!pom;inline=true</embed-dep>
         <embed-transitive>true</embed-transitive>
         <import.packages>*;resolution:=optional</import.packages>
         <libraries.export.packages>*,${export.packages}</libraries.export.packages>

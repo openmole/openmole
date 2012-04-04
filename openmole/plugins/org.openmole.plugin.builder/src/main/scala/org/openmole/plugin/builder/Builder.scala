@@ -328,7 +328,7 @@ object Builder {
     new Transition(loopOnCapsule, puzzle.first)
     new Transition(puzzle.last, decrementCapsule)
     new Transition(decrementCapsule, new Slot(loopOnCapsule), prototype.name + "<=" + nb)
-    new DataChannel(loopOnCapsule, decrementCapsule, prototype)
+    new DataChannel(loopOnCapsule, decrementCapsule)
     new PuzzleFirstAndLast(loopOnCapsule, decrementCapsule)
   }
       

@@ -37,4 +37,9 @@
 
     <packaging>bundle</packaging>
 
+    
+    <properties>
+        <embed-dep>*;type=!pom;inline=true</embed-dep>
+    </properties>
+
 </project>

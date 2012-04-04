@@ -52,19 +52,17 @@ class DataChannel(
   def this(start: ICapsule, end: ISlot, head: IPrototype[_]) = this(start, end, head, Array.empty[IPrototype[_]])
 
   def this(start: ICapsule, end: ISlot, dataset: IDataSet) = this(start, end, dataset.map( v => v.prototype.name ).toSet)
-   
-  
-  
+
   def this(start: ICapsule, end: ICapsule, head: String, variables: Array[String]) = 
     this(start, end.defaultInputSlot, (ListBuffer(head) ++ variables).toSet[String])
 
-  def this(start: ICapsule, end: ICapsule, head: IPrototype[_], variables: Array[IPrototype[_]]) =
-    this(start, end.defaultInputSlot, (ListBuffer(head) ++ variables).map( v => v.name).toSet)
-
-  def this(start: ICapsule, end: ICapsule, head: IPrototype[_]) = this(start, end, head, Array.empty[IPrototype[_]])
-
-  def this(start: ICapsule, end: ICapsule, dataset: IDataSet) = this(start, end.defaultInputSlot, dataset.map( v => v.prototype.name ).toSet)
-   
+  def this(start: ICapsule, end: ICapsule, dataset: IDataSet) = this(start, end.defaultInputSlot, dataset.map(_.prototype.name ).toSet)
+ 
+  def this(start: ICapsule, end: ISlot, prototypes: Array[IPrototype[_]]) = this(start, end, prototypes.map(_.name).toSet)
+  
+  def this(start: ICapsule, end: ICapsule, prototype: Array[IPrototype[_]]) = this(start, end.defaultInputSlot, prototype)
+  
+  
   override def consums(ticket: ITicket, moleExecution: IMoleExecution): Iterable[IVariable[_]] = moleExecution.synchronized {
     val levelDelta = LevelComputing(moleExecution).levelDelta(start, end.capsule)
     val dataChannelRegistry = moleExecution.dataChannelRegistry
