@@ -30,7 +30,7 @@ import org.openmole.ui.console.command.Get
 import org.openmole.ui.console.command.Print
 import org.openmole.ui.console.command.Auth
 import org.openmole.ui.console.command.Verify
-import org.openmole.ide.core.test.TestPanel
+import org.openmole.ide.core.implementation.dialog.GUIApplication
 import scala.actors.threadpool.locks.ReentrantLock
 import scala.swing.SimpleSwingApplication
 import scopt.generic.OptionDefinition
@@ -92,13 +92,13 @@ class Application extends IApplication with Logger {
         }
       } else {
         val waitClose = new Semaphore(0)
-        val pannel = new TestPanel() {
+        val application = new GUIApplication() {
           override def closeOperation = {
             super.closeOperation                     
             waitClose.release(1)
           }
         }
-        pannel.visible = true
+        application.display
         waitClose.acquire(1)
       }
 

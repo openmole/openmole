@@ -157,7 +157,7 @@
 	<!-- IDE plugins -->
         <dependency>
             <groupId>org.openmole.ide</groupId>
-            <artifactId>org.openmole.ide.core.test</artifactId>
+            <artifactId>org.openmole.ide.core.implementation</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
