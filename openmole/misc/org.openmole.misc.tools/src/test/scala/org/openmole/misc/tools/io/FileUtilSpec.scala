@@ -45,8 +45,8 @@ class FileUtilSpec extends FlatSpec with ShouldMatchers  {
     try {
       val t1 = "TestString"
       val t2 = "Test2String"
-      file.lockAndAppend(t1)
-      file.lockAndAppend(t2)
+      file.lockApply(_.append(t1))
+      file.lockApply(_.append(t2))
       file.content should equal (t1 + t2)
     } finally file.delete
   }

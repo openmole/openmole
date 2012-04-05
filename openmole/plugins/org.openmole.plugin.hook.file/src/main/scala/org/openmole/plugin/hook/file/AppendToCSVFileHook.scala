@@ -25,6 +25,7 @@ import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.misc.tools.io.Prettifier._
 
 class AppendToCSVFileHook(
   moleExecution: IMoleExecution,
@@ -38,9 +39,9 @@ class AppendToCSVFileHook(
     file.createParentDir
     val content = 
       prototypes.map { 
-        p => context.value(p).getOrElse("not found")
+        p => context.value(p).getOrElse("not found").prettify
       }.mkString(",")
-    file.lockAndAppend(content)
+    file.lockApply(_.appendLine(content))
   }
   
 } 

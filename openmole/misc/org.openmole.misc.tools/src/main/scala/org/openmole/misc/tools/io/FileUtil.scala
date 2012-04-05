@@ -325,11 +325,11 @@ object FileUtil {
       new TarInputStream(gzipedBufferedInputStream).extractDirArchiveWithRelativePathAndClose(dest)
     
     
-    def lockAndAppend(content: String) = {
+    def lockApply(operation: OutputStream => Unit) = {
       val fos = new FileOutputStream(file, true)
       try{
         val lock = fos.getChannel.lock
-        try fos.append(content)
+        try operation(fos)
         finally lock.release
       } finally fos.close
     }

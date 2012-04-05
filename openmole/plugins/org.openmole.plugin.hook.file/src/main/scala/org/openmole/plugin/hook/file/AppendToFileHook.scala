@@ -33,7 +33,7 @@ class AppendToFileHook(moleExecution: IMoleExecution, capsule: ICapsule, fileNam
     val file = new File(VariableExpansion.expandData(context,fileName))
     if(!file.getParentFile.exists) file.getParentFile.mkdirs
     if(!file.getParentFile.isDirectory) throw new UserBadDataError("Cannot create directory " + file.getParentFile)
-    file.lockAndAppend(VariableExpansion.expandData(context,content))
+    file.lockApply(_.append(VariableExpansion.expandData(context,content)))
   }
   
 }
