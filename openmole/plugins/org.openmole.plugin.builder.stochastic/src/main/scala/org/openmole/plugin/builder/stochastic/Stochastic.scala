@@ -66,8 +66,8 @@ object Stochastic {
     statistics: Statistics
   ): IPuzzleFirstAndLast = {
     val exploration = new ExplorationTask("replication", replicationFactor)
-    
     val explorationCapsule = new StrainerCapsule(exploration)
+    val aggregationCapsule = new StrainerCapsule(new EmptyTask("aggregation"))
     
     val medianTask = new MedianTask("median")
     medianTask.add(toArray(statistics.medians))
@@ -89,8 +89,7 @@ object Stochastic {
     mseTask.add(toArray(statistics.mses))
     val mseCapsule = new Capsule(mseTask)
     
-    val aggregationCapsule = new StrainerCapsule(new EmptyTask("aggregation"))
-    
+
     val endCapsule = new StrainerCapsule(new EmptyTask("end"))
     
     new ExplorationTransition(explorationCapsule, puzzle.first)
@@ -120,4 +119,22 @@ object Stochastic {
   ): IPuzzleFirstAndLast = 
       Stochastic.statistics(puzzle(model), replicationFactor, statistics)
   
+  
+  def replicate(
+    puzzle: IPuzzleFirstAndLast,
+    replicationFactor: DiscreteFactor[_, _]
+  ) = {
+    val exploration = new ExplorationTask("replication", replicationFactor)
+    val explorationCapsule = new StrainerCapsule(exploration)
+    val aggregationCapsule = new StrainerCapsule(new EmptyTask("aggregation"))
+    new ExplorationTransition(explorationCapsule, puzzle.first)
+    new AggregationTransition(puzzle.last, aggregationCapsule)
+    new DataChannel(explorationCapsule, aggregationCapsule)
+    new PuzzleFirstAndLast(explorationCapsule, aggregationCapsule)
+  }
+  
+  def replicate(
+    capsule: ICapsule,
+    replicationFactor: DiscreteFactor[_, _]
+  ): IPuzzleFirstAndLast = replicate(puzzle(capsule), replicationFactor)
 }
