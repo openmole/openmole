@@ -25,8 +25,10 @@ trait TaskActivator extends BundleActivator{
   
   def taskFactories : Iterable[ITaskFactoryUI]
   
-  override def start(context: BundleContext) = 
+  override def start(context: BundleContext) = {
+    super.start(context)
     taskFactories.foreach{f=> KeyRegistry.tasks += KeyGenerator(f.buildDataUI.coreObject) -> f}
+  }
 
   override def stop(context: BundleContext) = taskFactories.foreach{f => KeyRegistry.tasks -= KeyGenerator(f.buildDataUI.coreObject)}
 }

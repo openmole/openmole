@@ -26,8 +26,10 @@ trait PrototypeActivator extends BundleActivator{
   
   def prototypeFactories : Iterable[IPrototypeFactoryUI[_]]
   
-  override def start(context: BundleContext) = 
+  override def start(context: BundleContext) = {
+    super.start(context)
     prototypeFactories.foreach{f=> KeyRegistry.prototypes += KeyGenerator(f.buildDataUI.coreObject) -> f}
+  }
 
   override def stop(context: BundleContext) = prototypeFactories.foreach{f => KeyRegistry.prototypes -= KeyGenerator(f.buildDataUI.coreObject)}
   
