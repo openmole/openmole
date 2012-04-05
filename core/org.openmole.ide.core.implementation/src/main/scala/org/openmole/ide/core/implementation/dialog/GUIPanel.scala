@@ -25,7 +25,6 @@ import org.openmole.ide.core.implementation.dataproxy.Proxys
 
 class GUIPanel extends MainFrame {
   title = "OpenMOLE"
-  preferredSize = new Dimension(400,200)
   
   menuBar = new MenuBar{ 
     contents += new Menu("File") {
