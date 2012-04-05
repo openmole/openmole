@@ -22,7 +22,7 @@ import javax.swing.filechooser.FileNameExtensionFilter
 import scala.swing.FileChooser.SelectionMode._
 import org.openide.windows.WindowManager
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
-import org.openmole.ide.core.implementation.control.Settings
+import org.openmole.ide.core.implementation.execution.Settings
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import scala.swing.FileChooser.Result.Approve
 import scala.swing.Component

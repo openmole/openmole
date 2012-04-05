@@ -18,7 +18,7 @@
 package org.openmole.ide.core.implementation.action
 
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
-import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.misc.exception.UserBadDataError
 import scala.swing.Action
@@ -26,7 +26,7 @@ import scala.swing.Action
 class BuildExecutionAction(tc: MoleSceneTopComponent) extends Action(""){
   override def apply = {
     try {
-      val clone = TopComponentsManager.addExecutionTopComponent(tc.getMoleComponent)
+      val clone = ScenesManager.addExecutionTopComponent(tc.getMoleComponent)
       clone.requestActive
     } catch {
       case e: UserBadDataError=> StatusBar.block(e.message)

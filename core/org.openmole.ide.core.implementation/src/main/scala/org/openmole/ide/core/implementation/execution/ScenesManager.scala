@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.control
+package org.openmole.ide.core.implementation.execution
 
 import org.openmole.ide.core.model.control.IMoleComponent
 import java.util.concurrent.atomic.AtomicInteger
@@ -28,7 +28,7 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import scala.collection.JavaConversions._
 
-object TopComponentsManager {
+object ScenesManager {
 
   var countBuild = new AtomicInteger  
   var countExec = new AtomicInteger  

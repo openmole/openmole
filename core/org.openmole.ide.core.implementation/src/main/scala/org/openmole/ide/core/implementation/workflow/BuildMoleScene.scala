@@ -29,7 +29,7 @@ import org.openmole.ide.core.model.panel.PanelMode
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.netbeans.api.visual.action.ActionFactory
-import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.panel.EnvironmentPanelUI
 import org.openmole.ide.core.implementation.panel.PrototypePanelUI
 import org.openmole.ide.core.implementation.panel.SamplingPanelUI
@@ -41,13 +41,13 @@ import scala.collection.mutable.HashMap
 import org.openmole.ide.core.model.panel.PanelMode._
 
 class BuildMoleScene(n: String = "",
-                     id : Int = TopComponentsManager.countBuild.getAndIncrement) extends MoleScene(n,id) {
+                     id : Int = ScenesManager.countBuild.getAndIncrement) extends MoleScene(n,id) {
   override val isBuildScene = true
   
   def copy =  {
     var capsuleMapping = new HashMap[ICapsuleUI,ICapsuleUI]
     var islots = new HashMap[IInputSlotWidget, IInputSlotWidget]
-    val ms = new ExecutionMoleScene(TopComponentsManager.countExec.get,manager.name+"_"+TopComponentsManager.countExec.incrementAndGet)
+    val ms = new ExecutionMoleScene(ScenesManager.countExec.get,manager.name+"_"+ScenesManager.countExec.incrementAndGet)
     manager.capsules.foreach(n=> {
         val (caps,islotMapping) = n._2.copy(ms)
         if (n._2.dataUI.startingCapsule) ms.manager.setStartingCapsule(caps)
@@ -67,7 +67,7 @@ class BuildMoleScene(n: String = "",
   }
   
   def attachEdgeWidget(e: String)= {
-    val connectionWidget = TopComponentsManager.connectMode match {
+    val connectionWidget = ScenesManager.connectMode match {
       case true=> val x = new ConnectorWidget(this,manager.transition(e))
         x.setEndPointShape(PointShape.SQUARE_FILLED_BIG)
         x.getActions.addAction(ActionFactory.createPopupMenuAction(new TransitionMenuProvider(this,x)))

@@ -15,20 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.control
+package org.openmole.ide.core.implementation.execution
 
-import org.openmole.core.model.job.State._
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.misc.eventdispatcher.Event
-import org.openmole.misc.eventdispatcher.EventListener
-import org.openmole.core.model.mole.IMoleExecution.OneJobStatusChanged
+import org.openmole.core.model.mole.IMoleExecution.OneJobSubmitted
+import org.openmole.misc.eventdispatcher._
+import org.openmole.core.model.job.State._
 
-class JobSatusListener(exeManager: ExecutionManager) extends EventListener[IMoleExecution] {
+class JobCreatedListener(exeManager: ExecutionManager) extends EventListener[IMoleExecution] {
   override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = {
     event match {
-      case x: OneJobStatusChanged=> 
-        exeManager.wfPiePlotter.update(x.oldState,exeManager.status(x.oldState).decrementAndGet)
-        exeManager.wfPiePlotter.update(x.newState,exeManager.status(x.newState).incrementAndGet)
+      case x: OneJobSubmitted=>
+        exeManager.wfPiePlotter.update(READY,exeManager.status(READY).incrementAndGet)
     }
   }
 }

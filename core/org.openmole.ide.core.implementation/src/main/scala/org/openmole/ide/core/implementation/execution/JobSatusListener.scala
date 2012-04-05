@@ -15,22 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.control
+package org.openmole.ide.core.implementation.execution
 
-import org.openmole.core.model.execution.IEnvironment
+import org.openmole.core.model.job.State._
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.misc.eventdispatcher._
-import org.openmole.core.model.execution.ExecutionState._
-import ExecutionManager._
+import org.openmole.misc.eventdispatcher.Event
+import org.openmole.misc.eventdispatcher.EventListener
+import org.openmole.core.model.mole.IMoleExecution.OneJobStatusChanged
 
-class JobStateChangedOnEnvironmentListener(exeManager: ExecutionManager,
-                                            moleExecution: IMoleExecution, 
-                                            environment: IEnvironment) extends EventListener[IEnvironment] {
-  override def triggered(environment: IEnvironment, event: Event[IEnvironment]) = {
+class JobSatusListener(exeManager: ExecutionManager) extends EventListener[IMoleExecution] {
+  override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = {
     event match {
-      case x: IEnvironment.JobStateChanged=>
-        exeManager.decrementEnvironmentState(environment, x.oldState)
-        exeManager.incrementEnvironmentState(environment, x.newState)
+      case x: OneJobStatusChanged=> 
+        exeManager.wfPiePlotter.update(x.oldState,exeManager.status(x.oldState).decrementAndGet)
+        exeManager.wfPiePlotter.update(x.newState,exeManager.status(x.newState).incrementAndGet)
     }
   }
 }

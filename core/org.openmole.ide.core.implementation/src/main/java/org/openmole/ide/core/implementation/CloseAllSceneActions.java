@@ -23,7 +23,7 @@ import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionID;
 import org.openide.util.NbBundle.Messages;
-import org.openmole.ide.core.implementation.control.TopComponentsManager;
+import org.openmole.ide.core.implementation.execution.ScenesManager;
 
 @ActionID(category = "Edit",
 id = "org.openmole.ide.core.implementation.CloseAllSceneActions")
@@ -37,8 +37,8 @@ displayName = "#CTL_CloseAllSceneActions")
 public final class CloseAllSceneActions implements ActionListener {
 
     public void actionPerformed(ActionEvent e) {
-        TopComponentsManager.closeOpenedTopComponents();
-        TopComponentsManager.addTopComponent();
+        ScenesManager.closeOpenedTopComponents();
+        ScenesManager.addTopComponent();
        // MoleSceneTopComponent mstc = new MoleSceneTopComponent();
        // mstc.open();
     }

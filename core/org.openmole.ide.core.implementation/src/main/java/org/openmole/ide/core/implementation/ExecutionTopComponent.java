@@ -28,7 +28,7 @@ import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openmole.core.implementation.mole.MoleExecution;
-import org.openmole.ide.core.implementation.control.ExecutionSupport;
+import org.openmole.ide.core.implementation.execution.ExecutionSupport;
 import org.openmole.ide.core.implementation.serializer.MoleMaker;
 
 /**

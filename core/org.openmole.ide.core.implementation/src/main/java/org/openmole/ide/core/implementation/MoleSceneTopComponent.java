@@ -32,7 +32,7 @@ import org.openide.windows.WindowManager;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
-import org.openmole.ide.core.implementation.control.TopComponentsManager;
+import org.openmole.ide.core.implementation.execution.ScenesManager;
 import org.openide.awt.ActionID;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
@@ -178,9 +178,9 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
     
     @Override
     public void componentActivated() {
-        TopComponentsManager.setCurrentMoleSceneTopComponent(this);
+        ScenesManager.setCurrentMoleSceneTopComponent(this);
         refresh(moleScene.isBuildScene());
-        TopComponentsManager.displayExecutionView(moleComponent);
+        ScenesManager.displayExecutionView(moleComponent);
         if (!moleScene.isBuildScene()) {
             etc.open();
         }
@@ -190,7 +190,7 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
 
     @Override
     public void componentOpened() {
-        TopComponentsManager.setCurrentMoleSceneTopComponent(this);
+        ScenesManager.setCurrentMoleSceneTopComponent(this);
     }
 
     @Override
@@ -204,9 +204,9 @@ public final class MoleSceneTopComponent extends CloneableTopComponent {
 
     @Override
     public void componentClosed() {
-        TopComponentsManager.stopAndCloseExecutions(moleComponent);
-        TopComponentsManager.noCurrentMoleSceneTopComponent();
-       // TopComponentsManager.removeTopComponent(moleComponent);
+        ScenesManager.stopAndCloseExecutions(moleComponent);
+        ScenesManager.noCurrentMoleSceneTopComponent();
+       // ScenesManager.removeTopComponent(moleComponent);
     }
 
     void writeProperties(java.util.Properties p) {

@@ -31,7 +31,7 @@ import scala.swing.MenuBar
 import scala.swing.MenuItem
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.registry.KeyRegistry
-import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dataproxy.EnvironmentDataProxyFactory
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyFactory
 import org.openmole.ide.core.implementation.dataproxy.SamplingDataProxyFactory
@@ -103,7 +103,7 @@ object ConceptMenu {
         
   def display(proxy: IDataProxyUI,
               mode: Value) = 
-                TopComponentsManager.currentMoleSceneTopComponent match {
+                ScenesManager.currentMoleSceneTopComponent match {
       case Some(x: MoleSceneTopComponent)=> x.getMoleScene.displayPropertyPanel(proxy, mode)
       case None=> DialogFactory.newTabName match {
           case Some(x: MoleSceneTopComponent)=> x.getMoleScene.displayPropertyPanel(proxy, mode)

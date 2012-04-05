@@ -18,7 +18,7 @@
 package org.openmole.ide.core.implementation.action
 
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
-import org.openmole.ide.core.implementation.control.BuildMoleComponent
+import org.openmole.ide.core.implementation.execution.BuildMoleComponent
 import scala.swing.Action
 
 class CleanAndBuildExecutionAction(tc: MoleSceneTopComponent) extends Action(""){
@@ -28,7 +28,7 @@ class CleanAndBuildExecutionAction(tc: MoleSceneTopComponent) extends Action("")
       case _=>
     }
    // tc.getMoleComponent.executionMoleSceneComponents.foreach()
-    //  TopComponentsManager.removeAllExecutionTopComponent(tc)
+    //  ScenesManager.removeAllExecutionTopComponent(tc)
       new BuildExecutionAction(tc)()
   }
 }

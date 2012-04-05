@@ -21,7 +21,7 @@ import java.awt.BorderLayout
 import java.awt.Color
 import javax.swing.ImageIcon
 import org.openide.util.ImageUtilities
-import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.dataproxy.Proxys
@@ -60,7 +60,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   }
   
   def delete = {
-    val toBeRemovedCapsules : List[ICapsuleUI] = TopComponentsManager.moleScenes.map{_.manager.capsules.values.filter{_.dataUI.task == Some(proxy)}}.flatten.toList
+    val toBeRemovedCapsules : List[ICapsuleUI] = ScenesManager.moleScenes.map{_.manager.capsules.values.filter{_.dataUI.task == Some(proxy)}}.flatten.toList
     toBeRemovedCapsules match {
       case Nil => Proxys.tasks -= proxy
         ConceptMenu.removeItem(proxy)
@@ -76,7 +76,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   def save = {
     proxy.dataUI = panelUI.save(nameTextField.text,protoPanel.protoInEditor.content,protoPanel.protoOutEditor.content)
   
-    TopComponentsManager.capsules(proxy).foreach {c =>
+    ScenesManager.capsules(proxy).foreach {c =>
       proxy.dataUI match {
         case x : AbstractExplorationTaskDataUI => c.setSampling(x.sampling)
         case _ => 
@@ -88,7 +88,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     save
     if(mainPanel.contents.size == 2) mainPanel.contents.remove(1)
     if(mainLinksPanel.contents.size == 2) mainLinksPanel.contents.remove(1)
-    TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.closeExtraPropertyPanel
+    ScenesManager.currentMoleSceneTopComponent.get.getMoleScene.closeExtraPropertyPanel
   }
   
   def properties = {
@@ -156,6 +156,6 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     peer.add(protoOut.peer,BorderLayout.EAST)
   
     def contentAction(proto : IPrototypeDataProxyUI) = new ContentAction(proto.dataUI.displayName,proto){
-      override def apply = TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.displayExtraPropertyPanel(proto)} 
+      override def apply = ScenesManager.currentMoleSceneTopComponent.get.getMoleScene.displayExtraPropertyPanel(proto)} 
   }
 }

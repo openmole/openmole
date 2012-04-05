@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package org.openmole.ide.core.implementation.control
+package org.openmole.ide.core.implementation.execution
 
 
 import scala.swing.ScrollPane

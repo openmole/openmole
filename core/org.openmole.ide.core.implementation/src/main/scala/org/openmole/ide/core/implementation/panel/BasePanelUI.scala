@@ -35,7 +35,7 @@ import scala.swing.event.UIElementResized
 import scala.swing.TextField
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.workflow.ExecutionMoleScene
-import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.CheckData
 
 abstract class BasePanelUI(proxy: IDataProxyUI,
@@ -106,7 +106,7 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
   def baseSave : Unit = {
     save
     ConceptMenu.refreshItem(proxy)
-    CheckData.checkMole(TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.manager)
+    CheckData.checkMole(ScenesManager.currentMoleSceneTopComponent.get.getMoleScene.manager)
   }
   
   def create: Unit

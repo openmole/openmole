@@ -20,7 +20,7 @@ package org.openmole.ide.core.implementation.panel
 import java.awt.Color
 import javax.swing.ImageIcon
 import org.openide.util.ImageUtilities
-import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
@@ -42,7 +42,7 @@ class SamplingPanelUI(proxy: ISamplingDataProxyUI,
   }
   
   def delete = {
-    val toBeRemovedSamplings  = TopComponentsManager.explorationCapsules.filter{case(c,d) => d.sampling == Some(proxy)}
+    val toBeRemovedSamplings  = ScenesManager.explorationCapsules.filter{case(c,d) => d.sampling == Some(proxy)}
     toBeRemovedSamplings match {
       case Nil => 
     Proxys.samplings -= proxy

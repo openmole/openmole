@@ -22,13 +22,13 @@ import java.awt.event.ActionListener
 import javax.swing.AbstractButton
 import javax.swing.ImageIcon
 import org.openide.util.ImageUtilities
-import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.execution.ScenesManager
 
 class ConnectionVsDataChannelAction extends ActionListener{
   override def actionPerformed(ae: ActionEvent)= {
     val button = ae.getSource.asInstanceOf[AbstractButton]
-    TopComponentsManager.connectMode = button.isSelected
-    TopComponentsManager.connectMode match {
+    ScenesManager.connectMode = button.isSelected
+    ScenesManager.connectMode match {
       case true=> button.setIcon(new ImageIcon(ImageUtilities.loadImage("img/connectMode.png")))
       case false=> button.setIcon(new ImageIcon(ImageUtilities.loadImage("img/dataChannelMode.png")))
     }

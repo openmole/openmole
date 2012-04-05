@@ -18,13 +18,13 @@
 package org.openmole.ide.core.implementation.action
 
 import org.openmole.ide.core.implementation.MoleSceneTopComponent
-import org.openmole.ide.core.implementation.control.ExecutionMoleComponent
-import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.execution.ExecutionMoleComponent
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import scala.swing.Action
 
 class StartMoleAction extends Action(""){
   override def apply = 
-    TopComponentsManager.currentMoleSceneTopComponent match {
+    ScenesManager.currentMoleSceneTopComponent match {
       case Some(x: MoleSceneTopComponent)=> x.getMoleComponent match {
           case y: ExecutionMoleComponent=> y.executionManager.start
           case _=>

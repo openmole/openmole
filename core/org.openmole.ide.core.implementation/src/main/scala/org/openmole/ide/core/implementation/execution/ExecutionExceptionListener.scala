@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.control
+package org.openmole.ide.core.implementation.execution
 
 import org.openmole.core.model.mole.IMoleExecution.ExceptionRaised
 import java.awt.Color
