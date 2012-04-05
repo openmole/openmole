@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,23 +17,10 @@
 
 package org.openmole.ide.core.implementation.registry
 
-
-import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
 
-trait PrototypeActivator extends BundleActivator {
-  
-  def prototypeFactories : Iterable[IPrototypeFactoryUI[_]]
-
-  abstract override def start(context: BundleContext) = {
-    super.start(context)
-    prototypeFactories.foreach{f=> KeyRegistry.prototypes += KeyGenerator(f.buildDataUI.coreObject) -> f}
-  }
-
-  abstract override def stop(context: BundleContext) = {
-    super.stop(context)
-    prototypeFactories.foreach{f => KeyRegistry.prototypes -= KeyGenerator(f.buildDataUI.coreObject)}
-  }
-  
+class OSGiActivator extends BundleActivator  {
+  def start(context: BundleContext) = {}
+  def stop(context: BundleContext) = {}
 }

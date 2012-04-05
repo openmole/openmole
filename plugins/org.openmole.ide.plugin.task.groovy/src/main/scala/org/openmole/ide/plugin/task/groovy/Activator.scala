@@ -17,9 +17,10 @@
 
 package org.openmole.ide.plugin.task.groovy
 
+import org.openmole.ide.core.implementation.registry.OSGiActivator
 import org.openmole.ide.core.implementation.registry.TaskActivator
 
-class Activator extends TaskActivator{
+class Activator extends OSGiActivator with TaskActivator {
 
   override def taskFactories = List(new GroovyTaskFactoryUI)
 }

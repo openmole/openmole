@@ -17,9 +17,10 @@
 
 package org.openmole.ide.plugin.prototype.base
 
+import org.openmole.ide.core.implementation.registry.OSGiActivator
 import org.openmole.ide.core.implementation.registry.PrototypeActivator
 
-class Activator extends PrototypeActivator{
+class Activator extends OSGiActivator with PrototypeActivator {
 
   override def prototypeFactories = List(new StringPrototypeFactoryUI,
                                          new FilePrototypeFactoryUI,
