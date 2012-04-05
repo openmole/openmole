@@ -61,9 +61,7 @@ class CopyToEnvironment(environment: BatchEnvironment, job: IJob) extends Callab
     
     try {
       val (serializationFile, serializatonPlugins) = serializeJob(jobFile)
-      logger.fine("Found plugins: " + serializatonPlugins.mkString(","))
-      logger.fine("Found files: " + serializationFile.mkString(","))
-      
+       
       val serialisationPluginFiles = new TreeSet[File] ++ serializatonPlugins.flatMap{PluginManager.pluginsForClass}
       
       val storage = environment.selectAStorage(serializationFile + 

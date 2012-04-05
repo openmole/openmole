@@ -35,6 +35,7 @@ import java.nio.file.Files
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
+import org.openmole.misc.exception.UserBadDataError
 import scala.collection.mutable.ListBuffer
 import com.ice.tar.TarInputStream
 import com.ice.tar.TarOutputStream
@@ -214,8 +215,8 @@ object FileUtil {
       
       goThrough (
         (curFrom, curTo) =>
-          if (curFrom.isDirectory) curTo.mkdir
-          else curFrom.copyFile(curTo)
+        if (curFrom.isDirectory) curTo.mkdir
+        else curFrom.copyFile(curTo)
       )
       
       goThrough((curFrom, curTo) => curTo.setSamePermissionsAs(curFrom))
@@ -361,6 +362,10 @@ object FileUtil {
       }
     }
     
+    def createParentDir = {
+      if(!file.getParentFile.exists) file.getParentFile.mkdirs
+      if(!file.getParentFile.isDirectory) throw new UserBadDataError("Cannot create directory " + file.getParentFile)
+    }
 
   }
   

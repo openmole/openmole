@@ -70,7 +70,6 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
     val registry = subMole.transitionRegistry
     registry.register(this, ticket, context)
     if (nextTaskReady(ticket, subMole)) {
-      logger.fine("Task " + end.capsule + " is ready to submit.")
       val combinaison = 
         end.inputDataChannels.toList.flatMap{_.consums(ticket, moleExecution)} ++ 
         end.transitions.toList.flatMap(registry.remove(_, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable)
@@ -89,10 +88,8 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
     }
   }
 
-  override def perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {
-    logger.fine("Crossing transition " + this)
+  override def perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = 
     if (isConditionTrue(context)) _perform(context -- filtered, ticket, subMole)
-  }
 
   override def isConditionTrue(context: IContext): Boolean = condition.evaluate(context)
 
