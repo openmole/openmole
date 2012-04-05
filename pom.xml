@@ -17,6 +17,7 @@
     <version>0.5-SNAPSHOT</version>
 
     <modules>
+	<module>third-parties</module>
         <module>libraries</module>
         <module>misc</module>
         <module>core</module>
