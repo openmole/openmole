@@ -19,20 +19,19 @@ package org.openmole.ide.core.implementation.panel
 
 import java.awt.Color
 import javax.swing.ImageIcon
-import org.openide.util.ImageUtilities
 import org.openmole.ide.core.implementation.execution.ScenesManager
+import org.openide.util.ImageUtilities
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
-import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.JavaConversions._
 
 class EnvironmentPanelUI(proxy: IEnvironmentDataProxyUI,
                          scene: IMoleScene,
                          mode: Value = CREATION) extends BasePanelUI(proxy, scene, mode,new Color(68,120,33)){
-  iconLabel.icon = new ImageIcon(ImageUtilities.loadImage(proxy.dataUI.fatImagePath))
+  iconLabel.icon = new ImageIcon(ImageUtilities.loadImage(getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath).toString))
   
   val panelUI = proxy.dataUI.buildPanelUI
   mainPanel.contents += panelUI.peer

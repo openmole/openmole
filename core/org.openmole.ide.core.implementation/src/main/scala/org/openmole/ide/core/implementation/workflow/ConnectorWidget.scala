@@ -33,6 +33,7 @@ import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.misc.widget.dialog.DialogFactory
 import scala.swing.Label
 import scala.swing.event.MousePressed
+import org.openmole.ide.misc.tools.image.Images._
 
 class ConnectorWidget(val scene: IMoleScene,val transition: ITransitionUI, var toBeEdited: Boolean = false) extends ConnectionWidget(scene.graphScene){
   
@@ -58,8 +59,8 @@ class ConnectorWidget(val scene: IMoleScene,val transition: ITransitionUI, var t
   
   def drawTransitionType = {
     transition.transitionType match {
-      case EXPLORATION_TRANSITION=> setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(Images.EXPLORATION_TRANSITON,false))
-      case AGGREGATION_TRANSITION=> setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(Images.AGGREGATION_TRANSITON,false))
+      case EXPLORATION_TRANSITION=> setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(EXPLORATION_TRANSITON,false))
+      case AGGREGATION_TRANSITION=> setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(AGGREGATION_TRANSITON,false))
       case _=> setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
     }
   }

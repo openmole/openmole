@@ -22,7 +22,6 @@ import java.awt.Color
 import javax.swing.BorderFactory
 import javax.swing.ImageIcon
 import org.openmole.ide.core.model.panel.IPanelUI
-import org.openide.util.ImageUtilities
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.workflow.IMoleScene
@@ -33,17 +32,16 @@ import scala.swing.Action
 import scala.swing.Label
 import scala.swing.event.UIElementResized
 import scala.swing.TextField
-import org.openmole.ide.core.implementation.data.EmptyDataUIs
-import org.openmole.ide.core.implementation.workflow.ExecutionMoleScene
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.CheckData
+import org.openmole.ide.misc.tools.image.Images._
 
 abstract class BasePanelUI(proxy: IDataProxyUI,
                            scene: IMoleScene,
                            mode : Value,
                            borderColor : Color = new Color(200,200,200)) extends MyPanel {
   peer.setLayout(new BorderLayout)
-  val iconLabel = new Label{ icon = new ImageIcon(ImageUtilities.loadImage("img/empty.png"))}
+  val iconLabel = new Label{ icon = new ImageIcon(EMPTY)}
   val nameTextField = new TextField(15) {text = proxy.dataUI.name; tooltip = Help.tooltip("Name of the concept instance")}
   val createLabelLink = new MainLinkLabel("create",new Action("") { def apply = baseCreate})
   val mainLinksPanel = new PluginPanel("") {contents += createLabelLink}
@@ -106,7 +104,7 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
   def baseSave : Unit = {
     save
     ConceptMenu.refreshItem(proxy)
-    CheckData.checkMole(ScenesManager.currentMoleSceneTopComponent.get.getMoleScene.manager)
+    CheckData.checkMole(ScenesManager.currentSceneContainer.get.scene.manager)
   }
   
   def create: Unit

@@ -17,42 +17,47 @@
 
 package org.openmole.ide.core.implementation.execution
 
-import org.openmole.ide.core.model.control.IMoleComponent
+import org.openmole.ide.core.implementation.workflow.BuildMoleSceneContainer
+import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
 import java.util.concurrent.atomic.AtomicInteger
-import org.openide.windows.TopComponent
 import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
-import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
+import org.openmole.ide.core.model.workflow.ISceneContainer
+import org.openmole.ide.misc.widget.MigPanel
 import scala.collection.JavaConversions._
+import scala.swing.TabbedPane
 
 object ScenesManager {
 
+  val tabPane = new TabbedPane
+  
   var countBuild = new AtomicInteger  
   var countExec = new AtomicInteger  
-  var currentMoleSceneTopComponent: Option[MoleSceneTopComponent] = None  
   var connectMode = true
   PasswordListner.apply
   
-  def closeOpenedTopComponents = {
-    currentMoleSceneTopComponent match {
-      case Some(x: MoleSceneTopComponent)=>x.getOpened.foreach(_.close)
-      case _=>
+  def buildMoleSceneContainers = tabPane.pages.flatMap(_.content match {
+      case x : BuildMoleSceneContainer => List(x)
+      case _ => Nil
     }
+  )
+  
+  def currentSceneContainer : Option[ISceneContainer] =  tabPane.selection.page match {
+      case x : ISceneContainer => Some(x)
+      case _ => None
   }
   
-  def saveCurrentPropertyWidget = currentMoleSceneTopComponent match {
-    case Some(x : MoleSceneTopComponent) => x.getMoleScene.savePropertyPanel
-    case _=>
+  def closeAll = tabPane.pages.clear
+  
+  def saveCurrentPropertyWidget = currentSceneContainer match {
+      case Some(x : ISceneContainer) => x.scene.savePropertyPanel
+      case _ => None
   }
   
-  def noCurrentMoleSceneTopComponent = if (topComponents.size == 1) currentMoleSceneTopComponent = None
-  
-  def setCurrentMoleSceneTopComponent(ms: MoleSceneTopComponent) = currentMoleSceneTopComponent = Some(ms)
-  
-  def moleScenes = topComponents.map{_.getMoleScene}
+  def moleScenes = buildMoleSceneContainers.map{_.scene}
   
   def capsules : List[ICapsuleUI] = moleScenes.map{_.manager.capsules.values}.toList.flatten
   
@@ -73,48 +78,24 @@ object ScenesManager {
       case _ => Nil
     }
   }.toList
-  
-  def topComponents = TopComponent.getRegistry.getOpened.
-  filter(_.isInstanceOf[MoleSceneTopComponent]).
-  map{_.asInstanceOf[MoleSceneTopComponent]
-  }
-  
-  def addTopComponent: MoleSceneTopComponent = addTopComponent("")
-  
-  def addTopComponent(name: String): MoleSceneTopComponent = addTopComponent(new BuildMoleScene(name))
-  
-  def addTopComponent(ms: BuildMoleScene): MoleSceneTopComponent= {
-    val mc= new BuildMoleComponent(ms)
-    mc.moleSceneTopComponent.open
-    mc.moleSceneTopComponent.requestActive
-    mc.moleSceneTopComponent
-  }
     
-  def addExecutionTopComponent(mc : IMoleComponent): MoleSceneTopComponent = {
-    mc match {
-      case x:BuildMoleComponent=>
-        CheckData.fullCheck(x.moleScene.manager)
-        val clone = x.moleScene.copy
-        clone.manager.name = { x.moleScene.manager.name+"_"+countExec.incrementAndGet}
-        val ecomp = new ExecutionMoleComponent(clone)
-        x.executionMoleSceneComponents += ecomp
-        ecomp.moleSceneTopComponent.open
-        ecomp.moleSceneTopComponent
-    }
+  def addBuildSceneContainer : BuildMoleSceneContainer = addBuildSceneContainer(new BuildMoleScene(""))
+  
+  def addBuildSceneContainer(name: String) : BuildMoleSceneContainer = addBuildSceneContainer(new BuildMoleScene(name))
+  
+  def addBuildSceneContainer(ms: BuildMoleScene) : BuildMoleSceneContainer = {
+    val container = new BuildMoleSceneContainer(ms)
+    tabPane.pages += new TabbedPane.Page(ms.manager.name,container)
+    container
   }
   
-  def stopAndCloseExecutions(mc: IMoleComponent) = {
-    mc match {
-      case x: BuildMoleComponent=>x.stopAndCloseExecutions
-      case _=>
-    }
-  }
-  
-  def displayExecutionView(tc:IMoleComponent) {
-    tc match {
-      case x:ExecutionMoleComponent=>
-        ExecutionSupport.changeView(x.executionManager)
-      case _=>
-    }
+  def addExecutionSceneContainer(bmsc : BuildMoleSceneContainer) = {
+    CheckData.fullCheck(bmsc.scene.manager)
+    val clone = bmsc.scene.copy
+    clone.manager.name = { bmsc.scene.manager.name+"_"+countExec.incrementAndGet }
+    val page = new TabbedPane.Page("Settings",new MigPanel(""))
+    val container = new ExecutionMoleSceneContainer(clone,page)
+    page.content = container
+    bmsc.executionMoleSceneContainers += container
   }
 }

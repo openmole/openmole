@@ -33,14 +33,15 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.widget._
 import scala.swing.Action
+import org.openmole.ide.misc.tools.image.Images._
 
 class DataChannelConnectionWidget(scene: IMoleScene, val dataChannelUI: IDataChannelUI) extends ConnectionWidget(scene.graphScene){
   
   setLineColor(new Color(188,188,188))
   setStroke(new BasicStroke(6, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,20.0f, List(10.0f).toArray, 0.0f))
   
-  setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(Images.IMAGE_OUTPUT_DATA_CHANNEL,false))
-  setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(Images.IMAGE_INPUT_DATA_CHANNEL,false))
+  setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(OUTPUT_DATA_CHANNEL,false))
+  setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(INPUT_DATA_CHANNEL,false))
   var labeled = false
   
   val componentWidget = new PrototypeWidget(scene,new LinkLabel(DataChannelConnectionWidget.this.dataChannelUI.prototypes.size.toString,

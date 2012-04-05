@@ -63,14 +63,14 @@ object GUISerializer {
     val in = xstream.createObjectInputStream(reader)
    
     Proxys.clearAll
-    ScenesManager.closeOpenedTopComponents
+    ScenesManager.closeAll
     
     try {
       while(true) {
         val readObject = in.readObject
         readObject match{
           case x: SerializedProxys=> x.loadProxys
-          case x: BuildMoleScene=> {ScenesManager.addTopComponent(x)}
+          case x: BuildMoleScene=> {ScenesManager.addBuildSceneContainer(x)}
           case _=> throw new UserBadDataError("Failed to unserialize object " + readObject.toString)
         }
       }

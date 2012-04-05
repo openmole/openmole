@@ -20,7 +20,6 @@ package org.openmole.ide.core.implementation.panel
 import java.awt.BorderLayout
 import java.awt.Color
 import javax.swing.ImageIcon
-import org.openide.util.ImageUtilities
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
@@ -31,6 +30,7 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
+import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget.ImplicitLinkLabel
 import org.openmole.ide.misc.widget.ImageLinkLabel
@@ -42,11 +42,13 @@ import scala.swing.Action
 import scala.swing.Label
 import scala.swing.Separator
 import scala.collection.JavaConversions._
+import org.openmole.ide.misc.tools.image.Images._
+import org.openide.util.ImageUtilities
 
 class TaskPanelUI(proxy: ITaskDataProxyUI,
                   scene: IMoleScene,
                   mode: Value = CREATION) extends BasePanelUI(proxy, scene,mode,proxy.dataUI.borderColor){
-  iconLabel.icon = new ImageIcon(ImageUtilities.loadImage(proxy.dataUI.fatImagePath))
+  iconLabel.icon = new ImageIcon(ImageUtilities.loadImage(getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath).toString))
   val panelUI = proxy.dataUI.buildPanelUI
   val protoPanel = new IOPrototypePanel
   mode match {
@@ -88,7 +90,10 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     save
     if(mainPanel.contents.size == 2) mainPanel.contents.remove(1)
     if(mainLinksPanel.contents.size == 2) mainLinksPanel.contents.remove(1)
-    ScenesManager.currentMoleSceneTopComponent.get.getMoleScene.closeExtraPropertyPanel
+    ScenesManager.currentSceneContainer match {
+      case Some(x : ISceneContainer) => x.scene.closeExtraPropertyPanel
+      case None =>
+    }
   }
   
   def properties = {
@@ -107,7 +112,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   
   class IOPrototypePanel extends MyPanel{
     peer.setLayout(new BorderLayout)
-    val image = new ImageIcon(ImageUtilities.loadImage("img/eye.png"))
+    val image = EYE
       
     val emptyProto = EmptyDataUIs.emptyPrototypeProxy
     
@@ -156,6 +161,11 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     peer.add(protoOut.peer,BorderLayout.EAST)
   
     def contentAction(proto : IPrototypeDataProxyUI) = new ContentAction(proto.dataUI.displayName,proto){
-      override def apply = ScenesManager.currentMoleSceneTopComponent.get.getMoleScene.displayExtraPropertyPanel(proto)} 
+      override def apply = 
+        ScenesManager.currentSceneContainer match {
+          case Some(x : ISceneContainer) => x.scene.displayExtraPropertyPanel(proto)
+          case None =>
+        }
+    }
   }
 }

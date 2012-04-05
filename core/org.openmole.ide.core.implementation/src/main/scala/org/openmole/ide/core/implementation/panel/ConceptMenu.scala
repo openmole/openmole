@@ -29,7 +29,6 @@ import scala.swing.Action
 import scala.swing.Menu
 import scala.swing.MenuBar
 import scala.swing.MenuItem
-import org.openmole.ide.core.implementation.MoleSceneTopComponent
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dataproxy.EnvironmentDataProxyFactory
@@ -37,7 +36,9 @@ import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyFactory
 import org.openmole.ide.core.implementation.dataproxy.SamplingDataProxyFactory
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyFactory
 import org.openmole.ide.core.implementation.dialog.DialogFactory
+import org.openmole.ide.core.implementation.workflow.BuildMoleSceneContainer
 import org.openmole.ide.core.model.commons.Constants._
+import org.openmole.ide.core.model.workflow.ISceneContainer
 import scala.collection.JavaConversions._
 
 object ConceptMenu {
@@ -103,10 +104,10 @@ object ConceptMenu {
         
   def display(proxy: IDataProxyUI,
               mode: Value) = 
-                ScenesManager.currentMoleSceneTopComponent match {
-      case Some(x: MoleSceneTopComponent)=> x.getMoleScene.displayPropertyPanel(proxy, mode)
-      case None=> DialogFactory.newTabName match {
-          case Some(x: MoleSceneTopComponent)=> x.getMoleScene.displayPropertyPanel(proxy, mode)
+                ScenesManager.tabPane.selection.page match {
+      case x: ISceneContainer=> x.scene.displayPropertyPanel(proxy, mode)
+      case _ => DialogFactory.newTabName match {
+          case Some(x: BuildMoleSceneContainer)=> x.scene.displayPropertyPanel(proxy, mode)
           case None=>
         }
     }
