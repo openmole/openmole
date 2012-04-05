@@ -31,8 +31,7 @@ class AppendToFileHook(moleExecution: IMoleExecution, capsule: ICapsule, fileNam
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
     val file = new File(VariableExpansion.expandData(context,fileName))
-    if(!file.getParentFile.exists) file.getParentFile.mkdirs
-    if(!file.getParentFile.isDirectory) throw new UserBadDataError("Cannot create directory " + file.getParentFile)
+    file.createParentDir
     file.lockApply(_.append(VariableExpansion.expandData(context,content)))
   }
   

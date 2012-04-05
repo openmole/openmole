@@ -71,7 +71,7 @@ object JobPriorityQueue {
       nextDequeue = increment(nextDequeue)
       size -= 1
       
-      if(size < (jobs.size * shrinkCeil)) resize((size * shrinkFactor).toInt)
+      if(size < (jobs.size * shrinkCeil)) resize((jobs.size * shrinkFactor).toInt)
       dequeued
     }
     
