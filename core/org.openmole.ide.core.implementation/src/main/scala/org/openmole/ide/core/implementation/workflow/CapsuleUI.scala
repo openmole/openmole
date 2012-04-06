@@ -61,10 +61,9 @@ class CapsuleUI(val scene: IMoleScene,
   addChild(oslot)
   val capsuleMenuProvider= new CapsuleMenuProvider(scene, this)
   
-  scene.refresh
-        
   getActions.addAction(ActionFactory.createPopupMenuAction(capsuleMenuProvider))
   
+  scene.refresh
   def widget = this
   
   def copy(sc: IMoleScene) = {

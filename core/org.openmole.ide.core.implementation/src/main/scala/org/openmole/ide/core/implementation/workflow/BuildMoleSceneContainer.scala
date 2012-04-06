@@ -18,16 +18,18 @@
 package org.openmole.ide.core.implementation.workflow
 
 import java.awt.BorderLayout
-import javax.swing.ImageIcon
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.misc.widget.ToolBarButton
+import org.openmole.ide.misc.tools.image.Images._
 import scala.collection.mutable.HashSet
 import scala.swing.Action
 import scala.swing.Panel
 import org.openmole.ide.misc.tools.image.Images._
+import scala.swing.ToggleButton
+import scala.swing.event.ButtonClicked
 
 class BuildMoleSceneContainer(val scene : BuildMoleScene) extends Panel with ISceneContainer{ buildContainer => 
 
@@ -36,6 +38,25 @@ class BuildMoleSceneContainer(val scene : BuildMoleScene) extends Panel with ISc
   peer.setLayout(new BorderLayout)
   
   val toolBar = new MigPanel("") {
+    
+    
+    val connectionButton = new ToggleButton {
+      icon = CONNECT_TRANSITION_MODE
+      selected = true
+    }
+    
+    listenTo(connectionButton)
+    reactions += {
+      case x : ButtonClicked => 
+        ScenesManager.connectMode = connectionButton.selected
+        ScenesManager.connectMode match {
+          case true=> connectionButton.icon = CONNECT_TRANSITION_MODE
+          case false=> connectionButton.icon = DATA_CHANNEL_TRANSITION_MODE
+        }
+    }
+    
+    contents += connectionButton
+    
     contents += new ToolBarButton(BUILD_EXECUTION,
                                   "Build the workflow",
                                   buildExecutionAction)
