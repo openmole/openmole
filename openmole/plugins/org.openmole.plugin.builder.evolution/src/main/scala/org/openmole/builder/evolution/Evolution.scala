@@ -94,6 +94,8 @@ object Evolution {
   
   def inputs(inputs: Array[String]) = new Inputs(inputs)
   
+  def inputs(inputs: Array[IPrototype[_]]) = new Inputs(inputs.map{_.name})
+    
   def objectives = new Objectives
   
   def nsga2SigmaSteady(
