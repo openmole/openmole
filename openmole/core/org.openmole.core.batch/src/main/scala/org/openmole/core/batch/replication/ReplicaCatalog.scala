@@ -105,7 +105,7 @@ object ReplicaCatalog {
 
   private def getReplica(src: File, hash: String, storageDescription: ServiceDescription,  authenticationKey: String): Option[Replica] = {
     lockRead({
-        val set = objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription.description, hash, authenticationKey, null, null))
+        val set = objectServer.queryByExample(new Replica(src.getCanonicalPath, storageDescription.description, hash, authenticationKey, null, null))
 
           return set.size match {
           case 0 => None
@@ -117,7 +117,7 @@ object ReplicaCatalog {
     
 
   def getReplica(src: File, storageDescription: ServiceDescription, authenticationKey: String): ObjectSet[Replica] =
-    lockRead(objectServer.queryByExample(new Replica(src.getAbsolutePath, storageDescription.description, null, authenticationKey, null, null)))
+    lockRead(objectServer.queryByExample(new Replica(src.getCanonicalPath, storageDescription.description, null, authenticationKey, null, null)))
   
   def getReplica(storageDescription: ServiceDescription, authenticationKey: String): ObjectSet[Replica] =
     lockRead(objectServer.queryByExample(new Replica(null, storageDescription.description, null, authenticationKey, null, null)))
@@ -133,7 +133,7 @@ object ReplicaCatalog {
         query.constrain(classOf[Replica])
 
         query.descend("_authenticationKey").constrain(authenticationKey)
-          .and(src.map{ f => query.descend("_source").constrain(f.getAbsolutePath) }.reduceLeft( (c1, c2) => c1.or(c2)))
+          .and(src.map{ f => query.descend("_source").constrain(f.getCanonicalPath) }.reduceLeft( (c1, c2) => c1.or(c2)))
                
         var ret = new HashMap[File, HashSet[ServiceDescription]] 
         
@@ -166,7 +166,7 @@ object ReplicaCatalog {
           getReplica(hash, storageDescription, authenticationKey) match {
             case Some(sameContent) => 
               val replica = checkExists(sameContent, src, srcPath, hash, authenticationKey, storage, token)
-              val newReplica = new Replica(srcPath.getAbsolutePath, storageDescription.description, hash, authenticationKey, replica.destination, replica.lastCheckExists)
+              val newReplica = new Replica(srcPath.getCanonicalPath, storageDescription.description, hash, authenticationKey, replica.destination, replica.lastCheckExists)
               insert(newReplica)
               newReplica
             case None => 
@@ -201,7 +201,7 @@ object ReplicaCatalog {
   private def uploadAndInsert(src: File, srcPath: File,hash: String, authenticationKey: String, storage: Storage, token: AccessToken) = {
     val newFile = new GZURIFile(storage.persistentSpace(token).newFileInDir("replica", ".rep"))
     signalUpload(URIFile.copy(src, newFile, token), srcPath, storage)
-    val newReplica = new Replica(srcPath.getAbsolutePath, storage.description.description, hash, authenticationKey, newFile.location, System.currentTimeMillis)
+    val newReplica = new Replica(srcPath.getCanonicalPath, storage.description.description, hash, authenticationKey, newFile.location, System.currentTimeMillis)
     insert(newReplica)
     newReplica
   }
