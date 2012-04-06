@@ -64,7 +64,7 @@ class SigmaGenomeSampling(
       }.take(nbGenome)
       
     (genomes ++ 
-     (0 until genomes.size - nbGenome).map{ i => toSamplingLine(factory.random(generator))}
+     (0 until nbGenome - genomes.size).map{ i => toSamplingLine(factory.random(generator))}
     ).iterator
   }
 }
