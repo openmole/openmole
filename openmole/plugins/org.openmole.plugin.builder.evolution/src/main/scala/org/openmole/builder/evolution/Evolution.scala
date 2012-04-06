@@ -26,6 +26,7 @@ import fr.iscpif.mgo.ga.selection.Rank
 import fr.iscpif.mgo.ga.selection.ParetoRank
 import fr.iscpif.mgo.ga.selection.ParetoCrowdingRank
 import fr.iscpif.mgo.ga.selection.Ranking
+import fr.iscpif.mgo.tools.Scaling._
 import org.openmole.core.implementation.data.DataChannel
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.mole.Capsule
@@ -41,6 +42,7 @@ import org.openmole.core.model.IPuzzleFirstAndLast
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.builder.Builder
 import org.openmole.plugin.method.evolution.NSGA2SteadyElitismTask
 import org.openmole.plugin.method.evolution.NSGA2SteadySigmaBreedTask
@@ -52,7 +54,7 @@ import scala.collection.immutable.TreeMap
 
 object Evolution {
 
-  class Inputs {
+  class Inputs(val inputs: Array[String]) {
     var scales = TreeMap.empty[String, (Double, Double)]
     
     def scale(protoName: String, min: Double, max: Double): Unit = scales += (protoName) -> (min, max)
@@ -61,8 +63,20 @@ object Evolution {
     def scale(proto: IPrototype[Double], max: Double): Unit = scale(proto.name, max)
     
     var initialPopulation = List.empty[Array[Double]]
+
+    def initital(g: Array[Double]) = {
+      if(g.size != inputs.size) throw new UserBadDataError("Genome " + g.mkString(",") + " doesn't match the expected size of inputs " + inputs.size)
+      initialPopulation ::= g
+    }
     
-    def initital(g: Array[Double]) = initialPopulation ::= g
+    def unscaled(g: Array[Double]) = (g zip inputs) map { 
+      case(g, i) => 
+        val (min, max) = scales(i) 
+        g.unscale(min, max) 
+    }
+    
+    def unscaledInitialPopulation = 
+      initialPopulation.map{ unscaled }.toArray
   }
   
   class Objectives {
@@ -78,7 +92,8 @@ object Evolution {
     def generationPrototype: IPrototype[Int]
   }
   
-  def inputs = new Inputs
+  def inputs(inputs: Array[String]) = new Inputs(inputs)
+  
   def objectives = new Objectives
   
   def nsga2SigmaSteady(
@@ -102,14 +117,16 @@ object Evolution {
     
     val firstCapsule = new StrainerCapsule(new EmptyTask("first"))
     
-    val sampling = new SigmaGenomeSampling(genomeWithSigmaPrototype, genomeSize, populationSize, scaling.initialPopulation.toArray)
+    val sampling = new SigmaGenomeSampling(genomeWithSigmaPrototype, genomeSize, populationSize, scaling.unscaledInitialPopulation)
     val explorationCapsule = new Capsule(new ExplorationTask("genomeExploration", sampling))
 
     val scalingTask = new ScalingGenomeTask("scalingGenome", genomeWithSigmaPrototype)
-    scaling.scales.foreach { 
-      case(name, (min, max)) =>
-        scalingTask.scale(new Prototype(name, classOf[Double]), min, max)
-    }
+    
+    scaling.inputs.map{
+      name => (name, scaling.scales.getOrElse(name, throw new UserBadDataError("Scale not found for input " + name)))}.foreach { 
+        case (name, (min, max)) => scalingTask.scale(new Prototype(name, classOf[Double]), min, max)
+      }
+      
     
     val scalingCaps = new Capsule(scalingTask)
     
