@@ -35,6 +35,7 @@ import scala.swing.event.UIElementResized
 import scala.swing.TextField
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.CheckData
+import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.tools.image.Images._
 
 object BasePanelUI {
@@ -111,7 +112,10 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
   def baseSave : Unit = {
     save
     ConceptMenu.refreshItem(proxy)
-    CheckData.checkMole(ScenesManager.currentSceneContainer.get.scene.manager)
+    ScenesManager.currentSceneContainer match {
+      case Some(x : ISceneContainer) => CheckData.checkMole(x.scene.manager)
+      case None =>
+    }
   }
   
   def create: Unit

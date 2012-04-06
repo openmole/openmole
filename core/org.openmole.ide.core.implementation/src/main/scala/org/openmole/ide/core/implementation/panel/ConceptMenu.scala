@@ -104,8 +104,8 @@ object ConceptMenu {
         
   def display(proxy: IDataProxyUI,
               mode: Value) = {
-    if (ScenesManager.tabPane.pages.size == 0) createTab(proxy,mode)
-    ScenesManager.tabPane.selection.page match {
+    if (ScenesManager.tabPane.peer.getTabCount == 0) createTab(proxy,mode)
+    else  ScenesManager.tabPane.selection.page.content match {
       case x: ISceneContainer=> x.scene.displayPropertyPanel(proxy, mode)
       case _ => createTab(proxy,mode)
     }
