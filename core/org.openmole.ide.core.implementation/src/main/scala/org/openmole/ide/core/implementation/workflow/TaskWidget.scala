@@ -22,7 +22,6 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow._
-import org.openmole.ide.misc.widget.MyPanel
 import scala.swing.Action
 import javax.swing.BorderFactory
 import java.awt.Color
@@ -31,9 +30,10 @@ import java.awt.Graphics2D
 import java.awt.Dimension
 import java.awt.RenderingHints
 import org.openmole.ide.core.model.panel.PanelMode._
+import scala.swing.Panel
 
 class TaskWidget(scene: IMoleScene,
-                 val capsule : ICapsuleUI) extends MyPanel {
+                 val capsule : ICapsuleUI) extends Panel {
   peer.setLayout(new BorderLayout)
   preferredSize = new Dimension(TASK_CONTAINER_WIDTH,TASK_CONTAINER_HEIGHT)
   val titleLabel = new LinkLabel(capsule.toString, new Action(""){ 

@@ -19,6 +19,8 @@ package org.openmole.ide.core.implementation.workflow
 
 import java.awt.Dimension
 import java.awt.Point
+import javax.imageio.ImageIO
+import javax.swing.ImageIcon
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.implementation.data.CapsuleDataUI
@@ -36,6 +38,12 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.implementation.validation.DataflowProblem
 import scala.swing.Action
+
+object CapsuleUI {
+  def imageIcon(proxy : IDataProxyUI) = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.imagePath)))
+}
+
+import CapsuleUI._
 
 class CapsuleUI(val scene: IMoleScene, 
                 val dataUI : ICapsuleDataUI = new CapsuleDataUI) extends Widget(scene.graphScene) with ICapsuleUI{
@@ -117,7 +125,7 @@ class CapsuleUI(val scene: IMoleScene,
     }
     dataUI.environment match {
       case Some(x : IEnvironmentDataProxyUI) => 
-        environmentWidget = Some(new LinkedImageWidget(scene,x.dataUI.imagePath,TASK_CONTAINER_WIDTH - 10,TASK_CONTAINER_HEIGHT -3,
+        environmentWidget = Some(new LinkedImageWidget(scene,imageIcon(x),TASK_CONTAINER_WIDTH - 10,TASK_CONTAINER_HEIGHT -3,
                                                        new Action("") {def apply = scene.displayPropertyPanel(x,EDIT)}))
         addChild(environmentWidget.get)
       case None => environmentWidget = None
@@ -138,7 +146,7 @@ class CapsuleUI(val scene: IMoleScene,
     dataUI.sampling match {
       case None=> samplingWidget = None
       case Some(x : ISamplingDataProxyUI) => 
-        samplingWidget = Some(new LinkedImageWidget(scene,x.dataUI.imagePath,0,TASK_CONTAINER_HEIGHT - 3,
+        samplingWidget = Some(new LinkedImageWidget(scene,imageIcon(x),0,TASK_CONTAINER_HEIGHT - 3,
                                                     new Action("") {def apply = scene.displayPropertyPanel(x,EDIT)}))
         addChild(samplingWidget.get)
     }

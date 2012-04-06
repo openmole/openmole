@@ -18,11 +18,12 @@
 package org.openmole.ide.misc.widget.multirow
 
 import javax.swing.JPanel
+import org.openmole.ide.misc.tools.image.Images.DEL
 import org.openmole.ide.misc.widget.ImageLinkLabel
 import org.openmole.ide.misc.widget.MyPanel
 import scala.swing.Action
 
 trait IRowPanel extends MyPanel{
-  val removeButton = new ImageLinkLabel("img/del.png",new Action("") { def apply = {} })
+  val removeButton = new ImageLinkLabel(DEL,new Action("") { def apply = {} })
   def extend(extendedPanel: JPanel): Unit
 }

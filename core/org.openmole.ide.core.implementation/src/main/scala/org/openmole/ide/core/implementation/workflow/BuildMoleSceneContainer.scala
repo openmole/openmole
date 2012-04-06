@@ -18,6 +18,7 @@
 package org.openmole.ide.core.implementation.workflow
 
 import java.awt.BorderLayout
+import javax.swing.JScrollPane
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.workflow.ISceneContainer
@@ -67,8 +68,9 @@ class BuildMoleSceneContainer(val scene : BuildMoleScene) extends Panel with ISc
   }
    
   peer.add(toolBar.peer,BorderLayout.NORTH)
-  peer.add(scene.graphScene.createView,BorderLayout.CENTER)
+  peer.add(new JScrollPane(scene.graphScene.createView),BorderLayout.CENTER)
   
+  scene.refresh
   CheckData.checkMole(scene.manager)
   
                 

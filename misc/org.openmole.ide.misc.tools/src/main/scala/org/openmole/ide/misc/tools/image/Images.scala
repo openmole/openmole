@@ -46,5 +46,18 @@ object Images {
   
   val EYE = new ImageIcon(classLoader.getResource("img/eye.png"))
   val ARROW = new ImageIcon(classLoader.getResource("img/arrow.png"))
+  val REFRESH = new ImageIcon(classLoader.getResource("img/refresh.png"))
   val EMPTY = ImageIO.read(classLoader.getResource("img/empty.png")).asInstanceOf[Image]
+  
+  val EDIT = new ImageIcon(classLoader.getResource("img/edit.png"))
+  val EDIT_EMPTY = new ImageIcon(classLoader.getResource("img/edit_empty.png"))
+  val EDIT_ERROR = new ImageIcon(classLoader.getResource("img/edit_error.png"))
+  
+  val ADD = new ImageIcon(classLoader.getResource("img/add.png"))
+  val DEL = new ImageIcon(classLoader.getResource("img/del.png"))
+  val NEXT = new ImageIcon(classLoader.getResource("img/next.png"))
+  val PREVIOUS = new ImageIcon(classLoader.getResource("img/previous.png"))
+  val CLOSE = new ImageIcon(classLoader.getResource("img/close.png"))
+  
+  
 }

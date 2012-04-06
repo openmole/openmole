@@ -21,11 +21,10 @@ import javax.swing.ImageIcon
 import scala.swing.Action
 import scala.swing.Label
 import scala.swing.event.MousePressed
-import org.openide.util.ImageUtilities
 
-class ImageLinkLabel(imagePath : String,
+class ImageLinkLabel(image : ImageIcon,
                      var action: Action) extends Label {
-  icon = new ImageIcon(ImageUtilities.loadImage(imagePath))
+  icon = image
   cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
   
   listenTo(this.mouse.clicks)

@@ -19,6 +19,7 @@ package org.openmole.ide.core.implementation.panel
 
 import java.awt.BorderLayout
 import java.awt.Color
+import javax.imageio.ImageIO
 import javax.swing.BorderFactory
 import javax.swing.ImageIcon
 import org.openmole.ide.core.model.panel.IPanelUI
@@ -35,6 +36,12 @@ import scala.swing.TextField
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.misc.tools.image.Images._
+
+object BasePanelUI {
+  def imageIcon(proxy : IDataProxyUI) = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
+}
+
+import BasePanelUI._
 
 abstract class BasePanelUI(proxy: IDataProxyUI,
                            scene: IMoleScene,
@@ -54,7 +61,7 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
       contents += new PluginPanel("wrap"){
         contents += new PluginPanel("wrap 2"){
           contents += nameTextField
-          contents += new ImageLinkLabel("img/close.png",new Action("") { def apply = {
+          contents += new ImageLinkLabel(CLOSE,new Action("") { def apply = {
                 mode match {
                   case EXTRA => scene.closeExtraPropertyPanel
                   case _ => scene.closePropertyPanel

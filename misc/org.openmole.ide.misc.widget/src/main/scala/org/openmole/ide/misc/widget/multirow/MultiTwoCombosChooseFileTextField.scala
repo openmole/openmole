@@ -17,9 +17,7 @@
 
 package org.openmole.ide.misc.widget.multirow
 
-  
-import javax.swing.ImageIcon
-import org.openide.util.ImageUtilities
+import org.openmole.ide.misc.tools.image.Images
 import org.openmole.ide.misc.widget.ChooseFileTextField
 import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
@@ -58,7 +56,7 @@ object MultiTwoCombosChooseFileTextField
     val combo1 = new ComboBox[A](comboContentA) { selection.item = selectedA }
     val combo2 = new ComboBox[B](comboContentB) { selection.item = selectedB }
     val chooseFileText = new ChooseFileTextField(filePath)
-    val refreshButton = new Button{icon = new ImageIcon(ImageUtilities.loadImage("img/refresh.png"))}
+    val refreshButton = new Button{icon =  Images.REFRESH}
     
     override val panel = new RowPanel(List(combo1,new Label(inBetweenString1),
                                            combo2,new Label(inBetweenString2),

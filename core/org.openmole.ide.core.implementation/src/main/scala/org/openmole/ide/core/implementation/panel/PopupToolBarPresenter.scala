@@ -17,8 +17,6 @@
 
 package org.openmole.ide.core.implementation.panel
 
-import javax.swing.ImageIcon
-import org.openide.util.ImageUtilities
 import org.openmole.ide.misc.widget.PopupMenu
 import scala.swing.Component
 import scala.swing.Menu
@@ -47,5 +45,4 @@ class PopupToolBarPresenter(t: String, basemenu: Menu) extends Button(t){
     popup.peer.removeAll
     popup.contents += basemenu
   }
-  
 }

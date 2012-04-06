@@ -19,6 +19,7 @@ package org.openmole.ide.core.implementation.panel
 
 import java.awt.BorderLayout
 import java.awt.Color
+import javax.imageio.ImageIO
 import javax.swing.ImageIcon
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
@@ -43,12 +44,13 @@ import scala.swing.Label
 import scala.swing.Separator
 import scala.collection.JavaConversions._
 import org.openmole.ide.misc.tools.image.Images._
-import org.openide.util.ImageUtilities
+import BasePanelUI._
 
 class TaskPanelUI(proxy: ITaskDataProxyUI,
                   scene: IMoleScene,
                   mode: Value = CREATION) extends BasePanelUI(proxy, scene,mode,proxy.dataUI.borderColor){
-  iconLabel.icon = new ImageIcon(ImageUtilities.loadImage(getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath).toString))
+  iconLabel.icon = imageIcon(proxy)
+  
   val panelUI = proxy.dataUI.buildPanelUI
   val protoPanel = new IOPrototypePanel
   mode match {
@@ -99,7 +101,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   def properties = {
     switch    
     mainPanel.contents += panelUI.peer
-    mainLinksPanel.contents +=  new ImageLinkLabel("img/next.png",new Action("") { def apply = protos })
+    mainLinksPanel.contents +=  new ImageLinkLabel(NEXT,new Action("") { def apply = protos })
     revalidate
     repaint
   }
@@ -107,7 +109,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   def protos : Unit = {
     switch
     mainPanel.contents += protoPanel.peer
-    mainLinksPanel.contents +=  new ImageLinkLabel("img/previous.png",new Action("") { def apply = properties })
+    mainLinksPanel.contents +=  new ImageLinkLabel(PREVIOUS,new Action("") { def apply = properties })
   }
   
   class IOPrototypePanel extends MyPanel{
