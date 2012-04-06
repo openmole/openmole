@@ -24,16 +24,47 @@ import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.workspace.Workspace
 
-class SigmaGenomeSampling(genome: IPrototype[GAGenomeWithSigma], genomeSize: Int, nbGenome: Int, generator: Random) extends Sampling {
+
+class SigmaGenomeSampling(
+  genome: IPrototype[GAGenomeWithSigma],
+  genomeSize: Int,
+  nbGenome: Int,
+  generator: Random,
+  initialGenomes: Array[Array[Double]] = Array.empty
+) extends Sampling {
   
   def this(genome: IPrototype[GAGenomeWithSigma], genomeSize: Int, nbGenome: Int) = this(genome, genomeSize, nbGenome, Workspace.newRNG)
   
+  def this(genome: IPrototype[GAGenomeWithSigma], genomeSize: Int, nbGenome: Int, initialPopulation: Array[Array[Double]]) = 
+    this(genome, genomeSize, nbGenome, Workspace.newRNG, initialPopulation)
+
   @transient lazy val factory = new GAGenomeWithSigmaFactory(genomeSize)
   
-  def prototypes = List(genome)
+  {
+    val wrongSize = 
+      initialGenomes.filter(_.size != genomeSize).map {
+        i => "(" + i.mkString(",") + ")"
+      }
+    if(wrongSize.size != 0) throw new UserBadDataError("Genomes doesn't have the correct size " + genomeSize + ": " + wrongSize.mkString(";"))
+  }
+    
+    def prototypes = List(genome)
 
-  def build(context: IContext) = 
-    (0 until nbGenome).map{ i => List(new Variable(genome, factory.random(generator))) }.iterator
+  def build(context: IContext) = {
+    def toSamplingLine(g: GAGenomeWithSigma) =  List(new Variable(genome, g))
+    
+    val genomes = 
+      initialGenomes.map {
+        g => 
+          val rg = factory.random(generator)
+          toSamplingLine(factory.updatedValues(rg, g))
+      }.take(nbGenome)
+      
+    (genomes ++ 
+     (0 until genomes.size - nbGenome).map{ i => toSamplingLine(factory.random(generator))}
+    ).iterator
+  }
 }

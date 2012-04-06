@@ -52,12 +52,17 @@ import scala.collection.immutable.TreeMap
 
 object Evolution {
 
-  class Scaling {
+  class Inputs {
     var scales = TreeMap.empty[String, (Double, Double)]
-    def add(protoName: String, min: Double, max: Double): Unit = scales += (protoName) -> (min, max)
-    def add(proto: IPrototype[Double], min: Double, max: Double): Unit =  add(proto.name, min, max)
-    def add(protoName: String, max: Double): Unit = add(protoName, 0, max)
-    def add(proto: IPrototype[Double], max: Double): Unit = add(proto.name, max)
+    
+    def scale(protoName: String, min: Double, max: Double): Unit = scales += (protoName) -> (min, max)
+    def scale(proto: IPrototype[Double], min: Double, max: Double): Unit =  scale(proto.name, min, max)
+    def scale(protoName: String, max: Double): Unit = scale(protoName, 0, max)
+    def scale(proto: IPrototype[Double], max: Double): Unit = scale(proto.name, max)
+    
+    var initialPopulation = List.empty[Array[Double]]
+    
+    def initital(g: Array[Double]) = initialPopulation ::= g
   }
   
   class Objectives {
@@ -73,12 +78,12 @@ object Evolution {
     def generationPrototype: IPrototype[Int]
   }
   
-  def scaling = new Scaling
+  def inputs = new Inputs
   def objectives = new Objectives
   
   def nsga2SigmaSteady(
     model: IPuzzleFirstAndLast,
-    scaling: Scaling,
+    scaling: Inputs,
     objectives: Objectives,
     populationSize: Int,
     archiveSize: Int,
@@ -97,7 +102,7 @@ object Evolution {
     
     val firstCapsule = new StrainerCapsule(new EmptyTask("first"))
     
-    val sampling = new SigmaGenomeSampling(genomeWithSigmaPrototype, genomeSize, populationSize)
+    val sampling = new SigmaGenomeSampling(genomeWithSigmaPrototype, genomeSize, populationSize, scaling.initialPopulation.toArray)
     val explorationCapsule = new Capsule(new ExplorationTask("genomeExploration", sampling))
 
     val scalingTask = new ScalingGenomeTask("scalingGenome", genomeWithSigmaPrototype)
@@ -189,7 +194,7 @@ object Evolution {
  
   def nsga2SigmaSteady(
     model: ICapsule,
-    scaling: Scaling,
+    scaling: Inputs,
     objectives: Objectives,
     populationSize: Int,
     archiveSize: Int,
@@ -208,7 +213,7 @@ object Evolution {
   
   def nsga2SigmaSteady(
     model: IPuzzleFirstAndLast,
-    scaling: Scaling,
+    scaling: Inputs,
     objectives: Objectives,
     populationSize: Int,
     archiveSize: Int,
@@ -228,7 +233,7 @@ object Evolution {
   
   def nsga2DiversitySigmaSteady(
     model: IPuzzleFirstAndLast,
-    scaling: Scaling,
+    scaling: Inputs,
     objectives: Objectives,
     populationSize: Int,
     archiveSize: Int,
@@ -248,7 +253,7 @@ object Evolution {
   
   def nsga2DiversitySigmaSteady(
     model: ICapsule,
-    scaling: Scaling,
+    scaling: Inputs,
     objectives: Objectives,
     populationSize: Int,
     archiveSize: Int,
