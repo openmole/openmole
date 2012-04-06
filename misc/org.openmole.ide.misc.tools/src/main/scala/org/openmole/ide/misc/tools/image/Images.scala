@@ -17,33 +17,34 @@
 
 package org.openmole.ide.misc.tools.image
 
-import org.openide.util.ImageUtilities
+import java.awt.Image
+import javax.imageio.ImageIO
+import javax.swing.ImageIcon
 
 object Images {
   
   val classLoader = getClass.getClassLoader
   
-  println("----------- " + classLoader.getResource("img/build.png").toString)
-  val START_SLOT= ImageUtilities.loadImage(classLoader.getResource("img/startSlot.png").toString)
-  val START_EXE_SLOT= ImageUtilities.loadImage(classLoader.getResource("img/startSlotExe.png").toString)
-  val INPUT_SLOT= ImageUtilities.loadImage(classLoader.getResource("img/inputSlot.png").toString)
-  val INPUT_EXE_SLOT= ImageUtilities.loadImage(classLoader.getResource("img/inputSlotExe.png").toString)
-  val OUTPUT_SLOT= ImageUtilities.loadImage(classLoader.getResource("img/outputSlot.png").toString)
-  val OUTPUT_EXE_SLOT= ImageUtilities.loadImage(classLoader.getResource("img/outputSlotExe.png").toString)
-  val AGGREGATION_TRANSITON = ImageUtilities.loadImage(classLoader.getResource("img/aggregation.png").toString)
-  val EXPLORATION_TRANSITON = ImageUtilities.loadImage(classLoader.getResource("img/exploration.png").toString)
-  val INPUT_DATA_CHANNEL = ImageUtilities.loadImage(classLoader.getResource("img/inputDataChannel.png").toString)
-  val OUTPUT_DATA_CHANNEL = ImageUtilities.loadImage(classLoader.getResource("img/outputDataChannel.png").toString)
+  val START_SLOT= ImageIO.read(classLoader.getResource("img/startSlot.png")).asInstanceOf[Image]
+  val START_EXE_SLOT= ImageIO.read(classLoader.getResource("img/startSlotExe.png")).asInstanceOf[Image]
+  val INPUT_SLOT= ImageIO.read(classLoader.getResource("img/inputSlot.png")).asInstanceOf[Image]
+  val INPUT_EXE_SLOT= ImageIO.read(classLoader.getResource("img/inputSlotExe.png")).asInstanceOf[Image]
+  val OUTPUT_SLOT= ImageIO.read(classLoader.getResource("img/outputSlot.png")).asInstanceOf[Image]
+  val OUTPUT_EXE_SLOT= ImageIO.read(classLoader.getResource("img/outputSlotExe.png")).asInstanceOf[Image]
+  val AGGREGATION_TRANSITON = ImageIO.read(classLoader.getResource("img/aggregation.png")).asInstanceOf[Image]
+  val EXPLORATION_TRANSITON = ImageIO.read(classLoader.getResource("img/exploration.png")).asInstanceOf[Image]
+  val INPUT_DATA_CHANNEL = ImageIO.read(classLoader.getResource("img/inputDataChannel.png")).asInstanceOf[Image]
+  val OUTPUT_DATA_CHANNEL = ImageIO.read(classLoader.getResource("img/outputDataChannel.png")).asInstanceOf[Image]
   
-  val CONNECT_TRANSITION_MODE = ImageUtilities.loadImage(classLoader.getResource("img/connectMode.png").toString)
-  val DATA_CHANNEL_TRANSITION_MODE = ImageUtilities.loadImage(classLoader.getResource("img/dataChannelMode.png").toString)
+  val CONNECT_TRANSITION_MODE = new ImageIcon(classLoader.getResource("img/connectMode.png"))
+  val DATA_CHANNEL_TRANSITION_MODE = new ImageIcon(classLoader.getResource("img/dataChannelMode.png"))
   
-  val START_EXECUTION = ImageUtilities.loadImage(classLoader.getResource("img/startExe.png").toString)
-  val STOP_EXECUTION = ImageUtilities.loadImage(classLoader.getResource("img/stopExe.png").toString)
-  val BUILD_EXECUTION = ImageUtilities.loadImageIcon(classLoader.getResource("img/build.png").toString,true)
-  val CLEAN_BUILD_EXECUTION = ImageUtilities.loadImageIcon(classLoader.getResource("img/cleanAndBuild.png").toString,true)
+  val START_EXECUTION = ImageIO.read(classLoader.getResource("img/startExe.png")).asInstanceOf[Image]
+  val STOP_EXECUTION = ImageIO.read(classLoader.getResource("img/stopExe.png")).asInstanceOf[Image]
+  val BUILD_EXECUTION = new ImageIcon(classLoader.getResource("img/build.png"))
+  val CLEAN_BUILD_EXECUTION = new ImageIcon(classLoader.getResource("img/cleanAndBuild.png"))
   
-  val EYE = ImageUtilities.loadImageIcon(classLoader.getResource("img/eye.png").toString,true)
-  val ARROW = ImageUtilities.loadImageIcon(classLoader.getResource("img/arrow.png").toString,true)
-  val EMPTY = ImageUtilities.loadImage(classLoader.getResource("img/empty.png").toString)
+  val EYE = new ImageIcon(classLoader.getResource("img/eye.png"))
+  val ARROW = new ImageIcon(classLoader.getResource("img/arrow.png"))
+  val EMPTY = ImageIO.read(classLoader.getResource("img/empty.png")).asInstanceOf[Image]
 }
