@@ -44,7 +44,7 @@ trait ISubMoleExecution {
   def jobs: Iterable[IMoleJob]
   //def nbJobInProgress: Int
   //def nbJobGrouping: Int
-  def submitting_=(b: Boolean)
+  //def submitting_=(b: Boolean)
   
   def cancel
   

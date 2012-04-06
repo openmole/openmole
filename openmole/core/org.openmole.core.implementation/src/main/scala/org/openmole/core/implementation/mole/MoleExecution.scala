@@ -105,6 +105,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
  
   def start(context: IContext): this.type = {
     rootSubMoleExecution.newChild.submit(mole.root, context, nextTicket(rootTicket))
+    if(rootSubMoleExecution.nbJobInProgress <= rootSubMoleExecution.nbJobWaiting) rootSubMoleExecution.submitAll
     this
   }
   
@@ -143,6 +144,7 @@ class MoleExecution(val mole: IMole, environmentSelection: IEnvironmentSelection
   }
 
   def jobOutputTransitionsPerformed(job: IMoleJob, capsule: ICapsule) = synchronized {
+    if(rootSubMoleExecution.nbJobInProgress <= rootSubMoleExecution.nbJobWaiting) rootSubMoleExecution.submitAll
     if(!canceled.get)  {
       instantRerun.jobFinished(job, capsule)
       if (finished) {  

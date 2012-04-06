@@ -76,7 +76,7 @@ class ExplorationTransition(override val start: ICapsule, end: ISlot, condition:
 //   var size = 0
         
     val endTask = end.capsule.taskOrException
-    subMole.submitting_=(true)
+    //subMole.submitting_=(true)
     
     
     for(value <- values) {
@@ -100,7 +100,7 @@ class ExplorationTransition(override val start: ICapsule, end: ISlot, condition:
       submitNextJobsIfReady(ListBuffer() ++ variables.toContext, newTicket, subMole)
     }
     
-    subMole.submitting_=(false)
+    //subMole.submitting_=(false)
   }
   
   private def registerAggregationTransitions(ticket: ITicket, subMoleExecution: ISubMoleExecution) = {
