@@ -103,14 +103,21 @@ object ConceptMenu {
   }
         
   def display(proxy: IDataProxyUI,
-              mode: Value) = 
-                ScenesManager.tabPane.selection.page match {
+              mode: Value) = {
+    if (ScenesManager.tabPane.pages.size == 0) createTab(proxy,mode)
+    ScenesManager.tabPane.selection.page match {
       case x: ISceneContainer=> x.scene.displayPropertyPanel(proxy, mode)
-      case _ => DialogFactory.newTabName match {
-          case Some(x: BuildMoleSceneContainer)=> x.scene.displayPropertyPanel(proxy, mode)
-          case None=>
-        }
+      case _ => createTab(proxy,mode)
     }
+  }
+  
+  def createTab(proxy: IDataProxyUI,
+                mode: Value) = DialogFactory.newTabName match {
+    case Some(y: BuildMoleSceneContainer)=> y.scene.displayPropertyPanel(proxy, mode)
+    case None=>
+  }
+    
+  
   
   def addItem(proxy: IDataProxyUI): MenuItem = addItem(proxy.dataUI.name,proxy)
   
