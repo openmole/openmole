@@ -42,12 +42,12 @@ class SamplingPanelUI(proxy: ISamplingDataProxyUI,
     val toBeRemovedSamplings  = ScenesManager.explorationCapsules.filter{case(c,d) => d.sampling == Some(proxy)}
     toBeRemovedSamplings match {
       case Nil => 
+        scene.closePropertyPanel
         Proxys.samplings -= proxy
         ConceptMenu.removeItem(proxy)
       case _ => 
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
           toBeRemovedSamplings.foreach{case(c,d) => c.scene.graphScene.removeNodeWithEdges(c.scene.manager.removeCapsuleUI(c))}
-          scene.closePropertyPanel
           delete
         }
     }

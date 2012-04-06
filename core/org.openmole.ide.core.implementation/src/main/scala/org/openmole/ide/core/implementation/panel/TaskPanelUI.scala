@@ -66,12 +66,13 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   def delete = {
     val toBeRemovedCapsules : List[ICapsuleUI] = ScenesManager.moleScenes.map{_.manager.capsules.values.filter{_.dataUI.task == Some(proxy)}}.flatten.toList
     toBeRemovedCapsules match {
-      case Nil => Proxys.tasks -= proxy
+      case Nil => 
+          scene.closePropertyPanel
+          Proxys.tasks -= proxy
         ConceptMenu.removeItem(proxy)
       case _ => 
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
           toBeRemovedCapsules.foreach{c=>c.scene.graphScene.removeNodeWithEdges(c.scene.manager.removeCapsuleUI(c))}
-          scene.closePropertyPanel
           delete
         }
     }

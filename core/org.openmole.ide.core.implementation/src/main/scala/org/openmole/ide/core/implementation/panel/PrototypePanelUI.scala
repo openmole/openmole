@@ -48,12 +48,13 @@ class PrototypePanelUI[T](proxy: IPrototypeDataProxyUI,
         }}}.toList
     
     capsulesWithProtos match {
-      case Nil => Proxys.prototypes -= proxy
+      case Nil => 
+        scene.closePropertyPanel
+        Proxys.prototypes -= proxy
         ConceptMenu.removeItem(proxy)
       case _ => 
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
           capsulesWithProtos.foreach{_.dataUI.task.get.dataUI.removePrototypeOccurencies(proxy)}
-          scene.closePropertyPanel
           delete
         }
     }

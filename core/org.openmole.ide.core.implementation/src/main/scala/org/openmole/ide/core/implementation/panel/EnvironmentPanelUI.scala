@@ -45,12 +45,13 @@ class EnvironmentPanelUI(proxy: IEnvironmentDataProxyUI,
       _.manager.capsules.values.filter{
         _.dataUI.environment == Some(proxy)}}.toList
     capsulesWithEnv match {
-      case Nil => Proxys.environments -= proxy
+      case Nil =>
+        scene.closePropertyPanel
+        Proxys.environments -= proxy
         ConceptMenu.removeItem(proxy)
       case _ => 
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
           capsulesWithEnv.foreach{_.setEnvironment(None)}
-          scene.closePropertyPanel
           delete
         }
     }
