@@ -43,6 +43,7 @@ import BatchEnvironment._
 
 object BatchExecutionJob extends Logger
 
+//TODO switch to akka actors for job status refreshement
 class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) extends ExecutionJob(executionEnvironment, job) with IUpdatableWithVariableDelay {
 
   import executionEnvironment.{minUpdateInterval, incrementUpdateInterval, maxUpdateInterval}
@@ -60,7 +61,6 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) e
   val killed = new AtomicBoolean(false)
   var _delay = minUpdateInterval
 
-  
   private def updateAndGetState = {
     if (killed.get) KILLED
     else batchJob match {
@@ -95,17 +95,20 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) e
               Workspace.preferenceAsDurationInMs(MinUpdateInterval)
             } else incrementedDelay
           case Some(batchJob) =>
-            val newState = updateAndGetState
+            if(finalizing) tryFinalise(batchJob)
+            else {
+              val newState = updateAndGetState
  
-            newState match {
-              case READY => throw new InternalProcessingError("Bug, it should never append.")
-              case (SUBMITTED | RUNNING | KILLED) => {}
-              case FAILED => resubmit
-              case DONE => tryFinalise(batchJob)
-            }
+              newState match {
+                case READY => throw new InternalProcessingError("Bug, it should never append.")
+                case (SUBMITTED | RUNNING | KILLED) => {}
+                case FAILED => resubmit
+                case DONE => tryFinalise(batchJob)
+              }
+            } 
             
             if(oldState != newState && newState == DONE) executionEnvironment.statistics += new StatisticSample(batchJob)
-            if(oldState != newState) minUpdateInterval
+            if(oldState != newState || (state != RUNNING && state != SUBMITTED)) minUpdateInterval
             else incrementedDelay
         }
         
@@ -136,6 +139,8 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) e
     !killed.get
   }
     
+  private def finalizing = finalizeExecutionFuture.isDefined
+  
   private def tryFinalise(batchJob: BatchJob) = 
     finalizeExecutionFuture match {
       case None => 
