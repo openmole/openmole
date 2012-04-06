@@ -45,16 +45,19 @@ object ScenesManager {
     }
   )
   
-  def currentSceneContainer : Option[ISceneContainer] =  tabPane.selection.page match {
+  def currentSceneContainer : Option[ISceneContainer] =  {
+    if (tabPane.peer.getTabCount == 0) None
+    else tabPane.selection.page.content match {
       case x : ISceneContainer => Some(x)
       case _ => None
+    }
   }
   
   def closeAll = tabPane.pages.clear
   
   def saveCurrentPropertyWidget = currentSceneContainer match {
-      case Some(x : ISceneContainer) => x.scene.savePropertyPanel
-      case _ => None
+    case Some(x : ISceneContainer) => x.scene.savePropertyPanel
+    case _ => None
   }
   
   def moleScenes = buildMoleSceneContainers.map{_.scene}

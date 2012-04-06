@@ -108,8 +108,6 @@ class BuildMoleScene(n: String = "",
       })
     extraPropertyWidget.setVisible(true)
     extraPropertyWidget.setPreferredLocation(new Point(propertyWidget.getBounds.x.toInt + currentPanel.bounds.width + 40,20))
-    
-    
     refresh
   }
 }
