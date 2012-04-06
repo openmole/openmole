@@ -24,6 +24,7 @@ import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.ITransition
 import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 import org.openmole.core.implementation.job.Job
 import org.openmole.core.implementation.tools.RegistryWithTicket
 import org.openmole.core.model.mole.IAtomicCapsule
@@ -31,6 +32,7 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMasterCapsule
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
+import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.IMoleJob._
 import org.openmole.core.model.mole.IGroupingStrategy
@@ -53,12 +55,10 @@ import scala.collection.mutable.SynchronizedSet
 class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: MoleExecution) extends ISubMoleExecution {
   
   private var _nbJobs = 0
-  private var _nbWaiting = 0
   
   private var _childs = new HashSet[SubMoleExecution] with SynchronizedSet[SubMoleExecution]
   private var _jobs = TreeMap.empty[IMoleJob, (ICapsule, ITicket)]
   
-  private val waitingJobs = new HashMap[(ICapsule, IMoleJobGroup), ListBuffer[IMoleJob]]
   private var canceled = false
   
   val masterCapsuleRegistry = new RegistryWithTicket[IMasterCapsule, Iterable[IVariable[_]]]
@@ -72,15 +72,9 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
     parrentApply(_.nbJobs_+=(v))
   }
   
-  def nbWaiting_+=(v: Int): Unit = {
-    _nbWaiting += v
-    parrentApply(_.nbWaiting_+=(v))
-  }
-  
   override def isRoot = !parent.isDefined
   
   def nbJobInProgress: Int = synchronized { _nbJobs }
-  def nbJobWaiting: Int = synchronized { _nbWaiting }
   
   override def cancel = synchronized {
     _jobs.keys.foreach{_.cancel}
@@ -131,7 +125,7 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
       checkFinished(ticket)
       moleExecution.jobOutputTransitionsPerformed(job, capsule)
     } 
- }
+  }
   
   private def checkFinished(ticket: ITicket) = 
     if (nbJobInProgress == 0) {
@@ -151,49 +145,24 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
       _jobs += (moleJob -> (capsule, ticket))
       
       nbJobs_+=(1)
-      moleExecution.submit(moleJob, capsule, this, ticket)
-    }
-  }
-
-  override def group(moleJob: IMoleJob, capsule: ICapsule, grouping: Option[IGroupingStrategy]) = synchronized {
-    capsule match {
-      case _: IAtomicCapsule => moleJob.perform
-      case _ => 
-        grouping match {
-          case Some(strategy) =>
-            val (category, complete) = strategy.group(moleJob.context)
-            val key = (capsule, category)
-            
-            waitingJobs.getOrElseUpdate(key, new ListBuffer[IMoleJob]) += moleJob
-            nbWaiting_+=(1)
-            
-            if(complete) {
-              val toSubmit = waitingJobs.remove(key).getOrElse(new ListBuffer[IMoleJob]) += moleJob
-              submitGrouped(toSubmit, capsule)
-            }
-          case None =>
-            val job = new Job(moleExecution.id, List(moleJob))
-            moleExecution.submitToEnvironment(job, capsule)
+      
+      val instant = 
+        synchronized {
+          EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleStarting(moleJob, capsule))
+          EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobSubmitted(moleJob))
+          moleExecution.instantRerun(moleJob, capsule)
+        }
+      
+      if(!instant)
+        capsule match {
+          case _: IAtomicCapsule => moleJob.perform
+          case _ => moleExecution.group(moleJob, capsule)
         }
     }
   }
-    
+
   def newChild: ISubMoleExecution = new SubMoleExecution(Some(this), moleExecution)
   
-  private def submitGrouped(jobs: Iterable[IMoleJob], capsule: ICapsule) = {
-    nbJobs_+=(-jobs.size)
-    val job = new Job(moleExecution.id, jobs)
-    moleExecution.submitToEnvironment(job, capsule)
-  }
-  
-  def submitAll: Unit = 
-    synchronized {
-      waitingJobs.foreach {
-        case((capsule, category), jobs) => submitGrouped(jobs, capsule)
-      }
-      waitingJobs.empty
-      childs.foreach { _.submitAll }
-    }
   
   private def parrentApply(f: SubMoleExecution => Unit) = 
     parent match {

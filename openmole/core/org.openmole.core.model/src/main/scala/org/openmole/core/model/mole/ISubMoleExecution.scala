@@ -19,6 +19,7 @@ package org.openmole.core.model.mole
 
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
+import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.tools.IRegistryWithTicket
 import org.openmole.core.model.transition.IAggregationTransition
@@ -53,7 +54,8 @@ trait ISubMoleExecution {
   def transitionRegistry: IRegistryWithTicket[ITransition, Buffer[IVariable[_]]]
 
   def submit(capsule: ICapsule, context: IContext, ticket: ITicket)
-  def group(moleJob: IMoleJob, capsule: ICapsule, grouping: Option[IGroupingStrategy])
+  //def submit(job: IJob, capsule: ICapsule)
+  //def group(moleJob: IMoleJob, capsule: ICapsule, grouping: Option[IGroupingStrategy])
   def newChild: ISubMoleExecution 
  
 }
