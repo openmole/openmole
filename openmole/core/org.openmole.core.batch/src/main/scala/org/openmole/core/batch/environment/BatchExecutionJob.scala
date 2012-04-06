@@ -73,10 +73,10 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) e
   
   override def state =
     if (killed.get) KILLED 
-    else batchJob match {
-      case None => READY
-      case Some(batchJob) => batchJob.state
-    }
+  else batchJob match {
+    case None => READY
+    case Some(batchJob) => batchJob.state
+  }
 
   override def update: Boolean = synchronized {
     val oldState = state
@@ -95,8 +95,10 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) e
               Workspace.preferenceAsDurationInMs(MinUpdateInterval)
             } else incrementedDelay
           case Some(batchJob) =>
-            if(finalizing) tryFinalise(batchJob)
-            else {
+            if(finalizing) {
+              tryFinalise(batchJob)
+              minUpdateInterval
+            } else {
               val newState = updateAndGetState
  
               newState match {
@@ -105,11 +107,12 @@ class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) e
                 case FAILED => resubmit
                 case DONE => tryFinalise(batchJob)
               }
+              
+              if(oldState != newState && newState == DONE) executionEnvironment.statistics += new StatisticSample(batchJob)
+              if(oldState != newState || (state != RUNNING && state != SUBMITTED)) minUpdateInterval
+              else incrementedDelay
             } 
-            
-            if(oldState != newState && newState == DONE) executionEnvironment.statistics += new StatisticSample(batchJob)
-            if(oldState != newState || (state != RUNNING && state != SUBMITTED)) minUpdateInterval
-            else incrementedDelay
+
         }
         
       }
