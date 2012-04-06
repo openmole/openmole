@@ -52,11 +52,11 @@ class TaskWidget(scene: IMoleScene,
   override def paintComponent(g : Graphics2D) = {
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                        RenderingHints.VALUE_ANTIALIAS_ON)
-    g.setColor(backColor)
-    g.fillRect(0, 0, preferredSize.width, preferredSize.height)
+  //  g.setColor(backColor)
+  //  g.fillRect(0, 0, preferredSize.width, preferredSize.height)
     val bo = borderColor
-    g.setColor(bo)
-    g.fillRect(0, 0, preferredSize.width, TASK_TITLE_HEIGHT)
+  //  g.setColor(bo)
+  //  g.fillRect(0, 0, preferredSize.width, TASK_TITLE_HEIGHT)
     border = BorderFactory.createLineBorder(bo, 2)
     repaint
     revalidate
