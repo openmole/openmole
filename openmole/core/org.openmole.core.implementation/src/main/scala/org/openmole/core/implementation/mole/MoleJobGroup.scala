@@ -19,15 +19,4 @@ package org.openmole.core.implementation.mole
 
 import org.openmole.core.model.mole.IMoleJobGroup
 
-class MoleJobGroup(val values: Array[Any]) extends IMoleJobGroup {
-
-  override def equals(obj: Any): Boolean = {
-    if(obj == null) return false
-    if(!obj.asInstanceOf[AnyRef].getClass.isAssignableFrom(classOf[MoleJobGroup])) return false
-    val other = obj.asInstanceOf[MoleJobGroup]
-    values.deep == other.values.deep
-  }
-
-  override def hashCode: Int = values.deep.hashCode
-
-}
+case class MoleJobGroup(val values: Any*) extends IMoleJobGroup

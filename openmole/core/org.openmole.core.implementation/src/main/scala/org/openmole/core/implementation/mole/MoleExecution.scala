@@ -99,16 +99,17 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
   def group(moleJob: IMoleJob, capsule: ICapsule) = synchronized {
     moleJobGrouping(capsule) match {
       case Some(strategy) =>
-        val (category, complete) = strategy.group(moleJob.context)
+        val category = strategy.group(moleJob.context)
         val key = (capsule, category)
             
-        waitingJobs.getOrElseUpdate(key, new ListBuffer) += moleJob 
+        val jobs = waitingJobs.getOrElseUpdate(key, new ListBuffer) += moleJob 
         nbWaiting += 1
-            
+        
+        val complete = strategy.complete(jobs)
         if(complete) {
-          val toSubmit = waitingJobs.remove(key).getOrElse(new ListBuffer)
-          nbWaiting -= toSubmit.size
-          val job = new Job(id, toSubmit)
+          waitingJobs.remove(key)
+          nbWaiting -= jobs.size
+          val job = new Job(id, jobs)
           submit(job, capsule)
         }
       case None =>

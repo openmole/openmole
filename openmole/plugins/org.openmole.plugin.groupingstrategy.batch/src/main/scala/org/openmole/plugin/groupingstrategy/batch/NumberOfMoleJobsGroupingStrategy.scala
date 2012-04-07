@@ -32,13 +32,14 @@ class NumberOfMoleJobsGroupingStrategy(numberOfMoleJobs: Int) extends IGroupingS
   private var currentNumberOfJobs = 0
 
   override def group(context: IContext) = {
-    val ret = new MoleJobGroup(Array(currentBatchNumber))
+    val ret = new MoleJobGroup(currentBatchNumber)
     currentNumberOfJobs += 1
     if(currentNumberOfJobs >= numberOfMoleJobs) {
       currentNumberOfJobs = 0
       currentBatchNumber += 1
-      (ret, true)
     }
-    (ret, false)
+    ret
   }
+  
+  override def complete(jobs: Iterable[IMoleJobs]) = jobs.size >= numberOfMoleJobs
 }

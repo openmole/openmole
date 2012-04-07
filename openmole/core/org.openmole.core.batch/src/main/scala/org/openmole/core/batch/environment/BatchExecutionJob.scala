@@ -43,7 +43,7 @@ import BatchEnvironment._
 
 object BatchExecutionJob extends Logger
 
-//TODO switch to akka actors for job status refreshement
+//TODO switch to akka actors for job status refresh
 class BatchExecutionJob(val executionEnvironment: BatchEnvironment, job: IJob) extends ExecutionJob(executionEnvironment, job) with IUpdatableWithVariableDelay {
 
   import executionEnvironment.{minUpdateInterval, incrementUpdateInterval, maxUpdateInterval}

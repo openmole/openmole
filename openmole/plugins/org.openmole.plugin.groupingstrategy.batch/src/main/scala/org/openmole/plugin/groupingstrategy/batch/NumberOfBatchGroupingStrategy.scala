@@ -32,9 +32,9 @@ class NumberOfBatchGroupingStrategy(numberOfBatch: Int) extends IGroupingStrateg
   var currentBatchNumber = 0
 
   override def group(context: IContext) = {
-    val jobCategory = new MoleJobGroup(Array[Any](currentBatchNumber))
+    val jobCategory = new MoleJobGroup(currentBatchNumber)
     currentBatchNumber = (currentBatchNumber + 1) % numberOfBatch
-    (jobCategory, false)
+    jobCategory
   }
 
 }

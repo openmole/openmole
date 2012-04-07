@@ -30,6 +30,6 @@ class OnVariableGroupingStrategy(prototypes: IPrototype[_]*) extends IGroupingSt
 
     def this(prototypes: Array[IPrototype[_]]) = this(prototypes: _*)
 
-    override def group(context: IContext) = (new MoleJobGroup(prototypes.flatMap{context.value(_)}.toArray), false)
+    override def group(context: IContext) = new MoleJobGroup(prototypes.flatMap{context.value(_)}.toSeq: _*)
     
 }
