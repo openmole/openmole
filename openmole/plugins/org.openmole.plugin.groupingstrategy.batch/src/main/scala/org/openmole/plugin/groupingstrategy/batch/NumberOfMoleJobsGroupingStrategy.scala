@@ -19,6 +19,7 @@ package org.openmole.plugin.groupingstrategy.batch
 
 import org.openmole.core.implementation.mole.MoleJobGroup
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IGroupingStrategy
 
 /**
@@ -41,5 +42,5 @@ class NumberOfMoleJobsGroupingStrategy(numberOfMoleJobs: Int) extends IGroupingS
     ret
   }
   
-  override def complete(jobs: Iterable[IMoleJobs]) = jobs.size >= numberOfMoleJobs
+  override def complete(jobs: Iterable[IMoleJob]) = jobs.size >= numberOfMoleJobs
 }
