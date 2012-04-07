@@ -84,7 +84,6 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
   private val waitingJobs = new HashMap[(ICapsule, IMoleJobGroup), ListBuffer[IMoleJob]]
   private var nbWaiting = 0
   
-  
   val rootSubMoleExecution = new SubMoleExecution(None, this)
   val rootTicket = Ticket(id, ticketNumber.getAndIncrement)  
   val dataChannelRegistry = new RegistryWithTicket[IDataChannel, Buffer[IVariable[_]]]
@@ -116,7 +115,6 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
         val job = new Job(id, List(moleJob))
         submit(job, capsule)
     }
-    
   }
   
   def submit(job: IJob, capsule: ICapsule) = 

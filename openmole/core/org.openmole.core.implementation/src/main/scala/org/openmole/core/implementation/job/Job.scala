@@ -22,7 +22,7 @@ import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.MoleJobId
 import scala.collection.immutable.TreeMap
 
-class Job(override val executionId: String, override val moleJobs: Iterable[IMoleJob]) extends IJob {
+class Job(val executionId: String, val moleJobs: Iterable[IMoleJob]) extends IJob {
   
   @transient lazy val moleJobsMap = new TreeMap[MoleJobId, IMoleJob]() ++ moleJobs.map{mj => mj.id -> mj}  
   
