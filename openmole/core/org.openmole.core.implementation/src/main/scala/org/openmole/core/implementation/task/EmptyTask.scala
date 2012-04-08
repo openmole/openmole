@@ -19,6 +19,6 @@ package org.openmole.core.implementation.task
 
 import org.openmole.core.model.data.IContext
 
-class EmptyTask(name: String) extends Task(name) {
+class EmptyTask(val name: String) extends Task {
   override def process(context: IContext) = context
 }

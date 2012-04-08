@@ -63,7 +63,8 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
     
     val emptyC = new Capsule(emptyT)
     
-    val testT = new Task("Test") {
+    val testT = new Task {
+      val name = "Test"
       override def process(context: IContext) = {
         context.contains(toArray(i)) should equal (true)
         context.value(toArray(i)).get.sorted.deep should equal (data.toArray.deep)

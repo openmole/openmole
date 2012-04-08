@@ -30,8 +30,8 @@ import fr.iscpif.mgo.ga.selection.Ranking
 import fr.iscpif.mgo.tools.Scaling._
 
 class ScalingParetoTask[I <: Individual[GAGenome, GAFitness] with Ranking](
-  name: String,
-  archivePrototype: IPrototype[Array[I]]) extends Task(name) {
+  val name: String,
+  archivePrototype: IPrototype[Array[I]]) extends Task {
 
   addInput(archivePrototype)
   

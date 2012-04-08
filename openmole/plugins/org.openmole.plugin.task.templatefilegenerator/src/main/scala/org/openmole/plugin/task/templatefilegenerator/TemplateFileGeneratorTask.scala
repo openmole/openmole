@@ -21,9 +21,9 @@ import java.io.File
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 
-class TemplateFileGeneratorTask(name: String, template: File,outputPrototype: IPrototype[File]) extends AbstractTemplateFileGeneratorTask(name,outputPrototype){
+class TemplateFileGeneratorTask(val name: String, template: File, val output: IPrototype[File]) extends AbstractTemplateFileGeneratorTask {
 
-  def this(name: String, templateName: String,outputPrototype: IPrototype[File]) = this(name,new File(templateName),outputPrototype)
+  def this(name: String, templateName: String, outputPrototype: IPrototype[File]) = this(name,new File(templateName),outputPrototype)
   
   override def file(context: IContext) = template
 }

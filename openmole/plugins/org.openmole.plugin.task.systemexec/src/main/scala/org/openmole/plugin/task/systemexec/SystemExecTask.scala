@@ -26,11 +26,12 @@ import org.openmole.core.implementation.tools.VariableExpansion._
 import scala.collection.JavaConversions._
 
 
-class SystemExecTask(name: String, 
-                     cmd: String, 
-                     returnValue: Option[IPrototype[Int]], 
-                     exceptionIfReturnValueNotZero: Boolean,
-                     relativeDir: String) extends AbstractSystemExecTask(name,cmd,returnValue,exceptionIfReturnValueNotZero,relativeDir) {
+class SystemExecTask(
+  val name: String, 
+  val cmd: String, 
+  val returnValue: Option[IPrototype[Int]], 
+  val exceptionIfReturnValueNotZero: Boolean,
+  val relativeDir: String) extends AbstractSystemExecTask {
   
   def this(name: String, cmd: String) = this(name, cmd, None, true, "")
   

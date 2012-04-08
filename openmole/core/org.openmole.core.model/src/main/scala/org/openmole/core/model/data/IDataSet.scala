@@ -21,8 +21,12 @@ package org.openmole.core.model.data
  * It is a set of @link{IData}. It allows manipulating data by set instead of
  * individualy.
  */
-trait IDataSet extends Iterable[IData[_]] {
+import scala.collection.SetLike
+
+trait IDataSet extends SetLike[IData[_], IDataSet with Set[IData[_]]] {
   
+  //override def empty: this.type
+
   /**
    * Get the @link{IData} by its name as an Option.
    * 
@@ -39,4 +43,8 @@ trait IDataSet extends Iterable[IData[_]] {
    * set false otherwise
    */
   def contains(name: String): Boolean
+  
+  def +(p: IPrototype[_]): IDataSet
+  def ++(p: Traversable[IPrototype[_]]): IDataSet
+  
 }

@@ -35,13 +35,14 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.misc.workspace.Workspace
 
+
 class NSGA2SteadySigmaBreedTask(
-  name: String,
+  val name: String,
   archivePrototype: IPrototype[Array[Individual[GAGenomeWithSigma, GAFitness] with Ranking with Distance]],
   genomePrototype: IPrototype[GAGenomeWithSigma],
   genomeSize: Int,
   distributionIndex: Double, 
-  random: Random) extends Task(name) {
+  random: Random) extends Task {
 
   addInput(archivePrototype)
   addOutput(genomePrototype)

@@ -28,42 +28,45 @@ import fr.iscpif.mgo.ga.selection.Rank
 import fr.iscpif.mgo.ga.selection.ParetoRank
 import fr.iscpif.mgo.ga.selection.Ranking
 import org.openmole.core.implementation.data.Context
+import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 
 class NSGA2SteadyElitismTask[T <: GAGenome](
-  name: String, 
+  val name: String, 
   individual: IPrototype[Individual[T, GAFitness]],
-  archive: IPrototype[Array[Individual[T, GAFitness] with Ranking with Distance]],
+  archive: IPrototype[Array[Individual[T, GAFitness] with Ranking with Distance]], 
+  archiveSize: Int,
   nbGenerationSteady: IPrototype[Int],
   generation: IPrototype[Int],
-  archiveSize: Int,
   rank: Rank,
-  dominance: Dominant) extends Task(name) {
+  dominance: Dominant) extends Task {
 
   def this(
     name: String, 
     individual: IPrototype[Individual[T, GAFitness]],
     archive: IPrototype[Array[Individual[T, GAFitness] with Ranking with Distance]],
+    archiveSize: Int,
     nbGenerationSteady: IPrototype[Int],
     generation: IPrototype[Int],
-    archiveSize: Int,
     rank: Rank
-  ) = this(name, individual, archive, nbGenerationSteady, generation, archiveSize, rank, new StrictDominant)
+  ) = this(name, individual, archive, archiveSize, nbGenerationSteady, generation, rank, new StrictDominant)
   
   def this(
     name: String, 
     individual: IPrototype[Individual[T, GAFitness]],
     archive: IPrototype[Array[Individual[T, GAFitness] with Ranking with Distance]],
+    archiveSize: Int,
     nbGenerationSteady: IPrototype[Int],
-    generation: IPrototype[Int],
-    archiveSize: Int) = this(name, individual, archive, nbGenerationSteady, generation, archiveSize, new ParetoRank, new StrictDominant)
+    generation: IPrototype[Int]
+  ) = this(name, individual, archive, archiveSize, nbGenerationSteady, generation, new ParetoRank, new StrictDominant)
   
   addInput(archive)
   addInput(individual)
   addInput(nbGenerationSteady)
+  
   addOutput(archive)
   addOutput(nbGenerationSteady)
   addOutput(generation)

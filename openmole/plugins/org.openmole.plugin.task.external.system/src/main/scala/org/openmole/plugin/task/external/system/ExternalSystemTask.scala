@@ -32,7 +32,7 @@ import scala.collection.JavaConversions._
 
 object ExternalSystemTask extends Logger
 
-abstract class ExternalSystemTask(name: String) extends ExternalTask(name) {
+abstract class ExternalSystemTask extends ExternalTask {
 
   import ExternalSystemTask._
   

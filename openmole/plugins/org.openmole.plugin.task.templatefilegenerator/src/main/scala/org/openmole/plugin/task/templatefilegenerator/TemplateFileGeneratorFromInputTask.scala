@@ -23,7 +23,7 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IPrototype
 
-class TemplateFileGeneratorFromInputTask(name: String, templateFile: IData[File],outputPrototype: IPrototype[File]) extends AbstractTemplateFileGeneratorTask(name,outputPrototype){
+class TemplateFileGeneratorFromInputTask(val name: String, templateFile: IData[File], val output: IPrototype[File]) extends AbstractTemplateFileGeneratorTask {
 
   def this(name: String,tF: IPrototype[File],outputPrototype: IPrototype[File]) = this(name,new Data[File](tF),outputPrototype)
   addInput(templateFile)

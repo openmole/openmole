@@ -33,7 +33,8 @@ class StrainerCapsuleSpec extends FlatSpec with ShouldMatchers {
   "The strainer capsule" should "let the data pass through" in {
     val p = new Prototype("p", classOf[String])
     
-    val t1 = new Task("Test write") {
+    val t1 = new Task {
+      val name = "Test write"
       override def process(context: IContext) = context + (p -> "Test")
     }
     
@@ -41,7 +42,8 @@ class StrainerCapsuleSpec extends FlatSpec with ShouldMatchers {
     
     val strainer = new EmptyTask("Strainer")
     
-    val t2 = new Task("Test read") {
+    val t2 = new Task {
+      val name = "Test read"
       override def process(context: IContext) = {
         context.value(p).get should equal ("Test")
         context

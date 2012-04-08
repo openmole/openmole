@@ -23,7 +23,7 @@ import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 
-abstract class DoubleSequenceStatTask(name: String) extends Task(name){
+abstract class DoubleSequenceStatTask extends Task {
 
   var sequences: List[(IPrototype[Array[Double]], IPrototype[Double])] = Nil
 

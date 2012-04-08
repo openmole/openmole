@@ -27,19 +27,26 @@ import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.data.Context._
 import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.mole.MoleExecution
+import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.DataModeMask
 import org.openmole.core.model.data.DataModeMask._
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.IMoleTask
 
-class MoleTask(name: String, val mole: IMole, val lastCapsule: ICapsule) extends Task(name) with IMoleTask {
+class MoleTask(val name: String, val mole: IMole, val lastCapsule: ICapsule) extends Task with IMoleTask {
 
+  var implicits: IContext = new Context
+  
+  def addImplicit[T](p: IPrototype[T], v: T) = implicits = implicits + new Variable(p, v)
+  def addImplicit[T](name: String, v: T) = implicits = implicits + new Variable(name, v) 
+  
   class ResultGathering extends EventListener[IMoleExecution] {
     var lastContext: Option[IContext] = None
      
@@ -68,10 +75,10 @@ class MoleTask(name: String, val mole: IMole, val lastCapsule: ICapsule) extends
     execution.start(firstTaskContext)
     execution.waitUntilEnded
 
-    context ++ resultGathering.lastContext.getOrElse(throw new UserBadDataError("Last capsule " + lastCapsule + " has never been executed."))
+    context + resultGathering.lastContext.getOrElse(throw new UserBadDataError("Last capsule " + lastCapsule + " has never been executed."))
   }
 
-  override def inputs: IDataSet = new DataSet(super.inputs ++ mole.root.taskOrException.inputs)
-  override def outputs: IDataSet = new DataSet(super.inputs ++ lastCapsule.taskOrException.outputs)
+  override def inputs: IDataSet = new DataSet((super.inputs ++ mole.root.taskOrException.inputs).toList)
+  override def outputs: IDataSet = new DataSet((super.inputs ++ lastCapsule.taskOrException.outputs).toList)
  
 }

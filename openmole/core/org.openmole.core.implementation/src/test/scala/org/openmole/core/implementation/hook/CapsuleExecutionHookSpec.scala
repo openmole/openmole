@@ -38,9 +38,9 @@ class CapsuleExecutionHookSpec extends FlatSpec with ShouldMatchers {
     
     val p = new Prototype("p", classOf[String])
     
-    val t1 = new Task("Test") {
+    val t1 = new Task {
+      val name = "Test"
       override def process(context: IContext) = context + (p -> "test")
-      
     }
     
     t1.addOutput(p)
@@ -66,7 +66,8 @@ class CapsuleExecutionHookSpec extends FlatSpec with ShouldMatchers {
     
     val p = new Prototype("p", classOf[String])
     
-    val t1 = new Task("Test") {
+    val t1 = new Task {
+      val name = "Test"
       override def process(context: IContext) = context + (p -> "test")
       
     }

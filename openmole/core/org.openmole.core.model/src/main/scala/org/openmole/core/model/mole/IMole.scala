@@ -20,12 +20,7 @@ package org.openmole.core.model.mole
 import org.openmole.core.model.task.ITask
 
 trait IMole {
-
   def root: ICapsule
-    
-  @throws(classOf[Throwable])
   def capsules: Seq[ICapsule]
-   
-  @throws(classOf[Throwable])
   def tasks: Iterable[ITask]
 }

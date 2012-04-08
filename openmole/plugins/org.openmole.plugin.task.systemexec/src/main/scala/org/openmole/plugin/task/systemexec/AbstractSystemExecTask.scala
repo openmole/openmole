@@ -36,12 +36,14 @@ import scala.collection.JavaConversions._
 
 object AbstractSystemExecTask extends Logger
 
-abstract class AbstractSystemExecTask (name: String, 
-                                       val cmd: String, 
-                                       val returnValue: Option[IPrototype[Int]] = null, 
-                                       exceptionIfReturnValueNotZero: Boolean = true,
-                                       relativeDir: String = "") extends ExternalSystemTask(name) {
+abstract class AbstractSystemExecTask extends ExternalSystemTask {
  
+  def cmd: String
+  def returnValue: Option[IPrototype[Int]]
+  def exceptionIfReturnValueNotZero: Boolean 
+  def relativeDir: String
+  
+  
   import AbstractSystemExecTask._
   
   returnValue match {

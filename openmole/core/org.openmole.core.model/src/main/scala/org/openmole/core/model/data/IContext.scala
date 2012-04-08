@@ -23,15 +23,9 @@ package org.openmole.core.model.data
  * the variables and add values to it.
  */
 import org.openmole.misc.exception.UserBadDataError
+import scala.collection.immutable.MapLike
 
-trait IContext extends Iterable[IVariable[_]] {
-    
-  /**
-   * Get all the variables in this context.
-   * 
-   * @return all the variables in this context
-   */
-  def variables: Map[String, IVariable[_]]
+trait IContext extends MapLike[String, IVariable[_], IContext with Map[String, IVariable[_]]] {
 
   /** 
    * Get a variable given its name.
@@ -91,15 +85,6 @@ trait IContext extends Iterable[IVariable[_]] {
    */
   def valueOrException[T](proto: IPrototype[T]): T = value(proto).getOrElse(throw new UserBadDataError("Variable " + proto + " has not been found in the context"))
 
-  
-  /**
-   * Build a new context containing the variables of the current context plus the 
-   * variable give as parameter.
-   * 
-   * @param variable the variable to add
-   * @return the new context
-   */
-  def +(variable: IVariable[_]): IContext
 
   /**
    * Build a new context containing the variables of the current context plus the 
@@ -141,6 +126,12 @@ trait IContext extends Iterable[IVariable[_]] {
    */
   def +[T] (tuple: (IPrototype[T],T)): IContext = this.+(tuple._1, tuple._2)
 
+ 
+  def +[T](variable: IVariable[T]): IContext
+  
+  def +(ctx: IContext): IContext
+  
+  
   /**
    * Build a new context containing the variables of the current context plus the 
    * variables given in parameter.
@@ -152,49 +143,14 @@ trait IContext extends Iterable[IVariable[_]] {
   
   /**
    * Build a new context containing the variables of the current context minus the
-   * variable which name has been passed in parameter.
-   * 
-   * @param name the name of the variable
-   * @return the new context
-   */
-  def -(name: String): IContext
-  
-  /**
-   * Build a new context containing the variables of the current context minus the
    * variable which names have been passed in parameter.
    * 
    * @param names the names of the variables
    * @return the new context
    */
   def --(name: Traversable[String]): IContext
-
-  /**
-   * Check if the context contains a variable with a given prototype's name.
-   * 
-   * @param proto a prototype with the same name as the variable
-   * @return true if a variable with the given name as been found false
-   * otherwise
-   */
-  def containsVariableWithName(proto: IPrototype[_]): Boolean
   
-  /**
-   * Check if the context contains a variable with a given name.
-   * 
-   * @param name the name of the variable
-   * @return true if a variable with the given name as been found false
-   * otherwise
-   */
-  def containsVariableWithName(name: String): Boolean
+  def contains(p: IPrototype[_]): Boolean
 
-  /**
-   * Check if a variable matching a given prototype is contained in the context.
-   * A variable matches the prototype if and only if it has the same name and
-   * the prototype type is assignable from the variable type.
-   * 
-   * @param proto the prototype to look for in the context
-   * @return true if a variable matching the prototype has been found, false
-   * otherwise
-   */
-  def contains(proto: IPrototype[_]): Boolean
 
 }

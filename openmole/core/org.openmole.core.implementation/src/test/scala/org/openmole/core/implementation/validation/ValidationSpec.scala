@@ -48,7 +48,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     
     new Transition(c1, c2)
     
-    val errors = Validation.typeErrors(new Mole(c1))
+    val errors = Validation.typeErrors(new Mole(c1).capsules)
     errors.headOption match {
       case Some(MissingInput(_,_,d)) => assert(d.prototype == p)
       case None => sys.error("Error should have been detected")
@@ -68,7 +68,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     
     new Transition(c1, c2)
     
-    Validation.typeErrors(new Mole(c1)).isEmpty should equal (true)
+    Validation.typeErrors(new Mole(c1).capsules).isEmpty should equal (true)
   }
   
   "Validation" should "detect a type error" in {
@@ -85,7 +85,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     
     new Transition(c1, c2)
     
-    val errors = Validation.typeErrors(new Mole(c1))
+    val errors = Validation.typeErrors(new Mole(c1).capsules)
     errors.headOption match {
       case Some(WrongType(_,_,d,t)) => 
         assert(d.prototype == pString)
@@ -131,7 +131,8 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val p = new Prototype("t", classOf[String])
     
     val t1 = 
-      new Task("t1") {
+      new Task {
+        val name = "t1"
         override def process(context: IContext) = Context(new Variable(p, "test"))
       }
     t1.addOutput(p)
@@ -151,7 +152,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     
     new DataChannel(c1: ICapsule, c3: ICapsule, Array[IPrototype[_]](p))
     
-    val errors = Validation.typeErrors(new Mole(c1))
+    val errors = Validation.typeErrors(new Mole(c1).capsules)
     
     errors.headOption match {
       case Some(MissingInput(_,_,d)) => assert(d.prototype == p)
@@ -175,7 +176,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     
     val mt = new MoleTask("mt", new Mole(c1), c2)
     
-    val errors = Validation(new Mole(new Capsule(mt)))
+    val errors = Validation(new MoleExecution(new Mole(new Capsule(mt))))
     errors.headOption match {
       case Some(MissingInput(_,_,d)) => assert(d.prototype == p)
       case None => sys.error("Error should have been detected")
@@ -187,7 +188,8 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val p = new Prototype("t", classOf[String])
 
     val t1 = 
-      new Task("t1") {
+      new Task {
+        val name = "t1"
         override def process(context: IContext) = Context(new Variable(p, "test"))
       }
     t1.addOutput(p)
@@ -204,7 +206,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     
     new Transition(c1, mtC)
     
-    val errors = Validation(new Mole(mtC))
+    val errors = Validation(new MoleExecution(new Mole(mtC)))
     errors.isEmpty should equal (true)
   }
   

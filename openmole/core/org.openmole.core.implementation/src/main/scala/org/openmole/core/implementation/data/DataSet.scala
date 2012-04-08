@@ -22,22 +22,22 @@ import scala.collection.Iterator
 import scala.collection.immutable.TreeMap
 
 object DataSet {
-  lazy val empty = new DataSet(Iterable.empty[IData[_]])
+  val empty = new DataSet(List.empty)
   
   implicit def dataIterableDecorator(data: Iterable[IData[_]]) = new {
-    def toDataSet = new DataSet(data)
+    def toDataSet = new DataSet(data.toList)
   }
   
   def apply(prototypes: IPrototype[_]*): DataSet = apply(prototypes.toIterable)
-  def apply(prototypes: Iterable[IPrototype[_]]): DataSet = new DataSet(prototypes.map{new Data(_)})
+  def apply(prototypes: Iterable[IPrototype[_]]): DataSet = new DataSet(prototypes.map{new Data(_)}.toList)
 }
 
 
-class DataSet(data: Iterable[IData[_]]) extends IDataSet {
+class DataSet(data: List[IData[_]]) extends Set[IData[_]] with IDataSet {
   
   def this(head: IData[_], data: Array[IData[_]]) =  this(List(head) ++ data)
   
-  def this(head: IDataSet, dataSets: Array[IDataSet]) = this(head ++ dataSets.toList.flatten)
+  def this(head: IDataSet, dataSets: Array[IDataSet]) = this(head.toList ::: dataSets.toList.flatten ::: Nil)
   
   def this(head: IPrototype[_], prototypes: Iterable[IPrototype[_]]) = this((List(head) ++ prototypes).map{new Data(_)})
    
@@ -47,19 +47,22 @@ class DataSet(data: Iterable[IData[_]]) extends IDataSet {
 
   def this(dataMod: DataMode, head: IPrototype[_], prototypes: Array[IPrototype[_]]) = this(dataMod, head, prototypes.toIterable)
   
-
-  def this(data: Iterable[IData[_]], head: IPrototype[_], prototypes: Array[IPrototype[_]]) = this(data ++ (List(head) ++ prototypes).map{new Data(_)})
-  
-  def this(data: Iterable[IData[_]], dataMode: DataMode, prototypes: Array[IPrototype[_]]) = this(data ++ prototypes.map{new Data(_, dataMode)})
-   
-  def this(data: Iterable[IData[_]], head: IData[_], inData: Array[IData[_]]) = this(data ++ List(head) ++ inData)
+  def this(data: Iterable[IData[_]], head: IPrototype[_], prototypes: Array[IPrototype[_]]) = this(data.toList ::: (head :: prototypes.toList).map{new Data(_)}.toList)
   
   
   @transient private lazy val _data =
     TreeMap.empty[String, IData[_]] ++ data.map{d => (d.prototype.name,d)}
   
+  
+  override def empty = DataSet.empty
   override def iterator: Iterator[IData[_]] = _data.values.iterator
   override def apply(name: String) = _data.get(name)
   override def contains(name: String): Boolean = _data.contains(name)
 
+  override def ++(p: Traversable[IPrototype[_]]): IDataSet = this ++ p.map{new Data(_)}
+  override def +(p: IPrototype[_]): IDataSet = this + new Data(p)
+  override def +(data: IData[_]) = new DataSet(data :: this.data)
+  override def -(data: IData[_]) = new DataSet((_data - (data.prototype.name)).map{_._2}.toList)
+  override def contains(data: IData[_]) = _data.contains(data.prototype.name)
+  
 }

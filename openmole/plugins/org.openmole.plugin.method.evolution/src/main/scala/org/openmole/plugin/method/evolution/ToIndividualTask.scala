@@ -28,9 +28,9 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 
 class ToIndividualTask[T <: GAGenome](
-  name: String, 
+  val name: String, 
   genome: IPrototype[T], 
-  individual: IPrototype[Individual[T, GAFitness]]) extends Task(name) { task =>
+  individual: IPrototype[Individual[T, GAFitness]]) extends Task { task =>
   
   addInput(genome)
   addOutput(individual)

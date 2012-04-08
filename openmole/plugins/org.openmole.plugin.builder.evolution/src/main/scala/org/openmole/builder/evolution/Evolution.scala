@@ -29,6 +29,7 @@ import fr.iscpif.mgo.ga.selection.Ranking
 import fr.iscpif.mgo.tools.Scaling._
 import org.openmole.core.implementation.data.DataChannel
 import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.mole.Capsule
 import org.openmole.core.implementation.mole.MasterCapsule
 import org.openmole.core.implementation.task.ExplorationTask
@@ -61,22 +62,6 @@ object Evolution {
     def scale(proto: IPrototype[Double], min: Double, max: Double): Unit =  scale(proto.name, min, max)
     def scale(protoName: String, max: Double): Unit = scale(protoName, 0, max)
     def scale(proto: IPrototype[Double], max: Double): Unit = scale(proto.name, max)
-    
-    var initialPopulation = List.empty[Array[Double]]
-
-    def initial(g: Array[Double]) = {
-      if(g.size != inputs.size) throw new UserBadDataError("Genome " + g.mkString(",") + " doesn't match the expected size of inputs " + inputs.size)
-      initialPopulation ::= g
-    }
-    
-    def unscaled(g: Array[Double]) = (g zip inputs) map { 
-      case(g, i) => 
-        val (min, max) = scales(i) 
-        g.unscale(min, max) 
-    }
-    
-    def unscaledInitialPopulation = 
-      initialPopulation.map{ unscaled }.toArray
   }
   
   class Objectives {
@@ -84,21 +69,49 @@ object Evolution {
     def add(o: IPrototype[Double], v: Double) = objectives ::= o -> v
   }
   
-  trait NSGA2Sigma extends IPuzzleFirstAndLast {
+  abstract class NSGA2Sigma extends IPuzzleFirstAndLast { nsga2 =>
     def elitismCapsule: ICapsule
     def breedingCapsule: ICapsule
     def outputCapsule: ICapsule
     def steadySincePrototype: IPrototype[Int]
     def generationPrototype: IPrototype[Int]
+    def inputs: Inputs
+    def initialGenomes: IPrototype[Array[Array[Double]]]
+    
+    def initialPopulation = new InitialPopulation {
+      def inputs = nsga2.inputs
+      def initialGenomes = nsga2.initialGenomes
+    }
+  }
+  
+  abstract class InitialPopulation {
+    def inputs: Inputs
+    def initialGenomes: IPrototype[Array[Array[Double]]]
+    
+    var initialPopulation = List.empty[Array[Double]]
+
+    def add(g: Array[Double]) = {
+      if(g.size != inputs.inputs.size) throw new UserBadDataError("Genome " + g.mkString(",") + " doesn't match the expected size of inputs " + inputs.inputs.size)
+      initialPopulation ::= g
+    }
+    
+    def unscaled(g: Array[Double]) = (g zip inputs.inputs) map { 
+      case(g, i) => 
+        val (min, max) = inputs.scales(i) 
+        g.unscale(min, max) 
+    }
+    
+    def get = new Variable(initialGenomes, initialPopulation.map{ unscaled }.toArray)
+    
   }
   
   def inputs(inputs: Array[String]) = new Inputs(inputs)
-  
   def inputs(inputs: Array[IPrototype[_]]) = new Inputs(inputs.map{_.name})
     
   def objectives = new Objectives
   
   def nsga2SigmaSteady(
+    name: String,
     model: IPuzzleFirstAndLast,
     scaling: Inputs,
     objectives: Objectives,
@@ -108,21 +121,22 @@ object Evolution {
     distributionIndex: Double,
     rank: Rank
   ): NSGA2Sigma = { 
-    val genomeWithSigmaPrototype = new Prototype("genome", classOf[GAGenomeWithSigma])
-    val individualPrototype = new Prototype("individual", classOf[Individual[GAGenomeWithSigma, GAFitness]])
-    val archivePrototype = new Prototype("archive", classOf[Array[Individual[GAGenomeWithSigma, GAFitness] with Distance with Ranking]])
-    val steadySinceProto = new Prototype("steadySince", classOf[Int])
-    val fitnessProto = new Prototype("fitness", classOf[GAFitness])
-    val generationProto = new Prototype("generation", classOf[Int])
+    val genomeWithSigmaPrototype = new Prototype(name + "Genome", classOf[GAGenomeWithSigma])
+    val individualPrototype = new Prototype(name + "Individual", classOf[Individual[GAGenomeWithSigma, GAFitness]])
+    val archivePrototype = new Prototype(name + "Archive", classOf[Array[Individual[GAGenomeWithSigma, GAFitness] with Distance with Ranking]])
+    val steadySinceProto = new Prototype(name + "SteadySince", classOf[Int])
+    val fitnessProto = new Prototype(name + "Fitness", classOf[GAFitness])
+    val generationProto = new Prototype(name + "Generation", classOf[Int])
     
     val genomeSize = scaling.scales.size
     
-    val firstCapsule = new StrainerCapsule(new EmptyTask("first"))
+    val firstCapsule = new StrainerCapsule(new EmptyTask(name + "First"))
     
-    val sampling = new SigmaGenomeSampling(genomeWithSigmaPrototype, genomeSize, populationSize, scaling.unscaledInitialPopulation)
-    val explorationCapsule = new Capsule(new ExplorationTask("genomeExploration", sampling))
+    val sampling = new SigmaGenomeSampling(genomeWithSigmaPrototype, genomeSize, populationSize)
+    val exploreSampling = new ExplorationTask(name + "GenomeExploration", sampling) 
+    val explorationCapsule = new Capsule(exploreSampling)
 
-    val scalingTask = new ScalingGenomeTask("scalingGenome", genomeWithSigmaPrototype)
+    val scalingTask = new ScalingGenomeTask(name + "ScalingGenome", genomeWithSigmaPrototype)
     
     scaling.inputs.map{
       name => (name, scaling.scales.getOrElse(name, throw new UserBadDataError("Scale not found for input " + name)))}.foreach { 
@@ -132,7 +146,7 @@ object Evolution {
     
     val scalingCaps = new Capsule(scalingTask)
     
-    val toIndividualTask = new ToIndividualTask("toIndividualTask", genomeWithSigmaPrototype, individualPrototype)
+    val toIndividualTask = new ToIndividualTask(name + "ToIndividual", genomeWithSigmaPrototype, individualPrototype)
     objectives.objectives.reverse.foreach {
       case (o, v) => toIndividualTask.objective(o, v)
     }
@@ -140,18 +154,18 @@ object Evolution {
     val toIndividualCapsule = new Capsule(toIndividualTask)
     
     val elitismTask = new NSGA2SteadyElitismTask(
-      "elitismTask", 
+      name + "ElitismTask", 
       individualPrototype,
-      archivePrototype, 
+      archivePrototype,
+      archiveSize,
       steadySinceProto,
       generationProto,
-      archiveSize,
       rank
     )
     
     val elitismCaps = new MasterCapsule(elitismTask, archivePrototype, steadySinceProto, generationProto)
     
-    val scalingParetoTask = new ScalingParetoTask("scalingPareto", archivePrototype)
+    val scalingParetoTask = new ScalingParetoTask(name + "ScalingPareto", archivePrototype)
     scaling.scales.foreach { 
       case(name, (min, max)) =>
         scalingParetoTask.scale(new Prototype(name, classOf[Double]), min, max)
@@ -171,7 +185,7 @@ object Evolution {
       
     
     val breedingTask = new NSGA2SteadySigmaBreedTask(
-      "breedingTask", 
+      name + "Breeding", 
       archivePrototype,
       genomeWithSigmaPrototype,
       genomeSize,
@@ -180,7 +194,7 @@ object Evolution {
     
     val breedingCaps = new StrainerCapsule(breedingTask)
     
-    val endTask = new EmptyTask("endTask")
+    val endTask = new EmptyTask(name + "End")
     val endCapsule = new StrainerCapsule(endTask)
     
     new Transition(firstCapsule, explorationCapsule)
@@ -191,7 +205,7 @@ object Evolution {
     new Transition(elitismCaps, scalingParetoCapsule)
     new Transition(scalingParetoCapsule, breedingCaps)
     new Transition(breedingCaps, new Slot(scalingCaps))
-    new EndExplorationTransition("steadySince >= " + maxGenerationsSteady, scalingParetoCapsule, endCapsule)
+    new EndExplorationTransition(steadySinceProto.name + " >= " + maxGenerationsSteady, scalingParetoCapsule, endCapsule)
     
     new DataChannel(scalingCaps, toIndividualCapsule)
     new DataChannel(elitismCaps, breedingCaps)
@@ -207,11 +221,14 @@ object Evolution {
       def outputCapsule = scalingParetoCapsule
       def steadySincePrototype = steadySinceProto
       def generationPrototype = generationProto
+      def inputs = scaling
+      def initialGenomes = new Prototype(name + "InitialGenomes", classOf[Array[Array[Double]]])
     }
   }
   
  
   def nsga2SigmaSteady(
+    name: String,
     model: ICapsule,
     scaling: Inputs,
     objectives: Objectives,
@@ -221,6 +238,7 @@ object Evolution {
     distributionIndex: Double
   ): NSGA2Sigma = 
     nsga2SigmaSteady(
+      name,
       Builder.puzzle(model),
       scaling,
       objectives,
@@ -231,6 +249,7 @@ object Evolution {
   
   
   def nsga2SigmaSteady(
+    name: String,
     model: IPuzzleFirstAndLast,
     scaling: Inputs,
     objectives: Objectives,
@@ -240,6 +259,7 @@ object Evolution {
     distributionIndex: Double
   ): NSGA2Sigma = 
    nsga2SigmaSteady(
+      name,
       model,
       scaling,
       objectives,
@@ -251,6 +271,7 @@ object Evolution {
     )
   
   def nsga2DiversitySigmaSteady(
+    name: String,
     model: IPuzzleFirstAndLast,
     scaling: Inputs,
     objectives: Objectives,
@@ -260,6 +281,7 @@ object Evolution {
     distributionIndex: Double
   ): NSGA2Sigma = 
     nsga2SigmaSteady(
+      name,
       model,
       scaling,
       objectives,
@@ -271,6 +293,7 @@ object Evolution {
     )
   
   def nsga2DiversitySigmaSteady(
+    name: String,
     model: ICapsule,
     scaling: Inputs,
     objectives: Objectives,
@@ -280,6 +303,7 @@ object Evolution {
     distributionIndex: Double
   ): NSGA2Sigma = 
     nsga2DiversitySigmaSteady(
+      name,
       Builder.puzzle(model),
       scaling,
       objectives,

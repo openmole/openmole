@@ -32,14 +32,14 @@ import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.pluginmanager.PluginManagerInfo
 import org.openmole.misc.tools.io.FileUtil.fileOrdering
 
-abstract class Task(val name: String) extends ITask {
+abstract class Task extends ITask {
   
   import Data._
   import Parameter._
   
-  private var _inputs = TreeSet.empty[IData[_]]
-  private var _outputs = TreeSet.empty[IData[_]]
-  private var _parameters = TreeSet.empty[IParameter[_]]
+  private var _inputs = List.empty[IData[_]]
+  private var _outputs = List.empty[IData[_]]
+  private var _parameters = List.empty[IParameter[_]]
   private var _plugins = new TreeSet[File]
   
   protected def verifyInput(context: IContext) = {
@@ -76,7 +76,7 @@ abstract class Task(val name: String) extends ITask {
       context ++ 
         parameters.flatMap {
           parameter =>
-            if (parameter.`override` || !context.containsVariableWithName(parameter.variable.prototype)) Some(parameter.variable)
+            if (parameter.`override` || !context.contains(parameter.variable.prototype.name)) Some(parameter.variable)
             else Option.empty[IVariable[_]]
         }
     )
@@ -97,57 +97,57 @@ abstract class Task(val name: String) extends ITask {
    * @see org.openmole.core.processors.ITask#run(org.openmole.core.processors.ApplicativeContext)
    */
   override def perform(context: IContext) = {
-    try end(context ++ process(init(context)))
+    try end(context + process(init(context)))
     catch {
       case e => throw new InternalProcessingError(e, "Error in task " + name)
     }
   }
 
-  override def addOutput(prototype: IPrototype[_]): this.type = addOutput(new Data(prototype))
+  def addOutput(prototype: IPrototype[_]): this.type = addOutput(new Data(prototype))
 
-  override def addOutput(prototype: IPrototype[_], masks: Array[DataModeMask]): this.type = addOutput(new Data(prototype, masks)); this
+  def addOutput(prototype: IPrototype[_], masks: Array[DataModeMask]): this.type = addOutput(new Data(prototype, masks)); this
  
-  override def addOutput(data: IData[_]): this.type =  {
-    _outputs += data
+  def addOutput(data: IData[_]): this.type =  {
+    _outputs ::= data
     this
   }
   
-  override def addInput(prototype: IPrototype[_]): this.type = addInput(new Data(prototype))
+  def addInput(prototype: IPrototype[_]): this.type = addInput(new Data(prototype))
 
-  override def addInput(prototype: IPrototype[_], masks: Array[DataModeMask]): this.type = addInput(new Data(prototype, masks))
+  def addInput(prototype: IPrototype[_], masks: Array[DataModeMask]): this.type = addInput(new Data(prototype, masks))
 
-  override def addInput(data: IData[_]): this.type = {
-    _inputs += data
+  def addInput(data: IData[_]): this.type = {
+    _inputs ::= data
     this
   }
 
-  override def addInput(dataSet: IDataSet): this.type = {
+  def addInput(dataSet: IDataSet): this.type = {
     for(data <- dataSet) addInput(data)     
     this
   }
 
-  override def addOutput(dataSet: IDataSet): this.type = {
+  def addOutput(dataSet: IDataSet): this.type = {
     for(data <- dataSet) addOutput(data)
     this
   }
   
-  override def inputs: IDataSet = new DataSet(_inputs)
+  override def inputs: IDataSet = new DataSet(_inputs.toList)
+  override def outputs: IDataSet = new DataSet(_outputs.toList)
     
-  override def outputs: IDataSet = new DataSet(_outputs)
-    
-  override def addParameter(parameter: IParameter[_]): this.type = {
-    _parameters += parameter
+  def addParameter(parameter: IParameter[_]): this.type = {
+    _parameters ::= parameter
     this
   }
     
-  override def addParameter[T](prototype: IPrototype[T] , value: T): this.type = addParameter(new Parameter[T](prototype, value))
+  def addParameter[T](prototype: IPrototype[T] , value: T): this.type = addParameter(new Parameter[T](prototype, value))
     
-  override def addParameter[T](prototype: IPrototype[T], value: T, `override`: Boolean): this.type = addParameter(new Parameter[T](prototype, value, `override`))
+  def addParameter[T](prototype: IPrototype[T], value: T, `override`: Boolean): this.type = addParameter(new Parameter[T](prototype, value, `override`))
     
   override def parameters: Iterable[IParameter[_]]= _parameters
    
-  override def addPlugin(plugin: File): this.type = {_plugins += plugin; this}
-  override def addPlugin(plugin: String): this.type = addPlugin(new File(plugin))
+  def addPlugin(plugin: File): this.type = {_plugins += plugin; this}
+  def addPlugin(plugin: String): this.type = addPlugin(new File(plugin))
+  
   override def plugins = _plugins
   
   override def toString: String = name       

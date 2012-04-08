@@ -22,6 +22,7 @@ import org.openmole.core.model.job.State.State
 import org.openmole.core.model.tools.IRegistryWithTicket
 import org.openmole.misc.eventdispatcher.Event
 import java.util.logging.Level
+import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IDataChannel
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.job.IJob
@@ -44,15 +45,11 @@ trait IMoleExecution {
   def started: Boolean
 
   def start: this.type
-    
   def cancel: this.type
-    
   def waitUntilEnded: this.type
-      
+  def finished: Boolean
   def exceptions: Iterable[Throwable]
   
-  def finished: Boolean
-
   def mole: IMole
 
   def dataChannelRegistry: IRegistryWithTicket[IDataChannel, Buffer[IVariable[_]]]
@@ -61,4 +58,5 @@ trait IMoleExecution {
   def id: String
   def nextTicket(parent: ITicket): ITicket
 
+  def implicits: IContext
 }

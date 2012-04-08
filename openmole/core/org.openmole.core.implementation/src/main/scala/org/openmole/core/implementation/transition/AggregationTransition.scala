@@ -106,13 +106,13 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
     
     if(!hasBeenPerformed(subMole, parentTicket)) {
       subMole.aggregationTransitionRegistry.consult(this, parentTicket) match {
-        case Some(resultContexts) =>
-          resultContexts ++= context
+        case Some(results) =>
+          results ++= context.values
     
           trigger match {
             case Some(trigger) => 
                 val toArrayManifests = Map.empty[String, Manifest[_]] ++ start.outputs.toList.map{d => d.prototype.name -> d.prototype.`type`}
-                val context = ContextAggregator.aggregate(start.outputs, toArrayManifests, resultContexts.toIterable)
+                val context = ContextAggregator.aggregate(start.outputs, toArrayManifests, results.toIterable)
                 if(trigger.evaluate(context)) {
                   aggregate(subMole, ticket)
                   if(allAggregationTransitionsPerformed(subMole, parentTicket)) subMole.cancel

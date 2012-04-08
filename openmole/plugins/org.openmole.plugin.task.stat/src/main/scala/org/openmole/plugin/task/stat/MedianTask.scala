@@ -24,7 +24,7 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IContext
 import org.openmole.misc.math.Stat
 
-class MedianTask(name: String) extends DoubleSequenceStatTask(name) {
+class MedianTask(val name: String) extends DoubleSequenceStatTask {
   
   override def stat(seq: Array[Double]) =  Stat.median(seq)
   

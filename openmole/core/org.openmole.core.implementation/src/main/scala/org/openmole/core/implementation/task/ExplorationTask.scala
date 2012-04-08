@@ -34,10 +34,14 @@ object ExplorationTask {
   type SampledValues = Iterable[Iterable[IVariable[_]]]
 }
 
-class ExplorationTask(name: String, val sampling: ISampling) extends Task(name) with IExplorationTask {
+class ExplorationTask(val name: String, val sampling: ISampling) extends Task with IExplorationTask {
 
-  sampling.inputs.foreach{addInput}
-  sampling.prototypes.foreach{ p => addOutput(new Data(toArray(p), DataModeMask.explore)) }
+  override def inputs = 
+    sampling.inputs ++ super.inputs
+    
+  override def outputs = 
+    super.outputs ++ sampling.prototypes.map{p => new Data(toArray(p), DataModeMask.explore)}
+  
   
   //If input prototype as the same name as the output it is erased
   override protected def process(context: IContext) = {

@@ -19,7 +19,7 @@ package org.openmole.plugin.task.stat
 
 import org.openmole.misc.math.Stat
 
-class MeanSquareErrorTask(name: String) extends DoubleSequenceStatTask(name) {
+class MeanSquareErrorTask(val name: String) extends DoubleSequenceStatTask {
   
   override def stat(seq: Array[Double]) = Stat.meanSquareError(seq)
 

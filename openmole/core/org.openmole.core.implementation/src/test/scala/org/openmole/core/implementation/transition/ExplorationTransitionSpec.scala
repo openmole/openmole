@@ -47,7 +47,8 @@ class ExplorationTransitionSpec extends FlatSpec with ShouldMatchers {
      
     val res = new ListBuffer[String]
     
-    val t = new Task("Test") {
+    val t = new Task {
+      val name = "Test"
       override def process(context: IContext) = synchronized {
         context.contains(i) should equal (true)
         res += context.value(i).get

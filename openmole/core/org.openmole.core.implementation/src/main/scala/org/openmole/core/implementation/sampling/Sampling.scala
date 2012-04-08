@@ -18,12 +18,10 @@
 package org.openmole.core.implementation.sampling
 
 import org.openmole.core.implementation.data.Prototype._
-import org.openmole.core.implementation.data.Data
 import org.openmole.core.implementation.data.DataSet
-import org.openmole.core.model.data.DataModeMask
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.sampling.ISampling
 
 trait Sampling extends ISampling {
-  def inputs = DataSet.empty
+  override def inputs: IDataSet = DataSet.empty
 }

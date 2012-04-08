@@ -19,6 +19,7 @@ package org.openmole.core.model.sampling
 
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IDataSet
+import org.openmole.core.model.data.IParameter
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
 

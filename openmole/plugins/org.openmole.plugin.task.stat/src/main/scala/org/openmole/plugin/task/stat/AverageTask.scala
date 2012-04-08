@@ -19,7 +19,7 @@ package org.openmole.plugin.task.stat
 
 import org.openmole.misc.math.Stat
 
-class AverageTask(name: String) extends DoubleSequenceStatTask(name) {
+class AverageTask(val name: String) extends DoubleSequenceStatTask {
   
   override def stat(seq: Array[Double]) = Stat.average(seq)
 

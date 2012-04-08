@@ -61,7 +61,7 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
   
   private var canceled = false
   
-  val masterCapsuleRegistry = new RegistryWithTicket[IMasterCapsule, Iterable[IVariable[_]]]
+  val masterCapsuleRegistry = new RegistryWithTicket[IMasterCapsule, IContext]
   val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, Buffer[IVariable[_]]]
   val transitionRegistry = new RegistryWithTicket[ITransition, Buffer[IVariable[_]]]
 
@@ -111,7 +111,12 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
     nbJobs_+=(-1)
     try {
       capsule match {
-        case c: IMasterCapsule => masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(job.context))
+        case c: IMasterCapsule => 
+          masterCapsuleRegistry.register(
+            c,
+            ticket.parentOrException,
+            c.toPersist(job.context)
+          )
         case _ =>
       }
       
@@ -135,11 +140,13 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
   
   override def submit(capsule: ICapsule, context: IContext, ticket: ITicket) = synchronized {
     if(!canceled) {
+      def implicits = Context.empty ++ moleExecution.implicits.values.filter(v => capsule.taskOrException.inputs.contains(v.prototype.name))
+      
       val moleJob: IMoleJob = capsule match {
         case c: IMasterCapsule => 
           val savedContext = masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(new Context)
-          new MoleJob(capsule.taskOrException, context ++ savedContext, moleExecution.nextJobId, stateChanged)
-        case _ => new MoleJob(capsule.taskOrException, context, moleExecution.nextJobId, stateChanged)
+          new MoleJob(capsule.taskOrException, implicits + context + savedContext, moleExecution.nextJobId, stateChanged)
+        case _ => new MoleJob(capsule.taskOrException, implicits + context, moleExecution.nextJobId, stateChanged)
       }
       
       _jobs += (moleJob -> (capsule, ticket))

@@ -24,7 +24,7 @@ import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 
-class ScalingGenomeTask[T <: GAGenome](name: String, genome: IPrototype[T]) extends Task(name) {
+class ScalingGenomeTask[T <: GAGenome](val name: String, genome: IPrototype[T]) extends Task {
 
   addInput(genome)
   addOutput(genome)

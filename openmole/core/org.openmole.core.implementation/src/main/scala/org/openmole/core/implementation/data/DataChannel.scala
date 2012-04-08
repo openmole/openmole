@@ -81,7 +81,7 @@ class DataChannel(
     val levelDelta = LevelComputing(moleExecution).levelDelta(start, end.capsule)
     val dataChannelRegistry = moleExecution.dataChannelRegistry
     if (levelDelta >= 0) {
-      val toContext = ListBuffer() ++ fromContext.filterNot(v => filtered.contains(v.prototype.name))
+      val toContext = ListBuffer() ++ fromContext.values.filterNot(v => filtered.contains(v.prototype.name))
       dataChannelRegistry.register(this, ticket, toContext)
     } else {
       val workingOnTicket = (levelDelta until 0).foldLeft(ticket) {
@@ -89,7 +89,7 @@ class DataChannel(
       }
         
       val toContext = dataChannelRegistry.getOrElseUpdate(this, workingOnTicket, new ListBuffer[IVariable[_]]) 
-      toContext ++= fromContext.filterNot(v => filtered.contains(v.prototype.name))
+      toContext ++= fromContext.values.filterNot(v => filtered.contains(v.prototype.name))
     }  
     
   }

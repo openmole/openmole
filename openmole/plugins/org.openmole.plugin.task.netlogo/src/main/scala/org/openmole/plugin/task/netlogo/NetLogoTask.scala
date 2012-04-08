@@ -32,9 +32,9 @@ import scala.collection.mutable.ListBuffer
 object NetLogoTask extends Logger
 
 abstract class NetLogoTask(
-  name: String,
+  val name: String,
   workspace: Either[(File, String), File],
-  launchingCommands: Iterable[String]) extends ExternalSystemTask(name) {
+  launchingCommands: Iterable[String]) extends ExternalSystemTask {
 
   def this(name: String, workspace: File, scriptName: String, launchingCommands: Iterable[String]) = 
     this(name, Left(workspace -> scriptName), launchingCommands)

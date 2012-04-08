@@ -34,10 +34,10 @@ import collection.JavaConversions._
  * array. The number of data to store in columns is not limited.
  */
 class StoreIntoCSVTask(
-  name: String,
+  val name: String,
   var columns: List[(IPrototype[Array[_]], String)],
   filePrototype: IPrototype[File],
-  delimiter: Char, quoteChar: Char) extends Task(name) {
+  delimiter: Char, quoteChar: Char) extends Task {
 
   columns.foreach{case(p,s) => addInput(p)}
   addOutput(filePrototype)

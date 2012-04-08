@@ -39,13 +39,15 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
   "A transition" should "enable variable values to be transmitted from a task to another" in {
     val p = new Prototype("p", classOf[String])
     
-    val t1 = new Task("Test write") {
+    val t1 = new Task {
+      val name = "Test write"
       override def process(context: IContext) = context + (p -> "Test")
     }
     
     t1.addOutput(p)
     
-    val t2 = new Task("Test read") {
+    val t2 = new Task {
+      val name = "Test read"
       override def process(context: IContext) = {
         context.value(p).get should equal ("Test")
         context
@@ -69,19 +71,22 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
     
     val init = new EmptyTask("Init")
     
-    val t1 = new Task("Test write 1") {
+    val t1 = new Task {
+      val name = "Test write 1"
       override def process(context: IContext) = context + (p1 -> "Test1")
     }
     
     t1.addOutput(p1)
     
-    val t2 = new Task("Test write 2") {
+    val t2 = new Task {
+      val name = "Test write 2"
       override def process(context: IContext) = context + (p2 -> "Test2")
     }
     
     t2.addOutput(p2)
     
-    val t3 = new Task("Test read") {
+    val t3 = new Task {
+      val name = "Test read"
       override def process(context: IContext) = {
         context.value(p1).get should equal ("Test1")
         context.value(p2).get should equal ("Test2") 
@@ -115,19 +120,22 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
     
     val init = new EmptyTask("Init")
     
-    val t1 = new Task("Test write 1") {
+    val t1 = new Task {
+      val name = "Test write 1"
       override def process(context: IContext) = context + (p1 -> new java.lang.Long(1L))
     }
     
     t1.addOutput(p1)
     
-    val t2 = new Task("Test write 2") {
+    val t2 = new Task {
+      val name = "Test write 2"
       override def process(context: IContext) = context + (p2 -> new java.lang.Integer(2))
     }
     
     t2.addOutput(p2)
     
-    val t3 = new Task("Test read") {
+    val t3 = new Task {
+      val name = "Test read"
       override def process(context: IContext) = {
         //println(context.value(pArtoStringray).map(_.intL))
         context.value(pArray).get.map(_.intValue).contains(1) should equal (true)
@@ -162,19 +170,22 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
     
     val init = new EmptyTask("Init")
     
-    val t1 = new Task("Test write 1") {
+    val t1 = new Task {
+      val name = "Test write 1"
       override def process(context: IContext) = context + (p1 -> "Test1")
     }
     
     t1.addOutput(p1)
     
-    val t2 = new Task("Test write 2") {
+    val t2 = new Task {
+      val name = "Test write 2"
       override def process(context: IContext) = context + (p2 -> "Test2")
     }
     
     t2.addOutput(p2)
     
-    val t3 = new Task("Test read") {
+    val t3 = new Task {
+      val name = "Test read"
       override def process(context: IContext) = {
         context.value(p1).get should equal ("Test1")
         context.value(toArray(p2)).get.head should equal ("Test2") 
@@ -218,19 +229,22 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
     
     val init = new EmptyTask("Init")
     
-    val t1 = new Task("Test write 1") {
+    val t1 = new Task {
+      val name = "Test write 1"
       override def process(context: IContext) = context + (p1 -> Array(new java.lang.Long(1L)))
     }
     
     t1.addOutput(p1)
     
-    val t2 = new Task("Test write 2") {
+    val t2 = new Task {
+      val name = "Test write 2"
       override def process(context: IContext) = context + (p2 -> Array(new java.lang.Integer(2)))
     }
     
     t2.addOutput(p2)
     
-    val t3 = new Task("Test read") {
+    val t3 = new Task {
+      val name = "Test read"
       override def process(context: IContext) = {
         val res = IndexedSeq(context.value(pArray).get(0).deep, context.value(pArray).get(1).deep)
         

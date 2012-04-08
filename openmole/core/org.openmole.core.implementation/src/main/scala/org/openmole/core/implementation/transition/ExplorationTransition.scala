@@ -72,15 +72,11 @@ class ExplorationTransition(override val start: ICapsule, end: ISlot, condition:
   def submitIn(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
     val (factors, outputs) = start.outputs.partition(d => (d.mode is explore) && d.prototype.`type`.isArray)
     val typedFactors = factors.map(_.prototype.asInstanceOf[IPrototype[Array[Any]]])
-    val values = typedFactors.map(context.value(_).get.toIterable).transpose//.reduceLeft(_ zip _)
-//   var size = 0
+    val values = typedFactors.toList.map(context.value(_).get.toIterable).transpose
         
     val endTask = end.capsule.taskOrException
-    //subMole.submitting_=(true)
-    
     
     for(value <- values) {
-//      subMole.incNbJobInProgress(1)
 
       val newTicket = subMole.moleExecution.nextTicket(ticket)
       
@@ -97,10 +93,9 @@ class ExplorationTransition(override val start: ICapsule, end: ISlot, condition:
         if(fp.accepts(v)) variables += new Variable(fp, v)
         else throw new UserBadDataError("Found value of type " + v.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + fp) 
       }
-      submitNextJobsIfReady(ListBuffer() ++ variables.toContext, newTicket, subMole)
+      submitNextJobsIfReady(ListBuffer() ++ variables, newTicket, subMole)
     }
     
-    //subMole.submitting_=(false)
   }
   
   private def registerAggregationTransitions(ticket: ITicket, subMoleExecution: ISubMoleExecution) = {

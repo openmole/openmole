@@ -38,7 +38,7 @@ object ExternalTask {
 }
 
 
-abstract class ExternalTask(name: String) extends Task(name) {
+abstract class ExternalTask extends Task {
  
   val inContextFiles = new ListBuffer[(IPrototype[File], String, Boolean)]
   val inContextFilesAndNames = new ListBuffer[(IPrototype[Array[(File, String)]], String, Boolean)]

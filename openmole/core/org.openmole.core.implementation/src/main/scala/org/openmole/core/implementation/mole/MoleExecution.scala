@@ -26,6 +26,7 @@ import org.openmole.core.model.mole.IAtomicCapsule
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.implementation.validation.Validation
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
@@ -46,6 +47,7 @@ import org.openmole.core.model.mole.IMoleJobGrouping
 import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.data.IDataChannel
 import org.openmole.misc.tools.service.Priority
+import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 import org.openmole.core.implementation.job.Job
 import org.openmole.core.implementation.tools.RegistryWithTicket
@@ -83,6 +85,8 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
 
   private val waitingJobs = new HashMap[(ICapsule, IMoleJobGroup), ListBuffer[IMoleJob]]
   private var nbWaiting = 0
+  
+  var implicits: IContext = new Context
   
   val rootSubMoleExecution = new SubMoleExecution(None, this)
   val rootTicket = Ticket(id, ticketNumber.getAndIncrement)  
@@ -128,7 +132,7 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
     }
   
   
-  def submitAll = {
+  def submitAll = synchronized {
     waitingJobs.foreach {
       case((capsule, _), jobs) => submit(new Job(id, jobs) , capsule)
     }
@@ -144,7 +148,7 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
   
   override def start = {
     if(!_started.getAndSet(true)) {
-      val validationErrors = Validation(mole)
+      val validationErrors = Validation(this)
       if(!validationErrors.isEmpty) throw new UserBadDataError("Formal validation of you mole has failed, several errors have been found: " + validationErrors.mkString("; "))
       start(Context.empty) 
     }
@@ -188,12 +192,13 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
   }
   
   override def finished: Boolean = rootSubMoleExecution.nbJobInProgress == 0
-  
   override def started: Boolean = _started.get
 
   override def nextTicket(parent: ITicket): ITicket = Ticket(parent, ticketNumber.getAndIncrement)
 
   def nextJobId = new MoleJobId(id, currentJobId.getAndIncrement)
  
-  
+  def addImplicit[T](p: IPrototype[T], v: T) = implicits += new Variable(p, v)
+  def addImplicit[T](name: String, v: T) = implicits += new Variable(name, v) 
+  def addImplicit(variables: Traversable[IVariable[_]]) = implicits ++= variables
 }

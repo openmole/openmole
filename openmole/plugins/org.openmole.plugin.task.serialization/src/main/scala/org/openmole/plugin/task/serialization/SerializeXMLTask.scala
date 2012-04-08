@@ -25,7 +25,7 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.workspace.Workspace
 
-class SerializeXMLTask(name: String, var convert: List[(IPrototype[_], IPrototype[File])]) extends Task(name) {
+class SerializeXMLTask(val name: String, var convert: List[(IPrototype[_], IPrototype[File])]) extends Task {
   
   convert.foreach{case(input, output) => addInput(input); addOutput(output)}
   

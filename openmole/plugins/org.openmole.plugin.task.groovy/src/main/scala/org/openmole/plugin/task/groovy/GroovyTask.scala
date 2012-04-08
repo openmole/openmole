@@ -27,7 +27,7 @@ import org.openmole.core.model.data.IContext
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable.ListBuffer
 
-class GroovyTask(name: String, private var _code: ISourceCode) extends CodeTask(name) {
+class GroovyTask(val name: String, private var _code: ISourceCode) extends CodeTask {
   
   def this(name: String) = this(name, new StringSourceCode(""))
   def this(name: String, code: String) = this(name, new StringSourceCode(code))

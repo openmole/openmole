@@ -46,7 +46,8 @@ class CopyFileHookSpec extends FlatSpec with ShouldMatchers {
     
     val p = new Prototype("p", classOf[File])
     
-    val t1 = new Task("Test") {
+    val t1 = new Task {
+      val name = "Test"
       override def process(context: IContext) = context + (p -> f)
     }
 

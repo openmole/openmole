@@ -41,13 +41,15 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
   "A master capsule" should "execute tasks" in {
     val p = new Prototype("p", classOf[String])
     
-    val t1 = new Task("Test write") {
+    val t1 = new Task {
+      val name = "Test write"
       override def process(context: IContext) = context + (p -> "Test")
     }
     
     t1.addOutput(p)
     
-    val t2 = new Task("Test read") {
+    val t2 = new Task {
+      val name = "Test read"
       override def process(context: IContext) = {
         context.value(p).get should equal ("Test")
         context
@@ -79,7 +81,8 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
     
     val emptyC = new Capsule(emptyT)
      
-    val select = new Task("select") {
+    val select = new Task {
+      val name = "select"
       override def process(context: IContext) = {
         val nVal = context.value(n).get
         context + new Variable(n, nVal + 1) + new Variable(i, (nVal + 1).toString)
@@ -121,7 +124,8 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
     
     val emptyC = new Capsule(emptyT)
     
-    val testT = new Task("Test end") {
+    val testT = new Task {
+      val name = "Test end"
       override def process(context: IContext) = {
         context.contains(isaved) should equal (true)
         context.value(isaved).get.size should equal (10)
@@ -134,7 +138,8 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
     
     val testC = new Capsule(testT)
      
-    val select = new Task("select") {
+    val select = new Task {
+      val name = "select"
       override def process(context: IContext) = {
         val nVal = context.value(n).get
         val isavedVar = (nVal.toString :: context.variable(isaved).get.value.toList)

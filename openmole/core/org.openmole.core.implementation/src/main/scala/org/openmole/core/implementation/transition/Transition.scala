@@ -95,7 +95,7 @@ class Transition(val start: ICapsule, val end: ISlot, val condition: ICondition,
 
   override def unFiltred = start.outputs.filterNot(d => filtered.contains(d.prototype.name))
   
-  protected def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = submitNextJobsIfReady(ListBuffer() ++ context, ticket, subMole)
+  protected def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = submitNextJobsIfReady(ListBuffer() ++ context.values, ticket, subMole)
 
   override def toString = "Transition from " + start + " to " + end
   

@@ -18,9 +18,8 @@
 package org.openmole.plugin.tools.code
 
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IData
-import org.openmole.core.model.data.IVariable
+import org.openmole.core.model.data.IDataSet
 
 trait IContextToCode {
-  def execute(context: IContext, output: Iterable[IData[_]]): Iterable[IVariable[_]]
+  def execute(context: IContext, output: IDataSet): IContext
 }

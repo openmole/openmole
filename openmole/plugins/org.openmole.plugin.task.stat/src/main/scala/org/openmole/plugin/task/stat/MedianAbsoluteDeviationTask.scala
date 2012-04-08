@@ -18,7 +18,7 @@ package org.openmole.plugin.task.stat
 
 import org.openmole.misc.math.Stat
 
-class MedianAbsoluteDeviationTask(name: String) extends DoubleSequenceStatTask(name) {
+class MedianAbsoluteDeviationTask(val name: String) extends DoubleSequenceStatTask {
   
   override def stat(seq: Array[Double]) = Stat.medianAbsoluteDeviation(seq)
    

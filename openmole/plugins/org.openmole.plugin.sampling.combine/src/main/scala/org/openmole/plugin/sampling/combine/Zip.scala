@@ -32,7 +32,7 @@ class Zip(samplings: Iterable[ISampling]) extends ISampling {
   def this(samplings: ISampling*) = this(samplings)
   def this(head: ISampling, samplings: Array[ISampling]) = this(List(head) ++ samplings) 
 
-  override def inputs = new DataSet(samplings.flatMap(_.inputs))
+  override def inputs = DataSet.empty ++ samplings.flatMap(_.inputs)
   override def prototypes = samplings.flatMap(_.prototypes)
   
   override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 

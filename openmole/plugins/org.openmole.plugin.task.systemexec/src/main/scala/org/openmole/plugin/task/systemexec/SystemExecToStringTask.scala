@@ -25,13 +25,14 @@ import org.openmole.core.implementation.data.Variable
 import org.openmole.core.model.data.IContext
 import java.io.PrintStream
 
-class SystemExecToStringTask(name: String, 
-                             cmd: String, 
-                             returnValue: Option[Prototype[Int]], 
-                             exceptionIfReturnValueNotZero: Boolean,
-                             relativeDir: String,
-                             val outString: IPrototype[String],
-                             val errString: IPrototype[String]) extends AbstractSystemExecTask(name,cmd,returnValue,exceptionIfReturnValueNotZero,relativeDir) {
+class SystemExecToStringTask(
+  val name: String, 
+  val cmd: String, 
+  val returnValue: Option[Prototype[Int]], 
+  val exceptionIfReturnValueNotZero: Boolean,
+  val relativeDir: String,
+  val outString: IPrototype[String],
+  val errString: IPrototype[String]) extends AbstractSystemExecTask {
   
   
   def this(name: String, cmd: String, outString: IPrototype[String], errString: IPrototype[String]) = {

@@ -39,6 +39,7 @@ import org.openmole.core.implementation.puzzle.PuzzleFirst
 import org.openmole.core.implementation.puzzle.PuzzleFirstAndLast
 import org.openmole.core.implementation.puzzle.PuzzleLast
 import org.openmole.core.implementation.sampling.Factor
+import org.openmole.core.implementation.task.EmptyTask
 import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.core.implementation.task.MoleTask
 import org.openmole.core.implementation.task.Task
@@ -308,22 +309,23 @@ object Builder {
   def iterative(iterationName: String, nb: Int, puzzle: IPuzzleFirstAndLast) = {
     val prototype = new Prototype(iterationName, classOf[Int])
     
-    val loopOnCapsule = new StrainerCapsule(new Task(iterationName + "_loopOn") {
-      addParameter(prototype, 0)
-      addInput(prototype)
-      addOutput(prototype)
-        
-      override def process(context: IContext) = context
-    })
+    val loopOnTask = new EmptyTask(iterationName + "_loopOn")
     
-    val decrementCapsule = new StrainerCapsule(new Task(iterationName + "_decrement") {
-      addInput(prototype)
-      addOutput(prototype)
+    loopOnTask.addParameter(prototype, 0)
+    loopOnTask.addInput(prototype)
+    loopOnTask.addOutput(prototype)
+    
+    val loopOnCapsule = new StrainerCapsule(loopOnTask)
+
+    val decrementCapsule = new StrainerCapsule(new Task {
+        val name = iterationName + "_decrement"
+        addInput(prototype)
+        addOutput(prototype)
       
-      override def process(context: IContext) =
-        context + (prototype, context.value(prototype).get + 1)
+        override def process(context: IContext) =
+          context + (prototype, context.value(prototype).get + 1)
       
-    })
+      })
      
     new Transition(loopOnCapsule, puzzle.first)
     new Transition(puzzle.last, decrementCapsule)
@@ -385,12 +387,12 @@ object Builder {
    * @return an instance of IPuzzleFirstAndLast
    */
   /*def chain[F <: ICapsule](head: IPuzzleFirstAndLast[F, ICapsule], puzzles: IPuzzleFirstAndLast[ICapsule, ICapsule]*): IPuzzleFirstAndLast[F,ICapsule] = {
-    if(!puzzles.isEmpty) {
-      new Transition(head.lastCapsule, puzzles(0).firstCapsule)
-      for (i <- 1 until puzzles.length) new Transition(puzzles(i - 1).lastCapsule, puzzles(i).firstCapsule)
-      new PuzzleFirstAndLast(head.firstCapsule, puzzles.last.lastCapsule)
-    } else head
-  }*/
+   if(!puzzles.isEmpty) {
+   new Transition(head.lastCapsule, puzzles(0).firstCapsule)
+   for (i <- 1 until puzzles.length) new Transition(puzzles(i - 1).lastCapsule, puzzles(i).firstCapsule)
+   new PuzzleFirstAndLast(head.firstCapsule, puzzles.last.lastCapsule)
+   } else head
+   }*/
 
   def chain(head: IPuzzleFirstAndLast, last: IPuzzleFirstAndLast): IPuzzleFirstAndLast = {
     new Transition(head.last, last.first)

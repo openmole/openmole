@@ -26,7 +26,7 @@ import org.openmole.core.implementation.data.Context._
 
 import SaltelliSampling._
 
-class FirstOrderSensitivityTask(name: String, matrixName: IPrototype[String]) extends Task(name) {
+class FirstOrderSensitivityTask(val name: String, matrixName: IPrototype[String]) extends Task {
   
   var modelInput: List[IPrototype[Double]] = Nil
   var modelOutput: List[IPrototype[Double]] = Nil

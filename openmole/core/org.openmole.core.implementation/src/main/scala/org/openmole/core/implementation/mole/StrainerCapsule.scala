@@ -26,11 +26,12 @@ import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.validation.TypeUtil._
 
 object StrainerCapsule {
-  class StrainerTaskDecorator(task: ITask) extends Task(task.name) {
+  class StrainerTaskDecorator(val task: ITask) extends Task {
+    override def name = task.name
     override def inputs = task.inputs
     override def outputs = task.outputs
     override def perform(context: IContext) = process(context)
-    override def process(context: IContext) = context ++ task.perform(context)
+    override def process(context: IContext) = context + task.perform(context)
     override def parameters = task.parameters
   }
 }

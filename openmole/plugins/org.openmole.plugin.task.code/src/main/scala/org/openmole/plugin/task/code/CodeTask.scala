@@ -23,12 +23,12 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.task.external.system.ExternalSystemTask
 import org.openmole.plugin.tools.code.{IContextToCode,ISourceCode}
 
-abstract class CodeTask(name: String) extends ExternalSystemTask(name) {
+abstract class CodeTask extends ExternalSystemTask {
 
   override def process(context: IContext) = {
     val pwd = Workspace.newDir
     val links = prepareInputFiles(context, pwd.getCanonicalFile)
-    fetchOutputFiles(contextToCode.execute(context, outputs).toContext, pwd.getCanonicalFile, links)
+    fetchOutputFiles(contextToCode.execute(context, outputs), pwd.getCanonicalFile, links)
   }
 
   def contextToCode: IContextToCode

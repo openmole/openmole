@@ -61,36 +61,37 @@ object Stochastic {
     x.map { case(output, stat) => (Prototype.toArray(output), stat)}
   
   def statistics(
+    name: String,
     puzzle: IPuzzleFirstAndLast,
     replicationFactor: DiscreteFactor[_, _],
     statistics: Statistics
   ): IPuzzleFirstAndLast = {
-    val exploration = new ExplorationTask("replication", replicationFactor)
+    val exploration = new ExplorationTask(name + "Replication", replicationFactor)
     val explorationCapsule = new StrainerCapsule(exploration)
-    val aggregationCapsule = new StrainerCapsule(new EmptyTask("aggregation"))
+    val aggregationCapsule = new StrainerCapsule(new EmptyTask(name + "Aggregation"))
     
-    val medianTask = new MedianTask("median")
+    val medianTask = new MedianTask(name + "Median")
     medianTask.add(toArray(statistics.medians))
     val medianCapsule = new Capsule(medianTask)
     
-    val medianAbsoluteDeviationTask = new MedianAbsoluteDeviationTask("medianAbsoluteDeviation")
+    val medianAbsoluteDeviationTask = new MedianAbsoluteDeviationTask(name + "MedianAbsoluteDeviation")
     medianAbsoluteDeviationTask.add(toArray(statistics.medianAbsoluteDeviations))
     val medianAbsoluteDeviationCapsule = new Capsule(medianAbsoluteDeviationTask)
     
-    val averageTask = new AverageTask("average")
+    val averageTask = new AverageTask(name + "Average")
     averageTask.add(toArray(statistics.averages))
     val averageCapsule = new Capsule(averageTask)
     
-    val sumTask = new SumTask("sum")
+    val sumTask = new SumTask(name + "Sum")
     sumTask.add(toArray(statistics.sums))
     val sumCapsule = new Capsule(sumTask)
     
-    val mseTask = new MeanSquareErrorTask("meanSquareError")
+    val mseTask = new MeanSquareErrorTask(name + "MeanSquareError")
     mseTask.add(toArray(statistics.mses))
     val mseCapsule = new Capsule(mseTask)
     
 
-    val endCapsule = new StrainerCapsule(new EmptyTask("end"))
+    val endCapsule = new StrainerCapsule(new EmptyTask(name + "End"))
     
     new ExplorationTransition(explorationCapsule, puzzle.first)
     new AggregationTransition(puzzle.last, aggregationCapsule)
@@ -113,20 +114,22 @@ object Stochastic {
   }
   
   def statistics(
+    name: String,
     model: ICapsule,
     replicationFactor: DiscreteFactor[_, _],
     statistics: Statistics
   ): IPuzzleFirstAndLast = 
-      Stochastic.statistics(puzzle(model), replicationFactor, statistics)
+      Stochastic.statistics(name, puzzle(model), replicationFactor, statistics)
   
   
   def replicate(
+    name: String,
     puzzle: IPuzzleFirstAndLast,
     replicationFactor: DiscreteFactor[_, _]
   ) = {
-    val exploration = new ExplorationTask("replication", replicationFactor)
+    val exploration = new ExplorationTask(name + "Replication", replicationFactor)
     val explorationCapsule = new StrainerCapsule(exploration)
-    val aggregationCapsule = new StrainerCapsule(new EmptyTask("aggregation"))
+    val aggregationCapsule = new StrainerCapsule(new EmptyTask(name + "Aggregation"))
     new ExplorationTransition(explorationCapsule, puzzle.first)
     new AggregationTransition(puzzle.last, aggregationCapsule)
     new DataChannel(explorationCapsule, aggregationCapsule)
@@ -134,7 +137,8 @@ object Stochastic {
   }
   
   def replicate(
+    name: String,
     capsule: ICapsule,
     replicationFactor: DiscreteFactor[_, _]
-  ): IPuzzleFirstAndLast = replicate(puzzle(capsule), replicationFactor)
+  ): IPuzzleFirstAndLast = replicate(name, puzzle(capsule), replicationFactor)
 }

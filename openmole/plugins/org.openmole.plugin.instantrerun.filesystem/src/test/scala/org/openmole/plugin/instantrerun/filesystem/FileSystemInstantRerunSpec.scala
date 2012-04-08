@@ -43,11 +43,13 @@ class FileSystemInstantRerunSpec extends FlatSpec with ShouldMatchers {
    val p = new Prototype("p", classOf[java.lang.Long])
    val res = new ListBuffer[Long]
     
-    val t1 = new Task("Test instant rerun") {
+    val t1 = new Task {
+      val name = "Test instant rerun"
       override def process(context: IContext) = context + (p -> new java.lang.Long(System.currentTimeMillis))
     }
     
-    val t2 = new Task("Add result") {
+    val t2 = new Task {
+      val name = "Add result"
       override def process(context: IContext) = {
         res += context.value(p).get
         context

@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.task.stat
 
-class SumTask(name: String) extends DoubleSequenceStatTask(name) {
+class SumTask(val name: String) extends DoubleSequenceStatTask {
   
   override def stat(seq: Array[Double]) = seq.sum
   

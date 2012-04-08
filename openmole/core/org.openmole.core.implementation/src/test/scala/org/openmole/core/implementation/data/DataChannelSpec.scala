@@ -38,7 +38,8 @@ class DataChannelSpec extends FlatSpec with ShouldMatchers {
   "A datachannel" should "enable variable values to be transmitted from a task to another" in {
     val p = new Prototype("p", classOf[String])
     
-    val t1 = new Task("Test write") {
+    val t1 = new Task {
+      val name = "Test write"
       override def process(context: IContext) = context + (p -> "Test")
     }
     
@@ -46,7 +47,8 @@ class DataChannelSpec extends FlatSpec with ShouldMatchers {
     
     val t2 = new EmptyTask("Inter task")
     
-    val t3 = new Task("Test read") {
+    val t3 = new Task {
+      val name = "Test read"
       override def process(context: IContext) = {
         context.value(p).get should equal ("Test")
         context
@@ -70,7 +72,8 @@ class DataChannelSpec extends FlatSpec with ShouldMatchers {
   "A data channel" should "be able to transmit the value to the multiple execution of an explored task" in {
     
     val j = new Prototype("j", classOf[String])
-    val tw = new Task("Test write") {
+    val tw = new Task {
+      val name = "Test write"
       override def process(context: IContext) = context + (j -> "J")
     }
     tw.addOutput(j)
@@ -84,7 +87,8 @@ class DataChannelSpec extends FlatSpec with ShouldMatchers {
      
     val res = new ListBuffer[String]
     
-    val t = new Task("Test") {
+    val t = new Task {
+      val name = "Test"
       override def process(context: IContext) = synchronized {
         context.contains(i) should equal (true)
         context.contains(j) should equal (true)
@@ -118,14 +122,16 @@ class DataChannelSpec extends FlatSpec with ShouldMatchers {
     
     val exc = new Capsule(new ExplorationTask("Exploration", sampling))
      
-    val t = new Task("Test") {
+    val t = new Task {
+      val name = "Test"
       override def process(context: IContext) = context + (j -> "J")
     }
     t.addOutput(j)
     
     val noOP = new EmptyTask("NoOP") 
 
-    val tr = new Task("Test read") {
+    val tr = new Task {
+      val name = "Test read"
       override def process(context: IContext) = {
         context.value(toArray(j)).get.size should equal (data.size)
         executed = true

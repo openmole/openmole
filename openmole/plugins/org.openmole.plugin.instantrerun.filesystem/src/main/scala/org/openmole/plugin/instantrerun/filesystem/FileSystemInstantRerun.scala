@@ -161,7 +161,7 @@ class FileSystemInstantRerun(dir: File, capsules: Set[ICapsule]) extends IInstan
   private def saveContext(moleJob: IMoleJob) = {
     val file = Workspace.newFile("context", ".xml")
     val accepted = TreeSet.empty[String] ++ moleJob.task.outputs.map(_.prototype.name)
-    val context = Context(moleJob.context.filter(v => accepted.contains(v.prototype.name)))
+    val context = Context(moleJob.context.values.filter(v => accepted.contains(v.prototype.name)))
     val os = new GZIPOutputStream(new FileOutputStream(file))
     (file, try SerializerService.serializeFilePathAsHashGetFiles(context, os) finally os.close)
   }

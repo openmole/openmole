@@ -22,10 +22,11 @@ import java.io.File
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.groovy.GroovyProxyPool
-import org.openmole.core.implementation.data.{Prototype, Variable}
+import org.openmole.core.implementation.data.{Prototype, Variable, Context}
 import org.openmole.core.implementation.tools.GroovyContextAdapter._
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IData
+import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
 import org.openmole.plugin.tools.code.IContextToCode
@@ -39,20 +40,20 @@ class ContextToGroovyCode(source: String, libs: Iterable[File]) extends IContext
   
   def execute(context: IContext): Object =  editorPool.execute(context.toBinding)
  
-  override def execute(context: IContext, output: Iterable[IData[_]]): Iterable[IVariable[_]] = {
+  override def execute(context: IContext, output: IDataSet): IContext = {
     val binding = context.toBinding
     execute(binding)
     fetchVariables(context, output, binding)
   }
 
-  def fetchVariables(context: IContext, output: Iterable[IData[_]], binding: Binding): Iterable[IVariable[_]] =  {
+  def fetchVariables(context: IContext, output: IDataSet, binding: Binding): IContext =  {
     val variables = binding.getVariables
-    output.flatMap {
+    Context.empty ++ output.flatMap {
       data =>
       val out = data.prototype
 
       variables.get(out.name) match {
-        case null => Option.empty[IVariable[_]]
+        case null => None
         case value =>
           if (out.accepts(value)) Some(new Variable(out.asInstanceOf[IPrototype[Any]], value))
           else throw new InternalProcessingError("Variable " + out.name + " of type " + value.asInstanceOf[AnyRef].getClass.getName + " has been found at the end of the execution of the groovy code but type doesn't match : " + out.`type`.erasure.getName + ".")
