@@ -17,30 +17,28 @@
 
 package org.openmole.misc.tools.collection
 
-import java.util.Collections
-import java.util.LinkedList
-import scala.collection.JavaConversions._
+import org.scalatest.FlatSpec
+import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.junit.JUnitRunner
+import org.junit.runner.RunWith
 
-class OrderedSlidingList[T](size: Int) extends Iterable[T] {
-  val averages = Collections.synchronizedList(new LinkedList[T])
 
-  def iterator: Iterator[T] = averages.iterator
-
-  def += (sample: T)(implicit o: Ordering[T]) = averages.synchronized {
-    import o._
-    if(averages.size >= size) averages.remove(0)
+@RunWith(classOf[JUnitRunner])
+class OrderedSlidingListSpec extends FlatSpec with ShouldMatchers {
+  "OrderedSlidingList" should "preserve the max size" in {
+    val list = new OrderedSlidingList[Int](5)
+    list += 2
+    list += 8
+    list += 7
+    list += 7
     
-    val it = averages.listIterator(averages.size)
-    var inserted = false
+    list.elements.size should equal (4)
     
-    while(it.hasPrevious && !inserted) {
-      val elt = it.previous
-      if(elt <= sample) {
-        it.add(sample)
-        inserted = true
-      }
-    }
+    list += 3
+    list += 9
+    list += 7
     
-    if(!inserted) it.add(sample)
+    list.elements.size should equal(5)
   }
+  
 }
