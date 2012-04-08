@@ -32,7 +32,7 @@ class BigDecimalPrototypeDataUI(val name: String="", d: Int=0) extends GenericPr
   
   def imagePath = "img/bigdecimal.png"
  
-  def fatImagePath = "img/bigdecimal_fat.png"
+  override def fatImagePath = "img/bigdecimal_fat.png"
   
   def buildPanelUI = new BigDecimalPrototypePanelUI(this)
 }

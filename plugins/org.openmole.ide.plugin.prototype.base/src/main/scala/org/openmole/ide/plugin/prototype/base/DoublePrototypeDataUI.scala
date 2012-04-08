@@ -29,7 +29,7 @@ class DoublePrototypeDataUI(val name: String="",d: Int=0) extends GenericPrototy
   
    def imagePath = "img/double.png"
    
-   def fatImagePath = "img/double_fat.png"
+   override def fatImagePath = "img/double_fat.png"
   
    def buildPanelUI = new DoublePrototypePanelUI(this)
 }
