@@ -17,15 +17,17 @@
 
 package org.openmole.misc.tools.collection
 
-import java.util.Collections
 import java.util.LinkedList
 import scala.collection.JavaConversions._
+import scala.collection.mutable.LinkedListLike
 
-class OrderedSlidingList[T](size: Int) extends Iterable[T] {
-  val averages = Collections.synchronizedList(new LinkedList[T])
+class OrderedSlidingList[T](size: Int) extends LinkedListLike[T, OrderedSlidingList[T]] {
+  val averages = new LinkedList[T]
 
-  def iterator: Iterator[T] = averages.iterator
-
+  override def seq: Seq[T] = synchronized {
+    averages.toSeq
+  }
+  
   def += (sample: T)(implicit o: Ordering[T]) = synchronized {
     import o._
     if(averages.size >= size) averages.remove(0)
