@@ -18,8 +18,7 @@
 package org.openmole.ide.misc.widget
 
 import java.awt.Cursor
-import javax.swing.ImageIcon
-import org.openide.util.ImageUtilities
+import org.openmole.ide.misc.tools.image.Images._
 import org.openmole.ide.misc.widget.dialog.DialogFactory
 import scala.swing.Action
 import org.openmole.core.model.data.IPrototype
@@ -39,13 +38,13 @@ class PrototypeGroovyTextFieldEditor(val title : String ,
   
   private def setIcon(code : String) = {
     icon = code.isEmpty match {
-      case true => new ImageIcon(ImageUtilities.loadImage("img/edit_empty.png"))
+      case true => EDIT_EMPTY
       case false =>
         val (result,t) = TypeCheck.apply(code,prototype)
         tooltip =  t
         result match {
-          case true => new ImageIcon(ImageUtilities.loadImage("img/edit.png"))
-          case false => new ImageIcon(ImageUtilities.loadImage("img/edit_error.png"))
+          case true => EDIT
+          case false => EDIT_ERROR
         }
     }
     repaint

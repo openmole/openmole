@@ -18,31 +18,27 @@
 package org.openmole.ide.core.implementation.panel
 
 import java.awt.Dimension
-import org.openide.util.Lookup
-import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
-import org.openmole.ide.core.model.factory.ISamplingFactoryUI
-import org.openmole.ide.core.model.factory.ITaskFactoryUI
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
 import scala.collection.mutable.HashMap
 import scala.swing.Action
 import scala.swing.Menu
 import scala.swing.MenuBar
 import scala.swing.MenuItem
-import org.openmole.ide.core.implementation.MoleSceneTopComponent
-import org.openmole.ide.core.implementation.registry.KeyRegistery
-import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.registry.KeyRegistry
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dataproxy.EnvironmentDataProxyFactory
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyFactory
 import org.openmole.ide.core.implementation.dataproxy.SamplingDataProxyFactory
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyFactory
 import org.openmole.ide.core.implementation.dialog.DialogFactory
+import org.openmole.ide.core.implementation.workflow.BuildMoleSceneContainer
 import org.openmole.ide.core.model.commons.Constants._
+import org.openmole.ide.core.model.workflow.ISceneContainer
 import scala.collection.JavaConversions._
 
 object ConceptMenu {
@@ -50,7 +46,7 @@ object ConceptMenu {
   val menuItemMapping = new HashMap[IDataProxyUI,MenuItem]
     
   val environementClasses = new Menu("New")
-  Lookup.getDefault.lookupAll(classOf[IEnvironmentFactoryUI]).map{f=>new EnvironmentDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach(
+  KeyRegistry.environments.values.map{f=>new EnvironmentDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach(
     d => environementClasses.contents += new MenuItem(new Action(d.factory.displayName){
         override def apply = {
           val proxy = d.buildDataProxyUI
@@ -60,7 +56,7 @@ object ConceptMenu {
   val environmentMenu = new PopupToolBarPresenter("Environments", environementClasses)
   
   val taskClasses = new Menu("New") 
-  Lookup.getDefault.lookupAll(classOf[ITaskFactoryUI]).map{f=>new TaskDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach(
+  KeyRegistry.tasks.values.map{f=>new TaskDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach(
     d => taskClasses.contents += new MenuItem(new Action(d.factory.displayName){
         override def apply = {
           val proxy = d.buildDataProxyUI
@@ -71,7 +67,7 @@ object ConceptMenu {
   
   
   val prototypeClasses = new Menu("New")
-  KeyRegistery.prototypes.values.map{f=>new PrototypeDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach(
+  KeyRegistry.prototypes.values.map{f=>new PrototypeDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach(
     d => prototypeClasses.contents += new MenuItem(new Action(d.factory.displayName){
         override def apply = {
           val proxy = d.buildDataProxyUI
@@ -82,7 +78,7 @@ object ConceptMenu {
   
   
   val samplingClasses = new Menu("New")
-  Lookup.getDefault.lookupAll(classOf[ISamplingFactoryUI]).map{f=>new SamplingDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach(
+  KeyRegistry.samplings.values.map{f=>new SamplingDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach(
     d => samplingClasses.contents += new MenuItem(new Action(d.factory.displayName){
         override def apply = {
           val proxy = d.buildDataProxyUI
@@ -107,14 +103,21 @@ object ConceptMenu {
   }
         
   def display(proxy: IDataProxyUI,
-              mode: Value) = 
-                TopComponentsManager.currentMoleSceneTopComponent match {
-      case Some(x: MoleSceneTopComponent)=> x.getMoleScene.displayPropertyPanel(proxy, mode)
-      case None=> DialogFactory.newTabName match {
-          case Some(x: MoleSceneTopComponent)=> x.getMoleScene.displayPropertyPanel(proxy, mode)
-          case None=>
-        }
+              mode: Value) = {
+    if (ScenesManager.tabPane.peer.getTabCount == 0) createTab(proxy,mode)
+    else  ScenesManager.tabPane.selection.page.content match {
+      case x: ISceneContainer=> x.scene.displayPropertyPanel(proxy, mode)
+      case _ => createTab(proxy,mode)
     }
+  }
+  
+  def createTab(proxy: IDataProxyUI,
+                mode: Value) = DialogFactory.newTabName match {
+    case Some(y: BuildMoleSceneContainer)=> y.scene.displayPropertyPanel(proxy, mode)
+    case None=>
+  }
+    
+  
   
   def addItem(proxy: IDataProxyUI): MenuItem = addItem(proxy.dataUI.name,proxy)
   

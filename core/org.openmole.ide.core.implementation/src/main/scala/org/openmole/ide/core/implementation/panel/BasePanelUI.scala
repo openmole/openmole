@@ -19,10 +19,10 @@ package org.openmole.ide.core.implementation.panel
 
 import java.awt.BorderLayout
 import java.awt.Color
+import javax.imageio.ImageIO
 import javax.swing.BorderFactory
 import javax.swing.ImageIcon
 import org.openmole.ide.core.model.panel.IPanelUI
-import org.openide.util.ImageUtilities
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.workflow.IMoleScene
@@ -33,17 +33,23 @@ import scala.swing.Action
 import scala.swing.Label
 import scala.swing.event.UIElementResized
 import scala.swing.TextField
-import org.openmole.ide.core.implementation.data.EmptyDataUIs
-import org.openmole.ide.core.implementation.workflow.ExecutionMoleScene
-import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.CheckData
+import org.openmole.ide.core.model.workflow.ISceneContainer
+import org.openmole.ide.misc.tools.image.Images._
+
+object BasePanelUI {
+  def imageIcon(proxy : IDataProxyUI) = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
+}
+
+import BasePanelUI._
 
 abstract class BasePanelUI(proxy: IDataProxyUI,
                            scene: IMoleScene,
                            mode : Value,
                            borderColor : Color = new Color(200,200,200)) extends MyPanel {
   peer.setLayout(new BorderLayout)
-  val iconLabel = new Label{ icon = new ImageIcon(ImageUtilities.loadImage("img/empty.png"))}
+  val iconLabel = new Label{ icon = new ImageIcon(EMPTY)}
   val nameTextField = new TextField(15) {text = proxy.dataUI.name; tooltip = Help.tooltip("Name of the concept instance")}
   val createLabelLink = new MainLinkLabel("create",new Action("") { def apply = baseCreate})
   val mainLinksPanel = new PluginPanel("") {contents += createLabelLink}
@@ -56,7 +62,7 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
       contents += new PluginPanel("wrap"){
         contents += new PluginPanel("wrap 2"){
           contents += nameTextField
-          contents += new ImageLinkLabel("img/close.png",new Action("") { def apply = {
+          contents += new ImageLinkLabel(CLOSE,new Action("") { def apply = {
                 mode match {
                   case EXTRA => scene.closeExtraPropertyPanel
                   case _ => scene.closePropertyPanel
@@ -106,7 +112,10 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
   def baseSave : Unit = {
     save
     ConceptMenu.refreshItem(proxy)
-    CheckData.checkMole(TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.manager)
+    ScenesManager.currentSceneContainer match {
+      case Some(x : ISceneContainer) => CheckData.checkMole(x.scene.manager)
+      case None =>
+    }
   }
   
   def create: Unit

@@ -19,9 +19,9 @@ package org.openmole.ide.core.implementation.panel
 
 import java.awt.BorderLayout
 import java.awt.Color
+import javax.imageio.ImageIO
 import javax.swing.ImageIcon
-import org.openide.util.ImageUtilities
-import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.dataproxy.Proxys
@@ -31,6 +31,7 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
+import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget.ImplicitLinkLabel
 import org.openmole.ide.misc.widget.ImageLinkLabel
@@ -42,11 +43,14 @@ import scala.swing.Action
 import scala.swing.Label
 import scala.swing.Separator
 import scala.collection.JavaConversions._
+import org.openmole.ide.misc.tools.image.Images._
+import BasePanelUI._
 
 class TaskPanelUI(proxy: ITaskDataProxyUI,
                   scene: IMoleScene,
                   mode: Value = CREATION) extends BasePanelUI(proxy, scene,mode,proxy.dataUI.borderColor){
-  iconLabel.icon = new ImageIcon(ImageUtilities.loadImage(proxy.dataUI.fatImagePath))
+  iconLabel.icon = imageIcon(proxy)
+  
   val panelUI = proxy.dataUI.buildPanelUI
   val protoPanel = new IOPrototypePanel
   mode match {
@@ -60,14 +64,15 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   }
   
   def delete = {
-    val toBeRemovedCapsules : List[ICapsuleUI] = TopComponentsManager.moleScenes.map{_.manager.capsules.values.filter{_.dataUI.task == Some(proxy)}}.flatten.toList
+    val toBeRemovedCapsules : List[ICapsuleUI] = ScenesManager.moleScenes.map{_.manager.capsules.values.filter{_.dataUI.task == Some(proxy)}}.flatten.toList
     toBeRemovedCapsules match {
-      case Nil => Proxys.tasks -= proxy
+      case Nil => 
+          scene.closePropertyPanel
+          Proxys.tasks -= proxy
         ConceptMenu.removeItem(proxy)
       case _ => 
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
           toBeRemovedCapsules.foreach{c=>c.scene.graphScene.removeNodeWithEdges(c.scene.manager.removeCapsuleUI(c))}
-          scene.closePropertyPanel
           delete
         }
     }
@@ -76,7 +81,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   def save = {
     proxy.dataUI = panelUI.save(nameTextField.text,protoPanel.protoInEditor.content,protoPanel.protoOutEditor.content)
   
-    TopComponentsManager.capsules(proxy).foreach {c =>
+    ScenesManager.capsules(proxy).foreach {c =>
       proxy.dataUI match {
         case x : AbstractExplorationTaskDataUI => c.setSampling(x.sampling)
         case _ => 
@@ -88,13 +93,16 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     save
     if(mainPanel.contents.size == 2) mainPanel.contents.remove(1)
     if(mainLinksPanel.contents.size == 2) mainLinksPanel.contents.remove(1)
-    TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.closeExtraPropertyPanel
+    ScenesManager.currentSceneContainer match {
+      case Some(x : ISceneContainer) => x.scene.closeExtraPropertyPanel
+      case None =>
+    }
   }
   
   def properties = {
     switch    
     mainPanel.contents += panelUI.peer
-    mainLinksPanel.contents +=  new ImageLinkLabel("img/next.png",new Action("") { def apply = protos })
+    mainLinksPanel.contents +=  new ImageLinkLabel(NEXT,new Action("") { def apply = protos })
     revalidate
     repaint
   }
@@ -102,12 +110,12 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   def protos : Unit = {
     switch
     mainPanel.contents += protoPanel.peer
-    mainLinksPanel.contents +=  new ImageLinkLabel("img/previous.png",new Action("") { def apply = properties })
+    mainLinksPanel.contents +=  new ImageLinkLabel(PREVIOUS,new Action("") { def apply = properties })
   }
   
   class IOPrototypePanel extends MyPanel{
     peer.setLayout(new BorderLayout)
-    val image = new ImageIcon(ImageUtilities.loadImage("img/eye.png"))
+    val image = EYE
       
     val emptyProto = EmptyDataUIs.emptyPrototypeProxy
     
@@ -156,6 +164,11 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     peer.add(protoOut.peer,BorderLayout.EAST)
   
     def contentAction(proto : IPrototypeDataProxyUI) = new ContentAction(proto.dataUI.displayName,proto){
-      override def apply = TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.displayExtraPropertyPanel(proto)} 
+      override def apply = 
+        ScenesManager.currentSceneContainer match {
+          case Some(x : ISceneContainer) => x.scene.displayExtraPropertyPanel(proto)
+          case None =>
+        }
+    }
   }
 }

@@ -17,6 +17,7 @@
 
     <modules>
         <module>org.openmole.ide.plugin.prototype.base</module>
+        <module>org.openmole.ide.plugin.task.groovy</module>
     </modules>
 
     <dependencies>
@@ -28,6 +29,11 @@
         <dependency>
             <groupId>org.openmole.ide</groupId>
             <artifactId>org.openmole.ide.core.implementation</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.ide.misc.widget</artifactId>
             <version>${project.version}</version>
         </dependency>
      </dependencies>

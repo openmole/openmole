@@ -29,12 +29,6 @@
             <version>${netbeans.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-util-lookup</artifactId>
-            <version>${netbeans.version}</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->

@@ -9,23 +9,21 @@ import scala.swing._
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import java.awt.BorderLayout
-import org.openmole.ide.core.implementation.control.TabManager
-import org.openmole.ide.core.implementation.control.PasswordListner
+import org.openmole.ide.core.implementation.execution.PasswordListner
 import org.openide.DialogDescriptor
 import org.openide.DialogDescriptor._
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 import org.openide.NotifyDescriptor._
-import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.preference.PreferenceContent
-import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.action.LoadXML
 import org.openmole.ide.core.implementation.action.SaveXML
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 
 class GUIPanel extends MainFrame {
   title = "OpenMOLE"
-  preferredSize = new Dimension(400,200)
   
   menuBar = new MenuBar{ 
     contents += new Menu("File") {
@@ -40,7 +38,7 @@ class GUIPanel extends MainFrame {
       
       contents += new MenuItem(new Action("Save"){
           override def apply = {
-            TopComponentsManager.saveCurrentPropertyWidget
+            ScenesManager.saveCurrentPropertyWidget
             SaveXML.save
           }})
       
@@ -49,7 +47,7 @@ class GUIPanel extends MainFrame {
       
       contents += new MenuItem(new Action("Reset all"){
           override def apply = {
-            TopComponentsManager.closeOpenedTopComponents
+            ScenesManager.closeAll
             Proxys.clearAll
           }})
     }
@@ -75,7 +73,7 @@ class GUIPanel extends MainFrame {
         contents += ConceptMenu.environmentMenu
       }).peer,BorderLayout.NORTH)
 
-  peer.add((new TabManager).peer,BorderLayout.CENTER)
+  peer.add((ScenesManager.tabPane).peer,BorderLayout.CENTER)
   
   peer.add((StatusBar).peer,BorderLayout.SOUTH)
   StatusBar.inform("welcome")

@@ -28,6 +28,11 @@
             <artifactId>org.openmole.core.implementation</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.netbeans.api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->

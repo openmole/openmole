@@ -33,7 +33,7 @@ import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.panel._
 import org.openmole.ide.core.model.workflow._
-import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.panel._
@@ -128,7 +128,7 @@ abstract class MoleScene(n: String = "",
   
   override def attachEdgeSourceAnchor(edge: String, oldSourceNode: String,sourceNode: String)= {
     if (findWidget(sourceNode) != null) {
-      TopComponentsManager.connectMode match {
+      ScenesManager.connectMode match {
         case true => 
           findWidget(edge).asInstanceOf[ConnectorWidget].setSourceAnchor(new OutputSlotAnchor(findWidget(sourceNode).asInstanceOf[ICapsuleUI]))
         case false=> 
@@ -139,7 +139,7 @@ abstract class MoleScene(n: String = "",
   
   override def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String) = {
     val targetWidget = 
-      if (findWidget(targetNode)!=null){TopComponentsManager.connectMode match {
+      if (findWidget(targetNode)!=null){ScenesManager.connectMode match {
           case true => 
             findWidget(edge).asInstanceOf[ConnectorWidget].setTargetAnchor(new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex))
           case false=> 
@@ -173,7 +173,7 @@ abstract class MoleScene(n: String = "",
       val o= findObject(targetWidget)
       target= None
       if(isNode(o)) target= Some(o.asInstanceOf[String])
-      TopComponentsManager.connectMode match {
+      ScenesManager.connectMode match {
         case false => 
           targetWidget match {
             case x : TaskComponentWidget => return ConnectorState.ACCEPT
@@ -197,7 +197,7 @@ abstract class MoleScene(n: String = "",
   
     override def createConnection(sourceWidget: Widget, targetWidget: Widget)= {
       val sourceCapsuleUI = sourceWidget.asInstanceOf[CapsuleUI]
-      TopComponentsManager.connectMode match {
+      ScenesManager.connectMode match {
         case true=>
           if (manager.registerTransition(sourceCapsuleUI, targetWidget.asInstanceOf[InputSlotWidget],sourceCapsuleUI.dataUI.transitionType,None))
             createConnectEdge(source.get, target.get)

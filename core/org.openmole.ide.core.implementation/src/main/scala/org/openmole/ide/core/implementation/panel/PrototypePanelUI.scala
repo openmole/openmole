@@ -18,9 +18,7 @@
 package org.openmole.ide.core.implementation.panel
 
 import java.awt.Color
-import javax.swing.ImageIcon
-import org.openide.util.ImageUtilities
-import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
@@ -29,11 +27,12 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
 import scala.collection.JavaConversions._
+import BasePanelUI._
 
 class PrototypePanelUI[T](proxy: IPrototypeDataProxyUI,
                           scene: IMoleScene,
                           mode: Value = CREATION) extends BasePanelUI(proxy, scene,mode,new Color(255,204,0)){
-  iconLabel.icon = new ImageIcon(ImageUtilities.loadImage(proxy.dataUI.fatImagePath))
+  iconLabel.icon = imageIcon(proxy)
   val panelUI = proxy.dataUI.buildPanelUI
   mainPanel.contents += panelUI.peer
   
@@ -43,18 +42,19 @@ class PrototypePanelUI[T](proxy: IPrototypeDataProxyUI,
   }
   
   def delete = {
-    val capsulesWithProtos : List[ICapsuleUI] = TopComponentsManager.moleScenes.flatMap{_.manager.capsules.values.flatMap{c => c.dataUI.task match {
+    val capsulesWithProtos : List[ICapsuleUI] = ScenesManager.moleScenes.flatMap{_.manager.capsules.values.flatMap{c => c.dataUI.task match {
           case Some(x : ITaskDataProxyUI) =>  if (x.dataUI.filterPrototypeOccurencies(proxy).isEmpty) None else Some(c)
           case _ => None
         }}}.toList
     
     capsulesWithProtos match {
-      case Nil => Proxys.prototypes -= proxy
+      case Nil => 
+        scene.closePropertyPanel
+        Proxys.prototypes -= proxy
         ConceptMenu.removeItem(proxy)
       case _ => 
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
           capsulesWithProtos.foreach{_.dataUI.task.get.dataUI.removePrototypeOccurencies(proxy)}
-          scene.closePropertyPanel
           delete
         }
     }

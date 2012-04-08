@@ -22,13 +22,18 @@ import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
 
-trait PrototypeActivator extends BundleActivator{
+trait PrototypeActivator extends BundleActivator {
   
   def prototypeFactories : Iterable[IPrototypeFactoryUI[_]]
-  
-  override def start(context: BundleContext) = 
-    prototypeFactories.foreach{f=> KeyRegistery.prototypes += KeyGenerator(f.buildDataUI.coreObject) -> f}
 
-  override def stop(context: BundleContext) = prototypeFactories.foreach{f => KeyRegistery.prototypes -= KeyGenerator(f.buildDataUI.coreObject)}
+  abstract override def start(context: BundleContext) = {
+    super.start(context)
+    prototypeFactories.foreach{f=> KeyRegistry.prototypes += KeyGenerator(f.buildDataUI.coreObject) -> f}
+  }
+
+  abstract override def stop(context: BundleContext) = {
+    super.stop(context)
+    prototypeFactories.foreach{f => KeyRegistry.prototypes -= KeyGenerator(f.buildDataUI.coreObject)}
+  }
   
 }

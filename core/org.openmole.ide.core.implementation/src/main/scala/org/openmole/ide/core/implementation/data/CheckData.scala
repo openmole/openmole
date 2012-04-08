@@ -36,7 +36,7 @@ import scala.collection.JavaConversions._
 
 object CheckData {
   def dataProxyFactory(data : IData[_]) =  
-    new PrototypeDataProxyFactory(KeyRegistery.prototypes(KeyGenerator(data.prototype))).buildDataProxyUI(data.prototype)
+    new PrototypeDataProxyFactory(KeyRegistry.prototypes(KeyGenerator(data.prototype))).buildDataProxyUI(data.prototype)
     
   def checkMole(manager : IMoleSceneManager) = {
     manager.startingCapsule match {

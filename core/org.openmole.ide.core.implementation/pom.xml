@@ -103,6 +103,11 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.ide.misc.tools</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.misc.visualization</artifactId>
             <version>${project.version}</version>
         </dependency>

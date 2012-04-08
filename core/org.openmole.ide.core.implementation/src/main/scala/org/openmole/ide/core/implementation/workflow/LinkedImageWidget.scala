@@ -19,14 +19,15 @@ package org.openmole.ide.core.implementation.workflow
 
 import org.openmole.ide.core.model.workflow.IMoleScene
 import java.awt.Point
+import javax.swing.ImageIcon
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.openmole.ide.misc.widget.ImageLinkLabel
 import scala.swing.Action
 
 class LinkedImageWidget(scene : IMoleScene,
-                        imagePath : String,
+                        imageIcon : ImageIcon,
                         x : Int,
                         y : Int,
-                        action : Action) extends ComponentWidget(scene.graphScene,new ImageLinkLabel(imagePath,action).peer) {
+                        action : Action) extends ComponentWidget(scene.graphScene,new ImageLinkLabel(imageIcon,action).peer) {
   setPreferredLocation(new Point(x,y))
 }

@@ -21,13 +21,12 @@ import scala.swing.MainFrame
 import scala.swing.SimpleSwingApplication
 import java.awt.BorderLayout
 import java.awt.Dimension
-import javax.swing.ImageIcon
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiComboTextField
 import org.openmole.ide.misc.widget.multirow.MultiTextField
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
-import org.openide.util.ImageUtilities
 import org.openmole.core.model.data.IPrototype
+import org.openmole.ide.misc.tools.image.Images._
 import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor
 import org.openmole.core.implementation.data.Prototype
@@ -40,7 +39,7 @@ object MultiRowExample extends SimpleSwingApplication {
     val fake1 = new Fake(proto1)
     val fake2 = new Fake(proto2)
     val action = new ContentAction("Action " , fake1) { override def apply = println("view " + fake1.toString)}
-    val image = new ImageIcon(ImageUtilities.loadImage("img/eye.png"))
+    val image = EYE
     peer.add(new MultiComboLinkLabelGroovyTextFieldEditor("My title",
                                                           List((fake1,proto1,action,"12"),(fake2,proto2,action,"45.6d")),
                                                           List((fake1,proto1,action),(fake2,proto2,action)),image).panel.peer,BorderLayout.WEST)

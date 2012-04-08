@@ -27,7 +27,7 @@ import scala.collection.JavaConversions._
 import java.awt.Point
 import org.openmole.ide.core.implementation.workflow.SceneItemFactory
 import java.awt.Toolkit
-import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.implementation.dialog.StatusBar
@@ -154,13 +154,13 @@ class MoleSceneConverter extends Converter{
             }     
           }
         case "transition"=> 
-          TopComponentsManager.connectMode = true
+          ScenesManager.connectMode = true
           SceneItemFactory.createTransition(scene, 
                                             oslots(reader.getAttribute("source")), 
                                             islots(reader.getAttribute("target")), 
                                             TransitionType.fromString(reader.getAttribute("type")),Some(reader.getAttribute("condition")))
         case "datachannel"=>     
-          TopComponentsManager.connectMode = false
+          ScenesManager.connectMode = false
           val source = islots(reader.getAttribute("source")).capsule
           val target = islots(reader.getAttribute("target")).capsule
           var protoIds = new HashSet[Int]

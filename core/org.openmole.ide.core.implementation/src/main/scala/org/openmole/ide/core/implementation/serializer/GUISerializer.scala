@@ -24,7 +24,7 @@ import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.data._
@@ -51,7 +51,7 @@ object GUISerializer {
                                          Proxys.environments.toSet,
                                          Proxys.incr.get+1))
     //molescenes
-    TopComponentsManager.moleScenes.foreach(ms=>
+    ScenesManager.moleScenes.foreach(ms=>
       ms match {
         case x: BuildMoleScene=> out.writeObject(x)
         case _=>})
@@ -63,14 +63,14 @@ object GUISerializer {
     val in = xstream.createObjectInputStream(reader)
    
     Proxys.clearAll
-    TopComponentsManager.closeOpenedTopComponents
+    ScenesManager.closeAll
     
     try {
       while(true) {
         val readObject = in.readObject
         readObject match{
           case x: SerializedProxys=> x.loadProxys
-          case x: BuildMoleScene=> {TopComponentsManager.addTopComponent(x)}
+          case x: BuildMoleScene=> {ScenesManager.addBuildSceneContainer(x)}
           case _=> throw new UserBadDataError("Failed to unserialize object " + readObject.toString)
         }
       }
@@ -78,7 +78,7 @@ object GUISerializer {
       case eof: EOFException => println("Ugly stop condition of Xstream reader !")
     } finally {
       in.close
-      TopComponentsManager.connectMode = true
+      ScenesManager.connectMode = true
     }
   }
 }

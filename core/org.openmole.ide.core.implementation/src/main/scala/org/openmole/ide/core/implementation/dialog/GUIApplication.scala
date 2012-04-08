@@ -17,7 +17,9 @@
 
 package org.openmole.ide.core.implementation.dialog
 
+import java.awt.Dimension
 import java.awt.Font
+import java.awt.Frame
 import javax.swing.UIManager
 
 class GUIApplication { application => 
@@ -34,7 +36,11 @@ class GUIApplication { application =>
     }
   }
   
-  def display = frame.visible = true
+  def display = {
+    frame.minimumSize = new Dimension(600,300)
+    frame.peer.setExtendedState(Frame.MAXIMIZED_BOTH)
+    frame.visible = true
+  }
   
   def closeOperation : Unit = {}
 }

@@ -18,41 +18,35 @@
 package org.openmole.ide.core.implementation.dialog
 
 import java.awt.Color
-import java.awt.Dimension
 import javax.swing.JOptionPane
 import javax.swing.JOptionPane._
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
-import org.openmole.ide.core.implementation.MoleSceneTopComponent
-import org.openmole.ide.core.implementation.control.ExecutionMoleComponent
-import org.openmole.ide.core.implementation.control.TopComponentsManager
-import org.openmole.ide.core.model.control.IMoleComponent
+import org.openmole.ide.core.implementation.execution.ScenesManager
+import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
-import org.openmole.ide.misc.widget.GroovyEditor
+import org.openmole.ide.core.model.workflow.ISceneContainer
 import scala.swing.Label
 import scala.swing.TextField
 
 object DialogFactory {
   
-  def closeExecutionTab(mc: IMoleComponent): Boolean = { 
-    mc match {
-      case x: ExecutionMoleComponent=> 
-        if (x.executionManager.moleExecution.finished) true
-        else if (x.executionManager.moleExecution.started){
-          val lab = new Label("<html>A simulation is currently running.<br>Close anyway ?</html>"){
-            background = Color.white}.peer
-          if (DialogDisplayer.getDefault.notify(new DialogDescriptor(lab, "Execution warning")).equals(NotifyDescriptor.OK_OPTION)) true
-          else false 
-        }
-        else true
+  def closeExecutionTab(exeContainer: ExecutionMoleSceneContainer): Boolean = { 
+    if (exeContainer.executionManager.moleExecution.finished) true
+    else if (exeContainer.executionManager.moleExecution.started){
+      val lab = new Label("<html>A simulation is currently running.<br>Close anyway ?</html>"){
+        background = Color.white}.peer
+      if (DialogDisplayer.getDefault.notify(new DialogDescriptor(lab, "Execution warning")).equals(NotifyDescriptor.OK_OPTION)) true
+      else false 
     }
+    else true
   }
   
-  def newTabName : Option[MoleSceneTopComponent]= { 
-    val textField = new TextField("Mole_" + (TopComponentsManager.topComponents.size + 1),20)
+  def newTabName : Option[ISceneContainer] = { 
+    val textField = new TextField("Mole_" + (ScenesManager.buildMoleSceneContainers.size + 1),20)
     if (DialogDisplayer.getDefault.notify(new DialogDescriptor(textField.peer, "Mole name")).equals(NotifyDescriptor.OK_OPTION))
-      Some(TopComponentsManager.addTopComponent(textField.text))
+      Some(ScenesManager.addBuildSceneContainer(textField.text))
     else None
   }
   
