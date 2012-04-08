@@ -31,6 +31,8 @@ class BigDecimalPrototypeDataUI(val name: String="", d: Int=0) extends GenericPr
   def coreObject= toArray(new Prototype(name,classOf[BigDecimal]),dim).asInstanceOf[IPrototype[BigDecimal]]
   
   def imagePath = "img/bigdecimal.png"
+ 
+  def fatImagePath = "img/bigdecimal_fat.png"
   
   def buildPanelUI = new BigDecimalPrototypePanelUI(this)
 }

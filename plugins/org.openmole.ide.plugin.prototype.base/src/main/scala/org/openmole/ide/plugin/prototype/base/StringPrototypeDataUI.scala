@@ -31,5 +31,7 @@ class StringPrototypeDataUI(val name: String="", d: Int=0) extends GenericProtot
   
   override def imagePath = "img/string.png"
   
+  override def fatImagePath = "img/string_fat.png"
+  
   override def buildPanelUI = new StringPrototypePanelUI(this)
 }

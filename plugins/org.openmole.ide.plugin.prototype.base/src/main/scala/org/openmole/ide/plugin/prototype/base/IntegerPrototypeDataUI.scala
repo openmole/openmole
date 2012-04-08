@@ -30,5 +30,7 @@ class IntegerPrototypeDataUI(val name: String="", d: Int = 0) extends GenericPro
   
   def imagePath = "img/integer.png"
   
+  def fatImagePath = "img/integer_fat.png"
+  
   def buildPanelUI = new IntegerPrototypePanelUI(this)
 }
