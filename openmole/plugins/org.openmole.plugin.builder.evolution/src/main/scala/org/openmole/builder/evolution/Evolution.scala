@@ -64,7 +64,7 @@ object Evolution {
     
     var initialPopulation = List.empty[Array[Double]]
 
-    def initital(g: Array[Double]) = {
+    def initial(g: Array[Double]) = {
       if(g.size != inputs.size) throw new UserBadDataError("Genome " + g.mkString(",") + " doesn't match the expected size of inputs " + inputs.size)
       initialPopulation ::= g
     }
