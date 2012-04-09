@@ -20,7 +20,7 @@ package org.openmole.ui.console.command
 import org.codehaus.groovy.tools.shell.CommandSupport
 import org.codehaus.groovy.tools.shell.Shell
 import org.openmole.core.implementation.validation.Validation
-import org.openmole.core.model.mole.IMole
+import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.tools.service.HierarchicalRegistry
 import org.openmole.misc.workspace.Workspace
 import java.util.List
@@ -30,8 +30,8 @@ import org.openmole.ui.console.Console
 class Verify(shell: Shell, string: String, string1: String) extends CommandSupport(shell, string, string1)  {
 
   override def execute(list: List[_]): Object = {
-    val mole = shell.execute(list.head.asInstanceOf[String]).asInstanceOf[IMole]
-    Validation(mole).foreach(println)  
+    val moleExecution = shell.execute(list.head.asInstanceOf[String]).asInstanceOf[IMoleExecution]
+    Validation(moleExecution).foreach(println)  
     null
   }
   
