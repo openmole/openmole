@@ -56,13 +56,14 @@ class SigmaGenomeSampling(
     def toSamplingLine(g: GAGenomeWithSigma) = List(new Variable(genome, g))
     
     val genomes = 
-      initialGenomes match {
-        case Some(initialGenomes) =>
-          context.valueOrException(initialGenomes).toSeq.filter(_.size == genomeSize).map {
-            g => toSamplingLine(factory.updatedValues(factory.random(generator), g))
-          }.take(nbGenome)
-        case None => Seq.empty
-      }
+      initialGenomes.map{ 
+        context.value(_) match {
+          case Some(v) => v.toSeq.filter(_.size == genomeSize).map {
+              g => toSamplingLine(factory.updatedValues(factory.random(generator), g))
+            }.take(nbGenome)
+          case None => Seq.empty
+        }
+      }.getOrElse(Seq.empty)
 
     
     (genomes ++ 
