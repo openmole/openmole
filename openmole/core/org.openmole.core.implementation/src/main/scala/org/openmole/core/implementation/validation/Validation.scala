@@ -92,7 +92,7 @@ object Validation {
   }
       
   def typeErrorsTopMole(mole: IMole, implicits: Iterable[IPrototype[_]]) = typeErrors(mole.capsules, implicits)
-  def typeErrorsMoleTask(mole: IMole) = typeErrors(mole.capsules.drop(1))
+  def typeErrorsMoleTask(mole: IMole, implicits: Iterable[IPrototype[_]]) = typeErrors(mole.capsules.drop(1), implicits)
   
   def topologyErrors(mole: IMole) = {
     val errors = new ListBuffer[TopologyProblem]
@@ -130,11 +130,11 @@ object Validation {
       }
     }.map { t => new DuplicatedTransition(t)}
   
-
-  def apply(moleExecution: IMoleExecution) = 
-    allMoles(moleExecution.mole).flatMap {
+  
+  def apply(mole: IMole) = 
+    allMoles(mole).flatMap {
       case (m, mt) =>
-        if(mt) typeErrorsMoleTask(m) else typeErrorsTopMole(m, moleExecution.implicits.values.map{_.prototype}) ++ 
+        if(mt) typeErrorsMoleTask(m, m.implicits.values.map{_.prototype}) else typeErrorsTopMole(m, m.implicits.values.map{_.prototype}) ++ 
         topologyErrors(m) ++ 
         duplicatedTransitions(m)
     }

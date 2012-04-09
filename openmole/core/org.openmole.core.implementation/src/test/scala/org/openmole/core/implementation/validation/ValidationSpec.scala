@@ -176,7 +176,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     
     val mt = new MoleTask("mt", new Mole(c1), c2)
     
-    val errors = Validation(new MoleExecution(new Mole(new Capsule(mt))))
+    val errors = Validation(new Mole(new Capsule(mt)))
     errors.headOption match {
       case Some(MissingInput(_,_,d)) => assert(d.prototype == p)
       case None => sys.error("Error should have been detected")
@@ -206,7 +206,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     
     new Transition(c1, mtC)
     
-    val errors = Validation(new MoleExecution(new Mole(mtC)))
+    val errors = Validation(new Mole(mtC))
     errors.isEmpty should equal (true)
   }
   

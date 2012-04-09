@@ -17,6 +17,11 @@
 
 package org.openmole.core.implementation.mole
 
+import org.openmole.core.implementation.data.Context
+import org.openmole.core.implementation.data.Variable
+import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.task.ITask
@@ -48,4 +53,12 @@ class Mole(val root: ICapsule) extends IMole {
     }
     list
   }
+  
+  
+  var implicits: IContext = new Context
+  
+  def addImplicit[T](p: IPrototype[T], v: T) = implicits += new Variable(p, v)
+  def addImplicit[T](name: String, v: T) = implicits += new Variable(name, v) 
+  def addImplicit(variables: Traversable[IVariable[_]]) = implicits ++= variables
+
 }

@@ -57,6 +57,5 @@ trait IMoleExecution {
   def moleJobs: Iterable[IMoleJob]
   def id: String
   def nextTicket(parent: ITicket): ITicket
-
-  def implicits: IContext
 }
+

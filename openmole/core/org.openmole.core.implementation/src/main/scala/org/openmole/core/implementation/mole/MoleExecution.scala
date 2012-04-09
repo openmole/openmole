@@ -86,7 +86,6 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
   private val waitingJobs = new HashMap[(ICapsule, IMoleJobGroup), ListBuffer[IMoleJob]]
   private var nbWaiting = 0
   
-  var implicits: IContext = new Context
   
   val rootSubMoleExecution = new SubMoleExecution(None, this)
   val rootTicket = Ticket(id, ticketNumber.getAndIncrement)  
@@ -148,7 +147,7 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
   
   override def start = {
     if(!_started.getAndSet(true)) {
-      val validationErrors = Validation(this)
+      val validationErrors = Validation(mole)
       if(!validationErrors.isEmpty) throw new UserBadDataError("Formal validation of you mole has failed, several errors have been found: " + validationErrors.mkString("; "))
       start(Context.empty) 
     }
@@ -198,7 +197,4 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
 
   def nextJobId = new MoleJobId(id, currentJobId.getAndIncrement)
  
-  def addImplicit[T](p: IPrototype[T], v: T) = implicits += new Variable(p, v)
-  def addImplicit[T](name: String, v: T) = implicits += new Variable(name, v) 
-  def addImplicit(variables: Traversable[IVariable[_]]) = implicits ++= variables
 }

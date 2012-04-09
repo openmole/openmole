@@ -140,7 +140,7 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
   
   override def submit(capsule: ICapsule, context: IContext, ticket: ITicket) = synchronized {
     if(!canceled) {
-      def implicits = Context.empty ++ moleExecution.implicits.values.filter(v => capsule.taskOrException.inputs.contains(v.prototype.name))
+      def implicits = Context.empty ++ moleExecution.mole.implicits.values.filter(v => capsule.taskOrException.inputs.contains(v.prototype.name))
       
       val moleJob: IMoleJob = capsule match {
         case c: IMasterCapsule => 

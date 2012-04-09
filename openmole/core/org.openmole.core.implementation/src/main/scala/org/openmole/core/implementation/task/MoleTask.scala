@@ -41,12 +41,7 @@ import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.IMoleTask
 
 class MoleTask(val name: String, val mole: IMole, val lastCapsule: ICapsule) extends Task with IMoleTask {
-
-  var implicits: IContext = new Context
-  
-  def addImplicit[T](p: IPrototype[T], v: T) = implicits = implicits + new Variable(p, v)
-  def addImplicit[T](name: String, v: T) = implicits = implicits + new Variable(name, v) 
-  
+ 
   class ResultGathering extends EventListener[IMoleExecution] {
     var lastContext: Option[IContext] = None
      
