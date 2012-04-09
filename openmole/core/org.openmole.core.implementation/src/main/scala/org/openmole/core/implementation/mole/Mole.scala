@@ -20,7 +20,6 @@ package org.openmole.core.implementation.mole
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
@@ -28,8 +27,15 @@ import org.openmole.core.model.task.ITask
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
-class Mole(val root: ICapsule) extends IMole {
 
+
+
+class Mole(val root: ICapsule, val implicits: IContext) extends IMole {
+
+  def this(root: ICapsule) = this(root, Context.empty)
+  def this(root: ICapsule, contexts: Array[IContext]) = this(root, contexts.reduce(_ + _))
+  def this(root: ICapsule, variables: Array[IVariable[_]]) = this(root, Context.empty ++ variables)
+  
   override def tasks: Iterable[ITask] = capsules.flatMap(_.task).toSet
 
   
@@ -54,11 +60,5 @@ class Mole(val root: ICapsule) extends IMole {
     list
   }
   
-  
-  var implicits: IContext = new Context
-  
-  def addImplicit[T](p: IPrototype[T], v: T) = implicits += new Variable(p, v)
-  def addImplicit[T](name: String, v: T) = implicits += new Variable(name, v) 
-  def addImplicit(variables: Traversable[IVariable[_]]) = implicits ++= variables
 
 }

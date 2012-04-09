@@ -27,6 +27,7 @@ import fr.iscpif.mgo.ga.selection.ParetoRank
 import fr.iscpif.mgo.ga.selection.ParetoCrowdingRank
 import fr.iscpif.mgo.ga.selection.Ranking
 import fr.iscpif.mgo.tools.Scaling._
+import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.data.DataChannel
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Variable
@@ -101,7 +102,7 @@ object Evolution {
         g.unscale(min, max) 
     }
     
-    def get = new Variable(initialGenomes, initialPopulation.map{ unscaled }.toArray)
+    def get = Context.empty + new Variable(initialGenomes, initialPopulation.map{ unscaled }.toArray)
     
   }
   
