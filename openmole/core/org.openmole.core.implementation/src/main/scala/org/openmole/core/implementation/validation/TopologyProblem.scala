@@ -28,7 +28,6 @@ object TopologyProblem {
     override def toString = "DuplicatedTransition: from " + transitions.head.start + " to " + transitions.head.end.capsule + " has been found " + transitions.size + " times."
   }
   
-  
   case class LevelProblem (
     val capsule: ICapsule,
     val paths: List[(List[ICapsule], Int)]) extends TopologyProblem {
@@ -36,6 +35,13 @@ object TopologyProblem {
     override def toString = "LevelProblem: " + capsule + ", " + paths.map{case(p, l) => "Folowing the path (" + p.toCSV + " has level " + l + ")"}.toCSV
   }
   
+  case class NegativeLevelProblem (
+    val capsule: ICapsule,
+    val path: List[ICapsule], 
+    val level: Int) extends TopologyProblem {
+  
+    override def toString = "LevelProblem: " + capsule + ", " + path.toCSV + " has a negative level " + level
+  }
 }
 
 
