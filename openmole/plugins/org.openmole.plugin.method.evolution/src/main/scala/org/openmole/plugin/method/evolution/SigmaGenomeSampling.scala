@@ -20,10 +20,12 @@ package org.openmole.plugin.method.evolution
 import fr.iscpif.mgo.ga.algorithm.GAGenomeWithSigma
 import fr.iscpif.mgo.ga.algorithm.GAGenomeWithSigmaFactory
 import java.util.Random
+import org.openmole.core.implementation.data.Data
 import org.openmole.core.implementation.data.Parameter
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.sampling.Sampling
+import org.openmole.core.model.data.DataModeMask
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.misc.exception.UserBadDataError
@@ -45,11 +47,10 @@ class SigmaGenomeSampling(
   def this(genome: IPrototype[GAGenomeWithSigma], genomeSize: Int, nbGenome: Int) = this(genome, None, genomeSize, nbGenome, Workspace.newRNG)
   def this(genome: IPrototype[GAGenomeWithSigma], initialGenomes: IPrototype[Array[Array[Double]]], genomeSize: Int, nbGenome: Int) = this(genome, Some(initialGenomes), genomeSize, nbGenome, Workspace.newRNG)
 
-      
   @transient lazy val factory = new GAGenomeWithSigmaFactory(genomeSize)
     
   def prototypes = List(genome)
-  override def inputs = super.inputs ++ initialGenomes
+  override def inputs = super.inputs ++ initialGenomes.map{p => new Data(p, DataModeMask.optional)}
    
   def build(context: IContext) = {
     def toSamplingLine(g: GAGenomeWithSigma) = List(new Variable(genome, g))
@@ -62,8 +63,7 @@ class SigmaGenomeSampling(
           }.take(nbGenome)
         case None => Seq.empty
       }
-    
-    logger.fine("Found initial genomes " + genomes.size)
+
     
     (genomes ++ 
      (0 until nbGenome - genomes.size).map{ i => toSamplingLine(factory.random(generator))}
