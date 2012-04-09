@@ -128,12 +128,12 @@ object Evolution {
     val steadySinceProto = new Prototype(name + "SteadySince", classOf[Int])
     val fitnessProto = new Prototype(name + "Fitness", classOf[GAFitness])
     val generationProto = new Prototype(name + "Generation", classOf[Int])
-    
+    val initialGenomeProto = new Prototype(name + "InitialGenomes", classOf[Array[Array[Double]]])
     val genomeSize = scaling.scales.size
     
     val firstCapsule = new StrainerCapsule(new EmptyTask(name + "First"))
     
-    val sampling = new SigmaGenomeSampling(genomeWithSigmaPrototype, genomeSize, populationSize)
+    val sampling = new SigmaGenomeSampling(genomeWithSigmaPrototype, initialGenomeProto, genomeSize, populationSize)
     val exploreSampling = new ExplorationTask(name + "GenomeExploration", sampling) 
     val explorationCapsule = new Capsule(exploreSampling)
 
@@ -223,7 +223,7 @@ object Evolution {
       def steadySincePrototype = steadySinceProto
       def generationPrototype = generationProto
       def inputs = scaling
-      def initialGenomes = new Prototype(name + "InitialGenomes", classOf[Array[Array[Double]]])
+      def initialGenomes = initialGenomeProto
     }
   }
   

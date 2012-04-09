@@ -27,7 +27,12 @@ import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
+
+object SigmaGenomeSampling extends Logger
+
+import SigmaGenomeSampling._
 
 class SigmaGenomeSampling(
   genome: IPrototype[GAGenomeWithSigma],
@@ -52,13 +57,14 @@ class SigmaGenomeSampling(
     val genomes = 
       initialGenomes match {
         case Some(initialGenomes) =>
-          context.valueOrException(initialGenomes).filter(_.size == genomeSize).map {
+          context.valueOrException(initialGenomes).toSeq.filter(_.size == genomeSize).map {
             g => toSamplingLine(factory.updatedValues(factory.random(generator), g))
           }.take(nbGenome)
-        case None => Array.empty
+        case None => Seq.empty
       }
-
-      
+    
+    logger.fine("Found initial genomes " + genomes.size)
+    
     (genomes ++ 
      (0 until nbGenome - genomes.size).map{ i => toSamplingLine(factory.random(generator))}
     ).iterator
