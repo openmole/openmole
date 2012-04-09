@@ -16,7 +16,6 @@
  */
 
 package org.openmole.ide.core.implementation.data
-
 import org.openmole.core.implementation.validation.DataflowProblem
 import org.openmole.core.implementation.validation.Validation
 import org.openmole.core.model.data.IData
@@ -32,9 +31,10 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
 
-object CheckData {
+object CheckData extends Logger {
   def dataProxyFactory(data : IData[_]) =  
     new PrototypeDataProxyFactory(KeyRegistry.prototypes(KeyGenerator(data.prototype))).buildDataProxyUI(data.prototype)
     
@@ -56,13 +56,16 @@ object CheckData {
         }
         
         // Formal validation
-        val errors = Validation.typeErrors(mole) ++ Validation.duplicatedTransitions(mole)
+        val errors = Validation(mole)
         errors.isEmpty match {
           case false => 
-            errors.map{
+            errors.flatMap{
               _ match {
                 case x : DataflowProblem => 
-                  capsuleMap(x.capsule)-> (prototypeMap(x.data.prototype),x)
+                  Some(capsuleMap(x.capsule)-> (prototypeMap(x.data.prototype),x))
+                case x => 
+                  logger.info("Error " + x + " not taken into account in the GUI yet.")
+                  None
               }
             }.groupBy(_._1).map{ case (k,v) => (k,v.map(_._2))}.foreach{
               case(capsuleUI,e)=>
