@@ -19,15 +19,20 @@ package org.openmole.ide.core.implementation.execution
 
 import org.openmole.ide.core.implementation.workflow.BuildMoleSceneContainer
 import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
+import java.awt.Dimension
 import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
+import org.openmole.ide.misc.tools.image.Images._
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.MigPanel
 import scala.collection.JavaConversions._
+import scala.swing.Action
+import scala.swing.Button
+import scala.swing.Label
 import scala.swing.TabbedPane
 
 object ScenesManager {
@@ -88,7 +93,11 @@ object ScenesManager {
   
   def addBuildSceneContainer(ms: BuildMoleScene) : BuildMoleSceneContainer = {
     val container = new BuildMoleSceneContainer(ms)
-    tabPane.pages += new TabbedPane.Page(ms.manager.name,container)
+    val page = new TabbedPane.Page(ms.manager.name,container)
+    addTab(page,ms.manager.name,new Action(""){override def apply = {
+          container.stopAndCloseExecutions
+          tabPane.pages.remove(page.index)
+        }})
     container
   }
   
@@ -100,7 +109,22 @@ object ScenesManager {
     val container = new ExecutionMoleSceneContainer(clone,page)
     page.content = container
     bmsc.executionMoleSceneContainers += container
-    tabPane.pages += page
+    addTab(page,clone.manager.name,new Action(""){override def apply = tabPane.pages.remove(page.index)})
     tabPane.selection.index = page.index
+  }
+  
+  def addTab(page : TabbedPane.Page,title : String, action : Action) = {
+    tabPane.pages += page
+    tabPane.peer.setTabComponentAt(tabPane.peer.getTabCount - 1, new CloseableTab(title,page,action).peer)
+  }
+  
+  class CloseableTab(title : String,
+                     page : TabbedPane.Page,
+                     action : Action) extends MigPanel("") {
+    contents += new Label(title)
+    contents += new Button(action){
+      maximumSize = new Dimension(15,15)
+      icon = CLOSE_TAB
+    }
   }
 }
