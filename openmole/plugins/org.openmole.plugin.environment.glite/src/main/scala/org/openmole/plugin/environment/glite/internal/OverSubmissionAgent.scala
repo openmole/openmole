@@ -66,7 +66,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
             
       //Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"still running " + stillRunning.size )
   
-      val stillRunningSamples = jobs.view.flatMap{_.batchJob}.filter(_.state == RUNNING).map{j => new StatisticSample(j.timeStemp(SUBMITTED), j.timeStemp(RUNNING), now)}
+      val stillRunningSamples = jobs.view.flatMap{env.batchJobs.get(_)}.filter(_.state == RUNNING).map{j => new StatisticSample(j.timeStemp(SUBMITTED), j.timeStemp(RUNNING), now)}
                                                 
       val samples = (env.statistics ++ stillRunningSamples).toArray
  

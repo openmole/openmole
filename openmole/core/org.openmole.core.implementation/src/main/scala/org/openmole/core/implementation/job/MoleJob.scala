@@ -73,15 +73,17 @@ class MoleJob(
   }
 
   override def perform =
-    try {
-      state = RUNNING
-      _context = task.perform(context)
-      state = COMPLETED
-    } catch {
-      case t =>  
-        exception = Some(t)
-        state = FAILED  
-        if (classOf[InterruptedException].isAssignableFrom(t.getClass)) throw t
+    if(!state.isFinal) {
+      try {
+        state = RUNNING
+        _context = task.perform(context)
+        state = COMPLETED
+      } catch {
+        case t =>  
+          exception = Some(t)
+          state = FAILED  
+          if (classOf[InterruptedException].isAssignableFrom(t.getClass)) throw t
+      }
     }
   
   override def finished(context: IContext, timeStamps: Seq[ITimeStamp[State.State]]) = {

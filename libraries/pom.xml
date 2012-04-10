@@ -23,6 +23,7 @@
         <module>fr.in2p3.jsaga</module>
         <module>fr.iscpif.mgo</module>
         <module>com.thoughtworks.xstream</module>
+	<module>com.typesafe.akka</module>
         <module>org.codehaus.groovy</module>
         <module>org.apache.commons.compress</module>
 	<module>org.apache.log4j</module>

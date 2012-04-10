@@ -18,22 +18,9 @@
 package org.openmole.core.implementation.execution.local
 
 import org.openmole.core.implementation.execution.ExecutionJob
-import org.openmole.core.implementation.tools.TimeStamp
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.job.IJob
-import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.core.model.execution.IEnvironment
-import org.openmole.core.model.execution.IExecutionJob
 
-class LocalExecutionJob(environment: LocalExecutionEnvironment, job: IJob) extends ExecutionJob(environment, job) {
-  private var _state: ExecutionState = READY
-    
-  override def state = _state
-  
-  def state_=(state: ExecutionState) {
-    timeStamps += (new TimeStamp(state))
-    EventDispatcher.trigger(environment, new IEnvironment.JobStateChanged(this, state, this.state))
-    _state = state
-  }
-}
+
+class LocalExecutionJob(val environment: LocalExecutionEnvironment, val job: IJob) extends ExecutionJob

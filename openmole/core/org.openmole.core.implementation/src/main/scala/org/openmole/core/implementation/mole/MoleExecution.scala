@@ -120,7 +120,7 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
     }
   }
   
-  def submit(job: IJob, capsule: ICapsule) = 
+  def submit(job: IJob, capsule: ICapsule) = {
     capsule match {
       case _: IAtomicCapsule => synchronized { job.moleJobs.foreach{_.perform} }
       case _ =>
@@ -129,7 +129,7 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
             case None => LocalExecutionEnvironment
           }).submit(job)
     }
-  
+  }
   
   def submitAll = synchronized {
     waitingJobs.foreach {

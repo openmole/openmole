@@ -22,7 +22,6 @@ import java.net.URI
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.file.URIFile
-import org.openmole.core.batch.file.URIFileCleaner
 import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.misc.executorservice.ExecutorService
 import org.openmole.misc.executorservice.ExecutorType
@@ -66,7 +65,7 @@ class PersistentStorage(val environment: BatchEnvironment, URI: URI, override va
       val inCatalog = ReplicaCatalog.inCatalog(description, environment.authentication.key)
       for (file <- persistentSpaceVar.list(token)) {
         val child = new URIFile(persistentSpaceVar, file)
-        if(!inCatalog.contains(child.location)) service.submit(new URIFileCleaner(child, false))
+        if(!inCatalog.contains(child.location)) URIFile.clean(child)
       }
         
     }
@@ -88,12 +87,11 @@ class PersistentStorage(val environment: BatchEnvironment, URI: URI, override va
         if (child.URLRepresentsADirectory) {
           try {
             val timeOfDir = dir.substring(0, dir.length - 1).toLong
-            if (timeOfDir < removalDate) service.submit(new URIFileCleaner(child, true, false))
+            if (timeOfDir < removalDate) URIFile.clean(child)
           } catch  {
-            case (ex: NumberFormatException) =>
-              service.submit(new URIFileCleaner(child, true, false))
+            case (ex: NumberFormatException) => URIFile.clean(child)
           }
-        } else service.submit(new URIFileCleaner(child, false, false))
+        } else URIFile.clean(child)
       }
 
       val tmpTmpDir = tmpNoTime.mkdirIfNotExist(time.toString(), token)

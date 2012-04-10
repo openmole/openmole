@@ -17,6 +17,11 @@
 
 package org.openmole.core.batch.file
 
+import akka.actor.Actor
+import akka.actor.ActorSystem
+import akka.actor.Props
+import akka.routing.RoundRobinRouter
+import akka.routing.SmallestMailboxRouter
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -52,17 +57,26 @@ import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 
 object URIFile extends Logger {
-
+  
   import IURIFile._
   
   val Timeout = new ConfigurationLocation("URIFile", "Timeout")
   val BufferSize = new ConfigurationLocation("URIFile", "BufferSize")
   val CopyTimeout = new ConfigurationLocation("URIFile", "CopyTimeout")
+  val CleanerWorkers = new ConfigurationLocation("URIFile", "CleanerWorkers")
 
   Workspace += (Timeout, "PT2M")
   Workspace += (BufferSize, "32768")
   Workspace += (CopyTimeout, "PT1M")
-        
+  Workspace += (CleanerWorkers, "20")
+          
+  val system = ActorSystem("URIFile")
+  val cleaners = system.actorOf(Props(new CleanerActor).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(CleanerWorkers))), name = "cleaner")
+  
+  case class Clean(file: IURIFile)
+  
+  def clean(file: IURIFile) = cleaners ! Clean(file)
+  
   def child(url: URL, child: String): URL = {
     if (url.toString().endsWith("/") || child.charAt(0) == '/') fromLocation(url.toString() + child)
     else fromLocation(url.toString() + '/' + child)
@@ -70,26 +84,7 @@ object URIFile extends Logger {
     
   def fromLocation(location: String): URL = URLFactory.createURL(location) 
   def fromLocation(location: URI): URL = fromLocation(location.toString)
-    
-  /* def copy(src: IURIFile, srcToken: AccessToken, dest: IURIFile): Unit = {
-   val srcDescrption = src.storageDescription
-   val destDescrption = dest.storageDescription
 
-   val same = sameRessource(srcDescrption, destDescrption)
-
-   if(same) copy(src, dest, srcToken, srcToken)
-   else withToken(destDescrption,copy(src, dest, srcToken,_))
-   }*/
-
-  /*def copy(src: IURIFile, dest: IURIFile, destToken: AccessToken): Unit = {
-   val srcDescrption = src.storageDescription
-   val destDescrption = dest.storageDescription
-
-   val same = sameRessource(srcDescrption, destDescrption)
-
-   if(same) copy(src, dest, destToken, destToken)
-   else withToken(srcDescrption, copy(src, dest, _, destToken))
-   }*/
   
   def copy(src: IURIFile, dest: File): Unit = withToken(src.storageDescription, copy(src, _, dest))
 
@@ -299,19 +294,17 @@ class URIFile(val location: String) extends IURIFile with Id {
 
 
   /* -------------------- remove -------------------------------*/
-  override def remove(recursive: Boolean) = remove(true, recursive)
-  override def remove(recursive: Boolean, token: AccessToken) = remove(true, recursive, token);
-  override def remove(timeOut: Boolean, recursive: Boolean) = withToken(remove(timeOut, recursive,_))
+   override def remove = withToken(remove)
 
-  override def remove(timeOut: Boolean, recursive: Boolean, token: AccessToken) = trycatch {
+  override def remove(token: AccessToken) = trycatch {
     val entry = fetchEntry(token)
     try {
-      val task = if (recursive /*&& directory*/) entry.remove(TaskMode.ASYNC, Flags.RECURSIVE.getValue) 
-      else entry.remove(TaskMode.ASYNC)
+      val task = 
+        if ( URLRepresentsADirectory ) entry.remove(TaskMode.ASYNC, Flags.RECURSIVE.getValue) 
+        else entry.remove(TaskMode.ASYNC)
 
       trycatch(
-        if (timeOut) task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
-        else task.get
+        task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
         , task)
     } finally close(entry)
   }

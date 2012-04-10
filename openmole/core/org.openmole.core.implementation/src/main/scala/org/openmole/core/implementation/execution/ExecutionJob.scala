@@ -19,11 +19,26 @@ package org.openmole.core.implementation.execution
 
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.execution.IExecutionJob
-import org.openmole.core.model.job.IJob
 import org.openmole.core.model.tools.ITimeStamp
+import org.openmole.misc.eventdispatcher.EventDispatcher
 import scala.collection.mutable.ListBuffer
+import org.openmole.core.implementation.tools.TimeStamp
 import  org.openmole.core.model.execution.ExecutionState._
 
-abstract class ExecutionJob[ENV <: IEnvironment](val environment: ENV, val job: IJob) extends IExecutionJob {
-   val timeStamps: ListBuffer[ITimeStamp[ExecutionState]] = new ListBuffer
+abstract class ExecutionJob extends IExecutionJob {
+  val timeStamps: ListBuffer[ITimeStamp[ExecutionState]] = new ListBuffer
+
+  private var _state: ExecutionState = READY
+    
+  override def state = _state
+  
+  def state_=(state: ExecutionState) = 
+    synchronized {
+      if(!this.state.isFinal) {
+        timeStamps += (new TimeStamp(state))
+        EventDispatcher.trigger(environment, new IEnvironment.JobStateChanged(this, state, this.state))
+        _state = state
+      }
+    }
+
 }

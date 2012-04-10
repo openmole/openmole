@@ -59,14 +59,8 @@ trait IURIFile {
   def copy(dest: File)
   def copy(dest: File, srcToken: AccessToken)
   
-  //def copy(dest: IURIFile)
-  //def copy(dest: IURIFile, srcToken: AccessToken)
-    
-  def remove(recusrsive: Boolean) 
-  def remove(recursive: Boolean, token: AccessToken)   
-  
-  def remove(timeOut: Boolean, recusrsive: Boolean) 
-  def remove(timeOut: Boolean, recusrsive: Boolean, token: AccessToken) 
+  def remove 
+  def remove(token: AccessToken) 
     
   def list: Iterable[String]
   def list(token: AccessToken): Iterable[String]

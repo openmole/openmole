@@ -77,10 +77,10 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
   def nbJobInProgress: Int = synchronized { _nbJobs }
   
   override def cancel = synchronized {
+    canceled = true
     _jobs.keys.foreach{_.cancel}
     _childs.foreach{_.cancel}
     parrentApply(_.-=(this))
-    canceled = true
   }
   
   override def childs = _childs.toList

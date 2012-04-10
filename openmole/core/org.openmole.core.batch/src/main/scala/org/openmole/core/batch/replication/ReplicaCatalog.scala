@@ -48,7 +48,6 @@ import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.core.batch.environment.Storage
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.URIFile
-import org.openmole.core.batch.file.URIFileCleaner
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.hashservice.HashService._
@@ -107,7 +106,7 @@ object ReplicaCatalog {
     lockRead({
         val set = objectServer.queryByExample(new Replica(src.getCanonicalPath, storageDescription.description, hash, authenticationKey, null, null))
 
-          return set.size match {
+        return set.size match {
           case 0 => None
           case 1 => Some(set.get(0))
           case _ => Some(fix(set))
@@ -133,7 +132,7 @@ object ReplicaCatalog {
         query.constrain(classOf[Replica])
 
         query.descend("_authenticationKey").constrain(authenticationKey)
-          .and(src.map{ f => query.descend("_source").constrain(f.getCanonicalPath) }.reduceLeft( (c1, c2) => c1.or(c2)))
+        .and(src.map{ f => query.descend("_source").constrain(f.getCanonicalPath) }.reduceLeft( (c1, c2) => c1.or(c2)))
                
         var ret = new HashMap[File, HashSet[ServiceDescription]] 
         
@@ -236,39 +235,28 @@ object ReplicaCatalog {
 
   def remove(replica: Replica) = synchronized {
     lockWrite({
-        try {
-          objectServer.delete(replica)
-        } finally {
-          objectServer.commit
-        }
+        try objectServer.delete(replica)
+        finally objectServer.commit
       })
   }
 
-  def clean(replica: Replica): Future[_] = synchronized {
-    LOGGER.log(Level.FINE, "Cleaning replica {0}", replica.toString)
-    val ret = ExecutorService.executorService(ExecutorType.REMOVE).submit(new URIFileCleaner(new URIFile(replica.destination)), false)
-    remove(replica)
-    ret
-  }
+  def clean(replica: Replica) = 
+    synchronized {
+      LOGGER.log(Level.FINE, "Cleaning replica {0}", replica.toString)
+      URIFile.clean(new URIFile(replica.destination))
+      remove(replica)
+    }
 
-  def cleanAll: Iterable[Future[_]] = synchronized {
-    val ret = new ListBuffer[Future[_]]
-    for (rep <- allReplicas) ret += clean(rep)
-    ret
-  }
+  def cleanAll = 
+    synchronized {
+      for (rep <- allReplicas) clean(rep)
+    }
 
   private def dB4oConfiguration = {
     val configuration = Db4oEmbedded.newConfiguration
     configuration.common.add(new TransparentPersistenceSupport)
     configuration.common.objectClass(classOf[Replica]).cascadeOnDelete(true)
     configuration.common.activationDepth(Int.MaxValue)
-
-    /*configuration.common.diagnostic.addListener(new DiagnosticToConsole {	 
-        override def onDiagnostic(diagnostic: Diagnostic) =  {
-          LOGGER.log(Level.FINE, diagnostic.toString)
-        }
-      })*/
-    //configuration.freespace.discardSmallerThan(50)
 
     configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
     configuration.common.objectClass(classOf[Replica]).objectField("_source").indexed(true)

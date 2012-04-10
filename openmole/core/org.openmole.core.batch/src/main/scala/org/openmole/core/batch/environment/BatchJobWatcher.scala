@@ -17,58 +17,43 @@
 
 package org.openmole.core.batch.environment
 
+import akka.actor.Actor
+import org.openmole.core.batch.refresh.Kill
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.job.IJob
 import org.openmole.misc.tools.service.Logger
-import org.openmole.misc.updater.IUpdatableWithVariableDelay
-import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.ListBuffer
-import scala.ref.WeakReference
 
-object BatchJobWatcher extends Logger
+object BatchJobWatcher extends Logger {
+  case class Watch
+}
 
-class BatchJobWatcher(environmentRef: WeakReference[BatchEnvironment]) extends IUpdatableWithVariableDelay {
+class BatchJobWatcher(environment: BatchEnvironment) extends Actor {
 
   import BatchJobWatcher._
   
-  def this(environment: BatchEnvironment) = this(new WeakReference(environment))
-  
-  override def delay = Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval)
-  
-  override def update: Boolean = {
-    val environment = environmentRef.get match {
-      case None => return false
-      case Some(env) => env
-    }
+  def receive = {
+    case Watch =>
+      val registry = environment.jobRegistry
+      val jobGroupsToRemove = new ListBuffer[IJob]
     
-    val registry = environment.jobRegistry
-    val jobGroupsToRemove = new ListBuffer[IJob]
-    
-    registry.synchronized  {
-      for (val job <- registry.allJobs) {
+      registry.synchronized  {
+        for (val job <- registry.allJobs) {
 
-        if (job.allMoleJobsFinished) {
-          for (val ej <- registry.executionJobs(job)) ej.kill
-          jobGroupsToRemove += job
-        } else {
-          val executionJobsToRemove = new ListBuffer[BatchExecutionJob]
+          if (job.allMoleJobsFinished) {
+            for (ej <- registry.executionJobs(job)) environment.jobManager ! Kill(ej)
+            jobGroupsToRemove += job
+          } else {
+            val executionJobsToRemove = new ListBuffer[BatchExecutionJob]
 
-          for (ej <- registry.executionJobs(job)) {
-            ej.state match {
-              case KILLED => executionJobsToRemove += ej
-              case _ =>
-            }
+            for (ej <- registry.executionJobs(job) if (ej.state.isFinal)) executionJobsToRemove += ej
+            for (ej <- executionJobsToRemove) registry.remove(ej)
+
+            if (registry.executionJobs(job).isEmpty)  environment.submit(job)
           }
-       
-          for (ej <- executionJobsToRemove) registry.remove(ej)
-
-          if (registry.executionJobs(job).isEmpty)  environment.submit(job)
         }
+
+        for (j <- jobGroupsToRemove) registry.removeJob(j)
       }
-
-      for (j <- jobGroupsToRemove) registry.removeJob(j)
-    }
-
-    true
   }
 }
