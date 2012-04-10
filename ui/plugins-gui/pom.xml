@@ -34,6 +34,42 @@
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.openmole.ide.plugin.task.serialization</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.openmole.ide.plugin.task.exploration</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.openmole.ide.plugin.task.netlogo</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.openmole.ide.osgi.netlogo</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.openmole.ide.osgi.netlogo4</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.openmole.ide.osgi.netlogo5</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->
