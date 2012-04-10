@@ -22,13 +22,12 @@ import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.tools.image.Images._
 import scala.swing._
 import scala.swing.event.SelectionChanged
 import swing.Swing._
-import javax.swing.ImageIcon
-import org.openide.util.ImageUtilities
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
-import org.openmole.ide.core.implementation.control.TopComponentsManager
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
@@ -41,7 +40,7 @@ class ExplorationTaskPanelUI (pud: ExplorationTaskDataUI) extends PluginPanel("w
   contents += new Label("Sampling")
   contents += samplingComboBox
   val linkLabel : LinkLabel = new LinkLabel("",contentAction(pud.sampling.getOrElse(emptyProxy))) {
-    icon = new ImageIcon(ImageUtilities.loadImage("img/eye.png"))
+    icon = EYE
   }
   
   samplingComboBox.selection.item = pud.sampling.getOrElse(emptyProxy)
@@ -53,7 +52,7 @@ class ExplorationTaskPanelUI (pud: ExplorationTaskDataUI) extends PluginPanel("w
   contents += linkLabel
   
   def contentAction(proxy : ISamplingDataProxyUI)  = new ContentAction(proxy.dataUI.name,proxy){
-    override def apply = TopComponentsManager.currentMoleSceneTopComponent.get.getMoleScene.displayExtraPropertyPanel(proxy)}
+    override def apply = ScenesManager.currentSceneContainer.get.scene.displayExtraPropertyPanel(proxy)}
 
   override def saveContent(name: String) = 
     new ExplorationTaskDataUI(name , Some(samplingComboBox.selection.item))
