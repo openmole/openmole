@@ -182,8 +182,11 @@ class CapsuleUI(val scene: IMoleScene,
     dataUI.task match {
       case Some(x : ITaskDataProxyUI) => 
         val (protoOut,protoIn) = problems.partition{case (proto,problem)=> x.dataUI.prototypesIn.contains(proto)}
-        inputPrototypeWidget.get.updateErrors(protoIn.map{_._2}.mkString("\n"))
-        outputPrototypeWidget.get.updateErrors(protoOut.map{_._2}.mkString("\n"))
+        inputPrototypeWidget match {
+          case Some(x : PrototypeWidget) => 
+            x.updateErrors(protoIn.map{_._2}.mkString("\n"))
+            outputPrototypeWidget.get.updateErrors(protoOut.map{_._2}.mkString("\n"))
+        }
       case _ =>
     }
   }
