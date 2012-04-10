@@ -37,18 +37,6 @@ class TaskWidget(scene: IMoleScene,
                  val capsule : ICapsuleUI) extends Panel {
   peer.setLayout(new BorderLayout)
   preferredSize = new Dimension(TASK_CONTAINER_WIDTH,TASK_CONTAINER_HEIGHT)
-  val titleLabel = new LinkLabel(capsule.toString, new Action(""){ 
-      def apply = {
-        capsule.dataUI.task match {
-          case Some(x : ITaskDataProxyUI) => scene.displayPropertyPanel(x,EDIT)
-          case _=>
-        }
-      }
-    }){
-    foreground = Color.WHITE
-  }
-    
-  peer.add(titleLabel.peer,BorderLayout.NORTH)
   
   override def paint(g : Graphics2D) = {
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -64,13 +52,11 @@ class TaskWidget(scene: IMoleScene,
   def backColor : Color =  { 
     capsule.dataUI.task match {
       case Some(x : ITaskDataProxyUI) => 
-        titleLabel.text = x.dataUI.name
         scene match {
           case y:BuildMoleScene=> x.dataUI.backgroundColor
           case _=> new Color(215,238,244,64)
         }
       case _=> 
-        titleLabel.text = ""
         new Color(204,204,204,128)
     }
   }

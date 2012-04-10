@@ -17,7 +17,9 @@
 
 package org.openmole.ide.core.implementation.workflow
 
+import java.awt.Color
 import java.awt.Dimension
+import java.awt.Graphics2D
 import java.awt.Point
 import javax.imageio.ImageIO
 import javax.swing.ImageIcon
@@ -34,6 +36,8 @@ import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
+import org.openmole.ide.misc.widget.LinkLabel
+import org.openmole.ide.misc.widget.LinkLabel
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.implementation.validation.DataflowProblem
@@ -71,7 +75,27 @@ class CapsuleUI(val scene: IMoleScene,
   
   getActions.addAction(ActionFactory.createPopupMenuAction(capsuleMenuProvider))
   
-  scene.refresh
+  val titleWidget = new LinkedWidget(scene,new LinkLabel(toString, new Action(""){ 
+        def apply = {
+          dataUI.task match {
+            case Some(x : ITaskDataProxyUI) => scene.displayPropertyPanel(x,EDIT)
+            case _=>
+          }
+        }
+      },6){preferredSize = new Dimension(TASK_CONTAINER_WIDTH,TASK_TITLE_HEIGHT)},10,10)
+  addChild(titleWidget)
+  
+  override def paintWidget = {
+    super.paintWidget
+    dataUI.task match {
+      case Some(x : ITaskDataProxyUI) => 
+        titleWidget.linkLabel.foreground = Color.WHITE
+        titleWidget.linkLabel.text = x.dataUI.name
+        scene.refresh
+      case None =>
+    }
+  }
+     
   def widget = this
   
   def copy(sc: IMoleScene) = {
@@ -100,6 +124,7 @@ class CapsuleUI(val scene: IMoleScene,
     dataUI.task = None
     removeChild(inputPrototypeWidget.get)
     removeChild(outputPrototypeWidget.get)
+    removeChild(titleWidget)
     inputPrototypeWidget = None
     outputPrototypeWidget = None
   }
