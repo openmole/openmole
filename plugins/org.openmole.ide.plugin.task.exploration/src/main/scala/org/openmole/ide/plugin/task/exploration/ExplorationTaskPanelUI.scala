@@ -55,9 +55,9 @@ class ExplorationTaskPanelUI (pud: ExplorationTaskDataUI) extends PluginPanel("w
     override def apply = ScenesManager.currentSceneContainer.get.scene.displayExtraPropertyPanel(proxy)}
 
   override def saveContent(name: String) = 
-    new ExplorationTaskDataUI(name , Some(samplingComboBox.selection.item))
+    new ExplorationTaskDataUI(name , if (samplingComboBox.selection.item == emptyProxy) None else Some(samplingComboBox.selection.item))
   
   def comboContent: List[ISamplingDataProxyUI] = emptyProxy :: Proxys.samplings.toList
   
-  def emptyProxy = new SamplingDataProxyUI(new EmptySamplingDataUI)
+  val emptyProxy = new SamplingDataProxyUI(new EmptySamplingDataUI)
 }
