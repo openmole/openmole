@@ -121,7 +121,7 @@ object BatchEnvironment extends Logger {
 import BatchEnvironment._
 
 abstract class BatchEnvironment extends Environment { env =>
-  
+
    val system = ActorSystem("BatchEnvironment", ConfigFactory.parseString(
       """
 akka {
@@ -132,7 +132,7 @@ akka {
       type = Dispatcher
       
       fork-join-executor {
-        parallelism-min = 2
+        parallelism-min = 3
         parallelism-max = 10
       }
     }
@@ -199,5 +199,4 @@ akka {
   def maxUpdateInterval = Workspace.preferenceAsDurationInMs(MaxUpdateInterval)
   def incrementUpdateInterval = Workspace.preferenceAsDurationInMs(IncrementUpdateInterval)
  
-  
 }

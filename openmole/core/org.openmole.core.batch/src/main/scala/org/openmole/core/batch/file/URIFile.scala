@@ -90,7 +90,7 @@ akka {
 }
 """))
   
-  val cleaners = system.actorOf(Props(new CleanerActor).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(CleanerWorkers))), name = "cleaner")
+  val cleaners = system.actorOf(Props(new CleanerActor).withRouter(RoundRobinRouter(Workspace.preferenceAsInt(CleanerWorkers))), name = "cleaner")
   
   case class Clean(file: IURIFile)
   

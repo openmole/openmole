@@ -150,8 +150,8 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
     this
   }
   
-  override def cancel: this.type = {
-    if(!canceled.getAndSet(true)) {
+  override def cancel: this.type =  {
+    if(!canceled.getAndSet(true)) synchronized {
       rootSubMoleExecution.cancel
       EventDispatcher.trigger(this, new IMoleExecution.Finished)
     }
