@@ -19,7 +19,6 @@ package org.openmole.ide.plugin.task.serialization
 import java.io.File
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Prototype._
-import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
