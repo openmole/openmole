@@ -18,6 +18,7 @@
     <modules>
         <module>org.openmole.ide.plugin.prototype.base</module>
         <module>org.openmole.ide.plugin.task.groovy</module>
+        <module>org.openmole.ide.plugin.task.systemexec</module>
     </modules>
 
     <dependencies>
