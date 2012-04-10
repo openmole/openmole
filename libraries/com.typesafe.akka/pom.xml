@@ -40,7 +40,7 @@
 
     <!--optional. Use this property to tune the exported packages-->
     <properties>
-        <libraries.export.packages>akka.*</libraries.export.packages>
+        <libraries.export.packages>akka.*,com.typesafe.*</libraries.export.packages>
         <!--<import.packages>scala.*,*;resolution:=optional</import.packages>-->
     </properties>
 

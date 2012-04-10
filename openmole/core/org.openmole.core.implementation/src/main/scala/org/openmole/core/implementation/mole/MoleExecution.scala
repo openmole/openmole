@@ -120,7 +120,7 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
       
   }
   
-  def submit(job: IJob, capsule: ICapsule) = {
+  private def submit(job: IJob, capsule: ICapsule) = {
     (environmentSelection.select(capsule) match {
         case Some(environment) => environment
         case None => LocalExecutionEnvironment
@@ -150,7 +150,7 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
     this
   }
   
-  override def cancel: this.type =  {
+  override def cancel: this.type = {
     if(!canceled.getAndSet(true)) {
       rootSubMoleExecution.cancel
       EventDispatcher.trigger(this, new IMoleExecution.Finished)

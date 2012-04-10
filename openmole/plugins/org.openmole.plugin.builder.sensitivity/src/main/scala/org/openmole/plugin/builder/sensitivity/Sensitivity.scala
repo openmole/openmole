@@ -30,10 +30,46 @@ import org.openmole.core.implementation.data.DataChannel
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.IPuzzleFirstAndLast
 import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.domain.IBounded
+import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.sampling.IFactor
 import org.openmole.plugin.builder.Builder._
+import org.openmole.plugin.method.sensitivity.FirstOrderSensitivityTask
 import org.openmole.plugin.method.sensitivity.SaltelliSampling
+import org.openmole.plugin.method.sensitivity.SensitivityTask
 
 object Sensitivity {
+  
+  class Sensitivity {
+    var factors = List.empty[IFactor[Double, IDomain[Double] with IBounded[Double]]]
+    var outputs = List.empty[IPrototype[Double]]
+    
+    def factor(f: IFactor[Double, IDomain[Double] with IBounded[Double]]) = factors ::= f
+    def output(p: IPrototype[Double]) = outputs ::= p
+  }
+  
+  def indice(input: IPrototype[Double], output: IPrototype[Double]) = SensitivityTask.indice(input, output)
+  
+  def sensitivity(
+    name: String,
+    model: IPuzzleFirstAndLast,
+    samples: Int,
+    sensitivity: Sensitivity
+  ) = {
+    val matrixName = new Prototype(name + "Matrix", classOf[String])
+   
+    val sampling = new SaltelliSampling(samples, matrixName, sensitivity.factors.toArray)
+    val explorationCapsule = new StrainerCapsule(new ExplorationTask(name + "Exploration", sampling))
+   
+    val firstOrderSensitivityTask = 
+      new FirstOrderSensitivityTask(
+        name + "FirstOrderSensitivity", 
+        matrixName, 
+        sensitivity.factors.map{_.prototype}.toArray, 
+        sensitivity.outputs.toArray
+      )
+    
+  }
   
 }

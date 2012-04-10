@@ -49,7 +49,7 @@ class BatchJobWatcher(environment: BatchEnvironment) extends Actor {
             for (ej <- registry.executionJobs(job) if (ej.state.isFinal)) executionJobsToRemove += ej
             for (ej <- executionJobsToRemove) registry.remove(ej)
 
-            if (registry.executionJobs(job).isEmpty)  environment.submit(job)
+            if (registry.executionJobs(job).isEmpty) environment.submit(job)
           }
         }
 

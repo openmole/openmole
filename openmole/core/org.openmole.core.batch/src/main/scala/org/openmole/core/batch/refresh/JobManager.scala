@@ -18,22 +18,19 @@
 package org.openmole.core.batch.refresh
 
 import akka.actor.Actor
+import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.routing.SmallestMailboxRouter
 import akka.util.duration._
-import org.openmole.core.batch.environment.BatchExecutionJob
-import org.openmole.core.batch.environment.BatchJob
-import org.openmole.core.batch.environment.SerializedJob
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
+import com.typesafe.config.ConfigFactory
 import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.core.batch.environment.BatchEnvironment.Workers
-import scala.collection.mutable.SynchronizedMap
-import scala.collection.mutable.WeakHashMap
+import org.openmole.core.batch.environment.BatchEnvironment.JobManagmentThreads
 
 object JobManager extends Logger
 
@@ -41,25 +38,45 @@ import JobManager._
 
 class JobManager(environment: BatchEnvironment) extends Actor {
  
+  val workers = ActorSystem("JobManagment", ConfigFactory.parseString(
+      """
+akka {
+  daemonic="on"
+  actor {
+    default-dispatcher {
+            
+      executor = "fork-join-executor"
+      type = Dispatcher
+      
+      fork-join-executor {
+        parallelism-min = """ + Workspace.preference(JobManagmentThreads) + """
+        parallelism-max = """ + Workspace.preference(JobManagmentThreads) + """
+      }
+    }
+  }
+}
+"""))
+  
+  
+  
   import environment._
   
-  val serializedJobs = new WeakHashMap[BatchExecutionJob, SerializedJob] with SynchronizedMap[BatchExecutionJob, SerializedJob]
-
-  val uploader = context.actorOf(Props(new UploadActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(Workers))), name = "upload")
-  val submitter = context.actorOf(Props(new SubmitActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(Workers))), name = "submit")
-  val refresher = context.actorOf(Props(new RefreshActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(Workers))), name = "refresher")
-  val resultGetters = context.actorOf(Props(new GetResultActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(Workers))), name = "resultGetters")
-  val killer = context.actorOf(Props(new KillerActor).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(Workers))), name = "killer")
+  val workerForEach = Workspace.preferenceAsInt(JobManagmentThreads) // 5.0).toInt + 1
+  
+  val uploader = workers.actorOf(Props(new UploadActor(self)).withRouter(SmallestMailboxRouter(workerForEach)), name = "upload")
+  val submitter = workers.actorOf(Props(new SubmitActor(self)).withRouter(SmallestMailboxRouter(workerForEach)), name = "submit")
+  val refresher = workers.actorOf(Props(new RefreshActor(self)).withRouter(SmallestMailboxRouter(workerForEach)), name = "refresher")
+  val resultGetters = workers.actorOf(Props(new GetResultActor(self)).withRouter(SmallestMailboxRouter(workerForEach)), name = "resultGetters")
+  val killer = workers.actorOf(Props(new KillerActor).withRouter(SmallestMailboxRouter(workerForEach)), name = "killer")
  
   def receive = {
     case Upload(job) => uploader ! Upload(job)
     case Uploaded(job, sj) => 
-      serializedJobs += job -> sj
+      job.serializedJob = Some(sj)
       submitter ! Submit(job, sj)
-    case SubmitDelay(job, sj) => 
-      context.system.scheduler.scheduleOnce(minUpdateInterval milliseconds, submitter, Submit(job, sj))
+    case Submit(job, sj) => submitter ! Submit(job, sj)
     case Submitted(job, sj, bj) => 
-      batchJobs += job -> bj
+      job.batchJob = Some(bj)
       self ! RefreshDelay(job, sj, bj, minUpdateInterval, false)
     case RefreshDelay(job, sj, bj, delay, stateChanged) => 
       val newDelay = 
@@ -70,12 +87,12 @@ class JobManager(environment: BatchEnvironment) extends Actor {
     case Kill(job) => 
       job.state = ExecutionState.KILLED
       
-      batchJobs.remove(job) match {
+      job.batchJob match {
         case Some(bj) => self ! KillBatchJob(bj)
         case None =>
       }
       
-      serializedJobs.remove(job) match {
+      job.serializedJob match {
         case Some(sj) => 
           val path = sj.communicationStorage.path
           URIFile.clean(path.toURIFile(sj.communicationDirPath))

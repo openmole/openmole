@@ -22,6 +22,7 @@ import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.routing.RoundRobinRouter
 import akka.routing.SmallestMailboxRouter
+import com.typesafe.config.ConfigFactory
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -70,7 +71,25 @@ object URIFile extends Logger {
   Workspace += (CopyTimeout, "PT1M")
   Workspace += (CleanerWorkers, "20")
           
-  val system = ActorSystem("URIFile")
+  val system = ActorSystem("URIFile", ConfigFactory.parseString(
+      """
+akka {
+  daemonic="on"
+  actor {
+    default-dispatcher {
+            
+      executor = "fork-join-executor"
+      type = Dispatcher
+      
+      fork-join-executor {
+        parallelism-min = """ + Workspace.preference(CleanerWorkers) + """
+        parallelism-max = """ + Workspace.preference(CleanerWorkers) + """
+      }
+    }
+  }
+}
+"""))
+  
   val cleaners = system.actorOf(Props(new CleanerActor).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(CleanerWorkers))), name = "cleaner")
   
   case class Clean(file: IURIFile)

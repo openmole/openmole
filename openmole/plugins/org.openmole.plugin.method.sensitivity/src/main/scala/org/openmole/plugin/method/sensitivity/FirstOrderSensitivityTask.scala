@@ -21,40 +21,29 @@ import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
+import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Prototype._
+import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.data.Context._
-
 import SaltelliSampling._
+import SensitivityTask._
 
-class FirstOrderSensitivityTask(val name: String, matrixName: IPrototype[String]) extends Task {
+class FirstOrderSensitivityTask(
+  val name: String,
+  matrixName: IPrototype[String],
+  inputs: Array[IPrototype[Double]],
+  outputs: Array[IPrototype[Double]]
+) extends Task {
   
-  var modelInput: List[IPrototype[Double]] = Nil
-  var modelOutput: List[IPrototype[Double]] = Nil
+  outputs.foreach(addInput)
+  for(i <- inputs ; o <- outputs) addOutput(indice(i, o))
   
-  addInput(toArray(matrixName))
-  
-  def addModelInput(p: IPrototype[Double]) = {
-    modelInput ::= p
-    addOutput(toArray(p))
-  }
-  
-  def addModelOutput(p: IPrototype[Double]) = {
-    modelOutput ::= p
-    addInput(toArray(p))
-  }
   
   override def process(context: IContext): IContext = {
     val matrixNames = context.valueOrException(toArray(matrixName))
-    
-    modelInput.map {
-      input =>
 
-      val sensitivity = 
-        modelOutput.map {
-          o => computeSensitivity(context.valueOrException(toArray(o)), matrixNames, input)
-        }.toArray
-      new Variable(toArray(input), sensitivity)
-    }.toContext
+    Context.empty ++ 
+    (for(i <- inputs ; o <- outputs) yield new Variable(indice(i, o) ,computeSensitivity(context.valueOrException(toArray(o)), matrixNames, i)))
   }
   
   def computeSensitivity(allValues: Array[Double], allNames: Array[String], input: IPrototype[Double]) = {

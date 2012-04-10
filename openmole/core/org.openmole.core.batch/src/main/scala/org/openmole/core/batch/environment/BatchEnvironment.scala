@@ -22,6 +22,7 @@ import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.dispatch.Dispatchers
 import akka.routing.RoundRobinRouter
+import com.typesafe.config.ConfigFactory
 import java.io.File
 
 import org.openmole.misc.exception.InternalProcessingError
@@ -98,10 +99,8 @@ object BatchEnvironment extends Logger {
   val IncrementUpdateInterval = new ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval");
   val StatisticsHistorySize = new ConfigurationLocation("Environment", "StatisticsHistorySize")
   
-  val Workers = new ConfigurationLocation("Environment", "Workers")
+  val JobManagmentThreads = new ConfigurationLocation("Environment", "JobManagmentThreads")
 
-  
-  
   Workspace += (MinUpdateInterval, "PT1M")
   Workspace += (MaxUpdateInterval, "PT20M")
   Workspace += (IncrementUpdateInterval, "PT1M")
@@ -112,31 +111,43 @@ object BatchEnvironment extends Logger {
 
   Workspace += (MemorySizeForRuntime, "512")
   Workspace += (QualityHysteresis, "100")
-  Workspace += (CheckInterval, "PT2M")
+  Workspace += (CheckInterval, "PT1M")
   Workspace += (MinValueForSelectionExploration, "0.001")
   Workspace += (CheckFileExistsInterval, "PT1H")
   Workspace += (StatisticsHistorySize, "10000")
-  Workspace += (Workers, "20")
-  
+  Workspace += (JobManagmentThreads, "100")
 }
 
 import BatchEnvironment._
 
 abstract class BatchEnvironment extends Environment { env =>
   
+   val system = ActorSystem("BatchEnvironment", ConfigFactory.parseString(
+      """
+akka {
+  daemonic="on"
+  actor {
+    default-dispatcher {
+      executor = "fork-join-executor"
+      type = Dispatcher
+      
+      fork-join-executor {
+        parallelism-min = 2
+        parallelism-max = 10
+      }
+    }
+  }
+}
+"""))
   
-  val system = ActorSystem("BatchEnvironment")
+  
   val jobManager = system.actorOf(Props(new JobManager(this)))
-
   val watcher = system.actorOf(Props(new BatchJobWatcher(this)))
   
   system.scheduler.schedule(Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval) milliseconds, Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval) milliseconds, watcher, Watch)
   
-
-  val batchJobs = new WeakHashMap[BatchExecutionJob, BatchJob] with SynchronizedMap[BatchExecutionJob, BatchJob]  
   val jobRegistry = new ExecutionJobRegistry
   val statistics = new OrderedSlidingList[StatisticSample](Workspace.preferenceAsInt(StatisticsHistorySize))
-  
   
   AuthenticationRegistry.initAndRegisterIfNotAllreadyIs(authentication)
       

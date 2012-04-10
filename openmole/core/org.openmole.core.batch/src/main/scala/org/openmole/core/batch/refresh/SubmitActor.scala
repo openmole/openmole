@@ -41,7 +41,7 @@ class SubmitActor(jobManager: ActorRef) extends Actor {
         } catch {
           case e => 
             jobManager ! Error(job, e)
-            jobManager ! SubmitDelay(job, sj)
+            jobManager ! Submit(job, sj)
         }
       }
   }
