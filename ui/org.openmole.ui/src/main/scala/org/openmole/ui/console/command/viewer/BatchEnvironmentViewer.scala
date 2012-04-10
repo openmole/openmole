@@ -44,9 +44,9 @@ class BatchEnvironmentViewer extends IViewer {
       val parser = new BasicParser
       val commandLine = parser.parse(options, args)
 
-      val v = if (commandLine.hasOption('v')) {
+      /*val v = if (commandLine.hasOption('v')) {
         commandLine.getOptionValue('v').toInt
-      } else 0
+      } else 0*/
 
       val accounting = new Array[AtomicInteger](ExecutionState.values.size)
       val executionJobRegistry = obj.asInstanceOf[BatchEnvironment].jobRegistry
@@ -63,7 +63,7 @@ class BatchEnvironmentViewer extends IViewer {
         System.out.println(state.toString + ": " + accounting(state.id))
       }
       
-      if (v >= 1) {
+      /*if (v >= 1) {
         System.out.println(Separator)
         val jobServices = new HashMap[ServiceDescription, HashMap[ExecutionState.Value, AtomicInteger]]
 
@@ -98,7 +98,7 @@ class BatchEnvironmentViewer extends IViewer {
             case None =>
           }
         }
-      }
+      }*/
     } catch {
       case ex: ParseException =>
         Logger.getLogger(classOf[BatchEnvironmentViewer].getName).log(Level.SEVERE, "Wrong arguments format.")

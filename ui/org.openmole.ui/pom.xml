@@ -48,11 +48,6 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.misc.executorservice</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.eventdispatcher</artifactId>
             <version>${project.version}</version>
         </dependency>
