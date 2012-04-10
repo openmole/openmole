@@ -19,9 +19,8 @@ package org.openmole.misc.updater
 
 import java.util.logging.Level
 import java.util.logging.Logger
-import org.openmole.misc.executorservice.ExecutorType
 
-class UpdaterTask(val updatable: IUpdatableWithVariableDelay, val purpose: ExecutorType.Value) extends Runnable {
+class UpdaterTask(val updatable: IUpdatableWithVariableDelay) extends Runnable {
 
   override def run = {
     try {

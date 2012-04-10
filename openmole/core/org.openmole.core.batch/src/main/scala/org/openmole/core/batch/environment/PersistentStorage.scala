@@ -23,8 +23,6 @@ import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.replication.ReplicaCatalog
-import org.openmole.misc.executorservice.ExecutorService
-import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
@@ -60,8 +58,7 @@ class PersistentStorage(val environment: BatchEnvironment, URI: URI, override va
   override def persistentSpace(token: AccessToken): IURIFile = synchronized {
     if (persistentSpaceVar == null) {
       persistentSpaceVar = baseDir(token).mkdirIfNotExist(persistent, token)
-      
-      val service = ExecutorService.executorService(ExecutorType.REMOVE)
+
       val inCatalog = ReplicaCatalog.inCatalog(description, environment.authentication.key)
       for (file <- persistentSpaceVar.list(token)) {
         val child = new URIFile(persistentSpaceVar, file)
@@ -78,8 +75,6 @@ class PersistentStorage(val environment: BatchEnvironment, URI: URI, override va
       time = System.currentTimeMillis
 
       val tmpNoTime = baseDir(token).mkdirIfNotExist(tmp, token)
-
-      val service = ExecutorService.executorService(ExecutorType.REMOVE)
       val removalDate = System.currentTimeMillis - Workspace.preferenceAsDurationInMs(TmpDirRemoval);
 
       for (dir <- tmpNoTime.list(token)) {

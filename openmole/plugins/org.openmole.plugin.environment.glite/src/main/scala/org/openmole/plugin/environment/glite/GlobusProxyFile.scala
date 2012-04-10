@@ -23,10 +23,6 @@ import org.openmole.core.batch.jsaga.JSAGASessionService
 import fr.in2p3.jsaga.adaptor.security.VOMSContext
 
 import GliteAuthentication._
-import org.openmole.misc.executorservice.ExecutorType
-import org.openmole.misc.updater.Updater
-import org.openmole.misc.workspace.Workspace
-import scala.ref.WeakReference
 
 class GlobusProxyFile(val proxyFile: String) extends GliteAuthenticationMethod {
   

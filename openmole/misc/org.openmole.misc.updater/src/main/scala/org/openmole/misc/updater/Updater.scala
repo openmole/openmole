@@ -19,42 +19,39 @@ package org.openmole.misc.updater
 
 import java.util.concurrent.Executors
 import org.openmole.misc.tools.service.ThreadUtil._
-import org.openmole.misc.executorservice.ExecutorService
-import org.openmole.misc.executorservice.ExecutorType
 import java.util.concurrent.TimeUnit
 
 object Updater {
   
   private var shutDown = false
   private lazy val scheduler =  Executors.newScheduledThreadPool(1, daemonThreadFactory)
-
-  def registerForUpdate(updatable: IUpdatableWithVariableDelay, purpose: ExecutorType.Value) = {
-    val task = new UpdaterTask(updatable, purpose)
-    ExecutorService.executorService(purpose).submit(task)
+  private lazy val pool = Executors.newCachedThreadPool(daemonThreadFactory)
+  
+  
+  def registerForUpdate(updatable: IUpdatableWithVariableDelay) = {
+    val task = new UpdaterTask(updatable)
+    pool.submit(task)
   }
 
-  def delay(updatable: IUpdatableWithVariableDelay, purpose: ExecutorType.Value): Unit = {
-    val task = new UpdaterTask(updatable, purpose)
+  def delay(updatable: IUpdatableWithVariableDelay): Unit = {
+    val task = new UpdaterTask(updatable)
     delay(task)
   }
 
-  def registerForUpdate(updatable: IUpdatable, purpose: ExecutorType.Value, updateInterval: Long): Unit = {
-    registerForUpdate(new UpdatableWithFixedDelay(updatable, updateInterval), purpose)
+  def registerForUpdate(updatable: IUpdatable, updateInterval: Long): Unit = {
+    registerForUpdate(new UpdatableWithFixedDelay(updatable, updateInterval))
   }
 
-  def delay(updatable: IUpdatable, purpose: ExecutorType.Value, updateInterval: Long): Unit = {
-    delay(new UpdatableWithFixedDelay(updatable, updateInterval), purpose)
+  def delay(updatable: IUpdatable, updateInterval: Long): Unit = {
+    delay(new UpdatableWithFixedDelay(updatable, updateInterval))
   }
 
   def delay(updaterTask: UpdaterTask) = {
     if (!shutDown) {
-
-      scheduler.schedule(new Runnable {
-          override def run = {
-            ExecutorService.executorService(updaterTask.purpose).submit(updaterTask);
-          }
+      scheduler.schedule(
+        new Runnable {
+          override def run = pool.submit(updaterTask) 
         }, updaterTask.updatable.delay, TimeUnit.MILLISECONDS)
-
     }
 
   }

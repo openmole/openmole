@@ -75,6 +75,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
           case e =>
             logger.log(FINE, "Exception raised durring job upload.", e)
             jobManager ! Error(job, e)
+            jobManager ! Kill(job)
         }
       }
   }

@@ -28,11 +28,6 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.misc.executorservice</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.misc.workspace</artifactId>
             <version>${project.version}</version>
         </dependency>

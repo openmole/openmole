@@ -30,7 +30,6 @@ import org.openmole.misc.filecache.IFileCache
 import org.openmole.misc.hashservice.HashService
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.ConfigurationLocation
-import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.workspace.Workspace
 
 object FileService {
@@ -43,7 +42,7 @@ object FileService {
   private[fileservice] val hashCache = new AssociativeCache[String, HashWithLastModified]
   private[fileservice] val archiveCache = new AssociativeCache[String, CachedArchiveForDir]
 
-  Updater.delay(new FileServiceGC, ExecutorType.OWN, Workspace.preferenceAsDurationInMs(FileService.GCInterval))
+  Updater.delay(new FileServiceGC, Workspace.preferenceAsDurationInMs(FileService.GCInterval))
  
   def hash(file: File): IHash =     
     if(file.isDirectory) hash(archiveForDir(file).file(false), file)

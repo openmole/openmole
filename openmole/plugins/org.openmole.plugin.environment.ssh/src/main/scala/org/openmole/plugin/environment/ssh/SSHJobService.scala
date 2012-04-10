@@ -152,7 +152,7 @@ class SSHJobService(uri: URI, val environment: SSHEnvironment, nbSlot: Int, over
             val job = jobServiceCache.createJob(install)
             job.run
             job.get
-          } finally remoteScript.remove(false, token)
+          } finally remoteScript.remove(token)
  
           workdir.child("runtime/").path
         })

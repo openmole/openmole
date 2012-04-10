@@ -36,7 +36,6 @@ import org.openmole.core.implementation.execution.Environment
 import org.openmole.misc.workspace.ConfigurationLocation
 
 import org.openmole.core.model.job.IJob
-import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.Workspace

@@ -29,7 +29,6 @@ import java.io.IOException
 import java.net.URI
 import org.openmole.misc.tools.service.Logger
 import java.nio.file.FileSystems
-import java.nio.file.Files
 import java.util.zip.GZIPInputStream
 import org.ogf.saga.context.Context
 import org.openmole.misc.exception.InternalProcessingError
@@ -39,7 +38,6 @@ import org.openmole.core.batch.environment.Authentication
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.jsaga.JSAGASessionService
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.Workspace
 import GliteEnvironment._
@@ -182,6 +180,6 @@ class GliteAuthentication(
   
   def init(context: Context, expires: Option[Int]) = {
     reinit(context, expires)
-    Updater.delay(new ProxyChecker(context, new WeakReference(this), expires), ExecutorType.OWN)
+    Updater.delay(new ProxyChecker(context, new WeakReference(this), expires))
   }
 }

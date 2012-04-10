@@ -38,8 +38,6 @@ import java.util.concurrent.Future
 import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.misc.executorservice.ExecutorService
-import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.tools.service.ReadWriteLock
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.ServiceDescription
@@ -81,7 +79,7 @@ object ReplicaCatalog {
     Db4oEmbedded.openFile(dB4oConfiguration, objRepo.getAbsolutePath)
   }
 
-  Updater.registerForUpdate(new ReplicaCatalogGC, ExecutorType.OWN, Workspace.preferenceAsDurationInMs(GCUpdateInterval))
+  Updater.registerForUpdate(new ReplicaCatalogGC, Workspace.preferenceAsDurationInMs(GCUpdateInterval))
 
   def lockRead[A](op: => A): A = {
     readWriteLock.lockRead

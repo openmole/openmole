@@ -86,7 +86,6 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
   private val waitingJobs = new HashMap[(ICapsule, IMoleJobGroup), ListBuffer[IMoleJob]]
   private var nbWaiting = 0
   
-  
   val rootSubMoleExecution = new SubMoleExecution(None, this)
   val rootTicket = Ticket(id, ticketNumber.getAndIncrement)  
   val dataChannelRegistry = new RegistryWithTicket[IDataChannel, Buffer[IVariable[_]]]
@@ -118,17 +117,14 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
         val job = new Job(id, List(moleJob))
         submit(job, capsule)
     }
+      
   }
   
   def submit(job: IJob, capsule: ICapsule) = {
-    capsule match {
-      case _: IAtomicCapsule => synchronized { job.moleJobs.foreach{_.perform} }
-      case _ =>
-        (environmentSelection.select(capsule) match {
-            case Some(environment) => environment
-            case None => LocalExecutionEnvironment
-          }).submit(job)
-    }
+    (environmentSelection.select(capsule) match {
+        case Some(environment) => environment
+        case None => LocalExecutionEnvironment
+      }).submit(job)
   }
   
   def submitAll = synchronized {
@@ -154,7 +150,7 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
     this
   }
   
-  override def cancel: this.type = {
+  override def cancel: this.type =  {
     if(!canceled.getAndSet(true)) {
       rootSubMoleExecution.cancel
       EventDispatcher.trigger(this, new IMoleExecution.Finished)

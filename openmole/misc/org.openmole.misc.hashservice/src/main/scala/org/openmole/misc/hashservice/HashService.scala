@@ -23,11 +23,10 @@ import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.util.concurrent.TimeoutException
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import org.openmole.misc.tools.io.FileUtil
 import org.openmole.misc.tools.io.ReaderRunnable
-import org.openmole.misc.executorservice.ExecutorService
-import org.openmole.misc.executorservice.ExecutorType
 
 object HashService {
 
@@ -60,12 +59,12 @@ object HashService {
   def computeHash(is: InputStream, maxRead: Int, timeout: Long): SHA1Hash = {
     val buffer = new Array[Byte](maxRead)
     val md = new Sha160
-
-    val thread = ExecutorService.executorService(ExecutorType.OWN)
+    
+    val executor = Executors.newSingleThreadExecutor
     val reader = new ReaderRunnable(buffer, is, maxRead)
 
-    Stream.continually( {
-        val f = thread.submit(reader)
+    Iterator.continually( {
+        val f = executor.submit(reader)
 
         try {
           f.get(timeout, TimeUnit.MILLISECONDS)

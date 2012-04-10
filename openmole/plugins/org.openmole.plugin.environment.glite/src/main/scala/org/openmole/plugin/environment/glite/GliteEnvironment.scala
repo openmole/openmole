@@ -25,7 +25,6 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import org.openmole.core.batch.environment.ExecutionJobRegistry
 import org.openmole.core.batch.environment.PersistentStorage
-import org.openmole.misc.executorservice.ExecutorType
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.glite.internal.BDII
 import org.openmole.plugin.environment.glite.internal.OverSubmissionAgent
@@ -89,7 +88,7 @@ class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String
   val threadsByWMS = Workspace.preferenceAsInt(LocalThreadsByWMSLocation)
   
   
-  Updater.registerForUpdate(new OverSubmissionAgent(this), ExecutorType.OWN)
+  Updater.registerForUpdate(new OverSubmissionAgent(this))
   
   def this(voName: String, vomsURL: String, bdii: String) = this(voName, vomsURL, bdii, None, None, None)
 

@@ -168,7 +168,11 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
     }
   }
 
-  def newChild: ISubMoleExecution = new SubMoleExecution(Some(this), moleExecution)
+  def newChild: ISubMoleExecution = synchronized { 
+    val subMole = new SubMoleExecution(Some(this), moleExecution) 
+    if(canceled) subMole.cancel
+    subMole
+  } 
   
   
   private def parrentApply(f: SubMoleExecution => Unit) = 
