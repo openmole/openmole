@@ -71,7 +71,6 @@ class ExecutionManager(manager : IMoleSceneManager,
   val executionJobExceptionTextArea = new TextArea{columns = 40;rows = 10;editable = false}
   val moleExecutionExceptionTextArea = new TextArea{columns = 40;rows = 10;editable = false}
   override val printStream = new PrintStream(new TextAreaOutputStream(logTextArea),true)
-  // override val (mole, capsuleMapping, prototypeMapping) = MoleMaker.buildMole(manager)
   var moleExecution: IMoleExecution = new MoleExecution(mole)
   var gStrategyPanels= new HashMap[String,(IGroupingStrategyPanelUI,List[(IGroupingStrategy,ICapsule)])]
   val hookPanels= new HashMap[String, (IHookPanelUI, List[IHook])]
@@ -119,6 +118,8 @@ class ExecutionManager(manager : IMoleSceneManager,
   pages+= new TabbedPane.Page("Execution progress", splitPane)
   pages+= new TabbedPane.Page("Execution errors", new ScrollPane(executionJobExceptionTextArea))
   pages+= new TabbedPane.Page("Environments errors", new ScrollPane(moleExecutionExceptionTextArea))
+  
+  preferredSize = new Dimension(size.width,300)
   
   def canBeRun = 
     if(Workspace.anotherIsRunningAt(Workspace.defaultLocation)) {

@@ -96,9 +96,10 @@ object ScenesManager {
     CheckData.fullCheck(bmsc.scene.manager)
     val clone = bmsc.scene.copy
     clone.manager.name = { bmsc.scene.manager.name+"_"+countExec.incrementAndGet }
-    val page = new TabbedPane.Page("Settings",new MigPanel(""))
+    val page = new TabbedPane.Page(clone.manager.name,new MigPanel(""))
     val container = new ExecutionMoleSceneContainer(clone,page)
     page.content = container
     bmsc.executionMoleSceneContainers += container
+    tabPane.pages += page
   }
 }

@@ -48,7 +48,7 @@ class ExecutionMoleSceneContainer(val scene : ExecutionMoleScene,
                                               prototypeMapping,
                                               capsuleMapping)
   
-  peer.add(toolBar.peer,BorderLayout.SOUTH)
+  peer.add(toolBar.peer,BorderLayout.NORTH)
   peer.add(scene.graphScene.createView,BorderLayout.CENTER)
   peer.add(executionManager.peer,BorderLayout.SOUTH)
   
