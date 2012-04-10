@@ -58,6 +58,7 @@ object Images {
   val NEXT = new ImageIcon(classLoader.getResource("img/next.png"))
   val PREVIOUS = new ImageIcon(classLoader.getResource("img/previous.png"))
   val CLOSE = new ImageIcon(classLoader.getResource("img/close.png"))
+  val CLOSE_TAB = new ImageIcon(classLoader.getResource("img/close_tab.png"))
   
   
 }

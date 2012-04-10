@@ -9,17 +9,8 @@
   
     <artifactId>org.openmole.ide.plugin.task.netlogo</artifactId>
     <name>${project.artifactId} ${project.version}</name>
-    <packaging>nbm</packaging>
+    <packaging>bundle</packaging>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>nbm-maven-plugin</artifactId>
-                <extensions>true</extensions>
-            </plugin>
-        </plugins>
-    </build>
     <dependencies>
         <dependency>
             <groupId>org.openmole.core</groupId>
@@ -42,11 +33,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-netbeans-api-annotations-common</artifactId>
-            <version>${netbeans.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.workspace</artifactId>
             <version>${project.version}</version>
@@ -58,26 +44,6 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.ide.core.implementation</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-util</artifactId>
-            <version>${netbeans.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.ide.misc.widget</artifactId>
-            <version>${project.version}</version>
-        </dependency>  
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-swing</artifactId>
-            <version>${lib.org.scala-lang.scala.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.osgi.netlogo4</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -85,11 +51,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.osgi.netlogo5</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>org-openide-dialogs</artifactId>
-            <groupId>org.netbeans.api</groupId>
-            <version>${netbeans.version}</version>
         </dependency>
     </dependencies>
 </project>
