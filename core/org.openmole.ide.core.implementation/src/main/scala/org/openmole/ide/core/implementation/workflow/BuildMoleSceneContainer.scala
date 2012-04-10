@@ -77,7 +77,7 @@ class BuildMoleSceneContainer(val scene : BuildMoleScene) extends Panel with ISc
   def stopAndCloseExecutions = {
     executionMoleSceneContainers.foreach{emc=>
       emc.executionManager.cancel
-      ScenesManager.tabPane.pages -= emc.page
+      ScenesManager.tabPane.pages.remove(emc.page.index)
     }
     executionMoleSceneContainers.clear
   }

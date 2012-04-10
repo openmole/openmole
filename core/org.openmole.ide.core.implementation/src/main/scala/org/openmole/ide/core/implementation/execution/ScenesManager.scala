@@ -101,5 +101,6 @@ object ScenesManager {
     page.content = container
     bmsc.executionMoleSceneContainers += container
     tabPane.pages += page
+    tabPane.selection.index = page.index
   }
 }
