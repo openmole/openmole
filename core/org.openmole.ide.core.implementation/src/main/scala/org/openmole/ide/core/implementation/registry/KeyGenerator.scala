@@ -17,14 +17,7 @@
 
 package org.openmole.ide.core.implementation.registry
 
-import org.openmole.core.batch.environment.AuthenticationMethod
 import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.execution.IEnvironment
-import org.openmole.core.model.hook.IHook
-import org.openmole.core.model.mole.IGroupingStrategy
-import org.openmole.core.model.sampling.ISampling
-import org.openmole.core.model.task.ITask
 import org.openmole.misc.tools.obj.ClassUtils._
 
 
@@ -36,17 +29,5 @@ object KeyGenerator {
   
   def apply(proto : IPrototype[_]) : PrototypeKey = new PrototypeKey(proto.getClass,stripArrays(proto.`type`))
   
-  def apply(task : ITask) : DefaultKey = new DefaultKey(task.getClass)
-  
-  def apply(environment : IEnvironment) : DefaultKey = new DefaultKey(environment.getClass)
-  
-  def apply(sampling : ISampling) : DefaultKey = new DefaultKey(sampling.getClass)
-  
-  def apply(domain : IDomain[_]) : DefaultKey = new DefaultKey(domain.getClass)
-  
-  def apply(hook : IHook) : DefaultKey = new DefaultKey(hook.getClass)
-  
-  def apply(authentification : AuthenticationMethod) : DefaultKey = new DefaultKey(authentification.getClass)
-  
-  def apply(groupingStrategies : IGroupingStrategy) : DefaultKey = new DefaultKey(groupingStrategies.getClass)
+  def apply(entityClass : Class[_]) : DefaultKey = new DefaultKey(entityClass)
 }
