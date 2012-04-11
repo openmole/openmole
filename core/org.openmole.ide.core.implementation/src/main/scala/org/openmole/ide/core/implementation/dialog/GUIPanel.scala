@@ -22,7 +22,7 @@ import org.openmole.ide.core.implementation.action.LoadXML
 import org.openmole.ide.core.implementation.action.SaveXML
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 
-class GUIPanel extends MainFrame {
+class GUIPanel extends MainFrame { mainframe =>
   title = "OpenMOLE"
   
   menuBar = new MenuBar{ 
@@ -33,17 +33,17 @@ class GUIPanel extends MainFrame {
       contents += new MenuItem(new Action("Load"){
           override def apply = {
             Proxys.clearAll
-            LoadXML.show
+            mainframe.title = "OpenMOLE - " + LoadXML.show
           }})
       
       contents += new MenuItem(new Action("Save"){
           override def apply = {
             ScenesManager.saveCurrentPropertyWidget
-            SaveXML.save
+            SaveXML.save(mainframe)
           }})
       
       contents += new MenuItem(new Action("Save as"){
-          override def apply = SaveXML.save(SaveXML.show)})
+          override def apply = SaveXML.save(mainframe,SaveXML.show)})
       
       contents += new MenuItem(new Action("Reset all"){
           override def apply = {

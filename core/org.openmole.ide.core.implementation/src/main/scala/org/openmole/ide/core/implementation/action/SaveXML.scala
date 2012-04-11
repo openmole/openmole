@@ -20,20 +20,20 @@ package org.openmole.ide.core.implementation.action
 import java.io.File
 import javax.swing.filechooser.FileNameExtensionFilter
 import scala.swing.FileChooser.SelectionMode._
-import org.openide.windows.WindowManager
+import org.openmole.ide.core.implementation.dialog.GUIPanel
 import org.openmole.ide.core.implementation.execution.Settings
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import scala.swing.FileChooser.Result.Approve
-import scala.swing.Component
 import scala.swing.FileChooser
 import scala.swing.Label
 
 object SaveXML {
-  def save:Unit = SaveXML.save(Settings.currentProject.getOrElse(SaveXML.show))
+  def save(frame : GUIPanel) : Unit = SaveXML.save(frame,Settings.currentProject.getOrElse(SaveXML.show))
   
-  def save(title: String): Unit = {
+  def save(frame : GUIPanel,
+           title: String): Unit = {
     Settings.currentProject = Some(title)
-    WindowManager.getDefault.getMainWindow.setTitle(title)
+    frame.title = "OpenMOLE - " + title
     GUISerializer.serialize(title)
     }
   
