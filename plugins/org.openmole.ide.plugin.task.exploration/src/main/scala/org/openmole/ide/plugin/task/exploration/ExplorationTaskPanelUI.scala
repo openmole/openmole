@@ -33,6 +33,12 @@ import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 
+object ExplorationTaskPanelUI {
+  val emptyProxy = new SamplingDataProxyUI(new EmptySamplingDataUI)
+}
+
+import ExplorationTaskPanelUI._
+
 class ExplorationTaskPanelUI (pud: ExplorationTaskDataUI) extends PluginPanel("wrap 3") with ITaskPanelUI {
   val samplingComboBox = new ComboBox(comboContent) 
   {tooltip = Help.tooltip("The name of the sampling to be executed")}
@@ -58,6 +64,4 @@ class ExplorationTaskPanelUI (pud: ExplorationTaskDataUI) extends PluginPanel("w
     new ExplorationTaskDataUI(name , if (samplingComboBox.selection.item == emptyProxy) None else Some(samplingComboBox.selection.item))
   
   def comboContent: List[ISamplingDataProxyUI] = emptyProxy :: Proxys.samplings.toList
-  
-  val emptyProxy = new SamplingDataProxyUI(new EmptySamplingDataUI)
 }

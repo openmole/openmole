@@ -18,20 +18,20 @@
 package org.openmole.ide.plugin.task.exploration
 
 import java.awt.Color
-import org.openmole.core.implementation.task.ExplorationTask
+import org.openmole.ide.plugin.task.exploration.ExplorationTaskPanelUI._
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.ide.core.implementation.data._
 
 class ExplorationTaskDataUI(val name: String="",
                             override var sampling : Option[ISamplingDataProxyUI] = None) extends AbstractExplorationTaskDataUI{
    
-  override def coreObject = {
+  override def coreObject =
     sampling match {
       case Some(x: ISamplingDataProxyUI) => new ExplorationTask(name,x.dataUI.coreObject)
-      case _ => throw new UserBadDataError("Sampling missing to instanciate the exploration task " + name)
+      case None => throw new UserBadDataError("Sampling missing to instanciate the exploration task " + name)
     } 
-  }
   
   override def coreClass= classOf[ExplorationTask]
   
