@@ -20,13 +20,19 @@ package org.openmole.ide.core.implementation.data
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.sampling.ISampling
 import org.openmole.core.implementation.sampling.Sampling
+import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
+import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.data.IPrototypeDataUI
 import org.openmole.ide.core.model.data.ISamplingDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
+import java.awt.Color
 import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
@@ -34,6 +40,8 @@ import org.openmole.ide.core.model.panel.ISamplingPanelUI
 object EmptyDataUIs {
   
   def emptyPrototypeProxy : IPrototypeDataProxyUI = new PrototypeDataProxyUI(new EmptyPrototypeDataUI)
+  
+  def emptyTaskProxy : ITaskDataProxyUI = new TaskDataProxyUI(new EmptyTaskDataUI)
   
   class  EmptyPrototypeDataUI extends IPrototypeDataUI[Any] {
     def name = ""
@@ -68,5 +76,25 @@ object EmptyDataUIs {
   class EmptySampling extends Sampling {
     def prototypes = List.empty
     def build(context : IContext) = List[Iterable[IVariable[_]]]().toIterator
+  }
+  
+  class EmptyTaskDataUI extends TaskDataUI{
+    def name = ""
+    def buildPanelUI = new EmptyTaskPanelUI
+    def coreClass = classOf[ISampling]
+    def coreObject = new EmptyTask
+    def backgroundColor = Color.WHITE
+    def borderColor = Color.WHITE
+    def imagePath = "img/empty.png"
+  }
+  
+  class EmptyTaskPanelUI extends ITaskPanelUI {
+    override def peer = new PluginPanel("").peer
+    def saveContent(name: String) = new EmptyTaskDataUI
+  }
+  
+  class EmptyTask extends Task {
+    def process(context : IContext) = context
+    def name = ""
   }
 }
