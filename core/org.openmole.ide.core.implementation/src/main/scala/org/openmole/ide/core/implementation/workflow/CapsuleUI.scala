@@ -19,7 +19,6 @@ package org.openmole.ide.core.implementation.workflow
 
 import java.awt.Color
 import java.awt.Dimension
-import java.awt.Graphics2D
 import java.awt.Point
 import javax.imageio.ImageIO
 import javax.swing.ImageIcon
@@ -186,6 +185,7 @@ class CapsuleUI(val scene: IMoleScene,
           case Some(x : PrototypeWidget) => 
             x.updateErrors(protoIn.map{_._2}.mkString("\n"))
             outputPrototypeWidget.get.updateErrors(protoOut.map{_._2}.mkString("\n"))
+          case _ =>
         }
       case _ =>
     }
