@@ -19,6 +19,7 @@ package org.openmole.core.implementation.data
 
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.data.IPrototype
+import org.openmole.misc.tools.io.Prettifier._
 
 object Variable {
   def apply[C,T <: C](prototype: IPrototype[C], value: T): Variable[C] = new Variable[C](prototype, value)
@@ -35,6 +36,6 @@ class Variable[C](val prototype: IPrototype[C], val value: C) extends IVariable[
   def this(name: String, `type`: Class[C]) = this(new Prototype[C](name, `type`))
   
   override def toString: String = {
-    prototype.name + '=' + (if(value != null) value.toString else "null")
+    prototype.name + "=" + (if(value != null) value.prettify else "null")
   }
 }

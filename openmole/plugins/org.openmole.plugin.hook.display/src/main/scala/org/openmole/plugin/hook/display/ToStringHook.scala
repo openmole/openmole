@@ -38,15 +38,15 @@ class ToStringHook(execution: IMoleExecution, capsule: ICapsule, out: PrintStrea
     import moleJob.context
     
     if(!prototypes.isEmpty) 
-      prototypes.map(p => p -> context.variable(p)) foreach {
-        _  match {
-          case (p, Some(v)) => out.println(toString(v))
-          case (p, None) => out.println(p.name + " variable not found.")
-        }
-      }
-    else context.values.foreach { v => out.println(toString(v)) }
+      out.println (
+        prototypes.map(p => p -> context.variable(p)).map {
+          _  match {
+            case (p, Some(v)) => v
+            case (p, None) => p.name + " not found"
+          }
+        }.mkString(",")
+      )
+    else out.println(context.values.mkString(", "))
   }
-  
-  def toString(variable: IVariable[_]) = variable.prototype.name + " = " + (if(variable.value == null) "null" else variable.value.prettify)
-  
+              
 }

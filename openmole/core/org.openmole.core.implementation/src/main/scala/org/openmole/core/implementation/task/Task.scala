@@ -99,7 +99,7 @@ abstract class Task extends ITask {
   override def perform(context: IContext) = {
     try end(context + process(init(context)))
     catch {
-      case e => throw new InternalProcessingError(e, "Error in task " + name)
+      case e => throw new InternalProcessingError(e, "Error in task " + name + " for context values " + context)
     }
   }
 
