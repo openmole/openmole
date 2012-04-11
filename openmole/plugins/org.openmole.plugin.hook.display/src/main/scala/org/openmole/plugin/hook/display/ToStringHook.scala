@@ -21,9 +21,9 @@ import java.io.PrintStream
 import org.openmole.core.implementation.hook.CapsuleExecutionHook
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.Prettifier._
 
 class ToStringHook(execution: IMoleExecution, capsule: ICapsule, out: PrintStream, prototypes: IPrototype[_]*) extends CapsuleExecutionHook(execution, capsule) {
@@ -33,17 +33,20 @@ class ToStringHook(execution: IMoleExecution, capsule: ICapsule, out: PrintStrea
   def this(execution: IMoleExecution, capsule: ICapsule, prototypes: Array[IPrototype[_]]) = this(execution, capsule, System.out, prototypes: _*)
 
   def this(execution: IMoleExecution, capsule: ICapsule, out: PrintStream, prototypes: Array[IPrototype[_]]) = this(execution, capsule, out, prototypes: _*)
-
+  
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
     
-    prototypes.map(p => p -> context.variable(p)) foreach {
-      case(prototype, option) => 
-        option match {
-          case Some(v) => out.println(prototype.name + " = " + (if(v.value == null) "null" else v.value.prettify))
-          case None => out.println(prototype.name + " variable not found.")
+    if(!prototypes.isEmpty) 
+      prototypes.map(p => p -> context.variable(p)) foreach {
+        _  match {
+          case (p, Some(v)) => out.println(toString(v))
+          case (p, None) => out.println(p.name + " variable not found.")
         }
-    }
+      }
+    else context.values.foreach { v => out.println(toString(v)) }
   }
+  
+  def toString(variable: IVariable[_]) = variable.prototype.name + " = " + (if(variable.value == null) "null" else variable.value.prettify)
   
 }

@@ -68,7 +68,6 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
         case Left(result) => 
           val contextResults = getContextResults(result, communicationStorage, token)
 
-          //var successfull = 0
           var firstRunning = Long.MaxValue
           var lastCompleted = 0L
 
