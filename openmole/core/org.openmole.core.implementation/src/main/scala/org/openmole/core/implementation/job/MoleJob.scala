@@ -29,9 +29,9 @@ import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.ListBuffer
 
 object MoleJob extends Logger {
-  type StateChangedCallBack = (IMoleJob, State, State) => Unit
-             
+  type StateChangedCallBack = (IMoleJob, State, State) => Unit             
 }
+
 import MoleJob._
 
 class MoleJob(

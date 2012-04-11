@@ -19,17 +19,7 @@ package org.openmole.core.implementation.job
 
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.job.MoleJobId
-import scala.collection.immutable.TreeMap
 
 class Job(val executionId: String, val moleJobs: Iterable[IMoleJob]) extends IJob {
-  
-  @transient lazy val moleJobsMap = new TreeMap[MoleJobId, IMoleJob]() ++ moleJobs.map{mj => mj.id -> mj}  
-  
-  override def apply(id: MoleJobId) = moleJobsMap(id)
-
-  override def allMoleJobsFinished: Boolean = {
-    for(moleJob <- moleJobs; if(!moleJob.isFinished)) return false
-    true
-  }
+  override def allMoleJobsFinished: Boolean = !moleJobs.exists(!_.isFinished)
 }

@@ -120,12 +120,13 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
       
   }
   
-  private def submit(job: IJob, capsule: ICapsule) = {
-    (environmentSelection.select(capsule) match {
-        case Some(environment) => environment
-        case None => LocalExecutionEnvironment
-      }).submit(job)
-  }
+  private def submit(job: IJob, capsule: ICapsule) = 
+    if(!job.allMoleJobsFinished) {
+      (environmentSelection.select(capsule) match {
+          case Some(environment) => environment
+          case None => LocalExecutionEnvironment
+        }).submit(job)
+    }
   
   def submitAll = synchronized {
     waitingJobs.foreach {
