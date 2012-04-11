@@ -49,6 +49,7 @@ class GUIPanel extends MainFrame { mainframe =>
           override def apply = {
             ScenesManager.closeAll
             Proxys.clearAll
+            mainframe.title = "OpenMOLE"
           }})
     }
     
