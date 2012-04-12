@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation.mole
 
+import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.data.IContext
@@ -166,7 +167,7 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
     new ExplorationTransition(exc, emptyC)
     new Transition(emptyC, selectCaps)
     new Transition(selectCaps, new Slot(emptyC))  
-    new EndExplorationTransition("n >= 100", selectCaps, testC)
+    new EndExplorationTransition(selectCaps, testC, "n >= 100")
 
     new MoleExecution(new Mole(exc)).start.waitUntilEnded 
     endCapsExecuted should equal (1)

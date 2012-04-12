@@ -88,5 +88,5 @@ class Context(val variables: TreeMap[String, IVariable[_]]) extends Map[String, 
   
   override def iterator = variables.iterator
   
-  override def toString = "{" + variables.values.mkString(", ") + "}"
+  override def toString = "{" + (if(variables.values.isEmpty) "" else variables.values.mkString(", ")) + "}"
 }

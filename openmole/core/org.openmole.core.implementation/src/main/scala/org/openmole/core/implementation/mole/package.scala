@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,10 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model
+package org.openmole.core.implementation
 
-import org.openmole.core.model.transition.ISlot
+import org.openmole.core.model.IPuzzleFirst
+import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.mole.IMole
 
-trait IPuzzleFirst extends IPuzzle {
-  def first: ISlot
+package object mole {
+  implicit def capsuleToSlotConverter(capsule: ICapsule) = capsule.defaultInputSlot
+  implicit def puzzleToMoleConverter(puzzle: IPuzzleFirst) = new Mole(puzzle.first.capsule)
+  implicit def moleToMoleExecutionConverter(mole: IMole) = new MoleExecution(mole)
+  implicit def puzzleToMoleExecutionConverter(puzzle: IPuzzleFirst) = new MoleExecution(puzzle)
 }

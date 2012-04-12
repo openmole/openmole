@@ -20,20 +20,14 @@ package org.openmole.core.implementation.mole
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.mole.IEnvironmentSelection
-import scala.collection.mutable.HashMap
+import scala.collection.immutable.HashMap
+
 
 object FixedEnvironmentSelection {  
-  val Empty = new FixedEnvironmentSelection(new HashMap())
+  val empty = new FixedEnvironmentSelection(Map.empty)
+  def apply(values: (ICapsule, IEnvironment)*): FixedEnvironmentSelection = new FixedEnvironmentSelection(Map.empty ++ values)
 }
 
-class FixedEnvironmentSelection(environments: HashMap[ICapsule, IEnvironment]) extends IEnvironmentSelection {
-   
-  def this() = this(new HashMap[ICapsule, IEnvironment])
-
-  override def select(capsule: ICapsule): Option[IEnvironment] = environments.get(capsule);
-    
-  def select(capsule: ICapsule, environment: IEnvironment) {
-    environments(capsule) = environment
-  }
-
+class FixedEnvironmentSelection(values: Map[ICapsule, IEnvironment]) extends IEnvironmentSelection {
+  def apply(key: ICapsule) = values.get(key)
 }

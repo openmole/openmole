@@ -21,6 +21,6 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.model.job.IMoleJob
 
 trait IGroupingStrategy {
-  def group(context: IContext): IMoleJobGroup
+  def apply(context: IContext): IMoleJobGroup
   def complete(job: Iterable[IMoleJob]) = false
 }

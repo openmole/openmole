@@ -214,10 +214,11 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
     new Transition(t1c, t3c)
 
     val env = new LocalExecutionEnvironment(20)
-    val mapping = new FixedEnvironmentSelection
-    t2CList.foreach(c => mapping.select(c, env))
     
-    new MoleExecution(new Mole(initc), mapping).start.waitUntilEnded
+    new MoleExecution(
+      new Mole(initc), 
+      FixedEnvironmentSelection(t2CList.map{_ -> env}: _*)
+    ).start.waitUntilEnded
     executed should equal (true)
   }
   

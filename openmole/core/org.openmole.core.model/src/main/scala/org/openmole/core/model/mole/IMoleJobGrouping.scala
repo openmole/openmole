@@ -19,5 +19,4 @@ package org.openmole.core.model.mole
 
 trait IMoleJobGrouping {
   def apply(capsule: ICapsule): Option[IGroupingStrategy]
-  // def set(capsule: ICapsule, strategy: IGroupingStrategy)
 }

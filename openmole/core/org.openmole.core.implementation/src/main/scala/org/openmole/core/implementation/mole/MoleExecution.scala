@@ -60,17 +60,11 @@ import scala.collection.JavaConversions._
 
 object MoleExecution extends Logger
 
-class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelection, moleJobGrouping: IMoleJobGrouping, _instantRerun: IInstantRerun) extends IMoleExecution {
-
-  def this(mole: IMole) = this(mole, FixedEnvironmentSelection.Empty, MoleJobGrouping.Empty, IInstantRerun.empty)
-    
-  def this(mole: IMole, environmentSelection: IEnvironmentSelection) = this(mole, environmentSelection, MoleJobGrouping.Empty, IInstantRerun.empty)
-      
-  def this(mole: IMole, environmentSelection: IEnvironmentSelection, moleJobGrouping: IMoleJobGrouping) = this(mole, environmentSelection, moleJobGrouping, IInstantRerun.empty)
-  
-  def this(mole: IMole, instantRerun: IInstantRerun) = this(mole, FixedEnvironmentSelection.Empty, MoleJobGrouping.Empty, instantRerun)
-    
-  def this(mole: IMole, environmentSelection: IEnvironmentSelection, instantRerun: IInstantRerun) = this(mole, environmentSelection, MoleJobGrouping.Empty, instantRerun)
+class MoleExecution(
+  val mole: IMole, 
+  selection: IEnvironmentSelection = FixedEnvironmentSelection.empty,
+  grouping: IMoleJobGrouping = MoleJobGrouping.empty,
+  rerun: IInstantRerun = IInstantRerun.empty) extends IMoleExecution {
 
   import IMoleExecution._
   import MoleExecution._
@@ -93,14 +87,15 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
   val exceptions = new ListBuffer[Throwable]
   
 
-  def instantRerun(moleJob: IMoleJob, capsule: ICapsule) = synchronized {
-    _instantRerun.rerun(moleJob, capsule)
-  }
+  def instantRerun(moleJob: IMoleJob, capsule: ICapsule) = 
+    synchronized {
+      rerun.rerun(moleJob, capsule)
+    }
   
   def group(moleJob: IMoleJob, capsule: ICapsule) = synchronized {
-    moleJobGrouping(capsule) match {
+    grouping(capsule) match {
       case Some(strategy) =>
-        val category = strategy.group(moleJob.context)
+        val category = strategy(moleJob.context)
         val key = (capsule, category)
             
         val jobs = waitingJobs.getOrElseUpdate(key, new ListBuffer) += moleJob 
@@ -122,10 +117,10 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
   
   private def submit(job: IJob, capsule: ICapsule) = 
     if(!job.allMoleJobsFinished) {
-      (environmentSelection.select(capsule) match {
+      (selection(capsule) match {
           case Some(environment) => environment
           case None => LocalExecutionEnvironment
-        }).submit(job)
+      }).submit(job)
     }
   
   def submitAll = synchronized {
@@ -179,7 +174,7 @@ class MoleExecution(val mole: IMole, val environmentSelection: IEnvironmentSelec
   def jobOutputTransitionsPerformed(job: IMoleJob, capsule: ICapsule) = synchronized {
     if(rootSubMoleExecution.nbJobInProgress <= nbWaiting) submitAll
     if(!canceled.get)  {
-      _instantRerun.jobFinished(job, capsule)
+      rerun.jobFinished(job, capsule)
       if (finished) {  
         _finished.release
         EventDispatcher.trigger(this, new IMoleExecution.Finished)

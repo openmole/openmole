@@ -27,24 +27,8 @@ import org.openmole.core.model.transition.ISlot
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.UserBadDataError
 
-class EndExplorationTransition(trigger: ICondition, start: ICapsule, end: ISlot, filtered: Set[String]) extends Transition(start, end, True, filtered){
+class EndExplorationTransition(start: ICapsule, end: ISlot, trigger: ICondition, filtered: Set[String] = Set.empty) extends Transition(start, end, True, filtered){
   
-  def this(trigger: ICondition, start: ICapsule, end: ICapsule) = this(trigger, start, end.defaultInputSlot, Set.empty[String])
-
-  def this(trigger: ICondition, start: ICapsule, slot: ISlot) = this(trigger, start, slot, Set.empty[String])
-
-  def this(trigger: ICondition, start: ICapsule, end: ICapsule, filtred: Array[String]) = this(trigger, start, end.defaultInputSlot, filtred.toSet)
-
-  def this(trigger: ICondition, start: ICapsule, slot: ISlot, filtred: Array[String]) = this(trigger, start, slot, filtred.toSet)
-
-  def this(trigger: String, start: ICapsule, end: ICapsule) = this(new Condition(trigger), start, end.defaultInputSlot, Set.empty[String])
-
-  def this(trigger: String, start: ICapsule, slot: ISlot) = this(new Condition(trigger), start, slot, Set.empty[String])
-
-  def this(trigger: String, start: ICapsule, end: ICapsule, filtred: Array[String]) = this(new Condition(trigger), start, end.defaultInputSlot, filtred.toSet)
-
-  def this(trigger: String, start: ICapsule, slot: ISlot, filtred: Array[String]) = this(new Condition(trigger), start, slot, filtred.toSet)
-
   
   override protected def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
     if(trigger.evaluate(context)) {

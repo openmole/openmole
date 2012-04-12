@@ -68,8 +68,8 @@ class FileSystemInstantRerunSpec extends FlatSpec with ShouldMatchers {
     dir.delete
     dir.mkdir
     
-    new MoleExecution(new Mole(t1c), new FileSystemInstantRerun(dir, t1c)).start.waitUntilEnded
-    new MoleExecution(new Mole(t1c), new FileSystemInstantRerun(dir, t1c)).start.waitUntilEnded
+    new MoleExecution(new Mole(t1c), rerun = new FileSystemInstantRerun(dir, t1c)).start.waitUntilEnded
+    new MoleExecution(new Mole(t1c), rerun = new FileSystemInstantRerun(dir, t1c)).start.waitUntilEnded
     dir.recursiveDelete
     
     res.distinct.size should equal (1)

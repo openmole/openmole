@@ -18,6 +18,6 @@
 package org.openmole.core.implementation.puzzle
 
 import org.openmole.core.model.IPuzzleFirst
-import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.transition.ISlot
 
-class PuzzleFirst(val first: ICapsule) extends IPuzzleFirst
+class PuzzleFirst(val first: ISlot) extends IPuzzleFirst

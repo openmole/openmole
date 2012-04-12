@@ -17,42 +17,20 @@
 
 package org.openmole.plugin.groupingstrategy.batch
 
+import java.util.Random
 import org.openmole.core.implementation.mole.MoleJobGroup
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.mole.IGroupingStrategy
-import org.openmole.core.model.mole.IMoleJobGroup
-import scala.util.Random
+import org.openmole.misc.workspace.Workspace
 
 /**
  * Group the mole jobs by distributing them at random among {{{numberOfBatch}}}
- * groups. A seed could be provided for the random number generator. If no seed
- * is provided the empty contructor of scala.util.Random is called.
+ * groups.
  * 
  * @param numberOfBatch total number of groups
- * @param seed the seed for the pseudo-random numbers generator
  */
-class NumberOfRandomizedBatchGroupingStrategy(numberOfBatch: Int, seed: Option[Int]) extends IGroupingStrategy {
-  
-  /**
-   *  Constructor providing None for the seed option.
-   *  
-   *  @param numberOfBatch total number of groups
-   */
-  def this(numberOfBatch: Int) = this(numberOfBatch, None)
-  
-  /**
-   *  Constructor providing Some(seed) for the seed option.
-   *  
-   * @param numberOfBatch total number of groups
-   * @param seed the seed for the pseudo-random numbers generator
-   */
-  def this(numberOfBatch: Int, seed: Int) = this(numberOfBatch, Some(seed))
-  
-  private val random = seed match {
-    case None => new Random
-    case Some(seed) => new Random(seed)
-  }
+class NumberOfRandomizedBatchGroupingStrategy(numberOfBatch: Int, rng: Random = Workspace.newRNG) extends IGroupingStrategy {
 
-  override def group(context: IContext) = new MoleJobGroup(random.nextInt(numberOfBatch))
+  override def apply(context: IContext) = new MoleJobGroup(rng.nextInt(numberOfBatch))
 
 }

@@ -42,7 +42,7 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
     
     var group = true
     
-    override def group(context: IContext) = {
+    override def apply(context: IContext) = {
       val ret = new MoleJobGroup(group)
       group = !group
       ret
@@ -78,10 +78,10 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
     
     new ExplorationTransition(exc, emptyC)
     new AggregationTransition(emptyC, testC)
-                        
-    val grouping = new MoleJobGrouping
-    grouping.set(emptyC, new JobGroupingBy2Test)
-    
-    new MoleExecution(new Mole(exc), new FixedEnvironmentSelection, grouping).start.waitUntilEnded 
+
+    new MoleExecution(
+      mole = new Mole(exc), 
+      grouping = MoleJobGrouping(emptyC -> new JobGroupingBy2Test)
+    ).start.waitUntilEnded 
   }
 }

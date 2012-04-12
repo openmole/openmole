@@ -65,7 +65,7 @@ trait ITransition {
    *
    * @return the names of the variables which are filtred by this transition
    */
-  def filtered: Set[String]
+  def filter: Set[String]
 
   /**
    * Get the unfiltred user output data of the starting capsule going through 

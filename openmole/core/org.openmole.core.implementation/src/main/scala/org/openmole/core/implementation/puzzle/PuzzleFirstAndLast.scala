@@ -19,5 +19,6 @@ package org.openmole.core.implementation.puzzle
 
 import org.openmole.core.model.IPuzzleFirstAndLast
 import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.transition.ISlot
 
-class PuzzleFirstAndLast(val first: ICapsule, val last: ICapsule) extends IPuzzleFirstAndLast
+class PuzzleFirstAndLast(val first: ISlot, val last: ICapsule) extends IPuzzleFirstAndLast

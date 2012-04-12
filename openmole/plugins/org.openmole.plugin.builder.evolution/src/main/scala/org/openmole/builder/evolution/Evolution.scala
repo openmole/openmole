@@ -53,6 +53,8 @@ import org.openmole.plugin.method.evolution.ScalingGenomeTask
 import org.openmole.plugin.method.evolution.SigmaGenomeSampling
 import org.openmole.plugin.method.evolution.ToIndividualTask
 import scala.collection.immutable.TreeMap
+import org.openmole.core.implementation.puzzle._
+import org.openmole.core.implementation.transition._
 
 object Evolution {
 
@@ -201,12 +203,12 @@ object Evolution {
     new Transition(firstCapsule, explorationCapsule)
     new ExplorationTransition(explorationCapsule, scalingCaps)
     new Transition(scalingCaps, model.first)
-    new Transition(model.last, toIndividualCapsule, Array(genomeWithSigmaPrototype.name))
+    new Transition(model.last, toIndividualCapsule, filter = Set(genomeWithSigmaPrototype.name))
     new Transition(toIndividualCapsule, elitismCaps)
     new Transition(elitismCaps, scalingParetoCapsule)
     new Transition(scalingParetoCapsule, breedingCaps)
     new Transition(breedingCaps, new Slot(scalingCaps))
-    new EndExplorationTransition(steadySinceProto.name + " >= " + maxGenerationsSteady, scalingParetoCapsule, endCapsule)
+    new EndExplorationTransition(scalingParetoCapsule, endCapsule, steadySinceProto.name + " >= " + maxGenerationsSteady)
     
     new DataChannel(scalingCaps, toIndividualCapsule)
     new DataChannel(elitismCaps, breedingCaps)
@@ -226,27 +228,6 @@ object Evolution {
       def initialGenomes = initialGenomeProto
     }
   }
-  
- 
-  def nsga2SigmaSteady(
-    name: String,
-    model: ICapsule,
-    scaling: Inputs,
-    objectives: Objectives,
-    populationSize: Int,
-    archiveSize: Int,
-    maxGenerationsSteady: Int,
-    distributionIndex: Double
-  ): NSGA2Sigma = 
-    nsga2SigmaSteady(
-      name,
-      Builder.puzzle(model),
-      scaling,
-      objectives,
-      populationSize,
-      archiveSize,
-      maxGenerationsSteady,
-      distributionIndex)
   
   
   def nsga2SigmaSteady(
@@ -293,24 +274,5 @@ object Evolution {
       new ParetoCrowdingRank
     )
   
-  def nsga2DiversitySigmaSteady(
-    name: String,
-    model: ICapsule,
-    scaling: Inputs,
-    objectives: Objectives,
-    populationSize: Int,
-    archiveSize: Int,
-    maxGenerationsSteady: Int,
-    distributionIndex: Double
-  ): NSGA2Sigma = 
-    nsga2DiversitySigmaSteady(
-      name,
-      Builder.puzzle(model),
-      scaling,
-      objectives,
-      populationSize,
-      archiveSize,
-      maxGenerationsSteady,
-      distributionIndex)
   
 }

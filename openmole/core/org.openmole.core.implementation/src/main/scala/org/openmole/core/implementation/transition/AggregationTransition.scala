@@ -44,62 +44,6 @@ import scala.collection.mutable.ListBuffer
 
 class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition = True, filtered: Set[String] = Set.empty[String], trigger: Option[ICondition] = None) extends Transition(start, end, condition, filtered) with IAggregationTransition {
 
-  def this(start: ICapsule, end: ICapsule) = this(start, end.defaultInputSlot, True, Set.empty[String])
-    
-  def this(start: ICapsule, end: ICapsule, condition: ICondition) = this(start, end.defaultInputSlot, condition, Set.empty[String])
-
-  def this(start: ICapsule, end: ICapsule, condition: String) = this(start, end.defaultInputSlot, new Condition(condition), Set.empty[String])
-    
-  def this(start: ICapsule, slot: ISlot, condition: String) = this(start, slot, new Condition(condition), Set.empty[String])
-    
-  def this(start: ICapsule, slot: ISlot, condition: ICondition) = this(start, slot, condition, Set.empty[String])
-   
-  def this(start: ICapsule, end: ICapsule, filtred: Array[String]) = this(start, end.defaultInputSlot, ICondition.True, filtred.toSet)
-    
-  def this(start: ICapsule, end: ICapsule, condition: ICondition, filtred: Array[String]) = this(start, end.defaultInputSlot, condition, filtred.toSet)
-
-  def this(start: ICapsule, end: ICapsule, condition: String, filtred: Array[String]) = this(start, end.defaultInputSlot, new Condition(condition), filtred.toSet)
-    
-  def this(start: ICapsule, slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet)
-
-  
-  def this(trigger: ICondition, start: ICapsule, end: ICapsule) = this(start, end.defaultInputSlot, ICondition.True, Set.empty[String], Some(trigger))
-    
-  def this(trigger: ICondition, start: ICapsule, end: ICapsule, condition: ICondition) = this(start, end.defaultInputSlot, condition, Set.empty[String], Some(trigger))
-
-  def this(trigger: ICondition, start: ICapsule, end: ICapsule, condition: String) = this(start, end.defaultInputSlot, new Condition(condition), Set.empty[String], Some(trigger))
-    
-  def this(trigger: ICondition, start: ICapsule, slot: ISlot, condition: String) = this(start, slot, new Condition(condition), Set.empty[String], Some(trigger))
-    
-  def this(trigger: ICondition, start: ICapsule, slot: ISlot, condition: ICondition) = this(start, slot, condition, Set.empty[String], Some(trigger))
-   
-  def this(trigger: ICondition, start: ICapsule, end: ICapsule, filtred: Array[String]) = this(start, end.defaultInputSlot, ICondition.True, filtred.toSet, Some(trigger))
-    
-  def this(trigger: ICondition, start: ICapsule, end: ICapsule, condition: ICondition, filtred: Array[String]) = this(start, end.defaultInputSlot, condition, filtred.toSet, Some(trigger))
-
-  def this(trigger: ICondition, start: ICapsule, end: ICapsule, condition: String, filtred: Array[String]) = this(start, end.defaultInputSlot, new Condition(condition), filtred.toSet, Some(trigger))
-    
-  def this(trigger: ICondition, start: ICapsule, slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet, Some(trigger))
-  
-
-  def this(trigger: String, start: ICapsule, end: ICapsule) = this(new Condition(trigger), start, end)  
-  
-  def this(trigger: String, start: ICapsule, end: ICapsule, condition: ICondition) = this(new Condition(trigger), start, end, condition)
-
-  def this(trigger: String, start: ICapsule, end: ICapsule, condition: String) = this(new Condition(trigger), start, end, condition)
-  
-  def this(trigger: String, start: ICapsule, slot: ISlot, condition: String) = this(new Condition(trigger), start, slot, condition)
-    
-  def this(trigger: String, start: ICapsule, slot: ISlot, condition: ICondition) = this(new Condition(trigger), start, slot, condition)
-   
-  def this(trigger: String, start: ICapsule, end: ICapsule, filtred: Array[String]) = this(new Condition(trigger), start, end, filtred)
-    
-  def this(trigger: String, start: ICapsule, end: ICapsule, condition: ICondition, filtred: Array[String]) = this(new Condition(trigger), start, end, condition, filtred)
-
-  def this(trigger: String, start: ICapsule, end: ICapsule, condition: String, filtred: Array[String]) = this(new Condition(trigger), start, end, condition, filtred)
-    
-  def this(trigger: String, start: ICapsule, slot: ISlot, condition: String, filtred: Array[String]) = this(new Condition(trigger), start, slot, condition, filtred)
-
     
   override def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration."))

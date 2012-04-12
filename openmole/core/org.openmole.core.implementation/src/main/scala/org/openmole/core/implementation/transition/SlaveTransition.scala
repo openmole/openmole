@@ -25,29 +25,8 @@ import org.openmole.core.model.transition.ICondition
 import org.openmole.core.model.transition.ISlot
 import org.openmole.misc.exception.UserBadDataError
 
-class SlaveTransition(start: ICapsule, end: ISlot, condition: ICondition, filtered: Set[String]) extends ExplorationTransition(start, end, condition, filtered) {
+class SlaveTransition(start: ICapsule, end: ISlot, condition: ICondition = ICondition.True, filtered: Set[String] = Set.empty) extends ExplorationTransition(start, end, condition, filtered) {
 
-  def this(start: ICapsule, end: ICapsule) = this(start, end.defaultInputSlot, ICondition.True, Set.empty[String])
-    
-  def this(start: ICapsule, end: ISlot) = this(start, end, ICondition.True, Set.empty[String])
-  
-  def this(start: ICapsule, end: ICapsule, condition: ICondition) = this(start, end.defaultInputSlot, condition, Set.empty[String])
-
-  def this(start: ICapsule, end: ICapsule, condition: String) = this(start, end.defaultInputSlot, new Condition(condition), Set.empty[String])
-
-  def this(start: ICapsule, slot: ISlot, condition: String) = this(start, slot, new Condition(condition), Set.empty[String])
-
-  def this(start: ICapsule, slot: ISlot, condition: ICondition) = this(start, slot, condition, Set.empty[String])
-
-  def this(start: ICapsule, end: ICapsule, filtred: Array[String]) = this(start, end.defaultInputSlot, ICondition.True, filtred.toSet)
-
-  def this(start: ICapsule, end: ICapsule, condition: ICondition, filtred: Array[String]) = this(start, end.defaultInputSlot, condition, filtred.toSet)
-
-  def this(start: ICapsule, end: ICapsule, condition: String, filtred: Array[String]) = this(start, end.defaultInputSlot, new Condition(condition), filtred.toSet)
-
-  def this(start: ICapsule , slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet)
-  
   override def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = submitIn(context, ticket.parent.getOrElse(throw new UserBadDataError("Slave transition should take place after an master transition.")), subMole)
   
-
 }

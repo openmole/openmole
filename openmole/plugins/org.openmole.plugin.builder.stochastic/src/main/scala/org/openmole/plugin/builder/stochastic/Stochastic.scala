@@ -113,14 +113,6 @@ object Stochastic {
     new PuzzleFirstAndLast(explorationCapsule, endCapsule)
   }
   
-  def statistics(
-    name: String,
-    model: ICapsule,
-    replicationFactor: DiscreteFactor[_, _],
-    statistics: Statistics
-  ): IPuzzleFirstAndLast = 
-      Stochastic.statistics(name, puzzle(model), replicationFactor, statistics)
-  
   
   def replicate(
     name: String,
@@ -136,9 +128,4 @@ object Stochastic {
     new PuzzleFirstAndLast(explorationCapsule, aggregationCapsule)
   }
   
-  def replicate(
-    name: String,
-    capsule: ICapsule,
-    replicationFactor: DiscreteFactor[_, _]
-  ): IPuzzleFirstAndLast = replicate(name, puzzle(capsule), replicationFactor)
 }

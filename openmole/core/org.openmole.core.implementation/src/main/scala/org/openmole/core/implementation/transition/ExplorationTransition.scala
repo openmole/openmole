@@ -38,29 +38,7 @@ import org.openmole.misc.tools.service.Priority
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
-object ExplorationTransition extends Logger
-
-class ExplorationTransition(override val start: ICapsule, end: ISlot, condition: ICondition, filtered: Set[String]) extends Transition(start, end, condition, filtered) with IExplorationTransition {
-  import ExplorationTransition._
-  
-  def this(start: ICapsule, end: ICapsule) = this(start, end.defaultInputSlot, ICondition.True, Set.empty[String])
-    
-  def this(start: ICapsule, end: ICapsule, condition: ICondition) = this(start, end.defaultInputSlot, condition, Set.empty[String])
-
-  def this(start: ICapsule, end: ICapsule, condition: String) = this(start, end.defaultInputSlot, new Condition(condition), Set.empty[String])
-
-  def this(start: ICapsule, slot: ISlot, condition: String) = this(start, slot, new Condition(condition), Set.empty[String])
-
-  def this(start: ICapsule, slot: ISlot, condition: ICondition) = this(start, slot, condition, Set.empty[String])
-
-  def this(start: ICapsule, end: ICapsule, filtred: Array[String]) = this(start, end.defaultInputSlot, ICondition.True, filtred.toSet)
-
-  def this(start: ICapsule, end: ICapsule, condition: ICondition, filtred: Array[String]) = this(start, end.defaultInputSlot, condition, filtred.toSet)
-
-  def this(start: ICapsule, end: ICapsule, condition: String, filtred: Array[String]) = this(start, end.defaultInputSlot, new Condition(condition), filtred.toSet)
-
-  def this(start: ICapsule , slot: ISlot, condition: String, filtred: Array[String]) = this(start, slot, new Condition(condition), filtred.toSet)
-
+class ExplorationTransition(start: ICapsule, end: ISlot, condition: ICondition = ICondition.True, filtered: Set[String] = Set.empty[String]) extends Transition(start, end, condition, filtered) with IExplorationTransition {
 
   override def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {
     val subSubMole = subMole.newChild
