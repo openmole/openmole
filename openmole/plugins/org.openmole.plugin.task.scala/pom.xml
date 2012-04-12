@@ -7,7 +7,7 @@
         <version>0.5-SNAPSHOT</version>
     </parent>
 
-    <artifactId>org.openmole.plugin.task.groovy</artifactId>
+    <artifactId>org.openmole.plugin.task.scala</artifactId>
 
     <dependencies>
         <dependency>
@@ -22,12 +22,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.plugin.tools.groovy</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.plugin.task.code</artifactId>
+            <artifactId>org.apache.clerezza.scala</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

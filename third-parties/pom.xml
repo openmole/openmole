@@ -17,6 +17,7 @@
 
     <modules>
 	<module>com.ice.tar</module>
+	<module>org.apache.clerezza.scala</module>	
     </modules>
 
     <!-- ************************************************************* -->

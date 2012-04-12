@@ -37,6 +37,7 @@
         <module>net.sourceforge.jline</module>
 	<module>org.joda.time</module>
 	<module>org.scala-lang.scala-library</module>
+	<module>org.scala-lang.scala-compiler</module>
 	<module>org.apache.commons.exec</module>
 	<module>ccl.northwestern.edu.netlogo4</module>
 	<module>ccl.northwestern.edu.netlogo5</module>
