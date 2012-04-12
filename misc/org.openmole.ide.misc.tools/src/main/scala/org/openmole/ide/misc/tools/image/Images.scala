@@ -60,5 +60,7 @@ object Images {
   val CLOSE = new ImageIcon(classLoader.getResource("img/close.png"))
   val CLOSE_TAB = new ImageIcon(classLoader.getResource("img/close_tab.png"))
   
+  val CHECK_VALID = ImageIO.read(classLoader.getResource("img/check_valid.png")).asInstanceOf[Image]
+  val CHECK_INVALID = ImageIO.read(classLoader.getResource("img/check_invalid.png")).asInstanceOf[Image]
   
 }
