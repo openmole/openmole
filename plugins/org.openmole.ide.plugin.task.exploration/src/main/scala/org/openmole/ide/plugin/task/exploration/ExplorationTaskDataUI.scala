@@ -27,21 +27,19 @@ import org.openmole.ide.core.implementation.data._
 class ExplorationTaskDataUI(val name: String="",
                             override var sampling : Option[ISamplingDataProxyUI] = None) extends AbstractExplorationTaskDataUI{
    
-  override def coreObject =
+  def coreObject =
     sampling match {
       case Some(x: ISamplingDataProxyUI) => new ExplorationTask(name,x.dataUI.coreObject)
       case None => throw new UserBadDataError("Sampling missing to instanciate the exploration task " + name)
     } 
   
-  override def coreClass= classOf[ExplorationTask]
+  def coreClass= classOf[ExplorationTask]
   
-  override def imagePath = "img/explorationTask.png"
+  def fatImagePath = "img/explorationTask_fat.png"
   
-  override def fatImagePath = "img/explorationTask_fat.png"
+  def buildPanelUI = new ExplorationTaskPanelUI(this)
   
-  override def buildPanelUI = new ExplorationTaskPanelUI(this)
+  def borderColor = new Color(255,102,0)
   
-  override def borderColor = new Color(255,102,0)
-  
-  override def backgroundColor = new Color(255,102,0,128)
+  def backgroundColor = new Color(255,102,0,128)
 }

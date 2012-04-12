@@ -48,7 +48,7 @@ object EmptyDataUIs {
     def dim = 0
     def coreClass = classOf[IPrototype[_]]
     def coreObject = new Prototype("empty",classOf[Any])
-    def imagePath = "img/empty.png"
+    def fatImagePath = "img/empty.png"
     def buildPanelUI = new EmptyPrototypePanelUI
     def displayTypedName = ""
   }
@@ -64,6 +64,7 @@ object EmptyDataUIs {
     def coreClass = classOf[ISampling]
     def coreObject = new EmptySampling
     def imagePath = "img/empty.png"
+    def fatImagePath = "img/empty.png"
     def buildPanelUI = new EmptySamplingPanelUI
     def displayTypedName = ""
   }
@@ -85,7 +86,7 @@ object EmptyDataUIs {
     def coreObject = new EmptyTask
     def backgroundColor = Color.WHITE
     def borderColor = Color.WHITE
-    def imagePath = "img/empty.png"
+    def fatImagePath = "img/empty.png"
   }
   
   class EmptyTaskPanelUI extends ITaskPanelUI {

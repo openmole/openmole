@@ -18,7 +18,7 @@ import org.openmole.core.implementation.data.Prototype._
 
 class StoreIntoCSVTaskDataUI(val name: String="",val columns: List[(IPrototypeDataProxyUI,String)]= List.empty,val protoFile: Option[IPrototypeDataProxyUI]= None) extends TaskDataUI {
  
-  override def coreObject = {
+  def coreObject = {
     if (protoFile.isDefined)
       new StoreIntoCSVTask(name,
                            columns.map{e=> (e._1.dataUI.coreObject.asInstanceOf[IPrototype[Array[_]]],e._2)},
@@ -26,13 +26,13 @@ class StoreIntoCSVTaskDataUI(val name: String="",val columns: List[(IPrototypeDa
                            ',',CSVWriter.NO_QUOTE_CHARACTER)
     else throw new UserBadDataError("No output prototype file is defined !")}
   
-  override def coreClass= classOf[StoreIntoCSVTask]
+  def coreClass= classOf[StoreIntoCSVTask]
   
-  override def imagePath = "img/storeIntoCSV.png"
+  def fatImagePath = "img/storeIntoCSV_fat.png"
   
-  override def buildPanelUI = new StoreIntoCSVTaskPanelUI(this)
+  def buildPanelUI = new StoreIntoCSVTaskPanelUI(this)
   
-  override def borderColor = new Color(170,0,136)
+  def borderColor = new Color(170,0,136)
   
-  override def backgroundColor = new Color(170,0,136,128)
+  def backgroundColor = new Color(170,0,136,128)
 }

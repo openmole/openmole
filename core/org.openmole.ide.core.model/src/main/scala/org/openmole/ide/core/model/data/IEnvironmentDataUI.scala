@@ -17,7 +17,6 @@
 
 package org.openmole.ide.core.model.data
 
-import org.openmole.ide.core.model.commons.Constants
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.core.model.execution.IEnvironment
 
@@ -26,4 +25,6 @@ trait IEnvironmentDataUI extends IDataUI {
   def coreObject: IEnvironment
   
   def buildPanelUI: IEnvironmentPanelUI
+  
+  def imagePath: String 
 }

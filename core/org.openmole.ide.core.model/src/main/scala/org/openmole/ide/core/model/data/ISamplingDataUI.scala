@@ -26,4 +26,6 @@ trait ISamplingDataUI extends IDataUI{
   def coreObject: ISampling
   
   def buildPanelUI: ISamplingPanelUI
+  
+  def imagePath: String 
 }

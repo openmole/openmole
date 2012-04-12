@@ -22,9 +22,7 @@ class GroovyTaskDataUI(val name: String="",
   
   def coreClass= classOf[GroovyTask]
   
-  def imagePath = "img/groovyTask.png"
-  
-  override def fatImagePath = "img/groovyTask_fat.png"
+  def fatImagePath = "img/groovyTask_fat.png"
   
   def buildPanelUI = new GroovyTaskPanelUI(this)
   

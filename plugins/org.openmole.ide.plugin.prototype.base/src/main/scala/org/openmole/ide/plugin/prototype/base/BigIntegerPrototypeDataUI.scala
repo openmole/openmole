@@ -28,9 +28,7 @@ class BigIntegerPrototypeDataUI(val name: String="", d: Int=0) extends GenericPr
   
   def coreObject = toArray(new Prototype(name,classOf[BigInt]),dim).asInstanceOf[IPrototype[BigInt]]
   
-  def imagePath = "img/biginteger.png"
-  
-  override def fatImagePath = "img/biginteger_fat.png"
+  def fatImagePath = "img/biginteger_fat.png"
   
   def buildPanelUI = new BigIntegerPrototypePanelUI(this)
 }

@@ -26,9 +26,7 @@ trait IDataUI{
   
   def coreClass: Class[_]
   
-  def imagePath: String 
-  
-  def fatImagePath: String = imagePath
+  def fatImagePath: String
   
   def buildPanelUI: IPanelUI 
 }

@@ -20,7 +20,7 @@ class SystemExecTaskDataUI(val name: String="",
                            val inputMap: List[(IPrototypeDataProxyUI,String)]=List.empty,
                            val outputMap: List[(String,IPrototypeDataProxyUI)]= List.empty) extends TaskDataUI {
   
-  override def coreObject = {
+  def coreObject = {
     val syet = new SystemExecTask(name,lauchingCommands.filterNot(_=='\n'),workdir)
     resources.foreach(syet.addResource)
     outputMap.foreach(i=>syet.addOutput(i._1,i._2.dataUI.coreObject.asInstanceOf[IPrototype[File]]))
@@ -28,13 +28,13 @@ class SystemExecTaskDataUI(val name: String="",
     syet
   }
   
-  override def coreClass= classOf[SystemExecTask]
+  def coreClass= classOf[SystemExecTask]
   
-  override def imagePath = "img/systemexec_task.png"
+  def fatImagePath = "img/systemexec_task_fat.png"
   
-  override def buildPanelUI = new SystemExecTaskPanelUI(this)
+  def buildPanelUI = new SystemExecTaskPanelUI(this)
   
-  override def borderColor = new Color(255,200,0)
+  def borderColor = new Color(255,200,0)
   
-  override def backgroundColor = new Color(255,200,0,128)
+  def backgroundColor = new Color(255,200,0,128)
 }
