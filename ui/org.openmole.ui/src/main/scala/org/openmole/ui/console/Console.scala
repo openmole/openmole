@@ -62,25 +62,26 @@ class Console {
     loop.intp = new Interpreter
     
     //loop.bind(pluginManager, PluginManager)
-    loop.bind(workspace, Workspace)
-    loop.bind(logger, LoggerService)
-    loop.bind(serializer, new Serializer)
+    loop.beQuietDuring { 
+      loop.bind(workspace, Workspace)
+      loop.bind(logger, LoggerService)
+      loop.bind(serializer, new Serializer)
 
-    loop.interpret("import org.openmole.core.implementation.data._")
-    loop.interpret("import org.openmole.core.implementation.data.Prototype._")
-    loop.interpret("import org.openmole.core.implementation.data.Data._")
-    loop.interpret("import org.openmole.core.implementation.execution._")
-    loop.interpret("import org.openmole.core.implementation.execution.local._")
-    loop.interpret("import org.openmole.core.implementation.hook._")
-    loop.interpret("import org.openmole.core.implementation.job._")
-    loop.interpret("import org.openmole.core.implementation.mole._")
-    loop.interpret("import org.openmole.core.implementation.sampling._")
-    loop.interpret("import org.openmole.core.implementation.task._")
-    loop.interpret("import org.openmole.core.implementation.transition._")
+      loop.interpret("import org.openmole.core.implementation.data._")
+      loop.interpret("import org.openmole.core.implementation.data.Prototype._")
+      loop.interpret("import org.openmole.core.implementation.data.Data._")
+      loop.interpret("import org.openmole.core.implementation.execution._")
+      loop.interpret("import org.openmole.core.implementation.execution.local._")
+      loop.interpret("import org.openmole.core.implementation.hook._")
+      loop.interpret("import org.openmole.core.implementation.job._")
+      loop.interpret("import org.openmole.core.implementation.mole._")
+      loop.interpret("import org.openmole.core.implementation.sampling._")
+      loop.interpret("import org.openmole.core.implementation.task._")
+      loop.interpret("import org.openmole.core.implementation.transition._")
   
-    loop.bind("commands", new Command)
-    loop.interpret("import commands._")
-    
+      loop.bind("commands", new Command)
+      loop.interpret("import commands._")
+    }
     loop.loop
   }
   
