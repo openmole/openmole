@@ -49,7 +49,7 @@ import BasePanelUI._
 class TaskPanelUI(proxy: ITaskDataProxyUI,
                   scene: IMoleScene,
                   mode: Value = CREATION) extends BasePanelUI(proxy, scene,mode,proxy.dataUI.borderColor){
-  iconLabel.icon = imageIcon(proxy)
+  iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
   
   val panelUI = proxy.dataUI.buildPanelUI
   val protoPanel = new IOPrototypePanel
@@ -67,8 +67,8 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     val toBeRemovedCapsules : List[ICapsuleUI] = ScenesManager.moleScenes.map{_.manager.capsules.values.filter{_.dataUI.task == Some(proxy)}}.flatten.toList
     toBeRemovedCapsules match {
       case Nil => 
-          scene.closePropertyPanel
-          Proxys.tasks -= proxy
+        scene.closePropertyPanel
+        Proxys.tasks -= proxy
         ConceptMenu.removeItem(proxy)
       case _ => 
         if (DialogFactory.deleteProxyConfirmation(proxy)) {

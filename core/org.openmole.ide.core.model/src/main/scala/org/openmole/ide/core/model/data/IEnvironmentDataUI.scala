@@ -26,5 +26,7 @@ trait IEnvironmentDataUI extends IDataUI {
   
   def buildPanelUI: IEnvironmentPanelUI
   
+  def fatImagePath: String
+  
   def imagePath: String 
 }

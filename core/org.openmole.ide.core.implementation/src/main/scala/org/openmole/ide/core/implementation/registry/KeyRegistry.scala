@@ -18,6 +18,7 @@
 package org.openmole.ide.core.implementation.registry
 
 import org.openmole.ide.core.model.factory.IAuthentificationFactoryUI
+import org.openmole.ide.core.model.factory.IBoundedDomainFactoryUI
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
 import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
 import org.openmole.ide.core.model.factory.IGroupingStrategyFactoryUI
@@ -39,6 +40,8 @@ object KeyRegistry {
   val environments = new HashMap[DefaultKey,IEnvironmentFactoryUI] with SynchronizedMap[DefaultKey,IEnvironmentFactoryUI]
   
   val domains = new HashMap[DefaultKey,IDomainFactoryUI] with SynchronizedMap[DefaultKey,IDomainFactoryUI]
+  
+  val boundedDomains = new HashMap[DefaultKey,IBoundedDomainFactoryUI] with SynchronizedMap[DefaultKey,IBoundedDomainFactoryUI]
   
   val hooks = new HashMap[DefaultKey,IHookFactoryUI] with SynchronizedMap[DefaultKey,IHookFactoryUI]
   

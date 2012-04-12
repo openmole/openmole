@@ -38,12 +38,6 @@ import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.tools.image.Images._
 
-object BasePanelUI {
-  def imageIcon(proxy : IDataProxyUI) = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
-}
-
-import BasePanelUI._
-
 abstract class BasePanelUI(proxy: IDataProxyUI,
                            scene: IMoleScene,
                            mode : Value,

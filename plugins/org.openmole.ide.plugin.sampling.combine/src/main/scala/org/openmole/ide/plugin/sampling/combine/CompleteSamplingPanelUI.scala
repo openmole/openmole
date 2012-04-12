@@ -18,21 +18,17 @@
 package org.openmole.ide.plugin.sampling.combine
 
 import scala.swing._
-/import org.openmole.ide.plugin.sampling.tools.GenericSamplingPanel
+import org.openmole.ide.plugin.sampling.tools.GenericSamplingPanel
+import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.panel._
-import org.openide.util.Lookup
 import org.openmole.ide.misc.widget.PluginPanel
 
-//FIXME : Wait for the end Netbeans IDE !
 class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends PluginPanel("wrap") with ISamplingPanelUI {
     
-  val panel = new GenericSamplingPanel
-  //(cud.factors,
-    //                                   Lookup.getDefault.lookupAll(classOf[IDomainFactoryUI]).toList.map{_.displayName})
-  //contents += panel 
+  val panel = new GenericSamplingPanel(cud.factors, KeyRegistry.domains.map{_._2.displayName}.toList)
+  contents += panel 
   
-  override def saveContent(name: String) = new CompleteSamplingDataUI(name)
-                                                                      //panel.factors)
+  override def saveContent(name: String) = new CompleteSamplingDataUI(name,panel.factors)
 }

@@ -26,7 +26,7 @@ class CompleteSamplingDataUI(val name: String="",
   
   def imagePath = "img/completeSampling.png" 
   
-  override def fatImagePath = "img/completeSampling_fat.png" 
+  def fatImagePath = "img/completeSampling_fat.png" 
   
   def buildPanelUI = new CompleteSamplingPanelUI(this)
 }

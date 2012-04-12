@@ -9,14 +9,9 @@
   
     <artifactId>org.openmole.ide.plugin.domain.bounded</artifactId>
     <name>${project.artifactId} ${project.version}</name>
-    <packaging>nbm</packaging>
+    <packaging>bundle</packaging>
 
     <dependencies> 
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-swing</artifactId>
-            <version>${lib.org.scala-lang.scala.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.core.model</artifactId>
@@ -28,18 +23,8 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.ide.misc.widget</artifactId>
-            <version>${project.version}</version>
-        </dependency> 
-        <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.plugin.domain.bounded</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.misc.exception</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies> 

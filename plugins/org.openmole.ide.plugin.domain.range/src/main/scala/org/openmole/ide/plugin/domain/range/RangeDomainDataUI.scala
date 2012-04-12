@@ -37,8 +37,6 @@ class RangeDomainDataUI (val name: String="",
 
   def coreClass = classOf[IDomain[_]]
   
-  def imagePath = "img/domain_range.png"
-  
   def buildPanelUI = new RangeDomainPanelUI(this)
   
 }
