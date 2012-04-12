@@ -30,7 +30,8 @@ import scala.collection.JavaConversions._
 
 class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2","left,grow,fill","") with ITaskPanelUI{
   
-  val moleComboBox = new MyComboBox(MoleTaskDataUI.emptyMoleSceneManager :: ScenesManager.moleScenes.map{_.manager}.filter{_.capsules.size > 0}.toList) 
+  val moleComboBox = new MyComboBox(MoleTaskDataUI.emptyMoleSceneManager :: 
+                                    ScenesManager.moleScenes.map{_.manager}.filter{_ != ScenesManager.currentSceneContainer.get.scene.manager}.filter{_.capsules.size > 0}.toList) 
   {tooltip = Help.tooltip("The name of the inner Mole to be run.","Mole_1")}
   
   moleComboBox.selection.item = pud.mole match {
