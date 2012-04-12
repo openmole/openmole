@@ -17,23 +17,21 @@
 
 package org.openmole.ui.console
 
-import groovy.lang.Binding
-import java.io.InputStream
-import java.io.OutputStream
-import org.codehaus.groovy.ant.Groovy
-import org.codehaus.groovy.tools.shell.Command
-import org.codehaus.groovy.tools.shell.Groovysh
-import org.codehaus.groovy.tools.shell.IO
+import org.apache.clerezza.scala.console.Interpreter
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.logging.LoggerService
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.workspace.Workspace
 import scala.annotation.tailrec
+import scala.tools.nsc.Settings
+import scala.tools.nsc.interpreter.ILoop
+import scala.tools.nsc.interpreter.JLineCompletion
+import scala.tools.nsc.interpreter.JLineReader
 
 
-object Console {
+class Console {
 
-  @tailrec def initPassword: Unit = {
+  @tailrec private def initPassword: Unit = {
     val message = (if(Workspace.passwordChoosen) "Enter your OpenMOLE password" else "OpenMOLE Password has not been set yet, choose a  password") + "  (for preferences encryption):"
   
     val password = new jline.ConsoleReader().readLine(message, '*')
@@ -48,36 +46,48 @@ object Console {
     if(!success) initPassword
   }
   
-  val pluginManager = "plugin"
-  val workspace = "workspace"
-  val registry = "registry"
-  val logger = "logger"
-  val serializer = "serializer"
+  def pluginManager = "plugin"
+  def workspace = "workspace"
+  def registry = "registry"
+  def logger = "logger"
+  def serializer = "serializer"
   
-  val binding = new Binding
-  val groovysh = new Groovysh(classOf[Groovy].getClassLoader, binding, new IO())
+  def run {
+    initPassword
+    
+    val loop = new ILoop
+    loop.settings = new Settings()
+    loop.settings.processArgumentString("-Yrepl-sync")
+    loop.in = new JLineReader(new JLineCompletion(loop))
+    loop.intp = new Interpreter
+    
+    //loop.bind(pluginManager, PluginManager)
+    loop.bind(workspace, Workspace)
+    loop.bind(logger, LoggerService)
+    loop.bind(serializer, new Serializer)
 
-  setVariable(pluginManager, PluginManager)
-  setVariable(workspace, Workspace)
-  setVariable(logger, LoggerService)
-  setVariable(serializer, new Serializer)
-
-  run("import org.openmole.core.implementation.data.*")
-  run("import static org.openmole.core.implementation.data.Prototype.*")
-  run("import static org.openmole.core.implementation.data.Data.*")
-  run("import org.openmole.core.implementation.execution.*")
-  run("import org.openmole.core.implementation.execution.local.*")
-  run("import org.openmole.core.implementation.hook.*")
-  run("import org.openmole.core.implementation.job.*")
-  run("import org.openmole.core.implementation.mole.*")
-  run("import org.openmole.core.implementation.sampling.*")
-  run("import org.openmole.core.implementation.task.*")
-  run("import org.openmole.core.implementation.transition.*")
+    loop.interpret("import org.openmole.core.implementation.data._")
+    loop.interpret("import org.openmole.core.implementation.data.Prototype._")
+    loop.interpret("import org.openmole.core.implementation.data.Data._")
+    loop.interpret("import org.openmole.core.implementation.execution._")
+    loop.interpret("import org.openmole.core.implementation.execution.local._")
+    loop.interpret("import org.openmole.core.implementation.hook._")
+    loop.interpret("import org.openmole.core.implementation.job._")
+    loop.interpret("import org.openmole.core.implementation.mole._")
+    loop.interpret("import org.openmole.core.implementation.sampling._")
+    loop.interpret("import org.openmole.core.implementation.task._")
+    loop.interpret("import org.openmole.core.implementation.transition._")
   
-  def setVariable(name: String, value: Object) = binding.setVariable(name, value)
-
-  def run(command: String) = groovysh.run(command)
-
-  def leftShift(cmnd: Command): Object = groovysh.leftShift(cmnd)
+    loop.bind("commands", new Command)
+    loop.interpret("import commands._")
+    
+    loop.loop
+  }
   
+  //def setVariable(name: String, value: Object) = binding.setVariable(name, value)
+
+  //def run(command: String) = groovysh.run(command)
+
+  //def leftShift(cmnd: Command): Object = groovysh.leftShift(cmnd)
+ 
 }
