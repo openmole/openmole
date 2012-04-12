@@ -42,7 +42,7 @@ class ExecutionMoleSceneContainer(val scene : ExecutionMoleScene,
                                   "Stop the workflow",
                                   stop)
   } 
-  val (mole, prototypeMapping,capsuleMapping) = MoleMaker.buildMole(scene.manager)
+  val (mole, prototypeMapping,capsuleMapping,errors) = MoleMaker.buildMole(scene.manager)
   val executionManager = new ExecutionManager(scene.manager,
                                               mole,
                                               prototypeMapping,

@@ -23,6 +23,7 @@ import java.awt.Point
 import javax.imageio.ImageIO
 import javax.swing.ImageIcon
 import org.netbeans.api.visual.action.ActionFactory
+import org.netbeans.api.visual.widget.ImageWidget
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.implementation.data.CapsuleDataUI
 import org.openmole.ide.core.implementation.dataproxy.ProxyFreezer
@@ -35,6 +36,7 @@ import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
+import org.openmole.ide.misc.tools.image.Images
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.LinkLabel
 import scala.collection.mutable.HashMap
@@ -56,10 +58,19 @@ class CapsuleUI(val scene: IMoleScene,
   var samplingWidget : Option[LinkedImageWidget] = None
   var inputPrototypeWidget : Option[PrototypeWidget] = None
   var outputPrototypeWidget : Option[PrototypeWidget] = None
+  
+  val validationWidget = new ImageWidget(scene.graphScene,dataUI.task match {
+      case Some(x : ITaskDataProxyUI) => Images.CHECK_VALID
+      case _ => Images.CHECK_INVALID
+    }) {
+    setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 12 , 2))
+  }
+  
   setEnvironment(dataUI.environment)
   setSampling(dataUI.sampling)
   
   addChild(taskComponentWidget)
+  addChild(validationWidget)
   setPreferredSize(new Dimension(TASK_CONTAINER_WIDTH+20,TASK_CONTAINER_HEIGHT+20))
   taskComponentWidget.setPreferredLocation(new Point(10,10))
   createActions(MOVE).addAction (ActionFactory.createMoveAction)
@@ -82,7 +93,18 @@ class CapsuleUI(val scene: IMoleScene,
           }
         }
       },6){preferredSize = new Dimension(TASK_CONTAINER_WIDTH,TASK_TITLE_HEIGHT)},10,10)
+  
   addChild(titleWidget)
+  
+  def setAsValid = {
+    validationWidget.setImage(Images.CHECK_VALID)
+    validationWidget.setToolTipText("Runnable capsule")
+    }
+  
+  def setAsInvalid(errorString : String) = {
+    validationWidget.setImage(Images.CHECK_INVALID)
+    validationWidget.setToolTipText(errorString)
+  }
   
   override def paintWidget = {
     super.paintWidget

@@ -50,4 +50,8 @@ trait ICapsuleUI {
   def y: Double
   
   def islots: Iterable[IInputSlotWidget]
+  
+  def setAsValid : Unit
+  
+  def setAsInvalid(error : String) : Unit
 }

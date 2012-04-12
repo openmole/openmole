@@ -72,29 +72,42 @@ object MoleMaker {
    
       (new MoleExecution(mole,strat,mgs),envs.toSet)
     }
+  
   def buildMole(manager: IMoleSceneManager) = {
     if (manager.startingCapsule.isDefined){
       val prototypeMap: Map[IPrototypeDataProxyUI,IPrototype[_]] = Proxys.prototypes.map{p=> p->p.dataUI.coreObject}.toMap
-      val capsuleMap : Map[ICapsuleUI,ICapsule] = manager.capsules.map{c=> c._2->buildCapsule(c._2.dataUI)}.toMap
+      val builds = manager.capsules.map{c=> 
+        buildCapsule(c._2.dataUI) match {
+          case Left((capsule,error)) => (c._2 -> new Capsule , Some(c._2 -> error))
+          case Right(r) => (c._2 -> r , None)
+        }}.toMap
+      
+      val capsuleMap : Map[ICapsuleUI,ICapsule] = builds.map{case((cui,c),_) => cui -> c}
+      val errors = builds.flatMap{case((_,_),e) => e}
+      
       capsuleMap.foreach{case (cui,ccore)=> 
           manager.capsuleConnections(cui.dataUI).foreach(t=>buildTransition(ccore, capsuleMap(t.target.capsule),t))
           manager.dataChannels.filterNot{_.prototypes.isEmpty}.foreach{dc => new DataChannel(capsuleMap(dc.source),capsuleMap(dc.target),
                                                                                              dc.prototypes.map{p => prototypeMap(p)}.toArray)}}
       
-      (new Mole(capsuleMap(manager.startingCapsule.get)),capsuleMap,prototypeMap)
+      (new Mole(capsuleMap(manager.startingCapsule.get)),capsuleMap,prototypeMap,errors)
     }
     else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")  
   }
   
-  def buildCapsule(capsuleDataUI: ICapsuleDataUI) = 
-  capsuleDataUI.task match {
-    case Some(x : ITaskDataProxyUI) => 
-      x.dataUI match {
-        case y : AbstractExplorationTaskDataUI => new Capsule(addPrototypes(capsuleDataUI,y.coreObject))
-        case y : ITaskDataUI => new Capsule(addPrototypes(capsuleDataUI,y.coreObject))
-      }
-    case _ => new Capsule
-  }
+  def buildCapsule(capsuleDataUI: ICapsuleDataUI) : Either[(ICapsuleDataUI,Throwable),ICapsule] = 
+    capsuleDataUI.task match {
+      case Some(x : ITaskDataProxyUI) => 
+             try {
+        x.dataUI match {
+          case y : AbstractExplorationTaskDataUI => Right(new Capsule(addPrototypes(capsuleDataUI,y.coreObject)))
+          case y : ITaskDataUI => Right(new Capsule(addPrototypes(capsuleDataUI,y.coreObject)))
+        } 
+            } catch { case e : UserBadDataError => Left((capsuleDataUI,e))
+               }
+      case _ => Right(new Capsule)
+    }
+    
   
   def addPrototypes(capsuleDataUI: ICapsuleDataUI, task: ITask): ITask = {
     capsuleDataUI.task.get.dataUI.prototypesIn.foreach{case (pui,v)=> { 
