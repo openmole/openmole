@@ -55,7 +55,10 @@ class Console {
   def run {
     initPassword
     
-    val loop = new ILoop
+    val loop = new ILoop {
+      override val prompt = "OpenMOLE>"
+    }
+    
     loop.settings = new Settings()
     loop.settings.processArgumentString("-Yrepl-sync")
     loop.in = new JLineReader(new JLineCompletion(loop))
