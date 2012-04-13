@@ -21,7 +21,7 @@ import org.openmole.core.implementation.validation.Validation
 import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.registry._
 import org.openmole.core.model.mole.IMole
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyFactory
@@ -30,8 +30,6 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
-import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
 
@@ -41,13 +39,12 @@ object CheckData extends Logger {
     
   def checkMole(manager : IMoleSceneManager) = 
     manager.startingCapsule match {
-      case Some(x:ICapsuleUI) => 
+      case Some(x : ICapsuleUI) => 
         val (mole,cMap,pMap,errs) = MoleMaker.buildMole(manager)
         val error_capsules = manager.capsules.values.partition{_.dataUI.task.isDefined}
         error_capsules._1.foreach(_.setAsValid)
         error_capsules._2.foreach{_.setAsInvalid("A capsule has to be encapsulated to be run")}
         
-        if (errs.size == 0) {
           val capsuleMap : Map[ICapsule,ICapsuleUI] = cMap.map{case (k,v) => v -> k}
           val prototypeMap : Map[IPrototype[_],IPrototypeDataProxyUI] = pMap.map{case (k,v) => v -> k}.toMap
         
@@ -80,11 +77,8 @@ object CheckData extends Logger {
             case true => manager.capsules.values.foreach{_.updateErrors(List.empty)}
           }
           Some(mole,capsuleMap,prototypeMap,errs)
-        }
-        else {
           errs.foreach{ case(cui,e) => cui.setAsInvalid(e.getMessage) }
           Some(mole,cMap,pMap,errs)
-        }
       case _ => None
     }
   
@@ -97,9 +91,7 @@ object CheckData extends Logger {
   
   
   def checkTopology(mole : IMole) = {
-    println("checkTopo")
     val st = Validation.topologyErrors(mole).mkString("\n")
-    // if (moleBuild.isDefined) st
-    if (! st.isEmpty) throw new UserBadDataError(st)
+    if (! st.isEmpty) StatusBar.block(st)
   }
 }
