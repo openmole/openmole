@@ -24,7 +24,6 @@ import swing.ListView._
 import org.openmole.ide.core.implementation.dataproxy.BoundedDomainDataProxyFactory
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.data.IBoundedDomainDataUI
-import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.panel._
