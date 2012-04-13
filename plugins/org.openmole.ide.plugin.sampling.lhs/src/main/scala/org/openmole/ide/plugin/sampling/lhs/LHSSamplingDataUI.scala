@@ -10,11 +10,8 @@ import org.openmole.ide.core.model.data.IBoundedDomainDataUI
 import org.openmole.ide.core.model.data.ISamplingDataUI
 import org.openmole.plugin.sampling.lhs.LHSSampling
 import org.openmole.core.implementation.sampling.Factor
-import org.openmole.core.model.domain.IBounded
 import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.domain.IIterable
 import scala.collection.JavaConversions._
-import org.openide.awt.StatusDisplayer
 import org.openmole.misc.exception.UserBadDataError
 
 class LHSSamplingDataUI(val name : String="", 
@@ -30,7 +27,6 @@ class LHSSamplingDataUI(val name : String="",
         val proto = f._1.dataUI.coreObject.asInstanceOf[IPrototype[Double]]
         new Factor(proto,
                    f._3.coreObject(proto))
-                   //  .asInstanceOf[IDomain[Double] with IBounded[Double]]
         }.toArray)
 
 

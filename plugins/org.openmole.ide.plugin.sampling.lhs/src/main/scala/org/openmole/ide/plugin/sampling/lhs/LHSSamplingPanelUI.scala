@@ -21,7 +21,6 @@ import scala.swing._
 import swing.Swing._
 import swing.ListView._
 import org.openmole.ide.core.implementation.registry.KeyRegistry
-import org.openmole.ide.core.model.data.IBoundedDomainDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.panel._
@@ -42,6 +41,5 @@ class LHSSamplingPanelUI(cud: LHSSamplingDataUI) extends PluginPanel("wrap 2",""
   
   override def saveContent(name: String) = new LHSSamplingDataUI(name,
                                                                  sampleTextField.text,
-                                                                 List[(IPrototypeDataProxyUI,String,IBoundedDomainDataUI)]())
-                                                             //    panel.factors.map{_.asInstanceOf[(IPrototypeDataProxyUI,String,BoundedRangeDomainDataUI)]})
+                                                                 panel.factors)
 }
