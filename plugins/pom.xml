@@ -29,6 +29,7 @@
         <module>org.openmole.ide.plugin.sampling.tools</module>
         <module>org.openmole.ide.plugin.sampling.combine</module>
         <module>org.openmole.ide.plugin.sampling.lhs</module>
+        <module>org.openmole.ide.plugin.sampling.csv</module>
     </modules>
 
     <dependencies>
