@@ -33,37 +33,17 @@ class ExecutionMoleScene(id : Int,
   
   override def displayPropertyPanel(proxy: IDataProxyUI,
                                     mode: PanelMode.Value) = {
-   // super.displayPropertyPanel(proxy, mode)
-    //FIXME : double class loading from netbeans
-//    println("overrided method  ..")
-//    currentPanel.contents.foreach{c=> c match {
-//        case x : BasePanelUI =>
-//          println(" ++ BPanelUI " + x)
-//          x.contents.foreach{_.enabled = false}
-//          println ("  +++ panelUI " + x.panelUI)
-////          x.panelUI match {
-////            case y : MigPanel => 
-////              println("Mig")
-////              y.enabled = false
-////            case y : MyPanel => 
-////              println("MyPanel")
-////              y.enabled = false
-////            case _ => 
-////              
-////              println("Any ")
-////          }
-//        case x : Component => x.enabled = false
-//      }
-//    }
-//    currentExtraPanel.contents.foreach(_.enabled = false)
-//    refresh
+    super.displayPropertyPanel(proxy, mode)
+    currentPanel.contents.foreach{_.enabled = false}
   }
   
-  def displayExtraPropertyPanel(dproxy: IDataProxyUI) = {}
+  override def displayExtraPropertyPanel(dproxy: IDataProxyUI) = {
+    super.displayExtraPropertyPanel(dproxy)
+    currentPanel.contents.foreach{_.enabled = false}
+  }
     
   def initCapsuleAdd(w: ICapsuleUI)= {
     obUI= Some(w.asInstanceOf[Widget])
-    //  obUI.get.createActions(SELECT).addAction(MoleScene.selectAction)
     obUI.get.createActions(CONNECT).addAction(moveAction)
   }
   

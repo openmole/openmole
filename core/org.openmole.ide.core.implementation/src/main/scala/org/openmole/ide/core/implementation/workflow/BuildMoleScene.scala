@@ -61,7 +61,6 @@ class BuildMoleScene(n: String = "",
   
   def initCapsuleAdd(w: ICapsuleUI)= {
     obUI= Some(w.asInstanceOf[Widget])
-    //   obUI.get.createActions(SELECT).addAction(MoleScene.selectAction)
     obUI.get.createActions(CONNECT).addAction(connectAction)
     obUI.get.createActions(CONNECT).addAction(moveAction)
   }
@@ -81,33 +80,5 @@ class BuildMoleScene(n: String = "",
     connectionWidget.getActions.addAction(createObjectHoverAction)
     connectionWidget.getActions.addAction(reconnectAction)
     connectionWidget
-  }
-  
-  def displayPropertyPanel(proxy: IDataProxyUI,
-                           mode: PanelMode.Value) = {
-    closePropertyPanel
-    currentPanel.contents.removeAll
-    proxy match {
-      case x: ITaskDataProxyUI=> currentPanel.contents += new TaskPanelUI(x,this,mode)
-      case x: IPrototypeDataProxyUI=> currentPanel.contents += new PrototypePanelUI(x,this,mode)
-      case x: IEnvironmentDataProxyUI=> currentPanel.contents += new EnvironmentPanelUI(x,this,mode)
-      case x: ISamplingDataProxyUI=> currentPanel.contents += new SamplingPanelUI(x,this,mode)
-      case _=>
-    }
-    propertyWidget.setPreferredLocation(new Point(getView.getBounds().x.toInt +20, 20))
-    propertyWidget.revalidate
-    propertyWidget.setVisible(true)
-    refresh
-  } 
-  
-  def displayExtraPropertyPanel(dproxy: IDataProxyUI) = {
-    currentExtraPanel.contents.removeAll
-    currentExtraPanel.contents.add(dproxy match {
-        case x: IPrototypeDataProxyUI=> new PrototypePanelUI(x,this,EXTRA)
-        case x: ISamplingDataProxyUI=> new SamplingPanelUI(x,this,EXTRA)
-      })
-    extraPropertyWidget.setVisible(true)
-    extraPropertyWidget.setPreferredLocation(new Point(propertyWidget.getBounds.x.toInt + currentPanel.bounds.width + 40,20))
-    refresh
   }
 }

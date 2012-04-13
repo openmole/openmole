@@ -34,7 +34,6 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.panel._
 import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.panel._
 import org.openmole.ide.core.implementation.provider.MoleSceneMenuProvider
@@ -78,7 +77,33 @@ abstract class MoleScene(n: String = "",
   val connectAction = ActionFactory.createExtendedConnectAction(connectLayer, new MoleSceneConnectProvider)
   val reconnectAction = ActionFactory.createReconnectAction(new MoleSceneReconnectProvider)
   
+  def displayPropertyPanel(proxy: IDataProxyUI,
+                           mode: PanelMode.Value) = {
+    closePropertyPanel
+    currentPanel.contents.removeAll
+    proxy match {
+      case x: ITaskDataProxyUI=> currentPanel.contents += new TaskPanelUI(x,this,mode)
+      case x: IPrototypeDataProxyUI=> currentPanel.contents += new PrototypePanelUI(x,this,mode)
+      case x: IEnvironmentDataProxyUI=> currentPanel.contents += new EnvironmentPanelUI(x,this,mode)
+      case x: ISamplingDataProxyUI=> currentPanel.contents += new SamplingPanelUI(x,this,mode)
+      case _=>
+    }
+    propertyWidget.setPreferredLocation(new Point(getView.getBounds().x.toInt +20, 20))
+    propertyWidget.revalidate
+    propertyWidget.setVisible(true)
+    refresh
+  } 
   
+  def displayExtraPropertyPanel(dproxy: IDataProxyUI) = {
+    currentExtraPanel.contents.removeAll
+    currentExtraPanel.contents.add(dproxy match {
+        case x: IPrototypeDataProxyUI=> new PrototypePanelUI(x,this,EXTRA)
+        case x: ISamplingDataProxyUI=> new SamplingPanelUI(x,this,EXTRA)
+      })
+    extraPropertyWidget.setVisible(true)
+    extraPropertyWidget.setPreferredLocation(new Point(propertyWidget.getBounds.x.toInt + currentPanel.bounds.width + 40,20))
+    refresh
+  }
   
   def closeExtraPropertyPanel = {
     currentExtraPanel.contents.removeAll
