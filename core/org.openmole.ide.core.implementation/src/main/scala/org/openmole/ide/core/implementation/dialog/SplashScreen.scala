@@ -18,9 +18,16 @@
 package org.openmole.ide.core.implementation.dialog
 
 import scala.swing.Frame
+import java.awt.Point
+import java.awt.Toolkit
 import org.openmole.ide.misc.tools.image.Images._
 import scala.swing.Label
 
 class SplashScreen extends Frame{
-contents = new Label { icon = SPLASH_SCREEN }
+  
+  peer.setUndecorated(true)
+  val screenSize = Toolkit.getDefaultToolkit.getScreenSize
+  contents = new Label { icon = SPLASH_SCREEN }
+  
+  location = new Point((screenSize.width - size.width) / 2 , (screenSize.height - size.height) / 2 )
 }
