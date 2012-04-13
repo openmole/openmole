@@ -48,7 +48,6 @@ object CheckData extends Logger {
         error_capsules._2.foreach{_.setAsInvalid("A capsule has to be encapsulated to be run")}
         
         if (errs.size == 0) {
-          println("IFF")
           val capsuleMap : Map[ICapsule,ICapsuleUI] = cMap.map{case (k,v) => v -> k}
           val prototypeMap : Map[IPrototype[_],IPrototypeDataProxyUI] = pMap.map{case (k,v) => v -> k}.toMap
         
