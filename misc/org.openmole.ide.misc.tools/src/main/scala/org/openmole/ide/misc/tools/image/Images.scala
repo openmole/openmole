@@ -63,4 +63,5 @@ object Images {
   val CHECK_VALID = ImageIO.read(classLoader.getResource("img/check_valid.png")).asInstanceOf[Image]
   val CHECK_INVALID = ImageIO.read(classLoader.getResource("img/check_invalid.png")).asInstanceOf[Image]
   
+  val SPLASH_SCREEN = new ImageIcon(classLoader.getResource("img/splashscreen.png"))
 }
