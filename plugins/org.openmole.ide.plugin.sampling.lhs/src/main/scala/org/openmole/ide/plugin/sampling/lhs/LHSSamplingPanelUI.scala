@@ -20,32 +20,24 @@ package org.openmole.ide.plugin.sampling.lhs
 import scala.swing._
 import swing.Swing._
 import swing.ListView._
+import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.model.data.IBoundedDomainDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.panel._
-import org.openide.util.Lookup
-import org.openmole.core.model.data.IPrototype
-//import org.openmole.ide.plugin.sampling.tools.GenericSamplingPanel
-import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.PluginPanel
-import scala.collection.mutable.HashMap
 import scala.swing.BorderPanel.Position._
+import org.openmole.ide.plugin.sampling.tools.GenericBoundedSamplingPanel
 import scala.collection.JavaConversions._
 
-// FIXME : wait for the end of Netbeans IDE !
 class LHSSamplingPanelUI(cud: LHSSamplingDataUI) extends PluginPanel("wrap 2","","") with ISamplingPanelUI {
   
   val sampleTextField = new TextField(cud.samples,4) 
-  
-    
-  //val panel = new GenericSamplingPanel
-  //(cud.factors,
-    //                                   Lookup.getDefault.lookupAll(classOf[IDomainFactoryUI]).toList.map{_.displayName})
+   val panel = new GenericBoundedSamplingPanel(cud.factors, KeyRegistry.boundedDomains.map{_._2.displayName}.toList)
   
   contents += new Label("Number of samples")
   contents += sampleTextField
-  //contents += panel 
+  contents += panel 
   
   
   override def saveContent(name: String) = new LHSSamplingDataUI(name,

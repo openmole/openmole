@@ -9,7 +9,7 @@
   
     <artifactId>org.openmole.ide.plugin.sampling.lhs</artifactId>
     <name>${project.artifactId} ${project.version}</name>
-    <packaging>nbm</packaging>
+    <packaging>bundle</packaging>
 
     <dependencies> 
         <dependency>
@@ -17,15 +17,10 @@
             <artifactId>org.openmole.plugin.sampling.lhs</artifactId>
             <version>${project.version}</version>
         </dependency>
-         <!--dependency>
+         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.openmole.ide.plugin.sampling.tools</artifactId>
             <version>${project.version}</version>
-        </dependency-->
-        <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-openide-util-lookup</artifactId>
-            <version>${netbeans.version}</version>
         </dependency>
     </dependencies>
 </project>
