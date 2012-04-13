@@ -17,27 +17,9 @@
 
 package org.openmole.ide.misc.widget
 
-import javax.swing.JComponent
-import javax.swing.JPanel
 import scala.swing._
 
 class MyPanel extends Panel{
   override def enabled_=(b : Boolean) : Unit = 
-    contents.foreach{ c => c match {
-        case x : MyPanel => 
-          println("mypanel " + x.toString)
-          x.enabled = b
-        case null =>
-        case _ => c.peer match {
-            case x : JPanel => 
-          println("jpanel " + x.toString)
-              c.enabled = b
-             // x.getComponents.foreach{_.setEnabled(b)}
-            case x : JComponent => 
-          println("jcomponent " + x.toString)
-              x.setEnabled(b)
-            case _ => 
-          }
-      }
-    }
+    contents.foreach{ _.enabled = false}
 }

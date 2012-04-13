@@ -28,7 +28,9 @@ class GroovyEditor extends ScrollPane{
   editor.contentType = "text/groovy"
   editor.editorKit = new DefaultSyntaxKit(new GroovyLexer)
   
-  override def enabled_=(b : Boolean) : Unit =
+  override def enabled_=(b : Boolean) : Unit = {
+    super.enabled = b
     editor.enabled = b
+  }
 }
 
