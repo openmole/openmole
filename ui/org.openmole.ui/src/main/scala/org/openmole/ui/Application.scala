@@ -18,27 +18,32 @@
 package org.openmole.ui
 
 import java.io.File
+import java.io.PrintWriter
 import java.util.concurrent.Semaphore
+import org.apache.clerezza.scala.console.Interpreter
 import org.eclipse.equinox.app.IApplication
 import org.eclipse.equinox.app.IApplicationContext
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
-import org.openmole.ui.console.Console
-import org.openmole.ui.console.command.Encrypt
-import org.openmole.ui.console.command.Get
-import org.openmole.ui.console.command.Print
-import org.openmole.ui.console.command.Auth
-import org.openmole.ui.console.command.Verify
 import org.openmole.ide.core.implementation.dialog.GUIApplication
+import org.openmole.ui.console.Console
 import scala.actors.threadpool.locks.ReentrantLock
 import scala.swing.SimpleSwingApplication
+import scala.tools.nsc.Settings
+import scala.tools.nsc.interpreter.ILoop
+import scala.tools.nsc.interpreter.JLineCompletion
+import scala.tools.nsc.interpreter.JLineReader
+import scala.tools.nsc.interpreter.NoCompletion
+import scala.tools.nsc.interpreter.ProductCompletion
+import scala.tools.nsc.interpreter.SeqCompletion
 import scopt.generic.OptionDefinition
 import scopt.immutable._
 
 class Application extends IApplication with Logger {
   override def start(context: IApplicationContext) = {
     
+
     
     case class Config(
       pluginsDirs: List[String] = Nil,
@@ -61,7 +66,6 @@ class Application extends IApplication with Logger {
       )
     }
       
-    
     val args: Array[String] = context.getArguments.get("application.args").asInstanceOf[Array[String]]
     
     
@@ -80,19 +84,9 @@ class Application extends IApplication with Logger {
           logger.severe("Application is already runnig at " + workspaceLocation.getAbsolutePath + ". If it is not the case please remove the file '" + new File(workspaceLocation, Workspace.running).getAbsolutePath() + "'.")  
         else {       
           if(config.workspaceDir.isDefined) Workspace.instance = new Workspace(workspaceLocation)
- 
-          val g = Console.groovysh
-          g.leftShift(new Print(g, "print", "\\pr"))
-          g.leftShift(new Get(g, "get", "\\g"))
-          g.leftShift(new Auth(g, "auth", "\\au"))
-          g.leftShift(new Encrypt(g, "encrypt", "\\en"))
-          g.leftShift(new Verify(g, "verify", "\\vf"))
-         
           config.pluginsDirs.foreach { PluginManager.loadDir }
-        
-          // Run
-          Console.initPassword
-          Console.groovysh.run()
+          val console = new Console
+          console.run
         }
       } else {
         

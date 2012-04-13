@@ -102,6 +102,12 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.plugin.task.scala</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.plugin.task.code</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>

@@ -9,12 +9,12 @@
         <version>${version}</version>
     </parent>-->
 
-    <groupId>org.openmole.ui.console</groupId>
-    <artifactId>openmole-ui-console-installer</artifactId>
+    <groupId>org.openmole</groupId>
+    <artifactId>openmole-installer</artifactId>
     <version>${version}</version>
     <packaging>pom</packaging>
  
-    <name>OpenMOLE console installer</name>
+    <name>OpenMOLE installer</name>
  
     <url>http://www.openmole.org/</url>
  
@@ -99,25 +99,25 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.openmole.ui.console</groupId>
+                                    <groupId>org.openmole.ui</groupId>
                                     <artifactId>plugins</artifactId>
                                     <version>${version}</version>
                                     <type>tar.gz</type>
                                     <outputDirectory>${project.build.directory}/openmole-plugins/</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.openmole.ui.console</groupId>
-                                    <artifactId>plugins-ui</artifactId>
+                                    <groupId>org.openmole.ui</groupId>
+                                    <artifactId>plugins-gui</artifactId>
                                     <version>${version}</version>
                                     <type>tar.gz</type>
-                                    <outputDirectory>${project.build.directory}/openmole-plugins-ui/</outputDirectory>
+                                    <outputDirectory>${project.build.directory}/openmole-plugins-gui/</outputDirectory>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.openmole.ui.console</groupId>
-                                    <artifactId>org.openmole.ui.console</artifactId>
+                                    <groupId>org.openmole.ui</groupId>
+                                    <artifactId>org.openmole.ui</artifactId>
                                     <version>${version}</version>
                                     <type>tar.gz</type>
-                                    <outputDirectory>${project.build.directory}/console/</outputDirectory>
+                                    <outputDirectory>${project.build.directory}/openmole/</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
