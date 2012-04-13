@@ -60,7 +60,7 @@ object GenericBoundedSamplingPanel {
   
 import GenericBoundedSamplingPanel._
 class GenericBoundedSamplingPanel(val ifactors: List[(IPrototypeDataProxyUI,String,IBoundedDomainDataUI)] = List.empty,
-                           val domains : List[String]) extends PluginPanel("wrap 2") {
+                                  val domains : List[String]) extends PluginPanel("wrap 2") {
   
   var domainCombos: Option[MultiTwoCombos[IPrototypeDataProxyUI,String]]= None
   var rowMap = new HashMap[TwoCombosRowWidget[IPrototypeDataProxyUI,String],IBoundedDomainPanelUI]
@@ -68,7 +68,7 @@ class GenericBoundedSamplingPanel(val ifactors: List[(IPrototypeDataProxyUI,Stri
    
   if (!Proxys.prototypes.isEmpty){
     rowFactory(this)
-    val protos = Proxys.prototypes.toList
+    val protos = Proxys.prototypes.filter{_.dataUI.coreObject.`type`.erasure == classOf[Double]}.toList
     val csrs = if (ifactors.size > 0) ifactors.map{f=> 
       val rw = new TwoCombosRowWidget(protos,f._1,domains,f._2,"defined on ",ADD)
       extMap += rw->f._3
@@ -90,7 +90,7 @@ class GenericBoundedSamplingPanel(val ifactors: List[(IPrototypeDataProxyUI,Stri
   def factors = domainCombos match {
     case x : Some[MultiTwoCombos[IPrototypeDataProxyUI,String]]=> x.get.rowWidgets.map{
         r=>(r.content._1,r.content._2,rowMap(r).saveContent(""))}.toList
-    case _=> List[(IPrototypeDataProxyUI,String,IDomainDataUI)]()
+    case _=> List[(IPrototypeDataProxyUI,String,IBoundedDomainDataUI)]()
   }                                     
   
   def addRow(twocombrow: TwoCombosRowWidget[IPrototypeDataProxyUI,String],dd: IBoundedDomainDataUI, p: IPrototype[_]) : Unit = {
