@@ -90,18 +90,15 @@ object CheckData extends Logger {
   
   def fullCheck(manager : IMoleSceneManager) = {
     val a = checkMole(manager)
-    if (a.isDefined){
-      //  if (a.get._4.isEmpty)
-      
-      //  checkTopology((a.get._1,a.get._2,a.get._3))
-      // }
-    }
+    if (a.isDefined)
+      if (a.get._4.isEmpty)
+        checkTopology(a.get._1)
   }
   
   
-  def checkTopology(moleBuild : (IMole,Map[ICapsule,ICapsuleUI],Map[IPrototype[_],IPrototypeDataProxyUI])) = {
+  def checkTopology(mole : IMole) = {
     println("checkTopo")
-    val st = Validation.topologyErrors(moleBuild._1).mkString("\n")
+    val st = Validation.topologyErrors(mole).mkString("\n")
     // if (moleBuild.isDefined) st
     if (! st.isEmpty) throw new UserBadDataError(st)
   }
