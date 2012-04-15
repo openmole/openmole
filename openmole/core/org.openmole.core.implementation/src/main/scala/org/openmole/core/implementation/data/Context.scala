@@ -45,9 +45,9 @@ class Context(val variables: TreeMap[String, IVariable[_]]) extends Map[String, 
   //override def +(name: String, variable: IVariable[_]) = new Context(variables + (name -> variable))
   override def -(name: String) = new Context(variables - name)
   
-  override def +(name: String, value: Object) = new Context(variables + (name -> new Variable[Object](name, value)))
+  //override def +(name: String, value: Object) = new Context(variables + (name -> new Variable[Object](name, value)))
     
-  override def +[T](name: String, t: Class[T], value: T) = new Context(variables + (name -> new Variable[T](name, t, value)))
+  //override def +[T](name: String, t: Class[T], value: T) = new Context(variables + (name -> new Variable[T](name, t, value)))
  
   override def +[T] (p: IPrototype[T], value: T) = new Context(variables + (p.name -> new Variable[T](p, value)))
   

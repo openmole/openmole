@@ -45,6 +45,6 @@ trait IDataSet extends SetLike[IData[_], IDataSet with Set[IData[_]]] {
   def contains(name: String): Boolean
   
   def +(p: IPrototype[_]): IDataSet
-  def ++(p: Traversable[IPrototype[_]]): IDataSet
-  
+  def +(set: IDataSet): IDataSet
+  def ++(d: Traversable[IData[_]]): IDataSet
 }

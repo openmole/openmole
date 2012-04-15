@@ -17,8 +17,27 @@
 
 package org.openmole.core.implementation.task
 
+import org.openmole.core.implementation.data.DataSet
+import org.openmole.core.implementation.data.ParameterSet
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IDataSet
+import org.openmole.core.model.data.IParameterSet
+import org.openmole.core.model.task.IPluginSet
 
-class EmptyTask(val name: String) extends Task {
+object EmptyTask {
+  
+  def apply(name: String)(implicit plugins: IPluginSet = PluginSet.empty) = 
+    new TaskBuilder { builder =>
+      def toTask = 
+        new EmptyTask(name) {
+          val inputs = builder.inputs
+          val outputs = builder.outputs
+          val parameters = builder.parameters
+        }
+    }
+ 
+}
+
+sealed abstract class EmptyTask(val name: String)(implicit val plugins: IPluginSet) extends Task {
   override def process(context: IContext) = context
 }

@@ -24,6 +24,7 @@ import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IIterable
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.model.sampling.IDiscreteFactor
+import org.openmole.core.model.sampling.IFactor
 
 object DiscreteFactor {
   
@@ -34,7 +35,7 @@ object DiscreteFactor {
       iterableFactorConversion(f).build(context)
   }
   
-  def apply[T, D <: IDomain[T] with IIterable[T]](f: Factor[T, D]) = new DiscreteFactor(f.prototype, f.domain)
+  def apply[T, D <: IDomain[T] with IIterable[T]](f: IFactor[T, D]) = new DiscreteFactor(f.prototype, f.domain)
    
 }
 

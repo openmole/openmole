@@ -41,7 +41,7 @@ object SaltelliSampling {
   
   def cMatrixName(p: String) = "c" + p
   
-  val matrixNamePrototype = new Prototype("matrixName", classOf[String])
+  val matrixNamePrototype = new Prototype[String]("matrixName")
   
   def extractValues(allValues: Array[Double], allNames: Array[String], name: String): Array[Double] = 
     allValues zip allNames filter { case(_, n) => n == name } map { case(v, _) => v }

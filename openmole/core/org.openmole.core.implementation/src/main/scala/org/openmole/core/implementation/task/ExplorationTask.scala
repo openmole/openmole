@@ -17,31 +17,41 @@
 
 package org.openmole.core.implementation.task
 
-import org.openmole.core.implementation.data.Data
+import org.openmole.core.implementation.data._
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.sampling.ISampling
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.task.IExplorationTask
+import org.openmole.core.implementation.data.DataMode
 import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.model.data.DataModeMask
+import org.openmole.core.model.task.IPluginSet
 import org.openmole.misc.exception.UserBadDataError
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ArrayBuffer
 
 object ExplorationTask {
   type SampledValues = Iterable[Iterable[IVariable[_]]]
+ 
+  
+  def apply(name: String, sampling: ISampling)(implicit plugins: IPluginSet) = {
+    new TaskBuilder { builder =>
+      
+      def toTask = 
+        new ExplorationTask(name, sampling) {
+          val inputs = builder.inputs + sampling.inputs
+          val outputs = builder.outputs ++ sampling.prototypes.map{p => new Data(toArray(p), DataMode(DataModeMask.explore))}
+          val parameters = builder.parameters
+        }
+      
+    }
+  }
+  
 }
 
-class ExplorationTask(val name: String, val sampling: ISampling) extends Task with IExplorationTask {
-
-  override def inputs = 
-    sampling.inputs ++ super.inputs
-    
-  override def outputs = 
-    super.outputs ++ sampling.prototypes.map{p => new Data(toArray(p), DataModeMask.explore)}
-  
+sealed abstract class ExplorationTask(val name: String, val sampling: ISampling)(implicit val plugins: IPluginSet) extends Task with IExplorationTask {
   
   //If input prototype as the same name as the output it is erased
   override protected def process(context: IContext) = {

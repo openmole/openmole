@@ -17,14 +17,11 @@
 
 package org.openmole.core.implementation.validation
 
-import org.openmole.core.implementation.mole.Mole
-import org.openmole.core.implementation.mole.MoleExecution
-import org.openmole.core.implementation.task.EmptyTask
-import org.openmole.core.implementation.task.{Task, ExplorationTask}
-import org.openmole.core.implementation.sampling.EmptySampling
-import org.openmole.core.implementation.mole.Capsule
-import org.openmole.core.implementation.data.{Prototype, DataChannel}
-import org.openmole.core.implementation.transition.{Transition, ExplorationTransition, AggregationTransition}
+import org.openmole.core.implementation.mole._
+import org.openmole.core.implementation.task._
+import org.openmole.core.implementation.sampling._
+import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.transition._
 import org.openmole.core.model.data.IContext
 
 import org.scalatest.FlatSpec
@@ -35,14 +32,16 @@ import org.junit.runner.RunWith
 @RunWith(classOf[JUnitRunner])
 class TypeUtilSpec extends FlatSpec with ShouldMatchers {
 
+  implicit val plugins = PluginSet.empty
+  
   "To array finder" should "not detect a toArray case" in {
-    val p = new Prototype("p", classOf[java.lang.Integer])
+    val p = new Prototype[Int]("p")
     
-    val t1 = new EmptyTask("T1")
-    t1.addOutput(p)
+    val t1 = EmptyTask("T1")
+    t1.outputs += p
     
-    val t2 = new EmptyTask("T2")
-    t2.addInput(p)
+    val t2 = EmptyTask("T2")
+    t2.inputs += p
     
     val t1c = new Capsule(t1)
     val t2c = new Capsule(t2)
@@ -57,16 +56,16 @@ class TypeUtilSpec extends FlatSpec with ShouldMatchers {
   }
   
   "To array finder" should "detect a toArray case" in {
-    val p = new Prototype("p", classOf[Int])
+    val p = new Prototype[Int]("p")
     
-    val t1 = new EmptyTask("T1")
-    t1.addOutput(p)
+    val t1 = EmptyTask("T1")
+    t1.outputs += p
     
-    val t2 = new EmptyTask("T2")
-    t2.addOutput(p)
+    val t2 = EmptyTask("T2")
+    t2.outputs += p
     
-    val t3 = new EmptyTask("T3")
-    t3.addInput(p)
+    val t3 = EmptyTask("T3")
+    t3.inputs += p
     
     val t1c = new Capsule(t1)
     val t2c = new Capsule(t2)
@@ -82,21 +81,20 @@ class TypeUtilSpec extends FlatSpec with ShouldMatchers {
   }
   
   "Type system" should "detect an toArray case when a data channel is going from a level to a lower level" in {      
-    val i = new Prototype("i", classOf[String])
+    val i = new Prototype[String]("i")
 
-    val exc = new Capsule(new ExplorationTask("Exploration",  new EmptySampling))
+    val exc = new Capsule(ExplorationTask("Exploration", new EmptySampling))
      
-    val testT = new EmptyTask("Test")
-    testT.addOutput(i)
-        
-    val noOP = new EmptyTask("NoOP") 
-    val aggT = new EmptyTask("Aggregation") 
+    val testT = EmptyTask("Test")
+    testT.outputs += i    
+    
+    val noOP = EmptyTask("NoOP") 
+    val aggT = EmptyTask("Aggregation") 
     
     val testC = new Capsule(testT)
     val noOPC = new Capsule(noOP)
     val aggC = new Capsule(aggT)
-
-    
+  
     new ExplorationTransition(exc, testC)
     new Transition(testC, noOPC)
     new AggregationTransition(noOPC, aggC)

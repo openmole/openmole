@@ -19,11 +19,13 @@ package org.openmole.plugin.hook.file
 
 import java.io.File
 import org.openmole.core.implementation.mole.Capsule
+import org.openmole.core.implementation.data.DataSet
+import org.openmole.core.implementation.data.ParameterSet
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.mole.Mole
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.implementation.mole.MoleExecution
-import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.task._
 import org.openmole.core.model.data.IContext
 import org.openmole.misc.hashservice.HashService._
 import org.scalatest.FlatSpec
@@ -44,14 +46,16 @@ class CopyFileHookSpec extends FlatSpec with ShouldMatchers {
     try fw.write("File contents!")
     finally fw.close
     
-    val p = new Prototype("p", classOf[File])
+    val p = new Prototype[File]("p")
     
     val t1 = new Task {
       val name = "Test"
+      val outputs = DataSet(p)
+      val inputs = DataSet.empty
+      val plugins = PluginSet.empty
+      val parameters = ParameterSet.empty
       override def process(context: IContext) = context + (p -> f)
     }
-
-    t1.addOutput(p)
     
     val t1c = new Capsule(t1)
     val ex = new MoleExecution(new Mole(t1c))

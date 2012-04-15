@@ -85,27 +85,6 @@ trait IContext extends MapLike[String, IVariable[_], IContext with Map[String, I
    */
   def valueOrException[T](proto: IPrototype[T]): T = value(proto).getOrElse(throw new UserBadDataError("Variable " + proto + " has not been found in the context"))
 
-
-  /**
-   * Build a new context containing the variables of the current context plus the 
-   * variable constructed from the parameters.
-   * 
-   * @param name the name of the variable
-   * @param value the value of the variable
-   * @return the new context
-   */
-  def +(name: String, value: Object): IContext
-
-  /**
-   * Build a new context containing the variables of the current context plus the 
-   * variable constructed from the parameters.
-   * 
-   * @param name the name of the variable
-   * @param t the type of the variable
-   * @param value the value of the variable
-   * @return the new context
-   */
-  def +[T] (name: String, t: Class[T], value: T): IContext
     
   /**
    * Build a new context containing the variables of the current context plus the 

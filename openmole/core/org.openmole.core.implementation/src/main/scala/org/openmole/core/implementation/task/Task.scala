@@ -17,30 +17,20 @@
 
 package org.openmole.core.implementation.task
 
-import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.misc.exception.UserBadDataError
-import org.openmole.core.implementation.data.Data
-import org.openmole.core.implementation.data.DataSet
-import org.openmole.core.implementation.data.Parameter
+import org.openmole.misc.exception._
+import org.openmole.core.implementation.data._
 import org.openmole.core.model.data.DataModeMask._
-import org.openmole.core.model.data.{IContext,IData,IParameter,IVariable,IPrototype,DataModeMask, IDataSet}
-import org.openmole.core.model.task.ITask
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
 import org.openmole.core.implementation.data.Context._
-import scala.collection.immutable.TreeSet
-import java.io.File
-import org.openmole.misc.pluginmanager.PluginManager
-import org.openmole.misc.pluginmanager.PluginManagerInfo
-import org.openmole.misc.tools.io.FileUtil.fileOrdering
+import org.openmole.misc.pluginmanager._
 
-abstract class Task extends ITask {
+trait Task extends ITask {
   
-  import Data._
-  import Parameter._
-  
-  private var _inputs = List.empty[IData[_]]
-  private var _outputs = List.empty[IData[_]]
-  private var _parameters = List.empty[IParameter[_]]
-  private var _plugins = new TreeSet[File]
+  def inputs: IDataSet
+  def outputs: IDataSet
+  def parameters: IParameterSet
+  def plugins: IPluginSet
   
   protected def verifyInput(context: IContext) = {
     for (d <- inputs) {
@@ -69,16 +59,16 @@ abstract class Task extends ITask {
     }.toContext
 
   private def init(context: IContext): IContext = {
-    if(PluginManagerInfo.enabled) PluginManager.loadIfNotAlreadyLoaded(plugins) 
+    if(PluginManagerInfo.enabled) PluginManager.loadIfNotAlreadyLoaded(plugins.toIterable )
     else if(!plugins.isEmpty) throw new InternalProcessingError("Plugins can't be loadded cause the application isn't runned in an osgi environment.")
 
     verifyInput(
       context ++ 
-        parameters.flatMap {
-          parameter =>
-            if (parameter.`override` || !context.contains(parameter.variable.prototype.name)) Some(parameter.variable)
-            else Option.empty[IVariable[_]]
-        }
+      parameters.flatMap {
+        parameter =>
+        if (parameter.`override` || !context.contains(parameter.variable.prototype.name)) Some(parameter.variable)
+        else Option.empty[IVariable[_]]
+      }
     )
   }
 
@@ -102,53 +92,6 @@ abstract class Task extends ITask {
       case e => throw new InternalProcessingError(e, "Error in task " + name + " for context values " + context)
     }
   }
-
-  def addOutput(prototype: IPrototype[_]): this.type = addOutput(new Data(prototype))
-
-  def addOutput(prototype: IPrototype[_], masks: Array[DataModeMask]): this.type = addOutput(new Data(prototype, masks)); this
- 
-  def addOutput(data: IData[_]): this.type =  {
-    _outputs ::= data
-    this
-  }
-  
-  def addInput(prototype: IPrototype[_]): this.type = addInput(new Data(prototype))
-
-  def addInput(prototype: IPrototype[_], masks: Array[DataModeMask]): this.type = addInput(new Data(prototype, masks))
-
-  def addInput(data: IData[_]): this.type = {
-    _inputs ::= data
-    this
-  }
-
-  def addInput(dataSet: IDataSet): this.type = {
-    for(data <- dataSet) addInput(data)     
-    this
-  }
-
-  def addOutput(dataSet: IDataSet): this.type = {
-    for(data <- dataSet) addOutput(data)
-    this
-  }
-  
-  override def inputs: IDataSet = new DataSet(_inputs.toList)
-  override def outputs: IDataSet = new DataSet(_outputs.toList)
-    
-  def addParameter(parameter: IParameter[_]): this.type = {
-    _parameters ::= parameter
-    this
-  }
-    
-  def addParameter[T](prototype: IPrototype[T] , value: T): this.type = addParameter(new Parameter[T](prototype, value))
-    
-  def addParameter[T](prototype: IPrototype[T], value: T, `override`: Boolean): this.type = addParameter(new Parameter[T](prototype, value, `override`))
-    
-  override def parameters: Iterable[IParameter[_]]= _parameters
-   
-  def addPlugin(plugin: File): this.type = {_plugins += plugin; this}
-  def addPlugin(plugin: String): this.type = addPlugin(new File(plugin))
-  
-  override def plugins = _plugins
   
   override def toString: String = name       
     

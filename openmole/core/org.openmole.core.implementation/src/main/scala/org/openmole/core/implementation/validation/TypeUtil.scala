@@ -39,8 +39,8 @@ object TypeUtil {
   def receivedTypes(slot : ISlot): Iterable[IPrototype[_]] =
     computeManifests(slot).map {
       t =>
-      if(t.toArray) new Prototype(t.name, t.manifest.arrayManifest)
-      else new Prototype(t.name, t.manifest)
+      if(t.toArray) new Prototype(t.name)(t.manifest.arrayManifest)
+      else new Prototype(t.name)(t.manifest)
     }
   
   class ComputedType(val name: String, val manifest: Manifest[_], val toArray: Boolean)

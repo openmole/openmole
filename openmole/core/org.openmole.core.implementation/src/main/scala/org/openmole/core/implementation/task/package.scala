@@ -24,9 +24,11 @@ import org.openmole.core.model.task.ITask
 import mole._
 
 package object task {
+  implicit def taskBuilderToTask[TB <: TaskBuilder](builder: TB) = builder.toTask
   implicit def taskToCapsuleConveter(task: ITask) = new Capsule(task)
   implicit def taskToPuzzleConveter(task: ITask) = {
     val capsule = new Capsule(task)
     new PuzzleFirstAndLast(capsule, capsule)
   }
+  implicit def taskBuilderToPuzzleConverter(t: TaskBuilder) = taskToPuzzleConveter(t.toTask)
 }

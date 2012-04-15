@@ -18,6 +18,7 @@
 package org.openmole.core.implementation.task
 
 import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.core.model.task.IPluginSet
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.exception.InternalProcessingError
@@ -25,22 +26,36 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.data.Context._
-import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.mole.MoleExecution
-import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.DataModeMask
 import org.openmole.core.model.data.DataModeMask._
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.IMoleTask
 
-class MoleTask(val name: String, val mole: IMole, val lastCapsule: ICapsule) extends Task with IMoleTask {
+object MoleTask {
+  
+    def apply(name: String, mole: IMole, last: ICapsule)(implicit plugins: IPluginSet) = { 
+      new TaskBuilder { builder =>
+        def toTask = new MoleTask(name, mole, last) {
+          val inputs = builder.inputs
+          val outputs = builder.outputs
+          val parameters = builder.parameters
+        }
+      }
+    }
+  
+}
+
+
+sealed abstract class MoleTask(
+  val name: String,
+  val mole: IMole,
+  val last: ICapsule)(implicit val plugins: IPluginSet) extends Task with IMoleTask {
  
   class ResultGathering extends EventListener[IMoleExecution] {
     var lastContext: Option[IContext] = None
@@ -48,7 +63,7 @@ class MoleTask(val name: String, val mole: IMole, val lastCapsule: ICapsule) ext
     override def triggered(obj: IMoleExecution, ev: Event[IMoleExecution]) = synchronized {
       ev match {
         case ev: IMoleExecution.JobInCapsuleFinished =>  
-          if(ev.capsule == lastCapsule) lastContext = Some(ev.moleJob.context)
+          if(ev.capsule == last) lastContext = Some(ev.moleJob.context)
         case _ =>
       }
     }
@@ -70,10 +85,7 @@ class MoleTask(val name: String, val mole: IMole, val lastCapsule: ICapsule) ext
     execution.start(firstTaskContext)
     execution.waitUntilEnded
 
-    context + resultGathering.lastContext.getOrElse(throw new UserBadDataError("Last capsule " + lastCapsule + " has never been executed."))
+    context + resultGathering.lastContext.getOrElse(throw new UserBadDataError("Last capsule " + last + " has never been executed."))
   }
 
-  override def inputs: IDataSet = new DataSet((super.inputs ++ mole.root.taskOrException.inputs).toList)
-  override def outputs: IDataSet = new DataSet((super.inputs ++ lastCapsule.taskOrException.outputs).toList)
- 
 }

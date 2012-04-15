@@ -28,13 +28,54 @@ import fr.iscpif.mgo.ga.selection.Rank
 import fr.iscpif.mgo.ga.selection.ParetoRank
 import fr.iscpif.mgo.ga.selection.Ranking
 import org.openmole.core.implementation.data.Context
+import org.openmole.core.implementation.data.Parameter
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.task.TaskBuilder
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IParameterSet
 import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.task.IPluginSet
 
-class NSGA2SteadyElitismTask[T <: GAGenome](
+object NSGA2SteadyElitismTask {
+  
+  def apply[T <: GAGenome](  
+    name: String, 
+    individual: IPrototype[Individual[T, GAFitness]],
+    archive: IPrototype[Array[Individual[T, GAFitness] with Ranking with Distance]], 
+    archiveSize: Int,
+    nbGenerationSteady: IPrototype[Int],
+    generation: IPrototype[Int],
+    rank: Rank = new ParetoRank,
+    dominance: Dominant = new StrictDominant)(implicit plugins: IPluginSet) = 
+      new TaskBuilder { builder =>
+        
+      def toTask = new NSGA2SteadyElitismTask(
+        name,
+        individual,
+        archive,
+        archiveSize,
+        nbGenerationSteady,
+        generation,
+        rank,
+        dominance
+      ) {
+          
+        val inputs = builder.inputs + archive + individual + nbGenerationSteady
+        val outputs = builder.outputs + archive + individual + nbGenerationSteady
+        val parameters: IParameterSet = 
+          builder.parameters + 
+          new Parameter(archive, Array.empty[Individual[T, GAFitness] with Ranking with Distance]) +
+          new Parameter(nbGenerationSteady, 0) +
+          new Parameter(generation, 0)
+      }
+    }
+  
+}
+
+
+sealed abstract class NSGA2SteadyElitismTask[T <: GAGenome](
   val name: String, 
   individual: IPrototype[Individual[T, GAFitness]],
   archive: IPrototype[Array[Individual[T, GAFitness] with Ranking with Distance]], 
@@ -42,39 +83,8 @@ class NSGA2SteadyElitismTask[T <: GAGenome](
   nbGenerationSteady: IPrototype[Int],
   generation: IPrototype[Int],
   rank: Rank,
-  dominance: Dominant) extends Task {
+  dominance: Dominant)(implicit val plugins: IPluginSet)extends Task {
 
-  def this(
-    name: String, 
-    individual: IPrototype[Individual[T, GAFitness]],
-    archive: IPrototype[Array[Individual[T, GAFitness] with Ranking with Distance]],
-    archiveSize: Int,
-    nbGenerationSteady: IPrototype[Int],
-    generation: IPrototype[Int],
-    rank: Rank
-  ) = this(name, individual, archive, archiveSize, nbGenerationSteady, generation, rank, new StrictDominant)
-  
-  def this(
-    name: String, 
-    individual: IPrototype[Individual[T, GAFitness]],
-    archive: IPrototype[Array[Individual[T, GAFitness] with Ranking with Distance]],
-    archiveSize: Int,
-    nbGenerationSteady: IPrototype[Int],
-    generation: IPrototype[Int]
-  ) = this(name, individual, archive, archiveSize, nbGenerationSteady, generation, new ParetoRank, new StrictDominant)
-  
-  addInput(archive)
-  addInput(individual)
-  addInput(nbGenerationSteady)
-  
-  addOutput(archive)
-  addOutput(nbGenerationSteady)
-  addOutput(generation)
-  
-  addParameter(archive, Array.empty[Individual[T, GAFitness] with Ranking with Distance])
-  addParameter(nbGenerationSteady, 0)
-  addParameter(generation, 0)
-  
   override def process(context: IContext) = {
     val currentArchive =  context.valueOrException(archive)
     val globalArchive = context.valueOrException(individual) :: currentArchive.toList

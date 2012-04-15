@@ -27,17 +27,17 @@ object Prototype {
   def toArray[T](prototype: IPrototype[T], nbLevel: Int): IPrototype[_] = {
     if(nbLevel <= 0) prototype
     else { 
-      val arrayProto = new Prototype(prototype.name, prototype.`type`.arrayManifest).asInstanceOf[IPrototype[Array[_]]]
+      val arrayProto = new Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[IPrototype[Array[_]]]
       if(nbLevel <= 1) arrayProto
       else toArray(arrayProto, nbLevel - 1)
     }
   }
 
   def fromArray[T](prototype: IPrototype[Array[T]]): IPrototype[T] =
-    new Prototype(prototype.name, prototype.`type`.fromArray).asInstanceOf[IPrototype[T]]
+    (new Prototype(prototype.name)(prototype.`type`.fromArray.toManifest)).asInstanceOf[IPrototype[T]]
   
   def toArray[T](prototype: IPrototype[T]): IPrototype[Array[T]] =
-    new Prototype(prototype.name, prototype.`type`.arrayManifest).asInstanceOf[IPrototype[Array[T]]]
+    new Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[IPrototype[Array[T]]]
 
   implicit lazy val prototypeOrderingOnName = new Ordering[IPrototype[_]] {
     override def compare(left: IPrototype[_], right: IPrototype[_]) = 
@@ -46,12 +46,10 @@ object Prototype {
   
 }
 
-class Prototype[T](val name: String, val `type`: Manifest[T]) extends IPrototype[T] with Id {
+class Prototype[T](val name: String)(implicit val `type`: Manifest[T]) extends IPrototype[T] with Id {
  
   import Prototype._
-  
-  def this(name: String, clazz: Class[T]) = this(name, clazz.equivalence.toManifest)
-  
+   
   override def isAssignableFrom(p: IPrototype[_]): Boolean = 
     `type`.isAssignableFromHighOrder(p.`type`)
 

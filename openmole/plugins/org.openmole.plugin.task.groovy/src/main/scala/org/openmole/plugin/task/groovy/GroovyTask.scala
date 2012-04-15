@@ -18,36 +18,45 @@
 package org.openmole.plugin.task.groovy
 
 import java.io.File
-import java.util.logging.Logger
+import org.openmole.core.model.task.IPluginSet
 import org.openmole.misc.tools.io.FileUtil.fileOrdering
-import org.openmole.plugin.task.code.CodeTask
-import org.openmole.plugin.tools.code.{ISourceCode,StringSourceCode,FileSourceCode}
-import org.openmole.plugin.tools.groovy.ContextToGroovyCode
+import org.openmole.plugin.task.code._
+import org.openmole.core.implementation.task.PluginSet
 import org.openmole.core.model.data.IContext
-import scala.collection.immutable.TreeSet
-import scala.collection.mutable.ListBuffer
+import org.openmole.plugin.tools.groovy.ContextToGroovyCode
 
-class GroovyTask(val name: String, private var _code: ISourceCode) extends CodeTask {
+object GroovyTask {
   
-  def this(name: String) = this(name, new StringSourceCode(""))
-  def this(name: String, code: String) = this(name, new StringSourceCode(code))
-  def this(name: String, code: File) = this(name, new FileSourceCode(code))
+  def apply(
+    name: String,
+    code: String,
+    libs: Iterable[File] = List.empty
+  )(implicit plugins: IPluginSet) = 
+    new CodeTaskBuilder { builder =>
+      
+      def toTask = 
+        new GroovyTask(name, code, builder.imports(), libs) { 
+          val inputs = builder.inputs
+          val outputs = builder.outputs
+          val parameters = builder.parameters
+          val provided = builder.provided()
+          val produced = builder.produced()
+        }
+    }
   
-  var libs = new TreeSet[File]
-  var imports = new ListBuffer[String]
-  
-  @transient override lazy val contextToCode = new ContextToGroovyCode(code, libs)
-  
-  private def code: String = {
-    if(!imports.isEmpty) imports.map( "import " + _ ).reduceLeft( (l, r) => l + '\n' + r) + '\n' + _code.code
-    else _code.code
-  }
-  
-  def addImport(imp: String): this.type = {imports += imp; this}
-  def addLib(lib: File): this.type = {libs += lib; this}
-  def addLib(lib: String): this.type = addLib(new File(lib))
-  def setCode(code: String): this.type = {_code = new StringSourceCode(code); this}
-  def setCodeFile(file: File): this.type = {_code = new FileSourceCode(file); this}
-  def setCodeFile(file: String): this.type = setCodeFile(new File(file))
+}
 
+sealed abstract class GroovyTask(
+  val name: String,
+  code: String, 
+  imports: Iterable[String],
+  libs: Iterable[File]
+)(implicit val plugins: IPluginSet) extends CodeTask {
+  
+  @transient lazy val contextToCode = new ContextToGroovyCode(codeWithImports, libs)
+  
+  def processCode(context: IContext) = contextToCode.execute(context, outputs)
+ 
+  private def codeWithImports = imports.map( "import " + _ ).mkString("\n") + "\n" + code
+ 
 }

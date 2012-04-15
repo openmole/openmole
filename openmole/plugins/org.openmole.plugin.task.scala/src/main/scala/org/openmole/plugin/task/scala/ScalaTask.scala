@@ -21,25 +21,50 @@ import java.io.File
 import java.io.PrintWriter
 import java.util.logging.Logger
 import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.task.IPluginSet
 import org.openmole.misc.tools.io.FileUtil.fileOrdering
 import org.apache.clerezza.scala.scripting.InterpreterFactory
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.task.PluginSet
 import org.openmole.core.model.data.IContext
+import org.openmole.plugin.task.code._
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable.ListBuffer
 
-class ScalaTask(val name: String, val code: String) extends Task {
-  
-  var libs = new TreeSet[File]
-  var imports = new ListBuffer[String]
-    
-  def addImport(imp: String): this.type = {imports += imp; this}
 
+object ScalaTask {
+  
+  def apply(
+    name: String,
+    code: String
+  )(implicit plugins: IPluginSet = PluginSet.empty) = {
+    val _plugins = plugins
+    new CodeTaskBuilder { builder =>
+      
+      def toTask = 
+        new ScalaTask(name, code, builder.imports()) { 
+          val inputs = builder.inputs
+          val outputs = builder.outputs
+          val parameters = builder.parameters
+          val provided = builder.provided()
+          val produced = builder.produced()
+          val plugins = _plugins
+        }
+    }
+  }
+  
+}
+
+sealed abstract class ScalaTask(
+  val name: String,
+  val code: String,
+  imports: Iterable[String]
+) extends CodeTask {
+  
   @transient lazy val factory = new InterpreterFactory
   
-  override def process(context: IContext) = {
+  override def processCode(context: IContext) = {
     val interpreter = factory.createInterpreter(new PrintWriter(System.out))
     context.values.foreach{v => interpreter.bind(v.prototype.name, v.value)}
     interpreter.addImports(imports.toSeq: _*)

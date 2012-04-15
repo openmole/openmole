@@ -17,9 +17,7 @@
 
 package org.openmole.core.model.task
 
-import org.openmole.core.model.data.{IParameter,IPrototype,IDataSet, IData, DataModeMask}
-import java.io.File
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data._
 
 trait ITask {
    /**
@@ -60,14 +58,9 @@ trait ITask {
    *
    * @return the parameters configured for this task.
    */
-  def parameters: Iterable[IParameter[_]]
+  def parameters: IParameterSet
   
   
-  def plugins: Iterable[File]
+  def plugins: IPluginSet
   
-  def addInput(data: IData[_]): this.type
-  def addInput(prototype: IPrototype[_]): this.type
-  def addOutput(data: IData[_]): this.type
-  def addOutput(prototype: IPrototype[_]): this.type
-  def addParameter(parameter: IParameter[_]): this.type
 }

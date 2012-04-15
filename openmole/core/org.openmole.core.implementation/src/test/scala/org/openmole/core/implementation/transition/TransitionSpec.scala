@@ -18,13 +18,9 @@
 package org.openmole.core.implementation.transition
 
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
-import org.openmole.core.implementation.mole.FixedEnvironmentSelection
-import org.openmole.core.implementation.mole.Mole
-import org.openmole.core.implementation.mole.MoleExecution
-import org.openmole.core.implementation.task.EmptyTask
-import org.openmole.core.implementation.task.Task
-import org.openmole.core.implementation.mole.Capsule
-import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.implementation.mole._
+import org.openmole.core.implementation.task._
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.data.IContext
 
@@ -37,24 +33,24 @@ import org.junit.runner.RunWith
 class TransitionSpec extends FlatSpec with ShouldMatchers {
 
   "A transition" should "enable variable values to be transmitted from a task to another" in {
-    val p = new Prototype("p", classOf[String])
+    val p = new Prototype[String]("p")
     
-    val t1 = new Task {
+    val t1 = new TestTask {
       val name = "Test write"
+      override def outputs = DataSet(p)
       override def process(context: IContext) = context + (p -> "Test")
     }
     
-    t1.addOutput(p)
     
-    val t2 = new Task {
+    val t2 = new TestTask {
       val name = "Test read"
+      override def inputs = DataSet(p)
       override def process(context: IContext) = {
         context.value(p).get should equal ("Test")
         context
       }
     }
     
-    t2.addInput(p)
     
     val t1c = new Capsule(t1)
     val t2c = new Capsule(t2)
@@ -66,27 +62,28 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
   
   
   "A conjonctive pattern" should "enable variable values to be transmitted from a task to another" in {
-    val p1 = new Prototype("p1", classOf[String])
-    val p2 = new Prototype("p2", classOf[String])
+    val p1 = new Prototype[String]("p1")
+    val p2 = new Prototype[String]("p2")
     
-    val init = new EmptyTask("Init")
+    val init = EmptyTask("Init")
     
-    val t1 = new Task {
+    val t1 = new TestTask {
       val name = "Test write 1"
+      override def outputs = DataSet(p1)
       override def process(context: IContext) = context + (p1 -> "Test1")
     }
     
-    t1.addOutput(p1)
     
-    val t2 = new Task {
+    val t2 = new TestTask {
       val name = "Test write 2"
+      override def outputs = DataSet(p2)
       override def process(context: IContext) = context + (p2 -> "Test2")
     }
     
-    t2.addOutput(p2)
     
-    val t3 = new Task {
+    val t3 = new TestTask {
       val name = "Test read"
+      override def inputs = DataSet(p1, p2)
       override def process(context: IContext) = {
         context.value(p1).get should equal ("Test1")
         context.value(p2).get should equal ("Test2") 
@@ -94,8 +91,6 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
       }
     }
     
-    t3.addInput(p1)
-    t3.addInput(p2)
     
     val initc = new Capsule(init)
     val t1c = new Capsule(t1)
@@ -114,28 +109,28 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
   "A conjonctive pattern" should "aggregate variable of the same name in an array of closest common supertype" in {
         
 
-    val p1 = new Prototype("p", classOf[java.lang.Long])
-    val p2 = new Prototype("p", classOf[java.lang.Integer])
-    val pArray = new Prototype("p", classOf[Array[java.lang.Number]])
+    val p1 = new Prototype[java.lang.Long]("p")
+    val p2 = new Prototype[java.lang.Integer]("p")
+    val pArray = new Prototype[Array[java.lang.Number]]("p")
     
-    val init = new EmptyTask("Init")
+    val init = EmptyTask("Init")
     
-    val t1 = new Task {
+    val t1 = new TestTask {
       val name = "Test write 1"
+      override def outputs = DataSet(p1)
       override def process(context: IContext) = context + (p1 -> new java.lang.Long(1L))
     }
     
-    t1.addOutput(p1)
     
-    val t2 = new Task {
+    val t2 = new TestTask {
       val name = "Test write 2"
+      override def outputs = DataSet(p2)
       override def process(context: IContext) = context + (p2 -> new java.lang.Integer(2))
     }
     
-    t2.addOutput(p2)
-    
-    val t3 = new Task {
+    val t3 = new TestTask {
       val name = "Test read"
+      override def inputs = DataSet(pArray)
       override def process(context: IContext) = {
         //println(context.value(pArtoStringray).map(_.intL))
         context.value(pArray).get.map(_.intValue).contains(1) should equal (true)
@@ -146,8 +141,6 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
       }
     }
     
-    
-    t3.addInput(pArray)
     
     val initc = new Capsule(init)
     val t1c = new Capsule(t1)
@@ -165,27 +158,28 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
     
   "A conjonctive pattern" should "be robust to concurent execution" in {
     var executed = false
-    val p1 = new Prototype("p1", classOf[String])
-    val p2 = new Prototype("p2", classOf[String])
+    val p1 = new Prototype[String]("p1")
+    val p2 = new Prototype[String]("p2")
     
-    val init = new EmptyTask("Init")
+    val init = EmptyTask("Init")
     
-    val t1 = new Task {
+    val t1 = new TestTask {
       val name = "Test write 1"
+      override def outputs = DataSet(p1)
       override def process(context: IContext) = context + (p1 -> "Test1")
     }
     
-    t1.addOutput(p1)
     
-    val t2 = new Task {
+    val t2 = new TestTask {
       val name = "Test write 2"
+      override def outputs = DataSet(p2)
       override def process(context: IContext) = context + (p2 -> "Test2")
     }
     
-    t2.addOutput(p2)
     
-    val t3 = new Task {
+    val t3 = new TestTask {
       val name = "Test read"
+      override def inputs = DataSet(p1, toArray(p2))
       override def process(context: IContext) = {
         context.value(p1).get should equal ("Test1")
         context.value(toArray(p2)).get.head should equal ("Test2") 
@@ -195,19 +189,18 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
       }
     }
     
-    t3.addInput(p1)
-    t3.addInput(toArray(p2))
     
     val initc = new Capsule(init)
     val t1c = new Capsule(t1)
 
     val t3c = new Capsule(t3)
     
-    val t2CList = (0 until 100).map { i => 
-      val t2c = new Capsule(t2)
-      new Transition(initc, t2c)
-      new Transition(t2c, t3c)   
-      t2c
+    val t2CList = (0 until 100).map { 
+      i => 
+        val t2c = new Capsule(t2)
+        new Transition(initc, t2c)
+        new Transition(t2c, t3c)   
+        t2c
     }
     
     new Transition(initc, t1c)
@@ -224,28 +217,29 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
   
   "A conjonctive pattern" should "aggregate array variable of the same name in an array of array of the closest common supertype" in {
     
-    val p1 = new Prototype("p", classOf[Array[java.lang.Long]])
-    val p2 = new Prototype("p", classOf[Array[java.lang.Integer]])
-    val pArray = new Prototype("p", classOf[Array[Array[java.lang.Number]]])
+    val p1 = new Prototype[Array[java.lang.Long]]("p")
+    val p2 = new Prototype[Array[java.lang.Integer]]("p")
+    val pArray = new Prototype[Array[Array[java.lang.Number]]]("p")
     
-    val init = new EmptyTask("Init")
+    val init = EmptyTask("Init")
     
-    val t1 = new Task {
+    val t1 = new TestTask {
       val name = "Test write 1"
+      override def outputs = DataSet(p1)
       override def process(context: IContext) = context + (p1 -> Array(new java.lang.Long(1L)))
     }
     
-    t1.addOutput(p1)
     
-    val t2 = new Task {
+    val t2 = new TestTask {
       val name = "Test write 2"
+      override def outputs = DataSet(p2)
       override def process(context: IContext) = context + (p2 -> Array(new java.lang.Integer(2)))
     }
     
-    t2.addOutput(p2)
     
-    val t3 = new Task {
+    val t3 = new TestTask {
       val name = "Test read"
+      override def inputs = DataSet(pArray)
       override def process(context: IContext) = {
         val res = IndexedSeq(context.value(pArray).get(0).deep, context.value(pArray).get(1).deep)
         
@@ -257,8 +251,6 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
       }
     }
     
-    
-    t3.addInput(pArray)
     
     val initc = new Capsule(init)
     val t1c = new Capsule(t1)

@@ -34,7 +34,7 @@
            <groupId>org.scala-lang</groupId>
            <artifactId>scala-library</artifactId>
            <version>${lib.ccl.northwestern.edu.netlogo5.scala.version}</version>
-	    <scope>provided</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
            <groupId>org.objectweb</groupId>

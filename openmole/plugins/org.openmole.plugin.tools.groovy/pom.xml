@@ -20,11 +20,6 @@
             <artifactId>org.openmole.core.implementation</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.plugin.tools.code</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 	<dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>org.codehaus.groovy</artifactId>

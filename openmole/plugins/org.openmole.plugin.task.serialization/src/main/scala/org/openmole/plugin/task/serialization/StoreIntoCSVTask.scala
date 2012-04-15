@@ -24,6 +24,7 @@ import org.openmole.misc.tools.io.Prettifier._
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.task.IPluginSet
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.workspace.Workspace
 import collection.JavaConversions._
@@ -33,76 +34,33 @@ import collection.JavaConversions._
  * into CSV files. It is in particular possible to store data (as prototypes) aggregated in an
  * array. The number of data to store in columns is not limited.
  */
-class StoreIntoCSVTask(
+
+object StoreIntoCSVTask {
+  
+  def apply(name: String, outputFile: IPrototype[File])(implicit plugins: IPluginSet) = 
+    new StoreIntoCSVTaskBuilder { builder =>
+      
+      def toTask = new StoreIntoCSVTask(name, outputFile, builder.columns()) {
+          val inputs = builder.inputs
+          val outputs = builder.outputs + outputFile
+          val parameters = builder.parameters
+      }
+      
+    }
+  
+}
+
+sealed abstract class StoreIntoCSVTask(
   val name: String,
-  var columns: List[(IPrototype[Array[_]], String)],
   filePrototype: IPrototype[File],
-  delimiter: Char, quoteChar: Char) extends Task {
-
-  columns.foreach{case(p,s) => addInput(p)}
-  addOutput(filePrototype)
-  
-  /**
-   * Creates an instance of StoreIntoCSVTask with a specific delimiter and
-   * quote character
-   *
-   * @param name, the name of the task
-   * @param fileName, the path of the CSV file to be stored
-   * @param delimiter, the char to be used to separate values
-   * @param quotechar, the char to be used to quote  values
-   * @throws UserBadDataError
-   * @throws InternalProcessingError
-   */
-  def this(name: String, file: IPrototype[File], delimiter: Char, quotechar: Char) = this(name, List.empty, file, delimiter, quotechar)
-
-  /**
-   * Creates an instance of StoreIntoCSVTask with a specific delimiter and default
-   * quote character (none)
-   *
-   * @param name, the name of the task
-   * @param fileName, the path of the CSV file to be stored
-   * @param delimiter, the char to be used to separate values
-   * @throws UserBadDataError
-   * @throws InternalProcessingError
-   */
-  def this(name: String, file: IPrototype[File], delimiter: Char) = this(name, file, delimiter, CSVWriter.NO_QUOTE_CHARACTER)
-
-  
-  /**
-   * Creates an instance of StoreIntoCSVTask with a default delimiter (',') and
-   * quote character (none)
-   *
-   * @param name, the name of the task
-   * @param fileName, the path of the CSV file to be stored
-   * @throws UserBadDataError
-   * @throws InternalProcessingError
-   */
-  def this(name: String, file: IPrototype[File]) = this(name, file, ',')
-
-  /**
-   * Add a prototype to be stored
-   *
-   * @param prototype
-   */
-  def addColumn(prototype: IPrototype[Array[_]]): this.type = addColumn(prototype, prototype.name)
-
-  /**
-   * Add a prototype to be stored, specifying explicitely the name of the column header to be saved
-   *
-   * @param prototype
-   * @param columnName, the name of the column header
-   */
-  def addColumn(prototype: IPrototype[Array[_]], columnName: String): this.type = {
-    columns :+= prototype -> columnName
-    addInput(prototype)
-    this
-  }
+  columns: Iterable[(IPrototype[Array[_]], String)]
+)(implicit val plugins: IPluginSet) extends Task {
 
   override def process(context: IContext) = {
     val valuesList = columns.map{elt => context.value(elt._1).getOrElse(throw new UserBadDataError("Variable " + elt._1 + " not found."))}
 
     val file = Workspace.newFile("storeIntoCSV", ".csv")
-    val writer = new CSVWriter(new BufferedWriter(new FileWriter(file)), delimiter, quoteChar)
+    val writer = new CSVWriter(new BufferedWriter(new FileWriter(file)), ',', CSVWriter.NO_QUOTE_CHARACTER)
 
     try {
       //header

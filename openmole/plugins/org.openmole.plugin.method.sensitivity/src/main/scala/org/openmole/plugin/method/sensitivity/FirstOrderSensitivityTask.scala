@@ -17,9 +17,11 @@
 
 package org.openmole.plugin.method.sensitivity
 
-import org.openmole.core.implementation.data.Variable
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.task.TaskBuilder
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Prototype._
@@ -27,17 +29,33 @@ import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.data.Context._
 import SaltelliSampling._
 import SensitivityTask._
+import org.openmole.core.model.task.IPluginSet
 
-class FirstOrderSensitivityTask(
+object FirstOrderSensitivityTask {
+  
+  def apply(
+    name: String,
+    matrixName: IPrototype[String],
+    modelInputs: Iterable[IPrototype[Double]],
+    modelOutputs: Iterable[IPrototype[Double]]
+  )(implicit plugins: IPluginSet) = new TaskBuilder { builder =>
+    
+    def toTask = new FirstOrderSensitivityTask(name, matrixName, modelInputs, modelOutputs) {
+      val inputs: IDataSet = builder.inputs + DataSet(modelOutputs)
+      val outputs: IDataSet  = builder.outputs + DataSet(for(i <- modelInputs ; o <- modelOutputs) yield indice(i, o))
+      val parameters = builder.parameters
+    }
+    
+  }
+  
+}
+
+abstract sealed class FirstOrderSensitivityTask(
   val name: String,
   matrixName: IPrototype[String],
-  inputs: Array[IPrototype[Double]],
-  outputs: Array[IPrototype[Double]]
-) extends Task {
-  
-  outputs.foreach(addInput)
-  for(i <- inputs ; o <- outputs) addOutput(indice(i, o))
-  
+  inputs: Iterable[IPrototype[Double]],
+  outputs: Iterable[IPrototype[Double]]
+)(implicit val plugins: IPluginSet) extends Task {
   
   override def process(context: IContext): IContext = {
     val matrixNames = context.valueOrException(toArray(matrixName))

@@ -33,19 +33,18 @@ import org.openmole.misc.tools.io.FileUtil._
 class CSVSamplingSpec extends FlatSpec with ShouldMatchers {
   
   "CSVSampling" should "detect the correct mapping between csv header defined column" in {
-    
-    val p1 = new Prototype("col1", classOf[String])
-    val p2 = new Prototype("col2", classOf[Int])
+    val p1 = new Prototype[String]("col1")
+    val p2 = new Prototype[Int]("col2")
     
     val tmpCsvFile = File.createTempFile("tmp", ".csv")
     getClass.getClassLoader.getResourceAsStream("csvTest.csv").copy(tmpCsvFile)
     val reader = new CSVReader(new FileReader(tmpCsvFile))
-    val sampling = new CSVSampling(tmpCsvFile)
-    sampling.addColumn(p1)
+    val sampling = CSVSampling(tmpCsvFile)
+    sampling.columns += p1
     
-    sampling.build(Context.empty).toIterable.head.head.value should equal ("myTest")
+    sampling.build(Context.empty).toIterable.head.head.value should equal ("first")
     
-    sampling.addColumnAs("badName",p2)
-    val exception = evaluating { sampling.build(Context.empty)} should produce [UserBadDataError]
+    sampling.columns += ("badName",p2)
+    val exception = evaluating { sampling.toSampling.build(Context.empty)} should produce [UserBadDataError]
   }
 }

@@ -17,12 +17,12 @@
 
 package org.openmole.core.implementation.mole
 
+import org.openmole.core.implementation.task.TestTask
+import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.task.EmptyTask
-import org.openmole.core.implementation.task.ExplorationTask
-import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.sampling.ExplicitSampling
 import org.openmole.core.model.data.IContext
@@ -38,6 +38,9 @@ import scala.collection.mutable.ListBuffer
 @RunWith(classOf[JUnitRunner])
 class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
   
+  
+  implicit val plugins = PluginSet.empty
+  
   class JobGroupingBy2Test extends IGroupingStrategy {
     
     var group = true
@@ -47,24 +50,26 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
       group = !group
       ret
     }
+    
   }
   
   "Grouping jobs" should "not impact a normal mole execution" in {
     val data = List("A","A","B","C")
-    val i = new Prototype("i", classOf[String])
+    val i = new Prototype[String]("i")
      
     val sampling = new ExplicitSampling(i, data)
     
-    val exc = new Capsule(new ExplorationTask("Exploration", sampling))
+    val exc = new Capsule(ExplorationTask("Exploration", sampling))
      
-    val emptyT = new EmptyTask("Empty")
-    emptyT.addInput(i)
-    emptyT.addOutput(i)
+    val emptyT = EmptyTask("Empty")
+    emptyT.inputs += i
+    emptyT.outputs += i
     
     val emptyC = new Capsule(emptyT)
     
-    val testT = new Task {
+    val testT = new TestTask {
       val name = "Test"
+      override val inputs = DataSet(toArray(i))
       override def process(context: IContext) = {
         context.contains(toArray(i)) should equal (true)
         context.value(toArray(i)).get.sorted.deep should equal (data.toArray.deep)
@@ -72,7 +77,6 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
       }
     }
     
-    testT.addInput(toArray(i))
     
     val testC = new Capsule(testT)
     

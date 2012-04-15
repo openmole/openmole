@@ -25,7 +25,6 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IContext
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.task.external.ExternalTask
-import org.openmole.plugin.task.external.system.ExternalSystemTask
 import java.io.IOException
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.tools.VariableExpansion._
@@ -36,26 +35,20 @@ import scala.collection.JavaConversions._
 
 object AbstractSystemExecTask extends Logger
 
-abstract class AbstractSystemExecTask extends ExternalSystemTask {
+abstract class AbstractSystemExecTask extends ExternalTask {
  
   def cmd: String
   def returnValue: Option[IPrototype[Int]]
   def exceptionIfReturnValueNotZero: Boolean 
-  def relativeDir: String
-  
+  def dir: String
   
   import AbstractSystemExecTask._
-  
-  returnValue match {
-    case None =>
-    case Some(returnValue) => addOutput(returnValue)
-  }
   
   override protected def process(context: IContext) = {
     val tmpDir = Workspace.newDir("systemExecTask")
 
     val links = prepareInputFiles(context, tmpDir)
-    val workDir = if(relativeDir.isEmpty) tmpDir else new File(tmpDir, relativeDir)
+    val workDir = if(dir.isEmpty) tmpDir else new File(tmpDir, dir)
     val commandLine = CommandLine.parse( workDir.getAbsolutePath + File.separator + expandData(context, List(new Variable(ExternalTask.PWD, workDir.getAbsolutePath)), cmd))
       
     try {    

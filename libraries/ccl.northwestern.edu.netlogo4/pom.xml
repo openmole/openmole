@@ -34,7 +34,7 @@
            <groupId>org.scala-lang</groupId>
            <artifactId>scala-library</artifactId>
            <version>${lib.ccl.northwestern.edu.netlogo4.scala.version}</version>
-	    <scope>provided</scope>
+           <scope>provided</scope>
         </dependency>
 <!--
         <dependency>
@@ -73,6 +73,7 @@
     <!--optional. Use this property to tune the exported packages-->
     <properties>
 	<libraries.export.packages>org.nlogo.*</libraries.export.packages>
+ 	<!--<embed-dep>*;artifactId=!org.scala-lang.scala-library.netlogo4;type=!pom;inline=true</embed-dep>-->
         <embed-dep>*;type=!pom;inline=true</embed-dep>
     </properties>
 

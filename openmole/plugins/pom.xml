@@ -20,7 +20,6 @@
     </properties>
 
     <modules>
-        <module>org.openmole.plugin.tools.code</module>
         <module>org.openmole.plugin.tools.groovy</module>
         <module>org.openmole.plugin.environment.jsaga</module>
         <module>org.openmole.plugin.environment.glite</module>
@@ -33,12 +32,11 @@
         <module>org.openmole.plugin.task.netlogo5</module>
         <module>org.openmole.plugin.task.serialization</module>
         <module>org.openmole.plugin.task.external</module>
-	<module>org.openmole.plugin.task.external.system</module>
         <module>org.openmole.plugin.task.systemexec</module>
         <module>org.openmole.plugin.task.code</module>
         <module>org.openmole.plugin.task.groovy</module>
 	<module>org.openmole.plugin.task.scala</module>
-        <module>org.openmole.plugin.task.templatefilegenerator</module>
+        <module>org.openmole.plugin.task.templatefile</module>
         <module>org.openmole.plugin.task.stat</module>
 	<module>org.openmole.plugin.hook.file</module>
         <module>org.openmole.plugin.hook.csvprofiler</module>

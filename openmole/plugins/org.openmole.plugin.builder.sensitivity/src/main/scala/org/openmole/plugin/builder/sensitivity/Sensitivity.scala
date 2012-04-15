@@ -34,6 +34,7 @@ import org.openmole.core.model.domain.IBounded
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.sampling.IFactor
+import org.openmole.core.model.task.IPluginSet
 import org.openmole.plugin.builder.Builder._
 import org.openmole.plugin.method.sensitivity.FirstOrderSensitivityTask
 import org.openmole.plugin.method.sensitivity.SaltelliSampling
@@ -56,18 +57,18 @@ object Sensitivity {
     model: IPuzzleFirstAndLast,
     samples: Int,
     sensitivity: Sensitivity
-  ) = {
-    val matrixName = new Prototype(name + "Matrix", classOf[String])
+  )(implicit plugins: IPluginSet) = {
+    val matrixName = new Prototype[String](name + "Matrix")
    
     val sampling = new SaltelliSampling(samples, matrixName, sensitivity.factors.toArray)
-    val explorationCapsule = new StrainerCapsule(new ExplorationTask(name + "Exploration", sampling))
+    val explorationCapsule = new StrainerCapsule(ExplorationTask(name + "Exploration", sampling))
    
     val firstOrderSensitivityTask = 
-      new FirstOrderSensitivityTask(
+      FirstOrderSensitivityTask(
         name + "FirstOrderSensitivity", 
         matrixName, 
-        sensitivity.factors.map{_.prototype}.toArray, 
-        sensitivity.outputs.toArray
+        sensitivity.factors.map{_.prototype}, 
+        sensitivity.outputs
       )
     
   }

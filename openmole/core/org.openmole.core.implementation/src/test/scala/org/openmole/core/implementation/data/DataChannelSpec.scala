@@ -19,11 +19,9 @@ package org.openmole.core.implementation.data
 
 
 import org.openmole.core.implementation.data.Prototype._
-import org.openmole.core.implementation.mole.Capsule
-import org.openmole.core.implementation.mole.Mole
-import org.openmole.core.implementation.mole.MoleExecution
-import org.openmole.core.implementation.task.EmptyTask
-import org.openmole.core.implementation.task.{ExplorationTask, Task}
+import org.openmole.core.implementation.mole._
+import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.transition.{Transition, ExplorationTransition, AggregationTransition}
 import org.openmole.core.implementation.sampling.ExplicitSampling
 import org.openmole.core.model.data.IContext
@@ -35,27 +33,31 @@ import scala.collection.mutable.ListBuffer
 
 @RunWith(classOf[JUnitRunner])
 class DataChannelSpec extends FlatSpec with ShouldMatchers {
+  
+  implicit val plugins = PluginSet.empty
+  
   "A datachannel" should "enable variable values to be transmitted from a task to another" in {
-    val p = new Prototype("p", classOf[String])
+    val p = new Prototype[String]("p")
     
-    val t1 = new Task {
-      val name = "Test write"
-      override def process(context: IContext) = context + (p -> "Test")
-    }
+    val t1 = 
+      new TestTask {
+        val name = "Test write"
+        override val outputs = DataSet(p)
+        override def process(context: IContext) = context + (p -> "Test")
+      }
     
-    t1.addOutput(p)
     
-    val t2 = new EmptyTask("Inter task")
+    val t2 = EmptyTask("Inter task")
     
-    val t3 = new Task {
+    val t3 = new TestTask {
       val name = "Test read"
+      override val inputs = DataSet(p)
       override def process(context: IContext) = {
         context.value(p).get should equal ("Test")
         context
       }
     }
     
-    t3.addInput(p)
     
     val t1c = new Capsule(t1)
     val t2c = new Capsule(t2)
@@ -71,24 +73,25 @@ class DataChannelSpec extends FlatSpec with ShouldMatchers {
   
   "A data channel" should "be able to transmit the value to the multiple execution of an explored task" in {
     
-    val j = new Prototype("j", classOf[String])
-    val tw = new Task {
+    val j = new Prototype[String]("j")
+    val tw = new TestTask {
       val name = "Test write"
+      override def outputs = DataSet(j)
       override def process(context: IContext) = context + (j -> "J")
     }
-    tw.addOutput(j)
     
     val data = List("A","B","C")
-    val i = new Prototype("i", classOf[String])
+    val i = new Prototype[String]("i")
      
     val sampling = new ExplicitSampling(i, data)
     
-    val exc = new Capsule(new ExplorationTask("Exploration", sampling))
+    val exc = new Capsule(ExplorationTask("Exploration", sampling))
      
     val res = new ListBuffer[String]
     
-    val t = new Task {
+    val t = new TestTask {
       val name = "Test"
+      override val inputs = DataSet(i, j)
       override def process(context: IContext) = synchronized {
         context.contains(i) should equal (true)
         context.contains(j) should equal (true)
@@ -97,8 +100,6 @@ class DataChannelSpec extends FlatSpec with ShouldMatchers {
       }
     }
     
-    t.addInput(i)
-    t.addInput(j)
     
     val twc = new Capsule(tw)
     val tc = new Capsule(t)
@@ -115,30 +116,30 @@ class DataChannelSpec extends FlatSpec with ShouldMatchers {
  "A data channel" should "be able to gather the values of the multiple execution of an explored task" in {
     var executed = false
     val data = List("A","B","C")
-    val i = new Prototype("i", classOf[String])
-    val j = new Prototype("j", classOf[String])
+    val i = new Prototype[String]("i")
+    val j = new Prototype[String]("j")
          
     val sampling = new ExplicitSampling(i, data)
     
-    val exc = new Capsule(new ExplorationTask("Exploration", sampling))
+    val exc = new Capsule(ExplorationTask("Exploration", sampling))
      
-    val t = new Task {
+    val t = new TestTask {
       val name = "Test"
+      override val outputs = DataSet(j)
       override def process(context: IContext) = context + (j -> "J")
     }
-    t.addOutput(j)
     
-    val noOP = new EmptyTask("NoOP") 
+    val noOP = EmptyTask("NoOP") 
 
-    val tr = new Task {
+    val tr = new TestTask {
       val name = "Test read"
+      override val inputs = DataSet(toArray(j))
       override def process(context: IContext) = {
         context.value(toArray(j)).get.size should equal (data.size)
         executed = true
         context
       }
     }
-    tr.addInput(toArray(j))
 
     val tc = new Capsule(t)
     val noOPC = new Capsule(noOP)

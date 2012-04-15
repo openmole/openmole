@@ -20,19 +20,14 @@ package org.openmole.plugin.tools.groovy
 import groovy.lang.Binding
 import java.io.File
 import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.groovy.GroovyProxyPool
 import org.openmole.core.implementation.data.{Prototype, Variable, Context}
 import org.openmole.core.implementation.tools.GroovyContextAdapter._
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.data.IVariable
-import org.openmole.plugin.tools.code.IContextToCode
 
-
-class ContextToGroovyCode(source: String, libs: Iterable[File]) extends IContextToCode {
+class ContextToGroovyCode(source: String, libs: Iterable[File]) {
 
   @transient lazy val editorPool = new GroovyProxyPool(source, libs)
   
@@ -40,7 +35,7 @@ class ContextToGroovyCode(source: String, libs: Iterable[File]) extends IContext
   
   def execute(context: IContext): Object =  editorPool.execute(context.toBinding)
  
-  override def execute(context: IContext, output: IDataSet): IContext = {
+  def execute(context: IContext, output: IDataSet): IContext = {
     val binding = context.toBinding
     execute(binding)
     fetchVariables(context, output, binding)

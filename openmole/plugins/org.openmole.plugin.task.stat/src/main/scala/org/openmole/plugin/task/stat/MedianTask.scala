@@ -22,9 +22,23 @@ import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.task.IPluginSet
 import org.openmole.misc.math.Stat
 
-class MedianTask(val name: String) extends DoubleSequenceStatTask {
+object MedianTask {
+  
+  def apply(name: String)(implicit plugins: IPluginSet) = new DoubleSequenceStatTaskBuilder { builder =>
+    def toTask = new MedianTask(name) {
+      val sequences = builder.sequences()
+      val inputs = builder.inputs
+      val outputs = builder.outputs
+      val parameters = builder.parameters
+    }
+  }
+  
+}
+
+sealed abstract class MedianTask(val name: String)(implicit val plugins: IPluginSet) extends DoubleSequenceStatTask {
   
   override def stat(seq: Array[Double]) =  Stat.median(seq)
   

@@ -25,19 +25,7 @@ import org.openmole.core.model.data.IPrototype
 
 abstract class DoubleSequenceStatTask extends Task {
 
-  var sequences: List[(IPrototype[Array[Double]], IPrototype[Double])] = Nil
-
-  def add(sequence: IPrototype[Array[Double]], stat: IPrototype[Double]): this.type = {
-    addInput(sequence)
-    addOutput(stat)
-    sequences ::= (sequence, stat)
-    this
-  }
-  
-  def add(seqs: Iterable[(IPrototype[Array[Double]], IPrototype[Double])]): this.type = {
-    seqs.foreach{ case(sequence, stat) => add(sequence, stat) }
-    this
-  }
+  def sequences: Iterable[(IPrototype[Array[Double]], IPrototype[Double])]
   
   override def process(context: IContext) = 
     Context(

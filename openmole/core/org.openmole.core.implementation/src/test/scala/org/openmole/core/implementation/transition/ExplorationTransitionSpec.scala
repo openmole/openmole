@@ -17,13 +17,10 @@
 
 package org.openmole.core.implementation.transition
 
-import org.openmole.core.implementation.mole.Mole
-import org.openmole.core.implementation.mole.Capsule
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.mole.MoleExecution
-import org.openmole.core.implementation.task.ExplorationTask
-import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.mole._
+import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.task.PluginSet
+import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.sampling.ExplicitSampling
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.sampling.ISampling
@@ -36,19 +33,22 @@ import scala.collection.mutable.ListBuffer
 @RunWith(classOf[JUnitRunner])
 class ExplorationTransitionSpec extends FlatSpec with ShouldMatchers {
 
+  implicit val plugins = PluginSet.empty
+  
   "Exploration transition" should "submit one MoleJob for each value in the sampling" in {
      
     val data = List("A","B","C")
-    val i = new Prototype("i", classOf[String])
+    val i = new Prototype[String]("i")
      
     val sampling = new ExplicitSampling(i, data)
     
-    val exc = new Capsule(new ExplorationTask("Exploration", sampling))
+    val exc = new Capsule(ExplorationTask("Exploration", sampling))
      
     val res = new ListBuffer[String]
     
-    val t = new Task {
+    val t = new TestTask {
       val name = "Test"
+      override def inputs = DataSet(i)
       override def process(context: IContext) = synchronized {
         context.contains(i) should equal (true)
         res += context.value(i).get
@@ -56,10 +56,7 @@ class ExplorationTransitionSpec extends FlatSpec with ShouldMatchers {
       }
     }
     
-    t.addInput(i)
-    
-    new ExplorationTransition(exc, new Capsule(t))
-                              
+    new ExplorationTransition(exc, new Capsule(t))                     
     new MoleExecution(new Mole(exc)).start.waitUntilEnded
     
     res.toArray.sorted.deep should equal (data.toArray.deep)

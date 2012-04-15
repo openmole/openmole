@@ -20,10 +20,7 @@ package org.openmole.plugin.method.evolution
 import fr.iscpif.mgo.ga.algorithm.GAGenomeWithSigma
 import fr.iscpif.mgo.ga.algorithm.GAGenomeWithSigmaFactory
 import java.util.Random
-import org.openmole.core.implementation.data.Data
-import org.openmole.core.implementation.data.Parameter
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.data.Variable
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.core.model.data.DataModeMask
 import org.openmole.core.model.data.IContext
@@ -50,7 +47,7 @@ class SigmaGenomeSampling(
   @transient lazy val factory = new GAGenomeWithSigmaFactory(genomeSize)
     
   def prototypes = List(genome)
-  override def inputs = super.inputs ++ initialGenomes.map{p => new Data(p, DataModeMask.optional)}
+  override def inputs = super.inputs ++ initialGenomes.map{p => new Data(p, DataMode(DataModeMask.optional))}
    
   def build(context: IContext) = {
     def toSamplingLine(g: GAGenomeWithSigma) = List(new Variable(genome, g))

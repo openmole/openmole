@@ -18,11 +18,13 @@
 package org.openmole.core.implementation.hook
 
 import org.openmole.core.implementation.mole.{Capsule, MasterCapsule}
+import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.mole.Mole
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.implementation.task.EmptyTask
 import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.task.TestTask
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.job.IMoleJob
 import org.scalatest.FlatSpec
@@ -36,14 +38,13 @@ class CapsuleExecutionHookSpec extends FlatSpec with ShouldMatchers {
   "A capsule execution hook" should "intersept the execution of a capsule" in {
     var executed = false
     
-    val p = new Prototype("p", classOf[String])
+    val p = new Prototype[String]("p")
     
-    val t1 = new Task {
+    val t1 = new TestTask {
       val name = "Test"
+      override val outputs = DataSet(p)
       override def process(context: IContext) = context + (p -> "test")
     }
-    
-    t1.addOutput(p)
     
     val t1c = new Capsule(t1)
     val ex = new MoleExecution(new Mole(t1c))
@@ -64,15 +65,15 @@ class CapsuleExecutionHookSpec extends FlatSpec with ShouldMatchers {
   "A capsule execution hook" should "intersept the execution of a master capsule" in {
     var executed = false
     
-    val p = new Prototype("p", classOf[String])
+    val p = new Prototype[String]("p")
     
-    val t1 = new Task {
+    val t1 = new TestTask {
       val name = "Test"
+      override val outputs = DataSet(p)
       override def process(context: IContext) = context + (p -> "test")
       
     }
     
-    t1.addOutput(p)
     
     val t1c = new MasterCapsule(t1)
     val ex = new MoleExecution(new Mole(t1c))
@@ -96,7 +97,7 @@ class CapsuleExecutionHookSpec extends FlatSpec with ShouldMatchers {
   "After release a capsule execution hook" should "not be executed" in {
     var executed = false
     
-    val t1 = new EmptyTask("Test") 
+    val t1 = EmptyTask("Test") 
     
     val t1c = new Capsule(t1)
     val ex = new MoleExecution(new Mole(t1c))

@@ -23,12 +23,12 @@ import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IContext
 import org.openmole.misc.tools.groovy.GroovyProxy
 import org.openmole.misc.workspace.Workspace
-
+import org.openmole.misc.tools.obj.ClassUtils._
 
 object GroovyContextAdapter {
-  val workspaceVar = new Prototype("workspace", Workspace.getClass)
-  val rngVar = new Prototype("rng", classOf[Random])
-  val seedVar = new Prototype("seed", classOf[Long])
+  val workspaceVar = new Prototype[Workspace]("workspace")
+  val rngVar = new Prototype[Random]("rng")
+  val seedVar = new Prototype[Long]("seed")
   
   implicit def contextDecorator(variables: IContext) = new {
     def toBinding = {

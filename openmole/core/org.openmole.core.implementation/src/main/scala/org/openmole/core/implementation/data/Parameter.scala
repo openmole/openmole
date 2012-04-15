@@ -24,6 +24,8 @@ object Parameter {
     override def compare(left: IParameter[_], right: IParameter[_]) = 
       Prototype.prototypeOrderingOnName.compare(left.variable.prototype, right.variable.prototype)
   }
+  
+  implicit def tuple2IterableToParameters(values: Iterable[(IPrototype[T], T) forSome {type T}]) = values.map{case(p,v) => new Parameter(p,v)}
 }
 
 class Parameter[T](val variable: IVariable[T], val `override`: Boolean) extends IParameter[T] {

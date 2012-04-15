@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -44,6 +44,7 @@ import org.openmole.core.model.IPuzzleFirstAndLast
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
+import org.openmole.core.model.task.IPluginSet
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.builder.Builder
 import org.openmole.plugin.method.evolution.NSGA2SteadyElitismTask
@@ -121,42 +122,42 @@ object Evolution {
     populationSize: Int,
     archiveSize: Int,
     maxGenerationsSteady: Int,
-    distributionIndex: Double,
-    rank: Rank
-  ): NSGA2Sigma = { 
-    val genomeWithSigmaPrototype = new Prototype(name + "Genome", classOf[GAGenomeWithSigma])
-    val individualPrototype = new Prototype(name + "Individual", classOf[Individual[GAGenomeWithSigma, GAFitness]])
-    val archivePrototype = new Prototype(name + "Archive", classOf[Array[Individual[GAGenomeWithSigma, GAFitness] with Distance with Ranking]])
-    val steadySinceProto = new Prototype(name + "SteadySince", classOf[Int])
-    val fitnessProto = new Prototype(name + "Fitness", classOf[GAFitness])
-    val generationProto = new Prototype(name + "Generation", classOf[Int])
-    val initialGenomeProto = new Prototype(name + "InitialGenomes", classOf[Array[Array[Double]]])
+    distributionIndex: Double = 2,
+    rank: Rank = new ParetoRank
+  )(implicit plugins: IPluginSet): NSGA2Sigma = { 
+    val genomeWithSigmaPrototype = new Prototype[GAGenomeWithSigma](name + "Genome")
+    val individualPrototype = new Prototype[Individual[GAGenomeWithSigma, GAFitness]](name + "Individual")
+    val archivePrototype = new Prototype[Array[Individual[GAGenomeWithSigma, GAFitness] with Distance with Ranking]](name + "Archive")
+    val steadySinceProto = new Prototype[Int](name + "SteadySince")
+    val fitnessProto = new Prototype[GAFitness](name + "Fitness")
+    val generationProto = new Prototype[Int](name + "Generation")
+    val initialGenomeProto = new Prototype[Array[Array[Double]]](name + "InitialGenomes")
     val genomeSize = scaling.scales.size
     
-    val firstCapsule = new StrainerCapsule(new EmptyTask(name + "First"))
+    val firstCapsule = new StrainerCapsule(EmptyTask(name + "First"))
     
     val sampling = new SigmaGenomeSampling(genomeWithSigmaPrototype, initialGenomeProto, genomeSize, populationSize)
-    val exploreSampling = new ExplorationTask(name + "GenomeExploration", sampling) 
+    val exploreSampling = ExplorationTask(name + "GenomeExploration", sampling) 
     val explorationCapsule = new Capsule(exploreSampling)
 
-    val scalingTask = new ScalingGenomeTask(name + "ScalingGenome", genomeWithSigmaPrototype)
+    val scalingTask = ScalingGenomeTask(name + "ScalingGenome", genomeWithSigmaPrototype)
     
     scaling.inputs.map{
       name => (name, scaling.scales.getOrElse(name, throw new UserBadDataError("Scale not found for input " + name)))}.foreach { 
-        case (name, (min, max)) => scalingTask.scale(new Prototype(name, classOf[Double]), min, max)
+        case (name, (min, max)) => scalingTask.scale += (new Prototype[Double](name), min, max)
       }
       
     
     val scalingCaps = new Capsule(scalingTask)
     
-    val toIndividualTask = new ToIndividualTask(name + "ToIndividual", genomeWithSigmaPrototype, individualPrototype)
+    val toIndividualTask = ToIndividualTask(name + "ToIndividual", genomeWithSigmaPrototype, individualPrototype)
     objectives.objectives.reverse.foreach {
-      case (o, v) => toIndividualTask.objective(o, v)
+      case (o, v) => toIndividualTask.objectives += (o, v)
     }
     
     val toIndividualCapsule = new Capsule(toIndividualTask)
     
-    val elitismTask = new NSGA2SteadyElitismTask(
+    val elitismTask = NSGA2SteadyElitismTask(
       name + "ElitismTask", 
       individualPrototype,
       archivePrototype,
@@ -168,26 +169,26 @@ object Evolution {
     
     val elitismCaps = new MasterCapsule(elitismTask, archivePrototype, steadySinceProto, generationProto)
     
-    val scalingParetoTask = new ScalingParetoTask(name + "ScalingPareto", archivePrototype)
+    val scalingParetoTask = ScalingParetoTask(name + "ScalingPareto", archivePrototype)
     scaling.scales.foreach { 
       case(name, (min, max)) =>
-        scalingParetoTask.scale(new Prototype(name, classOf[Double]), min, max)
+        scalingParetoTask.scale += (new Prototype[Double](name), min, max)
     }
     
     objectives.objectives.reverse.foreach {
-      case(o, _) => scalingParetoTask.objective(o)
+      case(o, _) => scalingParetoTask.objective += o
     }
     
-    scalingParetoTask.addInput(steadySinceProto)
-    scalingParetoTask.addInput(generationProto)
+    scalingParetoTask.inputs += (steadySinceProto)
+    scalingParetoTask.inputs += (generationProto)
     
-    scalingParetoTask.addOutput(steadySinceProto)
-    scalingParetoTask.addOutput(generationProto)
+    scalingParetoTask.outputs += (steadySinceProto)
+    scalingParetoTask.outputs += (generationProto)
    
     val scalingParetoCapsule = new Capsule(scalingParetoTask)
       
     
-    val breedingTask = new NSGA2SteadySigmaBreedTask(
+    val breedingTask = NSGA2SteadySigmaBreedTask(
       name + "Breeding", 
       archivePrototype,
       genomeWithSigmaPrototype,
@@ -197,7 +198,7 @@ object Evolution {
     
     val breedingCaps = new StrainerCapsule(breedingTask)
     
-    val endTask = new EmptyTask(name + "End")
+    val endTask = EmptyTask(name + "End")
     val endCapsule = new StrainerCapsule(endTask)
     
     new Transition(firstCapsule, explorationCapsule)
@@ -229,50 +230,6 @@ object Evolution {
     }
   }
   
-  
-  def nsga2SigmaSteady(
-    name: String,
-    model: IPuzzleFirstAndLast,
-    scaling: Inputs,
-    objectives: Objectives,
-    populationSize: Int,
-    archiveSize: Int,
-    maxGenerationsSteady: Int,
-    distributionIndex: Double
-  ): NSGA2Sigma = 
-   nsga2SigmaSteady(
-      name,
-      model,
-      scaling,
-      objectives,
-      populationSize,
-      archiveSize,
-      maxGenerationsSteady,
-      distributionIndex,
-      new ParetoRank
-    )
-  
-  def nsga2DiversitySigmaSteady(
-    name: String,
-    model: IPuzzleFirstAndLast,
-    scaling: Inputs,
-    objectives: Objectives,
-    populationSize: Int,
-    archiveSize: Int,
-    maxGenerationsSteady: Int,
-    distributionIndex: Double
-  ): NSGA2Sigma = 
-    nsga2SigmaSteady(
-      name,
-      model,
-      scaling,
-      objectives,
-      populationSize,
-      archiveSize,
-      maxGenerationsSteady,
-      distributionIndex,
-      new ParetoCrowdingRank
-    )
   
   
 }

@@ -26,16 +26,8 @@ object Variable {
 }
 
 class Variable[C](val prototype: IPrototype[C], val value: C) extends IVariable[C] {
-
-  def this(name: String, `type`: Class[C] , value: C) = this(new Prototype[C](name, `type`), value)
-
-  def this(name: String, value: C) = this(name, value.asInstanceOf[AnyRef].getClass.asInstanceOf[Class[C]], value)
   
-  def this(prototype: IPrototype[C]) = this(prototype, null.asInstanceOf[C])
-
-  def this(name: String, `type`: Class[C]) = this(new Prototype[C](name, `type`))
-  
-  override def toString: String = {
+  override def toString: String = 
     prototype.name + "=" + (if(value != null) value.prettify else "null")
-  }
+
 }

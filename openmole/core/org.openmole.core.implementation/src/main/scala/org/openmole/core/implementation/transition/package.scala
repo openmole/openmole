@@ -31,6 +31,7 @@ package object transition {
   implicit def transitionsPuzzleDecorator(from: IPuzzleFirstAndLast) = new TransitionDecorator(from)
   implicit def transitionsCapsuleDecorator(from: ICapsule) = new TransitionDecorator(from)
   implicit def transitionsTaskDecorator(from: ITask) = new TransitionDecorator(from)
+  implicit def transitionsTaskDecorator(from: TaskBuilder) = new TransitionDecorator(from.toTask)
   
   class TransitionDecorator(from: IPuzzleFirstAndLast){
     def -< (to: IPuzzleFirstAndLast) = {

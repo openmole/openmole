@@ -17,34 +17,40 @@
 
 package org.openmole.plugin.task.systemexec
 
-import org.openmole.core.model.data.IVariable
+import org.openmole.core.model.data._
+import org.openmole.core.model.task.IPluginSet
 import org.openmole.misc.tools.service.ProcessUtil._
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.tools.VariableExpansion._
+import org.openmole.plugin.task.external.ExternalTaskBuilder
 import scala.collection.JavaConversions._
 
+object SystemExecTask {
+  
+  def apply(
+    name: String, 
+    cmd: String, 
+    dir: String = "",
+    exceptionIfReturnValueNotZero: Boolean = true,
+    returnValue: Option[IPrototype[Int]] = None
+  )(implicit plugins: IPluginSet) = new ExternalTaskBuilder { builder =>
+    def toTask = new SystemExecTask(name, cmd, dir, exceptionIfReturnValueNotZero, returnValue) {
+      val inputs = builder.inputs 
+      val outputs: IDataSet = builder.outputs ++ DataSet(returnValue)
+      val parameters = builder.parameters
+      val provided = builder.provided()
+      val produced = builder.produced()
+    }
+  }
+  
+}
 
-class SystemExecTask(
+sealed abstract class SystemExecTask(
   val name: String, 
   val cmd: String, 
-  val returnValue: Option[IPrototype[Int]], 
+  val dir: String,
   val exceptionIfReturnValueNotZero: Boolean,
-  val relativeDir: String) extends AbstractSystemExecTask {
-  
-  def this(name: String, cmd: String) = this(name, cmd, None, true, "")
-  
-  def this(name: String, cmd: String, relativeDir: String) = this(name, cmd, None, true, relativeDir)
-  
-  def this(name: String, cmd: String, exceptionIfReturnValueNotZero: Boolean) = this(name, cmd, None, exceptionIfReturnValueNotZero, "")
-  
-  def this(name: String, cmd: String, relativeDir: String,  exceptionIfReturnValueNotZero: Boolean) = this(name, cmd, None, exceptionIfReturnValueNotZero, relativeDir)
-  
-  def this(name: String, cmd: String, returnValue: Prototype[Int]) = this(name, cmd, Some(returnValue), false, "")
-  
-  def this(name: String, cmd: String, relativeDir: String, returnValue: Prototype[Int]) = this(name, cmd, Some(returnValue), false, relativeDir)
-  
+  val returnValue: Option[IPrototype[Int]]
+)(implicit val plugins: IPluginSet) extends AbstractSystemExecTask {
   override protected def execute(process: Process, context: IContext) = executeProcess(process,System.out,System.err) -> List.empty[IVariable[_]]
-  
 }

@@ -24,23 +24,43 @@ import fr.iscpif.mgo.ga.GAGenome
 import fr.iscpif.mgo.ga.GAIndividual
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.task.TaskBuilder
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.task.IPluginSet
 
-class ToIndividualTask[T <: GAGenome](
+object ToIndividualTask {
+  
+  def apply[T <: GAGenome](name: String, genome: IPrototype[T], individual: IPrototype[Individual[T, GAFitness]])(implicit plugins: IPluginSet) = 
+    new TaskBuilder { builder =>
+      
+      var _objectives: List[(IPrototype[Double], Double)] = Nil
+      
+      def objectives = new {
+        def +=(p: IPrototype[Double], v: Double) = {
+          inputs += p
+          _objectives ::= (p -> v)
+          builder
+        }
+      }
+      
+      def toTask = new ToIndividualTask[T](name, genome, individual) {
+        val inputs = builder.inputs + genome
+        val outputs = builder.outputs + individual
+        val parameters = builder.parameters
+        val objectives = _objectives.reverse
+      }
+    }
+  
+}
+
+sealed abstract class ToIndividualTask[T <: GAGenome](
   val name: String, 
   genome: IPrototype[T], 
-  individual: IPrototype[Individual[T, GAFitness]]) extends Task { task =>
+  individual: IPrototype[Individual[T, GAFitness]])(implicit val plugins: IPluginSet) extends Task { task =>
   
-  addInput(genome)
-  addOutput(individual)
   
-  var objectives: List[(IPrototype[Double], Double)] = Nil
-  
-  def objective(p: IPrototype[Double], v: Double) = {
-    objectives ::= p -> v
-    addInput(p)
-  }
+  def objectives: List[(IPrototype[Double], Double)]
   
   override def process(context: IContext) = 
     context + new Variable(

@@ -26,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.plugin.task.external.system</artifactId>
+            <artifactId>org.openmole.plugin.task.external</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -36,6 +36,6 @@ trait IMoleTask extends ITask {
    */
   def mole: IMole
   
-  def lastCapsule: ICapsule
+  def last: ICapsule
 
 }

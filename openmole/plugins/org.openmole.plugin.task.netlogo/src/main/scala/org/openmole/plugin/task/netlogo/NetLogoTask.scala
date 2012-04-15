@@ -22,84 +22,61 @@ import java.util.AbstractCollection
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IDataSet
+import org.openmole.core.model.data.IParameterSet
 import org.openmole.core.model.data.IPrototype
-import org.openmole.misc.tools.service.Logger
-import org.openmole.misc.workspace.Workspace
-import org.openmole.plugin.task.external.system.ExternalSystemTask
-import scala.collection.mutable.ListBuffer
+import org.openmole.core.model.task.IPluginSet
+import org.openmole.plugin.task.external.ExternalTask
 
-
-object NetLogoTask extends Logger
-
-abstract class NetLogoTask(
-  val name: String,
-  workspace: Either[(File, String), File],
-  launchingCommands: Iterable[String]) extends ExternalSystemTask {
-
-  def this(name: String, workspace: File, scriptName: String, launchingCommands: Iterable[String]) = 
-    this(name, Left(workspace -> scriptName), launchingCommands)
+object NetLogoTask {
   
-  def this(name: String, workspace: String, scriptName: String, launchingCommands: Iterable[String]) = 
-    this(name, new File(workspace), scriptName, launchingCommands)
-  
-  def this(name: String, script: File, launchingCommands: Iterable[String]) = 
-    this(name, Right(script), launchingCommands)
-  
-  def this(name: String, script: String, launchingCommands: Iterable[String]) = 
-    this(name, new File(script), launchingCommands: Iterable[String])
-    
-  def this(name: String, script: File, launchingCommands: Iterable[String], embedWorkspace: Boolean) = 
-    this(
-      name, 
-      if(embedWorkspace) Left(script.getParentFile, script.getName) 
-      else Right(script),
-      launchingCommands
-    )
-  
-  def this(name: String, script: String, launchingCommands: Iterable[String], embedWorkspace: Boolean) = 
-    this(
-      name, 
-      {
-        val scriptFile = new File(script) 
-        if(embedWorkspace) Left(scriptFile.getParentFile, scriptFile.getName) else Right(scriptFile)
-      },
-      launchingCommands
-    )
-  
-  
-  import NetLogoTask._
-  
-  val inputBinding = new ListBuffer[(IPrototype[_], String)]
-  val outputBinding = new ListBuffer[(String, IPrototype[_])]
-    
-  workspace match {
-    case Left((workspace, scriptName)) => addResource(workspace, false)
-    case Right(script) => addResource(script, true)
+  class Workspace(val location: Either[(File, String), File]) {
+    def this(workspace: File, script: String) = this(Left(workspace, script))
+    def this(script: File) = this(Right(script))
   }
+  
+  
+}
+
+class NetLogoTask(
+  val name: String,
+  val workspace: NetLogoTask.Workspace, 
+  val launchingCommands: Iterable[String],
+  val netLogoInputs: Iterable[(IPrototype[_], String)],
+  val netLogoOutputs: Iterable[(String, IPrototype[_])],
+  val netLogoFactory: NetLogoFactory,
+  val inputs: IDataSet,
+  val outputs: IDataSet,
+  val parameters: IParameterSet,
+  val provided: Iterable[(Either[File, IPrototype[File]], String, Boolean)],
+  val produced: Iterable[(String, IPrototype[File])]
+)(implicit val plugins: IPluginSet) extends ExternalTask {
+  
+  val scriptPath = 
+    workspace.location match {
+      case Left((f, s)) => f.getName + "/" + s
+      case Right(s) => s.getName
+    }
+  
 
   override def process(context: IContext): IContext = {
         
-    val tmpDir = Workspace.newDir("netLogoTask")
+    val tmpDir = org.openmole.misc.workspace.Workspace.newDir("netLogoTask")
     val links = prepareInputFiles(context, tmpDir)
-    
-    val scriptPath = workspace match {
-      case Left((workspace, scriptName)) => deployName(workspace) + "/" + scriptName
-      case Right(script) => deployName(script)
-    }
     
     val script = new File(tmpDir, scriptPath)
     val netLogo = netLogoFactory()
     try {
       netLogo.open(script.getAbsolutePath)
 
-      for (inBinding <- inputBinding) {
+      for (inBinding <- netLogoInputs) {
         val v = context.value(inBinding._1).get
         netLogo.command("set " + inBinding._2 + " " + v.toString)
       }
 
       for (cmd <- launchingCommands) netLogo.command(VariableExpansion.expandData(context, cmd))
                 
-      fetchOutputFiles(context, tmpDir, links) ++ outputBinding.map {
+      fetchOutputFiles(context, tmpDir, links) ++ netLogoOutputs.map {
         case(name, prototype) =>
           val outputValue = netLogo.report(name)
           if (!prototype.`type`.erasure.isArray) new Variable(prototype.asInstanceOf[IPrototype[Any]], outputValue)
@@ -115,21 +92,4 @@ abstract class NetLogoTask(
 
   }
 
-  def addNetLogoInput(prototype: IPrototype[_]): this.type = addNetLogoInput(prototype, prototype.name)
-
-  def addNetLogoInput(prototype: IPrototype[_], binding: String): this.type = {
-    inputBinding += prototype -> binding
-    super.addInput(prototype)
-    this
-  }
-
-  def addNetLogoOutput(binding: String, prototype: IPrototype[_]): this.type = {
-    outputBinding += binding -> prototype
-    super.addOutput(prototype)
-    this
-  }
-
-  def addNetLogoOutput(prototype: IPrototype[_]): this.type = addNetLogoOutput(prototype.name, prototype) 
-
-  def netLogoFactory: NetLogoFactory
 }

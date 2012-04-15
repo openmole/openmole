@@ -37,9 +37,9 @@ class FiltredSamplingSpec extends FlatSpec with ShouldMatchers {
   
   "Filtred sampling" should "remove all value which doesn't match the filters" in {
     
-    val p1 = new Prototype("p1", classOf[Int])
-    val p2 = new Prototype("p2", classOf[Int])
-    val p3 = new Prototype("p3", classOf[Int])
+    val p1 = new Prototype[Int]("p1")
+    val p2 = new Prototype[Int]("p2")
+    val p3 = new Prototype[Int]("p3")
 
     def pList(i: Int,j: Int,k: Int) = List(i,j,k).zip(List(p1,p2,p3)).map{case (v, p) => new Variable(p, v)}
     

@@ -23,37 +23,61 @@ import fr.iscpif.mgo.ga.GAGenome
 import org.openmole.core.implementation.data.Context._
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.task.TaskBuilder
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.implementation.data.Prototype.toArray
 import fr.iscpif.mgo.ga.selection.Ranking
 import fr.iscpif.mgo.tools.Scaling._
+import org.openmole.core.model.task.IPluginSet
 
-class ScalingParetoTask[I <: Individual[GAGenome, GAFitness] with Ranking](
+object ScalingParetoTask {
+  
+  def apply[I <: Individual[GAGenome, GAFitness] with Ranking](name: String, archive: IPrototype[Array[I]])(implicit plugins: IPluginSet) = 
+    new TaskBuilder { builder =>
+    
+    var _scale: List[(IPrototype[Double], Double, Double)] = Nil
+    
+    var _objectives: List[IPrototype[Double]] = Nil
+    def scale = new {
+      def +=(p: IPrototype[Double], min: Double, max: Double) = {
+        _scale ::= ((p, min, max))
+        outputs += toArray(p)
+        builder
+      }
+    }
+    
+    def objective = new {
+      def +=(p: IPrototype[Double]) = {
+        _objectives ::= p
+        builder
+      }
+    }
+    
+    def toTask = new ScalingParetoTask[I](name, archive) {
+        val inputs = builder.inputs + archive
+        val outputs = builder.outputs
+        val parameters = builder.parameters
+        val scale = _scale.reverse
+        val objectives = _objectives.reverse
+    }
+  }
+  
+}
+
+sealed abstract class ScalingParetoTask[I <: Individual[GAGenome, GAFitness] with Ranking](
   val name: String,
-  archivePrototype: IPrototype[Array[I]]) extends Task {
+  archive: IPrototype[Array[I]]) 
+(implicit val plugins: IPluginSet) extends Task {
 
-  addInput(archivePrototype)
-  
-  var scaled: List[(IPrototype[Double], Double, Double)] = Nil
-
-  def scale(p: IPrototype[Double], min: Double, max: Double) = {
-    scaled ::= ((p, min, max))
-    addOutput(toArray(p))
-  }
-  
-  var objectives: List[IPrototype[Double]] = Nil
-  
-  def objective(p: IPrototype[Double]) = {
-    objectives ::= p
-    addOutput(toArray(p))
-  }
+  def scale: List[(IPrototype[Double], Double, Double)]
+  def objectives: List[IPrototype[Double]]
   
   override def process(context: IContext) = {
-    val pareto = Ranking.firstRanked[I](context.valueOrException(archivePrototype))
+    val pareto = Ranking.firstRanked[I](context.valueOrException(archive))
 
     (
-      scaled.reverse.zipWithIndex.map {  case((p, min, max), i) => new Variable(toArray(p), pareto.map{_.genome.values(i).scale(min, max) }.toArray) } ++
+      scale.reverse.zipWithIndex.map {  case((p, min, max), i) => new Variable(toArray(p), pareto.map{_.genome.values(i).scale(min, max) }.toArray) } ++
       objectives.reverse.zipWithIndex.map { case(p, i) => new Variable(toArray(p), pareto.map{_.fitness.values(i)}.toArray) }
     ).toContext
   }

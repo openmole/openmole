@@ -26,38 +26,39 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 import scala.collection.mutable.ListBuffer
-import org.openmole.core.implementation.sampling.ExplicitSampling
-import org.openmole.core.implementation.task.EmptyTask
-import org.openmole.core.implementation.task.ExplorationTask
-import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.sampling._
+import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.transition.EndExplorationTransition
 import org.openmole.core.implementation.transition.ExplorationTransition
 import org.openmole.core.implementation.transition.Slot
 import org.openmole.core.implementation.transition.Transition
 import org.openmole.core.model.data.DataModeMask._
 
+
 @RunWith(classOf[JUnitRunner])
 class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
   
+  
+  implicit val plugins = PluginSet.empty
+  
   "A master capsule" should "execute tasks" in {
-    val p = new Prototype("p", classOf[String])
+    val p = new Prototype[String]("p")
     
-    val t1 = new Task {
+    val t1 = new TestTask {
       val name = "Test write"
+      override val outputs = DataSet(p)
       override def process(context: IContext) = context + (p -> "Test")
     }
     
-    t1.addOutput(p)
-    
-    val t2 = new Task {
+    val t2 = new TestTask {
       val name = "Test read"
+      override val inputs = DataSet(p)
       override def process(context: IContext) = {
         context.value(p).get should equal ("Test")
         context
       }
     }
     
-    t2.addInput(p)
     
     val t1c = new MasterCapsule(t1)
     val t2c = new MasterCapsule(t2)
@@ -69,34 +70,30 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
   
   "A master capsule" should "keep value of a variable from on execution to another" in {
     val data = List("A","A","B","C")
-    val i = new Prototype("i", classOf[String])
-    val n = new Prototype("n", classOf[Int])
+    val i = new Prototype[String]("i")
+    val n = new Prototype[Int]("n")
     
     val sampling = new ExplicitSampling(i, data)
     
-    val exc = new Capsule(new ExplorationTask("Exploration", sampling))
+    val exc = new Capsule(ExplorationTask("Exploration", sampling))
      
-    val emptyT = new EmptyTask("Slave")
-    emptyT.addInput(i)
-    emptyT.addOutput(i)
+    val emptyT = EmptyTask("Slave")
+    emptyT.inputs += i
+    emptyT.outputs += i
     
     val emptyC = new Capsule(emptyT)
      
-    val select = new Task {
+    val select = new TestTask {
       val name = "select"
+      override val inputs = DataSet(n, i)
+      override val outputs = DataSet(n, i)
+      override val parameters = ParameterSet(n -> 0)
       override def process(context: IContext) = {
         val nVal = context.value(n).get
         context + new Variable(n, nVal + 1) + new Variable(i, (nVal + 1).toString)
       }
     }
-    
-    select.addParameter(n, 0)
-    
-    select.addInput(n)
-    select.addInput(i)
-    
-    select.addOutput(n)
-    select.addOutput(i)
+   
     
     val selectCaps = new MasterCapsule(select, n)
 
@@ -111,22 +108,23 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
     @volatile var endCapsExecuted = 0
     
     val data = List("A","A","B","C")
-    val i = new Prototype("i", classOf[String])
-    val isaved = new Prototype("isaved", classOf[Array[String]])
-    val n = new Prototype("n", classOf[Int])
+    val i = new Prototype[String]("i")
+    val isaved = new Prototype[Array[String]]("isaved")
+    val n = new Prototype[Int]("n")
     
     val sampling = new ExplicitSampling(i, data)
     
-    val exc = new Capsule(new ExplorationTask("Exploration", sampling))
+    val exc = new Capsule(ExplorationTask("Exploration", sampling))
      
-    val emptyT = new EmptyTask("Slave")
-    emptyT.addInput(i)
-    emptyT.addOutput(i)
+    val emptyT = EmptyTask("Slave")
+    emptyT.inputs += i
+    emptyT.outputs += i
     
     val emptyC = new Capsule(emptyT)
     
-    val testT = new Task {
+    val testT = new TestTask {
       val name = "Test end"
+      override val inputs = DataSet(isaved)
       override def process(context: IContext) = {
         context.contains(isaved) should equal (true)
         context.value(isaved).get.size should equal (10)
@@ -135,12 +133,14 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
       }
     }
     
-    testT.addInput(isaved)
     
     val testC = new Capsule(testT)
      
-    val select = new Task {
+    val select = new TestTask {
       val name = "select"
+      override val inputs = DataSet(n, isaved, i)
+      override val outputs = DataSet(isaved, n, i)
+      override val parameters = ParameterSet(n -> 0, isaved -> Array.empty[String])
       override def process(context: IContext) = {
         val nVal = context.value(n).get
         val isavedVar = (nVal.toString :: context.variable(isaved).get.value.toList)
@@ -151,16 +151,6 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
       }
     }
     
-    select.addParameter(n, 0)
-    select.addParameter(isaved, Array.empty[String])
-    
-    select.addInput(n)
-    select.addInput(isaved)
-    select.addInput(i)
-    
-    select.addOutput(isaved)
-    select.addOutput(n)
-    select.addOutput(i)
 
     val selectCaps = new MasterCapsule(select, n, isaved)
     

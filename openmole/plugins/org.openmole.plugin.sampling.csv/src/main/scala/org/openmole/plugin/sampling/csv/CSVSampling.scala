@@ -22,6 +22,7 @@ import scala.collection.mutable.HashMap
 import scala.collection.immutable.TreeMap
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.implementation.sampling.Sampling
+import org.openmole.core.implementation.sampling.SamplingBuilder
 import org.openmole.core.model.data._
 import java.io.FileReader
 import org.openmole.core.implementation.data._
@@ -29,75 +30,49 @@ import org.openmole.core.model.sampling.ISampling
 import au.com.bytecode.opencsv.CSVReader
 import collection.JavaConversions._
 
-class CSVSampling(val csvFile: File) extends Sampling {
-  /**
-   * Creates an intstance of CSVPlan.
-   *
-   * @param csvFilePath, the path of the CSV file as a String
-   */
-  def this(csvFilePath: String) = this(new File(csvFilePath))
+object CSVSampling {
   
-  override def prototypes = columns.map{_.proto} ::: fileColumns.map{_.proto}
-  
-  private var columns = List[PrototypeColumn]()
-  private var fileColumns = List[FileProtoypeColumn]()
-  
-  /**
-   * Adds a prototype to be takken into account in the DoE
-   *
-   * @param proto, the prototyde to be added
-   */
-  def addColumn(proto: IPrototype[_]): Unit = columns = new PrototypeColumn(proto.name,proto) :: columns
-  
-  /**
-   * 
-   * @param dataset
-   */
-  def addColumn(dataSet: DataSet): Unit = dataSet.foreach{d=> columns= new PrototypeColumn(d.prototype.name,d.prototype)::columns}
-  
-  /**
-   * Adds a prototype taken into account in the DoE and mapped to a csv header
-   *
-   * @param proto, the prototyde to be added
-   * @param headerName, the mapped header
-   */
-  def addColumnAs(headerName: String, proto: IPrototype[_]): Unit = columns= new PrototypeColumn(headerName, proto):: columns
-  
-  /**
-   * Adds a prototype extended from a File to be takken into account in the DoE
-   *
-   * @param proto, the prototyde to be added
-   * @param basePath, the base path of the considered file (which is thus considered relativaly to this path) as a String
-   */
-  def addColumn(proto: IPrototype[File],basePath: String): Unit = addColumn(proto, new File(basePath))
+  def apply(
+    file: File    
+  ) = new SamplingBuilder { builder =>
+    var _columns: List[(String, IPrototype[_])] = List.empty
+    var _fileColumns: List[(String, File, IPrototype[File])] = List.empty
     
-  /**
-   * Adds a prototype extended from a File to be taken into account in the DoE
-   *
-   * @param proto, the prototyde to be added
-   * @param basePath, the base path of the considered file (which is thus considered relativaly to this path) as a File
-   */
-  def addColumn(proto: IPrototype[File],baseFile: File): Unit = fileColumns= new FileProtoypeColumn(proto.name,proto,baseFile)::fileColumns
+    def columns = new {
+      
+      def +=(proto: IPrototype[_]): builder.type = this.+=(proto.name, proto)
+      def +=(name: String, proto: IPrototype[_]): builder.type = {
+        _columns ::= (name, proto)
+        builder
+      }
+      def +=(name: String, dir: File, proto: IPrototype[File]): builder.type = {
+        _fileColumns ::= ((name, dir, proto))
+        builder
+      }
+      
+      def +=(dir: File, proto: IPrototype[File]): builder.type = this.+=(proto.name, dir, proto)
+    }
+    
+    
+    def toSampling = new CSVSampling(file) {
+      val columns = builder._columns.reverse
+      val fileColumns = builder._fileColumns.reverse
+    }
+  }
   
+}
 
-  /**
-   * Adds a prototype extended from a File to be takken into account in the DoE
-   *
-   * @param headerName, the name of the header to be matched with
-   * @param proto, the prototyde to be added
-   * @param basePath, the base path of the considered file (which is thus considered relativaly to this path) as a String
-   */
-  def addColumnAs(headerName: String, proto: IPrototype[File],basePath: String): Unit = addColumnAs(headerName, proto,new File(basePath))
+
+abstract sealed class CSVSampling(file: File) extends Sampling {
+
+  override def prototypes = 
+    columns.map{case(_, p) => p} ::: 
+  fileColumns.map{case(_, _, p) => p} ::: Nil
   
-  /**
-   * Adds a prototype extended from a File to be takken into account in the DoE
-   *
-   * @param headerName, the name of the header to be matched with
-   * @param proto, the prototyde to be added
-   * @param basePath, the base path of the considered file (which is thus considered relativaly to this path) as a File
-   */
-  def addColumnAs(headerName: String, proto: IPrototype[File],baseFile: File): Unit = fileColumns= new FileProtoypeColumn(headerName,proto,baseFile):: fileColumns
+  def columns: List[(String, IPrototype[_])]
+  def fileColumns: List[(String, File, IPrototype[File])]
   
+ 
   
   /**
    * Builds the plan.
@@ -105,31 +80,37 @@ class CSVSampling(val csvFile: File) extends Sampling {
    */
   override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = {
     var listOfListOfValues = List[Iterable[IVariable[_]]]()
-    val reader = new CSVReader(new FileReader(csvFile))
+    val reader = new CSVReader(new FileReader(file))
     val headers = reader.readNext.toArray
     
     //test wether prototype names belong to header names
-    columns.foreach(x=> {val i= headers.indexOf(x.name);
-                            if(i == -1) throw new UserBadDataError("Unknown column name : " + x.name)
-                            else {x.index = i;}})
-    
-    fileColumns.foreach(x=> {val i= headers.indexOf(x.name)
-                            if(i == -1) throw new UserBadDataError("Unknown column name : " + x.name)
-                            else {x.index = i}})
-    
-    var nextLine = reader.readNext
-    while(nextLine != null) {
-      var values = List[IVariable[_]]()
-      columns.filter(_.index != -1).foreach{p=> values = new Variable(p.proto.asInstanceOf[Prototype[Any]], StringConvertor.typeMapping(p.proto.`type`.erasure).convert(nextLine(p.index)))::values}
-      fileColumns.foreach{p=> values = new Variable(p.proto, new FileMapping(p.filePath).convert(nextLine(p.index)))::values}
-      listOfListOfValues= values::listOfListOfValues
-      nextLine = reader.readNext
+    val columnsIndexes = columns.map {
+      case(name, _) => 
+        val i = headers.indexOf(name)
+        if(i == -1) throw new UserBadDataError("Unknown column name : " + name)
+        else i
     }
-    reader.close
-    listOfListOfValues.iterator
+    
+    val fileColumnsIndexes = 
+      fileColumns.map{
+        case(name,_,_)=> 
+          val i = headers.indexOf(name)
+          if(i == -1) throw new UserBadDataError("Unknown column name : " + name)
+          else i
+      }
+      
+    Iterator.continually(reader.readNext).takeWhile(_ != null).map {
+      line =>
+      (columns zip columnsIndexes).map{
+        case((_, p), i) => new Variable(p.asInstanceOf[Prototype[Any]], StringConvertor.typeMapping(p.`type`.erasure).convert(line(i)))
+      } :::
+      (fileColumns zip fileColumnsIndexes).map{
+        case((_, f, p), i) => new Variable(p, new FileMapping(f).convert(line(i)))
+      } ::: Nil
+    }
+    
+   
   }
   
-  class PrototypeColumn(val name: String,val proto: IPrototype[_],var index: Int = -1)
-  class FileProtoypeColumn(val name: String,val proto: IPrototype[File], val filePath: File,var index: Int= -1)
-  
+   
 }

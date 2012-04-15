@@ -21,5 +21,5 @@ import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IPrototype
 
 object SensitivityTask {
-  def indice(input: IPrototype[Double], output: IPrototype[Double]) = new Prototype(input.name + output.name, classOf[Double])
+  def indice(input: IPrototype[Double], output: IPrototype[Double]) = new Prototype[Double](input.name + output.name)
 }

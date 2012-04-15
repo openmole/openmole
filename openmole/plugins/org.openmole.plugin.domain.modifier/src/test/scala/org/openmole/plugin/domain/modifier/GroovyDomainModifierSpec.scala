@@ -32,7 +32,7 @@ import org.junit.runner.RunWith
 class GroovyDomainModifierSpec extends FlatSpec with ShouldMatchers {
   
   "GroovyDomainModifier" should "change the values of a domain using groovy code" in {
-    val p1 = new Prototype("p1", classOf[Int])
+    val p1 = new Prototype[Int]("p1")
     val r1 = (1 to 3)
     
     val d1 = new IDomain[Int] with IIterable[Int] {

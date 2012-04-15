@@ -20,9 +20,12 @@ package org.openmole.plugin.instantrerun.filesystem
 import org.openmole.misc.workspace.Workspace
 import org.openmole.core.implementation.mole.Mole
 import org.openmole.core.implementation.mole.MoleExecution
-import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.transition.Transition
 import org.openmole.core.implementation.mole.Capsule
+import org.openmole.core.implementation.data.Context
+import org.openmole.core.implementation.data.DataSet
+import org.openmole.core.implementation.data.ParameterSet
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IContext
 
@@ -40,24 +43,31 @@ import scala.collection.mutable.ListBuffer
 class FileSystemInstantRerunSpec extends FlatSpec with ShouldMatchers {
 
   "The instant rerun" should "avoid the second execution of the task" in {
-   val p = new Prototype("p", classOf[java.lang.Long])
+   val p = new Prototype[Long]("p")
    val res = new ListBuffer[Long]
     
     val t1 = new Task {
       val name = "Test instant rerun"
-      override def process(context: IContext) = context + (p -> new java.lang.Long(System.currentTimeMillis))
+      val inputs = DataSet.empty
+      val outputs = DataSet(p)
+      val parameters = ParameterSet.empty
+      val plugins = PluginSet.empty
+      override def process(context: IContext) = Context.empty + (p -> System.currentTimeMillis)
     }
     
     val t2 = new Task {
       val name = "Add result"
+      
+      val inputs = DataSet(p)
+      val outputs = DataSet.empty
+      val parameters = ParameterSet.empty
+      val plugins = PluginSet.empty
+      
       override def process(context: IContext) = {
         res += context.value(p).get
         context
       }
     }
-    
-    t1.addOutput(p)
-    t2.addInput(p)
     
     val t1c = new Capsule(t1)
     val t2c = new Capsule(t2)
