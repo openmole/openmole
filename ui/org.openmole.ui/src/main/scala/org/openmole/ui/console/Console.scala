@@ -31,6 +31,8 @@ import scala.tools.nsc.interpreter.JLineReader
 
 class Console {
 
+ 
+  
   @tailrec private def initPassword: Unit = {
     val message = (if(Workspace.passwordChoosen) "Enter your OpenMOLE password" else "OpenMOLE Password has not been set yet, choose a  password") + "  (for preferences encryption):"
   
@@ -81,7 +83,8 @@ class Console {
       loop.interpret("import org.openmole.core.implementation.sampling._")
       loop.interpret("import org.openmole.core.implementation.task._")
       loop.interpret("import org.openmole.core.implementation.transition._")
-  
+      loop.interpret("import org.openmole.ui.console.Implicits._")
+      
       loop.bind("commands", new Command)
       loop.interpret("import commands._")
     }

@@ -56,7 +56,7 @@ class Command {
       
   }
   
-  def print(mole: IMole) = {
+  def structure(mole: IMole) = {
     mole.capsules.zipWithIndex.foreach { 
       case(c, i) => 
         println(i + " " + c + " (" + c.outputTransitions.map{
