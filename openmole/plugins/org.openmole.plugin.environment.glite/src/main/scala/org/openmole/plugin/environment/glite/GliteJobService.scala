@@ -63,7 +63,7 @@ class GliteJobService(jobServiceURI: URI, val environment: GliteEnvironment, ove
       try generateScript(serializedJob, outputFilePath, environment.memorySizeForRuntime.intValue, os)
       finally os.close
       
-      val jobDescription = buildJobDescription(runtime, script, environment.attributes)
+      val jobDescription = buildJobDescription(runtime, script, environment.allAttributes)
       val job = jobServiceCache.createJob(jobDescription)
       job.run
       

@@ -27,17 +27,22 @@ import Requirement._
 object JSAGAEnvironment {
   val DefaultRequieredMemory  = new ConfigurationLocation("JSAGAEnvironment", "RequieredMemory")
 
-  Workspace += (DefaultRequieredMemory, "1024")
+  Workspace += (DefaultRequieredMemory, "1024")  
 }
 
 
-abstract class JSAGAEnvironment(val inAttributes: Option[Map[String, String]]) extends BatchEnvironment {
+abstract class JSAGAEnvironment extends BatchEnvironment {
   import JSAGAEnvironment._
     
+  
   val memory = max(Workspace.preferenceAsInt(DefaultRequieredMemory), memorySizeForRuntime).toString
   
-  val attributes = inAttributes match {
-    case Some(map) => if(map.contains(MEMORY)) map else map + {MEMORY -> memory}
-    case None => Map(MEMORY -> memory)
+  def attributes: Map[String, String]
+  val allAttributes = {
+    attributes.get(MEMORY) match {
+      case Some(m) => if(m < memory) attributes + (MEMORY -> memory) else attributes
+      case None => attributes + (MEMORY -> memory)
+    }
   }
+  
 }

@@ -28,7 +28,7 @@ import org.openmole.core.batch.environment.PersistentStorage
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.glite.internal.BDII
 import org.openmole.plugin.environment.glite.internal.OverSubmissionAgent
-import org.openmole.plugin.environment.jsaga.JSAGAEnvironment
+import org.openmole.plugin.environment.jsaga._
 
 import scala.collection.JavaConversions._
 
@@ -80,46 +80,22 @@ object GliteEnvironment {
   Workspace += (JobShakingProbabilityQueued, "0.01")
 }
 
-class GliteEnvironment(val voName: String, val vomsURL: String, val bdii: String, val myProxy: Option[MyProxy], attributes: Option[Map[String, String]], val memoryForRuntime: Option[Int], val fqan: String = "") extends JSAGAEnvironment(attributes) {
+class GliteEnvironment(
+  val voName: String,
+  val vomsURL: String,
+  val bdii: String,
+  val myProxy: Option[MyProxy] = None,
+  val attributes: Map[String, String] = Map.empty,
+  val memoryForRuntime: Int = Workspace.preferenceAsInt(JSAGAEnvironment.DefaultRequieredMemory), 
+  val fqan: String = "") extends JSAGAEnvironment {
 
   import GliteEnvironment._
 
   val threadsBySE = Workspace.preferenceAsInt(LocalThreadsBySELocation)
   val threadsByWMS = Workspace.preferenceAsInt(LocalThreadsByWMSLocation)
   
-  
   Updater.registerForUpdate(new OverSubmissionAgent(this))
   
-  def this(voName: String, vomsURL: String, bdii: String) = this(voName, vomsURL, bdii, None, None, None)
-
-  def this(voName: String, vomsURL: String, bdii: String, attributes: java.util.Map[String, String]) = this(voName, vomsURL, bdii, None, Some(attributes.toMap), None)
- 
-  def this(voName: String, vomsURL: String, bdii: String, memoryForRuntime: Int) = this(voName, vomsURL, bdii, None, None, Some(memoryForRuntime))
-
-  def this(voName: String, vomsURL: String, bdii: String, memoryForRuntime: Int, attributes: java.util.Map[String, String]) = this(voName, vomsURL, bdii, None, Some(attributes.toMap), Some(memoryForRuntime))
-  
-  def this(voName: String, vomsURL: String, bdii: String, myProxy: MyProxy) =this(voName, vomsURL, bdii, Some(myProxy), None, None)
-
-  def this(voName: String, vomsURL: String, bdii: String, myProxy: MyProxy, attributes: java.util.Map[String, String]) = this(voName, vomsURL, bdii, Some(myProxy), Some(attributes.toMap), None)
- 
-  def this(voName: String, vomsURL: String, bdii: String, myProxy: MyProxy, memoryForRuntime: Int) =this(voName, vomsURL, bdii, Some(myProxy), None, Some(memoryForRuntime))
-  
-  def this(voName: String, vomsURL: String, bdii: String, myProxy: MyProxy, memoryForRuntime: Int, attributes: java.util.Map[String, String]) = this(voName, vomsURL, bdii, Some(myProxy), Some(attributes.toMap), Some(memoryForRuntime))
-  
-  def this(voName: String, vomsURL: String, bdii: String, fqan: String) = this(voName, vomsURL, bdii, None, None, None)
-
-  def this(voName: String, vomsURL: String, bdii: String, fqan: String, attributes: java.util.Map[String, String]) = this(voName, vomsURL, bdii, None, Some(attributes.toMap), None, fqan)
- 
-  def this(voName: String, vomsURL: String, bdii: String, fqan: String, memoryForRuntime: Int) = this(voName, vomsURL, bdii, None, None, Some(memoryForRuntime), fqan)
-  
-  def this(voName: String, vomsURL: String, bdii: String, fqan: String, memoryForRuntime: Int, attributes: java.util.Map[String, String]) = this(voName, vomsURL, bdii, None, Some(attributes.toMap), Some(memoryForRuntime), fqan)
-  
-  def this(voName: String, vomsURL: String, bdii: String, fqan: String, myProxy: MyProxy) =this(voName, vomsURL, bdii, Some(myProxy), None, None, fqan)
-
-  def this(voName: String, vomsURL: String, bdii: String, fqan: String, myProxy: MyProxy, attributes: java.util.Map[String, String]) = this(voName, vomsURL, bdii, Some(myProxy), Some(attributes.toMap), None, fqan)
- 
-  def this(voName: String, vomsURL: String, bdii: String, fqan: String, myProxy: MyProxy, memoryForRuntime: Int, attributes: java.util.Map[String, String]) = this(voName, vomsURL, bdii, Some(myProxy), Some(attributes.toMap), Some(memoryForRuntime), fqan)
-
   override def allJobServices: Iterable[GliteJobService] = {
     val jss = getBDII.queryWMSURIs(voName, Workspace.preferenceAsDurationInMs(FetchRessourcesTimeOutLocation).toInt)
 

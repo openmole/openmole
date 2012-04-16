@@ -53,32 +53,15 @@ abstract class JSAGAJobService(jobServiceURI: URI) extends JobService {
 
   import JSAGAJobService._
   
-  //override def environment: JSAGAEnvironment
-  
   @transient override lazy val description = new ServiceDescription(jobServiceURI.toString)
   
-  /*override def test: Boolean =
-    try {
-      val hello = JSAGAJobBuilder.helloWorld
-      val job = jobServiceCache.createJob(hello)
-
-      job.run
-      job.getState
-      //job.cancel();
-      true
-    } catch {
-      case e => 
-        logger.log(FINE, jobServiceURI + ": " + e.getMessage, e)
-        false
-    } */
-
   @transient lazy val jobServiceCache = {
     val task = {
       val url = URLFactory.createURL(jobServiceURI.toString)
       JobFactory.createJobService(TaskMode.ASYNC, JSAGASessionService.session(jobServiceURI.toString), url)
     } 
 
-    task.get(Workspace.preferenceAsDurationInMs(JSAGAJobService.CreationTimeout), TimeUnit.MILLISECONDS);
+    task.get(Workspace.preferenceAsDurationInMs(JSAGAJobService.CreationTimeout), TimeUnit.MILLISECONDS)
   }
 
 }
