@@ -7,7 +7,7 @@
         <version>0.5-SNAPSHOT</version>
     </parent>
 
-    <artifactId>org.openmole.plugin.groupingstrategy.batch</artifactId>
+    <artifactId>org.openmole.plugin.grouping.batch</artifactId>
 
     <dependencies>
 	<dependency>

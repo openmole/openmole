@@ -26,7 +26,7 @@
 	<module>org.openmole.plugin.environment.desktopgrid</module>
 	<module>org.openmole.plugin.environment.ssh</module>
         <module>org.openmole.plugin.grouping.onvariable</module>
-        <module>org.openmole.plugin.groupingstrategy.batch</module>
+        <module>org.openmole.plugin.grouping.batch</module>
         <module>org.openmole.plugin.task.netlogo</module>
         <module>org.openmole.plugin.task.netlogo4</module>
         <module>org.openmole.plugin.task.netlogo5</module>

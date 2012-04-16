@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.groupingstrategy.batch
+package org.openmole.plugin.grouping.batch
 
 import java.util.Random
 import org.openmole.core.implementation.mole.MoleJobGroup
