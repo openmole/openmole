@@ -48,13 +48,13 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.plugin.groupingstrategy.onvariable</artifactId>
+            <artifactId>org.openmole.plugin.grouping.onvariable</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
 	<dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.plugin.groupingstrategy.batch</artifactId>
+            <artifactId>org.openmole.plugin.grouping.batch</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
