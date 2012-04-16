@@ -28,11 +28,11 @@ package object mole {
   
   implicit def moleToMoleExecutionConverter(mole: IMole) = new MoleExecution(mole)
   
-  implicit def puzzleToMoleExecutionConverter(puzzle: Puzzle) = 
-    new MoleExecution(puzzle, puzzle.selection, puzzle.grouping)
-
-  implicit def fixedEnvironmentSelectionDecoraton(puzzle: Puzzle) = new {
+  implicit def puzzleMoleDecoraton(puzzle: Puzzle) = new {
     def on(env: IEnvironment) = 
-      puzzle.copy(selection = puzzle.selection + (puzzle.last -> new FixedEnvironmentSelection(env)))                                                    
+      puzzle.copy(selection = puzzle.selection + (puzzle.last -> new FixedEnvironmentSelection(env)))  
+    def toExecution = new MoleExecution(puzzle, puzzle.selection, puzzle.grouping)
   }
+  
+  //implicit def puzzleToMoleExecutionConverter(puzzle: Puzzle) = puzzle.toExecution
 }
