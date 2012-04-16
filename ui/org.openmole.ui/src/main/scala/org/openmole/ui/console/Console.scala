@@ -85,6 +85,7 @@ class Console {
       loop.interpret("import org.openmole.core.implementation.transition._")
       loop.interpret("import org.openmole.core.implementation.puzzle._")
       loop.interpret("import org.openmole.ui.console.Implicits._")
+      loop.interpret("import java.io.File")
       
       loop.bind("commands", new Command)
       loop.interpret("import commands._")
