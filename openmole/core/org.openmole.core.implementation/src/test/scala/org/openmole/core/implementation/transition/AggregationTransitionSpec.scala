@@ -20,8 +20,6 @@ package org.openmole.core.implementation.transition
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.data.Prototype._
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.sampling.ExplicitSampling
 import org.openmole.core.model.transition.ICondition
@@ -56,10 +54,10 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
     
     val testT = new TestTask {
       val name = "Test"
-      override def inputs = DataSet(toArray(i))
+      override def inputs = DataSet(i.toArray)
       override def process(context: IContext) = {
-        context.contains(toArray(i)) should equal (true)
-        context.value(toArray(i)).get.sorted.deep should equal (data.toArray.deep)
+        context.contains(i.toArray) should equal (true)
+        context.value(i.toArray).get.sorted.deep should equal (data.toArray.deep)
         endCapsExecuted += 1
         context
       }
@@ -94,12 +92,12 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
     
     val testT = new TestTask {
       val name = "Test"
-      override val inputs = DataSet(toArray(i))
+      override val inputs = DataSet(i.toArray)
       override def process(context: IContext) = {
-        context.contains(toArray(i)) should equal (true)
+        context.contains(i.toArray) should equal (true)
         
-        context.value(toArray(i)).get.getClass should equal (classOf[Array[Int]])
-        context.value(toArray(i)).get.sorted.deep should equal (data.sorted.toArray.deep)
+        context.value(i.toArray).get.getClass should equal (classOf[Array[Int]])
+        context.value(i.toArray).get.sorted.deep should equal (data.sorted.toArray.deep)
         endCapsExecuted += 1
         context
       }
@@ -132,10 +130,10 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
     
     val testT = new TestTask {
       val name = "Test"
-      override val inputs = DataSet(toArray(i))
+      override val inputs = DataSet(i.toArray)
       override def process(context: IContext) = {
-        context.contains(toArray(i)) should equal (true)
-        context.value(toArray(i)).get.sorted.deep should equal (data.toArray.deep)
+        context.contains(i.toArray) should equal (true)
+        context.value(i.toArray).get.sorted.deep should equal (data.toArray.deep)
         endCapsExecuted += 1
         context
       }

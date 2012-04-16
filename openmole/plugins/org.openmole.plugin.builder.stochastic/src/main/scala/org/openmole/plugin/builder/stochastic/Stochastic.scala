@@ -57,7 +57,7 @@ object Stochastic {
   def statistics = new Statistics
   
   private def toArray(x: List[(IPrototype[Double], IPrototype[Double])]) =
-    x.map { case(output, stat) => (Prototype.toArray(output), stat)}
+    x.map { case(output, stat) => (output.toArray, stat)}
   
   def statistics(
     name: String,

@@ -133,9 +133,9 @@ class DataChannelSpec extends FlatSpec with ShouldMatchers {
 
     val tr = new TestTask {
       val name = "Test read"
-      override val inputs = DataSet(toArray(j))
+      override val inputs = DataSet(j.toArray)
       override def process(context: IContext) = {
-        context.value(toArray(j)).get.size should equal (data.size)
+        context.value(j.toArray).get.size should equal (data.size)
         executed = true
         context
       }

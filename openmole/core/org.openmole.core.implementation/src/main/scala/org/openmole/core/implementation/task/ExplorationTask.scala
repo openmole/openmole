@@ -42,7 +42,7 @@ object ExplorationTask {
       def toTask = 
         new ExplorationTask(name, sampling) {
           val inputs = builder.inputs + sampling.inputs
-          val outputs = builder.outputs ++ sampling.prototypes.map{p => new Data(toArray(p), DataMode(DataModeMask.explore))}
+          val outputs = builder.outputs ++ sampling.prototypes.map{p => new Data(p, DataMode(DataModeMask.explore)).toArray}
           val parameters = builder.parameters
         }
       
@@ -66,10 +66,10 @@ sealed abstract class ExplorationTask(val name: String, val sampling: ISampling)
     
     context ++ variablesValues.map{
       case(k,v) => 
-        try new Variable(toArray(k).asInstanceOf[IPrototype[Array[_]]], 
+        try new Variable(k.toArray.asInstanceOf[IPrototype[Array[_]]], 
                          v.toArray(k.`type`.asInstanceOf[Manifest[Any]]))
         catch {
-          case e: ArrayStoreException => throw new UserBadDataError("Cannot fill factor values in " + toArray(k) + ", values " + v)
+          case e: ArrayStoreException => throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)
         }
     }
   }

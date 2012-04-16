@@ -21,12 +21,11 @@ import fr.iscpif.mgo.Individual
 import fr.iscpif.mgo.ga.GAFitness
 import fr.iscpif.mgo.ga.GAGenome
 import org.openmole.core.implementation.data.Context._
-import org.openmole.core.implementation.data.Variable
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.task.TaskBuilder
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
-import org.openmole.core.implementation.data.Prototype.toArray
 import fr.iscpif.mgo.ga.selection.Ranking
 import fr.iscpif.mgo.tools.Scaling._
 import org.openmole.core.model.task.IPluginSet
@@ -42,7 +41,7 @@ object ScalingParetoTask {
     def scale = new {
       def +=(p: IPrototype[Double], min: Double, max: Double) = {
         _scale ::= ((p, min, max))
-        outputs += toArray(p)
+        outputs += p.toArray
         builder
       }
     }
@@ -77,8 +76,8 @@ sealed abstract class ScalingParetoTask[I <: Individual[GAGenome, GAFitness] wit
     val pareto = Ranking.firstRanked[I](context.valueOrException(archive))
 
     (
-      scale.reverse.zipWithIndex.map {  case((p, min, max), i) => new Variable(toArray(p), pareto.map{_.genome.values(i).scale(min, max) }.toArray) } ++
-      objectives.reverse.zipWithIndex.map { case(p, i) => new Variable(toArray(p), pareto.map{_.fitness.values(i)}.toArray) }
+      scale.reverse.zipWithIndex.map {  case((p, min, max), i) => new Variable(p.toArray, pareto.map{_.genome.values(i).scale(min, max) }.toArray) } ++
+      objectives.reverse.zipWithIndex.map { case(p, i) => new Variable(p.toArray, pareto.map{_.fitness.values(i)}.toArray) }
     ).toContext
   }
   

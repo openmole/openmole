@@ -24,20 +24,6 @@ import scala.reflect.Manifest
 
 object Prototype {
   
-  def toArray[T](prototype: IPrototype[T], nbLevel: Int): IPrototype[_] = {
-    if(nbLevel <= 0) prototype
-    else { 
-      val arrayProto = new Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[IPrototype[Array[_]]]
-      if(nbLevel <= 1) arrayProto
-      else toArray(arrayProto, nbLevel - 1)
-    }
-  }
-
-  def fromArray[T](prototype: IPrototype[Array[T]]): IPrototype[T] =
-    (new Prototype(prototype.name)(prototype.`type`.fromArray.toManifest)).asInstanceOf[IPrototype[T]]
-  
-  def toArray[T](prototype: IPrototype[T]): IPrototype[Array[T]] =
-    new Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[IPrototype[Array[T]]]
 
   implicit lazy val prototypeOrderingOnName = new Ordering[IPrototype[_]] {
     override def compare(left: IPrototype[_], right: IPrototype[_]) = 

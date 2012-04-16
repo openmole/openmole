@@ -179,11 +179,11 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
     
     val t3 = new TestTask {
       val name = "Test read"
-      override def inputs = DataSet(p1, toArray(p2))
+      override def inputs = DataSet(p1, p2.toArray)
       override def process(context: IContext) = {
         context.value(p1).get should equal ("Test1")
-        context.value(toArray(p2)).get.head should equal ("Test2") 
-        context.value(toArray(p2)).get.size should equal (100)
+        context.value(p2.toArray).get.head should equal ("Test2") 
+        context.value(p2.toArray).get.size should equal (100)
         executed = true
         context
       }

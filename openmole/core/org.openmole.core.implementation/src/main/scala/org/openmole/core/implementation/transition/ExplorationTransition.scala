@@ -18,9 +18,8 @@
 package org.openmole.core.implementation.transition
 
 import org.openmole.core.implementation.task.ExplorationTask._
-import org.openmole.core.implementation.data.Variable
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.data.Context._
-import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.implementation.mole.SubMoleExecution
 import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.core.model.task.IExplorationTask
@@ -67,7 +66,7 @@ class ExplorationTransition(start: ICapsule, end: ISlot, condition: ICondition =
         }
       
       for((p, v) <- typedFactors zip value) {
-        val fp = fromArray(p)
+        val fp = p.fromArray
         if(fp.accepts(v)) variables += new Variable(fp, v)
         else throw new UserBadDataError("Found value of type " + v.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + fp) 
       }

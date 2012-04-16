@@ -58,10 +58,10 @@ abstract sealed class FirstOrderSensitivityTask(
 )(implicit val plugins: IPluginSet) extends Task {
   
   override def process(context: IContext): IContext = {
-    val matrixNames = context.valueOrException(toArray(matrixName))
+    val matrixNames = context.valueOrException(matrixName.toArray)
 
     Context.empty ++ 
-    (for(i <- inputs ; o <- outputs) yield new Variable(indice(i, o) ,computeSensitivity(context.valueOrException(toArray(o)), matrixNames, i)))
+    (for(i <- inputs ; o <- outputs) yield new Variable(indice(i, o) ,computeSensitivity(context.valueOrException(o.toArray), matrixNames, i)))
   }
   
   def computeSensitivity(allValues: Array[Double], allNames: Array[String], input: IPrototype[Double]) = {

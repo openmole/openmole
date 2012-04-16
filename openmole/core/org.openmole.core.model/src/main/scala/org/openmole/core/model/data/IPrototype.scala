@@ -51,8 +51,6 @@ trait IPrototype[T] {
   def isAssignableFrom(prototype: IPrototype[_]): Boolean
 
   def accepts(obj: Any): Boolean
-  /*override def equals(obj: Any): Boolean = (name, `type`).equals(obj)
-
-  override def hashCode: Int = (name, `type`).hashCode*/
+  
 }
 

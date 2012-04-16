@@ -27,6 +27,6 @@ import scala.collection.mutable.ListBuffer
 class PrototypeSpec extends FlatSpec with ShouldMatchers  {
   "ToArray of dim 0" should "return the prototype itself" in {
     val a = new Prototype[Int]("a")
-    Prototype.toArray(a, 0) should equal (a)
+    a.toArray(0) should equal (a)
   }
 }

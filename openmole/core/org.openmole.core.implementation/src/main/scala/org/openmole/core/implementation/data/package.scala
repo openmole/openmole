@@ -19,10 +19,44 @@ package org.openmole.core.implementation
 
 import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IPrototype
+import org.openmole.misc.tools.obj.ClassUtils._
+import scala.annotation.tailrec
 
 package object data {
   implicit def tupleToParameter[T](t: (IPrototype[T], T)) = new Parameter(t._1, t._2)
   implicit def prototypeToData(p: IPrototype[_]) = DataSet(p)
   implicit def dataIterableDecorator(data: Traversable[IData[_]]) = new DataSet(data.toList)
   implicit def iterableOfPrototypeToIterableOfDataConverter(prototypes: Traversable[IPrototype[_]]): Traversable[IData[_]] = DataSet(prototypes)
+
+  implicit def prototypeToArrayDecorator[T](prototype: IPrototype[T]) = new {
+    def toArray(level: Int): IPrototype[_] = {
+      def toArrayRecursive[A](prototype: IPrototype[A], level: Int): IPrototype[_] = {
+        if(level <= 0) prototype
+        else { 
+          val arrayProto = new Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[IPrototype[Array[_]]]
+          if(level <= 1) arrayProto
+          else toArrayRecursive(arrayProto, level - 1)
+        }
+      }
+      
+      toArrayRecursive(prototype, level)
+    }
+
+      
+    def toArray: IPrototype[Array[T]] =
+      new Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[IPrototype[Array[T]]]
+
+  }
+
+  implicit def prototypeFromArrayDecorator[T](prototype: IPrototype[Array[T]]) = new {
+
+    def fromArray: IPrototype[T] =
+      (new Prototype(prototype.name)(prototype.`type`.fromArray.toManifest)).asInstanceOf[IPrototype[T]]
+ 
+  }
+
+  implicit def dataToArrayDecorator[T](data: IData[T]) = new {
+    def toArray: IData[Array[T]] = new Data[Array[T]](data.prototype.toArray, data.mode)  
+  }
+  
 }

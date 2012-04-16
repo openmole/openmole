@@ -18,21 +18,13 @@
 package org.openmole.plugin.sampling.combine
 
 import org.openmole.core.implementation.data.DataSet
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.sampling.IFactor
 import org.openmole.core.model.sampling.ISampling
 import scala.util.control.Breaks._ 
 
-class CompleteSampling(samplings: Iterable[ISampling]) extends ISampling {
-
-  def this(samplings: Array[ISampling]) = this(samplings.toIterable)
-
-  def this(samplings: ISampling*) = this(samplings.toIterable)
+class CompleteSampling(samplings: ISampling*) extends ISampling {
 
   override def inputs = DataSet.empty ++ samplings.flatMap{_.inputs}
   override def prototypes: Iterable[IPrototype[_]] = samplings.flatMap{_.prototypes}
