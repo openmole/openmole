@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,16 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+package org.openmole.plugin.domain
 
-package org.openmole.plugin.domain.modifier
-
-import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IFinite
 import org.openmole.core.model.domain.IIterable
 
-class SlicedDomain[+T](val domain: IDomain[T] with IIterable[T], val size: Int) extends IDomain[T] with IFinite[T] {
-
-  override def computeValues(context: IContext): Iterable[T] = domain.iterator(context).slice(0, size).toIterable
-
+package object modifier {
+  
+  implicit def domainModifierDecorator[T](domain: IDomain[T] with IIterable[T]) = new {
+    def take(n: Int) = new TakeDomain(domain, n)
+    def group(n: Int)(implicit m: Manifest[T]) = new GroupDomain(domain, n)
+  }
+  
 }

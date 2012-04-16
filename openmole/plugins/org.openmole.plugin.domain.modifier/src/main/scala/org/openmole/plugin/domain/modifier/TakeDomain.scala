@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 reuillon
+ * Copyright (C) 2010 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,32 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IDomain
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.data.Context
-
+import org.openmole.core.model.domain.IFinite
 import org.openmole.core.model.domain.IIterable
-import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
 
-@RunWith(classOf[JUnitRunner])
-class GroupedDomainSpec extends FlatSpec with ShouldMatchers {
-  
-  "SlicedIterablesDomain" should "change the values of a domain to iterables" in {
-    val r1 = (1 to 10)
-    
-    val d1 = new IDomain[Int] with IIterable[Int] {
-      override def iterator(context: IContext) = r1.iterator
-    }
-    
-    val md = new GroupDomain(d1, 3).iterator(Context.empty)
-    
-    md.toList.size should equal (4)
-  }
-  
+class TakeDomain[+T](val domain: IDomain[T] with IIterable[T], val size: Int) extends IDomain[T] with IFinite[T] {
+
+  override def computeValues(context: IContext): Iterable[T] = domain.iterator(context).slice(0, size).toIterable
+
 }
