@@ -81,13 +81,15 @@ class Command {
   
   def verify(mole: IMole) = Validation(mole).foreach(println)  
   
-  def encrypt(s: String) = Workspace.encrypt(s)
-  
+  def encrypted = {
+    val password = new jline.ConsoleReader().readLine("encrypt:", '*')
+    Workspace.encrypt(password)
+  }
   
   def auth(method: Class[_]) {
-          Workspace.persistentList(method).foreach {
-        case (i, m) => println(i + ": " + m)
-      }
+    Workspace.persistentList(method).foreach {
+      case (i, m) => println(i + ": " + m)
+    }
   }
   
   def auth = new {
