@@ -17,17 +17,10 @@
 
 package org.openmole.core.implementation.mole
 
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.execution.IEnvironment
-import org.openmole.core.model.mole.IEnvironmentSelection
-import scala.collection.immutable.HashMap
+import org.openmole.core.model.execution._
+import org.openmole.core.model.job._
+import org.openmole.core.model.mole._
 
-
-object FixedEnvironmentSelection {  
-  val empty = new FixedEnvironmentSelection(Map.empty)
-  def apply(values: (ICapsule, IEnvironment)*): FixedEnvironmentSelection = new FixedEnvironmentSelection(Map.empty ++ values)
-}
-
-class FixedEnvironmentSelection(values: Map[ICapsule, IEnvironment]) extends IEnvironmentSelection {
-  def apply(key: ICapsule) = values.get(key)
+class FixedEnvironmentSelection(environment: IEnvironment) extends IEnvironmentSelection {
+  def apply(job: IJob) = environment
 }

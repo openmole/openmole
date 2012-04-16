@@ -17,13 +17,22 @@
 
 package org.openmole.core.implementation
 
-import org.openmole.core.model.IPuzzle
+import org.openmole.core.implementation.puzzle.Puzzle
+import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
 
 package object mole {
   implicit def capsuleToSlotConverter(capsule: ICapsule) = capsule.defaultInputSlot
-  implicit def puzzleToMoleConverter(puzzle: IPuzzle) = new Mole(puzzle.first.capsule)
+  implicit def puzzleToMoleConverter(puzzle: Puzzle) = new Mole(puzzle.first.capsule)
+  
   implicit def moleToMoleExecutionConverter(mole: IMole) = new MoleExecution(mole)
-  implicit def puzzleToMoleExecutionConverter(puzzle: IPuzzle) = new MoleExecution(puzzle)
+  
+  implicit def puzzleToMoleExecutionConverter(puzzle: Puzzle) = 
+    new MoleExecution(puzzle, puzzle.selection, puzzle.grouping)
+
+  implicit def fixedEnvironmentSelectionDecoraton(puzzle: Puzzle) = new {
+    def on(env: IEnvironment) = 
+      puzzle.copy(selection = puzzle.selection + (puzzle.last -> new FixedEnvironmentSelection(env)))                                                    
+  }
 }

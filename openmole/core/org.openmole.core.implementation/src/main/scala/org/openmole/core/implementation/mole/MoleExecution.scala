@@ -43,7 +43,6 @@ import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.mole.IMoleJobGroup
-import org.openmole.core.model.mole.IMoleJobGrouping
 import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.data.IDataChannel
 import org.openmole.misc.tools.service.Priority
@@ -62,8 +61,8 @@ object MoleExecution extends Logger
 
 class MoleExecution(
   val mole: IMole, 
-  selection: IEnvironmentSelection = FixedEnvironmentSelection.empty,
-  grouping: IMoleJobGrouping = MoleJobGrouping.empty,
+  selection: Map[ICapsule, IEnvironmentSelection] = Map.empty,
+  grouping: Map[ICapsule, IGroupingStrategy] = Map.empty,
   rerun: IInstantRerun = IInstantRerun.empty) extends IMoleExecution {
 
   import IMoleExecution._
@@ -93,7 +92,7 @@ class MoleExecution(
     }
   
   def group(moleJob: IMoleJob, capsule: ICapsule) = synchronized {
-    grouping(capsule) match {
+    grouping.get(capsule) match {
       case Some(strategy) =>
         val category = strategy(moleJob.context)
         val key = (capsule, category)
@@ -117,8 +116,8 @@ class MoleExecution(
   
   private def submit(job: IJob, capsule: ICapsule) = 
     if(!job.allMoleJobsFinished) {
-      (selection(capsule) match {
-          case Some(environment) => environment
+      (selection.get(capsule) match {
+          case Some(selection) => selection.apply(job)
           case None => LocalExecutionEnvironment
       }).submit(job)
     }

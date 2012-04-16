@@ -45,7 +45,6 @@ import org.openmole.core.implementation.transition.Transition
 import org.openmole.core.implementation.transition.AggregationTransition
 import org.openmole.core.implementation.transition.Slot
 import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.IPuzzle
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.data.IPrototype

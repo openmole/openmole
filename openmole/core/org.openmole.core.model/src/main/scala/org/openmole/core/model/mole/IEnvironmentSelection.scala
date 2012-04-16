@@ -17,8 +17,9 @@
 
 package org.openmole.core.model.mole
 
-import org.openmole.core.model.execution.IEnvironment
+import org.openmole.core.model.execution._
+import org.openmole.core.model.job._
 
 trait IEnvironmentSelection {
-  def apply(capsule: ICapsule): Option[IEnvironment]
+  def apply(job: IJob): IEnvironment
 }

@@ -19,6 +19,7 @@ package org.openmole.plugin.builder.sensitivity
 
 import org.openmole.core.implementation.mole.Capsule
 import org.openmole.core.implementation.mole.StrainerCapsule
+import org.openmole.core.implementation.puzzle.Puzzle
 import org.openmole.core.implementation.sampling.DiscreteFactor
 import org.openmole.core.implementation.task.EmptyTask
 import org.openmole.core.implementation.task.ExplorationTask
@@ -27,7 +28,6 @@ import org.openmole.core.implementation.transition.ExplorationTransition
 import org.openmole.core.implementation.transition.Transition
 import org.openmole.core.implementation.data.DataChannel
 import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.model.IPuzzle
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.domain.IBounded
 import org.openmole.core.model.domain.IDomain
@@ -53,7 +53,7 @@ object Sensitivity {
   
   def sensitivity(
     name: String,
-    model: IPuzzle,
+    model: Puzzle,
     samples: Int,
     sensitivity: Sensitivity
   )(implicit plugins: IPluginSet) = {

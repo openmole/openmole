@@ -18,7 +18,6 @@
 package org.openmole.core.implementation
 
 import org.openmole.core.implementation.puzzle.Puzzle
-import org.openmole.core.model.IPuzzle
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.task.ITask
 import org.openmole.core.model.transition.ITransition
@@ -28,25 +27,25 @@ import task._
 
 package object transition {
 
-  implicit def transitionsPuzzleDecorator(from: IPuzzle) = new TransitionDecorator(from)
+  implicit def transitionsPuzzleDecorator(from: Puzzle) = new TransitionDecorator(from)
   implicit def transitionsCapsuleDecorator(from: ICapsule) = new TransitionDecorator(from)
   implicit def transitionsTaskDecorator(from: ITask) = new TransitionDecorator(from)
   implicit def transitionsTaskBuilderDecorator(from: TaskBuilder) = new TransitionDecorator(from.toTask)
   
-  class TransitionDecorator(from: IPuzzle){
-    def -< (to: IPuzzle) = {
+  class TransitionDecorator(from: Puzzle){
+    def -< (to: Puzzle) = {
       new ExplorationTransition(from.last, to.first)
-      new Puzzle(from.first, to.last)
+      from + to
     }
     
-    def >- (to: IPuzzle) = {
+    def >- (to: Puzzle) = {
       new AggregationTransition(from.last, to.first)
-      new Puzzle(from.first, to.last)
+      from + to
     }
     
-    def -- (to: IPuzzle) = {
+    def -- (to: Puzzle) = {
       new Transition(from.last, to.first)
-      new Puzzle(from.first, to.last)
+      from + to
     }
   }
   

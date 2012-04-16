@@ -24,7 +24,6 @@ import org.openmole.core.implementation.sampling._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.data._
-import org.openmole.core.model.IPuzzle
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.sampling.IDiscreteFactor
@@ -56,10 +55,10 @@ object Stochastic {
   
   def statistics(
     name: String,
-    puzzle: IPuzzle,
+    model: Puzzle,
     replicationFactor: DiscreteFactor[_, _],
     statistics: Statistics
-  )(implicit plugins: IPluginSet): IPuzzle = {
+  )(implicit plugins: IPluginSet): Puzzle = {
     val exploration = ExplorationTask(name + "Replication", replicationFactor)
     val explorationCapsule = new StrainerCapsule(exploration)
     val aggregationCapsule = new StrainerCapsule(EmptyTask(name + "Aggregation"))
@@ -87,8 +86,8 @@ object Stochastic {
 
     val endCapsule = new StrainerCapsule(EmptyTask(name + "End"))
     
-    new ExplorationTransition(explorationCapsule, puzzle.first)
-    new AggregationTransition(puzzle.last, aggregationCapsule)
+    new ExplorationTransition(explorationCapsule, model.first)
+    new AggregationTransition(model.last, aggregationCapsule)
     
     new Transition(aggregationCapsule, medianCapsule)
     new Transition(aggregationCapsule, medianAbsoluteDeviationCapsule)
@@ -104,22 +103,22 @@ object Stochastic {
 
     new DataChannel(explorationCapsule, endCapsule)
     
-    new Puzzle(explorationCapsule, endCapsule)
+    model.copy(first = explorationCapsule, last = endCapsule)
   }
   
   
   def replicate(
     name: String,
-    puzzle: IPuzzle,
+    model: Puzzle,
     replications: ISampling
   )(implicit plugins: IPluginSet) = {
     val exploration = ExplorationTask(name + "Replication", replications)
     val explorationCapsule = new StrainerCapsule(exploration)
     val aggregationCapsule = new StrainerCapsule(EmptyTask(name + "Aggregation"))
-    new ExplorationTransition(explorationCapsule, puzzle.first)
-    new AggregationTransition(puzzle.last, aggregationCapsule)
+    new ExplorationTransition(explorationCapsule, model.first)
+    new AggregationTransition(model.last, aggregationCapsule)
     new DataChannel(explorationCapsule, aggregationCapsule)
-    new Puzzle(explorationCapsule, aggregationCapsule)
+    model.copy(first = explorationCapsule, last = aggregationCapsule)
   }
   
 }

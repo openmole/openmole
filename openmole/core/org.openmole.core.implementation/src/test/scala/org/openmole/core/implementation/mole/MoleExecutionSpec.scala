@@ -82,7 +82,7 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
 
     new MoleExecution(
       mole = new Mole(exc), 
-      grouping = MoleJobGrouping(emptyC -> new JobGroupingBy2Test)
+      grouping = Map(emptyC -> new JobGroupingBy2Test)
     ).start.waitUntilEnded 
   }
 }

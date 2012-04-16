@@ -40,7 +40,6 @@ import org.openmole.core.implementation.transition.EndExplorationTransition
 import org.openmole.core.implementation.transition.ExplorationTransition
 import org.openmole.core.implementation.transition.Slot
 import org.openmole.core.implementation.transition.Transition
-import org.openmole.core.model.IPuzzle
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
@@ -73,7 +72,7 @@ object Evolution {
     def add(o: IPrototype[Double], v: Double) = objectives ::= o -> v
   }
   
-  abstract class NSGA2Sigma extends IPuzzle { nsga2 =>
+  /*abstract class NSGA2Sigma extends IPuzzle { nsga2 =>
     def elitismCapsule: ICapsule
     def breedingCapsule: ICapsule
     def outputCapsule: ICapsule
@@ -86,7 +85,7 @@ object Evolution {
       def inputs = nsga2.inputs
       def initialGenomes = nsga2.initialGenomes
     }
-  }
+  }*/
   
   abstract class InitialPopulation {
     def inputs: Inputs
@@ -116,7 +115,7 @@ object Evolution {
   
   def nsga2SigmaSteady(
     name: String,
-    model: IPuzzle,
+    model: Puzzle,
     scaling: Inputs,
     objectives: Objectives,
     populationSize: Int,
@@ -124,7 +123,7 @@ object Evolution {
     maxGenerationsSteady: Int,
     distributionIndex: Double = 2,
     rank: Rank = new ParetoRank
-  )(implicit plugins: IPluginSet): NSGA2Sigma = { 
+  )(implicit plugins: IPluginSet): Puzzle = { 
     val genomeWithSigmaPrototype = new Prototype[GAGenomeWithSigma](name + "Genome")
     val individualPrototype = new Prototype[Individual[GAGenomeWithSigma, GAFitness]](name + "Individual")
     val archivePrototype = new Prototype[Array[Individual[GAGenomeWithSigma, GAFitness] with Distance with Ranking]](name + "Archive")
@@ -217,7 +216,8 @@ object Evolution {
     new DataChannel(firstCapsule, model.first)
     new DataChannel(explorationCapsule, endCapsule)
     
-    new NSGA2Sigma {
+    model.copy(first = firstCapsule, last = endCapsule)
+    /*new NSGA2Sigma {
       def first = firstCapsule
       def last = endCapsule
       def elitismCapsule = elitismCaps
@@ -227,7 +227,7 @@ object Evolution {
       def generationPrototype = generationProto
       def inputs = scaling
       def initialGenomes = initialGenomeProto
-    }
+    }*/
   }
   
   

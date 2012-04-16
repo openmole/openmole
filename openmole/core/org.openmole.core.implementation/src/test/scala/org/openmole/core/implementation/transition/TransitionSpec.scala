@@ -210,7 +210,7 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
     
     new MoleExecution(
       new Mole(initc), 
-      FixedEnvironmentSelection(t2CList.map{_ -> env}: _*)
+      t2CList.map{_ -> new FixedEnvironmentSelection(env)}.toMap
     ).start.waitUntilEnded
     executed should equal (true)
   }
