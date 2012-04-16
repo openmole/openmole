@@ -17,4 +17,10 @@
 
 package org.openmole.core.model
 
-trait IPuzzle
+import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.transition.ISlot
+
+trait IPuzzle {
+  def first: ISlot
+  def last: ICapsule
+}

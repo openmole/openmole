@@ -18,7 +18,7 @@
 package org.openmole.core.implementation
 
 import org.openmole.core.implementation.mole.Capsule
-import org.openmole.core.implementation.puzzle.PuzzleFirstAndLast
+import org.openmole.core.implementation.puzzle.Puzzle
 import org.openmole.core.model.task.ITask
 
 import mole._
@@ -28,7 +28,7 @@ package object task {
   implicit def taskToCapsuleConveter(task: ITask) = new Capsule(task)
   implicit def taskToPuzzleConveter(task: ITask) = {
     val capsule = new Capsule(task)
-    new PuzzleFirstAndLast(capsule, capsule)
+    new Puzzle(capsule, capsule)
   }
   implicit def taskBuilderToPuzzleConverter(t: TaskBuilder) = taskToPuzzleConveter(t.toTask)
 }

@@ -35,9 +35,7 @@ import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.mole.FixedEnvironmentSelection
 import org.openmole.core.implementation.mole.Mole
 import org.openmole.core.implementation.mole.MoleExecution
-import org.openmole.core.implementation.puzzle.PuzzleFirst
-import org.openmole.core.implementation.puzzle.PuzzleFirstAndLast
-import org.openmole.core.implementation.puzzle.PuzzleLast
+import org.openmole.core.implementation.puzzle.Puzzle
 import org.openmole.core.implementation.sampling.Factor
 import org.openmole.core.implementation.task.EmptyTask
 import org.openmole.core.implementation.task.ExplorationTask
@@ -47,9 +45,7 @@ import org.openmole.core.implementation.transition.Transition
 import org.openmole.core.implementation.transition.AggregationTransition
 import org.openmole.core.implementation.transition.Slot
 import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.IPuzzleFirst
-import org.openmole.core.model.IPuzzleFirstAndLast
-import org.openmole.core.model.IPuzzleLast
+import org.openmole.core.model.IPuzzle
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.data.IPrototype

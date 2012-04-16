@@ -40,7 +40,7 @@ import org.openmole.core.implementation.transition.EndExplorationTransition
 import org.openmole.core.implementation.transition.ExplorationTransition
 import org.openmole.core.implementation.transition.Slot
 import org.openmole.core.implementation.transition.Transition
-import org.openmole.core.model.IPuzzleFirstAndLast
+import org.openmole.core.model.IPuzzle
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
@@ -73,7 +73,7 @@ object Evolution {
     def add(o: IPrototype[Double], v: Double) = objectives ::= o -> v
   }
   
-  abstract class NSGA2Sigma extends IPuzzleFirstAndLast { nsga2 =>
+  abstract class NSGA2Sigma extends IPuzzle { nsga2 =>
     def elitismCapsule: ICapsule
     def breedingCapsule: ICapsule
     def outputCapsule: ICapsule
@@ -116,7 +116,7 @@ object Evolution {
   
   def nsga2SigmaSteady(
     name: String,
-    model: IPuzzleFirstAndLast,
+    model: IPuzzle,
     scaling: Inputs,
     objectives: Objectives,
     populationSize: Int,

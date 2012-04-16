@@ -17,13 +17,13 @@
 
 package org.openmole.core.implementation
 
-import org.openmole.core.model.IPuzzleFirst
+import org.openmole.core.model.IPuzzle
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
 
 package object mole {
   implicit def capsuleToSlotConverter(capsule: ICapsule) = capsule.defaultInputSlot
-  implicit def puzzleToMoleConverter(puzzle: IPuzzleFirst) = new Mole(puzzle.first.capsule)
+  implicit def puzzleToMoleConverter(puzzle: IPuzzle) = new Mole(puzzle.first.capsule)
   implicit def moleToMoleExecutionConverter(mole: IMole) = new MoleExecution(mole)
-  implicit def puzzleToMoleExecutionConverter(puzzle: IPuzzleFirst) = new MoleExecution(puzzle)
+  implicit def puzzleToMoleExecutionConverter(puzzle: IPuzzle) = new MoleExecution(puzzle)
 }

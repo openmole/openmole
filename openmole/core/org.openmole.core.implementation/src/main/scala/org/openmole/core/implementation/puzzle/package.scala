@@ -24,7 +24,7 @@ import org.openmole.core.model.task.ITask
 
 package object puzzle {
   
-  implicit def capsuleToPuzzle(capsule: ICapsule): PuzzleFirstAndLast = new PuzzleFirstAndLast(capsule, capsule) 
+  implicit def capsuleToPuzzle(capsule: ICapsule): Puzzle = new Puzzle(capsule, capsule) 
   //implicit def taskToPuzzle(task: ITask): PuzzleFirstAndLast = capsuleToPuzzle(new Capsule(task)) 
   //implicit def builderToPuzzle(builder: TaskBuilder): PuzzleFirstAndLast = taskToPuzzle(builder.toTask) 
   

@@ -34,7 +34,6 @@ import org.openmole.core.model.job.{IMoleJob,MoleJobId}
 import org.openmole.core.model.job.State
 import org.openmole.core.model.job.State._
 import org.openmole.core.model.transition.ISlot
-import scala.collection.mutable.HashSet
 
 import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.model.data.IDataSet

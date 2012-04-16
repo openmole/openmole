@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model
+package org.openmole.core.implementation.puzzle
 
+import org.openmole.core.model.IPuzzle
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.transition.ISlot
 
-trait IPuzzleFirst extends IPuzzle {
-  def first: ISlot
-}
+class Puzzle(val first: ISlot, val last: ICapsule) extends IPuzzle

@@ -19,24 +19,19 @@ package org.openmole.plugin.builder.stochastic
 
 import org.openmole.core.implementation.mole.Capsule
 import org.openmole.core.implementation.mole.StrainerCapsule
-import org.openmole.core.implementation.puzzle.PuzzleFirstAndLast
+import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.sampling._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.data._
-import org.openmole.core.model.IPuzzleFirstAndLast
+import org.openmole.core.model.IPuzzle
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.sampling.IDiscreteFactor
 import org.openmole.core.model.sampling.ISampling
 import org.openmole.core.model.task.IPluginSet
 import org.openmole.plugin.builder.Builder._
-import org.openmole.plugin.task.stat.AverageTask
-import org.openmole.plugin.task.stat.AverageTask
-import org.openmole.plugin.task.stat.MeanSquareErrorTask
-import org.openmole.plugin.task.stat.MedianAbsoluteDeviationTask
-import org.openmole.plugin.task.stat.MedianTask
-import org.openmole.plugin.task.stat.SumTask
+import org.openmole.plugin.task.stat._
 
 object Stochastic {
 
@@ -61,10 +56,10 @@ object Stochastic {
   
   def statistics(
     name: String,
-    puzzle: IPuzzleFirstAndLast,
+    puzzle: IPuzzle,
     replicationFactor: DiscreteFactor[_, _],
     statistics: Statistics
-  )(implicit plugins: IPluginSet): IPuzzleFirstAndLast = {
+  )(implicit plugins: IPluginSet): IPuzzle = {
     val exploration = ExplorationTask(name + "Replication", replicationFactor)
     val explorationCapsule = new StrainerCapsule(exploration)
     val aggregationCapsule = new StrainerCapsule(EmptyTask(name + "Aggregation"))
@@ -109,13 +104,13 @@ object Stochastic {
 
     new DataChannel(explorationCapsule, endCapsule)
     
-    new PuzzleFirstAndLast(explorationCapsule, endCapsule)
+    new Puzzle(explorationCapsule, endCapsule)
   }
   
   
   def replicate(
     name: String,
-    puzzle: IPuzzleFirstAndLast,
+    puzzle: IPuzzle,
     replications: ISampling
   )(implicit plugins: IPluginSet) = {
     val exploration = ExplorationTask(name + "Replication", replications)
@@ -124,7 +119,7 @@ object Stochastic {
     new ExplorationTransition(explorationCapsule, puzzle.first)
     new AggregationTransition(puzzle.last, aggregationCapsule)
     new DataChannel(explorationCapsule, aggregationCapsule)
-    new PuzzleFirstAndLast(explorationCapsule, aggregationCapsule)
+    new Puzzle(explorationCapsule, aggregationCapsule)
   }
   
 }
