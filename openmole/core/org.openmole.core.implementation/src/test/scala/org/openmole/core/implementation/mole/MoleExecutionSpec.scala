@@ -24,7 +24,7 @@ import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.sampling.ExplicitSampling
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.mole.IMoleJobGroup
-import org.openmole.core.model.mole.IGroupingStrategy
+import org.openmole.core.model.mole.IGrouping
 import org.openmole.core.model.sampling.ISampling
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
@@ -38,7 +38,7 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
   
   implicit val plugins = PluginSet.empty
   
-  class JobGroupingBy2Test extends IGroupingStrategy {
+  class JobGroupingBy2Test extends IGrouping {
     
     var group = true
     

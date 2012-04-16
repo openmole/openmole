@@ -17,30 +17,20 @@
 
 package org.openmole.plugin.groupingstrategy.batch
 
+import java.util.Random
 import org.openmole.core.implementation.mole.MoleJobGroup
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.mole.IGroupingStrategy
+import org.openmole.core.model.mole.IGrouping
+import org.openmole.misc.workspace.Workspace
 
 /**
- * Group mole jobs by group of numberOfMoleJobs.
+ * Group the mole jobs by distributing them at random among {{{numberOfBatch}}}
+ * groups.
  * 
- * @param numberOfMoleJobs size of each batch
+ * @param numberOfBatch total number of groups
  */
-class NumberOfMoleJobsGroupingStrategy(numberOfMoleJobs: Int) extends IGroupingStrategy {
+class NumberOfBatchShuffledGrouping(numberOfBatch: Int, rng: Random = Workspace.newRNG) extends IGrouping {
 
-  private var currentBatchNumber = 0
-  private var currentNumberOfJobs = 0
+  override def apply(context: IContext) = new MoleJobGroup(rng.nextInt(numberOfBatch))
 
-  override def apply(context: IContext) = {
-    val ret = new MoleJobGroup(currentBatchNumber)
-    currentNumberOfJobs += 1
-    if(currentNumberOfJobs >= numberOfMoleJobs) {
-      currentNumberOfJobs = 0
-      currentBatchNumber += 1
-    }
-    ret
-  }
-  
-  override def complete(jobs: Iterable[IMoleJob]) = jobs.size >= numberOfMoleJobs
 }

@@ -7,7 +7,7 @@
         <version>0.5-SNAPSHOT</version>
     </parent>
 
-    <artifactId>org.openmole.plugin.groupingstrategy.onvariable</artifactId>
+    <artifactId>org.openmole.plugin.grouping.onvariable</artifactId>
 
     <dependencies>
 	<dependency>

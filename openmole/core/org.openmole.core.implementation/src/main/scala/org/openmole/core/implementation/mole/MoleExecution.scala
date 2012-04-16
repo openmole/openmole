@@ -50,7 +50,7 @@ import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 import org.openmole.core.implementation.job.Job
 import org.openmole.core.implementation.tools.RegistryWithTicket
-import org.openmole.core.model.mole.IGroupingStrategy
+import org.openmole.core.model.mole.IGrouping
 import org.openmole.core.model.mole.IInstantRerun
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.HashMap
@@ -62,7 +62,7 @@ object MoleExecution extends Logger
 class MoleExecution(
   val mole: IMole, 
   selection: Map[ICapsule, IEnvironmentSelection] = Map.empty,
-  grouping: Map[ICapsule, IGroupingStrategy] = Map.empty,
+  grouping: Map[ICapsule, IGrouping] = Map.empty,
   rerun: IInstantRerun = IInstantRerun.empty) extends IMoleExecution {
 
   import IMoleExecution._

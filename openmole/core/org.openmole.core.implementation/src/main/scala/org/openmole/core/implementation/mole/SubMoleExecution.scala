@@ -35,7 +35,6 @@ import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.IMoleJob._
-import org.openmole.core.model.mole.IGroupingStrategy
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.job.State._
 import org.openmole.misc.eventdispatcher.EventDispatcher

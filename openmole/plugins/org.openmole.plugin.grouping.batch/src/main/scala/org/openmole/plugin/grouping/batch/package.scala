@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,12 +15,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.mole
+package org.openmole.plugin.groupingstrategy
 
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.job.IMoleJob
+import org.openmole.core.implementation.puzzle.Puzzle
 
-trait IGroupingStrategy {
-  def apply(context: IContext): IMoleJobGroup
-  def complete(job: Iterable[IMoleJob]) = false
+package object batch {
+  
+  implicit def puzzleBatchGroupingDecorator(puzzle: Puzzle) = new {
+    
+    def by(n: Int) = 
+      puzzle.copy(
+        grouping = puzzle.grouping + (puzzle.last -> new NumberOfMoleJobsGrouping(n))
+      )
+    
+    def in(n: Int) = 
+      puzzle.copy(
+        grouping = puzzle.grouping + (puzzle.last -> new NumberOfBatchGrouping(n))
+      )
+    
+    def inShuffled(n: Int)  = 
+      puzzle.copy(
+        grouping = puzzle.grouping + (puzzle.last -> new NumberOfBatchShuffledGrouping(n))
+      )
+    
+  }
+  
 }

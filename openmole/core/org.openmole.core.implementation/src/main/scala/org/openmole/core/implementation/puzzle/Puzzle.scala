@@ -19,14 +19,14 @@ package org.openmole.core.implementation.puzzle
 
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IEnvironmentSelection
-import org.openmole.core.model.mole.IGroupingStrategy
+import org.openmole.core.model.mole.IGrouping
 import org.openmole.core.model.transition.ISlot
 
 case class Puzzle(
   val first: ISlot,
   val last: ICapsule,
   val selection: Map[ICapsule, IEnvironmentSelection],
-  val grouping: Map[ICapsule, IGroupingStrategy]
+  val grouping: Map[ICapsule, IGrouping]
 ) {
   
   def +(p: Puzzle) = 

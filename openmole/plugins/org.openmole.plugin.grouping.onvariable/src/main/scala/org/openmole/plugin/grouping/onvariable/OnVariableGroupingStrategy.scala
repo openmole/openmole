@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.groupingstrategy.onvariable
+package org.openmole.plugin.grouping.onvariable
 
 import org.openmole.core.implementation.mole.MoleJobGroup
-import org.openmole.core.model.mole.IGroupingStrategy
+import org.openmole.core.model.mole.IGrouping
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 
@@ -26,6 +26,6 @@ import org.openmole.core.model.data.IPrototype
  *
  * @author reuillon
  */
-class OnVariableGroupingStrategy(prototypes: IPrototype[_]*) extends IGroupingStrategy {
+class OnVariableGroupingStrategy(prototypes: IPrototype[_]*) extends IGrouping {
   override def apply(context: IContext) = new MoleJobGroup(prototypes.flatMap{context.value(_)}.toSeq: _*)
 }
