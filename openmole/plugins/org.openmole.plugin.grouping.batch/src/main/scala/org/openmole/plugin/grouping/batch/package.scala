@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.groupingstrategy
+package org.openmole.plugin.grouping
 
 import org.openmole.core.implementation.puzzle.Puzzle
 
