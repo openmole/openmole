@@ -18,6 +18,7 @@
 package org.openmole.plugin.hook.display
 
 import java.io.PrintStream
+import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.hook.CapsuleExecutionHook
 import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.core.model.mole.ICapsule
@@ -30,4 +31,6 @@ class DisplayHook(execution: IMoleExecution, capsule: ICapsule, toDisplay: Strin
   def this(execution: IMoleExecution, capsule: ICapsule, toDisplay: String) = this(execution, capsule, toDisplay, System.out)
   
   override def process(moleJob: IMoleJob) = out.println(VariableExpansion.expandData(moleJob.context, toDisplay))
+
+  def inputs = DataSet.empty
 }

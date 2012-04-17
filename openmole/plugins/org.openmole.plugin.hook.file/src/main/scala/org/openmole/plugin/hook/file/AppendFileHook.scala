@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.hook.file
 
+import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.hook.CapsuleExecutionHook
 import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.core.model.data.IPrototype
@@ -34,12 +35,12 @@ import org.openmole.misc.exception.UserBadDataError
  * In the case of directories, all the files of the original directory are append to the
  * files of the target one.
  */
-class AppendFileHook(moleExecution: IMoleExecution, capsule: ICapsule, toBeDumpedPrototype: IPrototype[File], outputFile: String) extends CapsuleExecutionHook(moleExecution, capsule) {
+class AppendFileHook(moleExecution: IMoleExecution, capsule: ICapsule, prototype: IPrototype[File], outputFile: String) extends CapsuleExecutionHook(moleExecution, capsule) {
   
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
     
-    context.value(toBeDumpedPrototype) match {
+    context.value(prototype) match {
       case Some(from) =>
     
         val to = new File(VariableExpansion.expandData(context,outputFile))
@@ -62,10 +63,11 @@ class AppendFileHook(moleExecution: IMoleExecution, capsule: ICapsule, toBeDumpe
         }
         else if (from.isFile && to.isFile) to.lockAndAppendFile(from)
         else throw new UserBadDataError("The merge can only be done from a file to another or from a directory to another. ("+from.toString+" and "+to.toString+" found)")
-      case None => throw new UserBadDataError("Variable not found " + toBeDumpedPrototype)
+      case None => throw new UserBadDataError("Variable not found " + prototype)
     }
   }
   
+  def inputs = DataSet(prototype)
 
 }
 

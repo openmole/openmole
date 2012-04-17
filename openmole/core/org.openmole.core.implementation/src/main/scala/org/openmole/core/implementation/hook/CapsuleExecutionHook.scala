@@ -19,16 +19,52 @@ package org.openmole.core.implementation.hook
 
 import java.util.logging.Level
 import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.data.IData
+import org.openmole.core.model.data.IDataSet
+import org.openmole.core.implementation.data.DataSet
+import org.openmole.core.model.data.DataModeMask._
 import org.openmole.core.model.hook.ICapsuleExecutionHook
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.service.Logger
 import scala.ref.WeakReference
+
+object CapsuleExecutionHook {
+  
+  sealed trait Problem
+  
+  case class MissingInput(input: IData[_]) extends Problem {
+    override def toString = "Input is missing " + input
+  }
+  case class WrongType(input: IData[_], found: IData[_]) extends Problem {
+    override def toString = "Input has incompatible type " + found + " expected " + input
+  }
+  
+}
+
+import CapsuleExecutionHook._
 
 abstract class CapsuleExecutionHook(moleExecutionRef: WeakReference[IMoleExecution], capsuleRef: WeakReference[ICapsule]) extends ICapsuleExecutionHook with Logger {
   
   def this(moleExecution: IMoleExecution, capsule: ICapsule) = this(new WeakReference(moleExecution), new WeakReference(capsule))
+  
+  def errors = 
+    inputs.flatMap {
+    i =>
+     capsule.taskOrException.outputs(i.prototype.name) match {
+       case Some(o) => 
+         if(!i.prototype.isAssignableFrom(o.prototype)) Some(WrongType(i, o)) else None
+       case None => 
+         if(!(i.mode is optional)) Some(MissingInput(i)) else None
+     }
+    }
+  
+  {
+    val e = errors
+    if(!e.isEmpty) throw new UserBadDataError("Incorrect inputs: " +  e.mkString(", "))
+  }
   
   resume
   
@@ -43,4 +79,6 @@ abstract class CapsuleExecutionHook(moleExecutionRef: WeakReference[IMoleExecuti
     catch { case e => logger.log(Level.SEVERE,"Error durring hook execution", e)}
     
   def process(moleJob: IMoleJob)
+  
+  def inputs: IDataSet
 }

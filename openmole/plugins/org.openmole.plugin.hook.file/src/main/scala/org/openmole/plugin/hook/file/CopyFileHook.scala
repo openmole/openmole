@@ -20,6 +20,7 @@ package org.openmole.plugin.hook.file
 import java.io.File
 
 import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.hook.CapsuleExecutionHook
 import org.openmole.core.model.data.IPrototype
 
@@ -47,5 +48,7 @@ class CopyFileHook(moleExecution: IMoleExecution, capsule: ICapsule, filePrototy
       case None => throw new UserBadDataError("No variable " + filePrototype + " found.")
     } 
   }
+  
+  def inputs = DataSet(filePrototype)
   
 }

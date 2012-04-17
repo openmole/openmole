@@ -55,6 +55,7 @@ class CapsuleExecutionHookSpec extends FlatSpec with ShouldMatchers {
         moleJob.context.value(p).get should equal ("test")
         executed = true
       }
+      def inputs = DataSet(p)
     }
     
     ex.start.waitUntilEnded
@@ -84,6 +85,7 @@ class CapsuleExecutionHookSpec extends FlatSpec with ShouldMatchers {
         moleJob.context.value(p).get should equal ("test")
         executed = true
       }
+      def inputs = DataSet(p)
     }
     
     ex.start.waitUntilEnded
@@ -106,6 +108,7 @@ class CapsuleExecutionHookSpec extends FlatSpec with ShouldMatchers {
       override def process(moleJob: IMoleJob) = {
         executed = true
       }
+      def inputs = DataSet.empty
     }
     
     hook.release

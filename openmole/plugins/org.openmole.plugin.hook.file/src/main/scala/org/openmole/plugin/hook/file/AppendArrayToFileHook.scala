@@ -18,6 +18,7 @@
 package org.openmole.plugin.hook.file
 
 import java.io.File
+import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.hook.CapsuleExecutionHook
 import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.core.model.data.IPrototype
@@ -39,5 +40,7 @@ class AppendArrayToFileHook(
     val toWrite = context.value(content).getOrElse(Array("not found")).mkString(",")
     file.lockApply(_.appendLine(toWrite))
   }
+  
+  def inputs = DataSet(content)
   
 }
