@@ -35,5 +35,8 @@ object DataMode {
 
 class DataMode(mask: Int) extends IDataMode {
   override def is(mode: DataModeMask): Boolean = (mask & mode.value) != 0
-  override def toString = values.flatMap{m => if(this is m) Some(m.toString) else None }.toCSV
+  override def toString = {
+    val toDisplay = values.flatMap{m => if(this is m) Some(m.toString) else None}
+    if(toDisplay.isEmpty) "None" else toDisplay.mkString(", ")
+  }
 }

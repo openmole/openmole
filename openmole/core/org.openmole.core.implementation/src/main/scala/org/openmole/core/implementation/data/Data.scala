@@ -28,5 +28,5 @@ object Data {
 }
 
 class Data[T](val prototype: IPrototype[T], val mode: IDataMode = DataMode.NONE) extends IData[T] {
-  override def toString = "prototye: " + prototype.toString + ", mode: " + mode.toString
+  override def toString = "(" + prototype.toString + ", " + mode.toString + ")"
 }

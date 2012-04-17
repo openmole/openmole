@@ -28,14 +28,10 @@ class GroovyProxyPool(code: String, jars: Iterable[File]) extends {
       override def makeObject = new GroovyProxy(code, jars)
     })
   
-  @throws(classOf[Throwable])
   def execute(binding: Binding): Object = {
     val proxy = borrowObject
-    try {
-      proxy.executeUnsynchronized(binding)
-    } finally {
-      returnObject(proxy)
-    }
+    try proxy.executeUnsynchronized(binding)
+    finally returnObject(proxy)
   }
 
   private def returnObject(o: GroovyProxy) = bufferPool.returnObject(o)
