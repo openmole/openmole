@@ -15,16 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.domain.distribution
+package org.openmole.plugin.domain.range
 
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IFinite
-
-class SlicedUniformLongDistribution(domain: UniformLongDistribution, size: Int) extends IDomain[Long] with IFinite[Long] {
-    
-  def this(seed: Long, size: Int) = this(new UniformLongDistribution(seed), size)
-  def this(size: Int) = this(new UniformLongDistribution, size)
-
-  override def computeValues(context: IContext) = domain.iterator(context).take(size).toIterable
+trait FromString[T] {
+  def fromString(s: String): T
 }

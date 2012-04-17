@@ -25,17 +25,9 @@ import org.openmole.core.model.domain.IFinite
 import scala.collection.JavaConversions
 import scala.collection.mutable.ListBuffer
 
-class DynamicValueSetDomain[+T](val values: Iterable[String]) extends IDomain[T] with IFinite[T] {
+class DynamicListDomain[+T](values: String*) extends IDomain[T] with IFinite[T] {
 
-  def this (head: String, vals: Array[String]) = this(ListBuffer(head) ++ vals)
+  override def computeValues(context: IContext): Iterable[T] = 
+    values.map{VariableExpansion.expandData(context,_).asInstanceOf[T]}
 
-  def this (vals: java.lang.Iterable[String]) = this(JavaConversions.asScalaIterable(vals))
-
-  override def computeValues(context: IContext): Iterable[T] = {
-    var ret = new ArrayBuffer[T](values.size)
-    for(s <- values) {
-      ret += VariableExpansion.expandData(context, s).asInstanceOf[T]
-    }
-    ret
-  }
 }

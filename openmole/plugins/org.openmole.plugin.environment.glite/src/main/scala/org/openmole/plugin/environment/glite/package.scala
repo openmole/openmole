@@ -17,9 +17,9 @@
 
 package org.openmole.plugin.environment
 
+import org.openmole.core.implementation.tools._
+
 package object glite {
-  
-  implicit def myProxyToOptionConverter(proxy: MyProxy) = Some(proxy)
   
   lazy val complexsystems = 
     new GliteEnvironment(

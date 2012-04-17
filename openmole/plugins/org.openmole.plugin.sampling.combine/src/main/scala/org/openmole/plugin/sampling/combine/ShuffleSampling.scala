@@ -15,17 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation
+package org.openmole.plugin.sampling.combine
 
+import java.util.Random
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IIterable
-import org.openmole.core.model.sampling.IFactor
+import org.openmole.core.model.data.IVariable
+import org.openmole.core.model.sampling.ISampling
+import org.openmole.misc.tools.service.Random._
+import org.openmole.misc.workspace.Workspace
 
-package object sampling {
-  implicit def samplingBuilderToSampling(s: SamplingBuilder) = s.toSampling
+class ShuffleSampling(sampling: ISampling, random: Random = Workspace.newRNG) extends ISampling {
   
-  implicit def factorWithIterableToDiscreteFactor[T, D <: IDomain[T] with IIterable[T]](f: IFactor[T, D]) = 
-    new DiscreteFactor(f.prototype, f.domain)
+  override def inputs = sampling.inputs
+  override def prototypes = sampling.prototypes
   
+  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
+    shuffled(sampling.build(context).toList)(random).toIterator
+ 
 }

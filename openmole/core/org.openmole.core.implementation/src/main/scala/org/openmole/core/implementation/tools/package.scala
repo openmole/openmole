@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,18 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.domain.range
+package org.openmole.core.implementation
 
-import org.openmole.core.model.data.IContext
-import org.openmole.core.implementation.tools.VariableExpansion._
-
-
-class IntRange(min: String, max: String, step: String = "1") extends IntegralRange[Int](min, max, step) {
+package object tools {
   
-  def this(min: Int, max: Int, step: Int) = this(min.toString, max.toString, step.toString)
-  def this(min: Int, max: Int) = this(min.toString, max.toString)
+  implicit def objectToSomeObjectConverter[T](v: T) = Some(v)
   
-  override def step(context: IContext): Int = expandData(context, step).toInt
-  override def max(context: IContext): Int = expandData(context, max).toInt
-  override def min(context: IContext): Int = expandData(context, min).toInt
 }

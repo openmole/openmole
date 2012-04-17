@@ -57,9 +57,6 @@ class BigDecimalLogarithmRange(val min: String, val max: String, val nbStep: Str
       val ret = cur
       cur = cur.add(step)
       exp(ret, scale).setScale(retScale, RoundingMode.HALF_UP).round(mc) 
-      //val expRet = exp(ret, scale)
-      //expRet.setScale(retScale, BigDecimal.ROUND_HALF_UP)
-      //expRet
     }      
   }
   

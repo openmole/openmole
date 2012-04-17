@@ -15,17 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation
+package org.openmole.plugin.domain.collection
 
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IIterable
-import org.openmole.core.model.sampling.IFactor
+import org.openmole.core.model.domain.IFinite
 
-package object sampling {
-  implicit def samplingBuilderToSampling(s: SamplingBuilder) = s.toSampling
-  
-  implicit def factorWithIterableToDiscreteFactor[T, D <: IDomain[T] with IIterable[T]](f: IFactor[T, D]) = 
-    new DiscreteFactor(f.prototype, f.domain)
-  
+class ListDomain[T](values: T*) extends IDomain[T] with IFinite[T] {
+  override def computeValues(context: IContext): Iterable[T] = values
 }
+

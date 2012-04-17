@@ -15,18 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.domain.distribution
+package org.openmole.plugin.sampling.combine
 
+import org.openmole.core.implementation.data.Variable
+import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IFinite
+import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.IVariable
+import org.openmole.core.model.sampling.ISampling
 
-class SlicedUniformIntDistribution(domain: UniformIntDistribution, size: Int, topBound: Option[Int]= None) extends IDomain[Int] with IFinite[Int] {
-    
-  def this(seed: Long, size: Int) = this(new UniformIntDistribution(seed), size, None)
-  def this(seed: Long, size: Int, b: Int) = this(new UniformIntDistribution(seed), size,Some(b))
-  def this(size: Int) = this(new UniformIntDistribution, size,None)
-  def this(size: Int, b: Int) = this(new UniformIntDistribution, size,Some(b))
+class ZipWithIndexSampling(reference: ISampling, index: IPrototype[Int]) extends ISampling {
+  
+  override def inputs = reference.inputs
+  override def prototypes = index :: reference.prototypes.toList
+  
+  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
+    reference.build(context).zipWithIndex.map {
+      case(line, i) => line ++ List(new Variable(index, i))
+    }
 
-  override def computeValues(context: IContext) = domain.iterator(context).take(size).toIterable
 }

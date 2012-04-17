@@ -18,22 +18,31 @@
 package org.openmole.plugin.sampling
 
 import java.io.File
+import java.util.Random
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IIterable
 import org.openmole.core.model.sampling.IFactor
 import org.openmole.core.model.sampling.ISampling
+import org.openmole.misc.workspace.Workspace
+import org.openmole.core.implementation.sampling._
 
 package object combine {
   
   implicit def combineSamplingDecorator(s: ISampling) = new {
     def x(s2: ISampling) = new CompleteSampling(s, s2)
-    def zip(s2: ISampling) = new Zip(s, s2)
-    def zipWithIndex(index: IPrototype[Int]) = new ZipWithIndex(s, index)
+    def zip(s2: ISampling) = new ZipSampling(s, s2)
+    def zipWithIndex(index: IPrototype[Int]) = new ZipWithIndexSampling(s, index)
+    def take(n: Int) = new TakeSampling(s, n)
+    def shuffle(random: Random = Workspace.newRNG) = new ShuffleSampling(s, random)
   }
   
   implicit def zipWithNameFactorDecorator(factor: IFactor[File, IDomain[File] with IIterable[File]]) = new {
-    def zipWithName(name: IPrototype[String]) = new ZipWithName(factor, name)
+    def zipWithName(name: IPrototype[String]) = new ZipWithNameSampling(factor, name)
+  }
+  
+  implicit def combineFactorDecorator[T, D <: IDomain[T] with IIterable[T]](f: IFactor[T, D]) = new {
+    def x(s: ISampling) = new CompleteSampling(f, s)
   }
   
 }

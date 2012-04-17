@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,23 +17,16 @@
 
 package org.openmole.plugin.sampling.combine
 
-import java.io.File
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IIterable
-import org.openmole.core.model.sampling.IFactor
 import org.openmole.core.model.sampling.ISampling
 
-class ZipWithName(factor: IFactor[File, IDomain[File] with IIterable[File]], name: IPrototype[String]) extends Sampling {
-
-  override def prototypes = List(factor.prototype, name)
+class TakeSampling(sampling: ISampling, n: Int) extends ISampling {
+  
+  override def inputs = sampling.inputs
+  override def prototypes = sampling.prototypes
   
   override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
-    factor.domain.iterator(context).map {
-      v => List(new Variable(factor.prototype, v), new Variable(name, v.getName))
-    }
+    sampling.build(context).take(n)
+ 
 }

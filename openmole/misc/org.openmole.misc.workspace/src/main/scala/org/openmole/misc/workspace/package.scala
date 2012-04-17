@@ -15,14 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.domain.range
+package org.openmole.misc
 
-import java.math.BigDecimal
-
-class BigDecimalRange(val min: String, val max: String,val step: String) extends IRange[BigDecimal] with IRangeConverter[scala.BigDecimal,BigDecimal] {
-
-  @transient lazy val underlyingRange = new ScalaBigDecimalRange(min, max, step)
-  override def convert(a: scala.BigDecimal): BigDecimal = a.bigDecimal
-  
-  def this(min: String, max: String) = this(min, max, "1.0")
+package object workspace {  
+  implicit def longToRandomConverter(seed: Long) = Workspace.newRNG(seed)
 }

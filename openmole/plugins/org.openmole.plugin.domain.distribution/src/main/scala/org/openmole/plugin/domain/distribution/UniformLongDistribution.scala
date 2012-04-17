@@ -24,10 +24,7 @@ import org.openmole.core.model.domain.IIterable
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.service.Random._
 
-class UniformLongDistribution (generator: Random) extends IDomain[Long] with IIterable[Long] {
- 
-  def this(seed: Long) = this(buildSynchronized(seed))
-  def this() = this(Workspace.newRNG)
+class UniformLongDistribution (generator: Random = Workspace.newRNG) extends IDomain[Long] with IIterable[Long] {
 
   override def iterator(context: IContext): Iterator[Long] = 
     Iterator.continually { generator.nextLong }
