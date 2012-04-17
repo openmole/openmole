@@ -53,7 +53,7 @@ abstract class CapsuleExecutionHook(moleExecutionRef: WeakReference[IMoleExecuti
   def errors = 
     inputs.flatMap {
     i =>
-     capsule.taskOrException.outputs(i.prototype.name) match {
+     capsule.outputs(i.prototype.name) match {
        case Some(o) => 
          if(!i.prototype.isAssignableFrom(o.prototype)) Some(WrongType(i, o)) else None
        case None => 

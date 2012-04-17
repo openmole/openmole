@@ -17,10 +17,13 @@
 
 package org.openmole.core.implementation
 
-import org.openmole.core.implementation.puzzle.Puzzle
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
+
+import org.openmole.core.model.task.ITask
+import puzzle._
+import task._
 
 package object mole {
   implicit def capsuleToSlotConverter(capsule: ICapsule) = capsule.defaultInputSlot
@@ -28,11 +31,17 @@ package object mole {
   
   implicit def moleToMoleExecutionConverter(mole: IMole) = new MoleExecution(mole)
   
-  implicit def puzzleMoleDecoraton(puzzle: Puzzle) = new {
-    def on(env: IEnvironment) = 
-      puzzle.copy(selection = puzzle.selection + (puzzle.last -> new FixedEnvironmentSelection(env)))  
+  
+  class PuzzleMoleDecorator(puzzle: Puzzle) {
+    def on(env: IEnvironment): Puzzle = 
+      puzzle.copy(selection = puzzle.selection + (puzzle.last -> new FixedEnvironmentSelection(env)))     
     def toExecution = new MoleExecution(puzzle, puzzle.selection, puzzle.grouping)
   }
   
-  //implicit def puzzleToMoleExecutionConverter(puzzle: Puzzle) = puzzle.toExecution
+  implicit def puzzleMoleDecoraton(puzzle: Puzzle) = new PuzzleMoleDecorator(puzzle)
+  
+  implicit def capsuleMoleDecoraton(capsule: ICapsule) = new PuzzleMoleDecorator(capsule)
+  implicit def taskMoleDecoraton(task: ITask) = new PuzzleMoleDecorator(task)
+  implicit def taskMoleBuilderDecoraton(taskBuilder: TaskBuilder) = new PuzzleMoleDecorator(taskBuilder)
+  
 }

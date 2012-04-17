@@ -21,10 +21,14 @@ import org.openmole.core.model.mole.ICapsule
 import mole._
 
 package object puzzle {
+    
+  implicit def capsulePuzzleDecorator(capsule: ICapsule) = new {
+    def toPuzzle: Puzzle = new Puzzle(capsule, capsule, Map.empty, Map.empty) 
+  }
   
-  implicit def capsuleToPuzzleConverter(capsule: ICapsule): Puzzle = new Puzzle(capsule, capsule, Map.empty, Map.empty) 
+  implicit def capsuleToPuzzleConverter(capsule: ICapsule): Puzzle = capsule.toPuzzle
 
-  //implicit def taskToPuzzle(task: ITask): PuzzleFirstAndLast = capsuleToPuzzle(new Capsule(task)) 
-  //implicit def builderToPuzzle(builder: TaskBuilder): PuzzleFirstAndLast = taskToPuzzle(builder.toTask) 
+  //implicit def taskToPuzzle(task: ITask): Puzzle = capsuleToPuzzleConverter(new Capsule(task)) 
+  //implicit def builderToPuzzle(builder: TaskBuilder): Puzzle = taskToPuzzle(builder.toTask) 
   
 }

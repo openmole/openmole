@@ -23,17 +23,17 @@ package object batch {
   
   implicit def puzzleBatchGroupingDecorator(puzzle: Puzzle) = new {
     
-    def by(n: Int) = 
+    def by(n: Int): Puzzle = 
       puzzle.copy(
         grouping = puzzle.grouping + (puzzle.last -> new NumberOfMoleJobsGrouping(n))
       )
     
-    def in(n: Int) = 
+    def in(n: Int): Puzzle = 
       puzzle.copy(
         grouping = puzzle.grouping + (puzzle.last -> new NumberOfBatchGrouping(n))
       )
     
-    def inShuffled(n: Int)  = 
+    def inShuffled(n: Int): Puzzle  = 
       puzzle.copy(
         grouping = puzzle.grouping + (puzzle.last -> new NumberOfBatchShuffledGrouping(n))
       )
