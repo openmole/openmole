@@ -71,26 +71,26 @@ class Console {
       loop.bind(workspace, Workspace)
       loop.bind(logger, LoggerService)
       loop.bind(serializer, new Serializer)
-
-      loop.interpret("import org.openmole.core.implementation.data._")
-      loop.interpret("import org.openmole.core.implementation.data.Prototype._")
-      loop.interpret("import org.openmole.core.implementation.data.Data._")
-      loop.interpret("import org.openmole.core.implementation.execution._")
-      loop.interpret("import org.openmole.core.implementation.execution.local._")
-      loop.interpret("import org.openmole.core.implementation.hook._")
-      loop.interpret("import org.openmole.core.implementation.job._")
-      loop.interpret("import org.openmole.core.implementation.mole._")
-      loop.interpret("import org.openmole.core.implementation.sampling._")
-      loop.interpret("import org.openmole.core.implementation.task._")
-      loop.interpret("import org.openmole.core.implementation.transition._")
-      loop.interpret("import org.openmole.core.implementation.tools._")
-      loop.interpret("import org.openmole.core.implementation.puzzle._")
-      loop.interpret("import org.openmole.misc.workspace._")
-      loop.interpret("import org.openmole.ui.console.Implicits._")
-      loop.interpret("import java.io.File")
-      
       loop.bind("commands", new Command)
-      loop.interpret("import commands._")
+      loop.addImports(
+        "org.openmole.core.implementation.data._",
+        "org.openmole.core.implementation.data.Prototype._",
+        "org.openmole.core.implementation.data.Data._",
+        "org.openmole.core.implementation.execution._",
+        "org.openmole.core.implementation.execution.local._",
+        "org.openmole.core.implementation.hook._",
+        "org.openmole.core.implementation.job._",
+        "org.openmole.core.implementation.mole._",
+        "org.openmole.core.implementation.sampling._",
+        "org.openmole.core.implementation.task._",
+        "org.openmole.core.implementation.transition._",
+        "org.openmole.core.implementation.tools._",
+        "org.openmole.core.implementation.puzzle._",
+        "org.openmole.misc.workspace._",
+        "org.openmole.ui.console.Implicits._",
+        "java.io.File",
+        "commands._"
+      )
     }
     loop.loop
   }
