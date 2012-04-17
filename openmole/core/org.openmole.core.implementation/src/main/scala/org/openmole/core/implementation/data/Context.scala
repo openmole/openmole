@@ -25,13 +25,13 @@ object Context {
   val empty = new Context(TreeMap.empty)
   
   def apply(variables: IVariable[_]*): Context = apply(variables.toIterable)
-  def apply(variables: Iterable[IVariable[_]]): Context = new Context(TreeMap.empty[String, IVariable[_]] ++ variables.map{v => v.prototype.name -> v})
+  def apply(variables: Traversable[IVariable[_]]): Context = new Context(TreeMap.empty[String, IVariable[_]] ++ variables.map{v => v.prototype.name -> v})
   def apply(context: IContext, variables: java.lang.Iterable[IVariable[_]]) = {
     import collection.JavaConversions._
     context ++ variables
   }
   
-  implicit def decorateVariableIterable(variables: Iterable[IVariable[_]]) = new {
+  implicit def decorateVariableIterable(variables: Traversable[IVariable[_]]) = new {
     def toContext = Context(variables)
   }
   

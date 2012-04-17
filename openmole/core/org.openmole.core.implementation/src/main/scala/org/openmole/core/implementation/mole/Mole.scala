@@ -28,16 +28,9 @@ import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
 
+class Mole(val root: ICapsule, val implicits: IContext = Context.empty) extends IMole {
 
-
-class Mole(val root: ICapsule, val implicits: IContext) extends IMole {
-
-  def this(root: ICapsule) = this(root, Context.empty)
-  def this(root: ICapsule, contexts: Array[IContext]) = this(root, contexts.reduce(_ + _))
-  def this(root: ICapsule, variables: Array[IVariable[_]]) = this(root, Context.empty ++ variables)
-  
   override def tasks: Iterable[ITask] = capsules.flatMap(_.task).toSet
-
   
   override def capsules: Seq[ICapsule] = {
     val visited = new HashSet[ICapsule]

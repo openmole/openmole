@@ -17,12 +17,14 @@
 
 package org.openmole.core.implementation
 
-import org.openmole.core.model.data.IData
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data._
 import org.openmole.misc.tools.obj.ClassUtils._
 import scala.annotation.tailrec
 
 package object data {
+
+  import Context._
+  
   implicit def tupleToParameter[T](t: (IPrototype[T], T)) = new Parameter(t._1, t._2)
   implicit def prototypeToData(p: IPrototype[_]) = DataSet(p)
   implicit def dataIterableDecorator(data: Traversable[IData[_]]) = new DataSet(data.toList)
@@ -58,5 +60,7 @@ package object data {
   implicit def dataToArrayDecorator[T](data: IData[T]) = new {
     def toArray: IData[Array[T]] = new Data[Array[T]](data.prototype.toArray, data.mode)  
   }
+  
+  implicit def variablesToContextConverter(variables: Traversable[IVariable[_]]) = variables.toContext
   
 }
