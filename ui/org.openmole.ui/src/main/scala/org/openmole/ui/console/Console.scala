@@ -83,7 +83,9 @@ class Console {
       loop.interpret("import org.openmole.core.implementation.sampling._")
       loop.interpret("import org.openmole.core.implementation.task._")
       loop.interpret("import org.openmole.core.implementation.transition._")
+      loop.interpret("import org.openmole.core.implementation.tools._")
       loop.interpret("import org.openmole.core.implementation.puzzle._")
+      loop.interpret("import org.openmole.misc.workspace._")
       loop.interpret("import org.openmole.ui.console.Implicits._")
       loop.interpret("import java.io.File")
       
