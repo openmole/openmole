@@ -21,7 +21,7 @@ import groovy.lang.Binding
 import java.util.Random
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IContext
-import org.openmole.misc.tools.groovy.GroovyProxy
+import org.openmole.misc.tools.script.GroovyProxy
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.obj.ClassUtils._
 

@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.sampling.filter
 
-import org.openmole.misc.tools.groovy.GroovyProxy
+import org.openmole.misc.tools.script.GroovyProxy
 import org.openmole.core.implementation.tools.GroovyContextAdapter
 import org.openmole.core.model.data.IContext
 

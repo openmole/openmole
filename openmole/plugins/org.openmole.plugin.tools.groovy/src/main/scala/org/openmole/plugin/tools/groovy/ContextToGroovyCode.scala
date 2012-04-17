@@ -20,7 +20,7 @@ package org.openmole.plugin.tools.groovy
 import groovy.lang.Binding
 import java.io.File
 import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.misc.tools.groovy.GroovyProxyPool
+import org.openmole.misc.tools.script.GroovyProxyPool
 import org.openmole.core.implementation.data.{Prototype, Variable, Context}
 import org.openmole.core.implementation.tools.GroovyContextAdapter._
 import org.openmole.core.model.data.IContext

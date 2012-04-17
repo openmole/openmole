@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task.templatefile
+package org.openmole.plugin.task.template
 
 import java.io.File
 import org.openmole.core.implementation.data._

@@ -36,7 +36,7 @@
         <module>org.openmole.plugin.task.code</module>
         <module>org.openmole.plugin.task.groovy</module>
 	<module>org.openmole.plugin.task.scala</module>
-        <module>org.openmole.plugin.task.templatefile</module>
+        <module>org.openmole.plugin.task.template</module>
         <module>org.openmole.plugin.task.stat</module>
 	<module>org.openmole.plugin.hook.file</module>
         <module>org.openmole.plugin.hook.csvprofiler</module>

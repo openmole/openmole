@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.tools.groovy
+package org.openmole.misc.tools.script
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConversions

@@ -15,33 +15,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.task.templatefile
+package org.openmole.plugin.task.template
 
 import java.io.File
+import org.openmole.core.implementation.data.Data
 import org.openmole.core.implementation.task.TaskBuilder
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.task.IPluginSet
 
-object TemplateFileTask {
+
+object TemplateFileFromInputTask {
   def apply(
     name: String,
-    template: File,
+    template: IPrototype[File],
     output: IPrototype[File]
   )(implicit plugins: IPluginSet) = new TaskBuilder { builder =>
     
-    def toTask = new TemplateFileTask(name, template, output) {
-      val inputs = builder.inputs
+    def toTask = new TemplateFileFromInputTask(name, template, output) {
+      val inputs = builder.inputs + template
       val outputs = builder.outputs + output
       val parameters = builder.parameters
     }
   }
 }
 
-sealed abstract class TemplateFileTask(
+sealed abstract class TemplateFileFromInputTask(
   val name: String,
-  template: File, 
-  val output: IPrototype[File])(implicit val plugins: IPluginSet) extends AbstractTemplateFileTask {
+  template: IPrototype[File],
+  val output: IPrototype[File])
+(implicit val plugins: IPluginSet) extends AbstractTemplateFileTask {
+
+  override def file(context: IContext) = context.valueOrException(template)
  
-  override def file(context: IContext) = template
 }

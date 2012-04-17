@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.tools.groovy
+package org.openmole.misc.tools.script
 
 import groovy.lang.Binding
 import java.io.File
