@@ -22,7 +22,8 @@ import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.model.commons.TransitionType._
-import org.openmole.core.model.mole.IGroupingStrategy
+import org.openmole.core.model.mole.IEnvironmentSelection
+import org.openmole.core.model.mole.IGrouping
 import org.openmole.core.model.mole.IMole
 import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.data.ITaskDataUI
@@ -30,47 +31,52 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.data.DataChannel
+import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.data.Parameter
+import org.openmole.core.implementation.data.ParameterSet
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.transition._
 import org.openmole.ide.misc.tools.check.TypeCheck
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.task.IPluginSet
 import org.openmole.core.model.task.ITask
-import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.ITransitionUI
-import org.openmole.misc.tools.groovy.GroovyProxy
+import org.openmole.misc.tools.script.GroovyProxy
 import scala.collection.JavaConversions._
+import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
+import scala.collection.mutable.ListBuffer
 
 object MoleMaker {
-                                            
+                    
   def buildMoleExecution(mole: IMole,
                          manager: IMoleSceneManager, 
                          capsuleMap: Map[ICapsuleUI,ICapsule],
-                         groupingStrategies: List[(IGroupingStrategy,ICapsule)]): (IMoleExecution,Iterable[(IEnvironment, String)]) = 
+                         groupingStrategies: List[(IGrouping,ICapsule)]): (IMoleExecution,Iterable[(IEnvironment, String)]) = 
                            try{
       var envs = new HashSet[(IEnvironment,String)]
-      val strat = new FixedEnvironmentSelection
+      val strat = new ListBuffer[(ICapsule, IEnvironmentSelection)]
+      
       manager.capsules.values.foreach{c=> 
         c.dataUI.environment match {
           case Some(x : IEnvironmentDataProxyUI) => 
             try {
               val env = x.dataUI.coreObject
-              envs += new Tuple2(env,x.dataUI.name)
-              strat.select(capsuleMap(c),env)
+              envs += env -> x.dataUI.name
+              strat += capsuleMap(c) -> new FixedEnvironmentSelection(env)
             }catch {
               case e: UserBadDataError=> StatusBar.warn(e.message)
             }
           case _ =>
         }}
-      val mgs = new MoleJobGrouping
-      groupingStrategies.foreach(s=>mgs.set(s._2,s._1))
+      
+      val grouping = groupingStrategies.map{case(s, c) => c -> s}.toMap
    
-      (new MoleExecution(mole,strat,mgs),envs.toSet)
+      (new MoleExecution(mole, strat.toMap, grouping),envs.toSet)
     }
   
   def buildMole(manager: IMoleSceneManager) = {
@@ -95,35 +101,29 @@ object MoleMaker {
     else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")  
   }
   
-  def buildCapsule(capsuleDataUI: ICapsuleDataUI) : Either[(ICapsuleDataUI,Throwable),ICapsule] = 
+  def buildCapsule(capsuleDataUI: ICapsuleDataUI) : Either[(ICapsuleDataUI, Throwable),ICapsule] = 
     capsuleDataUI.task match {
       case Some(x : ITaskDataProxyUI) => 
-             try {
-        x.dataUI match {
-          case y : AbstractExplorationTaskDataUI => Right(new Capsule(addPrototypes(capsuleDataUI,y.coreObject)))
-          case y : ITaskDataUI => Right(new Capsule(addPrototypes(capsuleDataUI,y.coreObject)))
-        } 
-            } catch { case e : UserBadDataError => Left((capsuleDataUI,e))
-               }
+        try Right(new Capsule(x.dataUI.coreObject(inputs(capsuleDataUI), outputs(capsuleDataUI), parameters(capsuleDataUI), PluginSet.empty)))
+        catch { case e : UserBadDataError => Left((capsuleDataUI,e))
+        }
       case _ => Right(new Capsule)
     }
     
   
-  def addPrototypes(capsuleDataUI: ICapsuleDataUI, task: ITask): ITask = {
-    capsuleDataUI.task.get.dataUI.prototypesIn.foreach{case (pui,v)=> { 
+  def inputs(capsuleDataUI: ICapsuleDataUI) = DataSet(capsuleDataUI.task.get.dataUI.prototypesIn.map{_._1.dataUI.coreObject})
+  def outputs(capsuleDataUI: ICapsuleDataUI) = DataSet(capsuleDataUI.task.get.dataUI.prototypesOut.map{_.dataUI.coreObject})
+  def parameters(capsuleDataUI: ICapsuleDataUI) = 
+    new ParameterSet(capsuleDataUI.task.get.dataUI.prototypesIn.flatMap{
+      case (pui, v) => 
+        if(!v.isEmpty) {
           val proto = pui.dataUI.coreObject
-          v.isEmpty match {
-            case true=> task.addInput(proto)
-            case false=>
-              val groovyO = new GroovyProxy(v).execute()
-              val (ok,msg) = TypeCheck(groovyO,proto)
-              if (ok) task.addParameter(new Parameter(proto.asInstanceOf[IPrototype[Any]],groovyO))
-              else throw new UserBadDataError(msg) 
-          }
-        }}
-    capsuleDataUI.task.get.dataUI.prototypesOut.foreach{pui=> { task.addOutput(pui.dataUI.coreObject)}}
-    task
-  }
+          val groovyO = new GroovyProxy(v).execute()
+          val (ok,msg) = TypeCheck(groovyO,proto)
+          if(!ok) throw new UserBadDataError(msg)
+          else Some(new Parameter(proto.asInstanceOf[IPrototype[Any]],groovyO))
+        } else None
+    })
   
   def buildTransition(sourceCapsule: ICapsule, targetCapsule: ICapsule,t: ITransitionUI){
     t.transitionType match {

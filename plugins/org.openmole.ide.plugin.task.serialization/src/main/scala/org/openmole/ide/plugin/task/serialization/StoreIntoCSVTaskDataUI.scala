@@ -7,7 +7,10 @@ package org.openmole.ide.plugin.task.serialization
 
 import java.awt.Color
 import java.io.File
+import org.openmole.core.model.data.IDataSet
+import org.openmole.core.model.data.IParameterSet
 import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.task.IPluginSet
 import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.misc.exception.UserBadDataError
@@ -18,13 +21,15 @@ import org.openmole.core.implementation.data.Prototype._
 
 class StoreIntoCSVTaskDataUI(val name: String="",val columns: List[(IPrototypeDataProxyUI,String)]= List.empty,val protoFile: Option[IPrototypeDataProxyUI]= None) extends TaskDataUI {
  
-  def coreObject = {
-    if (protoFile.isDefined)
-      new StoreIntoCSVTask(name,
-                           columns.map{e=> (e._1.dataUI.coreObject.asInstanceOf[IPrototype[Array[_]]],e._2)},
-                           protoFile.get.dataUI.coreObject.asInstanceOf[IPrototype[File]],
-                           ',',CSVWriter.NO_QUOTE_CHARACTER)
-    else throw new UserBadDataError("No output prototype file is defined !")}
+  def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = {
+    if (protoFile.isDefined) {
+      val builder = 
+        StoreIntoCSVTask(
+          name,
+          protoFile.get.dataUI.coreObject.asInstanceOf[IPrototype[File]])(plugins)
+      columns.foreach{e => builder addColumn (e._1.dataUI.coreObject.asInstanceOf[IPrototype[Array[_]]],e._2)}
+      builder.toTask
+    } else throw new UserBadDataError("No output prototype file is defined !")}
   
   def coreClass= classOf[StoreIntoCSVTask]
   

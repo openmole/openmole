@@ -21,7 +21,7 @@ import org.openmole.ide.core.implementation.workflow.BuildMoleSceneContainer
 import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
 import java.awt.Dimension
 import java.util.concurrent.atomic.AtomicInteger
-import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
+import org.openmole.ide.core.model.data.IExplorationTaskDataUI
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.misc.tools.image.Images._
@@ -82,7 +82,7 @@ object ScenesManager {
   }.filter{
     _.dataUI.task.isDefined
   }.flatMap{c => c.dataUI.task.get.dataUI match {
-      case x : AbstractExplorationTaskDataUI => List((c,x))
+      case x : IExplorationTaskDataUI => List((c,x))
       case _ => Nil
     }
   }.toList

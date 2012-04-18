@@ -34,8 +34,8 @@ import org.openmole.core.implementation.data.Prototype
 object MultiRowExample extends SimpleSwingApplication {
   def top = new MainFrame {
     peer.setLayout(new BorderLayout)
-    val proto1 = new Prototype("proto1",classOf[Int])
-    val proto2 = new Prototype("proto2",classOf[Double])
+    val proto1 = new Prototype[Int]("proto1")
+    val proto2 = new Prototype[Double]("proto2")
     val fake1 = new Fake(proto1)
     val fake2 = new Fake(proto2)
     val action = new ContentAction("Action " , fake1) { override def apply = println("view " + fake1.toString)}

@@ -26,7 +26,7 @@ class FilePrototypeDataUI(val name: String="", d: Int=0) extends GenericPrototyp
   
    def coreClass = classOf[IPrototype[File]]
   
-   def coreObject = toArray(new Prototype(name,classOf[File]),dim).asInstanceOf[IPrototype[File]]
+   def coreObject = new Prototype[File](name).toArray(dim).asInstanceOf[IPrototype[File]]
      
    def fatImagePath = "img/file_fat.png"
   

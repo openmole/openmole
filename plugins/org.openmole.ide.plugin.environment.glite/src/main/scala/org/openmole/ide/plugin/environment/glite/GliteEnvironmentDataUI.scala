@@ -5,7 +5,7 @@
 
 package org.openmole.ide.plugin.environment.glite
 
-import org.openmole.plugin.environment.glite.GliteEnvironment
+import org.openmole.plugin.environment.glite._
 import org.openmole.ide.core.model.data.IEnvironmentDataUI
 import org.openmole.plugin.environment.jsaga.Requirement._
 import org.openmole.plugin.environment.glite.MyProxy
@@ -21,7 +21,6 @@ class GliteEnvironmentDataUI(val name: String="",
                              val bdii: String="",
                              val proxy: Boolean= false,
                              val proxyURL: String="", 
-                             val proxyUser: String="",
                              val requirement: Boolean= false,
                              val architecture64: Boolean = false, 
                              val runtimeMemory: String = Workspace.preference(BatchEnvironment.MemorySizeForRuntime),
@@ -41,8 +40,15 @@ class GliteEnvironmentDataUI(val name: String="",
     if (vo == "" || voms == "" || bdii == "") throw new UserBadDataError("The glite environment "+name+" is not properly set")
     
     try {
-      if (proxy && proxyURL != "" && proxyUser != "") new GliteEnvironment(vo,voms,bdii,new MyProxy(proxyURL,proxyUser),rtm,requirementMap.toMap)
-      else new GliteEnvironment(vo,voms,bdii,rtm,requirementMap.toMap)
+      if (proxy && proxyURL != "") 
+        new GliteEnvironment(
+          vo,
+          voms,
+          bdii,
+          Some(new MyProxy(proxyURL)),
+          requirements = requirementMap.toMap,
+          runtimeMemory = rtm)
+      else new GliteEnvironment(vo,voms,bdii, requirements = requirementMap.toMap, runtimeMemory = rtm)
     }
     catch {
       case _=> throw new UserBadDataError("An error occured when initialiazing the glite environment" + name +". Please check your certificate settings in the Preferences menu.")

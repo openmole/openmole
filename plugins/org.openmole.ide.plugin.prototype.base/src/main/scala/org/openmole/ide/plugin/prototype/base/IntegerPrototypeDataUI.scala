@@ -26,7 +26,7 @@ class IntegerPrototypeDataUI(val name: String="", d: Int = 0) extends GenericPro
   
   def coreClass = classOf[IPrototype[Int]]
   
-  def coreObject = toArray(new Prototype(name,classOf[Int]),dim).asInstanceOf[IPrototype[Int]]
+  def coreObject = new Prototype[Int](name).toArray(dim).asInstanceOf[IPrototype[Int]]
   
   def fatImagePath = "img/integer_fat.png"
   

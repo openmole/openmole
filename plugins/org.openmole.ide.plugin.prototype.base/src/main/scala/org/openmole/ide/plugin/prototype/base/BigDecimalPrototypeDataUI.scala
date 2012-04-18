@@ -19,7 +19,7 @@ package org.openmole.ide.plugin.prototype.base
 
 import org.openmole.ide.core.model.data.IPrototypeDataUI
 import org.openmole.core.implementation.data.Prototype._
-import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.implementation.data._
 import org.openmole.core.model.data.IPrototype
 import java.math.BigDecimal
 
@@ -28,7 +28,7 @@ class BigDecimalPrototypeDataUI(val name: String="", d: Int=0) extends GenericPr
   
   def coreClass = classOf[IPrototype[BigDecimal]]
   
-  def coreObject= toArray(new Prototype(name,classOf[BigDecimal]),dim).asInstanceOf[IPrototype[BigDecimal]]
+  def coreObject= new Prototype[BigDecimal](name).toArray(dim).asInstanceOf[IPrototype[BigDecimal]]
  
   def fatImagePath = "img/bigdecimal_fat.png"
   

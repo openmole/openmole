@@ -1,26 +1,25 @@
 /*
- * Copyright (C) 2011 leclaire
+ * Copyright (C) 2011 Mathieu leclaire <mathieu.leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
+ * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.model.data
+package org.openmole.ide.plugin.domain.distribution
 
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IGroupingStrategy
+import org.openmole.ide.core.model.factory.IDomainFactoryUI
 
-trait IGroupingStrategyDataUI {
-  def coreObject: (IGroupingStrategy,ICapsule)
+class FiniteUniformIntDistributionFactoryUI extends IDomainFactoryUI {
+  override def displayName = "Uniform distribution"
+  override def buildDataUI = new FiniteUniformIntDistributionDataUI
 }
-

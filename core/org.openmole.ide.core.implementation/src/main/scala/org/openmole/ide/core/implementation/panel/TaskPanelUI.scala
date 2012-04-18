@@ -22,10 +22,10 @@ import java.awt.Color
 import javax.imageio.ImageIO
 import javax.swing.ImageIcon
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dialog.DialogFactory
+import org.openmole.ide.core.model.data.IExplorationTaskDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
@@ -83,7 +83,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   
     ScenesManager.capsules(proxy).foreach {c =>
       proxy.dataUI match {
-        case x : AbstractExplorationTaskDataUI => c.setSampling(x.sampling)
+        case x : IExplorationTaskDataUI => c.setSampling(x.sampling)
         case _ => 
       }
     }

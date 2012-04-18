@@ -20,8 +20,10 @@ class CSVSamplingDataUI(val name: String="",
   def coreObject = {  
     if (csvFilePath != "") {
       val fi = new File(csvFilePath)
-      if (fi.isFile) new CSVSampling(fi) {
-        prototypeMapping.filter(!_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI]).foreach{m=>addColumnAs(m._1,m._2.dataUI.coreObject)}
+      if (fi.isFile) {
+        val sampling = CSVSampling(fi) 
+        prototypeMapping.filter(!_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI]).foreach{m=>sampling addColumn (m._1,m._2.dataUI.coreObject)}
+        sampling
       }
       else throw new UserBadDataError("CSV file " + csvFilePath + " does not exist")
     }

@@ -22,6 +22,7 @@ import org.openmole.core.model.sampling.ISampling
 import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.core.model.task.IPluginSet
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
 import org.openmole.ide.core.model.data.ICapsuleDataUI
@@ -32,8 +33,10 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import java.awt.Color
 import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.task.EmptyTask
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IDataSet
+import org.openmole.core.model.data.IParameterSet
 import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 
@@ -47,7 +50,7 @@ object EmptyDataUIs {
     def name = ""
     def dim = 0
     def coreClass = classOf[IPrototype[_]]
-    def coreObject = new Prototype("empty",classOf[Any])
+    def coreObject = new Prototype[Any]("empty")
     def fatImagePath = "img/empty.png"
     def buildPanelUI = new EmptyPrototypePanelUI
     def displayTypedName = ""
@@ -79,11 +82,19 @@ object EmptyDataUIs {
     def build(context : IContext) = List[Iterable[IVariable[_]]]().toIterator
   }
   
-  class EmptyTaskDataUI extends TaskDataUI{
+  class EmptyTaskDataUI extends TaskDataUI {
     def name = ""
     def buildPanelUI = new EmptyTaskPanelUI
-    def coreClass = classOf[ISampling]
-    def coreObject = new EmptyTask
+    def coreClass = classOf[EmptyTask]
+    
+    def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = {
+      val taskBuilder = EmptyTask(name)(plugins)
+      taskBuilder addInput inputs
+      taskBuilder addOutput outputs
+      taskBuilder addParameter parameters
+      taskBuilder.toTask
+    }
+    
     def backgroundColor = Color.WHITE
     def borderColor = Color.WHITE
     def fatImagePath = "img/empty.png"
@@ -94,8 +105,4 @@ object EmptyDataUIs {
     def saveContent(name: String) = new EmptyTaskDataUI
   }
   
-  class EmptyTask extends Task {
-    def process(context : IContext) = context
-    def name = ""
-  }
 }

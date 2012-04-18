@@ -25,7 +25,7 @@ import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.BorderPanel.Position._
 
-class SlicedUniformIntegerDistributionPanelUI(pud: SlicedUniformIntegerDistributionDataUI) extends PluginPanel("fillx","[left][grow,fill]","") with IDomainPanelUI{
+class FiniteUniformIntDistributionPanelUI(pud: FiniteUniformIntDistributionDataUI) extends PluginPanel("fillx","[left][grow,fill]","") with IDomainPanelUI{
   val seedField = new TextField(6)
   val sizeField = new TextField(6)
   
@@ -38,7 +38,9 @@ class SlicedUniformIntegerDistributionPanelUI(pud: SlicedUniformIntegerDistribut
   sizeField.text = pud.size.toString
   
   override def saveContent(name: String) = {
-    new SlicedUniformIntegerDistributionDataUI(name,seedField.text.toLong,
-                                               sizeField.text.toInt)
+    new FiniteUniformIntDistributionDataUI(
+      name,
+      seedField.text.toLong,
+      sizeField.text.toInt)
   }
 }

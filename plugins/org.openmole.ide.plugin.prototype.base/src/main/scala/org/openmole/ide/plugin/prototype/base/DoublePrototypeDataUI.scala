@@ -25,7 +25,7 @@ class DoublePrototypeDataUI(val name: String="",d: Int=0) extends GenericPrototy
   
   def coreClass = classOf[IPrototype[Double]]
 
-   def coreObject = toArray(new Prototype(name,classOf[Double]),dim).asInstanceOf[IPrototype[Double]]
+   def coreObject = new Prototype[Double](name).toArray(dim).asInstanceOf[IPrototype[Double]]
      
    def fatImagePath = "img/double_fat.png"
   

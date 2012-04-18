@@ -29,7 +29,7 @@ object GroovyEditorExampleApp extends SimpleSwingApplication
 {
   def top = new MainFrame {
     title = "Groovy editor Demo"
-    val prototype = new Prototype("proto",classOf[Int])
+    val prototype = new Prototype[Int]("proto")
     val editor = new PrototypeGroovyTextFieldEditor("<h1>Demo</h1>",prototype)
     val panel = new PluginPanel("")
     panel.contents += editor

@@ -18,7 +18,7 @@ package org.openmole.ide.misc.tools.check
  */
 
 import org.openmole.core.model.data.IPrototype
-import org.openmole.misc.tools.groovy.GroovyProxy
+import org.openmole.misc.tools.script.GroovyProxy
 
 object TypeCheck {
   

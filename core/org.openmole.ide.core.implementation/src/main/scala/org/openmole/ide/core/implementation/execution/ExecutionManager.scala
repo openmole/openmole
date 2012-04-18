@@ -22,7 +22,7 @@ import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.hook.IHook
 import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IGroupingStrategy
+import org.openmole.core.model.mole.IGrouping
 import org.openmole.ide.misc.visualization._
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.core.model.mole.IMole
@@ -72,7 +72,7 @@ class ExecutionManager(manager : IMoleSceneManager,
   val moleExecutionExceptionTextArea = new TextArea{columns = 40;rows = 10;editable = false}
   override val printStream = new PrintStream(new TextAreaOutputStream(logTextArea),true)
   var moleExecution: IMoleExecution = new MoleExecution(mole)
-  var gStrategyPanels= new HashMap[String,(IGroupingStrategyPanelUI,List[(IGroupingStrategy,ICapsule)])]
+  var gStrategyPanels= new HashMap[String,(IGroupingPanelUI,List[(IGrouping,ICapsule)])]
   val hookPanels= new HashMap[String, (IHookPanelUI, List[IHook])]
   var status = HashMap(State.READY-> new AtomicInteger,
                        State.RUNNING-> new AtomicInteger,
@@ -239,7 +239,7 @@ class ExecutionManager(manager : IMoleSceneManager,
     }
   }
   
-  class AddGroupingStrategyRowAction(fui: IGroupingStrategyFactoryUI) extends Action(fui.toString){
+  class AddGroupingStrategyRowAction(fui: IGroupingFactoryUI) extends Action(fui.toString){
     def apply = {
       val cl = fui.coreClass.getCanonicalName
       if(gStrategyPanels.contains(cl)) 

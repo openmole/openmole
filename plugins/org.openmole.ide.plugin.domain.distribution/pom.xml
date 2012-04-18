@@ -27,5 +27,10 @@
             <artifactId>org.openmole.plugin.domain.distribution</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.plugin.domain.modifier</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

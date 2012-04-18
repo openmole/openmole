@@ -18,6 +18,7 @@
 package org.openmole.ide.core.implementation.data
 
 import org.openmole.ide.core.model.commons.TransitionType._
+import org.openmole.ide.core.model.data.IExplorationTaskDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.data.ICapsuleDataUI
 
@@ -35,7 +36,7 @@ class CapsuleDataUI extends ICapsuleDataUI{
   
   def transitionType = task match {
     case Some(y: ITaskDataProxyUI)=> y.dataUI match {
-        case x: AbstractExplorationTaskDataUI=> EXPLORATION_TRANSITION 
+        case x: IExplorationTaskDataUI=> EXPLORATION_TRANSITION 
         case _=> BASIC_TRANSITION
       }
     case _=> BASIC_TRANSITION

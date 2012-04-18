@@ -22,10 +22,10 @@ import org.openmole.ide.misc.tools.check.TypeCheck
 
 object TypeCheckExample extends App{
   
-println(TypeCheck.apply("12.5",new Prototype("proto1",classOf[Int])))
-println(TypeCheck.apply("125",new Prototype("proto1",classOf[Int])))
-println(TypeCheck.apply("125",new Prototype("proto1",classOf[String])))
-println(TypeCheck.apply("\"125\"",new Prototype("proto1",classOf[String])))
-println(TypeCheck.apply("12.5d",new Prototype("proto1",classOf[java.lang.Double])))
+println(TypeCheck.apply("12.5",new Prototype[Int]("proto1")))
+println(TypeCheck.apply("125",new Prototype[Int]("proto1")))
+println(TypeCheck.apply("125",new Prototype[String]("proto1")))
+println(TypeCheck.apply("\"125\"",new Prototype[String]("proto1")))
+println(TypeCheck.apply("12.5d",new Prototype[Double]("proto1")))
 
 }

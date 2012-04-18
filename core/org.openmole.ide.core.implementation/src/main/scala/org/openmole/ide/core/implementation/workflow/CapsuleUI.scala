@@ -33,7 +33,7 @@ import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.workflow._
-import org.openmole.ide.core.implementation.data.AbstractExplorationTaskDataUI
+import org.openmole.ide.core.model.data.IExplorationTaskDataUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.tools.image.Images
@@ -231,7 +231,7 @@ class CapsuleUI(val scene: IMoleScene,
   def setTask(dpu: ITaskDataProxyUI)={
     dataUI.task= Some(dpu)
     dpu.dataUI match {
-      case x : AbstractExplorationTaskDataUI => setSampling(x.sampling)
+      case x : IExplorationTaskDataUI => setSampling(x.sampling)
       case _=>
     }
   }

@@ -15,12 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.domain.distribution
+package org.openmole.ide.core.model.data
 
-import org.openmole.ide.core.implementation.registry.OSGiActivator
-import org.openmole.ide.core.implementation.registry.DomainActivator
+import org.openmole.core.model.data.IDataSet
+import org.openmole.core.model.data.IParameterSet
+import org.openmole.core.model.task.IExplorationTask
+import org.openmole.core.model.task.IPluginSet
+import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 
-class Activator extends OSGiActivator with DomainActivator {
-
-  override def domainFactories = List(new FiniteUniformIntDistributionFactoryUI)
+trait IExplorationTaskDataUI extends ITaskDataUI {
+  
+  def sampling : Option[ISamplingDataProxyUI] = None
+  
+  def sampling_=(s: Option[ISamplingDataProxyUI])
+  
+  def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet): IExplorationTask
 }

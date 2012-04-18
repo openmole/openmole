@@ -18,9 +18,10 @@ import scala.collection.JavaConversions._
 class CompleteSamplingDataUI(val name: String="", 
                              val factors: List[(IPrototypeDataProxyUI ,String,IDomainDataUI)] = List.empty) extends ISamplingDataUI {
 
-  def coreObject = new CompleteSampling(factors.map(f=>new DiscreteFactor(
+  def coreObject = new CompleteSampling(
+    factors.map(f => new DiscreteFactor(
         f._1.dataUI.coreObject.asInstanceOf[IPrototype[Any]],
-        f._3.coreObject(f._1.dataUI.coreObject).asInstanceOf[IDomain[Any] with IIterable[Any]])))
+        f._3.coreObject(f._1.dataUI.coreObject).asInstanceOf[IDomain[Any] with IIterable[Any]])).toSeq: _*)
 
   def coreClass = classOf[CompleteSampling] 
   

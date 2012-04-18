@@ -20,20 +20,19 @@ package org.openmole.ide.plugin.domain.range
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.domain.IDomain
 import org.openmole.ide.core.model.data.IDomainDataUI
-import org.openmole.plugin.domain.range.BigDecimalRange
-import org.openmole.plugin.domain.range.DoubleRange
-import org.openmole.plugin.domain.range.IntegerRange
+import org.openmole.plugin.domain.range._
 
-class RangeDomainDataUI (val name: String="",
-                         val min: String = "",
-                         val max: String = "",
-                         val step: String = "") extends IDomainDataUI {
+class RangeDomainDataUI (
+  val name: String="",
+  val min: String = "",
+  val max: String = "",
+  val step: String = "") extends IDomainDataUI {
   
-  def coreObject(prototypeObject: IPrototype[_]) = {
-    if (prototypeObject.`type`.erasure == java.lang.Integer.TYPE) new IntegerRange(min,max,step)
-    else if (prototypeObject.`type`.erasure == java.lang.Double.TYPE) new DoubleRange(min,max,step)
-    else new BigDecimalRange(min,max,step)
-}
+  override def coreObject(prototypeObject: IPrototype[_]): IDomain[_] = {
+    if (prototypeObject.`type`.erasure == java.lang.Integer.TYPE) new Range[Int](min,max,step)
+    else if (prototypeObject.`type`.erasure == java.lang.Double.TYPE) new Range[Double](min,max,step)
+    else new Range[BigDecimal](min, max, step)
+  }
 
   def coreClass = classOf[IDomain[_]]
   

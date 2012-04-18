@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2011 leclaire
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,16 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.data
+package org.openmole.ide.core.model.data
 
-import org.openmole.core.implementation.task.ExplorationTask
-import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
+import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.mole.IGrouping
 
-abstract class AbstractExplorationTaskDataUI extends TaskDataUI {
-  
-  def sampling : Option[ISamplingDataProxyUI] = None
-  
-  def sampling_=(s: Option[ISamplingDataProxyUI])
-  
-  def coreObject: ExplorationTask
+trait IGroupingDataUI {
+  def coreObject: (IGrouping, ICapsule)
 }
+

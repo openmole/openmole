@@ -21,7 +21,7 @@ import org.openmole.ide.core.model.factory.IAuthentificationFactoryUI
 import org.openmole.ide.core.model.factory.IBoundedDomainFactoryUI
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
 import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
-import org.openmole.ide.core.model.factory.IGroupingStrategyFactoryUI
+import org.openmole.ide.core.model.factory.IGroupingFactoryUI
 import org.openmole.ide.core.model.factory.IHookFactoryUI
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 import org.openmole.ide.core.model.factory.ISamplingFactoryUI
@@ -47,5 +47,5 @@ object KeyRegistry {
   
   val authentifications = new HashMap[DefaultKey,IAuthentificationFactoryUI] with SynchronizedMap[DefaultKey,IAuthentificationFactoryUI]
   
-  val groupingStrategies = new HashMap[DefaultKey,IGroupingStrategyFactoryUI] with SynchronizedMap[DefaultKey,IGroupingStrategyFactoryUI]
+  val groupingStrategies = new HashMap[DefaultKey,IGroupingFactoryUI] with SynchronizedMap[DefaultKey,IGroupingFactoryUI]
 }

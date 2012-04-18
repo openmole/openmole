@@ -20,7 +20,10 @@ package org.openmole.ide.core.model.data
 import java.awt.Color
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.dataproxy._
-import org.openmole.core.implementation.task.Task
+import org.openmole.core.model.data.IDataSet
+import org.openmole.core.model.data.IParameterSet
+import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 
@@ -30,7 +33,7 @@ trait ITaskDataUI extends IDataUI{
   
   def backgroundColor: Color
   
-  def coreObject: Task
+  def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet): ITask
   
   def prototypesIn: List[(IPrototypeDataProxyUI,String)]
   

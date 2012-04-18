@@ -33,9 +33,9 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
   
   val proxyCheckBox = new CheckBox("MyProxy") {tooltip = Help.tooltip("Set Proxy settings")}
   val proxyURLTextField = new TextField(18) {tooltip = Help.tooltip("","")} 
-  val proxyUserTextField = new TextField(18){tooltip = Help.tooltip("","")}
+  //val proxyUserTextField = new TextField(18){tooltip = Help.tooltip("","")}
   val proxyURLLabel = new Label("url")
-  val proxyUserLabel = new Label("user")
+  //val proxyUserLabel = new Label("user")
   
   val requirementCheckBox = new CheckBox("Requirements") {tooltip = Help.tooltip("Adds specific requirements")}
   val architectureCheckBox = new CheckBox("64 bits") {tooltip = Help.tooltip("64 bits worker nodes only")}
@@ -60,8 +60,8 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
       contents+= (proxyCheckBox,"wrap")
       contents+= (proxyURLLabel,"gap para")
       contents+= proxyURLTextField
-      contents+= (proxyUserLabel,"gap para")
-      contents+= proxyUserTextField
+      //contents+= (proxyUserLabel,"gap para")
+      //contents+= proxyUserTextField
     },"wrap")
   contents+= (new PluginPanel("wrap 2") {
       contents+= (requirementCheckBox,"wrap")
@@ -80,7 +80,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
   vomsTextField.text = pud.voms
   bdiiTextField.text = pud.bdii
   proxyURLTextField.text = pud.proxyURL
-  proxyUserTextField.text = pud.proxyUser
+  //proxyUserTextField.text = pud.proxyUser
   proxyCheckBox.selected = pud.proxy
   requirementCheckBox.selected = pud.requirement
   architectureCheckBox.selected = pud.architecture64
@@ -97,7 +97,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
     case ButtonClicked(`proxyCheckBox`) => showProxy(proxyCheckBox.selected)}
       
   private def showProxy(b: Boolean) = {
-    List(proxyURLLabel, proxyURLLabel, proxyUserLabel, proxyURLTextField, proxyUserTextField).foreach{
+    List(proxyURLLabel, proxyURLLabel, proxyURLTextField).foreach{
       _.visible = b
     }
   }
@@ -116,7 +116,6 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
                                bdiiTextField.text,
                                proxyCheckBox.selected,
                                proxyURLTextField.text,
-                               proxyUserTextField.text,
                                requirementCheckBox.selected,
                                architectureCheckBox.selected,
                                runtimeMemoryTextField.text,

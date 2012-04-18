@@ -18,12 +18,12 @@
 package org.openmole.ide.core.model.factory
 
 import org.openmole.ide.core.model.control.IExecutionManager
-import org.openmole.ide.core.model.panel.IGroupingStrategyPanelUI
+import org.openmole.ide.core.model.panel.IGroupingPanelUI
 
-trait IGroupingStrategyFactoryUI extends IFactoryUI{
+trait IGroupingFactoryUI extends IFactoryUI{
   override def displayName: String = ""
   
   def coreClass : Class[_]
   
-  def buildPanelUI(executionManager: IExecutionManager): IGroupingStrategyPanelUI
+  def buildPanelUI(executionManager: IExecutionManager): IGroupingPanelUI
 }

@@ -7,6 +7,9 @@ package org.openmole.ide.plugin.task.netlogo5
 
 import java.awt.Color
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.core.model.data.IDataSet
+import org.openmole.core.model.data.IParameterSet
+import org.openmole.core.model.task.IPluginSet
 import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.plugin.task.netlogo5.NetLogo5Task
 import scala.collection.JavaConversions._
@@ -21,15 +24,21 @@ class NetLogo5TaskDataUI(val name: String="",
                          var prototypeMappingOutput: List[(String,IPrototypeDataProxyUI)] = List(),
                          val globals: List[String] = List()) extends TaskDataUI {
   
-  def coreObject = {
-    val nlt = new NetLogo5Task(name,
-                               new File(nlogoPath),
-                               asJavaIterable(Source.fromString(lauchingCommands).getLines.toIterable),
-                               workspaceEmbedded)
-    prototypeMappingInput.foreach(pm=>nlt.addNetLogoInput(pm._1.dataUI.coreObject,pm._2))
-    prototypeMappingOutput.foreach(pm=>nlt.addNetLogoOutput(pm._1,pm._2.dataUI.coreObject))
-    nlt
+
+  def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = {
+    val builder = NetLogo5Task(
+      name,
+      new File(nlogoPath),
+      Source.fromString(lauchingCommands).getLines.toIterable,
+      workspaceEmbedded)(plugins)
+    builder addInput inputs
+    builder addOutput outputs
+    builder addParameter parameters
+    prototypeMappingInput.foreach{case(p, n) => builder addNetLogoInput (p.dataUI.coreObject, n)}
+    prototypeMappingOutput.foreach{case(n, p) => builder addNetLogoOutput (n, p.dataUI.coreObject)} 
+    builder.toTask
   }
+  
   
   def coreClass= classOf[NetLogo5Task]
   

@@ -18,7 +18,7 @@
 package org.openmole.ide.plugin.groupingstrategy.batch
 
 import org.openmole.core.model.mole.ICapsule
-import org.openmole.plugin.groupingstrategy.batch.NumberOfMoleJobsGroupingStrategy
+import org.openmole.plugin.grouping.batch.NumberOfMoleJobsGroupingStrategy
 import org.openmole.ide.core.model.data.IGroupingStrategyDataUI
 import org.openmole.ide.core.model.control.IExecutionManager
 

@@ -27,7 +27,7 @@ class StringPrototypeDataUI(val name: String="", d: Int=0) extends GenericProtot
   
   def coreClass = classOf[IPrototype[String]]
   
-  def coreObject = toArray(new Prototype(name,classOf[String]),dim).asInstanceOf[IPrototype[String]]
+  def coreObject = new Prototype[String](name).toArray(dim).asInstanceOf[IPrototype[String]]
   
   def fatImagePath = "img/string_fat.png"
   
