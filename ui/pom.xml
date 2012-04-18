@@ -19,7 +19,7 @@
     <modules>
         <module>org.openmole.ui</module>
         <module>plugins</module>
-        <!--<module>plugins-gui</module>-->
+        <module>plugins-gui</module>
 	<module>openmole-ui-package</module>
     </modules>
 

@@ -22,6 +22,7 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.logging.LoggerService
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.tools.script.ScalaREPL
 import scala.annotation.tailrec
 import scala.tools.nsc.Settings
 import scala.tools.nsc.interpreter.ILoop
@@ -57,14 +58,7 @@ class Console {
   def run {
     initPassword
     
-    val loop = new ILoop {
-      override val prompt = "OpenMOLE>"
-    }
-    
-    loop.settings = new Settings()
-    loop.settings.processArgumentString("-Yrepl-sync")
-    loop.in = new JLineReader(new JLineCompletion(loop))
-    loop.intp = new Interpreter
+    val loop = new ScalaREPL
     
     //loop.bind(pluginManager, PluginManager)
     loop.beQuietDuring { 
@@ -92,6 +86,8 @@ class Console {
         "commands._"
       )
     }
+    
+    //println(loop.definedSymbols)
     loop.loop
   }
   

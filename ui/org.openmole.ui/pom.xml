@@ -16,11 +16,7 @@
     <artifactId>org.openmole.ui</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>org.apache.clerezza.scala</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.core.model</artifactId>
