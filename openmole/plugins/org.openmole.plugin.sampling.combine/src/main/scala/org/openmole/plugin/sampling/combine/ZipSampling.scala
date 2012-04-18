@@ -27,7 +27,7 @@ import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.ListBuffer
 
-class ZipSampling(samplings: Iterable[ISampling]) extends ISampling {
+sealed class ZipSampling(samplings: Iterable[ISampling]) extends ISampling {
 
   def this(samplings: ISampling*) = this(samplings)
   def this(head: ISampling, samplings: Array[ISampling]) = this(List(head) ++ samplings) 

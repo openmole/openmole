@@ -36,25 +36,25 @@ object NetLogo4Task {
     workspace: File,
     script: String,
     launchingCommands: Iterable[String]
-  )(implicit plugins: IPluginSet) = {
+  )(implicit plugins: IPluginSet): NetLogoTaskBuilder = {
     val _launchingCommands = launchingCommands
     val (_workspace, _script) = (workspace, script)
     
     new NetLogoTaskBuilder { builder =>
       
-      provided += workspace
+      addResource(workspace)
       
-      def toTask = new NetLogoTask(
+      def toTask = new NetLogo4Task(
         name,
         workspace = new Workspace(_workspace, _script),
         launchingCommands = _launchingCommands,
         inputs = builder.inputs,
         outputs = builder.outputs,
         parameters = builder.parameters,
-        provided = builder.provided(),
-        produced = builder.produced(),
-        netLogoInputs = builder.netLogoInputs(),
-        netLogoOutputs = builder.netLogoOutputs(),
+        provided = builder.provided,
+        produced = builder.produced,
+        netLogoInputs = builder.netLogoInputs,
+        netLogoOutputs = builder.netLogoOutputs,
         netLogoFactory = factory
       )
     }
@@ -64,27 +64,64 @@ object NetLogo4Task {
     name: String,
     script: File,
     launchingCommands: Iterable[String]
-  )(implicit plugins: IPluginSet) = {
+  )(implicit plugins: IPluginSet): NetLogoTaskBuilder = {
     val _launchingCommands = launchingCommands
     new NetLogoTaskBuilder { builder =>
   
-      provided += script
+      addResource(script)
       
-      def toTask = new NetLogoTask(
+      def toTask = new NetLogo4Task(
         name,
         launchingCommands = _launchingCommands,
         workspace = new Workspace(script),
         inputs = builder.inputs,
         outputs = builder.outputs,
         parameters = builder.parameters,
-        provided = builder.provided(),
-        produced = builder.produced(),
-        netLogoInputs = builder.netLogoInputs(),
-        netLogoOutputs = builder.netLogoOutputs(),
+        provided = builder.provided,
+        produced = builder.produced,
+        netLogoInputs = builder.netLogoInputs,
+        netLogoOutputs = builder.netLogoOutputs,
         netLogoFactory = factory
       )
     }
   }
+  
+  def apply(
+    name: String,
+    script: File,
+    launchingCommands: Iterable[String],
+    embedWorkpsace: Boolean
+  )(implicit plugins: IPluginSet): NetLogoTaskBuilder = 
+    if(embedWorkpsace) apply(name, script.getParentFile, script.getName, launchingCommands)
+    else apply(name, script, launchingCommands)
+  
+  
 }
 
+
+sealed class NetLogo4Task(
+  name: String,
+  workspace: NetLogoTask.Workspace, 
+  launchingCommands: Iterable[String],
+  netLogoInputs: Iterable[(IPrototype[_], String)],
+  netLogoOutputs: Iterable[(String, IPrototype[_])],
+  netLogoFactory: NetLogoFactory,
+  inputs: IDataSet,
+  outputs: IDataSet,
+  parameters: IParameterSet,
+  provided: Iterable[(Either[File, IPrototype[File]], String, Boolean)],
+  produced: Iterable[(String, IPrototype[File])]
+)(implicit plugins: IPluginSet) extends NetLogoTask(
+  name, 
+  workspace, 
+  launchingCommands, 
+  netLogoInputs,
+  netLogoOutputs,
+  netLogoFactory,
+  inputs,
+  outputs,
+  parameters,
+  provided,
+  produced
+)
 

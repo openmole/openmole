@@ -24,7 +24,7 @@ import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.sampling.ISampling
 import scala.util.control.Breaks._ 
 
-class CompleteSampling(samplings: ISampling*) extends ISampling {
+sealed class CompleteSampling(samplings: ISampling*) extends ISampling {
 
   override def inputs = DataSet.empty ++ samplings.flatMap{_.inputs}
   override def prototypes: Iterable[IPrototype[_]] = samplings.flatMap{_.prototypes}

@@ -21,7 +21,7 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.implementation.tools.VariableExpansion._
 import java.lang.Integer
 
-class IntegerRelative(val nominal: String, val percent: String, val size: String) extends IRelative[Integer] {
+sealed class IntegerRelative(val nominal: String, val percent: String, val size: String) extends IRelative[Integer] {
 
   override def  computeValues(context: IContext): Iterable[Integer] = {
     val nom = expandData(context, nominal).toInt

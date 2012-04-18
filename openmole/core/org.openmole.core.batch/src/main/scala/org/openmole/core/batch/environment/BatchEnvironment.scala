@@ -116,6 +116,8 @@ object BatchEnvironment extends Logger {
   Workspace += (CheckFileExistsInterval, "PT1H")
   Workspace += (StatisticsHistorySize, "10000")
   Workspace += (JobManagmentThreads, "100")
+  
+  def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
 }
 
 import BatchEnvironment._
@@ -151,12 +153,7 @@ akka {
   
   AuthenticationRegistry.initAndRegisterIfNotAllreadyIs(authentication)
       
-  def inMemorySizeForRuntime: Option[Int] = None
-  
-  val memorySizeForRuntime = inMemorySizeForRuntime match {
-    case Some(mem) => mem
-    case None => Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
-  }
+  def runtimeMemory: Int
   
   override def submit(job: IJob) = {
     val bej = executionJob(job)

@@ -29,38 +29,43 @@ import org.openmole.core.model.data.IPrototype
 import fr.iscpif.mgo.ga.selection.Ranking
 import fr.iscpif.mgo.tools.Scaling._
 import org.openmole.core.model.task.IPluginSet
+import scala.collection.mutable.ListBuffer
 
 object ScalingParetoTask {
   
   def apply[I <: Individual[GAGenome, GAFitness] with Ranking](name: String, archive: IPrototype[Array[I]])(implicit plugins: IPluginSet) = 
     new TaskBuilder { builder =>
     
-    var _scale: List[(IPrototype[Double], Double, Double)] = Nil
+      private var _scales = new ListBuffer[(IPrototype[Double], Double, Double)]
+      private var _objectives = new ListBuffer[IPrototype[Double]] 
     
-    var _objectives: List[IPrototype[Double]] = Nil
-    def scale = new {
-      def +=(p: IPrototype[Double], min: Double, max: Double) = {
-        _scale ::= ((p, min, max))
-        outputs += p.toArray
-        builder
+      def scales = _scales.toList 
+   
+      def scale(p: IPrototype[Double], min: Double, max: Double) = {
+        _scales += ((p, min, max))
+        this addOutput p.toArray
+        this
       }
-    }
+      
+      def objectives = _objectives.toList
     
-    def objective = new {
-      def +=(p: IPrototype[Double]) = {
-        _objectives ::= p
-        builder
+      def objective(p: IPrototype[Double]) = {
+        _objectives += p
+        this addOutput p.toArray
+        this
       }
-    }
-    
-    def toTask = new ScalingParetoTask[I](name, archive) {
+      
+      def toTask = new ScalingParetoTask[I](name, archive) {
         val inputs = builder.inputs + archive
         val outputs = builder.outputs
         val parameters = builder.parameters
-        val scale = _scale.reverse
-        val objectives = _objectives.reverse
+        val scales = builder.scales
+        val objectives = builder.objectives
+      }
     }
-  }
+    
+    
+ 
   
 }
 
@@ -69,14 +74,14 @@ sealed abstract class ScalingParetoTask[I <: Individual[GAGenome, GAFitness] wit
   archive: IPrototype[Array[I]]) 
 (implicit val plugins: IPluginSet) extends Task {
 
-  def scale: List[(IPrototype[Double], Double, Double)]
+  def scales: List[(IPrototype[Double], Double, Double)]
   def objectives: List[IPrototype[Double]]
   
   override def process(context: IContext) = {
     val pareto = Ranking.firstRanked[I](context.valueOrException(archive))
 
     (
-      scale.reverse.zipWithIndex.map {  case((p, min, max), i) => new Variable(p.toArray, pareto.map{_.genome.values(i).scale(min, max) }.toArray) } ++
+      scales.reverse.zipWithIndex.map {  case((p, min, max), i) => new Variable(p.toArray, pareto.map{_.genome.values(i).scale(min, max) }.toArray) } ++
       objectives.reverse.zipWithIndex.map { case(p, i) => new Variable(p.toArray, pareto.map{_.fitness.values(i)}.toArray) }
     ).toContext
   }

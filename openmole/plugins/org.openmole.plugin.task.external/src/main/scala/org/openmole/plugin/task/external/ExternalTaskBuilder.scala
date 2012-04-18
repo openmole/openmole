@@ -19,47 +19,43 @@ package org.openmole.plugin.task.external
 
 import java.io.File
 import org.openmole.core.implementation.task.TaskBuilder
+import org.openmole.core.implementation.data._
+import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.task.IPluginSet
+import scala.collection.mutable.ListBuffer
 
 abstract class ExternalTaskBuilder extends TaskBuilder {
   
-  var _provided = List.empty[(Either[File, IPrototype[File]], String, Boolean)]
-  var _produced = List.empty[(String, IPrototype[File])]
+  private var _provided = new ListBuffer[(Either[File, IPrototype[File]], String, Boolean)]
+  private var _produced = new ListBuffer[(String, IPrototype[File])]
 
-  def provided = new {
-    
-    def apply() = _provided.reverse
-    
-    def +=(file: File, name: String, link:  Boolean): ExternalTaskBuilder.this.type = {
-       _provided ::= ((Left(file), name, link))
-       ExternalTaskBuilder.this
-    }
-    
-    def +=(file: File, name: String): ExternalTaskBuilder.this.type = this.+=(file, name, false)
-    def +=(file: File, link: Boolean): ExternalTaskBuilder.this.type = this.+=(file, file.getName, link)
-    def +=(file: File): ExternalTaskBuilder.this.type = this.+=(file, false)
-    
-    
-    def +=(p: IPrototype[File], name: String, link: Boolean ): ExternalTaskBuilder.this.type = {
-      _provided ::= ((Right(p), name, link))
-      inputs += p
-      ExternalTaskBuilder.this
-    }
-    
-    def +=(p: IPrototype[File], name: String): ExternalTaskBuilder.this.type = this.+=(p, name, false)
-  }
+  def provided = _provided.toList
+  def produced = _produced.toList
   
-  def produced = new {
     
-    def apply() = _produced.reverse
+  def addResource(file: File, name: String, link:  Boolean): ExternalTaskBuilder.this.type = {
+    _provided += ((Left(file), name, link))
+    this
+  }
     
-    def +=(name: String, p: IPrototype[File]): ExternalTaskBuilder.this.type = {
-      _produced ::= ((name, p))
-      outputs += p
-      ExternalTaskBuilder.this
-    }
+  def addResource(file: File, name: String): this.type = this.addResource(file, name, false)
+  def addResource(file: File, link: Boolean): this.type = this.addResource(file, file.getName, link)
+  def addResource(file: File): this.type = this.addResource(file, false)
     
+    
+  def addInput(p: IPrototype[File], name: String, link: Boolean ): this.type = {
+    _provided += ((Right(p), name, link))
+    this addInput p
+    this
+  }
+    
+  def addInput(p: IPrototype[File], name: String): ExternalTaskBuilder.this.type = this.addInput(p, name, false)
+    
+  def addOutput(name: String, p: IPrototype[File]): this.type = {
+    _produced += ((name, p))
+    this addOutput p
+    this
   }
   
 }

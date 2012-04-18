@@ -59,8 +59,8 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
     val exc = new Capsule(ExplorationTask("Exploration", sampling))
      
     val emptyT = EmptyTask("Empty")
-    emptyT.inputs += i
-    emptyT.outputs += i
+    emptyT.addInput(i)
+    emptyT.addOutput(i)
     
     val emptyC = new Capsule(emptyT)
     

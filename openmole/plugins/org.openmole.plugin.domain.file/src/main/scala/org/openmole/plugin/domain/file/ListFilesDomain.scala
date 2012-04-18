@@ -28,7 +28,7 @@ import org.openmole.misc.tools.io.FileUtil._
 
 object ListFilesDomain extends Logger
 
-class ListFilesDomain(dir: File, filter: File => Boolean) extends IDomain[File] with IFinite[File] {
+sealed class ListFilesDomain(dir: File, filter: File => Boolean) extends IDomain[File] with IFinite[File] {
 
   import ListFilesDomain._
   

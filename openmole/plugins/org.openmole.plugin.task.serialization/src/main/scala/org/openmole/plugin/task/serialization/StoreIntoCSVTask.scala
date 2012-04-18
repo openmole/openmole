@@ -40,10 +40,10 @@ object StoreIntoCSVTask {
   def apply(name: String, outputFile: IPrototype[File])(implicit plugins: IPluginSet) = 
     new StoreIntoCSVTaskBuilder { builder =>
       
-      def toTask = new StoreIntoCSVTask(name, outputFile, builder.columns()) {
-          val inputs = builder.inputs
-          val outputs = builder.outputs + outputFile
-          val parameters = builder.parameters
+      def toTask = new StoreIntoCSVTask(name, outputFile, builder.columns) {
+        val inputs = builder.inputs
+        val outputs = builder.outputs + outputFile
+        val parameters = builder.parameters
       }
       
     }

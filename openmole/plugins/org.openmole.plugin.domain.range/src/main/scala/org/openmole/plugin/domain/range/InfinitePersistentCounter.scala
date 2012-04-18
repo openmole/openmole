@@ -21,7 +21,7 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IIterable
 
-class InfinitePersistentCounter(counter: Iterator[Long]) extends IDomain[Long] with IIterable[Long] {
+sealed class InfinitePersistentCounter(counter: Iterator[Long]) extends IDomain[Long] with IIterable[Long] {
 
   def this(start: Long, step: Long) = {
     this(new Iterator[Long] {

@@ -24,7 +24,7 @@ import org.openmole.core.model.sampling.ISampling
 import org.openmole.misc.tools.service.Random._
 import org.openmole.misc.workspace.Workspace
 
-class ShuffleSampling(sampling: ISampling, random: Random = Workspace.newRNG) extends ISampling {
+sealed class ShuffleSampling(sampling: ISampling, random: Random = Workspace.newRNG) extends ISampling {
   
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes

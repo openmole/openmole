@@ -38,8 +38,8 @@ object SystemExecTask {
       val inputs = builder.inputs 
       val outputs: IDataSet = builder.outputs ++ DataSet(returnValue)
       val parameters = builder.parameters
-      val provided = builder.provided()
-      val produced = builder.produced()
+      val provided = builder.provided
+      val produced = builder.produced
     }
   }
   

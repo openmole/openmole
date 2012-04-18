@@ -143,7 +143,7 @@ object Evolution {
     
     scaling.inputs.map{
       name => (name, scaling.scales.getOrElse(name, throw new UserBadDataError("Scale not found for input " + name)))}.foreach { 
-        case (name, (min, max)) => scalingTask.scale += (new Prototype[Double](name), min, max)
+        case (name, (min, max)) => scalingTask scale (new Prototype[Double](name), min, max)
       }
       
     
@@ -151,7 +151,7 @@ object Evolution {
     
     val toIndividualTask = ToIndividualTask(name + "ToIndividual", genomeWithSigmaPrototype, individualPrototype)
     objectives.objectives.reverse.foreach {
-      case (o, v) => toIndividualTask.objectives += (o, v)
+      case (o, v) => toIndividualTask objective (o, v)
     }
     
     val toIndividualCapsule = new Capsule(toIndividualTask)
@@ -171,18 +171,18 @@ object Evolution {
     val scalingParetoTask = ScalingParetoTask(name + "ScalingPareto", archivePrototype)
     scaling.scales.foreach { 
       case(name, (min, max)) =>
-        scalingParetoTask.scale += (new Prototype[Double](name), min, max)
+        scalingParetoTask scale (new Prototype[Double](name), min, max)
     }
     
     objectives.objectives.reverse.foreach {
-      case(o, _) => scalingParetoTask.objective += o
+      case(o, _) => scalingParetoTask objective o
     }
     
-    scalingParetoTask.inputs += (steadySinceProto)
-    scalingParetoTask.inputs += (generationProto)
+    scalingParetoTask addInput steadySinceProto
+    scalingParetoTask addInput generationProto
     
-    scalingParetoTask.outputs += (steadySinceProto)
-    scalingParetoTask.outputs += (generationProto)
+    scalingParetoTask addOutput steadySinceProto
+    scalingParetoTask addOutput generationProto
    
     val scalingParetoCapsule = new Capsule(scalingParetoTask)
       

@@ -24,7 +24,7 @@ import org.openmole.core.model.domain.IDomain
 import collection.JavaConversions._
 import org.openmole.core.model.domain.IIterable
 
-class VariableDomain[A](variable: IPrototype[Array[A]]) extends IDomain[A] with IIterable[A] {
+sealed class VariableDomain[A](variable: IPrototype[Array[A]]) extends IDomain[A] with IIterable[A] {
   
   override def iterator(context: IContext): Iterator[A] = 
     context.valueOrException(variable).iterator

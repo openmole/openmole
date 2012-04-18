@@ -25,7 +25,7 @@ import org.openmole.core.model.domain.IFinite
 import scala.collection.JavaConversions
 import scala.collection.mutable.ListBuffer
 
-class DynamicListDomain[+T](values: String*) extends IDomain[T] with IFinite[T] {
+sealed class DynamicListDomain[+T](values: String*) extends IDomain[T] with IFinite[T] {
 
   override def computeValues(context: IContext): Iterable[T] = 
     values.map{VariableExpansion.expandData(context,_).asInstanceOf[T]}

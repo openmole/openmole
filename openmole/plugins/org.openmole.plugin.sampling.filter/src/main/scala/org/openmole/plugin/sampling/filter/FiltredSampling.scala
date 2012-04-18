@@ -22,10 +22,8 @@ import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.sampling.ISampling
 import org.openmole.core.implementation.data.Context
 
-class FiltredSampling(sampling: ISampling, filters: Array[IFilter]) extends ISampling {
+sealed class FiltredSampling(sampling: ISampling, filters: IFilter*) extends ISampling {
 
-  def this(sampling: ISampling, filters: IFilter*) = this(sampling, filters.toArray)
-  
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
   

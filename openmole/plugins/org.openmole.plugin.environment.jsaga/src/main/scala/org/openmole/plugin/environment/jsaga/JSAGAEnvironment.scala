@@ -35,13 +35,13 @@ abstract class JSAGAEnvironment extends BatchEnvironment {
   import JSAGAEnvironment._
     
   
-  val memory = max(Workspace.preferenceAsInt(DefaultRequieredMemory), memorySizeForRuntime).toString
+  val memory = max(Workspace.preferenceAsInt(DefaultRequieredMemory), runtimeMemory).toString
   
-  def attributes: Map[String, String]
-  val allAttributes = {
-    attributes.get(MEMORY) match {
-      case Some(m) => if(m < memory) attributes + (MEMORY -> memory) else attributes
-      case None => attributes + (MEMORY -> memory)
+  def requirements: Map[String, String]
+  val allRequirements = {
+    requirements.get(MEMORY) match {
+      case Some(m) => if(m < memory) requirements + (MEMORY -> memory) else requirements
+      case None => requirements + (MEMORY -> memory)
     }
   }
   

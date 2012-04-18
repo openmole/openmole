@@ -32,8 +32,8 @@ class SerializationSpec extends FlatSpec with ShouldMatchers {
     val p = new Prototype[Int]("p")
     
     val t = EmptyTask("Test")
-    t.inputs += p
-    t.outputs += p
+    t.addInput(p)
+    t.addOutput(p)
     
     val builder = new BufferOutputStream
     

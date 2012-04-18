@@ -17,24 +17,24 @@
 
 package org.openmole.plugin.task.serialization
 
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task.TaskBuilder
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.task.IPluginSet
+import scala.collection.mutable.ListBuffer
 
 abstract class StoreIntoCSVTaskBuilder(implicit plugins: IPluginSet) extends TaskBuilder {
 
-  var _columns: List[(IPrototype[Array[_]], String)] = List.empty
+  private var _columns = new ListBuffer[(IPrototype[Array[_]], String)]
   
-  def columns = new {
-    def +=(prototype: IPrototype[Array[_]], columnName: String): StoreIntoCSVTaskBuilder.this.type = {
-      inputs += prototype
-      _columns ::= (prototype -> columnName)
-      StoreIntoCSVTaskBuilder.this
-    }
-    
-    def +=(prototype: IPrototype[Array[_]]): StoreIntoCSVTaskBuilder.this.type = this.+=(prototype, prototype.name)
-    
-    def apply() = _columns.reverse
+  def columns = _columns.toList 
+  
+  def addColumn(prototype: IPrototype[Array[_]], columnName: String): this.type = {
+    this addInput prototype
+    _columns +== (prototype -> columnName)
+    this
   }
+    
+  def addColumn(prototype: IPrototype[Array[_]]): this.type = this.addColumn(prototype, prototype.name)
   
 }

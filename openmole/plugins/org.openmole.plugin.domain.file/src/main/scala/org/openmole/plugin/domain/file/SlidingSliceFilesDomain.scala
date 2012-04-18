@@ -31,7 +31,7 @@ object SlidingSliceFilesDomain extends Logger {
 
 import SlidingSliceFilesDomain._
 
-class SlidingSliceFilesDomain(dir: File, numberPattern: String, sliceSize: Int, filter: File => Boolean) extends IDomain[Array[File]] with IFinite[Array[File]] {
+sealed class SlidingSliceFilesDomain(dir: File, numberPattern: String, sliceSize: Int, filter: File => Boolean) extends IDomain[Array[File]] with IFinite[Array[File]] {
  
   def this(dir: File, numberPattern: String, sliceSize: Int) = this(dir, numberPattern, sliceSize, f => true)
   

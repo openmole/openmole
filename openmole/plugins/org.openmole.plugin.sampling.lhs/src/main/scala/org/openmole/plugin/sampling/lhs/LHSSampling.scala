@@ -30,10 +30,9 @@ import org.openmole.core.model.domain.IBounded
 import org.openmole.core.model.sampling.IFactor
 import org.openmole.misc.workspace.Workspace
 
-class LHSSampling(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]], rng: Random) extends Sampling {
+sealed class LHSSampling(samples: Int, rng: Random, factors: IFactor[Double, IDomain[Double] with IBounded[Double]]*) extends Sampling {
 
-  def this(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]], seed: Long) = this(samples, factors, buildSynchronized(seed))
-  def this(samples: Int, factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]]) = this(samples, factors, Workspace.newRNG)
+  def this(samples: Int, factors: IFactor[Double, IDomain[Double] with IBounded[Double]]*) = this(samples, Workspace.newRNG, factors: _*)
 
   override def prototypes = factors.map{_.prototype}
   

@@ -22,33 +22,34 @@ import fr.iscpif.mgo.ga.GAFitness
 import fr.iscpif.mgo.ga.GAFitness._
 import fr.iscpif.mgo.ga.GAGenome
 import fr.iscpif.mgo.ga.GAIndividual
-import org.openmole.core.implementation.data.Variable
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.task.TaskBuilder
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.task.IPluginSet
+import scala.collection.mutable.ListBuffer
 
 object ToIndividualTask {
   
   def apply[T <: GAGenome](name: String, genome: IPrototype[T], individual: IPrototype[Individual[T, GAFitness]])(implicit plugins: IPluginSet) = 
     new TaskBuilder { builder =>
       
-      var _objectives: List[(IPrototype[Double], Double)] = Nil
+      private var _objectives = new ListBuffer[(IPrototype[Double], Double)]
       
-      def objectives = new {
-        def +=(p: IPrototype[Double], v: Double) = {
-          inputs += p
-          _objectives ::= (p -> v)
-          builder
-        }
+      def objectives = _objectives.toList 
+      
+      def objective(p: IPrototype[Double], v: Double) = {
+        this addInput p
+        _objectives += (p -> v)
+        this
       }
       
       def toTask = new ToIndividualTask[T](name, genome, individual) {
         val inputs = builder.inputs + genome
         val outputs = builder.outputs + individual
         val parameters = builder.parameters
-        val objectives = _objectives.reverse
+        val objectives = builder.objectives
       }
     }
   

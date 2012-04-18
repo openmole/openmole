@@ -19,32 +19,33 @@ package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo.ga.GAGenome
 import fr.iscpif.mgo.tools.Scaling._
-import org.openmole.core.implementation.data.Variable
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.task.TaskBuilder
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.task.IPluginSet
+import scala.collection.mutable.ListBuffer
 
 object ScalingGenomeTask {
   
   def apply[T <: GAGenome](name: String, genome: IPrototype[T])(implicit plugins: IPluginSet) = 
     new TaskBuilder { builder => 
-      var _scale: List[(IPrototype[Double], Double, Double)] = List.empty
+      private var _scale = new ListBuffer[(IPrototype[Double], Double, Double)]
       
-      def scale = new {
-        def +=(p: IPrototype[Double], min: Double, max: Double) = {
-          _scale ::= ((p, min, max))
-          outputs += p
-          builder
-        }
+      def scale = _scale.toList 
+      
+      def scale(p: IPrototype[Double], min: Double, max: Double) = {
+        _scale += ((p, min, max))
+        this addOutput p
+        this
       }
       
       def toTask = new ScalingGenomeTask[T](name, genome) {
         val inputs = builder.inputs + genome
         val outputs = builder.outputs + genome
         val parameters = builder.parameters
-        val scale = _scale.reverse
+        val scale = builder.scale
       }
     }
   
@@ -59,8 +60,8 @@ sealed abstract class ScalingGenomeTask[T <: GAGenome]
   
   override def process(context: IContext) = {
     context ++ 
-      scale.reverse.zip(context.valueOrException(genome).values).map {
-        case((p, min, max), g) => new Variable(p, g.scale(min, max))
-      }
+    scale.reverse.zip(context.valueOrException(genome).values).map {
+      case((p, min, max), g) => new Variable(p, g.scale(min, max))
+    }
   }
 }

@@ -40,7 +40,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     
     val t1 = EmptyTask("t1")
     val t2 = EmptyTask("t2")
-    t2.inputs += p
+    t2 addInput p
     
     val c1 = new Capsule(t1)
     val c2 = new Capsule(t2)
@@ -59,8 +59,8 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     
     val t1 = EmptyTask("t1")
     val t2 = EmptyTask("t2")
-    t2.inputs += p
-    t2.parameters += (p -> "Test")
+    t2 addInput p
+    t2 addParameter (p -> "Test")
     
     val c1 = new Capsule(t1)
     val c2 = new Capsule(t2)
@@ -75,10 +75,10 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val pString = new Prototype[String]("t")
     
     val t1 = EmptyTask("t1")
-    t1.outputs += pInt
+    t1 addOutput pInt
     
     val t2 = EmptyTask("t2")
-    t2.inputs += pString
+    t2 addInput pString
     
     val c1 = new Capsule(t1)
     val c2 = new Capsule(t2)
@@ -140,7 +140,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     
     val t2 = EmptyTask("t2")
     val t3 = EmptyTask("t2")
-    t3.inputs += p
+    t3 addInput p
     
     val c1 = new Capsule(t1)
     val c2 = new Capsule(t2)
@@ -165,7 +165,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val t1 = EmptyTask("t1")
    
     val t2 = EmptyTask("t2")
-    t2.inputs += p
+    t2 addInput p
     
     val c1 = new Capsule(t1)
     val c2 = new Capsule(t2)
@@ -195,7 +195,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val c1 = new Capsule(t1)
 
     val t2 = EmptyTask("t2")
-    t2.inputs += p
+    t2 addInput p
     val c2 = new Capsule(t2)
 
     val mt = MoleTask("mt", new Mole(c2), c2)

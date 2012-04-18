@@ -19,7 +19,6 @@ package org.openmole.core.implementation.mole
 
 import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.data.IContext
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
@@ -28,10 +27,7 @@ import org.junit.runner.RunWith
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.implementation.sampling._
 import org.openmole.core.implementation.task._
-import org.openmole.core.implementation.transition.EndExplorationTransition
-import org.openmole.core.implementation.transition.ExplorationTransition
-import org.openmole.core.implementation.transition.Slot
-import org.openmole.core.implementation.transition.Transition
+import org.openmole.core.implementation.transition._
 import org.openmole.core.model.data.DataModeMask._
 
 
@@ -78,8 +74,8 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
     val exc = new Capsule(ExplorationTask("Exploration", sampling))
      
     val emptyT = EmptyTask("Slave")
-    emptyT.inputs += i
-    emptyT.outputs += i
+    emptyT.addInput(i)
+    emptyT.addOutput(i)
     
     val emptyC = new Capsule(emptyT)
      
@@ -117,8 +113,8 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
     val exc = new Capsule(ExplorationTask("Exploration", sampling))
      
     val emptyT = EmptyTask("Slave")
-    emptyT.inputs += i
-    emptyT.outputs += i
+    emptyT.addInput(i)
+    emptyT.addOutput(i)
     
     val emptyC = new Capsule(emptyT)
     

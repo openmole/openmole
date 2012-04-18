@@ -23,7 +23,7 @@ import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IIterable
 import org.openmole.plugin.tools.groovy.ContextToGroovyCode
 
-class GroovyDomainModifier[-I,+O](prototype: IPrototype[I], domain: IDomain[I] with IIterable[I], code: String) extends IDomain[O] with IIterable[O] {
+sealed class GroovyDomainModifier[-I,+O](prototype: IPrototype[I], domain: IDomain[I] with IIterable[I], code: String) extends IDomain[O] with IIterable[O] {
 
   @transient lazy val contextToGroovyCode = new ContextToGroovyCode(code, Iterable.empty)
 

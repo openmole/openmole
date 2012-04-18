@@ -50,9 +50,6 @@ object Stochastic {
   
   def statistics = new Statistics
   
-  private def toArray(x: List[(IPrototype[Double], IPrototype[Double])]) =
-    x.map { case(output, stat) => (output.toArray, stat)}
-  
   def statistics(
     name: String,
     model: Puzzle,
@@ -64,23 +61,23 @@ object Stochastic {
     val aggregationCapsule = new StrainerCapsule(EmptyTask(name + "Aggregation"))
     
     val medianTask = MedianTask(name + "Median")
-    medianTask.sequences += (toArray(statistics.medians))
+    statistics.medians.foreach{case(out, stat) => medianTask sequence (out.toArray, stat)}
     val medianCapsule = new Capsule(medianTask)
     
     val medianAbsoluteDeviationTask = MedianAbsoluteDeviationTask(name + "MedianAbsoluteDeviation")
-    medianAbsoluteDeviationTask.sequences += (toArray(statistics.medianAbsoluteDeviations))
+    statistics.medianAbsoluteDeviations.foreach{case(out, stat) => medianAbsoluteDeviationTask sequence (out.toArray, stat)}
     val medianAbsoluteDeviationCapsule = new Capsule(medianAbsoluteDeviationTask)
     
     val averageTask = AverageTask(name + "Average")
-    averageTask.sequences += (toArray(statistics.averages))
+    statistics.averages.foreach{case(out, stat) => averageTask.sequence(out.toArray, stat)}
     val averageCapsule = new Capsule(averageTask)
     
     val sumTask = SumTask(name + "Sum")
-    sumTask.sequences += (toArray(statistics.sums))
+    statistics.sums.foreach{case(out, stat) => sumTask.sequence (out.toArray, stat)}
     val sumCapsule = new Capsule(sumTask)
     
     val mseTask = MeanSquareErrorTask(name + "MeanSquareError")
-    mseTask.sequences += (toArray(statistics.mses))
+    statistics.mses.foreach{case(out, stat) => mseTask.sequence(out.toArray, stat) }
     val mseCapsule = new Capsule(mseTask)
     
 

@@ -21,7 +21,7 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.sampling.ISampling
 
-class TakeSampling(sampling: ISampling, n: Int) extends ISampling {
+sealed class TakeSampling(sampling: ISampling, n: Int) extends ISampling {
   
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes

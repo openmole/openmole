@@ -22,7 +22,7 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.implementation.tools.VariableExpansion._
 import org.openmole.core.model.domain.IDomain
 
-class DoubleBounded(val min: String, val max: String) extends IDomain[Double] with IBounded[Double] {
+sealed class DoubleBounded(val min: String, val max: String) extends IDomain[Double] with IBounded[Double] {
   
   def this(min: Double, max: Double) = this(min.toString, max.toString)
   

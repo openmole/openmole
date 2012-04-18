@@ -41,7 +41,7 @@ class SerializeTaskSpec extends FlatSpec with ShouldMatchers {
     val pVal = new Variable(p, 5)
   
     val t = SerializeXMLTask("Test")
-    t.serialize += (p, pfile)
+    t serialize (p, pfile)
     val context = t.toTask.process(Context.empty + pVal)
       
     context.contains(pfile) should equal (true)

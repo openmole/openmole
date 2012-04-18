@@ -29,34 +29,35 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.model.sampling.ISampling
 import au.com.bytecode.opencsv.CSVReader
 import collection.JavaConversions._
+import scala.collection.mutable.ListBuffer
 
 object CSVSampling {
   
   def apply(
     file: File    
   ) = new SamplingBuilder { builder =>
-    var _columns: List[(String, IPrototype[_])] = List.empty
-    var _fileColumns: List[(String, File, IPrototype[File])] = List.empty
+    private var _columns = new ListBuffer[(String, IPrototype[_])]
+    private var _fileColumns = new ListBuffer[(String, File, IPrototype[File])]
     
-    def columns = new {
-      
-      def +=(proto: IPrototype[_]): builder.type = this.+=(proto.name, proto)
-      def +=(name: String, proto: IPrototype[_]): builder.type = {
-        _columns ::= (name, proto)
-        builder
-      }
-      def +=(name: String, dir: File, proto: IPrototype[File]): builder.type = {
-        _fileColumns ::= ((name, dir, proto))
-        builder
-      }
-      
-      def +=(dir: File, proto: IPrototype[File]): builder.type = this.+=(proto.name, dir, proto)
+    def columns = _columns.toList
+    def fileColumns = _fileColumns.toList
+    
+    def addColumn(proto: IPrototype[_]): this.type = this.addColumn(proto.name, proto)
+    def addColumn(name: String, proto: IPrototype[_]): builder.type = {
+      _columns += (name -> proto)
+      this
     }
     
-    
+    def addFileColumn(name: String, dir: File, proto: IPrototype[File]): builder.type = {
+      _fileColumns += ((name, dir, proto))
+      this
+    }
+      
+    def addFileColumn(dir: File, proto: IPrototype[File]): this.type = this.addFileColumn(proto.name, dir, proto)
+
     def toSampling = new CSVSampling(file) {
-      val columns = builder._columns.reverse
-      val fileColumns = builder._fileColumns.reverse
+      val columns = builder.columns
+      val fileColumns = builder.fileColumns
     }
   }
   

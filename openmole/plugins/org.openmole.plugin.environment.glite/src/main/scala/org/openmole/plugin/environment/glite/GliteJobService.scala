@@ -60,10 +60,10 @@ class GliteJobService(jobServiceURI: URI, val environment: GliteEnvironment, ove
       val outputFilePath = path.toURIFile(communicationDirPath).newFileInDir("job", ".out").path
    
       val os = script.bufferedOutputStream
-      try generateScript(serializedJob, outputFilePath, environment.memorySizeForRuntime.intValue, os)
+      try generateScript(serializedJob, outputFilePath, environment.runtimeMemory.intValue, os)
       finally os.close
       
-      val jobDescription = buildJobDescription(runtime, script, environment.allAttributes)
+      val jobDescription = buildJobDescription(runtime, script, environment.allRequirements)
       val job = jobServiceCache.createJob(jobDescription)
       job.run
       

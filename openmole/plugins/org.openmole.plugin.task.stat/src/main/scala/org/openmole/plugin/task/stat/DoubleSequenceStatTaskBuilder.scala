@@ -17,28 +17,22 @@
 
 package org.openmole.plugin.task.stat
 
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task.TaskBuilder
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.task.IPluginSet
+import scala.collection.mutable.ListBuffer
 
 abstract class DoubleSequenceStatTaskBuilder(implicit plugins: IPluginSet) extends TaskBuilder {
-  var _sequences: List[(IPrototype[Array[Double]], IPrototype[Double])] = Nil
+  private var _sequences = new ListBuffer[(IPrototype[Array[Double]], IPrototype[Double])]
  
-  def sequences = new {
-    def +=(sequence: IPrototype[Array[Double]], stat: IPrototype[Double]): DoubleSequenceStatTaskBuilder.this.type = {
-      inputs += sequence
-      outputs += stat
-      _sequences ::= (sequence, stat)
-      DoubleSequenceStatTaskBuilder.this
-    }
+  def sequences = _sequences.toList
   
-    def +=(seqs: Iterable[(IPrototype[Array[Double]], IPrototype[Double])]): DoubleSequenceStatTaskBuilder.this.type = {
-      seqs.foreach{ case(sequence, stat) => this.+=(sequence, stat) }
-      DoubleSequenceStatTaskBuilder.this
-    }
-    
-    def apply() = _sequences.reverse
+  def sequence(sequence: IPrototype[Array[Double]], stat: IPrototype[Double]): this.type = {
+    this addInput sequence
+    this addOutput stat
+    _sequences += sequence -> stat
+    this
   }
-  
-  
+
 }

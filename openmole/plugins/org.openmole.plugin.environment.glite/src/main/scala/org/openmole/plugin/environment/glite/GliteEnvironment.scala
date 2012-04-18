@@ -23,6 +23,7 @@ import java.net.URI
 import java.net.URISyntaxException
 import java.util.logging.Level
 import java.util.logging.Logger
+import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.environment.ExecutionJobRegistry
 import org.openmole.core.batch.environment.PersistentStorage
 import org.openmole.misc.workspace.Workspace
@@ -85,8 +86,8 @@ class GliteEnvironment(
   val vomsURL: String,
   val bdii: String,
   val myProxy: Option[MyProxy] = None,
-  val attributes: Map[String, String] = Map.empty,
-  val memoryForRuntime: Int = Workspace.preferenceAsInt(JSAGAEnvironment.DefaultRequieredMemory), 
+  val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory, 
+  val requirements: Map[String, String] = Map.empty,
   val fqan: String = "") extends JSAGAEnvironment {
 
   import GliteEnvironment._
@@ -98,8 +99,6 @@ class GliteEnvironment(
   
   override def allJobServices: Iterable[GliteJobService] = {
     val jss = getBDII.queryWMSURIs(voName, Workspace.preferenceAsDurationInMs(FetchRessourcesTimeOutLocation).toInt)
-
-    //val jobServices = new ListBuffer[GliteJobService]
 
     val jobServices = jss.flatMap {
       js =>

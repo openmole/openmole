@@ -33,7 +33,7 @@ object BigDecimalLogarithmRange {
 }
 
 
-class BigDecimalLogarithmRange(val min: String, val max: String, val nbStep: String) extends IDomain[BigDecimal] with IFinite[BigDecimal] with IBounded[BigDecimal] {
+sealed class BigDecimalLogarithmRange(val min: String, val max: String, val nbStep: String) extends IDomain[BigDecimal] with IFinite[BigDecimal] with IBounded[BigDecimal] {
   import BigDecimalLogarithmRange._
     
   override def computeValues(context: IContext): Iterable[BigDecimal] = {

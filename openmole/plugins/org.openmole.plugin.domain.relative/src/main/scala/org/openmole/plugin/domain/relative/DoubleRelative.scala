@@ -21,7 +21,7 @@ import java.lang.Double
 import org.openmole.core.implementation.tools.VariableExpansion._
 import org.openmole.core.model.data.IContext
 
-class DoubleRelative(val nominal: String, val percent: String, val size: String) extends IRelative[Double] {
+sealed class DoubleRelative(val nominal: String, val percent: String, val size: String) extends IRelative[Double] {
 
   override def  computeValues(context: IContext): Iterable[Double] = {
     val nom = expandData(context, nominal).toDouble

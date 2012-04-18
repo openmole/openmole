@@ -24,7 +24,7 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.sampling.ISampling
 
-class ZipWithIndexSampling(reference: ISampling, index: IPrototype[Int]) extends ISampling {
+sealed class ZipWithIndexSampling(reference: ISampling, index: IPrototype[Int]) extends ISampling {
   
   override def inputs = reference.inputs
   override def prototypes = index :: reference.prototypes.toList

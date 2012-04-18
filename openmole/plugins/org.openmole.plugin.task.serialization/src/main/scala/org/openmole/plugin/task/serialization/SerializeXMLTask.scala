@@ -34,7 +34,7 @@ object SerializeXMLTask {
   )(implicit plugins: IPluginSet) = 
     new SerializeXMLTaskBuilder { builder =>
       
-      def toTask = new SerializeXMLTask(name, builder.serialize()) {
+      def toTask = new SerializeXMLTask(name, builder.serialize) {
         val inputs = builder.inputs
         val outputs = builder.outputs
         val parameters = builder.parameters

@@ -17,38 +17,35 @@
 
 package org.openmole.plugin.task.netlogo
 
-import java.io.File
+import org.openmole.core.implementation.data._
 import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.task.IPluginSet
 import org.openmole.plugin.task.external.ExternalTaskBuilder
+import scala.collection.mutable.ListBuffer
 
 abstract class NetLogoTaskBuilder extends ExternalTaskBuilder {
     
-  var _netLogoInputs = List.empty[(IPrototype[_], String)]
-  var _netLogoOutputs = List.empty[(String, IPrototype[_])]
+  private var _netLogoInputs = new ListBuffer[(IPrototype[_], String)]
+  private var _netLogoOutputs = new ListBuffer[(String, IPrototype[_])]
+ 
+  def netLogoInputs = _netLogoInputs.toList
   
-  def netLogoInputs = new {
-    def +=(p: IPrototype[_], n: String): NetLogoTaskBuilder.this.type = {
-      _netLogoInputs ::= p -> n
-      inputs += p
-      NetLogoTaskBuilder.this
-    }
-    
-    def +=(p: IPrototype[_]): NetLogoTaskBuilder.this.type = this.+=(p, p.name)
-    
-    def apply() = _netLogoInputs.reverse
+  def addNetLogoInput(p: IPrototype[_], n: String): this.type = {
+    _netLogoInputs += p -> n
+    this addInput p
+    this
   }
+    
+  def addNetLogoInput(p: IPrototype[_]): this.type = this.addNetLogoInput(p, p.name)
+      
+  def netLogoOutputs = _netLogoOutputs.toList
   
-  def netLogoOutputs = new {
-    def +=(n: String, p: IPrototype[_]): NetLogoTaskBuilder.this.type = {
-      _netLogoOutputs ::= n -> p
-      outputs += p
-      NetLogoTaskBuilder.this
-    }
-    
-    def +=(p: IPrototype[_]): NetLogoTaskBuilder.this.type = this.+=(p.name, p)
-    
-    def apply() = _netLogoOutputs.reverse
+  
+  def addNetLogoOutput(n: String, p: IPrototype[_]): this.type = {
+    _netLogoOutputs += n -> p
+    this addOutput p
+    this
   }
+    
+  def addNetLogoOutput(p: IPrototype[_]): this.type = this.addNetLogoOutput(p.name, p)
   
 }

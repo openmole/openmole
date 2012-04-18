@@ -19,22 +19,22 @@ package org.openmole.plugin.task.serialization
 
 import java.io.File
 import org.openmole.core.implementation.task.TaskBuilder
+import org.openmole.core.implementation.data._
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.task.IPluginSet
+import scala.collection.mutable.ListBuffer
 
 abstract class SerializeXMLTaskBuilder(implicit plugins: IPluginSet) extends TaskBuilder {
 
-  var _serialize: List[(IPrototype[_], IPrototype[File])] = List.empty
+  private var _serialize = new ListBuffer[(IPrototype[_], IPrototype[File])]
   
-  def serialize = new {
-    def +=(p: IPrototype[_], f: IPrototype[File]) = {
-      _serialize ::= (p -> f)
-      inputs += p
-      outputs += f
-      SerializeXMLTaskBuilder.this
-    }
-    
-    def apply() = _serialize.reverse
+  def serialize = _serialize.toList
+  
+  def serialize(p: IPrototype[_], f: IPrototype[File]) = {
+    _serialize += (p -> f)
+    this addInput p
+    this addOutput f
+    this
   }
-  
+    
 }

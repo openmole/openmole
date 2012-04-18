@@ -43,13 +43,12 @@ object ScalaTask {
     new CodeTaskBuilder { builder =>
       
       def toTask = 
-        new ScalaTask(name, code, builder.imports()) { 
+        new ScalaTask(name, code, builder.imports) { 
           val inputs = builder.inputs
           val outputs = builder.outputs
           val parameters = builder.parameters
-          val provided = builder.provided()
-          val produced = builder.produced()
-          val plugins = _plugins
+          val provided = builder.provided
+          val produced = builder.produced
         }
     }
   }
@@ -60,7 +59,7 @@ sealed abstract class ScalaTask(
   val name: String,
   val code: String,
   imports: Iterable[String]
-) extends CodeTask {
+)(implicit val plugins: IPluginSet) extends CodeTask {
   
   @transient lazy val factory = new InterpreterFactory
   

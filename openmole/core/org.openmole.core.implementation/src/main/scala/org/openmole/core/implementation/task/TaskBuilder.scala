@@ -19,14 +19,29 @@ package org.openmole.core.implementation.task
 
 import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.data.ParameterSet
+import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IDataSet
+import org.openmole.core.model.data.IParameter
 import org.openmole.core.model.data.IParameterSet
 import org.openmole.core.model.task.ITask
 
 abstract class TaskBuilder {
-  var inputs: IDataSet = DataSet.empty
-  var outputs: IDataSet = DataSet.empty
-  var parameters: IParameterSet = ParameterSet.empty
+  private var _inputs: IDataSet = DataSet.empty
+  private var _outputs: IDataSet = DataSet.empty
+  private var _parameters: IParameterSet = ParameterSet.empty
+  
+  def addInput(d: IDataSet) = {_inputs ++= d; this}
+  def addInput(d: IData[_]) = {_inputs += d; this}
+  
+  def addOutput(d: IDataSet) = {_outputs ++= d; this}
+  def addOutput(d: IData[_]) = {_outputs += d; this}
+  
+  def addParameter(p: IParameter[_]) = {_parameters += p; this}
+  def addParameter(p: IParameterSet) = {_parameters ++= p; this}
+  
+  def inputs = _inputs
+  def outputs = _outputs
+  def parameters = _parameters
   
   def toTask: ITask
 }

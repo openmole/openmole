@@ -24,7 +24,7 @@ import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IFinite
 import org.openmole.misc.tools.io.FileUtil._
 
-class RecursiveListFilesDomain(dir: File, filter: FileFilter) extends IDomain[File] with IFinite[File] {
+sealed class RecursiveListFilesDomain(dir: File, filter: FileFilter) extends IDomain[File] with IFinite[File] {
 
   def this(dir: File, pattern: String, shouldBeAFile: Boolean) = {
     this(dir, new FileFilter {       

@@ -23,7 +23,7 @@ object MedianAbsoluteDeviationTask {
   
   def apply(name: String)(implicit plugins: IPluginSet) = new DoubleSequenceStatTaskBuilder { builder =>
     def toTask = new MedianAbsoluteDeviationTask(name) {
-      val sequences = builder.sequences()
+      val sequences = builder.sequences
       val inputs = builder.inputs
       val outputs = builder.outputs
       val parameters = builder.parameters

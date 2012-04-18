@@ -21,7 +21,7 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IFinite
 
-class ListDomain[T](values: T*) extends IDomain[T] with IFinite[T] {
+sealed class ListDomain[T](values: T*) extends IDomain[T] with IFinite[T] {
   override def computeValues(context: IContext): Iterable[T] = values
 }
 

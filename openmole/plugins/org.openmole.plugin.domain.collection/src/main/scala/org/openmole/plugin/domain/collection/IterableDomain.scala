@@ -23,7 +23,7 @@ import org.openmole.core.model.domain.IIterable
 
 import scala.collection.JavaConversions._
 
-class IterableDomain[T](iterable: Iterable[T]) extends IDomain[T] with IIterable[T] {
+sealed class IterableDomain[T](iterable: Iterable[T]) extends IDomain[T] with IIterable[T] {
 
   def this(elements: T*) = this(elements)
     

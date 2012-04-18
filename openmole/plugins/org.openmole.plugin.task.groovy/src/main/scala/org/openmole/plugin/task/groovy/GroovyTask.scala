@@ -35,12 +35,12 @@ object GroovyTask {
     new CodeTaskBuilder { builder =>
       
       def toTask = 
-        new GroovyTask(name, code, builder.imports(), libs) { 
+        new GroovyTask(name, code, builder.imports, libs) { 
           val inputs = builder.inputs
           val outputs = builder.outputs
           val parameters = builder.parameters
-          val provided = builder.provided()
-          val produced = builder.produced()
+          val provided = builder.provided
+          val produced = builder.produced
         }
     }
   

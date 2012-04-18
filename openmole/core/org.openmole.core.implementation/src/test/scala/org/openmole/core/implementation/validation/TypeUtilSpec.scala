@@ -38,10 +38,10 @@ class TypeUtilSpec extends FlatSpec with ShouldMatchers {
     val p = new Prototype[Int]("p")
     
     val t1 = EmptyTask("T1")
-    t1.outputs += p
+    t1 addOutput p
     
     val t2 = EmptyTask("T2")
-    t2.inputs += p
+    t2 addInput p
     
     val t1c = new Capsule(t1)
     val t2c = new Capsule(t2)
@@ -59,13 +59,13 @@ class TypeUtilSpec extends FlatSpec with ShouldMatchers {
     val p = new Prototype[Int]("p")
     
     val t1 = EmptyTask("T1")
-    t1.outputs += p
+    t1 addOutput p
     
     val t2 = EmptyTask("T2")
-    t2.outputs += p
+    t2 addOutput p
     
     val t3 = EmptyTask("T3")
-    t3.inputs += p
+    t3 addInput p
     
     val t1c = new Capsule(t1)
     val t2c = new Capsule(t2)
@@ -86,7 +86,7 @@ class TypeUtilSpec extends FlatSpec with ShouldMatchers {
     val exc = new Capsule(ExplorationTask("Exploration", new EmptySampling))
      
     val testT = EmptyTask("Test")
-    testT.outputs += i    
+    testT addOutput i    
     
     val noOP = EmptyTask("NoOP") 
     val aggT = EmptyTask("Aggregation") 
