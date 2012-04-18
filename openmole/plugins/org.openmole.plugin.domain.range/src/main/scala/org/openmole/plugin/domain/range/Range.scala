@@ -21,7 +21,7 @@ package org.openmole.plugin.domain.range
 import org.openmole.core.model.data.IContext
 import org.openmole.core.implementation.tools.VariableExpansion._
 
-sealed class Range[T](val min: String, val max: String, val step: String)(implicit integral: Integral[T], fs: FromString[T]) extends IRange[T] {
+sealed class Range[T](val min: String, val max: String, val step: String = "1")(implicit integral: Integral[T], fs: FromString[T]) extends IRange[T] {
   
   import integral._
   import fs._
