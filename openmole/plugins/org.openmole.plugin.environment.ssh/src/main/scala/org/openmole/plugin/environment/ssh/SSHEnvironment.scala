@@ -36,16 +36,13 @@ object SSHEnvironment {
 
 import SSHEnvironment._
 
-class SSHEnvironment(login: String, host: String, nbSlots: Int, dir: String, override val inMemorySizeForRuntime: Option[Int]) extends BatchEnvironment {
+class SSHEnvironment(
+  login: String,
+  host: String,
+  nbSlots: Int,
+  dir: String = "/tmp/" + Workspace.preference(Workspace.UniqueID),
+  val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory) extends BatchEnvironment {
   
-  def this(login: String, host: String, nbSlots: Int, dir: String) = this(login, host, nbSlots, dir, None)
-
-  def this(login: String, host: String, nbSlots: Int) = this(login, host, nbSlots, "/tmp/" + Workspace.preference(Workspace.UniqueID))
- 
-  def this(login: String, host: String, nbSlots: Int, dir: String, memory: Int) = this(login, host, nbSlots, dir, Some(memory))
-
-  def this(login: String, host: String, nbSlots: Int, memory: Int) = this(login, host, nbSlots, "/tmp/" + Workspace.preference(Workspace.UniqueID), Some(memory))
- 
   val storage = PersistentStorage.createBaseDir(this, URI.create("sftp://" + login + "@" + host), dir, Workspace.preferenceAsInt(MaxConnections))
   
   def allStorages = List(storage)

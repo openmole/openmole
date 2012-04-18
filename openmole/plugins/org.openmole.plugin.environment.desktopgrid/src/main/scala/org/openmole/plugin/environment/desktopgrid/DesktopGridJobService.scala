@@ -43,7 +43,7 @@ class DesktopGridJobService(val environment: DesktopGridEnvironment, val descrip
   override protected def doSubmit(serializedJob: SerializedJob, token: AccessToken): BatchJob = {
     val jobId = new File(serializedJob.communicationDirPath).getName
     import serializedJob._
-    val desktopJobMessage = new DesktopGridJobMessage(runtime.runtime, runtime.environmentPlugins, environment.memorySizeForRuntime, inputFilePath)
+    val desktopJobMessage = new DesktopGridJobMessage(runtime.runtime, runtime.environmentPlugins, environment.runtimeMemory, inputFilePath)
     
     val os = jobSubmissionFile(jobId).gzipedBufferedOutputStream
     try SerializerService.serialize(desktopJobMessage, os) 

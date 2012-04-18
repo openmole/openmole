@@ -38,9 +38,10 @@ object DesktopEnvironment {
   val timeStempSeparator = '@'
 }
 
-class DesktopGridEnvironment(port: Int, login: String, password: String, override val inMemorySizeForRuntime: Option[Int]) extends BatchEnvironment {
-  
-  def this(port: Int, login: String, password: String) = this(port, login, password, None)
+class DesktopGridEnvironment(
+  port: Int,
+  login: String, password: String,
+  val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory) extends BatchEnvironment {
   
   val path = Workspace.newDir
   new SFTPServer(path, login, password, port)

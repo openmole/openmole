@@ -92,7 +92,7 @@ class SSHJobService(uri: URI, val environment: SSHEnvironment, nbSlot: Int, over
           val workspace = UUID.randomUUID
           script.content = 
             "export PATH=" + installed + "/jvm/bin/" + ":$PATH; cd " + installed + "; mkdir " + workspace + "; " +
-            "sh run.sh " + environment.memorySizeForRuntime + "m " + UUID.randomUUID + " -s file:/" + 
+            "sh run.sh " + environment.runtimeMemory + "m " + UUID.randomUUID + " -s file:/" + 
             " -c " + serializedJob.communicationDirPath + " -p envplugins/ -i " + serializedJob.inputFilePath + " -o " + result.path +
             " -w " + workspace + "; rm -rf " + workspace + ";"
             
