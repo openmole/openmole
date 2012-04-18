@@ -1,3 +1,12 @@
-#!/bin/sh
+#!/bin/bash
 
-java -Xmx92m -Dosgi.classloader.singleThreadLoads=true -XX:+UseCompressedOops -XX:+CMSClassUnloadingEnabled -XX:+UseParallelGC -jar plugins/org.eclipse.equinox.launcher.jar $@ 
+FLAG=""
+
+JVMVERSION=`java -version 2>&1 | tail -1 -`
+
+case "$JVMVERSION" in
+  *64-Bit*) FLAG="-XX:+UseCompressedOops";;
+esac 
+
+
+java -Xmx92m -Dosgi.classloader.singleThreadLoads=true $FLAG -XX:+CMSClassUnloadingEnabled -XX:+UseParallelGC -jar plugins/org.eclipse.equinox.launcher.jar $@ 
