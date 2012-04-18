@@ -7,14 +7,17 @@ cd $LOCATION
 
 MEM="1G"
 
-#if [ $# -gt 0 ]
-#then
-#	MEM=$1	
-#fi
+FLAG=""
+
+JVMVERSION=`java -version 2>&1 | tail -1 -`
+
+case "$JVMVERSION" in
+  *64-Bit*) FLAG="-XX:+UseCompressedOops";;
+esac
 
 rm -Rf ./configuration/org*
 rm ./configuration/*.log
-java -ea -Xmx${MEM} -Dosgi.classloader.singleThreadLoads=true -XX:+UseCompressedOops -XX:MaxPermSize=128M -XX:+UseParallelGC \
+java -ea -Xmx${MEM} -Dosgi.classloader.singleThreadLoads=true $FLAG -XX:MaxPermSize=128M -XX:+UseParallelGC \
      -jar ./plugins/org.eclipse.equinox.launcher.jar \
      -p ./openmole-plugins -g ./openmole-plugins-gui "$@"
 #cat $LOCATION/configuration/*.log
