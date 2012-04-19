@@ -17,6 +17,7 @@
 
 package org.openmole.ui.console
 
+import java.io.File
 import org.apache.clerezza.scala.console.Interpreter
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.logging.LoggerService
@@ -28,11 +29,11 @@ import scala.tools.nsc.Settings
 import scala.tools.nsc.interpreter.ILoop
 import scala.tools.nsc.interpreter.JLineCompletion
 import scala.tools.nsc.interpreter.JLineReader
+import org.openmole.core.model.task.IPluginSet
 
-
-class Console {
-
- 
+class Console(plugins: IPluginSet) { console =>
+  
+  
   
   @tailrec private def initPassword: Unit = {
     val message = (if(Workspace.passwordChoosen) "Enter your OpenMOLE password" else "OpenMOLE Password has not been set yet, choose a  password") + "  (for preferences encryption):"
@@ -58,14 +59,17 @@ class Console {
   def run {
     initPassword
     
+   
+    
+    
     val loop = new ScalaREPL
     
-    //loop.bind(pluginManager, PluginManager)
     loop.beQuietDuring { 
       loop.bind(workspace, Workspace)
       loop.bind(logger, LoggerService)
       loop.bind(serializer, new Serializer)
       loop.bind("commands", new Command)
+      loop.bind("implicits", new Implicits()(plugins))
       loop.addImports(
         "org.openmole.core.implementation.data._",
         "org.openmole.core.implementation.data.Prototype._",
@@ -81,13 +85,14 @@ class Console {
         "org.openmole.core.implementation.tools._",
         "org.openmole.core.implementation.puzzle._",
         "org.openmole.misc.workspace._",
-        "org.openmole.ui.console.Implicits._",
+        "org.openmole.misc.tools.io.FromString._",
         "java.io.File",
-        "commands._"
+        "commands._",
+        "implicits._"
       )
+
     }
     
-    //println(loop.definedSymbols)
     loop.loop
   }
   

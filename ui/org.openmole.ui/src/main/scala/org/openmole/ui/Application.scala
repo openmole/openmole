@@ -26,6 +26,7 @@ import org.eclipse.equinox.app.IApplicationContext
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
+import org.openmole.core.implementation.task.PluginSet
 import org.openmole.ide.core.implementation.dialog.GUIApplication
 import org.openmole.ui.console.Console
 import scala.actors.threadpool.locks.ReentrantLock
@@ -42,23 +43,25 @@ import scopt.immutable._
 
 class Application extends IApplication with Logger {
   override def start(context: IApplicationContext) = {
-    
-
-    
+        
     case class Config(
       pluginsDirs: List[String] = Nil,
       guiPluginsDirs: List[String] = Nil,
+      userPlugins: List[String] = Nil,
       workspaceDir: Option[String] = None
     )
     
     
     val parser = new OptionParser[Config]("openmole", "0.x") { 
       def options = Seq(
-        opt("p", "pluginDirectories" ,"Plugins directories (seperated by \",\")") {
+        opt("cp", "pluginDirectories" ,"Plugins directories (seperated by \",\")") {
           (v: String, c: Config) => c.copy(pluginsDirs = v.split(',').toList) 
         },
-        opt("g", "guiPluginDirectories" ,"GUI plugins directories (seperated by \",\")") {
+        opt("gp", "guiPluginDirectories" ,"GUI plugins directories (seperated by \",\")") {
           (v: String, c: Config) => c.copy(guiPluginsDirs = v.split(',').toList) 
+        },
+        opt("p", "userPlugins" ,"Plugins (seperated by \",\")") {
+          (v: String, c: Config) => c.copy(userPlugins = v.split(',').toList) 
         },
         opt("w", "Path of the workspace") {
           (v: String, c: Config) => c.copy(workspaceDir = Some(v)) 
@@ -85,7 +88,10 @@ class Application extends IApplication with Logger {
         else {       
           if(config.workspaceDir.isDefined) Workspace.instance = new Workspace(workspaceLocation)
           config.pluginsDirs.foreach { PluginManager.loadDir }
-          val console = new Console
+          
+          val userPlugins = config.userPlugins.map{new File(_)}.toSet
+          PluginManager.load(userPlugins)
+          val console = new Console(new PluginSet(userPlugins))
           console.run
         }
       } else {

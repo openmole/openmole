@@ -31,7 +31,7 @@ import org.openmole.core.model.transition.IExplorationTransition
 import org.openmole.misc.workspace.Workspace
 
 class Command {
-
+  
   def print(environment: LocalExecutionEnvironment) = {
     println("Queued jobs: " + environment.nbJobInQueue)
     println("Number of threads: " + environment.nbThreads)
