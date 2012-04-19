@@ -22,14 +22,16 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.sampling.ISampling
 import org.openmole.misc.tools.service.Random._
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.implementation.task.Task._
 
-sealed class ShuffleSampling(sampling: ISampling, random: Random = Workspace.newRNG) extends ISampling {
+sealed class ShuffleSampling(sampling: ISampling) extends ISampling {
   
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
   
-  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
+  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = {
+    val random = context.valueOrException(openMOLERNG)
     shuffled(sampling.build(context).toList)(random).toIterator
+  }
  
 }

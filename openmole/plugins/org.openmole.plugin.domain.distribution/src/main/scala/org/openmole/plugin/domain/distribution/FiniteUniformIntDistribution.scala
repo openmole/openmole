@@ -24,9 +24,9 @@ import org.openmole.core.model.domain.IFinite
 import org.openmole.core.model.domain.IIterable
 import org.openmole.misc.workspace.Workspace
 
-sealed class FiniteUniformIntDistribution (size: Int, generator: Random = Workspace.newRNG, max: Option[Int] = None) extends IDomain[Int] with IIterable[Int] with IFinite[Int] {
+sealed class FiniteUniformIntDistribution (size: Int, max: Option[Int] = None) extends IDomain[Int] with IIterable[Int] with IFinite[Int] {
  
-  @transient lazy val innerDomain = new UniformIntDistribution(generator, max)
+  @transient lazy val innerDomain = new UniformIntDistribution(max)
 
   override def computeValues(context: IContext): Iterable[Int] = innerDomain.iterator(context).take(size).toIterable
   

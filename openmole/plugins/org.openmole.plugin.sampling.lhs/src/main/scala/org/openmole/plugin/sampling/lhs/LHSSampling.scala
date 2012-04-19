@@ -29,14 +29,15 @@ import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IBounded
 import org.openmole.core.model.sampling.IFactor
 import org.openmole.misc.workspace.Workspace
+import org.openmole.core.implementation.task.Task._
 
-sealed class LHSSampling(samples: Int, rng: Random, factors: IFactor[Double, IDomain[Double] with IBounded[Double]]*) extends Sampling {
-
-  def this(samples: Int, factors: IFactor[Double, IDomain[Double] with IBounded[Double]]*) = this(samples, Workspace.newRNG, factors: _*)
+sealed class LHSSampling(samples: Int, factors: IFactor[Double, IDomain[Double] with IBounded[Double]]*) extends Sampling {
 
   override def prototypes = factors.map{_.prototype}
   
-  override def build(context: IContext): Iterator[Iterable[IVariable[Double]]] = 
+  override def build(context: IContext): Iterator[Iterable[IVariable[Double]]] = {
+    val rng = context.valueOrException(openMOLERNG)
+    
     (0 until samples).map {
       _ =>
       (0 until factors.size).map {
@@ -45,5 +46,5 @@ sealed class LHSSampling(samples: Int, rng: Random, factors: IFactor[Double, IDo
         case (v, f) => new Variable(f.prototype, v.scale(f.domain.min(context), f.domain.max(context)))
       }
     }.toIterator
-  
+  }
 }

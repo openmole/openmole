@@ -22,7 +22,6 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.transition.ITransition
 import org.openmole.core.model.transition.ISlot
 import scala.collection.mutable.HashSet
-import org.openmole.misc.tools.io.StringUtil._
 import scala.collection.mutable.ListBuffer
 
 class Slot(val capsule: ICapsule) extends ISlot {

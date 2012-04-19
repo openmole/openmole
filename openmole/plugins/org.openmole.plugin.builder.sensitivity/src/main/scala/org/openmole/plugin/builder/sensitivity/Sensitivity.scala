@@ -39,15 +39,9 @@ import org.openmole.plugin.method.sensitivity.FirstOrderSensitivityTask
 import org.openmole.plugin.method.sensitivity.SaltelliSampling
 import org.openmole.plugin.method.sensitivity.SensitivityTask
 
+
 object Sensitivity {
   
-  class Sensitivity {
-    var factors = List.empty[IFactor[Double, IDomain[Double] with IBounded[Double]]]
-    var outputs = List.empty[IPrototype[Double]]
-    
-    def factor(f: IFactor[Double, IDomain[Double] with IBounded[Double]]) = factors ::= f
-    def output(p: IPrototype[Double]) = outputs ::= p
-  }
   
   def indice(input: IPrototype[Double], output: IPrototype[Double]) = SensitivityTask.indice(input, output)
   
@@ -55,19 +49,20 @@ object Sensitivity {
     name: String,
     model: Puzzle,
     samples: Int,
-    sensitivity: Sensitivity
+    factors: Iterable[IFactor[Double, IDomain[Double] with IBounded[Double]]],
+    outputs: Iterable[IPrototype[Double]]
   )(implicit plugins: IPluginSet) = {
     val matrixName = new Prototype[String](name + "Matrix")
    
-    val sampling = new SaltelliSampling(samples, matrixName, sensitivity.factors.toArray)
+    val sampling = new SaltelliSampling(samples, matrixName, factors.toSeq:_*)
     val explorationCapsule = new StrainerCapsule(ExplorationTask(name + "Exploration", sampling))
    
     val firstOrderSensitivityTask = 
       FirstOrderSensitivityTask(
         name + "FirstOrderSensitivity", 
         matrixName, 
-        sensitivity.factors.map{_.prototype}, 
-        sensitivity.outputs
+        factors.map{_.prototype}, 
+        outputs
       )
     
   }

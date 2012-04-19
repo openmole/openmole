@@ -17,47 +17,35 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo.Individual
-import fr.iscpif.mgo.ga.GAFitness
-import fr.iscpif.mgo.ga.GAGenome
-import fr.iscpif.mgo.ga.algorithm.GAGenomeWithSigma
-import fr.iscpif.mgo.ga.algorithm.GAGenomeWithSigmaFactory
-import fr.iscpif.mgo.ga.algorithm.NSGAII
-import fr.iscpif.mgo.ga.operators.crossover.SBXBoundedCrossover
-import fr.iscpif.mgo.ga.operators.mutation.CoEvolvingSigmaValuesMutation
-import fr.iscpif.mgo.ga.selection.BinaryTournamentNSGA2
-import fr.iscpif.mgo.ga.selection.Distance
-import fr.iscpif.mgo.ga.selection.Ranking
+import fr.iscpif.mgo._
+import fr.iscpif.mgo.ga._
+import fr.iscpif.mgo.ranking._
+import fr.iscpif.mgo.diversity._
 import java.util.Random
-import org.openmole.core.implementation.data.Variable
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.task.TaskBuilder
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.task.IPluginSet
 import org.openmole.misc.workspace.Workspace
+import org.openmole.core.implementation.task.Task._
 
 object NSGA2SteadySigmaBreedTask {
   
   def apply(
     name: String,
-    archive: IPrototype[Array[Individual[GAGenomeWithSigma, GAFitness] with Ranking with Distance]],
+    archive: IPrototype[Array[Individual[GAGenomeWithSigma, Fitness] with Rank with Diversity]],
     genome: IPrototype[GAGenomeWithSigma],
-    genomeSize: Int,
-    distributionIndex: Double = 2, 
-    random: Random = Workspace.newRNG
+    nsga2: NSGA2Sigma
   )(implicit plugins: IPluginSet) = new TaskBuilder { builder =>
+    addInput(archive)
+    addOutput(genome)
+    
     def toTask = 
-      new NSGA2SteadySigmaBreedTask(
-        name,
-        archive,
-        genome,
-        genomeSize,
-        distributionIndex,
-        random
-      ) {
-        val inputs = builder.inputs + archive
-        val outputs = builder.outputs + genome
+      new NSGA2SteadySigmaBreedTask(name,archive,genome,nsga2) {
+        val inputs = builder.inputs
+        val outputs = builder.outputs
         val parameters = builder.parameters
       }
   }
@@ -66,20 +54,14 @@ object NSGA2SteadySigmaBreedTask {
 
 sealed abstract class NSGA2SteadySigmaBreedTask(
   val name: String,
-  archive: IPrototype[Array[Individual[GAGenomeWithSigma, GAFitness] with Ranking with Distance]],
+  archive: IPrototype[Array[Individual[GAGenomeWithSigma, Fitness] with Rank with Diversity]],
   genome: IPrototype[GAGenomeWithSigma],
-  genomeSize: Int,
-  distributionIndex: Double, 
-  random: Random)(implicit val plugins: IPluginSet) extends Task {
-
-  @transient lazy val mutation = new CoEvolvingSigmaValuesMutation[GAGenomeWithSigma, GAGenomeWithSigmaFactory]
-  @transient lazy val crossover = new SBXBoundedCrossover[GAGenomeWithSigma, GAGenomeWithSigmaFactory](distributionIndex)
-  @transient lazy val factory = new GAGenomeWithSigmaFactory(genomeSize)
-  @transient lazy val selection = new BinaryTournamentNSGA2[Individual[GAGenomeWithSigma, _] with Distance with Ranking]
+  nsga2: NSGA2Sigma)(implicit val plugins: IPluginSet) extends Task {
 
   override def process(context: IContext) = {
+    val rng = context.valueOrException(openMOLERNG)
     val a = context.valueOrException(archive)
-    val newGenome = NSGAII.breed(a, factory, 1, selection, mutation, crossover)(random).head
+    val newGenome = nsga2.breed(a, 1)(rng).head
     context + new Variable(genome, newGenome)
   }
   

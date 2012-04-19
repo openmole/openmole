@@ -15,10 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.builder.stochastic
+package org.openmole.plugin.builder
 
-import org.openmole.core.implementation.mole.Capsule
-import org.openmole.core.implementation.mole.StrainerCapsule
+import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.sampling._
 import org.openmole.core.implementation.task._
@@ -32,7 +31,7 @@ import org.openmole.core.model.task.IPluginSet
 import org.openmole.plugin.builder.Builder._
 import org.openmole.plugin.task.stat._
 
-object Stochastic {
+package object Stochastic {
 
   class Statistics {
     var medians: List[(IPrototype[Double], IPrototype[Double])] = Nil
@@ -41,14 +40,12 @@ object Stochastic {
     var sums: List[(IPrototype[Double], IPrototype[Double])] = Nil
     var mses: List[(IPrototype[Double], IPrototype[Double])] = Nil
     
-    def median(output: IPrototype[Double], median: IPrototype[Double]) = medians ::= (output, median)
-    def medianAbsoluteDeviation(output: IPrototype[Double], deviation: IPrototype[Double]) = medianAbsoluteDeviations ::= (output, deviation)
-    def average(output: IPrototype[Double], average: IPrototype[Double]) = averages ::= (output, average)
-    def sum(output: IPrototype[Double], sum: IPrototype[Double]) = sums ::= (output, sum)
-    def meanSquareError(output: IPrototype[Double], mse: IPrototype[Double]) = mses ::= (output, mse)                                                                
+    def addMedian(output: IPrototype[Double], median: IPrototype[Double]) = medians ::= (output, median)
+    def addMedianAbsoluteDeviation(output: IPrototype[Double], deviation: IPrototype[Double]) = medianAbsoluteDeviations ::= (output, deviation)
+    def addAverage(output: IPrototype[Double], average: IPrototype[Double]) = averages ::= (output, average)
+    def addSum(output: IPrototype[Double], sum: IPrototype[Double]) = sums ::= (output, sum)
+    def addMeanSquareError(output: IPrototype[Double], mse: IPrototype[Double]) = mses ::= (output, mse)                                                                
   }
-  
-  def statistics = new Statistics
   
   def statistics(
     name: String,

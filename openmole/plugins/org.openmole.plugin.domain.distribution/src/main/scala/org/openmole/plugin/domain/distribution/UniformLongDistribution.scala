@@ -23,10 +23,11 @@ import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IIterable
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.service.Random._
+import org.openmole.core.implementation.task.Task._
 
-sealed class UniformLongDistribution (generator: Random = Workspace.newRNG) extends IDomain[Long] with IIterable[Long] {
+sealed class UniformLongDistribution extends IDomain[Long] with IIterable[Long] {
 
   override def iterator(context: IContext): Iterator[Long] = 
-    Iterator.continually { generator.nextLong }
+    Iterator.continually { context.valueOrException(openMOLERNG).nextLong }
   
 }

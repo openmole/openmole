@@ -152,9 +152,9 @@ object Workspace {
   
   def rng = instance.rng
   
-  def newRNG(seed: Long) = instance.newRNG(seed)
+  /*def newRNG(seed: Long) = instance.newRNG(seed)
   
-  def newRNG = instance.newRNG
+  def newRNG = instance.newRNG*/
   
   def newSeed = instance.newSeed
 }
@@ -183,8 +183,7 @@ class Workspace(val location: File) {
   persistentDir.mkdirs
   
   def newSeed = rng.nextLong
-  def newRNG(seed: Long): JRandom = Random.buildSynchronized(seed)
-  def newRNG: JRandom = newRNG(newSeed)
+
   val rng = Random.buildSynchronized(sessionUUID)
   
   private def textEncryptor(password: Option[String]) = {

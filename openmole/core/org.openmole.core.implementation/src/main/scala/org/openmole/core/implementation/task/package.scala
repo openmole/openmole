@@ -20,8 +20,9 @@ package org.openmole.core.implementation
 import org.openmole.core.implementation.mole.Capsule
 import org.openmole.core.implementation.puzzle.Puzzle
 import org.openmole.core.model.task.ITask
-
+import org.openmole.misc.pluginmanager.PluginManager
 import mole._
+import java.io.File
 
 package object task {
   implicit def taskBuilderToTask[TB <: TaskBuilder](builder: TB) = builder.toTask
@@ -31,4 +32,9 @@ package object task {
     puzzle.capsuleToPuzzleConverter(new Capsule(task))
   
   implicit def taskBuilderToPuzzleConverter(t: TaskBuilder) = taskToPuzzleConveter(t.toTask)
+  
+  def loadPlugins(f: File*) = {
+    PluginManager.load(f)
+    new PluginSet(f.toSet)
+  }
 }

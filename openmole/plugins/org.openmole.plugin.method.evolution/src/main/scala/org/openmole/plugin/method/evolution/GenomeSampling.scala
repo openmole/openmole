@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo.ga.algorithm.GAGenomeWithSigma
-import fr.iscpif.mgo.ga.algorithm.GAGenomeWithSigmaFactory
+import fr.iscpif.mgo.ga._
+import fr.iscpif.mgo._
 import java.util.Random
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.sampling.Sampling
@@ -28,43 +28,36 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
+import org.openmole.core.implementation.task.Task._
 
-object SigmaGenomeSampling extends Logger
-
-import SigmaGenomeSampling._
-
-class SigmaGenomeSampling(
-  genome: IPrototype[GAGenomeWithSigma],
-  initialGenomes: Option[IPrototype[Array[Array[Double]]]],
-  genomeSize: Int,
-  nbGenome: Int,
-  generator: Random
+class GenomeSampling[GS](
+  genome: IPrototype[GS],
+  evolution: Evolution {type G = GS} ,
+  size: Int,
+  initialGenomes: Option[IPrototype[Array[Array[Double]]]] = None
 ) extends Sampling {
-  
-  def this(genome: IPrototype[GAGenomeWithSigma], genomeSize: Int, nbGenome: Int) = this(genome, None, genomeSize, nbGenome, Workspace.newRNG)
-  def this(genome: IPrototype[GAGenomeWithSigma], initialGenomes: IPrototype[Array[Array[Double]]], genomeSize: Int, nbGenome: Int) = this(genome, Some(initialGenomes), genomeSize, nbGenome, Workspace.newRNG)
-
-  @transient lazy val factory = new GAGenomeWithSigmaFactory(genomeSize)
-    
+      
   def prototypes = List(genome)
   override def inputs = super.inputs ++ initialGenomes.map{p => new Data(p, DataMode(DataModeMask.optional))}
    
   def build(context: IContext) = {
-    def toSamplingLine(g: GAGenomeWithSigma) = List(new Variable(genome, g))
+    def toSamplingLine(g: GS) = List(new Variable(genome, g))
+    
+    val rng = context.valueOrException(openMOLERNG)
     
     val genomes = 
       initialGenomes.map{ 
         context.value(_) match {
-          case Some(v) => v.toSeq.filter(_.size == genomeSize).map {
-              g => toSamplingLine(factory.updatedValues(factory.random(generator), g))
-            }.take(nbGenome)
+          case Some(v) => 
+            v.toSeq.map {
+              g => toSamplingLine(evolution.factory(g))
+            }.take(size)
           case None => Seq.empty
         }
-      }.getOrElse(Seq.empty)
-
+      }.getOrElse(Seq.empty) 
     
     (genomes ++ 
-     (0 until nbGenome - genomes.size).map{ i => toSamplingLine(factory.random(generator))}
+     (0 until size - genomes.size).map{ i => toSamplingLine(evolution.factory.random(rng))}
     ).iterator
   }
 }

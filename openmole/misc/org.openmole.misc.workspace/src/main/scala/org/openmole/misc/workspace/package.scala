@@ -17,6 +17,4 @@
 
 package org.openmole.misc
 
-package object workspace {  
-  implicit def longToRandomConverter(seed: Long) = Workspace.newRNG(seed)
-}
+package object workspace

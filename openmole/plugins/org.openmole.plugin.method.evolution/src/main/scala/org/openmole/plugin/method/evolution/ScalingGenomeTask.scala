@@ -22,46 +22,42 @@ import fr.iscpif.mgo.tools.Scaling._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.task.TaskBuilder
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
+import org.openmole.core.model.sampling._
+import org.openmole.core.model.domain._
+
 import scala.collection.mutable.ListBuffer
 
 object ScalingGenomeTask {
   
-  def apply[T <: GAGenome](name: String, genome: IPrototype[T])(implicit plugins: IPluginSet) = 
+  def apply[T <: GAGenome](
+    name: String, 
+    genome: IPrototype[T], 
+    scale: (IPrototype[Double], (Double, Double))*)(implicit plugins: IPluginSet) = 
     new TaskBuilder { builder => 
-      private var _scale = new ListBuffer[(IPrototype[Double], Double, Double)]
-      
-      def scale = _scale.toList 
-      
-      def scale(p: IPrototype[Double], min: Double, max: Double) = {
-        _scale += ((p, min, max))
-        this addOutput p
-        this
-      }
-      
-      def toTask = new ScalingGenomeTask[T](name, genome) {
+      def toTask = new ScalingGenomeTask[T](name, genome, scale: _*) {
         val inputs = builder.inputs + genome
         val outputs = builder.outputs + genome
         val parameters = builder.parameters
-        val scale = builder.scale
       }
     }
   
 }
 
-sealed abstract class ScalingGenomeTask[T <: GAGenome]
-(val name: String,
- genome: IPrototype[T]) 
+sealed abstract class ScalingGenomeTask[T <: GAGenome] (
+  val name: String,
+  genome: IPrototype[T],
+  scale: (IPrototype[Double], (Double, Double))*
+) 
 (implicit val plugins: IPluginSet) extends Task {
 
-  def scale: List[(IPrototype[Double], Double, Double)]
-  
   override def process(context: IContext) = {
     context ++ 
-    scale.reverse.zip(context.valueOrException(genome).values).map {
-      case((p, min, max), g) => new Variable(p, g.scale(min, max))
+    (scale zip context.valueOrException(genome).values).map {
+      case(s, g) => 
+        val (p, (min, max)) = s
+        new Variable(p, g.scale(min, max))
     }
   }
 }

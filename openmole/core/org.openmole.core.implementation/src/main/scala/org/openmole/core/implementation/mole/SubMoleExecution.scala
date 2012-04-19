@@ -17,15 +17,17 @@
 
 package org.openmole.core.implementation.mole
 
-import org.openmole.core.implementation.data.Context
+import org.openmole.core.implementation.data._
 import org.openmole.core.model.mole.IMoleJobGroup
 import org.openmole.core.model.mole.ISubMoleExecution
 import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.ITransition
 import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 import org.openmole.core.implementation.job.Job
+import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.tools.RegistryWithTicket
 import org.openmole.core.model.mole.IAtomicCapsule
 import org.openmole.core.model.mole.ICapsule
@@ -139,7 +141,12 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
   
   override def submit(capsule: ICapsule, context: IContext, ticket: ITicket) = synchronized {
     if(!canceled) {
-      def implicits = Context.empty ++ moleExecution.mole.implicits.values.filter(v => capsule.taskOrException.inputs.contains(v.prototype.name))
+      val seed = moleExecution.newSeed
+      def implicits = 
+        Context.empty ++ 
+        moleExecution.mole.implicits.values.filter(v => capsule.taskOrException.inputs.contains(v.prototype.name)) + 
+        new Variable(Task.openMOLESeed, seed) +
+        new LazyVariable(Task.openMOLERNG, moleExecution.newRNG(seed))
       
       val moleJob: IMoleJob = capsule match {
         case c: IMasterCapsule => 

@@ -24,6 +24,17 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.core.implementation.data.Context._
 import org.openmole.misc.pluginmanager._
+import java.util.Random
+import org.openmole.misc.workspace.ConfigurationLocation
+import org.openmole.misc.workspace.Workspace
+
+object Task {
+  val OpenMOLEVariablePrefix = new ConfigurationLocation("Task", "OpenMOLEVariablePrefix")
+  Workspace += (OpenMOLEVariablePrefix, "oM")
+  
+  val openMOLERNG = new Prototype[Random](Workspace.preference(OpenMOLEVariablePrefix) + "RNG")
+  val openMOLESeed = new Prototype[Long](Workspace.preference(OpenMOLEVariablePrefix) +  "Seed")
+}
 
 trait Task extends ITask {
   

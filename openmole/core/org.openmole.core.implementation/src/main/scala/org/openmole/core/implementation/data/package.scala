@@ -29,7 +29,8 @@ package object data {
   implicit def prototypeToData[T](p: IPrototype[T]) = new Data[T](p)
   implicit def dataIterableDecorator(data: Traversable[IData[_]]) = new DataSet(data.toList)
   implicit def iterableOfPrototypeToIterableOfDataConverter(prototypes: Traversable[IPrototype[_]]): Traversable[IData[_]] = DataSet(prototypes)
-
+  implicit def prototypeToStringConverter(p: IPrototype[_]) = p.name
+  
   implicit def prototypeToArrayDecorator[T](prototype: IPrototype[T]) = new {
     def toArray(level: Int): IPrototype[_] = {
       def toArrayRecursive[A](prototype: IPrototype[A], level: Int): IPrototype[_] = {

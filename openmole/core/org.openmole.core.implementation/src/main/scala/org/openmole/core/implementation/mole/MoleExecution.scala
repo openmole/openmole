@@ -55,6 +55,8 @@ import org.openmole.core.model.mole.IInstantRerun
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
+import org.openmole.misc.tools.service.Random
+import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 
 object MoleExecution extends Logger
@@ -63,7 +65,9 @@ class MoleExecution(
   val mole: IMole, 
   selection: Map[ICapsule, IEnvironmentSelection] = Map.empty,
   grouping: Map[ICapsule, IGrouping] = Map.empty,
-  rerun: IInstantRerun = IInstantRerun.empty) extends IMoleExecution {
+  rerun: IInstantRerun = IInstantRerun.empty,
+  rng: java.util.Random = Random.buildSynchronized(Workspace.newSeed)
+) extends IMoleExecution {
 
   import IMoleExecution._
   import MoleExecution._
@@ -188,4 +192,7 @@ class MoleExecution(
 
   def nextJobId = new MoleJobId(id, currentJobId.getAndIncrement)
  
+  def newRNG(seed: Long): java.util.Random = Random.buildSynchronized(seed)
+  def newSeed = rng.nextLong
+  
 }

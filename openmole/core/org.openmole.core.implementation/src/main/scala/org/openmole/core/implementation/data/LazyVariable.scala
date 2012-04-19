@@ -15,8 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.domain.range
+package org.openmole.core.implementation.data
 
-trait FromString[T] {
-  def fromString(s: String): T
+import org.openmole.core.model.data.IVariable
+import org.openmole.core.model.data.IPrototype
+import org.openmole.misc.tools.io.Prettifier._
+
+class LazyVariable[C](val prototype: IPrototype[C], valueFunction: => C) extends IVariable[C] {
+  
+  lazy val value: C = valueFunction
+  
+  override def toString: String = 
+    prototype.name + "=" + (if(value != null) value.prettify else "null")
+
 }

@@ -21,18 +21,12 @@ import org.openmole.core.model.sampling.ISampling
 import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.service.Random._
 import java.util.Random
-import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.data.DataSet
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.sampling.Sampling
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IBounded
-import org.openmole.core.model.sampling.IFactor
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.sampling._
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
+import org.openmole.core.model.sampling._
+import org.openmole.core.implementation.task.Task._
 
 object SaltelliSampling {
   
@@ -56,12 +50,12 @@ object SaltelliSampling {
   def generateMatrix(
     context: IContext,
     samples: Int,
-    factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]],
+    factors: Seq[IFactor[Double, IDomain[Double] with IBounded[Double]]],
     rng: Random): Array[Array[Double]] = 
       factors.map{
-      f => 
-      (0 until samples).map(i => rng.nextDouble.scale(f.domain.min(context), f.domain.max(context))).toArray
-    }
+        f => 
+        (0 until samples).map(i => rng.nextDouble.scale(f.domain.min(context), f.domain.max(context))).toArray
+      }.toArray
   
   def buildC(
     i: Int,
@@ -93,37 +87,13 @@ import SaltelliSampling._
 class SaltelliSampling(
   samples: Int,
   matrixName: IPrototype[String],
-  factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]],
-  rng: Random
+  factors: IFactor[Double, IDomain[Double] with IBounded[Double]]*
 ) extends Sampling {
-  
-  def this( 
-    samples: Int,
-    matrixName: IPrototype[String],
-    factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]]
-  ) = this(samples, matrixName, factors, Workspace.newRNG)
-  
-  def this( 
-    samples: Int,
-    matrixName: IPrototype[String],
-    seed: Long,
-    factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]]
-  ) = this(samples, matrixName, factors, Workspace.newRNG(seed))
 
-  def this( 
-    samples: Int,
-    factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]]
-  ) = this(samples, matrixNamePrototype, factors, Workspace.newRNG)
-  
-  def this( 
-    samples: Int,
-    seed: Long,
-    factors: Array[IFactor[Double, IDomain[Double] with IBounded[Double]]]
-  ) = this(samples, matrixNamePrototype, factors, Workspace.newRNG(seed))
-  
   override def prototypes = matrixName :: factors.map{_.prototype}.toList 
   
   override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = {
+    val rng = context.valueOrException(openMOLERNG)
     val a = generateMatrix(context, samples, factors, rng)
     val b = generateMatrix(context, samples, factors, rng)
     val prototypes = factors.map{_.prototype}

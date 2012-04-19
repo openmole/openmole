@@ -19,7 +19,6 @@ package org.openmole.core.implementation.validation
 
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.transition.ITransition
-import org.openmole.misc.tools.io.StringUtil._
 
 object TopologyProblem {
   
@@ -32,7 +31,7 @@ object TopologyProblem {
     val capsule: ICapsule,
     val paths: List[(List[ICapsule], Int)]) extends TopologyProblem {
   
-    override def toString = "LevelProblem: " + capsule + ", " + paths.map{case(p, l) => "Folowing the path (" + p.toCSV + " has level " + l + ")"}.toCSV
+    override def toString = "LevelProblem: " + capsule + ", " + paths.map{case(p, l) => "Folowing the path (" + p.mkString(", ") + " has level " + l + ")"}.mkString(", ")
   }
   
   case class NegativeLevelProblem (
@@ -40,7 +39,7 @@ object TopologyProblem {
     val path: List[ICapsule], 
     val level: Int) extends TopologyProblem {
   
-    override def toString = "LevelProblem: " + capsule + ", " + path.toCSV + " has a negative level " + level
+    override def toString = "LevelProblem: " + capsule + ", " + path.mkString(", ") + " has a negative level " + level
   }
 }
 

@@ -21,38 +21,4 @@ import java.math.MathContext
 
 package object range {
   
-  implicit val doubleFromString = 
-    new FromString[Double] {
-      def fromString(s: String) = s.toDouble
-    }
-  
-  implicit val intFromString =
-    new FromString[Int] {
-      def fromString(s: String) = s.toInt
-    }
-  
-  implicit val longFromString = 
-    new FromString[Long] {
-      def fromString(s: String) = s.toLong
-    }
-  
-  implicit val floatFromString =
-    new FromString[Float] {
-      def fromString(s: String) = s.toFloat
-    }
-  
-  implicit val bigDecimalFromString = 
-    new FromString[BigDecimal] {
-      def fromString(s: String) = BigDecimal(s, MathContext.DECIMAL128)
-    }
-  
-  implicit val javaBigDecimalFromString = 
-    new FromString[java.math.BigDecimal] {
-      def fromString(s: String) = BigDecimal(s, MathContext.DECIMAL128).bigDecimal
-    }
-  
-  
-  implicit val doubleAsIfIntegral = Numeric.DoubleAsIfIntegral
-  implicit val bigDecimalAsIfIntegral = Numeric.BigDecimalAsIfIntegral
-  implicit val floatAsIfIntegral = Numeric.FloatAsIfIntegral
 }

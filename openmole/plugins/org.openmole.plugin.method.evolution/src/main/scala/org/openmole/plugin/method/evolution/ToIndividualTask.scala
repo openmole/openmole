@@ -17,11 +17,8 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo.Individual
-import fr.iscpif.mgo.ga.GAFitness
-import fr.iscpif.mgo.ga.GAFitness._
-import fr.iscpif.mgo.ga.GAGenome
-import fr.iscpif.mgo.ga.GAIndividual
+import fr.iscpif.mgo.ga._
+import fr.iscpif.mgo._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.task.TaskBuilder
@@ -32,16 +29,14 @@ import scala.collection.mutable.ListBuffer
 
 object ToIndividualTask {
   
-  def apply[T <: GAGenome](name: String, genome: IPrototype[T], individual: IPrototype[Individual[T, GAFitness]])(implicit plugins: IPluginSet) = 
+  def apply[T <: GAGenome](name: String, genome: IPrototype[T], individual: IPrototype[Individual[T, Fitness]])(implicit plugins: IPluginSet) = 
     new TaskBuilder { builder =>
       
-      private var _objectives = new ListBuffer[(IPrototype[Double], Double)]
+      private var objectives = new ListBuffer[(IPrototype[Double], Double)]
       
-      def objectives = _objectives.toList 
-      
-      def objective(p: IPrototype[Double], v: Double) = {
+      def addObjective(p: IPrototype[Double], v: Double) = {
         this addInput p
-        _objectives += (p -> v)
+        objectives += (p -> v)
         this
       }
       
@@ -49,7 +44,7 @@ object ToIndividualTask {
         val inputs = builder.inputs + genome
         val outputs = builder.outputs + individual
         val parameters = builder.parameters
-        val objectives = builder.objectives
+        val objectives = builder.objectives.toList
       }
     }
   
@@ -58,17 +53,16 @@ object ToIndividualTask {
 sealed abstract class ToIndividualTask[T <: GAGenome](
   val name: String, 
   genome: IPrototype[T], 
-  individual: IPrototype[Individual[T, GAFitness]])(implicit val plugins: IPluginSet) extends Task { task =>
-  
+  individual: IPrototype[Individual[T, Fitness]])(implicit val plugins: IPluginSet) extends Task { task =>
   
   def objectives: List[(IPrototype[Double], Double)]
   
   override def process(context: IContext) = 
     context + new Variable(
       individual, 
-      new GAIndividual[T, GAFitness] {
+      new Individual[T, Fitness] {
         val genome = context.valueOrException(task.genome)
-        val fitness =  new GAFitness {
+        val fitness =  new Fitness {
           val values = objectives.reverse.map {
             case (o, v) => math.abs(context.valueOrException(o) - v)
           }.toIndexedSeq

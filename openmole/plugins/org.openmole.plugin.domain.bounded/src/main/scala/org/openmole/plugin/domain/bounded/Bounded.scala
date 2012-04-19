@@ -15,12 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.tools.io
+package org.openmole.plugin.domain.bounded
 
-object StringUtil {
+import org.openmole.core.model.domain.IBounded
+import org.openmole.core.model.data.IContext
+import org.openmole.core.implementation.tools.VariableExpansion._
+import org.openmole.core.model.domain.IDomain
+import org.openmole.misc.tools.io.FromString
 
-  implicit def iterableDecorator[T](it: Iterable[T]) = new {
-    def toCSV[T] = if(it.isEmpty) "" else it.map(_.toString).reduceLeft(_ + "," + _)
-  }
-  
+sealed class Bounded[T](val min: String, val max: String)(implicit fromString: FromString[T]) extends IDomain[T] with IBounded[T] {
+  def min(context: IContext) = fromString.fromString(min.expand(context))
+  def max(context: IContext) = fromString.fromString(max.expand(context))
 }

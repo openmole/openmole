@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.domain.range
 
-
+import org.openmole.misc.tools.io.FromString
 import org.openmole.core.model.data.IContext
 import org.openmole.core.implementation.tools.VariableExpansion._
 

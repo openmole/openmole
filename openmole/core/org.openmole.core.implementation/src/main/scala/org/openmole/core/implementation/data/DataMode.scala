@@ -19,7 +19,6 @@ package org.openmole.core.implementation.data
 
 import org.openmole.core.model.data.{DataModeMask,IDataMode}
 import org.openmole.core.model.data.DataModeMask._
-import org.openmole.misc.tools.io.StringUtil._
 
 
 object DataMode {

@@ -23,15 +23,16 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IIterable
 import org.openmole.misc.tools.service.Random._
+import org.openmole.core.implementation.task.Task._
 
-sealed class UniformIntDistribution(generator: Random = Workspace.newRNG, max: Option[Int] = None) extends IDomain[Int] with IIterable[Int] {
+sealed class UniformIntDistribution(max: Option[Int] = None) extends IDomain[Int] with IIterable[Int] {
  
 
   override def iterator(context: IContext): Iterator[Int] = 
     Iterator.continually {
       max match {
-        case Some(i) => generator.nextInt(i)
-        case None => generator.nextInt
+        case Some(i) => context.valueOrException(openMOLERNG).nextInt(i)
+        case None => context.valueOrException(openMOLERNG).nextInt
       }
     }
   

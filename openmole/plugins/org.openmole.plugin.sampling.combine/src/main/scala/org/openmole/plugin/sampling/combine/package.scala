@@ -34,7 +34,7 @@ package object combine {
     def zip(s2: ISampling) = new ZipSampling(s, s2)
     def zipWithIndex(index: IPrototype[Int]) = new ZipWithIndexSampling(s, index)
     def take(n: Int) = new TakeSampling(s, n)
-    def shuffle(random: Random = Workspace.newRNG) = new ShuffleSampling(s, random)
+    def shuffle = new ShuffleSampling(s)
   }
   
   implicit def zipWithNameFactorDecorator(factor: IFactor[File, IDomain[File] with IIterable[File]]) = new {

@@ -19,6 +19,7 @@ package org.openmole.core.implementation.task
 
 import java.io.File
 import org.openmole.core.model.task.IPluginSet
+import org.openmole.misc.pluginmanager.PluginManager
 
 object PluginSet {
   val empty = new PluginSet(Set.empty)
