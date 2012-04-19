@@ -31,7 +31,7 @@ import org.openmole.core.model.task.IPluginSet
 import org.openmole.plugin.builder.Builder._
 import org.openmole.plugin.task.stat._
 
-package object Stochastic {
+package object stochastic {
 
   class Statistics {
     var medians: List[(IPrototype[Double], IPrototype[Double])] = Nil

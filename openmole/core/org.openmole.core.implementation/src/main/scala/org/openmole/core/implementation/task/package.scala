@@ -32,9 +32,5 @@ package object task {
     puzzle.capsuleToPuzzleConverter(new Capsule(task))
   
   implicit def taskBuilderToPuzzleConverter(t: TaskBuilder) = taskToPuzzleConveter(t.toTask)
-  
-  def loadPlugins(f: File*) = {
-    PluginManager.load(f)
-    new PluginSet(f.toSet)
-  }
+ 
 }

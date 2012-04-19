@@ -22,10 +22,12 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
 
 import org.openmole.core.model.task.ITask
+import org.openmole.core.model.transition.ISlot
 import puzzle._
 import task._
 
 package object mole {
+  implicit def slotToCapsuleConverter(slot: ISlot) = slot.capsule
   implicit def capsuleToSlotConverter(capsule: ICapsule) = capsule.defaultInputSlot
   implicit def puzzleToMoleConverter(puzzle: Puzzle) = new Mole(puzzle.first.capsule)
   

@@ -25,9 +25,11 @@ object Activator {
 }
 
 class Activator extends BundleActivator {
- override def start(componentContext: BundleContext)= {
+  
+
+  
+  override def start(componentContext: BundleContext)= {
     Activator.bundleContext = componentContext
-//    Activator.bundleContext.addBundleListener(this)
   }
 
   override def stop(componentContext: BundleContext) = {
