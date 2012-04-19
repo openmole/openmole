@@ -18,7 +18,8 @@
 package org.openmole.ide.plugin.domain.bounded
 
 import org.openmole.core.model.domain.IBounded
-import org.openmole.plugin.domain.bounded.DoubleBounded
+import org.openmole.plugin.domain.bounded.Bounded
+import org.openmole.misc.tools.io.FromString._
 import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.model.data.IBoundedDomainDataUI
 
@@ -27,7 +28,7 @@ class BoundedDomainDataUI (val name: String="",
                                 val max: String = "") extends IBoundedDomainDataUI {
   
   def coreObject(prototypeObject: IPrototype[Double]) = prototypeObject.`type` match {
-    case x : Manifest[Double] => new DoubleBounded(min,max)
+    case x : Manifest[Double] => new Bounded[Double](min,max)
   }
 
   def coreClass = classOf[IBounded[Double]]

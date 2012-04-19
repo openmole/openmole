@@ -21,6 +21,7 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.domain.IDomain
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.plugin.domain.range._
+import org.openmole.misc.tools.io.FromString._
 
 class RangeDomainDataUI (
   val name: String="",

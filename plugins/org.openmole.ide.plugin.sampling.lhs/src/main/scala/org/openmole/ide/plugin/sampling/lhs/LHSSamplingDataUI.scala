@@ -21,13 +21,15 @@ class LHSSamplingDataUI(val name : String="",
   implicit def string2Int(s: String): Int = augmentString(s).toInt
 
   def coreObject = 
-    new LHSSampling(try { samples 
-      } catch { case e : NumberFormatException => throw new UserBadDataError("An integer is exepected as number of samples") },
-                    factors.map{f=>
+    new LHSSampling(
+      try samples 
+      catch { 
+        case e : NumberFormatException => throw new UserBadDataError("An integer is exepected as number of samples") 
+      }, factors.map{
+        f=>
         val proto = f._1.dataUI.coreObject.asInstanceOf[IPrototype[Double]]
-        new Factor(proto,
-                   f._3.coreObject(proto))
-        }.toArray)
+        new Factor(proto, f._3.coreObject(proto))
+      }: _*)
 
 
   def coreClass = classOf[LHSSampling] 

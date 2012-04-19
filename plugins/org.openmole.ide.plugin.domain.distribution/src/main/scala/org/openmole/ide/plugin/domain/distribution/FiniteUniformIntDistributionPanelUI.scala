@@ -26,21 +26,16 @@ import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.BorderPanel.Position._
 
 class FiniteUniformIntDistributionPanelUI(pud: FiniteUniformIntDistributionDataUI) extends PluginPanel("fillx","[left][grow,fill]","") with IDomainPanelUI{
-  val seedField = new TextField(6)
   val sizeField = new TextField(6)
   
-  contents+= (new Label("Seed"),"gap para")
-  contents+= seedField
   contents+= (new Label("Size"),"gap para")
   contents+=  (sizeField,"wrap")
   
-  seedField.text = pud.seed.toString
   sizeField.text = pud.size.toString
   
   override def saveContent(name: String) = {
     new FiniteUniformIntDistributionDataUI(
       name,
-      seedField.text.toLong,
       sizeField.text.toInt)
   }
 }

@@ -14,10 +14,9 @@ import org.openmole.misc.workspace._
 
 class FiniteUniformIntDistributionDataUI(
   val name: String="",
-  val seed: Long=0,
   val size: Int=1) extends IDomainDataUI {
   
-  def coreObject(proto: IPrototype[_]) = new FiniteUniformIntDistribution(size, seed)
+  def coreObject(proto: IPrototype[_]) = new FiniteUniformIntDistribution(size)
 
   def coreClass = classOf[FiniteUniformIntDistribution] 
   
