@@ -23,15 +23,12 @@ import java.util.logging.Logger
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.task.IPluginSet
 import org.openmole.misc.tools.io.FileUtil.fileOrdering
-import org.apache.clerezza.scala.scripting.InterpreterFactory
 import org.openmole.core.implementation.data.Context
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.task.PluginSet
 import org.openmole.core.model.data.IContext
+import org.openmole.misc.tools.script.ScalaREPL
 import org.openmole.plugin.task.code._
-import scala.collection.immutable.TreeSet
-import scala.collection.mutable.ListBuffer
-
 
 object ScalaTask {
   
@@ -61,10 +58,8 @@ sealed abstract class ScalaTask(
   imports: Iterable[String]
 )(implicit val plugins: IPluginSet) extends CodeTask {
   
-  @transient lazy val factory = new InterpreterFactory
-  
   override def processCode(context: IContext) = {
-    val interpreter = factory.createInterpreter(new PrintWriter(System.out))
+    val interpreter = new ScalaREPL
     context.values.foreach{v => interpreter.bind(v.prototype.name, v.value)}
     interpreter.addImports(imports.toSeq: _*)
     interpreter.interpret(code)
