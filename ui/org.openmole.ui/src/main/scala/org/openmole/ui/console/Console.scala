@@ -50,7 +50,6 @@ class Console(plugins: IPluginSet) { console =>
     if(!success) initPassword
   }
   
-  def pluginManager = "plugin"
   def workspace = "workspace"
   def registry = "registry"
   def logger = "logger"
@@ -58,10 +57,7 @@ class Console(plugins: IPluginSet) { console =>
   
   def run {
     initPassword
-    
    
-    
-    
     val loop = new ScalaREPL
     
     loop.beQuietDuring { 

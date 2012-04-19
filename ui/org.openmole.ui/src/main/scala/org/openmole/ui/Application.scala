@@ -91,6 +91,7 @@ class Application extends IApplication with Logger {
           
           val userPlugins = config.userPlugins.map{new File(_)}.toSet
           PluginManager.load(userPlugins)
+          
           val console = new Console(new PluginSet(userPlugins))
           console.run
         }
