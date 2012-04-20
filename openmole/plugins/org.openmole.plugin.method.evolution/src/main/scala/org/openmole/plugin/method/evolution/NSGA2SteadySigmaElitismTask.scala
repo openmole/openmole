@@ -43,8 +43,10 @@ object NSGA2SteadySigmaElitismTask {
       addInput(archive)
       addInput(individual)
       addInput(generationSteady)
+      addInput(generation)
       addOutput(archive)
       addOutput(generationSteady)
+      addOutput(generation)
       
       addParameter(archive -> Array.empty[Individual[GAGenomeWithSigma, Fitness] with Rank with Diversity])
       addParameter(generationSteady -> 0)
