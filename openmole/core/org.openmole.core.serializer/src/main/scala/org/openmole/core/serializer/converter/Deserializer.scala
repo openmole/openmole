@@ -21,6 +21,7 @@ import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.converters.Converter
 import com.thoughtworks.xstream.converters.SingleValueConverter
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
+import com.thoughtworks.xstream.io.xml.StaxDriver
 import java.io.InputStream
 
 class Deserializer {

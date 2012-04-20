@@ -38,9 +38,10 @@ trait Factory[T <: { def clean }]{
     pool.borrowObject.asInstanceOf[T]
   }
     
-  def returnObject(serial: T) = {
-    serial.clean
-    pool.returnObject(serial)
-    capacitySemaphore.release
-  }
+  def returnObject(serial: T) = 
+    try serial.clean 
+    finally {
+      pool.returnObject(serial)
+      capacitySemaphore.release
+    }
 }

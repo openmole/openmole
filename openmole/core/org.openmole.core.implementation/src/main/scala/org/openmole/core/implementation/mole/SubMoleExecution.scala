@@ -146,7 +146,7 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
         Context.empty ++ 
         moleExecution.mole.implicits.values.filter(v => capsule.taskOrException.inputs.contains(v.prototype.name)) + 
         new Variable(Task.openMOLESeed, seed) +
-        new LazyVariable(Task.openMOLERNG, moleExecution.newRNG(seed))
+        new Variable(Task.openMOLERNG, moleExecution.newRNG(seed))
       
       val moleJob: IMoleJob = capsule match {
         case c: IMasterCapsule => 

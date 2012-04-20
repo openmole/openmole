@@ -30,8 +30,9 @@ import org.openmole.core.implementation.data.Context._
 import SaltelliSampling._
 import SensitivityTask._
 import org.openmole.core.model.task.IPluginSet
+import math._
 
-object FirstOrderSensitivityTask {
+object TotalEffectSensitivityTask {
   
   def apply(
     name: String,
@@ -40,7 +41,7 @@ object FirstOrderSensitivityTask {
     modelOutputs: Iterable[IPrototype[Double]]
   )(implicit plugins: IPluginSet) = new TaskBuilder { builder =>
     
-    def toTask = new FirstOrderSensitivityTask(name, matrixName, modelInputs, modelOutputs) {
+    def toTask = new TotalEffectSensitivityTask(name, matrixName, modelInputs, modelOutputs) {
       val inputs: IDataSet = builder.inputs + DataSet(modelOutputs)
       val outputs: IDataSet  = builder.outputs + DataSet(for(i <- modelInputs ; o <- modelOutputs) yield indice(i, o))
       val parameters = builder.parameters
@@ -50,24 +51,24 @@ object FirstOrderSensitivityTask {
   
 }
 
-abstract sealed class FirstOrderSensitivityTask(
+abstract sealed class TotalEffectSensitivityTask(
   val name: String,
   val matrixName: IPrototype[String],
   val inputs: Iterable[IPrototype[Double]],
   val outputs: Iterable[IPrototype[Double]]
 )(implicit val plugins: IPluginSet) extends SensitivityTask {
   
+  
   def computeSensitivity(allValues: Array[Double], allNames: Array[String], input: IPrototype[Double]) = {
     val (a, b, c) = extractValues(allValues, allNames, input)
     val n = a.size
     
-    val axcAvg = (a zip c map { case (a, c) => a * c } sum) / n
-    val g0 = (a zip b map { case (a, b) => a * b } sum) / n
+    val bxcAvg = (b zip c map { case (b, c) => b * c } sum) / n
+    
     val axaAvg = (a  map { a => a * a } sum) / n
     val f0 = (a sum) / n
     
-    (axcAvg - g0) / (axaAvg - math.pow(f0, 2))
+    1 - (bxcAvg - pow(f0,2)) / (axaAvg - math.pow(f0, 2))
   }
-
   
 }

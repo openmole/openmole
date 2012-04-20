@@ -34,16 +34,14 @@ import PluginConverter._
 class PluginConverter(serializer: SerializerWithPluginClassListing, reflectionConverter: ReflectionConverter) extends Converter {
 
   override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) = {
-      serializer.classUsed(o.getClass)
-        reflectionConverter.marshal(o, writer, mc)
+    serializer.classUsed(o.getClass)
+    reflectionConverter.marshal(o, writer, mc)
   }
 
   override def unmarshal(reader: HierarchicalStreamReader, uc: UnmarshallingContext): Object = {
     throw new UnsupportedOperationException("Bug: Should never be called.")
   }
 
-  override def canConvert(c: Class[_]): Boolean = 
-    PluginManager.isClassProvidedByAPlugin(c)
-  
+  override def canConvert(c: Class[_]): Boolean = PluginManager.isClassProvidedByAPlugin(c)
   
 }
