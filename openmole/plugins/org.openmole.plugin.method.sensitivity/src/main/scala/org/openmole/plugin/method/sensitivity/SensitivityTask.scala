@@ -33,14 +33,14 @@ import SensitivityTask._
 trait SensitivityTask extends Task {
   
   def matrixName: IPrototype[String]
-  def inputs: Iterable[IPrototype[Double]]
-  def outputs: Iterable[IPrototype[Double]]
+  def modelInputs: Iterable[IPrototype[Double]]
+  def modelOutputs: Iterable[IPrototype[Double]]
   
   override def process(context: IContext): IContext = {
     val matrixNames = context.valueOrException(matrixName.toArray)
 
     Context.empty ++ 
-    (for(i <- inputs ; o <- outputs) yield new Variable(indice(i, o) ,computeSensitivity(context.valueOrException(o.toArray), matrixNames, i)))
+    (for(i <- modelInputs ; o <- modelOutputs) yield new Variable(indice(i, o) ,computeSensitivity(context.valueOrException(o.toArray), matrixNames, i)))
   }
   
   def computeSensitivity(allValues: Array[Double], allNames: Array[String], input: IPrototype[Double]): Double

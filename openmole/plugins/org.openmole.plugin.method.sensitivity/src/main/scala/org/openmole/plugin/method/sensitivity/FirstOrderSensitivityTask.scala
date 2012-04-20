@@ -53,8 +53,8 @@ object FirstOrderSensitivityTask {
 abstract sealed class FirstOrderSensitivityTask(
   val name: String,
   val matrixName: IPrototype[String],
-  val inputs: Iterable[IPrototype[Double]],
-  val outputs: Iterable[IPrototype[Double]]
+  val modelInputs: Iterable[IPrototype[Double]],
+  val modelOutputs: Iterable[IPrototype[Double]]
 )(implicit val plugins: IPluginSet) extends SensitivityTask {
   
   def computeSensitivity(allValues: Array[Double], allNames: Array[String], input: IPrototype[Double]) = {
