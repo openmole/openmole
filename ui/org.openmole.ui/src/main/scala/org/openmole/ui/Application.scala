@@ -54,14 +54,14 @@ class Application extends IApplication with Logger {
     
     val parser = new OptionParser[Config]("openmole", "0.x") { 
       def options = Seq(
-        opt("cp", "pluginDirectories" ,"Plugins directories (seperated by \",\")") {
-          (v: String, c: Config) => c.copy(pluginsDirs = v.split(',').toList) 
+        opt("cp", "pluginDirectories" ,"Plugins directories (seperated by \" \")") {
+          (v: String, c: Config) => c.copy(pluginsDirs = v.split(' ').toList) 
         },
-        opt("gp", "guiPluginDirectories" ,"GUI plugins directories (seperated by \",\")") {
-          (v: String, c: Config) => c.copy(guiPluginsDirs = v.split(',').toList) 
+        opt("gp", "guiPluginDirectories" ,"GUI plugins directories (seperated by \" \")") {
+          (v: String, c: Config) => c.copy(guiPluginsDirs = v.split(' ').toList) 
         },
-        opt("p", "userPlugins" ,"Plugins (seperated by \",\")") {
-          (v: String, c: Config) => c.copy(userPlugins = v.split(',').toList) 
+        opt("p", "userPlugins" ,"Plugins (seperated by \" \")") {
+          (v: String, c: Config) => c.copy(userPlugins = v.split(' ').toList) 
         },
         opt("w", "Path of the workspace") {
           (v: String, c: Config) => c.copy(workspaceDir = Some(v)) 
