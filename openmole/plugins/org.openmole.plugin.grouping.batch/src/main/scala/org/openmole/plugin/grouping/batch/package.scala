@@ -40,4 +40,6 @@ package object batch {
     
   }
   
+  implicit def intToNumberOfMoleJobGrouping(n: Int) = new NumberOfMoleJobsGrouping(n)
+  
 }
