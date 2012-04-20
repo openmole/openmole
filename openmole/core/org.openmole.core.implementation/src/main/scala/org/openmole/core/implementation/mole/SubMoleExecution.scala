@@ -141,13 +141,11 @@ class SubMoleExecution(val parent: Option[SubMoleExecution], val moleExecution: 
   
   override def submit(capsule: ICapsule, context: IContext, ticket: ITicket) = synchronized {
     if(!canceled) {
-      val seed = moleExecution.newSeed
       def implicits = 
         Context.empty ++ 
         moleExecution.mole.implicits.values.filter(v => capsule.taskOrException.inputs.contains(v.prototype.name)) + 
-        new Variable(Task.openMOLESeed, seed) +
-        new Variable(Task.openMOLERNG, moleExecution.newRNG(seed))
-      
+        new Variable(Task.openMOLESeed, moleExecution.newSeed)
+        
       val moleJob: IMoleJob = capsule match {
         case c: IMasterCapsule => 
           val savedContext = masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(new Context)

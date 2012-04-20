@@ -17,8 +17,12 @@
 
 package org.openmole.core.implementation
 
+import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.data.Context._
 import org.openmole.core.model.data._
 import org.openmole.misc.tools.obj.ClassUtils._
+import org.openmole.misc.tools.service.Random
+import org.openmole.misc.workspace.Workspace
 import scala.annotation.tailrec
 
 package object data {
@@ -62,6 +66,6 @@ package object data {
     def toArray: IData[Array[T]] = new Data[Array[T]](data.prototype.toArray, data.mode)  
   }
   
-  implicit def variablesToContextConverter(variables: Traversable[IVariable[_]]) = variables.toContext
+  implicit def variablesToContextConverter(variables: Traversable[IVariable[_]]): Context = Context(variables)
   
 }

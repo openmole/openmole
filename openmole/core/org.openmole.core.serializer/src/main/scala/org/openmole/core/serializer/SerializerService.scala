@@ -42,11 +42,6 @@ import scala.io.Source
 
 object SerializerService {
 
-  //val NumberOfSerializer = new ConfigurationLocation("SerializerService", "NumberOfSerializer")
-  //Workspace += (NumberOfSerializer, "1")
-
-  //val serializerSemaphore = new Semaphore(Workspace.preferenceAsInt(NumberOfSerializer))
-  
   private val xstream = new XStream
   private val filesInfo = "filesInfo.xml"
   private val content = "content.xml"
