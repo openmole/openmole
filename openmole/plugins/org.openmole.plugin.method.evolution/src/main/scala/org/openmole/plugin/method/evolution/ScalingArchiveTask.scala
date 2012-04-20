@@ -48,6 +48,8 @@ object ScalingArchiveTask {
       }
       
       addInput(archive)
+      _inputs foreach {case(p, _) => this addOutput p}
+      
       
       def toTask = new ScalingArchiveTask[I](name, archive, _inputs: _*) {
         val inputs = builder.inputs

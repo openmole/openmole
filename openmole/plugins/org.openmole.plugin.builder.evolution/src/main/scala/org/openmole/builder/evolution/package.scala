@@ -129,19 +129,19 @@ package object evolution {
     
     val elitismCaps = new MasterCapsule(elitismTask, archivePrototype, steadySinceProto, generationProto)
     
-    val scalingParetoTask = ScalingArchiveTask(name + "ScalingArchive", archivePrototype, inputs.toSeq: _*)
+    val scalingArchiveTask = ScalingArchiveTask(name + "ScalingArchive", archivePrototype, inputs.toSeq: _*)
 
     objectives.foreach {
-      case(o, _) => scalingParetoTask addObjective o
+      case(o, _) => scalingArchiveTask addObjective o
     }
     
-    scalingParetoTask addInput steadySinceProto
-    scalingParetoTask addInput generationProto
+    scalingArchiveTask addInput steadySinceProto
+    scalingArchiveTask addInput generationProto
     
-    scalingParetoTask addOutput steadySinceProto
-    scalingParetoTask addOutput generationProto
+    scalingArchiveTask addOutput steadySinceProto
+    scalingArchiveTask addOutput generationProto
    
-    val scalingParetoCapsule = new Capsule(scalingParetoTask)
+    val scalingArchiveCapsule = new Capsule(scalingArchiveTask)
       
     
     val breedingTask = NSGA2SteadySigmaBreedTask(
@@ -161,10 +161,10 @@ package object evolution {
     new Transition(scalingCaps, model.first)
     new Transition(model.last, toIndividualCapsule, filter = Set(genomeWithSigmaPrototype.name))
     new Transition(toIndividualCapsule, elitismCaps)
-    new Transition(elitismCaps, scalingParetoCapsule)
-    new Transition(scalingParetoCapsule, breedingCaps)
+    new Transition(elitismCaps, scalingArchiveCapsule)
+    new Transition(scalingArchiveCapsule, breedingCaps)
     new Transition(breedingCaps, new Slot(scalingCaps))
-    new EndExplorationTransition(scalingParetoCapsule, endCapsule, terminatedProto.name)
+    new EndExplorationTransition(scalingArchiveCapsule, endCapsule, terminatedProto.name)
     
     new DataChannel(scalingCaps, toIndividualCapsule)
     new DataChannel(elitismCaps, breedingCaps)
@@ -173,7 +173,7 @@ package object evolution {
     new DataChannel(explorationCapsule, endCapsule)
     
     new Puzzle(firstCapsule, endCapsule, model.selection, model.grouping) {
-      def outputCapsule = scalingParetoCapsule
+      def outputCapsule = scalingArchiveCapsule
       def steady = steadySinceProto
       def generation = generationProto
     }
