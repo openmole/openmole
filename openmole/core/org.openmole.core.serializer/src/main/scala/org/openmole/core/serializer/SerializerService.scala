@@ -32,11 +32,15 @@ import org.openmole.core.serializer.converter._
 import org.openmole.core.serializer.structure.FileInfo
 import com.ice.tar.TarEntry
 import com.ice.tar.TarOutputStream
+import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import collection.JavaConversions._
 import scala.collection.immutable.TreeMap
 
 object SerializerService {
+
+  val NumberOfSerializers = new ConfigurationLocation("SerializerService", "NumberOfSerializers")
+  Workspace += (NumberOfSerializers, "20")
 
   private val xstream = new XStream
   private val filesInfo = "filesInfo.xml"
