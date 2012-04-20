@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>com.github.scopt</groupId>
-            <artifactId>scopt_${scala.version}</artifactId>
+            <artifactId>scopt_2.9.1</artifactId>
 	    <version>${lib.com.github.scopt.version}</version>
             <scope>provided</scope>
         </dependency>
