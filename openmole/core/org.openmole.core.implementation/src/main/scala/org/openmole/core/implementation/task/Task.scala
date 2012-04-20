@@ -70,8 +70,8 @@ trait Task extends ITask {
     }.toContext
 
   private def init(context: IContext): IContext = {
-    if(PluginManagerInfo.enabled) PluginManager.loadIfNotAlreadyLoaded(plugins.toIterable )
-    else if(!plugins.isEmpty) throw new InternalProcessingError("Plugins can't be loadded cause the application isn't runned in an osgi environment.")
+    if(PluginManagerInfo.enabled) PluginManager.loadIfNotAlreadyLoaded(plugins.toIterable)
+    else if(!plugins.isEmpty) throw new InternalProcessingError("Plugins can't be loadded cause the application isn't run in an osgi environment.")
 
     verifyInput(
       context ++ 

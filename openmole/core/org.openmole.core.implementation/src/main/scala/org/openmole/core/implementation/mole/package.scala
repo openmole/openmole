@@ -46,4 +46,6 @@ package object mole {
   implicit def taskMoleDecoraton(task: ITask) = new PuzzleMoleDecorator(task)
   implicit def taskMoleBuilderDecoraton(taskBuilder: TaskBuilder) = new PuzzleMoleDecorator(taskBuilder)
   
+  implicit def environmentToFixedEnvironmentSelectionConverter(env: IEnvironment) = new FixedEnvironmentSelection(env)
+  
 }
