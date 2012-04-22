@@ -18,6 +18,8 @@
 package org.openmole.misc.tools.io
 
 import java.math.MathContext
+import java.math.{BigDecimal => JBigDecimal}
+import java.math.{BigInteger => JBigInteger}
 
 object FromString {
 
@@ -66,6 +68,36 @@ object FromString {
   implicit val doubleAsIfIntegral = Numeric.DoubleAsIfIntegral
   implicit val bigDecimalAsIfIntegral = Numeric.BigDecimalAsIfIntegral
   implicit val floatAsIfIntegral = Numeric.FloatAsIfIntegral
+  
+  implicit val bigJavaBigDecimalAsIfIntegral = new Integral[JBigDecimal] {
+    def plus(x: JBigDecimal, y: JBigDecimal): JBigDecimal = x + y
+    def minus(x: JBigDecimal, y: JBigDecimal): JBigDecimal = x - y
+    def times(x: JBigDecimal, y: JBigDecimal): JBigDecimal = x * y
+    def negate(x: JBigDecimal): JBigDecimal = -x
+    def fromInt(x: Int): JBigDecimal = new JBigDecimal(x)
+    def toInt(x: JBigDecimal): Int = x.intValue
+    def toLong(x: JBigDecimal): Long = x.longValue
+    def toFloat(x: JBigDecimal): Float = x.floatValue
+    def toDouble(x: JBigDecimal): Double = x.doubleValue
+    def quot(x: JBigDecimal, y: JBigDecimal): JBigDecimal = (BigDecimal(x) / BigDecimal(y)).underlying
+    def rem(x: JBigDecimal, y: JBigDecimal): JBigDecimal = (BigDecimal(x) remainder BigDecimal(y)).underlying
+    def compare(x: JBigDecimal, y: JBigDecimal): Int = x compareTo y
+  }
+
+  implicit val bigJavaBigIntegerAsIfIntegral = new Integral[JBigInteger] {
+    def plus(x: JBigInteger, y: JBigInteger): JBigInteger = x + y
+    def minus(x: JBigInteger, y: JBigInteger): JBigInteger = x - y
+    def times(x: JBigInteger, y: JBigInteger): JBigInteger = x * y
+    def negate(x: JBigInteger): JBigInteger = -x
+    def fromInt(x: Int): JBigInteger = BigInt(x).underlying
+    def toInt(x: JBigInteger): Int = x.intValue
+    def toLong(x: JBigInteger): Long = x.longValue
+    def toFloat(x: JBigInteger): Float = x.floatValue
+    def toDouble(x: JBigInteger): Double = x.doubleValue
+    def quot(x: JBigInteger, y: JBigInteger): JBigInteger = x / y
+    def rem(x: JBigInteger, y: JBigInteger): JBigInteger = x % y
+    def compare(x: JBigInteger, y: JBigInteger): Int = x compareTo y
+  }
   
 }
 
