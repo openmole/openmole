@@ -21,4 +21,6 @@ import org.openmole.ide.core.model.panel.IAuthentificationPanelUI
 
 trait IAuthentificationFactoryUI extends IFactoryUI{
   def buildPanelUI: IAuthentificationPanelUI
+  
+  def coreClass : Class[_]
 }
