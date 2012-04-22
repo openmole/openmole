@@ -47,11 +47,21 @@ object FromString {
       def fromString(s: String) = BigDecimal(s, MathContext.DECIMAL128)
     }
   
+  implicit val bigIntFromString = 
+    new FromString[BigInt] {
+      def fromString(s: String) = BigInt(s)
+    }
+  
   implicit val javaBigDecimalFromString = 
     new FromString[java.math.BigDecimal] {
       def fromString(s: String) = BigDecimal(s, MathContext.DECIMAL128).bigDecimal
     }
   
+
+  implicit val javaBigIntegerFromString = 
+    new FromString[java.math.BigInteger] {
+      def fromString(s: String) = BigInt(s).underlying
+    }
   
   implicit val doubleAsIfIntegral = Numeric.DoubleAsIfIntegral
   implicit val bigDecimalAsIfIntegral = Numeric.BigDecimalAsIfIntegral
