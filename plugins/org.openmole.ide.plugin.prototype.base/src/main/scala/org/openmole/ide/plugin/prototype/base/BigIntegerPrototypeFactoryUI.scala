@@ -21,7 +21,7 @@ import java.math.BigInteger
 import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
-class BigIntegerPrototypeFactoryUI extends IPrototypeFactoryUI[scala.BigInt] {
+class BigIntegerPrototypeFactoryUI extends IPrototypeFactoryUI[java.math.BigInteger] {
   
   override def displayName = "BigInteger"
   

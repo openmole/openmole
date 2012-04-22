@@ -21,6 +21,7 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.domain.IDomain
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.plugin.domain.range._
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FromString._
 
 class RangeDomainDataUI (
@@ -32,7 +33,9 @@ class RangeDomainDataUI (
   override def coreObject(prototypeObject: IPrototype[_]): IDomain[_] = {
     if (prototypeObject.`type`.erasure == java.lang.Integer.TYPE) new Range[Int](min,max,step)
     else if (prototypeObject.`type`.erasure == java.lang.Double.TYPE) new Range[Double](min,max,step)
-    else new Range[BigDecimal](min, max, step)
+    else if (prototypeObject.`type`.erasure == classOf[java.math.BigDecimal]) new Range[java.math.BigDecimal](min, max, step)
+    else if (prototypeObject.`type`.erasure == classOf[java.math.BigInteger]) new Range[java.math.BigDecimal](min, max, step)
+    else throw new UserBadDataError("Unsupported range type " + prototypeObject.`type`.erasure)
   }
 
   def coreClass = classOf[IDomain[_]]
