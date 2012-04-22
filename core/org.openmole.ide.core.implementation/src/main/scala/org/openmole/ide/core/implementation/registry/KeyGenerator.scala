@@ -27,7 +27,7 @@ object KeyGenerator {
     else m
   }
   
-  def apply(proto : IPrototype[_]) : PrototypeKey = new PrototypeKey(proto.getClass,stripArrays(proto.`type`))
+  def apply(proto : IPrototype[_]) : PrototypeKey = new PrototypeKey(stripArrays(proto.`type`))
   
   def apply(entityClass : Class[_]) : DefaultKey = new DefaultKey(entityClass)
 }
