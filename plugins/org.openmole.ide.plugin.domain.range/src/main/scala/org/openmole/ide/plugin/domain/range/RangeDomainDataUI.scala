@@ -34,7 +34,7 @@ class RangeDomainDataUI (
     if (prototypeObject.`type`.erasure == java.lang.Integer.TYPE) new Range[Int](min,max,step)
     else if (prototypeObject.`type`.erasure == java.lang.Double.TYPE) new Range[Double](min,max,step)
     else if (prototypeObject.`type`.erasure == classOf[java.math.BigDecimal]) new Range[java.math.BigDecimal](min, max, step)
-    else if (prototypeObject.`type`.erasure == classOf[java.math.BigInteger]) new Range[java.math.BigDecimal](min, max, step)
+    else if (prototypeObject.`type`.erasure == classOf[java.math.BigInteger]) new Range[java.math.BigInteger](min, max, step)
     else throw new UserBadDataError("Unsupported range type " + prototypeObject.`type`.erasure)
   }
 
