@@ -70,10 +70,10 @@ object FromString {
   implicit val floatAsIfIntegral = Numeric.FloatAsIfIntegral
   
   implicit val bigJavaBigDecimalAsIfIntegral = new Integral[JBigDecimal] {
-    def plus(x: JBigDecimal, y: JBigDecimal): JBigDecimal = x + y
-    def minus(x: JBigDecimal, y: JBigDecimal): JBigDecimal = x - y
-    def times(x: JBigDecimal, y: JBigDecimal): JBigDecimal = x * y
-    def negate(x: JBigDecimal): JBigDecimal = -x
+    def plus(x: JBigDecimal, y: JBigDecimal): JBigDecimal = x add y
+    def minus(x: JBigDecimal, y: JBigDecimal): JBigDecimal = x subtract y
+    def times(x: JBigDecimal, y: JBigDecimal): JBigDecimal = x multiply y
+    def negate(x: JBigDecimal): JBigDecimal = x.negate
     def fromInt(x: Int): JBigDecimal = new JBigDecimal(x)
     def toInt(x: JBigDecimal): Int = x.intValue
     def toLong(x: JBigDecimal): Long = x.longValue
@@ -85,17 +85,17 @@ object FromString {
   }
 
   implicit val bigJavaBigIntegerAsIfIntegral = new Integral[JBigInteger] {
-    def plus(x: JBigInteger, y: JBigInteger): JBigInteger = x + y
-    def minus(x: JBigInteger, y: JBigInteger): JBigInteger = x - y
-    def times(x: JBigInteger, y: JBigInteger): JBigInteger = x * y
-    def negate(x: JBigInteger): JBigInteger = -x
+    def plus(x: JBigInteger, y: JBigInteger): JBigInteger = x add y
+    def minus(x: JBigInteger, y: JBigInteger): JBigInteger = x subtract y
+    def times(x: JBigInteger, y: JBigInteger): JBigInteger = x multiply y
+    def negate(x: JBigInteger): JBigInteger = x.negate
     def fromInt(x: Int): JBigInteger = BigInt(x).underlying
     def toInt(x: JBigInteger): Int = x.intValue
     def toLong(x: JBigInteger): Long = x.longValue
     def toFloat(x: JBigInteger): Float = x.floatValue
     def toDouble(x: JBigInteger): Double = x.doubleValue
-    def quot(x: JBigInteger, y: JBigInteger): JBigInteger = x / y
-    def rem(x: JBigInteger, y: JBigInteger): JBigInteger = x % y
+    def quot(x: JBigInteger, y: JBigInteger): JBigInteger = x divide y
+    def rem(x: JBigInteger, y: JBigInteger): JBigInteger = x mod y
     def compare(x: JBigInteger, y: JBigInteger): Int = x compareTo y
   }
   
