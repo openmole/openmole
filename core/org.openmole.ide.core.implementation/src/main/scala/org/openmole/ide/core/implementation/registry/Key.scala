@@ -19,6 +19,4 @@ package org.openmole.ide.core.implementation.registry
 
 case class DefaultKey(c : Class[_]) extends Key
 
-case class PrototypeKey(m : Manifest[_]) extends Key
-
 trait Key
