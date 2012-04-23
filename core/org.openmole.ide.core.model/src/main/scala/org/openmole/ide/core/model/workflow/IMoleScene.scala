@@ -21,6 +21,7 @@ import org.netbeans.api.visual.graph.GraphScene
 import org.openmole.ide.core.model.panel.PanelMode
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
+import scala.swing.Panel
 
 trait IMoleScene { 
   def manager: IMoleSceneManager
@@ -43,7 +44,9 @@ trait IMoleScene {
   
   def isBuildScene : Boolean
   
-  def savePropertyPanel : Unit
+  def savePropertyPanel: Unit
+  
+  def savePropertyPanel(panel : Panel) : Unit
   
   def displayPropertyPanel(proxy: IDataProxyUI, mode: PanelMode.Value)
   

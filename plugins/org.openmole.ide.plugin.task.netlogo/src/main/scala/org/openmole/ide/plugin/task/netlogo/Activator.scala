@@ -19,8 +19,6 @@ package org.openmole.ide.plugin.task.netlogo
 
 import org.openmole.ide.core.implementation.registry.OSGiActivator
 import org.openmole.ide.core.implementation.registry.TaskActivator
-import org.openmole.ide.plugin.task.netlogo4.NetLogo4TaskFactoryUI
-import org.openmole.ide.plugin.task.netlogo5.NetLogo5TaskFactoryUI
 
 class Activator extends OSGiActivator with TaskActivator {
 

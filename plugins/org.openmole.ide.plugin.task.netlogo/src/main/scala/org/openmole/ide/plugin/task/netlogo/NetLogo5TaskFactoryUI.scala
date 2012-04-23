@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.task.netlogo5
+package org.openmole.ide.plugin.task.netlogo
 
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 

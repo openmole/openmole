@@ -64,20 +64,19 @@ class GenericNetLogoPanelUI(nlogoPath: String,
         if ((new File(path)).isFile){
           nl.open(path)
           globals = nl.globals.toList
-          globals.foreach(println)
           nl.dispose
         }
       }
     }
     if (!globals.isEmpty){
       multiStringProto = Some(new MultiTwoCombos[String,IPrototypeDataProxyUI](
-          "Input Mapping",
+          "Output Mapping",
           "with",
           (globals, comboContent),
           prototypeMappingOutput))
       
     multiProtoString = Some(new MultiTwoCombos[IPrototypeDataProxyUI,String](
-          "Output Mapping",
+          "Input Mapping",
           "with",
           (comboContent,globals),
           prototypeMappingInput))
