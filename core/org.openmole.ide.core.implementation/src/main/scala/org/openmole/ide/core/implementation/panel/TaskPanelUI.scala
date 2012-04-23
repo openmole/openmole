@@ -138,7 +138,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
 
     val protoIn = new PluginPanel("wrap"){
       contents += new Label("Inputs") {foreground = Color.WHITE}
-      contents += new PluginPanel("wrap 2"){
+      contents += new PluginPanel("wrap"){
         TaskPanelUI.this.proxy.dataUI.implicitPrototypesIn.foreach{p=> 
           contents += new ImplicitLinkLabel(p.dataUI.name,contentAction(p))
         }
@@ -148,7 +148,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
                                                                       
     val protoOut =   new PluginPanel("wrap"){
       contents += new Label("Outputs") {foreground = Color.WHITE}
-      contents += new PluginPanel("wrap 2"){  
+      contents += new PluginPanel("wrap"){  
         TaskPanelUI.this.proxy.dataUI.implicitPrototypesOut.foreach{p=> 
           contents += new ImplicitLinkLabel(p.dataUI.name,contentAction(p))
         }
