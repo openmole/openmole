@@ -19,10 +19,8 @@ package org.openmole.ide.core.implementation.workflow
 
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow._
-import scala.swing.Action
 import java.awt.Color
 import java.awt.BasicStroke
 import java.awt.BorderLayout
