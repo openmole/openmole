@@ -43,6 +43,7 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.widget.MigPanel
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.model.panel.PanelMode._
+import scala.swing.Panel
 
 abstract class MoleScene(n: String = "",
                          id : Int) extends GraphScene.StringGraph with IMoleScene{
@@ -106,23 +107,26 @@ abstract class MoleScene(n: String = "",
   }
   
   def closeExtraPropertyPanel = {
+    savePropertyPanel(currentExtraPanel)
     currentExtraPanel.contents.removeAll
     extraPropertyWidget.setVisible(false)
     refresh
   }
     
-  def savePropertyPanel = 
-    if (currentPanel.contents.size > 0 ) {
-      currentPanel.contents(0) match {
+  def savePropertyPanel = savePropertyPanel(currentPanel)
+  
+  def savePropertyPanel(panel : Panel) = 
+    if (panel.contents.size > 0 ) {
+      panel.contents(0) match {
         case x:BasePanelUI=> x.baseSave
         case _=> 
       }
     }
   
   def closePropertyPanel : Unit = {
+    closeExtraPropertyPanel
     savePropertyPanel
     currentPanel.contents.removeAll
-    closeExtraPropertyPanel
     propertyWidget.setVisible(false)
     refresh
   }

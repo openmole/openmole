@@ -62,5 +62,7 @@ class PrototypePanelUI[T](proxy: IPrototypeDataProxyUI,
     }
   }
   
-  def save = proxy.dataUI = panelUI.saveContent(nameTextField.text)
+  def save = {
+    proxy.dataUI = panelUI.saveContent(nameTextField.text)
+  }
 }

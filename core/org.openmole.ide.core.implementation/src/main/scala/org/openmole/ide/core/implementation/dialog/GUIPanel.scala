@@ -77,7 +77,7 @@ class GUIPanel extends MainFrame { mainframe =>
   peer.add((ScenesManager.tabPane).peer,BorderLayout.CENTER)
   
   peer.add((StatusBar).peer,BorderLayout.SOUTH)
-  StatusBar.inform("welcome")
+  StatusBar.inform("OpenMOLE - 0.5 - Boundless Bamboo")
   
   PasswordListner.apply
 }
