@@ -30,7 +30,7 @@ sealed class ShuffleSampling(sampling: ISampling) extends ISampling {
   override def prototypes = sampling.prototypes
   
   override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = {
-    val random = context.valueOrException(openMOLERNG)
+    val random = newRNG(context.valueOrException(openMOLESeed))
     shuffled(sampling.build(context).toList)(random).toIterator
   }
  

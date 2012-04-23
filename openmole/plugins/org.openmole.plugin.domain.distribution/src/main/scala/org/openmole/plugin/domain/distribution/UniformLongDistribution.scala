@@ -27,7 +27,8 @@ import org.openmole.core.implementation.task.Task._
 
 sealed class UniformLongDistribution extends IDomain[Long] with IIterable[Long] {
 
-  override def iterator(context: IContext): Iterator[Long] = 
-    Iterator.continually { context.valueOrException(openMOLERNG).nextLong }
-  
+  override def iterator(context: IContext): Iterator[Long] = {
+    val rng = newRNG(context.valueOrException(openMOLESeed))
+    Iterator.continually { rng.nextLong }
+  }
 }

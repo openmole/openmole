@@ -66,7 +66,7 @@ class MoleExecution(
   selection: Map[ICapsule, IEnvironmentSelection] = Map.empty,
   grouping: Map[ICapsule, IGrouping] = Map.empty,
   rerun: IInstantRerun = IInstantRerun.empty,
-  rng: java.util.Random = Random.buildSynchronized(Workspace.newSeed)
+  rng: java.util.Random = Random.newRNG(Workspace.newSeed)
 ) extends IMoleExecution {
 
   import IMoleExecution._
@@ -192,7 +192,6 @@ class MoleExecution(
 
   def nextJobId = new MoleJobId(id, currentJobId.getAndIncrement)
  
-  def newRNG(seed: Long): java.util.Random = Random.buildSynchronized(seed)
   def newSeed = rng.nextLong
   
 }

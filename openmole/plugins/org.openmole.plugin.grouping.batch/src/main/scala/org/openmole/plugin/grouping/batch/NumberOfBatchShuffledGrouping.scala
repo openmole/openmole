@@ -17,11 +17,11 @@
 
 package org.openmole.plugin.grouping.batch
 
-import java.util.Random
 import org.openmole.core.implementation.mole.MoleJobGroup
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.mole.IGrouping
 import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.tools.service._
 import org.openmole.core.implementation.task.Task._
 
 /**
@@ -32,6 +32,9 @@ import org.openmole.core.implementation.task.Task._
  */
 class NumberOfBatchShuffledGrouping(numberOfBatch: Int) extends IGrouping {
 
-  override def apply(context: IContext) = new MoleJobGroup( context.valueOrException(openMOLERNG).nextInt(numberOfBatch) )
+  override def apply(context: IContext) = 
+    new MoleJobGroup( 
+      newRNG(context.valueOrException(openMOLESeed)).nextInt(numberOfBatch) 
+    )
 
 }

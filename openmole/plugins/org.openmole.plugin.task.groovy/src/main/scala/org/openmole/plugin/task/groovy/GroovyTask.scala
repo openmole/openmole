@@ -34,6 +34,10 @@ object GroovyTask {
   )(implicit plugins: IPluginSet) = 
     new CodeTaskBuilder { builder =>
       
+      addImport("static org.openmole.misc.tools.service.Random.newRNG")
+      addImport("static org.openmole.misc.workspace.Workspace.newFile")
+      addImport("static org.openmole.misc.workspace.Workspace.newDir")
+      
       def toTask = 
         new GroovyTask(name, code, builder.imports, libs) { 
           val inputs = builder.inputs

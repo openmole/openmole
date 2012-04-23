@@ -23,11 +23,11 @@ import org.apache.commons.math3.random.{RandomGenerator, Well44497b, RandomAdapt
 object Random { random =>
   implicit def uuid2long(uuid: UUID) = uuid.getMostSignificantBits ^ uuid.getLeastSignificantBits
   
-  val default = buildSynchronized(UUID.randomUUID)
+  val default = newRNG(UUID.randomUUID)
   
-  def buildSynchronized(seed: Long) = new SynchronizedRandom(new Well44497b(seed))
+  def newRNG(seed: Long) = new SynchronizedRandom(new Well44497b(seed))
   
-  def build(seed: Long) = new RandomAdaptor(new Well44497b(seed))
+  def newUnsychronizedRNG(seed: Long) = new RandomAdaptor(new Well44497b(seed))
   
   class SynchronizedRandom(generator: RandomGenerator) extends java.util.Random {
     override def nextBoolean = synchronized { generator.nextBoolean }

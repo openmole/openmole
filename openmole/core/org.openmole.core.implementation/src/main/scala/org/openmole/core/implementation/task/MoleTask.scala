@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation.task
 
+import org.openmole.misc.tools.service.Random
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.core.model.task.IPluginSet
 import org.openmole.misc.eventdispatcher.Event
@@ -77,7 +78,7 @@ sealed abstract class MoleTask(
       else acc
     }.toContext
 
-    val execution = new MoleExecution(mole)
+    val execution = new MoleExecution(mole, rng = Random.newRNG(context.valueOrException(Task.openMOLESeed)))
     val resultGathering = new ResultGathering
 
     EventDispatcher.listen(execution: IMoleExecution, resultGathering, classOf[IMoleExecution.JobInCapsuleFinished])

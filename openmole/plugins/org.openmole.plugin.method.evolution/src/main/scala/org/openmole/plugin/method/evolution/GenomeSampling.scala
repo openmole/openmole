@@ -19,14 +19,13 @@ package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo.ga._
 import fr.iscpif.mgo._
-import java.util.Random
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.core.model.data.DataModeMask
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.tools.service.Logger
+import org.openmole.misc.tools.service.Random._
 import org.openmole.misc.workspace.Workspace
 import org.openmole.core.implementation.task.Task._
 
@@ -43,7 +42,7 @@ class GenomeSampling[GS](
   def build(context: IContext) = {
     def toSamplingLine(g: GS) = List(new Variable(genome, g))
     
-    val rng = context.valueOrException(openMOLERNG)
+    val rng = newRNG(context.valueOrException(openMOLESeed))
     
     val genomes = 
       initialGenomes.map{ 

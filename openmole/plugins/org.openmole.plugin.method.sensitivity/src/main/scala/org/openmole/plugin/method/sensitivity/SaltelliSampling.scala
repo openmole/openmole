@@ -93,7 +93,7 @@ class SaltelliSampling(
   override def prototypes = matrixName :: factors.map{_.prototype}.toList 
   
   override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = {
-    val rng = context.valueOrException(openMOLERNG)
+    val rng = newRNG(context.valueOrException(openMOLESeed))
     val a = generateMatrix(context, samples, factors, rng)
     val b = generateMatrix(context, samples, factors, rng)
     val prototypes = factors.map{_.prototype}

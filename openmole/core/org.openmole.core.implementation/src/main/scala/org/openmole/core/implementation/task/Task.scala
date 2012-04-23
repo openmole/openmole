@@ -32,7 +32,6 @@ object Task {
   val OpenMOLEVariablePrefix = new ConfigurationLocation("Task", "OpenMOLEVariablePrefix")
   Workspace += (OpenMOLEVariablePrefix, "oM")
   
-  val openMOLERNG = new Prototype[java.util.Random](Workspace.preference(OpenMOLEVariablePrefix) + "RNG")
   val openMOLESeed = new Prototype[Long](Workspace.preference(OpenMOLEVariablePrefix) +  "Seed")
 }
 
@@ -80,7 +79,7 @@ trait Task extends ITask {
         if (parameter.`override` || !context.contains(parameter.variable.prototype.name)) Some(parameter.variable)
         else Option.empty[IVariable[_]]
       }
-    ) + new Variable(Task.openMOLERNG, Random.buildSynchronized(context.valueOrException(Task.openMOLESeed)))
+    )
   }
 
   private def end(context: IContext) = filterOutput(context)

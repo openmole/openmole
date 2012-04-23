@@ -152,10 +152,6 @@ object Workspace {
   
   def rng = instance.rng
   
-  /*def newRNG(seed: Long) = instance.newRNG(seed)
-  
-  def newRNG = instance.newRNG*/
-  
   def newSeed = instance.newSeed
 }
 
@@ -184,7 +180,7 @@ class Workspace(val location: File) {
   
   def newSeed = rng.nextLong
 
-  val rng = Random.buildSynchronized(sessionUUID)
+  val rng = Random.newRNG(sessionUUID)
   
   private def textEncryptor(password: Option[String]) = {
     password match {

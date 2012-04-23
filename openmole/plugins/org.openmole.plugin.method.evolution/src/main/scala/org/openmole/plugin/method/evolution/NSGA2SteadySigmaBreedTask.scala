@@ -21,7 +21,7 @@ import fr.iscpif.mgo._
 import fr.iscpif.mgo.ga._
 import fr.iscpif.mgo.ranking._
 import fr.iscpif.mgo.diversity._
-import java.util.Random
+
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.task.TaskBuilder
@@ -29,6 +29,7 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.task.IPluginSet
 import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.tools.service.Random._
 import org.openmole.core.implementation.task.Task._
 
 object NSGA2SteadySigmaBreedTask {
@@ -59,7 +60,7 @@ sealed abstract class NSGA2SteadySigmaBreedTask(
   nsga2: NSGA2Sigma)(implicit val plugins: IPluginSet) extends Task {
 
   override def process(context: IContext) = {
-    val rng = context.valueOrException(openMOLERNG)
+    val rng = newRNG(context.valueOrException(openMOLESeed))
     val a = context.valueOrException(archive)
     val newGenome = nsga2.breed(a, 1)(rng).head
     context + new Variable(genome, newGenome)

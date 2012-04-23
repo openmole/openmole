@@ -20,7 +20,6 @@ package org.openmole.plugin.sampling.lhs
 import org.openmole.core.model.sampling.ISampling
 import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.service.Random._
-import java.util.Random
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.core.model.data.IContext
@@ -36,7 +35,7 @@ sealed class LHSSampling(samples: Int, factors: IFactor[Double, IDomain[Double] 
   override def prototypes = factors.map{_.prototype}
   
   override def build(context: IContext): Iterator[Iterable[IVariable[Double]]] = {
-    val rng = context.valueOrException(openMOLERNG)
+    val rng = newRNG(context.valueOrException(openMOLESeed))
     
     (0 until samples).map {
       _ =>

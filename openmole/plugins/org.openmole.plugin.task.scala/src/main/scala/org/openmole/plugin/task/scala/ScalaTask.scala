@@ -39,6 +39,10 @@ object ScalaTask {
     val _plugins = plugins
     new CodeTaskBuilder { builder =>
       
+      addImport("org.openmole.misc.tools.service.Random.newRNG")
+      addImport("org.openmole.misc.workspace.Workspace.newFile")
+      addImport("org.openmole.misc.workspace.Workspace.newDir")
+      
       def toTask = 
         new ScalaTask(name, code, builder.imports) { 
           val inputs = builder.inputs
