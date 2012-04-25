@@ -70,7 +70,6 @@ class BuildMoleSceneContainer(val scene : BuildMoleScene) extends Panel with ISc
   peer.add(toolBar.peer,BorderLayout.NORTH)
   peer.add(new JScrollPane(scene.graphScene.createView),BorderLayout.CENTER)
   
-  scene.refresh
   CheckData.checkMole(scene.manager)
   
                 

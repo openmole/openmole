@@ -106,7 +106,6 @@ class CapsuleUI(val scene: IMoleScene,
       case Some(x : ITaskDataProxyUI) => 
         titleWidget.linkLabel.foreground = Color.WHITE
         titleWidget.linkLabel.text = x.dataUI.name
-        scene.refresh
       case None =>
     }
   }
