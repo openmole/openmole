@@ -82,7 +82,10 @@ class BuildMoleSceneContainer(val scene : BuildMoleScene) extends Panel with ISc
   }
   
   def buildExecutionAction = new Action("") {
-    override def apply = ScenesManager.addExecutionSceneContainer(buildContainer)
+    override def apply = {
+      ScenesManager.saveCurrentPropertyWidget
+      ScenesManager.addExecutionSceneContainer(buildContainer)
+    }
   }
   
   def cleanAndBuildExecutionAction = new Action("") {
