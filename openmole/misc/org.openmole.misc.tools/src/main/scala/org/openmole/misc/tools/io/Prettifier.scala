@@ -28,9 +28,9 @@ object Prettifier {
   def prettify(o: Any): String =
     o match {
       case null => "null"
-      case o: Array[_] => "[" + o.map{prettify}.reduce{(l, r) => l + "," + r } + "]"
-      case o: Iterable[_] =>"[" + o.map{prettify}.reduce{(l, r) => l + "," + r } + "]"
-      case o: java.lang.Iterable[_] =>"[" + o.map{prettify}.reduce{(l, r) => l + "," + r } + "]" 
+      case o: Array[_] => "[" + o.map{prettify}.mkString(", ") + "]"
+      case o: Iterable[_] =>"[" + o.map{prettify}.mkString(", ") + "]"
+      case o: java.lang.Iterable[_] =>"[" + o.map{prettify}.mkString(", ") + "]" 
       case o => o.toString
     }
 }
