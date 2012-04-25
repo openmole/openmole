@@ -84,7 +84,7 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
     }
     
     if (multiStringProto.isDefined) {
-      if (contents.size == 8) {contents.remove(6); contents.remove(6)}
+      if (contents.size == 7) {contents.remove(5); contents.remove(5)}
       contents+= (multiProtoString.get.panel,"span,grow,wrap")
       contents+= (multiStringProto.get.panel,"span,grow,wrap")
     }
