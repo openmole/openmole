@@ -26,10 +26,11 @@ import java.awt.Dimension
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing._
 import swing.Swing._
+import org.openmole.ide.osgi.netlogo.NetLogo
 import org.openmole.ide.osgi.netlogo4.NetLogo4
 import java.io.File
 
-class GenericNetLogoPanelUI(nlogoPath: String,
+abstract class GenericNetLogoPanelUI(nlogoPath: String,
                             workspaceEmbedded: Boolean,
                             lauchingCommands: String,
                             prototypeMappingInput: List[(IPrototypeDataProxyUI, String)],
@@ -59,7 +60,7 @@ class GenericNetLogoPanelUI(nlogoPath: String,
   
   def buildMultis(path: String) = {
     if (globals.isEmpty){
-      val nl = new NetLogo4
+      val nl = buildNetLogo
       try{
         if ((new File(path)).isFile){
           nl.open(path)
@@ -90,4 +91,6 @@ class GenericNetLogoPanelUI(nlogoPath: String,
   }
   
   def comboContent: List[IPrototypeDataProxyUI] = new PrototypeDataProxyUI(new EmptyPrototypeDataUI)::Proxys.prototypes.toList
+
+  def buildNetLogo: NetLogo
 }

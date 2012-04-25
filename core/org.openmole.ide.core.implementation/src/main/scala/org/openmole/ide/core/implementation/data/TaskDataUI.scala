@@ -22,7 +22,7 @@ import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
-abstract class TaskDataUI extends ITaskDataUI{
+abstract class TaskDataUI extends ITaskDataUI {
   var prototypesIn = List.empty[(IPrototypeDataProxyUI,String)]
   var prototypesOut = List.empty[IPrototypeDataProxyUI]
   var implicitPrototypesIn = List.empty[IPrototypeDataProxyUI]

@@ -19,6 +19,7 @@ package org.openmole.ide.plugin.task.netlogo
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
+import org.openmole.ide.osgi.netlogo5.NetLogo5
 import scala.swing._
 import swing.Swing._
 
@@ -37,4 +38,6 @@ class NetLogo5TaskPanelUI(ndu: NetLogo5TaskDataUI) extends GenericNetLogoPanelUI
                                                                                if (multiStringProto.isDefined) multiStringProto.get.content.filterNot(_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI])
                                                                                else List(),
                                                                                globals)
+  def buildNetLogo = new NetLogo5
+
 }
