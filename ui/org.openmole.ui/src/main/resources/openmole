@@ -17,7 +17,7 @@ esac
 
 rm -Rf ./configuration/org*
 rm ./configuration/*.log
-java -ea -Xmx${MEM} -Dosgi.classloader.singleThreadLoads=true $FLAG -XX:MaxPermSize=128M -XX:+UseParallelGC \
+java -ea -Xmx${MEM} $FLAG -XX:MaxPermSize=128M -XX:+UseParallelGC \
      -jar ./plugins/org.eclipse.equinox.launcher.jar \
      -cp ./openmole-plugins -gp ./openmole-plugins-gui "$@"
 #cat $LOCATION/configuration/*.log
