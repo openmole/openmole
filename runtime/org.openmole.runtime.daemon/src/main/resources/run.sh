@@ -9,4 +9,4 @@ case "$JVMVERSION" in
 esac 
 
 
-java -Xmx92m -Dosgi.classloader.singleThreadLoads=true $FLAG -XX:+CMSClassUnloadingEnabled -XX:+UseParallelGC -jar plugins/org.eclipse.equinox.launcher.jar $@ 
+java -Xmx92m $FLAG -XX:+CMSClassUnloadingEnabled -XX:+UseParallelGC -jar plugins/org.eclipse.equinox.launcher.jar $@ 

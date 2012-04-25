@@ -42,6 +42,6 @@ class Prototype[T](val name: String)(implicit val `type`: Manifest[T]) extends I
   override def accepts(obj: Any): Boolean =
     obj == null || `type`.isAssignableFromHighOrder(manifest(clazzOf(obj)))
   
-  override def id = (name, `type`)
+  override def id = (name, `type`.erasure)
   override def toString = name + ": " + `type`.toString
 }
