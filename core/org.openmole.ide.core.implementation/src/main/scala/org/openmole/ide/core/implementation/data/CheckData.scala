@@ -45,41 +45,46 @@ object CheckData extends Logger {
         error_capsules._1.foreach(_.setAsValid)
         error_capsules._2.foreach{_.setAsInvalid("A capsule has to be encapsulated to be run")}
         
-          val capsuleMap : Map[ICapsule,ICapsuleUI] = cMap.map{case (k,v) => v -> k}
-          val prototypeMap : Map[IPrototype[_],IPrototypeDataProxyUI] = pMap.map{case (k,v) => v -> k}.toMap
+        val capsuleMap : Map[ICapsule,ICapsuleUI] = cMap.map{case (k,v) => v -> k}
+        val prototypeMap : Map[IPrototype[_],IPrototypeDataProxyUI] = pMap.map{case (k,v) => v -> k}.toMap
 
-          // Compute implicit input / output
-          capsuleMap.foreach{
-            case(caps,capsUI) => 
-              capsUI.dataUI.task match {
-                case Some(x : ITaskDataProxyUI) => 
-                  x.dataUI.implicitPrototypesIn = caps.inputs.filterNot{c => prototypeMap.containsKey(c.prototype)}.toList.map{dataProxyFactory}
-                  x.dataUI.implicitPrototypesOut = caps.outputs.filterNot{c => prototypeMap.containsKey(c.prototype)}.toList.map{dataProxyFactory}
-                case _ =>
-              }
-          }
+        // Compute implicit input / output
+        capsuleMap.foreach{
+          case(caps,capsUI) => 
+            capsUI.dataUI.task match {
+              case Some(x : ITaskDataProxyUI) => 
+                
+                val nameMap = prototypeMap.map{p => p._1.name -> p._2}
+               x.dataUI.implicitPrototypesIn = 
+                 caps.inputs.map{_.prototype.name}.toList.filterNot{ n=> x.dataUI.prototypesIn.map{_._1.dataUI.name}.contains(n)}.map{nameMap}
+               
+               x.dataUI.implicitPrototypesOut = 
+                 caps.outputs.map{_.prototype.name}.toList.filterNot{ n=> x.dataUI.prototypesOut.map{_.dataUI.name}.contains(n)}.map{nameMap}
+              case _ =>
+            }
+        }
         
-          // Formal validation
-          val errors = Validation(mole)
-          errors.isEmpty match {
-            case false => 
-              errors.flatMap{
-                _ match {
-                  case x : DataflowProblem => 
-                    Some(capsuleMap(x.capsule)-> (prototypeMap(x.data.prototype),x))
-                  case x => 
-                    logger.info("Error " + x + " not taken into account in the GUI yet.")
-                    None
-                }
-              }.groupBy(_._1).map{ case (k,v) => (k,v.map(_._2))}.foreach{
-                case(capsuleUI,e)=>
-                  capsuleUI.updateErrors(e.toList)
+        // Formal validation
+        val errors = Validation(mole)
+        errors.isEmpty match {
+          case false => 
+            errors.flatMap{
+              _ match {
+                case x : DataflowProblem => 
+                  Some(capsuleMap(x.capsule)-> (prototypeMap(x.data.prototype),x))
+                case x => 
+                  logger.info("Error " + x + " not taken into account in the GUI yet.")
+                  None
               }
-            case true => manager.capsules.values.foreach{_.updateErrors(List.empty)}
-          }
-          Some(mole,capsuleMap,prototypeMap,errs)
-          errs.foreach{ case(cui,e) => cui.setAsInvalid(e.getMessage) }
-          Some(mole,cMap,pMap,errs)
+            }.groupBy(_._1).map{ case (k,v) => (k,v.map(_._2))}.foreach{
+              case(capsuleUI,e)=>
+                capsuleUI.updateErrors(e.toList)
+            }
+          case true => manager.capsules.values.foreach{_.updateErrors(List.empty)}
+        }
+        Some(mole,capsuleMap,prototypeMap,errs)
+        errs.foreach{ case(cui,e) => cui.setAsInvalid(e.getMessage) }
+        Some(mole,cMap,pMap,errs)
       case _ => None
     }
   
