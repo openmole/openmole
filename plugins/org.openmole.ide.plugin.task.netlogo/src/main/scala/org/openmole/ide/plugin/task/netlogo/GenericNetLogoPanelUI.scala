@@ -19,6 +19,7 @@ package org.openmole.ide.plugin.task.netlogo
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.misc.widget.DialogClosedEvent
 import org.openmole.ide.misc.widget.ChooseFileTextField
+import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
@@ -27,21 +28,24 @@ import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing._
 import swing.Swing._
 import org.openmole.ide.osgi.netlogo.NetLogo
-import org.openmole.ide.osgi.netlogo4.NetLogo4
+import scala.swing.FileChooser._
 import java.io.File
 
 abstract class GenericNetLogoPanelUI(nlogoPath: String,
-                            workspaceEmbedded: Boolean,
-                            lauchingCommands: String,
-                            prototypeMappingInput: List[(IPrototypeDataProxyUI, String)],
-                            prototypeMappingOutput: List[(String,IPrototypeDataProxyUI)],
-                            g: List[String]) extends PluginPanel("","[left]rel[grow,fill]","[]5[]5[]5[]2[]0[]"){
+                                     workspaceEmbedded: Boolean,
+                                     lauchingCommands: String,
+                                     prototypeMappingInput: List[(IPrototypeDataProxyUI, String)],
+                                     prototypeMappingOutput: List[(String,IPrototypeDataProxyUI)],
+                                     resources : List[String],
+                                     g: List[String]) extends PluginPanel("","[left]rel[grow,fill]",
+                                                                          "[]20[]"){
  
   val nlogoTextField = new ChooseFileTextField(nlogoPath,"Select a nlogo file","Netlogo files","nlogo")
   val workspaceCheckBox = new CheckBox("Embedd Workspace"){selected = workspaceEmbedded}
   val launchingCommandTextArea = new TextArea(lauchingCommands) 
   var multiStringProto : Option[MultiTwoCombos[String,IPrototypeDataProxyUI]] = None
   var multiProtoString : Option[MultiTwoCombos[IPrototypeDataProxyUI,String]] = None
+  val resourcesMultiTextField = new MultiChooseFileTextField("Resources",resources,SelectionMode.FilesAndDirectories)
   var globals = g
   
   listenTo(nlogoTextField)
@@ -55,7 +59,6 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
   contents+= (workspaceCheckBox,"span,growx,wrap")
   contents+= (new Label("Commands"),"wrap")
   contents+= (new ScrollPane(launchingCommandTextArea){minimumSize = new Dimension(150,80)},"span,growx")
-
   buildMultis(nlogoPath)
   
   def buildMultis(path: String) = {
@@ -76,15 +79,17 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
           (globals, comboContent),
           prototypeMappingOutput))
       
-    multiProtoString = Some(new MultiTwoCombos[IPrototypeDataProxyUI,String](
+      multiProtoString = Some(new MultiTwoCombos[IPrototypeDataProxyUI,String](
           "Input Mapping",
           "with",
           (comboContent,globals),
           prototypeMappingInput))
     }
     
+    println("sije :: " + contents.size)
     if (multiStringProto.isDefined) {
-      if (contents.size == 7) {contents.remove(5); contents.remove(5)}
+      if (contents.size == 8) {contents.remove(5); contents.remove(5); contents.remove(5)}
+      contents+= (resourcesMultiTextField.panel,"span,growx,wrap")
       contents+= (multiProtoString.get.panel,"span,grow,wrap")
       contents+= (multiStringProto.get.panel,"span,grow,wrap")
     }
