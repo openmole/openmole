@@ -47,13 +47,14 @@ object CheckData extends Logger {
         
           val capsuleMap : Map[ICapsule,ICapsuleUI] = cMap.map{case (k,v) => v -> k}
           val prototypeMap : Map[IPrototype[_],IPrototypeDataProxyUI] = pMap.map{case (k,v) => v -> k}.toMap
-        
+
           // Compute implicit input / output
-          capsuleMap.foreach{case(caps,capsUI) => 
+          capsuleMap.foreach{
+            case(caps,capsUI) => 
               capsUI.dataUI.task match {
                 case Some(x : ITaskDataProxyUI) => 
-                  x.dataUI.implicitPrototypesIn = caps.inputs.filterNot{c=> prototypeMap.containsKey(c.prototype)}.toList.map{dataProxyFactory}
-                  x.dataUI.implicitPrototypesOut = caps.outputs.filterNot{c=> prototypeMap.containsKey(c.prototype)}.toList.map{dataProxyFactory}
+                  x.dataUI.implicitPrototypesIn = caps.inputs.filterNot{c => prototypeMap.containsKey(c.prototype)}.toList.map{dataProxyFactory}
+                  x.dataUI.implicitPrototypesOut = caps.outputs.filterNot{c => prototypeMap.containsKey(c.prototype)}.toList.map{dataProxyFactory}
                 case _ =>
               }
           }
