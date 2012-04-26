@@ -26,7 +26,6 @@ import org.openmole.core.model.mole.IEnvironmentSelection
 import org.openmole.core.model.mole.IGrouping
 import org.openmole.core.model.mole.IMole
 import org.openmole.ide.core.model.data.ICapsuleDataUI
-import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.core.implementation.task._
@@ -40,14 +39,12 @@ import org.openmole.ide.misc.tools.check.TypeCheck
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.task.IPluginSet
 import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.ITransitionUI
 import org.openmole.misc.tools.script.GroovyProxy
 import scala.collection.JavaConversions._
-import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
@@ -81,7 +78,7 @@ object MoleMaker {
   
   def buildMole(manager: IMoleSceneManager) = {
     if (manager.startingCapsule.isDefined){
-      val prototypeMap: Map[IPrototypeDataProxyUI,IPrototype[_]] = Proxys.prototypes.map{p=> p->p.dataUI.coreObject}.toMap
+      val prototypeMap : Map[IPrototypeDataProxyUI,IPrototype[_]] = Proxys.prototypes.map{p=> p->p.dataUI.coreObject}.toMap
       val builds = manager.capsules.map{c=> 
         buildCapsule(c._2.dataUI) match {
           case Left((capsule,error)) => (c._2 -> new Capsule , Some(c._2 -> error))
@@ -101,20 +98,25 @@ object MoleMaker {
     else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")  
   }
   
+  def prototypeMapping : Map[IPrototypeDataProxyUI,IPrototype[_]] = Proxys.prototypes.map{p=> p->p.dataUI.coreObject}.toMap
+  
   def buildCapsule(capsuleDataUI: ICapsuleDataUI) : Either[(ICapsuleDataUI, Throwable),ICapsule] = 
     capsuleDataUI.task match {
       case Some(x : ITaskDataProxyUI) => 
-        try Right(new Capsule(x.dataUI.coreObject(inputs(capsuleDataUI), outputs(capsuleDataUI), parameters(capsuleDataUI), PluginSet.empty)))
+        try Right(new Capsule(taskCoreObject(x)))
         catch { case e : UserBadDataError => Left((capsuleDataUI,e))
         }
       case _ => Right(new Capsule)
     }
     
+  def taskCoreObject(proxy : ITaskDataProxyUI) : ITask = proxy.dataUI.coreObject(inputs(proxy),outputs(proxy),parameters(proxy),PluginSet.empty)
   
-  def inputs(capsuleDataUI: ICapsuleDataUI) = DataSet(capsuleDataUI.task.get.dataUI.prototypesIn.map{_._1.dataUI.coreObject})
-  def outputs(capsuleDataUI: ICapsuleDataUI) = DataSet(capsuleDataUI.task.get.dataUI.prototypesOut.map{_.dataUI.coreObject})
-  def parameters(capsuleDataUI: ICapsuleDataUI) = 
-    new ParameterSet(capsuleDataUI.task.get.dataUI.prototypesIn.flatMap{
+  def taskCoreObject(capsuleDataUI : ICapsuleDataUI) : ITask = taskCoreObject(capsuleDataUI.task.get)
+  
+  def inputs(proxy : ITaskDataProxyUI) = DataSet(proxy.dataUI.prototypesIn.map{_._1.dataUI.coreObject})
+  def outputs(proxy : ITaskDataProxyUI) = DataSet(proxy.dataUI.prototypesOut.map{_.dataUI.coreObject})
+  def parameters(proxy: ITaskDataProxyUI) = 
+    new ParameterSet(proxy.dataUI.prototypesIn.flatMap{
       case (pui, v) => 
         if(!v.isEmpty) {
           val proto = pui.dataUI.coreObject
@@ -124,7 +126,13 @@ object MoleMaker {
           else Some(new Parameter(proto.asInstanceOf[IPrototype[Any]],groovyO))
         } else None
     })
+
+  def inputs(capsuleDataUI: ICapsuleDataUI) : DataSet = inputs(capsuleDataUI.task.get)
+    
+  def outputs(capsuleDataUI: ICapsuleDataUI) : DataSet = outputs(capsuleDataUI.task.get)
   
+  def parameters(capsuleDataUI: ICapsuleDataUI) : ParameterSet = parameters(capsuleDataUI.task.get)
+ 
   def buildTransition(sourceCapsule: ICapsule, targetCapsule: ICapsule,t: ITransitionUI){
     t.transitionType match {
       case BASIC_TRANSITION=> new Transition(sourceCapsule,targetCapsule) 

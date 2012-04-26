@@ -16,6 +16,7 @@
  */
 
 package org.openmole.ide.core.implementation.data
+import org.openmole.core.implementation.mole.Capsule
 import org.openmole.core.implementation.validation.DataflowProblem
 import org.openmole.core.implementation.validation.Validation
 import org.openmole.core.model.data.IData
@@ -29,6 +30,7 @@ import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
+import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
@@ -53,13 +55,7 @@ object CheckData extends Logger {
           case(caps,capsUI) => 
             capsUI.dataUI.task match {
               case Some(x : ITaskDataProxyUI) => 
-                
-                val nameMap = prototypeMap.map{p => p._1.name -> p._2}
-               x.dataUI.implicitPrototypesIn = 
-                 caps.inputs.map{_.prototype.name}.toList.filterNot{ n=> x.dataUI.prototypesIn.map{_._1.dataUI.name}.contains(n)}.map{nameMap}
-               
-               x.dataUI.implicitPrototypesOut = 
-                 caps.outputs.map{_.prototype.name}.toList.filterNot{ n=> x.dataUI.prototypesOut.map{_.dataUI.name}.contains(n)}.map{nameMap}
+                computeImplicitPrototypes(x,prototypeMap.map{p => p._1.name -> p._2},caps)
               case _ =>
             }
         }
@@ -87,6 +83,29 @@ object CheckData extends Logger {
         Some(mole,cMap,pMap,errs)
       case _ => None
     }
+  
+  def computeImplicitPrototypes(proxy : ITaskDataProxyUI,
+                                nameMapping :  Map[String,IPrototypeDataProxyUI],
+                                coreCaspule : ICapsule) : Unit = {
+    proxy.dataUI.implicitPrototypesIn = 
+      coreCaspule.inputs.map{_.prototype.name}.toList.filterNot{ n=> proxy.dataUI.prototypesIn.map{_._1.dataUI.name}.contains(n)}.map{nameMapping}
+               
+    proxy.dataUI.implicitPrototypesOut = 
+      coreCaspule.outputs.map{_.prototype.name}.toList.filterNot{ n=> proxy.dataUI.prototypesOut.map{_.dataUI.name}.contains(n)}.map{nameMapping}
+  }
+  
+  def computeImplicitPrototypes(proxy : ITaskDataProxyUI) : Unit = 
+    computeImplicitPrototypes(proxy,
+                              MoleMaker.prototypeMapping.map{ case(pUI,p) => pUI.dataUI.name -> pUI}.toMap,
+                              new Capsule(MoleMaker.taskCoreObject(proxy)))
+  
+  def checkTaskProxyImplicitsPrototypes(scene : IMoleScene,
+                                        proxy : ITaskDataProxyUI) = {
+    scene.manager.capsules.values.flatMap{_.dataUI.task}.contains(proxy) match {
+      case true => checkMole(scene.manager)
+      case false => computeImplicitPrototypes(proxy)
+    }
+  }
   
   def fullCheck(manager : IMoleSceneManager) = {
     val a = checkMole(manager)
