@@ -25,7 +25,6 @@ import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.core.model.task.IPluginSet
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
-import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.data.IPrototypeDataUI
 import org.openmole.ide.core.model.data.ISamplingDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
@@ -50,7 +49,7 @@ object EmptyDataUIs {
     def name = ""
     def dim = 0
     def coreClass = classOf[IPrototype[_]]
-    def coreObject = new Prototype[Any]("empty")
+    def coreObject = new Prototype[Any]("")
     def fatImagePath = "img/empty.png"
     def buildPanelUI = new EmptyPrototypePanelUI
     def displayTypedName = ""

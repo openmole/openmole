@@ -27,6 +27,7 @@ import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 
+
 trait ITaskDataUI extends IDataUI{
   
   def borderColor: Color
@@ -35,9 +36,13 @@ trait ITaskDataUI extends IDataUI{
   
   def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet): ITask
   
-  def prototypesIn: List[(IPrototypeDataProxyUI,String)]
+  def inputParameters : scala.collection.mutable.Map[String,String]
   
-  def prototypesIn_=(pi: List[(IPrototypeDataProxyUI,String)])
+  def inputParameters_=(ip : scala.collection.mutable.Map[String,String])
+  
+  def prototypesIn: List[IPrototypeDataProxyUI]
+  
+  def prototypesIn_=(pi: List[IPrototypeDataProxyUI])
   
   def prototypesOut: List[IPrototypeDataProxyUI]
   

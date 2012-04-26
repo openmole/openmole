@@ -23,6 +23,4 @@ trait ITaskFactoryUI extends IFactoryUI{
   override def displayName: String = buildDataUI.coreClass.getSimpleName
   
   def buildDataUI : ITaskDataUI
-  
-  def category = List[String]()
 }

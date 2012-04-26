@@ -40,6 +40,7 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.ITask
+import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.ITransitionUI
@@ -98,7 +99,9 @@ object MoleMaker {
     else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")  
   }
   
-  def prototypeMapping : Map[IPrototypeDataProxyUI,IPrototype[_]] = Proxys.prototypes.map{p=> p->p.dataUI.coreObject}.toMap
+  def prototypeMapping : Map[IPrototypeDataProxyUI,IPrototype[_]] = (Proxys.prototypes.toList ::: List(EmptyDataUIs.emptyPrototypeProxy)).map{p=> p->p.dataUI.coreObject}.toMap
+  
+  def prototypeMappingByName : Map[String,IPrototypeDataProxyUI] = (Proxys.prototypes.toList ::: List(EmptyDataUIs.emptyPrototypeProxy)).map{p=> p.dataUI.name->p}.toMap
   
   def buildCapsule(capsuleDataUI: ICapsuleDataUI) : Either[(ICapsuleDataUI, Throwable),ICapsule] = 
     capsuleDataUI.task match {
@@ -113,19 +116,25 @@ object MoleMaker {
   
   def taskCoreObject(capsuleDataUI : ICapsuleDataUI) : ITask = taskCoreObject(capsuleDataUI.task.get)
   
-  def inputs(proxy : ITaskDataProxyUI) = DataSet(proxy.dataUI.prototypesIn.map{_._1.dataUI.coreObject})
+  def inputs(proxy : ITaskDataProxyUI) = DataSet(proxy.dataUI.prototypesIn.map{_.dataUI.coreObject})
   def outputs(proxy : ITaskDataProxyUI) = DataSet(proxy.dataUI.prototypesOut.map{_.dataUI.coreObject})
-  def parameters(proxy: ITaskDataProxyUI) = 
-    new ParameterSet(proxy.dataUI.prototypesIn.flatMap{
-      case (pui, v) => 
-        if(!v.isEmpty) {
-          val proto = pui.dataUI.coreObject
-          val groovyO = new GroovyProxy(v).execute()
-          val (ok,msg) = TypeCheck(groovyO,proto)
-          if(!ok) throw new UserBadDataError(msg)
-          else Some(new Parameter(proto.asInstanceOf[IPrototype[Any]],groovyO))
-        } else None
-    })
+  
+  def parameters(proxy: ITaskDataProxyUI) = {
+    val protoNames = prototypeMappingByName
+    println("proxy :: " + proxy)
+    println("proxy.datauI :: " + proxy.dataUI)
+    println("proxy.datauI :: " + proxy.dataUI.inputParameters)
+    new ParameterSet(proxy.dataUI.inputParameters.flatMap{
+        case(pname,v) => 
+          if(!v.isEmpty) {
+            val proto = protoNames(pname).dataUI.coreObject
+            val groovyO = new GroovyProxy(v).execute()
+            val (ok,msg) = TypeCheck(groovyO,proto)
+            if(!ok) throw new UserBadDataError(msg)
+            else Some(new Parameter(proto.asInstanceOf[IPrototype[Any]],groovyO))
+          } else None
+      }.toList)
+  }
 
   def inputs(capsuleDataUI: ICapsuleDataUI) : DataSet = inputs(capsuleDataUI.task.get)
     

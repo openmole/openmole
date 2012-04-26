@@ -88,7 +88,7 @@ object CheckData extends Logger {
                                 nameMapping :  Map[String,IPrototypeDataProxyUI],
                                 coreCaspule : ICapsule) : Unit = {
     proxy.dataUI.implicitPrototypesIn = 
-      coreCaspule.inputs.map{_.prototype.name}.toList.filterNot{ n=> proxy.dataUI.prototypesIn.map{_._1.dataUI.name}.contains(n)}.map{nameMapping}
+      coreCaspule.inputs.map{_.prototype.name}.toList.filterNot{ n=> proxy.dataUI.prototypesIn.map{_.dataUI.name}.contains(n)}.map{nameMapping}
                
     proxy.dataUI.implicitPrototypesOut = 
       coreCaspule.outputs.map{_.prototype.name}.toList.filterNot{ n=> proxy.dataUI.prototypesOut.map{_.dataUI.name}.contains(n)}.map{nameMapping}

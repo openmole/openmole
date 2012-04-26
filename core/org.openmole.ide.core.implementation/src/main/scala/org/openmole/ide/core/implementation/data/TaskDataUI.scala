@@ -21,18 +21,20 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import scala.collection.mutable.HashMap
 
 abstract class TaskDataUI extends ITaskDataUI {
-  var prototypesIn = List.empty[(IPrototypeDataProxyUI,String)]
+  var inputParameters : scala.collection.mutable.Map[String,String] = HashMap.empty[String,String]
+  var prototypesIn = List.empty[IPrototypeDataProxyUI]
   var prototypesOut = List.empty[IPrototypeDataProxyUI]
-  var implicitPrototypesIn = List.empty[IPrototypeDataProxyUI]
-  var implicitPrototypesOut = List.empty[IPrototypeDataProxyUI]
+  @transient var implicitPrototypesIn : List[IPrototypeDataProxyUI] = _
+  @transient var implicitPrototypesOut : List[IPrototypeDataProxyUI] = _
   
   def filterPrototypeOccurencies(pproxy : IPrototypeDataProxyUI) =
-    (prototypesIn.filter(_._1 == pproxy).map{_._1} ++ prototypesOut.filter(_ == pproxy)).distinct
+    (prototypesIn.filter(_ == pproxy) ++ prototypesOut.filter(_ == pproxy)).distinct
   
   def removePrototypeOccurencies(pproxy : IPrototypeDataProxyUI) = {
-    prototypesIn = prototypesIn.filterNot{_._1 == pproxy}
+    prototypesIn = prototypesIn.filterNot{_ == pproxy}
     prototypesOut = prototypesOut.filterNot{_ == pproxy}
   }
 }

@@ -22,5 +22,8 @@ import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 class NetLogo5TaskFactoryUI extends ITaskFactoryUI {
   override def displayName = "NetLogo5"
-  override def buildDataUI = new NetLogo5TaskDataUI
+  
+  def buildDataUI = new NetLogo5TaskDataUI
+  
+  override def category = List("Agent based model")
 }

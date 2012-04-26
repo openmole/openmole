@@ -86,7 +86,6 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
           prototypeMappingInput))
     }
     
-    println("sije :: " + contents.size)
     if (multiStringProto.isDefined) {
       if (contents.size == 8) {contents.remove(5); contents.remove(5); contents.remove(5)}
       contents+= (resourcesMultiTextField.panel,"span,growx,wrap")

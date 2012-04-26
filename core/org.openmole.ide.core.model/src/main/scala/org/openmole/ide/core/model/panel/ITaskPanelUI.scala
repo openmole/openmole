@@ -15,17 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package org.openmole.ide.core.model.panel
+
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
 trait ITaskPanelUI extends IPanelUI{
   
   def save(name: String,
-           prototypesIn : List[(IPrototypeDataProxyUI,String)],
+           prototypesIn : List[IPrototypeDataProxyUI],
+           inputParameters : scala.collection.mutable.Map[String,String],
            prototypesOut : List[IPrototypeDataProxyUI]) : ITaskDataUI = {
     var dataUI = saveContent(name)
     dataUI.prototypesIn = prototypesIn
     dataUI.prototypesOut = prototypesOut
+    dataUI.inputParameters = inputParameters
     dataUI
   }
   

@@ -22,5 +22,6 @@ import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 class GroovyTaskFactoryUI extends ITaskFactoryUI {
   override def displayName = "Groovy"
-  override def buildDataUI = new GroovyTaskDataUI
+  
+  def buildDataUI = new GroovyTaskDataUI
 }
