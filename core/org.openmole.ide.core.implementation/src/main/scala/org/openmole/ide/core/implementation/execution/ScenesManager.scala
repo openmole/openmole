@@ -19,6 +19,7 @@ package org.openmole.ide.core.implementation.execution
 
 import org.openmole.ide.core.implementation.workflow.BuildMoleSceneContainer
 import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
+import java.awt.Color
 import java.awt.Dimension
 import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.ide.core.model.data.IExplorationTaskDataUI
@@ -121,9 +122,11 @@ object ScenesManager {
   class CloseableTab(title : String,
                      page : TabbedPane.Page,
                      action : Action) extends MigPanel("") {
+    background = new Color(0,0,0,0)
     contents += new Label(title)
     contents += new Button(action){
-      maximumSize = new Dimension(15,15)
+      preferredSize = new Dimension(20,20)
+      maximumSize = new Dimension(20,20)
       icon = CLOSE_TAB
     }
   }

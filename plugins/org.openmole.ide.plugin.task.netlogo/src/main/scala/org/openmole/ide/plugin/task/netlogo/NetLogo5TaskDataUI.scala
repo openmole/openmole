@@ -22,6 +22,7 @@ class NetLogo5TaskDataUI(val name: String="",
                          val lauchingCommands: String = "",
                          var prototypeMappingInput: List[(IPrototypeDataProxyUI, String)]= List(),
                          var prototypeMappingOutput: List[(String,IPrototypeDataProxyUI)] = List(),
+                         val resources: List[String]= List(),
                          val globals: List[String] = List()) extends TaskDataUI {
   
 
@@ -34,6 +35,7 @@ class NetLogo5TaskDataUI(val name: String="",
     builder addInput inputs
     builder addOutput outputs
     builder addParameter parameters
+    resources.foreach{ r => builder addResource(new File(r)) }
     prototypeMappingInput.foreach{case(p, n) => builder addNetLogoInput (p.dataUI.coreObject, n)}
     prototypeMappingOutput.foreach{case(n, p) => builder addNetLogoOutput (n, p.dataUI.coreObject)} 
     builder.toTask

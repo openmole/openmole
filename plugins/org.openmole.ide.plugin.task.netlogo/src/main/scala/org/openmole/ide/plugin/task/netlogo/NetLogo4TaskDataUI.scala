@@ -22,6 +22,7 @@ class NetLogo4TaskDataUI(val name: String="",
                          val lauchingCommands: String="",
                          val prototypeMappingInput: List[(IPrototypeDataProxyUI, String)]= List(),
                          val prototypeMappingOutput: List[(String,IPrototypeDataProxyUI)]= List(),
+                         val resources: List[String]= List(),
                          val globals: List[String]= List()) extends TaskDataUI {
   
   def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = 
@@ -34,6 +35,7 @@ class NetLogo4TaskDataUI(val name: String="",
     builder addInput inputs
     builder addOutput outputs
     builder addParameter parameters
+    resources.foreach{r => builder addResource(new File(r)) }
     prototypeMappingInput.foreach{case(p, n) => builder addNetLogoInput (p.dataUI.coreObject, n)}
     prototypeMappingOutput.foreach{case(n, p) => builder addNetLogoOutput (n, p.dataUI.coreObject)} 
     builder.toTask

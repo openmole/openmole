@@ -25,7 +25,7 @@ import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.panel._
 import org.openmole.ide.misc.widget.PluginPanel
 
-class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends PluginPanel("wrap") with ISamplingPanelUI {
+class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends PluginPanel("wrap","","[]40[]") with ISamplingPanelUI {
     
   val panel = new GenericSamplingPanel(cud.factors, KeyRegistry.domains.map{_._2.displayName}.toList)
   contents += panel 
