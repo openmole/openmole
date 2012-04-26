@@ -23,9 +23,9 @@ import org.openmole.ide.misc.widget.ChooseFileTextField
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.glite.GliteAuthenticationMethod
-import org.openmole.plugin.environment.glite.GlobusProxyFile
 import org.openmole.plugin.environment.glite.P12Certificate
 import org.openmole.plugin.environment.glite.PEMCertificate
+import org.openmole.plugin.environment.glite.VOMSProxyFile
 import scala.swing.ButtonGroup
 import scala.swing.FileChooser.SelectionMode._
 import scala.swing.Label
@@ -83,7 +83,7 @@ class GliteAuthentificationPanelUI extends PluginPanel("","[left][right]","") wi
       pem2TextField.text = x.keyPath
       passString = Workspace.decrypt(x.cypheredPassword)
       addPem
-    case Some((i:Int,x: GlobusProxyFile))=> 
+    case Some((i:Int,x: VOMSProxyFile))=> 
       initButton = Some(proxyButton)
       proxyTextField.text = x.proxyFile
       addProxy
@@ -124,7 +124,7 @@ class GliteAuthentificationPanelUI extends PluginPanel("","[left][right]","") wi
       Workspace.persistentList(classOf[GliteAuthenticationMethod])(0)= new P12Certificate(Workspace.encrypt(new String(p12PassField.password)),
                                                                                                                     p12TextField.text)
     else if(proxyButton.selected) {
-      Workspace.persistentList(classOf[GliteAuthenticationMethod])(0)= new GlobusProxyFile(proxyTextField.text)
+      Workspace.persistentList(classOf[GliteAuthenticationMethod])(0)= new VOMSProxyFile(proxyTextField.text)
     }
     
     (pem :: p12 :: proxy :: Nil).filterNot(_._1.selected).foreach(_._3)
