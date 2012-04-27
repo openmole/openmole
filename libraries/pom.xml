@@ -42,7 +42,9 @@
 	<module>org.scala-lang.scala-compiler</module>
 	<module>org.apache.commons.exec</module>
 	<module>ccl.northwestern.edu.netlogo4</module>
+	<module>ccl.northwestern.edu.netlogo4.noscala</module>
 	<module>ccl.northwestern.edu.netlogo5</module>
+	<module>ccl.northwestern.edu.netlogo5.noscala</module>
 	<module>org.apache.commons.math</module>
 	<module>org.slf4j</module>
 	<module>net.java.dev.j3d</module>

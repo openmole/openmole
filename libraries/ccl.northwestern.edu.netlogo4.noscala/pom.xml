@@ -14,7 +14,7 @@
     </parent>
 
     <!--Used to build the symbolic name of the bundle-->
-    <artifactId>ccl.northwestern.edu.netlogo4</artifactId>
+    <artifactId>ccl.northwestern.edu.netlogo4.noscala</artifactId>
     <version>${lib.ccl.northwestern.edu.netlogo4.version}</version>
 
     <dependencies>
@@ -73,7 +73,8 @@
     <!--optional. Use this property to tune the exported packages-->
     <properties>
 	<libraries.export.packages>org.nlogo.*</libraries.export.packages>
-        <embed-dep>*;type=!pom;inline=true</embed-dep>
+ 	<!--<embed-dep>*;artifactId=!org.scala-lang.scala-library.netlogo4;type=!pom;inline=true</embed-dep>-->
+        <embed-dep>*;type=!pom;inline=true;artifactId=!scala-library</embed-dep>
     </properties>
 
 </project>

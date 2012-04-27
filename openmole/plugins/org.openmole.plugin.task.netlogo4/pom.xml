@@ -17,7 +17,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>ccl.northwestern.edu.netlogo4</artifactId>
+            <artifactId>ccl.northwestern.edu.netlogo4.noscala</artifactId>
             <version>${lib.ccl.northwestern.edu.netlogo4.version}</version>
         </dependency>
     </dependencies>

@@ -17,14 +17,8 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>ccl.northwestern.edu.netlogo5</artifactId>
+            <artifactId>ccl.northwestern.edu.netlogo5.noscala</artifactId>
             <version>${lib.ccl.northwestern.edu.netlogo5.version}</version>
-           <exclusions>
-                <exclusion>
-                    <groupId>org.openmole.core</groupId>
-                    <artifactId>org.scala-lang.scala-library.netlogo4</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 
