@@ -19,6 +19,4 @@ package org.openmole.ide.core.model.factory
 
 trait IFactoryUI {
   def displayName: String 
-  
-  def category = List[String]()
 }
