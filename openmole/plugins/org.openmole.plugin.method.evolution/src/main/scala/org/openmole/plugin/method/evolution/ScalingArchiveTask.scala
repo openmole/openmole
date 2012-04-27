@@ -35,7 +35,7 @@ object ScalingArchiveTask {
   def apply[I <: Individual[GAGenome, Fitness] with Rank](
     name: String, 
     archive: IPrototype[Array[I]],
-    _inputs: (IPrototype[Double], (Double, Double))*
+    modelInputs: (IPrototype[Double], (Double, Double))*
   )(implicit plugins: IPluginSet) = 
     new TaskBuilder { builder =>
     
@@ -48,10 +48,10 @@ object ScalingArchiveTask {
       }
       
       addInput(archive)
-      _inputs foreach {case(p, _) => this addOutput p.toArray}
+      modelInputs foreach {case(p, _) => this addOutput p.toArray}
       
       
-      def toTask = new ScalingArchiveTask[I](name, archive, _inputs: _*) {
+      def toTask = new ScalingArchiveTask[I](name, archive, modelInputs: _*) {
         val inputs = builder.inputs
         val outputs = builder.outputs
         val parameters = builder.parameters
@@ -64,7 +64,7 @@ object ScalingArchiveTask {
 sealed abstract class ScalingArchiveTask[I <: Individual[GAGenome, Fitness]](
   val name: String,
   archive: IPrototype[Array[I]],
-  inputs: (IPrototype[Double], (Double, Double))*
+  modelInputs: (IPrototype[Double], (Double, Double))*
 ) 
 (implicit val plugins: IPluginSet) extends Task {
 
@@ -74,7 +74,7 @@ sealed abstract class ScalingArchiveTask[I <: Individual[GAGenome, Fitness]](
     val archiveValue = context.valueOrException(archive)
 
     (
-      inputs.zipWithIndex.map {  
+      modelInputs.zipWithIndex.map {  
         case((prototype, (min, max)), i) => 
           new Variable( 
             prototype.toArray, 
