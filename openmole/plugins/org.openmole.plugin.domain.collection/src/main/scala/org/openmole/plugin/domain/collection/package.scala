@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,15 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.domain.collection
+package org.openmole.plugin.domain
 
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IIterable
-
-sealed class IterableDomain[T](iterable: Iterable[T]) extends IDomain[T] with IIterable[T] {
-
-  //def this(elements: T*) = this(elements)
-    
-  override def iterator(context: IContext): Iterator[T] = iterable.iterator
+package object collection {
+  implicit def scalaIterableDomainDecorator[T](iterable: Iterable[T]) = new {
+    def toDomain = new IterableDomain[T](iterable)  
+  }
 }

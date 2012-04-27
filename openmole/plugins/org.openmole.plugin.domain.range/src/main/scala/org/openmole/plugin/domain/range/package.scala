@@ -17,8 +17,4 @@
 
 package org.openmole.plugin.domain
 
-import java.math.MathContext
-
-package object range {
-  
-}
+package object range {}

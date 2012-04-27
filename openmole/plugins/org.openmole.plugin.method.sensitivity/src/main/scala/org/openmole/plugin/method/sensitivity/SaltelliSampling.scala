@@ -86,10 +86,17 @@ import SaltelliSampling._
 
 class SaltelliSampling(
   samples: Int,
-  matrixName: IPrototype[String],
+  val matrixName: IPrototype[String],
   factors: IFactor[Double, IDomain[Double] with IBounded[Double]]*
 ) extends Sampling {
-
+  
+  def this(samples: Int, factors: IFactor[Double, IDomain[Double] with IBounded[Double]]*) = 
+    this(
+      samples, 
+      new Prototype[String]("saltelliSampling"),
+      factors: _*
+    )
+  
   override def prototypes = matrixName :: factors.map{_.prototype}.toList 
   
   override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = {
