@@ -26,13 +26,13 @@ import org.openmole.ide.misc.widget.multirow.MultiComboTextField
 import org.openmole.ide.misc.widget.multirow.MultiComboTextField._
 import java.awt.Font
 import java.awt.Font._
-import org.openmole.ide.core.model.panel.IGroupingStrategyPanelUI
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.model.panel.IGroupingPanelUI
 import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.PluginPanel
 
-object NumberOfMoleJobsGroupingStrategyPanelUI {
-  def rowFactory(strategypanel: NumberOfMoleJobsGroupingStrategyPanelUI) = new Factory[ICapsule] {
+object NumberOfMoleJobsGroupingPanelUI {
+  def rowFactory(strategypanel: NumberOfMoleJobsGroupingPanelUI) = new Factory[ICapsule] {
     override def apply(row: ComboTextFieldRowWidget[ICapsule], p: MyPanel) = {
       import row._
      
@@ -43,9 +43,9 @@ object NumberOfMoleJobsGroupingStrategyPanelUI {
   }
 }
 
-import NumberOfMoleJobsGroupingStrategyPanelUI._
+import NumberOfMoleJobsGroupingPanelUI._
 //
-class NumberOfMoleJobsGroupingStrategyPanelUI(val executionManager: IExecutionManager) extends PluginPanel("") with IGroupingStrategyPanelUI{
+class NumberOfMoleJobsGroupingPanelUI(val executionManager: IExecutionManager) extends PluginPanel("") with IGroupingPanelUI{
   val capsules : List[ICapsule]= executionManager.capsuleMapping.values.toList
   
   val multiRow = 
@@ -67,7 +67,7 @@ class NumberOfMoleJobsGroupingStrategyPanelUI(val executionManager: IExecutionMa
      case Some(multiRow) =>
        multiRow.content.map {
         case(capsule, num)=>
-          try new NumberOfMoleJobsGroupingStrategyDataUI(executionManager, (capsule, num.toInt))
+          try new NumberOfMoleJobsGroupingDataUI(executionManager, (capsule, num.toInt))
           catch {
             case e:NumberFormatException=> throw new UserBadDataError(num + " is not an integer")
           }

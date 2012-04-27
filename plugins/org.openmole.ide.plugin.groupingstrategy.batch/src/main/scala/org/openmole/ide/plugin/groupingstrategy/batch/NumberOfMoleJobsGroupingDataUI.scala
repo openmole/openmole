@@ -18,12 +18,12 @@
 package org.openmole.ide.plugin.groupingstrategy.batch
 
 import org.openmole.core.model.mole.ICapsule
-import org.openmole.plugin.grouping.batch.NumberOfMoleJobsGroupingStrategy
-import org.openmole.ide.core.model.data.IGroupingStrategyDataUI
+import org.openmole.plugin.grouping.batch.NumberOfMoleJobsGrouping
+import org.openmole.ide.core.model.data.IGroupingDataUI
 import org.openmole.ide.core.model.control.IExecutionManager
 
-class NumberOfMoleJobsGroupingStrategyDataUI(executionManager: IExecutionManager,
-                        toBeGrouped: (ICapsule,Int)) extends IGroupingStrategyDataUI{
+class NumberOfMoleJobsGroupingDataUI(executionManager: IExecutionManager,
+                        toBeGrouped: (ICapsule,Int)) extends IGroupingDataUI{
     
-  override def coreObject = (new NumberOfMoleJobsGroupingStrategy(toBeGrouped._2),toBeGrouped._1)
+  override def coreObject = (new NumberOfMoleJobsGrouping(toBeGrouped._2),toBeGrouped._1)
 }

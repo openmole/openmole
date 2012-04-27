@@ -17,14 +17,14 @@
 
 package org.openmole.ide.plugin.groupingstrategy.batch
 
-import org.openmole.plugin.grouping.batch.NumberOfMoleJobsGroupingStrategy
 import org.openmole.ide.core.model.control.IExecutionManager
-import org.openmole.ide.core.model.factory.IGroupingStrategyFactoryUI
+import org.openmole.ide.core.model.factory.IGroupingFactoryUI
+import org.openmole.plugin.grouping.batch.NumberOfMoleJobsGrouping
 
-class NumberOfMoleJobsGroupingStrategyFactoryUI extends IGroupingStrategyFactoryUI {
-  def buildPanelUI(executionManager: IExecutionManager) = new NumberOfMoleJobsGroupingStrategyPanelUI(executionManager)
+class NumberOfMoleJobsGroupingFactoryUI extends IGroupingFactoryUI {
+  def buildPanelUI(executionManager: IExecutionManager) = new NumberOfMoleJobsGroupingPanelUI(executionManager)
   
-  def coreClass = classOf[NumberOfMoleJobsGroupingStrategy]
+  def coreClass = classOf[NumberOfMoleJobsGrouping]
   
   override def toString = "Group by number of jobs"
 }            
