@@ -38,6 +38,9 @@ object Proxys {
   def filePrototypes: List[IPrototypeDataProxyUI] = prototypes.filter(_.dataUI.coreObject.`type`.erasure == classOf[File])
   .toList
   
+  def stringPrototypes: List[IPrototypeDataProxyUI] = prototypes.filter(_.dataUI.coreObject.`type`.erasure == classOf[String])
+  .toList
+  
   def clearAll: Unit = {
     ConceptMenu.clearAllItems
     List(tasks,prototypes,environments,samplings).foreach{_.clear}

@@ -18,6 +18,10 @@
 package org.openmole.ide.core.implementation.panel
 
 import java.awt.Dimension
+import org.openmole.ide.core.model.factory.IFactoryUI
+import org.openmole.ide.core.model.factory.IMoleComponent
+import org.openmole.ide.core.model.factory.IMoleComponent
+import org.openmole.ide.core.model.panel.IComponentCategory
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
@@ -42,51 +46,53 @@ import org.openmole.ide.core.model.workflow.ISceneContainer
 import scala.collection.JavaConversions._
 
 object ConceptMenu {
-
+  
   val menuItemMapping = new HashMap[IDataProxyUI,MenuItem]
+  val mapping = new HashMap[IComponentCategory,Menu]
+  
+  def addCategoryComponents(rootComponent : ComponentCategory) : Menu = {
+    val menu = new Menu(rootComponent.name)
+    mapping += rootComponent -> menu
+    rootComponent.sons.foreach{cpt => 
+      menu.contents +=  addCategoryComponents(cpt)
+    }
+    menu
+  }
     
-  val environementClasses = new Menu("New")
-  KeyRegistry.environments.values.map{f=>new EnvironmentDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach(
-    d => environementClasses.contents += new MenuItem(new Action(d.factory.displayName){
-        override def apply = {
-          val proxy = d.buildDataProxyUI
-          display(proxy,CREATION)
-        }}))
-    
-  val environmentMenu = new PopupToolBarPresenter("Environments", environementClasses)
+  def createMenuItem(name : String,
+                     proxy : IDataProxyUI) = {
+    new MenuItem(new Action(name){
+        override def apply = display(proxy,CREATION)
+      })
+  }
   
-  val taskClasses = new Menu("New") 
-  KeyRegistry.tasks.values.map{f=>new TaskDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach(
-    d => taskClasses.contents += new MenuItem(new Action(d.factory.displayName){
-        override def apply = {
-          val proxy = d.buildDataProxyUI
-          display(proxy,CREATION)
-        }}))
+  def taskMenu = {
+  addCategoryComponents(ComponentCategories.TASK)
+    KeyRegistry.tasks.values.map{f=>new TaskDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach{ d =>
+      mapping(d.factory.category).contents += createMenuItem(d.factory.displayName,d.buildDataProxyUI)}
+    new PopupToolBarPresenter("Tasks", mapping(ComponentCategories.TASK))
+  }
   
-  val taskMenu = new PopupToolBarPresenter("Tasks", taskClasses)
+  def environmentMenu = {
+    addCategoryComponents(ComponentCategories.ENVIRONMENT)
+    KeyRegistry.environments.values.map{f=>new EnvironmentDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach{ d =>
+      mapping(d.factory.category).contents += createMenuItem(d.factory.displayName,d.buildDataProxyUI)}
+    new PopupToolBarPresenter("Environments", mapping(ComponentCategories.ENVIRONMENT))
+  }
   
+  def prototypeMenu = {
+    addCategoryComponents(ComponentCategories.PROTOTYPE)
+    KeyRegistry.prototypes.values.map{f=>new PrototypeDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach{ d =>
+      mapping(d.factory.category).contents += createMenuItem(d.factory.displayName,d.buildDataProxyUI)}
+    new PopupToolBarPresenter("Prototype", mapping(ComponentCategories.PROTOTYPE))
+  }
   
-  val prototypeClasses = new Menu("New")
-  KeyRegistry.prototypes.values.map{f=>new PrototypeDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach(
-    d => prototypeClasses.contents += new MenuItem(new Action(d.factory.displayName){
-        override def apply = {
-          val proxy = d.buildDataProxyUI
-          display(proxy,CREATION)
-        }}))
-  
-  val prototypeMenu = new PopupToolBarPresenter("Prototypes", prototypeClasses)
-  
-  
-  val samplingClasses = new Menu("New")
-  KeyRegistry.samplings.values.map{f=>new SamplingDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach(
-    d => samplingClasses.contents += new MenuItem(new Action(d.factory.displayName){
-        override def apply = {
-          val proxy = d.buildDataProxyUI
-          display(proxy,CREATION)
-        }}))
-  
-  
-  val samplingMenu = new PopupToolBarPresenter("Samplings", samplingClasses)
+  def samplingMenu = {
+   addCategoryComponents(ComponentCategories.SAMPLING)
+    KeyRegistry.samplings.values.map{f=>new SamplingDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach{ d =>
+      mapping(d.factory.category).contents += createMenuItem(d.factory.displayName,d.buildDataProxyUI)}
+    new PopupToolBarPresenter("Samplings", mapping(ComponentCategories.SAMPLING))
+  }
   
   def removeItem(proxy: IDataProxyUI) = {
     proxy match {

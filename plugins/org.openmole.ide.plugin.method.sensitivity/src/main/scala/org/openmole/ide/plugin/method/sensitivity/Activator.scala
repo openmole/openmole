@@ -15,12 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.task.groovy
+package org.openmole.ide.plugin.method.sensitivity
 
 import org.openmole.ide.core.implementation.registry.OSGiActivator
-import org.openmole.ide.core.implementation.registry.TaskActivator
+import org.openmole.ide.core.implementation.registry.SamplingActivator
 
-class Activator extends OSGiActivator with TaskActivator {
+class Activator extends OSGiActivator with SamplingActivator {
 
-  override def taskFactories = List(new GroovyTaskFactoryUI)
+  override def samplingFactories = List(new SaltelliSamplingFactoryUI)
 }

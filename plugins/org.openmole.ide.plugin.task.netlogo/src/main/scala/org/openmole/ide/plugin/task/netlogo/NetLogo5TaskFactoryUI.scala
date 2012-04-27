@@ -17,6 +17,7 @@
 
 package org.openmole.ide.plugin.task.netlogo
 
+import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 
@@ -25,5 +26,5 @@ class NetLogo5TaskFactoryUI extends ITaskFactoryUI {
   
   def buildDataUI = new NetLogo5TaskDataUI
   
-  override def category = List("Agent based model")
+  def category = ComponentCategories.ABM_TASK
 }

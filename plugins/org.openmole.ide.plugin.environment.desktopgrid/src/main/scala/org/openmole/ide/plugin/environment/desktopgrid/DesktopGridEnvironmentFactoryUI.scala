@@ -17,9 +17,14 @@
 
 package org.openmole.ide.plugin.environment.desktopgrid
 
+import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
 
 class DesktopGridEnvironmentFactoryUI extends IEnvironmentFactoryUI {
   override def displayName = "Desktop grid"
-  override def buildDataUI = new DesktopGridEnvironmentDataUI
+  
+  def buildDataUI = new DesktopGridEnvironmentDataUI
+  
+  def category = ComponentCategories.ENVIRONMENT
+  
 }

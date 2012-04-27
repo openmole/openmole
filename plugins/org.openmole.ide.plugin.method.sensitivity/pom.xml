@@ -14,7 +14,12 @@
     <dependencies>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.core.plugin.method.sensitivity</artifactId>
+            <artifactId>org.openmole.plugin.method.sensitivity</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.ide.plugin.sampling.tools</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

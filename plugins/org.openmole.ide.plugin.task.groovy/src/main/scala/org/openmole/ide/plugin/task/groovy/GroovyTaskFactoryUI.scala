@@ -17,6 +17,7 @@
 
 package org.openmole.ide.plugin.task.groovy
 
+import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 
@@ -24,4 +25,6 @@ class GroovyTaskFactoryUI extends ITaskFactoryUI {
   override def displayName = "Groovy"
   
   def buildDataUI = new GroovyTaskDataUI
+  
+  def category = ComponentCategories.TASK
 }

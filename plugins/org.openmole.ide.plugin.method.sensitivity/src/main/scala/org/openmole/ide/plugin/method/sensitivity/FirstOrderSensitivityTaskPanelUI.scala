@@ -25,8 +25,9 @@ import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
 
-class FirstOrderSensitivityTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("fillx,wrap","[left,grow,fill]","") with ITaskPanelUI {
-  
-  
-  override def saveContent(name: String):ITaskDataUI = new FirstOrderSensitivityTaskDataUI(name)
-}
+class FirstOrderSensitivityTaskPanelUI
+//(pud: GroovyTaskDataUI) extends PluginPanel("fillx,wrap","[left,grow,fill]","") with ITaskPanelUI {
+//  
+//  
+//  override def saveContent(name: String):ITaskDataUI = new FirstOrderSensitivityTaskDataUI(name)
+//}

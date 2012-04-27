@@ -17,9 +17,13 @@
 
 package org.openmole.ide.plugin.sampling.lhs
 
+import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 
 class LHSSamplingFactoryUI extends ISamplingFactoryUI {
   override def displayName = "LHS"
-  override def buildDataUI = new LHSSamplingDataUI
+  
+  def buildDataUI = new LHSSamplingDataUI
+  
+  def category = ComponentCategories.SAMPLING
 }

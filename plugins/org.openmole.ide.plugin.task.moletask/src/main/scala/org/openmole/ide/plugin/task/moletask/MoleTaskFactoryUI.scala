@@ -17,9 +17,13 @@
 
 package org.openmole.ide.plugin.task.moletask
 
+import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 class MoleTaskFactoryUI extends ITaskFactoryUI {
   override def displayName = "Mole Task"
-  override def buildDataUI = new MoleTaskDataUI
+  
+  def buildDataUI = new MoleTaskDataUI
+  
+  def category = ComponentCategories.TASK
 }

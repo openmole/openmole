@@ -17,11 +17,15 @@
 
 package org.openmole.ide.plugin.task.exploration
 
+import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 class ExplorationTaskFactoryUI extends ITaskFactoryUI {
   override def displayName = "Exploration"
-  override def buildDataUI = new ExplorationTaskDataUI
+  
+  def buildDataUI = new ExplorationTaskDataUI
+  
+  def category = ComponentCategories.TASK
 }
 
   

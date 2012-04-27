@@ -17,9 +17,13 @@
 
 package org.openmole.ide.plugin.sampling.combine
 
+import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 
 class CompleteSamplingFactoryUI extends ISamplingFactoryUI {
   override def displayName = "Complete"
-  override def buildDataUI = new CompleteSamplingDataUI
+  
+  def buildDataUI = new CompleteSamplingDataUI
+  
+  def category = ComponentCategories.SAMPLING
 }

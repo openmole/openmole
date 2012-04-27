@@ -17,9 +17,14 @@
 
 package org.openmole.ide.plugin.environment.glite
 
+import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
 
 class GliteEnvironmentFactoryUI extends IEnvironmentFactoryUI {
   override def displayName = "Grid"
-  override def buildDataUI = new GliteEnvironmentDataUI
+  
+  def category = ComponentCategories.ENVIRONMENT
+  
+  def buildDataUI = new GliteEnvironmentDataUI
+  
 }

@@ -17,9 +17,13 @@
 
 package org.openmole.ide.plugin.sampling.csv
 
+import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 
 class CSVSamplingFactoryUI extends ISamplingFactoryUI {
   override def displayName = "CSV"
-  override def buildDataUI = new CSVSamplingDataUI
+  
+  def buildDataUI = new CSVSamplingDataUI
+  
+  def category = ComponentCategories.SAMPLING
 }

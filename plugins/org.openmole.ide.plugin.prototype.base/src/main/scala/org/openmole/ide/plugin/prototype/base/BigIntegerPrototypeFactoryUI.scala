@@ -19,14 +19,17 @@ package org.openmole.ide.plugin.prototype.base
 
 import java.math.BigInteger
 import org.openmole.core.model.data.IPrototype
+import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
 class BigIntegerPrototypeFactoryUI extends IPrototypeFactoryUI[java.math.BigInteger] {
   
   override def displayName = "BigInteger"
   
-  override def buildDataUI = new BigIntegerPrototypeDataUI
+  def buildDataUI = new BigIntegerPrototypeDataUI
   
   //FIXME :: change 0 by correct value for dimension
   def buildDataUI(prototype : IPrototype[_]) = new BigIntegerPrototypeDataUI(prototype.name,0)
+  
+  def category = ComponentCategories.PROTOTYPE
 }

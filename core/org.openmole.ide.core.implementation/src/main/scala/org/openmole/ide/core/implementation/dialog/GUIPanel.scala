@@ -7,6 +7,7 @@ package org.openmole.ide.core.implementation.dialog
 
 import scala.swing._
 import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import java.awt.BorderLayout
 import org.openmole.ide.core.implementation.execution.PasswordListner
