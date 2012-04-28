@@ -58,40 +58,41 @@ object ConceptMenu {
     }
     menu
   }
-    
-  def createMenuItem(name : String,
-                     proxy : IDataProxyUI) = {
-    new MenuItem(new Action(name){
-        override def apply = display(proxy,CREATION)
-      })
-  }
   
-  def taskMenu = {
+  val taskMenu = {
   addCategoryComponents(ComponentCategories.TASK)
     KeyRegistry.tasks.values.map{f=>new TaskDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach{ d =>
-      mapping(d.factory.category).contents += createMenuItem(d.factory.displayName,d.buildDataProxyUI)}
-    new PopupToolBarPresenter("Tasks", mapping(ComponentCategories.TASK))
+      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName){
+        override def apply = display(d.buildDataProxyUI,CREATION)
+      })}
+    new PopupToolBarPresenter("Task", mapping(ComponentCategories.TASK))
   }
   
-  def environmentMenu = {
+  val environmentMenu = {
     addCategoryComponents(ComponentCategories.ENVIRONMENT)
     KeyRegistry.environments.values.map{f=>new EnvironmentDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach{ d =>
-      mapping(d.factory.category).contents += createMenuItem(d.factory.displayName,d.buildDataProxyUI)}
-    new PopupToolBarPresenter("Environments", mapping(ComponentCategories.ENVIRONMENT))
+      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName){
+        override def apply = display(d.buildDataProxyUI,CREATION)
+      })}
+    new PopupToolBarPresenter("Environment", mapping(ComponentCategories.ENVIRONMENT))
   }
   
-  def prototypeMenu = {
+  val prototypeMenu = {
     addCategoryComponents(ComponentCategories.PROTOTYPE)
     KeyRegistry.prototypes.values.map{f=>new PrototypeDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach{ d =>
-      mapping(d.factory.category).contents += createMenuItem(d.factory.displayName,d.buildDataProxyUI)}
+      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName){
+        override def apply = display(d.buildDataProxyUI,CREATION)
+      })}
     new PopupToolBarPresenter("Prototype", mapping(ComponentCategories.PROTOTYPE))
   }
   
-  def samplingMenu = {
+  val samplingMenu = {
    addCategoryComponents(ComponentCategories.SAMPLING)
     KeyRegistry.samplings.values.map{f=>new SamplingDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach{ d =>
-      mapping(d.factory.category).contents += createMenuItem(d.factory.displayName,d.buildDataProxyUI)}
-    new PopupToolBarPresenter("Samplings", mapping(ComponentCategories.SAMPLING))
+      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName){
+        override def apply = display(d.buildDataProxyUI,CREATION)
+      })}
+    new PopupToolBarPresenter("Sampling", mapping(ComponentCategories.SAMPLING))
   }
   
   def removeItem(proxy: IDataProxyUI) = {
