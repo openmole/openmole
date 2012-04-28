@@ -27,8 +27,8 @@ abstract class TaskDataUI extends ITaskDataUI {
   var inputParameters : scala.collection.mutable.Map[String,String] = HashMap.empty[String,String]
   var prototypesIn = List.empty[IPrototypeDataProxyUI]
   var prototypesOut = List.empty[IPrototypeDataProxyUI]
-  @transient var implicitPrototypesIn : List[IPrototypeDataProxyUI] = _
-  @transient var implicitPrototypesOut : List[IPrototypeDataProxyUI] = _
+  @transient var implicitPrototypesIn : List[IPrototypeDataProxyUI] = List.empty[IPrototypeDataProxyUI]
+  @transient var implicitPrototypesOut : List[IPrototypeDataProxyUI] = List.empty[IPrototypeDataProxyUI]
   
   def filterPrototypeOccurencies(pproxy : IPrototypeDataProxyUI) =
     (prototypesIn.filter(_ == pproxy) ++ prototypesOut.filter(_ == pproxy)).distinct
