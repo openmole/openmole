@@ -17,8 +17,8 @@
 
 package org.openmole.ide.plugin.groupingstrategy.batch
 
-import org.openide.awt.StatusDisplayer
 import org.openmole.core.model.mole.ICapsule
+import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
@@ -46,16 +46,18 @@ object NumberOfMoleJobsGroupingPanelUI {
 import NumberOfMoleJobsGroupingPanelUI._
 //
 class NumberOfMoleJobsGroupingPanelUI(val executionManager: IExecutionManager) extends PluginPanel("") with IGroupingPanelUI{
+  implicit def string2Int(s: String): Int = augmentString(s).toInt
+  
   val capsules : List[ICapsule]= executionManager.capsuleMapping.values.toList
   
   val multiRow = 
     capsules.headOption match {
       case Some(capsule) =>
-        val r =  new ComboTextFieldRowWidget(capsules, capsule, "by", NO_ADD)
+        val r =  new ComboTextFieldRowWidget(capsules, capsule, "2", NO_ADD)
     
         Some(new MultiComboTextField("Group", List(r), rowFactory(this), CLOSE_IF_EMPTY, NO_ADD))
       case None =>
-        StatusDisplayer.getDefault().setStatusText("No capsules are defined")
+        StatusBar.warn("No capsules are defined")
         None
     }
 
@@ -67,7 +69,7 @@ class NumberOfMoleJobsGroupingPanelUI(val executionManager: IExecutionManager) e
      case Some(multiRow) =>
        multiRow.content.map {
         case(capsule, num)=>
-          try new NumberOfMoleJobsGroupingDataUI(executionManager, (capsule, num.toInt))
+          try new NumberOfMoleJobsGroupingDataUI(executionManager, (capsule, num))
           catch {
             case e:NumberFormatException=> throw new UserBadDataError(num + " is not an integer")
           }

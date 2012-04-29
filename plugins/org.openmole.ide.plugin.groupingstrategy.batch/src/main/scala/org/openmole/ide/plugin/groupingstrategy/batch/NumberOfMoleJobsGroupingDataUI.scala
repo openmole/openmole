@@ -23,7 +23,7 @@ import org.openmole.ide.core.model.data.IGroupingDataUI
 import org.openmole.ide.core.model.control.IExecutionManager
 
 class NumberOfMoleJobsGroupingDataUI(executionManager: IExecutionManager,
-                        toBeGrouped: (ICapsule,Int)) extends IGroupingDataUI{
+                                     toBeGrouped: (ICapsule,Int)) extends IGroupingDataUI{
     
   override def coreObject = (new NumberOfMoleJobsGrouping(toBeGrouped._2),toBeGrouped._1)
 }
