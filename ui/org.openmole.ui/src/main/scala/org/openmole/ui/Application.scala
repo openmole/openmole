@@ -73,8 +73,8 @@ class Application extends IApplication with Logger {
     val args: Array[String] = context.getArguments.get("application.args").asInstanceOf[Array[String]]
     
     
-    val gui = args.contains("-gui")
-    val filtredArgs = args.filterNot((_: String) == "-gui")
+    val console = args.contains("-console")
+    val filtredArgs = args.filterNot((_: String) == "-console")
     
     parser.parse(filtredArgs, Config()) foreach { config =>
     
@@ -83,7 +83,7 @@ class Application extends IApplication with Logger {
         case None => Workspace.defaultLocation
       }
 
-      if(!gui) {
+      if(console) {
         if(Workspace.anotherIsRunningAt(workspaceLocation)) 
           logger.severe("Application is already runnig at " + workspaceLocation.getAbsolutePath + ". If it is not the case please remove the file '" + new File(workspaceLocation, Workspace.running).getAbsolutePath() + "'.")  
         else {       

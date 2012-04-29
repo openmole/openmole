@@ -6,7 +6,6 @@
 <shortcut
 	name="OpenMOLE"
 	target="$INSTALL_PATH/openmole"
-        commandLine="-gui"
 	workingDirectory="$INSTALL_PATH"
 	description="Launch OpenMOLE"
 	iconFile="$INSTALL_PATH/openmole.ico" 
