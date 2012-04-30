@@ -26,9 +26,9 @@ import org.openmole.misc.tools.io.FromString._
 
 class RangeDomainDataUI (
   val name: String="",
-  val min: String = "",
+  val min: String = "0",
   val max: String = "",
-  val step: String = "") extends IDomainDataUI {
+  val step: String = "1") extends IDomainDataUI {
   
   override def coreObject(prototypeObject: IPrototype[_]): IDomain[_] = {
     if (prototypeObject.`type`.erasure == java.lang.Integer.TYPE) new Range[Int](min,max,step)
