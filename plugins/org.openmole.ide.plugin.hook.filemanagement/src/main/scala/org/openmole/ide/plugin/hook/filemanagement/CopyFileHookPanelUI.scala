@@ -18,10 +18,10 @@
 package org.openmole.ide.plugin.hook.filemanagement
 
 import java.io.File
-import org.openide.awt.StatusDisplayer
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.model.panel.IHookPanelUI
+import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.model.control.IExecutionManager
 import java.awt.Font
 import java.awt.Font._
@@ -94,7 +94,7 @@ class CopyFileHookPanelUI(val executionManager: IExecutionManager) extends Plugi
       contents += multiRow.panel
       Some(multiRow)
     } else { 
-      StatusDisplayer.getDefault.setStatusText("No capsule or no prototype is defined")
+      StatusBar.inform("No capsule or no prototype is defined")
       None
     }
   }
