@@ -24,11 +24,10 @@ import scala.tools.nsc.interpreter.JLineCompletion
 import scala.tools.nsc.interpreter.JLineReader
 
 class ScalaREPL extends ILoop {
+  System.setProperty("jline.shutdownhook","true")
   override val prompt = "OpenMOLE>"
   settings = new Settings()
   settings.processArgumentString("-Yrepl-sync")
+  intp = new Interpreter
   in = new JLineReader(new JLineCompletion(this))
-  intp = new Interpreter {
-    
-  }
 }
