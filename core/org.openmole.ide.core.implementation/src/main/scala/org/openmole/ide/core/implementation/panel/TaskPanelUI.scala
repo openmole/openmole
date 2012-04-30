@@ -87,7 +87,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     
     proxy.dataUI = panelUI.save(nameTextField.text,
                                 protoInEditorContent.map{_._1},
-                                proxy.dataUI.inputParameters ++ protoPanel.implicitEditorsMapping.filterNot{_._2.editorText.isEmpty}.map{ case (k,v) => k -> v.editorText }.toMap,
+                                new HashMap[String,String]() ++ protoInEditorContent.map{case (k,v) => k.dataUI.name -> v}.toMap ++ protoPanel.implicitEditorsMapping.filterNot{_._2.editorText.isEmpty}.map{ case (k,v) => k -> v.editorText }.toMap,
                                 protoPanel.protoOutEditor.content)
   
     ScenesManager.capsules(proxy).foreach {c =>
