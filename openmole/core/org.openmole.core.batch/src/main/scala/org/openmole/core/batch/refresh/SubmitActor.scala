@@ -44,6 +44,7 @@ class SubmitActor(jobManager: ActorRef) extends Actor {
             jobManager ! Submit(job, sj)
         }
       }
+      System.runFinalization
   }
   
   private def trySubmit(serializedJob: SerializedJob, environment: BatchEnvironment) = {

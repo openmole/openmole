@@ -78,6 +78,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
             jobManager ! Kill(job)
         }
       }
+      System.runFinalization
   }
   
   private def initCommunication(environment: BatchEnvironment, job: IJob): SerializedJob = {

@@ -47,6 +47,7 @@ class RefreshActor(jobManager: ActorRef) extends Actor {
             jobManager ! Kill(job)
         }
       }
+      System.runFinalization
   }
 }
   

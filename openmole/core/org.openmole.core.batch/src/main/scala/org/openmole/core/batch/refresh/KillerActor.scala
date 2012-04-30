@@ -30,6 +30,7 @@ class KillerActor extends Actor {
       try bj.kill
       catch {
         case e => logger.log(FINE, "Could not kill job.", e)
-      } 
+      }
+    System.runFinalization
   }
 }

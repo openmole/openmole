@@ -49,6 +49,7 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
         case e => jobManager ! Error(job, e)
       }
       jobManager ! Kill(job)
+      System.runFinalization
   }
   
   def getResult(communicationStorage: Storage, outputFilePath: String, batchJob: BatchExecutionJob): Unit = {
@@ -115,9 +116,9 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
           val stdOutFile = signalDownload(path.cacheUnziped(message.path, token), path.toURI(message.path), communicationStorage)
           try {
             /*val stdOutHash = HashService.computeHash(stdOutFile)
-            if (stdOutHash != message.hash)
-              logger.log(WARNING, "The standard output has been corrupted durring the transfert.")
-            */
+             if (stdOutHash != message.hash)
+             logger.log(WARNING, "The standard output has been corrupted durring the transfert.")
+             */
            
             System.out.synchronized {
               System.out.println("-----------------" + description + " on remote host-----------------")
