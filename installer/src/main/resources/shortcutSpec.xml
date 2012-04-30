@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+
+<shortcuts>
+<skipIfNotSupported/>
+<programGroup defaultName="OpenMOLE" location="applications"/>
+<shortcut
+	name="OpenMOLE"
+	target="$INSTALL_PATH/openmole"
+	workingDirectory="$INSTALL_PATH"
+	description="Launch OpenMOLE"
+	iconFile="$INSTALL_PATH/openmole.ico" 
+	initialState="normal"
+	programGroup="yes"
+	desktop="yes"
+	applications="no"
+	startMenu="no"
+	startup="no">
+
+	<!--<createForPack name="OpenMOLE"/>-->
+</shortcut>
+
+<shortcut
+	name="OpenMOLE Uninstall"
+	target='java'
+	commandLine='-jar "$INSTALL_PATH/Uninstaller/uninstaller.jar"'
+	description="Uninstall OpenMOLE"
+	iconFile="$INSTALL_PATH/uninstall.ico" 
+	initialState="normal"
+	programGroup="yes"
+	desktop="yes"
+	applications="no"
+	startMenu="no"
+	startup="no">
+
+	<!--<createForPack name="OpenMOLE"/>-->
+</shortcut>
+</shortcuts>

@@ -9,19 +9,33 @@
     </info>
     
     <packs>
-        <pack name="OpenMOLE Console" required="yes">
-            <description>OpenMOLE</description>
+        <pack name="OpenMOLE Core" required="yes">
+	    <description>"OpenMOLE Core</description>
             <fileset dir="../openmole/" targetdir="$INSTALL_PATH" />
+            <fileset dir="../openmole-plugins/" targetdir="$INSTALL_PATH/openmole-plugins/" /> 
+	</pack>
+        <pack name="OpenMOLE GUI" required="yes">
+	    <description>"OpenMOLE GUI</description>
+            <fileset dir="../openmole-plugins-gui/" targetdir="$INSTALL_PATH/openmole-plugins-gui/" /> 
+	</pack>
+        <pack name="OpenMOLE Runtime" required="yes">
+	    <description>"OpenMOLE Runtime</description>
             <file src="../dependency/org.openmole.runtime.tar.gz" targetdir="$USER_HOME/.openmole/runtime/" />
             <file src="../jvm-linux-x64.tar.gz" targetdir="$USER_HOME/.openmole/runtime/" />
             <file src="../jvm-linux-i386.tar.gz" targetdir="$USER_HOME/.openmole/runtime/" />
-            <fileset dir="../openmole-plugins/" targetdir="$INSTALL_PATH/openmole-plugins/" /> 
-            <fileset dir="../openmole-plugins-gui/" targetdir="$INSTALL_PATH/openmole-plugins-gui/" /> 
+	</pack>
+        <pack name="OpenMOLE Icons" required="yes">
+	    <description>"OpenMOLE Icons</description>
+            <file src="./openmole.ico" targetdir="$INSTALL_PATH/" />
+            <file src="./openmole.png" targetdir="$INSTALL_PATH/" />
+ 	    <executable targetfile="$INSTALL_PATH/openmole" stage="never" />
         </pack>
     </packs>
     
     <resources>
         <res id="LicencePanel.licence" src="AGPLv3.txt"/>
+        <res id="shortcutSpec.xml" src="shortcutSpec.xml" /> 
+        <res id="Unix_shortcutSpec.xml" src="Unix_shortcutSpec.xml" /> 
     </resources>
 
     <panels>
@@ -37,5 +51,12 @@
     </locale>
 
     <guiprefs resizable="yes" width="640" height="480" />
+
+    <natives>
+        <native type="izpack" name="ShellLink.dll" />
+        <native type="3rdparty" name="COIOSHelper.dll" stage="both">
+            <os family="windows" />
+        </native>
+    </natives>
 
 </installation>
