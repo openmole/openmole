@@ -44,7 +44,7 @@ import scopt.immutable._
 
 class Application extends IApplication with Logger {
   override def start(context: IApplicationContext) = {
-        
+            
     case class Config(
       pluginsDirs: List[String] = Nil,
       guiPluginsDirs: List[String] = Nil,
@@ -73,8 +73,8 @@ class Application extends IApplication with Logger {
     val args: Array[String] = context.getArguments.get("application.args").asInstanceOf[Array[String]]
     
     
-    val console = args.contains("-console")
-    val filtredArgs = args.filterNot((_: String) == "-console")
+    val console = args.contains("-c")
+    val filtredArgs = args.filterNot((_: String) == "-c")
     
     parser.parse(filtredArgs, Config()) foreach { config =>
     

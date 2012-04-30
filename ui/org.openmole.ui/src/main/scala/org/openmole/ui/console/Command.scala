@@ -32,12 +32,12 @@ import org.openmole.misc.workspace.Workspace
 
 class Command {
   
-  def print(environment: LocalExecutionEnvironment) = {
+  def print(environment: LocalExecutionEnvironment): Unit = {
     println("Queued jobs: " + environment.nbJobInQueue)
     println("Number of threads: " + environment.nbThreads)
   }
   
-  def print(environment: BatchEnvironment) = {
+  def print(environment: BatchEnvironment): Unit = {
     
     val accounting = new Array[AtomicInteger](ExecutionState.values.size)
     val executionJobRegistry = environment.jobRegistry
@@ -56,7 +56,7 @@ class Command {
       
   }
   
-  def structure(mole: IMole) = {
+  def structure(mole: IMole): Unit = {
     mole.capsules.zipWithIndex.foreach { 
       case(c, i) => 
         println(i + " " + c + " (" + c.outputTransitions.map{
@@ -72,14 +72,14 @@ class Command {
     }
   }
   
-  def print(moleExecution: IMoleExecution) = {
+  def print(moleExecution: IMoleExecution): Unit = {
     val toDisplay = new Array[AtomicInteger](State.values.size)
     for (state <- State.values) toDisplay(state.id) = new AtomicInteger
     for (job <- moleExecution.moleJobs) toDisplay(job.state.id).incrementAndGet
     for (state <- State.values) System.out.println(state.toString + ": " + toDisplay(state.id))
   }
   
-  def verify(mole: IMole) = Validation(mole).foreach(println)  
+  def verify(mole: IMole): Unit = Validation(mole).foreach(println)  
   
   def encrypted = {
     val password = new jline.ConsoleReader().readLine("encrypt:", '*')
