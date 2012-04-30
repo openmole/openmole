@@ -87,7 +87,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     
     proxy.dataUI = panelUI.save(nameTextField.text,
                                 protoInEditorContent.map{_._1},
-                                new HashMap[String,String] ++ protoInEditorContent.map{p=>p._1.dataUI.name -> p._2}.toMap,
+                                proxy.dataUI.inputParameters ++ protoPanel.implicitEditorsMapping.filterNot{_._2.editorText.isEmpty}.map{ case (k,v) => k -> v.editorText }.toMap,
                                 protoPanel.protoOutEditor.content)
   
     ScenesManager.capsules(proxy).foreach {c =>
@@ -143,8 +143,9 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
                               availablePrototypes.map{p=>(p,contentAction(p))}.toList,
                               image)
     
+    val implicitEditorsMapping = new HashMap[String,PrototypeGroovyTextFieldEditor]()
 
-    def protoIn = new PluginPanel("wrap"){
+    lazy val protoIn = new PluginPanel("wrap"){
       contents += new Label("Inputs") {foreground = Color.WHITE}
       
       //implicits
@@ -152,7 +153,8 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
         TaskPanelUI.this.proxy.dataUI.implicitPrototypesIn.foreach{p=> 
           contents += new PluginPanel("wrap 2"){
             contents += new ComboBox(List(p)) {enabled = false}
-            contents += new PrototypeGroovyTextFieldEditor("Default value",p.dataUI.coreObject,TaskPanelUI.this.proxy.dataUI.inputParameters.getOrElseUpdate(p.dataUI.name,""))
+            implicitEditorsMapping += p.dataUI.name -> new PrototypeGroovyTextFieldEditor("Default value",p.dataUI.coreObject,TaskPanelUI.this.proxy.dataUI.inputParameters.getOrElseUpdate(p.dataUI.name,""))
+            contents += implicitEditorsMapping(p.dataUI.name)
           }
         }
       }
@@ -160,7 +162,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
       contents += protoInEditor.panel    
     }
                                                          
-    def protoOut =   new PluginPanel("wrap"){
+    lazy val protoOut =   new PluginPanel("wrap"){
       contents += new Label("Outputs") {foreground = Color.WHITE}
       contents += new PluginPanel("wrap"){  
         TaskPanelUI.this.proxy.dataUI.implicitPrototypesOut.foreach{p=> 
