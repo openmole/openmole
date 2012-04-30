@@ -15,7 +15,7 @@ import scala.collection.JavaConversions._
 import org.openmole.misc.exception.UserBadDataError
 
 class LHSSamplingDataUI(val name : String="", 
-                        val samples : String  = "",
+                        val samples : String  = "1",
                         val factors : List[(IPrototypeDataProxyUI,String,IBoundedDomainDataUI)] = List.empty) extends ISamplingDataUI {
                      
   implicit def string2Int(s: String): Int = augmentString(s).toInt

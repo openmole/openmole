@@ -19,20 +19,18 @@ package org.openmole.ide.core.implementation.panel
 
 object ComponentCategories {
   
-  val ABM_TASK = new ComponentCategory("agent based model",
-                                       List())
+  val ABM_TASK = new ComponentCategory("agent based model")
   
   val SENSITIVITY_TASK = new ComponentCategory("sensitivity",
-                                               List(new ComponentCategory("Saltelli",List())))
+                                               List(new ComponentCategory("Saltelli")))
   
-  val STORAGE_TASK = new ComponentCategory("storage",
-                                               List())
+  val STORAGE_TASK = new ComponentCategory("storage")
            
   val TASK = new ComponentCategory("New",List(ABM_TASK,SENSITIVITY_TASK,STORAGE_TASK))
   
-  val PROTOTYPE = new ComponentCategory("New",List())
+  val PROTOTYPE = new ComponentCategory("New")
   
-  val ENVIRONMENT = new ComponentCategory("New",List())
+  val ENVIRONMENT = new ComponentCategory("New")
   
-  val SAMPLING = new ComponentCategory("New",List())
+  val SAMPLING = new ComponentCategory("New")
 }

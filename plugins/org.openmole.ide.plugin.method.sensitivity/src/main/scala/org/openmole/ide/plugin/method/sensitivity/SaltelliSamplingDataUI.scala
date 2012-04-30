@@ -15,7 +15,7 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.method.sensitivity.SaltelliSampling
 
 class SaltelliSamplingDataUI(val name : String="", 
-                             val samples : String  = "",
+                             val samples : String  = "1",
                              val matrixName : IPrototypeDataProxyUI = EmptyDataUIs.emptyPrototypeProxy,
                              val factors : List[(IPrototypeDataProxyUI,String,IBoundedDomainDataUI)] = List.empty) extends ISamplingDataUI {
                      
@@ -25,8 +25,7 @@ class SaltelliSamplingDataUI(val name : String="",
     new SaltelliSampling(
       try samples 
       catch { 
-        case e : NumberFormatException => throw new UserBadDataError("An integer is exepected as number of samples") 
-      }, 
+        case e : NumberFormatException => throw new UserBadDataError("An integer is exepected as number of samples")}, 
       if (matrixName.dataUI.coreObject.`type`.erasure == classOf[String]) matrixName.dataUI.coreObject.asInstanceOf[IPrototype[String]]
       else throw new UserBadDataError("The matrix name prototype has to be a string"),
       factors.map{
@@ -38,7 +37,7 @@ class SaltelliSamplingDataUI(val name : String="",
 
   def coreClass = classOf[SaltelliSampling] 
   
-  def imagePath = "img/saletelliSampling.png" 
+  def imagePath = "img/saltelliSampling.png" 
   
   override def fatImagePath = "img/saltelliSampling_fat.png" 
   

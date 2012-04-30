@@ -44,7 +44,9 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
                            borderColor : Color = new Color(200,200,200)) extends MyPanel {
   peer.setLayout(new BorderLayout)
   val iconLabel = new Label{ icon = new ImageIcon(EMPTY)}
-  val nameTextField = new TextField(15) {text = proxy.dataUI.name; tooltip = Help.tooltip("Name of the concept instance")}
+  val nameTextField = new TextField(15) {text = proxy.dataUI.name
+                                         tooltip = Help.tooltip("Name of the concept instance")
+  }
   val createLabelLink = new MainLinkLabel("create",new Action("") { def apply = baseCreate})
   val mainLinksPanel = new PluginPanel("") {contents += createLabelLink}
   if (mode != CREATION) deleteLink
@@ -61,7 +63,7 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
                   case EXTRA => scene.closeExtraPropertyPanel
                   case _ => scene.closePropertyPanel
                 }}
-          })
+            })
         }
         contents += mainLinksPanel
       }
@@ -72,13 +74,14 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
   preferredSize.width = 300
   foreground = Color.white
   background = borderColor
+  nameTextField.requestFocusInWindow
   
   listenTo(this)
   reactions += {
     case x:UIElementResized => 
-        scene.propertyWidget.revalidate
-        scene.extraPropertyWidget.revalidate
-        scene.refresh
+      scene.propertyWidget.revalidate
+      scene.extraPropertyWidget.revalidate
+      scene.refresh
   }
   
   def hide = {

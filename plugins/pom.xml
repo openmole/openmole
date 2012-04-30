@@ -35,6 +35,7 @@
         <module>org.openmole.ide.plugin.environment.desktopgrid</module>
         <module>org.openmole.ide.plugin.groupingstrategy.batch</module>
         <module>org.openmole.ide.plugin.method.sensitivity</module>
+        <module>org.openmole.ide.plugin.hook.display</module>
     </modules>
 
     <dependencies>

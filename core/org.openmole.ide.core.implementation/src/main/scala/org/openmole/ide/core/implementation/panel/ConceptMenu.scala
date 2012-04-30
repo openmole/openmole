@@ -50,10 +50,10 @@ object ConceptMenu {
   val menuItemMapping = new HashMap[IDataProxyUI,MenuItem]
   val mapping = new HashMap[IComponentCategory,Menu]
   
-  def addCategoryComponents(rootComponent : ComponentCategory) : Menu = {
+  def addCategoryComponents(rootComponent : IComponentCategory) : Menu = {
     val menu = new Menu(rootComponent.name)
     mapping += rootComponent -> menu
-    rootComponent.sons.foreach{cpt => 
+    rootComponent.childs.foreach{cpt => 
       menu.contents +=  addCategoryComponents(cpt)
     }
     menu

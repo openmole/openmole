@@ -121,9 +121,6 @@ object MoleMaker {
   
   def parameters(proxy: ITaskDataProxyUI) = {
     val protoNames = prototypeMappingByName
-    println("proxy :: " + proxy)
-    println("proxy.datauI :: " + proxy.dataUI)
-    println("proxy.datauI :: " + proxy.dataUI.inputParameters)
     new ParameterSet(proxy.dataUI.inputParameters.flatMap{
         case(pname,v) => 
           if(!v.isEmpty) {

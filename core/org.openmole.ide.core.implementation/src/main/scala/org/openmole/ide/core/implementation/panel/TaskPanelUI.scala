@@ -130,7 +130,6 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     val availablePrototypes = List(EmptyDataUIs.emptyPrototypeProxy):::Proxys.prototypes.toList
     
     val protoInEditor = {
-      TaskPanelUI.this.proxy.dataUI.prototypesIn.foreach{p=>println("I " + p)}
       new MultiComboLinkLabelGroovyTextFieldEditor("",
                                                    TaskPanelUI.this.proxy.dataUI.prototypesIn.map{proto =>
           (proto,proto.dataUI.coreObject,contentAction(proto),
@@ -145,15 +144,14 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
                               image)
     
 
-    val protoIn = new PluginPanel("wrap"){
+    def protoIn = new PluginPanel("wrap"){
       contents += new Label("Inputs") {foreground = Color.WHITE}
       
       //implicits
       contents += new PluginPanel("wrap"){
         TaskPanelUI.this.proxy.dataUI.implicitPrototypesIn.foreach{p=> 
-          contents += new PluginPanel(""){
-            // contents += new ImplicitLinkLabel(p.dataUI.name,contentAction(p))
-            contents += new ComboBox(List(p)) {this.peer.setEditable(false)}
+          contents += new PluginPanel("wrap 2"){
+            contents += new ComboBox(List(p)) {enabled = false}
             contents += new PrototypeGroovyTextFieldEditor("Default value",p.dataUI.coreObject,TaskPanelUI.this.proxy.dataUI.inputParameters.getOrElseUpdate(p.dataUI.name,""))
           }
         }
@@ -162,11 +160,11 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
       contents += protoInEditor.panel    
     }
                                                          
-    val protoOut =   new PluginPanel("wrap"){
+    def protoOut =   new PluginPanel("wrap"){
       contents += new Label("Outputs") {foreground = Color.WHITE}
       contents += new PluginPanel("wrap"){  
         TaskPanelUI.this.proxy.dataUI.implicitPrototypesOut.foreach{p=> 
-          contents += new ImplicitLinkLabel(p.dataUI.name,contentAction(p))
+          contents += new ComboBox(List(p)) {enabled = false}
         }
       }
       if (TaskPanelUI.this.proxy.dataUI.prototypesOut.isEmpty) protoOutEditor.removeAllRows

@@ -26,7 +26,6 @@ import org.openmole.ide.misc.tools.image.Images._
 import scala.swing._
 import scala.swing.event.SelectionChanged
 import swing.Swing._
-import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._

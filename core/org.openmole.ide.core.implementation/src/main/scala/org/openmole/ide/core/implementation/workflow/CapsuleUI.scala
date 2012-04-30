@@ -26,6 +26,7 @@ import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.ImageWidget
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.implementation.data.CapsuleDataUI
+import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.dataproxy.ProxyFreezer
 import org.openmole.ide.core.implementation.provider.CapsuleMenuProvider
 import org.openmole.ide.core.model.commons.Constants._
@@ -147,6 +148,7 @@ class CapsuleUI(val scene: IMoleScene,
     setTask(dpu)
     inputPrototypeWidget = Some(PrototypeWidget.buildInput(scene, dpu))
     outputPrototypeWidget = Some(PrototypeWidget.buildOutput(scene, dpu))
+    CheckData.checkMole(scene.manager)
     addChild(inputPrototypeWidget.get)
     addChild(outputPrototypeWidget.get)
     capsuleMenuProvider.addTaskMenus

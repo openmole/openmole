@@ -20,4 +20,4 @@ package org.openmole.ide.core.implementation.panel
 import org.openmole.ide.core.model.panel.IComponentCategory
 
 class ComponentCategory(val name : String,
-                        val sons : Iterable[ComponentCategory]) extends IComponentCategory
+                        val childs : Iterable[IComponentCategory] = List.empty) extends IComponentCategory

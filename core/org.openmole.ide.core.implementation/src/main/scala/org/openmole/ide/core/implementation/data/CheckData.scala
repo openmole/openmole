@@ -32,6 +32,7 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
 
@@ -92,7 +93,7 @@ object CheckData extends Logger {
                
     proxy.dataUI.implicitPrototypesOut = 
       coreCaspule.outputs.map{_.prototype.name}.toList.filterNot{ n=> proxy.dataUI.prototypesOut.map{_.dataUI.name}.contains(n)}.map{nameMapping}
-  }
+    }
   
   def computeImplicitPrototypes(proxy : ITaskDataProxyUI) : Unit = 
     computeImplicitPrototypes(proxy,
@@ -101,10 +102,13 @@ object CheckData extends Logger {
   
   def checkTaskProxyImplicitsPrototypes(scene : IMoleScene,
                                         proxy : ITaskDataProxyUI) = {
-    scene.manager.capsules.values.flatMap{_.dataUI.task}.contains(proxy) match {
-      case true => checkMole(scene.manager)
-      case false => computeImplicitPrototypes(proxy)
-    }
+    
+    try {
+      scene.manager.capsules.values.flatMap{_.dataUI.task}.contains(proxy) match {
+        case true => checkMole(scene.manager)
+        case false => computeImplicitPrototypes(proxy)
+      }
+    } catch { case e : UserBadDataError =>}  
   }
   
   def fullCheck(manager : IMoleSceneManager) = {
