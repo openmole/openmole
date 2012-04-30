@@ -28,5 +28,7 @@ class ScalaREPL extends ILoop {
   settings = new Settings()
   settings.processArgumentString("-Yrepl-sync")
   in = new JLineReader(new JLineCompletion(this))
-  intp = new Interpreter
+  intp = new Interpreter {
+    
+  }
 }

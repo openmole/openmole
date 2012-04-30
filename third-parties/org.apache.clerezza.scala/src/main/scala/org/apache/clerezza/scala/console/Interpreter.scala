@@ -34,4 +34,11 @@ class Interpreter extends IMain {
     settings.outputDirs setSingleOutput virtualDirectory
     new BundleContextScalaCompiler(Activator.bundleContext, settings, reporter)
   }
+  
+  override def interpret(l: String) = {
+    val r = super.interpret(l)
+    virtualDirectory.clear
+    r
+  }
+  
 }
