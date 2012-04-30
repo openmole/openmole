@@ -36,37 +36,7 @@ import java.util.concurrent .TimeUnit
 class Console(plugins: IPluginSet) { console =>
   
   
-  val loop = new ScalaREPL 
-  loop.intp = new Interpreter
-    
-  loop.beQuietDuring { 
-    loop.bind(workspace, Workspace)
-    loop.bind(logger, LoggerService)
-    loop.bind(serializer, new Serializer)
-    loop.bind("commands", new Command)
-    loop.bind("implicits", new Implicits()(plugins))
-    loop.addImports(
-      "org.openmole.core.implementation.data._",
-      "org.openmole.core.implementation.data.Prototype._",
-      "org.openmole.core.implementation.data.Data._",
-      "org.openmole.core.implementation.execution._",
-      "org.openmole.core.implementation.execution.local._",
-      "org.openmole.core.implementation.hook._",
-      "org.openmole.core.implementation.job._",
-      "org.openmole.core.implementation.mole._",
-      "org.openmole.core.implementation.sampling._",
-      "org.openmole.core.implementation.task._",
-      "org.openmole.core.implementation.transition._",
-      "org.openmole.core.implementation.tools._",
-      "org.openmole.core.implementation.puzzle._",
-      "org.openmole.misc.workspace._",
-      "org.openmole.misc.tools.io.FromString._",
-      "java.io.File",
-      "commands._",
-      "implicits._"
-    )
 
-  }
   
   @tailrec private def initPassword: Unit = {
     val message = (if(Workspace.passwordChoosen) "Enter your OpenMOLE password" else "OpenMOLE Password has not been set yet, choose a  password") + "  (for preferences encryption):"
@@ -90,7 +60,40 @@ class Console(plugins: IPluginSet) { console =>
   
   def run {
     initPassword
-    loop.loop
+    val loop = new ScalaREPL
+    
+    try {
+      loop.beQuietDuring { 
+        loop.bind(workspace, Workspace)
+        loop.bind(logger, LoggerService)
+        loop.bind(serializer, new Serializer)
+        loop.bind("commands", new Command)
+        loop.bind("implicits", new Implicits()(plugins))
+        loop.addImports(
+          "org.openmole.core.implementation.data._",
+          "org.openmole.core.implementation.data.Prototype._",
+          "org.openmole.core.implementation.data.Data._",
+          "org.openmole.core.implementation.execution._",
+          "org.openmole.core.implementation.execution.local._",
+          "org.openmole.core.implementation.hook._",
+          "org.openmole.core.implementation.job._",
+          "org.openmole.core.implementation.mole._",
+          "org.openmole.core.implementation.sampling._",
+          "org.openmole.core.implementation.task._",
+          "org.openmole.core.implementation.transition._",
+          "org.openmole.core.implementation.tools._",
+          "org.openmole.core.implementation.puzzle._",
+          "org.openmole.misc.workspace._",
+          "org.openmole.misc.tools.io.FromString._",
+          "java.io.File",
+          "commands._",
+          "implicits._"
+        )
+
+      }
+      
+      loop.loop
+    } finally loop.close
   }
   
   //def setVariable(name: String, value: Object) = binding.setVariable(name, value)
