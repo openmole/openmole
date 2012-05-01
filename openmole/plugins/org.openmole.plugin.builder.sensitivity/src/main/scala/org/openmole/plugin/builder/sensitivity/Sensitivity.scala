@@ -35,7 +35,6 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.sampling.IFactor
 import org.openmole.core.model.task.IPluginSet
 import org.openmole.plugin.builder.Builder._
-import org.openmole.plugin.method.sensitivity.FirstOrderSensitivityTask
 import org.openmole.plugin.method.sensitivity.SaltelliSampling
 import org.openmole.plugin.method.sensitivity.SensitivityTask
 
