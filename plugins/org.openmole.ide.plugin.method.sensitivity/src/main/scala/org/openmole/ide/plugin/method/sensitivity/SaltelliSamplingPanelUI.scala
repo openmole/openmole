@@ -15,15 +15,14 @@ import scala.swing.TextField
 class SaltelliSamplingPanelUI(cud: SaltelliSamplingDataUI) extends PluginPanel("wrap 2","","") with ISamplingPanelUI {
   
   val sampleTextField = new TextField(cud.samples,4) 
-   val panel = new GenericBoundedSamplingPanel(cud.factors, KeyRegistry.boundedDomains.map{_._2.displayName}.toList)
+  val panel = new GenericBoundedSamplingPanel(cud.factors, KeyRegistry.boundedDomains.map{_._2.displayName}.toList)
   
   contents += new Label("Number of samples")
   contents += sampleTextField
-  contents += new Label("Matrix name")
   contents += panel 
   
   
   override def saveContent(name: String) = new SaltelliSamplingDataUI(name,
-                                                                 sampleTextField.text,
-                                                                 panel.factors)
+                                                                      sampleTextField.text,
+                                                                      panel.factors)
 }
