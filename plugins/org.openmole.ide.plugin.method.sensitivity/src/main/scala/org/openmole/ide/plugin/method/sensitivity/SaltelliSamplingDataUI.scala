@@ -16,7 +16,6 @@ import org.openmole.plugin.method.sensitivity.SaltelliSampling
 
 class SaltelliSamplingDataUI(val name : String="", 
                              val samples : String  = "1",
-                             val matrixName : IPrototypeDataProxyUI = EmptyDataUIs.emptyPrototypeProxy,
                              val factors : List[(IPrototypeDataProxyUI,String,IBoundedDomainDataUI)] = List.empty) extends ISamplingDataUI {
                      
   implicit def string2Int(s: String): Int = augmentString(s).toInt
@@ -25,9 +24,7 @@ class SaltelliSamplingDataUI(val name : String="",
     new SaltelliSampling(
       try samples 
       catch { 
-        case e : NumberFormatException => throw new UserBadDataError("An integer is exepected as number of samples")}, 
-      if (matrixName.dataUI.coreObject.`type`.erasure == classOf[String]) matrixName.dataUI.coreObject.asInstanceOf[IPrototype[String]]
-      else throw new UserBadDataError("The matrix name prototype has to be a string"),
+        case e : NumberFormatException => throw new UserBadDataError("An integer is exepected as number of samples")},
       factors.map{
         f=>
         val proto = f._1.dataUI.coreObject.asInstanceOf[IPrototype[Double]]

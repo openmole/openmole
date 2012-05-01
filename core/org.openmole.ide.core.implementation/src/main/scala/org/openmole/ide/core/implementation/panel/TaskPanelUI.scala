@@ -43,7 +43,7 @@ import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor
 import scala.collection.mutable.HashMap
 import scala.swing.Action
-import scala.swing.ComboBox
+import scala.swing.MyComboBox
 import scala.swing.Label
 import scala.swing.Separator
 import scala.collection.JavaConversions._
@@ -152,7 +152,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
       contents += new PluginPanel("wrap"){
         TaskPanelUI.this.proxy.dataUI.implicitPrototypesIn.foreach{p=> 
           contents += new PluginPanel("wrap 2"){
-            contents += new ComboBox(List(p)) {enabled = false}
+            contents += new MyComboBox(List(p)) {enabled = false}
             implicitEditorsMapping += p.dataUI.name -> new PrototypeGroovyTextFieldEditor("Default value",p.dataUI.coreObject,TaskPanelUI.this.proxy.dataUI.inputParameters.getOrElseUpdate(p.dataUI.name,""))
             contents += implicitEditorsMapping(p.dataUI.name)
           }
@@ -166,7 +166,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
       contents += new Label("Outputs") {foreground = Color.WHITE}
       contents += new PluginPanel("wrap"){  
         TaskPanelUI.this.proxy.dataUI.implicitPrototypesOut.foreach{p=> 
-          contents += new ComboBox(List(p)) {enabled = false}
+          contents += new MyComboBox(List(p)) {enabled = false}
         }
       }
       if (TaskPanelUI.this.proxy.dataUI.prototypesOut.isEmpty) protoOutEditor.removeAllRows
