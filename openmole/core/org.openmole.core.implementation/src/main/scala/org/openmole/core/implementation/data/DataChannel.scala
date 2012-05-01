@@ -20,6 +20,7 @@ package org.openmole.core.implementation.data
 
 import org.openmole.core.model.transition.ISlot
 import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.core.implementation.puzzle.Puzzle
 import org.openmole.core.implementation.tools.LevelComputing
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.{IDataChannel,IPrototype,IDataSet,IData,IContext, IVariable}
@@ -28,6 +29,7 @@ import org.openmole.core.model.mole.IMoleExecution
 import scala.collection.mutable.ListBuffer
 
 object DataChannel {
+  def apply(p: Puzzle) = new DataChannel(p.first.capsule, p.last)
   def levelDelta(dataChannel: IDataChannel): Int = LevelComputing.levelDelta(dataChannel.start, dataChannel.end.capsule)
 }
 
