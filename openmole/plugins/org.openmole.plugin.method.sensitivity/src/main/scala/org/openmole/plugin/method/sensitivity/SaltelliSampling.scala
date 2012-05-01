@@ -109,8 +109,7 @@ class SaltelliSampling(
         case(f, i) => toVariables(buildC(i, a, b), cMatrixName(f.prototype.name), prototypes, matrixName) 
       }
     
-    val res = (toVariables(a, aMatrixName, prototypes, matrixName) ++ toVariables(b, bMatrixName, prototypes, matrixName) ++ cMatrix)
-    res.iterator
+    (toVariables(a, aMatrixName, prototypes, matrixName) ++ toVariables(b, bMatrixName, prototypes, matrixName) ++ cMatrix).iterator
   }
   
 

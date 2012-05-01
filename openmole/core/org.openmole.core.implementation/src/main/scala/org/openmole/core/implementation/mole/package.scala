@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation
 
+import org.openmole.core.implementation.transition.Slot
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
@@ -47,5 +48,13 @@ package object mole {
   implicit def taskMoleBuilderDecoraton(taskBuilder: TaskBuilder) = new PuzzleMoleDecorator(taskBuilder)
   
   implicit def environmentToFixedEnvironmentSelectionConverter(env: IEnvironment) = new FixedEnvironmentSelection(env)
+  
+  implicit def caspuleSlotDecorator(capsule: ICapsule) = new {
+    def slot(i: Int) = {
+      (0 to (i - capsule.intputSlots.size)).foreach{i => newSlot}
+      capsule.intputSlots.toIndexedSeq(i)
+    }
+    def newSlot = new Slot(capsule)
+  }
   
 }

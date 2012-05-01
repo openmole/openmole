@@ -19,13 +19,25 @@ package org.openmole.plugin.method.sensitivity
 
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.task.TaskBuilder
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.data.IPrototype
 import SaltelliSampling._
 
 
 object SensitivityTask {
-  def indice(input: IPrototype[Double], output: IPrototype[Double]) = new Prototype[Double](input.name + output.name)
+  def indice(name: String, input: IPrototype[Double], output: IPrototype[Double]) = new Prototype[Double](name + input.name.capitalize + output.name.capitalize)
+
+  abstract class Builder extends TaskBuilder {
+    val name: String
+    val matrixName: IPrototype[String]
+    val modelInputs: Iterable[IPrototype[Double]]
+    val modelOutputs: Iterable[IPrototype[Double]]
+    
+    override def inputs: IDataSet = super.inputs + DataSet(modelInputs.map(_.toArray)) + DataSet(modelOutputs.map(_.toArray)) + matrixName.toArray
+    override def outputs: IDataSet  = super.outputs + DataSet(for(i <- modelInputs ; o <- modelOutputs) yield indice(name, i, o))
+  }
 }
 
 import SensitivityTask._
@@ -40,7 +52,7 @@ trait SensitivityTask extends Task {
     val matrixNames = context.valueOrException(matrixName.toArray)
 
     Context.empty ++ 
-    (for(i <- modelInputs ; o <- modelOutputs) yield new Variable(indice(i, o) ,computeSensitivity(context.valueOrException(o.toArray), matrixNames, i)))
+    (for(i <- modelInputs ; o <- modelOutputs) yield new Variable(indice(name, i, o) ,computeSensitivity(context.valueOrException(o.toArray), matrixNames, i)))
   }
   
   def computeSensitivity(allValues: Array[Double], allNames: Array[String], input: IPrototype[Double]): Double

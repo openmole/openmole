@@ -33,4 +33,12 @@ package object task {
   
   implicit def taskBuilderToPuzzleConverter(t: TaskBuilder) = taskToPuzzleConveter(t.toTask)
  
+  class TaskToCapsuleDecorator(task: ITask) {
+    def toCapsule = new Capsule(task)
+    def toStrainerCapsule = new StrainerCapsule(task)
+  }
+  
+  implicit def taskToCapsuleDecorator(task: ITask) = new TaskToCapsuleDecorator(task)
+  implicit def taskBuilderToCapsuleDecorator(task: TaskBuilder) = taskToCapsuleDecorator(task)
+  
 }

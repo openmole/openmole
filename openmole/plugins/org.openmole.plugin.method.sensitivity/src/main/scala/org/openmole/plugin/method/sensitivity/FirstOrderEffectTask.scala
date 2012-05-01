@@ -30,20 +30,32 @@ import org.openmole.core.implementation.data.Context._
 import SaltelliSampling._
 import SensitivityTask._
 import org.openmole.core.model.task.IPluginSet
-import math._
 
-object TotalEffectSensitivityTask {
+object FirstOrderEffectTask {
+  
+  def apply(
+    name: String,
+    modelInputs: Iterable[IPrototype[Double]],
+    modelOutputs: Iterable[IPrototype[Double]]
+  )(implicit plugins: IPluginSet) = new FirstOrderEffectTaskBuilder(name, SaltelliSampling.matrixName, modelInputs, modelOutputs)
   
   def apply(
     name: String,
     matrixName: IPrototype[String],
     modelInputs: Iterable[IPrototype[Double]],
     modelOutputs: Iterable[IPrototype[Double]]
-  )(implicit plugins: IPluginSet) = new TaskBuilder { builder =>
+  )(implicit plugins: IPluginSet) = new FirstOrderEffectTaskBuilder(name, matrixName, modelInputs, modelOutputs)
+  
+  class FirstOrderEffectTaskBuilder(
+    val name: String,
+    val matrixName: IPrototype[String],
+    val modelInputs: Iterable[IPrototype[Double]],
+    val modelOutputs: Iterable[IPrototype[Double]]
+  )(implicit plugins: IPluginSet) extends SensitivityTask.Builder { builder =>
     
-    def toTask = new TotalEffectSensitivityTask(name, matrixName, modelInputs, modelOutputs) {
-      val inputs: IDataSet = builder.inputs + DataSet(modelOutputs)
-      val outputs: IDataSet  = builder.outputs + DataSet(for(i <- modelInputs ; o <- modelOutputs) yield indice(i, o))
+    def toTask = new FirstOrderEffectTask(name, matrixName, modelInputs, modelOutputs) {
+      val inputs: IDataSet = builder.inputs 
+      val outputs: IDataSet  = builder.outputs 
       val parameters = builder.parameters
     }
     
@@ -51,24 +63,24 @@ object TotalEffectSensitivityTask {
   
 }
 
-abstract sealed class TotalEffectSensitivityTask(
+abstract sealed class FirstOrderEffectTask(
   val name: String,
   val matrixName: IPrototype[String],
   val modelInputs: Iterable[IPrototype[Double]],
   val modelOutputs: Iterable[IPrototype[Double]]
 )(implicit val plugins: IPluginSet) extends SensitivityTask {
   
-  
   def computeSensitivity(allValues: Array[Double], allNames: Array[String], input: IPrototype[Double]) = {
     val (a, b, c) = extractValues(allValues, allNames, input)
     val n = a.size
     
-    val bxcAvg = (b zip c map { case (b, c) => b * c } sum) / n
-    
+    val axcAvg = (a zip c map { case (a, c) => a * c } sum) / n
+    val g0 = (a zip b map { case (a, b) => a * b } sum) / n
     val axaAvg = (a  map { a => a * a } sum) / n
     val f0 = (a sum) / n
     
-    1 - (bxcAvg - pow(f0,2)) / (axaAvg - math.pow(f0, 2))
+    (axcAvg - g0) / (axaAvg - math.pow(f0, 2))
   }
+
   
 }

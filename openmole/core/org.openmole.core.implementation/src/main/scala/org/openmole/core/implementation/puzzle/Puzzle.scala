@@ -22,6 +22,22 @@ import org.openmole.core.model.mole.IEnvironmentSelection
 import org.openmole.core.model.mole.IGrouping
 import org.openmole.core.model.transition.ISlot
 
+object Puzzle {
+  
+  def merge(  
+    first: ISlot,
+    last: ICapsule,
+    puzzles: Iterable[Puzzle]
+  ) = Puzzle(
+        first,
+        last, 
+        Map() ++ puzzles.flatMap{_.selection}, 
+        Map() ++ puzzles.flatMap{_.grouping}
+      )
+  
+}
+
+
 case class Puzzle(
   val first: ISlot,
   val last: ICapsule,

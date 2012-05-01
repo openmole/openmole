@@ -30,19 +30,33 @@ import org.openmole.core.implementation.data.Context._
 import SaltelliSampling._
 import SensitivityTask._
 import org.openmole.core.model.task.IPluginSet
+import math._
 
-object FirstOrderSensitivityTask {
+object TotalOrderEffectTask {
+  
+  def apply(
+    name: String,
+    modelInputs: Iterable[IPrototype[Double]],
+    modelOutputs: Iterable[IPrototype[Double]]
+  )(implicit plugins: IPluginSet) = new TotalOrderEffectTaskBuilder(name, SaltelliSampling.matrixName, modelInputs, modelOutputs)
   
   def apply(
     name: String,
     matrixName: IPrototype[String],
     modelInputs: Iterable[IPrototype[Double]],
     modelOutputs: Iterable[IPrototype[Double]]
-  )(implicit plugins: IPluginSet) = new TaskBuilder { builder =>
+  )(implicit plugins: IPluginSet) = new TotalOrderEffectTaskBuilder(name, matrixName, modelInputs, modelOutputs)
+  
+  class TotalOrderEffectTaskBuilder(
+    val name: String,
+    val matrixName: IPrototype[String],
+    val modelInputs: Iterable[IPrototype[Double]],
+    val modelOutputs: Iterable[IPrototype[Double]]
+  )(implicit plugins: IPluginSet) extends SensitivityTask.Builder { builder =>
     
-    def toTask = new FirstOrderSensitivityTask(name, matrixName, modelInputs, modelOutputs) {
-      val inputs: IDataSet = builder.inputs + DataSet(modelOutputs)
-      val outputs: IDataSet  = builder.outputs + DataSet(for(i <- modelInputs ; o <- modelOutputs) yield indice(i, o))
+    def toTask = new TotalOrderEffectTask(name, matrixName, modelInputs, modelOutputs) {
+      val inputs: IDataSet = builder.inputs 
+      val outputs: IDataSet  = builder.outputs 
       val parameters = builder.parameters
     }
     
@@ -50,7 +64,7 @@ object FirstOrderSensitivityTask {
   
 }
 
-abstract sealed class FirstOrderSensitivityTask(
+abstract sealed class TotalOrderEffectTask(
   val name: String,
   val matrixName: IPrototype[String],
   val modelInputs: Iterable[IPrototype[Double]],
@@ -61,13 +75,12 @@ abstract sealed class FirstOrderSensitivityTask(
     val (a, b, c) = extractValues(allValues, allNames, input)
     val n = a.size
     
-    val axcAvg = (a zip c map { case (a, c) => a * c } sum) / n
-    val g0 = (a zip b map { case (a, b) => a * b } sum) / n
+    val bxcAvg = (b zip c map { case (b, c) => b * c } sum) / n
+    
     val axaAvg = (a  map { a => a * a } sum) / n
     val f0 = (a sum) / n
     
-    (axcAvg - g0) / (axaAvg - math.pow(f0, 2))
+    1 - (bxcAvg - pow(f0,2)) / (axaAvg - math.pow(f0, 2))  
   }
 
-  
 }
