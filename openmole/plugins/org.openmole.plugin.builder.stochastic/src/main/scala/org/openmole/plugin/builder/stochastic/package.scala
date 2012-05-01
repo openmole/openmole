@@ -58,23 +58,23 @@ package object stochastic {
     val aggregationCapsule = new StrainerCapsule(EmptyTask(name + "Aggregation"))
     
     val medianTask = MedianTask(name + "Median")
-    statistics.medians.foreach{case(out, stat) => medianTask sequence (out.toArray, stat)}
+    statistics.medians.foreach{case(out, stat) => medianTask addSequence (out.toArray, stat)}
     val medianCapsule = new Capsule(medianTask)
     
     val medianAbsoluteDeviationTask = MedianAbsoluteDeviationTask(name + "MedianAbsoluteDeviation")
-    statistics.medianAbsoluteDeviations.foreach{case(out, stat) => medianAbsoluteDeviationTask sequence (out.toArray, stat)}
+    statistics.medianAbsoluteDeviations.foreach{case(out, stat) => medianAbsoluteDeviationTask addSequence (out.toArray, stat)}
     val medianAbsoluteDeviationCapsule = new Capsule(medianAbsoluteDeviationTask)
     
     val averageTask = AverageTask(name + "Average")
-    statistics.averages.foreach{case(out, stat) => averageTask.sequence(out.toArray, stat)}
+    statistics.averages.foreach{case(out, stat) => averageTask addSequence(out.toArray, stat)}
     val averageCapsule = new Capsule(averageTask)
     
     val sumTask = SumTask(name + "Sum")
-    statistics.sums.foreach{case(out, stat) => sumTask.sequence (out.toArray, stat)}
+    statistics.sums.foreach{case(out, stat) => sumTask addSequence (out.toArray, stat)}
     val sumCapsule = new Capsule(sumTask)
     
     val mseTask = MeanSquareErrorTask(name + "MeanSquareError")
-    statistics.mses.foreach{case(out, stat) => mseTask.sequence(out.toArray, stat) }
+    statistics.mses.foreach{case(out, stat) => mseTask addSequence(out.toArray, stat) }
     val mseCapsule = new Capsule(mseTask)
     
 
