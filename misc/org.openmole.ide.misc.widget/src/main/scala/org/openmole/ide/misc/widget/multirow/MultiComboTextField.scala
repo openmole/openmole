@@ -22,7 +22,7 @@ import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget.Plus
-import scala.swing.ComboBox
+import scala.swing.MyComboBox
 import scala.swing.TextField
 
 object MultiComboTextField {
@@ -38,7 +38,7 @@ object MultiComboTextField {
                                    val initValue: String,
                                    val plus: Plus) extends IRowWidget2[A,String]{
     val textFied = new TextField(initValue,10)
-    val comboBox = new ComboBox(comboContentA) 
+    val comboBox = new MyComboBox(comboContentA) 
     comboBox.selection.item = selectedA
     override val panel = new RowPanel(List(comboBox,textFied),plus)
     

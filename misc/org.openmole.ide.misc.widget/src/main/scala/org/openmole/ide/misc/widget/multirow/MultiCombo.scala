@@ -21,7 +21,7 @@ import java.awt.Dimension
 import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
-import scala.swing.ComboBox
+import scala.swing.MyComboBox
 
 object MultiCombo {
 
@@ -36,7 +36,7 @@ object MultiCombo {
                           val selectedA: A, 
                           val plus: Plus) extends IRowWidget1[A]{
     
-    val combo = new ComboBox[A](comboContentA) { selection.item = selectedA ; preferredSize = new Dimension(8,size.height) }
+    val combo = new MyComboBox[A](comboContentA) { selection.item = selectedA ; preferredSize = new Dimension(8,size.height) }
     
     override val panel = new RowPanel(List(combo),plus)
     

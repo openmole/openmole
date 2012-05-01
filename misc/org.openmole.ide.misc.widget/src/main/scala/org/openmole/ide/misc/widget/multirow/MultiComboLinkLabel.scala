@@ -24,7 +24,7 @@ import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget.Plus
 import org.openmole.ide.misc.widget.multirow.RowWidget._
-import scala.swing.ComboBox
+import scala.swing.MyComboBox
 import scala.swing.event.SelectionChanged
 
 object MultiComboLinkLabel {
@@ -41,7 +41,7 @@ object MultiComboLinkLabel {
                                    val plus: Plus) extends IRowWidget1[A]{
     val linkLabel = new LinkLabel("",initValue._2) {
       icon = image}
-    val comboBox = new ComboBox(comboContent.map(c=>c._1))
+    val comboBox = new MyComboBox(comboContent.map(c=>c._1))
     comboBox.selection.item = initValue._1
     override val panel = new RowPanel(List(comboBox,linkLabel),plus){
        listenTo(`comboBox`)

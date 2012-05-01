@@ -27,7 +27,7 @@ import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget.Plus
 import org.openmole.ide.misc.widget.multirow.RowWidget._
-import scala.swing.ComboBox
+import scala.swing.MyComboBox
 import scala.swing.event.SelectionChanged
 
 object MultiComboLinkLabelGroovyTextFieldEditor {
@@ -45,7 +45,7 @@ object MultiComboLinkLabelGroovyTextFieldEditor {
     val linkLabel = new LinkLabel("",initValues._3) {icon = image}
     var textField = new PrototypeGroovyTextFieldEditor("Default value",initValues._2,initValues._4)
     
-    val comboBox = new ComboBox(comboContent.map(c=>c._1)) 
+    val comboBox = new MyComboBox(comboContent.map(c=>c._1)) 
     comboBox.selection.item = initValues._1
     
     override val panel = 

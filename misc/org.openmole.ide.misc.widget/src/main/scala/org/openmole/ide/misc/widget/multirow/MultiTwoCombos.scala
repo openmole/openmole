@@ -21,8 +21,8 @@ import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget.Plus
 import org.openmole.ide.misc.widget.multirow.RowWidget._
-import scala.swing.ComboBox
 import scala.swing.Label
+import scala.swing.MyComboBox
 
 object MultiTwoCombos {
   
@@ -41,8 +41,8 @@ object MultiTwoCombos {
                                 val inBetweenString: String,
                                 val plus: Plus) extends IRowWidget2[A,B]{
     
-    val combo1 = new ComboBox[A](comboContentA) { selection.item = selectedA }
-    val combo2 = new ComboBox[B](comboContentB) { selection.item = selectedB }
+    val combo1 = new MyComboBox[A](comboContentA) { selection.item = selectedA }
+    val combo2 = new MyComboBox[B](comboContentB) { selection.item = selectedB }
     
     override val panel = new RowPanel(List(combo1,new Label(inBetweenString),combo2),plus)
     

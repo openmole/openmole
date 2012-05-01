@@ -24,7 +24,7 @@ import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget.Plus
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import scala.swing.Button
-import scala.swing.ComboBox
+import scala.swing.MyComboBox
 import scala.swing.Label
 
 object MultiTwoCombosChooseFileTextField
@@ -53,8 +53,8 @@ object MultiTwoCombosChooseFileTextField
                                                    val filePath: String,
                                                    val plus: Plus) extends IRowWidget3[A,B,String]{
     
-    val combo1 = new ComboBox[A](comboContentA) { selection.item = selectedA }
-    val combo2 = new ComboBox[B](comboContentB) { selection.item = selectedB }
+    val combo1 = new MyComboBox[A](comboContentA) { selection.item = selectedA }
+    val combo2 = new MyComboBox[B](comboContentB) { selection.item = selectedB }
     val chooseFileText = new ChooseFileTextField(filePath)
     val refreshButton = new Button{icon =  Images.REFRESH}
     
