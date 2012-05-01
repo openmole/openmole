@@ -28,7 +28,7 @@ abstract class DoubleSequenceStatTaskBuilder(implicit plugins: IPluginSet) exten
  
   def sequences = _sequences.toList
   
-  def sequence(sequence: IPrototype[Array[Double]], stat: IPrototype[Double]): this.type = {
+  def addSequence(sequence: IPrototype[Array[Double]], stat: IPrototype[Double]): this.type = {
     this addInput sequence
     this addOutput stat
     _sequences += sequence -> stat

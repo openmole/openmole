@@ -35,8 +35,6 @@ object SaltelliSampling {
   
   def cMatrixName(p: String) = "c" + p
   
-  val matrixNamePrototype = new Prototype[String]("matrixName")
-  
   def extractValues(allValues: Array[Double], allNames: Array[String], name: String): Array[Double] = 
     allValues zip allNames filter { case(_, n) => n == name } map { case(v, _) => v }
   
@@ -52,10 +50,9 @@ object SaltelliSampling {
     samples: Int,
     factors: Seq[IFactor[Double, IDomain[Double] with IBounded[Double]]],
     rng: Random): Array[Array[Double]] = 
-      factors.map{
-        f => 
-        (0 until samples).map(i => rng.nextDouble.scale(f.domain.min(context), f.domain.max(context))).toArray
-      }.toArray
+      (for(s <- 0 until samples) yield {
+        factors.map(f => rng.nextDouble.scale(f.domain.min(context), f.domain.max(context))).toArray
+      }).toArray
   
   def buildC(
     i: Int,
@@ -79,6 +76,8 @@ object SaltelliSampling {
     matrix.map {
       l => new Variable(matrixName, m) :: (l zip prototypes map {case(v, p) => new Variable(p, v) }).toList
     }.toList
+ 
+  val matrixName = new Prototype[String]("matrixName")
   
 }
 
@@ -93,7 +92,7 @@ class SaltelliSampling(
   def this(samples: Int, factors: IFactor[Double, IDomain[Double] with IBounded[Double]]*) = 
     this(
       samples, 
-      new Prototype[String]("saltelliSampling"),
+      SaltelliSampling.matrixName,
       factors: _*
     )
   
@@ -110,7 +109,8 @@ class SaltelliSampling(
         case(f, i) => toVariables(buildC(i, a, b), cMatrixName(f.prototype.name), prototypes, matrixName) 
       }
     
-    (toVariables(a, aMatrixName, prototypes, matrixName) ++ toVariables(b, bMatrixName, prototypes, matrixName) ++ cMatrix).iterator
+    val res = (toVariables(a, aMatrixName, prototypes, matrixName) ++ toVariables(b, bMatrixName, prototypes, matrixName) ++ cMatrix)
+    res.iterator
   }
   
 
