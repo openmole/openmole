@@ -35,6 +35,10 @@ object Proxys {
   var samplings = new HashSet[ISamplingDataProxyUI]
   var environments = new HashSet[IEnvironmentDataProxyUI]
   
+  var generatedPrototypes = new HashSet[IPrototypeDataProxyUI]
+  
+  def allPrototypesByName = prototypes.map{_.dataUI.name} ++ Proxys.generatedPrototypes.map{_.dataUI.name}
+  
   def filePrototypes: List[IPrototypeDataProxyUI] = prototypes.filter(_.dataUI.coreObject.`type`.erasure == classOf[File])
   .toList
   

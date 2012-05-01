@@ -34,7 +34,6 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.ContentAction
-import org.openmole.ide.misc.widget.ImplicitLinkLabel
 import org.openmole.ide.misc.widget.ImageLinkLabel
 import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.PluginPanel
@@ -127,7 +126,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     peer.setLayout(new BorderLayout)
     val image = EYE
     
-    val availablePrototypes = List(EmptyDataUIs.emptyPrototypeProxy):::Proxys.prototypes.toList
+    val availablePrototypes = List(EmptyDataUIs.emptyPrototypeProxy) ::: Proxys.prototypes.toList ::: Proxys.generatedPrototypes.toList
     
     val protoInEditor = {
       new MultiComboLinkLabelGroovyTextFieldEditor("",
@@ -150,7 +149,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
       
       //implicits
       contents += new PluginPanel("wrap"){
-        TaskPanelUI.this.proxy.dataUI.implicitPrototypesIn.foreach{p=> 
+        TaskPanelUI.this.proxy.dataUI.implicitPrototypesIn ::: TaskPanelUI.this.proxy.dataUI.generatedPrototypesIn foreach{p=> 
           contents += new PluginPanel("wrap 2"){
             contents += new MyComboBox(List(p)) {enabled = false}
             implicitEditorsMapping += p.dataUI.name -> new PrototypeGroovyTextFieldEditor("Default value",p.dataUI.coreObject,TaskPanelUI.this.proxy.dataUI.inputParameters.getOrElseUpdate(p.dataUI.name,""))
@@ -158,6 +157,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
           }
         }
       }
+      
       if (TaskPanelUI.this.proxy.dataUI.prototypesIn.isEmpty) protoInEditor.removeAllRows
       contents += protoInEditor.panel    
     }
@@ -165,7 +165,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     lazy val protoOut =   new PluginPanel("wrap"){
       contents += new Label("Outputs") {foreground = Color.WHITE}
       contents += new PluginPanel("wrap"){  
-        TaskPanelUI.this.proxy.dataUI.implicitPrototypesOut.foreach{p=> 
+        TaskPanelUI.this.proxy.dataUI.implicitPrototypesOut ::: TaskPanelUI.this.proxy.dataUI.generatedPrototypesOut foreach{p=> 
           contents += new MyComboBox(List(p)) {enabled = false}
         }
       }

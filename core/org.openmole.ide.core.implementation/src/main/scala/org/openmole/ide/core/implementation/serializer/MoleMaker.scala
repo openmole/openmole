@@ -99,7 +99,9 @@ object MoleMaker {
     else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")  
   }
   
-  def prototypeMapping : Map[IPrototypeDataProxyUI,IPrototype[_]] = (Proxys.prototypes.toList ::: List(EmptyDataUIs.emptyPrototypeProxy)).map{p=> p->p.dataUI.coreObject}.toMap
+  def prototypeMapping : Map[IPrototypeDataProxyUI,IPrototype[_]] = (Proxys.prototypes.toList ::: 
+                                                                     Proxys.generatedPrototypes.toList ::: 
+                                                                     List(EmptyDataUIs.emptyPrototypeProxy)).map{p=> p->p.dataUI.coreObject}.toMap
   
   def prototypeMappingByName : Map[String,IPrototypeDataProxyUI] = (Proxys.prototypes.toList ::: List(EmptyDataUIs.emptyPrototypeProxy)).map{p=> p.dataUI.name->p}.toMap
   
