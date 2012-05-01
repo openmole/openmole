@@ -17,9 +17,9 @@
 
 package org.openmole.ide.plugin.hook.display
 
-import org.openide.awt.StatusDisplayer
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
+import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.misc.widget.multirow.RowWidget._
@@ -30,6 +30,7 @@ import java.awt.Font
 import java.awt.Font._
 import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.PluginPanel
+import scala.swing.MyComboBox
 import scala.swing.event.SelectionChanged
 
 object ToStringHookPanelUI{
@@ -41,11 +42,20 @@ object ToStringHookPanelUI{
           override def doOnClose = hookpanel.executionManager.commitHook("org.openmole.plugin.hook.display.ToStringHook")
         }
       
-      twocomborow.combo1.selection.reactions += {case SelectionChanged(twocomborow.`combo1`)=>commit}
-      twocomborow.combo2.selection.reactions += {case SelectionChanged(twocomborow.`combo2`)=>
-          // To be uncommented when the ComboBox is fixed 
-          // twocomborow.combo1.peer.setModel(ComboBox.newConstantModel(hookpanel.protosFromTask(twocomborow.`combo2`.selection.item)))
-          commit}
+      twocomborow.panel.listenTo(twocomborow.`combo1`,twocomborow.`combo2`)
+      
+      twocomborow.`combo1`.selection.reactions += {
+        case SelectionChanged(twocomborow.`combo1`)=> 
+          commit
+        case _ =>
+          }
+          
+          twocomborow.`combo2`.selection.reactions += {
+        case SelectionChanged(twocomborow.`combo2`)=> 
+          twocomborow.combo1.peer.setModel(MyComboBox.newConstantModel(hookpanel.protosFromTask(twocomborow.`combo2`.selection.item)))
+          commit
+        case _ =>
+          }
       
       def commit = 
         hookpanel.executionManager.commitHook("org.openmole.plugin.hook.display.ToStringHook")
@@ -60,12 +70,11 @@ class ToStringHookPanelUI(val executionManager: IExecutionManager) extends Plugi
   val capsules = executionManager.capsuleMapping.values.filter(!_.outputs.isEmpty).toList
   
   val multiRow = {
-    import  executionManager.prototypeMapping
     
-    if (!capsules.isEmpty && !prototypeMapping.isEmpty) {
-      val r =  new TwoCombosRowWidget(//protosFromTask(capsules(0)), //protosFromTask(capsules(0))(0),
-        prototypeMapping.values.toList,
-        prototypeMapping.values.toList.head,
+    if (!capsules.isEmpty) {
+      println("build hook row widg")
+      val r =  new TwoCombosRowWidget(
+        protosFromTask(capsules(0)), protosFromTask(capsules(0))(0),
         capsules,
         capsules(0),
         "from ",
@@ -76,20 +85,17 @@ class ToStringHookPanelUI(val executionManager: IExecutionManager) extends Plugi
                                         rowFactory(this),
                                         CLOSE_IF_EMPTY,
                                         NO_ADD,
-                                        false)
+                                        true)
       
       contents += multiRow.panel
       Some(multiRow)
     } else {
-      StatusDisplayer.getDefault.setStatusText("No capsules or no prototypes are defined")
+      StatusBar.inform("No capsules or no prototypes are defined")
       None
     }
   }
- 
-  
-    
-  /* def protosFromTask(c: ICapsule): List[IPrototype[_]] = 
-   executionManager.prototypeMapping.values.toList*/
+
+  def protosFromTask(c: ICapsule): List[IPrototype[_]] =  c.outputs.map{_.prototype}.toList
   
   def saveContent = multiRow match {
     case Some(multiRow) => 
