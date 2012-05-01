@@ -56,6 +56,14 @@ trait ITaskDataUI extends IDataUI{
   
   def implicitPrototypesOut_=(po: List[IPrototypeDataProxyUI])
   
+  def generatedPrototypesIn: List[IPrototypeDataProxyUI]
+  
+  def generatedPrototypesIn_=(pi: List[IPrototypeDataProxyUI])
+  
+  def generatedPrototypesOut: List[IPrototypeDataProxyUI]
+  
+  def generatedPrototypesOut_=(po: List[IPrototypeDataProxyUI])
+  
   def filterPrototypeOccurencies(pproxy : IPrototypeDataProxyUI) : List[IPrototypeDataProxyUI]
     
   def removePrototypeOccurencies(pproxy : IPrototypeDataProxyUI) : Unit
