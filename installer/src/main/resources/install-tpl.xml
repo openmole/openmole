@@ -55,11 +55,6 @@
 
     <guiprefs resizable="yes" width="640" height="480" />
 
-    <natives>
-        <native type="izpack" name="ShellLink.dll" />
-        <native type="3rdparty" name="COIOSHelper.dll" stage="both">
-            <os family="windows" />
-        </native>
-    </natives>
+    <native type="izpack" name="ShellLink.dll" />
 
 </installation>

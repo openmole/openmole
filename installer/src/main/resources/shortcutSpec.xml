@@ -5,11 +5,11 @@
 <programGroup defaultName="OpenMOLE" location="applications"/>
 <shortcut
 	name="OpenMOLE"
-	target="$INSTALL_PATH/openmole"
+	target='openmole.bat'
 	workingDirectory="$INSTALL_PATH"
 	description="Launch OpenMOLE"
 	iconFile="$INSTALL_PATH/openmole.ico" 
-	initialState="normal"
+	terminal="false"
 	programGroup="yes"
 	desktop="yes"
 	applications="no"
@@ -25,7 +25,7 @@
 	commandLine='-jar "$INSTALL_PATH/Uninstaller/uninstaller.jar"'
 	description="Uninstall OpenMOLE"
 	iconFile="$INSTALL_PATH/openmole-uninstall.ico" 
-	initialState="normal"
+	terminal="false"
 	programGroup="yes"
 	desktop="yes"
 	applications="no"

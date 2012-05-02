@@ -104,8 +104,6 @@ class Application extends IApplication with Logger {
         config.pluginsDirs.foreach { PluginManager.loadDir }
         config.guiPluginsDirs.foreach { PluginManager.loadDir }
         
-        splashscreen.close
-        
         val waitClose = new Semaphore(0)
         val application = new GUIApplication() {
           override def closeOperation = {
@@ -113,7 +111,10 @@ class Application extends IApplication with Logger {
             waitClose.release(1)
           }
         }
+        
         application.display
+        splashscreen.close
+
         waitClose.acquire(1)
       }
 
