@@ -41,7 +41,7 @@ import org.openmole.ide.core.model.panel.ISamplingPanelUI
 
 object EmptyDataUIs {
   
-  val emptyPrototypeProxy : IPrototypeDataProxyUI = new PrototypeDataProxyUI(new EmptyPrototypeDataUI)
+  val emptyPrototypeProxy : IPrototypeDataProxyUI = new PrototypeDataProxyUI(new EmptyPrototypeDataUI,false)
   
   val emptyTaskProxy : ITaskDataProxyUI = new TaskDataProxyUI(new EmptyTaskDataUI)
   

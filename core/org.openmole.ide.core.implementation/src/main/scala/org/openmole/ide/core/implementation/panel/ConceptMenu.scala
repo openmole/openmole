@@ -60,11 +60,11 @@ object ConceptMenu {
   }
   
   val taskMenu = {
-  addCategoryComponents(ComponentCategories.TASK)
+    addCategoryComponents(ComponentCategories.TASK)
     KeyRegistry.tasks.values.map{f=>new TaskDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach{ d =>
       mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName){
-        override def apply = display(d.buildDataProxyUI,CREATION)
-      })}
+          override def apply = display(d.buildDataProxyUI,CREATION)
+        })}
     new PopupToolBarPresenter("Task", mapping(ComponentCategories.TASK))
   }
   
@@ -72,26 +72,26 @@ object ConceptMenu {
     addCategoryComponents(ComponentCategories.ENVIRONMENT)
     KeyRegistry.environments.values.map{f=>new EnvironmentDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach{ d =>
       mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName){
-        override def apply = display(d.buildDataProxyUI,CREATION)
-      })}
+          override def apply = display(d.buildDataProxyUI,CREATION)
+        })}
     new PopupToolBarPresenter("Environment", mapping(ComponentCategories.ENVIRONMENT))
   }
   
   val prototypeMenu = {
     addCategoryComponents(ComponentCategories.PROTOTYPE)
     KeyRegistry.prototypes.values.map{f=>new PrototypeDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach{ d =>
-      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName){
+        mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName){
         override def apply = display(d.buildDataProxyUI,CREATION)
       })}
     new PopupToolBarPresenter("Prototype", mapping(ComponentCategories.PROTOTYPE))
   }
   
   val samplingMenu = {
-   addCategoryComponents(ComponentCategories.SAMPLING)
+    addCategoryComponents(ComponentCategories.SAMPLING)
     KeyRegistry.samplings.values.map{f=>new SamplingDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach{ d =>
       mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName){
-        override def apply = display(d.buildDataProxyUI,CREATION)
-      })}
+          override def apply = display(d.buildDataProxyUI,CREATION)
+        })}
     new PopupToolBarPresenter("Sampling", mapping(ComponentCategories.SAMPLING))
   }
   

@@ -39,7 +39,7 @@ class ExecutionMoleScene(id : Int,
   
   override def displayExtraPropertyPanel(dproxy: IDataProxyUI) = {
     super.displayExtraPropertyPanel(dproxy)
-    currentPanel.contents.foreach{_.enabled = false}
+    currentExtraPanel.contents.foreach{_.enabled = false}
   }
     
   def initCapsuleAdd(w: ICapsuleUI)= {

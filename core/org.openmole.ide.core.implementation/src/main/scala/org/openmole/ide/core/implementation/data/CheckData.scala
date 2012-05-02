@@ -58,8 +58,7 @@ object CheckData extends Logger {
             capsUI.dataUI.task match {
               case Some(x : ITaskDataProxyUI) => 
                 buildUnknownPrototypes(caps)
-                computeImplicitPrototypes(x,prototypeMap.map{p => p._1.name -> p._2} ++ 
-                                          Proxys.generatedPrototypes.map{p=> p.dataUI.name -> p}.toMap,
+                computeImplicitPrototypes(x,prototypeMap.map{p => p._1.name -> p._2},
                                           caps)
               case _ =>
             }
@@ -90,12 +89,12 @@ object CheckData extends Logger {
     }
   
   def buildUnknownPrototypes(coreCapsule : ICapsule) = {
-    val allPrototypesByName = Proxys.prototypes.map{_.dataUI.name} ++ Proxys.generatedPrototypes.map{_.dataUI.name}
+    val allPrototypesByName = Proxys.prototypes.map{_.dataUI.name}
     
     (coreCapsule.inputs.toList ++ coreCapsule.outputs) foreach  { d =>
       if (! allPrototypesByName.contains(d.prototype.name)) {
-        Proxys.generatedPrototypes += 
-        new PrototypeDataProxyFactory(KeyRegistry.prototypes(KeyGenerator(d.prototype))).buildDataProxyUI(d.prototype)
+        Proxys.prototypes += 
+        new PrototypeDataProxyFactory(KeyRegistry.prototypes(KeyGenerator(d.prototype))).buildDataProxyUI(d.prototype,true)
       }
     }
   }
@@ -104,19 +103,11 @@ object CheckData extends Logger {
                                 nameMapping :  Map[String,IPrototypeDataProxyUI],
                                 coreCapsule : ICapsule) : Unit = {
     
-    val genAndImplIn = coreCapsule.inputs.map{_.prototype.name}.toList
-    .filterNot{ n => proxy.dataUI.prototypesIn.map{_.dataUI.name}.contains(n)}
-    .partition{ n => Proxys.generatedPrototypes.map{_.dataUI.name}.contains(n)}
-    
-    proxy.dataUI.implicitPrototypesIn = genAndImplIn._2.map{nameMapping}
-    proxy.dataUI.generatedPrototypesIn = genAndImplIn._1.map{nameMapping}
+    proxy.dataUI.implicitPrototypesIn = coreCapsule.inputs.map{_.prototype.name}.toList
+    .filterNot{ n => proxy.dataUI.prototypesIn.map{_.dataUI.name}.contains(n)}.map{nameMapping}
                
-    val genAndImplOut = coreCapsule.outputs.map{_.prototype.name}.toList
-    .filterNot{ n=> proxy.dataUI.prototypesOut.map{_.dataUI.name}.contains(n)}
-    .partition{ n => Proxys.generatedPrototypes.map{_.dataUI.name}.contains(n)}
-    
-    proxy.dataUI.implicitPrototypesOut = genAndImplOut._2.map{nameMapping}
-    proxy.dataUI.generatedPrototypesOut = genAndImplOut._1.map{nameMapping}
+      proxy.dataUI.implicitPrototypesOut = coreCapsule.outputs.map{_.prototype.name}.toList
+    .filterNot{ n=> proxy.dataUI.prototypesOut.map{_.dataUI.name}.contains(n)}.map{nameMapping}
   }
   
   def computeImplicitPrototypes(proxy : ITaskDataProxyUI) : Unit = {

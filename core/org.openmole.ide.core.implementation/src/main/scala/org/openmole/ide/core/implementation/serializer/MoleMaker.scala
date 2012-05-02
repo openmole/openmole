@@ -100,7 +100,6 @@ object MoleMaker {
   }
   
   def prototypeMapping : Map[IPrototypeDataProxyUI,IPrototype[_]] = (Proxys.prototypes.toList ::: 
-                                                                     Proxys.generatedPrototypes.toList ::: 
                                                                      List(EmptyDataUIs.emptyPrototypeProxy)).map{p=> p->p.dataUI.coreObject}.toMap
   
   def prototypeMappingByName : Map[String,IPrototypeDataProxyUI] = (Proxys.prototypes.toList ::: List(EmptyDataUIs.emptyPrototypeProxy)).map{p=> p.dataUI.name->p}.toMap

@@ -34,7 +34,7 @@ class SerializedProxys(val task: Set[ITaskDataProxyUI],
     
   def loadProxys = {
     task.foreach{t=>Proxys.tasks += t; ConceptMenu.taskMenu.popup.contents += ConceptMenu.addItem(t)}
-    prototype.foreach{p=>Proxys.prototypes+= p; ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(p)}
+    prototype.foreach{p=>Proxys.prototypes+= p; if(!p.generated) ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(p)}
     sampling.foreach{s=>Proxys.samplings += s; ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(s)}
     environment.foreach{e=>Proxys.environments+= e; ConceptMenu.environmentMenu.popup.contents += ConceptMenu.addItem(e)}
     Proxys.incr.set(incr)

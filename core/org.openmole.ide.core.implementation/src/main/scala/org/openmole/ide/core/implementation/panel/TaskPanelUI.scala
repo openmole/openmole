@@ -126,7 +126,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     peer.setLayout(new BorderLayout)
     val image = EYE
     
-    val availablePrototypes = List(EmptyDataUIs.emptyPrototypeProxy) ::: Proxys.prototypes.toList ::: Proxys.generatedPrototypes.toList
+    val availablePrototypes = List(EmptyDataUIs.emptyPrototypeProxy) ::: Proxys.prototypes.toList
     
     val protoInEditor = {
       new MultiComboLinkLabelGroovyTextFieldEditor("",
@@ -149,9 +149,11 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
       
       //implicits
       contents += new PluginPanel("wrap"){
-        TaskPanelUI.this.proxy.dataUI.implicitPrototypesIn ::: TaskPanelUI.this.proxy.dataUI.generatedPrototypesIn foreach{p=> 
+        TaskPanelUI.this.proxy.dataUI.implicitPrototypesIn foreach{p=> 
           contents += new PluginPanel("wrap 2"){
-            contents += new MyComboBox(List(p)) {enabled = false}
+            contents += new MyComboBox(List(p)) {
+              enabled = false
+            }
             implicitEditorsMapping += p.dataUI.name -> new PrototypeGroovyTextFieldEditor("Default value",p.dataUI.coreObject,TaskPanelUI.this.proxy.dataUI.inputParameters.getOrElseUpdate(p.dataUI.name,""))
             contents += implicitEditorsMapping(p.dataUI.name)
           }
@@ -164,9 +166,9 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
                                                          
     lazy val protoOut =   new PluginPanel("wrap"){
       contents += new Label("Outputs") {foreground = Color.WHITE}
-      contents += new PluginPanel("wrap"){  
-        TaskPanelUI.this.proxy.dataUI.implicitPrototypesOut ::: TaskPanelUI.this.proxy.dataUI.generatedPrototypesOut foreach{p=> 
-          contents += new MyComboBox(List(p)) {enabled = false}
+      contents += new PluginPanel("wrap 2"){  
+        TaskPanelUI.this.proxy.dataUI.implicitPrototypesOut foreach{p=> 
+          contents += new MyComboBox(List(p)) {enabled = false}          
         }
       }
       if (TaskPanelUI.this.proxy.dataUI.prototypesOut.isEmpty) protoOutEditor.removeAllRows

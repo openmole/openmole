@@ -97,10 +97,14 @@ abstract class MoleScene(n: String = "",
   
   def displayExtraPropertyPanel(dproxy: IDataProxyUI) = {
     currentExtraPanel.contents.removeAll
+    var freeze = false
     currentExtraPanel.contents.add(dproxy match {
-        case x: IPrototypeDataProxyUI=> new PrototypePanelUI(x,this,EXTRA)
+        case x: IPrototypeDataProxyUI=> 
+          freeze = x.generated
+          new PrototypePanelUI(x,this,EXTRA)
         case x: ISamplingDataProxyUI=> new SamplingPanelUI(x,this,EXTRA)
       })
+    if (freeze) currentExtraPanel.contents.foreach{_.enabled = !freeze}
     extraPropertyWidget.setVisible(true)
     extraPropertyWidget.setPreferredLocation(new Point(propertyWidget.getBounds.x.toInt + currentPanel.bounds.width + 40,20))
     refresh
