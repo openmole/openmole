@@ -103,7 +103,6 @@ object CheckData extends Logger {
   def computeImplicitPrototypes(proxy : ITaskDataProxyUI,
                                 nameMapping :  Map[String,IPrototypeDataProxyUI],
                                 coreCapsule : ICapsule) : Unit = {
-    buildUnknownPrototypes(coreCapsule)
     
     val genAndImplIn = coreCapsule.inputs.map{_.prototype.name}.toList
     .filterNot{ n => proxy.dataUI.prototypesIn.map{_.dataUI.name}.contains(n)}
@@ -120,10 +119,13 @@ object CheckData extends Logger {
     proxy.dataUI.generatedPrototypesOut = genAndImplOut._1.map{nameMapping}
   }
   
-  def computeImplicitPrototypes(proxy : ITaskDataProxyUI) : Unit = 
+  def computeImplicitPrototypes(proxy : ITaskDataProxyUI) : Unit = {
+    val coreCapsule = new Capsule(MoleMaker.taskCoreObject(proxy))
+    buildUnknownPrototypes(coreCapsule)
     computeImplicitPrototypes(proxy,
                               MoleMaker.prototypeMapping.map{ case(pUI,p) => pUI.dataUI.name -> pUI}.toMap,
-                              new Capsule(MoleMaker.taskCoreObject(proxy)))
+                              coreCapsule)
+  }
   
   def checkTaskProxyImplicitsPrototypes(scene : IMoleScene,
                                         proxy : ITaskDataProxyUI) = {
