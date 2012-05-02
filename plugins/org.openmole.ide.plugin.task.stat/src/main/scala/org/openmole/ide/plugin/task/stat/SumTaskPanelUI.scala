@@ -17,12 +17,9 @@
 
 package org.openmole.ide.plugin.task.stat
 
-import org.openmole.ide.core.implementation.registry.OSGiActivator
-import org.openmole.ide.core.implementation.registry.TaskActivator
-
-class Activator extends OSGiActivator with TaskActivator {
-
-  override def taskFactories = List(new MedianTaskFactoryUI,
-                                    new AverageTaskFactoryUI,
-                                    new SumTaskFactoryUI)
+class SumTaskPanelUI(dataUI : SumTaskDataUI) extends BasicStatPanelUI("median",dataUI.sequence) {
+  
+  def saveContent(name : String) = new SumTaskDataUI(name,
+                                                        if (multiPrototypeCombo.isDefined) multiPrototypeCombo.get.content
+                                                        else List.empty)
 }
