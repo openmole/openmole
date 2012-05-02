@@ -35,9 +35,9 @@ import java.util.logging.Level
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.core.batch.environment.BatchEnvironment.{signalDownload, signalUpload}
+import org.openmole.core.batch.environment.BatchEnvironment.{ signalDownload, signalUpload }
 import org.openmole.core.batch.environment.SerializedJob
-import org.openmole.core.batch.environment.{Storage, Runtime}
+import org.openmole.core.batch.environment.{ Storage, Runtime }
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.model.execution.IEnvironment
@@ -66,13 +66,13 @@ import UploadActor._
 
 class UploadActor(jobManager: ActorRef) extends Actor {
   def receive = {
-    case Upload(job)=>  
-      if(!job.state.isFinal) {
+    case Upload(job) ⇒
+      if (!job.state.isFinal) {
         try {
           val sj = initCommunication(job.environment, job.job)
           jobManager ! Uploaded(job, sj)
         } catch {
-          case e =>
+          case e ⇒
             logger.log(FINE, "Exception raised durring job upload.", e)
             jobManager ! Error(job, e)
             jobManager ! Kill(job)
@@ -80,38 +80,38 @@ class UploadActor(jobManager: ActorRef) extends Actor {
       }
       System.runFinalization
   }
-  
+
   private def initCommunication(environment: BatchEnvironment, job: IJob): SerializedJob = {
     val jobFile = Workspace.newFile("job", ".tar")
-    
+
     try {
       val (serializationFile, serializatonPlugins) = serializeJob(jobFile, job)
-       
-      val serialisationPluginFiles = new TreeSet[File] ++ serializatonPlugins.flatMap{PluginManager.pluginsForClass}
-      
+
+      val serialisationPluginFiles = new TreeSet[File] ++ serializatonPlugins.flatMap { PluginManager.pluginsForClass }
+
       val storage = environment.selectAStorage(
-        serializationFile + 
-        environment.runtime +
-        environment.jvmLinuxI386 +
-        environment.jvmLinuxX64 ++
-        environment.plugins ++
-        serialisationPluginFiles)
+        serializationFile +
+          environment.runtime +
+          environment.jvmLinuxI386 +
+          environment.jvmLinuxX64 ++
+          environment.plugins ++
+          serialisationPluginFiles)
 
       val (communicationStorage, token) = storage
 
       try {
         val communicationDir = communicationStorage.tmpSpace(token).mkdir(UUID.randomUUID.toString + '/', token)
-            
+
         val inputFile = new GZURIFile(communicationDir.newFileInDir("job", ".in"))
         val runtime = replicateTheRuntime(job, environment, token, communicationStorage, communicationDir)
 
         val executionMessage = createExecutionMessage(
           job,
-          jobFile, 
-          serializationFile, 
-          serialisationPluginFiles, 
-          token, 
-          communicationStorage, 
+          jobFile,
+          serializationFile,
+          serialisationPluginFiles,
+          token,
+          communicationStorage,
           communicationDir)
 
         /* ---- upload the execution message ----*/
@@ -120,7 +120,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
           SerializerService.serialize(executionMessage, executionMessageFile)
           signalUpload(URIFile.copy(executionMessageFile, inputFile, token), executionMessageFile, communicationStorage)
         } finally executionMessageFile.delete
-            
+
         new SerializedJob(communicationStorage, communicationDir.path, inputFile.path, runtime)
       } finally UsageControl.get(communicationStorage.description).releaseToken(token)
     } finally jobFile.delete
@@ -129,20 +129,20 @@ class UploadActor(jobManager: ActorRef) extends Actor {
   def serializeJob(file: File, job: IJob) = {
     val files = new HashSet[File]
     val classes = new HashSet[Class[_]]
-    
-    val tos = new TarOutputStream(new FileOutputStream(file))   
+
+    val tos = new TarOutputStream(new FileOutputStream(file))
     try {
-      for(moleJob <- job.moleJobs) moleJob.synchronized {    
-        if(!moleJob.isFinished) {
+      for (moleJob ← job.moleJobs) moleJob.synchronized {
+        if (!moleJob.isFinished) {
           val moleJobFile = Workspace.newFile("job", ".tar")
           try {
             val serializationResult = SerializerService.serializeGetPluginClassAndFiles(
-              RunnableTask(moleJob), 
+              RunnableTask(moleJob),
               moleJobFile)
-            
+
             files ++= serializationResult.files
             classes ++= serializationResult.classes
-          
+
             tos.addFile(moleJobFile, UUID.randomUUID.toString)
           } finally moleJobFile.delete
         }
@@ -150,7 +150,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     } finally tos.close
     (files, classes)
   }
-  
+
   def toReplicatedFile(job: IJob, file: File, storage: Storage, token: AccessToken): ReplicatedFile = {
     val isDir = file.isDirectory
     var toReplicate = file
@@ -171,28 +171,27 @@ class UploadActor(jobManager: ActorRef) extends Actor {
   def replicateTheRuntime(
     job: IJob,
     environment: BatchEnvironment,
-    token: AccessToken, 
-    communicationStorage: Storage, 
+    token: AccessToken,
+    communicationStorage: Storage,
     communicationDir: IURIFile) = {
-   
-    val environmentPluginPath = environment.plugins.map{toReplicatedFile(job, _, communicationStorage, token)}.map{new FileMessage(_)}    
+
+    val environmentPluginPath = environment.plugins.map { toReplicatedFile(job, _, communicationStorage, token) }.map { new FileMessage(_) }
     val runtimeFileMessage = new FileMessage(toReplicatedFile(job, environment.runtime, communicationStorage, token))
     val jvmLinuxI386FileMessage = new FileMessage(toReplicatedFile(job, environment.jvmLinuxI386, communicationStorage, token))
     val jvmLinuxX64FileMessage = new FileMessage(toReplicatedFile(job, environment.jvmLinuxX64, communicationStorage, token))
 
     val authenticationURIFile = new GZURIFile(communicationDir.newFileInDir("authentication", ".xml"))
     val authenticationFile = Workspace.newFile("environmentAuthentication", ".xml")
-    
+
     val authReplication = try {
       SerializerService.serialize(communicationStorage.environment.authentication, authenticationFile)
       signalUpload(URIFile.copy(authenticationFile, authenticationURIFile, token), authenticationFile, communicationStorage)
       new FileMessage(authenticationURIFile.URI.getPath, authenticationFile.hash.toString)
     } finally authenticationFile.delete
-        
-    
+
     new Runtime(runtimeFileMessage, environmentPluginPath, authReplication, jvmLinuxI386FileMessage, jvmLinuxX64FileMessage)
   }
-  
+
   def createExecutionMessage(
     job: IJob,
     jobFile: File,
@@ -206,10 +205,10 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     signalUpload(URIFile.copy(jobFile, jobForRuntimeFile, token), jobFile, communicationStorage)
     val jobHash = HashService.computeHash(jobFile).toString
 
-    val pluginReplicas = serializationPlugin.map{toReplicatedFile(job, _, communicationStorage, token)}.toList
-    val files = serializationFile.map{toReplicatedFile(job, _, communicationStorage, token)}.toList
-  
+    val pluginReplicas = serializationPlugin.map { toReplicatedFile(job, _, communicationStorage, token) }.toList
+    val files = serializationFile.map { toReplicatedFile(job, _, communicationStorage, token) }.toList
+
     new ExecutionMessage(pluginReplicas, files, new FileMessage(jobForRuntimeFile.URI.getPath, jobHash), communicationDir.URI.getPath)
   }
-  
+
 }

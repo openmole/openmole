@@ -19,7 +19,7 @@ package org.openmole.core.model.domain
 
 import org.openmole.core.model.data.IContext
 
-trait IFinite[+T] extends IIterable[T] { this: IDomain[T] =>
+trait IFinite[+T] extends IIterable[T] { this: IDomain[T] ⇒
   def computeValues(context: IContext): Iterable[T]
   override def iterator(context: IContext): Iterator[T] = computeValues(context).iterator
 }

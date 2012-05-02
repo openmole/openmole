@@ -21,25 +21,25 @@ import java.util.concurrent.Semaphore
 import org.apache.commons.pool.BasePoolableObjectFactory
 import org.apache.commons.pool.impl.SoftReferenceObjectPool
 
-trait Factory[T <: { def clean }]{
+trait Factory[T <: { def clean }] {
 
   def capacity = Integer.MAX_VALUE
-  
+
   val capacitySemaphore = new Semaphore(capacity)
-  
+
   val pool = new SoftReferenceObjectPool(new BasePoolableObjectFactory {
-      override def makeObject: T = Factory.this.makeObject
-    })
-    
+    override def makeObject: T = Factory.this.makeObject
+  })
+
   def makeObject: T
-    
+
   def borrowObject: T = {
     capacitySemaphore.acquire
     pool.borrowObject.asInstanceOf[T]
   }
-    
-  def returnObject(serial: T) = 
-    try serial.clean 
+
+  def returnObject(serial: T) =
+    try serial.clean
     finally {
       pool.returnObject(serial)
       capacitySemaphore.release

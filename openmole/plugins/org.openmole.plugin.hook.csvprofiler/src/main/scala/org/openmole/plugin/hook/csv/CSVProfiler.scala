@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.hook.csvprofiler
 
-
 import au.com.bytecode.opencsv.CSVWriter
 import java.io.OutputStreamWriter
 import java.io.Writer
@@ -28,19 +27,19 @@ import org.openmole.core.model.mole.IMoleExecution
 import ToCSV._
 import scala.ref.WeakReference
 
-class CSVProfiler(moleExecution:  WeakReference[IMoleExecution], writer: CSVWriter) extends MoleExecutionHook(moleExecution) {
-    
+class CSVProfiler(moleExecution: WeakReference[IMoleExecution], writer: CSVWriter) extends MoleExecutionHook(moleExecution) {
+
   def this(moleExecution: IMoleExecution, out: Writer) = this(new WeakReference(moleExecution), new CSVWriter(out))
-  
+
   def this(moleExecution: IMoleExecution) = this(new WeakReference(moleExecution), new CSVWriter(new OutputStreamWriter(System.out)))
 
   override def stateChanged(moleJob: IMoleJob, newState: State, oldState: State) = synchronized {
-    if(moleJob.state.isFinal) {
+    if (moleJob.state.isFinal) {
       writer.writeNext(toColumns(moleJob))
       writer.flush
     }
   }
 
-  override def executionFinished =  writer.flush
-       
+  override def executionFinished = writer.flush
+
 }

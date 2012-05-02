@@ -30,17 +30,17 @@ class JSAGAOutputStream(stream: FileOutputStream) extends OutputStream {
   override def write(b: Array[Byte], off: Int, len: Int) = stream.write(b, off, len)
 
   override def write(b: Array[Byte]) = stream.write(b)
-    
+
   override def write(b: Int) = stream.write(b)
 
   override def flush = stream.flush()
-    
+
   override def close = {
     val task = stream.close(TaskMode.ASYNC)
-        
+
     try task.get(Workspace.preferenceAsDurationInMs(URIFile.Timeout), TimeUnit.MILLISECONDS)
     catch {
-      case (e: TimeoutException) => 
+      case (e: TimeoutException) ⇒
         task.cancel(true)
         throw e
     }

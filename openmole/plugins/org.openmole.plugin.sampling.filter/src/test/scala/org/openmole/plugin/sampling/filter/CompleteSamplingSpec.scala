@@ -34,31 +34,30 @@ import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
 class FiltredSamplingSpec extends FlatSpec with ShouldMatchers {
-  
+
   "Filtred sampling" should "remove all value which doesn't match the filters" in {
-    
+
     val p1 = new Prototype[Int]("p1")
     val p2 = new Prototype[Int]("p2")
     val p3 = new Prototype[Int]("p3")
 
-    def pList(i: Int,j: Int,k: Int) = List(i,j,k).zip(List(p1,p2,p3)).map{case (v, p) => new Variable(p, v)}
-    
+    def pList(i: Int, j: Int, k: Int) = List(i, j, k).zip(List(p1, p2, p3)).map { case (v, p) ⇒ new Variable(p, v) }
+
     val sampling = new Sampling {
       override def prototypes = List(p1, p2, p3)
-      override def build(context: IContext) = List(pList(1,2,3), pList(4,3,4), pList(1,5,3), pList(2,3,4), pList(6,7,8)).iterator
+      override def build(context: IContext) = List(pList(1, 2, 3), pList(4, 3, 4), pList(1, 5, 3), pList(2, 3, 4), pList(6, 7, 8)).iterator
     }
-    
+
     val f1 = new IFilter {
       override def apply(factorsValues: IContext) = factorsValues.value(p1).get != 1
     }
-        
+
     val f2 = new IFilter {
       override def apply(factorsValues: IContext) = factorsValues.value(p3).get < 5
     }
-    
+
     val s2 = new FiltredSampling(sampling, f1, f2).build(new Context)
-    s2.size should equal (2)    
+    s2.size should equal(2)
   }
-  
 
 }

@@ -17,7 +17,6 @@
 
 package org.openmole.core.model.execution
 
-
 import java.util.logging.Level
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob

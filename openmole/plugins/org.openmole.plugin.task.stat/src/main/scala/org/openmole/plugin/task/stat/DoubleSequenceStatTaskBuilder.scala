@@ -25,9 +25,9 @@ import scala.collection.mutable.ListBuffer
 
 abstract class DoubleSequenceStatTaskBuilder(implicit plugins: IPluginSet) extends TaskBuilder {
   private var _sequences = new ListBuffer[(IPrototype[Array[Double]], IPrototype[Double])]
- 
+
   def sequences = _sequences.toList
-  
+
   def addSequence(sequence: IPrototype[Array[Double]], stat: IPrototype[Double]): this.type = {
     this addInput sequence
     this addOutput stat

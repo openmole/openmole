@@ -22,11 +22,11 @@ import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.sampling.ISampling
 
 sealed class TakeSampling(sampling: ISampling, n: Int) extends ISampling {
-  
+
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
-  
-  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
+
+  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] =
     sampling.build(context).take(n)
- 
+
 }

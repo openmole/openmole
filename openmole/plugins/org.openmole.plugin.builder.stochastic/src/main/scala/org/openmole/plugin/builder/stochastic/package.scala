@@ -39,56 +39,54 @@ package object stochastic {
     var averages: List[(IPrototype[Double], IPrototype[Double])] = Nil
     var sums: List[(IPrototype[Double], IPrototype[Double])] = Nil
     var mses: List[(IPrototype[Double], IPrototype[Double])] = Nil
-    
+
     def addMedian(output: IPrototype[Double], median: IPrototype[Double]) = medians ::= (output, median)
     def addMedianAbsoluteDeviation(output: IPrototype[Double], deviation: IPrototype[Double]) = medianAbsoluteDeviations ::= (output, deviation)
     def addAverage(output: IPrototype[Double], average: IPrototype[Double]) = averages ::= (output, average)
     def addSum(output: IPrototype[Double], sum: IPrototype[Double]) = sums ::= (output, sum)
-    def addMeanSquareError(output: IPrototype[Double], mse: IPrototype[Double]) = mses ::= (output, mse)                                                                
+    def addMeanSquareError(output: IPrototype[Double], mse: IPrototype[Double]) = mses ::= (output, mse)
   }
-  
+
   def statistics(
     name: String,
     model: Puzzle,
     replicationFactor: DiscreteFactor[_, _],
-    statistics: Statistics
-  )(implicit plugins: IPluginSet): Puzzle = {
+    statistics: Statistics)(implicit plugins: IPluginSet): Puzzle = {
     val exploration = ExplorationTask(name + "Replication", replicationFactor)
     val explorationCapsule = new StrainerCapsule(exploration)
     val aggregationCapsule = new StrainerCapsule(EmptyTask(name + "Aggregation"))
-    
+
     val medianTask = MedianTask(name + "Median")
-    statistics.medians.foreach{case(out, stat) => medianTask addSequence (out.toArray, stat)}
+    statistics.medians.foreach { case (out, stat) ⇒ medianTask addSequence (out.toArray, stat) }
     val medianCapsule = new Capsule(medianTask)
-    
+
     val medianAbsoluteDeviationTask = MedianAbsoluteDeviationTask(name + "MedianAbsoluteDeviation")
-    statistics.medianAbsoluteDeviations.foreach{case(out, stat) => medianAbsoluteDeviationTask addSequence (out.toArray, stat)}
+    statistics.medianAbsoluteDeviations.foreach { case (out, stat) ⇒ medianAbsoluteDeviationTask addSequence (out.toArray, stat) }
     val medianAbsoluteDeviationCapsule = new Capsule(medianAbsoluteDeviationTask)
-    
+
     val averageTask = AverageTask(name + "Average")
-    statistics.averages.foreach{case(out, stat) => averageTask addSequence(out.toArray, stat)}
+    statistics.averages.foreach { case (out, stat) ⇒ averageTask addSequence (out.toArray, stat) }
     val averageCapsule = new Capsule(averageTask)
-    
+
     val sumTask = SumTask(name + "Sum")
-    statistics.sums.foreach{case(out, stat) => sumTask addSequence (out.toArray, stat)}
+    statistics.sums.foreach { case (out, stat) ⇒ sumTask addSequence (out.toArray, stat) }
     val sumCapsule = new Capsule(sumTask)
-    
+
     val mseTask = MeanSquareErrorTask(name + "MeanSquareError")
-    statistics.mses.foreach{case(out, stat) => mseTask addSequence(out.toArray, stat) }
+    statistics.mses.foreach { case (out, stat) ⇒ mseTask addSequence (out.toArray, stat) }
     val mseCapsule = new Capsule(mseTask)
-    
 
     val endCapsule = new StrainerCapsule(EmptyTask(name + "End"))
-    
+
     new ExplorationTransition(explorationCapsule, model.first)
     new AggregationTransition(model.last, aggregationCapsule)
-    
+
     new Transition(aggregationCapsule, medianCapsule)
     new Transition(aggregationCapsule, medianAbsoluteDeviationCapsule)
     new Transition(aggregationCapsule, averageCapsule)
     new Transition(aggregationCapsule, sumCapsule)
     new Transition(aggregationCapsule, mseCapsule)
-    
+
     new Transition(medianCapsule, endCapsule)
     new Transition(medianAbsoluteDeviationCapsule, endCapsule)
     new Transition(averageCapsule, endCapsule)
@@ -96,16 +94,14 @@ package object stochastic {
     new Transition(mseCapsule, endCapsule)
 
     new DataChannel(explorationCapsule, endCapsule)
-    
+
     model.copy(first = explorationCapsule, last = endCapsule)
   }
-  
-  
+
   def replicate(
     name: String,
     model: Puzzle,
-    replications: ISampling
-  )(implicit plugins: IPluginSet) = {
+    replications: ISampling)(implicit plugins: IPluginSet) = {
     val exploration = ExplorationTask(name + "Replication", replications)
     val explorationCapsule = new StrainerCapsule(exploration)
     val aggregationCapsule = new StrainerCapsule(EmptyTask(name + "Aggregation"))
@@ -114,5 +110,5 @@ package object stochastic {
     new DataChannel(explorationCapsule, aggregationCapsule)
     model.copy(first = explorationCapsule, last = aggregationCapsule)
   }
-  
+
 }

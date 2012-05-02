@@ -17,24 +17,24 @@
 
 package org.openmole.core.implementation.data
 
-import org.openmole.core.model.data.{IContext,IVariable,IPrototype, IData}
+import org.openmole.core.model.data.{ IContext, IVariable, IPrototype, IData }
 import scala.collection.immutable.TreeMap
 
 object Context {
-  
+
   val empty = new Context(TreeMap.empty)
-  
+
   def apply(variables: IVariable[_]*): Context = apply(variables.toIterable)
-  def apply(variables: Traversable[IVariable[_]]): Context = new Context(TreeMap.empty[String, IVariable[_]] ++ variables.map{v => v.prototype.name -> v})
+  def apply(variables: Traversable[IVariable[_]]): Context = new Context(TreeMap.empty[String, IVariable[_]] ++ variables.map { v ⇒ v.prototype.name -> v })
   def apply(context: IContext, variables: java.lang.Iterable[IVariable[_]]) = {
     import collection.JavaConversions._
     context ++ variables
   }
-  
+
   implicit def decorateVariableIterable(variables: Traversable[IVariable[_]]) = new {
     def toContext = Context(variables)
   }
-  
+
 }
 
 class Context(val variables: TreeMap[String, IVariable[_]]) extends Map[String, IVariable[_]] with IContext {
@@ -44,49 +44,49 @@ class Context(val variables: TreeMap[String, IVariable[_]]) extends Map[String, 
   override def +[B1 >: IVariable[_]](kv: (String, B1)) = variables + kv
   //override def +(name: String, variable: IVariable[_]) = new Context(variables + (name -> variable))
   override def -(name: String) = new Context(variables - name)
-  
+
   //override def +(name: String, value: Object) = new Context(variables + (name -> new Variable[Object](name, value)))
-    
+
   //override def +[T](name: String, t: Class[T], value: T) = new Context(variables + (name -> new Variable[T](name, t, value)))
- 
-  override def +[T] (p: IPrototype[T], value: T) = new Context(variables + (p.name -> new Variable[T](p, value)))
-  
-  override def +[T] (v: IVariable[T]) = new Context(variables + (v.prototype.name -> v))
-  
+
+  override def +[T](p: IPrototype[T], value: T) = new Context(variables + (p.name -> new Variable[T](p, value)))
+
+  override def +[T](v: IVariable[T]) = new Context(variables + (v.prototype.name -> v))
+
   override def +(ctx: IContext) = new Context(variables ++ ctx)
-  
-  override def ++(vs: Traversable[IVariable[_]]): IContext = new Context(variables ++ (vs.map{v => v.prototype.name -> v}))
-  
+
+  override def ++(vs: Traversable[IVariable[_]]): IContext = new Context(variables ++ (vs.map { v ⇒ v.prototype.name -> v }))
+
   override def --(names: Traversable[String]): IContext = new Context(variables -- names)
-  
+
   override def value[T](name: String): Option[T] = variables.get(name) match {
-    case None => None
-    case Some(v) => Some(v.asInstanceOf[IVariable[T]].value)
+    case None ⇒ None
+    case Some(v) ⇒ Some(v.asInstanceOf[IVariable[T]].value)
   }
 
   override def value[T](proto: IPrototype[T]) = value[T](proto.name)
 
   override def variable[T](proto: IPrototype[T]): Option[IVariable[T]] = {
     variables.get(proto.name) match {
-      case None => None
-      case Some(v) => Some(v.asInstanceOf[IVariable[T]])
+      case None ⇒ None
+      case Some(v) ⇒ Some(v.asInstanceOf[IVariable[T]])
     }
   }
-    
+
   override def variable[T](name: String): Option[IVariable[T]] = variables.get(name).asInstanceOf[Option[IVariable[T]]]
- 
+
   override def contains(p: IPrototype[_]): Boolean = {
     variable(p.name) match {
-      case None => false
-      case Some(v) => p.isAssignableFrom(v.prototype)
+      case None ⇒ false
+      case Some(v) ⇒ p.isAssignableFrom(v.prototype)
     }
   }
 
   override def empty = Context.empty
- 
+
   override def get(key: String) = variables.get(key)
-  
+
   override def iterator = variables.iterator
-  
-  override def toString = "{" + (if(variables.values.isEmpty) "" else variables.values.mkString(", ")) + "}"
+
+  override def toString = "{" + (if (variables.values.isEmpty) "" else variables.values.mkString(", ")) + "}"
 }

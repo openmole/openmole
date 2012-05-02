@@ -21,9 +21,9 @@ import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.control.UsageControl
 
 trait BatchService {
-  
+
   UsageControl.register(description, UsageControl(nbAccess))
-  
+
   def environment: BatchEnvironment
   def nbAccess: Int = Int.MaxValue
   def description: ServiceDescription

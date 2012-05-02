@@ -24,39 +24,38 @@ import org.openmole.plugin.environment.jsaga.JSAGAJob
 import scala.actors.threadpool.AtomicInteger
 
 object SSHBatchJob {
-  
-  val id = new AtomicInteger
-  implicit val oder = Ordering.by[SSHBatchJob, Int](j => j.id)
-  
-}
 
+  val id = new AtomicInteger
+  implicit val oder = Ordering.by[SSHBatchJob, Int](j ⇒ j.id)
+
+}
 
 class SSHBatchJob(job: Job, override val resultPath: String, jobService: SSHJobService) extends JSAGAJob(resultPath, jobService) {
 
   val id = SSHBatchJob.id.getAndIncrement
   var jobIdOption: Option[String] = None
-  
+
   def jobId = jobIdOption match {
-    case Some(jobId) => jobId
-    case None => throw new InternalError("Bug: JSAGA job is not lanched yet.")
+    case Some(jobId) ⇒ jobId
+    case None ⇒ throw new InternalError("Bug: JSAGA job is not lanched yet.")
   }
-  
+
   def unqueue = synchronized {
     job.run
     jobIdOption = Some(JSAGAJob.id(job))
   }
-  
-  override def deleteJob = synchronized { 
+
+  override def deleteJob = synchronized {
     jobIdOption match {
-      case Some(j) => super.deleteJob 
-      case None => 
+      case Some(j) ⇒ super.deleteJob
+      case None ⇒
     }
   }
-   
-  override def updatedState = synchronized {    
+
+  override def updatedState = synchronized {
     jobIdOption match {
-      case Some(j) => super.updatedState 
-      case None => SUBMITTED
+      case Some(j) ⇒ super.updatedState
+      case None ⇒ SUBMITTED
     }
   }
 

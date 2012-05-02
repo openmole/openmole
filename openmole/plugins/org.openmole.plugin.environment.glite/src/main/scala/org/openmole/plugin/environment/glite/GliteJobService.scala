@@ -42,43 +42,42 @@ import Requirement._
 
 object GliteJobService extends Logger {
   val LCGCPTimeOut = new ConfigurationLocation("GliteJobService", "RuntimeCopyOnWNTimeOut")
-    
+
   Workspace += (LCGCPTimeOut, "PT2M")
 }
 
-
-class GliteJobService(jobServiceURI: URI, val environment: GliteEnvironment, override val nbAccess: Int) extends JSAGAJobService(jobServiceURI)  {
+class GliteJobService(jobServiceURI: URI, val environment: GliteEnvironment, override val nbAccess: Int) extends JSAGAJobService(jobServiceURI) {
 
   import GliteJobService._
-  
+
   override protected def doSubmit(serializedJob: SerializedJob, token: AccessToken) = {
     import serializedJob._
     import communicationStorage.path
-    
+
     val script = Workspace.newFile("script", ".sh")
     try {
       val outputFilePath = path.toURIFile(communicationDirPath).newFileInDir("job", ".out").path
-   
+
       val os = script.bufferedOutputStream
       try generateScript(serializedJob, outputFilePath, environment.runtimeMemory.intValue, os)
       finally os.close
-      
+
       val jobDescription = buildJobDescription(runtime, script, environment.allRequirements)
       val job = jobServiceCache.createJob(jobDescription)
       job.run
-      
+
       //logger.fine(Source.fromFile(script).getLines.mkString)
-      
+
       new GliteJob(JSAGAJob.id(job), outputFilePath, this, environment.authentication.expires)
     } finally script.delete
   }
-  
+
   protected def generateScript(serializedJob: SerializedJob, resultPath: String, memorySizeForRuntime: Int, os: OutputStream) = {
     import serializedJob.communicationStorage.path
     import serializedJob._
-    
+
     val writter = new PrintStream(os)
-    
+
     assert(runtime.runtime.path != null)
     writter.print("BASEPATH=$PWD;CUR=$PWD/ws$RANDOM;while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; ")
     writter.print("if [ `uname -m` = x86_64 ]; then ")
@@ -90,13 +89,13 @@ class GliteJobService(jobServiceURI: URI, val environment: GliteEnvironment, ove
     writter.print(mkLcgCpGunZipCmd(environment, path.toStringURI(runtime.runtime.path), "$PWD/openmole.tar.gz"))
     writter.print("tar -xzf openmole.tar.gz >/dev/null; rm -f openmole.tar.gz; ")
     writter.print("mkdir envplugins; PLUGIN=0;")
-    
-    for (plugin <- runtime.environmentPlugins) {
+
+    for (plugin ← runtime.environmentPlugins) {
       assert(plugin.path != null)
       writter.print(mkLcgCpGunZipCmd(environment, path.toStringURI(plugin.path), "$CUR/envplugins/plugin$PLUGIN.jar"))
       writter.print("PLUGIN=`expr $PLUGIN + 1`; ")
     }
-    
+
     assert(runtime.authentication.path != null)
     writter.print(mkLcgCpGunZipCmd(environment, path.toStringURI(runtime.authentication.path), "$CUR/authentication.xml"))
 
@@ -142,32 +141,33 @@ class GliteJobService(jobServiceURI: URI, val environment: GliteEnvironment, ove
   }
 
   private def getTimeOut = Workspace.preferenceAsDurationInS(GliteJobService.LCGCPTimeOut).toString
-  
-  protected def buildJobDescription(runtime: Runtime, script: File,  attributes: Map[String, String]) = {
+
+  protected def buildJobDescription(runtime: Runtime, script: File, attributes: Map[String, String]) = {
     val description = JSAGAJobBuilder.description(attributes)
 
     description.setAttribute(JobDescription.EXECUTABLE, "/bin/bash")
     description.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](script.getName))
- 
-    description.setVectorAttribute(JobDescription.FILETRANSFER, Array[String]("file:/" + 
-                                                                              {if(script.getAbsolutePath.startsWith("/")) script.getAbsolutePath.tail else script.getAbsolutePath} +
-                                                                              ">" + script.getName))
+
+    description.setVectorAttribute(JobDescription.FILETRANSFER, Array[String]("file:/" +
+      { if (script.getAbsolutePath.startsWith("/")) script.getAbsolutePath.tail else script.getAbsolutePath } +
+      ">" + script.getName))
 
     attributes.get(REQUIREMENTS) match {
-      case Some(requirement) => val requirements = new StringBuilder
+      case Some(requirement) ⇒
+        val requirements = new StringBuilder
         requirements.append("JDLRequirements=(")
         requirements.append(requirement)
         requirements.append(')')
 
         description.setVectorAttribute("Extension", Array[String](requirements.toString))
-      case None =>
+      case None ⇒
     }
 
     /*environment.authentication.myProxy match {
       case Some(myProxy) => description.setAttribute("MyProxyServer", myProxy.url)
       case None =>
     }*/
-    
+
     description
   }
 }

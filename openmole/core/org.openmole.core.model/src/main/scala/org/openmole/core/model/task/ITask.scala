@@ -20,7 +20,7 @@ package org.openmole.core.model.task
 import org.openmole.core.model.data._
 
 trait ITask {
-   /**
+  /**
    *
    * Perform this task.
    *
@@ -51,16 +51,15 @@ trait ITask {
    * @return the output data of the task
    */
   def outputs: IDataSet
-  
-    /**
+
+  /**
    *
    * Get all the parameters configured for this task.
    *
    * @return the parameters configured for this task.
    */
   def parameters: IParameterSet
-  
-  
+
   def plugins: IPluginSet
-  
+
 }

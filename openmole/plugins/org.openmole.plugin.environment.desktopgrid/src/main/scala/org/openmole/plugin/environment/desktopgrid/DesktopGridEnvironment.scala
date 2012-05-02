@@ -30,7 +30,6 @@ import org.openmole.misc.tools.io.FileUtil._
 import java.io.File
 import collection.JavaConversions._
 
-
 object DesktopEnvironment {
   val timeStempsDirName = "timeStemps"
   val jobsDirName = "jobs"
@@ -39,21 +38,21 @@ object DesktopEnvironment {
 }
 
 class DesktopGridEnvironment(
-  port: Int,
-  login: String, password: String,
-  val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory) extends BatchEnvironment {
-  
+    port: Int,
+    login: String, password: String,
+    val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory) extends BatchEnvironment {
+
   val path = Workspace.newDir
   new SFTPServer(path, login, password, port)
-  
+
   val description = new ServiceDescription(login + "@localhost:" + port)
-  
+
   @transient lazy val batchStorage = new VolatileStorage(this, path.toURI, Int.MaxValue) {
     override lazy val description = DesktopGridEnvironment.this.description
   }
-  
+
   @transient override lazy val allStorages = List(batchStorage)
   @transient override lazy val allJobServices = List(new DesktopGridJobService(this, DesktopGridEnvironment.this.description))
-  
+
   override def authentication = DesktopGridAuthentication
 }

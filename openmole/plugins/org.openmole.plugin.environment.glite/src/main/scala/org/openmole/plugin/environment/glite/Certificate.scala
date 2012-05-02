@@ -26,50 +26,50 @@ import GliteAuthentication._
 import GliteAuthentication._
 
 abstract class Certificate(cypheredPassword: String) extends GliteAuthenticationMethod {
-  
+
   //@transient lazy val proxy = Workspace.newFile("proxy", ".x509")
-  
-  def password =  
-    if(cypheredPassword == null) ""
+
+  def password =
+    if (cypheredPassword == null) ""
     else Workspace.decrypt(cypheredPassword)
-   
+
   override def init(authentication: GliteAuthentication) = {
     import authentication._
 
     val ctx = JSAGASessionService.createContext
     ctx.setAttribute(VOMSContext.VOMSDIR, "")
- 
+
     ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
-    
+
     val proxyDuration = myProxy match {
-      case Some(proxy) => 
+      case Some(proxy) ⇒
         ctx.setAttribute(Context.TYPE, "VOMSMyProxy")
         ctx.setAttribute(VOMSContext.MYPROXYSERVER, proxy.url)
         ctx.setAttribute(VOMSContext.MYPROXYUSERID, proxy.userId)
         ctx.setAttribute(VOMSContext.MYPROXYPASS, proxy.pass)
         //ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME, getTimeString)
         None
-      case None =>
+      case None ⇒
         ctx.setAttribute(Context.TYPE, "VOMS")
         Some(inMs(getTimeString))
     }
-  
+
     ctx.setAttribute(Context.LIFETIME, getTimeString)
     ctx.setAttribute(Context.USERPASS, password)
-    
+
     if (!fqan.isEmpty) ctx.setAttribute(VOMSContext.USERFQAN, fqan)
-    
+
     val proxyFile = Workspace.newFile("proxy", ".x509")
     ctx.setAttribute(Context.USERPROXY, proxyFile.getAbsolutePath)
-    
+
     ctx.setAttribute(Context.SERVER, vomsURL)
     ctx.setAttribute(Context.USERVO, voName)
-   
+
     _init(ctx)
-            
+
     (ctx, proxyDuration)
   }
-  
+
   protected def _init(ctx: Context)
-  
+
 }

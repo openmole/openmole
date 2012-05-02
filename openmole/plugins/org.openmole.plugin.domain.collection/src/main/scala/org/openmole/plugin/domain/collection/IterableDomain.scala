@@ -24,6 +24,6 @@ import org.openmole.core.model.domain.IIterable
 sealed class IterableDomain[T](iterable: Iterable[T]) extends IDomain[T] with IIterable[T] {
 
   //def this(elements: T*) = this(elements)
-    
+
   override def iterator(context: IContext): Iterator[T] = iterable.iterator
 }

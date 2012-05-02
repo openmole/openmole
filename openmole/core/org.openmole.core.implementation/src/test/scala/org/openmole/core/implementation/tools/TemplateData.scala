@@ -31,7 +31,7 @@ object TemplateData {
     writer.close
     template
   }
-  
+
   def targetFile(): File = {
     val target = File.createTempFile("target", ".test")
     val writert = new PrintWriter(target)

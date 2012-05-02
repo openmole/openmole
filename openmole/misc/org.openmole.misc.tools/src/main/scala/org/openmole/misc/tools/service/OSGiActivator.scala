@@ -23,12 +23,12 @@ import org.osgi.framework.BundleContext
 trait OSGiActivator {
   def context: Option[BundleContext]
   def contextOrException = context.getOrElse(throw new InternalProcessingError("Context uninitialized"))
-  
+
   def getService[T](interface: Class[T]): T = {
     val ctx = contextOrException
     val ref = ctx.getServiceReference(interface.getName)
     ctx.getService(ref).asInstanceOf[T]
   }
-  
+
   def enabled = context.isDefined
 }

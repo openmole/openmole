@@ -17,7 +17,6 @@
 
 package org.openmole.core.batch.environment
 
-
 import java.net.URI
 import org.openmole.misc.tools.service.Logger
 import org.openmole.core.batch.control.AccessToken
@@ -33,25 +32,25 @@ import scala.collection.JavaConversions._
 object Storage extends Logger
 
 abstract class Storage(val URI: URI) extends BatchService {
-    
+
   @transient lazy val description = new ServiceDescription(URI)
-  
-  StorageControl.register(description, new QualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))      
+
+  StorageControl.register(description, new QualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))
 
   import Storage._
-  
+
   @transient protected var baseSpaceVar: IURIFile = null
-  
-  def persistentSpace(token: AccessToken): IURIFile 
+
+  def persistentSpace(token: AccessToken): IURIFile
   def tmpSpace(token: AccessToken): IURIFile
   def baseDir(token: AccessToken): IURIFile
-  def root = 
-    if(URI.getScheme != null) new URI(URI.getScheme + "://" +  URI.getAuthority)
+  def root =
+    if (URI.getScheme != null) new URI(URI.getScheme + "://" + URI.getAuthority)
     else new URI(URI.getScheme + ":/")
   def resolve(path: String) = root.resolve(path)
- 
+
   def path = new RelativePath(root)
-  
+
   /*def test: Boolean = {
     try {
       

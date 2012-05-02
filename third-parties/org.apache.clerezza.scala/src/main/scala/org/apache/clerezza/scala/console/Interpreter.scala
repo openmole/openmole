@@ -25,20 +25,20 @@ import scala.tools.nsc.interpreter.IMain
 import scala.tools.nsc.reporters.Reporter
 
 class Interpreter extends IMain {
-  
+
   override lazy val classLoader: AbstractFileClassLoader = {
     new AbstractFileClassLoader(virtualDirectory, this.getClass.getClassLoader())
   }
-  
+
   override protected def newCompiler(settings: Settings, reporter: Reporter) = {
     settings.outputDirs setSingleOutput virtualDirectory
     new BundleContextScalaCompiler(Activator.bundleContext, settings, reporter)
   }
-  
+
   override def interpret(l: String) = {
     val r = super.interpret(l)
     virtualDirectory.clear
     r
   }
-  
+
 }

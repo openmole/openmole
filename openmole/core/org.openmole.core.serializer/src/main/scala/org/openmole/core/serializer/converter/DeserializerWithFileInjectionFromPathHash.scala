@@ -25,7 +25,7 @@ class DeserializerWithFileInjectionFromPathHash extends Deserializer {
   var files: PartialFunction[FileInfo, File] = null
   registerConverter(new FilePathHashInjecter(this, reflectionConverter))
   def clean = files = null
-    
+
   def matchingFile(file: FileInfo) = files(file)
 
 }

@@ -19,7 +19,7 @@ package org.openmole.core.model.domain
 
 import org.openmole.core.model.data.IContext
 
-trait IIterable[+T] { this: IDomain[T] =>
-  
+trait IIterable[+T] { this: IDomain[T] ⇒
+
   def iterator(context: IContext): Iterator[T]
 }

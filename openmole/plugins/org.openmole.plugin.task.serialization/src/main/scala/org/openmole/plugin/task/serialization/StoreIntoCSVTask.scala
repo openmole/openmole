@@ -36,45 +36,44 @@ import collection.JavaConversions._
  */
 
 object StoreIntoCSVTask {
-  
-  def apply(name: String, outputFile: IPrototype[File])(implicit plugins: IPluginSet) = 
-    new StoreIntoCSVTaskBuilder { builder =>
-      
+
+  def apply(name: String, outputFile: IPrototype[File])(implicit plugins: IPluginSet) =
+    new StoreIntoCSVTaskBuilder { builder ⇒
+
       def toTask = new StoreIntoCSVTask(name, outputFile, builder.columns) {
         val inputs = builder.inputs
         val outputs = builder.outputs + outputFile
         val parameters = builder.parameters
       }
-      
+
     }
-  
+
 }
 
 sealed abstract class StoreIntoCSVTask(
-  val name: String,
-  filePrototype: IPrototype[File],
-  columns: Iterable[(IPrototype[Array[_]], String)]
-)(implicit val plugins: IPluginSet) extends Task {
+    val name: String,
+    filePrototype: IPrototype[File],
+    columns: Iterable[(IPrototype[Array[_]], String)])(implicit val plugins: IPluginSet) extends Task {
 
   override def process(context: IContext) = {
-    val valuesList = columns.map{elt => context.value(elt._1).getOrElse(throw new UserBadDataError("Variable " + elt._1 + " not found."))}
+    val valuesList = columns.map { elt ⇒ context.value(elt._1).getOrElse(throw new UserBadDataError("Variable " + elt._1 + " not found.")) }
 
     val file = Workspace.newFile("storeIntoCSV", ".csv")
     val writer = new CSVWriter(new BufferedWriter(new FileWriter(file)), ',', CSVWriter.NO_QUOTE_CHARACTER)
 
     try {
       //header
-      val columnIts = valuesList.map{_.iterator}
+      val columnIts = valuesList.map { _.iterator }
 
-      writer.writeNext(columns.map(_._2).toArray)          
-      val listSize = valuesList.map{_.size}.min
-            
+      writer.writeNext(columns.map(_._2).toArray)
+      val listSize = valuesList.map { _.size }.min
+
       //body
-      for (i <- 0 until listSize) 
-        writer.writeNext(columnIts.map{e => e.next.prettify}.toArray)
-      
+      for (i ← 0 until listSize)
+        writer.writeNext(columnIts.map { e ⇒ e.next.prettify }.toArray)
+
     } finally writer.close
     context + (filePrototype -> file)
   }
-  
+
 }

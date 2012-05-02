@@ -24,28 +24,28 @@ package org.openmole.core.model.data
 object DataModeMask {
 
   /**
-   * IData is optionnal. If this data is no found at the begining of a task 
+   * IData is optionnal. If this data is no found at the begining of a task
    * execution no error will be raised and the task should accomodate of it.
    *
    */
   val optional = new DataModeMask(0x0001) {
     override def toString = "optional"
   }
-  
+
   /**
-   * The value corresponding to the IData can be used by an exploration 
+   * The value corresponding to the IData can be used by an exploration
    * transition as a exploration set. This should be set only on array.
    *
    */
   val explore = new DataModeMask(0x0002) {
     override def toString = "explore"
   }
-  
+
   /**
    * All the possible values for the data mode mask.
    */
   val values = List(optional, explore)
-  
+
 }
 
 class DataModeMask(val value: Int)

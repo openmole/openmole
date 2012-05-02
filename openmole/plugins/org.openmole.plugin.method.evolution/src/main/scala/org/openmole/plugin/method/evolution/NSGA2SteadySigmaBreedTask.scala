@@ -33,31 +33,30 @@ import org.openmole.misc.tools.service.Random._
 import org.openmole.core.implementation.task.Task._
 
 object NSGA2SteadySigmaBreedTask {
-  
+
   def apply(
     name: String,
     archive: IPrototype[Array[Individual[GAGenomeWithSigma, Fitness] with Rank with Diversity]],
     genome: IPrototype[GAGenomeWithSigma],
-    nsga2: NSGA2Sigma
-  )(implicit plugins: IPluginSet) = new TaskBuilder { builder =>
+    nsga2: NSGA2Sigma)(implicit plugins: IPluginSet) = new TaskBuilder { builder ⇒
     addInput(archive)
     addOutput(genome)
-    
-    def toTask = 
-      new NSGA2SteadySigmaBreedTask(name,archive,genome,nsga2) {
+
+    def toTask =
+      new NSGA2SteadySigmaBreedTask(name, archive, genome, nsga2) {
         val inputs = builder.inputs
         val outputs = builder.outputs
         val parameters = builder.parameters
       }
   }
-  
+
 }
 
 sealed abstract class NSGA2SteadySigmaBreedTask(
-  val name: String,
-  archive: IPrototype[Array[Individual[GAGenomeWithSigma, Fitness] with Rank with Diversity]],
-  genome: IPrototype[GAGenomeWithSigma],
-  nsga2: NSGA2Sigma)(implicit val plugins: IPluginSet) extends Task {
+    val name: String,
+    archive: IPrototype[Array[Individual[GAGenomeWithSigma, Fitness] with Rank with Diversity]],
+    genome: IPrototype[GAGenomeWithSigma],
+    nsga2: NSGA2Sigma)(implicit val plugins: IPluginSet) extends Task {
 
   override def process(context: IContext) = {
     val rng = newRNG(context.valueOrException(openMOLESeed))
@@ -65,5 +64,5 @@ sealed abstract class NSGA2SteadySigmaBreedTask(
     val newGenome = nsga2.breed(a, 1)(rng).head
     context + new Variable(genome, newGenome)
   }
-  
+
 }

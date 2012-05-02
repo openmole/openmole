@@ -29,19 +29,18 @@ import java.util.concurrent.TimeUnit
 object AccessTokenPool {
   def apply(nbTokens: Int): AccessTokenPool = {
     val pool = new AccessTokenPool
-    for (i <- 0 until nbTokens) {
+    for (i ← 0 until nbTokens) {
       pool.add(new AccessToken)
     }
     pool
   }
 }
 
-
 class AccessTokenPool extends IAccessTokenPool {
   private val tokens = new LinkedBlockingDeque[AccessToken]
   private val taken = new HashSet[AccessToken] with SynchronizedSet[AccessToken]
   private val _load = new AtomicInteger
-  
+
   def add(token: AccessToken) = {
     tokens.add(token)
     _load.decrementAndGet
@@ -52,11 +51,11 @@ class AccessTokenPool extends IAccessTokenPool {
     val token = try {
       tokens.take
     } catch {
-      case (e) => 
+      case (e) ⇒
         _load.decrementAndGet
         throw e
     }
-    
+
     taken.add(token)
     token
   }
@@ -66,11 +65,11 @@ class AccessTokenPool extends IAccessTokenPool {
     val ret = try {
       tokens.poll(time, unit)
     } catch {
-      case (e) =>
+      case (e) ⇒
         _load.decrementAndGet
         throw e
     }
-    
+
     if (ret == null) {
       _load.decrementAndGet
       throw new TimeoutException
@@ -81,7 +80,7 @@ class AccessTokenPool extends IAccessTokenPool {
   }
 
   override def releaseToken(token: AccessToken) = {
-    
+
     if (!taken.remove(token)) {
       throw new InternalProcessingError("Trying to release a token that hasn't been taken.")
     }
@@ -93,14 +92,15 @@ class AccessTokenPool extends IAccessTokenPool {
   override def tryGetToken: Option[AccessToken] = {
     _load.incrementAndGet
     tokens.poll match {
-      case null => _load.decrementAndGet
+      case null ⇒
+        _load.decrementAndGet
         return None
-      case token => 
+      case token ⇒
         taken.add(token)
         return Some(token)
     }
   }
 
   override def load: Int = _load.get
-  
+
 }

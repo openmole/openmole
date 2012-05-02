@@ -27,14 +27,13 @@ import org.openmole.core.implementation.task.Task._
 /**
  * Group the mole jobs by distributing them at random among {{{numberOfBatch}}}
  * groups.
- * 
+ *
  * @param numberOfBatch total number of groups
  */
 class NumberOfBatchShuffledGrouping(numberOfBatch: Int) extends IGrouping {
 
-  override def apply(context: IContext) = 
-    new MoleJobGroup( 
-      newRNG(context.valueOrException(openMOLESeed)).nextInt(numberOfBatch) 
-    )
+  override def apply(context: IContext) =
+    new MoleJobGroup(
+      newRNG(context.valueOrException(openMOLESeed)).nextInt(numberOfBatch))
 
 }

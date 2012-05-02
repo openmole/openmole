@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.model.data.IContext

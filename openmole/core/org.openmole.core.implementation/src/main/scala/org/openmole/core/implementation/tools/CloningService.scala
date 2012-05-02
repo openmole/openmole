@@ -30,40 +30,39 @@ import org.openmole.core.model.data.IVariable
 import org.openmole.misc.workspace.Workspace
 
 object CloningService {
-    
+
   def clone[T](value: T): T = {
-            
-    if (value == null || 
-        value.asInstanceOf[AnyRef].getClass.isPrimitive ||
-        value.asInstanceOf[AnyRef].getClass == classOf[BigDecimal] ||
-        value.asInstanceOf[AnyRef].getClass == classOf[BigInteger]) {
+
+    if (value == null ||
+      value.asInstanceOf[AnyRef].getClass.isPrimitive ||
+      value.asInstanceOf[AnyRef].getClass == classOf[BigDecimal] ||
+      value.asInstanceOf[AnyRef].getClass == classOf[BigInteger]) {
       return value
     }
-        
+
     val cloner = new Cloner
     // val exceptions = Collections.synchronizedList(new LinkedList<Throwable>());
 
     cloner.registerFastCloner(classOf[File], new IFastCloner {
 
-        override def clone(o: Object, cloner: Cloner, map: java.util.Map[Object, Object]): Object = {
-          val toClone = o.asInstanceOf[File]
-          val cloned = if (toClone.isDirectory) Workspace.newDir else Workspace.newFile
-                    
-          toClone.copy(toClone)
-          cloned
-        }
-      })
+      override def clone(o: Object, cloner: Cloner, map: java.util.Map[Object, Object]): Object = {
+        val toClone = o.asInstanceOf[File]
+        val cloned = if (toClone.isDirectory) Workspace.newDir else Workspace.newFile
+
+        toClone.copy(toClone)
+        cloned
+      }
+    })
 
     cloner.registerImmutable(classOf[BigDecimal])
     cloner.registerImmutable(classOf[BigInteger])
-        
+
     cloner.deepClone(value)
   }
-  
+
   def clone[T](variable: IVariable[T]): IVariable[T] = {
     Logger.getLogger(CloningService.getClass.getName).log(Level.FINE, "Clonning {0}", variable.prototype)
 
-        
     //val cloned = cloner.deepClone(variable.value)
 
     /* if(!exceptions.isEmpty()) {

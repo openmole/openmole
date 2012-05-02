@@ -25,30 +25,28 @@ import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
 class Slot(val capsule: ICapsule) extends ISlot {
-  
+
   capsule.addInputSlot(this)
-  
+
   private val _transitions = new ListBuffer[ITransition]
   private val _inputDataChannels = new ListBuffer[IDataChannel]
-  
+
   override def +=(transition: ITransition) = {
     _transitions += transition
     this
   }
 
-
   override def addInputDataChannel(dataChannel: IDataChannel): this.type = {
     _inputDataChannels += dataChannel
     this
   }
-  
-  
+
   override def inputDataChannels: Iterable[IDataChannel] = _inputDataChannels
 
-  override def transitions: Iterable[ITransition] =  _transitions
-    
+  override def transitions: Iterable[ITransition] = _transitions
+
   override def contains(transition: ITransition) = _transitions.contains(transition)
-  
-  override def toString = "slot of capsule " + capsule + " containing transitions from (" + transitions.map{_.start}.mkString(",") + ")"
+
+  override def toString = "slot of capsule " + capsule + " containing transitions from (" + transitions.map { _.start }.mkString(",") + ")"
 
 }

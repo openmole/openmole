@@ -22,23 +22,23 @@ package org.openmole.core.model.data
  * workflow execution just before the begining of a task execution. It can be
  * usefull for testing purposes and for defining default value of inputs of a
  * task.
- * 
+ *
  */
 trait IParameter[T] {
 
-    /**
-     * Get the variable which is injected.
-     *
-     * @return the variable
-     */
-    def variable: IVariable[T]
+  /**
+   * Get the variable which is injected.
+   *
+   * @return the variable
+   */
+  def variable: IVariable[T]
 
-    /**
-     * Get if an existing value in the context should be overriden. If override
-     * is true the if a value with the same name is allready presentin the 
-     * context when the parameter is injected the vaule will be discarded.
-     *
-     * @return true if an existing value should be overriden false otherwise
-     */
-    def `override`: Boolean
+  /**
+   * Get if an existing value in the context should be overriden. If override
+   * is true the if a value with the same name is allready presentin the
+   * context when the parameter is injected the vaule will be discarded.
+   *
+   * @return true if an existing value should be overriden false otherwise
+   */
+  def `override`: Boolean
 }

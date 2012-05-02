@@ -29,18 +29,17 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import java.io.File
 
-class FilePathHashNotifier(serializer: SerializerWithPathHashInjection, reflectionConverter: ReflectionConverter)  extends Converter {
+class FilePathHashNotifier(serializer: SerializerWithPathHashInjection, reflectionConverter: ReflectionConverter) extends Converter {
 
-  
   override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) = {
     val file = o.asInstanceOf[File]
     reflectionConverter.marshal(serializer.fileUsed(file), writer, mc)
   }
-  
+
   override def unmarshal(reader: HierarchicalStreamReader, uc: UnmarshallingContext): Object = {
     throw new UnsupportedOperationException("Bug: Should never be called.")
   }
 
   override def canConvert(c: Class[_]): Boolean = classOf[File].isAssignableFrom(c)
-  
+
 }

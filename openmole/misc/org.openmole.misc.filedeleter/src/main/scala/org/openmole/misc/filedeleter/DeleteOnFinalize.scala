@@ -20,10 +20,10 @@ package org.openmole.misc.filedeleter
 import java.io.File
 
 class DeleteOnFinalize(path: String) {
-  
-    override protected def finalize = {
-        super.finalize
-        FileDeleter.assynchonousRemove(new File(path))
-    }
-    
+
+  override protected def finalize = {
+    super.finalize
+    FileDeleter.assynchonousRemove(new File(path))
+  }
+
 }

@@ -20,8 +20,8 @@ import org.openmole.core.model.task.IPluginSet
 import org.openmole.misc.math.Stat
 
 object MedianAbsoluteDeviationTask {
-  
-  def apply(name: String)(implicit plugins: IPluginSet) = new DoubleSequenceStatTaskBuilder { builder =>
+
+  def apply(name: String)(implicit plugins: IPluginSet) = new DoubleSequenceStatTaskBuilder { builder ⇒
     def toTask = new MedianAbsoluteDeviationTask(name) {
       val sequences = builder.sequences
       val inputs = builder.inputs
@@ -29,11 +29,11 @@ object MedianAbsoluteDeviationTask {
       val parameters = builder.parameters
     }
   }
-  
+
 }
 
 sealed abstract class MedianAbsoluteDeviationTask(val name: String)(implicit val plugins: IPluginSet) extends DoubleSequenceStatTask {
-  
+
   override def stat(seq: Array[Double]) = Stat.medianAbsoluteDeviation(seq)
-   
+
 }

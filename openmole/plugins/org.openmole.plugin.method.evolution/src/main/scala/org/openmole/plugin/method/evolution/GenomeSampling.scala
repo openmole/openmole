@@ -30,33 +30,31 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.core.implementation.task.Task._
 
 class GenomeSampling[GS](
-  genome: IPrototype[GS],
-  evolution: Evolution {type G = GS} ,
-  size: Int,
-  initialGenomes: Option[IPrototype[Array[Array[Double]]]] = None
-) extends Sampling {
-      
+    genome: IPrototype[GS],
+    evolution: Evolution { type G = GS },
+    size: Int,
+    initialGenomes: Option[IPrototype[Array[Array[Double]]]] = None) extends Sampling {
+
   def prototypes = List(genome)
-  override def inputs = super.inputs ++ initialGenomes.map{p => new Data(p, DataMode(DataModeMask.optional))}
-   
+  override def inputs = super.inputs ++ initialGenomes.map { p ⇒ new Data(p, DataMode(DataModeMask.optional)) }
+
   def build(context: IContext) = {
     def toSamplingLine(g: GS) = List(new Variable(genome, g))
-    
+
     val rng = newRNG(context.valueOrException(openMOLESeed))
-    
-    val genomes = 
-      initialGenomes.map{ 
+
+    val genomes =
+      initialGenomes.map {
         context.value(_) match {
-          case Some(v) => 
+          case Some(v) ⇒
             v.toSeq.map {
-              g => toSamplingLine(evolution.factory(g))
+              g ⇒ toSamplingLine(evolution.factory(g))
             }.take(size)
-          case None => Seq.empty
+          case None ⇒ Seq.empty
         }
-      }.getOrElse(Seq.empty) 
-    
-    (genomes ++ 
-     (0 until size - genomes.size).map{ i => toSamplingLine(evolution.factory.random(rng))}
-    ).iterator
+      }.getOrElse(Seq.empty)
+
+    (genomes ++
+      (0 until size - genomes.size).map { i ⇒ toSamplingLine(evolution.factory.random(rng)) }).iterator
   }
 }

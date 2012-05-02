@@ -32,18 +32,18 @@ import org.openmole.core.implementation.task.Task._
 
 sealed class LHSSampling(samples: Int, factors: IFactor[Double, IDomain[Double] with IBounded[Double]]*) extends Sampling {
 
-  override def prototypes = factors.map{_.prototype}
-  
+  override def prototypes = factors.map { _.prototype }
+
   override def build(context: IContext): Iterator[Iterable[IVariable[Double]]] = {
     val rng = newRNG(context.valueOrException(openMOLESeed))
-    
+
     (0 until samples).map {
-      _ =>
-      (0 until factors.size).map {
-        i => (i + rng.nextDouble) / factors.size
-      }.shuffled(rng).zip(factors).map {
-        case (v, f) => new Variable(f.prototype, v.scale(f.domain.min(context), f.domain.max(context)))
-      }
+      _ ⇒
+        (0 until factors.size).map {
+          i ⇒ (i + rng.nextDouble) / factors.size
+        }.shuffled(rng).zip(factors).map {
+          case (v, f) ⇒ new Variable(f.prototype, v.scale(f.domain.min(context), f.domain.max(context)))
+        }
     }.toIterator
   }
 }

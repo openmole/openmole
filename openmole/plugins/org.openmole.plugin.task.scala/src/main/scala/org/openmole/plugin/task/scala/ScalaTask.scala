@@ -31,20 +31,19 @@ import org.openmole.misc.tools.script.ScalaREPL
 import org.openmole.plugin.task.code._
 
 object ScalaTask {
-  
+
   def apply(
     name: String,
-    code: String
-  )(implicit plugins: IPluginSet = PluginSet.empty) = {
+    code: String)(implicit plugins: IPluginSet = PluginSet.empty) = {
     val _plugins = plugins
-    new CodeTaskBuilder { builder =>
-      
+    new CodeTaskBuilder { builder ⇒
+
       addImport("org.openmole.misc.tools.service.Random.newRNG")
       addImport("org.openmole.misc.workspace.Workspace.newFile")
       addImport("org.openmole.misc.workspace.Workspace.newDir")
-      
-      def toTask = 
-        new ScalaTask(name, code, builder.imports) { 
+
+      def toTask =
+        new ScalaTask(name, code, builder.imports) {
           val inputs = builder.inputs
           val outputs = builder.outputs
           val parameters = builder.parameters
@@ -53,21 +52,20 @@ object ScalaTask {
         }
     }
   }
-  
+
 }
 
 sealed abstract class ScalaTask(
-  val name: String,
-  val code: String,
-  imports: Iterable[String]
-)(implicit val plugins: IPluginSet) extends CodeTask {
-  
+    val name: String,
+    val code: String,
+    imports: Iterable[String])(implicit val plugins: IPluginSet) extends CodeTask {
+
   override def processCode(context: IContext) = {
     val interpreter = new ScalaREPL
-    context.values.foreach{v => interpreter.bind(v.prototype.name, v.value)}
+    context.values.foreach { v ⇒ interpreter.bind(v.prototype.name, v.value) }
     interpreter.addImports(imports.toSeq: _*)
     interpreter.interpret(code)
-    Context.empty ++ outputs.map{o => new Variable(o.prototype.asInstanceOf[IPrototype[Any]], interpreter.valueOfTerm(o.prototype.name))}
+    Context.empty ++ outputs.map { o ⇒ new Variable(o.prototype.asInstanceOf[IPrototype[Any]], interpreter.valueOfTerm(o.prototype.name)) }
   }
 }
 

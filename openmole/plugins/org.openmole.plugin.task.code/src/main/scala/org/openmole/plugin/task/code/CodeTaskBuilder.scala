@@ -23,12 +23,12 @@ import scala.collection.mutable.ListBuffer
 
 abstract class CodeTaskBuilder extends ExternalTaskBuilder {
   private var _imports = new ListBuffer[String]
-  
+
   def imports = _imports.toList
-  
+
   def addImport(s: String) = {
     _imports += s
     this
   }
-  
+
 }

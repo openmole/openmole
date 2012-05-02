@@ -24,26 +24,26 @@ package org.openmole.core.model.data
 import scala.collection.SetLike
 
 trait IDataSet extends SetLike[IData[_], IDataSet with Set[IData[_]]] {
-  
+
   //override def empty: this.type
 
   /**
    * Get the @link{IData} by its name as an Option.
-   * 
+   *
    * @param name the name of the @link{IData}
    * @return Some(data) if it is present in the data set None otherwise
    */
   def apply(name: String): Option[IData[_]]
-  
+
   /**
    * Test if a variable with a given name is present in the data set.
-   * 
+   *
    * @param name the name of the @link{IData}
    * @return true if the variable with a matching name is present in the data
    * set false otherwise
    */
   def contains(name: String): Boolean
-  
+
   def +(p: IPrototype[_]): IDataSet
   def +(set: IDataSet): IDataSet
   def ++(d: Traversable[IData[_]]): IDataSet

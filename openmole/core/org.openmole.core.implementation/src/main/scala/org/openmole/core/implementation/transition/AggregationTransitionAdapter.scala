@@ -23,10 +23,10 @@ import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
 
 class AggregationTransitionAdapter(transition: IAggregationTransition) extends EventListener[ISubMoleExecution] {
-  
+
   override def triggered(subMole: ISubMoleExecution, ev: Event[ISubMoleExecution]) =
     ev match {
-      case ev: ISubMoleExecution.Finished => transition.aggregate(subMole, ev.ticket)
+      case ev: ISubMoleExecution.Finished ⇒ transition.aggregate(subMole, ev.ticket)
     }
-  
+
 }

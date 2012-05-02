@@ -26,8 +26,8 @@ sealed class FiltredSampling(sampling: ISampling, filters: IFilter*) extends ISa
 
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
-  
-  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
-    sampling.build(context).filter(sample => !filters.exists(!_(Context(sample))))
+
+  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] =
+    sampling.build(context).filter(sample ⇒ !filters.exists(!_(Context(sample))))
 
 }

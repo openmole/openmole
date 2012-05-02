@@ -21,24 +21,24 @@ import java.util.concurrent.Executors
 import org.openmole.misc.tools.service.Priority
 
 object EventDispatcher {
-   
+
   private val triggerListenerMap = new ObjectListenerMap
   //private val objectChangedWithArgsMap = new ObjectListenerMap
-  
-  def listen[T, L <: EventListener[T], E <: Event[T]](obj: T, listner: L, event: Class[E]) = 
+
+  def listen[T, L <: EventListener[T], E <: Event[T]](obj: T, listner: L, event: Class[E]) =
     triggerListenerMap.register(obj, Priority.NORMAL, listner, event)
-  
-  def listen[T, L <: EventListener[T], E <: Event[T]](obj: T, priority: Int, listner: L, event: Class[E]) = 
+
+  def listen[T, L <: EventListener[T], E <: Event[T]](obj: T, priority: Int, listner: L, event: Class[E]) =
     triggerListenerMap.register(obj, priority, listner, event)
-  
+
   def unlisten[T, L <: EventListener[T], E <: Event[T]](obj: T, listner: L, event: Class[E]) =
     triggerListenerMap.unregister(obj, listner, event)
-   
+
   def trigger[T](obj: T, event: Event[T]) = {
     /* --- Listners without args ---*/
     val listeners = triggerListenerMap.get(obj, event.getClass.asInstanceOf[Class[Event[T]]])
 
-    for (listener <- listeners) listener.triggered(obj, event)
+    for (listener ← listeners) listener.triggered(obj, event)
   }
 
 }

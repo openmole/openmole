@@ -20,8 +20,8 @@ package org.openmole.plugin.task.stat
 import org.openmole.core.model.task.IPluginSet
 
 object SumTask {
-  
-  def apply(name: String)(implicit plugins: IPluginSet) = new DoubleSequenceStatTaskBuilder { builder =>
+
+  def apply(name: String)(implicit plugins: IPluginSet) = new DoubleSequenceStatTaskBuilder { builder ⇒
     def toTask = new SumTask(name) {
       val sequences = builder.sequences
       val inputs = builder.inputs
@@ -29,12 +29,12 @@ object SumTask {
       val parameters = builder.parameters
     }
   }
-  
+
 }
 
 sealed abstract class SumTask(val name: String)(implicit val plugins: IPluginSet) extends DoubleSequenceStatTask {
-  
+
   override def stat(seq: Array[Double]) = seq.sum
-  
+
 }
 

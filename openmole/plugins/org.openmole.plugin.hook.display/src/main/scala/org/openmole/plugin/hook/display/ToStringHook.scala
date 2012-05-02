@@ -30,22 +30,21 @@ import org.openmole.misc.tools.io.Prettifier._
 class ToStringHook(execution: IMoleExecution, capsule: ICapsule, out: PrintStream, prototypes: IPrototype[_]*) extends CapsuleExecutionHook(execution, capsule) {
 
   def this(execution: IMoleExecution, capsule: ICapsule, prototypes: IPrototype[_]*) = this(execution, capsule, System.out, prototypes: _*)
-  
+
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
-    
-    if(!prototypes.isEmpty) 
-      out.println (
-        prototypes.map(p => p -> context.variable(p)).map {
-          _  match {
-            case (p, Some(v)) => v
-            case (p, None) => p.name + " not found"
+
+    if (!prototypes.isEmpty)
+      out.println(
+        prototypes.map(p ⇒ p -> context.variable(p)).map {
+          _ match {
+            case (p, Some(v)) ⇒ v
+            case (p, None) ⇒ p.name + " not found"
           }
-        }.mkString(",")
-      )
+        }.mkString(","))
     else out.println(context.values.mkString(", "))
   }
-   
+
   def inputs = DataSet(prototypes)
-  
+
 }

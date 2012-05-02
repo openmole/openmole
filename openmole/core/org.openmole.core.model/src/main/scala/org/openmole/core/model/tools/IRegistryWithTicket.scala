@@ -17,7 +17,6 @@
 
 package org.openmole.core.model.tools
 
-
 import org.openmole.core.model.mole.ITicket
 /**
  *
@@ -32,14 +31,14 @@ import org.openmole.core.model.mole.ITicket
 trait IRegistryWithTicket[K, V] {
 
   /**
-   * 
+   *
    * Consult a value for a given key and ticket.
-   * 
-   * @param key the index key 
+   *
+   * @param key the index key
    * @param ticket the index ticket
    * @return the value or null if not found
    */
-  def consult(key: K, ticket: ITicket): Option[V] 
+  def consult(key: K, ticket: ITicket): Option[V]
 
   /**
    *
@@ -69,6 +68,6 @@ trait IRegistryWithTicket[K, V] {
    * @param ticket the index ticket
    */
   def remove(key: K, ticket: ITicket): Option[V]
-    
-  def getOrElseUpdate(key: K, ticket: ITicket, f: => V): V
+
+  def getOrElseUpdate(key: K, ticket: ITicket, f: ⇒ V): V
 }

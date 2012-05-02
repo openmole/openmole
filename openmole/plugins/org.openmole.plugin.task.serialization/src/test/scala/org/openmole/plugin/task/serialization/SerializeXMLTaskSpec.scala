@@ -31,24 +31,24 @@ import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
 class SerializeTaskSpec extends FlatSpec with ShouldMatchers {
-  
+
   implicit val plugins = PluginSet.empty
-    
+
   "SerializeTask" should "serialize input variables to files" in {
     val p = new Prototype[Int]("p")
     val pfile = new Prototype[File]("pfile")
-    
+
     val pVal = new Variable(p, 5)
-  
+
     val t = SerializeXMLTask("Test")
     t serialize (p, pfile)
     val context = t.toTask.process(Context.empty + pVal)
-      
-    context.contains(pfile) should equal (true)
-    
+
+    context.contains(pfile) should equal(true)
+
     val p2 = SerializerService.deserialize[Int](new FileInputStream(context.value(pfile).get))
-    
-    p2 should equal (5)
+
+    p2 should equal(5)
   }
 }
 

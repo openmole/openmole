@@ -20,17 +20,17 @@ package org.openmole.core.batch.refresh
 import akka.actor.Actor
 import org.openmole.misc.tools.service.Logger
 
-object KillerActor extends Logger 
+object KillerActor extends Logger
 
 import KillerActor._
 
 class KillerActor extends Actor {
   def receive = {
-    case KillBatchJob(bj) => 
+    case KillBatchJob(bj) ⇒
       try bj.kill
       catch {
-        case e => logger.log(FINE, "Could not kill job.", e)
+        case e ⇒ logger.log(FINE, "Could not kill job.", e)
       }
-    System.runFinalization
+      System.runFinalization
   }
 }

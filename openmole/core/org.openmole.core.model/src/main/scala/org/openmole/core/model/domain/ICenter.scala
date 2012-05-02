@@ -19,6 +19,6 @@ package org.openmole.core.model.domain
 
 import org.openmole.core.model.data.IContext
 
-trait ICenter[+T] { this: IDomain[T] =>
+trait ICenter[+T] { this: IDomain[T] ⇒
   def center(context: IContext): T
 }

@@ -24,22 +24,22 @@ import org.ogf.saga.job.JobFactory
 import Requirement._
 
 object JSAGAJobBuilder {
-  
+
   def description(attributes: Map[String, String]) = {
     val description = JobFactory.createJobDescription
-    
+
     attributes.get(CPU_TIME) match {
-      case Some(value) => 
+      case Some(value) ⇒
         val cpuTime = ISOPeriodFormat.standard.parsePeriod(value).toStandardMinutes.getMinutes
         description.setAttribute(JobDescription.WALLTIMELIMIT, cpuTime.toString)
         description.setAttribute(CPU_TIME, (cpuTime * attributes.getOrElse(CPU_COUNT, "1").toInt).toString)
-      case None =>
+      case None ⇒
     }
-    
+
     attributes.filterNot(_._1 == CPU_TIME).foreach {
-      case(k, v) => description.setAttribute(k, v)
+      case (k, v) ⇒ description.setAttribute(k, v)
     }
-    
+
     description
   }
 
@@ -56,7 +56,7 @@ object JSAGAJobBuilder {
     hello.setVectorAttribute(JobDescription.ARGUMENTS, Array[String]("Hello"))
     //hello.setVectorAttribute(JobDescription.FILETRANSFER, Array[String](helloFile.toURI().toURL() + ">" + helloFile.getName))
 
-    hello     
+    hello
   }
-  
+
 }

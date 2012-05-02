@@ -33,61 +33,59 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
-
 object TypeUtil {
- 
-  def receivedTypes(slot : ISlot): Iterable[IPrototype[_]] =
+
+  def receivedTypes(slot: ISlot): Iterable[IPrototype[_]] =
     computeManifests(slot).map {
-      t =>
-      if(t.toArray) new Prototype(t.name)(t.manifest.arrayManifest)
-      else new Prototype(t.name)(t.manifest)
+      t ⇒
+        if (t.toArray) new Prototype(t.name)(t.manifest.arrayManifest)
+        else new Prototype(t.name)(t.manifest)
     }
-  
+
   class ComputedType(val name: String, val manifest: Manifest[_], val toArray: Boolean)
-  
-  def computeManifests(slot : ISlot): Iterable[ComputedType] = {
+
+  def computeManifests(slot: ISlot): Iterable[ComputedType] = {
     val direct = new HashMap[String, ListBuffer[Manifest[_]]]
     val toArray = new HashMap[String, ListBuffer[Manifest[_]]]
     val fromArray = new HashMap[String, ListBuffer[Manifest[_]]]
     val varNames = new HashSet[String]
-    
-    
-    for(t <- slot.transitions; output <- t.unFiltred) {
-      def setFromArray = 
-        if(output.mode is explore) fromArray.getOrElseUpdate(output.prototype.name, new ListBuffer[Manifest[_]]) += output.prototype.`type`
-      else direct.getOrElseUpdate(output.prototype.name, new ListBuffer) += output.prototype.`type` 
- 
+
+    for (t ← slot.transitions; output ← t.unFiltred) {
+      def setFromArray =
+        if (output.mode is explore) fromArray.getOrElseUpdate(output.prototype.name, new ListBuffer[Manifest[_]]) += output.prototype.`type`
+        else direct.getOrElseUpdate(output.prototype.name, new ListBuffer) += output.prototype.`type`
+
       varNames += output.prototype.name
       t match {
-        case _: IAggregationTransition => 
-          toArray.getOrElseUpdate(output.prototype.name, new ListBuffer) += output.prototype.`type` 
-        case _: IExplorationTransition => setFromArray
-        case _: ISlaveTransition => setFromArray
-        case _ => direct.getOrElseUpdate(output.prototype.name, new ListBuffer) += output.prototype.`type` 
+        case _: IAggregationTransition ⇒
+          toArray.getOrElseUpdate(output.prototype.name, new ListBuffer) += output.prototype.`type`
+        case _: IExplorationTransition ⇒ setFromArray
+        case _: ISlaveTransition ⇒ setFromArray
+        case _ ⇒ direct.getOrElseUpdate(output.prototype.name, new ListBuffer) += output.prototype.`type`
       }
     }
-    
-    for(dc <- slot.inputDataChannels; d <- dc.data) {
+
+    for (dc ← slot.inputDataChannels; d ← dc.data) {
       varNames += d.prototype.name
-      if(DataChannel.levelDelta(dc) >= 0) direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
+      if (DataChannel.levelDelta(dc) >= 0) direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
       else toArray.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
     }
-    
+
     def s(m: Iterable[Manifest[_]]) = intersectionArray(m map (_.erasure))
-    
+
     varNames.map {
       import ListBuffer.empty
 
-      name =>
-      (direct.getOrElse(name, empty), toArray.getOrElse(name, empty), fromArray.getOrElse(name, empty)) match {
-        case (ListBuffer(d), ListBuffer(), ListBuffer()) => new ComputedType(name, d, false)
-        case (ListBuffer(), ListBuffer(t), ListBuffer()) => new ComputedType(name, t, true)
-        case (d, t, ListBuffer()) => new ComputedType(name, s(d ++ t), true)
-        case (ListBuffer(), ListBuffer(), ListBuffer(f)) =>
-          if(f.isArray) new ComputedType(name, f.fromArray.toManifest, false)
-          else new ComputedType(name, f, false)
-        case (d, t, f) => throw new UserBadDataError("Type computation doesn't match specification, direct " + d + ", toArray " + t + ", fromArray " + f)
-      }
+      name ⇒
+        (direct.getOrElse(name, empty), toArray.getOrElse(name, empty), fromArray.getOrElse(name, empty)) match {
+          case (ListBuffer(d), ListBuffer(), ListBuffer()) ⇒ new ComputedType(name, d, false)
+          case (ListBuffer(), ListBuffer(t), ListBuffer()) ⇒ new ComputedType(name, t, true)
+          case (d, t, ListBuffer()) ⇒ new ComputedType(name, s(d ++ t), true)
+          case (ListBuffer(), ListBuffer(), ListBuffer(f)) ⇒
+            if (f.isArray) new ComputedType(name, f.fromArray.toManifest, false)
+            else new ComputedType(name, f, false)
+          case (d, t, f) ⇒ throw new UserBadDataError("Type computation doesn't match specification, direct " + d + ", toArray " + t + ", fromArray " + f)
+        }
     }
   }
 }

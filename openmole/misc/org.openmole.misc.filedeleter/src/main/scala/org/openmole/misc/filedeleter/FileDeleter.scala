@@ -24,7 +24,6 @@ import java.util.logging.Logger
 import scala.collection.mutable.SynchronizedMap
 import scala.collection.mutable.WeakHashMap
 
-
 object FileDeleter {
 
   private val cleanFiles = new LinkedBlockingQueue[File]
@@ -32,23 +31,23 @@ object FileDeleter {
 
   private val thread = new Thread(new Runnable {
 
-      override def run = {
-        var finished = false
+    override def run = {
+      var finished = false
 
-        while (!finished) {
-          try {
-            cleanFiles.take.delete
-          } catch  {
-            case ex: InterruptedException => 
-              Logger.getLogger(FileDeleter.getClass.getName).log(Level.INFO, "File deleter interupted", ex)
-              finished = true
-          }
+      while (!finished) {
+        try {
+          cleanFiles.take.delete
+        } catch {
+          case ex: InterruptedException ⇒
+            Logger.getLogger(FileDeleter.getClass.getName).log(Level.INFO, "File deleter interupted", ex)
+            finished = true
         }
       }
-    })
+    }
+  })
   thread.setDaemon(true)
   thread.start
-    
+
   def assynchonousRemove(file: File) = cleanFiles.add(file)
 
   def deleteWhenGarbageCollected(file: File) = deleters += file -> new DeleteOnFinalize(file.getAbsolutePath)

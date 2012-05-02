@@ -30,18 +30,18 @@ object LoggerService {
   private val LogLevel = new ConfigurationLocation("LoggerService", "LogLevel")
 
   Workspace += (LogLevel, "INFO")
-  
+
   def level(levelLabel: String) = {
     val level = Level.parse(levelLabel)
     SLF4JBridgeHandler.uninstall
 
     val rootLogger = LogManager.getLogManager.getLogger("")
     val handlers = rootLogger.getHandlers
-    for (h <- handlers) rootLogger.removeHandler(h)
-    
+    for (h ← handlers) rootLogger.removeHandler(h)
+
     SLF4JBridgeHandler.install
     rootLogger.setLevel(level)
   }
-  
+
   def init = level(Workspace.preference(LogLevel))
 }

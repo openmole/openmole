@@ -19,8 +19,8 @@ package org.openmole.core.model.execution
 
 object ExecutionState extends Enumeration {
 
-  class ExecutionState(val name: String, val isFinal: Boolean = false) extends Val(name) 
-  
+  class ExecutionState(val name: String, val isFinal: Boolean = false) extends Val(name)
+
   val READY = new ExecutionState("Ready")
   val SUBMITTED = new ExecutionState("Submitted")
   val RUNNING = new ExecutionState("Running")

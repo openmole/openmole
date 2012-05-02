@@ -20,29 +20,26 @@ package org.openmole.plugin.environment
 import org.openmole.core.implementation.tools._
 
 package object glite {
-  
-  lazy val complexsystems = 
+
+  lazy val complexsystems =
     new GliteEnvironment(
       "vo.complex-systems.eu",
       "voms://voms.grid.auth.gr:15160/C=GR/O=HellasGrid/OU=auth.gr/CN=voms.grid.auth.gr",
       "ldap://topbdii.grif.fr:2170",
-      new MyProxy("myproxy.cern.ch")
-    )
-  
-  lazy val biomed = 
+      new MyProxy("myproxy.cern.ch"))
+
+  lazy val biomed =
     new GliteEnvironment(
       "biomed",
       "voms://cclcgvomsli01.in2p3.fr:15000/O=GRID-FR/C=FR/O=CNRS/OU=CC-IN2P3/CN=cclcgvomsli01.in2p3.fr",
       "ldap://topbdii.grif.fr:2170",
-      new MyProxy("myproxy.cern.ch")
-    )
-  
-  lazy val francegrilles = 
+      new MyProxy("myproxy.cern.ch"))
+
+  lazy val francegrilles =
     new GliteEnvironment(
       "vo.france-grilles.fr",
       "voms://cclcgvomsli01.in2p3.fr:15017/O=GRID-FR/C=FR/O=CNRS/OU=CC-IN2P3/CN=cclcgvomsli01.in2p3.fr",
       "ldap://topbdii.grif.fr:2170",
-      new MyProxy("myproxy.cern.ch")
-    )
-  
+      new MyProxy("myproxy.cern.ch"))
+
 }

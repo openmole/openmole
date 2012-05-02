@@ -34,55 +34,52 @@ import scala.collection.mutable.ListBuffer
 
 @RunWith(classOf[JUnitRunner])
 class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
-  
-  
+
   implicit val plugins = PluginSet.empty
-  
+
   class JobGroupingBy2Test extends IGrouping {
-    
+
     var group = true
-    
+
     override def apply(context: IContext) = {
       val ret = new MoleJobGroup(group)
       group = !group
       ret
     }
-    
+
   }
-  
+
   "Grouping jobs" should "not impact a normal mole execution" in {
-    val data = List("A","A","B","C")
+    val data = List("A", "A", "B", "C")
     val i = new Prototype[String]("i")
-     
+
     val sampling = new ExplicitSampling(i, data)
-    
+
     val exc = new Capsule(ExplorationTask("Exploration", sampling))
-     
+
     val emptyT = EmptyTask("Empty")
     emptyT.addInput(i)
     emptyT.addOutput(i)
-    
+
     val emptyC = new Capsule(emptyT)
-    
+
     val testT = new TestTask {
       val name = "Test"
       override val inputs = DataSet(i.toArray)
       override def process(context: IContext) = {
-        context.contains(i.toArray) should equal (true)
-        context.value(i.toArray).get.sorted.deep should equal (data.toArray.deep)
+        context.contains(i.toArray) should equal(true)
+        context.value(i.toArray).get.sorted.deep should equal(data.toArray.deep)
         context
       }
     }
-    
-    
+
     val testC = new Capsule(testT)
-    
+
     new ExplorationTransition(exc, emptyC)
     new AggregationTransition(emptyC, testC)
 
     new MoleExecution(
-      mole = new Mole(exc), 
-      grouping = Map(emptyC -> new JobGroupingBy2Test)
-    ).start.waitUntilEnded 
+      mole = new Mole(exc),
+      grouping = Map(emptyC -> new JobGroupingBy2Test)).start.waitUntilEnded
   }
 }

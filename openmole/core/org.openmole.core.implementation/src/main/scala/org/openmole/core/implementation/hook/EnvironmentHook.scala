@@ -27,32 +27,31 @@ import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.tools.service.Priority
 import scala.ref.WeakReference
 
-
 class EnvironmentHook(private val environment: WeakReference[IEnvironment]) extends IEnvironmentHook {
-  
+
   def this(environment: IEnvironment) = this(new WeakReference(environment))
-  
+
   import Priority._
   import EventDispatcher._
   import IEnvironment._
-  
+
   resume
-  
+
   override def resume = {
     listen(environment(), HIGH, environmentListener, classOf[JobStateChanged])
   }
-  
+
   override def release = {
     unlisten(environment(), environmentListener, classOf[JobStateChanged])
   }
-  
+
   val environmentListener = new EventListener[IEnvironment] {
-    override def triggered(obj: IEnvironment, ev: Event[IEnvironment]) = 
+    override def triggered(obj: IEnvironment, ev: Event[IEnvironment]) =
       ev match {
-        case ev: JobStateChanged => jobStatusChanged(ev.job, ev.newState, ev.oldState)
-        case _ =>
+        case ev: JobStateChanged ⇒ jobStatusChanged(ev.job, ev.newState, ev.oldState)
+        case _ ⇒
       }
-    
+
   }
-  
+
 }

@@ -21,7 +21,7 @@ import org.openmole.core.model.execution.ExecutionState._
 
 object StatisticSample {
   implicit val orderingByDone = new Ordering[StatisticSample] {
-    def compare (x: StatisticSample, y: StatisticSample): Int = (x.done - y.done).toInt
+    def compare(x: StatisticSample, y: StatisticSample): Int = (x.done - y.done).toInt
   }
 }
 

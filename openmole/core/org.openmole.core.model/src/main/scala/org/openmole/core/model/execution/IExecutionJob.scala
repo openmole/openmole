@@ -26,7 +26,7 @@ import ExecutionState._
   case class StateChanged(val newState: ExecutionState, oldState: ExecutionState) extends Event[IExecutionJob]
 }*/
 
-trait IExecutionJob {  
+trait IExecutionJob {
   def state: ExecutionState
   def environment: IEnvironment
   def job: IJob

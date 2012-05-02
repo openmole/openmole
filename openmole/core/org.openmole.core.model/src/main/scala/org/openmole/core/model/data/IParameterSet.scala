@@ -22,5 +22,5 @@ import scala.collection.SetLike
 trait IParameterSet extends SetLike[IParameter[_], IParameterSet with Set[IParameter[_]]] {
 
   def +[T](prototype: IPrototype[T], v: T, `override`: Boolean = false): IParameterSet
-  
-} 
+
+}

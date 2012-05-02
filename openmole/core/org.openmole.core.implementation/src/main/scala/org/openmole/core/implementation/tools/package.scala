@@ -18,7 +18,7 @@
 package org.openmole.core.implementation
 
 package object tools {
-  
+
   implicit def objectToSomeObjectConverter[T](v: T) = Some(v)
-  
+
 }

@@ -29,17 +29,17 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.task.IPluginSet
 
 object NSGA2SteadySigmaElitismTask {
-  
-  def apply(  
-    name: String, 
+
+  def apply(
+    name: String,
     individual: IPrototype[Individual[GAGenomeWithSigma, Fitness]],
-    archive: IPrototype[Array[Individual[GAGenomeWithSigma, Fitness] with Diversity with Rank]], 
+    archive: IPrototype[Array[Individual[GAGenomeWithSigma, Fitness] with Diversity with Rank]],
     nsga2: NSGA2Sigma,
     generation: IPrototype[Int],
     generationSteady: IPrototype[Int],
-    terminated: IPrototype[Boolean])(implicit plugins: IPluginSet) = 
-      new TaskBuilder { builder =>
-        
+    terminated: IPrototype[Boolean])(implicit plugins: IPluginSet) =
+    new TaskBuilder { builder ⇒
+
       addInput(archive)
       addInput(individual)
       addInput(generationSteady)
@@ -47,11 +47,11 @@ object NSGA2SteadySigmaElitismTask {
       addOutput(archive)
       addOutput(generationSteady)
       addOutput(generation)
-      
+
       addParameter(archive -> Array.empty[Individual[GAGenomeWithSigma, Fitness] with Rank with Diversity])
       addParameter(generationSteady -> 0)
       addParameter(generation -> 0)
-      
+
       def toTask = new NSGA2SteadySigmaElitismTask(
         name,
         individual,
@@ -59,36 +59,33 @@ object NSGA2SteadySigmaElitismTask {
         nsga2,
         generation,
         generationSteady,
-        terminated
-      ) {
+        terminated) {
         val inputs = builder.inputs
         val outputs = builder.outputs
-        val parameters = builder.parameters 
+        val parameters = builder.parameters
       }
     }
-  
+
 }
 
-
 sealed abstract class NSGA2SteadySigmaElitismTask(
-  val name: String, 
-  individual: IPrototype[Individual[GAGenomeWithSigma, Fitness]],
-  archive: IPrototype[Array[Individual[GAGenomeWithSigma, Fitness] with Diversity with Rank]], 
-  nsga2: NSGA2Sigma,
-  generation: IPrototype[Int],
-  generationSteady: IPrototype[Int],
-  terminated: IPrototype[Boolean])(implicit val plugins: IPluginSet)extends Task {
+    val name: String,
+    individual: IPrototype[Individual[GAGenomeWithSigma, Fitness]],
+    archive: IPrototype[Array[Individual[GAGenomeWithSigma, Fitness] with Diversity with Rank]],
+    nsga2: NSGA2Sigma,
+    generation: IPrototype[Int],
+    generationSteady: IPrototype[Int],
+    terminated: IPrototype[Boolean])(implicit val plugins: IPluginSet) extends Task {
 
   override def process(context: IContext) = {
-    val currentArchive =  context.valueOrException(archive)
+    val currentArchive = context.valueOrException(archive)
     val globalArchive = context.valueOrException(individual) :: currentArchive.toList
     val newArchive = (nsga2.elitism(nsga2.toI(globalArchive.toIndexedSeq))).toArray
-    
+
     val (term, steady) = nsga2.terminated(currentArchive, newArchive, context.valueOrException(generationSteady))
     val terminatedVariable = new Variable(terminated, term)
     val generationSteadyVariable = new Variable(generationSteady, steady)
     Context(new Variable(archive, newArchive.toArray), terminatedVariable, generationSteadyVariable, new Variable(generation, context.valueOrException(generation) + 1))
   }
-  
-  
+
 }

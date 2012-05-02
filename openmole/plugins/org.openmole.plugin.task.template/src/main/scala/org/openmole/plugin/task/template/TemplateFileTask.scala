@@ -27,9 +27,8 @@ object TemplateFileTask {
   def apply(
     name: String,
     template: File,
-    output: IPrototype[File]
-  )(implicit plugins: IPluginSet) = new TaskBuilder { builder =>
-    
+    output: IPrototype[File])(implicit plugins: IPluginSet) = new TaskBuilder { builder ⇒
+
     def toTask = new TemplateFileTask(name, template, output) {
       val inputs = builder.inputs
       val outputs = builder.outputs + output
@@ -39,9 +38,9 @@ object TemplateFileTask {
 }
 
 sealed abstract class TemplateFileTask(
-  val name: String,
-  template: File, 
-  val output: IPrototype[File])(implicit val plugins: IPluginSet) extends AbstractTemplateFileTask {
- 
+    val name: String,
+    template: File,
+    val output: IPrototype[File])(implicit val plugins: IPluginSet) extends AbstractTemplateFileTask {
+
   override def file(context: IContext) = template
 }

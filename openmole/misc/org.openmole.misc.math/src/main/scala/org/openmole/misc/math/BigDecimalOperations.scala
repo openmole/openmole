@@ -33,11 +33,11 @@ object BigDecimalOperations {
   def intPower(xVal: BigDecimal, exponentVal: Long, scale: Int): BigDecimal = {
     var x = xVal
     var exponent = exponentVal
-    
+
     // If the exponent is negative, compute 1/(x^-exponent).
     if (exponent < 0) {
       return BigDecimal.valueOf(1).divide(intPower(x, -exponent, scale), scale,
-                                          BigDecimal.ROUND_HALF_EVEN)
+        BigDecimal.ROUND_HALF_EVEN)
     }
 
     var power = BigDecimal.valueOf(1)
@@ -52,7 +52,7 @@ object BigDecimalOperations {
 
       // Square x and shift exponent 1 bit to the right.
       x = x.multiply(x)
-      .setScale(scale, BigDecimal.ROUND_HALF_EVEN);
+        .setScale(scale, BigDecimal.ROUND_HALF_EVEN);
       exponent >>= 1
     }
 
@@ -71,13 +71,13 @@ object BigDecimalOperations {
     // Check that x >= 0.
     var x = xVal
     if (x.signum() < 0) throw new IllegalArgumentException("x < 0")
-    
+
     val sp1 = scale + 1
     val n = x;
     val i = BigDecimal.valueOf(index)
-    val im1 = BigDecimal.valueOf(index-1)
+    val im1 = BigDecimal.valueOf(index - 1)
     val tolerance = BigDecimal.valueOf(5).movePointLeft(sp1)
-    
+
     var xPrev: BigDecimal = null
 
     // The initial approximation is x/index.
@@ -87,7 +87,7 @@ object BigDecimalOperations {
     // (two successive approximations are equal after rounding).
     do {
       // x^(index-1)
-      val xToIm1 = intPower(x, index-1, sp1)
+      val xToIm1 = intPower(x, index - 1, sp1)
 
       // x^index
       val xToI = x.multiply(xToIm1).setScale(sp1, BigDecimal.ROUND_HALF_EVEN);
@@ -140,7 +140,7 @@ object BigDecimalOperations {
     val t = expTaylor(z, scale)
 
     val maxLong = BigDecimal.valueOf(Long.MaxValue)
-    var result  = BigDecimal.valueOf(1);
+    var result = BigDecimal.valueOf(1);
 
     // Compute and return t^whole using intPower().
     // If whole > Long.MAX_VALUE, then first compute products
@@ -160,11 +160,11 @@ object BigDecimalOperations {
    */
   private def expTaylor(x: BigDecimal, scale: Int): BigDecimal = {
     var factorial = BigDecimal.valueOf(1)
-    var xPower    = x
-    var sumPrev:BigDecimal = null
+    var xPower = x
+    var sumPrev: BigDecimal = null
 
     // 1 + x
-    var sum  = x.add(BigDecimal.valueOf(1))
+    var sum = x.add(BigDecimal.valueOf(1))
 
     // Loop until the sums converge
     // (two successive sums are equal after rounding).
@@ -177,7 +177,7 @@ object BigDecimalOperations {
       factorial = factorial.multiply(BigDecimal.valueOf(i))
 
       // x^i/i!
-      val term = xPower.divide(factorial, scale,BigDecimal.ROUND_HALF_EVEN)
+      val term = xPower.divide(factorial, scale, BigDecimal.ROUND_HALF_EVEN)
 
       // sum = sum + x^i/i!
       sumPrev = sum
@@ -203,9 +203,7 @@ object BigDecimalOperations {
 
     if (magnitude < 3) {
       return lnNewton(x, scale)
-    }
-
-    // Compute magnitude*ln(x^(1/magnitude)).
+    } // Compute magnitude*ln(x^(1/magnitude)).
     else {
 
       // x^(1/magnitude)
@@ -241,7 +239,7 @@ object BigDecimalOperations {
 
       // (e^x - n)/e^x
       term = eToX.subtract(n)
-      .divide(eToX, sp1, BigDecimal.ROUND_DOWN)
+        .divide(eToX, sp1, BigDecimal.ROUND_DOWN)
 
       // x - (e^x - n)/e^x
       x = x.subtract(term)
@@ -265,8 +263,7 @@ object BigDecimalOperations {
     // If x is negative, return -arctan(-x).
     if (x.signum() == -1) {
       return arctan(x.negate, scale).negate
-    }
-    else {
+    } else {
       return arctanTaylor(x, scale)
     }
   }
@@ -284,12 +281,12 @@ object BigDecimalOperations {
     var addFlag = false
 
     var power = x
-    var sum   = x
+    var sum = x
     var term: BigDecimal = null
 
     // Convergence tolerance = 5*(10^-(scale+1))
     val tolerance = BigDecimal.valueOf(5).movePointLeft(sp1)
-    
+
     // Loop until the approximations converge
     // (two successive approximations are within the tolerance).
     do {
@@ -300,7 +297,7 @@ object BigDecimalOperations {
       term = power.divide(BigDecimal.valueOf(i), sp1, BigDecimal.ROUND_HALF_EVEN)
 
       // sum = sum +- (x^i)/i
-      sum = if(addFlag) sum.add(term) else sum.subtract(term)
+      sum = if (addFlag) sum.add(term) else sum.subtract(term)
 
       i += 2
       addFlag = !addFlag;

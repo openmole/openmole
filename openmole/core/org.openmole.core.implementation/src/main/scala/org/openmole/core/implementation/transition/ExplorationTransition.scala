@@ -25,9 +25,9 @@ import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.core.model.task.IExplorationTask
 import org.openmole.core.model.task.ITask
 import org.openmole.core.model.data.DataModeMask._
-import org.openmole.core.model.transition.{IExplorationTransition, ISlot, ICondition, IAggregationTransition}
-import org.openmole.core.model.data.{IPrototype, IContext, IVariable, IData}
-import org.openmole.core.model.mole.{ICapsule, ITicket, ISubMoleExecution}
+import org.openmole.core.model.transition.{ IExplorationTransition, ISlot, ICondition, IAggregationTransition }
+import org.openmole.core.model.data.{ IPrototype, IContext, IVariable, IData }
+import org.openmole.core.model.mole.{ ICapsule, ITicket, ISubMoleExecution }
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.UserBadDataError
@@ -41,65 +41,65 @@ class ExplorationTransition(start: ICapsule, end: ISlot, condition: ICondition =
 
   override def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {
     val subSubMole = subMole.newChild
-    
+
     registerAggregationTransitions(ticket, subSubMole)
     submitIn(context, ticket, subSubMole)
   }
 
   def submitIn(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
-    val (factors, outputs) = start.outputs.partition(d => (d.mode is explore) && d.prototype.`type`.isArray)
+    val (factors, outputs) = start.outputs.partition(d ⇒ (d.mode is explore) && d.prototype.`type`.isArray)
     val typedFactors = factors.map(_.prototype.asInstanceOf[IPrototype[Array[Any]]])
     val values = typedFactors.toList.map(context.value(_).get.toIterable).transpose
-        
+
     val endTask = end.capsule.taskOrException
-    
-    for(value <- values) {
+
+    for (value ← values) {
 
       val newTicket = subMole.moleExecution.nextTicket(ticket)
-      
+
       val variables = new ListBuffer[IVariable[_]]
-      
-      for (in <- outputs) 
+
+      for (in ← outputs)
         context.variable(in.prototype) match {
-          case Some(v) => variables += v      
-          case None =>
+          case Some(v) ⇒ variables += v
+          case None ⇒
         }
-      
-      for((p, v) <- typedFactors zip value) {
+
+      for ((p, v) ← typedFactors zip value) {
         val fp = p.fromArray
-        if(fp.accepts(v)) variables += new Variable(fp, v)
-        else throw new UserBadDataError("Found value of type " + v.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + fp) 
+        if (fp.accepts(v)) variables += new Variable(fp, v)
+        else throw new UserBadDataError("Found value of type " + v.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + fp)
       }
       submitNextJobsIfReady(ListBuffer() ++ variables, newTicket, subMole)
     }
-    
+
   }
-  
+
   private def registerAggregationTransitions(ticket: ITicket, subMoleExecution: ISubMoleExecution) = {
     val alreadySeen = new HashSet[ICapsule]
-    val toProcess = new ListBuffer[(ICapsule,Int)]
-    toProcess += ((end.capsule,0))
+    val toProcess = new ListBuffer[(ICapsule, Int)]
+    toProcess += ((end.capsule, 0))
 
-    while(!toProcess.isEmpty) {
+    while (!toProcess.isEmpty) {
       val cur = toProcess.remove(0)
       val capsule = cur._1
       val level = cur._2
-      
-      if(!alreadySeen(capsule)) {
+
+      if (!alreadySeen(capsule)) {
         alreadySeen += capsule
-      
+
         capsule.outputTransitions.foreach {
-          case t: IAggregationTransition => 
-            if(level > 0) toProcess += t.end.capsule -> (level - 1)
-            else if(level == 0) {
+          case t: IAggregationTransition ⇒
+            if (level > 0) toProcess += t.end.capsule -> (level - 1)
+            else if (level == 0) {
               subMoleExecution.aggregationTransitionRegistry.register(t, ticket, new ListBuffer)
               EventDispatcher.listen(subMoleExecution, Priority.LOW, new AggregationTransitionAdapter(t), classOf[ISubMoleExecution.Finished])
             }
-          case t: IExplorationTransition => toProcess += t.end.capsule -> (level + 1)
-          case t => toProcess += t.end.capsule -> level
+          case t: IExplorationTransition ⇒ toProcess += t.end.capsule -> (level + 1)
+          case t ⇒ toProcess += t.end.capsule -> level
         }
       }
     }
   }
-  
+
 }

@@ -23,7 +23,7 @@ import org.openmole.core.implementation.mole.MoleJobGroup
 
 /**
  * Group mole jobs given a fixed number of batch.
- * 
+ *
  * @param numberOfBatch total number of batch
  */
 class NumberOfBatchGrouping(numberOfBatch: Int) extends IGrouping {

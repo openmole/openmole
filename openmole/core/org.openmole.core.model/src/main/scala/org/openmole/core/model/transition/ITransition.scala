@@ -24,7 +24,7 @@ import org.openmole.core.model.data.IData
 import org.openmole.core.model.mole.ISubMoleExecution
 
 trait ITransition {
-  
+
   /**
    *
    * Get the starting capsule of this transition.
@@ -32,7 +32,6 @@ trait ITransition {
    * @return the starting capsule of this transition
    */
   def start: ICapsule
-
 
   /**
    *
@@ -68,9 +67,9 @@ trait ITransition {
   def filter: Set[String]
 
   /**
-   * Get the unfiltred user output data of the starting capsule going through 
+   * Get the unfiltred user output data of the starting capsule going through
    * this transition
-   * 
+   *
    * @return the unfiltred output data of the staring capsule
    */
   def unFiltred: Iterable[IData[_]]
@@ -85,5 +84,5 @@ trait ITransition {
    * @param subMole   current submole
    */
   def perform(from: IContext, ticket: ITicket, subMole: ISubMoleExecution)
-  
+
 }

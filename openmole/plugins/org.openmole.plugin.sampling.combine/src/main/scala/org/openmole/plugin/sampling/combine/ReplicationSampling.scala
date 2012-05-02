@@ -28,12 +28,11 @@ import org.openmole.core.model.sampling.ISampling
 import org.openmole.plugin.domain.modifier.TakeDomain
 
 sealed class ReplicationSampling[T](sampling: ISampling, seederFactor: IFactor[T, IDomain[T] with IIterable[T]], nbReplication: Int) extends ISampling {
-  
+
   override def inputs = sampling.inputs
   override def prototypes = seederFactor.prototype :: sampling.prototypes.toList
-  
-  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
+
+  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] =
     new CompleteSampling(sampling, new DiscreteFactor(seederFactor.prototype, new TakeDomain(seederFactor.domain, nbReplication))).build(context)
- 
- 
+
 }

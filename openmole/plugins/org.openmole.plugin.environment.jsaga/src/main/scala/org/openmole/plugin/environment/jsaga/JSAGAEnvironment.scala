@@ -25,24 +25,22 @@ import org.openmole.plugin.environment.jsaga._
 import Requirement._
 
 object JSAGAEnvironment {
-  val DefaultRequieredMemory  = new ConfigurationLocation("JSAGAEnvironment", "RequieredMemory")
+  val DefaultRequieredMemory = new ConfigurationLocation("JSAGAEnvironment", "RequieredMemory")
 
-  Workspace += (DefaultRequieredMemory, "1024")  
+  Workspace += (DefaultRequieredMemory, "1024")
 }
-
 
 abstract class JSAGAEnvironment extends BatchEnvironment {
   import JSAGAEnvironment._
-    
-  
+
   val memory = max(Workspace.preferenceAsInt(DefaultRequieredMemory), runtimeMemory).toString
-  
+
   def requirements: Map[String, String]
   val allRequirements = {
     requirements.get(MEMORY) match {
-      case Some(m) => if(m < memory) requirements + (MEMORY -> memory) else requirements
-      case None => requirements + (MEMORY -> memory)
+      case Some(m) ⇒ if (m < memory) requirements + (MEMORY -> memory) else requirements
+      case None ⇒ requirements + (MEMORY -> memory)
     }
   }
-  
+
 }

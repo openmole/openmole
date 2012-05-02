@@ -23,29 +23,28 @@ import org.openmole.plugin.task.external.ExternalTaskBuilder
 import scala.collection.mutable.ListBuffer
 
 abstract class NetLogoTaskBuilder extends ExternalTaskBuilder {
-    
+
   private var _netLogoInputs = new ListBuffer[(IPrototype[_], String)]
   private var _netLogoOutputs = new ListBuffer[(String, IPrototype[_])]
- 
+
   def netLogoInputs = _netLogoInputs.toList
-  
+
   def addNetLogoInput(p: IPrototype[_], n: String): this.type = {
     _netLogoInputs += p -> n
     this addInput p
     this
   }
-    
+
   def addNetLogoInput(p: IPrototype[_]): this.type = this.addNetLogoInput(p, p.name)
-      
+
   def netLogoOutputs = _netLogoOutputs.toList
-  
-  
+
   def addNetLogoOutput(n: String, p: IPrototype[_]): this.type = {
     _netLogoOutputs += n -> p
     this addOutput p
     this
   }
-    
+
   def addNetLogoOutput(p: IPrototype[_]): this.type = this.addNetLogoOutput(p.name, p)
-  
+
 }

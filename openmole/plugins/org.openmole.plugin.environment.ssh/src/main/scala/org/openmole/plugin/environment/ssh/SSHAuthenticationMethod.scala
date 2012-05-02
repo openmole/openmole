@@ -23,12 +23,12 @@ import org.openmole.core.batch.environment.AuthenticationMethod
 
 trait SSHAuthenticationMethod extends AuthenticationMethod {
   def method = classOf[SSHAuthenticationMethod]
-  
+
   def target: String
-  
+
   def init = JSAGASessionService.addContext(target, context)
-  
+
   def context: Context
-  
+
   override def toString = "Target = " + target
 }

@@ -30,28 +30,28 @@ object ProxyChecker extends Logger {
 import ProxyChecker._
 
 class ProxyChecker(
-  context: Context,
-  authentication: WeakReference[GliteAuthentication],
-  expires: Option[Int] = None) extends IUpdatableWithVariableDelay {
+    context: Context,
+    authentication: WeakReference[GliteAuthentication],
+    expires: Option[Int] = None) extends IUpdatableWithVariableDelay {
 
   override def update: Boolean =
     authentication.get match {
-      case Some(auth) => 
+      case Some(auth) ⇒
         try auth.reinit(context, expires)
         catch {
-          case(ex: Throwable) => logger.log(SEVERE, "Error while renewing the proxy", ex)
-        } 
+          case (ex: Throwable) ⇒ logger.log(SEVERE, "Error while renewing the proxy", ex)
+        }
         true
-      case None => false
+      case None ⇒ false
     }
-  
+
   def delay =
     try {
-      val interval = (context.getAttribute(Context.LIFETIME).toLong  * 1000 * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong
+      val interval = (context.getAttribute(Context.LIFETIME).toLong * 1000 * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong
       logger.fine("Renew proxy in " + interval)
       interval
     } catch {
-      case e =>
+      case e ⇒
         logger.log(SEVERE, "Error while getting the check interval", e)
         defaultCheckTime
     }
@@ -65,5 +65,5 @@ class ProxyChecker(
     logger.fine("Renew proxy in " + renew)
     renew
   }*/
-  
+
 }

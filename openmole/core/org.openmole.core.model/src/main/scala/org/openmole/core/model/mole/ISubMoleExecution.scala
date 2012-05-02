@@ -32,23 +32,22 @@ object ISubMoleExecution {
 }
 
 trait ISubMoleExecution {
- 
+
   def parent: Option[ISubMoleExecution]
   def childs: Iterable[ISubMoleExecution]
-  
+
   def isRoot: Boolean
   def moleExecution: IMoleExecution
-   
-   
+
   def jobs: Iterable[IMoleJob]
-  
+
   def cancel
-  
+
   def masterCapsuleRegistry: IRegistryWithTicket[IMasterCapsule, IContext]
   def aggregationTransitionRegistry: IRegistryWithTicket[IAggregationTransition, Buffer[IVariable[_]]]
   def transitionRegistry: IRegistryWithTicket[ITransition, Buffer[IVariable[_]]]
 
   def submit(capsule: ICapsule, context: IContext, ticket: ITicket)
-  def newChild: ISubMoleExecution 
- 
+  def newChild: ISubMoleExecution
+
 }

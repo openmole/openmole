@@ -23,34 +23,29 @@ import org.openmole.core.model.mole.IGrouping
 import org.openmole.core.model.transition.ISlot
 
 object Puzzle {
-  
-  def merge(  
+
+  def merge(
     first: ISlot,
     last: ICapsule,
-    puzzles: Iterable[Puzzle]
-  ) = Puzzle(
-        first,
-        last, 
-        Map() ++ puzzles.flatMap{_.selection}, 
-        Map() ++ puzzles.flatMap{_.grouping}
-      )
-  
+    puzzles: Iterable[Puzzle]) = Puzzle(
+    first,
+    last,
+    Map() ++ puzzles.flatMap { _.selection },
+    Map() ++ puzzles.flatMap { _.grouping })
+
 }
 
-
 case class Puzzle(
-  val first: ISlot,
-  val last: ICapsule,
-  val selection: Map[ICapsule, IEnvironmentSelection],
-  val grouping: Map[ICapsule, IGrouping]
-) {
-  
-  def +(p: Puzzle) = 
+    val first: ISlot,
+    val last: ICapsule,
+    val selection: Map[ICapsule, IEnvironmentSelection],
+    val grouping: Map[ICapsule, IGrouping]) {
+
+  def +(p: Puzzle) =
     new Puzzle(
       first,
       p.last,
       selection ++ p.selection,
-      grouping ++ p.grouping
-    )
-  
+      grouping ++ p.grouping)
+
 }

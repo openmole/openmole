@@ -24,7 +24,7 @@ import org.openmole.core.model.mole.IGrouping
 
 /**
  * Group mole jobs by group of numberOfMoleJobs.
- * 
+ *
  * @param numberOfMoleJobs size of each batch
  */
 class NumberOfMoleJobsGrouping(numberOfMoleJobs: Int) extends IGrouping {
@@ -35,12 +35,12 @@ class NumberOfMoleJobsGrouping(numberOfMoleJobs: Int) extends IGrouping {
   override def apply(context: IContext) = {
     val ret = new MoleJobGroup(currentBatchNumber)
     currentNumberOfJobs += 1
-    if(currentNumberOfJobs >= numberOfMoleJobs) {
+    if (currentNumberOfJobs >= numberOfMoleJobs) {
       currentNumberOfJobs = 0
       currentBatchNumber += 1
     }
     ret
   }
-  
+
   override def complete(jobs: Iterable[IMoleJob]) = jobs.size >= numberOfMoleJobs
 }

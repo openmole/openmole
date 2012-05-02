@@ -24,23 +24,23 @@ import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.hook.CapsuleExecutionHook
 import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.data.{IContext,IPrototype}
+import org.openmole.core.model.data.{ IContext, IPrototype }
 import org.openmole.misc.exception.UserBadDataError
 
 class DeleteFileHook(moleExecution: IMoleExecution, capsule: ICapsule, toDelete: IPrototype[File]*) extends CapsuleExecutionHook(moleExecution, capsule) {
-  
-  override def process(moleJob: IMoleJob)  = {
+
+  override def process(moleJob: IMoleJob) = {
     import moleJob.context
-    
-    toDelete.foreach { 
-      prototype => 
-      context.value(prototype) match {
-        case Some(file) => file.recursiveDelete
-        case None => throw new UserBadDataError("No variable " + prototype + " found.")
-      }
+
+    toDelete.foreach {
+      prototype ⇒
+        context.value(prototype) match {
+          case Some(file) ⇒ file.recursiveDelete
+          case None ⇒ throw new UserBadDataError("No variable " + prototype + " found.")
+        }
     }
   }
-   
+
   override def inputs = DataSet(toDelete)
 
 }

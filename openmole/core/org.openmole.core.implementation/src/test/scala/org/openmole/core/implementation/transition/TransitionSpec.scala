@@ -34,238 +34,219 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
 
   "A transition" should "enable variable values to be transmitted from a task to another" in {
     val p = new Prototype[String]("p")
-    
+
     val t1 = new TestTask {
       val name = "Test write"
       override def outputs = DataSet(p)
       override def process(context: IContext) = context + (p -> "Test")
     }
-    
-    
+
     val t2 = new TestTask {
       val name = "Test read"
       override def inputs = DataSet(p)
       override def process(context: IContext) = {
-        context.value(p).get should equal ("Test")
+        context.value(p).get should equal("Test")
         context
       }
     }
-    
-    
+
     val t1c = new Capsule(t1)
     val t2c = new Capsule(t2)
-    
+
     new Transition(t1c, t2c)
-    
+
     new MoleExecution(new Mole(t1c)).start.waitUntilEnded
   }
-  
-  
+
   "A conjonctive pattern" should "enable variable values to be transmitted from a task to another" in {
     val p1 = new Prototype[String]("p1")
     val p2 = new Prototype[String]("p2")
-    
+
     val init = EmptyTask("Init")
-    
+
     val t1 = new TestTask {
       val name = "Test write 1"
       override def outputs = DataSet(p1)
       override def process(context: IContext) = context + (p1 -> "Test1")
     }
-    
-    
+
     val t2 = new TestTask {
       val name = "Test write 2"
       override def outputs = DataSet(p2)
       override def process(context: IContext) = context + (p2 -> "Test2")
     }
-    
-    
+
     val t3 = new TestTask {
       val name = "Test read"
       override def inputs = DataSet(p1, p2)
       override def process(context: IContext) = {
-        context.value(p1).get should equal ("Test1")
-        context.value(p2).get should equal ("Test2") 
+        context.value(p1).get should equal("Test1")
+        context.value(p2).get should equal("Test2")
         context
       }
     }
-    
-    
+
     val initc = new Capsule(init)
     val t1c = new Capsule(t1)
     val t2c = new Capsule(t2)
     val t3c = new Capsule(t3)
-    
+
     new Transition(initc, t1c)
     new Transition(initc, t2c)
     new Transition(t1c, t3c)
     new Transition(t2c, t3c)
-    
+
     new MoleExecution(new Mole(initc)).start.waitUntilEnded
-  
+
   }
-  
+
   "A conjonctive pattern" should "aggregate variable of the same name in an array of closest common supertype" in {
-        
 
     val p1 = new Prototype[java.lang.Long]("p")
     val p2 = new Prototype[java.lang.Integer]("p")
     val pArray = new Prototype[Array[java.lang.Number]]("p")
-    
+
     val init = EmptyTask("Init")
-    
+
     val t1 = new TestTask {
       val name = "Test write 1"
       override def outputs = DataSet(p1)
       override def process(context: IContext) = context + (p1 -> new java.lang.Long(1L))
     }
-    
-    
+
     val t2 = new TestTask {
       val name = "Test write 2"
       override def outputs = DataSet(p2)
       override def process(context: IContext) = context + (p2 -> new java.lang.Integer(2))
     }
-    
+
     val t3 = new TestTask {
       val name = "Test read"
       override def inputs = DataSet(pArray)
       override def process(context: IContext) = {
         //println(context.value(pArtoStringray).map(_.intL))
-        context.value(pArray).get.map(_.intValue).contains(1) should equal (true)
-        context.value(pArray).get.map(_.intValue).contains(2) should equal (true)
-  
-        context.value(pArray).get.getClass should equal (classOf[Array[java.lang.Number]])
+        context.value(pArray).get.map(_.intValue).contains(1) should equal(true)
+        context.value(pArray).get.map(_.intValue).contains(2) should equal(true)
+
+        context.value(pArray).get.getClass should equal(classOf[Array[java.lang.Number]])
         context
       }
     }
-    
-    
+
     val initc = new Capsule(init)
     val t1c = new Capsule(t1)
     val t2c = new Capsule(t2)
     val t3c = new Capsule(t3)
-    
+
     new Transition(initc, t1c)
     new Transition(initc, t2c)
     new Transition(t1c, t3c)
     new Transition(t2c, t3c)
-    
+
     new MoleExecution(new Mole(initc)).start.waitUntilEnded
-    
+
   }
-    
+
   "A conjonctive pattern" should "be robust to concurent execution" in {
     var executed = false
     val p1 = new Prototype[String]("p1")
     val p2 = new Prototype[String]("p2")
-    
+
     val init = EmptyTask("Init")
-    
+
     val t1 = new TestTask {
       val name = "Test write 1"
       override def outputs = DataSet(p1)
       override def process(context: IContext) = context + (p1 -> "Test1")
     }
-    
-    
+
     val t2 = new TestTask {
       val name = "Test write 2"
       override def outputs = DataSet(p2)
       override def process(context: IContext) = context + (p2 -> "Test2")
     }
-    
-    
+
     val t3 = new TestTask {
       val name = "Test read"
       override def inputs = DataSet(p1, p2.toArray)
       override def process(context: IContext) = {
-        context.value(p1).get should equal ("Test1")
-        context.value(p2.toArray).get.head should equal ("Test2") 
-        context.value(p2.toArray).get.size should equal (100)
+        context.value(p1).get should equal("Test1")
+        context.value(p2.toArray).get.head should equal("Test2")
+        context.value(p2.toArray).get.size should equal(100)
         executed = true
         context
       }
     }
-    
-    
+
     val initc = new Capsule(init)
     val t1c = new Capsule(t1)
 
     val t3c = new Capsule(t3)
-    
-    val t2CList = (0 until 100).map { 
-      i => 
+
+    val t2CList = (0 until 100).map {
+      i ⇒
         val t2c = new Capsule(t2)
         new Transition(initc, t2c)
-        new Transition(t2c, t3c)   
+        new Transition(t2c, t3c)
         t2c
     }
-    
+
     new Transition(initc, t1c)
     new Transition(t1c, t3c)
 
     val env = new LocalExecutionEnvironment(20)
-    
+
     new MoleExecution(
-      new Mole(initc), 
-      t2CList.map{_ -> new FixedEnvironmentSelection(env)}.toMap
-    ).start.waitUntilEnded
-    executed should equal (true)
+      new Mole(initc),
+      t2CList.map { _ -> new FixedEnvironmentSelection(env) }.toMap).start.waitUntilEnded
+    executed should equal(true)
   }
-  
+
   "A conjonctive pattern" should "aggregate array variable of the same name in an array of array of the closest common supertype" in {
-    
+
     val p1 = new Prototype[Array[java.lang.Long]]("p")
     val p2 = new Prototype[Array[java.lang.Integer]]("p")
     val pArray = new Prototype[Array[Array[java.lang.Number]]]("p")
-    
+
     val init = EmptyTask("Init")
-    
+
     val t1 = new TestTask {
       val name = "Test write 1"
       override def outputs = DataSet(p1)
       override def process(context: IContext) = context + (p1 -> Array(new java.lang.Long(1L)))
     }
-    
-    
+
     val t2 = new TestTask {
       val name = "Test write 2"
       override def outputs = DataSet(p2)
       override def process(context: IContext) = context + (p2 -> Array(new java.lang.Integer(2)))
     }
-    
-    
+
     val t3 = new TestTask {
       val name = "Test read"
       override def inputs = DataSet(pArray)
       override def process(context: IContext) = {
         val res = IndexedSeq(context.value(pArray).get(0).deep, context.value(pArray).get(1).deep)
-        
-        res.contains(Array(new java.lang.Integer(1)).deep) should equal (true)
-        res.contains(Array(new java.lang.Long(2L)).deep) should equal (true)
-  
-        context.value(pArray).get.getClass should equal (classOf[Array[Array[java.lang.Number]]])
+
+        res.contains(Array(new java.lang.Integer(1)).deep) should equal(true)
+        res.contains(Array(new java.lang.Long(2L)).deep) should equal(true)
+
+        context.value(pArray).get.getClass should equal(classOf[Array[Array[java.lang.Number]]])
         context
       }
     }
-    
-    
+
     val initc = new Capsule(init)
     val t1c = new Capsule(t1)
     val t2c = new Capsule(t2)
     val t3c = new Capsule(t3)
-    
+
     new Transition(initc, t1c)
     new Transition(initc, t2c)
     new Transition(t1c, t3c)
     new Transition(t2c, t3c)
-    
+
     new MoleExecution(new Mole(initc)).start.waitUntilEnded
   }
-  
-  
-  
-  
+
 }

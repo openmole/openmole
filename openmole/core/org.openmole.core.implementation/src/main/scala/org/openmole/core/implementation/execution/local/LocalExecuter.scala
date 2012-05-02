@@ -33,11 +33,11 @@ object LocalExecuter extends Logger
 class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
 
   import LocalExecuter._
-  
+
   var stop: Boolean = false
 
   override def run = {
-    
+
     while (!stop) {
       val executionJob = environment.takeNextjob
       try {
@@ -45,25 +45,25 @@ class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
         executionJob.state = ExecutionState.RUNNING
         val running = System.currentTimeMillis
 
-        for (moleJob <- job.moleJobs) {
+        for (moleJob ← job.moleJobs) {
           if (moleJob.state != State.CANCELED) {
             if (classOf[IMoleTask].isAssignableFrom(moleJob.task.getClass)) jobGoneIdle
             moleJob.perform
-            
+
             moleJob.exception match {
-              case Some(e) => EventDispatcher.trigger(environment: IEnvironment, new MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
-              case _ =>
+              case Some(e) ⇒ EventDispatcher.trigger(environment: IEnvironment, new MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
+              case _ ⇒
             }
           }
         }
         executionJob.state = ExecutionState.DONE
       } catch {
-        case e: InterruptedException => 
+        case e: InterruptedException ⇒
           if (!stop) {
             EventDispatcher.trigger(environment: IEnvironment, new ExceptionRaised(executionJob, e, SEVERE))
-            logger.log(WARNING, "Interrupted despite stop is false.", e)  
+            logger.log(WARNING, "Interrupted despite stop is false.", e)
           }
-        case e => 
+        case e ⇒
           EventDispatcher.trigger(environment: IEnvironment, new ExceptionRaised(executionJob, e, SEVERE))
           logger.log(SEVERE, null, e)
       } finally executionJob.state = ExecutionState.KILLED

@@ -26,31 +26,29 @@ import org.openmole.plugin.task.external.ExternalTaskBuilder
 import scala.collection.JavaConversions._
 
 object SystemExecTask {
-  
+
   def apply(
-    name: String, 
-    cmd: String, 
+    name: String,
+    cmd: String,
     dir: String = "",
     exceptionIfReturnValueNotZero: Boolean = true,
-    returnValue: Option[IPrototype[Int]] = None
-  )(implicit plugins: IPluginSet) = new ExternalTaskBuilder { builder =>
+    returnValue: Option[IPrototype[Int]] = None)(implicit plugins: IPluginSet) = new ExternalTaskBuilder { builder ⇒
     def toTask = new SystemExecTask(name, cmd, dir, exceptionIfReturnValueNotZero, returnValue) {
-      val inputs = builder.inputs 
+      val inputs = builder.inputs
       val outputs: IDataSet = builder.outputs ++ DataSet(returnValue)
       val parameters = builder.parameters
       val provided = builder.provided
       val produced = builder.produced
     }
   }
-  
+
 }
 
 sealed abstract class SystemExecTask(
-  val name: String, 
-  val cmd: String, 
-  val dir: String,
-  val exceptionIfReturnValueNotZero: Boolean,
-  val returnValue: Option[IPrototype[Int]]
-)(implicit val plugins: IPluginSet) extends AbstractSystemExecTask {
-  override protected def execute(process: Process, context: IContext) = executeProcess(process,System.out,System.err) -> List.empty[IVariable[_]]
+    val name: String,
+    val cmd: String,
+    val dir: String,
+    val exceptionIfReturnValueNotZero: Boolean,
+    val returnValue: Option[IPrototype[Int]])(implicit val plugins: IPluginSet) extends AbstractSystemExecTask {
+  override protected def execute(process: Process, context: IContext) = executeProcess(process, System.out, System.err) -> List.empty[IVariable[_]]
 }

@@ -28,33 +28,31 @@ import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.workspace.Workspace
 
 object SerializeXMLTask {
-  
+
   def apply(
-    name: String
-  )(implicit plugins: IPluginSet) = 
-    new SerializeXMLTaskBuilder { builder =>
-      
+    name: String)(implicit plugins: IPluginSet) =
+    new SerializeXMLTaskBuilder { builder ⇒
+
       def toTask = new SerializeXMLTask(name, builder.serialize) {
         val inputs = builder.inputs
         val outputs = builder.outputs
         val parameters = builder.parameters
       }
-      
+
     }
-  
+
 }
 
 sealed abstract class SerializeXMLTask(
-  val name: String, 
-  serialize: List[(IPrototype[_], IPrototype[File])])
-(implicit val plugins: IPluginSet) extends Task {
-  
+    val name: String,
+    serialize: List[(IPrototype[_], IPrototype[File])])(implicit val plugins: IPluginSet) extends Task {
+
   override def process(context: IContext) =
     Context.empty ++ serialize.map {
-      case(input, output) =>
+      case (input, output) ⇒
         val file = Workspace.newFile
         SerializerService.serialize(context.value(input).get, file)
         new Variable(output, file)
-    } 
+    }
 
 }

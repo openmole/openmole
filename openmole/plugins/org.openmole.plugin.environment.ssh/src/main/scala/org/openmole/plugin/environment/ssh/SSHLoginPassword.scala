@@ -22,7 +22,7 @@ import org.ogf.saga.context.Context
 import org.openmole.misc.workspace.Workspace
 
 class SSHLoginPassword(val login: String, val cypheredPassword: String, val target: String) extends SSHAuthenticationMethod {
-  
+
   override def context = {
     val ctx = JSAGASessionService.createContext
     ctx.setAttribute(Context.TYPE, "UserPass")
@@ -30,7 +30,7 @@ class SSHLoginPassword(val login: String, val cypheredPassword: String, val targ
     ctx.setAttribute(Context.USERPASS, Workspace.decrypt(cypheredPassword))
     ctx
   }
-  
-  override def toString = super.toString + ", Login / password, login = " + login 
-  
+
+  override def toString = super.toString + ", Login / password, login = " + login
+
 }

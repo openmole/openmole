@@ -27,23 +27,22 @@ import org.openmole.core.model.task.ITask
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
-
 class Mole(val root: ICapsule, val implicits: IContext = Context.empty) extends IMole {
 
   override def tasks: Iterable[ITask] = capsules.flatMap(_.task).toSet
-  
+
   override def capsules: Seq[ICapsule] = {
     val visited = new HashSet[ICapsule]
     val list = new ListBuffer[ICapsule]
     val toExplore = new ListBuffer[ICapsule]
-  
+
     toExplore += root
 
     while (!(toExplore.isEmpty)) {
       val current = toExplore.remove(0)
 
       if (!visited.contains(current)) {
-        for (transition <- current.outputTransitions) {
+        for (transition ← current.outputTransitions) {
           toExplore += transition.end.capsule
         }
         visited += current
@@ -52,6 +51,5 @@ class Mole(val root: ICapsule, val implicits: IContext = Context.empty) extends 
     }
     list
   }
-  
 
 }

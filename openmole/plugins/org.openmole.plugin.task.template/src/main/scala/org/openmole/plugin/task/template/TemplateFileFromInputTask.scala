@@ -25,14 +25,12 @@ import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.task.IPluginSet
 
-
 object TemplateFileFromInputTask {
   def apply(
     name: String,
     template: IPrototype[File],
-    output: IPrototype[File]
-  )(implicit plugins: IPluginSet) = new TaskBuilder { builder =>
-    
+    output: IPrototype[File])(implicit plugins: IPluginSet) = new TaskBuilder { builder ⇒
+
     def toTask = new TemplateFileFromInputTask(name, template, output) {
       val inputs = builder.inputs + template
       val outputs = builder.outputs + output
@@ -42,11 +40,10 @@ object TemplateFileFromInputTask {
 }
 
 sealed abstract class TemplateFileFromInputTask(
-  val name: String,
-  template: IPrototype[File],
-  val output: IPrototype[File])
-(implicit val plugins: IPluginSet) extends AbstractTemplateFileTask {
+    val name: String,
+    template: IPrototype[File],
+    val output: IPrototype[File])(implicit val plugins: IPluginSet) extends AbstractTemplateFileTask {
 
   override def file(context: IContext) = context.valueOrException(template)
- 
+
 }

@@ -18,26 +18,26 @@
 package org.openmole.misc.eventdispatcher
 
 class SortedListeners[T] extends Iterable[T] {
-  
+
   class Listners(listners: List[(Int, T)]) {
-    
+
     def iterator = sorted.iterator
     lazy val sorted = listners.sortBy(_._1).map(_._2).reverse
-    
+
     def isEmpty = listners.isEmpty
     def -(elt: T) = new Listners(listners.filter(_._2 != elt))
     def +(priority: Int, elt: T) = new Listners(priority -> elt :: listners.filter(_._2 != elt))
-    
+
   }
-  
+
   var listeners = new Listners(List.empty)
- 
+
   def register(priority: Int, listener: T) = {
     listeners += (priority, listener)
   }
-  
+
   override def isEmpty = listeners.isEmpty
-  
+
   def -=(listener: T) = {
     listeners -= listener
   }

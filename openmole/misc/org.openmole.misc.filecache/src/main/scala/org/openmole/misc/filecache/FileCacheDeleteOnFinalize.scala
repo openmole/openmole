@@ -22,13 +22,13 @@ import org.openmole.misc.filedeleter.FileDeleter
 
 class FileCacheDeleteOnFinalize(file: File, var persist: Boolean = false) extends IFileCache {
 
-    override protected def finalize = {
-        if(!persist) FileDeleter.assynchonousRemove(file)
-        super.finalize
-    }
+  override protected def finalize = {
+    if (!persist) FileDeleter.assynchonousRemove(file)
+    super.finalize
+  }
 
-    override def file(persist: Boolean): File = {
-        if(persist) this.persist = true
-        return file
-    }
+  override def file(persist: Boolean): File = {
+    if (persist) this.persist = true
+    return file
+  }
 }

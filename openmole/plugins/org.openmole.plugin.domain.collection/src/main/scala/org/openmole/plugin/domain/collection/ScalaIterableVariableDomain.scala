@@ -25,7 +25,7 @@ import org.openmole.misc.exception.UserBadDataError
 
 sealed class ScalaIterableVariableDomain[T](variable: IPrototype[Iterable[_ <: T]]) extends IDomain[T] with IIterable[T] {
 
-  override def iterator(context: IContext): Iterator[T] = 
-    context.value(variable).getOrElse(throw new UserBadDataError("Value not found in context for prototype " + variable.toString())).iterator  
+  override def iterator(context: IContext): Iterator[T] =
+    context.value(variable).getOrElse(throw new UserBadDataError("Value not found in context for prototype " + variable.toString())).iterator
 
 }

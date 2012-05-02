@@ -27,9 +27,9 @@ import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.job.State.State
 
 class DisplayHook(execution: IMoleExecution, capsule: ICapsule, toDisplay: String, out: PrintStream) extends CapsuleExecutionHook(execution, capsule) {
-  
+
   def this(execution: IMoleExecution, capsule: ICapsule, toDisplay: String) = this(execution, capsule, toDisplay, System.out)
-  
+
   override def process(moleJob: IMoleJob) = out.println(VariableExpansion.expandData(moleJob.context, toDisplay))
 
   def inputs = DataSet.empty

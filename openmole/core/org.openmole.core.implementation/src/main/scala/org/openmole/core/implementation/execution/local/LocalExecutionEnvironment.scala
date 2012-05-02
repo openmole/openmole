@@ -32,8 +32,7 @@ import org.openmole.core.model.execution.IEnvironment
 import scala.collection.immutable.TreeMap
 
 object LocalExecutionEnvironment extends Environment {
-  
-  
+
   /*val jobOrdering = new Ordering[LocalExecutionJob] {
    override def compare(left: LocalExecutionJob, right: LocalExecutionJob): Int = {
    val nbMJLeft = left.job.moleJobs.count( mj => classOf[IMoleTask].isAssignableFrom( mj.task.getClass) )
@@ -42,32 +41,32 @@ object LocalExecutionEnvironment extends Environment {
    nbMJRight - nbMJLeft
    }
    }*/
-  
+
   val DefaultNumberOfThreads = new ConfigurationLocation("LocalExecutionEnvironment", "ThreadNumber")
 
   Workspace += (DefaultNumberOfThreads, Integer.toString(1))
   @transient lazy val default = new LocalExecutionEnvironment(Workspace.preferenceAsInt(DefaultNumberOfThreads))
-   
+
   override def submit(job: IJob) = default.submit(job)
-  
+
 }
 
 class LocalExecutionEnvironment(val nbThreads: Int) extends Environment {
-  
+
   import LocalExecutionEnvironment._
-  
+
   private val jobs = new JobPriorityQueue
-  
+
   private var executers = List.empty[(LocalExecuter, Thread)]
-       
+
   addExecuters(nbThreads)
-  
-  override def finalize = executers.foreach{
-    case(exe, thread) => exe.stop = true; thread.interrupt
+
+  override def finalize = executers.foreach {
+    case (exe, thread) ⇒ exe.stop = true; thread.interrupt
   }
-    
+
   private[local] def addExecuters(nbExecuters: Int) = synchronized {
-    for (i <- 0 until nbExecuters) {
+    for (i ← 0 until nbExecuters) {
       val executer = new LocalExecuter(this)
       val thread = daemonThreadFactory.newThread(executer)
       thread.start
@@ -89,5 +88,5 @@ class LocalExecutionEnvironment(val nbThreads: Int) extends Environment {
   }
 
   private[local] def takeNextjob: LocalExecutionJob = jobs.dequeue
-  
+
 }

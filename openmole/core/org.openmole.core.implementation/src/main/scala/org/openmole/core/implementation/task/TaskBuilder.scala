@@ -29,19 +29,19 @@ abstract class TaskBuilder {
   private var _inputs: IDataSet = DataSet.empty
   private var _outputs: IDataSet = DataSet.empty
   private var _parameters: IParameterSet = ParameterSet.empty
-  
-  def addInput(d: IDataSet) = {_inputs ++= d; this}
-  def addInput(d: IData[_]) = {_inputs += d; this}
-  
-  def addOutput(d: IDataSet) = {_outputs ++= d; this}
-  def addOutput(d: IData[_]) = {_outputs += d; this}
-  
-  def addParameter(p: IParameter[_]) = {_parameters += p; this}
-  def addParameter(p: IParameterSet) = {_parameters ++= p; this}
-  
+
+  def addInput(d: IDataSet) = { _inputs ++= d; this }
+  def addInput(d: IData[_]) = { _inputs += d; this }
+
+  def addOutput(d: IDataSet) = { _outputs ++= d; this }
+  def addOutput(d: IData[_]) = { _outputs += d; this }
+
+  def addParameter(p: IParameter[_]) = { _parameters += p; this }
+  def addParameter(p: IParameterSet) = { _parameters ++= p; this }
+
   def inputs = _inputs
   def outputs = _outputs
   def parameters = _parameters
-  
+
   def toTask: ITask
 }

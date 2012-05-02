@@ -17,7 +17,6 @@
 
 package org.openmole.core.model.job
 
-
 trait IJob {
   def executionId: String
   def moleJobs: Iterable[IMoleJob]

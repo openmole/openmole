@@ -58,9 +58,9 @@ class Runtime {
   import Runtime._
 
   def apply(baseURI: String, communicationDirPath: String, executionMessageURI: String, resultMessageURI: String, debug: Boolean) = {
-    
+
     val path = new RelativePath(baseURI)
-    
+
     val oldOut = System.out
     val oldErr = System.err
 
@@ -70,25 +70,24 @@ class Runtime {
     val outSt = new PrintStream(out)
     val errSt = new PrintStream(err)
 
-    if(!debug) {
+    if (!debug) {
       System.setOut(outSt)
       System.setErr(errSt)
     }
-         
+
     Workspace.setPreference(LocalExecutionEnvironment.DefaultNumberOfThreads, Integer.toString(NumberOfLocalTheads));
-                        
+
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[File, File]
 
     val executionMesageFileCache = path.cacheUnziped(executionMessageURI)
     val executionMessage = SerializerService.deserialize[ExecutionMessage](executionMesageFileCache)
     executionMesageFileCache.delete
-    
-    
-    val result = try { 
+
+    val result = try {
       val pluginDir = Workspace.newDir
 
-      for (plugin <- executionMessage.plugins) {
+      for (plugin ← executionMessage.plugins) {
         val inPluginDirLocalFile = File.createTempFile("plugin", ".jar", pluginDir)
         val replicaFileCache = path.toGZURIFile(plugin.replicaPath).copy(inPluginDirLocalFile)
 
@@ -101,8 +100,8 @@ class Runtime {
       PluginManager.loadDir(pluginDir)
 
       /* --- Download the files for the local file cache ---*/
-      
-      for (repliURI <- executionMessage.files) {
+
+      for (repliURI ← executionMessage.files) {
 
         //To avoid getting twice the same plugin with different path
         if (!usedFiles.containsKey(repliURI.src)) {
@@ -115,7 +114,7 @@ class Runtime {
 
           val local = if (repliURI.directory) {
             val local = Workspace.newDir("dirReplica")
-            cache.extractDirArchiveWithRelativePath(local) 
+            cache.extractDirArchiveWithRelativePath(local)
             local
           } else {
             cache.mode = repliURI.mode
@@ -125,20 +124,20 @@ class Runtime {
           usedFiles.put(repliURI.src, local)
         }
       }
-      
+
       val jobsFileCache = path.cacheUnziped(executionMessage.jobs.path)
 
       if (HashService.computeHash(jobsFileCache).toString != executionMessage.jobs.hash) throw new InternalProcessingError("Hash of the execution job does't match.")
 
-      val tis = new TarInputStream(new FileInputStream(jobsFileCache))     
-      val runableTasks = tis.applyAndClose(e => {SerializerService.deserializeReplaceFiles[RunnableTask](tis, usedFiles)})
+      val tis = new TarInputStream(new FileInputStream(jobsFileCache))
+      val runableTasks = tis.applyAndClose(e ⇒ { SerializerService.deserializeReplaceFiles[RunnableTask](tis, usedFiles) })
       jobsFileCache.delete
 
       val saver = new ContextSaver(runableTasks.size)
-      val allMoleJobs = runableTasks.map{_.toMoleJob(saver.save)}
-      
+      val allMoleJobs = runableTasks.map { _.toMoleJob(saver.save) }
+
       /* --- Submit all jobs to the local environment --*/
-      for (toProcess <- allMoleJobs) {
+      for (toProcess ← allMoleJobs) {
         //EventDispatcher.listen(toProcess, Priority.HIGH, saver, classOf[IMoleJob.StateChanged])
         LocalExecutionEnvironment.default.submit(toProcess)
       }
@@ -151,15 +150,15 @@ class Runtime {
       SerializerService.serializeAndArchiveFiles(contextResults, contextResultFile)
       val uploadedcontextResults = new GZURIFile(path.toURIFile(executionMessage.communicationDirPath).newFileInDir("uplodedTar", ".tgz"))
       val result = new FileMessage(uploadedcontextResults.path, HashService.computeHash(contextResultFile).toString)
-      retry( URIFile.copy(contextResultFile, uploadedcontextResults), NbRetry )
+      retry(URIFile.copy(contextResultFile, uploadedcontextResults), NbRetry)
       contextResultFile.delete
       Left(result)
 
     } catch {
-      case t => {
-          if(debug) Logger.getLogger(classOf[Runtime].getName).log(Level.SEVERE, "", t)
-          Right(t)
-        }
+      case t ⇒ {
+        if (debug) Logger.getLogger(classOf[Runtime].getName).log(Level.SEVERE, "", t)
+        Right(t)
+      }
     } finally {
       outSt.close
       errSt.close
@@ -168,7 +167,7 @@ class Runtime {
       System.setErr(oldErr)
     }
 
-    val outputMessage = 
+    val outputMessage =
       if (out.length != 0) {
         val output = new GZURIFile(path.toURIFile(executionMessage.communicationDirPath).newFileInDir("output", ".txt"))
         URIFile.copy(out, output)
@@ -176,9 +175,9 @@ class Runtime {
       } else None
 
     out.delete
-    
-    val errorMessage = 
-      if (err.length != 0) {                    
+
+    val errorMessage =
+      if (err.length != 0) {
         val errout = new GZURIFile(path.toURIFile(executionMessage.communicationDirPath).newFileInDir("outputError", ".txt"))
         URIFile.copy(err, errout)
         Some(new FileMessage(errout.path, HashService.computeHash(err).toString))
@@ -195,5 +194,5 @@ class Runtime {
       retry(URIFile.copy(outputLocal, output), NbRetry)
     } finally outputLocal.delete
   }
-  
+
 }

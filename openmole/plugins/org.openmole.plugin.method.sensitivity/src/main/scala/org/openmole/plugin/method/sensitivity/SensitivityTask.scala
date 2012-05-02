@@ -25,7 +25,6 @@ import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.data.IPrototype
 import SaltelliSampling._
 
-
 object SensitivityTask {
   def indice(name: String, input: IPrototype[Double], output: IPrototype[Double]) = new Prototype[Double](name + input.name.capitalize + output.name.capitalize)
 
@@ -34,27 +33,27 @@ object SensitivityTask {
     val matrixName: IPrototype[String]
     val modelInputs: Iterable[IPrototype[Double]]
     val modelOutputs: Iterable[IPrototype[Double]]
-    
+
     override def inputs: IDataSet = super.inputs + DataSet(modelInputs.map(_.toArray)) + DataSet(modelOutputs.map(_.toArray)) + matrixName.toArray
-    override def outputs: IDataSet  = super.outputs + DataSet(for(i <- modelInputs ; o <- modelOutputs) yield indice(name, i, o))
+    override def outputs: IDataSet = super.outputs + DataSet(for (i ← modelInputs; o ← modelOutputs) yield indice(name, i, o))
   }
 }
 
 import SensitivityTask._
 
 trait SensitivityTask extends Task {
-  
+
   def matrixName: IPrototype[String]
   def modelInputs: Iterable[IPrototype[Double]]
   def modelOutputs: Iterable[IPrototype[Double]]
-  
+
   override def process(context: IContext): IContext = {
     val matrixNames = context.valueOrException(matrixName.toArray)
 
-    Context.empty ++ 
-    (for(i <- modelInputs ; o <- modelOutputs) yield new Variable(indice(name, i, o) ,computeSensitivity(context.valueOrException(o.toArray), matrixNames, i)))
+    Context.empty ++
+      (for (i ← modelInputs; o ← modelOutputs) yield new Variable(indice(name, i, o), computeSensitivity(context.valueOrException(o.toArray), matrixNames, i)))
   }
-  
+
   def computeSensitivity(allValues: Array[Double], allNames: Array[String], input: IPrototype[Double]): Double
-  
+
 }

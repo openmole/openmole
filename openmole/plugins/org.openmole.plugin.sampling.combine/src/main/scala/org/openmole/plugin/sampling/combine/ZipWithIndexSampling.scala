@@ -25,13 +25,13 @@ import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.sampling.ISampling
 
 sealed class ZipWithIndexSampling(reference: ISampling, index: IPrototype[Int]) extends ISampling {
-  
+
   override def inputs = reference.inputs
   override def prototypes = index :: reference.prototypes.toList
-  
-  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
+
+  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] =
     reference.build(context).zipWithIndex.map {
-      case(line, i) => line ++ List(new Variable(index, i))
+      case (line, i) ⇒ line ++ List(new Variable(index, i))
     }
 
 }

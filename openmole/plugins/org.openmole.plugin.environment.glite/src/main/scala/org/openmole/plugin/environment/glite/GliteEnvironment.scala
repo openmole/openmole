@@ -34,9 +34,9 @@ import org.openmole.plugin.environment.jsaga._
 import scala.collection.JavaConversions._
 
 object GliteEnvironment {
-  
+
   val TimeLocation = new ConfigurationLocation("GliteEnvironment", "Time")
- 
+
   val FetchRessourcesTimeOutLocation = new ConfigurationLocation("GliteEnvironment", "FetchRessourcesTimeOut")
   val CACertificatesSite = new ConfigurationLocation("GliteEnvironment", "CACertificatesSite")
 
@@ -48,14 +48,13 @@ object GliteEnvironment {
   val OverSubmissionSamplingWindowFactor = new ConfigurationLocation("GliteEnvironment", "OverSubmissionSamplingWindowFactor")
   val MaxNumberOfJobReadyForOverSubmission = new ConfigurationLocation("GliteEnvironment", "MaxNumberOfJobReadyForOverSubmission")
 
-
   val LocalThreadsBySELocation = new ConfigurationLocation("GliteEnvironment", "LocalThreadsBySE")
   val LocalThreadsByWMSLocation = new ConfigurationLocation("GliteEnvironment", "LocalThreadsByWMS")
   val ProxyRenewalRatio = new ConfigurationLocation("GliteEnvironment", "ProxyRenewalRatio")
   val JobShakingInterval = new ConfigurationLocation("GliteEnvironment", "JobShakingInterval")
   val JobShakingProbabilitySubmitted = new ConfigurationLocation("GliteEnvironment", "JobShakingProbabilitySubmitted")
   val JobShakingProbabilityQueued = new ConfigurationLocation("GliteEnvironment", "JobShakingProbabilityQueued")
-  
+
   Workspace += (TimeLocation, "PT24H")
 
   Workspace += (FetchRessourcesTimeOutLocation, "PT5M")
@@ -68,62 +67,62 @@ object GliteEnvironment {
 
   Workspace += (OverSubmissionNbSampling, "10")
   Workspace += (OverSubmissionSamplingWindowFactor, "5")
-  
+
   // Workspace += (OverSubmissionGridSizeRatio, "0.25")
   Workspace += (OverSubmissionInterval, "PT5M")
 
   Workspace += (MaxNumberOfJobReadyForOverSubmission, "100")
   Workspace += (OverSubmissionMinNumberOfJob, "100")
   Workspace += (OverSubmissionNumberOfJobUnderMin, "5")
-  
+
   Workspace += (JobShakingInterval, "PT5M")
   Workspace += (JobShakingProbabilitySubmitted, "0.1")
   Workspace += (JobShakingProbabilityQueued, "0.01")
 }
 
 class GliteEnvironment(
-  val voName: String,
-  val vomsURL: String,
-  val bdii: String,
-  val myProxy: Option[MyProxy] = None,
-  val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory, 
-  val requirements: Map[String, String] = Map.empty,
-  val fqan: String = "") extends JSAGAEnvironment {
+    val voName: String,
+    val vomsURL: String,
+    val bdii: String,
+    val myProxy: Option[MyProxy] = None,
+    val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory,
+    val requirements: Map[String, String] = Map.empty,
+    val fqan: String = "") extends JSAGAEnvironment {
 
   import GliteEnvironment._
 
   val threadsBySE = Workspace.preferenceAsInt(LocalThreadsBySELocation)
   val threadsByWMS = Workspace.preferenceAsInt(LocalThreadsByWMSLocation)
-  
+
   Updater.registerForUpdate(new OverSubmissionAgent(this))
-  
+
   override def allJobServices: Iterable[GliteJobService] = {
     val jss = getBDII.queryWMSURIs(voName, Workspace.preferenceAsDurationInMs(FetchRessourcesTimeOutLocation).toInt)
 
     val jobServices = jss.flatMap {
-      js =>
-      try {
-        val wms = new URI("wms:" + js.getRawSchemeSpecificPart)
-        val jobService = new GliteJobService(wms, this, threadsByWMS)
-        Some(jobService)
-      } catch {
-        case (e: URISyntaxException) =>
-          Logger.getLogger(GliteEnvironment.getClass.getName).log(Level.WARNING, "wms:" + js.getRawSchemeSpecificPart(), e);
-          None
-      }
+      js ⇒
+        try {
+          val wms = new URI("wms:" + js.getRawSchemeSpecificPart)
+          val jobService = new GliteJobService(wms, this, threadsByWMS)
+          Some(jobService)
+        } catch {
+          case (e: URISyntaxException) ⇒
+            Logger.getLogger(GliteEnvironment.getClass.getName).log(Level.WARNING, "wms:" + js.getRawSchemeSpecificPart(), e);
+            None
+        }
     }
-    
+
     Logger.getLogger(classOf[GliteEnvironment].getName).fine(jobServices.toString)
     jobServices.toList
   }
 
   override def allStorages = {
     val stors = getBDII.querySRMURIs(voName, Workspace.preferenceAsDurationInMs(GliteEnvironment.FetchRessourcesTimeOutLocation).toInt)
-    stors.map{new PersistentStorage(this, _, threadsBySE)}
+    stors.map { new PersistentStorage(this, _, threadsBySE) }
   }
 
   @transient lazy val authentication = new GliteAuthentication(voName, vomsURL, myProxy, fqan)
- 
+
   private def getBDII: BDII = new BDII(bdii)
- 
+
 }

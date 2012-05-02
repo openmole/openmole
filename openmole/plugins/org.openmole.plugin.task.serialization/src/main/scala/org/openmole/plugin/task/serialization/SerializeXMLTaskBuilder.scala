@@ -27,14 +27,14 @@ import scala.collection.mutable.ListBuffer
 abstract class SerializeXMLTaskBuilder(implicit plugins: IPluginSet) extends TaskBuilder {
 
   private var _serialize = new ListBuffer[(IPrototype[_], IPrototype[File])]
-  
+
   def serialize = _serialize.toList
-  
+
   def serialize(p: IPrototype[_], f: IPrototype[File]) = {
     _serialize += (p -> f)
     this addInput p
     this addOutput f
     this
   }
-    
+
 }

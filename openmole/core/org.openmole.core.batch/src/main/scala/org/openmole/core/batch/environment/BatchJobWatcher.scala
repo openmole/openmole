@@ -31,29 +31,29 @@ object BatchJobWatcher extends Logger {
 class BatchJobWatcher(environment: BatchEnvironment) extends Actor {
 
   import BatchJobWatcher._
-  
+
   def receive = {
-    case Watch =>
+    case Watch ⇒
       val registry = environment.jobRegistry
       val jobGroupsToRemove = new ListBuffer[IJob]
-    
-      registry.synchronized  {
-        for (val job <- registry.allJobs) {
+
+      registry.synchronized {
+        for (val job ← registry.allJobs) {
 
           if (job.allMoleJobsFinished) {
-            for (ej <- registry.executionJobs(job)) environment.jobManager ! Kill(ej)
+            for (ej ← registry.executionJobs(job)) environment.jobManager ! Kill(ej)
             jobGroupsToRemove += job
           } else {
             val executionJobsToRemove = new ListBuffer[BatchExecutionJob]
 
-            for (ej <- registry.executionJobs(job) if (ej.state.isFinal)) executionJobsToRemove += ej
-            for (ej <- executionJobsToRemove) registry.remove(ej)
+            for (ej ← registry.executionJobs(job) if (ej.state.isFinal)) executionJobsToRemove += ej
+            for (ej ← executionJobsToRemove) registry.remove(ej)
 
             if (registry.executionJobs(job).isEmpty) environment.submit(job)
           }
         }
 
-        for (j <- jobGroupsToRemove) registry.removeJob(j)
+        for (j ← jobGroupsToRemove) registry.removeJob(j)
       }
   }
 }

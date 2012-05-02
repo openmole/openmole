@@ -21,5 +21,5 @@ import org.openmole.misc.tools.obj.Id
 import org.openmole.core.batch.control.ServiceDescription
 
 class ReplicaLockKey(hash: String, desc: ServiceDescription, auth: String) extends Id {
-  override def id = (hash, desc, auth) 
+  override def id = (hash, desc, auth)
 }

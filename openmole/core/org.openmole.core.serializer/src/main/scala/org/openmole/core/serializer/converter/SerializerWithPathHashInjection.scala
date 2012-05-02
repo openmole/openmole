@@ -30,27 +30,27 @@ class SerializerWithPathHashInjection extends Serializer {
 
   var files = new TreeMap[File, FileInfo]
   registerConverter(new FilePathHashNotifier(this, reflectionConverter))
-  
+
   override def toXML(obj: Object, outputStream: OutputStream) = {
     clean
     super.toXML(obj, outputStream)
   }
-  
+
   def fileUsed(file: File) = {
     var hash = files.getOrElse(file,
       {
         val pathHash = HashService.computeHash(new StringInputStream(file.getAbsolutePath))
         val fileHash = FileService.hash(file)
-            
+
         val hash = new FileInfo(fileHash, pathHash, file.isDirectory)
         files += file -> hash
         hash
       })
     hash
   }
-    
+
   def clean = {
     files = new TreeMap[File, FileInfo]
   }
-    
+
 }

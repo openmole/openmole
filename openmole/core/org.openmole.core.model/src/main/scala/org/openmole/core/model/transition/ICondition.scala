@@ -21,27 +21,27 @@ import org.openmole.core.model.data.IContext
 
 object ICondition {
   val True = new ICondition {
-     def evaluate(context: IContext): Boolean = true
+    def evaluate(context: IContext): Boolean = true
   }
-  
+
   val False = new ICondition {
-     def evaluate(context: IContext): Boolean = false
+    def evaluate(context: IContext): Boolean = false
   }
-  
-  implicit def function2IConditionConverter(f: IContext => Boolean) = new ICondition {
+
+  implicit def function2IConditionConverter(f: IContext ⇒ Boolean) = new ICondition {
     override def evaluate(context: IContext) = f(context)
   }
 }
 
 trait ICondition {
 
-    /**
-     * 
-     * Evaluate the value of this condition in a given context.
-     * 
-     * @param context the context in which the condition is evaluated
-     * @return the value of this condition
-     */
-    @throws(classOf[Throwable])
-    def evaluate(context: IContext): Boolean
+  /**
+   *
+   * Evaluate the value of this condition in a given context.
+   *
+   * @param context the context in which the condition is evaluated
+   * @return the value of this condition
+   */
+  @throws(classOf[Throwable])
+  def evaluate(context: IContext): Boolean
 }

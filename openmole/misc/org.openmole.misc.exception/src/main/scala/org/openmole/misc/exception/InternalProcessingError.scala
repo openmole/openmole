@@ -19,12 +19,12 @@ package org.openmole.misc.exception
 
 class InternalProcessingError(exception: Throwable, message: String) extends Exception(message, exception) {
 
-    def this (message: String) = {
-        this(null, message)
-    }
+  def this(message: String) = {
+    this(null, message)
+  }
 
-    def this (e: Throwable) {
-        this(e, null)
-    }
+  def this(e: Throwable) {
+    this(e, null)
+  }
 
 }

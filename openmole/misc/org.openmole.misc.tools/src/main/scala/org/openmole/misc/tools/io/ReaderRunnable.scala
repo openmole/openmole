@@ -21,5 +21,5 @@ import java.io.InputStream
 import java.util.concurrent.Callable
 
 class ReaderRunnable(buffer: Array[Byte], from: InputStream, maxRead: Int) extends Callable[Int] {
-    override def call: Int = from.read(buffer, 0, maxRead)
+  override def call: Int = from.read(buffer, 0, maxRead)
 }

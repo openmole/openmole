@@ -45,9 +45,9 @@ object SerializerService {
   private val xstream = new XStream
   private val filesInfo = "filesInfo.xml"
   private val content = "content.xml"
-  
+
   private type FilesInfo = TreeMap[String, (File, Boolean)]
-  
+
   def deserialize[T](file: File): T = {
     val is = new FileInputStream(file)
     try deserialize(is)
@@ -55,26 +55,26 @@ object SerializerService {
   }
 
   def deserialize[T](is: InputStream): T = xstream.fromXML(is).asInstanceOf[T]
-  
+
   def deserializeAndExtractFiles[T](file: File) = {
     val extractDir = Workspace.newDir("extraction")
     file.extractDirArchiveWithRelativePath(extractDir)
-    
+
     val fileInfoFile = new File(extractDir, filesInfo)
     val fi = deserialize[FilesInfo](fileInfoFile)
     fileInfoFile.delete
-    
-    val fileReplacement = 
-      new TreeMap[File, File] ++ extractDir.listFiles.filter(f => fi.contains(f.getName)).map {
-        f => 
-        val (file, isDirectory) = fi(f.getName)
-        file -> 
-        (if (isDirectory) {
-            val extractedDir = Workspace.newDir("extractionDir")
-            f.extractDirArchiveWithRelativePath(extractedDir)
-            f.delete
-            extractedDir
-          } else f)
+
+    val fileReplacement =
+      new TreeMap[File, File] ++ extractDir.listFiles.filter(f ⇒ fi.contains(f.getName)).map {
+        f ⇒
+          val (file, isDirectory) = fi(f.getName)
+          file ->
+            (if (isDirectory) {
+              val extractedDir = Workspace.newDir("extractionDir")
+              f.extractDirArchiveWithRelativePath(extractedDir)
+              f.delete
+              extractedDir
+            } else f)
       }
 
     val contentFile = new File(extractDir, content)
@@ -82,37 +82,37 @@ object SerializerService {
     contentFile.delete
     obj
   }
-  
+
   def serializeAndArchiveFiles(obj: Any, file: File) = {
     val objSerial = Workspace.newFile
     val serializationResult = serializeGetPluginClassAndFiles(obj, objSerial)
-    
-    val tos = new TarOutputStream(new FileOutputStream(file))   
-            
+
+    val tos = new TarOutputStream(new FileOutputStream(file))
+
     try {
       tos.addFile(objSerial, content)
       objSerial.delete
-      
+
       val fileInfo = new FilesInfo ++ serializationResult.files.map {
-        file =>
-        //Logger.getLogger(classOf[Runtime].getName).info("Output file: " + file.getAbsolutePath)
+        file ⇒
+          //Logger.getLogger(classOf[Runtime].getName).info("Output file: " + file.getAbsolutePath)
 
-        val name = UUID.randomUUID        
-        
-        val toArchive = 
-          if (file.isDirectory) {
-            val toArchive = Workspace.newFile
-            val outputStream = new TarOutputStream(new FileOutputStream(toArchive))
+          val name = UUID.randomUUID
 
-            try outputStream.createDirArchiveWithRelativePath(file)
-            finally outputStream.close
-                
-            toArchive
-          } else file
+          val toArchive =
+            if (file.isDirectory) {
+              val toArchive = Workspace.newFile
+              val outputStream = new TarOutputStream(new FileOutputStream(toArchive))
 
-        tos.addFile(toArchive, name.toString)
-              
-        (name.toString, (file, file.isDirectory))
+              try outputStream.createDirArchiveWithRelativePath(file)
+              finally outputStream.close
+
+              toArchive
+            } else file
+
+          tos.addFile(toArchive, name.toString)
+
+          (name.toString, (file, file.isDirectory))
       }
       val filesInfoSerial = Workspace.newFile
       serialize(fileInfo, filesInfoSerial)
@@ -120,14 +120,14 @@ object SerializerService {
       filesInfoSerial.delete
     } finally tos.close
   }
-  
-  def serializeFilePathAsHashGetFiles(obj: Any, file: File): Map[File,FileInfo] = {
+
+  def serializeFilePathAsHashGetFiles(obj: Any, file: File): Map[File, FileInfo] = {
     val os = file.bufferedOutputStream
     try serializeFilePathAsHashGetFiles(obj, os)
     finally os.close
   }
 
-  def serializeFilePathAsHashGetFiles(obj: Any, os: OutputStream): Map[File,FileInfo] = {
+  def serializeFilePathAsHashGetFiles(obj: Any, os: OutputStream): Map[File, FileInfo] = {
     //val serializer = SerializerWithPathHashInjectionFactory.borrowObject
     val serializer = new SerializerWithPathHashInjection
     //try {
@@ -135,8 +135,7 @@ object SerializerService {
     serializer.files
     //} finally SerializerWithPathHashInjectionFactory.returnObject(serializer)
   }
-  
-  
+
   def serializeGetPluginClassAndFiles(obj: Any, file: File): PluginClassAndFiles = {
     val os = file.bufferedOutputStream
     try serializeGetPluginClassAndFiles(obj, os)
@@ -146,14 +145,13 @@ object SerializerService {
   def serializeGetPluginClassAndFiles(obj: Any, os: OutputStream): PluginClassAndFiles = {
     //serializerSemaphore.acquire
     //try {
-    
+
     //val serializer = SerializerWithFileAndPluginListingFactory.borrowObject
     val serializer = new SerializerWithFileAndPluginListing
     //try {
     serializer.toXMLAndListPlugableClasses(obj.asInstanceOf[AnyRef], os)
     new PluginClassAndFiles(serializer.files, serializer.classes)
 
-      
     // } finally serializerSemaphore.release
     //} finally SerializerWithFileAndPluginListingFactory.returnObject(serializer)
   }

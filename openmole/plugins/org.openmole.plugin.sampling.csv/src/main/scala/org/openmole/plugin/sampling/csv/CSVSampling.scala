@@ -32,27 +32,26 @@ import collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
 
 object CSVSampling {
-  
+
   def apply(
-    file: File    
-  ) = new SamplingBuilder { builder =>
+    file: File) = new SamplingBuilder { builder ⇒
     private var _columns = new ListBuffer[(String, IPrototype[_])]
     private var _fileColumns = new ListBuffer[(String, File, IPrototype[File])]
-    
+
     def columns = _columns.toList
     def fileColumns = _fileColumns.toList
-    
+
     def addColumn(proto: IPrototype[_]): this.type = this.addColumn(proto.name, proto)
     def addColumn(name: String, proto: IPrototype[_]): builder.type = {
       _columns += (name -> proto)
       this
     }
-    
+
     def addFileColumn(name: String, dir: File, proto: IPrototype[File]): builder.type = {
       _fileColumns += ((name, dir, proto))
       this
     }
-      
+
     def addFileColumn(dir: File, proto: IPrototype[File]): this.type = this.addFileColumn(proto.name, dir, proto)
 
     def toSampling = new CSVSampling(file) {
@@ -60,21 +59,18 @@ object CSVSampling {
       val fileColumns = builder.fileColumns
     }
   }
-  
-}
 
+}
 
 abstract sealed class CSVSampling(file: File) extends Sampling {
 
-  override def prototypes = 
-    columns.map{case(_, p) => p} ::: 
-  fileColumns.map{case(_, _, p) => p} ::: Nil
-  
+  override def prototypes =
+    columns.map { case (_, p) ⇒ p } :::
+      fileColumns.map { case (_, _, p) ⇒ p } ::: Nil
+
   def columns: List[(String, IPrototype[_])]
   def fileColumns: List[(String, File, IPrototype[File])]
-  
- 
-  
+
   /**
    * Builds the plan.
    *
@@ -83,35 +79,33 @@ abstract sealed class CSVSampling(file: File) extends Sampling {
     var listOfListOfValues = List[Iterable[IVariable[_]]]()
     val reader = new CSVReader(new FileReader(file))
     val headers = reader.readNext.toArray
-    
+
     //test wether prototype names belong to header names
     val columnsIndexes = columns.map {
-      case(name, _) => 
+      case (name, _) ⇒
         val i = headers.indexOf(name)
-        if(i == -1) throw new UserBadDataError("Unknown column name : " + name)
+        if (i == -1) throw new UserBadDataError("Unknown column name : " + name)
         else i
     }
-    
-    val fileColumnsIndexes = 
-      fileColumns.map{
-        case(name,_,_)=> 
+
+    val fileColumnsIndexes =
+      fileColumns.map {
+        case (name, _, _) ⇒
           val i = headers.indexOf(name)
-          if(i == -1) throw new UserBadDataError("Unknown column name : " + name)
+          if (i == -1) throw new UserBadDataError("Unknown column name : " + name)
           else i
       }
-      
+
     Iterator.continually(reader.readNext).takeWhile(_ != null).map {
-      line =>
-      (columns zip columnsIndexes).map{
-        case((_, p), i) => new Variable(p.asInstanceOf[Prototype[Any]], StringConvertor.typeMapping(p.`type`.erasure).convert(line(i)))
-      } :::
-      (fileColumns zip fileColumnsIndexes).map{
-        case((_, f, p), i) => new Variable(p, new FileMapping(f).convert(line(i)))
-      } ::: Nil
+      line ⇒
+        (columns zip columnsIndexes).map {
+          case ((_, p), i) ⇒ new Variable(p.asInstanceOf[Prototype[Any]], StringConvertor.typeMapping(p.`type`.erasure).convert(line(i)))
+        } :::
+          (fileColumns zip fileColumnsIndexes).map {
+            case ((_, f, p), i) ⇒ new Variable(p, new FileMapping(f).convert(line(i)))
+          } ::: Nil
     }
-    
-   
+
   }
-  
-   
+
 }

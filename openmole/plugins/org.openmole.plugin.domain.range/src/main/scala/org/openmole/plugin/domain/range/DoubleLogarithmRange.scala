@@ -25,26 +25,26 @@ import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IFinite
 
 sealed class DoubleLogarithmRange(val min: String, val max: String, val nbStep: String) extends IDomain[Double] with IFinite[Double] with IBounded[Double] {
-  
+
   def this(min: Double, max: Double, nbStep: Int) = this(min.toString, max.toString, nbStep.toString)
-  
-//  override def range(context: IContext): Double = {max(context).doubleValue - min(context).doubleValue}
+
+  //  override def range(context: IContext): Double = {max(context).doubleValue - min(context).doubleValue}
 
   override def computeValues(context: IContext): Iterable[Double] = {
-     val mi = log(min(context).doubleValue)
-     val ma = log(max(context).doubleValue)
-     val nbst = nbStep(context).intValue - 1
-     val st = if(nbst > 0) (math.abs(ma - mi) / nbst)
-              else 0
-     var cur = mi
-        
-     for (i <- 0 to nbst) yield {
-       val ret = cur
-       cur += st
-       exp(ret)
-     }      
+    val mi = log(min(context).doubleValue)
+    val ma = log(max(context).doubleValue)
+    val nbst = nbStep(context).intValue - 1
+    val st = if (nbst > 0) (math.abs(ma - mi) / nbst)
+    else 0
+    var cur = mi
+
+    for (i ← 0 to nbst) yield {
+      val ret = cur
+      cur += st
+      exp(ret)
+    }
   }
-  
+
   def nbStep(context: IContext): Double = expandData(context, nbStep).toDouble
   def min(context: IContext): Double = expandData(context, min).toDouble
   def max(context: IContext): Double = expandData(context, max).toDouble

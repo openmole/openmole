@@ -26,13 +26,12 @@ import org.openmole.core.model.data.IPrototype
 abstract class DoubleSequenceStatTask extends Task {
 
   def sequences: Iterable[(IPrototype[Array[Double]], IPrototype[Double])]
-  
-  override def process(context: IContext) = 
+
+  override def process(context: IContext) =
     Context(
-      sequences.map{
-        case(sequence, statProto) => new Variable(statProto, stat(context.valueOrException(sequence)))
-      }
-    )
-  
+      sequences.map {
+        case (sequence, statProto) ⇒ new Variable(statProto, stat(context.valueOrException(sequence)))
+      })
+
   def stat(seq: Array[Double]): Double
 }

@@ -25,13 +25,13 @@ import org.openmole.misc.tools.service.Random._
 import org.openmole.core.implementation.task.Task._
 
 sealed class ShuffleSampling(sampling: ISampling) extends ISampling {
-  
+
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
-  
+
   override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = {
     val random = newRNG(context.valueOrException(openMOLESeed))
     shuffled(sampling.build(context).toList)(random).toIterator
   }
- 
+
 }

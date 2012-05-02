@@ -28,8 +28,8 @@ class Deserializer {
   private val xstream = new XStream
   protected val reflectionConverter = new ReflectionConverter(xstream.getMapper, xstream.getReflectionProvider)
 
-  def registerConverter(converter: Converter) =  xstream.registerConverter(converter)
-  def registerConverter(converter: SingleValueConverter) =  xstream.registerConverter(converter)
-    
+  def registerConverter(converter: Converter) = xstream.registerConverter(converter)
+  def registerConverter(converter: SingleValueConverter) = xstream.registerConverter(converter)
+
   def fromXMLInjectFiles[T](is: InputStream): T = xstream.fromXML(is).asInstanceOf[T]
 }

@@ -38,9 +38,9 @@ object JobManager extends Logger
 import JobManager._
 
 class JobManager(environment: BatchEnvironment) extends Actor {
- 
+
   val workers = ActorSystem("JobManagment", ConfigFactory.parseString(
-      """
+    """
 akka {
   daemonic="on"
   actor {
@@ -58,60 +58,57 @@ akka {
   }
 }
 """))
-  
-  
-  
+
   import environment._
-  
+
   val workerForEach = Workspace.preferenceAsInt(JobManagmentThreads) // 5.0).toInt + 1
   //def newRootees(f: => Actor) = (0 until workerForEach).map{i => workers.actorOf(Props(f))}
-  
-  
+
   val uploader = workers.actorOf(Props(new UploadActor(self)).withRouter(RoundRobinRouter(workerForEach)), name = "upload")
   val submitter = workers.actorOf(Props(new SubmitActor(self)).withRouter(RoundRobinRouter(workerForEach)), name = "submit")
   val refresher = workers.actorOf(Props(new RefreshActor(self)).withRouter(RoundRobinRouter(workerForEach)), name = "refresher")
   val resultGetters = workers.actorOf(Props(new GetResultActor(self)).withRouter(RoundRobinRouter(workerForEach)), name = "resultGetters")
   val killer = workers.actorOf(Props(new KillerActor).withRouter(RoundRobinRouter(workerForEach)), name = "killer")
- 
+
   def receive = {
-    case Upload(job) => uploader ! Upload(job)
-    case Uploaded(job, sj) => 
+    case Upload(job) ⇒ uploader ! Upload(job)
+    case Uploaded(job, sj) ⇒
       job.serializedJob = Some(sj)
       submitter ! Submit(job, sj)
-    case Submit(job, sj) => submitter ! Submit(job, sj)
-    case Submitted(job, sj, bj) => 
+    case Submit(job, sj) ⇒ submitter ! Submit(job, sj)
+    case Submitted(job, sj, bj) ⇒
       job.batchJob = Some(bj)
       self ! RefreshDelay(job, sj, bj, minUpdateInterval, false)
-    case RefreshDelay(job, sj, bj, delay, stateChanged) => 
-      val newDelay = 
-        if(stateChanged) math.min(delay + incrementUpdateInterval, maxUpdateInterval) else minUpdateInterval
+    case RefreshDelay(job, sj, bj, delay, stateChanged) ⇒
+      val newDelay =
+        if (stateChanged) math.min(delay + incrementUpdateInterval, maxUpdateInterval) else minUpdateInterval
       context.system.scheduler.scheduleOnce(newDelay milliseconds, refresher, Refresh(job, sj, bj, newDelay))
-    case GetResult(job, sj, out) => 
+    case GetResult(job, sj, out) ⇒
       resultGetters ! GetResult(job, sj, out)
-    case Kill(job) => 
+    case Kill(job) ⇒
       job.state = ExecutionState.KILLED
-      
+
       job.batchJob match {
-        case Some(bj) => self ! KillBatchJob(bj)
-        case None =>
+        case Some(bj) ⇒ self ! KillBatchJob(bj)
+        case None ⇒
       }
-      
+
       job.serializedJob match {
-        case Some(sj) => 
+        case Some(sj) ⇒
           val path = sj.communicationStorage.path
           URIFile.clean(path.toURIFile(sj.communicationDirPath))
-        case None =>
+        case None ⇒
       }
-            
-    case Error(job, exception) =>
+
+    case Error(job, exception) ⇒
       val level = exception match {
-        case e: JobRemoteExecutionException => WARNING
-        case _ => FINE
+        case e: JobRemoteExecutionException ⇒ WARNING
+        case _ ⇒ FINE
       }
-      EventDispatcher.trigger(environment: IEnvironment, new IEnvironment.ExceptionRaised(job, exception,level))
+      EventDispatcher.trigger(environment: IEnvironment, new IEnvironment.ExceptionRaised(job, exception, level))
       logger.log(level, "Error in job refresh", exception)
-    case KillBatchJob(bj) => killer ! KillBatchJob(bj)
-    case MoleJobError(mj, j, e) =>
+    case KillBatchJob(bj) ⇒ killer ! KillBatchJob(bj)
+    case MoleJobError(mj, j, e) ⇒
       EventDispatcher.trigger(environment: IEnvironment, new IEnvironment.MoleJobExceptionRaised(j, e, WARNING, mj))
       logger.log(WARNING, "Error durring job execution, it will be resubmitted.", e)
   }

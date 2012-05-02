@@ -22,15 +22,15 @@ import scala.collection.mutable.WeakHashMap
 
 //TODO?reimplemented a true weak hashset
 class WeakHashSet[A] extends Set[A] {
-  
-  val _values = new WeakHashMap[A,AnyRef]
-  
+
+  val _values = new WeakHashMap[A, AnyRef]
+
   override def contains(key: A): Boolean = _values.contains(key)
   override def iterator: Iterator[A] = _values.keysIterator
-  
+
   override def +=(elt: A): this.type = { _values(elt) = None; this }
   override def -=(elt: A): this.type = { _values -= elt; this }
-  
+
   override def empty: this.type = { _values.empty; this }
   override def size = _values.size
 }

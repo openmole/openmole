@@ -29,20 +29,20 @@ import RefreshActor._
 
 class RefreshActor(jobManager: ActorRef) extends Actor {
   def receive = {
-    case Refresh(job, sj, bj, delay)=> 
-      if(!job.state.isFinal) {
+    case Refresh(job, sj, bj, delay) ⇒
+      if (!job.state.isFinal) {
         try {
           val oldState = job.state
           job.state = bj.updateState
-          if(job.state == DONE) {
+          if (job.state == DONE) {
             jobManager ! GetResult(job, sj, bj.resultPath)
           } else {
-            if(!job.state.isFinal) jobManager ! RefreshDelay(job, sj, bj, delay, oldState != job.state)
+            if (!job.state.isFinal) jobManager ! RefreshDelay(job, sj, bj, delay, oldState != job.state)
             else jobManager ! Kill(job)
-          }   
-        } catch { 
-          case e: TemporaryErrorException => logger.log(FINE, "Temporary error durring job update.", e)
-          case e => 
+          }
+        } catch {
+          case e: TemporaryErrorException ⇒ logger.log(FINE, "Temporary error durring job update.", e)
+          case e ⇒
             jobManager ! Error(job, e)
             jobManager ! Kill(job)
         }
@@ -50,4 +50,4 @@ class RefreshActor(jobManager: ActorRef) extends Actor {
       System.runFinalization
   }
 }
-  
+

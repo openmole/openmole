@@ -29,16 +29,15 @@ import java.io.PrintStream
 import org.openmole.plugin.task.external.ExternalTaskBuilder
 
 object SystemExecToStringTask {
-  
+
   def apply(
-    name: String, 
-    cmd: String, 
+    name: String,
+    cmd: String,
     out: IPrototype[String],
     err: IPrototype[String],
     dir: String = "",
     exceptionIfReturnValueNotZero: Boolean = true,
-    returnValue: Option[IPrototype[Int]] = None
-  )(implicit plugins: IPluginSet) = new ExternalTaskBuilder { builder =>
+    returnValue: Option[IPrototype[Int]] = None)(implicit plugins: IPluginSet) = new ExternalTaskBuilder { builder ⇒
     def toTask = new SystemExecToStringTask(name, cmd, out, err, dir, exceptionIfReturnValueNotZero, returnValue) {
       val inputs = builder.inputs
       val outputs = builder.outputs + DataSet(returnValue) + out + err
@@ -47,26 +46,23 @@ object SystemExecToStringTask {
       val produced = builder.produced
     }
   }
-  
+
 }
 
-
 sealed abstract class SystemExecToStringTask(
-  val name: String, 
-  val cmd: String, 
-  out: IPrototype[String],
-  err: IPrototype[String],
-  val dir: String,
-  val exceptionIfReturnValueNotZero: Boolean,
-  val returnValue: Option[IPrototype[Int]]
-)(implicit val plugins: IPluginSet) extends AbstractSystemExecTask {
-  
-  
-  override protected def execute(process: Process, context: IContext) = {    
+    val name: String,
+    val cmd: String,
+    out: IPrototype[String],
+    err: IPrototype[String],
+    val dir: String,
+    val exceptionIfReturnValueNotZero: Boolean,
+    val returnValue: Option[IPrototype[Int]])(implicit val plugins: IPluginSet) extends AbstractSystemExecTask {
+
+  override protected def execute(process: Process, context: IContext) = {
     val outStringBuilder = new StringBuilder
     val errStringBuilder = new StringBuilder
-    
-    val ret = executeProcess(process,new PrintStream(new StringBuilderOutputStream(outStringBuilder)),new PrintStream(new StringBuilderOutputStream(errStringBuilder)))
-    (ret, List(new Variable(out, outStringBuilder.toString), new Variable(err,errStringBuilder.toString) ))
+
+    val ret = executeProcess(process, new PrintStream(new StringBuilderOutputStream(outStringBuilder)), new PrintStream(new StringBuilderOutputStream(errStringBuilder)))
+    (ret, List(new Variable(out, outStringBuilder.toString), new Variable(err, errStringBuilder.toString)))
   }
 }

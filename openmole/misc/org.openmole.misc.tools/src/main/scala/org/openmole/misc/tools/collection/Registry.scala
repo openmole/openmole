@@ -20,20 +20,20 @@ package org.openmole.misc.tools.collection
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.SynchronizedMap
 
-class Registry [K, V] {
+class Registry[K, V] {
 
-  val registry = new HashMap[K, V] with SynchronizedMap[K,V]
+  val registry = new HashMap[K, V] with SynchronizedMap[K, V]
 
   def isRegistred(key: K): Boolean = registry.contains(key)
-    
+
   def remove(key: K): Option[V] = registry.remove(key)
-  
+
   def +=(key: K, value: V) = registry += key -> value
-    
+
   def apply(key: K): Option[V] = registry.get(key)
-       
+
   def isEmpty = registry.isEmpty
-  
-  def getOrElseUpdate(k: K, f: => V) = registry.getOrElseUpdate(k, f)
-  
+
+  def getOrElseUpdate(k: K, f: ⇒ V) = registry.getOrElseUpdate(k, f)
+
 }

@@ -28,35 +28,34 @@ import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
 class StrainerCapsuleSpec extends FlatSpec with ShouldMatchers {
-  
+
   "The strainer capsule" should "let the data pass through" in {
     val p = new Prototype[String]("p")
-    
+
     val t1 = new TestTask {
       val name = "Test write"
       override def outputs = DataSet(p)
       override def process(context: IContext) = context + (p -> "Test")
     }
-    
-    
+
     val strainer = EmptyTask("Strainer")
-    
+
     val t2 = new TestTask {
       val name = "Test read"
       override def inputs = DataSet(p)
       override def process(context: IContext) = {
-        context.value(p).get should equal ("Test")
+        context.value(p).get should equal("Test")
         context
       }
     }
-    
+
     val t1c = new Capsule(t1)
     val strainerC = new StrainerCapsule(strainer)
     val t2c = new Capsule(t2)
-    
+
     new Transition(t1c, strainerC)
     new Transition(strainerC, t2c)
-    
+
     new MoleExecution(new Mole(t1c)).start.waitUntilEnded
   }
 

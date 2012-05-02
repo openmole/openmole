@@ -24,31 +24,29 @@ import org.openmole.core.batch.environment.Authentication
 import org.openmole.core.batch.jsaga.JSAGASessionService
 
 object SSHAuthentication {
-  
+
   def apply(login: String, host: String) = {
     val list = Workspace.persistentList(classOf[SSHAuthenticationMethod])
     val connection = login + '@' + host
-    
+
     new SSHAuthentication(
-      list.find{case(i, e) => connection.matches(e.target)}.getOrElse(throw new UserBadDataError("No authentication method found for " + connection))._2
-    )
+      list.find { case (i, e) ⇒ connection.matches(e.target) }.getOrElse(throw new UserBadDataError("No authentication method found for " + connection))._2)
   }
-  
+
 }
 
-
 class SSHAuthentication(val method: SSHAuthenticationMethod) extends Authentication {
-  
+
   override def key = method.target
 
   override def initialize(local: Boolean) = {
     val ctxSSH = method.context
     ctxSSH.setVectorAttribute(ContextImpl.BASE_URL_INCLUDES, Array("ssh->ssh2://*"))
     JSAGASessionService.addContext("ssh://" + method.target, ctxSSH)
-    
+
     val ctxSFTP = method.context
     ctxSFTP.setVectorAttribute(ContextImpl.BASE_URL_INCLUDES, Array("sftp->sftp2://*"))
     JSAGASessionService.addContext("sftp://" + method.target, ctxSFTP)
   }
-  
+
 }

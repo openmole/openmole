@@ -33,50 +33,50 @@ object HashService {
   implicit def fileHashServiceDecorator(file: File) = new {
     def hash = computeHash(file)
   }
-  
+
   implicit def inputStreamHashServiceDecorator(is: InputStream) = new Object {
     def hash = computeHash(is)
     def hash(maxRead: Int, timeout: Long) = computeHash(is, maxRead, timeout)
   }
-  
+
   def computeHash(file: File): SHA1Hash = {
     val is = new FileInputStream(file)
     try computeHash(is)
     finally is.close
   }
-  
+
   def computeHash(is: InputStream): SHA1Hash = {
-        
+
     val buffer = new Array[Byte](FileUtil.DefaultBufferSize)
     val md = new Sha160
-    Stream.continually(is.read(buffer)).takeWhile(_ != -1).foreach{ 
-      count => md.update(buffer, 0, count)
+    Stream.continually(is.read(buffer)).takeWhile(_ != -1).foreach {
+      count ⇒ md.update(buffer, 0, count)
     }
-    
+
     new SHA1Hash(md.digest)
   }
 
   def computeHash(is: InputStream, maxRead: Int, timeout: Long): SHA1Hash = {
     val buffer = new Array[Byte](maxRead)
     val md = new Sha160
-    
+
     val executor = Executors.newSingleThreadExecutor
     val reader = new ReaderRunnable(buffer, is, maxRead)
 
-    Iterator.continually( {
-        val f = executor.submit(reader)
+    Iterator.continually({
+      val f = executor.submit(reader)
 
-        try {
-          f.get(timeout, TimeUnit.MILLISECONDS)
-        } catch {
-          case (e: TimeoutException) =>
-            f.cancel(true)
-            throw new IOException("Timout on reading, read was longer than " + timeout, e)
-        }
-      }).takeWhile(_ != -1).foreach{ 
-      count => md.update(buffer, 0, count)
+      try {
+        f.get(timeout, TimeUnit.MILLISECONDS)
+      } catch {
+        case (e: TimeoutException) ⇒
+          f.cancel(true)
+          throw new IOException("Timout on reading, read was longer than " + timeout, e)
+      }
+    }).takeWhile(_ != -1).foreach {
+      count ⇒ md.update(buffer, 0, count)
     }
-                    
+
     new SHA1Hash(md.digest)
   }
 }

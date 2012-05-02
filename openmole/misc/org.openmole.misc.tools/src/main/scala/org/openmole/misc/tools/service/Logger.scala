@@ -17,11 +17,11 @@
 
 package org.openmole.misc.tools.service
 
-import java.util.logging.{Logger => JLogger,Level}
+import java.util.logging.{ Logger ⇒ JLogger, Level }
 
 trait Logger {
   @transient lazy val logger = JLogger.getLogger(getClass.getName)
-  
+
   def SEVERE = Level.SEVERE
   def WARNING = Level.WARNING
   def INFO = Level.INFO

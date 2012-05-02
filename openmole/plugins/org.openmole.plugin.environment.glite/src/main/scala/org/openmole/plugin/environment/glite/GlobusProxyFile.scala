@@ -25,21 +25,21 @@ import fr.in2p3.jsaga.adaptor.security.VOMSContext
 import GliteAuthentication._
 
 class GlobusProxyFile(val proxyFile: String) extends GliteAuthenticationMethod {
-  
+
   override def init(authentication: GliteAuthentication): (Context, Option[Int]) = {
     val ctx = JSAGASessionService.createContext
-    
+
     //logger.fine(proxyFile.getCanonicalPath + " " + proxyFile.exists)
     ctx.setAttribute(Context.TYPE, "GlobusLegacy")
     ctx.setAttribute(Context.USERPROXY, proxyFile)
     ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
     ctx.setAttribute(VOMSContext.VOMSDIR, "")
-     
+
     //Updater.delay(new ProxyChecker(ctx, None, new WeakReference(authentication)), ExecutorType.OWN, authentication.reloadProxyOnWorkerNodeInterval)
-   
+
     (ctx, None)
   }
-  
+
   override def toString = "Globus proxy file path = " + proxyFile
-  
+
 }

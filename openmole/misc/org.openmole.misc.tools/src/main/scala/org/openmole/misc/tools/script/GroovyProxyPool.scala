@@ -25,9 +25,9 @@ import org.apache.commons.pool.impl.SoftReferenceObjectPool
 class GroovyProxyPool(code: String, jars: Iterable[File]) extends {
 
   @transient lazy private val bufferPool = new SoftReferenceObjectPool(new BasePoolableObjectFactory {
-      override def makeObject = new GroovyProxy(code, jars)
-    })
-  
+    override def makeObject = new GroovyProxy(code, jars)
+  })
+
   def execute(binding: Binding): Object = {
     val proxy = borrowObject
     try proxy.executeUnsynchronized(binding)

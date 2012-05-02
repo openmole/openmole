@@ -29,62 +29,59 @@ import org.openmole.core.model.task.IPluginSet
 import org.openmole.plugin.task.external.ExternalTask
 
 object NetLogoTask {
-  
+
   class Workspace(val location: Either[(File, String), File]) {
     def this(workspace: File, script: String) = this(Left(workspace, script))
     def this(script: File) = this(Right(script))
   }
-  
-  
+
 }
 
 class NetLogoTask(
-  val name: String,
-  val workspace: NetLogoTask.Workspace, 
-  val launchingCommands: Iterable[String],
-  val netLogoInputs: Iterable[(IPrototype[_], String)],
-  val netLogoOutputs: Iterable[(String, IPrototype[_])],
-  val netLogoFactory: NetLogoFactory,
-  val inputs: IDataSet,
-  val outputs: IDataSet,
-  val parameters: IParameterSet,
-  val provided: Iterable[(Either[File, IPrototype[File]], String, Boolean)],
-  val produced: Iterable[(String, IPrototype[File])]
-)(implicit val plugins: IPluginSet) extends ExternalTask {
-  
-  val scriptPath = 
+    val name: String,
+    val workspace: NetLogoTask.Workspace,
+    val launchingCommands: Iterable[String],
+    val netLogoInputs: Iterable[(IPrototype[_], String)],
+    val netLogoOutputs: Iterable[(String, IPrototype[_])],
+    val netLogoFactory: NetLogoFactory,
+    val inputs: IDataSet,
+    val outputs: IDataSet,
+    val parameters: IParameterSet,
+    val provided: Iterable[(Either[File, IPrototype[File]], String, Boolean)],
+    val produced: Iterable[(String, IPrototype[File])])(implicit val plugins: IPluginSet) extends ExternalTask {
+
+  val scriptPath =
     workspace.location match {
-      case Left((f, s)) => f.getName + "/" + s
-      case Right(s) => s.getName
+      case Left((f, s)) ⇒ f.getName + "/" + s
+      case Right(s) ⇒ s.getName
     }
-  
 
   override def process(context: IContext): IContext = {
-        
+
     val tmpDir = org.openmole.misc.workspace.Workspace.newDir("netLogoTask")
     val links = prepareInputFiles(context, tmpDir)
-    
+
     val script = new File(tmpDir, scriptPath)
     val netLogo = netLogoFactory()
     try {
       netLogo.open(script.getAbsolutePath)
 
-      for (inBinding <- netLogoInputs) {
+      for (inBinding ← netLogoInputs) {
         val v = context.value(inBinding._1).get
         netLogo.command("set " + inBinding._2 + " " + v.toString)
       }
 
-      for (cmd <- launchingCommands) netLogo.command(VariableExpansion.expandData(context, cmd))
-                
+      for (cmd ← launchingCommands) netLogo.command(VariableExpansion.expandData(context, cmd))
+
       fetchOutputFiles(context, tmpDir, links) ++ netLogoOutputs.map {
-        case(name, prototype) =>
+        case (name, prototype) ⇒
           val outputValue = netLogo.report(name)
           if (!prototype.`type`.erasure.isArray) new Variable(prototype.asInstanceOf[IPrototype[Any]], outputValue)
           else {
             val netlogoCollection = outputValue.asInstanceOf[AbstractCollection[Any]]
             val array = java.lang.reflect.Array.newInstance(prototype.`type`.erasure.getComponentType, netlogoCollection.size)
             val it = netlogoCollection.iterator
-            for (i <- 0 until netlogoCollection.size) java.lang.reflect.Array.set(array, i, it.next)
+            for (i ← 0 until netlogoCollection.size) java.lang.reflect.Array.set(array, i, it.next)
             new Variable(prototype.asInstanceOf[IPrototype[Any]], array)
           }
       }

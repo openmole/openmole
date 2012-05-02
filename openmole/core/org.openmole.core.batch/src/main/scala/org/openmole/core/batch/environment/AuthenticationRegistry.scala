@@ -23,7 +23,7 @@ import scala.collection.mutable.HashMap
 object AuthenticationRegistry {
   @transient private lazy val lockRepository = new LockRepository[String]
   private val registry = new HashMap[String, Authentication]
-    
+
   def isRegistred(authenticationKey: String): Boolean = {
     registry.contains(authenticationKey)
   }
@@ -32,7 +32,7 @@ object AuthenticationRegistry {
     val key = authentication.key
     lockRepository.lock(key)
     try {
-      if(!isRegistred(key)) {
+      if (!isRegistred(key)) {
         authentication.initialize
         registry.put(key, authentication)
       }
@@ -40,8 +40,8 @@ object AuthenticationRegistry {
       lockRepository.unlock(key)
     }
   }
-                                                                                    
-  def registred (key: String): Option[Authentication] = synchronized {
+
+  def registred(key: String): Option[Authentication] = synchronized {
     registry.get(key)
   }
 

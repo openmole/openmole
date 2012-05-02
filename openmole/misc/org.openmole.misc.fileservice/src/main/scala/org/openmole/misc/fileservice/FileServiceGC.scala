@@ -22,15 +22,15 @@ import org.openmole.misc.updater.IUpdatable
 
 class FileServiceGC extends IUpdatable {
   override def update: Boolean = {
-    for(execution <- FileService.archiveCache.cacheMaps) {
-      for(file <- execution._2) {
-        if(!new File(file._1).exists) FileService.archiveCache.invalidateCache(execution._1, file._1)
+    for (execution ← FileService.archiveCache.cacheMaps) {
+      for (file ← execution._2) {
+        if (!new File(file._1).exists) FileService.archiveCache.invalidateCache(execution._1, file._1)
       }
     }
-    
-    for(execution <- FileService.hashCache.cacheMaps) {
-      for(file <- execution._2) {
-        if(!new File(file._1).exists) FileService.archiveCache.invalidateCache(execution._1, file._1)
+
+    for (execution ← FileService.hashCache.cacheMaps) {
+      for (file ← execution._2) {
+        if (!new File(file._1).exists) FileService.archiveCache.invalidateCache(execution._1, file._1)
       }
     }
 

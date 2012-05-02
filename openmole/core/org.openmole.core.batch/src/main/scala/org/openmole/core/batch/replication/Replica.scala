@@ -25,7 +25,7 @@ import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.file.URIFile
 
-class Replica( _source: String, _storageDescription: String, _hash: String, _authenticationKey: String, _destination: String, _lastCheckExists: java.lang.Long ) extends Activatable {
+class Replica(_source: String, _storageDescription: String, _hash: String, _authenticationKey: String, _destination: String, _lastCheckExists: java.lang.Long) extends Activatable {
 
   @transient
   var activator: com.db4o.activation.Activator = null
@@ -34,26 +34,26 @@ class Replica( _source: String, _storageDescription: String, _hash: String, _aut
     activate(ActivationPurpose.READ)
     _destination
   }
-  
+
   def lastCheckExists = {
     activate(ActivationPurpose.READ)
-    if(_lastCheckExists == null) new java.lang.Long(0) else _lastCheckExists
+    if (_lastCheckExists == null) new java.lang.Long(0) else _lastCheckExists
   }
-  
+
   def destinationURIFile: IURIFile = new GZURIFile(new URIFile(destination))
 
   def source = {
     activate(ActivationPurpose.READ)
     _source
   }
-  
+
   def sourceFile = new File(source)
 
   def storageDescriptionString = {
     activate(ActivationPurpose.READ)
     _storageDescription
   }
-  
+
   def storageDescription = new ServiceDescription(storageDescriptionString)
 
   def authenticationKey = {
@@ -78,18 +78,18 @@ class Replica( _source: String, _storageDescription: String, _hash: String, _aut
     activate(ActivationPurpose.READ)
     _hash
   }
-   
+
   @transient lazy val tuple = (source, storageDescription, hash, authenticationKey, destination)
-  
+
   override def hashCode = tuple.hashCode
 
   override def equals(other: Any): Boolean = {
-    if(other == null) false
-    else if(!classOf[Replica].isAssignableFrom(other.asInstanceOf[AnyRef].getClass)) false
+    if (other == null) false
+    else if (!classOf[Replica].isAssignableFrom(other.asInstanceOf[AnyRef].getClass)) false
     else tuple.equals(other.asInstanceOf[Replica].tuple)
   }
 
-  override def toString = 
+  override def toString =
     "Replica [destination=" + destination + ", authenticationKey=" + authenticationKey + ", hash=" + hash + ", source=" + source + ", storageDescription=" + storageDescription + "," + lastCheckExists + "]";
 
 }

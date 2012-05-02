@@ -33,53 +33,52 @@ import org.openmole.misc.tools.io.Prettifier._
 import scala.annotation.tailrec
 
 class AppendToCSVFileHook(
-  moleExecution: IMoleExecution,
-  capsule: ICapsule,
-  fileName: String,
-  prototypes: IPrototype[_]*) extends CapsuleExecutionHook(moleExecution, capsule) {
-  
-  override def process(moleJob: IMoleJob) =  {
+    moleExecution: IMoleExecution,
+    capsule: ICapsule,
+    fileName: String,
+    prototypes: IPrototype[_]*) extends CapsuleExecutionHook(moleExecution, capsule) {
+
+  override def process(moleJob: IMoleJob) = {
     import moleJob.context
-    val file = new File(VariableExpansion.expandData(context,fileName))
-    if(!file.getParentFile.exists) file.getParentFile.mkdirs
-    if(!file.getParentFile.isDirectory) throw new UserBadDataError("Cannot create directory " + file.getParentFile)
+    val file = new File(VariableExpansion.expandData(context, fileName))
+    if (!file.getParentFile.exists) file.getParentFile.mkdirs
+    if (!file.getParentFile.isDirectory) throw new UserBadDataError("Cannot create directory " + file.getParentFile)
 
     val fos = new FileOutputStream(file, true)
     val bfos = new BufferedOutputStream(fos)
-    try{
+    try {
       val lock = fos.getChannel.lock
       try {
-        if(file.size == 0) fos.appendLine(prototypes.map{_.name}.mkString(","))
-        
-        
+        if (file.size == 0) fos.appendLine(prototypes.map { _.name }.mkString(","))
+
         val lists = prototypes.map {
-          p => 
-          context.value(p) match {
-            case Some(v) => 
-              v match {
-                case v: Array[_] => v.toList
-                case v => List(v)
-              }
-            case None => List("not found")
-          }
+          p ⇒
+            context.value(p) match {
+              case Some(v) ⇒
+                v match {
+                  case v: Array[_] ⇒ v.toList
+                  case v ⇒ List(v)
+                }
+              case None ⇒ List("not found")
+            }
         }.toList
-        
-        @tailrec def write(lists: List[List[_]]): Unit = 
-          if(!lists.exists(_.size > 1)) writeLine(lists.map{_.head})
+
+        @tailrec def write(lists: List[List[_]]): Unit =
+          if (!lists.exists(_.size > 1)) writeLine(lists.map { _.head })
           else {
-            writeLine(lists.map{_.head})
-            write(lists.map{ l => if(l.size > 1) l.tail else l})
+            writeLine(lists.map { _.head })
+            write(lists.map { l ⇒ if (l.size > 1) l.tail else l })
           }
- 
-        def writeLine(list: List[_]) = 
-          bfos.appendLine(list.map{_.prettify}.mkString(","))
-        
+
+        def writeLine(list: List[_]) =
+          bfos.appendLine(list.map { _.prettify }.mkString(","))
+
         write(lists)
       } finally lock.release
     } finally bfos.close
-    
+
   }
-  
+
   def inputs = DataSet(prototypes)
-  
+
 }

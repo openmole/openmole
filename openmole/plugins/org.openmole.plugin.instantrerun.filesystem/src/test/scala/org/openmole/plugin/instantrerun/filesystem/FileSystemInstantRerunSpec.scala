@@ -43,9 +43,9 @@ import scala.collection.mutable.ListBuffer
 class FileSystemInstantRerunSpec extends FlatSpec with ShouldMatchers {
 
   "The instant rerun" should "avoid the second execution of the task" in {
-   val p = new Prototype[Long]("p")
-   val res = new ListBuffer[Long]
-    
+    val p = new Prototype[Long]("p")
+    val res = new ListBuffer[Long]
+
     val t1 = new Task {
       val name = "Test instant rerun"
       val inputs = DataSet.empty
@@ -54,35 +54,35 @@ class FileSystemInstantRerunSpec extends FlatSpec with ShouldMatchers {
       val plugins = PluginSet.empty
       override def process(context: IContext) = Context.empty + (p -> System.currentTimeMillis)
     }
-    
+
     val t2 = new Task {
       val name = "Add result"
-      
+
       val inputs = DataSet(p)
       val outputs = DataSet.empty
       val parameters = ParameterSet.empty
       val plugins = PluginSet.empty
-      
+
       override def process(context: IContext) = {
         res += context.value(p).get
         context
       }
     }
-    
+
     val t1c = new Capsule(t1)
     val t2c = new Capsule(t2)
-    
+
     new Transition(t1c, t2c)
-    
+
     val dir = File.createTempFile("testInstantRerun", "")
     dir.delete
     dir.mkdir
-    
+
     new MoleExecution(new Mole(t1c), rerun = new FileSystemInstantRerun(dir, t1c)).start.waitUntilEnded
     new MoleExecution(new Mole(t1c), rerun = new FileSystemInstantRerun(dir, t1c)).start.waitUntilEnded
     dir.recursiveDelete
-    
-    res.distinct.size should equal (1)
+
+    res.distinct.size should equal(1)
   }
-  
+
 }

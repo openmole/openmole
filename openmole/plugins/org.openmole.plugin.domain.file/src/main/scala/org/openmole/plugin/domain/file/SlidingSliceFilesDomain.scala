@@ -31,30 +31,29 @@ object SlidingSliceFilesDomain extends Logger {
 
 import SlidingSliceFilesDomain._
 
-sealed class SlidingSliceFilesDomain(dir: File, numberPattern: String, sliceSize: Int, filter: File => Boolean) extends IDomain[Array[File]] with IFinite[Array[File]] {
- 
-  def this(dir: File, numberPattern: String, sliceSize: Int) = this(dir, numberPattern, sliceSize, f => true)
-  
+sealed class SlidingSliceFilesDomain(dir: File, numberPattern: String, sliceSize: Int, filter: File ⇒ Boolean) extends IDomain[Array[File]] with IFinite[Array[File]] {
+
+  def this(dir: File, numberPattern: String, sliceSize: Int) = this(dir, numberPattern, sliceSize, f ⇒ true)
+
   def this(dir: File, sliceSize: Int) = this(dir, SlidingSliceFilesDomain.defaultPattern, sliceSize)
-  
-  def this(dir: File, sliceSize: Int, filter: File => Boolean) = this(dir, SlidingSliceFilesDomain.defaultPattern, sliceSize, filter)
+
+  def this(dir: File, sliceSize: Int, filter: File ⇒ Boolean) = this(dir, SlidingSliceFilesDomain.defaultPattern, sliceSize, filter)
 
   override def computeValues(context: IContext): Iterable[Array[File]] = {
     val pattern = Pattern.compile(numberPattern)
-    
-    val files = dir.listFiles(filter).flatMap{
-      f =>
-      val m = pattern.matcher(f.getName)
-      if(m.find) Some(f, m.group(1).toLong)
-      else {
-        logger.warning("File " + f.getName + " in dir " + dir + " doesn't match regexp " + numberPattern + ", it has been ignored.")
-        None
-      }
-    }.sortBy{ case(f, num) => num }.map{ case(f, num) => f}
-    
-    
+
+    val files = dir.listFiles(filter).flatMap {
+      f ⇒
+        val m = pattern.matcher(f.getName)
+        if (m.find) Some(f, m.group(1).toLong)
+        else {
+          logger.warning("File " + f.getName + " in dir " + dir + " doesn't match regexp " + numberPattern + ", it has been ignored.")
+          None
+        }
+    }.sortBy { case (f, num) ⇒ num }.map { case (f, num) ⇒ f }
+
     (0 to files.size - sliceSize).map {
-      i => files.slice(i, i + sliceSize)
+      i ⇒ files.slice(i, i + sliceSize)
     }
   }
 

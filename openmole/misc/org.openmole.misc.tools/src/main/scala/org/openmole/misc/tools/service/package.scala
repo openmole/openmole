@@ -18,8 +18,8 @@
 package org.openmole.misc.tools
 
 package object service {
-  
+
   def localHostName = LocalHostName.localHostName
   def newRNG(seed: Long) = Random.newRNG(seed)
-  
+
 }

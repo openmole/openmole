@@ -27,7 +27,7 @@ object Activator extends OSGiActivator {
 }
 
 class Activator extends BundleActivator {
-  
+
   override def start(context: BundleContext) = {
     Activator.context = Some(context)
     LoggerService.init
@@ -36,5 +36,5 @@ class Activator extends BundleActivator {
   override def stop(context: BundleContext) = {
     Activator.context = None
   }
- 
+
 }

@@ -23,80 +23,80 @@ import org.openmole.core.model.task.IMoleTask
 import scala.collection.immutable.TreeMap
 
 object JobPriorityQueue {
-  
+
   class JobQueue {
     val minSize = 1000
     val shrinkFactor = 0.5
     val shrinkCeil = 0.25
     val growthFactor = 2.
-    
+
     var jobs: Array[LocalExecutionJob] = Array.ofDim(minSize)
     var nextQueue = 0
     var nextDequeue = 0
     var size = 0
-     
-    private def resize(newSize: Int) = 
-      if(newSize >= minSize) {
+
+    private def resize(newSize: Int) =
+      if (newSize >= minSize) {
         val newJobs = Array.ofDim[LocalExecutionJob](newSize)
-          
-        if(nextDequeue < nextQueue)
+
+        if (nextDequeue < nextQueue)
           jobs.slice(nextDequeue, nextQueue).zipWithIndex.foreach {
-            case (j, i) => newJobs(i) = j
+            case (j, i) ⇒ newJobs(i) = j
           }
-        else 
+        else
           (jobs.slice(nextDequeue, jobs.size) ++ jobs.slice(0, nextQueue)).zipWithIndex.foreach {
-            case (j, i) => newJobs(i) = j
+            case (j, i) ⇒ newJobs(i) = j
           }
-        
+
         jobs = newJobs
         nextDequeue = 0
         nextQueue = size
       }
-    
+
     def enqueue(job: LocalExecutionJob) = {
-      if(size >= jobs.size) resize((jobs.size * growthFactor).toInt)
+      if (size >= jobs.size) resize((jobs.size * growthFactor).toInt)
 
       jobs(nextQueue) = job
       nextQueue = increment(nextQueue)
       size += 1
     }
-    
-    private def increment(i: Int) =if((i + 1) < jobs.size) i + 1 else 0
-    
+
+    private def increment(i: Int) = if ((i + 1) < jobs.size) i + 1 else 0
+
     def dequeue = {
-      if(isEmpty) throw new IndexOutOfBoundsException("Dequeing from an empty queue")
+      if (isEmpty) throw new IndexOutOfBoundsException("Dequeing from an empty queue")
 
       val dequeued = jobs(nextDequeue)
       jobs(nextDequeue) = null
       nextDequeue = increment(nextDequeue)
       size -= 1
-      
-      if(size < (jobs.size * shrinkCeil)) resize((jobs.size * shrinkFactor).toInt)
+
+      if (size < (jobs.size * shrinkCeil)) resize((jobs.size * shrinkFactor).toInt)
       dequeued
     }
-    
+
     def isEmpty = size == 0
   }
-  
-  def priority(job: IJob) = job.moleJobs.count( mj => classOf[IMoleTask].isAssignableFrom( mj.task.getClass) )
-  
+
+  def priority(job: IJob) = job.moleJobs.count(mj ⇒ classOf[IMoleTask].isAssignableFrom(mj.task.getClass))
+
 }
 
 import JobPriorityQueue._
 
 class JobPriorityQueue {
   private val jobInQueue = new Semaphore(0)
-    
+
   var queues = new TreeMap[Int, JobQueue]
-   
-  def size = synchronized { queues.map{case(_, q) => q.size}.sum }
-  
+
+  def size = synchronized { queues.map { case (_, q) ⇒ q.size }.sum }
+
   def enqueue(job: LocalExecutionJob) = {
     synchronized {
       val p = priority(job.job)
       queues.get(p) match {
-        case Some(queue) => queue.enqueue(job)
-        case None =>
+        case Some(queue) ⇒ queue.enqueue(job)
+        case None ⇒
           val q = new JobQueue
           q.enqueue(job)
           queues += p -> q
@@ -104,13 +104,13 @@ class JobPriorityQueue {
     }
     jobInQueue.release
   }
-    
+
   def dequeue = {
     jobInQueue.acquire
     synchronized {
       val (p, q) = queues.last
       val job = q.dequeue
-      if(q.isEmpty) queues -= p
+      if (q.isEmpty) queues -= p
       job
     }
   }

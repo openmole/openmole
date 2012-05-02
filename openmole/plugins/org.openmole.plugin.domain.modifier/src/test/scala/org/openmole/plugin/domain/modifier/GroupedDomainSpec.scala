@@ -30,17 +30,17 @@ import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
 class GroupedDomainSpec extends FlatSpec with ShouldMatchers {
-  
+
   "SlicedIterablesDomain" should "change the values of a domain to iterables" in {
     val r1 = (1 to 10)
-    
+
     val d1 = new IDomain[Int] with IIterable[Int] {
       override def iterator(context: IContext) = r1.iterator
     }
-    
+
     val md = new GroupDomain(d1, 3).iterator(Context.empty)
-    
-    md.toList.size should equal (4)
+
+    md.toList.size should equal(4)
   }
-  
+
 }

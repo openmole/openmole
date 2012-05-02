@@ -23,18 +23,17 @@ import java.lang.Integer
 
 sealed class IntegerRelative(val nominal: String, val percent: String, val size: String) extends IRelative[Integer] {
 
-  override def  computeValues(context: IContext): Iterable[Integer] = {
+  override def computeValues(context: IContext): Iterable[Integer] = {
     val nom = expandData(context, nominal).toInt
     val pe = expandData(context, percent).toInt
     val s = expandData(context, size).toInt
 
-
     val min = nom * (1 - pe / 100.)
     if (s > 1) {
       val step = 2 * nom * pe / 100. / (s - 1)
-      for (i <- 0 to s) yield new Integer(BigDecimal(min + i * s).toInt)
+      for (i ← 0 to s) yield new Integer(BigDecimal(min + i * s).toInt)
     } else {
-      List(min, nom, nom * (1 + pe / 100.)).map{e => new Integer(BigDecimal(e).toInt)}
+      List(min, nom, nom * (1 + pe / 100.)).map { e ⇒ new Integer(BigDecimal(e).toInt) }
     }
   }
 }

@@ -18,57 +18,55 @@
 package org.openmole.misc.tools.io
 
 import java.math.MathContext
-import java.math.{BigDecimal => JBigDecimal}
-import java.math.{BigInteger => JBigInteger}
+import java.math.{ BigDecimal ⇒ JBigDecimal }
+import java.math.{ BigInteger ⇒ JBigInteger }
 
 object FromString {
 
-
-  implicit val doubleFromString = 
+  implicit val doubleFromString =
     new FromString[Double] {
       def fromString(s: String) = s.toDouble
     }
-  
+
   implicit val intFromString =
     new FromString[Int] {
       def fromString(s: String) = s.toInt
     }
-  
-  implicit val longFromString = 
+
+  implicit val longFromString =
     new FromString[Long] {
       def fromString(s: String) = s.toLong
     }
-  
+
   implicit val floatFromString =
     new FromString[Float] {
       def fromString(s: String) = s.toFloat
     }
-  
-  implicit val bigDecimalFromString = 
+
+  implicit val bigDecimalFromString =
     new FromString[BigDecimal] {
       def fromString(s: String) = BigDecimal(s, MathContext.DECIMAL128)
     }
-  
-  implicit val bigIntFromString = 
+
+  implicit val bigIntFromString =
     new FromString[BigInt] {
       def fromString(s: String) = BigInt(s)
     }
-  
-  implicit val javaBigDecimalFromString = 
+
+  implicit val javaBigDecimalFromString =
     new FromString[java.math.BigDecimal] {
       def fromString(s: String) = BigDecimal(s, MathContext.DECIMAL128).bigDecimal
     }
-  
 
-  implicit val javaBigIntegerFromString = 
+  implicit val javaBigIntegerFromString =
     new FromString[java.math.BigInteger] {
       def fromString(s: String) = BigInt(s).underlying
     }
-  
+
   implicit val doubleAsIfIntegral = Numeric.DoubleAsIfIntegral
   implicit val bigDecimalAsIfIntegral = Numeric.BigDecimalAsIfIntegral
   implicit val floatAsIfIntegral = Numeric.FloatAsIfIntegral
-  
+
   implicit val bigJavaBigDecimalAsIfIntegral = new Integral[JBigDecimal] {
     def plus(x: JBigDecimal, y: JBigDecimal): JBigDecimal = x add y
     def minus(x: JBigDecimal, y: JBigDecimal): JBigDecimal = x subtract y
@@ -98,7 +96,7 @@ object FromString {
     def rem(x: JBigInteger, y: JBigInteger): JBigInteger = x mod y
     def compare(x: JBigInteger, y: JBigInteger): Int = x compareTo y
   }
-  
+
 }
 
 trait FromString[T] {

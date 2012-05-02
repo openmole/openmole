@@ -33,77 +33,77 @@ import org.junit.runner.RunWith
 class TypeUtilSpec extends FlatSpec with ShouldMatchers {
 
   implicit val plugins = PluginSet.empty
-  
+
   "To array finder" should "not detect a toArray case" in {
     val p = new Prototype[Int]("p")
-    
+
     val t1 = EmptyTask("T1")
     t1 addOutput p
-    
+
     val t2 = EmptyTask("T2")
     t2 addInput p
-    
+
     val t1c = new Capsule(t1)
     val t2c = new Capsule(t2)
-    
+
     new Transition(t1c, t2c)
-    
+
     val manifests = TypeUtil.computeManifests(t2c.defaultInputSlot)
-    
-    manifests.filter(_.toArray).isEmpty should equal (true)
+
+    manifests.filter(_.toArray).isEmpty should equal(true)
     val tc = manifests.filter(_.name == p.name).head
-    tc.toArray should equal (false)
+    tc.toArray should equal(false)
   }
-  
+
   "To array finder" should "detect a toArray case" in {
     val p = new Prototype[Int]("p")
-    
+
     val t1 = EmptyTask("T1")
     t1 addOutput p
-    
+
     val t2 = EmptyTask("T2")
     t2 addOutput p
-    
+
     val t3 = EmptyTask("T3")
     t3 addInput p
-    
+
     val t1c = new Capsule(t1)
     val t2c = new Capsule(t2)
     val t3c = new Capsule(t3)
-    
+
     new Transition(t1c, t3c)
     new Transition(t2c, t3c)
 
     val manifests = TypeUtil.computeManifests(t3c.defaultInputSlot)
     val m = manifests.filter(_.name == p.name).head
-    m.toArray should equal (true)
-    m.manifest.erasure should equal (classOf[Int])
+    m.toArray should equal(true)
+    m.manifest.erasure should equal(classOf[Int])
   }
-  
-  "Type system" should "detect an toArray case when a data channel is going from a level to a lower level" in {      
+
+  "Type system" should "detect an toArray case when a data channel is going from a level to a lower level" in {
     val i = new Prototype[String]("i")
 
     val exc = new Capsule(ExplorationTask("Exploration", new EmptySampling))
-     
+
     val testT = EmptyTask("Test")
-    testT addOutput i    
-    
-    val noOP = EmptyTask("NoOP") 
-    val aggT = EmptyTask("Aggregation") 
-    
+    testT addOutput i
+
+    val noOP = EmptyTask("NoOP")
+    val aggT = EmptyTask("Aggregation")
+
     val testC = new Capsule(testT)
     val noOPC = new Capsule(noOP)
     val aggC = new Capsule(aggT)
-  
+
     new ExplorationTransition(exc, testC)
     new Transition(testC, noOPC)
     new AggregationTransition(noOPC, aggC)
-    
+
     new DataChannel(testC, aggC)
-    
+
     val m = TypeUtil.computeManifests(aggC.defaultInputSlot).head
-    m.toArray should equal(true)             
-    m.manifest.erasure should equal (classOf[String])
+    m.toArray should equal(true)
+    m.manifest.erasure should equal(classOf[String])
   }
-  
+
 }

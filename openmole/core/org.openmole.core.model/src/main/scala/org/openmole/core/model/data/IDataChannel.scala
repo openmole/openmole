@@ -17,15 +17,14 @@
 
 package org.openmole.core.model.data
 
-
 /**
  *
  * A data channel allow to transmit data between remotes task capsules within a mole.
  * Two capsules could be linked with a {@link IDataChannel} if:
  *      - they belong to the same mole,
- *      - there is no capsule with more than one input slot in a path between 
+ *      - there is no capsule with more than one input slot in a path between
  *        the two capsules.
- *        
+ *
  */
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.ITicket
@@ -43,15 +42,13 @@ trait IDataChannel {
    */
   def start: ICapsule
 
-
   /**
    *
    * Get the capsule to which the data channel ends.
    *
    * @return the slot to which the data channel ends.
    */
-  def end:  ISlot
-
+  def end: ISlot
 
   /**
    *
@@ -61,7 +58,6 @@ trait IDataChannel {
    */
   def filtered: Iterable[String]
 
-   
   /**
    *
    * Get the set of data of that will actually be transmitted as input to the
@@ -76,17 +72,17 @@ trait IDataChannel {
   /**
    * Provides the variable for future consuption by the matching execution of
    * the ending task.
-   * 
+   *
    * @param context the context containing the variables
    * @param ticket the ticket of the current execution
    * @param toClone the set of variable wich should be cloned
    * @param moleExecution the current mole execution
    */
   def provides(context: IContext, ticket: ITicket, moleExecution: IMoleExecution)
-    
+
   /**
    * Consums the provided variables and construct a context for them.
-   * 
+   *
    * @param ticket the ticket of the current execution
    * @param moleExecution the current mole execution
    * @return the variables wich have been transmited through this data channel

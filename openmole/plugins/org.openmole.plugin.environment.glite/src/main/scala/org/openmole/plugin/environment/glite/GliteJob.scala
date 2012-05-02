@@ -25,36 +25,36 @@ import org.openmole.core.model.execution.ExecutionState._
 import fr.in2p3.jsaga.adaptor.job.SubState
 import org.openmole.core.model.execution.ExecutionState
 
-class GliteJob(val jobId: String, resultPath: String, jobService: GliteJobService, proxyExpired: Long) extends JSAGAJob(resultPath, jobService){
+class GliteJob(val jobId: String, resultPath: String, jobService: GliteJobService, proxyExpired: Long) extends JSAGAJob(resultPath, jobService) {
 
   var lastUpdate = System.currentTimeMillis
-  
+
   override def updatedState: ExecutionState = {
     val (state, subState) = super.updatedStateAndSubState
-    
-    if(!state.isFinal && proxyExpired < System.currentTimeMillis) throw new InternalProcessingError("Proxy for this job has expired.")
-    
-    if(state == SUBMITTED) {
+
+    if (!state.isFinal && proxyExpired < System.currentTimeMillis) throw new InternalProcessingError("Proxy for this job has expired.")
+
+    if (state == SUBMITTED) {
       val jobShakingInterval = Workspace.preferenceAsDurationInMs(GliteEnvironment.JobShakingInterval)
 
       val probability = {
-        if (subState == SubState.RUNNING_SUBMITTED.toString) 
+        if (subState == SubState.RUNNING_SUBMITTED.toString)
           Workspace.preferenceAsDouble(GliteEnvironment.JobShakingProbabilitySubmitted)
         else Workspace.preferenceAsDouble(GliteEnvironment.JobShakingProbabilityQueued)
       }
 
       val nbInterval = ((System.currentTimeMillis - lastUpdate.toDouble) / jobShakingInterval)
 
-      if(nbInterval < 1) {
-        if(Workspace.rng.nextDouble < nbInterval * probability) throw new ShouldBeKilledException("Killed in shaking process")
+      if (nbInterval < 1) {
+        if (Workspace.rng.nextDouble < nbInterval * probability) throw new ShouldBeKilledException("Killed in shaking process")
       } else {
-        for(i <- 0 to nbInterval.toInt ; if Workspace.rng.nextDouble < probability) 
+        for (i ← 0 to nbInterval.toInt; if Workspace.rng.nextDouble < probability)
           throw new ShouldBeKilledException("Killed in shaking process")
       }
     }
-    
+
     lastUpdate = System.currentTimeMillis
     state
   }
-  
- }
+
+}

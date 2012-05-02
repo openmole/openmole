@@ -34,31 +34,31 @@ import scala.collection.mutable.ListBuffer
 class ExplorationTransitionSpec extends FlatSpec with ShouldMatchers {
 
   implicit val plugins = PluginSet.empty
-  
+
   "Exploration transition" should "submit one MoleJob for each value in the sampling" in {
-     
-    val data = List("A","B","C")
+
+    val data = List("A", "B", "C")
     val i = new Prototype[String]("i")
-     
+
     val sampling = new ExplicitSampling(i, data)
-    
+
     val exc = new Capsule(ExplorationTask("Exploration", sampling))
-     
+
     val res = new ListBuffer[String]
-    
+
     val t = new TestTask {
       val name = "Test"
       override def inputs = DataSet(i)
       override def process(context: IContext) = synchronized {
-        context.contains(i) should equal (true)
+        context.contains(i) should equal(true)
         res += context.value(i).get
         context
       }
     }
-    
-    new ExplorationTransition(exc, new Capsule(t))                     
+
+    new ExplorationTransition(exc, new Capsule(t))
     new MoleExecution(new Mole(exc)).start.waitUntilEnded
-    
-    res.toArray.sorted.deep should equal (data.toArray.deep)
+
+    res.toArray.sorted.deep should equal(data.toArray.deep)
   }
 }

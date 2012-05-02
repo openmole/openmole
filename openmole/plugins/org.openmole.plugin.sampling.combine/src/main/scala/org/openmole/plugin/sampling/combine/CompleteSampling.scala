@@ -22,23 +22,22 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.sampling.ISampling
-import scala.util.control.Breaks._ 
+import scala.util.control.Breaks._
 
 sealed class CompleteSampling(samplings: ISampling*) extends ISampling {
 
-  override def inputs = DataSet.empty ++ samplings.flatMap{_.inputs}
-  override def prototypes: Iterable[IPrototype[_]] = samplings.flatMap{_.prototypes}
-  
-  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
-    if(samplings.isEmpty) Iterator.empty
+  override def inputs = DataSet.empty ++ samplings.flatMap { _.inputs }
+  override def prototypes: Iterable[IPrototype[_]] = samplings.flatMap { _.prototypes }
+
+  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] =
+    if (samplings.isEmpty) Iterator.empty
     else {
-      val values = samplings.map{_.build(context).toList}   
-      val composed = values.view.reduce{(a, b) => combine(a, b)}
+      val values = samplings.map { _.build(context).toList }
+      val composed = values.view.reduce { (a, b) ⇒ combine(a, b) }
       composed.iterator //map{comp => factors.zip(comp).map{case (f,v) => new Variable(f.prototype.asInstanceOf[IPrototype[Any]], v)}}.iterator
     }
-  
-  def combine[A](it1: List[Iterable[A]], it2: List[Iterable[A]]): List[Iterable[A]] = 
-    for(v1 <- it1; v2 <- it2) yield v1 ++ v2
-  
-  
+
+  def combine[A](it1: List[Iterable[A]], it2: List[Iterable[A]]): List[Iterable[A]] =
+    for (v1 ← it1; v2 ← it2) yield v1 ++ v2
+
 }

@@ -38,23 +38,23 @@ object StrainerCapsule {
 }
 
 class StrainerCapsule(t: Option[ITask] = None) extends Capsule(t.map(new StrainerCapsule.StrainerTaskDecorator(_))) {
-  
+
   def this(t: ITask) = this(Some(t))
 
   override def task_=(task: Option[ITask]) = super.task = t.map(new StrainerCapsule.StrainerTaskDecorator(_))
-  
-  override def inputs = 
-    (receivedTypes(defaultInputSlot).map(new Data(_)) ++ 
+
+  override def inputs =
+    (receivedTypes(defaultInputSlot).map(new Data(_)) ++
       (task match {
-        case Some(t) => t.inputs
-        case None => Iterable.empty
+        case Some(t) ⇒ t.inputs
+        case None ⇒ Iterable.empty
       }))
-  
-  override def outputs = 
-    (receivedTypes(defaultInputSlot).map(new Data(_)) ++ 
+
+  override def outputs =
+    (receivedTypes(defaultInputSlot).map(new Data(_)) ++
       (task match {
-        case Some(t) => t.outputs
-        case None => Iterable.empty
+        case Some(t) ⇒ t.outputs
+        case None ⇒ Iterable.empty
       }))
-  
+
 }

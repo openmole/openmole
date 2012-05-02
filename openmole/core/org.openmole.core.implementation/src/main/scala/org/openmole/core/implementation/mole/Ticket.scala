@@ -23,7 +23,7 @@ object Ticket {
   def apply(category: String, content: Long) = {
     new Ticket(category, content, None)
   }
-  
+
   def apply(parent: ITicket, content: Long) = {
     new Ticket(parent.category, content, Some(parent))
   }

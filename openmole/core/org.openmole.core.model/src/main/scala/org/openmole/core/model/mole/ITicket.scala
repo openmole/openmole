@@ -21,7 +21,7 @@ object ITicket {
   implicit def ordering = new Ordering[ITicket] {
     override def compare(left: ITicket, right: ITicket): Int = {
       val compare = left.content.compare(right.content)
-      if(compare != 0) return compare
+      if (compare != 0) return compare
       left.category.compare(right.category)
     }
   }
@@ -32,9 +32,9 @@ trait ITicket {
   def category: String
   def parent: Option[ITicket]
   def parentOrException = parent.getOrElse(throw new InternalError("This is a root ticket, it has no parent."))
-  
+
   def isRoot: Boolean = parent.equals(None)
-  
-  override def equals(obj: Any): Boolean = (content, category).equals(obj) 
+
+  override def equals(obj: Any): Boolean = (content, category).equals(obj)
   override def hashCode = (content, category).hashCode
 }

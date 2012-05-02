@@ -28,28 +28,27 @@ import org.openmole.misc.exception.UserBadDataError
 
 class GroovyProxy(code: String, jars: Iterable[File] = Iterable.empty) {
 
-  @transient 
+  @transient
   private lazy val compiledScript = {
-    val classLoader = new URLClassLoader(jars.map{jar => jar.getAbsoluteFile.toURI.toURL}.toArray, classOf[GroovyShell].getClassLoader)
+    val classLoader = new URLClassLoader(jars.map { jar ⇒ jar.getAbsoluteFile.toURI.toURL }.toArray, classOf[GroovyShell].getClassLoader)
 
     val groovyShell = new GroovyShell(classLoader)
     try {
       groovyShell.parse("package script\n" + code)
     } catch {
-      case t => throw new UserBadDataError("Script compilation error !\n The script was :\n" + code + "\n Error message was:" + t.getMessage);
+      case t ⇒ throw new UserBadDataError("Script compilation error !\n The script was :\n" + code + "\n Error message was:" + t.getMessage);
     }
   }
-
 
   /**
    * This method run your compiled script.
    * @return the result of your script if a variable is returned.
-   * @throws InternalProcessingError 
+   * @throws InternalProcessingError
    */
   def execute(binding: Binding = new Binding) = compiledScript.synchronized {
     executeUnsynchronized(binding)
   }
-  
+
   def executeUnsynchronized(binding: Binding = new Binding) = {
     compiledScript.setBinding(binding)
     val ret = compiledScript.run
@@ -57,5 +56,5 @@ class GroovyProxy(code: String, jars: Iterable[File] = Iterable.empty) {
     compiledScript.setBinding(null)
     ret
   }
-   
+
 }

@@ -38,10 +38,10 @@ object ThreadUtil extends Logger {
     }
 
   }
-  
-  implicit def future2Function[A](f: Future[A]) = () => f.get
-  implicit def function2Runnable[F](f: => F) = new Callable[F] { def call = f } 
-  
-  def background[F](f: => F): Future[F] = Executors.newSingleThreadExecutor(daemonThreadFactory).submit(f)
+
+  implicit def future2Function[A](f: Future[A]) = () ⇒ f.get
+  implicit def function2Runnable[F](f: ⇒ F) = new Callable[F] { def call = f }
+
+  def background[F](f: ⇒ F): Future[F] = Executors.newSingleThreadExecutor(daemonThreadFactory).submit(f)
 
 }

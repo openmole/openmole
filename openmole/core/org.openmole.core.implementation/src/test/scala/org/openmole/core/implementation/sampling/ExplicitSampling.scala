@@ -23,5 +23,5 @@ import org.openmole.core.implementation.data.Variable
 
 class ExplicitSampling[T](prototype: IPrototype[T], data: Iterable[T]) extends Sampling {
   override def prototypes = List(prototype)
-  override def build(context: IContext) = data.map{v => List(new Variable(prototype, v))}.iterator
+  override def build(context: IContext) = data.map { v ⇒ List(new Variable(prototype, v)) }.iterator
 }

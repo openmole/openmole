@@ -19,6 +19,6 @@ package org.openmole.plugin.sampling.csv
 
 import java.io.File
 
-class FileMapping(basePath: File) extends IStringMapping[File]{
-  override def convert(stringToBeConverted: String) = new File(basePath,stringToBeConverted)
+class FileMapping(basePath: File) extends IStringMapping[File] {
+  override def convert(stringToBeConverted: String) = new File(basePath, stringToBeConverted)
 }

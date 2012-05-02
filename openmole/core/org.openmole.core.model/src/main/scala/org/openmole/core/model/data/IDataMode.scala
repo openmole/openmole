@@ -18,12 +18,12 @@
 package org.openmole.core.model.data
 
 /**
- * The data mode give meta-information about the circulation of data in the 
+ * The data mode give meta-information about the circulation of data in the
  * mole.
  */
 trait IDataMode {
-  
-  /** 
+
+  /**
    * Test a data mode mask against this mode
    */
   def is(mode: DataModeMask): Boolean

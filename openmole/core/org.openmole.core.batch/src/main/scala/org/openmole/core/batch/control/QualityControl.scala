@@ -21,43 +21,43 @@ import org.openmole.misc.tools.service.MoovingAverage
 import java.util.logging.Logger
 
 object QualityControl {
-  
-  def withQualityControl[A](qualityControl: Option[QualityControl], op: => A, isFailure: Throwable => Boolean): A = {
+
+  def withQualityControl[A](qualityControl: Option[QualityControl], op: ⇒ A, isFailure: Throwable ⇒ Boolean): A = {
     try {
       val ret = op
       qualityControl match {
-        case Some(f) => f.success
-        case None => 
+        case Some(f) ⇒ f.success
+        case None ⇒
       }
       ret
     } catch {
-      case e =>
+      case e ⇒
         qualityControl match {
-          case Some(f) => f.failed
-          case None =>
+          case Some(f) ⇒ f.failed
+          case None ⇒
         }
         throw e
     }
   }
-  
-  def withQualityControl[A](qualityControl: QualityControl, op: => A, isFailure: Throwable => Boolean): A = {
+
+  def withQualityControl[A](qualityControl: QualityControl, op: ⇒ A, isFailure: Throwable ⇒ Boolean): A = {
     try {
       val ret = op
       qualityControl.success
       ret
     } catch {
-      case e =>
-        if(isFailure(e)) qualityControl.failed
+      case e ⇒
+        if (isFailure(e)) qualityControl.failed
         throw e
     }
   }
-  
+
 }
 
 class QualityControl(hysteresis: Int) {
   //Logger.getLogger(classOf[QualityControl].getName).fine("hysteresis " + hysteresis)
   private val _successRate = new MoovingAverage(hysteresis, 1.)
-  
+
   def failed = _successRate.apply(0)
   def success = _successRate.apply(1)
   def successRate = _successRate.get

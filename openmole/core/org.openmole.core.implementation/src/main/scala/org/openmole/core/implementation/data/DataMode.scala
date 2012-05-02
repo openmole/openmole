@@ -17,25 +17,24 @@
 
 package org.openmole.core.implementation.data
 
-import org.openmole.core.model.data.{DataModeMask,IDataMode}
+import org.openmole.core.model.data.{ DataModeMask, IDataMode }
 import org.openmole.core.model.data.DataModeMask._
-
 
 object DataMode {
   val NONE = new DataMode(0)
-  
+
   def apply(masks: DataModeMask*) = {
     var mask = 0
-    for(m <- masks) mask |= m.value
+    for (m ← masks) mask |= m.value
     new DataMode(mask)
   }
-  
+
 }
 
 class DataMode(mask: Int) extends IDataMode {
   override def is(mode: DataModeMask): Boolean = (mask & mode.value) != 0
   override def toString = {
-    val toDisplay = values.flatMap{m => if(this is m) Some(m.toString) else None}
-    if(toDisplay.isEmpty) "None" else toDisplay.mkString(", ")
+    val toDisplay = values.flatMap { m ⇒ if (this is m) Some(m.toString) else None }
+    if (toDisplay.isEmpty) "None" else toDisplay.mkString(", ")
   }
 }

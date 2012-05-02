@@ -21,15 +21,15 @@ import java.io.InputStream
 
 class StringInputStream(val s: String) extends InputStream {
 
-  private var strOffset  = 0
+  private var strOffset = 0
   private var charOffset = 0
   private var _available = s.length * 2
-  
+
   override def available = _available
 
   override def read: Int = {
     if (available == 0) return -1
-        
+
     _available -= 1
     val c = s.charAt(strOffset)
 

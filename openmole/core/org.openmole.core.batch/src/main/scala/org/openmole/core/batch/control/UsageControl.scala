@@ -25,9 +25,9 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.SynchronizedMap
 
 object UsageControl extends Logger {
-  
+
   case class ResourceReleased extends Event[UsageControl]
-  
+
   val botomlessUsage = new UsageControl(BotomlessTokenPool)
 
   def apply(nbAccess: Int) = {
@@ -35,34 +35,31 @@ object UsageControl extends Logger {
     else new UsageControl(BotomlessTokenPool)
   }
 
-  
-  def withUsageControl[B](usageControl: UsageControl, f: (AccessToken => B)): B = {
+  def withUsageControl[B](usageControl: UsageControl, f: (AccessToken ⇒ B)): B = {
     val token = usageControl.waitAToken
     try f(token)
     finally usageControl.releaseToken(token)
   }
 
-  def withToken[B]( desc: ServiceDescription, f: (AccessToken => B)): B = {
+  def withToken[B](desc: ServiceDescription, f: (AccessToken ⇒ B)): B = {
     val usageControl = this.get(desc)
     withUsageControl(usageControl, f)
   }
-  
-  
+
   val controls = new HashMap[ServiceDescription, UsageControl] with SynchronizedMap[ServiceDescription, UsageControl]
- 
+
   def register(ressource: ServiceDescription, usageControl: UsageControl) = {
     logger.fine("Register " + ressource)
-    controls.getOrElseUpdate(ressource, usageControl) 
+    controls.getOrElseUpdate(ressource, usageControl)
   }
-  
-  def get(ressource: ServiceDescription) = 
-    controls.get(ressource) match {
-      case Some(ctrl) => ctrl
-      case None => botomlessUsage
-    }
-  
-}
 
+  def get(ressource: ServiceDescription) =
+    controls.get(ressource) match {
+      case Some(ctrl) ⇒ ctrl
+      case None ⇒ botomlessUsage
+    }
+
+}
 
 class UsageControl(tokenPool: IAccessTokenPool) {
 
@@ -71,12 +68,12 @@ class UsageControl(tokenPool: IAccessTokenPool) {
   def waitAToken: AccessToken = tokenPool.waitAToken
 
   def tryGetToken: Option[AccessToken] = tokenPool.tryGetToken
-  
+
   def releaseToken(token: AccessToken) = {
     tokenPool.releaseToken(token)
     EventDispatcher.trigger(this, new UsageControl.ResourceReleased)
   }
- 
+
   def load: Int = tokenPool.load
-  
+
 }

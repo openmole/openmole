@@ -33,58 +33,57 @@ class JobServiceGroup(val environment: BatchEnvironment, resources: Iterable[Job
   class BatchRessourceGroupAdapterUsage extends EventListener[UsageControl] {
     override def triggered(subMole: UsageControl, ev: Event[UsageControl]) = waiting.release
   }
-  
+
   resources.foreach {
-    service =>
-    val usageControl = UsageControl.get(service.description)
-    EventDispatcher.listen(usageControl, new BatchRessourceGroupAdapterUsage, classOf[UsageControl.ResourceReleased])
+    service ⇒
+      val usageControl = UsageControl.get(service.description)
+      EventDispatcher.listen(usageControl, new BatchRessourceGroupAdapterUsage, classOf[UsageControl.ResourceReleased])
   }
-  
+
   @transient lazy val waiting = new Semaphore(0)
   @transient lazy val selectingRessource = new ReentrantLock
 
   override def iterator = resources.iterator
-  
+
   def selectAService: (JobService, AccessToken) = {
-    if(resources.size == 1) {
+    if (resources.size == 1) {
       val r = resources.head
       return (r, UsageControl.get(r.description).waitAToken)
-    } 
+    }
 
     selectingRessource.lock
     try {
       var ret: Option[(JobService, AccessToken)] = None
 
       do {
-        val notLoaded = resources.flatMap {   
-          cur =>
+        val notLoaded = resources.flatMap {
+          cur ⇒
             UsageControl.get(cur.description).tryGetToken match {
-              case None => None
-              case Some(token) => 
+              case None ⇒ None
+              case Some(token) ⇒
                 val quality = JobServiceControl.qualityControl(cur.description)
                 val nbSubmitted = quality.submitted
                 val fitness = orMin(
-                  if(quality.submitted > 0) math.pow((quality.runnig.toDouble / quality.submitted) * quality.successRate, 2)
-                  else math.pow(quality.successRate, 3)
-                ) 
+                  if (quality.submitted > 0) math.pow((quality.runnig.toDouble / quality.submitted) * quality.successRate, 2)
+                  else math.pow(quality.successRate, 3))
                 Some((cur, token, fitness))
-            }   
+            }
         }
 
         if (!notLoaded.isEmpty) {
-          var selected = Random.default.nextDouble * notLoaded.map{_._3}.sum
-          
-          for ((service, token, fitness) <- notLoaded) { 
-            if(!ret.isDefined && selected <= fitness) ret = Some((service, token))
-            else UsageControl.get(service.description).releaseToken(token) 
+          var selected = Random.default.nextDouble * notLoaded.map { _._3 }.sum
+
+          for ((service, token, fitness) ← notLoaded) {
+            if (!ret.isDefined && selected <= fitness) ret = Some((service, token))
+            else UsageControl.get(service.description).releaseToken(token)
             selected -= fitness
           }
         } else waiting.acquire
-        
+
       } while (!ret.isDefined)
       return ret.get
     } finally selectingRessource.unlock
-    
+
   }
 
 }

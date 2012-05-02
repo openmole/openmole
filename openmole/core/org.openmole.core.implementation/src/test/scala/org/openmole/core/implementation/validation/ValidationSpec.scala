@@ -32,166 +32,164 @@ import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
 class ValidationSpec extends FlatSpec with ShouldMatchers {
-  
+
   implicit val plugins = PluginSet.empty
-  
+
   "Validation" should "detect a missing input error" in {
     val p = new Prototype[String]("t")
-    
+
     val t1 = EmptyTask("t1")
     val t2 = EmptyTask("t2")
     t2 addInput p
-    
+
     val c1 = new Capsule(t1)
     val c2 = new Capsule(t2)
-    
+
     new Transition(c1, c2)
-    
+
     val errors = Validation.typeErrors(new Mole(c1).capsules)
     errors.headOption match {
-      case Some(MissingInput(_,_,d)) => assert(d.prototype == p)
-      case None => sys.error("Error should have been detected")
+      case Some(MissingInput(_, _, d)) ⇒ assert(d.prototype == p)
+      case None ⇒ sys.error("Error should have been detected")
     }
   }
-  
+
   "Validation" should "not detect a missing input error" in {
     val p = new Prototype[String]("t")
-    
+
     val t1 = EmptyTask("t1")
     val t2 = EmptyTask("t2")
     t2 addInput p
     t2 addParameter (p -> "Test")
-    
+
     val c1 = new Capsule(t1)
     val c2 = new Capsule(t2)
-    
+
     new Transition(c1, c2)
-    
-    Validation.typeErrors(new Mole(c1).capsules).isEmpty should equal (true)
+
+    Validation.typeErrors(new Mole(c1).capsules).isEmpty should equal(true)
   }
-  
+
   "Validation" should "detect a type error" in {
     val pInt = new Prototype[Int]("t")
     val pString = new Prototype[String]("t")
-    
+
     val t1 = EmptyTask("t1")
     t1 addOutput pInt
-    
+
     val t2 = EmptyTask("t2")
     t2 addInput pString
-    
+
     val c1 = new Capsule(t1)
     val c2 = new Capsule(t2)
-    
+
     new Transition(c1, c2)
-    
+
     val errors = Validation.typeErrors(new Mole(c1).capsules)
     errors.headOption match {
-      case Some(WrongType(_,_,d,t)) => 
+      case Some(WrongType(_, _, d, t)) ⇒
         assert(d.prototype == pString)
         assert(t == pInt)
-      case None => sys.error("Error should have been detected")
+      case None ⇒ sys.error("Error should have been detected")
     }
   }
-  
+
   "Validation" should "detect a topology error" in {
     val p = new Prototype[String]("t")
-    
+
     val t1 = EmptyTask("t1")
     val t2 = EmptyTask("t2")
-    
+
     val c1 = new Capsule(t1)
     val c2 = new Capsule(t2)
-    
+
     new ExplorationTransition(c1, c2)
     new Transition(c2, c1)
-    
+
     val errors = Validation.topologyErrors(new Mole(c1))
-    errors.isEmpty should equal (false) 
+    errors.isEmpty should equal(false)
   }
-  
-  
+
   "Validation" should "detect a duplicated transition" in {
     val p = new Prototype[String]("t")
-    
+
     val t1 = EmptyTask("t1")
     val t2 = EmptyTask("t2")
-    
+
     val c1 = new Capsule(t1)
     val c2 = new Capsule(t2)
-    
+
     new Transition(c1, c2)
     new Transition(c1, c2)
-    
+
     val errors = Validation.duplicatedTransitions(new Mole(c1))
-    errors.isEmpty should equal (false) 
+    errors.isEmpty should equal(false)
   }
-  
+
   "Validation" should "detect a missing input error due to datachannel filtering" in {
     val p = new Prototype[String]("t")
-    
-    val t1 = 
+
+    val t1 =
       new TestTask {
         val name = "t1"
         override def outputs = DataSet(p)
         override def process(context: IContext) = Context(new Variable(p, "test"))
       }
-    
-    
+
     val t2 = EmptyTask("t2")
     val t3 = EmptyTask("t2")
     t3 addInput p
-    
+
     val c1 = new Capsule(t1)
     val c2 = new Capsule(t2)
     val c3 = new Capsule(t3)
-    
+
     new Transition(c1, c2)
     new Transition(c2, c3)
-    
+
     new DataChannel(c1: ICapsule, c3: ICapsule, Array[IPrototype[_]](p))
-    
+
     val errors = Validation.typeErrors(new Mole(c1).capsules)
-    
+
     errors.headOption match {
-      case Some(MissingInput(_,_,d)) => assert(d.prototype == p)
-      case None => sys.error("Error should have been detected")
+      case Some(MissingInput(_, _, d)) ⇒ assert(d.prototype == p)
+      case None ⇒ sys.error("Error should have been detected")
     }
   }
-  
+
   "Validation" should "detect a missing input in the submole" in {
     val p = new Prototype[String]("t")
-    
+
     val t1 = EmptyTask("t1")
-   
+
     val t2 = EmptyTask("t2")
     t2 addInput p
-    
+
     val c1 = new Capsule(t1)
     val c2 = new Capsule(t2)
-    
+
     new Transition(c1, c2)
-    
+
     val mt = MoleTask("mt", new Mole(c1), c2)
-    
+
     val errors = Validation(new Mole(new Capsule(mt)))
     errors.headOption match {
-      case Some(MissingInput(_,_,d)) => assert(d.prototype == p)
-      case None => sys.error("Error should have been detected")
+      case Some(MissingInput(_, _, d)) ⇒ assert(d.prototype == p)
+      case None ⇒ sys.error("Error should have been detected")
     }
- 
+
   }
-  
+
   "Validation" should "not detect a missing input" in {
     val p = new Prototype[String]("t")
 
-    val t1 = 
+    val t1 =
       new TestTask {
         val name = "t1"
         override def outputs = DataSet(p)
         override def process(context: IContext) = Context(new Variable(p, "test"))
       }
-    
+
     val c1 = new Capsule(t1)
 
     val t2 = EmptyTask("t2")
@@ -199,13 +197,13 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val c2 = new Capsule(t2)
 
     val mt = MoleTask("mt", new Mole(c2), c2)
-    
+
     val mtC = new Capsule(mt)
-    
+
     new Transition(c1, mtC)
-    
+
     val errors = Validation(new Mole(mtC))
-    errors.isEmpty should equal (true)
+    errors.isEmpty should equal(true)
   }
-  
+
 }

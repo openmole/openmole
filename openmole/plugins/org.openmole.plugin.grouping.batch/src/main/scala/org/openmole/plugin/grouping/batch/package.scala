@@ -20,26 +20,23 @@ package org.openmole.plugin.grouping
 import org.openmole.core.implementation.puzzle.Puzzle
 
 package object batch {
-  
+
   implicit def puzzleBatchGroupingDecorator(puzzle: Puzzle) = new {
-    
-    def by(n: Int): Puzzle = 
+
+    def by(n: Int): Puzzle =
       puzzle.copy(
-        grouping = puzzle.grouping + (puzzle.last -> new NumberOfMoleJobsGrouping(n))
-      )
-    
-    def in(n: Int): Puzzle = 
+        grouping = puzzle.grouping + (puzzle.last -> new NumberOfMoleJobsGrouping(n)))
+
+    def in(n: Int): Puzzle =
       puzzle.copy(
-        grouping = puzzle.grouping + (puzzle.last -> new NumberOfBatchGrouping(n))
-      )
-    
-    def inShuffled(n: Int): Puzzle  = 
+        grouping = puzzle.grouping + (puzzle.last -> new NumberOfBatchGrouping(n)))
+
+    def inShuffled(n: Int): Puzzle =
       puzzle.copy(
-        grouping = puzzle.grouping + (puzzle.last -> new NumberOfBatchShuffledGrouping(n))
-      )
-    
+        grouping = puzzle.grouping + (puzzle.last -> new NumberOfBatchShuffledGrouping(n)))
+
   }
-  
+
   implicit def intToNumberOfMoleJobGrouping(n: Int) = new NumberOfMoleJobsGrouping(n)
-  
+
 }

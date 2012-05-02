@@ -30,14 +30,14 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.core.implementation.tools.VariableExpansion._
 
 abstract class AbstractTemplateFileTask extends Task {
-  
+
   def output: IPrototype[File]
-  
+
   override def process(context: IContext) = {
     val outputFile = Workspace.newFile("output", "template")
-    expandBufferData(context,new FileInputStream(file(context)),new FileOutputStream(outputFile))
-    Context.empty + (output, outputFile) 
+    expandBufferData(context, new FileInputStream(file(context)), new FileOutputStream(outputFile))
+    Context.empty + (output, outputFile)
   }
-   
+
   def file(context: IContext): File
 }

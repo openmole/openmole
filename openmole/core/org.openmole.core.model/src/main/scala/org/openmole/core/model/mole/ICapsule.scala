@@ -17,15 +17,15 @@
 
 package org.openmole.core.model.mole
 
-import org.openmole.core.model.data.{IDataSet, IContext, IDataChannel}
-import org.openmole.core.model.job.{MoleJobId, IMoleJob}
+import org.openmole.core.model.data.{ IDataSet, IContext, IDataChannel }
+import org.openmole.core.model.job.{ MoleJobId, IMoleJob }
 import org.openmole.core.model.task.ITask
-import org.openmole.core.model.transition.{ISlot, ITransition}
+import org.openmole.core.model.transition.{ ISlot, ITransition }
 import org.openmole.misc.exception.UserBadDataError
 
 /**
  * A capsule containing a task.
- * 
+ *
  */
 trait ICapsule {
 
@@ -36,9 +36,9 @@ trait ICapsule {
    * @return Some(task) inside this capsule or None if not the task has not been assigned
    */
   def task: Option[ITask]
-  
-  def taskOrException = task.getOrElse(throw new UserBadDataError("Capsule task is unassigned.")) 
-  
+
+  def taskOrException = task.getOrElse(throw new UserBadDataError("Capsule task is unassigned."))
+
   /*
    * Get the inputs data taken by this capsule, generally it is empty if the capsule
    * is empty or the input of the task inside the capsule. It can be different
@@ -47,7 +47,7 @@ trait ICapsule {
    * @return the input of the capsule
    */
   def inputs: IDataSet
-  
+
   /*
    * Get the outputs data taken by this capsule, generally it is empty if the capsule
    * is empty or the output of the task inside the capsule. It can be different
@@ -88,7 +88,6 @@ trait ICapsule {
    */
   //def removeOutputDataChannel(dataChannel: IDataChannel): this.type
 
-
   /**
    * Get the default input slot of this capsule.
    *
@@ -105,38 +104,38 @@ trait ICapsule {
 
   /**
    * Add an input slot to this capsule
-   * 
+   *
    * @param group the input slot to add.
    */
   def addInputSlot(group: ISlot): this.type
 
   /**
    * Assing a task to this capsule.
-   * 
+   *
    * @param task the task to assign to this capsule.
    */
   def task_=(task: ITask)
-  
+
   /**
    * Assing an option of task to this capsule.
-   * 
+   *
    * @param task the option of task to assign to this capsule.
    */
   def task_=(task: Option[ITask])
-    
+
   /**
    * Add an output transition to this capsule.
-   * 
+   *
    * @param transition the transition to add
    * @return the capsule itself
    */
   def addOutputTransition(transition: ITransition): this.type
-  
+
   /**
    * Get all the output transitions plugged to this capsule.
    *
    * @return all the output transitions plugged to this capsule
    */
   def outputTransitions: Iterable[ITransition]
-  
+
 }

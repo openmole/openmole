@@ -20,12 +20,12 @@ package org.openmole.misc.tools.io
 import java.io.InputStream
 
 class BufferInputStream(buffer: Iterator[Int]) extends InputStream {
-  
+
   def this(buffer: Iterable[Int]) = this(buffer.iterator)
-  
+
   override def available = buffer.length
 
-  override def read = 
-    if(buffer.hasNext) buffer.next
+  override def read =
+    if (buffer.hasNext) buffer.next
     else -1
 }

@@ -25,4 +25,3 @@ class BatchExecutionJob(val environment: BatchEnvironment, val job: IJob) extend
   var batchJob: Option[BatchJob] = None
 }
 
-   

@@ -31,26 +31,26 @@ object PersistentStorage extends Logger {
 
   val TmpDirRemoval = new ConfigurationLocation("Storage", "TmpDirRemoval")
   val TmpDirRegenerate = new ConfigurationLocation("Storage", "TmpDirRegenerate")
-    
+
   Workspace += (TmpDirRemoval, "P30D")
   Workspace += (TmpDirRegenerate, "P1D")
-    
+
   val persistent = "persistent/"
   val tmp = "tmp/"
-  
+
   def createBaseDir(environment: BatchEnvironment, base: URI, dir: String, nbAccess: Int) = {
     val baseURIFile = Iterator.iterate(new File(dir))(_.getParentFile).takeWhile(_ != null).toList.reverse.filterNot(_.getName.isEmpty).foldLeft(new URIFile(base): IURIFile) {
-      (uriFile, file) => uriFile.mkdirIfNotExist(file.getName)
+      (uriFile, file) ⇒ uriFile.mkdirIfNotExist(file.getName)
     }
     new PersistentStorage(environment, baseURIFile.URI, nbAccess)
   }
-  
+
 }
 
 class PersistentStorage(val environment: BatchEnvironment, URI: URI, override val nbAccess: Int) extends Storage(URI) {
 
   import PersistentStorage._
-  
+
   @transient protected var tmpSpaceVar: IURIFile = null
   @transient protected var persistentSpaceVar: IURIFile = null
   @transient protected var time = System.currentTimeMillis
@@ -60,11 +60,11 @@ class PersistentStorage(val environment: BatchEnvironment, URI: URI, override va
       persistentSpaceVar = baseDir(token).mkdirIfNotExist(persistent, token)
 
       val inCatalog = ReplicaCatalog.inCatalog(description, environment.authentication.key)
-      for (file <- persistentSpaceVar.list(token)) {
+      for (file ← persistentSpaceVar.list(token)) {
         val child = new URIFile(persistentSpaceVar, file)
-        if(!inCatalog.contains(child.location)) URIFile.clean(child)
+        if (!inCatalog.contains(child.location)) URIFile.clean(child)
       }
-        
+
     }
     persistentSpaceVar
   }
@@ -77,14 +77,14 @@ class PersistentStorage(val environment: BatchEnvironment, URI: URI, override va
       val tmpNoTime = baseDir(token).mkdirIfNotExist(tmp, token)
       val removalDate = System.currentTimeMillis - Workspace.preferenceAsDurationInMs(TmpDirRemoval);
 
-      for (dir <- tmpNoTime.list(token)) {
+      for (dir ← tmpNoTime.list(token)) {
         val child = new URIFile(tmpNoTime, dir)
         if (child.URLRepresentsADirectory) {
           try {
             val timeOfDir = dir.substring(0, dir.length - 1).toLong
             if (timeOfDir < removalDate) URIFile.clean(child)
-          } catch  {
-            case (ex: NumberFormatException) => URIFile.clean(child)
+          } catch {
+            case (ex: NumberFormatException) ⇒ URIFile.clean(child)
           }
         } else URIFile.clean(child)
       }
@@ -92,10 +92,10 @@ class PersistentStorage(val environment: BatchEnvironment, URI: URI, override va
       val tmpTmpDir = tmpNoTime.mkdirIfNotExist(time.toString(), token)
       tmpSpaceVar = tmpTmpDir
     }
-    
+
     tmpSpaceVar
   }
-  
+
   override def baseDir(token: AccessToken): IURIFile = synchronized {
     if (baseSpaceVar == null) {
       val storeFile = new URIFile(URI.toString)
@@ -103,6 +103,6 @@ class PersistentStorage(val environment: BatchEnvironment, URI: URI, override va
     }
     baseSpaceVar
   }
-  
+
   def baseDirName = Workspace.preference(Workspace.UniqueID) + '/'
 }

@@ -27,7 +27,7 @@ object Utils {
    * @param f
    * @return <code>f(s)</code> if s is not <code>null</code>, <code>null</code> otherwise.
    */
-  protected[scripting] def nullOrElse[S, T](s: S)(f: S => T): T =
+  protected[scripting] def nullOrElse[S, T](s: S)(f: S ⇒ T): T =
     if (s == null) null.asInstanceOf[T]
     else f(s)
 
@@ -36,7 +36,7 @@ object Utils {
    * @param default
    * @return <code>t</code> or <code>default</code> if <code>null</code>.
    */
-  protected[scripting] def valueOrElse[T](t: T)(default: => T) =
+  protected[scripting] def valueOrElse[T](t: T)(default: ⇒ T) =
     if (t == null) default
     else t
 
@@ -46,7 +46,7 @@ object Utils {
    * @returns <code>Some(value)</code> if value is not <code>null</code>,
    * <code>None</code> otherwise.
    */
-    protected[scripting] def option[T](value: T): Option[T] =
+  protected[scripting] def option[T](value: T): Option[T] =
     if (null == value) None else Some(value)
 
 }

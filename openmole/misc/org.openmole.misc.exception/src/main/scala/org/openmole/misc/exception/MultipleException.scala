@@ -17,13 +17,13 @@
 
 package org.openmole.misc.exception
 
-import java.io.{PrintStream,PrintWriter}
+import java.io.{ PrintStream, PrintWriter }
 
 class MultipleException(exceptions: Iterable[Throwable]) extends Exception with Iterable[Throwable] {
 
   override def printStackTrace = {
     super.printStackTrace
-    for(t <- exceptions) {
+    for (t ← exceptions) {
       System.err.println("---------------------------------------")
       t.printStackTrace
     }
@@ -33,17 +33,17 @@ class MultipleException(exceptions: Iterable[Throwable]) extends Exception with 
   override def printStackTrace(s: PrintStream) = {
     super.printStackTrace(s)
 
-    for(t <- exceptions) {
+    for (t ← exceptions) {
       s.println("----------------------------------------")
       t.printStackTrace(s)
     }
     s.println("----------------------------------------")
   }
 
-  override def printStackTrace(s: PrintWriter)  ={
+  override def printStackTrace(s: PrintWriter) = {
     super.printStackTrace(s)
 
-    for(t <- exceptions) {
+    for (t ← exceptions) {
       s.println("----------------------------------------")
       t.printStackTrace(s)
     }

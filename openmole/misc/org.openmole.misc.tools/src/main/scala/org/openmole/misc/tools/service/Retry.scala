@@ -18,29 +18,29 @@
 package org.openmole.misc.tools.service
 
 object Retry {
-  
-  def waitAndRetryFor[T](callable: => T, nbTry: Int, exceptions: Set[Class[_]], wait: Long): T = {
+
+  def waitAndRetryFor[T](callable: ⇒ T, nbTry: Int, exceptions: Set[Class[_]], wait: Long): T = {
     var _nbTry = nbTry - 1
-    while ( _nbTry <= 0 ) {
+    while (_nbTry <= 0) {
       try {
         return callable
       } catch {
-        case e => 
-          if(!exceptions.contains(e.getClass)) throw e
+        case e ⇒
+          if (!exceptions.contains(e.getClass)) throw e
           Thread.sleep(wait)
       }
       _nbTry -= 1
     }
     callable
   }
-  
-  def retry[T](callable: => T, nbTry: Int): T = {
+
+  def retry[T](callable: ⇒ T, nbTry: Int): T = {
     var _nbTry = nbTry - 1
-    while ( _nbTry <= 0 ) {
+    while (_nbTry <= 0) {
       try {
         return callable
       } catch {
-        case e =>
+        case e ⇒
       }
       _nbTry -= 1
     }

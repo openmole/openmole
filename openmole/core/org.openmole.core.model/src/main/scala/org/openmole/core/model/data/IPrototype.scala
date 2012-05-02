@@ -21,12 +21,12 @@ package org.openmole.core.model.data
  * {@link IPrototype} is a prototype in the sens of C language prototypes. It is
  * composed of a type and a name. It allows specifying typed data transfert in
  * OpenMOLE.
- * 
+ *
  * @type T the type of the prototype. Values associated to this prototype should
  * always be a subtype of T.
  */
 trait IPrototype[T] {
-  
+
   /**
    * Get the name of the prototype.
    *
@@ -42,7 +42,7 @@ trait IPrototype[T] {
   def `type`: Manifest[T]
 
   /**
-   * Test if this prototype can be assigned from another prototype. This work 
+   * Test if this prototype can be assigned from another prototype. This work
    * in the same way as java.lang.Class.isAssignableFrom.
    *
    * @param prototype the prototype to test
@@ -51,6 +51,6 @@ trait IPrototype[T] {
   def isAssignableFrom(prototype: IPrototype[_]): Boolean
 
   def accepts(obj: Any): Boolean
-  
+
 }
 

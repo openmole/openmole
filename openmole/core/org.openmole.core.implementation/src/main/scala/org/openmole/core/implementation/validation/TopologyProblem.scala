@@ -21,27 +21,26 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.transition.ITransition
 
 object TopologyProblem {
-  
-  case class DuplicatedTransition (val transitions: Iterable[ITransition]) extends TopologyProblem {
-    
+
+  case class DuplicatedTransition(val transitions: Iterable[ITransition]) extends TopologyProblem {
+
     override def toString = "DuplicatedTransition: from " + transitions.head.start + " to " + transitions.head.end.capsule + " has been found " + transitions.size + " times."
   }
-  
-  case class LevelProblem (
-    val capsule: ICapsule,
-    val paths: List[(List[ICapsule], Int)]) extends TopologyProblem {
-  
-    override def toString = "LevelProblem: " + capsule + ", " + paths.map{case(p, l) => "Folowing the path (" + p.mkString(", ") + " has level " + l + ")"}.mkString(", ")
+
+  case class LevelProblem(
+      val capsule: ICapsule,
+      val paths: List[(List[ICapsule], Int)]) extends TopologyProblem {
+
+    override def toString = "LevelProblem: " + capsule + ", " + paths.map { case (p, l) ⇒ "Folowing the path (" + p.mkString(", ") + " has level " + l + ")" }.mkString(", ")
   }
-  
-  case class NegativeLevelProblem (
-    val capsule: ICapsule,
-    val path: List[ICapsule], 
-    val level: Int) extends TopologyProblem {
-  
+
+  case class NegativeLevelProblem(
+      val capsule: ICapsule,
+      val path: List[ICapsule],
+      val level: Int) extends TopologyProblem {
+
     override def toString = "LevelProblem: " + capsule + ", " + path.mkString(", ") + " has a negative level " + level
   }
 }
-
 
 trait TopologyProblem extends Problem

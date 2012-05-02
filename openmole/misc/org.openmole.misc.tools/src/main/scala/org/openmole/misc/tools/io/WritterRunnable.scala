@@ -20,7 +20,6 @@ package org.openmole.misc.tools.io
 import java.io.OutputStream
 import java.util.concurrent.Callable
 
-
 class WritterRunnable(buffer: Array[Byte], to: OutputStream, amount: Int) extends Callable[Unit] {
-    override def call: Unit = to.write(buffer, 0, amount)
+  override def call: Unit = to.write(buffer, 0, amount)
 }

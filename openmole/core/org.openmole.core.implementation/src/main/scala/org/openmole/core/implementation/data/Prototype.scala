@@ -23,25 +23,24 @@ import org.openmole.misc.tools.obj.Id
 import scala.reflect.Manifest
 
 object Prototype {
-  
 
   implicit lazy val prototypeOrderingOnName = new Ordering[IPrototype[_]] {
-    override def compare(left: IPrototype[_], right: IPrototype[_]) = 
+    override def compare(left: IPrototype[_], right: IPrototype[_]) =
       left.name compare right.name
   }
-  
+
 }
 
 class Prototype[T](val name: String)(implicit val `type`: Manifest[T]) extends IPrototype[T] with Id {
- 
+
   import Prototype._
-   
-  override def isAssignableFrom(p: IPrototype[_]): Boolean = 
+
+  override def isAssignableFrom(p: IPrototype[_]): Boolean =
     `type`.isAssignableFromHighOrder(p.`type`)
 
   override def accepts(obj: Any): Boolean =
     obj == null || `type`.isAssignableFromHighOrder(manifest(clazzOf(obj)))
-  
+
   override def id = (name, `type`.erasure)
   override def toString = name + ": " + `type`.toString
 }

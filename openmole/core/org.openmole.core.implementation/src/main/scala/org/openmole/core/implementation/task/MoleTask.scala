@@ -39,43 +39,42 @@ import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.IMoleTask
 
 object MoleTask {
-  
-    def apply(name: String, mole: IMole, last: ICapsule)(implicit plugins: IPluginSet) = { 
-      new TaskBuilder { builder =>
-        def toTask = new MoleTask(name, mole, last) {
-          val inputs = builder.inputs
-          val outputs = builder.outputs
-          val parameters = builder.parameters
-        }
+
+  def apply(name: String, mole: IMole, last: ICapsule)(implicit plugins: IPluginSet) = {
+    new TaskBuilder { builder ⇒
+      def toTask = new MoleTask(name, mole, last) {
+        val inputs = builder.inputs
+        val outputs = builder.outputs
+        val parameters = builder.parameters
       }
     }
-  
+  }
+
 }
 
-
 sealed abstract class MoleTask(
-  val name: String,
-  val mole: IMole,
-  val last: ICapsule)(implicit val plugins: IPluginSet) extends Task with IMoleTask {
- 
+    val name: String,
+    val mole: IMole,
+    val last: ICapsule)(implicit val plugins: IPluginSet) extends Task with IMoleTask {
+
   class ResultGathering extends EventListener[IMoleExecution] {
     var lastContext: Option[IContext] = None
-     
+
     override def triggered(obj: IMoleExecution, ev: Event[IMoleExecution]) = synchronized {
       ev match {
-        case ev: IMoleExecution.JobInCapsuleFinished =>  
-          if(ev.capsule == last) lastContext = Some(ev.moleJob.context)
-        case _ =>
+        case ev: IMoleExecution.JobInCapsuleFinished ⇒
+          if (ev.capsule == last) lastContext = Some(ev.moleJob.context)
+        case _ ⇒
       }
     }
   }
 
   override protected def process(context: IContext) = {
     val firstTaskContext = inputs.foldLeft(List.empty[IVariable[_]]) {
-      (acc, input) =>
-      if (!(input.mode is optional) || ((input.mode is optional) && context.contains(input.prototype)))
-        context.variable(input.prototype).getOrElse(throw new InternalProcessingError("Bug: variable not found.")) :: acc
-      else acc
+      (acc, input) ⇒
+        if (!(input.mode is optional) || ((input.mode is optional) && context.contains(input.prototype)))
+          context.variable(input.prototype).getOrElse(throw new InternalProcessingError("Bug: variable not found.")) :: acc
+        else acc
     }.toContext
 
     val execution = new MoleExecution(mole, rng = Random.newRNG(context.valueOrException(Task.openMOLESeed)))

@@ -17,7 +17,6 @@
 
 package org.openmole.misc.tools.io
 
-
 import java.io.File
 import org.openmole.misc.tools.io.FileUtil._
 import org.scalatest.FlatSpec
@@ -27,9 +26,8 @@ import java.io.FileWriter
 import org.junit.runner.RunWith
 import scala.io.Source
 
-
 @RunWith(classOf[JUnitRunner])
-class FileUtilSpec extends FlatSpec with ShouldMatchers  {
+class FileUtilSpec extends FlatSpec with ShouldMatchers {
 
   "A string" should "be append to the stream" in {
     val t = "TestString"
@@ -37,9 +35,9 @@ class FileUtilSpec extends FlatSpec with ShouldMatchers  {
     val sis = new StringBuilderOutputStream(sbuild)
     try sis.append(t)
     finally sis.close
-    sbuild.toString should equal (t)
+    sbuild.toString should equal(t)
   }
-  
+
   "A string" should "be append to the file" in {
     val file = File.createTempFile("test", ".tmp")
     try {
@@ -47,8 +45,8 @@ class FileUtilSpec extends FlatSpec with ShouldMatchers  {
       val t2 = "Test2String"
       file.lockApply(_.append(t1))
       file.lockApply(_.append(t2))
-      file.content should equal (t1 + t2)
+      file.content should equal(t1 + t2)
     } finally file.delete
   }
-  
+
 }

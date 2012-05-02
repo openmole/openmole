@@ -27,37 +27,37 @@ import scala.collection.mutable.WeakHashMap
 import scala.ref.WeakReference
 
 object CapsuleExecutionDispatcher extends Logger {
-  
+
   private val dispatchers = new WeakHashMap[IMoleExecution, DispatcherMoleExecutionHook]
-  
+
   class DispatcherMoleExecutionHook(moleExecution: WeakReference[IMoleExecution]) extends MoleExecutionHook(moleExecution) {
-    
+
     def this(moleExecution: IMoleExecution) = this(new WeakReference(moleExecution))
-  
+
     private val hub = new WeakHashMap[ICapsule, HashSet[CapsuleExecutionHook]]
-    
+
     override def jobFinished(moleJob: IMoleJob, capsule: ICapsule) = hub.synchronized {
       hub.getOrElse(capsule, Iterable.empty).foreach(_.process(moleJob))
     }
-    
+
     def +=(capsule: ICapsule, hook: CapsuleExecutionHook) = hub.synchronized {
       hub.getOrElseUpdate(capsule, new HashSet) += hook
     }
-    
+
     def -=(capsule: ICapsule, hook: CapsuleExecutionHook) = hub.synchronized {
       hub.getOrElse(capsule, HashSet.empty) -= hook
     }
-    
+
   }
-  
-  def +=(execution: IMoleExecution, capsule: ICapsule, hook: CapsuleExecutionHook) =  dispatchers.synchronized {
+
+  def +=(execution: IMoleExecution, capsule: ICapsule, hook: CapsuleExecutionHook) = dispatchers.synchronized {
     dispatchers.getOrElseUpdate(execution, new DispatcherMoleExecutionHook(execution)) += (capsule, hook)
   }
-  
-  def -=(execution: IMoleExecution, capsule: ICapsule, hook: CapsuleExecutionHook) =  dispatchers.synchronized {
+
+  def -=(execution: IMoleExecution, capsule: ICapsule, hook: CapsuleExecutionHook) = dispatchers.synchronized {
     dispatchers.get(execution) match {
-      case Some(dispatcher) => dispatcher -= (capsule, hook)
-      case None => 
+      case Some(dispatcher) ⇒ dispatcher -= (capsule, hook)
+      case None ⇒
     }
   }
 

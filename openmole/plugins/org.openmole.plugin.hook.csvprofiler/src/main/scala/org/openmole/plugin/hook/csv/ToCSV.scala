@@ -25,19 +25,19 @@ object ToCSV {
   def toColumns(moleJob: IMoleJob): Array[String] = {
     val timeStamps = moleJob.timeStamps
     val toWrite = new Array[String]((timeStamps.size) + 3)
-        
+
     toWrite(0) = moleJob.task.name
     val (created, timeStampsStr) = toCSV(timeStamps)
     toWrite(1) = created.toString
     toWrite(2) = moleJob.id.toString
-    timeStampsStr.zipWithIndex.foreach { case(timeStamp, i) => toWrite(i + 3) = timeStamp}
+    timeStampsStr.zipWithIndex.foreach { case (timeStamp, i) ⇒ toWrite(i + 3) = timeStamp }
     toWrite
   }
-  
+
   def toCSV(timeStamps: Iterable[ITimeStamp[_]]) = {
     val created = timeStamps.head.time
     (created, timeStamps.map {
-      timeStamp => timeStamp.state.toString + ':' + timeStamp.hostName + ':' + (timeStamp.time - created).toString
+      timeStamp ⇒ timeStamp.state.toString + ':' + timeStamp.hostName + ':' + (timeStamp.time - created).toString
     })
   }
 }

@@ -25,21 +25,21 @@ import java.util.logging.Logger
 
 object Network {
   def isLocalHost(hostName: String): Boolean = {
-    
+
     try {
       val host = InetAddress.getByName(hostName)
       if (host.isLoopbackAddress) return true
-            
+
       val localhost = InetAddress.getLocalHost
 
       // Just in case this host has multiple IP addresses....
-      for (add <- InetAddress.getAllByName(localhost.getCanonicalHostName)) {
+      for (add ← InetAddress.getAllByName(localhost.getCanonicalHostName)) {
         if (add.equals(host)) return true
       }
 
       return false
     } catch {
-      case e: UnknownHostException =>
+      case e: UnknownHostException ⇒
         Logger.getLogger(Network.getClass.getName).log(Level.WARNING, "Host not found " + hostName, e);
         return false
     }

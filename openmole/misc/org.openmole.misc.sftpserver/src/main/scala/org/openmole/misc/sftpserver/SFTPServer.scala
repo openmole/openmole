@@ -43,31 +43,32 @@ class SFTPServer(path: File, login: String, password: String, port: Int) {
     sshd.setSubsystemFactories(List(new SftpSubsystem.Factory))
     sshd.setCommandFactory(new ScpCommandFactory)
     sshd.setFileSystemFactory(new FileSystemFactory {
-        override def createFileSystemView(s: Session) = new NativeFileSystemView(login, false) {        
-          override def getFile(file: String) = {
-            val sandboxed = 
-              if(file.startsWith(path.getCanonicalPath)) new File(file)
-              else new File(path, file)
+      override def createFileSystemView(s: Session) = new NativeFileSystemView(login, false) {
+        override def getFile(file: String) = {
+          val sandboxed =
+            if (file.startsWith(path.getCanonicalPath)) new File(file)
+            else new File(path, file)
 
-            if(sandboxed.getCanonicalPath.startsWith(path.getCanonicalPath)) super.getFile(sandboxed.getAbsolutePath)
-            else super.getFile(path.getAbsolutePath)
-          }
+          if (sandboxed.getCanonicalPath.startsWith(path.getCanonicalPath)) super.getFile(sandboxed.getAbsolutePath)
+          else super.getFile(path.getAbsolutePath)
         }
-      })
-    
+      }
+    })
+
     sshd.setPasswordAuthenticator(new PasswordAuthenticator {
-        override def authenticate(username: String, pass: String, session: ServerSession) = {
-          username == login && pass == password
-        }})
+      override def authenticate(username: String, pass: String, session: ServerSession) = {
+        username == login && pass == password
+      }
+    })
     sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider)
 
     start
   }
-  
-  override def finalize = background{stop}
- 
+
+  override def finalize = background { stop }
+
   def start = sshd.start
-  
+
   def stop = sshd.stop
-  
+
 }

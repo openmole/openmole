@@ -45,21 +45,21 @@ import scala.io.Source._
 
 object JSAGAJobService extends Logger {
   val CreationTimeout = new ConfigurationLocation("JSAGAJobService", "CreationeTimout")
- 
+
   Workspace += (CreationTimeout, "PT2M")
 }
 
 abstract class JSAGAJobService(jobServiceURI: URI) extends JobService {
 
   import JSAGAJobService._
-  
+
   @transient override lazy val description = new ServiceDescription(jobServiceURI.toString)
-  
+
   @transient lazy val jobServiceCache = {
     val task = {
       val url = URLFactory.createURL(jobServiceURI.toString)
       JobFactory.createJobService(TaskMode.ASYNC, JSAGASessionService.session(jobServiceURI.toString), url)
-    } 
+    }
 
     task.get(Workspace.preferenceAsDurationInMs(JSAGAJobService.CreationTimeout), TimeUnit.MILLISECONDS)
   }

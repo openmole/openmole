@@ -31,9 +31,9 @@ import org.openmole.core.model.sampling.ISampling
 sealed class ZipWithNameSampling(factor: IFactor[File, IDomain[File] with IIterable[File]], name: IPrototype[String]) extends Sampling {
 
   override def prototypes = List(factor.prototype, name)
-  
-  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
+
+  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] =
     factor.domain.iterator(context).map {
-      v => List(new Variable(factor.prototype, v), new Variable(name, v.getName))
+      v ⇒ List(new Variable(factor.prototype, v), new Variable(name, v.getName))
     }
 }

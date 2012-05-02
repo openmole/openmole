@@ -38,7 +38,7 @@ trait ISlot {
    */
   def +=(transition: ITransition): this.type
   def add(transition: ITransition): this.type = { +=(transition) }
-  
+
   /**
    *
    * Unplug <code>transition</code> from thi slot.
@@ -47,7 +47,7 @@ trait ISlot {
    */
   //def -=(transition: ITransition): this.type
   //def remove(transition: ITransition): this.type = { -=(transition)}
-  
+
   /**
    *
    * Test if <code>transition</code> is plugged to this slot.
@@ -61,19 +61,18 @@ trait ISlot {
    *
    * Get the capsule this slot belongs to.
    *
-   * 
+   *
    * @return the capsule this slot belongs to
    */
   def capsule: ICapsule
-  
-    
+
   /**
    * Get all data channels ending at this slot.
    *
    * @return all of data channels ending at this slot
    */
   def inputDataChannels: Iterable[IDataChannel]
-  
+
   /**
    * Add a datachannel to the input data channels of this slot.
    *

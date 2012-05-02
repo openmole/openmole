@@ -18,14 +18,12 @@
  * http://code.google.com/p/sling-scala/
  */
 import scala.tools.nsc.io.AbstractFile
-import java.io.{File, IOException, InputStream}
+import java.io.{ File, IOException, InputStream }
 import java.net.URL
 import org.osgi.framework.Bundle
-import org.apache.clerezza.scala.scripting.Utils.{valueOrElse, nullOrElse}
+import org.apache.clerezza.scala.scripting.Utils.{ valueOrElse, nullOrElse }
 
 package org.apache.clerezza.scala.scripting {
-
-
 
   /**
    * Implementation of {@link AbstractFile} on top of a {@link org.osgi.framework.Bundle}
@@ -46,7 +44,7 @@ package org.apache.clerezza.scala.scripting {
       abstract class BundleEntry(url: URL, parent: DirEntry) extends AbstractFile {
         require(url != null, "url must not be null")
         lazy val (path: String, name: String) = getPathAndName(url)
-        lazy val fullName: String = (path::name::Nil).filter(!_.isEmpty).mkString("/")
+        lazy val fullName: String = (path :: name :: Nil).filter(!_.isEmpty).mkString("/")
 
         /**
          * @return null
@@ -61,7 +59,7 @@ package org.apache.clerezza.scala.scripting {
          */
         def lastModified: Long =
           try { url.openConnection.getLastModified }
-        catch { case _ => 0 }
+          catch { case _ ⇒ 0 }
 
         @throws(classOf[IOException])
         def container: AbstractFile =
@@ -85,11 +83,11 @@ package org.apache.clerezza.scala.scripting {
         private def getPathAndName(url: URL): (String, String) = {
           val u = url.getPath
           var k = u.length
-          while( (k > 0) && (u(k - 1) == '/') )
+          while ((k > 0) && (u(k - 1) == '/'))
             k = k - 1
 
           var j = k
-          while( (j > 0) && (u(j - 1) != '/') )
+          while ((j > 0) && (u(j - 1) != '/'))
             j = j - 1
 
           (u.substring(if (j > 0) 1 else 0, if (j > 1) j - 1 else j), u.substring(j, k))
@@ -108,7 +106,7 @@ package org.apache.clerezza.scala.scripting {
         override def iterator: Iterator[AbstractFile] = {
           new Iterator[AbstractFile]() {
             val dirs = bundle.getEntryPaths(fullName)
-            def hasNext = if (dirs != null) { dirs.hasMoreElements} else {false}
+            def hasNext = if (dirs != null) { dirs.hasMoreElements } else { false }
             def next = {
               val entry = dirs.nextElement.asInstanceOf[String]
               var entryUrl = bundle.getResource("/" + entry)
@@ -121,20 +119,20 @@ package org.apache.clerezza.scala.scripting {
               if (entryUrl == null) {
                 entryUrl = new URL(bundle.getResource("/"), entry)
                 if (entryUrl == null) {
-                  throw new RuntimeException("Could not locate entry: "+entry+" in bundle: "+bundle)
+                  throw new RuntimeException("Could not locate entry: " + entry + " in bundle: " + bundle)
                 }
               }
-            
+
               if (entry.endsWith(".class"))
                 new FileEntry(entryUrl, DirEntry.this)
               else
                 new DirEntry(entryUrl, DirEntry.this)
             }
-          
+
             private def removeTralingSlash(s: String): String = {
               if (s == null || s.length == 0) {
                 s
-              }else if (s.last == '/') {
+              } else if (s.last == '/') {
                 removeTralingSlash(s.substring(0, s.length - 1))
               } else {
                 s
@@ -145,7 +143,7 @@ package org.apache.clerezza.scala.scripting {
 
         def lookupName(name: String, directory: Boolean): AbstractFile = {
           val entry = bundle.getEntry(fullName + "/" + name)
-          nullOrElse(entry) { entry =>
+          nullOrElse(entry) { entry ⇒
             if (directory)
               new DirEntry(entry, DirEntry.this)
             else

@@ -27,5 +27,5 @@ sealed class IteratorDomain[T](iterator: Iterator[T]) extends IDomain[T] with II
   def this(iterator: java.util.Iterator[_ <: T]) = this(asScalaIterator(iterator))
 
   override def iterator(context: IContext): Iterator[T] = iterator
-   
+
 }

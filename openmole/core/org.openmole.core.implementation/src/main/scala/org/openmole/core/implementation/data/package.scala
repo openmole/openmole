@@ -29,28 +29,27 @@ import scala.annotation.tailrec
 package object data {
 
   import Context._
-  
+
   implicit def tupleToParameter[T](t: (IPrototype[T], T)) = new Parameter(t._1, t._2)
   implicit def prototypeToData[T](p: IPrototype[T]) = new Data[T](p)
   implicit def dataIterableDecorator(data: Traversable[IData[_]]) = new DataSet(data.toList)
   implicit def iterableOfPrototypeToIterableOfDataConverter(prototypes: Traversable[IPrototype[_]]): Traversable[IData[_]] = DataSet(prototypes)
   implicit def prototypeToStringConverter(p: IPrototype[_]) = p.name
-  
+
   implicit def prototypeToArrayDecorator[T](prototype: IPrototype[T]) = new {
     def toArray(level: Int): IPrototype[_] = {
       def toArrayRecursive[A](prototype: IPrototype[A], level: Int): IPrototype[_] = {
-        if(level <= 0) prototype
-        else { 
+        if (level <= 0) prototype
+        else {
           val arrayProto = new Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[IPrototype[Array[_]]]
-          if(level <= 1) arrayProto
+          if (level <= 1) arrayProto
           else toArrayRecursive(arrayProto, level - 1)
         }
       }
-      
+
       toArrayRecursive(prototype, level)
     }
 
-      
     def toArray: IPrototype[Array[T]] =
       new Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[IPrototype[Array[T]]]
 
@@ -60,13 +59,13 @@ package object data {
 
     def fromArray: IPrototype[T] =
       (new Prototype(prototype.name)(prototype.`type`.fromArray.toManifest)).asInstanceOf[IPrototype[T]]
- 
+
   }
 
   implicit def dataToArrayDecorator[T](data: IData[T]) = new {
-    def toArray: IData[Array[T]] = new Data[Array[T]](data.prototype.toArray, data.mode)  
+    def toArray: IData[Array[T]] = new Data[Array[T]](data.prototype.toArray, data.mode)
   }
-  
+
   implicit def variablesToContextConverter(variables: Traversable[IVariable[_]]): Context = Context(variables)
-  
+
 }

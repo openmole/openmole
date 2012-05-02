@@ -20,13 +20,13 @@ package org.openmole.core.serializer.converter
 import java.io.File
 
 class DeserializerWithFileInjectionFromFile extends Deserializer {
-  
-    var files: PartialFunction[File, File] = null
-    registerConverter(new FileConverterInjecter(this))
-   
-    def clean = {
-        files = null
-    }
-    
-    def getMatchingFile(file: File): File = files(file)
+
+  var files: PartialFunction[File, File] = null
+  registerConverter(new FileConverterInjecter(this))
+
+  def clean = {
+    files = null
+  }
+
+  def getMatchingFile(file: File): File = files(file)
 }

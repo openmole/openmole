@@ -22,8 +22,8 @@ import org.openmole.core.model.data.IContext
 trait IRangeConverter[A, B] extends IRange[B] {
   def convert(e: A): B
   def underlyingRange: IRange[A]
-  
-  override def computeValues(context: IContext): Iterable[B] = underlyingRange.computeValues(context).map{convert(_)}
+
+  override def computeValues(context: IContext): Iterable[B] = underlyingRange.computeValues(context).map { convert(_) }
   override def step(context: IContext): B = convert(underlyingRange.step(context))
   override def min(context: IContext): B = convert(underlyingRange.min(context))
   override def max(context: IContext): B = convert(underlyingRange.max(context))

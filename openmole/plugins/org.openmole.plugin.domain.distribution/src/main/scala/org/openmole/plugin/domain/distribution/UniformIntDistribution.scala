@@ -26,14 +26,13 @@ import org.openmole.misc.tools.service.Random._
 import org.openmole.core.implementation.task.Task._
 
 sealed class UniformIntDistribution(max: Option[Int] = None) extends IDomain[Int] with IIterable[Int] {
- 
 
   override def iterator(context: IContext): Iterator[Int] = {
     val rng = newRNG(context.valueOrException(openMOLESeed))
     Iterator.continually {
       max match {
-        case Some(i) => rng.nextInt(i)
-        case None => rng.nextInt
+        case Some(i) ⇒ rng.nextInt(i)
+        case None ⇒ rng.nextInt
       }
     }
   }

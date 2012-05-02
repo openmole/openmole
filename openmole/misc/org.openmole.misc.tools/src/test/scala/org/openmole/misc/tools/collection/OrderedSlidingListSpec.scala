@@ -22,7 +22,6 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 
-
 @RunWith(classOf[JUnitRunner])
 class OrderedSlidingListSpec extends FlatSpec with ShouldMatchers {
   "OrderedSlidingList" should "preserve the max size" in {
@@ -31,14 +30,14 @@ class OrderedSlidingListSpec extends FlatSpec with ShouldMatchers {
     list += 8
     list += 7
     list += 7
-    
-    list.elements.size should equal (4)
-    
+
+    list.elements.size should equal(4)
+
     list += 3
     list += 9
     list += 7
-    
+
     list.elements.size should equal(5)
   }
-  
+
 }

@@ -24,7 +24,7 @@ import scala.collection.mutable.MultiMap
 
 class ExecutionJobRegistry {
 
-  val jobs = new HashMap[IJob, Set[BatchExecutionJob]] with MultiMap[IJob, BatchExecutionJob] 
+  val jobs = new HashMap[IJob, Set[BatchExecutionJob]] with MultiMap[IJob, BatchExecutionJob]
 
   def allJobs: Iterable[IJob] = synchronized { jobs.keySet }
 
@@ -34,10 +34,10 @@ class ExecutionJobRegistry {
 
   def isEmpty: Boolean = synchronized { jobs.isEmpty }
 
-  def register(ejob: BatchExecutionJob) = synchronized { jobs.addBinding (ejob.job, ejob) }
+  def register(ejob: BatchExecutionJob) = synchronized { jobs.addBinding(ejob.job, ejob) }
 
   def removeJob(job: IJob) = synchronized { jobs -= job }
 
-  def allExecutionJobs:  Iterable[BatchExecutionJob] = synchronized { jobs.values.flatten }
+  def allExecutionJobs: Iterable[BatchExecutionJob] = synchronized { jobs.values.flatten }
 
 }

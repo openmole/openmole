@@ -31,26 +31,24 @@ import org.openmole.core.model.task.IPluginSet
 import scala.collection.mutable.ListBuffer
 
 object ScalingArchiveTask {
-  
+
   def apply[I <: Individual[GAGenome, Fitness] with Rank](
-    name: String, 
+    name: String,
     archive: IPrototype[Array[I]],
-    modelInputs: (IPrototype[Double], (Double, Double))*
-  )(implicit plugins: IPluginSet) = 
-    new TaskBuilder { builder =>
-    
-      private var objectives = new ListBuffer[IPrototype[Double]] 
-      
+    modelInputs: (IPrototype[Double], (Double, Double))*)(implicit plugins: IPluginSet) =
+    new TaskBuilder { builder ⇒
+
+      private var objectives = new ListBuffer[IPrototype[Double]]
+
       def addObjective(p: IPrototype[Double]) = {
         objectives += p
         this addOutput p.toArray
         this
       }
-      
+
       addInput(archive)
-      modelInputs foreach {case(p, _) => this addOutput p.toArray}
-      
-      
+      modelInputs foreach { case (p, _) ⇒ this addOutput p.toArray }
+
       def toTask = new ScalingArchiveTask[I](name, archive, modelInputs: _*) {
         val inputs = builder.inputs
         val outputs = builder.outputs
@@ -58,38 +56,34 @@ object ScalingArchiveTask {
         val objectives = builder.objectives.toList
       }
     }
-    
+
 }
 
 sealed abstract class ScalingArchiveTask[I <: Individual[GAGenome, Fitness]](
-  val name: String,
-  archive: IPrototype[Array[I]],
-  modelInputs: (IPrototype[Double], (Double, Double))*
-) 
-(implicit val plugins: IPluginSet) extends Task {
+    val name: String,
+    archive: IPrototype[Array[I]],
+    modelInputs: (IPrototype[Double], (Double, Double))*)(implicit val plugins: IPluginSet) extends Task {
 
   def objectives: List[IPrototype[Double]]
-  
+
   override def process(context: IContext) = {
     val archiveValue = context.valueOrException(archive)
 
     (
-      modelInputs.zipWithIndex.map {  
-        case((prototype, (min, max)), i) => 
-          new Variable( 
-            prototype.toArray, 
-            archiveValue.map{
-              _.genome.values(i).scale(min, max) 
-            }.toArray) 
+      modelInputs.zipWithIndex.map {
+        case ((prototype, (min, max)), i) ⇒
+          new Variable(
+            prototype.toArray,
+            archiveValue.map {
+              _.genome.values(i).scale(min, max)
+            }.toArray)
       } ++
-      objectives.zipWithIndex.map { 
-        case(p, i) => 
+      objectives.zipWithIndex.map {
+        case (p, i) ⇒
           new Variable(
             p.toArray,
-            archiveValue.map{_.fitness.values(i)}.toArray
-          ) 
-      }
-    ).toContext
+            archiveValue.map { _.fitness.values(i) }.toArray)
+      }).toContext
   }
-  
+
 }

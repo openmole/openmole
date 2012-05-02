@@ -28,7 +28,7 @@ class GZURIFile(location: String) extends URIFile(location) {
 
   def this(file: IURIFile) = this(file.location)
   def this(uri: URI) = this(uri.toString)
-  
+
   override def openInputStream(token: AccessToken): InputStream = new GZIPInputStream(super.openInputStream(token))
-  override def  openOutputStream(token: AccessToken): OutputStream = new GZIPOutputStream(super.openOutputStream(token))
+  override def openOutputStream(token: AccessToken): OutputStream = new GZIPOutputStream(super.openOutputStream(token))
 }

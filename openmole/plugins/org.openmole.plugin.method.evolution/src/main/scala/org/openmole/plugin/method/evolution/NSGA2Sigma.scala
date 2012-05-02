@@ -33,24 +33,22 @@ sealed class NSGA2Sigma(
   val distributionIndex: Double,
   val steadySince: Int,
   val archiveSize: Int,
-  val genomeSize: Int
-) extends NSGAII 
-     with SigmaGAEvolution
-     with MGBinaryTournamentSelection
-     with FirstRankedSteadyTermination
-     with NonDominatedSortingElitism
-     with CoEvolvingSigmaValuesMutation
-     with SBXBoundedCrossover 
-     with CrowdingDistance
-     with ParetoRanking
-     with StrictDominance {
+  val genomeSize: Int) extends NSGAII
+    with SigmaGAEvolution
+    with MGBinaryTournamentSelection
+    with FirstRankedSteadyTermination
+    with NonDominatedSortingElitism
+    with CoEvolvingSigmaValuesMutation
+    with SBXBoundedCrossover
+    with CrowdingDistance
+    with ParetoRanking
+    with StrictDominance {
   type G = GAGenomeWithSigma
   type F = GAGenomeWithSigmaFactory
   type FIT = Fitness
-  
+
   def factory = new GAGenomeWithSigmaFactory {
     def size = genomeSize
   }
-    
+
 }
-  

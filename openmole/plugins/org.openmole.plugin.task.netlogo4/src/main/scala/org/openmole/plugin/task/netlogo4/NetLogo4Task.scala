@@ -26,24 +26,23 @@ import java.io.File
 import collection.JavaConversions._
 
 object NetLogo4Task {
-  
+
   def factory = new NetLogoFactory {
     def apply = new NetLogo4
   }
-  
+
   def apply(
     name: String,
     workspace: File,
     script: String,
-    launchingCommands: Iterable[String]
-  )(implicit plugins: IPluginSet): NetLogoTaskBuilder = {
+    launchingCommands: Iterable[String])(implicit plugins: IPluginSet): NetLogoTaskBuilder = {
     val _launchingCommands = launchingCommands
     val (_workspace, _script) = (workspace, script)
-    
-    new NetLogoTaskBuilder { builder =>
-      
+
+    new NetLogoTaskBuilder { builder ⇒
+
       addResource(workspace)
-      
+
       def toTask = new NetLogo4Task(
         name,
         workspace = new Workspace(_workspace, _script),
@@ -55,21 +54,19 @@ object NetLogo4Task {
         produced = builder.produced,
         netLogoInputs = builder.netLogoInputs,
         netLogoOutputs = builder.netLogoOutputs,
-        netLogoFactory = factory
-      )
+        netLogoFactory = factory)
     }
   }
-  
+
   def apply(
     name: String,
     script: File,
-    launchingCommands: Iterable[String]
-  )(implicit plugins: IPluginSet): NetLogoTaskBuilder = {
+    launchingCommands: Iterable[String])(implicit plugins: IPluginSet): NetLogoTaskBuilder = {
     val _launchingCommands = launchingCommands
-    new NetLogoTaskBuilder { builder =>
-  
+    new NetLogoTaskBuilder { builder ⇒
+
       addResource(script)
-      
+
       def toTask = new NetLogo4Task(
         name,
         launchingCommands = _launchingCommands,
@@ -81,27 +78,23 @@ object NetLogo4Task {
         produced = builder.produced,
         netLogoInputs = builder.netLogoInputs,
         netLogoOutputs = builder.netLogoOutputs,
-        netLogoFactory = factory
-      )
+        netLogoFactory = factory)
     }
   }
-  
+
   def apply(
     name: String,
     script: File,
     launchingCommands: Iterable[String],
-    embedWorkpsace: Boolean
-  )(implicit plugins: IPluginSet): NetLogoTaskBuilder = 
-    if(embedWorkpsace) apply(name, script.getParentFile, script.getName, launchingCommands)
+    embedWorkpsace: Boolean)(implicit plugins: IPluginSet): NetLogoTaskBuilder =
+    if (embedWorkpsace) apply(name, script.getParentFile, script.getName, launchingCommands)
     else apply(name, script, launchingCommands)
-  
-  
-}
 
+}
 
 sealed class NetLogo4Task(
   name: String,
-  workspace: NetLogoTask.Workspace, 
+  workspace: NetLogoTask.Workspace,
   launchingCommands: Iterable[String],
   netLogoInputs: Iterable[(IPrototype[_], String)],
   netLogoOutputs: Iterable[(String, IPrototype[_])],
@@ -110,11 +103,10 @@ sealed class NetLogo4Task(
   outputs: IDataSet,
   parameters: IParameterSet,
   provided: Iterable[(Either[File, IPrototype[File]], String, Boolean)],
-  produced: Iterable[(String, IPrototype[File])]
-)(implicit plugins: IPluginSet) extends NetLogoTask(
-  name, 
-  workspace, 
-  launchingCommands, 
+  produced: Iterable[(String, IPrototype[File])])(implicit plugins: IPluginSet) extends NetLogoTask(
+  name,
+  workspace,
+  launchingCommands,
   netLogoInputs,
   netLogoOutputs,
   netLogoFactory,
@@ -122,6 +114,5 @@ sealed class NetLogo4Task(
   outputs,
   parameters,
   provided,
-  produced
-)
+  produced)
 

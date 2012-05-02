@@ -24,13 +24,13 @@ import java.math.BigDecimal
 import java.math.BigInteger
 
 object StringConvertor {
-  
-  val typeMapping = new HashMap[Class[_],IStringMapping[_]]
+
+  val typeMapping = new HashMap[Class[_], IStringMapping[_]]
   register(classOf[BigInteger], new BigIntegerMapping)
   register(classOf[BigDecimal], new BigDecimalMapping)
   register(classOf[String], new StringMapping)
   register(classOf[Double], new DoubleMapping)
   register(classOf[Int], new IntegerMapping)
 
-  def register[T](cl: Class[T],mapping: IStringMapping[T]) = typeMapping += cl->mapping
+  def register[T](cl: Class[T], mapping: IStringMapping[T]) = typeMapping += cl -> mapping
 }

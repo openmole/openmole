@@ -43,5 +43,5 @@ class PluginConverter(serializer: SerializerWithPluginClassListing, reflectionCo
   }
 
   override def canConvert(c: Class[_]): Boolean = PluginManager.isClassProvidedByAPlugin(c)
-  
+
 }

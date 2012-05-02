@@ -29,23 +29,22 @@ class SortedListnerSpec extends FlatSpec with ShouldMatchers {
     sortedListners.register(4, "Test4")
     sortedListners.register(2, "Test2")
     sortedListners.register(10, "Test10")
-    
-    (sortedListners.head == "Test10") should equal (true)
-    (sortedListners.last == "Test2") should equal (true)
-    
+
+    (sortedListners.head == "Test10") should equal(true)
+    (sortedListners.last == "Test2") should equal(true)
+
   }
-  
+
   "A listner" should "be removed" in {
     val sortedListners = new SortedListeners[String]
     sortedListners.register(4, "Test4")
     sortedListners.register(2, "Test2")
     sortedListners.register(10, "Test10")
-    
+
     sortedListners -= "Test10"
-    
-    (sortedListners.size) should equal (2)
-    
+
+    (sortedListners.size) should equal(2)
+
   }
-  
-  
+
 }

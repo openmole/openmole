@@ -39,74 +39,72 @@ import org.openmole.misc.hashservice.HashService
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.service.Logger
 
-
 object GetResultActor extends Logger
 
 class GetResultActor(jobManager: ActorRef) extends Actor {
   def receive = {
-    case GetResult(job, sj, resultPath) => 
+    case GetResult(job, sj, resultPath) ⇒
       //logger.fine("Getting results.")
       try getResult(sj.communicationStorage, resultPath, job)
       catch {
-        case e => jobManager ! Error(job, e)
+        case e ⇒ jobManager ! Error(job, e)
       }
       jobManager ! Kill(job)
       System.runFinalization
   }
-  
+
   def getResult(communicationStorage: Storage, outputFilePath: String, batchJob: BatchExecutionJob): Unit = {
     import communicationStorage._
     import batchJob.job
-    
+
     val token = UsageControl.get(communicationStorage.description).waitAToken
 
     try {
       val runtimeResult = getRuntimeResult(outputFilePath, communicationStorage, token)
-      
+
       display(runtimeResult.stdOut, "Output", communicationStorage, token)
       display(runtimeResult.stdErr, "Error output", communicationStorage, token)
-      
+
       runtimeResult.result match {
-        case Right(exception) => throw new JobRemoteExecutionException(exception, "Fatal exception thrown durring the execution of the job execution on the excution node")
-        case Left(result) => 
+        case Right(exception) ⇒ throw new JobRemoteExecutionException(exception, "Fatal exception thrown durring the execution of the job execution on the excution node")
+        case Left(result) ⇒
           val contextResults = getContextResults(result, communicationStorage, token)
 
           var firstRunning = Long.MaxValue
           var lastCompleted = 0L
 
           //Try to download the results for all the jobs of the group
-          for (moleJob <- job.moleJobs) {
+          for (moleJob ← job.moleJobs) {
             if (contextResults.results.isDefinedAt(moleJob.id)) {
               val executionResult = contextResults.results(moleJob.id)
-         
+
               moleJob.synchronized {
                 if (!moleJob.isFinished) {
 
                   executionResult._1 match {
-                    case Left(context) =>
+                    case Left(context) ⇒
                       val timeStamps = executionResult._2
-                      val completed = timeStamps.view.reverse.find( _.state == State.COMPLETED ).get.time
-                      if(completed > lastCompleted) lastCompleted = completed
-                      val running = timeStamps.view.reverse.find( _.state == State.RUNNING ).get.time
-                      if(running < firstRunning) firstRunning = running
+                      val completed = timeStamps.view.reverse.find(_.state == State.COMPLETED).get.time
+                      if (completed > lastCompleted) lastCompleted = completed
+                      val running = timeStamps.view.reverse.find(_.state == State.RUNNING).get.time
+                      if (running < firstRunning) firstRunning = running
                       moleJob.finished(context, executionResult._2)
-                    case Right(e) => 
+                    case Right(e) ⇒
                       sender ! MoleJobError(moleJob, batchJob, e)
                   }
-                } 
-              } 
+                }
+              }
             }
           }
-          
+
           environment.statistics += new StatisticSample(batchJob.batchJob.get)
-          
-          /*if(firstRunning != Long.MaxValue && lastCompleted != 0L) 
+
+        /*if(firstRunning != Long.MaxValue && lastCompleted != 0L) 
             environment.statistics += new StatisticSample(batchJob.batchJob.get.timeStamp(ExecutionState.SUBMITTED), firstRunning, lastCompleted)*/
 
       }
     } finally UsageControl.get(communicationStorage.description).releaseToken(token)
   }
-
 
   private def getRuntimeResult(outputFilePath: String, communicationStorage: Storage, token: AccessToken): RuntimeResult = {
     import communicationStorage.path
@@ -118,7 +116,7 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
   private def display(message: Option[FileMessage], description: String, communicationStorage: Storage, token: AccessToken) = {
     import communicationStorage.path
     message match {
-      case Some(message) =>
+      case Some(message) ⇒
         try {
           val stdOutFile = signalDownload(path.cacheUnziped(message.path, token), path.toURI(message.path), communicationStorage)
           try {
@@ -126,7 +124,7 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
              if (stdOutHash != message.hash)
              logger.log(WARNING, "The standard output has been corrupted durring the transfert.")
              */
-           
+
             System.out.synchronized {
               System.out.println("-----------------" + description + " on remote host-----------------")
               val fis = new FileInputStream(stdOutFile)
@@ -134,13 +132,13 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
               System.out.println("-------------------------------------------------------")
             }
           } finally stdOutFile.delete
-        
+
         } catch {
-          case(e: IOException) => 
+          case (e: IOException) ⇒
             GetResultActor.logger.log(WARNING, description + " transfer has failed.")
-            GetResultActor.logger.log(FINE, "Stack of the error durring tranfert" , e)
+            GetResultActor.logger.log(FINE, "Stack of the error durring tranfert", e)
         }
-      case None => 
+      case None ⇒
     }
   }
 
@@ -148,10 +146,10 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
     import communicationStorage.path
     if (resultPath == null) throw new InternalProcessingError("Context results path is null")
     val contextResutsFileCache = signalDownload(path.cacheUnziped(resultPath.path, token), path.toURI(resultPath.path), communicationStorage)
-    if(HashService.computeHash(contextResutsFileCache) != resultPath.hash) throw new InternalProcessingError("Results have been corrupted durring the transfer.")
-    
+    if (HashService.computeHash(contextResutsFileCache) != resultPath.hash) throw new InternalProcessingError("Results have been corrupted durring the transfer.")
+
     try SerializerService.deserializeAndExtractFiles(contextResutsFileCache)
     finally contextResutsFileCache.delete
   }
-  
+
 }

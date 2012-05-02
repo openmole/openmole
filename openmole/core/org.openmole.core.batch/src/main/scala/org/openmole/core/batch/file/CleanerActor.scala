@@ -26,13 +26,13 @@ object CleanerActor extends Logger
 import CleanerActor._
 
 class CleanerActor extends Actor {
-  
+
   def receive = {
-    case Clean(file)=>
-      try file.remove  
+    case Clean(file) ⇒
+      try file.remove
       catch {
-        case e => logger.log(FINE, "Cannot delete file " + file.location, e)
+        case e ⇒ logger.log(FINE, "Cannot delete file " + file.location, e)
       }
   }
-  
+
 }

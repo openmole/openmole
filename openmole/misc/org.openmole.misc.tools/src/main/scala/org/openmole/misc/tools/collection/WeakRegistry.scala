@@ -20,15 +20,15 @@ package org.openmole.misc.tools.collection
 import scala.collection.mutable.SynchronizedMap
 import scala.collection.mutable.WeakHashMap
 
-class WeakRegistry[K,V] {
+class WeakRegistry[K, V] {
 
   val registry = new WeakHashMap[K, V] with SynchronizedMap[K, V]
-   
-  def isRegistred(key: K): Boolean = registry.contains(key)
- 
-  def +=(v: ( K, V)) = {registry += v}
 
-  def remove(key: K): Option[V] = {registry.remove(key)}
+  def isRegistred(key: K): Boolean = registry.contains(key)
+
+  def +=(v: (K, V)) = { registry += v }
+
+  def remove(key: K): Option[V] = { registry.remove(key) }
 
   def apply(key: K): Option[V] = registry.get(key)
 

@@ -31,30 +31,29 @@ package object mole {
   implicit def slotToCapsuleConverter(slot: ISlot) = slot.capsule
   implicit def capsuleToSlotConverter(capsule: ICapsule) = capsule.defaultInputSlot
   implicit def puzzleToMoleConverter(puzzle: Puzzle) = new Mole(puzzle.first.capsule)
-  
+
   implicit def moleToMoleExecutionConverter(mole: IMole) = new MoleExecution(mole)
-  
-  
+
   class PuzzleMoleDecorator(puzzle: Puzzle) {
-    def on(env: IEnvironment): Puzzle = 
-      puzzle.copy(selection = puzzle.selection + (puzzle.last -> new FixedEnvironmentSelection(env)))     
+    def on(env: IEnvironment): Puzzle =
+      puzzle.copy(selection = puzzle.selection + (puzzle.last -> new FixedEnvironmentSelection(env)))
     def toExecution = new MoleExecution(puzzle, puzzle.selection, puzzle.grouping)
   }
-  
+
   implicit def puzzleMoleDecoraton(puzzle: Puzzle) = new PuzzleMoleDecorator(puzzle)
-  
+
   implicit def capsuleMoleDecoraton(capsule: ICapsule) = new PuzzleMoleDecorator(capsule)
   implicit def taskMoleDecoraton(task: ITask) = new PuzzleMoleDecorator(task)
   implicit def taskMoleBuilderDecoraton(taskBuilder: TaskBuilder) = new PuzzleMoleDecorator(taskBuilder)
-  
+
   implicit def environmentToFixedEnvironmentSelectionConverter(env: IEnvironment) = new FixedEnvironmentSelection(env)
-  
+
   implicit def caspuleSlotDecorator(capsule: ICapsule) = new {
     def slot(i: Int) = {
-      (0 to (i - capsule.intputSlots.size)).foreach{i => newSlot}
+      (0 to (i - capsule.intputSlots.size)).foreach { i ⇒ newSlot }
       capsule.intputSlots.toIndexedSeq(i)
     }
     def newSlot = new Slot(capsule)
   }
-  
+
 }

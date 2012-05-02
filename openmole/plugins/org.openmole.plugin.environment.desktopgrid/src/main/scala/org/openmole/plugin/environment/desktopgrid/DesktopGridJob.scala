@@ -24,16 +24,16 @@ class DesktopGridJob(jobService: DesktopGridJobService, jobId: String) extends B
 
   override def deleteJob = {
     jobService.jobSubmissionFile(jobId).delete
-    jobService.timeStemps(jobId).foreach{_.delete}
-    jobService.results(jobId).foreach{_.delete}
+    jobService.timeStemps(jobId).foreach { _.delete }
+    jobService.results(jobId).foreach { _.delete }
   }
-  
+
   override def updatedState: ExecutionState = {
-    if(!jobService.timeStempsExists(jobId)) SUBMITTED
-    else if(!jobService.resultExists(jobId)) RUNNING
+    if (!jobService.timeStempsExists(jobId)) SUBMITTED
+    else if (!jobService.resultExists(jobId)) RUNNING
     else DONE
   }
-  
+
   override def resultPath = jobService.results(jobId).head.getAbsolutePath
- 
+
 }

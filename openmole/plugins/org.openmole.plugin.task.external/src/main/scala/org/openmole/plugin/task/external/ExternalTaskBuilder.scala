@@ -26,36 +26,34 @@ import org.openmole.core.model.task.IPluginSet
 import scala.collection.mutable.ListBuffer
 
 abstract class ExternalTaskBuilder extends TaskBuilder {
-  
+
   private var _provided = new ListBuffer[(Either[File, IPrototype[File]], String, Boolean)]
   private var _produced = new ListBuffer[(String, IPrototype[File])]
 
   def provided = _provided.toList
   def produced = _produced.toList
-  
-    
-  def addResource(file: File, name: String, link:  Boolean): ExternalTaskBuilder.this.type = {
+
+  def addResource(file: File, name: String, link: Boolean): ExternalTaskBuilder.this.type = {
     _provided += ((Left(file), name, link))
     this
   }
-    
+
   def addResource(file: File, name: String): this.type = this.addResource(file, name, false)
   def addResource(file: File, link: Boolean): this.type = this.addResource(file, file.getName, link)
   def addResource(file: File): this.type = this.addResource(file, false)
-    
-    
-  def addInput(p: IPrototype[File], name: String, link: Boolean ): this.type = {
+
+  def addInput(p: IPrototype[File], name: String, link: Boolean): this.type = {
     _provided += ((Right(p), name, link))
     this addInput p
     this
   }
-    
+
   def addInput(p: IPrototype[File], name: String): ExternalTaskBuilder.this.type = this.addInput(p, name, false)
-    
+
   def addOutput(name: String, p: IPrototype[File]): this.type = {
     _produced += ((name, p))
     this addOutput p
     this
   }
-  
+
 }

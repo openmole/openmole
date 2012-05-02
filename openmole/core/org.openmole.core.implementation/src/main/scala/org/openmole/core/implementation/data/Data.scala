@@ -17,12 +17,12 @@
 
 package org.openmole.core.implementation.data
 
-import org.openmole.core.model.data.{IData,IPrototype,DataModeMask, IDataMode}
+import org.openmole.core.model.data.{ IData, IPrototype, DataModeMask, IDataMode }
 
 object Data {
 
   implicit lazy val dataOrderingOnName = new Ordering[IData[_]] {
-    override def compare(left: IData[_], right: IData[_]) = 
+    override def compare(left: IData[_], right: IData[_]) =
       Prototype.prototypeOrderingOnName.compare(left.prototype, right.prototype)
   }
 }

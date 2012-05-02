@@ -35,53 +35,53 @@ import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
 class MoleExecutionHookSpec extends FlatSpec with ShouldMatchers {
-  
+
   "A execution hook" should "intersept finished jobs in mole execution" in {
     var executed = false
-    
+
     val p = new Prototype[String]("p")
-    
+
     val t1 = new TestTask {
       val name = "Test"
       override val outputs = DataSet(p)
       override def process(context: IContext) = context + (p -> "test")
     }
-    
+
     val t1c = new Capsule(t1)
     val ex = new MoleExecution(new Mole(t1c))
-    
+
     new MoleExecutionHook(ex) {
       override def jobFinished(moleJob: IMoleJob, capsule: ICapsule) = {
         capsule should equal(t1c)
-        moleJob.context.contains(p) should equal (true)
-        moleJob.context.value(p).get should equal ("test")
+        moleJob.context.contains(p) should equal(true)
+        moleJob.context.value(p).get should equal("test")
         executed = true
       }
     }
-    
+
     ex.start.waitUntilEnded
-    
-    executed should equal (true)
+
+    executed should equal(true)
   }
-  
+
   "After a release, an execution hook" should "not intersept finished jobs in mole execution" in {
     var executed = false
-    
+
     val t1 = EmptyTask("Test")
-    
+
     val t1c = new Capsule(t1)
     val ex = new MoleExecution(new Mole(t1c))
-    
+
     val hook = new MoleExecutionHook(ex) {
       override def jobFinished(moleJob: IMoleJob, capsule: ICapsule) = {
         executed = true
       }
     }
-    
+
     hook.release
     ex.start.waitUntilEnded
-    
-    executed should equal (false)
+
+    executed should equal(false)
   }
-  
+
 }

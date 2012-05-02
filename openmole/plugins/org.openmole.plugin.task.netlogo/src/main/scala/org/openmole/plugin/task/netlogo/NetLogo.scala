@@ -20,13 +20,13 @@ package org.openmole.plugin.task.netlogo
 trait NetLogo {
   @throws(classOf[Exception])
   def open(script: String)
-  
+
   @throws(classOf[Exception])
   def command(cmd: String)
-  
+
   @throws(classOf[Exception])
   def report(variable: String): Any
-  
+
   @throws(classOf[Exception])
   def dispose
 }

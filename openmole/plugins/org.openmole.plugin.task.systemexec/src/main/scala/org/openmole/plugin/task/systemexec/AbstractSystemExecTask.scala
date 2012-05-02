@@ -36,41 +36,41 @@ import scala.collection.JavaConversions._
 object AbstractSystemExecTask extends Logger
 
 abstract class AbstractSystemExecTask extends ExternalTask {
- 
+
   def cmd: String
   def returnValue: Option[IPrototype[Int]]
-  def exceptionIfReturnValueNotZero: Boolean 
+  def exceptionIfReturnValueNotZero: Boolean
   def dir: String
-  
+
   import AbstractSystemExecTask._
-  
+
   override protected def process(context: IContext) = {
     val tmpDir = Workspace.newDir("systemExecTask")
 
     val links = prepareInputFiles(context, tmpDir)
-    val workDir = if(dir.isEmpty) tmpDir else new File(tmpDir, dir)
-    val commandLine = CommandLine.parse( workDir.getAbsolutePath + File.separator + expandData(context, List(new Variable(ExternalTask.PWD, workDir.getAbsolutePath)), cmd))
-      
-    try {    
+    val workDir = if (dir.isEmpty) tmpDir else new File(tmpDir, dir)
+    val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + expandData(context, List(new Variable(ExternalTask.PWD, workDir.getAbsolutePath)), cmd))
+
+    try {
       val f = new File(commandLine.getExecutable)
       //logger.fine(f + " " + f.exists)
       val process = Runtime.getRuntime.exec(commandLine.toString, null, workDir)
-      
-      execute(process,context) match {
-        case(retCode, variables) =>
-          if(exceptionIfReturnValueNotZero && retCode != 0) throw new InternalProcessingError("Error executing: " + commandLine +" return code was not 0 but " + retCode)
-        
+
+      execute(process, context) match {
+        case (retCode, variables) ⇒
+          if (exceptionIfReturnValueNotZero && retCode != 0) throw new InternalProcessingError("Error executing: " + commandLine + " return code was not 0 but " + retCode)
+
           val retContext = fetchOutputFiles(context, workDir, links) ++ variables
-      
+
           returnValue match {
-            case None => retContext
-            case Some(returnValue) => retContext + (returnValue, retCode)
+            case None ⇒ retContext
+            case Some(returnValue) ⇒ retContext + (returnValue, retCode)
           }
       }
     } catch {
-      case e: IOException => throw new InternalProcessingError(e, "Error executing: " + commandLine)
+      case e: IOException ⇒ throw new InternalProcessingError(e, "Error executing: " + commandLine)
     }
   }
-  
+
   protected def execute(process: Process, context: IContext): (Int, Iterable[IVariable[_]])
 }

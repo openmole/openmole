@@ -23,10 +23,10 @@ import java.io.File
 
 class FileConverterInjecter(deserializer: DeserializerWithFileInjectionFromFile) extends FileConverter {
 
-    override def fromString(str: String): Object = {
-        val file = super.fromString(str).asInstanceOf[File]
-        val ret = deserializer.getMatchingFile(file)
-        if(ret == null) throw new XStreamException("No matching file for " + file.getAbsolutePath)
-        ret
-    }
+  override def fromString(str: String): Object = {
+    val file = super.fromString(str).asInstanceOf[File]
+    val ret = deserializer.getMatchingFile(file)
+    if (ret == null) throw new XStreamException("No matching file for " + file.getAbsolutePath)
+    ret
+  }
 }

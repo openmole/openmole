@@ -23,11 +23,11 @@ import java.util.UUID
 object LocalHostName extends Logger {
 
   @transient
-  lazy val localHostName = 
+  lazy val localHostName =
     try {
       InetAddress.getLocalHost.getCanonicalHostName
     } catch {
-      case ex =>
+      case ex ⇒
         logger.log(WARNING, "Was not able to get local host name.", ex)
         UUID.randomUUID.toString
     }

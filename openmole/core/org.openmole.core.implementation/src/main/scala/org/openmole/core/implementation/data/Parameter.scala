@@ -17,21 +17,21 @@
 
 package org.openmole.core.implementation.data
 
-import org.openmole.core.model.data.{IParameter,IVariable,IPrototype}
+import org.openmole.core.model.data.{ IParameter, IVariable, IPrototype }
 
 object Parameter {
   implicit lazy val parameterOrderingOnName = new Ordering[IParameter[_]] {
-    override def compare(left: IParameter[_], right: IParameter[_]) = 
+    override def compare(left: IParameter[_], right: IParameter[_]) =
       Prototype.prototypeOrderingOnName.compare(left.variable.prototype, right.variable.prototype)
   }
-  
-  implicit def tuple2IterableToParameters(values: Iterable[(IPrototype[T], T) forSome {type T}]) = values.map{case(p,v) => new Parameter(p,v)}
+
+  implicit def tuple2IterableToParameters(values: Iterable[(IPrototype[T], T) forSome { type T }]) = values.map { case (p, v) ⇒ new Parameter(p, v) }
 }
 
 class Parameter[T](val variable: IVariable[T], val `override`: Boolean) extends IParameter[T] {
 
   def this(prototype: IPrototype[T], value: T, `override`: Boolean) = this(new Variable(prototype, value), `override`)
-    
+
   def this(prototype: IPrototype[T], value: T) = this(prototype, value, false)
 
   def this(variable: IVariable[T]) = this(variable, false)

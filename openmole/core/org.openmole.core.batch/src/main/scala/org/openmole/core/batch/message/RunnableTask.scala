@@ -26,9 +26,9 @@ import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.task.ITask
 
 object RunnableTask {
-  
+
   def apply(moleJob: IMoleJob) = new RunnableTask(moleJob.task, moleJob.context, moleJob.id)
-  
+
 }
 
 class RunnableTask(val task: ITask, val context: IContext, val id: MoleJobId) {

@@ -27,7 +27,7 @@ import scala.collection.mutable.ListBuffer
 
 sealed class DynamicListDomain[+T](values: String*) extends IDomain[T] with IFinite[T] {
 
-  override def computeValues(context: IContext): Iterable[T] = 
-    values.map{VariableExpansion.expandData(context,_).asInstanceOf[T]}
+  override def computeValues(context: IContext): Iterable[T] =
+    values.map { VariableExpansion.expandData(context, _).asInstanceOf[T] }
 
 }

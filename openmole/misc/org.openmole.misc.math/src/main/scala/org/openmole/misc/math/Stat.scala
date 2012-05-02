@@ -22,18 +22,18 @@ object Stat {
   def median(serie: Iterable[Double]): Double = {
     val sortedSerie = serie.toArray.sorted
     val size = sortedSerie.size
-    if(size % 2 == 0) (sortedSerie(size / 2) + sortedSerie((size / 2) - 1)) / 2 else sortedSerie((size / 2))
+    if (size % 2 == 0) (sortedSerie(size / 2) + sortedSerie((size / 2) - 1)) / 2 else sortedSerie((size / 2))
   }
-  
+
   def medianAbsoluteDeviation(serie: Iterable[Double]): Double = {
     val m = median(serie)
-    median(serie.map{v => math.abs(v - m)})
+    median(serie.map { v ⇒ math.abs(v - m) })
   }
-  
+
   def average(serie: Iterable[Double]) = serie.sum / serie.size
-    
+
   def meanSquareError(serie: Iterable[Double]) = {
     val avg = average(serie)
-    average(serie.map{v => math.pow(v - avg, 2)})
+    average(serie.map { v ⇒ math.pow(v - avg, 2) })
   }
 }

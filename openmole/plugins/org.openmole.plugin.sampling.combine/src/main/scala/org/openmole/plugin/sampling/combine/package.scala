@@ -28,7 +28,7 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.core.implementation.sampling._
 
 package object combine {
-  
+
   implicit def combineSamplingDecorator(s: ISampling) = new {
     def x(s2: ISampling) = new CompleteSampling(s, s2)
     def zip(s2: ISampling) = new ZipSampling(s, s2)
@@ -36,13 +36,13 @@ package object combine {
     def take(n: Int) = new TakeSampling(s, n)
     def shuffle = new ShuffleSampling(s)
   }
-  
+
   implicit def zipWithNameFactorDecorator(factor: IFactor[File, IDomain[File] with IIterable[File]]) = new {
     def zipWithName(name: IPrototype[String]) = new ZipWithNameSampling(factor, name)
   }
-  
+
   implicit def combineFactorDecorator[T, D <: IDomain[T] with IIterable[T]](f: IFactor[T, D]) = new {
     def x(s: ISampling) = new CompleteSampling(f, s)
   }
-  
+
 }

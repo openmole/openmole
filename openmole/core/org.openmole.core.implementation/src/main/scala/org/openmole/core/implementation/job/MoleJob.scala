@@ -29,72 +29,71 @@ import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.ListBuffer
 
 object MoleJob extends Logger {
-  type StateChangedCallBack = (IMoleJob, State, State) => Unit             
+  type StateChangedCallBack = (IMoleJob, State, State) ⇒ Unit
 }
 
 import MoleJob._
 
 class MoleJob(
-  val task: ITask,
-  private var _context: IContext,
-  val id: MoleJobId,
-  val stateChangedCallBack: MoleJob.StateChangedCallBack) extends IMoleJob {
-   
+    val task: ITask,
+    private var _context: IContext,
+    val id: MoleJobId,
+    val stateChangedCallBack: MoleJob.StateChangedCallBack) extends IMoleJob {
+
   import IMoleJob._
   import MoleJob._
 
   val timeStamps: ListBuffer[ITimeStamp[State.State]] = new ListBuffer
   var exception: Option[Throwable] = None
-  
+
   @volatile private var _state: State = null
   state = READY
-      
+
   override def state: State = _state
   override def context: IContext = _context
-    
+
   def state_=(state: State) = {
     val changed = synchronized {
-      if(_state == null) {
+      if (_state == null) {
         timeStamps += new TimeStamp(state)
         _state = state
         None
-      } else if(!_state.isFinal) {
+      } else if (!_state.isFinal) {
         timeStamps += new TimeStamp(state)
         val oldState = _state
         _state = state
         Some(oldState)
       } else None
     }
-    
+
     changed match {
-      case Some(oldState) => stateChangedCallBack(this, oldState, state)
-      case _ =>
+      case Some(oldState) ⇒ stateChangedCallBack(this, oldState, state)
+      case _ ⇒
     }
   }
 
   override def perform =
-    if(!state.isFinal) {
+    if (!state.isFinal) {
       try {
         state = RUNNING
         _context = task.perform(context)
         state = COMPLETED
       } catch {
-        case t =>  
+        case t ⇒
           exception = Some(t)
-          state = FAILED  
+          state = FAILED
           if (classOf[InterruptedException].isAssignableFrom(t.getClass)) throw t
       }
     }
-  
+
   override def finished(context: IContext, timeStamps: Seq[ITimeStamp[State.State]]) = {
     _context = context
     this.timeStamps ++= timeStamps
     state = COMPLETED
   }
-  
+
   override def isFinished: Boolean = state.isFinal
-    
+
   override def cancel = state = CANCELED
-  
 
 }

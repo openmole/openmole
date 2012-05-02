@@ -36,37 +36,36 @@ import org.openmole.misc.exception.UserBadDataError
  * files of the target one.
  */
 class AppendFileHook(moleExecution: IMoleExecution, capsule: ICapsule, prototype: IPrototype[File], outputFile: String) extends CapsuleExecutionHook(moleExecution, capsule) {
-  
+
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
-    
+
     context.value(prototype) match {
-      case Some(from) =>
-    
-        val to = new File(VariableExpansion.expandData(context,outputFile))
+      case Some(from) ⇒
+
+        val to = new File(VariableExpansion.expandData(context, outputFile))
         if (!from.exists) throw new UserBadDataError("The file " + from + " does not exist.")
 
-        if (!to.exists){
-          if(from.isDirectory) to.mkdirs
+        if (!to.exists) {
+          if (from.isDirectory) to.mkdirs
           else {
             to.getParentFile.mkdirs
             to.createNewFile
           }
         }
-    
-        if (from.isDirectory && to.isDirectory){
+
+        if (from.isDirectory && to.isDirectory) {
           val toFiles = to.list
-          from.list foreach ( f => {
-              if (!toFiles.contains(f)) new File(f).createNewFile
-              new File(to,f).lockAndAppendFile(new File(from,f))
-            })
-        }
-        else if (from.isFile && to.isFile) to.lockAndAppendFile(from)
-        else throw new UserBadDataError("The merge can only be done from a file to another or from a directory to another. ("+from.toString+" and "+to.toString+" found)")
-      case None => throw new UserBadDataError("Variable not found " + prototype)
+          from.list foreach (f ⇒ {
+            if (!toFiles.contains(f)) new File(f).createNewFile
+            new File(to, f).lockAndAppendFile(new File(from, f))
+          })
+        } else if (from.isFile && to.isFile) to.lockAndAppendFile(from)
+        else throw new UserBadDataError("The merge can only be done from a file to another or from a directory to another. (" + from.toString + " and " + to.toString + " found)")
+      case None ⇒ throw new UserBadDataError("Variable not found " + prototype)
     }
   }
-  
+
   def inputs = DataSet(prototype)
 
 }

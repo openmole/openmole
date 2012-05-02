@@ -22,10 +22,10 @@ import org.ogf.saga.context.Context
 import org.openmole.core.batch.environment.Authentication
 import org.openmole.core.batch.jsaga.JSAGASessionService
 
-class SFTPAuthentication(host: String, port:Int, login: String, password: String) extends Authentication{
-  
+class SFTPAuthentication(host: String, port: Int, login: String, password: String) extends Authentication {
+
   override def key = "sftp:" + (host, port, login).toString
-  
+
   override def expires = Long.MaxValue
 
   override def initialize(local: Boolean) = {
@@ -34,8 +34,8 @@ class SFTPAuthentication(host: String, port:Int, login: String, password: String
     ctx.setAttribute(Context.USERID, login)
     ctx.setAttribute(Context.USERPASS, password)
     ctx.setVectorAttribute(ContextImpl.BASE_URL_INCLUDES, Array("sftp->sftp2://*"))
-    JSAGASessionService.addContext("sftp://"+ login + "@" + host + ":" + port + "/.*", ctx)
-    if(port == 22) JSAGASessionService.addContext("sftp://" + login + "@" + host + "/.*", ctx)
+    JSAGASessionService.addContext("sftp://" + login + "@" + host + ":" + port + "/.*", ctx)
+    if (port == 22) JSAGASessionService.addContext("sftp://" + login + "@" + host + "/.*", ctx)
   }
-  
+
 }

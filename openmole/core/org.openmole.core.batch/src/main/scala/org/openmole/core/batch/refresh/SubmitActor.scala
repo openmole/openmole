@@ -32,25 +32,25 @@ import SubmitActor._
 
 class SubmitActor(jobManager: ActorRef) extends Actor {
   def receive = {
-    case Submit(job, sj)=> 
-      if(!job.state.isFinal) {
+    case Submit(job, sj) ⇒
+      if (!job.state.isFinal) {
         try {
           val bj = trySubmit(sj, job.environment)
           job.state = SUBMITTED
           jobManager ! Submitted(job, sj, bj)
         } catch {
-          case e => 
+          case e ⇒
             jobManager ! Error(job, e)
             jobManager ! Submit(job, sj)
         }
       }
       System.runFinalization
   }
-  
+
   private def trySubmit(serializedJob: SerializedJob, environment: BatchEnvironment) = {
     val (js, token) = environment.selectAJobService
     try js.submit(serializedJob, token)
     finally UsageControl.get(js.description).releaseToken(token)
   }
-  
+
 }

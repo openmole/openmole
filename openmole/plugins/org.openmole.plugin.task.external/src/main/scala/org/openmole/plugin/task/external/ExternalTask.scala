@@ -36,82 +36,75 @@ object ExternalTask {
   val PWD = new Prototype[String]("PWD")
 }
 
-
 trait ExternalTask extends Task {
- 
+
   def provided: Iterable[(Either[File, IPrototype[File]], String, Boolean)]
   def produced: Iterable[(String, IPrototype[File])]
- 
+
   protected class ToPut(val file: File, val name: String, val link: Boolean)
   protected class ToGet(val name: String, val file: File)
 
   protected def listInputFiles(context: IContext): Iterable[ToPut] =
     provided.map {
       _ match {
-        case (Left(file), name, link) => new ToPut(file, expandData(context, name), link)
-        case (Right(prototype), name, link) => new ToPut(context.valueOrException(prototype), expandData(context, name), link)
+        case (Left(file), name, link) ⇒ new ToPut(file, expandData(context, name), link)
+        case (Right(prototype), name, link) ⇒ new ToPut(context.valueOrException(prototype), expandData(context, name), link)
       }
     }
 
-
   protected def listOutputFiles(context: IContext, localDir: File): (IContext, Iterable[ToGet]) = {
-    val files = 
+    val files =
       produced.map {
-        case(name, prototype) => 
-          val fileName  = expandData(context, name)
+        case (name, prototype) ⇒
+          val fileName = expandData(context, name)
           val file = new File(localDir, fileName)
-        
+
           val fileVariable = new Variable(prototype, file)
           new ToGet(fileName, file) -> fileVariable
       }
-    context ++ files.map{_._2} -> files.map{_._1}
+    context ++ files.map { _._2 } -> files.map { _._1 }
   }
-  
-  
-   
+
   def prepareInputFiles(context: IContext, tmpDir: File) = {
     val links = new ListBuffer[File]
     listInputFiles(context).foreach(
-      f => {        
-        val to = new File(tmpDir, f.name)        
+      f ⇒ {
+        val to = new File(tmpDir, f.name)
         to.getAbsoluteFile.getParentFile.mkdirs
-       
-        if(f.link) {
+
+        if (f.link) {
           to.createLink(f.file.getAbsolutePath)
           links += to
         } else {
           f.file.copy(to)
-          to.applyRecursive{_.deleteOnExit}
+          to.applyRecursive { _.deleteOnExit }
         }
       })
     links.toSet
   }
 
-
   def fetchOutputFiles(context: IContext, localDir: File, links: Set[File]): IContext = {
-    val (resultContext, outputFiles) = listOutputFiles(context,localDir)
+    val (resultContext, outputFiles) = listOutputFiles(context, localDir)
 
     val usedFiles = outputFiles.map(
-      f => {
+      f ⇒ {
         if (!f.file.exists) throw new UserBadDataError("Output file " + f.file.getAbsolutePath + " for task " + name + " doesn't exist")
         f.file
-      }
-    ).toSet
+      }).toSet
 
     val unusedFiles = new ListBuffer[File]
     val unusedDirs = new ListBuffer[File]
 
-    localDir.applyRecursive (
-      f => if(f.isFile) unusedFiles += f else unusedDirs += f,
-      usedFiles ++ links
-    )
+    localDir.applyRecursive(
+      f ⇒ if (f.isFile) unusedFiles += f else unusedDirs += f,
+      usedFiles ++ links)
 
     links.foreach(_.delete)
     unusedFiles.foreach(_.delete)
 
     //TODO algorithm is no optimal and may be problematic for a huge number of dirs
-    unusedDirs.foreach{d => if(d.exists && !usedFiles.contains(d) && d.dirContainsNoFileRecursive) d.recursiveDelete}
+    unusedDirs.foreach { d ⇒ if (d.exists && !usedFiles.contains(d) && d.dirContainsNoFileRecursive) d.recursiveDelete }
     resultContext
   }
-  
+
 }

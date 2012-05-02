@@ -27,29 +27,29 @@ import org.openmole.misc.workspace.Workspace
 
 class JSAGAInputStream(stream: FileInputStream) extends InputStream {
 
-    override def skip(n: Long): Long = stream.skip(n)
+  override def skip(n: Long): Long = stream.skip(n)
 
-    override def reset =  synchronized { stream.reset() }
+  override def reset = synchronized { stream.reset() }
 
-    override def read(b: Array[Byte], off: Int, len: Int): Int = stream.read(b, off, len)
+  override def read(b: Array[Byte], off: Int, len: Int): Int = stream.read(b, off, len)
 
-    override def read(b: Array[Byte]): Int = stream.read(b);
-    
-    override def read: Int = stream.read()
+  override def read(b: Array[Byte]): Int = stream.read(b);
 
-    override def markSupported: Boolean = stream.markSupported()
+  override def read: Int = stream.read()
 
-    override def mark(readlimit: Int) = synchronized { stream.mark(readlimit) }
+  override def markSupported: Boolean = stream.markSupported()
 
-    override def close = {
-        val task = stream.close(TaskMode.ASYNC)
- 
-        try {
-            task.get(Workspace.preferenceAsDurationInMs(URIFile.Timeout), TimeUnit.MILLISECONDS)
-        } catch {
-          case (e: TimeoutException) => task.cancel(true); throw e;
-        } 
+  override def mark(readlimit: Int) = synchronized { stream.mark(readlimit) }
+
+  override def close = {
+    val task = stream.close(TaskMode.ASYNC)
+
+    try {
+      task.get(Workspace.preferenceAsDurationInMs(URIFile.Timeout), TimeUnit.MILLISECONDS)
+    } catch {
+      case (e: TimeoutException) ⇒ task.cancel(true); throw e;
     }
+  }
 
-    override def available(): Int = stream.available
+  override def available(): Int = stream.available
 }

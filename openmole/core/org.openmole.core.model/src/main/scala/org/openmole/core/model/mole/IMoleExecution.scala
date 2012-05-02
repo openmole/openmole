@@ -17,7 +17,6 @@
 
 package org.openmole.core.model.mole
 
-
 import org.openmole.core.model.job.State.State
 import org.openmole.core.model.tools.IRegistryWithTicket
 import org.openmole.misc.eventdispatcher.Event
@@ -49,7 +48,7 @@ trait IMoleExecution {
   def waitUntilEnded: this.type
   def finished: Boolean
   def exceptions: Iterable[Throwable]
-  
+
   def mole: IMole
 
   def dataChannelRegistry: IRegistryWithTicket[IDataChannel, Buffer[IVariable[_]]]

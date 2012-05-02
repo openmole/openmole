@@ -23,9 +23,9 @@ object ServiceGroup {
 
   def orMin(v: Double) = {
     val min = Workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
-    if(v < min) min else v
+    if (v < min) min else v
   }
-              
+
 }
 
 trait ServiceGroup

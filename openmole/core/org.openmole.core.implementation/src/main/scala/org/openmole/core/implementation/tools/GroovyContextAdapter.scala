@@ -27,25 +27,24 @@ object GroovyContextAdapter {
   //val workspaceVar = new Prototype[Workspace]("workspace")
   //val rngVar = new Prototype[Random]("rng")
   //val seedVar = new Prototype[Long]("seed")
-  
-  
+
   implicit def contextDecorator(variables: IContext) = new {
     def toBinding = {
       val binding = new Binding
       //binding.setVariable(workspaceVar.name, Workspace)
-      
+
       //val seed = Workspace.newSeed
       //val rng = Workspace.newRNG(seed)
-     
+
       //binding.setVariable(rngVar.name, variables.buildRNG)
       //binding.setVariable(seedVar.name, seed)
-      variables.values.foreach{v => binding.setVariable(v.prototype.name, v.value)}
+      variables.values.foreach { v ⇒ binding.setVariable(v.prototype.name, v.value) }
       binding
     }
   }
 }
 
-trait GroovyContextAdapter extends GroovyProxy { 
+trait GroovyContextAdapter extends GroovyProxy {
   import GroovyContextAdapter._
   def execute(variables: IContext): Object = execute(variables.toBinding)
-}  
+}

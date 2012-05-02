@@ -26,34 +26,32 @@ import org.openmole.core.model.job.State._
 import scala.collection.immutable.TreeMap
 
 class ContextSaver(val nbJobs: Int) {
-  
+
   val allFinished = new Semaphore(0)
-  
+
   var nbFinished = 0
-  var _results = new TreeMap[MoleJobId, (Either[IContext,Throwable], Seq[ITimeStamp[State]])]
+  var _results = new TreeMap[MoleJobId, (Either[IContext, Throwable], Seq[ITimeStamp[State]])]
   def results = _results
 
   def save(job: IMoleJob, oldState: State, newState: State) = synchronized {
     newState match {
-      case COMPLETED | FAILED =>
+      case COMPLETED | FAILED ⇒
         job.exception match {
-          case None => _results += job.id -> (Left(job.context), job.timeStamps)
-          case Some(t) => _results += job.id -> (Right(t), job.timeStamps)
+          case None ⇒ _results += job.id -> (Left(job.context), job.timeStamps)
+          case Some(t) ⇒ _results += job.id -> (Right(t), job.timeStamps)
         }
-      case _ =>
+      case _ ⇒
     }
-    
+
     if (newState.isFinal) {
       nbFinished += 1
       if (nbFinished >= nbJobs) allFinished.release
     }
   }
-  
+
   def waitAllFinished = {
     allFinished.acquire
     allFinished.release
   }
-  
-  
-  
+
 }

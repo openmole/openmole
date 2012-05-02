@@ -23,13 +23,13 @@ import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class StatSpec extends FlatSpec with ShouldMatchers  {
+class StatSpec extends FlatSpec with ShouldMatchers {
 
   "The median" should "be correct" in {
-    Stat.median(List(1.,7,6,9,9)) should equal (7)
-    Stat.median(List(1., 1,1,1)) should equal (1)
-    Stat.median(List(1., 2, 3, 4)) should equal (2.5)
-    Stat.medianAbsoluteDeviation(List(1., 1, 2, 2, 4, 6, 9)) should equal (1)
+    Stat.median(List(1., 7, 6, 9, 9)) should equal(7)
+    Stat.median(List(1., 1, 1, 1)) should equal(1)
+    Stat.median(List(1., 2, 3, 4)) should equal(2.5)
+    Stat.medianAbsoluteDeviation(List(1., 1, 2, 2, 4, 6, 9)) should equal(1)
   }
-  
+
 }

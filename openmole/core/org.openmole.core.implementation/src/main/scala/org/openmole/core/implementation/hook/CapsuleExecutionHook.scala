@@ -32,53 +32,53 @@ import org.openmole.misc.tools.service.Logger
 import scala.ref.WeakReference
 
 object CapsuleExecutionHook {
-  
+
   sealed trait Problem
-  
+
   case class MissingInput(input: IData[_]) extends Problem {
     override def toString = "Input is missing " + input
   }
   case class WrongType(input: IData[_], found: IData[_]) extends Problem {
     override def toString = "Input has incompatible type " + found + " expected " + input
   }
-  
+
 }
 
 import CapsuleExecutionHook._
 
 abstract class CapsuleExecutionHook(moleExecutionRef: WeakReference[IMoleExecution], capsuleRef: WeakReference[ICapsule]) extends ICapsuleExecutionHook with Logger {
-  
+
   def this(moleExecution: IMoleExecution, capsule: ICapsule) = this(new WeakReference(moleExecution), new WeakReference(capsule))
-  
-  def errors = 
+
+  def errors =
     inputs.flatMap {
-    i =>
-     capsule.outputs(i.prototype.name) match {
-       case Some(o) => 
-         if(!i.prototype.isAssignableFrom(o.prototype)) Some(WrongType(i, o)) else None
-       case None => 
-         if(!(i.mode is optional)) Some(MissingInput(i)) else None
-     }
+      i ⇒
+        capsule.outputs(i.prototype.name) match {
+          case Some(o) ⇒
+            if (!i.prototype.isAssignableFrom(o.prototype)) Some(WrongType(i, o)) else None
+          case None ⇒
+            if (!(i.mode is optional)) Some(MissingInput(i)) else None
+        }
     }
-  
+
   {
     val e = errors
-    if(!e.isEmpty) throw new UserBadDataError("Incorrect inputs: " +  e.mkString(", "))
+    if (!e.isEmpty) throw new UserBadDataError("Incorrect inputs: " + e.mkString(", "))
   }
-  
+
   resume
-  
+
   private def moleExecution = moleExecutionRef.get.getOrElse(throw new InternalProcessingError("Reference garabage collected."))
   private def capsule = capsuleRef.get.getOrElse(throw new InternalProcessingError("Reference garabage collected."))
-  
+
   override def resume = CapsuleExecutionDispatcher += (moleExecution, capsule, this)
   override def release = CapsuleExecutionDispatcher -= (moleExecution, capsule, this)
-  
-  def safeProcess(moleJob: IMoleJob) = 
-    try process(moleJob) 
-    catch { case e => logger.log(Level.SEVERE,"Error durring hook execution", e)}
-    
+
+  def safeProcess(moleJob: IMoleJob) =
+    try process(moleJob)
+    catch { case e ⇒ logger.log(Level.SEVERE, "Error durring hook execution", e) }
+
   def process(moleJob: IMoleJob)
-  
+
   def inputs: IDataSet
 }

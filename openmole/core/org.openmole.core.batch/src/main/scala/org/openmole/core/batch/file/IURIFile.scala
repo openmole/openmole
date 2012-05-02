@@ -25,68 +25,68 @@ import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.control.AccessToken
 
 object IURIFile {
-  
+
   implicit def ordering = new Ordering[IURIFile] {
     def compare(left: IURIFile, right: IURIFile): Int = {
       left.location.compareTo(right.location)
     }
   }
-  
+
 }
 
 trait IURIFile {
-  def isDirectory: Boolean 
+  def isDirectory: Boolean
   def isDirectory(token: AccessToken): Boolean
   def URLRepresentsADirectory: Boolean
-    
+
   def mkdir(name: String): IURIFile
   def mkdir(name: String, token: AccessToken): IURIFile
-    
+
   def mkdirIfNotExist(name: String): IURIFile
   def mkdirIfNotExist(name: String, token: AccessToken): IURIFile
-    
+
   def newFileInDir(prefix: String, sufix: String): IURIFile
-    
-  def openInputStream: InputStream 
-  def openInputStream(token: AccessToken): InputStream 
-    
+
+  def openInputStream: InputStream
+  def openInputStream(token: AccessToken): InputStream
+
   def openOutputStream: OutputStream
   def openOutputStream(token: AccessToken): OutputStream
-    
+
   def touch
   def touch(token: AccessToken)
-  
+
   def copy(dest: File)
   def copy(dest: File, srcToken: AccessToken)
-  
-  def remove 
-  def remove(token: AccessToken) 
-    
+
+  def remove
+  def remove(token: AccessToken)
+
   def list: Iterable[String]
   def list(token: AccessToken): Iterable[String]
-    
-  def exists: Boolean 
-  def exists(token: AccessToken): Boolean 
 
-  def exist(name: String): Boolean 
-  def exist(name: String, token: AccessToken): Boolean 
+  def exists: Boolean
+  def exists(token: AccessToken): Boolean
+
+  def exist(name: String): Boolean
+  def exist(name: String, token: AccessToken): Boolean
 
   def name: String
-  
-  def modificationTime(name: String): Long 
+
+  def modificationTime(name: String): Long
   def modificationTime(name: String, token: AccessToken): Long
-    
-  def modificationTime: Long 
+
+  def modificationTime: Long
   def modificationTime(token: AccessToken): Long
-    
+
   def cache: File
   def cache(token: AccessToken): File
-    
+
   def child(child: String): IURIFile
-    
+
   def URI: URI
   def location: String
   def path: String
-    
+
   def storageDescription: ServiceDescription
 }

@@ -30,12 +30,12 @@ import TemplateData._
 @RunWith(classOf[JUnitRunner])
 class TemplateFileGeneratorTaskSpec extends FlatSpec with ShouldMatchers {
   implicit val plugins = PluginSet.empty
-  
-  "A template file generator task" should "parse a template file and evalutate the ${} expressions" in {  
+
+  "A template file generator task" should "parse a template file and evalutate the ${} expressions" in {
     val outputP = new Prototype[File]("file1")
-    val t1 = TemplateFileTask("Test TemplateFileGeneratorTask", templateFile, outputP)    
-   
-    t1.toTask.process(Context.empty).value(outputP).get.hash.equals(targetFile.hash) should equal (true)
+    val t1 = TemplateFileTask("Test TemplateFileGeneratorTask", templateFile, outputP)
+
+    t1.toTask.process(Context.empty).value(outputP).get.hash.equals(targetFile.hash) should equal(true)
   }
 
 }

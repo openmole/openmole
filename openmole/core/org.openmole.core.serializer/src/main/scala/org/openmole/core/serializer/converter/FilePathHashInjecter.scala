@@ -28,16 +28,16 @@ import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 
-class FilePathHashInjecter(deserializer: DeserializerWithFileInjectionFromPathHash, reflectionConverter: ReflectionConverter)  extends Converter {
+class FilePathHashInjecter(deserializer: DeserializerWithFileInjectionFromPathHash, reflectionConverter: ReflectionConverter) extends Converter {
 
   override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) = {
     throw new UnsupportedOperationException("Bug: Should never be called.")
   }
-  
+
   override def unmarshal(reader: HierarchicalStreamReader, uc: UnmarshallingContext): Object = {
     val fileInfo = reflectionConverter.unmarshal(reader, uc).asInstanceOf[FileInfo]
     val ret = deserializer.matchingFile(fileInfo)
-    if(ret == null) throw new XStreamException("No matching file for " + fileInfo.toString)
+    if (ret == null) throw new XStreamException("No matching file for " + fileInfo.toString)
     ret
   }
 

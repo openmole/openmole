@@ -62,95 +62,93 @@ import scala.collection.JavaConversions._
 object MoleExecution extends Logger
 
 class MoleExecution(
-  val mole: IMole, 
-  selection: Map[ICapsule, IEnvironmentSelection] = Map.empty,
-  grouping: Map[ICapsule, IGrouping] = Map.empty,
-  rerun: IInstantRerun = IInstantRerun.empty,
-  rng: java.util.Random = Random.newRNG(Workspace.newSeed)
-) extends IMoleExecution {
+    val mole: IMole,
+    selection: Map[ICapsule, IEnvironmentSelection] = Map.empty,
+    grouping: Map[ICapsule, IGrouping] = Map.empty,
+    rerun: IInstantRerun = IInstantRerun.empty,
+    rng: java.util.Random = Random.newRNG(Workspace.newSeed)) extends IMoleExecution {
 
   import IMoleExecution._
   import MoleExecution._
- 
+
   private val _started = new AtomicBoolean(false)
   private val canceled = new AtomicBoolean(false)
   private val _finished = new Semaphore(0)
 
-  override val id = UUID.randomUUID.toString  
+  override val id = UUID.randomUUID.toString
   private val ticketNumber = new AtomicLong
   private val currentJobId = new AtomicLong
 
   private val waitingJobs = new HashMap[(ICapsule, IMoleJobGroup), ListBuffer[IMoleJob]]
   private var nbWaiting = 0
-  
+
   val rootSubMoleExecution = new SubMoleExecution(None, this)
-  val rootTicket = Ticket(id, ticketNumber.getAndIncrement)  
+  val rootTicket = Ticket(id, ticketNumber.getAndIncrement)
   val dataChannelRegistry = new RegistryWithTicket[IDataChannel, Buffer[IVariable[_]]]
 
   val exceptions = new ListBuffer[Throwable]
-  
 
-  def instantRerun(moleJob: IMoleJob, capsule: ICapsule) = 
+  def instantRerun(moleJob: IMoleJob, capsule: ICapsule) =
     synchronized {
       rerun.rerun(moleJob, capsule)
     }
-  
+
   def group(moleJob: IMoleJob, capsule: ICapsule) = synchronized {
     grouping.get(capsule) match {
-      case Some(strategy) =>
+      case Some(strategy) ⇒
         val category = strategy(moleJob.context)
         val key = (capsule, category)
-            
-        val jobs = waitingJobs.getOrElseUpdate(key, new ListBuffer) += moleJob 
+
+        val jobs = waitingJobs.getOrElseUpdate(key, new ListBuffer) += moleJob
         nbWaiting += 1
-        
+
         val complete = strategy.complete(jobs)
-        if(complete) {
+        if (complete) {
           waitingJobs.remove(key)
           nbWaiting -= jobs.size
           val job = new Job(id, jobs)
           submit(job, capsule)
         }
-      case None =>
+      case None ⇒
         val job = new Job(id, List(moleJob))
         submit(job, capsule)
     }
-      
+
   }
-  
-  private def submit(job: IJob, capsule: ICapsule) = 
-    if(!job.allMoleJobsFinished) {
+
+  private def submit(job: IJob, capsule: ICapsule) =
+    if (!job.allMoleJobsFinished) {
       (selection.get(capsule) match {
-          case Some(selection) => selection.apply(job)
-          case None => LocalExecutionEnvironment
+        case Some(selection) ⇒ selection.apply(job)
+        case None ⇒ LocalExecutionEnvironment
       }).submit(job)
     }
-  
+
   def submitAll = synchronized {
     waitingJobs.foreach {
-      case((capsule, _), jobs) => submit(new Job(id, jobs) , capsule)
+      case ((capsule, _), jobs) ⇒ submit(new Job(id, jobs), capsule)
     }
     nbWaiting = 0
     waitingJobs.empty
   }
- 
+
   def start(context: IContext): this.type = {
     rootSubMoleExecution.newChild.submit(mole.root, context, nextTicket(rootTicket))
-    if(rootSubMoleExecution.nbJobInProgress <= nbWaiting) submitAll
+    if (rootSubMoleExecution.nbJobInProgress <= nbWaiting) submitAll
     this
   }
-  
+
   override def start = {
-    if(!_started.getAndSet(true)) {
+    if (!_started.getAndSet(true)) {
       val validationErrors = Validation(mole)
-      if(!validationErrors.isEmpty) throw new UserBadDataError("Formal validation of you mole has failed, several errors have been found: " + validationErrors.mkString("; "))
-      start(Context.empty) 
+      if (!validationErrors.isEmpty) throw new UserBadDataError("Formal validation of you mole has failed, several errors have been found: " + validationErrors.mkString("; "))
+      start(Context.empty)
     }
     this
   }
-  
-  override def cancel: this.type =  {
-    if(!canceled.getAndSet(true)) synchronized {
+
+  override def cancel: this.type = {
+    if (!canceled.getAndSet(true)) synchronized {
       rootSubMoleExecution.cancel
       EventDispatcher.trigger(this, new IMoleExecution.Finished)
     }
@@ -162,36 +160,36 @@ class MoleExecution(
   override def waitUntilEnded = {
     _finished.acquire
     _finished.release
-    if(!exceptions.isEmpty) throw new MultipleException(exceptions)
+    if (!exceptions.isEmpty) throw new MultipleException(exceptions)
     this
   }
-    
+
   def jobFailedOrCanceled(moleJob: IMoleJob, capsule: ICapsule) = synchronized {
     moleJob.exception match {
-      case None =>
-      case Some(e) => exceptions += e
+      case None ⇒
+      case Some(e) ⇒ exceptions += e
     }
     jobOutputTransitionsPerformed(moleJob, capsule)
   }
 
   def jobOutputTransitionsPerformed(job: IMoleJob, capsule: ICapsule) = synchronized {
-    if(rootSubMoleExecution.nbJobInProgress <= nbWaiting) submitAll
-    if(!canceled.get)  {
+    if (rootSubMoleExecution.nbJobInProgress <= nbWaiting) submitAll
+    if (!canceled.get) {
       rerun.jobFinished(job, capsule)
-      if (finished) {  
+      if (finished) {
         _finished.release
         EventDispatcher.trigger(this, new IMoleExecution.Finished)
       }
     }
   }
-  
+
   override def finished: Boolean = rootSubMoleExecution.nbJobInProgress == 0
   override def started: Boolean = _started.get
 
   override def nextTicket(parent: ITicket): ITicket = Ticket(parent, ticketNumber.getAndIncrement)
 
   def nextJobId = new MoleJobId(id, currentJobId.getAndIncrement)
- 
+
   def newSeed = rng.nextLong
-  
+
 }

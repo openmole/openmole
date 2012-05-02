@@ -20,14 +20,14 @@ package org.openmole.core.batch.environment
 import org.openmole.misc.workspace.Workspace
 
 object AuthenticationMethod {
-  
+
   implicit def workspaceDecorator(workspace: Workspace) = new {
-    
+
     def register(index: Int, auth: AuthenticationMethod) =
       Workspace.persistentList(auth.method.asInstanceOf[Class[Any]])(index) = auth
 
   }
-  
+
 }
 
 trait AuthenticationMethod {

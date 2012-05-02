@@ -28,18 +28,18 @@ import org.openmole.core.model.task.IPluginSet
 import scala.collection.mutable.ListBuffer
 
 object ToIndividualTask {
-  
-  def apply[T <: GAGenome](name: String, genome: IPrototype[T], individual: IPrototype[Individual[T, Fitness]])(implicit plugins: IPluginSet) = 
-    new TaskBuilder { builder =>
-      
+
+  def apply[T <: GAGenome](name: String, genome: IPrototype[T], individual: IPrototype[Individual[T, Fitness]])(implicit plugins: IPluginSet) =
+    new TaskBuilder { builder ⇒
+
       private var objectives = new ListBuffer[(IPrototype[Double], Double)]
-      
+
       def addObjective(p: IPrototype[Double], v: Double) = {
         this addInput p
         objectives += (p -> v)
         this
       }
-      
+
       def toTask = new ToIndividualTask[T](name, genome, individual) {
         val inputs = builder.inputs + genome
         val outputs = builder.outputs + individual
@@ -47,28 +47,26 @@ object ToIndividualTask {
         val objectives = builder.objectives.toList
       }
     }
-  
+
 }
 
 sealed abstract class ToIndividualTask[T <: GAGenome](
-  val name: String, 
-  genome: IPrototype[T], 
-  individual: IPrototype[Individual[T, Fitness]])(implicit val plugins: IPluginSet) extends Task { task =>
-  
+    val name: String,
+    genome: IPrototype[T],
+    individual: IPrototype[Individual[T, Fitness]])(implicit val plugins: IPluginSet) extends Task { task ⇒
+
   def objectives: List[(IPrototype[Double], Double)]
-  
-  override def process(context: IContext) = 
+
+  override def process(context: IContext) =
     context + new Variable(
-      individual, 
+      individual,
       new Individual[T, Fitness] {
         val genome = context.valueOrException(task.genome)
-        val fitness =  new Fitness {
+        val fitness = new Fitness {
           val values = objectives.reverse.map {
-            case (o, v) => math.abs(context.valueOrException(o) - v)
+            case (o, v) ⇒ math.abs(context.valueOrException(o) - v)
           }.toIndexedSeq
         }
-      }
-    )
-  
-  
+      })
+
 }

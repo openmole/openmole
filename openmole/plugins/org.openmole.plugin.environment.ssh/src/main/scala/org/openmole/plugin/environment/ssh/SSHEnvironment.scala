@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.environment.ssh
 
-
 import java.net.URI
 import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.environment.BatchEnvironment
@@ -27,7 +26,7 @@ import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 
 object SSHEnvironment {
-  val MaxConnections = new ConfigurationLocation("SSHEnvironment", "MaxConnections") 
+  val MaxConnections = new ConfigurationLocation("SSHEnvironment", "MaxConnections")
   val UpdateInterval = new ConfigurationLocation("SSHEnvironment", "UpdateInterval")
 
   Workspace += (UpdateInterval, "PT10S")
@@ -37,19 +36,19 @@ object SSHEnvironment {
 import SSHEnvironment._
 
 class SSHEnvironment(
-  login: String,
-  host: String,
-  nbSlots: Int,
-  dir: String = "/tmp/" + Workspace.preference(Workspace.UniqueID),
-  val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory) extends BatchEnvironment {
-  
+    login: String,
+    host: String,
+    nbSlots: Int,
+    dir: String = "/tmp/" + Workspace.preference(Workspace.UniqueID),
+    val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory) extends BatchEnvironment {
+
   val storage = PersistentStorage.createBaseDir(this, URI.create("sftp://" + login + "@" + host), dir, Workspace.preferenceAsInt(MaxConnections))
-  
+
   def allStorages = List(storage)
   def allJobServices: Iterable[JobService] = List(new SSHJobService(URI.create("ssh://" + login + '@' + host), this, nbSlots, Workspace.preferenceAsInt(MaxConnections)))
 
   override def authentication = SSHAuthentication(login, host)
-  
+
   override def minUpdateInterval = Workspace.preferenceAsDurationInMs(UpdateInterval)
   override def maxUpdateInterval = Workspace.preferenceAsDurationInMs(UpdateInterval)
   override def incrementUpdateInterval = 0

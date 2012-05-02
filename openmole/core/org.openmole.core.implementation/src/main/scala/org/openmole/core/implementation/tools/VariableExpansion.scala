@@ -17,7 +17,6 @@
 
 package org.openmole.core.implementation.tools
 
-
 import com.ibm.icu.text.UTF16
 import java.io.InputStreamReader
 import java.io.OutputStream
@@ -34,7 +33,7 @@ object VariableExpansion {
   private val patternBegin = '{'
   private val patternEnd = '}'
   private val eval = "$" + patternBegin
-    
+
   def expandBigDecimalData(context: IContext, s: String): BigDecimal = {
     BigDecimal(expandData(context, s))
   }
@@ -59,23 +58,23 @@ object VariableExpansion {
     var ret = s
     val allVariables = context ++ tmpVariable
     var cur = 0
-    
-    breakable { 
+
+    breakable {
       do {
         val beginIndex = ret.indexOf(eval)
-        if(beginIndex == -1) break
+        if (beginIndex == -1) break
         var cur = beginIndex + 2
         var curLevel = 0
-      
-        breakable { 
+
+        breakable {
           while (cur < ret.length) {
             val curChar = ret.charAt(cur)
 
             if (curChar == patternEnd) {
-              if(curLevel == 0) break
+              if (curLevel == 0) break
               curLevel -= 1
             } else if (curChar == patternBegin) {
-              curLevel += 1                
+              curLevel += 1
             }
             cur += 1
           }
@@ -85,7 +84,7 @@ object VariableExpansion {
           val toInsert = expandOneData(allVariables, getVarName(ret.substring(beginIndex + 1, cur + 1)))
           ret = ret.substring(0, beginIndex) + toInsert + ret.substring(cur + 1)
         } else break
-      } while (true) 
+      } while (true)
     }
 
     ret
@@ -99,23 +98,23 @@ object VariableExpansion {
     var ret = s
     var beginIndex = -1
     var endIndex = -1
-    
-    breakable { 
+
+    breakable {
       do {
         beginIndex = ret.indexOf(patternBegin)
         endIndex = ret.indexOf(patternEnd)
 
         if (beginIndex == -1 || endIndex == -1) break
-        
+
         val toReplace = ret.substring(beginIndex, endIndex + 1)
 
         val varName = getVarName(toReplace);
 
         ret = replace.get(varName) match {
-          case Some(toInsert) => ret.substring(0, beginIndex) + toInsert + ret.substring(endIndex + 1)
-          case None =>ret.substring(0, beginIndex) + ret.substring(endIndex + 1)
+          case Some(toInsert) ⇒ ret.substring(0, beginIndex) + toInsert + ret.substring(endIndex + 1)
+          case None ⇒ ret.substring(0, beginIndex) + ret.substring(endIndex + 1)
         }
-      } while (true) 
+      } while (true)
     }
 
     ret
@@ -127,47 +126,46 @@ object VariableExpansion {
 
   protected def expandOneData(allVariables: IContext, variableExpression: String): String = {
     allVariables.variable(variableExpression) match {
-      case Some(variable) => variable.value.toString
-      case None => 
+      case Some(variable) ⇒ variable.value.toString
+      case None ⇒
         val shell = new GroovyProxy(variableExpression, Iterable.empty) with GroovyContextAdapter
         shell.execute(allVariables).toString
     }
   }
-  
-  
-  def expandBufferData(context: IContext,is: InputStream,os: OutputStream) = {
+
+  def expandBufferData(context: IContext, is: InputStream, os: OutputStream) = {
     val isreader = new InputStreamReader(is, "UTF-8")
     val oswriter = new OutputStreamWriter(os)
-    
+
     var openbrace = 0
     var closebrace = 0
     var expandTime = false
     var esbuilder = new StringBuffer(UTF16.valueOf('$')).append(UTF16.valueOf('{'))
-    
+
     def appendChar(c: Int) = esbuilder.append(UTF16.valueOf(c))
-   
-    try{
+
+    try {
       Iterator.continually(isreader.read).takeWhile(_ != -1).foreach {
-        n => 
-        n match {
-          case '{' => 
-            openbrace += 1
-            expandTime = true
-            if (openbrace > 1) appendChar(n)
-            else esbuilder = new StringBuffer(UTF16.valueOf('$')).append(UTF16.valueOf('{'))
-          case '}' => 
-            closebrace += 1
-            appendChar(n)
-            if (openbrace == closebrace) {
-              oswriter.write(expandData(context, esbuilder.toString))
-              expandTime = false
-              openbrace = 0
-              closebrace = 0
-            }
-          case _ => 
-            if (expandTime) appendChar(n)
-            else if (n !='$') oswriter.write(UTF16.valueOf(n))
-        }    
+        n ⇒
+          n match {
+            case '{' ⇒
+              openbrace += 1
+              expandTime = true
+              if (openbrace > 1) appendChar(n)
+              else esbuilder = new StringBuffer(UTF16.valueOf('$')).append(UTF16.valueOf('{'))
+            case '}' ⇒
+              closebrace += 1
+              appendChar(n)
+              if (openbrace == closebrace) {
+                oswriter.write(expandData(context, esbuilder.toString))
+                expandTime = false
+                openbrace = 0
+                closebrace = 0
+              }
+            case _ ⇒
+              if (expandTime) appendChar(n)
+              else if (n != '$') oswriter.write(UTF16.valueOf(n))
+          }
       }
     } finally oswriter.close
   }
@@ -175,5 +173,5 @@ object VariableExpansion {
   implicit def stringExpansionDecorator(s: String) = new {
     def expand(context: IContext) = expandData(context, s)
   }
-  
+
 }

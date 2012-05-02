@@ -25,17 +25,16 @@ import scala.collection.immutable.TreeMap
 
 object ParameterSet {
   val empty = new ParameterSet(List.empty)
-  
-  def apply(parameters: (IPrototype[T], T) forSome {type T}*) = 
-    new ParameterSet(parameters.toList.map{case(p, v) => new Parameter(p, v)})
+
+  def apply(parameters: (IPrototype[T], T) forSome { type T }*) =
+    new ParameterSet(parameters.toList.map { case (p, v) ⇒ new Parameter(p, v) })
 }
 
-
 class ParameterSet(parameters: List[IParameter[_]]) extends Set[IParameter[_]] with IParameterSet {
-  
+
   @transient private lazy val _parameters =
-    TreeMap.empty[String, IParameter[_]] ++ parameters.map{p => (p.variable.prototype.name, p)}
-  
+    TreeMap.empty[String, IParameter[_]] ++ parameters.map { p ⇒ (p.variable.prototype.name, p) }
+
   override def empty = ParameterSet.empty
   override def iterator: Iterator[IParameter[_]] = _parameters.values.iterator
 
@@ -43,7 +42,7 @@ class ParameterSet(parameters: List[IParameter[_]]) extends Set[IParameter[_]] w
   override def -(p: IParameter[_]) = new ParameterSet((_parameters - p.variable.prototype.name).values.toList)
   override def contains(p: IParameter[_]) = _parameters.contains(p.variable.prototype.name)
 
-  override def + [T](prototype: IPrototype[T], v: T, `override`: Boolean = false): ParameterSet =
+  override def +[T](prototype: IPrototype[T], v: T, `override`: Boolean = false): ParameterSet =
     this + new Parameter(prototype, v, `override`)
 
 }

@@ -23,7 +23,7 @@ import org.openmole.core.model.data.IContext
 
 sealed class DoubleRelative(val nominal: String, val percent: String, val size: String) extends IRelative[Double] {
 
-  override def  computeValues(context: IContext): Iterable[Double] = {
+  override def computeValues(context: IContext): Iterable[Double] = {
     val nom = expandData(context, nominal).toDouble
     val pe = expandData(context, percent).toDouble
     val s = expandData(context, size).toInt
@@ -31,9 +31,9 @@ sealed class DoubleRelative(val nominal: String, val percent: String, val size: 
     val min = nom * (1 - pe / 100.)
     if (s > 1) {
       val step = 2 * nom * pe / 100. / (s - 1)
-      for (i <- 0 to s) yield new Double(min + i * s)
+      for (i ← 0 to s) yield new Double(min + i * s)
     } else {
-      List(min,nom,nom * (1 + pe / 100.)).map{new Double(_)}
+      List(min, nom, nom * (1 + pe / 100.)).map { new Double(_) }
     }
   }
 }

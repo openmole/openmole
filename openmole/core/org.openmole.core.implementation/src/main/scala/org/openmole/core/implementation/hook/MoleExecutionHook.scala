@@ -29,15 +29,15 @@ import org.openmole.misc.tools.service.Priority
 import scala.ref.WeakReference
 
 class MoleExecutionHook(private val moleExecution: WeakReference[IMoleExecution]) extends IMoleExecutionHook {
-  
+
   def this(moleExecution: IMoleExecution) = this(new WeakReference(moleExecution))
-  
+
   import Priority._
   import IMoleExecution._
   import EventDispatcher._
-  
+
   resume
-  
+
   override def resume = {
     listen(moleExecution(), HIGH, moleExecutionListener, classOf[Starting])
     listen(moleExecution(), HIGH, moleExecutionListener, classOf[OneJobStatusChanged])
@@ -45,7 +45,7 @@ class MoleExecutionHook(private val moleExecution: WeakReference[IMoleExecution]
     listen(moleExecution(), NORMAL, moleExecutionListener, classOf[JobInCapsuleFinished])
     listen(moleExecution(), NORMAL, moleExecutionListener, classOf[JobInCapsuleStarting])
   }
-  
+
   override def release = {
     unlisten(moleExecution(), moleExecutionListener, classOf[Starting])
     unlisten(moleExecution(), moleExecutionListener, classOf[OneJobStatusChanged])
@@ -53,25 +53,24 @@ class MoleExecutionHook(private val moleExecution: WeakReference[IMoleExecution]
     unlisten(moleExecution(), moleExecutionListener, classOf[JobInCapsuleFinished])
     unlisten(moleExecution(), moleExecutionListener, classOf[JobInCapsuleStarting])
   }
-  
+
   override def jobFinished(moleJob: IMoleJob, capsule: ICapsule) = {}
   override def jobStarting(moleJob: IMoleJob, capsule: ICapsule) = {}
-  
+
   override def stateChanged(moleJob: IMoleJob, newState: State, oldState: State) = {}
   override def executionStarting = {}
   override def executionFinished = {}
-  
-  
+
   @transient lazy val moleExecutionListener = new EventListener[IMoleExecution] {
-    override def triggered(obj: IMoleExecution, ev: Event[IMoleExecution]) = 
+    override def triggered(obj: IMoleExecution, ev: Event[IMoleExecution]) =
       ev match {
-        case ev: OneJobStatusChanged => stateChanged(ev.moleJob, ev.newState, ev.oldState)
-        case ev: JobInCapsuleStarting => jobStarting(ev.moleJob, ev.capsule)
-        case ev: JobInCapsuleFinished => jobFinished(ev.moleJob, ev.capsule)
-        case ev: Starting => executionStarting
-        case ev: Finished => executionFinished
-        case _ =>
+        case ev: OneJobStatusChanged ⇒ stateChanged(ev.moleJob, ev.newState, ev.oldState)
+        case ev: JobInCapsuleStarting ⇒ jobStarting(ev.moleJob, ev.capsule)
+        case ev: JobInCapsuleFinished ⇒ jobFinished(ev.moleJob, ev.capsule)
+        case ev: Starting ⇒ executionStarting
+        case ev: Finished ⇒ executionFinished
+        case _ ⇒
       }
   }
- 
+
 }

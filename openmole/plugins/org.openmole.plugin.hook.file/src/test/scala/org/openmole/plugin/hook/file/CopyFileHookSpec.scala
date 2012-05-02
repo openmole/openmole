@@ -35,19 +35,18 @@ import java.io.FileWriter
 import org.junit.runner.RunWith
 import scala.io.Source
 
-
 @RunWith(classOf[JUnitRunner])
 class CopyFileHookSpec extends FlatSpec with ShouldMatchers {
-  
+
   "A copy file hook" should "copy a file after the execution of a capsule" in {
     val f = File.createTempFile("test", ".tmp")
-    
+
     val fw = new FileWriter(f)
     try fw.write("File contents!")
     finally fw.close
-    
+
     val p = new Prototype[File]("p")
-    
+
     val t1 = new Task {
       val name = "Test"
       val outputs = DataSet(p)
@@ -56,19 +55,19 @@ class CopyFileHookSpec extends FlatSpec with ShouldMatchers {
       val parameters = ParameterSet.empty
       override def process(context: IContext) = context + (p -> f)
     }
-    
+
     val t1c = new Capsule(t1)
     val ex = new MoleExecution(new Mole(t1c))
-    
+
     val fDest = File.createTempFile("test", ".tmp")
-    
+
     val hook = new CopyFileHook(ex, t1c, p, fDest.getAbsolutePath)
-    
+
     ex.start.waitUntilEnded
-    
-    f.hash should equal (fDest.hash)
+
+    f.hash should equal(fDest.hash)
     f.delete
     fDest.delete
   }
-  
+
 }

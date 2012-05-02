@@ -27,9 +27,9 @@ object IMoleJob {
   case class JobFailedOrCanceled(val capsule: ICapsule) extends Event[IMoleJob]
   case class StateChanged(val newState: State.State, val oldState: State.State) extends Event[IMoleJob]
   case class ExceptionRaised(val exception: Throwable, level: Level) extends Event[IMoleJob]*/
-  
+
   implicit val moleJobOrdering = new Ordering[IMoleJob] {
-    
+
     override def compare(left: IMoleJob, right: IMoleJob) = {
       MoleJobId.moleJobIdOrdering.compare(left.id, right.id)
     }
@@ -47,5 +47,5 @@ trait IMoleJob {
   def finished(context: IContext, timeStamps: Seq[ITimeStamp[State.State]])
   def perform
   def id: MoleJobId
-  def cancel 
+  def cancel
 }

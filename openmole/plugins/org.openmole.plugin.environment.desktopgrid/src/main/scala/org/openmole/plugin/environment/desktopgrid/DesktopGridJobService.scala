@@ -29,28 +29,28 @@ import org.openmole.misc.tools.io.FileUtil._
 
 class DesktopGridJobService(val environment: DesktopGridEnvironment, val description: ServiceDescription) extends JobService {
   import DesktopEnvironment._
-  
-  val timeStempsDir = new File(environment.path, timeStempsDirName){mkdirs}
-  val jobsDir = new File(environment.path, jobsDirName){mkdirs}
-  val resultsDir = new File(environment.path, resultsDirName){mkdirs}
+
+  val timeStempsDir = new File(environment.path, timeStempsDirName) { mkdirs }
+  val jobsDir = new File(environment.path, jobsDirName) { mkdirs }
+  val resultsDir = new File(environment.path, resultsDirName) { mkdirs }
 
   def jobSubmissionFile(jobId: String) = new File(jobsDir, jobId)
-  def timeStemps(jobId: String) = timeStempsDir.listFiles.filter{_.getName.startsWith(jobId)}
-  def timeStempsExists(jobId: String) = timeStempsDir.list.exists{_.startsWith(jobId)}
-  def resultExists(jobId: String) = resultsDir.list.exists{_.startsWith(jobId)}
-  def results(jobId: String) = resultsDir.listFiles.filter{_.getName.startsWith(jobId)}
-  
+  def timeStemps(jobId: String) = timeStempsDir.listFiles.filter { _.getName.startsWith(jobId) }
+  def timeStempsExists(jobId: String) = timeStempsDir.list.exists { _.startsWith(jobId) }
+  def resultExists(jobId: String) = resultsDir.list.exists { _.startsWith(jobId) }
+  def results(jobId: String) = resultsDir.listFiles.filter { _.getName.startsWith(jobId) }
+
   override protected def doSubmit(serializedJob: SerializedJob, token: AccessToken): BatchJob = {
     val jobId = new File(serializedJob.communicationDirPath).getName
     import serializedJob._
     val desktopJobMessage = new DesktopGridJobMessage(runtime.runtime, runtime.environmentPlugins, environment.runtimeMemory, inputFilePath)
-    
+
     val os = jobSubmissionFile(jobId).gzipedBufferedOutputStream
-    try SerializerService.serialize(desktopJobMessage, os) 
+    try SerializerService.serialize(desktopJobMessage, os)
     finally os.close
-    
-    new DesktopGridJob(this, jobId) 
+
+    new DesktopGridJob(this, jobId)
   }
-  
+
   //override def test = true
 }

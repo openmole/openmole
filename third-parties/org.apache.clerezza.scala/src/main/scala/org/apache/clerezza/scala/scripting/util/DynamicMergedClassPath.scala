@@ -25,9 +25,8 @@ import scala.tools.nsc.util.ClassPath._
 import scala.tools.nsc.io.File.pathSeparator
 import scala.tools.nsc.util.MergedClassPath
 
-
 class DynamicMergedClassPath[T](var mergeClassPath: MergedClassPath[T]) extends ClassPath[T] {
- 
+
   def name = mergeClassPath.name
   def asURLs = mergeClassPath.asURLs
   def context = mergeClassPath.context
@@ -35,16 +34,15 @@ class DynamicMergedClassPath[T](var mergeClassPath: MergedClassPath[T]) extends 
 
   override def origin = mergeClassPath.origin
   override def asClasspathString: String = mergeClassPath.asClasspathString
-  
+
   def classes: IndexedSeq[AnyClassRep] = mergeClassPath.classes
-  
+
   def packages: IndexedSeq[ClassPath[T]] = mergeClassPath.packages
-  
+
   def show() {
     mergeClassPath.show
   }
 
   override def toString() = mergeClassPath.toString
 }
-
 

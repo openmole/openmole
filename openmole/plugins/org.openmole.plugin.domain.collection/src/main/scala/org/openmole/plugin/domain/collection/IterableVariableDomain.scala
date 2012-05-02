@@ -26,6 +26,6 @@ import scala.collection.JavaConversions._
 
 sealed class IterableVariableDomain[T](variable: IPrototype[java.lang.Iterable[_ <: T]]) extends IDomain[T] with IIterable[T] {
 
-  override def iterator(context: IContext): Iterator[T] = context.valueOrException(variable).iterator  
-  
+  override def iterator(context: IContext): Iterator[T] = context.valueOrException(variable).iterator
+
 }

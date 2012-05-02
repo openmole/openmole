@@ -25,17 +25,17 @@ import org.openmole.core.model.data.IParameterSet
 import org.openmole.core.model.task.IPluginSet
 
 object EmptyTask {
-  
-  def apply(name: String)(implicit plugins: IPluginSet = PluginSet.empty) = 
-    new TaskBuilder { builder =>
-      def toTask = 
+
+  def apply(name: String)(implicit plugins: IPluginSet = PluginSet.empty) =
+    new TaskBuilder { builder ⇒
+      def toTask =
         new EmptyTask(name) {
           val inputs = builder.inputs
           val outputs = builder.outputs
           val parameters = builder.parameters
         }
     }
- 
+
 }
 
 sealed abstract class EmptyTask(val name: String)(implicit val plugins: IPluginSet) extends Task {

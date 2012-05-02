@@ -29,15 +29,15 @@ import org.openmole.core.model.mole.IMasterCapsule
 import org.openmole.misc.exception.UserBadDataError
 
 class MasterCapsule(_task: Option[ITask] = None, val persist: Set[String] = Set.empty) extends Capsule(_task) with IMasterCapsule {
-  
-  def this (t: ITask, persist: String*) = this(Some(t), persist.toSet)
-  
-  def this (t: ITask, head: IPrototype[_], persist: IPrototype[_]*) = this(Some(t), (head :: persist.toList).map{_.name}.toSet)
-    
+
+  def this(t: ITask, persist: String*) = this(Some(t), persist.toSet)
+
+  def this(t: ITask, head: IPrototype[_], persist: IPrototype[_]*) = this(Some(t), (head :: persist.toList).map { _.name }.toSet)
+
   def this(t: ITask, head: String, persist: Array[String]) = this(t, (head :: persist.toList): _*)
-  
+
   def this(t: ITask, head: IPrototype[_], persist: Array[IPrototype[_]]) = this(t, head, persist: _*)
 
-  override def toPersist(context: IContext) =  persist.flatMap{n => context.variable(n).toList}.toContext
-  
+  override def toPersist(context: IContext) = persist.flatMap { n ⇒ context.variable(n).toList }.toContext
+
 }

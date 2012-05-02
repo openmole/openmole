@@ -26,15 +26,15 @@ import scala.collection.mutable.ListBuffer
 abstract class StoreIntoCSVTaskBuilder(implicit plugins: IPluginSet) extends TaskBuilder {
 
   private var _columns = new ListBuffer[(IPrototype[Array[_]], String)]
-  
-  def columns = _columns.toList 
-  
+
+  def columns = _columns.toList
+
   def addColumn(prototype: IPrototype[Array[_]], columnName: String): this.type = {
     this addInput prototype
     _columns +== (prototype -> columnName)
     this
   }
-    
+
   def addColumn(prototype: IPrototype[Array[_]]): this.type = this.addColumn(prototype, prototype.name)
-  
+
 }

@@ -30,36 +30,34 @@ import org.openmole.core.model.domain._
 import scala.collection.mutable.ListBuffer
 
 object ScalingGenomeTask {
-  
+
   def apply[T <: GAGenome](
-    name: String, 
-    genome: IPrototype[T], 
-    scale: (IPrototype[Double], (Double, Double))*)(implicit plugins: IPluginSet) = 
-    new TaskBuilder { builder => 
-      scale foreach {case(p, _) => this.addOutput(p)}
-      
+    name: String,
+    genome: IPrototype[T],
+    scale: (IPrototype[Double], (Double, Double))*)(implicit plugins: IPluginSet) =
+    new TaskBuilder { builder ⇒
+      scale foreach { case (p, _) ⇒ this.addOutput(p) }
+
       def toTask = new ScalingGenomeTask[T](name, genome, scale: _*) {
         val inputs = builder.inputs + genome
         val outputs = builder.outputs + genome
         val parameters = builder.parameters
       }
     }
-  
+
 }
 
-sealed abstract class ScalingGenomeTask[T <: GAGenome] (
-  val name: String,
-  genome: IPrototype[T],
-  scale: (IPrototype[Double], (Double, Double))*
-) 
-(implicit val plugins: IPluginSet) extends Task {
+sealed abstract class ScalingGenomeTask[T <: GAGenome](
+    val name: String,
+    genome: IPrototype[T],
+    scale: (IPrototype[Double], (Double, Double))*)(implicit val plugins: IPluginSet) extends Task {
 
   override def process(context: IContext) = {
-    context ++ 
-    (scale zip context.valueOrException(genome).values).map {
-      case(s, g) => 
-        val (p, (min, max)) = s
-        new Variable(p, g.scale(min, max))
-    }
+    context ++
+      (scale zip context.valueOrException(genome).values).map {
+        case (s, g) ⇒
+          val (p, (min, max)) = s
+          new Variable(p, g.scale(min, max))
+      }
   }
 }

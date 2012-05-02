@@ -17,24 +17,22 @@
 
 package org.openmole.core.implementation.data
 
-import org.openmole.core.model.data.{IData,IDataSet,IPrototype}
+import org.openmole.core.model.data.{ IData, IDataSet, IPrototype }
 import scala.collection.Iterator
 import scala.collection.immutable.TreeMap
 
 object DataSet {
   val empty = new DataSet(List.empty)
-  
-   
+
   def apply(prototypes: IPrototype[_]*): DataSet = apply(prototypes.toIterable)
-  def apply(prototypes: Traversable[IPrototype[_]]): DataSet = new DataSet(prototypes.map{new Data(_)}.toList)
+  def apply(prototypes: Traversable[IPrototype[_]]): DataSet = new DataSet(prototypes.map { new Data(_) }.toList)
 }
 
-
 class DataSet(data: List[IData[_]]) extends Set[IData[_]] with IDataSet {
- 
+
   @transient private lazy val _data =
-    TreeMap.empty[String, IData[_]] ++ data.map{d => (d.prototype.name,d)}
-  
+    TreeMap.empty[String, IData[_]] ++ data.map { d ⇒ (d.prototype.name, d) }
+
   override def empty = DataSet.empty
   override def iterator: Iterator[IData[_]] = _data.values.iterator
   override def apply(name: String) = _data.get(name)
@@ -44,7 +42,7 @@ class DataSet(data: List[IData[_]]) extends Set[IData[_]] with IDataSet {
   override def +(set: IDataSet): IDataSet = new DataSet(set.toList ::: data)
   override def +(p: IPrototype[_]): IDataSet = this + new Data(p)
   override def +(data: IData[_]) = new DataSet(data :: this.data)
-  override def -(data: IData[_]) = new DataSet((_data - (data.prototype.name)).map{_._2}.toList)
+  override def -(data: IData[_]) = new DataSet((_data - (data.prototype.name)).map { _._2 }.toList)
   override def contains(data: IData[_]) = _data.contains(data.prototype.name)
-  
+
 }

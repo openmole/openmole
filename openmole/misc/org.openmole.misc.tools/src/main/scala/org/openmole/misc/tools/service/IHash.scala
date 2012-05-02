@@ -18,14 +18,13 @@
 package org.openmole.misc.tools.service
 
 object IHash {
-  val HEX_CHAR_TABLE = List('0','1','2','3','4','5','6','7','8','9'
-                            ,'a','b','c','d','e','f').map{ _.toByte }.toArray
-  
+  val HEX_CHAR_TABLE = List('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f').map { _.toByte }.toArray
+
   def hexString(raw: Array[Byte]): String = {
     val hex = new Array[Byte](2 * raw.length)
     var index = 0
 
-    for (b <- raw) {
+    for (b ← raw) {
       val v = b & 0xFF
       hex(index) = HEX_CHAR_TABLE(v >>> 4)
       index += 1
@@ -34,7 +33,7 @@ object IHash {
     }
     new String(hex, "ASCII")
   }
-  
+
   implicit val ordering = new Ordering[IHash] {
     override def compare(left: IHash, right: IHash) = {
       left.toString.compare(right.toString)

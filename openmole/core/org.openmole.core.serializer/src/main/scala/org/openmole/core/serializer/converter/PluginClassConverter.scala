@@ -24,8 +24,8 @@ class PluginClassConverter(serializer: SerializerWithPluginClassListing) extends
 
   override def toString(obj: Object) = {
     val c = obj.asInstanceOf[Class[_]]
-    if(PluginManager.isClassProvidedByAPlugin(c)) serializer.classUsed(c)
+    if (PluginManager.isClassProvidedByAPlugin(c)) serializer.classUsed(c)
     super.toString(obj)
   }
-  
+
 }

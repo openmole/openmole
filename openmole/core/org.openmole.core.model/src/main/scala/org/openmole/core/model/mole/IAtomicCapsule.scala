@@ -17,4 +17,4 @@
 
 package org.openmole.core.model.mole
 
-trait IAtomicCapsule { this: ICapsule => }
+trait IAtomicCapsule { this: ICapsule ⇒ }

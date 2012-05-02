@@ -21,19 +21,17 @@ import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
 
 object Activator {
-  var bundleContext : BundleContext = null
+  var bundleContext: BundleContext = null
 }
 
 class Activator extends BundleActivator {
-  
 
-  
-  override def start(componentContext: BundleContext)= {
+  override def start(componentContext: BundleContext) = {
     Activator.bundleContext = componentContext
   }
 
   override def stop(componentContext: BundleContext) = {
     //currentSharedCompiler = null
-   // Activator.bundleContext.removeBundleListener(this)
+    // Activator.bundleContext.removeBundleListener(this)
   }
 }

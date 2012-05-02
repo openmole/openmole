@@ -29,18 +29,18 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FileUtil._
 
 class AppendToFileHook(
-  moleExecution: IMoleExecution,
-  capsule: ICapsule,
-  fileName: String,
-  content: String) extends CapsuleExecutionHook(moleExecution, capsule) {
-  
+    moleExecution: IMoleExecution,
+    capsule: ICapsule,
+    fileName: String,
+    content: String) extends CapsuleExecutionHook(moleExecution, capsule) {
+
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
-    val file = new File(VariableExpansion.expandData(context,fileName))
+    val file = new File(VariableExpansion.expandData(context, fileName))
     file.createParentDir
-    file.lockApply(_.append(VariableExpansion.expandData(context,content)))
+    file.lockApply(_.append(VariableExpansion.expandData(context, content)))
   }
-  
+
   def inputs = DataSet.empty
-  
+
 }

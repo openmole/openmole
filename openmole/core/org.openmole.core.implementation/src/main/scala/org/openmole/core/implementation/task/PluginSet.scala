@@ -27,8 +27,8 @@ object PluginSet {
 
 class PluginSet(plugins: Set[File]) extends Set[File] with IPluginSet {
   override def empty = PluginSet.empty
-  override def - (f: File) = new PluginSet(plugins - f)
-  override def + (f: File) = new PluginSet(plugins + f)
+  override def -(f: File) = new PluginSet(plugins - f)
+  override def +(f: File) = new PluginSet(plugins + f)
   override def contains(f: File) = plugins.contains(f)
   override def iterator = plugins.iterator
 }

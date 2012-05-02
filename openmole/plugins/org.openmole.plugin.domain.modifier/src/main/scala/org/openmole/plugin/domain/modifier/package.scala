@@ -21,10 +21,10 @@ import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IIterable
 
 package object modifier {
-  
+
   implicit def domainModifierDecorator[T](domain: IDomain[T] with IIterable[T]) = new {
     def take(n: Int) = new TakeDomain(domain, n)
     def group(n: Int)(implicit m: Manifest[T]) = new GroupDomain(domain, n)
   }
-  
+
 }

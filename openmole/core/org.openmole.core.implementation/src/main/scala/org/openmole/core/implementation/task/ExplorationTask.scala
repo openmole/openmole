@@ -34,44 +34,43 @@ import scala.collection.mutable.ArrayBuffer
 
 object ExplorationTask {
   type SampledValues = Iterable[Iterable[IVariable[_]]]
- 
-  
+
   def apply(name: String, sampling: ISampling)(implicit plugins: IPluginSet) = {
-    new TaskBuilder { builder =>
-      
-      def toTask = 
+    new TaskBuilder { builder ⇒
+
+      def toTask =
         new ExplorationTask(name, sampling) {
           val inputs = builder.inputs + sampling.inputs
-          val outputs = builder.outputs ++ sampling.prototypes.map{p => new Data(p, DataMode(DataModeMask.explore)).toArray}
+          val outputs = builder.outputs ++ sampling.prototypes.map { p ⇒ new Data(p, DataMode(DataModeMask.explore)).toArray }
           val parameters = builder.parameters
         }
-      
+
     }
   }
-  
+
 }
 
 sealed abstract class ExplorationTask(val name: String, val sampling: ISampling)(implicit val plugins: IPluginSet) extends Task with IExplorationTask {
-  
+
   //If input prototype as the same name as the output it is erased
   override protected def process(context: IContext) = {
     val sampled = sampling.build(context).toIterable
 
-    val variablesValues = TreeMap.empty[IPrototype[_], ArrayBuffer[Any]] ++ sampling.prototypes.map{p => p -> new ArrayBuffer[Any](sampled.size)}
- 
-    for(sample <- sampled; v <- sample) variablesValues.get(v.prototype) match {
-      case Some(b) => b += v.value
-      case None =>
+    val variablesValues = TreeMap.empty[IPrototype[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p -> new ArrayBuffer[Any](sampled.size) }
+
+    for (sample ← sampled; v ← sample) variablesValues.get(v.prototype) match {
+      case Some(b) ⇒ b += v.value
+      case None ⇒
     }
-    
-    context ++ variablesValues.map{
-      case(k,v) => 
-        try new Variable(k.toArray.asInstanceOf[IPrototype[Array[_]]], 
-                         v.toArray(k.`type`.asInstanceOf[Manifest[Any]]))
+
+    context ++ variablesValues.map {
+      case (k, v) ⇒
+        try new Variable(k.toArray.asInstanceOf[IPrototype[Array[_]]],
+          v.toArray(k.`type`.asInstanceOf[Manifest[Any]]))
         catch {
-          case e: ArrayStoreException => throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)
+          case e: ArrayStoreException ⇒ throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)
         }
     }
   }
- 
+
 }

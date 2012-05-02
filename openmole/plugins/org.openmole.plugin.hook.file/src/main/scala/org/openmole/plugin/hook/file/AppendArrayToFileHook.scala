@@ -28,19 +28,19 @@ import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.tools.io.FileUtil._
 
 class AppendArrayToFileHook(
-  moleExecution: IMoleExecution,
-  capsule: ICapsule,
-  fileName: String,
-  content: IPrototype[Array[_]]) extends CapsuleExecutionHook(moleExecution, capsule) {
-  
+    moleExecution: IMoleExecution,
+    capsule: ICapsule,
+    fileName: String,
+    content: IPrototype[Array[_]]) extends CapsuleExecutionHook(moleExecution, capsule) {
+
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
-    val file = new File(VariableExpansion.expandData(context,fileName))
+    val file = new File(VariableExpansion.expandData(context, fileName))
     file.createParentDir
     val toWrite = context.value(content).getOrElse(Array("not found")).mkString(",")
     file.lockApply(_.appendLine(toWrite))
   }
-  
+
   def inputs = DataSet(content)
-  
+
 }

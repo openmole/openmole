@@ -17,17 +17,15 @@
 
 package org.openmole.misc.tools.obj
 
-
 object OrderedTuple2Id {
   implicit def orderedTuple2IdOrdering[T1 <% Ordered[T1], T2 <% Ordered[T2], O <: OrderedTuple2Id[T1, T2]] = new Ordering[O] {
     override def compare(n1: O, n2: O) = {
       val cmpId = n1._1.compare(n2._1)
-      if(cmpId != 0) cmpId
+      if (cmpId != 0) cmpId
       else n1._2.compare(n2._2)
     }
   }
 }
-
 
 class OrderedTuple2Id[+T1 <% Ordered[T1], +T2 <% Ordered[T2]](val _1: T1, val _2: T2) extends Id {
   def id = (_1, _2)

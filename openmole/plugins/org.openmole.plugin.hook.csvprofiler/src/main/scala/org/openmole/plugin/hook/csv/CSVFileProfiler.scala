@@ -29,7 +29,7 @@ import ToCSV._
 import org.openmole.core.model.job.State._
 import scala.ref.WeakReference
 
-class CSVFileProfiler(moleExecution:  WeakReference[IMoleExecution], file: File) extends MoleExecutionHook(moleExecution) {
+class CSVFileProfiler(moleExecution: WeakReference[IMoleExecution], file: File) extends MoleExecutionHook(moleExecution) {
 
   def this(moleExecution: IMoleExecution, file: String) = this(new WeakReference(moleExecution), new File(file))
 
@@ -37,9 +37,9 @@ class CSVFileProfiler(moleExecution:  WeakReference[IMoleExecution], file: File)
 
   file.getParentFile.mkdirs
   @transient lazy val writer = new CSVWriter(new BufferedWriter(new FileWriter(file)))
-  
+
   override def stateChanged(moleJob: IMoleJob, newState: State, oldState: State) = synchronized {
-    if(moleJob.state.isFinal) {
+    if (moleJob.state.isFinal) {
       writer.writeNext(toColumns(moleJob))
       writer.flush
     }

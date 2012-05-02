@@ -31,24 +31,24 @@ import org.openmole.core.implementation.tools.VariableExpansion._
 import org.openmole.misc.exception.UserBadDataError
 
 class CopyFileHook(moleExecution: IMoleExecution, capsule: ICapsule, filePrototype: IPrototype[File], destination: String, remove: Boolean) extends CapsuleExecutionHook(moleExecution, capsule) {
-  
+
   def this(moleExecution: IMoleExecution, capsule: ICapsule, filePrototype: IPrototype[File], destination: String) = this(moleExecution, capsule, filePrototype, destination, false)
-  
+
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
 
     context.value(filePrototype) match {
-      case Some(from) =>   
+      case Some(from) ⇒
         val to = new File(expandData(context, destination))
-          
+
         to.getParentFile.mkdirs
         from.copy(to)
 
-        if(remove) from.recursiveDelete
-      case None => throw new UserBadDataError("No variable " + filePrototype + " found.")
-    } 
+        if (remove) from.recursiveDelete
+      case None ⇒ throw new UserBadDataError("No variable " + filePrototype + " found.")
+    }
   }
-  
+
   def inputs = DataSet(filePrototype)
-  
+
 }

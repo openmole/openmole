@@ -25,7 +25,7 @@ import java.io.File
 import scala.ref.WeakReference
 import scala.tools.nsc._
 import scala.tools.nsc.interpreter._
-import scala.tools.nsc.io.{AbstractFile, PlainFile}
+import scala.tools.nsc.io.{ AbstractFile, PlainFile }
 import scala.tools.nsc.util._
 import java.net._
 import scala.tools.nsc.io.AbstractFile
@@ -37,32 +37,30 @@ import scala.tools.util.PathResolver
  * listen to BundleEvents
  */
 class BundleContextScalaCompiler(
-  bundleContext : BundleContext,
-  settings: Settings,
-  reporter: Reporter) extends Global(settings, reporter) { compiler =>
- 
+    bundleContext: BundleContext,
+    settings: Settings,
+    reporter: Reporter) extends Global(settings, reporter) { compiler ⇒
+
   override val classPath = initClassPath
-    
+
   override def rootLoader: LazyType = new loaders.JavaPackageLoader(classPath)
-  
+
   def initClassPath = {
-    val classPathOrig: ClassPath[AbstractFile]  = new PathResolver(settings).result
+    val classPathOrig: ClassPath[AbstractFile] = new PathResolver(settings).result
     var bundles: Array[Bundle] = bundleContext.getBundles
-    val classPathAbstractFiles = 
-      for ( bundle <- bundles; val url = bundle.getResource("/"); if url != null) yield {
+    val classPathAbstractFiles =
+      for (bundle ← bundles; val url = bundle.getResource("/"); if url != null) yield {
         if ("file".equals(url.getProtocol())) new PlainFile(new File(url.toURI()))
         else BundleFS.create(bundle);
       }
-    val classPaths: List[ClassPath[AbstractFile]] = 
-      (for (abstractFile <- classPathAbstractFiles) yield {
-          new DirectoryClassPath(abstractFile, classPathOrig.context)
-        }) toList
+    val classPaths: List[ClassPath[AbstractFile]] =
+      (for (abstractFile ← classPathAbstractFiles) yield {
+        new DirectoryClassPath(abstractFile, classPathOrig.context)
+      }) toList
 
     new MergedClassPath[AbstractFile](classPathOrig :: classPaths, classPathOrig.context)
 
   }
 
-      
 }
-
 

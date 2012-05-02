@@ -22,12 +22,11 @@ import org.openmole.misc.tools.service.ThreadUtil._
 import java.util.concurrent.TimeUnit
 
 object Updater {
-  
+
   private var shutDown = false
-  private lazy val scheduler =  Executors.newScheduledThreadPool(1, daemonThreadFactory)
+  private lazy val scheduler = Executors.newScheduledThreadPool(1, daemonThreadFactory)
   private lazy val pool = Executors.newCachedThreadPool(daemonThreadFactory)
-  
-  
+
   def registerForUpdate(updatable: IUpdatableWithVariableDelay) = {
     val task = new UpdaterTask(updatable)
     pool.submit(task)
@@ -50,7 +49,7 @@ object Updater {
     if (!shutDown) {
       scheduler.schedule(
         new Runnable {
-          override def run = pool.submit(updaterTask) 
+          override def run = pool.submit(updaterTask)
         }, updaterTask.updatable.delay, TimeUnit.MILLISECONDS)
     }
 

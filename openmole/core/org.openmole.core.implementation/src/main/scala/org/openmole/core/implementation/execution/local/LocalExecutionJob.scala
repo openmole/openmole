@@ -22,5 +22,4 @@ import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.job.IJob
 
-
 class LocalExecutionJob(val environment: LocalExecutionEnvironment, val job: IJob) extends ExecutionJob

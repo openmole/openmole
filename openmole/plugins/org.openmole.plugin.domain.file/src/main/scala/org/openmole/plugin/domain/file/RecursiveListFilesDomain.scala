@@ -27,11 +27,11 @@ import org.openmole.misc.tools.io.FileUtil._
 sealed class RecursiveListFilesDomain(dir: File, filter: FileFilter) extends IDomain[File] with IFinite[File] {
 
   def this(dir: File, pattern: String, shouldBeAFile: Boolean) = {
-    this(dir, new FileFilter {       
-        override def accept(file: File) = file.getName.matches(pattern) && (if(shouldBeAFile) file.isFile else true)
-      })
+    this(dir, new FileFilter {
+      override def accept(file: File) = file.getName.matches(pattern) && (if (shouldBeAFile) file.isFile else true)
+    })
   }
-    
+
   override def computeValues(context: IContext) = dir.listRecursive(filter)
-  
+
 }

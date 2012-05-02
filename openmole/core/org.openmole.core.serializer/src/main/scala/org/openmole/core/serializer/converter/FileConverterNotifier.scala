@@ -27,6 +27,6 @@ class FileConverterNotifier(serializer: SerializerWithFileAndPluginListing) exte
     serializer.fileUsed(file)
     super.toString(obj)
   }
-    
+
 }
 

@@ -22,7 +22,7 @@ import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
 
 class Activator extends BundleActivator {
-  
+
   override def start(context: BundleContext) = {
     //Make sure JSAGASessionService is initialized
     JSAGASessionService.init

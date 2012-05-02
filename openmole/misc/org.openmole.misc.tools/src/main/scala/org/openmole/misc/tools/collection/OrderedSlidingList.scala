@@ -26,21 +26,21 @@ class OrderedSlidingList[T](size: Int)(implicit o: Ordering[T]) extends Iterable
 
   def iterator: Iterator[T] = averages.iterator
 
-  def += (sample: T) = averages.synchronized {
+  def +=(sample: T) = averages.synchronized {
     import o._
-    if(averages.size >= size) averages.remove(0)
-    
+    if (averages.size >= size) averages.remove(0)
+
     val it = averages.listIterator(averages.size)
     var inserted = false
-    
-    while(it.hasPrevious && !inserted) {
+
+    while (it.hasPrevious && !inserted) {
       val elt = it.previous
-      if(elt <= sample) {
+      if (elt <= sample) {
         it.add(sample)
         inserted = true
       }
     }
-    
-    if(!inserted) it.add(sample)
+
+    if (!inserted) it.add(sample)
   }
 }

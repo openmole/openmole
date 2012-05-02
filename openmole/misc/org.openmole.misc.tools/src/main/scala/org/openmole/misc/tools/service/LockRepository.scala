@@ -27,19 +27,19 @@ class LockRepository[T] {
   val locks = new HashMap[T, (Lock, AtomicInteger)]
 
   def lock(obj: T) = synchronized {
-    val lock = locks.getOrElseUpdate(obj,(new ReentrantLock, new AtomicInteger(0)))
+    val lock = locks.getOrElseUpdate(obj, (new ReentrantLock, new AtomicInteger(0)))
     lock._2.incrementAndGet
     lock._1
   }.lock
-    
+
   def unlock(obj: T) = synchronized {
     locks.get(obj) match {
-      case Some(lock) => 
+      case Some(lock) ⇒
         val value = lock._2.decrementAndGet
         if (value <= 0) locks.remove(obj)
         lock._1
-      case None => throw new IllegalArgumentException("Unlocking an object that has not been locked.")
+      case None ⇒ throw new IllegalArgumentException("Unlocking an object that has not been locked.")
     }
   }.unlock
-  
+
 }

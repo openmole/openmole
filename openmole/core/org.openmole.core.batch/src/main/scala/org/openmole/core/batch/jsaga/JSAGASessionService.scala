@@ -18,7 +18,7 @@
 package org.openmole.core.batch.jsaga
 
 import java.util.logging.Level
-import java.util.logging.{Logger => JLogger}
+import java.util.logging.{ Logger ⇒ JLogger }
 import org.ogf.saga.context.Context
 import org.ogf.saga.context.ContextFactory
 import org.ogf.saga.session.SessionFactory
@@ -27,12 +27,12 @@ import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
 
 object JSAGASessionService extends Logger {
-  
+
   private var sessions = List[(String, Session)]()
   private lazy val defaultSession = SessionFactory.createSession(false)
   private val JSAGAConfigFile = "jsaga-universe.xml"
   private val JSAGATimeOutFile = "jsaga-timeout.properties"
-  
+
   init
   @transient lazy val init = {
     val varDir = Workspace.newDir
@@ -40,38 +40,37 @@ object JSAGASessionService extends Logger {
     System.setProperty("saga.factory", "fr.in2p3.jsaga.impl.SagaFactoryImpl")
 
     // org.apache.log4j.Logger.getLogger(org.glite.security.util.FileEndingIterator.class.getName()).setLevel(org.apache.log4j.Level.FATAL);
-    org.apache.log4j.Logger.getRootLogger.setLevel(org.apache.log4j.Level.FATAL)    
+    org.apache.log4j.Logger.getRootLogger.setLevel(org.apache.log4j.Level.FATAL)
     val universe = this.getClass.getClassLoader.getResource(JSAGAConfigFile)
 
-    if (universe != null)  System.setProperty("jsaga.universe", universe.toString)
+    if (universe != null) System.setProperty("jsaga.universe", universe.toString)
     else JLogger.getLogger(JSAGASessionService.getClass.getName).log(Level.WARNING, JSAGAConfigFile + " JSAGA config file not found.");
-      
+
     val timeout = this.getClass.getClassLoader.getResource(JSAGATimeOutFile)
 
     if (universe != null) System.setProperty("jsaga.timeout", timeout.toString)
-    else  JLogger.getLogger(JSAGASessionService.getClass.getName).log(Level.WARNING, JSAGAConfigFile + " JSAGA timeout file not found.")
-    
+    else JLogger.getLogger(JSAGASessionService.getClass.getName).log(Level.WARNING, JSAGAConfigFile + " JSAGA timeout file not found.")
+
     Unit
   }
-    
+
   def addContext(expr: String, context: Context) = synchronized {
     sessions.filter(_ == expr).headOption match {
-      case None => 
+      case None ⇒
         val session = SessionFactory.createSession(false)
         session.addContext(context)
         sessions = (expr -> session) :: sessions
-      case Some((pattern,session)) =>
+      case Some((pattern, session)) ⇒
         session.addContext(context)
     }
   }
-  
+
   def session(url: String) = synchronized {
-    sessions.filter{case(p, s) => url.matches(p + ".*")}.headOption match {
-      case Some((p, s)) => s
-      case None => defaultSession //throw new InternalProcessingError("No session available for url " + url)
+    sessions.filter { case (p, s) ⇒ url.matches(p + ".*") }.headOption match {
+      case Some((p, s)) ⇒ s
+      case None ⇒ defaultSession //throw new InternalProcessingError("No session available for url " + url)
     }
   }
-  
-  
+
   def createContext: Context = ContextFactory.createContext
 }

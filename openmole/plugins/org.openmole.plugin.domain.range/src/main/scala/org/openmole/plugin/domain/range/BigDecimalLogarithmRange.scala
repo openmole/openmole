@@ -32,34 +32,33 @@ object BigDecimalLogarithmRange {
   val scale = 128
 }
 
-
 sealed class BigDecimalLogarithmRange(val min: String, val max: String, val nbStep: String) extends IDomain[BigDecimal] with IFinite[BigDecimal] with IBounded[BigDecimal] {
   import BigDecimalLogarithmRange._
-    
+
   override def computeValues(context: IContext): Iterable[BigDecimal] = {
     val minValue = min(context)
     val mi = ln(minValue, scale)
-    
+
     val maxValue = max(context)
     val ma = ln(maxValue, scale)
 
     val retScale = math.max(minValue.scale, maxValue.scale)
-    
+
     val nbst = nbStep(context).intValue - 1
-    val step = if(nbst > 0) ma.subtract(mi).abs.divide(new BigDecimal(nbst), BigDecimal.ROUND_HALF_UP)
-               else BigDecimal.ZERO
+    val step = if (nbst > 0) ma.subtract(mi).abs.divide(new BigDecimal(nbst), BigDecimal.ROUND_HALF_UP)
+    else BigDecimal.ZERO
 
     var cur = mi
     val mc = new MathContext(retScale, RoundingMode.HALF_UP)
     //Logger.getLogger(getClass.getName).info(" " + minValue + " " + retScale)
-    
-    for (i <- 0 to nbst) yield {
+
+    for (i ← 0 to nbst) yield {
       val ret = cur
       cur = cur.add(step)
-      exp(ret, scale).setScale(retScale, RoundingMode.HALF_UP).round(mc) 
-    }      
+      exp(ret, scale).setScale(retScale, RoundingMode.HALF_UP).round(mc)
+    }
   }
-  
+
   def nbStep(context: IContext): BigDecimal = new BigDecimal(expandData(context, nbStep))
   def min(context: IContext): BigDecimal = new BigDecimal(expandData(context, min))
   def max(context: IContext): BigDecimal = new BigDecimal(expandData(context, max))

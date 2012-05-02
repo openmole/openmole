@@ -25,7 +25,7 @@ class JobServiceQualityControl(hysteresis: Int) extends QualityControl(hysteresi
 
   def submitted = _nbSubmitted.get
   def runnig = _nbRunning.get
-  
+
   def incrementSubmitted = _nbSubmitted.incrementAndGet
   def decrementSubmitted = _nbSubmitted.decrementAndGet
   def incrementRunning = _nbRunning.incrementAndGet

@@ -27,5 +27,5 @@ import org.openmole.core.model.data.IPrototype
  * @author reuillon
  */
 class OnVariableGroupingStrategy(prototypes: IPrototype[_]*) extends IGrouping {
-  override def apply(context: IContext) = new MoleJobGroup(prototypes.flatMap{context.value(_)}.toSeq: _*)
+  override def apply(context: IContext) = new MoleJobGroup(prototypes.flatMap { context.value(_) }.toSeq: _*)
 }

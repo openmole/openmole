@@ -27,7 +27,7 @@ class HierarchicalRegistry[T] {
 
   def register(c: Class[_], t: T): Unit = register(c, t, Priority.NORMAL)
 
-  def register(c: Class[_], t: T, priority: Int): Unit = registry += c -> (t,priority)
+  def register(c: Class[_], t: T, priority: Int): Unit = registry += c -> (t, priority)
 
   def allRegistred: Set[Class[_]] = registry.keySet.toSet
 
@@ -37,43 +37,43 @@ class HierarchicalRegistry[T] {
 
     val result = new ListBuffer[(T, Int)]()
 
-    while(result.isEmpty && !toProceed.isEmpty) {
+    while (result.isEmpty && !toProceed.isEmpty) {
       val cur = toProceed.remove(0)
       registry.get(cur._1) match {
 
-        case Some(registred) => {
-            result += registred
-            val seen = new HashSet[Class[_]]
-            seen += cur._1
+        case Some(registred) ⇒ {
+          result += registred
+          val seen = new HashSet[Class[_]]
+          seen += cur._1
 
-            while(!toProceed.isEmpty) {
-              val curProc = toProceed.remove(0)
+          while (!toProceed.isEmpty) {
+            val curProc = toProceed.remove(0)
 
-              if(curProc._2 == cur._2 && !seen.contains(curProc._1)) {
-                registry.get(curProc._1) match {
-                  case None =>
-                  case Some(registred) => result += registred
-                }
-                seen += curProc._1
-              } else {
-                toProceed.clear
+            if (curProc._2 == cur._2 && !seen.contains(curProc._1)) {
+              registry.get(curProc._1) match {
+                case None ⇒
+                case Some(registred) ⇒ result += registred
               }
-            }
-          } 
-        case None => {
-            if(cur._1 != classOf[Object]) {
-              if(!cur._1.isInterface) {
-                val sc = cur._1.getSuperclass
-                toProceed += ((sc, cur._2+1))
-              }
-              for(i <- cur._1.getInterfaces) {
-                toProceed += ((i, cur._2+1))
-              }
+              seen += curProc._1
+            } else {
+              toProceed.clear
             }
           }
+        }
+        case None ⇒ {
+          if (cur._1 != classOf[Object]) {
+            if (!cur._1.isInterface) {
+              val sc = cur._1.getSuperclass
+              toProceed += ((sc, cur._2 + 1))
+            }
+            for (i ← cur._1.getInterfaces) {
+              toProceed += ((i, cur._2 + 1))
+            }
+          }
+        }
       }
     }
-    result.sortWith{case(l,r) => l._2 < r._2}.map{case(r,p) => r}
+    result.sortWith { case (l, r) ⇒ l._2 < r._2 }.map { case (r, p) ⇒ r }
   }
 
 }

@@ -26,26 +26,26 @@ sealed class InfiniteCounter(counter: Iterable[Long]) extends IDomain[Long] with
   def this(start: Long, step: Long) = {
     this(new Iterable[Long]() {
 
-        override def iterator: Iterator[Long] = {
-          return new Iterator[Long] {
+      override def iterator: Iterator[Long] = {
+        return new Iterator[Long] {
 
-            var value = start
+          var value = start
 
-            override def hasNext: Boolean = true
+          override def hasNext: Boolean = true
 
-            override def next: Long = {
-              val ret = value;
-              value += step;
-              ret
-            }   
+          override def next: Long = {
+            val ret = value;
+            value += step;
+            ret
           }
         }
-      })
-        
+      }
+    })
+
   }
-  
+
   def this() = this(0L, 1L)
-    
+
   override def iterator(context: IContext): Iterator[Long] = counter.iterator
-  
+
 }

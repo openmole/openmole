@@ -30,16 +30,16 @@ import scala.collection.mutable.ListBuffer
 sealed class ZipSampling(samplings: Iterable[ISampling]) extends ISampling {
 
   def this(samplings: ISampling*) = this(samplings)
-  def this(head: ISampling, samplings: Array[ISampling]) = this(List(head) ++ samplings) 
+  def this(head: ISampling, samplings: Array[ISampling]) = this(List(head) ++ samplings)
 
   override def inputs = DataSet.empty ++ samplings.flatMap(_.inputs)
   override def prototypes = samplings.flatMap(_.prototypes)
-  
-  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = 
+
+  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] =
     samplings.headOption match {
-      case Some(reference) =>
+      case Some(reference) ⇒
         /* Compute plans */
-        val cachedSample = samplings.tail.map{_.build(context)}.toArray
+        val cachedSample = samplings.tail.map { _.build(context) }.toArray
 
         /* Compose plans */
         val factorValuesCollection = new ListBuffer[Iterable[IVariable[_]]]
@@ -47,24 +47,23 @@ sealed class ZipSampling(samplings: Iterable[ISampling]) extends ISampling {
         val valuesIterator = reference.build(context)
         var oneFinished = false
 
-        while(valuesIterator.hasNext && !oneFinished) {
+        while (valuesIterator.hasNext && !oneFinished) {
           val values = new ListBuffer[IVariable[_]]
-      
-          for(it <- cachedSample) {
-            if(!it.hasNext)  oneFinished = true
+
+          for (it ← cachedSample) {
+            if (!it.hasNext) oneFinished = true
             else values ++= (it.next)
           }
 
-          if(!oneFinished) {
+          if (!oneFinished) {
             values ++= (valuesIterator.next)
-            factorValuesCollection +=  values
+            factorValuesCollection += values
           }
         }
 
         factorValuesCollection.iterator
-  
-      case None => Iterator.empty
-    }
 
+      case None ⇒ Iterator.empty
+    }
 
 }

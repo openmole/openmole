@@ -19,6 +19,6 @@ package org.openmole.plugin.domain
 
 package object collection {
   implicit def scalaIterableDomainDecorator[T](iterable: Iterable[T]) = new {
-    def toDomain = new IterableDomain[T](iterable)  
+    def toDomain = new IterableDomain[T](iterable)
   }
 }

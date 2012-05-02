@@ -22,7 +22,7 @@ import org.openmole.core.batch.environment.BatchJob
 import org.openmole.core.batch.environment.SerializedJob
 import org.openmole.core.model.job.IMoleJob
 
-sealed trait JobMessage 
+sealed trait JobMessage
 case class Upload(job: BatchExecutionJob) extends JobMessage
 case class Uploaded(job: BatchExecutionJob, serializedJob: SerializedJob) extends JobMessage
 case class Submit(job: BatchExecutionJob, serializedJob: SerializedJob) extends JobMessage
@@ -35,4 +35,3 @@ case class KillBatchJob(batchJob: BatchJob) extends JobMessage
 case class GetResult(job: BatchExecutionJob, serializedJob: SerializedJob, outputFilePath: String) extends JobMessage
 case class MoleJobError(moleJob: IMoleJob, job: BatchExecutionJob, exception: Throwable)
 
- 

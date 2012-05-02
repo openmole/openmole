@@ -19,7 +19,7 @@ package org.openmole.core.model.domain
 
 import org.openmole.core.model.data.IContext
 
-trait IBounded[+T]  { this: IDomain[T] =>   
+trait IBounded[+T] { this: IDomain[T] ⇒
   def min(context: IContext): T
   def max(context: IContext): T
 }

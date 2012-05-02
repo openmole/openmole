@@ -26,20 +26,19 @@ import org.openmole.core.model.data.IContext
 import org.openmole.plugin.tools.groovy.ContextToGroovyCode
 
 object GroovyTask {
-  
+
   def apply(
     name: String,
     code: String,
-    libs: Iterable[File] = List.empty
-  )(implicit plugins: IPluginSet) = 
-    new CodeTaskBuilder { builder =>
-      
+    libs: Iterable[File] = List.empty)(implicit plugins: IPluginSet) =
+    new CodeTaskBuilder { builder ⇒
+
       addImport("static org.openmole.misc.tools.service.Random.newRNG")
       addImport("static org.openmole.misc.workspace.Workspace.newFile")
       addImport("static org.openmole.misc.workspace.Workspace.newDir")
-      
-      def toTask = 
-        new GroovyTask(name, code, builder.imports, libs) { 
+
+      def toTask =
+        new GroovyTask(name, code, builder.imports, libs) {
           val inputs = builder.inputs
           val outputs = builder.outputs
           val parameters = builder.parameters
@@ -47,20 +46,19 @@ object GroovyTask {
           val produced = builder.produced
         }
     }
-  
+
 }
 
 sealed abstract class GroovyTask(
-  val name: String,
-  code: String, 
-  imports: Iterable[String],
-  libs: Iterable[File]
-)(implicit val plugins: IPluginSet) extends CodeTask {
-  
+    val name: String,
+    code: String,
+    imports: Iterable[String],
+    libs: Iterable[File])(implicit val plugins: IPluginSet) extends CodeTask {
+
   @transient lazy val contextToCode = new ContextToGroovyCode(codeWithImports, libs)
-  
+
   def processCode(context: IContext) = contextToCode.execute(context, outputs)
- 
-  private def codeWithImports = imports.map( "import " + _ ).mkString("\n") + "\n" + code
- 
+
+  private def codeWithImports = imports.map("import " + _).mkString("\n") + "\n" + code
+
 }
