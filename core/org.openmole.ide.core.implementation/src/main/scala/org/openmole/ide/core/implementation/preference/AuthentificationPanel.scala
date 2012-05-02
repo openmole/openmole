@@ -34,5 +34,5 @@ class AuthentificationPanel extends MigPanel("wrap","[grow,fill]","") with IAuth
       contents+= new Label(a.displayName)
       contents+= new ScrollPane{peer.setViewportView(p.peer)}})
   
-  def save = auths.foreach{a=>a.saveContent; println("save " + a)}
+  def save = auths.foreach{a=>a.saveContent}
 }
