@@ -19,6 +19,7 @@ package org.openmole.ide.core.implementation.workflow
 
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import javax.imageio.ImageIO
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow._
 import java.awt.Color
@@ -26,6 +27,7 @@ import java.awt.BasicStroke
 import java.awt.BorderLayout
 import java.awt.Graphics2D
 import java.awt.Dimension
+import java.awt.Image
 import java.awt.Rectangle
 import java.awt.RenderingHints
 import org.openmole.ide.core.model.panel.PanelMode._
@@ -45,13 +47,20 @@ class TaskWidget(scene: IMoleScene,
     g.setStroke(new BasicStroke(5))
     g.draw(new Rectangle(bounds.x,bounds.y,bounds.width-1,bounds.height-1))
     g.fillRect(0, 0, preferredSize.width, TASK_TITLE_HEIGHT)
+    
+    capsule.dataUI.task match {
+      case Some(x : ITaskDataProxyUI) =>
+        g.drawImage(ImageIO.read(x.dataUI.getClass.getClassLoader.getResource(x.dataUI.fatImagePath)),10,30,80,80,peer)
+    case None =>
+    }
+    
   }
   
   def backColor : Color =  { 
     capsule.dataUI.task match {
       case Some(x : ITaskDataProxyUI) => 
         scene match {
-          case y:BuildMoleScene=> x.dataUI.backgroundColor
+          case y:BuildMoleScene=> new Color(204,204,204,128)
           case _=> new Color(215,238,244,64)
         }
       case _=> 
@@ -63,7 +72,7 @@ class TaskWidget(scene: IMoleScene,
     capsule.dataUI.task match {
       case Some(x : ITaskDataProxyUI) => 
         scene match {
-          case y: BuildMoleScene=> x.dataUI.borderColor
+          case y: BuildMoleScene=> new Color(128,128,128)
           case _=> new Color(44,137,160,64)
         }
       case _=> new Color(204,204,204)

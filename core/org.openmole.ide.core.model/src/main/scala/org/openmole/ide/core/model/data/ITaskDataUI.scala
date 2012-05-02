@@ -63,4 +63,6 @@ trait ITaskDataUI extends IDataUI{
   def buildPanelUI: ITaskPanelUI
   
   def fatImagePath: String
+  
+  def imagePath: String = fatImagePath
 }

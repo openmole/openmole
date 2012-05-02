@@ -56,7 +56,7 @@ class MoleTaskDataUI(val name: String="",
 
   def coreClass = classOf[MoleTask] 
   
-  def imagePath = "img/mole.png" 
+  override def imagePath = "img/mole.png" 
   
   override def fatImagePath = "img/mole_fat.png" 
   

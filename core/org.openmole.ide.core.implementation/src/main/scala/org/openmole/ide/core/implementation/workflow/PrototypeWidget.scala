@@ -42,7 +42,7 @@ object PrototypeWidget {
   
   
   def green(scene: IMoleScene) =  scene match {
-    case y:BuildMoleScene=> new Color(180,200,7,180)
+    case y:BuildMoleScene=> new Color(180,200,7,220)
     case _=> new Color(44,137,160,64)
   }
   
