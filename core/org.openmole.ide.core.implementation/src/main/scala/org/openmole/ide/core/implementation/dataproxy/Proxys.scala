@@ -24,7 +24,6 @@ import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.data._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
-import java.io.File
 
 object Proxys {
     
@@ -37,10 +36,8 @@ object Proxys {
   
   def allPrototypesByName = prototypes.map{_.dataUI.name}
   
-  def filePrototypes: List[IPrototypeDataProxyUI] = prototypes.filter(_.dataUI.coreObject.`type`.erasure == classOf[File])
-  .toList
-  
-  def stringPrototypes: List[IPrototypeDataProxyUI] = prototypes.filter(_.dataUI.coreObject.`type`.erasure == classOf[String])
+  def classPrototypes(prototypeClass : Class[_]) : List[IPrototypeDataProxyUI] 
+  = prototypes.filter(_.dataUI.coreObject.`type`.erasure == prototypeClass)
   .toList
   
   def clearAll: Unit = {
