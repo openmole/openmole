@@ -22,6 +22,7 @@ import org.openmole.ide.misc.widget.ChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
 import org.openmole.ide.core.implementation.dataproxy._
+import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import java.awt.Dimension
 import org.openmole.ide.misc.widget.PluginPanel
@@ -94,7 +95,7 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
     }
   }
   
-  def comboContent: List[IPrototypeDataProxyUI] = new PrototypeDataProxyUI(new EmptyPrototypeDataUI)::Proxys.prototypes.toList
+  def comboContent: List[IPrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy::Proxys.prototypes.toList
 
   def buildNetLogo: NetLogo
 }
