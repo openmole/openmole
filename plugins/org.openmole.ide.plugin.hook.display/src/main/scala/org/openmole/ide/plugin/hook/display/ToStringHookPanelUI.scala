@@ -72,7 +72,6 @@ class ToStringHookPanelUI(val executionManager: IExecutionManager) extends Plugi
   val multiRow = {
     
     if (!capsules.isEmpty) {
-      println("build hook row widg")
       val r =  new TwoCombosRowWidget(
         protosFromTask(capsules(0)), protosFromTask(capsules(0))(0),
         capsules,
