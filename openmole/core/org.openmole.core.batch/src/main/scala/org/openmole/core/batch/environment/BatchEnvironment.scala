@@ -134,7 +134,7 @@ akka {
       type = Dispatcher
       
       fork-join-executor {
-        parallelism-min = 3
+        parallelism-min = 5
         parallelism-max = 10
       }
     }
@@ -146,7 +146,12 @@ akka {
   val jobManager = system.actorOf(Props(new JobManager(this)))
   val watcher = system.actorOf(Props(new BatchJobWatcher(this)))
   
-  system.scheduler.schedule(Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval) milliseconds, Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval) milliseconds, watcher, Watch)
+  system.scheduler.schedule(
+    Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval) milliseconds,
+    Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval) milliseconds,
+    watcher,
+    Watch
+  )
   
   val jobRegistry = new ExecutionJobRegistry
   val statistics = new OrderedSlidingList[StatisticSample](Workspace.preferenceAsInt(StatisticsHistorySize))
