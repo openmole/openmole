@@ -24,7 +24,7 @@
 	target='java'
 	commandLine='-jar "$INSTALL_PATH/Uninstaller/uninstaller.jar"'
 	description="Uninstall OpenMOLE"
-	iconFile="$INSTALL_PATH/uninstall.ico" 
+	iconFile="$INSTALL_PATH/openmole-uninstall.ico" 
 	initialState="normal"
 	programGroup="yes"
 	desktop="yes"
