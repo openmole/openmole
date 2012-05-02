@@ -26,5 +26,5 @@ object StatisticSample {
 }
 
 class StatisticSample(val submitted: Long, val running: Long, val done: Long) {
-  def this(job: BatchJob) = this(job.timeStemp(SUBMITTED), job.timeStemp(RUNNING), job.timeStemp(DONE))
+  def this(job: BatchJob) = this(job.timeStamp(SUBMITTED), job.timeStamp(RUNNING), job.timeStamp(DONE))
 }

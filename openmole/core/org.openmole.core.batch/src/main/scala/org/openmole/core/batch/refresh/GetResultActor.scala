@@ -24,10 +24,12 @@ import java.io.IOException
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.environment.BatchExecutionJob
+import org.openmole.core.batch.environment.StatisticSample
 import org.openmole.core.batch.environment.Storage
 import org.openmole.core.batch.message.ContextResults
 import org.openmole.core.batch.message.FileMessage
 import org.openmole.core.batch.message.RuntimeResult
+import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.State
 import org.openmole.core.serializer.SerializerService
@@ -95,6 +97,11 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
               } 
             }
           }
+          
+          environment.statistics += new StatisticSample(batchJob.batchJob.get)
+          
+          /*if(firstRunning != Long.MaxValue && lastCompleted != 0L) 
+            environment.statistics += new StatisticSample(batchJob.batchJob.get.timeStamp(ExecutionState.SUBMITTED), firstRunning, lastCompleted)*/
 
       }
     } finally UsageControl.get(communicationStorage.description).releaseToken(token)

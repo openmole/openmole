@@ -21,12 +21,12 @@ import java.util.Collections
 import java.util.LinkedList
 import scala.collection.JavaConversions._
 
-class OrderedSlidingList[T](size: Int) extends Iterable[T] {
+class OrderedSlidingList[T](size: Int)(implicit o: Ordering[T]) extends Iterable[T] {
   val averages = Collections.synchronizedList(new LinkedList[T])
 
   def iterator: Iterator[T] = averages.iterator
 
-  def += (sample: T)(implicit o: Ordering[T]) = averages.synchronized {
+  def += (sample: T) = averages.synchronized {
     import o._
     if(averages.size >= size) averages.remove(0)
     
