@@ -20,6 +20,7 @@ package org.openmole.ide.core.implementation.action
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import org.openmole.ide.core.model.commons.TransitionType._
+import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.workflow.ConnectorWidget
 
 class AggregationTransitionAction(connectionWidget: ConnectorWidget) extends ActionListener{
@@ -27,5 +28,6 @@ class AggregationTransitionAction(connectionWidget: ConnectorWidget) extends Act
     if (connectionWidget.transition.transitionType == BASIC_TRANSITION) connectionWidget.transition.transitionType = AGGREGATION_TRANSITION
     else connectionWidget.transition.transitionType = BASIC_TRANSITION
     connectionWidget.drawTransitionType
+    CheckData.checkMole(connectionWidget.scene.manager)
   }
 }
