@@ -27,7 +27,9 @@
         <pack name="OpenMOLE Icons" required="yes">
 	    <description>"OpenMOLE Icons</description>
             <file src="./openmole.ico" targetdir="$INSTALL_PATH/" />
+            <file src="./openmole-uninstall.ico" targetdir="$INSTALL_PATH/" />
             <file src="./openmole.png" targetdir="$INSTALL_PATH/" />
+            <file src="./openmole-uninstall.png" targetdir="$INSTALL_PATH/" />
  	    <executable targetfile="$INSTALL_PATH/openmole" stage="never" />
         </pack>
     </packs>
