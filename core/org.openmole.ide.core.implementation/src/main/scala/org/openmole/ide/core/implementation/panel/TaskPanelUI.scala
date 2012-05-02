@@ -166,7 +166,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
                                                          
     lazy val protoOut =   new PluginPanel("wrap"){
       contents += new Label("Outputs") {foreground = Color.WHITE}
-      contents += new PluginPanel("wrap 2"){  
+      contents += new PluginPanel("wrap"){  
         TaskPanelUI.this.proxy.dataUI.implicitPrototypesOut foreach{p=> 
           contents += new MyComboBox(List(p)) {enabled = false}          
         }
