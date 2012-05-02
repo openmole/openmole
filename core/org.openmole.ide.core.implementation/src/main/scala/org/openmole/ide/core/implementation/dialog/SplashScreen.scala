@@ -20,12 +20,17 @@ package org.openmole.ide.core.implementation.dialog
 import scala.swing.Frame
 import java.awt.Point
 import java.awt.Toolkit
+import javax.swing.ImageIcon
 import org.openmole.ide.misc.tools.image.Images._
 import scala.swing.Label
 
 class SplashScreen extends Frame{
   
   peer.setUndecorated(true)
+  
+  iconImage = new ImageIcon ( this.getClass.getClassLoader.getResource("/openmole.png") ).getImage
+  title = "OpenMOLE"
+  
   val screenSize = Toolkit.getDefaultToolkit.getScreenSize
   contents = new Label { icon = SPLASH_SCREEN }
   
