@@ -12,7 +12,7 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.task.IPluginSet
 import org.openmole.ide.core.implementation.data.TaskDataUI
 
-class FirstOrderSensitivityTaskDataUI(val name: String="")
+class FirstOrderEffectTaskDataUI(val name: String="")
                                       //val matrixName: IPrototype[String],
                                     //  val modelInputs: Iterable[IPrototype[Double]],
                                     //  val modelOutputs: Iterable[IPrototype[Double]]) extends TaskDataUI {
