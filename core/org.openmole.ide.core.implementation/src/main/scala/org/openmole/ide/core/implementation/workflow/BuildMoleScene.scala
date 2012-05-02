@@ -54,8 +54,12 @@ class BuildMoleScene(n: String = "",
         SceneItemFactory.createCapsule(caps,ms, new Point(n._2.x.toInt / 2,n._2.y.toInt / 2))
         capsuleMapping+= n._2-> caps
         islots++= islotMapping})
+ //   val connectMode = ScenesManager.connectMode
+ //   ScenesManager.connectMode = true
     manager.transitions.foreach(t=> {SceneItemFactory.createTransition(ms,capsuleMapping(t.source), islots(t.target), t.transitionType, t.condition)})
-    manager.dataChannels.foreach(dc=>{SceneItemFactory.createDataChannel(ms, capsuleMapping(dc.source),capsuleMapping(dc.target),dc.prototypes)})
+ //   ScenesManager.connectMode = false
+   // manager.dataChannels.foreach(dc=>{SceneItemFactory.createDataChannel(ms, capsuleMapping(dc.source),capsuleMapping(dc.target),dc.prototypes)})
+  //  ScenesManager.connectMode = connectMode
     ms
   }
   
