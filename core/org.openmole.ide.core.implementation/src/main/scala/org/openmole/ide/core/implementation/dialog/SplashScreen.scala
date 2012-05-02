@@ -29,7 +29,8 @@ class SplashScreen extends Frame{
   peer.setUndecorated(true)
   
   iconImage = new ImageIcon ( this.getClass.getClassLoader.getResource("/openmole.png") ).getImage
-
+  title = "OpenMOLE"
+  
   val screenSize = Toolkit.getDefaultToolkit.getScreenSize
   contents = new Label { icon = SPLASH_SCREEN }
   
