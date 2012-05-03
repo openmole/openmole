@@ -39,11 +39,11 @@ class Transition(
     val start: ICapsule,
     val end: ISlot,
     val condition: ICondition = ICondition.True,
-    val filter: Set[String] = Set.empty[String]) extends ITransition {
-
+    val filtered: Iterable[String] = Iterable.empty[String]) extends ITransition {
+  
   start.addOutputTransition(this)
   end += this
-
+  
   private def nextTaskReady(ticket: ITicket, subMole: ISubMoleExecution): Boolean = {
     val registry = subMole.transitionRegistry
     !end.transitions.exists(!registry.isRegistred(_, ticket))
@@ -73,7 +73,7 @@ class Transition(
   }
 
   override def perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) =
-    if (isConditionTrue(context)) _perform(context -- filter, ticket, subMole)
+    if (isConditionTrue(context)) _perform(context -- filtered, ticket, subMole)
 
   override def isConditionTrue(context: IContext): Boolean = condition.evaluate(context)
 
