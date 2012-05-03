@@ -24,7 +24,7 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import scala.collection.mutable.HashMap
 
 abstract class TaskDataUI extends ITaskDataUI {
-  var inputParameters : scala.collection.mutable.Map[String,String] = HashMap.empty[String,String]
+  var inputParameters : scala.collection.mutable.Map[IPrototypeDataProxyUI,String] = HashMap.empty[IPrototypeDataProxyUI,String]
   var prototypesIn = List.empty[IPrototypeDataProxyUI]
   var prototypesOut = List.empty[IPrototypeDataProxyUI]
   var implicitPrototypesIn : List[IPrototypeDataProxyUI] = List.empty[IPrototypeDataProxyUI]

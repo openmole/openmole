@@ -37,6 +37,8 @@ class SystemExecTaskDataUI(val name: String="",
   
   def coreClass= classOf[SystemExecTask]
   
+  override def imagePath = "img/systemexec_task.png"
+  
   def fatImagePath = "img/systemexec_task_fat.png"
   
   def buildPanelUI = new SystemExecTaskPanelUI(this)

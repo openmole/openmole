@@ -30,7 +30,7 @@ import org.openmole.ide.core.implementation.data._
 
 class ExplorationTaskDataUI(
   val name: String="",
-  override var sampling : Option[ISamplingDataProxyUI] = None) extends TaskDataUI with IExplorationTaskDataUI{
+  override val sampling : Option[ISamplingDataProxyUI] = None) extends TaskDataUI with IExplorationTaskDataUI{
    
   def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = {
      val taskBuilder = sampling match {

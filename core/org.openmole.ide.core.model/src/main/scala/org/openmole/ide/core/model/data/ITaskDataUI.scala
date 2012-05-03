@@ -36,9 +36,9 @@ trait ITaskDataUI extends IDataUI{
   
   def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet): ITask
   
-  def inputParameters : scala.collection.mutable.Map[String,String]
+  def inputParameters : scala.collection.mutable.Map[IPrototypeDataProxyUI,String]
   
-  def inputParameters_=(ip : scala.collection.mutable.Map[String,String])
+  def inputParameters_=(ip : scala.collection.mutable.Map[IPrototypeDataProxyUI,String])
   
   def prototypesIn: List[IPrototypeDataProxyUI]
   

@@ -86,7 +86,8 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     
     proxy.dataUI = panelUI.save(nameTextField.text,
                                 protoInEditorContent.map{_._1},
-                                new HashMap[String,String]() ++ protoInEditorContent.map{case (k,v) => k.dataUI.name -> v}.toMap ++ protoPanel.implicitEditorsMapping.filterNot{_._2.editorText.isEmpty}.map{ case (k,v) => k -> v.editorText }.toMap,
+                                new HashMap[IPrototypeDataProxyUI,String]() ++ 
+                                protoInEditorContent ++ protoPanel.implicitEditorsMapping.filterNot{_._2.editorText.isEmpty}.map{ case (k,v) => k -> v.editorText }.toMap,
                                 protoPanel.protoOutEditor.content)
   
     ScenesManager.capsules(proxy).foreach {c =>
@@ -132,7 +133,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
       new MultiComboLinkLabelGroovyTextFieldEditor("",
                                                    TaskPanelUI.this.proxy.dataUI.prototypesIn.map{proto =>
           (proto,proto.dataUI.coreObject,contentAction(proto),
-           TaskPanelUI.this.proxy.dataUI.inputParameters.getOrElseUpdate(proto.dataUI.name,""))}.toList,
+           TaskPanelUI.this.proxy.dataUI.inputParameters.getOrElseUpdate(proto,""))}.toList,
                                                    availablePrototypes.map{p=>(p,p.dataUI.coreObject,contentAction(p))}.toList,
                                                    image)}
     
@@ -142,7 +143,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
                               availablePrototypes.map{p=>(p,contentAction(p))}.toList,
                               image)
     
-    val implicitEditorsMapping = new HashMap[String,PrototypeGroovyTextFieldEditor]()
+    val implicitEditorsMapping = new HashMap[IPrototypeDataProxyUI,PrototypeGroovyTextFieldEditor]()
 
     lazy val protoIn = new PluginPanel("wrap"){
       contents += new Label("Inputs") {foreground = Color.WHITE}
@@ -154,8 +155,8 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
             contents += new MyComboBox(List(p)) {
               enabled = false
             }
-            implicitEditorsMapping += p.dataUI.name -> new PrototypeGroovyTextFieldEditor("Default value",p.dataUI.coreObject,TaskPanelUI.this.proxy.dataUI.inputParameters.getOrElseUpdate(p.dataUI.name,""))
-            contents += implicitEditorsMapping(p.dataUI.name)
+            implicitEditorsMapping += p -> new PrototypeGroovyTextFieldEditor("Default value",p.dataUI.coreObject,TaskPanelUI.this.proxy.dataUI.inputParameters.getOrElseUpdate(p,""))
+            contents += implicitEditorsMapping(p)
           }
         }
       }
