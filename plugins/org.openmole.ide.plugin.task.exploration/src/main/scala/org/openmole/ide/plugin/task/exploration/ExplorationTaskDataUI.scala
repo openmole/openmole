@@ -47,6 +47,8 @@ class ExplorationTaskDataUI(
   
   def fatImagePath = "img/explorationTask_fat.png"
   
+  override def imagePath = "img/explorationTask.png"
+  
   def buildPanelUI = new ExplorationTaskPanelUI(this)
   
   def borderColor = new Color(255,102,0)
