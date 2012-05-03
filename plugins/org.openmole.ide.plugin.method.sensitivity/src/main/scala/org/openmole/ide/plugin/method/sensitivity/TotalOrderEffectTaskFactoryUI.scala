@@ -21,10 +21,10 @@ import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 
-class FirstOrderEffectTaskFactoryUI extends ITaskFactoryUI {
-  override def displayName = "First Order effect"
+class TotalOrderEffectTaskFactoryUI extends ITaskFactoryUI {
+  override def displayName = "Total Order effect"
   
-  def buildDataUI = new FirstOrderEffectTaskDataUI
+  def buildDataUI = new TotalOrderEffectTaskDataUI
   
   def category = ComponentCategories.SALTELLI_TASK
 }

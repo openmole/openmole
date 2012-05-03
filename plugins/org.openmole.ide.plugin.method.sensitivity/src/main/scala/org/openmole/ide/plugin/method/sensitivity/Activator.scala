@@ -19,8 +19,12 @@ package org.openmole.ide.plugin.method.sensitivity
 
 import org.openmole.ide.core.implementation.registry.OSGiActivator
 import org.openmole.ide.core.implementation.registry.SamplingActivator
+import org.openmole.ide.core.implementation.registry.TaskActivator
 
-class Activator extends OSGiActivator with SamplingActivator {
+class Activator extends OSGiActivator with SamplingActivator with TaskActivator{
 
   override def samplingFactories = List(new SaltelliSamplingFactoryUI)
+  
+  override def taskFactories = List(new FirstOrderEffectTaskFactoryUI,
+                                    new TotalOrderEffectTaskFactoryUI)
 }

@@ -29,7 +29,9 @@ class SumTaskDataUI(val name: String="",
   
   def coreClass= classOf[SumTask]
   
-  def fatImagePath = "img/groovyTask_fat.png"
+  override def imagePath = "img/sum.png"
+  
+  def fatImagePath = "img/sum_fat.png"
   
   def buildPanelUI = new SumTaskPanelUI(this)
   
