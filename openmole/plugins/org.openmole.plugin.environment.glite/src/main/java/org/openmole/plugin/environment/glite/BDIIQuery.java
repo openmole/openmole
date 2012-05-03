@@ -12,7 +12,7 @@
  * Contributor(s):
  *    Nikolaos Tsioutsias - implementation
  *****************************************************************************/
-package org.openmole.plugin.environment.glite.internal;
+package org.openmole.plugin.environment.glite;
 
 import java.util.ArrayList;
 import java.util.Hashtable;

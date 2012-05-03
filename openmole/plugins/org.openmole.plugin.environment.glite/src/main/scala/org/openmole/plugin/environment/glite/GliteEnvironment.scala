@@ -27,8 +27,6 @@ import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.environment.ExecutionJobRegistry
 import org.openmole.core.batch.environment.PersistentStorage
 import org.openmole.misc.workspace.Workspace
-import org.openmole.plugin.environment.glite.internal.BDII
-import org.openmole.plugin.environment.glite.internal.OverSubmissionAgent
 import org.openmole.plugin.environment.jsaga._
 
 import scala.collection.JavaConversions._
@@ -86,7 +84,7 @@ class GliteEnvironment(
     val bdii: String,
     val myProxy: Option[MyProxy] = None,
     val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory,
-    val requirements: Map[String, String] = Map.empty,
+    val requirements: Iterable[Requirement] = List.empty,
     val fqan: String = "") extends JSAGAEnvironment {
 
   import GliteEnvironment._

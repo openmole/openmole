@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.glite.internal
+package org.openmole.plugin.environment.glite
 
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -29,7 +29,6 @@ import org.openmole.misc.tools.cache.AssociativeCache
 import org.openmole.misc.updater.IUpdatableWithVariableDelay
 import org.openmole.plugin.environment.glite.GliteEnvironment._
 import org.openmole.misc.workspace.Workspace
-import org.openmole.plugin.environment.glite.GliteEnvironment
 import scala.collection.mutable.HashMap
 import scala.collection.immutable.TreeSet
 import scala.collection.mutable.HashSet

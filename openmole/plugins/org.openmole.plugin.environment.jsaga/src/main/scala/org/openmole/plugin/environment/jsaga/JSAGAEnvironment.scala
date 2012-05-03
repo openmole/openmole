@@ -35,11 +35,14 @@ abstract class JSAGAEnvironment extends BatchEnvironment {
 
   val memory = max(Workspace.preferenceAsInt(DefaultRequieredMemory), runtimeMemory).toString
 
-  def requirements: Map[String, String]
-  val allRequirements = {
-    requirements.get(MEMORY) match {
-      case Some(m) ⇒ if (m < memory) requirements + (MEMORY -> memory) else requirements
-      case None ⇒ requirements + (MEMORY -> memory)
+  def requirements: Iterable[Requirement]
+
+  @transient lazy val requirementsMap = requirements.map { case Requirement(k, v) ⇒ k -> v }.toMap
+
+  @transient lazy val allRequirements = {
+    requirementsMap.get(MEMORY) match {
+      case Some(m) ⇒ if (m < memory) requirementsMap + (MEMORY -> memory) else requirementsMap
+      case None ⇒ requirementsMap + (MEMORY -> memory)
     }
   }
 
