@@ -96,16 +96,12 @@ object MoleMaker {
       capsuleMap.foreach {
         case (cui, ccore) ⇒
           manager.capsuleConnections(cui.dataUI).foreach(t ⇒ buildTransition(ccore, capsuleMap(t.target.capsule), t))
-          println(manager.dataChannels.size)
-      }  
+     }  
       
       manager.dataChannels.foreach { dc ⇒
-            println("datac from : " + dc.source.dataUI.task.get + "to " + dc.target.dataUI.task.get)
-            println("filtre :: " + dc.prototypes)
-            new DataChannel(capsuleMap(dc.source), capsuleMap(dc.target))
-                            //,
-                           // dc.prototypes.map { p ⇒ prototypeMap(p).name }.toSeq: _*)
-          }
+        new DataChannel(capsuleMap(dc.source), capsuleMap(dc.target),
+                        dc.prototypes.map { p ⇒ prototypeMap(p).name }.toSeq: _*)
+      }
 
       (new Mole(capsuleMap(manager.startingCapsule.get)), capsuleMap, prototypeMap, errors)
     } else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")

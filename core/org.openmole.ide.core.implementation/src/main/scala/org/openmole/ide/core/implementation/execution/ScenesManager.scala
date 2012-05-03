@@ -109,7 +109,7 @@ object ScenesManager {
     val clone = bmsc.scene.copy
     clone.manager.name = { bmsc.scene.manager.name + "_" + countExec.incrementAndGet }
     val page = new TabbedPane.Page(clone.manager.name, new MigPanel(""))
-    val container = new ExecutionMoleSceneContainer(clone, page)
+    val container = new ExecutionMoleSceneContainer(clone, page, bmsc)
     page.content = container
     bmsc.executionMoleSceneContainers += container
     addTab(page, clone.manager.name, new Action("") { override def apply = tabPane.pages.remove(page.index) })

@@ -30,23 +30,24 @@ import scala.swing.TabbedPane
 import org.openmole.ide.misc.tools.image.Images._
 
 class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
-                                  val page: TabbedPane.Page) extends Panel with ISceneContainer {
+                                  val page: TabbedPane.Page,
+                                  bmsc : BuildMoleSceneContainer) extends Panel with ISceneContainer {
 
   peer.setLayout(new BorderLayout)
   val toolBar = new MigPanel("") {
     contents += new ToolBarButton(new ImageIcon(START_EXECUTION),
-      "Start the workflow",
-      start)
+                                  "Start the workflow",
+                                  start)
 
     contents += new ToolBarButton(new ImageIcon(STOP_EXECUTION),
-      "Stop the workflow",
-      stop)
+                                  "Stop the workflow",
+                                  stop)
   }
-  val (mole, prototypeMapping, capsuleMapping, errors) = MoleMaker.buildMole(scene.manager)
-  val executionManager = new ExecutionManager(scene.manager,
-    mole,
-    prototypeMapping,
-    capsuleMapping)
+  val (mole, prototypeMapping, capsuleMapping, errors) = MoleMaker.buildMole(bmsc.scene.manager)
+  val executionManager = new ExecutionManager(bmsc.scene.manager,
+                                              mole,
+                                              prototypeMapping,
+                                              capsuleMapping)
 
   peer.add(toolBar.peer, BorderLayout.NORTH)
   peer.add(scene.graphScene.createView, BorderLayout.CENTER)
