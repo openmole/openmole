@@ -248,6 +248,7 @@
                         </goals>
                         <configuration>
                             <rewriteArrowSymbols>true</rewriteArrowSymbols>
+			    <alignParameters>true</alignParameters>
                         </configuration>
                     </execution>
                 </executions>
