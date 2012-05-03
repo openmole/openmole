@@ -52,6 +52,7 @@ class PersistentStorage(val environment: BatchEnvironment, URI: URI, override va
 
   import PersistentStorage._
 
+  @transient protected var baseSpaceVar: Option[IURIFile] = None
   @transient protected var tmpSpaceVar: Option[IURIFile] = None
   @transient protected var persistentSpaceVar: Option[IURIFile] = None
   @transient protected var time = System.currentTimeMillis
@@ -59,9 +60,8 @@ class PersistentStorage(val environment: BatchEnvironment, URI: URI, override va
   override def clean(token: AccessToken) = synchronized {
     for (r ← ReplicaCatalog.getReplica(description, environment.authentication.key)) ReplicaCatalog.remove(r)
 
-    tmpSpaceVar.map { _.remove(token) }
-    persistentSpaceVar.map { _.remove(token) }
-
+    baseSpaceVar.map { _.remove(token) }
+    baseSpaceVar = None
     tmpSpaceVar = None
     persistentSpaceVar = None
     time = System.currentTimeMillis
@@ -122,11 +122,14 @@ class PersistentStorage(val environment: BatchEnvironment, URI: URI, override va
   }
 
   override def baseDir(token: AccessToken): IURIFile = synchronized {
-    if (baseSpaceVar == null) {
-      val storeFile = new URIFile(URI.toString)
-      baseSpaceVar = storeFile.mkdirIfNotExist(baseDirName, token)
+    baseSpaceVar match {
+      case Some(s) ⇒ s
+      case None ⇒
+        val storeFile = new URIFile(URI.toString)
+        val baseSpace = storeFile.mkdirIfNotExist(baseDirName, token)
+        baseSpaceVar = Some(baseSpace)
+        baseSpace
     }
-    baseSpaceVar
   }
 
   def baseDirName = Workspace.preference(Workspace.UniqueID) + '/'

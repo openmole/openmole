@@ -39,8 +39,6 @@ abstract class Storage(val URI: URI) extends BatchService {
 
   import Storage._
 
-  @transient protected var baseSpaceVar: IURIFile = null
-
   def persistentSpace(token: AccessToken): IURIFile
   def tmpSpace(token: AccessToken): IURIFile
   def baseDir(token: AccessToken): IURIFile
