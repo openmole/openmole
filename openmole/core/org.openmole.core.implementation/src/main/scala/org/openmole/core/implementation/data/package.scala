@@ -54,7 +54,7 @@ package object data {
       new Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[IPrototype[Array[T]]]
 
   }
-
+  
   implicit def prototypeFromArrayDecorator[T](prototype: IPrototype[Array[T]]) = new {
 
     def fromArray: IPrototype[T] =
