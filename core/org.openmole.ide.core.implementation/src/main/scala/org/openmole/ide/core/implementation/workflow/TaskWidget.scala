@@ -60,11 +60,11 @@ class TaskWidget(scene: IMoleScene,
     capsule.dataUI.task match {
       case Some(x : ITaskDataProxyUI) => 
         scene match {
-          case y:BuildMoleScene=> new Color(204,204,204,128)
+          case y:BuildMoleScene=> new Color(215,238,244)
           case _=> new Color(215,238,244,64)
         }
       case _=> 
-        new Color(204,204,204,128)
+        new Color(215,238,244)
     }
   }
   
@@ -72,10 +72,10 @@ class TaskWidget(scene: IMoleScene,
     capsule.dataUI.task match {
       case Some(x : ITaskDataProxyUI) => 
         scene match {
-          case y: BuildMoleScene=> new Color(128,128,128)
+          case y: BuildMoleScene=> new Color(73,90,105)
           case _=> new Color(44,137,160,64)
         }
-      case _=> new Color(204,204,204)
+      case _=> new Color(73,90,105)
     }
   }
 }
