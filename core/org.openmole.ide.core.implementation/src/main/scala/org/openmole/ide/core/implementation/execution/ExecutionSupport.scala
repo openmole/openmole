@@ -5,10 +5,9 @@
 
 package org.openmole.ide.core.implementation.execution
 
-
 import scala.swing.ScrollPane
 
 object ExecutionSupport extends ScrollPane {
-  def changeView(etp: ExecutionManager) = contents= etp
+  def changeView(etp: ExecutionManager) = contents = etp
 }
 

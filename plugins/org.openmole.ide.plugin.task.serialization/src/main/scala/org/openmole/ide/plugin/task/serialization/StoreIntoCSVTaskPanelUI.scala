@@ -28,35 +28,37 @@ import scala.swing._
 import scala.swing.event.ButtonClicked
 import swing.Swing._
 
-class StoreIntoCSVTaskPanelUI(sdu: StoreIntoCSVTaskDataUI) extends PluginPanel("wrap 2") with ITaskPanelUI{
+class StoreIntoCSVTaskPanelUI(sdu: StoreIntoCSVTaskDataUI) extends PluginPanel("wrap 2") with ITaskPanelUI {
   var columns = new HashSet[ColumnPanel]
   val loaded = sdu.columns.groupBy(_._1)
-  val protoFileComboBox = new ComboBox(Proxys.prototypes.filter(p=>p.dataUI.coreObject.`type`.erasure == classOf[File]).toList)
-  if (sdu.protoFile.isDefined) protoFileComboBox.selection.item= sdu.protoFile.get
-  Proxys.prototypes.filter(_.dataUI.dim>0).foreach(columns+= buildColumn(_))
-  contents+= new Label("File Prototype to be stored")
-  contents+= protoFileComboBox
-  
+  val protoFileComboBox = new ComboBox(Proxys.prototypes.filter(p ⇒ p.dataUI.coreObject.`type`.erasure == classOf[File]).toList)
+  if (sdu.protoFile.isDefined) protoFileComboBox.selection.item = sdu.protoFile.get
+  Proxys.prototypes.filter(_.dataUI.dim > 0).foreach(columns += buildColumn(_))
+  contents += new Label("File Prototype to be stored")
+  contents += protoFileComboBox
+
   def buildColumn(pud: IPrototypeDataProxyUI) = {
-    val tf= new TextField(15){enabled = false}
-    val cb = new CheckBox(pud.dataUI.displayName) {reactions+= {case ButtonClicked(cb) =>tf.enabled = selected}}
-    contents+= (cb,"gap para")
-    contents+= tf
+    val tf = new TextField(15) { enabled = false }
+    val cb = new CheckBox(pud.dataUI.displayName) { reactions += { case ButtonClicked(cb) ⇒ tf.enabled = selected } }
+    contents += (cb, "gap para")
+    contents += tf
     if (loaded.contains(pud)) {
       cb.selected = true
       tf.text = loaded(pud).head._2
       tf.enabled = true
     }
-    new ColumnPanel(pud,tf)
+    new ColumnPanel(pud, tf)
   }
-  
+
   override def saveContent(name: String) = {
-    new StoreIntoCSVTaskDataUI(name,columns.flatMap {
-      case co: ColumnPanel=> if (co.selected) List(co.column) else None
-      case _=> None}.toList,Some(protoFileComboBox.selection.item))}
-    
-  class ColumnPanel(pud: IPrototypeDataProxyUI,tf: TextField){
+    new StoreIntoCSVTaskDataUI(name, columns.flatMap {
+      case co: ColumnPanel ⇒ if (co.selected) List(co.column) else None
+      case _ ⇒ None
+    }.toList, Some(protoFileComboBox.selection.item))
+  }
+
+  class ColumnPanel(pud: IPrototypeDataProxyUI, tf: TextField) {
     def selected = tf.enabled
-    def column= (pud,if (tf.text == "") pud.dataUI.name else tf.text)
+    def column = (pud, if (tf.text == "") pud.dataUI.name else tf.text)
   }
 }

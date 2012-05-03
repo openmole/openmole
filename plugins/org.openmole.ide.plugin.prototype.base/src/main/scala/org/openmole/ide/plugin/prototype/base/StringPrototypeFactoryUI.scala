@@ -22,9 +22,9 @@ import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
 class StringPrototypeFactoryUI extends IPrototypeFactoryUI[String] {
-  
+
   override def displayName = "String"
-  
+
   def buildDataUI = new StringPrototypeDataUI
   
   def buildDataUI(prototype : IPrototype[_],

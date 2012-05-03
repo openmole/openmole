@@ -26,25 +26,29 @@ import javax.swing.Icon
 import scala.swing._
 import swing.Swing._
 
-class MenuToggleButton(ic: Option[Icon]= None, t:String= "") extends ToggleButton(""){
+class MenuToggleButton(ic: Option[Icon] = None, t: String = "") extends ToggleButton("") {
   var popup = new PopupMenu
-      
-  popup.peer.addPropertyChangeListener( "visible", new PropertyChangeListener {
-      def propertyChange(e: PropertyChangeEvent) = peer.setSelected( popup.peer.isVisible )})
-  text= t
-  action = new Action(t) { 
+
+  popup.peer.addPropertyChangeListener("visible", new PropertyChangeListener {
+    def propertyChange(e: PropertyChangeEvent) = peer.setSelected(popup.peer.isVisible)
+  })
+  text = t
+  action = new Action(t) {
     if (ic.isDefined) icon = {
-      if (t=="") MenuToggleButton.this.maximumSize = new Dimension (ic.get.getIconWidth+10,ic.get.getIconHeight+10)
-      ic.get}
+      if (t == "") MenuToggleButton.this.maximumSize = new Dimension(ic.get.getIconWidth + 10, ic.get.getIconHeight + 10)
+      ic.get
+    }
     override def apply = {
-      popup.show(MenuToggleButton.this, 0,MenuToggleButton.this.peer.getHeight-1 )} }
-  
+      popup.show(MenuToggleButton.this, 0, MenuToggleButton.this.peer.getHeight - 1)
+    }
+  }
+
   repaint
-  
-  def addItem(item : MenuItem) = popup.contents += item
-  
+
+  def addItem(item: MenuItem) = popup.contents += item
+
   class MenuArrowIcon extends Icon {
-    override def paintIcon(c: java.awt.Component,g: Graphics, x: Int, y: Int) = {
+    override def paintIcon(c: java.awt.Component, g: Graphics, x: Int, y: Int) = {
       val g2 = g.asInstanceOf[Graphics2D]
       g2.setPaint(Color.BLACK)
       g2.translate(x, y)
@@ -53,7 +57,7 @@ class MenuToggleButton(ic: Option[Icon]= None, t:String= "") extends ToggleButto
       g2.drawLine(4, 5, 4, 5)
       g2.translate(-x, -y)
     }
-    
+
     override def getIconWidth = 9
     override def getIconHeight = 9
   }

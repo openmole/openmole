@@ -26,13 +26,14 @@ import scala.collection.immutable.HashSet
 import scala.swing.Label
 import scala.swing.ScrollPane
 
-class AuthentificationPanel extends MigPanel("wrap","[grow,fill]","") with IAuthentificationPanel{
+class AuthentificationPanel extends MigPanel("wrap", "[grow,fill]", "") with IAuthentificationPanel {
   var auths = new HashSet[IAuthentificationPanelUI]()
-  KeyRegistry.authentifications.values.foreach(a=>{
-      val p= a.buildPanelUI
-      auths += p
-      contents+= new Label(a.displayName)
-      contents+= new ScrollPane{peer.setViewportView(p.peer)}})
-  
-  def save = auths.foreach{a=>a.saveContent}
+  KeyRegistry.authentifications.values.foreach(a ⇒ {
+    val p = a.buildPanelUI
+    auths += p
+    contents += new Label(a.displayName)
+    contents += new ScrollPane { peer.setViewportView(p.peer) }
+  })
+
+  def save = auths.foreach { a ⇒ a.saveContent }
 }

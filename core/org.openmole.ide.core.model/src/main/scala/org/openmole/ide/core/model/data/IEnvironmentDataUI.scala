@@ -21,12 +21,12 @@ import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.core.model.execution.IEnvironment
 
 trait IEnvironmentDataUI extends IDataUI {
-  
+
   def coreObject: IEnvironment
-  
+
   def buildPanelUI: IEnvironmentPanelUI
-  
+
   def fatImagePath: String
-  
-  def imagePath: String 
+
+  def imagePath: String
 }

@@ -23,11 +23,10 @@ import org.openmole.ide.core.implementation.workflow.SceneItemFactory
 import org.openmole.ide.core.implementation.provider.GenericMenuProvider
 import org.openmole.ide.core.model.workflow.IMoleScene
 
+class AddCapsuleAction(moleScene: IMoleScene, provider: GenericMenuProvider) extends ActionListener {
 
-class AddCapsuleAction(moleScene: IMoleScene, provider: GenericMenuProvider) extends ActionListener{
-  
-  override def actionPerformed(ae: ActionEvent)= {
-    SceneItemFactory.createCapsule(moleScene,provider.currentPoint).addInputSlot(false)
+  override def actionPerformed(ae: ActionEvent) = {
+    SceneItemFactory.createCapsule(moleScene, provider.currentPoint).addInputSlot(false)
     moleScene.refresh
   }
 }

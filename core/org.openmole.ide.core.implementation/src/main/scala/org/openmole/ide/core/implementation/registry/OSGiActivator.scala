@@ -20,7 +20,7 @@ package org.openmole.ide.core.implementation.registry
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
 
-class OSGiActivator extends BundleActivator  {
+class OSGiActivator extends BundleActivator {
   def start(context: BundleContext) = {}
   def stop(context: BundleContext) = {}
 }

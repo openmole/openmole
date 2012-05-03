@@ -18,6 +18,6 @@
 package org.openmole.ide.core.model.panel
 import org.openmole.ide.core.model.data.IEnvironmentDataUI
 
-trait IEnvironmentPanelUI extends IPanelUI{
+trait IEnvironmentPanelUI extends IPanelUI {
   def saveContent(name: String): IEnvironmentDataUI
 }

@@ -16,6 +16,6 @@
  */
 package org.openmole.ide.plugin.prototype.base
 
-class IntegerPrototypePanelUI(pud:IntegerPrototypeDataUI) extends GenericPrototypePanelUI[Int](pud.dim) {
-   override def saveContent(name: String) =  new IntegerPrototypeDataUI(name,if(dim!="") dim.toInt else 0)
+class IntegerPrototypePanelUI(pud: IntegerPrototypeDataUI) extends GenericPrototypePanelUI[Int](pud.dim) {
+  override def saveContent(name: String) = new IntegerPrototypeDataUI(name, if (dim != "") dim.toInt else 0)
 }

@@ -17,7 +17,7 @@
 
 package org.openmole.ide.misc.widget.multirow
 
-object RowWidget  extends Enumeration {
+object RowWidget extends Enumeration {
 
   class Plus(val name: String) extends Val(name)
   val ADD = new Plus("ADD")

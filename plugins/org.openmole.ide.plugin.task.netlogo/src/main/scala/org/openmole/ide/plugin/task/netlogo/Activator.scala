@@ -23,5 +23,5 @@ import org.openmole.ide.core.implementation.registry.TaskActivator
 class Activator extends OSGiActivator with TaskActivator {
 
   override def taskFactories = List(new NetLogo4TaskFactoryUI,
-                                    new NetLogo5TaskFactoryUI)
+    new NetLogo5TaskFactoryUI)
 }

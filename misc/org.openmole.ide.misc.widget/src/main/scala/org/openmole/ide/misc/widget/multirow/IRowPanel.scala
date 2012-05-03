@@ -23,7 +23,7 @@ import org.openmole.ide.misc.widget.ImageLinkLabel
 import org.openmole.ide.misc.widget.MyPanel
 import scala.swing.Action
 
-trait IRowPanel extends MyPanel{
-  val removeButton = new ImageLinkLabel(DEL,new Action("") { def apply = {} })
+trait IRowPanel extends MyPanel {
+  val removeButton = new ImageLinkLabel(DEL, new Action("") { def apply = {} })
   def extend(extendedPanel: JPanel): Unit
 }

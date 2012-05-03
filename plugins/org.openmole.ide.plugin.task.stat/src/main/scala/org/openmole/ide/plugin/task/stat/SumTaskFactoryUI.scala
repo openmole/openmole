@@ -20,11 +20,10 @@ package org.openmole.ide.plugin.task.stat
 import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
-
 class SumTaskFactoryUI extends ITaskFactoryUI {
   override def displayName = "Sum"
-  
+
   def buildDataUI = new SumTaskDataUI
-  
+
   def category = ComponentCategories.STAT_TASK
 }

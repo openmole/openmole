@@ -30,7 +30,5 @@ class PreferenceContent extends MigPanel("wrap","[right]",""){
       pages.append(new TabbedPane.Page("Authentification",authentification))
       pages.append(new TabbedPane.Page("Environment management",new EnvironmentSettingPanel))
     }
-    
-
   def save = authentification.save
 }

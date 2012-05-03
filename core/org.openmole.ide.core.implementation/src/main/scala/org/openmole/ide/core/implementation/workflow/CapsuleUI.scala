@@ -45,96 +45,96 @@ import scala.collection.mutable.ListBuffer
 import org.openmole.core.implementation.validation.DataflowProblem
 import scala.swing.Action
 
-class CapsuleUI(val scene: IMoleScene, 
-                val dataUI : ICapsuleDataUI = new CapsuleDataUI) extends Widget(scene.graphScene) with ICapsuleUI{
-  
-  val taskComponentWidget = new TaskComponentWidget(scene,this,new TaskWidget(scene,this))
-  var environmentWidget : Option[LinkedImageWidget] = None
-  var samplingWidget : Option[LinkedImageWidget] = None
-  var inputPrototypeWidget : Option[PrototypeWidget] = None
-  var outputPrototypeWidget : Option[PrototypeWidget] = None
-  
-  val validationWidget = new ImageWidget(scene.graphScene,dataUI.task match {
-      case Some(x : ITaskDataProxyUI) => Images.CHECK_VALID
-      case _ => Images.CHECK_INVALID
-    }) {
-    setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 12 , 2))
+class CapsuleUI(val scene: IMoleScene,
+                val dataUI: ICapsuleDataUI = new CapsuleDataUI) extends Widget(scene.graphScene) with ICapsuleUI {
+
+  val taskComponentWidget = new TaskComponentWidget(scene, this, new TaskWidget(scene, this))
+  var environmentWidget: Option[LinkedImageWidget] = None
+  var samplingWidget: Option[LinkedImageWidget] = None
+  var inputPrototypeWidget: Option[PrototypeWidget] = None
+  var outputPrototypeWidget: Option[PrototypeWidget] = None
+
+  val validationWidget = new ImageWidget(scene.graphScene, dataUI.task match {
+    case Some(x: ITaskDataProxyUI) ⇒ Images.CHECK_VALID
+    case _ ⇒ Images.CHECK_INVALID
+  }) {
+    setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 12, 2))
   }
-  
+
   setEnvironment(dataUI.environment)
   setSampling(dataUI.sampling)
-  
+
   addChild(taskComponentWidget)
   addChild(validationWidget)
-  setPreferredSize(new Dimension(TASK_CONTAINER_WIDTH+20,TASK_CONTAINER_HEIGHT+20))
-  taskComponentWidget.setPreferredLocation(new Point(10,10))
-  createActions(MOVE).addAction (ActionFactory.createMoveAction)
-  
-  
-  var islots= ListBuffer.empty[IInputSlotWidget]
-  val oslot= new OutputSlotWidget(scene,this)
+  setPreferredSize(new Dimension(TASK_CONTAINER_WIDTH + 20, TASK_CONTAINER_HEIGHT + 20))
+  taskComponentWidget.setPreferredLocation(new Point(10, 10))
+  createActions(MOVE).addAction(ActionFactory.createMoveAction)
+
+  var islots = ListBuffer.empty[IInputSlotWidget]
+  val oslot = new OutputSlotWidget(scene, this)
   var nbInputSlots = 0
-  
+
   addChild(oslot)
-  val capsuleMenuProvider= new CapsuleMenuProvider(scene, this)
-  
+  val capsuleMenuProvider = new CapsuleMenuProvider(scene, this)
+
   getActions.addAction(ActionFactory.createPopupMenuAction(capsuleMenuProvider))
-  
-  val titleWidget = new LinkedWidget(scene,new LinkLabel(toString, new Action(""){ 
-        def apply = {
-          dataUI.task match {
-            case Some(x : ITaskDataProxyUI) => scene.displayPropertyPanel(x,EDIT)
-            case _=>
-          }
-        }
-      },6){preferredSize = new Dimension(TASK_CONTAINER_WIDTH,TASK_TITLE_HEIGHT)},10,10)
-  
+
+  val titleWidget = new LinkedWidget(scene, new LinkLabel(toString, new Action("") {
+    def apply = {
+      dataUI.task match {
+        case Some(x: ITaskDataProxyUI) ⇒ scene.displayPropertyPanel(x, EDIT)
+        case _ ⇒
+      }
+    }
+  }, 6) { preferredSize = new Dimension(TASK_CONTAINER_WIDTH, TASK_TITLE_HEIGHT) }, 10, 10)
+
   addChild(titleWidget)
-  
+
   def setAsValid = {
     validationWidget.setImage(Images.CHECK_VALID)
     validationWidget.setToolTipText("Runnable capsule")
   }
-  
-  def setAsInvalid(errorString : String) = {
+
+  def setAsInvalid(errorString: String) = {
     validationWidget.setImage(Images.CHECK_INVALID)
     validationWidget.setToolTipText(errorString)
   }
-  
+
   override def paintWidget = {
     super.paintWidget
     dataUI.task match {
-      case Some(x : ITaskDataProxyUI) => 
+      case Some(x: ITaskDataProxyUI) ⇒
         titleWidget.linkLabel.foreground = Color.WHITE
         titleWidget.linkLabel.text = x.dataUI.name
-      case None =>
+      case None ⇒
     }
   }
-     
+
   def widget = this
-  
+
   def copy(sc: IMoleScene) = {
-    var slotMapping = new HashMap[IInputSlotWidget,IInputSlotWidget]
+    var slotMapping = new HashMap[IInputSlotWidget, IInputSlotWidget]
     val c = new CapsuleUI(sc)
-    islots.foreach(i=>slotMapping+=i->c.addInputSlot(false))
+    islots.foreach(i ⇒ slotMapping += i -> c.addInputSlot(false))
     dataUI.task match {
-      case Some(x : ITaskDataProxyUI) => 
+      case Some(x: ITaskDataProxyUI) ⇒
         c.encapsule(ProxyFreezer.freeze(x))
-        if(dataUI.environment.isDefined) c.setEnvironment(ProxyFreezer.freeze(dataUI.environment))
-        if(dataUI.sampling.isDefined) c.setSampling(ProxyFreezer.freeze(dataUI.sampling))
-      case _=>
+        if (dataUI.environment.isDefined) c.setEnvironment(ProxyFreezer.freeze(dataUI.environment))
+        if (dataUI.sampling.isDefined) c.setSampling(ProxyFreezer.freeze(dataUI.sampling))
+      case _ ⇒
     }
-    (c,slotMapping)
+    (c, slotMapping)
   }
-  
-  def defineAsStartingCapsule(b : Boolean) = {
+
+  def defineAsStartingCapsule(b: Boolean) = {
     dataUI.startingCapsule = b
-    islots.foreach{ isw=>
-      isw.setStartingSlot(b)}
+    islots.foreach { isw ⇒
+      isw.setStartingSlot(b)
+    }
     scene.validate
     scene.refresh
   }
-  
+
   def decapsule = {
     dataUI.task = None
     removeChild(inputPrototypeWidget.get)
@@ -143,8 +143,8 @@ class CapsuleUI(val scene: IMoleScene,
     inputPrototypeWidget = None
     outputPrototypeWidget = None
   }
-  
-  def encapsule(dpu: ITaskDataProxyUI)= {
+
+  def encapsule(dpu: ITaskDataProxyUI) = {
     setTask(dpu)
     inputPrototypeWidget = Some(PrototypeWidget.buildInput(scene, dpu))
     outputPrototypeWidget = Some(PrototypeWidget.buildOutput(scene, dpu))
@@ -153,91 +153,91 @@ class CapsuleUI(val scene: IMoleScene,
     addChild(outputPrototypeWidget.get)
     capsuleMenuProvider.addTaskMenus
   }
-  
-  def setEnvironment(envtask : Option[IEnvironmentDataProxyUI]) = {
+
+  def setEnvironment(envtask: Option[IEnvironmentDataProxyUI]) = {
     dataUI.environment = envtask
     updateEnvironmentWidget
   }
-    
+
   private def updateEnvironmentWidget = {
     environmentWidget match {
-      case Some(y : LinkedImageWidget) => removeChild(y)
-      case None =>
+      case Some(y: LinkedImageWidget) ⇒ removeChild(y)
+      case None ⇒
     }
     dataUI.environment match {
-      case Some(x : IEnvironmentDataProxyUI) => 
+      case Some(x: IEnvironmentDataProxyUI) ⇒
         environmentWidget = Some(new LinkedImageWidget(scene,
-                                                       new ImageIcon(ImageIO.read(x.dataUI.getClass.getClassLoader.getResource(x.dataUI.imagePath))),
-                                                       TASK_CONTAINER_WIDTH - 10,TASK_CONTAINER_HEIGHT -3,
-                                                       new Action("") {def apply = scene.displayPropertyPanel(x,EDIT)}))
+          new ImageIcon(ImageIO.read(x.dataUI.getClass.getClassLoader.getResource(x.dataUI.imagePath))),
+          TASK_CONTAINER_WIDTH - 10, TASK_CONTAINER_HEIGHT - 3,
+          new Action("") { def apply = scene.displayPropertyPanel(x, EDIT) }))
         addChild(environmentWidget.get)
-      case None => environmentWidget = None
+      case None ⇒ environmentWidget = None
     }
     scene.refresh
   }
-  
-  def setSampling(sampletask : Option[ISamplingDataProxyUI]) = {
+
+  def setSampling(sampletask: Option[ISamplingDataProxyUI]) = {
     dataUI.sampling = sampletask
     updateSamplingWidget
   }
-  
+
   private def updateSamplingWidget = {
     samplingWidget match {
-      case Some(y : LinkedImageWidget) => removeChild(y)
-      case None =>
+      case Some(y: LinkedImageWidget) ⇒ removeChild(y)
+      case None ⇒
     }
     dataUI.sampling match {
-      case None=> samplingWidget = None
-      case Some(x : ISamplingDataProxyUI) => 
+      case None ⇒ samplingWidget = None
+      case Some(x: ISamplingDataProxyUI) ⇒
         samplingWidget = Some(new LinkedImageWidget(scene,
-                                                    new ImageIcon(ImageIO.read(x.dataUI.getClass.getClassLoader.getResource(x.dataUI.imagePath))),
-                                                    0,TASK_CONTAINER_HEIGHT - 3,
-                                                    new Action("") {def apply = scene.displayPropertyPanel(x,EDIT)}))
+          new ImageIcon(ImageIO.read(x.dataUI.getClass.getClassLoader.getResource(x.dataUI.imagePath))),
+          0, TASK_CONTAINER_HEIGHT - 3,
+          new Action("") { def apply = scene.displayPropertyPanel(x, EDIT) }))
         addChild(samplingWidget.get)
     }
     scene.refresh
   }
-  
-  def updateErrors(problems : List[(IPrototypeDataProxyUI,DataflowProblem)]) = {
+
+  def updateErrors(problems: List[(IPrototypeDataProxyUI, DataflowProblem)]) = {
     dataUI.task match {
-      case Some(x : ITaskDataProxyUI) => 
-        val (protoOut,protoIn) = problems.partition{case (proto,problem)=> x.dataUI.prototypesIn.contains(proto)}
+      case Some(x: ITaskDataProxyUI) ⇒
+        val (protoOut, protoIn) = problems.partition { case (proto, problem) ⇒ x.dataUI.prototypesIn.contains(proto) }
         inputPrototypeWidget match {
-          case Some(x : PrototypeWidget) => 
-            x.updateErrors(protoIn.map{_._2}.mkString("\n"))
-            outputPrototypeWidget.get.updateErrors(protoOut.map{_._2}.mkString("\n"))
-          case _ =>
+          case Some(x: PrototypeWidget) ⇒
+            x.updateErrors(protoIn.map { _._2 }.mkString("\n"))
+            outputPrototypeWidget.get.updateErrors(protoOut.map { _._2 }.mkString("\n"))
+          case _ ⇒
         }
-      case _ =>
+      case _ ⇒
     }
   }
-  
-  def addInputSlot(on: Boolean): IInputSlotWidget =  {
+
+  def addInputSlot(on: Boolean): IInputSlotWidget = {
     if (on) dataUI.startingCapsule = on
-    nbInputSlots+= 1
-    val im = new InputSlotWidget(scene,this,nbInputSlots,on)
+    nbInputSlots += 1
+    val im = new InputSlotWidget(scene, this, nbInputSlots, on)
     islots += im
     addChild(im)
     scene.refresh
     im
   }
 
-  def removeInputSlot= {
-    nbInputSlots-= 1
+  def removeInputSlot = {
+    nbInputSlots -= 1
     val toBeRemoved = islots.tail.last
     removeChild(toBeRemoved.widget)
-    islots-= toBeRemoved
+    islots -= toBeRemoved
   }
-  
-  def setTask(dpu: ITaskDataProxyUI)={
-    dataUI.task= Some(dpu)
+
+  def setTask(dpu: ITaskDataProxyUI) = {
+    dataUI.task = Some(dpu)
     dpu.dataUI match {
-      case x : IExplorationTaskDataUI => setSampling(x.sampling)
-      case _=>
+      case x: IExplorationTaskDataUI ⇒ setSampling(x.sampling)
+      case _ ⇒
     }
   }
-  
+
   def x = convertLocalToScene(getLocation).getX
-  
+
   def y = convertLocalToScene(getLocation).getY
 }

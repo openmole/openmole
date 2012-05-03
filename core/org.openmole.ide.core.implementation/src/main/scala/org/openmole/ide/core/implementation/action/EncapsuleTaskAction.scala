@@ -25,8 +25,8 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 
 class EncapsuleTaskAction(moleScene: IMoleScene,
                           capsule: CapsuleUI,
-                          dpu: TaskDataProxyUI) extends ActionListener{
-  override def actionPerformed(ae: ActionEvent)= {
+                          dpu: TaskDataProxyUI) extends ActionListener {
+  override def actionPerformed(ae: ActionEvent) = {
     capsule.encapsule(dpu)
     moleScene.refresh
   }

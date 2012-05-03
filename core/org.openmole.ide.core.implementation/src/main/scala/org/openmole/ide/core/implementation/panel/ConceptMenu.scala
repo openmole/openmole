@@ -46,105 +46,107 @@ import org.openmole.ide.core.model.workflow.ISceneContainer
 import scala.collection.JavaConversions._
 
 object ConceptMenu {
-  
-  val menuItemMapping = new HashMap[IDataProxyUI,MenuItem]
-  val mapping = new HashMap[IComponentCategory,Menu]
-  
-  def addCategoryComponents(rootComponent : IComponentCategory) : Menu = {
+
+  val menuItemMapping = new HashMap[IDataProxyUI, MenuItem]
+  val mapping = new HashMap[IComponentCategory, Menu]
+
+  def addCategoryComponents(rootComponent: IComponentCategory): Menu = {
     val menu = new Menu(rootComponent.name)
     mapping += rootComponent -> menu
-    rootComponent.childs.foreach{cpt => 
-      menu.contents +=  addCategoryComponents(cpt)
+    rootComponent.childs.foreach { cpt ⇒
+      menu.contents += addCategoryComponents(cpt)
     }
     menu
   }
-  
+
   val taskMenu = {
     addCategoryComponents(ComponentCategories.TASK)
-    KeyRegistry.tasks.values.map{f=>new TaskDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach{ d =>
-      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName){
-          override def apply = display(d.buildDataProxyUI,CREATION)
-        })}
+    KeyRegistry.tasks.values.map { f ⇒ new TaskDataProxyFactory(f) }.toList.sortBy(_.factory.displayName).foreach { d ⇒
+      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName) {
+        override def apply = display(d.buildDataProxyUI, CREATION)
+      })
+    }
     new PopupToolBarPresenter("Task", mapping(ComponentCategories.TASK))
   }
-  
+
   val environmentMenu = {
     addCategoryComponents(ComponentCategories.ENVIRONMENT)
-    KeyRegistry.environments.values.map{f=>new EnvironmentDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach{ d =>
-      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName){
-          override def apply = display(d.buildDataProxyUI,CREATION)
-        })}
+    KeyRegistry.environments.values.map { f ⇒ new EnvironmentDataProxyFactory(f) }.toList.sortBy(_.factory.displayName).foreach { d ⇒
+      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName) {
+        override def apply = display(d.buildDataProxyUI, CREATION)
+      })
+    }
     new PopupToolBarPresenter("Environment", mapping(ComponentCategories.ENVIRONMENT))
   }
-  
+
   val prototypeMenu = {
     addCategoryComponents(ComponentCategories.PROTOTYPE)
-    KeyRegistry.prototypes.values.map{f=>new PrototypeDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach{ d =>
-        mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName){
-        override def apply = display(d.buildDataProxyUI,CREATION)
-      })}
+    KeyRegistry.prototypes.values.map { f ⇒ new PrototypeDataProxyFactory(f) }.toList.sortBy(_.factory.displayName).foreach { d ⇒
+      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName) {
+        override def apply = display(d.buildDataProxyUI, CREATION)
+      })
+    }
     new PopupToolBarPresenter("Prototype", mapping(ComponentCategories.PROTOTYPE))
   }
-  
+
   val samplingMenu = {
     addCategoryComponents(ComponentCategories.SAMPLING)
-    KeyRegistry.samplings.values.map{f=>new SamplingDataProxyFactory(f)}.toList.sortBy(_.factory.displayName).foreach{ d =>
-      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName){
-          override def apply = display(d.buildDataProxyUI,CREATION)
-        })}
+    KeyRegistry.samplings.values.map { f ⇒ new SamplingDataProxyFactory(f) }.toList.sortBy(_.factory.displayName).foreach { d ⇒
+      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName) {
+        override def apply = display(d.buildDataProxyUI, CREATION)
+      })
+    }
     new PopupToolBarPresenter("Sampling", mapping(ComponentCategories.SAMPLING))
   }
-  
+
   def removeItem(proxy: IDataProxyUI) = {
     proxy match {
-      case x:IEnvironmentDataProxyUI=> environmentMenu.remove(menuItemMapping(proxy))
-      case x:IPrototypeDataProxyUI=> prototypeMenu.remove(menuItemMapping(proxy))
-      case x:ITaskDataProxyUI=> taskMenu.remove(menuItemMapping(proxy))
-      case x:ISamplingDataProxyUI=> samplingMenu.remove(menuItemMapping(proxy))
+      case x: IEnvironmentDataProxyUI ⇒ environmentMenu.remove(menuItemMapping(proxy))
+      case x: IPrototypeDataProxyUI ⇒ prototypeMenu.remove(menuItemMapping(proxy))
+      case x: ITaskDataProxyUI ⇒ taskMenu.remove(menuItemMapping(proxy))
+      case x: ISamplingDataProxyUI ⇒ samplingMenu.remove(menuItemMapping(proxy))
     }
-  } 
-  
-  def menuBar = new MenuBar{
-    contents.append(prototypeMenu,taskMenu,samplingMenu,environmentMenu)
-    minimumSize = new Dimension(size.width,50)
   }
-        
+
+  def menuBar = new MenuBar {
+    contents.append(prototypeMenu, taskMenu, samplingMenu, environmentMenu)
+    minimumSize = new Dimension(size.width, 50)
+  }
+
   def display(proxy: IDataProxyUI,
               mode: Value) = {
-    if (ScenesManager.tabPane.peer.getTabCount == 0) createTab(proxy,mode)
-    else  ScenesManager.tabPane.selection.page.content match {
-      case x: ISceneContainer=> x.scene.displayPropertyPanel(proxy, mode)
-      case _ => createTab(proxy,mode)
+    if (ScenesManager.tabPane.peer.getTabCount == 0) createTab(proxy, mode)
+    else ScenesManager.tabPane.selection.page.content match {
+      case x: ISceneContainer ⇒ x.scene.displayPropertyPanel(proxy, mode)
+      case _ ⇒ createTab(proxy, mode)
     }
   }
-  
+
   def createTab(proxy: IDataProxyUI,
                 mode: Value) = DialogFactory.newTabName match {
-    case Some(y: BuildMoleSceneContainer)=> y.scene.displayPropertyPanel(proxy, mode)
-    case None=>
+    case Some(y: BuildMoleSceneContainer) ⇒ y.scene.displayPropertyPanel(proxy, mode)
+    case None ⇒
   }
-    
-  
-  
-  def addItem(proxy: IDataProxyUI): MenuItem = addItem(proxy.dataUI.name,proxy)
-  
+
+  def addItem(proxy: IDataProxyUI): MenuItem = addItem(proxy.dataUI.name, proxy)
+
   def addItem(name: String,
-              proxy: IDataProxyUI) : MenuItem = {
-    menuItemMapping += proxy-> new MenuItem( new Action(proxy.dataUI.name) {
-        override def apply = {
-          ConceptMenu.display(proxy,EDIT)
-        }
-      })
+              proxy: IDataProxyUI): MenuItem = {
+    menuItemMapping += proxy -> new MenuItem(new Action(proxy.dataUI.name) {
+      override def apply = {
+        ConceptMenu.display(proxy, EDIT)
+      }
+    })
     menuItemMapping(proxy)
   }
-  
+
   def refreshItem(proxy: IDataProxyUI) = {
     if (menuItemMapping.contains(proxy))
       menuItemMapping(proxy).action.title = proxy.dataUI.name
   }
-  
+
   def clearAllItems = {
-    List(samplingMenu,prototypeMenu,taskMenu,environmentMenu).foreach{_.removeAll}
+    List(samplingMenu, prototypeMenu, taskMenu, environmentMenu).foreach { _.removeAll }
     menuItemMapping.clear
   }
 }

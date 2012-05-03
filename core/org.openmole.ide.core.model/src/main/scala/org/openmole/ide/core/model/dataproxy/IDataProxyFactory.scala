@@ -21,6 +21,6 @@ import org.openmole.ide.core.model.factory.IFactoryUI
 
 trait IDataProxyFactory {
   def buildDataProxyUI: IDataProxyUI
-  
+
   def factory: IFactoryUI
 }

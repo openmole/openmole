@@ -21,18 +21,18 @@ import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
 
-trait EnvironmentActivator extends BundleActivator{
-  
-  def environmentFactories : Iterable[IEnvironmentFactoryUI]
-  
+trait EnvironmentActivator extends BundleActivator {
+
+  def environmentFactories: Iterable[IEnvironmentFactoryUI]
+
   abstract override def start(context: BundleContext) = {
     super.start(context)
-    environmentFactories.foreach{f=> KeyRegistry.environments += KeyGenerator(f.buildDataUI.coreClass) -> f}
+    environmentFactories.foreach { f ⇒ KeyRegistry.environments += KeyGenerator(f.buildDataUI.coreClass) -> f }
   }
 
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
-    environmentFactories.foreach{f => KeyRegistry.environments -= KeyGenerator(f.buildDataUI.coreClass)}
+    environmentFactories.foreach { f ⇒ KeyRegistry.environments -= KeyGenerator(f.buildDataUI.coreClass) }
   }
 }
 

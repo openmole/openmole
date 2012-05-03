@@ -24,29 +24,29 @@ import org.openmole.ide.misc.widget.MigPanel
 import scala.util.Random
 import org.openmole.core.model.job.State._
 
-class ExampleStackedPanel extends MigPanel("","[][grow,fill]",""){
-  val g= new Random(51)
+class ExampleStackedPanel extends MigPanel("", "[][grow,fill]", "") {
+  val g = new Random(51)
 
   //PiePlotter    
   val plot = new PiePlotter("title")
-  plot.update(READY,8)
-  plot.update(COMPLETED,8)
-  plot.update(CANCELED,4)
-  
+  plot.update(READY, 8)
+  plot.update(COMPLETED, 8)
+  plot.update(CANCELED, 4)
+
   //XYPLOT
-  val plot2 = new XYPlotter("Mon plot XY",3000,20){
+  val plot2 = new XYPlotter("Mon plot XY", 3000, 20) {
     background = Color.white
   }
-  
+
   peer.add(plot.panel)
   peer.add(plot2.panel)
-  
-  for(i <- 1 to 5) {
+
+  for (i ← 1 to 5) {
     println(i)
     Thread.sleep(7000)
-  plot2.update(new States(200,100,50))
+    plot2.update(new States(200, 100, 50))
   }
-  
-  preferredSize = new Dimension(200,800)
+
+  preferredSize = new Dimension(200, 800)
 
 }

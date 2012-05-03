@@ -14,29 +14,28 @@ import org.openmole.core.model.data.IPrototype
 import scala.collection.JavaConversions._
 import org.openmole.misc.exception.UserBadDataError
 
-class LHSSamplingDataUI(val name : String="", 
-                        val samples : String  = "1",
-                        val factors : List[(IPrototypeDataProxyUI,String,IBoundedDomainDataUI)] = List.empty) extends ISamplingDataUI {
-                     
+class LHSSamplingDataUI(val name: String = "",
+                        val samples: String = "1",
+                        val factors: List[(IPrototypeDataProxyUI, String, IBoundedDomainDataUI)] = List.empty) extends ISamplingDataUI {
+
   implicit def string2Int(s: String): Int = augmentString(s).toInt
 
-  def coreObject = 
+  def coreObject =
     new LHSSampling(
-      try samples 
-      catch { 
-        case e : NumberFormatException => throw new UserBadDataError("An integer is exepected as number of samples") 
-      }, factors.map{
-        f=>
-        val proto = f._1.dataUI.coreObject.asInstanceOf[IPrototype[Double]]
-        new Factor(proto, f._3.coreObject(proto))
+      try samples
+      catch {
+        case e: NumberFormatException ⇒ throw new UserBadDataError("An integer is exepected as number of samples")
+      }, factors.map {
+        f ⇒
+          val proto = f._1.dataUI.coreObject.asInstanceOf[IPrototype[Double]]
+          new Factor(proto, f._3.coreObject(proto))
       }: _*)
 
+  def coreClass = classOf[LHSSampling]
 
-  def coreClass = classOf[LHSSampling] 
-  
-  def imagePath = "img/lhsSampling.png" 
-  
-  override def fatImagePath = "img/lhsSampling_fat.png" 
-  
+  def imagePath = "img/lhsSampling.png"
+
+  override def fatImagePath = "img/lhsSampling_fat.png"
+
   def buildPanelUI = new LHSSamplingPanelUI(this)
 }

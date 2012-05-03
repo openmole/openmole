@@ -26,18 +26,18 @@ import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
 import TextAreaOutputStream._
 
-class ExecutionExceptionListener(exeManager: ExecutionManager)  extends EventListener[IMoleExecution] {
+class ExecutionExceptionListener(exeManager: ExecutionManager) extends EventListener[IMoleExecution] {
 
   override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = synchronized {
     event match {
-      case x: ExceptionRaised=> 
+      case x: ExceptionRaised ⇒
         exeManager.executionJobExceptionTextArea.append(x.level + ": Exception in task " + x.moleJob)
-        
+
         val stream = new PrintStream(exeManager.executionJobExceptionTextArea.toStream)
         try x.exception.printStackTrace(new PrintStream(stream))
         finally stream.close
-        
-        //exeManager.executionJobExceptionTextArea.background = Color.red
+
+      //exeManager.executionJobExceptionTextArea.background = Color.red
     }
   }
 }

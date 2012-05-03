@@ -19,12 +19,12 @@ package org.openmole.ide.core.model.data
 
 import org.openmole.ide.core.model.panel.IPanelUI
 
-trait IDataUI{
+trait IDataUI {
   def name: String
-  
+
   def displayName: String = name
-  
+
   def coreClass: Class[_]
-  
-  def buildPanelUI: IPanelUI 
+
+  def buildPanelUI: IPanelUI
 }

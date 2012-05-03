@@ -24,10 +24,10 @@ import org.netbeans.api.visual.widget.ComponentWidget
 import org.openmole.ide.misc.widget.ImageLinkLabel
 import scala.swing.Action
 
-class LinkedImageWidget(scene : IMoleScene,
-                        imageIcon : ImageIcon,
-                        x : Int,
-                        y : Int,
-                        action : Action) extends ComponentWidget(scene.graphScene,new ImageLinkLabel(imageIcon,action).peer) {
-  setPreferredLocation(new Point(x,y))
+class LinkedImageWidget(scene: IMoleScene,
+                        imageIcon: ImageIcon,
+                        x: Int,
+                        y: Int,
+                        action: Action) extends ComponentWidget(scene.graphScene, new ImageLinkLabel(imageIcon, action).peer) {
+  setPreferredLocation(new Point(x, y))
 }

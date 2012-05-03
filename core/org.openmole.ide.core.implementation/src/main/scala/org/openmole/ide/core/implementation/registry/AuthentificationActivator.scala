@@ -21,18 +21,18 @@ import org.openmole.ide.core.model.factory.IAuthentificationFactoryUI
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
 
-trait AuthentificationActivator extends BundleActivator{
-  
-  def authentificationFactories : Iterable[IAuthentificationFactoryUI]
-  
+trait AuthentificationActivator extends BundleActivator {
+
+  def authentificationFactories: Iterable[IAuthentificationFactoryUI]
+
   abstract override def start(context: BundleContext) = {
     super.start(context)
-    authentificationFactories.foreach{f=> KeyRegistry.authentifications += KeyGenerator(f.coreClass) -> f}
+    authentificationFactories.foreach { f ⇒ KeyRegistry.authentifications += KeyGenerator(f.coreClass) -> f }
   }
 
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
-    authentificationFactories.foreach{f => KeyRegistry.authentifications -= KeyGenerator(f.coreClass)}
+    authentificationFactories.foreach { f ⇒ KeyRegistry.authentifications -= KeyGenerator(f.coreClass) }
   }
 }
 

@@ -17,7 +17,6 @@
 
 package org.openmole.ide.core.implementation.provider
 
-
 import java.awt.Point
 import javax.swing.JMenuItem
 import org.netbeans.api.visual.widget.Widget
@@ -27,19 +26,19 @@ import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.IMoleScene
 
 class MoleSceneMenuProvider(moleScene: IMoleScene) extends GenericMenuProvider {
-  
+
   def initMenu = {
-    val itemTCapsule= new JMenuItem("Add a Task Capsule") 
-    itemTCapsule.addActionListener(new AddCapsuleAction(moleScene,this))
-    items+= itemTCapsule
+    val itemTCapsule = new JMenuItem("Add a Task Capsule")
+    itemTCapsule.addActionListener(new AddCapsuleAction(moleScene, this))
+    items += itemTCapsule
   }
-    
-  override def getPopupMenu(widget: Widget, 
-                       point: Point)= {
+
+  override def getPopupMenu(widget: Widget,
+                            point: Point) = {
     items.clear
     initMenu
-    Proxys.tasks.foreach{p=> items+= new JMenuItem(new AddTaskAction(moleScene,p,this).peer)
-    }  
-    super.getPopupMenu(widget, point)              
+    Proxys.tasks.foreach { p ⇒ items += new JMenuItem(new AddTaskAction(moleScene, p, this).peer)
+    }
+    super.getPopupMenu(widget, point)
   }
 }

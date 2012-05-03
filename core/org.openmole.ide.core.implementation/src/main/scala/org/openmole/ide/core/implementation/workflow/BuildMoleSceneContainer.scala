@@ -32,66 +32,64 @@ import org.openmole.ide.misc.tools.image.Images._
 import scala.swing.ToggleButton
 import scala.swing.event.ButtonClicked
 
-class BuildMoleSceneContainer(val scene : BuildMoleScene) extends Panel with ISceneContainer{ buildContainer => 
+class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISceneContainer { buildContainer ⇒
 
   val executionMoleSceneContainers = new HashSet[ExecutionMoleSceneContainer]
-  
+
   peer.setLayout(new BorderLayout)
-  
+
   val toolBar = new MigPanel("") {
-    
-    
+
     val connectionButton = new ToggleButton {
       icon = CONNECT_TRANSITION_MODE
       selected = true
     }
-    
+
     listenTo(connectionButton)
     reactions += {
-      case x : ButtonClicked => 
+      case x: ButtonClicked ⇒
         ScenesManager.connectMode = connectionButton.selected
         ScenesManager.connectMode match {
-          case true=> connectionButton.icon = CONNECT_TRANSITION_MODE
-          case false=> connectionButton.icon = DATA_CHANNEL_TRANSITION_MODE
+          case true ⇒ connectionButton.icon = CONNECT_TRANSITION_MODE
+          case false ⇒ connectionButton.icon = DATA_CHANNEL_TRANSITION_MODE
         }
     }
-    
+
     contents += connectionButton
-    
+
     contents += new ToolBarButton(BUILD_EXECUTION,
-                                  "Build the workflow",
-                                  buildExecutionAction)
-  
+      "Build the workflow",
+      buildExecutionAction)
+
     contents += new ToolBarButton(CLEAN_BUILD_EXECUTION,
-                                  "Clean and build the workflow",
-                                  cleanAndBuildExecutionAction)
+      "Clean and build the workflow",
+      cleanAndBuildExecutionAction)
   }
-   
-  peer.add(toolBar.peer,BorderLayout.NORTH)
-  peer.add(new JScrollPane(scene.graphScene.createView),BorderLayout.CENTER)
-  
+
+  peer.add(toolBar.peer, BorderLayout.NORTH)
+  peer.add(new JScrollPane(scene.graphScene.createView), BorderLayout.CENTER)
+
   CheckData.checkMole(scene.manager)
-  
-                
+
   def stopAndCloseExecutions = {
-    executionMoleSceneContainers.foreach{emc=>
+    executionMoleSceneContainers.foreach { emc ⇒
       emc.executionManager.cancel
       ScenesManager.tabPane.pages.remove(emc.page.index)
     }
     executionMoleSceneContainers.clear
   }
-  
+
   def buildExecutionAction = new Action("") {
     override def apply = {
       ScenesManager.saveCurrentPropertyWidget
       ScenesManager.addExecutionSceneContainer(buildContainer)
     }
   }
-  
+
   def cleanAndBuildExecutionAction = new Action("") {
     override def apply = {
       stopAndCloseExecutions
       ScenesManager.addExecutionSceneContainer(buildContainer)
-    }  
-  }                                     
+    }
+  }
 }

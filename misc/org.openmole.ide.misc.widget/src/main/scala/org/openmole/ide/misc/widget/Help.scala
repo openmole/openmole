@@ -20,5 +20,5 @@ package org.openmole.ide.misc.widget
 object Help {
 
   def tooltip(text: String,
-              example: String="") = "<html>"+text+ (if (example.isEmpty) "</html>" else "<p style=\"color:#ADD8E6\">Ex: "+example+"</p></html>")
+              example: String = "") = "<html>" + text + (if (example.isEmpty) "</html>" else "<p style=\"color:#ADD8E6\">Ex: " + example + "</p></html>")
 }

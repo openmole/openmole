@@ -20,13 +20,13 @@ package org.openmole.ide.core.implementation.dialog
 import java.awt.Color
 import scala.swing.Label
 
-object StatusBar extends Label{
+object StatusBar extends Label {
   background = Color.WHITE
   opaque = true
-  
-  def inform(info : String) = text = info
-  
-  def warn(warning : String) = text = "<html><p style=\"color:#FF9955\">"+warning+"</p></html>"
-  
-  def block(warning : String) = text = "<html><p style=\"color:#DD0000\">"+warning+"</p></html>"
+
+  def inform(info: String) = text = info
+
+  def warn(warning: String) = text = "<html><p style=\"color:#FF9955\">" + warning + "</p></html>"
+
+  def block(warning: String) = text = "<html><p style=\"color:#DD0000\">" + warning + "</p></html>"
 }

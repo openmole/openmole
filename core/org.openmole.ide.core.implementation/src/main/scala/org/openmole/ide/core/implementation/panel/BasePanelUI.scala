@@ -40,86 +40,89 @@ import org.openmole.ide.misc.tools.image.Images._
 
 abstract class BasePanelUI(proxy: IDataProxyUI,
                            scene: IMoleScene,
-                           mode : Value,
-                           borderColor : Color = new Color(200,200,200)) extends MyPanel {
+                           mode: Value,
+                           borderColor: Color = new Color(200, 200, 200)) extends MyPanel {
   peer.setLayout(new BorderLayout)
-  val iconLabel = new Label{ icon = new ImageIcon(EMPTY)}
-  val nameTextField = new TextField(15) {text = proxy.dataUI.name
-                                         tooltip = Help.tooltip("Name of the concept instance")
+  val iconLabel = new Label { icon = new ImageIcon(EMPTY) }
+  val nameTextField = new TextField(15) {
+    text = proxy.dataUI.name
+    tooltip = Help.tooltip("Name of the concept instance")
   }
-  val createLabelLink = new MainLinkLabel("create",new Action("") { def apply = baseCreate})
-  val mainLinksPanel = new PluginPanel("") {contents += createLabelLink}
+  val createLabelLink = new MainLinkLabel("create", new Action("") { def apply = baseCreate })
+  val mainLinksPanel = new PluginPanel("") { contents += createLabelLink }
   if (mode != CREATION) deleteLink
   border = BorderFactory.createEmptyBorder
 
-  val mainPanel = new PluginPanel("wrap"){
+  val mainPanel = new PluginPanel("wrap") {
     contents += new PluginPanel("wrap 2") {
       contents += iconLabel
-      contents += new PluginPanel("wrap"){
-        contents += new PluginPanel("wrap 2"){
+      contents += new PluginPanel("wrap") {
+        contents += new PluginPanel("wrap 2") {
           contents += nameTextField
-          contents += new ImageLinkLabel(CLOSE,new Action("") { def apply = {
-                mode match {
-                  case EXTRA => scene.closeExtraPropertyPanel
-                  case _ => scene.closePropertyPanel
-                }}
-            })
+          contents += new ImageLinkLabel(CLOSE, new Action("") {
+            def apply = {
+              mode match {
+                case EXTRA ⇒ scene.closeExtraPropertyPanel
+                case _ ⇒ scene.closePropertyPanel
+              }
+            }
+          })
         }
         contents += mainLinksPanel
       }
     }
   }
-  
-  peer.add(mainPanel.peer,BorderLayout.CENTER)
+
+  peer.add(mainPanel.peer, BorderLayout.CENTER)
   preferredSize.width = 300
   foreground = Color.white
   background = borderColor
   nameTextField.requestFocusInWindow
-  
+
   listenTo(this)
   reactions += {
-    case x:UIElementResized => 
+    case x: UIElementResized ⇒
       scene.propertyWidget.revalidate
       scene.extraPropertyWidget.revalidate
       scene.refresh
   }
-  
+
   def hide = {
     baseSave
     visible = false
     scene.refresh
   }
-  
+
   def deleteLink = {
     createLabelLink.link("delete")
-    createLabelLink.action = new Action("") { def apply = baseDelete}
+    createLabelLink.action = new Action("") { def apply = baseDelete }
   }
-  
-  def baseCreate : Unit = {
-    create  
+
+  def baseCreate: Unit = {
+    create
     deleteLink
     baseSave
     scene.refresh
   }
-  
+
   def baseDelete: Unit = {
     delete
   }
-  
-  def baseSave : Unit = {
+
+  def baseSave: Unit = {
     save
     ConceptMenu.refreshItem(proxy)
     ScenesManager.currentSceneContainer match {
-      case Some(x : ISceneContainer) => CheckData.checkMole(x.scene.manager)
-      case None =>
+      case Some(x: ISceneContainer) ⇒ CheckData.checkMole(x.scene.manager)
+      case None ⇒
     }
   }
-  
+
   def create: Unit
-  
+
   def delete: Unit
-  
+
   def save: Unit
-  
+
   def panelUI: IPanelUI
 }

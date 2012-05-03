@@ -25,67 +25,69 @@ import scala.swing.MyComboBox
 
 object MultiCombo {
 
-  class Factory[A] extends IRowWidgetFactory[ComboRowWidget[A]]{
+  class Factory[A] extends IRowWidgetFactory[ComboRowWidget[A]] {
     def apply(row: ComboRowWidget[A], panel: MyPanel) = {
       import row._
-      new ComboRowWidget(comboContentA,selectedA,plus)
+      new ComboRowWidget(comboContentA, selectedA, plus)
     }
   }
-  
-  class ComboRowWidget[A](val comboContentA: List[A], 
-                          val selectedA: A, 
-                          val plus: Plus) extends IRowWidget1[A]{
-    
-    val combo = new MyComboBox[A](comboContentA) { selection.item = selectedA ; preferredSize = new Dimension(8,size.height) }
-    
-    override val panel = new RowPanel(List(combo),plus)
-    
+
+  class ComboRowWidget[A](val comboContentA: List[A],
+                          val selectedA: A,
+                          val plus: Plus) extends IRowWidget1[A] {
+
+    val combo = new MyComboBox[A](comboContentA) { selection.item = selectedA; preferredSize = new Dimension(8, size.height) }
+
+    override val panel = new RowPanel(List(combo), plus)
+
     override def content: A = combo.selection.item
-    
-    
+
   }
 }
 
 import MultiCombo._
 class MultiCombo[A](title: String,
-                    rWidgets: List[ComboRowWidget[A]], 
+                    rWidgets: List[ComboRowWidget[A]],
                     factory: IRowWidgetFactory[ComboRowWidget[A]],
-                    minus: Minus= NO_EMPTY,
-                    plus: Plus= ADD) 
-extends MultiWidget(title,rWidgets,factory,1,minus){ 
+                    minus: Minus = NO_EMPTY,
+                    plus: Plus = ADD)
+    extends MultiWidget(title, rWidgets, factory, 1, minus) {
   def this(title: String,
-           initValues: List[A], 
+           initValues: List[A],
            selected: List[A],
            factory: IRowWidgetFactory[ComboRowWidget[A]],
            minus: Minus,
-           plus: Plus) = this (title,
-                               if (selected.isEmpty) { List(new ComboRowWidget(initValues, 
-                                                                               initValues(0),
-                                                                               plus))}
-                               else
-                                 selected.map{s1=> new ComboRowWidget(initValues, 
-                                                                      s1,
-                                                                      plus)}, 
-                               factory,minus,plus)
+           plus: Plus) = this(title,
+    if (selected.isEmpty) {
+      List(new ComboRowWidget(initValues,
+        initValues(0),
+        plus))
+    } else
+      selected.map { s1 ⇒
+        new ComboRowWidget(initValues,
+          s1,
+          plus)
+      },
+    factory, minus, plus)
 
   def this(title: String,
-           iValues: List[A], 
+           iValues: List[A],
            selected: List[A]) = this(title,
-                                     iValues,
-                                     selected, 
-                                     new Factory[A],
-                                     NO_EMPTY,
-                                     ADD)
-  
+    iValues,
+    selected,
+    new Factory[A],
+    NO_EMPTY,
+    ADD)
+
   def this(title: String,
-           iValues: List[A], 
+           iValues: List[A],
            selected: List[A],
-           minus: Minus, 
+           minus: Minus,
            plus: Plus) = this(title,
-                              iValues,
-                              selected, 
-                              new Factory[A],
-                              minus,
-                              plus)
-  def content = rowWidgets.map(_.content).toList 
+    iValues,
+    selected,
+    new Factory[A],
+    minus,
+    plus)
+  def content = rowWidgets.map(_.content).toList
 }

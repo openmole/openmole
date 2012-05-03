@@ -21,20 +21,20 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.misc.tools.script.GroovyProxy
 
 object TypeCheck {
-  
-  def apply(code : String,
-            prototype : IPrototype[_]) : (Boolean, String) =  {
+
+  def apply(code: String,
+            prototype: IPrototype[_]): (Boolean, String) = {
     try {
-      apply(new GroovyProxy(code).execute(),prototype)
+      apply(new GroovyProxy(code).execute(), prototype)
     } catch {
-      case e => (false,e.getMessage)
+      case e ⇒ (false, e.getMessage)
     }
   }
-  
-  def apply(groovyObject : Object,
-            prototype : IPrototype[_]) : (Boolean, String) = 
-              prototype.accepts(groovyObject) match { 
-      case true => (true,groovyObject.toString)
-      case false => (false,"The default value for the prototype " + prototype.name + " is not valid ( " + prototype.`type` + " is required )")
+
+  def apply(groovyObject: Object,
+            prototype: IPrototype[_]): (Boolean, String) =
+    prototype.accepts(groovyObject) match {
+      case true ⇒ (true, groovyObject.toString)
+      case false ⇒ (false, "The default value for the prototype " + prototype.name + " is not valid ( " + prototype.`type` + " is required )")
     }
-} 
+}

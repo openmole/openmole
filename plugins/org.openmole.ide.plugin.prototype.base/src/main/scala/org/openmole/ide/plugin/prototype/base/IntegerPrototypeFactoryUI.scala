@@ -21,15 +21,15 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
-class IntegerPrototypeFactoryUI  extends IPrototypeFactoryUI[Int] {
-  
+class IntegerPrototypeFactoryUI extends IPrototypeFactoryUI[Int] {
+
   override def displayName = "Integer"
-  
+
   def buildDataUI = new IntegerPrototypeDataUI
   
   def buildDataUI(prototype : IPrototype[_],
                   dim : Int = 0 ) = new IntegerPrototypeDataUI(prototype.name,dim)
-  
+
   def category = ComponentCategories.PROTOTYPE
 }
 

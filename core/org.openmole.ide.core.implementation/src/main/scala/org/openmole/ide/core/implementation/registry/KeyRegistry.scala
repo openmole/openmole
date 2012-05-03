@@ -31,21 +31,21 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.SynchronizedMap
 
 object KeyRegistry {
-  val prototypes = new HashMap[DefaultKey,IPrototypeFactoryUI[_]] with SynchronizedMap[DefaultKey,IPrototypeFactoryUI[_]]
-  
-  val tasks = new HashMap[DefaultKey,ITaskFactoryUI] with SynchronizedMap[DefaultKey,ITaskFactoryUI]
-  
-  val samplings = new HashMap[DefaultKey,ISamplingFactoryUI] with SynchronizedMap[DefaultKey,ISamplingFactoryUI]
-  
-  val environments = new HashMap[DefaultKey,IEnvironmentFactoryUI] with SynchronizedMap[DefaultKey,IEnvironmentFactoryUI]
-  
-  val domains = new HashMap[DefaultKey,IDomainFactoryUI] with SynchronizedMap[DefaultKey,IDomainFactoryUI]
-  
-  val boundedDomains = new HashMap[DefaultKey,IBoundedDomainFactoryUI] with SynchronizedMap[DefaultKey,IBoundedDomainFactoryUI]
-  
-  val hooks = new HashMap[DefaultKey,IHookFactoryUI] with SynchronizedMap[DefaultKey,IHookFactoryUI]
-  
-  val authentifications = new HashMap[DefaultKey,IAuthentificationFactoryUI] with SynchronizedMap[DefaultKey,IAuthentificationFactoryUI]
-  
-  val groupingStrategies = new HashMap[DefaultKey,IGroupingFactoryUI] with SynchronizedMap[DefaultKey,IGroupingFactoryUI]
+  val prototypes = new HashMap[DefaultKey, IPrototypeFactoryUI[_]] with SynchronizedMap[DefaultKey, IPrototypeFactoryUI[_]]
+
+  val tasks = new HashMap[DefaultKey, ITaskFactoryUI] with SynchronizedMap[DefaultKey, ITaskFactoryUI]
+
+  val samplings = new HashMap[DefaultKey, ISamplingFactoryUI] with SynchronizedMap[DefaultKey, ISamplingFactoryUI]
+
+  val environments = new HashMap[DefaultKey, IEnvironmentFactoryUI] with SynchronizedMap[DefaultKey, IEnvironmentFactoryUI]
+
+  val domains = new HashMap[DefaultKey, IDomainFactoryUI] with SynchronizedMap[DefaultKey, IDomainFactoryUI]
+
+  val boundedDomains = new HashMap[DefaultKey, IBoundedDomainFactoryUI] with SynchronizedMap[DefaultKey, IBoundedDomainFactoryUI]
+
+  val hooks = new HashMap[DefaultKey, IHookFactoryUI] with SynchronizedMap[DefaultKey, IHookFactoryUI]
+
+  val authentifications = new HashMap[DefaultKey, IAuthentificationFactoryUI] with SynchronizedMap[DefaultKey, IAuthentificationFactoryUI]
+
+  val groupingStrategies = new HashMap[DefaultKey, IGroupingFactoryUI] with SynchronizedMap[DefaultKey, IGroupingFactoryUI]
 }

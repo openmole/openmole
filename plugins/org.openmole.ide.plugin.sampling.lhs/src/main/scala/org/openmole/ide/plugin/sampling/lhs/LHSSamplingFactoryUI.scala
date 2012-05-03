@@ -22,8 +22,8 @@ import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 
 class LHSSamplingFactoryUI extends ISamplingFactoryUI {
   override def displayName = "LHS"
-  
+
   def buildDataUI = new LHSSamplingDataUI
-  
+
   def category = ComponentCategories.SAMPLING
 }

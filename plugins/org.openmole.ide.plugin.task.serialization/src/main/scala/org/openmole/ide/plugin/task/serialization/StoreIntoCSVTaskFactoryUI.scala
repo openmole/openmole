@@ -20,11 +20,10 @@ package org.openmole.ide.plugin.task.serialization
 import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
-
 class StoreIntoCSVTaskFactoryUI extends ITaskFactoryUI {
   override def displayName = "Merge prototypes in file"
-  
+
   def buildDataUI = new StoreIntoCSVTaskDataUI
-  
+
   def category = ComponentCategories.STORAGE_TASK
 }

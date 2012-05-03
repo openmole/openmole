@@ -23,6 +23,6 @@ import org.openmole.ide.core.implementation.registry.TaskActivator
 class Activator extends OSGiActivator with TaskActivator {
 
   override def taskFactories = List(new MedianTaskFactoryUI,
-                                    new AverageTaskFactoryUI,
-                                    new SumTaskFactoryUI)
+    new AverageTaskFactoryUI,
+    new SumTaskFactoryUI)
 }

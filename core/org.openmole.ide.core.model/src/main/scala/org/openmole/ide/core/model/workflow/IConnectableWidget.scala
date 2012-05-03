@@ -19,8 +19,8 @@ package org.openmole.ide.core.model.workflow
 
 trait IConnectableWidget {
   def x: Double
-  
+
   def y: Double
-  
+
   def islots: Iterable[IInputSlotWidget]
 }

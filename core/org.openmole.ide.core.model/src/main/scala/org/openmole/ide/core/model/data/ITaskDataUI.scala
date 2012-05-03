@@ -27,42 +27,41 @@ import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 
+trait ITaskDataUI extends IDataUI {
 
-trait ITaskDataUI extends IDataUI{
-  
   def borderColor: Color
-  
+
   def backgroundColor: Color
-  
+
   def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet): ITask
-  
-  def inputParameters : scala.collection.mutable.Map[IPrototypeDataProxyUI,String]
-  
-  def inputParameters_=(ip : scala.collection.mutable.Map[IPrototypeDataProxyUI,String])
-  
+
+  def inputParameters: scala.collection.mutable.Map[IPrototypeDataProxyUI, String]
+
+  def inputParameters_=(ip: scala.collection.mutable.Map[IPrototypeDataProxyUI, String])
+
   def prototypesIn: List[IPrototypeDataProxyUI]
-  
+
   def prototypesIn_=(pi: List[IPrototypeDataProxyUI])
-  
+
   def prototypesOut: List[IPrototypeDataProxyUI]
-  
+
   def prototypesOut_=(po: List[IPrototypeDataProxyUI])
-  
+
   def implicitPrototypesIn: List[IPrototypeDataProxyUI]
-  
+
   def implicitPrototypesIn_=(pi: List[IPrototypeDataProxyUI])
-  
+
   def implicitPrototypesOut: List[IPrototypeDataProxyUI]
-  
+
   def implicitPrototypesOut_=(po: List[IPrototypeDataProxyUI])
-  
-  def filterPrototypeOccurencies(pproxy : IPrototypeDataProxyUI) : List[IPrototypeDataProxyUI]
-    
-  def removePrototypeOccurencies(pproxy : IPrototypeDataProxyUI) : Unit
-    
+
+  def filterPrototypeOccurencies(pproxy: IPrototypeDataProxyUI): List[IPrototypeDataProxyUI]
+
+  def removePrototypeOccurencies(pproxy: IPrototypeDataProxyUI): Unit
+
   def buildPanelUI: ITaskPanelUI
-  
+
   def fatImagePath: String
-  
+
   def imagePath: String = fatImagePath
 }

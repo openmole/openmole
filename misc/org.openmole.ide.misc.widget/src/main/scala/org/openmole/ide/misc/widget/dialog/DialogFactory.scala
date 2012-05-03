@@ -26,12 +26,12 @@ import org.openide.NotifyDescriptor
 object DialogFactory {
 
   def groovyEditor(title: String,
-                   content: String) : String = {
+                   content: String): String = {
     val editor = new GroovyEditor
-    editor.preferredSize = new Dimension(150,150)
+    editor.preferredSize = new Dimension(150, 150)
     editor.editor.text = content
-    if (DialogDisplayer.getDefault.notify(new DialogDescriptor(editor.peer, title)).equals(NotifyDescriptor.OK_OPTION)) 
-      scala.xml.XML.loadString("<a>"+editor.editor.text+"</a>").text
+    if (DialogDisplayer.getDefault.notify(new DialogDescriptor(editor.peer, title)).equals(NotifyDescriptor.OK_OPTION))
+      scala.xml.XML.loadString("<a>" + editor.editor.text + "</a>").text
     else content
   }
 }

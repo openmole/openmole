@@ -30,4 +30,3 @@ class PrototypeDataProxyFactory(val factory: IPrototypeFactoryUI[_]) extends IPr
                        generated : Boolean = false,
                        dim : Int = 0) = new PrototypeDataProxyUI(factory.buildDataUI(prototype,dim),generated)
 }
-  

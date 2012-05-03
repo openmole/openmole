@@ -11,8 +11,8 @@ import org.openmole.core.model.domain.IDomain
 import org.openmole.ide.core.model.panel.IBoundedDomainPanelUI
 
 trait IBoundedDomainDataUI extends IDataUI {
-  
-  def coreObject(proto: IPrototype[Double]) : IDomain[Double] with IBounded[Double]
-  
+
+  def coreObject(proto: IPrototype[Double]): IDomain[Double] with IBounded[Double]
+
   def buildPanelUI: IBoundedDomainPanelUI
 }

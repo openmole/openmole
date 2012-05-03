@@ -41,44 +41,47 @@ import scala.collection.mutable.HashMap
 import org.openmole.ide.core.model.panel.PanelMode._
 
 class BuildMoleScene(n: String = "",
-                     id : Int = ScenesManager.countBuild.getAndIncrement) extends MoleScene(n,id) {
+                     id: Int = ScenesManager.countBuild.getAndIncrement) extends MoleScene(n, id) {
   override val isBuildScene = true
-  
-  def copy =  {
-    var capsuleMapping = new HashMap[ICapsuleUI,ICapsuleUI]
+
+  def copy = {
+    var capsuleMapping = new HashMap[ICapsuleUI, ICapsuleUI]
     var islots = new HashMap[IInputSlotWidget, IInputSlotWidget]
-    val ms = new ExecutionMoleScene(ScenesManager.countExec.get,manager.name+"_"+ScenesManager.countExec.incrementAndGet)
-    manager.capsules.foreach(n=> {
-        val (caps,islotMapping) = n._2.copy(ms)
-        if (n._2.dataUI.startingCapsule) ms.manager.setStartingCapsule(caps)
-        SceneItemFactory.createCapsule(caps,ms, new Point(n._2.x.toInt / 2,n._2.y.toInt / 2))
-        capsuleMapping+= n._2-> caps
-        islots++= islotMapping})
- //   val connectMode = ScenesManager.connectMode
- //   ScenesManager.connectMode = true
-    manager.transitions.foreach(t=> {SceneItemFactory.createTransition(ms,capsuleMapping(t.source), islots(t.target), t.transitionType, t.condition)})
- //   ScenesManager.connectMode = false
-   // manager.dataChannels.foreach(dc=>{SceneItemFactory.createDataChannel(ms, capsuleMapping(dc.source),capsuleMapping(dc.target),dc.prototypes)})
-  //  ScenesManager.connectMode = connectMode
+    val ms = new ExecutionMoleScene(ScenesManager.countExec.get, manager.name + "_" + ScenesManager.countExec.incrementAndGet)
+    manager.capsules.foreach(n ⇒ {
+      val (caps, islotMapping) = n._2.copy(ms)
+      if (n._2.dataUI.startingCapsule) ms.manager.setStartingCapsule(caps)
+      SceneItemFactory.createCapsule(caps, ms, new Point(n._2.x.toInt / 2, n._2.y.toInt / 2))
+      capsuleMapping += n._2 -> caps
+      islots ++= islotMapping
+    })
+    //   val connectMode = ScenesManager.connectMode
+    //   ScenesManager.connectMode = true
+    manager.transitions.foreach(t ⇒ { SceneItemFactory.createTransition(ms, capsuleMapping(t.source), islots(t.target), t.transitionType, t.condition) })
+    //   ScenesManager.connectMode = false
+    // manager.dataChannels.foreach(dc=>{SceneItemFactory.createDataChannel(ms, capsuleMapping(dc.source),capsuleMapping(dc.target),dc.prototypes)})
+    //  ScenesManager.connectMode = connectMode
     ms
   }
-  
-  def initCapsuleAdd(w: ICapsuleUI)= {
-    obUI= Some(w.asInstanceOf[Widget])
+
+  def initCapsuleAdd(w: ICapsuleUI) = {
+    obUI = Some(w.asInstanceOf[Widget])
     obUI.get.createActions(CONNECT).addAction(connectAction)
     obUI.get.createActions(CONNECT).addAction(moveAction)
   }
-  
-  def attachEdgeWidget(e: String)= {
+
+  def attachEdgeWidget(e: String) = {
     val connectionWidget = ScenesManager.connectMode match {
-      case true=> val x = new ConnectorWidget(this,manager.transition(e))
+      case true ⇒
+        val x = new ConnectorWidget(this, manager.transition(e))
         x.setEndPointShape(PointShape.SQUARE_FILLED_BIG)
-        x.getActions.addAction(ActionFactory.createPopupMenuAction(new TransitionMenuProvider(this,x)))
+        x.getActions.addAction(ActionFactory.createPopupMenuAction(new TransitionMenuProvider(this, x)))
         x
-      case false=> val x = new DataChannelConnectionWidget(this,manager.dataChannel(e))
+      case false ⇒
+        val x = new DataChannelConnectionWidget(this, manager.dataChannel(e))
         x
     }
-    
+
     connectLayer.addChild(connectionWidget);
     //  connectionWidget.getActions.addAction(createSelectAction)
     connectionWidget.getActions.addAction(createObjectHoverAction)

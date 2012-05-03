@@ -29,29 +29,29 @@ import org.openmole.core.model.task.IPluginSet
 import org.openmole.ide.core.implementation.data._
 
 class ExplorationTaskDataUI(
-  val name: String="",
-  override var sampling : Option[ISamplingDataProxyUI] = None) extends TaskDataUI with IExplorationTaskDataUI{
-   
+    val name: String = "",
+    override var sampling: Option[ISamplingDataProxyUI] = None) extends TaskDataUI with IExplorationTaskDataUI {
+
   def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = {
-     val taskBuilder = sampling match {
-      case Some(x: ISamplingDataProxyUI) => ExplorationTask(name,x.dataUI.coreObject)(plugins)
-      case None => throw new UserBadDataError("Sampling missing to instanciate the exploration task " + name)
-    } 
+    val taskBuilder = sampling match {
+      case Some(x: ISamplingDataProxyUI) ⇒ ExplorationTask(name, x.dataUI.coreObject)(plugins)
+      case None ⇒ throw new UserBadDataError("Sampling missing to instanciate the exploration task " + name)
+    }
     taskBuilder addInput inputs
     taskBuilder addOutput outputs
     taskBuilder addParameter parameters
     taskBuilder.toTask
   }
-  
-  def coreClass= classOf[ExplorationTask]
-  
+
+  def coreClass = classOf[ExplorationTask]
+
   def fatImagePath = "img/explorationTask_fat.png"
-  
+
   override def imagePath = "img/explorationTask.png"
-  
+
   def buildPanelUI = new ExplorationTaskPanelUI(this)
-  
-  def borderColor = new Color(255,102,0)
-  
-  def backgroundColor = new Color(255,102,0,128)
+
+  def borderColor = new Color(255, 102, 0)
+
+  def backgroundColor = new Color(255, 102, 0, 128)
 }

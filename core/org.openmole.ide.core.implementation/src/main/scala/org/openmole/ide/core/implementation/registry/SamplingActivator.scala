@@ -21,18 +21,18 @@ import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
 
-trait SamplingActivator extends BundleActivator{
-  
-  def samplingFactories : Iterable[ISamplingFactoryUI]
-  
+trait SamplingActivator extends BundleActivator {
+
+  def samplingFactories: Iterable[ISamplingFactoryUI]
+
   abstract override def start(context: BundleContext) = {
     super.start(context)
-    samplingFactories.foreach{f=> KeyRegistry.samplings += KeyGenerator(f.buildDataUI.coreClass) -> f}
+    samplingFactories.foreach { f ⇒ KeyRegistry.samplings += KeyGenerator(f.buildDataUI.coreClass) -> f }
   }
 
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
-    samplingFactories.foreach{f => KeyRegistry.samplings -= KeyGenerator(f.buildDataUI.coreClass)}
+    samplingFactories.foreach { f ⇒ KeyRegistry.samplings -= KeyGenerator(f.buildDataUI.coreClass) }
   }
 }
 

@@ -19,7 +19,7 @@ package org.openmole.ide.misc.widget
 
 import scala.swing._
 
-class MyPanel extends Panel{
-  override def enabled_=(b : Boolean) : Unit = 
-    contents.foreach{ _.enabled = false}
+class MyPanel extends Panel {
+  override def enabled_=(b: Boolean): Unit =
+    contents.foreach { _.enabled = false }
 }

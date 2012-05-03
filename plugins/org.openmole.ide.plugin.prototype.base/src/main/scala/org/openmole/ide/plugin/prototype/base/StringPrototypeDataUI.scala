@@ -22,14 +22,14 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Prototype._
 
-class StringPrototypeDataUI(val name: String="", d: Int=0) extends GenericPrototypeDataUI[String](d){
+class StringPrototypeDataUI(val name: String = "", d: Int = 0) extends GenericPrototypeDataUI[String](d) {
   def displayTypedName = displayName + " : String"
-  
+
   def coreClass = classOf[IPrototype[String]]
-  
+
   def coreObject = new Prototype[String](name).toArray(dim).asInstanceOf[IPrototype[String]]
-  
+
   def fatImagePath = "img/string_fat.png"
-  
+
   def buildPanelUI = new StringPrototypePanelUI(this)
 }

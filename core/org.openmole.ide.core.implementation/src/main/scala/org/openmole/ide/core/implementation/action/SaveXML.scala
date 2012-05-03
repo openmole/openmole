@@ -28,25 +28,25 @@ import scala.swing.FileChooser
 import scala.swing.Label
 
 object SaveXML {
-  def save(frame : GUIPanel) : Unit = SaveXML.save(frame,Settings.currentProject.getOrElse(SaveXML.show))
-  
-  def save(frame : GUIPanel,
+  def save(frame: GUIPanel): Unit = SaveXML.save(frame, Settings.currentProject.getOrElse(SaveXML.show))
+
+  def save(frame: GUIPanel,
            title: String): Unit = {
     Settings.currentProject = Some(title)
     frame.title = "OpenMOLE - " + title
     GUISerializer.serialize(title)
-    }
-  
-  def show : String = {
+  }
+
+  def show: String = {
     val fc = new FileChooser {
       new FileNameExtensionFilter("Save", ".xml,.XML")
       fileSelectionMode = FilesOnly
-      title ="Save OpenMOLE project"
+      title = "Save OpenMOLE project"
     }
-  
+
     var text = ""
-    if (fc.showDialog(new Label,"OK") == Approve) text = fc.selectedFile.getPath
-    if (new File(text).getParentFile.isDirectory) text= text.split('.')(0)+".xml"
+    if (fc.showDialog(new Label, "OK") == Approve) text = fc.selectedFile.getPath
+    if (new File(text).getParentFile.isDirectory) text = text.split('.')(0) + ".xml"
     text
   }
 }

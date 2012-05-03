@@ -22,8 +22,8 @@ import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 
 class CSVSamplingFactoryUI extends ISamplingFactoryUI {
   override def displayName = "CSV"
-  
+
   def buildDataUI = new CSVSamplingDataUI
-  
+
   def category = ComponentCategories.SAMPLING
 }

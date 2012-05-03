@@ -21,13 +21,13 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.core.model.sampling.ISampling
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 
-trait ISamplingDataUI extends IDataUI{
+trait ISamplingDataUI extends IDataUI {
 
   def coreObject: ISampling
-  
+
   def buildPanelUI: ISamplingPanelUI
-  
-  def imagePath: String 
-  
+
+  def imagePath: String
+
   def fatImagePath: String
 }

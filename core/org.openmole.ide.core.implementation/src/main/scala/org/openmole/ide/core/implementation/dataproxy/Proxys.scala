@@ -26,23 +26,22 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
 
 object Proxys {
-    
+
   val incr = new AtomicInteger
-  
+
   var tasks = new HashSet[ITaskDataProxyUI]
   var prototypes = new HashSet[IPrototypeDataProxyUI]
   var samplings = new HashSet[ISamplingDataProxyUI]
   var environments = new HashSet[IEnvironmentDataProxyUI]
-  
-  def allPrototypesByName = prototypes.map{_.dataUI.name}
-  
-  def classPrototypes(prototypeClass : Class[_]) : List[IPrototypeDataProxyUI] 
-  = prototypes.filter(_.dataUI.coreObject.`type`.erasure == prototypeClass)
-  .toList
-  
+
+  def allPrototypesByName = prototypes.map { _.dataUI.name }
+
+  def classPrototypes(prototypeClass: Class[_]): List[IPrototypeDataProxyUI] = prototypes.filter(_.dataUI.coreObject.`type`.erasure == prototypeClass)
+    .toList
+
   def clearAll: Unit = {
     ConceptMenu.clearAllItems
-    List(tasks,prototypes,environments,samplings).foreach{_.clear}
+    List(tasks, prototypes, environments, samplings).foreach { _.clear }
   }
-} 
-  
+}
+

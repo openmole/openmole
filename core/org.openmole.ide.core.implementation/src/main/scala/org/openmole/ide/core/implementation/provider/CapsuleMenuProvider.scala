@@ -29,50 +29,56 @@ import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.action._
 
 class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends GenericMenuProvider {
-  var encapsulated= false
-  var taskMenu= new JMenu
-  
-  
+  var encapsulated = false
+  var taskMenu = new JMenu
+
   def initMenu = {
     items.clear
-    
+
     scene match {
-      case x : BuildMoleScene =>
+      case x: BuildMoleScene ⇒
         val itStart = new JMenuItem("Define as starting capsule")
-        val itIS= new JMenuItem("Add an input slot")
+        val itIS = new JMenuItem("Add an input slot")
         val itRIS = new JMenuItem("Remove an input slot")
         val itR = new JMenuItem("Remove capsule")
         val menuTask = new JMenu("Set task")
-    
+
         itIS.addActionListener(new AddInputSlotAction(capsule))
-        itR.addActionListener(new RemoveCapsuleAction(scene,capsule))
+        itR.addActionListener(new RemoveCapsuleAction(scene, capsule))
         itStart.addActionListener(new DefineMoleStartAction(scene, capsule))
         itRIS.addActionListener(new RemoveInputSlot(capsule))
-    
-        Proxys.tasks.foreach{p=> menuTask.add(new JMenuItem(new Action(p.dataUI.name){
-                override def apply = {
-                  capsule.encapsule(p)
-                }}.peer))}
-        menuTask.insert(new JMenuItem(new Action("None"){
-              override def apply = capsule.decapsule}.peer),0)
-        items += (itIS,itRIS,itR,itStart,menuTask)
-      case _ =>
+
+        Proxys.tasks.foreach { p ⇒
+          menuTask.add(new JMenuItem(new Action(p.dataUI.name) {
+            override def apply = {
+              capsule.encapsule(p)
+            }
+          }.peer))
+        }
+        menuTask.insert(new JMenuItem(new Action("None") {
+          override def apply = capsule.decapsule
+        }.peer), 0)
+        items += (itIS, itRIS, itR, itStart, menuTask)
+      case _ ⇒
     }
-    
+
     val menuEnv = new JMenu("Set environment")
-    
-    Proxys.environments.foreach{env =>
-      menuEnv.add(new JMenuItem(new Action(env.dataUI.name){
-            override def apply = capsule.setEnvironment(Some(env))}.peer))}
-    menuEnv.insert(new JMenuItem(new Action("None"){
-          override def apply = capsule.setEnvironment(None)}.peer),0)
-    
+
+    Proxys.environments.foreach { env ⇒
+      menuEnv.add(new JMenuItem(new Action(env.dataUI.name) {
+        override def apply = capsule.setEnvironment(Some(env))
+      }.peer))
+    }
+    menuEnv.insert(new JMenuItem(new Action("None") {
+      override def apply = capsule.setEnvironment(None)
+    }.peer), 0)
+
     items += menuEnv
   }
-  
-  def addTaskMenus= encapsulated= true
-  
-  override def getPopupMenu(widget: Widget, point: Point)= {
+
+  def addTaskMenus = encapsulated = true
+
+  override def getPopupMenu(widget: Widget, point: Point) = {
     initMenu
     super.getPopupMenu(widget, point)
   }

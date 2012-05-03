@@ -21,6 +21,6 @@ import org.openmole.ide.core.model.data.IGroupingDataUI
 
 trait IGroupingPanelUI extends IPanelUI {
   def saveContent: List[IGroupingDataUI]
-  
+
   def addStrategy: Unit
 }

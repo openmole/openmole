@@ -22,23 +22,23 @@ import org.openmole.ide.core.model.data.IExplorationTaskDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.data.ICapsuleDataUI
 
-class CapsuleDataUI extends ICapsuleDataUI{
-  
+class CapsuleDataUI extends ICapsuleDataUI {
+
   var task: Option[ITaskDataProxyUI] = None
   var sampling: Option[ISamplingDataProxyUI] = None
   var environment: Option[IEnvironmentDataProxyUI] = None
   var startingCapsule: Boolean = false
-  
+
   override def toString = task match {
-    case Some(x : ITaskDataProxyUI)=> x.dataUI.name
-    case _=> ""
+    case Some(x: ITaskDataProxyUI) ⇒ x.dataUI.name
+    case _ ⇒ ""
   }
-  
+
   def transitionType = task match {
-    case Some(y: ITaskDataProxyUI)=> y.dataUI match {
-        case x: IExplorationTaskDataUI=> EXPLORATION_TRANSITION 
-        case _=> BASIC_TRANSITION
-      }
-    case _=> BASIC_TRANSITION
+    case Some(y: ITaskDataProxyUI) ⇒ y.dataUI match {
+      case x: IExplorationTaskDataUI ⇒ EXPLORATION_TRANSITION
+      case _ ⇒ BASIC_TRANSITION
+    }
+    case _ ⇒ BASIC_TRANSITION
   }
 }

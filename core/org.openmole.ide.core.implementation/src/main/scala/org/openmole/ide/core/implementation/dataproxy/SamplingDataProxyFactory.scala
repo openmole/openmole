@@ -19,6 +19,6 @@ package org.openmole.ide.core.implementation.dataproxy
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyFactory
 import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 
-class SamplingDataProxyFactory (val factory: ISamplingFactoryUI) extends ISamplingDataProxyFactory{
+class SamplingDataProxyFactory(val factory: ISamplingFactoryUI) extends ISamplingDataProxyFactory {
   def buildDataProxyUI = new SamplingDataProxyUI(factory.buildDataUI)
 }

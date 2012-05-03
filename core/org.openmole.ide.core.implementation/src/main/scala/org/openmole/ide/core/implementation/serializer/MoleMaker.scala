@@ -52,53 +52,58 @@ import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
 object MoleMaker {
-                    
+
   def buildMoleExecution(mole: IMole,
-                         manager: IMoleSceneManager, 
-                         capsuleMap: Map[ICapsuleUI,ICapsule],
-                         groupingStrategies: List[(IGrouping,ICapsule)]): (IMoleExecution,Iterable[(IEnvironment, String)]) = 
-                           try{
-      var envs = new HashSet[(IEnvironment,String)]
+                         manager: IMoleSceneManager,
+                         capsuleMap: Map[ICapsuleUI, ICapsule],
+                         groupingStrategies: List[(IGrouping, ICapsule)]): (IMoleExecution, Iterable[(IEnvironment, String)]) =
+    try {
+      var envs = new HashSet[(IEnvironment, String)]
       val strat = new ListBuffer[(ICapsule, IEnvironmentSelection)]
-      
-      manager.capsules.values.foreach{c=> 
+
+      manager.capsules.values.foreach { c ⇒
         c.dataUI.environment match {
-          case Some(x : IEnvironmentDataProxyUI) => 
+          case Some(x: IEnvironmentDataProxyUI) ⇒
             try {
               val env = x.dataUI.coreObject
               envs += env -> x.dataUI.name
               strat += capsuleMap(c) -> new FixedEnvironmentSelection(env)
-            }catch {
-              case e: UserBadDataError=> StatusBar.warn(e.message)
+            } catch {
+              case e: UserBadDataError ⇒ StatusBar.warn(e.message)
             }
-          case _ =>
-        }}
-      
-      val grouping = groupingStrategies.map{case(s, c) => c -> s}.toMap
-   
-      (new MoleExecution(mole, strat.toMap, grouping),envs.toSet)
+          case _ ⇒
+        }
+      }
+
+      val grouping = groupingStrategies.map { case (s, c) ⇒ c -> s }.toMap
+
+      (new MoleExecution(mole, strat.toMap, grouping), envs.toSet)
     }
-  
+
   def buildMole(manager: IMoleSceneManager) = {
-    if (manager.startingCapsule.isDefined){
-      val prototypeMap : Map[IPrototypeDataProxyUI,IPrototype[_]] = Proxys.prototypes.map{p=> p->p.dataUI.coreObject}.toMap
-      val builds = manager.capsules.map{c=> 
+    if (manager.startingCapsule.isDefined) {
+      val prototypeMap: Map[IPrototypeDataProxyUI, IPrototype[_]] = Proxys.prototypes.map { p ⇒ p -> p.dataUI.coreObject }.toMap
+      val builds = manager.capsules.map { c ⇒
         buildCapsule(c._2.dataUI) match {
-          case Left((capsule,error)) => (c._2 -> new Capsule , Some(c._2 -> error))
-          case Right(r) => (c._2 -> r , None)
-        }}.toMap
-      
-      val capsuleMap : Map[ICapsuleUI,ICapsule] = builds.map{case((cui,c),_) => cui -> c}
-      val errors = builds.flatMap{case((_,_),e) => e}
-      
-      capsuleMap.foreach{case (cui,ccore)=> 
-          manager.capsuleConnections(cui.dataUI).foreach(t=>buildTransition(ccore, capsuleMap(t.target.capsule),t))
-          manager.dataChannels.filterNot{_.prototypes.isEmpty}.foreach{dc => new DataChannel(capsuleMap(dc.source),capsuleMap(dc.target),
-                                                                                             dc.prototypes.map{p => prototypeMap(p)}.toArray)}}
-      
-      (new Mole(capsuleMap(manager.startingCapsule.get)),capsuleMap,prototypeMap,errors)
-    }
-    else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")  
+          case Left((capsule, error)) ⇒ (c._2 -> new Capsule, Some(c._2 -> error))
+          case Right(r) ⇒ (c._2 -> r, None)
+        }
+      }.toMap
+
+      val capsuleMap: Map[ICapsuleUI, ICapsule] = builds.map { case ((cui, c), _) ⇒ cui -> c }
+      val errors = builds.flatMap { case ((_, _), e) ⇒ e }
+
+      capsuleMap.foreach {
+        case (cui, ccore) ⇒
+          manager.capsuleConnections(cui.dataUI).foreach(t ⇒ buildTransition(ccore, capsuleMap(t.target.capsule), t))
+          manager.dataChannels.filterNot { _.prototypes.isEmpty }.foreach { dc ⇒
+            new DataChannel(capsuleMap(dc.source), capsuleMap(dc.target),
+              dc.prototypes.map { p ⇒ prototypeMap(p) }.toArray)
+          }
+      }
+
+      (new Mole(capsuleMap(manager.startingCapsule.get)), capsuleMap, prototypeMap, errors)
+    } else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")
   }
   
   def prototypeMapping : Map[IPrototypeDataProxyUI,IPrototype[_]] = (Proxys.prototypes.toList ::: 
@@ -109,45 +114,46 @@ object MoleMaker {
   
   def buildCapsule(capsuleDataUI: ICapsuleDataUI) : Either[(ICapsuleDataUI, Throwable),ICapsule] = 
     capsuleDataUI.task match {
-      case Some(x : ITaskDataProxyUI) => 
+      case Some(x: ITaskDataProxyUI) ⇒
         try Right(new Capsule(taskCoreObject(x)))
-        catch { case e : UserBadDataError => Left((capsuleDataUI,e))
+        catch {
+          case e: UserBadDataError ⇒ Left((capsuleDataUI, e))
         }
-      case _ => Right(new Capsule)
+      case _ ⇒ Right(new Capsule)
     }
-    
-  def taskCoreObject(proxy : ITaskDataProxyUI) : ITask = proxy.dataUI.coreObject(inputs(proxy),outputs(proxy),parameters(proxy),PluginSet.empty)
-  
-  def taskCoreObject(capsuleDataUI : ICapsuleDataUI) : ITask = taskCoreObject(capsuleDataUI.task.get)
-  
-  def inputs(proxy : ITaskDataProxyUI) = DataSet(proxy.dataUI.prototypesIn.map{_.dataUI.coreObject})
-  def outputs(proxy : ITaskDataProxyUI) = DataSet(proxy.dataUI.prototypesOut.map{_.dataUI.coreObject})
-  
+
+  def taskCoreObject(proxy: ITaskDataProxyUI): ITask = proxy.dataUI.coreObject(inputs(proxy), outputs(proxy), parameters(proxy), PluginSet.empty)
+
+  def taskCoreObject(capsuleDataUI: ICapsuleDataUI): ITask = taskCoreObject(capsuleDataUI.task.get)
+
+  def inputs(proxy: ITaskDataProxyUI) = DataSet(proxy.dataUI.prototypesIn.map { _.dataUI.coreObject })
+  def outputs(proxy: ITaskDataProxyUI) = DataSet(proxy.dataUI.prototypesOut.map { _.dataUI.coreObject })
+
   def parameters(proxy: ITaskDataProxyUI) = {
-    new ParameterSet(proxy.dataUI.inputParameters.flatMap{
-        case(protoProxy,v) => 
-          if(!v.isEmpty) {
-            val proto = protoProxy.dataUI.coreObject
-            val groovyO = new GroovyProxy(v).execute()
-            val (ok,msg) = TypeCheck(groovyO,proto)
-            if(!ok) throw new UserBadDataError(msg)
-            else Some(new Parameter(proto.asInstanceOf[IPrototype[Any]],groovyO))
-          } else None
-      }.toList)
+    new ParameterSet(proxy.dataUI.inputParameters.flatMap {
+      case (protoProxy, v) ⇒
+        if (!v.isEmpty) {
+          val proto = protoProxy.dataUI.coreObject
+          val groovyO = new GroovyProxy(v).execute()
+          val (ok, msg) = TypeCheck(groovyO, proto)
+          if (!ok) throw new UserBadDataError(msg)
+          else Some(new Parameter(proto.asInstanceOf[IPrototype[Any]], groovyO))
+        } else None
+    }.toList)
   }
 
-  def inputs(capsuleDataUI: ICapsuleDataUI) : DataSet = inputs(capsuleDataUI.task.get)
-    
-  def outputs(capsuleDataUI: ICapsuleDataUI) : DataSet = outputs(capsuleDataUI.task.get)
-  
-  def parameters(capsuleDataUI: ICapsuleDataUI) : ParameterSet = parameters(capsuleDataUI.task.get)
- 
-  def buildTransition(sourceCapsule: ICapsule, targetCapsule: ICapsule,t: ITransitionUI){
+  def inputs(capsuleDataUI: ICapsuleDataUI): DataSet = inputs(capsuleDataUI.task.get)
+
+  def outputs(capsuleDataUI: ICapsuleDataUI): DataSet = outputs(capsuleDataUI.task.get)
+
+  def parameters(capsuleDataUI: ICapsuleDataUI): ParameterSet = parameters(capsuleDataUI.task.get)
+
+  def buildTransition(sourceCapsule: ICapsule, targetCapsule: ICapsule, t: ITransitionUI) {
     t.transitionType match {
-      case BASIC_TRANSITION=> new Transition(sourceCapsule,targetCapsule) 
-      case AGGREGATION_TRANSITION=> new AggregationTransition(sourceCapsule,targetCapsule)
-      case EXPLORATION_TRANSITION=> new ExplorationTransition(sourceCapsule,targetCapsule)
-      case _=> throw new UserBadDataError("No matching type between capsule " + sourceCapsule +" and " + targetCapsule +". The transition can not be built")
+      case BASIC_TRANSITION ⇒ new Transition(sourceCapsule, targetCapsule)
+      case AGGREGATION_TRANSITION ⇒ new AggregationTransition(sourceCapsule, targetCapsule)
+      case EXPLORATION_TRANSITION ⇒ new ExplorationTransition(sourceCapsule, targetCapsule)
+      case _ ⇒ throw new UserBadDataError("No matching type between capsule " + sourceCapsule + " and " + targetCapsule + ". The transition can not be built")
     }
   }
 }

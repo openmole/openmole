@@ -21,18 +21,18 @@ import org.openmole.ide.core.model.factory.IGroupingFactoryUI
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
 
-trait GroupingActivator extends BundleActivator{
-  
-  def groupingFactories : Iterable[IGroupingFactoryUI]
-  
+trait GroupingActivator extends BundleActivator {
+
+  def groupingFactories: Iterable[IGroupingFactoryUI]
+
   abstract override def start(context: BundleContext) = {
     super.start(context)
-    groupingFactories.foreach{f=> KeyRegistry.groupingStrategies += KeyGenerator(f.coreClass) -> f}
+    groupingFactories.foreach { f ⇒ KeyRegistry.groupingStrategies += KeyGenerator(f.coreClass) -> f }
   }
 
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
-    groupingFactories.foreach{f => KeyRegistry.groupingStrategies -= KeyGenerator(f.coreClass)}
+    groupingFactories.foreach { f ⇒ KeyRegistry.groupingStrategies -= KeyGenerator(f.coreClass) }
   }
 }
 

@@ -27,16 +27,16 @@ import scala.swing.FileChooser
 import scala.swing.Label
 
 object LoadXML {
-  
+
   def show = {
     val fc = new FileChooser {
       new FileNameExtensionFilter("Select an xml file to be loaded", ".xml,.XML")
       fileSelectionMode = FilesOnly
-      title =" OpenMOLE project loading"
+      title = " OpenMOLE project loading"
     }
-  
-    var text=""
-    if (fc.showDialog(new Label,"OK") == Approve) text = fc.selectedFile.getPath
+
+    var text = ""
+    if (fc.showDialog(new Label, "OK") == Approve) text = fc.selectedFile.getPath
     if (new File(text).isFile) {
       Settings.currentProject = Some(text)
       GUISerializer.unserialize(text)

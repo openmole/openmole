@@ -26,9 +26,9 @@ import org.openmole.core.model.mole.IMoleExecution.OneJobStatusChanged
 class JobSatusListener(exeManager: ExecutionManager) extends EventListener[IMoleExecution] {
   override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = {
     event match {
-      case x: OneJobStatusChanged=> 
-        exeManager.wfPiePlotter.update(x.oldState,exeManager.status(x.oldState).decrementAndGet)
-        exeManager.wfPiePlotter.update(x.newState,exeManager.status(x.newState).incrementAndGet)
+      case x: OneJobStatusChanged ⇒
+        exeManager.wfPiePlotter.update(x.oldState, exeManager.status(x.oldState).decrementAndGet)
+        exeManager.wfPiePlotter.update(x.newState, exeManager.status(x.newState).incrementAndGet)
     }
   }
 }

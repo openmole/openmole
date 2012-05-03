@@ -25,9 +25,9 @@ import scala.swing.Action
 
 class AddTaskAction(moleScene: IMoleScene,
                     dpu: ITaskDataProxyUI,
-                    provider: GenericMenuProvider) extends Action(dpu.dataUI.name){
-  override def apply= {
-    val capsule = SceneItemFactory.createCapsule(moleScene,provider.currentPoint)
+                    provider: GenericMenuProvider) extends Action(dpu.dataUI.name) {
+  override def apply = {
+    val capsule = SceneItemFactory.createCapsule(moleScene, provider.currentPoint)
     capsule.encapsule(dpu)
     capsule.addInputSlot(moleScene.manager.capsules.size == 1)
   }

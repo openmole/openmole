@@ -18,7 +18,7 @@
 package org.openmole.ide.core.model.panel
 
 trait IComponentCategory {
-  def name : String
-  
-  def childs : Iterable[IComponentCategory]
+  def name: String
+
+  def childs: Iterable[IComponentCategory]
 }

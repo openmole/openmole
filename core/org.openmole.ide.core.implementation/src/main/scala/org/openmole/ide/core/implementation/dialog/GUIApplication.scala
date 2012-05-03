@@ -23,14 +23,14 @@ import java.awt.Frame
 import javax.swing.UIManager
 import org.openmole.ide.misc.tools.image.Images._
 
-class GUIApplication { application => 
-  
-  val font = new Font("Ubuntu",Font.PLAIN,12)
-  UIManager.put("Menu.font",font)
-  UIManager.put("MenuItem.font",font)
-  UIManager.put("Button.font",font)
-  UIManager.put("Label.font",font)
-  
+class GUIApplication { application ⇒
+
+  val font = new Font("Ubuntu", Font.PLAIN, 12)
+  UIManager.put("Menu.font", font)
+  UIManager.put("MenuItem.font", font)
+  UIManager.put("Button.font", font)
+  UIManager.put("Label.font", font)
+
   val frame = new GUIPanel {
     iconImage = APPLICATION_ICON.getImage
     override def closeOperation = {
@@ -38,12 +38,12 @@ class GUIApplication { application =>
       application.closeOperation
     }
   }
-  
+
   def display = {
-    frame.minimumSize = new Dimension(600,300)
+    frame.minimumSize = new Dimension(600, 300)
     frame.peer.setExtendedState(Frame.MAXIMIZED_BOTH)
     frame.visible = true
   }
-  
-  def closeOperation : Unit = {}
+
+  def closeOperation: Unit = {}
 }

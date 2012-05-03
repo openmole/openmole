@@ -27,30 +27,34 @@ import scala.swing.event.Key._
 import scala.swing.event.KeyReleased
 
 object PasswordDialog {
-  val passField = new PasswordField(12){
+  val passField = new PasswordField(12) {
     listenTo(keys)
     reactions += {
-      case KeyPressed(_, Enter, _, _) => ok(true)
-      case KeyReleased(_, _, _, _) => testPassword}}
-  
-  def panel = new MigPanel(""){
-    contents+= new Label("Password: ")
-    contents+=passField}
-  
+      case KeyPressed(_, Enter, _, _) ⇒ ok(true)
+      case KeyReleased(_, _, _, _) ⇒ testPassword
+    }
+  }
+
+  def panel = new MigPanel("") {
+    contents += new Label("Password: ")
+    contents += passField
+  }
+
   private def setColor(c: Color) = {
     passField.foreground = c
     passField.repaint
   }
-  
+
   def testPassword: Boolean = {
     if (Workspace.passwordIsCorrect(new String(passField.password))) {
-      setColor(new Color(136,170,0) )
+      setColor(new Color(136, 170, 0))
       true
     } else {
-      setColor(new Color(212,0,0))
-      false}
+      setColor(new Color(212, 0, 0))
+      false
+    }
   }
-  
-  def ok(b: Boolean):Unit =  if (b && testPassword) Workspace.password_=(new String(passField.password))
- 
+
+  def ok(b: Boolean): Unit = if (b && testPassword) Workspace.password_=(new String(passField.password))
+
 }

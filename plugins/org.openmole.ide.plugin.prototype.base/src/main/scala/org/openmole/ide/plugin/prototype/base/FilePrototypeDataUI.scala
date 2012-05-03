@@ -21,14 +21,14 @@ import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.data.IPrototype
 
-class FilePrototypeDataUI(val name: String="", d: Int=0) extends GenericPrototypeDataUI[File](d){
+class FilePrototypeDataUI(val name: String = "", d: Int = 0) extends GenericPrototypeDataUI[File](d) {
   def displayTypedName = displayName + " : File"
-  
-   def coreClass = classOf[IPrototype[File]]
-  
-   def coreObject = new Prototype[File](name).toArray(dim).asInstanceOf[IPrototype[File]]
-     
-   def fatImagePath = "img/file_fat.png"
-  
-   def buildPanelUI = new FilePrototypePanelUI(this)
+
+  def coreClass = classOf[IPrototype[File]]
+
+  def coreObject = new Prototype[File](name).toArray(dim).asInstanceOf[IPrototype[File]]
+
+  def fatImagePath = "img/file_fat.png"
+
+  def buildPanelUI = new FilePrototypePanelUI(this)
 }

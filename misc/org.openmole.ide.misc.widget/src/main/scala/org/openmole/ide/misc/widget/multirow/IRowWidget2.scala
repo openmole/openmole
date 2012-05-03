@@ -17,6 +17,6 @@
 
 package org.openmole.ide.misc.widget.multirow
 
-trait IRowWidget2[+S,+T] extends IRowWidget{
-  def content: (S,T)
+trait IRowWidget2[+S, +T] extends IRowWidget {
+  def content: (S, T)
 }

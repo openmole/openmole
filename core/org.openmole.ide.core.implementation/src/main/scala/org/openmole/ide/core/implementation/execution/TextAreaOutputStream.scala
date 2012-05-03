@@ -22,21 +22,21 @@ import java.io.OutputStream
 import scala.swing.TextArea
 
 object TextAreaOutputStream {
-  
+
   implicit def textAreadDecorator(textArea: TextArea) = new {
-    
+
     def toStream = new TextAreaOutputStream(textArea)
-  
+
   }
 }
 
 class TextAreaOutputStream(textArea: TextArea) extends OutputStream {
-    override def flush = textArea.repaint
-    
-    override def write(b:Int) = textArea.append(new String(Array[Byte](b.asInstanceOf[Byte])))
-                      
-    override def write(b: Array[Byte], off: Int,len: Int) = {
-      textArea.append(new String(b,off,len))
-      textArea.peer.scrollRectToVisible(new Rectangle(0, textArea.size.height - 2, 1, 1))
-    }
+  override def flush = textArea.repaint
+
+  override def write(b: Int) = textArea.append(new String(Array[Byte](b.asInstanceOf[Byte])))
+
+  override def write(b: Array[Byte], off: Int, len: Int) = {
+    textArea.append(new String(b, off, len))
+    textArea.peer.scrollRectToVisible(new Rectangle(0, textArea.size.height - 2, 1, 1))
   }
+}

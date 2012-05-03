@@ -24,6 +24,6 @@ import org.openmole.ide.core.implementation.registry.EnvironmentActivator
 class Activator extends OSGiActivator with EnvironmentActivator with AuthentificationActivator {
 
   override def environmentFactories = List(new GliteEnvironmentFactoryUI)
-  
+
   override def authentificationFactories = List(new GliteAuthentificationFactoryUI)
 }

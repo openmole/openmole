@@ -17,9 +17,9 @@
 
 package org.openmole.ide.plugin.task.stat
 
-class SumTaskPanelUI(dataUI : SumTaskDataUI) extends BasicStatPanelUI("median",dataUI.sequence) {
-  
-  def saveContent(name : String) = new SumTaskDataUI(name,
-                                                        if (multiPrototypeCombo.isDefined) multiPrototypeCombo.get.content
-                                                        else List.empty)
+class SumTaskPanelUI(dataUI: SumTaskDataUI) extends BasicStatPanelUI("median", dataUI.sequence) {
+
+  def saveContent(name: String) = new SumTaskDataUI(name,
+    if (multiPrototypeCombo.isDefined) multiPrototypeCombo.get.content
+    else List.empty)
 }

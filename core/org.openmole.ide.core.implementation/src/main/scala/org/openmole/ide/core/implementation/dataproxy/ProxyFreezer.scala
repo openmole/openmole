@@ -20,5 +20,5 @@ package org.openmole.ide.core.implementation.dataproxy
 import com.rits.cloning.Cloner
 
 object ProxyFreezer {
-  def freeze[T](t : T) : T = (new Cloner).deepClone(t)
+  def freeze[T](t: T): T = (new Cloner).deepClone(t)
 }

@@ -8,10 +8,10 @@ package org.openmole.ide.core.model.factory
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.panel.IHookPanelUI
 
-trait IHookFactoryUI extends IFactoryUI{
+trait IHookFactoryUI extends IFactoryUI {
   override def displayName: String = ""
-  
-  def coreClass : Class[_]
-  
+
+  def coreClass: Class[_]
+
   def buildPanelUI(executionManager: IExecutionManager): IHookPanelUI
 }

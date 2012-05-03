@@ -22,8 +22,8 @@ import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 
 class CompleteSamplingFactoryUI extends ISamplingFactoryUI {
   override def displayName = "Complete"
-  
+
   def buildDataUI = new CompleteSamplingDataUI
-  
+
   def category = ComponentCategories.SAMPLING
 }

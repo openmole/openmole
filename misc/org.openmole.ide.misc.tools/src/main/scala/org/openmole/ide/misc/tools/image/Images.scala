@@ -22,47 +22,47 @@ import javax.imageio.ImageIO
 import javax.swing.ImageIcon
 
 object Images {
-  
+
   val classLoader = getClass.getClassLoader
-  
-  val START_SLOT : Image= ImageIO.read(classLoader.getResource("img/startSlot.png"))
-  val START_EXE_SLOT : Image= ImageIO.read(classLoader.getResource("img/startSlotExe.png"))
-  val INPUT_SLOT : Image= ImageIO.read(classLoader.getResource("img/inputSlot.png"))
-  val INPUT_EXE_SLOT : Image= ImageIO.read(classLoader.getResource("img/inputSlotExe.png"))
-  val OUTPUT_SLOT : Image= ImageIO.read(classLoader.getResource("img/outputSlot.png"))
-  val OUTPUT_EXE_SLOT : Image= ImageIO.read(classLoader.getResource("img/outputSlotExe.png"))
-  val AGGREGATION_TRANSITON : Image = ImageIO.read(classLoader.getResource("img/aggregation.png"))
-  val EXPLORATION_TRANSITON : Image = ImageIO.read(classLoader.getResource("img/exploration.png"))
-  val INPUT_DATA_CHANNEL : Image = ImageIO.read(classLoader.getResource("img/inputDataChannel.png"))
-  val OUTPUT_DATA_CHANNEL : Image = ImageIO.read(classLoader.getResource("img/outputDataChannel.png"))
-  
+
+  val START_SLOT: Image = ImageIO.read(classLoader.getResource("img/startSlot.png"))
+  val START_EXE_SLOT: Image = ImageIO.read(classLoader.getResource("img/startSlotExe.png"))
+  val INPUT_SLOT: Image = ImageIO.read(classLoader.getResource("img/inputSlot.png"))
+  val INPUT_EXE_SLOT: Image = ImageIO.read(classLoader.getResource("img/inputSlotExe.png"))
+  val OUTPUT_SLOT: Image = ImageIO.read(classLoader.getResource("img/outputSlot.png"))
+  val OUTPUT_EXE_SLOT: Image = ImageIO.read(classLoader.getResource("img/outputSlotExe.png"))
+  val AGGREGATION_TRANSITON: Image = ImageIO.read(classLoader.getResource("img/aggregation.png"))
+  val EXPLORATION_TRANSITON: Image = ImageIO.read(classLoader.getResource("img/exploration.png"))
+  val INPUT_DATA_CHANNEL: Image = ImageIO.read(classLoader.getResource("img/inputDataChannel.png"))
+  val OUTPUT_DATA_CHANNEL: Image = ImageIO.read(classLoader.getResource("img/outputDataChannel.png"))
+
   val CONNECT_TRANSITION_MODE = new ImageIcon(classLoader.getResource("img/connectMode.png"))
   val DATA_CHANNEL_TRANSITION_MODE = new ImageIcon(classLoader.getResource("img/dataChannelMode.png"))
-  
-  val START_EXECUTION : Image = ImageIO.read(classLoader.getResource("img/startExe.png"))
-  val STOP_EXECUTION : Image = ImageIO.read(classLoader.getResource("img/stopExe.png"))
+
+  val START_EXECUTION: Image = ImageIO.read(classLoader.getResource("img/startExe.png"))
+  val STOP_EXECUTION: Image = ImageIO.read(classLoader.getResource("img/stopExe.png"))
   val BUILD_EXECUTION = new ImageIcon(classLoader.getResource("img/build.png"))
   val CLEAN_BUILD_EXECUTION = new ImageIcon(classLoader.getResource("img/cleanAndBuild.png"))
-  
+
   val EYE = new ImageIcon(classLoader.getResource("img/eye.png"))
   val ARROW = new ImageIcon(classLoader.getResource("img/arrow.png"))
   val REFRESH = new ImageIcon(classLoader.getResource("img/refresh.png"))
-  val EMPTY : Image = ImageIO.read(classLoader.getResource("img/empty.png"))
-  
+  val EMPTY: Image = ImageIO.read(classLoader.getResource("img/empty.png"))
+
   val EDIT = new ImageIcon(classLoader.getResource("img/edit.png"))
   val EDIT_EMPTY = new ImageIcon(classLoader.getResource("img/edit_empty.png"))
   val EDIT_ERROR = new ImageIcon(classLoader.getResource("img/edit_error.png"))
-  
+
   val ADD = new ImageIcon(classLoader.getResource("img/add.png"))
   val DEL = new ImageIcon(classLoader.getResource("img/del.png"))
   val NEXT = new ImageIcon(classLoader.getResource("img/next.png"))
   val PREVIOUS = new ImageIcon(classLoader.getResource("img/previous.png"))
   val CLOSE = new ImageIcon(classLoader.getResource("img/close.png"))
   val CLOSE_TAB = new ImageIcon(classLoader.getResource("img/close_tab.png"))
-  
-  val CHECK_VALID  : Image= ImageIO.read(classLoader.getResource("img/check_valid.png"))
-  val CHECK_INVALID : Image = ImageIO.read(classLoader.getResource("img/check_invalid.png"))
-  
+
+  val CHECK_VALID: Image = ImageIO.read(classLoader.getResource("img/check_valid.png"))
+  val CHECK_INVALID: Image = ImageIO.read(classLoader.getResource("img/check_invalid.png"))
+
   val SPLASH_SCREEN = new ImageIcon(classLoader.getResource("img/splashscreen.png"))
   val APPLICATION_ICON = new ImageIcon(classLoader.getResource("img/openmole.png"))
 }

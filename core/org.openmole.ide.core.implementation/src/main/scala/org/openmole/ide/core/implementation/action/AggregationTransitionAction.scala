@@ -23,8 +23,8 @@ import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.workflow.ConnectorWidget
 
-class AggregationTransitionAction(connectionWidget: ConnectorWidget) extends ActionListener{
-  override def actionPerformed(ae: ActionEvent)= {
+class AggregationTransitionAction(connectionWidget: ConnectorWidget) extends ActionListener {
+  override def actionPerformed(ae: ActionEvent) = {
     if (connectionWidget.transition.transitionType == BASIC_TRANSITION) connectionWidget.transition.transitionType = AGGREGATION_TRANSITION
     else connectionWidget.transition.transitionType = BASIC_TRANSITION
     connectionWidget.drawTransitionType

@@ -24,11 +24,11 @@ import org.openmole.core.model.execution.ExecutionState._
 import ExecutionManager._
 
 class JobStateChangedOnEnvironmentListener(exeManager: ExecutionManager,
-                                            moleExecution: IMoleExecution, 
-                                            environment: IEnvironment) extends EventListener[IEnvironment] {
+                                           moleExecution: IMoleExecution,
+                                           environment: IEnvironment) extends EventListener[IEnvironment] {
   override def triggered(environment: IEnvironment, event: Event[IEnvironment]) = {
     event match {
-      case x: IEnvironment.JobStateChanged=>
+      case x: IEnvironment.JobStateChanged ⇒
         exeManager.decrementEnvironmentState(environment, x.oldState)
         exeManager.incrementEnvironmentState(environment, x.newState)
     }

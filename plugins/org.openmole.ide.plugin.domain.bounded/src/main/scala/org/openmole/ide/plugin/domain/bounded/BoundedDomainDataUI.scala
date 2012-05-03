@@ -23,18 +23,18 @@ import org.openmole.misc.tools.io.FromString._
 import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.model.data.IBoundedDomainDataUI
 
-class BoundedDomainDataUI (val name: String="",
-                                val min: String = "",
-                                val max: String = "") extends IBoundedDomainDataUI {
-  
+class BoundedDomainDataUI(val name: String = "",
+                          val min: String = "",
+                          val max: String = "") extends IBoundedDomainDataUI {
+
   def coreObject(prototypeObject: IPrototype[Double]) = prototypeObject.`type` match {
-    case x : Manifest[Double] => new Bounded[Double](min,max)
+    case x: Manifest[Double] ⇒ new Bounded[Double](min, max)
   }
 
   def coreClass = classOf[IBounded[Double]]
-  
+
   def imagePath = "img/domain_range.png"
-  
+
   def buildPanelUI = new BoundedDomainPanelUI(this)
-  
+
 }

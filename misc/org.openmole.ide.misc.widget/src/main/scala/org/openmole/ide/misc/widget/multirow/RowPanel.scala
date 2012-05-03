@@ -23,17 +23,17 @@ import org.openmole.ide.misc.widget.multirow.RowWidget._
 import scala.swing._
 
 class RowPanel[T](val components: List[Component],
-               val plusAllowed: Plus= ADD) extends PluginPanel("wrap,insets -2 5 -2 5") with IRowPanel{
+                  val plusAllowed: Plus = ADD) extends PluginPanel("wrap,insets -2 5 -2 5") with IRowPanel {
   var extendedPanel: Option[JPanel] = None
-  
-  contents+= new PluginPanel(""){
+
+  contents += new PluginPanel("") {
     components.foreach(contents+=)
     contents += removeButton
   }
-  
+
   def extend(ext: JPanel) = {
-    if (extendedPanel.isDefined) contents-= extendedPanel.get
-    contents+= ext
+    if (extendedPanel.isDefined) contents -= extendedPanel.get
+    contents += ext
     extendedPanel = Some(ext)
     repaint
     revalidate

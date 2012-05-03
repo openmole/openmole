@@ -26,54 +26,54 @@ import scala.collection.mutable.HashSet
 
 trait IMoleSceneManager {
   override def toString = name
-  
-  def id : Int
-  
+
+  def id: Int
+
   def name: String
-  
-  def name_=(n:String)
-  
-  def startingCapsule_=(n:Option[ICapsuleUI])
-  
+
+  def name_=(n: String)
+
+  def startingCapsule_=(n: Option[ICapsuleUI])
+
   def getNodeID: String
-  
+
   def getEdgeID: String
-  
-  def getDataChannelID : String
-  
-  def capsuleID(cv : ICapsuleUI) : String
-  
-  def capsules : DualHashBidiMap[String, ICapsuleUI]
-  
-  def startingCapsule : Option[ICapsuleUI]
-  
-  def capsuleConnections :  HashMap[ICapsuleDataUI, HashSet[ITransitionUI]]
-  
-  def removeCapsuleUI(nodeID: String) : String
-  
-  def removeCapsuleUI(capslue: ICapsuleUI) : String
-  
-  def registerCapsuleUI(cv: ICapsuleUI) : Unit
-  
-  def setStartingCapsule(capsule : ICapsuleUI)
-  
-  def transitions : Iterable[ITransitionUI] 
-  
-  def dataChannels : Iterable[IDataChannelUI]
-  
-  def transition(edgeID : String): ITransitionUI
-  
-  def dataChannel(dID : String): IDataChannelUI
-  
-  def removeTransition(edgeID : String)
-  
-  def removeDataChannel(id : String)
-  
-  def registerTransition(s : ICapsuleUI, t : IInputSlotWidget,transitionType : TransitionType.Value,cond : Option[String]) : Boolean
-  
-  def registerTransition(edgeID : String,s : ICapsuleUI, t : IInputSlotWidget,transitionType : TransitionType.Value,cond : Option[String]) : Boolean
-  
-  def registerDataChannel(id : String, source : ICapsuleUI, target : ICapsuleUI,prototypes : List[IPrototypeDataProxyUI]) : Boolean
-  
-  def registerDataChannel(source : ICapsuleUI, target : ICapsuleUI,prototypes : List[IPrototypeDataProxyUI]) : Boolean
- }
+
+  def getDataChannelID: String
+
+  def capsuleID(cv: ICapsuleUI): String
+
+  def capsules: DualHashBidiMap[String, ICapsuleUI]
+
+  def startingCapsule: Option[ICapsuleUI]
+
+  def capsuleConnections: HashMap[ICapsuleDataUI, HashSet[ITransitionUI]]
+
+  def removeCapsuleUI(nodeID: String): String
+
+  def removeCapsuleUI(capslue: ICapsuleUI): String
+
+  def registerCapsuleUI(cv: ICapsuleUI): Unit
+
+  def setStartingCapsule(capsule: ICapsuleUI)
+
+  def transitions: Iterable[ITransitionUI]
+
+  def dataChannels: Iterable[IDataChannelUI]
+
+  def transition(edgeID: String): ITransitionUI
+
+  def dataChannel(dID: String): IDataChannelUI
+
+  def removeTransition(edgeID: String)
+
+  def removeDataChannel(id: String)
+
+  def registerTransition(s: ICapsuleUI, t: IInputSlotWidget, transitionType: TransitionType.Value, cond: Option[String]): Boolean
+
+  def registerTransition(edgeID: String, s: ICapsuleUI, t: IInputSlotWidget, transitionType: TransitionType.Value, cond: Option[String]): Boolean
+
+  def registerDataChannel(id: String, source: ICapsuleUI, target: ICapsuleUI, prototypes: List[IPrototypeDataProxyUI]): Boolean
+
+  def registerDataChannel(source: ICapsuleUI, target: ICapsuleUI, prototypes: List[IPrototypeDataProxyUI]): Boolean
+}

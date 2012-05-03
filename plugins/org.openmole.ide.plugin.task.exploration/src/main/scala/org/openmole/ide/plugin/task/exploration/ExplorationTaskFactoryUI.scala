@@ -22,11 +22,9 @@ import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 class ExplorationTaskFactoryUI extends ITaskFactoryUI {
   override def displayName = "Exploration"
-  
+
   def buildDataUI = new ExplorationTaskDataUI
-  
+
   def category = ComponentCategories.TASK
 }
 
-  
-  

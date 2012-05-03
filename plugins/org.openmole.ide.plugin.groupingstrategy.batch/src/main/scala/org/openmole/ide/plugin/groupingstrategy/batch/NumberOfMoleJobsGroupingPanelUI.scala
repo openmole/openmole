@@ -35,9 +35,9 @@ object NumberOfMoleJobsGroupingPanelUI {
   def rowFactory(strategypanel: NumberOfMoleJobsGroupingPanelUI) = new Factory[ICapsule] {
     override def apply(row: ComboTextFieldRowWidget[ICapsule], p: MyPanel) = {
       import row._
-     
-      val combotfrow: ComboTextFieldRowWidget[ICapsule] = 
-        new ComboTextFieldRowWidget(comboContentA,selectedA,"",plus)
+
+      val combotfrow: ComboTextFieldRowWidget[ICapsule] =
+        new ComboTextFieldRowWidget(comboContentA, selectedA, "", plus)
       combotfrow
     }
   }
@@ -45,42 +45,41 @@ object NumberOfMoleJobsGroupingPanelUI {
 
 import NumberOfMoleJobsGroupingPanelUI._
 //
-class NumberOfMoleJobsGroupingPanelUI(val executionManager: IExecutionManager) extends PluginPanel("") with IGroupingPanelUI{
+class NumberOfMoleJobsGroupingPanelUI(val executionManager: IExecutionManager) extends PluginPanel("") with IGroupingPanelUI {
   implicit def string2Int(s: String): Int = augmentString(s).toInt
-  
-  val capsules : List[ICapsule]= executionManager.capsuleMapping.values.toList
-  
-  val multiRow = 
+
+  val capsules: List[ICapsule] = executionManager.capsuleMapping.values.toList
+
+  val multiRow =
     capsules.headOption match {
-      case Some(capsule) =>
-        val r =  new ComboTextFieldRowWidget(capsules, capsule, "2", NO_ADD)
-    
+      case Some(capsule) ⇒
+        val r = new ComboTextFieldRowWidget(capsules, capsule, "2", NO_ADD)
+
         Some(new MultiComboTextField("Group", List(r), rowFactory(this), CLOSE_IF_EMPTY, NO_ADD))
-      case None =>
+      case None ⇒
         StatusBar.warn("No capsules are defined")
         None
     }
 
-  
-  if (multiRow.isDefined) contents+= multiRow.get.panel
-  
-  def saveContent = 
+  if (multiRow.isDefined) contents += multiRow.get.panel
+
+  def saveContent =
     multiRow match {
-     case Some(multiRow) =>
-       multiRow.content.map {
-        case(capsule, num)=>
-          try new NumberOfMoleJobsGroupingDataUI(executionManager, (capsule, num))
-          catch {
-            case e:NumberFormatException=> throw new UserBadDataError(num + " is not an integer")
-          }
-      }
-     case None => List()
+      case Some(multiRow) ⇒
+        multiRow.content.map {
+          case (capsule, num) ⇒
+            try new NumberOfMoleJobsGroupingDataUI(executionManager, (capsule, num))
+            catch {
+              case e: NumberFormatException ⇒ throw new UserBadDataError(num + " is not an integer")
+            }
+        }
+      case None ⇒ List()
     }
-  
+
   def addStrategy = multiRow match {
-    case Some(multiRow) => 
+    case Some(multiRow) ⇒
       multiRow.addRow
       multiRow.refresh
-    case None => 
+    case None ⇒
   }
 }

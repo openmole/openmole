@@ -25,30 +25,29 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.commons.Constants._
 import scala.collection.JavaConversions._
 
-class ExecutionMoleScene(id : Int,
-                         name : String) extends MoleScene(name,id){
+class ExecutionMoleScene(id: Int,
+                         name: String) extends MoleScene(name, id) {
 
   override val isBuildScene = false
-      
-  
+
   override def displayPropertyPanel(proxy: IDataProxyUI,
                                     mode: PanelMode.Value) = {
     super.displayPropertyPanel(proxy, mode)
-    currentPanel.contents.foreach{_.enabled = false}
+    currentPanel.contents.foreach { _.enabled = false }
   }
-  
+
   override def displayExtraPropertyPanel(dproxy: IDataProxyUI) = {
     super.displayExtraPropertyPanel(dproxy)
-    currentExtraPanel.contents.foreach{_.enabled = false}
+    currentExtraPanel.contents.foreach { _.enabled = false }
   }
-    
-  def initCapsuleAdd(w: ICapsuleUI)= {
-    obUI= Some(w.asInstanceOf[Widget])
+
+  def initCapsuleAdd(w: ICapsuleUI) = {
+    obUI = Some(w.asInstanceOf[Widget])
     obUI.get.createActions(CONNECT).addAction(moveAction)
   }
-  
-  def attachEdgeWidget(e: String)= {
-    val connectionWidget = new ConnectorWidget(this,manager.transition(e))
+
+  def attachEdgeWidget(e: String) = {
+    val connectionWidget = new ConnectorWidget(this, manager.transition(e))
     connectLayer.addChild(connectionWidget);
     connectionWidget.setEndPointShape(PointShape.SQUARE_FILLED_BIG)
     connectionWidget

@@ -21,7 +21,7 @@ import javax.swing.Icon
 import scala.swing.Action
 import scala.swing.Button
 
-class ToolBarButton(ic: Icon,tt: String, a: Action) extends Button(a){
+class ToolBarButton(ic: Icon, tt: String, a: Action) extends Button(a) {
   icon = ic
   tooltip = tt
 }

@@ -18,6 +18,6 @@
 package org.openmole.ide.core.model.commons
 
 object MoleSceneType extends Enumeration {
-    type MoleSceneType= Value
-    val BUILD,EXECUTION= Value
-  }
+  type MoleSceneType = Value
+  val BUILD, EXECUTION = Value
+}

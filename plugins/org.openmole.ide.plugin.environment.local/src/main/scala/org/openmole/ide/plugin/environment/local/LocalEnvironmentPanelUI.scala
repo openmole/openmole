@@ -22,13 +22,13 @@ import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
 import scala.swing.TextField
 
-class LocalEnvironmentPanelUI(pud: LocalEnvironmentDataUI) extends PluginPanel("fillx,wrap 2","","") with IEnvironmentPanelUI{
+class LocalEnvironmentPanelUI(pud: LocalEnvironmentDataUI) extends PluginPanel("fillx,wrap 2", "", "") with IEnvironmentPanelUI {
   val nbThreadTextField = new TextField(3)
-  contents+= (new Label("Number of threads"),"gap para")
-  contents+= nbThreadTextField
-  
+  contents += (new Label("Number of threads"), "gap para")
+  contents += nbThreadTextField
+
   nbThreadTextField.text = pud.nbThread.toString
-  
+
   override def saveContent(name: String) = new LocalEnvironmentDataUI(name,
-                                                                            nbThreadTextField.text.toInt)
+    nbThreadTextField.text.toInt)
 }

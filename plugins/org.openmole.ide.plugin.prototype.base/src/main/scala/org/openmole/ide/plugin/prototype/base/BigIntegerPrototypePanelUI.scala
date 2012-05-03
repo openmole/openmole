@@ -18,6 +18,6 @@ package org.openmole.ide.plugin.prototype.base
 
 import java.math.BigInteger
 
-class BigIntegerPrototypePanelUI(pud:BigIntegerPrototypeDataUI) extends GenericPrototypePanelUI[BigInteger](pud.dim) {
-    override def saveContent(name: String) = new BigIntegerPrototypeDataUI(name,if(dim!="") dim.toInt else 0)
+class BigIntegerPrototypePanelUI(pud: BigIntegerPrototypeDataUI) extends GenericPrototypePanelUI[BigInteger](pud.dim) {
+  override def saveContent(name: String) = new BigIntegerPrototypeDataUI(name, if (dim != "") dim.toInt else 0)
 }

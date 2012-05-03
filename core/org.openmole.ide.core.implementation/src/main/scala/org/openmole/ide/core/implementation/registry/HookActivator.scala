@@ -20,17 +20,17 @@ import org.openmole.ide.core.model.factory.IHookFactoryUI
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
 
-trait HookActivator extends BundleActivator{
-  
-  def hookFactories : Iterable[IHookFactoryUI]
-  
+trait HookActivator extends BundleActivator {
+
+  def hookFactories: Iterable[IHookFactoryUI]
+
   abstract override def start(context: BundleContext) = {
     super.start(context)
-    hookFactories.foreach{f=> KeyRegistry.hooks+= KeyGenerator(f.coreClass) -> f}
+    hookFactories.foreach { f ⇒ KeyRegistry.hooks += KeyGenerator(f.coreClass) -> f }
   }
 
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
-    hookFactories.foreach{f => KeyRegistry.hooks -= KeyGenerator(f.coreClass)}
+    hookFactories.foreach { f ⇒ KeyRegistry.hooks -= KeyGenerator(f.coreClass) }
   }
 }

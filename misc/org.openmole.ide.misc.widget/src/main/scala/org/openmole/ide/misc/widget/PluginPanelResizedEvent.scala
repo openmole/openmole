@@ -20,4 +20,4 @@ package org.openmole.ide.misc.widget
 import scala.swing.Component
 import scala.swing.event.ActionEvent
 
-  class PluginPanelResizedEvent(c : Component) extends ActionEvent(c) 
+class PluginPanelResizedEvent(c: Component) extends ActionEvent(c)

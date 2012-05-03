@@ -21,14 +21,14 @@ import java.awt.Color
 import java.awt.Graphics2D
 import scala.swing._
 
-class MyMigPanel (mig1: String, mig2: String ="", mig3: String="") extends MigPanel(mig1,mig2,mig3) {
-    background = new Color(77,77,77)
-    
+class MyMigPanel(mig1: String, mig2: String = "", mig3: String = "") extends MigPanel(mig1, mig2, mig3) {
+  background = new Color(77, 77, 77)
+
   override def paintComponent(g: Graphics2D) = {
-    contents.foreach(c=> c match {
-        case x: TextField=> x.foreground= Color.BLACK
-        case x: UIElement=> x.foreground= Color.WHITE
-        case _=>
-      })
+    contents.foreach(c ⇒ c match {
+      case x: TextField ⇒ x.foreground = Color.BLACK
+      case x: UIElement ⇒ x.foreground = Color.WHITE
+      case _ ⇒
+    })
   }
 }

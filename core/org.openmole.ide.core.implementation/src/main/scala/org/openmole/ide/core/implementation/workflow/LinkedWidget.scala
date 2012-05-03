@@ -22,9 +22,9 @@ import org.netbeans.api.visual.widget.ComponentWidget
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.widget.LinkLabel
 
-class LinkedWidget (scene : IMoleScene,
-                    val linkLabel : LinkLabel,
-                    x : Int,
-                    y : Int) extends ComponentWidget(scene.graphScene,linkLabel.peer) {
-  setPreferredLocation(new Point(x,y))
+class LinkedWidget(scene: IMoleScene,
+                   val linkLabel: LinkLabel,
+                   x: Int,
+                   y: Int) extends ComponentWidget(scene.graphScene, linkLabel.peer) {
+  setPreferredLocation(new Point(x, y))
 }

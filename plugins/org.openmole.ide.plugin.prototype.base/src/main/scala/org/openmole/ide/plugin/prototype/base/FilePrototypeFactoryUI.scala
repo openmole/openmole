@@ -23,9 +23,9 @@ import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
 class FilePrototypeFactoryUI extends IPrototypeFactoryUI[File] {
-  
+
   override def displayName = "File"
-  
+
   def buildDataUI = new FilePrototypeDataUI
   
   def buildDataUI(prototype : IPrototype[_],

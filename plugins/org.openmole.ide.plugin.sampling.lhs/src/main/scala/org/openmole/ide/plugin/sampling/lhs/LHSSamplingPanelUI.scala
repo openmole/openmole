@@ -29,17 +29,16 @@ import scala.swing.BorderPanel.Position._
 import org.openmole.ide.plugin.sampling.tools.GenericBoundedSamplingPanel
 import scala.collection.JavaConversions._
 
-class LHSSamplingPanelUI(cud: LHSSamplingDataUI) extends PluginPanel("wrap 2","","") with ISamplingPanelUI {
-  
-  val sampleTextField = new TextField(cud.samples,4) 
-   val panel = new GenericBoundedSamplingPanel(cud.factors, KeyRegistry.boundedDomains.map{_._2.displayName}.toList)
-  
+class LHSSamplingPanelUI(cud: LHSSamplingDataUI) extends PluginPanel("wrap 2", "", "") with ISamplingPanelUI {
+
+  val sampleTextField = new TextField(cud.samples, 4)
+  val panel = new GenericBoundedSamplingPanel(cud.factors, KeyRegistry.boundedDomains.map { _._2.displayName }.toList)
+
   contents += new Label("Number of samples")
   contents += sampleTextField
-  contents += panel 
-  
-  
+  contents += panel
+
   override def saveContent(name: String) = new LHSSamplingDataUI(name,
-                                                                 sampleTextField.text,
-                                                                 panel.factors)
+    sampleTextField.text,
+    panel.factors)
 }

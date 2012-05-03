@@ -25,14 +25,14 @@ import scala.collection.mutable.HashSet
 import org.openmole.ide.core.model.provider.IGenericMenuProvider
 import scala.collection.mutable.ListBuffer
 
-class GenericMenuProvider extends IGenericMenuProvider{
- 
-  var items= ListBuffer.empty[JMenuItem]
-  var menus= HashSet.empty[JMenu]
-  var currentPoint= new Point(0,0)
-  
-  override def getPopupMenu(widget: Widget, point: Point)= {
-    currentPoint= point
+class GenericMenuProvider extends IGenericMenuProvider {
+
+  var items = ListBuffer.empty[JMenuItem]
+  var menus = HashSet.empty[JMenu]
+  var currentPoint = new Point(0, 0)
+
+  override def getPopupMenu(widget: Widget, point: Point) = {
+    currentPoint = point
     PopupMenuProviderFactory.fillPopupMenu(this)
   }
 }

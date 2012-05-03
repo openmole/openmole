@@ -25,10 +25,10 @@ import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.plugin.hook.file.CopyFileHook
 
 class CopyFileHookDataUI(executionManager: IExecutionManager,
-                         toBeHooked: (ICapsule,IPrototype[File],String)) extends IHookDataUI{
-  
-  override def coreObject = new CopyFileHook(executionManager.moleExecution, 
-                                             toBeHooked._1, 
-                                             toBeHooked._2, 
-                                             toBeHooked._3)
+                         toBeHooked: (ICapsule, IPrototype[File], String)) extends IHookDataUI {
+
+  override def coreObject = new CopyFileHook(executionManager.moleExecution,
+    toBeHooked._1,
+    toBeHooked._2,
+    toBeHooked._3)
 }

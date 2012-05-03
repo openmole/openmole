@@ -24,8 +24,8 @@ import org.openmole.ide.core.model.commons.Constants
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 
 class OutputDataChannelAnchor(relatedWidget: ICapsuleUI) extends Anchor(relatedWidget.widget) {
-  
-  override def compute(entry: Anchor.Entry)= 
+
+  override def compute(entry: Anchor.Entry) =
     new Result(relatedWidget.widget.convertLocalToScene(new Point(Constants.TASK_CONTAINER_WIDTH + 10,
-                                                                  Constants.TASK_CONTAINER_HEIGHT - 15)),Anchor.Direction.RIGHT)    
+      Constants.TASK_CONTAINER_HEIGHT - 15)), Anchor.Direction.RIGHT)
 }

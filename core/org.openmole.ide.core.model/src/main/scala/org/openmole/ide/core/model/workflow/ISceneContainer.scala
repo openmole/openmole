@@ -18,6 +18,6 @@
 package org.openmole.ide.core.model.workflow
 
 trait ISceneContainer {
-  
-  def scene : IMoleScene
+
+  def scene: IMoleScene
 }

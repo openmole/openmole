@@ -21,9 +21,9 @@ import java.awt.event.ActionListener
 import java.awt.event.ActionEvent
 import org.openmole.ide.core.implementation.workflow.MoleScene
 
-class RemoveTransitionAction(scene: MoleScene, edgeID: String) extends ActionListener{
+class RemoveTransitionAction(scene: MoleScene, edgeID: String) extends ActionListener {
 
-  override def actionPerformed(ae: ActionEvent)= {
+  override def actionPerformed(ae: ActionEvent) = {
     scene.manager.removeTransition(edgeID)
     scene.removeEdge(edgeID)
   }
