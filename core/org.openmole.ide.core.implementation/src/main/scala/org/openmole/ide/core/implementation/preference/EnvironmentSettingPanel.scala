@@ -20,6 +20,7 @@ package org.openmole.ide.core.implementation.preference
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.misc.exception.UserBadDataError
 import scala.swing.Button
 import scala.swing.ComboBox
 import scala.swing.event.ButtonClicked
@@ -36,9 +37,14 @@ class EnvironmentSettingPanel extends MigPanel("wrap 2") {
   
   listenTo(`trashButton`)
   reactions += {
-    case ButtonClicked(`trashButton`) => combo.selection.item.dataUI.coreObject
+    case ButtonClicked(`trashButton`) => 
+      try {
+        combo.selection.item.dataUI.coreObject match {
+          case x : BatchEnvironment => x.clean
+          case _ => None
+        }
+      } catch {case e : UserBadDataError =>}
   }
-  
   
   contents += combo
   contents += trashButton
