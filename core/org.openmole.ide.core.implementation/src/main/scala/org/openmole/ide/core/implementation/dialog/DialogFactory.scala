@@ -31,29 +31,29 @@ import scala.swing.Label
 import scala.swing.TextField
 
 object DialogFactory {
-  
-  def closeExecutionTab(exeContainer: ExecutionMoleSceneContainer): Boolean = { 
+
+  def closeExecutionTab(exeContainer: ExecutionMoleSceneContainer): Boolean = {
     if (exeContainer.executionManager.moleExecution.finished) true
-    else if (exeContainer.executionManager.moleExecution.started){
-      val lab = new Label("<html>A simulation is currently running.<br>Close anyway ?</html>"){
-        background = Color.white}.peer
+    else if (exeContainer.executionManager.moleExecution.started) {
+      val lab = new Label("<html>A simulation is currently running.<br>Close anyway ?</html>") {
+        background = Color.white
+      }.peer
       if (DialogDisplayer.getDefault.notify(new DialogDescriptor(lab, "Execution warning")).equals(NotifyDescriptor.OK_OPTION)) true
-      else false 
-    }
-    else true
+      else false
+    } else true
   }
-  
-  def newTabName : Option[ISceneContainer] = { 
-    val textField = new TextField("Mole_" + (ScenesManager.buildMoleSceneContainers.size + 1),20)
+
+  def newTabName: Option[ISceneContainer] = {
+    val textField = new TextField("Mole_" + (ScenesManager.buildMoleSceneContainers.size + 1), 20)
     if (DialogDisplayer.getDefault.notify(new DialogDescriptor(textField.peer, "Mole name")).equals(NotifyDescriptor.OK_OPTION))
       Some(ScenesManager.addBuildSceneContainer(textField.text))
     else None
   }
-  
-  def deleteProxyConfirmation(proxy : IDataProxyUI) : Boolean = {
-    if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new Label("<html>" +proxy.dataUI.name + " is currently used in a scene.<br>" +
-                                                                         "It will be deleted everywhere it appears. <br>" +
-                                                                         "Delete anyway ?").peer, "Execution warning")).equals(NotifyDescriptor.OK_OPTION)) true
-    else false 
+
+  def deleteProxyConfirmation(proxy: IDataProxyUI): Boolean = {
+    if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new Label("<html>" + proxy.dataUI.name + " is currently used in a scene.<br>" +
+      "It will be deleted everywhere it appears. <br>" +
+      "Delete anyway ?").peer, "Execution warning")).equals(NotifyDescriptor.OK_OPTION)) true
+    else false
   }
 }

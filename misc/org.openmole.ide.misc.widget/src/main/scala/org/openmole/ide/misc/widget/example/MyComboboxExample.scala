@@ -23,11 +23,11 @@ import scala.swing.MyComboBox
 import scala.swing.SimpleSwingApplication
 
 object MyComboboxExample extends SimpleSwingApplication {
-  
+
   def top = new MainFrame {
-    val a = new MyComboBox(List("one","two"))
-    a.peer.setModel(MyComboBox.newConstantModel(List("three","four")))
+    val a = new MyComboBox(List("one", "two"))
+    a.peer.setModel(MyComboBox.newConstantModel(List("three", "four")))
     contents = a
-    size = new Dimension(100,100)
+    size = new Dimension(100, 100)
   }
 }

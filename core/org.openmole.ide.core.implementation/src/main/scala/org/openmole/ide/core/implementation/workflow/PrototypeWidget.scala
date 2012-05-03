@@ -32,80 +32,82 @@ import org.openmole.ide.misc.widget.LinkLabel
 import scala.swing.Action
 import scala.swing.Label
 
-
 object PrototypeWidget {
-  def nbProtoIn(taskproxy : ITaskDataProxyUI) = 
+  def nbProtoIn(taskproxy: ITaskDataProxyUI) =
     (taskproxy.dataUI.prototypesIn.size + taskproxy.dataUI.implicitPrototypesIn.size).toString
-  
-  def nbProtoOut(taskproxy : ITaskDataProxyUI) =  
+
+  def nbProtoOut(taskproxy: ITaskDataProxyUI) =
     (taskproxy.dataUI.prototypesOut.size + taskproxy.dataUI.implicitPrototypesOut.size).toString
-  
-  
-  def green(scene: IMoleScene) =  scene match {
-    case y:BuildMoleScene=> new Color(180,200,7,220)
-    case _=> new Color(44,137,160,64)
+
+  def green(scene: IMoleScene) = scene match {
+    case y: BuildMoleScene ⇒ new Color(180, 200, 7, 220)
+    case _ ⇒ new Color(44, 137, 160, 64)
   }
-  
-  val red = new Color(212,0,0)  
-                                              
-  def buildInput(scene : IMoleScene, taskproxy : ITaskDataProxyUI) = {
-    new PrototypeWidget(scene, x=> nbProtoIn(taskproxy), 
-                        new LinkLabel(nbProtoIn(taskproxy),new Action("") { def apply = 
-                          scene.displayPropertyPanel(taskproxy,IO)})){
-              setPreferredLocation(new Point(19, TASK_CONTAINER_HEIGHT / 2))
-            }
-        }
-                                           
-                                      def buildOutput(scene : IMoleScene, taskproxy : ITaskDataProxyUI) = {
-          new PrototypeWidget(scene, x=>nbProtoOut(taskproxy), 
-                              new LinkLabel(nbProtoOut(taskproxy),new Action("") { def apply = 
-                                scene.displayPropertyPanel(taskproxy,IO)})) {
-                    setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 30, TASK_CONTAINER_HEIGHT / 2))
-                  }
-              }
-                                              
-                                            }
-                                                                                                                      
-                                            import PrototypeWidget._
-                                            class PrototypeWidget(scene: IMoleScene, 
-                                                                  f : Unit=>String,
-                                                                  link : Label) extends ComponentWidget(scene.graphScene,link.peer) {
-                link.foreground = Color.WHITE
-                var validationColor = green(scene)
-                val dim = 30
-                val pos = link.size.width / 2 + 1
-                setPreferredBounds(new Rectangle(dim,dim))
-                setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))
-                setOpaque(true)
-  
-                def updateErrors(errorString : String) = {
-                  validationColor = errorString.isEmpty match {
-                    case true => green(scene)
-                    case false => 
-                      link.tooltip = errorString
-                      red
-                  }
-                  revalidate
-                }
-                  
-                override def paintChildren = link.text = f.apply()
-               
-                override def paintBackground = {
-                  val g = scene.graphScene.getGraphics
-                  g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                                     RenderingHints.VALUE_ANTIALIAS_ON)
-                  g.setColor(validationColor)
-                  g.fillOval(pos,pos, dim, dim)
-                  revalidate
-                }
-    
-                override def paintBorder = {
-                  val g = scene.graphScene.getGraphics
-                  g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                                     RenderingHints.VALUE_ANTIALIAS_ON)
-                  g.setStroke(new BasicStroke(3f))
-                  g.setColor(new Color(77,77,77,150))
-                  g.drawOval(pos,pos, dim-2,dim-2)
-                  revalidate
-                }
-              }
+
+  val red = new Color(212, 0, 0)
+
+  def buildInput(scene: IMoleScene, taskproxy: ITaskDataProxyUI) = {
+    new PrototypeWidget(scene, x ⇒ nbProtoIn(taskproxy),
+      new LinkLabel(nbProtoIn(taskproxy), new Action("") {
+        def apply =
+          scene.displayPropertyPanel(taskproxy, IO)
+      })) {
+      setPreferredLocation(new Point(19, TASK_CONTAINER_HEIGHT / 2))
+    }
+  }
+
+  def buildOutput(scene: IMoleScene, taskproxy: ITaskDataProxyUI) = {
+    new PrototypeWidget(scene, x ⇒ nbProtoOut(taskproxy),
+      new LinkLabel(nbProtoOut(taskproxy), new Action("") {
+        def apply =
+          scene.displayPropertyPanel(taskproxy, IO)
+      })) {
+      setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 30, TASK_CONTAINER_HEIGHT / 2))
+    }
+  }
+
+}
+
+import PrototypeWidget._
+class PrototypeWidget(scene: IMoleScene,
+                      f: Unit ⇒ String,
+                      link: Label) extends ComponentWidget(scene.graphScene, link.peer) {
+  link.foreground = Color.WHITE
+  var validationColor = green(scene)
+  val dim = 30
+  val pos = link.size.width / 2 + 1
+  setPreferredBounds(new Rectangle(dim, dim))
+  setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))
+  setOpaque(true)
+
+  def updateErrors(errorString: String) = {
+    validationColor = errorString.isEmpty match {
+      case true ⇒ green(scene)
+      case false ⇒
+        link.tooltip = errorString
+        red
+    }
+    revalidate
+  }
+
+  override def paintChildren = link.text = f.apply()
+
+  override def paintBackground = {
+    val g = scene.graphScene.getGraphics
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+      RenderingHints.VALUE_ANTIALIAS_ON)
+    g.setColor(validationColor)
+    g.fillOval(pos, pos, dim, dim)
+    revalidate
+  }
+
+  override def paintBorder = {
+    val g = scene.graphScene.getGraphics
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+      RenderingHints.VALUE_ANTIALIAS_ON)
+    g.setStroke(new BasicStroke(3f))
+    g.setColor(new Color(77, 77, 77, 150))
+    g.drawOval(pos, pos, dim - 2, dim - 2)
+    revalidate
+  }
+}

@@ -14,26 +14,28 @@ import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.task.stat.SumTask
 
-class SumTaskDataUI(val name: String="",
-                       val sequence: List[(IPrototypeDataProxyUI,IPrototypeDataProxyUI)]= List.empty) extends TaskDataUI {
-  
+class SumTaskDataUI(val name: String = "",
+                    val sequence: List[(IPrototypeDataProxyUI, IPrototypeDataProxyUI)] = List.empty) extends TaskDataUI {
+
   def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = {
     val gtBuilder = SumTask(name)(plugins)
-    sequence foreach { s => gtBuilder addSequence(s._1.dataUI.coreObject.asInstanceOf[IPrototype[Array[Double]]],
-                                                  s._2.dataUI.coreObject.asInstanceOf[IPrototype[Double]])}
+    sequence foreach { s ⇒
+      gtBuilder addSequence (s._1.dataUI.coreObject.asInstanceOf[IPrototype[Array[Double]]],
+        s._2.dataUI.coreObject.asInstanceOf[IPrototype[Double]])
+    }
     gtBuilder addInput inputs
     gtBuilder addOutput outputs
     gtBuilder addParameter parameters
     gtBuilder.toTask
   }
-  
-  def coreClass= classOf[SumTask]
-  
+
+  def coreClass = classOf[SumTask]
+
   def fatImagePath = "img/groovyTask_fat.png"
-  
+
   def buildPanelUI = new SumTaskPanelUI(this)
-  
-  def borderColor = new Color(61,104,130)
-  
-  def backgroundColor = new Color(61,104,130,128)
+
+  def borderColor = new Color(61, 104, 130)
+
+  def backgroundColor = new Color(61, 104, 130, 128)
 }

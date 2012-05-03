@@ -19,8 +19,7 @@ package org.openmole.ide.plugin.method.sensitivity
 
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
-
-class FirstOrderEffectTaskFactoryUI 
+class FirstOrderEffectTaskFactoryUI
 //extends ITaskFactoryUI {
 //  override def displayName = "First Order"
 //  

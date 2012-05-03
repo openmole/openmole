@@ -20,5 +20,5 @@ package org.openmole.ide.core.model.dataproxy
 import org.openmole.core.model.data.IPrototype
 
 trait IPrototypeDataProxyFactory extends IDataProxyFactory {
-  def buildDataProxyUI(prototype : IPrototype[_], generated : Boolean) : IDataProxyUI
+  def buildDataProxyUI(prototype: IPrototype[_], generated: Boolean): IDataProxyUI
 }

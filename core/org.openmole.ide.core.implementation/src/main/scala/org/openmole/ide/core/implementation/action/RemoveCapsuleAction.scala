@@ -22,8 +22,8 @@ import java.awt.event.ActionListener
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 
-class RemoveCapsuleAction(scene: IMoleScene,capsule: ICapsuleUI) extends ActionListener{
+class RemoveCapsuleAction(scene: IMoleScene, capsule: ICapsuleUI) extends ActionListener {
 
-  override def actionPerformed(ae: ActionEvent)= 
+  override def actionPerformed(ae: ActionEvent) =
     scene.graphScene.removeNodeWithEdges(scene.manager.removeCapsuleUI(capsule))
 }

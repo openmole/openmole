@@ -23,8 +23,8 @@ import org.openmole.plugin.hook.file.CopyFileHook
 
 class CopyFileHookFactoryUI extends IHookFactoryUI {
   def buildPanelUI(executionManager: IExecutionManager) = new CopyFileHookPanelUI(executionManager)
-  
+
   def coreClass = classOf[CopyFileHook]
-  
+
   override def toString = "Save prototypes"
-}                     
+}

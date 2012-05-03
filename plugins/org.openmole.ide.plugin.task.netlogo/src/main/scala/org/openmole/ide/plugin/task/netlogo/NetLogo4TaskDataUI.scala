@@ -16,40 +16,40 @@ import scala.collection.JavaConversions._
 import scala.io.Source
 import java.io.File
 
-class NetLogo4TaskDataUI(val name: String="",
-                         val workspaceEmbedded: Boolean= false,
-                         val nlogoPath: String = "", 
-                         val lauchingCommands: String="",
-                         val prototypeMappingInput: List[(IPrototypeDataProxyUI, String)]= List(),
-                         val prototypeMappingOutput: List[(String,IPrototypeDataProxyUI)]= List(),
-                         val resources: List[String]= List(),
-                         val globals: List[String]= List()) extends TaskDataUI {
-  
-  def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = 
-  {
-    val builder = NetLogo4Task(
-      name,
-      new File(nlogoPath),
-      Source.fromString(lauchingCommands).getLines.toIterable,
-      workspaceEmbedded)(plugins)
-    builder addInput inputs
-    builder addOutput outputs
-    builder addParameter parameters
-    resources.foreach{r => builder addResource(new File(r)) }
-    prototypeMappingInput.foreach{case(p, n) => builder addNetLogoInput (p.dataUI.coreObject, n)}
-    prototypeMappingOutput.foreach{case(n, p) => builder addNetLogoOutput (n, p.dataUI.coreObject)} 
-    builder.toTask
-  }
-  
-  def coreClass= classOf[NetLogo4Task]
-  
+class NetLogo4TaskDataUI(val name: String = "",
+                         val workspaceEmbedded: Boolean = false,
+                         val nlogoPath: String = "",
+                         val lauchingCommands: String = "",
+                         val prototypeMappingInput: List[(IPrototypeDataProxyUI, String)] = List(),
+                         val prototypeMappingOutput: List[(String, IPrototypeDataProxyUI)] = List(),
+                         val resources: List[String] = List(),
+                         val globals: List[String] = List()) extends TaskDataUI {
+
+  def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) =
+    {
+      val builder = NetLogo4Task(
+        name,
+        new File(nlogoPath),
+        Source.fromString(lauchingCommands).getLines.toIterable,
+        workspaceEmbedded)(plugins)
+      builder addInput inputs
+      builder addOutput outputs
+      builder addParameter parameters
+      resources.foreach { r ⇒ builder addResource (new File(r)) }
+      prototypeMappingInput.foreach { case (p, n) ⇒ builder addNetLogoInput (p.dataUI.coreObject, n) }
+      prototypeMappingOutput.foreach { case (n, p) ⇒ builder addNetLogoOutput (n, p.dataUI.coreObject) }
+      builder.toTask
+    }
+
+  def coreClass = classOf[NetLogo4Task]
+
   override def imagePath = "img/netlogo4.png"
-  
+
   def fatImagePath = "img/netlogo4_fat.png"
-  
+
   def buildPanelUI = new NetLogo4TaskPanelUI(this)
-  
-  def borderColor = new Color(19,118,8)
-  
-  def backgroundColor = new Color(175,233,175,128)
+
+  def borderColor = new Color(19, 118, 8)
+
+  def backgroundColor = new Color(175, 233, 175, 128)
 }

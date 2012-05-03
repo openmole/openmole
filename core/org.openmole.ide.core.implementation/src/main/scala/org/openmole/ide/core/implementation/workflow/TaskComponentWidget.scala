@@ -22,9 +22,9 @@ import org.netbeans.api.visual.widget.ComponentWidget
 import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.core.model.commons.Constants._
 
-class TaskComponentWidget(scene: IMoleScene, 
-                          val capsule : ICapsuleUI,
-                          panel : TaskWidget) extends ComponentWidget(scene.graphScene, panel.peer) {
-  setPreferredSize(new Dimension(TASK_CONTAINER_WIDTH,TASK_CONTAINER_HEIGHT))
+class TaskComponentWidget(scene: IMoleScene,
+                          val capsule: ICapsuleUI,
+                          panel: TaskWidget) extends ComponentWidget(scene.graphScene, panel.peer) {
+  setPreferredSize(new Dimension(TASK_CONTAINER_WIDTH, TASK_CONTAINER_HEIGHT))
   setOpaque(true)
 }

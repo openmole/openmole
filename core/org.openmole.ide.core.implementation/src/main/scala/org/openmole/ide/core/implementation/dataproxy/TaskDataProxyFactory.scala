@@ -20,7 +20,7 @@ package org.openmole.ide.core.implementation.dataproxy
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyFactory
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
-class TaskDataProxyFactory(val factory: ITaskFactoryUI) extends ITaskDataProxyFactory{
+class TaskDataProxyFactory(val factory: ITaskFactoryUI) extends ITaskDataProxyFactory {
 
   def buildDataProxyUI = new TaskDataProxyUI(factory.buildDataUI)
 }

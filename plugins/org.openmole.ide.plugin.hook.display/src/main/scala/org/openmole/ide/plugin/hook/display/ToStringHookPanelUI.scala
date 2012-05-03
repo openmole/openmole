@@ -33,59 +33,59 @@ import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.MyComboBox
 import scala.swing.event.SelectionChanged
 
-object ToStringHookPanelUI{
-  def rowFactory(hookpanel: ToStringHookPanelUI) = new Factory[IPrototype[_],ICapsule] {
-    override def apply(row: TwoCombosRowWidget[IPrototype[_],ICapsule], p: MyPanel) = {
+object ToStringHookPanelUI {
+  def rowFactory(hookpanel: ToStringHookPanelUI) = new Factory[IPrototype[_], ICapsule] {
+    override def apply(row: TwoCombosRowWidget[IPrototype[_], ICapsule], p: MyPanel) = {
       import row._
-      val twocomborow: TwoCombosRowWidget[IPrototype[_],ICapsule] = 
-        new TwoCombosRowWidget(comboContentA,selectedA,comboContentB,selectedB,inBetweenString,plus) {
+      val twocomborow: TwoCombosRowWidget[IPrototype[_], ICapsule] =
+        new TwoCombosRowWidget(comboContentA, selectedA, comboContentB, selectedB, inBetweenString, plus) {
           override def doOnClose = hookpanel.executionManager.commitHook("org.openmole.plugin.hook.display.ToStringHook")
         }
-      
-      twocomborow.panel.listenTo(twocomborow.`combo1`,twocomborow.`combo2`)
-      
+
+      twocomborow.panel.listenTo(twocomborow.`combo1`, twocomborow.`combo2`)
+
       twocomborow.`combo1`.selection.reactions += {
-        case SelectionChanged(twocomborow.`combo1`)=> 
+        case SelectionChanged(twocomborow.`combo1`) ⇒
           commit
-        case _ =>
-          }
-          
-          twocomborow.`combo2`.selection.reactions += {
-        case SelectionChanged(twocomborow.`combo2`)=> 
+        case _ ⇒
+      }
+
+      twocomborow.`combo2`.selection.reactions += {
+        case SelectionChanged(twocomborow.`combo2`) ⇒
           twocomborow.combo1.peer.setModel(MyComboBox.newConstantModel(hookpanel.protosFromTask(twocomborow.`combo2`.selection.item)))
           commit
-        case _ =>
-          }
-      
-      def commit = 
+        case _ ⇒
+      }
+
+      def commit =
         hookpanel.executionManager.commitHook("org.openmole.plugin.hook.display.ToStringHook")
-      
+
       twocomborow
     }
   }
 }
 import ToStringHookPanelUI._
-class ToStringHookPanelUI(val executionManager: IExecutionManager) extends PluginPanel("wrap") with IHookPanelUI{
+class ToStringHookPanelUI(val executionManager: IExecutionManager) extends PluginPanel("wrap") with IHookPanelUI {
 
   val capsules = executionManager.capsuleMapping.values.filter(!_.outputs.isEmpty).toList
-  
+
   val multiRow = {
-    
+
     if (!capsules.isEmpty) {
-      val r =  new TwoCombosRowWidget(
+      val r = new TwoCombosRowWidget(
         protosFromTask(capsules(0)), protosFromTask(capsules(0))(0),
         capsules,
         capsules(0),
         "from ",
         NO_ADD)
-      
+
       val multiRow = new MultiTwoCombos("Displaying prototypes",
-                                        List(r),
-                                        rowFactory(this),
-                                        CLOSE_IF_EMPTY,
-                                        NO_ADD,
-                                        true)
-      
+        List(r),
+        rowFactory(this),
+        CLOSE_IF_EMPTY,
+        NO_ADD,
+        true)
+
       contents += multiRow.panel
       Some(multiRow)
     } else {
@@ -94,19 +94,19 @@ class ToStringHookPanelUI(val executionManager: IExecutionManager) extends Plugi
     }
   }
 
-  def protosFromTask(c: ICapsule): List[IPrototype[_]] =  c.outputs.map{_.prototype}.toList
-  
+  def protosFromTask(c: ICapsule): List[IPrototype[_]] = c.outputs.map { _.prototype }.toList
+
   def saveContent = multiRow match {
-    case Some(multiRow) => 
-      multiRow.content.map{
-        case(capsule, proto) => 
-          new ToStringHookDataUI(executionManager,(proto, capsule))
+    case Some(multiRow) ⇒
+      multiRow.content.map {
+        case (capsule, proto) ⇒
+          new ToStringHookDataUI(executionManager, (proto, capsule))
       }
-    case None => List()
+    case None ⇒ List()
   }
-    
+
   def addHook = multiRow match {
-    case Some(multiRow) => multiRow.addRow
-    case None =>
+    case Some(multiRow) ⇒ multiRow.addRow
+    case None ⇒
   }
 }

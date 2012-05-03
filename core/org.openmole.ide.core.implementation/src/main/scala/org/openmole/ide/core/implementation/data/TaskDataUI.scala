@@ -24,17 +24,17 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import scala.collection.mutable.HashMap
 
 abstract class TaskDataUI extends ITaskDataUI {
-  var inputParameters : scala.collection.mutable.Map[IPrototypeDataProxyUI,String] = HashMap.empty[IPrototypeDataProxyUI,String]
+  var inputParameters: scala.collection.mutable.Map[IPrototypeDataProxyUI, String] = HashMap.empty[IPrototypeDataProxyUI, String]
   var prototypesIn = List.empty[IPrototypeDataProxyUI]
   var prototypesOut = List.empty[IPrototypeDataProxyUI]
-  var implicitPrototypesIn : List[IPrototypeDataProxyUI] = List.empty[IPrototypeDataProxyUI]
-  var implicitPrototypesOut : List[IPrototypeDataProxyUI] = List.empty[IPrototypeDataProxyUI]
-  
-  def filterPrototypeOccurencies(pproxy : IPrototypeDataProxyUI) =
+  var implicitPrototypesIn: List[IPrototypeDataProxyUI] = List.empty[IPrototypeDataProxyUI]
+  var implicitPrototypesOut: List[IPrototypeDataProxyUI] = List.empty[IPrototypeDataProxyUI]
+
+  def filterPrototypeOccurencies(pproxy: IPrototypeDataProxyUI) =
     (prototypesIn.filter(_ == pproxy) ++ prototypesOut.filter(_ == pproxy)).distinct
-  
-  def removePrototypeOccurencies(pproxy : IPrototypeDataProxyUI) = {
-    prototypesIn = prototypesIn.filterNot{_ == pproxy}
-    prototypesOut = prototypesOut.filterNot{_ == pproxy}
+
+  def removePrototypeOccurencies(pproxy: IPrototypeDataProxyUI) = {
+    prototypesIn = prototypesIn.filterNot { _ == pproxy }
+    prototypesOut = prototypesOut.filterNot { _ == pproxy }
   }
 }

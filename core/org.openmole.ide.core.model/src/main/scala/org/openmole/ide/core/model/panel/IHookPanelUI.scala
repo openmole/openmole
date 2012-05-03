@@ -9,6 +9,6 @@ import org.openmole.ide.core.model.data.IHookDataUI
 
 trait IHookPanelUI extends IPanelUI {
   def saveContent: List[IHookDataUI]
-  
+
   def addHook: Unit
 }

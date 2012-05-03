@@ -32,50 +32,51 @@ import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.implementation.workflow.MoleScene
 
 object GUISerializer {
-  
+
   val xstream = new XStream(new DomDriver)
   xstream.registerConverter(new MoleSceneConverter)
-  
+
   xstream.alias("molescene", classOf[MoleScene])
   xstream.alias("data_proxy", classOf[IDataProxyUI])
-  
+
   def serialize(toFile: String) = {
     val writer = new FileWriter(new File(toFile))
-    
+
     //root node
     val out = xstream.createObjectOutputStream(writer, "openmole")
 
     out.writeObject(new SerializedProxys(Proxys.tasks.toSet,
-                                         Proxys.prototypes.toSet,
-                                         Proxys.samplings.toSet,
-                                         Proxys.environments.toSet,
-                                         Proxys.incr.get+1))
+      Proxys.prototypes.toSet,
+      Proxys.samplings.toSet,
+      Proxys.environments.toSet,
+      Proxys.incr.get + 1))
     //molescenes
-    ScenesManager.moleScenes.foreach(ms=>
+    ScenesManager.moleScenes.foreach(ms ⇒
       ms match {
-        case x: BuildMoleScene=> out.writeObject(x)
-        case _=>})
+        case x: BuildMoleScene ⇒ out.writeObject(x)
+        case _ ⇒
+      })
     out.close
   }
-  
+
   def unserialize(fromFile: String) = {
     val reader = new FileReader(new File(fromFile))
     val in = xstream.createObjectInputStream(reader)
-   
+
     Proxys.clearAll
     ScenesManager.closeAll
-    
+
     try {
-      while(true) {
+      while (true) {
         val readObject = in.readObject
-        readObject match{
-          case x: SerializedProxys=> x.loadProxys
-          case x: BuildMoleScene=> {ScenesManager.addBuildSceneContainer(x)}
-          case _=> throw new UserBadDataError("Failed to unserialize object " + readObject.toString)
+        readObject match {
+          case x: SerializedProxys ⇒ x.loadProxys
+          case x: BuildMoleScene ⇒ { ScenesManager.addBuildSceneContainer(x) }
+          case _ ⇒ throw new UserBadDataError("Failed to unserialize object " + readObject.toString)
         }
       }
     } catch {
-      case eof: EOFException => println("Ugly stop condition of Xstream reader !")
+      case eof: EOFException ⇒ println("Ugly stop condition of Xstream reader !")
     } finally {
       in.close
       ScenesManager.connectMode = true

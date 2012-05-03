@@ -20,11 +20,11 @@ package org.openmole.ide.core.model.workflow
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
 trait IDataChannelUI {
-  def source : ICapsuleUI
+  def source: ICapsuleUI
 
   def target: ICapsuleUI
-  
+
   def prototypes: List[IPrototypeDataProxyUI]
-  
+
   def prototypes_=(li: List[IPrototypeDataProxyUI])
 }

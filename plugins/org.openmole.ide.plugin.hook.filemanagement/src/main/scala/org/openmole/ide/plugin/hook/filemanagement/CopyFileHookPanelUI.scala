@@ -34,27 +34,26 @@ import org.openmole.ide.misc.widget.multirow.MultiTwoCombosChooseFileTextField._
 import scala.swing.event.ButtonClicked
 import scala.swing.event.SelectionChanged
 
-object CopyFileHookPanelUI{
-  def rowFactory(hookpanel: CopyFileHookPanelUI) = new Factory[IPrototype[File],ICapsule] {
-    override def apply(row: TwoCombosChooseFileTextFieldRowWidget[IPrototype[File],ICapsule], p: MyPanel) = {
+object CopyFileHookPanelUI {
+  def rowFactory(hookpanel: CopyFileHookPanelUI) = new Factory[IPrototype[File], ICapsule] {
+    override def apply(row: TwoCombosChooseFileTextFieldRowWidget[IPrototype[File], ICapsule], p: MyPanel) = {
       import row._
-      val twocombrow= new TwoCombosChooseFileTextFieldRowWidget(comboContentA,
-                                                                selectedA,
-                                                                inBetweenString1,
-                                                                comboContentB,
-                                                                selectedB,
-                                                                inBetweenString2,
-                                                                filePath,
-                                                                plus) {
+      val twocombrow = new TwoCombosChooseFileTextFieldRowWidget(comboContentA,
+        selectedA,
+        inBetweenString1,
+        comboContentB,
+        selectedB,
+        inBetweenString2,
+        filePath,
+        plus) {
         override def doOnClose = hookpanel.executionManager.commitHook("org.openmole.plugin.hook.filemanagement.CopyFileHook")
       }
-      twocombrow.combo1.selection.reactions += {case SelectionChanged(twocombrow.`combo1`)=>commit}
-      twocombrow.combo2.selection.reactions += {case SelectionChanged(twocombrow.`combo2`)=>commit}
-      twocombrow.refreshButton.reactions += {case ButtonClicked(twocombrow.`refreshButton`)=>commit}
-      
-      
+      twocombrow.combo1.selection.reactions += { case SelectionChanged(twocombrow.`combo1`) ⇒ commit }
+      twocombrow.combo2.selection.reactions += { case SelectionChanged(twocombrow.`combo2`) ⇒ commit }
+      twocombrow.refreshButton.reactions += { case ButtonClicked(twocombrow.`refreshButton`) ⇒ commit }
+
       def commit = hookpanel.executionManager.commitHook("org.openmole.plugin.hook.filemanagement.CopyFileHook")
-      
+
       twocombrow
     }
   }
@@ -62,59 +61,58 @@ object CopyFileHookPanelUI{
 
 import CopyFileHookPanelUI._
 
-class CopyFileHookPanelUI(val executionManager: IExecutionManager) extends PluginPanel("wrap") with IHookPanelUI{
-  val capsules : List[ICapsule]= executionManager.capsuleMapping.values.filter(_.outputs.size > 0).toList
-  
-  val multiRow : Option[MultiTwoCombosChooseFileTextField[IPrototype[File],ICapsule]] = {
-    import  executionManager.prototypeMapping
-    
-    
-  val protosFromTask = 
-    executionManager.prototypeMapping.values.filter(_.`type`.erasure == classOf[File]).map(_.asInstanceOf[IPrototype[File]]).toList
+class CopyFileHookPanelUI(val executionManager: IExecutionManager) extends PluginPanel("wrap") with IHookPanelUI {
+  val capsules: List[ICapsule] = executionManager.capsuleMapping.values.filter(_.outputs.size > 0).toList
+
+  val multiRow: Option[MultiTwoCombosChooseFileTextField[IPrototype[File], ICapsule]] = {
+    import executionManager.prototypeMapping
+
+    val protosFromTask =
+      executionManager.prototypeMapping.values.filter(_.`type`.erasure == classOf[File]).map(_.asInstanceOf[IPrototype[File]]).toList
     // To be uncommented when the ComboBox is fixed 
-  //  c.outputs.map(_.prototype).filter(_.`type`.erasure == classOf[File]).map(_.asInstanceOf[IPrototype[File]]).toList
-  
+    //  c.outputs.map(_.prototype).filter(_.`type`.erasure == classOf[File]).map(_.asInstanceOf[IPrototype[File]]).toList
+
     if (!capsules.isEmpty && !protosFromTask.isEmpty) {
-      val r =  new TwoCombosChooseFileTextFieldRowWidget(//protosFromTask(capsules(0)),
-                                                         //protosFromTask(capsules(0))(0),
-                                                         protosFromTask,
-                                                         protosFromTask.head,
-                                                         "from",
-                                                         capsules,
-                                                         capsules(0),
-                                                         "in",
-                                                         "",
-                                                         NO_ADD)
+      val r = new TwoCombosChooseFileTextFieldRowWidget( //protosFromTask(capsules(0)),
+        //protosFromTask(capsules(0))(0),
+        protosFromTask,
+        protosFromTask.head,
+        "from",
+        capsules,
+        capsules(0),
+        "in",
+        "",
+        NO_ADD)
       val multiRow = new MultiTwoCombosChooseFileTextField("Save prototypes in file",
-                                                             List(r),
-                                                             rowFactory(this),
-                                                             CLOSE_IF_EMPTY,
-                                                             NO_ADD)
-    
+        List(r),
+        rowFactory(this),
+        CLOSE_IF_EMPTY,
+        NO_ADD)
+
       contents += multiRow.panel
       Some(multiRow)
-    } else { 
+    } else {
       StatusBar.inform("No capsule or no prototype is defined")
       None
     }
   }
-  
-  def saveContent = 
+
+  def saveContent =
     multiRow match {
-      case Some(multiRow) => 
+      case Some(multiRow) ⇒
         multiRow.content.map {
-          case (proto, capsule, name) => 
+          case (proto, capsule, name) ⇒
             new CopyFileHookDataUI(executionManager, (capsule, proto, name))
         }
-      case None => List()
+      case None ⇒ List()
     }
-  
-  def addHook = 
+
+  def addHook =
     multiRow match {
-      case Some(multiRow) =>
+      case Some(multiRow) ⇒
         multiRow.addRow
         multiRow.refresh
-      case None =>
+      case None ⇒
     }
 }
 

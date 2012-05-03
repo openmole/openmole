@@ -39,127 +39,129 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import scala.collection.immutable.HashSet
 import scala.collection.mutable.HashMap
 
-class MoleSceneConverter extends Converter{
-  override def marshal(o: Object,writer: HierarchicalStreamWriter,mc: MarshallingContext) = {
-    
+class MoleSceneConverter extends Converter {
+  override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) = {
+
     var firstSlotID = new HashMap[ICapsuleUI, Int]
     var iSlotMapping = new HashMap[IInputSlotWidget, Int]
-    
-    val molescene= o.asInstanceOf[IMoleScene]
+
+    val molescene = o.asInstanceOf[IMoleScene]
     var slotcount = 0
-    
+
     writer.addAttribute("id", molescene.manager.id.toString)
     writer.addAttribute("name", molescene.manager.name)
-    
-    molescene.manager.capsules.values.foreach(view=> {
-        writer.startNode("capsule")
-        writer.addAttribute("start", view.dataUI.startingCapsule.toString)
-        writer.addAttribute("x", String.valueOf(view.x / 2 / Toolkit.getDefaultToolkit.getScreenSize.width))
-        writer.addAttribute("y", String.valueOf(view.y / 2 / Toolkit.getDefaultToolkit.getScreenSize.height))
 
-        //Input slot
-        slotcount+= 1
-        firstSlotID.put(view, slotcount)
-        view.islots.foreach(is=>{ 
-            iSlotMapping += is-> slotcount
-            writer.startNode("islot")
-            writer.addAttribute("id",slotcount.toString)
-            writer.endNode
-            slotcount+= 1
-          })
-        
-        //Output slot
-        writer.startNode("oslot")
+    molescene.manager.capsules.values.foreach(view ⇒ {
+      writer.startNode("capsule")
+      writer.addAttribute("start", view.dataUI.startingCapsule.toString)
+      writer.addAttribute("x", String.valueOf(view.x / 2 / Toolkit.getDefaultToolkit.getScreenSize.width))
+      writer.addAttribute("y", String.valueOf(view.y / 2 / Toolkit.getDefaultToolkit.getScreenSize.height))
+
+      //Input slot
+      slotcount += 1
+      firstSlotID.put(view, slotcount)
+      view.islots.foreach(is ⇒ {
+        iSlotMapping += is -> slotcount
+        writer.startNode("islot")
         writer.addAttribute("id", slotcount.toString)
         writer.endNode
-        
-        //Environment
-        view.dataUI.environment match {
-          case Some(x:IEnvironmentDataProxyUI)=> 
-            writer.startNode("environment")
-            writer.addAttribute("id",x.id.toString)
-            writer.endNode
-          case _=>
-        }
-        
-        //Task
-        view.dataUI.task match {
-          case Some(x:ITaskDataProxyUI)=> 
-            writer.startNode("task");
-            writer.addAttribute("id", x.id.toString)
-            writer.endNode
-          case _=>
-        }
-        
-        writer.endNode
+        slotcount += 1
       })
-    
+
+      //Output slot
+      writer.startNode("oslot")
+      writer.addAttribute("id", slotcount.toString)
+      writer.endNode
+
+      //Environment
+      view.dataUI.environment match {
+        case Some(x: IEnvironmentDataProxyUI) ⇒
+          writer.startNode("environment")
+          writer.addAttribute("id", x.id.toString)
+          writer.endNode
+        case _ ⇒
+      }
+
+      //Task
+      view.dataUI.task match {
+        case Some(x: ITaskDataProxyUI) ⇒
+          writer.startNode("task");
+          writer.addAttribute("id", x.id.toString)
+          writer.endNode
+        case _ ⇒
+      }
+
+      writer.endNode
+    })
+
     //Transitions
-    molescene.manager.transitions.foreach(trans=> {
-        writer.startNode("transition")
-        writer.addAttribute("source",(firstSlotID(trans.source) + trans.source.nbInputSlots).toString)
-        writer.addAttribute("target", iSlotMapping(trans.target).toString)
-        writer.addAttribute("type", TransitionType.toString(trans.transitionType))
-        writer.addAttribute("condition", trans.condition.getOrElse(""))
-        writer.endNode
-      })
-    
+    molescene.manager.transitions.foreach(trans ⇒ {
+      writer.startNode("transition")
+      writer.addAttribute("source", (firstSlotID(trans.source) + trans.source.nbInputSlots).toString)
+      writer.addAttribute("target", iSlotMapping(trans.target).toString)
+      writer.addAttribute("type", TransitionType.toString(trans.transitionType))
+      writer.addAttribute("condition", trans.condition.getOrElse(""))
+      writer.endNode
+    })
+
     //Data channels
-    molescene.manager.dataChannels.foreach(dc => {
-        writer.startNode("datachannel")
-        writer.addAttribute("source",(firstSlotID(dc.source)).toString)
-        writer.addAttribute("target",(firstSlotID(dc.target)).toString)
-        dc.prototypes.foreach{p=>writer.startNode("prototype")
-                              writer.addAttribute("id",p.id.toString)
-                              writer.endNode}
+    molescene.manager.dataChannels.foreach(dc ⇒ {
+      writer.startNode("datachannel")
+      writer.addAttribute("source", (firstSlotID(dc.source)).toString)
+      writer.addAttribute("target", (firstSlotID(dc.target)).toString)
+      dc.prototypes.foreach { p ⇒
+        writer.startNode("prototype")
+        writer.addAttribute("id", p.id.toString)
         writer.endNode
-      })
+      }
+      writer.endNode
+    })
   }
-  
-  override def unmarshal(reader: HierarchicalStreamReader,uc: UnmarshallingContext) =  {
+
+  override def unmarshal(reader: HierarchicalStreamReader, uc: UnmarshallingContext) = {
     var oslots = new HashMap[String, ICapsuleUI]
     var islots = new HashMap[String, IInputSlotWidget]
-    
+
     val scene = new BuildMoleScene(reader.getAttribute("name"),
-                                   reader.getAttribute("id").toInt)
-    
+      reader.getAttribute("id").toInt)
+
     //Capsules
     while (reader.hasMoreChildren) {
       reader.moveDown
       val n0 = reader.getNodeName
       n0 match {
-        case "capsule"=> {
-            val p= new Point
-            p.setLocation(reader.getAttribute("x").toDouble * Toolkit.getDefaultToolkit.getScreenSize.width, 
-                          reader.getAttribute("y").toDouble * Toolkit.getDefaultToolkit.getScreenSize.height)
-            val caps = SceneItemFactory.createCapsule(scene, p)
-            
-            val start = reader.getAttribute("start").toBoolean
-            start match {
-              case true => scene.manager.startingCapsule = Some(caps)
-              case false =>
-            }
-                        
-            while (reader.hasMoreChildren) {
-              reader.moveDown
-              val n1= reader.getNodeName
-              n1 match{
-                case "islot"=> islots.put(reader.getAttribute("id"), caps.addInputSlot(start))
-                case "oslot"=> oslots.put(reader.getAttribute("id"), caps)
-                case "task"=> caps.encapsule(Proxys.tasks.filter(p=> p.id == reader.getAttribute("id").toInt).head)  
-                case "environment"=> caps.setEnvironment(Some(Proxys.environments.filter(e=> e.id == reader.getAttribute("id").toInt).head))
-                case _=> StatusBar.block("Unknown balise "+ n1)
-              }
-              reader.moveUp
-            }     
+        case "capsule" ⇒ {
+          val p = new Point
+          p.setLocation(reader.getAttribute("x").toDouble * Toolkit.getDefaultToolkit.getScreenSize.width,
+            reader.getAttribute("y").toDouble * Toolkit.getDefaultToolkit.getScreenSize.height)
+          val caps = SceneItemFactory.createCapsule(scene, p)
+
+          val start = reader.getAttribute("start").toBoolean
+          start match {
+            case true ⇒ scene.manager.startingCapsule = Some(caps)
+            case false ⇒
           }
-        case "transition"=> 
+
+          while (reader.hasMoreChildren) {
+            reader.moveDown
+            val n1 = reader.getNodeName
+            n1 match {
+              case "islot" ⇒ islots.put(reader.getAttribute("id"), caps.addInputSlot(start))
+              case "oslot" ⇒ oslots.put(reader.getAttribute("id"), caps)
+              case "task" ⇒ caps.encapsule(Proxys.tasks.filter(p ⇒ p.id == reader.getAttribute("id").toInt).head)
+              case "environment" ⇒ caps.setEnvironment(Some(Proxys.environments.filter(e ⇒ e.id == reader.getAttribute("id").toInt).head))
+              case _ ⇒ StatusBar.block("Unknown balise " + n1)
+            }
+            reader.moveUp
+          }
+        }
+        case "transition" ⇒
           ScenesManager.connectMode = true
-          SceneItemFactory.createTransition(scene, 
-                                            oslots(reader.getAttribute("source")), 
-                                            islots(reader.getAttribute("target")), 
-                                            TransitionType.fromString(reader.getAttribute("type")),Some(reader.getAttribute("condition")))
-        case "datachannel"=>     
+          SceneItemFactory.createTransition(scene,
+            oslots(reader.getAttribute("source")),
+            islots(reader.getAttribute("target")),
+            TransitionType.fromString(reader.getAttribute("type")), Some(reader.getAttribute("condition")))
+        case "datachannel" ⇒
           ScenesManager.connectMode = false
           val source = islots(reader.getAttribute("source")).capsule
           val target = islots(reader.getAttribute("target")).capsule
@@ -167,23 +169,23 @@ class MoleSceneConverter extends Converter{
           while (reader.hasMoreChildren) {
             reader.moveDown
             val p = reader.getNodeName
-            p match { 
-              case "prototype"=> protoIds += reader.getAttribute("id").toInt
-              case _=> StatusBar.block("Unknown balise "+ p)
+            p match {
+              case "prototype" ⇒ protoIds += reader.getAttribute("id").toInt
+              case _ ⇒ StatusBar.block("Unknown balise " + p)
             }
             reader.moveUp
           }
-          Proxys.prototypes.filter{p=>protoIds.contains(p.id)}.toList.foreach(println)
-          SceneItemFactory.createDataChannel(scene, 
-                                             source,
-                                             target,
-                                             Proxys.prototypes.filter{p=>protoIds.contains(p.id)}.toList)
-        case _=> StatusBar.block("Unknown balise "+ n0)        
+          Proxys.prototypes.filter { p ⇒ protoIds.contains(p.id) }.toList.foreach(println)
+          SceneItemFactory.createDataChannel(scene,
+            source,
+            target,
+            Proxys.prototypes.filter { p ⇒ protoIds.contains(p.id) }.toList)
+        case _ ⇒ StatusBar.block("Unknown balise " + n0)
       }
       reader.moveUp
     }
     scene
   }
-  
+
   override def canConvert(t: Class[_]) = t.equals(classOf[BuildMoleScene])
 }

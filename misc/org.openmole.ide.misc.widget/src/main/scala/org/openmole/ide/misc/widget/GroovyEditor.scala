@@ -22,13 +22,13 @@ import jsyntaxpane.DefaultSyntaxKit
 import scala.swing.EditorPane
 import scala.swing.ScrollPane
 
-class GroovyEditor extends ScrollPane{
+class GroovyEditor extends ScrollPane {
   val editor = new EditorPane
   viewportView = editor
   editor.contentType = "text/groovy"
   editor.editorKit = new DefaultSyntaxKit(new GroovyLexer)
-  
-  override def enabled_=(b : Boolean) : Unit = {
+
+  override def enabled_=(b: Boolean): Unit = {
     super.enabled = b
     editor.enabled = b
   }

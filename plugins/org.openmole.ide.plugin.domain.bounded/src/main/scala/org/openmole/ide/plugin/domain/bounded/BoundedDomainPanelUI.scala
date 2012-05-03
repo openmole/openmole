@@ -22,17 +22,17 @@ import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
 import scala.swing.TextField
 
-class BoundedDomainPanelUI (bud: BoundedDomainDataUI) extends PluginPanel("fillx","[left][grow,fill]","") with IBoundedDomainPanelUI{
-  val minField = new TextField(6) {text = bud.min}
-  val maxField = new TextField(6) {text = bud.max}
-    
-  contents+= (new Label("Min"),"gap para")
-  contents+= minField
-  contents+= (new Label("Max"),"gap para")
-  contents+=  maxField
-  
+class BoundedDomainPanelUI(bud: BoundedDomainDataUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IBoundedDomainPanelUI {
+  val minField = new TextField(6) { text = bud.min }
+  val maxField = new TextField(6) { text = bud.max }
+
+  contents += (new Label("Min"), "gap para")
+  contents += minField
+  contents += (new Label("Max"), "gap para")
+  contents += maxField
+
   def saveContent(name: String) = new BoundedDomainDataUI(name,
-                                                          minField.text,
-                                                          maxField.text)
-  
+    minField.text,
+    maxField.text)
+
 }

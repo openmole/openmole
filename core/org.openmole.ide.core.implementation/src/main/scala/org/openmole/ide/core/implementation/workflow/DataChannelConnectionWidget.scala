@@ -35,52 +35,52 @@ import org.openmole.ide.misc.widget._
 import scala.swing.Action
 import org.openmole.ide.misc.tools.image.Images._
 
-class DataChannelConnectionWidget(scene: IMoleScene, val dataChannelUI: IDataChannelUI) extends ConnectionWidget(scene.graphScene){
-  
-  setLineColor(new Color(188,188,188))
-  setStroke(new BasicStroke(6, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,20.0f, List(10.0f).toArray, 0.0f))
-  
-  setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(OUTPUT_DATA_CHANNEL,false))
-  setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(INPUT_DATA_CHANNEL,false))
+class DataChannelConnectionWidget(scene: IMoleScene, val dataChannelUI: IDataChannelUI) extends ConnectionWidget(scene.graphScene) {
+
+  setLineColor(new Color(188, 188, 188))
+  setStroke(new BasicStroke(6, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 20.0f, List(10.0f).toArray, 0.0f))
+
+  setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(OUTPUT_DATA_CHANNEL, false))
+  setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(INPUT_DATA_CHANNEL, false))
   var labeled = false
-  
-  val componentWidget = new PrototypeWidget(scene,new LinkLabel(DataChannelConnectionWidget.this.dataChannelUI.prototypes.size.toString,
-                                 new Action("") { def apply = edit},10))
+
+  val componentWidget = new PrototypeWidget(scene, new LinkLabel(DataChannelConnectionWidget.this.dataChannelUI.prototypes.size.toString,
+    new Action("") { def apply = edit }, 10))
   setConstraint(componentWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
   componentWidget.setOpaque(true)
   addChild(componentWidget)
   scene.refresh
-  
-  def edit : Unit= {
+
+  def edit: Unit = {
     DataChannelDialog.display(DataChannelConnectionWidget.this)
     scene.refresh
   }
-  
-  class PrototypeWidget(scene: IMoleScene,val link: LinkLabel) extends ComponentWidget(scene.graphScene,link.peer) {
+
+  class PrototypeWidget(scene: IMoleScene, val link: LinkLabel) extends ComponentWidget(scene.graphScene, link.peer) {
     link.foreground = Color.WHITE
     val dim = 30
     val pos = link.size.width / 2 + 1
-    setPreferredBounds(new Rectangle(dim,dim))
-    
+    setPreferredBounds(new Rectangle(dim, dim))
+
     override def paintBackground = {
       val g = scene.graphScene.getGraphics
       g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                         RenderingHints.VALUE_ANTIALIAS_ON)
+        RenderingHints.VALUE_ANTIALIAS_ON)
       g.setColor(new Color(0, 0, 0, 180))
-      g.fillOval(pos,pos, dim, dim)
+      g.fillOval(pos, pos, dim, dim)
       link.text = DataChannelConnectionWidget.this.dataChannelUI.prototypes.size.toString
       revalidate
     }
-    
+
     override def paintBorder = {
       val g = scene.graphScene.getGraphics
       g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                         RenderingHints.VALUE_ANTIALIAS_ON)
+        RenderingHints.VALUE_ANTIALIAS_ON)
       g.setStroke(new BasicStroke(3f))
-      g.setColor(new Color(200,200,200))
-      g.drawOval(pos,pos, dim-2,dim-2)
+      g.setColor(new Color(200, 200, 200))
+      g.drawOval(pos, pos, dim - 2, dim - 2)
       revalidate
     }
   }
-  
+
 }

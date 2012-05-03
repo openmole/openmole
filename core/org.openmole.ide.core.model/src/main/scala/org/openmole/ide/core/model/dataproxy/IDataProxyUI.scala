@@ -19,10 +19,10 @@ package org.openmole.ide.core.model.dataproxy
 
 import org.openmole.ide.core.model.data.IDataUI
 
-trait IDataProxyUI{
+trait IDataProxyUI {
   def id: Int
-  
+
   def dataUI: IDataUI
-  
+
   override def toString = dataUI.name
 }

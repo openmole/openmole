@@ -24,21 +24,21 @@ import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.commons.TransitionType._
 
 trait ICapsuleDataUI {
-  def task : Option[ITaskDataProxyUI]  
-  
-  def task_=(t : Option[ITaskDataProxyUI])
+  def task: Option[ITaskDataProxyUI]
 
-  def sampling : Option[ISamplingDataProxyUI]  
+  def task_=(t: Option[ITaskDataProxyUI])
+
+  def sampling: Option[ISamplingDataProxyUI]
 
   def sampling_=(s: Option[ISamplingDataProxyUI])
 
-  def environment : Option[IEnvironmentDataProxyUI]  
+  def environment: Option[IEnvironmentDataProxyUI]
 
-  def environment_=(e : Option[IEnvironmentDataProxyUI] )
+  def environment_=(e: Option[IEnvironmentDataProxyUI])
 
-  def startingCapsule : Boolean
-  
-  def startingCapsule_=(sc : Boolean)
+  def startingCapsule: Boolean
 
-  def transitionType : TransitionType.Value 
+  def startingCapsule_=(sc: Boolean)
+
+  def transitionType: TransitionType.Value
 }

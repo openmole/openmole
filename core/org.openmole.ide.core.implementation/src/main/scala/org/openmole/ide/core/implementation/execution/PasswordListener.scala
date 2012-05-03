@@ -28,8 +28,8 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.workspace.Workspace
 
 object PasswordListner {
-  
-  lazy val apply = {  
+
+  lazy val apply = {
     EventDispatcher.listen(Workspace.instance, new PasswordListener, classOf[Workspace.PasswordRequired])
     Unit
   }
@@ -38,18 +38,17 @@ object PasswordListner {
 class PasswordListener extends EventListener[Workspace] {
   override def triggered(obj: Workspace, event: Event[Workspace]): Unit = {
     event match {
-      case event: Workspace.PasswordRequired =>
+      case event: Workspace.PasswordRequired ⇒
         try {
           val dd = new DialogDescriptor(PasswordDialog.panel.peer, "Preferences access")
           val result = DialogDisplayer.getDefault.notify(dd)
           if (result == NotifyDescriptor.OK_OPTION) PasswordDialog.ok(true)
           else PasswordDialog.ok(false)
+        } catch {
+          case e: UserBadDataError ⇒ StatusBar.warn("The preference password is not set. All the actions requiring encrypted data are unvailable")
+          case x ⇒ println(" other exception " + x)
         }
-        catch {
-          case e: UserBadDataError => StatusBar.warn("The preference password is not set. All the actions requiring encrypted data are unvailable")
-          case x => println(" other exception " + x)
-        }
-      case _ => 
+      case _ ⇒
     }
 
   }

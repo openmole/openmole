@@ -30,30 +30,30 @@ import BasePanelUI._
 
 class SamplingPanelUI(proxy: ISamplingDataProxyUI,
                       scene: IMoleScene,
-                      mode: Value = CREATION) extends BasePanelUI(proxy, scene,mode,new Color(80,118,152)){
+                      mode: Value = CREATION) extends BasePanelUI(proxy, scene, mode, new Color(80, 118, 152)) {
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
   val panelUI = proxy.dataUI.buildPanelUI
   mainPanel.contents += panelUI.peer
-  
+
   def create = {
     Proxys.samplings += proxy
     ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
-  
+
   def delete = {
-    val toBeRemovedSamplings  = ScenesManager.explorationCapsules.filter{case(c,d) => d.sampling == Some(proxy)}
+    val toBeRemovedSamplings = ScenesManager.explorationCapsules.filter { case (c, d) ⇒ d.sampling == Some(proxy) }
     toBeRemovedSamplings match {
-      case Nil => 
+      case Nil ⇒
         scene.closePropertyPanel
         Proxys.samplings -= proxy
         ConceptMenu.removeItem(proxy)
-      case _ => 
+      case _ ⇒
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
-          toBeRemovedSamplings.foreach{case(c,d) => c.scene.graphScene.removeNodeWithEdges(c.scene.manager.removeCapsuleUI(c))}
+          toBeRemovedSamplings.foreach { case (c, d) ⇒ c.scene.graphScene.removeNodeWithEdges(c.scene.manager.removeCapsuleUI(c)) }
           delete
         }
     }
   }
-  
+
   def save = proxy.dataUI = panelUI.saveContent(nameTextField.text)
 }

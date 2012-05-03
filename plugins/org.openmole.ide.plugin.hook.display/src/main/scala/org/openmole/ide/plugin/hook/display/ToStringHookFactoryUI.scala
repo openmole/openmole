@@ -23,8 +23,8 @@ import org.openmole.ide.core.model.factory.IHookFactoryUI
 
 class ToStringHookFactoryUI extends IHookFactoryUI {
   def buildPanelUI(executionManager: IExecutionManager) = new ToStringHookPanelUI(executionManager)
-  
+
   def coreClass = classOf[ToStringHook]
-  
+
   override def toString = "Display prototypes"
-}            
+}

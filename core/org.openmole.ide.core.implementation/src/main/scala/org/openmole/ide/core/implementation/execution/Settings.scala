@@ -18,5 +18,5 @@
 package org.openmole.ide.core.implementation.execution
 
 object Settings {
-var currentProject: Option[String] = None
+  var currentProject: Option[String] = None
 }

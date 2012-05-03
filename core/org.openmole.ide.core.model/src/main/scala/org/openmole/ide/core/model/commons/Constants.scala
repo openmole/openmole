@@ -16,13 +16,13 @@
  */
 package org.openmole.ide.core.model.commons
 
-object Constants{
-  val MOVE= "move"
+object Constants {
+  val MOVE = "move"
   val SELECT = "connect"
   val CONNECT = "connect"
   val RECONNECT = "connect"
-  
-  val TASK_CONTAINER_WIDTH= 100
-  val TASK_CONTAINER_HEIGHT= 120
-  val TASK_TITLE_HEIGHT= 20
+
+  val TASK_CONTAINER_WIDTH = 100
+  val TASK_CONTAINER_HEIGHT = 120
+  val TASK_TITLE_HEIGHT = 20
 }

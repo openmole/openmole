@@ -20,10 +20,10 @@ package org.openmole.ide.core.model.factory
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.panel.IGroupingPanelUI
 
-trait IGroupingFactoryUI extends IFactoryUI{
+trait IGroupingFactoryUI extends IFactoryUI {
   override def displayName: String = ""
-  
-  def coreClass : Class[_]
-  
+
+  def coreClass: Class[_]
+
   def buildPanelUI(executionManager: IExecutionManager): IGroupingPanelUI
 }

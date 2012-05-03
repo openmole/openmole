@@ -25,23 +25,24 @@ import scala.swing.TextField
 import scala.swing.event.MousePressed
 import scala.collection.JavaConversions._
 
-class ChooseFileTextField(initialText: String, chooserTitle: String, chooserDescription: Option[String], selectionMode: Value,extensions: Option[String] ) extends TextField {
-  def this(iT:String,cT:String,cD:String,ex:String) = this(iT,cT,Some(cD),FilesOnly,Some(ex))
-  def this(iT:String,cT:String) = this(iT,cT,None,FilesOnly,None)
-  def this(iT:String) = this(iT,"Select a directory",None,DirectoriesOnly,None)
-  
+class ChooseFileTextField(initialText: String, chooserTitle: String, chooserDescription: Option[String], selectionMode: Value, extensions: Option[String]) extends TextField {
+  def this(iT: String, cT: String, cD: String, ex: String) = this(iT, cT, Some(cD), FilesOnly, Some(ex))
+  def this(iT: String, cT: String) = this(iT, cT, None, FilesOnly, None)
+  def this(iT: String) = this(iT, "Select a directory", None, DirectoriesOnly, None)
+
   text = initialText
   val fc = new FileChooser {
-    if (chooserDescription.isDefined) fileFilter = new FileNameExtensionFilter(chooserDescription.get,extensions.get)
+    if (chooserDescription.isDefined) fileFilter = new FileNameExtensionFilter(chooserDescription.get, extensions.get)
     fileSelectionMode = selectionMode
     title = chooserTitle
   }
-  
+
   reactions += {
-    case e: MousePressed => 
-      if(e.clicks == 2) {
-        if (fc.showDialog(this,"OK") == Approve) text = fc.selectedFile.getPath
-        publish(new DialogClosedEvent(this))}
+    case e: MousePressed ⇒
+      if (e.clicks == 2) {
+        if (fc.showDialog(this, "OK") == Approve) text = fc.selectedFile.getPath
+        publish(new DialogClosedEvent(this))
+      }
   }
   columns = 15
   listenTo(this.mouse.clicks)

@@ -21,14 +21,14 @@ import org.openmole.ide.core.model.commons.TransitionType
 
 trait ITransitionUI {
   def source: ICapsuleUI
-  
+
   def target: IInputSlotWidget
-  
+
   def condition: Option[String]
-  
-  def condition_=(c:Option[String])
-  
+
+  def condition_=(c: Option[String])
+
   def transitionType: TransitionType.Value
-  
-  def transitionType_=(t:TransitionType.Value)
+
+  def transitionType_=(t: TransitionType.Value)
 }

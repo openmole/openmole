@@ -19,8 +19,8 @@ package org.openmole.ide.core.model.dataproxy
 
 import org.openmole.ide.core.model.data.ISamplingDataUI
 
-trait ISamplingDataProxyUI extends IDataProxyUI{
+trait ISamplingDataProxyUI extends IDataProxyUI {
   def dataUI_=(d: ISamplingDataUI)
-  
-  override def dataUI: ISamplingDataUI 
+
+  override def dataUI: ISamplingDataUI
 }

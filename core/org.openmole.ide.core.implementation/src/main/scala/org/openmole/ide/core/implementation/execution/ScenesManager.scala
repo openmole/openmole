@@ -39,94 +39,96 @@ import scala.swing.TabbedPane
 object ScenesManager {
 
   val tabPane = new TabbedPane
-  
-  var countBuild = new AtomicInteger  
-  var countExec = new AtomicInteger  
+
+  var countBuild = new AtomicInteger
+  var countExec = new AtomicInteger
   var connectMode = true
   PasswordListner.apply
-  
+
   def buildMoleSceneContainers = tabPane.pages.flatMap(_.content match {
-      case x : BuildMoleSceneContainer => List(x)
-      case _ => Nil
-    }
-  )
-  
-  def currentSceneContainer : Option[ISceneContainer] =  {
+    case x: BuildMoleSceneContainer ⇒ List(x)
+    case _ ⇒ Nil
+  })
+
+  def currentSceneContainer: Option[ISceneContainer] = {
     if (tabPane.peer.getTabCount == 0) None
     else tabPane.selection.page.content match {
-      case x : ISceneContainer => Some(x)
-      case _ => None
+      case x: ISceneContainer ⇒ Some(x)
+      case _ ⇒ None
     }
   }
-  
+
   def closeAll = tabPane.pages.clear
-  
+
   def saveCurrentPropertyWidget = currentSceneContainer match {
-    case Some(x : ISceneContainer) => x.scene.savePropertyPanel
-    case _ => None
+    case Some(x: ISceneContainer) ⇒ x.scene.savePropertyPanel
+    case _ ⇒ None
   }
-  
-  def moleScenes = buildMoleSceneContainers.map{_.scene}
-  
-  def capsules : List[ICapsuleUI] = moleScenes.map{_.manager.capsules.values}.toList.flatten
-  
-  def capsules(p : ITaskDataProxyUI) = moleScenes.flatMap{
+
+  def moleScenes = buildMoleSceneContainers.map { _.scene }
+
+  def capsules: List[ICapsuleUI] = moleScenes.map { _.manager.capsules.values }.toList.flatten
+
+  def capsules(p: ITaskDataProxyUI) = moleScenes.flatMap {
     _.manager.capsules.values
-  }.filter{
+  }.filter {
     _.dataUI.task.isDefined
-  }.filter{
+  }.filter {
     p == _.dataUI.task.get
   }
-  
-  def explorationCapsules = moleScenes.flatMap{
+
+  def explorationCapsules = moleScenes.flatMap {
     _.manager.capsules.values
-  }.filter{
+  }.filter {
     _.dataUI.task.isDefined
-  }.flatMap{c => c.dataUI.task.get.dataUI match {
-      case x : IExplorationTaskDataUI => List((c,x))
-      case _ => Nil
+  }.flatMap { c ⇒
+    c.dataUI.task.get.dataUI match {
+      case x: IExplorationTaskDataUI ⇒ List((c, x))
+      case _ ⇒ Nil
     }
   }.toList
-    
-  def addBuildSceneContainer : BuildMoleSceneContainer = addBuildSceneContainer(new BuildMoleScene(""))
-  
-  def addBuildSceneContainer(name: String) : BuildMoleSceneContainer = addBuildSceneContainer(new BuildMoleScene(name))
-  
-  def addBuildSceneContainer(ms: BuildMoleScene) : BuildMoleSceneContainer = {
+
+  def addBuildSceneContainer: BuildMoleSceneContainer = addBuildSceneContainer(new BuildMoleScene(""))
+
+  def addBuildSceneContainer(name: String): BuildMoleSceneContainer = addBuildSceneContainer(new BuildMoleScene(name))
+
+  def addBuildSceneContainer(ms: BuildMoleScene): BuildMoleSceneContainer = {
     val container = new BuildMoleSceneContainer(ms)
-    val page = new TabbedPane.Page(ms.manager.name,container)
-    addTab(page,ms.manager.name,new Action(""){override def apply = {
-          container.stopAndCloseExecutions
-          tabPane.pages.remove(page.index)
-        }})
+    val page = new TabbedPane.Page(ms.manager.name, container)
+    addTab(page, ms.manager.name, new Action("") {
+      override def apply = {
+        container.stopAndCloseExecutions
+        tabPane.pages.remove(page.index)
+      }
+    })
     container
   }
-  
-  def addExecutionSceneContainer(bmsc : BuildMoleSceneContainer) = {
+
+  def addExecutionSceneContainer(bmsc: BuildMoleSceneContainer) = {
     CheckData.fullCheck(bmsc.scene.manager)
     val clone = bmsc.scene.copy
-    clone.manager.name = { bmsc.scene.manager.name+"_"+countExec.incrementAndGet }
-    val page = new TabbedPane.Page(clone.manager.name,new MigPanel(""))
-    val container = new ExecutionMoleSceneContainer(clone,page)
+    clone.manager.name = { bmsc.scene.manager.name + "_" + countExec.incrementAndGet }
+    val page = new TabbedPane.Page(clone.manager.name, new MigPanel(""))
+    val container = new ExecutionMoleSceneContainer(clone, page)
     page.content = container
     bmsc.executionMoleSceneContainers += container
-    addTab(page,clone.manager.name,new Action(""){override def apply = tabPane.pages.remove(page.index)})
+    addTab(page, clone.manager.name, new Action("") { override def apply = tabPane.pages.remove(page.index) })
     tabPane.selection.index = page.index
   }
-  
-  def addTab(page : TabbedPane.Page,title : String, action : Action) = {
+
+  def addTab(page: TabbedPane.Page, title: String, action: Action) = {
     tabPane.pages += page
-    tabPane.peer.setTabComponentAt(tabPane.peer.getTabCount - 1, new CloseableTab(title,page,action).peer)
+    tabPane.peer.setTabComponentAt(tabPane.peer.getTabCount - 1, new CloseableTab(title, page, action).peer)
   }
-  
-  class CloseableTab(title : String,
-                     page : TabbedPane.Page,
-                     action : Action) extends MigPanel("") {
-    background = new Color(0,0,0,0)
+
+  class CloseableTab(title: String,
+                     page: TabbedPane.Page,
+                     action: Action) extends MigPanel("") {
+    background = new Color(0, 0, 0, 0)
     contents += new Label(title)
-    contents += new Button(action){
-      preferredSize = new Dimension(20,20)
-      maximumSize = new Dimension(20,20)
+    contents += new Button(action) {
+      preferredSize = new Dimension(20, 20)
+      maximumSize = new Dimension(20, 20)
       icon = CLOSE_TAB
     }
   }

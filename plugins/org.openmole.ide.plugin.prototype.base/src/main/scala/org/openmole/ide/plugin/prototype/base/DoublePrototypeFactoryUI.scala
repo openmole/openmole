@@ -22,13 +22,13 @@ import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
 class DoublePrototypeFactoryUI extends IPrototypeFactoryUI[Double] {
-  
+
   override def displayName = "Double"
-  
+
   def buildDataUI = new DoublePrototypeDataUI
-  
+
   //FIXME :: change 0 by correct value for dimension
-  def buildDataUI(prototype : IPrototype[_]) = new DoublePrototypeDataUI(prototype.name,0)
-  
+  def buildDataUI(prototype: IPrototype[_]) = new DoublePrototypeDataUI(prototype.name, 0)
+
   def category = ComponentCategories.PROTOTYPE
 }

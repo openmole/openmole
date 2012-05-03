@@ -20,11 +20,10 @@ package org.openmole.ide.plugin.task.stat
 import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
-
 class MedianTaskFactoryUI extends ITaskFactoryUI {
   override def displayName = "Median"
-  
+
   def buildDataUI = new MedianTaskDataUI
-  
+
   def category = ComponentCategories.STAT_TASK
 }

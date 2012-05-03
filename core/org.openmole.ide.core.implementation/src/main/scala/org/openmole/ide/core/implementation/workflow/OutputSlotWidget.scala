@@ -23,11 +23,11 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.tools.image.Images._
 
-class OutputSlotWidget(scene: IMoleScene,val capsule: ICapsuleUI)   extends SlotWidget(scene.graphScene){
-  setPreferredLocation(new Point(TASK_CONTAINER_WIDTH,24 + TASK_TITLE_HEIGHT))
-  
+class OutputSlotWidget(scene: IMoleScene, val capsule: ICapsuleUI) extends SlotWidget(scene.graphScene) {
+  setPreferredLocation(new Point(TASK_CONTAINER_WIDTH, 24 + TASK_TITLE_HEIGHT))
+
   scene match {
-    case x: ExecutionMoleScene=> setImage(OUTPUT_EXE_SLOT)
-    case _=>setImage(OUTPUT_SLOT)
+    case x: ExecutionMoleScene ⇒ setImage(OUTPUT_EXE_SLOT)
+    case _ ⇒ setImage(OUTPUT_SLOT)
   }
 }

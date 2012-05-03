@@ -17,9 +17,9 @@
 
 package org.openmole.ide.osgi.netlogo
 
-import org.openmole.plugin.task.netlogo.{NetLogo => NetLogoCore}
+import org.openmole.plugin.task.netlogo.{ NetLogo ⇒ NetLogoCore }
 
 trait NetLogo extends NetLogoCore {
   @throws(classOf[Exception])
-  def globals : Array[String]
+  def globals: Array[String]
 }

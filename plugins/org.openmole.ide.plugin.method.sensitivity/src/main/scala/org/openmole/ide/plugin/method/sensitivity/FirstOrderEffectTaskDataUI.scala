@@ -12,11 +12,11 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.task.IPluginSet
 import org.openmole.ide.core.implementation.data.TaskDataUI
 
-class FirstOrderEffectTaskDataUI(val name: String="")
-                                      //val matrixName: IPrototype[String],
-                                    //  val modelInputs: Iterable[IPrototype[Double]],
-                                    //  val modelOutputs: Iterable[IPrototype[Double]]) extends TaskDataUI {
-  
+class FirstOrderEffectTaskDataUI(val name: String = "")
+//val matrixName: IPrototype[String],
+//  val modelInputs: Iterable[IPrototype[Double]],
+//  val modelOutputs: Iterable[IPrototype[Double]]) extends TaskDataUI {
+
 //  def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = {
 //    val builder = 
 //      builder addInput inputs

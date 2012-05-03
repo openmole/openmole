@@ -27,17 +27,17 @@ class SerializedProxys(val task: Set[ITaskDataProxyUI],
                        val environment: Set[IEnvironmentDataProxyUI],
                        val incr: Int) {
   def this() = this(Proxys.tasks.toSet,
-              Proxys.prototypes.toSet,
-              Proxys.samplings.toSet,
-              Proxys.environments.toSet,
-              0)
-    
+    Proxys.prototypes.toSet,
+    Proxys.samplings.toSet,
+    Proxys.environments.toSet,
+    0)
+
   def loadProxys = {
-    task.foreach{t=>Proxys.tasks += t; ConceptMenu.taskMenu.popup.contents += ConceptMenu.addItem(t)}
-    prototype.foreach{p=>Proxys.prototypes+= p; if(!p.generated) ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(p)}
-    sampling.foreach{s=>Proxys.samplings += s; ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(s)}
-    environment.foreach{e=>Proxys.environments+= e; ConceptMenu.environmentMenu.popup.contents += ConceptMenu.addItem(e)}
+    task.foreach { t ⇒ Proxys.tasks += t; ConceptMenu.taskMenu.popup.contents += ConceptMenu.addItem(t) }
+    prototype.foreach { p ⇒ Proxys.prototypes += p; if (!p.generated) ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(p) }
+    sampling.foreach { s ⇒ Proxys.samplings += s; ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(s) }
+    environment.foreach { e ⇒ Proxys.environments += e; ConceptMenu.environmentMenu.popup.contents += ConceptMenu.addItem(e) }
     Proxys.incr.set(incr)
   }
-  
+
 }

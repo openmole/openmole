@@ -24,14 +24,14 @@ import org.openmole.ide.core.model.provider.IGenericMenuProvider
 
 object PopupMenuProviderFactory {
 
-  def fillPopupMenu(gmp: IGenericMenuProvider)= {
+  def fillPopupMenu(gmp: IGenericMenuProvider) = {
     val popupMenu = new JPopupMenu
     gmp.menus.foreach(popupMenu.add(_))
     gmp.items.foreach(popupMenu.add(_))
     popupMenu
   }
-  
-  def addSubMenu(subMenuTitle: String, its: Set[JMenuItem])= {
+
+  def addSubMenu(subMenuTitle: String, its: Set[JMenuItem]) = {
     val subMenu = new JMenu(subMenuTitle)
     its.foreach(subMenu.add(_))
     subMenu

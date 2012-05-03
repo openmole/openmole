@@ -14,7 +14,7 @@ import scala.swing.SimpleGUIApplication
 object TestApplication extends SimpleGUIApplication {
   def top = {
     val f = new GUIPanel
-  //  f.peer.setExtendedState(Frame.MAXIMIZED_BOTH)
+    //  f.peer.setExtendedState(Frame.MAXIMIZED_BOTH)
     f
   }
 }

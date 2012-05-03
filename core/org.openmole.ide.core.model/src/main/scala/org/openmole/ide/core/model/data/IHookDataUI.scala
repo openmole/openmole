@@ -21,6 +21,6 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.core.model.hook.IHook
 
-trait IHookDataUI{
+trait IHookDataUI {
   def coreObject: IHook
 }

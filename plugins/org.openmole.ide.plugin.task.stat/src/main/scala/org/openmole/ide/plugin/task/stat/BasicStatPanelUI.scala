@@ -17,7 +17,6 @@
 
 package org.openmole.ide.plugin.task.stat
 
-
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
@@ -26,25 +25,23 @@ import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 
-abstract class BasicStatPanelUI(statType : String,
-                                sequences : List[(IPrototypeDataProxyUI,IPrototypeDataProxyUI)]
-) extends PluginPanel("wrap 2") with ITaskPanelUI {
-  
+abstract class BasicStatPanelUI(statType: String,
+                                sequences: List[(IPrototypeDataProxyUI, IPrototypeDataProxyUI)]) extends PluginPanel("wrap 2") with ITaskPanelUI {
+
   val arrayDoublePrototypes = Proxys.classPrototypes(classOf[Array[Double]])
   val doublePrototypes = Proxys.classPrototypes(classOf[Double])
-  
-  val multiPrototypeCombo : Option[MultiTwoCombos[IPrototypeDataProxyUI,IPrototypeDataProxyUI]] = 
-    if ( !arrayDoublePrototypes.isEmpty && !doublePrototypes.isEmpty) {
+
+  val multiPrototypeCombo: Option[MultiTwoCombos[IPrototypeDataProxyUI, IPrototypeDataProxyUI]] =
+    if (!arrayDoublePrototypes.isEmpty && !doublePrototypes.isEmpty) {
       Some(new MultiTwoCombos("Prototypes",
-                              "to " + statType,
-                              (arrayDoublePrototypes,doublePrototypes),
-                              sequences,
-                              NO_EMPTY,
-                              ADD,
-                              false))
-    }
-  else None
-  
+        "to " + statType,
+        (arrayDoublePrototypes, doublePrototypes),
+        sequences,
+        NO_EMPTY,
+        ADD,
+        false))
+    } else None
+
   if (multiPrototypeCombo.isDefined)
     contents += multiPrototypeCombo.get.panel
 

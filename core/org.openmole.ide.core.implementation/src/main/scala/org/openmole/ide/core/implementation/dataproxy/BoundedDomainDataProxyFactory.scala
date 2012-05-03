@@ -22,11 +22,11 @@ import org.openmole.ide.core.model.dataproxy.IBoundedDomainDataProxyFactory
 import org.openmole.ide.core.model.factory.IBoundedDomainFactoryUI
 
 object BoundedDomainDataProxyFactory {
-  def factoryByName(name: String) = 
-    new BoundedDomainDataProxyFactory(KeyRegistry.boundedDomains.values.filter(df=> df.displayName == name).head)
+  def factoryByName(name: String) =
+    new BoundedDomainDataProxyFactory(KeyRegistry.boundedDomains.values.filter(df ⇒ df.displayName == name).head)
 }
 
 class BoundedDomainDataProxyFactory(val factory: IBoundedDomainFactoryUI) extends IBoundedDomainDataProxyFactory {
   override def buildDataProxyUI = new BoundedDomainDataProxyUI(factory.buildDataUI)
-  override def toString= factory.displayName
+  override def toString = factory.displayName
 }

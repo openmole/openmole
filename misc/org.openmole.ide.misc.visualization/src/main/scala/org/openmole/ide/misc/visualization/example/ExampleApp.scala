@@ -22,11 +22,10 @@ import scala.swing.MainFrame
 import scala.swing.SimpleSwingApplication
 import org.openmole.core.model.job.State._
 
-object ExampleApp extends SimpleSwingApplication
-{
+object ExampleApp extends SimpleSwingApplication {
   def top = new MainFrame {
     title = "Image Panel Demo"
     peer.add((new ExampleStackedPanel).peer)
-    size = new Dimension(800,200)
+    size = new Dimension(800, 200)
   }
 }

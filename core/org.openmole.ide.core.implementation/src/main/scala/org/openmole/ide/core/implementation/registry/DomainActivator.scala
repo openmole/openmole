@@ -21,18 +21,18 @@ import org.openmole.ide.core.model.factory.IDomainFactoryUI
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
 
-trait DomainActivator extends BundleActivator{
-  
-  def domainFactories : Iterable[IDomainFactoryUI]
-  
+trait DomainActivator extends BundleActivator {
+
+  def domainFactories: Iterable[IDomainFactoryUI]
+
   abstract override def start(context: BundleContext) = {
     super.start(context)
-    domainFactories.foreach{f=> KeyRegistry.domains += KeyGenerator(f.buildDataUI.coreClass) -> f}
+    domainFactories.foreach { f ⇒ KeyRegistry.domains += KeyGenerator(f.buildDataUI.coreClass) -> f }
   }
 
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
-    domainFactories.foreach{f => KeyRegistry.domains -= KeyGenerator(f.buildDataUI.coreClass)}
+    domainFactories.foreach { f ⇒ KeyRegistry.domains -= KeyGenerator(f.buildDataUI.coreClass) }
   }
 }
 

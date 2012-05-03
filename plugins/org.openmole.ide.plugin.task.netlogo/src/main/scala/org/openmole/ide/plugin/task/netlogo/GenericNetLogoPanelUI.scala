@@ -36,66 +36,67 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
                                      workspaceEmbedded: Boolean,
                                      lauchingCommands: String,
                                      prototypeMappingInput: List[(IPrototypeDataProxyUI, String)],
-                                     prototypeMappingOutput: List[(String,IPrototypeDataProxyUI)],
-                                     resources : List[String],
-                                     g: List[String]) extends PluginPanel("","[left]rel[grow,fill]",
-                                                                          "[]20[]"){
- 
-  val nlogoTextField = new ChooseFileTextField(nlogoPath,"Select a nlogo file","Netlogo files","nlogo")
-  val workspaceCheckBox = new CheckBox("Embedd Workspace"){selected = workspaceEmbedded}
-  val launchingCommandTextArea = new TextArea(lauchingCommands) 
-  var multiStringProto : Option[MultiTwoCombos[String,IPrototypeDataProxyUI]] = None
-  var multiProtoString : Option[MultiTwoCombos[IPrototypeDataProxyUI,String]] = None
-  val resourcesMultiTextField = new MultiChooseFileTextField("Resources",resources,SelectionMode.FilesAndDirectories)
+                                     prototypeMappingOutput: List[(String, IPrototypeDataProxyUI)],
+                                     resources: List[String],
+                                     g: List[String]) extends PluginPanel("", "[left]rel[grow,fill]",
+  "[]20[]") {
+
+  val nlogoTextField = new ChooseFileTextField(nlogoPath, "Select a nlogo file", "Netlogo files", "nlogo")
+  val workspaceCheckBox = new CheckBox("Embedd Workspace") { selected = workspaceEmbedded }
+  val launchingCommandTextArea = new TextArea(lauchingCommands)
+  var multiStringProto: Option[MultiTwoCombos[String, IPrototypeDataProxyUI]] = None
+  var multiProtoString: Option[MultiTwoCombos[IPrototypeDataProxyUI, String]] = None
+  val resourcesMultiTextField = new MultiChooseFileTextField("Resources", resources, SelectionMode.FilesAndDirectories)
   var globals = g
-  
+
   listenTo(nlogoTextField)
   reactions += {
-    case DialogClosedEvent(nlogoTextField)=> 
+    case DialogClosedEvent(nlogoTextField) ⇒
       globals = List()
-      buildMultis(nlogoTextField.text)}
-  
-  contents+= new Label("Nlogo file")
-  contents+= (nlogoTextField,"growx,wrap")
-  contents+= (workspaceCheckBox,"span,growx,wrap")
-  contents+= (new Label("Commands"),"wrap")
-  contents+= (new ScrollPane(launchingCommandTextArea){minimumSize = new Dimension(150,80)},"span,growx")
+      buildMultis(nlogoTextField.text)
+  }
+
+  contents += new Label("Nlogo file")
+  contents += (nlogoTextField, "growx,wrap")
+  contents += (workspaceCheckBox, "span,growx,wrap")
+  contents += (new Label("Commands"), "wrap")
+  contents += (new ScrollPane(launchingCommandTextArea) { minimumSize = new Dimension(150, 80) }, "span,growx")
   buildMultis(nlogoPath)
-  
+
   def buildMultis(path: String) = {
-    if (globals.isEmpty){
+    if (globals.isEmpty) {
       val nl = buildNetLogo
-      try{
-        if ((new File(path)).isFile){
+      try {
+        if ((new File(path)).isFile) {
           nl.open(path)
           globals = nl.globals.toList
           nl.dispose
         }
       }
     }
-    if (!globals.isEmpty){
-      multiStringProto = Some(new MultiTwoCombos[String,IPrototypeDataProxyUI](
-          "Output Mapping",
-          "with",
-          (globals, comboContent),
-          prototypeMappingOutput))
-      
-      multiProtoString = Some(new MultiTwoCombos[IPrototypeDataProxyUI,String](
-          "Input Mapping",
-          "with",
-          (comboContent,globals),
-          prototypeMappingInput))
+    if (!globals.isEmpty) {
+      multiStringProto = Some(new MultiTwoCombos[String, IPrototypeDataProxyUI](
+        "Output Mapping",
+        "with",
+        (globals, comboContent),
+        prototypeMappingOutput))
+
+      multiProtoString = Some(new MultiTwoCombos[IPrototypeDataProxyUI, String](
+        "Input Mapping",
+        "with",
+        (comboContent, globals),
+        prototypeMappingInput))
     }
-    
+
     if (multiStringProto.isDefined) {
-      if (contents.size == 8) {contents.remove(5); contents.remove(5); contents.remove(5)}
-      contents+= (resourcesMultiTextField.panel,"span,growx,wrap")
-      contents+= (multiProtoString.get.panel,"span,grow,wrap")
-      contents+= (multiStringProto.get.panel,"span,grow,wrap")
+      if (contents.size == 8) { contents.remove(5); contents.remove(5); contents.remove(5) }
+      contents += (resourcesMultiTextField.panel, "span,growx,wrap")
+      contents += (multiProtoString.get.panel, "span,grow,wrap")
+      contents += (multiStringProto.get.panel, "span,grow,wrap")
     }
   }
-  
-  def comboContent: List[IPrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy::Proxys.prototypes.toList
+
+  def comboContent: List[IPrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxys.prototypes.toList
 
   def buildNetLogo: NetLogo
 }

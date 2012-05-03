@@ -31,33 +31,35 @@ import BasePanelUI._
 
 class EnvironmentPanelUI(proxy: IEnvironmentDataProxyUI,
                          scene: IMoleScene,
-                         mode: Value = CREATION) extends BasePanelUI(proxy, scene, mode,new Color(68,120,33)){
+                         mode: Value = CREATION) extends BasePanelUI(proxy, scene, mode, new Color(68, 120, 33)) {
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
-  
+
   val panelUI = proxy.dataUI.buildPanelUI
   mainPanel.contents += panelUI.peer
-  
+
   def create = {
     Proxys.environments += proxy
     ConceptMenu.environmentMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
-  
+
   def delete = {
-    val capsulesWithEnv = ScenesManager.moleScenes.flatMap{
-      _.manager.capsules.values.filter{
-        _.dataUI.environment == Some(proxy)}}.toList
+    val capsulesWithEnv = ScenesManager.moleScenes.flatMap {
+      _.manager.capsules.values.filter {
+        _.dataUI.environment == Some(proxy)
+      }
+    }.toList
     capsulesWithEnv match {
-      case Nil =>
+      case Nil ⇒
         scene.closePropertyPanel
         Proxys.environments -= proxy
         ConceptMenu.removeItem(proxy)
-      case _ => 
+      case _ ⇒
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
-          capsulesWithEnv.foreach{_.setEnvironment(None)}
+          capsulesWithEnv.foreach { _.setEnvironment(None) }
           delete
         }
     }
   }
-  
+
   def save = proxy.dataUI = panelUI.saveContent(nameTextField.text)
 }

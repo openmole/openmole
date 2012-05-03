@@ -22,11 +22,10 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyFactory
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 import scala.collection.JavaConversions._
 
-class PrototypeDataProxyFactory(val factory: IPrototypeFactoryUI[_]) extends IPrototypeDataProxyFactory{
-  
-  def buildDataProxyUI = new PrototypeDataProxyUI(factory.buildDataUI,false)
-  
-  def buildDataProxyUI(prototype : IPrototype[_],
-                       generated : Boolean = false) = new PrototypeDataProxyUI(factory.buildDataUI(prototype),generated)
+class PrototypeDataProxyFactory(val factory: IPrototypeFactoryUI[_]) extends IPrototypeDataProxyFactory {
+
+  def buildDataProxyUI = new PrototypeDataProxyUI(factory.buildDataUI, false)
+
+  def buildDataProxyUI(prototype: IPrototype[_],
+                       generated: Boolean = false) = new PrototypeDataProxyUI(factory.buildDataUI(prototype), generated)
 }
-  

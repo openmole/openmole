@@ -26,21 +26,21 @@ import scala.swing.event.ButtonClicked
 import java.awt.Color
 import org.openmole.ide.misc.tools.image.Images._
 
-class PopupToolBarPresenter(t: String, basemenu: Menu) extends Button(t){
-  val popup = new PopupMenu {contents += basemenu}
-  
+class PopupToolBarPresenter(t: String, basemenu: Menu) extends Button(t) {
+  val popup = new PopupMenu { contents += basemenu }
+
   icon = ARROW
-  background = new Color(204,204,204,128)
+  background = new Color(204, 204, 204, 128)
   listenTo(mouse.clicks)
   reactions += {
-    case x:ButtonClicked => popup.show(this, 0, size.height)
+    case x: ButtonClicked ⇒ popup.show(this, 0, size.height)
   }
-    
+
   def remove(c: Component) = c match {
-    case x: Menu =>
-    case x: MenuItem => popup.contents -= c
+    case x: Menu ⇒
+    case x: MenuItem ⇒ popup.contents -= c
   }
-    
+
   def removeAll = {
     popup.peer.removeAll
     popup.contents += basemenu

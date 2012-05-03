@@ -27,14 +27,14 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 
 trait IExecutionManager {
   def mole: IMole
-  
+
   def moleExecution: IMoleExecution
-  
-  def prototypeMapping: Map[IPrototypeDataProxyUI,IPrototype[_]]
-  
+
+  def prototypeMapping: Map[IPrototypeDataProxyUI, IPrototype[_]]
+
   def capsuleMapping: Map[ICapsuleUI, ICapsule]
-  
+
   def printStream: PrintStream
-  
+
   def commitHook(hookName: String)
 }

@@ -19,9 +19,9 @@ package org.openmole.ide.core.model.factory
 
 import org.openmole.ide.core.model.data.ITaskDataUI
 
-trait ITaskFactoryUI extends IFactoryUI with IMoleComponent{
-  
+trait ITaskFactoryUI extends IFactoryUI with IMoleComponent {
+
   override def displayName: String = buildDataUI.coreClass.getSimpleName
-  
-  def buildDataUI : ITaskDataUI
+
+  def buildDataUI: ITaskDataUI
 }

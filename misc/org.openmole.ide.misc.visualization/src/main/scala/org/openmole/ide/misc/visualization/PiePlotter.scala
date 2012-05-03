@@ -35,16 +35,16 @@ import org.openmole.core.model.job.State._
 import java.awt.Dimension
 
 class PiePlotter(title: String) {
-  
+
   val data = new DataTable(classOf[java.lang.Integer])
   data.add(0)
   data.add(0)
   data.add(0)
-	
+
   // Create new pie plot
   val plot = new PiePlot(data)
-  plot.setSetting(Plot.TITLE,title)
-  
+  plot.setSetting(Plot.TITLE, title)
+
   // Change relative size of pie
   plot.setSetting(PiePlot.RADIUS, 0.95)
   // Change relative size of inner region
@@ -55,14 +55,14 @@ class PiePlotter(title: String) {
   plot.getPointRenderer(data).setSetting(PointRenderer.VALUE_DISPLAYED, true)
   plot.getPointRenderer(data).setSetting(PointRenderer.VALUE_COLOR, Color.WHITE)
   // Change the colors
-  val colors = new IndexedColors(new Color(77,77,77), new Color(187,200,7), new Color(170,0,0))
+  val colors = new IndexedColors(new Color(77, 77, 77), new Color(187, 200, 7), new Color(170, 0, 0))
   colors.setMode(ColorMapper.Mode.REPEAT)
   plot.getPointRenderer(data).setSetting(PieSliceRenderer.COLORS, colors)
   plot.setInsets(new Insets2D.Double(20.0, 40.0, 40.0, 40.0))
-  
+
   plot.setSetting(Plot.LEGEND, true)
   plot.setSetting(Plot.LEGEND_LOCATION, Location.SOUTH_WEST)
-	
+
   def update(ready: Int,
              completed: Int,
              canceled: Int): Unit = {
@@ -70,22 +70,23 @@ class PiePlotter(title: String) {
     updateCompleted(completed)
     updateCancel(canceled)
   }
-  
+
   def update(key: State, value: Int): Unit = {
     key match {
-      case READY=> updateReady(value)
-      case COMPLETED=> updateCompleted(value)
-      case CANCELED=> updateCancel(value)
-      case _=>
+      case READY ⇒ updateReady(value)
+      case COMPLETED ⇒ updateCompleted(value)
+      case CANCELED ⇒ updateCancel(value)
+      case _ ⇒
     }
   }
-  
-  def updateReady(ready: Int) = {data.set(0,0,ready);panel.repaint()}
-  def updateCompleted(completed: Int) = {data.set(0,1,completed);panel.repaint()}
-  def updateCancel(canceled: Int) = {data.set(0,2,canceled);panel.repaint()}
-  
-  val panel = new InteractivePanel(plot){
+
+  def updateReady(ready: Int) = { data.set(0, 0, ready); panel.repaint() }
+  def updateCompleted(completed: Int) = { data.set(0, 1, completed); panel.repaint() }
+  def updateCancel(canceled: Int) = { data.set(0, 2, canceled); panel.repaint() }
+
+  val panel = new InteractivePanel(plot) {
     setZoomable(false)
-    setPannable(false)}
-  panel.setPreferredSize(new Dimension(250,250))
+    setPannable(false)
+  }
+  panel.setPreferredSize(new Dimension(250, 250))
 }

@@ -24,27 +24,27 @@ import scala.swing.Action
 import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.misc.tools.check.TypeCheck
 
-class PrototypeGroovyTextFieldEditor(val title : String ,
-                                     prototype : IPrototype[_] ,
-                                     var editorText : String = "") extends LinkLabel("",new Action("") { def apply = {}}){
+class PrototypeGroovyTextFieldEditor(val title: String,
+                                     prototype: IPrototype[_],
+                                     var editorText: String = "") extends LinkLabel("", new Action("") { def apply = {} }) {
   setIcon(editorText)
   cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-  action = new Action(""){
+  action = new Action("") {
     def apply = {
-      editorText = DialogFactory.groovyEditor(title,editorText)
+      editorText = DialogFactory.groovyEditor(title, editorText)
       setIcon(editorText)
     }
   }
-  
-  private def setIcon(code : String) = {
+
+  private def setIcon(code: String) = {
     icon = code.isEmpty match {
-      case true => EDIT_EMPTY
-      case false =>
-        val (result,t) = TypeCheck.apply(code,prototype)
-        tooltip =  t
+      case true ⇒ EDIT_EMPTY
+      case false ⇒
+        val (result, t) = TypeCheck.apply(code, prototype)
+        tooltip = t
         result match {
-          case true => EDIT
-          case false => EDIT_ERROR
+          case true ⇒ EDIT
+          case false ⇒ EDIT_ERROR
         }
     }
     repaint

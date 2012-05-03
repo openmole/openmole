@@ -21,25 +21,25 @@ import java.awt.Point
 import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.misc.tools.image.Images._
 
-class InputSlotWidget(scene: IMoleScene,val capsule: ICapsuleUI, val index: Int,var startingSlot: Boolean) extends SlotWidget(scene.graphScene) with IInputSlotWidget{
-  
+class InputSlotWidget(scene: IMoleScene, val capsule: ICapsuleUI, val index: Int, var startingSlot: Boolean) extends SlotWidget(scene.graphScene) with IInputSlotWidget {
+
   setStartingSlot(startingSlot)
   setPreferredLocation(new Point(2, 24 + index * 20))
 
   def widget = this
-  
+
   def setStartingSlot(b: Boolean) = {
     startingSlot = b
     b match {
-      case true=>
+      case true ⇒
         scene match {
-          case x:ExecutionMoleScene=> setImage(START_EXE_SLOT)
-          case _=> setImage(START_SLOT)
+          case x: ExecutionMoleScene ⇒ setImage(START_EXE_SLOT)
+          case _ ⇒ setImage(START_SLOT)
         }
-      case false=> scene match {
-          case x:ExecutionMoleScene=> setImage(INPUT_EXE_SLOT) 
-          case _=> setImage(INPUT_SLOT)
-        }
+      case false ⇒ scene match {
+        case x: ExecutionMoleScene ⇒ setImage(INPUT_EXE_SLOT)
+        case _ ⇒ setImage(INPUT_SLOT)
+      }
     }
   }
 }

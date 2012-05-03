@@ -20,14 +20,13 @@ package org.openmole.ide.core.implementation.registry
 import org.openmole.core.model.data.IPrototype
 import org.openmole.misc.tools.obj.ClassUtils._
 
-
 object KeyGenerator {
-  def stripArrays(m : Manifest[_]) : Manifest[_] = {
+  def stripArrays(m: Manifest[_]): Manifest[_] = {
     if (m.erasure.isArray) stripArrays(m.erasure.fromArray.toManifest)
     else m
   }
-  
-  def apply(proto : IPrototype[_]) : DefaultKey = new DefaultKey(stripArrays(proto.`type`).erasure)
-  
-  def apply(entityClass : Class[_]) : DefaultKey = new DefaultKey(entityClass)
+
+  def apply(proto: IPrototype[_]): DefaultKey = new DefaultKey(stripArrays(proto.`type`).erasure)
+
+  def apply(entityClass: Class[_]): DefaultKey = new DefaultKey(entityClass)
 }

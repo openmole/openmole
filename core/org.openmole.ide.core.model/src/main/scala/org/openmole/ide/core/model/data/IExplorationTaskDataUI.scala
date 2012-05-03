@@ -24,10 +24,10 @@ import org.openmole.core.model.task.IPluginSet
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 
 trait IExplorationTaskDataUI extends ITaskDataUI {
-  
-  def sampling : Option[ISamplingDataProxyUI] = None
-  
+
+  def sampling: Option[ISamplingDataProxyUI] = None
+
   def sampling_=(s: Option[ISamplingDataProxyUI])
-  
+
   def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet): IExplorationTask
 }

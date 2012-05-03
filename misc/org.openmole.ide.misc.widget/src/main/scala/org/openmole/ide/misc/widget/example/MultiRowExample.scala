@@ -38,17 +38,17 @@ object MultiRowExample extends SimpleSwingApplication {
     val proto2 = new Prototype[Double]("proto2")
     val fake1 = new Fake(proto1)
     val fake2 = new Fake(proto2)
-    val action = new ContentAction("Action " , fake1) { override def apply = println("view " + fake1.toString)}
+    val action = new ContentAction("Action ", fake1) { override def apply = println("view " + fake1.toString) }
     val image = EYE
     peer.add(new MultiComboLinkLabelGroovyTextFieldEditor("My title",
-                                                          List((fake1,proto1,action,"12"),(fake2,proto2,action,"45.6d")),
-                                                          List((fake1,proto1,action),(fake2,proto2,action)),image).panel.peer,BorderLayout.WEST)
+      List((fake1, proto1, action, "12"), (fake2, proto2, action, "45.6d")),
+      List((fake1, proto1, action), (fake2, proto2, action)), image).panel.peer, BorderLayout.WEST)
     peer.add(new MultiComboTextField("My title2",
-                                     List((fake1,"un"),(fake2,"deux")),
-                                     List(fake1,fake2)).panel.peer,BorderLayout.EAST)
-    size = new Dimension(250,200)
+      List((fake1, "un"), (fake2, "deux")),
+      List(fake1, fake2)).panel.peer, BorderLayout.EAST)
+    size = new Dimension(250, 200)
   }
-  
+
   class Fake(p: IPrototype[_]) {
     override def toString = p.name
   }

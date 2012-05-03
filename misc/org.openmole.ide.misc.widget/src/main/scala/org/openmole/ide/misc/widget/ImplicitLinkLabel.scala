@@ -19,7 +19,7 @@ package org.openmole.ide.misc.widget
 
 import scala.swing.Action
 
-class ImplicitLinkLabel(t: String, a : Action) extends LinkLabel(t,a){
-  override def link(t: String) = 
-    text = "<html><i><font color=\"#c8c8c8ff\" size=\""+textSize+"\">"+t+"</font></i></html>"
+class ImplicitLinkLabel(t: String, a: Action) extends LinkLabel(t, a) {
+  override def link(t: String) =
+    text = "<html><i><font color=\"#c8c8c8ff\" size=\"" + textSize + "\">" + t + "</font></i></html>"
 }

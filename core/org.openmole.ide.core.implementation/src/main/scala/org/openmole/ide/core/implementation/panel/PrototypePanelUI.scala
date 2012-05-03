@@ -33,35 +33,39 @@ import BasePanelUI._
 
 class PrototypePanelUI[T](proxy: IPrototypeDataProxyUI,
                           scene: IMoleScene,
-                          mode: Value = CREATION) extends BasePanelUI(proxy, scene,mode,new Color(255,204,0)){
+                          mode: Value = CREATION) extends BasePanelUI(proxy, scene, mode, new Color(255, 204, 0)) {
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
   val panelUI = proxy.dataUI.buildPanelUI
   mainPanel.contents += panelUI.peer
-  
+
   def create = {
     Proxys.prototypes += proxy
     ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(proxy.dataUI.name, proxy)
   }
-  
+
   def delete = {
-    val capsulesWithProtos : List[ICapsuleUI] = ScenesManager.moleScenes.flatMap{_.manager.capsules.values.flatMap{c => c.dataUI.task match {
-          case Some(x : ITaskDataProxyUI) =>  if (x.dataUI.filterPrototypeOccurencies(proxy).isEmpty) None else Some(c)
-          case _ => None
-        }}}.toList
-    
+    val capsulesWithProtos: List[ICapsuleUI] = ScenesManager.moleScenes.flatMap {
+      _.manager.capsules.values.flatMap { c ⇒
+        c.dataUI.task match {
+          case Some(x: ITaskDataProxyUI) ⇒ if (x.dataUI.filterPrototypeOccurencies(proxy).isEmpty) None else Some(c)
+          case _ ⇒ None
+        }
+      }
+    }.toList
+
     capsulesWithProtos match {
-      case Nil => 
+      case Nil ⇒
         scene.closePropertyPanel
         Proxys.prototypes -= proxy
         ConceptMenu.removeItem(proxy)
-      case _ => 
+      case _ ⇒
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
-          capsulesWithProtos.foreach{_.dataUI.task.get.dataUI.removePrototypeOccurencies(proxy)}
+          capsulesWithProtos.foreach { _.dataUI.task.get.dataUI.removePrototypeOccurencies(proxy) }
           delete
         }
     }
   }
-  
+
   def save = {
     proxy.dataUI = panelUI.saveContent(nameTextField.text)
   }

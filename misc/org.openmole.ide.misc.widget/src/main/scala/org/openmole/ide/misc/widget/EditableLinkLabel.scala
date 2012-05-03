@@ -26,28 +26,28 @@ import scala.swing.event.MousePressed
 class EditableLinkLabel[A](val action: ContentAction[A],
                            choices: List[ContentAction[A]],
                            val textSize: Int = 4) extends Label {
-  foreground = Color.white                         
+  foreground = Color.white
   cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-  val popup = new PopupMenu 
-  choices.foreach{popup.contents += new LinkLabelMenuItem(_,this)}
+  val popup = new PopupMenu
+  choices.foreach { popup.contents += new LinkLabelMenuItem(_, this) }
   link(action.title)
-  
+
   listenTo(mouse.clicks)
   reactions += {
-    case e: MousePressed => 
+    case e: MousePressed ⇒
       popup.isOpened match {
-        case true=> popup.hide
-        case false=> popup.show(this,0,size.height)
-      } 
+        case true ⇒ popup.hide
+        case false ⇒ popup.show(this, 0, size.height)
+      }
   }
-  
-  def link(t: String) = text = "<html><font color=\"#507698\" size=\""+textSize+"\">"+t+"</font></html>"
-  
+
+  def link(t: String) = text = "<html><font color=\"#507698\" size=\"" + textSize + "\">" + t + "</font></html>"
+
   class LinkLabelMenuItem(a: ContentAction[A],
                           lab: EditableLinkLabel[A]) extends MenuItem(a) {
     listenTo(mouse.clicks)
     reactions += {
-      case e: MousePressed => lab.link(a.title)
+      case e: MousePressed ⇒ lab.link(a.title)
     }
-  }    
+  }
 }

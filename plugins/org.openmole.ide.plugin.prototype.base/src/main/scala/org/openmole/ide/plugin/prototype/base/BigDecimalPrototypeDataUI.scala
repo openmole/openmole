@@ -23,14 +23,14 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.model.data.IPrototype
 import java.math.BigDecimal
 
-class BigDecimalPrototypeDataUI(val name: String="", d: Int=0) extends GenericPrototypeDataUI[BigDecimal](d){
+class BigDecimalPrototypeDataUI(val name: String = "", d: Int = 0) extends GenericPrototypeDataUI[BigDecimal](d) {
   def displayTypedName = displayName + " : BigDecimal"
-  
+
   def coreClass = classOf[IPrototype[BigDecimal]]
-  
-  def coreObject= new Prototype[BigDecimal](name).toArray(dim).asInstanceOf[IPrototype[BigDecimal]]
- 
+
+  def coreObject = new Prototype[BigDecimal](name).toArray(dim).asInstanceOf[IPrototype[BigDecimal]]
+
   def fatImagePath = "img/bigdecimal_fat.png"
-  
+
   def buildPanelUI = new BigDecimalPrototypePanelUI(this)
 }

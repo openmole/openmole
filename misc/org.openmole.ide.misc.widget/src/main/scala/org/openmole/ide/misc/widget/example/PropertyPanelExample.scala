@@ -28,64 +28,63 @@ import org.netbeans.api.visual.widget._
 import org.netbeans.api.visual.graph.GraphScene
 import scala.swing.event.UIElementResized
 
-object PropertyPanelExample extends SimpleSwingApplication
-{
+object PropertyPanelExample extends SimpleSwingApplication {
   def top = new MainFrame {
     title = "Link Label Demo"
-    
+
     val scene = new MyScene
-    
-    val pp : Panel = new PluginPanel("wrap"){
-      contents += new MultiCombo("",List("un","deux"),List("un","un")).panel
-      preferredSize = new Dimension(200,200)
-      
+
+    val pp: Panel = new PluginPanel("wrap") {
+      contents += new MultiCombo("", List("un", "deux"), List("un", "un")).panel
+      preferredSize = new Dimension(200, 200)
+
       listenTo(this)
       reactions += {
-        case x : UIElementResized => 
+        case x: UIElementResized ⇒
           scene.compow.revalidate
           scene.compow.repaint
-//          
+        //          
       }
     }
-    
-//    contents = new PropertyPanel(Color.green,"wrap"){
-//      contents +=new Label("first")
-//      contents += new TextField("TextField")
-//      contents += new ComboBox(List.empty)
-//      contents += new PluginPanel("wrap"){
-//        contents += new MainLinkLabel("second",new Action(""){def apply = println("My link")})
-//        contents += new Label("Tranparent panel")}
-//        
-//        
-      
+
+    //    contents = new PropertyPanel(Color.green,"wrap"){
+    //      contents +=new Label("first")
+    //      contents += new TextField("TextField")
+    //      contents += new ComboBox(List.empty)
+    //      contents += new PluginPanel("wrap"){
+    //        contents += new MainLinkLabel("second",new Action(""){def apply = println("My link")})
+    //        contents += new Label("Tranparent panel")}
+    //        
+    //        
+
     peer.setContentPane(scene.createView)
     scene.updatePanel(pp)
-    minimumSize = new Dimension(400,400)
+    minimumSize = new Dimension(400, 400)
   }
-  
+
   class MyScene extends GraphScene.StringGraph {
-    
+
     val panel = new PluginPanel("")
     val layer = new LayerWidget(this)
     addChild(layer)
-    var compow = new ComponentWidget(this,panel.peer){
-      setBorder(BorderFactory.createLineBorder(Color.red,2))
+    var compow = new ComponentWidget(this, panel.peer) {
+      setBorder(BorderFactory.createLineBorder(Color.red, 2))
       setOpaque(true)
-      setPreferredLocation(new Point(10,10))
+      setPreferredLocation(new Point(10, 10))
     }
-    
+
     layer.addChild(compow)
-      
-    def updatePanel(p : Panel) = {
+
+    def updatePanel(p: Panel) = {
       panel.contents += p
-      compow.setPreferredLocation(new Point(10,10))
+      compow.setPreferredLocation(new Point(10, 10))
       repaint
       revalidate
     }
-      
-    def attachEdgeSourceAnchor(edge: String, oldSourceNode: String,sourceNode: String)= {}
-    def attachEdgeTargetAnchor(edge: String,oldTargetNode: String,targetNode: String) = {}
-    def attachNodeWidget(n: String)= new Widget(this)
-    def attachEdgeWidget(n: String)= new Widget(this)
+
+    def attachEdgeSourceAnchor(edge: String, oldSourceNode: String, sourceNode: String) = {}
+    def attachEdgeTargetAnchor(edge: String, oldTargetNode: String, targetNode: String) = {}
+    def attachNodeWidget(n: String) = new Widget(this)
+    def attachEdgeWidget(n: String) = new Widget(this)
   }
 }

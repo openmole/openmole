@@ -21,18 +21,18 @@ import org.openmole.ide.core.model.factory.ITaskFactoryUI
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
 
-trait TaskActivator extends BundleActivator{
-  
-  def taskFactories : Iterable[ITaskFactoryUI]
-  
+trait TaskActivator extends BundleActivator {
+
+  def taskFactories: Iterable[ITaskFactoryUI]
+
   abstract override def start(context: BundleContext) = {
     super.start(context)
-    taskFactories.foreach{f=> KeyRegistry.tasks += KeyGenerator(f.buildDataUI.coreClass) -> f}
+    taskFactories.foreach { f ⇒ KeyRegistry.tasks += KeyGenerator(f.buildDataUI.coreClass) -> f }
   }
 
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
-    taskFactories.foreach{f => KeyRegistry.tasks -= KeyGenerator(f.buildDataUI.coreClass)}
+    taskFactories.foreach { f ⇒ KeyRegistry.tasks -= KeyGenerator(f.buildDataUI.coreClass) }
   }
 }
 

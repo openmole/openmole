@@ -27,11 +27,11 @@ class LinkLabel(textLink: String,
                 val textSize: Int = 4) extends Label {
   cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
   link(textLink)
-  
+
   listenTo(this.mouse.clicks)
   reactions += {
-    case e: MousePressed => action.apply
+    case e: MousePressed ⇒ action.apply
   }
-  
-  def link(t: String) = text = "<html><font color=\"#ffffff\" size=\""+textSize+"\">"+t+"</font></html>"
+
+  def link(t: String) = text = "<html><font color=\"#ffffff\" size=\"" + textSize + "\">" + t + "</font></html>"
 }

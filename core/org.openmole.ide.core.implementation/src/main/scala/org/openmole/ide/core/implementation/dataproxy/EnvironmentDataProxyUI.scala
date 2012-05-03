@@ -20,4 +20,4 @@ package org.openmole.ide.core.implementation.dataproxy
 import org.openmole.ide.core.model.data.IEnvironmentDataUI
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 
-class EnvironmentDataProxyUI (var dataUI: IEnvironmentDataUI, val id: Int = Proxys.incr.getAndIncrement) extends IEnvironmentDataProxyUI 
+class EnvironmentDataProxyUI(var dataUI: IEnvironmentDataUI, val id: Int = Proxys.incr.getAndIncrement) extends IEnvironmentDataProxyUI

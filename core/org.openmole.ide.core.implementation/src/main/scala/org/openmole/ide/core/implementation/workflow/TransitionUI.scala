@@ -20,4 +20,4 @@ package org.openmole.ide.core.implementation.workflow
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.workflow._
 
-class TransitionUI(val source: ICapsuleUI,val target: IInputSlotWidget,var transitionType: TransitionType.Value, var condition: Option[String]= None) extends ITransitionUI
+class TransitionUI(val source: ICapsuleUI, val target: IInputSlotWidget, var transitionType: TransitionType.Value, var condition: Option[String] = None) extends ITransitionUI

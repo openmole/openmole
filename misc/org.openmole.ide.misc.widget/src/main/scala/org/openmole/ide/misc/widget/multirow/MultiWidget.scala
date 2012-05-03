@@ -35,48 +35,52 @@ object MultiWidget extends Enumeration {
 }
 
 import MultiWidget._
-class MultiWidget[T<:IRowWidget](title: String = "",
-                                 rWidgets: List[T],
-                                 factory: IRowWidgetFactory[T],
-                                 nbComponent: Int,
-                                 allowEmpty: Minus= NO_EMPTY,
-                                 buildRowFromFactory : Boolean = false){
+class MultiWidget[T <: IRowWidget](title: String = "",
+                                   rWidgets: List[T],
+                                   factory: IRowWidgetFactory[T],
+                                   nbComponent: Int,
+                                   allowEmpty: Minus = NO_EMPTY,
+                                   buildRowFromFactory: Boolean = false) {
   val specimen = rWidgets.head
   val rowWidgets = new HashSet[T]
-  val panel =  new PluginPanel("wrap "+{if(rWidgets.head.plusAllowed == ADD) 1 else 0}.toString +", insets 0 5 0 5")
-  val titleLabel = new Label(title){foreground = new Color(0,113,187)}
-  val addButton = new ImageLinkLabel(ADD,new Action("") { def apply = addRow })
-  
-  if(buildRowFromFactory) rWidgets.foreach(r=>addRow(factory(r,panel)))
+  val panel = new PluginPanel("wrap " + { if (rWidgets.head.plusAllowed == ADD) 1 else 0 }.toString + ", insets 0 5 0 5")
+  val titleLabel = new Label(title) { foreground = new Color(0, 113, 187) }
+  val addButton = new ImageLinkLabel(ADD, new Action("") { def apply = addRow })
+
+  if (buildRowFromFactory) rWidgets.foreach(r ⇒ addRow(factory(r, panel)))
   else rWidgets.foreach(addRow)
-  
-  if(!title.isEmpty) panel.contents.insert(0,titleLabel)
+
+  if (!title.isEmpty) panel.contents.insert(0, titleLabel)
   panel.contents += addButton
-  
-  def addRow: T = addRow(factory.apply(specimen,panel))
- 
-  def addRow(rowWidget: T):T = {
+
+  def addRow: T = addRow(factory.apply(specimen, panel))
+
+  def addRow(rowWidget: T): T = {
     rowWidgets += rowWidget
-    panel.contents.insert(panel.contents.size-1,rowWidget.panel)
-    
-    rowWidget.panel.removeButton.action =  new Action("") {def apply = {
+    panel.contents.insert(panel.contents.size - 1, rowWidget.panel)
+
+    rowWidget.panel.removeButton.action = new Action("") {
+      def apply = {
         if (allowEmpty == CLOSE_IF_EMPTY || (allowEmpty == NO_EMPTY && rowWidgets.size > 1)) {
           removeRow(rowWidget)
-          rowWidget.doOnClose}}}
+          rowWidget.doOnClose
+        }
+      }
+    }
     refresh
     rowWidget
   }
-  
+
   def removeAllRows = rowWidgets.foreach(removeRow)
-  
+
   def removeRow(rowWidget: T) = {
     rowWidgets -= rowWidget
     panel.contents -= rowWidget.panel
     refresh
   }
-  
+
   def refresh = {
     panel.repaint
     panel.revalidate
-  } 
+  }
 }

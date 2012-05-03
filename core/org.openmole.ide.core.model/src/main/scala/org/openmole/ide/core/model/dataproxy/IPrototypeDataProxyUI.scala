@@ -19,15 +19,15 @@ package org.openmole.ide.core.model.dataproxy
 
 import org.openmole.ide.core.model.data.IPrototypeDataUI
 
-trait IPrototypeDataProxyUI extends IDataProxyUI{
+trait IPrototypeDataProxyUI extends IDataProxyUI {
   def dataUI_=(d: IPrototypeDataUI[_])
-  
-  override def dataUI: IPrototypeDataUI[_] 
-  
+
+  override def dataUI: IPrototypeDataUI[_]
+
   override def toString = {
-    if (dataUI.dim > 0) dataUI.name + " [" + dataUI.dim+"]"
+    if (dataUI.dim > 0) dataUI.name + " [" + dataUI.dim + "]"
     else dataUI.name
   }
-  
-  def generated : Boolean
+
+  def generated: Boolean
 }

@@ -27,21 +27,21 @@ import org.openmole.ide.core.implementation.action.AggregationTransitionAction
 import org.openmole.ide.core.implementation.workflow.MoleScene
 import org.openmole.ide.core.implementation.workflow.ConnectorWidget
 
-class TransitionMenuProvider(scene: MoleScene,connectionWidget: ConnectorWidget) extends GenericMenuProvider {  
+class TransitionMenuProvider(scene: MoleScene, connectionWidget: ConnectorWidget) extends GenericMenuProvider {
   val itCond = new JMenuItem("Edit condition")
   itCond.addActionListener(new AddTransitionConditionAction(connectionWidget))
-  
+
   var itAgreg = new JMenuItem
-  items+= (itCond,itAgreg)
-  
-  override def getPopupMenu(widget: Widget, point: Point)= {
-    items-= itAgreg
-    if(!(connectionWidget.transition.transitionType == EXPLORATION_TRANSITION)){
+  items += (itCond, itAgreg)
+
+  override def getPopupMenu(widget: Widget, point: Point) = {
+    items -= itAgreg
+    if (!(connectionWidget.transition.transitionType == EXPLORATION_TRANSITION)) {
       var transitonTypeString = if (connectionWidget.transition.transitionType == BASIC_TRANSITION) "aggregation" else "basic"
-      itAgreg = new JMenuItem("Set as "+ transitonTypeString +" transition")
+      itAgreg = new JMenuItem("Set as " + transitonTypeString + " transition")
       itAgreg.addActionListener(new AggregationTransitionAction(connectionWidget))
-      items+= itAgreg
+      items += itAgreg
     }
     super.getPopupMenu(widget, point)
   }
-} 
+}

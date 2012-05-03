@@ -34,23 +34,23 @@ import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 
 object DataChannelDialog {
-  def display(dcWidget : DataChannelConnectionWidget) = {
-    Proxys.prototypes.isEmpty match{
-      case false=>
+  def display(dcWidget: DataChannelConnectionWidget) = {
+    Proxys.prototypes.isEmpty match {
+      case false ⇒
         val prototypePanel = new PrototypePanel(dcWidget.dataChannelUI.prototypes)
-        if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel){verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded}.peer,
-                                                                   "Set the Data Channel")).equals(NotifyDescriptor.OK_OPTION)) 
-                                                                     dcWidget.dataChannelUI.prototypes = prototypePanel.multiPrototypeCombo.content
-      case true=> StatusBar.warn("No Prototype is defined !")
+        if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel) { verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded }.peer,
+          "Set the Data Channel")).equals(NotifyDescriptor.OK_OPTION))
+          dcWidget.dataChannelUI.prototypes = prototypePanel.multiPrototypeCombo.content
+      case true ⇒ StatusBar.warn("No Prototype is defined !")
     }
   }
-  
+
   class PrototypePanel(protoProxys: List[IPrototypeDataProxyUI]) extends PluginPanel("") {
-    preferredSize = new Dimension(250,300)
+    preferredSize = new Dimension(250, 300)
     val multiPrototypeCombo = new MultiCombo("Filter Prototypes",
-                                             Proxys.prototypes.toList,protoProxys,
-                                             CLOSE_IF_EMPTY,
-                                             ADD)
-    contents+= multiPrototypeCombo.panel
+      Proxys.prototypes.toList, protoProxys,
+      CLOSE_IF_EMPTY,
+      ADD)
+    contents += multiPrototypeCombo.panel
   }
 }

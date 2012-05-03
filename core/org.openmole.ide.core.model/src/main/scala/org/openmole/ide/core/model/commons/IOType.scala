@@ -17,6 +17,6 @@
 package org.openmole.ide.core.model.commons
 
 object IOType extends Enumeration {
-  type IOType= Value
-  val INPUT,OUTPUT= Value
+  type IOType = Value
+  val INPUT, OUTPUT = Value
 }

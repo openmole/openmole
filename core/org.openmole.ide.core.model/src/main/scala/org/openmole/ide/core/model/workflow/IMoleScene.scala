@@ -23,42 +23,42 @@ import org.netbeans.api.visual.widget.ComponentWidget
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import scala.swing.Panel
 
-trait IMoleScene { 
+trait IMoleScene {
   def manager: IMoleSceneManager
-  
+
   def setLayout
-  
+
   def refresh
-  
+
   def validate
-  
+
   def initCapsuleAdd(w: ICapsuleUI)
-  
-  def graphScene: GraphScene[String,String]
-  
-  def createConnectEdge(sourceNodeID:String, targetNodeID: String)
-  
-  def createDataChannelEdge(sourceNodeID:String, targetNodeID: String)
-  
-  def createEdge(sourceNodeID:String, targetNodeID: String, id: String)
-  
-  def isBuildScene : Boolean
-  
+
+  def graphScene: GraphScene[String, String]
+
+  def createConnectEdge(sourceNodeID: String, targetNodeID: String)
+
+  def createDataChannelEdge(sourceNodeID: String, targetNodeID: String)
+
+  def createEdge(sourceNodeID: String, targetNodeID: String, id: String)
+
+  def isBuildScene: Boolean
+
   def savePropertyPanel: Unit
-  
-  def savePropertyPanel(panel : Panel) : Unit
-  
+
+  def savePropertyPanel(panel: Panel): Unit
+
   def displayPropertyPanel(proxy: IDataProxyUI, mode: PanelMode.Value)
-  
+
   def displayExtraPropertyPanel(proxy: IDataProxyUI)
-  
+
   def closeExtraPropertyPanel
-  
+
   def closePropertyPanel
-  
-  def propertyWidget : ComponentWidget
-  
-  def extraPropertyWidget : ComponentWidget
-  
+
+  def propertyWidget: ComponentWidget
+
+  def extraPropertyWidget: ComponentWidget
+
   override def toString = manager.name
 }

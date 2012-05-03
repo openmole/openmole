@@ -21,16 +21,16 @@ import javax.swing.JPanel
 
 trait IPanelUI {
   def peer: JPanel
-  
-//  def enabled(b : Boolean) : Unit = 
-//    peer.getComponents.foreach{ c => c match {
-//        case x : MyPanel => 
-//          println("IPA mypanel")
-//          x.enabled = b
-//        case x : JComponent => 
-//          println("IPA jcomponent")
-//          x.setEnabled(b)
-//        case _ => 
-//      }
-//    }
+
+  //  def enabled(b : Boolean) : Unit = 
+  //    peer.getComponents.foreach{ c => c match {
+  //        case x : MyPanel => 
+  //          println("IPA mypanel")
+  //          x.enabled = b
+  //        case x : JComponent => 
+  //          println("IPA jcomponent")
+  //          x.setEnabled(b)
+  //        case _ => 
+  //      }
+  //    }
 }

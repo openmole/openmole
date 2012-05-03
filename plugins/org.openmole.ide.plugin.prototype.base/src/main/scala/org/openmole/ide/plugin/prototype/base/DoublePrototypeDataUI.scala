@@ -20,14 +20,14 @@ import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.data.IPrototype
 
-class DoublePrototypeDataUI(val name: String="",d: Int=0) extends GenericPrototypeDataUI[Double](d){
+class DoublePrototypeDataUI(val name: String = "", d: Int = 0) extends GenericPrototypeDataUI[Double](d) {
   def displayTypedName = displayName + " : Double"
-  
+
   def coreClass = classOf[IPrototype[Double]]
 
-   def coreObject = new Prototype[Double](name).toArray(dim).asInstanceOf[IPrototype[Double]]
-     
-   def fatImagePath = "img/double_fat.png"
-  
-   def buildPanelUI = new DoublePrototypePanelUI(this)
+  def coreObject = new Prototype[Double](name).toArray(dim).asInstanceOf[IPrototype[Double]]
+
+  def fatImagePath = "img/double_fat.png"
+
+  def buildPanelUI = new DoublePrototypePanelUI(this)
 }

@@ -17,7 +17,6 @@
 
 package org.openmole.ide.plugin.task.exploration
 
-
 import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.LinkLabel
@@ -38,29 +37,29 @@ object ExplorationTaskPanelUI {
 
 import ExplorationTaskPanelUI._
 
-class ExplorationTaskPanelUI (pud: ExplorationTaskDataUI) extends PluginPanel("wrap 3") with ITaskPanelUI {
-  val samplingComboBox = new ComboBox(comboContent) 
-  {tooltip = Help.tooltip("The name of the sampling to be executed")}
+class ExplorationTaskPanelUI(pud: ExplorationTaskDataUI) extends PluginPanel("wrap 3") with ITaskPanelUI {
+  val samplingComboBox = new ComboBox(comboContent) { tooltip = Help.tooltip("The name of the sampling to be executed") }
 
   contents += new Label("Sampling")
   contents += samplingComboBox
-  val linkLabel : LinkLabel = new LinkLabel("",contentAction(pud.sampling.getOrElse(emptyProxy))) {
+  val linkLabel: LinkLabel = new LinkLabel("", contentAction(pud.sampling.getOrElse(emptyProxy))) {
     icon = EYE
   }
-  
+
   samplingComboBox.selection.item = pud.sampling.getOrElse(emptyProxy)
   listenTo(`samplingComboBox`)
   samplingComboBox.selection.reactions += {
-    case SelectionChanged(`samplingComboBox`)=> 
-      linkLabel.action = contentAction(samplingComboBox.selection.item) 
+    case SelectionChanged(`samplingComboBox`) ⇒
+      linkLabel.action = contentAction(samplingComboBox.selection.item)
   }
   contents += linkLabel
-  
-  def contentAction(proxy : ISamplingDataProxyUI)  = new ContentAction(proxy.dataUI.name,proxy){
-    override def apply = ScenesManager.currentSceneContainer.get.scene.displayExtraPropertyPanel(proxy)}
 
-  override def saveContent(name: String) = 
-    new ExplorationTaskDataUI(name , if (samplingComboBox.selection.item == emptyProxy) None else Some(samplingComboBox.selection.item))
-  
+  def contentAction(proxy: ISamplingDataProxyUI) = new ContentAction(proxy.dataUI.name, proxy) {
+    override def apply = ScenesManager.currentSceneContainer.get.scene.displayExtraPropertyPanel(proxy)
+  }
+
+  override def saveContent(name: String) =
+    new ExplorationTaskDataUI(name, if (samplingComboBox.selection.item == emptyProxy) None else Some(samplingComboBox.selection.item))
+
   def comboContent: List[ISamplingDataProxyUI] = emptyProxy :: Proxys.samplings.toList
 }

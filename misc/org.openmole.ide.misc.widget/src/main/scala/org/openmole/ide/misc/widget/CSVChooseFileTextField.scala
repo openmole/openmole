@@ -18,6 +18,6 @@
 package org.openmole.ide.misc.widget
 
 class CSVChooseFileTextField(initialText: String) extends ChooseFileTextField(initialText,
-                                                                              "Select a CSV file",
-                                                                              "CSV files",
-                                                                              "csv")
+  "Select a CSV file",
+  "CSV files",
+  "csv")

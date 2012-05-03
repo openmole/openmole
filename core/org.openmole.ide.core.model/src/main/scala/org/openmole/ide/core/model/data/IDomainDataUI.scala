@@ -22,9 +22,9 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.domain.IDomain
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 
-trait IDomainDataUI extends IDataUI{
-  
+trait IDomainDataUI extends IDataUI {
+
   def coreObject(proto: IPrototype[_]): IDomain[_]
-  
+
   def buildPanelUI: IDomainPanelUI
 }

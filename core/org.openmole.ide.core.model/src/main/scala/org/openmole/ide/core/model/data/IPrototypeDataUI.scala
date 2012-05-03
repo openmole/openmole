@@ -21,16 +21,16 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import org.openmole.core.model.data.IPrototype
 
-trait IPrototypeDataUI[T] extends IDataUI{
-  override def displayName = if (dim>0) name+"[" + dim +"]" else name
+trait IPrototypeDataUI[T] extends IDataUI {
+  override def displayName = if (dim > 0) name + "[" + dim + "]" else name
 
   def displayTypedName: String
-  
+
   def coreObject: IPrototype[T]
-  
+
   def buildPanelUI: IPrototypePanelUI[T]
-  
+
   def fatImagePath: String
-  
+
   def dim: Int
 }

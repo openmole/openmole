@@ -38,107 +38,106 @@ import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
 
 object CheckData extends Logger {
-  def dataProxyFactory(data : IData[_]) =  
+  def dataProxyFactory(data: IData[_]) =
     new PrototypeDataProxyFactory(KeyRegistry.prototypes(KeyGenerator(data.prototype))).buildDataProxyUI(data.prototype)
-    
-  def checkMole(manager : IMoleSceneManager) = 
+
+  def checkMole(manager: IMoleSceneManager) =
     manager.startingCapsule match {
-      case Some(x : ICapsuleUI) => 
-        val (mole,cMap,pMap,errs) = MoleMaker.buildMole(manager)
-        val error_capsules = manager.capsules.values.partition{_.dataUI.task.isDefined}
+      case Some(x: ICapsuleUI) ⇒
+        val (mole, cMap, pMap, errs) = MoleMaker.buildMole(manager)
+        val error_capsules = manager.capsules.values.partition { _.dataUI.task.isDefined }
         error_capsules._1.foreach(_.setAsValid)
-        error_capsules._2.foreach{_.setAsInvalid("A capsule has to be encapsulated to be run")}
-        
-        val capsuleMap : Map[ICapsule,ICapsuleUI] = cMap.map{case (k,v) => v -> k}
-        val prototypeMap : Map[IPrototype[_],IPrototypeDataProxyUI] = pMap.map{case (k,v) => v -> k}.toMap
+        error_capsules._2.foreach { _.setAsInvalid("A capsule has to be encapsulated to be run") }
+
+        val capsuleMap: Map[ICapsule, ICapsuleUI] = cMap.map { case (k, v) ⇒ v -> k }
+        val prototypeMap: Map[IPrototype[_], IPrototypeDataProxyUI] = pMap.map { case (k, v) ⇒ v -> k }.toMap
 
         // Compute implicit input / output
-        capsuleMap.foreach{
-          case(caps,capsUI) => 
+        capsuleMap.foreach {
+          case (caps, capsUI) ⇒
             capsUI.dataUI.task match {
-              case Some(x : ITaskDataProxyUI) => 
+              case Some(x: ITaskDataProxyUI) ⇒
                 buildUnknownPrototypes(caps)
-                computeImplicitPrototypes(x,prototypeMap.map{p => p._1.name -> p._2},
-                                          caps)
-              case _ =>
+                computeImplicitPrototypes(x, prototypeMap.map { p ⇒ p._1.name -> p._2 },
+                  caps)
+              case _ ⇒
             }
         }
-        
+
         // Formal validation
         val errors = Validation(mole)
         errors.isEmpty match {
-          case false => 
-            errors.flatMap{
+          case false ⇒
+            errors.flatMap {
               _ match {
-                case x : DataflowProblem => 
-                  Some(capsuleMap(x.capsule)-> (prototypeMap(x.data.prototype),x))
-                case x => 
+                case x: DataflowProblem ⇒
+                  Some(capsuleMap(x.capsule) -> (prototypeMap(x.data.prototype), x))
+                case x ⇒
                   logger.info("Error " + x + " not taken into account in the GUI yet.")
                   None
               }
-            }.groupBy(_._1).map{ case (k,v) => (k,v.map(_._2))}.foreach{
-              case(capsuleUI,e)=>
+            }.groupBy(_._1).map { case (k, v) ⇒ (k, v.map(_._2)) }.foreach {
+              case (capsuleUI, e) ⇒
                 capsuleUI.updateErrors(e.toList)
             }
-          case true => manager.capsules.values.foreach{_.updateErrors(List.empty)}
+          case true ⇒ manager.capsules.values.foreach { _.updateErrors(List.empty) }
         }
-        Some(mole,capsuleMap,prototypeMap,errs)
-        errs.foreach{ case(cui,e) => cui.setAsInvalid(e.getMessage) }
-        Some(mole,cMap,pMap,errs)
-      case _ => None
+        Some(mole, capsuleMap, prototypeMap, errs)
+        errs.foreach { case (cui, e) ⇒ cui.setAsInvalid(e.getMessage) }
+        Some(mole, cMap, pMap, errs)
+      case _ ⇒ None
     }
-  
-  def buildUnknownPrototypes(coreCapsule : ICapsule) = {
-    val allPrototypesByName = Proxys.prototypes.map{_.dataUI.name}
-    
-    (coreCapsule.inputs.toList ++ coreCapsule.outputs) foreach  { d =>
-      if (! allPrototypesByName.contains(d.prototype.name)) {
-        Proxys.prototypes += 
-        new PrototypeDataProxyFactory(KeyRegistry.prototypes(KeyGenerator(d.prototype))).buildDataProxyUI(d.prototype,true)
+
+  def buildUnknownPrototypes(coreCapsule: ICapsule) = {
+    val allPrototypesByName = Proxys.prototypes.map { _.dataUI.name }
+
+    (coreCapsule.inputs.toList ++ coreCapsule.outputs) foreach { d ⇒
+      if (!allPrototypesByName.contains(d.prototype.name)) {
+        Proxys.prototypes +=
+          new PrototypeDataProxyFactory(KeyRegistry.prototypes(KeyGenerator(d.prototype))).buildDataProxyUI(d.prototype, true)
       }
     }
   }
-  
-  def computeImplicitPrototypes(proxy : ITaskDataProxyUI,
-                                nameMapping :  Map[String,IPrototypeDataProxyUI],
-                                coreCapsule : ICapsule) : Unit = {
-    
-    proxy.dataUI.implicitPrototypesIn = coreCapsule.inputs.map{_.prototype.name}.toList
-    .filterNot{ n => proxy.dataUI.prototypesIn.map{_.dataUI.name}.contains(n)}.map{nameMapping}
-               
-      proxy.dataUI.implicitPrototypesOut = coreCapsule.outputs.map{_.prototype.name}.toList
-    .filterNot{ n=> proxy.dataUI.prototypesOut.map{_.dataUI.name}.contains(n)}.map{nameMapping}
+
+  def computeImplicitPrototypes(proxy: ITaskDataProxyUI,
+                                nameMapping: Map[String, IPrototypeDataProxyUI],
+                                coreCapsule: ICapsule): Unit = {
+
+    proxy.dataUI.implicitPrototypesIn = coreCapsule.inputs.map { _.prototype.name }.toList
+      .filterNot { n ⇒ proxy.dataUI.prototypesIn.map { _.dataUI.name }.contains(n) }.map { nameMapping }
+
+    proxy.dataUI.implicitPrototypesOut = coreCapsule.outputs.map { _.prototype.name }.toList
+      .filterNot { n ⇒ proxy.dataUI.prototypesOut.map { _.dataUI.name }.contains(n) }.map { nameMapping }
   }
-  
-  def computeImplicitPrototypes(proxy : ITaskDataProxyUI) : Unit = {
+
+  def computeImplicitPrototypes(proxy: ITaskDataProxyUI): Unit = {
     val coreCapsule = new Capsule(MoleMaker.taskCoreObject(proxy))
     buildUnknownPrototypes(coreCapsule)
     computeImplicitPrototypes(proxy,
-                              MoleMaker.prototypeMapping.map{ case(pUI,p) => pUI.dataUI.name -> pUI}.toMap,
-                              coreCapsule)
+      MoleMaker.prototypeMapping.map { case (pUI, p) ⇒ pUI.dataUI.name -> pUI }.toMap,
+      coreCapsule)
   }
-  
-  def checkTaskProxyImplicitsPrototypes(scene : IMoleScene,
-                                        proxy : ITaskDataProxyUI) = {
-    
+
+  def checkTaskProxyImplicitsPrototypes(scene: IMoleScene,
+                                        proxy: ITaskDataProxyUI) = {
+
     try {
-      scene.manager.capsules.values.flatMap{_.dataUI.task}.contains(proxy) match {
-        case true => checkMole(scene.manager)
-        case false => computeImplicitPrototypes(proxy)
+      scene.manager.capsules.values.flatMap { _.dataUI.task }.contains(proxy) match {
+        case true ⇒ checkMole(scene.manager)
+        case false ⇒ computeImplicitPrototypes(proxy)
       }
-    } catch { case e : UserBadDataError =>}  
+    } catch { case e: UserBadDataError ⇒ }
   }
-  
-  def fullCheck(manager : IMoleSceneManager) = {
+
+  def fullCheck(manager: IMoleSceneManager) = {
     val a = checkMole(manager)
     if (a.isDefined)
       if (a.get._4.isEmpty)
         checkTopology(a.get._1)
   }
-  
-  
-  def checkTopology(mole : IMole) = {
+
+  def checkTopology(mole: IMole) = {
     val st = Validation.topologyErrors(mole).mkString("\n")
-    if (! st.isEmpty) StatusBar.block(st)
+    if (!st.isEmpty) StatusBar.block(st)
   }
 }

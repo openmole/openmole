@@ -17,6 +17,6 @@
 
 package org.openmole.ide.core.model.panel
 
-trait IAuthentificationPanelUI extends IPanelUI{
+trait IAuthentificationPanelUI extends IPanelUI {
   def saveContent
 }

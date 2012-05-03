@@ -27,23 +27,23 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 
 object SceneItemFactory {
 
-  def createCapsule(caps: ICapsuleUI,scene: IMoleScene, locationPoint: Point): ICapsuleUI = {
+  def createCapsule(caps: ICapsuleUI, scene: IMoleScene, locationPoint: Point): ICapsuleUI = {
     scene.initCapsuleAdd(caps)
     scene.manager.registerCapsuleUI(caps)
     scene.graphScene.addNode(scene.manager.getNodeID).setPreferredLocation(locationPoint)
     CheckData.checkMole(scene.manager)
-    caps   
+    caps
   }
-  
-  def createCapsule(scene: IMoleScene, locationPoint: Point): ICapsuleUI = createCapsule(new CapsuleUI(scene),scene, locationPoint)
-    
-  def createTransition(scene: IMoleScene,s: ICapsuleUI, t:IInputSlotWidget,transitionType: TransitionType.Value,cond: Option[String]) = {
-    if (scene.manager.registerTransition(s, t, transitionType,cond))
-      scene.createConnectEdge(scene.manager.capsuleID(s), scene.manager.capsuleID(t.capsule))  
+
+  def createCapsule(scene: IMoleScene, locationPoint: Point): ICapsuleUI = createCapsule(new CapsuleUI(scene), scene, locationPoint)
+
+  def createTransition(scene: IMoleScene, s: ICapsuleUI, t: IInputSlotWidget, transitionType: TransitionType.Value, cond: Option[String]) = {
+    if (scene.manager.registerTransition(s, t, transitionType, cond))
+      scene.createConnectEdge(scene.manager.capsuleID(s), scene.manager.capsuleID(t.capsule))
   }
-  
+
   def createDataChannel(scene: IMoleScene, s: ICapsuleUI, t: ICapsuleUI, li: List[IPrototypeDataProxyUI]) = {
-    if (scene.manager.registerDataChannel(s, t,li))
+    if (scene.manager.registerDataChannel(s, t, li))
       scene.createDataChannelEdge(scene.manager.capsuleID(s), scene.manager.capsuleID(t))
   }
 }

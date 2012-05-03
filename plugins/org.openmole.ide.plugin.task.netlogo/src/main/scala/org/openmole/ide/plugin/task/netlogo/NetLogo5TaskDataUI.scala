@@ -16,15 +16,14 @@ import scala.collection.JavaConversions._
 import scala.io.Source
 import java.io.File
 
-class NetLogo5TaskDataUI(val name: String="",
-                         val workspaceEmbedded: Boolean=false,
-                         val nlogoPath: String = "", 
+class NetLogo5TaskDataUI(val name: String = "",
+                         val workspaceEmbedded: Boolean = false,
+                         val nlogoPath: String = "",
                          val lauchingCommands: String = "",
-                         var prototypeMappingInput: List[(IPrototypeDataProxyUI, String)]= List(),
-                         var prototypeMappingOutput: List[(String,IPrototypeDataProxyUI)] = List(),
-                         val resources: List[String]= List(),
+                         var prototypeMappingInput: List[(IPrototypeDataProxyUI, String)] = List(),
+                         var prototypeMappingOutput: List[(String, IPrototypeDataProxyUI)] = List(),
+                         val resources: List[String] = List(),
                          val globals: List[String] = List()) extends TaskDataUI {
-  
 
   def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = {
     val builder = NetLogo5Task(
@@ -35,22 +34,21 @@ class NetLogo5TaskDataUI(val name: String="",
     builder addInput inputs
     builder addOutput outputs
     builder addParameter parameters
-    resources.foreach{ r => builder addResource(new File(r)) }
-    prototypeMappingInput.foreach{case(p, n) => builder addNetLogoInput (p.dataUI.coreObject, n)}
-    prototypeMappingOutput.foreach{case(n, p) => builder addNetLogoOutput (n, p.dataUI.coreObject)} 
+    resources.foreach { r ⇒ builder addResource (new File(r)) }
+    prototypeMappingInput.foreach { case (p, n) ⇒ builder addNetLogoInput (p.dataUI.coreObject, n) }
+    prototypeMappingOutput.foreach { case (n, p) ⇒ builder addNetLogoOutput (n, p.dataUI.coreObject) }
     builder.toTask
   }
-  
-  
-  def coreClass= classOf[NetLogo5Task]
-  
+
+  def coreClass = classOf[NetLogo5Task]
+
   override def imagePath = "img/netlogo5.png"
-  
+
   def fatImagePath = "img/netlogo5_fat.png"
-  
+
   def buildPanelUI = new NetLogo5TaskPanelUI(this)
-  
-  def borderColor = new Color(19,118,8)
-  
-  def backgroundColor = new Color(175,233,175,128)
+
+  def borderColor = new Color(19, 118, 8)
+
+  def backgroundColor = new Color(175, 233, 175, 128)
 }

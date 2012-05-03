@@ -20,12 +20,11 @@ package org.openmole.ide.plugin.task.netlogo
 import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
-
 class NetLogo4TaskFactoryUI extends ITaskFactoryUI {
-  
+
   override def displayName = "NetLogo4"
-  
+
   def buildDataUI = new NetLogo4TaskDataUI
-  
+
   def category = ComponentCategories.ABM_TASK
 }

@@ -23,9 +23,9 @@ import org.openmole.ide.core.implementation.registry.PrototypeActivator
 class Activator extends OSGiActivator with PrototypeActivator {
 
   override def prototypeFactories = List(new StringPrototypeFactoryUI,
-                                         new FilePrototypeFactoryUI,
-                                         new IntegerPrototypeFactoryUI,
-                                         new DoublePrototypeFactoryUI,
-                                         new BigIntegerPrototypeFactoryUI,
-                                         new BigDecimalPrototypeFactoryUI)
+    new FilePrototypeFactoryUI,
+    new IntegerPrototypeFactoryUI,
+    new DoublePrototypeFactoryUI,
+    new BigIntegerPrototypeFactoryUI,
+    new BigDecimalPrototypeFactoryUI)
 }

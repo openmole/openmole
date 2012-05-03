@@ -24,10 +24,10 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.model.control.IExecutionManager
 
 class ToStringHookDataUI(executionManager: IExecutionManager,
-                        toBeHooked: (ICapsule,IPrototype[_])) extends IHookDataUI{
-    
-  override def coreObject = new ToStringHook(executionManager.moleExecution, 
-                                             toBeHooked._1, 
-                                             executionManager.printStream, 
-                                             toBeHooked._2)
+                         toBeHooked: (ICapsule, IPrototype[_])) extends IHookDataUI {
+
+  override def coreObject = new ToStringHook(executionManager.moleExecution,
+    toBeHooked._1,
+    executionManager.printStream,
+    toBeHooked._2)
 }

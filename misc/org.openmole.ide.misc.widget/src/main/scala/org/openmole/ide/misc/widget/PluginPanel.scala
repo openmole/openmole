@@ -24,14 +24,14 @@ import scala.swing._
 import scala.swing.event.ActionEvent
 import scala.swing.event.UIElementResized
 
-class PluginPanel (mig1: String, mig2: String ="", mig3: String="") extends MyMigPanel(mig1,mig2,mig3) {
-  
+class PluginPanel(mig1: String, mig2: String = "", mig3: String = "") extends MyMigPanel(mig1, mig2, mig3) {
+
   override def paintComponent(g: Graphics2D) = {
     super.paintComponent(g)
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                       RenderingHints.VALUE_ANTIALIAS_ON)
-    g.setColor(new Color(77,77,77))
+      RenderingHints.VALUE_ANTIALIAS_ON)
+    g.setColor(new Color(77, 77, 77))
     g.fillRect(0, 0, size.width, size.height)
     revalidate
-  }   
+  }
 }

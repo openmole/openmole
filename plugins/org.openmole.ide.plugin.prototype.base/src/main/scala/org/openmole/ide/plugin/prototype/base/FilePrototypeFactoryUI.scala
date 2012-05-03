@@ -23,13 +23,13 @@ import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
 class FilePrototypeFactoryUI extends IPrototypeFactoryUI[File] {
-  
+
   override def displayName = "File"
-  
+
   def buildDataUI = new FilePrototypeDataUI
-  
+
   //FIXME :: change 0 by correct value for dimension
-  def buildDataUI(prototype : IPrototype[_]) = new FilePrototypeDataUI(prototype.name,0)
-  
+  def buildDataUI(prototype: IPrototype[_]) = new FilePrototypeDataUI(prototype.name, 0)
+
   def category = ComponentCategories.PROTOTYPE
 }

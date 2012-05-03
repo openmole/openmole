@@ -24,22 +24,22 @@ import org.openmole.plugin.domain.range._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FromString._
 
-class RangeDomainDataUI (
-  val name: String="",
-  val min: String = "0",
-  val max: String = "",
-  val step: String = "1") extends IDomainDataUI {
-  
+class RangeDomainDataUI(
+    val name: String = "",
+    val min: String = "0",
+    val max: String = "",
+    val step: String = "1") extends IDomainDataUI {
+
   override def coreObject(prototypeObject: IPrototype[_]): IDomain[_] = {
-    if (prototypeObject.`type`.erasure == java.lang.Integer.TYPE) new Range[Int](min,max,step)
-    else if (prototypeObject.`type`.erasure == java.lang.Double.TYPE) new Range[Double](min,max,step)
+    if (prototypeObject.`type`.erasure == java.lang.Integer.TYPE) new Range[Int](min, max, step)
+    else if (prototypeObject.`type`.erasure == java.lang.Double.TYPE) new Range[Double](min, max, step)
     else if (prototypeObject.`type`.erasure == classOf[java.math.BigDecimal]) new Range[java.math.BigDecimal](min, max, step)
     else if (prototypeObject.`type`.erasure == classOf[java.math.BigInteger]) new Range[java.math.BigInteger](min, max, step)
     else throw new UserBadDataError("Unsupported range type " + prototypeObject.`type`.erasure)
   }
 
   def coreClass = classOf[IDomain[_]]
-  
+
   def buildPanelUI = new RangeDomainPanelUI(this)
-  
+
 }

@@ -23,21 +23,21 @@ import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.TextField
 import scala.swing.Label
 
-class RangeDomainPanelUI(pud: RangeDomainDataUI) extends PluginPanel("fillx","[left][grow,fill]","") with IDomainPanelUI{
-  val minField = new TextField(6) {text = pud.min}
-  val maxField = new TextField(6) {text = pud.max}
-  val stepField = new TextField(6) {text = pud.step}
-    
-  contents+= (new Label("Min"),"gap para")
-  contents+= minField
-  contents+= (new Label("Max"),"gap para")
-  contents+=  maxField
-    contents+= (new Label("Step"),"gap para")
-    contents+= (stepField,"wrap")
-  
+class RangeDomainPanelUI(pud: RangeDomainDataUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IDomainPanelUI {
+  val minField = new TextField(6) { text = pud.min }
+  val maxField = new TextField(6) { text = pud.max }
+  val stepField = new TextField(6) { text = pud.step }
+
+  contents += (new Label("Min"), "gap para")
+  contents += minField
+  contents += (new Label("Max"), "gap para")
+  contents += maxField
+  contents += (new Label("Step"), "gap para")
+  contents += (stepField, "wrap")
+
   def saveContent(name: String) = new RangeDomainDataUI(name,
-                                                        minField.text,
-                                                        maxField.text,
-                                                        stepField.text)
-  
+    minField.text,
+    maxField.text,
+    stepField.text)
+
 }

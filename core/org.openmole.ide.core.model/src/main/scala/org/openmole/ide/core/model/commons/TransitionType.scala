@@ -19,24 +19,24 @@ package org.openmole.ide.core.model.commons
 import org.openmole.misc.exception.UserBadDataError
 
 object TransitionType extends Enumeration {
-  type TransitionType= Value
-  val BASIC_TRANSITION,EXPLORATION_TRANSITION,AGGREGATION_TRANSITION= Value
-    
+  type TransitionType = Value
+  val BASIC_TRANSITION, EXPLORATION_TRANSITION, AGGREGATION_TRANSITION = Value
+
   def toString(transition: Value) = {
     transition match {
-      case BASIC_TRANSITION => "BASIC"
-      case EXPLORATION_TRANSITION=> "EXPLORATION"
-      case AGGREGATION_TRANSITION=> "AGGREGATION"
-      case _=> throw new UserBadDataError("Unknown transition type " + transition)
+      case BASIC_TRANSITION ⇒ "BASIC"
+      case EXPLORATION_TRANSITION ⇒ "EXPLORATION"
+      case AGGREGATION_TRANSITION ⇒ "AGGREGATION"
+      case _ ⇒ throw new UserBadDataError("Unknown transition type " + transition)
     }
   }
-  
+
   def fromString(transitionString: String) = {
     transitionString match {
-      case "BASIC" => BASIC_TRANSITION
-      case "EXPLORATION"=> EXPLORATION_TRANSITION
-      case "AGGREGATION"=> AGGREGATION_TRANSITION
-      case _=> throw new UserBadDataError("Unknown transition type string " + transitionString)
+      case "BASIC" ⇒ BASIC_TRANSITION
+      case "EXPLORATION" ⇒ EXPLORATION_TRANSITION
+      case "AGGREGATION" ⇒ AGGREGATION_TRANSITION
+      case _ ⇒ throw new UserBadDataError("Unknown transition type string " + transitionString)
     }
   }
 }

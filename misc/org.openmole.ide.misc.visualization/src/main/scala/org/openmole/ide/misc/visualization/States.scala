@@ -22,12 +22,12 @@ import org.openmole.core.model.execution.ExecutionState._
 object States {
   def factory(s: States, state: ExecutionState, value: Int): States = {
     state match {
-      case READY=> new States(value,s.submitted,s.running)
-      case SUBMITTED=> new States(s.ready,value,s.running)
-      case RUNNING=> new States(s.ready,s.submitted,value)
-      case _=> s
+      case READY ⇒ new States(value, s.submitted, s.running)
+      case SUBMITTED ⇒ new States(s.ready, value, s.running)
+      case RUNNING ⇒ new States(s.ready, s.submitted, value)
+      case _ ⇒ s
     }
-  }  
+  }
 }
 
 class States(val ready: Int, val submitted: Int, val running: Int)

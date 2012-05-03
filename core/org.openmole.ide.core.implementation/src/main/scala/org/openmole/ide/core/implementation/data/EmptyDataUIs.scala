@@ -40,12 +40,12 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 
 object EmptyDataUIs {
-  
-  val emptyPrototypeProxy : IPrototypeDataProxyUI = new PrototypeDataProxyUI(new EmptyPrototypeDataUI,false)
-  
-  val emptyTaskProxy : ITaskDataProxyUI = new TaskDataProxyUI(new EmptyTaskDataUI)
-  
-  class  EmptyPrototypeDataUI extends IPrototypeDataUI[Any] {
+
+  val emptyPrototypeProxy: IPrototypeDataProxyUI = new PrototypeDataProxyUI(new EmptyPrototypeDataUI, false)
+
+  val emptyTaskProxy: ITaskDataProxyUI = new TaskDataProxyUI(new EmptyTaskDataUI)
+
+  class EmptyPrototypeDataUI extends IPrototypeDataUI[Any] {
     def name = ""
     def dim = 0
     def coreClass = classOf[IPrototype[_]]
@@ -54,13 +54,13 @@ object EmptyDataUIs {
     def buildPanelUI = new EmptyPrototypePanelUI
     def displayTypedName = ""
   }
-  
-    class EmptyPrototypePanelUI extends IPrototypePanelUI[Any] {
-      override def peer  = new PluginPanel("").peer
-      def saveContent(name: String) = new EmptyPrototypeDataUI
-    }
-  
-  class  EmptySamplingDataUI extends ISamplingDataUI  {
+
+  class EmptyPrototypePanelUI extends IPrototypePanelUI[Any] {
+    override def peer = new PluginPanel("").peer
+    def saveContent(name: String) = new EmptyPrototypeDataUI
+  }
+
+  class EmptySamplingDataUI extends ISamplingDataUI {
     def name = ""
     def dim = 0
     def coreClass = classOf[ISampling]
@@ -70,22 +70,22 @@ object EmptyDataUIs {
     def buildPanelUI = new EmptySamplingPanelUI
     def displayTypedName = ""
   }
-    
+
   class EmptySamplingPanelUI extends ISamplingPanelUI {
     override def peer = new PluginPanel("").peer
     def saveContent(name: String) = new EmptySamplingDataUI
   }
-  
+
   class EmptySampling extends Sampling {
     def prototypes = List.empty
-    def build(context : IContext) = List[Iterable[IVariable[_]]]().toIterator
+    def build(context: IContext) = List[Iterable[IVariable[_]]]().toIterator
   }
-  
+
   class EmptyTaskDataUI extends TaskDataUI {
     def name = ""
     def buildPanelUI = new EmptyTaskPanelUI
     def coreClass = classOf[EmptyTask]
-    
+
     def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = {
       val taskBuilder = EmptyTask(name)(plugins)
       taskBuilder addInput inputs
@@ -93,15 +93,15 @@ object EmptyDataUIs {
       taskBuilder addParameter parameters
       taskBuilder.toTask
     }
-    
+
     def backgroundColor = Color.WHITE
     def borderColor = Color.WHITE
     def fatImagePath = "img/empty.png"
   }
-  
+
   class EmptyTaskPanelUI extends ITaskPanelUI {
     override def peer = new PluginPanel("").peer
     def saveContent(name: String) = new EmptyTaskDataUI
   }
-  
+
 }

@@ -16,34 +16,34 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.task.systemexec.SystemExecTask
 import scala.collection.JavaConversions._
 
-class SystemExecTaskDataUI(val name: String="",
-                           val workdir: String="",
-                           val lauchingCommands: String="", 
-                           val resources: List[String]= List.empty,
-                           val inputMap: List[(IPrototypeDataProxyUI,String)]=List.empty,
-                           val outputMap: List[(String,IPrototypeDataProxyUI)]= List.empty) extends TaskDataUI {
-  
+class SystemExecTaskDataUI(val name: String = "",
+                           val workdir: String = "",
+                           val lauchingCommands: String = "",
+                           val resources: List[String] = List.empty,
+                           val inputMap: List[(IPrototypeDataProxyUI, String)] = List.empty,
+                           val outputMap: List[(String, IPrototypeDataProxyUI)] = List.empty) extends TaskDataUI {
+
   def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = {
-    val syet = SystemExecTask(name,lauchingCommands.filterNot(_=='\n'),workdir)(plugins)
+    val syet = SystemExecTask(name, lauchingCommands.filterNot(_ == '\n'), workdir)(plugins)
     syet addInput inputs
     syet addOutput outputs
     syet addParameter parameters
     resources.foreach(syet addResource new File(_))
-    
-    outputMap.foreach(i=> syet addOutput (i._1, i._2.dataUI.coreObject.asInstanceOf[IPrototype[File]]))
-    inputMap.foreach(i=>syet addInput (i._1.dataUI.coreObject.asInstanceOf[IPrototype[File]],i._2))
+
+    outputMap.foreach(i ⇒ syet addOutput (i._1, i._2.dataUI.coreObject.asInstanceOf[IPrototype[File]]))
+    inputMap.foreach(i ⇒ syet addInput (i._1.dataUI.coreObject.asInstanceOf[IPrototype[File]], i._2))
     syet
   }
-  
-  def coreClass= classOf[SystemExecTask]
-  
+
+  def coreClass = classOf[SystemExecTask]
+
   override def imagePath = "img/systemexec_task.png"
-  
+
   def fatImagePath = "img/systemexec_task_fat.png"
-  
+
   def buildPanelUI = new SystemExecTaskPanelUI(this)
-  
-  def borderColor = new Color(255,200,0)
-  
-  def backgroundColor = new Color(255,200,0,128)
+
+  def borderColor = new Color(255, 200, 0)
+
+  def backgroundColor = new Color(255, 200, 0, 128)
 }

@@ -22,8 +22,8 @@ import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 class MoleTaskFactoryUI extends ITaskFactoryUI {
   override def displayName = "Mole Task"
-  
+
   def buildDataUI = new MoleTaskDataUI
-  
+
   def category = ComponentCategories.TASK
 }

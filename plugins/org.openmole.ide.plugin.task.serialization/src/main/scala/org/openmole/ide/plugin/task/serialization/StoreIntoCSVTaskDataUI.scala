@@ -18,31 +18,31 @@ import org.openmole.plugin.task.serialization.StoreIntoCSVTask
 import scala.collection.JavaConversions._
 import org.openmole.core.implementation.data.Prototype._
 
-class StoreIntoCSVTaskDataUI(val name: String="",
-                             val columns: List[(IPrototypeDataProxyUI,String)]= List.empty,
-                             val protoFile: Option[IPrototypeDataProxyUI]= None) extends TaskDataUI {
- 
+class StoreIntoCSVTaskDataUI(val name: String = "",
+                             val columns: List[(IPrototypeDataProxyUI, String)] = List.empty,
+                             val protoFile: Option[IPrototypeDataProxyUI] = None) extends TaskDataUI {
+
   def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = {
     val builder = protoFile match {
-      case Some(x: IPrototypeDataProxyUI) =>
+      case Some(x: IPrototypeDataProxyUI) ⇒
         StoreIntoCSVTask(
           name,
           protoFile.get.dataUI.coreObject.asInstanceOf[IPrototype[File]])(plugins)
-      case None => throw new UserBadDataError("No output prototype file is defined !")
+      case None ⇒ throw new UserBadDataError("No output prototype file is defined !")
     }
-    columns.foreach{e => builder addColumn (e._1.dataUI.coreObject.asInstanceOf[IPrototype[Array[_]]],e._2)}
+    columns.foreach { e ⇒ builder addColumn (e._1.dataUI.coreObject.asInstanceOf[IPrototype[Array[_]]], e._2) }
     builder.toTask
   }
-  
-  def coreClass= classOf[StoreIntoCSVTask]
-  
+
+  def coreClass = classOf[StoreIntoCSVTask]
+
   override def imagePath = "img/storeIntoCSV.png"
-  
+
   def fatImagePath = "img/storeIntoCSV_fat.png"
-  
+
   def buildPanelUI = new StoreIntoCSVTaskPanelUI(this)
-  
-  def borderColor = new Color(170,0,136)
-  
-  def backgroundColor = new Color(170,0,136,128)
+
+  def borderColor = new Color(170, 0, 136)
+
+  def backgroundColor = new Color(170, 0, 136, 128)
 }

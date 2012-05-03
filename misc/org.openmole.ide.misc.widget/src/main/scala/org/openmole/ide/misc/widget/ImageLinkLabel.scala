@@ -22,13 +22,13 @@ import scala.swing.Action
 import scala.swing.Label
 import scala.swing.event.MousePressed
 
-class ImageLinkLabel(image : ImageIcon,
+class ImageLinkLabel(image: ImageIcon,
                      var action: Action) extends Label {
   icon = image
   cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
-  
+
   listenTo(this.mouse.clicks)
   reactions += {
-    case e: MousePressed => action.apply
+    case e: MousePressed ⇒ action.apply
   }
 }

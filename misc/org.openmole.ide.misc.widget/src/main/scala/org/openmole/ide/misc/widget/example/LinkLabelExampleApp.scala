@@ -21,28 +21,27 @@ import java.awt.Dimension
 import org.openmole.ide.misc.widget._
 import scala.collection.JavaConversions._
 import org.openmole.ide.misc.tools.image.Images._
-import scala.swing.{ComboBox,Action,MainFrame,SimpleSwingApplication}
+import scala.swing.{ ComboBox, Action, MainFrame, SimpleSwingApplication }
 import javax.swing.JComboBox
 
-object LinkLabelExampleApp extends SimpleSwingApplication
-{
+object LinkLabelExampleApp extends SimpleSwingApplication {
   def top = new MainFrame {
     title = "Link Label Demo"
-    contents = new PluginPanel(""){
-      contents +=new MainLinkLabel("Edit",
-                                   new Action(""){def apply = println("My main link !")})
-      contents +=new LinkLabel("My hyper label ",
-                               new Action(""){def apply = println("My link !")})
-      contents +=new ImplicitLinkLabel("My implicit label ",
-                               new Action(""){def apply = println("My implicit !")})
-      
-      val li = List(new ContentAction("one",new Fake){override def apply = content.fakemethod(title)},new ContentAction("two",new Fake){def apply = content.fakemethod(title)})
-      contents += new EditableLinkLabel(li.head,li)
-      contents += new ImageLinkLabel(ADD,new Action(""){def apply = println("My image link !")} )
+    contents = new PluginPanel("") {
+      contents += new MainLinkLabel("Edit",
+        new Action("") { def apply = println("My main link !") })
+      contents += new LinkLabel("My hyper label ",
+        new Action("") { def apply = println("My link !") })
+      contents += new ImplicitLinkLabel("My implicit label ",
+        new Action("") { def apply = println("My implicit !") })
+
+      val li = List(new ContentAction("one", new Fake) { override def apply = content.fakemethod(title) }, new ContentAction("two", new Fake) { def apply = content.fakemethod(title) })
+      contents += new EditableLinkLabel(li.head, li)
+      contents += new ImageLinkLabel(ADD, new Action("") { def apply = println("My image link !") })
     }
-    size = new Dimension(250,200)
+    size = new Dimension(250, 200)
   }
-  
+
   class Fake {
     def fakemethod(s: String) = println("fake method from " + s)
   }

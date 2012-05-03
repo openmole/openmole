@@ -29,32 +29,31 @@ import scala.swing.Panel
 import scala.swing.TabbedPane
 import org.openmole.ide.misc.tools.image.Images._
 
-class ExecutionMoleSceneContainer(val scene : ExecutionMoleScene,
-                                  val page : TabbedPane.Page) extends Panel with ISceneContainer{
-  
+class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
+                                  val page: TabbedPane.Page) extends Panel with ISceneContainer {
+
   peer.setLayout(new BorderLayout)
   val toolBar = new MigPanel("") {
-    contents += new ToolBarButton(new ImageIcon(START_EXECUTION), 
-                                  "Start the workflow",
-                                  start)
-    
-    contents += new ToolBarButton(new ImageIcon(STOP_EXECUTION), 
-                                  "Stop the workflow",
-                                  stop)
-  } 
-  val (mole, prototypeMapping,capsuleMapping,errors) = MoleMaker.buildMole(scene.manager)
+    contents += new ToolBarButton(new ImageIcon(START_EXECUTION),
+      "Start the workflow",
+      start)
+
+    contents += new ToolBarButton(new ImageIcon(STOP_EXECUTION),
+      "Stop the workflow",
+      stop)
+  }
+  val (mole, prototypeMapping, capsuleMapping, errors) = MoleMaker.buildMole(scene.manager)
   val executionManager = new ExecutionManager(scene.manager,
-                                              mole,
-                                              prototypeMapping,
-                                              capsuleMapping)
-  
-  peer.add(toolBar.peer,BorderLayout.NORTH)
-  peer.add(scene.graphScene.createView,BorderLayout.CENTER)
-  peer.add(executionManager.peer,BorderLayout.SOUTH)
-  
-  
-  def start = new Action("") { override def apply = executionManager.start}
-  
-  def stop = new Action("") { override def apply = executionManager.cancel}
-  
+    mole,
+    prototypeMapping,
+    capsuleMapping)
+
+  peer.add(toolBar.peer, BorderLayout.NORTH)
+  peer.add(scene.graphScene.createView, BorderLayout.CENTER)
+  peer.add(executionManager.peer, BorderLayout.SOUTH)
+
+  def start = new Action("") { override def apply = executionManager.start }
+
+  def stop = new Action("") { override def apply = executionManager.cancel }
+
 }

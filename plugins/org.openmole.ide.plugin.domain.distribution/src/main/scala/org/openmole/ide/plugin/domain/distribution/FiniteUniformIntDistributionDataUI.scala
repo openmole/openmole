@@ -13,14 +13,14 @@ import org.openmole.plugin.domain.modifier._
 import org.openmole.misc.workspace._
 
 class FiniteUniformIntDistributionDataUI(
-  val name: String="",
-  val size: Int=1) extends IDomainDataUI {
-  
+    val name: String = "",
+    val size: Int = 1) extends IDomainDataUI {
+
   def coreObject(proto: IPrototype[_]) = new FiniteUniformIntDistribution(size)
 
-  def coreClass = classOf[FiniteUniformIntDistribution] 
-  
+  def coreClass = classOf[FiniteUniformIntDistribution]
+
   def imagePath = "img/domain_uniform_distribution.png"
-  
+
   def buildPanelUI = new FiniteUniformIntDistributionPanelUI(this)
 }

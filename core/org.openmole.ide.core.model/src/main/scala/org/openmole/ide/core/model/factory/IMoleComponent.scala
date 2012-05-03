@@ -19,5 +19,5 @@ package org.openmole.ide.core.model.factory
 import org.openmole.ide.core.model.panel.IComponentCategory
 
 trait IMoleComponent {
-  def category : IComponentCategory
+  def category: IComponentCategory
 }
