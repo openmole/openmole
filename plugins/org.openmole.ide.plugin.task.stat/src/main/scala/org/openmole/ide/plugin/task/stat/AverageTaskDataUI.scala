@@ -31,7 +31,9 @@ class AverageTaskDataUI(val name: String = "",
 
   def coreClass = classOf[AverageTask]
 
-  def fatImagePath = "img/groovyTask_fat.png"
+  def fatImagePath = "img/average_fat.png"
+
+  override def imagePath = "img/average.png"
 
   def buildPanelUI = new AverageTaskPanelUI(this)
 

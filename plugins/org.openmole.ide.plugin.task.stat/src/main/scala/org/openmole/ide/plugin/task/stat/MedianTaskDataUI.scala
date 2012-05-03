@@ -31,7 +31,9 @@ class MedianTaskDataUI(val name: String = "",
 
   def coreClass = classOf[MedianTask]
 
-  def fatImagePath = "img/groovyTask_fat.png"
+  override def imagePath = "img/median.png"
+
+  def fatImagePath = "img/median_fat.png"
 
   def buildPanelUI = new MedianTaskPanelUI(this)
 
