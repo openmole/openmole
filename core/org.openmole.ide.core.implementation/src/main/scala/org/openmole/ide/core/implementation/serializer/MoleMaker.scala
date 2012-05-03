@@ -101,9 +101,7 @@ object MoleMaker {
   
   def prototypeMapping : Map[IPrototypeDataProxyUI,IPrototype[_]] = (Proxys.prototypes.toList ::: 
                                                                      List(EmptyDataUIs.emptyPrototypeProxy)).map{p=> p->p.dataUI.coreObject}.toMap
-  
-  def prototypeMappingByName : Map[String,IPrototypeDataProxyUI] = (Proxys.prototypes.toList ::: List(EmptyDataUIs.emptyPrototypeProxy)).map{p=> p.dataUI.name->p}.toMap
-  
+ 
   def buildCapsule(capsuleDataUI: ICapsuleDataUI) : Either[(ICapsuleDataUI, Throwable),ICapsule] = 
     capsuleDataUI.task match {
       case Some(x : ITaskDataProxyUI) => 
@@ -121,11 +119,10 @@ object MoleMaker {
   def outputs(proxy : ITaskDataProxyUI) = DataSet(proxy.dataUI.prototypesOut.map{_.dataUI.coreObject})
   
   def parameters(proxy: ITaskDataProxyUI) = {
-    val protoNames = prototypeMappingByName
     new ParameterSet(proxy.dataUI.inputParameters.flatMap{
-        case(pname,v) => 
+        case(protoProxy,v) => 
           if(!v.isEmpty) {
-            val proto = protoNames(pname).dataUI.coreObject
+            val proto = protoProxy.dataUI.coreObject
             val groovyO = new GroovyProxy(v).execute()
             val (ok,msg) = TypeCheck(groovyO,proto)
             if(!ok) throw new UserBadDataError(msg)

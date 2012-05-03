@@ -23,7 +23,7 @@ trait ITaskPanelUI extends IPanelUI{
   
   def save(name: String,
            prototypesIn : List[IPrototypeDataProxyUI],
-           inputParameters : scala.collection.mutable.Map[String,String],
+           inputParameters : scala.collection.mutable.Map[IPrototypeDataProxyUI,String],
            prototypesOut : List[IPrototypeDataProxyUI]) : ITaskDataUI = {
     var dataUI = saveContent(name)
     dataUI.prototypesIn = prototypesIn
