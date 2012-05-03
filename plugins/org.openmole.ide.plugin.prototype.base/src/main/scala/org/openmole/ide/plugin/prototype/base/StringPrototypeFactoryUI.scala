@@ -27,8 +27,8 @@ class StringPrototypeFactoryUI extends IPrototypeFactoryUI[String] {
   
   def buildDataUI = new StringPrototypeDataUI
   
-  //FIXME :: change 0 by correct value for dimension
-  def buildDataUI(prototype : IPrototype[_]) = new StringPrototypeDataUI(prototype.name,0)
+  def buildDataUI(prototype : IPrototype[_],
+                  dim : Int = 0 ) = new StringPrototypeDataUI(prototype.name,dim)
   
   def category = ComponentCategories.PROTOTYPE
 }

@@ -27,8 +27,8 @@ class IntegerPrototypeFactoryUI  extends IPrototypeFactoryUI[Int] {
   
   def buildDataUI = new IntegerPrototypeDataUI
   
-  //FIXME :: change 0 by correct value for dimension
-  def buildDataUI(prototype : IPrototype[_]) = new IntegerPrototypeDataUI(prototype.name,0)
+  def buildDataUI(prototype : IPrototype[_],
+                  dim : Int = 0 ) = new IntegerPrototypeDataUI(prototype.name,dim)
   
   def category = ComponentCategories.PROTOTYPE
 }

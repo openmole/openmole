@@ -28,8 +28,8 @@ class BigDecimalPrototypeFactoryUI extends IPrototypeFactoryUI[BigDecimal] {
   
   override def buildDataUI = new BigDecimalPrototypeDataUI
   
-  //FIXME :: change 0 by correct value for dimension
-  def buildDataUI(prototype : IPrototype[_]) = new BigDecimalPrototypeDataUI(prototype.name,0)
+  def buildDataUI(prototype : IPrototype[_],
+                  dim : Int = 0 ) = new BigDecimalPrototypeDataUI(prototype.name,dim)
   
   def category = ComponentCategories.PROTOTYPE
 }

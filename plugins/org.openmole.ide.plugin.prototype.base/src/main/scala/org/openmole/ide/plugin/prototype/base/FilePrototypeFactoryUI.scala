@@ -28,8 +28,8 @@ class FilePrototypeFactoryUI extends IPrototypeFactoryUI[File] {
   
   def buildDataUI = new FilePrototypeDataUI
   
-  //FIXME :: change 0 by correct value for dimension
-  def buildDataUI(prototype : IPrototype[_]) = new FilePrototypeDataUI(prototype.name,0)
+  def buildDataUI(prototype : IPrototype[_],
+                  dim : Int = 0 ) = new FilePrototypeDataUI(prototype.name,dim)
   
   def category = ComponentCategories.PROTOTYPE
 }

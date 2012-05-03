@@ -28,8 +28,8 @@ class BigIntegerPrototypeFactoryUI extends IPrototypeFactoryUI[java.math.BigInte
   
   def buildDataUI = new BigIntegerPrototypeDataUI
   
-  //FIXME :: change 0 by correct value for dimension
-  def buildDataUI(prototype : IPrototype[_]) = new BigIntegerPrototypeDataUI(prototype.name,0)
+  def buildDataUI(prototype : IPrototype[_],
+                  dim : Int = 0 ) = new BigIntegerPrototypeDataUI(prototype.name,dim)
   
   def category = ComponentCategories.PROTOTYPE
 }
