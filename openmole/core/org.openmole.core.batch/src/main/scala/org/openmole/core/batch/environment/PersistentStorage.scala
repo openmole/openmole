@@ -60,7 +60,7 @@ class PersistentStorage(val environment: BatchEnvironment, URI: URI, override va
   override def clean(token: AccessToken) = synchronized {
     for (r ← ReplicaCatalog.getReplica(description, environment.authentication.key)) ReplicaCatalog.remove(r)
 
-    baseSpaceVar.map { _.remove(token) }
+    baseDir(token).remove(token)
     baseSpaceVar = None
     tmpSpaceVar = None
     persistentSpaceVar = None
