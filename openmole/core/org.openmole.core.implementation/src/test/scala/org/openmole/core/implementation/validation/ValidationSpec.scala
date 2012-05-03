@@ -147,7 +147,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     new Transition(c1, c2)
     new Transition(c2, c3)
 
-    new DataChannel(c1: ICapsule, c3: ICapsule, Array[IPrototype[_]](p))
+    new DataChannel(c1, c3, p)
 
     val errors = Validation.typeErrors(new Mole(c1).capsules)
 

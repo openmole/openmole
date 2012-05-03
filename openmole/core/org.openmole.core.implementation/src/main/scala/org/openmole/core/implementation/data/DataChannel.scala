@@ -39,9 +39,8 @@ class DataChannel(
 
   start.addOutputDataChannel(this)
   end.addInputDataChannel(this)
-  
+
   @transient lazy val filteredSet = filtered.toSet
-  
 
   override def consums(ticket: ITicket, moleExecution: IMoleExecution): Iterable[IVariable[_]] = moleExecution.synchronized {
     val levelDelta = LevelComputing(moleExecution).levelDelta(start, end.capsule)
