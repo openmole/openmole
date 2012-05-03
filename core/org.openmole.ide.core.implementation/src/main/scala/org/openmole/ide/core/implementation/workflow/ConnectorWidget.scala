@@ -42,9 +42,6 @@ class ConnectorWidget(val scene: IMoleScene, val transition: ITransitionUI, var 
   setConstraint(componentWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
   addChild(componentWidget)
 
-  println("transisiot :: " + transition)
-  println("transisiot.cond :: " + transition.condition)
-
   transition.condition match {
     case Some(x: String) ⇒ label.text = x
     case None ⇒
