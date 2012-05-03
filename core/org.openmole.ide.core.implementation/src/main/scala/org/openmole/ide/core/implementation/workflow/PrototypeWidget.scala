@@ -49,9 +49,8 @@ object PrototypeWidget {
   val red = new Color(212,0,0)  
                                               
   def buildInput(scene : IMoleScene, taskproxy : ITaskDataProxyUI) = {
-    val protoIn = nbProtoIn(taskproxy)
-    new PrototypeWidget(scene, x=> protoIn, 
-                        new LinkLabel(protoIn,new Action("") { def apply = 
+    new PrototypeWidget(scene, x=> nbProtoIn(taskproxy), 
+                        new LinkLabel(nbProtoIn(taskproxy),new Action("") { def apply = 
                           scene.displayPropertyPanel(taskproxy,IO)})){
               setPreferredLocation(new Point(19, TASK_CONTAINER_HEIGHT / 2))
             }
