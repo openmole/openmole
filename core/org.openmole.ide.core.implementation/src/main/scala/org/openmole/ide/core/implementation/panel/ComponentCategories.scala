@@ -21,8 +21,10 @@ object ComponentCategories {
   
   val ABM_TASK = new ComponentCategory("Agent based model")
   
+  val SALTELLI_TASK = new ComponentCategory("Saltelli")
+  
   val SENSITIVITY_TASK = new ComponentCategory("Sensitivity",
-                                               List(new ComponentCategory("Saltelli")))
+                                               List(SALTELLI_TASK))
   
   val STORAGE_TASK = new ComponentCategory("Storage")
   

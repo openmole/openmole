@@ -17,23 +17,20 @@
 
 package org.openmole.ide.core.implementation.registry
 
+import org.openmole.core.model.data.IPrototype
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
-import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
-import org.osgi.framework.BundleActivator
-import org.osgi.framework.BundleContext
+object KeyPrototypeGenerator {
 
-trait PrototypeActivator extends BundleActivator {
-  
-  def prototypeFactories : Iterable[IPrototypeFactoryUI[_]]
-
-  abstract override def start(context: BundleContext) = {
-    super.start(context)
-    prototypeFactories.foreach{f=> KeyRegistry.prototypes += KeyGenerator(f.buildDataUI.coreObject)._1 -> f}
-  }
-
-  abstract override def stop(context: BundleContext) = {
-    super.stop(context)
-    prototypeFactories.foreach{f => KeyRegistry.prototypes -= KeyGenerator(f.buildDataUI.coreObject)._1}
+  def apply(proxy : IPrototypeDataProxyUI) : PrototypeKey = {
+    val (manifest,dim) = KeyGenerator.stripArrays(proxy.dataUI.coreObject.`type`)
+    new PrototypeKey(proxy.dataUI.name,manifest.erasure,dim)
   }
   
+  def apply(proto : IPrototype[_]) : PrototypeKey = {
+    val (manifest,dim) = KeyGenerator.stripArrays(proto.`type`)
+    new PrototypeKey(proto.name,manifest.erasure,dim)
+  }
 }
+
+case class PrototypeKey(val name : String,val protoClass : Class[_],val dim : Int)

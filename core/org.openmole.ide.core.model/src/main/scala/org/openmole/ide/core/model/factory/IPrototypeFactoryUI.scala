@@ -25,5 +25,6 @@ trait IPrototypeFactoryUI[T] extends IFactoryUI with IMoleComponent{
  
   def buildDataUI: IPrototypeDataUI[T]
   
-  def buildDataUI(prototype : IPrototype[_]): IPrototypeDataUI[T]
+  def buildDataUI(prototype : IPrototype[_],
+                  dim : Int): IPrototypeDataUI[T]
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
+ * Copyright (C) 2012 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,20 +17,29 @@
 
 package org.openmole.ide.core.implementation.preference
 
-import java.awt.Dimension
+import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.misc.widget.MigPanel
-import scala.swing.TabbedPane
-import scala.swing.event.Key._
+import scala.swing.Button
+import scala.swing.ComboBox
+import scala.swing.event.ButtonClicked
 
-class PreferenceContent extends MigPanel("wrap","[right]",""){ 
-  minimumSize = new Dimension(450,300)
+class EnvironmentSettingPanel extends MigPanel("wrap 2") {
   
-  val authentification = new AuthentificationPanel
-    contents+= new TabbedPane {
-      pages.append(new TabbedPane.Page("Authentification",authentification))
-      pages.append(new TabbedPane.Page("Environment management",new EnvironmentSettingPanel))
-    }
-    
-
-  def save = authentification.save
+  val combo = new ComboBox(Proxys.environments.filter{e => e.dataUI.coreObject match {
+        case x : BatchEnvironment => true
+        case _ => false
+      }
+    }.toList)
+  
+  val trashButton = new Button("Trash data")
+  
+  listenTo(`trashButton`)
+  reactions += {
+    case ButtonClicked(`trashButton`) => combo.selection.item.dataUI.coreObject
+  }
+  
+  
+  contents += combo
+  contents += trashButton
 }

@@ -19,7 +19,6 @@ package org.openmole.ide.core.implementation.data
 import org.openmole.core.implementation.mole.Capsule
 import org.openmole.core.implementation.validation.DataflowProblem
 import org.openmole.core.implementation.validation.Validation
-import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.implementation.dataproxy.Proxys
@@ -38,8 +37,6 @@ import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
 
 object CheckData extends Logger {
-  def dataProxyFactory(data : IData[_]) =  
-    new PrototypeDataProxyFactory(KeyRegistry.prototypes(KeyGenerator(data.prototype))).buildDataProxyUI(data.prototype)
     
   def checkMole(manager : IMoleSceneManager) = 
     manager.startingCapsule match {
@@ -58,8 +55,7 @@ object CheckData extends Logger {
             capsUI.dataUI.task match {
               case Some(x : ITaskDataProxyUI) => 
                 buildUnknownPrototypes(caps)
-                computeImplicitPrototypes(x,prototypeMap.map{p => p._1.name -> p._2},
-                                          caps)
+                computeImplicitPrototypes(x)
               case _ =>
             }
         }
@@ -89,32 +85,38 @@ object CheckData extends Logger {
     }
   
   def buildUnknownPrototypes(coreCapsule : ICapsule) = {
-    val allPrototypesByName = Proxys.prototypes.map{_.dataUI.name}
+    var protoMapping = MoleMaker.keyPrototypeMapping
+    protoMapping.foreach {p => println(p._1.name + " " + p._1.protoClass + " " + p._1.dim)}
     
     (coreCapsule.inputs.toList ++ coreCapsule.outputs) foreach  { d =>
-      if (! allPrototypesByName.contains(d.prototype.name)) {
+      if (! protoMapping.keys.contains(KeyPrototypeGenerator(d.prototype))) {
+        val (key,dim) = KeyGenerator(d.prototype: IPrototype[_])
         Proxys.prototypes += 
-        new PrototypeDataProxyFactory(KeyRegistry.prototypes(KeyGenerator(d.prototype))).buildDataProxyUI(d.prototype,true)
+        new PrototypeDataProxyFactory(KeyRegistry.prototypes(key)).buildDataProxyUI(d.prototype,true,dim)
       }
     }
+    
+    protoMapping.foreach {p => println(p._1.name + " " + p._1.protoClass + " " + p._1.dim)}
   }
   
   def computeImplicitPrototypes(proxy : ITaskDataProxyUI,
-                                nameMapping :  Map[String,IPrototypeDataProxyUI],
+                                protoMapping :  Map[PrototypeKey,IPrototypeDataProxyUI],
                                 coreCapsule : ICapsule) : Unit = {
     
-    proxy.dataUI.implicitPrototypesIn = coreCapsule.inputs.map{_.prototype.name}.toList
-    .filterNot{ n => proxy.dataUI.prototypesIn.map{_.dataUI.name}.contains(n)}.map{nameMapping}
-               
-      proxy.dataUI.implicitPrototypesOut = coreCapsule.outputs.map{_.prototype.name}.toList
-    .filterNot{ n=> proxy.dataUI.prototypesOut.map{_.dataUI.name}.contains(n)}.map{nameMapping}
+    proxy.dataUI.implicitPrototypesIn = coreCapsule.inputs.map{i => KeyPrototypeGenerator(i.prototype)}.toList
+    .filterNot{ n => proxy.dataUI.prototypesIn.map{p=>KeyPrototypeGenerator(p)}.contains(n)}
+    .map{protoMapping}
+    
+    proxy.dataUI.implicitPrototypesOut = coreCapsule.outputs.map{i => KeyPrototypeGenerator(i.prototype)}.toList
+    .filterNot{ n => proxy.dataUI.prototypesOut.map{p=>KeyPrototypeGenerator(p)}.contains(n)}
+    .map{protoMapping}
   }
   
   def computeImplicitPrototypes(proxy : ITaskDataProxyUI) : Unit = {
     val coreCapsule = new Capsule(MoleMaker.taskCoreObject(proxy))
     buildUnknownPrototypes(coreCapsule)
     computeImplicitPrototypes(proxy,
-                              MoleMaker.prototypeMapping.map{ case(pUI,p) => pUI.dataUI.name -> pUI}.toMap,
+                              MoleMaker.keyPrototypeMapping,
                               coreCapsule)
   }
   

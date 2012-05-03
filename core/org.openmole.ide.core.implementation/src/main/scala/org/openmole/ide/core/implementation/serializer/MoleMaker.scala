@@ -21,6 +21,8 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.core.implementation.registry.PrototypeKey
+import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.core.model.mole.IEnvironmentSelection
 import org.openmole.core.model.mole.IGrouping
@@ -102,6 +104,9 @@ object MoleMaker {
   def prototypeMapping : Map[IPrototypeDataProxyUI,IPrototype[_]] = (Proxys.prototypes.toList ::: 
                                                                      List(EmptyDataUIs.emptyPrototypeProxy)).map{p=> p->p.dataUI.coreObject}.toMap
  
+  def keyPrototypeMapping : Map[PrototypeKey,IPrototypeDataProxyUI] = (Proxys.prototypes.toList ::: 
+                                                                     List(EmptyDataUIs.emptyPrototypeProxy)).map{p=> KeyPrototypeGenerator(p) -> p}.toMap
+  
   def buildCapsule(capsuleDataUI: ICapsuleDataUI) : Either[(ICapsuleDataUI, Throwable),ICapsule] = 
     capsuleDataUI.task match {
       case Some(x : ITaskDataProxyUI) => 
