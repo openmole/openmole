@@ -20,8 +20,8 @@ package org.openmole.ide.core.implementation.dialog
 import java.awt.Dimension
 import java.awt.Font
 import java.awt.Frame
-import javax.swing.ImageIcon
 import javax.swing.UIManager
+import org.openmole.ide.misc.tools.image.Images._
 
 class GUIApplication { application => 
   
@@ -32,7 +32,7 @@ class GUIApplication { application =>
   UIManager.put("Label.font",font)
   
   val frame = new GUIPanel {
-    iconImage = new ImageIcon ( this.getClass.getClassLoader.getResource("/openmole.png") ).getImage
+    iconImage = APPLICATION_ICON.getImage
     override def closeOperation = {
       super.closeOperation
       application.closeOperation
