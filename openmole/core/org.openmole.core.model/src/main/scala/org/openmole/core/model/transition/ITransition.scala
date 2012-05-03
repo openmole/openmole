@@ -64,7 +64,7 @@ trait ITransition {
    *
    * @return the names of the variables which are filtred by this transition
    */
-  def filter: Set[String]
+  def filtered: Iterable[String]
 
   /**
    * Get the unfiltred user output data of the starting capsule going through
@@ -72,7 +72,7 @@ trait ITransition {
    *
    * @return the unfiltred output data of the staring capsule
    */
-  def unFiltred: Iterable[IData[_]]
+  def unFiltered: Iterable[IData[_]]
 
   /**
    *

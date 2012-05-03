@@ -25,7 +25,7 @@ import org.openmole.core.model.transition.ICondition
 import org.openmole.core.model.transition.ISlot
 import org.openmole.misc.exception.UserBadDataError
 
-class SlaveTransition(start: ICapsule, end: ISlot, condition: ICondition = ICondition.True, filtered: Set[String] = Set.empty) extends ExplorationTransition(start, end, condition, filtered) {
+class SlaveTransition(start: ICapsule, end: ISlot, condition: ICondition = ICondition.True, filtered: Iterable[String] = Iterable.empty) extends ExplorationTransition(start, end, condition, filtered) {
 
   override def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = submitIn(context, ticket.parent.getOrElse(throw new UserBadDataError("Slave transition should take place after an master transition.")), subMole)
 

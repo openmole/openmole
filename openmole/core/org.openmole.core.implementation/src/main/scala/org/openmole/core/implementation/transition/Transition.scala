@@ -40,10 +40,12 @@ class Transition(
     val end: ISlot,
     val condition: ICondition = ICondition.True,
     val filtered: Iterable[String] = Iterable.empty[String]) extends ITransition {
-  
+
   start.addOutputTransition(this)
   end += this
-  
+
+  @transient val filteredSet = filtered.toSet
+
   private def nextTaskReady(ticket: ITicket, subMole: ISubMoleExecution): Boolean = {
     val registry = subMole.transitionRegistry
     !end.transitions.exists(!registry.isRegistred(_, ticket))
@@ -77,7 +79,7 @@ class Transition(
 
   override def isConditionTrue(context: IContext): Boolean = condition.evaluate(context)
 
-  override def unFiltred = start.outputs.filterNot(d ⇒ filter.contains(d.prototype.name))
+  override def unFiltered = start.outputs.filterNot(d ⇒ filteredSet.contains(d.prototype.name))
 
   protected def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = submitNextJobsIfReady(ListBuffer() ++ context.values, ticket, subMole)
 

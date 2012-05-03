@@ -42,7 +42,7 @@ import scala.collection.immutable.TreeMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
-class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition = True, filtered: Set[String] = Set.empty[String], trigger: Option[ICondition] = None) extends Transition(start, end, condition, filtered) with IAggregationTransition {
+class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition = True, filtered: Iterable[String] = Iterable.empty[String], trigger: Option[ICondition] = None) extends Transition(start, end, condition, filtered) with IAggregationTransition {
 
   override def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration."))
