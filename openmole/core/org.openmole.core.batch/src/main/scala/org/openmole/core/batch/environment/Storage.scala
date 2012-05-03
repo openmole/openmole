@@ -51,6 +51,8 @@ abstract class Storage(val URI: URI) extends BatchService {
 
   def path = new RelativePath(root)
 
+  def clean(token: AccessToken) = {}
+
   /*def test: Boolean = {
     try {
       

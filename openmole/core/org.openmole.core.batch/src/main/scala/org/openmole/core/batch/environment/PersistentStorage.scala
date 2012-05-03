@@ -26,6 +26,7 @@ import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
+import collection.JavaConversions._
 
 object PersistentStorage extends Logger {
 
@@ -51,49 +52,73 @@ class PersistentStorage(val environment: BatchEnvironment, URI: URI, override va
 
   import PersistentStorage._
 
-  @transient protected var tmpSpaceVar: IURIFile = null
-  @transient protected var persistentSpaceVar: IURIFile = null
+  @transient protected var tmpSpaceVar: Option[IURIFile] = None
+  @transient protected var persistentSpaceVar: Option[IURIFile] = None
   @transient protected var time = System.currentTimeMillis
 
+  override def clean(token: AccessToken) = synchronized {
+    for (r ← ReplicaCatalog.getReplica(description, environment.authentication.key)) ReplicaCatalog.remove(r)
+
+    tmpSpaceVar.map { _.remove(token) }
+    persistentSpaceVar.map { _.remove(token) }
+
+    tmpSpaceVar = None
+    persistentSpaceVar = None
+    time = System.currentTimeMillis
+  }
+
   override def persistentSpace(token: AccessToken): IURIFile = synchronized {
-    if (persistentSpaceVar == null) {
-      persistentSpaceVar = baseDir(token).mkdirIfNotExist(persistent, token)
+    persistentSpaceVar match {
+      case None ⇒
+        val persistentSpace = baseDir(token).mkdirIfNotExist(persistent, token)
 
-      val inCatalog = ReplicaCatalog.inCatalog(description, environment.authentication.key)
-      for (file ← persistentSpaceVar.list(token)) {
-        val child = new URIFile(persistentSpaceVar, file)
-        if (!inCatalog.contains(child.location)) URIFile.clean(child)
-      }
+        val inCatalog = ReplicaCatalog.inCatalog(description, environment.authentication.key)
+        for (file ← persistentSpace.list(token)) {
+          val child = new URIFile(persistentSpace, file)
+          if (!inCatalog.contains(child.location)) URIFile.clean(child)
+        }
 
+        persistentSpaceVar = Some(persistentSpace)
+        persistentSpace
+      case Some(s) ⇒ s
     }
-    persistentSpaceVar
   }
 
   override def tmpSpace(token: AccessToken): IURIFile = synchronized {
+    tmpSpaceVar match {
+      case Some(space) ⇒
+        if (time + Workspace.preferenceAsDurationInMs(TmpDirRegenerate) < System.currentTimeMillis) {
+          val tmpDir = createTmpDir(token)
+          tmpSpaceVar = Some(tmpDir)
+          tmpDir
+        } else space
 
-    if (tmpSpaceVar == null || time + Workspace.preferenceAsDurationInMs(TmpDirRegenerate) < System.currentTimeMillis()) {
-      time = System.currentTimeMillis
+      case None ⇒
+        val tmpDir = createTmpDir(token)
+        tmpSpaceVar = Some(tmpDir)
+        tmpDir
+    }
+  }
 
-      val tmpNoTime = baseDir(token).mkdirIfNotExist(tmp, token)
-      val removalDate = System.currentTimeMillis - Workspace.preferenceAsDurationInMs(TmpDirRemoval);
+  private def createTmpDir(token: AccessToken) = {
+    time = System.currentTimeMillis
 
-      for (dir ← tmpNoTime.list(token)) {
-        val child = new URIFile(tmpNoTime, dir)
-        if (child.URLRepresentsADirectory) {
-          try {
-            val timeOfDir = dir.substring(0, dir.length - 1).toLong
-            if (timeOfDir < removalDate) URIFile.clean(child)
-          } catch {
-            case (ex: NumberFormatException) ⇒ URIFile.clean(child)
-          }
-        } else URIFile.clean(child)
-      }
+    val tmpNoTime = baseDir(token).mkdirIfNotExist(tmp, token)
+    val removalDate = System.currentTimeMillis - Workspace.preferenceAsDurationInMs(TmpDirRemoval);
 
-      val tmpTmpDir = tmpNoTime.mkdirIfNotExist(time.toString(), token)
-      tmpSpaceVar = tmpTmpDir
+    for (dir ← tmpNoTime.list(token)) {
+      val child = new URIFile(tmpNoTime, dir)
+      if (child.URLRepresentsADirectory) {
+        try {
+          val timeOfDir = dir.substring(0, dir.length - 1).toLong
+          if (timeOfDir < removalDate) URIFile.clean(child)
+        } catch {
+          case (ex: NumberFormatException) ⇒ URIFile.clean(child)
+        }
+      } else URIFile.clean(child)
     }
 
-    tmpSpaceVar
+    tmpNoTime.mkdirIfNotExist(time.toString, token)
   }
 
   override def baseDir(token: AccessToken): IURIFile = synchronized {

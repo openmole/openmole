@@ -30,6 +30,8 @@ import java.net.URI
 import java.util.concurrent.atomic.AtomicLong
 import java.util.logging.Level
 import org.openmole.core.batch.control.AccessToken
+import org.openmole.core.batch.control.StorageControl
+import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.environment.BatchJobWatcher.Watch
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.refresh._
@@ -52,6 +54,7 @@ import akka.routing.SmallestMailboxRouter
 import akka.util.duration._
 import scala.collection.mutable.SynchronizedMap
 import scala.collection.mutable.WeakHashMap
+import org.openmole.misc.tools.service.ThreadUtil._
 
 object BatchEnvironment extends Logger {
 
@@ -101,6 +104,8 @@ object BatchEnvironment extends Logger {
 
   val JobManagmentThreads = new ConfigurationLocation("Environment", "JobManagmentThreads")
 
+  val EnvironmentCleaningThreads = new ConfigurationLocation("Environment", "EnvironmentCleaningThreads")
+
   Workspace += (MinUpdateInterval, "PT1M")
   Workspace += (MaxUpdateInterval, "PT20M")
   Workspace += (IncrementUpdateInterval, "PT1M")
@@ -116,6 +121,7 @@ object BatchEnvironment extends Logger {
   Workspace += (CheckFileExistsInterval, "PT1H")
   Workspace += (StatisticsHistorySize, "10000")
   Workspace += (JobManagmentThreads, "100")
+  Workspace += (EnvironmentCleaningThreads, "20")
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
 }
@@ -163,6 +169,13 @@ akka {
     EventDispatcher.trigger(this, new IEnvironment.JobSubmitted(bej))
     jobRegistry.register(bej)
     jobManager ! Upload(bej)
+  }
+
+  def clean = {
+    val cleaningThreadPool = fixedThreadPool(Workspace.preferenceAsInt(EnvironmentCleaningThreads))
+    allStorages.foreach {
+      s ⇒ background { UsageControl.withToken(s.description, s.clean) }(cleaningThreadPool)
+    }
   }
 
   def executionJob(job: IJob) = new BatchExecutionJob(this, job)
