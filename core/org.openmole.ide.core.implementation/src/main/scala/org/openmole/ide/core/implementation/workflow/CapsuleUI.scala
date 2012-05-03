@@ -201,7 +201,7 @@ class CapsuleUI(val scene: IMoleScene,
   def updateErrors(problems: List[(IPrototypeDataProxyUI, DataflowProblem)]) = {
     dataUI.task match {
       case Some(x: ITaskDataProxyUI) ⇒
-        val (protoOut, protoIn) = problems.partition { case (proto, problem) ⇒ x.dataUI.prototypesIn.contains(proto) }
+        val (protoIn, protoOut) = problems.partition { case (proto, problem) ⇒ x.dataUI.prototypesIn.contains(proto) }
         inputPrototypeWidget match {
           case Some(x: PrototypeWidget) ⇒
             x.updateErrors(protoIn.map { _._2 }.mkString("\n"))
