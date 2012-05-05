@@ -17,15 +17,13 @@
 
 package org.openmole.plugin.environment.glite
 
-import java.util.logging.Level
-import java.util.logging.Logger
-
 import org.openmole.core.batch.environment.BatchExecutionJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.batch.environment.StatisticSample
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.job.IJob
 import org.openmole.misc.tools.cache.AssociativeCache
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.updater.IUpdatableWithVariableDelay
 import org.openmole.plugin.environment.glite.GliteEnvironment._
 import org.openmole.misc.workspace.Workspace
@@ -37,6 +35,10 @@ import scala.collection.mutable.MultiMap
 import scala.ref.WeakReference
 import scala.math._
 
+object OverSubmissionAgent extends Logger
+
+import OverSubmissionAgent._
+
 class OverSubmissionAgent(
   environment: WeakReference[GliteEnvironment]) extends IUpdatableWithVariableDelay {
 
@@ -45,7 +47,8 @@ class OverSubmissionAgent(
   override def delay = Workspace.preferenceAsDurationInMs(OverSubmissionInterval)
 
   override def update: Boolean = {
-    Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE, "oversubmission started")
+    try {
+    logger.log(FINE, "oversubmission started")
 
     val env = environment.get match {
       case None ⇒ return false
@@ -64,13 +67,13 @@ class OverSubmissionAgent(
       val stillRunning = jobs.filter(_.state == RUNNING)
       val stillReady = jobs.filter(_.state == READY)
 
-      Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE, "still running " + stillRunning.size)
+      logger.fine("still running " + stillRunning.size)
 
       val stillRunningSamples = jobs.view.flatMap { _.batchJob }.filter(_.state == RUNNING).map { j ⇒ new StatisticSample(j.timeStamp(SUBMITTED), j.timeStamp(RUNNING), now) }
 
       val samples = (env.statistics ++ stillRunningSamples).toArray
 
-      Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE, "still running samples " + stillRunningSamples.size + " samples size " + samples.size)
+      logger.fine("still running samples " + stillRunningSamples.size + " samples size " + samples.size)
 
       var nbRessub = if (!samples.isEmpty && stillReady.size < Workspace.preferenceAsInt(MaxNumberOfJobReadyForOverSubmission)) {
         val windowSize = (jobs.size * Workspace.preferenceAsDouble(OverSubmissionSamplingWindowFactor)).toInt
@@ -89,7 +92,7 @@ class OverSubmissionAgent(
         if (maxNbRunning < minOversub) minOversub - jobs.size else maxNbRunning - stillRunning.size
       } else Workspace.preferenceAsInt(OverSubmissionMinNumberOfJob) - jobs.size
 
-      Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE, "NbRessub " + nbRessub)
+      logger.fine("NbRessub " + nbRessub)
       val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = Workspace.preferenceAsInt(OverSubmissionNumberOfJobUnderMin)
 
       if (nbRessub > 0) {
@@ -131,7 +134,9 @@ class OverSubmissionAgent(
         }
       }
     }
-
+    } catch {
+      case e => logger.log(SEVERE, "Exception in oversubmission agen", e)
+    }
     true
   }
 
