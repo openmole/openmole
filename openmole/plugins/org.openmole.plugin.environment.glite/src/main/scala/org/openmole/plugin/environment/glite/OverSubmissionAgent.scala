@@ -40,7 +40,7 @@ object OverSubmissionAgent extends Logger
 import OverSubmissionAgent._
 
 class OverSubmissionAgent(
-  environment: WeakReference[GliteEnvironment]) extends IUpdatableWithVariableDelay {
+    environment: WeakReference[GliteEnvironment]) extends IUpdatableWithVariableDelay {
 
   def this(environment: GliteEnvironment) = this(new WeakReference(environment))
 
@@ -48,94 +48,95 @@ class OverSubmissionAgent(
 
   override def update: Boolean = {
     try {
-    logger.log(FINE, "oversubmission started")
+      logger.log(FINE, "oversubmission started")
 
-    val env = environment.get match {
-      case None ⇒ return false
-      case Some(env) ⇒ env
-    }
+      val env = environment.get match {
+        case None ⇒ return false
+        case Some(env) ⇒ env
+      }
 
-    val registry = env.jobRegistry
-    registry.synchronized {
+      val registry = env.jobRegistry
+      registry.synchronized {
 
-      val jobs = registry.allExecutionJobs
-      // registry.allExecutionJobs.groupBy(ejob => (ejob.job.executionId, new StatisticKey(ejob.job))).
-      //                         filter( elt => {elt._1 != null && elt._2.size > 0} )
-      //Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"size " + toProceed.size + " all " + registry.allExecutionJobs)
+        val jobs = registry.allExecutionJobs
+        // registry.allExecutionJobs.groupBy(ejob => (ejob.job.executionId, new StatisticKey(ejob.job))).
+        //                         filter( elt => {elt._1 != null && elt._2.size > 0} )
+        //Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"size " + toProceed.size + " all " + registry.allExecutionJobs)
 
-      val now = System.currentTimeMillis
-      val stillRunning = jobs.filter(_.state == RUNNING)
-      val stillReady = jobs.filter(_.state == READY)
+        val now = System.currentTimeMillis
+        val stillRunning = jobs.filter(_.state == RUNNING)
+        val stillReady = jobs.filter(_.state == READY)
 
-      logger.fine("still running " + stillRunning.size)
+        logger.fine("still running " + stillRunning.size)
 
-      val stillRunningSamples = jobs.view.flatMap { _.batchJob }.filter(_.state == RUNNING).map { j ⇒ new StatisticSample(j.timeStamp(SUBMITTED), j.timeStamp(RUNNING), now) }
+        val stillRunningSamples = jobs.view.flatMap { _.batchJob }.filter(_.state == RUNNING).map { j ⇒ new StatisticSample(j.timeStamp(SUBMITTED), j.timeStamp(RUNNING), now) }
 
-      val samples = (env.statistics ++ stillRunningSamples).toArray
+        val samples = (env.statistics ++ stillRunningSamples).toArray
 
-      logger.fine("still running samples " + stillRunningSamples.size + " samples size " + samples.size)
+        logger.fine("still running samples " + stillRunningSamples.size + " samples size " + samples.size)
 
-      var nbRessub = if (!samples.isEmpty && stillReady.size < Workspace.preferenceAsInt(MaxNumberOfJobReadyForOverSubmission)) {
-        val windowSize = (jobs.size * Workspace.preferenceAsDouble(OverSubmissionSamplingWindowFactor)).toInt
-        val windowStart = if (samples.size - 1 > windowSize) samples.size - 1 - windowSize else 0
+        var nbRessub = if (jobs.size > Workspace.preferenceAsInt(OverSubmissionMinNumberOfJob)) {
+          val windowSize = (jobs.size * Workspace.preferenceAsDouble(OverSubmissionSamplingWindowFactor)).toInt
+          val windowStart = if (samples.size - 1 > windowSize) samples.size - 1 - windowSize else 0
 
-        val nbSamples = Workspace.preferenceAsInt(OverSubmissionNbSampling)
-        val interval = (samples.last.done - samples(windowStart).submitted) / (nbSamples)
+          val nbSamples = Workspace.preferenceAsInt(OverSubmissionNbSampling)
+          val interval = (samples.last.done - samples(windowStart).submitted) / (nbSamples)
 
-        //Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"interval " + interval)
+          //Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"interval " + interval)
 
-        val maxNbRunning =
-          (for (date ← (samples(windowStart).submitted) until (samples.last.done, interval)) yield samples.count(s ⇒ s.running <= date && s.done >= date)).max
+          val maxNbRunning =
+            (for (date ← (samples(windowStart).submitted) until (samples.last.done, interval)) yield samples.count(s ⇒ s.running <= date && s.done >= date)).max
 
-        //Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"max running " + maxNbRunning)
-        val minOversub = Workspace.preferenceAsInt(OverSubmissionMinNumberOfJob)
-        if (maxNbRunning < minOversub) minOversub - jobs.size else maxNbRunning - stillRunning.size
-      } else Workspace.preferenceAsInt(OverSubmissionMinNumberOfJob) - jobs.size
+          logger.fine("max running " + maxNbRunning)
 
-      logger.fine("NbRessub " + nbRessub)
-      val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = Workspace.preferenceAsInt(OverSubmissionNumberOfJobUnderMin)
+          val minOversub = Workspace.preferenceAsInt(OverSubmissionMinNumberOfJob)
+          if (maxNbRunning < minOversub) minOversub - jobs.size else maxNbRunning - (stillRunning.size + stillReady.size)
+        } else Workspace.preferenceAsInt(OverSubmissionMinNumberOfJob) - jobs.size
 
-      if (nbRessub > 0) {
-        // Resubmit nbRessub jobs in a fair manner
-        val order = new HashMap[Int, Set[IJob]] with MultiMap[Int, IJob]
-        var keys = new TreeSet[Int]
+        logger.fine("NbRessub " + nbRessub)
+        val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = Workspace.preferenceAsInt(OverSubmissionNumberOfJobUnderMin)
 
-        for (job ← registry.allJobs) {
-          val nb = registry.executionJobs(job).size
-          if (nb < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
-            order.addBinding(nb, job)
-            keys += nb
+        if (nbRessub > 0) {
+          // Resubmit nbRessub jobs in a fair manner
+          val order = new HashMap[Int, Set[IJob]] with MultiMap[Int, IJob]
+          var keys = new TreeSet[Int]
+
+          for (job ← registry.allJobs) {
+            val nb = registry.executionJobs(job).size
+            if (nb < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
+              order.addBinding(nb, job)
+              keys += nb
+            }
           }
-        }
 
-        if (!keys.isEmpty) {
-          while (nbRessub > 0 && keys.head < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
-            val key = keys.head
-            val jobs = order(keys.head)
-            val job =
-              jobs.find(j ⇒ registry.executionJobs(j).isEmpty) match {
-                case Some(j) ⇒ j
-                case None ⇒
-                  jobs.find(j ⇒ !registry.executionJobs(j).exists(_.state != SUBMITTED)) match {
-                    case Some(j) ⇒ j
-                    case None ⇒ jobs.head
-                  }
-              }
+          if (!keys.isEmpty) {
+            while (nbRessub > 0 && keys.head < numberOfSimultaneousExecutionForAJobWhenUnderMinJob) {
+              val key = keys.head
+              val jobs = order(keys.head)
+              val job =
+                jobs.find(j ⇒ registry.executionJobs(j).isEmpty) match {
+                  case Some(j) ⇒ j
+                  case None ⇒
+                    jobs.find(j ⇒ !registry.executionJobs(j).exists(_.state != SUBMITTED)) match {
+                      case Some(j) ⇒ j
+                      case None ⇒ jobs.head
+                    }
+                }
 
-            env.submit(job)
+              env.submit(job)
 
-            order.removeBinding(key, job)
-            if (jobs.isEmpty) keys -= key
+              order.removeBinding(key, job)
+              if (jobs.isEmpty) keys -= key
 
-            order.addBinding(key + 1, job)
-            keys += (key + 1)
-            nbRessub -= 1
+              order.addBinding(key + 1, job)
+              keys += (key + 1)
+              nbRessub -= 1
+            }
           }
         }
       }
-    }
     } catch {
-      case e => logger.log(SEVERE, "Exception in oversubmission agen", e)
+      case e ⇒ logger.log(SEVERE, "Exception in oversubmission agen", e)
     }
     true
   }
