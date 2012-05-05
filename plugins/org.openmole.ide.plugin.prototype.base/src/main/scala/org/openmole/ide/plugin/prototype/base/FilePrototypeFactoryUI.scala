@@ -27,9 +27,9 @@ class FilePrototypeFactoryUI extends IPrototypeFactoryUI[File] {
   override def displayName = "File"
 
   def buildDataUI = new FilePrototypeDataUI
-  
-  def buildDataUI(prototype : IPrototype[_],
-                  dim : Int = 0 ) = new FilePrototypeDataUI(prototype.name,dim)
-  
+
+  def buildDataUI(prototype: IPrototype[_],
+                  dim: Int = 0) = new FilePrototypeDataUI(prototype.name, dim)
+
   def category = ComponentCategories.PROTOTYPE
 }

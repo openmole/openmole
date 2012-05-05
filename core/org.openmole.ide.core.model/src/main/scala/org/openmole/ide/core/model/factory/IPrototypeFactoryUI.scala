@@ -24,7 +24,7 @@ trait IPrototypeFactoryUI[T] extends IFactoryUI with IMoleComponent {
   override def displayName: String = buildDataUI.coreClass.getSimpleName
 
   def buildDataUI: IPrototypeDataUI[T]
-  
-  def buildDataUI(prototype : IPrototype[_],
-                  dim : Int): IPrototypeDataUI[T]
+
+  def buildDataUI(prototype: IPrototype[_],
+                  dim: Int): IPrototypeDataUI[T]
 }

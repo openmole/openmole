@@ -28,13 +28,13 @@ class SumTaskDataUI(val name: String = "",
     gtBuilder addParameter parameters
     gtBuilder.toTask
   }
-  
-  def coreClass= classOf[SumTask]
-  
+
+  def coreClass = classOf[SumTask]
+
   override def imagePath = "img/sum.png"
-  
+
   def fatImagePath = "img/sum_fat.png"
-  
+
   def buildPanelUI = new SumTaskPanelUI(this)
 
   def borderColor = new Color(61, 104, 130)

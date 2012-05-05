@@ -37,7 +37,7 @@ import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
 
 object CheckData extends Logger {
-  def checkMole(manager : IMoleSceneManager) =
+  def checkMole(manager: IMoleSceneManager) =
     manager.startingCapsule match {
       case Some(x: ICapsuleUI) ⇒
         val (mole, cMap, pMap, errs) = MoleMaker.buildMole(manager)
@@ -55,7 +55,7 @@ object CheckData extends Logger {
               case Some(x: ITaskDataProxyUI) ⇒
                 buildUnknownPrototypes(caps)
                 computeImplicitPrototypes(x)
-              case _ =>
+              case _ ⇒
             }
         }
 
@@ -82,39 +82,39 @@ object CheckData extends Logger {
         Some(mole, cMap, pMap, errs)
       case _ ⇒ None
     }
-  
-  def buildUnknownPrototypes(coreCapsule : ICapsule) = {
+
+  def buildUnknownPrototypes(coreCapsule: ICapsule) = {
     var protoMapping = MoleMaker.keyPrototypeMapping
-    
-    (coreCapsule.inputs.toList ++ coreCapsule.outputs) foreach  { d =>
-      if (! protoMapping.keys.contains(KeyPrototypeGenerator(d.prototype))) {
-        val (key,dim) = KeyGenerator(d.prototype: IPrototype[_])
-        Proxys.prototypes += 
-        new PrototypeDataProxyFactory(KeyRegistry.prototypes(key)).buildDataProxyUI(d.prototype,true,dim)
+
+    (coreCapsule.inputs.toList ++ coreCapsule.outputs) foreach { d ⇒
+      if (!protoMapping.keys.contains(KeyPrototypeGenerator(d.prototype))) {
+        val (key, dim) = KeyGenerator(d.prototype: IPrototype[_])
+        Proxys.prototypes +=
+          new PrototypeDataProxyFactory(KeyRegistry.prototypes(key)).buildDataProxyUI(d.prototype, true, dim)
 
       }
     }
   }
-  
-  def computeImplicitPrototypes(proxy : ITaskDataProxyUI,
-                                protoMapping :  Map[PrototypeKey,IPrototypeDataProxyUI],
-                                coreCapsule : ICapsule) : Unit = {
-    
-    proxy.dataUI.implicitPrototypesIn = coreCapsule.inputs.map{i => KeyPrototypeGenerator(i.prototype)}.toList
-    .filterNot{ n => proxy.dataUI.prototypesIn.map{p=>KeyPrototypeGenerator(p)}.contains(n)}
-    .map{protoMapping}
-    
-    proxy.dataUI.implicitPrototypesOut = coreCapsule.outputs.map{i => KeyPrototypeGenerator(i.prototype)}.toList
-    .filterNot{ n => proxy.dataUI.prototypesOut.map{p=>KeyPrototypeGenerator(p)}.contains(n)}
-    .map{protoMapping}
+
+  def computeImplicitPrototypes(proxy: ITaskDataProxyUI,
+                                protoMapping: Map[PrototypeKey, IPrototypeDataProxyUI],
+                                coreCapsule: ICapsule): Unit = {
+
+    proxy.dataUI.implicitPrototypesIn = coreCapsule.inputs.map { i ⇒ KeyPrototypeGenerator(i.prototype) }.toList
+      .filterNot { n ⇒ proxy.dataUI.prototypesIn.map { p ⇒ KeyPrototypeGenerator(p) }.contains(n) }
+      .map { protoMapping }
+
+    proxy.dataUI.implicitPrototypesOut = coreCapsule.outputs.map { i ⇒ KeyPrototypeGenerator(i.prototype) }.toList
+      .filterNot { n ⇒ proxy.dataUI.prototypesOut.map { p ⇒ KeyPrototypeGenerator(p) }.contains(n) }
+      .map { protoMapping }
   }
 
   def computeImplicitPrototypes(proxy: ITaskDataProxyUI): Unit = {
     val coreCapsule = new Capsule(MoleMaker.taskCoreObject(proxy))
     buildUnknownPrototypes(coreCapsule)
     computeImplicitPrototypes(proxy,
-                              MoleMaker.keyPrototypeMapping,
-                              coreCapsule)
+      MoleMaker.keyPrototypeMapping,
+      coreCapsule)
   }
 
   def checkTaskProxyImplicitsPrototypes(scene: IMoleScene,

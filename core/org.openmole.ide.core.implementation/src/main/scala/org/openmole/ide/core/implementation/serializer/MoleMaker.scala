@@ -57,7 +57,7 @@ object MoleMaker {
                          manager: IMoleSceneManager,
                          capsuleMap: Map[ICapsuleUI, ICapsule],
                          groupingStrategies: List[(IGrouping, ICapsule)]): (IMoleExecution, Iterable[(IEnvironment, String)]) =
-                           try {
+    try {
       var envs = new HashSet[(IEnvironment, String)]
       val strat = new ListBuffer[(ICapsule, IEnvironmentSelection)]
 
@@ -96,24 +96,24 @@ object MoleMaker {
       capsuleMap.foreach {
         case (cui, ccore) ⇒
           manager.capsuleConnections(cui.dataUI).foreach(t ⇒ buildTransition(ccore, capsuleMap(t.target.capsule), t))
-     }  
-      
+      }
+
       manager.dataChannels.foreach { dc ⇒
         new DataChannel(capsuleMap(dc.source), capsuleMap(dc.target),
-                        dc.prototypes.map { p ⇒ prototypeMap(p).name }.toSeq: _*)
+          dc.prototypes.map { p ⇒ prototypeMap(p).name }.toSeq: _*)
       }
 
       (new Mole(capsuleMap(manager.startingCapsule.get)), capsuleMap, prototypeMap, errors)
     } else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")
   }
-  
-  def prototypeMapping : Map[IPrototypeDataProxyUI,IPrototype[_]] = (Proxys.prototypes.toList ::: 
-                                                                     List(EmptyDataUIs.emptyPrototypeProxy)).map{p=> p->p.dataUI.coreObject}.toMap
- 
-  def keyPrototypeMapping : Map[PrototypeKey,IPrototypeDataProxyUI] = (Proxys.prototypes.toList ::: 
-                                                                       List(EmptyDataUIs.emptyPrototypeProxy)).map{p=> KeyPrototypeGenerator(p) -> p}.toMap
-  
-  def buildCapsule(capsuleDataUI: ICapsuleDataUI) : Either[(ICapsuleDataUI, Throwable),ICapsule] = 
+
+  def prototypeMapping: Map[IPrototypeDataProxyUI, IPrototype[_]] = (Proxys.prototypes.toList :::
+    List(EmptyDataUIs.emptyPrototypeProxy)).map { p ⇒ p -> p.dataUI.coreObject }.toMap
+
+  def keyPrototypeMapping: Map[PrototypeKey, IPrototypeDataProxyUI] = (Proxys.prototypes.toList :::
+    List(EmptyDataUIs.emptyPrototypeProxy)).map { p ⇒ KeyPrototypeGenerator(p) -> p }.toMap
+
+  def buildCapsule(capsuleDataUI: ICapsuleDataUI): Either[(ICapsuleDataUI, Throwable), ICapsule] =
     capsuleDataUI.task match {
       case Some(x: ITaskDataProxyUI) ⇒
         try Right(new Capsule(taskCoreObject(x)))
@@ -132,15 +132,15 @@ object MoleMaker {
 
   def parameters(proxy: ITaskDataProxyUI) = {
     new ParameterSet(proxy.dataUI.inputParameters.flatMap {
-        case (protoProxy, v) ⇒
-          if (!v.isEmpty) {
-            val proto = protoProxy.dataUI.coreObject
-            val groovyO = new GroovyProxy(v).execute()
-            val (ok, msg) = TypeCheck(groovyO, proto)
-            if (!ok) throw new UserBadDataError(msg)
-            else Some(new Parameter(proto.asInstanceOf[IPrototype[Any]], groovyO))
-          } else None
-      }.toList)
+      case (protoProxy, v) ⇒
+        if (!v.isEmpty) {
+          val proto = protoProxy.dataUI.coreObject
+          val groovyO = new GroovyProxy(v).execute()
+          val (ok, msg) = TypeCheck(groovyO, proto)
+          if (!ok) throw new UserBadDataError(msg)
+          else Some(new Parameter(proto.asInstanceOf[IPrototype[Any]], groovyO))
+        } else None
+    }.toList)
   }
 
   def inputs(capsuleDataUI: ICapsuleDataUI): DataSet = inputs(capsuleDataUI.task.get)

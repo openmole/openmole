@@ -27,9 +27,9 @@ class BigDecimalPrototypeFactoryUI extends IPrototypeFactoryUI[BigDecimal] {
   override def displayName = "BigDecimal"
 
   override def buildDataUI = new BigDecimalPrototypeDataUI
-  
-  def buildDataUI(prototype : IPrototype[_],
-                  dim : Int = 0 ) = new BigDecimalPrototypeDataUI(prototype.name,dim)
- 
+
+  def buildDataUI(prototype: IPrototype[_],
+                  dim: Int = 0) = new BigDecimalPrototypeDataUI(prototype.name, dim)
+
   def category = ComponentCategories.PROTOTYPE
 }

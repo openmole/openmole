@@ -27,9 +27,9 @@ class BigIntegerPrototypeFactoryUI extends IPrototypeFactoryUI[java.math.BigInte
   override def displayName = "BigInteger"
 
   def buildDataUI = new BigIntegerPrototypeDataUI
-  
-  def buildDataUI(prototype : IPrototype[_],
-                  dim : Int = 0 ) = new BigIntegerPrototypeDataUI(prototype.name,dim)
-  
+
+  def buildDataUI(prototype: IPrototype[_],
+                  dim: Int = 0) = new BigIntegerPrototypeDataUI(prototype.name, dim)
+
   def category = ComponentCategories.PROTOTYPE
 }

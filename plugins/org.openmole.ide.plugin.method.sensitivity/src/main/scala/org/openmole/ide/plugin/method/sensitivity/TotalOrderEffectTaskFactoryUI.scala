@@ -20,11 +20,10 @@ package org.openmole.ide.plugin.method.sensitivity
 import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
-
 class TotalOrderEffectTaskFactoryUI extends ITaskFactoryUI {
   override def displayName = "Total Order effect"
-  
+
   def buildDataUI = new TotalOrderEffectTaskDataUI
-  
+
   def category = ComponentCategories.SALTELLI_TASK
 }

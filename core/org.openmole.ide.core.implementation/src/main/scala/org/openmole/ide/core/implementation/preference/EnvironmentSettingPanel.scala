@@ -26,26 +26,27 @@ import scala.swing.ComboBox
 import scala.swing.event.ButtonClicked
 
 class EnvironmentSettingPanel extends MigPanel("wrap 2") {
-  
-  val combo = new ComboBox(Proxys.environments.filter{e => e.dataUI.coreObject match {
-        case x : BatchEnvironment => true
-        case _ => false
-      }
-    }.toList)
-  
+
+  val combo = new ComboBox(Proxys.environments.filter { e ⇒
+    e.dataUI.coreObject match {
+      case x: BatchEnvironment ⇒ true
+      case _ ⇒ false
+    }
+  }.toList)
+
   val trashButton = new Button("Trash data")
-  
+
   listenTo(`trashButton`)
   reactions += {
-    case ButtonClicked(`trashButton`) => 
+    case ButtonClicked(`trashButton`) ⇒
       try {
         combo.selection.item.dataUI.coreObject match {
-          case x : BatchEnvironment => x.clean
-          case _ => None
+          case x: BatchEnvironment ⇒ x.clean
+          case _ ⇒ None
         }
-      } catch {case e : UserBadDataError =>}
+      } catch { case e: UserBadDataError ⇒ }
   }
-  
+
   contents += combo
   contents += trashButton
 }

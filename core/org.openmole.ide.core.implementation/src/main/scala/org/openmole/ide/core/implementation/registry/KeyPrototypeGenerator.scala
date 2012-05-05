@@ -22,15 +22,15 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
 object KeyPrototypeGenerator {
 
-  def apply(proxy : IPrototypeDataProxyUI) : PrototypeKey = {
-    val (manifest,dim) = KeyGenerator.stripArrays(proxy.dataUI.coreObject.`type`)
-    new PrototypeKey(proxy.dataUI.name,manifest.erasure,dim)
+  def apply(proxy: IPrototypeDataProxyUI): PrototypeKey = {
+    val (manifest, dim) = KeyGenerator.stripArrays(proxy.dataUI.coreObject.`type`)
+    new PrototypeKey(proxy.dataUI.name, manifest.erasure, dim)
   }
-  
-  def apply(proto : IPrototype[_]) : PrototypeKey = {
-    val (manifest,dim) = KeyGenerator.stripArrays(proto.`type`)
-    new PrototypeKey(proto.name,manifest.erasure,dim)
+
+  def apply(proto: IPrototype[_]): PrototypeKey = {
+    val (manifest, dim) = KeyGenerator.stripArrays(proto.`type`)
+    new PrototypeKey(proto.name, manifest.erasure, dim)
   }
 }
 
-case class PrototypeKey(val name : String,val protoClass : Class[_],val dim : Int)
+case class PrototypeKey(val name: String, val protoClass: Class[_], val dim: Int)

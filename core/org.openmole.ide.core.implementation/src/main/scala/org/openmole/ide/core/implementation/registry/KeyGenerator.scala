@@ -22,15 +22,15 @@ import org.openmole.misc.tools.obj.ClassUtils._
 import scala.annotation.tailrec
 
 object KeyGenerator {
-  @tailrec def stripArrays(m : Manifest[_], dim : Int = 0) : (Manifest[_],Int) = {
-    if (m.erasure.isArray) stripArrays(m.erasure.fromArray.toManifest,dim+1)
-    else (m,dim)
+  @tailrec def stripArrays(m: Manifest[_], dim: Int = 0): (Manifest[_], Int) = {
+    if (m.erasure.isArray) stripArrays(m.erasure.fromArray.toManifest, dim + 1)
+    else (m, dim)
   }
-  
-  def apply(proto : IPrototype[_]) : (DefaultKey,Int) = {
-    val (manifest,dim) = stripArrays(proto.`type`)
-    (new DefaultKey(manifest.erasure),dim)
+
+  def apply(proto: IPrototype[_]): (DefaultKey, Int) = {
+    val (manifest, dim) = stripArrays(proto.`type`)
+    (new DefaultKey(manifest.erasure), dim)
   }
-  
-  def apply(entityClass : Class[_]) : DefaultKey = new DefaultKey(entityClass)
+
+  def apply(entityClass: Class[_]): DefaultKey = new DefaultKey(entityClass)
 }

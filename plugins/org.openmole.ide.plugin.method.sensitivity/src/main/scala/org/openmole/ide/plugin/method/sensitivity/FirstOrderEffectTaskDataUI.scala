@@ -14,29 +14,29 @@ import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.method.sensitivity.FirstOrderEffectTask
 
-class FirstOrderEffectTaskDataUI(val name: String="",
-                                 val modelInputs : Iterable[IPrototypeDataProxyUI] = List.empty,
+class FirstOrderEffectTaskDataUI(val name: String = "",
+                                 val modelInputs: Iterable[IPrototypeDataProxyUI] = List.empty,
                                  val modelOutputs: Iterable[IPrototypeDataProxyUI] = List.empty) extends TaskDataUI {
-  
+
   def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = {
     val builder = FirstOrderEffectTask(name,
-                                       modelInputs.map{_.dataUI.coreObject.asInstanceOf[IPrototype[Double]]},
-                                       modelOutputs.map{_.dataUI.coreObject.asInstanceOf[IPrototype[Double]]})(plugins)
-    builder addOutput inputs         
+      modelInputs.map { _.dataUI.coreObject.asInstanceOf[IPrototype[Double]] },
+      modelOutputs.map { _.dataUI.coreObject.asInstanceOf[IPrototype[Double]] })(plugins)
+    builder addOutput inputs
     builder addOutput outputs
     builder addParameter parameters
     builder.toTask
   }
-  
-  def coreClass= classOf[FirstOrderEffectTask]
-  
+
+  def coreClass = classOf[FirstOrderEffectTask]
+
   override def imagePath = "img/firstOrderEffectTask.png"
-  
+
   def fatImagePath = "img/firstOrderEffectTask_fat.png"
-  
+
   def buildPanelUI = new FirstOrderEffectTaskPanelUI(this)
-  
-  def borderColor = new Color(61,104,130)
-  
-  def backgroundColor = new Color(61,104,130,128)
+
+  def borderColor = new Color(61, 104, 130)
+
+  def backgroundColor = new Color(61, 104, 130, 128)
 }

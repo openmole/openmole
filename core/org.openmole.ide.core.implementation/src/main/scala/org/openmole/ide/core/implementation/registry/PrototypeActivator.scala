@@ -29,9 +29,9 @@ trait PrototypeActivator extends BundleActivator {
     super.start(context)
     prototypeFactories.foreach { f ⇒ KeyRegistry.prototypes += KeyGenerator(f.buildDataUI.coreObject)._1 -> f }
   }
-  
+
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
-    prototypeFactories.foreach{f => KeyRegistry.prototypes -= KeyGenerator(f.buildDataUI.coreObject)._1}
+    prototypeFactories.foreach { f ⇒ KeyRegistry.prototypes -= KeyGenerator(f.buildDataUI.coreObject)._1 }
   }
 }

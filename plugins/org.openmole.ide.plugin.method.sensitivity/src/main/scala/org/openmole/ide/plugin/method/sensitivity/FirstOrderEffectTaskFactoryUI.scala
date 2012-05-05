@@ -22,8 +22,8 @@ import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 class FirstOrderEffectTaskFactoryUI extends ITaskFactoryUI {
   override def displayName = "First Order effect"
-  
+
   def buildDataUI = new FirstOrderEffectTaskDataUI
-  
+
   def category = ComponentCategories.SALTELLI_TASK
 }
