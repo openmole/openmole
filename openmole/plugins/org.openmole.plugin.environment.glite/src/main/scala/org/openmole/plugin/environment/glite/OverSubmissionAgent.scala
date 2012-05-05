@@ -37,7 +37,8 @@ import scala.collection.mutable.MultiMap
 import scala.ref.WeakReference
 import scala.math._
 
-class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends IUpdatableWithVariableDelay {
+class OverSubmissionAgent(
+  environment: WeakReference[GliteEnvironment]) extends IUpdatableWithVariableDelay {
 
   def this(environment: GliteEnvironment) = this(new WeakReference(environment))
 

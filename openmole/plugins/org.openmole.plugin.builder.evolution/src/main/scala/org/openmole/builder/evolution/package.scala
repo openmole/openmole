@@ -153,7 +153,7 @@ package object evolution {
     new Transition(firstCapsule, explorationCapsule)
     new ExplorationTransition(explorationCapsule, scalingCaps)
     new Transition(scalingCaps, model.first)
-    new Transition(model.last, toIndividualCapsule, filter = Set(genomeWithSigmaPrototype.name))
+    new Transition(model.last, toIndividualCapsule, filtered = Set(genomeWithSigmaPrototype.name))
     new Transition(toIndividualCapsule, elitismCaps)
     new Transition(elitismCaps, scalingArchiveCapsule)
     new Transition(scalingArchiveCapsule, breedingCaps)
