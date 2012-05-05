@@ -31,39 +31,36 @@ import scala.tools.nsc.interpreter.ILoop
 import scala.tools.nsc.interpreter.JLineCompletion
 import scala.tools.nsc.interpreter.JLineReader
 import org.openmole.core.model.task.IPluginSet
-import java.util.concurrent .TimeUnit
+import java.util.concurrent.TimeUnit
 
-class Console(plugins: IPluginSet) { console =>
-  
-  
+class Console(plugins: IPluginSet) { console ⇒
 
-  
   @tailrec private def initPassword: Unit = {
-    val message = (if(Workspace.passwordChoosen) "Enter your OpenMOLE password" else "OpenMOLE Password has not been set yet, choose a  password") + "  (for preferences encryption):"
-  
+    val message = (if (Workspace.passwordChoosen) "Enter your OpenMOLE password" else "OpenMOLE Password has not been set yet, choose a  password") + "  (for preferences encryption):"
+
     val password = new jline.ConsoleReader().readLine(message, '*')
     val success = try {
       Workspace.password_=(password)
       true
     } catch {
-      case e: UserBadDataError => 
+      case e: UserBadDataError ⇒
         println("Password incorrect.")
         false
     }
-    if(!success) initPassword
+    if (!success) initPassword
   }
-  
+
   def workspace = "workspace"
   def registry = "registry"
   def logger = "logger"
   def serializer = "serializer"
-  
+
   def run {
     initPassword
     val loop = new ScalaREPL
-    
+
     try {
-      loop.beQuietDuring { 
+      loop.beQuietDuring {
         loop.bind(workspace, Workspace)
         loop.bind(logger, LoggerService)
         loop.bind(serializer, new Serializer)
@@ -87,19 +84,18 @@ class Console(plugins: IPluginSet) { console =>
           "org.openmole.misc.tools.io.FromString._",
           "java.io.File",
           "commands._",
-          "implicits._"
-        )
+          "implicits._")
 
       }
-      
+
       loop.loop
     } finally loop.close
   }
-  
+
   //def setVariable(name: String, value: Object) = binding.setVariable(name, value)
 
   //def run(command: String) = groovysh.run(command)
 
   //def leftShift(cmnd: Command): Object = groovysh.leftShift(cmnd)
- 
+
 }

@@ -23,13 +23,13 @@ import org.openmole.core.serializer.SerializerService
 class Serializer {
   def load(file: File) = SerializerService.deserialize[Object](file)
   def loadArchive(file: File) = SerializerService.deserializeAndExtractFiles[Object](file)
-  
+
   def load(file: String): Object = load(new File(file))
   def loadArchive(file: String): Object = loadArchive(new File(file))
-  
+
   def save(obj: Object, file: File) = SerializerService.serialize(obj, file)
   def saveArchive(obj: Object, file: File) = SerializerService.serializeAndArchiveFiles(obj, file)
-  
+
   def save(obj: Object, file: String): Unit = save(obj, new File(file))
   def saveArchive(obj: Object, file: String): Unit = saveArchive(obj, new File(file))
 }

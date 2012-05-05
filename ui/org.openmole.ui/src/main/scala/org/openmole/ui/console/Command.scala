@@ -31,71 +31,70 @@ import org.openmole.core.model.transition.IExplorationTransition
 import org.openmole.misc.workspace.Workspace
 
 class Command {
-  
+
   def print(environment: LocalExecutionEnvironment): Unit = {
     println("Queued jobs: " + environment.nbJobInQueue)
     println("Number of threads: " + environment.nbThreads)
   }
-  
+
   def print(environment: BatchEnvironment): Unit = {
-    
+
     val accounting = new Array[AtomicInteger](ExecutionState.values.size)
     val executionJobRegistry = environment.jobRegistry
 
-    for (state <- ExecutionState.values) {
+    for (state ← ExecutionState.values) {
       accounting(state.id) = new AtomicInteger
     }
 
-    for (executionJob <- executionJobRegistry.allExecutionJobs) {
+    for (executionJob ← executionJobRegistry.allExecutionJobs) {
       accounting(executionJob.state.id).incrementAndGet
     }
 
-    for (state <- ExecutionState.values) {
+    for (state ← ExecutionState.values) {
       System.out.println(state.toString + ": " + accounting(state.id))
     }
-      
+
   }
-  
+
   def structure(mole: IMole): Unit = {
-    mole.capsules.zipWithIndex.foreach { 
-      case(c, i) => 
-        println(i + " " + c + " (" + c.outputTransitions.map{
-            t =>
+    mole.capsules.zipWithIndex.foreach {
+      case (c, i) ⇒
+        println(i + " " + c + " (" + c.outputTransitions.map {
+          t ⇒
             (t match {
-                case _: IExplorationTransition => "< "
-                case _: IAggregationTransition => "> "
-                case _ => "- "
-              }) + t.end.capsule.toString
-          }.foldLeft("") {
-            (acc, c) => if(acc.isEmpty) c else acc + ", " + c
-          } + ")")
+              case _: IExplorationTransition ⇒ "< "
+              case _: IAggregationTransition ⇒ "> "
+              case _ ⇒ "- "
+            }) + t.end.capsule.toString
+        }.foldLeft("") {
+          (acc, c) ⇒ if (acc.isEmpty) c else acc + ", " + c
+        } + ")")
     }
   }
-  
+
   def print(moleExecution: IMoleExecution): Unit = {
     val toDisplay = new Array[AtomicInteger](State.values.size)
-    for (state <- State.values) toDisplay(state.id) = new AtomicInteger
-    for (job <- moleExecution.moleJobs) toDisplay(job.state.id).incrementAndGet
-    for (state <- State.values) System.out.println(state.toString + ": " + toDisplay(state.id))
+    for (state ← State.values) toDisplay(state.id) = new AtomicInteger
+    for (job ← moleExecution.moleJobs) toDisplay(job.state.id).incrementAndGet
+    for (state ← State.values) System.out.println(state.toString + ": " + toDisplay(state.id))
   }
-  
-  def verify(mole: IMole): Unit = Validation(mole).foreach(println)  
-  
+
+  def verify(mole: IMole): Unit = Validation(mole).foreach(println)
+
   def encrypted = {
     val password = new jline.ConsoleReader().readLine("encrypt:", '*')
     Workspace.encrypt(password)
   }
-  
+
   def auth(method: Class[_]) {
     Workspace.persistentList(method).foreach {
-      case (i, m) => println(i + ": " + m)
+      case (i, m) ⇒ println(i + ": " + m)
     }
   }
-  
+
   def auth = new {
-    def update(index: Int, auth: AuthenticationMethod) =  
+    def update(index: Int, auth: AuthenticationMethod) =
       Workspace.instance.persistentList(auth.method.asInstanceOf[Class[AuthenticationMethod]]).update(index, auth)
   }
-  
-  
+
 }

@@ -44,83 +44,79 @@ import scopt.immutable._
 
 class Application extends IApplication with Logger {
   override def start(context: IApplicationContext) = {
-            
+
     case class Config(
       pluginsDirs: List[String] = Nil,
       guiPluginsDirs: List[String] = Nil,
       userPlugins: List[String] = Nil,
-      workspaceDir: Option[String] = None
-    )
-    
-    
-    val parser = new OptionParser[Config]("openmole", "0.x") { 
+      workspaceDir: Option[String] = None)
+
+    val parser = new OptionParser[Config]("openmole", "0.x") {
       def options = Seq(
-        opt("cp", "pluginDirectories" ,"Plugins directories (seperated by \" \")") {
-          (v: String, c: Config) => c.copy(pluginsDirs = v.split(' ').toList) 
+        opt("cp", "pluginDirectories", "Plugins directories (seperated by \" \")") {
+          (v: String, c: Config) ⇒ c.copy(pluginsDirs = v.split(' ').toList)
         },
-        opt("gp", "guiPluginDirectories" ,"GUI plugins directories (seperated by \" \")") {
-          (v: String, c: Config) => c.copy(guiPluginsDirs = v.split(' ').toList) 
+        opt("gp", "guiPluginDirectories", "GUI plugins directories (seperated by \" \")") {
+          (v: String, c: Config) ⇒ c.copy(guiPluginsDirs = v.split(' ').toList)
         },
-        opt("p", "userPlugins" ,"Plugins (seperated by \" \")") {
-          (v: String, c: Config) => c.copy(userPlugins = v.split(' ').toList) 
+        opt("p", "userPlugins", "Plugins (seperated by \" \")") {
+          (v: String, c: Config) ⇒ c.copy(userPlugins = v.split(' ').toList)
         },
         opt("w", "Path of the workspace") {
-          (v: String, c: Config) => c.copy(workspaceDir = Some(v)) 
-        }
-      )
+          (v: String, c: Config) ⇒ c.copy(workspaceDir = Some(v))
+        })
     }
-      
+
     val args: Array[String] = context.getArguments.get("application.args").asInstanceOf[Array[String]]
-    
-    
+
     val console = args.contains("-c")
     val filtredArgs = args.filterNot((_: String) == "-c")
-    
-    parser.parse(filtredArgs, Config()) foreach { config =>
-    
+
+    parser.parse(filtredArgs, Config()) foreach { config ⇒
+
       val workspaceLocation = config.workspaceDir match {
-        case Some(w) => new File(w)
-        case None => Workspace.defaultLocation
+        case Some(w) ⇒ new File(w)
+        case None ⇒ Workspace.defaultLocation
       }
 
-      if(console) {
-        if(Workspace.anotherIsRunningAt(workspaceLocation)) 
-          logger.severe("Application is already runnig at " + workspaceLocation.getAbsolutePath + ". If it is not the case please remove the file '" + new File(workspaceLocation, Workspace.running).getAbsolutePath() + "'.")  
-        else {       
-          if(config.workspaceDir.isDefined) Workspace.instance = new Workspace(workspaceLocation)
+      if (console) {
+        if (Workspace.anotherIsRunningAt(workspaceLocation))
+          logger.severe("Application is already runnig at " + workspaceLocation.getAbsolutePath + ". If it is not the case please remove the file '" + new File(workspaceLocation, Workspace.running).getAbsolutePath() + "'.")
+        else {
+          if (config.workspaceDir.isDefined) Workspace.instance = new Workspace(workspaceLocation)
           config.pluginsDirs.foreach { PluginManager.loadDir }
-          
-          val userPlugins = config.userPlugins.map{new File(_)}.toSet
+
+          val userPlugins = config.userPlugins.map { new File(_) }.toSet
           PluginManager.load(userPlugins)
-          
+
           val console = new Console(new PluginSet(userPlugins))
           console.run
         }
       } else {
-        
-        val splashscreen = new SplashScreen 
+
+        val splashscreen = new SplashScreen
         splashscreen.visible = true
-        
+
         config.pluginsDirs.foreach { PluginManager.loadDir }
         config.guiPluginsDirs.foreach { PluginManager.loadDir }
-        
+
         val waitClose = new Semaphore(0)
         val application = new GUIApplication() {
           override def closeOperation = {
-            super.closeOperation                     
+            super.closeOperation
             waitClose.release(1)
           }
         }
-        
+
         application.display
-        splashscreen.close
+        splashscreen.visible = false
 
         waitClose.acquire(1)
       }
 
-    } 
+    }
     IApplication.EXIT_OK
   }
-  
+
   override def stop = {}
 }

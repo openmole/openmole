@@ -21,8 +21,7 @@ import java.io.File
 import org.openmole.core.model.task.IPluginSet
 
 class Implicits(
-  implicit val plugins: IPluginSet
-) {
+    implicit val plugins: IPluginSet) {
   implicit def stringToFile(path: String) = new File(path)
 }
 
