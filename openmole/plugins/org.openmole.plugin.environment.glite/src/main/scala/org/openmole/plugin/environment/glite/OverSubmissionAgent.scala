@@ -75,7 +75,7 @@ class OverSubmissionAgent(
 
         logger.fine("still running samples " + stillRunningSamples.size + " samples size " + samples.size)
 
-        var nbRessub = if (jobs.size > Workspace.preferenceAsInt(OverSubmissionMinNumberOfJob)) {
+        var nbRessub = if (!samples.isEmpty && jobs.size > Workspace.preferenceAsInt(OverSubmissionMinNumberOfJob)) {
           val windowSize = (jobs.size * Workspace.preferenceAsDouble(OverSubmissionSamplingWindowFactor)).toInt
           val windowStart = if (samples.size - 1 > windowSize) samples.size - 1 - windowSize else 0
 
