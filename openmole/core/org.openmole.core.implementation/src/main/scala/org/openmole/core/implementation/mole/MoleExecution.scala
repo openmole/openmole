@@ -89,7 +89,7 @@ class MoleExecution(
   val exceptions = new ListBuffer[Throwable]
 
   def instantRerun(moleJob: IMoleJob, capsule: ICapsule) =
-    synchronized {
+    rerun.synchronized {
       rerun.rerun(moleJob, capsule)
     }
 
@@ -148,7 +148,7 @@ class MoleExecution(
   }
 
   override def cancel: this.type = {
-    if (!canceled.getAndSet(true)) synchronized {
+    if (!canceled.getAndSet(true)) {
       rootSubMoleExecution.cancel
       EventDispatcher.trigger(this, new IMoleExecution.Finished)
     }
@@ -175,7 +175,7 @@ class MoleExecution(
   def jobOutputTransitionsPerformed(job: IMoleJob, capsule: ICapsule) = synchronized {
     if (rootSubMoleExecution.nbJobInProgress <= nbWaiting) submitAll
     if (!canceled.get) {
-      rerun.jobFinished(job, capsule)
+      rerun.synchronized { rerun.jobFinished(job, capsule) }
       if (finished) {
         _finished.release
         EventDispatcher.trigger(this, new IMoleExecution.Finished)
@@ -184,6 +184,7 @@ class MoleExecution(
   }
 
   override def finished: Boolean = rootSubMoleExecution.nbJobInProgress == 0
+  
   override def started: Boolean = _started.get
 
   override def nextTicket(parent: ITicket): ITicket = Ticket(parent, ticketNumber.getAndIncrement)

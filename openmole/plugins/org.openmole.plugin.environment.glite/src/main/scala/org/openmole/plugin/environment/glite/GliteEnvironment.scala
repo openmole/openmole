@@ -64,9 +64,8 @@ object GliteEnvironment {
 
   Workspace += (OverSubmissionNbSampling, "10")
   Workspace += (OverSubmissionSamplingWindowFactor, "5")
-
-  // Workspace += (OverSubmissionGridSizeRatio, "0.25")
-  Workspace += (OverSubmissionInterval, "PT2M")
+ 
+ Workspace += (OverSubmissionInterval, "PT2M")
 
   Workspace += (OverSubmissionMinNumberOfJob, "100")
   Workspace += (OverSubmissionNumberOfJobUnderMin, "5")
