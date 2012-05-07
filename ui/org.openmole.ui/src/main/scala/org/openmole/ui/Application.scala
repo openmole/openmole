@@ -17,6 +17,7 @@
 
 package org.openmole.ui
 
+import java.awt.GraphicsEnvironment
 import java.awt.SplashScreen
 import java.io.File
 import java.io.PrintWriter
@@ -80,6 +81,9 @@ class Application extends IApplication with Logger {
       }
 
       if (console) {
+        val headless = GraphicsEnvironment.getLocalGraphicsEnvironment.isHeadlessInstance
+        if (!headless && SplashScreen.getSplashScreen != null) SplashScreen.getSplashScreen.close
+
         if (Workspace.anotherIsRunningAt(workspaceLocation))
           logger.severe("Application is already runnig at " + workspaceLocation.getAbsolutePath + ". If it is not the case please remove the file '" + new File(workspaceLocation, Workspace.running).getAbsolutePath() + "'.")
         else {
