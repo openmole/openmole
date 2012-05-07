@@ -20,13 +20,12 @@ package org.openmole.plugin.task.systemexec
 import java.io.File
 import org.openmole.core.model.data.IVariable
 import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IContext
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.task.external.ExternalTask
 import java.io.IOException
-import org.openmole.core.implementation.data.Variable
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.tools.VariableExpansion._
 import org.apache.commons.exec.CommandLine
 import org.openmole.misc.tools.service.ProcessUtil._
@@ -43,6 +42,7 @@ object AbstractSystemExecTask {
 
     def addVariable(prototype: IPrototype[_], variable: String): this.type = {
       _variables += prototype -> variable
+      addInput(prototype)
       this
     }
     def addVariable(prototype: IPrototype[_]): this.type = addVariable(prototype, prototype.name)
