@@ -8,7 +8,6 @@ package org.openmole.ide.core.implementation.example
 import java.awt.Frame
 import org.openmole.ide.core.implementation.dialog.GUIApplication
 import org.openmole.ide.core.implementation.dialog.GUIPanel
-import org.openmole.ide.core.implementation.dialog.SplashScreen
 import scala.swing.SimpleGUIApplication
 
 object TestApplication extends SimpleGUIApplication {
