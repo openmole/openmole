@@ -37,15 +37,15 @@ import scala.collection.mutable.ListBuffer
 object AbstractSystemExecTask {
 
   abstract class Builder extends ExternalTaskBuilder {
-    private val _variables = new ListBuffer[(String, String)]
+    private val _variables = new ListBuffer[(IPrototype[_], String)]
 
     def variables = _variables.toList
 
-    def addVariable(prototype: String, variable: String): this.type = {
+    def addVariable(prototype: IPrototype[_], variable: String): this.type = {
       _variables += prototype -> variable
       this
     }
-    def addVariable(prototype: String): this.type = addVariable(prototype, prototype)
+    def addVariable(prototype: IPrototype[_]): this.type = addVariable(prototype, prototype.name)
 
   }
 
