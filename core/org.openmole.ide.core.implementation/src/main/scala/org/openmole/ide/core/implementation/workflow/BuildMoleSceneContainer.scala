@@ -20,6 +20,7 @@ package org.openmole.ide.core.implementation.workflow
 import java.awt.BorderLayout
 import javax.swing.JScrollPane
 import org.openmole.ide.core.implementation.data.CheckData
+import org.openmole.ide.core.implementation.dialog.MoleSettingsDialog
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.MigPanel
@@ -39,6 +40,10 @@ class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISce
   peer.setLayout(new BorderLayout)
 
   val toolBar = new MigPanel("") {
+
+    contents += new ToolBarButton(MOLE_SETTINGS,
+      "Mole settings",
+      displayMoleSettingsDialogAction)
 
     val connectionButton = new ToggleButton {
       icon = CONNECT_TRANSITION_MODE
@@ -92,4 +97,11 @@ class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISce
       ScenesManager.addExecutionSceneContainer(buildContainer)
     }
   }
+
+  def displayMoleSettingsDialogAction = new Action("") {
+    override def apply = {
+      MoleSettingsDialog.display(scene.manager)
+    }
+  }
+
 }

@@ -28,9 +28,11 @@ import org.openmole.core.model.mole.IEnvironmentSelection
 import org.openmole.core.model.mole.IGrouping
 import org.openmole.core.model.mole.IMole
 import org.openmole.ide.core.model.data.ICapsuleDataUI
+import org.openmole.ide.core.model.data.IMoleDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.core.implementation.task._
+import java.io.File
 import org.openmole.core.implementation.data.DataChannel
 import org.openmole.core.implementation.data.DataSet
 import org.openmole.core.implementation.data.Parameter
@@ -84,7 +86,7 @@ object MoleMaker {
     if (manager.startingCapsule.isDefined) {
       val prototypeMap: Map[IPrototypeDataProxyUI, IPrototype[_]] = Proxys.prototypes.map { p ⇒ p -> p.dataUI.coreObject }.toMap
       val builds = manager.capsules.map { c ⇒
-        buildCapsule(c._2.dataUI) match {
+        buildCapsule(c._2.dataUI, manager.dataUI) match {
           case Left((capsule, error)) ⇒ (c._2 -> new Capsule, Some(c._2 -> error))
           case Right(r) ⇒ (c._2 -> r, None)
         }
@@ -113,19 +115,25 @@ object MoleMaker {
   def keyPrototypeMapping: Map[PrototypeKey, IPrototypeDataProxyUI] = (Proxys.prototypes.toList :::
     List(EmptyDataUIs.emptyPrototypeProxy)).map { p ⇒ KeyPrototypeGenerator(p) -> p }.toMap
 
-  def buildCapsule(capsuleDataUI: ICapsuleDataUI): Either[(ICapsuleDataUI, Throwable), ICapsule] =
+  def buildCapsule(capsuleDataUI: ICapsuleDataUI,
+                   moleDataUI: IMoleDataUI): Either[(ICapsuleDataUI, Throwable), ICapsule] =
     capsuleDataUI.task match {
       case Some(x: ITaskDataProxyUI) ⇒
-        try Right(new Capsule(taskCoreObject(x)))
+        try Right(new Capsule(taskCoreObject(x, moleDataUI.plugins.map { p ⇒ new File(p) }.toSet)))
         catch {
           case e: UserBadDataError ⇒ Left((capsuleDataUI, e))
         }
       case _ ⇒ Right(new Capsule)
     }
 
-  def taskCoreObject(proxy: ITaskDataProxyUI): ITask = proxy.dataUI.coreObject(inputs(proxy), outputs(proxy), parameters(proxy), PluginSet.empty)
+  def taskCoreObject(proxy: ITaskDataProxyUI,
+                     plugins: Set[File] = Set.empty): ITask = proxy.dataUI.coreObject(inputs(proxy),
+    outputs(proxy),
+    parameters(proxy),
+    new PluginSet(plugins))
 
-  def taskCoreObject(capsuleDataUI: ICapsuleDataUI): ITask = taskCoreObject(capsuleDataUI.task.get)
+  def taskCoreObject(capsuleDataUI: ICapsuleDataUI,
+                     plugins: Set[File]): ITask = taskCoreObject(capsuleDataUI.task.get, plugins)
 
   def inputs(proxy: ITaskDataProxyUI) = DataSet(proxy.dataUI.prototypesIn.map { _.dataUI.coreObject })
   def outputs(proxy: ITaskDataProxyUI) = DataSet(proxy.dataUI.prototypesOut.map { _.dataUI.coreObject })

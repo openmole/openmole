@@ -21,10 +21,12 @@ import scala.collection.mutable.HashMap
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.data.ICapsuleDataUI
+import org.openmole.ide.core.model.data.IMoleDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
+import org.openmole.ide.core.implementation.data.MoleDataUI
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow._
@@ -42,7 +44,8 @@ class MoleSceneManager(var name: String,
   var nodeID = 0
   var edgeID = 0
   var dataChannelID = 0
-  // var name: Option[String]= None
+
+  var dataUI: IMoleDataUI = new MoleDataUI
 
   override def setStartingCapsule(stCapsule: ICapsuleUI) = {
     startingCapsule match {

@@ -20,6 +20,7 @@ package org.openmole.ide.core.model.workflow
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.data.ICapsuleDataUI
+import org.openmole.ide.core.model.data.IMoleDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
@@ -32,6 +33,10 @@ trait IMoleSceneManager {
   def name: String
 
   def name_=(n: String)
+
+  def dataUI: IMoleDataUI
+
+  def dataUI_=(dataUI: IMoleDataUI)
 
   def startingCapsule_=(n: Option[ICapsuleUI])
 
