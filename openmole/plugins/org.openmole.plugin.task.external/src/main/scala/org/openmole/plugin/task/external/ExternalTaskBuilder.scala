@@ -20,21 +20,21 @@ package org.openmole.plugin.task.external
 import java.io.File
 import org.openmole.core.implementation.task.TaskBuilder
 import org.openmole.core.implementation.data._
-import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.task.IPluginSet
 import scala.collection.mutable.ListBuffer
 
 abstract class ExternalTaskBuilder extends TaskBuilder {
 
-  private var _provided = new ListBuffer[(Either[File, IPrototype[File]], String, Boolean)]
-  private var _produced = new ListBuffer[(String, IPrototype[File])]
+  private var _inputFiles = new ListBuffer[(IPrototype[File], String, Boolean)]
+  private var _outputFiles = new ListBuffer[(String, IPrototype[File])]
+  private var _resources = new ListBuffer[(File, String, Boolean)]
 
-  def provided = _provided.toList
-  def produced = _produced.toList
+  def inputFiles = _inputFiles.toList
+  def outputFiles = _outputFiles.toList
+  def resources = _resources.toList
 
   def addResource(file: File, name: String, link: Boolean): ExternalTaskBuilder.this.type = {
-    _provided += ((Left(file), name, link))
+    _resources += ((file, name, link))
     this
   }
 
@@ -43,7 +43,7 @@ abstract class ExternalTaskBuilder extends TaskBuilder {
   def addResource(file: File): this.type = this.addResource(file, false)
 
   def addInput(p: IPrototype[File], name: String, link: Boolean): this.type = {
-    _provided += ((Right(p), name, link))
+    _inputFiles += ((p, name, link))
     this addInput p
     this
   }
@@ -51,7 +51,7 @@ abstract class ExternalTaskBuilder extends TaskBuilder {
   def addInput(p: IPrototype[File], name: String): ExternalTaskBuilder.this.type = this.addInput(p, name, false)
 
   def addOutput(name: String, p: IPrototype[File]): this.type = {
-    _produced += ((name, p))
+    _outputFiles += ((name, p))
     this addOutput p
     this
   }

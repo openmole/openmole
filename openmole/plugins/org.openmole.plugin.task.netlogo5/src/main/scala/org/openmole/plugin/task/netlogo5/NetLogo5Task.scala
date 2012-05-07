@@ -17,14 +17,13 @@
 
 package org.openmole.plugin.task.netlogo5
 
-import java.io.File
-import org.openmole.core.model.data.IDataSet
-import org.openmole.core.model.data.IParameterSet
-import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.task.IPluginSet
-import org.openmole.plugin.task.netlogo.NetLogoFactory
-import org.openmole.plugin.task.netlogo.NetLogoTask
-import org.openmole.plugin.task.netlogo.NetLogoTaskBuilder
+import org.openmole.core.model.data._
+import org.openmole.plugin.task.netlogo._
+import NetLogoTask.Workspace
+import org.openmole.core.implementation.task._
+import java.io.File
+import collection.JavaConversions._
 
 object NetLogo5Task {
 
@@ -36,7 +35,7 @@ object NetLogo5Task {
     name: String,
     workspace: File,
     script: String,
-    launchingCommands: Iterable[String])(implicit plugins: IPluginSet) = {
+    launchingCommands: Iterable[String])(implicit plugins: IPluginSet): NetLogoTaskBuilder = {
     val _launchingCommands = launchingCommands
     val (_workspace, _script) = (workspace, script)
 
@@ -46,13 +45,14 @@ object NetLogo5Task {
 
       def toTask = new NetLogo5Task(
         name,
-        workspace = new NetLogoTask.Workspace(_workspace, _script),
+        workspace = new Workspace(_workspace, _script),
         launchingCommands = _launchingCommands,
         inputs = builder.inputs,
         outputs = builder.outputs,
         parameters = builder.parameters,
-        provided = builder.provided,
-        produced = builder.produced,
+        inputFiles = builder.inputFiles,
+        outputFiles = builder.outputFiles,
+        resources = builder.resources,
         netLogoInputs = builder.netLogoInputs,
         netLogoOutputs = builder.netLogoOutputs,
         netLogoFactory = factory)
@@ -62,7 +62,7 @@ object NetLogo5Task {
   def apply(
     name: String,
     script: File,
-    launchingCommands: Iterable[String])(implicit plugins: IPluginSet) = {
+    launchingCommands: Iterable[String])(implicit plugins: IPluginSet): NetLogoTaskBuilder = {
     val _launchingCommands = launchingCommands
     new NetLogoTaskBuilder { builder ⇒
 
@@ -71,12 +71,13 @@ object NetLogo5Task {
       def toTask = new NetLogo5Task(
         name,
         launchingCommands = _launchingCommands,
-        workspace = new NetLogoTask.Workspace(script),
+        workspace = new Workspace(script),
         inputs = builder.inputs,
         outputs = builder.outputs,
         parameters = builder.parameters,
-        provided = builder.provided,
-        produced = builder.produced,
+        inputFiles = builder.inputFiles,
+        outputFiles = builder.outputFiles,
+        resources = builder.resources,
         netLogoInputs = builder.netLogoInputs,
         netLogoOutputs = builder.netLogoOutputs,
         netLogoFactory = factory)
@@ -103,8 +104,9 @@ sealed class NetLogo5Task(
   inputs: IDataSet,
   outputs: IDataSet,
   parameters: IParameterSet,
-  provided: Iterable[(Either[File, IPrototype[File]], String, Boolean)],
-  produced: Iterable[(String, IPrototype[File])])(implicit plugins: IPluginSet) extends NetLogoTask(
+  inputFiles: Iterable[(IPrototype[File], String, Boolean)],
+  outputFiles: Iterable[(String, IPrototype[File])],
+  resources: Iterable[(File, String, Boolean)])(implicit plugins: IPluginSet) extends NetLogoTask(
   name,
   workspace,
   launchingCommands,
@@ -114,6 +116,7 @@ sealed class NetLogo5Task(
   inputs,
   outputs,
   parameters,
-  provided,
-  produced)
+  inputFiles,
+  outputFiles,
+  resources)
 

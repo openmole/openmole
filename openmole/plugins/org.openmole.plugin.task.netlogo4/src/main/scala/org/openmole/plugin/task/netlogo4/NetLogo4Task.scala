@@ -50,8 +50,9 @@ object NetLogo4Task {
         inputs = builder.inputs,
         outputs = builder.outputs,
         parameters = builder.parameters,
-        provided = builder.provided,
-        produced = builder.produced,
+        inputFiles = builder.inputFiles,
+        outputFiles = builder.outputFiles,
+        resources = builder.resources,
         netLogoInputs = builder.netLogoInputs,
         netLogoOutputs = builder.netLogoOutputs,
         netLogoFactory = factory)
@@ -74,8 +75,9 @@ object NetLogo4Task {
         inputs = builder.inputs,
         outputs = builder.outputs,
         parameters = builder.parameters,
-        provided = builder.provided,
-        produced = builder.produced,
+        inputFiles = builder.inputFiles,
+        outputFiles = builder.outputFiles,
+        resources = builder.resources,
         netLogoInputs = builder.netLogoInputs,
         netLogoOutputs = builder.netLogoOutputs,
         netLogoFactory = factory)
@@ -102,8 +104,9 @@ sealed class NetLogo4Task(
   inputs: IDataSet,
   outputs: IDataSet,
   parameters: IParameterSet,
-  provided: Iterable[(Either[File, IPrototype[File]], String, Boolean)],
-  produced: Iterable[(String, IPrototype[File])])(implicit plugins: IPluginSet) extends NetLogoTask(
+  inputFiles: Iterable[(IPrototype[File], String, Boolean)],
+  outputFiles: Iterable[(String, IPrototype[File])],
+  resources: Iterable[(File, String, Boolean)])(implicit plugins: IPluginSet) extends NetLogoTask(
   name,
   workspace,
   launchingCommands,
@@ -113,6 +116,7 @@ sealed class NetLogo4Task(
   inputs,
   outputs,
   parameters,
-  provided,
-  produced)
+  inputFiles,
+  outputFiles,
+  resources)
 

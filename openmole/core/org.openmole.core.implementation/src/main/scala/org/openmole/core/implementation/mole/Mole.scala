@@ -18,9 +18,7 @@
 package org.openmole.core.implementation.mole
 
 import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.data.Variable
 import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.task.ITask

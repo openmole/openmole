@@ -42,8 +42,9 @@ object GroovyTask {
           val inputs = builder.inputs
           val outputs = builder.outputs
           val parameters = builder.parameters
-          val provided = builder.provided
-          val produced = builder.produced
+          val inputFiles = builder.inputFiles
+          val outputFiles = builder.outputFiles
+          val resources = builder.resources
         }
     }
 

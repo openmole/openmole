@@ -38,23 +38,27 @@ object ExternalTask {
 
 trait ExternalTask extends Task {
 
-  def provided: Iterable[(Either[File, IPrototype[File]], String, Boolean)]
-  def produced: Iterable[(String, IPrototype[File])]
+  def inputFiles: Iterable[(IPrototype[File], String, Boolean)]
+  def outputFiles: Iterable[(String, IPrototype[File])]
+  def resources: Iterable[(File, String, Boolean)]
 
   protected class ToPut(val file: File, val name: String, val link: Boolean)
   protected class ToGet(val name: String, val file: File)
 
   protected def listInputFiles(context: IContext): Iterable[ToPut] =
-    provided.map {
-      _ match {
-        case (Left(file), name, link) ⇒ new ToPut(file, expandData(context, name), link)
-        case (Right(prototype), name, link) ⇒ new ToPut(context.valueOrException(prototype), expandData(context, name), link)
-      }
+    inputFiles.map {
+      case (prototype, name, link) ⇒ new ToPut(context.valueOrException(prototype), expandData(context, name), link)
+
+    }
+
+  protected def listResources(context: IContext): Iterable[ToPut] =
+    resources.map {
+      case (file, name, link) ⇒ new ToPut(file, expandData(context, name), link)
     }
 
   protected def listOutputFiles(context: IContext, localDir: File): (IContext, Iterable[ToGet]) = {
     val files =
-      produced.map {
+      outputFiles.map {
         case (name, prototype) ⇒
           val fileName = expandData(context, name)
           val file = new File(localDir, fileName)
@@ -65,22 +69,26 @@ trait ExternalTask extends Task {
     context ++ files.map { _._2 } -> files.map { _._1 }
   }
 
-  def prepareInputFiles(context: IContext, tmpDir: File) = {
-    val links = new ListBuffer[File]
-    listInputFiles(context).foreach(
-      f ⇒ {
-        val to = new File(tmpDir, f.name)
-        to.getAbsoluteFile.getParentFile.mkdirs
+  private def copy(f: ToPut, to: File) = {
+    to.getAbsoluteFile.getParentFile.mkdirs
 
-        if (f.link) {
-          to.createLink(f.file.getAbsolutePath)
-          links += to
-        } else {
-          f.file.copy(to)
-          to.applyRecursive { _.deleteOnExit }
-        }
-      })
-    links.toSet
+    if (f.link) {
+      to.createLink(f.file.getAbsolutePath)
+      Some(to)
+    } else {
+      f.file.copy(to)
+      to.applyRecursive { _.deleteOnExit }
+      None
+    }
+  }
+
+  def prepareInputFiles(context: IContext, tmpDir: File, workDirPath: String = "") = {
+    val workDir = new File(tmpDir, workDirPath)
+    Set.empty[File] ++
+      listInputFiles(context).flatMap(
+        f ⇒ copy(f, new File(workDir, f.name))) ++
+        listResources(context).flatMap(
+          f ⇒ copy(f, new File(tmpDir, f.name)))
   }
 
   def fetchOutputFiles(context: IContext, localDir: File, links: Set[File]): IContext = {
