@@ -233,6 +233,7 @@
                                         <include>openmole</include>
                                         <include>debug.sh</include>
                                         <include>openmole.bat</include>
+                                        <include>splashscreen.png</include>
                                     </includes>
                                 </resource>
                             </resources>

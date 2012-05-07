@@ -17,13 +17,13 @@
 
 package org.openmole.ui
 
+import java.awt.SplashScreen
 import java.io.File
 import java.io.PrintWriter
 import java.util.concurrent.Semaphore
 import org.apache.clerezza.scala.console.Interpreter
 import org.eclipse.equinox.app.IApplication
 import org.eclipse.equinox.app.IApplicationContext
-import org.openmole.ide.core.implementation.dialog.SplashScreen
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
@@ -94,9 +94,6 @@ class Application extends IApplication with Logger {
         }
       } else {
 
-        val splashscreen = new SplashScreen
-        splashscreen.visible = true
-
         config.pluginsDirs.foreach { PluginManager.loadDir }
         config.guiPluginsDirs.foreach { PluginManager.loadDir }
 
@@ -109,8 +106,6 @@ class Application extends IApplication with Logger {
         }
 
         application.display
-        splashscreen.visible = false
-
         waitClose.acquire(1)
       }
 
