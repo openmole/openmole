@@ -29,11 +29,27 @@ import java.io.IOException
 import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.tools.VariableExpansion._
 import org.apache.commons.exec.CommandLine
-import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.tools.service.ProcessUtil._
+import org.openmole.plugin.task.external.ExternalTaskBuilder
 import scala.collection.JavaConversions._
+import scala.collection.mutable.ListBuffer
 
-object AbstractSystemExecTask extends Logger
+object AbstractSystemExecTask {
+
+  abstract class Builder extends ExternalTaskBuilder {
+    private val _variables = new ListBuffer[(String, String)]
+
+    def variables = _variables.toList
+
+    def addVariable(prototype: String, variable: String): this.type = {
+      _variables += prototype -> variable
+      this
+    }
+    def addVariable(prototype: String): this.type = addVariable(prototype, prototype)
+
+  }
+
+}
 
 abstract class AbstractSystemExecTask extends ExternalTask {
 
@@ -41,6 +57,7 @@ abstract class AbstractSystemExecTask extends ExternalTask {
   def returnValue: Option[IPrototype[Int]]
   def exceptionIfReturnValueNotZero: Boolean
   def dir: String
+  def variables: Iterable[(String, String)]
 
   import AbstractSystemExecTask._
 
@@ -54,7 +71,10 @@ abstract class AbstractSystemExecTask extends ExternalTask {
     try {
       val f = new File(commandLine.getExecutable)
       //logger.fine(f + " " + f.exists)
-      val process = Runtime.getRuntime.exec(commandLine.toString, null, workDir)
+      val process = Runtime.getRuntime.exec(
+        commandLine.toString,
+        variables.map { case (p, v) ⇒ v + "=" + context.valueOrException(p).toString }.toArray,
+        workDir)
 
       execute(process, context) match {
         case (retCode, variables) ⇒

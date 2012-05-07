@@ -32,7 +32,7 @@ object SystemExecTask {
     cmd: String,
     dir: String = "",
     exceptionIfReturnValueNotZero: Boolean = true,
-    returnValue: Option[IPrototype[Int]] = None)(implicit plugins: IPluginSet) = new ExternalTaskBuilder { builder ⇒
+    returnValue: Option[IPrototype[Int]] = None)(implicit plugins: IPluginSet) = new AbstractSystemExecTask.Builder { builder ⇒
     def toTask = new SystemExecTask(name, cmd, dir, exceptionIfReturnValueNotZero, returnValue) {
       val inputs = builder.inputs
       val outputs: IDataSet = builder.outputs ++ DataSet(returnValue)
@@ -40,6 +40,7 @@ object SystemExecTask {
       val inputFiles = builder.inputFiles
       val outputFiles = builder.outputFiles
       val resources = builder.resources
+      val variables = builder.variables
     }
   }
 
