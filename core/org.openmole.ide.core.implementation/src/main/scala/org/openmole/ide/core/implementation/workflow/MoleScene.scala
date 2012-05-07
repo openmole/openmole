@@ -19,6 +19,7 @@ package org.openmole.ide.core.implementation.workflow
 import org.netbeans.api.visual.graph.layout.GraphLayoutFactory
 import org.netbeans.api.visual.layout.LayoutFactory
 import java.awt.Point
+import java.awt.event.InputEvent
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.action.ConnectProvider
 import org.netbeans.api.visual.action.ReconnectProvider
@@ -75,7 +76,7 @@ abstract class MoleScene(n: String = "",
 
   getActions.addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)))
 
-  val connectAction = ActionFactory.createExtendedConnectAction(connectLayer, new MoleSceneConnectProvider)
+  val connectAction = ActionFactory.createExtendedConnectAction(null, connectLayer, new MoleSceneConnectProvider, InputEvent.SHIFT_MASK)
   val reconnectAction = ActionFactory.createReconnectAction(new MoleSceneReconnectProvider)
 
   def displayPropertyPanel(proxy: IDataProxyUI,
