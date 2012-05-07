@@ -65,4 +65,5 @@ object Images {
 
   val SPLASH_SCREEN = new ImageIcon(classLoader.getResource("img/splashscreen.png"))
   val APPLICATION_ICON = new ImageIcon(classLoader.getResource("img/openmole.png"))
+  val MOLE_SETTINGS = new ImageIcon(classLoader.getResource("img/moleSettings.png"))
 }
