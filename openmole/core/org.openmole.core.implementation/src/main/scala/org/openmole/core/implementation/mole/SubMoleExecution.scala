@@ -52,8 +52,8 @@ import collection.JavaConversions._
 import scala.collection.mutable.SynchronizedSet
 
 class SubMoleExecution(
-  val parent: Option[SubMoleExecution],
-  val moleExecution: MoleExecution) extends ISubMoleExecution {
+    val parent: Option[SubMoleExecution],
+    val moleExecution: MoleExecution) extends ISubMoleExecution {
 
   private var _nbJobs = 0
 

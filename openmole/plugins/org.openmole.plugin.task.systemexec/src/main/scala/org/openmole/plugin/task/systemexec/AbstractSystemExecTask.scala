@@ -47,8 +47,8 @@ abstract class AbstractSystemExecTask extends ExternalTask {
   override protected def process(context: IContext) = {
     val tmpDir = Workspace.newDir("systemExecTask")
 
-    val links = prepareInputFiles(context, tmpDir)
     val workDir = if (dir.isEmpty) tmpDir else new File(tmpDir, dir)
+    val links = prepareInputFiles(context, workDir)
     val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + expandData(context, List(new Variable(ExternalTask.PWD, workDir.getAbsolutePath)), cmd))
 
     try {

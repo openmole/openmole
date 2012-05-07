@@ -184,7 +184,7 @@ class MoleExecution(
   }
 
   override def finished: Boolean = rootSubMoleExecution.nbJobInProgress == 0
-  
+
   override def started: Boolean = _started.get
 
   override def nextTicket(parent: ITicket): ITicket = Ticket(parent, ticketNumber.getAndIncrement)
