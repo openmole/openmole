@@ -51,7 +51,7 @@ import BasePanelUI._
 
 class TaskPanelUI(proxy: ITaskDataProxyUI,
                   scene: IMoleScene,
-                  mode: Value = CREATION) extends BasePanelUI(proxy, scene, mode, proxy.dataUI.borderColor) {
+                  mode: Value = CREATION) extends BasePanelUI(proxy, scene, mode, new Color(73, 90, 105)) {
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.imagePath)))
 
   val panelUI = proxy.dataUI.buildPanelUI

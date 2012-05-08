@@ -28,6 +28,7 @@ import java.awt.Point
 import org.openmole.ide.core.implementation.workflow.SceneItemFactory
 import java.awt.Toolkit
 import org.openmole.ide.core.implementation.execution.ScenesManager
+import org.openmole.ide.core.implementation.data.MoleDataUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.implementation.dialog.StatusBar
@@ -50,6 +51,15 @@ class MoleSceneConverter extends Converter {
 
     writer.addAttribute("id", molescene.manager.id.toString)
     writer.addAttribute("name", molescene.manager.name)
+
+    // MoleDataUI
+    writer.startNode("dataUI")
+    molescene.manager.dataUI.plugins.foreach { p ⇒
+      writer.startNode("plugin")
+      writer.addAttribute("path", p)
+      writer.endNode
+    }
+    writer.endNode
 
     molescene.manager.capsules.values.foreach(view ⇒ {
       writer.startNode("capsule")
@@ -130,6 +140,18 @@ class MoleSceneConverter extends Converter {
       reader.moveDown
       val n0 = reader.getNodeName
       n0 match {
+        case "dataUI" ⇒ {
+          var plugins = new HashSet[String]
+          while (reader.hasMoreChildren) {
+            reader.moveDown
+            val n1 = reader.getNodeName
+            n1 match {
+              case "plugin" ⇒ plugins += reader.getAttribute("path")
+            }
+            reader.moveUp
+          }
+          scene.manager.dataUI = new MoleDataUI(plugins.toList)
+        }
         case "capsule" ⇒ {
           val p = new Point
           p.setLocation(reader.getAttribute("x").toDouble * Toolkit.getDefaultToolkit.getScreenSize.width,
