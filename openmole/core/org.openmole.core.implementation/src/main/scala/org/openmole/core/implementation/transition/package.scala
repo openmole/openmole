@@ -17,12 +17,11 @@
 
 package org.openmole.core.implementation
 
-import org.openmole.core.implementation.mole.StrainerCapsule
-import org.openmole.core.implementation.puzzle.Puzzle
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.task.ITask
-import org.openmole.core.model.transition.ISlot
-import org.openmole.core.model.transition.ITransition
+import org.openmole.core.implementation.mole._
+import org.openmole.core.implementation.puzzle._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.task._
+import org.openmole.core.model.transition._
 
 import puzzle._
 import task._
@@ -36,6 +35,9 @@ package object transition {
   implicit def transitionsTaskDecorator(from: ITask) = new TransitionDecorator(from)
   implicit def transitionsTaskBuilderDecorator(from: TaskBuilder) = new TransitionDecorator(from.toTask)
 
+  implicit def transitionToSlotConverter(transition: ITransition) = transition.end
+  implicit def conditionStringConverter(condition: String) = new Condition(condition)
+
   def join(first: Puzzle, last: Iterable[Puzzle]) = {
     val join = newJoin
     last foreach { p ⇒ new Transition(p.last, join) }
@@ -44,8 +46,10 @@ package object transition {
 
   class TransitionDecorator(from: Puzzle) {
 
-    def -<(to: Puzzle) = {
-      new ExplorationTransition(from.last, to.first)
+    def -<(
+      to: Puzzle, condition: ICondition = ICondition.True,
+      filtered: Iterable[String] = Set.empty) = {
+      new ExplorationTransition(from.last, to.first, condition, filtered)
       from + to
     }
 
@@ -58,8 +62,12 @@ package object transition {
       join(from, toPuzzles)
     }
 
-    def >-(to: Puzzle) = {
-      new AggregationTransition(from.last, to.first)
+    def >-(
+      to: Puzzle,
+      condition: ICondition = ICondition.True,
+      filtered: Iterable[String] = Set.empty,
+      trigger: ICondition = ICondition.False) = {
+      new AggregationTransition(from.last, to.first, condition, filtered, trigger)
       from + to
     }
 
@@ -72,8 +80,8 @@ package object transition {
       join(from, toPuzzles)
     }
 
-    def --(to: Puzzle) = {
-      new Transition(from.last, to.first)
+    def --(to: Puzzle, condition: ICondition = ICondition.True, filtered: Iterable[String] = Set.empty) = {
+      new Transition(from.last, to.first, condition, filtered)
       from + to
     }
 
@@ -85,8 +93,12 @@ package object transition {
       }
       join(from, toPuzzles)
     }
+
+    def loop(condition: ICondition = ICondition.True) = {
+      new Transition(from.last, from.first.capsule.newSlot, condition)
+      from
+    }
+
   }
 
-  implicit def transitionToSlotConverter(transition: ITransition) = transition.end
-  implicit def conditionStringConverter(condition: String) = new Condition(condition)
 }

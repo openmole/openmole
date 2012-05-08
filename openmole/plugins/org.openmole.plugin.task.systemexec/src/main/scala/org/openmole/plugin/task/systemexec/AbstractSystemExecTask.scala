@@ -45,8 +45,8 @@ object AbstractSystemExecTask {
       addInput(prototype)
       this
     }
+    
     def addVariable(prototype: IPrototype[_]): this.type = addVariable(prototype, prototype.name)
-
   }
 
 }

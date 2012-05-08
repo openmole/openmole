@@ -42,7 +42,7 @@ import scala.collection.immutable.TreeMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
-class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition = True, filtered: Iterable[String] = Iterable.empty[String], trigger: Option[ICondition] = None) extends Transition(start, end, condition, filtered) with IAggregationTransition {
+class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition = True, filtered: Iterable[String] = Iterable.empty[String], trigger: ICondition = ICondition.False) extends Transition(start, end, condition, filtered) with IAggregationTransition {
 
   override def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration."))
@@ -52,16 +52,15 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
         case Some(results) ⇒
           results ++= context.values
 
-          trigger match {
-            case Some(trigger) ⇒
-              val toArrayManifests = Map.empty[String, Manifest[_]] ++ start.outputs.toList.map { d ⇒ d.prototype.name -> d.prototype.`type` }
-              val context = ContextAggregator.aggregate(start.outputs, toArrayManifests, results.toIterable)
-              if (trigger.evaluate(context)) {
-                aggregate(subMole, ticket)
-                if (allAggregationTransitionsPerformed(subMole, parentTicket)) subMole.cancel
-              }
-            case None ⇒
+          if (trigger != ICondition.False) {
+            val toArrayManifests = Map.empty[String, Manifest[_]] ++ start.outputs.toList.map { d ⇒ d.prototype.name -> d.prototype.`type` }
+            val context = ContextAggregator.aggregate(start.outputs, toArrayManifests, results.toIterable)
+            if (trigger.evaluate(context)) {
+              aggregate(subMole, ticket)
+              if (allAggregationTransitionsPerformed(subMole, parentTicket)) subMole.cancel
+            }
           }
+
         case None ⇒ throw new InternalProcessingError("No context registred for aggregation.")
       }
     }
