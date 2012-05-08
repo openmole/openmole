@@ -42,8 +42,4 @@ class SystemExecTaskDataUI(val name: String = "",
   def fatImagePath = "img/systemexec_task_fat.png"
 
   def buildPanelUI = new SystemExecTaskPanelUI(this)
-
-  def borderColor = new Color(255, 200, 0)
-
-  def backgroundColor = new Color(255, 200, 0, 128)
 }

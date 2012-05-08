@@ -47,8 +47,4 @@ class NetLogo5TaskDataUI(val name: String = "",
   def fatImagePath = "img/netlogo5_fat.png"
 
   def buildPanelUI = new NetLogo5TaskPanelUI(this)
-
-  def borderColor = new Color(19, 118, 8)
-
-  def backgroundColor = new Color(175, 233, 175, 128)
 }

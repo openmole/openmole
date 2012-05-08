@@ -29,10 +29,6 @@ import org.openmole.ide.core.model.panel.ITaskPanelUI
 
 trait ITaskDataUI extends IDataUI {
 
-  def borderColor: Color
-
-  def backgroundColor: Color
-
   def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet): ITask
 
   def inputParameters: scala.collection.mutable.Map[IPrototypeDataProxyUI, String]

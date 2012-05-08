@@ -36,8 +36,4 @@ class MedianTaskDataUI(val name: String = "",
   def fatImagePath = "img/median_fat.png"
 
   def buildPanelUI = new MedianTaskPanelUI(this)
-
-  def borderColor = new Color(61, 104, 130)
-
-  def backgroundColor = new Color(61, 104, 130, 128)
 }

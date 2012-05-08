@@ -61,8 +61,4 @@ class MoleTaskDataUI(val name: String = "",
   override def fatImagePath = "img/mole_fat.png"
 
   def buildPanelUI = new MoleTaskPanelUI(this)
-
-  def borderColor = new Color(164, 186, 0)
-
-  def backgroundColor = new Color(164, 186, 0, 128)
 }

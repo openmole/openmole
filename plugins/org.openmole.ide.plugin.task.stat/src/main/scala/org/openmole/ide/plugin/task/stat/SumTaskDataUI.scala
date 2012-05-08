@@ -36,8 +36,4 @@ class SumTaskDataUI(val name: String = "",
   def fatImagePath = "img/sum_fat.png"
 
   def buildPanelUI = new SumTaskPanelUI(this)
-
-  def borderColor = new Color(61, 104, 130)
-
-  def backgroundColor = new Color(61, 104, 130, 128)
 }

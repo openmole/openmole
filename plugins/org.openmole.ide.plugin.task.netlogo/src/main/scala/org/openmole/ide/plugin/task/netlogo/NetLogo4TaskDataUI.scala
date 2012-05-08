@@ -49,7 +49,4 @@ class NetLogo4TaskDataUI(val name: String = "",
 
   def buildPanelUI = new NetLogo4TaskPanelUI(this)
 
-  def borderColor = new Color(19, 118, 8)
-
-  def backgroundColor = new Color(175, 233, 175, 128)
 }

@@ -41,8 +41,4 @@ class StoreIntoCSVTaskDataUI(val name: String = "",
   def fatImagePath = "img/storeIntoCSV_fat.png"
 
   def buildPanelUI = new StoreIntoCSVTaskPanelUI(this)
-
-  def borderColor = new Color(170, 0, 136)
-
-  def backgroundColor = new Color(170, 0, 136, 128)
 }

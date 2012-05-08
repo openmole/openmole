@@ -33,8 +33,4 @@ class GroovyTaskDataUI(val name: String = "",
   def fatImagePath = "img/groovyTask_fat.png"
 
   def buildPanelUI = new GroovyTaskPanelUI(this)
-
-  def borderColor = new Color(61, 104, 130)
-
-  def backgroundColor = new Color(61, 104, 130, 128)
 }

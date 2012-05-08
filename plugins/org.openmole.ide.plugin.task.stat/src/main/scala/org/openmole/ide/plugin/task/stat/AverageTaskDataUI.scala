@@ -36,8 +36,4 @@ class AverageTaskDataUI(val name: String = "",
   override def imagePath = "img/average.png"
 
   def buildPanelUI = new AverageTaskPanelUI(this)
-
-  def borderColor = new Color(61, 104, 130)
-
-  def backgroundColor = new Color(61, 104, 130, 128)
 }
