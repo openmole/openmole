@@ -5,7 +5,6 @@
 
 package org.openmole.ide.plugin.task.groovy
 
-import java.awt.Color
 import java.io.File
 import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.data.IParameterSet
@@ -15,11 +14,10 @@ import org.openmole.plugin.task.groovy.GroovyTask
 
 class GroovyTaskDataUI(val name: String = "",
                        val code: String = "",
-                       val libs: List[String] = List.empty,
-                       val plugins: List[String] = List.empty) extends TaskDataUI {
+                       val libs: List[String] = List.empty) extends TaskDataUI {
 
   def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = {
-    val gtBuilder = GroovyTask(name, code, libs.map { l ⇒ new File(l) })(plugins ++ this.plugins.map { l ⇒ new File(l) })
+    val gtBuilder = GroovyTask(name, code, libs.map { l ⇒ new File(l) })(plugins)
     gtBuilder addInput inputs
     gtBuilder addOutput outputs
     gtBuilder addParameter parameters

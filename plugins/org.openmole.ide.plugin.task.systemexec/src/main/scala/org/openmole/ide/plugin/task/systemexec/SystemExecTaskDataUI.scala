@@ -5,7 +5,6 @@
 
 package org.openmole.ide.plugin.task.systemexec
 
-import java.awt.Color
 import java.io.File
 import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.data.IParameterSet

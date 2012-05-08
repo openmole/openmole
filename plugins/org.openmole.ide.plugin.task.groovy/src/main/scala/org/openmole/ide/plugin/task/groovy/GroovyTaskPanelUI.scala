@@ -38,17 +38,11 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("fillx,wrap",
     tooltip = Help.tooltip("Library path", "/home/path/to/my/lib")
   }
 
-  val pluginMultiTextField = new MultiChooseFileTextField("Plugin", pud.plugins, "Select a file", Some("Plugin files"), FilesOnly, Some("jar")) {
-    tooltip = Help.tooltip("Plugin path. Can be used to link a jar file for instance", "/home/path/to/myjar.jar")
-  }
-
   contents += (new Label("Code"), "left")
   contents += (codeTextArea, "span,growx")
   contents += libMultiTextField.panel
-  contents += pluginMultiTextField.panel
 
   override def saveContent(name: String): ITaskDataUI = new GroovyTaskDataUI(name,
     codeTextArea.editor.text,
-    libMultiTextField.content.filterNot(_.isEmpty),
-    pluginMultiTextField.content.filterNot(_.isEmpty))
+    libMultiTextField.content.filterNot(_.isEmpty))
 }
