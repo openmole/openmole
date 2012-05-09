@@ -45,7 +45,7 @@ object AbstractSystemExecTask {
       addInput(prototype)
       this
     }
-    
+
     def addVariable(prototype: IPrototype[_]): this.type = addVariable(prototype, prototype.name)
   }
 
@@ -57,7 +57,7 @@ abstract class AbstractSystemExecTask extends ExternalTask {
   def returnValue: Option[IPrototype[Int]]
   def exceptionIfReturnValueNotZero: Boolean
   def dir: String
-  def variables: Iterable[(String, String)]
+  def variables: Iterable[(IPrototype[_], String)]
 
   import AbstractSystemExecTask._
 
