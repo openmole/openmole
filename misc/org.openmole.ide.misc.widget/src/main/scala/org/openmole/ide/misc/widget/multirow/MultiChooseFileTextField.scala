@@ -68,11 +68,15 @@ class MultiChooseFileTextField(title: String,
     exts,
     new Factory,
     NO_EMPTY)
+
   def this(title: String, iValues: List[String]) =
     this(title, iValues, "", None, SelectionMode.FilesOnly, None)
 
   def this(title: String, iValues: List[String], selectionMode: SelectionMode.Value) =
     this(title, iValues, "", None, selectionMode, None)
+
+  def this(title: String, iValues: List[String], selectionMode: SelectionMode.Value, minus: Minus) =
+    this(title, iValues, "", None, selectionMode, None, new Factory, minus)
 
   def content = rowWidgets.map(_.content).toList
 }
