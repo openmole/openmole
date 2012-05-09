@@ -23,6 +23,7 @@ import java.util.concurrent.locks.ReentrantLock
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.tools.service.Random
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.batch.control.AccessToken
@@ -33,7 +34,9 @@ import org.openmole.misc.workspace.Workspace
 import scala.annotation.tailrec
 import ServiceGroup._
 
-//object StorageGroup extends Logger
+object StorageGroup extends Logger
+
+import StorageGroup._
 
 class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) extends ServiceGroup with Iterable[Storage] {
 
@@ -82,6 +85,8 @@ class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) 
         }
       }.toList
 
+      
+      
       @tailrec def selected(value: Double, storages: List[(Storage, AccessToken, Double)]): Option[(Storage, AccessToken)] =
         storages.headOption match {
           case Some((storage, token, fitness)) ⇒
@@ -97,6 +102,8 @@ class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) 
 
       @tailrec def wait: (Storage, AccessToken) = {
         val notLoaded = fitness
+        logger.finest(notLoaded.mkString(", "))
+        
         selected(Random.default.nextDouble * notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum, notLoaded) match {
           case Some(storage) ⇒ storage
           case None ⇒

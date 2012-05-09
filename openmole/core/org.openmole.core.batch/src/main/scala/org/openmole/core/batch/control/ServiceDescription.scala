@@ -25,16 +25,7 @@ object ServiceDescription {
   }
 }
 
-class ServiceDescription(val description: String) {
-
+case class ServiceDescription(val description: String) {
   def this(uri: URI) = this({ if (uri.getHost == null) "localhost" else uri.getHost } + ":" + uri.getPort)
-
-  override def equals(other: Any): Boolean = {
-    if (other == null) return false
-    if (!classOf[ServiceDescription].isAssignableFrom(other.asInstanceOf[AnyRef].getClass)) return false
-    description == other.asInstanceOf[ServiceDescription].description
-  }
-  override def hashCode = description.hashCode
-
   override def toString = description
 }
