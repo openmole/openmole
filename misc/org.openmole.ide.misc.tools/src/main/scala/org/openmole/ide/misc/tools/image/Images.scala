@@ -63,7 +63,6 @@ object Images {
   val CHECK_VALID: Image = ImageIO.read(classLoader.getResource("img/check_valid.png"))
   val CHECK_INVALID: Image = ImageIO.read(classLoader.getResource("img/check_invalid.png"))
 
-  val SPLASH_SCREEN = new ImageIcon(classLoader.getResource("img/splashscreen.png"))
   val APPLICATION_ICON = new ImageIcon(classLoader.getResource("img/openmole.png"))
   val MOLE_SETTINGS = new ImageIcon(classLoader.getResource("img/moleSettings.png"))
 }
