@@ -28,7 +28,6 @@ import org.openmole.misc.workspace.Workspace
 
 object JSAGASessionService extends Logger {
 
-  
   private var sessions = List[(String, Session)]()
   private lazy val defaultSession = SessionFactory.createSession(false)
   private val JSAGAConfigFile = "jsaga-universe.xml"
@@ -39,7 +38,7 @@ object JSAGASessionService extends Logger {
     val varDir = Workspace.newDir
     System.setProperty("JSAGA_VAR", varDir.getAbsolutePath)
     System.setProperty("saga.factory", "fr.in2p3.jsaga.impl.SagaFactoryImpl")
-    
+
     // org.apache.log4j.Logger.getLogger(org.glite.security.util.FileEndingIterator.class.getName()).setLevel(org.apache.log4j.Level.FATAL);
     org.apache.log4j.Logger.getRootLogger.setLevel(org.apache.log4j.Level.FATAL)
     val universe = this.getClass.getClassLoader.getResource(JSAGAConfigFile)
