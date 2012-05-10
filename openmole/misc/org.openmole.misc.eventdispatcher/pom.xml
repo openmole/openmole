@@ -10,7 +10,7 @@
     <parent>
         <groupId>org.openmole.core</groupId>
         <artifactId>misc</artifactId>
-        <version>0.5-RC2-SNAPSHOT</version>
+        <version>0.5-RC1</version>
     </parent>
 
     <artifactId>org.openmole.misc.eventdispatcher</artifactId>
