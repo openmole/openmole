@@ -15,6 +15,7 @@
 
     <groupId>org.openmole.ui</groupId>
     <artifactId>ui</artifactId>
+  <version>0.5-RC1</version>
 
     <modules>
         <module>org.openmole.ui</module>
