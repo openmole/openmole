@@ -148,7 +148,7 @@ class CapsuleUI(val scene: IMoleScene,
     setTask(dpu)
     inputPrototypeWidget = Some(PrototypeWidget.buildInput(scene, dpu))
     outputPrototypeWidget = Some(PrototypeWidget.buildOutput(scene, dpu))
-    CheckData.checkMole(scene.manager)
+    CheckData.checkMole(scene)
     addChild(inputPrototypeWidget.get)
     addChild(outputPrototypeWidget.get)
     capsuleMenuProvider.addTaskMenus

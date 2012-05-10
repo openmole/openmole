@@ -47,7 +47,7 @@ import org.openmole.ide.core.model.panel.PanelMode._
 import scala.swing.Panel
 
 abstract class MoleScene(n: String = "",
-                         id: Int) extends GraphScene.StringGraph with IMoleScene {
+                         id: Int) extends GraphScene.StringGraph with IMoleScene { moleScene ⇒
 
   val manager = new MoleSceneManager(n, id)
   var obUI: Option[Widget] = None
@@ -238,7 +238,7 @@ abstract class MoleScene(n: String = "",
           if (manager.registerDataChannel(sourceCapsuleUI, targetWidget.asInstanceOf[TaskComponentWidget].capsule))
             createDataChannelEdge(source.get, target.get)
       }
-      CheckData.checkMole(manager)
+      CheckData.checkMole(moleScene)
     }
   }
 

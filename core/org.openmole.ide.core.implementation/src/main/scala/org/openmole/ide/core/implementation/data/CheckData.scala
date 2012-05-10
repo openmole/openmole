@@ -27,6 +27,7 @@ import org.openmole.ide.core.implementation.registry._
 import org.openmole.core.model.mole.IMole
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyFactory
 import org.openmole.ide.core.implementation.serializer.MoleMaker
+import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
@@ -37,49 +38,54 @@ import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
 
 object CheckData extends Logger {
-  def checkMole(manager: IMoleSceneManager) =
-    manager.startingCapsule match {
-      case Some(x: ICapsuleUI) ⇒
-        val (mole, cMap, pMap, errs) = MoleMaker.buildMole(manager)
-        val error_capsules = manager.capsules.values.partition { _.dataUI.task.isDefined }
-        error_capsules._1.foreach(_.setAsValid)
-        error_capsules._2.foreach { _.setAsInvalid("A capsule has to be encapsulated to be run") }
 
-        val capsuleMap: Map[ICapsule, ICapsuleUI] = cMap.map { case (k, v) ⇒ v -> k }
-        val prototypeMap: Map[IPrototype[_], IPrototypeDataProxyUI] = pMap.map { case (k, v) ⇒ v -> k }.toMap
+  def checkMole(scene: IMoleScene) =
+    scene match {
+      case y: BuildMoleScene ⇒
+        y.manager.startingCapsule match {
+          case Some(x: ICapsuleUI) ⇒
+            val (mole, cMap, pMap, errs) = MoleMaker.buildMole(y.manager)
+            val error_capsules = y.manager.capsules.values.partition { _.dataUI.task.isDefined }
+            error_capsules._1.foreach(_.setAsValid)
+            error_capsules._2.foreach { _.setAsInvalid("A capsule has to be encapsulated to be run") }
 
-        // Compute implicit input / output
-        capsuleMap.foreach {
-          case (caps, capsUI) ⇒
-            capsUI.dataUI.task match {
-              case Some(x: ITaskDataProxyUI) ⇒
-                buildUnknownPrototypes(caps)
-                computeImplicitPrototypes(x)
-              case _ ⇒
+            val capsuleMap: Map[ICapsule, ICapsuleUI] = cMap.map { case (k, v) ⇒ v -> k }
+            val prototypeMap: Map[IPrototype[_], IPrototypeDataProxyUI] = pMap.map { case (k, v) ⇒ v -> k }.toMap
+
+            // Compute implicit input / output
+            capsuleMap.foreach {
+              case (caps, capsUI) ⇒
+                capsUI.dataUI.task match {
+                  case Some(x: ITaskDataProxyUI) ⇒
+                    buildUnknownPrototypes(caps)
+                    computeImplicitPrototypes(x)
+                  case _ ⇒
+                }
             }
-        }
 
-        // Formal validation
-        val errors = Validation(mole)
-        errors.isEmpty match {
-          case false ⇒
-            errors.flatMap {
-              _ match {
-                case x: DataflowProblem ⇒
-                  Some(capsuleMap(x.capsule) -> (prototypeMap(x.data.prototype), x))
-                case x ⇒
-                  logger.info("Error " + x + " not taken into account in the GUI yet.")
-                  None
-              }
-            }.groupBy(_._1).map { case (k, v) ⇒ (k, v.map(_._2)) }.foreach {
-              case (capsuleUI, e) ⇒
-                capsuleUI.updateErrors(e.toList)
+            // Formal validation
+            val errors = Validation(mole)
+            errors.isEmpty match {
+              case false ⇒
+                errors.flatMap {
+                  _ match {
+                    case x: DataflowProblem ⇒
+                      Some(capsuleMap(x.capsule) -> (prototypeMap(x.data.prototype), x))
+                    case x ⇒
+                      logger.info("Error " + x + " not taken into account in the GUI yet.")
+                      None
+                  }
+                }.groupBy(_._1).map { case (k, v) ⇒ (k, v.map(_._2)) }.foreach {
+                  case (capsuleUI, e) ⇒
+                    capsuleUI.updateErrors(e.toList)
+                }
+              case true ⇒ y.manager.capsules.values.foreach { _.updateErrors(List.empty) }
             }
-          case true ⇒ manager.capsules.values.foreach { _.updateErrors(List.empty) }
+            Some(mole, capsuleMap, prototypeMap, errs)
+            errs.foreach { case (cui, e) ⇒ cui.setAsInvalid(e.getMessage) }
+            Some(mole, cMap, pMap, errs)
+          case _ ⇒ None
         }
-        Some(mole, capsuleMap, prototypeMap, errs)
-        errs.foreach { case (cui, e) ⇒ cui.setAsInvalid(e.getMessage) }
-        Some(mole, cMap, pMap, errs)
       case _ ⇒ None
     }
 
@@ -118,18 +124,20 @@ object CheckData extends Logger {
   }
 
   def checkTaskProxyImplicitsPrototypes(scene: IMoleScene,
-                                        proxy: ITaskDataProxyUI) = {
+                                        proxy: ITaskDataProxyUI) =
+    scene match {
+      case x: BuildMoleScene ⇒
+        try {
+          x.manager.capsules.values.flatMap { _.dataUI.task }.contains(proxy) match {
+            case true ⇒ checkMole(x)
+            case false ⇒ computeImplicitPrototypes(proxy)
+          }
+        } catch { case e: UserBadDataError ⇒ }
+      case _ ⇒
+    }
 
-    try {
-      scene.manager.capsules.values.flatMap { _.dataUI.task }.contains(proxy) match {
-        case true ⇒ checkMole(scene.manager)
-        case false ⇒ computeImplicitPrototypes(proxy)
-      }
-    } catch { case e: UserBadDataError ⇒ }
-  }
-
-  def fullCheck(manager: IMoleSceneManager) = {
-    val a = checkMole(manager)
+  def fullCheck(scene: IMoleScene) = {
+    val a = checkMole(scene)
     if (a.isDefined)
       if (a.get._4.isEmpty)
         checkTopology(a.get._1)

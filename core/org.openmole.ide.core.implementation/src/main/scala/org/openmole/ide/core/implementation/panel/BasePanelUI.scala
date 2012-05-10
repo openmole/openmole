@@ -19,7 +19,6 @@ package org.openmole.ide.core.implementation.panel
 
 import java.awt.BorderLayout
 import java.awt.Color
-import javax.imageio.ImageIO
 import javax.swing.BorderFactory
 import javax.swing.ImageIcon
 import org.openmole.ide.core.model.panel.IPanelUI
@@ -113,7 +112,7 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
     save
     ConceptMenu.refreshItem(proxy)
     ScenesManager.currentSceneContainer match {
-      case Some(x: ISceneContainer) ⇒ CheckData.checkMole(x.scene.manager)
+      case Some(x: ISceneContainer) ⇒ CheckData.checkMole(x.scene)
       case None ⇒
     }
   }

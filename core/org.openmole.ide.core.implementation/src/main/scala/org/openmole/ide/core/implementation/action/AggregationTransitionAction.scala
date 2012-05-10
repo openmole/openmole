@@ -28,6 +28,6 @@ class AggregationTransitionAction(connectionWidget: ConnectorWidget) extends Act
     if (connectionWidget.transition.transitionType == BASIC_TRANSITION) connectionWidget.transition.transitionType = AGGREGATION_TRANSITION
     else connectionWidget.transition.transitionType = BASIC_TRANSITION
     connectionWidget.drawTransitionType
-    CheckData.checkMole(connectionWidget.scene.manager)
+    CheckData.checkMole(connectionWidget.scene)
   }
 }

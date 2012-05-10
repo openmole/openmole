@@ -74,7 +74,7 @@ class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISce
   peer.add(toolBar.peer, BorderLayout.NORTH)
   peer.add(new JScrollPane(scene.graphScene.createView), BorderLayout.CENTER)
 
-  CheckData.checkMole(scene.manager)
+  CheckData.checkMole(scene)
 
   def stopAndCloseExecutions = {
     executionMoleSceneContainers.foreach { emc ⇒

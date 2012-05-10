@@ -31,7 +31,7 @@ object SceneItemFactory {
     scene.initCapsuleAdd(caps)
     scene.manager.registerCapsuleUI(caps)
     scene.graphScene.addNode(scene.manager.getNodeID).setPreferredLocation(locationPoint)
-    CheckData.checkMole(scene.manager)
+    CheckData.checkMole(scene)
     caps
   }
 

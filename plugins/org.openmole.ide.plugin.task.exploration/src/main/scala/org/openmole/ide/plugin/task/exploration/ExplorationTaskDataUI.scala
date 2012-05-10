@@ -17,7 +17,6 @@
 
 package org.openmole.ide.plugin.task.exploration
 
-import java.awt.Color
 import org.openmole.ide.plugin.task.exploration.ExplorationTaskPanelUI._
 import org.openmole.ide.core.model.data.IExplorationTaskDataUI
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
