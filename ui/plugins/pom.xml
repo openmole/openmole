@@ -250,12 +250,6 @@
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>
-	<dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>ch.ethz.ssh2</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>ccl.northwestern.edu.netlogo4</artifactId>
