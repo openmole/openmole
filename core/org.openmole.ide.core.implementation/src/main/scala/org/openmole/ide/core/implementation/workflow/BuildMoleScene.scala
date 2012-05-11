@@ -54,6 +54,7 @@ class BuildMoleScene(n: String = "",
       SceneItemFactory.createCapsule(caps, ms, new Point(n._2.x.toInt / 2, n._2.y.toInt / 2))
       capsuleMapping += n._2 -> caps
       islots ++= islotMapping
+      caps.setAsValid
     })
     //   val connectMode = ScenesManager.connectMode
     //   ScenesManager.connectMode = true
