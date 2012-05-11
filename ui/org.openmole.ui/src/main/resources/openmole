@@ -1,0 +1,26 @@
+#!/bin/sh
+
+CURDIR=$PWD
+LOCATION=`dirname $0`
+
+cd $LOCATION
+
+MEM="1G"
+
+FLAG=""
+
+JVMVERSION=`java -version 2>&1 | tail -1 -`
+
+case "$JVMVERSION" in
+  *64-Bit*) FLAG="-XX:+UseCompressedOops";;
+esac
+
+rm -Rf ./configuration/org*
+rm ./configuration/*.log
+java -splash:splashscreen.png -Xmx${MEM} $FLAG -XX:MaxPermSize=128M -XX:+UseParallelGC \
+     -jar ./plugins/org.eclipse.equinox.launcher.jar \
+     -cp ./openmole-plugins -gp ./openmole-plugins-gui "$@"
+#cat $LOCATION/configuration/*.log
+
+cd $CURDIR
+
