@@ -48,7 +48,7 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
     tooltip = Help.tooltip("Name of the concept instance")
   }
   val createLabelLink = new MainLinkLabel("create", new Action("") { def apply = baseCreate })
-  val mainLinksPanel = new PluginPanel("") { contents += createLabelLink }
+  val mainLinksPanel = new PluginPanel("", "[]110px[]") { contents += createLabelLink }
   if (mode != CREATION) deleteLink
   border = BorderFactory.createEmptyBorder
 
