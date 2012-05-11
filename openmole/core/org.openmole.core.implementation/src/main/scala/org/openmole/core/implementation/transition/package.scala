@@ -19,12 +19,14 @@ package org.openmole.core.implementation
 
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.puzzle._
+import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole._
 import org.openmole.core.model.task._
 import org.openmole.core.model.transition._
 
 import puzzle._
 import task._
+import data._
 
 package object transition {
 
@@ -94,7 +96,7 @@ package object transition {
       join(from, toPuzzles)
     }
 
-    def loop(condition: ICondition = ICondition.True) = {
+    def loop(condition: ICondition) = {
       new Transition(from.last, from.first.capsule.newSlot, condition)
       from
     }

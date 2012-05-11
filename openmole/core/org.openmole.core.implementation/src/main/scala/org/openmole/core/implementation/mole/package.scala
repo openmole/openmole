@@ -26,6 +26,7 @@ import org.openmole.core.model.task.ITask
 import org.openmole.core.model.transition.ISlot
 import puzzle._
 import task._
+import data._
 
 package object mole {
   implicit def slotToCapsuleConverter(slot: ISlot) = slot.capsule
@@ -54,6 +55,8 @@ package object mole {
       capsule.intputSlots.toIndexedSeq(i)
     }
     def newSlot = new Slot(capsule)
+    
+    def channel (slot: ISlot, filtered: String*) = new DataChannel(capsule, slot, filtered: _*)
   }
 
 }
