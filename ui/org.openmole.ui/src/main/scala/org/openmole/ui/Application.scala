@@ -81,9 +81,12 @@ class Application extends IApplication with Logger {
       }
 
       if (console) {
-        val headless = GraphicsEnvironment.getLocalGraphicsEnvironment.isHeadlessInstance
-        if (!headless && SplashScreen.getSplashScreen != null) SplashScreen.getSplashScreen.close
-
+        try {
+          val headless = GraphicsEnvironment.getLocalGraphicsEnvironment.isHeadlessInstance
+          if (!headless && SplashScreen.getSplashScreen != null) SplashScreen.getSplashScreen.close
+        } catch {
+          case e => logger.log(FINE, "Error in splash screen closing", e)
+        }
         if (Workspace.anotherIsRunningAt(workspaceLocation))
           logger.severe("Application is already runnig at " + workspaceLocation.getAbsolutePath + ". If it is not the case please remove the file '" + new File(workspaceLocation, Workspace.running).getAbsolutePath() + "'.")
         else {
