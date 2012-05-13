@@ -55,8 +55,8 @@ package object mole {
       capsule.intputSlots.toIndexedSeq(i)
     }
     def newSlot = new Slot(capsule)
-    
-    def channel (slot: ISlot, filtered: String*) = new DataChannel(capsule, slot, filtered: _*)
+
+    def channel(slot: ISlot, filtered: String*) = new DataChannel(capsule, slot, filtered: _*)
   }
 
 }

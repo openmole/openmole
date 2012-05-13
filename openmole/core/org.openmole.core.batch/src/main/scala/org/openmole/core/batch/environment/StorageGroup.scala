@@ -85,8 +85,6 @@ class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) 
         }
       }.toList
 
-      
-      
       @tailrec def selected(value: Double, storages: List[(Storage, AccessToken, Double)]): Option[(Storage, AccessToken)] =
         storages.headOption match {
           case Some((storage, token, fitness)) ⇒
@@ -103,7 +101,7 @@ class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) 
       @tailrec def wait: (Storage, AccessToken) = {
         val notLoaded = fitness
         logger.finest(notLoaded.mkString(", "))
-        
+
         selected(Random.default.nextDouble * notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum, notLoaded) match {
           case Some(storage) ⇒ storage
           case None ⇒

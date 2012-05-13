@@ -42,7 +42,7 @@ import scala.io.Source
 object GliteJobService extends Logger {
   val LCGCPTimeOut = new ConfigurationLocation("GliteJobService", "RuntimeCopyOnWNTimeOut")
 
-  Workspace += (LCGCPTimeOut, "PT2M")
+  Workspace += (LCGCPTimeOut, "PT5M")
 }
 
 class GliteJobService(

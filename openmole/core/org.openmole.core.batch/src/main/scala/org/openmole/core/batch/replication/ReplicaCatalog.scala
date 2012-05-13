@@ -120,16 +120,16 @@ object ReplicaCatalog extends Logger {
   private def key(r: Replica): String = key(r.hash, r.storageDescriptionString, r.authenticationKey)
   private def key(hash: String, storage: Storage): String = key(hash, storage.description.toString, storage.environment.authentication.key)
   def withSemaphore[T](key: String)(op: ⇒ T) = {
-    logger.fine("Loking on " + key)
+    //logger.fine("Loking on " + key)
     objectServer.ext.setSemaphore(key, Int.MaxValue)
-    try { val r = op; logger.fine("Unloking on " + key); r }
+    try op
     finally objectServer.ext.releaseSemaphore(key)
 
   }
 
   //Synchronization should be achieved outiside the replica for database caching and isolation purposes
   def uploadAndGet(src: File, srcPath: File, hash: String, storage: Storage, token: AccessToken): Replica = {
-    logger.fine("Looking for replica for" + srcPath.getAbsolutePath + "hash" + hash + ".")
+    //logger.fine("Looking for replica for" + srcPath.getAbsolutePath + "hash" + hash + ".")
 
     withSemaphore(key(hash, storage)) {
       val storageDescription = storage.description
@@ -137,7 +137,7 @@ object ReplicaCatalog extends Logger {
 
       val replica = getReplica(srcPath, hash, storageDescription, authenticationKey) match {
         case None ⇒
-          logger.fine("Not found Replica for" + srcPath.getAbsolutePath + " " + storage)
+          //logger.fine("Not found Replica for" + srcPath.getAbsolutePath + " " + storage)
           getReplica(srcPath, storageDescription, authenticationKey).foreach { r ⇒ clean(r) }
 
           getReplica(hash, storageDescription, authenticationKey) match {
@@ -150,7 +150,7 @@ object ReplicaCatalog extends Logger {
               uploadAndInsert(src, srcPath, hash, authenticationKey, storage, token)
           }
         case Some(r) ⇒ {
-          logger.fine("Found Replica for " + srcPath.getAbsolutePath + " " + storage)
+          //logger.fine("Found Replica for " + srcPath.getAbsolutePath + " " + storage)
           objectServer.activate(r, Int.MaxValue)
           checkExists(r, src, srcPath, hash, authenticationKey, storage, token)
         }

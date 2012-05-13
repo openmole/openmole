@@ -44,7 +44,6 @@ object GetResultActor extends Logger
 class GetResultActor(jobManager: ActorRef) extends Actor {
   def receive = {
     case GetResult(job, sj, resultPath) ⇒
-      //logger.fine("Getting results.")
       try getResult(sj.communicationStorage, resultPath, job)
       catch {
         case e ⇒ jobManager ! Error(job, e)

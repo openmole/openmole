@@ -78,11 +78,15 @@ akka {
     case Submit(job, sj) ⇒ submitter ! Submit(job, sj)
     case Submitted(job, sj, bj) ⇒
       job.batchJob = Some(bj)
-      self ! RefreshDelay(job, sj, bj, minUpdateInterval, false)
+      self ! RefreshDelay(job, sj, bj, minUpdateInterval, true)
     case RefreshDelay(job, sj, bj, delay, stateChanged) ⇒
+      logger.fine("Refresh delay")
       val newDelay =
-        if (stateChanged) math.min(delay + incrementUpdateInterval, maxUpdateInterval) else minUpdateInterval
-      context.system.scheduler.scheduleOnce(newDelay milliseconds, refresher, Refresh(job, sj, bj, newDelay))
+        if (!stateChanged) math.min(delay + incrementUpdateInterval, maxUpdateInterval) else minUpdateInterval
+      logger.fine("Next state refresh in " + newDelay + " " + job)
+      context.system.scheduler.scheduleOnce(newDelay milliseconds) {
+        refresher ! Refresh(job, sj, bj, newDelay)
+      }
     case GetResult(job, sj, out) ⇒
       resultGetters ! GetResult(job, sj, out)
     case Kill(job) ⇒
