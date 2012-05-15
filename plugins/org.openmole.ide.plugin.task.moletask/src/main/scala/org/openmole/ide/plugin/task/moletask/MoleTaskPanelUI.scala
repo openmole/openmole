@@ -19,6 +19,8 @@ package org.openmole.ide.plugin.task.moletask
 
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.PluginPanel
+import java.util.Locale
+import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.workflow.MoleSceneManager
@@ -30,8 +32,17 @@ import scala.collection.JavaConversions._
 
 class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2", "left,grow,fill", "") with ITaskPanelUI {
 
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+
   val moleComboBox = new MyComboBox(MoleTaskDataUI.emptyMoleSceneManager ::
-    ScenesManager.moleScenes.map { _.manager }.filter { _ != ScenesManager.currentSceneContainer.get.scene.manager }.filter { _.capsules.size > 0 }.toList) { tooltip = Help.tooltip("The name of the inner Mole to be run.", "Mole_1") }
+    ScenesManager.moleScenes.map { _.manager }.filter {
+      _ != ScenesManager.currentSceneContainer.get.scene.manager
+    }.filter {
+      _.capsules.size > 0
+    }.toList) {
+    tooltip = Help.tooltip(i18n.getString("mole"),
+      i18n.getString("moleEx"))
+  }
 
   moleComboBox.selection.item = pud.mole match {
     case Some(x: Int) ⇒ MoleTaskDataUI.manager(x).get.asInstanceOf[MoleSceneManager]
@@ -39,7 +50,11 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2", "
     case _ ⇒ MoleTaskDataUI.emptyMoleSceneManager
   }
 
-  val capsuleComboBox = new MyComboBox(EmptyDataUIs.emptyTaskProxy :: currentCapsules.toList) { tooltip = Help.tooltip("The name of the final encapsulated task", "myTask1") }
+  val capsuleComboBox = new MyComboBox(EmptyDataUIs.emptyTaskProxy :: currentCapsules.toList) {
+    tooltip = Help.tooltip(i18n.getString("finalCapsule"),
+      i18n.getString("finalCapsuleEx"))
+  }
+
   capsuleComboBox.selection.item = pud.finalCapsule.getOrElse(EmptyDataUIs.emptyTaskProxy)
 
   contents += (new Label("Embedded mole"), "gap para")
