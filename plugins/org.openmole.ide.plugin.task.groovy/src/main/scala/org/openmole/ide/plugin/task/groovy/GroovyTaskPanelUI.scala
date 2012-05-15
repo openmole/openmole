@@ -34,13 +34,13 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("fillx,wrap",
 
   val codeTextArea = new GroovyEditor {
     editor.text = pud.code; minimumSize = new Dimension(150, 150);
-    tooltip = Help.tooltip("groovyCode", 
-                           "groovyCodeEx")
+    tooltip = Help.tooltip(i18n.getString("groovyCode"), 
+                           i18n.getString("groovyCodeEx"))
   }
 
   val libMultiTextField = new MultiChooseFileTextField("Lib", pud.libs, "Select a file", Some("Lib files"), FilesOnly, Some("jar")) {
-    tooltip = Help.tooltip("libraryPath", 
-                           "libraryPathEx")
+    tooltip = Help.tooltip(i18n.getString("libraryPath"), 
+                           i18n.getString("libraryPathEx"))
   }
 
   contents += (new Label("Code"), "left")
