@@ -22,9 +22,12 @@ import org.openmole.ide.misc.widget.ChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
 import org.openmole.ide.core.implementation.dataproxy._
+import java.util.Locale
+import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import java.awt.Dimension
+import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing._
 import swing.Swing._
@@ -39,14 +42,37 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
                                      prototypeMappingOutput: List[(String, IPrototypeDataProxyUI)],
                                      resources: List[String],
                                      g: List[String]) extends PluginPanel("", "[left]rel[grow,fill]",
-  "[]20[]") {
+                                                                          "[]20[]") {
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
-  val nlogoTextField = new ChooseFileTextField(nlogoPath, "Select a nlogo file", "Netlogo files", "nlogo")
-  val workspaceCheckBox = new CheckBox("Embedd Workspace") { selected = workspaceEmbedded }
-  val launchingCommandTextArea = new TextArea(lauchingCommands)
+  val nlogoTextField = new ChooseFileTextField(nlogoPath,
+                                               "Select a nlogo file",
+                                               "Netlogo files",
+                                               "nlogo") {
+    tooltip = Help.tooltip(i18n.getString("nlogoPath"),
+                           Help.tooltip(i18n.getString("nlogoPathEx")))
+  }
+
+  val workspaceCheckBox = new CheckBox("Embed Workspace") {
+    selected = workspaceEmbedded
+    tooltip = Help.tooltip(i18n.getString("embedWorspace"),
+                           i18n.getString("embedWorspaceEx") )
+  }
+
+  val launchingCommandTextArea = new TextArea(lauchingCommands) {
+    tooltip = Help.tooltip(i18n.getString("command"),
+                           i18n.getString("commandEx"))
+  }
+
   var multiStringProto: Option[MultiTwoCombos[String, IPrototypeDataProxyUI]] = None
   var multiProtoString: Option[MultiTwoCombos[IPrototypeDataProxyUI, String]] = None
-  val resourcesMultiTextField = new MultiChooseFileTextField("Resources", resources, SelectionMode.FilesAndDirectories)
+  val resourcesMultiTextField = new MultiChooseFileTextField("Resources",
+                                                             resources,
+                                                             SelectionMode.FilesAndDirectories) {
+
+    tooltip = Help.tooltip(i18n.getString("resources"),
+                           i18n.getString("resourcesEx"))
+  }
   var globals = g
 
   listenTo(nlogoTextField)
@@ -76,16 +102,16 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
     }
     if (!globals.isEmpty) {
       multiStringProto = Some(new MultiTwoCombos[String, IPrototypeDataProxyUI](
-        "Output Mapping",
-        "with",
-        (globals, comboContent),
-        prototypeMappingOutput))
+          "Output Mapping",
+          "with",
+          (globals, comboContent),
+          prototypeMappingOutput))
 
       multiProtoString = Some(new MultiTwoCombos[IPrototypeDataProxyUI, String](
-        "Input Mapping",
-        "with",
-        (comboContent, globals),
-        prototypeMappingInput))
+          "Input Mapping",
+          "with",
+          (comboContent, globals),
+          prototypeMappingInput))
     }
 
     if (multiStringProto.isDefined) {
