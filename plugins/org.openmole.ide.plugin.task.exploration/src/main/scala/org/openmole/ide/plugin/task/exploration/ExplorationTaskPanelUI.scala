@@ -27,6 +27,8 @@ import scala.swing.event.SelectionChanged
 import swing.Swing._
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dataproxy._
+import java.util.Locale
+import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
@@ -38,7 +40,9 @@ object ExplorationTaskPanelUI {
 import ExplorationTaskPanelUI._
 
 class ExplorationTaskPanelUI(pud: ExplorationTaskDataUI) extends PluginPanel("wrap 3") with ITaskPanelUI {
-  val samplingComboBox = new ComboBox(comboContent) { tooltip = Help.tooltip("The name of the sampling to be executed") }
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+
+  val samplingComboBox = new ComboBox(comboContent) { tooltip = Help.tooltip(i18n.getString("sampling")) }
 
   contents += new Label("Sampling")
   contents += samplingComboBox
