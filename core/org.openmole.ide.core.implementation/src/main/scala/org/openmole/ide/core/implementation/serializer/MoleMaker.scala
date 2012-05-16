@@ -144,9 +144,11 @@ object MoleMaker {
       case (protoProxy, v) ⇒
         if (!v.isEmpty) {
           val proto = protoProxy.dataUI.coreObject
-          val (ok, msg) = TypeCheck(v, proto)
-          if (ok) Some(new Parameter(proto.asInstanceOf[IPrototype[Any]], msg))
-          else None
+          val (msg, obj) = TypeCheck(v, proto)
+          obj match {
+            case Some(x: Object) ⇒ Some(new Parameter(proto.asInstanceOf[IPrototype[Any]], x))
+            case _ ⇒ None
+          }
         } else None
     }.toList)
 
