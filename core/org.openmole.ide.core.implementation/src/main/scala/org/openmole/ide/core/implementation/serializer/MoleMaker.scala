@@ -143,10 +143,10 @@ object MoleMaker {
       case (protoProxy, v) ⇒
         if (!v.isEmpty) {
           val proto = protoProxy.dataUI.coreObject
-          val groovyO = new GroovyProxy(v).execute()
-          val (ok, msg) = TypeCheck(groovyO, proto)
-          if (!ok) throw new UserBadDataError(msg)
-          else Some(new Parameter(proto.asInstanceOf[IPrototype[Any]], groovyO))
+          //val groovyO = new GroovyProxy(v).execute()
+          val (ok, msg) = TypeCheck(v, proto)
+          if (ok) Some(new Parameter(proto.asInstanceOf[IPrototype[Any]], msg))
+          else None
         } else None
     }.toList)
   }
