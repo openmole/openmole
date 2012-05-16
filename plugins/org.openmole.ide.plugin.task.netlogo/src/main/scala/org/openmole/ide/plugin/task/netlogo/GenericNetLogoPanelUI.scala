@@ -42,36 +42,36 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
                                      prototypeMappingOutput: List[(String, IPrototypeDataProxyUI)],
                                      resources: List[String],
                                      g: List[String]) extends PluginPanel("", "[left]rel[grow,fill]",
-                                                                          "[]20[]") {
+  "[]20[]") {
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val nlogoTextField = new ChooseFileTextField(nlogoPath,
-                                               "Select a nlogo file",
-                                               "Netlogo files",
-                                               "nlogo") {
+    "Select a nlogo file",
+    "Netlogo files",
+    "nlogo") {
     tooltip = Help.tooltip(i18n.getString("nlogoPath"),
-                           Help.tooltip(i18n.getString("nlogoPathEx")))
+      Help.tooltip(i18n.getString("nlogoPathEx")))
   }
 
   val workspaceCheckBox = new CheckBox("Embed Workspace") {
     selected = workspaceEmbedded
     tooltip = Help.tooltip(i18n.getString("embedWorspace"),
-                           i18n.getString("embedWorspaceEx") )
+      i18n.getString("embedWorspaceEx"))
   }
 
   val launchingCommandTextArea = new TextArea(lauchingCommands) {
     tooltip = Help.tooltip(i18n.getString("command"),
-                           i18n.getString("commandEx"))
+      i18n.getString("commandEx"))
   }
 
   var multiStringProto: Option[MultiTwoCombos[String, IPrototypeDataProxyUI]] = None
   var multiProtoString: Option[MultiTwoCombos[IPrototypeDataProxyUI, String]] = None
   val resourcesMultiTextField = new MultiChooseFileTextField("Resources",
-                                                             resources,
-                                                             SelectionMode.FilesAndDirectories) {
+    resources,
+    SelectionMode.FilesAndDirectories) {
 
     tooltip = Help.tooltip(i18n.getString("resources"),
-                           i18n.getString("resourcesEx"))
+      i18n.getString("resourcesEx"))
   }
   var globals = g
 
@@ -102,16 +102,16 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
     }
     if (!globals.isEmpty) {
       multiStringProto = Some(new MultiTwoCombos[String, IPrototypeDataProxyUI](
-          "Output Mapping",
-          "with",
-          (globals, comboContent),
-          prototypeMappingOutput))
+        "Output Mapping",
+        "with",
+        (globals, comboContent),
+        prototypeMappingOutput))
 
       multiProtoString = Some(new MultiTwoCombos[IPrototypeDataProxyUI, String](
-          "Input Mapping",
-          "with",
-          (comboContent, globals),
-          prototypeMappingInput))
+        "Input Mapping",
+        "with",
+        (comboContent, globals),
+        prototypeMappingInput))
     }
 
     if (multiStringProto.isDefined) {

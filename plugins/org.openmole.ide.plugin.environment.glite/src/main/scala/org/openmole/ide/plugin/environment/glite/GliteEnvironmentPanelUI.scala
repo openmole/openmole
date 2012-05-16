@@ -63,8 +63,8 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
     tooltip = Help.tooltip(i18n.getString("workerNodeMemory"),
       i18n.getString("workerNodeMemoryEx"))
   }
-  val maxCPUTimeLabel = new Label("Max CPU Time") 
-  val maxCPUTimeTextField = new TextField(4){
+  val maxCPUTimeLabel = new Label("Max CPU Time")
+  val maxCPUTimeTextField = new TextField(4) {
     tooltip = Help.tooltip(i18n.getString("maxCPUTime"),
       i18n.getString("maxCPUTimeEx"))
   }

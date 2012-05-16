@@ -210,6 +210,7 @@ class CapsuleUI(val scene: IMoleScene,
         }
       case _ ⇒
     }
+    if (problems.size > 0) setAsInvalid("I / O errors")
   }
 
   def addInputSlot(on: Boolean): IInputSlotWidget = {
