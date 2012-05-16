@@ -81,7 +81,6 @@ object CheckData extends Logger {
                 }
               case true ⇒ y.manager.capsules.values.foreach { _.updateErrors(List.empty) }
             }
-            Some(mole, capsuleMap, prototypeMap, errs)
             errs.foreach { case (cui, e) ⇒ cui.setAsInvalid(e.getMessage) }
             Some(mole, cMap, pMap, errs)
           case _ ⇒ None

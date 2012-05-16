@@ -38,21 +38,21 @@ import swing.Swing._
 
 class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("fillx,wrap 2", "[left][grow,fill]", "") with ITaskPanelUI {
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
-  val workdirTextField = new TextField(ndu.workdir){
+  val workdirTextField = new TextField(ndu.workdir) {
     tooltip = Help.tooltip(i18n.getString("workdir"),
-                           i18n.getString("workdirEx"))
+      i18n.getString("workdirEx"))
   }
   val resourcesMultiTextField = new MultiChooseFileTextField("Resource", ndu.resources, SelectionMode.FilesAndDirectories)
   val outputMapMultiTextFieldCombo = new MultiTextFieldCombo[IPrototypeDataProxyUI]("Output mapping",
-                                                                                    ndu.outputMap,
-                                                                                    comboContent)
+    ndu.outputMap,
+    comboContent)
 
   val inputMapMultiComboTextField = new MultiComboTextField[IPrototypeDataProxyUI]("Input mapping",
-                                                                                   ndu.inputMap,
-                                                                                   comboContent)
-  val launchingCommandTextArea = new TextArea(ndu.lauchingCommands){
+    ndu.inputMap,
+    comboContent)
+  val launchingCommandTextArea = new TextArea(ndu.lauchingCommands) {
     tooltip = Help.tooltip(i18n.getString("command"),
-                           i18n.getString("commandEx"))
+      i18n.getString("commandEx"))
   }
 
   contents += new Label("Workdir")
@@ -64,16 +64,16 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("fill
   contents += (outputMapMultiTextFieldCombo.panel, "span,grow,wrap")
 
   override def saveContent(name: String): ITaskDataUI = new SystemExecTaskDataUI(name,
-                                                                                 workdirTextField.text,
-                                                                                 launchingCommandTextArea.text,
-                                                                                 resourcesMultiTextField.content,
-                                                                                 inputMapMultiComboTextField.content.flatMap { p ⇒
+    workdirTextField.text,
+    launchingCommandTextArea.text,
+    resourcesMultiTextField.content,
+    inputMapMultiComboTextField.content.flatMap { p ⇒
       p._1.dataUI match {
         case x: EmptyPrototypeDataUI ⇒ Nil
         case _ ⇒ List(p)
       }
     },
-                                                                                 outputMapMultiTextFieldCombo.content.flatMap { p ⇒
+    outputMapMultiTextFieldCombo.content.flatMap { p ⇒
       p._2.dataUI match {
         case x: EmptyPrototypeDataUI ⇒ Nil
         case _ ⇒ List(p)

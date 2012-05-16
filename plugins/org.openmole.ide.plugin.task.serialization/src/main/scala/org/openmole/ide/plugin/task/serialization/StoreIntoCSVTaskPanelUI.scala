@@ -33,13 +33,13 @@ import swing.Swing._
 
 class StoreIntoCSVTaskPanelUI(sdu: StoreIntoCSVTaskDataUI) extends PluginPanel("wrap 2") with ITaskPanelUI {
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
-  
+
   var columns = new HashSet[ColumnPanel]
   val loaded = sdu.columns.groupBy(_._1)
   val protoFileComboBox = new ComboBox(Proxys.prototypes.filter(p ⇒ p.dataUI.coreObject.`type`.erasure == classOf[File]).toList) {
     tooltip = Help.tooltip(i18n.getString("fileProto"))
   }
-  
+
   if (sdu.protoFile.isDefined) protoFileComboBox.selection.item = sdu.protoFile.get
   Proxys.prototypes.filter(_.dataUI.dim > 0).foreach(columns += buildColumn(_))
   contents += new Label("File Prototype to be stored")
