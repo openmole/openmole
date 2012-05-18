@@ -25,6 +25,7 @@ import scala.collection.JavaConversions._
 
 class MoleRouter(scene: IMoleScene) extends Router {
   def routeConnection(widget: ConnectionWidget) = {
+    widget.setControlPoints(List(), false)
     (widget.getTargetAnchor.compute(widget.getSourceAnchorEntry).getAnchorSceneLocation.x -
       widget.getSourceAnchor.compute(widget.getSourceAnchorEntry).getAnchorSceneLocation.x) < 0 match {
         case true ⇒ RouterFactory.createOrthogonalSearchRouter(scene.capsuleLayer).routeConnection(widget)
