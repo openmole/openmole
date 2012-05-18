@@ -48,6 +48,7 @@ class ExecutionMoleScene(id: Int,
 
   def attachEdgeWidget(e: String) = {
     val connectionWidget = new ConnectorWidget(this, manager.transition(e))
+    connectionWidget.setRouter(new MoleRouter(this))
     connectLayer.addChild(connectionWidget);
     connectionWidget.setEndPointShape(PointShape.SQUARE_FILLED_BIG)
     connectionWidget

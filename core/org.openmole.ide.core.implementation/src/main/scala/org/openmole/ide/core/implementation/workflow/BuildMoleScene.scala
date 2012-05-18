@@ -19,6 +19,7 @@ package org.openmole.ide.core.implementation.workflow
 
 import java.awt.Point
 import org.netbeans.api.visual.anchor.PointShape
+import org.netbeans.api.visual.router.RouterFactory
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
@@ -82,8 +83,8 @@ class BuildMoleScene(n: String = "",
         val x = new DataChannelConnectionWidget(this, manager.dataChannel(e))
         x
     }
-
-    connectLayer.addChild(connectionWidget);
+    connectionWidget.setRouter(new MoleRouter(this))
+    connectLayer.addChild(connectionWidget)
     //  connectionWidget.getActions.addAction(createSelectAction)
     connectionWidget.getActions.addAction(createObjectHoverAction)
     connectionWidget.getActions.addAction(reconnectAction)

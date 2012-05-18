@@ -20,17 +20,18 @@ package org.openmole.ide.core.model.workflow
 import org.netbeans.api.visual.graph.GraphScene
 import org.openmole.ide.core.model.panel.PanelMode
 import org.netbeans.api.visual.widget.ComponentWidget
+import org.netbeans.api.visual.widget.LayerWidget
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import scala.swing.Panel
 
 trait IMoleScene {
   def manager: IMoleSceneManager
 
-  def setLayout
-
   def refresh
 
   def validate
+
+  def capsuleLayer: LayerWidget
 
   def initCapsuleAdd(w: ICapsuleUI)
 

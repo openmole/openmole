@@ -19,6 +19,7 @@ package org.openmole.ide.core.implementation.workflow
 import org.netbeans.api.visual.graph.layout.GraphLayoutFactory
 import org.netbeans.api.visual.layout.LayoutFactory
 import java.awt.Point
+import java.awt.RenderingHints
 import java.awt.event.InputEvent
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.action.ConnectProvider
@@ -78,6 +79,14 @@ abstract class MoleScene(n: String = "",
 
   val connectAction = ActionFactory.createExtendedConnectAction(null, connectLayer, new MoleSceneConnectProvider, InputEvent.SHIFT_MASK)
   val reconnectAction = ActionFactory.createReconnectAction(new MoleSceneReconnectProvider)
+
+  override def paintChildren = {
+
+    getGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+    getGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+
+    super.paintChildren
+  }
 
   def displayPropertyPanel(proxy: IDataProxyUI,
                            mode: PanelMode.Value) = {
@@ -139,13 +148,6 @@ abstract class MoleScene(n: String = "",
   def graphScene = this
 
   def refresh = { validate; repaint }
-
-  def setLayout = {
-    val graphLayout = GraphLayoutFactory.createHierarchicalGraphLayout(this, true)
-    graphLayout.layoutGraph(this)
-    val sceneGraphLayout = LayoutFactory.createSceneGraphLayout(this, graphLayout)
-    sceneGraphLayout.invokeLayout
-  }
 
   def createConnectEdge(sourceNodeID: String, targetNodeID: String) =
     createEdge(sourceNodeID, targetNodeID, manager.getEdgeID)

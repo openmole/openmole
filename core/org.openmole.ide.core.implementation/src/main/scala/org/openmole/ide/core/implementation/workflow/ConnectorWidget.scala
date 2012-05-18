@@ -51,6 +51,8 @@ class ConnectorWidget(val scene: IMoleScene, val transition: ITransitionUI, var 
   drawTransitionType
   toBeEdited = true
 
+  setStroke(new BasicStroke(1.5f))
+
   def setLabelVisible = {
     componentWidget.setVisible(!label.text.isEmpty)
     label.revalidate
