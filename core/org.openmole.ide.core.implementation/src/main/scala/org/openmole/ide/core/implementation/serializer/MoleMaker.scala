@@ -127,10 +127,11 @@ object MoleMaker {
     }
 
   def taskCoreObject(proxy: ITaskDataProxyUI,
-                     plugins: Set[File] = Set.empty): ITask = proxy.dataUI.coreObject(inputs(proxy),
-    outputs(proxy),
-    parameters(proxy),
-    new PluginSet(plugins))
+                     plugins: Set[File] = Set.empty): ITask =
+    proxy.dataUI.coreObject(inputs(proxy),
+      outputs(proxy),
+      parameters(proxy),
+      new PluginSet(plugins))
 
   def taskCoreObject(capsuleDataUI: ICapsuleDataUI,
                      plugins: Set[File]): ITask = taskCoreObject(capsuleDataUI.task.get, plugins)
@@ -138,18 +139,18 @@ object MoleMaker {
   def inputs(proxy: ITaskDataProxyUI) = DataSet(proxy.dataUI.prototypesIn.map { _.dataUI.coreObject })
   def outputs(proxy: ITaskDataProxyUI) = DataSet(proxy.dataUI.prototypesOut.map { _.dataUI.coreObject })
 
-  def parameters(proxy: ITaskDataProxyUI) = {
+  def parameters(proxy: ITaskDataProxyUI) =
     new ParameterSet(proxy.dataUI.inputParameters.flatMap {
       case (protoProxy, v) ⇒
         if (!v.isEmpty) {
           val proto = protoProxy.dataUI.coreObject
-          val groovyO = new GroovyProxy(v).execute()
-          val (ok, msg) = TypeCheck(groovyO, proto)
-          if (!ok) throw new UserBadDataError(msg)
-          else Some(new Parameter(proto.asInstanceOf[IPrototype[Any]], groovyO))
+          val (msg, obj) = TypeCheck(v, proto)
+          obj match {
+            case Some(x: Object) ⇒ Some(new Parameter(proto.asInstanceOf[IPrototype[Any]], x))
+            case _ ⇒ None
+          }
         } else None
     }.toList)
-  }
 
   def inputs(capsuleDataUI: ICapsuleDataUI): DataSet = inputs(capsuleDataUI.task.get)
 

@@ -40,11 +40,11 @@ class PrototypeGroovyTextFieldEditor(val title: String,
     icon = code.isEmpty match {
       case true ⇒ EDIT_EMPTY
       case false ⇒
-        val (result, t) = TypeCheck.apply(code, prototype)
-        tooltip = t
-        result match {
-          case true ⇒ EDIT
-          case false ⇒ EDIT_ERROR
+        val (msg, obj) = TypeCheck.apply(code, prototype)
+        tooltip = msg
+        obj match {
+          case Some(x) ⇒ EDIT
+          case None ⇒ EDIT_ERROR
         }
     }
     repaint

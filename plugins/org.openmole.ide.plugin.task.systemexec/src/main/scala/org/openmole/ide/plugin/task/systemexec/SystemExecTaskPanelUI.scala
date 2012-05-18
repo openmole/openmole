@@ -17,6 +17,8 @@
 package org.openmole.ide.plugin.task.systemexec
 
 import java.io.File
+import java.util.Locale
+import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.data.EmptyDataUIs.EmptyPrototypeDataUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
@@ -26,6 +28,7 @@ import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import java.awt.Dimension
+import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiComboTextField
 import org.openmole.ide.misc.widget.multirow.MultiTextFieldCombo
@@ -34,8 +37,11 @@ import scala.swing._
 import swing.Swing._
 
 class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("fillx,wrap 2", "[left][grow,fill]", "") with ITaskPanelUI {
-
-  val workdirTextField = new TextField(ndu.workdir)
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+  val workdirTextField = new TextField(ndu.workdir) {
+    tooltip = Help.tooltip(i18n.getString("workdir"),
+      i18n.getString("workdirEx"))
+  }
   val resourcesMultiTextField = new MultiChooseFileTextField("Resource", ndu.resources, SelectionMode.FilesAndDirectories)
   val outputMapMultiTextFieldCombo = new MultiTextFieldCombo[IPrototypeDataProxyUI]("Output mapping",
     ndu.outputMap,
@@ -44,7 +50,10 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("fill
   val inputMapMultiComboTextField = new MultiComboTextField[IPrototypeDataProxyUI]("Input mapping",
     ndu.inputMap,
     comboContent)
-  val launchingCommandTextArea = new TextArea(ndu.lauchingCommands)
+  val launchingCommandTextArea = new TextArea(ndu.lauchingCommands) {
+    tooltip = Help.tooltip(i18n.getString("command"),
+      i18n.getString("commandEx"))
+  }
 
   contents += new Label("Workdir")
   contents += (workdirTextField, "growx,span 3, wrap")

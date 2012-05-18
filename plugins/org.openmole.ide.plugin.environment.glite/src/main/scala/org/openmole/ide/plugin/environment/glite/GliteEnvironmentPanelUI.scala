@@ -17,7 +17,8 @@
 
 package org.openmole.ide.plugin.environment.glite
 
-import java.awt.Color
+import java.util.Locale
+import java.util.ResourceBundle
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget._
 import scala.swing.CheckBox
@@ -27,26 +28,48 @@ import scala.swing.event.ButtonClicked
 
 class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IEnvironmentPanelUI {
 
-  val voTextField = new TextField(20) { tooltip = Help.tooltip("Virtual Organization name", "vo.complex-systems.eu") }
-  val vomsTextField = new TextField(20) { tooltip = Help.tooltip("Virtual Organization Membership Service url", "voms://voms.grid.auth.gr:15160/C=GR/O=HellasGrid/OU=auth.gr/CN=voms.grid.auth.gr") }
-  val bdiiTextField = new TextField(20) { tooltip = Help.tooltip("Berkeley Database Information Index url", "ldap://topbdii.grif.fr:2170") }
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
-  val proxyCheckBox = new CheckBox("MyProxy") { tooltip = Help.tooltip("Set Proxy settings") }
-  val proxyURLTextField = new TextField(18) { tooltip = Help.tooltip("", "") }
-  //val proxyUserTextField = new TextField(18){tooltip = Help.tooltip("","")}
+  val voTextField = new TextField(20) {
+    tooltip = Help.tooltip(i18n.getString("vo"),
+      i18n.getString("voEx"))
+  }
+  val vomsTextField = new TextField(20) {
+    tooltip = Help.tooltip(i18n.getString("voms"),
+      i18n.getString("vomsEx"))
+  }
+  val bdiiTextField = new TextField(20) {
+    tooltip = Help.tooltip(i18n.getString("bdii"),
+      i18n.getString("bdiiEx"))
+  }
+
+  val proxyCheckBox = new CheckBox("MyProxy") { tooltip = Help.tooltip(i18n.getString("myProxy")) }
+  val proxyURLTextField = new TextField(18) {
+    tooltip = Help.tooltip(i18n.getString("proxyURL"),
+      i18n.getString("proxyURLEx"))
+  }
   val proxyURLLabel = new Label("url")
-  //val proxyUserLabel = new Label("user")
 
-  val requirementCheckBox = new CheckBox("Requirements") { tooltip = Help.tooltip("Adds specific requirements") }
-  val architectureCheckBox = new CheckBox("64 bits") { tooltip = Help.tooltip("64 bits worker nodes only") }
-  val runtimeMemoryLabel = new Label("Runtime memory")
-  val runtimeMemoryTextField = new TextField(4)
+  val requirementCheckBox = new CheckBox("Requirements") { tooltip = Help.tooltip(i18n.getString("requirement")) }
+  val architectureCheckBox = new CheckBox("64 bits") { tooltip = Help.tooltip(i18n.getString("64bits")) }
+
+  val runtimeMemoryLabel = new Label("RuntimeMemory")
+  val runtimeMemoryTextField = new TextField(4) {
+    tooltip = Help.tooltip(i18n.getString("runtimeMemory"),
+      i18n.getString("runtimeMemoryEx"))
+  }
   val workerNodeMemoryLabel = new Label("Worker memory")
-  val workerNodeMemoryTextField = new TextField(4) { tooltip = Help.tooltip("Specify a minimal size of RAM for the worker nodes", "4Go") }
+  val workerNodeMemoryTextField = new TextField(4) {
+    tooltip = Help.tooltip(i18n.getString("workerNodeMemory"),
+      i18n.getString("workerNodeMemoryEx"))
+  }
   val maxCPUTimeLabel = new Label("Max CPU Time")
-  val maxCPUTimeTextField = new TextField(4)
+  val maxCPUTimeTextField = new TextField(4) {
+    tooltip = Help.tooltip(i18n.getString("maxCPUTime"),
+      i18n.getString("maxCPUTimeEx"))
+  }
   val otherRequirementLabel = new Label("Other")
-  val otherRequirementTextField = new TextField(16) { tooltip = Help.tooltip("Free requirement specification", "4Go") }
+  val otherRequirementTextField = new TextField(16) { tooltip = Help.tooltip(i18n.getString("other")) }
 
   contents += (new PluginPanel("wrap 2") {
     contents += (new Label("VO"), "gap para")
@@ -60,8 +83,6 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
     contents += (proxyCheckBox, "wrap")
     contents += (proxyURLLabel, "gap para")
     contents += proxyURLTextField
-    //contents+= (proxyUserLabel,"gap para")
-    //contents+= proxyUserTextField
   }, "wrap")
   contents += (new PluginPanel("wrap 2") {
     contents += (requirementCheckBox, "wrap")
@@ -80,7 +101,6 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
   vomsTextField.text = pud.voms
   bdiiTextField.text = pud.bdii
   proxyURLTextField.text = pud.proxyURL
-  //proxyUserTextField.text = pud.proxyUser
   proxyCheckBox.selected = pud.proxy
   requirementCheckBox.selected = pud.requirement
   architectureCheckBox.selected = pud.architecture64
