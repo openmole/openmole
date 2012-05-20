@@ -150,7 +150,7 @@ class GliteAuthentication(
           ctx.setAttribute(VOMSContext.MYPROXYUSERID, myProxy.userId)
           ctx.setAttribute(VOMSContext.MYPROXYPASS, myProxy.pass)
           ctx.setAttribute(VOMSContext.MYPROXYSERVER, myProxy.url)
-          ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME, myProxy.delegationTime)
+          ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME, GliteAuthentication.getTimeString)
           ctx.setAttribute(VOMSContext.VOMSDIR, "")
           init(ctx, false)
         }

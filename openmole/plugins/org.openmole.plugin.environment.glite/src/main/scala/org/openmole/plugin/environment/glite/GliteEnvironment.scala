@@ -35,7 +35,7 @@ object GliteEnvironment {
 
   val ProxyTime = new ConfigurationLocation("GliteEnvironment", "ProxyTime")
   val MyProxyTime = new ConfigurationLocation("GliteEnvironment", "MyProxyTime")
-  
+
   val FetchRessourcesTimeOut = new ConfigurationLocation("GliteEnvironment", "FetchRessourcesTimeOut")
   val CACertificatesSite = new ConfigurationLocation("GliteEnvironment", "CACertificatesSite")
 

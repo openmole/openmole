@@ -19,17 +19,21 @@ package org.openmole.plugin.environment.glite
 
 import org.ogf.saga.context.Context
 
-class PEMCertificate(val cypheredPassword: String, val certPath: String, val keyPath: String) extends Certificate(cypheredPassword) {
+class PEMCertificate(
+    val cypheredPassword: String,
+    val certificatePath: String,
+    val keyPath: String,
+    val proxyTime: String = GliteAuthentication.getTimeString) extends Certificate {
 
   def this(cypheredPassword: String) = this(cypheredPassword,
     System.getProperty("user.home") + "/.globus/usercert.pem",
     System.getProperty("user.home") + "/.globus/userkey.pem")
 
   override protected def _init(ctx: Context) = {
-    ctx.setAttribute(Context.USERCERT, certPath)
+    ctx.setAttribute(Context.USERCERT, certificatePath)
     ctx.setAttribute(Context.USERKEY, keyPath)
   }
 
-  override def toString = "pem certificate path = " + certPath + ", pem key path = " + keyPath
+  override def toString = "pem certificate path = " + certificatePath + ", pem key path = " + keyPath
 
 }

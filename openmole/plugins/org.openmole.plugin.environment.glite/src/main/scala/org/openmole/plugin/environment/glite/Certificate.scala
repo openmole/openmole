@@ -27,9 +27,10 @@ object Certificates extends Logger
 
 import Certificates._
 
-abstract class Certificate(cypheredPassword: String) extends GliteAuthenticationMethod {
+abstract class Certificate extends GliteAuthenticationMethod {
 
-  //@transient lazy val proxy = Workspace.newFile("proxy", ".x509")
+  def cypheredPassword: String
+  def proxyTime: String
 
   def password =
     if (cypheredPassword == null) ""
@@ -62,7 +63,7 @@ abstract class Certificate(cypheredPassword: String) extends GliteAuthentication
         true
     }
 
-    ctx.setAttribute(Context.LIFETIME, GliteAuthentication.getTimeString)
+    ctx.setAttribute(Context.LIFETIME, proxyTime)
     ctx.setAttribute(Context.USERPASS, password)
 
     if (!fqan.isEmpty) ctx.setAttribute(VOMSContext.USERFQAN, fqan)
