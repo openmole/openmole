@@ -65,7 +65,7 @@ class GliteJobService(
       val job = jobServiceCache.createJob(jobDescription)
       job.run
 
-      logger.fine(Source.fromFile(script).getLines.mkString)
+      //logger.fine(Source.fromFile(script).getLines.mkString)
 
       new GliteJob(JSAGAJob.id(job), outputFilePath, this, environment.authentication.expires)
     } finally script.delete
