@@ -22,8 +22,7 @@ import fr.in2p3.jsaga.adaptor.security.VOMSContext
 
 class P12Certificate(
     val cypheredPassword: String,
-    val p12CertificatePath: String,
-    val proxyTime: String = GliteAuthentication.getTimeString) extends Certificate {
+    val certificatePath: String) extends Certificate {
 
   def this(cypheredPassword: String) = this(cypheredPassword, System.getProperty("user.home") + "/.globus/certificate.p12")
 

@@ -22,8 +22,7 @@ import org.ogf.saga.context.Context
 class PEMCertificate(
     val cypheredPassword: String,
     val certificatePath: String,
-    val keyPath: String,
-    val proxyTime: String = GliteAuthentication.getTimeString) extends Certificate {
+    val keyPath: String) extends Certificate {
 
   def this(cypheredPassword: String) = this(cypheredPassword,
     System.getProperty("user.home") + "/.globus/usercert.pem",

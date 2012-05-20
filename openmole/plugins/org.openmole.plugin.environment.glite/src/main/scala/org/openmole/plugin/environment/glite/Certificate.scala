@@ -30,7 +30,7 @@ import Certificates._
 abstract class Certificate extends GliteAuthenticationMethod {
 
   def cypheredPassword: String
-  def proxyTime: String
+  def proxyTime: String = GliteAuthentication.getTimeString
 
   def password =
     if (cypheredPassword == null) ""
