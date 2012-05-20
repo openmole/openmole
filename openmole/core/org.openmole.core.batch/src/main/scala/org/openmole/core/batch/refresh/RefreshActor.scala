@@ -35,6 +35,7 @@ class RefreshActor(jobManager: ActorRef) extends Actor {
           val oldState = job.state
           job.state = bj.updateState
           if (job.state == DONE) {
+            //logger.fine(sj.communicationStorage.path.toStringURI(sj.communicationDirPath))
             jobManager ! GetResult(job, sj, bj.resultPath)
           } else {
             if (!job.state.isFinal) jobManager ! RefreshDelay(job, sj, bj, delay, oldState != job.state)

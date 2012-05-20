@@ -43,6 +43,7 @@ import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.pluginmanager.PluginManager
+import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.core.model.execution.ExecutionState
@@ -200,6 +201,12 @@ akka {
   def allJobServices: Iterable[JobService]
 
   def authentication: Authentication
+
+  @transient lazy val serializedAuthentication = {
+    val authenticationFile = Workspace.newFile("environmentAuthentication", ".tar")
+    val authReplication = SerializerService.serializeAndArchiveFiles(authentication, authenticationFile)
+    authenticationFile
+  }
 
   def selectAJobService: (JobService, AccessToken) = jobServices.selectAService
 

@@ -26,7 +26,7 @@ import GliteAuthentication._
 
 class GlobusProxyFile(val proxyFile: String) extends GliteAuthenticationMethod {
 
-  override def init(authentication: GliteAuthentication): (Context, Option[Int]) = {
+  override def init(authentication: GliteAuthentication): (Context, Boolean) = {
     val ctx = JSAGASessionService.createContext
 
     //logger.fine(proxyFile.getCanonicalPath + " " + proxyFile.exists)
@@ -37,7 +37,7 @@ class GlobusProxyFile(val proxyFile: String) extends GliteAuthenticationMethod {
 
     //Updater.delay(new ProxyChecker(ctx, None, new WeakReference(authentication)), ExecutorType.OWN, authentication.reloadProxyOnWorkerNodeInterval)
 
-    (ctx, None)
+    (ctx, true)
   }
 
   override def toString = "Globus proxy file path = " + proxyFile

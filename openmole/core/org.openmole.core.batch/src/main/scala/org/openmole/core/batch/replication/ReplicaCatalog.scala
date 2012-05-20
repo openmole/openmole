@@ -206,8 +206,8 @@ object ReplicaCatalog extends Logger {
 
   def clean(replica: Replica) = {
     logger.fine("Cleaning replica " + replica.toString)
-    URIFile.clean(new URIFile(replica.destination))
     remove(replica)
+    URIFile.clean(new URIFile(replica.destination))
   }
 
   def cleanAll = {

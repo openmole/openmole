@@ -24,7 +24,7 @@ import fr.in2p3.jsaga.adaptor.security.VOMSContext
 
 class VOMSProxyFile(val proxyFile: String) extends GliteAuthenticationMethod {
 
-  def init(authentication: GliteAuthentication): (Context, Option[Int]) = {
+  def init(authentication: GliteAuthentication): (Context, Boolean) = {
     val ctx = JSAGASessionService.createContext
 
     ctx.setAttribute(Context.TYPE, "VOMS")
@@ -32,7 +32,7 @@ class VOMSProxyFile(val proxyFile: String) extends GliteAuthenticationMethod {
     ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
     ctx.setAttribute(VOMSContext.VOMSDIR, "")
     ctx.setAttribute(VOMSContext.PROXYTYPE, "RFC820")
-    (ctx, None)
+    (ctx, true)
   }
 
   override def toString = "VOMS proxy file path = " + proxyFile

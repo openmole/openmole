@@ -38,7 +38,6 @@ import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import collection.JavaConversions._
 import scala.collection.immutable.TreeMap
-import scala.io.Source
 
 object SerializerService {
 
@@ -65,9 +64,9 @@ object SerializerService {
     fileInfoFile.delete
 
     val fileReplacement =
-      new TreeMap[File, File] ++ extractDir.listFiles.filter(f ⇒ fi.contains(f.getName)).map {
-        f ⇒
-          val (file, isDirectory) = fi(f.getName)
+      new TreeMap[File, File] ++ fi.map {
+        case (name, (file, isDirectory)) ⇒
+          val f = new File(extractDir, name)
           file ->
             (if (isDirectory) {
               val extractedDir = Workspace.newDir("extractionDir")
@@ -76,6 +75,8 @@ object SerializerService {
               extractedDir
             } else f)
       }
+
+    //println("Replacement: " + fileReplacement)
 
     val contentFile = new File(extractDir, content)
     val obj = deserializeReplaceFiles[T](contentFile, fileReplacement)

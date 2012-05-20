@@ -103,7 +103,7 @@ public class SimExplorer implements IApplication {
             Authentication authentication = null;
             if (cmdLine.hasOption("a")) {
                 File envFile = new File(cmdLine.getOptionValue("a"));
-                authentication = SerializerService.deserialize(envFile);
+                authentication = SerializerService.deserializeAndExtractFiles(envFile);
                 authentication.initialize(false);
             }
             //if(!debug) envFile.delete();

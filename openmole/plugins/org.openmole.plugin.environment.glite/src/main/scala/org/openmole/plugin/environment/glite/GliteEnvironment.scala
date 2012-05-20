@@ -33,9 +33,9 @@ import scala.collection.JavaConversions._
 
 object GliteEnvironment {
 
-  val TimeLocation = new ConfigurationLocation("GliteEnvironment", "Time")
+  val ProxyTime = new ConfigurationLocation("GliteEnvironment", "ProxyTime")
 
-  val FetchRessourcesTimeOutLocation = new ConfigurationLocation("GliteEnvironment", "FetchRessourcesTimeOut")
+  val FetchRessourcesTimeOut = new ConfigurationLocation("GliteEnvironment", "FetchRessourcesTimeOut")
   val CACertificatesSite = new ConfigurationLocation("GliteEnvironment", "CACertificatesSite")
 
   val OverSubmissionInterval = new ConfigurationLocation("GliteEnvironment", "OverSubmissionInterval")
@@ -45,22 +45,27 @@ object GliteEnvironment {
   //val OverSubmissionGridSizeRatio = new ConfigurationLocation("GliteEnvironment", "OverSubmissionGridSizeRatio")
   val OverSubmissionSamplingWindowFactor = new ConfigurationLocation("GliteEnvironment", "OverSubmissionSamplingWindowFactor")
 
-  val LocalThreadsBySELocation = new ConfigurationLocation("GliteEnvironment", "LocalThreadsBySE")
-  val LocalThreadsByWMSLocation = new ConfigurationLocation("GliteEnvironment", "LocalThreadsByWMS")
+  val LocalThreadsBySE = new ConfigurationLocation("GliteEnvironment", "LocalThreadsBySE")
+  val LocalThreadsByWMS = new ConfigurationLocation("GliteEnvironment", "LocalThreadsByWMS")
   val ProxyRenewalRatio = new ConfigurationLocation("GliteEnvironment", "ProxyRenewalRatio")
+  val MinProxyRenewal = new ConfigurationLocation("GliteEnvironment", "MinProxyRenewal")
   val JobShakingInterval = new ConfigurationLocation("GliteEnvironment", "JobShakingInterval")
   val JobShakingProbabilitySubmitted = new ConfigurationLocation("GliteEnvironment", "JobShakingProbabilitySubmitted")
   val JobShakingProbabilityQueued = new ConfigurationLocation("GliteEnvironment", "JobShakingProbabilityQueued")
 
-  Workspace += (TimeLocation, "PT24H")
+  val LCGCPTimeOut = new ConfigurationLocation("GliteEnvironment", "RuntimeCopyOnWNTimeOut")
 
-  Workspace += (FetchRessourcesTimeOutLocation, "PT5M")
+  Workspace += (ProxyTime, "PT24H")
+
+  Workspace += (FetchRessourcesTimeOut, "PT5M")
   Workspace += (CACertificatesSite, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/")
 
-  Workspace += (LocalThreadsBySELocation, "10")
-  Workspace += (LocalThreadsByWMSLocation, "10")
+  Workspace += (LocalThreadsBySE, "10")
+  Workspace += (LocalThreadsByWMS, "10")
 
   Workspace += (ProxyRenewalRatio, "0.2")
+
+  Workspace += (MinProxyRenewal, "PT5M")
 
   Workspace += (OverSubmissionNbSampling, "10")
   Workspace += (OverSubmissionSamplingWindowFactor, "5")
@@ -73,6 +78,8 @@ object GliteEnvironment {
   Workspace += (JobShakingInterval, "PT5M")
   Workspace += (JobShakingProbabilitySubmitted, "0.1")
   Workspace += (JobShakingProbabilityQueued, "0.01")
+
+  Workspace += (LCGCPTimeOut, "PT5M")
 }
 
 class GliteEnvironment(
@@ -86,13 +93,13 @@ class GliteEnvironment(
 
   import GliteEnvironment._
 
-  val threadsBySE = Workspace.preferenceAsInt(LocalThreadsBySELocation)
-  val threadsByWMS = Workspace.preferenceAsInt(LocalThreadsByWMSLocation)
+  val threadsBySE = Workspace.preferenceAsInt(LocalThreadsBySE)
+  val threadsByWMS = Workspace.preferenceAsInt(LocalThreadsByWMS)
 
   Updater.registerForUpdate(new OverSubmissionAgent(this))
 
   override def allJobServices: Iterable[GliteJobService] = {
-    val jss = getBDII.queryWMSURIs(voName, Workspace.preferenceAsDurationInMs(FetchRessourcesTimeOutLocation).toInt)
+    val jss = getBDII.queryWMSURIs(voName, Workspace.preferenceAsDurationInMs(FetchRessourcesTimeOut).toInt)
 
     val jobServices = jss.flatMap {
       js ⇒
@@ -112,7 +119,7 @@ class GliteEnvironment(
   }
 
   override def allStorages = {
-    val stors = getBDII.querySRMURIs(voName, Workspace.preferenceAsDurationInMs(GliteEnvironment.FetchRessourcesTimeOutLocation).toInt)
+    val stors = getBDII.querySRMURIs(voName, Workspace.preferenceAsDurationInMs(GliteEnvironment.FetchRessourcesTimeOut).toInt)
     stors.map { new PersistentStorage(this, _, threadsBySE) }
   }
 

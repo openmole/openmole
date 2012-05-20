@@ -20,12 +20,18 @@ package org.openmole.plugin.environment.glite
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.jsaga.JSAGAJob
+import java.io.File
 import org.openmole.core.batch.environment.ShouldBeKilledException
 import org.openmole.core.model.execution.ExecutionState._
 import fr.in2p3.jsaga.adaptor.job.SubState
 import org.openmole.core.model.execution.ExecutionState
+import scala.io.Source
 
-class GliteJob(val jobId: String, resultPath: String, jobService: GliteJobService, proxyExpired: Long) extends JSAGAJob(resultPath, jobService) {
+class GliteJob(
+    val jobId: String,
+    resultPath: String,
+    jobService: GliteJobService,
+    proxyExpired: Long) extends JSAGAJob(resultPath, jobService) {
 
   var lastUpdate = System.currentTimeMillis
 

@@ -17,6 +17,7 @@
 
 package org.openmole.core.batch.environment
 
+import java.io.File
 import org.openmole.core.batch.message.FileMessage
 
 class Runtime(

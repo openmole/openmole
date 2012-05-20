@@ -21,6 +21,6 @@ import org.ogf.saga.context.Context
 import org.openmole.core.batch.environment.AuthenticationMethod
 
 trait GliteAuthenticationMethod extends AuthenticationMethod {
-  def init(authentication: GliteAuthentication): (Context, Option[Int])
+  def init(authentication: GliteAuthentication): (Context, Boolean)
   override def method = classOf[GliteAuthenticationMethod]
 }

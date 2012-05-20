@@ -23,16 +23,14 @@ import org.openmole.misc.updater.IUpdatableWithVariableDelay
 import org.openmole.misc.workspace.Workspace
 import scala.ref.WeakReference
 
-object ProxyChecker extends Logger {
-  val defaultCheckTime = 30 * 1000 * 60
-}
+object ProxyChecker extends Logger
 
 import ProxyChecker._
 
 class ProxyChecker(
     context: Context,
     authentication: WeakReference[GliteAuthentication],
-    expires: Option[Int] = None) extends IUpdatableWithVariableDelay {
+    expires: Boolean) extends IUpdatableWithVariableDelay {
 
   override def update: Boolean =
     authentication.get match {
@@ -47,13 +45,17 @@ class ProxyChecker(
 
   def delay =
     try {
-      val interval = (context.getAttribute(Context.LIFETIME).toLong * 1000 * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong
+      val interval =
+        math.max(
+          (context.getAttribute(Context.LIFETIME).toLong * 1000 * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong,
+          Workspace.preferenceAsDurationInMs(GliteEnvironment.MinProxyRenewal))
+
       logger.fine("Renew proxy in " + interval)
       interval
     } catch {
       case e ⇒
         logger.log(SEVERE, "Error while getting the check interval", e)
-        defaultCheckTime
+        Workspace.preferenceAsDurationInMs(GliteEnvironment.MinProxyRenewal)
     }
 
   /*{

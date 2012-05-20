@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.environment.glite
 
+import fr.in2p3.jsaga.adaptor.security.VOMSContext
 import java.io.File
 import java.io.OutputStream
 import java.io.PrintStream
@@ -39,11 +40,7 @@ import org.openmole.misc.tools.io.FileUtil._
 import scala.collection.JavaConversions._
 import scala.io.Source
 
-object GliteJobService extends Logger {
-  val LCGCPTimeOut = new ConfigurationLocation("GliteJobService", "RuntimeCopyOnWNTimeOut")
-
-  Workspace += (LCGCPTimeOut, "PT5M")
-}
+object GliteJobService extends Logger
 
 class GliteJobService(
     jobServiceURI: URI,
@@ -68,7 +65,7 @@ class GliteJobService(
       val job = jobServiceCache.createJob(jobDescription)
       job.run
 
-      //logger.fine(Source.fromFile(script).getLines.mkString)
+      logger.fine(Source.fromFile(script).getLines.mkString)
 
       new GliteJob(JSAGAJob.id(job), outputFilePath, this, environment.authentication.expires)
     } finally script.delete
@@ -115,7 +112,8 @@ class GliteJobService(
     writter.print(inputFilePath)
     writter.print(" -o ")
     writter.print(resultPath)
-    writter.print(" -w $CUR ; cd .. ; rm -rf $CUR")
+    writter.print(" -w $CUR") // 2>err.txt ; lcg-cp file:$PWD/err.txt " + path.toStringURI("err.txt")) 
+    writter.print("; cd .. ; rm -rf $CUR")
   }
 
   private def mkLcgCpGunZipCmd(env: GliteEnvironment, from: String, to: String) = {
@@ -142,13 +140,16 @@ class GliteJobService(
     builder.toString
   }
 
-  private def getTimeOut = Workspace.preferenceAsDurationInS(GliteJobService.LCGCPTimeOut).toString
+  private def getTimeOut = Workspace.preferenceAsDurationInS(GliteEnvironment.LCGCPTimeOut).toString
 
   protected def buildJobDescription(runtime: Runtime, script: File, attributes: Map[String, String]) = {
     val description = JSAGAJobBuilder.description(attributes)
 
     description.setAttribute(JobDescription.EXECUTABLE, "/bin/bash")
     description.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](script.getName))
+
+    /*description.setAttribute(JobDescription.OUTPUT, "out.txt")
+    description.setAttribute(JobDescription.ERROR, "err.txt")*/
 
     description.setVectorAttribute(JobDescription.FILETRANSFER, Array[String]("file:/" +
       { if (script.getAbsolutePath.startsWith("/")) script.getAbsolutePath.tail else script.getAbsolutePath } +
@@ -165,10 +166,11 @@ class GliteJobService(
       case None ⇒
     }
 
-    /*environment.authentication.myProxy match {
-      case Some(myProxy) => description.setAttribute("MyProxyServer", myProxy.url)
-      case None =>
-    }*/
+    environment.authentication.myProxy match {
+      case Some(myProxy) ⇒
+        description.setAttribute(VOMSContext.MYPROXYSERVER, myProxy.url)
+      case None ⇒
+    }
 
     description
   }

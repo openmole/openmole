@@ -18,12 +18,14 @@
 package org.openmole.plugin.environment.glite
 
 import org.ogf.saga.context.Context
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
 import fr.in2p3.jsaga.adaptor.security.VOMSContext
 import org.openmole.core.batch.jsaga.JSAGASessionService
-import GliteAuthentication._
 
-import GliteAuthentication._
+object Certificates extends Logger
+
+import Certificates._
 
 abstract class Certificate(cypheredPassword: String) extends GliteAuthenticationMethod {
 
@@ -46,15 +48,21 @@ abstract class Certificate(cypheredPassword: String) extends GliteAuthentication
         ctx.setAttribute(Context.TYPE, "VOMSMyProxy")
         ctx.setAttribute(VOMSContext.MYPROXYSERVER, proxy.url)
         ctx.setAttribute(VOMSContext.MYPROXYUSERID, proxy.userId)
+        ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME, proxy.delegationTime)
         ctx.setAttribute(VOMSContext.MYPROXYPASS, proxy.pass)
+        ctx.setAttribute("MyProxyDN", proxy.userId)
+        logger.fine("Initialize my proxy " + proxy.url + " for " + proxy.userId)
+
         //ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME, getTimeString)
-        None
+        //None
+        false
       case None ⇒
         ctx.setAttribute(Context.TYPE, "VOMS")
-        Some(inMs(getTimeString))
+        //Some(inMs(getTimeString))
+        true
     }
 
-    ctx.setAttribute(Context.LIFETIME, getTimeString)
+    ctx.setAttribute(Context.LIFETIME, GliteAuthentication.getTimeString)
     ctx.setAttribute(Context.USERPASS, password)
 
     if (!fqan.isEmpty) ctx.setAttribute(VOMSContext.USERFQAN, fqan)

@@ -183,13 +183,14 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     val authenticationURIFile = new GZURIFile(communicationDir.newFileInDir("authentication", ".xml"))
     val authenticationFile = Workspace.newFile("environmentAuthentication", ".xml")
 
-    val authReplication = try {
-      SerializerService.serialize(communicationStorage.environment.authentication, authenticationFile)
-      signalUpload(URIFile.copy(authenticationFile, authenticationURIFile, token), authenticationFile, communicationStorage)
-      new FileMessage(authenticationURIFile.URI.getPath, authenticationFile.hash.toString)
-    } finally authenticationFile.delete
+    val authReplication = new FileMessage(toReplicatedFile(job, environment.serializedAuthentication, communicationStorage, token))
 
-    new Runtime(runtimeFileMessage, environmentPluginPath, authReplication, jvmLinuxI386FileMessage, jvmLinuxX64FileMessage)
+    new Runtime(
+      runtimeFileMessage,
+      environmentPluginPath,
+      authReplication,
+      jvmLinuxI386FileMessage,
+      jvmLinuxX64FileMessage)
   }
 
   def createExecutionMessage(
