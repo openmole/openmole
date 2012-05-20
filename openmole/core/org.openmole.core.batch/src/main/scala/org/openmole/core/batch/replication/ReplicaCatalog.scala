@@ -162,12 +162,12 @@ object ReplicaCatalog extends Logger {
   private def checkExists(replica: Replica, src: File, srcPath: File, hash: String, authenticationKey: String, storage: Storage, token: AccessToken) =
     if (System.currentTimeMillis > (replica.lastCheckExists + Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckFileExistsInterval))) {
       if (replica.destinationURIFile.exists(token)) {
-        remove(replica)
+        removeNoLock(replica)
         val toInsert = new Replica(replica.source, replica.storageDescriptionString, replica.hash, replica.authenticationKey, replica.destination, System.currentTimeMillis)
         insert(toInsert)
         toInsert
       } else {
-        remove(replica)
+        removeNoLock(replica)
         uploadAndInsert(src, srcPath, hash, authenticationKey, storage, token)
       }
     } else replica
@@ -200,14 +200,25 @@ object ReplicaCatalog extends Logger {
     }
 
   def remove(replica: Replica) = withSemaphore(key(replica)) {
+    removeNoLock(replica)
+  }
+
+  private def removeNoLock(replica: Replica) = {
     try objectServer.delete(replica)
     finally objectServer.commit
   }
 
-  def clean(replica: Replica) = {
+  private def containsDestination(destination: String) = {
+    val query = objectServer.query
+    query.descend("_destination").constrain(destination)
+    !query.execute.isEmpty
+  }
+
+  def clean(replica: Replica) = withSemaphore(key(replica)) {
     logger.fine("Cleaning replica " + replica.toString)
-    remove(replica)
-    URIFile.clean(new URIFile(replica.destination))
+    removeNoLock(replica)
+
+    if (!containsDestination(replica.destination)) URIFile.clean(new URIFile(replica.destination))
   }
 
   def cleanAll = {
@@ -224,6 +235,7 @@ object ReplicaCatalog extends Logger {
     configuration.common.objectClass(classOf[Replica]).objectField("_source").indexed(true)
     configuration.common.objectClass(classOf[Replica]).objectField("_storageDescription").indexed(true)
     configuration.common.objectClass(classOf[Replica]).objectField("_authenticationKey").indexed(true)
+    configuration.common.objectClass(classOf[Replica]).objectField("_destination").indexed(true)
 
     configuration
   }
