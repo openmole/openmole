@@ -34,7 +34,8 @@ import scala.collection.JavaConversions._
 object GliteEnvironment {
 
   val ProxyTime = new ConfigurationLocation("GliteEnvironment", "ProxyTime")
-
+  val MyProxyTime = new ConfigurationLocation("GliteEnvironment", "MyProxyTime")
+  
   val FetchRessourcesTimeOut = new ConfigurationLocation("GliteEnvironment", "FetchRessourcesTimeOut")
   val CACertificatesSite = new ConfigurationLocation("GliteEnvironment", "CACertificatesSite")
 
@@ -42,7 +43,6 @@ object GliteEnvironment {
   val OverSubmissionMinNumberOfJob = new ConfigurationLocation("GliteEnvironment", "OverSubmissionMinNumberOfJob")
   val OverSubmissionNumberOfJobUnderMin = new ConfigurationLocation("GliteEnvironment", "OverSubmissionNumberOfJobUnderMin")
   val OverSubmissionNbSampling = new ConfigurationLocation("GliteEnvironment", "OverSubmissionNbSampling")
-  //val OverSubmissionGridSizeRatio = new ConfigurationLocation("GliteEnvironment", "OverSubmissionGridSizeRatio")
   val OverSubmissionSamplingWindowFactor = new ConfigurationLocation("GliteEnvironment", "OverSubmissionSamplingWindowFactor")
 
   val LocalThreadsBySE = new ConfigurationLocation("GliteEnvironment", "LocalThreadsBySE")
@@ -56,6 +56,7 @@ object GliteEnvironment {
   val LCGCPTimeOut = new ConfigurationLocation("GliteEnvironment", "RuntimeCopyOnWNTimeOut")
 
   Workspace += (ProxyTime, "PT24H")
+  Workspace += (MyProxyTime, "P7D")
 
   Workspace += (FetchRessourcesTimeOut, "PT5M")
   Workspace += (CACertificatesSite, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/")

@@ -82,15 +82,15 @@ object GliteAuthentication extends Logger {
         try {
           val links = Iterator.continually(tis.getNextEntry).drop(1).takeWhile(_ != null).flatMap {
             tarEntry ⇒
-            val destForName = new File(dir, tarEntry.getName)
-            val dest = new File(dir, destForName.getName)
+              val destForName = new File(dir, tarEntry.getName)
+              val dest = new File(dir, destForName.getName)
 
-            if (dest.exists) dest.delete
-            if (!tarEntry.getLinkName.isEmpty) Some(dest -> tarEntry.getLinkName)
-            else {
-              tis.copy(dest)
-              None
-            }
+              if (dest.exists) dest.delete
+              if (!tarEntry.getLinkName.isEmpty) Some(dest -> tarEntry.getLinkName)
+              else {
+                tis.copy(dest)
+                None
+              }
           }.toList
 
           links.foreach {
@@ -114,17 +114,17 @@ object GliteAuthentication extends Logger {
 
   def inMs(time: String) =
     try UDuration.toInt(time) * 1000
-  catch {
-    case (ex: ParseException) ⇒ throw new UserBadDataError(ex)
-  }
+    catch {
+      case (ex: ParseException) ⇒ throw new UserBadDataError(ex)
+    }
 
 }
 
 class GliteAuthentication(
-  val voName: String,
-  val vomsURL: String,
-  val myProxy: Option[MyProxy],
-  val fqan: String) extends Authentication {
+    val voName: String,
+    val vomsURL: String,
+    val myProxy: Option[MyProxy],
+    val fqan: String) extends Authentication {
 
   import GliteAuthentication.{ logger, addContext }
 
@@ -140,20 +140,20 @@ class GliteAuthentication(
     if (!local) {
       val globusProxy =
         if (System.getenv.containsKey("X509_USER_PROXY") && new File(System.getenv.get("X509_USER_PROXY")).exists) System.getenv.get("X509_USER_PROXY")
-      else throw new InternalProcessingError("The X509_USER_PROXY environment variable is not defined or point to an inexisting file.")
+        else throw new InternalProcessingError("The X509_USER_PROXY environment variable is not defined or point to an inexisting file.")
       myProxy match {
         case Some(myProxy) ⇒ {
-            val ctx = JSAGASessionService.createContext
-            ctx.setAttribute(Context.TYPE, "VOMSMyProxy")
-            ctx.setAttribute(Context.USERPROXY, globusProxy)
-            ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
-            ctx.setAttribute(VOMSContext.MYPROXYUSERID, myProxy.userId)
-            ctx.setAttribute(VOMSContext.MYPROXYPASS, myProxy.pass)
-            ctx.setAttribute(VOMSContext.MYPROXYSERVER, myProxy.url)
-            ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME, myProxy.delegationTime)
-            ctx.setAttribute(VOMSContext.VOMSDIR, "")
-            init(ctx, false)
-          }
+          val ctx = JSAGASessionService.createContext
+          ctx.setAttribute(Context.TYPE, "VOMSMyProxy")
+          ctx.setAttribute(Context.USERPROXY, globusProxy)
+          ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
+          ctx.setAttribute(VOMSContext.MYPROXYUSERID, myProxy.userId)
+          ctx.setAttribute(VOMSContext.MYPROXYPASS, myProxy.pass)
+          ctx.setAttribute(VOMSContext.MYPROXYSERVER, myProxy.url)
+          ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME, myProxy.delegationTime)
+          ctx.setAttribute(VOMSContext.VOMSDIR, "")
+          init(ctx, false)
+        }
         case None ⇒
           val (ctx, expires) = new GlobusProxyFile(globusProxy).init(this)
           init(ctx, expires)
@@ -164,7 +164,7 @@ class GliteAuthentication(
         case None ⇒ throw new UserBadDataError("Preferences not set for grid authentication")
       }
 
-      val (ctx, expires) = auth.init(this) 
+      val (ctx, expires) = auth.init(this)
       init(ctx, expires)
     }
 
