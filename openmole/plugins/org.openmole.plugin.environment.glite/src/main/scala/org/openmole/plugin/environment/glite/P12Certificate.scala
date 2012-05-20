@@ -27,9 +27,9 @@ class P12Certificate(
   def this(cypheredPassword: String) = this(cypheredPassword, System.getProperty("user.home") + "/.globus/certificate.p12")
 
   override protected def _init(ctx: Context) = {
-    ctx.setAttribute(VOMSContext.USERCERTKEY, p12CertificatePath)
+    ctx.setAttribute(VOMSContext.USERCERTKEY, certificatePath)
   }
 
-  override def toString = "P12Path = " + p12CertificatePath
+  override def toString = "P12Path = " + certificatePath
 
 }
