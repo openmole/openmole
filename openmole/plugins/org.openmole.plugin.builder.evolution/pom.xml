@@ -5,7 +5,7 @@
     <parent>
         <artifactId>plugins</artifactId>
         <groupId>org.openmole.core</groupId>
-        <version>0.5-RC2</version>
+        <version>0.5-RC3-SNAPSHOT</version>
     </parent>
     
     <artifactId>org.openmole.plugin.builder.evolution</artifactId>
