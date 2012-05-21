@@ -18,6 +18,7 @@
 package org.openmole.ui.console
 
 import java.util.concurrent.atomic.AtomicInteger
+import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.environment.AuthenticationMethod
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
@@ -29,6 +30,7 @@ import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.IExplorationTransition
 import org.openmole.misc.workspace.Workspace
+import scala.collection.mutable.HashMap
 
 class Command {
 
@@ -37,7 +39,7 @@ class Command {
     println("Number of threads: " + environment.nbThreads)
   }
 
-  def print(environment: BatchEnvironment): Unit = {
+  def print(environment: BatchEnvironment, v: Int = 0): Unit = {
 
     val accounting = new Array[AtomicInteger](ExecutionState.values.size)
     val executionJobRegistry = environment.jobRegistry
@@ -49,11 +51,19 @@ class Command {
     for (executionJob ← executionJobRegistry.allExecutionJobs) {
       accounting(executionJob.state.id).incrementAndGet
     }
-
+    
     for (state ← ExecutionState.values) {
-      System.out.println(state.toString + ": " + accounting(state.id))
+      println(state.toString + ": " + accounting(state.id))
+    }  
+    
+    if(v > 0) { 
+      val js = new HashMap[ServiceDescription, AtomicInteger]
+      for(
+        ej <- executionJobRegistry.allExecutionJobs ;
+        bj <- ej.batchJob
+      ) js.getOrElseUpdate(bj.jobServiceDescription, new AtomicInteger).incrementAndGet
+      for((js, i) <- js) println(js + ": " + i.get)
     }
-
   }
 
   def structure(mole: IMole): Unit = {
