@@ -168,7 +168,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.ide</groupId>
-            <artifactId>org.openmole.ide.plugin.hook.filemanagement</artifactId>
+            <artifactId>org.openmole.ide.plugin.hook.file</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>

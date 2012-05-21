@@ -51,18 +51,18 @@ class Command {
     for (executionJob ← executionJobRegistry.allExecutionJobs) {
       accounting(executionJob.state.id).incrementAndGet
     }
-    
+
     for (state ← ExecutionState.values) {
       println(state.toString + ": " + accounting(state.id))
-    }  
-    
-    if(v > 0) { 
+    }
+
+    if (v > 0) {
       val js = new HashMap[ServiceDescription, AtomicInteger]
-      for(
-        ej <- executionJobRegistry.allExecutionJobs ;
-        bj <- ej.batchJob
+      for (
+        ej ← executionJobRegistry.allExecutionJobs;
+        bj ← ej.batchJob
       ) js.getOrElseUpdate(bj.jobServiceDescription, new AtomicInteger).incrementAndGet
-      for((js, i) <- js) println(js + ": " + i.get)
+      for ((js, i) ← js) println(js + ": " + i.get)
     }
   }
 

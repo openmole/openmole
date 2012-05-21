@@ -55,8 +55,8 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
 
   val workspaceCheckBox = new CheckBox("Embed Workspace") {
     selected = workspaceEmbedded
-    tooltip = Help.tooltip(i18n.getString("embedWorspace"),
-      i18n.getString("embedWorspaceEx"))
+    tooltip = Help.tooltip(i18n.getString("embedWorkspace"),
+      i18n.getString("embedWorkspaceEx"))
   }
 
   val launchingCommandTextArea = new TextArea(lauchingCommands) {
