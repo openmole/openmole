@@ -56,6 +56,7 @@ abstract class BatchJob(val jobServiceDescription: ServiceDescription) {
       state match {
         case SUBMITTED ⇒ JobServiceControl.qualityControl(jobServiceDescription).incrementSubmitted
         case RUNNING ⇒ JobServiceControl.qualityControl(jobServiceDescription).incrementRunning
+        case DONE ⇒ JobServiceControl.qualityControl(jobServiceDescription).incrementDone
         case _ ⇒
       }
 

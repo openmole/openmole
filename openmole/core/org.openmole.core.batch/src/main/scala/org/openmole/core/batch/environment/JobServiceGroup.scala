@@ -36,8 +36,8 @@ class JobServiceGroup(val environment: BatchEnvironment, resources: Iterable[Job
 
   resources.foreach {
     service ⇒
-      val usageControl = UsageControl.get(service.description)
-      EventDispatcher.listen(usageControl, new BatchRessourceGroupAdapterUsage, classOf[UsageControl.ResourceReleased])
+    val usageControl = UsageControl.get(service.description)
+    EventDispatcher.listen(usageControl, new BatchRessourceGroupAdapterUsage, classOf[UsageControl.ResourceReleased])
   }
 
   @transient lazy val waiting = new Semaphore(0)
@@ -56,20 +56,26 @@ class JobServiceGroup(val environment: BatchEnvironment, resources: Iterable[Job
       var ret: Option[(JobService, AccessToken)] = None
 
       do {
-        val notLoaded = resources.flatMap {
-          cur ⇒
-            UsageControl.get(cur.description).tryGetToken match {
-              case None ⇒ None
-              case Some(token) ⇒
-                val quality = JobServiceControl.qualityControl(cur.description)
-                val nbSubmitted = quality.submitted
-                val fitness = orMin(
-                  if (quality.submitted > 0) math.pow((quality.runnig.toDouble / quality.submitted) * quality.successRate, 2)
-                  else math.pow(quality.successRate, 3))
-                Some((cur, token, fitness))
-            }
-        }
-
+        val usable = 
+          for(
+            r <- resources;
+            token <- UsageControl.get(r.description).tryGetToken
+          ) yield (r, token, JobServiceControl.qualityControl(r.description))
+       
+        val maxDone = usable.map{ case (_, _ , q) => q.done }.max.toDouble
+        
+        val notLoaded = 
+          for((r, t, q) <- usable) yield {
+            val nbSubmitted = q.submitted
+            val maxDoneRatio = math.pow(if(maxDone == 0) 1 else q.done / maxDone, 2)
+            val fitness = orMin (
+              if (q.submitted > 0) 
+                math.pow((q.runnig.toDouble / q.submitted) * q.successRate * maxDoneRatio, 2)
+              else math.pow(q.successRate, 3)
+            )
+            (r, t, fitness)
+          }
+        
         if (!notLoaded.isEmpty) {
           var selected = Random.default.nextDouble * notLoaded.map { _._3 }.sum
 
