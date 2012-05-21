@@ -10,7 +10,7 @@
     <parent>
         <groupId>org.openmole.ide</groupId>
 	<artifactId>misc</artifactId>    
-    	<version>0.5-RC2-SNAPSHOT</version>
+    	<version>0.5-RC3-SNAPSHOT</version>
     </parent>
 
     <artifactId>org.openmole.ide.misc.tools</artifactId>

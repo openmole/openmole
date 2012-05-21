@@ -77,11 +77,11 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
     case Some((i: Int, x: P12Certificate)) ⇒
       initButton = Some(p12Button)
       passString = Workspace.decrypt(x.cypheredPassword)
-      p12TextField.text = x.p12CertPath
+      p12TextField.text = x.certificatePath
       addP12
     case Some((i: Int, x: PEMCertificate)) ⇒
       initButton = Some(pemButton)
-      pem1TextField.text = x.certPath
+      pem1TextField.text = x.certificatePath
       pem2TextField.text = x.keyPath
       passString = Workspace.decrypt(x.cypheredPassword)
       addPem
