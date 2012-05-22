@@ -4,7 +4,7 @@
     <parent>
         <artifactId>misc</artifactId>
         <groupId>org.openmole.core</groupId>
-        <version>0.5-RC3-SNAPSHOT</version>
+        <version>0.5-RC3</version>
     </parent>
 
     <artifactId>org.openmole.misc.pluginmanager</artifactId>
