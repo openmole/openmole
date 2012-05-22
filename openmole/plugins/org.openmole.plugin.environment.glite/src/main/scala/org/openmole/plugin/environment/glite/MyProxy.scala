@@ -22,6 +22,6 @@ import org.openmole.misc.workspace.Workspace
 
 class MyProxy(
   val url: String,
-  val delegationTime: String = Workspace.preference(GliteEnvironment.MyProxyTime),
+  val time: String = Workspace.preference(GliteEnvironment.MyProxyTime),
   val userId: String = UUID.randomUUID.toString,
   val pass: String = UUID.randomUUID.toString)

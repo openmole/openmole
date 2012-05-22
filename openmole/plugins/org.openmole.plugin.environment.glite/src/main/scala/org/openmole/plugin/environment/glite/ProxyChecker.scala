@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.environment.glite
 
+import fr.in2p3.jsaga.adaptor.security.VOMSContext
 import org.ogf.saga.context.Context
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.updater.IUpdatableWithVariableDelay
@@ -45,9 +46,12 @@ class ProxyChecker(
 
   def delay =
     try {
+      val remainingTime =
+        (if (context.getAttribute(Context.TYPE) == "VOMSMyProxy") context.getAttribute(VOMSContext.DELEGATIONLIFETIME).toLong
+        else context.getAttribute(Context.LIFETIME).toLong) * 1000
       val interval =
         math.max(
-          (context.getAttribute(Context.LIFETIME).toLong * 1000 * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong,
+          (remainingTime * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong,
           Workspace.preferenceAsDurationInMs(GliteEnvironment.MinProxyRenewal))
 
       logger.fine("Renew proxy in " + interval)
@@ -57,15 +61,5 @@ class ProxyChecker(
         logger.log(SEVERE, "Error while getting the check interval", e)
         Workspace.preferenceAsDurationInMs(GliteEnvironment.MinProxyRenewal)
     }
-
-  /*{
-    val interval = lifeTime match {
-      case Some(time) => time
-      case None => context.getAttribute(Context.LIFETIME).toLong
-    } 
-    val renew = (interval * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio) * 1000).toLong
-    logger.fine("Renew proxy in " + renew)
-    renew
-  }*/
 
 }

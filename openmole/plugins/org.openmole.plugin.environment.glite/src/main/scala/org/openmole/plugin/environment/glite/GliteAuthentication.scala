@@ -173,7 +173,6 @@ class GliteAuthentication(
   def reinit(context: Context, expires: Boolean) = {
     addContext(context)
     if (expires) _proxyExpiresTime = System.currentTimeMillis + context.getAttribute(Context.LIFETIME).toLong * 1000
-    logger.fine("Reinit proxy " + context.getAttribute(Context.TYPE) + ", life time " + context.getAttribute(Context.LIFETIME))
   }
 
   def init(context: Context, expires: Boolean) = {

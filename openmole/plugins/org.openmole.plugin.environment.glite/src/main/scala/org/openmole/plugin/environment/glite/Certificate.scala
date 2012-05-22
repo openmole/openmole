@@ -49,7 +49,8 @@ abstract class Certificate extends GliteAuthenticationMethod {
         ctx.setAttribute(Context.TYPE, "VOMSMyProxy")
         ctx.setAttribute(VOMSContext.MYPROXYSERVER, proxy.url)
         ctx.setAttribute(VOMSContext.MYPROXYUSERID, proxy.userId)
-        ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME, proxy.delegationTime)
+        ctx.setAttribute(Context.LIFETIME, proxy.time)
+        ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME, proxyTime)
         ctx.setAttribute(VOMSContext.MYPROXYPASS, proxy.pass)
         ctx.setAttribute("DelegationID", proxy.userId)
         logger.fine("Initialize my proxy " + proxy.url + " for " + proxy.userId + " pass " + proxy.pass)
@@ -63,7 +64,6 @@ abstract class Certificate extends GliteAuthenticationMethod {
         true
     }
 
-    ctx.setAttribute(Context.LIFETIME, proxyTime)
     ctx.setAttribute(Context.USERPASS, password)
 
     if (!fqan.isEmpty) ctx.setAttribute(VOMSContext.USERFQAN, fqan)
