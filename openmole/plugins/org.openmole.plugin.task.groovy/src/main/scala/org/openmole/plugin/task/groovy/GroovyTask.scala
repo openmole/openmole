@@ -27,15 +27,19 @@ import org.openmole.plugin.tools.groovy.ContextToGroovyCode
 
 object GroovyTask {
 
+  def newRNG(seed: Long) = org.openmole.misc.tools.service.Random.newRNG(seed)
+  def newFile() = org.openmole.misc.workspace.Workspace.newFile
+  def newDir() = org.openmole.misc.workspace.Workspace.newDir
+
   def apply(
     name: String,
     code: String,
     libs: Iterable[File] = List.empty)(implicit plugins: IPluginSet) =
     new CodeTaskBuilder { builder ⇒
 
-      addImport("static org.openmole.misc.tools.service.Random.newRNG")
-      addImport("static org.openmole.misc.workspace.Workspace.newFile")
-      addImport("static org.openmole.misc.workspace.Workspace.newDir")
+      addImport("static org.openmole.plugin.task.groovy.GroovyTask.newRNG")
+      addImport("static org.openmole.plugin.task.groovy.GroovyTask.newFile")
+      addImport("static org.openmole.plugin.task.groovy.GroovyTask.newDir")
 
       def toTask =
         new GroovyTask(name, code, builder.imports, libs) {
