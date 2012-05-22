@@ -14,7 +14,7 @@
 
     <groupId>org.openmole.core</groupId>
     <artifactId>openmole-ecosystem</artifactId>
-    <version>0.5-RC3</version>
+    <version>0.5-RC4-SNAPSHOT</version>
 
     <modules>
         <module>libraries</module>
