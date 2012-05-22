@@ -45,6 +45,7 @@ import scala.swing.Orientation
 import scala.swing.ScrollPane
 import scala.swing.Separator
 import scala.swing.SplitPane
+import scala.swing.SplitPane
 import scala.swing.TabbedPane
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.workspace.Workspace

@@ -19,13 +19,18 @@ package org.openmole.ide.core.implementation.workflow
 
 import java.awt.BorderLayout
 import javax.swing.ImageIcon
+import javax.swing.JSplitPane
 import org.openmole.ide.core.implementation.execution.ExecutionManager
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.misc.widget.ToolBarButton
+import scala.swing.Component
+import scala.swing.Orientation
 import scala.swing.Action
 import scala.swing.Panel
+import scala.swing.ScrollPane
+import scala.swing.SplitPane
 import scala.swing.TabbedPane
 import org.openmole.ide.misc.tools.image.Images._
 
@@ -50,8 +55,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
     capsuleMapping)
 
   peer.add(toolBar.peer, BorderLayout.NORTH)
-  peer.add(scene.graphScene.createView, BorderLayout.CENTER)
-  peer.add(executionManager.peer, BorderLayout.SOUTH)
+  peer.add(new JSplitPane(JSplitPane.VERTICAL_SPLIT, scene.graphScene.createView, executionManager.peer), BorderLayout.CENTER)
 
   def start = new Action("") { override def apply = executionManager.start }
 

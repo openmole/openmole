@@ -19,11 +19,12 @@ package org.openmole.ide.core.implementation.provider
 
 import java.awt.Point
 import javax.swing.JMenuItem
-import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.commons.TransitionType._
+import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.implementation.action.AddTransitionConditionAction
 import org.openmole.ide.core.implementation.action.AggregationTransitionAction
+import org.openmole.ide.core.implementation.action.RemoveTransitionAction
 import org.openmole.ide.core.implementation.workflow.MoleScene
 import org.openmole.ide.core.implementation.workflow.ConnectorWidget
 
@@ -31,8 +32,11 @@ class TransitionMenuProvider(scene: MoleScene, connectionWidget: ConnectorWidget
   val itCond = new JMenuItem("Edit condition")
   itCond.addActionListener(new AddTransitionConditionAction(connectionWidget))
 
+  val itRem = new JMenuItem("Remove")
+  itRem.addActionListener(new RemoveTransitionAction(scene, scene.manager.transitionMap.getKey(connectionWidget.transition)))
+
   var itAgreg = new JMenuItem
-  items += (itCond, itAgreg)
+  items += (itCond, itRem, itAgreg)
 
   override def getPopupMenu(widget: Widget, point: Point) = {
     items -= itAgreg

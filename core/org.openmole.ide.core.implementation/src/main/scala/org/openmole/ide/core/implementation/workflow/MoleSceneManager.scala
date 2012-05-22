@@ -102,10 +102,16 @@ class MoleSceneManager(var name: String,
   private def removeIncomingTransitions(capsule: ICapsuleUI) =
     transitionMap.filter { _._2.target.capsule == capsule }.foreach { t ⇒
       removeTransition(t._1)
-      capsuleConnections(t._2.source.dataUI) -= t._2
+      // capsuleConnections(t._2.source.dataUI) -= t._2
     }
 
-  def removeTransition(edge: String) = transitionMap.remove(edge)
+  def removeTransition(edgeID: String) = removeTransition(edgeID, transitionMap.get(edgeID))
+
+  def removeTransition(edgeID: String,
+                       transition: ITransitionUI) = {
+    transitionMap.remove(edgeID)
+    capsuleConnections(transition.source.dataUI) -= transition
+  }
 
   def removeDataChannel(id: String): Unit = dataChannelMap.remove(id)
 
