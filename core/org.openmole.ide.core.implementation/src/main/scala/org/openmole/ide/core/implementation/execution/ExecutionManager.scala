@@ -65,7 +65,8 @@ object ExecutionManager {
 class ExecutionManager(manager: IMoleSceneManager,
                        val mole: IMole,
                        val capsuleMapping: Map[ICapsuleUI, ICapsule],
-                       val prototypeMapping: Map[IPrototypeDataProxyUI, IPrototype[_]]) extends TabbedPane with IExecutionManager {
+                       val prototypeMapping: Map[IPrototypeDataProxyUI, IPrototype[_]]) extends ScrollPane with IExecutionManager {
+  preferredSize.height = 400
   val logTextArea = new TextArea { columns = 20; rows = 10; editable = false }
   val executionJobExceptionTextArea = new TextArea { columns = 40; rows = 10; editable = false }
   val moleExecutionExceptionTextArea = new TextArea { columns = 40; rows = 10; editable = false }
@@ -96,7 +97,7 @@ class ExecutionManager(manager: IMoleSceneManager,
 
   val hookMenu = new Menu("Hooks")
   val groupingMenu = new Menu("Grouping")
-  KeyRegistry.hooks.values.foreach { f ⇒ hookMenu.contents += new MenuItem(new AddHookRowAction(f)) }
+  KeyRegistry.hooks.values.toList.sortBy { _.toString }.foreach { f ⇒ hookMenu.contents += new MenuItem(new AddHookRowAction(f)) }
   KeyRegistry.groupingStrategies.values.foreach { f ⇒ groupingMenu.contents += new MenuItem(new AddGroupingStrategyRowAction(f)) }
   val menuBar = new MenuBar { contents.append(hookMenu, groupingMenu) }
   menuBar.minimumSize = new Dimension(menuBar.size.width, 30)
@@ -114,11 +115,13 @@ class ExecutionManager(manager: IMoleSceneManager,
   System.setOut(new PrintStream(logTextArea.toStream))
   System.setErr(new PrintStream(logTextArea.toStream))
 
-  pages += new TabbedPane.Page("Settings", hookPanel)
-  pages += new TabbedPane.Page("Execution progress", splitPane)
-  pages += new TabbedPane.Page("Execution errors", new ScrollPane(executionJobExceptionTextArea))
-  pages += new TabbedPane.Page("Environments errors", new ScrollPane(moleExecutionExceptionTextArea))
+  val tabbedPane = new TabbedPane
+  tabbedPane.pages += new TabbedPane.Page("Settings", hookPanel)
+  tabbedPane.pages += new TabbedPane.Page("Execution progress", splitPane)
+  tabbedPane.pages += new TabbedPane.Page("Execution errors", new ScrollPane(executionJobExceptionTextArea))
+  tabbedPane.pages += new TabbedPane.Page("Environments errors", new ScrollPane(moleExecutionExceptionTextArea))
 
+  contents = tabbedPane
   preferredSize = new Dimension(size.width, 300)
 
   def canBeRun =
@@ -212,8 +215,10 @@ class ExecutionManager(manager: IMoleSceneManager,
   }
 
   override def commitHook(hookClassName: String) {
-    if (hookPanels.contains(hookClassName)) hookPanels(hookClassName)._2.foreach(_.release)
-    hookPanels(hookClassName) = (hookPanels(hookClassName)._1, hookPanels(hookClassName)._1.saveContent.map(_.coreObject))
+    if (hookPanels.contains(hookClassName)) {
+      hookPanels(hookClassName)._2.foreach(_.release)
+      hookPanels(hookClassName) = (hookPanels(hookClassName)._1, hookPanels(hookClassName)._1.saveContent.map(_.coreObject))
+    }
   }
 
   def initPieChart = synchronized {
