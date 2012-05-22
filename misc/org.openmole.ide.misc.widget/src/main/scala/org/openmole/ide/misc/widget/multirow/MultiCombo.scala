@@ -36,7 +36,7 @@ object MultiCombo {
                           val selectedA: A,
                           val plus: Plus) extends IRowWidget1[A] {
 
-    val combo = new MyComboBox[A](comboContentA) { selection.item = selectedA; preferredSize = new Dimension(8, size.height) }
+    val combo = new MyComboBox(comboContentA) { selection.item = selectedA; preferredSize = new Dimension(8, size.height) }
 
     override val panel = new RowPanel(List(combo), plus)
 

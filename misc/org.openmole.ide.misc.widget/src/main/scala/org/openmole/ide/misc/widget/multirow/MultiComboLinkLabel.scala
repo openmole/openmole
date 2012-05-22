@@ -42,7 +42,7 @@ object MultiComboLinkLabel {
     val linkLabel = new LinkLabel("", initValue._2) {
       icon = image
     }
-    val comboBox = new MyComboBox(comboContent.map(c ⇒ c._1))
+    val comboBox = new MyComboBox(comboContent.sortBy { _._1.toString }.map(c ⇒ c._1))
     comboBox.selection.item = initValue._1
     override val panel = new RowPanel(List(comboBox, linkLabel), plus) {
       listenTo(`comboBox`)

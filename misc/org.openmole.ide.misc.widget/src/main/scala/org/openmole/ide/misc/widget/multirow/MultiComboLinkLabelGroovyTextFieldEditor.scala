@@ -45,7 +45,7 @@ object MultiComboLinkLabelGroovyTextFieldEditor {
     val linkLabel = new LinkLabel("", initValues._3) { icon = image }
     var textField = new PrototypeGroovyTextFieldEditor("Default value", initValues._2, initValues._4)
 
-    val comboBox = new MyComboBox(comboContent.map(c ⇒ c._1))
+    val comboBox = new MyComboBox(comboContent.sortBy { _._2.name }.map(c ⇒ c._1))
     comboBox.selection.item = initValues._1
 
     override val panel =

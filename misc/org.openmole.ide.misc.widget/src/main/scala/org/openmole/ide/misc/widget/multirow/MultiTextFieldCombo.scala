@@ -34,7 +34,7 @@ object MultiTextFieldCombo {
                                    val comboContentB: List[B],
                                    val selectedB: B) extends IRowWidget2[String, B] {
     val textFied = new TextField(initValue, 10)
-    val comboBox = new MyComboBox(comboContentB) { selection.item = selectedB }
+    val comboBox = new MyComboBox(comboContentB.sortBy { _.toString }) { selection.item = selectedB }
     override val panel = new RowPanel(List(textFied, comboBox))
 
     override def content: (String, B) = (textFied.text, comboBox.selection.item)

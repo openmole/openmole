@@ -52,8 +52,8 @@ object MultiTwoCombosChooseFileTextField {
                                                     val filePath: String,
                                                     val plus: Plus) extends IRowWidget3[A, B, String] {
 
-    val combo1 = new MyComboBox[A](comboContentA) { selection.item = selectedA }
-    val combo2 = new MyComboBox[B](comboContentB) { selection.item = selectedB }
+    val combo1 = new MyComboBox[A](comboContentA.sortBy { _.toString }) { selection.item = selectedA }
+    val combo2 = new MyComboBox[B](comboContentB.sortBy { _.toString }) { selection.item = selectedB }
     val chooseFileText = new ChooseFileTextField(filePath)
     val refreshButton = new Button { icon = Images.REFRESH }
 
