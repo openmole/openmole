@@ -50,7 +50,7 @@ object TypeUtil {
     val fromArray = new HashMap[String, ListBuffer[Manifest[_]]]
     val varNames = new HashSet[String]
 
-    for (t ← slot.transitions; output ← t.unFiltered) {
+    for (t ← slot.transitions; output ← t.data) {
       def setFromArray =
         if (output.mode is explore) fromArray.getOrElseUpdate(output.prototype.name, new ListBuffer[Manifest[_]]) += output.prototype.`type`
         else direct.getOrElseUpdate(output.prototype.name, new ListBuffer) += output.prototype.`type`

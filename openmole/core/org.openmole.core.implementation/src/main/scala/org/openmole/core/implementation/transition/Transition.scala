@@ -79,7 +79,7 @@ class Transition(
 
   override def isConditionTrue(context: IContext): Boolean = condition.evaluate(context)
 
-  override def unFiltered = start.outputs.filterNot(d ⇒ filteredSet.contains(d.prototype.name))
+  override def data = start.outputs.filterNot(d ⇒ filteredSet.contains(d.prototype.name))
 
   protected def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = submitNextJobsIfReady(ListBuffer() ++ context.values, ticket, subMole)
 

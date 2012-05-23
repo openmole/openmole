@@ -72,7 +72,7 @@ trait ITransition {
    *
    * @return the unfiltred output data of the staring capsule
    */
-  def unFiltered: Iterable[IData[_]]
+  def data: Iterable[IData[_]]
 
   /**
    *
