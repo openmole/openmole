@@ -28,8 +28,8 @@ import scala.swing.event.ButtonClicked
 class EnvironmentSettingPanel extends MigPanel("wrap 2") {
 
   val combo = new ComboBox(Proxys.environments.filter { e ⇒
-    e.dataUI.coreObject match {
-      case x: BatchEnvironment ⇒ true
+    e.dataUI.coreClass match {
+      case _ : BatchEnvironment ⇒ true
       case _ ⇒ false
     }
   }.toList)
