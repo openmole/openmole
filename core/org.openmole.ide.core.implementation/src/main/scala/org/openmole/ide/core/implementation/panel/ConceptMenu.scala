@@ -128,11 +128,11 @@ object ConceptMenu {
     case None ⇒
   }
 
-  def addItem(proxy: IDataProxyUI): MenuItem = addItem(proxy.dataUI.name, proxy)
+  def addItem(proxy: IDataProxyUI): MenuItem = addItem(proxyName(proxy), proxy)
 
   def addItem(name: String,
               proxy: IDataProxyUI): MenuItem = {
-    menuItemMapping += proxy -> new MenuItem(new Action(proxy.dataUI.name) {
+    menuItemMapping += proxy -> new MenuItem(new Action(proxyName(proxy)) {
       override def apply = {
         ConceptMenu.display(proxy, EDIT)
       }
@@ -142,11 +142,20 @@ object ConceptMenu {
 
   def refreshItem(proxy: IDataProxyUI) = {
     if (menuItemMapping.contains(proxy))
-      menuItemMapping(proxy).action.title = proxy.dataUI.name
+      menuItemMapping(proxy).action.title = proxyName(proxy)
   }
 
   def clearAllItems = {
     List(samplingMenu, prototypeMenu, taskMenu, environmentMenu).foreach { _.removeAll }
     menuItemMapping.clear
   }
+
+  def proxyName(proxy: IDataProxyUI) = {
+    proxy.dataUI.name + (proxy match {
+      case x: IPrototypeDataProxyUI ⇒
+        if (x.dataUI.dim > 0) " [" + x.dataUI.dim.toString + "]" else ""
+      case _ ⇒ ""
+    })
+  }
+
 }

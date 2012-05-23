@@ -29,7 +29,7 @@ class EnvironmentSettingPanel extends MigPanel("wrap 2") {
 
   val combo = new ComboBox(Proxys.environments.filter { e ⇒
     e.dataUI.coreClass match {
-      case _ : BatchEnvironment ⇒ true
+      case _: BatchEnvironment ⇒ true
       case _ ⇒ false
     }
   }.toList)

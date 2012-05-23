@@ -40,7 +40,8 @@ class PrototypePanelUI[T](proxy: IPrototypeDataProxyUI,
 
   def create = {
     Proxys.prototypes += proxy
-    ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(proxy.dataUI.name, proxy)
+    ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(nameTextField.text,
+      proxy)
   }
 
   def delete = {
@@ -66,7 +67,6 @@ class PrototypePanelUI[T](proxy: IPrototypeDataProxyUI,
     }
   }
 
-  def save = {
-    proxy.dataUI = panelUI.saveContent(nameTextField.text)
-  }
+  def save = proxy.dataUI = panelUI.saveContent(nameTextField.text)
+
 }

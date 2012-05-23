@@ -18,6 +18,7 @@
 package org.openmole.ide.core.implementation.data
 import org.openmole.core.implementation.mole.Capsule
 import org.openmole.core.implementation.validation.DataflowProblem
+import org.openmole.core.implementation.validation.TopologyProblem.NegativeLevelProblem
 import org.openmole.core.implementation.validation.Validation
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
