@@ -62,11 +62,28 @@ object ReplicaCatalog extends Logger {
 
   lazy val dbFile = Workspace.file(Workspace.preference(ObjectRepoLocation))
 
-  lazy val objectServer: EmbeddedObjectContainer = {
+  var _objectServer: Option[ObjectContainer] = None
+
+  def open = {
     val objRepo = Workspace.file(Workspace.preference(ObjectRepoLocation))
 
     if (objRepo.exists) defrag(objRepo)
     Db4oEmbedded.openFile(dB4oConfiguration, objRepo.getAbsolutePath)
+  }
+
+  def objectServer: ObjectContainer = synchronized {
+    _objectServer match {
+      case Some(server) ⇒
+        if (!server.ext.isClosed) {
+          val server = open
+          _objectServer = Some(server)
+          server
+        } else server
+      case None ⇒
+        val server = open
+        _objectServer = Some(server)
+        server
+    }
   }
 
   Updater.registerForUpdate(new ReplicaCatalogGC, Workspace.preferenceAsDurationInMs(GCUpdateInterval))
