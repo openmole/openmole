@@ -44,6 +44,8 @@ trait IMoleSceneManager {
 
   def getEdgeID: String
 
+  def dataChannelID(dc: IDataChannelUI): String
+
   def getDataChannelID: String
 
   def capsuleID(cv: ICapsuleUI): String

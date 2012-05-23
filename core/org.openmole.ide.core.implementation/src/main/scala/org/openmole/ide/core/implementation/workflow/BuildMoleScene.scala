@@ -35,6 +35,7 @@ import org.openmole.ide.core.implementation.panel.EnvironmentPanelUI
 import org.openmole.ide.core.implementation.panel.PrototypePanelUI
 import org.openmole.ide.core.implementation.panel.SamplingPanelUI
 import org.openmole.ide.core.implementation.panel.TaskPanelUI
+import org.openmole.ide.core.implementation.provider.DataChannelMenuProvider
 import org.openmole.ide.core.implementation.provider.TransitionMenuProvider
 import org.openmole.ide.core.model.commons.Constants._
 import scala.collection.JavaConversions._
@@ -81,6 +82,7 @@ class BuildMoleScene(n: String = "",
         x
       case false ⇒
         val x = new DataChannelConnectionWidget(this, manager.dataChannel(e))
+        x.getActions.addAction(ActionFactory.createPopupMenuAction(new DataChannelMenuProvider(this, x)))
         x
     }
     connectionWidget.setRouter(new MoleRouter(this))

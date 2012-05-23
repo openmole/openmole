@@ -61,5 +61,7 @@ trait IMoleScene {
 
   def extraPropertyWidget: ComponentWidget
 
+  def removeEdge(id: String)
+
   override def toString = manager.name
 }

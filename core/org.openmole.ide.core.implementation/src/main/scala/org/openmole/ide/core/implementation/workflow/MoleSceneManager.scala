@@ -89,6 +89,8 @@ class MoleSceneManager(var name: String,
     nodeID
   }
 
+  def dataChannelID(dc: IDataChannelUI) = dataChannelMap.getKey(dc)
+
   def capsuleID(cv: ICapsuleUI) = capsules.getKey(cv)
 
   def transitions = transitionMap.values
@@ -116,7 +118,8 @@ class MoleSceneManager(var name: String,
   def removeDataChannel(id: String): Unit = dataChannelMap.remove(id)
 
   def removeDataChannel(capsule: ICapsuleUI): Unit = {
-    dataChannelMap.foreach { case (k, v) ⇒ if (v.source == capsule || v.target == capsule) removeDataChannel(k) }
+    dataChannelMap.filter { case (k, v) ⇒ (v.source == capsule || v.target == capsule) }.
+      foreach { m ⇒ removeDataChannel(m._1) }
   }
 
   def registerDataChannel(source: ICapsuleUI, target: ICapsuleUI, prototypes: List[IPrototypeDataProxyUI] = List.empty): Boolean = {
