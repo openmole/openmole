@@ -46,7 +46,7 @@ class MultiTextField(title: String,
     List(new TextFieldRowWidget(""))
   else initValues.map { s ⇒ new TextFieldRowWidget(s) },
   factory,
-  2, minus) {
+  minus) {
 
   def this(title: String,
            iValues: List[String]) = this(title,

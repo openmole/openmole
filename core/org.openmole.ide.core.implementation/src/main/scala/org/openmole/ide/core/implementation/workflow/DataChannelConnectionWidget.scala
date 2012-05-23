@@ -44,7 +44,7 @@ class DataChannelConnectionWidget(scene: IMoleScene, val dataChannelUI: IDataCha
   setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(INPUT_DATA_CHANNEL, false))
   var labeled = false
 
-  val componentWidget = new PrototypeWidget(scene, new LinkLabel(DataChannelConnectionWidget.this.dataChannelUI.prototypes.size.toString,
+  val componentWidget = new PrototypeWidget(scene, new LinkLabel(DataChannelConnectionWidget.this.dataChannelUI.nbPrototypes.toString,
     new Action("") { def apply = edit }, 10))
   setConstraint(componentWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
   componentWidget.setOpaque(true)
@@ -68,7 +68,7 @@ class DataChannelConnectionWidget(scene: IMoleScene, val dataChannelUI: IDataCha
         RenderingHints.VALUE_ANTIALIAS_ON)
       g.setColor(new Color(0, 0, 0, 180))
       g.fillOval(pos, pos, dim, dim)
-      link.text = DataChannelConnectionWidget.this.dataChannelUI.prototypes.size.toString
+      link.text = DataChannelConnectionWidget.this.dataChannelUI.nbPrototypes.toString
       revalidate
     }
 

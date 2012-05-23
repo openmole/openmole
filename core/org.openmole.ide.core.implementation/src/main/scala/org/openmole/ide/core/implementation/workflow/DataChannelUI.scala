@@ -18,8 +18,19 @@
 package org.openmole.ide.core.implementation.workflow
 
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow._
 
 class DataChannelUI(val source: ICapsuleUI,
                     val target: ICapsuleUI,
-                    var prototypes: List[IPrototypeDataProxyUI] = List.empty) extends IDataChannelUI
+                    var filteredPrototypes: List[IPrototypeDataProxyUI] = List.empty) extends IDataChannelUI {
+
+  def availablePrototypes = source.dataUI.task match {
+    case Some(x: ITaskDataProxyUI) ⇒
+      x.dataUI.prototypesOut ++
+        x.dataUI.implicitPrototypesOut
+    case None ⇒ List.empty
+  }
+
+  def nbPrototypes = availablePrototypes.size - filteredPrototypes.size
+}

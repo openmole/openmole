@@ -24,7 +24,11 @@ trait IDataChannelUI {
 
   def target: ICapsuleUI
 
-  def prototypes: List[IPrototypeDataProxyUI]
+  def nbPrototypes: Int
 
-  def prototypes_=(li: List[IPrototypeDataProxyUI])
+  def availablePrototypes: List[IPrototypeDataProxyUI]
+
+  def filteredPrototypes: List[IPrototypeDataProxyUI]
+
+  def filteredPrototypes_=(li: List[IPrototypeDataProxyUI])
 }

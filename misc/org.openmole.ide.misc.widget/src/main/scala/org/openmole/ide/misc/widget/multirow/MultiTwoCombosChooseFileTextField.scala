@@ -74,7 +74,7 @@ class MultiTwoCombosChooseFileTextField[A, B](title: String,
                                               factory: IRowWidgetFactory[TwoCombosChooseFileTextFieldRowWidget[A, B]],
                                               minus: Minus = NO_EMPTY,
                                               plus: Plus = ADD)
-    extends MultiWidget(title, rWidgets, factory, 5, minus) {
+    extends MultiWidget(title, rWidgets, factory, minus) {
   def this(title: String,
            initValues: (List[A], List[B]),
            selected: List[(A, B)],

@@ -54,7 +54,7 @@ class MultiChooseFileTextField(title: String,
                                minus: Minus) extends MultiWidget(title,
   if (initValues.isEmpty) List(new ChooseFileTextFieldRowWidget("", chooserTitle, chooserDescription, selectionMode, extensions))
   else initValues.map(iv ⇒ new ChooseFileTextFieldRowWidget(iv, chooserTitle, chooserDescription, selectionMode, extensions)),
-  factory, 1, minus) {
+  factory, minus) {
   def this(title: String,
            iValues: List[String],
            cTitle: String,

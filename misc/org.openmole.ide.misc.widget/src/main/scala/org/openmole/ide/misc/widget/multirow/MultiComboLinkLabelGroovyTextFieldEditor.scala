@@ -74,7 +74,7 @@ class MultiComboLinkLabelGroovyTextFieldEditor[A](title: String,
                                                   rWidgets: List[ComboLinkLabelGroovyTextFieldEditorRowWidget[A]],
                                                   factory: IRowWidgetFactory[ComboLinkLabelGroovyTextFieldEditorRowWidget[A]],
                                                   minus: Minus = CLOSE_IF_EMPTY,
-                                                  plus: Plus = ADD) extends MultiWidget(title, rWidgets, factory, 2, minus) {
+                                                  plus: Plus = ADD) extends MultiWidget(title, rWidgets, factory, minus) {
 
   def this(title: String,
            comboContent: List[(A, IPrototype[_], ContentAction[A])],

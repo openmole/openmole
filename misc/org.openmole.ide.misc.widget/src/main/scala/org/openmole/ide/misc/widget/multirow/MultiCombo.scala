@@ -49,9 +49,9 @@ import MultiCombo._
 class MultiCombo[A](title: String,
                     rWidgets: List[ComboRowWidget[A]],
                     factory: IRowWidgetFactory[ComboRowWidget[A]],
-                    minus: Minus = NO_EMPTY,
+                    minus: Minus = CLOSE_IF_EMPTY,
                     plus: Plus = ADD)
-    extends MultiWidget(title, rWidgets, factory, 1, minus) {
+    extends MultiWidget(title, rWidgets, factory, minus) {
   def this(title: String,
            initValues: List[A],
            selected: List[A],

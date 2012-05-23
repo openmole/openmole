@@ -55,7 +55,7 @@ class MultiTextFieldCombo[B](title: String,
     case (s, b) ⇒ new TextFieldComboRowWidget(s, comboContent, b)
   },
   factory,
-  2, minus) {
+  minus) {
 
   def this(title: String,
            iValues: List[(String, B)],

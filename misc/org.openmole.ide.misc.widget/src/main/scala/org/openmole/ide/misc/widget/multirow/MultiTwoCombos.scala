@@ -58,7 +58,7 @@ class MultiTwoCombos[A, B](title: String,
                            minus: Minus,
                            plus: Plus,
                            buildFromFactory: Boolean)
-    extends MultiWidget(title, rWidgets, factory, 3, minus, buildFromFactory) {
+    extends MultiWidget(title, rWidgets, factory, minus, buildFromFactory) {
   def this(title: String,
            inbetweenString: String,
            initValues: (List[A], List[B]),

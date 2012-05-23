@@ -52,7 +52,7 @@ class MultiComboTextField[A](title: String,
                              rWidgets: List[ComboTextFieldRowWidget[A]],
                              factory: IRowWidgetFactory[ComboTextFieldRowWidget[A]],
                              minus: Minus = NO_EMPTY,
-                             plus: Plus = ADD) extends MultiWidget(title, rWidgets, factory, 2, minus) {
+                             plus: Plus = ADD) extends MultiWidget(title, rWidgets, factory, minus) {
 
   def this(title: String,
            initValues: List[(A, String)],

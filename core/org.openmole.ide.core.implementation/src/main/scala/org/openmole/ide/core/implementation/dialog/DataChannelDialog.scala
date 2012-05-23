@@ -37,20 +37,26 @@ object DataChannelDialog {
   def display(dcWidget: DataChannelConnectionWidget) = {
     Proxys.prototypes.isEmpty match {
       case false ⇒
-        val prototypePanel = new PrototypePanel(dcWidget.dataChannelUI.prototypes)
-        if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel) { verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded }.peer,
+        val prototypePanel = new PrototypePanel(dcWidget.dataChannelUI.availablePrototypes,
+          dcWidget.dataChannelUI.filteredPrototypes)
+        if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel) {
+          verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
+        }.peer,
           "Set the Data Channel")).equals(NotifyDescriptor.OK_OPTION))
-          dcWidget.dataChannelUI.prototypes = prototypePanel.multiPrototypeCombo.content
+          dcWidget.dataChannelUI.filteredPrototypes = prototypePanel.multiPrototypeCombo.content
       case true ⇒ StatusBar.warn("No Prototype is defined !")
     }
   }
 
-  class PrototypePanel(protoProxys: List[IPrototypeDataProxyUI]) extends PluginPanel("") {
+  class PrototypePanel(availableProtoProxys: List[IPrototypeDataProxyUI],
+                       protoProxys: List[IPrototypeDataProxyUI]) extends PluginPanel("") {
     preferredSize = new Dimension(250, 300)
-    val multiPrototypeCombo = new MultiCombo("Filter Prototypes",
-      Proxys.prototypes.toList, protoProxys,
+    val multiPrototypeCombo = new MultiCombo("Filtered Prototypes",
+      availableProtoProxys,
+      protoProxys,
       CLOSE_IF_EMPTY,
       ADD)
+    if (protoProxys.isEmpty) multiPrototypeCombo.removeAllRows
     contents += multiPrototypeCombo.panel
   }
 }

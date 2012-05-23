@@ -21,13 +21,14 @@ import scala.swing.MainFrame
 import scala.swing.SimpleSwingApplication
 import java.awt.BorderLayout
 import java.awt.Dimension
-import org.openmole.ide.misc.widget.multirow.RowWidget._
+import org.openmole.ide.misc.widget.multirow.RowWidget
 import org.openmole.ide.misc.widget.multirow.MultiComboTextField
 import org.openmole.ide.misc.widget.multirow.MultiTextField
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.misc.tools.image.Images._
 import org.openmole.ide.misc.widget.ContentAction
+import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor
 import org.openmole.core.implementation.data.Prototype
 
@@ -46,6 +47,8 @@ object MultiRowExample extends SimpleSwingApplication {
     peer.add(new MultiComboTextField("My title2",
       List((fake1, "un"), (fake2, "deux")),
       List(fake1, fake2)).panel.peer, BorderLayout.EAST)
+    peer.add(new MultiCombo("My title2",
+      List(fake2, fake1), List(), CLOSE_IF_EMPTY, RowWidget.ADD).panel.peer, BorderLayout.CENTER)
     size = new Dimension(250, 200)
   }
 

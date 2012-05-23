@@ -38,7 +38,6 @@ import MultiWidget._
 class MultiWidget[T <: IRowWidget](title: String = "",
                                    rWidgets: List[T],
                                    factory: IRowWidgetFactory[T],
-                                   nbComponent: Int,
                                    allowEmpty: Minus = NO_EMPTY,
                                    buildRowFromFactory: Boolean = false) {
   val specimen = rWidgets.head

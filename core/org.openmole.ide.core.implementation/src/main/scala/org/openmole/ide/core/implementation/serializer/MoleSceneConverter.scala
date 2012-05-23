@@ -119,8 +119,8 @@ class MoleSceneConverter extends Converter {
       writer.startNode("datachannel")
       writer.addAttribute("source", (firstSlotID(dc.source)).toString)
       writer.addAttribute("target", (firstSlotID(dc.target)).toString)
-      dc.prototypes.foreach { p ⇒
-        writer.startNode("prototype")
+      dc.filteredPrototypes.foreach { p ⇒
+        writer.startNode("filteredPrototype")
         writer.addAttribute("id", p.id.toString)
         writer.endNode
       }
@@ -192,7 +192,7 @@ class MoleSceneConverter extends Converter {
             reader.moveDown
             val p = reader.getNodeName
             p match {
-              case "prototype" ⇒ protoIds += reader.getAttribute("id").toInt
+              case "filteredPrototype" ⇒ protoIds += reader.getAttribute("id").toInt
               case _ ⇒ StatusBar.block("Unknown balise " + p)
             }
             reader.moveUp
