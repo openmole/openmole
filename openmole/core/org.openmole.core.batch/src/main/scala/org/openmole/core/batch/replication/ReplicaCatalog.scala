@@ -74,7 +74,7 @@ object ReplicaCatalog extends Logger {
   def objectServer: ObjectContainer = synchronized {
     _objectServer match {
       case Some(server) ⇒
-        if (!server.ext.isClosed) {
+        if (server.ext.isClosed) {
           val server = open
           _objectServer = Some(server)
           server
