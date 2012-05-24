@@ -22,9 +22,9 @@ import java.awt.Dimension
 import javax.swing.JOptionPane._
 import scala.swing.ScrollPane
 import scala.swing.ScrollPane._
-import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.workflow.DataChannelConnectionWidget
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
@@ -35,8 +35,8 @@ import org.openide.NotifyDescriptor
 
 object DataChannelDialog {
   def display(dcWidget: DataChannelConnectionWidget) = {
-    Proxys.prototypes.isEmpty match {
-      case false ⇒
+    openable match {
+      case true ⇒
         val prototypePanel = new PrototypePanel(dcWidget.dataChannelUI.availablePrototypes,
           dcWidget.dataChannelUI.filteredPrototypes)
         if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel) {
@@ -44,8 +44,16 @@ object DataChannelDialog {
         }.peer,
           "Set the Data Channel")).equals(NotifyDescriptor.OK_OPTION))
           dcWidget.dataChannelUI.filteredPrototypes = prototypePanel.multiPrototypeCombo.content
-      case true ⇒ StatusBar.warn("No Prototype is defined !")
+      case false ⇒ StatusBar.warn("No Prototype is defined !")
     }
+
+    def openable =
+      dcWidget.dataChannelUI.source.dataUI.task match {
+        case Some(x: ITaskDataProxyUI) ⇒
+          !(x.dataUI.prototypesOut ++
+            x.dataUI.implicitPrototypesOut).isEmpty
+        case None ⇒ false
+      }
   }
 
   class PrototypePanel(availableProtoProxys: List[IPrototypeDataProxyUI],
