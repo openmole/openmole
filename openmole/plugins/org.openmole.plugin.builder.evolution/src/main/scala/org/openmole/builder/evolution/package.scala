@@ -170,6 +170,7 @@ package object evolution {
       def outputCapsule = scalingArchiveCapsule
       def steady = steadySinceProto
       def generation = generationProto
+      def genomes = initialGenomeProto
     }
 
   }
