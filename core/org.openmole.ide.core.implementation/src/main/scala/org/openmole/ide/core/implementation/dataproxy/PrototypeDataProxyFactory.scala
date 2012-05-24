@@ -24,7 +24,7 @@ import scala.collection.JavaConversions._
 
 class PrototypeDataProxyFactory(val factory: IPrototypeFactoryUI[_]) extends IPrototypeDataProxyFactory {
 
-  def buildDataProxyUI = new PrototypeDataProxyUI(factory.buildDataUI, false, 0)
+  def buildDataProxyUI = new PrototypeDataProxyUI(factory.buildDataUI, false)
 
   def buildDataProxyUI(prototype: IPrototype[_],
                        generated: Boolean = false,
