@@ -32,5 +32,9 @@ class DataChannelUI(val source: ICapsuleUI,
     case None ⇒ List.empty
   }
 
-  def nbPrototypes = availablePrototypes.size - filteredPrototypes.size
+  def nbPrototypes = {
+    val availables = availablePrototypes
+    filteredPrototypes = filteredPrototypes.filter { p ⇒ availables.contains(p) }
+    availables.size - filteredPrototypes.size
+  }
 }
