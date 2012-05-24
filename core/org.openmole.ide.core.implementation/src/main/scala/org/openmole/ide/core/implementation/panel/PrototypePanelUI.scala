@@ -45,6 +45,7 @@ class PrototypePanelUI[T](proxy: IPrototypeDataProxyUI,
   }
 
   def delete = {
+    //remove in Tasks
     val capsulesWithProtos: List[ICapsuleUI] = ScenesManager.moleScenes.flatMap {
       _.manager.capsules.values.flatMap { c ⇒
         c.dataUI.task match {
@@ -55,15 +56,19 @@ class PrototypePanelUI[T](proxy: IPrototypeDataProxyUI,
     }.toList
 
     capsulesWithProtos match {
-      case Nil ⇒
-        scene.closePropertyPanel
-        Proxys.prototypes -= proxy
-        ConceptMenu.removeItem(proxy)
+      case Nil ⇒ erase
       case _ ⇒
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
+          erase
           capsulesWithProtos.foreach { _.dataUI.task.get.dataUI.removePrototypeOccurencies(proxy) }
-          delete
+          scene.manager.dataChannels.foreach { dc ⇒ dc.filteredPrototypes = dc.filteredPrototypes.filterNot { _ == proxy } }
         }
+    }
+
+    def erase = {
+      scene.closePropertyPanel
+      Proxys.prototypes -= proxy
+      ConceptMenu.removeItem(proxy)
     }
   }
 

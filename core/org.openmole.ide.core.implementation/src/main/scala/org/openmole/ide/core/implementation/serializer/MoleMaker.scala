@@ -48,7 +48,6 @@ import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.ITransitionUI
-import org.openmole.misc.tools.script.GroovyProxy
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
