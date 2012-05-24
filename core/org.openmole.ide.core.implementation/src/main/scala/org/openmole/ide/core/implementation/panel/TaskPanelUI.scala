@@ -127,7 +127,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     peer.setLayout(new BorderLayout)
     val image = EYE
 
-    val availablePrototypes = List(EmptyDataUIs.emptyPrototypeProxy) ::: Proxys.prototypes.toList
+    val availablePrototypes = Proxys.prototypes.toList
 
     val protoInEditor = {
       new MultiComboLinkLabelGroovyTextFieldEditor("",
