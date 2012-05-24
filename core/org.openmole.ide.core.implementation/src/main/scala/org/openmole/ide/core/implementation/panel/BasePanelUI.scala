@@ -76,7 +76,6 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
   preferredSize.width = 300
   foreground = Color.white
   background = borderColor
-  nameTextField.requestFocusInWindow
 
   listenTo(this)
   reactions += {

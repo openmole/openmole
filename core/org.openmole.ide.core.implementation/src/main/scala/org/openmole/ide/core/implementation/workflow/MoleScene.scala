@@ -102,6 +102,11 @@ abstract class MoleScene(n: String = "",
     propertyWidget.setPreferredLocation(new Point(getView.getBounds().x.toInt + 20, 20))
     propertyWidget.revalidate
     propertyWidget.setVisible(true)
+
+    currentPanel.contents.get(currentPanel.contents.size - 1) match {
+      case x: BasePanelUI ⇒ x.nameTextField.requestFocus
+      case _ ⇒
+    }
     refresh
   }
 
