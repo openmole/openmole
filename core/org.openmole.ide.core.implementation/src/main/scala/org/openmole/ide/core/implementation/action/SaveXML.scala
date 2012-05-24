@@ -23,30 +23,34 @@ import scala.swing.FileChooser.SelectionMode._
 import org.openmole.ide.core.implementation.dialog.GUIPanel
 import org.openmole.ide.core.implementation.execution.Settings
 import org.openmole.ide.core.implementation.serializer.GUISerializer
-import scala.swing.FileChooser.Result.Approve
+import scala.swing.FileChooser.Result._
 import scala.swing.FileChooser
 import scala.swing.Label
 
 object SaveXML {
-  def save(frame: GUIPanel): Unit = SaveXML.save(frame, Settings.currentProject.getOrElse(SaveXML.show))
+  def save(frame: GUIPanel): Unit = SaveXML.save(frame, Settings.currentProject.getOrElse(SaveXML.show.getOrElse("")))
 
   def save(frame: GUIPanel,
            title: String): Unit = {
-    Settings.currentProject = Some(title)
-    frame.title = "OpenMOLE - " + title
-    GUISerializer.serialize(title)
+    if (title != "") {
+      Settings.currentProject = Some(title)
+      frame.title = "OpenMOLE - " + title
+      GUISerializer.serialize(title)
+    } else Settings.currentProject = None
   }
 
-  def show: String = {
+  def show: Option[String] = {
     val fc = new FileChooser {
       new FileNameExtensionFilter("Save", ".xml,.XML")
       fileSelectionMode = FilesOnly
       title = "Save OpenMOLE project"
     }
 
-    var text = ""
-    if (fc.showDialog(new Label, "OK") == Approve) text = fc.selectedFile.getPath
-    if (new File(text).getParentFile.isDirectory) text = text.split('.')(0) + ".xml"
+    var text: Option[String] = None
+    if (fc.showDialog(new Label, "OK") == Approve) {
+      text = Some(fc.selectedFile.getPath)
+      if (new File(text.get).getParentFile.isDirectory) text = Some(text.get.split('.')(0) + ".xml")
+    }
     text
   }
 }

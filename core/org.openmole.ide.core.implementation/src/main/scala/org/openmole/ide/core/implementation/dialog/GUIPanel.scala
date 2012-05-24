@@ -47,7 +47,7 @@ class GUIPanel extends MainFrame { mainframe ⇒
       })
 
       contents += new MenuItem(new Action("Save as") {
-        override def apply = SaveXML.save(mainframe, SaveXML.show)
+        override def apply = SaveXML.save(mainframe, SaveXML.show.getOrElse(""))
       })
 
       contents += new MenuItem(new Action("Reset all") {

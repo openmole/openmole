@@ -40,23 +40,26 @@ object GUISerializer {
   xstream.alias("data_proxy", classOf[IDataProxyUI])
 
   def serialize(toFile: String) = {
-    val writer = new FileWriter(new File(toFile))
+    val f = new File(toFile)
+    if (f.getParentFile.isDirectory) {
+      val writer = new FileWriter(f)
 
-    //root node
-    val out = xstream.createObjectOutputStream(writer, "openmole")
+      //root node
+      val out = xstream.createObjectOutputStream(writer, "openmole")
 
-    out.writeObject(new SerializedProxys(Proxys.tasks.toSet,
-      Proxys.prototypes.toSet,
-      Proxys.samplings.toSet,
-      Proxys.environments.toSet,
-      Proxys.incr.get + 1))
-    //molescenes
-    ScenesManager.moleScenes.foreach(ms ⇒
-      ms match {
-        case x: BuildMoleScene ⇒ out.writeObject(x)
-        case _ ⇒
-      })
-    out.close
+      out.writeObject(new SerializedProxys(Proxys.tasks.toSet,
+        Proxys.prototypes.toSet,
+        Proxys.samplings.toSet,
+        Proxys.environments.toSet,
+        Proxys.incr.get + 1))
+      //molescenes
+      ScenesManager.moleScenes.foreach(ms ⇒
+        ms match {
+          case x: BuildMoleScene ⇒ out.writeObject(x)
+          case _ ⇒
+        })
+      out.close
+    }
   }
 
   def unserialize(fromFile: String) = {
