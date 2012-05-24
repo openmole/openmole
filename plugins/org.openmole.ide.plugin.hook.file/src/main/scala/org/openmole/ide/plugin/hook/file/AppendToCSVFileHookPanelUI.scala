@@ -36,50 +36,50 @@ import scala.swing.event.SelectionChanged
 class AppendToCSVFileHookPanelUI(val executionManager: IExecutionManager) extends PluginPanel("wrap") with IHookPanelUI {
 
   val capsules: List[ICapsule] = executionManager.capsuleMapping.values.filter(_.outputs.size > 0).toList
-
+  val capsuleComboBox = new MyComboBox(capsules)
   var multiProto: Option[MultiCombo[IPrototype[_]]] = None
-
   val chooseFileTextField = new CSVChooseFileTextField("")
   val button = new Button { icon = Images.REFRESH }
 
-  contents += new PluginPanel("wrap 2") {
-    contents += chooseFileTextField
-    contents += button
-  }
+  if (capsules.size > 0) {
 
-  listenTo(button)
-  reactions += {
-    case ButtonClicked(`button`) ⇒
-      executionManager.commitHook("org.openmole.plugin.hook.file.AppendToCSVFileHook")
-  }
+    contents += new PluginPanel("wrap 2") {
+      contents += chooseFileTextField
+      contents += button
+    }
 
-  val capsuleComboBox = new MyComboBox(capsules)
-  contents += new PluginPanel("") {
-    contents += new Label("Capsule")
-    contents += capsuleComboBox
-  }
+    listenTo(button)
+    reactions += {
+      case ButtonClicked(`button`) ⇒
+        executionManager.commitHook("org.openmole.plugin.hook.file.AppendToCSVFileHook")
+    }
 
-  listenTo(capsuleComboBox.selection)
-  reactions += {
-    case SelectionChanged(`capsuleComboBox`) ⇒
-      buildAndDisplayMultiProtos
-  }
+    contents += new PluginPanel("") {
+      contents += new Label("Capsule")
+      contents += capsuleComboBox
+    }
 
-  buildAndDisplayMultiProtos
+    listenTo(capsuleComboBox.selection)
+    reactions += {
+      case SelectionChanged(`capsuleComboBox`) ⇒
+        buildAndDisplayMultiProtos
+    }
+
+    buildAndDisplayMultiProtos
+  }
 
   def protos(capsule: ICapsule) = capsule.outputs.map { _.prototype }.toList
 
   def buildAndDisplayMultiProtos = {
     if (contents.size == 3) contents.remove(2)
-    if (capsules.size > 0) {
-      multiProto = Some(new MultiCombo("Prototypes to be stored",
-        protos(capsuleComboBox.selection.item),
-        List(protos(capsuleComboBox.selection.item)(0)),
-        NO_EMPTY,
-        ADD))
-      contents += multiProto.get.panel
-    } else multiProto = None
+    multiProto = Some(new MultiCombo("Prototypes to be stored",
+      protos(capsuleComboBox.selection.item),
+      List(protos(capsuleComboBox.selection.item)(0)),
+      NO_EMPTY,
+      ADD))
+    contents += multiProto.get.panel
   }
+
   def addHook = {}
 
   def saveContent = {
