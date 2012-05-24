@@ -21,9 +21,9 @@ import java.awt.BorderLayout
 import java.awt.Color
 import javax.imageio.ImageIO
 import javax.swing.ImageIcon
+import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.CheckData
-import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.model.data.IExplorationTaskDataUI
@@ -55,7 +55,11 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.imagePath)))
 
   val panelUI = proxy.dataUI.buildPanelUI
-  var protoPanel = new IOPrototypePanel
+  var protoPanel = {
+    if (Proxys.prototypes.isEmpty) None
+    else Some(new IOPrototypePanel)
+  }
+
   mode match {
     case IO ⇒ protos
     case _ ⇒ properties
@@ -82,13 +86,18 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   }
 
   def save = {
-    val protoInEditorContent = protoPanel.protoInEditor.content.filterNot(p ⇒ p._1 == EmptyDataUIs.emptyPrototypeProxy)
+    val (protoInEditorContent, implicitEditorsMapping, protoOutEditorContent) = protoPanel match {
+      case Some(x: IOPrototypePanel) ⇒ (x.protoInEditor.content,
+        x.implicitEditorsMapping.filterNot { _._2.editorText.isEmpty },
+        x.protoOutEditor.content)
+      case None ⇒ (List(), List(), List())
+    }
 
     proxy.dataUI = panelUI.save(nameTextField.text,
       protoInEditorContent.map { _._1 },
       new HashMap[IPrototypeDataProxyUI, String]() ++
-        protoInEditorContent ++ protoPanel.implicitEditorsMapping.filterNot { _._2.editorText.isEmpty }.map { case (k, v) ⇒ k -> v.editorText }.toMap,
-      protoPanel.protoOutEditor.content)
+        protoInEditorContent ++ implicitEditorsMapping.map { case (k, v) ⇒ k -> v.editorText }.toMap,
+      protoOutEditorContent)
 
     ScenesManager.capsules(proxy).foreach { c ⇒
       proxy.dataUI match {
@@ -118,16 +127,18 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
 
   def protos: Unit = {
     switch
-    protoPanel = new IOPrototypePanel
-    mainPanel.contents += protoPanel.peer
     mainLinksPanel.contents += new ImageLinkLabel(PREVIOUS, new Action("") { def apply = properties })
+    if (Proxys.prototypes.isEmpty) StatusBar.inform("No Prototype has been created yet")
+    else {
+      protoPanel = Some(new IOPrototypePanel)
+      mainPanel.contents += protoPanel.get.peer
+    }
   }
 
   class IOPrototypePanel extends MyPanel {
+    val availablePrototypes = Proxys.prototypes.toList
     peer.setLayout(new BorderLayout)
     val image = EYE
-
-    val availablePrototypes = Proxys.prototypes.toList
 
     val protoInEditor = {
       new MultiComboLinkLabelGroovyTextFieldEditor("",
