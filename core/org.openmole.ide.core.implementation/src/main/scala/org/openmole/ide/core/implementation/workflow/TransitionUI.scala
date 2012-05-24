@@ -18,9 +18,11 @@
 package org.openmole.ide.core.implementation.workflow
 
 import org.openmole.ide.core.model.commons.TransitionType
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.workflow._
 
 class TransitionUI(val source: ICapsuleUI,
                    val target: IInputSlotWidget,
                    var transitionType: TransitionType.Value,
-                   var condition: Option[String] = None) extends ITransitionUI
+                   var condition: Option[String] = None,
+                   var filteredPrototypes: List[IPrototypeDataProxyUI] = List.empty) extends ITransitionUI

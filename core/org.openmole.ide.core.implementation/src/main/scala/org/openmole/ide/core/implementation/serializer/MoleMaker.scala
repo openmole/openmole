@@ -44,6 +44,7 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.ITask
+import org.openmole.core.model.transition.ICondition
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.ICapsuleUI
@@ -96,7 +97,7 @@ object MoleMaker {
 
       capsuleMap.foreach {
         case (cui, ccore) ⇒
-          manager.capsuleConnections(cui.dataUI).foreach(t ⇒ buildTransition(ccore, capsuleMap(t.target.capsule), t))
+          manager.capsuleConnections(cui.dataUI).foreach(t ⇒ buildTransition(ccore, capsuleMap(t.target.capsule), t, prototypeMap))
       }
 
       manager.dataChannels.foreach { dc ⇒
@@ -157,11 +158,16 @@ object MoleMaker {
 
   def parameters(capsuleDataUI: ICapsuleDataUI): ParameterSet = parameters(capsuleDataUI.task.get)
 
-  def buildTransition(sourceCapsule: ICapsule, targetCapsule: ICapsule, t: ITransitionUI) {
+  def buildTransition(sourceCapsule: ICapsule,
+                      targetCapsule: ICapsule,
+                      t: ITransitionUI,
+                      prototypeMap: Map[IPrototypeDataProxyUI, IPrototype[_]]) {
+    val filtered = t.filteredPrototypes.map { p ⇒ prototypeMap(p).name }
+    val condition = if (t.condition.isDefined) new Condition(t.condition.get) else ICondition.True
     t.transitionType match {
-      case BASIC_TRANSITION ⇒ new Transition(sourceCapsule, targetCapsule)
-      case AGGREGATION_TRANSITION ⇒ new AggregationTransition(sourceCapsule, targetCapsule)
-      case EXPLORATION_TRANSITION ⇒ new ExplorationTransition(sourceCapsule, targetCapsule)
+      case BASIC_TRANSITION ⇒ new Transition(sourceCapsule, targetCapsule, condition, filtered)
+      case AGGREGATION_TRANSITION ⇒ new AggregationTransition(sourceCapsule, targetCapsule, condition, filtered)
+      case EXPLORATION_TRANSITION ⇒ new ExplorationTransition(sourceCapsule, targetCapsule, condition, filtered)
       case _ ⇒ throw new UserBadDataError("No matching type between capsule " + sourceCapsule + " and " + targetCapsule + ". The transition can not be built")
     }
   }

@@ -15,11 +15,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.workflow
+package org.openmole.ide.core.model.workflow
 
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.workflow._
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 
-class DataChannelUI(val source: ICapsuleUI,
-                    val target: ICapsuleUI,
-                    var filteredPrototypes: List[IPrototypeDataProxyUI] = List.empty) extends IDataChannelUI
+trait IConnectorUI {
+  def source: ICapsuleUI
+
+  def nbPrototypes: Int = {
+    val availables = availablePrototypes
+    filteredPrototypes = filteredPrototypes.filter { p ⇒ availables.contains(p) }
+    availables.size - filteredPrototypes.size
+  }
+
+  def availablePrototypes: List[IPrototypeDataProxyUI] =
+    source.dataUI.task match {
+      case Some(x: ITaskDataProxyUI) ⇒
+        x.dataUI.prototypesOut ++
+          x.dataUI.implicitPrototypesOut
+      case None ⇒ List.empty
+    }
+
+  def filteredPrototypes: List[IPrototypeDataProxyUI]
+
+  def filteredPrototypes_=(li: List[IPrototypeDataProxyUI])
+
+}

@@ -29,23 +29,37 @@ import org.netbeans.api.visual.widget.ConnectionWidget
 import org.netbeans.api.visual.layout.LayoutFactory
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.workflow.ITransitionUI
+import org.openmole.ide.core.implementation.dialog.ConnectorPrototypeFilterDialog
 import org.openmole.ide.core.model.commons.TransitionType._
+import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.dialog.DialogFactory
+import scala.swing.Action
 import scala.swing.Label
 import scala.swing.event.MousePressed
 import org.openmole.ide.misc.tools.image.Images._
 
-class ConnectorWidget(val scene: IMoleScene, val transition: ITransitionUI, var toBeEdited: Boolean = false) extends ConnectionWidget(scene.graphScene) {
+class ConnectorWidget(val scene: IMoleScene,
+                      val transition: ITransitionUI,
+                      var toBeEdited: Boolean = false) extends ConnectionWidget(scene.graphScene) { connectorWidget ⇒
 
   val label = new ConnectorLabel
   val componentWidget = new ConditionWidget(scene, label)
-  setConstraint(componentWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
-  addChild(componentWidget)
+  setConstraint(componentWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.66f)
 
   transition.condition match {
     case Some(x: String) ⇒ label.text = x
     case None ⇒
   }
+
+  val prototypeFilterWidget = new PrototypeOnConnectorWidget(scene,
+    transition,
+    new LinkLabel(transition.nbPrototypes.toString,
+      new Action("") { def apply = editPrototypeFilter }, 10))
+
+  setConstraint(prototypeFilterWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
+  prototypeFilterWidget.setOpaque(true)
+  addChild(prototypeFilterWidget)
+  addChild(componentWidget)
 
   setLabelVisible
   drawTransitionType
@@ -55,6 +69,9 @@ class ConnectorWidget(val scene: IMoleScene, val transition: ITransitionUI, var 
 
   def setLabelVisible = {
     componentWidget.setVisible(!label.text.isEmpty)
+    removeConstraint(prototypeFilterWidget)
+    setConstraint(prototypeFilterWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER,
+      if (label.text.isEmpty) 0.5f else 0.33f)
     label.revalidate
     scene.refresh
   }
@@ -65,6 +82,11 @@ class ConnectorWidget(val scene: IMoleScene, val transition: ITransitionUI, var 
       case AGGREGATION_TRANSITION ⇒ setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(AGGREGATION_TRANSITON, false))
       case _ ⇒ setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
     }
+  }
+
+  def editPrototypeFilter: Unit = {
+    ConnectorPrototypeFilterDialog.display(transition)
+    scene.refresh
   }
 
   class ConditionWidget(scene: IMoleScene, label: ConnectorLabel) extends ComponentWidget(scene.graphScene, label.peer) {
@@ -103,7 +125,8 @@ class ConnectorWidget(val scene: IMoleScene, val transition: ITransitionUI, var 
     def edit = {
       if (toBeEdited) {
         text = DialogFactory.groovyEditor("Condition", text)
-        ConnectorWidget.this.transition.condition = Some(text)
+        connectorWidget.transition.condition = if (text.isEmpty) None else Some(text)
+        connectorWidget.setLabelVisible
         revalidate
       }
     }

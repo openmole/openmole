@@ -17,18 +17,6 @@
 
 package org.openmole.ide.core.model.workflow
 
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-
-trait IDataChannelUI {
-  def source: ICapsuleUI
-
+trait IDataChannelUI extends IConnectorUI {
   def target: ICapsuleUI
-
-  def nbPrototypes: Int
-
-  def availablePrototypes: List[IPrototypeDataProxyUI]
-
-  def filteredPrototypes: List[IPrototypeDataProxyUI]
-
-  def filteredPrototypes_=(li: List[IPrototypeDataProxyUI])
 }

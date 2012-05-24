@@ -17,54 +17,50 @@
 
 package org.openmole.ide.core.implementation.dialog
 
-import javax.swing._
 import java.awt.Dimension
-import javax.swing.JOptionPane._
-import scala.swing.ScrollPane
-import scala.swing.ScrollPane._
-import org.openmole.ide.core.implementation.workflow.DataChannelConnectionWidget
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.misc.widget.PluginPanel
-import org.openmole.ide.misc.widget.multirow.RowWidget._
-import org.openmole.ide.misc.widget.multirow.MultiWidget._
-import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.model.workflow.ICapsuleUI
+import org.openmole.ide.core.model.workflow.IConnectorUI
+import org.openmole.ide.core.model.workflow.IConnectorUI
+import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget.multirow.MultiCombo
+import org.openmole.ide.misc.widget.multirow.RowWidget._
+import org.openmole.ide.misc.widget.multirow.MultiWidget._
+import scala.swing.ScrollPane
 
-object DataChannelDialog {
-  def display(dcWidget: DataChannelConnectionWidget) = {
-    openable match {
+object ConnectorPrototypeFilterDialog {
+  def display(connectorUI: IConnectorUI) = {
+    openable(connectorUI.source) match {
       case true ⇒
-        val prototypePanel = new PrototypePanel(dcWidget.dataChannelUI.availablePrototypes,
-          dcWidget.dataChannelUI.filteredPrototypes)
+        val prototypePanel = new FilteredPrototypePanel(connectorUI)
         if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel) {
           verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
         }.peer,
-          "Set the Data Channel")).equals(NotifyDescriptor.OK_OPTION))
-          dcWidget.dataChannelUI.filteredPrototypes = prototypePanel.multiPrototypeCombo.content
+          "Add prototype filters")).equals(NotifyDescriptor.OK_OPTION))
+          connectorUI.filteredPrototypes = prototypePanel.multiPrototypeCombo.content
       case false ⇒ StatusBar.warn("No Prototype is defined !")
     }
-
-    def openable =
-      dcWidget.dataChannelUI.source.dataUI.task match {
-        case Some(x: ITaskDataProxyUI) ⇒
-          !(x.dataUI.prototypesOut ++
-            x.dataUI.implicitPrototypesOut).isEmpty
-        case None ⇒ false
-      }
   }
 
-  class PrototypePanel(availableProtoProxys: List[IPrototypeDataProxyUI],
-                       protoProxys: List[IPrototypeDataProxyUI]) extends PluginPanel("") {
+  def openable(source: ICapsuleUI) =
+    source.dataUI.task match {
+      case Some(x: ITaskDataProxyUI) ⇒
+        !(x.dataUI.prototypesOut ++
+          x.dataUI.implicitPrototypesOut).isEmpty
+      case None ⇒ false
+    }
+
+  class FilteredPrototypePanel(connector: IConnectorUI) extends PluginPanel("") {
     preferredSize = new Dimension(250, 300)
     val multiPrototypeCombo = new MultiCombo("Filtered Prototypes",
-      availableProtoProxys,
-      protoProxys,
+      connector.availablePrototypes,
+      connector.filteredPrototypes,
       CLOSE_IF_EMPTY,
       ADD)
-    if (protoProxys.isEmpty) multiPrototypeCombo.removeAllRows
+    if (connector.filteredPrototypes.isEmpty) multiPrototypeCombo.removeAllRows
     contents += multiPrototypeCombo.panel
   }
 }
