@@ -25,7 +25,7 @@
     <parent>
         <artifactId>third-parties</artifactId>
         <groupId>org.openmole.core</groupId>
-        <version>0.5-RC4</version>
+        <version>0.5-RC5-SNAPSHOT</version>
     </parent>
 	
 	<artifactId>org.apache.clerezza.scala</artifactId>
