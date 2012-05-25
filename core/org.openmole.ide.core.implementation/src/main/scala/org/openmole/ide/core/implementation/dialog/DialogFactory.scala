@@ -24,6 +24,7 @@ import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 import org.openmole.ide.core.implementation.execution.ScenesManager
+import org.openmole.ide.core.implementation.panel.BasePanelUI
 import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.workflow.ISceneContainer
@@ -54,6 +55,14 @@ object DialogFactory {
     if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new Label("<html>" + proxy.dataUI.name + " is currently used in a scene.<br>" +
       "It will be deleted everywhere it appears. <br>" +
       "Delete anyway ?").peer, "Execution warning")).equals(NotifyDescriptor.OK_OPTION)) true
+    else false
+  }
+
+  def closePropertyPanelConfirmation(panel: BasePanelUI): Boolean = {
+    if (DialogDisplayer.getDefault.notify(
+      new DialogDescriptor(new Label("<html> The property panel " + panel.nameTextField.text + " has not been created yet.<br>" +
+        "All the data will be lost. <br>" +
+        "Close anyway ?").peer, "Warning")).equals(NotifyDescriptor.OK_OPTION)) true
     else false
   }
 }

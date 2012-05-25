@@ -85,6 +85,8 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
       scene.refresh
   }
 
+  var created = if (mode == CREATION) false else true
+
   def hide = {
     baseSave
     visible = false
@@ -98,6 +100,7 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
 
   def baseCreate: Unit = {
     create
+    created = true
     deleteLink
     baseSave
     scene.refresh

@@ -35,6 +35,7 @@ import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.panel._
 import org.openmole.ide.core.model.workflow._
+import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.panel._
@@ -143,11 +144,24 @@ abstract class MoleScene(n: String = "",
     }
 
   def closePropertyPanel: Unit = {
-    closeExtraPropertyPanel
-    savePropertyPanel
-    currentPanel.contents.removeAll
-    propertyWidget.setVisible(false)
-    refresh
+    if (currentPanel.contents.size > 0) {
+      currentPanel.contents(0) match {
+        case x: BasePanelUI ⇒
+          if (!x.created) {
+            if (DialogFactory.closePropertyPanelConfirmation(x))
+              saveAndClose
+          } else saveAndClose
+        case _ ⇒
+      }
+    }
+
+    def saveAndClose = {
+      closeExtraPropertyPanel
+      savePropertyPanel
+      currentPanel.contents.removeAll
+      propertyWidget.setVisible(false)
+      refresh
+    }
   }
 
   def graphScene = this
