@@ -311,12 +311,22 @@ abstract class MoleScene(n: String = "",
       else if (reconnectingSource) {
         setEdgeSource(edge.get, replacementNode.get)
         val sourceW = replacementWidget.asInstanceOf[OutputSlotWidget].capsule
-        manager.registerTransition(edge.get, sourceW, t.target, sourceW.dataUI.transitionType, None)
+        manager.registerTransition(edge.get,
+          sourceW,
+          t.target,
+          sourceW.dataUI.transitionType,
+          t.condition,
+          t.filteredPrototypes)
       } else {
         val targetView = replacementWidget.asInstanceOf[InputSlotWidget]
         connectionWidget.setTargetAnchor(new InputSlotAnchor(targetView.capsule, currentSlotIndex))
         setEdgeTarget(edge.get, replacementNode.get)
-        manager.registerTransition(edge.get, t.source, targetView, targetView.capsule.dataUI.transitionType, None)
+        manager.registerTransition(edge.get,
+          t.source,
+          targetView,
+          targetView.capsule.dataUI.transitionType,
+          t.condition,
+          t.filteredPrototypes)
       }
       repaint
     }

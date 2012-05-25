@@ -19,13 +19,7 @@ package org.openmole.ide.core.implementation.workflow
 
 import java.awt.Point
 import org.netbeans.api.visual.anchor.PointShape
-import org.netbeans.api.visual.router.RouterFactory
 import org.netbeans.api.visual.widget.Widget
-import org.openmole.ide.core.model.dataproxy.IDataProxyUI
-import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
@@ -60,7 +54,13 @@ class BuildMoleScene(n: String = "",
     })
     //   val connectMode = ScenesManager.connectMode
     //   ScenesManager.connectMode = true
-    manager.transitions.foreach(t ⇒ { SceneItemFactory.createTransition(ms, capsuleMapping(t.source), islots(t.target), t.transitionType, t.condition) })
+    manager.transitions.foreach(t ⇒ {
+      SceneItemFactory.createTransition(ms, capsuleMapping(t.source),
+        islots(t.target),
+        t.transitionType,
+        t.condition,
+        t.filteredPrototypes)
+    })
     //   ScenesManager.connectMode = false
     // manager.dataChannels.foreach(dc=>{SceneItemFactory.createDataChannel(ms, capsuleMapping(dc.source),capsuleMapping(dc.target),dc.prototypes)})
     //  ScenesManager.connectMode = connectMode

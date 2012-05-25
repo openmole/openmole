@@ -76,11 +76,25 @@ trait IMoleSceneManager {
 
   def removeDataChannel(id: String)
 
-  def registerTransition(s: ICapsuleUI, t: IInputSlotWidget, transitionType: TransitionType.Value, cond: Option[String]): Boolean
+  def registerTransition(s: ICapsuleUI,
+                         t: IInputSlotWidget,
+                         transitionType: TransitionType.Value,
+                         cond: Option[String],
+                         filtered: List[IPrototypeDataProxyUI]): Boolean
 
-  def registerTransition(edgeID: String, s: ICapsuleUI, t: IInputSlotWidget, transitionType: TransitionType.Value, cond: Option[String]): Boolean
+  def registerTransition(edgeID: String,
+                         s: ICapsuleUI,
+                         t: IInputSlotWidget,
+                         transitionType: TransitionType.Value,
+                         cond: Option[String],
+                         filtered: List[IPrototypeDataProxyUI]): Boolean
 
-  def registerDataChannel(id: String, source: ICapsuleUI, target: ICapsuleUI, prototypes: List[IPrototypeDataProxyUI]): Boolean
+  def registerDataChannel(id: String,
+                          source: ICapsuleUI,
+                          target: ICapsuleUI,
+                          prototypes: List[IPrototypeDataProxyUI]): Boolean
 
-  def registerDataChannel(source: ICapsuleUI, target: ICapsuleUI, prototypes: List[IPrototypeDataProxyUI]): Boolean
+  def registerDataChannel(source: ICapsuleUI,
+                          target: ICapsuleUI,
+                          prototypes: List[IPrototypeDataProxyUI]): Boolean
 }

@@ -37,12 +37,20 @@ object SceneItemFactory {
 
   def createCapsule(scene: IMoleScene, locationPoint: Point): ICapsuleUI = createCapsule(new CapsuleUI(scene), scene, locationPoint)
 
-  def createTransition(scene: IMoleScene, s: ICapsuleUI, t: IInputSlotWidget, transitionType: TransitionType.Value, cond: Option[String]) = {
-    if (scene.manager.registerTransition(s, t, transitionType, cond))
+  def createTransition(scene: IMoleScene,
+                       s: ICapsuleUI,
+                       t: IInputSlotWidget,
+                       transitionType: TransitionType.Value,
+                       cond: Option[String],
+                       li: List[IPrototypeDataProxyUI]) = {
+    if (scene.manager.registerTransition(s, t, transitionType, cond, li))
       scene.createConnectEdge(scene.manager.capsuleID(s), scene.manager.capsuleID(t.capsule))
   }
 
-  def createDataChannel(scene: IMoleScene, s: ICapsuleUI, t: ICapsuleUI, li: List[IPrototypeDataProxyUI]) = {
+  def createDataChannel(scene: IMoleScene,
+                        s: ICapsuleUI,
+                        t: ICapsuleUI,
+                        li: List[IPrototypeDataProxyUI]) = {
     if (scene.manager.registerDataChannel(s, t, li))
       scene.createDataChannelEdge(scene.manager.capsuleID(s), scene.manager.capsuleID(t))
   }

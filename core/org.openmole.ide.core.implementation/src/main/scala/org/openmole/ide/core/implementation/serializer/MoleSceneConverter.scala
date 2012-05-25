@@ -111,6 +111,11 @@ class MoleSceneConverter extends Converter {
       writer.addAttribute("target", iSlotMapping(trans.target).toString)
       writer.addAttribute("type", TransitionType.toString(trans.transitionType))
       writer.addAttribute("condition", trans.condition.getOrElse(""))
+      trans.filteredPrototypes.foreach { p ⇒
+        writer.startNode("filteredPrototype")
+        writer.addAttribute("id", p.id.toString)
+        writer.endNode
+      }
       writer.endNode
     })
 
@@ -182,31 +187,37 @@ class MoleSceneConverter extends Converter {
           SceneItemFactory.createTransition(scene,
             oslots(reader.getAttribute("source")),
             islots(reader.getAttribute("target")),
-            TransitionType.fromString(reader.getAttribute("type")), Some(reader.getAttribute("condition")))
+            TransitionType.fromString(reader.getAttribute("type")),
+            Some(reader.getAttribute("condition")),
+            Proxys.prototypes.filter { p ⇒ readFiltered(reader).contains(p.id) }.toList)
+
         case "datachannel" ⇒
           ScenesManager.connectMode = false
           val source = islots(reader.getAttribute("source")).capsule
           val target = islots(reader.getAttribute("target")).capsule
-          var protoIds = new HashSet[Int]
-          while (reader.hasMoreChildren) {
-            reader.moveDown
-            val p = reader.getNodeName
-            p match {
-              case "filteredPrototype" ⇒ protoIds += reader.getAttribute("id").toInt
-              case _ ⇒ StatusBar.block("Unknown balise " + p)
-            }
-            reader.moveUp
-          }
-          Proxys.prototypes.filter { p ⇒ protoIds.contains(p.id) }.toList.foreach(println)
           SceneItemFactory.createDataChannel(scene,
             source,
             target,
-            Proxys.prototypes.filter { p ⇒ protoIds.contains(p.id) }.toList)
+            Proxys.prototypes.filter { p ⇒ readFiltered(reader).contains(p.id) }.toList)
         case _ ⇒ StatusBar.block("Unknown balise " + n0)
       }
       reader.moveUp
     }
     scene
+  }
+
+  def readFiltered(reader: HierarchicalStreamReader) = {
+    var protoIds = new HashSet[Int]
+    while (reader.hasMoreChildren) {
+      reader.moveDown
+      val p = reader.getNodeName
+      p match {
+        case "filteredPrototype" ⇒ protoIds += reader.getAttribute("id").toInt
+        case _ ⇒ StatusBar.block("Unknown balise " + p)
+      }
+      reader.moveUp
+    }
+    protoIds
   }
 
   override def canConvert(t: Class[_]) = t.equals(classOf[BuildMoleScene])

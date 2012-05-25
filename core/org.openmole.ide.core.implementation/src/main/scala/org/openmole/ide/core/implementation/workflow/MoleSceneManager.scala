@@ -27,7 +27,6 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.ide.core.implementation.data.MoleDataUI
-import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow._
 import scala.collection.JavaConversions._
@@ -104,7 +103,6 @@ class MoleSceneManager(var name: String,
   private def removeIncomingTransitions(capsule: ICapsuleUI) =
     transitionMap.filter { _._2.target.capsule == capsule }.foreach { t ⇒
       removeTransition(t._1)
-      // capsuleConnections(t._2.source.dataUI) -= t._2
     }
 
   def removeTransition(edgeID: String) = removeTransition(edgeID, transitionMap.get(edgeID))
@@ -122,24 +120,38 @@ class MoleSceneManager(var name: String,
       foreach { m ⇒ removeDataChannel(m._1) }
   }
 
-  def registerDataChannel(source: ICapsuleUI, target: ICapsuleUI, prototypes: List[IPrototypeDataProxyUI] = List.empty): Boolean = {
+  def registerDataChannel(source: ICapsuleUI,
+                          target: ICapsuleUI,
+                          filetered: List[IPrototypeDataProxyUI] = List.empty): Boolean = {
     dataChannelID += 1
-    registerDataChannel(getDataChannelID, source, target, prototypes)
+    registerDataChannel(getDataChannelID, source, target, filetered)
   }
 
-  def registerDataChannel(id: String, source: ICapsuleUI, target: ICapsuleUI, prototypes: List[IPrototypeDataProxyUI]): Boolean = {
-    if (!dataChannelMap.keys.contains(id)) { dataChannelMap.put(id, new DataChannelUI(source, target, prototypes)); return true }
+  def registerDataChannel(id: String,
+                          source: ICapsuleUI,
+                          target: ICapsuleUI,
+                          filetered: List[IPrototypeDataProxyUI]): Boolean = {
+    if (!dataChannelMap.keys.contains(id)) { dataChannelMap.put(id, new DataChannelUI(source, target, filetered)); return true }
     false
   }
 
-  def registerTransition(s: ICapsuleUI, t: IInputSlotWidget, transitionType: TransitionType.Value, cond: Option[String]): Boolean = {
+  def registerTransition(s: ICapsuleUI,
+                         t: IInputSlotWidget,
+                         transitionType: TransitionType.Value,
+                         cond: Option[String],
+                         filtered: List[IPrototypeDataProxyUI] = List.empty): Boolean = {
     edgeID += 1
-    registerTransition(getEdgeID, s, t, transitionType, cond)
+    registerTransition(getEdgeID, s, t, transitionType, cond, filtered)
   }
 
-  def registerTransition(edgeID: String, s: ICapsuleUI, t: IInputSlotWidget, transitionType: TransitionType.Value, cond: Option[String]): Boolean = {
+  def registerTransition(edgeID: String,
+                         s: ICapsuleUI,
+                         t: IInputSlotWidget,
+                         transitionType: TransitionType.Value,
+                         cond: Option[String],
+                         filtered: List[IPrototypeDataProxyUI]): Boolean = {
     if (!transitionMap.keys.contains(edgeID)) {
-      val transition = new TransitionUI(s, t, transitionType, cond)
+      val transition = new TransitionUI(s, t, transitionType, cond, filtered)
       transitionMap.put(edgeID, transition)
       capsuleConnections(transition.source.dataUI) += transition
       return true
