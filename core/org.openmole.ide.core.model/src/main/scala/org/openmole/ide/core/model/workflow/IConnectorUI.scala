@@ -23,6 +23,8 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 trait IConnectorUI {
   def source: ICapsuleUI
 
+  def target: IInputSlotWidget
+
   def nbPrototypes: Int = {
     val availables = availablePrototypes
     filteredPrototypes = filteredPrototypes.filter { p ⇒ availables.contains(p) }

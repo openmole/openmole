@@ -122,8 +122,8 @@ class MoleSceneConverter extends Converter {
     //Data channels
     molescene.manager.dataChannels.foreach(dc ⇒ {
       writer.startNode("datachannel")
-      writer.addAttribute("source", (firstSlotID(dc.source)).toString)
-      writer.addAttribute("target", (firstSlotID(dc.target)).toString)
+      writer.addAttribute("source", (firstSlotID(dc.source) + dc.source.nbInputSlots).toString)
+      writer.addAttribute("target", iSlotMapping(dc.target).toString)
       dc.filteredPrototypes.foreach { p ⇒
         writer.startNode("filteredPrototype")
         writer.addAttribute("id", p.id.toString)
@@ -193,11 +193,9 @@ class MoleSceneConverter extends Converter {
 
         case "datachannel" ⇒
           ScenesManager.connectMode = false
-          val source = islots(reader.getAttribute("source")).capsule
-          val target = islots(reader.getAttribute("target")).capsule
           SceneItemFactory.createDataChannel(scene,
-            source,
-            target,
+            oslots(reader.getAttribute("source")),
+            islots(reader.getAttribute("target")),
             Proxys.prototypes.filter { p ⇒ readFiltered(reader).contains(p.id) }.toList)
         case _ ⇒ StatusBar.block("Unknown balise " + n0)
       }

@@ -20,8 +20,6 @@ package org.openmole.ide.core.model.workflow
 import org.openmole.ide.core.model.commons.TransitionType
 
 trait ITransitionUI extends IConnectorUI {
-  def target: IInputSlotWidget
-
   def condition: Option[String]
 
   def condition_=(c: Option[String])

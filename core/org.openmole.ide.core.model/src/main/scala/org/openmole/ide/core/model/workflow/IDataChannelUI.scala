@@ -17,6 +17,4 @@
 
 package org.openmole.ide.core.model.workflow
 
-trait IDataChannelUI extends IConnectorUI {
-  def target: ICapsuleUI
-}
+trait IDataChannelUI extends IConnectorUI

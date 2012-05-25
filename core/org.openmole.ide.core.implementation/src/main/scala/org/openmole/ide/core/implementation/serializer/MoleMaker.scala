@@ -101,7 +101,7 @@ object MoleMaker {
       }
 
       manager.dataChannels.foreach { dc ⇒
-        new DataChannel(capsuleMap(dc.source), capsuleMap(dc.target),
+        new DataChannel(capsuleMap(dc.source), capsuleMap(dc.target.capsule),
           dc.filteredPrototypes.map { p ⇒ prototypeMap(p).name }.toSeq: _*)
       }
 

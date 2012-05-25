@@ -87,9 +87,7 @@ class BuildMoleScene(n: String = "",
     }
     connectionWidget.setRouter(new MoleRouter(this))
     connectLayer.addChild(connectionWidget)
-    //  connectionWidget.getActions.addAction(createSelectAction)
     connectionWidget.getActions.addAction(createObjectHoverAction)
-    connectionWidget.getActions.addAction(reconnectAction)
     connectionWidget
   }
 }

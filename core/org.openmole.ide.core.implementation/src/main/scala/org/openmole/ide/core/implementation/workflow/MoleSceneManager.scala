@@ -121,7 +121,7 @@ class MoleSceneManager(var name: String,
   }
 
   def registerDataChannel(source: ICapsuleUI,
-                          target: ICapsuleUI,
+                          target: IInputSlotWidget,
                           filetered: List[IPrototypeDataProxyUI] = List.empty): Boolean = {
     dataChannelID += 1
     registerDataChannel(getDataChannelID, source, target, filetered)
@@ -129,7 +129,7 @@ class MoleSceneManager(var name: String,
 
   def registerDataChannel(id: String,
                           source: ICapsuleUI,
-                          target: ICapsuleUI,
+                          target: IInputSlotWidget,
                           filetered: List[IPrototypeDataProxyUI]): Boolean = {
     if (!dataChannelMap.keys.contains(id)) { dataChannelMap.put(id, new DataChannelUI(source, target, filetered)); return true }
     false

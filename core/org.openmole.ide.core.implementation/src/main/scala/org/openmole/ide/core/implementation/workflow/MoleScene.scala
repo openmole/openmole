@@ -79,7 +79,6 @@ abstract class MoleScene(n: String = "",
   getActions.addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)))
 
   val connectAction = ActionFactory.createExtendedConnectAction(null, connectLayer, new MoleSceneConnectProvider, InputEvent.SHIFT_MASK)
-  val reconnectAction = ActionFactory.createReconnectAction(new MoleSceneReconnectProvider)
 
   override def paintChildren = {
 
@@ -182,11 +181,12 @@ abstract class MoleScene(n: String = "",
 
   override def attachEdgeSourceAnchor(edge: String, oldSourceNode: String, sourceNode: String) = {
     if (findWidget(sourceNode) != null) {
+      val slotAnchor = new OutputSlotAnchor(findWidget(sourceNode).asInstanceOf[ICapsuleUI])
       ScenesManager.connectMode match {
         case true ⇒
-          findWidget(edge).asInstanceOf[ConnectorWidget].setSourceAnchor(new OutputSlotAnchor(findWidget(sourceNode).asInstanceOf[ICapsuleUI]))
+          findWidget(edge).asInstanceOf[ConnectorWidget].setSourceAnchor(slotAnchor)
         case false ⇒
-          findWidget(edge).asInstanceOf[DataChannelConnectionWidget].setSourceAnchor(new OutputDataChannelAnchor(findWidget(sourceNode).asInstanceOf[ICapsuleUI]))
+          findWidget(edge).asInstanceOf[DataChannelConnectionWidget].setSourceAnchor(slotAnchor)
       }
     }
   }
@@ -194,11 +194,12 @@ abstract class MoleScene(n: String = "",
   override def attachEdgeTargetAnchor(edge: String, oldTargetNode: String, targetNode: String) = {
     val targetWidget =
       if (findWidget(targetNode) != null) {
+        val slotAnchor = new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex)
         ScenesManager.connectMode match {
           case true ⇒
-            findWidget(edge).asInstanceOf[ConnectorWidget].setTargetAnchor(new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex))
+            findWidget(edge).asInstanceOf[ConnectorWidget].setTargetAnchor(slotAnchor)
           case false ⇒
-            findWidget(edge).asInstanceOf[DataChannelConnectionWidget].setTargetAnchor(new InputDataChannelAnchor(findWidget(targetNode).asInstanceOf[ICapsuleUI]))
+            findWidget(edge).asInstanceOf[DataChannelConnectionWidget].setTargetAnchor(slotAnchor)
         }
       }
   }
@@ -227,19 +228,11 @@ abstract class MoleScene(n: String = "",
       val o = findObject(targetWidget)
       target = None
       if (isNode(o)) target = Some(o.asInstanceOf[String])
-      ScenesManager.connectMode match {
-        case false ⇒
-          targetWidget match {
-            case x: TaskComponentWidget ⇒ return ConnectorState.ACCEPT
-            case _: Any ⇒ ConnectorState.REJECT
-          }
-        case true ⇒
-          if (targetWidget.getClass.equals(classOf[InputSlotWidget])) {
-            val iw = targetWidget.asInstanceOf[InputSlotWidget]
-            currentSlotIndex = iw.index
-            if (source.equals(target)) return ConnectorState.REJECT_AND_STOP
-            else return ConnectorState.ACCEPT
-          }
+      if (targetWidget.getClass.equals(classOf[InputSlotWidget])) {
+        val iw = targetWidget.asInstanceOf[InputSlotWidget]
+        currentSlotIndex = iw.index
+        if (source.equals(target)) return ConnectorState.REJECT_AND_STOP
+        else return ConnectorState.ACCEPT
       }
       if (o == null) return ConnectorState.REJECT
       return ConnectorState.REJECT_AND_STOP
@@ -256,93 +249,10 @@ abstract class MoleScene(n: String = "",
           if (manager.registerTransition(sourceCapsuleUI, targetWidget.asInstanceOf[InputSlotWidget], sourceCapsuleUI.dataUI.transitionType, None))
             createConnectEdge(source.get, target.get)
         case false ⇒
-          if (manager.registerDataChannel(sourceCapsuleUI, targetWidget.asInstanceOf[TaskComponentWidget].capsule))
+          if (manager.registerDataChannel(sourceCapsuleUI, targetWidget.asInstanceOf[InputSlotWidget]))
             createDataChannelEdge(source.get, target.get)
       }
       CheckData.checkMole(moleScene)
-    }
-  }
-
-  class MoleSceneReconnectProvider extends ReconnectProvider {
-
-    var edge: Option[String] = None
-    var originalNode: Option[String] = None
-    var replacementNode: Option[String] = None
-
-    override def reconnectingStarted(connectionWidget: ConnectionWidget, reconnectingSource: Boolean) = {}
-
-    override def reconnectingFinished(connectionWidget: ConnectionWidget, reconnectingSource: Boolean) = {}
-
-    def findConnection(connectionWidget: ConnectionWidget) = {
-      val o = findObject(connectionWidget)
-      edge = None
-      if (isEdge(o)) edge = Some(o.asInstanceOf[String])
-      originalNode = edge
-    }
-
-    override def isSourceReconnectable(connectionWidget: ConnectionWidget): Boolean = {
-      val o = findObject(connectionWidget)
-      edge = None
-      if (isEdge(o)) edge = Some(o.asInstanceOf[String])
-      originalNode = None
-      if (edge.isDefined) originalNode = Some(getEdgeSource(edge.get))
-      originalNode.isDefined
-    }
-
-    override def isTargetReconnectable(connectionWidget: ConnectionWidget): Boolean = {
-      val o = findObject(connectionWidget)
-
-      if (isEdge(o)) {
-        edge = Some(o.asInstanceOf[String])
-        originalNode = Some(getEdgeTarget(edge.get))
-        true
-      } else false
-    }
-
-    override def isReplacementWidget(connectionWidget: ConnectionWidget, replacementWidget: Widget, reconnectingSource: Boolean): ConnectorState = {
-      val o = findObject(replacementWidget)
-      replacementNode = None
-      if (isNode(o)) replacementNode = Some(o.asInstanceOf[String])
-      replacementWidget match {
-        case x: OutputSlotWidget ⇒ return ConnectorState.ACCEPT
-        case x: InputSlotWidget ⇒ {
-          val iw = replacementWidget.asInstanceOf[InputSlotWidget]
-          currentSlotIndex = iw.index
-          return ConnectorState.ACCEPT
-        }
-        case _ ⇒ return ConnectorState.REJECT_AND_STOP
-      }
-    }
-
-    override def hasCustomReplacementWidgetResolver(scene: Scene) = false
-
-    override def resolveReplacementWidget(scene: Scene, sceneLocation: Point) = null
-
-    override def reconnect(connectionWidget: ConnectionWidget, replacementWidget: Widget, reconnectingSource: Boolean) = {
-      val t = manager.transition(edge.get)
-      manager.removeTransition(edge.get)
-      if (replacementWidget == null) removeEdge(edge.get)
-      else if (reconnectingSource) {
-        setEdgeSource(edge.get, replacementNode.get)
-        val sourceW = replacementWidget.asInstanceOf[OutputSlotWidget].capsule
-        manager.registerTransition(edge.get,
-          sourceW,
-          t.target,
-          sourceW.dataUI.transitionType,
-          t.condition,
-          t.filteredPrototypes)
-      } else {
-        val targetView = replacementWidget.asInstanceOf[InputSlotWidget]
-        connectionWidget.setTargetAnchor(new InputSlotAnchor(targetView.capsule, currentSlotIndex))
-        setEdgeTarget(edge.get, replacementNode.get)
-        manager.registerTransition(edge.get,
-          t.source,
-          targetView,
-          targetView.capsule.dataUI.transitionType,
-          t.condition,
-          t.filteredPrototypes)
-      }
-      repaint
     }
   }
 }

@@ -65,7 +65,7 @@ class ConnectorWidget(val scene: IMoleScene,
   drawTransitionType
   toBeEdited = true
 
-  setStroke(new BasicStroke(1.5f))
+  setStroke(new BasicStroke(3f))
 
   def setLabelVisible = {
     componentWidget.setVisible(!label.text.isEmpty)

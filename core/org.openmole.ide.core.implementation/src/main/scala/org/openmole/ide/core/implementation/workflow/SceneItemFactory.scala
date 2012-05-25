@@ -49,9 +49,9 @@ object SceneItemFactory {
 
   def createDataChannel(scene: IMoleScene,
                         s: ICapsuleUI,
-                        t: ICapsuleUI,
+                        t: IInputSlotWidget,
                         li: List[IPrototypeDataProxyUI]) = {
     if (scene.manager.registerDataChannel(s, t, li))
-      scene.createDataChannelEdge(scene.manager.capsuleID(s), scene.manager.capsuleID(t))
+      scene.createDataChannelEdge(scene.manager.capsuleID(s), scene.manager.capsuleID(t.capsule))
   }
 }

@@ -33,8 +33,6 @@ object Images {
   val OUTPUT_EXE_SLOT: Image = ImageIO.read(classLoader.getResource("img/outputSlotExe.png"))
   val AGGREGATION_TRANSITON: Image = ImageIO.read(classLoader.getResource("img/aggregation.png"))
   val EXPLORATION_TRANSITON: Image = ImageIO.read(classLoader.getResource("img/exploration.png"))
-  val INPUT_DATA_CHANNEL: Image = ImageIO.read(classLoader.getResource("img/inputDataChannel.png"))
-  val OUTPUT_DATA_CHANNEL: Image = ImageIO.read(classLoader.getResource("img/outputDataChannel.png"))
 
   val CONNECT_TRANSITION_MODE = new ImageIcon(classLoader.getResource("img/connectMode.png"))
   val DATA_CHANNEL_TRANSITION_MODE = new ImageIcon(classLoader.getResource("img/dataChannelMode.png"))

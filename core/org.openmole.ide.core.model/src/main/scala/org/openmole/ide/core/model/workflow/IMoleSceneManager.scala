@@ -91,10 +91,10 @@ trait IMoleSceneManager {
 
   def registerDataChannel(id: String,
                           source: ICapsuleUI,
-                          target: ICapsuleUI,
+                          target: IInputSlotWidget,
                           prototypes: List[IPrototypeDataProxyUI]): Boolean
 
   def registerDataChannel(source: ICapsuleUI,
-                          target: ICapsuleUI,
+                          target: IInputSlotWidget,
                           prototypes: List[IPrototypeDataProxyUI]): Boolean
 }
