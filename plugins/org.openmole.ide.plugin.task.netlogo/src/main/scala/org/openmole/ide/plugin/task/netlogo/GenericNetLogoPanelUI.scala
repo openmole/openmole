@@ -34,6 +34,7 @@ import swing.Swing._
 import org.openmole.ide.osgi.netlogo.NetLogo
 import scala.swing.FileChooser._
 import java.io.File
+import org.openmole.ide.misc.widget.multirow.MultiWidget._
 
 abstract class GenericNetLogoPanelUI(nlogoPath: String,
                                      workspaceEmbedded: Boolean,
@@ -68,11 +69,12 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
   var multiProtoString: Option[MultiTwoCombos[IPrototypeDataProxyUI, String]] = None
   val resourcesMultiTextField = new MultiChooseFileTextField("Resources",
     resources,
-    SelectionMode.FilesAndDirectories) {
-
+    SelectionMode.FilesAndDirectories,
+    CLOSE_IF_EMPTY) {
     tooltip = Help.tooltip(i18n.getString("resources"),
       i18n.getString("resourcesEx"))
   }
+  if (resources.isEmpty) resourcesMultiTextField.removeAllRows
   var globals = g
 
   listenTo(nlogoTextField)
@@ -100,18 +102,24 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
         }
       }
     }
-    if (!globals.isEmpty) {
+    if (!globals.isEmpty && !comboContent.isEmpty) {
       multiStringProto = Some(new MultiTwoCombos[String, IPrototypeDataProxyUI](
         "Output Mapping",
         "with",
         (globals, comboContent),
-        prototypeMappingOutput))
+        prototypeMappingOutput,
+        minus = CLOSE_IF_EMPTY))
+
+      if (prototypeMappingOutput.isEmpty) multiStringProto.get.removeAllRows
 
       multiProtoString = Some(new MultiTwoCombos[IPrototypeDataProxyUI, String](
         "Input Mapping",
         "with",
         (comboContent, globals),
-        prototypeMappingInput))
+        prototypeMappingInput,
+        minus = CLOSE_IF_EMPTY))
+
+      if (prototypeMappingInput.isEmpty) multiProtoString.get.removeAllRows
     }
 
     if (multiStringProto.isDefined) {
@@ -122,7 +130,7 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
     }
   }
 
-  def comboContent: List[IPrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxys.prototypes.toList
+  def comboContent: List[IPrototypeDataProxyUI] = Proxys.prototypes.toList
 
   def buildNetLogo: NetLogo
 }

@@ -100,19 +100,5 @@ class MultiTwoCombos[A, B](title: String,
     plus,
     buildFromFactory)
 
-  //  def this(title: String,
-  //           ibString: String,
-  //            iValues: (List[A],List[B]), 
-  //           selected: List[(A,B)],
-  //           minus: Minus = NO_EMPTY, 
-  //           plus: Plus = ADD,
-  //           buildFromFactory : Boolean = false) = this(title,
-  //                                              ibString,
-  //                                              iValues,
-  //                                              selected, 
-  //                                              new Factory[A,B],
-  //                                              minus,
-  //                                              plus,
-  //                                              buildFromFactory)
   def content = rowWidgets.map(_.content).toList
 }
