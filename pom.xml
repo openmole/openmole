@@ -14,7 +14,7 @@
 
     <groupId>org.openmole.ide</groupId>
     <artifactId>gui</artifactId>
-    <version>0.5-RC4</version>
+    <version>0.5-RC5-SNAPSHOT</version>
 
     <modules>
 	<module>third-parties</module>
