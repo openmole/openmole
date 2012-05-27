@@ -110,6 +110,7 @@
         <lib.de.erichseifert.gral.version>0.9-SNAPSHOT</lib.de.erichseifert.gral.version>
         <lib.runtime.jvm.version>7-u3-2.1</lib.runtime.jvm.version>
         <plugin.org.scala-tools.maven-scala-plugin.version>2.15.2</plugin.org.scala-tools.maven-scala-plugin.version>
+	<plugin.scala-maven-plugin.version>3.0.2</plugin.scala-maven-plugin.version>
         <maven.scala.version>${lib.org.scala-lang.scala.version}</maven.scala.version>
         <scala.version>${lib.org.scala-lang.scala.version}</scala.version>
 
@@ -263,7 +264,28 @@
                 </configuration>
             </plugin>
 
-            <plugin>
+	   <plugin>
+              <groupId>net.alchim31.maven</groupId>
+              <artifactId>scala-maven-plugin</artifactId>
+              <version>${plugin.scala-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>scala-compile-first</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                            <goal>compile</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <scalaVersion>${maven.scala.version}</scalaVersion>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+           </plugin>
+
+            <!--<plugin>
                 <groupId>org.scala-tools</groupId>
                 <artifactId>maven-scala-plugin</artifactId>
                 <version>${plugin.org.scala-tools.maven-scala-plugin.version}</version>
@@ -282,7 +304,7 @@
                     <scalaVersion>${maven.scala.version}</scalaVersion>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
-            </plugin>
+            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.felix</groupId>
