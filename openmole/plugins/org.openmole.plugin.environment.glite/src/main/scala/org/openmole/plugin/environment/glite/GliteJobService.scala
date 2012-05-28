@@ -43,9 +43,9 @@ import scala.io.Source
 object GliteJobService extends Logger
 
 class GliteJobService(
-    jobServiceURI: URI,
+    val uri: URI,
     val environment: GliteEnvironment,
-    override val nbAccess: Int) extends JSAGAJobService(jobServiceURI) {
+    override val nbAccess: Int) extends JSAGAJobService {
 
   import GliteJobService._
 
@@ -62,7 +62,7 @@ class GliteJobService(
       finally os.close
 
       val jobDescription = buildJobDescription(runtime, script, environment.allRequirements)
-      val job = jobServiceCache.createJob(jobDescription)
+      val job = jobService.createJob(jobDescription)
       job.run
 
       //logger.fine(Source.fromFile(script).getLines.mkString)

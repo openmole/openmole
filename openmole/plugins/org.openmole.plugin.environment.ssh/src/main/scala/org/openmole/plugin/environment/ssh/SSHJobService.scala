@@ -29,6 +29,7 @@ import org.openmole.core.batch.environment.Runtime
 import org.openmole.core.batch.environment.BatchJob
 import org.openmole.core.batch.environment.JobService
 import org.openmole.core.batch.environment.SerializedJob
+import org.openmole.core.batch.environment.Storage
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.misc.eventdispatcher.Event
@@ -47,7 +48,11 @@ object SSHJobService extends Logger
 
 import SSHJobService._
 
-class SSHJobService(uri: URI, val environment: SSHEnvironment, nbSlot: Int, override val nbAccess: Int) extends JSAGAJobService(uri) {
+class SSHJobService(
+    val uri: URI,
+    val environment: SSHEnvironment,
+    val nbSlot: Int,
+    override val nbAccess: Int) extends JSAGAJobService {
 
   var queue = new TreeSet[SSHBatchJob]
   var nbRunning = 0
@@ -80,7 +85,7 @@ class SSHJobService(uri: URI, val environment: SSHEnvironment, nbSlot: Int, over
   }
 
   protected def doSubmit(serializedJob: SerializedJob, token: AccessToken) = {
-    val installed = preparedRuntime(serializedJob.runtime)
+    val installed = environment.preparedRuntime(serializedJob.runtime)
     val (remoteScript, result) = withToken(serializedJob.communicationStorage.description, {
       token ⇒
         val tmp = serializedJob.communicationStorage.tmpSpace(token)
@@ -106,7 +111,7 @@ class SSHJobService(uri: URI, val environment: SSHEnvironment, nbSlot: Int, over
     jobDesc.setAttribute(JobDescription.EXECUTABLE, "/bin/bash")
     jobDesc.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](remoteScript.path))
 
-    val job = jobServiceCache.createJob(jobDesc)
+    val job = jobService.createJob(jobDesc)
     val sshJob = new SSHBatchJob(job, result.path, this)
 
     EventDispatcher.listen(sshJob: BatchJob, BatchJobStatusListner, classOf[BatchJob.StateChanged])
@@ -118,45 +123,6 @@ class SSHJobService(uri: URI, val environment: SSHEnvironment, nbSlot: Int, over
       } else queue += sshJob
     }
     sshJob
-  }
-
-  @transient private var installed: String = null
-
-  def preparedRuntime(runtime: Runtime) = synchronized {
-    if (installed == null) {
-      installed = withToken(environment.storage.description, token ⇒ {
-        val workdir = environment.storage.baseDir(token)
-        val script = Workspace.newFile("install", ".sh")
-        val remoteScript = try {
-          script.content =
-            "rm -rf runtime*; mkdir runtime; cd runtime; if [ `uname -m` = x86_64 ]; then cp " + runtime.jvmLinuxX64.path + " jvm.tar.gz.gz;" +
-              "else cp " + runtime.jvmLinuxI386.path + " jvm.tar.gz.gz; fi;" +
-              "gunzip jvm.tar.gz.gz; gunzip jvm.tar.gz; tar -xf jvm.tar; rm jvm.tar;" +
-              "cp " + runtime.runtime.path + " runtime.tar.gz.gz; gunzip runtime.tar.gz.gz; gunzip runtime.tar.gz; tar -xf runtime.tar; rm runtime.tar; mkdir envplugins; PLUGIN=0;" +
-              runtime.environmentPlugins.map { p ⇒ "cp " + p.path + " envplugins/plugin$PLUGIN.jar.gz; gunzip envplugins/plugin$PLUGIN.jar.gz; PLUGIN=`expr $PLUGIN + 1`;" }.foldLeft("") { case (c, s) ⇒ c + s }
-          //     "cp " + runtime.authentication.path + " authentication.xml.gz; gunzip authentication.xml.gz;"
-
-          val remoteScript = workdir.newFileInDir("install", ".sh")
-          URIFile.copy(script, remoteScript, token)
-          remoteScript
-        } finally script.delete
-
-        try {
-          val name = remoteScript.name
-          val install = JobFactory.createJobDescription
-          install.setAttribute(JobDescription.EXECUTABLE, "/bin/bash")
-          install.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](name))
-          install.setAttribute(JobDescription.WORKINGDIRECTORY, workdir.path)
-
-          val job = jobServiceCache.createJob(install)
-          job.run
-          job.get
-        } finally remoteScript.remove(token)
-
-        workdir.child("runtime/").path
-      })
-    }
-    installed
   }
 
 }

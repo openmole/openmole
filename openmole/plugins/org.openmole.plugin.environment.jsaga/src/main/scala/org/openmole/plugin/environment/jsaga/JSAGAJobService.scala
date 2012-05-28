@@ -49,19 +49,21 @@ object JSAGAJobService extends Logger {
   Workspace += (CreationTimeout, "PT2M")
 }
 
-abstract class JSAGAJobService(jobServiceURI: URI) extends JobService {
+trait JSAGAJobService extends JobService {
 
   import JSAGAJobService._
 
-  @transient override lazy val description = new ServiceDescription(jobServiceURI.toString)
+  @transient override lazy val description = new ServiceDescription(uri.toString)
 
-  @transient lazy val jobServiceCache = {
+  @transient lazy val jobService = {
     val task = {
-      val url = URLFactory.createURL(jobServiceURI.toString)
-      JobFactory.createJobService(TaskMode.ASYNC, JSAGASessionService.session(jobServiceURI.toString), url)
+      val url = URLFactory.createURL(uri.toString)
+      JobFactory.createJobService(TaskMode.ASYNC, JSAGASessionService.session(uri.toString), url)
     }
 
     task.get(Workspace.preferenceAsDurationInMs(JSAGAJobService.CreationTimeout), TimeUnit.MILLISECONDS)
   }
+
+  def uri: URI
 
 }

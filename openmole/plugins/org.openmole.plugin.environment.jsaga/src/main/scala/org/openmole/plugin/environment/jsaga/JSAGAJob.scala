@@ -41,7 +41,7 @@ object JSAGAJob extends Logger {
 abstract class JSAGAJob(override val resultPath: String, jobService: JSAGAJobService) extends BatchJob(jobService) {
 
   //var subState: String = ""
-  def job: Job = jobService.jobServiceCache.getJob(jobId)
+  def job: Job = jobService.jobService.getJob(jobId)
   def jobId: String
 
   private def translateStatus(job: Job, state: State) = {
