@@ -21,6 +21,7 @@ import java.awt.Dimension
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
+import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IConnectorUI
@@ -37,9 +38,9 @@ object ConnectorPrototypeFilterDialog {
       case true ⇒
         val prototypePanel = new FilteredPrototypePanel(connectorUI)
         if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel) {
-                verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
-              }.peer,
-                                                                   "Add prototype filters")).equals(NotifyDescriptor.OK_OPTION)){
+          verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
+        }.peer,
+          "Add prototype filters")).equals(NotifyDescriptor.OK_OPTION)) {
           connectorUI.filteredPrototypes = prototypePanel.multiPrototypeCombo.content
           CheckData.checkMole(connectorUI.source.scene)
         }
@@ -58,10 +59,10 @@ object ConnectorPrototypeFilterDialog {
   class FilteredPrototypePanel(connector: IConnectorUI) extends PluginPanel("") {
     preferredSize = new Dimension(250, 300)
     val multiPrototypeCombo = new MultiCombo("Filtered Prototypes",
-                                             connector.availablePrototypes,
-                                             connector.filteredPrototypes,
-                                             CLOSE_IF_EMPTY,
-                                             ADD)
+      connector.availablePrototypes,
+      connector.filteredPrototypes,
+      CLOSE_IF_EMPTY,
+      ADD)
     if (connector.filteredPrototypes.isEmpty) multiPrototypeCombo.removeAllRows
     contents += multiPrototypeCombo.panel
   }
