@@ -37,10 +37,12 @@ object ConnectorPrototypeFilterDialog {
       case true ⇒
         val prototypePanel = new FilteredPrototypePanel(connectorUI)
         if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel) {
-          verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
-        }.peer,
-          "Add prototype filters")).equals(NotifyDescriptor.OK_OPTION))
+                verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
+              }.peer,
+                                                                   "Add prototype filters")).equals(NotifyDescriptor.OK_OPTION)){
           connectorUI.filteredPrototypes = prototypePanel.multiPrototypeCombo.content
+          CheckData.checkMole(connectorUI.source.scene)
+        }
       case false ⇒ StatusBar.warn("No Prototype is defined !")
     }
   }
@@ -56,10 +58,10 @@ object ConnectorPrototypeFilterDialog {
   class FilteredPrototypePanel(connector: IConnectorUI) extends PluginPanel("") {
     preferredSize = new Dimension(250, 300)
     val multiPrototypeCombo = new MultiCombo("Filtered Prototypes",
-      connector.availablePrototypes,
-      connector.filteredPrototypes,
-      CLOSE_IF_EMPTY,
-      ADD)
+                                             connector.availablePrototypes,
+                                             connector.filteredPrototypes,
+                                             CLOSE_IF_EMPTY,
+                                             ADD)
     if (connector.filteredPrototypes.isEmpty) multiPrototypeCombo.removeAllRows
     contents += multiPrototypeCombo.panel
   }
