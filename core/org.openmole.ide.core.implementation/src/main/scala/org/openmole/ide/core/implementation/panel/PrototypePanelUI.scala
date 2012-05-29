@@ -61,7 +61,7 @@ class PrototypePanelUI[T](proxy: IPrototypeDataProxyUI,
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
           erase
           capsulesWithProtos.foreach { _.dataUI.task.get.dataUI.removePrototypeOccurencies(proxy) }
-          scene.manager.dataChannels.foreach { dc ⇒ dc.filteredPrototypes = dc.filteredPrototypes.filterNot { _ == proxy } }
+          scene.manager.connectors.foreach { dc ⇒ dc.filteredPrototypes = dc.filteredPrototypes.filterNot { _ == proxy } }
         }
     }
 

@@ -39,8 +39,6 @@ trait IMoleScene {
 
   def createConnectEdge(sourceNodeID: String, targetNodeID: String)
 
-  def createDataChannelEdge(sourceNodeID: String, targetNodeID: String)
-
   def createEdge(sourceNodeID: String, targetNodeID: String, id: String)
 
   def isBuildScene: Boolean

@@ -22,12 +22,17 @@ import java.awt.event.ActionListener
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.workflow.ConnectorWidget
+import org.openmole.ide.core.model.workflow.ITransitionUI
 
 class AggregationTransitionAction(connectionWidget: ConnectorWidget) extends ActionListener {
   override def actionPerformed(ae: ActionEvent) = {
-    if (connectionWidget.transition.transitionType == BASIC_TRANSITION) connectionWidget.transition.transitionType = AGGREGATION_TRANSITION
-    else connectionWidget.transition.transitionType = BASIC_TRANSITION
-    connectionWidget.drawTransitionType
-    CheckData.checkMole(connectionWidget.scene)
+    connectionWidget.connector match {
+      case x: ITransitionUI ⇒
+        if (x.transitionType == BASIC_TRANSITION) x.transitionType = AGGREGATION_TRANSITION
+        else x.transitionType = BASIC_TRANSITION
+        connectionWidget.drawTransitionType
+        CheckData.checkMole(connectionWidget.scene)
+      case _ ⇒
+    }
   }
 }

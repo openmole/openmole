@@ -22,6 +22,7 @@ import com.thoughtworks.xstream.converters.MarshallingContext
 import com.thoughtworks.xstream.converters.UnmarshallingContext
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
+import org.openmole.ide.core.model.workflow.ITransitionUI
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 import java.awt.Point
@@ -30,6 +31,7 @@ import java.awt.Toolkit
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.MoleDataUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.model.workflow.IDataChannelUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
@@ -105,29 +107,25 @@ class MoleSceneConverter extends Converter {
     })
 
     //Transitions
-    molescene.manager.transitions.foreach(trans ⇒ {
-      writer.startNode("transition")
-      writer.addAttribute("source", (firstSlotID(trans.source) + trans.source.nbInputSlots).toString)
-      writer.addAttribute("target", iSlotMapping(trans.target).toString)
-      writer.addAttribute("type", TransitionType.toString(trans.transitionType))
-      writer.addAttribute("condition", trans.condition.getOrElse(""))
-      trans.filteredPrototypes.foreach { p ⇒
+    molescene.manager.connectors.foreach(c ⇒ {
+      c match {
+        case x: ITransitionUI ⇒ writer.startNode("transition")
+        case x: IDataChannelUI ⇒ writer.startNode("datachannel")
+        case _ ⇒
+      }
+
+      writer.addAttribute("source", (firstSlotID(c.source) + c.source.nbInputSlots).toString)
+      writer.addAttribute("target", iSlotMapping(c.target).toString)
+      c.filteredPrototypes.foreach { p ⇒
         writer.startNode("filteredPrototype")
         writer.addAttribute("id", p.id.toString)
         writer.endNode
       }
-      writer.endNode
-    })
-
-    //Data channels
-    molescene.manager.dataChannels.foreach(dc ⇒ {
-      writer.startNode("datachannel")
-      writer.addAttribute("source", (firstSlotID(dc.source) + dc.source.nbInputSlots).toString)
-      writer.addAttribute("target", iSlotMapping(dc.target).toString)
-      dc.filteredPrototypes.foreach { p ⇒
-        writer.startNode("filteredPrototype")
-        writer.addAttribute("id", p.id.toString)
-        writer.endNode
+      c match {
+        case x: ITransitionUI ⇒
+          writer.addAttribute("type", TransitionType.toString(x.transitionType))
+          writer.addAttribute("condition", x.condition.getOrElse(""))
+        case _ ⇒
       }
       writer.endNode
     })
@@ -183,7 +181,6 @@ class MoleSceneConverter extends Converter {
           }
         }
         case "transition" ⇒
-          ScenesManager.connectMode = true
           SceneItemFactory.createTransition(scene,
             oslots(reader.getAttribute("source")),
             islots(reader.getAttribute("target")),
@@ -192,7 +189,6 @@ class MoleSceneConverter extends Converter {
             Proxys.prototypes.filter { p ⇒ readFiltered(reader).contains(p.id) }.toList)
 
         case "datachannel" ⇒
-          ScenesManager.connectMode = false
           SceneItemFactory.createDataChannel(scene,
             oslots(reader.getAttribute("source")),
             islots(reader.getAttribute("target")),

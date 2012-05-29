@@ -41,17 +41,17 @@ object SceneItemFactory {
                        s: ICapsuleUI,
                        t: IInputSlotWidget,
                        transitionType: TransitionType.Value,
-                       cond: Option[String],
-                       li: List[IPrototypeDataProxyUI]) = {
-    if (scene.manager.registerTransition(s, t, transitionType, cond, li))
+                       cond: Option[String] = None,
+                       li: List[IPrototypeDataProxyUI] = List.empty) = {
+    if (scene.manager.registerConnector(new TransitionUI(s, t, transitionType, cond, li)))
       scene.createConnectEdge(scene.manager.capsuleID(s), scene.manager.capsuleID(t.capsule))
   }
 
   def createDataChannel(scene: IMoleScene,
                         s: ICapsuleUI,
                         t: IInputSlotWidget,
-                        li: List[IPrototypeDataProxyUI]) = {
-    if (scene.manager.registerDataChannel(s, t, li))
-      scene.createDataChannelEdge(scene.manager.capsuleID(s), scene.manager.capsuleID(t.capsule))
+                        li: List[IPrototypeDataProxyUI] = List.empty) = {
+    if (scene.manager.registerConnector(new DataChannelUI(s, t, li)))
+      scene.createConnectEdge(scene.manager.capsuleID(s), scene.manager.capsuleID(t.capsule))
   }
 }

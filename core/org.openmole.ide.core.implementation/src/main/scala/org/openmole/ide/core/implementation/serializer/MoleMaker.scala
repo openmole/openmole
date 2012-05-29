@@ -41,6 +41,7 @@ import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.transition._
 import org.openmole.ide.misc.tools.check.TypeCheck
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.model.workflow.IDataChannelUI
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.ITask
@@ -97,12 +98,17 @@ object MoleMaker {
 
       capsuleMap.foreach {
         case (cui, ccore) ⇒
-          manager.capsuleConnections(cui.dataUI).foreach(t ⇒ buildTransition(ccore, capsuleMap(t.target.capsule), t, prototypeMap))
-      }
+          manager.capsuleConnections(cui.dataUI).foreach { t ⇒
+            t match {
+              case x: ITransitionUI ⇒ buildTransition(ccore,
+                capsuleMap(x.target.capsule),
+                x, prototypeMap)
 
-      manager.dataChannels.foreach { dc ⇒
-        new DataChannel(capsuleMap(dc.source), capsuleMap(dc.target.capsule),
-          dc.filteredPrototypes.map { p ⇒ prototypeMap(p).name }.toSeq: _*)
+              case x: IDataChannelUI ⇒ new DataChannel(capsuleMap(x.source),
+                capsuleMap(x.target.capsule),
+                x.filteredPrototypes.map { p ⇒ prototypeMap(p).name }.toSeq: _*)
+            }
+          }
       }
 
       (new Mole(capsuleMap(manager.startingCapsule.get)), capsuleMap, prototypeMap, errors)

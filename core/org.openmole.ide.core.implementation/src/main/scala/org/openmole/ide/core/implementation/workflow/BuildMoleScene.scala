@@ -22,16 +22,13 @@ import org.netbeans.api.visual.anchor.PointShape
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.panel.PanelMode
 import org.openmole.ide.core.model.workflow.ICapsuleUI
+import org.openmole.ide.core.model.workflow.IDataChannelUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.netbeans.api.visual.action.ActionFactory
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.implementation.panel.EnvironmentPanelUI
-import org.openmole.ide.core.implementation.panel.PrototypePanelUI
-import org.openmole.ide.core.implementation.panel.SamplingPanelUI
-import org.openmole.ide.core.implementation.panel.TaskPanelUI
-import org.openmole.ide.core.implementation.provider.DataChannelMenuProvider
-import org.openmole.ide.core.implementation.provider.TransitionMenuProvider
+import org.openmole.ide.core.implementation.provider.ConnectorMenuProvider
 import org.openmole.ide.core.model.commons.Constants._
+import org.openmole.ide.core.model.workflow.ITransitionUI
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import org.openmole.ide.core.model.panel.PanelMode._
@@ -52,18 +49,21 @@ class BuildMoleScene(n: String = "",
       islots ++= islotMapping
       caps.setAsValid
     })
-    //   val connectMode = ScenesManager.connectMode
-    //   ScenesManager.connectMode = true
-    manager.transitions.foreach(t ⇒ {
-      SceneItemFactory.createTransition(ms, capsuleMapping(t.source),
-        islots(t.target),
-        t.transitionType,
-        t.condition,
-        t.filteredPrototypes)
-    })
-    //   ScenesManager.connectMode = false
-    // manager.dataChannels.foreach(dc=>{SceneItemFactory.createDataChannel(ms, capsuleMapping(dc.source),capsuleMapping(dc.target),dc.prototypes)})
-    //  ScenesManager.connectMode = connectMode
+    manager.connectors.foreach { c ⇒
+      c match {
+        case t: ITransitionUI ⇒
+          SceneItemFactory.createTransition(ms, capsuleMapping(t.source),
+            islots(t.target),
+            t.transitionType,
+            t.condition,
+            t.filteredPrototypes)
+        case dc: IDataChannelUI ⇒
+          SceneItemFactory.createDataChannel(ms, capsuleMapping(dc.source),
+            islots(dc.target),
+            dc.filteredPrototypes)
+        case _ ⇒
+      }
+    }
     ms
   }
 
@@ -74,17 +74,9 @@ class BuildMoleScene(n: String = "",
   }
 
   def attachEdgeWidget(e: String) = {
-    val connectionWidget = ScenesManager.connectMode match {
-      case true ⇒
-        val x = new ConnectorWidget(this, manager.transition(e))
-        x.setEndPointShape(PointShape.SQUARE_FILLED_BIG)
-        x.getActions.addAction(ActionFactory.createPopupMenuAction(new TransitionMenuProvider(this, x)))
-        x
-      case false ⇒
-        val x = new DataChannelConnectionWidget(this, manager.dataChannel(e))
-        x.getActions.addAction(ActionFactory.createPopupMenuAction(new DataChannelMenuProvider(this, x)))
-        x
-    }
+    val connectionWidget = new ConnectorWidget(this, manager.connector(e))
+    connectionWidget.setEndPointShape(PointShape.SQUARE_FILLED_BIG)
+    connectionWidget.getActions.addAction(ActionFactory.createPopupMenuAction(new ConnectorMenuProvider(this, connectionWidget)))
     connectionWidget.setRouter(new MoleRouter(this))
     connectLayer.addChild(connectionWidget)
     connectionWidget.getActions.addAction(createObjectHoverAction)

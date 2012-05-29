@@ -30,8 +30,6 @@ import scala.collection.mutable.HashSet
 import scala.swing.Action
 import scala.swing.Panel
 import org.openmole.ide.misc.tools.image.Images._
-import scala.swing.ToggleButton
-import scala.swing.event.ButtonClicked
 
 class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISceneContainer { buildContainer ⇒
 
@@ -44,23 +42,6 @@ class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISce
     contents += new ToolBarButton(MOLE_SETTINGS,
       "Mole settings",
       displayMoleSettingsDialogAction)
-
-    val connectionButton = new ToggleButton {
-      icon = CONNECT_TRANSITION_MODE
-      selected = true
-    }
-
-    listenTo(connectionButton)
-    reactions += {
-      case x: ButtonClicked ⇒
-        ScenesManager.connectMode = connectionButton.selected
-        ScenesManager.connectMode match {
-          case true ⇒ connectionButton.icon = CONNECT_TRANSITION_MODE
-          case false ⇒ connectionButton.icon = DATA_CHANNEL_TRANSITION_MODE
-        }
-    }
-
-    contents += connectionButton
 
     contents += new ToolBarButton(BUILD_EXECUTION,
       "Build the workflow",

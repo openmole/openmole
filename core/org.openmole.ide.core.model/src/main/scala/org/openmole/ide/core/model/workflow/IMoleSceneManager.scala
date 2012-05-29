@@ -18,10 +18,8 @@
 package org.openmole.ide.core.model.workflow
 
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
-import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.data.IMoleDataUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 
@@ -44,9 +42,7 @@ trait IMoleSceneManager {
 
   def getEdgeID: String
 
-  def dataChannelID(dc: IDataChannelUI): String
-
-  def getDataChannelID: String
+  def connectorID(dc: IConnectorUI): String
 
   def capsuleID(cv: ICapsuleUI): String
 
@@ -54,7 +50,7 @@ trait IMoleSceneManager {
 
   def startingCapsule: Option[ICapsuleUI]
 
-  def capsuleConnections: HashMap[ICapsuleDataUI, HashSet[ITransitionUI]]
+  def capsuleConnections: HashMap[ICapsuleDataUI, HashSet[IConnectorUI]]
 
   def removeCapsuleUI(nodeID: String): String
 
@@ -64,37 +60,14 @@ trait IMoleSceneManager {
 
   def setStartingCapsule(capsule: ICapsuleUI)
 
-  def transitions: Iterable[ITransitionUI]
+  def connectors: Iterable[IConnectorUI]
 
-  def dataChannels: Iterable[IDataChannelUI]
+  def connector(dID: String): IConnectorUI
 
-  def transition(edgeID: String): ITransitionUI
+  def removeConnector(edgeID: String)
 
-  def dataChannel(dID: String): IDataChannelUI
+  def registerConnector(connector: IConnectorUI): Boolean
 
-  def removeTransition(edgeID: String)
-
-  def removeDataChannel(id: String)
-
-  def registerTransition(s: ICapsuleUI,
-                         t: IInputSlotWidget,
-                         transitionType: TransitionType.Value,
-                         cond: Option[String],
-                         filtered: List[IPrototypeDataProxyUI]): Boolean
-
-  def registerTransition(edgeID: String,
-                         s: ICapsuleUI,
-                         t: IInputSlotWidget,
-                         transitionType: TransitionType.Value,
-                         cond: Option[String],
-                         filtered: List[IPrototypeDataProxyUI]): Boolean
-
-  def registerDataChannel(id: String,
-                          source: ICapsuleUI,
-                          target: IInputSlotWidget,
-                          prototypes: List[IPrototypeDataProxyUI]): Boolean
-
-  def registerDataChannel(source: ICapsuleUI,
-                          target: IInputSlotWidget,
-                          prototypes: List[IPrototypeDataProxyUI]): Boolean
+  def registerConnector(edgeID: String,
+                        connector: IConnectorUI): Boolean
 }

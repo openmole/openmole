@@ -82,7 +82,6 @@ object GUISerializer {
       case eof: EOFException ⇒ println("Ugly stop condition of Xstream reader !")
     } finally {
       in.close
-      ScenesManager.connectMode = true
     }
   }
 }

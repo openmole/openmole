@@ -78,7 +78,14 @@ abstract class MoleScene(n: String = "",
 
   getActions.addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)))
 
-  val connectAction = ActionFactory.createExtendedConnectAction(null, connectLayer, new MoleSceneConnectProvider, InputEvent.SHIFT_MASK)
+  val connectAction = ActionFactory.createExtendedConnectAction(null,
+    connectLayer,
+    new MoleSceneTransitionProvider,
+    InputEvent.SHIFT_MASK)
+
+  val dataChannelAction = ActionFactory.createExtendedConnectAction(null, connectLayer,
+    new MoleSceneDataChannelProvider,
+    InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK)
 
   override def paintChildren = {
 
@@ -170,9 +177,6 @@ abstract class MoleScene(n: String = "",
   def createConnectEdge(sourceNodeID: String, targetNodeID: String) =
     createEdge(sourceNodeID, targetNodeID, manager.getEdgeID)
 
-  def createDataChannelEdge(sourceNodeID: String, targetNodeID: String) =
-    createEdge(sourceNodeID, targetNodeID, manager.getDataChannelID)
-
   override def createEdge(sourceNodeID: String, targetNodeID: String, id: String) = {
     addEdge(id)
     setEdgeSource(id, sourceNodeID)
@@ -182,12 +186,7 @@ abstract class MoleScene(n: String = "",
   override def attachEdgeSourceAnchor(edge: String, oldSourceNode: String, sourceNode: String) = {
     if (findWidget(sourceNode) != null) {
       val slotAnchor = new OutputSlotAnchor(findWidget(sourceNode).asInstanceOf[ICapsuleUI])
-      ScenesManager.connectMode match {
-        case true ⇒
-          findWidget(edge).asInstanceOf[ConnectorWidget].setSourceAnchor(slotAnchor)
-        case false ⇒
-          findWidget(edge).asInstanceOf[DataChannelConnectionWidget].setSourceAnchor(slotAnchor)
-      }
+      findWidget(edge).asInstanceOf[ConnectorWidget].setSourceAnchor(slotAnchor)
     }
   }
 
@@ -195,12 +194,7 @@ abstract class MoleScene(n: String = "",
     val targetWidget =
       if (findWidget(targetNode) != null) {
         val slotAnchor = new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex)
-        ScenesManager.connectMode match {
-          case true ⇒
-            findWidget(edge).asInstanceOf[ConnectorWidget].setTargetAnchor(slotAnchor)
-          case false ⇒
-            findWidget(edge).asInstanceOf[DataChannelConnectionWidget].setTargetAnchor(slotAnchor)
-        }
+        findWidget(edge).asInstanceOf[ConnectorWidget].setTargetAnchor(slotAnchor)
       }
   }
 
@@ -209,7 +203,7 @@ abstract class MoleScene(n: String = "",
     obUI.get
   }
 
-  class MoleSceneConnectProvider extends ConnectProvider {
+  class MoleSceneTransitionProvider extends ConnectProvider {
     var source: Option[String] = None
     var target: Option[String] = None
 
@@ -244,15 +238,21 @@ abstract class MoleScene(n: String = "",
 
     override def createConnection(sourceWidget: Widget, targetWidget: Widget) = {
       val sourceCapsuleUI = sourceWidget.asInstanceOf[CapsuleUI]
-      ScenesManager.connectMode match {
-        case true ⇒
-          if (manager.registerTransition(sourceCapsuleUI, targetWidget.asInstanceOf[InputSlotWidget], sourceCapsuleUI.dataUI.transitionType, None))
-            createConnectEdge(source.get, target.get)
-        case false ⇒
-          if (manager.registerDataChannel(sourceCapsuleUI, targetWidget.asInstanceOf[InputSlotWidget]))
-            createDataChannelEdge(source.get, target.get)
-      }
+      SceneItemFactory.createTransition(moleScene,
+        sourceCapsuleUI,
+        targetWidget.asInstanceOf[InputSlotWidget],
+        sourceCapsuleUI.dataUI.transitionType)
       CheckData.checkMole(moleScene)
     }
+  }
+
+  class MoleSceneDataChannelProvider extends MoleSceneTransitionProvider {
+    override def createConnection(sourceWidget: Widget, targetWidget: Widget) = {
+      SceneItemFactory.createDataChannel(moleScene,
+        sourceWidget.asInstanceOf[CapsuleUI],
+        targetWidget.asInstanceOf[InputSlotWidget])
+      CheckData.checkMole(moleScene)
+    }
+
   }
 }

@@ -27,6 +27,8 @@ import org.netbeans.api.visual.anchor.AnchorShapeFactory
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.widget.ConnectionWidget
 import org.netbeans.api.visual.layout.LayoutFactory
+import org.openmole.ide.core.model.workflow.IConnectorUI
+import org.openmole.ide.core.model.workflow.IDataChannelUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.workflow.ITransitionUI
 import org.openmole.ide.core.implementation.dialog.ConnectorPrototypeFilterDialog
@@ -39,53 +41,74 @@ import scala.swing.event.MousePressed
 import org.openmole.ide.misc.tools.image.Images._
 
 class ConnectorWidget(val scene: IMoleScene,
-                      val transition: ITransitionUI,
+                      var connector: IConnectorUI,
                       var toBeEdited: Boolean = false) extends ConnectionWidget(scene.graphScene) { connectorWidget ⇒
 
   val label = new ConnectorLabel
   val componentWidget = new ConditionWidget(scene, label)
-  setConstraint(componentWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.66f)
+  // setConstraint(componentWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.66f)
 
-  transition.condition match {
-    case Some(x: String) ⇒ label.text = x
-    case None ⇒
+  connector match {
+    case x: ITransitionUI ⇒ x.condition match {
+        case Some(t: String) ⇒ 
+          label.text = t
+          addChild(componentWidget)
+        case None ⇒
+      }
+    case _ ⇒
   }
 
   val prototypeFilterWidget = new PrototypeOnConnectorWidget(scene,
-    transition,
-    new LinkLabel(transition.nbPrototypes.toString,
-      new Action("") { def apply = editPrototypeFilter }, 10))
+                                                             connector,
+                                                             new LinkLabel(connector.nbPrototypes.toString,
+                                                                           new Action("") { def apply = editPrototypeFilter }, 10))
 
-  setConstraint(prototypeFilterWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
-  prototypeFilterWidget.setOpaque(true)
   addChild(prototypeFilterWidget)
-  addChild(componentWidget)
 
-  setLabelVisible
   drawTransitionType
+  setLabelVisible
   toBeEdited = true
 
-  setStroke(new BasicStroke(3f))
+  def setConnnector(c: IConnectorUI) {
+    connector = c
+    println("connector changed for : " + connector)
+    setLabelVisible
+  }
 
   def setLabelVisible = {
-    componentWidget.setVisible(!label.text.isEmpty)
     removeConstraint(prototypeFilterWidget)
-    setConstraint(prototypeFilterWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER,
-      if (label.text.isEmpty) 0.5f else 0.33f)
-    label.revalidate
+    connector match {
+      case x: ITransitionUI ⇒
+        componentWidget.setVisible(!label.text.isEmpty)
+        setLineColor(new Color(130, 130, 130))
+        setStroke(new BasicStroke(3f))
+        setConstraint(prototypeFilterWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER,
+                      if (label.text.isEmpty) 0.5f else 0.33f)
+        label.revalidate
+      case x: IDataChannelUI ⇒
+        setLineColor(new Color(188, 188, 188))
+        setStroke(new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 20.0f, List(10.0f).toArray, 0.0f))
+        setConstraint(prototypeFilterWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
+        setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
+      case _ ⇒
+    }
+    prototypeFilterWidget.setOpaque(true)
     scene.refresh
   }
 
-  def drawTransitionType = {
-    transition.transitionType match {
-      case EXPLORATION_TRANSITION ⇒ setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(EXPLORATION_TRANSITON, false))
-      case AGGREGATION_TRANSITION ⇒ setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(AGGREGATION_TRANSITON, false))
-      case _ ⇒ setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
+  def drawTransitionType =
+    connector match {
+      case x: ITransitionUI ⇒
+        x.transitionType match {
+          case EXPLORATION_TRANSITION ⇒ setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(EXPLORATION_TRANSITON, false))
+          case AGGREGATION_TRANSITION ⇒ setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(AGGREGATION_TRANSITON, false))
+          case _ ⇒ setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
+        }
+      case _ ⇒
     }
-  }
 
   def editPrototypeFilter: Unit = {
-    ConnectorPrototypeFilterDialog.display(transition)
+    ConnectorPrototypeFilterDialog.display(connector)
     scene.refresh
   }
 
@@ -95,7 +118,7 @@ class ConnectorWidget(val scene: IMoleScene,
     override def paintBackground = {
       val g = scene.graphScene.getGraphics
       g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-        RenderingHints.VALUE_ANTIALIAS_ON)
+                         RenderingHints.VALUE_ANTIALIAS_ON)
       g.setColor(new Color(0, 0, 0, 200))
       g.fillRoundRect(0, 0, label.size.width, label.size.height, 10, 10)
       revalidate
@@ -104,7 +127,7 @@ class ConnectorWidget(val scene: IMoleScene,
     override def paintBorder = {
       val g = scene.graphScene.getGraphics
       g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-        RenderingHints.VALUE_ANTIALIAS_ON)
+                         RenderingHints.VALUE_ANTIALIAS_ON)
       g.setStroke(new BasicStroke(3f))
       g.setColor(new Color(200, 200, 200))
       g.drawRoundRect(0, 0, label.size.width + 1, label.size.height + 1, 10, 10)
@@ -125,7 +148,10 @@ class ConnectorWidget(val scene: IMoleScene,
     def edit = {
       if (toBeEdited) {
         text = DialogFactory.groovyEditor("Condition", text)
-        connectorWidget.transition.condition = if (text.isEmpty) None else Some(text)
+        connectorWidget.connector match {
+          case x: ITransitionUI ⇒ x.condition = if (text.isEmpty) None else Some(text)
+          case _ ⇒
+        }
         connectorWidget.setLabelVisible
         revalidate
       }

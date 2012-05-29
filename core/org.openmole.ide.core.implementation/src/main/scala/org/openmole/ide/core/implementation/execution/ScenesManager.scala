@@ -42,7 +42,6 @@ object ScenesManager {
 
   var countBuild = new AtomicInteger
   var countExec = new AtomicInteger
-  var connectMode = true
   PasswordListner.apply
 
   def buildMoleSceneContainers = tabPane.pages.flatMap(_.content match {

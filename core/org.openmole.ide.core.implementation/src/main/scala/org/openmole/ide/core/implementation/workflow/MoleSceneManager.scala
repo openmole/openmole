@@ -19,12 +19,9 @@ package org.openmole.ide.core.implementation.workflow
 
 import scala.collection.mutable.HashMap
 import org.apache.commons.collections15.bidimap.DualHashBidiMap
-import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.data.IMoleDataUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.ide.core.implementation.data.MoleDataUI
 import org.openmole.ide.core.model.commons.Constants._
@@ -37,12 +34,10 @@ class MoleSceneManager(var name: String,
 
   var startingCapsule: Option[ICapsuleUI] = None
   var capsules = new DualHashBidiMap[String, ICapsuleUI]
-  var transitionMap = new DualHashBidiMap[String, ITransitionUI]
-  var dataChannelMap = new DualHashBidiMap[String, IDataChannelUI]
-  var capsuleConnections = new HashMap[ICapsuleDataUI, HashSet[ITransitionUI]]
+  var connectorMap = new DualHashBidiMap[String, IConnectorUI]
+  var capsuleConnections = new HashMap[ICapsuleDataUI, HashSet[IConnectorUI]]
   var nodeID = 0
   var edgeID = 0
-  var dataChannelID = 0
 
   var dataUI: IMoleDataUI = new MoleDataUI
 
@@ -59,13 +54,11 @@ class MoleSceneManager(var name: String,
 
   def getEdgeID: String = "edge" + edgeID
 
-  def getDataChannelID: String = "dc" + dataChannelID
-
   override def registerCapsuleUI(cv: ICapsuleUI) = {
     nodeID += 1
     capsules.put(getNodeID, cv)
     if (capsules.size == 1) startingCapsule = Some(cv)
-    capsuleConnections += cv.dataUI -> HashSet.empty[ITransitionUI]
+    capsuleConnections += cv.dataUI -> HashSet.empty[IConnectorUI]
   }
 
   def removeCapsuleUI(capsule: ICapsuleUI): String = removeCapsuleUI(capsuleID(capsule))
@@ -76,84 +69,46 @@ class MoleSceneManager(var name: String,
       case Some(caps: ICapsuleUI) ⇒ if (capsules.get(nodeID) == caps) startingCapsule = None
     }
 
-    //remove following transitionMap
-    capsuleConnections(capsules.get(nodeID).dataUI).foreach { x ⇒ transitionMap.removeValue(x) }
+    capsuleConnections(capsules.get(nodeID).dataUI).foreach { x ⇒ connectorMap.removeValue(x) }
     capsuleConnections -= capsules.get(nodeID).dataUI
 
-    //remove incoming transitionMap
     removeIncomingTransitions(capsules.get(nodeID))
-    removeDataChannel(capsules.get(nodeID))
 
     capsules.remove(nodeID)
     nodeID
   }
 
-  def dataChannelID(dc: IDataChannelUI) = dataChannelMap.getKey(dc)
+  def connector(cID: String) = connectorMap.get(cID)
+
+  def connectorID(c: IConnectorUI) = connectorMap.getKey(c)
+
+  def connectors = connectorMap.values
 
   def capsuleID(cv: ICapsuleUI) = capsules.getKey(cv)
 
-  def transitions = transitionMap.values
-
-  def dataChannels = dataChannelMap.values
-
-  def transition(eID: String) = transitionMap.get(eID)
-
-  def dataChannel(dID: String) = dataChannelMap.get(dID)
-
   private def removeIncomingTransitions(capsule: ICapsuleUI) =
-    transitionMap.filter { _._2.target.capsule == capsule }.foreach { t ⇒
-      removeTransition(t._1)
+    connectorMap.filter { _._2.target.capsule == capsule }.foreach { t ⇒
+      removeConnector(t._1)
     }
 
-  def removeTransition(edgeID: String) = removeTransition(edgeID, transitionMap.get(edgeID))
+  def removeConnector(edgeID: String): Unit = removeConnector(edgeID, connectorMap.get(edgeID))
 
-  def removeTransition(edgeID: String,
-                       transition: ITransitionUI) = {
-    transitionMap.remove(edgeID)
-    capsuleConnections(transition.source.dataUI) -= transition
+  def removeConnector(edgeID: String,
+                      connector: IConnectorUI): Unit = {
+    connectorMap.remove(edgeID)
+    capsuleConnections(connector.source.dataUI) -= connector
   }
 
-  def removeDataChannel(id: String): Unit = dataChannelMap.remove(id)
-
-  def removeDataChannel(capsule: ICapsuleUI): Unit = {
-    dataChannelMap.filter { case (k, v) ⇒ (v.source == capsule || v.target == capsule) }.
-      foreach { m ⇒ removeDataChannel(m._1) }
-  }
-
-  def registerDataChannel(source: ICapsuleUI,
-                          target: IInputSlotWidget,
-                          filetered: List[IPrototypeDataProxyUI] = List.empty): Boolean = {
-    dataChannelID += 1
-    registerDataChannel(getDataChannelID, source, target, filetered)
-  }
-
-  def registerDataChannel(id: String,
-                          source: ICapsuleUI,
-                          target: IInputSlotWidget,
-                          filetered: List[IPrototypeDataProxyUI]): Boolean = {
-    if (!dataChannelMap.keys.contains(id)) { dataChannelMap.put(id, new DataChannelUI(source, target, filetered)); return true }
-    false
-  }
-
-  def registerTransition(s: ICapsuleUI,
-                         t: IInputSlotWidget,
-                         transitionType: TransitionType.Value,
-                         cond: Option[String],
-                         filtered: List[IPrototypeDataProxyUI] = List.empty): Boolean = {
+  def registerConnector(connector: IConnectorUI): Boolean = {
     edgeID += 1
-    registerTransition(getEdgeID, s, t, transitionType, cond, filtered)
+    registerConnector(getEdgeID, connector)
   }
 
-  def registerTransition(edgeID: String,
-                         s: ICapsuleUI,
-                         t: IInputSlotWidget,
-                         transitionType: TransitionType.Value,
-                         cond: Option[String],
-                         filtered: List[IPrototypeDataProxyUI]): Boolean = {
-    if (!transitionMap.keys.contains(edgeID)) {
-      val transition = new TransitionUI(s, t, transitionType, cond, filtered)
-      transitionMap.put(edgeID, transition)
-      capsuleConnections(transition.source.dataUI) += transition
+  def registerConnector(edgeID: String,
+                        connector: IConnectorUI): Boolean = {
+    if (!connectorMap.keys.contains(edgeID)) {
+      connectorMap.put(edgeID, connector)
+      capsuleConnections(connector.source.dataUI) += connector
       return true
     }
     false
