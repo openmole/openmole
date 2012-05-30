@@ -85,7 +85,7 @@ abstract class MoleScene(n: String = "",
 
   val dataChannelAction = ActionFactory.createExtendedConnectAction(null, connectLayer,
     new MoleSceneDataChannelProvider,
-    InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK)
+    InputEvent.CTRL_MASK)
 
   override def paintChildren = {
 

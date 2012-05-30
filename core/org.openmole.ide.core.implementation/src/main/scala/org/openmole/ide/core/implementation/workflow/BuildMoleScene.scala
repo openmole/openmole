@@ -70,6 +70,7 @@ class BuildMoleScene(n: String = "",
   def initCapsuleAdd(w: ICapsuleUI) = {
     obUI = Some(w.asInstanceOf[Widget])
     obUI.get.createActions(CONNECT).addAction(connectAction)
+    obUI.get.createActions(CONNECT).addAction(dataChannelAction)
     obUI.get.createActions(CONNECT).addAction(moveAction)
   }
 
