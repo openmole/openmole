@@ -116,16 +116,16 @@ class MoleSceneConverter extends Converter {
 
       writer.addAttribute("source", (firstSlotID(c.source) + c.source.nbInputSlots).toString)
       writer.addAttribute("target", iSlotMapping(c.target).toString)
-      c.filteredPrototypes.foreach { p ⇒
-        writer.startNode("filteredPrototype")
-        writer.addAttribute("id", p.id.toString)
-        writer.endNode
-      }
       c match {
         case x: ITransitionUI ⇒
           writer.addAttribute("type", TransitionType.toString(x.transitionType))
           writer.addAttribute("condition", x.condition.getOrElse(""))
         case _ ⇒
+      }
+      c.filteredPrototypes.foreach { p ⇒
+        writer.startNode("filteredPrototype")
+        writer.addAttribute("id", p.id.toString)
+        writer.endNode
       }
       writer.endNode
     })
