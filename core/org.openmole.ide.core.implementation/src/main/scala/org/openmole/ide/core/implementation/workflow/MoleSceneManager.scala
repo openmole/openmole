@@ -91,6 +91,13 @@ class MoleSceneManager(var name: String,
       removeConnector(t._1)
     }
 
+  def changeConnector(oldConnector: IConnectorUI,
+                      connector: IConnectorUI) = {
+    connectorMap(connectorID(oldConnector)) = connector
+    capsuleConnections(connector.source.dataUI) -= oldConnector
+    capsuleConnections(connector.source.dataUI) += connector
+  }
+
   def removeConnector(edgeID: String): Unit = removeConnector(edgeID, connectorMap.get(edgeID))
 
   def removeConnector(edgeID: String,
@@ -106,9 +113,9 @@ class MoleSceneManager(var name: String,
 
   def registerConnector(edgeID: String,
                         connector: IConnectorUI): Boolean = {
+    capsuleConnections(connector.source.dataUI) += connector
     if (!connectorMap.keys.contains(edgeID)) {
       connectorMap.put(edgeID, connector)
-      capsuleConnections(connector.source.dataUI) += connector
       return true
     }
     false

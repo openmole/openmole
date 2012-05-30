@@ -27,8 +27,7 @@ trait IConnectorUI {
 
   def nbPrototypes: Int = {
     val availables = availablePrototypes
-    filteredPrototypes = filteredPrototypes.filter { p ⇒ availables.contains(p) }
-    availables.size - filteredPrototypes.size
+    availables.size - filteredPrototypes.filter { p ⇒ availables.contains(p) }.size
   }
 
   def availablePrototypes: List[IPrototypeDataProxyUI] =

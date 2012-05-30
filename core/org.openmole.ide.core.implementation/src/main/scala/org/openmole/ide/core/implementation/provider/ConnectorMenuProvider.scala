@@ -67,25 +67,27 @@ class ConnectorMenuProvider(scene: MoleScene,
         }
         itChange = new MenuItem(new Action("to Data channel") {
           override def apply {
-            scene.manager.removeConnector(scene.manager.connectorID(x))
+            //  scene.manager.removeConnector(scene.manager.connectorID(x))
             val newC = new DataChannelUI(x.source,
               x.target,
               x.filteredPrototypes)
-            scene.manager.registerConnector(newC)
+            //  scene.manager.registerConnector(newC)
+            scene.manager.changeConnector(x, newC)
             connectionWidget.setConnnector(newC)
           }
         })
       case x: IDataChannelUI ⇒
         itChange = new MenuItem(new Action("to Transition") {
           override def apply {
-            scene.manager.removeConnector(scene.manager.connectorID(x))
+            //  scene.manager.removeConnector(scene.manager.connectorID(x))
             val newC = new TransitionUI(x.source,
               x.target,
               BASIC_TRANSITION,
               None,
               x.filteredPrototypes)
+            scene.manager.changeConnector(x, newC)
             connectionWidget.setConnnector(newC)
-            scene.manager.registerConnector(newC)
+            // scene.manager.registerConnector(newC)
           }
         })
       case _ ⇒

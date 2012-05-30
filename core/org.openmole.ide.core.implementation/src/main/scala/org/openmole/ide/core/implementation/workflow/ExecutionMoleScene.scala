@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.implementation.workflow
 
+import org.netbeans.api.visual.anchor.PointShape
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode

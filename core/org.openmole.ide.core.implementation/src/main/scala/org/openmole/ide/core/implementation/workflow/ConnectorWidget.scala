@@ -50,19 +50,15 @@ class ConnectorWidget(val scene: IMoleScene,
 
   connector match {
     case x: ITransitionUI ⇒ x.condition match {
-        case Some(t: String) ⇒ 
-          label.text = t
-          addChild(componentWidget)
-        case None ⇒
-      }
+      case Some(t: String) ⇒
+        label.text = t
+        addChild(componentWidget)
+      case None ⇒
+    }
     case _ ⇒
   }
 
-  val prototypeFilterWidget = new PrototypeOnConnectorWidget(scene,
-                                                             connector,
-                                                             new LinkLabel(connector.nbPrototypes.toString,
-                                                                           new Action("") { def apply = editPrototypeFilter }, 10))
-
+  var prototypeFilterWidget = buildPrototypeFilterWidget
   addChild(prototypeFilterWidget)
 
   drawTransitionType
@@ -71,8 +67,17 @@ class ConnectorWidget(val scene: IMoleScene,
 
   def setConnnector(c: IConnectorUI) {
     connector = c
-    println("connector changed for : " + connector)
+    removeChild(prototypeFilterWidget)
+    prototypeFilterWidget = buildPrototypeFilterWidget
+    addChild(prototypeFilterWidget)
     setLabelVisible
+  }
+
+  def buildPrototypeFilterWidget = {
+    new PrototypeOnConnectorWidget(scene,
+      connector,
+      new LinkLabel(connector.nbPrototypes.toString,
+        new Action("") { def apply = editPrototypeFilter }, 10))
   }
 
   def setLabelVisible = {
@@ -83,7 +88,7 @@ class ConnectorWidget(val scene: IMoleScene,
         setLineColor(new Color(130, 130, 130))
         setStroke(new BasicStroke(3f))
         setConstraint(prototypeFilterWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER,
-                      if (label.text.isEmpty) 0.5f else 0.33f)
+          if (label.text.isEmpty) 0.5f else 0.33f)
         label.revalidate
       case x: IDataChannelUI ⇒
         setLineColor(new Color(188, 188, 188))
@@ -118,7 +123,7 @@ class ConnectorWidget(val scene: IMoleScene,
     override def paintBackground = {
       val g = scene.graphScene.getGraphics
       g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                         RenderingHints.VALUE_ANTIALIAS_ON)
+        RenderingHints.VALUE_ANTIALIAS_ON)
       g.setColor(new Color(0, 0, 0, 200))
       g.fillRoundRect(0, 0, label.size.width, label.size.height, 10, 10)
       revalidate
@@ -127,7 +132,7 @@ class ConnectorWidget(val scene: IMoleScene,
     override def paintBorder = {
       val g = scene.graphScene.getGraphics
       g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                         RenderingHints.VALUE_ANTIALIAS_ON)
+        RenderingHints.VALUE_ANTIALIAS_ON)
       g.setStroke(new BasicStroke(3f))
       g.setColor(new Color(200, 200, 200))
       g.drawRoundRect(0, 0, label.size.width + 1, label.size.height + 1, 10, 10)

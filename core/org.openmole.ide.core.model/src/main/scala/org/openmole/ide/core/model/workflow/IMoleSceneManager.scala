@@ -70,4 +70,7 @@ trait IMoleSceneManager {
 
   def registerConnector(edgeID: String,
                         connector: IConnectorUI): Boolean
+
+  def changeConnector(oldConnector: IConnectorUI,
+                      connector: IConnectorUI)
 }
