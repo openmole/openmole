@@ -42,42 +42,42 @@ trait SharedFSJobService { this: JSAGAJobService ⇒
     if (installed == null) {
       installed = withToken(sharedFS.description, token ⇒ {
 
-        val workdir = sharedFS.baseDir(token).mkdirIfNotExist("install")
+          val workdir = sharedFS.baseDir(token).mkdirIfNotExist("install")
 
-        val script = Workspace.newFile("install", ".sh")
-        val remoteScript = try {
+          val script = Workspace.newFile("install", ".sh")
+          val remoteScript = try {
 
-          val tmpDirName = UUID.randomUUID.toString
+            val tmpDirName = UUID.randomUUID.toString
 
-          script.content =
-            "if [ -d " + runtime.runtime.hash + " ]; then exit 0; fi; " +
-              "mkdir " + tmpDirName + "; cd " + tmpDirName + "; if [ `uname -m` = x86_64 ]; then cp " + runtime.jvmLinuxX64.path + " jvm.tar.gz.gz;" +
-              "else cp " + runtime.jvmLinuxI386.path + " jvm.tar.gz.gz; fi;" +
-              "gunzip jvm.tar.gz.gz; gunzip jvm.tar.gz; tar -xf jvm.tar; rm jvm.tar;" +
-              "cp " + runtime.runtime.path + " runtime.tar.gz.gz; gunzip runtime.tar.gz.gz; gunzip runtime.tar.gz; tar -xf runtime.tar; rm runtime.tar; mkdir envplugins; PLUGIN=0;" +
-              runtime.environmentPlugins.map { p ⇒ "cp " + p.path + " envplugins/plugin$PLUGIN.jar.gz; gunzip envplugins/plugin$PLUGIN.jar.gz; PLUGIN=`expr $PLUGIN + 1`;" }.foldLeft("") { case (c, s) ⇒ c + s } +
-              "cd ..; if [ -d " + runtime.runtime.hash + " ]; then rm -rf " + tmpDirName + "; exit 0; fi; " +
-              " mv " + tmpDirName + " " + runtime.runtime.hash + "; ls | grep -v " + runtime.runtime.hash + " | xargs rm -rf"
+            script.content =
+              "if [ -d " + runtime.runtime.hash + " ]; then exit 0; fi; " +
+            "mkdir " + tmpDirName + "; cd " + tmpDirName + "; if [ `uname -m` = x86_64 ]; then cp " + runtime.jvmLinuxX64.path + " jvm.tar.gz.gz;" +
+            "else cp " + runtime.jvmLinuxI386.path + " jvm.tar.gz.gz; fi;" +
+            "gunzip jvm.tar.gz.gz; gunzip jvm.tar.gz; tar -xf jvm.tar; rm jvm.tar;" +
+            "cp " + runtime.runtime.path + " runtime.tar.gz.gz; gunzip runtime.tar.gz.gz; gunzip runtime.tar.gz; tar -xf runtime.tar; rm runtime.tar; mkdir envplugins; PLUGIN=0;" +
+            runtime.environmentPlugins.map { p ⇒ "cp " + p.path + " envplugins/plugin$PLUGIN.jar.gz; gunzip envplugins/plugin$PLUGIN.jar.gz; PLUGIN=`expr $PLUGIN + 1`;" }.foldLeft("") { case (c, s) ⇒ c + s } +
+            "cd ..; if [ -d " + runtime.runtime.hash + " ]; then rm -rf " + tmpDirName + "; exit 0; fi; " +
+            " mv " + tmpDirName + " " + runtime.runtime.hash + "; ls | grep -v " + runtime.runtime.hash + " | xargs rm -rf"
 
-          val remoteScript = workdir.newFileInDir("install", ".sh")
-          URIFile.copy(script, remoteScript, token)
-          remoteScript
-        } finally script.delete
+            val remoteScript = workdir.newFileInDir("install", ".sh")
+            URIFile.copy(script, remoteScript, token)
+            remoteScript
+          } finally script.delete
 
-        //try {
-        val name = remoteScript.name
-        val install = JobFactory.createJobDescription
-        install.setAttribute(JobDescription.EXECUTABLE, "/bin/bash")
-        install.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](name))
-        install.setAttribute(JobDescription.WORKINGDIRECTORY, workdir.path)
+          try {
+            val name = remoteScript.name
+            val install = JobFactory.createJobDescription
+            install.setAttribute(JobDescription.EXECUTABLE, "/bin/bash")
+            install.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](name))
+            install.setAttribute(JobDescription.WORKINGDIRECTORY, workdir.path)
 
-        val job = jobService.createJob(install)
-        job.run
-        job.get
-        //} finally remoteScript.remove(token)
+            val job = jobService.createJob(install)
+            job.run
+            job.get
+          } finally remoteScript.remove(token)
 
-        workdir.child(runtime.runtime.hash).path
-      })
+          workdir.child(runtime.runtime.hash).path
+        })
     }
     installed
   }
@@ -85,7 +85,7 @@ trait SharedFSJobService { this: JSAGAJobService ⇒
   def buildScript(serializedJob: SerializedJob, token: AccessToken) = {
 
     withToken(serializedJob.communicationStorage.description, {
-      token ⇒
+        token ⇒
         val tmp = serializedJob.communicationStorage.tmpSpace(token)
         val result = tmp.newFileInDir("result", ".xml.gz")
 
@@ -94,16 +94,16 @@ trait SharedFSJobService { this: JSAGAJobService ⇒
           val workspace = UUID.randomUUID
           script.content =
             "export PATH=" + installed + "/jvm/bin/" + ":$PATH; cd " + installed + "; mkdir " + workspace + "; " +
-              "sh run.sh " + environment.runtimeMemory + "m " + UUID.randomUUID + " -s file:/" +
-              " -c " + serializedJob.communicationDirPath + " -p envplugins/ -i " + serializedJob.inputFilePath + " -o " + result.path +
-              " -w " + workspace + "; rm -rf " + workspace + ";"
+          "sh run.sh " + environment.runtimeMemory + "m " + UUID.randomUUID + " -s file:/" +
+          " -c " + serializedJob.communicationDirPath + " -p envplugins/ -i " + serializedJob.inputFilePath + " -o " + result.path +
+          " -w " + workspace + "; rm -rf " + workspace + ";"
 
           val remoteScript = tmp.newFileInDir("run", ".sh")
           URIFile.copy(script, remoteScript, token)
           remoteScript
         } finally script.delete
         (remoteScript, result)
-    })
+      })
 
   }
 
