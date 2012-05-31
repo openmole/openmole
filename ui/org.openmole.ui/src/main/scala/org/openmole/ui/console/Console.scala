@@ -80,6 +80,7 @@ class Console(plugins: IPluginSet) { console ⇒
           "org.openmole.core.implementation.transition._",
           "org.openmole.core.implementation.tools._",
           "org.openmole.core.implementation.puzzle._",
+          "org.openmole.core.batch.authentication._",
           "org.openmole.misc.workspace._",
           "org.openmole.misc.tools.io.FromString._",
           "java.io.File",
