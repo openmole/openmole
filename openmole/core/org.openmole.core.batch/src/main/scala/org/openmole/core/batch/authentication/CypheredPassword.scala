@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,20 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.ssh
+package org.openmole.core.batch.authentication
 
-import org.openmole.core.batch.jsaga.JSAGASessionService
-import org.ogf.saga.context.Context
-import org.openmole.core.batch.authentication._
+import org.openmole.misc.workspace.Workspace
 
-trait SSHAuthenticationMethod extends AuthenticationMethod {
-  def method = classOf[SSHAuthenticationMethod]
+trait CypheredPassword { this: AuthenticationMethod ⇒
+  def cypheredPassword: String
 
-  def target: String
-
-  def init = JSAGASessionService.addContext(target, context)
-
-  def context: Context
-
-  override def toString = "Target = " + target
+  def password =
+    if (cypheredPassword == null) ""
+    else Workspace.decrypt(cypheredPassword)
 }

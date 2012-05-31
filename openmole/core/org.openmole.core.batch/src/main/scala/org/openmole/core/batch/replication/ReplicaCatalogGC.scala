@@ -17,7 +17,7 @@
 
 package org.openmole.core.batch.replication
 
-import org.openmole.core.batch.environment.AuthenticationRegistry
+import org.openmole.core.batch.authentication._
 import org.openmole.misc.updater.IUpdatable
 import org.openmole.misc.workspace.Workspace
 

@@ -22,19 +22,15 @@ import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
 import fr.in2p3.jsaga.adaptor.security.VOMSContext
 import org.openmole.core.batch.jsaga.JSAGASessionService
+import org.openmole.core.batch.authentication._
 
 object Certificates extends Logger
 
 import Certificates._
 
-abstract class Certificate extends GliteAuthenticationMethod {
+abstract class Certificate extends GliteAuthenticationMethod with CypheredPassword {
 
-  def cypheredPassword: String
   def proxyTime: String = GliteAuthentication.getTimeString
-
-  def password =
-    if (cypheredPassword == null) ""
-    else Workspace.decrypt(cypheredPassword)
 
   override def init(authentication: GliteAuthentication) = {
     import authentication._

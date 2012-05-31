@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.batch.environment
+package org.openmole.core.batch.authentication
 
 trait Authentication {
   def initialize(local: Boolean): Unit

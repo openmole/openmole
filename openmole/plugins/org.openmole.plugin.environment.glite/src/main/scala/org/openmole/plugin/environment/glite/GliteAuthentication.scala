@@ -34,7 +34,7 @@ import org.ogf.saga.context.Context
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.core.batch.environment.Authentication
+import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.jsaga.JSAGASessionService
 import org.openmole.misc.exception.UserBadDataError

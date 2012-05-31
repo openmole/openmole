@@ -34,6 +34,7 @@ import org.openmole.core.batch.control.StorageControl
 import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.environment.BatchJobWatcher.Watch
 import org.openmole.core.batch.file.URIFile
+import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.refresh._
 import org.openmole.core.implementation.execution.Environment
 import org.openmole.misc.workspace.ConfigurationLocation

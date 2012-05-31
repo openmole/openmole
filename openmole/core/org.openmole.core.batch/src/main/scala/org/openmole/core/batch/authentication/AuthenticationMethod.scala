@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.batch.environment
+package org.openmole.core.batch.authentication
 
 import org.openmole.misc.workspace.Workspace
 

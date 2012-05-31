@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.desktopgrid
 
-import org.openmole.core.batch.environment.Authentication
+import org.openmole.core.batch.authentication.Authentication
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.environment.JobService
 import org.openmole.core.batch.environment.VolatileStorage

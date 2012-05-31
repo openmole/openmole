@@ -16,7 +16,7 @@
  */
 package org.openmole.runtime.daemon;
 
-import org.openmole.core.batch.environment.Authentication;
+import org.openmole.core.batch.authentication.Authentication;
 import java.io.File;
 import java.util.logging.Level;
 

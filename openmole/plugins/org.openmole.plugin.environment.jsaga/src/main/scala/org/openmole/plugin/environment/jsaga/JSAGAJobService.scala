@@ -29,7 +29,7 @@ import org.ogf.saga.job.JobFactory
 import org.ogf.saga.task.TaskMode
 import org.ogf.saga.url.URLFactory
 import org.openmole.core.batch.control.ServiceDescription
-import org.openmole.core.batch.environment.Authentication
+import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.environment.BatchJob
 import org.openmole.core.batch.environment.Runtime
 import org.openmole.core.batch.environment.JobService

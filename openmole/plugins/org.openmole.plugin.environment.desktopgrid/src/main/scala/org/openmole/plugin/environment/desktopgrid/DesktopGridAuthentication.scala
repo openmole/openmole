@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.desktopgrid
 
-import org.openmole.core.batch.environment.Authentication
+import org.openmole.core.batch.authentication.Authentication
 
 object DesktopGridAuthentication extends Authentication {
   override def initialize(local: Boolean) = {}

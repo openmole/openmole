@@ -32,7 +32,7 @@ import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.TarArchiver._
 import org.openmole.misc.tools.service.Priority
-import org.openmole.core.batch.environment.Authentication
+import org.openmole.core.batch.authentication.Authentication
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.RelativePath
 import org.openmole.core.batch.file.URIFile

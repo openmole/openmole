@@ -18,7 +18,7 @@
 package org.openmole.plugin.environment.glite
 
 import org.ogf.saga.context.Context
-import org.openmole.core.batch.environment.AuthenticationMethod
+import org.openmole.core.batch.authentication._
 
 trait GliteAuthenticationMethod extends AuthenticationMethod {
   def init(authentication: GliteAuthentication): (Context, Boolean)

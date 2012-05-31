@@ -19,7 +19,7 @@ package org.openmole.plugin.environment.desktopgrid
 
 import fr.in2p3.jsaga.impl.context.ContextImpl
 import org.ogf.saga.context.Context
-import org.openmole.core.batch.environment.Authentication
+import org.openmole.core.batch.authentication.Authentication
 import org.openmole.core.batch.jsaga.JSAGASessionService
 
 class SFTPAuthentication(host: String, port: Int, login: String, password: String) extends Authentication {

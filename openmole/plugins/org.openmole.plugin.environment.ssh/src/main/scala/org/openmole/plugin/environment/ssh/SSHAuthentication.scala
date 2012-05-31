@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.ssh
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.workspace.Workspace
 import fr.in2p3.jsaga.impl.context.ContextImpl
-import org.openmole.core.batch.environment.Authentication
+import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.jsaga.JSAGASessionService
 
 object SSHAuthentication {
