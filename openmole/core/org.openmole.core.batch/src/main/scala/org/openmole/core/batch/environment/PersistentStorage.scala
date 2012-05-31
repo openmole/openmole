@@ -40,15 +40,21 @@ object PersistentStorage extends Logger {
   val tmp = "tmp/"
 
   def createBaseDir(environment: BatchEnvironment, base: URI, dir: String, nbAccess: Int) = {
-    val baseURIFile = Iterator.iterate(new File(dir))(_.getParentFile).takeWhile(_ != null).toList.reverse.filterNot(_.getName.isEmpty).foldLeft(new URIFile(base): IURIFile) {
-      (uriFile, file) ⇒ uriFile.mkdirIfNotExist(file.getName)
-    }
+    val baseURIFile =
+      Iterator.iterate(new File(dir))(_.getParentFile).takeWhile(_ != null).toList.reverse.filterNot(_.getName.isEmpty).foldLeft(new URIFile(base): IURIFile) {
+        (uriFile, file) ⇒
+          uriFile.mkdirIfNotExist(file.getName)
+      }
+
     new PersistentStorage(environment, baseURIFile.URI, nbAccess)
   }
 
 }
 
-class PersistentStorage(val environment: BatchEnvironment, URI: URI, override val nbAccess: Int) extends Storage(URI) {
+class PersistentStorage(
+    val environment: BatchEnvironment,
+    val URI: URI,
+    override val nbAccess: Int) extends Storage {
 
   import PersistentStorage._
 
@@ -71,7 +77,6 @@ class PersistentStorage(val environment: BatchEnvironment, URI: URI, override va
     persistentSpaceVar match {
       case None ⇒
         val persistentSpace = baseDir(token).mkdirIfNotExist(persistent, token)
-
         val inCatalog = ReplicaCatalog.inCatalog(description, environment.authentication.key)
         for (file ← persistentSpace.list(token)) {
           val child = new URIFile(persistentSpace, file)

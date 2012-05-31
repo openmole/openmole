@@ -31,7 +31,7 @@ import scala.collection.JavaConversions._
 
 object Storage extends Logger
 
-abstract class Storage(val URI: URI) extends BatchService {
+abstract class Storage extends BatchService {
 
   @transient lazy val description = new ServiceDescription(URI)
 
@@ -39,6 +39,7 @@ abstract class Storage(val URI: URI) extends BatchService {
 
   import Storage._
 
+  def URI: URI
   def persistentSpace(token: AccessToken): IURIFile
   def tmpSpace(token: AccessToken): IURIFile
   def baseDir(token: AccessToken): IURIFile

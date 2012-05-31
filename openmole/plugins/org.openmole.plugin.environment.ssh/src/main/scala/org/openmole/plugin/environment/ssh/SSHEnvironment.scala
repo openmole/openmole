@@ -25,7 +25,6 @@ import org.openmole.core.batch.environment.PersistentStorage
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.jsaga.JSAGAEnvironment
-import org.openmole.plugin.environment.jsaga.ReachableEnvironment
 
 object SSHEnvironment {
   val MaxConnections = new ConfigurationLocation("SSHEnvironment", "MaxConnections")
@@ -41,20 +40,20 @@ class SSHEnvironment(
     login: String,
     host: String,
     nbSlots: Int,
-    dir: String = "/tmp/" + Workspace.preference(Workspace.UniqueID),
-    val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory) extends BatchEnvironment with ReachableEnvironment {
+    dir: String = "/tmp/",
+    val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory) extends BatchEnvironment {
 
   val storage = PersistentStorage.createBaseDir(this, URI.create("sftp://" + login + "@" + host), dir, Workspace.preferenceAsInt(MaxConnections))
-  val jobService = sshJobService.jobService
 
-  val sshJobService = new SSHJobService(
+  val jobService = new SSHJobService(
     URI.create("ssh://" + login + '@' + host),
     this,
     nbSlots,
+    storage,
     Workspace.preferenceAsInt(MaxConnections))
 
   def allStorages = List(storage)
-  def allJobServices: Iterable[JobService] = List(sshJobService)
+  def allJobServices: Iterable[JobService] = List(jobService)
 
   override def authentication = SSHAuthentication(login, host)
 

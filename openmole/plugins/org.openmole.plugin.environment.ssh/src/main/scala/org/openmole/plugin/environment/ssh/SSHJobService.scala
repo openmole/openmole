@@ -42,6 +42,7 @@ import org.openmole.plugin.environment.jsaga.JSAGAJob
 import org.openmole.plugin.environment.jsaga.JSAGAJobService
 import java.net.URI
 import SSHBatchJob._
+import org.openmole.plugin.environment.jsaga.SharedFSJobService
 import scala.collection.immutable.TreeSet
 
 object SSHJobService extends Logger
@@ -52,7 +53,8 @@ class SSHJobService(
     val uri: URI,
     val environment: SSHEnvironment,
     val nbSlot: Int,
-    override val nbAccess: Int) extends JSAGAJobService {
+    val sharedFS: Storage,
+    override val nbAccess: Int) extends JSAGAJobService with SharedFSJobService {
 
   var queue = new TreeSet[SSHBatchJob]
   var nbRunning = 0
@@ -85,28 +87,8 @@ class SSHJobService(
   }
 
   protected def doSubmit(serializedJob: SerializedJob, token: AccessToken) = {
-    val installed = environment.preparedRuntime(serializedJob.runtime)
-    val (remoteScript, result) = withToken(serializedJob.communicationStorage.description, {
-      token ⇒
-        val tmp = serializedJob.communicationStorage.tmpSpace(token)
-        val result = tmp.newFileInDir("result", ".xml.gz")
-
-        val script = Workspace.newFile("run", ".sh")
-        val remoteScript = try {
-          val workspace = UUID.randomUUID
-          script.content =
-            "export PATH=" + installed + "/jvm/bin/" + ":$PATH; cd " + installed + "; mkdir " + workspace + "; " +
-              "sh run.sh " + environment.runtimeMemory + "m " + UUID.randomUUID + " -s file:/" +
-              " -c " + serializedJob.communicationDirPath + " -p envplugins/ -i " + serializedJob.inputFilePath + " -o " + result.path +
-              " -w " + workspace + "; rm -rf " + workspace + ";"
-
-          logger.fine(script.content)
-          val remoteScript = environment.storage.tmpSpace(token).newFileInDir("run", ".sh")
-          URIFile.copy(script, remoteScript, token)
-          remoteScript
-        } finally script.delete
-        (remoteScript, result)
-    })
+    val installed = preparedRuntime(serializedJob.runtime)
+    val (remoteScript, result) = buildScript(serializedJob, token)
     val jobDesc = JobFactory.createJobDescription
     jobDesc.setAttribute(JobDescription.EXECUTABLE, "/bin/bash")
     jobDesc.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](remoteScript.path))

@@ -24,7 +24,7 @@ import org.openmole.core.batch.replication.ReplicaCatalog
 import collection.JavaConversions._
 import java.net.URI
 
-class VolatileStorage(val environment: BatchEnvironment, URI: URI, override val nbAccess: Int) extends Storage(URI) {
+class VolatileStorage(val environment: BatchEnvironment, val URI: URI, override val nbAccess: Int) extends Storage {
   ReplicaCatalog.getReplica(description, environment.authentication.key).foreach { ReplicaCatalog.remove }
   override def baseDir(token: AccessToken) = new URIFile(URI)
   override def persistentSpace(token: AccessToken): IURIFile = baseDir(token)

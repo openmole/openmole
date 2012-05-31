@@ -166,6 +166,7 @@ class URIFile(val location: String) extends IURIFile with Id {
         t.cancel(true)
         throw new IOException(location, e)
       case (e: IOException) ⇒ throw e
+      case e: ExecutionException ⇒ throw e.getCause
       case e ⇒ throw new IOException(location, e)
     }
   }
@@ -236,7 +237,8 @@ class URIFile(val location: String) extends IURIFile with Id {
     catch {
       case (e: IOException) ⇒
         withFailureControl {
-          val childVal = child(name)
+          val cname = if (name.endsWith("/")) name else name + '/'
+          val childVal = child(cname)
           if (!childVal.isDirectory(token)) throw new IOException("Could not create dir " + location, e);
           childVal
         }
@@ -264,8 +266,16 @@ class URIFile(val location: String) extends IURIFile with Id {
   override def exists: Boolean = withToken(exists(_))
 
   override def exists(token: AccessToken): Boolean = {
-    val (parent, name) = parentLocationAndName(token)
-    new URIFile(parent).exist(name, token)
+    try {
+      val (parent, name) = parentLocationAndName(token)
+      new URIFile(parent).exist(name, token)
+    } catch {
+      case e: IOException ⇒
+        e.getCause match {
+          case _: DoesNotExistException ⇒ false
+          case _ ⇒ throw e
+        }
+    }
   }
 
   override def openInputStream: InputStream = withToken(openInputStream(_))
