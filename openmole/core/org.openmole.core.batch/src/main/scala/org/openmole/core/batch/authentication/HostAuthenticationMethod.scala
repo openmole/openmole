@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,22 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.ssh
+package org.openmole.core.batch.authentication
 
-import org.openmole.core.batch.jsaga.JSAGASessionService
 import org.ogf.saga.context.Context
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.workspace.Workspace
 
-class SSHLoginPassword(val login: String, val cypheredPassword: String, val target: String) extends SSHAuthenticationMethod {
+object HostAuthenticationMethod {
 
-  override def context = {
-    val ctx = JSAGASessionService.createContext
-    ctx.setAttribute(Context.TYPE, "UserPass")
-    ctx.setAttribute(Context.USERID, login)
-    ctx.setAttribute(Context.USERPASS, Workspace.decrypt(cypheredPassword))
-    ctx
+  def apply(login: String, host: String) = {
+    val list = Workspace.persistentList(classOf[HostAuthenticationMethod])
+    val connection = login + '@' + host
+
+    list.find { case (i, e) ⇒ connection.matches(e.target) }.getOrElse(throw new UserBadDataError("No authentication method found for " + connection))._2
   }
 
-  override def toString = super.toString + ", Login / password, login = " + login
+}
 
+trait HostAuthenticationMethod extends AuthenticationMethod {
+  def target: String
+  def context: Context
+  def init = JSAGASessionService.addContext(target, context)
+  def method = classOf[HostAuthenticationMethod]
 }

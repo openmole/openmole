@@ -15,18 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.ssh
+package org.openmole.core.batch.authentication
 
 import org.ogf.saga.context.Context
-import org.openmole.core.batch.authentication.CypheredPassword
-import org.openmole.core.batch.jsaga.JSAGASessionService
 
-class SSHPrivateKey(
+class PrivateKey(
     val privateKeyPath: String,
     val publicKeyPath: String,
     val login: String,
     val cypheredPassword: String,
-    val target: String) extends SSHAuthenticationMethod with CypheredPassword {
+    val target: String) extends HostAuthenticationMethod with CypheredPassword {
 
   def this(login: String, cypheredPassword: String, keyType: String, target: String) =
     this(
@@ -49,8 +47,8 @@ class SSHPrivateKey(
   }
 
   override def toString =
-    "SSHPubicKey = " + publicKeyPath +
-      ", SSHPrivateKey = " + privateKeyPath +
+    "PubicKey = " + publicKeyPath +
+      ", PrivateKey = " + privateKeyPath +
       ", Login = " + login
 
 }

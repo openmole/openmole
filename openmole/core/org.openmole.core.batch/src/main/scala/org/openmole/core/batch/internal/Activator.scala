@@ -17,9 +17,9 @@
 
 package org.openmole.core.batch.internal
 
-import org.openmole.core.batch.jsaga.JSAGASessionService
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
+import org.openmole.core.batch.authentication.JSAGASessionService
 
 class Activator extends BundleActivator {
 

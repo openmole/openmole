@@ -17,36 +17,25 @@
 
 package org.openmole.plugin.environment.ssh
 
-import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.workspace.Workspace
 import fr.in2p3.jsaga.impl.context.ContextImpl
 import org.openmole.core.batch.authentication._
-import org.openmole.core.batch.jsaga.JSAGASessionService
 
 object SSHAuthentication {
 
-  def apply(login: String, host: String) = {
-    val list = Workspace.persistentList(classOf[SSHAuthenticationMethod])
-    val connection = login + '@' + host
-
-    new SSHAuthentication(
-      list.find { case (i, e) ⇒ connection.matches(e.target) }.getOrElse(throw new UserBadDataError("No authentication method found for " + connection))._2)
-  }
+  def apply(login: String, host: String) =
+    new SSHAuthentication(HostAuthenticationMethod(login, host))
 
 }
 
-class SSHAuthentication(val method: SSHAuthenticationMethod) extends Authentication {
+class SSHAuthentication(val method: HostAuthenticationMethod) extends Authentication {
 
   override def key = method.target
 
   override def initialize(local: Boolean) = {
     val ctxSSH = method.context
     ctxSSH.setVectorAttribute(ContextImpl.BASE_URL_INCLUDES, Array("ssh->ssh2://*"))
-    JSAGASessionService.addContext("ssh://" + method.target, ctxSSH)
-
-    val ctxSFTP = method.context
-    ctxSFTP.setVectorAttribute(ContextImpl.BASE_URL_INCLUDES, Array("sftp->sftp2://*"))
-    JSAGASessionService.addContext("sftp://" + method.target, ctxSFTP)
+    ctxSSH.setVectorAttribute(ContextImpl.BASE_URL_INCLUDES, Array("sftp->sftp2://*"))
+    JSAGASessionService.addContext(method.target, ctxSSH)
   }
 
 }

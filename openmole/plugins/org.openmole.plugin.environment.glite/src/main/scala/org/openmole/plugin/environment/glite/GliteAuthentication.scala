@@ -36,7 +36,6 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.file.URIFile
-import org.openmole.core.batch.jsaga.JSAGASessionService
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.Workspace

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.batch.jsaga
+package org.openmole.core.batch.authentication
 
 import java.util.logging.Level
 import java.util.logging.{ Logger ⇒ JLogger }
@@ -66,7 +66,7 @@ object JSAGASessionService extends Logger {
   }
 
   def session(url: String) = synchronized {
-    sessions.filter { case (p, s) ⇒ url.matches(p + ".*") }.headOption match {
+    sessions.filter { case (p, s) ⇒ url.matches(".*" + p + ".*") }.headOption match {
       case Some((p, s)) ⇒ s
       case None ⇒ defaultSession //throw new InternalProcessingError("No session available for url " + url)
     }

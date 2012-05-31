@@ -45,7 +45,6 @@ import org.ogf.saga.url.URLFactory
 import org.ogf.saga.namespace.Flags
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.jsaga.JSAGASessionService
 import org.openmole.misc.tools.obj.Id
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.ConfigurationLocation
@@ -54,6 +53,7 @@ import org.openmole.core.batch.control.StorageControl._
 import org.openmole.core.batch.control.UsageControl._
 import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.control.QualityControl._
+import org.openmole.core.batch.authentication.JSAGASessionService
 import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 

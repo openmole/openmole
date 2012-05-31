@@ -19,7 +19,7 @@ package org.openmole.plugin.environment.glite
 
 import org.ogf.saga.context.Context
 import GliteAuthentication._
-import org.openmole.core.batch.jsaga.JSAGASessionService
+import org.openmole.core.batch.authentication.JSAGASessionService
 import fr.in2p3.jsaga.adaptor.security.VOMSContext
 
 class VOMSProxyFile(val proxyFile: String) extends GliteAuthenticationMethod {

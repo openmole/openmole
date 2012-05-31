@@ -21,7 +21,6 @@ import org.ogf.saga.context.Context
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
 import fr.in2p3.jsaga.adaptor.security.VOMSContext
-import org.openmole.core.batch.jsaga.JSAGASessionService
 import org.openmole.core.batch.authentication._
 
 object Certificates extends Logger

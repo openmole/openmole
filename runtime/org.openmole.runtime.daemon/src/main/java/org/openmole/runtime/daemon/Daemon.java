@@ -31,7 +31,7 @@ import org.apache.commons.cli.ParseException;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 import org.openmole.core.batch.file.URIFile;
-import org.openmole.core.batch.jsaga.JSAGASessionService;
+import org.openmole.core.batch.authentication.JSAGASessionService;
 import org.openmole.misc.pluginmanager.PluginManager;
 import org.openmole.misc.workspace.Workspace;
 import org.openmole.core.serializer.SerializerService;

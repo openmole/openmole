@@ -36,7 +36,7 @@ import org.openmole.core.batch.environment.JobService
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.environment.SerializedJob
 import org.openmole.core.batch.file.IURIFile
-import org.openmole.core.batch.jsaga.JSAGASessionService
+import org.openmole.core.batch.authentication.JSAGASessionService
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.service.Logger
