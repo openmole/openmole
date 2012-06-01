@@ -24,6 +24,7 @@ import java.awt.Dimension
 import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.ide.core.model.data.IExplorationTaskDataUI
 import org.openmole.ide.core.implementation.data.CheckData
+import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.misc.tools.image.Images._
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
@@ -45,9 +46,9 @@ object ScenesManager {
   PasswordListner.apply
 
   def buildMoleSceneContainers = tabPane.pages.flatMap(_.content match {
-    case x: BuildMoleSceneContainer ⇒ List(x)
-    case _ ⇒ Nil
-  })
+      case x: BuildMoleSceneContainer ⇒ List(x)
+      case _ ⇒ Nil
+    })
 
   def currentSceneContainer: Option[ISceneContainer] = {
     if (tabPane.peer.getTabCount == 0) None
@@ -95,25 +96,31 @@ object ScenesManager {
     val container = new BuildMoleSceneContainer(ms)
     val page = new TabbedPane.Page(ms.manager.name, container)
     addTab(page, ms.manager.name, new Action("") {
-      override def apply = {
-        container.stopAndCloseExecutions
-        tabPane.pages.remove(page.index)
-      }
-    })
+        override def apply = {
+          container.stopAndCloseExecutions
+          tabPane.pages.remove(page.index)
+        }
+      })
     container
   }
 
-  def addExecutionSceneContainer(bmsc: BuildMoleSceneContainer) = {
-    CheckData.fullCheck(bmsc.scene)
-    val clone = bmsc.scene.copy
-    clone.manager.name = { bmsc.scene.manager.name + "_" + countExec.incrementAndGet }
-    val page = new TabbedPane.Page(clone.manager.name, new MigPanel(""))
-    val container = new ExecutionMoleSceneContainer(clone, page, bmsc)
-    page.content = container
-    bmsc.executionMoleSceneContainers += container
-    addTab(page, clone.manager.name, new Action("") { override def apply = tabPane.pages.remove(page.index) })
-    tabPane.selection.index = page.index
-  }
+  def addExecutionSceneContainer(bmsc: BuildMoleSceneContainer) =
+    CheckData.fullCheck(bmsc.scene) match {
+      case Right(_) ⇒
+        if (StatusBar.isValid) {
+          val clone = bmsc.scene.copy
+          clone.manager.name = { bmsc.scene.manager.name + "_" + countExec.incrementAndGet }
+          val page = new TabbedPane.Page(clone.manager.name, new MigPanel(""))
+          val container = new ExecutionMoleSceneContainer(clone, page, bmsc)
+          page.content = container
+          bmsc.executionMoleSceneContainers += container
+          addTab(page, clone.manager.name, new Action("") { override def apply = tabPane.pages.remove(page.index) })
+          tabPane.selection.index = page.index
+        }
+        else 
+          StatusBar.block("The Mole can not be built due to the previous errors")
+      case Left(msg: String) ⇒ StatusBar.block(msg)
+    }
 
   def addTab(page: TabbedPane.Page, title: String, action: Action) = {
     tabPane.pages += page

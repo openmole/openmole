@@ -32,6 +32,7 @@ import scala.swing.Panel
 import scala.swing.ScrollPane
 import scala.swing.SplitPane
 import scala.swing.TabbedPane
+import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.misc.tools.image.Images._
 
 class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
@@ -48,17 +49,45 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
       "Stop the workflow",
       stop)
   }
-  val (mole, prototypeMapping, capsuleMapping, errors) = MoleMaker.buildMole(bmsc.scene.manager)
-  val executionManager = new ExecutionManager(bmsc.scene.manager,
-    mole,
-    prototypeMapping,
-    capsuleMapping)
 
-  peer.add(toolBar.peer, BorderLayout.NORTH)
-  peer.add(new JSplitPane(JSplitPane.VERTICAL_SPLIT, scene.graphScene.createView, executionManager.peer), BorderLayout.CENTER)
+  val executionManager =
+    MoleMaker.buildMole(bmsc.scene.manager) match {
+      case Right((mole, prototypeMapping, capsuleMapping, errors)) ⇒
+        Some(new ExecutionManager(bmsc.scene.manager,
+          mole,
+          prototypeMapping,
+          capsuleMapping))
+      case Left(l) ⇒
+    }
 
-  def start = new Action("") { override def apply = executionManager.start }
+  executionManager match {
+    case Some(x: ExecutionManager) ⇒
+      peer.add(toolBar.peer, BorderLayout.NORTH)
+      peer.add(new JSplitPane(JSplitPane.VERTICAL_SPLIT, scene.graphScene.createView, x.peer), BorderLayout.CENTER)
+    case None ⇒
+  }
 
-  def stop = new Action("") { override def apply = executionManager.cancel }
+  def start = new Action("") {
+    override def apply = executionManager match {
+      case Some(x: ExecutionManager) ⇒ x.start
+      case _ ⇒
+    }
+  }
 
+  def stop = new Action("") {
+    override def apply = executionManager match {
+      case Some(x: ExecutionManager) ⇒ x.cancel
+      case _ ⇒
+    }
+  }
+
+  def started = executionManager match {
+    case Some(x: ExecutionManager) ⇒ x.moleExecution.started
+    case None ⇒ false
+  }
+
+  def finished = executionManager match {
+    case Some(x: ExecutionManager) ⇒ x.moleExecution.finished
+    case None ⇒ true
+  }
 }

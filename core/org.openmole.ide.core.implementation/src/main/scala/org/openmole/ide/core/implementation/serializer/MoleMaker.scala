@@ -72,7 +72,7 @@ object MoleMaker {
               envs += env -> x.dataUI.name
               strat += capsuleMap(c) -> new FixedEnvironmentSelection(env)
             } catch {
-              case e: UserBadDataError ⇒ StatusBar.warn(e.message)
+              case e: UserBadDataError ⇒ StatusBar.block(e.message)
             }
           case _ ⇒
         }
@@ -83,36 +83,37 @@ object MoleMaker {
       (new MoleExecution(mole, strat.toMap, grouping), envs.toSet)
     }
 
-  def buildMole(manager: IMoleSceneManager) = {
-    if (manager.startingCapsule.isDefined) {
-      val prototypeMap: Map[IPrototypeDataProxyUI, IPrototype[_]] = Proxys.prototypes.map { p ⇒ p -> p.dataUI.coreObject }.toMap
-      val builds = manager.capsules.map { c ⇒
-        buildCapsule(c._2.dataUI, manager.dataUI) match {
-          case Left((capsule, error)) ⇒ (c._2 -> new Capsule, Some(c._2 -> error))
-          case Right(r) ⇒ (c._2 -> r, None)
-        }
-      }.toMap
+  def buildMole(manager: IMoleSceneManager): Either[String, (IMole, Map[ICapsuleUI, ICapsule], Map[IPrototypeDataProxyUI, IPrototype[_]], Iterable[(ICapsuleUI, Throwable)])] = {
+    try {
+      if (manager.startingCapsule.isDefined) {
+        val prototypeMap: Map[IPrototypeDataProxyUI, IPrototype[_]] = Proxys.prototypes.map { p ⇒ p -> p.dataUI.coreObject }.toMap
+        val builds = manager.capsules.map { c ⇒
+          (c._2 -> buildCapsule(c._2.dataUI, manager.dataUI), None)
+        }.toMap
 
-      val capsuleMap: Map[ICapsuleUI, ICapsule] = builds.map { case ((cui, c), _) ⇒ cui -> c }
-      val errors = builds.flatMap { case ((_, _), e) ⇒ e }
+        val capsuleMap: Map[ICapsuleUI, ICapsule] = builds.map { case ((cui, c), _) ⇒ cui -> c }
+        val errors = builds.flatMap { case ((_, _), e) ⇒ e }
 
-      capsuleMap.foreach {
-        case (cui, ccore) ⇒
-          manager.capsuleConnections(cui.dataUI).foreach { t ⇒
-            t match {
-              case x: ITransitionUI ⇒ buildTransition(ccore,
-                capsuleMap(x.target.capsule),
-                x, prototypeMap)
+        capsuleMap.foreach {
+          case (cui, ccore) ⇒
+            manager.capsuleConnections(cui.dataUI).foreach { t ⇒
+              t match {
+                case x: ITransitionUI ⇒ buildTransition(ccore,
+                  capsuleMap(x.target.capsule),
+                  x, prototypeMap)
 
-              case x: IDataChannelUI ⇒ new DataChannel(capsuleMap(x.source),
-                capsuleMap(x.target.capsule),
-                x.filteredPrototypes.map { p ⇒ prototypeMap(p).name }.toSeq: _*)
+                case x: IDataChannelUI ⇒ new DataChannel(capsuleMap(x.source),
+                  capsuleMap(x.target.capsule),
+                  x.filteredPrototypes.map { p ⇒ prototypeMap(p).name }.toSeq: _*)
+              }
             }
-          }
-      }
-
-      (new Mole(capsuleMap(manager.startingCapsule.get)), capsuleMap, prototypeMap, errors)
-    } else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")
+        }
+        Right((new Mole(capsuleMap(manager.startingCapsule.get)), capsuleMap, prototypeMap, errors))
+      } else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")
+    } catch {
+      case e ⇒
+        Left(e.getMessage)
+    }
   }
 
   def prototypeMapping: Map[IPrototypeDataProxyUI, IPrototype[_]] = (Proxys.prototypes.toList :::
@@ -121,26 +122,39 @@ object MoleMaker {
   def keyPrototypeMapping: Map[PrototypeKey, IPrototypeDataProxyUI] = (Proxys.prototypes.toList :::
     List(EmptyDataUIs.emptyPrototypeProxy)).map { p ⇒ KeyPrototypeGenerator(p) -> p }.toMap
 
+  def buildCapsule(proxy: ITaskDataProxyUI,
+                   plugins: Set[File] = Set.empty) =
+    taskCoreObject(proxy, plugins) match {
+      case Right(x: ITask) ⇒ new Capsule(x)
+      case Left(x: Throwable) ⇒
+        new Capsule
+    }
+
   def buildCapsule(capsuleDataUI: ICapsuleDataUI,
-                   moleDataUI: IMoleDataUI): Either[(ICapsuleDataUI, Throwable), ICapsule] =
+                   moleDataUI: IMoleDataUI): ICapsule =
     capsuleDataUI.task match {
       case Some(x: ITaskDataProxyUI) ⇒
-        try Right(new Capsule(taskCoreObject(x, moleDataUI.plugins.map { p ⇒ new File(p) }.toSet)))
-        catch {
-          case e: UserBadDataError ⇒ Left((capsuleDataUI, e))
-        }
-      case _ ⇒ Right(new Capsule)
+        buildCapsule(x, moleDataUI.plugins.map { p ⇒ new File(p) }.toSet)
+      case _ ⇒ new Capsule
+
     }
 
   def taskCoreObject(proxy: ITaskDataProxyUI,
-                     plugins: Set[File] = Set.empty): ITask =
-    proxy.dataUI.coreObject(inputs(proxy),
-      outputs(proxy),
-      parameters(proxy),
-      new PluginSet(plugins))
+                     plugins: Set[File] = Set.empty): Either[Throwable, ITask] =
+    try {
+      Right(proxy.dataUI.coreObject(inputs(proxy),
+        outputs(proxy),
+        parameters(proxy),
+        new PluginSet(plugins)))
+    } catch {
+      case e ⇒
+        StatusBar.warn(e.getMessage, proxy)
+        Left(e)
+    }
 
   def taskCoreObject(capsuleDataUI: ICapsuleDataUI,
-                     plugins: Set[File]): ITask = taskCoreObject(capsuleDataUI.task.get, plugins)
+                     plugins: Set[File]): Either[Throwable, ITask] =
+    taskCoreObject(capsuleDataUI.task.get, plugins)
 
   def inputs(proxy: ITaskDataProxyUI) = DataSet(proxy.dataUI.prototypesIn.map { _.dataUI.coreObject })
   def outputs(proxy: ITaskDataProxyUI) = DataSet(proxy.dataUI.prototypesOut.map { _.dataUI.coreObject })

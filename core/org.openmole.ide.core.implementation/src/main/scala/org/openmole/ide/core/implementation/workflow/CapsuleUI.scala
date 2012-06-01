@@ -186,14 +186,15 @@ class CapsuleUI(val scene: IMoleScene,
       case Some(y: LinkedImageWidget) ⇒ removeChild(y)
       case None ⇒
     }
+
     dataUI.sampling match {
-      case None ⇒ samplingWidget = None
       case Some(x: ISamplingDataProxyUI) ⇒
         samplingWidget = Some(new LinkedImageWidget(scene,
           new ImageIcon(ImageIO.read(x.dataUI.getClass.getClassLoader.getResource(x.dataUI.imagePath))),
           0, TASK_CONTAINER_HEIGHT - 3,
           new Action("") { def apply = scene.displayPropertyPanel(x, EDIT) }))
         addChild(samplingWidget.get)
+      case _ ⇒ samplingWidget = None
     }
     scene.refresh
   }

@@ -18,7 +18,6 @@
 package org.openmole.ide.core.implementation.data
 import org.openmole.core.implementation.mole.Capsule
 import org.openmole.core.implementation.validation.DataflowProblem
-import org.openmole.core.implementation.validation.TopologyProblem.NegativeLevelProblem
 import org.openmole.core.implementation.validation.Validation
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
@@ -26,6 +25,7 @@ import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.registry._
 import org.openmole.core.model.mole.IMole
+import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyFactory
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
@@ -33,61 +33,66 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
 
 object CheckData extends Logger {
 
-  def checkMole(scene: IMoleScene) =
+  def checkMole(scene: IMoleScene) = {
+    StatusBar.clear
     scene match {
       case y: BuildMoleScene ⇒
         y.manager.startingCapsule match {
           case Some(x: ICapsuleUI) ⇒
-            val (mole, cMap, pMap, errs) = MoleMaker.buildMole(y.manager)
-            val error_capsules = y.manager.capsules.values.partition { _.dataUI.task.isDefined }
-            error_capsules._1.foreach(_.setAsValid)
-            error_capsules._2.foreach { _.setAsInvalid("A capsule has to be encapsulated to be run") }
+            //  val (mole, cMap, pMap, errs) = MoleMaker.buildMole(y.manager)
+            MoleMaker.buildMole(y.manager) match {
+              case Right((mole, cMap, pMap, errs)) ⇒
+                val error_capsules = y.manager.capsules.values.partition { _.dataUI.task.isDefined }
+                error_capsules._1.foreach(_.setAsValid)
+                error_capsules._2.foreach { _.setAsInvalid("A capsule has to be encapsulated to be run") }
 
-            val capsuleMap: Map[ICapsule, ICapsuleUI] = cMap.map { case (k, v) ⇒ v -> k }
-            val prototypeMap: Map[IPrototype[_], IPrototypeDataProxyUI] = pMap.map { case (k, v) ⇒ v -> k }.toMap
+                val capsuleMap: Map[ICapsule, ICapsuleUI] = cMap.map { case (k, v) ⇒ v -> k }
+                val prototypeMap: Map[IPrototype[_], IPrototypeDataProxyUI] = pMap.map { case (k, v) ⇒ v -> k }.toMap
 
-            // Compute implicit input / output
-            capsuleMap.foreach {
-              case (caps, capsUI) ⇒
-                capsUI.dataUI.task match {
-                  case Some(x: ITaskDataProxyUI) ⇒
-                    buildUnknownPrototypes(caps)
-                    computeImplicitPrototypes(x)
-                  case _ ⇒
+                // Compute implicit input / output
+                capsuleMap.foreach {
+                  case (caps, capsUI) ⇒
+                    capsUI.dataUI.task match {
+                      case Some(x: ITaskDataProxyUI) ⇒
+                        buildUnknownPrototypes(caps)
+                        computeImplicitPrototypes(x)
+                      case _ ⇒
+                    }
                 }
-            }
 
-            // Formal validation
-            val errors = Validation(mole)
-            errors.isEmpty match {
-              case false ⇒
-                errors.flatMap {
-                  _ match {
-                    case x: DataflowProblem ⇒
-                      Some(capsuleMap(x.capsule) -> (prototypeMap(x.data.prototype), x))
-                    case x ⇒
-                      logger.info("Error " + x + " not taken into account in the GUI yet.")
-                      None
-                  }
-                }.groupBy(_._1).map { case (k, v) ⇒ (k, v.map(_._2)) }.foreach {
-                  case (capsuleUI, e) ⇒
-                    capsuleUI.updateErrors(e.toList)
+                // Formal validation
+                val errors = Validation(mole)
+                errors.isEmpty match {
+                  case false ⇒
+                    errors.flatMap {
+                      _ match {
+                        case x: DataflowProblem ⇒
+                          Some(capsuleMap(x.capsule) -> (prototypeMap(x.data.prototype), x))
+                        case x ⇒
+                          logger.info("Error " + x + " not taken into account in the GUI yet.")
+                          None
+                      }
+                    }.groupBy(_._1).map { case (k, v) ⇒ (k, v.map(_._2)) }.foreach {
+                      case (capsuleUI, e) ⇒
+                        capsuleUI.updateErrors(e.toList)
+                    }
+                  case true ⇒ y.manager.capsules.values.foreach { _.updateErrors(List.empty) }
                 }
-              case true ⇒ y.manager.capsules.values.foreach { _.updateErrors(List.empty) }
+                errs.foreach { case (cui, e) ⇒ cui.setAsInvalid(e.getMessage) }
+                Right(mole, cMap, pMap, errs)
+              case Left(l) ⇒ Left(List(l, None))
             }
-            errs.foreach { case (cui, e) ⇒ cui.setAsInvalid(e.getMessage) }
-            Some(mole, cMap, pMap, errs)
-          case _ ⇒ None
+          case _ ⇒ Left(List(("No starting capsule is defined, the Mole can not be built", None)))
         }
-      case _ ⇒ None
+      case _ ⇒ Left("")
     }
+  }
 
   def buildUnknownPrototypes(coreCapsule: ICapsule) = {
     var protoMapping = MoleMaker.keyPrototypeMapping
@@ -105,7 +110,6 @@ object CheckData extends Logger {
   def computeImplicitPrototypes(proxy: ITaskDataProxyUI,
                                 protoMapping: Map[PrototypeKey, IPrototypeDataProxyUI],
                                 coreCapsule: ICapsule): Unit = {
-
     proxy.dataUI.implicitPrototypesIn = coreCapsule.inputs.map { i ⇒ KeyPrototypeGenerator(i.prototype) }.toList
       .filterNot { n ⇒ proxy.dataUI.prototypesIn.map { p ⇒ KeyPrototypeGenerator(p) }.contains(n) }
       .map { protoMapping }
@@ -113,18 +117,23 @@ object CheckData extends Logger {
     proxy.dataUI.implicitPrototypesOut = coreCapsule.outputs.map { i ⇒ KeyPrototypeGenerator(i.prototype) }.toList
       .filterNot { n ⇒ proxy.dataUI.prototypesOut.map { p ⇒ KeyPrototypeGenerator(p) }.contains(n) }
       .map { protoMapping }
+
   }
 
-  def computeImplicitPrototypes(proxy: ITaskDataProxyUI): Unit = {
-    val coreCapsule = new Capsule(MoleMaker.taskCoreObject(proxy))
-    buildUnknownPrototypes(coreCapsule)
-    computeImplicitPrototypes(proxy,
-      MoleMaker.keyPrototypeMapping,
-      coreCapsule)
-  }
+  def computeImplicitPrototypes(proxy: ITaskDataProxyUI): Unit =
+    MoleMaker.taskCoreObject(proxy) match {
+      case Right(x: ITask) ⇒
+        val capsule = new Capsule(x)
+        buildUnknownPrototypes(capsule)
+        computeImplicitPrototypes(proxy,
+          MoleMaker.keyPrototypeMapping,
+          capsule)
+      case Left(e: Throwable) ⇒
+    }
 
   def checkTaskProxyImplicitsPrototypes(scene: IMoleScene,
-                                        proxy: ITaskDataProxyUI) =
+                                        proxy: ITaskDataProxyUI) = {
+    StatusBar.clear
     scene match {
       case x: BuildMoleScene ⇒
         try {
@@ -135,16 +144,19 @@ object CheckData extends Logger {
         } catch { case e: UserBadDataError ⇒ }
       case _ ⇒
     }
-
-  def fullCheck(scene: IMoleScene) = {
-    val a = checkMole(scene)
-    if (a.isDefined)
-      if (a.get._4.isEmpty)
-        checkTopology(a.get._1)
   }
 
-  def checkTopology(mole: IMole) = {
-    val st = Validation.topologyErrors(mole).mkString("\n")
-    if (!st.isEmpty) StatusBar.block(st)
-  }
+  def fullCheck(scene: IMoleScene) =
+    checkMole(scene) match {
+      case Right((mole, _, _, errors)) ⇒
+        if (errors.isEmpty) {
+          val checkTopo = checkTopology(mole)
+          if (checkTopo.isEmpty) Right("")
+          else Left(checkTopo)
+        } else Left(errors.mkString("\n"))
+      case Left(l) ⇒ Left(l)
+    }
+
+  def checkTopology(mole: IMole) =
+    Validation.topologyErrors(mole).mkString("\n")
 }

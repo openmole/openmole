@@ -34,8 +34,8 @@ import scala.swing.TextField
 object DialogFactory {
 
   def closeExecutionTab(exeContainer: ExecutionMoleSceneContainer): Boolean = {
-    if (exeContainer.executionManager.moleExecution.finished) true
-    else if (exeContainer.executionManager.moleExecution.started) {
+    if (exeContainer.finished) true
+    else if (exeContainer.started) {
       val lab = new Label("<html>A simulation is currently running.<br>Close anyway ?</html>") {
         background = Color.white
       }.peer

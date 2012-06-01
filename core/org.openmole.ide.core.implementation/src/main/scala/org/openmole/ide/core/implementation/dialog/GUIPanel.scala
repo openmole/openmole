@@ -80,9 +80,13 @@ class GUIPanel extends MainFrame { mainframe ⇒
     contents += ConceptMenu.environmentMenu
   }).peer, BorderLayout.NORTH)
 
-  peer.add((ScenesManager.tabPane).peer, BorderLayout.CENTER)
+  val splitPane = new SplitPane(Orientation.Horizontal) {
+    leftComponent = ScenesManager.tabPane
+    rightComponent = new ScrollPane(StatusBar)
+    resizeWeight = 0.8
+  }
 
-  peer.add((StatusBar).peer, BorderLayout.SOUTH)
+  peer.add(splitPane.peer, BorderLayout.CENTER)
   StatusBar.inform("OpenMOLE - 0.5 - Boundless Bamboo")
 
   PasswordListner.apply
