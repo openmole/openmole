@@ -73,6 +73,7 @@ object CheckData extends Logger {
                     errors.flatMap {
                       _ match {
                         case x: DataflowProblem ⇒
+                          displayCapsuleErrors(capsuleMap(x.capsule), x.toString)
                           Some(capsuleMap(x.capsule) -> (prototypeMap(x.data.prototype), x))
                         case x ⇒
                           logger.info("Error " + x + " not taken into account in the GUI yet.")
@@ -84,13 +85,25 @@ object CheckData extends Logger {
                     }
                   case true ⇒ y.manager.capsules.values.foreach { _.updateErrors(List.empty) }
                 }
-                errs.foreach { case (cui, e) ⇒ cui.setAsInvalid(e.getMessage) }
+                errs.foreach {
+                  case (cui, e) ⇒
+                    cui.setAsInvalid(e.getMessage)
+                    displayCapsuleErrors(cui, e.getMessage)
+                }
                 Right(mole, cMap, pMap, errs)
               case Left(l) ⇒ Left(List(l, None))
             }
           case _ ⇒ Left(List(("No starting capsule is defined, the Mole can not be built", None)))
         }
       case _ ⇒ Left("")
+    }
+  }
+
+  def displayCapsuleErrors(capsule: ICapsuleUI,
+                           errorMsg: String) = {
+    capsule.dataUI.task match {
+      case Some(x: ITaskDataProxyUI) ⇒ StatusBar.warn(errorMsg, x)
+      case None ⇒ StatusBar.warn(errorMsg)
     }
   }
 

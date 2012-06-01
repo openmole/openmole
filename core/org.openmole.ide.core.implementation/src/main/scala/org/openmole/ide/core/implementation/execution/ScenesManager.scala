@@ -46,9 +46,9 @@ object ScenesManager {
   PasswordListner.apply
 
   def buildMoleSceneContainers = tabPane.pages.flatMap(_.content match {
-      case x: BuildMoleSceneContainer ⇒ List(x)
-      case _ ⇒ Nil
-    })
+    case x: BuildMoleSceneContainer ⇒ List(x)
+    case _ ⇒ Nil
+  })
 
   def currentSceneContainer: Option[ISceneContainer] = {
     if (tabPane.peer.getTabCount == 0) None
@@ -96,11 +96,11 @@ object ScenesManager {
     val container = new BuildMoleSceneContainer(ms)
     val page = new TabbedPane.Page(ms.manager.name, container)
     addTab(page, ms.manager.name, new Action("") {
-        override def apply = {
-          container.stopAndCloseExecutions
-          tabPane.pages.remove(page.index)
-        }
-      })
+      override def apply = {
+        container.stopAndCloseExecutions
+        tabPane.pages.remove(page.index)
+      }
+    })
     container
   }
 
@@ -116,8 +116,7 @@ object ScenesManager {
           bmsc.executionMoleSceneContainers += container
           addTab(page, clone.manager.name, new Action("") { override def apply = tabPane.pages.remove(page.index) })
           tabPane.selection.index = page.index
-        }
-        else 
+        } else
           StatusBar.block("The Mole can not be built due to the previous errors")
       case Left(msg: String) ⇒ StatusBar.block(msg)
     }
