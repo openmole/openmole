@@ -19,7 +19,7 @@ package org.openmole.ui.console
 
 import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.core.batch.control.ServiceDescription
-import org.openmole.core.batch.environment.AuthenticationMethod
+import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
 import org.openmole.core.implementation.validation.Validation
