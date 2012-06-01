@@ -24,10 +24,11 @@ import scala.swing.Button
 import scala.swing.MenuItem
 import scala.swing.event.ButtonClicked
 import java.awt.Color
+import org.openmole.ide.misc.tools.image.Images._
 
 class PopupToolBarPresenter(t: String, basemenu: Menu) extends Button(t) {
   val popup = new PopupMenu { contents += basemenu }
-
+  val arrow = ARROW
   background = new Color(204, 204, 204, 128)
   listenTo(mouse.clicks)
   reactions += {
