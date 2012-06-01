@@ -18,117 +18,74 @@
 package org.openmole.ide.core.implementation.dialog
 
 import java.awt.Color
-import javax.swing.event.HyperlinkEvent
-import javax.swing.event.HyperlinkListener
-import javax.swing.text.html.HTML
-import javax.swing.text.html.HTMLDocument
-import javax.swing.text.html.HTMLEditorKit
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.workflow.ISceneContainer
-import scala.collection.mutable.HashMap
-import scala.swing.EditorPane
+import org.openmole.ide.misc.widget.LinkLabel
+import org.openmole.ide.misc.widget.MigPanel
+import scala.swing.Action
+import scala.swing.Label
 
-object StatusBar extends EditorPane { statusBar ⇒
+object StatusBar extends MigPanel("wrap 2") { statusBar ⇒
   background = Color.WHITE
   opaque = true
 
-  //val kit = new HTMLEditorKit
-  // val doc = new HTMLDocument
-  // editorKit = kit
-  // peer.setDocument(doc)
-
-  val proxyMapping = new HashMap[Int, IDataProxyUI]
+  var strings = ""
 
   def inform(info: String,
-             proxy: IDataProxyUI): Unit = {
-    if (!text.contains(info)) {
-      proxyMapping += caret.position -> proxy
-      appendLink("[INFO] ")
-      append(info)
-    }
-  }
+             proxy: IDataProxyUI): Unit = genericProxy("[INFO] ", info, proxy)
 
-  def inform(info: String) = {
-    if (!text.contains(info)) {
-      appendBold("[INFO]")
-      append(info)
-    }
-  }
+  def inform(info: String) = generic("[INFO] ", info)
 
   def warn(warning: String,
-           proxy: IDataProxyUI): Unit = {
-    if (!text.contains(warning)) {
-      proxyMapping += caret.position -> proxy
-      appendLink("[WARNING] ")
-      append(warning)
-    }
-  }
+           proxy: IDataProxyUI): Unit = genericProxy("[WARNING] ", warning, proxy)
 
-  def warn(warning: String) = {
-    if (!text.contains(warning)) {
-      appendBold("[WARNING] ")
-      append(warning)
-    }
-  }
+  def warn(warning: String) = generic("[WARNING] ", warning)
 
   def block(b: String,
-            proxy: IDataProxyUI): Unit = {
-    if (!text.contains(b)) {
-      proxyMapping += caret.position -> proxy
-      appendLink("[CRITICAL] ")
-      append(b)
+            proxy: IDataProxyUI): Unit = genericProxy("[CRITICAL] ", b, proxy)
+
+  def block(b: String) = generic("[CRITICAL] ", b)
+
+  def generic(header: String,
+              error: String) = {
+    if (!strings.contains(error)) {
+      strings += error
+      contents += new Label(header)
+      contents += new Label(error)
+      revalidate
+      repaint
     }
   }
 
-  def block(b: String) = {
-    if (!text.contains(b)) {
-      appendBold("[CRITICAL] ")
-      append(b)
+  def genericProxy(header: String,
+                   error: String,
+                   proxy: IDataProxyUI) = {
+    if (!strings.contains(error)) {
+      strings += error
+      contents += new LinkLabel(header,
+        new Action("") { override def apply = display(proxy) },
+        4,
+        "0088aa")
+      contents += new Label(error)
+      revalidate
+      repaint
     }
   }
 
   def clear = {
-    proxyMapping.clear
-    text = ""
+    contents.clear
+    revalidate
+    repaint
+    strings = ""
   }
 
-  def isValid = text.isEmpty
+  def isValid = strings.isEmpty
 
-  def appendBold(s: String) =
-    //kit.insertHTML(doc, doc.getLength, s, 0, 0, HTML.Tag.STRONG)
-    text += s
-
-  def appendLink(s: String) =
-    // kit.insertHTML(doc, doc.getLength, s, 0, 0, HTML.Tag.A)
-    text += s
-
-  def append(s: String) = {
-    //kit.insertHTML(doc, doc.getLength, s, 0, 0, HTML.Tag.P)
-    text += s + "\n"
-  }
-
-  peer.addHyperlinkListener(new MyHyperlinkListener)
-
-  class MyHyperlinkListener extends HyperlinkListener {
-    def hyperlinkUpdate(evt: HyperlinkEvent) = {
-      if (evt.getEventType == HyperlinkEvent.EventType.ACTIVATED) {
-        val proxy = proxyMapping.getOrElse(caret.position, None)
-        proxy match {
-          case Some(x: IDataProxyUI) ⇒
-            ScenesManager.currentSceneContainer match {
-              case Some(sc: ISceneContainer) ⇒ sc.scene.displayPropertyPanel(x, EDIT)
-              case None ⇒
-            }
-        }
-      }
+  def display(proxy: IDataProxyUI) =
+    ScenesManager.currentSceneContainer match {
+      case Some(sc: ISceneContainer) ⇒ sc.scene.displayPropertyPanel(proxy, EDIT)
+      case None ⇒
     }
-
-    class MyEditorPane(t: String,
-                       oldEditor: Option[MyEditorPane] = None) extends EditorPane("text/html",
-      if (oldEditor.isDefined) oldEditor.get text
-      else "" + t) { editor ⇒
-    }
-  }
 }
