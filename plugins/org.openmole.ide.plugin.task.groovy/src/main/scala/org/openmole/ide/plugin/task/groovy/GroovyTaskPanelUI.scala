@@ -28,6 +28,7 @@ import org.openmole.ide.misc.widget.GroovyEditor
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
+import org.openmole.ide.misc.widget.multirow.MultiWidget._
 
 class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("fillx,wrap", "[left,grow,fill]", "") with ITaskPanelUI {
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
@@ -38,7 +39,13 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("fillx,wrap",
       i18n.getString("groovyCodeEx"))
   }
 
-  val libMultiTextField = new MultiChooseFileTextField("Lib", pud.libs, "Select a file", Some("Lib files"), FilesOnly, Some("jar")) {
+  val libMultiTextField = new MultiChooseFileTextField("Lib",
+    pud.libs,
+    "Select a file",
+    Some("Lib files"),
+    FilesOnly,
+    Some("jar"),
+    CLOSE_IF_EMPTY) {
     tooltip = Help.tooltip(i18n.getString("libraryPath"),
       i18n.getString("libraryPathEx"))
   }
