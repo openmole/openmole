@@ -126,8 +126,7 @@ object MoleMaker {
                    plugins: Set[File] = Set.empty) =
     taskCoreObject(proxy, plugins) match {
       case Right(x: ITask) ⇒ new Capsule(x)
-      case Left(x: Throwable) ⇒
-        new Capsule
+      case Left(x: Throwable) ⇒ new Capsule
     }
 
   def buildCapsule(capsuleDataUI: ICapsuleDataUI,

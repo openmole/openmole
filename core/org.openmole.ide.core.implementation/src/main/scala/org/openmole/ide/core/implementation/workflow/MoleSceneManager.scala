@@ -57,7 +57,7 @@ class MoleSceneManager(var name: String,
   override def registerCapsuleUI(cv: ICapsuleUI) = {
     nodeID += 1
     capsules.put(getNodeID, cv)
-    if (capsules.size == 1) startingCapsule = Some(cv)
+    if (capsules.size == 1) setStartingCapsule(cv)
     capsuleConnections += cv.dataUI -> HashSet.empty[IConnectorUI]
   }
 
@@ -76,6 +76,19 @@ class MoleSceneManager(var name: String,
 
     capsules.remove(nodeID)
     nodeID
+  }
+
+  def capsulesInMole = {
+    val capsuleSet = new HashSet[ICapsuleDataUI]
+    capsuleConnections.foreach {
+      case (capsuleData, connections) ⇒
+        capsuleSet += capsuleData
+        connections.foreach { c ⇒
+          capsuleSet += c.source.dataUI
+          capsuleSet += c.target.capsule.dataUI
+        }
+    }
+    capsuleSet
   }
 
   def connector(cID: String) = connectorMap.get(cID)

@@ -68,6 +68,7 @@ class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISce
   def buildExecutionAction = new Action("") {
     override def apply = {
       ScenesManager.saveCurrentPropertyWidget
+      CheckData.checkNoEmptyCapsule(scene)
       ScenesManager.addExecutionSceneContainer(buildContainer)
     }
   }

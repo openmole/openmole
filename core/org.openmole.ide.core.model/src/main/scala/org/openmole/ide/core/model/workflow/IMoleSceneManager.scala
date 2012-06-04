@@ -73,4 +73,6 @@ trait IMoleSceneManager {
 
   def changeConnector(oldConnector: IConnectorUI,
                       connector: IConnectorUI)
+
+  def capsulesInMole: Iterable[ICapsuleDataUI]
 }

@@ -45,7 +45,6 @@ object CheckData extends Logger {
       case y: BuildMoleScene ⇒
         y.manager.startingCapsule match {
           case Some(x: ICapsuleUI) ⇒
-            //  val (mole, cMap, pMap, errs) = MoleMaker.buildMole(y.manager)
             MoleMaker.buildMole(y.manager) match {
               case Right((mole, cMap, pMap, errs)) ⇒
                 val error_capsules = y.manager.capsules.values.partition { _.dataUI.task.isDefined }
@@ -93,7 +92,8 @@ object CheckData extends Logger {
                 Right(mole, cMap, pMap, errs)
               case Left(l) ⇒ Left(List(l, None))
             }
-          case _ ⇒ Left(List(("No starting capsule is defined, the Mole can not be built", None)))
+          case _ ⇒
+            Left(List(("No starting capsule is defined, the Mole can not be built", None)))
         }
       case _ ⇒ Left("")
     }
@@ -158,6 +158,14 @@ object CheckData extends Logger {
       case _ ⇒
     }
   }
+
+  def checkNoEmptyCapsule(scene: IMoleScene) =
+    scene.manager.capsulesInMole.foreach { c ⇒
+      c.task match {
+        case x: ITaskDataProxyUI ⇒
+        case _ ⇒ StatusBar.warn("A capsule without task can not be run")
+      }
+    }
 
   def fullCheck(scene: IMoleScene) =
     checkMole(scene) match {

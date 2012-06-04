@@ -25,14 +25,9 @@ import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.misc.widget.ToolBarButton
-import scala.swing.Component
-import scala.swing.Orientation
 import scala.swing.Action
 import scala.swing.Panel
-import scala.swing.ScrollPane
-import scala.swing.SplitPane
 import scala.swing.TabbedPane
-import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.misc.tools.image.Images._
 
 class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
