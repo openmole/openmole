@@ -134,7 +134,9 @@ object MoleMaker {
     capsuleDataUI.task match {
       case Some(x: ITaskDataProxyUI) ⇒
         buildCapsule(x, moleDataUI.plugins.map { p ⇒ new File(p) }.toSet)
-      case _ ⇒ new Capsule
+      case _ ⇒
+        StatusBar.inform("A capsule without Task can not be run")
+        new Capsule
 
     }
 

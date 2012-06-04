@@ -90,10 +90,10 @@ object CheckData extends Logger {
                     displayCapsuleErrors(cui, e.getMessage)
                 }
                 Right(mole, cMap, pMap, errs)
-              case Left(l) ⇒ Left(List(l, None))
+              case Left(l) ⇒ Left(l)
             }
           case _ ⇒
-            Left(List(("No starting capsule is defined, the Mole can not be built", None)))
+            Left(("No starting capsule is defined, the Mole can not be built"))
         }
       case _ ⇒ Left("")
     }
