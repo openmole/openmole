@@ -46,7 +46,7 @@ object MultiRowExample extends SimpleSwingApplication {
       List((fake1, proto1, action), (fake2, proto2, action)), image).panel.peer, BorderLayout.WEST)
     peer.add(new MultiComboTextField("My title2",
       List((fake1, "un"), (fake2, "deux")),
-      List(fake1, fake2)).panel.peer, BorderLayout.EAST)
+      List(fake1, fake2), NO_EMPTY, RowWidget.ADD).panel.peer, BorderLayout.EAST)
     peer.add(new MultiCombo("My title2",
       List(fake2, fake1), List(), CLOSE_IF_EMPTY, RowWidget.ADD).panel.peer, BorderLayout.CENTER)
     size = new Dimension(250, 200)

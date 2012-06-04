@@ -20,7 +20,8 @@ class SystemExecTaskDataUI(val name: String = "",
                            val lauchingCommands: String = "",
                            val resources: List[String] = List.empty,
                            val inputMap: List[(IPrototypeDataProxyUI, String)] = List.empty,
-                           val outputMap: List[(String, IPrototypeDataProxyUI)] = List.empty) extends TaskDataUI {
+                           val outputMap: List[(String, IPrototypeDataProxyUI)] = List.empty,
+                           val variables: List[IPrototypeDataProxyUI] = List.empty) extends TaskDataUI {
 
   def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = {
     val syet = SystemExecTask(name, lauchingCommands.filterNot(_ == '\n'), workdir)(plugins)
@@ -28,6 +29,7 @@ class SystemExecTaskDataUI(val name: String = "",
     syet addOutput outputs
     syet addParameter parameters
     resources.foreach(syet addResource new File(_))
+    variables.foreach { p ⇒ syet addVariable (p.dataUI.coreObject) }
 
     outputMap.foreach(i ⇒ syet addOutput (i._1, i._2.dataUI.coreObject.asInstanceOf[IPrototype[File]]))
     inputMap.foreach(i ⇒ syet addInput (i._1.dataUI.coreObject.asInstanceOf[IPrototype[File]], i._2))

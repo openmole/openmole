@@ -60,14 +60,15 @@ class MultiChooseFileTextField(title: String,
            cTitle: String,
            cDescription: Option[String],
            sMode: SelectionMode.Value,
-           exts: Option[String]) = this(title,
+           exts: Option[String],
+           minus: Minus = NO_EMPTY) = this(title,
     iValues,
     cTitle,
     cDescription,
     sMode,
     exts,
     new Factory,
-    NO_EMPTY)
+    minus)
 
   def this(title: String, iValues: List[String]) =
     this(title, iValues, "", None, SelectionMode.FilesOnly, None)

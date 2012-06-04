@@ -46,7 +46,7 @@ class MultiTextFieldCombo[B](title: String,
                              initValues: List[(String, B)],
                              comboContent: List[B],
                              factory: IRowWidgetFactory[TextFieldComboRowWidget[B]],
-                             minus: Minus) extends MultiWidget(title,
+                             minus: Minus = NO_EMPTY) extends MultiWidget(title,
   if (initValues.isEmpty)
     List(new TextFieldComboRowWidget("",
     comboContent,
@@ -59,11 +59,12 @@ class MultiTextFieldCombo[B](title: String,
 
   def this(title: String,
            iValues: List[(String, B)],
-           cContent: List[B]) = this(title,
+           cContent: List[B],
+           minus: Minus = NO_EMPTY) = this(title,
     iValues,
     cContent,
     new Factory[B],
-    NO_EMPTY)
+    minus)
 
   def content = rowWidgets.map(_.content).toList
 }
