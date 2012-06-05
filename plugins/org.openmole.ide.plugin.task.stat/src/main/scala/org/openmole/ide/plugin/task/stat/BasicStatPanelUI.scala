@@ -18,6 +18,7 @@
 package org.openmole.ide.plugin.task.stat
 
 import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
@@ -30,6 +31,12 @@ abstract class BasicStatPanelUI(statType: String,
 
   val arrayDoublePrototypes = Proxys.classPrototypes(classOf[Array[Double]])
   val doublePrototypes = Proxys.classPrototypes(classOf[Double])
+
+  if (arrayDoublePrototypes.isEmpty) 
+    StatusBar.inform("At least 1 Array of Prototype (Double) has to be created before using a" + statType + "  Tasks")
+  
+  if (doublePrototypes.isEmpty) 
+    StatusBar.inform("At least 1 Prototype (Double) have to be created before using a" + statType + "  Tasks")
 
   val multiPrototypeCombo: Option[MultiTwoCombos[IPrototypeDataProxyUI, IPrototypeDataProxyUI]] =
     if (!arrayDoublePrototypes.isEmpty && !doublePrototypes.isEmpty) {
