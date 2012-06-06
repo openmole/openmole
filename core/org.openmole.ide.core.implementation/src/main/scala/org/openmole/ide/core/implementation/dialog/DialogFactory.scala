@@ -30,6 +30,7 @@ import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import scala.swing.EditorPane
 import scala.swing.Label
+import scala.swing.ScrollPane
 import scala.swing.TextArea
 import scala.swing.TextField
 
@@ -39,9 +40,9 @@ object DialogFactory {
     if (exeContainer.finished) true
     else if (exeContainer.started) {
       if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new Label("<html>A simulation is currently running.<br>Close anyway ?</html>") {
-              opaque = true
-              background = Color.white
-            }.peer, "Execution warning")).equals(NotifyDescriptor.OK_OPTION)) true
+        opaque = true
+        background = Color.white
+      }.peer, "Execution warning")).equals(NotifyDescriptor.OK_OPTION)) true
       else false
     } else true
   }
@@ -55,19 +56,19 @@ object DialogFactory {
 
   def deleteProxyConfirmation(proxy: IDataProxyUI): Boolean = {
     if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new Label("<html>" + proxy.dataUI.name + " is currently used in a scene.<br>" +
-                                                                         "It will be deleted everywhere it appears. <br>" +
-                                                                         "Delete anyway ?"){ opaque = true; background = Color.WHITE }.peer, "Execution warning")).equals(NotifyDescriptor.OK_OPTION)) true
+      "It will be deleted everywhere it appears. <br>" +
+      "Delete anyway ?") { opaque = true; background = Color.WHITE }.peer, "Execution warning")).equals(NotifyDescriptor.OK_OPTION)) true
     else false
   }
 
   def closePropertyPanelConfirmation(panel: BasePanelUI): Boolean = {
     if (DialogDisplayer.getDefault.notify(
-        new DialogDescriptor(new Label("<html> The property panel " + panel.nameTextField.text + " has not been created yet.<br>" +
-                                       "All the data will be lost. <br>" +
-                                       "Close anyway ?") { opaque = true; background = Color.WHITE }.peer, "Warning")).equals(NotifyDescriptor.OK_OPTION)) true
+      new DialogDescriptor(new Label("<html> The property panel " + panel.nameTextField.text + " has not been created yet.<br>" +
+        "All the data will be lost. <br>" +
+        "Close anyway ?") { opaque = true; background = Color.WHITE }.peer, "Warning")).equals(NotifyDescriptor.OK_OPTION)) true
     else false
   }
 
   def displayStack(stack: String) =
-    DialogDisplayer.getDefault.notify(new DialogDescriptor(new TextArea(stack).peer, "Error stack"))
+    DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(new TextArea(stack)).peer, "Error stack"))
 }
