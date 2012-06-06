@@ -72,7 +72,7 @@ object MoleMaker {
               envs += env -> x.dataUI.name
               strat += capsuleMap(c) -> new FixedEnvironmentSelection(env)
             } catch {
-              case e: UserBadDataError ⇒ StatusBar.block(e.message)
+              case e: UserBadDataError ⇒ StatusBar.block(e.message, stack = e.getStackTraceString)
             }
           case _ ⇒
         }
@@ -149,7 +149,7 @@ object MoleMaker {
         new PluginSet(plugins)))
     } catch {
       case e ⇒
-        StatusBar.warn(e.getMessage, proxy)
+        StatusBar.warn(e.getMessage, Some(proxy), e.getStackTraceString)
         Left(e)
     }
 

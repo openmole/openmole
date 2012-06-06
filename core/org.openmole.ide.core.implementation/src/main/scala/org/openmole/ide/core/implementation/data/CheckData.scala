@@ -102,7 +102,7 @@ object CheckData extends Logger {
   def displayCapsuleErrors(capsule: ICapsuleUI,
                            errorMsg: String) = {
     capsule.dataUI.task match {
-      case Some(x: ITaskDataProxyUI) ⇒ StatusBar.warn(errorMsg, x)
+      case Some(x: ITaskDataProxyUI) ⇒ StatusBar.warn(errorMsg, Some(x))
       case None ⇒ StatusBar.warn(errorMsg)
     }
   }

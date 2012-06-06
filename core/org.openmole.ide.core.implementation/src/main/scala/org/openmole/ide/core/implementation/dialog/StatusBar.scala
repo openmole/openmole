@@ -27,52 +27,50 @@ import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.Action
 import scala.swing.Label
 
-object StatusBar extends MigPanel("wrap 2") { statusBar ⇒
+object StatusBar extends MigPanel("wrap 3") { statusBar ⇒
   background = Color.WHITE
   opaque = true
 
   var strings = ""
 
   def inform(info: String,
-             proxy: IDataProxyUI): Unit = genericProxy("[INFO] ", info, proxy)
-
-  def inform(info: String) = generic("[INFO] ", info)
+             proxy: Option[IDataProxyUI] = None,
+             stack: String = ""): Unit = printError("", info, proxy, stack)
 
   def warn(warning: String,
-           proxy: IDataProxyUI): Unit = genericProxy("[WARNING] ", warning, proxy)
-
-  def warn(warning: String) = generic("[WARNING] ", warning)
+           proxy: Option[IDataProxyUI] = None,
+           stack: String = ""): Unit = printError("[WARNING] ", warning, proxy, stack)
 
   def block(b: String,
-            proxy: IDataProxyUI): Unit = genericProxy("[CRITICAL] ", b, proxy)
+            proxy: Option[IDataProxyUI] = None,
+            stack: String = ""): Unit = printError("[CRITICAL] ", b, proxy, stack)
 
-  def block(b: String) = generic("[CRITICAL] ", b)
-
-  def generic(header: String,
-              error: String) = {
+  def printError(header: String,
+                 error: String,
+                 proxy: Option[IDataProxyUI],
+                 stack: String) =
     if (!strings.contains(error)) {
       strings += error
-      contents += new Label(header)
-      contents += new Label(error)
+      proxy match {
+        case Some(x: IDataProxyUI) ⇒
+          contents += new LinkLabel(header,
+            new Action("") { override def apply = displayProxy(x) },
+            4,
+            "0088aa")
+        case None ⇒ contents += new Label(header)
+      }
+      if (stack.isEmpty) {
+        contents += (new Label(error), "wrap")
+      } else {
+        contents += new Label(error)
+        contents += new LinkLabel(" details",
+          new Action("") { override def apply = DialogFactory.displayStack(stack) },
+          3,
+          "0088aa")
+      }
       revalidate
       repaint
     }
-  }
-
-  def genericProxy(header: String,
-                   error: String,
-                   proxy: IDataProxyUI) = {
-    if (!strings.contains(error)) {
-      strings += error
-      contents += new LinkLabel(header,
-        new Action("") { override def apply = display(proxy) },
-        4,
-        "0088aa")
-      contents += new Label(error)
-      revalidate
-      repaint
-    }
-  }
 
   def clear = {
     contents.clear
@@ -83,7 +81,7 @@ object StatusBar extends MigPanel("wrap 2") { statusBar ⇒
 
   def isValid = strings.isEmpty
 
-  def display(proxy: IDataProxyUI) =
+  def displayProxy(proxy: IDataProxyUI) =
     ScenesManager.currentSceneContainer match {
       case Some(sc: ISceneContainer) ⇒ sc.scene.displayPropertyPanel(proxy, EDIT)
       case None ⇒

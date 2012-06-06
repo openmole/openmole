@@ -32,10 +32,10 @@ abstract class BasicStatPanelUI(statType: String,
   val arrayDoublePrototypes = Proxys.classPrototypes(classOf[Array[Double]])
   val doublePrototypes = Proxys.classPrototypes(classOf[Double])
 
-  if (arrayDoublePrototypes.isEmpty) 
+  if (arrayDoublePrototypes.isEmpty)
     StatusBar.inform("At least 1 Array of Prototype (Double) has to be created before using a" + statType + "  Tasks")
-  
-  if (doublePrototypes.isEmpty) 
+
+  if (doublePrototypes.isEmpty)
     StatusBar.inform("At least 1 Prototype (Double) have to be created before using a" + statType + "  Tasks")
 
   val multiPrototypeCombo: Option[MultiTwoCombos[IPrototypeDataProxyUI, IPrototypeDataProxyUI]] =

@@ -28,7 +28,9 @@ import org.openmole.ide.core.implementation.panel.BasePanelUI
 import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.workflow.ISceneContainer
+import scala.swing.EditorPane
 import scala.swing.Label
+import scala.swing.TextArea
 import scala.swing.TextField
 
 object DialogFactory {
@@ -62,7 +64,10 @@ object DialogFactory {
     if (DialogDisplayer.getDefault.notify(
       new DialogDescriptor(new Label("<html> The property panel " + panel.nameTextField.text + " has not been created yet.<br>" +
         "All the data will be lost. <br>" +
-        "Close anyway ?").peer, "Warning")).equals(NotifyDescriptor.OK_OPTION)) true
+        "Close anyway ?") { opaque = true; background = Color.WHITE }.peer, "Warning")).equals(NotifyDescriptor.OK_OPTION)) true
     else false
   }
+
+  def displayStack(stack: String) =
+    DialogDisplayer.getDefault.notify(new DialogDescriptor(new TextArea(stack).peer, "Error stack"))
 }
