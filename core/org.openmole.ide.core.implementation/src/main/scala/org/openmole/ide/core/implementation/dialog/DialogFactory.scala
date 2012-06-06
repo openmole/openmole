@@ -38,10 +38,10 @@ object DialogFactory {
   def closeExecutionTab(exeContainer: ExecutionMoleSceneContainer): Boolean = {
     if (exeContainer.finished) true
     else if (exeContainer.started) {
-      val lab = new Label("<html>A simulation is currently running.<br>Close anyway ?</html>") {
-        background = Color.white
-      }.peer
-      if (DialogDisplayer.getDefault.notify(new DialogDescriptor(lab, "Execution warning")).equals(NotifyDescriptor.OK_OPTION)) true
+      if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new Label("<html>A simulation is currently running.<br>Close anyway ?</html>") {
+              opaque = true
+              background = Color.white
+            }.peer, "Execution warning")).equals(NotifyDescriptor.OK_OPTION)) true
       else false
     } else true
   }
@@ -55,16 +55,16 @@ object DialogFactory {
 
   def deleteProxyConfirmation(proxy: IDataProxyUI): Boolean = {
     if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new Label("<html>" + proxy.dataUI.name + " is currently used in a scene.<br>" +
-      "It will be deleted everywhere it appears. <br>" +
-      "Delete anyway ?").peer, "Execution warning")).equals(NotifyDescriptor.OK_OPTION)) true
+                                                                         "It will be deleted everywhere it appears. <br>" +
+                                                                         "Delete anyway ?"){ opaque = true; background = Color.WHITE }.peer, "Execution warning")).equals(NotifyDescriptor.OK_OPTION)) true
     else false
   }
 
   def closePropertyPanelConfirmation(panel: BasePanelUI): Boolean = {
     if (DialogDisplayer.getDefault.notify(
-      new DialogDescriptor(new Label("<html> The property panel " + panel.nameTextField.text + " has not been created yet.<br>" +
-        "All the data will be lost. <br>" +
-        "Close anyway ?") { opaque = true; background = Color.WHITE }.peer, "Warning")).equals(NotifyDescriptor.OK_OPTION)) true
+        new DialogDescriptor(new Label("<html> The property panel " + panel.nameTextField.text + " has not been created yet.<br>" +
+                                       "All the data will be lost. <br>" +
+                                       "Close anyway ?") { opaque = true; background = Color.WHITE }.peer, "Warning")).equals(NotifyDescriptor.OK_OPTION)) true
     else false
   }
 
