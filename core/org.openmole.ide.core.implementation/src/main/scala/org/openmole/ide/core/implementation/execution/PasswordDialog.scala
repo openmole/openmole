@@ -18,15 +18,19 @@
 package org.openmole.ide.core.implementation.execution
 
 import java.awt.Color
+import scala.swing.Button
 import scala.swing.Label
 import scala.swing.PasswordField
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.misc.workspace.Workspace
 import scala.swing.event.KeyPressed
+import scala.swing.event.ButtonClicked
 import scala.swing.event.Key._
 import scala.swing.event.KeyReleased
+import scala.swing.event.MousePressed
 
 object PasswordDialog {
+
   val passField = new PasswordField(12) {
     listenTo(keys)
     reactions += {
@@ -35,9 +39,17 @@ object PasswordDialog {
     }
   }
 
-  def panel = new MigPanel("") {
+  val initButton = new Button("Reset")
+
+  val panel = new MigPanel("") {
     contents += new Label("Password: ")
     contents += passField
+    contents += initButton
+  }
+
+  panel.listenTo(`initButton`)
+  panel.reactions += {
+    case ButtonClicked(`initButton`) ⇒ Workspace.reset
   }
 
   private def setColor(c: Color) = {
