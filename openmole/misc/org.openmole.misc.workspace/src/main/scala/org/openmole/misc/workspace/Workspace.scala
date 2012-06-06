@@ -282,11 +282,12 @@ class Workspace(val location: File) {
 
   def newDir: File = newDir(fixedDir)
 
-  def reset {
+  def reset = synchronized {
     persistentDir.recursiveDelete
     val uniqueId = preference(UniqueID)
-    configurationFile.delete
-    configurationFile.createNewFile
+    configurationFile.content = ""
+    configuration.clear
+    _password = None
     setPreference(UniqueID, uniqueId)
   }
 
