@@ -29,9 +29,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole.core</groupId>
+            <groupId>org.openmole.ide</groupId>
             <artifactId>org.apache.commons.collections15</artifactId>
-            <version>4.01</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>

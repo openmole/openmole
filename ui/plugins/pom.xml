@@ -48,6 +48,12 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.plugin.environment.pbs</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.plugin.grouping.onvariable</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
