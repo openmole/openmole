@@ -18,6 +18,7 @@
 package org.openmole.ide.plugin.environment.glite
 
 import java.awt.Color
+import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.model.panel.IAuthentificationPanelUI
 import org.openmole.ide.misc.widget.ChooseFileTextField
 import org.openmole.ide.misc.widget.PluginPanel
@@ -58,13 +59,6 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
   val p12TextField = new ChooseFileTextField("Certificate path", "Select a file", Some("p12 file"), FilesOnly, Some("p12"))
   val proxyTextField = new ChooseFileTextField("", "Select a file", Some("proxy file"), FilesOnly, Some("proxy"))
 
-  contents += new PluginPanel("wrap", "", "[]15[]15[]") {
-    contents += pemButton
-    contents += p12Button
-    contents += proxyButton
-  }
-  contents += new Separator
-
   val pemPanel = buildPemPanel
   val p12Panel = buildP12Panel
   val proxyPanel = buildProxyPanel
@@ -73,44 +67,57 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
   val p12 = (p12Button, p12Panel, { p12TextField.text = "" })
   val proxy = (proxyButton, proxyPanel, { proxyTextField.text = "" })
 
-  Workspace.persistentList(classOf[GliteAuthenticationMethod]).headOption match {
-    case Some((i: Int, x: P12Certificate)) ⇒
-      initButton = Some(p12Button)
-      passString = Workspace.decrypt(x.cypheredPassword)
-      p12TextField.text = x.certificatePath
-      addP12
-    case Some((i: Int, x: PEMCertificate)) ⇒
-      initButton = Some(pemButton)
-      pem1TextField.text = x.certificatePath
-      pem2TextField.text = x.keyPath
-      passString = Workspace.decrypt(x.cypheredPassword)
-      addPem
-    case Some((i: Int, x: VOMSProxyFile)) ⇒
-      initButton = Some(proxyButton)
-      proxyTextField.text = x.proxyFile
-      addProxy
-    case _ ⇒
-      initButton = Some(p12Button)
-      addP12
-  }
+  val pemPassField = Some(new PasswordField(passString, 20))
+  val p12PassField = Some(new PasswordField(passString, 20))
 
-  var pemPassField = new PasswordField(passString, 20)
-  pemPanel.contents += pemPassField
-  var p12PassField = new PasswordField(passString, 20)
-  p12Panel.contents += p12PassField
+  try {
+    Workspace.persistentList(classOf[GliteAuthenticationMethod]).headOption match {
+      case Some((i: Int, x: P12Certificate)) ⇒
+        initButton = Some(p12Button)
+        passString = Workspace.decrypt(x.cypheredPassword)
+        p12TextField.text = x.certificatePath
+        addP12
+      case Some((i: Int, x: PEMCertificate)) ⇒
+        initButton = Some(pemButton)
+        pem1TextField.text = x.certificatePath
+        pem2TextField.text = x.keyPath
+        passString = Workspace.decrypt(x.cypheredPassword)
+        addPem
+      case Some((i: Int, x: VOMSProxyFile)) ⇒
+        initButton = Some(proxyButton)
+        proxyTextField.text = x.proxyFile
+        addProxy
+      case _ ⇒
+        initButton = Some(p12Button)
+        addP12
+    }
 
-  listenTo(`pemButton`, `p12Button`, `proxyButton`)
-  reactions += {
-    case ButtonClicked(`pemButton`) ⇒ addPem
-    case ButtonClicked(`p12Button`) ⇒ addP12
-    case ButtonClicked(`proxyButton`) ⇒ addProxy
-  }
+    pemPanel.contents += pemPassField.get
+    p12Panel.contents += p12PassField.get
 
-  groupButton.select(initButton.get)
+    listenTo(`pemButton`, `p12Button`, `proxyButton`)
+    reactions += {
+      case ButtonClicked(`pemButton`) ⇒ addPem
+      case ButtonClicked(`p12Button`) ⇒ addP12
+      case ButtonClicked(`proxyButton`) ⇒ addProxy
+    }
 
-  def addPem = { clean; contents += pem._2; refresh }
-  def addP12 = { clean; contents += p12._2; refresh }
-  def addProxy = { clean; contents += proxy._2; refresh }
+    groupButton.select(initButton.get)
+
+  } catch { case e: Throwable ⇒ StatusBar.block(e.getMessage, stack = e.getStackTraceString) }
+
+  def addButtons =
+    contents += new PluginPanel("wrap", "", "[]15[]15[]") {
+      contents += pemButton
+      contents += p12Button
+      contents += proxyButton
+
+      contents += new Separator
+    }
+
+  def addPem = { clean; addButtons; contents += pem._2; refresh }
+  def addP12 = { clean; addButtons; contents += p12._2; refresh }
+  def addProxy = { clean; addButtons; contents += proxy._2; refresh }
 
   def clean = if (contents.size == 3) contents.remove(2)
 
@@ -120,16 +127,18 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
   }
 
   def saveContent = {
-    if (pemButton.selected) Workspace.persistentList(classOf[GliteAuthenticationMethod])(0) = new PEMCertificate(Workspace.encrypt(new String(pemPassField.password)),
-      pem1TextField.text,
-      pem2TextField.text)
-    else if (p12Button.selected)
-      Workspace.persistentList(classOf[GliteAuthenticationMethod])(0) = new P12Certificate(Workspace.encrypt(new String(p12PassField.password)),
-        p12TextField.text)
-    else if (proxyButton.selected) {
-      Workspace.persistentList(classOf[GliteAuthenticationMethod])(0) = new VOMSProxyFile(proxyTextField.text)
+    pemPassField match {
+      case Some(x: PasswordField) ⇒
+        if (pemButton.selected) Workspace.persistentList(classOf[GliteAuthenticationMethod])(0) = new PEMCertificate(Workspace.encrypt(new String(x.password)),
+          pem1TextField.text,
+          pem2TextField.text)
+        else if (p12Button.selected)
+          Workspace.persistentList(classOf[GliteAuthenticationMethod])(0) = new P12Certificate(Workspace.encrypt(new String(p12PassField.get.password)),
+            p12TextField.text)
+        else if (proxyButton.selected) {
+          Workspace.persistentList(classOf[GliteAuthenticationMethod])(0) = new VOMSProxyFile(proxyTextField.text)
+        }
     }
-
     (pem :: p12 :: proxy :: Nil).filterNot(_._1.selected).foreach(_._3)
   }
 

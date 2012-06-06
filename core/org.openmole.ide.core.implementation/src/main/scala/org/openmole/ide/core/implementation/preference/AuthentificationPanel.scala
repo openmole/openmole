@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.implementation.preference
 
+import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.model.panel.IAuthentificationPanelUI
 import org.openmole.ide.core.model.preference.IAuthentificationPanel
@@ -29,10 +30,20 @@ import scala.swing.ScrollPane
 class AuthentificationPanel extends MigPanel("wrap", "[grow,fill]", "") with IAuthentificationPanel {
   var auths = new HashSet[IAuthentificationPanelUI]()
   KeyRegistry.authentifications.values.foreach(a ⇒ {
-    val p = a.buildPanelUI
-    auths += p
-    contents += new Label(a.displayName)
-    contents += new ScrollPane { peer.setViewportView(p.peer) }
+    val p = try {
+      Right(a.buildPanelUI)
+    } catch {
+      case e: Throwable ⇒
+        StatusBar.block(e.getMessage, stack = e.getStackTraceString)
+        Left
+    }
+    p match {
+      case Right(r: IAuthentificationPanelUI) ⇒
+        auths += r
+        contents += new Label(a.displayName)
+        contents += new ScrollPane { peer.setViewportView(r.peer) }
+      case Left ⇒
+    }
   })
 
   def save = auths.foreach { a ⇒ a.saveContent }

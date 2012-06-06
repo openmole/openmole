@@ -18,17 +18,18 @@
 package org.openmole.ide.core.implementation.preference
 
 import java.awt.Dimension
+import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.TabbedPane
 import scala.swing.event.Key._
 
 class PreferenceContent extends MigPanel("wrap", "[right]", "") {
-  minimumSize = new Dimension(450, 300)
-
+  preferredSize = new Dimension(450, 300)
+  StatusBar.clear
   val authentification = new AuthentificationPanel
   contents += new TabbedPane {
     pages.append(new TabbedPane.Page("Authentification", authentification))
-    pages.append(new TabbedPane.Page("Environment management", new EnvironmentSettingPanel))
+    pages.append(new TabbedPane.Page("Settings", new EnvironmentSettingPanel))
   }
   def save = authentification.save
 }
