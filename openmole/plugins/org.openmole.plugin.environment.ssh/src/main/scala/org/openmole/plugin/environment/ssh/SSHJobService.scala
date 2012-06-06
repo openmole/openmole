@@ -87,7 +87,6 @@ class SSHJobService(
   }
 
   protected def doSubmit(serializedJob: SerializedJob, token: AccessToken) = {
-    val installed = preparedRuntime(serializedJob.runtime)
     val (remoteScript, result) = buildScript(serializedJob, token)
     val jobDesc = JobFactory.createJobDescription
     jobDesc.setAttribute(JobDescription.EXECUTABLE, "/bin/bash")

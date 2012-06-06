@@ -22,15 +22,21 @@ import java.util.concurrent.atomic._
 class JobServiceQualityControl(hysteresis: Int) extends QualityControl(hysteresis) {
   private val _nbSubmitted = new AtomicInteger
   private val _nbRunning = new AtomicInteger
-  private val _nbDone = new AtomicLong
+  private val _totalDone = new AtomicLong
+  private val _totalSubmitted = new AtomicLong
 
   def submitted = _nbSubmitted.get
   def runnig = _nbRunning.get
-  def done = _nbDone.get
+  def totalDone = _totalDone.get
+  def totalSubmitted = _totalSubmitted.get
 
-  def incrementSubmitted = _nbSubmitted.incrementAndGet
+  def incrementSubmitted = {
+    _totalSubmitted.incrementAndGet
+    _nbSubmitted.incrementAndGet
+  }
+
   def decrementSubmitted = _nbSubmitted.decrementAndGet
   def incrementRunning = _nbRunning.incrementAndGet
   def decrementRunning = _nbRunning.decrementAndGet
-  def incrementDone = _nbDone.incrementAndGet
+  def incrementDone = _totalDone.incrementAndGet
 }

@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.environment.jsaga
 
+import fr.in2p3.jsaga.impl.job.instance.JobImpl
 import java.util.UUID
 import org.ogf.saga.job.JobDescription
 import org.ogf.saga.job.JobFactory
@@ -73,7 +74,8 @@ trait SharedFSJobService { this: JSAGAJobService ⇒
 
           val job = jobService.createJob(install)
           job.run
-          job.get
+          job.waitFor
+          //job.asInstanceOf[JobImpl].postStagingAndCleanup
         } finally remoteScript.remove(token)
 
         workdir.child(runtime.runtime.hash).path
@@ -83,17 +85,17 @@ trait SharedFSJobService { this: JSAGAJobService ⇒
   }
 
   def buildScript(serializedJob: SerializedJob, token: AccessToken) = {
-
+    val installed = preparedRuntime(serializedJob.runtime)
     withToken(serializedJob.communicationStorage.description, {
       token ⇒
-        val tmp = serializedJob.communicationStorage.tmpSpace(token)
+        val tmp = serializedJob.communicationStorage.path.toURIFile(serializedJob.communicationDirPath)
         val result = tmp.newFileInDir("result", ".xml.gz")
 
         val script = Workspace.newFile("run", ".sh")
         val remoteScript = try {
           val workspace = UUID.randomUUID
           script.content =
-            "export PATH=" + installed + "/jvm/bin/" + ":$PATH; cd " + installed + "; mkdir " + workspace + "; " +
+            "export PATH=" + installed + "/jre/bin/" + ":$PATH; cd " + installed + "; mkdir " + workspace + "; " +
               "sh run.sh " + environment.runtimeMemory + "m " + UUID.randomUUID + " -s file:/" +
               " -c " + serializedJob.communicationDirPath + " -p envplugins/ -i " + serializedJob.inputFilePath + " -o " + result.path +
               " -w " + workspace + "; rm -rf " + workspace + ";"

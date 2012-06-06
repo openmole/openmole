@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,16 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.ssh
+package org.openmole.core.batch.authentication
 
-import fr.in2p3.jsaga.impl.context.ContextImpl
-import org.openmole.core.batch.authentication._
-
-object SSHAuthentication {
-
-  def apply(login: String, host: String) =
-    new SSHAuthentication(HostAuthenticationMethod(login, host))
-
+trait HostAuthentication extends Authentication {
+  def method: HostAuthenticationMethod
+  override def key = method.target
+  override def initialize(local: Boolean) = method.init
 }
-
-class SSHAuthentication(val method: HostAuthenticationMethod) extends HostAuthentication

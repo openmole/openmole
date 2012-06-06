@@ -23,6 +23,6 @@ trait CypheredPassword { this: AuthenticationMethod ⇒
   def cypheredPassword: String
 
   def password =
-    if (cypheredPassword == null) ""
+    if (cypheredPassword == null || cypheredPassword == "") ""
     else Workspace.decrypt(cypheredPassword)
 }

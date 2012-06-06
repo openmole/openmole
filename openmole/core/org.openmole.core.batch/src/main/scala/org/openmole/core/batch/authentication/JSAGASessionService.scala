@@ -17,6 +17,7 @@
 
 package org.openmole.core.batch.authentication
 
+import fr.in2p3.jsaga.impl.context.ContextImpl
 import java.util.logging.Level
 import java.util.logging.{ Logger ⇒ JLogger }
 import org.ogf.saga.context.Context
@@ -66,11 +67,15 @@ object JSAGASessionService extends Logger {
   }
 
   def session(url: String) = synchronized {
-    sessions.filter { case (p, s) ⇒ url.matches(".*" + p + ".*") }.headOption match {
+    sessions.filter { case (p, s) ⇒ url.matches(p) }.headOption match {
       case Some((p, s)) ⇒ s
       case None ⇒ defaultSession //throw new InternalProcessingError("No session available for url " + url)
     }
   }
 
-  def createContext: Context = ContextFactory.createContext
+  def createContext: Context = {
+    val ctx = ContextFactory.createContext
+    ctx.setVectorAttribute(ContextImpl.BASE_URL_INCLUDES, Array("ssh->ssh2://*", "sftp->sftp2://*"))
+    ctx
+  }
 }

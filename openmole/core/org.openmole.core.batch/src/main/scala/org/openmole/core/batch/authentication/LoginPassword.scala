@@ -18,18 +18,17 @@
 package org.openmole.core.batch.authentication
 
 import org.ogf.saga.context.Context
-import org.openmole.misc.workspace.Workspace
 
 class LoginPassword(
     val login: String,
     val cypheredPassword: String,
-    val target: String) extends HostAuthenticationMethod {
+    val target: String) extends HostAuthenticationMethod with CypheredPassword {
 
   override def context = {
     val ctx = JSAGASessionService.createContext
     ctx.setAttribute(Context.TYPE, "UserPass")
     ctx.setAttribute(Context.USERID, login)
-    ctx.setAttribute(Context.USERPASS, Workspace.decrypt(cypheredPassword))
+    ctx.setAttribute(Context.USERPASS, password)
     ctx
   }
 

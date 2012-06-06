@@ -27,14 +27,18 @@ object HostAuthenticationMethod {
     val list = Workspace.persistentList(classOf[HostAuthenticationMethod])
     val connection = login + '@' + host
 
-    list.find { case (i, e) ⇒ connection.matches(e.target) }.getOrElse(throw new UserBadDataError("No authentication method found for " + connection))._2
+    list.find { case (i, e) ⇒ connection.matches(e.regexp) }.getOrElse(throw new UserBadDataError("No authentication method found for " + connection))._2
   }
 
 }
 
 trait HostAuthenticationMethod extends AuthenticationMethod {
   def target: String
+  def regexp = ".*" + target + ".*"
   def context: Context
-  def init = JSAGASessionService.addContext(target, context)
+
+  def init = JSAGASessionService.addContext(regexp, context)
+
   def method = classOf[HostAuthenticationMethod]
+  override def toString = "Target = " + target
 }

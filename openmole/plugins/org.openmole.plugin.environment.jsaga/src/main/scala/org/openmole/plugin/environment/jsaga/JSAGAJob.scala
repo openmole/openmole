@@ -18,6 +18,7 @@
 package org.openmole.plugin.environment.jsaga
 
 import fr.in2p3.jsaga.adaptor.job.SubState
+import fr.in2p3.jsaga.impl.job.instance.JobImpl
 import fr.in2p3.jsaga.impl.job.service.ReconnectionException
 import org.ogf.saga.job.Job
 import org.openmole.core.batch.environment.BatchJob
@@ -31,6 +32,11 @@ import org.openmole.misc.tools.service.Logger
 
 object JSAGAJob extends Logger {
 
+  def apply(id: String, resultPath: String, jobService: JSAGAJobService) =
+    new JSAGAJob(resultPath, jobService) {
+      val jobId = id
+    }
+
   def id(job: Job) = {
     val id = job.getAttribute(Job.JOBID)
     id.substring(id.lastIndexOf('[') + 1, id.lastIndexOf(']'))
@@ -40,12 +46,10 @@ object JSAGAJob extends Logger {
 
 abstract class JSAGAJob(override val resultPath: String, jobService: JSAGAJobService) extends BatchJob(jobService) {
 
-  //var subState: String = ""
   def job: Job = jobService.jobService.getJob(jobId)
   def jobId: String
 
   private def translateStatus(job: Job, state: State) = {
-    //JSAGAJob.logger.fine(state.name)
     import State._
 
     val subState = job.getMetric(Job.JOB_STATEDETAIL).getAttribute(Metric.VALUE)
@@ -60,13 +64,15 @@ abstract class JSAGAJob(override val resultPath: String, jobService: JSAGAJobSer
     }, subState)
   }
 
-  override def deleteJob =
+  override def deleteJob = {
     if (state == ExecutionState.SUBMITTED || state == ExecutionState.RUNNING) {
       try job.cancel
       catch {
         case e: ReconnectionException ⇒ throw new TemporaryErrorException("Service is being reconnected durring job deletion.", e)
       }
     }
+    job.asInstanceOf[JobImpl].postStagingAndCleanup
+  }
 
   def updatedStateAndSubState = {
     val curjob = job

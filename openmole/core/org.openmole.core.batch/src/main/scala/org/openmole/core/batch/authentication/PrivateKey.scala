@@ -47,7 +47,7 @@ class PrivateKey(
   }
 
   override def toString =
-    "PubicKey = " + publicKeyPath +
+    super.toString + ", " + "PubicKey = " + publicKeyPath +
       ", PrivateKey = " + privateKeyPath +
       ", Login = " + login
 

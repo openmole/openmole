@@ -13,7 +13,7 @@
         <version>0.5-RC5-SNAPSHOT</version>
     </parent>
 
-    <artifactId>org.openmole.plugin.environment.ssh</artifactId>
+    <artifactId>org.openmole.plugin.environment.pbs</artifactId>
 
     <dependencies>
         <dependency>

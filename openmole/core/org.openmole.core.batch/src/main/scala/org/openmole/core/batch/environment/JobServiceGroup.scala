@@ -62,15 +62,14 @@ class JobServiceGroup(val environment: BatchEnvironment, resources: Iterable[Job
             token ← UsageControl.get(r.description).tryGetToken
           ) yield (r, token, JobServiceControl.qualityControl(r.description))
 
-        val maxDone = usable.map { case (_, _, q) ⇒ q.done }.max.toDouble
+        //val maxDone = usable.map { case (_, _, q) ⇒ q.done }.max.toDouble
 
         val notLoaded =
           for ((r, t, q) ← usable) yield {
             val nbSubmitted = q.submitted
-            val maxDoneRatio = if (maxDone == 0) 1 else q.done / maxDone
             val fitness = orMin(
               if (q.submitted > 0)
-                math.pow((q.runnig.toDouble / q.submitted) * q.successRate * maxDoneRatio, 2)
+                math.pow((q.runnig.toDouble / q.submitted) * q.successRate * (q.totalDone / q.totalSubmitted), 2)
               else math.pow(q.successRate, 3))
             (r, t, fitness)
           }
