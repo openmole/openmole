@@ -10,7 +10,7 @@
     <parent>
         <artifactId>ui</artifactId>
         <groupId>org.openmole.ui</groupId>
-        <version>0.5-RC5</version>
+        <version>0.5-RC6-SNAPSHOT</version>
     </parent>
 
     <artifactId>plugins</artifactId>
