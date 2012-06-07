@@ -21,6 +21,7 @@ import java.awt.Color
 import scala.swing.Button
 import scala.swing.Label
 import scala.swing.PasswordField
+import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.misc.workspace.Workspace
 import scala.swing.event.KeyPressed
@@ -49,7 +50,9 @@ object PasswordDialog {
 
   panel.listenTo(`initButton`)
   panel.reactions += {
-    case ButtonClicked(`initButton`) ⇒ Workspace.reset
+    case ButtonClicked(`initButton`) ⇒
+      if (DialogFactory.changePasswordConfirmation)
+        Workspace.reset
   }
 
   private def setColor(c: Color) = {
