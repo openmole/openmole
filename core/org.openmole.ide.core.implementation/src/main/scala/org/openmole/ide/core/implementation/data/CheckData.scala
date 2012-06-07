@@ -122,16 +122,13 @@ object CheckData extends Logger {
 
   def computeImplicitPrototypes(proxy: ITaskDataProxyUI,
                                 protoMapping: Map[PrototypeKey, IPrototypeDataProxyUI],
-                                coreCapsule: ICapsule): Unit = {
-    proxy.dataUI.implicitPrototypesIn = coreCapsule.inputs.map { i ⇒ KeyPrototypeGenerator(i.prototype) }.toList
+                                coreCapsule: ICapsule): Unit =
+    proxy.dataUI.updateImplicits(coreCapsule.inputs.map { i ⇒ KeyPrototypeGenerator(i.prototype) }.toList
       .filterNot { n ⇒ proxy.dataUI.prototypesIn.map { p ⇒ KeyPrototypeGenerator(p) }.contains(n) }
-      .map { protoMapping }
-
-    proxy.dataUI.implicitPrototypesOut = coreCapsule.outputs.map { i ⇒ KeyPrototypeGenerator(i.prototype) }.toList
-      .filterNot { n ⇒ proxy.dataUI.prototypesOut.map { p ⇒ KeyPrototypeGenerator(p) }.contains(n) }
-      .map { protoMapping }
-
-  }
+      .map { protoMapping },
+      coreCapsule.outputs.map { i ⇒ KeyPrototypeGenerator(i.prototype) }.toList
+        .filterNot { n ⇒ proxy.dataUI.prototypesOut.map { p ⇒ KeyPrototypeGenerator(p) }.contains(n) }
+        .map { protoMapping })
 
   def computeImplicitPrototypes(proxy: ITaskDataProxyUI): Unit =
     MoleMaker.taskCoreObject(proxy) match {
