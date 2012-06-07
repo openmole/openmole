@@ -91,6 +91,7 @@ class ConnectorWidget(val scene: IMoleScene,
           if (label.text.isEmpty) 0.5f else 0.33f)
         label.revalidate
       case x: IDataChannelUI ⇒
+        componentWidget.setVisible(false)
         setLineColor(new Color(188, 188, 188))
         setStroke(new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 20.0f, List(10.0f).toArray, 0.0f))
         setConstraint(prototypeFilterWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
