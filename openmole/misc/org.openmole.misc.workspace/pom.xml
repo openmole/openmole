@@ -10,7 +10,7 @@
     <parent>
         <artifactId>misc</artifactId>
         <groupId>org.openmole.core</groupId>
-        <version>0.5-RC5</version>
+        <version>0.5-RC6-SNAPSHOT</version>
     </parent>
 
     <artifactId>org.openmole.misc.workspace</artifactId>
