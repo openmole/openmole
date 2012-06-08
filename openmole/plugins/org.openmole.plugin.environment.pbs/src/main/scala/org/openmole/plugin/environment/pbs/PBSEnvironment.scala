@@ -29,7 +29,7 @@ import org.openmole.plugin.environment.jsaga.Requirement
 object PBSEnvironment {
   val MaxConnections = new ConfigurationLocation("PBSEnvironment", "MaxConnections")
 
-  Workspace += (MaxConnections, "5")
+  Workspace += (MaxConnections, "10")
 }
 
 import PBSEnvironment._
