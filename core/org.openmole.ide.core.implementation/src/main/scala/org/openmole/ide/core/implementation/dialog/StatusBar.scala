@@ -35,15 +35,18 @@ object StatusBar extends MigPanel("wrap 3") { statusBar ⇒
 
   def inform(info: String,
              proxy: Option[IDataProxyUI] = None,
-             stack: String = ""): Unit = printError("", info, proxy, stack)
+             stack: String = "",
+             exceptionName: String = ""): Unit = printError("", info, proxy, exceptionName + "\n" + stack)
 
   def warn(warning: String,
            proxy: Option[IDataProxyUI] = None,
-           stack: String = ""): Unit = printError("[WARNING] ", warning, proxy, stack)
+           stack: String = "",
+           exceptionName: String = ""): Unit = printError("[WARNING] ", warning, proxy, exceptionName + "\n" + stack)
 
   def block(b: String,
             proxy: Option[IDataProxyUI] = None,
-            stack: String = ""): Unit = printError("[CRITICAL] ", b, proxy, stack)
+            stack: String = "",
+            exceptionName: String = ""): Unit = printError("[CRITICAL] ", b, proxy, exceptionName + "\n" + stack)
 
   def printError(header: String,
                  error: String,
@@ -59,7 +62,7 @@ object StatusBar extends MigPanel("wrap 3") { statusBar ⇒
             "0088aa")
         case None ⇒ contents += new Label(header)
       }
-      if (stack.isEmpty) {
+      if (stack.isEmpty || stack == "\n") {
         contents += (new Label(error), "wrap")
       } else {
         contents += new Label(error)
