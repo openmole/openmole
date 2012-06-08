@@ -228,7 +228,7 @@ class ExecutionManager(manager: IMoleSceneManager,
   }
 
   def displayFileTransfer = {
-    SatusBar.clear
+    StatusBar.clear
     StatusBar.inform("Downloads : " + downloads._1 + " / " + downloads._2 + "  Uploads : " + uploads._1 + " / " + uploads._2)
   }
 
