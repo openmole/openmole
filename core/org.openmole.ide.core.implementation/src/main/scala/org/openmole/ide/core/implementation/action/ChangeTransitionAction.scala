@@ -17,19 +17,19 @@
 
 package org.openmole.ide.core.implementation.action
 
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
+import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.workflow.ConnectorWidget
 import org.openmole.ide.core.model.workflow.ITransitionUI
+import scala.swing.Action
 
-class AggregationTransitionAction(connectionWidget: ConnectorWidget) extends ActionListener {
-  override def actionPerformed(ae: ActionEvent) = {
+class ChangeTransitionAction(connectionWidget: ConnectorWidget,
+                             newType: TransitionType) extends Action(TransitionType.toString(newType).toLowerCase) {
+  override def apply = {
     connectionWidget.connector match {
       case x: ITransitionUI ⇒
-        if (x.transitionType == BASIC_TRANSITION) x.transitionType = AGGREGATION_TRANSITION
-        else x.transitionType = BASIC_TRANSITION
+        if (x.transitionType != newType) x.transitionType = newType
         connectionWidget.drawTransitionType
         CheckData.checkMole(connectionWidget.scene)
       case _ ⇒

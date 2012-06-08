@@ -70,6 +70,7 @@ class ConnectorWidget(val scene: IMoleScene,
     removeChild(prototypeFilterWidget)
     prototypeFilterWidget = buildPrototypeFilterWidget
     addChild(prototypeFilterWidget)
+    drawTransitionType
     setLabelVisible
   }
 
@@ -101,16 +102,19 @@ class ConnectorWidget(val scene: IMoleScene,
     scene.refresh
   }
 
-  def drawTransitionType =
+  def drawTransitionType = {
+    setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
+    setSourceAnchorShape(AnchorShape.NONE)
     connector match {
       case x: ITransitionUI ⇒
         x.transitionType match {
           case EXPLORATION_TRANSITION ⇒ setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(EXPLORATION_TRANSITON, false))
           case AGGREGATION_TRANSITION ⇒ setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(AGGREGATION_TRANSITON, false))
-          case _ ⇒ setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
+          case _ ⇒
         }
       case _ ⇒
     }
+  }
 
   def editPrototypeFilter: Unit = {
     ConnectorPrototypeFilterDialog.display(connector)

@@ -23,7 +23,7 @@ import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.implementation.action.AddTransitionConditionAction
-import org.openmole.ide.core.implementation.action.AggregationTransitionAction
+import org.openmole.ide.core.implementation.action.ChangeTransitionAction
 import org.openmole.ide.core.implementation.action.RemoveTransitionAction
 import org.openmole.ide.core.implementation.workflow.TransitionUI
 import org.openmole.ide.core.implementation.workflow.DataChannelUI
@@ -32,22 +32,15 @@ import org.openmole.ide.core.implementation.workflow.ConnectorWidget
 import org.openmole.ide.core.model.workflow.IDataChannelUI
 import org.openmole.ide.core.model.workflow.ITransitionUI
 import scala.swing.Action
+import scala.swing.Menu
 import scala.swing.MenuItem
 
 class ConnectorMenuProvider(scene: MoleScene,
                             connectionWidget: ConnectorWidget) extends GenericMenuProvider {
 
-  var itAgreg = new JMenuItem
-  var itChange = new MenuItem("to")
-
-  connectionWidget.connector match {
-    case x: ITransitionUI ⇒
-      val itCond = new JMenuItem("Edit condition")
-      itCond.addActionListener(new AddTransitionConditionAction(connectionWidget))
-
-      items += (itCond, itAgreg, itChange.peer)
-    case _ ⇒
-  }
+  var itTransitionOrDataChannelMenu = new MenuItem("to ")
+  var itCond = new MenuItem(new AddTransitionConditionAction(connectionWidget))
+  var itChangeTransition = new Menu("to ")
 
   val itRem = new JMenuItem("Remove")
   itRem.addActionListener(new RemoveTransitionAction(scene, scene.manager.connectorMap.getKey(connectionWidget.connector)))
@@ -55,31 +48,32 @@ class ConnectorMenuProvider(scene: MoleScene,
   items += itRem
 
   override def getPopupMenu(widget: Widget, point: Point) = {
-    items -= itChange.peer
+    items -= (itTransitionOrDataChannelMenu.peer,
+      itChangeTransition.peer,
+      itCond.peer)
+
     connectionWidget.connector match {
       case x: ITransitionUI ⇒
-        items -= (itAgreg, itChange.peer)
-        if (!(x.transitionType == EXPLORATION_TRANSITION)) {
-          var transitonTypeString = if (x.transitionType == BASIC_TRANSITION) "aggregation" else "basic"
-          itAgreg = new JMenuItem("Set as " + transitonTypeString + " transition")
-          itAgreg.addActionListener(new AggregationTransitionAction(connectionWidget))
-          items += itAgreg
+        itChangeTransition.peer.removeAll
+        TransitionType.values.filterNot(_ == x.transitionType).foreach { ttype ⇒
+          itChangeTransition.peer.add(new MenuItem(new ChangeTransitionAction(connectionWidget, ttype)).peer)
         }
-        itChange = new MenuItem(new Action("to Data channel") {
+
+        items += (itCond.peer,
+          itChangeTransition.peer)
+
+        itTransitionOrDataChannelMenu = new MenuItem(new Action("to Data channel") {
           override def apply {
-            //  scene.manager.removeConnector(scene.manager.connectorID(x))
             val newC = new DataChannelUI(x.source,
               x.target,
               x.filteredPrototypes)
-            //  scene.manager.registerConnector(newC)
             scene.manager.changeConnector(x, newC)
             connectionWidget.setConnnector(newC)
           }
         })
       case x: IDataChannelUI ⇒
-        itChange = new MenuItem(new Action("to Transition") {
+        itTransitionOrDataChannelMenu = new MenuItem(new Action("to Transition") {
           override def apply {
-            //  scene.manager.removeConnector(scene.manager.connectorID(x))
             val newC = new TransitionUI(x.source,
               x.target,
               BASIC_TRANSITION,
@@ -87,12 +81,11 @@ class ConnectorMenuProvider(scene: MoleScene,
               x.filteredPrototypes)
             scene.manager.changeConnector(x, newC)
             connectionWidget.setConnnector(newC)
-            // scene.manager.registerConnector(newC)
           }
         })
       case _ ⇒
     }
-    items += itChange.peer
+    items += itTransitionOrDataChannelMenu.peer
     super.getPopupMenu(widget, point)
   }
 }

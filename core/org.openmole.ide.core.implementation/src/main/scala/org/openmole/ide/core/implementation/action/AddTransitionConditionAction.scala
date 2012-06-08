@@ -16,12 +16,11 @@
  */
 
 package org.openmole.ide.core.implementation.action
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
 import org.openmole.ide.core.implementation.workflow.ConnectorWidget
+import scala.swing.Action
 
-class AddTransitionConditionAction(connectionWidget: ConnectorWidget) extends ActionListener {
-  override def actionPerformed(ae: ActionEvent) = {
+class AddTransitionConditionAction(connectionWidget: ConnectorWidget) extends Action("Edit condition") {
+  override def apply = {
     connectionWidget.label.edit
     connectionWidget.setLabelVisible
   }
