@@ -59,7 +59,7 @@ object MoleMaker {
   def buildMoleExecution(mole: IMole,
                          manager: IMoleSceneManager,
                          capsuleMap: Map[ICapsuleUI, ICapsule],
-                         groupingStrategies: List[(IGrouping, ICapsule)]): (IMoleExecution, Iterable[(IEnvironment, String)]) =
+                         groupingStrategies: List[(IGrouping, ICapsule)]): Either[Throwable, (IMoleExecution, Iterable[(IEnvironment, String)])] =
     try {
       var envs = new HashSet[(IEnvironment, String)]
       val strat = new ListBuffer[(ICapsule, IEnvironmentSelection)]
@@ -67,20 +67,18 @@ object MoleMaker {
       manager.capsules.values.foreach { c ⇒
         c.dataUI.environment match {
           case Some(x: IEnvironmentDataProxyUI) ⇒
-            try {
-              val env = x.dataUI.coreObject
-              envs += env -> x.dataUI.name
-              strat += capsuleMap(c) -> new FixedEnvironmentSelection(env)
-            } catch {
-              case e: UserBadDataError ⇒ StatusBar.block(e.message, stack = e.getStackTraceString)
-            }
+            val env = x.dataUI.coreObject
+            envs += env -> x.dataUI.name
+            strat += capsuleMap(c) -> new FixedEnvironmentSelection(env)
           case _ ⇒
         }
       }
 
       val grouping = groupingStrategies.map { case (s, c) ⇒ c -> s }.toMap
-
-      (new MoleExecution(mole, strat.toMap, grouping), envs.toSet)
+      Right((new MoleExecution(mole, strat.toMap, grouping), envs.toSet))
+    } catch {
+      case e ⇒
+        Left(e)
     }
 
   def buildMole(manager: IMoleSceneManager): Either[String, (IMole, Map[ICapsuleUI, ICapsule], Map[IPrototypeDataProxyUI, IPrototype[_]], Iterable[(ICapsuleUI, Throwable)])] = {
@@ -149,7 +147,7 @@ object MoleMaker {
         new PluginSet(plugins)))
     } catch {
       case e ⇒
-        StatusBar.warn(e.getMessage, Some(proxy), e.getStackTraceString)
+        StatusBar.warn(e.getMessage, Some(proxy), e.getStackTraceString, e.getClass.getCanonicalName)
         Left(e)
     }
 

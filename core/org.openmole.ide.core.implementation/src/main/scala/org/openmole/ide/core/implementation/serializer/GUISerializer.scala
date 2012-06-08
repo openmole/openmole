@@ -72,7 +72,8 @@ object GUISerializer {
     } catch {
       case e ⇒
         StatusBar.block("An error occured when loading the project " + fromFile + ". " + e.getMessage,
-          stack = e.getStackTraceString)
+          stack = e.getStackTraceString,
+          exceptionName = e.getClass.getCanonicalName)
         Left
     }
 
@@ -93,7 +94,8 @@ object GUISerializer {
         } catch {
           case eof: EOFException ⇒ StatusBar.inform("Project loaded")
           case e ⇒ StatusBar.block("An error occured when loading the project " + fromFile,
-            stack = e.getMessage + "\n" + e.getStackTraceString)
+            stack = e.getMessage + "\n" + e.getStackTraceString,
+            exceptionName = e.getClass.getCanonicalName)
         } finally {
           x.close
         }

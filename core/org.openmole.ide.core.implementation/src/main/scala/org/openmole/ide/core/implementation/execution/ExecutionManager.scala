@@ -76,10 +76,10 @@ class ExecutionManager(manager: IMoleSceneManager,
   var gStrategyPanels = new HashMap[String, (IGroupingPanelUI, List[(IGrouping, ICapsule)])]
   val hookPanels = new HashMap[String, (IHookPanelUI, List[IHook])]
   var status = HashMap(State.READY -> new AtomicInteger,
-                       State.RUNNING -> new AtomicInteger,
-                       State.COMPLETED -> new AtomicInteger,
-                       State.FAILED -> new AtomicInteger,
-                       State.CANCELED -> new AtomicInteger)
+    State.RUNNING -> new AtomicInteger,
+    State.COMPLETED -> new AtomicInteger,
+    State.FAILED -> new AtomicInteger,
+    State.CANCELED -> new AtomicInteger)
 
   val wfPiePlotter = new PiePlotter("Workflow execution")
   val envBarPanel = new PluginPanel("", "[][grow,fill]", "") {
@@ -90,10 +90,10 @@ class ExecutionManager(manager: IMoleSceneManager,
 
   var states = new States(0, 0, 0)
   val timer = new Timer(5000, new ActionListener {
-      def actionPerformed(e: ActionEvent) = {
-        envBarPlotter.update(states)
-      }
-    })
+    def actionPerformed(e: ActionEvent) = {
+      envBarPlotter.update(states)
+    }
+  })
   var environments = new HashMap[IEnvironment, (String, HashMap[ExecutionState.ExecutionState, AtomicInteger])]
 
   val hookMenu = new Menu("Hooks")
@@ -128,7 +128,7 @@ class ExecutionManager(manager: IMoleSceneManager,
   def canBeRun =
     if (Workspace.anotherIsRunningAt(Workspace.defaultLocation)) {
       val dd = new DialogDescriptor(new Label("A simulation is currently running.\nTwo simulations can not run concurrently, overwrite ?") { background = Color.white }.peer,
-                                    "Execution warning")
+        "Execution warning")
       val result = DialogDisplayer.getDefault.notify(dd)
       if (result.equals(NotifyDescriptor.OK_OPTION)) {
         (new File(Workspace.defaultLocation.getAbsolutePath + "/.running")).delete
@@ -141,46 +141,51 @@ class ExecutionManager(manager: IMoleSceneManager,
       cancel
       initBarPlotter
       hookPanels.values.foreach(_._2.foreach(_.release))
-      val (moleExecution, environments) = MoleMaker.buildMoleExecution(mole,
-                                                                       manager,
-                                                                       capsuleMapping,
-                                                                       gStrategyPanels.values.map { v ⇒ v._1.saveContent.map(_.coreObject) }.flatten.toList)
+      MoleMaker.buildMoleExecution(mole,
+        manager,
+        capsuleMapping,
+        gStrategyPanels.values.map { v ⇒ v._1.saveContent.map(_.coreObject) }.flatten.toList) match {
+          case Right((moleExecution, environments)) ⇒
+            this.moleExecution = moleExecution
 
-      this.moleExecution = moleExecution
+            EventDispatcher.listen(moleExecution, new JobSatusListener(this), classOf[IMoleExecution.OneJobStatusChanged])
+            EventDispatcher.listen(moleExecution, new JobCreatedListener(this), classOf[IMoleExecution.OneJobSubmitted])
+            EventDispatcher.listen(moleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ExceptionRaised])
+            environments.foreach { e ⇒
+              e._1 match {
+                case be: BatchEnvironment ⇒
+                  EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.BeginUpload])
+                  EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.EndUpload])
+                  EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.BeginDownload])
+                  EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.EndDownload])
+                case _ ⇒
+              }
+            }
 
-      EventDispatcher.listen(moleExecution, new JobSatusListener(this), classOf[IMoleExecution.OneJobStatusChanged])
-      EventDispatcher.listen(moleExecution, new JobCreatedListener(this), classOf[IMoleExecution.OneJobSubmitted])
-      EventDispatcher.listen(moleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ExceptionRaised])
-      environments.foreach { e ⇒
-        e._1 match {
-          case be: BatchEnvironment ⇒
-            EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.BeginUpload])
-            EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.EndUpload])
-            EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.BeginDownload])
-            EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.EndDownload])
-          case _ ⇒
+            environments.foreach {
+              case (env, _) ⇒ EventDispatcher.listen(env, new EnvironmentExceptionListener(this), classOf[IEnvironment.ExceptionRaised])
+            }
+
+            environments.foreach(buildEmptyEnvPlotter)
+            if (envBarPanel.peer.getComponentCount == 2) envBarPanel.peer.remove(1)
+
+            //FIXME Displays several environments
+            if (environments.size > 0) {
+              envBarPlotter.title(environments.toList(0)._2)
+              envBarPanel.peer.add(envBarPlotter.panel)
+            }
+            initPieChart
+            hookPanels.keys.foreach { commitHook }
+            repaint
+            revalidate
+
+            timer.start
+            moleExecution.start
+          case Left(e) ⇒
+            StatusBar.block(e.getMessage,
+              stack = e.getStackTraceString,
+              exceptionName = e.getClass.getCanonicalName)
         }
-      }
-
-      environments.foreach {
-        case (env, _) ⇒ EventDispatcher.listen(env, new EnvironmentExceptionListener(this), classOf[IEnvironment.ExceptionRaised])
-      }
-
-      environments.foreach(buildEmptyEnvPlotter)
-      if (envBarPanel.peer.getComponentCount == 2) envBarPanel.peer.remove(1)
-
-      //FIXME Displays several environments
-      if (environments.size > 0) {
-        envBarPlotter.title(environments.toList(0)._2)
-        envBarPanel.peer.add(envBarPlotter.panel)
-      }
-      initPieChart
-      hookPanels.keys.foreach { commitHook }
-      repaint
-      revalidate
-
-      timer.start
-      moleExecution.start
     }
   }
 
@@ -206,11 +211,11 @@ class ExecutionManager(manager: IMoleSceneManager,
 
   def buildEmptyEnvPlotter(e: (IEnvironment, String)) = {
     val m = HashMap(ExecutionState.SUBMITTED -> new AtomicInteger,
-                    ExecutionState.READY -> new AtomicInteger,
-                    ExecutionState.RUNNING -> new AtomicInteger,
-                    ExecutionState.DONE -> new AtomicInteger,
-                    ExecutionState.FAILED -> new AtomicInteger,
-                    ExecutionState.KILLED -> new AtomicInteger)
+      ExecutionState.READY -> new AtomicInteger,
+      ExecutionState.RUNNING -> new AtomicInteger,
+      ExecutionState.DONE -> new AtomicInteger,
+      ExecutionState.FAILED -> new AtomicInteger,
+      ExecutionState.KILLED -> new AtomicInteger)
     environments += e._1 -> (e._2, m)
     EventDispatcher.listen(e._1, new JobStateChangedOnEnvironmentListener(this, moleExecution, e._1), classOf[IEnvironment.JobStateChanged])
   }
