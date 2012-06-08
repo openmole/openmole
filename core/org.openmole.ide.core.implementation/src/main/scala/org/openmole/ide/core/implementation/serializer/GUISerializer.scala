@@ -50,10 +50,10 @@ object GUISerializer {
       val out = xstream.createObjectOutputStream(writer, "openmole")
 
       out.writeObject(new SerializedProxys(Proxys.tasks.toSet,
-                                           Proxys.prototypes.toSet,
-                                           Proxys.samplings.toSet,
-                                           Proxys.environments.toSet,
-                                           Proxys.incr.get + 1))
+        Proxys.prototypes.toSet,
+        Proxys.samplings.toSet,
+        Proxys.environments.toSet,
+        Proxys.incr.get + 1))
       //molescenes
       ScenesManager.moleScenes.foreach(ms ⇒
         ms match {
@@ -72,7 +72,7 @@ object GUISerializer {
     } catch {
       case e ⇒
         StatusBar.block("An error occured when loading the project " + fromFile + ". " + e.getMessage,
-                        stack = e.getStackTraceString)
+          stack = e.getStackTraceString)
         Left
     }
 
@@ -93,7 +93,7 @@ object GUISerializer {
         } catch {
           case eof: EOFException ⇒ StatusBar.inform("Project loaded")
           case e ⇒ StatusBar.block("An error occured when loading the project " + fromFile,
-                                   stack = e.getMessage + "\n"+ e.getStackTraceString)
+            stack = e.getMessage + "\n" + e.getStackTraceString)
         } finally {
           x.close
         }
