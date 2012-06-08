@@ -24,9 +24,11 @@ import java.io.File
 import java.io.FileReader
 import java.io.FileWriter
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.dataproxy._
+import java.io.ObjectInputStream
 import org.openmole.ide.core.implementation.data._
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.implementation.workflow.MoleScene
@@ -63,25 +65,37 @@ object GUISerializer {
   }
 
   def unserialize(fromFile: String) = {
+    StatusBar.clear
     val reader = new FileReader(new File(fromFile))
-    val in = xstream.createObjectInputStream(reader)
-
-    Proxys.clearAll
-    ScenesManager.closeAll
-
-    try {
-      while (true) {
-        val readObject = in.readObject
-        readObject match {
-          case x: SerializedProxys ⇒ x.loadProxys
-          case x: BuildMoleScene ⇒ { ScenesManager.addBuildSceneContainer(x) }
-          case _ ⇒ throw new UserBadDataError("Failed to unserialize object " + readObject.toString)
-        }
-      }
+    val in = try {
+      Right(xstream.createObjectInputStream(reader))
     } catch {
-      case eof: EOFException ⇒ println("Ugly stop condition of Xstream reader !")
-    } finally {
-      in.close
+      case e ⇒
+        StatusBar.block("An error occured when loading the project " + fromFile + ". " + e.getMessage,
+          stack = e.getStackTraceString)
+        Left
+    }
+
+    in match {
+      case Right(x: ObjectInputStream) ⇒
+        try {
+          Proxys.clearAll
+          ScenesManager.closeAll
+
+          while (true) {
+            val readObject = x.readObject
+            readObject match {
+              case x: SerializedProxys ⇒ x.loadProxys
+              case x: BuildMoleScene ⇒ { ScenesManager.addBuildSceneContainer(x) }
+              case _ ⇒ throw new UserBadDataError("Failed to unserialize object " + readObject.toString)
+            }
+          }
+        } catch {
+          case eof: EOFException ⇒ StatusBar.inform("Project loaded")
+        } finally {
+          x.close
+        }
+      case Left ⇒
     }
   }
 }
