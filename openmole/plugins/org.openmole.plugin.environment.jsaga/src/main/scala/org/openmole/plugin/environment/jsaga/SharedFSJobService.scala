@@ -36,6 +36,7 @@ import org.openmole.core.batch.environment.Runtime
 trait SharedFSJobService { this: JSAGAJobService ⇒
 
   def sharedFS: Storage
+  def installJobService: JobService = jobService
 
   @transient private var installed: String = null
 
@@ -72,7 +73,7 @@ trait SharedFSJobService { this: JSAGAJobService ⇒
           install.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](name))
           install.setAttribute(JobDescription.WORKINGDIRECTORY, workdir.path)
 
-          val job = jobService.createJob(install)
+          val job = installJobService.createJob(install)
           job.run
           job.waitFor
           //job.asInstanceOf[JobImpl].postStagingAndCleanup

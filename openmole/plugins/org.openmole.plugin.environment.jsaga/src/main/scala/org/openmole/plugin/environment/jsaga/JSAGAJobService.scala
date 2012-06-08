@@ -23,6 +23,7 @@ import java.io.FileOutputStream
 import java.io.OutputStream
 import java.net.URI
 import java.util.concurrent.TimeUnit
+import org.joda.time.format.ISOPeriodFormat
 import org.ogf.saga.job.Job
 import org.ogf.saga.job.JobDescription
 import org.ogf.saga.job.JobFactory
@@ -54,8 +55,12 @@ trait JSAGAJobService extends JobService {
   import JSAGAJobService._
 
   @transient override lazy val description = new ServiceDescription(uri.toString)
+  @transient lazy val jobService = createJobService(uri)
 
-  @transient lazy val jobService = {
+  def environment: JSAGAEnvironment
+  def uri: URI
+
+  def createJobService(uri: URI) = {
     val task = {
       val url = URLFactory.createURL(uri.toString)
       JobFactory.createJobService(TaskMode.ASYNC, JSAGASessionService.session(uri.toString), url)
@@ -64,6 +69,23 @@ trait JSAGAJobService extends JobService {
     task.get(Workspace.preferenceAsDurationInMs(JSAGAJobService.CreationTimeout), TimeUnit.MILLISECONDS)
   }
 
-  def uri: URI
+  def newJobDescription = {
+    val attributes = environment.allRequirements
+    val description = JobFactory.createJobDescription
+
+    attributes.get(CPU_TIME) match {
+      case Some(value) ⇒
+        val cpuTime = ISOPeriodFormat.standard.parsePeriod(value).toStandardMinutes.getMinutes
+        description.setAttribute(JobDescription.WALLTIMELIMIT, cpuTime.toString)
+        description.setAttribute(CPU_TIME, (cpuTime * attributes.getOrElse(CPU_COUNT, "1").toInt).toString)
+      case None ⇒
+    }
+
+    attributes.filterNot(_._1 == CPU_TIME).foreach {
+      case (k, v) ⇒ description.setAttribute(k, v)
+    }
+
+    description
+  }
 
 }

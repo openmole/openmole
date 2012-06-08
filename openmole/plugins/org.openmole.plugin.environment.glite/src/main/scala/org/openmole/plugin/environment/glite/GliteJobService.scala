@@ -33,7 +33,6 @@ import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.jsaga.JSAGAJob
-import org.openmole.plugin.environment.jsaga.JSAGAJobBuilder
 import org.openmole.plugin.environment.jsaga.JSAGAJobService
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.misc.tools.io.FileUtil._
@@ -45,7 +44,7 @@ object GliteJobService extends Logger
 class GliteJobService(
     val uri: URI,
     val environment: GliteEnvironment,
-    override val nbAccess: Int) extends JSAGAJobService {
+    override val connections: Int) extends JSAGAJobService {
 
   import GliteJobService._
 
@@ -61,7 +60,7 @@ class GliteJobService(
       try generateScript(serializedJob, outputFilePath, environment.runtimeMemory.intValue, os)
       finally os.close
 
-      val jobDescription = buildJobDescription(runtime, script, environment.allRequirements)
+      val jobDescription = buildJobDescription(runtime, script)
       val job = jobService.createJob(jobDescription)
       job.run
 
@@ -142,8 +141,8 @@ class GliteJobService(
 
   private def getTimeOut = Workspace.preferenceAsDurationInS(GliteEnvironment.LCGCPTimeOut).toString
 
-  protected def buildJobDescription(runtime: Runtime, script: File, attributes: Map[String, String]) = {
-    val description = JSAGAJobBuilder.description(attributes)
+  protected def buildJobDescription(runtime: Runtime, script: File) = {
+    val description = newJobDescription
 
     description.setAttribute(JobDescription.EXECUTABLE, "/bin/bash")
     description.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](script.getName))
@@ -155,7 +154,7 @@ class GliteJobService(
       { if (script.getAbsolutePath.startsWith("/")) script.getAbsolutePath.tail else script.getAbsolutePath } +
       ">" + script.getName))
 
-    attributes.get(GLITE_REQUIREMENTS) match {
+    environment.allRequirements.get(GLITE_REQUIREMENTS) match {
       case Some(requirement) ⇒
         val requirements = new StringBuilder
         requirements.append("JDLRequirements=(")

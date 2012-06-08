@@ -23,11 +23,13 @@ import org.openmole.core.batch.environment.JobService
 import org.openmole.core.batch.environment.PersistentStorage
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
+import org.openmole.plugin.environment.jsaga.JSAGAEnvironment
+import org.openmole.plugin.environment.jsaga.Requirement
 
 object PBSEnvironment {
   val MaxConnections = new ConfigurationLocation("PBSEnvironment", "MaxConnections")
 
-  Workspace += (MaxConnections, "10")
+  Workspace += (MaxConnections, "5")
 }
 
 import PBSEnvironment._
@@ -36,9 +38,16 @@ class PBSEnvironment(
     login: String,
     host: String,
     dir: String,
-    val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory) extends BatchEnvironment {
+    val queue: Option[String] = None,
+    val requirements: Iterable[Requirement] = List.empty,
+    val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory) extends JSAGAEnvironment {
 
-  val storage = PersistentStorage.createBaseDir(this, URI.create("sftp://" + login + "@" + host), dir, Workspace.preferenceAsInt(MaxConnections))
+  val storage =
+    PersistentStorage.createBaseDir(
+      this,
+      URI.create("sftp://" + login + "@" + host),
+      dir,
+      Workspace.preferenceAsInt(MaxConnections))
 
   val jobService = new PBSJobService(
     URI.create("pbs-ssh://" + login + '@' + host + "/" + dir),

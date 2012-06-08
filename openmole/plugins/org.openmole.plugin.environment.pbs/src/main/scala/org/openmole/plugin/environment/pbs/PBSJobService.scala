@@ -33,13 +33,21 @@ class PBSJobService(
     val uri: URI,
     val sharedFS: Storage,
     val environment: PBSEnvironment,
-    override val nbAccess: Int) extends JSAGAJobService with SharedFSJobService {
+    override val connections: Int) extends JSAGAJobService with SharedFSJobService {
+
+  override def installJobService = createJobService(URI.create("ssh:" + uri.getSchemeSpecificPart))
 
   protected def doSubmit(serializedJob: SerializedJob, token: AccessToken) = {
     val (remoteScript, result) = buildScript(serializedJob, token)
-    val jobDesc = JobFactory.createJobDescription
+    val jobDesc = newJobDescription
     jobDesc.setAttribute(JobDescription.EXECUTABLE, "/bin/bash")
     jobDesc.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](remoteScript.path))
+
+    environment.queue match {
+      case Some(queue) ⇒
+        jobDesc.setAttribute(JobDescription.QUEUE, queue)
+      case None ⇒
+    }
 
     val job = jobService.createJob(jobDesc)
     job.run

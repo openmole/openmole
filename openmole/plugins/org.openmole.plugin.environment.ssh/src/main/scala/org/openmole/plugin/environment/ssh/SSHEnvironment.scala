@@ -31,7 +31,7 @@ object SSHEnvironment {
   val UpdateInterval = new ConfigurationLocation("SSHEnvironment", "UpdateInterval")
 
   Workspace += (UpdateInterval, "PT10S")
-  Workspace += (MaxConnections, "10")
+  Workspace += (MaxConnections, "5")
 }
 
 import SSHEnvironment._
@@ -41,7 +41,9 @@ class SSHEnvironment(
     host: String,
     nbSlots: Int,
     dir: String = "/tmp/",
-    val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory) extends BatchEnvironment {
+    val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory) extends JSAGAEnvironment {
+
+  def requirements = List.empty
 
   val storage = PersistentStorage.createBaseDir(this, URI.create("sftp://" + login + "@" + host), dir, Workspace.preferenceAsInt(MaxConnections))
 

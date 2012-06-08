@@ -54,7 +54,7 @@ class SSHJobService(
     val environment: SSHEnvironment,
     val nbSlot: Int,
     val sharedFS: Storage,
-    override val nbAccess: Int) extends JSAGAJobService with SharedFSJobService {
+    override val connections: Int) extends JSAGAJobService with SharedFSJobService {
 
   var queue = new TreeSet[SSHBatchJob]
   var nbRunning = 0
@@ -88,7 +88,7 @@ class SSHJobService(
 
   protected def doSubmit(serializedJob: SerializedJob, token: AccessToken) = {
     val (remoteScript, result) = buildScript(serializedJob, token)
-    val jobDesc = JobFactory.createJobDescription
+    val jobDesc = newJobDescription
     jobDesc.setAttribute(JobDescription.EXECUTABLE, "/bin/bash")
     jobDesc.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](remoteScript.path))
 

@@ -34,6 +34,7 @@ class DesktopGridJobService(val environment: DesktopGridEnvironment, val descrip
   val jobsDir = new File(environment.path, jobsDirName) { mkdirs }
   val resultsDir = new File(environment.path, resultsDirName) { mkdirs }
 
+  def connections = Int.MaxValue
   def jobSubmissionFile(jobId: String) = new File(jobsDir, jobId)
   def timeStemps(jobId: String) = timeStempsDir.listFiles.filter { _.getName.startsWith(jobId) }
   def timeStempsExists(jobId: String) = timeStempsDir.list.exists { _.startsWith(jobId) }
