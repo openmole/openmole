@@ -45,14 +45,14 @@ class ConnectorWidget(val scene: IMoleScene,
                       var toBeEdited: Boolean = false) extends ConnectionWidget(scene.graphScene) { connectorWidget ⇒
 
   val label = new ConnectorLabel
-  val componentWidget = new ConditionWidget(scene, label)
-  // setConstraint(componentWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.66f)
+  val conditionWidget = new ConditionWidget(scene, label)
+  setConstraint(conditionWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.66f)
+  addChild(conditionWidget)
 
   connector match {
     case x: ITransitionUI ⇒ x.condition match {
       case Some(t: String) ⇒
         label.text = t
-        addChild(componentWidget)
       case None ⇒
     }
     case _ ⇒
@@ -85,14 +85,14 @@ class ConnectorWidget(val scene: IMoleScene,
     removeConstraint(prototypeFilterWidget)
     connector match {
       case x: ITransitionUI ⇒
-        componentWidget.setVisible(!label.text.isEmpty)
+        conditionWidget.setVisible(!label.text.isEmpty)
         setLineColor(new Color(130, 130, 130))
         setStroke(new BasicStroke(3f))
         setConstraint(prototypeFilterWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER,
           if (label.text.isEmpty) 0.5f else 0.33f)
         label.revalidate
       case x: IDataChannelUI ⇒
-        componentWidget.setVisible(false)
+        conditionWidget.setVisible(false)
         setLineColor(new Color(188, 188, 188))
         setStroke(new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 20.0f, List(10.0f).toArray, 0.0f))
         setConstraint(prototypeFilterWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
