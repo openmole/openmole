@@ -10,12 +10,12 @@
     <parent>
         <artifactId>libraries</artifactId>
         <groupId>org.openmole.core</groupId>
-        <version>0.5-RC6-SNAPSHOT</version>
+        <version>0.5</version>
     </parent>
 
     <!--Used to build the symbolic name of the bundle-->
     <artifactId>ccl.northwestern.edu.netlogo5</artifactId>
-    <version>5.0</version>
+    <version>0.5</version>
 
     <dependencies>
         <dependency>
