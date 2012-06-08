@@ -76,10 +76,10 @@ class ExecutionManager(manager: IMoleSceneManager,
   var gStrategyPanels = new HashMap[String, (IGroupingPanelUI, List[(IGrouping, ICapsule)])]
   val hookPanels = new HashMap[String, (IHookPanelUI, List[IHook])]
   var status = HashMap(State.READY -> new AtomicInteger,
-    State.RUNNING -> new AtomicInteger,
-    State.COMPLETED -> new AtomicInteger,
-    State.FAILED -> new AtomicInteger,
-    State.CANCELED -> new AtomicInteger)
+                       State.RUNNING -> new AtomicInteger,
+                       State.COMPLETED -> new AtomicInteger,
+                       State.FAILED -> new AtomicInteger,
+                       State.CANCELED -> new AtomicInteger)
 
   val wfPiePlotter = new PiePlotter("Workflow execution")
   val envBarPanel = new PluginPanel("", "[][grow,fill]", "") {
@@ -90,10 +90,10 @@ class ExecutionManager(manager: IMoleSceneManager,
 
   var states = new States(0, 0, 0)
   val timer = new Timer(5000, new ActionListener {
-    def actionPerformed(e: ActionEvent) = {
-      envBarPlotter.update(states)
-    }
-  })
+      def actionPerformed(e: ActionEvent) = {
+        envBarPlotter.update(states)
+      }
+    })
   var environments = new HashMap[IEnvironment, (String, HashMap[ExecutionState.ExecutionState, AtomicInteger])]
 
   val hookMenu = new Menu("Hooks")
@@ -128,7 +128,7 @@ class ExecutionManager(manager: IMoleSceneManager,
   def canBeRun =
     if (Workspace.anotherIsRunningAt(Workspace.defaultLocation)) {
       val dd = new DialogDescriptor(new Label("A simulation is currently running.\nTwo simulations can not run concurrently, overwrite ?") { background = Color.white }.peer,
-        "Execution warning")
+                                    "Execution warning")
       val result = DialogDisplayer.getDefault.notify(dd)
       if (result.equals(NotifyDescriptor.OK_OPTION)) {
         (new File(Workspace.defaultLocation.getAbsolutePath + "/.running")).delete
@@ -142,9 +142,9 @@ class ExecutionManager(manager: IMoleSceneManager,
       initBarPlotter
       hookPanels.values.foreach(_._2.foreach(_.release))
       val (moleExecution, environments) = MoleMaker.buildMoleExecution(mole,
-        manager,
-        capsuleMapping,
-        gStrategyPanels.values.map { v ⇒ v._1.saveContent.map(_.coreObject) }.flatten.toList)
+                                                                       manager,
+                                                                       capsuleMapping,
+                                                                       gStrategyPanels.values.map { v ⇒ v._1.saveContent.map(_.coreObject) }.flatten.toList)
 
       this.moleExecution = moleExecution
 
@@ -206,11 +206,11 @@ class ExecutionManager(manager: IMoleSceneManager,
 
   def buildEmptyEnvPlotter(e: (IEnvironment, String)) = {
     val m = HashMap(ExecutionState.SUBMITTED -> new AtomicInteger,
-      ExecutionState.READY -> new AtomicInteger,
-      ExecutionState.RUNNING -> new AtomicInteger,
-      ExecutionState.DONE -> new AtomicInteger,
-      ExecutionState.FAILED -> new AtomicInteger,
-      ExecutionState.KILLED -> new AtomicInteger)
+                    ExecutionState.READY -> new AtomicInteger,
+                    ExecutionState.RUNNING -> new AtomicInteger,
+                    ExecutionState.DONE -> new AtomicInteger,
+                    ExecutionState.FAILED -> new AtomicInteger,
+                    ExecutionState.KILLED -> new AtomicInteger)
     environments += e._1 -> (e._2, m)
     EventDispatcher.listen(e._1, new JobStateChangedOnEnvironmentListener(this, moleExecution, e._1), classOf[IEnvironment.JobStateChanged])
   }
@@ -227,8 +227,10 @@ class ExecutionManager(manager: IMoleSceneManager,
     environments.values.foreach(env ⇒ env._2.keys.foreach(k ⇒ env._2(k) = new AtomicInteger))
   }
 
-  def displayFileTransfer =
+  def displayFileTransfer = {
+    SatusBar.clear
     StatusBar.inform("Downloads : " + downloads._1 + " / " + downloads._2 + "  Uploads : " + uploads._1 + " / " + uploads._2)
+  }
 
   class AddHookRowAction(fui: IHookFactoryUI) extends Action(fui.toString) {
     def apply = {
