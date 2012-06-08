@@ -29,6 +29,8 @@ import java.io.IOException
 import java.net.URI
 import org.openmole.misc.tools.service.Logger
 import java.nio.file.FileSystems
+import java.security.InvalidKeyException
+import java.security.NoSuchAlgorithmException
 import java.util.zip.GZIPInputStream
 import org.ogf.saga.context.Context
 import org.openmole.misc.exception.InternalProcessingError
@@ -104,10 +106,16 @@ object GliteAuthentication extends Logger {
     }
   }
 
-  def addContext(ctx: Context) {
-    JSAGASessionService.addContext("wms://.*", ctx)
-    JSAGASessionService.addContext("srm://.*", ctx)
-  }
+  def addContext(ctx: Context) =
+    try {
+      JSAGASessionService.addContext("wms://.*", ctx)
+      JSAGASessionService.addContext("srm://.*", ctx)
+    } catch {
+      case e: NoSuchAlgorithmException ⇒
+        throw new UserBadDataError(e, "Using OpenMOLE with glite requiers to use java 7 of Oracle and the JCE (see install section of OpenMOLE web site)")
+      case e: InvalidKeyException ⇒
+        throw new UserBadDataError(e, "You should install the JCE, Java Cryptography Extention (see OpenMOLE install session)")
+    }
 
   def getTimeString: String = Workspace.preference(GliteEnvironment.ProxyTime)
 
