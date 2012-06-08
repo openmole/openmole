@@ -111,10 +111,8 @@ object GliteAuthentication extends Logger {
       JSAGASessionService.addContext("wms://.*", ctx)
       JSAGASessionService.addContext("srm://.*", ctx)
     } catch {
-      case e: NoSuchAlgorithmException ⇒
+      case e: InternalError ⇒
         throw new UserBadDataError(e, "Using OpenMOLE with glite requiers to use java 7 of Oracle and the JCE (see install section of OpenMOLE web site)")
-      case e: InvalidKeyException ⇒
-        throw new UserBadDataError(e, "You should install the JCE, Java Cryptography Extention (see OpenMOLE install session)")
     }
 
   def getTimeString: String = Workspace.preference(GliteEnvironment.ProxyTime)
