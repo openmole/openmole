@@ -34,7 +34,7 @@ class AuthentificationPanel extends MigPanel("wrap", "[grow,fill]", "") with IAu
       Right(a.buildPanelUI)
     } catch {
       case e: Throwable ⇒
-        StatusBar.block(e.getMessage, stack = e.getStackTraceString)
+        StatusBar.block(Some(e.getMessage).getOrElse(""), stack = e.getStackTraceString)
         Left
     }
     p match {

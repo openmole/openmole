@@ -98,7 +98,7 @@ object MoleMaker {
           case (cui, ccore) ⇒
             manager.capsuleConnections(cui.dataUI).foreach { t ⇒
               t match {
-                case x: ITransitionUI ⇒ buildTransition(ccore,
+                case x: ITransitionUI ⇒ buildTransition(capsuleMap(x.source),
                   capsuleMap(x.target.capsule),
                   x, prototypeMap)
 
@@ -184,7 +184,7 @@ object MoleMaker {
                       t: ITransitionUI,
                       prototypeMap: Map[IPrototypeDataProxyUI, IPrototype[_]]) {
     val filtered = t.filteredPrototypes.map { p ⇒ prototypeMap(p).name }
-    val condition = if (t.condition.isDefined) new Condition(t.condition.get) else ICondition.True
+    val condition: ICondition = if (t.condition.isDefined) new Condition(t.condition.get) else ICondition.True
     t.transitionType match {
       case BASIC_TRANSITION ⇒ new Transition(sourceCapsule, targetCapsule, condition, filtered)
       case AGGREGATION_TRANSITION ⇒ new AggregationTransition(sourceCapsule, targetCapsule, condition, filtered)

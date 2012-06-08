@@ -181,11 +181,12 @@ class MoleSceneConverter extends Converter {
           }
         }
         case "transition" ⇒
+          val condition = reader.getAttribute("condition")
           SceneItemFactory.createTransition(scene,
             oslots(reader.getAttribute("source")),
             islots(reader.getAttribute("target")),
             TransitionType.fromString(reader.getAttribute("type")),
-            Some(reader.getAttribute("condition")),
+            if (condition.isEmpty) None else Some(condition),
             Proxys.prototypes.filter { p ⇒ readFiltered(reader).contains(p.id) }.toList)
 
         case "datachannel" ⇒

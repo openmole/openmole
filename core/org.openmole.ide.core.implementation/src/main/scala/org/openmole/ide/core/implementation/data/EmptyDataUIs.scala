@@ -85,6 +85,8 @@ object EmptyDataUIs {
     def name = ""
     def buildPanelUI = new EmptyTaskPanelUI
     def coreClass = classOf[EmptyTask]
+    def updateImplicts(ipList: List[IPrototypeDataProxyUI],
+                       opList: List[IPrototypeDataProxyUI]) = {}
 
     def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = {
       val taskBuilder = EmptyTask(name)(plugins)
@@ -94,8 +96,6 @@ object EmptyDataUIs {
       taskBuilder.toTask
     }
 
-    def backgroundColor = Color.WHITE
-    def borderColor = Color.WHITE
     def fatImagePath = "img/empty.png"
   }
 

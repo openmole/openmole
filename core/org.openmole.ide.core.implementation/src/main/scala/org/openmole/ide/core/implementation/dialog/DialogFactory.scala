@@ -54,20 +54,27 @@ object DialogFactory {
     else None
   }
 
-  def deleteProxyConfirmation(proxy: IDataProxyUI): Boolean = {
-    if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new Label("<html>" + proxy.dataUI.name + " is currently used in a scene.<br>" +
-      "It will be deleted everywhere it appears. <br>" +
-      "Delete anyway ?") { opaque = true; background = Color.WHITE }.peer, "Execution warning")).equals(NotifyDescriptor.OK_OPTION)) true
+  def confirmationDialog(header: String,
+                         text: String) = {
+    if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new Label(text) {
+      opaque = true
+      background = Color.WHITE
+    }.peer, header)).equals(NotifyDescriptor.OK_OPTION)) true
     else false
   }
 
-  def closePropertyPanelConfirmation(panel: BasePanelUI): Boolean = {
-    if (DialogDisplayer.getDefault.notify(
-      new DialogDescriptor(new Label("<html> The property panel " + panel.nameTextField.text + " has not been created yet.<br>" +
-        "All the data will be lost. <br>" +
-        "Close anyway ?") { opaque = true; background = Color.WHITE }.peer, "Warning")).equals(NotifyDescriptor.OK_OPTION)) true
-    else false
-  }
+  def deleteProxyConfirmation(proxy: IDataProxyUI) = confirmationDialog("Execution warning", "<html>" + proxy.dataUI.name + " is currently used in a scene.<br>" +
+    "It will be deleted everywhere it appears. <br>" +
+    "Delete anyway ?")
+
+  def closePropertyPanelConfirmation(panel: BasePanelUI): Boolean = confirmationDialog("Warning",
+    "<html> The property panel " + panel.nameTextField.text + " has not been created yet.<br>" +
+      "All the data will be lost. <br>" +
+      "Close anyway ?</html>")
+
+  def changePasswordConfirmation = confirmationDialog("Warning",
+    "<html>Changing the password will reset all your preferences and authentication data.<br>" +
+      "Reset anyway ?</html> ")
 
   def displayStack(stack: String) =
     DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(new TextArea(stack)).peer, "Error stack"))

@@ -45,11 +45,10 @@ trait ITaskDataUI extends IDataUI {
 
   def implicitPrototypesIn: List[IPrototypeDataProxyUI]
 
-  def implicitPrototypesIn_=(pi: List[IPrototypeDataProxyUI])
-
   def implicitPrototypesOut: List[IPrototypeDataProxyUI]
 
-  def implicitPrototypesOut_=(po: List[IPrototypeDataProxyUI])
+  def updateImplicits(ipList: List[IPrototypeDataProxyUI],
+                      opList: List[IPrototypeDataProxyUI])
 
   def filterPrototypeOccurencies(pproxy: IPrototypeDataProxyUI): List[IPrototypeDataProxyUI]
 
