@@ -190,7 +190,8 @@ object ReplicaCatalog extends Logger {
     } else replica
 
   private def uploadAndInsert(src: File, srcPath: File, hash: String, authenticationKey: String, storage: Storage, token: AccessToken) = {
-    val newFile = new GZURIFile(storage.persistentSpace(token).newFileInDir("replica", ".rep"))
+    val newFile = new GZURIFile(storage.persistentSpace(token).child(hash))
+    if(newFile.exists(token)) newFile.remove(token)
     signalUpload(URIFile.copy(src, newFile, token), srcPath, storage)
     val newReplica = new Replica(srcPath.getCanonicalPath, storage.description.description, hash, authenticationKey, newFile.location, System.currentTimeMillis)
     insert(newReplica)
