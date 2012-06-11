@@ -95,11 +95,12 @@ trait SharedFSJobService { this: JSAGAJobService ⇒
         val script = Workspace.newFile("run", ".sh")
         val remoteScript = try {
           val workspace = UUID.randomUUID
+          val osgiWorkDir = UUID.randomUUID
           script.content =
             "export PATH=" + installed + "/jre/bin/" + ":$PATH; cd " + installed + "; mkdir " + workspace + "; " +
-              "sh run.sh " + environment.runtimeMemory + "m " + UUID.randomUUID + " -s file:/" +
+              "sh run.sh " + environment.runtimeMemory + "m " + osgiWorkDir + " -s file:/" +
               " -c " + serializedJob.communicationDirPath + " -p envplugins/ -i " + serializedJob.inputFilePath + " -o " + result.path +
-              " -w " + workspace + "; rm -rf " + workspace + ";"
+              " -w " + workspace + "; rm -rf " + workspace + "; rm -rf " + osgiWorkDir
 
           val remoteScript = tmp.newFileInDir("run", ".sh")
           URIFile.copy(script, remoteScript, token)
