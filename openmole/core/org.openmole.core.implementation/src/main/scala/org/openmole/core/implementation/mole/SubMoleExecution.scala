@@ -56,10 +56,8 @@ class SubMoleExecution(
     val moleExecution: MoleExecution) extends ISubMoleExecution {
 
   private var _nbJobs = 0
-
   private var _childs = new HashSet[SubMoleExecution] with SynchronizedSet[SubMoleExecution]
   private var _jobs = TreeMap.empty[IMoleJob, (ICapsule, ITicket)]
-
   private var canceled = false
 
   val masterCapsuleRegistry = new RegistryWithTicket[IMasterCapsule, IContext]
@@ -68,14 +66,24 @@ class SubMoleExecution(
 
   parrentApply(_.+=(this))
 
-  def nbJobs_+=(v: Int): Unit = {
+  private def addJob(moleJob: IMoleJob, capsule: ICapsule, ticket: ITicket) = {
+    _jobs += (moleJob -> (capsule, ticket))
+    moleExecution.nbJobInProgress += 1
+    nbJobs_+=(1)
+  }
+
+  private def rmJob(moleJob: IMoleJob) = {
+    _jobs -= moleJob
+    moleExecution.nbJobInProgress -= 1
+    nbJobs_+=(-1)
+  }
+
+  private def nbJobs_+=(v: Int): Unit = {
     _nbJobs += v
     parrentApply(_.nbJobs_+=(v))
   }
 
   override def isRoot = !parent.isDefined
-
-  def nbJobInProgress: Int = synchronized { _nbJobs }
 
   override def cancel = synchronized {
     canceled = true
@@ -100,16 +108,16 @@ class SubMoleExecution(
 
   private def jobFailedOrCanceled(job: IMoleJob) = synchronized {
     val (capsule, ticket) = _jobs.get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registred."))
-    _jobs -= job
-    nbJobs_+=(-1)
+    rmJob(job)
+
     checkFinished(ticket)
     moleExecution.jobFailedOrCanceled(job, capsule)
   }
 
   private def jobFinished(job: IMoleJob) = synchronized {
     val (capsule, ticket) = _jobs.get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registred."))
-    _jobs -= job
-    nbJobs_+=(-1)
+    rmJob(job)
+
     try {
       capsule match {
         case c: IMasterCapsule ⇒
@@ -133,7 +141,7 @@ class SubMoleExecution(
   }
 
   private def checkFinished(ticket: ITicket) =
-    if (nbJobInProgress == 0) {
+    if (_nbJobs == 0) {
       EventDispatcher.trigger(this, new ISubMoleExecution.Finished(ticket))
       parrentApply(_.-=(this))
     }
@@ -152,9 +160,7 @@ class SubMoleExecution(
         case _ ⇒ new MoleJob(capsule.taskOrException, implicits + context, moleExecution.nextJobId, stateChanged)
       }
 
-      _jobs += (moleJob -> (capsule, ticket))
-
-      nbJobs_+=(1)
+      addJob(moleJob, capsule, ticket)
 
       val instant =
         synchronized {

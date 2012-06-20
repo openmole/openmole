@@ -80,7 +80,9 @@ class MoleExecution(
   private val currentJobId = new AtomicLong
 
   private val waitingJobs = new HashMap[(ICapsule, IMoleJobGroup), ListBuffer[IMoleJob]]
-  private var nbWaiting = 0
+
+  @volatile private var nbWaiting = 0
+  @volatile private[mole] var nbJobInProgress = 0
 
   val rootSubMoleExecution = new SubMoleExecution(None, this)
   val rootTicket = Ticket(id, ticketNumber.getAndIncrement)
@@ -134,7 +136,7 @@ class MoleExecution(
 
   def start(context: IContext): this.type = {
     rootSubMoleExecution.newChild.submit(mole.root, context, nextTicket(rootTicket))
-    if (rootSubMoleExecution.nbJobInProgress <= nbWaiting) submitAll
+    if (nbJobInProgress <= nbWaiting) submitAll
     this
   }
 
@@ -173,7 +175,7 @@ class MoleExecution(
   }
 
   def jobOutputTransitionsPerformed(job: IMoleJob, capsule: ICapsule) = synchronized {
-    if (rootSubMoleExecution.nbJobInProgress <= nbWaiting) submitAll
+    if (nbJobInProgress <= nbWaiting) submitAll
     if (!canceled.get) {
       rerun.synchronized { rerun.jobFinished(job, capsule) }
       if (finished) {
@@ -183,7 +185,7 @@ class MoleExecution(
     }
   }
 
-  override def finished: Boolean = rootSubMoleExecution.nbJobInProgress == 0
+  override def finished: Boolean = nbJobInProgress == 0
 
   override def started: Boolean = _started.get
 

@@ -31,51 +31,11 @@ import org.openmole.core.model.mole._
 import org.openmole.core.model.task._
 import org.openmole.core.model.sampling._
 import org.openmole.core.model.domain._
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.method.evolution._
-import scala.collection.immutable.TreeMap
 import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.transition._
-import collection.mutable.ListBuffer
 
 package object evolution {
-
-  /*class NSGA2Sigma extends Puzzle { nsga2 =>
-   def elitismCapsule: ICapsule
-   def breedingCapsule: ICapsule
-   def outputCapsule: ICapsule
-   def steadyPrototype: IPrototype[Int]
-   def generationPrototype: IPrototype[Int]
-   def archivePrototype
-   def inputs: Inputs
-   def initialGenomes: IPrototype[Array[Array[Double]]]
-    
-   def initialPopulation = new InitialPopulation {
-   def inputs = nsga2.inputs
-   def initialGenomes = nsga2.initialGenomes
-   }
-   }*/
-
-  /*abstract class InitialPopulation {
-   def inputs: Inputs
-   def initialGenomes: IPrototype[Array[Array[Double]]]
-    
-   var initialPopulation = List.empty[Array[Double]]
-
-   def add(g: Array[Double]) = {
-   if(g.size != inputs.inputs.size) throw new UserBadDataError("Genome " + g.mkString(",") + " doesn't match the expected size of inputs " + inputs.inputs.size)
-   initialPopulation ::= g
-   }
-    
-   def unscaled(g: Array[Double]) = (g zip inputs.inputs) map { 
-   case(g, i) => 
-   val (min, max) = inputs.scales(i) 
-   g.unscale(min, max) 
-   }
-    
-   def get = Context.empty + new Variable(initialGenomes, initialPopulation.map{ unscaled }.toArray)
-    
-   }*/
 
   def nsga2SigmaSteady(
     name: String,
@@ -86,6 +46,7 @@ package object evolution {
     populationSize: Int,
     inputs: Iterable[(IPrototype[Double], (Double, Double))],
     objectives: Iterable[(IPrototype[Double], Double)])(implicit plugins: IPluginSet) = {
+
     val genomeWithSigmaPrototype = new Prototype[GAGenomeWithSigma](name + "Genome")
     val individualPrototype = new Prototype[Individual[GAGenomeWithSigma, Fitness]](name + "Individual")
     val archivePrototype = new Prototype[Array[Individual[GAGenomeWithSigma, Fitness] with Diversity with Rank]](name + "Archive")
