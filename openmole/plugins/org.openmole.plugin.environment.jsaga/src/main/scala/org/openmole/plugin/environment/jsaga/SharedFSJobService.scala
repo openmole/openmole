@@ -100,7 +100,7 @@ trait SharedFSJobService { this: JSAGAJobService ⇒
             "export PATH=" + installed + "/jre/bin/" + ":$PATH; cd " + installed + "; mkdir " + workspace + "; " +
               "sh run.sh " + environment.runtimeMemory + "m " + osgiWorkDir + " -s file:/" +
               " -c " + serializedJob.communicationDirPath + " -p envplugins/ -i " + serializedJob.inputFilePath + " -o " + result.path +
-              " -w " + workspace + "; rm -rf " + workspace + "; rm -rf " + osgiWorkDir
+              " -w " + workspace + "; rm -rf " + workspace + " ; rm -rf " + osgiWorkDir + " ;"
 
           val remoteScript = tmp.newFileInDir("run", ".sh")
           URIFile.copy(script, remoteScript, token)
