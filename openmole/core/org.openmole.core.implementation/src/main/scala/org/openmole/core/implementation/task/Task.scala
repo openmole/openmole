@@ -27,12 +27,15 @@ import org.openmole.misc.pluginmanager._
 import org.openmole.misc.tools.service.Random
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.tools.service.Random._
 
 object Task {
   val OpenMOLEVariablePrefix = new ConfigurationLocation("Task", "OpenMOLEVariablePrefix")
   Workspace += (OpenMOLEVariablePrefix, "oM")
 
   val openMOLESeed = new Prototype[Long](Workspace.preference(OpenMOLEVariablePrefix) + "Seed")
+
+  def buildRNG(context: IContext) = newRNG(context.valueOrException(Task.openMOLESeed))
 }
 
 trait Task extends ITask {

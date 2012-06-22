@@ -49,7 +49,7 @@ object TotalOrderEffectTask {
       val name: String,
       val matrixName: IPrototype[String],
       val modelInputs: Iterable[IPrototype[Double]],
-      val modelOutputs: Iterable[IPrototype[Double]])(implicit plugins: IPluginSet) extends SensitivityTask.Builder { builder ⇒
+      val modelOutputs: Iterable[IPrototype[Double]])(implicit plugins: IPluginSet) extends RawSensitivityTask.Builder { builder ⇒
 
     def toTask = new TotalOrderEffectTask(name, matrixName, modelInputs, modelOutputs) {
       val inputs: IDataSet = builder.inputs
@@ -62,21 +62,7 @@ object TotalOrderEffectTask {
 }
 
 abstract sealed class TotalOrderEffectTask(
-    val name: String,
-    val matrixName: IPrototype[String],
-    val modelInputs: Iterable[IPrototype[Double]],
-    val modelOutputs: Iterable[IPrototype[Double]])(implicit val plugins: IPluginSet) extends SensitivityTask {
-
-  def computeSensitivity(allValues: Array[Double], allNames: Array[String], input: IPrototype[Double]) = {
-    val (a, b, c) = extractValues(allValues, allNames, input)
-    val n = a.size
-
-    val bxcAvg = (b zip c map { case (b, c) ⇒ b * c } sum) / n
-
-    val axaAvg = (a map { a ⇒ a * a } sum) / n
-    val f0 = (a sum) / n
-
-    1 - (bxcAvg - pow(f0, 2)) / (axaAvg - math.pow(f0, 2))
-  }
-
-}
+  val name: String,
+  val matrixName: IPrototype[String],
+  val modelInputs: Iterable[IPrototype[Double]],
+  val modelOutputs: Iterable[IPrototype[Double]])(implicit val plugins: IPluginSet) extends RawSensitivityTask with TotalOrderEffect

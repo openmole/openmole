@@ -20,7 +20,6 @@ package org.openmole.plugin.method.sensitivity
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.task.TaskBuilder
-import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.data.IPrototype
 import SaltelliSampling._
@@ -35,7 +34,6 @@ object SensitivityTask {
     val modelOutputs: Iterable[IPrototype[Double]]
 
     override def inputs: IDataSet = super.inputs + DataSet(modelInputs.map(_.toArray)) + DataSet(modelOutputs.map(_.toArray)) + matrixName.toArray
-    override def outputs: IDataSet = super.outputs + DataSet(for (i ← modelInputs; o ← modelOutputs) yield indice(name, i, o))
   }
 }
 
@@ -47,13 +45,6 @@ trait SensitivityTask extends Task {
   def modelInputs: Iterable[IPrototype[Double]]
   def modelOutputs: Iterable[IPrototype[Double]]
 
-  override def process(context: IContext): IContext = {
-    val matrixNames = context.valueOrException(matrixName.toArray)
-
-    Context.empty ++
-      (for (i ← modelInputs; o ← modelOutputs) yield new Variable(indice(name, i, o), computeSensitivity(context.valueOrException(o.toArray), matrixNames, i)))
-  }
-
-  def computeSensitivity(allValues: Array[Double], allNames: Array[String], input: IPrototype[Double]): Double
+  def computeSensitivity(a: Seq[Double], b: Seq[Double], c: Seq[Double]): Double
 
 }

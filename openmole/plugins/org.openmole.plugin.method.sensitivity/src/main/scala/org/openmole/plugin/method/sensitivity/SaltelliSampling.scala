@@ -19,7 +19,6 @@ package org.openmole.plugin.method.sensitivity
 
 import org.openmole.core.model.sampling.ISampling
 import org.openmole.misc.tools.service.Scaling._
-import org.openmole.misc.tools.service.Random._
 import java.util.Random
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.sampling._
@@ -96,7 +95,7 @@ class SaltelliSampling(
   override def prototypes = matrixName :: factors.map { _.prototype }.toList
 
   override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = {
-    val rng = newRNG(context.valueOrException(openMOLESeed))
+    val rng = buildRNG(context)
     val a = generateMatrix(context, samples, factors, rng)
     val b = generateMatrix(context, samples, factors, rng)
     val prototypes = factors.map { _.prototype }

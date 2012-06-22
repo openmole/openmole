@@ -31,37 +31,41 @@ import SaltelliSampling._
 import SensitivityTask._
 import org.openmole.core.model.task.IPluginSet
 
-object FirstOrderEffectTask {
+object BootstrappedFirstOrderEffectTask {
 
   def apply(
     name: String,
     modelInputs: Iterable[IPrototype[Double]],
-    modelOutputs: Iterable[IPrototype[Double]])(implicit plugins: IPluginSet) = new FirstOrderEffectTaskBuilder(name, SaltelliSampling.matrixName, modelInputs, modelOutputs)
+    modelOutputs: Iterable[IPrototype[Double]],
+    bootstrap: Int)(implicit plugins: IPluginSet) = new BootstrappedFirstOrderEffectTaskBuilder(name, SaltelliSampling.matrixName, modelInputs, modelOutputs, bootstrap)
 
   def apply(
     name: String,
     matrixName: IPrototype[String],
     modelInputs: Iterable[IPrototype[Double]],
-    modelOutputs: Iterable[IPrototype[Double]])(implicit plugins: IPluginSet) = new FirstOrderEffectTaskBuilder(name, matrixName, modelInputs, modelOutputs)
+    modelOutputs: Iterable[IPrototype[Double]],
+    bootstrap: Int)(implicit plugins: IPluginSet) = new BootstrappedFirstOrderEffectTaskBuilder(name, matrixName, modelInputs, modelOutputs, bootstrap)
 
-  class FirstOrderEffectTaskBuilder(
+  class BootstrappedFirstOrderEffectTaskBuilder(
       val name: String,
       val matrixName: IPrototype[String],
       val modelInputs: Iterable[IPrototype[Double]],
-      val modelOutputs: Iterable[IPrototype[Double]])(implicit plugins: IPluginSet) extends RawSensitivityTask.Builder { builder ⇒
+      val modelOutputs: Iterable[IPrototype[Double]],
+      val bootstrap: Int)(implicit plugins: IPluginSet) extends BootstrappedSensitivityTask.Builder { builder ⇒
 
-    def toTask = new FirstOrderEffectTask(name, matrixName, modelInputs, modelOutputs) {
+    def toTask = new BootstrappedFirstOrderEffectTask(name, matrixName, modelInputs, modelOutputs) {
       val inputs: IDataSet = builder.inputs
       val outputs: IDataSet = builder.outputs
       val parameters = builder.parameters
+      val bootstrap = builder.bootstrap
     }
 
   }
 
 }
 
-abstract sealed class FirstOrderEffectTask(
+abstract sealed class BootstrappedFirstOrderEffectTask(
   val name: String,
   val matrixName: IPrototype[String],
   val modelInputs: Iterable[IPrototype[Double]],
-  val modelOutputs: Iterable[IPrototype[Double]])(implicit val plugins: IPluginSet) extends RawSensitivityTask with FirstOrderEffect
+  val modelOutputs: Iterable[IPrototype[Double]])(implicit val plugins: IPluginSet) extends BootstrappedSensitivityTask with FirstOrderEffect
