@@ -52,7 +52,7 @@ class GliteEnvironmentDataUI(
       else new GliteEnvironment(vo, voms, bdii, requirements = requirements, runtimeMemory = rtm)
     } catch {
       case e: UserBadDataError ⇒ throw e
-      case _ ⇒ throw new UserBadDataError("An error occured when initialiazing the glite environment" + name + ". Please check your certificate settings in the Preferences menu.")
+      case e: Exception ⇒ throw new UserBadDataError(e, "An error occured when initializing the glite environment" + name + ". Please check your certificate settings in the Preferences menu.")
     }
   }
 

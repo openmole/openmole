@@ -48,6 +48,7 @@ import scala.swing.SplitPane
 import scala.swing.SplitPane
 import scala.swing.TabbedPane
 import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 import scala.swing.TextArea
@@ -181,6 +182,10 @@ class ExecutionManager(manager: IMoleSceneManager,
 
             timer.start
             moleExecution.start
+          case Left(e: UserBadDataError) ⇒
+            StatusBar.block(e.getMessage,
+              stack = e.getStackTraceString + "\nCaused by\n" + e.getCause.getMessage + e.getCause.getStackTraceString,
+              exceptionName = e.getClass.getCanonicalName)
           case Left(e) ⇒
             StatusBar.block(e.getMessage,
               stack = e.getStackTraceString,
