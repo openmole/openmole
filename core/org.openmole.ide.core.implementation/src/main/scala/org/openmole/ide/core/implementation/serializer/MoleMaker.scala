@@ -42,15 +42,18 @@ import org.openmole.core.implementation.transition._
 import org.openmole.ide.misc.tools.check.TypeCheck
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.workflow.IDataChannelUI
+import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.ITask
 import org.openmole.core.model.transition.ICondition
+import org.openmole.core.model.transition.ISlot
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.ITransitionUI
 import scala.collection.JavaConversions._
+import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
@@ -92,14 +95,20 @@ object MoleMaker {
         val capsuleMap: Map[ICapsuleUI, ICapsule] = builds.map { case ((cui, c), _) ⇒ cui -> c }
         val errors = builds.flatMap { case ((_, _), e) ⇒ e }
 
+        val islotsMapping = new HashMap[IInputSlotWidget, ISlot]
         capsuleMap.foreach {
           case (cui, ccore) ⇒
             manager.capsuleConnections(cui.dataUI).foreach { t ⇒
               t match {
-                case x: ITransitionUI ⇒ buildTransition(capsuleMap(x.source),
-                  capsuleMap(x.target.capsule),
-                  x, prototypeMap)
-
+                case x: ITransitionUI ⇒
+                  buildTransition(capsuleMap(x.source),
+                    islotsMapping.getOrElseUpdate(x.target, {
+                      println("  NEW SLOT on : " + x.target.capsule)
+                      new Slot(capsuleMap(x.target.capsule))
+                    }),
+                    //  capsuleMap(x.target.capsule),
+                    x, prototypeMap)
+                  println("## " + islotsMapping.size)
                 case x: IDataChannelUI ⇒ new DataChannel(capsuleMap(x.source),
                   capsuleMap(x.target.capsule),
                   x.filteredPrototypes.map { p ⇒ prototypeMap(p).name }.toSeq: _*)
@@ -178,16 +187,18 @@ object MoleMaker {
   def parameters(capsuleDataUI: ICapsuleDataUI): ParameterSet = parameters(capsuleDataUI.task.get)
 
   def buildTransition(sourceCapsule: ICapsule,
-                      targetCapsule: ICapsule,
+                      targetSlot: ISlot,
                       t: ITransitionUI,
                       prototypeMap: Map[IPrototypeDataProxyUI, IPrototype[_]]) {
+
+    println("Build Transition from : " + sourceCapsule + " to " + targetSlot)
     val filtered = t.filteredPrototypes.map { p ⇒ prototypeMap(p).name }
     val condition: ICondition = if (t.condition.isDefined) new Condition(t.condition.get) else ICondition.True
     t.transitionType match {
-      case BASIC_TRANSITION ⇒ new Transition(sourceCapsule, targetCapsule, condition, filtered)
-      case AGGREGATION_TRANSITION ⇒ new AggregationTransition(sourceCapsule, targetCapsule, condition, filtered)
-      case EXPLORATION_TRANSITION ⇒ new ExplorationTransition(sourceCapsule, targetCapsule, condition, filtered)
-      case _ ⇒ throw new UserBadDataError("No matching type between capsule " + sourceCapsule + " and " + targetCapsule + ". The transition can not be built")
+      case BASIC_TRANSITION ⇒ new Transition(sourceCapsule, targetSlot, condition, filtered)
+      case AGGREGATION_TRANSITION ⇒ new AggregationTransition(sourceCapsule, targetSlot, condition, filtered)
+      case EXPLORATION_TRANSITION ⇒ new ExplorationTransition(sourceCapsule, targetSlot, condition, filtered)
+      case _ ⇒ throw new UserBadDataError("No matching type between capsule " + sourceCapsule + " and " + targetSlot + ". The transition can not be built")
     }
   }
 }

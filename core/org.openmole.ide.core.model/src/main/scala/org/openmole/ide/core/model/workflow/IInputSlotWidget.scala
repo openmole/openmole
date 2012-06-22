@@ -20,6 +20,8 @@ package org.openmole.ide.core.model.workflow
 import org.netbeans.api.visual.widget.Widget
 
 trait IInputSlotWidget {
+  def index: Int
+
   def widget: Widget
 
   def capsule: ICapsuleUI
