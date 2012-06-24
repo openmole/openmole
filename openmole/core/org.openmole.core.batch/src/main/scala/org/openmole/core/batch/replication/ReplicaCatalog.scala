@@ -31,6 +31,7 @@ import com.db4o.query.Predicate
 import com.db4o.ta.TransparentPersistenceSupport
 import java.io.File
 import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.misc.tools.service.LockRepository
 import org.openmole.misc.tools.service.Logger
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.ServiceDescription
@@ -55,7 +56,8 @@ object ReplicaCatalog extends Logger {
   val GCUpdateInterval = new ConfigurationLocation("ReplicaCatalog", "GCUpdateInterval")
   val ObjectRepoLocation = new ConfigurationLocation("ReplicaCatalog", "ObjectRepoLocation")
   val NoAccessCleanTime = new ConfigurationLocation("ReplicaCatalog", "NoAccessCleanTime")
-
+  val lockRepository = new LockRepository[String]
+  
   Workspace += (GCUpdateInterval, "PT5M")
   Workspace += (ObjectRepoLocation, ".objectRepository.bin")
   Workspace += (NoAccessCleanTime, "P30D")
@@ -136,12 +138,17 @@ object ReplicaCatalog extends Logger {
   private def key(hash: String, storage: String, environmentKey: String): String = hash + "_" + storage + "_" + environmentKey
   private def key(r: Replica): String = key(r.hash, r.storageDescriptionString, r.authenticationKey)
   private def key(hash: String, storage: Storage): String = key(hash, storage.description.toString, storage.environment.authentication.key)
+  
   def withSemaphore[T](key: String)(op: ⇒ T) = {
-    //logger.fine("Loking on " + key)
-    objectServer.ext.setSemaphore(key, Int.MaxValue)
+    lockRepository.lock(key)
+    //objectServer.ext.setSemaphore(key, Int.MaxValue)
+    //logger.fine("Locked on " + key)
     try op
-    finally objectServer.ext.releaseSemaphore(key)
-
+    finally {
+      //logger.fine("Unlocked on " + key) 
+      lockRepository.unlock(key)
+      //objectServer.ext.releaseSemaphore(key)
+    }
   }
 
   //Synchronization should be achieved outiside the replica for database caching and isolation purposes
@@ -192,7 +199,9 @@ object ReplicaCatalog extends Logger {
   private def uploadAndInsert(src: File, srcPath: File, hash: String, authenticationKey: String, storage: Storage, token: AccessToken) = {
     val newFile = new GZURIFile(storage.persistentSpace(token).child(hash))
     if (newFile.exists(token)) newFile.remove(token)
+    logger.fine("Uploading " + newFile)
     signalUpload(URIFile.copy(src, newFile, token), srcPath, storage)
+    logger.fine("Uploaded " + newFile)
     val newReplica = new Replica(srcPath.getCanonicalPath, storage.description.description, hash, authenticationKey, newFile.location, System.currentTimeMillis)
     insert(newReplica)
     newReplica
