@@ -139,6 +139,7 @@ class ExecutionManager(manager: IMoleSceneManager,
 
   def start = synchronized {
     if (canBeRun) {
+      tabbedPane.selection.index = 1
       cancel
       initBarPlotter
       hookPanels.values.foreach(_._2.foreach(_.release))
