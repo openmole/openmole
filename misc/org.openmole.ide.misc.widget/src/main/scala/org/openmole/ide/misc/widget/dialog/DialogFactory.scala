@@ -31,7 +31,7 @@ object DialogFactory {
     editor.preferredSize = new Dimension(150, 150)
     editor.editor.text = content
     if (DialogDisplayer.getDefault.notify(new DialogDescriptor(editor.peer, title)).equals(NotifyDescriptor.OK_OPTION))
-      scala.xml.XML.loadString("<a>" + editor.editor.text + "</a>").text
+      editor.editor.text
     else content
   }
 }
