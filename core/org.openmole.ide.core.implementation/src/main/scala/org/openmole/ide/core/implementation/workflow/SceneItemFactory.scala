@@ -44,7 +44,7 @@ object SceneItemFactory {
                        cond: Option[String] = None,
                        li: List[IPrototypeDataProxyUI] = List.empty) = {
     if (scene.manager.registerConnector(new TransitionUI(s, t, transitionType, cond, li)))
-      scene.createConnectEdge(scene.manager.capsuleID(s), scene.manager.capsuleID(t.capsule))
+      scene.createConnectEdge(scene.manager.capsuleID(s), scene.manager.capsuleID(t.capsule), t.index)
   }
 
   def createDataChannel(scene: IMoleScene,

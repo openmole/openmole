@@ -174,8 +174,10 @@ abstract class MoleScene(n: String = "",
 
   def refresh = { validate; repaint }
 
-  def createConnectEdge(sourceNodeID: String, targetNodeID: String) =
+  def createConnectEdge(sourceNodeID: String, targetNodeID: String, slotIndex: Int = 1) = {
+    currentSlotIndex = slotIndex
     createEdge(sourceNodeID, targetNodeID, manager.getEdgeID)
+  }
 
   override def createEdge(sourceNodeID: String, targetNodeID: String, id: String) = {
     addEdge(id)

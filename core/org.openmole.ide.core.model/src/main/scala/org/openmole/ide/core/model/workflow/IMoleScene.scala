@@ -37,7 +37,7 @@ trait IMoleScene {
 
   def graphScene: GraphScene[String, String]
 
-  def createConnectEdge(sourceNodeID: String, targetNodeID: String)
+  def createConnectEdge(sourceNodeID: String, targetNodeID: String, slotIndex: Int = 1)
 
   def createEdge(sourceNodeID: String, targetNodeID: String, id: String)
 

@@ -9,6 +9,7 @@ import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.core.implementation.validation.DataflowProblem
 import org.openmole.ide.core.model.dataproxy._
+import scala.collection.mutable.Buffer
 import scala.collection.mutable.HashMap
 
 trait ICapsuleUI {
@@ -49,7 +50,7 @@ trait ICapsuleUI {
 
   def y: Double
 
-  def islots: Iterable[IInputSlotWidget]
+  def islots: Buffer[IInputSlotWidget]
 
   def setAsValid: Unit
 
