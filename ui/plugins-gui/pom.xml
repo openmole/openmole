@@ -147,7 +147,14 @@
             <artifactId>org.openmole.ide.plugin.environment.desktopgrid</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
+        </dependency>        
+        <dependency>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.openmole.ide.plugin.environment.ssh</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
         </dependency>
+
         <dependency>
             <groupId>org.openmole.ide</groupId>
             <artifactId>org.openmole.ide.plugin.method.sensitivity</artifactId>
