@@ -24,11 +24,11 @@ import scala.swing.TextField
 
 class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fillx,wrap 2", "", "") with IEnvironmentPanelUI {
 
-  val loginTextField = new TextField(pud.login)
-  val hostTextField = new TextField(pud.host)
+  val loginTextField = new TextField(pud.login, 15)
+  val hostTextField = new TextField(pud.host, 15)
   val nbSlotTextField = new TextField(pud.nbSlots.toString, 3)
-  val dirTextField = new TextField(pud.dir)
-  val runTimeMemoryTextField = new TextField(pud.runtimeMemory)
+  val dirTextField = new TextField(pud.dir, 15)
+  val runTimeMemoryTextField = new TextField(pud.runtimeMemory.toString, 5)
 
   contents += (new Label("Login"), "gap para")
   contents += loginTextField
