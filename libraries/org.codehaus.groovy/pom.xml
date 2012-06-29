@@ -22,6 +22,8 @@
     	   <artifactId>groovy-all</artifactId>
            <version>${lib.org.codehaus.groovy.version}</version>
 	   <scope>provided</scope>
+           <!-- Not yet compatible with the maven bundle plugin
+           <classifier>indy</classifier>-->
         </dependency>
 	<dependency>
 	   <groupId>org.fusesource.jansi</groupId>

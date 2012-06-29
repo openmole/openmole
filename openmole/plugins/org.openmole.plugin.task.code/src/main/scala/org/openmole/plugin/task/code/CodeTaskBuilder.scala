@@ -17,17 +17,24 @@
 
 package org.openmole.plugin.task.code
 
-import org.openmole.core.model.task.IPluginSet
+import java.io.File
 import org.openmole.plugin.task.external.ExternalTaskBuilder
 import scala.collection.mutable.ListBuffer
 
 abstract class CodeTaskBuilder extends ExternalTaskBuilder {
   private var _imports = new ListBuffer[String]
+  private var _libraries = new ListBuffer[File]
 
   def imports = _imports.toList
+  def libraries = _libraries.toList
 
   def addImport(s: String) = {
     _imports += s
+    this
+  }
+
+  def addLib(l: File) = {
+    _libraries += l
     this
   }
 

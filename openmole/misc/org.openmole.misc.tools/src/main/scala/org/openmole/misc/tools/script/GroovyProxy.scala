@@ -23,16 +23,22 @@ import groovy.lang.Binding
 import groovy.lang.GroovyShell
 import java.io.File
 import java.net.URLClassLoader
+import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.runtime.InvokerHelper
 import org.openmole.misc.exception.UserBadDataError
+import collection.JavaConversions._
 
 class GroovyProxy(code: String, jars: Iterable[File] = Iterable.empty) {
 
   @transient
   private lazy val compiledScript = {
-    val classLoader = new URLClassLoader(jars.map { jar ⇒ jar.getAbsoluteFile.toURI.toURL }.toArray, classOf[GroovyShell].getClassLoader)
-
-    val groovyShell = new GroovyShell(classLoader)
+    //val classLoader = new URLClassLoader(jars.map { jar ⇒ jar.getAbsoluteFile.toURI.toURL }.toArray, classOf[GroovyShell].getClassLoader)
+    val config = new CompilerConfiguration
+    /* Add optimisations when indy version of groovy will be used
+    config.getOptimizationOptions.put("indy", true)
+    config.getOptimizationOptions.put("int", false) */
+    config.setClasspathList(jars.map { _.getAbsolutePath }.toList)
+    val groovyShell = new GroovyShell(config)
     try {
       groovyShell.parse("package script\n" + code)
     } catch {

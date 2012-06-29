@@ -57,7 +57,7 @@ object ReplicaCatalog extends Logger {
   val ObjectRepoLocation = new ConfigurationLocation("ReplicaCatalog", "ObjectRepoLocation")
   val NoAccessCleanTime = new ConfigurationLocation("ReplicaCatalog", "NoAccessCleanTime")
   val lockRepository = new LockRepository[String]
-  
+
   Workspace += (GCUpdateInterval, "PT5M")
   Workspace += (ObjectRepoLocation, ".objectRepository.bin")
   Workspace += (NoAccessCleanTime, "P30D")
@@ -138,7 +138,7 @@ object ReplicaCatalog extends Logger {
   private def key(hash: String, storage: String, environmentKey: String): String = hash + "_" + storage + "_" + environmentKey
   private def key(r: Replica): String = key(r.hash, r.storageDescriptionString, r.authenticationKey)
   private def key(hash: String, storage: Storage): String = key(hash, storage.description.toString, storage.environment.authentication.key)
-  
+
   def withSemaphore[T](key: String)(op: ⇒ T) = {
     lockRepository.lock(key)
     //objectServer.ext.setSemaphore(key, Int.MaxValue)

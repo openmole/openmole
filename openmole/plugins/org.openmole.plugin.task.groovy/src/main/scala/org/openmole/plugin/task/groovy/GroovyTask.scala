@@ -33,8 +33,7 @@ object GroovyTask {
 
   def apply(
     name: String,
-    code: String,
-    libs: Iterable[File] = List.empty)(implicit plugins: IPluginSet) =
+    code: String)(implicit plugins: IPluginSet) =
     new CodeTaskBuilder { builder ⇒
 
       addImport("static org.openmole.plugin.task.groovy.GroovyTask.newRNG")
@@ -42,7 +41,7 @@ object GroovyTask {
       addImport("static org.openmole.plugin.task.groovy.GroovyTask.newDir")
 
       def toTask =
-        new GroovyTask(name, code, builder.imports, libs) {
+        new GroovyTask(name, code, builder.imports, builder.libraries) {
           val inputs = builder.inputs
           val outputs = builder.outputs
           val parameters = builder.parameters
