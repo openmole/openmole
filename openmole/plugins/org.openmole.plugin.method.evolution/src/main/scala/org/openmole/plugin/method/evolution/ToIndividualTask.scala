@@ -63,7 +63,7 @@ sealed abstract class ToIndividualTask[T <: GAGenome](
       new Individual[T, Fitness] {
         val genome = context.valueOrException(task.genome)
         val fitness = new Fitness {
-          val values = objectives.reverse.map {
+          val values = objectives.map {
             case (o, v) ⇒ math.abs(context.valueOrException(o) - v)
           }.toIndexedSeq
         }
