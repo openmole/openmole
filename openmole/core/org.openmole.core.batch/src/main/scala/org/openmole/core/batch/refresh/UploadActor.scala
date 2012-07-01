@@ -60,6 +60,8 @@ import scala.collection.mutable.HashSet
 import org.openmole.misc.hashservice.HashService._
 import org.openmole.core.model.execution.ExecutionState._
 
+import actors.Futures._
+
 object UploadActor extends Logger
 
 import UploadActor._
@@ -175,7 +177,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     communicationStorage: Storage,
     communicationDir: IURIFile) = {
 
-    val environmentPluginPath = environment.plugins.map { toReplicatedFile(job, _, communicationStorage, token) }.map { new FileMessage(_) }
+    val environmentPluginPath = environment.plugins.view.map { p ⇒ toReplicatedFile(job, p, communicationStorage, token) }.map { f ⇒ new FileMessage(f) }
     val runtimeFileMessage = new FileMessage(toReplicatedFile(job, environment.runtime, communicationStorage, token))
     val jvmLinuxI386FileMessage = new FileMessage(toReplicatedFile(job, environment.jvmLinuxI386, communicationStorage, token))
     val jvmLinuxX64FileMessage = new FileMessage(toReplicatedFile(job, environment.jvmLinuxX64, communicationStorage, token))
@@ -187,10 +189,11 @@ class UploadActor(jobManager: ActorRef) extends Actor {
 
     new Runtime(
       runtimeFileMessage,
-      environmentPluginPath,
+      environmentPluginPath.force,
       authReplication,
       jvmLinuxI386FileMessage,
-      jvmLinuxX64FileMessage)
+      jvmLinuxX64FileMessage
+    )
   }
 
   def createExecutionMessage(
@@ -206,10 +209,14 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     signalUpload(URIFile.copy(jobFile, jobForRuntimeFile, token), jobFile, communicationStorage)
     val jobHash = HashService.computeHash(jobFile).toString
 
-    val pluginReplicas = serializationPlugin.map { toReplicatedFile(job, _, communicationStorage, token) }.toList
-    val files = serializationFile.map { toReplicatedFile(job, _, communicationStorage, token) }.toList
+    val pluginReplicas = serializationPlugin.view.map { p ⇒ { toReplicatedFile(job, p, communicationStorage, token) } }
+    val files = serializationFile.view.map { f ⇒ { toReplicatedFile(job, f, communicationStorage, token) } }
 
-    new ExecutionMessage(pluginReplicas, files, new FileMessage(jobForRuntimeFile.URI.getPath, jobHash), communicationDir.URI.getPath)
+    new ExecutionMessage(
+      pluginReplicas.force,
+      files.force,
+      new FileMessage(jobForRuntimeFile.URI.getPath, jobHash),
+      communicationDir.URI.getPath)
   }
 
 }

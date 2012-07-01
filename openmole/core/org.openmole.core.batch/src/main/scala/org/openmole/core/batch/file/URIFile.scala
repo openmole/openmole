@@ -72,7 +72,7 @@ object URIFile extends Logger {
   Workspace += (CleanerWorkers, "20")
 
   val system = ActorSystem("URIFile", ConfigFactory.parseString(
-    """
+      """
 akka {
   daemonic="on"
   actor {
@@ -106,26 +106,26 @@ akka {
 
   def copy(src: IURIFile, dest: File): Unit = withToken(src.storageDescription, copy(src, _, dest))
 
-  def copy(src: IURIFile, srcToken: AccessToken, dest: File): Unit = {
+  def copy(src: IURIFile, srcToken: AccessToken, dest: File): Unit = srcToken.synchronized {
     val os = new FileOutputStream(dest)
     try {
       val is = src.openInputStream(srcToken)
       try {
         withFailureControl(src.storageDescription,
-          is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)))
+                           is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)))
       } finally is.close
     } finally os.close
   }
 
   def copy(src: File, dest: IURIFile): Unit = withToken(dest.storageDescription, copy(src, dest, _))
 
-  def copy(src: File, dest: IURIFile, token: AccessToken): Unit = {
+  def copy(src: File, dest: IURIFile, token: AccessToken): Unit = token.synchronized {
     val is = new FileInputStream(src)
     try {
       val os = dest.openOutputStream(token)
       try withFailureControl(dest.storageDescription,
-        is.copy(os, Workspace.preferenceAsInt(BufferSize),
-          Workspace.preferenceAsDurationInMs(CopyTimeout)))
+                             is.copy(os, Workspace.preferenceAsInt(BufferSize),
+                                     Workspace.preferenceAsDurationInMs(CopyTimeout)))
       finally os.close
     } finally is.close
   }
@@ -216,23 +216,25 @@ class URIFile(val location: String) extends IURIFile with Id {
   /*--------------------- mkdir ---------------------------*/
   override def mkdir(name: String): IURIFile = withToken(mkdir(name, _))
 
-  override def mkdir(name: String, token: AccessToken): IURIFile = withFailureControl {
-    val dir = fetchEntryAsDirectory(token)
-    try trycatch {
-      val cname = if (name.endsWith("/")) name else name + '/'
+  override def mkdir(name: String, token: AccessToken): IURIFile = token.synchronized {
+    withFailureControl {
+      val dir = fetchEntryAsDirectory(token)
+      try trycatch {
+        val cname = if (name.endsWith("/")) name else name + '/'
 
-      val dest = URIFile.child(SAGAURL, cname)
-      val task = dir.makeDir(TaskMode.ASYNC, dest)
+        val dest = URIFile.child(SAGAURL, cname)
+        val task = dir.makeDir(TaskMode.ASYNC, dest)
 
-      trycatch(task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
+        trycatch(task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
 
-      new URIFile(this, name)
-    } finally close(dir)
+        new URIFile(this, name)
+      } finally close(dir)
+    }
   }
 
   override def mkdirIfNotExist(name: String): IURIFile = withToken(mkdirIfNotExist(name, _))
 
-  override def mkdirIfNotExist(name: String, token: AccessToken): IURIFile = {
+  override def mkdirIfNotExist(name: String, token: AccessToken): IURIFile = token.synchronized {
     try mkdir(name, token)
     catch {
       case (e: IOException) ⇒
@@ -246,12 +248,12 @@ class URIFile(val location: String) extends IURIFile with Id {
   }
 
   /* ------------------- new file in dir -------------------------*/
-  override def newFileInDir(prefix: String, sufix: String): IURIFile = new URIFile(this, prefix + UUID.randomUUID.toString + sufix)
+  override def newFileInDir(prefix: String, sufix: String): IURIFile = new URIFile(this, prefix + "_" + UUID.randomUUID.toString + sufix)
 
   /*-------------------------- exist -------------------------*/
   override def exist(name: String): Boolean = withToken(exist(name, _))
 
-  override def exist(name: String, token: AccessToken): Boolean = {
+  override def exist(name: String, token: AccessToken): Boolean = token.synchronized {
     val dir = fetchEntryAsDirectory(token)
 
     try trycatch {
@@ -265,7 +267,7 @@ class URIFile(val location: String) extends IURIFile with Id {
 
   override def exists: Boolean = withToken(exists(_))
 
-  override def exists(token: AccessToken): Boolean = {
+  override def exists(token: AccessToken): Boolean = token.synchronized {
     try {
       val (parent, name) = parentLocationAndName(token)
       new URIFile(parent).exist(name, token)
@@ -280,34 +282,40 @@ class URIFile(val location: String) extends IURIFile with Id {
 
   override def openInputStream: InputStream = withToken(openInputStream(_))
 
-  override def openInputStream(token: AccessToken): InputStream = trycatch {
-    val task = FileFactory.createFileInputStream(TaskMode.ASYNC, JSAGASessionService.session(location), SAGAURL);
+  override def openInputStream(token: AccessToken): InputStream = token.synchronized {
+    trycatch {
+      val task = FileFactory.createFileInputStream(TaskMode.ASYNC, JSAGASessionService.session(location), SAGAURL);
 
-    trycatch(
-      withFailureControl({
-        val ret = task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
-        new JSAGAInputStream(ret)
-      }, { e: Throwable ⇒ !classOf[DoesNotExistException].isAssignableFrom(e.getCause.getClass) }), task)
+      trycatch(
+        withFailureControl({
+            val ret = task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
+            new JSAGAInputStream(ret)
+          }, { e: Throwable ⇒ !classOf[DoesNotExistException].isAssignableFrom(e.getCause.getClass) }), task)
+    }
   }
 
   override def openOutputStream: OutputStream = withToken(openOutputStream(_))
 
-  override def openOutputStream(token: AccessToken): OutputStream = trycatch {
-    val task = FileFactory.createFileOutputStream(TaskMode.ASYNC, JSAGASessionService.session(location), SAGAURL, false)
-    trycatch(
-      withFailureControl {
-        val ret = task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
-        new JSAGAOutputStream(ret)
-      }, task)
+  override def openOutputStream(token: AccessToken): OutputStream = token.synchronized {
+    trycatch {
+      val task = FileFactory.createFileOutputStream(TaskMode.ASYNC, JSAGASessionService.session(location), SAGAURL, false)
+      trycatch(
+        withFailureControl {
+          val ret = task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
+          new JSAGAOutputStream(ret)
+        }, task)
+    }
   }
 
   override def cache: File = withToken(cache(_))
 
-  override def cache(token: AccessToken): File = trycatch( /*synchronized */ {
-    val cacheTmp = Workspace.newFile("file", "cache")
-    this.copy(cacheTmp, token)
-    cacheTmp
-  })
+  override def cache(token: AccessToken): File = token.synchronized {
+    trycatch( /*synchronized */ {
+        val cacheTmp = Workspace.newFile("file", "cache")
+        this.copy(cacheTmp, token)
+        cacheTmp
+      })
+  }
 
   private def isLocal: Boolean = {
     val url = SAGAURL
@@ -317,21 +325,18 @@ class URIFile(val location: String) extends IURIFile with Id {
   override def copy(dest: File) = URIFile.copy(this, dest)
   override def copy(dest: File, srcToken: AccessToken) = URIFile.copy(this, srcToken, dest)
 
-  //override def copy(dest: IURIFile) = URIFile.copy(this, dest)
-  //override def copy(dest: IURIFile, srcToken: AccessToken) = URIFile.copy(this, srcToken, dest)
-
   /* -------------------- remove -------------------------------*/
+  private def removeTask(entry: NSEntry) =
+    if (URLRepresentsADirectory) entry.remove(TaskMode.ASYNC, Flags.RECURSIVE.getValue)
+    else entry.remove(TaskMode.ASYNC)
+
   override def remove = withToken(remove)
 
   override def remove(token: AccessToken) = trycatch {
     val entry = fetchEntry(token)
     try {
-      val task =
-        if (URLRepresentsADirectory) entry.remove(TaskMode.ASYNC, Flags.RECURSIVE.getValue)
-        else entry.remove(TaskMode.ASYNC)
-
-      trycatch(
-        task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
+      val task = removeTask(entry)
+      trycatch(task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
     } finally close(entry)
   }
 
@@ -363,12 +368,14 @@ class URIFile(val location: String) extends IURIFile with Id {
   }
   override def modificationTime: Long = withToken(modificationTime(_))
 
-  override def modificationTime(token: AccessToken): Long = trycatch {
-    val entry = fetchEntry(token)
-    try {
-      val task = entry.getMTime(TaskMode.ASYNC)
-      trycatch(task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
-    } finally close(entry)
+  override def modificationTime(token: AccessToken): Long = token.synchronized {
+    trycatch {
+      val entry = fetchEntry(token)
+      try {
+        val task = entry.getMTime(TaskMode.ASYNC)
+        trycatch(task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS), task)
+      } finally close(entry)
+    }
   }
 
   override def child(childVal: String): URIFile = new URIFile(this, childVal)

@@ -17,7 +17,6 @@
 
 package org.openmole.core.batch.replication
 
-import com.db4o.Db4o
 import com.db4o.Db4oEmbedded
 import com.db4o.EmbeddedObjectContainer
 import com.db4o.ObjectContainer
@@ -141,6 +140,7 @@ object ReplicaCatalog extends Logger {
 
   def withSemaphore[T](key: String)(op: ⇒ T) = {
     lockRepository.lock(key)
+
     //objectServer.ext.setSemaphore(key, Int.MaxValue)
     //logger.fine("Locked on " + key)
     try op
@@ -197,8 +197,7 @@ object ReplicaCatalog extends Logger {
     } else replica
 
   private def uploadAndInsert(src: File, srcPath: File, hash: String, authenticationKey: String, storage: Storage, token: AccessToken) = {
-    val newFile = new GZURIFile(storage.persistentSpace(token).child(hash))
-    if (newFile.exists(token)) newFile.remove(token)
+    val newFile = new GZURIFile(storage.persistentSpace(token).newFileInDir(hash,".rep"))
     logger.fine("Uploading " + newFile)
     signalUpload(URIFile.copy(src, newFile, token), srcPath, storage)
     logger.fine("Uploaded " + newFile)

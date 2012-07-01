@@ -70,16 +70,20 @@ abstract class BatchJob(val jobServiceDescription: ServiceDescription) {
 
   def kill: Unit = withToken(jobServiceDescription, kill(_))
 
-  def kill(token: AccessToken) = synchronized {
-    state = KILLED
-    deleteJob
+  def kill(token: AccessToken) = token.synchronized {
+    synchronized {
+      state = KILLED
+      deleteJob
+    }
   }
 
   def updateState: ExecutionState = withToken(jobServiceDescription, updateState(_))
 
-  def updateState(token: AccessToken): ExecutionState = synchronized {
-    state = withFailureControl(jobServiceDescription, updatedState)
-    state
+  def updateState(token: AccessToken): ExecutionState = token.synchronized {
+    synchronized {
+      state = withFailureControl(jobServiceDescription, updatedState)
+      state
+    }
   }
 
   def state: ExecutionState = _state
