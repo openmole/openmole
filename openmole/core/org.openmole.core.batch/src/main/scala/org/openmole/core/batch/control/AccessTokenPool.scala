@@ -45,7 +45,7 @@ class AccessTokenPool extends IAccessTokenPool {
 
   override def waitAToken = {
     _load.incrementAndGet
-    val token = 
+    val token =
       try tokens.take
       catch {
         case e ⇒

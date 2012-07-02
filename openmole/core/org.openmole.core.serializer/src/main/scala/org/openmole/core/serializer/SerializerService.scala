@@ -100,8 +100,6 @@ object SerializerService {
 
       val fileInfo = new FilesInfo ++ serializationResult.files.map {
         file ⇒
-        //Logger.getLogger(classOf[Runtime].getName).info("Output file: " + file.getAbsolutePath)
-
         val name = UUID.randomUUID
 
         val toArchive =
