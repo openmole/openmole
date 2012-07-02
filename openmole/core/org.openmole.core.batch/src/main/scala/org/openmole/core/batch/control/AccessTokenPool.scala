@@ -20,7 +20,6 @@ package org.openmole.core.batch.control
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.logging.Logger
 import org.openmole.misc.exception.InternalProcessingError
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.SynchronizedSet
@@ -29,9 +28,7 @@ import java.util.concurrent.TimeUnit
 object AccessTokenPool {
   def apply(nbTokens: Int): AccessTokenPool = {
     val pool = new AccessTokenPool
-    for (i ← 0 until nbTokens) {
-      pool.add(new AccessToken)
-    }
+    for (i ← 0 until nbTokens) pool.add(new AccessToken)
     pool
   }
 }
@@ -48,13 +45,13 @@ class AccessTokenPool extends IAccessTokenPool {
 
   override def waitAToken = {
     _load.incrementAndGet
-    val token = try {
-      tokens.take
-    } catch {
-      case (e) ⇒
-        _load.decrementAndGet
-        throw e
-    }
+    val token = 
+      try tokens.take
+      catch {
+        case e ⇒
+          _load.decrementAndGet
+          throw e
+      }
 
     taken.add(token)
     token
