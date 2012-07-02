@@ -72,7 +72,7 @@ object URIFile extends Logger {
   Workspace += (CleanerWorkers, "20")
 
   val system = ActorSystem("URIFile", ConfigFactory.parseString(
-      """
+    """
 akka {
   daemonic="on"
   actor {
@@ -112,7 +112,7 @@ akka {
       val is = src.openInputStream(srcToken)
       try {
         withFailureControl(src.storageDescription,
-                           is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)))
+          is.copy(os, Workspace.preferenceAsInt(BufferSize), Workspace.preferenceAsDurationInMs(CopyTimeout)))
       } finally is.close
     } finally os.close
   }
@@ -124,8 +124,8 @@ akka {
     try {
       val os = dest.openOutputStream(token)
       try withFailureControl(dest.storageDescription,
-                             is.copy(os, Workspace.preferenceAsInt(BufferSize),
-                                     Workspace.preferenceAsDurationInMs(CopyTimeout)))
+        is.copy(os, Workspace.preferenceAsInt(BufferSize),
+          Workspace.preferenceAsDurationInMs(CopyTimeout)))
       finally os.close
     } finally is.close
   }
@@ -288,9 +288,9 @@ class URIFile(val location: String) extends IURIFile with Id {
 
       trycatch(
         withFailureControl({
-            val ret = task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
-            new JSAGAInputStream(ret)
-          }, { e: Throwable ⇒ !classOf[DoesNotExistException].isAssignableFrom(e.getCause.getClass) }), task)
+          val ret = task.get(Workspace.preferenceAsDurationInMs(Timeout), TimeUnit.MILLISECONDS)
+          new JSAGAInputStream(ret)
+        }, { e: Throwable ⇒ !classOf[DoesNotExistException].isAssignableFrom(e.getCause.getClass) }), task)
     }
   }
 
@@ -311,10 +311,10 @@ class URIFile(val location: String) extends IURIFile with Id {
 
   override def cache(token: AccessToken): File = token.synchronized {
     trycatch( /*synchronized */ {
-        val cacheTmp = Workspace.newFile("file", "cache")
-        this.copy(cacheTmp, token)
-        cacheTmp
-      })
+      val cacheTmp = Workspace.newFile("file", "cache")
+      this.copy(cacheTmp, token)
+      cacheTmp
+    })
   }
 
   private def isLocal: Boolean = {
