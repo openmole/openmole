@@ -192,8 +192,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
       environmentPluginPath.force,
       authReplication,
       jvmLinuxI386FileMessage,
-      jvmLinuxX64FileMessage
-    )
+      jvmLinuxX64FileMessage)
   }
 
   def createExecutionMessage(
