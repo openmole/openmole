@@ -77,7 +77,7 @@ class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) 
 
                 val fitness = orMin(
                   StorageControl.qualityControl(cur.description) match {
-                    case Some(q) ⇒ math.pow(q.successRate, 3)
+                    case Some(q) ⇒ math.pow(q.successRate, 2)
                     case None ⇒ 1.
                   }) * (if (totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) else 1)
                 Some((cur, token, fitness))

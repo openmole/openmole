@@ -310,9 +310,20 @@ class URIFile(val location: String) extends IURIFile with Id {
   override def cache: File = withToken(cache(_))
 
   override def cache(token: AccessToken): File = token.synchronized {
+<<<<<<< HEAD
     trycatch( /*synchronized */ {
       val cacheTmp = Workspace.newFile("file", "cache")
       this.copy(cacheTmp, token)
+=======
+    trycatch(synchronized {
+      val cacheTmp = Workspace.newFile("file", "cache")
+      try this.copy(cacheTmp, token)
+      catch {
+        case e ⇒
+          cacheTmp.delete
+          throw e
+      }
+>>>>>>> 8c39a558ce02cae0f08d40c10ea6b8dd66cda2ce
       cacheTmp
     })
   }

@@ -67,20 +67,24 @@ object SerializerService {
       new TreeMap[File, File] ++ fi.map {
         case (name, (file, isDirectory)) ⇒
           val f = new File(extractDir, name)
+          val dest = Workspace.newFile("extracted", ".bin")
+          f.move(dest)
+          
           file ->
-            (if (isDirectory) {
-              val extractedDir = Workspace.newDir("extractionDir")
-              f.extractDirArchiveWithRelativePath(extractedDir)
-              f.delete
-              extractedDir
-            } else f)
+          (if (isDirectory) {
+            val extractedDir = Workspace.newDir("extractionDir")
+            dest.extractDirArchiveWithRelativePath(extractedDir)
+            dest.delete
+              
+            extractedDir
+          } else dest)
       }
-
-    //println("Replacement: " + fileReplacement)
 
     val contentFile = new File(extractDir, content)
     val obj = deserializeReplaceFiles[T](contentFile, fileReplacement)
     contentFile.delete
+    extractDir.delete
+
     obj
   }
 
@@ -96,24 +100,22 @@ object SerializerService {
 
       val fileInfo = new FilesInfo ++ serializationResult.files.map {
         file ⇒
-          //Logger.getLogger(classOf[Runtime].getName).info("Output file: " + file.getAbsolutePath)
+        val name = UUID.randomUUID
 
-          val name = UUID.randomUUID
+        val toArchive =
+          if (file.isDirectory) {
+            val toArchive = Workspace.newFile
+            val outputStream = new TarOutputStream(new FileOutputStream(toArchive))
 
-          val toArchive =
-            if (file.isDirectory) {
-              val toArchive = Workspace.newFile
-              val outputStream = new TarOutputStream(new FileOutputStream(toArchive))
+            try outputStream.createDirArchiveWithRelativePath(file)
+            finally outputStream.close
 
-              try outputStream.createDirArchiveWithRelativePath(file)
-              finally outputStream.close
+            toArchive
+          } else file
 
-              toArchive
-            } else file
+        tos.addFile(toArchive, name.toString)
 
-          tos.addFile(toArchive, name.toString)
-
-          (name.toString, (file, file.isDirectory))
+        (name.toString, (file, file.isDirectory))
       }
       val filesInfoSerial = Workspace.newFile
       serialize(fileInfo, filesInfoSerial)

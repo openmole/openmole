@@ -182,9 +182,6 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     val jvmLinuxI386FileMessage = new FileMessage(toReplicatedFile(job, environment.jvmLinuxI386, communicationStorage, token))
     val jvmLinuxX64FileMessage = new FileMessage(toReplicatedFile(job, environment.jvmLinuxX64, communicationStorage, token))
 
-    val authenticationURIFile = new GZURIFile(communicationDir.newFileInDir("authentication", ".xml"))
-    val authenticationFile = Workspace.newFile("environmentAuthentication", ".xml")
-
     val authReplication = new FileMessage(toReplicatedFile(job, environment.serializedAuthentication, communicationStorage, token))
 
     new Runtime(

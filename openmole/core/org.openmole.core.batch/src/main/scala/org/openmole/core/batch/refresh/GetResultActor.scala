@@ -145,10 +145,10 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
     import communicationStorage.path
     if (resultPath == null) throw new InternalProcessingError("Context results path is null")
     val contextResutsFileCache = signalDownload(path.cacheUnziped(resultPath.path, token), path.toURI(resultPath.path), communicationStorage)
-    if (HashService.computeHash(contextResutsFileCache) != resultPath.hash) throw new InternalProcessingError("Results have been corrupted durring the transfer.")
-
-    try SerializerService.deserializeAndExtractFiles(contextResutsFileCache)
-    finally contextResutsFileCache.delete
+    try {
+      if (HashService.computeHash(contextResutsFileCache) != resultPath.hash) throw new InternalProcessingError("Results have been corrupted durring the transfer.")
+      SerializerService.deserializeAndExtractFiles(contextResutsFileCache)
+    } finally contextResutsFileCache.delete
   }
 
 }
