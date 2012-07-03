@@ -30,9 +30,9 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.implementation.tools.VariableExpansion._
 import org.openmole.misc.exception.UserBadDataError
 
-class CopyFileHook(moleExecution: IMoleExecution, capsule: ICapsule, filePrototype: IPrototype[File], destination: String, remove: Boolean) extends CapsuleExecutionHook(moleExecution, capsule) {
+class CopyFileHook(moleExecution: IMoleExecution, capsule: ICapsule, filePrototype: IPrototype[File], destination: String, remove: Boolean, compress: Boolean) extends CapsuleExecutionHook(moleExecution, capsule) {
 
-  def this(moleExecution: IMoleExecution, capsule: ICapsule, filePrototype: IPrototype[File], destination: String) = this(moleExecution, capsule, filePrototype, destination, false)
+  def this(moleExecution: IMoleExecution, capsule: ICapsule, filePrototype: IPrototype[File], destination: String) = this(moleExecution, capsule, filePrototype, destination, false, false)
 
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
@@ -42,7 +42,8 @@ class CopyFileHook(moleExecution: IMoleExecution, capsule: ICapsule, filePrototy
         val to = new File(expandData(context, destination))
 
         to.getParentFile.mkdirs
-        from.copy(to)
+        if (compress) from.copyCompressFile(to)
+        else from.copy(to)
 
         if (remove) from.recursiveDelete
       case None ⇒ throw new UserBadDataError("No variable " + filePrototype + " found.")
