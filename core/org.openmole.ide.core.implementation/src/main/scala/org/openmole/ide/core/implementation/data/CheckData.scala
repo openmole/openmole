@@ -37,7 +37,6 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
 
-
 object CheckData extends Logger {
 
   def checkMole(scene: IMoleScene) = {
