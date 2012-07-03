@@ -233,7 +233,12 @@ object FileUtil {
         try FileUtil.copy(from, to) finally to.close
       } finally from.close
     }
-
+    
+    def copyCompress(toF: File): Unit = {
+      if(toF.isDirectory) toF.archiveCompressDirWithRelativePathNoVariableContent(file)
+      else copyCompressFile(toF)
+    }
+    
     def copyCompressFile(toF: File): Unit = {
       val to = new GZIPOutputStream(new FileOutputStream(toF))
       try file.copy(to) finally to.close
