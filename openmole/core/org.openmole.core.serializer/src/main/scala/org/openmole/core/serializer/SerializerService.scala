@@ -69,15 +69,15 @@ object SerializerService {
           val f = new File(extractDir, name)
           val dest = Workspace.newFile("extracted", ".bin")
           f.move(dest)
-          
+
           file ->
-          (if (isDirectory) {
-            val extractedDir = Workspace.newDir("extractionDir")
-            dest.extractDirArchiveWithRelativePath(extractedDir)
-            dest.delete
-              
-            extractedDir
-          } else dest)
+            (if (isDirectory) {
+              val extractedDir = Workspace.newDir("extractionDir")
+              dest.extractDirArchiveWithRelativePath(extractedDir)
+              dest.delete
+
+              extractedDir
+            } else dest)
       }
 
     val contentFile = new File(extractDir, content)
@@ -100,22 +100,22 @@ object SerializerService {
 
       val fileInfo = new FilesInfo ++ serializationResult.files.map {
         file ⇒
-        val name = UUID.randomUUID
+          val name = UUID.randomUUID
 
-        val toArchive =
-          if (file.isDirectory) {
-            val toArchive = Workspace.newFile
-            val outputStream = new TarOutputStream(new FileOutputStream(toArchive))
+          val toArchive =
+            if (file.isDirectory) {
+              val toArchive = Workspace.newFile
+              val outputStream = new TarOutputStream(new FileOutputStream(toArchive))
 
-            try outputStream.createDirArchiveWithRelativePath(file)
-            finally outputStream.close
+              try outputStream.createDirArchiveWithRelativePath(file)
+              finally outputStream.close
 
-            toArchive
-          } else file
+              toArchive
+            } else file
 
-        tos.addFile(toArchive, name.toString)
+          tos.addFile(toArchive, name.toString)
 
-        (name.toString, (file, file.isDirectory))
+          (name.toString, (file, file.isDirectory))
       }
       val filesInfoSerial = Workspace.newFile
       serialize(fileInfo, filesInfoSerial)
