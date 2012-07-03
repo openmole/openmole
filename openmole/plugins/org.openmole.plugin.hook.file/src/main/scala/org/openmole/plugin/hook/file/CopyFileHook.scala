@@ -42,7 +42,7 @@ class CopyFileHook(moleExecution: IMoleExecution, capsule: ICapsule, filePrototy
         val to = new File(expandData(context, destination))
 
         to.getParentFile.mkdirs
-        if (compress) from.copyCompressFile(to)
+        if (compress) from.copyCompress(to)
         else from.copy(to)
 
         if (remove) from.recursiveDelete

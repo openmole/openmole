@@ -313,6 +313,7 @@ object FileUtil {
       finally os.close
     }
 
+    //FIXME method name is ambiguous rename
     def archiveCompressDirWithRelativePathNoVariableContent(dest: File) = {
       val os = new TarOutputStream(gzipedBufferedOutputStream)
       try os.createDirArchiveWithRelativePathNoVariableContent(dest)
