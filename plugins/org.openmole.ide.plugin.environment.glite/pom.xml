@@ -34,7 +34,7 @@
         </dependency>
        <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>org.openmole.ide.plugin.misc</artifactId>
+            <artifactId>org.openmole.ide.plugin.environment.tools</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

@@ -7,9 +7,9 @@
         <version>0.6-SNAPSHOT</version>
     </parent>
 
-    <artifactId>org.openmole.ide.plugin.misc</artifactId>
+    <artifactId>org.openmole.ide.plugin.environment.tools</artifactId>
     <name>${project.artifactId} ${project.version}</name>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
 
     <dependencies>
         <dependency>
@@ -28,4 +28,7 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
+    <properties>
+        <bundle.activator/>
+    </properties>
 </project>

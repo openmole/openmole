@@ -13,7 +13,7 @@ class PBSEnvironmentDataUI(val name: String = "",
                            val login: String = "",
                            val host: String = "",
                            val dir: String = "/tmp/",
-                           val queue: String,
+                           val queue: String = "",
                            val requirements: String = "",
                            val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory) extends IEnvironmentDataUI {
 

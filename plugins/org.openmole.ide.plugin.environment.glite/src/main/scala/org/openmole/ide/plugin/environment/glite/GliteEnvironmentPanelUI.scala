@@ -19,7 +19,7 @@ package org.openmole.ide.plugin.environment.glite
 
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.plugin.misc.RequirementPanelUI
+import org.openmole.ide.plugin.environment.tools._
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget._
 import scala.swing.CheckBox
@@ -44,6 +44,12 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
       i18n.getString("bdiiEx"))
   }
 
+  val runtimeMemoryLabel = new Label("RuntimeMemory")
+  val runtimeMemoryTextField = new TextField(4) {
+    tooltip = Help.tooltip(i18n.getString("runtimeMemory"),
+      i18n.getString("runtimeMemoryEx"))
+  }
+
   val proxyCheckBox = new CheckBox("MyProxy") { tooltip = Help.tooltip(i18n.getString("myProxy")) }
   val proxyURLTextField = new TextField(18) {
     tooltip = Help.tooltip(i18n.getString("proxyURL"),
@@ -51,11 +57,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
   }
   val proxyURLLabel = new Label("url")
 
-  val requirements = new RequirementPanelUI(pud.architecture64,
-    pud.runtimeMemory,
-    pud.workerNodeMemory,
-    pud.maxCPUTime,
-    pud.otherRequirements)
+  val requirementsPanelUI = new RequirementPanelUI(pud.requirements)
 
   val tabbedPane = new TabbedPane
   tabbedPane.pages += new TabbedPane.Page("Requirements",
@@ -71,13 +73,14 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
       contents += proxyURLTextField
     })
 
-  tabbedPane.pages += requirements
+  tabbedPane.pages += requirementsPanelUI
 
   voTextField.text = pud.vo
   vomsTextField.text = pud.voms
   bdiiTextField.text = pud.bdii
   proxyURLTextField.text = pud.proxyURL
   proxyCheckBox.selected = pud.proxy
+  runtimeMemoryTextField.text = pud.runtimeMemory
   showProxy(pud.proxy)
 
   contents += tabbedPane
@@ -95,9 +98,10 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
       bdiiTextField.text,
       proxyCheckBox.selected,
       proxyURLTextField.text,
-      requirements.architectureCheckBox.selected,
-      requirements.runtimeMemoryTextField.text,
-      requirements.workerNodeMemoryTextField.text,
-      requirements.maxCPUTimeTextField.text,
-      requirements.otherRequirementTextField.text)
+      runtimeMemoryTextField.text,
+      new RequirementDataUI(
+        requirementsPanelUI.architectureCheckBox.selected,
+        requirementsPanelUI.workerNodeMemoryTextField.text,
+        requirementsPanelUI.maxCPUTimeTextField.text,
+        requirementsPanelUI.otherRequirementTextField.text))
 }

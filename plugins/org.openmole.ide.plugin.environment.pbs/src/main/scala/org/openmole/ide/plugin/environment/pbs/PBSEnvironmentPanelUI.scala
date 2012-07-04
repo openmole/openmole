@@ -22,11 +22,12 @@ import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
 import scala.swing.TextField
 
-class SSHEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fillx,wrap 2", "", "") with IEnvironmentPanelUI {
+class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fillx,wrap 2", "", "") with IEnvironmentPanelUI {
 
   val loginTextField = new TextField(pud.login, 15)
   val hostTextField = new TextField(pud.host, 15)
   val dirTextField = new TextField(pud.dir, 15)
+  val queueTextField = new TextField(pud.queue, 15)
   val runTimeMemoryTextField = new TextField(pud.runtimeMemory.toString, 5)
 
   contents += (new Label("Login"), "gap para")
@@ -41,10 +42,17 @@ class SSHEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
   contents += (new Label("Runtime memory"), "gap para")
   contents += runTimeMemoryTextField
 
+  val requirements = new RequirementPanelUI(pud.architecture64,
+    pud.runtimeMemory,
+    pud.workerNodeMemory,
+    pud.maxCPUTime,
+    pud.otherRequirements)
+
   override def saveContent(name: String) = new PBSEnvironmentDataUI(name,
     loginTextField.text,
     hostTextField.text,
-    nbSlotTextField.text.toInt,
     dirTextField.text,
+    queueTextField.text,
+
     runTimeMemoryTextField.text.toInt)
 }

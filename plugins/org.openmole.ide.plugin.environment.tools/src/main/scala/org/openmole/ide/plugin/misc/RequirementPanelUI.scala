@@ -15,23 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.misc
+package org.openmole.ide.plugin.environment.tools
 
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.ide.misc.widget._
-import org.openmole.misc.workspace.Workspace
 import scala.swing.CheckBox
 import scala.swing.Label
 import scala.swing.TabbedPane
 import scala.swing.TextField
 
-class RequirementPanelUI(val architecture64: Boolean = false,
-                         val runtimeMemory: String = Workspace.preference(BatchEnvironment.MemorySizeForRuntime),
-                         val workerNodeMemory: String = "",
-                         val maxCPUTime: String = "",
-                         val otherRequirements: String = "") extends TabbedPane.Page("Requirements", new Label) {
+class RequirementPanelUI(val requirementDataUI: RequirementDataUI = new RequirementDataUI)
+    extends TabbedPane.Page("Requirements", new Label) {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
@@ -67,9 +62,13 @@ class RequirementPanelUI(val architecture64: Boolean = false,
     contents += otherRequirementTextField
   }
 
-  architectureCheckBox.selected = architecture64
-  runtimeMemoryTextField.text = runtimeMemory
-  workerNodeMemoryTextField.text = workerNodeMemory
-  maxCPUTimeTextField.text = maxCPUTime
-  otherRequirementTextField.text = otherRequirements
+  architectureCheckBox.selected = requirementDataUI.architecture64
+  workerNodeMemoryTextField.text = requirementDataUI.workerNodeMemory
+  maxCPUTimeTextField.text = requirementDataUI.maxCPUTime
+  otherRequirementTextField.text = requirementDataUI.otherRequirements
+
+  def save = new RequirementDataUI(architectureCheckBox.selected,
+    workerNodeMemoryTextField.text,
+    maxCPUTimeTextField.text,
+    otherRequirementTextField.text)
 }
