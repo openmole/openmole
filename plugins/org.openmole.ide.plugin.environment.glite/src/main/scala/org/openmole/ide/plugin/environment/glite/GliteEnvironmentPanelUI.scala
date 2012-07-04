@@ -45,7 +45,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
       i18n.getString("bdiiEx"))
   }
 
-  val runtimeMemoryTextField = new TextField(pud.runtimeMemory,4) {
+  val runtimeMemoryTextField = new TextField(pud.runtimeMemory, 4) {
     tooltip = Help.tooltip(i18n.getString("runtimeMemory"),
       i18n.getString("runtimeMemoryEx"))
   }
@@ -56,7 +56,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
     case ButtonClicked(`proxyCheckBox`) ⇒ showProxy(proxyCheckBox.selected)
   }
 
-  val proxyURLTextField = new TextField(pud.proxyURL,18) {
+  val proxyURLTextField = new TextField(pud.proxyURL, 18) {
     tooltip = Help.tooltip(i18n.getString("proxyURL"),
       i18n.getString("proxyURLEx"))
   }
