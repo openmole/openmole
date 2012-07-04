@@ -23,7 +23,6 @@ class GliteEnvironmentDataUI(
     val bdii: String = "",
     val proxy: Boolean = false,
     val proxyURL: String = "",
-    val requirement: Boolean = false,
     val architecture64: Boolean = false,
     val runtimeMemory: String = Workspace.preference(BatchEnvironment.MemorySizeForRuntime),
     val workerNodeMemory: String = "",

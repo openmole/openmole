@@ -19,7 +19,7 @@ package org.openmole.ide.plugin.environment.glite
 
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.plugins.misc.RequirementPanelUI
+import org.openmole.ide.plugin.misc.RequirementPanelUI
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget._
 import scala.swing.CheckBox
@@ -33,33 +33,33 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
 
   val voTextField = new TextField(20) {
     tooltip = Help.tooltip(i18n.getString("vo"),
-                           i18n.getString("voEx"))
+      i18n.getString("voEx"))
   }
   val vomsTextField = new TextField(20) {
     tooltip = Help.tooltip(i18n.getString("voms"),
-                           i18n.getString("vomsEx"))
+      i18n.getString("vomsEx"))
   }
   val bdiiTextField = new TextField(20) {
     tooltip = Help.tooltip(i18n.getString("bdii"),
-                           i18n.getString("bdiiEx"))
+      i18n.getString("bdiiEx"))
   }
 
   val proxyCheckBox = new CheckBox("MyProxy") { tooltip = Help.tooltip(i18n.getString("myProxy")) }
   val proxyURLTextField = new TextField(18) {
     tooltip = Help.tooltip(i18n.getString("proxyURL"),
-                           i18n.getString("proxyURLEx"))
+      i18n.getString("proxyURLEx"))
   }
   val proxyURLLabel = new Label("url")
 
   val requirements = new RequirementPanelUI(pud.architecture64,
-                                            pud.runtimeMemory,
-                                            pud.workerNodeMemory,
-                                            pud.maxCPUTime,
-                                            pud.otherRequirements)
-  
+    pud.runtimeMemory,
+    pud.workerNodeMemory,
+    pud.maxCPUTime,
+    pud.otherRequirements)
+
   val tabbedPane = new TabbedPane
   tabbedPane.pages += new TabbedPane.Page("Requirements",
-                                          new PluginPanel("wrap 2") {
+    new PluginPanel("wrap 2") {
       contents += (new Label("VO"), "gap para")
       contents += voTextField
       contents += (new Label("VOMS"), "gap para")
@@ -72,7 +72,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
     })
 
   tabbedPane.pages += requirements
-  
+
   voTextField.text = pud.vo
   vomsTextField.text = pud.voms
   bdiiTextField.text = pud.bdii
@@ -81,7 +81,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
   showProxy(pud.proxy)
 
   contents += tabbedPane
-  
+
   private def showProxy(b: Boolean) = {
     List(proxyURLLabel, proxyURLLabel, proxyURLTextField).foreach {
       _.visible = b
@@ -90,14 +90,14 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
 
   override def saveContent(name: String) =
     new GliteEnvironmentDataUI(name,
-                               voTextField.text,
-                               vomsTextField.text,
-                               bdiiTextField.text,
-                               proxyCheckBox.selected,
-                               proxyURLTextField.text,
-                               requirements.architectureCheckBox.selected,
-                               requirements.runtimeMemoryTextField.text,
-                               requirements.workerNodeMemoryTextField.text,
-                               requirements.maxCPUTimeTextField.text,
-                               requirements.otherRequirementTextField.text)
+      voTextField.text,
+      vomsTextField.text,
+      bdiiTextField.text,
+      proxyCheckBox.selected,
+      proxyURLTextField.text,
+      requirements.architectureCheckBox.selected,
+      requirements.runtimeMemoryTextField.text,
+      requirements.workerNodeMemoryTextField.text,
+      requirements.maxCPUTimeTextField.text,
+      requirements.otherRequirementTextField.text)
 }

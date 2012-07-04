@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.environment.glite
+package org.openmole.ide.plugin.misc
 
 import java.util.Locale
 import java.util.ResourceBundle
@@ -27,11 +27,11 @@ import scala.swing.Label
 import scala.swing.TabbedPane
 import scala.swing.TextField
 
-class GliteEnvironmentPanelUI(val architecture64: Boolean = false,
-                              val runtimeMemory: String = Workspace.preference(BatchEnvironment.MemorySizeForRuntime),
-                              val workerNodeMemory: String = "",
-                              val maxCPUTime: String = "",
-                              val otherRequirements: String = "") extends TabbedPane.Page("Requirements", new Label) {
+class RequirementPanelUI(val architecture64: Boolean = false,
+                         val runtimeMemory: String = Workspace.preference(BatchEnvironment.MemorySizeForRuntime),
+                         val workerNodeMemory: String = "",
+                         val maxCPUTime: String = "",
+                         val otherRequirements: String = "") extends TabbedPane.Page("Requirements", new Label) {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
