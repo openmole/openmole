@@ -19,7 +19,9 @@ package org.openmole.ide.plugin.environment.pbs
 
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.plugin.environment.tools._
 import scala.swing.Label
+import scala.swing.TabbedPane
 import scala.swing.TextField
 
 class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fillx,wrap 2", "", "") with IEnvironmentPanelUI {
@@ -30,29 +32,37 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
   val queueTextField = new TextField(pud.queue, 15)
   val runTimeMemoryTextField = new TextField(pud.runtimeMemory.toString, 5)
 
-  contents += (new Label("Login"), "gap para")
-  contents += loginTextField
+  val requirementsPanelUI = new RequirementPanelUI(pud.requirements)
 
-  contents += (new Label("Host"), "gap para")
-  contents += hostTextField
+  val tabbedPane = new TabbedPane
+  tabbedPane.pages += new TabbedPane.Page("PBS settings",
+    new PluginPanel("wrap 2") {
+      contents += (new Label("Login"), "gap para")
+      contents += loginTextField
 
-  contents += (new Label("Directory"), "gap para")
-  contents += dirTextField
+      contents += (new Label("Host"), "gap para")
+      contents += hostTextField
 
-  contents += (new Label("Runtime memory"), "gap para")
-  contents += runTimeMemoryTextField
+      contents += (new Label("Directory"), "gap para")
+      contents += dirTextField
 
-  val requirements = new RequirementPanelUI(pud.architecture64,
-    pud.runtimeMemory,
-    pud.workerNodeMemory,
-    pud.maxCPUTime,
-    pud.otherRequirements)
+      contents += (new Label("Runtime memory"), "gap para")
+      contents += runTimeMemoryTextField
+    })
 
-  override def saveContent(name: String) = new PBSEnvironmentDataUI(name,
-    loginTextField.text,
-    hostTextField.text,
-    dirTextField.text,
-    queueTextField.text,
+  tabbedPane.pages += requirementsPanelUI
+  contents += tabbedPane
 
-    runTimeMemoryTextField.text.toInt)
+  override def saveContent(name: String) =
+    new PBSEnvironmentDataUI(name,
+      loginTextField.text,
+      hostTextField.text,
+      dirTextField.text,
+      queueTextField.text,
+      runTimeMemoryTextField.text.toInt,
+      new RequirementDataUI(
+        requirementsPanelUI.architectureCheckBox.selected,
+        requirementsPanelUI.workerNodeMemoryTextField.text,
+        requirementsPanelUI.maxCPUTimeTextField.text,
+        requirementsPanelUI.otherRequirementTextField.text))
 }

@@ -26,32 +26,37 @@ import scala.swing.CheckBox
 import scala.swing.Label
 import scala.swing.TabbedPane
 import scala.swing.TextField
+import scala.swing.event.ButtonClicked
 
 class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IEnvironmentPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
-  val voTextField = new TextField(20) {
+  val voTextField = new TextField(pud.vo, 20) {
     tooltip = Help.tooltip(i18n.getString("vo"),
       i18n.getString("voEx"))
   }
-  val vomsTextField = new TextField(20) {
+  val vomsTextField = new TextField(pud.voms, 20) {
     tooltip = Help.tooltip(i18n.getString("voms"),
       i18n.getString("vomsEx"))
   }
-  val bdiiTextField = new TextField(20) {
+  val bdiiTextField = new TextField(pud.bdii, 20) {
     tooltip = Help.tooltip(i18n.getString("bdii"),
       i18n.getString("bdiiEx"))
   }
 
-  val runtimeMemoryLabel = new Label("RuntimeMemory")
-  val runtimeMemoryTextField = new TextField(4) {
+  val runtimeMemoryTextField = new TextField(pud.runtimeMemory,4) {
     tooltip = Help.tooltip(i18n.getString("runtimeMemory"),
       i18n.getString("runtimeMemoryEx"))
   }
 
   val proxyCheckBox = new CheckBox("MyProxy") { tooltip = Help.tooltip(i18n.getString("myProxy")) }
-  val proxyURLTextField = new TextField(18) {
+  listenTo(`proxyCheckBox`)
+  reactions += {
+    case ButtonClicked(`proxyCheckBox`) ⇒ showProxy(proxyCheckBox.selected)
+  }
+
+  val proxyURLTextField = new TextField(pud.proxyURL,18) {
     tooltip = Help.tooltip(i18n.getString("proxyURL"),
       i18n.getString("proxyURLEx"))
   }
@@ -60,7 +65,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
   val requirementsPanelUI = new RequirementPanelUI(pud.requirements)
 
   val tabbedPane = new TabbedPane
-  tabbedPane.pages += new TabbedPane.Page("Requirements",
+  tabbedPane.pages += new TabbedPane.Page("Grid settings",
     new PluginPanel("wrap 2") {
       contents += (new Label("VO"), "gap para")
       contents += voTextField
@@ -68,6 +73,8 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
       contents += vomsTextField
       contents += (new Label("BDII"), "gap para")
       contents += bdiiTextField
+      contents += (new Label("Runtime memory"), "gap para")
+      contents += runtimeMemoryTextField
       contents += (proxyCheckBox, "wrap")
       contents += (proxyURLLabel, "gap para")
       contents += proxyURLTextField
@@ -75,12 +82,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
 
   tabbedPane.pages += requirementsPanelUI
 
-  voTextField.text = pud.vo
-  vomsTextField.text = pud.voms
-  bdiiTextField.text = pud.bdii
-  proxyURLTextField.text = pud.proxyURL
   proxyCheckBox.selected = pud.proxy
-  runtimeMemoryTextField.text = pud.runtimeMemory
   showProxy(pud.proxy)
 
   contents += tabbedPane

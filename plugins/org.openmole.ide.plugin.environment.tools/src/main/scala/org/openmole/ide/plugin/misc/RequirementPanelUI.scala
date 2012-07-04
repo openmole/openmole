@@ -32,11 +32,6 @@ class RequirementPanelUI(val requirementDataUI: RequirementDataUI = new Requirem
 
   val architectureCheckBox = new CheckBox("64 bits") { tooltip = Help.tooltip(i18n.getString("64bits")) }
 
-  val runtimeMemoryLabel = new Label("RuntimeMemory")
-  val runtimeMemoryTextField = new TextField(4) {
-    tooltip = Help.tooltip(i18n.getString("runtimeMemory"),
-      i18n.getString("runtimeMemoryEx"))
-  }
   val workerNodeMemoryLabel = new Label("Worker memory")
   val workerNodeMemoryTextField = new TextField(4) {
     tooltip = Help.tooltip(i18n.getString("workerNodeMemory"),
@@ -52,13 +47,11 @@ class RequirementPanelUI(val requirementDataUI: RequirementDataUI = new Requirem
 
   this.content = new PluginPanel("wrap 2") {
     contents += (architectureCheckBox, "wrap")
-    contents += (runtimeMemoryLabel, "gap para")
-    contents += runtimeMemoryTextField
     contents += (workerNodeMemoryLabel, "gap para")
     contents += workerNodeMemoryTextField
     contents += (maxCPUTimeLabel, "gap para")
     contents += maxCPUTimeTextField
-    contents += otherRequirementLabel
+    contents += (otherRequirementLabel, "gap para")
     contents += otherRequirementTextField
   }
 
@@ -67,7 +60,8 @@ class RequirementPanelUI(val requirementDataUI: RequirementDataUI = new Requirem
   maxCPUTimeTextField.text = requirementDataUI.maxCPUTime
   otherRequirementTextField.text = requirementDataUI.otherRequirements
 
-  def save = new RequirementDataUI(architectureCheckBox.selected,
+  def save = new RequirementDataUI(
+    architectureCheckBox.selected,
     workerNodeMemoryTextField.text,
     maxCPUTimeTextField.text,
     otherRequirementTextField.text)
