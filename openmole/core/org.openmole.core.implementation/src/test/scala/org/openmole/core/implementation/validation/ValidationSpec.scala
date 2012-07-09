@@ -49,7 +49,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val errors = Validation.typeErrors(new Mole(c1).capsules)
     errors.headOption match {
-      case Some(MissingInput(_, _, d)) ⇒ assert(d.prototype == p)
+      case Some(MissingInput(_, d)) ⇒ assert(d.prototype == p)
       case None ⇒ sys.error("Error should have been detected")
     }
   }
@@ -87,7 +87,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val errors = Validation.typeErrors(new Mole(c1).capsules)
     errors.headOption match {
-      case Some(WrongType(_, _, d, t)) ⇒
+      case Some(WrongType(_, d, t)) ⇒
         assert(d.prototype == pString)
         assert(t == pInt)
       case None ⇒ sys.error("Error should have been detected")
@@ -152,7 +152,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val errors = Validation.typeErrors(new Mole(c1).capsules)
 
     errors.headOption match {
-      case Some(MissingInput(_, _, d)) ⇒ assert(d.prototype == p)
+      case Some(MissingInput(_, d)) ⇒ assert(d.prototype == p)
       case None ⇒ sys.error("Error should have been detected")
     }
   }
@@ -174,7 +174,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val errors = Validation(new Mole(new Capsule(mt)))
     errors.headOption match {
-      case Some(MissingInput(_, _, d)) ⇒ assert(d.prototype == p)
+      case Some(MissingInput(_, d)) ⇒ assert(d.prototype == p)
       case None ⇒ sys.error("Error should have been detected")
     }
 
@@ -204,6 +204,23 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val errors = Validation(new Mole(mtC))
     errors.isEmpty should equal(true)
+  }
+
+  "Validation" should "detect a duplicated name error" in {
+    val pInt = new Prototype[Int]("t")
+    val pString = new Prototype[String]("t")
+
+    val t1 = EmptyTask("t1")
+    t1 addOutput pInt
+    t1 addOutput pString
+
+    val c1 = new Capsule(t1)
+
+    val errors = Validation.duplicatedName(new Mole(c1))
+    errors.headOption match {
+      case Some(DuplicatedName(_, _, _, Output)) ⇒
+      case _ ⇒ sys.error("Error should have been detected")
+    }
   }
 
 }

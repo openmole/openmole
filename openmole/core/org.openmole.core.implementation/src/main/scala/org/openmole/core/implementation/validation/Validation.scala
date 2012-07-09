@@ -18,6 +18,7 @@
 package org.openmole.core.implementation.validation
 
 import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.data.IParameter
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
@@ -75,7 +76,7 @@ object Validation {
             capsule.inputs.filterNot(_.mode is optional).flatMap {
               input ⇒
                 def checkPrototypeMatch(p: IPrototype[_]) =
-                  if (!input.prototype.isAssignableFrom(p)) Some(new WrongType(capsule, slot, input, p))
+                  if (!input.prototype.isAssignableFrom(p)) Some(new WrongType(slot, input, p))
                   else None
 
                 val name = input.prototype.name
@@ -84,7 +85,7 @@ object Validation {
                   case (None, Some(recieved), _, _) ⇒ checkPrototypeMatch(recieved)
                   case (None, None, Some(impl), _) ⇒ checkPrototypeMatch(impl)
                   case (None, None, None, Some(parameter)) ⇒ checkPrototypeMatch(parameter)
-                  case (None, None, None, None) ⇒ Some(new MissingInput(capsule, slot, input))
+                  case (None, None, None, None) ⇒ Some(new MissingInput(slot, input))
                 }
             }
         }
@@ -134,12 +135,24 @@ object Validation {
         }
     }.map { t ⇒ new DuplicatedTransition(t) }
 
+  def duplicatedName(mole: IMole) = {
+    def duplicated(data: IDataSet) =
+      data.data.groupBy(_.prototype.name).filter { case (_, d) ⇒ d.size > 1 }
+
+    mole.capsules.flatMap {
+      c ⇒
+        duplicated(c.inputs).map { case (name, data) ⇒ new DuplicatedName(c, name, data, Input) } ++
+          duplicated(c.outputs).map { case (name, data) ⇒ new DuplicatedName(c, name, data, Output) }
+    }
+  }
+
   def apply(mole: IMole) =
     allMoles(mole).flatMap {
       case (m, mt) ⇒
         if (mt) typeErrorsMoleTask(m, m.implicits.values.map { _.prototype }) else typeErrorsTopMole(m, m.implicits.values.map { _.prototype }) ++
           topologyErrors(m) ++
-          duplicatedTransitions(m)
+          duplicatedTransitions(m) ++
+          duplicatedName(m)
     }
 
 }

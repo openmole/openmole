@@ -28,7 +28,7 @@ object DataSet {
   def apply(prototypes: Traversable[IPrototype[_]]): DataSet = new DataSet(prototypes.map { new Data(_) }.toList)
 }
 
-class DataSet(data: List[IData[_]]) extends Set[IData[_]] with IDataSet {
+class DataSet(val data: List[IData[_]]) extends Set[IData[_]] with IDataSet {
 
   @transient private lazy val _data =
     TreeMap.empty[String, IData[_]] ++ data.map { d ⇒ (d.prototype.name, d) }

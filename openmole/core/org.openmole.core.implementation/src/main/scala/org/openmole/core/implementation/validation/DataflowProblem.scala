@@ -20,31 +20,39 @@ package org.openmole.core.implementation.validation
 import org.openmole.core.model.data.IData
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.task.ITask
 import org.openmole.core.model.transition.ISlot
 
 object DataflowProblem {
+
+  sealed trait SlotType
+  case object Input extends SlotType
+  case object Output extends SlotType
+
   case class WrongType(
-      val capsule: ICapsule,
       val slot: ISlot,
       val data: IData[_],
       val provided: IPrototype[_]) extends DataflowProblem {
 
-    override def toString = "Wrong type from capsule " + capsule + " to " + slot + ", data " + data.prototype + " is expected but " + provided + " is provided."
+    override def toString = "Wrong type from " + slot + ", data " + data.prototype + " is expected but " + provided + " is provided."
   }
 
   case class MissingInput(
-      val capsule: ICapsule,
       val slot: ISlot,
       val data: IData[_]) extends DataflowProblem {
 
+    def capsule: ICapsule = slot.capsule
+
     override def toString = "Input " + data + " is missing when reaching the " + slot + "."
   }
+
+  case class DuplicatedName(
+      val capsule: ICapsule,
+      val name: String,
+      val data: Iterable[IData[_]],
+      val slotType: SlotType) extends DataflowProblem {
+    override def toString = name + " has been found several time in capsule in " + slotType + " of capsule " + capsule + ": " + data.mkString(", ") + "."
+  }
+
 }
 
-trait DataflowProblem extends Problem {
-  def capsule: ICapsule
-  def slot: ISlot
-  def data: IData[_]
-
-}
+trait DataflowProblem extends Problem
