@@ -29,7 +29,9 @@ import scala.collection.mutable.ListBuffer
 
 object ToIndividualTask {
 
-  def apply[T <: GAGenome](name: String, genome: IPrototype[T], individual: IPrototype[Individual[T, Fitness]])(implicit plugins: IPluginSet) =
+  def apply[T <: GAGenome](
+    name: String, genome: IPrototype[T],
+    individual: IPrototype[Individual[T]])(implicit plugins: IPluginSet) =
     new TaskBuilder { builder ⇒
 
       private var objectives = new ListBuffer[(IPrototype[Double], Double)]
@@ -53,14 +55,14 @@ object ToIndividualTask {
 sealed abstract class ToIndividualTask[T <: GAGenome](
     val name: String,
     genome: IPrototype[T],
-    individual: IPrototype[Individual[T, Fitness]])(implicit val plugins: IPluginSet) extends Task { task ⇒
+    individual: IPrototype[Individual[T]])(implicit val plugins: IPluginSet) extends Task { task ⇒
 
   def objectives: List[(IPrototype[Double], Double)]
 
   override def process(context: IContext) =
     context + new Variable(
       individual,
-      new Individual[T, Fitness] {
+      new Individual[T] {
         val genome = context.valueOrException(task.genome)
         val fitness = new Fitness {
           val values = objectives.map {

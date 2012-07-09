@@ -21,6 +21,7 @@ import fr.iscpif.mgo._
 import fr.iscpif.mgo.crossover._
 import fr.iscpif.mgo.elitism._
 import fr.iscpif.mgo.mutation._
+import fr.iscpif.mgo.modifier._
 import fr.iscpif.mgo.ranking._
 import fr.iscpif.mgo.diversity._
 import fr.iscpif.mgo.selection._
@@ -28,13 +29,13 @@ import fr.iscpif.mgo.dominance._
 import fr.iscpif.mgo.termination._
 import fr.iscpif.mgo.tools.Math
 import fr.iscpif.mgo.ga._
+import fr.iscpif.mgo.algorithm.ga._
 
 sealed class NSGA2Sigma(
   val distributionIndex: Double,
   val steadySince: Int,
-  val archiveSize: Int,
-  val genomeSize: Int) extends NSGAII
-    with SigmaGAEvolution
+  val archiveSize: Int)
+    extends NSGAIISigma
     with MGBinaryTournamentSelection
     with FirstRankedSteadyTermination
     with NonDominatedSortingElitism
@@ -42,13 +43,5 @@ sealed class NSGA2Sigma(
     with SBXBoundedCrossover
     with CrowdingDistance
     with ParetoRanking
-    with StrictDominance {
-  type G = GAGenomeWithSigma
-  type F = GAGenomeWithSigmaFactory
-  type FIT = Fitness
-
-  def factory = new GAGenomeWithSigmaFactory {
-    def size = genomeSize
-  }
-
-}
+    with StrictDominance
+    with RankDiversityModifier

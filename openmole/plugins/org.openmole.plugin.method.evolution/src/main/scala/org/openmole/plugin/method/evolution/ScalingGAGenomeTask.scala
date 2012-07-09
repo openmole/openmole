@@ -29,7 +29,7 @@ import org.openmole.core.model.domain._
 
 import scala.collection.mutable.ListBuffer
 
-object ScalingGenomeTask {
+object ScalingGAGenomeTask {
 
   def apply[T <: GAGenome](
     name: String,
@@ -38,7 +38,7 @@ object ScalingGenomeTask {
     new TaskBuilder { builder ⇒
       scale foreach { case (p, _) ⇒ this.addOutput(p) }
 
-      def toTask = new ScalingGenomeTask[T](name, genome, scale: _*) {
+      def toTask = new ScalingGAGenomeTask[T](name, genome, scale: _*) {
         val inputs = builder.inputs + genome
         val outputs = builder.outputs + genome
         val parameters = builder.parameters
@@ -47,7 +47,7 @@ object ScalingGenomeTask {
 
 }
 
-sealed abstract class ScalingGenomeTask[T <: GAGenome](
+sealed abstract class ScalingGAGenomeTask[T <: GAGenome](
     val name: String,
     genome: IPrototype[T],
     scale: (IPrototype[Double], (Double, Double))*)(implicit val plugins: IPluginSet) extends Task {

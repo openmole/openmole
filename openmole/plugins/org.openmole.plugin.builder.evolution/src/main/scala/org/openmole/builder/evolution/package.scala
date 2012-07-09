@@ -18,6 +18,9 @@
 package org.openmole.plugin.builder
 
 import fr.iscpif.mgo._
+import fr.iscpif.mgo.elitism._
+import fr.iscpif.mgo.termination._
+import fr.iscpif.mgo.breed._
 import fr.iscpif.mgo.ga._
 import fr.iscpif.mgo.ranking._
 import fr.iscpif.mgo.diversity._
@@ -37,74 +40,69 @@ import org.openmole.core.implementation.transition._
 
 package object evolution {
 
-  def nsga2SigmaSteady(
+  def steadyGA(evolution: GAEvolution with Elitism with Termination with Breeding)(
     name: String,
     model: Puzzle,
-    distributionIndex: Double,
-    steadySince: Int,
-    archiveSize: Int,
     populationSize: Int,
     inputs: Iterable[(IPrototype[Double], (Double, Double))],
-    objectives: Iterable[(IPrototype[Double], Double)])(implicit plugins: IPluginSet) = {
+    objectives: Iterable[(IPrototype[Double], Double)])(implicit plugins: IPluginSet, factory: Factory[evolution.G]) = {
 
-    val genomeWithSigmaPrototype = new Prototype[GAGenomeWithSigma](name + "Genome")
-    val individualPrototype = new Prototype[Individual[GAGenomeWithSigma, Fitness]](name + "Individual")
-    val archivePrototype = new Prototype[Array[Individual[GAGenomeWithSigma, Fitness] with Diversity with Rank]](name + "Archive")
-    val steadySinceProto = new Prototype[Int](name + "SteadySince")
-    val fitnessProto = new Prototype[Fitness](name + "Fitness")
-    val generationProto = new Prototype[Int](name + "Generation")
-    val terminatedProto = new Prototype[Boolean](name + "Terminated")
-    val initialGenomeProto = new Prototype[Array[Array[Double]]](name + "InitialGenomes")
-    //val genomeSize = inputs.scales.size
+    import evolution._
 
-    val nsga = new NSGA2Sigma(distributionIndex, steadySince, archiveSize, inputs.size)
+    val genome = new Prototype[evolution.G](name + "Genome")
+    val individual = new Prototype[Individual[evolution.G]](name + "Individual")
+    val archive = new Prototype[Population[evolution.G, evolution.MF]](name + "Archive")
+    val state = new Prototype[evolution.STATE](name + "State")
+    val fitness = new Prototype[Fitness](name + "Fitness")
+    val generation = new Prototype[Int](name + "Generation")
+    val terminated = new Prototype[Boolean](name + "Terminated")
+
+    //val nsga = new NSGA2Sigma(distributionIndex, steadySince, archiveSize, inputs.size)
 
     val firstCapsule = new StrainerCapsule(EmptyTask(name + "First"))
 
-    val sampling = new GenomeSampling(genomeWithSigmaPrototype, nsga, populationSize)
+    val sampling = new GenomeSampling(genome, populationSize)
     val exploreSampling = ExplorationTask(name + "GenomeExploration", sampling)
     val explorationCapsule = new Capsule(exploreSampling)
 
-    val scalingTask = ScalingGenomeTask(name + "ScalingGenome", genomeWithSigmaPrototype, inputs.toSeq: _*)
+    val scalingTask = ScalingGAGenomeTask(name + "ScalingGenome", genome, inputs.toSeq: _*)
     val scalingCaps = new Capsule(scalingTask)
 
-    val toIndividualTask = ToIndividualTask(name + "ToIndividual", genomeWithSigmaPrototype, individualPrototype)
+    val toIndividualTask = ToIndividualTask(name + "ToIndividual", genome, individual)
     objectives.foreach {
       case (o, v) ⇒ toIndividualTask addObjective (o, v)
     }
 
     val toIndividualCapsule = new Capsule(toIndividualTask)
 
-    val elitismTask = NSGA2SteadySigmaElitismTask(
+    val elitismTask = ElitismTask(evolution)(
       name + "ElitismTask",
-      individualPrototype,
-      archivePrototype,
-      nsga,
-      generationProto,
-      steadySinceProto,
-      terminatedProto)
+      individual,
+      archive,
+      generation,
+      state,
+      terminated)
 
-    val elitismCaps = new MasterCapsule(elitismTask, archivePrototype, steadySinceProto, generationProto)
+    val elitismCaps = new MasterCapsule(elitismTask, archive, state, generation)
 
-    val scalingArchiveTask = ScalingArchiveTask(name + "ScalingArchive", archivePrototype, inputs.toSeq: _*)
+    val scalingArchiveTask = ScalingGAArchiveTask[evolution.type](name + "ScalingArchive", archive, inputs.toSeq: _*)
 
     objectives.foreach {
       case (o, _) ⇒ scalingArchiveTask addObjective o
     }
 
-    scalingArchiveTask addInput steadySinceProto
-    scalingArchiveTask addInput generationProto
+    scalingArchiveTask addInput state
+    scalingArchiveTask addInput generation
 
-    scalingArchiveTask addOutput steadySinceProto
-    scalingArchiveTask addOutput generationProto
+    scalingArchiveTask addOutput state
+    scalingArchiveTask addOutput generation
 
     val scalingArchiveCapsule = new Capsule(scalingArchiveTask)
 
-    val breedingTask = NSGA2SteadySigmaBreedTask(
+    val breedingTask = SteadyBreedTask(evolution)(
       name + "Breeding",
-      archivePrototype,
-      genomeWithSigmaPrototype,
-      nsga)
+      archive,
+      genome)
 
     val breedingCaps = new StrainerCapsule(breedingTask)
 
@@ -114,12 +112,12 @@ package object evolution {
     new Transition(firstCapsule, explorationCapsule)
     new ExplorationTransition(explorationCapsule, scalingCaps)
     new Transition(scalingCaps, model.first)
-    new Transition(model.last, toIndividualCapsule, filtered = Set(genomeWithSigmaPrototype.name))
+    new Transition(model.last, toIndividualCapsule, filtered = Set(genome.name))
     new Transition(toIndividualCapsule, elitismCaps)
     new Transition(elitismCaps, scalingArchiveCapsule)
     new Transition(scalingArchiveCapsule, breedingCaps)
     new Transition(breedingCaps, new Slot(scalingCaps))
-    new EndExplorationTransition(scalingArchiveCapsule, endCapsule, terminatedProto.name)
+    new EndExplorationTransition(scalingArchiveCapsule, endCapsule, terminated.name)
 
     new DataChannel(scalingCaps, toIndividualCapsule)
     new DataChannel(elitismCaps, breedingCaps)
@@ -127,11 +125,13 @@ package object evolution {
     new DataChannel(firstCapsule, model.first)
     new DataChannel(explorationCapsule, endCapsule)
 
+    val (_state, _generation, _genome) = (state, generation, genome)
+
     new Puzzle(firstCapsule, endCapsule, model.selection, model.grouping) {
       def outputCapsule = scalingArchiveCapsule
-      def steady = steadySinceProto
-      def generation = generationProto
-      def genomes = initialGenomeProto
+      def state = _state
+      def generation = _generation
+      def genome = _genome
     }
 
   }

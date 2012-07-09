@@ -30,11 +30,11 @@ import fr.iscpif.mgo.tools.Scaling._
 import org.openmole.core.model.task.IPluginSet
 import scala.collection.mutable.ListBuffer
 
-object ScalingArchiveTask {
+object ScalingGAArchiveTask {
 
-  def apply[I <: Individual[GAGenome, Fitness] with Rank](
+  def apply[E <: GAEvolution](
     name: String,
-    archive: IPrototype[Array[I]],
+    archive: IPrototype[Population[E#G, E#MF]],
     modelInputs: (IPrototype[Double], (Double, Double))*)(implicit plugins: IPluginSet) =
     new TaskBuilder { builder ⇒
 
@@ -49,7 +49,7 @@ object ScalingArchiveTask {
       addInput(archive)
       modelInputs foreach { case (p, _) ⇒ this addOutput p.toArray }
 
-      def toTask = new ScalingArchiveTask[I](name, archive, modelInputs: _*) {
+      def toTask = new ScalingGAArchiveTask(name, archive, modelInputs: _*) {
         val inputs = builder.inputs
         val outputs = builder.outputs
         val parameters = builder.parameters
@@ -59,9 +59,9 @@ object ScalingArchiveTask {
 
 }
 
-sealed abstract class ScalingArchiveTask[I <: Individual[GAGenome, Fitness]](
+sealed abstract class ScalingGAArchiveTask[E <: GAEvolution](
     val name: String,
-    archive: IPrototype[Array[I]],
+    archive: IPrototype[Population[E#G, E#MF]],
     modelInputs: (IPrototype[Double], (Double, Double))*)(implicit val plugins: IPluginSet) extends Task {
 
   def objectives: List[IPrototype[Double]]

@@ -20,6 +20,7 @@ package org.openmole.plugin.method.evolution
 import fr.iscpif.mgo._
 import fr.iscpif.mgo.ga._
 import fr.iscpif.mgo.ranking._
+import fr.iscpif.mgo.breed.Breeding
 import fr.iscpif.mgo.diversity._
 
 import org.openmole.core.implementation.data._
@@ -32,36 +33,43 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.service.Random._
 import org.openmole.core.implementation.task.Task._
 
-object NSGA2SteadySigmaBreedTask {
+object SteadyBreedTask {
 
-  def apply(
+  def apply(evolution: Evolution with Breeding)(
     name: String,
-    archive: IPrototype[Array[Individual[GAGenomeWithSigma, Fitness] with Rank with Diversity]],
-    genome: IPrototype[GAGenomeWithSigma],
-    nsga2: NSGA2Sigma)(implicit plugins: IPluginSet) = new TaskBuilder { builder ⇒
-    addInput(archive)
-    addOutput(genome)
+    archive: IPrototype[Population[evolution.G, evolution.MF]],
+    genome: IPrototype[evolution.G])(implicit plugins: IPluginSet, factory: Factory[evolution.G]) = {
 
-    def toTask =
-      new NSGA2SteadySigmaBreedTask(name, archive, genome, nsga2) {
-        val inputs = builder.inputs
-        val outputs = builder.outputs
-        val parameters = builder.parameters
-      }
+    val (_archive, _genome, _factory) = (archive, genome, factory)
+
+    new TaskBuilder { builder ⇒
+      addInput(archive)
+      addOutput(genome)
+
+      def toTask =
+        new SteadyBreedTask(name, evolution) {
+          val archive = _archive.asInstanceOf[IPrototype[Population[evolution.G, evolution.MF]]]
+          val genome = _genome.asInstanceOf[IPrototype[evolution.G]]
+          val factory = _factory.asInstanceOf[Factory[evolution.G]]
+
+          val inputs = builder.inputs
+          val outputs = builder.outputs
+          val parameters = builder.parameters
+        }
+    }
   }
-
 }
 
-sealed abstract class NSGA2SteadySigmaBreedTask(
-    val name: String,
-    archive: IPrototype[Array[Individual[GAGenomeWithSigma, Fitness] with Rank with Diversity]],
-    genome: IPrototype[GAGenomeWithSigma],
-    nsga2: NSGA2Sigma)(implicit val plugins: IPluginSet) extends Task {
+sealed abstract class SteadyBreedTask(val name: String, val evolution: Evolution with Breeding)(implicit val plugins: IPluginSet) extends Task {
+
+  def archive: IPrototype[Population[evolution.G, evolution.MF]]
+  def genome: IPrototype[evolution.G]
+  implicit val factory: Factory[evolution.G]
 
   override def process(context: IContext) = {
     val rng = newRNG(context.valueOrException(openMOLESeed))
     val a = context.valueOrException(archive)
-    val newGenome = nsga2.breed(a, 1)(rng).head
+    val newGenome = evolution.breed(a, 1)(rng, factory).head
     context + new Variable(genome, newGenome)
   }
 
