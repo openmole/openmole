@@ -33,6 +33,8 @@ object DataflowProblem {
       val data: IData[_],
       val provided: IPrototype[_]) extends DataflowProblem {
 
+    def capsule: ICapsule = slot.capsule
+
     override def toString = "Wrong type from " + slot + ", data " + data.prototype + " is expected but " + provided + " is provided."
   }
 
@@ -55,4 +57,6 @@ object DataflowProblem {
 
 }
 
-trait DataflowProblem extends Problem
+trait DataflowProblem extends Problem {
+  def capsule: ICapsule
+}
