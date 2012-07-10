@@ -64,7 +64,7 @@ class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) 
     selectingRessource.lock
     try {
       val totalFileSize = usedFiles.map { _.size }.sum
-      val onStorage = ReplicaCatalog.inCatalog(usedFiles, environment.authentication.key)
+      val onStorage = ReplicaCatalog.withClient(ReplicaCatalog.inCatalog(usedFiles, environment.authentication.key)(_))
 
       def fitness = {
         resources.flatMap {

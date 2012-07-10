@@ -25,7 +25,9 @@ import collection.JavaConversions._
 import java.net.URI
 
 class VolatileStorage(val environment: BatchEnvironment, val URI: URI, override val connections: Int) extends Storage {
-  ReplicaCatalog.getReplica(description, environment.authentication.key).foreach { ReplicaCatalog.remove }
+  ReplicaCatalog.withClient {
+    c ⇒ ReplicaCatalog.getReplica(description, environment.authentication.key)(c).foreach { ReplicaCatalog.remove(_)(c) }
+  }
   override def baseDir(token: AccessToken) = new URIFile(URI)
   override def persistentSpace(token: AccessToken): IURIFile = baseDir(token)
   override def tmpSpace(token: AccessToken): IURIFile = baseDir(token)

@@ -64,7 +64,9 @@ class PersistentStorage(
   @transient protected var time = System.currentTimeMillis
 
   override def clean(token: AccessToken) = synchronized {
-    for (r ← ReplicaCatalog.getReplica(description, environment.authentication.key)) ReplicaCatalog.remove(r)
+    ReplicaCatalog.withClient {
+      c ⇒ for (r ← ReplicaCatalog.getReplica(description, environment.authentication.key)(c)) ReplicaCatalog.remove(r)(c)
+    }
 
     baseDir(token).remove(token)
     baseSpaceVar = None
@@ -77,7 +79,7 @@ class PersistentStorage(
     persistentSpaceVar match {
       case None ⇒
         val persistentSpace = baseDir(token).mkdirIfNotExist(persistent, token)
-        val inCatalog = ReplicaCatalog.inCatalog(description, environment.authentication.key)
+        val inCatalog = ReplicaCatalog.withClient(ReplicaCatalog.inCatalog(description, environment.authentication.key)(_))
         for (file ← persistentSpace.list(token)) {
           val child = new URIFile(persistentSpace, file)
           if (!inCatalog.contains(child.location)) URIFile.clean(child)

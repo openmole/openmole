@@ -23,12 +23,15 @@ import org.openmole.misc.workspace.Workspace
 
 class ReplicaCatalogGC extends IUpdatable {
 
-  override def update: Boolean = {
-    for (replica ← ReplicaCatalog.allReplicas) {
-      if (AuthenticationRegistry.isRegistred(replica.authenticationKey) &&
-        (!replica.sourceFile.exists || System.currentTimeMillis - replica.lastCheckExists > Workspace.preferenceAsDurationInMs(ReplicaCatalog.NoAccessCleanTime)))
-        ReplicaCatalog.clean(replica)
+  override def update: Boolean =
+    ReplicaCatalog.withClient {
+      c ⇒
+        for (replica ← ReplicaCatalog.allReplicas(c)) {
+          if (AuthenticationRegistry.isRegistred(replica.authenticationKey) &&
+            (!replica.sourceFile.exists || System.currentTimeMillis - replica.lastCheckExists > Workspace.preferenceAsDurationInMs(ReplicaCatalog.NoAccessCleanTime)))
+            ReplicaCatalog.clean(replica)(c)
+        }
+        true
     }
-    true
-  }
+
 }
