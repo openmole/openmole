@@ -53,7 +53,6 @@ object ReplicaCatalog extends Logger {
   val GCUpdateInterval = new ConfigurationLocation("ReplicaCatalog", "GCUpdateInterval")
   val ObjectRepoLocation = new ConfigurationLocation("ReplicaCatalog", "ObjectRepoLocation")
   val NoAccessCleanTime = new ConfigurationLocation("ReplicaCatalog", "NoAccessCleanTime")
-  val lockRepository = new LockRepository[String]
 
   Workspace += (GCUpdateInterval, "PT5M")
   Workspace += (ObjectRepoLocation, ".objectRepository.bin")

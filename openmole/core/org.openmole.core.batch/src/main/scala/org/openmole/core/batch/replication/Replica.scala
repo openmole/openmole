@@ -20,10 +20,6 @@ package org.openmole.core.batch.replication
 import com.db4o.activation.ActivationPurpose
 import com.db4o.ta.Activatable
 import java.io.File
-import org.openmole.core.batch.control.ServiceDescription
-import org.openmole.core.batch.file.GZURIFile
-import org.openmole.core.batch.file.IURIFile
-import org.openmole.core.batch.file.URIFile
 
 class Replica(_source: String, _storageDescription: String, _hash: String, _authenticationKey: String, _destination: String, _lastCheckExists: java.lang.Long) extends Activatable {
 
@@ -40,8 +36,6 @@ class Replica(_source: String, _storageDescription: String, _hash: String, _auth
     if (_lastCheckExists == null) new java.lang.Long(0) else _lastCheckExists
   }
 
-  def destinationURIFile: IURIFile = new GZURIFile(new URIFile(destination))
-
   def source = {
     activate(ActivationPurpose.READ)
     _source
@@ -53,8 +47,6 @@ class Replica(_source: String, _storageDescription: String, _hash: String, _auth
     activate(ActivationPurpose.READ)
     _storageDescription
   }
-
-  def storageDescription = new ServiceDescription(storageDescriptionString)
 
   def authenticationKey = {
     activate(ActivationPurpose.READ)
@@ -79,7 +71,7 @@ class Replica(_source: String, _storageDescription: String, _hash: String, _auth
     _hash
   }
 
-  @transient lazy val tuple = (source, storageDescription, hash, authenticationKey, destination)
+  @transient lazy val tuple = (source, storageDescriptionString, hash, authenticationKey, destination)
 
   override def hashCode = tuple.hashCode
 
@@ -90,6 +82,6 @@ class Replica(_source: String, _storageDescription: String, _hash: String, _auth
   }
 
   override def toString =
-    "Replica [destination=" + destination + ", authenticationKey=" + authenticationKey + ", hash=" + hash + ", source=" + source + ", storageDescription=" + storageDescription + "," + lastCheckExists + "]";
+    "Replica [destination=" + destination + ", authenticationKey=" + authenticationKey + ", hash=" + hash + ", source=" + source + ", storageDescription=" + storageDescriptionString + "," + lastCheckExists + "]";
 
 }
