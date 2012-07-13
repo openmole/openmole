@@ -5,6 +5,8 @@ LOCATION=`dirname $0`
 
 cd $LOCATION
 
+nohup java -jar dbserver.jar &
+
 MEM="1G"
 
 FLAG=""

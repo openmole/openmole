@@ -62,9 +62,6 @@ class Application extends IApplication with Logger {
         },
         opt("p", "userPlugins", "Plugins (seperated by \" \")") {
           (v: String, c: Config) ⇒ c.copy(userPlugins = v.split(' ').toList)
-        },
-        opt("w", "Path of the workspace") {
-          (v: String, c: Config) ⇒ c.copy(workspaceDir = Some(v))
         })
     }
 
@@ -75,10 +72,12 @@ class Application extends IApplication with Logger {
 
     parser.parse(filtredArgs, Config()) foreach { config ⇒
 
-      val workspaceLocation = config.workspaceDir match {
+      /*val workspaceLocation = config.workspaceDir match {
         case Some(w) ⇒ new File(w)
         case None ⇒ Workspace.defaultLocation
-      }
+      }*/
+
+      //if (config.workspaceDir.isDefined) Workspace.instance = new Workspace(workspaceLocation)
 
       if (console) {
         try {
@@ -87,18 +86,18 @@ class Application extends IApplication with Logger {
         } catch {
           case e ⇒ logger.log(FINE, "Error in splash screen closing", e)
         }
-        if (Workspace.anotherIsRunningAt(workspaceLocation))
+        /*if (Workspace.anotherIsRunningAt(workspaceLocation))
           logger.severe("Application is already runnig at " + workspaceLocation.getAbsolutePath + ". If it is not the case please remove the file '" + new File(workspaceLocation, Workspace.running).getAbsolutePath() + "'.")
-        else {
-          if (config.workspaceDir.isDefined) Workspace.instance = new Workspace(workspaceLocation)
-          config.pluginsDirs.foreach { PluginManager.loadDir }
+        else {*/
 
-          val userPlugins = config.userPlugins.map { new File(_) }.toSet
-          PluginManager.load(userPlugins)
+        config.pluginsDirs.foreach { PluginManager.loadDir }
 
-          val console = new Console(new PluginSet(userPlugins))
-          console.run
-        }
+        val userPlugins = config.userPlugins.map { new File(_) }.toSet
+        PluginManager.load(userPlugins)
+
+        val console = new Console(new PluginSet(userPlugins))
+        console.run
+        // }
       } else {
 
         config.pluginsDirs.foreach { PluginManager.loadDir }

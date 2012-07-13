@@ -145,6 +145,13 @@
                                     <outputDirectory>${project.build.directory}</outputDirectory>
                                     <destFileName>jvm-linux-x64.tar.gz</destFileName>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.openmole.core</groupId>
+                                    <artifactId>org.openmole.runtime.dbserver</artifactId>
+                                    <version>${project.version}</version>
+                                    <outputDirectory>${package.directory}</outputDirectory>
+				    <destFileName>dbserver.jar</destFileName>
+                                </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
