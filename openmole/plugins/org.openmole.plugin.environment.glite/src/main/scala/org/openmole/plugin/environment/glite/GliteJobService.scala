@@ -77,7 +77,7 @@ class GliteJobService(
     val writter = new PrintStream(os)
 
     assert(runtime.runtime.path != null)
-    writter.print("BASEPATH=$PWD;CUR=$PWD/ws$RANDOM;while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; ")
+    writter.print("BASEPATH=$PWD;CUR=$PWD/ws$RANDOM;while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; export OPENMOLE_HOME=$CUR; ")
     writter.print("if [ `uname -m` = x86_64 ]; then ")
     writter.print(mkLcgCpGunZipCmd(environment, path.toStringURI(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz"))
     writter.print("else ")
@@ -111,7 +111,7 @@ class GliteJobService(
     writter.print(inputFilePath)
     writter.print(" -o ")
     writter.print(resultPath)
-    writter.print(" -w $CUR") // 2>err.txt ; lcg-cp file:$PWD/err.txt " + path.toStringURI("err.txt")) 
+    //    writter.print(" -w $CUR") // 2>err.txt ; lcg-cp file:$PWD/err.txt " + path.toStringURI("err.txt")) 
     writter.print("; cd .. ; rm -rf $CUR")
   }
 

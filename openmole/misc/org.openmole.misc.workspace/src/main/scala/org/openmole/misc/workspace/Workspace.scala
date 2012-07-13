@@ -35,22 +35,22 @@ import scala.collection.mutable.HashMap
 import org.openmole.misc.eventdispatcher.{ EventDispatcher, Event }
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.replication.DBServerInfo
 import org.openmole.misc.tools.io.FileUtil._
 
 object Workspace {
 
-  val noUniqueResourceProperty = "org.openmole.misc.workspace.noUniqueResource"
-
   case class PasswordRequired extends Event[Workspace]
 
   val sessionUUID = UUID.randomUUID
-  val OpenMoleDir = ".openmole"
-  val ConfigurationFile = "preferences"
-  val GlobalGroup = "Global"
-  val TmpLocation = ".tmp"
-  val PersitentLocation = "persistent"
-  val running = ".running"
-  val UniqueID = new ConfigurationLocation(GlobalGroup, "UniqueID")
+
+  //val openMoleDir = ".openmole"
+
+  val preferences = "preferences"
+  val globalGroup = "Global"
+  val tmpLocation = ".tmp"
+  val persitentLocation = "persistent"
+  val uniqueID = new ConfigurationLocation(globalGroup, "UniqueID")
 
   private val group = "Workspace"
   private val fixedPrefix = "file"
@@ -62,31 +62,11 @@ object Workspace {
 
   private val configurations = new HashMap[ConfigurationLocation, () ⇒ String]
 
-  this += (UniqueID, UUID.randomUUID.toString)
+  this += (uniqueID, UUID.randomUUID.toString)
   this += (passwordTest, passwordTestString)
 
-  def anotherIsRunningAt(location: File) = {
-    val f = new File(location, running)
-    f.contentOption match {
-      case Some(uuid) ⇒
-        !uuid.isEmpty && UUID.fromString(uuid).compareTo(sessionUUID) != 0
-      case None ⇒ false
-    }
-  }
-
-  lazy val defaultLocation = new File(System.getProperty("user.home"), OpenMoleDir)
-
-  def instance = synchronized {
-    if (_instance == null) _instance = new Workspace(defaultLocation)
-    _instance
-  }
-
-  def instance_=(wp: Workspace) = {
-    if (_instance != null) _instance.clean
-    _instance = wp
-  }
-
-  private var _instance: Workspace = null
+  lazy val defaultLocation = DBServerInfo.base //new File(System.getProperty("user.home"), openMoleDir)
+  lazy val instance = new Workspace(defaultLocation)
 
   Runtime.getRuntime.addShutdownHook(new Thread {
     override def run = synchronized {
@@ -157,24 +137,14 @@ object Workspace {
 
 class Workspace(val location: File) {
 
-  import Workspace.{ PersitentLocation, fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, running, TmpLocation, ConfigurationFile, configurations, sessionUUID, UniqueID, noUniqueResourceProperty }
+  import Workspace.{ persitentLocation, fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, tmpLocation, preferences, configurations, sessionUUID, uniqueID }
 
   location.mkdirs
-  val run = new File(location, running)
 
-  {
-    val noURProp = System.getProperty(noUniqueResourceProperty)
-    val noUR = noURProp != null && noURProp.equalsIgnoreCase("true")
-    if (!run.exists && !noUR) {
-      run.createNewFile
-      run.content = sessionUUID.toString
-    }
-  }
-
-  @transient val tmpDir = new File(new File(location, TmpLocation), sessionUUID.toString)
+  @transient val tmpDir = new File(new File(location, tmpLocation), sessionUUID.toString)
   tmpDir.mkdirs
 
-  @transient val persistentDir = new File(location, PersitentLocation)
+  @transient val persistentDir = new File(location, persitentLocation)
   persistentDir.mkdirs
 
   def newSeed = rng.nextLong
@@ -194,7 +164,7 @@ class Workspace(val location: File) {
   @transient private var _password: Option[String] = None
 
   @transient private lazy val configurationFile: File = {
-    val file = new File(location, ConfigurationFile)
+    val file = new File(location, preferences)
     file.createNewFile
     file
   }
@@ -206,11 +176,11 @@ class Workspace(val location: File) {
   }
 
   def clean = {
-    run.contentOption match {
+    /*run.contentOption match {
       case Some(uuid) ⇒
         if (!uuid.isEmpty && UUID.fromString(uuid).compareTo(sessionUUID) == 0) run.delete
       case None ⇒
-    }
+    }*/
 
     tmpDir.recursiveDelete
   }
@@ -284,11 +254,11 @@ class Workspace(val location: File) {
 
   def reset = synchronized {
     persistentDir.recursiveDelete
-    val uniqueId = preference(UniqueID)
+    val uniqueId = preference(uniqueID)
     configurationFile.content = ""
     configuration.clear
     _password = None
-    setPreference(UniqueID, uniqueId)
+    setPreference(uniqueID, uniqueId)
   }
 
   def preferenceAsLong(location: ConfigurationLocation): Long = preference(location).toLong

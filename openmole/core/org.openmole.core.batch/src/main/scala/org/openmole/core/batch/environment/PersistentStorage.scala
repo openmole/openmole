@@ -139,5 +139,5 @@ class PersistentStorage(
     }
   }
 
-  def baseDirName = Workspace.preference(Workspace.UniqueID) + '/'
+  def baseDirName = Workspace.preference(Workspace.uniqueID) + '/'
 }

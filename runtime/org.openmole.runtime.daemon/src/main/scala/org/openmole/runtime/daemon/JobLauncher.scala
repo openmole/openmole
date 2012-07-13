@@ -109,11 +109,11 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
                 val workspaceDir = Workspace.newDir("workspace")
                 val osgiDir = new File(runtime, UUID.randomUUID.toString)
 
-                val cmd = "java -Xmx" + memory + "m -Dosgi.configuration.area=" + osgiDir.getName + " -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration \"" + configurationDir.getAbsolutePath + "\" -a \"" + authFile.getAbsolutePath + "\" -s \"" + "file://localhost" + "\" -w \"" + workspaceDir.getAbsolutePath + "\" -i \"" + localExecutionMessage.getAbsolutePath + "\" -o \"" + new URIFile(localResultFile).location + "\" -c / -p \"" + pluginDir.getAbsolutePath + "\"" + (if (debug) " -d " else "")
+                val cmd = "java -Xmx" + memory + "m -Dosgi.configuration.area=" + osgiDir.getName + " -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration \"" + configurationDir.getAbsolutePath + "\" -a \"" + authFile.getAbsolutePath + "\" -s \"" + "file://localhost" + "\" -i \"" + localExecutionMessage.getAbsolutePath + "\" -o \"" + new URIFile(localResultFile).location + "\" -c / -p \"" + pluginDir.getAbsolutePath + "\"" + (if (debug) " -d " else "")
 
                 logger.info("Executing runtime: " + cmd)
                 //val commandLine = CommandLine.parse(cmd)
-                val process = Runtime.getRuntime.exec(cmd, null, runtime) //commandLine.toString, null, runtimeLocation)
+                val process = Runtime.getRuntime.exec(cmd, Array("OPENMOLE_HOME=" + workspaceDir.getAbsolutePath), runtime) //commandLine.toString, null, runtimeLocation)
                 executeProcess(process, System.out, System.err)
                 logger.info("Process finished.")
 

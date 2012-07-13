@@ -46,7 +46,6 @@ public class SimExplorer implements IApplication {
 
             options.addOption("a", true, "Path to a serialized authentication to initialize.");
             options.addOption("s", true, "Base uri for the storage.");
-            options.addOption("w", true, "Path for the workspace.");
             options.addOption("i", true, "URI of the input message.");
             options.addOption("o", true, "URI of the output message.");
             options.addOption("c", true, "Path for the communication.");
@@ -66,11 +65,6 @@ public class SimExplorer implements IApplication {
                 new HelpFormatter().printHelp(" ", options);
                 return IApplication.EXIT_OK;
             }
-
-            //init jsaga
-            //JSAGASessionService.init();
-
-            Workspace.instance_$eq(new Workspace(new File(cmdLine.getOptionValue("w"))));
 
             String environmentPluginDirPath = cmdLine.getOptionValue("p");
             String executionMessageURI = cmdLine.getOptionValue("i");

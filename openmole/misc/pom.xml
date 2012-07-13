@@ -32,6 +32,7 @@
         <module>org.openmole.misc.fileservice</module>
 	<module>org.openmole.misc.filecache</module>
 	<module>org.openmole.misc.filedeleter</module>
+	<module>org.openmole.misc.replication</module>
 	<module>org.openmole.misc.sftpserver</module>
     </modules>
 

@@ -27,6 +27,7 @@ import com.db4o.defragment.Defragment
 import com.db4o.defragment.DefragmentConfig
 import com.db4o.ta.TransparentPersistenceSupport
 import java.io.File
+import org.openmole.misc.replication.DBServerInfo
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.service.LockRepository
 import org.openmole.misc.tools.service.Logger
@@ -39,6 +40,7 @@ import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.URIFile
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.ConfigurationLocation
+import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.hashservice.HashService._
 import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
@@ -58,35 +60,30 @@ object ReplicaCatalog extends Logger {
   Workspace += (ObjectRepoLocation, ".objectRepository.bin")
   Workspace += (NoAccessCleanTime, "P30D")
 
-  lazy val dbFile = Workspace.file(Workspace.preference(ObjectRepoLocation))
-
-  var _objectServer: Option[ObjectServer] = None
-
-  def open = {
-    val objRepo = Workspace.file(Workspace.preference(ObjectRepoLocation))
-
-    if (objRepo.exists) defrag(objRepo)
-    Db4oClientServer.openServer(dB4oConfiguration, objRepo.getAbsolutePath, 0)
+  private def openClient = {
+    val info = dbInfo
+    Db4oClientServer.openClient("localhost", info.port, info.user, info.password)
   }
 
   def withClient[T](f: ObjectContainer ⇒ T) = {
-    val container = objectServer.openClient
+    val container = openClient
     try f(container)
     finally container.close
   }
 
-  def objectServer: ObjectServer = synchronized {
-    _objectServer match {
-      case Some(server) ⇒
-        if (server.ext.objectContainer.ext.isClosed) {
-          val server = open
-          _objectServer = Some(server)
-          server
-        } else server
-      case None ⇒
-        val server = open
-        _objectServer = Some(server)
-        server
+  private var _dbInfo: Option[(DBServerInfo, Long)] = None
+
+  def dbInfo = synchronized {
+    val dbInfoFile = DBServerInfo.dbInfoFile(DBServerInfo.base)
+
+    if (!dbInfoFile.exists) throw new InternalProcessingError("Database server not launched, file " + dbInfoFile + " doesn't exists.")
+
+    _dbInfo match {
+      case Some((server, modif)) if (modif >= dbInfoFile.lastModification) ⇒ server
+      case _ ⇒
+        val dbInfo = DBServerInfo.load(dbInfoFile) -> dbInfoFile.lastModification
+        _dbInfo = Some(dbInfo)
+        dbInfo._1
     }
   }
 
@@ -176,7 +173,7 @@ object ReplicaCatalog extends Logger {
     storage: Storage,
     token: AccessToken): Replica = {
     //logger.fine("Looking for replica for" + srcPath.getAbsolutePath + "hash" + hash + ".")
-    implicit val client = objectServer.openClient
+    implicit val client = openClient
     try withSemaphore(key(hash, storage), client) {
       val storageDescription = storage.description
       val authenticationKey = storage.environment.authentication.key
@@ -279,33 +276,16 @@ object ReplicaCatalog extends Logger {
   def clean(replica: Replica)(implicit objectContainer: ObjectContainer) =
     withSemaphore(key(replica), objectContainer) {
       logger.fine("Cleaning replica " + replica.toString)
-      removeNoLock(replica)
-
-      if (!containsDestination(replica.destination)) URIFile.clean(new URIFile(replica.destination))
+      if (contains(replica)) {
+        removeNoLock(replica)
+        if (!containsDestination(replica.destination)) URIFile.clean(new URIFile(replica.destination))
+      }
     }
+
+  private def contains(replica: Replica)(implicit objectContainer: ObjectContainer) =
+    !objectContainer.queryByExample(replica).isEmpty
 
   def cleanAll(implicit objectContainer: ObjectContainer) =
     for (rep ← allReplicas) clean(rep)
-
-  private def dB4oConfiguration = {
-    val configuration = Db4oClientServer.newServerConfiguration
-    configuration.common.add(new TransparentPersistenceSupport)
-    configuration.common.objectClass(classOf[Replica]).cascadeOnDelete(true)
-    configuration.common.activationDepth(Int.MaxValue)
-
-    configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
-    configuration.common.objectClass(classOf[Replica]).objectField("_source").indexed(true)
-    configuration.common.objectClass(classOf[Replica]).objectField("_storageDescription").indexed(true)
-    configuration.common.objectClass(classOf[Replica]).objectField("_authenticationKey").indexed(true)
-    configuration.common.objectClass(classOf[Replica]).objectField("_destination").indexed(true)
-
-    configuration
-  }
-
-  private def defrag(db: File) = {
-    val defragmentConfig = new DefragmentConfig(db.getAbsolutePath)
-    defragmentConfig.forceBackupDelete(true)
-    Defragment.defrag(defragmentConfig)
-  }
 
 }
