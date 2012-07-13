@@ -108,11 +108,11 @@ class MoleExecution(
         if (complete) {
           waitingJobs.remove(key)
           nbWaiting -= jobs.size
-          val job = new Job(id, jobs)
+          val job = new Job(this, jobs)
           submit(job, capsule)
         }
       case None ⇒
-        val job = new Job(id, List(moleJob))
+        val job = new Job(this, List(moleJob))
         submit(job, capsule)
     }
 
@@ -128,7 +128,7 @@ class MoleExecution(
 
   def submitAll = synchronized {
     waitingJobs.foreach {
-      case ((capsule, _), jobs) ⇒ submit(new Job(id, jobs), capsule)
+      case ((capsule, _), jobs) ⇒ submit(new Job(this, jobs), capsule)
     }
     nbWaiting = 0
     waitingJobs.empty

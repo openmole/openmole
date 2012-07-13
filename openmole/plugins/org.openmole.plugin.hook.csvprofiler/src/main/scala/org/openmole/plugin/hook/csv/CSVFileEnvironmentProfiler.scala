@@ -38,9 +38,8 @@ class CSVFileEnvironmentProfiler(environment: IEnvironment, file: File) extends 
     if (newState.isFinal) {
       val writter = new CSVWriter(new BufferedWriter(new FileWriter(file, true)))
       try {
-        val jobIds = job.job.moleJobs.map { _.id }.foldLeft("") {
-          (acc, id) ⇒ if (acc.isEmpty) id.toString else acc + ":" + id
-        }
+
+        val jobIds = job.moleJobs.map { _.id }.mkString(":")
         val (created, timeStampsStr) = ToCSV.toCSV(job.timeStamps)
         writter.writeNext((jobIds :: created.toString :: timeStampsStr.toList).toArray)
       } finally writter.close

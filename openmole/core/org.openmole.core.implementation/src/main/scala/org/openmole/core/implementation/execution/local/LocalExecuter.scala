@@ -41,11 +41,10 @@ class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
     while (!stop) {
       val executionJob = environment.takeNextjob
       try {
-        val job = executionJob.job
         executionJob.state = ExecutionState.RUNNING
         val running = System.currentTimeMillis
 
-        for (moleJob ← job.moleJobs) {
+        for (moleJob ← executionJob.moleJobs) {
           if (moleJob.state != State.CANCELED) {
             if (classOf[IMoleTask].isAssignableFrom(moleJob.task.getClass)) jobGoneIdle
             moleJob.perform

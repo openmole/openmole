@@ -17,18 +17,13 @@
 
 package org.openmole.core.model.execution
 
-import org.openmole.core.model.job.IJob
+import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.tools.ITimeStamp
 import ExecutionState._
-
-/*object IExecutionJob {
-  case class ExceptionRaised(val exception: Throwable, level: Level) extends Event[IExecutionJob]
-  case class StateChanged(val newState: ExecutionState, oldState: ExecutionState) extends Event[IExecutionJob]
-}*/
 
 trait IExecutionJob {
   def state: ExecutionState
   def environment: IEnvironment
-  def job: IJob
   def timeStamps: Seq[ITimeStamp[ExecutionState]]
+  def moleJobs: Iterable[IMoleJob]
 }

@@ -19,7 +19,8 @@ package org.openmole.core.implementation.job
 
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
+import org.openmole.core.model.mole.IMoleExecution
 
-class Job(val executionId: String, val moleJobs: Iterable[IMoleJob]) extends IJob {
+class Job(val execution: IMoleExecution, val moleJobs: Iterable[IMoleJob]) extends IJob {
   override def allMoleJobsFinished: Boolean = !moleJobs.exists(!_.isFinished)
 }

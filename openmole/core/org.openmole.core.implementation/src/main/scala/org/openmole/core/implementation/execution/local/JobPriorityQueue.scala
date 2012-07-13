@@ -19,6 +19,7 @@ package org.openmole.core.implementation.execution.local
 
 import java.util.concurrent.Semaphore
 import org.openmole.core.model.job.IJob
+import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.task.IMoleTask
 import scala.collection.immutable.TreeMap
 
@@ -78,7 +79,7 @@ object JobPriorityQueue {
     def isEmpty = size == 0
   }
 
-  def priority(job: IJob) = job.moleJobs.count(mj ⇒ classOf[IMoleTask].isAssignableFrom(mj.task.getClass))
+  def priority(jobs: Iterable[IMoleJob]) = jobs.count(mj ⇒ classOf[IMoleTask].isAssignableFrom(mj.task.getClass))
 
 }
 
@@ -93,7 +94,7 @@ class JobPriorityQueue {
 
   def enqueue(job: LocalExecutionJob) = {
     synchronized {
-      val p = priority(job.job)
+      val p = priority(job.moleJobs)
       queues.get(p) match {
         case Some(queue) ⇒ queue.enqueue(job)
         case None ⇒

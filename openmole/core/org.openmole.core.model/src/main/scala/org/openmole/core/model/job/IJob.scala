@@ -17,8 +17,10 @@
 
 package org.openmole.core.model.job
 
+import org.openmole.core.model.mole.IMoleExecution
+
 trait IJob {
-  def executionId: String
+  def execution: IMoleExecution
   def moleJobs: Iterable[IMoleJob]
   def allMoleJobsFinished: Boolean
 }

@@ -138,9 +138,10 @@ class UploadActor(jobManager: ActorRef) extends Actor {
         if (!moleJob.isFinished) {
           val moleJobFile = Workspace.newFile("job", ".tar")
           try {
-            val serializationResult = SerializerService.serializeGetPluginClassAndFiles(
-              RunnableTask(moleJob),
-              moleJobFile)
+            val serializationResult =
+              SerializerService.serializeGetPluginClassAndFiles(
+                RunnableTask(moleJob),
+                moleJobFile)
 
             files ++= serializationResult.files
             classes ++= serializationResult.classes
@@ -160,12 +161,12 @@ class UploadActor(jobManager: ActorRef) extends Actor {
 
     //Hold cache to avoid gc and file deletion
     val cache = if (isDir) {
-      val cache = FileService.archiveForDir(file, job.executionId)
+      val cache = FileService.archiveForDir(job.execution, file)
       toReplicate = cache.file(false)
       cache
     } else null
 
-    val hash = FileService.hash(toReplicate, job.executionId).toString
+    val hash = FileService.hash(job.execution, toReplicate).toString
     val replica = ReplicaCatalog.uploadAndGet(toReplicate, toReplicatePath, hash, storage, token)
     new ReplicatedFile(file, isDir, hash, replica.destinationURIFile.path, file.mode)
   }

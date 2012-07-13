@@ -37,9 +37,8 @@ object FileService {
   Workspace += (GCInterval, "PT5M")
 
   class CachedArchiveForDir(file: File, val lastModified: Long) extends FileCacheDeleteOnFinalize(file)
-  class HashWithLastModified(val hash: IHash, val lastModified: Long)
 
-  private[fileservice] val hashCache = new AssociativeCache[String, HashWithLastModified]
+  private[fileservice] val hashCache = new AssociativeCache[String, IHash]
   private[fileservice] val archiveCache = new AssociativeCache[String, CachedArchiveForDir]
 
   Updater.delay(new FileServiceGC, Workspace.preferenceAsDurationInMs(FileService.GCInterval))
@@ -50,26 +49,13 @@ object FileService {
 
   def archiveForDir(file: File): IFileCache = archiveForDir(file, file)
 
-  def hash(file: File, cacheLength: Object): IHash = {
-    invalidateHashCacheIfModified(file, cacheLength)
-    hashCache.cache(cacheLength, file.getAbsolutePath, new HashWithLastModified(HashService.computeHash(file), file.lastModified)).hash
-  }
+  def hash(key: Object, file: File): IHash = hashCache.cache(key, file.getAbsolutePath, HashService.computeHash(file))
 
-  private[fileservice] def invalidateHashCacheIfModified(file: File, cacheLength: Object) =
-    hashCache.cached(cacheLength, file.getAbsolutePath) match {
-      case None ⇒
-      case Some(hash) ⇒
-        if (hash.lastModified < file.lastModification) {
-          //Logger.getLogger(FileService.getClass.getName).fine("Invalidate cache " + file.getAbsolutePath)
-          hashCache.invalidateCache(cacheLength, file.getAbsolutePath)
-        }
-    }
+  def archiveForDir(key: Object, file: File): IFileCache = {
 
-  def archiveForDir(file: File, cacheLenght: Object): IFileCache = {
+    //invalidateDirCacheIfModified(file, cacheLenght)
 
-    invalidateDirCacheIfModified(file, cacheLenght)
-
-    archiveCache.cache(cacheLenght, file.getAbsolutePath, {
+    archiveCache.cache(key, file.getAbsolutePath, {
       val ret = Workspace.newFile("archive", ".tar");
       val os = new TarOutputStream(new FileOutputStream(ret))
       try os.createDirArchiveWithRelativePathNoVariableContent(file)

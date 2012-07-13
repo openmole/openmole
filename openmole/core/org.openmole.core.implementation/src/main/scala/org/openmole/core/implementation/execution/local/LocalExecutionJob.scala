@@ -20,6 +20,6 @@ package org.openmole.core.implementation.execution.local
 import org.openmole.core.implementation.execution.ExecutionJob
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.ExecutionState._
-import org.openmole.core.model.job.IJob
+import org.openmole.core.model.job.IMoleJob
 
-class LocalExecutionJob(val environment: LocalExecutionEnvironment, val job: IJob) extends ExecutionJob
+class LocalExecutionJob(val environment: LocalExecutionEnvironment, val moleJobs: Iterable[IMoleJob]) extends ExecutionJob
