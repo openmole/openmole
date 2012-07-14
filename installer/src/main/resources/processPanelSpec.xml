@@ -1,0 +1,12 @@
+
+<processing>
+  <job name="do xyz">
+    <os family="windows" />
+    <executefile name="$INSTALL_PATH/register.bat">
+	<arg>$INSTALL_PATH</arg>
+    	<!--<arg>doit</arg>
+    	<arg>$variable</arg>-->
+    </executefile>
+  </job>
+</processing>
+

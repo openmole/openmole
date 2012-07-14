@@ -12,6 +12,7 @@
         <pack name="OpenMOLE Core" required="yes">
 	    <description>"OpenMOLE Core</description>
             <fileset dir="../openmole/" targetdir="$INSTALL_PATH" />
+            <file src="register.bat" targetdir="$INSTALL_PATH" override="true" />
 	</pack>
         <pack name="OpenMOLE Runtime" required="yes">
 	    <description>"OpenMOLE Runtime</description>
@@ -27,12 +28,14 @@
             <file src="./openmole-uninstall.png" targetdir="$INSTALL_PATH/" />
  	    <executable targetfile="$INSTALL_PATH/openmole" stage="never" />
         </pack>
+
     </packs>
     
     <resources>
         <res id="LicencePanel.licence" src="AGPLv3.txt"/>
         <res id="shortcutSpec.xml" src="shortcutSpec.xml" /> 
         <res id="Unix_shortcutSpec.xml" src="Unix_shortcutSpec.xml" /> 
+	<!--<res id="ProcessPanel.Spec.xml" src="processPanelSpec.xml" />-->
     </resources>
 
     <panels>
@@ -41,6 +44,7 @@
         <panel classname="TargetPanel" />
         <panel classname="InstallPanel" />
         <panel classname="ShortcutPanel"/>
+	<!--<panel classname="ProcessPanel" />-->
         <panel classname="SimpleFinishPanel" />
     </panels>
 
