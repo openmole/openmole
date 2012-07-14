@@ -52,9 +52,6 @@ object FileService {
   def hash(key: Object, file: File): IHash = hashCache.cache(key, file.getAbsolutePath, HashService.computeHash(file))
 
   def archiveForDir(key: Object, file: File): IFileCache = {
-
-    //invalidateDirCacheIfModified(file, cacheLenght)
-
     archiveCache.cache(key, file.getAbsolutePath, {
       val ret = Workspace.newFile("archive", ".tar");
       val os = new TarOutputStream(new FileOutputStream(ret))
@@ -64,14 +61,5 @@ object FileService {
       new CachedArchiveForDir(ret, file.lastModification)
     })
   }
-
-  private[fileservice] def invalidateDirCacheIfModified(file: File, cacheLenght: Object) =
-    archiveCache.cached(cacheLenght, file.getAbsolutePath) match {
-      case None ⇒
-      case Some(cached) ⇒
-        if (cached.lastModified < file.lastModification) {
-          archiveCache.invalidateCache(cacheLenght, file.getAbsolutePath)
-        }
-    }
 
 }
