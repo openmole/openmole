@@ -17,42 +17,45 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo.ga._
 import fr.iscpif.mgo._
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.sampling.Sampling
-import org.openmole.core.model.data.DataModeMask
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
-import org.openmole.misc.exception.UserBadDataError
+import org.openmole.core.implementation.sampling._
+import org.openmole.core.model.data._
 import org.openmole.misc.tools.service.Random._
-import org.openmole.misc.workspace.Workspace
 import org.openmole.core.implementation.task.Task._
 
-object GenomeSampling {
+object IslandSampling {
 
-  def apply(evolution: Evolution)(genome: IPrototype[evolution.G], size: Int) = {
-    val (_genome, _size) = (genome, size)
-    new GenomeSampling(evolution) {
-      val genome = _genome.asInstanceOf[IPrototype[evolution.G]]
+  def apply(evolution: Evolution with EvolutionManifest)(genome: IPrototype[Array[evolution.G]], islandSize: Int, size: Int) = {
+    val (_genome, _islandSize, _size) = (genome, islandSize, size)
+    new IslandSampling(evolution) {
+      val genome = _genome.asInstanceOf[IPrototype[Array[evolution.G]]]
+      val islandSize = _islandSize
       val size = _size
     }
   }
 
 }
 
-sealed abstract class GenomeSampling(val evolution: Evolution) extends Sampling {
+sealed abstract class IslandSampling(val evolution: Evolution with EvolutionManifest) extends Sampling {
 
-  def genome: IPrototype[evolution.G]
+  def genome: IPrototype[Array[evolution.G]]
+  def islandSize: Int
   def size: Int
-
   def prototypes = List(genome)
 
   def build(context: IContext) = {
-    def toSamplingLine(g: evolution.G) = List(new Variable(genome, g))
+    import evolution._
+
+    def toSamplingLine(g: Array[evolution.G]) = List(new Variable(genome, g))
 
     val rng = newRNG(context.valueOrException(openMOLESeed))
 
-    ((0 until size).map(i ⇒ toSamplingLine(evolution.factory.random(rng)))).iterator
+    (0 until size).map(
+      i ⇒
+        toSamplingLine(
+          (0 to islandSize).map(
+            j ⇒ evolution.factory.random(rng)).toArray)).iterator
   }
 }
+

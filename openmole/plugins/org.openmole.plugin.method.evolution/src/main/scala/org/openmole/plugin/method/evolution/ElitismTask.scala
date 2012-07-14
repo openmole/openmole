@@ -34,17 +34,17 @@ object ElitismTask {
 
   def apply(evolution: Evolution with Elitism with Termination)(
     name: String,
-    individual: IPrototype[Individual[evolution.G]],
+    individuals: IPrototype[Array[Individual[evolution.G]]],
     archive: IPrototype[Population[evolution.G, evolution.MF]],
     generation: IPrototype[Int],
     state: IPrototype[evolution.STATE],
     terminated: IPrototype[Boolean])(implicit plugins: IPluginSet) = {
-    val (_individual, _archive, _generation, _state, _terminated) = (individual, archive, generation, state, terminated)
+    val (_individuals, _archive, _generation, _state, _terminated) = (individuals, archive, generation, state, terminated)
 
     new TaskBuilder { builder ⇒
 
       addInput(archive)
-      addInput(individual)
+      addInput(individuals)
       addInput(generation)
       addInput(state)
       addOutput(archive)
@@ -57,7 +57,7 @@ object ElitismTask {
 
       def toTask = new ElitismTask(name, evolution) {
 
-        val individual = _individual.asInstanceOf[IPrototype[Individual[evolution.G]]]
+        val individuals = _individuals.asInstanceOf[IPrototype[Array[Individual[evolution.G]]]]
         val archive = _archive.asInstanceOf[IPrototype[Population[evolution.G, evolution.MF]]]
         val generation = _generation
         val state = _state.asInstanceOf[IPrototype[evolution.STATE]]
@@ -74,7 +74,7 @@ object ElitismTask {
 sealed abstract class ElitismTask[E <: Evolution with Elitism with Termination](
     val name: String, val evolution: Evolution with Elitism with Termination)(implicit val plugins: IPluginSet) extends Task {
 
-  def individual: IPrototype[Individual[evolution.G]]
+  def individuals: IPrototype[Array[Individual[evolution.G]]]
   def archive: IPrototype[Population[evolution.G, evolution.MF]]
   def state: IPrototype[evolution.STATE]
   def generation: IPrototype[Int]
@@ -82,7 +82,7 @@ sealed abstract class ElitismTask[E <: Evolution with Elitism with Termination](
 
   override def process(context: IContext) = {
     val currentArchive = context.valueOrException(archive).asInstanceOf[Population[evolution.G, evolution.MF]]
-    val globalArchive = context.valueOrException(individual) :: currentArchive.individuals.toList
+    val globalArchive = context.valueOrException(individuals).toList ::: currentArchive.individuals.toList
 
     val population = evolution.toPopulation(globalArchive.toIndexedSeq)
     val newArchive = evolution.elitism(population)

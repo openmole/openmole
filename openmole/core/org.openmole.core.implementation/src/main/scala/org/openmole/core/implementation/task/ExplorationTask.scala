@@ -41,7 +41,7 @@ object ExplorationTask {
       def toTask =
         new ExplorationTask(name, sampling) {
           val inputs = builder.inputs + sampling.inputs
-          val outputs = builder.outputs ++ sampling.prototypes.map { p ⇒ new Data(p, DataMode(DataModeMask.explore)).toArray }
+          val outputs = builder.outputs ++ sampling.prototypes.map { p ⇒ new Data(p, DataModeMask.explore).toArray }
           val parameters = builder.parameters
         }
 

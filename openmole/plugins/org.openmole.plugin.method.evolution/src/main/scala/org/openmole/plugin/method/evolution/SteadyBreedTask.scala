@@ -26,6 +26,7 @@ import fr.iscpif.mgo.diversity._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.task.TaskBuilder
+import org.openmole.core.model.data.DataModeMask
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.task.IPluginSet
@@ -35,22 +36,22 @@ import org.openmole.core.implementation.task.Task._
 
 object SteadyBreedTask {
 
-  def apply(evolution: Evolution with Breeding)(
+  def apply(evolution: Evolution with Breeding with EvolutionManifest)(
     name: String,
     archive: IPrototype[Population[evolution.G, evolution.MF]],
-    genome: IPrototype[evolution.G])(implicit plugins: IPluginSet, factory: Factory[evolution.G]) = {
+    genome: IPrototype[Array[evolution.G]],
+    size: Int)(implicit plugins: IPluginSet) = {
 
-    val (_archive, _genome, _factory) = (archive, genome, factory)
+    val (_archive, _genome) = (archive, genome)
 
     new TaskBuilder { builder ⇒
       addInput(archive)
-      addOutput(genome)
+      addOutput(new Data(genome, DataModeMask.explore))
 
       def toTask =
-        new SteadyBreedTask(name, evolution) {
+        new SteadyBreedTask(name, evolution, size) {
           val archive = _archive.asInstanceOf[IPrototype[Population[evolution.G, evolution.MF]]]
-          val genome = _genome.asInstanceOf[IPrototype[evolution.G]]
-          val factory = _factory.asInstanceOf[Factory[evolution.G]]
+          val genome = _genome.asInstanceOf[IPrototype[Array[evolution.G]]]
 
           val inputs = builder.inputs
           val outputs = builder.outputs
@@ -60,16 +61,20 @@ object SteadyBreedTask {
   }
 }
 
-sealed abstract class SteadyBreedTask(val name: String, val evolution: Evolution with Breeding)(implicit val plugins: IPluginSet) extends Task {
+sealed abstract class SteadyBreedTask(
+    val name: String,
+    val evolution: Evolution with Breeding with EvolutionManifest,
+    size: Int)(implicit val plugins: IPluginSet) extends Task {
 
   def archive: IPrototype[Population[evolution.G, evolution.MF]]
-  def genome: IPrototype[evolution.G]
-  implicit val factory: Factory[evolution.G]
+  def genome: IPrototype[Array[evolution.G]]
 
   override def process(context: IContext) = {
+    import evolution._
+
     val rng = newRNG(context.valueOrException(openMOLESeed))
     val a = context.valueOrException(archive)
-    val newGenome = evolution.breed(a, 1)(rng, factory).head
+    val newGenome = evolution.breed(a, size)(rng).toArray
     context + new Variable(genome, newGenome)
   }
 

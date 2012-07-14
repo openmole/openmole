@@ -20,7 +20,7 @@ package org.openmole.core.implementation.tools
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.transition.{ ITransition, IAggregationTransition, IExplorationTransition, IEndExplorationTransition }
+import org.openmole.core.model.transition.{ ITransition, IAggregationTransition, IExplorationTransition, IEndExplorationTransition, ISlaveTransition }
 import scala.collection.mutable.WeakHashMap
 import scala.collection.mutable.SynchronizedMap
 import scala.collection.mutable.ListBuffer
@@ -57,6 +57,7 @@ object LevelComputing {
     from.outputTransitions.map {
       case t: IAggregationTransition ⇒ t -> (lvl - 1)
       case t: IEndExplorationTransition ⇒ t -> (lvl - 1)
+      case t: ISlaveTransition ⇒ t -> lvl
       case t: IExplorationTransition ⇒ t -> (lvl + 1)
       case t: ITransition ⇒ t -> lvl
     }

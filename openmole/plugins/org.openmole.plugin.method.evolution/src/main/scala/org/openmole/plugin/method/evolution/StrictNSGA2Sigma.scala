@@ -31,11 +31,11 @@ import fr.iscpif.mgo.tools.Math
 import fr.iscpif.mgo.ga._
 import fr.iscpif.mgo.algorithm.ga._
 
-sealed class NSGA2Sigma(
+sealed class StrictNSGA2Sigma(
   val distributionIndex: Double,
   val steadySince: Int,
-  val archiveSize: Int)
-    extends NSGAIISigma
+  val genomeSize: Int,
+  val archiveSize: Int) extends NSGAIISigma
     with MGBinaryTournamentSelection
     with FirstRankedSteadyTermination
     with NonDominatedSortingElitism
@@ -45,3 +45,11 @@ sealed class NSGA2Sigma(
     with ParetoRanking
     with StrictDominance
     with RankDiversityModifier
+    with EvolutionManifest
+    with TerminationManifest {
+
+  val genomeManifest = manifest[G]
+  val individualManifest = manifest[Individual[G]]
+  val populationManifest = manifest[Population[G, MF]]
+  val stateManifest = manifest[STATE]
+}

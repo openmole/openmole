@@ -154,12 +154,12 @@ object ReplicaCatalog extends Logger {
 
   def withSemaphore[T](key: String, objectContainer: ObjectContainer)(op: ⇒ T) = {
     //lockRepository.lock(key)
-    logger.fine("Locking on " + key)
+    //logger.fine("Locking on " + key)
     objectContainer.ext.setSemaphore(key, Int.MaxValue)
-    logger.fine("Locked on " + key)
+    //logger.fine("Locked on " + key)
     try op
     finally {
-      logger.fine("Unlocked on " + key)
+      //logger.fine("Unlocked on " + key)
       //lockRepository.unlock(key)
       objectContainer.ext.releaseSemaphore(key)
     }

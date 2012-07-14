@@ -25,8 +25,11 @@ object Data {
     override def compare(left: IData[_], right: IData[_]) =
       Prototype.prototypeOrderingOnName.compare(left.prototype, right.prototype)
   }
+
 }
 
 class Data[T](val prototype: IPrototype[T], val mode: IDataMode = DataMode.NONE) extends IData[T] {
+  def this(prototype: IPrototype[T], masks: DataModeMask*) = this(prototype, DataMode(masks: _*))
+
   override def toString = "(" + prototype.toString + ", " + mode.toString + ")"
 }

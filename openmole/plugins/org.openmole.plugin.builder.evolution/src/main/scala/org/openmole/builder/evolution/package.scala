@@ -34,18 +34,22 @@ import org.openmole.core.model.mole._
 import org.openmole.core.model.task._
 import org.openmole.core.model.sampling._
 import org.openmole.core.model.domain._
+import org.openmole.plugin.method.evolution.ToIndividualArrayTask
 import org.openmole.plugin.method.evolution._
 import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.transition._
 
 package object evolution {
 
-  def steadyGA(evolution: GAEvolution with Elitism with Termination with Breeding)(
+  def steadyGA(evolution: GAEvolution with Elitism with Termination with Breeding with EvolutionManifest with TerminationManifest)(
     name: String,
     model: Puzzle,
     populationSize: Int,
     inputs: Iterable[(IPrototype[Double], (Double, Double))],
-    objectives: Iterable[(IPrototype[Double], Double)])(implicit plugins: IPluginSet, factory: Factory[evolution.G]) = {
+    objectives: Iterable[(IPrototype[Double], Double)],
+    offspring: Int = 1)(implicit plugins: IPluginSet) = {
+
+    require(evolution.genomeSize == inputs.size)
 
     import evolution._
 
@@ -61,14 +65,14 @@ package object evolution {
 
     val firstCapsule = new StrainerCapsule(EmptyTask(name + "First"))
 
-    val sampling = new GenomeSampling(genome, populationSize)
+    val sampling = GenomeSampling(evolution)(genome, populationSize)
     val exploreSampling = ExplorationTask(name + "GenomeExploration", sampling)
     val explorationCapsule = new Capsule(exploreSampling)
 
     val scalingTask = ScalingGAGenomeTask(name + "ScalingGenome", genome, inputs.toSeq: _*)
     val scalingCaps = new Capsule(scalingTask)
 
-    val toIndividualTask = ToIndividualTask(name + "ToIndividual", genome, individual)
+    val toIndividualTask = ToIndividualArrayTask(name + "ToIndividual", genome, individual)
     objectives.foreach {
       case (o, v) ⇒ toIndividualTask addObjective (o, v)
     }
@@ -77,7 +81,7 @@ package object evolution {
 
     val elitismTask = ElitismTask(evolution)(
       name + "ElitismTask",
-      individual,
+      individual.toArray,
       archive,
       generation,
       state,
@@ -102,7 +106,8 @@ package object evolution {
     val breedingTask = SteadyBreedTask(evolution)(
       name + "Breeding",
       archive,
-      genome)
+      genome.toArray,
+      offspring)
 
     val breedingCaps = new StrainerCapsule(breedingTask)
 
@@ -115,8 +120,8 @@ package object evolution {
     new Transition(model.last, toIndividualCapsule, filtered = Set(genome.name))
     new Transition(toIndividualCapsule, elitismCaps)
     new Transition(elitismCaps, scalingArchiveCapsule)
-    new Transition(scalingArchiveCapsule, breedingCaps)
-    new Transition(breedingCaps, new Slot(scalingCaps))
+    new Transition(scalingArchiveCapsule, breedingCaps, generation.name + " % " + offspring + " == 0")
+    new SlaveTransition(breedingCaps, new Slot(scalingCaps))
     new EndExplorationTransition(scalingArchiveCapsule, endCapsule, terminated.name)
 
     new DataChannel(scalingCaps, toIndividualCapsule)

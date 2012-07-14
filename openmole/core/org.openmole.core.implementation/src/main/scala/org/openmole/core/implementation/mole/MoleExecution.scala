@@ -143,7 +143,7 @@ class MoleExecution(
   override def start = {
     if (!_started.getAndSet(true)) {
       val validationErrors = Validation(mole)
-      if (!validationErrors.isEmpty) throw new UserBadDataError("Formal validation of you mole has failed, several errors have been found: " + validationErrors.mkString("; "))
+      if (!validationErrors.isEmpty) throw new UserBadDataError("Formal validation of your mole has failed, several errors have been found: " + validationErrors.mkString("\n"))
       start(Context.empty)
     }
     this

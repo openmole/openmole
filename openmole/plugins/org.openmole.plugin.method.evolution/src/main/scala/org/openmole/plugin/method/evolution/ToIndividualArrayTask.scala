@@ -27,7 +27,7 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.task.IPluginSet
 import scala.collection.mutable.ListBuffer
 
-object ToIndividualTask {
+object ToIndividualArrayTask {
 
   def apply[T <: GAGenome](
     name: String, genome: IPrototype[T],
@@ -42,9 +42,9 @@ object ToIndividualTask {
         this
       }
 
-      def toTask = new ToIndividualTask[T](name, genome, individual) {
+      def toTask = new ToIndividualArrayTask[T](name, genome, individual) {
         val inputs = builder.inputs + genome
-        val outputs = builder.outputs + individual
+        val outputs = builder.outputs + individual.toArray
         val parameters = builder.parameters
         val objectives = builder.objectives.toList
       }
@@ -52,7 +52,7 @@ object ToIndividualTask {
 
 }
 
-sealed abstract class ToIndividualTask[T <: GAGenome](
+sealed abstract class ToIndividualArrayTask[T <: GAGenome](
     val name: String,
     genome: IPrototype[T],
     individual: IPrototype[Individual[T]])(implicit val plugins: IPluginSet) extends Task { task ⇒
@@ -61,14 +61,15 @@ sealed abstract class ToIndividualTask[T <: GAGenome](
 
   override def process(context: IContext) =
     context + new Variable(
-      individual,
-      new Individual[T] {
-        val genome = context.valueOrException(task.genome)
-        val fitness = new Fitness {
-          val values = objectives.map {
-            case (o, v) ⇒ math.abs(context.valueOrException(o) - v)
-          }.toIndexedSeq
-        }
-      })
+      individual.toArray,
+      Array[Individual[T]](
+        new Individual[T] {
+          val genome = context.valueOrException(task.genome)
+          val fitness = new Fitness {
+            val values = objectives.map {
+              case (o, v) ⇒ math.abs(context.valueOrException(o) - v)
+            }.toIndexedSeq
+          }
+        }))
 
 }
