@@ -13,8 +13,8 @@
 	initialState="noShow"
 	programGroup="yes"
 	desktop="yes"
-	applications="no"
-	startMenu="no"
+	applications="yes"
+	startMenu="non"
 	startup="no">
 
 	<!--<createForPack name="OpenMOLE"/>-->
