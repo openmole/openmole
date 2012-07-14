@@ -57,16 +57,20 @@ object DBServer extends App {
     Defragment.defrag(defragmentConfig)
   }
 
-  def open(dbFile: File) = Db4oClientServer.openServer(dB4oConfiguration, objRepo.getAbsolutePath, -1)
+  def open(dbFile: File) = Db4oClientServer.openServer(dB4oConfiguration, dbFile.getAbsolutePath, -1)
 
-  val objRepo = DBServerInfo.dbFile(base)
+  val lockFile = DBServerInfo.dbLockFile(base)
+  lockFile.createNewFile
 
-  objRepo.createNewFile
-  val str = new FileOutputStream(objRepo)
+  val str = new FileOutputStream(lockFile)
   val lock = str.getChannel.tryLock
 
   if (lock != null) {
+    val objRepo = DBServerInfo.dbFile(base)
+    if (objRepo.exists) defrag(objRepo)
+
     val server = open(objRepo)
+
     Runtime.getRuntime.addShutdownHook(
       new Thread {
         override def run = {

@@ -6,7 +6,7 @@
   </formats>
   <fileSets>
     <fileSet>
-      <directory>${project.build.directory}/appassembler/jsw/dbserver/</directory>
+      <directory>${project.build.directory}/appassembler/</directory>
       <outputDirectory>/dbserver/</outputDirectory>
     </fileSet>
   </fileSets>

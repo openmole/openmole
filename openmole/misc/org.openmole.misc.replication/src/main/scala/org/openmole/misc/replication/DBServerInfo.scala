@@ -31,8 +31,9 @@ object DBServerInfo {
     dir
   }
 
-  val dbName = "objectRepository.bin"
+  val dbName = "db.bin"
   val dbInfoName = "db.info"
+  val dbLock = "db.lock"
 
   lazy val xstream = new XStream
 
@@ -41,6 +42,8 @@ object DBServerInfo {
     try xstream.fromXML(src.mkString).asInstanceOf[DBServerInfo]
     finally src.close
   }
+
+  def dbLockFile(base: File) = new File(base, dbLock)
   def dbFile(base: File) = new File(base, dbName)
   def dbInfoFile(base: File) = new File(base, dbInfoName)
 }

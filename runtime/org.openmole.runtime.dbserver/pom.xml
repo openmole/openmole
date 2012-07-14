@@ -48,14 +48,14 @@
 
     <properties>
         <run.mainclass>org.openmole.runtime.dbserver.DBServer</run.mainclass>
-        <rpm.appname>dbserver</rpm.appname>
+        <rpm.appname>openmole-dbserver</rpm.appname>
         <appassemblerTarget>${project.build.directory}/appassembler</appassemblerTarget>
         <appassemblerAssembleDirectory>${appassemblerTarget}/jsw/${rpm.appname}</appassemblerAssembleDirectory>
     </properties>
 
     <build>
         <plugins>
-            <plugin>
+<!--            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>appassembler-maven-plugin</artifactId>
                 <version>1.2.2</version>
@@ -67,7 +67,7 @@
                     <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
                     <daemons>
                         <daemon>
-                            <id>dbserver</id>
+                            <id>openmole-dbserver</id>
                             <mainClass>${run.mainclass}</mainClass>
                             <platforms>
                                 <platform>jsw</platform>
@@ -109,7 +109,7 @@
                     </execution>
                 </executions>
             </plugin>
-            
+-->            
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>appassembler-maven-plugin</artifactId>
@@ -122,8 +122,7 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    
+                <configuration> 
                     <repositoryName>lib</repositoryName>
                     <programs>
                         <program>
@@ -133,6 +132,7 @@
                     </programs>
                     <platforms>
                         <platform>unix</platform>
+                        <platform>windows</platform>
                     </platforms>
                 </configuration>
             </plugin>
