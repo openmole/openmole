@@ -5,7 +5,7 @@ LOCATION=`dirname $0`
 
 cd $LOCATION
 
-nohup java -jar dbserver.jar &
+nohup sh dbserver/bin/dbserver &
 
 MEM="1G"
 

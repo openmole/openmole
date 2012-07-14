@@ -45,6 +45,12 @@
             <version>${project.version}</version>
             <type>tar.gz</type>
         </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.runtime.dbserver</artifactId>
+            <version>${project.version}</version>
+            <type>tar.gz</type>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->
@@ -103,6 +109,13 @@
                                     <type>tar.gz</type>
 				    <outputDirectory>${package.openmole.plugins-gui.directory}</outputDirectory>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.openmole.core</groupId>
+                                    <artifactId>org.openmole.runtime.dbserver</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>tar.gz</type>
+                                    <outputDirectory>${package.directory}</outputDirectory>
+                                </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
@@ -145,18 +158,29 @@
                                     <outputDirectory>${project.build.directory}</outputDirectory>
                                     <destFileName>jvm-linux-x64.tar.gz</destFileName>
                                 </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.openmole.core</groupId>
-                                    <artifactId>org.openmole.runtime.dbserver</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${package.directory}</outputDirectory>
-				    <destFileName>dbserver.jar</destFileName>
-                                </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <descriptor>src/main/assembly/openmole.xml</descriptor>
+                    <appendAssemblyId>false</appendAssemblyId>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                        <phase>package</phase> <!-- bind to the packaging phase -->
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 </project>
