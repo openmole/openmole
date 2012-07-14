@@ -100,21 +100,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>org.openmole.ui</groupId>
-                                    <artifactId>plugins</artifactId>
-                                    <version>${version}</version>
-                                    <type>tar.gz</type>
-                                    <outputDirectory>${project.build.directory}/openmole-plugins/</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.openmole.ui</groupId>
-                                    <artifactId>plugins-gui</artifactId>
-                                    <version>${version}</version>
-                                    <type>tar.gz</type>
-                                    <outputDirectory>${project.build.directory}/openmole-plugins-gui/</outputDirectory>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.openmole.ui</groupId>
-                                    <artifactId>org.openmole.ui</artifactId>
+                                    <artifactId>openmole-ui-package</artifactId>
                                     <version>${version}</version>
                                     <type>tar.gz</type>
                                     <outputDirectory>${project.build.directory}/openmole/</outputDirectory>

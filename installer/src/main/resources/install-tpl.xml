@@ -12,11 +12,6 @@
         <pack name="OpenMOLE Core" required="yes">
 	    <description>"OpenMOLE Core</description>
             <fileset dir="../openmole/" targetdir="$INSTALL_PATH" />
-            <fileset dir="../openmole-plugins/" targetdir="$INSTALL_PATH/openmole-plugins/" /> 
-	</pack>
-        <pack name="OpenMOLE GUI" required="yes">
-	    <description>"OpenMOLE GUI</description>
-            <fileset dir="../openmole-plugins-gui/" targetdir="$INSTALL_PATH/openmole-plugins-gui/" /> 
 	</pack>
         <pack name="OpenMOLE Runtime" required="yes">
 	    <description>"OpenMOLE Runtime</description>
