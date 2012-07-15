@@ -17,6 +17,6 @@
 
 package org.openmole.core.serializer.converter
 
-//object DeserializerWithFileInjectionFromPathHashFactory extends Factory[DeserializerWithFileInjectionFromPathHash] {
-//  def makeObject = new DeserializerWithFileInjectionFromPathHash
-//}
+object DeserializerWithFileInjectionFromPathHashFactory extends Factory[DeserializerWithFileInjectionFromPathHash] {
+  def makeObject = new DeserializerWithFileInjectionFromPathHash
+}

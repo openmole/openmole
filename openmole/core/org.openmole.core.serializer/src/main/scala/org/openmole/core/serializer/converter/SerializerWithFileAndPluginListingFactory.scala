@@ -17,10 +17,6 @@
 
 package org.openmole.core.serializer.converter
 
-import org.openmole.core.serializer.SerializerService
-import org.openmole.misc.workspace.Workspace
-
-/*object SerializerWithFileAndPluginListingFactory extends Factory[SerializerWithFileAndPluginListing] {
-  //override def capacity = Workspace.preferenceAsInt(SerializerService.NumberOfSerializers)
+object SerializerWithFileAndPluginListingFactory extends Factory[SerializerWithFileAndPluginListing] {
   def makeObject = new SerializerWithFileAndPluginListing
-}*/
+}

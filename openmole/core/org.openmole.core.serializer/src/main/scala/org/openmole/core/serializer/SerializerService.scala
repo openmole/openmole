@@ -149,14 +149,13 @@ object SerializerService {
     //serializerSemaphore.acquire
     //try {
 
-    //val serializer = SerializerWithFileAndPluginListingFactory.borrowObject
-    val serializer = new SerializerWithFileAndPluginListing
-    //try {
-    serializer.toXMLAndListPlugableClasses(obj.asInstanceOf[AnyRef], os)
-    new PluginClassAndFiles(serializer.files, serializer.classes)
-
-    // } finally serializerSemaphore.release
-    //} finally SerializerWithFileAndPluginListingFactory.returnObject(serializer)
+    val serializer = SerializerWithFileAndPluginListingFactory.borrowObject
+    //val serializer = new SerializerWithFileAndPluginListing
+    try {
+      serializer.toXMLAndListPlugableClasses(obj.asInstanceOf[AnyRef], os)
+      new PluginClassAndFiles(serializer.files, serializer.classes)
+      //} finally serializerSemaphore.release
+    } finally SerializerWithFileAndPluginListingFactory.returnObject(serializer)
   }
 
   def deserializeReplaceFiles[T](file: File, files: PartialFunction[File, File]): T = {
@@ -166,12 +165,12 @@ object SerializerService {
   }
 
   def deserializeReplaceFiles[T](is: InputStream, files: PartialFunction[File, File]): T = {
-    //val serializer = DeserializerWithFileInjectionFromFileFactory.borrowObject
-    val serializer = new DeserializerWithFileInjectionFromFile
-    //try {
-    serializer.files = files
-    serializer.fromXMLInjectFiles[T](is)
-    //} finally DeserializerWithFileInjectionFromFileFactory.returnObject(serializer)
+    val serializer = DeserializerWithFileInjectionFromFileFactory.borrowObject
+    //val serializer = new DeserializerWithFileInjectionFromFile
+    try {
+      serializer.files = files
+      serializer.fromXMLInjectFiles[T](is)
+    } finally DeserializerWithFileInjectionFromFileFactory.returnObject(serializer)
   }
 
   def serialize(obj: Any, os: OutputStream) = xstream.toXML(obj, os)
@@ -189,11 +188,11 @@ object SerializerService {
   }
 
   def deserializeReplacePathHash[T](is: InputStream, files: PartialFunction[FileInfo, File]) = {
-    //val deserializer = DeserializerWithFileInjectionFromPathHashFactory.borrowObject
-    val deserializer = new DeserializerWithFileInjectionFromPathHash
-    //try {
-    deserializer.files = files
-    deserializer.fromXMLInjectFiles[T](is)
-    //} finally DeserializerWithFileInjectionFromPathHashFactory.returnObject(deserializer)
+    val deserializer = DeserializerWithFileInjectionFromPathHashFactory.borrowObject
+    //val deserializer = new DeserializerWithFileInjectionFromPathHash
+    try {
+      deserializer.files = files
+      deserializer.fromXMLInjectFiles[T](is)
+    } finally DeserializerWithFileInjectionFromPathHashFactory.returnObject(deserializer)
   }
 }
