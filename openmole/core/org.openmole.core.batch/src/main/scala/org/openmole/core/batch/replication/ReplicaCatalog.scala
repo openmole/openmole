@@ -61,7 +61,7 @@ object ReplicaCatalog extends Logger {
   Workspace += (ObjectRepoLocation, ".objectRepository.bin")
   Workspace += (NoAccessCleanTime, "P30D")
 
-  val replicationPattern = Pattern.compile("\\p{XDigit}*_.*")
+  val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
 
   private def openClient = {
     val info = dbInfo
