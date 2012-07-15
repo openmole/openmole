@@ -20,15 +20,10 @@ package org.openmole.core.batch.environment
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.file.URIFile
-import org.openmole.core.batch.replication.ReplicaCatalog
 import collection.JavaConversions._
 import java.net.URI
 
 class VolatileStorage(val environment: BatchEnvironment, val URI: URI, override val connections: Int) extends Storage {
-  ReplicaCatalog.withClient {
-    c ⇒ ReplicaCatalog.getReplica(description, environment.authentication.key)(c).foreach { ReplicaCatalog.remove(_)(c) }
-  }
-
   override def baseDir(token: AccessToken) = new URIFile(URI)
   override def persistentSpace(token: AccessToken): IURIFile = baseDir(token)
   override def tmpSpace(token: AccessToken): IURIFile = baseDir(token)

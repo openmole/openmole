@@ -17,7 +17,6 @@
 
 package org.openmole.core.batch.replication
 
-import com.db4o.Db4o
 import com.db4o.ObjectContainer
 import com.db4o.ObjectServer
 import com.db4o.ObjectSet
@@ -31,12 +30,14 @@ import org.openmole.misc.replication.DBServerInfo
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.service.LockRepository
 import org.openmole.misc.tools.service.Logger
+import java.util.regex.Pattern
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.core.batch.environment.Storage
 import org.openmole.core.batch.file.GZURIFile
+import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.file.URIFile
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.ConfigurationLocation
@@ -59,6 +60,8 @@ object ReplicaCatalog extends Logger {
   Workspace += (GCUpdateInterval, "PT5M")
   Workspace += (ObjectRepoLocation, ".objectRepository.bin")
   Workspace += (NoAccessCleanTime, "P30D")
+
+  val replicationPattern = Pattern.compile("\\p{XDigit}*_.*")
 
   private def openClient = {
     val info = dbInfo
@@ -121,11 +124,6 @@ object ReplicaCatalog extends Logger {
     storageDescription: ServiceDescription,
     authenticationKey: String)(implicit objectContainer: ObjectContainer): ObjectSet[Replica] =
     objectContainer.queryByExample(new Replica(null, storageDescription.description, null, authenticationKey, null, null))
-
-  def inCatalog(
-    storageDescription: ServiceDescription,
-    authenticationKey: String)(implicit objectContainer: ObjectContainer): Set[String] =
-    objectContainer.queryByExample[Replica](new Replica(null, storageDescription.description, null, authenticationKey, null, null)).map { _.destination }.toSet
 
   def inCatalog(
     src: Iterable[File],
@@ -230,6 +228,9 @@ object ReplicaCatalog extends Logger {
     storage: Storage,
     token: AccessToken)(implicit objectContainer: ObjectContainer) = {
     val newFile = new GZURIFile(storage.persistentSpace(token).newFileInDir(hash, ".rep"))
+    
+    require(replicationPattern.matcher(newFile.name).matches)
+    
     logger.fine("Uploading " + newFile)
     signalUpload(URIFile.copy(src, newFile, token), srcPath, storage)
     logger.fine("Uploaded " + newFile)
@@ -281,6 +282,17 @@ object ReplicaCatalog extends Logger {
         if (!containsDestination(replica.destination)) URIFile.clean(new URIFile(replica.destination))
       }
     }
+
+  def cleanIfNotContains(destination: IURIFile, storage: Storage)(implicit objectContainer: ObjectContainer) = {
+    val matcher = replicationPattern.matcher(destination.name)
+    if (!matcher.matches) URIFile.clean(destination)
+    else {
+      val hash = matcher.group(1)
+      withSemaphore(key(hash, storage), objectContainer) {
+        if (!containsDestination(destination.location)) URIFile.clean(destination)
+      }
+    }
+  }
 
   private def contains(replica: Replica)(implicit objectContainer: ObjectContainer) =
     !objectContainer.queryByExample(replica).isEmpty

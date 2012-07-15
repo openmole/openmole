@@ -79,10 +79,11 @@ class PersistentStorage(
     persistentSpaceVar match {
       case None ⇒
         val persistentSpace = baseDir(token).mkdirIfNotExist(persistent, token)
-        val inCatalog = ReplicaCatalog.withClient(ReplicaCatalog.inCatalog(description, environment.authentication.key)(_))
-        for (file ← persistentSpace.list(token)) {
-          val child = new URIFile(persistentSpace, file)
-          if (!inCatalog.contains(child.location)) URIFile.clean(child)
+        
+        ReplicaCatalog.withClient {
+          c ⇒
+            for (file ← persistentSpace.list(token))
+              ReplicaCatalog.cleanIfNotContains(new URIFile(persistentSpace, file), this)(c)
         }
 
         persistentSpaceVar = Some(persistentSpace)
