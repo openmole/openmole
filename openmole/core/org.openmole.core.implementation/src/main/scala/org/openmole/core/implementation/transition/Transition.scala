@@ -51,7 +51,7 @@ class Transition(
     !end.transitions.exists(!registry.isRegistred(_, ticket))
   }
 
-  protected def submitNextJobsIfReady(context: Buffer[IVariable[_]], ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
+  protected def submitNextJobsIfReady(context: Buffer[IVariable[_]], ticket: ITicket, subMole: ISubMoleExecution) = subMole.transitionRegistry.synchronized {
     import subMole.moleExecution
     val registry = subMole.transitionRegistry
     registry.register(this, ticket, context)

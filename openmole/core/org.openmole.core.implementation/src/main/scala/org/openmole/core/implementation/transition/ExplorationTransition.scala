@@ -46,7 +46,7 @@ class ExplorationTransition(start: ICapsule, end: ISlot, condition: ICondition =
     submitIn(context, ticket, subSubMole)
   }
 
-  def submitIn(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
+  def submitIn(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {
     val (factors, outputs) = start.outputs.partition(d ⇒ (d.mode is explore) && d.prototype.`type`.isArray)
     val typedFactors = factors.map(_.prototype.asInstanceOf[IPrototype[Array[Any]]])
     val values = typedFactors.toList.map(context.value(_).get.toIterable).transpose

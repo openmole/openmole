@@ -29,7 +29,7 @@ import org.openmole.misc.exception.UserBadDataError
 
 class EndExplorationTransition(start: ICapsule, end: ISlot, trigger: ICondition, filtered: Iterable[String] = Iterable.empty) extends Transition(start, end, True, filtered) {
 
-  override protected def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
+  override protected def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {
     if (trigger.evaluate(context)) {
       val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("End exploration transition should take place after an exploration."))
       val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
