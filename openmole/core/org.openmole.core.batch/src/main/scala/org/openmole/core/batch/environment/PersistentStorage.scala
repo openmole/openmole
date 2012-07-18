@@ -79,7 +79,7 @@ class PersistentStorage(
     persistentSpaceVar match {
       case None ⇒
         val persistentSpace = baseDir(token).mkdirIfNotExist(persistent, token)
-        
+
         ReplicaCatalog.withClient {
           c ⇒
             for (file ← persistentSpace.list(token))

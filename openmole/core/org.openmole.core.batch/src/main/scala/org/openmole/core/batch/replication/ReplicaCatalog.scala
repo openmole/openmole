@@ -228,9 +228,9 @@ object ReplicaCatalog extends Logger {
     storage: Storage,
     token: AccessToken)(implicit objectContainer: ObjectContainer) = {
     val newFile = new GZURIFile(storage.persistentSpace(token).newFileInDir(hash, ".rep"))
-    
+
     require(replicationPattern.matcher(newFile.name).matches)
-    
+
     logger.fine("Uploading " + newFile)
     signalUpload(URIFile.copy(src, newFile, token), srcPath, storage)
     logger.fine("Uploaded " + newFile)
