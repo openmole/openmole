@@ -26,26 +26,18 @@ object Puzzle {
 
   def merge(
     first: ISlot,
-    last: ICapsule,
-    puzzles: Iterable[Puzzle]) = Puzzle(
-    first,
-    last,
-    Map() ++ puzzles.flatMap { _.selection },
-    Map() ++ puzzles.flatMap { _.grouping })
+    lasts: Iterable[ICapsule],
+    puzzles: Iterable[Puzzle]) =
+    new Puzzle(
+      first,
+      lasts,
+      puzzles.flatMap { _.selection }.toMap,
+      puzzles.flatMap { _.grouping }.toMap)
 
 }
 
 case class Puzzle(
-    val first: ISlot,
-    val last: ICapsule,
-    val selection: Map[ICapsule, IEnvironmentSelection],
-    val grouping: Map[ICapsule, IGrouping]) {
-
-  def +(p: Puzzle) =
-    new Puzzle(
-      first,
-      p.last,
-      selection ++ p.selection,
-      grouping ++ p.grouping)
-
-}
+  val first: ISlot,
+  val lasts: Iterable[ICapsule],
+  val selection: Map[ICapsule, IEnvironmentSelection],
+  val grouping: Map[ICapsule, IGrouping])

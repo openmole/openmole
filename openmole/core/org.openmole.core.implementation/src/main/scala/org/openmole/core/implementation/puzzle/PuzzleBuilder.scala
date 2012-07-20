@@ -17,6 +17,6 @@
 
 package org.openmole.core.implementation.puzzle
 
-trait PuzzleBuilder {
+/*trait PuzzleBuilder {
   def toPuzzle: Puzzle
-}
+}*/

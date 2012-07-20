@@ -78,8 +78,8 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
       Some((result, parentTicket, subMoleParent))
     } else None
   } match {
-    case Some((result, ticket, subMole)) => submitNextJobsIfReady(result, ticket, subMole)
-    case None =>
+    case Some((result, ticket, subMole)) ⇒ submitNextJobsIfReady(result, ticket, subMole)
+    case None ⇒
   }
 
   override def hasBeenPerformed(subMole: ISubMoleExecution, ticket: ITicket) = !subMole.aggregationTransitionRegistry.isRegistred(this, ticket)

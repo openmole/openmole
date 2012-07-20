@@ -27,7 +27,7 @@ import org.openmole.misc.tools.io.FileUtil._
 
 object ListFilesDomain extends Logger
 
-sealed class ListFilesDomain(dir: File, filter: File ⇒ Boolean) extends IDomain[File] with IFinite[File] {
+sealed class ListFilesDomain(baseDir: File, filter: File ⇒ Boolean) extends IDomain[File] with IFinite[File] {
 
   import ListFilesDomain._
 
@@ -37,10 +37,10 @@ sealed class ListFilesDomain(dir: File, filter: File ⇒ Boolean) extends IDomai
   def this(dir: String) = this(new File(dir))
 
   override def computeValues(context: IContext): Iterable[File] = {
-    val files = dir.listFiles(filter)
+    val files = baseDir.listFiles(filter)
 
     if (files == null) {
-      logger.warning("Directory " + dir + " in ListFilesDomain doesn't exists, returning an empty list of values.")
+      logger.warning("Directory " + baseDir + " in ListFilesDomain doesn't exists, returning an empty list of values.")
       Iterable.empty
     } else files
   }

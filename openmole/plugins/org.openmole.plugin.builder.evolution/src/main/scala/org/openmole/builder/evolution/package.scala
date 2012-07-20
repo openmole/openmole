@@ -114,15 +114,28 @@ package object evolution {
     val endTask = EmptyTask(name + "End")
     val endCapsule = new StrainerCapsule(endTask)
 
-    new Transition(firstCapsule, explorationCapsule)
+    firstCapsule --
+      explorationCapsule -<
+      scalingCaps --
+      (model, filtered = Set(genome.name)) --
+      toIndividualCapsule --
+      elitismCaps --
+      scalingArchiveCapsule --
+      (breedingCaps, condition = generation.name + " % " + offspring + " == 0") -<-
+      scalingCaps.newSlot
+
+    scalingArchiveCapsule >| (endCapsule, terminated.name + " == true")
+
+    /*new Transition(firstCapsule, explorationCapsule)
     new ExplorationTransition(explorationCapsule, scalingCaps)
     new Transition(scalingCaps, model.first)
-    new Transition(model.last, toIndividualCapsule, filtered = Set(genome.name))
+    new Transition(model.lasts, toIndividualCapsule, filtered = Set(genome.name))
     new Transition(toIndividualCapsule, elitismCaps)
     new Transition(elitismCaps, scalingArchiveCapsule)
     new Transition(scalingArchiveCapsule, breedingCaps, generation.name + " % " + offspring + " == 0")
-    new SlaveTransition(breedingCaps, new Slot(scalingCaps))
-    new EndExplorationTransition(scalingArchiveCapsule, endCapsule, terminated.name)
+    new SlaveTransition(breedingCaps, new Slot(scalingCaps))*/
+
+    //new EndExplorationTransition(scalingArchiveCapsule, endCapsule, terminated.name)
 
     new DataChannel(scalingCaps, toIndividualCapsule)
     new DataChannel(elitismCaps, breedingCaps)
@@ -132,7 +145,7 @@ package object evolution {
 
     val (_state, _generation, _genome) = (state, generation, genome)
 
-    new Puzzle(firstCapsule, endCapsule, model.selection, model.grouping) {
+    new Puzzle(firstCapsule, List(endCapsule), model.selection, model.grouping) {
       def outputCapsule = scalingArchiveCapsule
       def state = _state
       def generation = _generation

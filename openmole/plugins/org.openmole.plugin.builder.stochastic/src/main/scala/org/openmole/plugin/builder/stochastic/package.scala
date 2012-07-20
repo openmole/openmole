@@ -78,24 +78,11 @@ package object stochastic {
 
     val endCapsule = new StrainerCapsule(EmptyTask(name + "End"))
 
-    new ExplorationTransition(explorationCapsule, model.first)
-    new AggregationTransition(model.last, aggregationCapsule)
-
-    new Transition(aggregationCapsule, medianCapsule)
-    new Transition(aggregationCapsule, medianAbsoluteDeviationCapsule)
-    new Transition(aggregationCapsule, averageCapsule)
-    new Transition(aggregationCapsule, sumCapsule)
-    new Transition(aggregationCapsule, mseCapsule)
-
-    new Transition(medianCapsule, endCapsule)
-    new Transition(medianAbsoluteDeviationCapsule, endCapsule)
-    new Transition(averageCapsule, endCapsule)
-    new Transition(sumCapsule, endCapsule)
-    new Transition(mseCapsule, endCapsule)
-
     new DataChannel(explorationCapsule, endCapsule)
 
-    model.copy(first = explorationCapsule, last = endCapsule)
+    explorationCapsule -< model >- aggregationCapsule --
+      (medianCapsule, medianAbsoluteDeviationCapsule, averageCapsule, sumCapsule, mseCapsule) --
+      endCapsule
   }
 
   def replicate(
@@ -105,10 +92,8 @@ package object stochastic {
     val exploration = ExplorationTask(name + "Replication", replications)
     val explorationCapsule = new StrainerCapsule(exploration)
     val aggregationCapsule = new StrainerCapsule(EmptyTask(name + "Aggregation"))
-    new ExplorationTransition(explorationCapsule, model.first)
-    new AggregationTransition(model.last, aggregationCapsule)
     new DataChannel(explorationCapsule, aggregationCapsule)
-    model.copy(first = explorationCapsule, last = aggregationCapsule)
+    explorationCapsule -< model >- aggregationCapsule
   }
 
 }

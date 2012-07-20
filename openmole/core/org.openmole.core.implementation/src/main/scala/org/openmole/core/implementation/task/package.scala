@@ -22,16 +22,14 @@ import org.openmole.core.implementation.puzzle.Puzzle
 import org.openmole.core.model.task.ITask
 import org.openmole.misc.pluginmanager.PluginManager
 import mole._
+import puzzle._
 import java.io.File
 
 package object task {
   implicit def taskBuilderToTask[TB <: TaskBuilder](builder: TB) = builder.toTask
   implicit def taskToCapsuleConveter(task: ITask) = new Capsule(task)
 
-  implicit def taskToPuzzleConveter(task: ITask) =
-    puzzle.capsuleToPuzzleConverter(new Capsule(task))
-
-  implicit def taskBuilderToPuzzleConverter(t: TaskBuilder) = taskToPuzzleConveter(t.toTask)
+  implicit def taskToPuzzleConveter(task: ITask) = new Capsule(task).toPuzzle
 
   class TaskToCapsuleDecorator(task: ITask) {
     def toCapsule = new Capsule(task)
@@ -40,5 +38,7 @@ package object task {
 
   implicit def taskToCapsuleDecorator(task: ITask) = new TaskToCapsuleDecorator(task)
   implicit def taskBuilderToCapsuleDecorator(task: TaskBuilder) = taskToCapsuleDecorator(task)
+
+  implicit def taskBuilderToPuzzleConverter(t: TaskBuilder) = t.toTask.toCapsule.toPuzzle
 
 }

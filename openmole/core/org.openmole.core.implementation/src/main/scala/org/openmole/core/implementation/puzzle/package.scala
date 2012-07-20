@@ -19,16 +19,24 @@ package org.openmole.core.implementation
 
 import org.openmole.core.model.mole.ICapsule
 import mole._
+import org.openmole.core.model.transition.ISlot
 
 package object puzzle {
 
   implicit def capsulePuzzleDecorator(capsule: ICapsule) = new {
-    def toPuzzle: Puzzle = new Puzzle(capsule, capsule, Map.empty, Map.empty)
+    def toPuzzle: Puzzle =
+      Puzzle(
+        capsule.defaultInputSlot,
+        List(capsule),
+        Map.empty,
+        Map.empty)
   }
 
-  implicit def capsuleToPuzzleConverter(capsule: ICapsule): Puzzle = capsule.toPuzzle
+  implicit def capsuleToPuzzleConverter(capsule: ICapsule) = capsule.toPuzzle
 
-  implicit def puzzleBuilderToPuzzle(puzzleBuilder: PuzzleBuilder) = puzzleBuilder.toPuzzle
+  implicit def slotToPuzzleConverter(slot: ISlot) = slot.capsule.toPuzzle
+
+  //implicit def puzzleBuilderToPuzzle(puzzleBuilder: PuzzleBuilder) = puzzleBuilder.toPuzzle
 
   //implicit def taskToPuzzle(task: ITask): Puzzle = capsuleToPuzzleConverter(new Capsule(task)) 
   //implicit def builderToPuzzle(builder: TaskBuilder): Puzzle = taskToPuzzle(builder.toTask) 

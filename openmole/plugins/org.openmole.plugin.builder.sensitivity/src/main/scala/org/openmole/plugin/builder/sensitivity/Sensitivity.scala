@@ -17,51 +17,64 @@
 
 package org.openmole.plugin.builder.sensitivity
 
-import org.openmole.core.implementation.mole.Capsule
-import org.openmole.core.implementation.mole.StrainerCapsule
-import org.openmole.core.implementation.puzzle.Puzzle
-import org.openmole.core.implementation.sampling.DiscreteFactor
-import org.openmole.core.implementation.task.EmptyTask
-import org.openmole.core.implementation.task.ExplorationTask
-import org.openmole.core.implementation.transition.AggregationTransition
-import org.openmole.core.implementation.transition.ExplorationTransition
-import org.openmole.core.implementation.transition.Transition
-import org.openmole.core.implementation.data.DataChannel
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.domain.IBounded
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.sampling.IFactor
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.implementation.mole._
+import org.openmole.core.implementation.puzzle._
+import org.openmole.core.implementation.sampling._
+import org.openmole.core.implementation.task._
+import org.openmole.core.implementation.transition._
+import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.sampling._
+import org.openmole.core.model.task._
 import org.openmole.plugin.builder.Builder._
-import org.openmole.plugin.method.sensitivity.SaltelliSampling
-import org.openmole.plugin.method.sensitivity.SensitivityTask
+import org.openmole.plugin.method.sensitivity._
 
 object Sensitivity {
 
   def indice(name: String, input: IPrototype[Double], output: IPrototype[Double]) = SensitivityTask.indice(name, input, output)
-  //  
-  //  def sensitivity(
-  //    name: String,
-  //    model: Puzzle,
-  //    samples: Int,
-  //    factors: Iterable[IFactor[Double, IDomain[Double] with IBounded[Double]]],
-  //    outputs: Iterable[IPrototype[Double]]
-  //  )(implicit plugins: IPluginSet) = {
-  //    val matrixName = new Prototype[String](name + "Matrix")
-  //   
-  //    val sampling = new SaltelliSampling(samples, matrixName, factors.toSeq:_*)
-  //    val explorationCapsule = new StrainerCapsule(ExplorationTask(name + "Exploration", sampling))
-  //   
-  //    val firstOrderSensitivityTask = 
-  //      FirstOrderSensitivityTask(
-  //        name + "FirstOrderSensitivity", 
-  //        matrixName, 
-  //        factors.map{_.prototype}, 
-  //        outputs
-  //      )
-  //    
-  //  }
+
+  def bootStrappedSensitivity(
+    name: String,
+    model: Puzzle,
+    samples: Int,
+    bootstrap: Int,
+    factors: Iterable[IFactor[Double, IDomain[Double] with IBounded[Double]]],
+    outputs: Iterable[IPrototype[Double]])(implicit plugins: IPluginSet) = {
+    val matrixName = new Prototype[String](name + "Matrix")
+    val sampling = new SaltelliSampling(samples, matrixName, factors.toSeq: _*)
+    val explorationCapsule = new StrainerCapsule(ExplorationTask(name + "Exploration", sampling))
+
+    val firstOrderTask =
+      BootstrappedFirstOrderEffectTask(
+        name + "FirstOrder",
+        matrixName,
+        factors.map { _.prototype },
+        outputs,
+        bootstrap)
+
+    val firstOrderCapsule = new Capsule(firstOrderTask)
+
+    val totalOrderTask =
+      BootstrappedTotalOrderEffectTask(
+        name + "TotalOrder",
+        matrixName,
+        factors.map { _.prototype },
+        outputs,
+        bootstrap)
+
+    val totalOrderCapsule = new Capsule(totalOrderTask)
+
+    val aggregateCapsule = new StrainerCapsule(EmptyTask(name + "Aggregate"))
+
+    val puzzle = explorationCapsule -< model >- aggregateCapsule -- (firstOrderCapsule, totalOrderCapsule)
+
+    new Puzzle(puzzle.first, puzzle.lasts, puzzle.selection, puzzle.grouping) {
+      def firtOrderEffect = firstOrderCapsule
+      def totalOrderEffect = totalOrderCapsule
+    }
+
+  }
 
 }

@@ -35,18 +35,16 @@ package object mole {
 
   implicit def moleToMoleExecutionConverter(mole: IMole) = new MoleExecution(mole)
 
-  class PuzzleMoleDecorator(puzzle: Puzzle) {
-    def on(env: IEnvironment): Puzzle =
-      puzzle.copy(selection = puzzle.selection + (puzzle.last -> new FixedEnvironmentSelection(env)))
-    def toExecution = new MoleExecution(puzzle, puzzle.selection, puzzle.grouping)
+  class PuzzleMoleExecutionDecorator(puzzle: Puzzle) {
+    def toExecution = new MoleExecution(new Mole(puzzle.first.capsule), puzzle.selection, puzzle.grouping)
+    def on(env: IEnvironment) =
+      puzzle.copy(selection = puzzle.selection ++ puzzle.lasts.map(_ -> new FixedEnvironmentSelection(env)))
   }
 
-  implicit def puzzleMoleDecoraton(puzzle: Puzzle) = new PuzzleMoleDecorator(puzzle)
-
-  implicit def capsuleMoleDecoraton(capsule: ICapsule) = new PuzzleMoleDecorator(capsule)
-  implicit def taskMoleDecoraton(task: ITask) = new PuzzleMoleDecorator(task)
-  implicit def taskMoleBuilderDecoraton(taskBuilder: TaskBuilder) = new PuzzleMoleDecorator(taskBuilder)
-
+  implicit def puzzleMoleExecutionDecoration(puzzle: Puzzle) = new PuzzleMoleExecutionDecorator(puzzle)
+  implicit def capsuleMoleExecutionDecoration(capsule: ICapsule) = puzzleMoleExecutionDecoration(capsule.toPuzzle)
+  implicit def taskMoleExecutionDecoration(task: ITask): PuzzleMoleExecutionDecorator = capsuleMoleExecutionDecoration(task.toCapsule)
+  implicit def taskMoleBuilderDecoraton(taskBuilder: TaskBuilder) = taskMoleExecutionDecoration(taskBuilder.toTask)
   implicit def environmentToFixedEnvironmentSelectionConverter(env: IEnvironment) = new FixedEnvironmentSelection(env)
 
   implicit def caspuleSlotDecorator(capsule: ICapsule) = new {

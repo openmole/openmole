@@ -25,15 +25,15 @@ package object batch {
 
     def by(n: Int): Puzzle =
       puzzle.copy(
-        grouping = puzzle.grouping + (puzzle.last -> new NumberOfMoleJobsGrouping(n)))
+        grouping = puzzle.grouping ++ puzzle.lasts.map(_ -> new NumberOfMoleJobsGrouping(n)))
 
     def in(n: Int): Puzzle =
       puzzle.copy(
-        grouping = puzzle.grouping + (puzzle.last -> new NumberOfBatchGrouping(n)))
+        grouping = puzzle.grouping ++ puzzle.lasts.map(_ -> new NumberOfBatchGrouping(n)))
 
     def inShuffled(n: Int): Puzzle =
       puzzle.copy(
-        grouping = puzzle.grouping + (puzzle.last -> new NumberOfBatchShuffledGrouping(n)))
+        grouping = puzzle.grouping ++ puzzle.lasts.map(_ -> new NumberOfBatchShuffledGrouping(n)))
 
   }
 
