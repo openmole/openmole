@@ -1,0 +1,13 @@
+<assembly>
+  <id>openmole</id>
+  <baseDirectory></baseDirectory>
+  <formats>
+    <format>tar.gz</format>
+  </formats>
+  <fileSets>
+    <fileSet>
+      <directory>${project.build.directory}/openmole</directory>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+  </fileSets>
+</assembly>

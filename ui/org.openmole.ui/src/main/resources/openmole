@@ -5,6 +5,8 @@ LOCATION=`dirname $0`
 
 cd $LOCATION
 
+nohup sh dbserver/bin/openmole-dbserver &
+
 MEM="1G"
 
 FLAG=""

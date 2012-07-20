@@ -126,74 +126,61 @@ class ExecutionManager(manager: IMoleSceneManager,
   contents = tabbedPane
   preferredSize = new Dimension(size.width, 300)
 
-  def canBeRun =
-    if (Workspace.anotherIsRunningAt(Workspace.defaultLocation)) {
-      val dd = new DialogDescriptor(new Label("A simulation is currently running.\nTwo simulations can not run concurrently, overwrite ?") { background = Color.white }.peer,
-        "Execution warning")
-      val result = DialogDisplayer.getDefault.notify(dd)
-      if (result.equals(NotifyDescriptor.OK_OPTION)) {
-        (new File(Workspace.defaultLocation.getAbsolutePath + "/.running")).delete
-        true
-      } else false
-    } else true
-
   def start = synchronized {
-    if (canBeRun) {
-      tabbedPane.selection.index = 1
-      cancel
-      initBarPlotter
-      //   hookPanels.values.foreach(_._2.foreach(_.release))
-      MoleMaker.buildMoleExecution(mole,
-        manager,
-        capsuleMapping,
-        //FIXME with Grouping Strategy
-        List.empty) match {
-          case Right((moleExecution, environments)) ⇒
-            this.moleExecution = moleExecution
+    tabbedPane.selection.index = 0
+    cancel
+    initBarPlotter
+    //   hookPanels.values.foreach(_._2.foreach(_.release))
+    MoleMaker.buildMoleExecution(mole,
+      manager,
+      capsuleMapping,
+      //FIXME with Grouping Strategy
+      List.empty) match {
+        case Right((moleExecution, environments)) ⇒
+          this.moleExecution = moleExecution
 
-            EventDispatcher.listen(moleExecution, new JobSatusListener(this), classOf[IMoleExecution.OneJobStatusChanged])
-            EventDispatcher.listen(moleExecution, new JobCreatedListener(this), classOf[IMoleExecution.OneJobSubmitted])
-            EventDispatcher.listen(moleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ExceptionRaised])
-            environments.foreach { e ⇒
-              e._1 match {
-                case be: BatchEnvironment ⇒
-                  EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.BeginUpload])
-                  EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.EndUpload])
-                  EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.BeginDownload])
-                  EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.EndDownload])
-                case _ ⇒
-              }
+          EventDispatcher.listen(moleExecution, new JobSatusListener(this), classOf[IMoleExecution.OneJobStatusChanged])
+          EventDispatcher.listen(moleExecution, new JobCreatedListener(this), classOf[IMoleExecution.OneJobSubmitted])
+          EventDispatcher.listen(moleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ExceptionRaised])
+          environments.foreach { e ⇒
+            e._1 match {
+              case be: BatchEnvironment ⇒
+                EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.BeginUpload])
+                EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.EndUpload])
+                EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.BeginDownload])
+                EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.EndDownload])
+              case _ ⇒
             }
+          }
 
-            environments.foreach {
-              case (env, _) ⇒ EventDispatcher.listen(env, new EnvironmentExceptionListener(this), classOf[IEnvironment.ExceptionRaised])
-            }
+          environments.foreach {
+            case (env, _) ⇒ EventDispatcher.listen(env, new EnvironmentExceptionListener(this), classOf[IEnvironment.ExceptionRaised])
+          }
 
-            environments.foreach(buildEmptyEnvPlotter)
-            if (envBarPanel.peer.getComponentCount == 2) envBarPanel.peer.remove(1)
+          environments.foreach(buildEmptyEnvPlotter)
+          if (envBarPanel.peer.getComponentCount == 2) envBarPanel.peer.remove(1)
 
-            //FIXME Displays several environments
-            if (environments.size > 0) {
-              envBarPlotter.title(environments.toList(0)._2)
-              envBarPanel.peer.add(envBarPlotter.panel)
-            }
-            initPieChart
-            //   hookPanels.keys.foreach { commitHook }
-            repaint
-            revalidate
+          //FIXME Displays several environments
+          if (environments.size > 0) {
+            envBarPlotter.title(environments.toList(0)._2)
+            envBarPanel.peer.add(envBarPlotter.panel)
+          }
+          initPieChart
+          // hookPanels.keys.foreach { commitHook }
+          repaint
+          revalidate
 
-            timer.start
-            moleExecution.start
-          case Left(e: UserBadDataError) ⇒
-            StatusBar.block(e.getMessage,
-              stack = e.getStackTraceString + "\nCaused by\n" + e.getCause.getMessage + e.getCause.getStackTraceString,
-              exceptionName = e.getClass.getCanonicalName)
-          case Left(e) ⇒
-            StatusBar.block(e.getMessage,
-              stack = e.getStackTraceString,
-              exceptionName = e.getClass.getCanonicalName)
-        }
-    }
+          timer.start
+          moleExecution.start
+        case Left(e: UserBadDataError) ⇒
+          StatusBar.block(e.getMessage,
+            stack = e.getStackTraceString + "\nCaused by\n" + e.getCause.getMessage + e.getCause.getStackTraceString,
+            exceptionName = e.getClass.getCanonicalName)
+        case Left(e) ⇒
+          StatusBar.block(e.getMessage,
+            stack = e.getStackTraceString,
+            exceptionName = e.getClass.getCanonicalName)
+      }
   }
 
   def incrementEnvironmentState(environment: IEnvironment,

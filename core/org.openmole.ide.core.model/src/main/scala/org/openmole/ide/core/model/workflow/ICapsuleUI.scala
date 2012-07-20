@@ -47,7 +47,7 @@ trait ICapsuleUI {
 
   def addInputSlot(startingCapsule: Boolean): IInputSlotWidget
 
-  def updateErrors(errors: List[(IPrototypeDataProxyUI, DataflowProblem)]): Unit
+  def updateErrors(errors: Iterable[DataflowProblem]): Unit
 
   def x: Double
 

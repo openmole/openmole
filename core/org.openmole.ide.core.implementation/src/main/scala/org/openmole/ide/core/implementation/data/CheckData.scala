@@ -73,7 +73,7 @@ object CheckData extends Logger {
                       _ match {
                         case x: DataflowProblem ⇒
                           displayCapsuleErrors(capsuleMap(x.capsule), x.toString)
-                          Some(capsuleMap(x.capsule) -> (prototypeMap(x.data.prototype), x))
+                          Some(capsuleMap(x.capsule) -> x)
                         case x ⇒
                           logger.info("Error " + x + " not taken into account in the GUI yet.")
                           None
