@@ -278,8 +278,11 @@ object ReplicaCatalog extends Logger {
     withSemaphore(key(replica), objectContainer) {
       logger.fine("Cleaning replica " + replica.toString)
       if (contains(replica)) {
+        logger.fine("Contains replica " + replica.toString)
         removeNoLock(replica)
+        logger.fine("Removed replica " + replica.toString)
         if (!containsDestination(replica.destination)) URIFile.clean(new URIFile(replica.destination))
+        else logger.fine("Still contains " + replica.destination)
       }
     }
 

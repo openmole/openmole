@@ -54,7 +54,7 @@ object Workspace {
 
   private val group = "Workspace"
   private val fixedPrefix = "file"
-  private val fixedPostfix = ".wf"
+  private val fixedPostfix = ".bin"
   private val fixedDir = "dir"
 
   private val passwordTest = new ConfigurationLocation(group, "passwordTest", true)

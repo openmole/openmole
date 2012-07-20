@@ -56,9 +56,7 @@ package object transition {
 
     def -<(toHead: Puzzle, toTail: Puzzle*) = {
       val toPuzzles = (toHead :: toTail.toList)
-      toPuzzles foreach {
-        p ⇒ p.lasts.foreach { c ⇒ new ExplorationTransition(c, p.first) }
-      }
+      for (f ← from.lasts; l ← toPuzzles.flatMap { _.lasts }) new ExplorationTransition(f, l)
       Puzzle.merge(from.first, toPuzzles.flatMap { _.lasts }, from :: toPuzzles ::: Nil)
     }
 
@@ -76,9 +74,7 @@ package object transition {
 
     def -<-(toHead: Puzzle, toTail: Puzzle*) = {
       val toPuzzles = (toHead :: toTail.toList)
-      toPuzzles foreach {
-        p ⇒ p.lasts.foreach { c ⇒ new SlaveTransition(c, p.first) }
-      }
+      for (f ← from.lasts; l ← toPuzzles.flatMap { _.lasts }) new SlaveTransition(f, l)
       Puzzle.merge(from.first, toPuzzles.flatMap { _.lasts }, from :: toPuzzles ::: Nil)
     }
 
@@ -93,9 +89,7 @@ package object transition {
 
     def >-(toHead: Puzzle, toTail: Puzzle*) = {
       val toPuzzles = (toHead :: toTail.toList)
-      toPuzzles foreach {
-        p ⇒ p.lasts.foreach { c ⇒ new AggregationTransition(c, p.first) }
-      }
+      for (f ← from.lasts; l ← toPuzzles.flatMap { _.lasts }) new AggregationTransition(f, l)
       Puzzle.merge(from.first, toPuzzles.flatMap { _.lasts }, from :: toPuzzles ::: Nil)
     }
 
@@ -116,21 +110,10 @@ package object transition {
 
     def --(toHead: Puzzle, toTail: Puzzle*) = {
       val toPuzzles = (toHead :: toTail.toList)
-      toPuzzles foreach {
-        p ⇒ p.lasts.foreach { c ⇒ new Transition(c, p.first) }
-      }
+      for (f ← from.lasts; l ← toPuzzles.flatMap { _.lasts }) new Transition(f, l)
       Puzzle.merge(from.first, toPuzzles.flatMap { _.lasts }, from :: toPuzzles ::: Nil)
     }
 
   }
-
-  /*  class TransitionDecorator[T <: First with Last](from: Puzzle[T]) {
-
-    def loop(condition: ICondition) = {
-      new Transition(from.last, from.first.capsule.newSlot, condition)
-      from
-    }
-  }
-*/
 
 }

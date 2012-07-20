@@ -19,7 +19,6 @@ package org.openmole.core.implementation.transition
 
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.task.PluginSet
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.sampling.ExplicitSampling
 import org.openmole.core.model.data.IContext
@@ -59,6 +58,31 @@ class ExplorationTransitionSpec extends FlatSpec with ShouldMatchers {
     new ExplorationTransition(exc, new Capsule(t))
     new MoleExecution(new Mole(exc)).start.waitUntilEnded
 
+    res.toArray.sorted.deep should equal(data.toArray.deep)
+  }
+
+  "Exploration transition" should "work with the DSL interface" in {
+
+    println("Test")
+
+    val data = List("A", "B", "C")
+    val i = new Prototype[String]("i")
+
+    val explo = ExplorationTask("Exploration", new ExplicitSampling(i, data))
+
+    val res = new ListBuffer[String]
+
+    val t = new TestTask {
+      val name = "Test"
+      override def inputs = DataSet(i)
+      override def process(context: IContext) = synchronized {
+        context.contains(i) should equal(true)
+        res += context.value(i).get
+        context
+      }
+    }
+
+    (explo -< t).toExecution.start.waitUntilEnded
     res.toArray.sorted.deep should equal(data.toArray.deep)
   }
 }

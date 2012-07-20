@@ -31,7 +31,7 @@ object SSHEnvironment {
   val UpdateInterval = new ConfigurationLocation("SSHEnvironment", "UpdateInterval")
 
   Workspace += (UpdateInterval, "PT10S")
-  Workspace += (MaxConnections, "5")
+  Workspace += (MaxConnections, "10")
 }
 
 import SSHEnvironment._
