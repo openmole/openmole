@@ -20,4 +20,8 @@ package org.openmole.ide.core.implementation.dataproxy
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.core.model.dataproxy.IDomainDataProxyUI
 
-class DomainDataProxyUI(var dataUI: IDomainDataUI, val id: Int = Proxys.incr.getAndIncrement) extends IDomainDataProxyUI
+class DomainDataProxyUI(name: String,
+                        var dataUI: IDomainDataUI,
+                        val id: Int = Proxys.incr.getAndIncrement) extends IDomainDataProxyUI {
+  override def toString = name
+}

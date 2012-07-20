@@ -35,24 +35,30 @@ object MultiWidget extends Enumeration {
 }
 
 import MultiWidget._
-class MultiWidget[T <: IRowWidget](title: String = "",
-                                   rWidgets: List[T],
-                                   factory: IRowWidgetFactory[T],
-                                   allowEmpty: Minus = NO_EMPTY,
-                                   buildRowFromFactory: Boolean = false) {
-  val specimen = rWidgets.head
+class MultiWidget[S, T <: IRowWidget[S]](title: String = "",
+                                         rWidgets: List[T],
+                                         factory: IRowWidgetFactory[S, T],
+                                         allowEmpty: Minus = NO_EMPTY,
+                                         buildRowFromFactory: Boolean = false) {
+  //  val specimen = rWidgets.head
   val rowWidgets = new HashSet[T]
-  val panel = new PluginPanel("wrap " + { if (rWidgets.head.plusAllowed == ADD) 1 else 0 }.toString + ", insets 0 5 0 5")
+  val panel = new PluginPanel("wrap " + {
+    rWidgets.headOption match {
+      case Some(x: IRowWidget[T]) ⇒ if (x.plusAllowed == ADD) 1 else 0
+      case _ ⇒ 0
+    }
+  }.toString + ", insets 0 5 0 5")
   val titleLabel = new Label(title) { foreground = new Color(0, 113, 187) }
   val addButton = new ImageLinkLabel(ADD, new Action("") { def apply = addRow })
 
-  if (buildRowFromFactory) rWidgets.foreach(r ⇒ addRow(factory(r, panel)))
-  else rWidgets.foreach(addRow)
+  // if (buildRowFromFactory) rWidgets.foreach(r ⇒ addRow(factory(r, panel)))
+  // else rWidgets.foreach(addRow)
+  rWidgets.foreach(addRow)
 
   if (!title.isEmpty) panel.contents.insert(0, titleLabel)
   panel.contents += addButton
 
-  def addRow: T = addRow(factory.apply(specimen, panel))
+  def addRow: T = addRow(factory.apply)
 
   def addRow(rowWidget: T): T = {
     rowWidgets += rowWidget

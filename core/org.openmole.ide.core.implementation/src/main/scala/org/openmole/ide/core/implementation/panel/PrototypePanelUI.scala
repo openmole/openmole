@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.implementation.panel
 
+import java.awt.BorderLayout
 import java.awt.Color
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import javax.imageio.ImageIO
@@ -30,13 +31,17 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
 import scala.collection.JavaConversions._
 import BasePanelUI._
+import scala.swing.TabbedPane
 
 class PrototypePanelUI[T](proxy: IPrototypeDataProxyUI,
                           scene: IMoleScene,
                           mode: Value = CREATION) extends BasePanelUI(proxy, scene, mode, new Color(255, 204, 0)) {
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
   val panelUI = proxy.dataUI.buildPanelUI
-  mainPanel.contents += panelUI.peer
+
+  //panelUI.tabbedPane.pages.insert(0, new TabbedPane.Page("General", mainPanel))
+  peer.add(mainPanel.peer, BorderLayout.NORTH)
+  peer.add(panelUI.peer, BorderLayout.CENTER)
 
   def create = {
     Proxys.prototypes += proxy

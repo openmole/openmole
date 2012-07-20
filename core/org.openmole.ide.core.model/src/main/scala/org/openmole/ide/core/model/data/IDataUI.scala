@@ -22,7 +22,7 @@ import org.openmole.ide.core.model.panel.IPanelUI
 trait IDataUI {
   def name: String
 
-  def displayName: String = name
+  override def toString: String = name
 
   def coreClass: Class[_]
 

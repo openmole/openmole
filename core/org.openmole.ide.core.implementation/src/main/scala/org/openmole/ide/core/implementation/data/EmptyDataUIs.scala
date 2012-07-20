@@ -38,6 +38,7 @@ import org.openmole.core.model.data.IDataSet
 import org.openmole.core.model.data.IParameterSet
 import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
+import scala.swing.TabbedPane
 
 object EmptyDataUIs {
 
@@ -56,7 +57,7 @@ object EmptyDataUIs {
   }
 
   class EmptyPrototypePanelUI extends IPrototypePanelUI[Any] {
-    override def peer = new PluginPanel("").peer
+    def peer = new PluginPanel("").peer
     def saveContent(name: String) = new EmptyPrototypeDataUI
   }
 
@@ -72,7 +73,7 @@ object EmptyDataUIs {
   }
 
   class EmptySamplingPanelUI extends ISamplingPanelUI {
-    override def peer = new PluginPanel("").peer
+    def peer = new PluginPanel("").peer
     def saveContent(name: String) = new EmptySamplingDataUI
   }
 
@@ -100,7 +101,7 @@ object EmptyDataUIs {
   }
 
   class EmptyTaskPanelUI extends ITaskPanelUI {
-    override def peer = new PluginPanel("").peer
+    def peer = new PluginPanel("").peer
     def saveContent(name: String) = new EmptyTaskDataUI
   }
 

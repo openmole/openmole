@@ -18,11 +18,11 @@
 package org.openmole.ide.plugin.hook.display
 
 import org.openmole.plugin.hook.display.ToStringHook
-import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.factory.IHookFactoryUI
 
 class ToStringHookFactoryUI extends IHookFactoryUI {
-  def buildPanelUI(executionManager: IExecutionManager) = new ToStringHookPanelUI(executionManager)
+
+  def buildDataUI = new ToStringHookDataUI
 
   def coreClass = classOf[ToStringHook]
 

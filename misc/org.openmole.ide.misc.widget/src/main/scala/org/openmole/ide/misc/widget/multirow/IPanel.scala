@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 <mathieu.leclaire at openmole.org>
+ * Copyright (C) 2012 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@
 
 package org.openmole.ide.misc.widget.multirow
 
-trait IRowWidget2[+S, +T] extends IRowWidget {
-  def content: (S, T)
+import scala.swing.Component
+
+trait IPanel[C <: IData] extends Component {
+  def content: C
 }

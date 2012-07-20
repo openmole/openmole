@@ -19,7 +19,7 @@ package org.openmole.ide.misc.widget.multirow
 
 import org.openmole.ide.misc.tools.image.Images
 import org.openmole.ide.misc.widget.ChooseFileTextField
-import org.openmole.ide.misc.widget.MyPanel
+import org.openmole.ide.misc.widget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget.Plus
 import org.openmole.ide.misc.widget.multirow.RowWidget._
@@ -28,115 +28,71 @@ import scala.swing.MyComboBox
 import scala.swing.Label
 
 object MultiTwoCombosChooseFileTextField {
-  class Factory[A, B] extends IRowWidgetFactory[TwoCombosChooseFileTextFieldRowWidget[A, B]] {
-    def apply(row: TwoCombosChooseFileTextFieldRowWidget[A, B], panel: MyPanel) = {
-      import row._
-      new TwoCombosChooseFileTextFieldRowWidget(comboContentA,
-        selectedA,
-        inBetweenString1,
-        comboContentB,
-        selectedB,
-        inBetweenString2,
-        filePath,
-        plus)
 
+  class TwoCombosChooseFileTextFieldPanel[A, B](comboContent1: List[A],
+                                                comboContent2: List[B],
+                                                inBetweenString1: String,
+                                                inBetweenString2: String,
+                                                data: TwoCombosChooseFileTextFieldData[A, B])
+      extends PluginPanel("wrap 6") with IPanel[TwoCombosChooseFileTextFieldData[A, B]] {
+    val combo1 = new MyComboBox[A](comboContent1.sortBy { _.toString }) {
+      data.comboValue1 match {
+        case Some(x: A) ⇒ selection.item = x
+        case _ ⇒
+      }
     }
-  }
 
-  class TwoCombosChooseFileTextFieldRowWidget[A, B](val comboContentA: List[A],
-                                                    val selectedA: A,
-                                                    val inBetweenString1: String,
-                                                    val comboContentB: List[B],
-                                                    val selectedB: B,
-                                                    val inBetweenString2: String,
-                                                    val filePath: String,
-                                                    val plus: Plus) extends IRowWidget3[A, B, String] {
+    val combo2 = new MyComboBox[B](comboContent2.sortBy { _.toString }) {
+      data.comboValue2 match {
+        case Some(x: B) ⇒ selection.item = x
+        case _ ⇒
+      }
+    }
 
-    val combo1 = new MyComboBox[A](comboContentA.sortBy { _.toString }) { selection.item = selectedA }
-    val combo2 = new MyComboBox[B](comboContentB.sortBy { _.toString }) { selection.item = selectedB }
-    val chooseFileText = new ChooseFileTextField(filePath)
+    val chooseFileText = new ChooseFileTextField(data.filePath)
     val refreshButton = new Button { icon = Images.REFRESH }
 
-    override val panel = new RowPanel(List(combo1, new Label(inBetweenString1),
-      combo2, new Label(inBetweenString2),
-      chooseFileText,
-      refreshButton),
-      plus)
+    contents += combo1
+    contents += new Label(inBetweenString1)
+    contents += combo2
+    contents += new Label(inBetweenString2)
+    contents += chooseFileText
+    contents += refreshButton
 
-    override def content: (A, B, String) = (combo1.selection.item, combo2.selection.item, chooseFileText.text)
+    def content = new TwoCombosChooseFileTextFieldData(Some(combo1.selection.item),
+      Some(combo2.selection.item),
+      chooseFileText.text)
+  }
 
+  class TwoCombosChooseFileTextFieldData[A, B](val comboValue1: Option[A] = None,
+                                               val comboValue2: Option[B] = None,
+                                               val filePath: String = "") extends IData
+
+  class TwoCombosChooseFileTextFieldFactory[A, B](comboContent1: List[A],
+                                                  comboContent2: List[B],
+                                                  inBetweenString1: String,
+                                                  inBetweenString2: String) extends IFactory[TwoCombosChooseFileTextFieldData[A, B]] {
+    def apply = new TwoCombosChooseFileTextFieldPanel(comboContent1,
+      comboContent2,
+      inBetweenString1,
+      inBetweenString2,
+      new TwoCombosChooseFileTextFieldData)
   }
 }
-
 import MultiTwoCombosChooseFileTextField._
+
 class MultiTwoCombosChooseFileTextField[A, B](title: String,
-                                              rWidgets: List[TwoCombosChooseFileTextFieldRowWidget[A, B]],
-                                              factory: IRowWidgetFactory[TwoCombosChooseFileTextFieldRowWidget[A, B]],
+                                              comboContent1: List[A],
+                                              comboContent2: List[B],
+                                              inBetweenString1: String,
+                                              inBetweenString2: String,
+                                              initPanels: List[TwoCombosChooseFileTextFieldPanel[A, B]],
                                               minus: Minus = NO_EMPTY,
-                                              plus: Plus = ADD)
-    extends MultiWidget(title, rWidgets, factory, minus) {
-  def this(title: String,
-           initValues: (List[A], List[B]),
-           selected: List[(A, B)],
-           inbetweenString1: String,
-           inbetweenString2: String,
-           filePath: String,
-           factory: IRowWidgetFactory[TwoCombosChooseFileTextFieldRowWidget[A, B]],
-           minus: Minus,
-           plus: Plus) = this(title,
-    if (selected.isEmpty) {
-      List(new TwoCombosChooseFileTextFieldRowWidget(initValues._1,
-        initValues._1(0),
-        inbetweenString1,
-        initValues._2,
-        initValues._2(0),
-        inbetweenString2,
-        filePath,
-        plus))
-    } else
-      selected.map {
-        case (s1, s2) ⇒ new TwoCombosChooseFileTextFieldRowWidget(initValues._1,
-          s1,
-          inbetweenString1,
-          initValues._2,
-          s2,
-          inbetweenString2,
-          filePath,
-          plus)
-      },
-    factory, minus, plus)
-
-  def this(title: String, rName: String,
-           iValues: (List[A], List[B]),
-           selected: List[(A, B)],
-           ibString: String,
-           ibString2: String,
-           fp: String) = this(title,
-    iValues,
-    selected,
-    ibString,
-    ibString2,
-    fp,
-    new Factory[A, B],
-    NO_EMPTY,
-    ADD)
-
-  def this(title: String,
-           iValues: (List[A], List[B]),
-           selected: List[(A, B)],
-           ibString: String,
-           ibString2: String,
-           fp: String,
-           minus: Minus,
-           plus: Plus) = this(title,
-    iValues,
-    selected,
-    ibString,
-    ibString2,
-    fp,
-    new Factory[A, B],
-    minus,
-    plus)
-
-  def content = rowWidgets.map(_.content).toList
-}
+                                              plus: Plus = ADD) extends MultiPanel(title,
+  new TwoCombosChooseFileTextFieldFactory(comboContent1,
+    comboContent2,
+    inBetweenString1,
+    inBetweenString2),
+  initPanels,
+  minus,
+  plus)

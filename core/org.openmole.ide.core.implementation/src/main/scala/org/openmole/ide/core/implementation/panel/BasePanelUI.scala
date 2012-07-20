@@ -41,6 +41,8 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
                            scene: IMoleScene,
                            mode: Value,
                            borderColor: Color = new Color(200, 200, 200)) extends MyPanel {
+  background = Color.WHITE
+  opaque = true
   peer.setLayout(new BorderLayout)
   val iconLabel = new Label { icon = new ImageIcon(EMPTY) }
   val nameTextField = new TextField(15) {
@@ -48,31 +50,34 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
     tooltip = Help.tooltip("Name of the concept instance")
   }
   val createLabelLink = new MainLinkLabel("create", new Action("") { def apply = baseCreate })
-  val mainLinksPanel = new PluginPanel("", "[]110px[]") { contents += createLabelLink }
+  //val mainLinksPanel = new PluginPanel("", "[]110px[]")
+  val mainLinksPanel = new PluginPanel("")
+  //{ 
+  //contents += createLabelLink }
   if (mode != CREATION) deleteLink
   border = BorderFactory.createEmptyBorder
 
-  val mainPanel = new PluginPanel("wrap") {
-    contents += new PluginPanel("wrap 2") {
-      contents += iconLabel
-      contents += new PluginPanel("wrap") {
-        contents += new PluginPanel("wrap 2") {
-          contents += nameTextField
-          contents += new ImageLinkLabel(CLOSE, new Action("") {
-            def apply = {
-              mode match {
-                case EXTRA ⇒ scene.closeExtraPropertyPanel
-                case _ ⇒ scene.closePropertyPanel
-              }
-            }
-          })
+  val mainPanel = new PluginPanel("wrap", "", "[][]40") {
+    contents += new PluginPanel("", "[right]", "[top]") {
+      contents += new ImageLinkLabel(CLOSE, new Action("") {
+        def apply = {
+          mode match {
+            case EXTRA ⇒ scene.closeExtraPropertyPanel
+            case _ ⇒ scene.closePropertyPanel
+          }
         }
-        contents += mainLinksPanel
-      }
+      })
     }
+    contents += new PluginPanel("wrap 3", "[left]", "[center]") {
+      contents += iconLabel
+      contents += nameTextField
+      contents += createLabelLink
+      // contents += mainLinksPanel
+    }
+
+    //}, "gapbottom 60")
   }
 
-  peer.add(mainPanel.peer, BorderLayout.CENTER)
   preferredSize.width = 300
   foreground = Color.white
   background = borderColor

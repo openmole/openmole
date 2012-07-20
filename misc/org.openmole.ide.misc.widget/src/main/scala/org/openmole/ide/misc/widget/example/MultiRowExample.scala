@@ -17,20 +17,25 @@
 
 package org.openmole.ide.misc.widget.example
 
+import scala.swing.ComboBox
+import scala.swing.Component
 import scala.swing.MainFrame
 import scala.swing.SimpleSwingApplication
 import java.awt.BorderLayout
 import java.awt.Dimension
 import org.openmole.ide.misc.widget.multirow.RowWidget
 import org.openmole.ide.misc.widget.multirow.MultiComboTextField
+import org.openmole.ide.misc.widget.multirow.MultiPanel
 import org.openmole.ide.misc.widget.multirow.MultiTextField
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.misc.tools.image.Images._
-import org.openmole.ide.misc.widget.ContentAction
+import org.openmole.ide.misc.widget._
+import org.openmole.ide.misc.widget.multirow._
 import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor
 import org.openmole.core.implementation.data.Prototype
+import scala.swing.TextField
 
 object MultiRowExample extends SimpleSwingApplication {
   def top = new MainFrame {
@@ -41,18 +46,34 @@ object MultiRowExample extends SimpleSwingApplication {
     val fake2 = new Fake(proto2)
     val action = new ContentAction("Action ", fake1) { override def apply = println("view " + fake1.toString) }
     val image = EYE
-    peer.add(new MultiComboLinkLabelGroovyTextFieldEditor("My title",
-      List((fake1, proto1, action, "12"), (fake2, proto2, action, "45.6d")),
-      List((fake1, proto1, action), (fake2, proto2, action)), image).panel.peer, BorderLayout.WEST)
-    peer.add(new MultiComboTextField("My title2",
-      List((fake1, "un"), (fake2, "deux")),
-      List(fake1, fake2), NO_EMPTY, RowWidget.ADD).panel.peer, BorderLayout.EAST)
-    peer.add(new MultiCombo("My title2",
-      List(fake2, fake1), List(), CLOSE_IF_EMPTY, RowWidget.ADD).panel.peer, BorderLayout.CENTER)
+    val customPanel = new CustomPanel(new Data("yo", "77", 2))
+    peer.add(new MultiPanel("Panels",
+      Factory,
+      List(customPanel)).panel.peer, BorderLayout.CENTER)
     size = new Dimension(250, 200)
   }
 
   class Fake(p: IPrototype[_]) {
     override def toString = p.name
+  }
+
+  object Factory extends IFactory[Data] {
+    def apply = new CustomPanel(new Data)
+  }
+
+  class Data(val name: String = "",
+             val id: String = "",
+             val nb: Int = 0) extends IData
+
+  class CustomPanel(data: Data) extends PluginPanel("wrap") with IPanel[Data] {
+    val t1 = new TextField(data.name)
+    val t2 = new TextField(data.id)
+    val c1 = new ComboBox[Int](List(1, 2, 3)) { selection.item = data.nb }
+
+    contents += t1
+    contents += t2
+    contents += c1
+
+    def content = new Data(t1.text, t2.text, c1.selection.item)
   }
 }

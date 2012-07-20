@@ -17,13 +17,17 @@
 
 package org.openmole.ide.core.model.factory
 
+import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.mole.IGrouping
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.panel.IGroupingPanelUI
 
 trait IGroupingFactoryUI extends IFactoryUI {
-  override def displayName: String = ""
+  override def toString: String = ""
 
-  def coreClass: Class[_]
+  def coreClass: Class[_ <: IGrouping]
+
+  def coreObject: List[(IGrouping, ICapsule)]
 
   def buildPanelUI(executionManager: IExecutionManager): IGroupingPanelUI
 }

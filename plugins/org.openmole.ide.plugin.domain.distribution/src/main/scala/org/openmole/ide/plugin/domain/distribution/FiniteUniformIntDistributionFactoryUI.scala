@@ -20,6 +20,6 @@ package org.openmole.ide.plugin.domain.distribution
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
 
 class FiniteUniformIntDistributionFactoryUI extends IDomainFactoryUI {
-  override def displayName = "Uniform distribution"
+  def name = "Uniform distribution"
   override def buildDataUI = new FiniteUniformIntDistributionDataUI
 }

@@ -23,7 +23,7 @@ import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.data.IPrototype
 
 class BigIntegerPrototypeDataUI(val name: String = "", d: Int = 0) extends GenericPrototypeDataUI[BigInteger](d) {
-  def displayTypedName = displayName + " : BigInt"
+  def displayTypedName = toString + " : BigInt"
 
   def coreClass = classOf[IPrototype[BigInteger]]
 

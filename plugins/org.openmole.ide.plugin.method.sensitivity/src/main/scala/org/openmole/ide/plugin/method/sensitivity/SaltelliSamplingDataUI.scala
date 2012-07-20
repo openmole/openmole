@@ -10,6 +10,7 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.model.data.IBoundedDomainDataUI
 import org.openmole.ide.core.model.data.ISamplingDataUI
+import org.openmole.ide.core.model.dataproxy.IBoundedDomainDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.method.sensitivity.SaltelliSampling

@@ -20,6 +20,7 @@ package org.openmole.ide.core.implementation.panel
 import java.awt.BorderLayout
 import java.awt.Color
 import javax.imageio.ImageIO
+import javax.swing.BorderFactory
 import javax.swing.ImageIcon
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.execution.ScenesManager
@@ -32,6 +33,7 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
+import org.openmole.ide.misc.widget.multirow.MultiWidget.CLOSE_IF_EMPTY
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget.ImageLinkLabel
@@ -39,7 +41,9 @@ import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.PrototypeGroovyTextFieldEditor
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel
+import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel._
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor
+import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor._
 import scala.collection.mutable.HashMap
 import scala.swing.Action
 import scala.swing.MyComboBox
@@ -48,6 +52,7 @@ import scala.swing.Separator
 import scala.collection.JavaConversions._
 import org.openmole.ide.misc.tools.image.Images._
 import BasePanelUI._
+import scala.swing.TabbedPane
 
 class TaskPanelUI(proxy: ITaskDataProxyUI,
                   scene: IMoleScene,
@@ -55,15 +60,26 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.imagePath)))
 
   val panelUI = proxy.dataUI.buildPanelUI
-  var protoPanel = {
-    if (Proxys.prototypes.isEmpty) None
-    else Some(new IOPrototypePanel)
+
+  val protoPanel = Proxys.prototypes.size match {
+    case 0 ⇒
+      StatusBar.inform("No Prototype has been created yet")
+      panelUI.tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", new Label("First define Prototypes !")))
+      None
+    case _ ⇒
+      val iop = Some(new IOPrototypePanel)
+      panelUI.tabbedPane.pages.insert(0, new TabbedPane.Page("Inputs / Outputs", iop.get))
+      iop
   }
 
-  mode match {
-    case IO ⇒ protos
-    case _ ⇒ properties
+  panelUI.tabbedPane.selection.index = mode match {
+    case CREATION ⇒ 0
+    case IO ⇒ 0
+    case _ ⇒ 1
   }
+  mainPanel.contents += panelUI.tabbedPane
+  peer.add(mainPanel.peer, BorderLayout.CENTER)
+  //peer.add(panelUI.tabbedPane.peer, BorderLayout.CENTER)
 
   def create = {
     Proxys.tasks += proxy
@@ -94,10 +110,10 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     }
 
     proxy.dataUI = panelUI.save(nameTextField.text,
-      protoInEditorContent.map { _._1 },
+      protoInEditorContent.map { _.content.get },
       new HashMap[IPrototypeDataProxyUI, String]() ++
-        protoInEditorContent ++ implicitEditorsMapping.map { case (k, v) ⇒ k -> v.editorText }.toMap,
-      protoOutEditorContent)
+        protoInEditorContent.map { x ⇒ x.content.get -> x.editorValue } ++ implicitEditorsMapping.map { case (k, v) ⇒ k -> v.editorText }.toMap,
+      protoOutEditorContent.map { _.content.get })
 
     ScenesManager.capsules(proxy).foreach { c ⇒
       proxy.dataUI match {
@@ -107,54 +123,28 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     }
   }
 
-  def switch = {
-    save
-    if (mainPanel.contents.size == 2) mainPanel.contents.remove(1)
-    if (mainLinksPanel.contents.size == 2) mainLinksPanel.contents.remove(1)
-    ScenesManager.currentSceneContainer match {
-      case Some(x: ISceneContainer) ⇒ x.scene.closeExtraPropertyPanel
-      case None ⇒
-    }
-  }
-
-  def properties = {
-    switch
-    mainPanel.contents += panelUI.peer
-    mainLinksPanel.contents += new ImageLinkLabel(NEXT, new Action("") { def apply = protos })
-    revalidate
-    repaint
-  }
-
-  def protos: Unit = {
-    switch
-    mainLinksPanel.contents += new ImageLinkLabel(PREVIOUS, new Action("") { def apply = properties })
-    if (Proxys.prototypes.isEmpty) StatusBar.inform("No Prototype has been created yet")
-    else {
-      protoPanel = Some(new IOPrototypePanel)
-      mainPanel.contents += protoPanel.get.peer
-    }
-  }
-
-  class IOPrototypePanel extends MyPanel {
+  class IOPrototypePanel extends PluginPanel("") {
     val availablePrototypes = Proxys.prototypes.toList
     peer.setLayout(new BorderLayout)
     val image = EYE
 
-    val protoInEditor = {
-      new MultiComboLinkLabelGroovyTextFieldEditor("",
-        TaskPanelUI.this.proxy.dataUI.prototypesIn.map { proto ⇒
-          (proto, proto.dataUI.coreObject, contentAction(proto),
-            TaskPanelUI.this.proxy.dataUI.inputParameters.getOrElseUpdate(proto, ""))
-        }.toList,
-        availablePrototypes.map { p ⇒ (p, p.dataUI.coreObject, contentAction(p)) }.toList,
-        image)
-    }
+    val incomboContent = availablePrototypes.map { p ⇒ (p, p.dataUI.coreObject, contentAction(p)) }.toList
+    val protoInEditor = new MultiComboLinkLabelGroovyTextFieldEditor("",
+      incomboContent,
+      TaskPanelUI.this.proxy.dataUI.prototypesIn.map { proto ⇒
+        new ComboLinkLabelGroovyTextFieldEditorPanel(incomboContent,
+          image,
+          new ComboLinkLabelGroovyTextFieldEditorData(
+            proto.dataUI.coreObject, Some(proto),
+            TaskPanelUI.this.proxy.dataUI.inputParameters.getOrElseUpdate(proto, "")))
+      }, image, CLOSE_IF_EMPTY)
 
+    val outcomboContent = availablePrototypes.map { p ⇒ (p, contentAction(p)) }.toList
     val protoOutEditor =
-      new MultiComboLinkLabel("",
-        TaskPanelUI.this.proxy.dataUI.prototypesOut.map { proto ⇒ (proto, contentAction(proto)) }.toList,
-        availablePrototypes.map { p ⇒ (p, contentAction(p)) }.toList,
-        image)
+      new MultiComboLinkLabel("", outcomboContent,
+        TaskPanelUI.this.proxy.dataUI.prototypesOut.map { proto ⇒
+          new ComboLinkLabelPanel(outcomboContent, image, new ComboLinkLabelData(Some(proto)))
+        }, image, CLOSE_IF_EMPTY)
 
     val implicitEditorsMapping = new HashMap[IPrototypeDataProxyUI, PrototypeGroovyTextFieldEditor]()
 
@@ -195,7 +185,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     peer.add((new Separator).peer)
     peer.add(protoOut.peer, BorderLayout.EAST)
 
-    def contentAction(proto: IPrototypeDataProxyUI) = new ContentAction(proto.dataUI.displayName, proto) {
+    def contentAction(proto: IPrototypeDataProxyUI) = new ContentAction(proto.dataUI.toString, proto) {
       override def apply =
         ScenesManager.currentSceneContainer match {
           case Some(x: ISceneContainer) ⇒ x.scene.displayExtraPropertyPanel(proto)

@@ -21,7 +21,7 @@ import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 class ExplorationTaskFactoryUI extends ITaskFactoryUI {
-  override def displayName = "Exploration"
+  override def toString = "Exploration"
 
   def buildDataUI = new ExplorationTaskDataUI
 

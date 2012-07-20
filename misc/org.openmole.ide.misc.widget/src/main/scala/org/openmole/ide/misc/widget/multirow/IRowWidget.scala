@@ -19,10 +19,12 @@ package org.openmole.ide.misc.widget.multirow
 
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 
-trait IRowWidget {
+trait IRowWidget[+S] {
   val panel: IRowPanel
 
   val plusAllowed: Plus = ADD
+
+  def content: S
 
   def doOnClose: Unit = {}
 }

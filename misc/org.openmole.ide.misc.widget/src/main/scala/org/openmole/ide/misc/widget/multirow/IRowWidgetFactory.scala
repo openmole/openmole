@@ -17,8 +17,6 @@
 
 package org.openmole.ide.misc.widget.multirow
 
-import org.openmole.ide.misc.widget.MyPanel
-
-trait IRowWidgetFactory[T <: IRowWidget] {
-  def apply(row: T, panel: MyPanel): T
+trait IRowWidgetFactory[S, T <: IRowWidget[S]] {
+  def apply: T
 }

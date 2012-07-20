@@ -44,12 +44,14 @@ class ExplorationTaskPanelUI(pud: ExplorationTaskDataUI) extends PluginPanel("wr
 
   val samplingComboBox = new ComboBox(comboContent) { tooltip = Help.tooltip(i18n.getString("sampling")) }
 
-  contents += new Label("Sampling")
-  contents += samplingComboBox
+  tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("wrap 2") {
+    contents += new Label("Sampling")
+    add(samplingComboBox, "gapbottom 40")
+  })
+
   val linkLabel: LinkLabel = new LinkLabel("", contentAction(pud.sampling.getOrElse(emptyProxy))) {
     icon = EYE
   }
-
   samplingComboBox.selection.item = pud.sampling.getOrElse(emptyProxy)
   listenTo(`samplingComboBox`)
   samplingComboBox.selection.reactions += {

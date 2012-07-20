@@ -21,21 +21,20 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.data.IHookDataUI
-import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.plugin.hook.file.AppendToCSVFileHook
 
-class AppendToCSVFileHookDataUI(executionManager: IExecutionManager,
-                                capsule: Option[ICapsule] = None,
-                                protos: Iterable[IPrototype[_]] = List(),
-                                fileName: String = "") extends IHookDataUI {
+class AppendToCSVFileHookDataUI(var activated: Boolean = true,
+                                val prototypes: Iterable[IPrototypeDataProxyUI] = List.empty,
+                                val fileName: String = "") extends IHookDataUI {
 
-  override def coreObject =
-    capsule match {
-      case Some(x: ICapsule) ⇒
-        new AppendToCSVFileHook(executionManager.moleExecution,
-          x,
-          fileName,
-          protos.toSeq: _*)
-      case None ⇒ throw new UserBadDataError("No Capsule is set, the hook can not be activated")
-    }
+  def buildPanelUI(task: ITaskDataProxyUI) = new AppendToCSVFileHookPanelUI(this, task)
+
+  def coreObject(executionManager: IExecutionManager,
+                 capsule: ICapsule) =
+    List(new AppendToCSVFileHook(executionManager.moleExecution,
+      capsule,
+      fileName,
+      prototypes.map { executionManager.prototypeMapping }.toSeq: _*))
 }

@@ -18,9 +18,12 @@
 package org.openmole.ide.plugin.environment.ssh
 
 import org.openmole.ide.core.implementation.registry.OSGiActivator
+import org.openmole.ide.core.implementation.registry.AuthentificationActivator
 import org.openmole.ide.core.implementation.registry.EnvironmentActivator
 
-class Activator extends OSGiActivator with EnvironmentActivator {
+class Activator extends OSGiActivator with EnvironmentActivator with AuthentificationActivator {
 
   override def environmentFactories = List(new SSHEnvironmentFactoryUI)
+
+  override def authentificationFactories = List(new SSHAuthentificationFactoryUI)
 }

@@ -29,17 +29,18 @@ class NetLogo4TaskPanelUI(ndu: NetLogo4TaskDataUI) extends GenericNetLogoPanelUI
   ndu.prototypeMappingInput,
   ndu.prototypeMappingOutput,
   ndu.resources,
-  ndu.globals) with ITaskPanelUI {
+  ndu.globals) {
   override def saveContent(name: String): ITaskDataUI = new NetLogo4TaskDataUI(name,
     workspaceCheckBox.selected,
     nlogoTextField.text,
     launchingCommandTextArea.text,
     if (multiProtoString.isDefined)
-      multiProtoString.get.content.filterNot(_._1.dataUI.isInstanceOf[EmptyPrototypeDataUI])
+      multiProtoString.get.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) }.filterNot(_._1.dataUI.isInstanceOf[EmptyPrototypeDataUI])
     else List(),
-    if (multiStringProto.isDefined) multiStringProto.get.content.filterNot(_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI])
+    if (multiStringProto.isDefined)
+      multiStringProto.get.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) }.filterNot(_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI])
     else List(),
-    resourcesMultiTextField.content,
+    resourcesMultiTextField.content.map { _.content },
     globals)
 
   def buildNetLogo = new NetLogo4

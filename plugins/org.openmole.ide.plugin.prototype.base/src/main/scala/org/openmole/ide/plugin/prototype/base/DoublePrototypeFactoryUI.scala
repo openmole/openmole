@@ -23,7 +23,7 @@ import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
 class DoublePrototypeFactoryUI extends IPrototypeFactoryUI[Double] {
 
-  override def displayName = "Double"
+  override def toString = "Double"
 
   def buildDataUI = new DoublePrototypeDataUI
 

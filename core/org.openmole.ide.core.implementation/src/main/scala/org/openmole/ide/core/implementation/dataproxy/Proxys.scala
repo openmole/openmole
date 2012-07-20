@@ -36,8 +36,12 @@ object Proxys {
 
   def allPrototypesByName = prototypes.map { _.dataUI.name }
 
-  def classPrototypes(prototypeClass: Class[_]): List[IPrototypeDataProxyUI] = prototypes.filter(_.dataUI.coreObject.`type`.erasure == prototypeClass)
-    .toList
+  def classPrototypes(prototypeClass: Class[_],
+                      protoList: List[IPrototypeDataProxyUI]) =
+    protoList.filter(_.dataUI.coreObject.`type`.erasure == prototypeClass)
+
+  def classPrototypes(prototypeClass: Class[_]): List[IPrototypeDataProxyUI] =
+    classPrototypes(prototypeClass, prototypes.toList)
 
   def clearAll: Unit = {
     ConceptMenu.clearAllItems

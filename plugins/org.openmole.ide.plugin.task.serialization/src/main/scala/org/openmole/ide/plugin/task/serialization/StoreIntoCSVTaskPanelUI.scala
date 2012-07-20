@@ -42,12 +42,15 @@ class StoreIntoCSVTaskPanelUI(sdu: StoreIntoCSVTaskDataUI) extends PluginPanel("
 
   if (sdu.protoFile.isDefined) protoFileComboBox.selection.item = sdu.protoFile.get
   Proxys.prototypes.filter(_.dataUI.dim > 0).foreach(columns += buildColumn(_))
-  contents += new Label("File Prototype to be stored")
-  contents += protoFileComboBox
+
+  tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("wrap 2") {
+    contents += new Label("File Prototype to be stored")
+    contents += protoFileComboBox
+  })
 
   def buildColumn(pud: IPrototypeDataProxyUI) = {
     val tf = new TextField(15) { enabled = false }
-    val cb = new CheckBox(pud.dataUI.displayName) { reactions += { case ButtonClicked(cb) ⇒ tf.enabled = selected } }
+    val cb = new CheckBox(pud.dataUI.toString) { reactions += { case ButtonClicked(cb) ⇒ tf.enabled = selected } }
     contents += (cb, "gap para")
     contents += tf
     if (loaded.contains(pud)) {

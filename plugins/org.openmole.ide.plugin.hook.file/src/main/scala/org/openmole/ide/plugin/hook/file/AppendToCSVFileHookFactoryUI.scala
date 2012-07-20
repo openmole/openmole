@@ -22,7 +22,8 @@ import org.openmole.ide.core.model.factory.IHookFactoryUI
 import org.openmole.plugin.hook.file.AppendToCSVFileHook
 
 class AppendToCSVFileHookFactoryUI extends IHookFactoryUI {
-  def buildPanelUI(executionManager: IExecutionManager) = new AppendToCSVFileHookPanelUI(executionManager)
+
+  def buildDataUI = new AppendToCSVFileHookDataUI
 
   def coreClass = classOf[AppendToCSVFileHook]
 

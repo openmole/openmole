@@ -17,12 +17,12 @@
 
 package org.openmole.ide.plugin.hook.file
 
-import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.factory.IHookFactoryUI
 import org.openmole.plugin.hook.file.CopyFileHook
 
 class CopyFileHookFactoryUI extends IHookFactoryUI {
-  def buildPanelUI(executionManager: IExecutionManager) = new CopyFileHookPanelUI(executionManager)
+
+  def buildDataUI = new CopyFileHookDataUI
 
   def coreClass = classOf[CopyFileHook]
 

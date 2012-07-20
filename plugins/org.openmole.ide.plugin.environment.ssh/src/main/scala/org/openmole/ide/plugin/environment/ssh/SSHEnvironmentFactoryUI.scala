@@ -21,7 +21,7 @@ import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
 
 class SSHEnvironmentFactoryUI extends IEnvironmentFactoryUI {
-  override def displayName = "SSH"
+  override def toString = "SSH"
 
   def buildDataUI = new SSHEnvironmentDataUI
 

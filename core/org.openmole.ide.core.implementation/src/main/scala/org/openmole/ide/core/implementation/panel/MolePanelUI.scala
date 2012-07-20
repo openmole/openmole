@@ -24,17 +24,19 @@ import org.openmole.ide.core.model.panel.IPanelUI
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
+import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.swing.FileChooser.SelectionMode._
+import scala.swing.TabbedPane
 
 class MolePanelUI(mdu: IMoleDataUI) extends PluginPanel("") with IPanelUI {
   minimumSize = new Dimension(300, 400)
   preferredSize = new Dimension(300, 400)
   val pluginMultiTextField = new MultiChooseFileTextField("Plugin",
-    mdu.plugins.toList, FilesOnly, CLOSE_IF_EMPTY) {
+    mdu.plugins.map { p ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(p)) }.toList, minus = CLOSE_IF_EMPTY) {
     tooltip = Help.tooltip("Plugin path. Can be used to link a jar file for instance", "/home/path/to/myjar.jar")
   }
   contents += pluginMultiTextField.panel
 
-  def saveContent(name: String) = new MoleDataUI(pluginMultiTextField.content)
+  def saveContent(name: String) = new MoleDataUI(pluginMultiTextField.content.map { _.content })
 }

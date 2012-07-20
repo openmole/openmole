@@ -17,42 +17,71 @@
 
 package org.openmole.ide.misc.widget.multirow
 
-import org.openmole.ide.misc.widget.MyPanel
+import org.openmole.ide.misc.widget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
+import org.openmole.ide.misc.widget.multirow.RowWidget._
 import scala.swing.TextField
 
 object MultiTextField {
-  class Factory extends IRowWidgetFactory[TextFieldRowWidget] {
-    def apply(row: TextFieldRowWidget, panel: MyPanel) = {
-      import row._
-      new TextFieldRowWidget(initValue)
-    }
+
+  class TextFieldPanel(val data: TextFieldData) extends PluginPanel("wrap 2") with IPanel[TextFieldData] {
+
+    val textField = new TextField(data.textFieldValue)
+
+    contents += textField
+
+    def content = new TextFieldData(textField.text)
   }
 
-  class TextFieldRowWidget(val initValue: String) extends IRowWidget1[String] {
-    val textField = new TextField(initValue, 10)
-    override val panel = new RowPanel(List(textField))
+  class TextFieldData(val textFieldValue: String = "") extends IData
 
-    override def content: String = textField.text
+  class TextFieldFactory extends IFactory[TextFieldData] {
+    def apply = new TextFieldPanel(new TextFieldData)
   }
 }
 
 import MultiTextField._
 class MultiTextField(title: String,
-                     initValues: List[String],
-                     factory: IRowWidgetFactory[TextFieldRowWidget],
-                     minus: Minus) extends MultiWidget(title,
-  if (initValues.isEmpty)
-    List(new TextFieldRowWidget(""))
-  else initValues.map { s ⇒ new TextFieldRowWidget(s) },
-  factory,
-  minus) {
-
-  def this(title: String,
-           iValues: List[String]) = this(title,
-    iValues,
-    new Factory,
-    NO_EMPTY)
-
-  def content = rowWidgets.map(_.content).toList
-}
+                     initPanels: List[TextFieldPanel],
+                     minus: Minus = NO_EMPTY,
+                     plus: Plus = ADD) extends MultiPanel(title,
+  new TextFieldFactory,
+  initPanels,
+  minus,
+  plus)
+//
+//object MultiTextField {
+//  class Factory extends IRowWidgetFactory[TextFieldRowWidget] {
+//    def apply(row: TextFieldRowWidget, panel: MyPanel) = {
+//      import row._
+//      new TextFieldRowWidget(initValue)
+//    }
+//  }
+//
+//  class TextFieldRowWidget(val initValue: String) extends IRowWidget1[String] {
+//    val textField = new TextField(initValue, 10)
+//    override val panel = new RowPanel(List(textField))
+//
+//    override def content: String = textField.text
+//  }
+//}
+//
+//import MultiTextField._
+//class MultiTextField(title: String,
+//                     initValues: List[String],
+//                     factory: IRowWidgetFactory[TextFieldRowWidget],
+//                     minus: Minus) extends MultiWidget(title,
+//  if (initValues.isEmpty)
+//    List(new TextFieldRowWidget(""))
+//  else initValues.map { s ⇒ new TextFieldRowWidget(s) },
+//  factory,
+//  minus) {
+//
+//  def this(title: String,
+//           iValues: List[String]) = this(title,
+//    iValues,
+//    new Factory,
+//    NO_EMPTY)
+//
+//  def content = rowWidgets.map(_.content).toList
+//}

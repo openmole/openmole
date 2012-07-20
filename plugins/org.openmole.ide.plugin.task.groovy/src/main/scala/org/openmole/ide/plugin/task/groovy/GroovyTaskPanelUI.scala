@@ -23,24 +23,26 @@ import java.util.ResourceBundle
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
+import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField._
 import scala.swing.FileChooser.SelectionMode._
 import org.openmole.ide.misc.widget.GroovyEditor
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.PluginPanel
-import scala.swing.Label
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
+import scala.swing.TabbedPane
 
-class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("fillx,wrap", "[left,grow,fill]", "") with ITaskPanelUI {
+class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("") with ITaskPanelUI {
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val codeTextArea = new GroovyEditor {
-    editor.text = pud.code; minimumSize = new Dimension(150, 150);
+    editor.text = pud.code
+    minimumSize = new Dimension(70, 150);
     tooltip = Help.tooltip(i18n.getString("groovyCode"),
       i18n.getString("groovyCodeEx"))
   }
 
-  val libMultiTextField = new MultiChooseFileTextField("Lib",
-    pud.libs,
+  val libMultiTextField = new MultiChooseFileTextField("Libraries",
+    pud.libs.map { l ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(l)) },
     "Select a file",
     Some("Lib files"),
     FilesOnly,
@@ -50,11 +52,11 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("fillx,wrap",
       i18n.getString("libraryPathEx"))
   }
 
-  contents += (new Label("Code"), "left")
-  contents += (codeTextArea, "span,growx")
-  contents += libMultiTextField.panel
+  tabbedPane.pages += new TabbedPane.Page("Code", codeTextArea)
+
+  tabbedPane.pages += new TabbedPane.Page("Library", libMultiTextField.panel)
 
   override def saveContent(name: String): ITaskDataUI = new GroovyTaskDataUI(name,
     codeTextArea.editor.text,
-    libMultiTextField.content.filterNot(_.isEmpty))
+    libMultiTextField.content.map { _.content }.filterNot(_.isEmpty))
 }

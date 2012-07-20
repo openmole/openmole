@@ -42,7 +42,7 @@ class AuthentificationPanel extends MigPanel("wrap", "[grow,fill]", "") with IAu
     p match {
       case Right(r: IAuthentificationPanelUI) ⇒
         auths += r
-        contents += new Label(a.displayName)
+        contents += new Label(a.toString)
         contents += new ScrollPane { peer.setViewportView(r.peer) }
       case Left ⇒
     }

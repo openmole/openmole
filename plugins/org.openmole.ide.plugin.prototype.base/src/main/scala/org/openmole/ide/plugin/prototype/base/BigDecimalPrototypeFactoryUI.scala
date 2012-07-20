@@ -24,7 +24,7 @@ import java.math.BigDecimal
 
 class BigDecimalPrototypeFactoryUI extends IPrototypeFactoryUI[BigDecimal] {
 
-  override def displayName = "BigDecimal"
+  override def toString = "BigDecimal"
 
   override def buildDataUI = new BigDecimalPrototypeDataUI
 

@@ -27,5 +27,10 @@
             <artifactId>org.openmole.misc.exception</artifactId>
             <version>${project.version}</version>
         </dependency>
+       <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.core.batch</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

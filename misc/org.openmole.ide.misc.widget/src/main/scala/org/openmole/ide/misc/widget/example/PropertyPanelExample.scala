@@ -21,6 +21,7 @@ import javax.swing.BorderFactory
 import java.awt.Color
 import java.awt.Dimension
 import org.openmole.ide.misc.widget.multirow.MultiCombo
+import org.openmole.ide.misc.widget.multirow.MultiCombo._
 import org.openmole.ide.misc.widget._
 import scala.swing._
 import org.netbeans.api.visual.widget.ComponentWidget
@@ -33,9 +34,12 @@ object PropertyPanelExample extends SimpleSwingApplication {
     title = "Link Label Demo"
 
     val scene = new MyScene
-
+    val comboContent = List("un", "deux")
     val pp: Panel = new PluginPanel("wrap") {
-      contents += new MultiCombo("", List("un", "deux"), List("un", "un")).panel
+      contents += new MultiCombo("",
+        comboContent,
+        List(new ComboPanel(comboContent, new ComboData(Some("deux"))),
+          new ComboPanel(comboContent, new ComboData(Some("deux"))))).panel
       preferredSize = new Dimension(200, 200)
 
       listenTo(this)

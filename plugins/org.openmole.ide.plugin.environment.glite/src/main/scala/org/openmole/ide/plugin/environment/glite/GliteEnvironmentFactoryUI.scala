@@ -21,7 +21,7 @@ import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
 
 class GliteEnvironmentFactoryUI extends IEnvironmentFactoryUI {
-  override def displayName = "Grid"
+  override def toString = "Grid"
 
   def category = ComponentCategories.ENVIRONMENT
 

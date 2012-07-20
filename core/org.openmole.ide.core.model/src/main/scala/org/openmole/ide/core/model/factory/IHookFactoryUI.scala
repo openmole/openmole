@@ -5,13 +5,15 @@
 
 package org.openmole.ide.core.model.factory
 
-import org.openmole.ide.core.model.control.IExecutionManager
-import org.openmole.ide.core.model.panel.IHookPanelUI
+import org.openmole.core.model.hook.ICapsuleExecutionHook
+import org.openmole.ide.core.model.data.IHookDataUI
 
 trait IHookFactoryUI extends IFactoryUI {
-  override def displayName: String = ""
+  var id = 0
 
-  def coreClass: Class[_]
+  override def toString: String = ""
 
-  def buildPanelUI(executionManager: IExecutionManager): IHookPanelUI
+  def buildDataUI: IHookDataUI
+
+  def coreClass: Class[_ <: ICapsuleExecutionHook]
 }

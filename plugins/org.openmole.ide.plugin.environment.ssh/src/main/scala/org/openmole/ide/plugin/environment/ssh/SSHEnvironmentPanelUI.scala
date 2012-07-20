@@ -20,6 +20,7 @@ package org.openmole.ide.plugin.environment.ssh
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
+import scala.swing.TabbedPane
 import scala.swing.TextField
 
 class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fillx,wrap 2", "", "") with IEnvironmentPanelUI {
@@ -30,20 +31,24 @@ class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fill
   val dirTextField = new TextField(pud.dir, 15)
   val runTimeMemoryTextField = new TextField(pud.runtimeMemory.toString, 5)
 
-  contents += (new Label("Login"), "gap para")
-  contents += loginTextField
+  tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("wrap 2") {
+    contents += (new Label("Login"), "gap para")
+    contents += loginTextField
 
-  contents += (new Label("Host"), "gap para")
-  contents += hostTextField
+    contents += (new Label("Host"), "gap para")
+    contents += hostTextField
 
-  contents += (new Label("Number of slots"), "gap para")
-  contents += nbSlotTextField
+    contents += (new Label("Number of slots"), "gap para")
+    contents += nbSlotTextField
 
-  contents += (new Label("Directory"), "gap para")
-  contents += dirTextField
+    contents += (new Label("Directory"), "gap para")
+    contents += dirTextField
+  })
 
-  contents += (new Label("Runtime memory"), "gap para")
-  contents += runTimeMemoryTextField
+  tabbedPane.pages += new TabbedPane.Page("Memory", new PluginPanel("wrap 2") {
+    contents += (new Label("Runtime memory"), "gap para")
+    contents += runTimeMemoryTextField
+  })
 
   override def saveContent(name: String) = new SSHEnvironmentDataUI(name,
     loginTextField.text,

@@ -21,7 +21,7 @@ import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 class FirstOrderEffectTaskFactoryUI extends ITaskFactoryUI {
-  override def displayName = "First Order effect"
+  override def toString = "First Order effect"
 
   def buildDataUI = new FirstOrderEffectTaskDataUI
 

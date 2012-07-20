@@ -20,6 +20,7 @@ package org.openmole.ide.plugin.domain.range
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
 
 class RangeDomainFactoryUI extends IDomainFactoryUI {
-  override def displayName = "Range"
+  def name = "Range"
+
   override def buildDataUI = new RangeDomainDataUI
 }

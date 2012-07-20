@@ -21,7 +21,7 @@ import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 class AverageTaskFactoryUI extends ITaskFactoryUI {
-  override def displayName = "Average"
+  override def toString = "Average"
 
   def buildDataUI = new AverageTaskDataUI
 

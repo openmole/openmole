@@ -24,7 +24,7 @@ import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
 class FilePrototypeFactoryUI extends IPrototypeFactoryUI[File] {
 
-  override def displayName = "File"
+  override def toString = "File"
 
   def buildDataUI = new FilePrototypeDataUI
 

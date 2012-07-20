@@ -18,9 +18,11 @@ package org.openmole.ide.core.implementation.workflow
 
 import org.netbeans.api.visual.graph.layout.GraphLayoutFactory
 import org.netbeans.api.visual.layout.LayoutFactory
+import java.awt.Color
 import java.awt.Point
 import java.awt.RenderingHints
 import java.awt.event.InputEvent
+import javax.swing.BorderFactory
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.action.ConnectProvider
 import org.netbeans.api.visual.action.ReconnectProvider
@@ -70,7 +72,9 @@ abstract class MoleScene(n: String = "",
   addChild(extraPropertyLayer)
 
   val extraPropertyWidget = new ComponentWidget(this, currentExtraPanel.peer) { setVisible(false) }
-  val propertyWidget = new ComponentWidget(this, currentPanel.peer) { setVisible(false) }
+  val propertyWidget = new ComponentWidget(this, currentPanel.peer) {
+    setVisible(false)
+  }
   extraPropertyLayer.addChild(extraPropertyWidget)
   propertyLayer.addChild(propertyWidget)
 

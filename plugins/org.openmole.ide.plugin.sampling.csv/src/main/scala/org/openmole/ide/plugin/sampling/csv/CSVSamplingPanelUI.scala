@@ -34,6 +34,7 @@ import org.openmole.ide.misc.widget.CSVChooseFileTextField
 import org.openmole.ide.misc.widget.DialogClosedEvent
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
+import org.openmole.ide.misc.widget.multirow.MultiTwoCombos._
 import scala.swing.BorderPanel.Position._
 
 class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("", "[][grow,fill]", "") with ISamplingPanelUI {
@@ -41,8 +42,13 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("", "[][gro
   val csvTextField = new CSVChooseFileTextField(pud.csvFilePath)
   var comboMulti: Option[MultiTwoCombos[String, IPrototypeDataProxyUI]] = None
 
-  contents += new Label("CSV file")
-  contents += (csvTextField, "wrap")
+  tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("wrap") {
+    contents += new Label("CSV file")
+    add(csvTextField, "gapbottom 20")
+  })
+
+  val mappingTab = new TabbedPane.Page("Mapping", new Label("No variable to be mapped"))
+  tabbedPane.pages += mappingTab
 
   readFile(pud.csvFilePath)
 
@@ -56,13 +62,20 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("", "[][gro
       val reader = new CSVReader(new FileReader(s))
       val headers = reader.readNext
       comboMulti =
-        Some(new MultiTwoCombos[String, IPrototypeDataProxyUI](
+        Some(new MultiTwoCombos(
           "Map columns to prototypes",
+          headers.toList,
+          comboContent,
           "with",
-          (headers.toList, comboContent),
-          pud.prototypeMapping))
-      if (contents.size == 3) contents.remove(2)
-      contents += (comboMulti.get.panel, "span,grow,wrap")
+          pud.prototypeMapping.map { pm ⇒
+            println("new TTwoCombosPanel " + pm._1 + " " + pm._2)
+            new TwoCombosPanel(
+              headers.toList,
+              comboContent,
+              "with",
+              new TwoCombosData(Some(pm._1), Some(pm._2)))
+          }))
+      mappingTab.content = comboMulti.get.panel
       reader.close
     }
   }
@@ -71,7 +84,7 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("", "[][gro
     if (comboMulti.isDefined)
       new CSVSamplingDataUI(name,
         csvTextField.text,
-        comboMulti.get.content)
+        comboMulti.get.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) })
     else new CSVSamplingDataUI(name, csvTextField.text, List[(String, PrototypeDataProxyUI)]())
   }
 

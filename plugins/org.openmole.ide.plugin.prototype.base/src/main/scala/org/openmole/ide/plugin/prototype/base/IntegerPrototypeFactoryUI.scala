@@ -23,7 +23,7 @@ import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
 class IntegerPrototypeFactoryUI extends IPrototypeFactoryUI[Int] {
 
-  override def displayName = "Integer"
+  override def toString = "Integer"
 
   def buildDataUI = new IntegerPrototypeDataUI
 

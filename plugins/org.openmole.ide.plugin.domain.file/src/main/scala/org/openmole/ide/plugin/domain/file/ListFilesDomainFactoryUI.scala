@@ -20,7 +20,7 @@ package org.openmole.ide.plugin.domain.file
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
 
 class ListFilesDomainFactoryUI extends IDomainFactoryUI {
-  override def displayName = "File list"
+  def name = "File list"
 
   override def buildDataUI = new ListFilesDomainDataUI
 }

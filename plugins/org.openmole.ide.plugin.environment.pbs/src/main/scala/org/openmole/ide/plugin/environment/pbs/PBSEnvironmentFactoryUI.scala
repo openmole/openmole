@@ -21,7 +21,7 @@ import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
 
 class PBSEnvironmentFactoryUI extends IEnvironmentFactoryUI {
-  override def displayName = "PBS"
+  override def toString = "PBS"
 
   def buildDataUI = new PBSEnvironmentDataUI
 

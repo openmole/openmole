@@ -22,13 +22,20 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.data.IHookDataUI
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.plugin.hook.file.CopyFileHook
 
-class CopyFileHookDataUI(executionManager: IExecutionManager,
-                         toBeHooked: (ICapsule, IPrototype[File], String)) extends IHookDataUI {
+class CopyFileHookDataUI(var activated: Boolean = true,
+                         val toBeHooked: List[(IPrototypeDataProxyUI, String)] = List.empty) extends IHookDataUI {
 
-  override def coreObject = new CopyFileHook(executionManager.moleExecution,
-    toBeHooked._1,
-    toBeHooked._2,
-    toBeHooked._3)
+  override def coreObject(executionManager: IExecutionManager,
+                          capsule: ICapsule) = toBeHooked.map { h ⇒
+    new CopyFileHook(executionManager.moleExecution,
+      capsule,
+      executionManager.prototypeMapping(h._1).asInstanceOf[IPrototype[File]],
+      h._2)
+  }
+
+  def buildPanelUI(task: ITaskDataProxyUI) = new CopyFileHookPanelUI(task, this)
 }

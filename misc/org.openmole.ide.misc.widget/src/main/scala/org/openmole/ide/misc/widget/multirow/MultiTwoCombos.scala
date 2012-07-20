@@ -17,7 +17,7 @@
 
 package org.openmole.ide.misc.widget.multirow
 
-import org.openmole.ide.misc.widget.MyPanel
+import org.openmole.ide.misc.widget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget.Plus
 import org.openmole.ide.misc.widget.multirow.RowWidget._
@@ -26,79 +26,135 @@ import scala.swing.MyComboBox
 
 object MultiTwoCombos {
 
-  class Factory[A, B] extends IRowWidgetFactory[TwoCombosRowWidget[A, B]] {
-    def apply(row: TwoCombosRowWidget[A, B], panel: MyPanel) = {
-      import row._
-      new TwoCombosRowWidget(comboContentA, selectedA, comboContentB, selectedB, inBetweenString, plus)
+  class TwoCombosPanel[A, B](comboContent1: List[A],
+                             comboContent2: List[B],
+                             inBetweenString: String,
+                             data: TwoCombosData[A, B]) extends PluginPanel("wrap 3") with IPanel[TwoCombosData[A, B]] {
 
+    val comboBox1 = new MyComboBox(comboContent1.sortBy { _.toString }) {
+      data.comboValue1 match {
+        case Some(x: A) ⇒ selection.item = x
+        case _ ⇒
+      }
     }
+
+    val comboBox2 = new MyComboBox(comboContent2.sortBy { _.toString }) {
+      data.comboValue2 match {
+        case Some(x: B) ⇒ selection.item = x
+        case _ ⇒
+      }
+    }
+
+    contents += comboBox1
+    contents += new Label(inBetweenString)
+    contents += comboBox2
+
+    def content = new TwoCombosData(Some(comboBox1.selection.item),
+      Some(comboBox2.selection.item))
   }
 
-  class TwoCombosRowWidget[A, B](val comboContentA: List[A],
-                                 val selectedA: A,
-                                 val comboContentB: List[B],
-                                 val selectedB: B,
-                                 val inBetweenString: String,
-                                 val plus: Plus) extends IRowWidget2[A, B] {
+  class TwoCombosData[A, B](val comboValue1: Option[A] = None,
+                            val comboValue2: Option[B] = None) extends IData
 
-    val combo1 = new MyComboBox[A](comboContentA.sortBy { _.toString }) { selection.item = selectedA }
-    val combo2 = new MyComboBox[B](comboContentB.sortBy { _.toString }) { selection.item = selectedB }
-
-    override val panel = new RowPanel(List(combo1, new Label(inBetweenString), combo2), plus)
-
-    override def content: (A, B) = (combo1.selection.item, combo2.selection.item)
-
+  class TwoCombosFactory[A, B](comboContent1: List[A],
+                               comboContent2: List[B],
+                               inBetweenString: String) extends IFactory[TwoCombosData[A, B]] {
+    def apply = new TwoCombosPanel(comboContent1,
+      comboContent2,
+      inBetweenString,
+      new TwoCombosData)
   }
 }
 
 import MultiTwoCombos._
 class MultiTwoCombos[A, B](title: String,
-                           rWidgets: List[TwoCombosRowWidget[A, B]],
-                           factory: IRowWidgetFactory[TwoCombosRowWidget[A, B]],
-                           minus: Minus,
-                           plus: Plus,
-                           buildFromFactory: Boolean)
-    extends MultiWidget(title, rWidgets, factory, minus, buildFromFactory) {
-  def this(title: String,
-           inbetweenString: String,
-           initValues: (List[A], List[B]),
-           selected: List[(A, B)],
-           factory: IRowWidgetFactory[TwoCombosRowWidget[A, B]],
-           minus: Minus = NO_EMPTY,
-           plus: Plus = ADD,
-           buildFromFactory: Boolean = false) = this(title,
-    if (selected.isEmpty) {
-      List(new TwoCombosRowWidget(initValues._1,
-        initValues._1(0),
-        initValues._2,
-        initValues._2(0),
-        inbetweenString,
-        plus))
-    } else
-      selected.map {
-        case (s1, s2) ⇒ new TwoCombosRowWidget(initValues._1,
-          s1,
-          initValues._2,
-          s2,
-          inbetweenString,
-          plus)
-      },
-    factory, minus, plus, buildFromFactory)
+                           comboContent1: List[A],
+                           comboContent2: List[B],
+                           inBetweenString: String,
+                           initPanels: List[TwoCombosPanel[A, B]],
+                           minus: Minus = NO_EMPTY,
+                           plus: Plus = ADD) extends MultiPanel(title,
+  new TwoCombosFactory(comboContent1, comboContent2, inBetweenString),
+  initPanels,
+  minus,
+  plus)
 
-  def this(title: String,
-           ibString: String,
-           iValues: (List[A], List[B]),
-           selected: List[(A, B)],
-           minus: Minus = NO_EMPTY,
-           plus: Plus = ADD,
-           buildFromFactory: Boolean = false) = this(title,
-    ibString,
-    iValues,
-    selected,
-    new Factory[A, B],
-    minus,
-    plus,
-    buildFromFactory)
-
-  def content = rowWidgets.map(_.content).toList
-}
+//
+//object MultiTwoCombos {
+//
+//  class Factory[A, B] extends IRowWidgetFactory[TwoCombosRowWidget[A, B]] {
+//    def apply(row: TwoCombosRowWidget[A, B], panel: MyPanel) = {
+//      import row._
+//      new TwoCombosRowWidget(comboContentA, selectedA, comboContentB, selectedB, inBetweenString, plus)
+//
+//    }
+//  }
+//
+//  class TwoCombosRowWidget[A, B](val comboContentA: List[A],
+//                                 val selectedA: A,
+//                                 val comboContentB: List[B],
+//                                 val selectedB: B,
+//                                 val inBetweenString: String,
+//                                 val plus: Plus) extends IRowWidget2[A, B] {
+//
+//    val combo1 = new MyComboBox[A](comboContentA.sortBy { _.toString }) { selection.item = selectedA }
+//    val combo2 = new MyComboBox[B](comboContentB.sortBy { _.toString }) { selection.item = selectedB }
+//
+//    override val panel = new RowPanel(List(combo1, new Label(inBetweenString), combo2), plus)
+//
+//    override def content: (A, B) = (combo1.selection.item, combo2.selection.item)
+//
+//  }
+//}
+//
+//import MultiTwoCombos._
+//class MultiTwoCombos[A, B](title: String,
+//                           rWidgets: List[TwoCombosRowWidget[A, B]],
+//                           factory: IRowWidgetFactory[TwoCombosRowWidget[A, B]],
+//                           minus: Minus,
+//                           plus: Plus,
+//                           buildFromFactory: Boolean)
+//    extends MultiWidget(title, rWidgets, factory, minus, buildFromFactory) {
+//  def this(title: String,
+//           inbetweenString: String,
+//           initValues: (List[A], List[B]),
+//           selected: List[(A, B)],
+//           factory: IRowWidgetFactory[TwoCombosRowWidget[A, B]],
+//           minus: Minus = NO_EMPTY,
+//           plus: Plus = ADD,
+//           buildFromFactory: Boolean = false) = this(title,
+//    if (selected.isEmpty) {
+//      List(new TwoCombosRowWidget(initValues._1,
+//        initValues._1(0),
+//        initValues._2,
+//        initValues._2(0),
+//        inbetweenString,
+//        plus))
+//    } else
+//      selected.map {
+//        case (s1, s2) ⇒ new TwoCombosRowWidget(initValues._1,
+//          s1,
+//          initValues._2,
+//          s2,
+//          inbetweenString,
+//          plus)
+//      },
+//    factory, minus, plus, buildFromFactory)
+//
+//  def this(title: String,
+//           ibString: String,
+//           iValues: (List[A], List[B]),
+//           selected: List[(A, B)],
+//           minus: Minus = NO_EMPTY,
+//           plus: Plus = ADD,
+//           buildFromFactory: Boolean = false) = this(title,
+//    ibString,
+//    iValues,
+//    selected,
+//    new Factory[A, B],
+//    minus,
+//    plus,
+//    buildFromFactory)
+//
+//  def content = rowWidgets.map(_.content).toList
+//}

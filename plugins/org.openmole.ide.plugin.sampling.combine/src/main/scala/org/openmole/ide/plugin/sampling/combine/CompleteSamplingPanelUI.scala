@@ -18,7 +18,10 @@
 package org.openmole.ide.plugin.sampling.combine
 
 import scala.swing._
-import org.openmole.ide.plugin.sampling.tools.GenericSamplingPanel
+import org.openmole.ide.plugin.sampling.tools.MultiGenericSamplingPanel
+import org.openmole.ide.plugin.sampling.tools.MultiGenericSamplingPanel._
+import org.openmole.ide.core.implementation.dataproxy.DomainDataProxyFactory
+import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory._
@@ -27,8 +30,24 @@ import org.openmole.ide.misc.widget.PluginPanel
 
 class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends PluginPanel("wrap", "", "[]40[]") with ISamplingPanelUI {
 
-  val panel = new GenericSamplingPanel(cud.factors, KeyRegistry.domains.map { _._2.displayName }.toList)
-  contents += panel
+  //val panel = new GenericSamplingPanel(cud.factors, KeyRegistry.domains.map { _._2.toString }.toList)
+  val samplingPanel = new MultiGenericSamplingPanel(Proxys.prototypes.toList,
+    domains,
+    cud.factors.map { f ⇒
+      new GenericSamplingPanel(Proxys.prototypes.toList,
+        domains,
+        new GenericSamplingData(Some(f._1),
+          Some(f._2.toString),
+          Some(f._3)))
+    })
 
-  override def saveContent(name: String) = new CompleteSamplingDataUI(name, panel.factors)
+  tabbedPane.pages += new TabbedPane.Page("Settings", samplingPanel.panel)
+
+  def domains = KeyRegistry.domains.values.map { f ⇒ new DomainDataProxyFactory(f).buildDataProxyUI }.toList
+
+  override def saveContent(name: String) = new CompleteSamplingDataUI(name, samplingPanel.content.map { c ⇒
+    (c.prototypeProxy.get,
+      c.domainProxy.get,
+      c.domainDataUI.get)
+  })
 }

@@ -21,7 +21,7 @@ import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 class NetLogo5TaskFactoryUI extends ITaskFactoryUI {
-  override def displayName = "NetLogo5"
+  override def toString = "NetLogo5"
 
   def buildDataUI = new NetLogo5TaskDataUI
 

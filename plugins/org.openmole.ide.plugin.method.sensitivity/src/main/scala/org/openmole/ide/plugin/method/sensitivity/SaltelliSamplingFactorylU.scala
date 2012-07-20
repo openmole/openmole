@@ -9,7 +9,7 @@ import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 
 class SaltelliSamplingFactoryUI extends ISamplingFactoryUI {
-  override def displayName = "Saltelli"
+  override def toString = "Saltelli"
 
   def buildDataUI = new SaltelliSamplingDataUI
 

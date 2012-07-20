@@ -21,7 +21,7 @@ import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 class StoreIntoCSVTaskFactoryUI extends ITaskFactoryUI {
-  override def displayName = "Merge prototypes in file"
+  override def toString = "Merge prototypes in file"
 
   def buildDataUI = new StoreIntoCSVTaskDataUI
 

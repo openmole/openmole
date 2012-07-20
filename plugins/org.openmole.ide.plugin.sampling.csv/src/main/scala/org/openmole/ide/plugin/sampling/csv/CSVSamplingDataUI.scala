@@ -16,6 +16,9 @@ class CSVSamplingDataUI(val name: String = "",
                         var csvFilePath: String = "",
                         var prototypeMapping: List[(String, IPrototypeDataProxyUI)] = List.empty) extends ISamplingDataUI {
 
+  println("data " + csvFilePath)
+  println("data " + prototypeMapping)
+
   def coreObject = {
     if (csvFilePath != "") {
       val fi = new File(csvFilePath)

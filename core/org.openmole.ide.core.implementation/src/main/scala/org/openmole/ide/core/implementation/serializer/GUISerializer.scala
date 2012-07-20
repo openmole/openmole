@@ -27,6 +27,7 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.dataproxy._
+import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.dataproxy._
 import java.io.ObjectInputStream
 import org.openmole.ide.core.implementation.data._
@@ -49,6 +50,7 @@ object GUISerializer {
       //root node
       val out = xstream.createObjectOutputStream(writer, "openmole")
 
+      KeyRegistry.hooks.values.foreach { _.id = Proxys.incr.getAndIncrement }
       out.writeObject(new SerializedProxys(Proxys.tasks.toSet,
         Proxys.prototypes.toSet,
         Proxys.samplings.toSet,

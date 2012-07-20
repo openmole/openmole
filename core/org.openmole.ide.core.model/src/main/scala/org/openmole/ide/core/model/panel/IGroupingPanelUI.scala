@@ -17,10 +17,4 @@
 
 package org.openmole.ide.core.model.panel
 
-import org.openmole.ide.core.model.data.IGroupingDataUI
-
-trait IGroupingPanelUI extends IPanelUI {
-  def saveContent: List[IGroupingDataUI]
-
-  def addStrategy: Unit
-}
+trait IGroupingPanelUI extends IPanelUI

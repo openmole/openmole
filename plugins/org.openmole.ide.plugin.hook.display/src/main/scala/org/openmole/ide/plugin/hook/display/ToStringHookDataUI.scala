@@ -17,17 +17,23 @@
 
 package org.openmole.ide.plugin.hook.display
 
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.plugin.hook.display.ToStringHook
 import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.model.control.IExecutionManager
 
-class ToStringHookDataUI(executionManager: IExecutionManager,
-                         toBeHooked: (ICapsule, IPrototype[_])) extends IHookDataUI {
+class ToStringHookDataUI(var activated: Boolean = true,
+                         val toBeHooked: List[IPrototypeDataProxyUI] = List.empty) extends IHookDataUI {
 
-  override def coreObject = new ToStringHook(executionManager.moleExecution,
-    toBeHooked._1,
-    executionManager.printStream,
-    toBeHooked._2)
+  def coreObject(executionManager: IExecutionManager,
+                 capsule: ICapsule) =
+    List(new ToStringHook(executionManager.moleExecution,
+      capsule,
+      executionManager.printStream,
+      toBeHooked.map { executionManager.prototypeMapping }.toSeq: _*))
+
+  def buildPanelUI(task: ITaskDataProxyUI) = new ToStringHookPanelUI(this, task)
 }

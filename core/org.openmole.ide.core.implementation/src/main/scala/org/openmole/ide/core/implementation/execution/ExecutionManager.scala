@@ -74,8 +74,8 @@ class ExecutionManager(manager: IMoleSceneManager,
   val moleExecutionExceptionTextArea = new TextArea { columns = 40; rows = 10; editable = false }
   override val printStream = new PrintStream(new TextAreaOutputStream(logTextArea), true)
   var moleExecution: IMoleExecution = new MoleExecution(mole)
-  var gStrategyPanels = new HashMap[String, (IGroupingPanelUI, List[(IGrouping, ICapsule)])]
-  val hookPanels = new HashMap[String, (IHookPanelUI, List[IHook])]
+  //var gStrategyPanels = new HashMap[String, (IGroupingPanelUI, List[(IGrouping, ICapsule)])]
+  // val hookPanels = new HashMap[String, (IHookPanelUI, List[IHook])]
   var status = HashMap(State.READY -> new AtomicInteger,
     State.RUNNING -> new AtomicInteger,
     State.COMPLETED -> new AtomicInteger,
@@ -98,12 +98,12 @@ class ExecutionManager(manager: IMoleSceneManager,
   var environments = new HashMap[IEnvironment, (String, HashMap[ExecutionState.ExecutionState, AtomicInteger])]
 
   val hookMenu = new Menu("Hooks")
-  val groupingMenu = new Menu("Grouping")
-  KeyRegistry.hooks.values.toList.sortBy { _.toString }.foreach { f ⇒ hookMenu.contents += new MenuItem(new AddHookRowAction(f)) }
-  KeyRegistry.groupingStrategies.values.foreach { f ⇒ groupingMenu.contents += new MenuItem(new AddGroupingStrategyRowAction(f)) }
-  val menuBar = new MenuBar { contents.append(hookMenu, groupingMenu) }
-  menuBar.minimumSize = new Dimension(menuBar.size.width, 30)
-  val hookPanel = new PluginPanel("") { contents += (menuBar, "wrap") }
+  // val groupingMenu = new Menu("Grouping")
+  //KeyRegistry.hooks.values.toList.sortBy { _.toString }.foreach { f ⇒ hookMenu.contents += new MenuItem(new AddHookRowAction(f)) }
+  //KeyRegistry.groupingStrategies.values.foreach { f ⇒ groupingMenu.contents += new MenuItem(new AddGroupingStrategyRowAction(f)) }
+  // val menuBar = new MenuBar { contents.append(hookMenu, groupingMenu) }
+  // menuBar.minimumSize = new Dimension(menuBar.size.width, 30)
+  // val hookPanel = new PluginPanel("") { contents += (menuBar, "wrap") }
 
   val splitPane = new SplitPane(Orientation.Vertical) {
     leftComponent = new ScrollPane(envBarPanel)
@@ -118,7 +118,7 @@ class ExecutionManager(manager: IMoleSceneManager,
   System.setErr(new PrintStream(logTextArea.toStream))
 
   val tabbedPane = new TabbedPane
-  tabbedPane.pages += new TabbedPane.Page("Settings", hookPanel)
+  // tabbedPane.pages += new TabbedPane.Page("Settings", hookPanel)
   tabbedPane.pages += new TabbedPane.Page("Execution progress", splitPane)
   tabbedPane.pages += new TabbedPane.Page("Execution errors", new ScrollPane(executionJobExceptionTextArea))
   tabbedPane.pages += new TabbedPane.Page("Environments errors", new ScrollPane(moleExecutionExceptionTextArea))
@@ -142,11 +142,12 @@ class ExecutionManager(manager: IMoleSceneManager,
       tabbedPane.selection.index = 1
       cancel
       initBarPlotter
-      hookPanels.values.foreach(_._2.foreach(_.release))
+      //   hookPanels.values.foreach(_._2.foreach(_.release))
       MoleMaker.buildMoleExecution(mole,
         manager,
         capsuleMapping,
-        gStrategyPanels.values.map { v ⇒ v._1.saveContent.map(_.coreObject) }.flatten.toList) match {
+        //FIXME with Grouping Strategy
+        List.empty) match {
           case Right((moleExecution, environments)) ⇒
             this.moleExecution = moleExecution
 
@@ -177,7 +178,7 @@ class ExecutionManager(manager: IMoleSceneManager,
               envBarPanel.peer.add(envBarPlotter.panel)
             }
             initPieChart
-            hookPanels.keys.foreach { commitHook }
+            //   hookPanels.keys.foreach { commitHook }
             repaint
             revalidate
 
@@ -226,12 +227,12 @@ class ExecutionManager(manager: IMoleSceneManager,
     EventDispatcher.listen(e._1, new JobStateChangedOnEnvironmentListener(this, moleExecution, e._1), classOf[IEnvironment.JobStateChanged])
   }
 
-  override def commitHook(hookClassName: String) {
-    if (hookPanels.contains(hookClassName)) {
-      hookPanels(hookClassName)._2.foreach(_.release)
-      hookPanels(hookClassName) = (hookPanels(hookClassName)._1, hookPanels(hookClassName)._1.saveContent.map(_.coreObject))
-    }
-  }
+  //  override def commitHook(hookClassName: String) {
+  //    if (hookPanels.contains(hookClassName)) {
+  //      hookPanels(hookClassName)._2.foreach(_.release)
+  //      hookPanels(hookClassName) = (hookPanels(hookClassName)._1, hookPanels(hookClassName)._1.saveContent.map(_.coreObject))
+  //    }
+  //  }
 
   def initPieChart = synchronized {
     status.keys.foreach(k ⇒ status(k) = new AtomicInteger)
@@ -243,31 +244,31 @@ class ExecutionManager(manager: IMoleSceneManager,
     StatusBar.inform("Downloads : " + downloads._1 + " / " + downloads._2 + "  Uploads : " + uploads._1 + " / " + uploads._2)
   }
 
-  class AddHookRowAction(fui: IHookFactoryUI) extends Action(fui.toString) {
-    def apply = {
-      val cl = fui.coreClass.getCanonicalName
-      if (hookPanels.contains(cl)) hookPanels(cl)._1.addHook
-      else {
-        val pui = fui.buildPanelUI(ExecutionManager.this)
-        hookPanel.peer.add(pui.peer)
-        hookPanel.peer.add((new Separator).peer)
-        hookPanels += cl -> (pui, List.empty)
-      }
-      hookPanels += cl -> (hookPanels(cl)._1, hookPanels(cl)._1.saveContent.map(_.coreObject))
-    }
-  }
+  //  class AddHookRowAction(fui: IHookFactoryUI) extends Action(fui.toString) {
+  //    def apply = {
+  //      val cl = fui.coreClass.getCanonicalName
+  //      if (hookPanels.contains(cl)) hookPanels(cl)._1.addHook
+  //      else {
+  //        val pui = fui.buildPanelUI(ExecutionManager.this)
+  //        hookPanel.peer.add(pui.peer)
+  //        hookPanel.peer.add((new Separator).peer)
+  //        hookPanels += cl -> (pui, List.empty)
+  //      }
+  //      hookPanels += cl -> (hookPanels(cl)._1, hookPanels(cl)._1.saveContent.map(_.coreObject))
+  //    }
+  //  }
 
-  class AddGroupingStrategyRowAction(fui: IGroupingFactoryUI) extends Action(fui.toString) {
-    def apply = {
-      val cl = fui.coreClass.getCanonicalName
-      if (gStrategyPanels.contains(cl))
-        gStrategyPanels(cl)._1.addStrategy
-      else {
-        val pui = fui.buildPanelUI(ExecutionManager.this)
-        hookPanel.peer.add(pui.peer)
-        gStrategyPanels += cl -> (pui, List.empty)
-      }
-      gStrategyPanels += cl -> (gStrategyPanels(cl)._1, gStrategyPanels(cl)._1.saveContent.map(_.coreObject))
-    }
-  }
+  //  class AddGroupingStrategyRowAction(fui: IGroupingFactoryUI) extends Action(fui.toString) {
+  //    def apply = {
+  //      val cl = fui.coreClass.getCanonicalName
+  //      if (gStrategyPanels.contains(cl))
+  //        gStrategyPanels(cl)._1.addStrategy
+  //      else {
+  //        val pui = fui.buildPanelUI(ExecutionManager.this)
+  //        hookPanel.peer.add(pui.peer)
+  //        gStrategyPanels += cl -> (pui, List.empty)
+  //      }
+  //      gStrategyPanels += cl -> (gStrategyPanels(cl)._1, gStrategyPanels(cl)._1.saveContent.map(_.coreObject))
+  //    }
+  //  }
 }

@@ -21,8 +21,10 @@ class TotalOrderEffectTaskPanelUI(pud: TotalOrderEffectTaskDataUI) extends Basic
   pud.modelOutputs) {
 
   def saveContent(name: String) = new TotalOrderEffectTaskDataUI(name,
-    if (inputPrototypeCombo.isDefined) inputPrototypeCombo.get.content
+    if (inputPrototypeCombo.isDefined)
+      inputPrototypeCombo.get.content.map { c ⇒ c.comboValue.get }
     else List.empty,
-    if (outputPrototypeCombo.isDefined) outputPrototypeCombo.get.content
+    if (outputPrototypeCombo.isDefined)
+      outputPrototypeCombo.get.content.map { c ⇒ c.comboValue.get }
     else List.empty)
 }

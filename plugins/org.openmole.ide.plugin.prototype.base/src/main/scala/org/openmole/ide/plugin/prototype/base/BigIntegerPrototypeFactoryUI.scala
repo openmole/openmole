@@ -24,7 +24,7 @@ import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
 class BigIntegerPrototypeFactoryUI extends IPrototypeFactoryUI[java.math.BigInteger] {
 
-  override def displayName = "BigInteger"
+  override def toString = "BigInteger"
 
   def buildDataUI = new BigIntegerPrototypeDataUI
 

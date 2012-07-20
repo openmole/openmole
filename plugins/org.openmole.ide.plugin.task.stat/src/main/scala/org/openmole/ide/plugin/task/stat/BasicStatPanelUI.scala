@@ -23,8 +23,11 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
+import org.openmole.ide.misc.widget.multirow.MultiTwoCombos._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
+import scala.swing.Label
+import scala.swing.TabbedPane
 
 abstract class BasicStatPanelUI(statType: String,
                                 sequences: List[(IPrototypeDataProxyUI, IPrototypeDataProxyUI)]) extends PluginPanel("wrap 2") with ITaskPanelUI {
@@ -41,15 +44,22 @@ abstract class BasicStatPanelUI(statType: String,
   val multiPrototypeCombo: Option[MultiTwoCombos[IPrototypeDataProxyUI, IPrototypeDataProxyUI]] =
     if (!arrayDoublePrototypes.isEmpty && !doublePrototypes.isEmpty) {
       Some(new MultiTwoCombos("Prototypes",
+        arrayDoublePrototypes,
+        doublePrototypes,
         "to " + statType,
-        (arrayDoublePrototypes, doublePrototypes),
-        sequences,
+        sequences.map { s ⇒
+          new TwoCombosPanel(arrayDoublePrototypes,
+            doublePrototypes,
+            "to " + statType,
+            new TwoCombosData(Some(s._1), Some(s._2)))
+        },
         NO_EMPTY,
-        ADD,
-        false))
+        ADD))
     } else None
 
   if (multiPrototypeCombo.isDefined)
-    contents += multiPrototypeCombo.get.panel
+    tabbedPane.pages += new TabbedPane.Page("Settings", multiPrototypeCombo.get.panel)
+  else
+    tabbedPane.pages += new TabbedPane.Page("Settings", new Label("At least 2 Prototypes (a Double an array of Double have to be created first.)"))
 
 }

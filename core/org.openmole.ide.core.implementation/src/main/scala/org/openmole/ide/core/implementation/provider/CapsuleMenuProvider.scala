@@ -19,14 +19,18 @@ package org.openmole.ide.core.implementation.provider
 
 import java.awt.Point
 import scala.swing.Action
+import javax.swing.JCheckBoxMenuItem
 import javax.swing.JMenu
 import javax.swing.JMenuItem
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.model.factory.IHookFactoryUI
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.action._
+import org.openmole.ide.core.implementation.registry.KeyRegistry
+import scala.swing.CheckMenuItem
 
 class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends GenericMenuProvider {
   var encapsulated = false
@@ -41,7 +45,7 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
         val itIS = new JMenuItem("Add an input slot")
         val itRIS = new JMenuItem("Remove an input slot")
         val itR = new JMenuItem("Remove capsule")
-        val menuTask = new JMenu("Set task")
+        val menuTask = new JMenu("Task")
 
         itIS.addActionListener(new AddInputSlotAction(capsule))
         itR.addActionListener(new RemoveCapsuleAction(scene, capsule))
@@ -49,31 +53,50 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
         itRIS.addActionListener(new RemoveInputSlot(capsule))
 
         Proxys.tasks.foreach { p ⇒
-          menuTask.add(new JMenuItem(new Action(p.dataUI.name) {
-            override def apply = {
-              capsule.encapsule(p)
+          menuTask.add(new CheckMenuItem(p.dataUI.name) {
+            action = new Action(p.dataUI.name) {
+              def apply = {
+                capsule.encapsule(p)
+              }
             }
-          }.peer))
+          }.peer)
         }
-        menuTask.insert(new JMenuItem(new Action("None") {
-          override def apply = capsule.decapsule
-        }.peer), 0)
+        menuTask.insert(new CheckMenuItem("None") {
+          action = new Action("None") {
+            def apply = capsule.decapsule
+          }
+        }.peer, 0)
         items += (itIS, itRIS, itR, itStart, menuTask)
       case _ ⇒
     }
 
-    val menuEnv = new JMenu("Set environment")
+    val menuEnv = new JMenu("Environment")
 
     Proxys.environments.foreach { env ⇒
-      menuEnv.add(new JMenuItem(new Action(env.dataUI.name) {
-        override def apply = capsule.setEnvironment(Some(env))
-      }.peer))
+      menuEnv.add(new CheckMenuItem(env.dataUI.name) {
+        action = new Action(env.dataUI.name) {
+          def apply = capsule.setEnvironment(Some(env))
+        }
+      }.peer)
     }
-    menuEnv.insert(new JMenuItem(new Action("None") {
-      override def apply = capsule.setEnvironment(None)
-    }.peer), 0)
+    menuEnv.insert(new CheckMenuItem("None") {
+      action = new Action("None") {
+        def apply = capsule.setEnvironment(None)
+      }
+    }.peer, 0)
 
-    items += menuEnv
+    val menuHook = new JMenu("Hook")
+    KeyRegistry.hooks.values.toList.sortBy { _.toString }.foreach { h ⇒
+      menuHook.add(new CheckMenuItem(h.toString) {
+        selected = {
+          if (capsule.dataUI.hooks.contains(h.coreClass))
+            capsule.dataUI.hooks(h.coreClass).activated
+          else false
+        }
+        action = new HookAction(h, this)
+      }.peer)
+      items += (menuEnv, menuHook)
+    }
   }
 
   def addTaskMenus = encapsulated = true
@@ -81,5 +104,16 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
   override def getPopupMenu(widget: Widget, point: Point) = {
     initMenu
     super.getPopupMenu(widget, point)
+  }
+
+  class HookAction(factory: IHookFactoryUI,
+                   it: CheckMenuItem) extends Action(factory.toString) {
+    def apply = {
+      if (!capsule.dataUI.hooks.contains(factory.coreClass))
+        capsule.dataUI.hooks += factory.coreClass -> factory.buildDataUI
+      else capsule.dataUI.hooks(factory.coreClass).activated = it.selected
+      // capsule.hook(factory, it.selected)
+      println("add Hook")
+    }
   }
 }

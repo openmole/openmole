@@ -17,20 +17,17 @@
 
 package org.openmole.ide.core.model.panel
 
+import java.awt.Color
 import javax.swing.JPanel
+import scala.swing.Alignment
+import scala.swing.TabbedPane
 
 trait IPanelUI {
   def peer: JPanel
 
-  //  def enabled(b : Boolean) : Unit = 
-  //    peer.getComponents.foreach{ c => c match {
-  //        case x : MyPanel => 
-  //          println("IPA mypanel")
-  //          x.enabled = b
-  //        case x : JComponent => 
-  //          println("IPA jcomponent")
-  //          x.setEnabled(b)
-  //        case _ => 
-  //      }
-  //    }
+  val tabbedPane = new TabbedPane {
+    tabPlacement(Alignment.Left)
+    opaque = true
+    background = new Color(77, 77, 77)
+  }
 }

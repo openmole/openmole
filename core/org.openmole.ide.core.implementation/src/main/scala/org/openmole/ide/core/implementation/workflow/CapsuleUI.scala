@@ -36,6 +36,7 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.core.model.data.IExplorationTaskDataUI
 import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.model.factory.IHookFactoryUI
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.tools.image.Images
 import org.openmole.ide.misc.widget.LinkLabel
@@ -158,6 +159,11 @@ class CapsuleUI(val scene: IMoleScene,
     dataUI.environment = envtask
     updateEnvironmentWidget
   }
+  //
+  //  def hook(hookFactory: IHookFactoryUI, activated: Boolean) = {
+  //    if (activated) dataUI.hooks.getOrElseUpdate(hookFactory.coreClass)
+  //    println("hook " + hookFactory.toString + " " + activated)
+  //  }
 
   private def updateEnvironmentWidget = {
     environmentWidget match {

@@ -17,10 +17,20 @@
 
 package org.openmole.ide.core.model.data
 
+import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.core.model.commons.Constants._
-import org.openmole.ide.core.model.panel.IHookPanelUI
+import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.core.model.hook.IHook
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.model.panel.IHookPanelUI
 
 trait IHookDataUI {
-  def coreObject: IHook
+  def activated: Boolean
+
+  def activated_=(a: Boolean)
+
+  def coreObject(executionManager: IExecutionManager,
+                 capsule: ICapsule): Iterable[IHook]
+
+  def buildPanelUI(task: ITaskDataProxyUI): IHookPanelUI
 }

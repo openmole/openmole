@@ -94,6 +94,13 @@ class MoleSceneConverter extends Converter {
         case _ ⇒
       }
 
+      //Hook
+      //      view.dataUI.hooks.foreach { hf ⇒
+      //        writer.startNode("hook")
+      //        writer.addAttribute("id", hf.id.toString)
+      //        writer.endNode
+      //      }
+
       //Task
       view.dataUI.task match {
         case Some(x: ITaskDataProxyUI) ⇒

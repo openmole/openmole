@@ -21,7 +21,7 @@ import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
 
 class LocalEnvironmentFactoryUI extends IEnvironmentFactoryUI {
-  override def displayName = "Multi threading"
+  override def toString = "Multi threading"
 
   def buildDataUI = new LocalEnvironmentDataUI
 

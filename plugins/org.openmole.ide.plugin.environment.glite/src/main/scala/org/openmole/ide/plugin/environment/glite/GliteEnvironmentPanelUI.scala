@@ -64,8 +64,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
 
   val requirementsPanelUI = new RequirementPanelUI(pud.requirements)
 
-  val tabbedPane = new TabbedPane
-  tabbedPane.pages += new TabbedPane.Page("Grid settings",
+  tabbedPane.pages += new TabbedPane.Page("Settings",
     new PluginPanel("wrap 2") {
       contents += (new Label("VO"), "gap para")
       contents += voTextField
@@ -75,17 +74,17 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
       contents += bdiiTextField
       contents += (new Label("Runtime memory"), "gap para")
       contents += runtimeMemoryTextField
-      contents += (proxyCheckBox, "wrap")
-      contents += (proxyURLLabel, "gap para")
-      contents += proxyURLTextField
     })
 
   tabbedPane.pages += requirementsPanelUI
+  tabbedPane.pages += new TabbedPane.Page("MyProxy", new PluginPanel("") {
+    contents += (proxyCheckBox, "wrap")
+    contents += (proxyURLLabel, "gap para")
+    contents += proxyURLTextField
+  })
 
   proxyCheckBox.selected = pud.proxy
   showProxy(pud.proxy)
-
-  contents += tabbedPane
 
   private def showProxy(b: Boolean) = {
     List(proxyURLLabel, proxyURLLabel, proxyURLTextField).foreach {

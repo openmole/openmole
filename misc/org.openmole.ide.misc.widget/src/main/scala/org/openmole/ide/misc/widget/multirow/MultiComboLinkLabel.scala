@@ -17,10 +17,11 @@
 
 package org.openmole.ide.misc.widget.multirow
 
-import javax.swing.Icon
+import javax.swing._
 import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget.LinkLabel
-import org.openmole.ide.misc.widget.MyPanel
+import org.openmole.ide.misc.widget.ContentAction
+import org.openmole.ide.misc.widget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget.Plus
 import org.openmole.ide.misc.widget.multirow.RowWidget._
@@ -28,63 +29,50 @@ import scala.swing.MyComboBox
 import scala.swing.event.SelectionChanged
 
 object MultiComboLinkLabel {
-  class Factory[A] extends IRowWidgetFactory[ComboLinkLabelRowWidget[A]] {
-    def apply(row: ComboLinkLabelRowWidget[A], panel: MyPanel) = {
-      import row._
-      new ComboLinkLabelRowWidget(comboContent, initValue, image, plus)
-    }
-  }
 
-  class ComboLinkLabelRowWidget[A](val comboContent: List[(A, ContentAction[A])],
-                                   val initValue: (A, ContentAction[A]),
-                                   val image: Icon,
-                                   val plus: Plus) extends IRowWidget1[A] {
-    val linkLabel = new LinkLabel("", initValue._2) {
-      icon = image
-    }
-    val comboBox = new MyComboBox(comboContent.sortBy { _._1.toString }.map(c ⇒ c._1))
-    comboBox.selection.item = initValue._1
-    override val panel = new RowPanel(List(comboBox, linkLabel), plus) {
-      listenTo(`comboBox`)
-      comboBox.selection.reactions += {
-        case SelectionChanged(`comboBox`) ⇒
-          linkLabel.action = {
-            comboContent.filter { cc ⇒ cc._1 == comboBox.selection.item }.head._2
-          }
+  class ComboLinkLabelPanel[A](val comboContent: List[(A, ContentAction[A])],
+                               val image: Icon,
+                               val data: ComboLinkLabelData[A]) extends PluginPanel("wrap 2") with IPanel[ComboLinkLabelData[A]] {
+    val comboBox = new MyComboBox(comboContent.sortBy { _._1.toString }.map(c ⇒ c._1)) {
+      data.content match {
+        case Some(x: A) ⇒
+          selection.item = x
+        case _ ⇒
       }
     }
 
-    override def content: A = comboBox.selection.item
+    val linkLabel = new LinkLabel("", action) { icon = image }
+
+    contents += comboBox
+    contents += linkLabel
+
+    listenTo(`comboBox`)
+    comboBox.selection.reactions += {
+      case SelectionChanged(`comboBox`) ⇒
+        linkLabel.action = action
+    }
+
+    def action = comboContent.filter { cc ⇒ cc._1 == comboBox.selection.item }.head._2
+
+    def content = new ComboLinkLabelData(Some(comboBox.selection.item))
+  }
+
+  class ComboLinkLabelData[A](val content: Option[A] = None) extends IData
+
+  class ComboLinkLabelFactory[A](comboContent: List[(A, ContentAction[A])],
+                                 image: Icon) extends IFactory[ComboLinkLabelData[A]] {
+    def apply = new ComboLinkLabelPanel(comboContent, image, new ComboLinkLabelData)
   }
 }
+
 import MultiComboLinkLabel._
-
 class MultiComboLinkLabel[A](title: String,
-                             rWidgets: List[ComboLinkLabelRowWidget[A]],
-                             factory: IRowWidgetFactory[ComboLinkLabelRowWidget[A]],
-                             minus: Minus = CLOSE_IF_EMPTY,
-                             plus: Plus = ADD) extends MultiWidget(title, rWidgets, factory, minus) {
-  def this(title: String,
-           comboContent: List[(A, ContentAction[A])],
-           selected: List[(A, ContentAction[A])],
-           image: Icon,
-           factory: IRowWidgetFactory[ComboLinkLabelRowWidget[A]],
-           minus: Minus,
-           plus: Plus) = this(title,
-    if (selected.isEmpty)
-      List(new ComboLinkLabelRowWidget(comboContent,
-      (comboContent(0)._1, comboContent(0)._2),
-      image, plus))
-    else selected.map { s ⇒ new ComboLinkLabelRowWidget(comboContent, s, image, plus) }, factory, minus, plus)
-
-  def this(title: String,
-           selected: List[(A, ContentAction[A])],
-           comboContent: List[(A, ContentAction[A])],
-           image: Icon) = this(title,
-    comboContent,
-    selected,
-    image,
-    new Factory[A], CLOSE_IF_EMPTY, ADD)
-
-  def content = rowWidgets.map(_.content).toList
-}
+                             comboContent: List[(A, ContentAction[A])],
+                             initPanels: List[ComboLinkLabelPanel[A]],
+                             image: Icon,
+                             minus: Minus = NO_EMPTY,
+                             plus: Plus = ADD) extends MultiPanel(title,
+  new ComboLinkLabelFactory(comboContent, image),
+  initPanels,
+  minus,
+  plus)

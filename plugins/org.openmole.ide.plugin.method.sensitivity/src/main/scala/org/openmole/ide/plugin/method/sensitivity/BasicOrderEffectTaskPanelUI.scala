@@ -22,8 +22,10 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiCombo
+import org.openmole.ide.misc.widget.multirow.MultiCombo._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
+import scala.swing.TabbedPane
 
 abstract class BasicOrderEffectTaskPanelUI(inputSequence: Iterable[IPrototypeDataProxyUI],
                                            outputSequence: Iterable[IPrototypeDataProxyUI]) extends PluginPanel("wrap 2") with ITaskPanelUI {
@@ -34,18 +36,27 @@ abstract class BasicOrderEffectTaskPanelUI(inputSequence: Iterable[IPrototypeDat
     if (!doublePrototypes.isEmpty) {
       Some(new MultiCombo("Model inputs",
         doublePrototypes,
-        inputSequence.toList))
+        inputSequence.map { is ⇒
+          new ComboPanel(doublePrototypes,
+            new ComboData(Some(is)))
+        }.toList))
     } else None
 
   val outputPrototypeCombo: Option[MultiCombo[IPrototypeDataProxyUI]] =
     if (!doublePrototypes.isEmpty) {
       Some(new MultiCombo("Model outputs",
         doublePrototypes,
-        outputSequence.toList))
+        outputSequence.map { is ⇒
+          new ComboPanel(doublePrototypes,
+            new ComboData(Some(is)))
+        }.toList))
     } else None
 
-  if (inputPrototypeCombo.isDefined && outputPrototypeCombo.isDefined) {
-    contents += inputPrototypeCombo.get.panel
-    contents += outputPrototypeCombo.get.panel
-  }
+  tabbedPane.pages += new TabbedPane.Page("Settings",
+    new PluginPanel("wrap 2") {
+      if (inputPrototypeCombo.isDefined && outputPrototypeCombo.isDefined) {
+        contents += inputPrototypeCombo.get.panel
+        contents += outputPrototypeCombo.get.panel
+      }
+    })
 }

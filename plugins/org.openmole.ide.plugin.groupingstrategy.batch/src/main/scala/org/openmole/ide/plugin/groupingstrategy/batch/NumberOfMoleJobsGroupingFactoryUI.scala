@@ -19,12 +19,28 @@ package org.openmole.ide.plugin.groupingstrategy.batch
 
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.factory.IGroupingFactoryUI
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.grouping.batch.NumberOfMoleJobsGrouping
 
 class NumberOfMoleJobsGroupingFactoryUI extends IGroupingFactoryUI {
-  def buildPanelUI(executionManager: IExecutionManager) = new NumberOfMoleJobsGroupingPanelUI(executionManager)
+
+  var panelUI: Option[NumberOfMoleJobsGroupingPanelUI] = None
+
+  def buildPanelUI(executionManager: IExecutionManager) = {
+    panelUI = Some(new NumberOfMoleJobsGroupingPanelUI(executionManager))
+    panelUI.get
+  }
 
   def coreClass = classOf[NumberOfMoleJobsGrouping]
+
+  def coreObject = panelUI match {
+    case p: NumberOfMoleJobsGroupingPanelUI ⇒
+      p.multiComboTextField.content.map { c ⇒
+        (new NumberOfMoleJobsGrouping(c.textFieldValue.toInt),
+          c.comboValue.get)
+      }
+    case _ ⇒ throw new UserBadDataError("An error occured when settings the grouping strategies (by number of jobs)")
+  }
 
   override def toString = "Group by number of jobs"
 }

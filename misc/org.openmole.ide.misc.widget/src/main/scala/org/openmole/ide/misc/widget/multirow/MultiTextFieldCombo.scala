@@ -17,54 +17,94 @@
 
 package org.openmole.ide.misc.widget.multirow
 
-import org.openmole.ide.misc.widget.MyPanel
+import org.openmole.ide.misc.widget._
+import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.swing.MyComboBox
 import scala.swing.TextField
 
 object MultiTextFieldCombo {
-  class Factory[B] extends IRowWidgetFactory[TextFieldComboRowWidget[B]] {
-    def apply(row: TextFieldComboRowWidget[B], panel: MyPanel) = {
-      import row._
-      new TextFieldComboRowWidget("", comboContentB, selectedB)
+
+  class TextFieldComboPanel[B](val comboContent: List[B],
+                               val data: TextFieldComboData[B]) extends PluginPanel("wrap 2") with IPanel[TextFieldComboData[B]] {
+
+    val textField = new TextField(data.textFieldValue, 15)
+    val comboBox = new MyComboBox(comboContent.sortBy { _.toString }) {
+      data.comboValue match {
+        case Some(x: B) ⇒ selection.item = x
+        case _ ⇒
+      }
     }
+
+    contents += textField
+    contents += comboBox
+
+    def content = new TextFieldComboData(textField.text, Some(comboBox.selection.item))
   }
 
-  class TextFieldComboRowWidget[B](val initValue: String,
-                                   val comboContentB: List[B],
-                                   val selectedB: B) extends IRowWidget2[String, B] {
-    val textFied = new TextField(initValue, 10)
-    val comboBox = new MyComboBox(comboContentB.sortBy { _.toString }) { selection.item = selectedB }
-    override val panel = new RowPanel(List(textFied, comboBox))
+  class TextFieldComboData[B](val textFieldValue: String = "",
+                              val comboValue: Option[B] = None) extends IData
 
-    override def content: (String, B) = (textFied.text, comboBox.selection.item)
+  class TextFieldComboFactory[B](comboContent: List[B]) extends IFactory[TextFieldComboData[B]] {
+    def apply = new TextFieldComboPanel(comboContent, new TextFieldComboData)
   }
 }
 
 import MultiTextFieldCombo._
 class MultiTextFieldCombo[B](title: String,
-                             initValues: List[(String, B)],
                              comboContent: List[B],
-                             factory: IRowWidgetFactory[TextFieldComboRowWidget[B]],
-                             minus: Minus = NO_EMPTY) extends MultiWidget(title,
-  if (initValues.isEmpty)
-    List(new TextFieldComboRowWidget("",
-    comboContent,
-    comboContent(0)))
-  else initValues.map {
-    case (s, b) ⇒ new TextFieldComboRowWidget(s, comboContent, b)
-  },
-  factory,
-  minus) {
+                             initPanels: List[TextFieldComboPanel[B]],
+                             minus: Minus = NO_EMPTY,
+                             plus: Plus = ADD) extends MultiPanel(title,
+  new TextFieldComboFactory(comboContent),
+  initPanels,
+  minus,
+  plus)
 
-  def this(title: String,
-           iValues: List[(String, B)],
-           cContent: List[B],
-           minus: Minus = NO_EMPTY) = this(title,
-    iValues,
-    cContent,
-    new Factory[B],
-    minus)
-
-  def content = rowWidgets.map(_.content).toList
-}
+//
+//object MultiTextFieldCombo {
+//  class Factory[B] extends IRowWidgetFactory[TextFieldComboRowWidget[B]] {
+//    def apply(row: TextFieldComboRowWidget[B], panel: MyPanel) = {
+//      import row._
+//      new TextFieldComboRowWidget("", comboContentB, selectedB)
+//    }
+//  }
+//
+//  class TextFieldComboRowWidget[B](val initValue: String,
+//                                   val comboContentB: List[B],
+//                                   val selectedB: B) extends IRowWidget2[String, B] {
+//    val textFied = new TextField(initValue, 10)
+//    val comboBox = new MyComboBox(comboContentB.sortBy { _.toString }) { selection.item = selectedB }
+//    override val panel = new RowPanel(List(textFied, comboBox))
+//
+//    override def content: (String, B) = (textFied.text, comboBox.selection.item)
+//  }
+//}
+//
+//import MultiTextFieldCombo._
+//class MultiTextFieldCombo[B](title: String,
+//                             initValues: List[(String, B)],
+//                             comboContent: List[B],
+//                             factory: IRowWidgetFactory[TextFieldComboRowWidget[B]],
+//                             minus: Minus = NO_EMPTY) extends MultiWidget(title,
+//  if (initValues.isEmpty)
+//    List(new TextFieldComboRowWidget("",
+//    comboContent,
+//    comboContent(0)))
+//  else initValues.map {
+//    case (s, b) ⇒ new TextFieldComboRowWidget(s, comboContent, b)
+//  },
+//  factory,
+//  minus) {
+//
+//  def this(title: String,
+//           iValues: List[(String, B)],
+//           cContent: List[B],
+//           minus: Minus = NO_EMPTY) = this(title,
+//    iValues,
+//    cContent,
+//    new Factory[B],
+//    minus)
+//
+//  def content = rowWidgets.map(_.content).toList
+//}

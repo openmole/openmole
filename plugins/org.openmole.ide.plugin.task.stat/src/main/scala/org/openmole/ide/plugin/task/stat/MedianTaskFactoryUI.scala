@@ -21,7 +21,7 @@ import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 class MedianTaskFactoryUI extends ITaskFactoryUI {
-  override def displayName = "Median"
+  override def toString = "Median"
 
   def buildDataUI = new MedianTaskDataUI
 

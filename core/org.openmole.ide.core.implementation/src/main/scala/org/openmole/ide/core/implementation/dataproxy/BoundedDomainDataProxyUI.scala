@@ -18,8 +18,10 @@
 package org.openmole.ide.core.implementation.dataproxy
 
 import org.openmole.ide.core.model.data.IBoundedDomainDataUI
-import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.core.model.dataproxy.IBoundedDomainDataProxyUI
-import org.openmole.ide.core.model.dataproxy.IDomainDataProxyUI
 
-class BoundedDomainDataProxyUI(var dataUI: IBoundedDomainDataUI, val id: Int = Proxys.incr.getAndIncrement) extends IBoundedDomainDataProxyUI
+class BoundedDomainDataProxyUI(name: String,
+                               var dataUI: IBoundedDomainDataUI,
+                               val id: Int = Proxys.incr.getAndIncrement) extends IBoundedDomainDataProxyUI {
+  override def toString = name
+}

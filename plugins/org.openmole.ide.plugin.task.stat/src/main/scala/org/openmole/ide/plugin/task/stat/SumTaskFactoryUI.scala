@@ -21,7 +21,7 @@ import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 
 class SumTaskFactoryUI extends ITaskFactoryUI {
-  override def displayName = "Sum"
+  override def toString = "Sum"
 
   def buildDataUI = new SumTaskDataUI
 

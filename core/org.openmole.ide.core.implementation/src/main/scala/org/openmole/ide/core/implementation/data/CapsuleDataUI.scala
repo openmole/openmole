@@ -17,16 +17,21 @@
 
 package org.openmole.ide.core.implementation.data
 
+import org.openmole.core.model.hook.ICapsuleExecutionHook
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.data.IExplorationTaskDataUI
+import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.data.ICapsuleDataUI
+import org.openmole.ide.core.model.factory.IHookFactoryUI
+import scala.collection.mutable.HashMap
 
 class CapsuleDataUI extends ICapsuleDataUI {
 
   var task: Option[ITaskDataProxyUI] = None
   var sampling: Option[ISamplingDataProxyUI] = None
   var environment: Option[IEnvironmentDataProxyUI] = None
+  var hooks = new HashMap[Class[_ <: ICapsuleExecutionHook], IHookDataUI]
   var startingCapsule: Boolean = false
 
   override def toString = task match {

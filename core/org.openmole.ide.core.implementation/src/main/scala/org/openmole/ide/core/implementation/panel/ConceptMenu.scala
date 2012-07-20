@@ -61,8 +61,8 @@ object ConceptMenu {
 
   val taskMenu = {
     addCategoryComponents(ComponentCategories.TASK)
-    KeyRegistry.tasks.values.map { f ⇒ new TaskDataProxyFactory(f) }.toList.sortBy(_.factory.displayName).foreach { d ⇒
-      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName) {
+    KeyRegistry.tasks.values.map { f ⇒ new TaskDataProxyFactory(f) }.toList.sortBy(_.factory.toString).foreach { d ⇒
+      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.toString) {
         override def apply = display(d.buildDataProxyUI, CREATION)
       })
     }
@@ -71,8 +71,8 @@ object ConceptMenu {
 
   val environmentMenu = {
     addCategoryComponents(ComponentCategories.ENVIRONMENT)
-    KeyRegistry.environments.values.map { f ⇒ new EnvironmentDataProxyFactory(f) }.toList.sortBy(_.factory.displayName).foreach { d ⇒
-      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName) {
+    KeyRegistry.environments.values.map { f ⇒ new EnvironmentDataProxyFactory(f) }.toList.sortBy(_.factory.toString).foreach { d ⇒
+      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.toString) {
         override def apply = display(d.buildDataProxyUI, CREATION)
       })
     }
@@ -81,8 +81,8 @@ object ConceptMenu {
 
   val prototypeMenu = {
     addCategoryComponents(ComponentCategories.PROTOTYPE)
-    KeyRegistry.prototypes.values.map { f ⇒ new PrototypeDataProxyFactory(f) }.toList.sortBy(_.factory.displayName).foreach { d ⇒
-      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName) {
+    KeyRegistry.prototypes.values.map { f ⇒ new PrototypeDataProxyFactory(f) }.toList.sortBy(_.factory.toString).foreach { d ⇒
+      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.toString) {
         override def apply = display(d.buildDataProxyUI, CREATION)
       })
     }
@@ -91,8 +91,8 @@ object ConceptMenu {
 
   val samplingMenu = {
     addCategoryComponents(ComponentCategories.SAMPLING)
-    KeyRegistry.samplings.values.map { f ⇒ new SamplingDataProxyFactory(f) }.toList.sortBy(_.factory.displayName).foreach { d ⇒
-      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.displayName) {
+    KeyRegistry.samplings.values.map { f ⇒ new SamplingDataProxyFactory(f) }.toList.sortBy(_.factory.toString).foreach { d ⇒
+      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.toString) {
         override def apply = display(d.buildDataProxyUI, CREATION)
       })
     }

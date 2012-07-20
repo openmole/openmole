@@ -20,6 +20,8 @@ package org.openmole.ide.core.model.factory
 import org.openmole.ide.core.model.data.IBoundedDomainDataUI
 
 trait IBoundedDomainFactoryUI extends IFactoryUI {
+  def name: String
+
   def buildDataUI: IBoundedDomainDataUI
 }
 

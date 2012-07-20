@@ -19,9 +19,12 @@ package org.openmole.ide.plugin.task.netlogo
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.misc.widget.DialogClosedEvent
+import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.ChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
+import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField._
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
+import org.openmole.ide.misc.widget.multirow.MultiTwoCombos._
 import org.openmole.ide.core.implementation.dataproxy._
 import java.util.Locale
 import java.util.ResourceBundle
@@ -43,8 +46,7 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
                                      prototypeMappingInput: List[(IPrototypeDataProxyUI, String)],
                                      prototypeMappingOutput: List[(String, IPrototypeDataProxyUI)],
                                      resources: List[String],
-                                     g: List[String]) extends PluginPanel("", "[left]rel[grow,fill]",
-  "[]20[]") {
+                                     g: List[String]) extends PluginPanel("") with ITaskPanelUI {
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val nlogoTextField = new ChooseFileTextField(nlogoPath,
@@ -68,10 +70,10 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
 
   var multiStringProto: Option[MultiTwoCombos[String, IPrototypeDataProxyUI]] = None
   var multiProtoString: Option[MultiTwoCombos[IPrototypeDataProxyUI, String]] = None
-  val resourcesMultiTextField = new MultiChooseFileTextField("Resources",
-    resources,
-    SelectionMode.FilesAndDirectories,
-    CLOSE_IF_EMPTY) {
+  val resourcesMultiTextField = new MultiChooseFileTextField("",
+    resources.map { r ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(r)) },
+    selectionMode = SelectionMode.FilesAndDirectories,
+    minus = CLOSE_IF_EMPTY) {
     tooltip = Help.tooltip(i18n.getString("resources"),
       i18n.getString("resourcesEx"))
   }
@@ -85,11 +87,25 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
       buildMultis(nlogoTextField.text)
   }
 
-  contents += new Label("Nlogo file")
-  contents += (nlogoTextField, "growx,wrap")
-  contents += (workspaceCheckBox, "span,growx,wrap")
-  contents += (new Label("Commands"), "wrap")
-  contents += (new ScrollPane(launchingCommandTextArea) { minimumSize = new Dimension(150, 80) }, "span,growx")
+  tabbedPane.pages += new TabbedPane.Page("Settings",
+    new PluginPanel("", "[left]rel[grow,fill]", "[]20[]") {
+      contents += new Label("Nlogo file")
+      contents += (nlogoTextField, "growx,wrap")
+      contents += (new Label("Commands"), "wrap")
+      contents += (new ScrollPane(launchingCommandTextArea) { minimumSize = new Dimension(150, 80) }, "span,growx")
+    })
+
+  val inputMappingPage = new TabbedPane.Page("Input mapping", new PluginPanel(""))
+  val outputMappingPage = new TabbedPane.Page("Output mapping", new PluginPanel(""))
+
+  tabbedPane.pages += new TabbedPane.Page("Resources", new PluginPanel("wrap") {
+    contents += (workspaceCheckBox, "span,growx,wrap")
+    contents += resourcesMultiTextField.panel
+  })
+
+  tabbedPane.pages += inputMappingPage
+  tabbedPane.pages += outputMappingPage
+
   buildMultis(nlogoPath)
 
   def buildMultis(path: String) =
@@ -106,29 +122,34 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
       }
       if (!globals.isEmpty && !comboContent.isEmpty) {
         multiStringProto = Some(new MultiTwoCombos[String, IPrototypeDataProxyUI](
-          "Output Mapping",
+          "",
+          globals,
+          comboContent,
           "with",
-          (globals, comboContent),
-          prototypeMappingOutput,
+          prototypeMappingOutput.map { m ⇒ new TwoCombosPanel(globals, comboContent, "with", new TwoCombosData(Some(m._1), Some(m._2))) },
           minus = CLOSE_IF_EMPTY))
 
         if (prototypeMappingOutput.isEmpty) multiStringProto.get.removeAllRows
 
         multiProtoString = Some(new MultiTwoCombos[IPrototypeDataProxyUI, String](
-          "Input Mapping",
+          "",
+          comboContent,
+          globals,
           "with",
-          (comboContent, globals),
-          prototypeMappingInput,
+          prototypeMappingInput.map { m ⇒ new TwoCombosPanel(comboContent, globals, "with", new TwoCombosData(Some(m._1), Some(m._2))) },
           minus = CLOSE_IF_EMPTY))
 
         if (prototypeMappingInput.isEmpty) multiProtoString.get.removeAllRows
       }
 
       if (multiStringProto.isDefined) {
-        if (contents.size == 8) { contents.remove(5); contents.remove(5); contents.remove(5) }
-        contents += (resourcesMultiTextField.panel, "span,growx,wrap")
-        contents += (multiProtoString.get.panel, "span,grow,wrap")
-        contents += (multiStringProto.get.panel, "span,grow,wrap")
+        inputMappingPage.content = multiProtoString.get.panel
+        outputMappingPage.content = multiStringProto.get.panel
+
+        // if (contents.size == 8) { contents.remove(5); contents.remove(5); contents.remove(5) }
+        //contents += (resourcesMultiTextField.panel, "span,growx,wrap")
+        //contents += (multiProtoString.get.panel, "span,grow,wrap")
+        //contents += (multiStringProto.get.panel, "span,grow,wrap")
       }
     } catch {
       case e: Throwable ⇒ StatusBar.block(e.getMessage,

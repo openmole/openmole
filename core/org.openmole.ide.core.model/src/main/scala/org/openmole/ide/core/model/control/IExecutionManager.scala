@@ -36,5 +36,5 @@ trait IExecutionManager {
 
   def printStream: PrintStream
 
-  def commitHook(hookName: String)
+  // def commitHook(hookName: String)
 }

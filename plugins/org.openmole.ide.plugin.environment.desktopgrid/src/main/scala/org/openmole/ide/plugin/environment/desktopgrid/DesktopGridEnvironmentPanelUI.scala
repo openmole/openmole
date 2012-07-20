@@ -20,6 +20,7 @@ package org.openmole.ide.plugin.environment.desktopgrid
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
+import scala.swing.TabbedPane
 import scala.swing.TextField
 
 class DesktopGridEnvironmentPanelUI(pud: DesktopGridEnvironmentDataUI) extends PluginPanel("fillx,wrap 2", "[left][grow,fill]", "") with IEnvironmentPanelUI {
@@ -27,12 +28,14 @@ class DesktopGridEnvironmentPanelUI(pud: DesktopGridEnvironmentDataUI) extends P
   val passTextField = new TextField(20)
   val portTextField = new TextField(5)
 
-  contents += (new Label("Login"), "gap para")
-  contents += loginTextField
-  contents += (new Label("Password"), "gap para")
-  contents += passTextField
-  contents += (new Label("Port"), "gap para")
-  contents += portTextField
+  tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("wrap 2") {
+    contents += (new Label("Login"), "gap para")
+    contents += loginTextField
+    contents += (new Label("Password"), "gap para")
+    contents += passTextField
+    contents += (new Label("Port"), "gap para")
+    contents += portTextField
+  })
 
   loginTextField.text = pud.login
   passTextField.text = pud.pass

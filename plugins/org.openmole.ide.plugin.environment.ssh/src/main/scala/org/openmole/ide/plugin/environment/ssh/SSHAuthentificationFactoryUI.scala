@@ -15,15 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.groupingstrategy.batch
+package org.openmole.ide.plugin.environment.ssh
 
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.plugin.grouping.batch.NumberOfMoleJobsGrouping
-import org.openmole.ide.core.model.data.IGroupingDataUI
-import org.openmole.ide.core.model.control.IExecutionManager
+import org.openmole.ide.core.model.factory.IAuthentificationFactoryUI
+import org.openmole.core.batch.authentication
 
-class NumberOfMoleJobsGroupingDataUI(executionManager: IExecutionManager,
-                                     toBeGrouped: (ICapsule, Int)) extends IGroupingDataUI {
+class SSHAuthentificationFactoryUI extends IAuthentificationFactoryUI {
+  override def toString = "Host"
 
-  override def coreObject = (new NumberOfMoleJobsGrouping(toBeGrouped._2), toBeGrouped._1)
+  override def buildPanelUI = new SSHAuthentificationPanelUI
+
+  override def coreClass = classOf[authentication.HostAuthenticationMethod]
 }

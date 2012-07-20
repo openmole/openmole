@@ -24,7 +24,7 @@ import org.openmole.core.model.data.IPrototype
 import java.math.BigDecimal
 
 class BigDecimalPrototypeDataUI(val name: String = "", d: Int = 0) extends GenericPrototypeDataUI[BigDecimal](d) {
-  def displayTypedName = displayName + " : BigDecimal"
+  def displayTypedName = toString + " : BigDecimal"
 
   def coreClass = classOf[IPrototype[BigDecimal]]
 

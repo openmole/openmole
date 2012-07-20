@@ -22,7 +22,7 @@ import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.model.data.IPrototype
 
 class FilePrototypeDataUI(val name: String = "", d: Int = 0) extends GenericPrototypeDataUI[File](d) {
-  def displayTypedName = displayName + " : File"
+  def displayTypedName = toString + " : File"
 
   def coreClass = classOf[IPrototype[File]]
 

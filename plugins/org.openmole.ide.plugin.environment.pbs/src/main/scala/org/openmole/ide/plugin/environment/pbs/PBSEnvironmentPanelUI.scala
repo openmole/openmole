@@ -34,8 +34,7 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
 
   val requirementsPanelUI = new RequirementPanelUI(pud.requirements)
 
-  val tabbedPane = new TabbedPane
-  tabbedPane.pages += new TabbedPane.Page("PBS settings",
+  tabbedPane.pages += new TabbedPane.Page("Settings",
     new PluginPanel("wrap 2") {
       contents += (new Label("Login"), "gap para")
       contents += loginTextField

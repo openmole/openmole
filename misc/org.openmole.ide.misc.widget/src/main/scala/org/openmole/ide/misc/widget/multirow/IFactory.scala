@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 leclaire
+ * Copyright (C) 2012 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,12 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.model.data
+package org.openmole.ide.misc.widget.multirow
 
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IGrouping
-
-trait IGroupingDataUI {
-  def coreObject: (IGrouping, ICapsule)
+trait IFactory[D <: IData] {
+  def apply: IPanel[D]
 }
-

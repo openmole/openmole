@@ -22,7 +22,7 @@ import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
 import scala.swing.TextField
 
-abstract class GenericPrototypePanelUI[T](d: Int = 0) extends PluginPanel("") with IPrototypePanelUI[T] {
+abstract class GenericPrototypePanelUI[T](d: Int = 0) extends PluginPanel("wrap 2") with IPrototypePanelUI[T] {
   val dimTextField = new TextField(if (d >= 0) d.toString else "0", 2)
 
   contents += new Label("Dimension")
