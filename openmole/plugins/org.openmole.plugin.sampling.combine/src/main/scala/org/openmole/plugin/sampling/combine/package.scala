@@ -30,6 +30,7 @@ import org.openmole.core.implementation.sampling._
 package object combine {
 
   implicit def combineSamplingDecorator(s: ISampling) = new {
+    def +(s2: ISampling) = new CombineSampling(s, s2)
     def x(s2: ISampling) = new CompleteSampling(s, s2)
     def zip(s2: ISampling) = new ZipSampling(s, s2)
     def zipWithIndex(index: IPrototype[Int]) = new ZipWithIndexSampling(s, index)

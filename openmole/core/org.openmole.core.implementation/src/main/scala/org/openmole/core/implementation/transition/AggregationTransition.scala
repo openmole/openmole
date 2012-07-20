@@ -75,8 +75,11 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
       val startTask = start.task.getOrElse(throw new UserBadDataError("No task assigned for start capsule"))
       val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
 
-      submitNextJobsIfReady(result, parentTicket, subMoleParent)
-    }
+      Some((result, parentTicket, subMoleParent))
+    } else None
+  } match {
+    case Some((result, ticket, subMole)) => submitNextJobsIfReady(result, ticket, subMole)
+    case None =>
   }
 
   override def hasBeenPerformed(subMole: ISubMoleExecution, ticket: ITicket) = !subMole.aggregationTransitionRegistry.isRegistred(this, ticket)

@@ -1,17 +1,17 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -22,22 +22,20 @@ import org.openmole.core.model.data.IContext
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.data.IVariable
 import org.openmole.core.model.sampling.ISampling
-import scala.util.control.Breaks._
 
-sealed class CompleteSampling(samplings: ISampling*) extends ISampling {
+class CombineSampling(samplings: ISampling*) extends ISampling {
 
   override def inputs = DataSet.empty ++ samplings.flatMap { _.inputs }
   override def prototypes: Iterable[IPrototype[_]] = samplings.flatMap { _.prototypes }
 
   override def build(context: IContext): Iterator[Iterable[IVariable[_]]] =
     if (samplings.isEmpty) Iterator.empty
-    else {
-      val values = samplings.map { _.build(context).toList }
-      val composed = values.view.reduce { (a, b) ⇒ combine(a, b) }
-      composed.iterator
-    }
+    else
+      samplings.tail.foldLeft(samplings.head.build(context)) {
+        (a, b) ⇒ combine(a, b, context)
+      }
 
-  def combine[A](it1: List[Iterable[A]], it2: List[Iterable[A]]): List[Iterable[A]] =
-    for (v1 ← it1; v2 ← it2) yield v1 ++ v2
+  def combine(s1: Iterator[Iterable[IVariable[_]]], s2: ISampling, context: IContext) =
+    for (x ← s1; y ← s2.build(context ++ x)) yield x ++ y
 
 }
