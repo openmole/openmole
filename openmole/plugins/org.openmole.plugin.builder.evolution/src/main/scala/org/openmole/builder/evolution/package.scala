@@ -18,13 +18,6 @@
 package org.openmole.plugin.builder
 
 import fr.iscpif.mgo._
-import fr.iscpif.mgo.elitism._
-import fr.iscpif.mgo.termination._
-import fr.iscpif.mgo.breed._
-import fr.iscpif.mgo.ga._
-import fr.iscpif.mgo.ranking._
-import fr.iscpif.mgo.diversity._
-import fr.iscpif.mgo.tools.Scaling._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.task._
@@ -46,8 +39,7 @@ package object evolution {
     model: Puzzle,
     populationSize: Int,
     inputs: Iterable[(IPrototype[Double], (Double, Double))],
-    objectives: Iterable[(IPrototype[Double], Double)],
-    offspring: Int = 1)(implicit plugins: IPluginSet) = {
+    objectives: Iterable[(IPrototype[Double], Double)])(implicit plugins: IPluginSet) = {
 
     require(evolution.genomeSize == inputs.size)
 
@@ -106,8 +98,7 @@ package object evolution {
     val breedingTask = SteadyBreedTask(evolution)(
       name + "Breeding",
       archive,
-      genome.toArray,
-      offspring)
+      genome.toArray)
 
     val breedingCaps = new StrainerCapsule(breedingTask)
 
@@ -121,7 +112,7 @@ package object evolution {
       toIndividualCapsule --
       elitismCaps --
       scalingArchiveCapsule --
-      (breedingCaps, condition = generation.name + " % " + offspring + " == 0") -<-
+      (breedingCaps, condition = generation.name + " % " + evolution.lambda + " == 0") -<-
       scalingCaps.newSlot
 
     scalingArchiveCapsule >| (endCapsule, terminated.name + " == true")

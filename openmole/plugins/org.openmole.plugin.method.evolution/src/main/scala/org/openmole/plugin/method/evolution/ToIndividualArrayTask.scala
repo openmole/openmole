@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo.ga._
 import fr.iscpif.mgo._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task.Task

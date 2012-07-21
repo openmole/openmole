@@ -18,24 +18,13 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import fr.iscpif.mgo.crossover._
-import fr.iscpif.mgo.elitism._
-import fr.iscpif.mgo.mutation._
-import fr.iscpif.mgo.modifier._
-import fr.iscpif.mgo.ranking._
-import fr.iscpif.mgo.diversity._
-import fr.iscpif.mgo.selection._
-import fr.iscpif.mgo.dominance._
-import fr.iscpif.mgo.termination._
-import fr.iscpif.mgo.tools.Math
-import fr.iscpif.mgo.ga._
-import fr.iscpif.mgo.algorithm.ga._
 
 sealed class EpsilonNSGA2Sigma(
   val distributionIndex: Double,
   val steadySince: Int,
-  val archiveSize: Int,
   val genomeSize: Int,
+  val mu: Int,
+  val lambda: Int,
   val epsilons: Seq[Double]) extends NSGAIISigma
     with MGBinaryTournamentSelection
     with FirstRankedSteadyTermination

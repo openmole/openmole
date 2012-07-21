@@ -17,8 +17,7 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo.ga.GAGenome
-import fr.iscpif.mgo.tools.Scaling._
+import fr.iscpif.mgo._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.task.TaskBuilder

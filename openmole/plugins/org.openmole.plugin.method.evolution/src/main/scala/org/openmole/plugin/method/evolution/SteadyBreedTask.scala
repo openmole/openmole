@@ -39,8 +39,7 @@ object SteadyBreedTask {
   def apply(evolution: Evolution with Breeding with EvolutionManifest)(
     name: String,
     archive: IPrototype[Population[evolution.G, evolution.MF]],
-    genome: IPrototype[Array[evolution.G]],
-    size: Int)(implicit plugins: IPluginSet) = {
+    genome: IPrototype[Array[evolution.G]])(implicit plugins: IPluginSet) = {
 
     val (_archive, _genome) = (archive, genome)
 
@@ -49,7 +48,7 @@ object SteadyBreedTask {
       addOutput(new Data(genome, DataModeMask.explore))
 
       def toTask =
-        new SteadyBreedTask(name, evolution, size) {
+        new SteadyBreedTask(name, evolution) {
           val archive = _archive.asInstanceOf[IPrototype[Population[evolution.G, evolution.MF]]]
           val genome = _genome.asInstanceOf[IPrototype[Array[evolution.G]]]
 
@@ -63,8 +62,7 @@ object SteadyBreedTask {
 
 sealed abstract class SteadyBreedTask(
     val name: String,
-    val evolution: Evolution with Breeding with EvolutionManifest,
-    size: Int)(implicit val plugins: IPluginSet) extends Task {
+    val evolution: Evolution with Breeding with EvolutionManifest)(implicit val plugins: IPluginSet) extends Task {
 
   def archive: IPrototype[Population[evolution.G, evolution.MF]]
   def genome: IPrototype[Array[evolution.G]]
@@ -74,7 +72,7 @@ sealed abstract class SteadyBreedTask(
 
     val rng = newRNG(context.valueOrException(openMOLESeed))
     val a = context.valueOrException(archive)
-    val newGenome = evolution.breed(a, size)(rng).toArray
+    val newGenome = evolution.breed(a)(rng).toArray
     context + new Variable(genome, newGenome)
   }
 

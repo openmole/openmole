@@ -18,15 +18,12 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import fr.iscpif.mgo.ga._
-import fr.iscpif.mgo.ranking._
 import org.openmole.core.implementation.data.Context._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 import org.openmole.core.model.domain._
-import fr.iscpif.mgo.tools.Scaling._
 import org.openmole.core.model.task.IPluginSet
 import scala.collection.mutable.ListBuffer
 

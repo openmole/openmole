@@ -17,18 +17,12 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo.Individual
-import fr.iscpif.mgo.elitism._
-import fr.iscpif.mgo.ga._
 import fr.iscpif.mgo._
-import fr.iscpif.mgo.diversity._
-import fr.iscpif.mgo.ranking._
 
-import fr.iscpif.mgo.termination.Termination
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
 import org.openmole.core.model.data._
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.model.task._
 
 object ElitismTask {
 
