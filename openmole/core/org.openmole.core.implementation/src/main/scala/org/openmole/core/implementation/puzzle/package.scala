@@ -34,11 +34,15 @@ package object puzzle {
 
   implicit def capsuleToPuzzleConverter(capsule: ICapsule) = capsule.toPuzzle
 
-  implicit def slotToPuzzleConverter(slot: ISlot) = slot.capsule.toPuzzle
+  implicit def slotDecorator(slot: ISlot) = new {
+    def toPuzzle =
+      Puzzle(
+        slot,
+        List(slot.capsule),
+        Map.empty,
+        Map.empty)
+  }
 
-  //implicit def puzzleBuilderToPuzzle(puzzleBuilder: PuzzleBuilder) = puzzleBuilder.toPuzzle
-
-  //implicit def taskToPuzzle(task: ITask): Puzzle = capsuleToPuzzleConverter(new Capsule(task)) 
-  //implicit def builderToPuzzle(builder: TaskBuilder): Puzzle = taskToPuzzle(builder.toTask) 
+  implicit def slotToPuzzleConverter(slot: ISlot) = slot.toPuzzle
 
 }

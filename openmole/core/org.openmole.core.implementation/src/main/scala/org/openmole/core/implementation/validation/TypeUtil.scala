@@ -84,7 +84,7 @@ object TypeUtil {
           case (ListBuffer(), ListBuffer(), ListBuffer(f)) ⇒
             if (f.isArray) new ComputedType(name, f.fromArray.toManifest, false)
             else new ComputedType(name, f, false)
-          case (d, t, f) ⇒ throw new UserBadDataError("Type computation doesn't match specification, direct " + d + ", toArray " + t + ", fromArray " + f)
+          case (d, t, f) ⇒ throw new UserBadDataError("Type computation doesn't match specification, direct " + d + ", toArray " + t + ", fromArray " + f + " in " + slot)
         }
     }
   }

@@ -56,7 +56,7 @@ package object transition {
 
     def -<(toHead: Puzzle, toTail: Puzzle*) = {
       val toPuzzles = (toHead :: toTail.toList)
-      for (f ← from.lasts; l ← toPuzzles.flatMap { _.lasts }) new ExplorationTransition(f, l)
+      for (f ← from.lasts; l ← toPuzzles) new ExplorationTransition(f, l.first)
       Puzzle.merge(from.first, toPuzzles.flatMap { _.lasts }, from :: toPuzzles ::: Nil)
     }
 
@@ -74,7 +74,7 @@ package object transition {
 
     def -<-(toHead: Puzzle, toTail: Puzzle*) = {
       val toPuzzles = (toHead :: toTail.toList)
-      for (f ← from.lasts; l ← toPuzzles.flatMap { _.lasts }) new SlaveTransition(f, l)
+      for (f ← from.lasts; l ← toPuzzles) new SlaveTransition(f, l.first)
       Puzzle.merge(from.first, toPuzzles.flatMap { _.lasts }, from :: toPuzzles ::: Nil)
     }
 
@@ -89,7 +89,7 @@ package object transition {
 
     def >-(toHead: Puzzle, toTail: Puzzle*) = {
       val toPuzzles = (toHead :: toTail.toList)
-      for (f ← from.lasts; l ← toPuzzles.flatMap { _.lasts }) new AggregationTransition(f, l)
+      for (f ← from.lasts; l ← toPuzzles) new AggregationTransition(f, l.first)
       Puzzle.merge(from.first, toPuzzles.flatMap { _.lasts }, from :: toPuzzles ::: Nil)
     }
 
@@ -110,7 +110,7 @@ package object transition {
 
     def --(toHead: Puzzle, toTail: Puzzle*) = {
       val toPuzzles = (toHead :: toTail.toList)
-      for (f ← from.lasts; l ← toPuzzles.flatMap { _.lasts }) new Transition(f, l)
+      for (f ← from.lasts; l ← toPuzzles) new Transition(f, l.first)
       Puzzle.merge(from.first, toPuzzles.flatMap { _.lasts }, from :: toPuzzles ::: Nil)
     }
 
