@@ -31,7 +31,7 @@ import scala.collection.JavaConversions._
 
 object Storage extends Logger
 
-abstract class Storage extends BatchService {
+trait Storage extends BatchService {
 
   @transient lazy val description = new ServiceDescription(URI)
 
@@ -50,7 +50,7 @@ abstract class Storage extends BatchService {
 
   def path = new RelativePath(root)
 
-  def clean(token: AccessToken) = {}
+  def clean(token: AccessToken)
 
   /*def test: Boolean = {
     try {

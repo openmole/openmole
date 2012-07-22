@@ -69,7 +69,7 @@ object URIFile extends Logger {
   Workspace += (Timeout, "PT2M")
   Workspace += (BufferSize, "32768")
   Workspace += (CopyTimeout, "PT1M")
-  Workspace += (CleanerWorkers, "20")
+  Workspace += (CleanerWorkers, "5")
 
   val system = ActorSystem("URIFile", ConfigFactory.parseString(
     """
