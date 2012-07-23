@@ -55,18 +55,26 @@ class CapsuleUI(val scene: IMoleScene,
   var inputPrototypeWidget: Option[PrototypeWidget] = None
   var outputPrototypeWidget: Option[PrototypeWidget] = None
 
-  val validationWidget = new ImageWidget(scene.graphScene, dataUI.task match {
-    case Some(x: ITaskDataProxyUI) ⇒ Images.CHECK_VALID
-    case _ ⇒ Images.CHECK_INVALID
-  }) {
-    setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 12, 2))
-  }
+  val capsuleMenuProvider = new CapsuleMenuProvider(scene, this)
+
+  addChild(taskComponentWidget)
 
   setEnvironment(dataUI.environment)
   setSampling(dataUI.sampling)
 
-  addChild(taskComponentWidget)
+  val validationWidget = new ImageWidget(scene.graphScene,
+    dataUI.task match {
+      case Some(t: ITaskDataProxyUI) ⇒
+        encapsule(t)
+        Images.CHECK_VALID
+      case _ ⇒
+        Images.CHECK_INVALID
+    }) {
+    setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 12, 2))
+  }
+
   addChild(validationWidget)
+
   setPreferredSize(new Dimension(TASK_CONTAINER_WIDTH + 20, TASK_CONTAINER_HEIGHT + 20))
   taskComponentWidget.setPreferredLocation(new Point(10, 10))
   createActions(MOVE).addAction(ActionFactory.createMoveAction)
@@ -76,7 +84,6 @@ class CapsuleUI(val scene: IMoleScene,
   var nbInputSlots = 0
 
   addChild(oslot)
-  val capsuleMenuProvider = new CapsuleMenuProvider(scene, this)
 
   getActions.addAction(ActionFactory.createPopupMenuAction(capsuleMenuProvider))
 
