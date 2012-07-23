@@ -43,6 +43,7 @@ import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.implementation.job.MoleJob
 import org.openmole.core.implementation.job.MoleJob._
+import scala.actors.threadpool.locks.ReentrantLock
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.HashMap
@@ -55,10 +56,11 @@ class SubMoleExecution(
     val parent: Option[SubMoleExecution],
     val moleExecution: MoleExecution) extends ISubMoleExecution {
 
-  private var _nbJobs = 0
-  private var _childs = new HashSet[SubMoleExecution] with SynchronizedSet[SubMoleExecution]
-  private var _jobs = TreeMap.empty[IMoleJob, (ICapsule, ITicket)]
-  private var canceled = false
+  @volatile private var _nbJobs = 0
+  private val _childs = new HashSet[SubMoleExecution] with SynchronizedSet[SubMoleExecution]
+  private val jobsLock = new ReentrantLock
+  @volatile private var _jobs = TreeMap.empty[IMoleJob, (ICapsule, ITicket)]
+  @volatile private var canceled = false
 
   val masterCapsuleRegistry = new RegistryWithTicket[IMasterCapsule, IContext]
   val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, Buffer[IVariable[_]]]
@@ -66,14 +68,20 @@ class SubMoleExecution(
 
   parrentApply(_.+=(this))
 
+  private def withJobsLock[T](f: ⇒ T): T = {
+    jobsLock.lock
+    try f
+    finally jobsLock.unlock
+  }
+
   private def addJob(moleJob: IMoleJob, capsule: ICapsule, ticket: ITicket) = {
-    _jobs += (moleJob -> (capsule, ticket))
+    withJobsLock(_jobs += (moleJob -> (capsule, ticket)))
     moleExecution.nbJobInProgress += 1
     nbJobs_+=(1)
   }
 
   private def rmJob(moleJob: IMoleJob) = {
-    _jobs -= moleJob
+    withJobsLock(_jobs -= moleJob)
     moleExecution.nbJobInProgress -= 1
     nbJobs_+=(-1)
   }
@@ -85,11 +93,13 @@ class SubMoleExecution(
 
   override def isRoot = !parent.isDefined
 
-  override def cancel = synchronized {
-    canceled = true
+  override def cancel = {
     _childs.foreach { _.cancel }
-    _jobs.keys.foreach { _.cancel }
-    parrentApply(_.-=(this))
+    synchronized {
+      withJobsLock(_jobs.keys.foreach { _.cancel })
+      parrentApply(_.-=(this))
+      canceled = true
+    }
   }
 
   override def childs = _childs.toList
@@ -102,20 +112,18 @@ class SubMoleExecution(
     _childs -= submoleExecution
   }
 
-  override def jobs = {
-    _jobs.keys.toList ::: childs.flatMap(_.jobs.toList)
-  }
+  override def jobs =
+    withJobsLock(_jobs.keys.toList) ::: childs.flatMap(_.jobs.toList)
 
   private def jobFailedOrCanceled(job: IMoleJob) = synchronized {
-    val (capsule, ticket) = _jobs.get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registred."))
+    val (capsule, ticket) = withJobsLock(_jobs.get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registred.")))
     rmJob(job)
-
     checkFinished(ticket)
     moleExecution.jobFailedOrCanceled(job, capsule)
   }
 
   private def jobFinished(job: IMoleJob) = synchronized {
-    val (capsule, ticket) = _jobs.get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registred."))
+    val (capsule, ticket) = withJobsLock(_jobs.get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registred.")))
     rmJob(job)
 
     try {
@@ -171,7 +179,7 @@ class SubMoleExecution(
 
       if (!instant)
         capsule match {
-          case _: IAtomicCapsule ⇒ moleJob.perform
+          case _: IAtomicCapsule ⇒ synchronized { moleJob.perform }
           case _ ⇒ moleExecution.group(moleJob, capsule)
         }
     }

@@ -19,22 +19,20 @@ package org.openmole.misc.tools.script
 
 import groovy.lang.Binding
 import java.io.File
-import org.apache.commons.pool.BasePoolableObjectFactory
-import org.apache.commons.pool.impl.SoftReferenceObjectPool
+import org.openmole.misc.tools.service.ObjectPool
 
 class GroovyProxyPool(code: String, jars: Iterable[File]) extends {
 
-  @transient lazy private val bufferPool = new SoftReferenceObjectPool(new BasePoolableObjectFactory {
-    override def makeObject = new GroovyProxy(code, jars)
-  })
+  //Don't use soft reference here, it leads to keep compiling the script in case of high memory load and make it worse
+  @transient lazy private val pool = new ObjectPool({ new GroovyProxy(code, jars) })
 
   def execute(binding: Binding): Object = {
-    val proxy = borrowObject
+    val proxy = borrow
     try proxy.executeUnsynchronized(binding)
-    finally returnObject(proxy)
+    finally release(proxy)
   }
 
-  private def returnObject(o: GroovyProxy) = bufferPool.returnObject(o)
+  private def release(o: GroovyProxy) = pool.release(o)
 
-  private def borrowObject: GroovyProxy = bufferPool.borrowObject.asInstanceOf[GroovyProxy]
+  private def borrow: GroovyProxy = pool.borrow
 }

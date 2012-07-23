@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,17 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.batch.environment
+package org.openmole.misc.tools.service
 
-import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.file.IURIFile
-import org.openmole.core.batch.file.URIFile
-import collection.JavaConversions._
-import java.net.URI
+class ObjectPool[T](f: ⇒ T) {
 
-class VolatileStorage(val environment: BatchEnvironment, val URI: URI, override val connections: Int) extends Storage {
-  override def baseDir(token: AccessToken) = new URIFile(URI)
-  override def persistentSpace(token: AccessToken): IURIFile = baseDir(token)
-  override def tmpSpace(token: AccessToken): IURIFile = baseDir(token)
-  def clean(token: AccessToken) = {}
+  var instances: List[T] = Nil
+
+  def borrow: T = synchronized {
+    instances match {
+      case head :: tail ⇒
+        instances = tail
+        head
+      case Nil ⇒ f
+    }
+  }
+
+  def release(t: T) = synchronized { instances ::= t }
+
 }
