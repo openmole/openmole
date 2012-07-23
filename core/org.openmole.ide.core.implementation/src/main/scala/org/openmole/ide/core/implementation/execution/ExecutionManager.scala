@@ -12,6 +12,7 @@ import java.awt.event.ActionListener
 import java.io.File
 import java.io.PrintStream
 import java.util.concurrent.atomic.AtomicInteger
+import javax.swing.BorderFactory
 import javax.swing.Timer
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
@@ -117,7 +118,11 @@ class ExecutionManager(manager: IMoleSceneManager,
   System.setOut(new PrintStream(logTextArea.toStream))
   System.setErr(new PrintStream(logTextArea.toStream))
 
-  val tabbedPane = new TabbedPane
+  val tabbedPane = new TabbedPane {
+    opaque = true
+    background = new Color(77, 77, 77)
+    border = BorderFactory.createLineBorder(new Color(77, 77, 77))
+  }
   // tabbedPane.pages += new TabbedPane.Page("Settings", hookPanel)
   tabbedPane.pages += new TabbedPane.Page("Execution progress", splitPane)
   tabbedPane.pages += new TabbedPane.Page("Execution errors", new ScrollPane(executionJobExceptionTextArea))

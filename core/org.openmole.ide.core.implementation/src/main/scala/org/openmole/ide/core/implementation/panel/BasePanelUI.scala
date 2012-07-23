@@ -57,7 +57,7 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
   if (mode != CREATION) deleteLink
   border = BorderFactory.createEmptyBorder
 
-  val mainPanel = new PluginPanel("wrap", "", "[][]40") {
+  val mainPanel = new PluginPanel("wrap", "", "") {
     contents += new PluginPanel("", "[right]", "[top]") {
       contents += new ImageLinkLabel(CLOSE, new Action("") {
         def apply = {

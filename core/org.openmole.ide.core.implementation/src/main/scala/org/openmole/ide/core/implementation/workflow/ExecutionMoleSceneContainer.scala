@@ -18,16 +18,24 @@
 package org.openmole.ide.core.implementation.workflow
 
 import java.awt.BorderLayout
+import java.awt.Color
+import javax.swing.BorderFactory
 import javax.swing.ImageIcon
-import javax.swing.JSplitPane
+import javax.swing.JScrollPane
+import javax.swing.ScrollPaneConstants._
+import org.openide.DialogDescriptor
+import org.openide.DialogDisplayer
 import org.openmole.ide.core.implementation.execution.ExecutionManager
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.model.workflow.ISceneContainer
+import org.openmole.ide.misc.widget.MainLinkLabel
 import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.ToolBarButton
 import scala.swing.Action
 import scala.swing.Panel
 import scala.swing.TabbedPane
+import scala.swing.ScrollPane
 import org.openmole.ide.misc.tools.image.Images._
 
 class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
@@ -58,7 +66,18 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   executionManager match {
     case Some(x: ExecutionManager) ⇒
       peer.add(toolBar.peer, BorderLayout.NORTH)
-      peer.add(new JSplitPane(JSplitPane.VERTICAL_SPLIT, scene.graphScene.createView, x.peer), BorderLayout.CENTER)
+
+      peer.add(new PluginPanel("wrap") {
+        contents += new MainLinkLabel("Mole execution", new Action("") {
+          def apply =
+            DialogDisplayer.getDefault.notify(new DialogDescriptor(new JScrollPane(scene.graphScene.createView) {
+              setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_AS_NEEDED)
+            }, "Mole execution"))
+        })
+      }.peer, BorderLayout.CENTER)
+      peer.add(new PluginPanel("wrap", "[grow]") {
+        add(x, "growx")
+      }.peer, BorderLayout.SOUTH)
     case None ⇒
   }
 
