@@ -78,7 +78,7 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("fill
   if (ndu.inputMap.isEmpty) inputMapMultiComboTextField.removeAllRows
 
   val launchingCommandTextArea = new TextArea(ndu.lauchingCommands) {
-    preferredSize = new Dimension(70, 150);
+    preferredSize = new Dimension(40, 100);
     tooltip = Help.tooltip(i18n.getString("command"),
       i18n.getString("commandEx"))
   }

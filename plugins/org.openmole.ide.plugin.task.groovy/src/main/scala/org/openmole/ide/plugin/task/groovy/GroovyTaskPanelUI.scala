@@ -36,7 +36,7 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("") with ITas
 
   val codeTextArea = new GroovyEditor {
     editor.text = pud.code
-    minimumSize = new Dimension(70, 150);
+    minimumSize = new Dimension(40, 100);
     tooltip = Help.tooltip(i18n.getString("groovyCode"),
       i18n.getString("groovyCodeEx"))
   }
