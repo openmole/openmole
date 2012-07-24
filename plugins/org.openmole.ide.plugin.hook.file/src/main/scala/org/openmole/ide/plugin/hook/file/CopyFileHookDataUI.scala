@@ -20,6 +20,7 @@ package org.openmole.ide.plugin.hook.file
 import java.io.File
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
@@ -30,8 +31,9 @@ class CopyFileHookDataUI(var activated: Boolean = true,
                          val toBeHooked: List[(IPrototypeDataProxyUI, String)] = List.empty) extends IHookDataUI {
 
   override def coreObject(executionManager: IExecutionManager,
+                          moleExecution: IMoleExecution,
                           capsule: ICapsule) = toBeHooked.map { h ⇒
-    new CopyFileHook(executionManager.moleExecution,
+    new CopyFileHook(moleExecution,
       capsule,
       executionManager.prototypeMapping(h._1).asInstanceOf[IPrototype[File]],
       h._2)
