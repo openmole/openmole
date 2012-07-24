@@ -17,12 +17,10 @@
 
 package org.openmole.ide.core.implementation.dialog
 
-import java.awt.Color
 import java.awt.Dimension
 import java.awt.Font
 import java.awt.Frame
 import javax.swing.UIManager
-import javax.swing.plaf.ColorUIResource
 import org.openmole.ide.misc.tools.image.Images._
 
 class GUIApplication { application ⇒
