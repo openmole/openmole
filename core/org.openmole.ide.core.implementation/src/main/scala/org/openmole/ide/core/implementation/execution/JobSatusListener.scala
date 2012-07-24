@@ -21,7 +21,9 @@ import org.openmole.core.model.job.State._
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
-import org.openmole.core.model.mole.IMoleExecution.OneJobStatusChanged
+import org.openmole.core.model.mole.IMoleExecution._
+
+case object MoleFinishedEvent extends scala.swing.event.Event
 
 class JobSatusListener(exeManager: ExecutionManager) extends EventListener[IMoleExecution] {
   override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = {
@@ -29,6 +31,10 @@ class JobSatusListener(exeManager: ExecutionManager) extends EventListener[IMole
       case x: OneJobStatusChanged ⇒
         exeManager.wfPiePlotter.update(x.oldState, exeManager.status(x.oldState).decrementAndGet)
         exeManager.wfPiePlotter.update(x.newState, exeManager.status(x.newState).incrementAndGet)
+      case x: Finished ⇒
+        exeManager.logTextArea.append("The simulation is completed")
+        exeManager.publish(MoleFinishedEvent)
+        println("job finished")
     }
   }
 }

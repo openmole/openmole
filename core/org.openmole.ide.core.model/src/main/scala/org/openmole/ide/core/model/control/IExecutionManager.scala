@@ -23,12 +23,13 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
 import java.io.PrintStream
+import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 
 trait IExecutionManager {
   def mole: IMole
 
-  def moleExecution: IMoleExecution
+  def moleExecution: Option[IMoleExecution]
 
   def prototypeMapping: Map[IPrototypeDataProxyUI, IPrototype[_]]
 
@@ -36,5 +37,5 @@ trait IExecutionManager {
 
   def printStream: PrintStream
 
-  // def commitHook(hookName: String)
+  def start(hooks: Map[IHookPanelUI, ICapsuleUI])
 }

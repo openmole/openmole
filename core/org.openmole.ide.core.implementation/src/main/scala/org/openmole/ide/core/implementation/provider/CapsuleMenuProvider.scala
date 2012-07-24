@@ -25,6 +25,7 @@ import javax.swing.JMenuItem
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.model.factory.IHookFactoryUI
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.implementation.dataproxy._
@@ -77,6 +78,12 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
         action = new Action(env.dataUI.name) {
           def apply = capsule.setEnvironment(Some(env))
         }
+        capsule.dataUI.environment match {
+          case e: IEnvironmentDataProxyUI ⇒
+            println("END :: " + env.dataUI.name + { env.dataUI.name == e.dataUI.name })
+            selected = { env.dataUI.name == e.dataUI.name }
+          case _ ⇒
+        }
       }.peer)
     }
     menuEnv.insert(new CheckMenuItem("None") {
@@ -112,8 +119,6 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
       if (!capsule.dataUI.hooks.contains(factory.coreClass))
         capsule.dataUI.hooks += factory.coreClass -> factory.buildDataUI
       else capsule.dataUI.hooks(factory.coreClass).activated = it.selected
-      // capsule.hook(factory, it.selected)
-      println("add Hook")
     }
   }
 }

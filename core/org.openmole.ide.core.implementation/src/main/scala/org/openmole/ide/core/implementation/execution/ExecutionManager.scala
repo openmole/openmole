@@ -43,6 +43,7 @@ import scala.swing.Menu
 import scala.swing.MenuBar
 import scala.swing.MenuItem
 import scala.swing.Orientation
+import scala.swing.Publisher
 import scala.swing.ScrollPane
 import scala.swing.Separator
 import scala.swing.SplitPane
@@ -68,13 +69,15 @@ object ExecutionManager {
 class ExecutionManager(manager: IMoleSceneManager,
                        val mole: IMole,
                        val capsuleMapping: Map[ICapsuleUI, ICapsule],
-                       val prototypeMapping: Map[IPrototypeDataProxyUI, IPrototype[_]]) extends ScrollPane with IExecutionManager {
+                       val prototypeMapping: Map[IPrototypeDataProxyUI, IPrototype[_]]) extends ScrollPane
+    with IExecutionManager
+    with Publisher {
   preferredSize.height = 400
   val logTextArea = new TextArea { columns = 20; rows = 10; editable = false }
   val executionJobExceptionTextArea = new TextArea { columns = 40; rows = 10; editable = false }
   val moleExecutionExceptionTextArea = new TextArea { columns = 40; rows = 10; editable = false }
   override val printStream = new PrintStream(new TextAreaOutputStream(logTextArea), true)
-  var moleExecution: IMoleExecution = new MoleExecution(mole)
+  var moleExecution: Option[IMoleExecution] = None
   //var gStrategyPanels = new HashMap[String, (IGroupingPanelUI, List[(IGrouping, ICapsule)])]
   // val hookPanels = new HashMap[String, (IHookPanelUI, List[IHook])]
   var status = HashMap(State.READY -> new AtomicInteger,
@@ -83,6 +86,7 @@ class ExecutionManager(manager: IMoleSceneManager,
     State.FAILED -> new AtomicInteger,
     State.CANCELED -> new AtomicInteger)
 
+  var hooksInExecution = List.empty[IHook]
   val wfPiePlotter = new PiePlotter("Workflow execution")
   val envBarPanel = new PluginPanel("", "[][grow,fill]", "") {
     peer.add(wfPiePlotter.panel)
@@ -131,7 +135,7 @@ class ExecutionManager(manager: IMoleSceneManager,
   contents = tabbedPane
   preferredSize = new Dimension(size.width, 300)
 
-  def start = synchronized {
+  def start(hooks: Map[IHookPanelUI, ICapsuleUI]) = synchronized {
     tabbedPane.selection.index = 0
     cancel
     initBarPlotter
@@ -141,12 +145,13 @@ class ExecutionManager(manager: IMoleSceneManager,
       capsuleMapping,
       //FIXME with Grouping Strategy
       List.empty) match {
-        case Right((moleExecution, environments)) ⇒
-          this.moleExecution = moleExecution
+        case Right((mExecution, environments)) ⇒
+          this.moleExecution = Some(mExecution)
 
-          EventDispatcher.listen(moleExecution, new JobSatusListener(this), classOf[IMoleExecution.OneJobStatusChanged])
-          EventDispatcher.listen(moleExecution, new JobCreatedListener(this), classOf[IMoleExecution.OneJobSubmitted])
-          EventDispatcher.listen(moleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ExceptionRaised])
+          EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.OneJobStatusChanged])
+          EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.Finished])
+          EventDispatcher.listen(mExecution, new JobCreatedListener(this), classOf[IMoleExecution.OneJobSubmitted])
+          EventDispatcher.listen(mExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ExceptionRaised])
           environments.foreach { e ⇒
             e._1 match {
               case be: BatchEnvironment ⇒
@@ -171,12 +176,17 @@ class ExecutionManager(manager: IMoleSceneManager,
             envBarPanel.peer.add(envBarPlotter.panel)
           }
           initPieChart
+          hooksInExecution = hooks.flatMap {
+            case (panel, caps) ⇒ panel.saveContent.coreObject(this,
+              this.moleExecution.get,
+              capsuleMapping(caps))
+          }.toList
           // hookPanels.keys.foreach { commitHook }
           repaint
           revalidate
 
           timer.start
-          moleExecution.start
+          mExecution.start
         case Left(e: UserBadDataError) ⇒
           StatusBar.block(e.getMessage,
             stack = e.getStackTraceString + "\nCaused by\n" + e.getCause.getMessage + e.getCause.getStackTraceString,
@@ -200,7 +210,11 @@ class ExecutionManager(manager: IMoleSceneManager,
 
   def cancel = synchronized {
     timer.stop
-    moleExecution.cancel
+    hooksInExecution.foreach { _.release }
+    moleExecution match {
+      case me: IMoleExecution ⇒ me.cancel
+      case _ ⇒
+    }
   }
 
   def initBarPlotter = synchronized {
@@ -216,7 +230,12 @@ class ExecutionManager(manager: IMoleSceneManager,
       ExecutionState.FAILED -> new AtomicInteger,
       ExecutionState.KILLED -> new AtomicInteger)
     environments += e._1 -> (e._2, m)
-    EventDispatcher.listen(e._1, new JobStateChangedOnEnvironmentListener(this, moleExecution, e._1), classOf[IEnvironment.JobStateChanged])
+
+    moleExecution match {
+      case me: IMoleExecution ⇒
+        EventDispatcher.listen(e._1, new JobStateChangedOnEnvironmentListener(this, me, e._1), classOf[IEnvironment.JobStateChanged])
+      case _ ⇒
+    }
   }
 
   //  override def commitHook(hookClassName: String) {

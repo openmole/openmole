@@ -136,9 +136,7 @@ class CapsuleUI(val scene: IMoleScene,
 
   def defineAsStartingCapsule(b: Boolean) = {
     dataUI.startingCapsule = b
-    islots.foreach { isw ⇒
-      isw.setStartingSlot(b)
-    }
+    islots.foreach { _.setStartingSlot(b) }
     scene.validate
     scene.refresh
   }
