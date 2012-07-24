@@ -78,7 +78,6 @@ abstract sealed class CSVSampling(file: File) extends Sampling {
    *
    */
   override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = {
-    var listOfListOfValues = List[Iterable[IVariable[_]]]()
     val reader = new CSVReader(new FileReader(file))
     val headers = reader.readNext.toArray
 
@@ -101,7 +100,7 @@ abstract sealed class CSVSampling(file: File) extends Sampling {
     Iterator.continually(reader.readNext).takeWhile(_ != null).map {
       line ⇒
         (columns zip columnsIndexes).map {
-          case ((_, p), i) ⇒ println(p.`type`); new Variable(p.asInstanceOf[IPrototype[Any]], converter(p)(line(i)))
+          case ((_, p), i) ⇒ new Variable(p.asInstanceOf[IPrototype[Any]], converter(p)(line(i)))
         } :::
           (fileColumns zip fileColumnsIndexes).map {
             case ((_, f, p), i) ⇒ new Variable(p, new File(f, line(i)))
