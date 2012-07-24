@@ -34,8 +34,6 @@ object Images {
   val AGGREGATION_TRANSITON: Image = ImageIO.read(classLoader.getResource("img/aggregation.png"))
   val EXPLORATION_TRANSITON: Image = ImageIO.read(classLoader.getResource("img/exploration.png"))
 
-  val START_EXECUTION: Image = ImageIO.read(classLoader.getResource("img/startExe.png"))
-  val STOP_EXECUTION: Image = ImageIO.read(classLoader.getResource("img/stopExe.png"))
   val BUILD_EXECUTION = new ImageIcon(classLoader.getResource("img/build.png"))
   val CLEAN_BUILD_EXECUTION = new ImageIcon(classLoader.getResource("img/cleanAndBuild.png"))
 
