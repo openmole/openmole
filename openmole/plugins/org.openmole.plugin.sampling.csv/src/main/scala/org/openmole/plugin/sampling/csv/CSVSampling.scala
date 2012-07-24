@@ -25,6 +25,8 @@ import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.core.implementation.sampling.SamplingBuilder
 import org.openmole.core.model.data._
 import java.io.FileReader
+import java.math.BigInteger
+import java.math.BigDecimal
 import org.openmole.core.implementation.data._
 import org.openmole.core.model.sampling.ISampling
 import au.com.bytecode.opencsv.CSVReader
@@ -99,13 +101,26 @@ abstract sealed class CSVSampling(file: File) extends Sampling {
     Iterator.continually(reader.readNext).takeWhile(_ != null).map {
       line ⇒
         (columns zip columnsIndexes).map {
-          case ((_, p), i) ⇒ new Variable(p.asInstanceOf[Prototype[Any]], StringConvertor.typeMapping(p.`type`.erasure).convert(line(i)))
+          case ((_, p), i) ⇒ println(p.`type`); new Variable(p.asInstanceOf[IPrototype[Any]], converter(p)(line(i)))
         } :::
           (fileColumns zip fileColumnsIndexes).map {
-            case ((_, f, p), i) ⇒ new Variable(p, new FileMapping(f).convert(line(i)))
+            case ((_, f, p), i) ⇒ new Variable(p, new File(f, line(i)))
           } ::: Nil
     }
 
   }
+
+  val conveters = Map[Class[_], (String ⇒ _)](
+    classOf[BigInteger] -> (new BigInteger(_: String)),
+    classOf[BigDecimal] -> (new BigDecimal(_: String)),
+    classOf[Double] -> ((_: String).toDouble),
+    classOf[String] -> ((_: String).toString),
+    classOf[Boolean] -> ((_: String).toBoolean),
+    classOf[Int] -> ((_: String).toInt),
+    classOf[Float] -> ((_: String).toFloat),
+    classOf[Long] -> ((_: String).toLong))
+
+  def converter[T](p: IPrototype[_]): String ⇒ _ =
+    conveters.getOrElse(p.`type`.erasure, throw new UserBadDataError("Unmanaged type for csv sampling for column binded to prototype " + p))
 
 }
