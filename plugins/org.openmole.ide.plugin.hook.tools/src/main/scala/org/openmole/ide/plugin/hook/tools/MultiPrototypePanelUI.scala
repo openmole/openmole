@@ -24,18 +24,21 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget.multirow.MultiCombo._
+import scala.swing.Label
 
-class MultiPrototypePanelUI(taskProxy: ITaskDataProxyUI,
-                            prototypeProxys: List[IPrototypeDataProxyUI] = List.empty) extends PluginPanel("") {
-  val multiPrototypeCombo = new MultiCombo("Hooked Prototypes",
+class MultiPrototypePanelUI(title: String,
+                            taskProxy: ITaskDataProxyUI,
+                            prototypeProxys: List[IPrototypeDataProxyUI] = List.empty) extends PluginPanel("wrap") {
+  val multiPrototypeCombo = new MultiCombo("",
     availablePrototypes,
     prototypeProxys.map { p ⇒
       new ComboPanel(availablePrototypes,
         new ComboData(Some(p)))
     },
-    CLOSE_IF_EMPTY,
+    NO_EMPTY,
     ADD)
 
+  contents += new Label("<html><b>" + title + "</b></html>")
   contents += multiPrototypeCombo.panel
 
   def availablePrototypes = taskProxy.dataUI.prototypesOut ::: taskProxy.dataUI.implicitPrototypesOut
