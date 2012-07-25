@@ -19,19 +19,20 @@ package org.openmole.ide.core.implementation.provider
 
 import java.awt.Point
 import scala.swing.Action
-import javax.swing.JCheckBoxMenuItem
 import javax.swing.JMenu
 import javax.swing.JMenuItem
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.factory.IHookFactoryUI
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.action._
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import scala.swing.CheckMenuItem
+import scala.swing.Menu
 
 class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends GenericMenuProvider {
   var encapsulated = false
@@ -46,63 +47,77 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
         val itIS = new JMenuItem("Add an input slot")
         val itRIS = new JMenuItem("Remove an input slot")
         val itR = new JMenuItem("Remove capsule")
-        val menuTask = new JMenu("Task")
+        val menuTask = new Menu("Task")
 
         itIS.addActionListener(new AddInputSlotAction(capsule))
         itR.addActionListener(new RemoveCapsuleAction(scene, capsule))
         itStart.addActionListener(new DefineMoleStartAction(scene, capsule))
         itRIS.addActionListener(new RemoveInputSlot(capsule))
 
+        //Tasks
         Proxys.tasks.foreach { p ⇒
-          menuTask.add(new CheckMenuItem(p.dataUI.name) {
-            action = new Action(p.dataUI.name) {
+          menuTask.contents += new CheckMenuItem(p.dataUI.name) {
+            action = new TaskEnvAction(p.dataUI.name, this) {
               def apply = {
+                capsule.decapsule
                 capsule.encapsule(p)
+                selectOneItem(menuTask, item)
               }
             }
-          }.peer)
+            capsule.dataUI.task match {
+              case Some(t: ITaskDataProxyUI) ⇒
+                selected = { p.dataUI.name == t.dataUI.name }
+              case _ ⇒
+            }
+          }
         }
-        menuTask.insert(new CheckMenuItem("None") {
+
+        menuTask.peer.insert(new CheckMenuItem("None") {
           action = new Action("None") {
             def apply = capsule.decapsule
           }
         }.peer, 0)
-        items += (itIS, itRIS, itR, itStart, menuTask)
+        items += (itIS, itRIS, itR, itStart, menuTask.peer)
       case _ ⇒
     }
 
-    val menuEnv = new JMenu("Environment")
+    //Environments
+    val menuEnv = new Menu("Environment")
 
     Proxys.environments.foreach { env ⇒
-      menuEnv.add(new CheckMenuItem(env.dataUI.name) {
-        action = new Action(env.dataUI.name) {
-          def apply = capsule.setEnvironment(Some(env))
+      menuEnv.contents += new CheckMenuItem(env.dataUI.name) {
+        action = new TaskEnvAction(env.dataUI.name, this) {
+          def apply = {
+            capsule.setEnvironment(Some(env))
+            selectOneItem(menuEnv, item)
+          }
         }
+
         capsule.dataUI.environment match {
-          case e: IEnvironmentDataProxyUI ⇒
-            println("END :: " + env.dataUI.name + { env.dataUI.name == e.dataUI.name })
+          case Some(e: IEnvironmentDataProxyUI) ⇒
             selected = { env.dataUI.name == e.dataUI.name }
-          case _ ⇒
+          case _ ⇒ selected = false
         }
-      }.peer)
+      }
     }
-    menuEnv.insert(new CheckMenuItem("None") {
+
+    menuEnv.peer.insert(new CheckMenuItem("None") {
       action = new Action("None") {
         def apply = capsule.setEnvironment(None)
       }
     }.peer, 0)
 
-    val menuHook = new JMenu("Hook")
+    val menuHook = new Menu("Hook")
     KeyRegistry.hooks.values.toList.sortBy { _.toString }.foreach { h ⇒
-      menuHook.add(new CheckMenuItem(h.toString) {
+      menuHook.contents += new CheckMenuItem(h.toString) {
         selected = {
           if (capsule.dataUI.hooks.contains(h.coreClass))
             capsule.dataUI.hooks(h.coreClass).activated
           else false
         }
         action = new HookAction(h, this)
-      }.peer)
-      items += (menuEnv, menuHook)
+      }
+      items += (menuEnv.peer, menuHook.peer)
     }
   }
 
@@ -112,6 +127,17 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
     initMenu
     super.getPopupMenu(widget, point)
   }
+
+  def selectOneItem(menu: Menu, item: CheckMenuItem) =
+    menu.contents.foreach { i ⇒
+      i match {
+        case mi: CheckMenuItem ⇒ mi.selected = false
+      }
+      item.selected = true
+    }
+
+  abstract class TaskEnvAction(name: String,
+                               val item: CheckMenuItem) extends Action(name)
 
   class HookAction(factory: IHookFactoryUI,
                    it: CheckMenuItem) extends Action(factory.toString) {

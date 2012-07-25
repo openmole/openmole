@@ -23,6 +23,7 @@ import java.awt.Point
 import javax.imageio.ImageIO
 import javax.swing.ImageIcon
 import org.netbeans.api.visual.action.ActionFactory
+import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.widget.ImageWidget
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.implementation.data.CapsuleDataUI
@@ -143,20 +144,28 @@ class CapsuleUI(val scene: IMoleScene,
 
   def decapsule = {
     dataUI.task = None
-    removeChild(inputPrototypeWidget.get)
-    removeChild(outputPrototypeWidget.get)
     removeChild(titleWidget)
+    removeWidget(inputPrototypeWidget)
+    removeWidget(outputPrototypeWidget)
+    removeWidget(environmentWidget)
+    removeWidget(samplingWidget)
+    environmentWidget = None
+    samplingWidget = None
     inputPrototypeWidget = None
     outputPrototypeWidget = None
   }
 
   def encapsule(dpu: ITaskDataProxyUI) = {
+    decapsule
     setTask(dpu)
     inputPrototypeWidget = Some(PrototypeWidget.buildInput(scene, dpu))
     outputPrototypeWidget = Some(PrototypeWidget.buildOutput(scene, dpu))
     CheckData.checkMole(scene)
     addChild(inputPrototypeWidget.get)
     addChild(outputPrototypeWidget.get)
+    addChild(titleWidget)
+    // updateSamplingWidget
+    // updateEnvironmentWidget
     capsuleMenuProvider.addTaskMenus
   }
 
@@ -170,11 +179,17 @@ class CapsuleUI(val scene: IMoleScene,
   //    println("hook " + hookFactory.toString + " " + activated)
   //  }
 
-  private def updateEnvironmentWidget = {
-    environmentWidget match {
-      case Some(y: LinkedImageWidget) ⇒ removeChild(y)
+  private def removeWidget(w: Option[ComponentWidget]) = {
+    w match {
+      case Some(y: ComponentWidget) ⇒
+        removeChild(y)
       case None ⇒
     }
+  }
+
+  private def updateEnvironmentWidget = {
+    removeWidget(environmentWidget)
+
     dataUI.environment match {
       case Some(x: IEnvironmentDataProxyUI) ⇒
         environmentWidget = Some(new LinkedImageWidget(scene,
@@ -193,10 +208,7 @@ class CapsuleUI(val scene: IMoleScene,
   }
 
   private def updateSamplingWidget = {
-    samplingWidget match {
-      case Some(y: LinkedImageWidget) ⇒ removeChild(y)
-      case None ⇒
-    }
+    removeWidget(samplingWidget)
 
     dataUI.sampling match {
       case Some(x: ISamplingDataProxyUI) ⇒
@@ -241,6 +253,8 @@ class CapsuleUI(val scene: IMoleScene,
 
   def setTask(dpu: ITaskDataProxyUI) = {
     dataUI.task = Some(dpu)
+    dataUI.environment = None
+    dataUI.sampling = None
     dpu.dataUI match {
       case x: IExplorationTaskDataUI ⇒ setSampling(x.sampling)
       case _ ⇒

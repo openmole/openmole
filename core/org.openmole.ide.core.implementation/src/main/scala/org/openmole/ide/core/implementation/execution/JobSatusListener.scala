@@ -34,7 +34,6 @@ class JobSatusListener(exeManager: ExecutionManager) extends EventListener[IMole
       case x: Finished ⇒
         exeManager.logTextArea.append("The simulation is completed")
         exeManager.publish(MoleFinishedEvent)
-        println("job finished")
     }
   }
 }

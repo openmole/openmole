@@ -5,6 +5,7 @@
 
 package org.openmole.ide.core.implementation.execution
 
+import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.event.ActionEvent
@@ -25,6 +26,8 @@ import org.openmole.core.model.hook.IHook
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IGrouping
 import org.openmole.ide.misc.visualization._
+import org.openmole.ide.misc.widget.MyMigPanel
+import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
@@ -43,6 +46,7 @@ import scala.swing.Menu
 import scala.swing.MenuBar
 import scala.swing.MenuItem
 import scala.swing.Orientation
+import scala.swing.Panel
 import scala.swing.Publisher
 import scala.swing.ScrollPane
 import scala.swing.Separator
@@ -87,8 +91,9 @@ class ExecutionManager(manager: IMoleSceneManager,
     State.CANCELED -> new AtomicInteger)
 
   var hooksInExecution = List.empty[IHook]
-  val wfPiePlotter = new PiePlotter("Workflow execution")
-  val envBarPanel = new PluginPanel("", "[][grow,fill]", "") {
+  val wfPiePlotter = new PiePlotter
+  val envBarPanel = new PluginPanel("wrap", "[][grow,fill]", "") {
+    //  contents += new Label { text = "<html><b><font \"size=\"5\" >Workflow execution</font></b></html>" }
     peer.add(wfPiePlotter.panel)
     preferredSize = new Dimension(250, 250)
   }
@@ -111,7 +116,12 @@ class ExecutionManager(manager: IMoleSceneManager,
   // val hookPanel = new PluginPanel("") { contents += (menuBar, "wrap") }
 
   val splitPane = new SplitPane(Orientation.Vertical) {
-    leftComponent = new ScrollPane(envBarPanel)
+    leftComponent = new MyMigPanel("wrap", color = new Color(0, 0, 0, 0)) {
+      border = BorderFactory.createEmptyBorder
+      contents += new Label { text = "<html><b><font \"size=\"5\" >Workflow execution</font></b></html>" }
+      contents += new ScrollPane(envBarPanel)
+    }
+
     rightComponent = new ScrollPane(logTextArea)
     resizeWeight = 0.6
   }
