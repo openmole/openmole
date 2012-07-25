@@ -28,7 +28,7 @@ class ExampleStackedPanel extends MigPanel("", "[][grow,fill]", "") {
   val g = new Random(51)
 
   //PiePlotter    
-  val plot = new PiePlotter("title")
+  val plot = new PiePlotter
   plot.update(READY, 8)
   plot.update(COMPLETED, 8)
   plot.update(CANCELED, 4)

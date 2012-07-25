@@ -34,7 +34,7 @@ import java.awt.Color._
 import org.openmole.core.model.job.State._
 import java.awt.Dimension
 
-class PiePlotter(title: String) {
+class PiePlotter {
 
   val data = new DataTable(classOf[java.lang.Integer])
   data.add(0)
@@ -43,7 +43,6 @@ class PiePlotter(title: String) {
 
   // Create new pie plot
   val plot = new PiePlot(data)
-  plot.setSetting(Plot.TITLE, title)
 
   // Change relative size of pie
   plot.setSetting(PiePlot.RADIUS, 0.95)
