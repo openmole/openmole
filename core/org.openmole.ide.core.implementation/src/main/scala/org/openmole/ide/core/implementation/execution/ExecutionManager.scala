@@ -73,7 +73,7 @@ object ExecutionManager {
 class ExecutionManager(manager: IMoleSceneManager,
                        val mole: IMole,
                        val capsuleMapping: Map[ICapsuleUI, ICapsule],
-                       val prototypeMapping: Map[IPrototypeDataProxyUI, IPrototype[_]]) extends ScrollPane
+                       val prototypeMapping: Map[IPrototypeDataProxyUI, IPrototype[_]]) extends PluginPanel("", "[grow,fill]", "")
     with IExecutionManager
     with Publisher {
   preferredSize.height = 400
@@ -82,8 +82,6 @@ class ExecutionManager(manager: IMoleSceneManager,
   val moleExecutionExceptionTextArea = new TextArea { columns = 40; rows = 10; editable = false }
   override val printStream = new PrintStream(new TextAreaOutputStream(logTextArea), true)
   var moleExecution: Option[IMoleExecution] = None
-  //var gStrategyPanels = new HashMap[String, (IGroupingPanelUI, List[(IGrouping, ICapsule)])]
-  // val hookPanels = new HashMap[String, (IHookPanelUI, List[IHook])]
   var status = HashMap(State.READY -> new AtomicInteger,
     State.RUNNING -> new AtomicInteger,
     State.COMPLETED -> new AtomicInteger,
@@ -93,7 +91,6 @@ class ExecutionManager(manager: IMoleSceneManager,
   var hooksInExecution = List.empty[IHook]
   val wfPiePlotter = new PiePlotter
   val envBarPanel = new PluginPanel("wrap", "[][grow,fill]", "") {
-    //  contents += new Label { text = "<html><b><font \"size=\"5\" >Workflow execution</font></b></html>" }
     peer.add(wfPiePlotter.panel)
     preferredSize = new Dimension(250, 250)
   }
@@ -108,18 +105,11 @@ class ExecutionManager(manager: IMoleSceneManager,
   var environments = new HashMap[IEnvironment, (String, HashMap[ExecutionState.ExecutionState, AtomicInteger])]
 
   val hookMenu = new Menu("Hooks")
-  // val groupingMenu = new Menu("Grouping")
-  //KeyRegistry.hooks.values.toList.sortBy { _.toString }.foreach { f ⇒ hookMenu.contents += new MenuItem(new AddHookRowAction(f)) }
-  //KeyRegistry.groupingStrategies.values.foreach { f ⇒ groupingMenu.contents += new MenuItem(new AddGroupingStrategyRowAction(f)) }
-  // val menuBar = new MenuBar { contents.append(hookMenu, groupingMenu) }
-  // menuBar.minimumSize = new Dimension(menuBar.size.width, 30)
-  // val hookPanel = new PluginPanel("") { contents += (menuBar, "wrap") }
 
   val splitPane = new SplitPane(Orientation.Vertical) {
-    leftComponent = new MyMigPanel("wrap", color = new Color(0, 0, 0, 0)) {
-      border = BorderFactory.createEmptyBorder
+    leftComponent = new PluginPanel("wrap") {
       contents += new Label { text = "<html><b><font \"size=\"5\" >Workflow execution</font></b></html>" }
-      contents += new ScrollPane(envBarPanel)
+      contents += envBarPanel
     }
 
     rightComponent = new ScrollPane(logTextArea)
@@ -135,21 +125,18 @@ class ExecutionManager(manager: IMoleSceneManager,
   val tabbedPane = new TabbedPane {
     opaque = true
     background = new Color(77, 77, 77)
-    border = BorderFactory.createLineBorder(new Color(77, 77, 77))
   }
-  // tabbedPane.pages += new TabbedPane.Page("Settings", hookPanel)
   tabbedPane.pages += new TabbedPane.Page("Execution progress", splitPane)
   tabbedPane.pages += new TabbedPane.Page("Execution errors", new ScrollPane(executionJobExceptionTextArea))
   tabbedPane.pages += new TabbedPane.Page("Environments errors", new ScrollPane(moleExecutionExceptionTextArea))
 
-  contents = tabbedPane
+  contents += tabbedPane
   preferredSize = new Dimension(size.width, 300)
 
   def start(hooks: Map[IHookPanelUI, ICapsuleUI]) = synchronized {
     tabbedPane.selection.index = 0
     cancel
     initBarPlotter
-    //   hookPanels.values.foreach(_._2.foreach(_.release))
     MoleMaker.buildMoleExecution(mole,
       manager,
       capsuleMapping,
@@ -188,10 +175,9 @@ class ExecutionManager(manager: IMoleSceneManager,
           initPieChart
           hooksInExecution = hooks.flatMap {
             case (panel, caps) ⇒ panel.saveContent.coreObject(this,
-              this.moleExecution.get,
+              mExecution,
               capsuleMapping(caps))
           }.toList
-          // hookPanels.keys.foreach { commitHook }
           repaint
           revalidate
 
@@ -222,7 +208,7 @@ class ExecutionManager(manager: IMoleSceneManager,
     timer.stop
     hooksInExecution.foreach { _.release }
     moleExecution match {
-      case me: IMoleExecution ⇒ me.cancel
+      case Some(me: IMoleExecution) ⇒ me.cancel
       case _ ⇒
     }
   }
@@ -242,18 +228,11 @@ class ExecutionManager(manager: IMoleSceneManager,
     environments += e._1 -> (e._2, m)
 
     moleExecution match {
-      case me: IMoleExecution ⇒
+      case Some(me: IMoleExecution) ⇒
         EventDispatcher.listen(e._1, new JobStateChangedOnEnvironmentListener(this, me, e._1), classOf[IEnvironment.JobStateChanged])
       case _ ⇒
     }
   }
-
-  //  override def commitHook(hookClassName: String) {
-  //    if (hookPanels.contains(hookClassName)) {
-  //      hookPanels(hookClassName)._2.foreach(_.release)
-  //      hookPanels(hookClassName) = (hookPanels(hookClassName)._1, hookPanels(hookClassName)._1.saveContent.map(_.coreObject))
-  //    }
-  //  }
 
   def initPieChart = synchronized {
     status.keys.foreach(k ⇒ status(k) = new AtomicInteger)
@@ -264,32 +243,4 @@ class ExecutionManager(manager: IMoleSceneManager,
     StatusBar.clear
     StatusBar.inform("Downloads : " + downloads._1 + " / " + downloads._2 + "  Uploads : " + uploads._1 + " / " + uploads._2)
   }
-
-  //  class AddHookRowAction(fui: IHookFactoryUI) extends Action(fui.toString) {
-  //    def apply = {
-  //      val cl = fui.coreClass.getCanonicalName
-  //      if (hookPanels.contains(cl)) hookPanels(cl)._1.addHook
-  //      else {
-  //        val pui = fui.buildPanelUI(ExecutionManager.this)
-  //        hookPanel.peer.add(pui.peer)
-  //        hookPanel.peer.add((new Separator).peer)
-  //        hookPanels += cl -> (pui, List.empty)
-  //      }
-  //      hookPanels += cl -> (hookPanels(cl)._1, hookPanels(cl)._1.saveContent.map(_.coreObject))
-  //    }
-  //  }
-
-  //  class AddGroupingStrategyRowAction(fui: IGroupingFactoryUI) extends Action(fui.toString) {
-  //    def apply = {
-  //      val cl = fui.coreClass.getCanonicalName
-  //      if (gStrategyPanels.contains(cl))
-  //        gStrategyPanels(cl)._1.addStrategy
-  //      else {
-  //        val pui = fui.buildPanelUI(ExecutionManager.this)
-  //        hookPanel.peer.add(pui.peer)
-  //        gStrategyPanels += cl -> (pui, List.empty)
-  //      }
-  //      gStrategyPanels += cl -> (gStrategyPanels(cl)._1, gStrategyPanels(cl)._1.saveContent.map(_.coreObject))
-  //    }
-  //  }
 }

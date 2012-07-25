@@ -19,13 +19,10 @@ package org.openmole.ide.core.implementation.workflow
 
 import java.awt.BorderLayout
 import java.awt.Color
-import javax.swing.BorderFactory
-import javax.swing.ImageIcon
 import javax.swing.JScrollPane
 import javax.swing.ScrollPaneConstants._
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
-import org.openmole.core.model.hook.IHook
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.implementation.execution.ExecutionManager
 import org.openmole.ide.core.implementation.execution.MoleFinishedEvent
@@ -35,22 +32,15 @@ import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.MainLinkLabel
-import org.openmole.ide.misc.widget.MigPanel
-import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.PluginPanel
-import org.openmole.ide.misc.widget.ToolBarButton
-import org.openmole.misc.eventdispatcher.EventDispatcher
 import scala.collection.mutable.HashMap
-import scala.collection.mutable.HashSet
 import scala.swing.Action
 import scala.swing.Button
-import scala.swing.Frame
 import scala.swing.Label
 import scala.swing.Orientation
 import scala.swing.Panel
 import scala.swing.Separator
 import scala.swing.TabbedPane
-import scala.swing.ScrollPane
 import org.openmole.ide.misc.tools.image.Images._
 
 class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
@@ -76,7 +66,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   executionManager match {
     case Some(x: ExecutionManager) ⇒
 
-      peer.add(new ScrollPane(new ExecutionPanel {
+      peer.add(new ExecutionPanel {
         peer.setLayout(new BorderLayout)
         peer.add(new PluginPanel("wrap") {
           val hookTabbedPane = new TabbedPane
@@ -120,7 +110,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
             })
           }
         }.peer, BorderLayout.SOUTH)
-      }).peer, BorderLayout.CENTER)
+      }.peer, BorderLayout.CENTER)
 
       // Execution
       peer.add(new PluginPanel("wrap", "[grow]") {
