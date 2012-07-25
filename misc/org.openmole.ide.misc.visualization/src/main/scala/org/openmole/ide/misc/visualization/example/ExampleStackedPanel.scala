@@ -34,7 +34,7 @@ class ExampleStackedPanel extends MigPanel("", "[][grow,fill]", "") {
   plot.update(CANCELED, 4)
 
   //XYPLOT
-  val plot2 = new XYPlotter("Mon plot XY", 3000, 20) {
+  val plot2 = new XYPlotter(3000, 20) {
     background = Color.white
   }
 

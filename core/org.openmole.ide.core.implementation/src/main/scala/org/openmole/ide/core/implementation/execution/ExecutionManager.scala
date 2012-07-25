@@ -5,29 +5,19 @@
 
 package org.openmole.ide.core.implementation.execution
 
-import java.awt.BorderLayout
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
-import java.io.File
 import java.io.PrintStream
 import java.util.concurrent.atomic.AtomicInteger
-import javax.swing.BorderFactory
 import javax.swing.Timer
-import org.openide.DialogDescriptor
-import org.openide.DialogDisplayer
-import org.openide.NotifyDescriptor
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
-import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.hook.IHook
 import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IGrouping
 import org.openmole.ide.misc.visualization._
-import org.openmole.ide.misc.widget.MyMigPanel
-import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
@@ -38,24 +28,17 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
-import org.openmole.ide.core.implementation.registry.KeyRegistry
 import scala.collection.mutable.HashMap
-import scala.swing.Action
 import scala.swing.Label
 import scala.swing.Menu
-import scala.swing.MenuBar
-import scala.swing.MenuItem
 import scala.swing.Orientation
-import scala.swing.Panel
 import scala.swing.Publisher
 import scala.swing.ScrollPane
-import scala.swing.Separator
 import scala.swing.SplitPane
 import scala.swing.SplitPane
 import scala.swing.TabbedPane
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 import scala.swing.TextArea
 import org.openmole.core.model.job.State
@@ -90,11 +73,15 @@ class ExecutionManager(manager: IMoleSceneManager,
 
   var hooksInExecution = List.empty[IHook]
   val wfPiePlotter = new PiePlotter
-  val envBarPanel = new PluginPanel("wrap", "[][grow,fill]", "") {
-    peer.add(wfPiePlotter.panel)
+  val envBarPlotter = new XYPlotter(5000, 120) { preferredSize = new Dimension(400, 250) }
+
+  val envBarPanel = new PluginPanel("", "[][grow,fill]", "") {
+    contents += new PluginPanel("wrap", "[center]", "") {
+      contents += new Label { text = "<html><b><font \"size=\"5\" >Workflow execution</font></b></html>" }
+      peer.add(wfPiePlotter.panel)
+    }
     preferredSize = new Dimension(250, 250)
   }
-  val envBarPlotter = new XYPlotter("Environment", 5000, 120) { preferredSize = new Dimension(400, 250) }
 
   var states = new States(0, 0, 0)
   val timer = new Timer(5000, new ActionListener {
@@ -107,8 +94,7 @@ class ExecutionManager(manager: IMoleSceneManager,
   val hookMenu = new Menu("Hooks")
 
   val splitPane = new SplitPane(Orientation.Vertical) {
-    leftComponent = new PluginPanel("wrap") {
-      contents += new Label { text = "<html><b><font \"size=\"5\" >Workflow execution</font></b></html>" }
+    leftComponent = new PluginPanel("wrap", "[center]", "") {
       contents += envBarPanel
     }
 
@@ -169,8 +155,10 @@ class ExecutionManager(manager: IMoleSceneManager,
 
           //FIXME Displays several environments
           if (environments.size > 0) {
-            envBarPlotter.title(environments.toList(0)._2)
-            envBarPanel.peer.add(envBarPlotter.panel)
+            envBarPanel.peer.add(new PluginPanel("wrap", "[center]", "") {
+              contents += new Label { text = "<html><b><font \"size=\"5\" >" + environments.toList(0)._2 + "</font></b></html>" }
+              contents += envBarPlotter.panel
+            }.peer)
           }
           initPieChart
           hooksInExecution = hooks.flatMap {

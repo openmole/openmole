@@ -39,8 +39,7 @@ import de.erichseifert.gral.Legend
 import de.erichseifert.gral.Location
 import java.awt.Dimension
 
-class XYPlotter(t: String,
-                buffer_size: Int,
+class XYPlotter(buffer_size: Int,
                 nbInterval: Int) {
 
   val data = new DataTable(classOf[java.lang.Long],
@@ -55,7 +54,6 @@ class XYPlotter(t: String,
   val data3 = new DataSeries("Running", data, 0, 2)
 
   val plot = new XYPlot(data2, data3)
-  title(t)
   plot.setSetting(Plot.LEGEND, true)
   plot.setSetting(Plot.LEGEND_LOCATION, Location.NORTH_WEST)
   plot.getLegend.setSetting(Legend.ORIENTATION, Orientation.HORIZONTAL)
@@ -79,8 +77,6 @@ class XYPlotter(t: String,
   panel.setZoomable(false)
   panel.setPannable(false)
   update(new States(0, 0, 0))
-
-  def title(t: String) = plot.setSetting(Plot.TITLE, t)
 
   def update(states: States): Unit = synchronized {
     import states._
