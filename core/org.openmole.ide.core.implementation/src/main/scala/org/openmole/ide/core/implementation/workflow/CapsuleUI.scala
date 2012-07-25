@@ -144,7 +144,6 @@ class CapsuleUI(val scene: IMoleScene,
 
   def decapsule = {
     dataUI.task = None
-    removeChild(titleWidget)
     removeWidget(inputPrototypeWidget)
     removeWidget(outputPrototypeWidget)
     removeWidget(environmentWidget)
@@ -163,9 +162,6 @@ class CapsuleUI(val scene: IMoleScene,
     CheckData.checkMole(scene)
     addChild(inputPrototypeWidget.get)
     addChild(outputPrototypeWidget.get)
-    addChild(titleWidget)
-    // updateSamplingWidget
-    // updateEnvironmentWidget
     capsuleMenuProvider.addTaskMenus
   }
 
@@ -173,11 +169,6 @@ class CapsuleUI(val scene: IMoleScene,
     dataUI.environment = envtask
     updateEnvironmentWidget
   }
-  //
-  //  def hook(hookFactory: IHookFactoryUI, activated: Boolean) = {
-  //    if (activated) dataUI.hooks.getOrElseUpdate(hookFactory.coreClass)
-  //    println("hook " + hookFactory.toString + " " + activated)
-  //  }
 
   private def removeWidget(w: Option[ComponentWidget]) = {
     w match {
