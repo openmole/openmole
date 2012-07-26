@@ -102,7 +102,7 @@ class SubMoleExecution(
   override def cancel = synchronized {
     _canceled = true
     parrentApply(_.-=(this))
-    childs.foreach{_.cancelJobs}
+    childs.foreach{_.cancel}
   }
   
   def cancelJobs = withJobsLock(_jobs.keys.foreach { _.cancel })
