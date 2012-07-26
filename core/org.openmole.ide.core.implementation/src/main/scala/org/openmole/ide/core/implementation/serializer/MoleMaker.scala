@@ -76,9 +76,7 @@ object MoleMaker {
           case _ ⇒
         }
       }
-
-      val grouping = groupingStrategies.map { case (s, c) ⇒ c -> s }.toMap
-      Right((new MoleExecution(mole, strat.toMap, grouping), envs.toSet))
+      Right((new MoleExecution(mole, strat.toMap, groupingStrategies.map { case (s, c) ⇒ c -> s }.toMap), envs.toSet))
     } catch {
       case e ⇒
         Left(e)

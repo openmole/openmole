@@ -107,6 +107,7 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
       }
     }.peer, 0)
 
+    //Hooks
     val menuHook = new Menu("Hook")
     KeyRegistry.hooks.values.toList.sortBy { _.toString }.foreach { h ⇒
       menuHook.contents += new CheckMenuItem(h.toString) {

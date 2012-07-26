@@ -25,6 +25,8 @@ import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openmole.core.model.hook.ICapsuleExecutionHook
 import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.ide.core.implementation.execution.MultiGenericGroupingStrategyPanel
+import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.execution.ExecutionManager
 import org.openmole.ide.core.implementation.execution.MoleFinishedEvent
 import org.openmole.ide.core.implementation.serializer.MoleMaker
@@ -64,9 +66,11 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
     background = new Color(125, 160, 0)
   }
 
+  var groupingPanel: Option[MultiGenericGroupingStrategyPanel] = None
+
   var panelHooks = new HashMap[IHookPanelUI, (ICapsuleUI, Class[_ <: ICapsuleExecutionHook])]
   executionManager match {
-    case Some(x: ExecutionManager) ⇒
+    case Some(eManager: ExecutionManager) ⇒
 
       peer.add(new ScrollPane(new ExecutionPanel {
         peer.setLayout(new BorderLayout)
@@ -76,7 +80,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
           //Hooks
           contents += new Label { text = "<html><b><font \"size=\"5\" >Hooks</font></b></html>" }
           contents += hookTabbedPane
-          x.capsuleMapping.keys.foreach { c ⇒
+          eManager.capsuleMapping.keys.foreach { c ⇒
             c.dataUI.task match {
               case Some(t: ITaskDataProxyUI) ⇒
                 val activated = c.dataUI.hooks.filter { _._2.activated }
@@ -96,6 +100,8 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
             }
           }
           contents += new Label { text = "<html><b><font \"size=\"5\" >Grouping strategy</font></b></html>" }
+          groupingPanel = Some(new MultiGenericGroupingStrategyPanel(eManager))
+          contents += groupingPanel.get.panel
         }.peer, BorderLayout.CENTER)
 
         peer.add(new PluginPanel("wrap") {
@@ -117,7 +123,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
 
       // Execution
       peer.add(new PluginPanel("wrap", "[grow]") {
-        add(x, "growx")
+        add(eManager, "growx")
       }.peer, BorderLayout.SOUTH)
     case None ⇒
   }
@@ -132,7 +138,8 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         }
         startStopButton.background = new Color(170, 0, 0)
         startStopButton.action = stop
-        x.start(panelHooks.map { ph ⇒ ph._1 -> ph._2._1 }.toMap)
+        x.start(panelHooks.map { ph ⇒ ph._1 -> ph._2._1 }.toMap,
+          groupingPanel.get.coreObjects)
       case _ ⇒
     }
   }
