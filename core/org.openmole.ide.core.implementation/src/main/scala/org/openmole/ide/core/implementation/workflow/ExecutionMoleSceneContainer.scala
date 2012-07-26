@@ -23,6 +23,7 @@ import javax.swing.JScrollPane
 import javax.swing.ScrollPaneConstants._
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
+import org.openmole.core.model.hook.ICapsuleExecutionHook
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.implementation.execution.ExecutionManager
 import org.openmole.ide.core.implementation.execution.MoleFinishedEvent
@@ -39,6 +40,7 @@ import scala.swing.Button
 import scala.swing.Label
 import scala.swing.Orientation
 import scala.swing.Panel
+import scala.swing.ScrollPane
 import scala.swing.Separator
 import scala.swing.TabbedPane
 import org.openmole.ide.misc.tools.image.Images._
@@ -62,11 +64,11 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
     background = new Color(125, 160, 0)
   }
 
-  var panelHooks = new HashMap[IHookPanelUI, ICapsuleUI]
+  var panelHooks = new HashMap[IHookPanelUI, (ICapsuleUI, Class[_ <: ICapsuleExecutionHook])]
   executionManager match {
     case Some(x: ExecutionManager) ⇒
 
-      peer.add(new ExecutionPanel {
+      peer.add(new ScrollPane(new ExecutionPanel {
         peer.setLayout(new BorderLayout)
         peer.add(new PluginPanel("wrap") {
           val hookTabbedPane = new TabbedPane
@@ -81,11 +83,12 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
                 if (!activated.isEmpty) {
                   hookTabbedPane.pages += new TabbedPane.Page("<html><b>" + t.dataUI.name + "</b></html>",
                     new PluginPanel("", "", "[top]") {
-                      activated.values.foreach { h ⇒
-                        val p = h.buildPanelUI(t)
-                        panelHooks += p -> c
-                        contents += p.peer
-                        contents += new Separator(Orientation.Vertical) { foreground = Color.WHITE }
+                      activated.foreach {
+                        case (hClass, hDataUI) ⇒
+                          val p = hDataUI.buildPanelUI(t)
+                          panelHooks += p -> (c, hClass)
+                          contents += p.peer
+                          contents += new Separator(Orientation.Vertical) { foreground = Color.WHITE }
                       }
                     })
                 }
@@ -110,7 +113,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
             })
           }
         }.peer, BorderLayout.SOUTH)
-      }.peer, BorderLayout.CENTER)
+      }).peer, BorderLayout.CENTER)
 
       // Execution
       peer.add(new PluginPanel("wrap", "[grow]") {
@@ -129,7 +132,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         }
         startStopButton.background = new Color(170, 0, 0)
         startStopButton.action = stop
-        x.start(panelHooks.toMap)
+        x.start(panelHooks.map { ph ⇒ ph._1 -> ph._2._1 }.toMap)
       case _ ⇒
     }
   }

@@ -114,7 +114,14 @@ object ScenesManager {
           val container = new ExecutionMoleSceneContainer(clone, page, bmsc)
           page.content = container
           bmsc.executionMoleSceneContainers += container
-          addTab(page, clone.manager.name, new Action("") { override def apply = tabPane.pages.remove(page.index) })
+          addTab(page, clone.manager.name, new Action("") {
+            def apply = {
+              container.panelHooks.foreach { ph ⇒
+                ph._2._1.dataUI.hooks(ph._2._2) = ph._1.saveContent
+              }
+              tabPane.pages.remove(page.index)
+            }
+          })
           tabPane.selection.index = page.index
         } else
           StatusBar.block("The Mole can not be built due to the previous errors")
