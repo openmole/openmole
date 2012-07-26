@@ -59,7 +59,9 @@ object StatusBar extends MigPanel("wrap 3") { statusBar ⇒
           contents += new LinkLabel(header,
             new Action("") { override def apply = displayProxy(x) },
             4,
-            "0088aa")
+            "0088aa",
+            true)
+
         case None ⇒ contents += new Label(header)
       }
       if (stack.isEmpty || stack == "\n") {
@@ -69,7 +71,8 @@ object StatusBar extends MigPanel("wrap 3") { statusBar ⇒
         contents += new LinkLabel(" details",
           new Action("") { override def apply = DialogFactory.displayStack(stack) },
           3,
-          "0088aa")
+          "0088aa",
+          true)
       }
       revalidate
       repaint

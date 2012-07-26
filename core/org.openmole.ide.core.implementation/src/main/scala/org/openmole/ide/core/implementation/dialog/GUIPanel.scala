@@ -7,10 +7,10 @@ package org.openmole.ide.core.implementation.dialog
 
 import scala.swing._
 import org.openmole.ide.misc.widget.MigPanel
-import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import java.awt.BorderLayout
 import org.openmole.ide.core.implementation.execution.PasswordListner
+import java.awt.Toolkit
 import org.openide.DialogDescriptor
 import org.openide.DialogDescriptor._
 import org.openide.DialogDisplayer
@@ -83,7 +83,8 @@ class GUIPanel extends MainFrame { mainframe ⇒
   val splitPane = new SplitPane(Orientation.Horizontal) {
     leftComponent = ScenesManager.tabPane
     rightComponent = new ScrollPane(StatusBar)
-    resizeWeight = 0.8
+    println("aa " + (1 - (30.0 / Toolkit.getDefaultToolkit.getScreenSize.height)))
+    this.resizeWeight = 1 - (30.0 / Toolkit.getDefaultToolkit.getScreenSize.height)
   }
 
   peer.add(splitPane.peer, BorderLayout.CENTER)
