@@ -19,6 +19,7 @@ import org.openmole.core.model.hook.IHook
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.misc.visualization._
 import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.core.model.mole.IGrouping
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.implementation.dialog.StatusBar
@@ -59,8 +60,12 @@ class ExecutionManager(manager: IMoleSceneManager,
                        val prototypeMapping: Map[IPrototypeDataProxyUI, IPrototype[_]]) extends PluginPanel("", "[grow,fill]", "")
     with IExecutionManager
     with Publisher {
-  preferredSize.height = 400
-  val logTextArea = new TextArea { columns = 20; rows = 10; editable = false }
+  // preferredSize.height = 300
+  val logTextArea = new TextArea {
+    columns = 20;
+    //rows = 10; 
+    editable = false
+  }
   val executionJobExceptionTextArea = new TextArea { columns = 40; rows = 10; editable = false }
   val moleExecutionExceptionTextArea = new TextArea { columns = 40; rows = 10; editable = false }
   override val printStream = new PrintStream(new TextAreaOutputStream(logTextArea), true)
@@ -73,14 +78,15 @@ class ExecutionManager(manager: IMoleSceneManager,
 
   var hooksInExecution = List.empty[IHook]
   val wfPiePlotter = new PiePlotter
-  val envBarPlotter = new XYPlotter(5000, 120) { preferredSize = new Dimension(400, 250) }
+  val envBarPlotter = new XYPlotter(5000, 120)
+  //{ preferredSize = new Dimension(400, 200) }
 
   val envBarPanel = new PluginPanel("", "[][grow,fill]", "") {
     contents += new PluginPanel("wrap", "[center]", "") {
       contents += new Label { text = "<html><b><font \"size=\"5\" >Workflow execution</font></b></html>" }
       peer.add(wfPiePlotter.panel)
     }
-    preferredSize = new Dimension(250, 250)
+    //preferredSize = new Dimension(200, 200)
   }
 
   var states = new States(0, 0, 0)
@@ -117,17 +123,17 @@ class ExecutionManager(manager: IMoleSceneManager,
   tabbedPane.pages += new TabbedPane.Page("Environments errors", new ScrollPane(moleExecutionExceptionTextArea))
 
   contents += tabbedPane
-  preferredSize = new Dimension(size.width, 300)
+  //preferredSize = new Dimension(size.width, 300)
 
-  def start(hooks: Map[IHookPanelUI, ICapsuleUI]) = synchronized {
+  def start(hooks: Map[IHookPanelUI, ICapsuleUI],
+            groupings: List[(IGrouping, ICapsule)]) = synchronized {
     tabbedPane.selection.index = 0
     cancel
     initBarPlotter
     MoleMaker.buildMoleExecution(mole,
       manager,
       capsuleMapping,
-      //FIXME with Grouping Strategy
-      List.empty) match {
+      groupings) match {
         case Right((mExecution, environments)) ⇒
           this.moleExecution = Some(mExecution)
 
@@ -145,7 +151,7 @@ class ExecutionManager(manager: IMoleSceneManager,
               case _ ⇒
             }
           }
-
+          println("grouping :: " + mExecution.moleJobs.size)
           environments.foreach {
             case (env, _) ⇒ EventDispatcher.listen(env, new EnvironmentExceptionListener(this), classOf[IEnvironment.ExceptionRaised])
           }

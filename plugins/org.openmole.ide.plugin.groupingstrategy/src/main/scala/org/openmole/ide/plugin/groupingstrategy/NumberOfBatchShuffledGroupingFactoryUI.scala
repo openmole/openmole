@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 leclaire
+ * Copyright (C) 2012 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,10 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.model.panel
+package org.openmole.ide.plugin.groupingstrategy
 
-import org.openmole.core.model.mole.IGrouping
+import org.openmole.ide.core.model.control.IExecutionManager
+import org.openmole.ide.core.model.factory.IGroupingFactoryUI
+import org.openmole.plugin.grouping.batch.NumberOfBatchShuffledGrouping
 
-trait IGroupingPanelUI extends IPanelUI {
-  def coreObject: IGrouping
+class NumberOfBatchShuffledGroupingFactoryUI extends IGroupingFactoryUI {
+  override def toString = "by shuffled groups"
+
+  def coreClass = classOf[NumberOfBatchShuffledGrouping]
+
+  def buildPanelUI(executionManager: IExecutionManager) =
+    new NumberOfBatchShuffledGroupingPanelUI(executionManager)
 }
