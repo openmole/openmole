@@ -47,7 +47,7 @@ object ElitismTask {
 
       addParameter(archive -> evolution.emptyPopulation)
       addParameter(generation -> 0)
-      addParameter(state -> evolution.initialState)
+      addParameter(state -> evolution.initialState(evolution.emptyPopulation))
 
       def toTask = new ElitismTask(name, evolution) {
 
@@ -82,7 +82,6 @@ sealed abstract class ElitismTask[E <: Evolution with Elitism with Termination](
     val newArchive = evolution.elitism(population)
 
     val (term, newState) = evolution.terminated(
-      currentArchive,
       newArchive,
       context.valueOrException(state))
 

@@ -32,7 +32,7 @@ sealed class EpsilonNSGA2Sigma(
     with NonDominatedSortingElitism
     with CoEvolvingSigmaValuesMutation
     with SBXBoundedCrossover
-    with Crowding
+    with CrowdingDiversity
     with ParetoRanking
     with EpsilonDominance
     with RankDiversityModifier

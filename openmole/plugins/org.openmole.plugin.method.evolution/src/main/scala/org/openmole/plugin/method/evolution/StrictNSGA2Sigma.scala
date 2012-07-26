@@ -31,7 +31,7 @@ sealed class StrictNSGA2Sigma(
     with NonDominatedSortingElitism
     with CoEvolvingSigmaValuesMutation
     with SBXBoundedCrossover
-    with Crowding
+    with CrowdingDiversity
     with ParetoRanking
     with StrictDominance
     with RankDiversityModifier
