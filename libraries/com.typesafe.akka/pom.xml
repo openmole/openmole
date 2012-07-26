@@ -41,7 +41,7 @@
     <!--optional. Use this property to tune the exported packages-->
     <properties>
         <libraries.export.packages>akka.*,com.typesafe.*</libraries.export.packages>
-        <!--<import.packages>scala.*,*;resolution:=optional</import.packages>-->
+        <eclipse.buddypolicy>global</eclipse.buddypolicy>
     </properties>
 
 </project>

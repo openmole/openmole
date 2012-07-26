@@ -79,7 +79,7 @@ class MoleExecution(
   private val ticketNumber = new AtomicLong
   private val currentJobId = new AtomicLong
 
-  private val waitingJobs = new HashMap[(ICapsule, IMoleJobGroup), ListBuffer[IMoleJob]]
+  private val waitingJobs = new HashMap[(ICapsule, IMoleJobGroup, ISubMoleExecution), ListBuffer[IMoleJob]]
 
   @volatile private var nbWaiting = 0
   @volatile private[mole] var nbJobInProgress = 0
@@ -95,11 +95,11 @@ class MoleExecution(
       rerun.rerun(moleJob, capsule)
     }
 
-  def group(moleJob: IMoleJob, capsule: ICapsule) = synchronized {
+  def group(moleJob: IMoleJob, capsule: ICapsule, submole: ISubMoleExecution) = synchronized {
     grouping.get(capsule) match {
       case Some(strategy) ⇒
         val category = strategy(moleJob.context)
-        val key = (capsule, category)
+        val key = (capsule, category, submole)
 
         val jobs = waitingJobs.getOrElseUpdate(key, new ListBuffer) += moleJob
         nbWaiting += 1
@@ -108,18 +108,18 @@ class MoleExecution(
         if (complete) {
           waitingJobs.remove(key)
           nbWaiting -= jobs.size
-          val job = new Job(this, jobs)
+          val job = new Job(submole, jobs)
           submit(job, capsule)
         }
       case None ⇒
-        val job = new Job(this, List(moleJob))
+        val job = new Job(submole, List(moleJob))
         submit(job, capsule)
     }
 
   }
 
   private def submit(job: IJob, capsule: ICapsule) =
-    if (!job.allMoleJobsFinished) {
+    if (!job.finished) {
       (selection.get(capsule) match {
         case Some(selection) ⇒ selection.apply(job)
         case None ⇒ LocalExecutionEnvironment
@@ -128,7 +128,7 @@ class MoleExecution(
 
   def submitAll = synchronized {
     waitingJobs.foreach {
-      case ((capsule, _), jobs) ⇒ submit(new Job(this, jobs), capsule)
+      case ((capsule, _, submole), jobs) ⇒ submit(new Job(submole, jobs), capsule)
     }
     nbWaiting = 0
     waitingJobs.empty

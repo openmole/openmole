@@ -69,7 +69,7 @@ object URIFile extends Logger {
   Workspace += (Timeout, "PT2M")
   Workspace += (BufferSize, "32768")
   Workspace += (CopyTimeout, "PT1M")
-  Workspace += (CleanerWorkers, "5")
+  Workspace += (CleanerWorkers, "20")
 
   val system = ActorSystem("URIFile", ConfigFactory.parseString(
     """
@@ -90,7 +90,7 @@ akka {
 }
 """))
 
-  val cleaners = system.actorOf(Props(new CleanerActor).withRouter(RoundRobinRouter(Workspace.preferenceAsInt(CleanerWorkers))), name = "cleaner")
+  val cleaners = system.actorOf(Props(new CleanerActor).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(CleanerWorkers))), name = "cleaner")
 
   case class Clean(file: IURIFile)
 

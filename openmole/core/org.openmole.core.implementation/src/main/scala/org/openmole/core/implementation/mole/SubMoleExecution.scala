@@ -60,13 +60,19 @@ class SubMoleExecution(
   private val _childs = new HashSet[SubMoleExecution] with SynchronizedSet[SubMoleExecution]
   private val jobsLock = new ReentrantLock
   @volatile private var _jobs = TreeMap.empty[IMoleJob, (ICapsule, ITicket)]
-  @volatile private var canceled = false
+  @volatile private var _canceled = false
 
   val masterCapsuleRegistry = new RegistryWithTicket[IMasterCapsule, IContext]
   val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, Buffer[IVariable[_]]]
   val transitionRegistry = new RegistryWithTicket[ITransition, Buffer[IVariable[_]]]
 
   parrentApply(_.+=(this))
+
+  override def canceled: Boolean =
+    _canceled || (parent match {
+      case Some(p) ⇒ p.canceled
+      case None ⇒ false
+    })
 
   private def withJobsLock[T](f: ⇒ T): T = {
     jobsLock.lock
@@ -91,15 +97,12 @@ class SubMoleExecution(
     parrentApply(_.nbJobs_+=(v))
   }
 
-  override def isRoot = !parent.isDefined
+  override def root = !parent.isDefined
 
-  override def cancel = {
-    _childs.foreach { _.cancel }
-    synchronized {
-      withJobsLock(_jobs.keys.foreach { _.cancel })
-      parrentApply(_.-=(this))
-      canceled = true
-    }
+  override def cancel = synchronized {
+    _canceled = true
+    withJobsLock(_jobs.keys.foreach { _.cancel })
+    parrentApply(_.-=(this))
   }
 
   override def childs = _childs.toList
@@ -180,7 +183,7 @@ class SubMoleExecution(
       if (!instant)
         capsule match {
           case _: IAtomicCapsule ⇒ synchronized { moleJob.perform }
-          case _ ⇒ moleExecution.group(moleJob, capsule)
+          case _ ⇒ moleExecution.group(moleJob, capsule, this)
         }
     }
   }

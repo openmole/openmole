@@ -36,12 +36,13 @@ trait ISubMoleExecution {
   def parent: Option[ISubMoleExecution]
   def childs: Iterable[ISubMoleExecution]
 
-  def isRoot: Boolean
+  def root: Boolean
   def moleExecution: IMoleExecution
 
   def jobs: Iterable[IMoleJob]
 
   def cancel
+  def canceled: Boolean
 
   def masterCapsuleRegistry: IRegistryWithTicket[IMasterCapsule, IContext]
   def aggregationTransitionRegistry: IRegistryWithTicket[IAggregationTransition, Buffer[IVariable[_]]]

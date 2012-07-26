@@ -161,12 +161,12 @@ class UploadActor(jobManager: ActorRef) extends Actor {
 
     //Hold cache to avoid gc and file deletion
     val cache = if (isDir) {
-      val cache = FileService.archiveForDir(job.execution, file)
+      val cache = FileService.archiveForDir(job.moleExecution, file)
       toReplicate = cache.file(false)
       cache
     } else null
 
-    val hash = FileService.hash(job.execution, toReplicate).toString
+    val hash = FileService.hash(job.moleExecution, toReplicate).toString
     val replica = ReplicaCatalog.uploadAndGet(toReplicate, toReplicatePath, hash, storage, token)
     new ReplicatedFile(file, isDir, hash, replica.destinationURIFile.path, file.mode)
   }

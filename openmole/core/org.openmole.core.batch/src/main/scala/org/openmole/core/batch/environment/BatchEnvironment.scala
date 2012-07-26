@@ -122,7 +122,7 @@ object BatchEnvironment extends Logger {
   Workspace += (MinValueForSelectionExploration, "0.001")
   Workspace += (CheckFileExistsInterval, "PT1H")
   Workspace += (StatisticsHistorySize, "10000")
-  Workspace += (JobManagmentThreads, "20")
+  Workspace += (JobManagmentThreads, "100")
   Workspace += (EnvironmentCleaningThreads, "20")
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)

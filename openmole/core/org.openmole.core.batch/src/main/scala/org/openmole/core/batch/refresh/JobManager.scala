@@ -20,6 +20,10 @@ package org.openmole.core.batch.refresh
 import akka.actor.Actor
 import akka.actor.ActorSystem
 import akka.actor.Props
+import akka.dispatch.Dispatchers
+import akka.dispatch.PriorityGenerator
+import akka.dispatch.UnboundedPriorityMailbox
+import akka.routing.DefaultResizer
 import akka.routing.RoundRobinRouter
 import akka.routing.SmallestMailboxRouter
 import akka.util.duration._
@@ -29,6 +33,7 @@ import org.openmole.core.model.execution.IEnvironment
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
+import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.environment.BatchEnvironment.JobManagmentThreads
@@ -39,18 +44,18 @@ import JobManager._
 
 class JobManager(environment: BatchEnvironment) extends Actor {
 
-  val workers = ActorSystem("JobManagment", ConfigFactory.parseString(
+  val workers = ActorSystem.create("JobManagment", ConfigFactory.parseString(
     """
 akka {
   daemonic="on"
   actor {
     default-dispatcher {
-            
       executor = "fork-join-executor"
       type = Dispatcher
+      mailbox-type = """ + '"' + classOf[PriorityMailBox].getName + '"' + """
       
       fork-join-executor {
-        parallelism-min = """ + Workspace.preference(JobManagmentThreads) + """
+        parallelism-min = """ + 10 + """
         parallelism-max = """ + Workspace.preference(JobManagmentThreads) + """
       }
       throughput = 1
@@ -61,14 +66,13 @@ akka {
 
   import environment._
 
-  val workerForEach = Workspace.preferenceAsInt(JobManagmentThreads) // 5.0).toInt + 1
-  //def newRootees(f: => Actor) = (0 until workerForEach).map{i => workers.actorOf(Props(f))}
-
-  val uploader = workers.actorOf(Props(new UploadActor(self)).withRouter(RoundRobinRouter(workerForEach)), name = "upload")
-  val submitter = workers.actorOf(Props(new SubmitActor(self)).withRouter(RoundRobinRouter(workerForEach)), name = "submit")
-  val refresher = workers.actorOf(Props(new RefreshActor(self)).withRouter(RoundRobinRouter(workerForEach)), name = "refresher")
-  val resultGetters = workers.actorOf(Props(new GetResultActor(self)).withRouter(RoundRobinRouter(workerForEach)), name = "resultGetters")
-  val killer = workers.actorOf(Props(new KillerActor).withRouter(RoundRobinRouter(workerForEach)), name = "killer")
+  val resizer = DefaultResizer(lowerBound = 10, upperBound = Workspace.preferenceAsInt(JobManagmentThreads))
+  // val workerForEach = Workspace.preferenceAsInt(JobManagmentThreads)
+  val uploader = workers.actorOf(Props(new UploadActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
+  val submitter = workers.actorOf(Props(new SubmitActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
+  val refresher = workers.actorOf(Props(new RefreshActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
+  val resultGetters = workers.actorOf(Props(new GetResultActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
+  val killer = workers.actorOf(Props(new KillerActor).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
 
   def receive = {
     case Upload(job) ⇒ uploader ! Upload(job)

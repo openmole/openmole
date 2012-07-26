@@ -19,8 +19,8 @@ package org.openmole.core.implementation.job
 
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.mole.ISubMoleExecution
 
-class Job(val execution: IMoleExecution, val moleJobs: Iterable[IMoleJob]) extends IJob {
-  override def allMoleJobsFinished: Boolean = !moleJobs.exists(!_.isFinished)
+class Job(val subMoleExecution: ISubMoleExecution, val moleJobs: Iterable[IMoleJob]) extends IJob {
+  override def finished: Boolean = subMoleExecution.canceled | moleJobs.forall(_.isFinished)
 }
