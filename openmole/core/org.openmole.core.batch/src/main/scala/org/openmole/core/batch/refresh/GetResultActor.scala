@@ -73,12 +73,12 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
           var lastCompleted = 0L
 
           //Try to download the results for all the jobs of the group
-          for (moleJob ← job.moleJobs) {
+          for (moleJob ← job.moleJobs.unzip._1) {
             if (contextResults.results.isDefinedAt(moleJob.id)) {
               val executionResult = contextResults.results(moleJob.id)
 
               moleJob.synchronized {
-                if (!moleJob.isFinished) {
+                if (!moleJob.finished) {
 
                   executionResult._1 match {
                     case Left(context) ⇒
@@ -87,7 +87,7 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
                       if (completed > lastCompleted) lastCompleted = completed
                       val running = timeStamps.view.reverse.find(_.state == State.RUNNING).get.time
                       if (running < firstRunning) firstRunning = running
-                      moleJob.finished(context, executionResult._2)
+                      moleJob.finish(context, executionResult._2)
                     case Right(e) ⇒
                       sender ! MoleJobError(moleJob, batchJob, e)
                   }

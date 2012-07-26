@@ -17,11 +17,10 @@
 
 package org.openmole.core.model.job
 
-import org.openmole.core.model.mole.ISubMoleExecution
+import org.openmole.core.model.mole._
 
 trait IJob {
-  def subMoleExecution: ISubMoleExecution
-  def moleExecution = subMoleExecution.moleExecution
-  def moleJobs: Iterable[IMoleJob]
+  def moleExecution: IMoleExecution
+  def moleJobs: Iterable[(IMoleJob, ISubMoleExecution)]
   def finished: Boolean
 }

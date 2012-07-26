@@ -134,8 +134,8 @@ class UploadActor(jobManager: ActorRef) extends Actor {
 
     val tos = new TarOutputStream(new FileOutputStream(file))
     try {
-      for (moleJob ← job.moleJobs) moleJob.synchronized {
-        if (!moleJob.isFinished) {
+      for ((moleJob, _) ← job.moleJobs) moleJob.synchronized {
+        if (!moleJob.finished) {
           val moleJobFile = Workspace.newFile("job", ".tar")
           try {
             val serializationResult =

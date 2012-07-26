@@ -40,11 +40,11 @@ object IMoleJob {
 trait IMoleJob {
   def task: ITask
   def state: State.State
-  def isFinished: Boolean
+  def finished: Boolean
   def context: IContext
   def exception: Option[Throwable]
   def timeStamps: Seq[ITimeStamp[State.State]]
-  def finished(context: IContext, timeStamps: Seq[ITimeStamp[State.State]])
+  def finish(context: IContext, timeStamps: Seq[ITimeStamp[State.State]])
   def perform
   def id: MoleJobId
   def cancel

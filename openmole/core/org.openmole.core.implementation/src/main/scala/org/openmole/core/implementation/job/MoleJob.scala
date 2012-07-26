@@ -86,13 +86,13 @@ class MoleJob(
       }
     }
 
-  override def finished(context: IContext, timeStamps: Seq[ITimeStamp[State.State]]) = {
+  override def finish(context: IContext, timeStamps: Seq[ITimeStamp[State.State]]) = {
     _context = context
     this.timeStamps ++= timeStamps
     state = COMPLETED
   }
 
-  override def isFinished: Boolean = state.isFinal
+  override def finished: Boolean = state.isFinal
 
   override def cancel = state = CANCELED
 
