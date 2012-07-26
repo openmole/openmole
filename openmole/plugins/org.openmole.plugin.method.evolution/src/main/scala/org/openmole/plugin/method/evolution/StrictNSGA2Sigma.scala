@@ -21,16 +21,17 @@ import fr.iscpif.mgo._
 
 sealed class StrictNSGA2Sigma(
   val distributionIndex: Double,
-  val steadySince: Int,
+  val windowSize: Int,
+  val deviationEpsilon: Double,
   val genomeSize: Int,
   val mu: Int,
   val lambda: Int) extends NSGAIISigma
     with MGBinaryTournamentSelection
-    with FirstRankedSteadyTermination
+    with CrowdingStabilityTermination
     with NonDominatedSortingElitism
     with CoEvolvingSigmaValuesMutation
     with SBXBoundedCrossover
-    with CrowdingDistance
+    with Crowding
     with ParetoRanking
     with StrictDominance
     with RankDiversityModifier

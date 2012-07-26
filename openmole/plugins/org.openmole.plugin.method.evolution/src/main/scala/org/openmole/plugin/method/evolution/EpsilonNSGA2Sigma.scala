@@ -21,17 +21,18 @@ import fr.iscpif.mgo._
 
 sealed class EpsilonNSGA2Sigma(
   val distributionIndex: Double,
-  val steadySince: Int,
+  val windowSize: Int,
+  val deviationEpsilon: Double,
   val genomeSize: Int,
   val mu: Int,
   val lambda: Int,
   val epsilons: Seq[Double]) extends NSGAIISigma
     with MGBinaryTournamentSelection
-    with FirstRankedSteadyTermination
+    with CrowdingStabilityTermination
     with NonDominatedSortingElitism
     with CoEvolvingSigmaValuesMutation
     with SBXBoundedCrossover
-    with CrowdingDistance
+    with Crowding
     with ParetoRanking
     with EpsilonDominance
     with RankDiversityModifier
