@@ -103,6 +103,7 @@ class SubMoleExecution(
     _canceled = true
     withJobsLock(_jobs.keys.foreach { _.cancel })
     parrentApply(_.-=(this))
+    childs.foreach{_.cancel}
   }
 
   override def childs = _childs.toList
