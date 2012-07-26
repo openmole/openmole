@@ -20,6 +20,7 @@ package org.openmole.ide.core.model.control
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.mole.IGrouping
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
 import java.io.PrintStream
@@ -37,5 +38,6 @@ trait IExecutionManager {
 
   def printStream: PrintStream
 
-  def start(hooks: Map[IHookPanelUI, ICapsuleUI])
+  def start(hooks: Map[IHookPanelUI, ICapsuleUI],
+            groupings: List[(IGrouping, ICapsule)])
 }
