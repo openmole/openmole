@@ -22,6 +22,7 @@ import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.job.State.State
 import org.openmole.misc.tools.service.Logger
+import org.openmole.core.implementation.tools._
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.WeakHashMap
 import scala.ref.WeakReference
@@ -30,9 +31,7 @@ object CapsuleExecutionDispatcher extends Logger {
 
   private val dispatchers = new WeakHashMap[IMoleExecution, DispatcherMoleExecutionHook]
 
-  class DispatcherMoleExecutionHook(moleExecution: WeakReference[IMoleExecution]) extends MoleExecutionHook(moleExecution) {
-
-    def this(moleExecution: IMoleExecution) = this(new WeakReference(moleExecution))
+  class DispatcherMoleExecutionHook(val moleExecution: WeakReference[IMoleExecution]) extends MoleExecutionHook {
 
     private val hub = new WeakHashMap[ICapsule, HashSet[CapsuleExecutionHook]]
 

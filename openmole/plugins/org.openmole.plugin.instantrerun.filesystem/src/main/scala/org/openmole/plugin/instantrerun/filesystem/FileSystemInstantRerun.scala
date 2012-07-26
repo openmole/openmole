@@ -113,7 +113,7 @@ class FileSystemInstantRerun(dir: File, capsules: Set[ICapsule]) extends IInstan
           })
         finally is.close
 
-        job.finished(context, Seq.empty)
+        job.finish(context, Seq.empty)
         true
       }
 

@@ -27,7 +27,7 @@ import org.openmole.core.model.mole.IMoleExecution
 import ToCSV._
 import scala.ref.WeakReference
 
-class CSVProfiler(moleExecution: WeakReference[IMoleExecution], writer: CSVWriter) extends MoleExecutionHook(moleExecution) {
+class CSVProfiler(val moleExecution: WeakReference[IMoleExecution], writer: CSVWriter) extends MoleExecutionHook {
 
   def this(moleExecution: IMoleExecution, out: Writer) = this(new WeakReference(moleExecution), new CSVWriter(out))
 

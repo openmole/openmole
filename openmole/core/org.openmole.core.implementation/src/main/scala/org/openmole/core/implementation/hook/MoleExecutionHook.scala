@@ -28,9 +28,9 @@ import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.tools.service.Priority
 import scala.ref.WeakReference
 
-class MoleExecutionHook(private val moleExecution: WeakReference[IMoleExecution]) extends IMoleExecutionHook {
+trait MoleExecutionHook extends IMoleExecutionHook {
 
-  def this(moleExecution: IMoleExecution) = this(new WeakReference(moleExecution))
+  def moleExecution: WeakReference[IMoleExecution]
 
   import Priority._
   import IMoleExecution._

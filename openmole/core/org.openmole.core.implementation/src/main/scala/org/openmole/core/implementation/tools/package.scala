@@ -17,8 +17,11 @@
 
 package org.openmole.core.implementation
 
+import scala.ref.WeakReference
+
 package object tools {
 
   implicit def objectToSomeObjectConverter[T](v: T) = Some(v)
+  implicit def objectToWeakReferenceConverter[T <: AnyRef](v: T) = new WeakReference[T](v)
 
 }

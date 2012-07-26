@@ -29,7 +29,7 @@ import ToCSV._
 import org.openmole.core.model.job.State._
 import scala.ref.WeakReference
 
-class CSVFileProfiler(moleExecution: WeakReference[IMoleExecution], file: File) extends MoleExecutionHook(moleExecution) {
+class CSVFileProfiler(val moleExecution: WeakReference[IMoleExecution], file: File) extends MoleExecutionHook {
 
   def this(moleExecution: IMoleExecution, file: String) = this(new WeakReference(moleExecution), new File(file))
 

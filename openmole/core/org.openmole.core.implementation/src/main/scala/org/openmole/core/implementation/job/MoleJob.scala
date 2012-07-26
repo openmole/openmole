@@ -30,6 +30,15 @@ import scala.collection.mutable.ListBuffer
 
 object MoleJob extends Logger {
   type StateChangedCallBack = (IMoleJob, State, State) ⇒ Unit
+
+  def cpuTime(job: IMoleJob) =
+    job.timeStamps.find(j ⇒ j.state.isFinal) match {
+      case Some(last) ⇒
+        val running = job.timeStamps.find(_.state == RUNNING).get
+        last.time - running.time
+      case None ⇒ 0L
+    }
+
 }
 
 import MoleJob._

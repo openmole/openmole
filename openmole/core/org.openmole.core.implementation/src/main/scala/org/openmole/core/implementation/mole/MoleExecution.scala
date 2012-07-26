@@ -21,37 +21,21 @@ import java.util.UUID
 import java.util.concurrent.Semaphore
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
-import org.openmole.core.implementation.data.Context
-import org.openmole.core.model.mole.IAtomicCapsule
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.implementation.validation.Validation
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.job.IJob
-import org.openmole.core.model.job.IMoleJob
+import org.openmole.core.implementation.data._
+import org.openmole.core.model.mole._
+import org.openmole.core.implementation.validation._
+import org.openmole.core.model.data._
+import org.openmole.core.model.job._
 import org.openmole.core.model.job.IMoleJob.moleJobOrdering
-import org.openmole.core.model.job.MoleJobId
-import org.openmole.core.model.mole.IEnvironmentSelection
-import org.openmole.core.model.mole.IMole
-import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.exception._
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.exception.MultipleException
-import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.eventdispatcher.Event
-import org.openmole.misc.eventdispatcher.EventListener
-import org.openmole.core.model.mole.ITicket
-import org.openmole.core.model.mole.IMoleJobGroup
-import org.openmole.core.model.mole.ISubMoleExecution
-import org.openmole.core.model.data.IDataChannel
+import org.openmole.misc.eventdispatcher._
 import org.openmole.misc.tools.service.Priority
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
-import org.openmole.core.implementation.job.Job
-import org.openmole.core.implementation.tools.RegistryWithTicket
-import org.openmole.core.model.mole.IGrouping
-import org.openmole.core.model.mole.IInstantRerun
+import org.openmole.core.implementation.execution.local._
+import org.openmole.core.implementation.hook._
+import org.openmole.core.implementation.job._
+import org.openmole.core.implementation.tools._
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
@@ -59,7 +43,20 @@ import org.openmole.misc.tools.service.Random
 import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 
-object MoleExecution extends Logger
+object MoleExecution extends Logger {
+
+  def apply(
+    mole: IMole,
+    selection: Map[ICapsule, IEnvironmentSelection] = Map.empty,
+    grouping: Map[ICapsule, IGrouping] = Map.empty,
+    rerun: IInstantRerun = IInstantRerun.empty,
+    rng: java.util.Random = Random.newRNG(Workspace.newSeed)) = {
+    val ex = new MoleExecution(mole, selection, grouping, rerun, rng)
+    val hook = new MoleExecutionStatHook(ex)
+    ex -> hook
+  }
+
+}
 
 class MoleExecution(
     val mole: IMole,
@@ -104,7 +101,7 @@ class MoleExecution(
         val jobs = waitingJobs.getOrElseUpdate(key, new ListBuffer) += (moleJob -> submole)
         nbWaiting += 1
 
-        val complete = strategy.complete(jobs.map { _._1 })
+        val complete = strategy.complete(jobs.unzip._1)
         if (complete) {
           waitingJobs.remove(key)
           nbWaiting -= jobs.size

@@ -24,6 +24,7 @@ import org.openmole.core.implementation.mole.Mole
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.core.implementation.task.EmptyTask
 import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.tools._
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.implementation.task.TestTask
 import org.openmole.core.model.data.IContext
@@ -50,7 +51,9 @@ class MoleExecutionHookSpec extends FlatSpec with ShouldMatchers {
     val t1c = new Capsule(t1)
     val ex = new MoleExecution(new Mole(t1c))
 
-    new MoleExecutionHook(ex) {
+    new MoleExecutionHook {
+      def moleExecution = ex
+
       override def jobFinished(moleJob: IMoleJob, capsule: ICapsule) = {
         capsule should equal(t1c)
         moleJob.context.contains(p) should equal(true)
@@ -72,7 +75,9 @@ class MoleExecutionHookSpec extends FlatSpec with ShouldMatchers {
     val t1c = new Capsule(t1)
     val ex = new MoleExecution(new Mole(t1c))
 
-    val hook = new MoleExecutionHook(ex) {
+    val hook = new MoleExecutionHook {
+      def moleExecution = ex
+
       override def jobFinished(moleJob: IMoleJob, capsule: ICapsule) = {
         executed = true
       }
