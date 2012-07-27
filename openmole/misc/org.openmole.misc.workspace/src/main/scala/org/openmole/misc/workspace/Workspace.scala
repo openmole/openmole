@@ -188,7 +188,7 @@ class Workspace(val location: File) {
   def newDir(prefix: String): File = {
     //val tempFile = File.createTempFile(prefix, "", tmpDir)
     val tempFile = newFile(prefix, "")
-    
+
     //if (!tempFile.delete) throw new IOException
     if (!tempFile.mkdir) throw new IOException
 
@@ -196,7 +196,7 @@ class Workspace(val location: File) {
     tempFile
   }
 
-  def newFile(prefix: String, suffix: String): File = new File(tmpDir, "prefix" + UUID.randomUUID + "suffix")
+  def newFile(prefix: String, suffix: String): File = new File(tmpDir, prefix + UUID.randomUUID + suffix)
 
   def defaultValue(location: ConfigurationLocation): String = {
     configurations.get(location) match {
