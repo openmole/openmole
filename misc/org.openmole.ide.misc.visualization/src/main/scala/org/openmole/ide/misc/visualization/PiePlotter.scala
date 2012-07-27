@@ -57,7 +57,7 @@ class PiePlotter {
   val colors = new IndexedColors(new Color(77, 77, 77), new Color(187, 200, 7), new Color(170, 0, 0))
   colors.setMode(ColorMapper.Mode.REPEAT)
   plot.getPointRenderer(data).setSetting(PieSliceRenderer.COLORS, colors)
-  plot.setInsets(new Insets2D.Double(20.0, 40.0, 40.0, 40.0))
+  plot.setInsets(new Insets2D.Double(0.0, 0.0, 0.0, 0.0))
 
   plot.setSetting(Plot.LEGEND, true)
   plot.setSetting(Plot.LEGEND_LOCATION, Location.SOUTH_WEST)
@@ -87,5 +87,5 @@ class PiePlotter {
     setZoomable(false)
     setPannable(false)
   }
-  panel.setPreferredSize(new Dimension(250, 250))
+  panel.setPreferredSize(new Dimension(200, 200))
 }

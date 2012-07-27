@@ -58,7 +58,7 @@ class XYPlotter(buffer_size: Int,
   plot.setSetting(Plot.LEGEND_LOCATION, Location.NORTH_WEST)
   plot.getLegend.setSetting(Legend.ORIENTATION, Orientation.HORIZONTAL)
 
-  plot.setInsets(new Insets2D.Double(20.0, 40.0, 40.0, 40.0))
+  plot.setInsets(new Insets2D.Double(0.0, 60.0, 40.0, 10.0))
 
   val axisRendererY = plot.getAxisRenderer(XYPlot.AXIS_Y)
   axisRendererY.setSetting(AxisRenderer.TICK_LABELS_FORMAT, new DecimalFormat)

@@ -83,7 +83,6 @@ class GUIPanel extends MainFrame { mainframe ⇒
   val splitPane = new SplitPane(Orientation.Horizontal) {
     leftComponent = ScenesManager.tabPane
     rightComponent = new ScrollPane(StatusBar)
-    println("aa " + (1 - (30.0 / Toolkit.getDefaultToolkit.getScreenSize.height)))
     this.resizeWeight = 1 - (30.0 / Toolkit.getDefaultToolkit.getScreenSize.height)
   }
 

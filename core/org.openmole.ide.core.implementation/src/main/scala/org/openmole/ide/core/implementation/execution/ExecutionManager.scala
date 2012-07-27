@@ -60,14 +60,15 @@ class ExecutionManager(manager: IMoleSceneManager,
                        val prototypeMapping: Map[IPrototypeDataProxyUI, IPrototype[_]]) extends PluginPanel("", "[grow,fill]", "")
     with IExecutionManager
     with Publisher {
-  // preferredSize.height = 300
   val logTextArea = new TextArea {
     columns = 20;
-    //rows = 10; 
+    rows = 10;
     editable = false
   }
-  val executionJobExceptionTextArea = new TextArea { columns = 40; rows = 10; editable = false }
-  val moleExecutionExceptionTextArea = new TextArea { columns = 40; rows = 10; editable = false }
+  val executionJobExceptionTextArea = new TextArea { editable = false }
+
+  val moleExecutionExceptionTextArea = new TextArea { editable = false }
+
   override val printStream = new PrintStream(new TextAreaOutputStream(logTextArea), true)
   var moleExecution: Option[IMoleExecution] = None
   var status = HashMap(State.READY -> new AtomicInteger,
@@ -79,14 +80,12 @@ class ExecutionManager(manager: IMoleSceneManager,
   var hooksInExecution = List.empty[IHook]
   val wfPiePlotter = new PiePlotter
   val envBarPlotter = new XYPlotter(5000, 120)
-  //{ preferredSize = new Dimension(400, 200) }
 
   val envBarPanel = new PluginPanel("", "[][grow,fill]", "") {
     contents += new PluginPanel("wrap", "[center]", "") {
       contents += new Label { text = "<html><b><font \"size=\"5\" >Workflow execution</font></b></html>" }
       peer.add(wfPiePlotter.panel)
     }
-    //preferredSize = new Dimension(200, 200)
   }
 
   var states = new States(0, 0, 0)
@@ -123,7 +122,6 @@ class ExecutionManager(manager: IMoleSceneManager,
   tabbedPane.pages += new TabbedPane.Page("Environments errors", new ScrollPane(moleExecutionExceptionTextArea))
 
   contents += tabbedPane
-  //preferredSize = new Dimension(size.width, 300)
 
   def start(hooks: Map[IHookPanelUI, ICapsuleUI],
             groupings: List[(IGrouping, ICapsule)]) = synchronized {
@@ -151,7 +149,6 @@ class ExecutionManager(manager: IMoleSceneManager,
               case _ ⇒
             }
           }
-          println("grouping :: " + mExecution.moleJobs.size)
           environments.foreach {
             case (env, _) ⇒ EventDispatcher.listen(env, new EnvironmentExceptionListener(this), classOf[IEnvironment.ExceptionRaised])
           }
