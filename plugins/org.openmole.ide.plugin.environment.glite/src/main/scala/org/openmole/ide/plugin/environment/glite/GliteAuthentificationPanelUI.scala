@@ -70,6 +70,7 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
   val pemPassField = Some(new PasswordField(passString, 20))
   val p12PassField = Some(new PasswordField(passString, 20))
 
+  addButtons
   try {
     Workspace.persistentList(classOf[GliteAuthenticationMethod]).headOption match {
       case Some((i: Int, x: P12Certificate)) ⇒
@@ -111,15 +112,32 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
       contents += pemButton
       contents += p12Button
       contents += proxyButton
-
-      contents += new Separator
     }
 
-  def addPem = { clean; addButtons; contents += pem._2; refresh }
-  def addP12 = { clean; addButtons; contents += p12._2; refresh }
-  def addProxy = { clean; addButtons; contents += proxy._2; refresh }
+  def addPem = {
+    clean
+    //addButtons
+    contents += pem._2
+    refresh
+  }
+  def addP12 = {
+    clean
+    // addButtons
+    contents += p12._2
+    refresh
+  }
+  def addProxy = {
+    clean
+    // addButtons 
+    contents += proxy._2
+    refresh
+  }
 
-  def clean = if (contents.size == 3) contents.remove(2)
+  def clean = {
+    println("clean : " + contents.size)
+    if (contents.size == 2) contents.remove(1)
+    // if (contents.size == 3) contents.remove(2)
+  }
 
   def refresh = {
     repaint
@@ -144,7 +162,7 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
     } catch { case e: Throwable ⇒ StatusBar.block(e.getMessage, stack = e.getStackTraceString) }
 
   def buildPemPanel =
-    new PluginPanel("fillx,wrap 2", "[left][grow,fill]", "") {
+    new PluginPanel("fillx,wrap 2", "[left][grow,fill]", "[top]") {
       contents += (new Label("Certification"), "gap para")
       contents += pem1TextField
       contents += (new Label("Key"), "gap para")
@@ -153,14 +171,14 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
     }
 
   def buildP12Panel =
-    new PluginPanel("fillx,wrap 2", "[left][grow,fill]", "") {
+    new PluginPanel("fillx,wrap 2", "[left][grow,fill]", "[top]") {
       contents += (new Label("Certification"), "gap para")
       contents += p12TextField
-      contents += (new Label("password"), "gap para")
+      contents += (new Label("Password"), "gap para")
     }
 
   def buildProxyPanel =
-    new PluginPanel("fillx,wrap 2", "[left][grow,fill]", "") {
+    new PluginPanel("fillx,wrap 2", "[left][grow,fill]", "[top]") {
       contents += (new Label("Proxy"), "gap para")
       contents += proxyTextField
     }
