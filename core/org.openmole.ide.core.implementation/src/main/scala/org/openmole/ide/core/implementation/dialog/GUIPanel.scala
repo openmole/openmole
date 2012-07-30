@@ -10,7 +10,10 @@ import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import java.awt.BorderLayout
 import org.openmole.ide.core.implementation.execution.PasswordListner
+import java.awt.Event
 import java.awt.Toolkit
+import java.awt.event.KeyEvent
+import javax.swing.KeyStroke
 import org.openide.DialogDescriptor
 import org.openide.DialogDescriptor._
 import org.openide.DialogDisplayer
@@ -30,6 +33,7 @@ class GUIPanel extends MainFrame { mainframe ⇒
     contents += new Menu("File") {
       contents += new MenuItem(new Action("New Mole") {
         override def apply = DialogFactory.newTabName
+        accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_N, Event.CTRL_MASK))
       })
 
       contents += new MenuItem(new Action("Load") {
@@ -37,6 +41,7 @@ class GUIPanel extends MainFrame { mainframe ⇒
           Proxys.clearAll
           mainframe.title = "OpenMOLE - " + LoadXML.show
         }
+        accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_L, Event.CTRL_MASK))
       })
 
       contents += new MenuItem(new Action("Save") {
@@ -44,6 +49,7 @@ class GUIPanel extends MainFrame { mainframe ⇒
           ScenesManager.saveCurrentPropertyWidget
           SaveXML.save(mainframe)
         }
+        accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_S, Event.CTRL_MASK))
       })
 
       contents += new MenuItem(new Action("Save as") {
