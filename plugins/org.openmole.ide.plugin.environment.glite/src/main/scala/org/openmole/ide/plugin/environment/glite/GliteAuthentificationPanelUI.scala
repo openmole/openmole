@@ -32,7 +32,6 @@ import scala.swing.FileChooser.SelectionMode._
 import scala.swing.Label
 import scala.swing.PasswordField
 import scala.swing.RadioButton
-import scala.swing.Separator
 import scala.swing.event.ButtonClicked
 import org.openmole.misc.workspace.Workspace
 import scala.swing.event.Key._
@@ -116,28 +115,21 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
 
   def addPem = {
     clean
-    //addButtons
     contents += pem._2
     refresh
   }
   def addP12 = {
     clean
-    // addButtons
     contents += p12._2
     refresh
   }
   def addProxy = {
     clean
-    // addButtons 
     contents += proxy._2
     refresh
   }
 
-  def clean = {
-    println("clean : " + contents.size)
-    if (contents.size == 2) contents.remove(1)
-    // if (contents.size == 3) contents.remove(2)
-  }
+  def clean = if (contents.size == 2) contents.remove(1)
 
   def refresh = {
     repaint
