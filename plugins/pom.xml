@@ -38,7 +38,7 @@
         <module>org.openmole.ide.plugin.environment.local</module>
         <module>org.openmole.ide.plugin.environment.desktopgrid</module>
         <module>org.openmole.ide.plugin.environment.ssh</module>
-        <module>org.openmole.ide.plugin.groupingstrategy.batch</module>
+        <module>org.openmole.ide.plugin.groupingstrategy</module>
         <module>org.openmole.ide.plugin.method.sensitivity</module>
         <module>org.openmole.ide.plugin.hook.tools</module>
 	<module>org.openmole.ide.plugin.hook.display</module>

@@ -7,7 +7,7 @@
         <version>0.6-SNAPSHOT</version>
     </parent>
   
-    <artifactId>org.openmole.ide.plugin.groupingstrategy.batch</artifactId>
+    <artifactId>org.openmole.ide.plugin.groupingstrategy</artifactId>
     <name>${project.artifactId} ${project.version}</name>
     <packaging>bundle</packaging>
 

@@ -67,7 +67,7 @@ object ConceptMenu {
         override def apply = display(d.buildDataProxyUI, CREATION)
       })
     }
-    new PopupToolBarPresenter("Task", mapping(ComponentCategories.TASK), new Color(255, 85, 85))
+     new PopupToolBarPresenter("Task", mapping(ComponentCategories.TASK), new Color(255, 85, 85))
   }
 
   val environmentMenu = {
