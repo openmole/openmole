@@ -21,7 +21,7 @@ import org.openmole.ide.core.model.factory.IAuthentificationFactoryUI
 import org.openmole.core.batch.authentication
 
 class SSHAuthentificationFactoryUI extends IAuthentificationFactoryUI {
-  override def toString = "Host"
+  override def toString = "SSH"
 
   override def buildPanelUI = new SSHAuthentificationPanelUI
 
