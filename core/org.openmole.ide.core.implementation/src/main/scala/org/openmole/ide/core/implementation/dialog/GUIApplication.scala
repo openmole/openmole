@@ -17,18 +17,22 @@
 
 package org.openmole.ide.core.implementation.dialog
 
+import java.awt.Color
 import java.awt.Dimension
 import java.awt.Font
 import java.awt.Frame
 import javax.swing.UIManager
+import javax.swing.plaf.ColorUIResource
 import org.openmole.ide.misc.tools.image.Images._
 
 class GUIApplication { application ⇒
 
   val font = new Font("Ubuntu", Font.PLAIN, 12)
-  UIManager.put("Menu.font", font)
-  UIManager.put("MenuItem.font", font)
-  UIManager.put("Button.font", font)
+  val fontBold = new Font("Ubuntu", Font.BOLD, 12)
+  UIManager.put("Menu.font", fontBold)
+  UIManager.put("MenuItem.font", fontBold)
+  UIManager.put("Button.font", fontBold)
+  UIManager.put("Button.foreground", new ColorUIResource(new Color(77, 77, 77)))
   UIManager.put("Label.font", font)
 
   val frame = new GUIPanel {

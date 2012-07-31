@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.implementation.panel
 
+import java.awt.Color
 import java.awt.Dimension
 import org.openmole.ide.core.model.factory.IFactoryUI
 import org.openmole.ide.core.model.factory.IMoleComponent
@@ -66,7 +67,7 @@ object ConceptMenu {
         override def apply = display(d.buildDataProxyUI, CREATION)
       })
     }
-    new PopupToolBarPresenter("Task", mapping(ComponentCategories.TASK))
+    new PopupToolBarPresenter("Task", mapping(ComponentCategories.TASK), new Color(255, 85, 85))
   }
 
   val environmentMenu = {
@@ -76,7 +77,7 @@ object ConceptMenu {
         override def apply = display(d.buildDataProxyUI, CREATION)
       })
     }
-    new PopupToolBarPresenter("Environment", mapping(ComponentCategories.ENVIRONMENT))
+    new PopupToolBarPresenter("Environment", mapping(ComponentCategories.ENVIRONMENT), new Color(68, 120, 33))
   }
 
   val prototypeMenu = {
@@ -86,7 +87,7 @@ object ConceptMenu {
         override def apply = display(d.buildDataProxyUI, CREATION)
       })
     }
-    new PopupToolBarPresenter("Prototype", mapping(ComponentCategories.PROTOTYPE))
+    new PopupToolBarPresenter("Prototype", mapping(ComponentCategories.PROTOTYPE), new Color(212, 170, 0))
   }
 
   val samplingMenu = {
@@ -96,7 +97,7 @@ object ConceptMenu {
         override def apply = display(d.buildDataProxyUI, CREATION)
       })
     }
-    new PopupToolBarPresenter("Sampling", mapping(ComponentCategories.SAMPLING))
+    new PopupToolBarPresenter("Sampling", mapping(ComponentCategories.SAMPLING), new Color(107, 138, 166))
   }
 
   def removeItem(proxy: IDataProxyUI) = {
