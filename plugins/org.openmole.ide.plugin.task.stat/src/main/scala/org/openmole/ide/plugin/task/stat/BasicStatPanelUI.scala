@@ -58,8 +58,8 @@ abstract class BasicStatPanelUI(statType: String,
     } else None
 
   if (multiPrototypeCombo.isDefined)
-    tabbedPane.pages += new TabbedPane.Page("Settings", multiPrototypeCombo.get.panel)
+    tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("") { add(multiPrototypeCombo.get.panel, "gap bottom 40") })
   else
-    tabbedPane.pages += new TabbedPane.Page("Settings", new Label("At least 2 Prototypes (a Double an array of Double have to be created first.)"))
+    tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("") { add(new Label("At least 2 Prototypes (a Double and an array of Double have to be created first.)"), "gap bottom 40") })
 
 }
