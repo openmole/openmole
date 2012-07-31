@@ -6,7 +6,6 @@
 package org.openmole.ide.core.implementation.execution
 
 import java.awt.Color
-import java.awt.Dimension
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import java.io.PrintStream
@@ -18,7 +17,7 @@ import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.hook.IHook
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.misc.visualization._
-import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget._
 import org.openmole.core.model.mole.IGrouping
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
@@ -30,7 +29,6 @@ import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import scala.collection.mutable.HashMap
-import scala.swing.Label
 import scala.swing.Menu
 import scala.swing.Orientation
 import scala.swing.Publisher
@@ -83,7 +81,7 @@ class ExecutionManager(manager: IMoleSceneManager,
 
   val envBarPanel = new PluginPanel("", "[][grow,fill]", "") {
     contents += new PluginPanel("wrap", "[center]", "") {
-      contents += new Label { text = "<html><b><font \"size=\"5\" >Workflow execution</font></b></html>" }
+      contents += new TitleLabel("Workflow execution")
       peer.add(wfPiePlotter.panel)
     }
   }
@@ -159,7 +157,7 @@ class ExecutionManager(manager: IMoleSceneManager,
           //FIXME Displays several environments
           if (environments.size > 0) {
             envBarPanel.peer.add(new PluginPanel("wrap", "[center]", "") {
-              contents += new Label { text = "<html><b><font \"size=\"5\" >" + environments.toList(0)._2 + "</font></b></html>" }
+              contents += new TitleLabel(environments.toList(0)._2)
               contents += envBarPlotter.panel
             }.peer)
           }
