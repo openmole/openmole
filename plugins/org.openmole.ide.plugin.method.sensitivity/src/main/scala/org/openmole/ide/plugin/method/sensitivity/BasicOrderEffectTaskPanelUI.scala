@@ -25,6 +25,7 @@ import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget.multirow.MultiCombo._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
+import scala.swing.Label
 import scala.swing.TabbedPane
 
 abstract class BasicOrderEffectTaskPanelUI(inputSequence: Iterable[IPrototypeDataProxyUI],
@@ -56,7 +57,7 @@ abstract class BasicOrderEffectTaskPanelUI(inputSequence: Iterable[IPrototypeDat
     new PluginPanel("wrap 2") {
       if (inputPrototypeCombo.isDefined && outputPrototypeCombo.isDefined) {
         contents += inputPrototypeCombo.get.panel
-        contents += outputPrototypeCombo.get.panel
-      }
+        add(outputPrototypeCombo.get.panel, "gap bottom 40")
+      } else add(new Label("No Double Prototypes defined"), "gap bottom 40")
     })
 }
