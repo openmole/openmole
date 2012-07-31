@@ -47,6 +47,8 @@ trait ICapsuleUI {
 
   def addInputSlot(startingCapsule: Boolean): IInputSlotWidget
 
+  def hooked(b: Boolean)
+
   def updateErrors(errors: Iterable[DataflowProblem]): Unit
 
   def x: Double

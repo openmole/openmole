@@ -119,6 +119,11 @@ class CapsuleUI(val scene: IMoleScene,
     }
   }
 
+  def hooked(b: Boolean) = outputPrototypeWidget match {
+    case Some(w: PrototypeWidget) ⇒ w.hooked = b
+    case _ ⇒
+  }
+
   def widget = this
 
   def copy(sc: IMoleScene) = {

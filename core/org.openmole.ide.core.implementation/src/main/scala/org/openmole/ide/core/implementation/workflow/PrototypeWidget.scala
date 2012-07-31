@@ -71,7 +71,8 @@ object PrototypeWidget {
 import PrototypeWidget._
 class PrototypeWidget(scene: IMoleScene,
                       f: Unit ⇒ String,
-                      link: Label) extends ComponentWidget(scene.graphScene, link.peer) {
+                      link: Label,
+                      var hooked: Boolean = false) extends ComponentWidget(scene.graphScene, link.peer) {
   link.foreground = Color.WHITE
   var validationColor = green(scene)
   val dim = 30
@@ -107,7 +108,16 @@ class PrototypeWidget(scene: IMoleScene,
       RenderingHints.VALUE_ANTIALIAS_ON)
     g.setStroke(new BasicStroke(3f))
     g.setColor(new Color(77, 77, 77, 150))
-    g.drawOval(pos, pos, dim - 2, dim - 2)
+
+    val offset1 = dim - 2 * { if (hooked) 1 else 0 }
+    g.drawOval(pos, pos, offset1, offset1)
+
+    if (hooked) {
+      g.setColor(new Color(77, 77, 77, 150))
+      g.drawOval(pos - 3, pos - 3, offset1 + 6, offset1 + 6)
+      g.drawOval(pos - 5, pos - 5, offset1 + 10, offset1 + 10)
+    }
+
     revalidate
   }
 }

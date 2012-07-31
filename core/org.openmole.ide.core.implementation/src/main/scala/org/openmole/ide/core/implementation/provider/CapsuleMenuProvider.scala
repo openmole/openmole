@@ -112,9 +112,9 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
     KeyRegistry.hooks.values.toList.sortBy { _.toString }.foreach { h ⇒
       menuHook.contents += new CheckMenuItem(h.toString) {
         selected = {
-          if (capsule.dataUI.hooks.contains(h.coreClass))
+          if (capsule.dataUI.hooks.contains(h.coreClass)) {
             capsule.dataUI.hooks(h.coreClass).activated
-          else false
+          } else false
         }
         action = new HookAction(h, this)
       }
@@ -146,6 +146,7 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
       if (!capsule.dataUI.hooks.contains(factory.coreClass))
         capsule.dataUI.hooks += factory.coreClass -> factory.buildDataUI
       else capsule.dataUI.hooks(factory.coreClass).activated = it.selected
+      capsule.hooked(if (capsule.dataUI.hooks.values.filter { _.activated }.size > 0) true else false)
     }
   }
 }
