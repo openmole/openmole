@@ -19,6 +19,7 @@ package org.openmole.ide.plugin.task.systemexec
 import java.io.File
 import java.util.Locale
 import java.util.ResourceBundle
+import scala.swing.EditorPane
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.data.EmptyDataUIs.EmptyPrototypeDataUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
@@ -32,6 +33,7 @@ import org.openmole.ide.misc.widget.multirow.MultiComboTextField
 import org.openmole.ide.misc.widget.multirow.MultiComboTextField._
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField._
+import org.openmole.ide.misc.widget.BashEditor
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow._
@@ -43,7 +45,8 @@ import scala.swing.FileChooser._
 import scala.swing._
 import swing.Swing._
 
-class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("fillx,wrap 2", "[left][grow,fill]", "") with ITaskPanelUI {
+//class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("fillx,wrap 2", "[left][grow,fill]", "") with ITaskPanelUI {
+class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("") with ITaskPanelUI {
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
   val workdirTextField = new TextField(ndu.workdir, 30) {
     tooltip = Help.tooltip(i18n.getString("workdir"),
@@ -77,15 +80,16 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("fill
     plus = ADD)
   if (ndu.inputMap.isEmpty) inputMapMultiComboTextField.removeAllRows
 
-  val launchingCommandTextArea = new TextArea(ndu.lauchingCommands) {
-    preferredSize = new Dimension(40, 100);
+  val launchingCommandTextArea = new BashEditor {
+    editor.text = ndu.lauchingCommands
+    preferredSize = new Dimension(40, 200)
     tooltip = Help.tooltip(i18n.getString("command"),
       i18n.getString("commandEx"))
   }
 
   tabbedPane.pages += new TabbedPane.Page("Working directory", new PluginPanel("wrap") { contents += workdirTextField })
   tabbedPane.pages += new TabbedPane.Page("Variables", variablesMultiCombo.panel)
-  tabbedPane.pages += new TabbedPane.Page("Commands", new ScrollPane(launchingCommandTextArea))
+  tabbedPane.pages += new TabbedPane.Page("Commands", launchingCommandTextArea)
   tabbedPane.pages += new TabbedPane.Page("Resources", resourcesMultiTextField.panel)
   tabbedPane.pages += new TabbedPane.Page("Input mapping", inputMapMultiComboTextField.panel)
   tabbedPane.pages += new TabbedPane.Page("Output mapping", outputMapMultiTextFieldCombo.panel)
@@ -93,7 +97,7 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("fill
   override def saveContent(name: String): ITaskDataUI =
     new SystemExecTaskDataUI(name,
       workdirTextField.text,
-      launchingCommandTextArea.text,
+      launchingCommandTextArea.editor.text,
       resourcesMultiTextField.content.map { _.content },
       inputMapMultiComboTextField.content.map { d ⇒ d.comboValue.get -> d.textFieldValue }.flatMap { p ⇒
         p._1.dataUI match {
@@ -102,19 +106,7 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("fill
         }
       },
       outputMapMultiTextFieldCombo.content.map { data ⇒ data.textFieldValue -> data.comboValue.get },
-      variablesMultiCombo.content.map { _.comboValue.get } //    outputMapMultiTextFieldCombo.content.flatMap { p ⇒
-      //      p._2.dataUI match {
-      //        case x: EmptyPrototypeDataUI ⇒ Nil
-      //        case _ ⇒ List(p)
-      //      }
-      //    }, variablesMultiCombo.content.flatMap { p ⇒
-      //      p.dataUI match {
-      //        case x: EmptyPrototypeDataUI ⇒ Nil
-      //        case _ ⇒ List(p)
-      //      }
-      //    }
-      )
+      variablesMultiCombo.content.map { _.comboValue.get })
 
-  // def comboContent: List[IPrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxys.classPrototypes(classOf[File])
   def comboContent: List[IPrototypeDataProxyUI] = Proxys.classPrototypes(classOf[File])
 }
