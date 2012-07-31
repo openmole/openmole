@@ -43,9 +43,11 @@ class StoreIntoCSVTaskPanelUI(sdu: StoreIntoCSVTaskDataUI) extends PluginPanel("
   if (sdu.protoFile.isDefined) protoFileComboBox.selection.item = sdu.protoFile.get
   Proxys.prototypes.filter(_.dataUI.dim > 0).foreach(columns += buildColumn(_))
 
-  tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("wrap 2") {
-    contents += new Label("File Prototype to be stored")
-    contents += protoFileComboBox
+  tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("") {
+    add(new PluginPanel("wrap 2") {
+      contents += new Label("File Prototype to be stored")
+      contents += protoFileComboBox
+    }, "gap bottom 40")
   })
 
   def buildColumn(pud: IPrototypeDataProxyUI) = {
