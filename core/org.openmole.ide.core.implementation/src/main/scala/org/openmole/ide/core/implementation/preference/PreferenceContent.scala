@@ -19,11 +19,11 @@ package org.openmole.ide.core.implementation.preference
 
 import java.awt.Dimension
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.TabbedPane
 import scala.swing.event.Key._
 
-class PreferenceContent extends MigPanel("wrap", "[right]", "") {
+class PreferenceContent extends PluginPanel("wrap", "[right]", "") {
   preferredSize = new Dimension(450, 300)
   StatusBar.clear
   val authentification = new AuthentificationPanel

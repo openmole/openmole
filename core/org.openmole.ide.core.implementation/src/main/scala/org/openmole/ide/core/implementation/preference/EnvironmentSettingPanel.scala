@@ -17,15 +17,16 @@
 
 package org.openmole.ide.core.implementation.preference
 
+import java.awt.Color
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.ide.core.implementation.dataproxy.Proxys
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.misc.exception.UserBadDataError
 import scala.swing.Button
 import scala.swing.ComboBox
 import scala.swing.event.ButtonClicked
 
-class EnvironmentSettingPanel extends MigPanel("wrap 2") {
+class EnvironmentSettingPanel extends PluginPanel("wrap 2") {
 
   val combo = new ComboBox(Proxys.environments.filter { e ⇒
     e.dataUI.coreClass match {
@@ -34,7 +35,7 @@ class EnvironmentSettingPanel extends MigPanel("wrap 2") {
     }
   }.toList)
 
-  val trashButton = new Button("Trash data")
+  val trashButton = new Button("Trash data") { background = new Color(170, 0, 0) }
 
   listenTo(`trashButton`)
   reactions += {
