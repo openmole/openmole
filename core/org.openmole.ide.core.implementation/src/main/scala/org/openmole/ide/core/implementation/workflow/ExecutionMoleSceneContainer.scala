@@ -26,7 +26,6 @@ import org.openide.DialogDisplayer
 import org.openmole.core.model.hook.ICapsuleExecutionHook
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.implementation.execution.MultiGenericGroupingStrategyPanel
-import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.execution.ExecutionManager
 import org.openmole.ide.core.implementation.execution.MoleFinishedEvent
 import org.openmole.ide.core.implementation.serializer.MoleMaker
@@ -34,8 +33,7 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.ISceneContainer
-import org.openmole.ide.misc.widget.MainLinkLabel
-import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget._
 import scala.collection.mutable.HashMap
 import scala.swing.Action
 import scala.swing.Button
@@ -99,13 +97,13 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
               case _ ⇒
             }
           }
-          contents += new Label { text = "<html><b><font \"size=\"5\" >Grouping strategy</font></b></html>" }
+          contents += new TitleLabel("Grouping strategy")
           groupingPanel = Some(new MultiGenericGroupingStrategyPanel(eManager))
           contents += groupingPanel.get.panel
         }.peer, BorderLayout.CENTER)
 
         peer.add(new PluginPanel("wrap") {
-          contents += new Label { text = "<html><b><font \"size=\"5\" >Execution control</font></b></html>" }
+          contents += new TitleLabel("Execution control")
           contents += new PluginPanel("wrap 2", "[]30[]") {
             //Start / Stop
             contents += startStopButton
