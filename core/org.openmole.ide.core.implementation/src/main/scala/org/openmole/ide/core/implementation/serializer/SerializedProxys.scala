@@ -20,6 +20,7 @@ package org.openmole.ide.core.implementation.serializer
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.dataproxy._
+import org.openmole.ide.misc.tools.Counter
 
 class SerializedProxys(val task: Set[ITaskDataProxyUI],
                        val prototype: Set[IPrototypeDataProxyUI],
@@ -37,7 +38,7 @@ class SerializedProxys(val task: Set[ITaskDataProxyUI],
     prototype.foreach { p ⇒ Proxys.prototypes += p; if (!p.generated) ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(p) }
     sampling.foreach { s ⇒ Proxys.samplings += s; ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(s) }
     environment.foreach { e ⇒ Proxys.environments += e; ConceptMenu.environmentMenu.popup.contents += ConceptMenu.addItem(e) }
-    Proxys.incr.set(incr)
+    Counter.id.set(incr)
   }
 
 }

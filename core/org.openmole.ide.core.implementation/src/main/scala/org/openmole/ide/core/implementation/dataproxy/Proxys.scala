@@ -27,8 +27,6 @@ import scala.collection.mutable.HashSet
 
 object Proxys {
 
-  val incr = new AtomicInteger
-
   var tasks = new HashSet[ITaskDataProxyUI]
   var prototypes = new HashSet[IPrototypeDataProxyUI]
   var samplings = new HashSet[ISamplingDataProxyUI]

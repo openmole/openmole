@@ -28,6 +28,8 @@ import org.openmole.ide.core.model.control.IExecutionManager
 class ToStringHookDataUI(var activated: Boolean = true,
                          val toBeHooked: List[IPrototypeDataProxyUI] = List.empty) extends IHookDataUI {
 
+  def coreClass = classOf[ToStringHook]
+
   def coreObject(executionManager: IExecutionManager,
                  moleExecution: IMoleExecution,
                  capsule: ICapsule) =

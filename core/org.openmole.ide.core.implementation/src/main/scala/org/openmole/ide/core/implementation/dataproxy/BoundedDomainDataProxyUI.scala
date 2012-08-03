@@ -19,9 +19,10 @@ package org.openmole.ide.core.implementation.dataproxy
 
 import org.openmole.ide.core.model.data.IBoundedDomainDataUI
 import org.openmole.ide.core.model.dataproxy.IBoundedDomainDataProxyUI
+import org.openmole.ide.misc.tools.Counter
 
 class BoundedDomainDataProxyUI(name: String,
                                var dataUI: IBoundedDomainDataUI,
-                               val id: Int = Proxys.incr.getAndIncrement) extends IBoundedDomainDataProxyUI {
+                               val id: Int = Counter.id.getAndIncrement) extends IBoundedDomainDataProxyUI {
   override def toString = name
 }

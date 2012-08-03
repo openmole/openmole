@@ -32,6 +32,8 @@ class AppendToCSVFileHookDataUI(var activated: Boolean = true,
 
   def buildPanelUI(task: ITaskDataProxyUI) = new AppendToCSVFileHookPanelUI(this, task)
 
+  def coreClass = classOf[AppendToCSVFileHook]
+
   def coreObject(executionManager: IExecutionManager,
                  moleExecution: IMoleExecution,
                  capsule: ICapsule) =

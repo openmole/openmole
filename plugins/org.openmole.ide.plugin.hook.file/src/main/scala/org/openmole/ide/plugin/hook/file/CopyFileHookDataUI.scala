@@ -30,9 +30,11 @@ import org.openmole.plugin.hook.file.CopyFileHook
 class CopyFileHookDataUI(var activated: Boolean = true,
                          val toBeHooked: List[(IPrototypeDataProxyUI, String)] = List.empty) extends IHookDataUI {
 
-  override def coreObject(executionManager: IExecutionManager,
-                          moleExecution: IMoleExecution,
-                          capsule: ICapsule) = toBeHooked.map { h ⇒
+  def coreClass = classOf[CopyFileHook]
+
+  def coreObject(executionManager: IExecutionManager,
+                 moleExecution: IMoleExecution,
+                 capsule: ICapsule) = toBeHooked.map { h ⇒
     new CopyFileHook(moleExecution,
       capsule,
       executionManager.prototypeMapping(h._1).asInstanceOf[IPrototype[File]],

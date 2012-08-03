@@ -21,6 +21,7 @@ import com.thoughtworks.xstream.XStream
 import java.io.EOFException
 import com.thoughtworks.xstream.io.xml.DomDriver
 import java.io.File
+import java.io.FileOutputStream
 import java.io.FileReader
 import java.io.FileWriter
 import org.openmole.misc.exception.UserBadDataError
@@ -30,9 +31,13 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.dataproxy._
 import java.io.ObjectInputStream
+import java.util.zip.GZIPOutputStream
 import org.openmole.ide.core.implementation.data._
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.implementation.workflow.MoleScene
+import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.misc.workspace.Workspace
+import scala.collection.JavaConversions._
 
 object GUISerializer {
 
@@ -42,27 +47,53 @@ object GUISerializer {
   xstream.alias("molescene", classOf[MoleScene])
   xstream.alias("data_proxy", classOf[IDataProxyUI])
 
+  def serializeConcept(path: File,
+                       concept: String,
+                       set: List[(_, Int)]) = {
+    val prefix = path.getParentFile + "/" + path.getName.split('.')(0)
+    val taskFile = new File(prefix + "/" + concept)
+    taskFile.mkdirs
+    set.foreach {
+      case (s, id) ⇒
+        val f = new File(taskFile.getCanonicalFile + "/" + id + ".xml")
+        val writer = new FileWriter(f)
+        val out = xstream.createObjectOutputStream(writer, concept)
+        out.writeObject(s)
+        out.close
+    }
+  }
+
   def serialize(toFile: String) = {
-    val f = new File(toFile)
-    if (f.getParentFile.isDirectory) {
-      val writer = new FileWriter(f)
+    val path = new File(toFile)
+    if (path.getParentFile.isDirectory) {
+      serializeConcept(path, "task", Proxys.tasks.map { s ⇒ s -> s.id }.toList)
+      serializeConcept(path, "prototype", Proxys.prototypes.map { s ⇒ s -> s.id }.toList)
+      serializeConcept(path, "sampling", Proxys.samplings.map { s ⇒ s -> s.id }.toList)
+      serializeConcept(path, "environment", Proxys.environments.map { s ⇒ s -> s.id }.toList)
+      serializeConcept(path, "hook", ScenesManager.moleScenes.flatMap {
+        _.manager.capsules.values.flatMap {
+          _.dataUI.hooks.values
+        }
+      }.map { h ⇒ h -> h.id }.toList)
+      serializeConcept(path, "mole", ScenesManager.moleScenes.map { ms ⇒ ms -> ms.manager.id }.toList)
 
-      //root node
-      val out = xstream.createObjectOutputStream(writer, "openmole")
+      // path.copyCompressFile(new File(toFile))
+      // new GZIPOutputStream(new FileOutputStream(path))
 
-      KeyRegistry.hooks.values.foreach { _.id = Proxys.incr.getAndIncrement }
-      out.writeObject(new SerializedProxys(Proxys.tasks.toSet,
-        Proxys.prototypes.toSet,
-        Proxys.samplings.toSet,
-        Proxys.environments.toSet,
-        Proxys.incr.get + 1))
+      // KeyRegistry.hooks.values.foreach { _.id = Proxys.incr.getAndIncrement }
+      // out.writeObject(new SerializedProxys(Proxys.tasks.toSet,
+      //   Proxys.prototypes.toSet,
+      //   Proxys.samplings.toSet,
+      //   Proxys.environments.toSet,
+      //   Proxys.incr.get + 1))
+      //   
       //molescenes
-      ScenesManager.moleScenes.foreach(ms ⇒
-        ms match {
-          case x: BuildMoleScene ⇒ out.writeObject(x)
-          case _ ⇒
-        })
-      out.close
+      //      ScenesManager.moleScenes.foreach(ms ⇒
+      //        ms match {
+      //          case x: BuildMoleScene ⇒ out.writeObject(x)
+      //          case _ ⇒
+      //        })
+      //  out.close
     }
   }
 

@@ -33,14 +33,13 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import org.openmole.ide.core.model.panel.PanelMode._
 
-class BuildMoleScene(n: String = "",
-                     id: Int = ScenesManager.countBuild.getAndIncrement) extends MoleScene(n, id) {
+class BuildMoleScene(n: String = "") extends MoleScene(n) {
   override val isBuildScene = true
 
   def copy = {
     var capsuleMapping = new HashMap[ICapsuleUI, ICapsuleUI]
     var islots = new HashMap[IInputSlotWidget, IInputSlotWidget]
-    val ms = new ExecutionMoleScene(ScenesManager.countExec.get, manager.name + "_" + ScenesManager.countExec.incrementAndGet)
+    val ms = new ExecutionMoleScene(manager.name + "_" + ScenesManager.countExec.incrementAndGet)
     manager.capsules.foreach(n ⇒ {
       val (caps, islotMapping) = n._2.copy(ms)
       if (n._2.dataUI.startingCapsule) ms.manager.setStartingCapsule(caps)

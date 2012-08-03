@@ -50,10 +50,9 @@ import scala.collection.JavaConversions._
 import org.openmole.ide.core.model.panel.PanelMode._
 import scala.swing.Panel
 
-abstract class MoleScene(n: String = "",
-                         id: Int) extends GraphScene.StringGraph with IMoleScene { moleScene ⇒
+abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMoleScene { moleScene ⇒
 
-  val manager = new MoleSceneManager(n, id)
+  val manager = new MoleSceneManager(n)
   var obUI: Option[Widget] = None
   val capsuleLayer = new LayerWidget(this)
   val connectLayer = new LayerWidget(this)

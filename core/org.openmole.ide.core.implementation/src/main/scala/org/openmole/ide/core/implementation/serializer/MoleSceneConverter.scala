@@ -95,11 +95,11 @@ class MoleSceneConverter extends Converter {
       }
 
       //Hook
-      //      view.dataUI.hooks.foreach { hf ⇒
-      //        writer.startNode("hook")
-      //        writer.addAttribute("id", hf.id.toString)
-      //        writer.endNode
-      //      }
+      view.dataUI.hooks.values.foreach { hf ⇒
+        writer.startNode("hook")
+        writer.addAttribute("id", hf.id.toString)
+        writer.endNode
+      }
 
       //Task
       view.dataUI.task match {
@@ -142,8 +142,7 @@ class MoleSceneConverter extends Converter {
     var oslots = new HashMap[String, ICapsuleUI]
     var islots = new HashMap[String, IInputSlotWidget]
 
-    val scene = new BuildMoleScene(reader.getAttribute("name"),
-      reader.getAttribute("id").toInt)
+    val scene = new BuildMoleScene(reader.getAttribute("name"))
 
     //Capsules
     while (reader.hasMoreChildren) {

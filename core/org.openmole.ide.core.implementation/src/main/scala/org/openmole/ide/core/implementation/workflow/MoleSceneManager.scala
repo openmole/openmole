@@ -24,14 +24,15 @@ import org.openmole.ide.core.model.data.IMoleDataUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.ide.core.implementation.data.MoleDataUI
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
 
-class MoleSceneManager(var name: String,
-                       val id: Int) extends IMoleSceneManager {
+class MoleSceneManager(var name: String) extends IMoleSceneManager {
 
+  val id = ScenesManager.countBuild.getAndIncrement
   var startingCapsule: Option[ICapsuleUI] = None
   var capsules = new DualHashBidiMap[String, ICapsuleUI]
   var connectorMap = new DualHashBidiMap[String, IConnectorUI]

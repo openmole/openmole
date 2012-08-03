@@ -17,8 +17,10 @@
 
 package org.openmole.ide.core.implementation.dataproxy
 
+import org.openmole.ide.misc.tools.Counter
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.data.ITaskDataUI
 
-class TaskDataProxyUI(var dataUI: ITaskDataUI, val id: Int = Proxys.incr.getAndIncrement) extends ITaskDataProxyUI
+class TaskDataProxyUI(var dataUI: ITaskDataUI,
+                      val id: Int = Counter.id.getAndIncrement) extends ITaskDataProxyUI

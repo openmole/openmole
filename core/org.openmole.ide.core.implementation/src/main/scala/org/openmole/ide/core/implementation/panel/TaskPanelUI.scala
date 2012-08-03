@@ -37,6 +37,7 @@ import org.openmole.ide.misc.widget.multirow.MultiWidget.CLOSE_IF_EMPTY
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget.ImageLinkLabel
+import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.PrototypeGroovyTextFieldEditor

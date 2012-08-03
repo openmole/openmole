@@ -25,8 +25,7 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.commons.Constants._
 import scala.collection.JavaConversions._
 
-class ExecutionMoleScene(id: Int,
-                         name: String) extends MoleScene(name, id) {
+class ExecutionMoleScene(name: String) extends MoleScene(name) {
 
   override val isBuildScene = false
 
