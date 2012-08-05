@@ -19,9 +19,19 @@ package org.openmole.core.implementation
 
 import scala.ref.WeakReference
 
+import scala.concurrent.stm._
+
 package object tools {
 
   implicit def objectToSomeObjectConverter[T](v: T) = Some(v)
   implicit def objectToWeakReferenceConverter[T <: AnyRef](v: T) = new WeakReference[T](v)
+
+  implicit def refDecorator[T](r: Ref[T]) = new {
+    def getUpdate(t: T ⇒ T): T = atomic { implicit txn ⇒ val v = r(); r() = t(v); v }
+  }
+
+  implicit def longRefDecorator(r: Ref[Long]) = new {
+    def next: Long = r.getUpdate(_ + 1)
+  }
 
 }

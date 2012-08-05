@@ -18,5 +18,14 @@
 package org.openmole.core.implementation.mole
 
 import org.openmole.core.model.mole.IMoleJobGroup
+import org.openmole.core.implementation.tools._
+import scala.concurrent.stm._
+
+object MoleJobGroup {
+
+  private val currentGroup = Ref(0L)
+  def apply() = new MoleJobGroup(currentGroup.next)
+
+}
 
 case class MoleJobGroup(val values: Any*) extends IMoleJobGroup

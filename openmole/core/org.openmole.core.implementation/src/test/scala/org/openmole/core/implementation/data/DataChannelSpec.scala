@@ -21,7 +21,7 @@ import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
-import org.openmole.core.implementation.transition.{ Transition, ExplorationTransition, AggregationTransition }
+import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.sampling.ExplicitSampling
 import org.openmole.core.model.data.IContext
 import org.scalatest.FlatSpec
@@ -142,10 +142,9 @@ class DataChannelSpec extends FlatSpec with ShouldMatchers {
 
     new DataChannel(tc, trc)
 
-    new ExplorationTransition(exc, tc)
-    new Transition(tc, noOPC)
-    new AggregationTransition(noOPC, trc)
-    new MoleExecution(new Mole(exc)).start.waitUntilEnded
+    val ex = exc -< tc -- noOPC >- trc toExecution
+
+    ex.start.waitUntilEnded
     executed should equal(true)
   }
 }

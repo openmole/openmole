@@ -23,6 +23,6 @@ import org.openmole.core.model.job.IJob
 class BatchExecutionJob(val environment: BatchEnvironment, val job: IJob) extends ExecutionJob {
   var serializedJob: Option[SerializedJob] = None
   var batchJob: Option[BatchJob] = None
-  def moleJobs = job.moleJobs.map { _._1 }
+  def moleJobs = job.moleJobs
 }
 

@@ -24,6 +24,7 @@ import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.sampling.ExplicitSampling
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.mole.IMoleJobGroup
+import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IGrouping
 import org.openmole.core.model.sampling.ISampling
 import org.scalatest.FlatSpec
@@ -39,12 +40,11 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
 
   class JobGroupingBy2Test extends IGrouping {
 
-    var group = true
-
-    override def apply(context: IContext) = {
-      val ret = new MoleJobGroup(group)
-      group = !group
-      ret
+    def apply(context: IContext, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup = {
+      groups.find { case (_, g) ⇒ g.size < 2 } match {
+        case Some((mg, _)) ⇒ mg
+        case None ⇒ MoleJobGroup()
+      }
     }
 
   }

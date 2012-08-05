@@ -148,32 +148,32 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
   }
 
   "A conjonctive pattern" should "be robust to concurent execution" in {
-    var executed = false
+    @volatile var executed = 0
     val p1 = new Prototype[String]("p1")
     val p2 = new Prototype[String]("p2")
 
-    val init = EmptyTask("Init")
+    val init = EmptyTask("Init conjonctive")
 
     val t1 = new TestTask {
-      val name = "Test write 1"
+      val name = "Test write 1 conjonctive"
       override def outputs = DataSet(p1)
       override def process(context: IContext) = context + (p1 -> "Test1")
     }
 
     val t2 = new TestTask {
-      val name = "Test write 2"
+      val name = "Test write 2 conjonctive"
       override def outputs = DataSet(p2)
       override def process(context: IContext) = context + (p2 -> "Test2")
     }
 
     val t3 = new TestTask {
-      val name = "Test read"
+      val name = "Test read conjonctive"
       override def inputs = DataSet(p1, p2.toArray)
       override def process(context: IContext) = {
         context.value(p1).get should equal("Test1")
         context.value(p2.toArray).get.head should equal("Test2")
         context.value(p2.toArray).get.size should equal(100)
-        executed = true
+        executed += 1
         context
       }
     }
@@ -199,7 +199,7 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
     new MoleExecution(
       new Mole(initc),
       t2CList.map { _ -> new FixedEnvironmentSelection(env) }.toMap).start.waitUntilEnded
-    executed should equal(true)
+    executed should equal(1)
   }
 
   "A conjonctive pattern" should "aggregate array variable of the same name in an array of array of the closest common supertype" in {

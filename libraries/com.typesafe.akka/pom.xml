@@ -23,6 +23,12 @@
 	    <version>${lib.com.typesafe.akka.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-transactor</artifactId>
+	    <version>${lib.com.typesafe.akka.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->
@@ -40,7 +46,7 @@
 
     <!--optional. Use this property to tune the exported packages-->
     <properties>
-        <libraries.export.packages>akka.*,com.typesafe.*</libraries.export.packages>
+        <libraries.export.packages>akka.*,com.typesafe.*,scala.concurrent.*</libraries.export.packages>
         <eclipse.buddypolicy>global</eclipse.buddypolicy>
     </properties>
 

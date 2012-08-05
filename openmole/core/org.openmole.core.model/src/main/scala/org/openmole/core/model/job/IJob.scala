@@ -21,6 +21,6 @@ import org.openmole.core.model.mole._
 
 trait IJob {
   def moleExecution: IMoleExecution
-  def moleJobs: Iterable[(IMoleJob, ISubMoleExecution)]
+  def moleJobs: Iterable[IMoleJob]
   def finished: Boolean
 }

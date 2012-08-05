@@ -17,9 +17,10 @@
 
 package org.openmole.plugin.grouping.batch
 
-import org.openmole.core.implementation.mole.MoleJobGroup
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.mole.IGrouping
+import org.openmole.core.implementation.mole._
+import org.openmole.core.model.data._
+import org.openmole.core.model.job._
+import org.openmole.core.model.mole._
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.service._
 import org.openmole.core.implementation.task.Task._
@@ -32,8 +33,7 @@ import org.openmole.core.implementation.task.Task._
  */
 class NumberOfBatchShuffledGrouping(numberOfBatch: Int) extends IGrouping {
 
-  override def apply(context: IContext) =
-    new MoleJobGroup(
-      newRNG(context.valueOrException(openMOLESeed)).nextInt(numberOfBatch))
+  override def apply(context: IContext, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup =
+    new MoleJobGroup(newRNG(context.valueOrException(openMOLESeed)).nextInt(numberOfBatch))
 
 }

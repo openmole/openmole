@@ -17,9 +17,10 @@
 
 package org.openmole.plugin.grouping.batch
 
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.mole.IGrouping
-import org.openmole.core.implementation.mole.MoleJobGroup
+import org.openmole.core.implementation.mole._
+import org.openmole.core.model.data._
+import org.openmole.core.model.job._
+import org.openmole.core.model.mole._
 
 /**
  * Group mole jobs given a fixed number of batch.
@@ -28,12 +29,9 @@ import org.openmole.core.implementation.mole.MoleJobGroup
  */
 class NumberOfBatchGrouping(numberOfBatch: Int) extends IGrouping {
 
-  var currentBatchNumber = 0
-
-  override def apply(context: IContext) = {
-    val jobCategory = new MoleJobGroup(currentBatchNumber)
-    currentBatchNumber = (currentBatchNumber + 1) % numberOfBatch
-    jobCategory
+  override def apply(context: IContext, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup = {
+    if (groups.size < numberOfBatch) MoleJobGroup()
+    else groups.minBy { case (_, g) ⇒ g.size }._1
   }
 
 }

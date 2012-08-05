@@ -73,7 +73,7 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
           var lastCompleted = 0L
 
           //Try to download the results for all the jobs of the group
-          for (moleJob ← job.moleJobs.unzip._1) {
+          for (moleJob ← job.moleJobs) {
             if (contextResults.results.isDefinedAt(moleJob.id)) {
               val executionResult = contextResults.results(moleJob.id)
 

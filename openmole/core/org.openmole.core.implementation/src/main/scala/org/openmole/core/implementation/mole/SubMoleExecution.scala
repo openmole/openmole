@@ -18,49 +18,34 @@
 package org.openmole.core.implementation.mole
 
 import org.openmole.core.implementation.data._
-import org.openmole.core.model.mole.IMoleJobGroup
-import org.openmole.core.model.mole.ISubMoleExecution
-import org.openmole.core.model.mole.ITicket
-import org.openmole.core.model.transition.IAggregationTransition
-import org.openmole.core.model.transition.ITransition
+import org.openmole.core.model.transition._
 import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.core.implementation.data.Variable
 import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
-import org.openmole.core.implementation.job.Job
-import org.openmole.core.implementation.task.Task
-import org.openmole.core.implementation.tools.RegistryWithTicket
-import org.openmole.core.model.mole.IAtomicCapsule
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IMasterCapsule
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.job.IJob
-import org.openmole.core.model.job.IMoleJob
+import org.openmole.core.implementation.job._
+import org.openmole.core.implementation.task._
+import org.openmole.core.implementation.tools._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.data._
+import org.openmole.core.model.job._
 import org.openmole.core.model.job.IMoleJob._
-import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.job.State._
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.core.implementation.job.MoleJob
 import org.openmole.core.implementation.job.MoleJob._
-import scala.actors.threadpool.locks.ReentrantLock
 import scala.collection.immutable.TreeMap
-import scala.collection.mutable.Buffer
-import scala.collection.mutable.HashMap
-import scala.collection.mutable.HashSet
-import scala.collection.mutable.ListBuffer
 import collection.JavaConversions._
-import scala.collection.mutable.SynchronizedSet
+import scala.collection.mutable.Buffer
+
+import scala.concurrent.stm._
 
 class SubMoleExecution(
     val parent: Option[SubMoleExecution],
     val moleExecution: MoleExecution) extends ISubMoleExecution {
 
-  @volatile private var _nbJobs = 0
-  private val _childs = new HashSet[SubMoleExecution] with SynchronizedSet[SubMoleExecution]
-  private val jobsLock = new ReentrantLock
-  @volatile private var _jobs = TreeMap.empty[IMoleJob, (ICapsule, ITicket)]
-  @volatile private var _canceled = false
+  private val _nbJobs = Ref(0)
+  private val _childs = TSet.empty[SubMoleExecution]
+  private val _jobs = Ref(TreeMap.empty[IMoleJob, (ICapsule, ITicket)])
+  private val _canceled = Ref(false)
 
   val masterCapsuleRegistry = new RegistryWithTicket[IMasterCapsule, IContext]
   val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, Buffer[IVariable[_]]]
@@ -68,79 +53,63 @@ class SubMoleExecution(
 
   parrentApply(_.+=(this))
 
-  override def canceled: Boolean =
-    _canceled || (parent match {
+  override def canceled: Boolean = atomic { implicit txn ⇒
+    _canceled() || (parent match {
       case Some(p) ⇒ p.canceled
       case None ⇒ false
     })
-
-  private def withJobsLock[T](f: ⇒ T): T = {
-    jobsLock.lock
-    try f
-    finally jobsLock.unlock
   }
 
-  private def addJob(moleJob: IMoleJob, capsule: ICapsule, ticket: ITicket) = {
-    withJobsLock(_jobs += (moleJob -> (capsule, ticket)))
-    moleExecution.nbJobInProgress += 1
+  private def addJob(moleJob: IMoleJob, capsule: ICapsule, ticket: ITicket) = atomic { implicit txn ⇒
+    _jobs() = _jobs() + (moleJob -> (capsule, ticket))
     nbJobs_+=(1)
   }
 
-  private def rmJob(moleJob: IMoleJob) = {
-    withJobsLock(_jobs -= moleJob)
-    moleExecution.nbJobInProgress -= 1
+  private def rmJob(moleJob: IMoleJob) = atomic { implicit txn ⇒
+    _jobs() = _jobs() - moleJob
     nbJobs_+=(-1)
   }
 
-  private def nbJobs_+=(v: Int): Unit = {
+  private def nbJobs_+=(v: Int): Unit = atomic { implicit txn ⇒
     _nbJobs += v
     parrentApply(_.nbJobs_+=(v))
   }
 
+  def numberOfJobs = _nbJobs.single()
+
   override def root = !parent.isDefined
 
-  override def cancel = synchronized {
-    _canceled = true
+  override def cancel = {
+    atomic { implicit txn ⇒
+      _canceled() = true
+      TSet.asSet(_childs)
+    }.foreach { _.cancel }
     parrentApply(_.-=(this))
-    childs.foreach { _.cancel }
   }
 
-  def cancelJobs = withJobsLock(_jobs.keys.foreach { _.cancel })
+  def cancelJobs = _jobs.single().keys.foreach { _.cancel }
 
-  override def childs = _childs.toList
+  override def childs = _childs.single
 
-  private def +=(submoleExecution: SubMoleExecution) = {
-    _childs += submoleExecution
-  }
+  private def +=(submoleExecution: SubMoleExecution) =
+    _childs.single += submoleExecution
 
-  private def -=(submoleExecution: SubMoleExecution) = {
-    _childs -= submoleExecution
-  }
+  private def -=(submoleExecution: SubMoleExecution) =
+    _childs.single -= submoleExecution
 
   override def jobs =
-    withJobsLock(_jobs.keys.toList) ::: childs.flatMap(_.jobs.toList)
+    atomic { implicit txn ⇒ _jobs().keys.toList ::: TSet.asSet(_childs).flatMap(_.jobs.toList).toList }
 
-  private def jobFailedOrCanceled(job: IMoleJob) = synchronized {
-    val (capsule, ticket) = withJobsLock(_jobs.get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registred.")))
+  private def jobFailedOrCanceled(job: IMoleJob) = {
+    val (capsule, ticket) = _jobs.single().get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registred."))
     rmJob(job)
     checkFinished(ticket)
     moleExecution.jobFailedOrCanceled(job, capsule)
   }
 
-  private def jobFinished(job: IMoleJob) = synchronized {
-    val (capsule, ticket) = withJobsLock(_jobs.get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registred.")))
-    rmJob(job)
-
+  private def jobFinished(job: IMoleJob) = {
+    val (capsule, ticket) = _jobs.single().get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registred."))
     try {
-      capsule match {
-        case c: IMasterCapsule ⇒
-          masterCapsuleRegistry.register(
-            c,
-            ticket.parentOrException,
-            c.toPersist(job.context))
-        case _ ⇒
-      }
-
       EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleFinished(job, capsule))
 
       capsule.outputDataChannels.foreach { _.provides(job.context, ticket, moleExecution) }
@@ -148,49 +117,50 @@ class SubMoleExecution(
     } catch {
       case e ⇒ throw new InternalProcessingError(e, "Error at the end of a MoleJob for capsule " + capsule)
     } finally {
+      rmJob(job)
       checkFinished(ticket)
       moleExecution.jobOutputTransitionsPerformed(job, capsule)
     }
   }
 
   private def checkFinished(ticket: ITicket) =
-    if (_nbJobs == 0) {
+    if (_nbJobs.single() == 0) {
       EventDispatcher.trigger(this, new ISubMoleExecution.Finished(ticket))
       parrentApply(_.-=(this))
     }
 
-  override def submit(capsule: ICapsule, context: IContext, ticket: ITicket) = synchronized {
+  override def submit(capsule: ICapsule, context: IContext, ticket: ITicket) = {
     if (!canceled) {
       def implicits =
         Context.empty ++
           moleExecution.mole.implicits.values.filter(v ⇒ capsule.taskOrException.inputs.contains(v.prototype.name)) +
           new Variable(Task.openMOLESeed, moleExecution.newSeed)
 
-      val moleJob: IMoleJob = capsule match {
+      //FIXME: Factorize code
+      capsule match {
         case c: IMasterCapsule ⇒
-          val savedContext = masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(new Context)
-          new MoleJob(capsule.taskOrException, implicits + context + savedContext, moleExecution.nextJobId, stateChanged)
-        case _ ⇒ new MoleJob(capsule.taskOrException, implicits + context, moleExecution.nextJobId, stateChanged)
-      }
-
-      addJob(moleJob, capsule, ticket)
-
-      val instant =
-        synchronized {
+          synchronized {
+            val savedContext = masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(new Context)
+            val moleJob: IMoleJob = new MoleJob(capsule.taskOrException, implicits + context + savedContext, moleExecution.nextJobId, stateChanged)
+            EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleStarting(moleJob, capsule))
+            EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobSubmitted(moleJob))
+            val instant = moleExecution.instantRerun(moleJob, capsule)
+            addJob(moleJob, capsule, ticket)
+            if (!instant) moleJob.perform
+            masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(moleJob.context))
+          }
+        case _ ⇒
+          val moleJob: IMoleJob = new MoleJob(capsule.taskOrException, implicits + context, moleExecution.nextJobId, stateChanged)
+          addJob(moleJob, capsule, ticket)
           EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleStarting(moleJob, capsule))
           EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobSubmitted(moleJob))
-          moleExecution.instantRerun(moleJob, capsule)
-        }
-
-      if (!instant)
-        capsule match {
-          case _: IAtomicCapsule ⇒ synchronized { moleJob.perform }
-          case _ ⇒ moleExecution.group(moleJob, capsule, this)
-        }
+          val instant = moleExecution.instantRerun(moleJob, capsule)
+          if (!instant) moleExecution.group(moleJob, capsule, this)
+      }
     }
   }
 
-  def newChild: ISubMoleExecution = synchronized {
+  def newChild: ISubMoleExecution = {
     val subMole = new SubMoleExecution(Some(this), moleExecution)
     if (canceled) subMole.cancel
     subMole

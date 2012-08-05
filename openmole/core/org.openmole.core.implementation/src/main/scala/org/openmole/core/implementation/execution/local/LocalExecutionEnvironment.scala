@@ -77,7 +77,7 @@ class LocalExecutionEnvironment(val nbThreads: Int) extends Environment {
 
   def nbJobInQueue = jobs.size
 
-  override def submit(job: IJob) = submit(new LocalExecutionJob(this, job.moleJobs.map { _._1 }))
+  override def submit(job: IJob) = submit(new LocalExecutionJob(this, job.moleJobs))
 
   def submit(moleJob: IMoleJob): Unit = submit(new LocalExecutionJob(this, List(moleJob)))
 

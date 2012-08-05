@@ -36,12 +36,13 @@ import org.openmole.core.implementation.execution.local._
 import org.openmole.core.implementation.hook._
 import org.openmole.core.implementation.job._
 import org.openmole.core.implementation.tools._
-import scala.collection.mutable.Buffer
-import scala.collection.mutable.HashMap
-import scala.collection.mutable.ListBuffer
 import org.openmole.misc.tools.service.Random
 import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
+
+import scala.collection.immutable.HashMap
+import scala.collection.mutable.Buffer
+import scala.concurrent.stm._
 
 object MoleExecution extends Logger {
 
@@ -58,6 +59,8 @@ object MoleExecution extends Logger {
 
 }
 
+import MoleExecution._
+
 class MoleExecution(
     val mole: IMole,
     selection: Map[ICapsule, IEnvironmentSelection] = Map.empty,
@@ -68,52 +71,54 @@ class MoleExecution(
   import IMoleExecution._
   import MoleExecution._
 
-  private val _started = new AtomicBoolean(false)
-  private val canceled = new AtomicBoolean(false)
-  private val _finished = new Semaphore(0)
+  private val _started = Ref(false)
+  private val _canceled = Ref(false)
+  private val _finished = Ref(false)
 
   override val id = UUID.randomUUID.toString
-  private val ticketNumber = new AtomicLong
-  private val currentJobId = new AtomicLong
 
-  private val waitingJobs = new HashMap[(ICapsule, IMoleJobGroup), ListBuffer[(IMoleJob, ISubMoleExecution)]]
+  private val ticketNumber = Ref(0L)
+  private val jobId = Ref(0L)
 
-  @volatile private var nbWaiting = 0
-  @volatile private[mole] var nbJobInProgress = 0
+  private val waitingJobs: TMap[ICapsule, TMap[IMoleJobGroup, Ref[List[IMoleJob]]]] =
+    TMap(grouping.map { case (c, g) ⇒ c -> TMap.empty[IMoleJobGroup, Ref[List[IMoleJob]]] }.toSeq: _*)
+
+  private val nbWaiting = Ref(0)
 
   val rootSubMoleExecution = new SubMoleExecution(None, this)
-  val rootTicket = Ticket(id, ticketNumber.getAndIncrement)
+  val rootTicket = Ticket(id, ticketNumber.next)
+
   val dataChannelRegistry = new RegistryWithTicket[IDataChannel, Buffer[IVariable[_]]]
 
-  val exceptions = new ListBuffer[Throwable]
+  val _exceptions = Ref(List.empty[Throwable])
+
+  def numberOfJobs = rootSubMoleExecution.numberOfJobs
+
+  def exceptions = _exceptions.single()
 
   def instantRerun(moleJob: IMoleJob, capsule: ICapsule) =
-    rerun.synchronized {
-      rerun.rerun(moleJob, capsule)
-    }
+    rerun.synchronized { rerun.rerun(moleJob, capsule) }
 
-  def group(moleJob: IMoleJob, capsule: ICapsule, submole: ISubMoleExecution) = synchronized {
-    grouping.get(capsule) match {
-      case Some(strategy) ⇒
-        val category = strategy(moleJob.context)
-        val key = (capsule, category)
+  def group(moleJob: IMoleJob, capsule: ICapsule, submole: ISubMoleExecution) =
+    atomic { implicit txn ⇒
+      grouping.get(capsule) match {
+        case Some(strategy) ⇒
+          val groups = waitingJobs(capsule)
+          val category = strategy(moleJob.context, TMap.asMap(groups).map { case (gr, jobs) ⇒ gr -> jobs() })
+          val jobs = groups.getOrElseUpdate(category, Ref(List.empty))
+          jobs() = moleJob :: jobs()
+          nbWaiting += 1
 
-        val jobs = waitingJobs.getOrElseUpdate(key, new ListBuffer) += (moleJob -> submole)
-        nbWaiting += 1
-
-        val complete = strategy.complete(jobs.unzip._1)
-        if (complete) {
-          waitingJobs.remove(key)
-          nbWaiting -= jobs.size
-          val job = new Job(this, jobs)
-          submit(job, capsule)
-        }
-      case None ⇒
-        val job = new Job(this, List(moleJob -> submole))
-        submit(job, capsule)
-    }
-
-  }
+          if (strategy.complete(jobs())) {
+            groups -= category
+            nbWaiting -= jobs().size
+            Some(new Job(this, jobs()) -> capsule)
+          } else None
+        case None ⇒
+          val job = new Job(this, List(moleJob))
+          Some(job -> capsule)
+      }
+    }.map { case (j, c) ⇒ submit(j, c) }
 
   private def submit(job: IJob, capsule: ICapsule) =
     if (!job.finished) {
@@ -123,22 +128,30 @@ class MoleExecution(
       }).submit(job)
     }
 
-  def submitAll = synchronized {
-    waitingJobs.foreach {
-      case ((capsule, _), jobs) ⇒ submit(new Job(this, jobs), capsule)
+  def submitAll =
+    atomic { implicit txn ⇒
+      val jobs =
+        for {
+          (capsule, groups) ← TMap.asMap(waitingJobs).toList
+          (_, jobs) ← TMap.asMap(groups).toList
+        } yield capsule -> jobs()
+      nbWaiting() = 0
+      waitingJobs.clear
+      jobs
+    }.foreach {
+      case (capsule, jobs) ⇒ submit(new Job(this, jobs), capsule)
     }
-    nbWaiting = 0
-    waitingJobs.empty
-  }
+
+  private def allWaiting = atomic { implicit txn ⇒ numberOfJobs <= nbWaiting() }
 
   def start(context: IContext): this.type = {
     rootSubMoleExecution.newChild.submit(mole.root, context, nextTicket(rootTicket))
-    if (nbJobInProgress <= nbWaiting) submitAll
+    if (allWaiting) submitAll
     this
   }
 
   override def start = {
-    if (!_started.getAndSet(true)) {
+    if (!_started.getUpdate(_ ⇒ true)) {
       val validationErrors = Validation(mole)
       if (!validationErrors.isEmpty) throw new UserBadDataError("Formal validation of your mole has failed, several errors have been found: " + validationErrors.mkString("\n"))
       start(Context.empty)
@@ -147,9 +160,10 @@ class MoleExecution(
   }
 
   override def cancel: this.type = {
-    if (!canceled.getAndSet(true)) {
+    if (!_canceled.getUpdate(_ ⇒ true)) {
       rootSubMoleExecution.cancel
       EventDispatcher.trigger(this, new IMoleExecution.Finished)
+      _finished.single() = true
     }
     this
   }
@@ -157,38 +171,38 @@ class MoleExecution(
   override def moleJobs = rootSubMoleExecution.jobs
 
   override def waitUntilEnded = {
-    _finished.acquire
-    _finished.release
-    if (!exceptions.isEmpty) throw new MultipleException(exceptions)
+    atomic { implicit txn ⇒
+      if (!_finished()) retry
+      if (!_exceptions().isEmpty) throw new MultipleException(_exceptions().reverse)
+    }
     this
   }
 
-  def jobFailedOrCanceled(moleJob: IMoleJob, capsule: ICapsule) = synchronized {
+  def jobFailedOrCanceled(moleJob: IMoleJob, capsule: ICapsule) = {
     moleJob.exception match {
       case None ⇒
-      case Some(e) ⇒ exceptions += e
+      case Some(e) ⇒ atomic { implicit txn ⇒ _exceptions() = e :: _exceptions() }
     }
     jobOutputTransitionsPerformed(moleJob, capsule)
   }
 
-  def jobOutputTransitionsPerformed(job: IMoleJob, capsule: ICapsule) = synchronized {
-    if (nbJobInProgress <= nbWaiting) submitAll
-    if (!canceled.get) {
+  def jobOutputTransitionsPerformed(job: IMoleJob, capsule: ICapsule) =
+    if (!_canceled.single()) {
+      if (allWaiting) submitAll
       rerun.synchronized { rerun.jobFinished(job, capsule) }
-      if (finished) {
-        _finished.release
+      if (numberOfJobs == 0) {
         EventDispatcher.trigger(this, new IMoleExecution.Finished)
+        _finished.single() = true
       }
     }
-  }
 
-  override def finished: Boolean = nbJobInProgress == 0
+  override def finished: Boolean = _finished.single()
 
-  override def started: Boolean = _started.get
+  override def started: Boolean = _started.single()
 
-  override def nextTicket(parent: ITicket): ITicket = Ticket(parent, ticketNumber.getAndIncrement)
+  override def nextTicket(parent: ITicket): ITicket = Ticket(parent, ticketNumber.next)
 
-  def nextJobId = new MoleJobId(id, currentJobId.getAndIncrement)
+  def nextJobId = new MoleJobId(id, jobId.next)
 
   def newSeed = rng.nextLong
 

@@ -17,15 +17,16 @@
 
 package org.openmole.plugin.grouping.onvariable
 
-import org.openmole.core.implementation.mole.MoleJobGroup
-import org.openmole.core.model.mole.IGrouping
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.implementation.mole._
+import org.openmole.core.model.job._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.data._
+import org.openmole.core.model.data._
 
 /**
  *
  * @author reuillon
  */
 class OnVariableGroupingStrategy(prototypes: IPrototype[_]*) extends IGrouping {
-  override def apply(context: IContext) = new MoleJobGroup(prototypes.flatMap { context.value(_) }.toSeq: _*)
+  def apply(context: IContext, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup = new MoleJobGroup(prototypes.flatMap { context.value(_) }.toSeq: _*)
 }
