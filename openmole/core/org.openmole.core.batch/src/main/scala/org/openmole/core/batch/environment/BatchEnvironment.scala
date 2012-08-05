@@ -108,6 +108,8 @@ object BatchEnvironment extends Logger {
 
   val EnvironmentCleaningThreads = new ConfigurationLocation("Environment", "EnvironmentCleaningThreads")
 
+  val AuthenticationTimeout = new ConfigurationLocation("Environment", "AuthenticationTimeout")
+
   Workspace += (MinUpdateInterval, "PT1M")
   Workspace += (MaxUpdateInterval, "PT20M")
   Workspace += (IncrementUpdateInterval, "PT1M")
@@ -124,6 +126,7 @@ object BatchEnvironment extends Logger {
   Workspace += (StatisticsHistorySize, "10000")
   Workspace += (JobManagmentThreads, "100")
   Workspace += (EnvironmentCleaningThreads, "20")
+  Workspace += (AuthenticationTimeout, "120")
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
 }

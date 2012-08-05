@@ -25,7 +25,9 @@ import org.ogf.saga.context.ContextFactory
 import org.ogf.saga.session.SessionFactory
 import org.ogf.saga.session.Session
 import org.openmole.misc.tools.service.Logger
+import org.openmole.misc.tools.service.ThreadUtil._
 import org.openmole.misc.workspace.Workspace
+import org.openmole.core.batch.environment.BatchEnvironment
 
 object JSAGASessionService extends Logger {
 
@@ -59,7 +61,7 @@ object JSAGASessionService extends Logger {
     sessions.filter(_ == expr).headOption match {
       case None ⇒
         val session = SessionFactory.createSession(false)
-        session.addContext(context)
+        timeout(session.addContext(context))(Workspace.preferenceAsLong(BatchEnvironment.AuthenticationTimeout))
         sessions = (expr -> session) :: sessions
       case Some((pattern, session)) ⇒
         session.addContext(context)

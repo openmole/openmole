@@ -18,11 +18,7 @@
 package org.openmole.misc.tools.service
 
 import java.lang.Thread.UncaughtExceptionHandler
-import java.util.concurrent.Callable
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.ThreadFactory
-import java.util.concurrent.Executors
-import java.util.concurrent.Future
+import java.util.concurrent._
 
 object ThreadUtil extends Logger {
   val daemonThreadFactory = new ThreadFactory {
@@ -46,5 +42,13 @@ object ThreadUtil extends Logger {
   def fixedThreadPool(n: Int) = Executors.newFixedThreadPool(n, daemonThreadFactory)
 
   def background[F](f: ⇒ F)(implicit executor: ExecutorService = Executors.newSingleThreadExecutor(daemonThreadFactory)): Future[F] = executor.submit(f)
+
+  def timeout[F](f: ⇒ F)(duration: Long)(implicit executor: ExecutorService = Executors.newSingleThreadExecutor(daemonThreadFactory)): F = {
+    val r = executor.submit(f)
+    try r.get(duration, TimeUnit.SECONDS)
+    catch {
+      case e: TimeoutException ⇒ r.cancel(true); throw e
+    }
+  }
 
 }
