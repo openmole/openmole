@@ -24,7 +24,7 @@ object MoleTaskDataUI {
   def manager(i: Int): Option[IMoleSceneManager] = ScenesManager.moleScenes.map { _.manager }.filter { _.id == i }.headOption
   def capsule(t: ITaskDataProxyUI, manager: IMoleSceneManager): Option[ICapsuleDataUI] =
     manager.capsules.values.map { _.dataUI }.filter { _.task.isDefined }.filter { _.task.get == t }.headOption
-  def emptyMoleSceneManager = new MoleSceneManager("", -1)
+  def emptyMoleSceneManager = new MoleSceneManager("")
 }
 
 import MoleTaskDataUI._
