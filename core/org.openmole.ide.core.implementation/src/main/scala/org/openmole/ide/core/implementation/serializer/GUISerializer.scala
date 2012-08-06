@@ -17,26 +17,32 @@
 
 package org.openmole.ide.core.implementation.serializer
 
+import com.ice.tar.TarInputStream
 import com.ice.tar.TarOutputStream
 import com.thoughtworks.xstream.XStream
 import java.io.EOFException
 import com.thoughtworks.xstream.io.xml.DomDriver
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.FileReader
 import java.io.FileWriter
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.execution.ScenesManager
+import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.dataproxy._
 import java.io.ObjectInputStream
+import java.nio.file.Files
 import org.openmole.ide.core.implementation.data._
+import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.implementation.workflow.MoleScene
 import org.openmole.misc.tools.io.FileUtil._
 import scala.collection.JavaConversions._
 import org.openmole.misc.tools.io.TarArchiver._
+import scala.collection.mutable.HashSet
 
 object GUISerializer {
 
@@ -45,6 +51,8 @@ object GUISerializer {
 
   xstream.alias("molescene", classOf[MoleScene])
   xstream.alias("data_proxy", classOf[IDataProxyUI])
+
+  var hookList = new HashSet[IHookDataUI]
 
   def serializeConcept(prefix: String,
                        concept: String,
@@ -82,42 +90,81 @@ object GUISerializer {
     }
   }
 
-  def unserialize(fromFile: String) = {
-    StatusBar.clear
-    val reader = new FileReader(new File(fromFile))
-    val in = try {
-      Right(xstream.createObjectInputStream(reader))
-    } catch {
-      case e ⇒
-        StatusBar.block("An error occured when loading the project " + fromFile + ". " + e.getMessage,
-          stack = e.getStackTraceString,
-          exceptionName = e.getClass.getCanonicalName)
-        Left
-    }
+  def readStream(f: File) = try {
+    Right(xstream.createObjectInputStream(new FileReader(f)))
+  } catch {
+    case e ⇒
+      StatusBar.block("An error occured when loading " + f.getAbsolutePath + "\n" + e.getMessage,
+        stack = e.getStackTraceString,
+        exceptionName = e.getClass.getCanonicalName)
+      Left
+  }
 
-    in match {
-      case Right(x: ObjectInputStream) ⇒
-        try {
-          Proxys.clearAll
-          ScenesManager.closeAll
+  def unserializeProxy(prefixFile: String,
+                       concept: String) =
+    new File(prefixFile + "/" + concept).listFiles.toList.foreach { f ⇒
 
-          while (true) {
+      readStream(f) match {
+        case Right(x: ObjectInputStream) ⇒
+          try {
             val readObject = x.readObject
             readObject match {
-              case x: SerializedProxys ⇒ x.loadProxys
-              case x: BuildMoleScene ⇒ { ScenesManager.addBuildSceneContainer(x) }
+              case t: ITaskDataProxyUI ⇒
+                Proxys.tasks += t
+                ConceptMenu.taskMenu.popup.contents += ConceptMenu.addItem(t)
+              case p: IPrototypeDataProxyUI ⇒
+                Proxys.prototypes += p
+                ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(p)
+              case s: ISamplingDataProxyUI ⇒
+                Proxys.samplings += s
+                ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(s)
+              case e: IEnvironmentDataProxyUI ⇒
+                Proxys.environments += e
+                ConceptMenu.environmentMenu.popup.contents += ConceptMenu.addItem(e)
+              case ms: BuildMoleScene ⇒ ScenesManager.addBuildSceneContainer(ms)
               case _ ⇒ throw new UserBadDataError("Failed to unserialize object " + readObject.toString)
             }
+          } catch {
+            case eof: EOFException ⇒ StatusBar.inform("Project loaded")
+            case e ⇒ StatusBar.block("An error occured when loading the project ",
+              stack = e.getMessage + "\n" + e.getStackTraceString,
+              exceptionName = e.getClass.getCanonicalName)
+          } finally {
+            x.close
           }
-        } catch {
-          case eof: EOFException ⇒ StatusBar.inform("Project loaded")
-          case e ⇒ StatusBar.block("An error occured when loading the project " + fromFile,
-            stack = e.getMessage + "\n" + e.getStackTraceString,
-            exceptionName = e.getClass.getCanonicalName)
-        } finally {
-          x.close
-        }
-      case Left ⇒
+        case Left ⇒
+      }
     }
+
+  def unserializeHook(prefixFile: String) = {
+    hookList.clear
+    new File(prefixFile + "/hook").listFiles.toList.flatMap { f ⇒
+      readStream(f) match {
+        case Right(x: ObjectInputStream) ⇒
+          try {
+            val readObject = x.readObject
+            readObject match {
+              case h: IHookDataUI ⇒ Some(h)
+              case _ ⇒ Nil
+            }
+          }
+      }
+    }.foreach { hookList += }
+  }
+
+  def unserialize(fromFile: String) = {
+    StatusBar.clear
+    Proxys.clearAll
+    ScenesManager.closeAll
+
+    val os = new TarInputStream(new FileInputStream(fromFile))
+    val extractDir = Files.createTempDirectory("openmole").toFile
+    os.extractDirArchiveWithRelativePathAndClose(extractDir)
+    unserializeProxy(extractDir.getAbsolutePath, "task")
+    unserializeProxy(extractDir.getAbsolutePath, "prototype")
+    unserializeProxy(extractDir.getAbsolutePath, "sampling")
+    unserializeProxy(extractDir.getAbsolutePath, "environment")
+    unserializeHook(extractDir.getAbsolutePath)
+    unserializeProxy(extractDir.getAbsolutePath, "mole")
   }
 }

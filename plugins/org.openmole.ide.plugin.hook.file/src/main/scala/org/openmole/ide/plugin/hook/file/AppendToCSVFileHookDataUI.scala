@@ -24,11 +24,13 @@ import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.misc.tools.Counter
 import org.openmole.plugin.hook.file.AppendToCSVFileHook
 
 class AppendToCSVFileHookDataUI(var activated: Boolean = true,
                                 val prototypes: Iterable[IPrototypeDataProxyUI] = List.empty,
-                                val fileName: String = "") extends IHookDataUI {
+                                val fileName: String = "",
+                                val id: Int = Counter.id.getAndIncrement) extends IHookDataUI {
 
   def buildPanelUI(task: ITaskDataProxyUI) = new AppendToCSVFileHookPanelUI(this, task)
 

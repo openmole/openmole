@@ -23,6 +23,7 @@ import org.openmole.ide.core.model.data.IExplorationTaskDataUI
 import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.data.ICapsuleDataUI
+import org.openmole.ide.misc.tools.Counter
 import scala.collection.mutable.HashMap
 
 class CapsuleDataUI(var task: Option[ITaskDataProxyUI] = None,
@@ -31,6 +32,8 @@ class CapsuleDataUI(var task: Option[ITaskDataProxyUI] = None,
                     var startingCapsule: Boolean = false) extends ICapsuleDataUI {
 
   var hooks = new HashMap[Class[_ <: ICapsuleExecutionHook], IHookDataUI]
+
+  def id = Counter.id.getAndIncrement
 
   override def toString = task match {
     case Some(x: ITaskDataProxyUI) ⇒ x.dataUI.name

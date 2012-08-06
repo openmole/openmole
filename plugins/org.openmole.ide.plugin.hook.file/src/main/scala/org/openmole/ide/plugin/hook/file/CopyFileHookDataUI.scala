@@ -25,10 +25,12 @@ import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.misc.tools.Counter
 import org.openmole.plugin.hook.file.CopyFileHook
 
 class CopyFileHookDataUI(var activated: Boolean = true,
-                         val toBeHooked: List[(IPrototypeDataProxyUI, String)] = List.empty) extends IHookDataUI {
+                         val toBeHooked: List[(IPrototypeDataProxyUI, String)] = List.empty,
+                         val id: Int = Counter.id.getAndIncrement) extends IHookDataUI {
 
   def coreClass = classOf[CopyFileHook]
 

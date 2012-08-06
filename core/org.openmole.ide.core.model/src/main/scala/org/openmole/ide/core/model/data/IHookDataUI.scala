@@ -25,10 +25,9 @@ import org.openmole.core.model.hook.IHook
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.IHookPanelUI
-import org.openmole.ide.misc.tools.Counter
 
 trait IHookDataUI {
-  def id = Counter.id.getAndIncrement
+  def id: Int
 
   def activated: Boolean
 

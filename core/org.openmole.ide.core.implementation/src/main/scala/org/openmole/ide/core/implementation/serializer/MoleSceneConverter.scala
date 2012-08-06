@@ -36,6 +36,7 @@ import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.workflow.ICapsuleUI
@@ -94,13 +95,6 @@ class MoleSceneConverter extends Converter {
         case _ ⇒
       }
 
-      //Hook
-      view.dataUI.hooks.values.foreach { hf ⇒
-        writer.startNode("hook")
-        writer.addAttribute("id", hf.id.toString)
-        writer.endNode
-      }
-
       //Task
       view.dataUI.task match {
         case Some(x: ITaskDataProxyUI) ⇒
@@ -108,6 +102,13 @@ class MoleSceneConverter extends Converter {
           writer.addAttribute("id", x.id.toString)
           writer.endNode
         case _ ⇒
+      }
+
+      //Hook
+      view.dataUI.hooks.values.foreach { hf ⇒
+        writer.startNode("hook")
+        writer.addAttribute("id", hf.id.toString)
+        writer.endNode
       }
 
       writer.endNode
@@ -181,6 +182,13 @@ class MoleSceneConverter extends Converter {
               case "oslot" ⇒ oslots.put(reader.getAttribute("id"), caps)
               case "task" ⇒ caps.encapsule(Proxys.tasks.filter(p ⇒ p.id == reader.getAttribute("id").toInt).head)
               case "environment" ⇒ caps.setEnvironment(Some(Proxys.environments.filter(e ⇒ e.id == reader.getAttribute("id").toInt).head))
+              case "hook" ⇒
+                GUISerializer.hookList.filter(_.id == reader.getAttribute("id").toInt).headOption match {
+                  case Some(h: IHookDataUI) ⇒
+                    caps.dataUI.hooks += h.coreClass -> h
+                    caps.hooked(true)
+                  case _ ⇒
+                }
               case _ ⇒ StatusBar.block("Unknown balise " + n1)
             }
             reader.moveUp

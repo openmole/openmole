@@ -23,10 +23,11 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.core.model.hook.ICapsuleExecutionHook
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.commons.TransitionType._
-import org.openmole.ide.core.model.factory.IHookFactoryUI
 import scala.collection.mutable.HashMap
 
 trait ICapsuleDataUI {
+  def id: Int
+
   def task: Option[ITaskDataProxyUI]
 
   def task_=(t: Option[ITaskDataProxyUI])

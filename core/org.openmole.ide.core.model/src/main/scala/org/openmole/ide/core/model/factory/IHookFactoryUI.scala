@@ -9,8 +9,6 @@ import org.openmole.core.model.hook.ICapsuleExecutionHook
 import org.openmole.ide.core.model.data.IHookDataUI
 
 trait IHookFactoryUI extends IFactoryUI {
-  var id = 0
-
   override def toString: String = ""
 
   def buildDataUI: IHookDataUI

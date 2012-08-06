@@ -19,6 +19,7 @@ package org.openmole.ide.plugin.hook.display
 
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.misc.tools.Counter
 import org.openmole.plugin.hook.display.ToStringHook
 import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.core.model.mole.ICapsule
@@ -26,7 +27,8 @@ import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.model.control.IExecutionManager
 
 class ToStringHookDataUI(var activated: Boolean = true,
-                         val toBeHooked: List[IPrototypeDataProxyUI] = List.empty) extends IHookDataUI {
+                         val toBeHooked: List[IPrototypeDataProxyUI] = List.empty,
+                         val id: Int = Counter.id.getAndIncrement) extends IHookDataUI {
 
   def coreClass = classOf[ToStringHook]
 
