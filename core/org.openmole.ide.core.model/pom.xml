@@ -44,11 +44,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>org.joda.time</artifactId>
-            <version>${lib.org.joda.time.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.openmole.ide</groupId>
             <artifactId>org.netbeans.api</artifactId>
             <version>${project.version}</version>
