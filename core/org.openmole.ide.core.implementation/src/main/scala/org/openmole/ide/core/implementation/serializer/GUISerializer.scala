@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.implementation.serializer
 
+import com.ice.tar.TarOutputStream
 import com.thoughtworks.xstream.XStream
 import java.io.EOFException
 import com.thoughtworks.xstream.io.xml.DomDriver
@@ -28,16 +29,14 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.dataproxy._
-import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.dataproxy._
 import java.io.ObjectInputStream
-import java.util.zip.GZIPOutputStream
 import org.openmole.ide.core.implementation.data._
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.implementation.workflow.MoleScene
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
+import org.openmole.misc.tools.io.TarArchiver._
 
 object GUISerializer {
 
@@ -47,15 +46,14 @@ object GUISerializer {
   xstream.alias("molescene", classOf[MoleScene])
   xstream.alias("data_proxy", classOf[IDataProxyUI])
 
-  def serializeConcept(path: File,
+  def serializeConcept(prefix: String,
                        concept: String,
                        set: List[(_, Int)]) = {
-    val prefix = path.getParentFile + "/" + path.getName.split('.')(0)
-    val taskFile = new File(prefix + "/" + concept)
-    taskFile.mkdirs
+    val conceptFile = new File(prefix + "/" + concept)
+    conceptFile.mkdirs
     set.foreach {
       case (s, id) ⇒
-        val f = new File(taskFile.getCanonicalFile + "/" + id + ".xml")
+        val f = new File(conceptFile.getCanonicalFile + "/" + id + ".xml")
         val writer = new FileWriter(f)
         val out = xstream.createObjectOutputStream(writer, concept)
         out.writeObject(s)
@@ -65,35 +63,22 @@ object GUISerializer {
 
   def serialize(toFile: String) = {
     val path = new File(toFile)
+    val prefix = path.getParentFile + "/" + path.getName.split('.')(0)
     if (path.getParentFile.isDirectory) {
-      serializeConcept(path, "task", Proxys.tasks.map { s ⇒ s -> s.id }.toList)
-      serializeConcept(path, "prototype", Proxys.prototypes.map { s ⇒ s -> s.id }.toList)
-      serializeConcept(path, "sampling", Proxys.samplings.map { s ⇒ s -> s.id }.toList)
-      serializeConcept(path, "environment", Proxys.environments.map { s ⇒ s -> s.id }.toList)
-      serializeConcept(path, "hook", ScenesManager.moleScenes.flatMap {
+      serializeConcept(prefix, "task", Proxys.tasks.map { s ⇒ s -> s.id }.toList)
+      serializeConcept(prefix, "prototype", Proxys.prototypes.map { s ⇒ s -> s.id }.toList)
+      serializeConcept(prefix, "sampling", Proxys.samplings.map { s ⇒ s -> s.id }.toList)
+      serializeConcept(prefix, "environment", Proxys.environments.map { s ⇒ s -> s.id }.toList)
+      serializeConcept(prefix, "hook", ScenesManager.moleScenes.flatMap {
         _.manager.capsules.values.flatMap {
           _.dataUI.hooks.values
         }
       }.map { h ⇒ h -> h.id }.toList)
-      serializeConcept(path, "mole", ScenesManager.moleScenes.map { ms ⇒ ms -> ms.manager.id }.toList)
-
-      // path.copyCompressFile(new File(toFile))
-      // new GZIPOutputStream(new FileOutputStream(path))
-
-      // KeyRegistry.hooks.values.foreach { _.id = Proxys.incr.getAndIncrement }
-      // out.writeObject(new SerializedProxys(Proxys.tasks.toSet,
-      //   Proxys.prototypes.toSet,
-      //   Proxys.samplings.toSet,
-      //   Proxys.environments.toSet,
-      //   Proxys.incr.get + 1))
-      //   
-      //molescenes
-      //      ScenesManager.moleScenes.foreach(ms ⇒
-      //        ms match {
-      //          case x: BuildMoleScene ⇒ out.writeObject(x)
-      //          case _ ⇒
-      //        })
-      //  out.close
+      serializeConcept(prefix, "mole", ScenesManager.moleScenes.map { ms ⇒ ms -> ms.manager.id }.toList)
+      val os = new TarOutputStream(new FileOutputStream(path))
+      try os.createDirArchiveWithRelativePathNoVariableContent(new File(prefix))
+      finally os.close
+      new File(prefix).recursiveDelete
     }
   }
 

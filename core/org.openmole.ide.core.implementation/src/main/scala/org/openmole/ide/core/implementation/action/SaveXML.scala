@@ -41,7 +41,7 @@ object SaveXML {
 
   def show: Option[String] = {
     val fc = new FileChooser {
-      new FileNameExtensionFilter("Save", ".xml,.XML")
+      new FileNameExtensionFilter("Save", ".om,.OM")
       fileSelectionMode = FilesOnly
       title = "Save OpenMOLE project"
     }
@@ -49,7 +49,7 @@ object SaveXML {
     var text: Option[String] = None
     if (fc.showDialog(new Label, "OK") == Approve) {
       text = Some(fc.selectedFile.getPath)
-      if (new File(text.get).getParentFile.isDirectory) text = Some(text.get.split('.')(0) + ".xml")
+      if (new File(text.get).getParentFile.isDirectory) text = Some(text.get.split('.')(0) + ".om")
     }
     text
   }
