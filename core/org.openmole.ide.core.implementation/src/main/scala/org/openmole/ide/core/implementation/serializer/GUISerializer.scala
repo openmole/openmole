@@ -122,11 +122,12 @@ object GUISerializer {
                 Proxys.environments += e
                 ConceptMenu.environmentMenu.popup.contents += ConceptMenu.addItem(e)
               case ms: BuildMoleScene ⇒ ScenesManager.addBuildSceneContainer(ms)
-              case _ ⇒ throw new UserBadDataError("Failed to unserialize object " + readObject.toString)
+              case _ ⇒
+                StatusBar.block("Failed to unserialize the " + concept + " " + readObject.toString)
             }
           } catch {
             case eof: EOFException ⇒ StatusBar.inform("Project loaded")
-            case e ⇒ StatusBar.block("An error occured when loading the project ",
+            case e ⇒ StatusBar.block("Failed to unserialize a data of type " + concept,
               stack = e.getMessage + "\n" + e.getStackTraceString,
               exceptionName = e.getClass.getCanonicalName)
           } finally {

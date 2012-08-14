@@ -39,8 +39,9 @@ import scala.collection.JavaConversions._
 
 object CheckData extends Logger {
 
-  def checkMole(scene: IMoleScene) = {
-    StatusBar.clear
+  def checkMole(scene: IMoleScene,
+                clear: Boolean = true) = {
+    if (clear) StatusBar.clear
     scene match {
       case y: BuildMoleScene ⇒
         y.manager.startingCapsule match {
@@ -142,8 +143,9 @@ object CheckData extends Logger {
     }
 
   def checkTaskProxyImplicitsPrototypes(scene: IMoleScene,
-                                        proxy: ITaskDataProxyUI) = {
-    StatusBar.clear
+                                        proxy: ITaskDataProxyUI,
+                                        clear: Boolean = true) = {
+    if (clear) StatusBar.clear
     scene match {
       case x: BuildMoleScene ⇒
         try {

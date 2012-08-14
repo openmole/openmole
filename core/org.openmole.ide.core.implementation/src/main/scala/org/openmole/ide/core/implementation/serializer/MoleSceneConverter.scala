@@ -143,6 +143,7 @@ class MoleSceneConverter extends Converter {
     var oslots = new HashMap[String, ICapsuleUI]
     var islots = new HashMap[String, IInputSlotWidget]
 
+    var errors = new HashSet[String]
     val scene = new BuildMoleScene(reader.getAttribute("name"))
 
     //Capsules
@@ -180,14 +181,22 @@ class MoleSceneConverter extends Converter {
             n1 match {
               case "islot" ⇒ islots.put(reader.getAttribute("id"), caps.addInputSlot(start))
               case "oslot" ⇒ oslots.put(reader.getAttribute("id"), caps)
-              case "task" ⇒ caps.encapsule(Proxys.tasks.filter(p ⇒ p.id == reader.getAttribute("id").toInt).head)
-              case "environment" ⇒ caps.setEnvironment(Some(Proxys.environments.filter(e ⇒ e.id == reader.getAttribute("id").toInt).head))
+              case "task" ⇒ Proxys.tasks.filter(p ⇒ p.id == reader.getAttribute("id").toInt).headOption match {
+                case Some(t: ITaskDataProxyUI) ⇒ caps.encapsule(t)
+                case None ⇒ errors += "An error occured when loading the Task for a capsule. No Task has been set."
+              }
+              case "environment" ⇒
+                Proxys.environments.filter(e ⇒ e.id == reader.getAttribute("id").toInt).headOption match {
+                  case Some(e: IEnvironmentDataProxyUI) ⇒ caps.setEnvironment(Some(e))
+                  case None ⇒ errors += "An error occured when loading the Environment for a capsule. No Environment has been set."
+                }
+
               case "hook" ⇒
                 GUISerializer.hookList.filter(_.id == reader.getAttribute("id").toInt).headOption match {
                   case Some(h: IHookDataUI) ⇒
                     caps.dataUI.hooks += h.coreClass -> h
                     caps.hooked(true)
-                  case _ ⇒
+                  case None ⇒ errors += "An error occured when loading the Hook for a capsule. No Hook has been set."
                 }
               case _ ⇒ StatusBar.block("Unknown balise " + n1)
             }
@@ -208,10 +217,12 @@ class MoleSceneConverter extends Converter {
             oslots(reader.getAttribute("source")),
             islots(reader.getAttribute("target")),
             Proxys.prototypes.filter { p ⇒ readFiltered(reader).contains(p.id) }.toList)
-        case _ ⇒ StatusBar.block("Unknown balise " + n0)
+        case _ ⇒ errors += "Unknown balise " + n0
       }
       reader.moveUp
     }
+
+    errors.foreach(s ⇒ StatusBar.block(s))
     scene
   }
 
