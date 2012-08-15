@@ -32,6 +32,9 @@ class GUIApplication { application ⇒
   UIManager.put("Menu.font", fontBold)
   UIManager.put("MenuItem.font", fontBold)
   UIManager.put("Button.font", fontBold)
+  UIManager.put("text", new Color(77, 77, 77))
+  UIManager.put("TabbedPane.foreground", new Color(0, 0, 255))
+  UIManager.put("TabbedPane.font", fontBold)
   UIManager.put("Button.foreground", new ColorUIResource(new Color(77, 77, 77)))
   UIManager.put("Label.font", font)
 

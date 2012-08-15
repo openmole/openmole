@@ -19,11 +19,15 @@ package org.openmole.ide.core.implementation.panel
 
 import java.awt.BorderLayout
 import java.awt.Color
+import java.awt.Graphics
+import java.awt.Graphics2D
+import java.awt.Rectangle
 import javax.imageio.ImageIO
 import javax.swing.BorderFactory
 import javax.swing.ImageIcon
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.execution.ScenesManager
+import javax.swing.plaf.basic.BasicTabbedPaneUI
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dialog.DialogFactory

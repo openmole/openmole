@@ -30,4 +30,5 @@ trait IPanelUI {
     opaque = true
     background = new Color(77, 77, 77)
   }
+
 }
