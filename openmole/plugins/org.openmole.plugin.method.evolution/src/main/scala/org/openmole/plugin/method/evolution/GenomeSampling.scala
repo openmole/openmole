@@ -17,16 +17,14 @@
 
 package org.openmole.plugin.method.evolution
 
-import fr.iscpif.mgo.ga._
 import fr.iscpif.mgo._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.sampling.Sampling
-import org.openmole.core.model.data.DataModeMask
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
-import org.openmole.misc.exception.UserBadDataError
+import org.openmole.core.model.data._
+import DataModeMask._
+import org.openmole.misc.exception._
 import org.openmole.misc.tools.service.Random._
-import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.workspace._
 import org.openmole.core.implementation.task.Task._
 
 object GenomeSampling {
@@ -45,6 +43,7 @@ sealed abstract class GenomeSampling(val evolution: Evolution) extends Sampling 
 
   def genome: IPrototype[evolution.G]
   def size: Int
+  override def inputs = DataSet(new Data(genome, optional).toArray)
 
   def prototypes = List(genome)
 
@@ -53,6 +52,11 @@ sealed abstract class GenomeSampling(val evolution: Evolution) extends Sampling 
 
     val rng = newRNG(context.valueOrException(openMOLESeed))
 
-    ((0 until size).map(i ⇒ toSamplingLine(evolution.factory.random(rng)))).iterator
+    val initialGenomes = context.value(genome.toArray).getOrElse(Array.empty).map { toSamplingLine }
+
+    {
+      initialGenomes.toList :::
+        (0 until size - initialGenomes.size).map(i ⇒ toSamplingLine(evolution.factory.random(rng))).toList
+    }.slice(0, size).iterator
   }
 }

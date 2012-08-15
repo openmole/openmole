@@ -24,8 +24,8 @@ import scala.collection.immutable.TreeMap
 object DataSet {
   val empty = new DataSet(List.empty)
 
-  def apply(prototypes: IPrototype[_]*): DataSet = apply(prototypes.toIterable)
-  def apply(prototypes: Traversable[IPrototype[_]]): DataSet = new DataSet(prototypes.map { new Data(_) }.toList)
+  def apply(data: IData[_]*): DataSet = new DataSet(data.toList)
+  //def apply(prototypes: Traversable[IPrototype[_]]): DataSet = new DataSet(prototypes.map { new Data(_) }.toList)
 }
 
 class DataSet(val data: List[IData[_]]) extends Set[IData[_]] with IDataSet {
