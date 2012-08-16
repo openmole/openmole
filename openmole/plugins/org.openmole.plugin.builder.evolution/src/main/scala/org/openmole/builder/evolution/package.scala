@@ -27,7 +27,6 @@ import org.openmole.core.model.mole._
 import org.openmole.core.model.task._
 import org.openmole.core.model.sampling._
 import org.openmole.core.model.domain._
-import org.openmole.plugin.method.evolution.ToIndividualArrayTask
 import org.openmole.plugin.method.evolution._
 import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.transition._
@@ -92,6 +91,7 @@ package object evolution {
     scalingArchiveTask addOutput state
     scalingArchiveTask addOutput generation
     scalingArchiveTask addOutput terminated
+    scalingArchiveTask addOutput archive
 
     val scalingArchiveCapsule = new Capsule(scalingArchiveTask)
 
@@ -117,12 +117,11 @@ package object evolution {
     scalingArchiveCapsule >| (endCapsule, terminated.name + " == true")
 
     new DataChannel(scalingCaps, toIndividualCapsule)
-    new DataChannel(elitismCaps, breedingCaps)
 
     new DataChannel(firstCapsule, model.first)
-    new DataChannel(explorationCapsule, endCapsule)
+    new DataChannel(firstCapsule, endCapsule)
 
-    val (_state, _generation, _genome, _individual) = (state, generation, genome, individual)
+    val (_state, _generation, _genome, _individual, _archive, _inputs, _objectives) = (state, generation, genome, individual, archive, inputs, objectives)
 
     new Puzzle(firstCapsule, List(endCapsule), model.selection, model.grouping) {
       def outputCapsule = scalingArchiveCapsule
@@ -131,18 +130,22 @@ package object evolution {
       def genome = _genome
       def size = populationSize
       def individual = _individual
-      def scalingTask = scalingArchiveTask.toTask
+      def archive = _archive
+      def inputs = _inputs
+      def objectives = _objectives
     }
 
   }
 
-  def island(evolution: Evolution with Elitism with Termination with Breeding with EvolutionManifest with TerminationManifest)(
+  def islandGA(evolution: GAEvolution with Elitism with Termination with Breeding with EvolutionManifest with TerminationManifest)(
     name: String,
     model: Puzzle {
       def genome: IPrototype[evolution.G]
       def size: Int
       def individual: IPrototype[Individual[evolution.G]]
-      def scalingTask: ITask
+      def archive: IPrototype[Population[evolution.G, evolution.MF]]
+      def inputs: Iterable[(IPrototype[Double], (Double, Double))]
+      def objectives: Iterable[(IPrototype[Double], Double)]
     },
     island: Int)(implicit plugins: IPluginSet) = {
     import evolution._
@@ -155,6 +158,8 @@ package object evolution {
 
     val sampling = IslandSampling(evolution)(model.genome.toArray, model.size, island)
     val exploration = ExplorationTask(name + "IslandExploration", sampling)
+
+    val archiveToIndividual = ArchiveToIndividualArrayTask(name + "ArchiveToInidividualArray", model.archive, model.individual)
 
     val elitismTask = ElitismTask(evolution)(
       name + "ElitismTask",
@@ -173,24 +178,43 @@ package object evolution {
 
     val endCapsule = new StrainerCapsule(EmptyTask(name + "End"))
 
-    val islandCapsule = new Capsule(MoleTask(name, model))
+    val islandCapsule = new Capsule(MoleTask(name + "MoleTask", model))
 
-    val scalingCapsule = new Capsule(model.scalingTask)
+    val scalingArchiveTask = ScalingGAArchiveTask[evolution.type](name + "ScalingArchive", archive, model.inputs.toSeq: _*)
+
+    model.objectives.foreach {
+      case (o, _) ⇒ scalingArchiveTask addObjective o
+    }
+
+    scalingArchiveTask addInput state
+    scalingArchiveTask addInput generation
+    scalingArchiveTask addInput terminated
+
+    scalingArchiveTask addOutput state
+    scalingArchiveTask addOutput generation
+    scalingArchiveTask addOutput terminated
+    scalingArchiveTask addOutput archive
+
+    val scalingArchiveCapsule = new Capsule(scalingArchiveTask)
 
     firstCapsule --
       exploration -<
       islandCapsule --
+      archiveToIndividual --
       elitismCaps --
-      scalingCapsule --
+      scalingArchiveCapsule --
       breedingTask --
       islandCapsule.newSlot
 
-    scalingCapsule >| (endCapsule, terminated.name + " == true")
+    scalingArchiveCapsule >| (endCapsule, terminated.name + " == true")
+
+    new DataChannel(firstCapsule, islandCapsule)
+    new DataChannel(firstCapsule, endCapsule)
 
     val (_state, _generation, _genome, _individual) = (state, generation, model.genome, model.individual)
 
     new Puzzle(firstCapsule, List(endCapsule), model.selection, model.grouping) {
-      def outputCapsule = scalingCapsule
+      def outputCapsule = scalingArchiveCapsule
       def state = _state
       def generation = _generation
       def genome = _genome

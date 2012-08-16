@@ -47,8 +47,8 @@ object MoleTask {
   def apply(name: String, mole: IMole, last: ICapsule)(implicit plugins: IPluginSet) = {
     new TaskBuilder { builder ⇒
       def toTask = new MoleTask(name, mole, last) {
-        val inputs = builder.inputs
-        val outputs = builder.outputs
+        val inputs = builder.inputs + mole.root.inputs
+        val outputs = builder.outputs + last.outputs
         val parameters = builder.parameters
       }
     }
