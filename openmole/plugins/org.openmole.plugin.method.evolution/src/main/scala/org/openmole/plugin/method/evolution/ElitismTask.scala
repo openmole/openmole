@@ -44,6 +44,7 @@ object ElitismTask {
       addOutput(archive)
       addOutput(generation)
       addOutput(state)
+      addOutput(terminated)
 
       addParameter(archive -> evolution.emptyPopulation)
       addParameter(generation -> 0)

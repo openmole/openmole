@@ -87,9 +87,11 @@ package object evolution {
 
     scalingArchiveTask addInput state
     scalingArchiveTask addInput generation
+    scalingArchiveTask addInput terminated
 
     scalingArchiveTask addOutput state
     scalingArchiveTask addOutput generation
+    scalingArchiveTask addOutput terminated
 
     val scalingArchiveCapsule = new Capsule(scalingArchiveTask)
 
