@@ -53,8 +53,6 @@ package object evolution {
     val generation = new Prototype[Int](name + "Generation")
     val terminated = new Prototype[Boolean](name + "Terminated")
 
-    //val nsga = new NSGA2Sigma(distributionIndex, steadySince, archiveSize, inputs.size)
-
     val firstCapsule = new StrainerCapsule(EmptyTask(name + "First"))
 
     val sampling = GenomeSampling(evolution)(genome, populationSize)
@@ -102,8 +100,7 @@ package object evolution {
 
     val breedingCaps = new StrainerCapsule(breedingTask)
 
-    val endTask = EmptyTask(name + "End")
-    val endCapsule = new StrainerCapsule(endTask)
+    val endCapsule = new StrainerCapsule(EmptyTask(name + "End"))
 
     firstCapsule --
       explorationCapsule -<
@@ -117,32 +114,85 @@ package object evolution {
 
     scalingArchiveCapsule >| (endCapsule, terminated.name + " == true")
 
-    /*new Transition(firstCapsule, explorationCapsule)
-    new ExplorationTransition(explorationCapsule, scalingCaps)
-    new Transition(scalingCaps, model.first)
-    new Transition(model.lasts, toIndividualCapsule, filtered = Set(genome.name))
-    new Transition(toIndividualCapsule, elitismCaps)
-    new Transition(elitismCaps, scalingArchiveCapsule)
-    new Transition(scalingArchiveCapsule, breedingCaps, generation.name + " % " + offspring + " == 0")
-    new SlaveTransition(breedingCaps, new Slot(scalingCaps))*/
-
-    //new EndExplorationTransition(scalingArchiveCapsule, endCapsule, terminated.name)
-
     new DataChannel(scalingCaps, toIndividualCapsule)
     new DataChannel(elitismCaps, breedingCaps)
 
     new DataChannel(firstCapsule, model.first)
     new DataChannel(explorationCapsule, endCapsule)
 
-    val (_state, _generation, _genome) = (state, generation, genome)
+    val (_state, _generation, _genome, _individual) = (state, generation, genome, individual)
 
     new Puzzle(firstCapsule, List(endCapsule), model.selection, model.grouping) {
       def outputCapsule = scalingArchiveCapsule
       def state = _state
       def generation = _generation
       def genome = _genome
+      def size = populationSize
+      def individual = _individual
+      def scalingTask = scalingArchiveTask.toTask
     }
 
+  }
+
+  def island(evolution: Evolution with Elitism with Termination with Breeding with EvolutionManifest with TerminationManifest)(
+    name: String,
+    model: Puzzle {
+      def genome: IPrototype[evolution.G]
+      def size: Int
+      def individual: IPrototype[Individual[evolution.G]]
+      def scalingTask: ITask
+    },
+    island: Int)(implicit plugins: IPluginSet) = {
+    import evolution._
+    val archive = new Prototype[Population[evolution.G, evolution.MF]](name + "Archive")
+    val state = new Prototype[evolution.STATE](name + "State")
+    val generation = new Prototype[Int](name + "Generation")
+    val terminated = new Prototype[Boolean](name + "Terminated")
+
+    val firstCapsule = new StrainerCapsule(EmptyTask(name + "First"))
+
+    val sampling = IslandSampling(evolution)(model.genome.toArray, model.size, island)
+    val exploration = ExplorationTask(name + "IslandExploration", sampling)
+
+    val elitismTask = ElitismTask(evolution)(
+      name + "ElitismTask",
+      model.individual.toArray,
+      archive,
+      generation,
+      state,
+      terminated)
+
+    val elitismCaps = new MasterCapsule(elitismTask, archive, state, generation)
+
+    val breedingTask = SteadyBreedTask(evolution)(
+      name + "Breeding",
+      archive,
+      model.genome toArray)
+
+    val endCapsule = new StrainerCapsule(EmptyTask(name + "End"))
+
+    val islandCapsule = new Capsule(MoleTask(name, model))
+
+    val scalingCapsule = new Capsule(model.scalingTask)
+
+    firstCapsule --
+      exploration -<
+      islandCapsule --
+      elitismCaps --
+      scalingCapsule --
+      breedingTask --
+      islandCapsule.newSlot
+
+    scalingCapsule >| (endCapsule, terminated.name + " == true")
+
+    val (_state, _generation, _genome, _individual) = (state, generation, model.genome, model.individual)
+
+    new Puzzle(firstCapsule, List(endCapsule), model.selection, model.grouping) {
+      def outputCapsule = scalingCapsule
+      def state = _state
+      def generation = _generation
+      def genome = _genome
+    }
   }
 
 }

@@ -25,7 +25,7 @@ object DataSet {
   val empty = new DataSet(List.empty)
 
   def apply(data: IData[_]*): DataSet = new DataSet(data.toList)
-  //def apply(prototypes: Traversable[IPrototype[_]]): DataSet = new DataSet(prototypes.map { new Data(_) }.toList)
+  def apply(prototypes: Traversable[IPrototype[_]]): DataSet = new DataSet(prototypes.map { new Data(_) }.toList)
 }
 
 class DataSet(val data: List[IData[_]]) extends Set[IData[_]] with IDataSet {

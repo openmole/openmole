@@ -25,9 +25,10 @@ import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.obj.ClassUtils._
-import org.openmole.core.implementation.data.Context
+import org.openmole.core.implementation.puzzle._
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.data.Context._
-import org.openmole.core.implementation.mole.MoleExecution
+import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.DataModeMask
@@ -39,6 +40,9 @@ import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.task.IMoleTask
 
 object MoleTask {
+
+  def apply(name: String, puzzle: Puzzle)(implicit plugins: IPluginSet): TaskBuilder =
+    apply(name, new Mole(puzzle.first), puzzle.lasts.head)
 
   def apply(name: String, mole: IMole, last: ICapsule)(implicit plugins: IPluginSet) = {
     new TaskBuilder { builder ⇒

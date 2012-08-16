@@ -82,6 +82,7 @@ class SubMoleExecution(
   override def cancel = {
     atomic { implicit txn ⇒
       _canceled() = true
+      cancelJobs
       TSet.asSet(_childs)
     }.foreach { _.cancel }
     parrentApply(_.-=(this))

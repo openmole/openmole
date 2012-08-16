@@ -20,7 +20,7 @@ package org.openmole.plugin.hook.file
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
-import org.openmole.core.implementation.data.DataSet
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.hook.CapsuleExecutionHook
 import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.core.model.data.IPrototype

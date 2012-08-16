@@ -21,7 +21,7 @@ import java.io.File
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.implementation.data.DataSet
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.hook.CapsuleExecutionHook
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.data.{ IContext, IPrototype }
