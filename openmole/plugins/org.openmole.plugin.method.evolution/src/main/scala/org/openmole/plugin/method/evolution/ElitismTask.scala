@@ -48,7 +48,7 @@ object ElitismTask {
 
       addParameter(archive -> evolution.emptyPopulation)
       addParameter(generation -> 0)
-      addParameter(state -> evolution.initialState(evolution.emptyPopulation))
+      addParameter(new DynamicParameter(state, evolution.initialState(evolution.emptyPopulation)))
 
       def toTask = new ElitismTask(name, evolution) {
 
