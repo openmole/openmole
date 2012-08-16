@@ -218,6 +218,7 @@ package object evolution {
       def state = _state
       def generation = _generation
       def genome = _genome
+      def island = islandCapsule
     }
   }
 
