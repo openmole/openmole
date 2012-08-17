@@ -37,7 +37,6 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.core.model.data.IExplorationTaskDataUI
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.model.factory.IHookFactoryUI
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.tools.image.Images
 import org.openmole.ide.misc.widget.LinkLabel

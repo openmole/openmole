@@ -43,7 +43,7 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import scala.collection.immutable.HashSet
 import scala.collection.mutable.HashMap
 
-class MoleSceneConverter extends Converter {
+class MoleSceneConverter(serializer: GUISerializer) extends Converter {
   override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) = {
 
     var firstSlotID = new HashMap[ICapsuleUI, Int]
@@ -86,19 +86,19 @@ class MoleSceneConverter extends Converter {
       writer.addAttribute("id", slotcount.toString)
       writer.endNode
 
-      //Environment
-      view.dataUI.environment match {
-        case Some(x: IEnvironmentDataProxyUI) ⇒
-          writer.startNode("environment")
+      //Task
+      view.dataUI.task match {
+        case Some(x: ITaskDataProxyUI) ⇒
+          writer.startNode("task");
           writer.addAttribute("id", x.id.toString)
           writer.endNode
         case _ ⇒
       }
 
-      //Task
-      view.dataUI.task match {
-        case Some(x: ITaskDataProxyUI) ⇒
-          writer.startNode("task");
+      //Environment
+      view.dataUI.environment match {
+        case Some(x: IEnvironmentDataProxyUI) ⇒
+          writer.startNode("environment")
           writer.addAttribute("id", x.id.toString)
           writer.endNode
         case _ ⇒
@@ -192,7 +192,7 @@ class MoleSceneConverter extends Converter {
                 }
 
               case "hook" ⇒
-                GUISerializer.hookList.filter(_.id == reader.getAttribute("id").toInt).headOption match {
+                serializer.hookList.filter(_.id == reader.getAttribute("id").toInt).headOption match {
                   case Some(h: IHookDataUI) ⇒
                     caps.dataUI.hooks += h.coreClass -> h
                     caps.hooked(true)

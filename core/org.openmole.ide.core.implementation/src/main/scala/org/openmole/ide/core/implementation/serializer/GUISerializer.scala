@@ -19,15 +19,25 @@ package org.openmole.ide.core.implementation.serializer
 
 import com.ice.tar.TarInputStream
 import com.ice.tar.TarOutputStream
+import com.thoughtworks.xstream.MarshallingStrategy
 import com.thoughtworks.xstream.XStream
+import com.thoughtworks.xstream.mapper.Mapper
+import com.thoughtworks.xstream.persistence.FilePersistenceStrategy
+import com.thoughtworks.xstream.persistence.XmlArrayList
 import java.io.EOFException
+import com.thoughtworks.xstream.converters.ConverterLookup
+import com.thoughtworks.xstream.converters.DataHolder
+import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
+import com.thoughtworks.xstream.core.ReferenceByIdMarshaller
+import com.thoughtworks.xstream.core.ReferenceByIdUnmarshaller
+import com.thoughtworks.xstream.io.HierarchicalStreamReader
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import com.thoughtworks.xstream.io.xml.DomDriver
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.FileReader
 import java.io.FileWriter
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.data.IHookDataUI
@@ -43,14 +53,24 @@ import org.openmole.misc.tools.io.FileUtil._
 import scala.collection.JavaConversions._
 import org.openmole.misc.tools.io.TarArchiver._
 import scala.collection.mutable.HashSet
+import scala.collection.JavaConversions._
 
-object GUISerializer {
+class GUISerializer {
 
   val xstream = new XStream(new DomDriver)
-  xstream.registerConverter(new MoleSceneConverter)
+  val samplingConverter = new SamplingConverter(xstream.getMapper, xstream.getReflectionProvider)
+  val prototypeConverter = new PrototypeConverter(xstream.getMapper, xstream.getReflectionProvider)
+  val environmentConverter = new EnvironmentConverter(xstream.getMapper, xstream.getReflectionProvider)
+
+  xstream.registerConverter(new MoleSceneConverter(this))
+  xstream.registerConverter(prototypeConverter)
+  xstream.registerConverter(samplingConverter)
+  xstream.registerConverter(environmentConverter)
 
   xstream.alias("molescene", classOf[MoleScene])
-  xstream.alias("data_proxy", classOf[IDataProxyUI])
+  xstream.alias("sampling", classOf[ISamplingDataProxyUI])
+  xstream.alias("prototype", classOf[IPrototypeDataProxyUI])
+  xstream.alias("environment", classOf[IEnvironmentDataProxyUI])
 
   var hookList = new HashSet[IHookDataUI]
 
@@ -74,9 +94,15 @@ object GUISerializer {
     val prefix = path.getParentFile + "/" + path.getName.split('.')(0)
     if (path.getParentFile.isDirectory) {
       serializeConcept(prefix, "task", Proxys.tasks.map { s ⇒ s -> s.id }.toList)
-      serializeConcept(prefix, "prototype", Proxys.prototypes.map { s ⇒ s -> s.id }.toList)
-      serializeConcept(prefix, "sampling", Proxys.samplings.map { s ⇒ s -> s.id }.toList)
-      serializeConcept(prefix, "environment", Proxys.environments.map { s ⇒ s -> s.id }.toList)
+      serializeConcept(prefix,
+        "sampling",
+        Proxys.samplings.filterNot(s ⇒ samplingConverter.added.contains(s.id)).map { s ⇒ s -> s.id }.toList)
+      serializeConcept(prefix,
+        "prototype",
+        Proxys.prototypes.filterNot(s ⇒ prototypeConverter.added.contains(s.id)).map { s ⇒ s -> s.id }.toList)
+      serializeConcept(prefix,
+        "environment",
+        Proxys.environments.filterNot(s ⇒ environmentConverter.added.contains(s.id)).map { s ⇒ s -> s.id }.toList)
       serializeConcept(prefix, "hook", ScenesManager.moleScenes.flatMap {
         _.manager.capsules.values.flatMap {
           _.dataUI.hooks.values
@@ -100,8 +126,14 @@ object GUISerializer {
       Left
   }
 
+  def addTask(t: ITaskDataProxyUI) =
+    if (!Proxys.tasks.contains(t)) {
+      Proxys.tasks += t
+      ConceptMenu.taskMenu.popup.contents += ConceptMenu.addItem(t)
+    }
+
   def unserializeProxy(prefixFile: String,
-                       concept: String) =
+                       concept: String) = {
     new File(prefixFile + "/" + concept).listFiles.toList.foreach { f ⇒
 
       readStream(f) match {
@@ -109,18 +141,10 @@ object GUISerializer {
           try {
             val readObject = x.readObject
             readObject match {
-              case t: ITaskDataProxyUI ⇒
-                Proxys.tasks += t
-                ConceptMenu.taskMenu.popup.contents += ConceptMenu.addItem(t)
-              case p: IPrototypeDataProxyUI ⇒
-                Proxys.prototypes += p
-                ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(p)
-              case s: ISamplingDataProxyUI ⇒
-                Proxys.samplings += s
-                ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(s)
-              case e: IEnvironmentDataProxyUI ⇒
-                Proxys.environments += e
-                ConceptMenu.environmentMenu.popup.contents += ConceptMenu.addItem(e)
+              case t: ITaskDataProxyUI ⇒ addTask(t)
+              case p: IPrototypeDataProxyUI ⇒ prototypeConverter.addPrototype(p)
+              case s: ISamplingDataProxyUI ⇒ samplingConverter.addSampling(s)
+              case e: IEnvironmentDataProxyUI ⇒ environmentConverter.addEnvironment(e)
               case ms: BuildMoleScene ⇒ ScenesManager.addBuildSceneContainer(ms)
               case _ ⇒
                 StatusBar.block("Failed to unserialize the " + concept + " " + readObject.toString)
@@ -136,6 +160,7 @@ object GUISerializer {
         case Left ⇒
       }
     }
+  }
 
   def unserializeHook(prefixFile: String) = {
     hookList.clear
@@ -161,11 +186,12 @@ object GUISerializer {
     val os = new TarInputStream(new FileInputStream(fromFile))
     val extractDir = Files.createTempDirectory("openmole").toFile
     os.extractDirArchiveWithRelativePathAndClose(extractDir)
-    unserializeProxy(extractDir.getAbsolutePath, "task")
-    unserializeProxy(extractDir.getAbsolutePath, "prototype")
-    unserializeProxy(extractDir.getAbsolutePath, "sampling")
     unserializeProxy(extractDir.getAbsolutePath, "environment")
     unserializeHook(extractDir.getAbsolutePath)
+    unserializeProxy(extractDir.getAbsolutePath, "sampling")
+    unserializeProxy(extractDir.getAbsolutePath, "prototype")
+    unserializeProxy(extractDir.getAbsolutePath, "task")
     unserializeProxy(extractDir.getAbsolutePath, "mole")
   }
+
 }
