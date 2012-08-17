@@ -70,7 +70,7 @@ sealed abstract class MoleTask(
       ev match {
         case ev: IMoleExecution.JobInCapsuleFinished ⇒
           if (ev.capsule == last) lastContext = Some(ev.moleJob.context)
-        case ev: IMoleExecution.ExceptionRaised =>
+        case ev: IMoleExecution.ExceptionRaised ⇒
           exceptions ::= ev.exception
         case _ ⇒
       }
@@ -94,8 +94,8 @@ sealed abstract class MoleTask(
     execution.start(firstTaskContext)
     execution.waitUntilEnded
 
-    if(!resultGathering.exceptions.isEmpty) throw new MultipleException(resultGathering.exceptions.reverse)
-    
+    if (!resultGathering.exceptions.isEmpty) throw new MultipleException(resultGathering.exceptions.reverse)
+
     context + resultGathering.lastContext.getOrElse(throw new UserBadDataError("Last capsule " + last + " has never been executed."))
   }
 

@@ -178,7 +178,7 @@ object ReplicaCatalog extends Logger {
 
       val replica = getReplica(srcPath, hash, storageDescription, authenticationKey) match {
         case None ⇒
-          logger.fine("Not found Replica for" + srcPath.getAbsolutePath + " " + storage)
+          //logger.fine("Not found Replica for" + srcPath.getAbsolutePath + " " + storage)
           getReplica(srcPath, storageDescription, authenticationKey).foreach { r ⇒ clean(r) }
 
           getReplica(hash, storageDescription, authenticationKey) match {
@@ -191,7 +191,7 @@ object ReplicaCatalog extends Logger {
               uploadAndInsert(src, srcPath, hash, authenticationKey, storage, token)
           }
         case Some(r) ⇒ {
-          logger.fine("Found Replica " + r)
+          //logger.fine("Found Replica " + r)
           client.activate(r, Int.MaxValue)
           checkExists(r, src, srcPath, hash, authenticationKey, storage, token)
         }
