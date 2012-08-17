@@ -23,6 +23,7 @@ import org.openmole.core.model.task.IPluginSet
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.exception.MultipleException
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.core.implementation.puzzle._
@@ -63,11 +64,14 @@ sealed abstract class MoleTask(
 
   class ResultGathering extends EventListener[IMoleExecution] {
     var lastContext: Option[IContext] = None
+    var exceptions: List[Throwable] = List.empty
 
     override def triggered(obj: IMoleExecution, ev: Event[IMoleExecution]) = synchronized {
       ev match {
         case ev: IMoleExecution.JobInCapsuleFinished ⇒
           if (ev.capsule == last) lastContext = Some(ev.moleJob.context)
+        case ev: IMoleExecution.ExceptionRaised =>
+          exceptions ::= ev.exception
         case _ ⇒
       }
     }
@@ -85,10 +89,13 @@ sealed abstract class MoleTask(
     val resultGathering = new ResultGathering
 
     EventDispatcher.listen(execution: IMoleExecution, resultGathering, classOf[IMoleExecution.JobInCapsuleFinished])
+    EventDispatcher.listen(execution: IMoleExecution, resultGathering, classOf[IMoleExecution.ExceptionRaised])
 
     execution.start(firstTaskContext)
     execution.waitUntilEnded
 
+    if(!resultGathering.exceptions.isEmpty) throw new MultipleException(resultGathering.exceptions.reverse)
+    
     context + resultGathering.lastContext.getOrElse(throw new UserBadDataError("Last capsule " + last + " has never been executed."))
   }
 
