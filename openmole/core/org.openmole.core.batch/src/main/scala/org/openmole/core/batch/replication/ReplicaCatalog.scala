@@ -178,7 +178,7 @@ object ReplicaCatalog extends Logger {
 
       val replica = getReplica(srcPath, hash, storageDescription, authenticationKey) match {
         case None ⇒
-          //logger.fine("Not found Replica for" + srcPath.getAbsolutePath + " " + storage)
+          logger.fine("Not found Replica for" + srcPath.getAbsolutePath + " " + storage)
           getReplica(srcPath, storageDescription, authenticationKey).foreach { r ⇒ clean(r) }
 
           getReplica(hash, storageDescription, authenticationKey) match {
@@ -191,7 +191,7 @@ object ReplicaCatalog extends Logger {
               uploadAndInsert(src, srcPath, hash, authenticationKey, storage, token)
           }
         case Some(r) ⇒ {
-          //logger.fine("Found Replica for " + srcPath.getAbsolutePath + " " + storage)
+          logger.fine("Found Replica " + r)
           client.activate(r, Int.MaxValue)
           checkExists(r, src, srcPath, hash, authenticationKey, storage, token)
         }
@@ -253,7 +253,7 @@ object ReplicaCatalog extends Logger {
   private def insert(replica: Replica)(implicit objectContainer: ObjectContainer) =
     try {
       objectContainer.store(replica)
-      logger.fine("Insert " + replica.toString)
+      //logger.fine("Insert " + replica.toString)
     } finally {
       objectContainer.commit
     }
@@ -276,13 +276,13 @@ object ReplicaCatalog extends Logger {
 
   def clean(replica: Replica)(implicit objectContainer: ObjectContainer) =
     withSemaphore(key(replica), objectContainer) {
-      logger.fine("Cleaning replica " + replica.toString)
+      //logger.fine("Cleaning replica " + replica.toString)
       if (contains(replica)) {
-        logger.fine("Contains replica " + replica.toString)
+        //logger.fine("Contains replica " + replica.toString)
         removeNoLock(replica)
-        logger.fine("Removed replica " + replica.toString)
+        //logger.fine("Removed replica " + replica.toString)
         if (!containsDestination(replica.destination)) URIFile.clean(new URIFile(replica.destination))
-        else logger.fine("Still contains " + replica.destination)
+        //else logger.fine("Still contains " + replica.destination)
       }
     }
 

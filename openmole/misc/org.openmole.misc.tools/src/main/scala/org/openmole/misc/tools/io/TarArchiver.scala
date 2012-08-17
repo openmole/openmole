@@ -63,24 +63,29 @@ object TarArchiver {
 
     def extractDirArchiveWithRelativePathAndClose(baseDir: File) = try {
       if (!baseDir.isDirectory) throw new IOException(baseDir.getAbsolutePath + " is not a directory.")
-      val fs = FileSystems.getDefault
 
-      var e = tis.getNextEntry
+      val links = Iterator.continually(tis.getNextEntry).takeWhile(_ != null).flatMap {
+        e ⇒
+          val dest = new File(baseDir, e.getName)
+          val link =
+            if (!e.getLinkName.isEmpty) Some(dest -> e.getLinkName)
+            else if (e.isDirectory) {
+              dest.mkdirs
+              None
+            } else {
+              dest.getParentFile.mkdirs
+              val fos = new FileOutputStream(dest)
+              try tis.copy(fos) finally fos.close
+              None
+            }
+          dest.mode = e.getMode
+          link
+      }.toList
 
-      while (e != null) {
-        val dest = new File(baseDir, e.getName)
-        if (!e.getLinkName.isEmpty) {
-          dest.createLink(e.getLinkName)
-        } else if (e.isDirectory) {
-          dest.mkdirs
-        } else {
-          dest.getParentFile.mkdirs
-          val fos = new FileOutputStream(dest)
-          try tis.copy(fos) finally fos.close
-        }
-        dest.mode = e.getMode
-        e = tis.getNextEntry
+      links.foreach {
+        case ((dest, name)) ⇒ dest.createLink(name)
       }
+
     } finally tis.close
   }
 

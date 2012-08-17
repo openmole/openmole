@@ -47,9 +47,7 @@ class DesktopGridEnvironment(
 
   val description = new ServiceDescription(login + "@localhost:" + port)
 
-  @transient lazy val batchStorage = new VolatileStorage(this, path.toURI, Int.MaxValue) {
-    override lazy val description = DesktopGridEnvironment.this.description
-  }
+  @transient lazy val batchStorage = new VolatileStorage(this, path.toURI, Int.MaxValue)
 
   @transient override lazy val allStorages = List(batchStorage)
   @transient override lazy val allJobServices = List(new DesktopGridJobService(this, DesktopGridEnvironment.this.description))

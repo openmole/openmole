@@ -72,7 +72,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     auth.initialize(false)
 
     val authFile = Workspace.newFile("auth", ".xml")
-    SerializerService.serialize(auth, authFile)
+    SerializerService.serializeAndArchiveFiles(auth, authFile)
 
     (0 until nbWorkers).foreach {
       i ⇒ background { runJobs(user, host, port, password, authFile) }
