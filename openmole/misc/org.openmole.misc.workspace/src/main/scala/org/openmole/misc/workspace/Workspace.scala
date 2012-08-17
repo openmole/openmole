@@ -141,10 +141,10 @@ class Workspace(val location: File) {
 
   location.mkdirs
 
-  @transient val tmpDir = new File(new File(location, tmpLocation), sessionUUID.toString)
+  val tmpDir = new File(new File(location, tmpLocation), sessionUUID.toString)
   tmpDir.mkdirs
 
-  @transient val persistentDir = new File(location, persitentLocation)
+  val persistentDir = new File(location, persitentLocation)
   persistentDir.mkdirs
 
   def newSeed = rng.nextLong

@@ -52,7 +52,7 @@ class Transition(
   start.addOutputTransition(this)
   end += this
 
-  @transient val filteredSet = filtered.toSet
+  @transient lazy val filteredSet = filtered.toSet
 
   private def nextTaskReady(ticket: ITicket, subMole: ISubMoleExecution): Boolean = {
     val registry = subMole.transitionRegistry
