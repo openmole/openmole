@@ -122,8 +122,8 @@ package object evolution {
 
     new DataChannel(scalingCaps, toIndividualCapsule)
 
-    new DataChannel(firstCapsule, model.first)
-    new DataChannel(firstCapsule, endCapsule)
+    new DataChannel(firstCapsule, model.first, genome.name)
+    new DataChannel(firstCapsule, endCapsule, genome.name)
 
     val (_state, _generation, _genome, _individual, _archive, _inputs, _objectives) = (state, generation, genome, individual, archive, inputs, objectives)
 
