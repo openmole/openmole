@@ -19,7 +19,6 @@ package org.openmole.core.implementation.task
 
 import org.openmole.misc.exception._
 import org.openmole.core.implementation.data._
-import org.openmole.core.model.data.DataModeMask._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.core.implementation.data.Context._

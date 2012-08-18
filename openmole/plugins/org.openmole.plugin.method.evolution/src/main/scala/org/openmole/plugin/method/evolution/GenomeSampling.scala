@@ -19,9 +19,8 @@ package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.sampling.Sampling
+import org.openmole.core.implementation.sampling._
 import org.openmole.core.model.data._
-import DataModeMask._
 import org.openmole.misc.exception._
 import org.openmole.misc.tools.service.Random._
 import org.openmole.misc.workspace._

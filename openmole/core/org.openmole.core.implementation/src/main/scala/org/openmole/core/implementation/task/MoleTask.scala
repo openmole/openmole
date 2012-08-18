@@ -18,27 +18,18 @@
 package org.openmole.core.implementation.task
 
 import org.openmole.misc.tools.service.Random
-import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.core.model.task.IPluginSet
-import org.openmole.misc.eventdispatcher.Event
-import org.openmole.misc.eventdispatcher.EventListener
-import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.misc.exception.MultipleException
-import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.eventdispatcher._
+import org.openmole.misc.exception._
 import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.data.Context._
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.mole.Capsule._
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.data.DataModeMask
-import org.openmole.core.model.data.DataModeMask._
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.mole.IMole
-import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.task.IMoleTask
+import org.openmole.core.model.mole._
+import org.openmole.core.model.data._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.task._
 
 object MoleTask {
 

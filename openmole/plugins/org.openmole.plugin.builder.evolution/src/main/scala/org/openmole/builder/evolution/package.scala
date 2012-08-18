@@ -52,7 +52,11 @@ package object evolution {
     val generation = new Prototype[Int](name + "Generation")
     val terminated = new Prototype[Boolean](name + "Terminated")
 
-    val firstCapsule = new StrainerCapsule(EmptyTask(name + "First"))
+    val firstTask = EmptyTask(name + "First")
+    firstTask addInput (new Data(genome.toArray, optional))
+    firstTask addOutput (new Data(genome.toArray, optional))
+
+    val firstCapsule = new StrainerCapsule(firstTask)
 
     val sampling = GenomeSampling(evolution)(genome, populationSize)
     val exploreSampling = ExplorationTask(name + "GenomeExploration", sampling)

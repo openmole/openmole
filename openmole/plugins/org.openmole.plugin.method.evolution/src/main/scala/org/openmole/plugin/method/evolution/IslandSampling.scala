@@ -54,7 +54,7 @@ sealed abstract class IslandSampling(val evolution: Evolution with EvolutionMani
     (0 until size).map(
       i ⇒
         toSamplingLine(
-          (0 to islandSize).map(
+          (0 until islandSize).map(
             j ⇒ evolution.factory.random(rng)).toArray)).iterator
   }
 }

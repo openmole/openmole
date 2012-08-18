@@ -68,4 +68,6 @@ package object data {
 
   implicit def variablesToContextConverter(variables: Traversable[IVariable[_]]): Context = Context(variables)
 
+  val optional = DataModeMask.optional
+
 }
