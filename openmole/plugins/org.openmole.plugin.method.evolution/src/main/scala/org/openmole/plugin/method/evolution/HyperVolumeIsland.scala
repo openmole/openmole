@@ -19,27 +19,28 @@ package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
 
-sealed class StrictNSGA2Sigma(
-  val distributionIndex: Double,
-  val windowSize: Int,
-  val deviationEpsilon: Double,
-  val genomeSize: Int,
-  val mu: Int,
-  val lambda: Int) extends NSGAIISigma
+sealed class HyperVolumeIsland[E <: GAG with MF with GenomeFactory with Dominance with GManifest with Mu with ReferencePoint](val evolution: E)(val mu: Int, val windowSize: Int, val deviationEpsilon: Double) extends Breeding
+    with NoneCrossOver
+    with NoneMutation
     with MGBinaryTournamentSelection
-    with CrowdingStabilityTermination
+    with GAG
+    with GManifest
     with NonDominatedSortingElitism
-    with CoEvolvingSigmaValuesMutation
-    with SBXBoundedCrossover
-    with CrowdingDiversity
+    with HyperVolumeStabilityTermination
+    with TerminationManifest
+    with HypervolumeDiversity
     with ParetoRanking
-    with StrictDominance
     with RankDiversityModifier
-    with EvolutionManifest
-    with TerminationManifest {
+    with GenomeFactory {
 
-  val gManifest = manifest[G]
-  val individualManifest = manifest[Individual[G]]
-  val populationManifest = manifest[Population[G, MF]]
+  type G = evolution.G
+
+  val gManifest = evolution.gManifest
   val stateManifest = manifest[STATE]
+
+  val genomeFactory = evolution.genomeFactory
+
+  def lambda = evolution.mu
+  def isDominated(p1: Seq[Double], p2: Seq[Double]) = evolution.isDominated(p1, p2)
+  def referencePoint(front: IndexedSeq[IndexedSeq[Double]]) = evolution.referencePoint(front)
 }

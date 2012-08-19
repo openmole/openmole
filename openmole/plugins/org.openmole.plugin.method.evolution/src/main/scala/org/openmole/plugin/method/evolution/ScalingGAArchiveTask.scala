@@ -29,9 +29,9 @@ import scala.collection.mutable.ListBuffer
 
 object ScalingGAArchiveTask {
 
-  def apply[E <: GAEvolution](
+  def apply[G <: GAGenome, MF](
     name: String,
-    archive: IPrototype[Population[E#G, E#MF]],
+    archive: IPrototype[Population[G, MF]],
     modelInputs: (IPrototype[Double], (Double, Double))*)(implicit plugins: IPluginSet) =
     new TaskBuilder { builder ⇒
 
@@ -56,9 +56,9 @@ object ScalingGAArchiveTask {
 
 }
 
-sealed abstract class ScalingGAArchiveTask[E <: GAEvolution](
+sealed abstract class ScalingGAArchiveTask[G <: GAGenome, MF](
     val name: String,
-    archive: IPrototype[Population[E#G, E#MF]],
+    archive: IPrototype[Population[G, MF]],
     modelInputs: (IPrototype[Double], (Double, Double))*)(implicit val plugins: IPluginSet) extends Task {
 
   def objectives: List[IPrototype[Double]]

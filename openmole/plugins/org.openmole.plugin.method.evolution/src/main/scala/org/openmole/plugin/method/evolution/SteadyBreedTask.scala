@@ -36,7 +36,7 @@ import org.openmole.core.implementation.task.Task._
 
 object SteadyBreedTask {
 
-  def apply(evolution: Evolution with Breeding with EvolutionManifest)(
+  def apply(evolution: Breeding with GManifest)(
     name: String,
     archive: IPrototype[Population[evolution.G, evolution.MF]],
     genome: IPrototype[Array[evolution.G]])(implicit plugins: IPluginSet) = {
@@ -62,7 +62,7 @@ object SteadyBreedTask {
 
 sealed abstract class SteadyBreedTask(
     val name: String,
-    val evolution: Evolution with Breeding with EvolutionManifest)(implicit val plugins: IPluginSet) extends Task {
+    val evolution: Breeding with GManifest)(implicit val plugins: IPluginSet) extends Task {
 
   def archive: IPrototype[Population[evolution.G, evolution.MF]]
   def genome: IPrototype[Array[evolution.G]]

@@ -39,7 +39,7 @@ sealed class EpsilonNSGA2Sigma(
     with EvolutionManifest
     with TerminationManifest {
 
-  val genomeManifest = manifest[G]
+  val gManifest = manifest[G]
   val individualManifest = manifest[Individual[G]]
   val populationManifest = manifest[Population[G, MF]]
   val stateManifest = manifest[STATE]

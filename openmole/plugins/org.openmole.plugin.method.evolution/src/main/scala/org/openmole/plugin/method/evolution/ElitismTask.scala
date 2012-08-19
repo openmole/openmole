@@ -26,7 +26,7 @@ import org.openmole.core.model.task._
 
 object ElitismTask {
 
-  def apply(evolution: Evolution with Elitism with Termination)(
+  def apply(evolution: Elitism with Termination with Modifier)(
     name: String,
     individuals: IPrototype[Array[Individual[evolution.G]]],
     archive: IPrototype[Population[evolution.G, evolution.MF]],
@@ -66,8 +66,8 @@ object ElitismTask {
   }
 }
 
-sealed abstract class ElitismTask[E <: Evolution with Elitism with Termination](
-    val name: String, val evolution: Evolution with Elitism with Termination)(implicit val plugins: IPluginSet) extends Task {
+sealed abstract class ElitismTask[E <: Elitism with Termination with Modifier](
+    val name: String, val evolution: E)(implicit val plugins: IPluginSet) extends Task {
 
   def individuals: IPrototype[Array[Individual[evolution.G]]]
   def archive: IPrototype[Population[evolution.G, evolution.MF]]

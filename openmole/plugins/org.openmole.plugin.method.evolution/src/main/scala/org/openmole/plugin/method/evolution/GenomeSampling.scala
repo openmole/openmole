@@ -28,7 +28,7 @@ import org.openmole.core.implementation.task.Task._
 
 object GenomeSampling {
 
-  def apply(evolution: Evolution)(genome: IPrototype[evolution.G], size: Int) = {
+  def apply(evolution: G with GManifest with GenomeFactory)(genome: IPrototype[evolution.G], size: Int) = {
     val (_genome, _size) = (genome, size)
     new GenomeSampling(evolution) {
       val genome = _genome.asInstanceOf[IPrototype[evolution.G]]
@@ -38,7 +38,7 @@ object GenomeSampling {
 
 }
 
-sealed abstract class GenomeSampling(val evolution: Evolution) extends Sampling {
+sealed abstract class GenomeSampling(val evolution: G with GManifest with GenomeFactory) extends Sampling {
 
   def genome: IPrototype[evolution.G]
   def size: Int
@@ -55,7 +55,7 @@ sealed abstract class GenomeSampling(val evolution: Evolution) extends Sampling 
 
     {
       initialGenomes.toList :::
-        (0 until size - initialGenomes.size).map(i ⇒ toSamplingLine(evolution.factory.random(rng))).toList
+        (0 until size - initialGenomes.size).map(i ⇒ toSamplingLine(evolution.genomeFactory.random(rng))).toList
     }.slice(0, size).iterator
   }
 }
