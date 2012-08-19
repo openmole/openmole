@@ -34,23 +34,30 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.service.Random._
 import org.openmole.core.implementation.task.Task._
 
-object SteadyBreedTask {
+object BreedTask {
 
   def apply(evolution: Breeding with GManifest)(
     name: String,
     archive: IPrototype[Population[evolution.G, evolution.MF]],
-    genome: IPrototype[Array[evolution.G]])(implicit plugins: IPluginSet) = {
+    genome: IPrototype[evolution.G])(implicit plugins: IPluginSet) = sized(evolution)(name, archive, genome, None)
+
+  def sized(evolution: Breeding with GManifest)(
+    name: String,
+    archive: IPrototype[Population[evolution.G, evolution.MF]],
+    genome: IPrototype[evolution.G],
+    size: Option[Int])(implicit plugins: IPluginSet) = {
 
     val (_archive, _genome) = (archive, genome)
 
     new TaskBuilder { builder ⇒
       addInput(archive)
-      addOutput(new Data(genome, DataModeMask.explore))
+      addOutput(new Data(genome toArray, DataModeMask.explore))
+      addParameter(archive -> Population.empty)
 
       def toTask =
-        new SteadyBreedTask(name, evolution) {
+        new BreedTask(name, evolution, size) {
           val archive = _archive.asInstanceOf[IPrototype[Population[evolution.G, evolution.MF]]]
-          val genome = _genome.asInstanceOf[IPrototype[Array[evolution.G]]]
+          val genome = _genome.asInstanceOf[IPrototype[evolution.G]]
 
           val inputs = builder.inputs
           val outputs = builder.outputs
@@ -60,20 +67,23 @@ object SteadyBreedTask {
   }
 }
 
-sealed abstract class SteadyBreedTask(
+sealed abstract class BreedTask(
     val name: String,
-    val evolution: Breeding with GManifest)(implicit val plugins: IPluginSet) extends Task {
+    val evolution: Breeding with GManifest, size: Option[Int])(implicit val plugins: IPluginSet) extends Task {
 
   def archive: IPrototype[Population[evolution.G, evolution.MF]]
-  def genome: IPrototype[Array[evolution.G]]
+  def genome: IPrototype[evolution.G]
 
   override def process(context: IContext) = {
     import evolution._
 
     val rng = newRNG(context.valueOrException(openMOLESeed))
     val a = context.valueOrException(archive)
-    val newGenome = evolution.breed(a)(rng).toArray
-    context + new Variable(genome, newGenome)
+    val newGenome = size match {
+      case None ⇒ evolution.breed(a)(rng).toArray
+      case Some(s) ⇒ evolution.breed(a, s)(rng).toArray
+    }
+    context + new Variable(genome toArray, newGenome)
   }
 
 }

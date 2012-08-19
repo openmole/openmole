@@ -19,10 +19,8 @@ package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
 
-sealed class HyperVolumeIsland[E <: GAG with MF with GenomeFactory with Dominance with GManifest with Mu with ReferencePoint](val evolution: E)(val mu: Int, val windowSize: Int, val deviationEpsilon: Double) extends Breeding
-    with NoneCrossOver
-    with NoneMutation
-    with MGBinaryTournamentSelection
+sealed class HyperVolumeIsland[E <: GAG with MF with GenomeFactory with Dominance with GManifest with Mu with ReferencePoint](val evolution: E)(val mu: Int, val windowSize: Int, val deviationEpsilon: Double)
+    extends MGBinaryTournamentSelection
     with GAG
     with GManifest
     with NonDominatedSortingElitism
@@ -31,7 +29,8 @@ sealed class HyperVolumeIsland[E <: GAG with MF with GenomeFactory with Dominanc
     with HypervolumeDiversity
     with ParetoRanking
     with RankDiversityModifier
-    with GenomeFactory {
+    with GenomeFactory
+    with Lambda {
 
   type G = evolution.G
 

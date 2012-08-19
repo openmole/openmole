@@ -20,6 +20,7 @@ package org.openmole.plugin.builder
 import fr.iscpif.mgo._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.mole._
+import org.openmole.core.implementation.sampling._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.transition._
 import org.openmole.core.model.data._
@@ -53,14 +54,12 @@ package object evolution {
     val terminated = new Prototype[Boolean](name + "Terminated")
 
     val firstTask = EmptyTask(name + "First")
-    firstTask addInput (new Data(genome.toArray, optional))
-    firstTask addOutput (new Data(genome.toArray, optional))
+    firstTask addInput (new Data(archive, optional))
+    firstTask addOutput (new Data(archive, optional))
 
     val firstCapsule = new StrainerCapsule(firstTask)
 
-    val sampling = GenomeSampling(evolution)(genome, populationSize)
-    val exploreSampling = ExplorationTask(name + "GenomeExploration", sampling)
-    val explorationCapsule = new Capsule(exploreSampling)
+    val initialBreedTask = BreedTask.sized(evolution)(name + "InitialBreed", archive, genome, Some(populationSize))
 
     val scalingTask = ScalingGAGenomeTask(name + "ScalingGenome", genome, inputs.toSeq: _*)
     val scalingCaps = new Capsule(scalingTask)
@@ -99,17 +98,17 @@ package object evolution {
 
     val scalingArchiveCapsule = new Capsule(scalingArchiveTask)
 
-    val breedingTask = SteadyBreedTask(evolution)(
+    val breedingTask = BreedTask(evolution)(
       name + "Breeding",
       archive,
-      genome.toArray)
+      genome)
 
     val breedingCaps = new StrainerCapsule(breedingTask)
 
     val endCapsule = new StrainerCapsule(EmptyTask(name + "End"))
 
     firstCapsule --
-      explorationCapsule -<
+      initialBreedTask -<
       scalingCaps --
       (model, filtered = Set(genome.name)) --
       toIndividualCapsule --
@@ -122,8 +121,9 @@ package object evolution {
 
     new DataChannel(scalingCaps, toIndividualCapsule)
 
-    new DataChannel(firstCapsule, model.first, genome.name)
-    new DataChannel(firstCapsule, endCapsule, genome.name)
+    new DataChannel(firstCapsule, model.first, archive)
+    new DataChannel(firstCapsule, endCapsule, archive)
+    new DataChannel(firstCapsule, elitismCaps)
 
     val (_state, _generation, _genome, _individual, _archive, _inputs, _objectives, _populationSize) = (state, generation, genome, individual, archive, inputs, objectives, populationSize)
 
@@ -141,7 +141,7 @@ package object evolution {
 
   }
 
-  def islandGA(islandEvolution: Elitism with Breeding with Termination with TerminationManifest with GManifest with GenomeFactory with Modifier with GAG)(
+  def islandGA(islandEvolution: Elitism with Termination with TerminationManifest with GManifest with GenomeFactory with Modifier with GAG with Lambda with Selection)(
     name: String,
     model: Puzzle {
       def archive: IPrototype[Population[islandEvolution.G, islandEvolution.MF]]
@@ -180,10 +180,9 @@ package object evolution {
 
     val elitismCaps = new MasterCapsule(elitismTask, archive, state, generation)
 
-    val breedingTask = SteadyBreedTask(islandEvolution)(
+    val breedingTask = SelectPopulationTask(islandEvolution)(
       name + "Breeding",
-      archive,
-      genome toArray)
+      archive)
 
     val endCapsule = new StrainerCapsule(EmptyTask(name + "End"))
 

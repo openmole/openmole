@@ -77,7 +77,7 @@ object GliteEnvironment {
   Workspace += (OverSubmissionNumberOfJobUnderMin, "10")
 
   Workspace += (JobShakingInterval, "PT5M")
-  Workspace += (JobShakingProbabilitySubmitted, "0.1")
+  Workspace += (JobShakingProbabilitySubmitted, "0.01")
   Workspace += (JobShakingProbabilityQueued, "0.01")
 
   Workspace += (LCGCPTimeOut, "PT5M")
