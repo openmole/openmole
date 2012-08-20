@@ -17,7 +17,6 @@
 
 package org.openmole.misc.tools.service
 
-//import java.util.logging.Logger
 import scala.collection.mutable.Queue
 
 class MovingAverage(period: Int, queue: Queue[Double]) {
@@ -27,13 +26,13 @@ class MovingAverage(period: Int, queue: Queue[Double]) {
   def apply(n: Double) = synchronized {
     queue.enqueue(n)
     if (queue.size > period) queue.dequeue
-    //queue.sum / queue.size
   }
 
   def get = synchronized {
-    //Logger.getLogger(classOf[MoovingAverage].getName).fine("Sum " + queue.sum + " size " + queue.size)
     queue.sum / queue.size
   }
+
+  def size = queue.size
 
   override def toString = get.toString
 

@@ -40,7 +40,7 @@ object DBServer extends App {
     val configuration = Db4oClientServer.newServerConfiguration
     configuration.common.add(new TransparentPersistenceSupport)
     configuration.common.objectClass(classOf[Replica]).cascadeOnDelete(true)
-    configuration.common.activationDepth(Int.MaxValue)
+    //configuration.common.activationDepth(Int.MaxValue)
 
     configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
     configuration.common.objectClass(classOf[Replica]).objectField("_source").indexed(true)

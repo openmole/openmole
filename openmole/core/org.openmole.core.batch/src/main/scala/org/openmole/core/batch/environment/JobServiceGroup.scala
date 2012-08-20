@@ -17,31 +17,16 @@
 
 package org.openmole.core.batch.environment
 
-import java.util.concurrent.Semaphore
-import java.util.concurrent.locks.ReentrantLock
-import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.eventdispatcher.Event
-import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.tools.service.Random
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.JobServiceControl
 import org.openmole.core.batch.control.UsageControl
 import ServiceGroup._
+import scala.annotation.tailrec
+
+import scala.concurrent.stm._
 
 class JobServiceGroup(val environment: BatchEnvironment, resources: Iterable[JobService]) extends ServiceGroup with Iterable[JobService] {
-
-  class BatchRessourceGroupAdapterUsage extends EventListener[UsageControl] {
-    override def triggered(subMole: UsageControl, ev: Event[UsageControl]) = waiting.release
-  }
-
-  resources.foreach {
-    service ⇒
-      val usageControl = UsageControl.get(service.description)
-      EventDispatcher.listen(usageControl, new BatchRessourceGroupAdapterUsage, classOf[UsageControl.ResourceReleased])
-  }
-
-  @transient lazy val waiting = new Semaphore(0)
-  @transient lazy val selectingRessource = new ReentrantLock
 
   override def iterator = resources.iterator
 
@@ -51,43 +36,43 @@ class JobServiceGroup(val environment: BatchEnvironment, resources: Iterable[Job
       return (r, UsageControl.get(r.description).waitAToken)
     }
 
-    selectingRessource.lock
-    try {
-      var ret: Option[(JobService, AccessToken)] = None
+    def fitness =
+      resources.flatMap {
+        cur ⇒
+          UsageControl.get(cur.description).tryGetToken match {
+            case None ⇒ None
+            case Some(token) ⇒
+              val q = JobServiceControl.qualityControl(cur.description).get
 
-      do {
-        val usable =
-          for (
-            r ← resources;
-            token ← UsageControl.get(r.description).tryGetToken
-          ) yield (r, token, JobServiceControl.qualityControl(r.description))
-
-        //val maxDone = usable.map { case (_, _, q) ⇒ q.done }.max.toDouble
-
-        val notLoaded =
-          for ((r, t, q) ← usable) yield {
-            val nbSubmitted = q.submitted
-            val fitness = orMin(
-              if (q.submitted > 0)
-                math.pow((q.runnig.toDouble / q.submitted) * q.successRate * (q.totalDone / q.totalSubmitted), 2)
-              else math.pow(q.successRate, 3))
-            (r, t, fitness)
+              val nbSubmitted = q.submitted
+              val fitness = orMin(
+                if (q.submitted > 0)
+                  math.pow((q.runnig.toDouble / q.submitted) * q.successRate * (q.totalDone / q.totalSubmitted), 2)
+                else math.pow(q.successRate, 2))
+              Some((cur, token, fitness))
           }
+      }
 
-        if (!notLoaded.isEmpty) {
-          var selected = Random.default.nextDouble * notLoaded.map { _._3 }.sum
+    @tailrec def selected(value: Double, storages: List[(JobService, AccessToken, Double)]): Option[(JobService, AccessToken)] =
+      storages.headOption match {
+        case Some((js, token, fitness)) ⇒
+          if (value <= fitness) Some((js, token))
+          else selected(value - fitness, storages.tail)
+        case None ⇒ None
+      }
 
-          for ((service, token, fitness) ← notLoaded) {
-            if (!ret.isDefined && selected <= fitness) ret = Some((service, token))
-            else UsageControl.get(service.description).releaseToken(token)
-            selected -= fitness
-          }
-        } else waiting.acquire
-
-      } while (!ret.isDefined)
-      return ret.get
-    } finally selectingRessource.unlock
-
+    atomic { implicit txn ⇒
+      val notLoaded = fitness
+      selected(Random.default.nextDouble * notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum, notLoaded.toList) match {
+        case Some((jobService, token)) ⇒
+          for {
+            (s, t, _) ← notLoaded
+            if (s.description != jobService.description)
+          } UsageControl.get(s.description).releaseToken(t)
+          jobService -> token
+        case None ⇒ retry
+      }
+    }
   }
 
 }

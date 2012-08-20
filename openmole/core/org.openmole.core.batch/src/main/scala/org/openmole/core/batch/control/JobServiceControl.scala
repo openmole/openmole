@@ -17,7 +17,6 @@
 
 package org.openmole.core.batch.control
 
-import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.batch.environment.TemporaryErrorException
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.SynchronizedMap
@@ -28,13 +27,11 @@ object JobServiceControl {
   def register(ressource: ServiceDescription, failureControl: JobServiceQualityControl) =
     ressources.getOrElseUpdate(ressource, failureControl)
 
-  def qualityControl(ressource: ServiceDescription): JobServiceQualityControl =
-    ressources.getOrElse(ressource, throw new InternalProcessingError("Quality control not found for " + ressource.toString))
+  def qualityControl(ressource: ServiceDescription) =
+    ressources.get(ressource)
 
-  def withFailureControl[A](desc: ServiceDescription, op: ⇒ A): A = withFailureControl[A](desc, op, { e: Throwable ⇒ !classOf[TemporaryErrorException].isAssignableFrom(e.getClass) })
-  def withFailureControl[A](desc: ServiceDescription, op: ⇒ A, isFailure: Throwable ⇒ Boolean): A = {
-    val qualityControl = this.qualityControl(desc)
-    QualityControl.withQualityControl(qualityControl, op, isFailure)
+  def withQualityControl[A](desc: ServiceDescription, op: ⇒ A, isFailure: Throwable ⇒ Boolean = e ⇒ !classOf[TemporaryErrorException].isAssignableFrom(e.getClass)): A = {
+    val qc = qualityControl(desc)
+    QualityControl.timed(qc, QualityControl.withFailureControl(qc, op, isFailure))
   }
-
 }

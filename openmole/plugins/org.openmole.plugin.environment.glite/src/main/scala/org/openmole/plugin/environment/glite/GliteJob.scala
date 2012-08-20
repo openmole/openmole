@@ -42,8 +42,8 @@ class GliteJob(
     if (!state.isFinal && proxyExpired < System.currentTimeMillis) throw new InternalProcessingError("Proxy for this job has expired.")
 
     if (state == SUBMITTED) {
-      val jobShakingAverageTime = Workspace.preferenceAsDurationInMs(GliteEnvironment.JobShakingAverageTime)
-      val maxNbReady = Workspace.preferenceAsInt(GliteEnvironment.JobShakingAverageMaxReady)
+      val jobShakingAverageTime = Workspace.preferenceAsDurationInMs(GliteEnvironment.JobShakingHalfLife)
+      val maxNbReady = Workspace.preferenceAsInt(GliteEnvironment.JobShakingMaxReady)
 
       val nbInterval = ((System.currentTimeMillis - lastUpdate.toDouble) / jobShakingAverageTime)
 

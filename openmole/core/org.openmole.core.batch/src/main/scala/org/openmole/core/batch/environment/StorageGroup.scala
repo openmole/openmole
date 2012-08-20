@@ -34,24 +34,13 @@ import org.openmole.misc.workspace.Workspace
 import scala.annotation.tailrec
 import ServiceGroup._
 
+import scala.concurrent.stm._
+
 object StorageGroup extends Logger
 
 import StorageGroup._
 
 class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) extends ServiceGroup with Iterable[Storage] {
-
-  class BatchRessourceGroupAdapterUsage extends EventListener[UsageControl] {
-    override def triggered(subMole: UsageControl, ev: Event[UsageControl]) = waiting.release
-  }
-
-  resources.foreach {
-    service ⇒
-      val usageControl = UsageControl.get(service.description)
-      EventDispatcher.listen(usageControl, new BatchRessourceGroupAdapterUsage, classOf[UsageControl.ResourceReleased])
-  }
-
-  @transient lazy val waiting = new Semaphore(0)
-  @transient lazy val selectingRessource = new ReentrantLock
 
   override def iterator = resources.iterator
 
@@ -61,65 +50,47 @@ class StorageGroup(environment: BatchEnvironment, resources: Iterable[Storage]) 
       return (r, UsageControl.get(r.description).waitAToken)
     }
 
-    selectingRessource.lock
-    try {
-      val totalFileSize = usedFiles.map { _.size }.sum
-      val onStorage = ReplicaCatalog.withClient(ReplicaCatalog.inCatalog(usedFiles, environment.authentication.key)(_))
+    val totalFileSize = usedFiles.map { _.size }.sum
+    val onStorage = ReplicaCatalog.withClient(ReplicaCatalog.inCatalog(usedFiles, environment.authentication.key)(_))
 
-      def fitness = {
-        resources.flatMap {
-          cur ⇒
+    def fitness =
+      resources.flatMap {
+        cur ⇒
 
-            UsageControl.get(cur.description).tryGetToken match {
-              case None ⇒ None
-              case Some(token) ⇒
-                val sizeOnStorage = usedFiles.filter(onStorage.getOrElse(_, Set.empty).contains(cur.description)).map(_.size).sum
+          UsageControl.get(cur.description).tryGetToken match {
+            case None ⇒ None
+            case Some(token) ⇒
+              val sizeOnStorage = usedFiles.filter(onStorage.getOrElse(_, Set.empty).contains(cur.description)).map(_.size).sum
 
-                val fitness = orMin(
-                  StorageControl.qualityControl(cur.description) match {
-                    case Some(q) ⇒ math.pow(q.successRate, 2)
-                    case None ⇒ 1.
-                  }) * (if (totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) else 1)
-                Some((cur, token, fitness))
-            }
-        }
-      }.toList
-
-      @tailrec def selected(value: Double, storages: List[(Storage, AccessToken, Double)]): Option[(Storage, AccessToken)] =
-        storages.headOption match {
-          case Some((storage, token, fitness)) ⇒
-            if (value <= fitness) {
-              releaseAll(storages.tail)
-              Some((storage, token))
-            } else {
-              release(storage, token)
-              selected(value - fitness, storages.tail)
-            }
-          case None ⇒ None
-        }
-
-      @tailrec def wait: (Storage, AccessToken) = {
-        val notLoaded = fitness
-        logger.finest(notLoaded.mkString(", "))
-
-        selected(Random.default.nextDouble * notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum, notLoaded) match {
-          case Some(storage) ⇒ storage
-          case None ⇒
-            waiting.acquire
-            wait
-        }
+              val fitness = orMin(
+                StorageControl.qualityControl(cur.description) match {
+                  case Some(q) ⇒ math.pow(q.successRate, 2)
+                  case None ⇒ 1.
+                }) * (if (totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) else 1)
+              Some((cur, token, fitness))
+          }
       }
 
-      wait
-    } finally selectingRessource.unlock
-  }
+    @tailrec def selected(value: Double, storages: List[(Storage, AccessToken, Double)]): Option[(Storage, AccessToken)] =
+      storages.headOption match {
+        case Some((storage, token, fitness)) ⇒
+          if (value <= fitness) Some((storage, token))
+          else selected(value - fitness, storages.tail)
+        case None ⇒ None
+      }
 
-  private def releaseAll(storages: List[(Storage, AccessToken, Double)]) =
-    storages.foreach {
-      case (storage, token, _) ⇒ release(storage, token)
+    atomic { implicit txn ⇒
+      val notLoaded = fitness
+      selected(Random.default.nextDouble * notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum, notLoaded.toList) match {
+        case Some((storage, token)) ⇒
+          for {
+            (s, t, _) ← notLoaded
+            if (s.description != storage.description)
+          } UsageControl.get(s.description).releaseToken(t)
+          storage -> token
+        case None ⇒ retry
+      }
     }
 
-  private def release(storage: Storage, token: AccessToken) =
-    UsageControl.get(storage.description).releaseToken(token)
-
+  }
 }

@@ -48,15 +48,15 @@ abstract class BatchJob(val jobServiceDescription: ServiceDescription) {
       timeStamps(state.id) = System.currentTimeMillis
 
       _state match {
-        case SUBMITTED ⇒ JobServiceControl.qualityControl(jobServiceDescription).decrementSubmitted
-        case RUNNING ⇒ JobServiceControl.qualityControl(jobServiceDescription).decrementRunning
+        case SUBMITTED ⇒ JobServiceControl.qualityControl(jobServiceDescription).map(_.decrementSubmitted)
+        case RUNNING ⇒ JobServiceControl.qualityControl(jobServiceDescription).map(_.decrementRunning)
         case _ ⇒
       }
 
       state match {
-        case SUBMITTED ⇒ JobServiceControl.qualityControl(jobServiceDescription).incrementSubmitted
-        case RUNNING ⇒ JobServiceControl.qualityControl(jobServiceDescription).incrementRunning
-        case DONE ⇒ JobServiceControl.qualityControl(jobServiceDescription).incrementDone
+        case SUBMITTED ⇒ JobServiceControl.qualityControl(jobServiceDescription).map(_.incrementSubmitted)
+        case RUNNING ⇒ JobServiceControl.qualityControl(jobServiceDescription).map(_.incrementRunning)
+        case DONE ⇒ JobServiceControl.qualityControl(jobServiceDescription).map(_.incrementDone)
         case _ ⇒
       }
 
@@ -81,7 +81,7 @@ abstract class BatchJob(val jobServiceDescription: ServiceDescription) {
 
   def updateState(token: AccessToken): ExecutionState = token.synchronized {
     synchronized {
-      state = withFailureControl(jobServiceDescription, updatedState)
+      state = JobServiceControl.withQualityControl(jobServiceDescription, updatedState)
       state
     }
   }

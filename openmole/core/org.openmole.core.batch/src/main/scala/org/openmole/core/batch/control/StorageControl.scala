@@ -28,11 +28,4 @@ object StorageControl {
 
   def qualityControl(ressource: ServiceDescription): Option[QualityControl] = ressources.get(ressource)
 
-  def withFailureControl[A](desc: ServiceDescription, op: ⇒ A): A = withFailureControl[A](desc, op, { e: Throwable ⇒ true })
-
-  def withFailureControl[A](desc: ServiceDescription, op: ⇒ A, isFailure: Throwable ⇒ Boolean): A = {
-    val qualityControl = this.qualityControl(desc)
-    QualityControl.withQualityControl(qualityControl, op, isFailure)
-  }
-
 }

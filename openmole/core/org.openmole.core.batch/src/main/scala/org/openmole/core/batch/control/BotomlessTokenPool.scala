@@ -17,17 +17,8 @@
 
 package org.openmole.core.batch.control
 
-import java.util.concurrent.TimeUnit
-
 object BotomlessTokenPool extends IAccessTokenPool {
-
-  override def load: Int = -1
-
-  override def releaseToken(token: AccessToken) = {}
-
-  override def waitAToken: AccessToken = new AccessToken
-
-  override def waitAToken(time: Long, unit: TimeUnit): AccessToken = new AccessToken
-
-  override def tryGetToken: Option[AccessToken] = Some(new AccessToken)
+  def releaseToken(token: AccessToken) = {}
+  def tryGetToken: Option[AccessToken] = Some(new AccessToken)
+  def waitAToken = new AccessToken
 }

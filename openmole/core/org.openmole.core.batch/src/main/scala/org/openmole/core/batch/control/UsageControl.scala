@@ -24,9 +24,9 @@ import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.SynchronizedMap
 
-object UsageControl extends Logger {
+import scala.concurrent.stm._
 
-  case class ResourceReleased extends Event[UsageControl]
+object UsageControl extends Logger {
 
   val botomlessUsage = new UsageControl(BotomlessTokenPool)
 
@@ -63,17 +63,10 @@ object UsageControl extends Logger {
 
 class UsageControl(tokenPool: IAccessTokenPool) {
 
-  def waitAToken(time: Long, unit: TimeUnit): AccessToken = tokenPool.waitAToken(time, unit)
-
   def waitAToken: AccessToken = tokenPool.waitAToken
 
   def tryGetToken: Option[AccessToken] = tokenPool.tryGetToken
 
-  def releaseToken(token: AccessToken) = {
-    tokenPool.releaseToken(token)
-    EventDispatcher.trigger(this, new UsageControl.ResourceReleased)
-  }
-
-  def load: Int = tokenPool.load
+  def releaseToken(token: AccessToken) = tokenPool.releaseToken(token)
 
 }

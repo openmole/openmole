@@ -135,7 +135,7 @@ object ReplicaCatalog extends Logger {
     query.constrain(classOf[Replica])
 
     query.descend("_authenticationKey").constrain(authenticationKey)
-      .and(src.map { f ⇒ query.descend("_source").constrain(f.getCanonicalPath) }.reduceLeft((c1, c2) ⇒ c1.or(c2)))
+      .and(src.map { f ⇒ query.descend("_source").constrain(f.getCanonicalPath) }.reduce(_ or _))
 
     var ret = new HashMap[File, HashSet[ServiceDescription]]
 

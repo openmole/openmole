@@ -21,44 +21,34 @@ import org.openmole.misc.tools.service._
 
 object QualityControl {
 
-  def withQualityControl[A](qualityControl: Option[QualityControl], op: ⇒ A, isFailure: Throwable ⇒ Boolean): A = {
+  def withFailureControl[A](qualityControl: Option[QualityControl], op: ⇒ A, isFailure: Throwable ⇒ Boolean = t ⇒ true): A = {
     try {
       val ret = op
-      qualityControl match {
-        case Some(f) ⇒ f.success
-        case None ⇒
-      }
+      qualityControl.map(_.success)
       ret
     } catch {
       case e ⇒
-        qualityControl match {
-          case Some(f) ⇒ f.failed
-          case None ⇒
-        }
+        qualityControl.map(_.failed)
         throw e
     }
   }
 
-  def withQualityControl[A](qualityControl: QualityControl, op: ⇒ A, isFailure: Throwable ⇒ Boolean): A = {
-    try {
-      val ret = op
-      qualityControl.success
-      ret
-    } catch {
-      case e ⇒
-        if (isFailure(e)) qualityControl.failed
-        throw e
-    }
+  def timed[A](qualityControl: Option[QualityControl], op: ⇒ A): A = {
+    val begin = System.currentTimeMillis
+    val a = op
+    qualityControl.map(_.timed(System.currentTimeMillis - begin))
+    a
   }
 
 }
 
 class QualityControl(hysteresis: Int) {
-  //Logger.getLogger(classOf[QualityControl].getName).fine("hysteresis " + hysteresis)
   private val _successRate = new MovingAverage(hysteresis, 1.)
+  private val operationTime = new MovingAverage(hysteresis)
 
   def failed = _successRate.apply(0)
   def success = _successRate.apply(1)
   def successRate = _successRate.get
-  def reinit = _successRate.reset(1.)
+  def reinit = { _successRate.reset(1.); operationTime.reset() }
+  def timed(t: Double) = operationTime(t)
 }

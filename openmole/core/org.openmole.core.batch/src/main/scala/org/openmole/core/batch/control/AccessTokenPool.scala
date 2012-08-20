@@ -17,87 +17,29 @@
 
 package org.openmole.core.batch.control
 
-import java.util.concurrent.LinkedBlockingDeque
-import java.util.concurrent.TimeoutException
-import java.util.concurrent.atomic.AtomicInteger
-import org.openmole.misc.exception.InternalProcessingError
-import scala.collection.mutable.HashSet
-import scala.collection.mutable.SynchronizedSet
-import java.util.concurrent.TimeUnit
+import scala.concurrent.stm._
 
 object AccessTokenPool {
-  def apply(nbTokens: Int): AccessTokenPool = {
-    val pool = new AccessTokenPool
-    for (i ← 0 until nbTokens) pool.add(new AccessToken)
-    pool
-  }
+  def apply(nbTokens: Int): AccessTokenPool =
+    new AccessTokenPool(Ref((0 until nbTokens).map { i ⇒ new AccessToken }.toList))
 }
 
-class AccessTokenPool extends IAccessTokenPool {
-  private val tokens = new LinkedBlockingDeque[AccessToken]
-  private val taken = new HashSet[AccessToken] with SynchronizedSet[AccessToken]
-  private val _load = new AtomicInteger
+class AccessTokenPool(private val tokens: Ref[List[AccessToken]]) extends IAccessTokenPool {
 
-  def add(token: AccessToken) = {
-    tokens.add(token)
-    _load.decrementAndGet
-  }
+  def add(token: AccessToken) = atomic { implicit txn ⇒ tokens() = token :: tokens() }
 
-  override def waitAToken = {
-    _load.incrementAndGet
-    val token =
-      try tokens.take
-      catch {
-        case e ⇒
-          _load.decrementAndGet
-          throw e
-      }
+  def releaseToken(token: AccessToken) = add(token)
 
-    taken.add(token)
-    token
-  }
-
-  override def waitAToken(time: Long, unit: TimeUnit): AccessToken = {
-    _load.incrementAndGet
-    val ret = try {
-      tokens.poll(time, unit)
-    } catch {
-      case (e) ⇒
-        _load.decrementAndGet
-        throw e
-    }
-
-    if (ret == null) {
-      _load.decrementAndGet
-      throw new TimeoutException
-    }
-
-    taken.add(ret)
-    ret
-  }
-
-  override def releaseToken(token: AccessToken) = {
-
-    if (!taken.remove(token)) {
-      throw new InternalProcessingError("Trying to release a token that hasn't been taken.")
-    }
-
-    tokens.add(token)
-    _load.decrementAndGet
-  }
-
-  override def tryGetToken: Option[AccessToken] = {
-    _load.incrementAndGet
-    tokens.poll match {
-      case null ⇒
-        _load.decrementAndGet
-        return None
-      case token ⇒
-        taken.add(token)
-        return Some(token)
+  def tryGetToken: Option[AccessToken] = atomic { implicit txn ⇒
+    tokens() match {
+      case head :: tail ⇒
+        tokens() = tail
+        Some(head)
+      case _ ⇒ None
     }
   }
 
-  override def load: Int = _load.get
-
+  def waitAToken = atomic { implicit txn ⇒
+    tryGetToken.getOrElse(retry)
+  }
 }
