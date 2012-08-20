@@ -36,27 +36,23 @@ class GliteJob(
   var lastUpdate = System.currentTimeMillis
 
   override def updatedState: ExecutionState = {
+
     val (state, subState) = super.updatedStateAndSubState
 
     if (!state.isFinal && proxyExpired < System.currentTimeMillis) throw new InternalProcessingError("Proxy for this job has expired.")
 
     if (state == SUBMITTED) {
-      val jobShakingInterval = Workspace.preferenceAsDurationInMs(GliteEnvironment.JobShakingInterval)
+      val jobShakingAverageTime = Workspace.preferenceAsDurationInMs(GliteEnvironment.JobShakingAverageTime)
+      val maxNbReady = Workspace.preferenceAsInt(GliteEnvironment.JobShakingAverageMaxReady)
 
-      val probability = {
-        if (subState == SubState.RUNNING_SUBMITTED.toString)
-          Workspace.preferenceAsDouble(GliteEnvironment.JobShakingProbabilitySubmitted)
-        else Workspace.preferenceAsDouble(GliteEnvironment.JobShakingProbabilityQueued)
-      }
+      val nbInterval = ((System.currentTimeMillis - lastUpdate.toDouble) / jobShakingAverageTime)
 
-      val nbInterval = ((System.currentTimeMillis - lastUpdate.toDouble) / jobShakingInterval)
+      val probability = 1 - math.pow(0.5, nbInterval)
 
-      if (nbInterval < 1) {
-        if (Workspace.rng.nextDouble < nbInterval * probability) throw new ShouldBeKilledException("Killed in shaking process")
-      } else {
-        for (i ← 0 to nbInterval.toInt; if Workspace.rng.nextDouble < probability)
-          throw new ShouldBeKilledException("Killed in shaking process")
-      }
+      def nbReady = jobService.environment.jobRegistry.allExecutionJobs.count(_.state == READY)
+
+      if (Workspace.rng.nextDouble < probability && nbReady < maxNbReady)
+        throw new ShouldBeKilledException("Killed in shaking process")
     }
 
     lastUpdate = System.currentTimeMillis

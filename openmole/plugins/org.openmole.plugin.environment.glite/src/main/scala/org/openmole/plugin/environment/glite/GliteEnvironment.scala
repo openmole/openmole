@@ -49,9 +49,8 @@ object GliteEnvironment {
   val LocalThreadsByWMS = new ConfigurationLocation("GliteEnvironment", "LocalThreadsByWMS")
   val ProxyRenewalRatio = new ConfigurationLocation("GliteEnvironment", "ProxyRenewalRatio")
   val MinProxyRenewal = new ConfigurationLocation("GliteEnvironment", "MinProxyRenewal")
-  val JobShakingInterval = new ConfigurationLocation("GliteEnvironment", "JobShakingInterval")
-  val JobShakingProbabilitySubmitted = new ConfigurationLocation("GliteEnvironment", "JobShakingProbabilitySubmitted")
-  val JobShakingProbabilityQueued = new ConfigurationLocation("GliteEnvironment", "JobShakingProbabilityQueued")
+  val JobShakingAverageTime = new ConfigurationLocation("GliteEnvironment", "JobShakingAverageTime")
+  val JobShakingAverageMaxReady = new ConfigurationLocation("GliteEnvironment", "JobShakingAverageMaxReady")
 
   val LCGCPTimeOut = new ConfigurationLocation("GliteEnvironment", "RuntimeCopyOnWNTimeOut")
 
@@ -76,9 +75,8 @@ object GliteEnvironment {
   Workspace += (OverSubmissionMinNumberOfJob, "100")
   Workspace += (OverSubmissionNumberOfJobUnderMin, "10")
 
-  Workspace += (JobShakingInterval, "PT5M")
-  Workspace += (JobShakingProbabilitySubmitted, "0.01")
-  Workspace += (JobShakingProbabilityQueued, "0.01")
+  Workspace += (JobShakingAverageTime, "PT30M")
+  Workspace += (JobShakingAverageMaxReady, "100")
 
   Workspace += (LCGCPTimeOut, "PT5M")
 }

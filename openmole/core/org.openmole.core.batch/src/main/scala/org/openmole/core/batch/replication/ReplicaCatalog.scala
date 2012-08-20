@@ -231,9 +231,9 @@ object ReplicaCatalog extends Logger {
 
     require(replicationPattern.matcher(newFile.name).matches)
 
-    logger.fine("Uploading " + newFile)
+    logger.fine("Uploading " + src + " to " + newFile)
     signalUpload(URIFile.copy(src, newFile, token), srcPath, storage)
-    logger.fine("Uploaded " + newFile)
+    logger.fine("Uploaded " + src + " to " + newFile)
     val newReplica = new Replica(srcPath.getCanonicalPath, storage.description.description, hash, authenticationKey, newFile.location, System.currentTimeMillis)
     insert(newReplica)
     newReplica
