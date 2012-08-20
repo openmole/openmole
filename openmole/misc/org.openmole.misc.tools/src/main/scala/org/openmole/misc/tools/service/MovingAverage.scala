@@ -20,7 +20,7 @@ package org.openmole.misc.tools.service
 //import java.util.logging.Logger
 import scala.collection.mutable.Queue
 
-class MoovingAverage(period: Int, queue: Queue[Double]) {
+class MovingAverage(period: Int, queue: Queue[Double]) {
 
   def this(period: Int, values: Double*) = this(period, Queue(values.slice(values.size - period, values.size): _*))
 
