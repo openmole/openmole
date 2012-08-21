@@ -39,6 +39,7 @@ import org.openmole.core.batch.environment.Storage
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.file.URIFile
+import org.openmole.misc.tools.service.ObjectPool
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.exception.InternalProcessingError
@@ -63,21 +64,15 @@ object ReplicaCatalog extends Logger {
 
   val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
   
-  val lockRepository = new LockRepository[String]
-  var clientCache: Option[ObjectContainer] = None
+  //val lockRepository = new LockRepository[String]
   
-  def client = synchronized {
-    clientCache match {
-      case None =>
-        clientCache = Some(openClient)
-      case Some(client) => 
-        if(client.ext.isClosed) clientCache = Some(openClient)
-    }
-    clientCache.get
-  }
+  val clientPool = new ObjectPool(openClient)
+  
+  //lazy val client = openClient
   
   def openClient = {
-    val info = dbInfo
+    val dbInfoFile = DBServerInfo.dbInfoFile(DBServerInfo.base)
+    val info = DBServerInfo.load(dbInfoFile)
     
     val configuration = Db4oClientServer.newClientConfiguration
     configuration.common.add(new TransparentPersistenceSupport)
@@ -94,23 +89,28 @@ object ReplicaCatalog extends Logger {
   }
   
 
-  def withClient[T](f: ObjectContainer ⇒ T) = f(client)
-
-  private var _dbInfo: Option[(DBServerInfo, Long)] = None
-
-  def dbInfo = synchronized {
-    val dbInfoFile = DBServerInfo.dbInfoFile(DBServerInfo.base)
-
-    if (!dbInfoFile.exists) throw new InternalProcessingError("Database server not launched, file " + dbInfoFile + " doesn't exists.")
-
-    _dbInfo match {
-      case Some((server, modif)) if (modif >= dbInfoFile.lastModification) ⇒ server
-      case _ ⇒
-        val dbInfo = DBServerInfo.load(dbInfoFile) -> dbInfoFile.lastModification
-        _dbInfo = Some(dbInfo)
-        dbInfo._1
-    }
+  def withClient[T](f: ObjectContainer ⇒ T) = {
+    val client = clientPool.borrow
+    try f(client)
+    finally clientPool.release(client)
   }
+  
+  
+  /*private var _dbInfo: Option[(DBServerInfo, Long)] = None
+
+   def dbInfo = synchronized {
+   val dbInfoFile = DBServerInfo.dbInfoFile(DBServerInfo.base)
+
+   if (!dbInfoFile.exists) throw new InternalProcessingError("Database server not launched, file " + dbInfoFile + " doesn't exists.")
+
+   _dbInfo match {
+   case Some((server, modif)) if (modif >= dbInfoFile.lastModification) ⇒ server
+   case _ ⇒
+   val dbInfo = DBServerInfo.load(dbInfoFile) -> dbInfoFile.lastModification
+   _dbInfo = Some(dbInfo)
+   dbInfo._1
+   }
+   }*/
 
   Updater.registerForUpdate(new ReplicaCatalogGC, Workspace.preferenceAsDurationInMs(GCUpdateInterval))
 
@@ -174,15 +174,15 @@ object ReplicaCatalog extends Logger {
 
   def withSemaphore[T](key: String, objectContainer: ObjectContainer)(op: ⇒ T) = {
     objectContainer.ext.setSemaphore(key, Int.MaxValue)
-    try withLocalLock(key)(op)
+    try op
     finally objectContainer.ext.releaseSemaphore(key)
   }
   
-  def withLocalLock[T](key: String)(op: => T) = {
-    lockRepository.lock(key)
-    try op
-    finally lockRepository.unlock(key)
-  }
+  /*  def withLocalLock[T](key: String)(op: => T) = {
+   lockRepository.lock(key)
+   try op
+   finally lockRepository.unlock(key)
+   }*/
 
   //Synchronization should be achieved outiside the replica for database caching and isolation purposes
   def uploadAndGet(
@@ -192,33 +192,34 @@ object ReplicaCatalog extends Logger {
     storage: Storage,
     token: AccessToken): Replica = {
     //logger.fine("Looking for replica for" + srcPath.getAbsolutePath + "hash" + hash + ".")
-    implicit val client = this.client
-    withSemaphore(key(hash, storage), client) {
-      val storageDescription = storage.description
-      val authenticationKey = storage.environment.authentication.key
+    withClient { implicit client =>
+      withSemaphore(key(hash, storage), client) {
+        val storageDescription = storage.description
+        val authenticationKey = storage.environment.authentication.key
 
-      val replica = getReplica(srcPath, hash, storageDescription, authenticationKey) match {
-        case None ⇒
-          //logger.fine("Not found Replica for" + srcPath.getAbsolutePath + " " + storage)
-          getReplica(srcPath, storageDescription, authenticationKey).foreach { r ⇒ clean(r) }
+        val replica = getReplica(srcPath, hash, storageDescription, authenticationKey) match {
+          case None ⇒
+            //logger.fine("Not found Replica for" + srcPath.getAbsolutePath + " " + storage)
+            getReplica(srcPath, storageDescription, authenticationKey).foreach { r ⇒ clean(r) }
 
-          getReplica(hash, storageDescription, authenticationKey) match {
-            case Some(sameContent) ⇒
-              val replica = checkExists(sameContent, src, srcPath, hash, authenticationKey, storage, token)
-              val newReplica = new Replica(srcPath.getCanonicalPath, storageDescription.description, hash, authenticationKey, replica.destination, replica.lastCheckExists)
-              insert(newReplica)
-              newReplica
-            case None ⇒
-              uploadAndInsert(src, srcPath, hash, authenticationKey, storage, token)
-          }
-        case Some(r) ⇒ {
-            //logger.fine("Found Replica " + r)
-            client.activate(r, Int.MaxValue)
-            checkExists(r, src, srcPath, hash, authenticationKey, storage, token)
-          }
+            getReplica(hash, storageDescription, authenticationKey) match {
+              case Some(sameContent) ⇒
+                val replica = checkExists(sameContent, src, srcPath, hash, authenticationKey, storage, token)
+                val newReplica = new Replica(srcPath.getCanonicalPath, storageDescription.description, hash, authenticationKey, replica.destination, replica.lastCheckExists)
+                insert(newReplica)
+                newReplica
+              case None ⇒
+                uploadAndInsert(src, srcPath, hash, authenticationKey, storage, token)
+            }
+          case Some(r) ⇒ {
+              //logger.fine("Found Replica " + r)
+              client.activate(r, Int.MaxValue)
+              checkExists(r, src, srcPath, hash, authenticationKey, storage, token)
+            }
+        }
+        replica
       }
-      replica
-    } 
+    }
   }
 
   private def checkExists(
