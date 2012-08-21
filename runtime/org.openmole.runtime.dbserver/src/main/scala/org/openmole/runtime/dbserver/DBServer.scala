@@ -41,7 +41,7 @@ object DBServer extends App {
     configuration.common.add(new TransparentPersistenceSupport)
     configuration.common.objectClass(classOf[Replica]).cascadeOnDelete(true)
     //configuration.common.activationDepth(Int.MaxValue)
-
+    configuration.common.bTreeNodeSize(256)
     configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
     configuration.common.objectClass(classOf[Replica]).objectField("_source").indexed(true)
     configuration.common.objectClass(classOf[Replica]).objectField("_storageDescription").indexed(true)

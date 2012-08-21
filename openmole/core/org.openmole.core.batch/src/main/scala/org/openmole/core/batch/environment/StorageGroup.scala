@@ -18,19 +18,10 @@
 package org.openmole.core.batch.environment
 
 import java.io.File
-import java.util.concurrent.Semaphore
-import java.util.concurrent.locks.ReentrantLock
-import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.eventdispatcher.Event
-import org.openmole.misc.eventdispatcher.EventListener
-import org.openmole.misc.tools.service.Logger
-import org.openmole.misc.tools.service.Random
+import org.openmole.misc.tools.service._
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.control.StorageControl
-import org.openmole.core.batch.control.UsageControl
-import org.openmole.core.batch.replication.ReplicaCatalog
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.batch.control._
+import org.openmole.core.batch.replication._
 import scala.annotation.tailrec
 import ServiceGroup._
 
