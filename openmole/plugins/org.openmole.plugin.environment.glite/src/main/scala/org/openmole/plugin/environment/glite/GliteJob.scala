@@ -33,7 +33,7 @@ class GliteJob(
     jobService: GliteJobService,
     proxyExpired: Long) extends JSAGAJob(resultPath, jobService) {
 
-  var lastUpdate = System.currentTimeMillis
+  var lastChaked = System.currentTimeMillis
 
   override def updatedState: ExecutionState = {
 
@@ -42,20 +42,21 @@ class GliteJob(
     if (!state.isFinal && proxyExpired < System.currentTimeMillis) throw new InternalProcessingError("Proxy for this job has expired.")
 
     if (state == SUBMITTED) {
-      val jobShakingAverageTime = Workspace.preferenceAsDurationInMs(GliteEnvironment.JobShakingHalfLife)
       val maxNbReady = Workspace.preferenceAsInt(GliteEnvironment.JobShakingMaxReady)
-
-      val nbInterval = ((System.currentTimeMillis - lastUpdate.toDouble) / jobShakingAverageTime)
-
-      val probability = 1 - math.pow(0.5, nbInterval)
 
       def nbReady = jobService.environment.jobRegistry.allExecutionJobs.count(_.state == READY)
 
-      if (Workspace.rng.nextDouble < probability && nbReady < maxNbReady)
-        throw new ShouldBeKilledException("Killed in shaking process")
+      if (nbReady < maxNbReady) {
+        lastChaked = System.currentTimeMillis
+
+        val jobShakingAverageTime = Workspace.preferenceAsDurationInMs(GliteEnvironment.JobShakingHalfLife)
+        val nbInterval = ((System.currentTimeMillis - lastChaked.toDouble) / jobShakingAverageTime)
+        val probability = 1 - math.pow(0.5, nbInterval)
+
+        if (Workspace.rng.nextDouble < probability) throw new ShouldBeKilledException("Killed in shaking process")
+      }
     }
 
-    lastUpdate = System.currentTimeMillis
     state
   }
 
