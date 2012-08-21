@@ -77,7 +77,7 @@ object ReplicaCatalog extends Logger {
     val configuration = Db4oClientServer.newClientConfiguration
     configuration.common.add(new TransparentPersistenceSupport)
     configuration.common.objectClass(classOf[Replica]).cascadeOnDelete(true)
-    
+    configuration.prefetchObjectCount(1000)
     configuration.common.bTreeNodeSize(256)
     configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
     configuration.common.objectClass(classOf[Replica]).objectField("_source").indexed(true)
