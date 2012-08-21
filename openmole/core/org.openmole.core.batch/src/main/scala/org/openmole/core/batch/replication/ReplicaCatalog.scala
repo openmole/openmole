@@ -63,6 +63,7 @@ object ReplicaCatalog extends Logger {
 
   val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
   
+  val lockRepository = new LockRepository[String]
   var clientCache: Option[ObjectContainer] = None
   
   def client = synchronized {
@@ -172,16 +173,15 @@ object ReplicaCatalog extends Logger {
   private def key(hash: String, storage: Storage): String = key(hash, storage.description.toString, storage.environment.authentication.key)
 
   def withSemaphore[T](key: String, objectContainer: ObjectContainer)(op: ⇒ T) = {
-    //lockRepository.lock(key)
-    //logger.fine("Locking on " + key)
     objectContainer.ext.setSemaphore(key, Int.MaxValue)
-    //logger.fine("Locked on " + key)
+    try withLocalLock(key)(op)
+    finally objectContainer.ext.releaseSemaphore(key)
+  }
+  
+  def withLocalLock[T](key: String)(op: => T) = {
+    lockRepository.lock(key)
     try op
-    finally {
-      //logger.fine("Unlocked on " + key)
-      //lockRepository.unlock(key)
-      objectContainer.ext.releaseSemaphore(key)
-    }
+    finally lockRepository.unlock(key)
   }
 
   //Synchronization should be achieved outiside the replica for database caching and isolation purposes
