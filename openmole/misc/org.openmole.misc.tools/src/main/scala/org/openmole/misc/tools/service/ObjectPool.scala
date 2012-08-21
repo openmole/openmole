@@ -31,5 +31,6 @@ class ObjectPool[T](f: ⇒ T) {
   }
 
   def release(t: T) = synchronized { instances ::= t }
+  def discard(t: T) = {}
 
 }

@@ -90,7 +90,15 @@ object ReplicaCatalog extends Logger {
   
 
   def withClient[T](f: ObjectContainer ⇒ T) = {
-    val client = clientPool.borrow
+    def discardUntilOpened: ObjectContainer = {
+      val client = clientPool.borrow
+      if(client.ext.isClosed) {
+        clientPool.discard(client)
+        discardUntilOpened
+      } else client
+    }
+    
+    val client = discardUntilOpened
     try f(client)
     finally clientPool.release(client)
   }
