@@ -20,6 +20,7 @@ package org.openmole.core.batch.refresh
 import akka.actor.Actor
 
 import akka.actor.ActorRef
+import com.db4o.ObjectContainer
 import com.ice.tar.TarOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -101,7 +102,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
 
       val (communicationStorage, token) = storage
 
-      try {
+      try ReplicaCatalog.withClient { implicit client ⇒
         val communicationDir = communicationStorage.tmpSpace(token).mkdir(UUID.randomUUID.toString + '/', token)
 
         val inputFile = new GZURIFile(communicationDir.newFileInDir("job", ".in"))
@@ -154,7 +155,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     (files, classes)
   }
 
-  def toReplicatedFile(job: IJob, file: File, storage: Storage, token: AccessToken): ReplicatedFile = {
+  def toReplicatedFile(job: IJob, file: File, storage: Storage, token: AccessToken)(implicit objectContainer: ObjectContainer): ReplicatedFile = {
     val isDir = file.isDirectory
     var toReplicate = file
     val toReplicatePath = file.getAbsoluteFile
@@ -176,7 +177,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     environment: BatchEnvironment,
     token: AccessToken,
     communicationStorage: Storage,
-    communicationDir: IURIFile) = {
+    communicationDir: IURIFile)(implicit objectContainer: ObjectContainer) = {
 
     val environmentPluginPath = environment.plugins.view.map { p ⇒ toReplicatedFile(job, p, communicationStorage, token) }.map { f ⇒ new FileMessage(f) }
     val runtimeFileMessage = new FileMessage(toReplicatedFile(job, environment.runtime, communicationStorage, token))
@@ -200,7 +201,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     serializationPlugin: Iterable[File],
     token: AccessToken,
     communicationStorage: Storage,
-    communicationDir: IURIFile): ExecutionMessage = {
+    communicationDir: IURIFile)(implicit objectContainer: ObjectContainer): ExecutionMessage = {
     val jobForRuntimeFile = new GZURIFile(communicationDir.newFileInDir("job", ".tar"))
 
     signalUpload(URIFile.copy(jobFile, jobForRuntimeFile, token), jobFile, communicationStorage)
