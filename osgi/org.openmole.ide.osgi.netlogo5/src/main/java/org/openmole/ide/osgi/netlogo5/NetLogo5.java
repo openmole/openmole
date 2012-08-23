@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 reuillon
+ * Copyright (C) 2011 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import org.openmole.ide.osgi.netlogo.NetLogo;
 
 /**
  *
- * @author reuillon
+ * @author Romain Reuillon
  */
 public class NetLogo5 extends org.openmole.plugin.task.netlogo5.NetLogo5 implements NetLogo {
     
