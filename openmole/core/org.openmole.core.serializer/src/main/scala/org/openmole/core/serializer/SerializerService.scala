@@ -93,8 +93,6 @@ object SerializerService extends Logger {
     val objSerial = Workspace.newFile
     val serializationResult = serializeGetPluginClassAndFiles(obj, objSerial)
 
-    logger.fine("serial:" + objSerial.content)
-
     val tos = new TarOutputStream(new FileOutputStream(file))
 
     try {
@@ -120,8 +118,6 @@ object SerializerService extends Logger {
 
           (name.toString, (file, file.isDirectory))
       }
-
-      logger.fine("files:" + fileInfo)
 
       val filesInfoSerial = Workspace.newFile
       serialize(fileInfo, filesInfoSerial)
