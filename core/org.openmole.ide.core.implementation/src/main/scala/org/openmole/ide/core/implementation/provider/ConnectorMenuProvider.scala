@@ -43,7 +43,7 @@ class ConnectorMenuProvider(scene: MoleScene,
   var itChangeTransition = new Menu("to ")
 
   val itRem = new JMenuItem("Remove")
-  itRem.addActionListener(new RemoveTransitionAction(scene, scene.manager.connectorMap.getKey(connectionWidget.connector)))
+  itRem.addActionListener(new RemoveTransitionAction(scene, scene.manager.connectorID(connectionWidget.connector)))
 
   items += itRem
 

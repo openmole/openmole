@@ -16,20 +16,22 @@
  */
 package org.openmole.ide.core.implementation.workflow
 
-import org.netbeans.api.visual.graph.layout.GraphLayoutFactory
-import org.netbeans.api.visual.layout.LayoutFactory
 import java.awt.Color
 import java.awt.Point
+import java.awt.Rectangle
 import java.awt.RenderingHints
 import java.awt.event.InputEvent
 import javax.swing.BorderFactory
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.action.ConnectProvider
-import org.netbeans.api.visual.action.ReconnectProvider
+import org.netbeans.api.visual.action.MoveProvider
+import org.netbeans.api.visual.action.RectangularSelectDecorator
+import org.netbeans.api.visual.action.RectangularSelectProvider
+import org.netbeans.api.visual.action.SelectProvider
 import org.netbeans.api.visual.graph.GraphScene
 import org.openmole.ide.core.model.commons.Constants
+import org.netbeans.api.visual.model.ObjectState
 import org.netbeans.api.visual.widget.ComponentWidget
-import org.netbeans.api.visual.widget.ConnectionWidget
 import org.netbeans.api.visual.widget.LayerWidget
 import org.netbeans.api.visual.action.ConnectorState
 import org.netbeans.api.visual.widget.Scene
@@ -38,7 +40,6 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.panel._
 import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.core.implementation.dialog.DialogFactory
-import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.panel._
 import org.openmole.ide.core.implementation.provider.MoleSceneMenuProvider
@@ -48,9 +49,14 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.widget.MigPanel
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.model.panel.PanelMode._
+import scala.collection.mutable.HashMap
+import scala.collection.mutable.HashSet
 import scala.swing.Panel
 
-abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMoleScene { moleScene ⇒
+abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMoleScene
+    with SelectProvider
+    with RectangularSelectDecorator
+    with RectangularSelectProvider { moleScene ⇒
 
   val manager = new MoleSceneManager(n)
   var obUI: Option[Widget] = None
@@ -59,11 +65,13 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   val propertyLayer = new LayerWidget(this)
   val extraPropertyLayer = new LayerWidget(this)
   var currentSlotIndex = 1
+  val _selection = new HashSet[ICapsuleUI]
 
   val currentPanel = new MigPanel("")
   val currentExtraPanel = new MigPanel("")
 
-  val moveAction = ActionFactory.createMoveAction
+  val moveAction = ActionFactory.createMoveAction(null, new MultiMoveProvider)
+  val selectAction = ActionFactory.createSelectAction(this)
 
   addChild(capsuleLayer)
   addChild(connectLayer)
@@ -77,9 +85,8 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   extraPropertyLayer.addChild(extraPropertyWidget)
   propertyLayer.addChild(propertyWidget)
 
-  setActiveTool(CONNECT)
-
   getActions.addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)))
+  getActions.addAction(ActionFactory.createRectangularSelectAction(this, capsuleLayer, this))
 
   val connectAction = ActionFactory.createExtendedConnectAction(null,
     connectLayer,
@@ -91,10 +98,8 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     InputEvent.CTRL_MASK)
 
   override def paintChildren = {
-
     getGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
     getGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
-
     super.paintChildren
   }
 
@@ -173,6 +178,8 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     }
   }
 
+  def toSceneCoordinates(p: Point) = convertLocalToScene(p)
+
   def graphScene = this
 
   def refresh = { validate; repaint }
@@ -206,6 +213,132 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   override def attachNodeWidget(n: String) = {
     capsuleLayer.addChild(obUI.get)
     obUI.get
+  }
+
+  def isAimingAllowed(w: Widget, point: Point, b: Boolean) = false
+
+  def isSelectionAllowed(w: Widget, point: Point, b: Boolean) = true
+
+  def select(w: Widget, point: Point, change: Boolean) {
+    if (w == this) clearSelection
+    else {
+      w match {
+        case widget: CapsuleUI ⇒
+          if (change) {
+            if (_selection.contains(widget)) removeFromSelection(widget)
+            else addToSelection(widget)
+          } else {
+            if (!_selection.contains(widget)) {
+              clearSelection
+              addToSelection(widget)
+            }
+          }
+        case _ ⇒
+      }
+    }
+  }
+
+  def selection = _selection.toSet
+
+  def addToSelection(widget: ICapsuleUI) = {
+    widget.selected = true
+    _selection += widget
+  }
+
+  def removeFromSelection(widget: ICapsuleUI) = {
+    widget.selected = false
+    _selection -= widget
+  }
+
+  def clearSelection = _selection.foreach { removeFromSelection }
+
+  def clearRemovedCapsulesFromSelection = _selection.clear
+
+  def createSelectionWidget = {
+    val widget = new Widget(this)
+    widget.setOpaque(false)
+    widget.setBorder(BorderFactory.createLineBorder(new Color(222, 135, 135), 2))
+    widget.setForeground(Color.red)
+    widget
+  }
+
+  def performSelection(rectangle: Rectangle) = {
+    if (rectangle.width < 0) {
+      rectangle.x += rectangle.width
+      rectangle.width *= -1
+    }
+
+    if (rectangle.height < 0) {
+      rectangle.y += rectangle.height
+      rectangle.height *= -1
+    }
+
+    var changed = false
+    getNodes.foreach { b ⇒
+      findWidget(b) match {
+        case w: CapsuleUI ⇒
+          val r = new Rectangle(w.getBounds)
+          r.setLocation(w.getLocation)
+          if (r.intersects(rectangle)) {
+            if (!_selection.contains(w)) {
+              changed = true
+              addToSelection(w)
+            }
+          } else {
+            if (_selection.contains(w)) {
+              changed = true
+              removeFromSelection(w)
+            }
+          }
+        case x ⇒
+      }
+    }
+  }
+
+  class MultiMoveProvider extends MoveProvider {
+
+    val originals = new HashMap[ICapsuleUI, Point]
+    var original: Option[Point] = None
+
+    def movementStarted(widget: Widget) = {
+      _selection.foreach { o ⇒
+        originals += o -> o.widget.getPreferredLocation
+      }
+    }
+
+    def movementFinished(widget: Widget) = {
+      originals.clear
+      original = None
+    }
+
+    def getOriginalLocation(widget: Widget) = {
+      widget match {
+        case x: ICapsuleUI ⇒
+          if (!_selection.contains(x)) {
+            clearSelection
+            addToSelection(x)
+            x.repaint
+          }
+          original = Some(widget.getPreferredLocation)
+          original.get
+        case _ ⇒
+          clearSelection
+          new Point
+      }
+    }
+
+    def setNewLocation(widget: Widget, location: Point) {
+      original match {
+        case Some(o: Point) ⇒
+          val dx = location.x - o.x
+          val dy = location.y - o.y
+          originals.foreach {
+            case (k, v) ⇒
+              k.widget.setPreferredLocation(new Point(v.x + dx, v.y + dy))
+          }
+        case _ ⇒
+      }
+    }
   }
 
   class MoleSceneTransitionProvider extends ConnectProvider {
@@ -258,6 +391,14 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
         targetWidget.asInstanceOf[InputSlotWidget])
       CheckData.checkMole(moleScene)
     }
+  }
 
+  class MoleSceneSelectDecorator(scene: Scene) extends RectangularSelectDecorator {
+    def createSelectionWidget = {
+      val widget = new Widget(scene)
+      widget.setBorder(BorderFactory.createLineBorder(new Color(255, 0, 0)))
+      widget.setOpaque(true)
+      widget
+    }
   }
 }

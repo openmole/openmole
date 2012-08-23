@@ -47,13 +47,15 @@ import org.openmole.core.implementation.validation.DataflowProblem
 import scala.swing.Action
 
 class CapsuleUI(val scene: IMoleScene,
-                val dataUI: ICapsuleDataUI = new CapsuleDataUI) extends Widget(scene.graphScene) with ICapsuleUI {
+                val dataUI: ICapsuleDataUI = new CapsuleDataUI) extends Widget(scene.graphScene)
+    with ICapsuleUI {
 
   val taskComponentWidget = new TaskComponentWidget(scene, this, new TaskWidget(scene, this))
   var environmentWidget: Option[LinkedImageWidget] = None
   var samplingWidget: Option[LinkedImageWidget] = None
   var inputPrototypeWidget: Option[PrototypeWidget] = None
   var outputPrototypeWidget: Option[PrototypeWidget] = None
+  var selected = false
 
   val capsuleMenuProvider = new CapsuleMenuProvider(scene, this)
 
@@ -259,4 +261,6 @@ class CapsuleUI(val scene: IMoleScene,
   def x = convertLocalToScene(getLocation).getX
 
   def y = convertLocalToScene(getLocation).getY
+
+  def location = getLocation
 }

@@ -25,6 +25,7 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IDataChannelUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.netbeans.api.visual.action.ActionFactory
+import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.provider.ConnectorMenuProvider
 import org.openmole.ide.core.model.commons.Constants._
@@ -32,11 +33,12 @@ import org.openmole.ide.core.model.workflow.ITransitionUI
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import org.openmole.ide.core.model.panel.PanelMode._
+import org.netbeans.api.visual.action.WidgetAction.State._
 
-class BuildMoleScene(n: String = "") extends MoleScene(n) {
+class BuildMoleScene(n: String = "") extends MoleScene(n) { buildMoleScene ⇒
   override val isBuildScene = true
 
-  def copy = {
+  def copyScene = {
     var capsuleMapping = new HashMap[ICapsuleUI, ICapsuleUI]
     var islots = new HashMap[IInputSlotWidget, IInputSlotWidget]
     val ms = new ExecutionMoleScene(manager.name + "_" + ScenesManager.countExec.incrementAndGet)
@@ -68,9 +70,10 @@ class BuildMoleScene(n: String = "") extends MoleScene(n) {
 
   def initCapsuleAdd(w: ICapsuleUI) = {
     obUI = Some(w.asInstanceOf[Widget])
-    obUI.get.createActions(CONNECT).addAction(connectAction)
-    obUI.get.createActions(CONNECT).addAction(dataChannelAction)
-    obUI.get.createActions(CONNECT).addAction(moveAction)
+    obUI.get.getActions.addAction(connectAction)
+    obUI.get.getActions.addAction(dataChannelAction)
+    obUI.get.getActions.addAction(createSelectAction)
+    obUI.get.getActions.addAction(moveAction)
   }
 
   def attachEdgeWidget(e: String) = {
@@ -81,5 +84,10 @@ class BuildMoleScene(n: String = "") extends MoleScene(n) {
     connectLayer.addChild(connectionWidget)
     connectionWidget.getActions.addAction(createObjectHoverAction)
     connectionWidget
+  }
+
+  def removeSelectedWidgets = selection.foreach { c ⇒
+    graphScene.removeNodeWithEdges(manager.removeCapsuleUI(c))
+    CheckData.checkMole(buildMoleScene)
   }
 }

@@ -17,7 +17,6 @@
 
 package org.openmole.ide.core.model.workflow
 
-import org.apache.commons.collections15.bidimap.DualHashBidiMap
 import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.data.IMoleDataUI
 import scala.collection.mutable.HashMap
@@ -46,7 +45,7 @@ trait IMoleSceneManager {
 
   def capsuleID(cv: ICapsuleUI): String
 
-  def capsules: DualHashBidiMap[String, ICapsuleUI]
+  def capsules: Map[String, ICapsuleUI]
 
   def startingCapsule: Option[ICapsuleUI]
 

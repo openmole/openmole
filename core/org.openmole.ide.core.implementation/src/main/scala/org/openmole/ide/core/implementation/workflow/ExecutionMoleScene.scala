@@ -42,7 +42,7 @@ class ExecutionMoleScene(name: String) extends MoleScene(name) {
 
   def initCapsuleAdd(w: ICapsuleUI) = {
     obUI = Some(w.asInstanceOf[Widget])
-    obUI.get.createActions(CONNECT).addAction(moveAction)
+    obUI.get.getActions.addAction(moveAction)
   }
 
   def attachEdgeWidget(e: String) = {

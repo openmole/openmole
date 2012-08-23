@@ -113,9 +113,9 @@ class PrototypeWidget(scene: IMoleScene,
     g.drawOval(pos, pos, offset1, offset1)
 
     if (hooked) {
-      g.setColor(new Color(77, 77, 77, 150))
-      g.drawOval(pos - 3, pos - 3, offset1 + 6, offset1 + 6)
-      g.drawOval(pos - 5, pos - 5, offset1 + 10, offset1 + 10)
+      g.setColor(new Color(230, 180, 25))
+      g.setStroke(new BasicStroke(5f))
+      g.drawOval(pos - 4, pos - 4, offset1 + 8, offset1 + 8)
     }
 
     revalidate

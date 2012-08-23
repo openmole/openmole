@@ -40,13 +40,14 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
 
   def initMenu = {
     items.clear
-
     scene match {
       case x: BuildMoleScene ⇒
+        if (x.selection.size == 0) x.addToSelection(capsule)
+        val selectionSize = x.selection.size
         val itStart = new JMenuItem("Define as starting capsule")
         val itIS = new JMenuItem("Add an input slot")
         val itRIS = new JMenuItem("Remove an input slot")
-        val itR = new JMenuItem("Remove capsule")
+        val itR = new JMenuItem("Remove " + selectionSize + " capsule" + (if (selectionSize > 1) "s" else ""))
         val menuTask = new Menu("Task")
 
         itIS.addActionListener(new AddInputSlotAction(capsule))

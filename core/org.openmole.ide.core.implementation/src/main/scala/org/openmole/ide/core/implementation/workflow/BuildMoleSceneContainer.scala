@@ -18,7 +18,10 @@
 package org.openmole.ide.core.implementation.workflow
 
 import java.awt.BorderLayout
+import java.awt.event.ActionEvent
+import javax.swing.AbstractAction
 import javax.swing.JScrollPane
+import javax.swing.KeyStroke
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.dialog.MoleSettingsDialog
 import org.openmole.ide.core.implementation.execution.ScenesManager
@@ -53,8 +56,11 @@ class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISce
   }
 
   peer.add(toolBar.peer, BorderLayout.NORTH)
-  peer.add(new JScrollPane(scene.graphScene.createView), BorderLayout.CENTER)
 
+  val view = scene.graphScene.createView
+  view.setFocusable(true)
+
+  peer.add(new JScrollPane(scene.graphScene.createView), BorderLayout.CENTER)
   CheckData.checkMole(scene, false)
 
   def stopAndCloseExecutions = {
@@ -85,5 +91,4 @@ class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISce
       MoleSettingsDialog.display(scene.manager)
     }
   }
-
 }

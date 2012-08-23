@@ -17,6 +17,7 @@
 
 package org.openmole.ide.plugin.task.moletask
 
+import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.PluginPanel
 import java.util.Locale
@@ -46,8 +47,10 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2", "
   }
 
   moleComboBox.selection.item = pud.mole match {
-    case Some(x: Int) ⇒ MoleTaskDataUI.manager(x).get.asInstanceOf[MoleSceneManager]
-
+    case Some(x: Int) ⇒ MoleTaskDataUI.manager(x) match {
+      case Some(m: IMoleSceneManager) ⇒ m.asInstanceOf[MoleSceneManager]
+      case _ ⇒ MoleTaskDataUI.emptyMoleSceneManager
+    }
     case _ ⇒ MoleTaskDataUI.emptyMoleSceneManager
   }
 
