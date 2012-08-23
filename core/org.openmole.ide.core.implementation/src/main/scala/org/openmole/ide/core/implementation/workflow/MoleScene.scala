@@ -19,6 +19,7 @@ package org.openmole.ide.core.implementation.workflow
 import java.awt.Color
 import java.awt.Point
 import java.awt.Rectangle
+import java.awt.RenderingHints
 import java.awt.event.InputEvent
 import javax.swing.BorderFactory
 import org.netbeans.api.visual.action.ActionFactory
@@ -95,6 +96,12 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   val dataChannelAction = ActionFactory.createExtendedConnectAction(null, connectLayer,
     new MoleSceneDataChannelProvider,
     InputEvent.CTRL_MASK)
+
+  override def paintChildren = {
+    getGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+    getGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+    super.paintChildren
+  }
 
   def displayPropertyPanel(proxy: IDataProxyUI,
                            mode: PanelMode.Value) = {

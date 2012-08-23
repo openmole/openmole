@@ -67,7 +67,7 @@ object ConceptMenu {
         override def apply = display(d.buildDataProxyUI, CREATION)
       })
     }
-    new PopupToolBarPresenter("Task", mapping(ComponentCategories.TASK), new Color(255, 85, 85))
+    new PopupToolBarPresenter("Task", mapping(ComponentCategories.TASK), new Color(107, 138, 166))
   }
 
   val environmentMenu = {
@@ -97,7 +97,7 @@ object ConceptMenu {
         override def apply = display(d.buildDataProxyUI, CREATION)
       })
     }
-    new PopupToolBarPresenter("Sampling", mapping(ComponentCategories.SAMPLING), new Color(107, 138, 166))
+    new PopupToolBarPresenter("Sampling", mapping(ComponentCategories.SAMPLING), new Color(255, 85, 85))
   }
 
   def removeItem(proxy: IDataProxyUI) = {
