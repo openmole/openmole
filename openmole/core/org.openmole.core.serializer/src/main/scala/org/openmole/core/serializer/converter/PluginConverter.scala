@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2010 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -31,7 +31,7 @@ object PluginConverter extends Logger
 
 import PluginConverter._
 
-class PluginConverter(serializer: SerializerWithPluginClassListing, reflectionConverter: ReflectionConverter) extends Converter {
+class PluginConverter[A <: { def classUsed(c: Class[_]) }](serializer: A, reflectionConverter: ReflectionConverter) extends Converter {
 
   override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) = {
     serializer.classUsed(o.getClass)

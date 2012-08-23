@@ -33,4 +33,10 @@ class ObjectPool[T](f: ⇒ T) {
   def release(t: T) = synchronized { instances ::= t }
   def discard(t: T) = {}
 
+  def exec[A](f: T ⇒ A): A = {
+    val o = borrow
+    try f(o)
+    finally release(o)
+  }
+
 }

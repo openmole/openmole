@@ -18,5 +18,5 @@
 package org.openmole.core.serializer.converter
 
 object DeserializerWithFileInjectionFromFileFactory extends Factory[DeserializerWithFileInjectionFromFile] {
-  def makeObject = new DeserializerWithFileInjectionFromFile
+  def make = new DeserializerWithFileInjectionFromFile
 }

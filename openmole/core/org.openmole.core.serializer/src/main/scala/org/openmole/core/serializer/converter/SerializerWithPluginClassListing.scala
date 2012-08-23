@@ -23,10 +23,12 @@ import scala.collection.mutable.HashSet
 class SerializerWithPluginClassListing extends Serializer {
 
   var classes: HashSet[Class[_]] = null
-  registerConverter(new PluginConverter(this, reflectionConverter))
-  registerConverter(new PluginClassConverter(this))
 
-  def classUsed(c: Class[_]) = classes.add(c)
+  //xstream.registerConverter(new PluginManifestConverter(this))
+  xstream.registerConverter(new PluginConverter(this, reflectionConverter))
+  xstream.registerConverter(new PluginClassConverter(this))
+
+  def classUsed(c: Class[_]): Unit = classes.add(c)
 
   def toXMLAndListPlugableClasses(obj: Object, outputStream: OutputStream) = {
     classes = new HashSet[Class[_]]

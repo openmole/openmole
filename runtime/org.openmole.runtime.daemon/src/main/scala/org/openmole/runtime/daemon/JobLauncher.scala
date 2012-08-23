@@ -193,9 +193,10 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     val outputLocal = Workspace.newFile("output", ".res")
     logger.info("Uploading job results")
     SerializerService.serialize(resultToSend, outputLocal)
-    try URIFile.copy(outputLocal, new GZURIFile(resultsDir.newFileInDir(job, ".res")))
+    val resultFile = new GZURIFile(resultsDir.newFileInDir(job, ".res"))
+    try URIFile.copy(outputLocal, resultFile)
     finally outputLocal.delete
-    logger.info("Job results uploaded")
+    logger.info("Job results uploaded at " + resultFile)
 
   }
 

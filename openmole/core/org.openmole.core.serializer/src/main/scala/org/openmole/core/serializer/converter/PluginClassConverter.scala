@@ -17,10 +17,11 @@
 
 package org.openmole.core.serializer.converter
 
+import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.converters.extended.JavaClassConverter
 import org.openmole.misc.pluginmanager.PluginManager
 
-class PluginClassConverter(serializer: SerializerWithPluginClassListing) extends JavaClassConverter(classOf[Serializer].getClassLoader) {
+class PluginClassConverter[A <: { def classUsed(c: Class[_]) }](serializer: A) extends JavaClassConverter(classOf[XStream].getClassLoader) {
 
   override def toString(obj: Object) = {
     val c = obj.asInstanceOf[Class[_]]

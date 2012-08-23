@@ -24,7 +24,7 @@ import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
 import java.io.OutputStream
 
 class Serializer {
-  protected val xstream = new XStream
+  protected val xstream = XStreamFactory()
 
   protected val reflectionConverter = new ReflectionConverter(xstream.getMapper, xstream.getReflectionProvider)
 
@@ -32,4 +32,5 @@ class Serializer {
 
   protected def registerConverter(converter: Converter) = xstream.registerConverter(converter)
   protected def registerConverter(converter: SingleValueConverter) = xstream.registerConverter(converter)
+
 }

@@ -62,13 +62,11 @@ sealed abstract class ToIndividualArrayTask[T <: GAGenome](
     context + new Variable(
       individual.toArray,
       Array[Individual[T]](
-        new Individual[T] {
-          val genome = context.valueOrException(task.genome)
-          val fitness = new Fitness {
-            val values = objectives.map {
+        Individual[T](
+          context.valueOrException(task.genome),
+          Fitness(
+            objectives.map {
               case (o, v) ⇒ math.abs(context.valueOrException(o) - v)
-            }.toIndexedSeq
-          }
-        }))
+            }))))
 
 }

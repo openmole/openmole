@@ -18,5 +18,5 @@
 package org.openmole.core.serializer.converter
 
 object SerializerWithFileAndPluginListingFactory extends Factory[SerializerWithFileAndPluginListing] {
-  def makeObject = new SerializerWithFileAndPluginListing
+  def make = new SerializerWithFileAndPluginListing
 }

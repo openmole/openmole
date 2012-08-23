@@ -40,7 +40,6 @@ import org.openmole.core.batch.environment.Storage
 import org.openmole.core.batch.file.GZURIFile
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.file.URIFile
-import org.openmole.misc.tools.service.ObjectPool
 import org.openmole.misc.tools.service.TimeCache
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.ConfigurationLocation
@@ -70,10 +69,10 @@ object ReplicaCatalog extends Logger {
 
   val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
   val inCatalogCache = new TimeCache[Map[File, Set[ServiceDescription]]]
-  
+
   type ReplicaCacheKey = (String, String, String, String)
   val replicaCache = CacheBuilder.newBuilder.asInstanceOf[CacheBuilder[ReplicaCacheKey, Replica]].
-  expireAfterWrite(Workspace.preferenceAsDurationInS(ReplicaCacheTime), TimeUnit.SECONDS).build[ReplicaCacheKey, Replica]
+    expireAfterWrite(Workspace.preferenceAsDurationInS(ReplicaCacheTime), TimeUnit.SECONDS).build[ReplicaCacheKey, Replica]
 
   def openClient = {
     val dbInfoFile = DBServerInfo.dbInfoFile(DBServerInfo.base)
@@ -120,7 +119,7 @@ object ReplicaCatalog extends Logger {
   def getReplica(
     storageDescription: ServiceDescription,
     authenticationKey: String)(implicit objectContainer: ObjectContainer): ObjectSet[Replica] =
-      objectContainer.queryByExample(new Replica(null, storageDescription.description, null, authenticationKey, null, null))
+    objectContainer.queryByExample(new Replica(null, storageDescription.description, null, authenticationKey, null, null))
 
   def inCatalog(
     src: Iterable[File],
@@ -135,7 +134,7 @@ object ReplicaCatalog extends Logger {
     query.constrain(classOf[Replica])
 
     query.descend("_authenticationKey").constrain(authenticationKey)
-    .and(src.map { f ⇒ query.descend("_source").constrain(f.getCanonicalPath) }.reduce(_ or _))
+      .and(src.map { f ⇒ query.descend("_source").constrain(f.getCanonicalPath) }.reduce(_ or _))
 
     var ret = new HashMap[File, HashSet[ServiceDescription]]
 
@@ -170,9 +169,9 @@ object ReplicaCatalog extends Logger {
       def getReplicasForSrc(
         src: File,
         storageDescription: ServiceDescription,
-        authenticationKey: String): ObjectSet[Replica] = 
-          client.queryByExample(new Replica(src.getCanonicalPath, storageDescription.description, null, authenticationKey, null, null))
-  
+        authenticationKey: String): ObjectSet[Replica] =
+        client.queryByExample(new Replica(src.getCanonicalPath, storageDescription.description, null, authenticationKey, null, null))
+
       def getReplica(
         src: File,
         hash: String,
@@ -186,7 +185,7 @@ object ReplicaCatalog extends Logger {
           case _ ⇒ Some(fix(set))
         }
       }
-        
+
       def getReplicaForHash(
         hash: String,
         storageDescription: ServiceDescription,
@@ -194,9 +193,9 @@ object ReplicaCatalog extends Logger {
         val set = objectContainer.queryByExample(new Replica(null, storageDescription.description, hash, authenticationKey, null, null))
         if (!set.isEmpty) Some(set.get(0)) else None
       }
-      
+
       Option(replicaCache.getIfPresent(cacheKey)) match {
-        case None =>
+        case None ⇒
           val replica = getReplica(srcPath, hash, storageDescription, authenticationKey) match {
             case None ⇒
               getReplicasForSrc(srcPath, storageDescription, authenticationKey).foreach { r ⇒ clean(r) }
@@ -214,7 +213,7 @@ object ReplicaCatalog extends Logger {
           }
           replicaCache.put(cacheKey, replica)
           replica
-        case Some(r) => r
+        case Some(r) ⇒ r
       }
     }
   }
@@ -227,7 +226,7 @@ object ReplicaCatalog extends Logger {
     authenticationKey: String,
     storage: Storage,
     token: AccessToken)(implicit objectContainer: ObjectContainer) =
-      if (System.currentTimeMillis > (replica.lastCheckExists + Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckFileExistsInterval))) {
+    if (replica.lastCheckExists + Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckFileExistsInterval) < System.currentTimeMillis) {
       if (replica.destinationURIFile.exists(token)) {
         removeNoLock(replica)
         val toInsert = new Replica(replica.source, replica.storageDescriptionString, replica.hash, replica.authenticationKey, replica.destination, System.currentTimeMillis)
@@ -269,21 +268,18 @@ object ReplicaCatalog extends Logger {
     q.execute.toArray(Array[Replica]())
   }
 
-  private def insert(replica: Replica)(implicit objectContainer: ObjectContainer) =
-    try {
-      objectContainer.store(replica)
-    } finally {
-      objectContainer.commit
-    }
+  private def insert(replica: Replica)(implicit objectContainer: ObjectContainer) = {
+    logger.fine("Insert " + replica)
+    objectContainer.store(replica)
+  }
 
   def remove(replica: Replica)(implicit objectContainer: ObjectContainer) =
     withSemaphore(key(replica), objectContainer) {
       removeNoLock(replica)
     }
 
-  private def removeNoLock(replica: Replica)(implicit objectContainer: ObjectContainer) = 
-    try objectContainer.delete(replica)
-    finally objectContainer.commit
+  private def removeNoLock(replica: Replica)(implicit objectContainer: ObjectContainer) =
+    objectContainer.delete(replica)
 
   private def containsDestination(destination: String)(implicit objectContainer: ObjectContainer) = {
     val query = objectContainer.query
@@ -293,14 +289,8 @@ object ReplicaCatalog extends Logger {
 
   def clean(replica: Replica)(implicit objectContainer: ObjectContainer) =
     withSemaphore(key(replica), objectContainer) {
-      //logger.fine("Cleaning replica " + replica.toString)
-      if (contains(replica)) {
-        //logger.fine("Contains replica " + replica.toString)
-        removeNoLock(replica)
-        //logger.fine("Removed replica " + replica.toString)
-        if (!containsDestination(replica.destination)) URIFile.clean(new URIFile(replica.destination))
-        //else logger.fine("Still contains " + replica.destination)
-      }
+      removeNoLock(replica)
+      if (!containsDestination(replica.destination)) URIFile.clean(new URIFile(replica.destination))
     }
 
   def cleanIfNotContains(destination: IURIFile, storage: Storage)(implicit objectContainer: ObjectContainer) = {

@@ -71,7 +71,7 @@ class Replica(_source: String, _storageDescription: String, _hash: String, _auth
     _hash
   }
 
-  @transient lazy val tuple = (source, storageDescriptionString, hash, authenticationKey, destination)
+  /*@transient lazy val tuple = (source, storageDescriptionString, hash, authenticationKey, destination, lastCheckExists)
 
   override def hashCode = tuple.hashCode
 
@@ -79,7 +79,7 @@ class Replica(_source: String, _storageDescription: String, _hash: String, _auth
     if (other == null) false
     else if (!classOf[Replica].isAssignableFrom(other.asInstanceOf[AnyRef].getClass)) false
     else tuple.equals(other.asInstanceOf[Replica].tuple)
-  }
+  }*/
 
   override def toString =
     "Replica [destination=" + destination + ", authenticationKey=" + authenticationKey + ", hash=" + hash + ", source=" + source + ", storageDescription=" + storageDescriptionString + "," + lastCheckExists + "]";

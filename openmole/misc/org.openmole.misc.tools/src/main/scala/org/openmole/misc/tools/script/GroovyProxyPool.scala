@@ -26,10 +26,8 @@ class GroovyProxyPool(code: String, jars: Iterable[File]) extends {
   //Don't use soft reference here, it leads to keep compiling the script in case of high memory load and make it worse
   @transient lazy private val pool = new ObjectPool({ new GroovyProxy(code, jars) })
 
-  def execute(binding: Binding): Object = {
-    val proxy = borrow
-    try proxy.executeUnsynchronized(binding)
-    finally release(proxy)
+  def execute(binding: Binding): Object = pool.exec {
+    _.executeUnsynchronized(binding)
   }
 
   private def release(o: GroovyProxy) = pool.release(o)

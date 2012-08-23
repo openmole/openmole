@@ -17,31 +17,27 @@
 
 package org.openmole.core.serializer.converter
 
-import java.util.concurrent.Semaphore
 import org.apache.commons.pool.BasePoolableObjectFactory
 import org.apache.commons.pool.impl.SoftReferenceObjectPool
 
 trait Factory[T <: { def clean }] {
 
-  def capacity = Integer.MAX_VALUE
-
-  val capacitySemaphore = new Semaphore(capacity)
-
   val pool = new SoftReferenceObjectPool(new BasePoolableObjectFactory {
-    override def makeObject: T = Factory.this.makeObject
+    override def makeObject: T = Factory.this.make
   })
 
-  def makeObject: T
+  def make: T
 
-  def borrowObject: T = {
-    capacitySemaphore.acquire
+  def borrow: T =
     pool.borrowObject.asInstanceOf[T]
-  }
 
-  def returnObject(serial: T) =
+  def release(serial: T) =
     try serial.clean
-    finally {
-      pool.returnObject(serial)
-      capacitySemaphore.release
-    }
+    finally pool.returnObject(serial)
+
+  def exec[A](f: T ⇒ A): A = {
+    val o = borrow
+    try f(o)
+    finally release(o)
+  }
 }

@@ -17,19 +17,18 @@
 
 package org.openmole.core.serializer.converter
 
-import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.converters.Converter
 import com.thoughtworks.xstream.converters.SingleValueConverter
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
-import com.thoughtworks.xstream.io.xml.StaxDriver
 import java.io.InputStream
 
 class Deserializer {
-  private val xstream = new XStream
+  private val xstream = XStreamFactory()
+
   protected val reflectionConverter = new ReflectionConverter(xstream.getMapper, xstream.getReflectionProvider)
 
   def registerConverter(converter: Converter) = xstream.registerConverter(converter)
   def registerConverter(converter: SingleValueConverter) = xstream.registerConverter(converter)
 
-  def fromXMLInjectFiles[T](is: InputStream): T = xstream.fromXML(is).asInstanceOf[T]
+  def fromXML[T](is: InputStream): T = xstream.fromXML(is).asInstanceOf[T]
 }

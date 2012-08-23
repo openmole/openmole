@@ -25,12 +25,11 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.PrintStream
 import java.util.UUID
-import java.util.logging.Level
-import java.util.logging.Logger
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.TarArchiver._
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.tools.service.Priority
 import org.openmole.core.batch.authentication.Authentication
 import org.openmole.core.batch.file.GZURIFile
@@ -48,7 +47,7 @@ import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 
-object Runtime {
+object Runtime extends Logger {
   val NumberOfLocalTheads = 1
   val NbRetry = 3
 }
@@ -137,16 +136,15 @@ class Runtime {
       val allMoleJobs = runableTasks.map { _.toMoleJob(saver.save) }
 
       /* --- Submit all jobs to the local environment --*/
-      for (toProcess ← allMoleJobs) {
-        //EventDispatcher.listen(toProcess, Priority.HIGH, saver, classOf[IMoleJob.StateChanged])
-        LocalExecutionEnvironment.default.submit(toProcess)
-      }
+      for (toProcess ← allMoleJobs) LocalExecutionEnvironment.default.submit(toProcess)
+
       saver.waitAllFinished
+
+      logger.fine("Result " + saver.results)
 
       val contextResults = new ContextResults(saver.results)
       val contextResultFile = Workspace.newFile
 
-      //val serializationResult = SerializerService.serializeGetPluginClassAndFiles(contextResults, contextResultFile)
       SerializerService.serializeAndArchiveFiles(contextResults, contextResultFile)
       val uploadedcontextResults = new GZURIFile(path.toURIFile(executionMessage.communicationDirPath).newFileInDir("uplodedTar", ".tgz"))
       val result = new FileMessage(uploadedcontextResults.path, HashService.computeHash(contextResultFile).toString)
@@ -156,7 +154,7 @@ class Runtime {
 
     } catch {
       case t ⇒ {
-        if (debug) Logger.getLogger(classOf[Runtime].getName).log(Level.SEVERE, "", t)
+        if (debug) logger.log(SEVERE, "", t)
         Right(t)
       }
     } finally {
