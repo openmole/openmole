@@ -9,7 +9,6 @@ import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.core.implementation.validation.DataflowProblem
 import org.openmole.ide.core.model.dataproxy._
-import org.openmole.ide.core.model.factory.IHookFactoryUI
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.HashMap
 
@@ -43,8 +42,6 @@ trait ICapsuleUI {
 
   def setSampling(sampling: Option[ISamplingDataProxyUI])
 
-  //def hook(hook: IHookFactoryUI, selected: Boolean)
-
   def addInputSlot(startingCapsule: Boolean): IInputSlotWidget
 
   def hooked(b: Boolean)
@@ -60,4 +57,8 @@ trait ICapsuleUI {
   def setAsValid: Unit
 
   def setAsInvalid(error: String): Unit
+
+  def selected: Boolean
+
+  def selected_=(b: Boolean)
 }

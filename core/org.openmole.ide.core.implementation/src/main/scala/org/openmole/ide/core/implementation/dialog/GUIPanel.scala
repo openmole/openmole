@@ -93,7 +93,7 @@ class GUIPanel extends MainFrame { mainframe ⇒
   }
 
   peer.add(splitPane.peer, BorderLayout.CENTER)
-  StatusBar.inform("OpenMOLE - 0.5 - Boundless Bamboo")
+  StatusBar.inform("OpenMOLE - 0.6 - Crazy Coconut")
 
   PasswordListner.apply
 }

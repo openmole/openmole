@@ -21,17 +21,24 @@ import org.openmole.ide.core.implementation.workflow.BuildMoleSceneContainer
 import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
 import java.awt.Color
 import java.awt.Dimension
+import java.awt.Point
 import java.util.concurrent.atomic.AtomicInteger
+import org.openmole.ide.core.implementation.workflow.SceneItemFactory
 import org.openmole.ide.core.model.data.IExplorationTaskDataUI
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
+import org.openmole.ide.core.model.workflow.ITransitionUI
 import org.openmole.ide.misc.tools.image.Images._
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
+import org.openmole.ide.core.model.workflow.IDataChannelUI
+import org.openmole.ide.core.model.workflow.IInputSlotWidget
+import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.MigPanel
 import scala.collection.JavaConversions._
+import scala.collection.mutable.HashMap
 import scala.swing.Action
 import scala.swing.Button
 import scala.swing.Label
@@ -43,6 +50,8 @@ object ScenesManager {
 
   var countBuild = new AtomicInteger
   var countExec = new AtomicInteger
+  var copied = Map.empty[ICapsuleUI, (ICapsuleUI, HashMap[IInputSlotWidget, IInputSlotWidget])]
+
   PasswordListner.apply
 
   def buildMoleSceneContainers = tabPane.pages.flatMap(_.content match {
@@ -56,6 +65,45 @@ object ScenesManager {
       case x: ISceneContainer ⇒ Some(x)
       case _ ⇒ None
     }
+  }
+
+  def pasteCapsules(ms: IMoleScene,
+                    point: Point) = {
+    copied = ms.selection.map { z ⇒
+      z -> z.copy(ms)
+    }.toMap
+
+    val dx = (point.x - ms.selection.map { _.widget.getPreferredLocation.x }.min).toInt
+    val dy = (point.y - ms.selection.map { _.widget.getPreferredLocation.y }.min).toInt
+
+    copied.foreach {
+      case (old, neo) ⇒
+        val p = new Point((old.widget.getPreferredLocation.x + dx).toInt, (old.widget.getPreferredLocation.y + dy).toInt)
+        SceneItemFactory.createCapsule(neo._1, ms, p)
+        ms.refresh
+    }
+
+    val islots = ms.manager.capsules.values.flatMap { _.islots }
+    val connectors = ms.manager.connectors
+    connectors.foreach { con ⇒
+      if (ms.selection.contains(con.source) && islots.contains(con.target)) {
+        con match {
+          case (t: ITransitionUI) ⇒
+            SceneItemFactory.createTransition(ms,
+              copied(t.source)._1,
+              copied(t.target.capsule)._1.islots.find { s ⇒ t.target.index == s.index }.get,
+              t.transitionType,
+              t.condition,
+              t.filteredPrototypes)
+          case (t: IDataChannelUI) ⇒
+            SceneItemFactory.createDataChannel(ms,
+              copied(t.source)._1,
+              copied(t.target.capsule)._1.islots.find { s ⇒ t.target.index == s.index }.get,
+              t.filteredPrototypes)
+        }
+      }
+    }
+    ms.refresh
   }
 
   def closeAll = tabPane.pages.clear
@@ -108,7 +156,7 @@ object ScenesManager {
     CheckData.fullCheck(bmsc.scene) match {
       case Right(_) ⇒
         if (StatusBar.isValid) {
-          val clone = bmsc.scene.copy
+          val clone = bmsc.scene.copyScene
           clone.manager.name = { bmsc.scene.manager.name + "_" + countExec.incrementAndGet }
           val page = new TabbedPane.Page(clone.manager.name, new MigPanel(""))
           val container = new ExecutionMoleSceneContainer(clone, page, bmsc)

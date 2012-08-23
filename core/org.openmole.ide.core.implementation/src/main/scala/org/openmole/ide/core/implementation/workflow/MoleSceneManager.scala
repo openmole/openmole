@@ -18,7 +18,6 @@
 package org.openmole.ide.core.implementation.workflow
 
 import scala.collection.mutable.HashMap
-import org.apache.commons.collections15.bidimap.DualHashBidiMap
 import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.data.IMoleDataUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
@@ -34,15 +33,17 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
 
   val id = ScenesManager.countBuild.getAndIncrement
   var startingCapsule: Option[ICapsuleUI] = None
-  var capsules = new DualHashBidiMap[String, ICapsuleUI]
-  var connectorMap = new DualHashBidiMap[String, IConnectorUI]
+  var _capsules = new HashMap[String, ICapsuleUI]
+  var _connectors = new HashMap[String, IConnectorUI]
   var capsuleConnections = new HashMap[ICapsuleDataUI, HashSet[IConnectorUI]]
   var nodeID = 0
   var edgeID = 0
 
   var dataUI: IMoleDataUI = new MoleDataUI
 
-  override def setStartingCapsule(stCapsule: ICapsuleUI) = {
+  def capsules = _capsules.toMap
+
+  def setStartingCapsule(stCapsule: ICapsuleUI) = {
     startingCapsule match {
       case Some(x: ICapsuleUI) ⇒ x.defineAsStartingCapsule(false)
       case None ⇒
@@ -57,8 +58,8 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
 
   override def registerCapsuleUI(cv: ICapsuleUI) = {
     nodeID += 1
-    capsules.put(getNodeID, cv)
-    if (capsules.size == 1) setStartingCapsule(cv)
+    _capsules += getNodeID -> cv
+    if (_capsules.size == 1) setStartingCapsule(cv)
     capsuleConnections += cv.dataUI -> HashSet.empty[IConnectorUI]
   }
 
@@ -67,15 +68,15 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
   def removeCapsuleUI(nodeID: String): String = {
     startingCapsule match {
       case None ⇒
-      case Some(caps: ICapsuleUI) ⇒ if (capsules.get(nodeID) == caps) startingCapsule = None
+      case Some(caps: ICapsuleUI) ⇒ if (capsules(nodeID) == caps) startingCapsule = None
     }
 
-    capsuleConnections(capsules.get(nodeID).dataUI).foreach { x ⇒ connectorMap.removeValue(x) }
-    capsuleConnections -= capsules.get(nodeID).dataUI
+    capsuleConnections(_capsules(nodeID).dataUI).foreach { x ⇒ connectorIDs -= x }
+    capsuleConnections -= _capsules(nodeID).dataUI
 
-    removeIncomingTransitions(capsules.get(nodeID))
+    removeIncomingTransitions(_capsules(nodeID))
 
-    capsules.remove(nodeID)
+    _capsules.remove(nodeID)
     nodeID
   }
 
@@ -92,32 +93,40 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
     capsuleSet
   }
 
-  def connector(cID: String) = connectorMap.get(cID)
+  def connector(cID: String) = _connectors(cID)
 
-  def connectorID(c: IConnectorUI) = connectorMap.getKey(c)
+  def connectorIDs = _connectors.map { case (k, v) ⇒ v -> k }
 
-  def connectors = connectorMap.values
+  def connectorID(c: IConnectorUI) = connectorIDs(c)
 
-  def capsuleID(cv: ICapsuleUI) = capsules.getKey(cv)
+  def connectors = _connectors.values
+
+  def capsuleID(cv: ICapsuleUI) = _capsules.map { case (k, v) ⇒ v -> k }.get(cv).get
 
   private def removeIncomingTransitions(capsule: ICapsuleUI) =
-    connectorMap.filter { _._2.target.capsule == capsule }.foreach { t ⇒
+    _connectors.filter { _._2.target.capsule == capsule }.foreach { t ⇒
       removeConnector(t._1)
     }
 
   def changeConnector(oldConnector: IConnectorUI,
                       connector: IConnectorUI) = {
-    connectorMap(connectorID(oldConnector)) = connector
+    _connectors(connectorID(oldConnector)) = connector
     capsuleConnections(connector.source.dataUI) -= oldConnector
     capsuleConnections(connector.source.dataUI) += connector
   }
 
-  def removeConnector(edgeID: String): Unit = removeConnector(edgeID, connectorMap.get(edgeID))
+  def removeConnector(edgeID: String): Unit = removeConnector(edgeID, _connectors(edgeID))
 
   def removeConnector(edgeID: String,
                       connector: IConnectorUI): Unit = {
-    connectorMap.remove(edgeID)
-    capsuleConnections(connector.source.dataUI) -= connector
+    _connectors.remove(edgeID)
+    println("remove conncetor dataui:: " + connector.source.dataUI.id)
+    println("remove conncetor :: " + capsuleConnections)
+
+    capsuleConnections.contains(connector.source.dataUI) match {
+      case true ⇒ capsuleConnections(connector.source.dataUI) -= connector
+      case _ ⇒
+    }
   }
 
   def registerConnector(connector: IConnectorUI): Boolean = {
@@ -127,9 +136,11 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
 
   def registerConnector(edgeID: String,
                         connector: IConnectorUI): Boolean = {
+
+    println("register conncetor")
     capsuleConnections(connector.source.dataUI) += connector
-    if (!connectorMap.keys.contains(edgeID)) {
-      connectorMap.put(edgeID, connector)
+    if (!_connectors.keys.contains(edgeID)) {
+      _connectors += edgeID -> connector
       return true
     }
     false

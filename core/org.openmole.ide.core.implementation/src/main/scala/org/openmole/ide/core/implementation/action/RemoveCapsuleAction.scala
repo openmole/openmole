@@ -26,7 +26,10 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 class RemoveCapsuleAction(scene: IMoleScene, capsule: ICapsuleUI) extends ActionListener {
 
   override def actionPerformed(ae: ActionEvent) = {
-    scene.graphScene.removeNodeWithEdges(scene.manager.removeCapsuleUI(capsule))
+    scene.selection.map { c ⇒ c }.foreach { c ⇒
+      scene.graphScene.removeNodeWithEdges(scene.manager.removeCapsuleUI(c))
+    }
+    scene.clearRemovedCapsulesFromSelection
     CheckData.checkMole(scene)
   }
 }

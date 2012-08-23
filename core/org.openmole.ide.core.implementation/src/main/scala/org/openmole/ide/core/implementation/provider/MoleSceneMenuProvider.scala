@@ -23,7 +23,10 @@ import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.implementation.action.AddCapsuleAction
 import org.openmole.ide.core.implementation.action.AddTaskAction
 import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.workflow.IMoleScene
+import scala.swing.Action
+import scala.swing.MenuItem
 
 class MoleSceneMenuProvider(moleScene: IMoleScene) extends GenericMenuProvider {
 
@@ -39,6 +42,9 @@ class MoleSceneMenuProvider(moleScene: IMoleScene) extends GenericMenuProvider {
     initMenu
     Proxys.tasks.foreach { p ⇒ items += new JMenuItem(new AddTaskAction(moleScene, p, this).peer)
     }
+    val itPaste = new MenuItem(new Action("Paste") { def apply = ScenesManager.pasteCapsules(moleScene, point) })
+    itPaste.enabled = !moleScene.selection.isEmpty
+    items.insert(0, itPaste.peer)
     super.getPopupMenu(widget, point)
   }
 }

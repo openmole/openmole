@@ -27,7 +27,6 @@ import java.awt.BasicStroke
 import java.awt.BorderLayout
 import java.awt.Graphics2D
 import java.awt.Dimension
-import java.awt.Image
 import java.awt.Rectangle
 import java.awt.RenderingHints
 import org.openmole.ide.core.model.panel.PanelMode._
@@ -53,7 +52,6 @@ class TaskWidget(scene: IMoleScene,
         g.drawImage(ImageIO.read(x.dataUI.getClass.getClassLoader.getResource(x.dataUI.fatImagePath)), 10, 30, 80, 80, peer)
       case None ⇒
     }
-
   }
 
   def backColor: Color = {
@@ -69,13 +67,16 @@ class TaskWidget(scene: IMoleScene,
   }
 
   def borderColor: Color = {
-    capsule.dataUI.task match {
-      case Some(x: ITaskDataProxyUI) ⇒
-        scene match {
-          case y: BuildMoleScene ⇒ new Color(73, 90, 105)
-          case _ ⇒ new Color(44, 137, 160, 64)
-        }
-      case _ ⇒ new Color(73, 90, 105)
+    if (capsule.selected) new Color(222, 135, 135)
+    else {
+      capsule.dataUI.task match {
+        case Some(x: ITaskDataProxyUI) ⇒
+          scene match {
+            case y: BuildMoleScene ⇒ new Color(73, 90, 105)
+            case _ ⇒ new Color(44, 137, 160, 64)
+          }
+        case _ ⇒ new Color(73, 90, 105)
+      }
     }
   }
 }

@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.model.workflow
 
+import java.awt.Point
 import org.netbeans.api.visual.graph.GraphScene
 import org.openmole.ide.core.model.panel.PanelMode
 import org.netbeans.api.visual.widget.ComponentWidget
@@ -61,5 +62,15 @@ trait IMoleScene {
 
   def removeEdge(id: String)
 
+  def addToSelection(capsule: ICapsuleUI): Unit
+
+  def clearSelection: Unit
+
+  def selection: Set[ICapsuleUI]
+
+  def clearRemovedCapsulesFromSelection: Unit
+
   override def toString = manager.name
+
+  def toSceneCoordinates(p: Point): Point
 }
