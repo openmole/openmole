@@ -58,7 +58,7 @@ object StatusBar extends MigPanel("wrap 3") { statusBar ⇒
         case Some(x: IDataProxyUI) ⇒
           contents += new LinkLabel(header,
             new Action("") { override def apply = displayProxy(x) },
-            4,
+            3,
             "0088aa",
             true)
 
