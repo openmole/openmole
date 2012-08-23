@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2010 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -24,7 +24,7 @@ import org.openmole.core.model.mole.ITicket
  * stored in a WeakHashMap and are garbage collected after the ticket is gabage
  * collected.
  *
- * @author Romain Reuillon <romain.reuillon at openmole.org>
+ * @author Romain Reuillon <romain.Romain Reuillon at openmole.org>
  * @param <K> the type of the keys
  * @param <V> the type of the values
  */

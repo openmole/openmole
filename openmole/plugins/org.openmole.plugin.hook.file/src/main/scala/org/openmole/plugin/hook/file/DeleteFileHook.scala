@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Leclaire Mathieu  <mathieu.leclaire at openmole.org>
+ * Copyright (C) 2011 Leclaire Mathieu  <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by

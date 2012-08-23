@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2010 reuillon
+ *  Copyright (C) 2010 Romain Reuillon
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published by
@@ -25,7 +25,7 @@ import org.openmole.core.model.data._
 
 /**
  *
- * @author reuillon
+ * @author Romain Reuillon
  */
 class OnVariableGroupingStrategy(prototypes: IPrototype[_]*) extends IGrouping {
   def apply(context: IContext, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup = new MoleJobGroup(prototypes.flatMap { context.value(_) }.toSeq: _*)

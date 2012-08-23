@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 reuillon
+ * Copyright (C) 2010 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -21,7 +21,7 @@ package org.openmole.core.model.task
  *
  * The mole task is a task that executes a mole.
  *
- * @author Romain Reuillon <romain.reuillon at openmole.org>
+ * @author Romain Reuillon <romain.Romain Reuillon at openmole.org>
  */
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
