@@ -43,7 +43,7 @@ class BuildMoleScene(n: String = "") extends MoleScene(n) { buildMoleScene ⇒
     var islots = new HashMap[IInputSlotWidget, IInputSlotWidget]
     val ms = new ExecutionMoleScene(manager.name + "_" + ScenesManager.countExec.incrementAndGet)
     manager.capsules.foreach(n ⇒ {
-      val (caps, islotMapping) = n._2.copy(ms)
+      val (caps, islotMapping) = n._2.deepcopy(ms)
       if (n._2.dataUI.startingCapsule) ms.manager.setStartingCapsule(caps)
       SceneItemFactory.createCapsule(caps, ms, new Point(n._2.x.toInt / 2, n._2.y.toInt / 2))
       capsuleMapping += n._2 -> caps

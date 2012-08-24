@@ -127,17 +127,22 @@ class CapsuleUI(val scene: IMoleScene,
 
   def widget = this
 
+  def deepcopy(sc: IMoleScene) = {
+    val ret = copy(sc)
+    dataUI.task match {
+      case Some(x: ITaskDataProxyUI) ⇒
+        ret._1.encapsule(ProxyFreezer.freeze(x))
+        if (dataUI.environment.isDefined) ret._1.setEnvironment(ProxyFreezer.freeze(dataUI.environment))
+        if (dataUI.sampling.isDefined) ret._1.setSampling(ProxyFreezer.freeze(dataUI.sampling))
+      case _ ⇒
+    }
+    ret
+  }
+
   def copy(sc: IMoleScene) = {
     var slotMapping = new HashMap[IInputSlotWidget, IInputSlotWidget]
     val c = new CapsuleUI(sc)
     islots.foreach(i ⇒ slotMapping += i -> c.addInputSlot(false))
-    dataUI.task match {
-      case Some(x: ITaskDataProxyUI) ⇒
-        c.encapsule(ProxyFreezer.freeze(x))
-        if (dataUI.environment.isDefined) c.setEnvironment(ProxyFreezer.freeze(dataUI.environment))
-        if (dataUI.sampling.isDefined) c.setSampling(ProxyFreezer.freeze(dataUI.sampling))
-      case _ ⇒
-    }
     (c, slotMapping)
   }
 
@@ -168,7 +173,6 @@ class CapsuleUI(val scene: IMoleScene,
     CheckData.checkMole(scene)
     addChild(inputPrototypeWidget.get)
     addChild(outputPrototypeWidget.get)
-    capsuleMenuProvider.addTaskMenus
   }
 
   def setEnvironment(envtask: Option[IEnvironmentDataProxyUI]) = {

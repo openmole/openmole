@@ -36,6 +36,8 @@ trait ICapsuleUI {
 
   def copy(sc: IMoleScene): (ICapsuleUI, HashMap[IInputSlotWidget, IInputSlotWidget])
 
+  def deepcopy(sc: IMoleScene): (ICapsuleUI, HashMap[IInputSlotWidget, IInputSlotWidget])
+
   def setTask(dpu: ITaskDataProxyUI)
 
   def setEnvironment(environment: Option[IEnvironmentDataProxyUI])
