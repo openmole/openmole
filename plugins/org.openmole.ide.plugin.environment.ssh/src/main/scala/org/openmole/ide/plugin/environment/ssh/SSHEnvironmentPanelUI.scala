@@ -50,6 +50,8 @@ class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fill
     contents += runTimeMemoryTextField
   })
 
+  override def helpMap = Map()
+
   override def saveContent(name: String) = new SSHEnvironmentDataUI(name,
     loginTextField.text,
     hostTextField.text,

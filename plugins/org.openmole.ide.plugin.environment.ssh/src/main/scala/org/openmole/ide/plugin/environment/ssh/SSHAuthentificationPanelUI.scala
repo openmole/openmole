@@ -72,16 +72,15 @@ object SSHAuthentificationPanelUI {
     }
 
     def expandName = {
-      if (data.connectionData.login == "" && data.host == "") "new"
-      else data.connectionData.login + "@" + data.host
+      if (data.connectionData.login == "" && data.connectionData.target == "") "new"
+      else data.connectionData.login + "@" + data.connectionData.target
     }
 
     def content = popupPanel.content
 
   }
 
-  class SSHAuthentificationData(val host: String = "",
-                                val connectionData: ConnectionData = new ConnectionData) extends IData
+  class SSHAuthentificationData(val connectionData: ConnectionData = new ConnectionData) extends IData
 
   class ConnectionData(val connectionMethod: ConnectionMethod = new Login,
                        val login: String = "",
@@ -113,12 +112,6 @@ object SSHAuthentificationPanelUI {
         displayAuthentification
     }
 
-    val hostTextField = new TextField("zebulon.iscpif.fr", 15)
-
-    contents += new PluginPanel("") {
-      contents += new Label("zebulon.iscpif.fr")
-      contents += hostTextField
-    }
     contents += authentificationTypeComboBox
     displayAuthentification
     preferredSize = new Dimension(300, 280)
@@ -140,12 +133,12 @@ object SSHAuthentificationPanelUI {
       val passwordTextField = new PasswordField(data.password, 15)
       val targetTextField = new TextField(data.target, 15)
 
+      contents += new Label("Target")
+      contents += targetTextField
       contents += new Label("Login")
       contents += loginTextField
       contents += new Label("Password")
       contents += passwordTextField
-      contents += new Label("Target")
-      contents += targetTextField
 
       def content = new ConnectionData(new Login,
         loginTextField.text,
@@ -172,8 +165,7 @@ object SSHAuthentificationPanelUI {
         publicKeyTextField.text)
     }
 
-    def content = new SSHAuthentificationData(hostTextField.text,
-      authentificationTypeComboBox.selection.item.content)
+    def content = new SSHAuthentificationData(authentificationTypeComboBox.selection.item.content)
   }
 }
 
@@ -184,19 +176,17 @@ class SSHAuthentificationPanelUI extends PluginPanel("") with IAuthentificationP
     Workspace.persistentList(classOf[HostAuthenticationMethod]).map { hm ⇒
       hm match {
         case (i: Int, x: LoginPassword) ⇒
-          new SSHAuthentificationPanel(new SSHAuthentificationData("zebulon.iscpif.fr",
-            new ConnectionData(new Login,
-              x.login,
-              Workspace.decrypt(x.cypheredPassword),
-              x.target)))
+          new SSHAuthentificationPanel(new SSHAuthentificationData(new ConnectionData(new Login,
+            x.login,
+            Workspace.decrypt(x.cypheredPassword),
+            x.target)))
         case (i: Int, x: PrivateKey) ⇒
-          new SSHAuthentificationPanel(new SSHAuthentificationData("zebulon.iscpif.fr",
-            new ConnectionData(new SSHKey,
-              x.login,
-              Workspace.decrypt(x.cypheredPassword),
-              x.target,
-              x.privateKeyPath,
-              x.publicKeyPath)))
+          new SSHAuthentificationPanel(new SSHAuthentificationData(new ConnectionData(new SSHKey,
+            x.login,
+            Workspace.decrypt(x.cypheredPassword),
+            x.target,
+            x.privateKeyPath,
+            x.publicKeyPath)))
       }
     }.toList
 
