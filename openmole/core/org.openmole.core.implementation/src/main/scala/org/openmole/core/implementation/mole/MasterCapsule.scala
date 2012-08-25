@@ -17,16 +17,11 @@
 
 package org.openmole.core.implementation.mole
 
-import org.openmole.core.model.mole.ISubMoleExecution
-import org.openmole.core.model.mole.ITicket
-import org.openmole.core.model.task.ITask
-import org.openmole.core.implementation.data.Context._
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.job.MoleJobId
-import org.openmole.core.model.mole.IMasterCapsule
-import org.openmole.misc.exception.UserBadDataError
+import org.openmole.core.model.mole._
+import org.openmole.core.model.task._
+import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
+import org.openmole.core.model.job._
 
 class MasterCapsule(_task: Option[ITask] = None, val persist: Set[String] = Set.empty) extends Capsule(_task) with IMasterCapsule {
 

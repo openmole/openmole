@@ -66,7 +66,13 @@ package object data {
     def toArray: IData[Array[T]] = new Data[Array[T]](data.prototype.toArray, data.mode)
   }
 
-  implicit def variablesToContextConverter(variables: Traversable[IVariable[_]]): Context = Context(variables)
+  implicit def decorateVariableIterable(variables: Traversable[IVariable[_]]) = new {
+    def toContext: Context = Context(variables)
+  }
+
+  implicit def variableToContextConverter(variable: IVariable[_]) = Context(variable)
+
+  implicit def variablesToContextConverter(variables: Traversable[IVariable[_]]): Context = variables.toContext
 
   val optional = DataModeMask.optional
 

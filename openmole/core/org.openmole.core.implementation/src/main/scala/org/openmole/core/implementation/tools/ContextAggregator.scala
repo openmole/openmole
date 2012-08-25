@@ -17,13 +17,11 @@
 
 package org.openmole.core.implementation.tools
 
-import org.openmole.core.implementation.data.{ Variable, Prototype }
-import org.openmole.core.model.data.{ IDataSet, IContext, IVariable, IPrototype }
-import org.openmole.misc.exception.InternalProcessingError
-import scala.collection.JavaConversions
+import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
+import org.openmole.misc.exception._
 import scala.collection.JavaConversions._
 import org.openmole.misc.tools.obj.ClassUtils._
-import org.openmole.core.implementation.data.Context._
 
 object ContextAggregator {
 
