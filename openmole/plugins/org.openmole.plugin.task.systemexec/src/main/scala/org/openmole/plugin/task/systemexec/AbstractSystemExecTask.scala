@@ -26,7 +26,7 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.task.external.ExternalTask
 import java.io.IOException
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.tools.VariableExpansion._
+import org.openmole.core.implementation.tools._
 import org.apache.commons.exec.CommandLine
 import org.openmole.misc.tools.service.ProcessUtil._
 import org.openmole.plugin.task.external.ExternalTaskBuilder
@@ -66,7 +66,7 @@ abstract class AbstractSystemExecTask extends ExternalTask {
 
     val workDir = if (dir.isEmpty) tmpDir else new File(tmpDir, dir)
     val links = prepareInputFiles(context, tmpDir, dir)
-    val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + expandData(context, List(new Variable(ExternalTask.PWD, workDir.getAbsolutePath)), cmd))
+    val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + VariableExpansion(context, List(new Variable(ExternalTask.PWD, workDir.getAbsolutePath)), cmd))
 
     try {
       val f = new File(commandLine.getExecutable)

@@ -35,7 +35,7 @@ class AppendArrayToFileHook(
 
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
-    val file = new File(VariableExpansion.expandData(context, fileName))
+    val file = new File(VariableExpansion(context, fileName))
     file.createParentDir
     val toWrite = context.value(content).getOrElse(Array("not found")).mkString(",")
     file.lockApply(_.appendLine(toWrite))

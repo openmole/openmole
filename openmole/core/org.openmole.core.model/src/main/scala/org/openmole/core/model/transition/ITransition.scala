@@ -17,11 +17,9 @@
 
 package org.openmole.core.model.transition
 
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.mole.ITicket
-import org.openmole.core.model.data.IData
-import org.openmole.core.model.mole.ISubMoleExecution
+import org.openmole.core.model.mole._
+import org.openmole.core.model.data._
+import org.openmole.core.model.tools._
 
 trait ITransition {
 
@@ -60,11 +58,11 @@ trait ITransition {
 
   /**
    *
-   * Get the names of the variables which are filtred by this transition.
+   * Get the filter of the variables which are filtred by this transition.
    *
-   * @return the names of the variables which are filtred by this transition
+   * @return filter on the names of the variables which are filtred by this transition
    */
-  def filtered: Iterable[String]
+  def filter: IFilter[String]
 
   /**
    * Get the unfiltred user output data of the starting capsule going through

@@ -23,7 +23,7 @@ import org.openmole.core.model.domain.IBounded
 import java.math.MathContext
 import java.math.RoundingMode
 import java.util.logging.Logger
-import org.openmole.core.implementation.tools.VariableExpansion._
+import org.openmole.core.implementation.tools._
 import org.openmole.core.model.domain.IFinite
 import org.openmole.misc.math.BigDecimalOperations._
 import java.math.BigDecimal
@@ -59,7 +59,7 @@ sealed class BigDecimalLogarithmRange(val min: String, val max: String, val nbSt
     }
   }
 
-  def nbStep(context: IContext): BigDecimal = new BigDecimal(expandData(context, nbStep))
-  def min(context: IContext): BigDecimal = new BigDecimal(expandData(context, min))
-  def max(context: IContext): BigDecimal = new BigDecimal(expandData(context, max))
+  def nbStep(context: IContext): BigDecimal = new BigDecimal(VariableExpansion(context, nbStep))
+  def min(context: IContext): BigDecimal = new BigDecimal(VariableExpansion(context, min))
+  def max(context: IContext): BigDecimal = new BigDecimal(VariableExpansion(context, max))
 }

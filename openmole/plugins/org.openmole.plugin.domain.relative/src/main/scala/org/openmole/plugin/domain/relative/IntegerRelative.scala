@@ -18,15 +18,15 @@
 package org.openmole.plugin.domain.relative
 
 import org.openmole.core.model.data.IContext
-import org.openmole.core.implementation.tools.VariableExpansion._
+import org.openmole.core.implementation.tools._
 import java.lang.Integer
 
 sealed class IntegerRelative(val nominal: String, val percent: String, val size: String) extends IRelative[Integer] {
 
   override def computeValues(context: IContext): Iterable[Integer] = {
-    val nom = expandData(context, nominal).toInt
-    val pe = expandData(context, percent).toInt
-    val s = expandData(context, size).toInt
+    val nom = VariableExpansion(context, nominal).toInt
+    val pe = VariableExpansion(context, percent).toInt
+    val s = VariableExpansion(context, size).toInt
 
     val min = nom * (1 - pe / 100.)
     if (s > 1) {

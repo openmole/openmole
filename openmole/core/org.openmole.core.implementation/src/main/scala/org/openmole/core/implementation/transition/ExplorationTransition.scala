@@ -20,24 +20,23 @@ package org.openmole.core.implementation.transition
 import org.openmole.core.implementation.task.ExplorationTask._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.data.Context._
-import org.openmole.core.implementation.mole.SubMoleExecution
+import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.mole.Capsule._
-import org.openmole.core.model.task.IExplorationTask
-import org.openmole.core.model.task.ITask
+import org.openmole.core.model.task._
+import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data.DataModeMask._
-import org.openmole.core.model.transition.{ IExplorationTransition, ISlot, ICondition, IAggregationTransition }
-import org.openmole.core.model.data.{ IPrototype, IContext, IVariable, IData }
-import org.openmole.core.model.mole.{ ICapsule, ITicket, ISubMoleExecution }
-import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.core.model.tools._
+import org.openmole.core.model.transition._
+import org.openmole.core.model.data._
+import org.openmole.core.model.mole._
+import org.openmole.misc.eventdispatcher._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.obj.ClassUtils._
-import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.tools.service.Priority
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
-class ExplorationTransition(start: ICapsule, end: ISlot, condition: ICondition = ICondition.True, filtered: Iterable[String] = Iterable.empty[String]) extends Transition(start, end, condition, filtered) with IExplorationTransition {
+class ExplorationTransition(start: ICapsule, end: ISlot, condition: ICondition = ICondition.True, filter: IFilter[String] = Filter.empty) extends Transition(start, end, condition, filter) with IExplorationTransition {
 
   override def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {
     val subSubMole = subMole.newChild
@@ -54,7 +53,6 @@ class ExplorationTransition(start: ICapsule, end: ISlot, condition: ICondition =
     val endTask = end.capsule.taskOrException
 
     for (value ← values) {
-
       val newTicket = subMole.moleExecution.nextTicket(ticket)
 
       val variables = new ListBuffer[IVariable[_]]

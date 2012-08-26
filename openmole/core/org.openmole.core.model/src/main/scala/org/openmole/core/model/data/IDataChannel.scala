@@ -26,11 +26,10 @@ package org.openmole.core.model.data
  *        the two capsules.
  *
  */
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.ITicket
-import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.task.ITask
-import org.openmole.core.model.transition.ISlot
+import org.openmole.core.model.mole._
+import org.openmole.core.model.task._
+import org.openmole.core.model.transition._
+import org.openmole.core.model.tools._
 
 trait IDataChannel {
 
@@ -52,11 +51,11 @@ trait IDataChannel {
 
   /**
    *
-   * Get the names of the variable transported by this data channel.
+   * Get the filter of the variable transported by this data channel.
    *
-   * @return the name of the variable not transported by this data channel.
+   * @return a filter on the name of the variable not transported by this data channel.
    */
-  def filtered: Iterable[String]
+  def filter: IFilter[String]
 
   /**
    *

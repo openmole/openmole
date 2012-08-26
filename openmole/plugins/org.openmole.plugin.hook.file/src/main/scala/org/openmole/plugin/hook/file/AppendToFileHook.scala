@@ -36,9 +36,9 @@ class AppendToFileHook(
 
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
-    val file = new File(VariableExpansion.expandData(context, fileName))
+    val file = new File(VariableExpansion(context, fileName))
     file.createParentDir
-    file.lockApply(_.append(VariableExpansion.expandData(context, content)))
+    file.lockApply(_.append(VariableExpansion(context, content)))
   }
 
   def inputs = DataSet.empty

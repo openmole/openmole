@@ -27,7 +27,7 @@ import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.core.implementation.tools.VariableExpansion._
+import org.openmole.core.implementation.tools._
 import org.openmole.misc.exception.UserBadDataError
 
 class CopyFileHook(moleExecution: IMoleExecution, capsule: ICapsule, filePrototype: IPrototype[File], destination: String, remove: Boolean, compress: Boolean) extends CapsuleExecutionHook(moleExecution, capsule) {
@@ -39,7 +39,7 @@ class CopyFileHook(moleExecution: IMoleExecution, capsule: ICapsule, filePrototy
 
     context.value(filePrototype) match {
       case Some(from) ⇒
-        val to = new File(expandData(context, destination))
+        val to = new File(VariableExpansion(context, destination))
 
         to.getParentFile.mkdirs
         if (compress) from.copyCompress(to)

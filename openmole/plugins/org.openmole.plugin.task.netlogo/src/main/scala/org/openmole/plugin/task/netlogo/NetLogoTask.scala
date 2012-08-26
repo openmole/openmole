@@ -72,7 +72,7 @@ class NetLogoTask(
         netLogo.command("set " + inBinding._2 + " " + v.toString)
       }
 
-      for (cmd ← launchingCommands) netLogo.command(VariableExpansion.expandData(context, cmd))
+      for (cmd ← launchingCommands) netLogo.command(VariableExpansion(context, cmd))
 
       fetchOutputFiles(context, tmpDir, links) ++ netLogoOutputs.map {
         case (name, prototype) ⇒

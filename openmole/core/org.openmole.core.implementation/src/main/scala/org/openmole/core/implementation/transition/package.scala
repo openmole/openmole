@@ -19,9 +19,11 @@ package org.openmole.core.implementation
 
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.puzzle._
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.implementation.tools._
+import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.task._
+import org.openmole.core.model.tools._
 import org.openmole.core.model.transition._
 
 import puzzle._
@@ -45,10 +47,15 @@ package object transition {
     def -<(
       to: Puzzle,
       condition: ICondition = ICondition.True,
-      filtered: Iterable[String] = Set.empty) = {
+      filter: IFilter[String] = Filter.empty,
+      size: Option[String] = None) = {
 
       from.lasts.foreach {
-        c ⇒ new ExplorationTransition(c, to.first, condition, filtered)
+        c ⇒
+          size match {
+            case None ⇒ new ExplorationTransition(c, to.first, condition, filter)
+            case Some(s) ⇒ new EmptyExplorationTransition(c, to.first, s, condition, filter)
+          }
       }
 
       Puzzle.merge(from.first, to.lasts, from :: to :: Nil)
@@ -63,10 +70,10 @@ package object transition {
     def -<-(
       to: Puzzle,
       condition: ICondition = ICondition.True,
-      filtered: Iterable[String] = Set.empty) = {
+      filter: IFilter[String] = Filter.empty) = {
 
       from.lasts.foreach {
-        c ⇒ new SlaveTransition(c, to.first, condition, filtered)
+        c ⇒ new SlaveTransition(c, to.first, condition, filter)
       }
 
       Puzzle.merge(from.first, to.lasts, from :: to :: Nil)
@@ -81,9 +88,9 @@ package object transition {
     def >-(
       to: Puzzle,
       condition: ICondition = ICondition.True,
-      filtered: Iterable[String] = Set.empty,
+      filter: IFilter[String] = Filter.empty,
       trigger: ICondition = ICondition.False) = {
-      from.lasts.foreach { c ⇒ new AggregationTransition(c, to.first, condition, filtered, trigger) }
+      from.lasts.foreach { c ⇒ new AggregationTransition(c, to.first, condition, filter, trigger) }
       Puzzle.merge(from.first, to.lasts, from :: to :: Nil)
     }
 
@@ -96,14 +103,14 @@ package object transition {
     def >|(
       to: Puzzle,
       trigger: ICondition,
-      filtered: Iterable[String] = Set.empty) = {
-      from.lasts.foreach { c ⇒ new EndExplorationTransition(c, to.first, trigger, filtered) }
+      filter: IFilter[String] = Filter.empty) = {
+      from.lasts.foreach { c ⇒ new EndExplorationTransition(c, to.first, trigger, filter) }
       Puzzle.merge(from.first, to.lasts, from :: to :: Nil)
     }
 
-    def --(to: Puzzle, condition: ICondition = ICondition.True, filtered: Iterable[String] = Set.empty) = {
+    def --(to: Puzzle, condition: ICondition = ICondition.True, filter: IFilter[String] = Filter.empty) = {
       from.lasts.foreach {
-        c ⇒ new Transition(c, to.first, condition, filtered)
+        c ⇒ new Transition(c, to.first, condition, filter)
       }
       Puzzle.merge(from.first, to.lasts, from :: to :: Nil)
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Romain Reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,22 +18,14 @@
 package org.openmole.core.implementation.transition
 
 import org.openmole.core.implementation.tools._
-import org.openmole.core.model.tools._
 import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
-import org.openmole.core.model.transition.ICondition._
+import org.openmole.core.model.tools._
 import org.openmole.core.model.transition._
-import org.openmole.misc.exception._
+import scala.collection.mutable.ListBuffer
 
-class EndExplorationTransition(start: ICapsule, end: ISlot, trigger: ICondition, filter: IFilter[String] = Filter.empty) extends Transition(start, end, True, filter) {
+class EmptyExplorationTransition(start: ICapsule, end: ISlot, size: String, condition: ICondition = ICondition.True, filter: IFilter[String] = Filter.empty) extends ExplorationTransition(start, end, condition, filter) {
 
-  override protected def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
-    if (trigger.evaluate(context)) {
-      val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("End exploration transition should take place after an exploration."))
-      val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
-      super._perform(context, parentTicket, subMoleParent)
-      subMole.cancel
-    }
-  }
-
+  override def submitIn(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) =
+    for (i ← 0 until VariableExpansion.expandInt(context, size)) submitNextJobsIfReady(ListBuffer() ++ context.values, ticket, subMole)
 }

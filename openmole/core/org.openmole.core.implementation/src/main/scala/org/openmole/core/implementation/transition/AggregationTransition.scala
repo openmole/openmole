@@ -17,32 +17,21 @@
 
 package org.openmole.core.implementation.transition
 
-import java.util.logging.Logger
-import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.misc.tools.service.Priority
-import org.openmole.core.implementation.tools.ContextAggregator
+import org.openmole.misc.exception._
+import org.openmole.core.implementation.tools._
 import org.openmole.core.implementation.mole.Capsule._
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.mole.ITicket
-import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.mole.ISubMoleExecution
-import org.openmole.core.model.task.ITask
-import org.openmole.core.model.transition.IAggregationTransition
-import org.openmole.core.model.transition.ICondition
+import org.openmole.core.model.mole._
+import org.openmole.core.model.data._
+import org.openmole.core.model.job._
+import org.openmole.core.model.task._
+import org.openmole.core.model.transition._
+import org.openmole.core.model.tools._
 import org.openmole.core.model.transition.ICondition._
-import org.openmole.core.model.transition.ITransition
-import org.openmole.core.model.transition.IExplorationTransition
-import org.openmole.core.model.transition.ISlot
 import org.openmole.misc.tools.obj.ClassUtils._
-import scala.collection.immutable.TreeMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
-class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition = True, filtered: Iterable[String] = Iterable.empty[String], trigger: ICondition = ICondition.False) extends Transition(start, end, condition, filtered) with IAggregationTransition {
+class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition = True, filter: IFilter[String] = Filter.empty, trigger: ICondition = ICondition.False) extends Transition(start, end, condition, filter) with IAggregationTransition {
 
   override def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = subMole.aggregationTransitionRegistry.synchronized {
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration."))

@@ -17,30 +17,29 @@
 
 package org.openmole.core.implementation.data
 
-import org.openmole.core.model.transition.ISlot
-import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.core.model.transition._
+import org.openmole.misc.exception._
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.puzzle._
-import org.openmole.core.implementation.tools.LevelComputing
-import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
+import org.openmole.core.model.tools._
 import scala.collection.mutable.ListBuffer
 
 object DataChannel {
-  //def apply(p: Puzzle) = new DataChannel(p.first.capsule, p.lasts)
   def levelDelta(dataChannel: IDataChannel): Int = LevelComputing.levelDelta(dataChannel.start, dataChannel.end.capsule)
 }
 
 class DataChannel(
     val start: ICapsule,
     val end: ISlot,
-    val filtered: String*) extends IDataChannel {
+    val filter: IFilter[String]) extends IDataChannel {
+
+  def this(start: ICapsule, end: ISlot, filtered: String*) = this(start, end, Filter(filtered: _*))
 
   start.addOutputDataChannel(this)
   end.addInputDataChannel(this)
-
-  @transient lazy val filteredSet = filtered.toSet
 
   override def consums(ticket: ITicket, moleExecution: IMoleExecution): Iterable[IVariable[_]] = moleExecution.synchronized {
     val levelDelta = LevelComputing(moleExecution).levelDelta(start, end.capsule)
@@ -61,7 +60,7 @@ class DataChannel(
     val levelDelta = LevelComputing(moleExecution).levelDelta(start, end.capsule)
     val dataChannelRegistry = moleExecution.dataChannelRegistry
     if (levelDelta >= 0) {
-      val toContext = ListBuffer() ++ fromContext.values.filterNot(v ⇒ filteredSet.contains(v.prototype.name))
+      val toContext = ListBuffer() ++ fromContext.values.filterNot(v ⇒ filter(v.prototype.name))
       dataChannelRegistry.register(this, ticket, toContext)
     } else {
       val workingOnTicket = (levelDelta until 0).foldLeft(ticket) {
@@ -69,11 +68,11 @@ class DataChannel(
       }
 
       val toContext = dataChannelRegistry.getOrElseUpdate(this, workingOnTicket, new ListBuffer[IVariable[_]])
-      toContext ++= fromContext.values.filterNot(v ⇒ filteredSet.contains(v.prototype.name))
+      toContext ++= fromContext.values.filterNot(v ⇒ filter(v.prototype.name))
     }
 
   }
 
-  def data = start.outputs.filterNot(d ⇒ filteredSet.contains(d.prototype.name))
+  def data = start.outputs.filterNot(d ⇒ filter(d.prototype.name))
 
 }

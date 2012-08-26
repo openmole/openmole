@@ -17,13 +17,13 @@
 
 package org.openmole.core.implementation
 
-import org.openmole.core.implementation.puzzle.Puzzle
-import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.puzzle._
+import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.data.Context._
 import org.openmole.core.model.data._
 import org.openmole.misc.tools.obj.ClassUtils._
-import org.openmole.misc.tools.service.Random
-import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.tools.service._
+import org.openmole.misc.workspace._
 import scala.annotation.tailrec
 
 package object data {
@@ -35,6 +35,7 @@ package object data {
   implicit def dataIterableDecorator(data: Traversable[IData[_]]) = new DataSet(data.toList)
   //  implicit def iterableOfPrototypeToIterableOfDataConverter(prototypes: Traversable[IPrototype[_]]): Traversable[IData[_]] = DataSet(prototypes)
   implicit def prototypeToStringConverter(p: IPrototype[_]) = p.name
+  implicit def dataToStringConverter(d: IData[_]) = d.prototype.name
 
   implicit def prototypeToArrayDecorator[T](prototype: IPrototype[T]) = new {
     def toArray(level: Int): IPrototype[_] = {
@@ -75,5 +76,9 @@ package object data {
   implicit def variablesToContextConverter(variables: Traversable[IVariable[_]]): Context = variables.toContext
 
   val optional = DataModeMask.optional
+
+  implicit def prototypeDecorator[T](prototype: IPrototype[T]) = new {
+    def withName(name: String) = new Prototype[T](name)(prototype.`type`)
+  }
 
 }

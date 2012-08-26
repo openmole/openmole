@@ -19,7 +19,7 @@ package org.openmole.plugin.domain.range
 
 import org.openmole.misc.tools.io.FromString
 import org.openmole.core.model.data.IContext
-import org.openmole.core.implementation.tools.VariableExpansion._
+import org.openmole.core.implementation.tools._
 
 sealed class Range[T](val min: String, val max: String, val step: String = "1")(implicit integral: Integral[T], fs: FromString[T]) extends IRange[T] {
 
@@ -41,9 +41,9 @@ sealed class Range[T](val min: String, val max: String, val step: String = "1")(
     mi + ((max(context) - mi) / fromInt(2))
   }
 
-  override def step(context: IContext): T = fromString(expandData(context, step))
-  override def max(context: IContext): T = fromString(expandData(context, max))
-  override def min(context: IContext): T = fromString(expandData(context, min))
+  override def step(context: IContext): T = fromString(VariableExpansion(context, step))
+  override def max(context: IContext): T = fromString(VariableExpansion(context, max))
+  override def min(context: IContext): T = fromString(VariableExpansion(context, min))
 
 }
 

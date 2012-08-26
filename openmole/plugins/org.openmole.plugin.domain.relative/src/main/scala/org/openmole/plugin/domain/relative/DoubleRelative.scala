@@ -18,15 +18,15 @@
 package org.openmole.plugin.domain.relative
 
 import java.lang.Double
-import org.openmole.core.implementation.tools.VariableExpansion._
-import org.openmole.core.model.data.IContext
+import org.openmole.core.implementation.tools._
+import org.openmole.core.model.data._
 
 sealed class DoubleRelative(val nominal: String, val percent: String, val size: String) extends IRelative[Double] {
 
   override def computeValues(context: IContext): Iterable[Double] = {
-    val nom = expandData(context, nominal).toDouble
-    val pe = expandData(context, percent).toDouble
-    val s = expandData(context, size).toInt
+    val nom = VariableExpansion(context, nominal).toDouble
+    val pe = VariableExpansion(context, percent).toDouble
+    val s = VariableExpansion(context, size).toInt
 
     val min = nom * (1 - pe / 100.)
     if (s > 1) {

@@ -17,18 +17,14 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.domain.IBounded
-import org.openmole.core.implementation.tools.VariableExpansion._
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
+import org.openmole.core.implementation.tools._
 import math._
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IFinite
 
 sealed class DoubleLogarithmRange(val min: String, val max: String, val nbStep: String) extends IDomain[Double] with IFinite[Double] with IBounded[Double] {
 
   def this(min: Double, max: Double, nbStep: Int) = this(min.toString, max.toString, nbStep.toString)
-
-  //  override def range(context: IContext): Double = {max(context).doubleValue - min(context).doubleValue}
 
   override def computeValues(context: IContext): Iterable[Double] = {
     val mi = log(min(context).doubleValue)
@@ -45,8 +41,8 @@ sealed class DoubleLogarithmRange(val min: String, val max: String, val nbStep: 
     }
   }
 
-  def nbStep(context: IContext): Double = expandData(context, nbStep).toDouble
-  def min(context: IContext): Double = expandData(context, min).toDouble
-  def max(context: IContext): Double = expandData(context, max).toDouble
+  def nbStep(context: IContext): Double = VariableExpansion(context, nbStep).toDouble
+  def min(context: IContext): Double = VariableExpansion(context, min).toDouble
+  def max(context: IContext): Double = VariableExpansion(context, max).toDouble
 
 }

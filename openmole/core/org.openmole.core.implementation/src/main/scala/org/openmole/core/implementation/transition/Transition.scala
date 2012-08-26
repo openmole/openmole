@@ -17,29 +17,21 @@
 
 package org.openmole.core.implementation.transition
 
-import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.exception._
 import org.openmole.core.implementation.tools.ContextAggregator._
+import org.openmole.core.implementation.tools._
 import org.openmole.core.implementation.validation.TypeUtil._
 import org.openmole.core.implementation.data.Context._
-import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.mole.{ ICapsule, ITicket, ISubMoleExecution }
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.transition.{ ICondition, ITransition, ISlot }
+import org.openmole.core.model.data._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.tools._
+import org.openmole.core.model.transition._
 import org.openmole.core.implementation.mole.Capsule._
-import org.openmole.misc.tools.service.LockRepository
 import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.ListBuffer
 
-object Transition extends Logger {
-
-  def apply(
-    start: ICapsule,
-    end: ISlot,
-    condition: ICondition = ICondition.True,
-    filtered: Iterable[String] = Iterable.empty[String]) = new Transition(start, end, condition, filtered)
-
-}
+object Transition extends Logger
 
 import Transition._
 
@@ -47,12 +39,10 @@ class Transition(
     val start: ICapsule,
     val end: ISlot,
     val condition: ICondition = ICondition.True,
-    val filtered: Iterable[String] = Iterable.empty[String]) extends ITransition {
+    val filter: IFilter[String] = Filter.empty) extends ITransition {
 
   start.addOutputTransition(this)
   end += this
-
-  @transient lazy val filteredSet = filtered.toSet
 
   private def nextTaskReady(ticket: ITicket, subMole: ISubMoleExecution): Boolean = {
     val registry = subMole.transitionRegistry
@@ -86,11 +76,11 @@ class Transition(
   }
 
   override def perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) =
-    if (isConditionTrue(context)) _perform(context -- filtered, ticket, subMole)
+    if (isConditionTrue(context)) _perform(context.filterNot { case (n, _) ⇒ filter(n) }, ticket, subMole)
 
   override def isConditionTrue(context: IContext): Boolean = condition.evaluate(context)
 
-  override def data = start.outputs.filterNot(d ⇒ filteredSet.contains(d.prototype.name))
+  override def data = start.outputs.filterNot(d ⇒ filter(d.prototype.name))
 
   protected def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = submitNextJobsIfReady(ListBuffer() ++ context.values, ticket, subMole)
 

@@ -30,7 +30,7 @@ class DisplayHook(execution: IMoleExecution, capsule: ICapsule, toDisplay: Strin
 
   def this(execution: IMoleExecution, capsule: ICapsule, toDisplay: String) = this(execution, capsule, toDisplay, System.out)
 
-  override def process(moleJob: IMoleJob) = out.println(VariableExpansion.expandData(moleJob.context, toDisplay))
+  override def process(moleJob: IMoleJob) = out.println(VariableExpansion(moleJob.context, toDisplay))
 
   def inputs = DataSet.empty
 }

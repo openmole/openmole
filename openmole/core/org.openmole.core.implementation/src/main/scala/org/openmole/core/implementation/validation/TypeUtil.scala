@@ -17,15 +17,13 @@
 
 package org.openmole.core.implementation.validation
 
-import org.openmole.core.model.transition.IExplorationTransition
-import org.openmole.core.model.transition.ISlaveTransition
-import org.openmole.core.model.transition.ISlot
+import org.openmole.core.model.mole._
+import org.openmole.core.model.transition._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.core.model.data.DataModeMask._
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.transition.IAggregationTransition
-import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.model.data._
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.implementation.data.DataChannel
 import org.openmole.core.implementation.data.DataChannel._
@@ -45,33 +43,7 @@ object TypeUtil {
   class ComputedType(val name: String, val manifest: Manifest[_], val toArray: Boolean)
 
   def computeManifests(slot: ISlot): Iterable[ComputedType] = {
-    val direct = new HashMap[String, ListBuffer[Manifest[_]]]
-    val toArray = new HashMap[String, ListBuffer[Manifest[_]]]
-    val fromArray = new HashMap[String, ListBuffer[Manifest[_]]]
-    val varNames = new HashSet[String]
-
-    for (t ← slot.transitions; output ← t.data) {
-      def setFromArray =
-        if (output.mode is explore) fromArray.getOrElseUpdate(output.prototype.name, new ListBuffer[Manifest[_]]) += output.prototype.`type`
-        else direct.getOrElseUpdate(output.prototype.name, new ListBuffer) += output.prototype.`type`
-
-      varNames += output.prototype.name
-      t match {
-        case _: IAggregationTransition ⇒
-          toArray.getOrElseUpdate(output.prototype.name, new ListBuffer) += output.prototype.`type`
-        case _: IExplorationTransition ⇒ setFromArray
-        case _: ISlaveTransition ⇒ setFromArray
-        case _ ⇒ direct.getOrElseUpdate(output.prototype.name, new ListBuffer) += output.prototype.`type`
-      }
-    }
-
-    for (dc ← slot.inputDataChannels; d ← dc.data) {
-      varNames += d.prototype.name
-      if (DataChannel.levelDelta(dc) >= 0) direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
-      else toArray.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
-    }
-
-    def s(m: Iterable[Manifest[_]]) = intersectionArray(m map (_.erasure))
+    val (varNames, direct, toArray, fromArray) = computeManifests(slot.transitions, slot.inputDataChannels)
 
     varNames.map {
       import ListBuffer.empty
@@ -87,5 +59,37 @@ object TypeUtil {
           case (d, t, f) ⇒ throw new UserBadDataError("Type computation doesn't match specification, direct " + d + ", toArray " + t + ", fromArray " + f + " in " + slot)
         }
     }
+  }
+
+  private def s(m: Iterable[Manifest[_]]) = intersectionArray(m map (_.erasure))
+
+  private def computeManifests(transitions: Iterable[ITransition], dataChannels: Iterable[IDataChannel]) = {
+    val direct = new HashMap[String, ListBuffer[Manifest[_]]] // Direct transmission through transition or data channel
+    val toArray = new HashMap[String, ListBuffer[Manifest[_]]] // Transmission through exploration transition
+    val fromArray = new HashMap[String, ListBuffer[Manifest[_]]] // Transmission through aggregation transition
+    val varNames = new HashSet[String]
+
+    for (t ← transitions; d ← t.data) {
+      def setFromArray =
+        if (d.mode is explore) fromArray.getOrElseUpdate(d.prototype.name, new ListBuffer[Manifest[_]]) += d.prototype.`type`
+        else direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
+
+      varNames += d.prototype.name
+      t match {
+        case _: IAggregationTransition ⇒
+          toArray.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
+        case _: IExplorationTransition ⇒ setFromArray
+        case _: ISlaveTransition ⇒ setFromArray
+        case _ ⇒ direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
+      }
+    }
+
+    for (dc ← dataChannels; d ← dc.data) {
+      varNames += d.prototype.name
+      if (DataChannel.levelDelta(dc) >= 0) direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
+      else toArray.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
+    }
+
+    (varNames.toSet, direct.toMap, toArray.toMap, fromArray.toMap)
   }
 }

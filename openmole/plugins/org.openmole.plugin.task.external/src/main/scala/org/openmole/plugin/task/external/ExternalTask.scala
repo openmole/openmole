@@ -27,7 +27,7 @@ import org.openmole.core.model.data.IPrototype
 
 import org.openmole.core.implementation.data.Context._
 
-import org.openmole.core.implementation.tools.VariableExpansion._
+import org.openmole.core.implementation.tools._
 import org.openmole.misc.exception.UserBadDataError
 import scala.collection.mutable.ListBuffer
 import org.openmole.misc.tools.io.FileUtil._
@@ -47,20 +47,20 @@ trait ExternalTask extends Task {
 
   protected def listInputFiles(context: IContext): Iterable[ToPut] =
     inputFiles.map {
-      case (prototype, name, link) ⇒ new ToPut(context.valueOrException(prototype), expandData(context, name), link)
+      case (prototype, name, link) ⇒ new ToPut(context.valueOrException(prototype), VariableExpansion(context, name), link)
 
     }
 
   protected def listResources(context: IContext): Iterable[ToPut] =
     resources.map {
-      case (file, name, link) ⇒ new ToPut(file, expandData(context, name), link)
+      case (file, name, link) ⇒ new ToPut(file, VariableExpansion(context, name), link)
     }
 
   protected def listOutputFiles(context: IContext, localDir: File): (IContext, Iterable[ToGet]) = {
     val files =
       outputFiles.map {
         case (name, prototype) ⇒
-          val fileName = expandData(context, name)
+          val fileName = VariableExpansion(context, name)
           val file = new File(localDir, fileName)
 
           val fileVariable = new Variable(prototype, file)

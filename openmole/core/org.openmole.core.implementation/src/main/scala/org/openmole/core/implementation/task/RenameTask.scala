@@ -25,6 +25,9 @@ object RenameTask {
 
   def apply[T](name: String, source: IPrototype[T], destination: IPrototype[T])(implicit plugins: IPluginSet = PluginSet.empty) =
     new TaskBuilder { builder ⇒
+      addInput(source)
+      addOutput(destination)
+
       def toTask =
         new RenameTask(name, source, destination) {
           val inputs = builder.inputs

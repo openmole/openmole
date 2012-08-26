@@ -43,7 +43,7 @@ class AppendFileHook(moleExecution: IMoleExecution, capsule: ICapsule, prototype
     context.value(prototype) match {
       case Some(from) ⇒
 
-        val to = new File(VariableExpansion.expandData(context, outputFile))
+        val to = new File(VariableExpansion(context, outputFile))
         if (!from.exists) throw new UserBadDataError("The file " + from + " does not exist.")
 
         if (!to.exists) {

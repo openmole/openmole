@@ -34,25 +34,20 @@ object VariableExpansion {
   private val patternEnd = '}'
   private val eval = "$" + patternBegin
 
-  def expandBigDecimalData(context: IContext, s: String): BigDecimal = {
-    BigDecimal(expandData(context, s))
-  }
+  def expandBigDecimal(context: IContext, s: String): BigDecimal =
+    BigDecimal(apply(context, s))
 
-  def expandDoubleData(context: IContext, s: String): Double = {
-    expandData(context, s).toDouble
-  }
+  def expandDouble(context: IContext, s: String): Double =
+    apply(context, s).toDouble
 
-  def expandIntegerData(context: IContext, s: String): Int = {
-    expandData(context, s).toInt
-  }
+  def expandInt(context: IContext, s: String): Int =
+    apply(context, s).toInt
 
-  def expandData(context: IContext, s: String): String = {
-    expandData(context, Iterable.empty, s)
-  }
+  def apply(context: IContext, s: String): String =
+    apply(context, Iterable.empty, s)
 
-  def expandData(context: IContext, tmpVariable: Iterable[IVariable[_]], s: String): String = {
+  def apply(context: IContext, tmpVariable: Iterable[IVariable[_]], s: String): String =
     expandDataInernal(context, tmpVariable, s)
-  }
 
   private def expandDataInernal(context: IContext, tmpVariable: Iterable[IVariable[_]], s: String): String = {
     var ret = s
@@ -157,7 +152,7 @@ object VariableExpansion {
               closebrace += 1
               appendChar(n)
               if (openbrace == closebrace) {
-                oswriter.write(expandData(context, esbuilder.toString))
+                oswriter.write(apply(context, esbuilder.toString))
                 expandTime = false
                 openbrace = 0
                 closebrace = 0
@@ -171,7 +166,7 @@ object VariableExpansion {
   }
 
   implicit def stringExpansionDecorator(s: String) = new {
-    def expand(context: IContext) = expandData(context, s)
+    def expand(context: IContext) = apply(context, s)
   }
 
 }

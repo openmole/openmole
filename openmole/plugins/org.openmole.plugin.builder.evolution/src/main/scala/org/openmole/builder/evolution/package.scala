@@ -31,6 +31,7 @@ import org.openmole.core.model.domain._
 import org.openmole.plugin.method.evolution._
 import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.transition._
+import org.openmole.core.implementation.tools._
 
 package object evolution {
 
@@ -110,7 +111,7 @@ package object evolution {
     firstCapsule --
       initialBreedTask -<
       scalingCaps --
-      (model, filtered = Set(genome.name)) --
+      (model, filter = Filter(genome)) --
       toIndividualCapsule --
       elitismCaps --
       scalingArchiveCapsule --
@@ -123,7 +124,7 @@ package object evolution {
 
     new DataChannel(firstCapsule, model.first, archive)
     new DataChannel(firstCapsule, endCapsule, archive)
-    new DataChannel(firstCapsule, elitismCaps)
+    new DataChannel(firstCapsule, elitismCaps, filter = Filter not archive)
 
     val (_state, _generation, _genome, _individual, _archive, _inputs, _objectives, _populationSize) = (state, generation, genome, individual, archive, inputs, objectives, populationSize)
 
@@ -156,6 +157,8 @@ package object evolution {
     import islandEvolution._
 
     val archive = model.archive.asInstanceOf[IPrototype[Population[islandEvolution.G, islandEvolution.MF]]]
+    val initialArchive = model.archive.withName(name + "InitialArchive")
+
     val individual = model.individual.asInstanceOf[IPrototype[Individual[islandEvolution.G]]]
     val genome = model.genome.asInstanceOf[IPrototype[islandEvolution.G]]
 
@@ -164,9 +167,6 @@ package object evolution {
     val terminated = new Prototype[Boolean](name + "Terminated")
 
     val firstCapsule = new StrainerCapsule(EmptyTask(name + "First"))
-
-    val sampling = IslandSampling(islandEvolution)(genome.toArray, model.populationSize, island)
-    val exploration = ExplorationTask(name + "IslandExploration", sampling)
 
     val archiveToIndividual = ArchiveToIndividualArrayTask(name + "ArchiveToInidividualArray", model.archive, model.individual)
 
@@ -186,7 +186,19 @@ package object evolution {
 
     val endCapsule = new StrainerCapsule(EmptyTask(name + "End"))
 
+    val preIslandTask = EmptyTask(name + "PreIsland")
+    preIslandTask addInput archive
+    preIslandTask addOutput archive
+    preIslandTask addParameter (archive -> Population.empty)
+
+    val preIslandCapsule = new StrainerCapsule(preIslandTask)
+
     val islandCapsule = new Capsule(MoleTask(name + "MoleTask", model))
+
+    val renameArchiveCapsule = new Capsule(RenameTask(name + "RenameArchive", archive, initialArchive))
+
+    val filterPopulationTask = FilterPopulationTask(name + "FilterPopulationTask", archive, initialArchive)
+    val filterPopulationCapsule = new StrainerCapsule(filterPopulationTask)
 
     val scalingArchiveTask = ScalingGAArchiveTask(name + "ScalingArchive", archive, model.inputs.toSeq: _*)
 
@@ -205,15 +217,17 @@ package object evolution {
 
     val scalingArchiveCapsule = new Capsule(scalingArchiveTask)
 
-    firstCapsule --
-      exploration -<
+    firstCapsule -<
+      (preIslandCapsule, size = island.toString) --
       islandCapsule --
       archiveToIndividual --
       elitismCaps --
       scalingArchiveCapsule --
+      filterPopulationCapsule --
       breedingTask --
-      islandCapsule.newSlot
+      preIslandCapsule.newSlot
 
+    preIslandCapsule -- (renameArchiveCapsule, filter = Filter not archive) -- filterPopulationCapsule
     scalingArchiveCapsule >| (endCapsule, terminated.name + " == true")
 
     new DataChannel(firstCapsule, islandCapsule)

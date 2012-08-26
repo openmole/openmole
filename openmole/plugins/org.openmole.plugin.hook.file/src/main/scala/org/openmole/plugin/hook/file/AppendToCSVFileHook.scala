@@ -40,7 +40,7 @@ class AppendToCSVFileHook(
 
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
-    val file = new File(VariableExpansion.expandData(context, fileName))
+    val file = new File(VariableExpansion(context, fileName))
     if (!file.getParentFile.exists) file.getParentFile.mkdirs
     if (!file.getParentFile.isDirectory) throw new UserBadDataError("Cannot create directory " + file.getParentFile)
 
