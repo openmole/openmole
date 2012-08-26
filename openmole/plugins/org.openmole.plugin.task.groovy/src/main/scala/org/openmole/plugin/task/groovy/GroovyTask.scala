@@ -18,11 +18,11 @@
 package org.openmole.plugin.task.groovy
 
 import java.io.File
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.model.task._
 import org.openmole.misc.tools.io.FileUtil.fileOrdering
 import org.openmole.plugin.task.code._
-import org.openmole.core.implementation.task.PluginSet
-import org.openmole.core.model.data.IContext
+import org.openmole.core.implementation.task._
+import org.openmole.core.model.data._
 import org.openmole.plugin.tools.groovy.ContextToGroovyCode
 
 object GroovyTask {
@@ -31,6 +31,16 @@ object GroovyTask {
   def newFile() = org.openmole.misc.workspace.Workspace.newFile
   def newDir() = org.openmole.misc.workspace.Workspace.newDir
 
+  /**
+   * Instanciate a builder for the groovy task
+   *
+   * val hello = GroovyTask("hello", "println('Hello world! ' + i + ' ' + j)")
+   *
+   * @see CodeTaskBuilder for more info on addImport, addLib...
+   *
+   * @param name the task name
+   * @param code the groovy source code
+   */
   def apply(
     name: String,
     code: String)(implicit plugins: IPluginSet) =

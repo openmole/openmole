@@ -175,24 +175,11 @@ class Workspace(val location: File) {
     configuration
   }
 
-  def clean = {
-    /*run.contentOption match {
-      case Some(uuid) ⇒
-        if (!uuid.isEmpty && UUID.fromString(uuid).compareTo(sessionUUID) == 0) run.delete
-      case None ⇒
-    }*/
-
-    tmpDir.recursiveDelete
-  }
+  def clean = tmpDir.recursiveDelete
 
   def newDir(prefix: String): File = {
-    //val tempFile = File.createTempFile(prefix, "", tmpDir)
     val tempFile = newFile(prefix, "")
-
-    //if (!tempFile.delete) throw new IOException
     if (!tempFile.mkdir) throw new IOException
-
-    //tempFile.deleteOnExit
     tempFile
   }
 

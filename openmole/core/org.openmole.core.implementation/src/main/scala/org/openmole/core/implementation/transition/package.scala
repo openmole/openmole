@@ -32,8 +32,6 @@ import data._
 
 package object transition {
 
-  //def newJoin = new StrainerCapsule(EmptyTask("join"))
-  //
   implicit def transitionsPuzzleDecorator(from: Puzzle) = new TransitionDecorator(from)
   implicit def transitionsCapsuleDecorator(from: ICapsule) = new TransitionDecorator(from.toPuzzle)
   implicit def transitionsTaskDecorator(from: ITask) = new TransitionDecorator(from)
