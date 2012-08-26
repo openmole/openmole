@@ -17,41 +17,31 @@
 
 package org.openmole.ide.core.implementation.serializer
 
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.execution.IEnvironment
-import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.data._
+import org.openmole.core.model.execution._
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.registry.PrototypeKey
 import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
 import org.openmole.ide.core.model.commons.TransitionType._
-import org.openmole.core.model.mole.IEnvironmentSelection
-import org.openmole.core.model.mole.IGrouping
-import org.openmole.core.model.mole.IMole
 import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.data.IMoleDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.core.implementation.task._
 import java.io.File
-import org.openmole.core.implementation.data.DataChannel
-import org.openmole.core.implementation.data.DataSet
-import org.openmole.core.implementation.data.Parameter
-import org.openmole.core.implementation.data.ParameterSet
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.transition._
+import org.openmole.core.implementation.tools._
 import org.openmole.ide.misc.tools.check.TypeCheck
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.ide.core.model.workflow.IDataChannelUI
-import org.openmole.ide.core.model.workflow.IInputSlotWidget
-import org.openmole.ide.core.model.workflow.IMoleSceneManager
-import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.task.ITask
-import org.openmole.core.model.transition.ICondition
-import org.openmole.core.model.transition.ISlot
+import org.openmole.ide.core.model.workflow._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.task._
+import org.openmole.core.model.transition._
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.dataproxy.Proxys
-import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.workflow.ITransitionUI
+import org.openmole.ide.core.model.workflow._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
@@ -105,7 +95,7 @@ object MoleMaker {
                     x, prototypeMap)
                 case x: IDataChannelUI ⇒ new DataChannel(capsuleMap(x.source),
                   capsuleMap(x.target.capsule),
-                  x.filteredPrototypes.map { p ⇒ prototypeMap(p).name }.toSeq: _*)
+                  Filter(x.filteredPrototypes.map { p ⇒ prototypeMap(p).name }.toSeq: _*))
               }
             }
         }
@@ -187,9 +177,9 @@ object MoleMaker {
     val filtered = t.filteredPrototypes.map { p ⇒ prototypeMap(p).name }
     val condition: ICondition = if (t.condition.isDefined) new Condition(t.condition.get) else ICondition.True
     t.transitionType match {
-      case BASIC_TRANSITION ⇒ new Transition(sourceCapsule, targetSlot, condition, filtered)
-      case AGGREGATION_TRANSITION ⇒ new AggregationTransition(sourceCapsule, targetSlot, condition, filtered)
-      case EXPLORATION_TRANSITION ⇒ new ExplorationTransition(sourceCapsule, targetSlot, condition, filtered)
+      case BASIC_TRANSITION ⇒ new Transition(sourceCapsule, targetSlot, condition, Filter(filtered: _*))
+      case AGGREGATION_TRANSITION ⇒ new AggregationTransition(sourceCapsule, targetSlot, condition, Filter(filtered: _*))
+      case EXPLORATION_TRANSITION ⇒ new ExplorationTransition(sourceCapsule, targetSlot, condition, Filter(filtered: _*))
       case _ ⇒ throw new UserBadDataError("No matching type between capsule " + sourceCapsule + " and " + targetSlot + ". The transition can not be built")
     }
   }

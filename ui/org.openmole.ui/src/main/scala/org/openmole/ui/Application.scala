@@ -71,14 +71,6 @@ class Application extends IApplication with Logger {
     val filtredArgs = args.filterNot((_: String) == "-c")
 
     parser.parse(filtredArgs, Config()) foreach { config ⇒
-
-      /*val workspaceLocation = config.workspaceDir match {
-        case Some(w) ⇒ new File(w)
-        case None ⇒ Workspace.defaultLocation
-      }*/
-
-      //if (config.workspaceDir.isDefined) Workspace.instance = new Workspace(workspaceLocation)
-
       if (console) {
         try {
           val headless = GraphicsEnvironment.getLocalGraphicsEnvironment.isHeadlessInstance
@@ -86,9 +78,6 @@ class Application extends IApplication with Logger {
         } catch {
           case e ⇒ logger.log(FINE, "Error in splash screen closing", e)
         }
-        /*if (Workspace.anotherIsRunningAt(workspaceLocation))
-          logger.severe("Application is already runnig at " + workspaceLocation.getAbsolutePath + ". If it is not the case please remove the file '" + new File(workspaceLocation, Workspace.running).getAbsolutePath() + "'.")
-        else {*/
 
         config.pluginsDirs.foreach { PluginManager.loadDir }
 
@@ -97,7 +86,6 @@ class Application extends IApplication with Logger {
 
         val console = new Console(new PluginSet(userPlugins))
         console.run
-        // }
       } else {
 
         config.pluginsDirs.foreach { PluginManager.loadDir }
