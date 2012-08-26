@@ -21,6 +21,11 @@ import java.io.File
 import org.openmole.plugin.task.external.ExternalTaskBuilder
 import scala.collection.mutable.ListBuffer
 
+/** Builder for any code task 
+ *
+ * The code task builder is an external task builder, you may want to look
+ * at the @see ExternalTaskBuilder for a complement of documentation.
+ */
 abstract class CodeTaskBuilder extends ExternalTaskBuilder {
   private var _imports = new ListBuffer[String]
   private var _libraries = new ListBuffer[File]
@@ -28,11 +33,28 @@ abstract class CodeTaskBuilder extends ExternalTaskBuilder {
   def imports = _imports.toList
   def libraries = _libraries.toList
 
+  /** Add a namespace import and make it available to in the task
+   *
+   * For instance addImport("java.io.*") in a groovy task make the content of the
+   * java.io package available in the groovy code.
+   *
+   * @param s a namespace   
+   */
   def addImport(s: String) = {
     _imports += s
     this
   }
 
+  /** Add a library and make it available to the task
+   * 
+   * For instance addLib("/tmp/malib.jar") in a groovy task make the content of the
+   * jar available to the task. This method support jars but has some limitation. The
+   * best way to use your own bytecode (java, scala, groovy, jython) in OpenMOLE is
+   * building an OpenMOLE plugin (see the section on openmole.org for details). 
+   * 
+   * @param l a jar file
+   * 
+   */
   def addLib(l: File) = {
     _libraries += l
     this
