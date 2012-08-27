@@ -17,30 +17,79 @@
 
 package org.openmole.plugin.task.systemexec
 
+import org.openmole.core.implementation.task._
+import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data._
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.model.task._
+import org.openmole.misc.exception._
+import org.openmole.misc.tools.io.StringBuilderOutputStream
 import org.openmole.misc.tools.service.ProcessUtil._
+import java.io.File
+import java.io.IOException
+import java.io.PrintStream
+import org.apache.commons.exec.CommandLine
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.tools.VariableExpansion._
-import org.openmole.plugin.task.external.ExternalTaskBuilder
+import org.openmole.misc.workspace._
+import org.openmole.plugin.task.external._
 import scala.collection.JavaConversions._
+import scala.collection.mutable.ListBuffer
 
 object SystemExecTask {
 
+  /**
+   * System exec task execute an external process.
+   * To communicate with the dataflow the result should be either a file / dir or the return
+   * value of the process.
+   *
+   * @param name the name of the task
+   * @param command the command to run. The command is expanded before evalualtion.
+   * @param directory a subdirectory of the workspace that serve as reference for the command
+   * execution and the files deployment / gathering
+   * @param errorOnReturnCode if true an exception is thrown by the task in case the return
+   * value of the process is not 0
+   * @param returnValue optionally a prototype to output the return value of the process
+   * @param output optionally a prototype to output the standard output of the process
+   * @param error optionally a prototype to output the standard error output of the process
+   *
+   */
   def apply(
     name: String,
-    cmd: String,
-    dir: String = "",
-    exceptionIfReturnValueNotZero: Boolean = true,
-    returnValue: Option[IPrototype[Int]] = None)(implicit plugins: IPluginSet) = new AbstractSystemExecTask.Builder { builder ⇒
-    def toTask = new SystemExecTask(name, cmd, dir, exceptionIfReturnValueNotZero, returnValue) {
+    command: String,
+    directory: String = "",
+    errorOnReturnCode: Boolean = true,
+    returnValue: Option[IPrototype[Int]] = None,
+    output: Option[IPrototype[String]] = None,
+    error: Option[IPrototype[String]] = None)(implicit plugins: IPluginSet) = new ExternalTaskBuilder { builder ⇒
+
+    List(output, error, returnValue).flatten.foreach(p ⇒ addOutput(p))
+
+    private val _variables = new ListBuffer[(IPrototype[_], String)]
+
+    def variables = _variables.toList
+
+    /**
+     * Add variable from openmole to the environment of the system exec task. The
+     * environment variable is set using a toString of the openmole variable content.
+     *
+     * @param prototype the prototype of the openmole variable to inject in the environment
+     * @param variable the name of the environment variable. By default the name of the environment
+     * variable is the same as the one of the openmole protoype.
+     */
+    def addVariable(prototype: IPrototype[_], variable: String): this.type = {
+      _variables += prototype -> variable
+      addInput(prototype)
+      this
+    }
+
+    def addVariable(prototype: IPrototype[_]): this.type = addVariable(prototype, prototype.name)
+
+    def toTask = new SystemExecTask(name, command, directory, errorOnReturnCode, returnValue, output, error, variables) {
       val inputs = builder.inputs
       val outputs: IDataSet = builder.outputs ++ DataSet(returnValue)
       val parameters = builder.parameters
       val inputFiles = builder.inputFiles
       val outputFiles = builder.outputFiles
       val resources = builder.resources
-      val variables = builder.variables
     }
   }
 
@@ -48,9 +97,64 @@ object SystemExecTask {
 
 sealed abstract class SystemExecTask(
     val name: String,
-    val cmd: String,
-    val dir: String,
-    val exceptionIfReturnValueNotZero: Boolean,
-    val returnValue: Option[IPrototype[Int]])(implicit val plugins: IPluginSet) extends AbstractSystemExecTask {
-  override protected def execute(process: Process, context: IContext) = executeProcess(process, System.out, System.err) -> List.empty[IVariable[_]]
+    val command: String,
+    val directory: String,
+    val errorOnReturnCode: Boolean,
+    val returnValue: Option[IPrototype[Int]],
+    val output: Option[IPrototype[String]],
+    val error: Option[IPrototype[String]],
+    val variables: Iterable[(IPrototype[_], String)])(implicit val plugins: IPluginSet) extends ExternalTask {
+
+  override protected def process(context: IContext) = {
+    val tmpDir = Workspace.newDir("systemExecTask")
+
+    val workDir = if (directory.isEmpty) tmpDir else new File(tmpDir, directory)
+    val links = prepareInputFiles(context, tmpDir, directory)
+    val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + VariableExpansion(context, List(new Variable(ExternalTask.PWD, workDir.getAbsolutePath)), command))
+
+    try {
+      val f = new File(commandLine.getExecutable)
+      //logger.fine(f + " " + f.exists)
+      val process = Runtime.getRuntime.exec(
+        commandLine.toString,
+        variables.map { case (p, v) ⇒ v + "=" + context.valueOrException(p).toString }.toArray,
+        workDir)
+
+      execute(process, context) match {
+        case (retCode, variables) ⇒
+          if (errorOnReturnCode && retCode != 0) throw new InternalProcessingError("Error executing: " + commandLine + " return code was not 0 but " + retCode)
+
+          val retContext = fetchOutputFiles(context, workDir, links) ++ variables
+
+          returnValue match {
+            case None ⇒ retContext
+            case Some(returnValue) ⇒ retContext + (returnValue, retCode)
+          }
+      }
+    } catch {
+      case e: IOException ⇒ throw new InternalProcessingError(e, "Error executing: " + commandLine)
+    }
+  }
+
+  protected def execute(process: Process, context: IContext) = {
+    val outBuilder = new StringBuilder
+    val errBuilder = new StringBuilder
+
+    val out = output match {
+      case Some(_) ⇒ new PrintStream(new StringBuilderOutputStream(outBuilder))
+      case None ⇒ System.out
+    }
+    val err = error match {
+      case Some(_) ⇒ new PrintStream(new StringBuilderOutputStream(errBuilder))
+      case None ⇒ System.err
+    }
+
+    val r = executeProcess(process, out, err)
+
+    (
+      r,
+      List(
+        output.map { o ⇒ new Variable(o, outBuilder.toString) },
+        error.map { e ⇒ new Variable(e, errBuilder.toString) }).flatten)
+  }
 }
