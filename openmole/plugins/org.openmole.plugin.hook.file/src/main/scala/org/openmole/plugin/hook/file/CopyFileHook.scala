@@ -19,20 +19,22 @@ package org.openmole.plugin.hook.file
 
 import java.io.File
 
-import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.mole._
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.hook.CapsuleExecutionHook
-import org.openmole.core.model.data.IPrototype
-
-import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.implementation.hook._
+import org.openmole.core.model.data._
+import org.openmole.core.model.job._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.implementation.tools._
 import org.openmole.misc.exception.UserBadDataError
 
-class CopyFileHook(moleExecution: IMoleExecution, capsule: ICapsule, filePrototype: IPrototype[File], destination: String, remove: Boolean, compress: Boolean) extends CapsuleExecutionHook(moleExecution, capsule) {
-
-  def this(moleExecution: IMoleExecution, capsule: ICapsule, filePrototype: IPrototype[File], destination: String) = this(moleExecution, capsule, filePrototype, destination, false, false)
+class CopyFileHook(
+  moleExecution: IMoleExecution,
+  capsule: ICapsule,
+  filePrototype: IPrototype[File],
+  destination: String,
+  remove: Boolean = false,
+  compress: Boolean = false) extends CapsuleExecutionHook(moleExecution, capsule) {
 
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
