@@ -20,7 +20,7 @@ package org.openmole.plugin.domain
 import java.io.File
 
 package object file {
-  
+
   implicit def stringToFilter(pattern: String) = (_: File).getName.matches(pattern)
-  
+
 }

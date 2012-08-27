@@ -32,14 +32,13 @@ sealed class ListFilesDomain(base: File, subdirectory: String = "", filter: File
 
   override def computeValues(context: IContext): Iterable[File] = {
     val dir = new File(base, VariableExpansion(context, subdirectory))
-    
+
     Option(dir.listFiles(filter)) match {
-      case Some(f) => f
-      case None =>
+      case Some(f) ⇒ f
+      case None ⇒
         ListFilesDomain.logger.warning("Directory " + dir + " in ListFilesDomain doesn't exists, returning an empty list of values.")
         Iterable.empty
     }
   }
-  
 
 }
