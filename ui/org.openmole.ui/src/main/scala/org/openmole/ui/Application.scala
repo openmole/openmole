@@ -50,7 +50,9 @@ class Application extends IApplication with Logger {
       pluginsDirs: List[String] = Nil,
       guiPluginsDirs: List[String] = Nil,
       userPlugins: List[String] = Nil,
-      workspaceDir: Option[String] = None)
+      workspaceDir: Option[String] = None,
+      scriptFile: Option[String] = None,
+      password: Option[String] = None)
 
     val parser = new OptionParser[Config]("openmole", "0.x") {
       def options = Seq(
@@ -62,6 +64,12 @@ class Application extends IApplication with Logger {
         },
         opt("p", "userPlugins", "Plugins (seperated by \" \")") {
           (v: String, c: Config) ⇒ c.copy(userPlugins = v.split(' ').toList)
+        },
+        opt("s", "script", "Script file to execute") {
+          (v: String, c: Config) ⇒ c.copy(scriptFile = Some(v))
+        },
+        opt("pw", "password", "Password for the preferences encryption") {
+          (v: String, c: Config) ⇒ c.copy(password = Some(v))
         })
     }
 
@@ -84,7 +92,7 @@ class Application extends IApplication with Logger {
         val userPlugins = config.userPlugins.map { new File(_) }.toSet
         PluginManager.load(userPlugins)
 
-        val console = new Console(new PluginSet(userPlugins))
+        val console = new Console(new PluginSet(userPlugins), config.password, config.scriptFile)
         console.run
       } else {
 
