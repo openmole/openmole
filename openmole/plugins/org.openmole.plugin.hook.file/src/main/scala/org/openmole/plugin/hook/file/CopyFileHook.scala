@@ -29,12 +29,12 @@ import org.openmole.core.implementation.tools._
 import org.openmole.misc.exception.UserBadDataError
 
 class CopyFileHook(
-  moleExecution: IMoleExecution,
-  capsule: ICapsule,
-  filePrototype: IPrototype[File],
-  destination: String,
-  remove: Boolean = false,
-  compress: Boolean = false) extends CapsuleExecutionHook(moleExecution, capsule) {
+    moleExecution: IMoleExecution,
+    capsule: ICapsule,
+    filePrototype: IPrototype[File],
+    destination: String,
+    remove: Boolean = false,
+    compress: Boolean = false) extends CapsuleExecutionHook(moleExecution, capsule) {
 
   override def process(moleJob: IMoleJob) = {
     import moleJob.context

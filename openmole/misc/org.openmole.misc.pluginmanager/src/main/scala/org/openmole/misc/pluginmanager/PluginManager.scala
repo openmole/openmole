@@ -30,7 +30,7 @@ import org.osgi.framework.BundleEvent
 import org.osgi.framework.BundleListener
 import scala.collection.JavaConversions._
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.hashservice.HashService
+import org.openmole.misc.fileservice._
 
 object PluginManager {
 
@@ -134,11 +134,12 @@ object PluginManager {
     files.get(file) match {
       case None ⇒
         val ret = Activator.contextOrException.installBundle(file.toURI.toString)
-        files += file -> ((ret.getBundleId, HashService.computeHash(file)))
+        files += file -> ((ret.getBundleId, FileService.hash(ret, file)))
         ret
       case Some(bundleId) ⇒
         val bundle = Activator.contextOrException.getBundle(bundleId._1)
-        if (HashService.computeHash(file) != bundleId._2) {
+        FileService.invalidate(bundle, file)
+        if (FileService.hash(bundle, file) != bundleId._2) {
           val is = new FileInputStream(f)
           try bundle.update(is)
           finally is.close
@@ -148,8 +149,6 @@ object PluginManager {
   }
 
   private def updateDependencies = synchronized {
-    //Activator.contextOrException.getBundles.foreach{b => println(b.getLocation)}
-
     val bundles = Activator.contextOrException.getBundles.filter(!_.isSystem)
 
     resolvedDirectDependencies = new HashMap[Long, HashSet[Long]]
@@ -165,7 +164,7 @@ object PluginManager {
 
     resolvedPluginDependenciesCache = new HashMap[Long, Iterable[Long]]
     providedDependencies = dependencies(bundles.filter(b ⇒ b.isProvided).map { _.getBundleId }).toSet
-    files = bundles.map(b ⇒ b.file.getAbsoluteFile -> ((b.getBundleId, HashService.computeHash(b.file)))).toMap
+    files = bundles.map(b ⇒ b.file.getAbsoluteFile -> ((b.getBundleId, FileService.hash(b, b.file)))).toMap
   }
 
   private def dependingBundles(b: Bundle): Iterable[Bundle] = {

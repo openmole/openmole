@@ -47,6 +47,8 @@ object FileService {
     if (file.isDirectory) hash(archiveForDir(file).file(false), file)
     else hash(file, file)
 
+  def invalidate(key: Object, file: File) = hashCache.invalidateCache(key, file.getAbsolutePath)
+
   def archiveForDir(file: File): IFileCache = archiveForDir(file, file)
 
   def hash(key: Object, file: File): IHash = hashCache.cache(key, file.getAbsolutePath, HashService.computeHash(file))
