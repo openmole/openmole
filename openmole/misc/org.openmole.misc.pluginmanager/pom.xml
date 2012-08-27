@@ -24,11 +24,6 @@
             <artifactId>org.openmole.misc.tools</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.misc.fileservice</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 
 
