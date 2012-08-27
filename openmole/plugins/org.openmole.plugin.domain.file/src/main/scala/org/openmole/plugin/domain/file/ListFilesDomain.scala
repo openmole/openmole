@@ -18,6 +18,7 @@
 package org.openmole.plugin.domain.file
 
 import java.io.File
+import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data.IContext
 import org.openmole.core.model.domain.IDomain
 import org.openmole.misc.tools.service.Logger
@@ -27,22 +28,18 @@ import org.openmole.misc.tools.io.FileUtil._
 
 object ListFilesDomain extends Logger
 
-sealed class ListFilesDomain(baseDir: File, filter: File ⇒ Boolean) extends IDomain[File] with IFinite[File] {
-
-  import ListFilesDomain._
-
-  def this(dir: File) = this(dir, f ⇒ true)
-  def this(dir: File, pattern: String) = this(dir, _.getName.matches(pattern))
-  def this(dir: String, pattern: String) = this(new File(dir), _.getName.matches(pattern))
-  def this(dir: String) = this(new File(dir))
+sealed class ListFilesDomain(base: File, subdirectory: String = "", filter: File ⇒ Boolean = f ⇒ true) extends IDomain[File] with IFinite[File] {
 
   override def computeValues(context: IContext): Iterable[File] = {
-    val files = baseDir.listFiles(filter)
-
-    if (files == null) {
-      logger.warning("Directory " + baseDir + " in ListFilesDomain doesn't exists, returning an empty list of values.")
-      Iterable.empty
-    } else files
+    val dir = new File(base, VariableExpansion(context, subdirectory))
+    
+    Option(dir.listFiles(filter)) match {
+      case Some(f) => f
+      case None =>
+        ListFilesDomain.logger.warning("Directory " + dir + " in ListFilesDomain doesn't exists, returning an empty list of values.")
+        Iterable.empty
+    }
   }
+  
 
 }
