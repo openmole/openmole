@@ -113,10 +113,10 @@ object SSHAuthentificationPanelUI {
         displayAuthentification
     }
 
-    val hostTextField = new TextField("zebulon.iscpif.fr", 15)
+    val hostTextField = new TextField("", 15)
 
     contents += new PluginPanel("") {
-      contents += new Label("zebulon.iscpif.fr")
+      contents += new Label("")
       contents += hostTextField
     }
     contents += authentificationTypeComboBox
