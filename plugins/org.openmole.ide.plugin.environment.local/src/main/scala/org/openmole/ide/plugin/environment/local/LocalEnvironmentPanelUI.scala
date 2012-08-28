@@ -26,9 +26,9 @@ import scala.swing.TabbedPane
 import scala.swing.TextField
 
 class LocalEnvironmentPanelUI(pud: LocalEnvironmentDataUI) extends PluginPanel("wrap 2") with IEnvironmentPanelUI {
-  
+
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
-  
+
   val nbThreadTextField = new TextField(6)
   tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("wrap 2") {
     contents += (new Label("Number of threads"), "gap para")
@@ -38,7 +38,7 @@ class LocalEnvironmentPanelUI(pud: LocalEnvironmentDataUI) extends PluginPanel("
   nbThreadTextField.text = pud.nbThread.toString
 
   override def helpMap = Map(nbThreadTextField -> (i18n.getString("thread"), i18n.getString("threadEx")))
-  
+
   override def saveContent(name: String) = new LocalEnvironmentDataUI(name,
     nbThreadTextField.text.toInt)
 }

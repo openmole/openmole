@@ -20,6 +20,8 @@ package org.openmole.ide.plugin.environment.ssh
 import java.util.Locale
 import java.util.ResourceBundle
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
+import org.openmole.ide.misc.widget.Help
+import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
 import scala.swing.TabbedPane
@@ -54,11 +56,24 @@ class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fill
     contents += runTimeMemoryTextField
   })
 
-  override def helpMap = Map(loginTextField -> (i18n.getString("login"), i18n.getString("loginEx")),
-    hostTextField -> (i18n.getString("host"), i18n.getString("hostEx")),
-    nbSlotTextField -> (i18n.getString("nbSlot"), i18n.getString("nbSlotEx")),
-    dirTextField -> (i18n.getString("dir"), i18n.getString("dirEx")),
-    runTimeMemoryTextField -> (i18n.getString("runTimeMemory"), i18n.getString("runTimeMemoryEx")))
+  override val help = new Helper {
+    add(loginTextField,
+      new Help(i18n.getString("login"),
+        i18n.getString("loginEx")))
+    add(hostTextField,
+      new Help(i18n.getString("host"),
+        i18n.getString("hostEx")))
+    add(nbSlotTextField,
+      new Help(i18n.getString("nbSlot"),
+        i18n.getString("nbSlotEx")))
+    add(dirTextField,
+      new Help(i18n.getString("dir"),
+        i18n.getString("dirEx")))
+    add(runTimeMemoryTextField,
+      new Help(i18n.getString("runtimeMemory"),
+        i18n.getString("runtimeMemoryEx")))
+
+  }
 
   override def saveContent(name: String) = new SSHEnvironmentDataUI(name,
     loginTextField.text,

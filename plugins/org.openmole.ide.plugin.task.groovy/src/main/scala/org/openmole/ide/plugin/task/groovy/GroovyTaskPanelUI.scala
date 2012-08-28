@@ -52,11 +52,12 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("") with ITas
   tabbedPane.pages += new TabbedPane.Page("Code", codeTextArea)
   tabbedPane.pages += new TabbedPane.Page("Library", libMultiTextField.panel)
 
-  override def help = new Helper {
+  override val help = new Helper {
     add(codeTextArea.editor,
       new Help(i18n.getString("groovyCode"),
         i18n.getString("groovyCodeEx"),
-        List(new URL(i18n.getString("groovyURLText"), i18n.getString("groovyURL")))))
+        List(new URL(i18n.getString("groovyURLText"), i18n.getString("groovyURL")),
+          new URL(i18n.getString("groovyURL1Text"), i18n.getString("groovyURL1")))))
     add(libMultiTextField,
       new Help(i18n.getString("libraryPath"),
         i18n.getString("libraryPathEx")))

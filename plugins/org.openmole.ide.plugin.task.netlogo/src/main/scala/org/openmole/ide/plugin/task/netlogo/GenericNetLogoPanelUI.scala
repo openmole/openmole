@@ -31,7 +31,9 @@ import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import java.awt.Dimension
+import org.openmole.ide.misc.widget.URL
 import org.openmole.ide.misc.widget.Help
+import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing._
 import swing.Swing._
@@ -52,31 +54,20 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
   val nlogoTextField = new ChooseFileTextField(nlogoPath,
     "Select a nlogo file",
     "Netlogo files",
-    "nlogo") {
-    tooltip = Help.tooltip(i18n.getString("nlogoPath"),
-      Help.tooltip(i18n.getString("nlogoPathEx")))
-  }
+    "nlogo")
 
   val workspaceCheckBox = new CheckBox("Embed Workspace") {
     selected = workspaceEmbedded
-    tooltip = Help.tooltip(i18n.getString("embedWorkspace"),
-      i18n.getString("embedWorkspaceEx"))
   }
 
-  val launchingCommandTextArea = new TextArea(lauchingCommands) {
-    tooltip = Help.tooltip(i18n.getString("command"),
-      i18n.getString("commandEx"))
-  }
+  val launchingCommandTextArea = new TextArea(lauchingCommands)
 
   var multiStringProto: Option[MultiTwoCombos[String, IPrototypeDataProxyUI]] = None
   var multiProtoString: Option[MultiTwoCombos[IPrototypeDataProxyUI, String]] = None
   val resourcesMultiTextField = new MultiChooseFileTextField("",
     resources.map { r ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(r)) },
     selectionMode = SelectionMode.FilesAndDirectories,
-    minus = CLOSE_IF_EMPTY) {
-    tooltip = Help.tooltip(i18n.getString("resources"),
-      i18n.getString("resourcesEx"))
-  }
+    minus = CLOSE_IF_EMPTY)
   if (resources.isEmpty) resourcesMultiTextField.removeAllRows
   var globals = g
 
@@ -145,11 +136,6 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
       if (multiStringProto.isDefined) {
         inputMappingPage.content = multiProtoString.get.panel
         outputMappingPage.content = multiStringProto.get.panel
-
-        // if (contents.size == 8) { contents.remove(5); contents.remove(5); contents.remove(5) }
-        //contents += (resourcesMultiTextField.panel, "span,growx,wrap")
-        //contents += (multiProtoString.get.panel, "span,grow,wrap")
-        //contents += (multiStringProto.get.panel, "span,grow,wrap")
       }
     } catch {
       case e: Throwable ⇒ StatusBar.block(e.getMessage,
@@ -159,4 +145,20 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
   def comboContent: List[IPrototypeDataProxyUI] = Proxys.prototypes.toList
 
   def buildNetLogo: NetLogo
+  
+  override val help = new Helper {
+    add(nlogoTextField,
+      new Help(i18n.getString("nlogoPath"),
+        i18n.getString("nlogoPathEx"),
+        List(new URL(i18n.getString("nlogoURLtext"), i18n.getString("nlogoURL")))))
+    add(workspaceCheckBox,
+      new Help(i18n.getString("embedWorkspace"),
+        i18n.getString("embedWorkspaceEx")))
+    add(launchingCommandTextArea,
+      new Help(i18n.getString("command"),
+        i18n.getString("commandEx")))
+    add(resourcesMultiTextField,
+      new Help(i18n.getString("resources"),
+        i18n.getString("resourcesEx")))
+  }
 }

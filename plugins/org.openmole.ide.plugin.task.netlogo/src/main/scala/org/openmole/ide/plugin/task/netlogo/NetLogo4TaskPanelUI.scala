@@ -17,7 +17,6 @@
 package org.openmole.ide.plugin.task.netlogo
 
 import org.openmole.ide.core.model.data.ITaskDataUI
-import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.osgi.netlogo4.NetLogo4
 import scala.swing._

@@ -17,7 +17,6 @@
 package org.openmole.ide.plugin.task.netlogo
 
 import org.openmole.ide.core.model.data.ITaskDataUI
-import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.osgi.netlogo5.NetLogo5
 import scala.swing._
@@ -42,6 +41,7 @@ class NetLogo5TaskPanelUI(ndu: NetLogo5TaskDataUI) extends GenericNetLogoPanelUI
     else List(),
     resourcesMultiTextField.content.map { _.content },
     globals)
+
   def buildNetLogo = new NetLogo5
 
 }

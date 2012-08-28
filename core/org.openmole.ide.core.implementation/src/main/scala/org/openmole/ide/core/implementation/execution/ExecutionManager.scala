@@ -172,20 +172,9 @@ class ExecutionManager(manager: IMoleSceneManager,
 
           timer.start
           mExecution.start
-        case Left(e: UserBadDataError) ⇒
-          StatusBar.block(e.getMessage,
-            stack = e.getStackTraceString + errorCause(e),
-            exceptionName = e.getClass.getCanonicalName)
         case Left(e) ⇒
-          StatusBar.block(e.getMessage,
-            stack = e.getStackTraceString,
-            exceptionName = e.getClass.getCanonicalName)
+          StatusBar.blockException(e)
       }
-  }
-
-  def errorCause(e: UserBadDataError) = {
-    if (e.getCause != null) "\nCaused by\n" + e.getCause.getMessage + e.getCause.getStackTraceString
-    else ""
   }
 
   def incrementEnvironmentState(environment: IEnvironment,

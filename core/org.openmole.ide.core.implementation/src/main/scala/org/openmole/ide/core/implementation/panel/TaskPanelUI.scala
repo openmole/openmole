@@ -88,12 +88,8 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
 
   listenTo(panelUI.help.components.toSeq: _*)
   reactions += {
-    case FocusGained(source: Component, _, _) ⇒
-      println("switch focus g")
-      panelUI.help.switchTo(source)
-    case ComponentFocusedEvent(source: Component) ⇒
-      println("switch compo foucus")
-      panelUI.help.switchTo(source)
+    case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
+    case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
   }
 
   def create = {

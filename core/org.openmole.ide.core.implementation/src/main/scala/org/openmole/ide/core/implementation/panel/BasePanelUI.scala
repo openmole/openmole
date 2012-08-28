@@ -30,8 +30,11 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.widget.MyPanel
 import org.openmole.ide.misc.widget.ImageLinkLabel
 import org.openmole.ide.misc.widget._
+import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import scala.swing.Action
+import scala.swing.Component
 import scala.swing.Label
+import scala.swing.event.FocusGained
 import scala.swing.event.UIElementResized
 import scala.swing.Publisher
 import scala.swing.TextField
@@ -89,22 +92,6 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
   }
 
   var created = if (mode == CREATION) false else true
-
-  //  def displayHelp(source: Component) = {
-  //    panelUI.help.contains(source) match {
-  //      case true ⇒
-  //        helpLabel.text = panelUI.help(source).message
-  //        helpExLabel.text = panelUI.help(source).example
-  //        if (headPanel.contents.size > 5) headPanel.contents.remove(5)
-  //        headPanel.contents += ExternalLinkLabel(panelUI.help(source).urls.map { u ⇒ (u.text, u.url) })
-  //        revalidate
-  //        repaint
-  //      case false ⇒
-  //        helpLabel.text = ""
-  //        helpExLabel.text = ""
-  //        if (headPanel.contents.size > 5) headPanel.contents.remove(5)
-  //    }
-  //  }
 
   def hide = {
     baseSave

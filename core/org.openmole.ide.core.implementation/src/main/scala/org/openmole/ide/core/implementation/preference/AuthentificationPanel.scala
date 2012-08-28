@@ -35,8 +35,6 @@ class AuthentificationPanel extends PluginPanel("wrap", "[grow,fill]", "") with 
       Right(a.buildPanelUI)
     } catch {
       case e: Throwable ⇒
-        println("E " + e)
-        println("EMESS " + e.getMessage)
         StatusBar.block(Some(e.getMessage).getOrElse(""),
           stack = e.getStackTraceString,
           exceptionName = e.getClass.getCanonicalName)

@@ -42,9 +42,9 @@ import org.openmole.ide.misc.widget.multirow.RowWidget._
 import scala.swing.event.SelectionChanged
 
 object SSHAuthentificationPanelUI {
-  trait ConnectionMethod
-  case class Login extends ConnectionMethod
-  case class SSHKey extends ConnectionMethod
+  sealed trait ConnectionMethod
+  case object Login extends ConnectionMethod
+  case object SSHKey extends ConnectionMethod
 
   class SSHAuthentificationPanel(var data: SSHAuthentificationData)
       extends PluginPanel("") with IPanel[SSHAuthentificationData] {
@@ -82,7 +82,7 @@ object SSHAuthentificationPanelUI {
 
   class SSHAuthentificationData(val connectionData: ConnectionData = new ConnectionData) extends IData
 
-  class ConnectionData(val connectionMethod: ConnectionMethod = new Login,
+  class ConnectionData(val connectionMethod: ConnectionMethod = Login,
                        val login: String = "",
                        val password: String = "",
                        val target: String = "",
@@ -101,8 +101,8 @@ object SSHAuthentificationPanelUI {
     val authentificationTypeComboBox = new MyComboBox(List(loginPasswordPanel,
       sshKeyPanel))
     data.connectionData.connectionMethod match {
-      case x: Login ⇒ authentificationTypeComboBox.selection.index = 0
-      case x: SSHKey ⇒ authentificationTypeComboBox.selection.index = 1
+      case Login ⇒ authentificationTypeComboBox.selection.index = 0
+      case SSHKey ⇒ authentificationTypeComboBox.selection.index = 1
       case _ ⇒
     }
 
@@ -117,7 +117,7 @@ object SSHAuthentificationPanelUI {
     preferredSize = new Dimension(300, 280)
 
     def displayAuthentification = {
-      if (contents.size > 2) contents.remove(2)
+      if (contents.size > 1) contents.remove(1)
       contents += authentificationTypeComboBox.selection.item
       revalidate
       repaint
@@ -140,7 +140,7 @@ object SSHAuthentificationPanelUI {
       contents += new Label("Password")
       contents += passwordTextField
 
-      def content = new ConnectionData(new Login,
+      def content = new ConnectionData(Login,
         loginTextField.text,
         new String(passwordTextField.password),
         targetTextField.text)
@@ -157,7 +157,7 @@ object SSHAuthentificationPanelUI {
       contents += new Label("Public key")
       contents += publicKeyTextField
 
-      override def content = new ConnectionData(new SSHKey,
+      override def content = new ConnectionData(SSHKey,
         loginTextField.text,
         new String(passwordTextField.password),
         targetTextField.text,
@@ -176,17 +176,19 @@ class SSHAuthentificationPanelUI extends PluginPanel("") with IAuthentificationP
     Workspace.persistentList(classOf[HostAuthenticationMethod]).map { hm ⇒
       hm match {
         case (i: Int, x: LoginPassword) ⇒
-          new SSHAuthentificationPanel(new SSHAuthentificationData(new ConnectionData(new Login,
-            x.login,
-            Workspace.decrypt(x.cypheredPassword),
-            x.target)))
+          new SSHAuthentificationPanel(new SSHAuthentificationData(
+            new ConnectionData(Login,
+              x.login,
+              Workspace.decrypt(x.cypheredPassword),
+              x.target)))
         case (i: Int, x: PrivateKey) ⇒
-          new SSHAuthentificationPanel(new SSHAuthentificationData(new ConnectionData(new SSHKey,
-            x.login,
-            Workspace.decrypt(x.cypheredPassword),
-            x.target,
-            x.privateKeyPath,
-            x.publicKeyPath)))
+          new SSHAuthentificationPanel(new SSHAuthentificationData(
+            new ConnectionData(SSHKey,
+              x.login,
+              Workspace.decrypt(x.cypheredPassword),
+              x.target,
+              x.privateKeyPath,
+              x.publicKeyPath)))
       }
     }.toList
 
@@ -203,11 +205,11 @@ class SSHAuthentificationPanelUI extends PluginPanel("") with IAuthentificationP
       Workspace.persistentList(classOf[HostAuthenticationMethod]) -= j
     multiPanel.content.foreach { data ⇒
       data.connectionData.connectionMethod match {
-        case x: Login ⇒ Workspace.persistentList(classOf[HostAuthenticationMethod])(i) =
+        case Login ⇒ Workspace.persistentList(classOf[HostAuthenticationMethod])(i) =
           new LoginPassword(data.connectionData.login,
             Workspace.encrypt(new String(data.connectionData.password)),
             data.connectionData.target)
-        case x: SSHKey ⇒ Workspace.persistentList(classOf[HostAuthenticationMethod])(i) =
+        case SSHKey ⇒ Workspace.persistentList(classOf[HostAuthenticationMethod])(i) =
           new PrivateKey(data.connectionData.pritvateKey,
             data.connectionData.publicKey,
             data.connectionData.login,
@@ -216,7 +218,6 @@ class SSHAuthentificationPanelUI extends PluginPanel("") with IAuthentificationP
       }
       i += 1
     }
-
   }
 
 }

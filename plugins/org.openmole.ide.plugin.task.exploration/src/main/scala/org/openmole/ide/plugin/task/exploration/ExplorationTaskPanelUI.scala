@@ -19,6 +19,7 @@ package org.openmole.ide.plugin.task.exploration
 
 import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget.Help
+import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.tools.image.Images._
@@ -42,7 +43,7 @@ import ExplorationTaskPanelUI._
 class ExplorationTaskPanelUI(pud: ExplorationTaskDataUI) extends PluginPanel("wrap 3") with ITaskPanelUI {
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
-  val samplingComboBox = new ComboBox(comboContent) { tooltip = Help.tooltip(i18n.getString("sampling")) }
+  val samplingComboBox = new ComboBox(comboContent)
 
   tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("wrap 2") {
     contents += new Label("Sampling")
@@ -68,4 +69,9 @@ class ExplorationTaskPanelUI(pud: ExplorationTaskDataUI) extends PluginPanel("wr
     new ExplorationTaskDataUI(name, if (samplingComboBox.selection.item == emptyProxy) None else Some(samplingComboBox.selection.item))
 
   def comboContent: List[ISamplingDataProxyUI] = emptyProxy :: Proxys.samplings.toList
+
+  override val help = new Helper {
+    add(samplingComboBox,
+      new Help(i18n.getString("sampling"), ""))
+  }
 }

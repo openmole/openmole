@@ -35,6 +35,7 @@ import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField._
 import org.openmole.ide.misc.widget.BashEditor
 import org.openmole.ide.misc.widget.Help
+import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow._
 import org.openmole.ide.misc.widget.multirow.MultiTextFieldCombo
@@ -45,13 +46,9 @@ import scala.swing.FileChooser._
 import scala.swing._
 import swing.Swing._
 
-//class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("fillx,wrap 2", "[left][grow,fill]", "") with ITaskPanelUI {
 class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("") with ITaskPanelUI {
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
-  val workdirTextField = new TextField(ndu.workdir, 30) {
-    tooltip = Help.tooltip(i18n.getString("workdir"),
-      i18n.getString("workdirEx"))
-  }
+  val workdirTextField = new TextField(ndu.workdir, 30)
 
   val variablesMultiCombo = new MultiCombo("Variables",
     EmptyDataUIs.emptyPrototypeProxy :: Proxys.prototypes.toList,
@@ -83,8 +80,6 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("") w
   val launchingCommandTextArea = new BashEditor {
     editor.text = ndu.lauchingCommands
     preferredSize = new Dimension(40, 200)
-    tooltip = Help.tooltip(i18n.getString("command"),
-      i18n.getString("commandEx"))
   }
 
   tabbedPane.pages += new TabbedPane.Page("Working directory", new PluginPanel("wrap") { contents += workdirTextField })
@@ -109,4 +104,25 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("") w
       variablesMultiCombo.content.map { _.comboValue.get })
 
   def comboContent: List[IPrototypeDataProxyUI] = Proxys.classPrototypes(classOf[File])
+
+  override val help = new Helper {
+    add(workdirTextField,
+      new Help(i18n.getString("workdir"),
+        i18n.getString("workdirEx")))
+    add(variablesMultiCombo,
+      new Help(i18n.getString("variables"),
+        i18n.getString("variablesEx")))
+    add(resourcesMultiTextField,
+      new Help(i18n.getString("resources"),
+        i18n.getString("resourcesEx")))
+    add(inputMapMultiComboTextField,
+      new Help(i18n.getString("inputMap"),
+        i18n.getString("inputMapEx")))
+    add(outputMapMultiTextFieldCombo,
+      new Help(i18n.getString("outputMap"),
+        i18n.getString("outputMapEx")))
+    add(launchingCommandTextArea,
+      new Help(i18n.getString("command"),
+        i18n.getString("commandEx")))
+  }
 }
