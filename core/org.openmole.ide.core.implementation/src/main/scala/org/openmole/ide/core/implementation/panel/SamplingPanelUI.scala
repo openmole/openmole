@@ -27,6 +27,7 @@ import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
+import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import BasePanelUI._
 import scala.swing.Component
@@ -39,7 +40,10 @@ class SamplingPanelUI(proxy: ISamplingDataProxyUI,
   val panelUI = proxy.dataUI.buildPanelUI
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
-  peer.add(panelUI.tabbedPane.peer, BorderLayout.CENTER)
+  peer.add(new PluginPanel("wrap") {
+    contents += panelUI.tabbedPane
+    contents += panelUI.help
+  }.peer, BorderLayout.CENTER)
 
   listenTo(panelUI.help.components.toSeq: _*)
   reactions += {

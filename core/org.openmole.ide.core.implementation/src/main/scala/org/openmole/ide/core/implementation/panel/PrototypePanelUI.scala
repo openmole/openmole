@@ -29,6 +29,7 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
+import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import scala.collection.JavaConversions._
 import BasePanelUI._
@@ -42,7 +43,10 @@ class PrototypePanelUI[T](proxy: IPrototypeDataProxyUI,
   val panelUI = proxy.dataUI.buildPanelUI
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
-  peer.add(panelUI.peer, BorderLayout.CENTER)
+  peer.add(new PluginPanel("wrap") {
+    contents += panelUI.peer
+    contents += panelUI.help
+  }.peer, BorderLayout.CENTER)
 
   listenTo(panelUI.help.components.toSeq: _*)
   reactions += {

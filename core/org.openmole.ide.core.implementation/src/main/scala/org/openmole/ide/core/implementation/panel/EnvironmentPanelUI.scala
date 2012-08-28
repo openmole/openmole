@@ -28,6 +28,7 @@ import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.JavaConversions._
+import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import BasePanelUI._
 import scala.swing.Component
@@ -47,7 +48,10 @@ class EnvironmentPanelUI(proxy: IEnvironmentDataProxyUI,
   }
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
-  peer.add(panelUI.tabbedPane.peer, BorderLayout.CENTER)
+  peer.add(new PluginPanel("wrap") {
+    contents += panelUI.tabbedPane
+    contents += panelUI.help
+  }.peer, BorderLayout.CENTER)
 
   def create = {
     Proxys.environments += proxy

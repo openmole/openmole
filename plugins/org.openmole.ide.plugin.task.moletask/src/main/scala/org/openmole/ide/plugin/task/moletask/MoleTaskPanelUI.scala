@@ -19,6 +19,7 @@ package org.openmole.ide.plugin.task.moletask
 
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.ide.misc.widget.Help
+import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import java.util.Locale
 import java.util.ResourceBundle
@@ -41,10 +42,7 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2", "
       _ != ScenesManager.currentSceneContainer.get.scene.manager
     }.filter {
       _.capsules.size > 0
-    }.toList) {
-    tooltip = Help.tooltip(i18n.getString("mole"),
-      i18n.getString("moleEx"))
-  }
+    }.toList)
 
   moleComboBox.selection.item = pud.mole match {
     case Some(x: Int) ⇒ MoleTaskDataUI.manager(x) match {
@@ -54,10 +52,7 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2", "
     case _ ⇒ MoleTaskDataUI.emptyMoleSceneManager
   }
 
-  val capsuleComboBox = new MyComboBox(EmptyDataUIs.emptyTaskProxy :: currentCapsules.toList) {
-    tooltip = Help.tooltip(i18n.getString("finalCapsule"),
-      i18n.getString("finalCapsuleEx"))
-  }
+  val capsuleComboBox = new MyComboBox(EmptyDataUIs.emptyTaskProxy :: currentCapsules.toList)
 
   capsuleComboBox.selection.item = pud.finalCapsule.getOrElse(EmptyDataUIs.emptyTaskProxy)
 
@@ -84,4 +79,13 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2", "
   else Some(moleComboBox.selection.item.id),
     if (capsuleComboBox.selection.item == EmptyDataUIs.emptyTaskProxy) None
     else Some(capsuleComboBox.selection.item))
+
+  override val help = new Helper {
+    add(moleComboBox,
+      new Help(i18n.getString("mole"),
+        i18n.getString("moleEx")))
+    add(capsuleComboBox,
+      new Help(i18n.getString("finalCapsule"),
+        i18n.getString("finalCapsuleEx")))
+  }
 }

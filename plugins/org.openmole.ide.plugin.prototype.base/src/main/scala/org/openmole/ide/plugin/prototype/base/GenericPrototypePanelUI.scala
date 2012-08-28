@@ -17,7 +17,11 @@
 
 package org.openmole.ide.plugin.prototype.base
 
+import java.util.Locale
+import java.util.ResourceBundle
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
+import org.openmole.ide.misc.widget.Help
+import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
 import scala.swing.TextField
@@ -25,8 +29,13 @@ import scala.swing.TextField
 abstract class GenericPrototypePanelUI[T](d: Int = 0) extends PluginPanel("wrap 2") with IPrototypePanelUI[T] {
   val dimTextField = new TextField(if (d >= 0) d.toString else "0", 2)
 
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
   contents += new Label("Dimension")
   contents += dimTextField
 
   def dim = dimTextField.text
+
+  override val help = new Helper {
+    add(dimTextField, new Help(i18n.getString("dimension"), i18n.getString("dimensionEx")))
+  }
 }

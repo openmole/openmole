@@ -17,10 +17,14 @@
 
 package org.openmole.ide.plugin.task.stat
 
+import java.util.Locale
+import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
+import org.openmole.ide.misc.widget.Help
+import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos._
@@ -32,6 +36,7 @@ import scala.swing.TabbedPane
 abstract class BasicStatPanelUI(statType: String,
                                 sequences: List[(IPrototypeDataProxyUI, IPrototypeDataProxyUI)]) extends PluginPanel("wrap 2") with ITaskPanelUI {
 
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
   val arrayDoublePrototypes = Proxys.classPrototypes(classOf[Array[Double]])
   val doublePrototypes = Proxys.classPrototypes(classOf[Double])
 
@@ -62,4 +67,11 @@ abstract class BasicStatPanelUI(statType: String,
   else
     tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("") { add(new Label("At least 2 Prototypes (a Double and an array of Double have to be created first.)"), "gap bottom 40") })
 
+  override val help = new Helper {
+    multiPrototypeCombo match {
+      case Some(x: MultiTwoCombos[IPrototypeDataProxyUI, IPrototypeDataProxyUI]) ⇒ add(x,
+        new Help(i18n.getString("prototype")))
+      case _ ⇒
+    }
+  }
 }

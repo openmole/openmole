@@ -25,6 +25,7 @@ import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.Help
+import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.collection.mutable.HashSet
 import scala.swing._
@@ -36,9 +37,7 @@ class StoreIntoCSVTaskPanelUI(sdu: StoreIntoCSVTaskDataUI) extends PluginPanel("
 
   var columns = new HashSet[ColumnPanel]
   val loaded = sdu.columns.groupBy(_._1)
-  val protoFileComboBox = new ComboBox(Proxys.prototypes.filter(p ⇒ p.dataUI.coreObject.`type`.erasure == classOf[File]).toList) {
-    tooltip = Help.tooltip(i18n.getString("fileProto"))
-  }
+  val protoFileComboBox = new ComboBox(Proxys.prototypes.filter(p ⇒ p.dataUI.coreObject.`type`.erasure == classOf[File]).toList)
 
   if (sdu.protoFile.isDefined) protoFileComboBox.selection.item = sdu.protoFile.get
   Proxys.prototypes.filter(_.dataUI.dim > 0).foreach(columns += buildColumn(_))
@@ -68,6 +67,11 @@ class StoreIntoCSVTaskPanelUI(sdu: StoreIntoCSVTaskDataUI) extends PluginPanel("
       case co: ColumnPanel ⇒ if (co.selected) List(co.column) else None
       case _ ⇒ None
     }.toList, Some(protoFileComboBox.selection.item))
+  }
+
+  override val help = new Helper {
+    add(protoFileComboBox,
+      new Help(i18n.getString("fileProto")))
   }
 
   class ColumnPanel(pud: IPrototypeDataProxyUI, tf: TextField) {
