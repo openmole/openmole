@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 reuillon
+ * Copyright (C) 2012 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,9 @@ class Application extends IApplication with Logger {
       pluginsDirs: List[String] = Nil,
       guiPluginsDirs: List[String] = Nil,
       userPlugins: List[String] = Nil,
-      workspaceDir: Option[String] = None)
+      workspaceDir: Option[String] = None,
+      scriptFile: Option[String] = None,
+      password: Option[String] = None)
 
     val parser = new OptionParser[Config]("openmole", "0.x") {
       def options = Seq(
@@ -62,6 +64,12 @@ class Application extends IApplication with Logger {
         },
         opt("p", "userPlugins", "Plugins (seperated by \" \")") {
           (v: String, c: Config) ⇒ c.copy(userPlugins = v.split(' ').toList)
+        },
+        opt("s", "script", "Script file to execute") {
+          (v: String, c: Config) ⇒ c.copy(scriptFile = Some(v))
+        },
+        opt("pw", "password", "Password for the preferences encryption") {
+          (v: String, c: Config) ⇒ c.copy(password = Some(v))
         })
     }
 
@@ -71,14 +79,6 @@ class Application extends IApplication with Logger {
     val filtredArgs = args.filterNot((_: String) == "-c")
 
     parser.parse(filtredArgs, Config()) foreach { config ⇒
-
-      /*val workspaceLocation = config.workspaceDir match {
-        case Some(w) ⇒ new File(w)
-        case None ⇒ Workspace.defaultLocation
-      }*/
-
-      //if (config.workspaceDir.isDefined) Workspace.instance = new Workspace(workspaceLocation)
-
       if (console) {
         try {
           val headless = GraphicsEnvironment.getLocalGraphicsEnvironment.isHeadlessInstance
@@ -86,18 +86,14 @@ class Application extends IApplication with Logger {
         } catch {
           case e ⇒ logger.log(FINE, "Error in splash screen closing", e)
         }
-        /*if (Workspace.anotherIsRunningAt(workspaceLocation))
-          logger.severe("Application is already runnig at " + workspaceLocation.getAbsolutePath + ". If it is not the case please remove the file '" + new File(workspaceLocation, Workspace.running).getAbsolutePath() + "'.")
-        else {*/
 
         config.pluginsDirs.foreach { PluginManager.loadDir }
 
         val userPlugins = config.userPlugins.map { new File(_) }.toSet
         PluginManager.load(userPlugins)
 
-        val console = new Console(new PluginSet(userPlugins))
+        val console = new Console(new PluginSet(userPlugins), config.password, config.scriptFile)
         console.run
-        // }
       } else {
 
         config.pluginsDirs.foreach { PluginManager.loadDir }

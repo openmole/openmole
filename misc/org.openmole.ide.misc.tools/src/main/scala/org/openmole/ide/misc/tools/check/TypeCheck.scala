@@ -1,7 +1,7 @@
 package org.openmole.ide.misc.tools.check
 
 /*
- * Copyright (C) 19/03/12 <mathieu.leclaire at openmole.org>
+ * Copyright (C) 19/03/12 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by

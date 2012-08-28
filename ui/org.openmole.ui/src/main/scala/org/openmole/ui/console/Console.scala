@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 reuillon
+ * Copyright (C) 2011 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,7 +17,6 @@
 
 package org.openmole.ui.console
 
-import java.io.File
 import java.util.concurrent.Executors
 import org.apache.clerezza.scala.console.Interpreter
 import org.openmole.misc.exception.UserBadDataError
@@ -32,14 +31,13 @@ import scala.tools.nsc.interpreter.JLineCompletion
 import scala.tools.nsc.interpreter.JLineReader
 import org.openmole.core.model.task.IPluginSet
 import java.util.concurrent.TimeUnit
+import scala.tools.nsc.io.{ File ⇒ SFile }
+import java.io.File
 
-class Console(plugins: IPluginSet) { console ⇒
+class Console(plugins: IPluginSet, password: Option[String], script: Option[String]) { console ⇒
 
-  @tailrec private def initPassword: Unit = {
-    val message = (if (Workspace.passwordChoosen) "Enter your OpenMOLE password" else "OpenMOLE Password has not been set yet, choose a  password") + "  (for preferences encryption):"
-
-    val password = new jline.ConsoleReader().readLine(message, '*')
-    val success = try {
+  def setPassword(password: String) =
+    try {
       Workspace.password_=(password)
       true
     } catch {
@@ -47,7 +45,11 @@ class Console(plugins: IPluginSet) { console ⇒
         println("Password incorrect.")
         false
     }
-    if (!success) initPassword
+
+  @tailrec private def initPassword: Unit = {
+    val message = (if (Workspace.passwordChoosen) "Enter your OpenMOLE password" else "OpenMOLE Password has not been set yet, choose a  password") + "  (for preferences encryption):"
+    val password = new jline.ConsoleReader().readLine(message, '*')
+    if (!setPassword(password)) initPassword
   }
 
   def workspace = "workspace"
@@ -56,41 +58,54 @@ class Console(plugins: IPluginSet) { console ⇒
   def serializer = "serializer"
 
   def run {
-    initPassword
-    val loop = new ScalaREPL
-
-    try {
-      loop.beQuietDuring {
-        loop.bind(workspace, Workspace)
-        loop.bind(logger, LoggerService)
-        loop.bind(serializer, new Serializer)
-        loop.bind("commands", new Command)
-        loop.bind("implicits", new Implicits()(plugins))
-        loop.addImports(
-          "org.openmole.core.implementation.data._",
-          "org.openmole.core.implementation.data.Prototype._",
-          "org.openmole.core.implementation.data.Data._",
-          "org.openmole.core.implementation.execution._",
-          "org.openmole.core.implementation.execution.local._",
-          "org.openmole.core.implementation.hook._",
-          "org.openmole.core.implementation.job._",
-          "org.openmole.core.implementation.mole._",
-          "org.openmole.core.implementation.sampling._",
-          "org.openmole.core.implementation.task._",
-          "org.openmole.core.implementation.transition._",
-          "org.openmole.core.implementation.tools._",
-          "org.openmole.core.implementation.puzzle._",
-          "org.openmole.core.batch.authentication._",
-          "org.openmole.misc.workspace._",
-          "org.openmole.misc.tools.io.FromString._",
-          "java.io.File",
-          "commands._",
-          "implicits._")
-
+    val correctPassword =
+      password match {
+        case None ⇒ initPassword; true
+        case Some(p) ⇒ setPassword(p)
       }
 
-      loop.loop
-    } finally loop.close
+    if (correctPassword) {
+      val loop = new ScalaREPL
+
+      try {
+        loop.beQuietDuring {
+          loop.bind(workspace, Workspace)
+          loop.bind(logger, LoggerService)
+          loop.bind(serializer, new Serializer)
+          loop.bind("commands", new Command)
+          loop.bind("implicits", new Implicits()(plugins))
+          loop.addImports(
+            "org.openmole.core.implementation.data._",
+            "org.openmole.core.implementation.data.Prototype._",
+            "org.openmole.core.implementation.data.Data._",
+            "org.openmole.core.implementation.execution._",
+            "org.openmole.core.implementation.execution.local._",
+            "org.openmole.core.implementation.hook._",
+            "org.openmole.core.implementation.job._",
+            "org.openmole.core.implementation.mole._",
+            "org.openmole.core.implementation.sampling._",
+            "org.openmole.core.implementation.task._",
+            "org.openmole.core.implementation.transition._",
+            "org.openmole.core.implementation.tools._",
+            "org.openmole.core.implementation.puzzle._",
+            "org.openmole.core.batch.authentication._",
+            "org.openmole.misc.workspace._",
+            "org.openmole.misc.tools.io.FromString._",
+            "java.io.File",
+            "commands._",
+            "implicits._")
+
+        }
+
+        script match {
+          case None ⇒ loop.loop
+          case Some(s) ⇒
+            val scriptFile = new File(s)
+            if (scriptFile.exists) loop.interpretAllFrom(new SFile(scriptFile))
+            else println("File " + scriptFile + " doesn't exist.")
+        }
+      } finally loop.close
+    }
   }
 
   //def setVariable(name: String, value: Object) = binding.setVariable(name, value)
