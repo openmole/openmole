@@ -21,7 +21,6 @@ import java.io.File
 import java.io.FileFilter
 import java.io.FileInputStream
 import org.openmole.misc.pluginmanager.internal.Activator
-import org.openmole.misc.tools.service.IHash
 import org.osgi.framework.Bundle
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
@@ -30,7 +29,6 @@ import org.osgi.framework.BundleEvent
 import org.osgi.framework.BundleListener
 import scala.collection.JavaConversions._
 import org.openmole.misc.exception.UserBadDataError
-//import org.openmole.misc.fileservice._
 
 object PluginManager {
 

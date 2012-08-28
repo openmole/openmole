@@ -257,13 +257,15 @@ class Workspace(val location: File) {
     if (!isPreferenceSet(passwordTest)) setToDefaultValue(passwordTest)
   }
 
-  def decrypt(s: String) = {
-    _password match {
-      case None ⇒ EventDispatcher.trigger(this, new Workspace.PasswordRequired)
-      case Some(p) ⇒
+  def decrypt(s: String) =
+    if (s.isEmpty) s
+    else {
+      _password match {
+        case None ⇒ EventDispatcher.trigger(this, new Workspace.PasswordRequired)
+        case Some(p) ⇒
+      }
+      textEncryptor(_password).decrypt(s)
     }
-    textEncryptor(_password).decrypt(s)
-  }
 
   def encrypt(s: String) = {
     _password match {
