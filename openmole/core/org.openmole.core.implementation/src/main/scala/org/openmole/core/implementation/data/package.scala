@@ -31,6 +31,7 @@ package object data {
   import Context._
 
   implicit def tupleToParameter[T](t: (IPrototype[T], T)) = new Parameter(t._1, t._2)
+  implicit def tuple3ToParameter[T](t: (IPrototype[T], T, Boolean)) = new Parameter(t._1, t._2, t._3)
   implicit def prototypeToData[T](p: IPrototype[T]) = new Data[T](p)
   implicit def dataIterableDecorator(data: Traversable[IData[_]]) = new DataSet(data.toList)
   //  implicit def iterableOfPrototypeToIterableOfDataConverter(prototypes: Traversable[IPrototype[_]]): Traversable[IData[_]] = DataSet(prototypes)
