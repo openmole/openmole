@@ -44,14 +44,18 @@ class AppendToCSVFileHook(
     if (!file.getParentFile.exists) file.getParentFile.mkdirs
     if (!file.getParentFile.isDirectory) throw new UserBadDataError("Cannot create directory " + file.getParentFile)
 
+    val ps = 
+      if(prototypes.isEmpty) context.values.map{_.prototype}
+      else prototypes
+    
     val fos = new FileOutputStream(file, true)
     val bfos = new BufferedOutputStream(fos)
     try {
       val lock = fos.getChannel.lock
       try {
-        if (file.size == 0) fos.appendLine(prototypes.map { _.name }.mkString(","))
-
-        val lists = prototypes.map {
+        if (file.size == 0) fos.appendLine(ps.map { _.name }.mkString(","))
+        
+        val lists = ps.map {
           p ⇒
             context.value(p) match {
               case Some(v) ⇒
