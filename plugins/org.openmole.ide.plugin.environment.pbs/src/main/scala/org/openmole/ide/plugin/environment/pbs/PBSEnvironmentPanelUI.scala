@@ -17,6 +17,8 @@
 
 package org.openmole.ide.plugin.environment.pbs
 
+import java.util.Locale
+import java.util.ResourceBundle
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.plugin.environment.tools._
@@ -25,6 +27,8 @@ import scala.swing.TabbedPane
 import scala.swing.TextField
 
 class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fillx,wrap 2", "", "") with IEnvironmentPanelUI {
+
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val loginTextField = new TextField(pud.login, 15)
   val hostTextField = new TextField(pud.host, 15)
@@ -51,6 +55,12 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
 
   tabbedPane.pages += requirementsPanelUI
   contents += tabbedPane
+
+  override def helpMap = Map(loginTextField -> (i18n.getString("login"), i18n.getString("loginEx")),
+    hostTextField -> (i18n.getString("host"), i18n.getString("hostEx")),
+    dirTextField -> (i18n.getString("dir"), i18n.getString("dirEx")),
+    queueTextField -> (i18n.getString("queueText"), i18n.getString("queueTextEx")),
+    runTimeMemoryTextField -> (i18n.getString("runTimeMemory"), i18n.getString("runTimeMemoryEx")))
 
   override def saveContent(name: String) =
     new PBSEnvironmentDataUI(name,

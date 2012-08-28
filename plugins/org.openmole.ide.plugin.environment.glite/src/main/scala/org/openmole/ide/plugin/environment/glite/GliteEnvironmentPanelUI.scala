@@ -32,34 +32,17 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
-  val voTextField = new TextField(pud.vo, 20) {
-    tooltip = Help.tooltip(i18n.getString("vo"),
-      i18n.getString("voEx"))
-  }
-  val vomsTextField = new TextField(pud.voms, 20) {
-    tooltip = Help.tooltip(i18n.getString("voms"),
-      i18n.getString("vomsEx"))
-  }
-  val bdiiTextField = new TextField(pud.bdii, 20) {
-    tooltip = Help.tooltip(i18n.getString("bdii"),
-      i18n.getString("bdiiEx"))
-  }
-
-  val runtimeMemoryTextField = new TextField(pud.runtimeMemory, 4) {
-    tooltip = Help.tooltip(i18n.getString("runtimeMemory"),
-      i18n.getString("runtimeMemoryEx"))
-  }
-
-  val proxyCheckBox = new CheckBox("MyProxy") { tooltip = Help.tooltip(i18n.getString("myProxy")) }
+  val voTextField = new TextField(pud.vo, 20)
+  val vomsTextField = new TextField(pud.voms, 20)
+  val bdiiTextField = new TextField(pud.bdii, 20)
+  val runtimeMemoryTextField = new TextField(pud.runtimeMemory, 4)
+  val proxyCheckBox = new CheckBox("MyProxy")
   listenTo(`proxyCheckBox`)
   reactions += {
     case ButtonClicked(`proxyCheckBox`) ⇒ showProxy(proxyCheckBox.selected)
   }
 
-  val proxyURLTextField = new TextField(pud.proxyURL, 18) {
-    tooltip = Help.tooltip(i18n.getString("proxyURL"),
-      i18n.getString("proxyURLEx"))
-  }
+  val proxyURLTextField = new TextField(pud.proxyURL, 18)
   val proxyURLLabel = new Label("url")
 
   val requirementsPanelUI = new RequirementPanelUI(pud.requirements)
@@ -92,7 +75,14 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
     }
   }
 
-  override def saveContent(name: String) =
+  override def helpMap = Map(voTextField -> (i18n.getString("vo"), i18n.getString("voEx")),
+    vomsTextField -> (i18n.getString("voms"), i18n.getString("vomsEx")),
+    bdiiTextField -> (i18n.getString("bdii"), i18n.getString("bdiiEx")),
+    runtimeMemoryTextField -> (i18n.getString("runtimeMemory"), i18n.getString("runtimeMemoryEx")),
+    proxyCheckBox -> (i18n.getString("myProxy"), ""),
+    proxyURLTextField -> (i18n.getString("proxyURL"), i18n.getString("proxyURLEx")))
+
+  def saveContent(name: String) =
     new GliteEnvironmentDataUI(name,
       voTextField.text,
       vomsTextField.text,

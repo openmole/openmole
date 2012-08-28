@@ -35,7 +35,6 @@ import scala.swing.CheckMenuItem
 import scala.swing.Menu
 
 class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends GenericMenuProvider {
-  var encapsulated = false
   var taskMenu = new JMenu
 
   def initMenu = {
@@ -122,8 +121,6 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
       items += (menuEnv.peer, menuHook.peer)
     }
   }
-
-  def addTaskMenus = encapsulated = true
 
   override def getPopupMenu(widget: Widget, point: Point) = {
     initMenu

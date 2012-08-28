@@ -30,20 +30,14 @@ class RequirementPanelUI(val requirementDataUI: RequirementDataUI = new Requirem
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
-  val architectureCheckBox = new CheckBox("64 bits") { tooltip = Help.tooltip(i18n.getString("64bits")) }
+  val architectureCheckBox = new CheckBox("64 bits")
 
   val workerNodeMemoryLabel = new Label("Worker memory")
-  val workerNodeMemoryTextField = new TextField(4) {
-    tooltip = Help.tooltip(i18n.getString("workerNodeMemory"),
-      i18n.getString("workerNodeMemoryEx"))
-  }
+  val workerNodeMemoryTextField = new TextField(4)
   val maxCPUTimeLabel = new Label("Max CPU Time")
-  val maxCPUTimeTextField = new TextField(4) {
-    tooltip = Help.tooltip(i18n.getString("maxCPUTime"),
-      i18n.getString("maxCPUTimeEx"))
-  }
+  val maxCPUTimeTextField = new TextField(4)
   val otherRequirementLabel = new Label("Other")
-  val otherRequirementTextField = new TextField(16) { tooltip = Help.tooltip(i18n.getString("other")) }
+  val otherRequirementTextField = new TextField(16)
 
   this.content = new PluginPanel("wrap 2") {
     contents += (architectureCheckBox, "wrap")
@@ -59,6 +53,11 @@ class RequirementPanelUI(val requirementDataUI: RequirementDataUI = new Requirem
   workerNodeMemoryTextField.text = requirementDataUI.workerNodeMemory
   maxCPUTimeTextField.text = requirementDataUI.maxCPUTime
   otherRequirementTextField.text = requirementDataUI.otherRequirements
+
+  override def helpMap = Map(architectureCheckBox -> (i18n.getString("architecture"), i18n.getString("architectureEx")),
+    workerNodeMemoryTextField -> (i18n.getString("workerNodeMemory"), i18n.getString("workerNodeMemoryEx")),
+    maxCPUTimeTextField -> (i18n.getString("maxCPUTime"), i18n.getString("maxCPUTimeEx")),
+    otherRequirementTextField -> (i18n.getString("otherRequirement"), i18n.getString("otherRequirementEx")))
 
   def save = new RequirementDataUI(
     architectureCheckBox.selected,

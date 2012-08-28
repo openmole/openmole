@@ -18,13 +18,16 @@
 package org.openmole.ide.misc.widget.multirow
 
 import org.openmole.ide.misc.widget.multirow.RowWidget._
+import scala.swing.Component
 
-trait IRowWidget[+S] {
+trait IRowWidget[+S] extends Component {
   val panel: IRowPanel
 
   val plusAllowed: Plus = ADD
 
   def content: S
+
+  def contents: Seq[Component]
 
   def doOnClose: Unit = {}
 }

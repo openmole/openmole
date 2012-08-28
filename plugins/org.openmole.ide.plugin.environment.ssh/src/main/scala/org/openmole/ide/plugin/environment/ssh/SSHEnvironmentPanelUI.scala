@@ -17,6 +17,8 @@
 
 package org.openmole.ide.plugin.environment.ssh
 
+import java.util.Locale
+import java.util.ResourceBundle
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
@@ -24,6 +26,8 @@ import scala.swing.TabbedPane
 import scala.swing.TextField
 
 class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fillx,wrap 2", "", "") with IEnvironmentPanelUI {
+
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val loginTextField = new TextField(pud.login, 15)
   val hostTextField = new TextField(pud.host, 15)
@@ -50,7 +54,11 @@ class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fill
     contents += runTimeMemoryTextField
   })
 
-  override def helpMap = Map()
+  override def helpMap = Map(loginTextField -> (i18n.getString("login"), i18n.getString("loginEx")),
+    hostTextField -> (i18n.getString("host"), i18n.getString("hostEx")),
+    nbSlotTextField -> (i18n.getString("nbSlot"), i18n.getString("nbSlotEx")),
+    dirTextField -> (i18n.getString("dir"), i18n.getString("dirEx")),
+    runTimeMemoryTextField -> (i18n.getString("runTimeMemory"), i18n.getString("runTimeMemoryEx")))
 
   override def saveContent(name: String) = new SSHEnvironmentDataUI(name,
     loginTextField.text,

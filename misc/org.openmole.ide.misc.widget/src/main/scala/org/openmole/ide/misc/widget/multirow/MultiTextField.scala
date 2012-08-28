@@ -49,39 +49,3 @@ class MultiTextField(title: String,
   initPanels,
   minus,
   plus)
-//
-//object MultiTextField {
-//  class Factory extends IRowWidgetFactory[TextFieldRowWidget] {
-//    def apply(row: TextFieldRowWidget, panel: MyPanel) = {
-//      import row._
-//      new TextFieldRowWidget(initValue)
-//    }
-//  }
-//
-//  class TextFieldRowWidget(val initValue: String) extends IRowWidget1[String] {
-//    val textField = new TextField(initValue, 10)
-//    override val panel = new RowPanel(List(textField))
-//
-//    override def content: String = textField.text
-//  }
-//}
-//
-//import MultiTextField._
-//class MultiTextField(title: String,
-//                     initValues: List[String],
-//                     factory: IRowWidgetFactory[TextFieldRowWidget],
-//                     minus: Minus) extends MultiWidget(title,
-//  if (initValues.isEmpty)
-//    List(new TextFieldRowWidget(""))
-//  else initValues.map { s ⇒ new TextFieldRowWidget(s) },
-//  factory,
-//  minus) {
-//
-//  def this(title: String,
-//           iValues: List[String]) = this(title,
-//    iValues,
-//    new Factory,
-//    NO_EMPTY)
-//
-//  def content = rowWidgets.map(_.content).toList
-//}

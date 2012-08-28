@@ -17,6 +17,8 @@
 
 package org.openmole.ide.plugin.environment.desktopgrid
 
+import java.util.Locale
+import java.util.ResourceBundle
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
@@ -27,6 +29,8 @@ class DesktopGridEnvironmentPanelUI(pud: DesktopGridEnvironmentDataUI) extends P
   val loginTextField = new TextField(20)
   val passTextField = new TextField(20)
   val portTextField = new TextField(5)
+
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("wrap 2") {
     contents += (new Label("Login"), "gap para")
@@ -40,6 +44,10 @@ class DesktopGridEnvironmentPanelUI(pud: DesktopGridEnvironmentDataUI) extends P
   loginTextField.text = pud.login
   passTextField.text = pud.pass
   portTextField.text = pud.port.toString
+
+  override def helpMap = Map(loginTextField -> (i18n.getString("login"), i18n.getString("loginEx")),
+    passTextField -> (i18n.getString("password"), i18n.getString("passwordEx")),
+    portTextField -> (i18n.getString("port"), i18n.getString("portEx")))
 
   override def saveContent(name: String) = new DesktopGridEnvironmentDataUI(name,
     loginTextField.text,

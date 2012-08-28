@@ -28,7 +28,10 @@ import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.JavaConversions._
+import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import BasePanelUI._
+import scala.swing.Component
+import scala.swing.event.FocusGained
 
 class EnvironmentPanelUI(proxy: IEnvironmentDataProxyUI,
                          scene: IMoleScene,
@@ -36,6 +39,12 @@ class EnvironmentPanelUI(proxy: IEnvironmentDataProxyUI,
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
 
   val panelUI = proxy.dataUI.buildPanelUI
+
+  listenTo(panelUI.help.components.toSeq: _*)
+  reactions += {
+    case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
+    case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
+  }
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(panelUI.tabbedPane.peer, BorderLayout.CENTER)

@@ -17,9 +17,6 @@
 
 package org.openmole.ide.misc.widget
 
-object Help {
-
-  def tooltip(text: String,
-              example: String = "") =
-    "<html>" + text + (if (example.isEmpty) "</html>" else "<p style=\"color:#ACACAC\">Ex: " + example + "</p></html>")
-}
+class Help(val message: String = "",
+           val example: String = "",
+           val urls: List[URL] = List.empty)

@@ -28,6 +28,7 @@ import javax.swing.ImageIcon
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import javax.swing.plaf.basic.BasicTabbedPaneUI
+import org.openide.awt.HtmlBrowser
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dialog.DialogFactory
@@ -39,25 +40,21 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.widget.multirow.MultiWidget.CLOSE_IF_EMPTY
 import org.openmole.ide.core.model.workflow.ISceneContainer
-import org.openmole.ide.misc.widget.ContentAction
-import org.openmole.ide.misc.widget.ImageLinkLabel
-import org.openmole.ide.misc.widget.MigPanel
-import org.openmole.ide.misc.widget.MyPanel
-import org.openmole.ide.misc.widget.PluginPanel
-import org.openmole.ide.misc.widget.PrototypeGroovyTextFieldEditor
-import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel
+import org.openmole.ide.misc.widget._
+import org.openmole.ide.misc.widget.multirow._
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel._
-import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor._
 import scala.collection.mutable.HashMap
 import scala.swing.Action
 import scala.swing.MyComboBox
+import scala.swing.Component
 import scala.swing.Label
 import scala.swing.Separator
 import scala.collection.JavaConversions._
 import org.openmole.ide.misc.tools.image.Images._
 import BasePanelUI._
 import scala.swing.TabbedPane
+import scala.swing.event.FocusGained
 
 class TaskPanelUI(proxy: ITaskDataProxyUI,
                   scene: IMoleScene,
@@ -82,9 +79,22 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     case IO ⇒ 0
     case _ ⇒ 1
   }
-  mainPanel.contents += panelUI.tabbedPane
-  peer.add(mainPanel.peer, BorderLayout.CENTER)
-  //peer.add(panelUI.tabbedPane.peer, BorderLayout.CENTER)
+
+  peer.add(mainPanel.peer, BorderLayout.NORTH)
+  peer.add(new PluginPanel("wrap") {
+    contents += panelUI.tabbedPane
+    contents += panelUI.help
+  }.peer, BorderLayout.CENTER)
+
+  listenTo(panelUI.help.components.toSeq: _*)
+  reactions += {
+    case FocusGained(source: Component, _, _) ⇒
+      println("switch focus g")
+      panelUI.help.switchTo(source)
+    case ComponentFocusedEvent(source: Component) ⇒
+      println("switch compo foucus")
+      panelUI.help.switchTo(source)
+  }
 
   def create = {
     Proxys.tasks += proxy

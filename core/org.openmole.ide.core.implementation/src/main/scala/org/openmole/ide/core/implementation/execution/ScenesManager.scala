@@ -81,6 +81,10 @@ object ScenesManager {
         val p = new Point((old.widget.getPreferredLocation.x + dx).toInt, (old.widget.getPreferredLocation.y + dy).toInt)
         SceneItemFactory.createCapsule(neo._1, ms, p)
         neo._1.setEnvironment(old.dataUI.environment)
+        old.dataUI.task match {
+          case Some(t: ITaskDataProxyUI) ⇒ neo._1.encapsule(t)
+          case _ ⇒
+        }
         ms.refresh
     }
 

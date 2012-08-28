@@ -20,11 +20,14 @@ package org.openmole.ide.misc.widget.multirow
 import java.awt.Color
 import scala.collection.mutable.HashSet
 import scala.swing.Action
+import scala.swing.Component
 import scala.swing.Label
 import org.openmole.ide.misc.tools.image.Images.ADD
 import org.openmole.ide.misc.widget.ImageLinkLabel
+import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.RowWidget._
+import scala.swing.event.FocusGained
 
 object MultiWidget extends Enumeration {
 
@@ -39,8 +42,7 @@ class MultiWidget[S, T <: IRowWidget[S]](title: String = "",
                                          rWidgets: List[T],
                                          factory: IRowWidgetFactory[S, T],
                                          allowEmpty: Minus = NO_EMPTY,
-                                         buildRowFromFactory: Boolean = false) {
-  //  val specimen = rWidgets.head
+                                         buildRowFromFactory: Boolean = false) extends Component {
   val rowWidgets = new HashSet[T]
   val panel = new PluginPanel("wrap " + {
     rWidgets.headOption match {
@@ -51,8 +53,6 @@ class MultiWidget[S, T <: IRowWidget[S]](title: String = "",
   val titleLabel = new Label(title) { foreground = new Color(0, 113, 187) }
   val addButton = new ImageLinkLabel(ADD, new Action("") { def apply = addRow })
 
-  // if (buildRowFromFactory) rWidgets.foreach(r ⇒ addRow(factory(r, panel)))
-  // else rWidgets.foreach(addRow)
   rWidgets.foreach(addRow)
 
   if (!title.isEmpty) panel.contents.insert(0, titleLabel)
@@ -72,6 +72,16 @@ class MultiWidget[S, T <: IRowWidget[S]](title: String = "",
         }
       }
     }
+
+    listenTo(rowWidget.contents.toSeq: _*)
+    reactions += {
+      case FocusGained(source: Component,
+        other: Option[Component],
+        temporary: Boolean) ⇒
+        publish(new ComponentFocusedEvent(this))
+      case _ ⇒
+    }
+
     refresh
     rowWidget
   }

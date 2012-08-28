@@ -19,7 +19,9 @@ package org.openmole.ide.core.model.panel
 
 import java.awt.Color
 import javax.swing.JPanel
+import org.openmole.ide.misc.widget.Helper
 import scala.swing.Alignment
+import scala.swing.Component
 import scala.swing.TabbedPane
 
 trait IPanelUI {
@@ -31,4 +33,5 @@ trait IPanelUI {
     background = new Color(77, 77, 77)
   }
 
+  def help: Helper = new Helper
 }

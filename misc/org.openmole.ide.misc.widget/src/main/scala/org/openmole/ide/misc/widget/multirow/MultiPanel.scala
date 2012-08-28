@@ -19,6 +19,8 @@ package org.openmole.ide.misc.widget.multirow
 
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
+import scala.swing.Component
+import scala.swing.event.FocusGained
 
 object MultiPanel {
   class Factory[D <: IData](panelFactory: IFactory[D],
@@ -31,6 +33,8 @@ object MultiPanel {
     override val panel = new RowPanel(List(p), plus)
 
     override def content = p.content
+
+    def contents = p.contents
   }
 }
 

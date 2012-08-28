@@ -22,11 +22,13 @@ import java.util.Locale
 import java.util.ResourceBundle
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
+import org.openmole.ide.misc.widget.URL
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField._
 import scala.swing.FileChooser.SelectionMode._
 import org.openmole.ide.misc.widget.GroovyEditor
 import org.openmole.ide.misc.widget.Help
+import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.swing.TabbedPane
@@ -36,9 +38,7 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("") with ITas
 
   val codeTextArea = new GroovyEditor {
     editor.text = pud.code
-    minimumSize = new Dimension(40, 100);
-    tooltip = Help.tooltip(i18n.getString("groovyCode"),
-      i18n.getString("groovyCodeEx"))
+    minimumSize = new Dimension(80, 100);
   }
 
   val libMultiTextField = new MultiChooseFileTextField("Libraries",
@@ -47,14 +47,20 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("") with ITas
     Some("Lib files"),
     FilesOnly,
     Some("jar"),
-    CLOSE_IF_EMPTY) {
-    tooltip = Help.tooltip(i18n.getString("libraryPath"),
-      i18n.getString("libraryPathEx"))
-  }
+    CLOSE_IF_EMPTY)
 
   tabbedPane.pages += new TabbedPane.Page("Code", codeTextArea)
-
   tabbedPane.pages += new TabbedPane.Page("Library", libMultiTextField.panel)
+
+  override def help = new Helper {
+    add(codeTextArea.editor,
+      new Help(i18n.getString("groovyCode"),
+        i18n.getString("groovyCodeEx"),
+        List(new URL(i18n.getString("groovyURLText"), i18n.getString("groovyURL")))))
+    add(libMultiTextField,
+      new Help(i18n.getString("libraryPath"),
+        i18n.getString("libraryPathEx")))
+  }
 
   override def saveContent(name: String): ITaskDataUI = new GroovyTaskDataUI(name,
     codeTextArea.editor.text,

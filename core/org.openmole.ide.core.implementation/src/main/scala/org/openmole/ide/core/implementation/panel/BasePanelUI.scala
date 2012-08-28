@@ -19,6 +19,8 @@ package org.openmole.ide.core.implementation.panel
 
 import java.awt.BorderLayout
 import java.awt.Color
+import java.awt.Font
+import java.awt.Font._
 import javax.swing.BorderFactory
 import javax.swing.ImageIcon
 import org.openmole.ide.core.model.panel.IPanelUI
@@ -31,6 +33,7 @@ import org.openmole.ide.misc.widget._
 import scala.swing.Action
 import scala.swing.Label
 import scala.swing.event.UIElementResized
+import scala.swing.Publisher
 import scala.swing.TextField
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.CheckData
@@ -40,25 +43,22 @@ import org.openmole.ide.misc.tools.image.Images._
 abstract class BasePanelUI(proxy: IDataProxyUI,
                            scene: IMoleScene,
                            mode: Value,
-                           borderColor: Color = new Color(200, 200, 200)) extends MyPanel {
+                           borderColor: Color = new Color(200, 200, 200)) extends MyPanel with Publisher {
   background = Color.WHITE
   opaque = true
   peer.setLayout(new BorderLayout)
   val iconLabel = new Label { icon = new ImageIcon(EMPTY) }
+
   val nameTextField = new TextField(15) {
     text = proxy.dataUI.name
-    tooltip = Help.tooltip("Name of the concept instance")
   }
   val createLabelLink = new MainLinkLabel("create", new Action("") { def apply = baseCreate })
-  //val mainLinksPanel = new PluginPanel("", "[]110px[]")
   val mainLinksPanel = new PluginPanel("")
-  //{ 
-  //contents += createLabelLink }
   if (mode != CREATION) deleteLink
   border = BorderFactory.createEmptyBorder
 
   val mainPanel = new PluginPanel("wrap", "", "") {
-    contents += new PluginPanel("", "[right]", "[top]") {
+    contents += new PluginPanel("", "[left]", "[top]") {
       contents += new ImageLinkLabel(CLOSE, new Action("") {
         def apply = {
           mode match {
@@ -68,14 +68,12 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
         }
       })
     }
-    contents += new PluginPanel("wrap 3", "[left]", "[center]") {
+
+    add(new PluginPanel("wrap 3", "[left]", "[center]") {
       contents += iconLabel
       contents += nameTextField
       contents += createLabelLink
-      // contents += mainLinksPanel
-    }
-
-    //}, "gapbottom 60")
+    }, "gapbottom 10")
   }
 
   preferredSize.width = 300
@@ -91,6 +89,22 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
   }
 
   var created = if (mode == CREATION) false else true
+
+  //  def displayHelp(source: Component) = {
+  //    panelUI.help.contains(source) match {
+  //      case true ⇒
+  //        helpLabel.text = panelUI.help(source).message
+  //        helpExLabel.text = panelUI.help(source).example
+  //        if (headPanel.contents.size > 5) headPanel.contents.remove(5)
+  //        headPanel.contents += ExternalLinkLabel(panelUI.help(source).urls.map { u ⇒ (u.text, u.url) })
+  //        revalidate
+  //        repaint
+  //      case false ⇒
+  //        helpLabel.text = ""
+  //        helpExLabel.text = ""
+  //        if (headPanel.contents.size > 5) headPanel.contents.remove(5)
+  //    }
+  //  }
 
   def hide = {
     baseSave

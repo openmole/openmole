@@ -27,7 +27,10 @@ import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
+import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import BasePanelUI._
+import scala.swing.Component
+import scala.swing.event.FocusGained
 
 class SamplingPanelUI(proxy: ISamplingDataProxyUI,
                       scene: IMoleScene,
@@ -37,6 +40,12 @@ class SamplingPanelUI(proxy: ISamplingDataProxyUI,
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(panelUI.tabbedPane.peer, BorderLayout.CENTER)
+
+  listenTo(panelUI.help.components.toSeq: _*)
+  reactions += {
+    case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
+    case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
+  }
 
   def create = {
     Proxys.samplings += proxy

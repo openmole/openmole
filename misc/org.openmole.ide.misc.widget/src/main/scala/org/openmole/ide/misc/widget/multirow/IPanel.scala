@@ -20,5 +20,7 @@ package org.openmole.ide.misc.widget.multirow
 import scala.swing.Component
 
 trait IPanel[C <: IData] extends Component {
+  def contents: Seq[Component]
+
   def content: C
 }

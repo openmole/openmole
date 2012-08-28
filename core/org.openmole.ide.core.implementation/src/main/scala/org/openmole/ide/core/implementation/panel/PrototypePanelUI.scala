@@ -29,9 +29,11 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
+import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import scala.collection.JavaConversions._
 import BasePanelUI._
-import scala.swing.TabbedPane
+import scala.swing.Component
+import scala.swing.event.FocusGained
 
 class PrototypePanelUI[T](proxy: IPrototypeDataProxyUI,
                           scene: IMoleScene,
@@ -39,9 +41,14 @@ class PrototypePanelUI[T](proxy: IPrototypeDataProxyUI,
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
   val panelUI = proxy.dataUI.buildPanelUI
 
-  //panelUI.tabbedPane.pages.insert(0, new TabbedPane.Page("General", mainPanel))
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(panelUI.peer, BorderLayout.CENTER)
+
+  listenTo(panelUI.help.components.toSeq: _*)
+  reactions += {
+    case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
+    case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
+  }
 
   def create = {
     Proxys.prototypes += proxy

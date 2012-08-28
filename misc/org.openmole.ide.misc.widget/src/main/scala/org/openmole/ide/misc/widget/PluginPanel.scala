@@ -21,8 +21,6 @@ import java.awt.Color
 import java.awt.Graphics2D
 import java.awt.RenderingHints
 import scala.swing._
-import scala.swing.event.ActionEvent
-import scala.swing.event.UIElementResized
 
 class PluginPanel(mig1: String, mig2: String = "", mig3: String = "") extends MyMigPanel(mig1, mig2, mig3) {
 
