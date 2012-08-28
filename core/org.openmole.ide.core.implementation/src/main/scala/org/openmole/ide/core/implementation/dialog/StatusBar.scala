@@ -26,6 +26,7 @@ import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.Action
 import scala.swing.Label
+import compat.Platform.EOL
 
 object StatusBar extends MigPanel("wrap 3") { statusBar ⇒
   background = Color.WHITE
@@ -33,26 +34,35 @@ object StatusBar extends MigPanel("wrap 3") { statusBar ⇒
 
   var strings = ""
 
+  def informException(t: Throwable, proxy: Option[IDataProxyUI] = None): Unit = inform(t.getMessage, proxy, errorStack(t), t.getClass.getCanonicalName)
+
   def inform(info: String,
              proxy: Option[IDataProxyUI] = None,
              stack: String = "",
              exceptionName: String = ""): Unit = printError("[INFO]", info, proxy, exceptionName + "\n" + stack)
+
+  def warnException(t: Throwable, proxy: Option[IDataProxyUI] = None): Unit = warn(t.getMessage, proxy, errorStack(t), t.getClass.getCanonicalName)
 
   def warn(warning: String,
            proxy: Option[IDataProxyUI] = None,
            stack: String = "",
            exceptionName: String = ""): Unit = printError("[WARNING] ", warning, proxy, exceptionName + "\n" + stack)
 
+  def blockException(t: Throwable, proxy: Option[IDataProxyUI] = None): Unit = block(t.getMessage, proxy, errorStack(t), t.getClass.getCanonicalName)
+
   def block(b: String,
             proxy: Option[IDataProxyUI] = None,
             stack: String = "",
             exceptionName: String = ""): Unit = printError("[CRITICAL] ", b, proxy, exceptionName + "\n" + stack)
 
+  def errorStack(e: Throwable) =
+    Iterator.iterate(e)(_.getCause).takeWhile(_ != null).map(e ⇒ e.getCause.getMessage + e.getCause.getStackTraceString).mkString(EOL)
+
   def printError(header: String,
                  error: String,
                  proxy: Option[IDataProxyUI],
                  stack: String) =
-    if (!strings.contains(error)) {
+    if (error == null || !strings.contains(error)) {
       strings += error
       proxy match {
         case Some(x: IDataProxyUI) ⇒
