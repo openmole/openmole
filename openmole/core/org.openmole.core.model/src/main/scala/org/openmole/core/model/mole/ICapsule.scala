@@ -17,11 +17,11 @@
 
 package org.openmole.core.model.mole
 
-import org.openmole.core.model.data.{ IDataSet, IContext, IDataChannel }
-import org.openmole.core.model.job.{ MoleJobId, IMoleJob }
-import org.openmole.core.model.task.ITask
-import org.openmole.core.model.transition.{ ISlot, ITransition }
-import org.openmole.misc.exception.UserBadDataError
+import org.openmole.core.model.data._
+import org.openmole.core.model.job._
+import org.openmole.core.model.task._
+import org.openmole.core.model.transition._
+import org.openmole.misc.exception._
 
 /**
  * A capsule containing a task.
