@@ -29,7 +29,7 @@ sealed class EpsilonNSGA2Sigma(
   val epsilons: Seq[Double]) extends NSGAIISigma
     with MGBinaryTournamentSelection
     with CrowdingStabilityTermination
-    with NonDominatedSortingElitism
+    with NonDominatedElitism
     with CoEvolvingSigmaValuesMutation
     with SBXBoundedCrossover
     with CrowdingDiversity

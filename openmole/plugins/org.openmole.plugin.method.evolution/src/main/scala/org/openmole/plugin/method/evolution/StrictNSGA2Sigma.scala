@@ -28,7 +28,7 @@ sealed class StrictNSGA2Sigma(
   val lambda: Int) extends NSGAIISigma
     with MGBinaryTournamentSelection
     with CrowdingStabilityTermination
-    with NonDominatedSortingElitism
+    with NonDominatedElitism
     with CoEvolvingSigmaValuesMutation
     with SBXBoundedCrossover
     with CrowdingDiversity

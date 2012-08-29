@@ -23,14 +23,15 @@ sealed class HyperVolumeIsland[E <: GAG with MF with GenomeFactory with Dominanc
     extends MGBinaryTournamentSelection
     with GAG
     with GManifest
-    with NonDominatedSortingElitism
+    with NonDominatedElitism
     with HyperVolumeStabilityTermination
     with TerminationManifest
     with HypervolumeDiversity
     with ParetoRanking
     with RankDiversityModifier
     with GenomeFactory
-    with Lambda {
+    with Lambda
+    with CloneRemoval {
 
   type G = evolution.G
 

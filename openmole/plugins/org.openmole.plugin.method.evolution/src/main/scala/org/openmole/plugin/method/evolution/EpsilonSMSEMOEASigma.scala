@@ -30,7 +30,7 @@ sealed class EpsilonSMSEMOEASigma(
   val referencePoint: Seq[Double]) extends NSGAIISigma
     with MGBinaryTournamentSelection
     with HyperVolumeStabilityTermination
-    with NonDominatedSortingElitism
+    with NonDominatedElitism
     with CoEvolvingSigmaValuesMutation
     with SBXBoundedCrossover
     with HypervolumeDiversity

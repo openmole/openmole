@@ -29,7 +29,7 @@ sealed class TimedEpsilonSMSEMOEASigma(
   val referencePoint: Seq[Double]) extends NSGAIISigma
     with MGBinaryTournamentSelection
     with TimedTermination
-    with NonDominatedSortingElitism
+    with NonDominatedElitism
     with CoEvolvingSigmaValuesMutation
     with SBXBoundedCrossover
     with HypervolumeDiversity
