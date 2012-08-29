@@ -25,30 +25,24 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.PrintStream
 import java.util.UUID
-import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.eventdispatcher._
+import org.openmole.misc.exception._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.TarArchiver._
-import org.openmole.misc.tools.service.Logger
-import org.openmole.misc.tools.service.Priority
-import org.openmole.core.batch.authentication.Authentication
-import org.openmole.core.batch.file.GZURIFile
-import org.openmole.core.batch.file.RelativePath
-import org.openmole.core.batch.file.URIFile
-import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
+import org.openmole.misc.tools.service._
+import org.openmole.core.batch.authentication._
+import org.openmole.core.batch.file._
+import org.openmole.core.implementation.execution.local._
 import org.openmole.core.batch.message._
-import org.openmole.core.batch.file.IURIFile
-import org.openmole.core.model.job.IMoleJob
 import org.openmole.misc.tools.service.Retry._
-import org.openmole.core.serializer.SerializerService
-import org.openmole.misc.hashservice.HashService
-import org.openmole.misc.pluginmanager.PluginManager
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.serializer._
+import org.openmole.misc.hashservice._
+import org.openmole.misc.pluginmanager._
+import org.openmole.misc.workspace._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 
 object Runtime extends Logger {
-  val NumberOfLocalTheads = 1
   val NbRetry = 3
 }
 
@@ -73,8 +67,6 @@ class Runtime {
       System.setOut(outSt)
       System.setErr(errSt)
     }
-
-    Workspace.setPreference(LocalExecutionEnvironment.DefaultNumberOfThreads, Integer.toString(NumberOfLocalTheads));
 
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[File, File]
@@ -136,7 +128,7 @@ class Runtime {
       val allMoleJobs = runableTasks.map { _.toMoleJob(saver.save) }
 
       /* --- Submit all jobs to the local environment --*/
-      for (toProcess ← allMoleJobs) LocalExecutionEnvironment.default.submit(toProcess)
+      for (toProcess ← allMoleJobs) LocalEnvironment.default.submit(toProcess)
 
       saver.waitAllFinished
 

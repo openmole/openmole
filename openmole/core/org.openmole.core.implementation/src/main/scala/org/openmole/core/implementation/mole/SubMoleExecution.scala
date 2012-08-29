@@ -19,8 +19,8 @@ package org.openmole.core.implementation.mole
 
 import org.openmole.core.implementation.data._
 import org.openmole.core.model.transition._
-import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
+import org.openmole.misc.eventdispatcher._
+import org.openmole.core.implementation.execution.local._
 import org.openmole.core.implementation.job._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.tools._
@@ -29,8 +29,7 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.job._
 import org.openmole.core.model.job.IMoleJob._
 import org.openmole.core.model.job.State._
-import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.exception._
 import org.openmole.core.implementation.job.MoleJob._
 import scala.collection.immutable.TreeMap
 import collection.JavaConversions._

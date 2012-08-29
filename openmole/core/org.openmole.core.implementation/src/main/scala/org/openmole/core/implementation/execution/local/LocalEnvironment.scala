@@ -31,7 +31,7 @@ import org.openmole.misc.tools.service.ThreadUtil._
 import org.openmole.core.model.execution.IEnvironment
 import scala.collection.immutable.TreeMap
 
-object LocalExecutionEnvironment extends Environment {
+object LocalEnvironment extends Environment {
 
   /*val jobOrdering = new Ordering[LocalExecutionJob] {
    override def compare(left: LocalExecutionJob, right: LocalExecutionJob): Int = {
@@ -45,15 +45,15 @@ object LocalExecutionEnvironment extends Environment {
   val DefaultNumberOfThreads = new ConfigurationLocation("LocalExecutionEnvironment", "ThreadNumber")
 
   Workspace += (DefaultNumberOfThreads, Integer.toString(1))
-  @transient lazy val default = new LocalExecutionEnvironment(Workspace.preferenceAsInt(DefaultNumberOfThreads))
+  @transient lazy val default = new LocalEnvironment(Workspace.preferenceAsInt(DefaultNumberOfThreads))
 
   override def submit(job: IJob) = default.submit(job)
 
 }
 
-class LocalExecutionEnvironment(val nbThreads: Int) extends Environment {
+class LocalEnvironment(val nbThreads: Int) extends Environment {
 
-  import LocalExecutionEnvironment._
+  import LocalEnvironment._
 
   private val jobs = new JobPriorityQueue
 

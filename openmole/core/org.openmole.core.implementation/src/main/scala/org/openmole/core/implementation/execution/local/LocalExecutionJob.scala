@@ -22,4 +22,4 @@ import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.job.IMoleJob
 
-class LocalExecutionJob(val environment: LocalExecutionEnvironment, val moleJobs: Iterable[IMoleJob]) extends ExecutionJob
+class LocalExecutionJob(val environment: LocalEnvironment, val moleJobs: Iterable[IMoleJob]) extends ExecutionJob

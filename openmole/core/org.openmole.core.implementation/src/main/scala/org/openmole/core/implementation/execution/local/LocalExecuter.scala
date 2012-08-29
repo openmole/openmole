@@ -30,7 +30,7 @@ import scala.collection.JavaConversions._
 
 object LocalExecuter extends Logger
 
-class LocalExecuter(environment: LocalExecutionEnvironment) extends Runnable {
+class LocalExecuter(environment: LocalEnvironment) extends Runnable {
 
   import LocalExecuter._
 

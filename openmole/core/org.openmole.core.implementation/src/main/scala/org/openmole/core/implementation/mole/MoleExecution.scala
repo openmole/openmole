@@ -124,7 +124,7 @@ class MoleExecution(
     if (!job.finished) {
       (selection.get(capsule) match {
         case Some(selection) ⇒ selection.apply(job)
-        case None ⇒ LocalExecutionEnvironment
+        case None ⇒ LocalEnvironment
       }).submit(job)
     }
 

@@ -17,7 +17,7 @@
 
 package org.openmole.core.implementation.transition
 
-import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
+import org.openmole.core.implementation.execution.local._
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.data._
@@ -194,7 +194,7 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
     new Transition(initc, t1c)
     new Transition(t1c, t3c)
 
-    val env = new LocalExecutionEnvironment(20)
+    val env = new LocalEnvironment(20)
 
     new MoleExecution(
       new Mole(initc),
