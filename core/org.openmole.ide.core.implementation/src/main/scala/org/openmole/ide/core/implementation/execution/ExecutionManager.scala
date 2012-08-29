@@ -12,7 +12,7 @@ import java.io.PrintStream
 import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.Timer
 import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
+import org.openmole.core.implementation.execution.local._
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.core.model.hook.IHook
 import org.openmole.core.model.mole.ICapsule
@@ -198,7 +198,7 @@ class ExecutionManager(manager: IMoleSceneManager,
 
   def initBarPlotter = synchronized {
     environments.clear
-    buildEmptyEnvPlotter((LocalExecutionEnvironment.asInstanceOf[IEnvironment], "Local"))
+    buildEmptyEnvPlotter((LocalEnvironment.asInstanceOf[IEnvironment], "Local"))
   }
 
   def buildEmptyEnvPlotter(e: (IEnvironment, String)) = {

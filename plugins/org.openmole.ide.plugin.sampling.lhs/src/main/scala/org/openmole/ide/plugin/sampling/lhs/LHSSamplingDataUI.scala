@@ -6,9 +6,8 @@
 package org.openmole.ide.plugin.sampling.lhs
 
 import org.openmole.ide.core.model.dataproxy._
-import org.openmole.ide.core.model.data.IBoundedDomainDataUI
-import org.openmole.ide.core.model.data.ISamplingDataUI
-import org.openmole.plugin.sampling.lhs.LHSSampling
+import org.openmole.ide.core.model.data._
+import org.openmole.plugin.sampling.lhs._
 import org.openmole.core.implementation.sampling.Factor
 import org.openmole.core.model.data.IPrototype
 import scala.collection.JavaConversions._
@@ -21,7 +20,7 @@ class LHSSamplingDataUI(val name: String = "",
   implicit def string2Int(s: String): Int = augmentString(s).toInt
 
   def coreObject =
-    new LHSSampling(
+    new LHS(
       try samples
       catch {
         case e: NumberFormatException ⇒ throw new UserBadDataError("An integer is exepected as number of samples")
@@ -31,7 +30,7 @@ class LHSSamplingDataUI(val name: String = "",
           new Factor(proto, f._3.coreObject(proto))
       }: _*)
 
-  def coreClass = classOf[LHSSampling]
+  def coreClass = classOf[LHS]
 
   def imagePath = "img/lhsSampling.png"
 
