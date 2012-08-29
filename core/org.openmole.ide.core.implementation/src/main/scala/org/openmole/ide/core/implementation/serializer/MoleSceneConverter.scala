@@ -66,7 +66,12 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
 
     molescene.manager.capsules.values.foreach(view ⇒ {
       writer.startNode("capsule")
-      writer.addAttribute("start", view.dataUI.startingCapsule.toString)
+      //  writer.addAttribute("start", view.dataUI.startingCapsule.toString)
+      writer.addAttribute("start", molescene.manager.startingCapsule match {
+        case Some(c: ICapsuleUI) ⇒ if (c == view) "true"
+        else "false"
+        case _ ⇒ "false"
+      })
       writer.addAttribute("x", String.valueOf(view.x / 2 / Toolkit.getDefaultToolkit.getScreenSize.width))
       writer.addAttribute("y", String.valueOf(view.y / 2 / Toolkit.getDefaultToolkit.getScreenSize.height))
 

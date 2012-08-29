@@ -44,9 +44,5 @@ trait ICapsuleDataUI {
 
   def hooks_=(hm: HashMap[Class[_ <: ICapsuleExecutionHook], IHookDataUI])
 
-  def startingCapsule: Boolean
-
-  def startingCapsule_=(sc: Boolean)
-
   def transitionType: TransitionType.Value
 }

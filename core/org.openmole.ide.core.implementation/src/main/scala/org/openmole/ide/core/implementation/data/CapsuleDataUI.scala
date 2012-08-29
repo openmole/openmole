@@ -28,8 +28,7 @@ import scala.collection.mutable.HashMap
 
 class CapsuleDataUI(var task: Option[ITaskDataProxyUI] = None,
                     var sampling: Option[ISamplingDataProxyUI] = None,
-                    var environment: Option[IEnvironmentDataProxyUI] = None,
-                    var startingCapsule: Boolean = false) extends ICapsuleDataUI {
+                    var environment: Option[IEnvironmentDataProxyUI] = None) extends ICapsuleDataUI {
 
   var hooks = new HashMap[Class[_ <: ICapsuleExecutionHook], IHookDataUI]
 

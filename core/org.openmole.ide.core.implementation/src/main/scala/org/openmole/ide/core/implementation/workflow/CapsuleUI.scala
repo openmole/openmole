@@ -147,7 +147,6 @@ class CapsuleUI(val scene: IMoleScene,
   }
 
   def defineAsStartingCapsule(b: Boolean) = {
-    dataUI.startingCapsule = b
     islots.foreach { _.setStartingSlot(b) }
     scene.validate
     scene.refresh
@@ -236,7 +235,6 @@ class CapsuleUI(val scene: IMoleScene,
   }
 
   def addInputSlot(on: Boolean): IInputSlotWidget = {
-    if (on) dataUI.startingCapsule = on
     nbInputSlots += 1
     val im = new InputSlotWidget(scene, this, nbInputSlots, on)
     islots += im
