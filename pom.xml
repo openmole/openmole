@@ -54,7 +54,7 @@
         <!--<lib.com.db4o.version>7.4.58</lib.com.db4o.version>-->
         <lib.org.scalatest.version>1.6.1</lib.org.scalatest.version>
         <lib.org.scala-tools.testing.scalacheck.version>1.9</lib.org.scala-tools.testing.scalacheck.version>
-        <lib.com.db4o.version>8.1-SNAPSHOT</lib.com.db4o.version>
+        <lib.com.db4o.version>8.0-SNAPSHOT</lib.com.db4o.version>
         <lib.com.ice.tar.version>1.1.4-2</lib.com.ice.tar.version>
         <!--<lib.com.jcraft.jsch.version>0.1.42</lib.com.jcraft.jsch.version>-->
         <lib.com.thoughtworks.xstream.version>1.4.1</lib.com.thoughtworks.xstream.version>
@@ -92,7 +92,7 @@
         <lib.ca.umontreal.iro.ssj.version>2.4</lib.ca.umontreal.iro.ssj.version>
         <lib.gov.lbl.acs.colt.version>1.2</lib.gov.lbl.acs.colt.version>
         <lib.org.apache.commons.math.version>3.0-SNAPSHOT</lib.org.apache.commons.math.version>
-        <lib.com.google.guava.version>10.0.1</lib.com.google.guava.version>
+        <lib.com.google.guava.version>13.0</lib.com.google.guava.version>
         <lib.org.slf4j.version>1.6.1</lib.org.slf4j.version>
         <lib.ch.qos.logback.version>0.9.21</lib.ch.qos.logback.version>
         <lib.net.java.dev.j3d.version>1.3.1</lib.net.java.dev.j3d.version>
@@ -105,7 +105,7 @@
         <lib.org.nuiton.thirdparty.jri.version>0.7-0</lib.org.nuiton.thirdparty.jri.version>
         <lib.org.apache.sling.scripting.scala.script.version>0.9.0-SNAPSHOT</lib.org.apache.sling.scripting.scala.script.version>
         <lib.com.github.scopt.version>2.0.0</lib.com.github.scopt.version>
-        <lib.fr.iscpif.mgo.version>1.31</lib.fr.iscpif.mgo.version>
+        <lib.fr.iscpif.mgo.version>1.32</lib.fr.iscpif.mgo.version>
         <lib.com.typesafe.akka.version>2.0.3</lib.com.typesafe.akka.version>
         <lib.de.erichseifert.gral.version>0.9-SNAPSHOT</lib.de.erichseifert.gral.version>
         <lib.runtime.jvm.version>7-u5</lib.runtime.jvm.version>
