@@ -23,6 +23,7 @@ import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget.URL
 import scala.swing.Label
 import scala.swing.TextField
 
@@ -35,7 +36,7 @@ abstract class GenericPrototypePanelUI[T](d: Int = 0) extends PluginPanel("wrap 
 
   def dim = dimTextField.text
 
-  override val help = new Helper {
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     add(dimTextField, new Help(i18n.getString("dimension"), i18n.getString("dimensionEx")))
   }
 }

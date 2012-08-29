@@ -20,7 +20,10 @@ package org.openmole.ide.plugin.environment.desktopgrid
 import java.util.Locale
 import java.util.ResourceBundle
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
+import org.openmole.ide.misc.widget.Help
+import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget.URL
 import scala.swing.Label
 import scala.swing.TabbedPane
 import scala.swing.TextField
@@ -45,9 +48,11 @@ class DesktopGridEnvironmentPanelUI(pud: DesktopGridEnvironmentDataUI) extends P
   passTextField.text = pud.pass
   portTextField.text = pud.port.toString
 
-  override def helpMap = Map(loginTextField -> (i18n.getString("login"), i18n.getString("loginEx")),
-    passTextField -> (i18n.getString("password"), i18n.getString("passwordEx")),
-    portTextField -> (i18n.getString("port"), i18n.getString("portEx")))
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
+    add(loginTextField, new Help(i18n.getString("login"), i18n.getString("loginEx")))
+    add(passTextField, new Help(i18n.getString("password"), i18n.getString("passwordEx")))
+    add(portTextField, new Help(i18n.getString("port"), i18n.getString("portEx")))
+  }
 
   override def saveContent(name: String) = new DesktopGridEnvironmentDataUI(name,
     loginTextField.text,

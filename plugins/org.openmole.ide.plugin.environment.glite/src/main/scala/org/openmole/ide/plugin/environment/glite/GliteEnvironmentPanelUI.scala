@@ -75,12 +75,15 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
     }
   }
 
-  override def helpMap = Map(voTextField -> (i18n.getString("vo"), i18n.getString("voEx")),
-    vomsTextField -> (i18n.getString("voms"), i18n.getString("vomsEx")),
-    bdiiTextField -> (i18n.getString("bdii"), i18n.getString("bdiiEx")),
-    runtimeMemoryTextField -> (i18n.getString("runtimeMemory"), i18n.getString("runtimeMemoryEx")),
-    proxyCheckBox -> (i18n.getString("myProxy"), ""),
-    proxyURLTextField -> (i18n.getString("proxyURL"), i18n.getString("proxyURLEx")))
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
+    requirementsPanelUI.requirementHelp.foreach { hm ⇒ add(hm._1, hm._2) }
+    add(voTextField, new Help(i18n.getString("vo"), i18n.getString("voEx")))
+    add(vomsTextField, new Help(i18n.getString("voms"), i18n.getString("vomsEx")))
+    add(bdiiTextField, new Help(i18n.getString("bdii"), i18n.getString("bdiiEx")))
+    add(proxyCheckBox, new Help(i18n.getString("runtimeMemory"), i18n.getString("runtimeMemoryEx")))
+    add(runtimeMemoryTextField, new Help(i18n.getString("myProxy")))
+    add(proxyURLTextField, new Help(i18n.getString("proxyURL"), i18n.getString("proxyURLEx")))
+  }
 
   def saveContent(name: String) =
     new GliteEnvironmentDataUI(name,

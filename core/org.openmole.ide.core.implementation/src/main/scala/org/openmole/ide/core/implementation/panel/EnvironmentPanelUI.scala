@@ -49,7 +49,8 @@ class EnvironmentPanelUI(proxy: IEnvironmentDataProxyUI,
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
-    contents += panelUI.tabbedPane
+    if (panelUI.tabbedPane.pages.size == 0) contents += panelUI.peer
+    else contents += panelUI.tabbedPane
     contents += panelUI.help
   }.peer, BorderLayout.CENTER)
 

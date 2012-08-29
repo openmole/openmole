@@ -21,7 +21,6 @@ import java.awt.Color
 import javax.swing.JPanel
 import org.openmole.ide.misc.widget.Helper
 import scala.swing.Alignment
-import scala.swing.Component
 import scala.swing.TabbedPane
 
 trait IPanelUI {

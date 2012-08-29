@@ -20,20 +20,25 @@ package org.openmole.ide.plugin.sampling.lhs
 import scala.swing._
 import swing.Swing._
 import swing.ListView._
+import java.util.Locale
+import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.dataproxy.BoundedDomainDataProxyFactory
-import org.openmole.ide.core.implementation.dataproxy.DomainDataProxyFactory
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.panel._
+import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.BorderPanel.Position._
+import org.openmole.ide.misc.widget.URL
 import org.openmole.ide.plugin.sampling.tools.MultiGenericBoundedSamplingPanel
 import org.openmole.ide.plugin.sampling.tools.MultiGenericBoundedSamplingPanel._
 import scala.collection.JavaConversions._
 
 class LHSSamplingPanelUI(cud: LHSSamplingDataUI) extends PluginPanel("wrap 2", "", "") with ISamplingPanelUI {
+
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val sampleTextField = new TextField(cud.samples, 4)
   val multiPanel = new MultiGenericBoundedSamplingPanel(Proxys.prototypes.toList,
@@ -61,4 +66,6 @@ class LHSSamplingPanelUI(cud: LHSSamplingDataUI) extends PluginPanel("wrap 2", "
         d.boundedDomainProxy.get,
         d.boundedDomainDataUI.get)
     })
+
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
 }

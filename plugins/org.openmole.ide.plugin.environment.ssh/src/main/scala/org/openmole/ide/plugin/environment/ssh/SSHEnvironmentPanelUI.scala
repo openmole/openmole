@@ -23,6 +23,7 @@ import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget.URL
 import scala.swing.Label
 import scala.swing.TabbedPane
 import scala.swing.TextField
@@ -56,7 +57,7 @@ class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fill
     contents += runTimeMemoryTextField
   })
 
-  override val help = new Helper {
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     add(loginTextField,
       new Help(i18n.getString("login"),
         i18n.getString("loginEx")))

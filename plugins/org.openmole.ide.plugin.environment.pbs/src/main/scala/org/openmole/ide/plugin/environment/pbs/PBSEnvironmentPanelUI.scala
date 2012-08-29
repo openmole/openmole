@@ -20,7 +20,10 @@ package org.openmole.ide.plugin.environment.pbs
 import java.util.Locale
 import java.util.ResourceBundle
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
+import org.openmole.ide.misc.widget.Help
+import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget.URL
 import org.openmole.ide.plugin.environment.tools._
 import scala.swing.Label
 import scala.swing.TabbedPane
@@ -56,11 +59,14 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
   tabbedPane.pages += requirementsPanelUI
   contents += tabbedPane
 
-  override def helpMap = Map(loginTextField -> (i18n.getString("login"), i18n.getString("loginEx")),
-    hostTextField -> (i18n.getString("host"), i18n.getString("hostEx")),
-    dirTextField -> (i18n.getString("dir"), i18n.getString("dirEx")),
-    queueTextField -> (i18n.getString("queueText"), i18n.getString("queueTextEx")),
-    runTimeMemoryTextField -> (i18n.getString("runTimeMemory"), i18n.getString("runTimeMemoryEx")))
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
+    requirementsPanelUI.requirementHelp.foreach { hm ⇒ add(hm._1, hm._2) }
+    add(loginTextField, new Help(i18n.getString("login"), i18n.getString("loginEx")))
+    add(hostTextField, new Help(i18n.getString("host"), i18n.getString("hostEx")))
+    add(dirTextField, new Help(i18n.getString("dir"), i18n.getString("dirEx")))
+    add(queueTextField, new Help(i18n.getString("queue"), i18n.getString("queueEx")))
+    add(runTimeMemoryTextField, new Help(i18n.getString("runtimeMemory"), i18n.getString("runtimeMemoryEx")))
+  }
 
   override def saveContent(name: String) =
     new PBSEnvironmentDataUI(name,

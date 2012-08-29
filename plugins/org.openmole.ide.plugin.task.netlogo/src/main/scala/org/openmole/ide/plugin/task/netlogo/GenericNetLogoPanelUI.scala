@@ -145,8 +145,8 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
   def comboContent: List[IPrototypeDataProxyUI] = Proxys.prototypes.toList
 
   def buildNetLogo: NetLogo
-  
-  override val help = new Helper {
+
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     add(nlogoTextField,
       new Help(i18n.getString("nlogoPath"),
         i18n.getString("nlogoPathEx"),

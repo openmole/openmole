@@ -31,6 +31,7 @@ import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget.multirow.MultiCombo._
 import org.openmole.ide.misc.widget.multirow.MultiComboTextField
 import org.openmole.ide.misc.widget.multirow.MultiComboTextField._
+import org.openmole.ide.misc.widget.URL
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField._
 import org.openmole.ide.misc.widget.BashEditor
@@ -105,7 +106,7 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("") w
 
   def comboContent: List[IPrototypeDataProxyUI] = Proxys.classPrototypes(classOf[File])
 
-  override val help = new Helper {
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     add(workdirTextField,
       new Help(i18n.getString("workdir"),
         i18n.getString("workdirEx")))

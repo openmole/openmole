@@ -31,6 +31,7 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import java.awt.Color
+import java.util.Locale
 import org.openmole.core.implementation.data.Prototype
 import org.openmole.core.implementation.task.EmptyTask
 import org.openmole.core.model.data.IContext

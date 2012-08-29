@@ -31,6 +31,7 @@ import scala.swing.TabbedPane
 import scala.swing.event.SelectionChanged
 import scala.swing.Label
 import scala.swing.MyComboBox
+import org.openmole.ide.misc.widget.URL
 import scala.collection.JavaConversions._
 
 class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2", "left,grow,fill", "") with ITaskPanelUI {
@@ -80,7 +81,7 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2", "
     if (capsuleComboBox.selection.item == EmptyDataUIs.emptyTaskProxy) None
     else Some(capsuleComboBox.selection.item))
 
-  override val help = new Helper {
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     add(moleComboBox,
       new Help(i18n.getString("mole"),
         i18n.getString("moleEx")))

@@ -19,7 +19,9 @@ package org.openmole.ide.plugin.environment.tools
 
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.misc.widget._
+import org.openmole.ide.misc.widget.Help
+import org.openmole.ide.misc.widget.Helper
+import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.CheckBox
 import scala.swing.Label
 import scala.swing.TabbedPane
@@ -54,10 +56,11 @@ class RequirementPanelUI(val requirementDataUI: RequirementDataUI = new Requirem
   maxCPUTimeTextField.text = requirementDataUI.maxCPUTime
   otherRequirementTextField.text = requirementDataUI.otherRequirements
 
-  override def helpMap = Map(architectureCheckBox -> (i18n.getString("architecture"), i18n.getString("architectureEx")),
-    workerNodeMemoryTextField -> (i18n.getString("workerNodeMemory"), i18n.getString("workerNodeMemoryEx")),
-    maxCPUTimeTextField -> (i18n.getString("maxCPUTime"), i18n.getString("maxCPUTimeEx")),
-    otherRequirementTextField -> (i18n.getString("otherRequirement"), i18n.getString("otherRequirementEx")))
+  val requirementHelp = List(
+    (architectureCheckBox, new Help(i18n.getString("architecture"), i18n.getString("architectureEx"))),
+    (workerNodeMemoryTextField, new Help(i18n.getString("workerNodeMemory"), i18n.getString("workerNodeMemoryEx"))),
+    (maxCPUTimeTextField, new Help(i18n.getString("maxCPUTime"), i18n.getString("maxCPUTimeEx"))),
+    (otherRequirementTextField, new Help(i18n.getString("otherRequirement"), i18n.getString("otherRequirementEx"))))
 
   def save = new RequirementDataUI(
     architectureCheckBox.selected,

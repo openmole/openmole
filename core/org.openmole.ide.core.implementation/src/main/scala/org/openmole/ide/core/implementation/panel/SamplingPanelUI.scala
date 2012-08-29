@@ -27,6 +27,7 @@ import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
+import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import BasePanelUI._
@@ -45,6 +46,7 @@ class SamplingPanelUI(proxy: ISamplingDataProxyUI,
     contents += panelUI.help
   }.peer, BorderLayout.CENTER)
 
+  listenTo(nameTextField)
   listenTo(panelUI.help.components.toSeq: _*)
   reactions += {
     case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)

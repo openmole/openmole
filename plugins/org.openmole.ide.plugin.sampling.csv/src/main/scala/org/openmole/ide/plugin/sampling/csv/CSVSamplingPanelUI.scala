@@ -28,16 +28,23 @@ import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import java.util.Locale
+import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.misc.widget.CSVChooseFileTextField
 import org.openmole.ide.misc.widget.DialogClosedEvent
+import org.openmole.ide.misc.widget.Help
+import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget.URL
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos._
 import scala.swing.BorderPanel.Position._
 
 class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("", "[][grow,fill]", "") with ISamplingPanelUI {
+
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val csvTextField = new CSVChooseFileTextField(pud.csvFilePath)
   var comboMulti: Option[MultiTwoCombos[String, IPrototypeDataProxyUI]] = None
@@ -68,13 +75,13 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("", "[][gro
           comboContent,
           "with",
           pud.prototypeMapping.map { pm ⇒
-            println("new TTwoCombosPanel " + pm._1 + " " + pm._2)
             new TwoCombosPanel(
               headers.toList,
               comboContent,
               "with",
               new TwoCombosData(Some(pm._1), Some(pm._2)))
           }))
+      help.add(comboMulti.get, new Help(i18n.getString("mapping")))
       mappingTab.content = comboMulti.get.panel
       reader.close
     }
@@ -89,4 +96,8 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("", "[][gro
   }
 
   def comboContent: List[IPrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxys.prototypes.toList
+
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
+    add(csvTextField, new Help(i18n.getString("csvPath"), i18n.getString("csvPathEx")))
+  }
 }

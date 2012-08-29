@@ -26,7 +26,7 @@ import scala.swing.event.MousePressed
 
 class ExternalLinkLabel(val textLink: String,
                         val href: String,
-                        val textSize: Int = 3,
+                        val textSize: Int = 4,
                         color: String = "#bbc807ff",
                         bold: Boolean = false) extends Label {
   cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)

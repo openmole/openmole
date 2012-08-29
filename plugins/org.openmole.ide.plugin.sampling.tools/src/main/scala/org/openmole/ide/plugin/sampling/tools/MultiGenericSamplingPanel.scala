@@ -28,6 +28,7 @@ import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.panel._
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import org.openmole.ide.misc.widget.multirow.IData
 import org.openmole.ide.misc.widget.multirow.IFactory
 import org.openmole.ide.misc.widget.multirow.IPanel
@@ -104,5 +105,4 @@ class MultiGenericSamplingPanel(protoContent: List[IPrototypeDataProxyUI] = List
                                 domainContent: List[IDomainDataProxyUI] = List.empty,
                                 initPanels: List[GenericSamplingPanel]) extends MultiPanel("Factors",
   new GenericSamplingFactory(protoContent, domainContent),
-  initPanels) {
-}
+  initPanels)

@@ -70,8 +70,7 @@ class StoreIntoCSVTaskPanelUI(sdu: StoreIntoCSVTaskDataUI) extends PluginPanel("
   }
 
   override val help = new Helper {
-    add(protoFileComboBox,
-      new Help(i18n.getString("fileProto")))
+    add(protoFileComboBox, new Help(i18n.getString("fileProto")))
   }
 
   class ColumnPanel(pud: IPrototypeDataProxyUI, tf: TextField) {

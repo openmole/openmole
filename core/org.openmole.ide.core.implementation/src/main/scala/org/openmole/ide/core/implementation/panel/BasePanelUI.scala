@@ -79,6 +79,7 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
     }, "gapbottom 10")
   }
 
+  listenTo(nameTextField)
   preferredSize.width = 300
   foreground = Color.white
   background = borderColor

@@ -24,32 +24,35 @@ import javax.swing.BorderFactory
 import scala.collection.mutable.HashMap
 import scala.swing.Component
 import scala.swing.TextArea
-import scala.swing.Label
 
-class Helper extends PluginPanel("wrap") {
-  val _helpMap = new HashMap[Component, Help]
+class Helper(val permalinks: List[URL] = List.empty) extends PluginPanel("wrap") {
+  val helpMap = new HashMap[Component, Help]
 
   def add(component: Component,
-          help: Help) = _helpMap += component -> help
+          help: Help) = helpMap += component -> help
 
-  def components = _helpMap.keys
+  def components = helpMap.keys
 
-  def switchTo(component: Component) = {
+  def switchTo(help: Help) = {
+    contents += new HelpTextArea(help.message)
+    contents += new ExampleHelpTextArea(help.example)
+    permalinks foreach { addExternalLink(_, true) }
+    help.urls foreach { addExternalLink(_, false) }
+  }
+
+  def switchTo(component: Component): Unit = {
     contents.removeAll
     contents += new PluginPanel("wrap") {
-      _helpMap.contains(component) match {
-        case true ⇒
-          val help = _helpMap(component)
-          contents += new HelpTextArea(help.message)
-          contents += new ExampleHelpTextArea(help.example)
-          help.urls.foreach { u ⇒ contents += new ExternalLinkLabel(u.text, u.url)
-          }
-        case false ⇒ new Label { opaque = false }
+      helpMap.contains(component) match {
+        case true ⇒ switchTo(helpMap(component))
+        case false ⇒ permalinks foreach { addExternalLink(_, true) }
       }
     }
     revalidate
     repaint
   }
+
+  private def addExternalLink(u: URL, b: Boolean) = contents += new ExternalLinkLabel(u.text, u.url, bold = b)
 
   class HelpTextArea(t: String) extends TextArea(t, 1, 40) {
     border = BorderFactory.createEmptyBorder
@@ -59,7 +62,7 @@ class Helper extends PluginPanel("wrap") {
     editable = false
   }
 
-  class ExampleHelpTextArea(t: String) extends HelpTextArea(t) {
+  class ExampleHelpTextArea(t: String) extends HelpTextArea({ if (!t.isEmpty) "Ex: " else "" } + t) {
     font = new Font(font.getFamily, ITALIC, font.getSize)
   }
 }

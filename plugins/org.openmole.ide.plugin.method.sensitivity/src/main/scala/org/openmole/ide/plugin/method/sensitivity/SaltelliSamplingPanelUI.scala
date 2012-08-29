@@ -5,11 +5,16 @@
 
 package org.openmole.ide.plugin.method.sensitivity
 
+import java.util.Locale
+import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.dataproxy.BoundedDomainDataProxyFactory
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
+import org.openmole.ide.misc.widget.Help
+import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget.URL
 import org.openmole.ide.plugin.sampling.tools.MultiGenericBoundedSamplingPanel
 import org.openmole.ide.plugin.sampling.tools.MultiGenericBoundedSamplingPanel._
 import scala.swing.Label
@@ -17,6 +22,8 @@ import scala.swing.TabbedPane
 import scala.swing.TextField
 
 class SaltelliSamplingPanelUI(cud: SaltelliSamplingDataUI) extends PluginPanel("wrap 2", "", "") with ISamplingPanelUI {
+
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val sampleTextField = new TextField(cud.samples, 4)
   val multiPanel = new MultiGenericBoundedSamplingPanel(Proxys.prototypes.toList,
@@ -45,4 +52,11 @@ class SaltelliSamplingPanelUI(cud: SaltelliSamplingDataUI) extends PluginPanel("
         c.boundedDomainProxy.get,
         c.boundedDomainDataUI.get)
     })
+
+  override val help = new Helper(List(new URL(i18n.getString("samplingPermalinkText"),
+    i18n.getString("samplingPermalink")),
+    new URL(i18n.getString("samplingPermalink1Text"),
+      i18n.getString("samplingPermalink1")))) {
+    add(sampleTextField, new Help(i18n.getString("sample"), i18n.getString("sampleEx")))
+  }
 }
