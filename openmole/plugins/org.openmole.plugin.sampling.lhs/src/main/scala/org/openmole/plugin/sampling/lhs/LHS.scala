@@ -17,20 +17,17 @@
 
 package org.openmole.plugin.sampling.lhs
 
-import org.openmole.core.model.sampling.ISampling
 import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.service.Random._
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.sampling.Sampling
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IBounded
-import org.openmole.core.model.sampling.IFactor
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.sampling._
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
+import org.openmole.core.model.sampling._
+import org.openmole.misc.workspace._
 import org.openmole.core.implementation.task.Task._
 
-sealed class LHSSampling(samples: Int, factors: IFactor[Double, IDomain[Double] with IBounded[Double]]*) extends Sampling {
+sealed class LHS(samples: Int, factors: IFactor[Double, IDomain[Double] with IBounded[Double]]*) extends Sampling {
 
   override def prototypes = factors.map { _.prototype }
 
