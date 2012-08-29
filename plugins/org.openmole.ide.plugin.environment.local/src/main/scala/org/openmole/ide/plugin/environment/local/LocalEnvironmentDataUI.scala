@@ -5,15 +5,15 @@
 
 package org.openmole.ide.plugin.environment.local
 
-import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
+import org.openmole.core.implementation.execution.local.LocalEnvironment
 import org.openmole.ide.core.model.data.IEnvironmentDataUI
 
 class LocalEnvironmentDataUI(val name: String = "",
                              val nbThread: Int = 1) extends IEnvironmentDataUI {
 
-  def coreObject = new LocalExecutionEnvironment(nbThread)
+  def coreObject = new LocalEnvironment(nbThread)
 
-  def coreClass = classOf[LocalExecutionEnvironment]
+  def coreClass = classOf[LocalEnvironment]
 
   def imagePath = "img/local.png"
 
