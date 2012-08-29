@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.core.implementation.execution.local.LocalExecutionEnvironment
+import org.openmole.core.implementation.execution.local._
 import org.openmole.core.implementation.validation.Validation
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.job.State
@@ -34,7 +34,7 @@ import scala.collection.mutable.HashMap
 
 class Command {
 
-  def print(environment: LocalExecutionEnvironment): Unit = {
+  def print(environment: LocalEnvironment): Unit = {
     println("Queued jobs: " + environment.nbJobInQueue)
     println("Number of threads: " + environment.nbThreads)
   }
