@@ -13,7 +13,7 @@ import org.openmole.ide.core.model.data.IEnvironmentDataUI
 class PBSEnvironmentDataUI(val name: String = "",
                            val login: String = "",
                            val host: String = "",
-                           val dir: String = "/tmp/",
+                           val dir: String = "",
                            val queue: String = "",
                            val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory,
                            val requirements: RequirementDataUI = new RequirementDataUI) extends IEnvironmentDataUI {
