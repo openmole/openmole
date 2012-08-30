@@ -77,7 +77,7 @@ sealed abstract class ElitismTask[E <: Elitism with Termination with Modifier](
 
   override def process(context: IContext) = {
     val currentArchive = context.valueOrException(archive).asInstanceOf[Population[evolution.G, evolution.MF]]
-    val globalArchive = context.valueOrException(individuals).toList ::: currentArchive.individuals.toList
+    val globalArchive = context.valueOrException(individuals).toList ::: currentArchive.toIndividuals.toList
 
     val population = evolution.toPopulation(globalArchive.toIndexedSeq)
     val newArchive = evolution.elitism(population)

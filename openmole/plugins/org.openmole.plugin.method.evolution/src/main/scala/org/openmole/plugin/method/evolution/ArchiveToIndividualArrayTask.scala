@@ -50,6 +50,6 @@ sealed abstract class ArchiveToIndividualArrayTask[G <: Genome, MF](
   override def process(context: IContext) =
     context + new Variable(
       individual.toArray,
-      context.valueOrException(archive).individuals.toArray)
+      context.valueOrException(archive).toIndividuals.toArray)
 
 }

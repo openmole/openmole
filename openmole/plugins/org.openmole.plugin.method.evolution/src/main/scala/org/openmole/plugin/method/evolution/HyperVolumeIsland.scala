@@ -20,7 +20,7 @@ package org.openmole.plugin.method.evolution
 import fr.iscpif.mgo._
 
 sealed class HyperVolumeIsland[E <: GAG with MF with GenomeFactory with Dominance with GManifest with Mu with ReferencePoint](val evolution: E)(val mu: Int, val windowSize: Int, val deviationEpsilon: Double)
-    extends MGBinaryTournamentSelection
+    extends BinaryTournamentSelection
     with GAG
     with GManifest
     with NonDominatedElitism
@@ -42,5 +42,5 @@ sealed class HyperVolumeIsland[E <: GAG with MF with GenomeFactory with Dominanc
 
   def lambda = evolution.mu
   def isDominated(p1: Seq[Double], p2: Seq[Double]) = evolution.isDominated(p1, p2)
-  def referencePoint(front: IndexedSeq[IndexedSeq[Double]]) = evolution.referencePoint(front)
+  def referencePoint = evolution.referencePoint
 }

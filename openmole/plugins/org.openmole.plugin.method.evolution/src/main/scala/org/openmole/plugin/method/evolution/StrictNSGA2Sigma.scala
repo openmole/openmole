@@ -26,7 +26,7 @@ sealed class StrictNSGA2Sigma(
   val genomeSize: Int,
   val mu: Int,
   val lambda: Int) extends NSGAIISigma
-    with MGBinaryTournamentSelection
+    with BinaryTournamentSelection
     with CrowdingStabilityTermination
     with NonDominatedElitism
     with CoEvolvingSigmaValuesMutation

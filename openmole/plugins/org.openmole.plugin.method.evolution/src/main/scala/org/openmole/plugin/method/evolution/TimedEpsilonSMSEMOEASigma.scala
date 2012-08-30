@@ -27,7 +27,7 @@ sealed class TimedEpsilonSMSEMOEASigma(
   val lambda: Int,
   val epsilons: Seq[Double],
   val referencePoint: Seq[Double]) extends NSGAIISigma
-    with MGBinaryTournamentSelection
+    with BinaryTournamentSelection
     with TimedTermination
     with NonDominatedElitism
     with CoEvolvingSigmaValuesMutation
@@ -37,8 +37,7 @@ sealed class TimedEpsilonSMSEMOEASigma(
     with EpsilonDominance
     with RankDiversityModifier
     with EvolutionManifest
-    with TerminationManifest
-    with ManualReferencePoint {
+    with TerminationManifest {
 
   val gManifest = manifest[G]
   val individualManifest = manifest[Individual[G]]
