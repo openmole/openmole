@@ -97,8 +97,8 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("", "[][gro
 
   def comboContent: List[IPrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxys.prototypes.toList
 
-  override lazy val help = 
+  override lazy val help =
     new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
       add(csvTextField, new Help(i18n.getString("csvPath"), i18n.getString("csvPathEx")))
-  }
+    }
 }
