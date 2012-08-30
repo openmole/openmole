@@ -69,6 +69,7 @@ object ReplicaCatalog extends Logger {
 
   val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
   val inCatalogCache = new TimeCache[Map[File, Set[ServiceDescription]]]
+  val localLock = new LockRepository[String]
 
   type ReplicaCacheKey = (String, String, String, String)
   val replicaCache = CacheBuilder.newBuilder.asInstanceOf[CacheBuilder[ReplicaCacheKey, Replica]].
@@ -149,7 +150,7 @@ object ReplicaCatalog extends Logger {
   private def key(r: Replica): String = key(r.hash, r.storageDescriptionString, r.authenticationKey)
   private def key(hash: String, storage: Storage): String = key(hash, storage.description.toString, storage.environment.authentication.key)
 
-  private def withSemaphore[T](key: String, objectContainer: ObjectContainer)(op: ⇒ T) = {
+  private def withSemaphore[T](key: String, objectContainer: ObjectContainer)(op: ⇒ T) = localLock.withLock(key) {
     objectContainer.ext.setSemaphore(key, Int.MaxValue)
     try op
     finally objectContainer.ext.releaseSemaphore(key)
@@ -290,7 +291,11 @@ object ReplicaCatalog extends Logger {
   def clean(replica: Replica)(implicit objectContainer: ObjectContainer) =
     withSemaphore(key(replica), objectContainer) {
       removeNoLock(replica)
-      if (!containsDestination(replica.destination)) URIFile.clean(new URIFile(replica.destination))
+      logger.fine("Remove " + replica)
+      if (!containsDestination(replica.destination)) {
+        logger.fine("Clean " + replica.destination)
+        URIFile.clean(new URIFile(replica.destination))
+      }
     }
 
   def cleanIfNotContains(destination: IURIFile, storage: Storage)(implicit objectContainer: ObjectContainer) = {

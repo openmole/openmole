@@ -36,6 +36,7 @@ import org.openmole.core.batch.environment.BatchJobWatcher.Watch
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.refresh._
+import org.openmole.core.batch.replication._
 import org.openmole.core.implementation.execution.Environment
 import org.openmole.misc.workspace.ConfigurationLocation
 
@@ -176,7 +177,7 @@ akka {
     jobManager ! Upload(bej)
   }
 
-  def clean = {
+  def clean = ReplicaCatalog.withClient { implicit c ⇒
     val cleaningThreadPool = fixedThreadPool(Workspace.preferenceAsInt(EnvironmentCleaningThreads))
     allStorages.foreach {
       s ⇒ background { UsageControl.withToken(s.description, s.clean) }(cleaningThreadPool)

@@ -45,4 +45,8 @@ package object puzzle {
 
   implicit def slotToPuzzleConverter(slot: ISlot) = slot.toPuzzle
 
+  implicit def puzzleDecoraton(puzzle: Puzzle) = new {
+    def last = puzzle.lasts.head
+  }
+
 }

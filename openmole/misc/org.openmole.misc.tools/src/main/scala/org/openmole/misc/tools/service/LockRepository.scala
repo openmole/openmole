@@ -42,4 +42,10 @@ class LockRepository[T] {
     }
   }.unlock
 
+  def withLock[A](obj: T)(op: ⇒ A) = {
+    lock(obj)
+    try op
+    finally unlock(obj)
+  }
+
 }

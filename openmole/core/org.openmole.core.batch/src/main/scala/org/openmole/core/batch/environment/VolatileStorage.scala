@@ -17,12 +17,12 @@
 
 package org.openmole.core.batch.environment
 
-import java.util.UUID
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.file.IURIFile
 import org.openmole.core.batch.file.URIFile
 import collection.JavaConversions._
+import com.db4o.ObjectContainer
 import java.net.URI
 import org.openmole.misc.workspace.Workspace
 
@@ -31,7 +31,7 @@ class VolatileStorage(val environment: BatchEnvironment, val URI: URI, override 
   @transient override lazy val description = new ServiceDescription(Workspace.sessionUUID.toString)
 
   override def baseDir(token: AccessToken) = new URIFile(URI)
-  override def persistentSpace(token: AccessToken): IURIFile = baseDir(token)
+  override def persistentSpace(token: AccessToken)(implicit objectContainer: ObjectContainer): IURIFile = baseDir(token)
   override def tmpSpace(token: AccessToken): IURIFile = baseDir(token)
-  def clean(token: AccessToken) = {}
+  def clean(token: AccessToken)(implicit objectContainer: ObjectContainer) = {}
 }

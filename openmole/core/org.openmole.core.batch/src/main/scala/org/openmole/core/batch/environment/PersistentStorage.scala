@@ -17,6 +17,7 @@
 
 package org.openmole.core.batch.environment
 
+import com.db4o.ObjectContainer
 import java.io.File
 import java.net.URI
 import org.openmole.core.batch.control.AccessToken
@@ -63,10 +64,8 @@ class PersistentStorage(
   @transient protected var persistentSpaceVar: Option[IURIFile] = None
   @transient protected var time = System.currentTimeMillis
 
-  override def clean(token: AccessToken) = synchronized {
-    ReplicaCatalog.withClient {
-      c ⇒ for (r ← ReplicaCatalog.getReplica(description, environment.authentication.key)(c)) ReplicaCatalog.remove(r)(c)
-    }
+  override def clean(token: AccessToken)(implicit objectContainer: ObjectContainer) = synchronized {
+    for (r ← ReplicaCatalog.getReplica(description, environment.authentication.key)) ReplicaCatalog.remove(r)
 
     baseDir(token).remove(token)
     baseSpaceVar = None
@@ -75,16 +74,13 @@ class PersistentStorage(
     time = System.currentTimeMillis
   }
 
-  override def persistentSpace(token: AccessToken): IURIFile = synchronized {
+  override def persistentSpace(token: AccessToken)(implicit objectContainer: ObjectContainer): IURIFile = synchronized {
     persistentSpaceVar match {
       case None ⇒
         val persistentSpace = baseDir(token).mkdirIfNotExist(persistent, token)
 
-        ReplicaCatalog.withClient {
-          c ⇒
-            for (file ← persistentSpace.list(token))
-              ReplicaCatalog.cleanIfNotContains(new URIFile(persistentSpace, file), this)(c)
-        }
+        for (file ← persistentSpace.list(token))
+          ReplicaCatalog.cleanIfNotContains(new URIFile(persistentSpace, file), this)
 
         persistentSpaceVar = Some(persistentSpace)
         persistentSpace
