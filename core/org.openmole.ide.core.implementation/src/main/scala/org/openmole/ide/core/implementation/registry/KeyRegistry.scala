@@ -32,7 +32,7 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.SynchronizedMap
 
 object KeyRegistry {
-  val prototypes = new HashMap[PrototypeKey, IPrototypeFactoryUI[_]] with SynchronizedMap[PrototypeKey, IPrototypeFactoryUI[_]]
+  val prototypes = new HashMap[DefaultKey, IPrototypeFactoryUI[_]] with SynchronizedMap[DefaultKey, IPrototypeFactoryUI[_]]
 
   val tasks = new HashMap[DefaultKey, ITaskFactoryUI] with SynchronizedMap[DefaultKey, ITaskFactoryUI]
 
