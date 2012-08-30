@@ -19,19 +19,8 @@ package org.openmole.ide.core.implementation.serializer
 
 import com.ice.tar.TarInputStream
 import com.ice.tar.TarOutputStream
-import com.thoughtworks.xstream.MarshallingStrategy
 import com.thoughtworks.xstream.XStream
-import com.thoughtworks.xstream.mapper.Mapper
-import com.thoughtworks.xstream.persistence.FilePersistenceStrategy
-import com.thoughtworks.xstream.persistence.XmlArrayList
 import java.io.EOFException
-import com.thoughtworks.xstream.converters.ConverterLookup
-import com.thoughtworks.xstream.converters.DataHolder
-import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
-import com.thoughtworks.xstream.core.ReferenceByIdMarshaller
-import com.thoughtworks.xstream.core.ReferenceByIdUnmarshaller
-import com.thoughtworks.xstream.io.HierarchicalStreamReader
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import com.thoughtworks.xstream.io.xml.DomDriver
 import java.io.File
 import java.io.FileInputStream
@@ -58,8 +47,8 @@ import scala.collection.JavaConversions._
 class GUISerializer {
 
   val xstream = new XStream(new DomDriver)
-  val samplingConverter = new SamplingConverter(xstream.getMapper, xstream.getReflectionProvider)
   val prototypeConverter = new PrototypeConverter(xstream.getMapper, xstream.getReflectionProvider)
+  val samplingConverter = new SamplingConverter(xstream.getMapper, xstream.getReflectionProvider, prototypeConverter)
   val environmentConverter = new EnvironmentConverter(xstream.getMapper, xstream.getReflectionProvider)
 
   xstream.registerConverter(new MoleSceneConverter(this))
@@ -186,9 +175,9 @@ class GUISerializer {
     val os = new TarInputStream(new FileInputStream(fromFile))
     val extractDir = Files.createTempDirectory("openmole").toFile
     os.extractDirArchiveWithRelativePathAndClose(extractDir)
+    unserializeProxy(extractDir.getAbsolutePath, "sampling")
     unserializeProxy(extractDir.getAbsolutePath, "environment")
     unserializeHook(extractDir.getAbsolutePath)
-    unserializeProxy(extractDir.getAbsolutePath, "sampling")
     unserializeProxy(extractDir.getAbsolutePath, "prototype")
     unserializeProxy(extractDir.getAbsolutePath, "task")
     unserializeProxy(extractDir.getAbsolutePath, "mole")

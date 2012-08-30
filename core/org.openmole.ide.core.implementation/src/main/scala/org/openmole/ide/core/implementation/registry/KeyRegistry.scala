@@ -51,4 +51,8 @@ object KeyRegistry {
   val groupingStrategies = new HashMap[DefaultKey, IGroupingFactoryUI] with SynchronizedMap[DefaultKey, IGroupingFactoryUI]
 
   def protoProxyKeyMap = Proxys.prototypes.map { p ⇒ KeyPrototypeGenerator(p) -> p }.toMap
+
+  def samplingProxyKeyMap = Proxys.samplings.map { s ⇒ KeyGenerator(s.getClass) -> s }.toMap
+
+  def environmentProxyKeyMap = Proxys.environments.map { e ⇒ KeyGenerator(e.getClass) -> e }.toMap
 }

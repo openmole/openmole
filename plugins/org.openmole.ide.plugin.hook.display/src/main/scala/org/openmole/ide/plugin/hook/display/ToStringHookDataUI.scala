@@ -37,11 +37,10 @@ class ToStringHookDataUI(var activated: Boolean = true,
                  moleExecution: IMoleExecution,
                  capsule: ICapsule) = {
 
-    println("protoMapping : " + executionManager.prototypeMapping)
     List(new ToStringHook(moleExecution,
       capsule,
       executionManager.printStream,
-      toBeHooked.map { tbh ⇒ KeyRegistry.protoProxyKeyMap(KeyPrototypeGenerator(tbh)) }.map { executionManager.prototypeMapping }.toSeq: _*))
+      toBeHooked.map { executionManager.prototypeMapping }.toSeq: _*))
   }
 
   def buildPanelUI(task: ITaskDataProxyUI) = new ToStringHookPanelUI(this, task)

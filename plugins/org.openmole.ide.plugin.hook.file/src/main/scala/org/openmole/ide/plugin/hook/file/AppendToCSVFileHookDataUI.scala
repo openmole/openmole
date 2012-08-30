@@ -43,5 +43,5 @@ class AppendToCSVFileHookDataUI(var activated: Boolean = true,
     List(new AppendToCSVFileHook(moleExecution,
       capsule,
       fileName,
-      prototypes.map { tbh ⇒ KeyRegistry.protoProxyKeyMap(KeyPrototypeGenerator(tbh)) }.map { executionManager.prototypeMapping }.toSeq: _*))
+      prototypes.map { executionManager.prototypeMapping }.toSeq: _*))
 }

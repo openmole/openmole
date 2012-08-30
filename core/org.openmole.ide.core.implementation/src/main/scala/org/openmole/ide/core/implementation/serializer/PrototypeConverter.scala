@@ -24,7 +24,7 @@ import com.thoughtworks.xstream.converters.reflection.ReflectionProvider
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import com.thoughtworks.xstream.mapper.Mapper
-import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
+import org.openmole.ide.core.implementation.registry._
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.panel.ConceptMenu
@@ -51,16 +51,18 @@ class PrototypeConverter(mapper: Mapper,
     val prototypeProxy = super.unmarshal(reader, uc)
     prototypeProxy match {
       case p: IPrototypeDataProxyUI ⇒ addPrototype(p)
-      case _ ⇒
+      case _ ⇒ prototypeProxy
     }
-    prototypeProxy
   }
 
   override def canConvert(t: Class[_]) = t.isAssignableFrom(classOf[PrototypeDataProxyUI])
 
-  def addPrototype(p: IPrototypeDataProxyUI) =
-    if (!Proxys.prototypes.map { KeyPrototypeGenerator(_) }.contains(KeyPrototypeGenerator(p))) {
+  def addPrototype(p: IPrototypeDataProxyUI): IPrototypeDataProxyUI = {
+    val key = KeyPrototypeGenerator(p)
+    if (!KeyRegistry.protoProxyKeyMap.contains(key)) {
       Proxys.prototypes += p
       ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(p)
     }
+    KeyRegistry.protoProxyKeyMap(key)
+  }
 }

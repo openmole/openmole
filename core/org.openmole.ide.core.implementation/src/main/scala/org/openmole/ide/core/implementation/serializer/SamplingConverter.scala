@@ -25,6 +25,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import com.thoughtworks.xstream.mapper.Mapper
 import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.registry._
 import org.openmole.ide.core.implementation.dataproxy.SamplingDataProxyUI
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
@@ -32,7 +33,8 @@ import org.openmole.ide.core.implementation.registry.KeyGenerator
 import scala.collection.mutable.HashSet
 
 class SamplingConverter(mapper: Mapper,
-                        provider: ReflectionProvider) extends ReflectionConverter(mapper, provider) {
+                        provider: ReflectionProvider,
+                        prototypeConverter: PrototypeConverter) extends ReflectionConverter(mapper, provider) {
 
   val added = new HashSet[Int]
 
@@ -51,16 +53,18 @@ class SamplingConverter(mapper: Mapper,
     val samplingProxy = super.unmarshal(reader, uc)
     samplingProxy match {
       case s: ISamplingDataProxyUI ⇒ addSampling(s)
-      case _ ⇒
+      case _ ⇒ samplingProxy
     }
-    samplingProxy
   }
 
   override def canConvert(t: Class[_]) = t.isAssignableFrom(classOf[SamplingDataProxyUI])
 
-  def addSampling(s: ISamplingDataProxyUI) =
-    if (!Proxys.samplings.map { ss ⇒ KeyGenerator(ss.getClass) }.contains(KeyGenerator(s.getClass))) {
+  def addSampling(s: ISamplingDataProxyUI): ISamplingDataProxyUI = {
+    val key = KeyGenerator(s.getClass)
+    if (!KeyRegistry.samplingProxyKeyMap.contains(key)) {
       Proxys.samplings += s
       ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(s)
     }
+    KeyRegistry.samplingProxyKeyMap(key)
+  }
 }

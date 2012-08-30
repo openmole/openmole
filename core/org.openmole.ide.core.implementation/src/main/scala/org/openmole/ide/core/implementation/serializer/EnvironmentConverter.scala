@@ -26,6 +26,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import com.thoughtworks.xstream.mapper.Mapper
 import org.openmole.ide.core.implementation.dataproxy.EnvironmentDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.registry._
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.implementation.registry.KeyGenerator
@@ -50,17 +51,19 @@ class EnvironmentConverter(mapper: Mapper,
                          uc: UnmarshallingContext) = {
     val environmentProxy = super.unmarshal(reader, uc)
     environmentProxy match {
-      case p: IEnvironmentDataProxyUI ⇒ addEnvironment(p)
-      case _ ⇒
+      case e: IEnvironmentDataProxyUI ⇒ addEnvironment(e)
+      case _ ⇒ environmentProxy
     }
-    environmentProxy
   }
 
   override def canConvert(t: Class[_]) = t.isAssignableFrom(classOf[EnvironmentDataProxyUI])
 
-  def addEnvironment(e: IEnvironmentDataProxyUI) =
-    if (!Proxys.environments.map { ee ⇒ KeyGenerator(ee.getClass) }.contains(KeyGenerator(e.getClass))) {
+  def addEnvironment(e: IEnvironmentDataProxyUI): IEnvironmentDataProxyUI = {
+    val key = KeyGenerator(e.getClass)
+    if (!KeyRegistry.environmentProxyKeyMap.contains(key)) {
       Proxys.environments += e
       ConceptMenu.environmentMenu.popup.contents += ConceptMenu.addItem(e)
     }
+    KeyRegistry.environmentProxyKeyMap(key)
+  }
 }
