@@ -28,6 +28,7 @@ import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dataproxy.SamplingDataProxyUI
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
+import org.openmole.ide.core.implementation.registry.KeyGenerator
 import scala.collection.mutable.HashSet
 
 class SamplingConverter(mapper: Mapper,
@@ -58,7 +59,7 @@ class SamplingConverter(mapper: Mapper,
   override def canConvert(t: Class[_]) = t.isAssignableFrom(classOf[SamplingDataProxyUI])
 
   def addSampling(s: ISamplingDataProxyUI) =
-    if (!Proxys.samplings.contains(s)) {
+    if (!Proxys.samplings.map { ss ⇒ KeyGenerator(ss.getClass) }.contains(KeyGenerator(s.getClass))) {
       Proxys.samplings += s
       ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(s)
     }

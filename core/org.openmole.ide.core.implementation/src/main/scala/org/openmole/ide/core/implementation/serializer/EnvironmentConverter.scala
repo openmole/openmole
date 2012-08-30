@@ -28,6 +28,7 @@ import org.openmole.ide.core.implementation.dataproxy.EnvironmentDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
+import org.openmole.ide.core.implementation.registry.KeyGenerator
 import scala.collection.mutable.HashSet
 
 class EnvironmentConverter(mapper: Mapper,
@@ -58,7 +59,7 @@ class EnvironmentConverter(mapper: Mapper,
   override def canConvert(t: Class[_]) = t.isAssignableFrom(classOf[EnvironmentDataProxyUI])
 
   def addEnvironment(e: IEnvironmentDataProxyUI) =
-    if (!Proxys.environments.contains(e)) {
+    if (!Proxys.environments.map { ee ⇒ KeyGenerator(ee.getClass) }.contains(KeyGenerator(e.getClass))) {
       Proxys.environments += e
       ConceptMenu.environmentMenu.popup.contents += ConceptMenu.addItem(e)
     }
