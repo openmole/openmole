@@ -25,6 +25,7 @@ import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiComboTextField
 import org.openmole.ide.misc.widget.multirow.MultiComboTextField._
+import org.openmole.ide.core.implementation.registry._
 import java.io.File
 import scala.swing.Label
 
@@ -46,5 +47,5 @@ class CopyFileHookPanelUI(taskProxy: ITaskDataProxyUI,
     taskProxy.dataUI.prototypesOut ::: taskProxy.dataUI.implicitPrototypesOut)
 
   def saveContent = new CopyFileHookDataUI(dataUI.activated,
-    multiComboTextField.content.map { m ⇒ (m.comboValue.get, m.textFieldValue) })
+    multiComboTextField.content.map { m ⇒ (KeyRegistry.protoProxyKeyMap(KeyPrototypeGenerator(m.comboValue.get)), m.textFieldValue) })
 }

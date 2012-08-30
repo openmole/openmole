@@ -22,6 +22,7 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.misc.tools.Counter
 import org.openmole.plugin.hook.display.ToStringHook
 import org.openmole.ide.core.model.data.IHookDataUI
+import org.openmole.ide.core.implementation.registry._
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.model.control.IExecutionManager
@@ -34,11 +35,14 @@ class ToStringHookDataUI(var activated: Boolean = true,
 
   def coreObject(executionManager: IExecutionManager,
                  moleExecution: IMoleExecution,
-                 capsule: ICapsule) =
+                 capsule: ICapsule) = {
+
+    println("protoMapping : " + executionManager.prototypeMapping)
     List(new ToStringHook(moleExecution,
       capsule,
       executionManager.printStream,
-      toBeHooked.map { executionManager.prototypeMapping }.toSeq: _*))
+      toBeHooked.map { tbh ⇒ KeyRegistry.protoProxyKeyMap(KeyPrototypeGenerator(tbh)) }.map { executionManager.prototypeMapping }.toSeq: _*))
+  }
 
   def buildPanelUI(task: ITaskDataProxyUI) = new ToStringHookPanelUI(this, task)
 }

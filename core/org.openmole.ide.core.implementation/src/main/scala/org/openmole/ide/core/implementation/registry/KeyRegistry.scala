@@ -26,12 +26,13 @@ import org.openmole.ide.core.model.factory.IHookFactoryUI
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
+import org.openmole.ide.core.implementation.dataproxy.Proxys
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.SynchronizedMap
 
 object KeyRegistry {
-  val prototypes = new HashMap[DefaultKey, IPrototypeFactoryUI[_]] with SynchronizedMap[DefaultKey, IPrototypeFactoryUI[_]]
+  val prototypes = new HashMap[PrototypeKey, IPrototypeFactoryUI[_]] with SynchronizedMap[PrototypeKey, IPrototypeFactoryUI[_]]
 
   val tasks = new HashMap[DefaultKey, ITaskFactoryUI] with SynchronizedMap[DefaultKey, ITaskFactoryUI]
 
@@ -48,4 +49,6 @@ object KeyRegistry {
   val authentifications = new HashMap[DefaultKey, IAuthentificationFactoryUI] with SynchronizedMap[DefaultKey, IAuthentificationFactoryUI]
 
   val groupingStrategies = new HashMap[DefaultKey, IGroupingFactoryUI] with SynchronizedMap[DefaultKey, IGroupingFactoryUI]
+
+  def protoProxyKeyMap = Proxys.prototypes.map { p ⇒ KeyPrototypeGenerator(p) -> p }.toMap
 }

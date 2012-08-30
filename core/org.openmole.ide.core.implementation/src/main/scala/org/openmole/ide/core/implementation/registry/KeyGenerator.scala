@@ -27,9 +27,9 @@ object KeyGenerator {
     else (m, dim)
   }
 
-  def apply(proto: IPrototype[_]): (DefaultKey, Int) = {
+  def apply(proto: IPrototype[_]): (PrototypeKey, Int) = {
     val (manifest, dim) = stripArrays(proto.`type`)
-    (new DefaultKey(manifest.erasure), dim)
+    (new PrototypeKey(proto.name, manifest.erasure, dim), dim)
   }
 
   def apply(entityClass: Class[_]): DefaultKey = new DefaultKey(entityClass)

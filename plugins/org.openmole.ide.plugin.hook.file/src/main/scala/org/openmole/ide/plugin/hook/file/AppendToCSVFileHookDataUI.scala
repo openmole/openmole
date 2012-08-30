@@ -26,6 +26,7 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.misc.tools.Counter
 import org.openmole.plugin.hook.file.AppendToCSVFileHook
+import org.openmole.ide.core.implementation.registry._
 
 class AppendToCSVFileHookDataUI(var activated: Boolean = true,
                                 val prototypes: Iterable[IPrototypeDataProxyUI] = List.empty,
@@ -42,5 +43,5 @@ class AppendToCSVFileHookDataUI(var activated: Boolean = true,
     List(new AppendToCSVFileHook(moleExecution,
       capsule,
       fileName,
-      prototypes.map { executionManager.prototypeMapping }.toSeq: _*))
+      prototypes.map { tbh ⇒ KeyRegistry.protoProxyKeyMap(KeyPrototypeGenerator(tbh)) }.map { executionManager.prototypeMapping }.toSeq: _*))
 }

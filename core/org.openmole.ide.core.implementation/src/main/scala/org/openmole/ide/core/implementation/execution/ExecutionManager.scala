@@ -59,8 +59,8 @@ class ExecutionManager(manager: IMoleSceneManager,
     with IExecutionManager
     with Publisher {
   val logTextArea = new TextArea {
-    columns = 20;
-    rows = 10;
+    columns = 20
+    rows = 10
     editable = false
   }
   val executionJobExceptionTextArea = new TextArea { editable = false }
@@ -102,7 +102,6 @@ class ExecutionManager(manager: IMoleSceneManager,
     }
 
     rightComponent = new ScrollPane(logTextArea)
-    resizeWeight = 0.6
   }
 
   var downloads = (0, 0)
@@ -160,6 +159,9 @@ class ExecutionManager(manager: IMoleSceneManager,
               contents += new TitleLabel(environments.toList(0)._2)
               contents += envBarPlotter.panel
             }.peer)
+            splitPane.dividerLocation = (preferredSize.width * 0.4).toInt
+            splitPane.revalidate
+            splitPane.repaint
           }
           initPieChart
           hooksInExecution = hooks.flatMap {
@@ -169,7 +171,6 @@ class ExecutionManager(manager: IMoleSceneManager,
           }.toList
           repaint
           revalidate
-
           timer.start
           mExecution.start
         case Left(e) ⇒
