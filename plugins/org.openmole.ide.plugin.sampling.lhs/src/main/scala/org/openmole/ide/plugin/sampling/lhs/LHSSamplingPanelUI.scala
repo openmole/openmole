@@ -28,6 +28,7 @@ import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.panel._
+import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.BorderPanel.Position._
@@ -67,5 +68,7 @@ class LHSSamplingPanelUI(cud: LHSSamplingDataUI) extends PluginPanel("wrap 2", "
         d.boundedDomainDataUI.get)
     })
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
+    add(sampleTextField, new Help(i18n.getString("sample"), i18n.getString("sampleEx")))
+  }
 }
