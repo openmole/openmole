@@ -47,9 +47,9 @@ class RangeDomainPanelUI(pud: RangeDomainDataUI) extends PluginPanel("fillx", "[
     maxField.text,
     stepField.text)
 
-  override val help = new Helper {
-    add(minField, new Help(i18n.getString("min"), i18n.getString("minEX")))
-    add(maxField, new Help(i18n.getString("max"), i18n.getString("maxEX")))
-    add(stepField, new Help(i18n.getString("step"), i18n.getString("stepEX")))
-  }
+  //  override val help = new Helper {
+  //    add(minField, new Help(i18n.getString("min"), i18n.getString("minEX")))
+  //    add(maxField, new Help(i18n.getString("max"), i18n.getString("maxEX")))
+  //    add(stepField, new Help(i18n.getString("step"), i18n.getString("stepEX")))
+  //  }
 }
