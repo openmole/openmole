@@ -21,7 +21,7 @@ CONFIGDIR=$RANDOM
 
 rm -Rf ./configuration/org*
 rm ./configuration/*.log
-java -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area=${CONFIGDIR} -splash:splashscreen.png -Xmx${MEM} $FLAG -XX:MaxPermSize=128M -XX:+UseParallelGC \
+java -Dosgi.locking=none -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area=${CONFIGDIR} -splash:splashscreen.png -Xmx${MEM} $FLAG -XX:MaxPermSize=128M -XX:+UseParallelGC \
      -jar ./plugins/org.eclipse.equinox.launcher.jar \
      -cp ./openmole-plugins -gp ./openmole-plugins-gui "$@"
 #cat $LOCATION/configuration/*.log
