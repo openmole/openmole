@@ -18,8 +18,6 @@
 package org.openmole.ide.core.implementation.panel
 
 import java.awt.Dimension
-import java.util.Locale
-import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.data.MoleDataUI
 import org.openmole.ide.core.model.data.IMoleDataUI
 import org.openmole.ide.core.model.panel.IPanelUI
@@ -30,7 +28,6 @@ import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.swing.FileChooser.SelectionMode._
 
 class MolePanelUI(mdu: IMoleDataUI) extends PluginPanel("") with IPanelUI {
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
   minimumSize = new Dimension(300, 400)
   preferredSize = new Dimension(300, 400)
   val pluginMultiTextField = new MultiChooseFileTextField("Plugin",
