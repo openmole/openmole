@@ -89,7 +89,7 @@ class GUIPanel extends MainFrame { mainframe ⇒
   val splitPane = new SplitPane(Orientation.Horizontal) {
     leftComponent = ScenesManager.tabPane
     rightComponent = new ScrollPane(StatusBar)
-    this.resizeWeight = 1 - (40.0 / Toolkit.getDefaultToolkit.getScreenSize.height)
+    resizeWeight = 1 - (40.0 / Toolkit.getDefaultToolkit.getScreenSize.height)
   }
 
   peer.add(splitPane.peer, BorderLayout.CENTER)

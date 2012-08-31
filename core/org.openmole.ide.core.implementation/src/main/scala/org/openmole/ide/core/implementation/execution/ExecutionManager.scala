@@ -79,9 +79,9 @@ class ExecutionManager(manager: IMoleSceneManager,
   val wfPiePlotter = new PiePlotter
   val envBarPlotter = new XYPlotter(5000, 120)
 
-  val envBarPanel = new PluginPanel("", "[][grow,fill]", "") {
+  val envBarPanel = new PluginPanel("", "[][grow,fill]", "[top]") {
     contents += new PluginPanel("wrap", "[center]", "") {
-      contents += new TitleLabel("Workflow execution")
+      contents += new TitleLabel("Workflow")
       peer.add(wfPiePlotter.panel)
     }
   }
@@ -102,6 +102,7 @@ class ExecutionManager(manager: IMoleSceneManager,
     }
 
     rightComponent = new ScrollPane(logTextArea)
+    resizeWeight = 0.65
   }
 
   var downloads = (0, 0)
@@ -114,8 +115,8 @@ class ExecutionManager(manager: IMoleSceneManager,
     opaque = true
     background = new Color(77, 77, 77)
   }
-  tabbedPane.pages += new TabbedPane.Page("Execution progress", splitPane)
-  tabbedPane.pages += new TabbedPane.Page("Execution errors", new ScrollPane(executionJobExceptionTextArea))
+  tabbedPane.pages += new TabbedPane.Page("Progress", splitPane)
+  tabbedPane.pages += new TabbedPane.Page("Errors", new ScrollPane(executionJobExceptionTextArea))
   tabbedPane.pages += new TabbedPane.Page("Environments errors", new ScrollPane(moleExecutionExceptionTextArea))
 
   contents += tabbedPane
@@ -156,10 +157,10 @@ class ExecutionManager(manager: IMoleSceneManager,
           //FIXME Displays several environments
           if (environments.size > 0) {
             envBarPanel.peer.add(new PluginPanel("wrap", "[center]", "") {
-              contents += new TitleLabel(environments.toList(0)._2)
+              contents += new TitleLabel("Environment: " + environments.toList(0)._2)
               contents += envBarPlotter.panel
             }.peer)
-            splitPane.dividerLocation = (preferredSize.width * 0.4).toInt
+            // splitPane.dividerLocation = (preferredSize.width * 0.4).toInt
             splitPane.revalidate
             splitPane.repaint
           }

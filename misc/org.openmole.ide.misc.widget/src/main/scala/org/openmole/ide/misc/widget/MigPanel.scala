@@ -30,7 +30,7 @@ class MigPanel(constraints: String, colConst: String, rowConst: String) extends 
 
   def layoutManager = peer.getLayout.asInstanceOf[MigLayout]
 
-  override lazy val peer = new javax.swing.JPanel(new MigLayout(constraints, colConst, rowConst)) with SuperMixin
+  override lazy val peer = new JPanel(new MigLayout(constraints, colConst, rowConst)) with SuperMixin
 
   override def contents: MigContent = new MigContent
   protected class MigContent extends Content {

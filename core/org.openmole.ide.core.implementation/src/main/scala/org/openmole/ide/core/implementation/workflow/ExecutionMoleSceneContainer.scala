@@ -42,6 +42,7 @@ import scala.swing.Orientation
 import scala.swing.Panel
 import scala.swing.ScrollPane
 import scala.swing.Separator
+import scala.swing.SplitPane
 import scala.swing.TabbedPane
 import org.openmole.ide.misc.tools.image.Images._
 
@@ -70,7 +71,8 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   executionManager match {
     case Some(eManager: ExecutionManager) ⇒
 
-      peer.add(new ScrollPane(new ExecutionPanel {
+      //peer.add(
+      val centerPanel = new ScrollPane(new ExecutionPanel {
         peer.setLayout(new BorderLayout)
         peer.add(new PluginPanel("wrap") {
           val hookTabbedPane = new TabbedPane
@@ -117,12 +119,13 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
             })
           }
         }.peer, BorderLayout.SOUTH)
-      }).peer, BorderLayout.CENTER)
+      })
 
-      // Execution
-      peer.add(new PluginPanel("wrap", "[grow]") {
-        add(eManager, "growx")
-      }.peer, BorderLayout.SOUTH)
+      peer.add(new SplitPane(Orientation.Horizontal) {
+        leftComponent = centerPanel
+        rightComponent = eManager
+        resizeWeight = 1
+      }.peer)
     case None ⇒
   }
 
