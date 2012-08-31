@@ -26,11 +26,10 @@ package object jsaga {
   val CPU_TIME = JobDescription.TOTALCPUTIME
   val CPU_COUNT = JobDescription.TOTALCPUCOUNT
   val CPU_ARCHITECTURE = JobDescription.CPUARCHITECTURE
-
-  def memory(size: Int) = new Requirement(MEMORY, size.toString)
-  def cpuTime(time: String) = new Requirement(CPU_TIME, time)
-  def cpuCount(nb: Int) = new Requirement(CPU_COUNT, nb.toString)
-  def cpuArchitecture(arch: String) = new Requirement(CPU_ARCHITECTURE, arch)
-
-  val x86_64 = cpuArchitecture("x86_64")
+  val SPMD_VARIATION = JobDescription.SPMDVARIATION
+  val NUMBER_OF_PROCESSES = JobDescription.NUMBEROFPROCESSES
+  val PROCESSES_PER_HOST = JobDescription.PROCESSESPERHOST
+  
+  val x86_64 = new Requirement(CPU_ARCHITECTURE, "x86_64")
+  val openMPI = new Requirement(SPMD_VARIATION, "OPENMPI")
 }
