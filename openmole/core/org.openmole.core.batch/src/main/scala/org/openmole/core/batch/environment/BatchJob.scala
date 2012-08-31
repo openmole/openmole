@@ -72,8 +72,8 @@ abstract class BatchJob(val jobServiceDescription: ServiceDescription) {
 
   def kill(token: AccessToken) = token.synchronized {
     synchronized {
-      state = KILLED
-      deleteJob
+      try deleteJob
+      finally state = KILLED
     }
   }
 
