@@ -29,7 +29,7 @@ package object jsaga {
   val SPMD_VARIATION = JobDescription.SPMDVARIATION
   val NUMBER_OF_PROCESSES = JobDescription.NUMBEROFPROCESSES
   val PROCESSES_PER_HOST = JobDescription.PROCESSESPERHOST
-  
+
   val x86_64 = new Requirement(CPU_ARCHITECTURE, "x86_64")
   val openMPI = new Requirement(SPMD_VARIATION, "OPENMPI")
 }
