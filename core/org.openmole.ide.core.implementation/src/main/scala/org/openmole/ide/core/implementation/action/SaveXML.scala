@@ -41,7 +41,7 @@ object SaveXML {
 
   def show: Option[String] = {
     val fc = new FileChooser {
-      new FileNameExtensionFilter("Save", ".om,.OM")
+      fileFilter = new FileNameExtensionFilter("*.om", ".om")
       fileSelectionMode = FilesOnly
       title = "Save OpenMOLE project"
     }
