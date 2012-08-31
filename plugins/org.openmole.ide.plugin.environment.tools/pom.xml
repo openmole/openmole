@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.openmole.ide</groupId>
         <artifactId>plugins</artifactId>
-        <version>0.6-SNAPSHOT</version>
+        <version>0.6-RC2-SNAPSHOT</version>
     </parent>
 
     <artifactId>org.openmole.ide.plugin.environment.tools</artifactId>
@@ -29,6 +29,6 @@
         </dependency>
     </dependencies>
     <properties>
-        <bundle.activator/>
+        <bundle.activator />
     </properties>
 </project>
