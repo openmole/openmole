@@ -30,7 +30,7 @@ object LoadXML {
 
   def show = {
     val fc = new FileChooser {
-      new FileNameExtensionFilter("Select an xml file to be loaded", ".xml,.XML")
+      fileFilter = new FileNameExtensionFilter("*.om", "om")
       fileSelectionMode = FilesOnly
       title = " OpenMOLE project loading"
     }
