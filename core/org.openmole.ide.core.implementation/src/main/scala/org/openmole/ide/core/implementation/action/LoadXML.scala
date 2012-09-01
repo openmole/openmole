@@ -18,23 +18,19 @@
 package org.openmole.ide.core.implementation.action
 
 import java.io.File
-import javax.swing.filechooser.FileNameExtensionFilter
+import scala.swing.Label
 import scala.swing.FileChooser.SelectionMode._
 import org.openmole.ide.core.implementation.execution.Settings
 import org.openmole.ide.core.implementation.serializer.GUISerializer
-import scala.swing.FileChooser.Result.Approve
-import scala.swing.FileChooser
-import scala.swing.Label
+import org.openmole.ide.core.implementation.dialog.DialogFactory
+import scala.swing.FileChooser.Result._
 
 object LoadXML {
 
   def show = {
-    val fc = new FileChooser {
-      fileFilter = new FileNameExtensionFilter("*.om", "om")
-      fileSelectionMode = FilesOnly
-      title = " OpenMOLE project loading"
-    }
-
+    val fc = DialogFactory.fileChooser(" OpenMOLE project loading",
+      "*.om",
+      "om")
     var text = ""
     if (fc.showDialog(new Label, "OK") == Approve) text = fc.selectedFile.getPath
     if (new File(text).isFile) {

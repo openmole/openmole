@@ -20,6 +20,7 @@ package org.openmole.ide.core.implementation.dialog
 import java.awt.Color
 import javax.swing.JOptionPane
 import javax.swing.JOptionPane._
+import javax.swing.filechooser.FileNameExtensionFilter
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
@@ -28,13 +29,22 @@ import org.openmole.ide.core.implementation.panel.BasePanelUI
 import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.workflow.ISceneContainer
-import scala.swing.EditorPane
+import scala.swing.FileChooser.SelectionMode._
+import scala.swing.FileChooser
 import scala.swing.Label
 import scala.swing.ScrollPane
 import scala.swing.TextArea
 import scala.swing.TextField
 
 object DialogFactory {
+
+  def fileChooser(titleText: String,
+                  extensionText: String,
+                  extension: String) = new FileChooser {
+    fileFilter = new FileNameExtensionFilter(extensionText, extension)
+    fileSelectionMode = FilesOnly
+    title = titleText
+  }
 
   def closeExecutionTab(exeContainer: ExecutionMoleSceneContainer): Boolean = {
     if (exeContainer.finished) true
