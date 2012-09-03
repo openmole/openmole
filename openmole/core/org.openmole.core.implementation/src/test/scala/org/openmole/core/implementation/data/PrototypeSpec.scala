@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation.data
 
+import org.openmole.core.model.data._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
@@ -26,7 +27,7 @@ import scala.collection.mutable.ListBuffer
 @RunWith(classOf[JUnitRunner])
 class PrototypeSpec extends FlatSpec with ShouldMatchers {
   "ToArray of dim 0" should "return the prototype itself" in {
-    val a = new Prototype[Int]("a")
+    val a = Prototype[Int]("a")
     a.toArray(0) should equal(a)
   }
 }

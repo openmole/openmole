@@ -46,9 +46,9 @@ class SubMoleExecution(
   private val _jobs = Ref(TreeMap.empty[IMoleJob, (ICapsule, ITicket)])
   private val _canceled = Ref(false)
 
-  val masterCapsuleRegistry = new RegistryWithTicket[IMasterCapsule, IContext]
-  val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, Buffer[IVariable[_]]]
-  val transitionRegistry = new RegistryWithTicket[ITransition, Buffer[IVariable[_]]]
+  val masterCapsuleRegistry = new RegistryWithTicket[IMasterCapsule, Context]
+  val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, Buffer[Variable[_]]]
+  val transitionRegistry = new RegistryWithTicket[ITransition, Buffer[Variable[_]]]
 
   parrentApply(_.+=(this))
 
@@ -112,7 +112,10 @@ class SubMoleExecution(
     try {
       EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleFinished(job, capsule))
 
-      capsule.outputDataChannels.foreach { _.provides(job.context, ticket, moleExecution) }
+      moleExecution.indexedHooks.getOrElse(capsule, List.empty).foreach { _.process(job) }
+      moleExecution.profiler.process(job)
+
+      capsule.outputIDataChannels.foreach { _.provides(job.context, ticket, moleExecution) }
       capsule.outputTransitions.foreach { _.perform(job.context, ticket, this) }
     } catch {
       case e ⇒ throw new InternalProcessingError(e, "Error at the end of a MoleJob for capsule " + capsule)
@@ -129,18 +132,18 @@ class SubMoleExecution(
       parrentApply(_.-=(this))
     }
 
-  override def submit(capsule: ICapsule, context: IContext, ticket: ITicket) = {
+  override def submit(capsule: ICapsule, context: Context, ticket: ITicket) = {
     if (!canceled) {
       def implicits =
         Context.empty ++
           moleExecution.mole.implicits.values.filter(v ⇒ capsule.taskOrException.inputs.contains(v.prototype.name)) +
-          new Variable(Task.openMOLESeed, moleExecution.newSeed)
+          Variable(Task.openMOLESeed, moleExecution.newSeed)
 
       //FIXME: Factorize code
       capsule match {
         case c: IMasterCapsule ⇒
           synchronized {
-            val savedContext = masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(new Context)
+            val savedContext = masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(Context.empty)
             val moleJob: IMoleJob = new MoleJob(capsule.taskOrException, implicits + context + savedContext, moleExecution.nextJobId, stateChanged)
             EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleStarting(moleJob, capsule))
             EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobSubmitted(moleJob))

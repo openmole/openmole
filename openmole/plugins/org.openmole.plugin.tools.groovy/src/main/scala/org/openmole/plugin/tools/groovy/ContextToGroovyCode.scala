@@ -19,13 +19,11 @@ package org.openmole.plugin.tools.groovy
 
 import groovy.lang.Binding
 import java.io.File
-import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.exception._
 import org.openmole.misc.tools.script.GroovyProxyPool
-import org.openmole.core.implementation.data.{ Prototype, Variable, Context }
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.tools.GroovyContextAdapter._
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IDataSet
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data._
 
 class ContextToGroovyCode(source: String, libs: Iterable[File]) {
 
@@ -33,15 +31,15 @@ class ContextToGroovyCode(source: String, libs: Iterable[File]) {
 
   def execute(binding: Binding): Object = editorPool.execute(binding)
 
-  def execute(context: IContext): Object = editorPool.execute(context.toBinding)
+  def execute(context: Context): Object = editorPool.execute(context.toBinding)
 
-  def execute(context: IContext, output: IDataSet): IContext = {
+  def execute(context: Context, output: DataSet): Context = {
     val binding = context.toBinding
     execute(binding)
     fetchVariables(context, output, binding)
   }
 
-  def fetchVariables(context: IContext, output: IDataSet, binding: Binding): IContext = {
+  def fetchVariables(context: Context, output: DataSet, binding: Binding): Context = {
     val variables = binding.getVariables
     Context.empty ++ output.flatMap {
       data ⇒
@@ -50,7 +48,7 @@ class ContextToGroovyCode(source: String, libs: Iterable[File]) {
         variables.get(out.name) match {
           case null ⇒ None
           case value ⇒
-            if (out.accepts(value)) Some(new Variable(out.asInstanceOf[IPrototype[Any]], value))
+            if (out.accepts(value)) Some(Variable(out.asInstanceOf[Prototype[Any]], value))
             else throw new InternalProcessingError("Variable " + out.name + " of type " + value.asInstanceOf[AnyRef].getClass.getName + " has been found at the end of the execution of the groovy code but type doesn't match : " + out.`type`.erasure.getName + ".")
         }
     }

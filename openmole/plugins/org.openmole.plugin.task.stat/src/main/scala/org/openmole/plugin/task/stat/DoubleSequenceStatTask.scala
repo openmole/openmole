@@ -17,20 +17,18 @@
 
 package org.openmole.plugin.task.stat
 
-import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.task.Task
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.task._
+import org.openmole.core.model.data._
 
 abstract class DoubleSequenceStatTask extends Task {
 
-  def sequences: Iterable[(IPrototype[Array[Double]], IPrototype[Double])]
+  def sequences: Iterable[(Prototype[Array[Double]], Prototype[Double])]
 
-  override def process(context: IContext) =
+  override def process(context: Context) =
     Context(
       sequences.map {
-        case (sequence, statProto) ⇒ new Variable(statProto, stat(context.valueOrException(sequence)))
+        case (sequence, statProto) ⇒ Variable(statProto, stat(context.valueOrException(sequence)))
       })
 
   def stat(seq: Array[Double]): Double

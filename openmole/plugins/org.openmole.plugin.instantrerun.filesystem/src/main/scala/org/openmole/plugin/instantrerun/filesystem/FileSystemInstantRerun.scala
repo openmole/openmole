@@ -17,24 +17,20 @@
 
 package org.openmole.plugin.instantrerun.filesystem
 
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 import java.io.FileOutputStream
 import java.io.FileInputStream
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import java.io.File
-import org.openmole.misc.exception.UserBadDataError
-import org.openmole.core.model.task.ITask
-import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.job.IMoleJob
+import org.openmole.misc.exception._
+import org.openmole.core.model.task._
 import org.openmole.core.model.job.IMoleJob._
-import org.openmole.core.model.job.MoleJobId
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.job.State
-import org.openmole.core.model.mole.IInstantRerun
-import org.openmole.core.model.data.IContext
-import org.openmole.core.implementation.data.Context
-import org.openmole.core.serializer.SerializerService
+import org.openmole.core.model.job._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.data._
+import org.openmole.core.implementation.data._
+import org.openmole.core.serializer._
 import org.openmole.core.serializer.structure.FileInfo
 import org.openmole.misc.hashservice.HashService._
 import org.openmole.misc.tools.service.IHash
@@ -89,7 +85,7 @@ class FileSystemInstantRerun(dir: File, capsules: Set[ICapsule]) extends IInstan
         false
       } else {
         val is = new GZIPInputStream(new FileInputStream(contextDir.listFiles()(0)))
-        val context = try SerializerService.deserializeReplacePathHash[IContext](is,
+        val context = try SerializerService.deserializeReplacePathHash[Context](is,
           new PartialFunction[FileInfo, File] {
             val allReadyCopied = new HashMap[FileInfo, File]
 

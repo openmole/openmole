@@ -18,15 +18,12 @@
 package org.openmole.plugin.hook.file
 
 import java.io.File
-import org.openmole.core.implementation.mole.Capsule
-import org.openmole.core.implementation.data.DataSet
-import org.openmole.core.implementation.data.ParameterSet
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.mole.Mole
-import org.openmole.core.implementation.mole.MoleExecution
-import org.openmole.core.implementation.mole.MoleExecution
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
+import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.task._
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 import org.openmole.misc.hashservice.HashService._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
@@ -45,7 +42,7 @@ class CopyFileHookSpec extends FlatSpec with ShouldMatchers {
     try fw.write("File contents!")
     finally fw.close
 
-    val p = new Prototype[File]("p")
+    val p = Prototype[File]("p")
 
     val t1 = new Task {
       val name = "Test"
@@ -53,15 +50,16 @@ class CopyFileHookSpec extends FlatSpec with ShouldMatchers {
       val inputs = DataSet.empty
       val plugins = PluginSet.empty
       val parameters = ParameterSet.empty
-      override def process(context: IContext) = context + (p -> f)
+      override def process(context: Context) = context + (p -> f)
     }
 
     val t1c = new Capsule(t1)
-    val ex = new MoleExecution(new Mole(t1c))
 
     val fDest = File.createTempFile("test", ".tmp")
 
-    val hook = new CopyFileHook(ex, t1c, p, fDest.getAbsolutePath)
+    val hook = new CopyFileHook(p, fDest.getAbsolutePath)
+
+    val ex = new MoleExecution(new Mole(t1c), hooks = List(t1c -> hook))
 
     ex.start.waitUntilEnded
 

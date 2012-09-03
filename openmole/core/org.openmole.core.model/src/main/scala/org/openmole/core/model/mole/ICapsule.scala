@@ -46,7 +46,7 @@ trait ICapsule {
    * 
    * @return the input of the capsule
    */
-  def inputs: IDataSet
+  def inputs: DataSet
 
   /*
    * Get the outputs data taken by this capsule, generally it is empty if the capsule
@@ -55,14 +55,14 @@ trait ICapsule {
    * 
    * @return the output of the capsule
    */
-  def outputs: IDataSet
+  def outputs: DataSet
 
   /**
    * Get all data channels starting from this capsule.
    *
    * @return all data channels starting from this capsule
    */
-  def outputDataChannels: Iterable[IDataChannel]
+  def outputIDataChannels: Iterable[IDataChannel]
 
   /**
    * Add a datachannel in output of this capsule.
@@ -70,7 +70,7 @@ trait ICapsule {
    * @param dataChannel the datachannel to add
    * @return the capsule itself
    */
-  def addOutputDataChannel(dataChannel: IDataChannel): this.type
+  def addOutputIDataChannel(dataChannel: IDataChannel): this.type
 
   /**
    * Remove a datachannel from the input data chanel of this capsule.
@@ -78,7 +78,7 @@ trait ICapsule {
    * @param dataChannel the datachannel to remove
    * @return the capsule itself
    */
-  //def removeInputDataChannel(dataChannel: IDataChannel): this.type
+  //def removeInputIDataChannel(dataChannel: IDataChannel): this.type
 
   /**
    * Remove a datachannel in output of this capsule.
@@ -86,7 +86,7 @@ trait ICapsule {
    * @param dataChannel the datachannel to remove
    * @return the capsule itself
    */
-  //def removeOutputDataChannel(dataChannel: IDataChannel): this.type
+  //def removeOutputIDataChannel(dataChannel: IDataChannel): this.type
 
   /**
    * Get the default input slot of this capsule.

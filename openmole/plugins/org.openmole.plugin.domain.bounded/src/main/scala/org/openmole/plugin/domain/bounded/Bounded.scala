@@ -18,12 +18,12 @@
 package org.openmole.plugin.domain.bounded
 
 import org.openmole.core.model.domain.IBounded
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 import org.openmole.core.implementation.tools.VariableExpansion._
 import org.openmole.core.model.domain.IDomain
 import org.openmole.misc.tools.io.FromString
 
 sealed class Bounded[T](val min: String, val max: String)(implicit fromString: FromString[T]) extends IDomain[T] with IBounded[T] {
-  def min(context: IContext) = fromString.fromString(min.expand(context))
-  def max(context: IContext) = fromString.fromString(max.expand(context))
+  def min(context: Context) = fromString.fromString(min.expand(context))
+  def max(context: Context) = fromString.fromString(max.expand(context))
 }

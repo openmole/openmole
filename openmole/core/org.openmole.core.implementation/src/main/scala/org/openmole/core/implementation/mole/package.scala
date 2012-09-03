@@ -17,13 +17,13 @@
 
 package org.openmole.core.implementation
 
-import org.openmole.core.implementation.transition.Slot
-import org.openmole.core.model.execution.IEnvironment
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IMole
+import org.openmole.core.model.execution._
+import org.openmole.core.model.job._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.task._
+import org.openmole.core.model.transition._
 
-import org.openmole.core.model.task.ITask
-import org.openmole.core.model.transition.ISlot
+import transition._
 import puzzle._
 import task._
 import data._
@@ -33,14 +33,20 @@ package object mole {
   implicit def capsuleToSlotConverter(capsule: ICapsule) = capsule.defaultInputSlot
   implicit def puzzleToMoleConverter(puzzle: Puzzle) = new Mole(puzzle.first.capsule)
 
-  implicit def moleToMoleExecutionConverter(mole: IMole) = new MoleExecution(mole)
+  //implicit def moleToMoleExecutionConverter(mole: IMole) = new MoleExecution(mole)
 
   class PuzzleMoleExecutionDecorator(puzzle: Puzzle) {
-    def toExecution = new MoleExecution(new Mole(puzzle.first.capsule), puzzle.selection, puzzle.grouping)
+    def toExecution: MoleExecution = toExecution(IProfiler.empty)
+    def toExecution(profiler: IProfiler) = new MoleExecution(new Mole(puzzle.first.capsule), puzzle.hooks, puzzle.selection, puzzle.grouping, profiler)
     def on(env: IEnvironment) =
       puzzle.copy(selection = puzzle.selection ++ puzzle.lasts.map(_ -> new FixedEnvironmentSelection(env)))
+    def hook(hook: IHook) =
+      puzzle.copy(hooks = puzzle.hooks.toList ::: puzzle.lasts.map(_ -> hook).toList)
   }
 
+  implicit def hookToProfilerConverter(hook: IHook) = new IProfiler {
+    override def process(job: IMoleJob) = hook.process(job)
+  }
   implicit def puzzleMoleExecutionDecoration(puzzle: Puzzle) = new PuzzleMoleExecutionDecorator(puzzle)
   implicit def capsuleMoleExecutionDecoration(capsule: ICapsule) = puzzleMoleExecutionDecoration(capsule.toPuzzle)
   implicit def taskMoleExecutionDecoration(task: ITask): PuzzleMoleExecutionDecorator = capsuleMoleExecutionDecoration(task.toCapsule)

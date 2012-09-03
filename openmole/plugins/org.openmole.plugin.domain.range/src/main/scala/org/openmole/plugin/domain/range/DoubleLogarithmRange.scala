@@ -26,7 +26,7 @@ sealed class DoubleLogarithmRange(val min: String, val max: String, val nbStep: 
 
   def this(min: Double, max: Double, nbStep: Int) = this(min.toString, max.toString, nbStep.toString)
 
-  override def computeValues(context: IContext): Iterable[Double] = {
+  override def computeValues(context: Context): Iterable[Double] = {
     val mi = log(min(context).doubleValue)
     val ma = log(max(context).doubleValue)
     val nbst = nbStep(context).intValue - 1
@@ -41,8 +41,8 @@ sealed class DoubleLogarithmRange(val min: String, val max: String, val nbStep: 
     }
   }
 
-  def nbStep(context: IContext): Double = VariableExpansion(context, nbStep).toDouble
-  def min(context: IContext): Double = VariableExpansion(context, min).toDouble
-  def max(context: IContext): Double = VariableExpansion(context, max).toDouble
+  def nbStep(context: Context): Double = VariableExpansion(context, nbStep).toDouble
+  def min(context: Context): Double = VariableExpansion(context, min).toDouble
+  def max(context: Context): Double = VariableExpansion(context, max).toDouble
 
 }

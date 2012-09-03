@@ -27,8 +27,8 @@ object FilterPopulationTask {
 
   def apply[G <: GAGenome, MF](
     name: String,
-    archive: IPrototype[Population[G, MF]],
-    filtered: IPrototype[Population[G, MF]])(implicit plugins: IPluginSet) =
+    archive: Prototype[Population[G, MF]],
+    filtered: Prototype[Population[G, MF]])(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
 
       addInput(archive)
@@ -46,12 +46,12 @@ object FilterPopulationTask {
 
 sealed abstract class FilterPopulationTask[G <: GAGenome, MF](
     val name: String,
-    archive: IPrototype[Population[G, MF]],
-    filtered: IPrototype[Population[G, MF]])(implicit val plugins: IPluginSet) extends Task { task ⇒
+    archive: Prototype[Population[G, MF]],
+    filtered: Prototype[Population[G, MF]])(implicit val plugins: PluginSet) extends Task { task ⇒
 
-  override def process(context: IContext) = {
+  override def process(context: Context) = {
     val filter = context.valueOrException(filtered).content.map { _.genome }.toSet
-    new Variable(
+    Variable(
       archive,
       context.valueOrException(archive).content.filterNot(e ⇒ filter.contains(e.genome)): Population[G, MF])
   }

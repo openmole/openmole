@@ -20,9 +20,10 @@ package org.openmole.core.implementation.transition
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
-import org.openmole.core.implementation.sampling.ExplicitSampling
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.implementation.sampling._
+import org.openmole.core.model.data._
+import org.openmole.core.model.sampling._
+import org.openmole.core.model.task._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
@@ -38,7 +39,7 @@ class EndExplorationTransitionSpec extends FlatSpec with ShouldMatchers {
     @volatile var endCapsExecuted = 0
 
     val data = List("A", "A", "B", "C")
-    val i = new Prototype[String]("i")
+    val i = Prototype[String]("i")
 
     val sampling = new ExplicitSampling(i, data)
 
@@ -53,7 +54,7 @@ class EndExplorationTransitionSpec extends FlatSpec with ShouldMatchers {
     val testT = new TestTask {
       val name = "Test"
       override def inputs = DataSet(i)
-      override def process(context: IContext) = {
+      override def process(context: Context) = {
         context.contains(i) should equal(true)
         endCapsExecuted += 1
         context

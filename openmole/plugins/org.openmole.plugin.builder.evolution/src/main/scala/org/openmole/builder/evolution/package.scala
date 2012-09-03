@@ -39,24 +39,24 @@ package object evolution {
     name: String,
     model: Puzzle,
     populationSize: Int,
-    inputs: Iterable[(IPrototype[Double], (Double, Double))],
-    objectives: Iterable[(IPrototype[Double], Double)])(implicit plugins: IPluginSet) = {
+    inputs: Iterable[(Prototype[Double], (Double, Double))],
+    objectives: Iterable[(Prototype[Double], Double)])(implicit plugins: PluginSet) = {
 
     require(evolution.genomeSize == inputs.size)
 
     import evolution._
 
-    val genome = new Prototype[evolution.G](name + "Genome")
-    val individual = new Prototype[Individual[evolution.G]](name + "Individual")
-    val archive = new Prototype[Population[evolution.G, evolution.MF]](name + "Archive")
-    val state = new Prototype[evolution.STATE](name + "State")
-    val fitness = new Prototype[Fitness](name + "Fitness")
-    val generation = new Prototype[Int](name + "Generation")
-    val terminated = new Prototype[Boolean](name + "Terminated")
+    val genome = Prototype[evolution.G](name + "Genome")
+    val individual = Prototype[Individual[evolution.G]](name + "Individual")
+    val archive = Prototype[Population[evolution.G, evolution.MF]](name + "Archive")
+    val state = Prototype[evolution.STATE](name + "State")
+    val fitness = Prototype[Fitness](name + "Fitness")
+    val generation = Prototype[Int](name + "Generation")
+    val terminated = Prototype[Boolean](name + "Terminated")
 
     val firstTask = EmptyTask(name + "First")
-    firstTask addInput (new Data(archive, optional))
-    firstTask addOutput (new Data(archive, optional))
+    firstTask addInput (Data(archive, optional))
+    firstTask addOutput (Data(archive, optional))
 
     val firstCapsule = new StrainerCapsule(firstTask)
 
@@ -128,7 +128,7 @@ package object evolution {
 
     val (_state, _generation, _genome, _individual, _archive, _inputs, _objectives, _populationSize) = (state, generation, genome, individual, archive, inputs, objectives, populationSize)
 
-    new Puzzle(firstCapsule, List(endCapsule), model.selection, model.grouping) {
+    new Puzzle(firstCapsule, List(endCapsule), model.hooks, model.selection, model.grouping) {
       def outputCapsule = scalingArchiveCapsule
       def state = _state
       def generation = _generation
@@ -145,26 +145,26 @@ package object evolution {
   def islandGA(islandEvolution: Elitism with Termination with TerminationManifest with GManifest with GenomeFactory with Modifier with GAG with Lambda with Selection)(
     name: String,
     model: Puzzle {
-      def archive: IPrototype[Population[islandEvolution.G, islandEvolution.MF]]
-      def genome: IPrototype[islandEvolution.G]
+      def archive: Prototype[Population[islandEvolution.G, islandEvolution.MF]]
+      def genome: Prototype[islandEvolution.G]
       def populationSize: Int
-      def individual: IPrototype[Individual[islandEvolution.G]]
-      def inputs: Iterable[(IPrototype[Double], (Double, Double))]
-      def objectives: Iterable[(IPrototype[Double], Double)]
+      def individual: Prototype[Individual[islandEvolution.G]]
+      def inputs: Iterable[(Prototype[Double], (Double, Double))]
+      def objectives: Iterable[(Prototype[Double], Double)]
     },
-    island: Int)(implicit plugins: IPluginSet) = {
+    island: Int)(implicit plugins: PluginSet) = {
 
     import islandEvolution._
 
-    val archive = model.archive.asInstanceOf[IPrototype[Population[islandEvolution.G, islandEvolution.MF]]]
+    val archive = model.archive.asInstanceOf[Prototype[Population[islandEvolution.G, islandEvolution.MF]]]
     val initialArchive = model.archive.withName(name + "InitialArchive")
 
-    val individual = model.individual.asInstanceOf[IPrototype[Individual[islandEvolution.G]]]
-    val genome = model.genome.asInstanceOf[IPrototype[islandEvolution.G]]
+    val individual = model.individual.asInstanceOf[Prototype[Individual[islandEvolution.G]]]
+    val genome = model.genome.asInstanceOf[Prototype[islandEvolution.G]]
 
-    val state = new Prototype[islandEvolution.STATE](name + "State")
-    val generation = new Prototype[Int](name + "Generation")
-    val terminated = new Prototype[Boolean](name + "Terminated")
+    val state = Prototype[islandEvolution.STATE](name + "State")
+    val generation = Prototype[Int](name + "Generation")
+    val terminated = Prototype[Boolean](name + "Terminated")
 
     val firstCapsule = new StrainerCapsule(EmptyTask(name + "First"))
 
@@ -235,7 +235,7 @@ package object evolution {
 
     val (_state, _generation, _genome, _individual) = (state, generation, model.genome, model.individual)
 
-    new Puzzle(firstCapsule, List(endCapsule), model.selection, model.grouping) {
+    new Puzzle(firstCapsule, List(endCapsule), model.hooks, model.selection, model.grouping) {
       def outputCapsule = scalingArchiveCapsule
       def state = _state
       def generation = _generation

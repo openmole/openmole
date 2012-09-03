@@ -26,10 +26,10 @@ import org.openmole.core.implementation.task.Task._
 
 object IslandSampling {
 
-  def apply(evolution: G with GManifest with GenomeFactory)(genome: IPrototype[Array[evolution.G]], islandSize: Int, size: Int) = {
+  def apply(evolution: G with GManifest with GenomeFactory)(genome: Prototype[Array[evolution.G]], islandSize: Int, size: Int) = {
     val (_genome, _islandSize, _size) = (genome, islandSize, size)
     new IslandSampling(evolution) {
-      val genome = _genome.asInstanceOf[IPrototype[Array[evolution.G]]]
+      val genome = _genome.asInstanceOf[Prototype[Array[evolution.G]]]
       val islandSize = _islandSize
       val size = _size
     }
@@ -39,15 +39,15 @@ object IslandSampling {
 
 sealed abstract class IslandSampling(val evolution: G with GManifest with GenomeFactory) extends Sampling {
 
-  def genome: IPrototype[Array[evolution.G]]
+  def genome: Prototype[Array[evolution.G]]
   def islandSize: Int
   def size: Int
   def prototypes = List(genome)
 
-  def build(context: IContext) = {
+  def build(context: Context) = {
     import evolution._
 
-    def toSamplingLine(g: Array[evolution.G]) = List(new Variable(genome, g))
+    def toSamplingLine(g: Array[evolution.G]) = List(Variable(genome, g))
 
     val rng = newRNG(context.valueOrException(openMOLESeed))
 

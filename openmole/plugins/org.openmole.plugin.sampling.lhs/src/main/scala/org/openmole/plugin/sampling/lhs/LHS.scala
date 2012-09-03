@@ -31,7 +31,7 @@ sealed class LHS(samples: Int, factors: IFactor[Double, IDomain[Double] with IBo
 
   override def prototypes = factors.map { _.prototype }
 
-  override def build(context: IContext): Iterator[Iterable[IVariable[Double]]] = {
+  override def build(context: Context): Iterator[Iterable[Variable[Double]]] = {
     val rng = newRNG(context.valueOrException(openMOLESeed))
 
     (0 until samples).map {
@@ -39,7 +39,7 @@ sealed class LHS(samples: Int, factors: IFactor[Double, IDomain[Double] with IBo
         (0 until factors.size).map {
           i ⇒ (i + rng.nextDouble) / factors.size
         }.shuffled(rng).zip(factors).map {
-          case (v, f) ⇒ new Variable(f.prototype, v.scale(f.domain.min(context), f.domain.max(context)))
+          case (v, f) ⇒ Variable(f.prototype, v.scale(f.domain.min(context), f.domain.max(context)))
         }
     }.toIterator
   }

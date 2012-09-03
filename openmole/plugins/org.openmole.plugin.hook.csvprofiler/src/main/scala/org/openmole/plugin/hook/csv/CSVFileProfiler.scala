@@ -21,30 +21,22 @@ import au.com.bytecode.opencsv.CSVWriter
 import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
-import org.openmole.core.implementation.hook.MoleExecutionHook
-import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.job._
+import org.openmole.core.model.mole._
 import org.openmole.core.model.job.State.State
 import ToCSV._
 import org.openmole.core.model.job.State._
-import scala.ref.WeakReference
 
-class CSVFileProfiler(val moleExecution: WeakReference[IMoleExecution], file: File) extends MoleExecutionHook {
-
-  def this(moleExecution: IMoleExecution, file: String) = this(new WeakReference(moleExecution), new File(file))
-
-  def this(moleExecution: IMoleExecution, file: File) = this(new WeakReference(moleExecution), file)
+class CSVFileProfiler(file: File) extends IProfiler {
 
   file.getParentFile.mkdirs
   @transient lazy val writer = new CSVWriter(new BufferedWriter(new FileWriter(file)))
 
-  override def stateChanged(moleJob: IMoleJob, newState: State, oldState: State) = synchronized {
-    if (moleJob.state.isFinal) {
-      writer.writeNext(toColumns(moleJob))
-      writer.flush
-    }
+  override def process(moleJob: IMoleJob) = synchronized {
+    writer.writeNext(toColumns(moleJob))
+    writer.flush
   }
 
-  override def executionFinished = writer.close
+  override def finished = writer.close
 
 }

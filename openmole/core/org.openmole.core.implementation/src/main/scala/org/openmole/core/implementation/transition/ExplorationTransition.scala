@@ -19,7 +19,6 @@ package org.openmole.core.implementation.transition
 
 import org.openmole.core.implementation.task.ExplorationTask._
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.data.Context._
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.core.model.task._
@@ -38,16 +37,16 @@ import scala.collection.mutable.ListBuffer
 
 class ExplorationTransition(start: ICapsule, end: ISlot, condition: ICondition = ICondition.True, filter: IFilter[String] = Filter.empty) extends Transition(start, end, condition, filter) with IExplorationTransition {
 
-  override def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {
+  override def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = {
     val subSubMole = subMole.newChild
 
     registerAggregationTransitions(ticket, subSubMole)
     submitIn(context, ticket, subSubMole)
   }
 
-  def submitIn(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = {
+  def submitIn(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = {
     val (factors, outputs) = start.outputs.partition(d ⇒ (d.mode is explore) && d.prototype.`type`.isArray)
-    val typedFactors = factors.map(_.prototype.asInstanceOf[IPrototype[Array[Any]]])
+    val typedFactors = factors.map(_.prototype.asInstanceOf[Prototype[Array[Any]]])
     val values = typedFactors.toList.map(context.value(_).get.toIterable).transpose
 
     val endTask = end.capsule.taskOrException
@@ -55,7 +54,7 @@ class ExplorationTransition(start: ICapsule, end: ISlot, condition: ICondition =
     for (value ← values) {
       val newTicket = subMole.moleExecution.nextTicket(ticket)
 
-      val variables = new ListBuffer[IVariable[_]]
+      val variables = new ListBuffer[Variable[_]]
 
       for (in ← outputs)
         context.variable(in.prototype) match {
@@ -65,7 +64,7 @@ class ExplorationTransition(start: ICapsule, end: ISlot, condition: ICondition =
 
       for ((p, v) ← typedFactors zip value) {
         val fp = p.fromArray
-        if (fp.accepts(v)) variables += new Variable(fp, v)
+        if (fp.accepts(v)) variables += Variable(fp, v)
         else throw new UserBadDataError("Found value of type " + v.asInstanceOf[AnyRef].getClass + " incompatible with prototype " + fp)
       }
       submitNextJobsIfReady(ListBuffer() ++ variables, newTicket, subMole)

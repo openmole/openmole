@@ -24,7 +24,7 @@ import org.openmole.core.implementation.tools._
 
 class SelectFileDomain(val base: File, val path: String) extends IDomain[File] with IFinite[File] {
 
-  override def computeValues(context: IContext): Iterable[File] =
+  override def computeValues(context: Context): Iterable[File] =
     List(new File(base, VariableExpansion(context, path)))
 
 }

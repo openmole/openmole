@@ -17,16 +17,16 @@
 
 package org.openmole.plugin.domain.collection
 
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.Context
+import org.openmole.core.model.data.Prototype
 import org.openmole.core.model.domain.IDomain
 
 import collection.JavaConversions._
 import org.openmole.core.model.domain.IIterable
 
-sealed class VariableDomain[A](variable: IPrototype[Array[A]]) extends IDomain[A] with IIterable[A] {
+sealed class VariableDomain[A](variable: Prototype[Array[A]]) extends IDomain[A] with IIterable[A] {
 
-  override def iterator(context: IContext): Iterator[A] =
+  override def iterator(context: Context): Iterator[A] =
     context.valueOrException(variable).iterator
 
 }

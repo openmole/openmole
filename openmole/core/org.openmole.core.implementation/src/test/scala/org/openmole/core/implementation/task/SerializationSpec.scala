@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation.task
 
+import org.openmole.core.model.data._
 import org.openmole.core.implementation.data._
 import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.tools.io.BufferInputStream
@@ -29,7 +30,7 @@ import org.junit.runner.RunWith
 @RunWith(classOf[JUnitRunner])
 class SerializationSpec extends FlatSpec with ShouldMatchers {
   "Task " should "be the same after serialization and deserialization" in {
-    val p = new Prototype[Int]("p")
+    val p = Prototype[Int]("p")
 
     val t = EmptyTask("Test")
     t.addInput(p)

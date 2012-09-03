@@ -29,7 +29,7 @@ import org.openmole.core.model.mole._
  */
 class NumberOfMoleJobsGrouping(numberOfMoleJobs: Int) extends IGrouping {
 
-  override def apply(context: IContext, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup = {
+  override def apply(context: Context, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup = {
     groups.find { case (_, g) ⇒ g.size < numberOfMoleJobs } match {
       case Some((mg, _)) ⇒ mg
       case None ⇒ MoleJobGroup()

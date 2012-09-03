@@ -18,15 +18,13 @@
 package org.openmole.plugin.hook.file
 
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.hook.CapsuleExecutionHook
-import org.openmole.core.implementation.tools.VariableExpansion
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.implementation.tools._
+import org.openmole.core.model.data._
+import org.openmole.core.model.mole._
 import java.io.File
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.misc.exception.UserBadDataError
+import org.openmole.core.model.job._
+import org.openmole.misc.exception._
 
 /**
  * Appends a variable content to an existing file.
@@ -35,7 +33,7 @@ import org.openmole.misc.exception.UserBadDataError
  * In the case of directories, all the files of the original directory are append to the
  * files of the target one.
  */
-class AppendFileHook(moleExecution: IMoleExecution, capsule: ICapsule, prototype: IPrototype[File], outputFile: String) extends CapsuleExecutionHook(moleExecution, capsule) {
+class AppendFileHook(prototype: Prototype[File], outputFile: String) extends IHook {
 
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
@@ -66,7 +64,7 @@ class AppendFileHook(moleExecution: IMoleExecution, capsule: ICapsule, prototype
     }
   }
 
-  def inputs = DataSet(prototype)
+  override def requiered = DataSet(prototype)
 
 }
 

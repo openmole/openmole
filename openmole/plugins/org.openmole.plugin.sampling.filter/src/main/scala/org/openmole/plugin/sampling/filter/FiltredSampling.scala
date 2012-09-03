@@ -17,17 +17,15 @@
 
 package org.openmole.plugin.sampling.filter
 
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.sampling.ISampling
-import org.openmole.core.implementation.data.Context
+import org.openmole.core.model.data._
+import org.openmole.core.model.sampling._
 
 sealed class FiltredSampling(sampling: ISampling, filters: IFilter*) extends ISampling {
 
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
 
-  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] =
+  override def build(context: Context): Iterator[Iterable[Variable[_]]] =
     sampling.build(context).filter(sample ⇒ !filters.exists(!_(Context(sample))))
 
 }

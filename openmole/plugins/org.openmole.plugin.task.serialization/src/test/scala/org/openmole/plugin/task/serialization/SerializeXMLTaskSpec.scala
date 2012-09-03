@@ -19,9 +19,10 @@ package org.openmole.plugin.task.serialization
 
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
-import org.openmole.core.serializer.SerializerService
-import org.openmole.misc.tools.io.BufferInputStream
-import org.openmole.misc.tools.io.BufferOutputStream
+import org.openmole.core.model.task._
+import org.openmole.core.model.data._
+import org.openmole.core.serializer._
+import org.openmole.misc.tools.io._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
@@ -35,10 +36,10 @@ class SerializeTaskSpec extends FlatSpec with ShouldMatchers {
   implicit val plugins = PluginSet.empty
 
   "SerializeTask" should "serialize input variables to files" in {
-    val p = new Prototype[Int]("p")
-    val pfile = new Prototype[File]("pfile")
+    val p = Prototype[Int]("p")
+    val pfile = Prototype[File]("pfile")
 
-    val pVal = new Variable(p, 5)
+    val pVal = Variable(p, 5)
 
     val t = SerializeXMLTask("Test")
     t serialize (p, pfile)

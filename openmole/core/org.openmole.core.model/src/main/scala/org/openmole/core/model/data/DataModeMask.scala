@@ -19,12 +19,12 @@ package org.openmole.core.model.data
 
 /**
  * This class is a collection of masks to set modalties on how a task uses
- * {@see IData}.
+ * {@see Data}.
  */
 object DataModeMask {
 
   /**
-   * IData is optionnal. If this data is no found at the begining of a task
+   * Data is optionnal. If this data is no found at the begining of a task
    * execution no error will be raised and the task should accomodate of it.
    *
    */
@@ -33,7 +33,7 @@ object DataModeMask {
   }
 
   /**
-   * The value corresponding to the IData can be used by an exploration
+   * The value corresponding to the Data can be used by an exploration
    * transition as a exploration set. This should be set only on array.
    *
    */

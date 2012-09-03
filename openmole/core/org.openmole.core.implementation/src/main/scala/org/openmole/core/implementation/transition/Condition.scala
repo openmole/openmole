@@ -17,7 +17,7 @@
 
 package org.openmole.core.implementation.transition
 
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 import org.openmole.core.model.transition.ICondition
 import org.openmole.misc.tools.script.GroovyProxy
 import org.openmole.core.implementation.tools.GroovyContextAdapter
@@ -26,6 +26,6 @@ class Condition(code: String) extends ICondition {
 
   @transient lazy val groovyProxy = new GroovyProxy(code, Iterable.empty) with GroovyContextAdapter
 
-  override def evaluate(context: IContext) = groovyProxy.execute(context).asInstanceOf[Boolean]
+  override def evaluate(context: Context) = groovyProxy.execute(context).asInstanceOf[Boolean]
 
 }

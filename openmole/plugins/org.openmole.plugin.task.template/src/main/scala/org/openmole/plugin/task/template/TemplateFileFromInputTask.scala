@@ -18,22 +18,23 @@
 package org.openmole.plugin.task.template
 
 import java.io.File
-import org.openmole.core.implementation.data.Data
-import org.openmole.core.implementation.task.TaskBuilder
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IData
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.task._
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
 
 object TemplateFileFromInputTask {
   def apply(
     name: String,
-    template: IPrototype[File],
-    output: IPrototype[File])(implicit plugins: IPluginSet) = new TaskBuilder { builder ⇒
+    template: Prototype[File],
+    output: Prototype[File])(implicit plugins: PluginSet) = new TaskBuilder { builder ⇒
+
+    addInput(template)
+    addOutput(output)
 
     def toTask = new TemplateFileFromInputTask(name, template, output) {
-      val inputs = builder.inputs + template
-      val outputs = builder.outputs + output
+      val inputs = builder.inputs
+      val outputs = builder.outputs
       val parameters = builder.parameters
     }
   }
@@ -41,9 +42,9 @@ object TemplateFileFromInputTask {
 
 sealed abstract class TemplateFileFromInputTask(
     val name: String,
-    template: IPrototype[File],
-    val output: IPrototype[File])(implicit val plugins: IPluginSet) extends AbstractTemplateFileTask {
+    template: Prototype[File],
+    val output: Prototype[File])(implicit val plugins: PluginSet) extends AbstractTemplateFileTask {
 
-  override def file(context: IContext) = context.valueOrException(template)
+  override def file(context: Context) = context.valueOrException(template)
 
 }

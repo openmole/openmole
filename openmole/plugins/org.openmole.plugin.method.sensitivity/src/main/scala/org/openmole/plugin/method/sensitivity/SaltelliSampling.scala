@@ -37,7 +37,7 @@ object SaltelliSampling {
   def extractValues(allValues: Array[Double], allNames: Array[String], name: String): Array[Double] =
     allValues zip allNames filter { case (_, n) ⇒ n == name } map { case (v, _) ⇒ v }
 
-  def extractValues(allValues: Array[Double], allNames: Array[String], input: IPrototype[Double]): (Seq[Double], Seq[Double], Seq[Double]) = {
+  def extractValues(allValues: Array[Double], allNames: Array[String], input: Prototype[Double]): (Seq[Double], Seq[Double], Seq[Double]) = {
     val a = extractValues(allValues, allNames, aMatrixName)
     val b = extractValues(allValues, allNames, bMatrixName)
     val c = extractValues(allValues, allNames, cMatrixName(input.name))
@@ -45,7 +45,7 @@ object SaltelliSampling {
   }
 
   def generateMatrix(
-    context: IContext,
+    context: Context,
     samples: Int,
     factors: Seq[IFactor[Double, IDomain[Double] with IBounded[Double]]],
     rng: Random): Array[Array[Double]] =
@@ -69,13 +69,13 @@ object SaltelliSampling {
   def toVariables(
     matrix: Array[Array[Double]],
     m: String,
-    prototypes: Iterable[IPrototype[Double]],
-    matrixName: IPrototype[String]): List[Iterable[IVariable[_]]] =
+    prototypes: Iterable[Prototype[Double]],
+    matrixName: Prototype[String]): List[Iterable[Variable[_]]] =
     matrix.map {
-      l ⇒ new Variable(matrixName, m) :: (l zip prototypes map { case (v, p) ⇒ new Variable(p, v) }).toList
+      l ⇒ Variable(matrixName, m) :: (l zip prototypes map { case (v, p) ⇒ Variable(p, v) }).toList
     }.toList
 
-  val matrixName = new Prototype[String]("matrixName")
+  val matrixName = Prototype[String]("matrixName")
 
 }
 
@@ -83,7 +83,7 @@ import SaltelliSampling._
 
 class SaltelliSampling(
     samples: Int,
-    val matrixName: IPrototype[String],
+    val matrixName: Prototype[String],
     factors: IFactor[Double, IDomain[Double] with IBounded[Double]]*) extends Sampling {
 
   def this(samples: Int, factors: IFactor[Double, IDomain[Double] with IBounded[Double]]*) =
@@ -94,7 +94,7 @@ class SaltelliSampling(
 
   override def prototypes = matrixName :: factors.map { _.prototype }.toList
 
-  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = {
+  override def build(context: Context): Iterator[Iterable[Variable[_]]] = {
     val rng = buildRNG(context)
     val a = generateMatrix(context, samples, factors, rng)
     val b = generateMatrix(context, samples, factors, rng)

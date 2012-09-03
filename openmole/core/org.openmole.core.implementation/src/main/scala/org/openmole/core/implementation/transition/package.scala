@@ -34,8 +34,8 @@ package object transition {
 
   implicit def transitionsPuzzleDecorator(from: Puzzle) = new TransitionDecorator(from)
   implicit def transitionsCapsuleDecorator(from: ICapsule) = new TransitionDecorator(from.toPuzzle)
-  implicit def transitionsTaskDecorator(from: ITask) = new TransitionDecorator(from)
-  implicit def transitionsTaskBuilderDecorator(from: TaskBuilder) = new TransitionDecorator(from.toTask)
+  implicit def transitionsTaskDecorator(from: ITask) = new TransitionDecorator(from.toCapsule.toPuzzle)
+  implicit def transitionsTaskBuilderDecorator(from: TaskBuilder) = new TransitionDecorator(from.toTask.toCapsule.toPuzzle)
 
   implicit def transitionToSlotConverter(transition: ITransition) = transition.end
   implicit def conditionStringConverter(condition: String) = new Condition(condition)

@@ -17,12 +17,12 @@
 
 package org.openmole.plugin.task.stat
 
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.model.task.PluginSet
 import org.openmole.misc.math.Stat
 
 object MeanSquareErrorTask {
 
-  def apply(name: String)(implicit plugins: IPluginSet) = new DoubleSequenceStatTaskBuilder { builder ⇒
+  def apply(name: String)(implicit plugins: PluginSet) = new DoubleSequenceStatTaskBuilder { builder ⇒
     def toTask = new MeanSquareErrorTask(name) {
       val sequences = builder.sequences
       val inputs = builder.inputs
@@ -33,7 +33,7 @@ object MeanSquareErrorTask {
 
 }
 
-sealed abstract class MeanSquareErrorTask(val name: String)(implicit val plugins: IPluginSet) extends DoubleSequenceStatTask {
+sealed abstract class MeanSquareErrorTask(val name: String)(implicit val plugins: PluginSet) extends DoubleSequenceStatTask {
 
   override def stat(seq: Array[Double]) = Stat.meanSquareError(seq)
 

@@ -17,13 +17,13 @@
 
 package org.openmole.plugin.domain.modifier
 
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IFinite
 import org.openmole.core.model.domain.IIterable
 
 sealed class TakeDomain[+T](val domain: IDomain[T] with IIterable[T], val size: Int) extends IDomain[T] with IFinite[T] {
 
-  override def computeValues(context: IContext): Iterable[T] = domain.iterator(context).slice(0, size).toIterable
+  override def computeValues(context: Context): Iterable[T] = domain.iterator(context).slice(0, size).toIterable
 
 }

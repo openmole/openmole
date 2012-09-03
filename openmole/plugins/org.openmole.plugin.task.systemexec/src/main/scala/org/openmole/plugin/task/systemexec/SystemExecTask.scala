@@ -18,6 +18,7 @@
 package org.openmole.plugin.task.systemexec
 
 import org.openmole.core.implementation.task._
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
@@ -57,13 +58,13 @@ object SystemExecTask {
     command: String,
     directory: String = "",
     errorOnReturnCode: Boolean = true,
-    returnValue: Option[IPrototype[Int]] = None,
-    output: Option[IPrototype[String]] = None,
-    error: Option[IPrototype[String]] = None)(implicit plugins: IPluginSet) = new ExternalTaskBuilder { builder ⇒
+    returnValue: Option[Prototype[Int]] = None,
+    output: Option[Prototype[String]] = None,
+    error: Option[Prototype[String]] = None)(implicit plugins: PluginSet) = new ExternalTaskBuilder { builder ⇒
 
     List(output, error, returnValue).flatten.foreach(p ⇒ addOutput(p))
 
-    private val _variables = new ListBuffer[(IPrototype[_], String)]
+    private val _variables = new ListBuffer[(Prototype[_], String)]
 
     def variables = _variables.toList
 
@@ -75,17 +76,17 @@ object SystemExecTask {
      * @param variable the name of the environment variable. By default the name of the environment
      * variable is the same as the one of the openmole protoype.
      */
-    def addVariable(prototype: IPrototype[_], variable: String): this.type = {
+    def addVariable(prototype: Prototype[_], variable: String): this.type = {
       _variables += prototype -> variable
       addInput(prototype)
       this
     }
 
-    def addVariable(prototype: IPrototype[_]): this.type = addVariable(prototype, prototype.name)
+    def addVariable(prototype: Prototype[_]): this.type = addVariable(prototype, prototype.name)
 
     def toTask = new SystemExecTask(name, command, directory, errorOnReturnCode, returnValue, output, error, variables) {
       val inputs = builder.inputs
-      val outputs: IDataSet = builder.outputs ++ DataSet(returnValue)
+      val outputs = builder.outputs
       val parameters = builder.parameters
       val inputFiles = builder.inputFiles
       val outputFiles = builder.outputFiles
@@ -100,17 +101,17 @@ sealed abstract class SystemExecTask(
     val command: String,
     val directory: String,
     val errorOnReturnCode: Boolean,
-    val returnValue: Option[IPrototype[Int]],
-    val output: Option[IPrototype[String]],
-    val error: Option[IPrototype[String]],
-    val variables: Iterable[(IPrototype[_], String)])(implicit val plugins: IPluginSet) extends ExternalTask {
+    val returnValue: Option[Prototype[Int]],
+    val output: Option[Prototype[String]],
+    val error: Option[Prototype[String]],
+    val variables: Iterable[(Prototype[_], String)])(implicit val plugins: PluginSet) extends ExternalTask {
 
-  override protected def process(context: IContext) = {
+  override protected def process(context: Context) = {
     val tmpDir = Workspace.newDir("systemExecTask")
 
     val workDir = if (directory.isEmpty) tmpDir else new File(tmpDir, directory)
     val links = prepareInputFiles(context, tmpDir, directory)
-    val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + VariableExpansion(context, List(new Variable(ExternalTask.PWD, workDir.getAbsolutePath)), command))
+    val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + VariableExpansion(context, List(Variable(ExternalTask.PWD, workDir.getAbsolutePath)), command))
 
     try {
       val f = new File(commandLine.getExecutable)
@@ -136,7 +137,7 @@ sealed abstract class SystemExecTask(
     }
   }
 
-  protected def execute(process: Process, context: IContext) = {
+  protected def execute(process: Process, context: Context) = {
     val outBuilder = new StringBuilder
     val errBuilder = new StringBuilder
 
@@ -154,7 +155,7 @@ sealed abstract class SystemExecTask(
     (
       r,
       List(
-        output.map { o ⇒ new Variable(o, outBuilder.toString) },
-        error.map { e ⇒ new Variable(e, errBuilder.toString) }).flatten)
+        output.map { o ⇒ Variable(o, outBuilder.toString) },
+        error.map { e ⇒ Variable(e, errBuilder.toString) }).flatten)
   }
 }

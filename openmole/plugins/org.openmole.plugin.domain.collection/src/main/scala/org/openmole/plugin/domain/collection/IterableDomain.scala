@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.domain.collection
 
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IIterable
 
@@ -25,5 +25,5 @@ sealed class IterableDomain[T](iterable: Iterable[T]) extends IDomain[T] with II
 
   //def this(elements: T*) = this(elements)
 
-  override def iterator(context: IContext): Iterator[T] = iterable.iterator
+  override def iterator(context: Context): Iterator[T] = iterable.iterator
 }

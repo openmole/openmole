@@ -17,24 +17,18 @@
 
 package org.openmole.core.implementation.validation
 
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IDataSet
-import org.openmole.core.model.data.IParameter
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IMole
+import org.openmole.core.model.data._
+import org.openmole.core.model.mole._
 import TypeUtil.receivedTypes
-import org.openmole.core.model.data.DataModeMask._
 import scala.collection.immutable.TreeMap
-import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.task.IMoleTask
+import org.openmole.core.model.task._
 import org.openmole.misc.tools.obj.ClassUtils._
 import DataflowProblem._
 import TopologyProblem._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Queue
-import org.openmole.core.implementation.data.Context
+import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.tools.LevelComputing._
 
 object Validation {
@@ -52,8 +46,8 @@ object Validation {
         }
       }.toList
 
-  def typeErrors(capsules: Iterable[ICapsule], implicits: Iterable[IPrototype[_]] = List.empty) = {
-    val implicitMap = implicits.map { i ⇒ i.name -> i }.toMap[String, IPrototype[_]]
+  def typeErrors(capsules: Iterable[ICapsule], implicits: Iterable[Prototype[_]] = List.empty) = {
+    val implicitMap = implicits.map { i ⇒ i.name -> i }.toMap[String, Prototype[_]]
     capsules.flatMap {
       c ⇒
         c.intputSlots.map {
@@ -63,19 +57,19 @@ object Validation {
                 def paramsToMap(params: Iterable[IParameter[_]]) =
                   params.map {
                     p ⇒ p.variable.prototype.name -> p.variable.prototype
-                  }.toMap[String, IPrototype[_]]
+                  }.toMap[String, Prototype[_]]
 
                 val (parametersOverride, parameterNonOverride) = t.parameters.partition(_.`override`)
 
                 (paramsToMap(parametersOverride), paramsToMap(parameterNonOverride))
-              case None ⇒ (Map.empty[String, IPrototype[_]], Map.empty[String, IPrototype[_]])
+              case None ⇒ (Map.empty[String, Prototype[_]], Map.empty[String, Prototype[_]])
             })
         }.flatMap {
 
           case (capsule, slot, received, (parametersOverride, parameterNonOverride)) ⇒
             capsule.inputs.filterNot(_.mode is optional).flatMap {
               input ⇒
-                def checkPrototypeMatch(p: IPrototype[_]) =
+                def checkPrototypeMatch(p: Prototype[_]) =
                   if (!input.prototype.isAssignableFrom(p)) Some(new WrongType(slot, input, p))
                   else None
 
@@ -92,8 +86,8 @@ object Validation {
     }
   }
 
-  def typeErrorsTopMole(mole: IMole, implicits: Iterable[IPrototype[_]]) = typeErrors(mole.capsules, implicits)
-  def typeErrorsMoleTask(mole: IMole, implicits: Iterable[IPrototype[_]]) = typeErrors(mole.capsules.drop(1), implicits)
+  def typeErrorsTopMole(mole: IMole, implicits: Iterable[Prototype[_]]) = typeErrors(mole.capsules, implicits)
+  def typeErrorsMoleTask(mole: IMole, implicits: Iterable[Prototype[_]]) = typeErrors(mole.capsules.drop(1), implicits)
 
   def topologyErrors(mole: IMole) = {
     val errors = new ListBuffer[TopologyProblem]
@@ -136,7 +130,7 @@ object Validation {
     }.map { t ⇒ new DuplicatedTransition(t) }
 
   def duplicatedName(mole: IMole) = {
-    def duplicated(data: IDataSet) =
+    def duplicated(data: DataSet) =
       data.data.groupBy(_.prototype.name).filter { case (_, d) ⇒ d.size > 1 }
 
     mole.capsules.flatMap {

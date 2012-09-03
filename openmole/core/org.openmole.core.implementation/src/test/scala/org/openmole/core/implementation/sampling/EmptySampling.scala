@@ -17,9 +17,9 @@
 
 package org.openmole.core.implementation.sampling
 
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 
 class EmptySampling extends Sampling {
   override def prototypes = List.empty
-  override def build(context: IContext) = Iterator.empty
+  override def build(context: Context) = Iterator.empty
 }

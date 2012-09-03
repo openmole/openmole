@@ -15,21 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.data
+package org.openmole.core.model.mole
 
-import org.openmole.core.model.data.{ IData, IPrototype, DataModeMask, IDataMode }
+import org.openmole.core.model.job._
+import org.openmole.core.model.data._
 
-object Data {
-
-  implicit lazy val dataOrderingOnName = new Ordering[IData[_]] {
-    override def compare(left: IData[_], right: IData[_]) =
-      Prototype.prototypeOrderingOnName.compare(left.prototype, right.prototype)
+object IHook {
+  val empty = new IHook {
+    def process(job: IMoleJob) = {}
   }
-
 }
 
-class Data[T](val prototype: IPrototype[T], val mode: IDataMode = DataMode.NONE) extends IData[T] {
-  def this(prototype: IPrototype[T], masks: DataModeMask*) = this(prototype, DataMode(masks: _*))
+trait IHook {
+  def requiered: DataSet = DataSet.empty
 
-  override def toString = "(" + prototype.toString + ", " + mode.toString + ")"
+  def process(moleJob: IMoleJob)
 }

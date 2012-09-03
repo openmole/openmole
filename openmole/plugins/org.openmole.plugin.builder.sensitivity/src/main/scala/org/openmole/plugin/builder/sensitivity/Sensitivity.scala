@@ -28,12 +28,11 @@ import org.openmole.core.model.domain._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.sampling._
 import org.openmole.core.model.task._
-import org.openmole.plugin.builder.Builder._
 import org.openmole.plugin.method.sensitivity._
 
 object Sensitivity {
 
-  def indice(name: String, input: IPrototype[Double], output: IPrototype[Double]) = SensitivityTask.indice(name, input, output)
+  def indice(name: String, input: Prototype[Double], output: Prototype[Double]) = SensitivityTask.indice(name, input, output)
 
   def bootStrappedSensitivity(
     name: String,
@@ -41,8 +40,8 @@ object Sensitivity {
     samples: Int,
     bootstrap: Int,
     factors: Iterable[IFactor[Double, IDomain[Double] with IBounded[Double]]],
-    outputs: Iterable[IPrototype[Double]])(implicit plugins: IPluginSet) = {
-    val matrixName = new Prototype[String](name + "Matrix")
+    outputs: Iterable[Prototype[Double]])(implicit plugins: PluginSet) = {
+    val matrixName = Prototype[String](name + "Matrix")
     val sampling = new SaltelliSampling(samples, matrixName, factors.toSeq: _*)
     val explorationCapsule = new StrainerCapsule(ExplorationTask(name + "Exploration", sampling))
 
@@ -70,7 +69,7 @@ object Sensitivity {
 
     val puzzle = explorationCapsule -< model >- aggregateCapsule -- (firstOrderCapsule, totalOrderCapsule)
 
-    new Puzzle(puzzle.first, puzzle.lasts, puzzle.selection, puzzle.grouping) {
+    new Puzzle(puzzle.first, puzzle.lasts, puzzle.hooks, puzzle.selection, puzzle.grouping) {
       def firtOrderEffect = firstOrderCapsule
       def totalOrderEffect = totalOrderCapsule
     }

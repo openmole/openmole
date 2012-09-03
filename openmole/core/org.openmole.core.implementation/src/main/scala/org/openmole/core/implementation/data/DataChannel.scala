@@ -38,25 +38,25 @@ class DataChannel(
 
   def this(start: ICapsule, end: ISlot, filtered: String*) = this(start, end, Filter(filtered: _*))
 
-  start.addOutputDataChannel(this)
-  end.addInputDataChannel(this)
+  start.addOutputIDataChannel(this)
+  end.addInputIDataChannel(this)
 
-  override def consums(ticket: ITicket, moleExecution: IMoleExecution): Iterable[IVariable[_]] = moleExecution.synchronized {
+  override def consums(ticket: ITicket, moleExecution: IMoleExecution): Iterable[Variable[_]] = moleExecution.synchronized {
     val levelDelta = LevelComputing(moleExecution).levelDelta(start, end.capsule)
     val dataChannelRegistry = moleExecution.dataChannelRegistry
 
     {
-      if (levelDelta <= 0) dataChannelRegistry.remove(this, ticket).getOrElse(new ListBuffer[IVariable[_]])
+      if (levelDelta <= 0) dataChannelRegistry.remove(this, ticket).getOrElse(new ListBuffer[Variable[_]])
       else {
         val workingOnTicket = (0 until levelDelta).foldLeft(ticket) {
           (c, e) ⇒ c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
         }
-        dataChannelRegistry.consult(this, workingOnTicket) getOrElse (new ListBuffer[IVariable[_]])
+        dataChannelRegistry.consult(this, workingOnTicket) getOrElse (new ListBuffer[Variable[_]])
       }
     }.toIterable
   }
 
-  override def provides(fromContext: IContext, ticket: ITicket, moleExecution: IMoleExecution) = moleExecution.synchronized {
+  override def provides(fromContext: Context, ticket: ITicket, moleExecution: IMoleExecution) = moleExecution.synchronized {
     val levelDelta = LevelComputing(moleExecution).levelDelta(start, end.capsule)
     val dataChannelRegistry = moleExecution.dataChannelRegistry
     if (levelDelta >= 0) {
@@ -67,7 +67,7 @@ class DataChannel(
         (c, e) ⇒ c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
       }
 
-      val toContext = dataChannelRegistry.getOrElseUpdate(this, workingOnTicket, new ListBuffer[IVariable[_]])
+      val toContext = dataChannelRegistry.getOrElseUpdate(this, workingOnTicket, new ListBuffer[Variable[_]])
       toContext ++= fromContext.values.filterNot(v ⇒ filter(v.prototype.name))
     }
 

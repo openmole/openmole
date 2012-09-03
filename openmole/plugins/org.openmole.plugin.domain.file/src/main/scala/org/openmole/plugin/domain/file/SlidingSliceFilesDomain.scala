@@ -19,7 +19,7 @@ package org.openmole.plugin.domain.file
 
 import java.io.File
 import java.util.regex.Pattern
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IFinite
 import org.openmole.misc.tools.io.FileUtil._
@@ -39,7 +39,7 @@ sealed class SlidingSliceFilesDomain(dir: File, numberPattern: String, sliceSize
 
   def this(dir: File, sliceSize: Int, filter: File ⇒ Boolean) = this(dir, SlidingSliceFilesDomain.defaultPattern, sliceSize, filter)
 
-  override def computeValues(context: IContext): Iterable[Array[File]] = {
+  override def computeValues(context: Context): Iterable[Array[File]] = {
     val pattern = Pattern.compile(numberPattern)
 
     val files = dir.listFiles(filter).flatMap {

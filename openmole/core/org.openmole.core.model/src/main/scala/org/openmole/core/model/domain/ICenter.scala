@@ -17,8 +17,8 @@
 
 package org.openmole.core.model.domain
 
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 
 trait ICenter[+T] { this: IDomain[T] ⇒
-  def center(context: IContext): T
+  def center(context: Context): T
 }

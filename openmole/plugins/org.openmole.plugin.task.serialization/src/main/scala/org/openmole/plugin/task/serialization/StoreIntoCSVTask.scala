@@ -21,12 +21,12 @@ import java.io.BufferedWriter
 import java.io.File
 import java.io.FileWriter
 import org.openmole.misc.tools.io.Prettifier._
-import org.openmole.core.implementation.task.Task
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.task.IPluginSet
-import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.implementation.task._
+import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
+import org.openmole.misc.exception._
+import org.openmole.misc.workspace._
 import collection.JavaConversions._
 
 /**
@@ -37,12 +37,14 @@ import collection.JavaConversions._
 
 object StoreIntoCSVTask {
 
-  def apply(name: String, outputFile: IPrototype[File])(implicit plugins: IPluginSet) =
+  def apply(name: String, outputFile: Prototype[File])(implicit plugins: PluginSet) =
     new StoreIntoCSVTaskBuilder { builder ⇒
+
+      addOutput(outputFile)
 
       def toTask = new StoreIntoCSVTask(name, outputFile, builder.columns) {
         val inputs = builder.inputs
-        val outputs = builder.outputs + outputFile
+        val outputs = builder.outputs
         val parameters = builder.parameters
       }
 
@@ -52,10 +54,10 @@ object StoreIntoCSVTask {
 
 sealed abstract class StoreIntoCSVTask(
     val name: String,
-    filePrototype: IPrototype[File],
-    columns: Iterable[(IPrototype[Array[_]], String)])(implicit val plugins: IPluginSet) extends Task {
+    filePrototype: Prototype[File],
+    columns: Iterable[(Prototype[Array[_]], String)])(implicit val plugins: PluginSet) extends Task {
 
-  override def process(context: IContext) = {
+  override def process(context: Context) = {
     val valuesList = columns.map { elt ⇒ context.value(elt._1).getOrElse(throw new UserBadDataError("Variable " + elt._1 + " not found.")) }
 
     val file = Workspace.newFile("storeIntoCSV", ".csv")

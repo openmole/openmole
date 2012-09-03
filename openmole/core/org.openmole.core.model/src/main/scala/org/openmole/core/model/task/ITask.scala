@@ -26,7 +26,7 @@ trait ITask {
    *
    * @param context the context in which the task will be executed
    */
-  def perform(context: IContext): IContext
+  def perform(context: Context): Context
 
   /**
    *
@@ -42,7 +42,7 @@ trait ITask {
    *
    * @return the input of the task
    */
-  def inputs: IDataSet
+  def inputs: DataSet
 
   /**
    *
@@ -50,7 +50,7 @@ trait ITask {
    *
    * @return the output data of the task
    */
-  def outputs: IDataSet
+  def outputs: DataSet
 
   /**
    *
@@ -58,8 +58,8 @@ trait ITask {
    *
    * @return the parameters configured for this task.
    */
-  def parameters: IParameterSet
+  def parameters: ParameterSet
 
-  def plugins: IPluginSet
+  def plugins: PluginSet
 
 }

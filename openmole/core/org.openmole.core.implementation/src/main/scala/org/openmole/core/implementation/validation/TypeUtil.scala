@@ -24,26 +24,23 @@ import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.core.model.data.DataModeMask._
 import org.openmole.core.model.data._
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.data.Prototype._
-import org.openmole.core.implementation.data.DataChannel
-import org.openmole.core.implementation.data.DataChannel._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
 object TypeUtil {
 
-  def receivedTypes(slot: ISlot): Iterable[IPrototype[_]] =
+  def receivedTypes(slot: ISlot): Iterable[Prototype[_]] =
     computeManifests(slot).map {
       t ⇒
-        if (t.toArray) new Prototype(t.name)(t.manifest.arrayManifest)
-        else new Prototype(t.name)(t.manifest)
+        if (t.toArray) Prototype(t.name)(t.manifest.arrayManifest)
+        else Prototype(t.name)(t.manifest)
     }
 
   class ComputedType(val name: String, val manifest: Manifest[_], val toArray: Boolean)
 
   def computeManifests(slot: ISlot): Iterable[ComputedType] = {
-    val (varNames, direct, toArray, fromArray) = computeManifests(slot.transitions, slot.inputDataChannels)
+    val (varNames, direct, toArray, fromArray) = computeManifests(slot.transitions, slot.inputIDataChannels)
 
     varNames.map {
       import ListBuffer.empty

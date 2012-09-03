@@ -33,7 +33,7 @@ import scala.collection.mutable.ListBuffer
 
 class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition = True, filter: IFilter[String] = Filter.empty, trigger: ICondition = ICondition.False) extends Transition(start, end, condition, filter) with IAggregationTransition {
 
-  override def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = subMole.aggregationTransitionRegistry.synchronized {
+  override def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = subMole.aggregationTransitionRegistry.synchronized {
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration."))
 
     if (!hasBeenPerformed(subMole, parentTicket)) {

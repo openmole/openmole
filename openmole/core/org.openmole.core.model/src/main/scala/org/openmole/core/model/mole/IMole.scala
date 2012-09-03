@@ -17,12 +17,12 @@
 
 package org.openmole.core.model.mole
 
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 import org.openmole.core.model.task.ITask
 
 trait IMole {
   def root: ICapsule
   def capsules: Seq[ICapsule]
   def tasks: Iterable[ITask]
-  def implicits: IContext
+  def implicits: Context
 }

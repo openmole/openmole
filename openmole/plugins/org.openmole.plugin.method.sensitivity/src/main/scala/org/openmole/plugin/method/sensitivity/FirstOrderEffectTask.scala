@@ -18,41 +18,34 @@
 package org.openmole.plugin.method.sensitivity
 
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.task.Task
-import org.openmole.core.implementation.task.TaskBuilder
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IDataSet
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.data.Prototype._
-import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.data.Context._
+import org.openmole.core.implementation.task._
+import org.openmole.core.model.data._
 import SaltelliSampling._
 import SensitivityTask._
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.model.task._
 
 object FirstOrderEffectTask {
 
   def apply(
     name: String,
-    modelInputs: Iterable[IPrototype[Double]],
-    modelOutputs: Iterable[IPrototype[Double]])(implicit plugins: IPluginSet) = new FirstOrderEffectTaskBuilder(name, SaltelliSampling.matrixName, modelInputs, modelOutputs)
+    modelInputs: Iterable[Prototype[Double]],
+    modelOutputs: Iterable[Prototype[Double]])(implicit plugins: PluginSet) = new FirstOrderEffectTaskBuilder(name, SaltelliSampling.matrixName, modelInputs, modelOutputs)
 
   def apply(
     name: String,
-    matrixName: IPrototype[String],
-    modelInputs: Iterable[IPrototype[Double]],
-    modelOutputs: Iterable[IPrototype[Double]])(implicit plugins: IPluginSet) = new FirstOrderEffectTaskBuilder(name, matrixName, modelInputs, modelOutputs)
+    matrixName: Prototype[String],
+    modelInputs: Iterable[Prototype[Double]],
+    modelOutputs: Iterable[Prototype[Double]])(implicit plugins: PluginSet) = new FirstOrderEffectTaskBuilder(name, matrixName, modelInputs, modelOutputs)
 
   class FirstOrderEffectTaskBuilder(
       val name: String,
-      val matrixName: IPrototype[String],
-      val modelInputs: Iterable[IPrototype[Double]],
-      val modelOutputs: Iterable[IPrototype[Double]])(implicit plugins: IPluginSet) extends RawSensitivityTask.Builder { builder ⇒
+      val matrixName: Prototype[String],
+      val modelInputs: Iterable[Prototype[Double]],
+      val modelOutputs: Iterable[Prototype[Double]])(implicit plugins: PluginSet) extends RawSensitivityTask.Builder { builder ⇒
 
     def toTask = new FirstOrderEffectTask(name, matrixName, modelInputs, modelOutputs) {
-      val inputs: IDataSet = builder.inputs
-      val outputs: IDataSet = builder.outputs
+      val inputs: DataSet = builder.inputs
+      val outputs: DataSet = builder.outputs
       val parameters = builder.parameters
     }
 
@@ -62,6 +55,6 @@ object FirstOrderEffectTask {
 
 abstract sealed class FirstOrderEffectTask(
   val name: String,
-  val matrixName: IPrototype[String],
-  val modelInputs: Iterable[IPrototype[Double]],
-  val modelOutputs: Iterable[IPrototype[Double]])(implicit val plugins: IPluginSet) extends RawSensitivityTask with FirstOrderEffect
+  val matrixName: Prototype[String],
+  val modelInputs: Iterable[Prototype[Double]],
+  val modelOutputs: Iterable[Prototype[Double]])(implicit val plugins: PluginSet) extends RawSensitivityTask with FirstOrderEffect

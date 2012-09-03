@@ -17,9 +17,9 @@
 
 package org.openmole.plugin.sampling.filter
 
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 
 trait IFilter {
   @throws(classOf[Throwable])
-  def apply(factorsValues: IContext): Boolean
+  def apply(factorsValues: Context): Boolean
 }

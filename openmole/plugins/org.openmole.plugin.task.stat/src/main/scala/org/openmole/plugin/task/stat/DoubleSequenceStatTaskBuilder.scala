@@ -19,16 +19,16 @@ package org.openmole.plugin.task.stat
 
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task.TaskBuilder
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.model.data.Prototype
+import org.openmole.core.model.task.PluginSet
 import scala.collection.mutable.ListBuffer
 
-abstract class DoubleSequenceStatTaskBuilder(implicit plugins: IPluginSet) extends TaskBuilder {
-  private var _sequences = new ListBuffer[(IPrototype[Array[Double]], IPrototype[Double])]
+abstract class DoubleSequenceStatTaskBuilder(implicit plugins: PluginSet) extends TaskBuilder {
+  private var _sequences = new ListBuffer[(Prototype[Array[Double]], Prototype[Double])]
 
   def sequences = _sequences.toList
 
-  def addSequence(sequence: IPrototype[Array[Double]], stat: IPrototype[Double]): this.type = {
+  def addSequence(sequence: Prototype[Array[Double]], stat: Prototype[Double]): this.type = {
     this addInput sequence
     this addOutput stat
     _sequences += sequence -> stat

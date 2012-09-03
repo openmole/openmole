@@ -71,7 +71,7 @@ trait ISlot {
    *
    * @return all of data channels ending at this slot
    */
-  def inputDataChannels: Iterable[IDataChannel]
+  def inputIDataChannels: Iterable[IDataChannel]
 
   /**
    * Add a datachannel to the input data channels of this slot.
@@ -79,5 +79,5 @@ trait ISlot {
    * @param dataChannel the datachannel to plug
    * @return the capsule itself
    */
-  def addInputDataChannel(dataChannel: IDataChannel): this.type
+  def addInputIDataChannel(dataChannel: IDataChannel): this.type
 }

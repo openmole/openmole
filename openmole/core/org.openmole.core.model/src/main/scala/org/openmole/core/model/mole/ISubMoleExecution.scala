@@ -17,8 +17,8 @@
 
 package org.openmole.core.model.mole
 
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IVariable
+import org.openmole.core.model.data.Context
+import org.openmole.core.model.data.Variable
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.tools.IRegistryWithTicket
@@ -44,11 +44,11 @@ trait ISubMoleExecution {
   def cancel
   def canceled: Boolean
 
-  def masterCapsuleRegistry: IRegistryWithTicket[IMasterCapsule, IContext]
-  def aggregationTransitionRegistry: IRegistryWithTicket[IAggregationTransition, Buffer[IVariable[_]]]
-  def transitionRegistry: IRegistryWithTicket[ITransition, Buffer[IVariable[_]]]
+  def masterCapsuleRegistry: IRegistryWithTicket[IMasterCapsule, Context]
+  def aggregationTransitionRegistry: IRegistryWithTicket[IAggregationTransition, Buffer[Variable[_]]]
+  def transitionRegistry: IRegistryWithTicket[ITransition, Buffer[Variable[_]]]
 
-  def submit(capsule: ICapsule, context: IContext, ticket: ITicket)
+  def submit(capsule: ICapsule, context: Context, ticket: ITicket)
   def newChild: ISubMoleExecution
 
 }

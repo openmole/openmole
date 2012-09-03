@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.task.netlogo5
 
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.model.task._
 import org.openmole.core.model.data._
 import org.openmole.plugin.task.netlogo._
 import NetLogoTask.Workspace
@@ -35,7 +35,7 @@ object NetLogo5Task {
     name: String,
     workspace: File,
     script: String,
-    launchingCommands: Iterable[String])(implicit plugins: IPluginSet): NetLogoTaskBuilder = {
+    launchingCommands: Iterable[String])(implicit plugins: PluginSet): NetLogoTaskBuilder = {
     val _launchingCommands = launchingCommands
     val (_workspace, _script) = (workspace, script)
 
@@ -62,7 +62,7 @@ object NetLogo5Task {
   def apply(
     name: String,
     script: File,
-    launchingCommands: Iterable[String])(implicit plugins: IPluginSet): NetLogoTaskBuilder = {
+    launchingCommands: Iterable[String])(implicit plugins: PluginSet): NetLogoTaskBuilder = {
     val _launchingCommands = launchingCommands
     new NetLogoTaskBuilder { builder ⇒
 
@@ -88,7 +88,7 @@ object NetLogo5Task {
     name: String,
     script: File,
     launchingCommands: Iterable[String],
-    embedWorkpsace: Boolean)(implicit plugins: IPluginSet): NetLogoTaskBuilder =
+    embedWorkpsace: Boolean)(implicit plugins: PluginSet): NetLogoTaskBuilder =
     if (embedWorkpsace) apply(name, script.getParentFile, script.getName, launchingCommands)
     else apply(name, script, launchingCommands)
 
@@ -98,15 +98,15 @@ sealed class NetLogo5Task(
   name: String,
   workspace: NetLogoTask.Workspace,
   launchingCommands: Iterable[String],
-  netLogoInputs: Iterable[(IPrototype[_], String)],
-  netLogoOutputs: Iterable[(String, IPrototype[_])],
+  netLogoInputs: Iterable[(Prototype[_], String)],
+  netLogoOutputs: Iterable[(String, Prototype[_])],
   netLogoFactory: NetLogoFactory,
-  inputs: IDataSet,
-  outputs: IDataSet,
-  parameters: IParameterSet,
-  inputFiles: Iterable[(IPrototype[File], String, Boolean)],
-  outputFiles: Iterable[(String, IPrototype[File])],
-  resources: Iterable[(File, String, Boolean)])(implicit plugins: IPluginSet) extends NetLogoTask(
+  inputs: DataSet,
+  outputs: DataSet,
+  parameters: ParameterSet,
+  inputFiles: Iterable[(Prototype[File], String, Boolean)],
+  outputFiles: Iterable[(String, Prototype[File])],
+  resources: Iterable[(File, String, Boolean)])(implicit plugins: PluginSet) extends NetLogoTask(
   name,
   workspace,
   launchingCommands,

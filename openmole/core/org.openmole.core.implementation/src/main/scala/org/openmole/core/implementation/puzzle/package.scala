@@ -17,9 +17,8 @@
 
 package org.openmole.core.implementation
 
-import org.openmole.core.model.mole.ICapsule
-import mole._
-import org.openmole.core.model.transition.ISlot
+import org.openmole.core.model.transition._
+import org.openmole.core.model.mole._
 
 package object puzzle {
 
@@ -28,6 +27,7 @@ package object puzzle {
       Puzzle(
         capsule.defaultInputSlot,
         List(capsule),
+        Iterable.empty,
         Map.empty,
         Map.empty)
   }
@@ -39,6 +39,7 @@ package object puzzle {
       Puzzle(
         slot,
         List(slot.capsule),
+        Iterable.empty,
         Map.empty,
         Map.empty)
   }

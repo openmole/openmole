@@ -27,8 +27,8 @@ object ArchiveToIndividualArrayTask {
 
   def apply[G <: Genome, MF](
     name: String,
-    archive: IPrototype[Population[G, MF]],
-    individual: IPrototype[Individual[G]])(implicit plugins: IPluginSet) =
+    archive: Prototype[Population[G, MF]],
+    individual: Prototype[Individual[G]])(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
 
       addInput(archive)
@@ -44,11 +44,11 @@ object ArchiveToIndividualArrayTask {
 
 sealed abstract class ArchiveToIndividualArrayTask[G <: Genome, MF](
     val name: String,
-    archive: IPrototype[Population[G, MF]],
-    individual: IPrototype[Individual[G]])(implicit val plugins: IPluginSet) extends Task { task ⇒
+    archive: Prototype[Population[G, MF]],
+    individual: Prototype[Individual[G]])(implicit val plugins: PluginSet) extends Task { task ⇒
 
-  override def process(context: IContext) =
-    context + new Variable(
+  override def process(context: Context) =
+    context + Variable(
       individual.toArray,
       context.valueOrException(archive).toIndividuals.toArray)
 

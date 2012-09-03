@@ -22,7 +22,8 @@ import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.sampling._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.transition._
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
 
 import org.scalatest.FlatSpec
 import org.scalatest.junit.JUnitRunner
@@ -35,7 +36,7 @@ class TypeUtilSpec extends FlatSpec with ShouldMatchers {
   implicit val plugins = PluginSet.empty
 
   "To array finder" should "not detect a toArray case" in {
-    val p = new Prototype[Int]("p")
+    val p = Prototype[Int]("p")
 
     val t1 = EmptyTask("T1")
     t1 addOutput p
@@ -56,7 +57,7 @@ class TypeUtilSpec extends FlatSpec with ShouldMatchers {
   }
 
   "To array finder" should "detect a toArray case" in {
-    val p = new Prototype[Int]("p")
+    val p = Prototype[Int]("p")
 
     val t1 = EmptyTask("T1")
     t1 addOutput p
@@ -81,7 +82,7 @@ class TypeUtilSpec extends FlatSpec with ShouldMatchers {
   }
 
   "Type system" should "detect an toArray case when a data channel is going from a level to a lower level" in {
-    val i = new Prototype[String]("i")
+    val i = Prototype[String]("i")
 
     val exc = new Capsule(ExplorationTask("Exploration", new EmptySampling))
 

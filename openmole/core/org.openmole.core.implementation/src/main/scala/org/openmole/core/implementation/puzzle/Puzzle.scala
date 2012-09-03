@@ -17,10 +17,8 @@
 
 package org.openmole.core.implementation.puzzle
 
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IEnvironmentSelection
-import org.openmole.core.model.mole.IGrouping
-import org.openmole.core.model.transition.ISlot
+import org.openmole.core.model.mole._
+import org.openmole.core.model.transition._
 
 object Puzzle {
 
@@ -31,6 +29,7 @@ object Puzzle {
     new Puzzle(
       first,
       lasts,
+      puzzles.flatMap(_.hooks),
       puzzles.flatMap { _.selection }.toMap,
       puzzles.flatMap { _.grouping }.toMap)
 
@@ -39,5 +38,6 @@ object Puzzle {
 case class Puzzle(
   val first: ISlot,
   val lasts: Iterable[ICapsule],
+  val hooks: Iterable[(ICapsule, IHook)],
   val selection: Map[ICapsule, IEnvironmentSelection],
   val grouping: Map[ICapsule, IGrouping])

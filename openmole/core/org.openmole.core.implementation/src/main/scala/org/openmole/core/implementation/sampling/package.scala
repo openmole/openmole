@@ -17,8 +17,8 @@
 
 package org.openmole.core.implementation
 
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.Context
+import org.openmole.core.model.data.Prototype
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IIterable
 import org.openmole.core.model.sampling.IFactor

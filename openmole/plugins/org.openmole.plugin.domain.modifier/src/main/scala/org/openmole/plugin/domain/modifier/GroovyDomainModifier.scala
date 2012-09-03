@@ -17,17 +17,17 @@
 
 package org.openmole.plugin.domain.modifier
 
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.Context
+import org.openmole.core.model.data.Prototype
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IIterable
 import org.openmole.plugin.tools.groovy.ContextToGroovyCode
 
-sealed class GroovyDomainModifier[-I, +O](prototype: IPrototype[I], domain: IDomain[I] with IIterable[I], code: String) extends IDomain[O] with IIterable[O] {
+sealed class GroovyDomainModifier[-I, +O](prototype: Prototype[I], domain: IDomain[I] with IIterable[I], code: String) extends IDomain[O] with IIterable[O] {
 
   @transient lazy val contextToGroovyCode = new ContextToGroovyCode(code, Iterable.empty)
 
-  override def iterator(context: IContext): Iterator[O] =
+  override def iterator(context: Context): Iterator[O] =
     domain.iterator(context).map(e ⇒ contextToGroovyCode.execute(context + (prototype, e)).asInstanceOf[O])
 
 }

@@ -17,13 +17,13 @@
 
 package org.openmole.plugin.domain.relative
 
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 import org.openmole.core.implementation.tools._
 import java.lang.Integer
 
 sealed class IntegerRelative(val nominal: String, val percent: String, val size: String) extends IRelative[Integer] {
 
-  override def computeValues(context: IContext): Iterable[Integer] = {
+  override def computeValues(context: Context): Iterable[Integer] = {
     val nom = VariableExpansion(context, nominal).toInt
     val pe = VariableExpansion(context, percent).toInt
     val s = VariableExpansion(context, size).toInt

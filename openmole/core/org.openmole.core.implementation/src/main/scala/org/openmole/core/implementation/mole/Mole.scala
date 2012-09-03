@@ -17,15 +17,14 @@
 
 package org.openmole.core.implementation.mole
 
-import org.openmole.core.implementation.data.Context
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data._
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.task.ITask
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
-class Mole(val root: ICapsule, val implicits: IContext = Context.empty) extends IMole {
+class Mole(val root: ICapsule, val implicits: Context = Context.empty) extends IMole {
 
   override def tasks: Iterable[ITask] = capsules.flatMap(_.task).toSet
 

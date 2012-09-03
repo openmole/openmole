@@ -17,19 +17,19 @@
 
 package org.openmole.core.model.transition
 
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 
 object ICondition {
   val True = new ICondition {
-    def evaluate(context: IContext): Boolean = true
+    def evaluate(context: Context): Boolean = true
   }
 
   val False = new ICondition {
-    def evaluate(context: IContext): Boolean = false
+    def evaluate(context: Context): Boolean = false
   }
 
-  implicit def function2IConditionConverter(f: IContext ⇒ Boolean) = new ICondition {
-    override def evaluate(context: IContext) = f(context)
+  implicit def function2IConditionConverter(f: Context ⇒ Boolean) = new ICondition {
+    override def evaluate(context: Context) = f(context)
   }
 }
 
@@ -43,5 +43,5 @@ trait ICondition {
    * @return the value of this condition
    */
   @throws(classOf[Throwable])
-  def evaluate(context: IContext): Boolean
+  def evaluate(context: Context): Boolean
 }

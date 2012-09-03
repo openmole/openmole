@@ -18,7 +18,7 @@
 package org.openmole.plugin.domain.distribution
 
 import java.util.Random
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IFinite
 import org.openmole.core.model.domain.IIterable
@@ -28,6 +28,6 @@ sealed class FiniteUniformIntDistribution(size: Int, max: Option[Int] = None) ex
 
   @transient lazy val innerDomain = new UniformIntDistribution(max)
 
-  override def computeValues(context: IContext): Iterable[Int] = innerDomain.iterator(context).take(size).toIterable
+  override def computeValues(context: Context): Iterable[Int] = innerDomain.iterator(context).take(size).toIterable
 
 }

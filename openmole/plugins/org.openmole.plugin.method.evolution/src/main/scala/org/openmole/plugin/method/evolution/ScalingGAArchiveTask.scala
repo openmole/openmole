@@ -18,26 +18,25 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import org.openmole.core.implementation.data.Context._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 import org.openmole.core.model.domain._
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.model.task._
 import scala.collection.mutable.ListBuffer
 
 object ScalingGAArchiveTask {
 
   def apply[G <: GAGenome, MF](
     name: String,
-    archive: IPrototype[Population[G, MF]],
-    modelInputs: (IPrototype[Double], (Double, Double))*)(implicit plugins: IPluginSet) =
+    archive: Prototype[Population[G, MF]],
+    modelInputs: (Prototype[Double], (Double, Double))*)(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
 
-      private var objectives = new ListBuffer[IPrototype[Double]]
+      private var objectives = new ListBuffer[Prototype[Double]]
 
-      def addObjective(p: IPrototype[Double]) = {
+      def addObjective(p: Prototype[Double]) = {
         objectives += p
         this addOutput p.toArray
         this
@@ -58,18 +57,18 @@ object ScalingGAArchiveTask {
 
 sealed abstract class ScalingGAArchiveTask[G <: GAGenome, MF](
     val name: String,
-    archive: IPrototype[Population[G, MF]],
-    modelInputs: (IPrototype[Double], (Double, Double))*)(implicit val plugins: IPluginSet) extends Task {
+    archive: Prototype[Population[G, MF]],
+    modelInputs: (Prototype[Double], (Double, Double))*)(implicit val plugins: PluginSet) extends Task {
 
-  def objectives: List[IPrototype[Double]]
+  def objectives: List[Prototype[Double]]
 
-  override def process(context: IContext) = {
+  override def process(context: Context) = {
     val archiveValue = context.valueOrException(archive)
 
     (
       modelInputs.zipWithIndex.map {
         case ((prototype, (min, max)), i) ⇒
-          new Variable(
+          Variable(
             prototype.toArray,
             archiveValue.map {
               _.genome.values(i).scale(min, max)
@@ -77,7 +76,7 @@ sealed abstract class ScalingGAArchiveTask[G <: GAGenome, MF](
       } ++
       objectives.zipWithIndex.map {
         case (p, i) ⇒
-          new Variable(
+          Variable(
             p.toArray,
             archiveValue.map { _.fitness.values(i) }.toArray)
       }).toContext

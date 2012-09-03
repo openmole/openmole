@@ -54,7 +54,7 @@ trait ITransition {
    *
    * @return the value of the condition under which this transition is performed
    */
-  def isConditionTrue(context: IContext): Boolean
+  def isConditionTrue(context: Context): Boolean
 
   /**
    *
@@ -70,7 +70,7 @@ trait ITransition {
    *
    * @return the unfiltred output data of the staring capsule
    */
-  def data: Iterable[IData[_]]
+  def data: Iterable[Data[_]]
 
   /**
    *
@@ -81,6 +81,6 @@ trait ITransition {
    * @param toClone   variable to clone in the transition
    * @param subMole   current submole
    */
-  def perform(from: IContext, ticket: ITicket, subMole: ISubMoleExecution)
+  def perform(from: Context, ticket: ITicket, subMole: ISubMoleExecution)
 
 }

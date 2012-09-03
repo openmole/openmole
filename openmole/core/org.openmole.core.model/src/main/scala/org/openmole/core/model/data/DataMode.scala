@@ -15,26 +15,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.data
+package org.openmole.core.model.data
 
-import org.openmole.core.model.data.{ DataModeMask, IDataMode }
-import org.openmole.core.model.data.DataModeMask._
+import DataModeMask._
 
 object DataMode {
-  val NONE = new DataMode(0)
+  val NONE = apply(0)
 
-  def apply(masks: DataModeMask*) = {
-    var mask = 0
-    for (m ← masks) mask |= m.value
-    new DataMode(mask)
+  def apply(masks: DataModeMask*): DataMode =
+    DataMode(masks.map(_.value).foldLeft(0)(_ | _))
+
+  def apply(mask: Int) = new DataMode {
+    override def is(mode: DataModeMask): Boolean = (mask & mode.value) != 0
+    override def toString = {
+      val toDisplay = values.flatMap { m ⇒ if (this is m) Some(m.toString) else None }
+      if (toDisplay.isEmpty) "None" else toDisplay.mkString(", ")
+    }
   }
-
 }
 
-class DataMode(mask: Int) extends IDataMode {
-  override def is(mode: DataModeMask): Boolean = (mask & mode.value) != 0
-  override def toString = {
-    val toDisplay = values.flatMap { m ⇒ if (this is m) Some(m.toString) else None }
-    if (toDisplay.isEmpty) "None" else toDisplay.mkString(", ")
-  }
+/**
+ * The data mode give meta-information about the circulation of data in the
+ * mole.
+ */
+trait DataMode {
+
+  /**
+   * Test a data mode mask against this mode
+   */
+  def is(mode: DataModeMask): Boolean
 }

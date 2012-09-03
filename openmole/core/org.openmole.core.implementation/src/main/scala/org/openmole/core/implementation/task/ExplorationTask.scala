@@ -18,30 +18,27 @@
 package org.openmole.core.implementation.task
 
 import org.openmole.core.implementation.data._
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.sampling.ISampling
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.task.IExplorationTask
-import org.openmole.core.implementation.data.DataMode
-import org.openmole.core.implementation.data.Prototype._
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.model.data.DataModeMask
-import org.openmole.core.model.task.IPluginSet
-import org.openmole.misc.exception.UserBadDataError
+import org.openmole.core.model.data._
+import org.openmole.core.model.sampling._
+import org.openmole.core.model.task._
+import org.openmole.misc.exception._
+
 import scala.collection.immutable.TreeMap
 import scala.collection.mutable.ArrayBuffer
 
 object ExplorationTask {
-  type SampledValues = Iterable[Iterable[IVariable[_]]]
+  type SampledValues = Iterable[Iterable[Variable[_]]]
 
-  def apply(name: String, sampling: ISampling)(implicit plugins: IPluginSet) = {
+  def apply(name: String, sampling: ISampling)(implicit plugins: PluginSet) = {
     new TaskBuilder { builder ⇒
+
+      addInput(sampling.inputs)
+      addOutput(sampling.prototypes.map { p ⇒ Data(p, DataModeMask.explore).toArray })
 
       def toTask =
         new ExplorationTask(name, sampling) {
           val inputs = builder.inputs + sampling.inputs
-          val outputs = builder.outputs ++ sampling.prototypes.map { p ⇒ new Data(p, DataModeMask.explore).toArray }
+          val outputs = builder.outputs
           val parameters = builder.parameters
         }
 
@@ -50,13 +47,13 @@ object ExplorationTask {
 
 }
 
-sealed abstract class ExplorationTask(val name: String, val sampling: ISampling)(implicit val plugins: IPluginSet) extends Task with IExplorationTask {
+sealed abstract class ExplorationTask(val name: String, val sampling: ISampling)(implicit val plugins: PluginSet) extends Task with IExplorationTask {
 
   //If input prototype as the same name as the output it is erased
-  override protected def process(context: IContext) = {
+  override protected def process(context: Context) = {
     val sampled = sampling.build(context).toIterable
 
-    val variablesValues = TreeMap.empty[IPrototype[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p -> new ArrayBuffer[Any](sampled.size) }
+    val variablesValues = TreeMap.empty[Prototype[_], ArrayBuffer[Any]] ++ sampling.prototypes.map { p ⇒ p -> new ArrayBuffer[Any](sampled.size) }
 
     for (sample ← sampled; v ← sample) variablesValues.get(v.prototype) match {
       case Some(b) ⇒ b += v.value
@@ -65,7 +62,7 @@ sealed abstract class ExplorationTask(val name: String, val sampling: ISampling)
 
     context ++ variablesValues.map {
       case (k, v) ⇒
-        try new Variable(k.toArray.asInstanceOf[IPrototype[Array[_]]],
+        try Variable(k.toArray.asInstanceOf[Prototype[Array[_]]],
           v.toArray(k.`type`.asInstanceOf[Manifest[Any]]))
         catch {
           case e: ArrayStoreException ⇒ throw new UserBadDataError("Cannot fill factor values in " + k.toArray + ", values " + v)

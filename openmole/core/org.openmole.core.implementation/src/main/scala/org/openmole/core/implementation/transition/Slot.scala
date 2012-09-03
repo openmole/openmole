@@ -29,19 +29,19 @@ class Slot(val capsule: ICapsule) extends ISlot {
   capsule.addInputSlot(this)
 
   private val _transitions = new ListBuffer[ITransition]
-  private val _inputDataChannels = new ListBuffer[IDataChannel]
+  private val _inputIDataChannels = new ListBuffer[IDataChannel]
 
   override def +=(transition: ITransition) = {
     _transitions += transition
     this
   }
 
-  override def addInputDataChannel(dataChannel: IDataChannel): this.type = {
-    _inputDataChannels += dataChannel
+  override def addInputIDataChannel(dataChannel: IDataChannel): this.type = {
+    _inputIDataChannels += dataChannel
     this
   }
 
-  override def inputDataChannels: Iterable[IDataChannel] = _inputDataChannels
+  override def inputIDataChannels: Iterable[IDataChannel] = _inputIDataChannels
 
   override def transitions: Iterable[ITransition] = _transitions
 

@@ -18,7 +18,7 @@
 package org.openmole.plugin.domain.distribution
 
 import java.util.Random
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 import org.openmole.misc.workspace.Workspace
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IIterable
@@ -27,7 +27,7 @@ import org.openmole.core.implementation.task.Task._
 
 sealed class UniformIntDistribution(max: Option[Int] = None) extends IDomain[Int] with IIterable[Int] {
 
-  override def iterator(context: IContext): Iterator[Int] = {
+  override def iterator(context: Context): Iterator[Int] = {
     val rng = newRNG(context.valueOrException(openMOLESeed))
     Iterator.continually {
       max match {

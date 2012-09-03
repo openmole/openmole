@@ -19,12 +19,13 @@ package org.openmole.core.implementation.transition
 
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.mole._
-import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.sampling.ExplicitSampling
-import org.openmole.core.model.transition.ICondition
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.model.transition._
+import org.openmole.core.model.data._
+import org.openmole.core.model.sampling._
+import org.openmole.core.model.task._
+
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
@@ -40,7 +41,7 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
     @volatile var endCapsExecuted = 0
 
     val data = List("A", "A", "B", "C")
-    val i = new Prototype[String]("i")
+    val i = Prototype[String]("i")
 
     val sampling = new ExplicitSampling(i, data)
 
@@ -55,7 +56,7 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
     val testT = new TestTask {
       val name = "Test"
       override def inputs = DataSet(i.toArray)
-      override def process(context: IContext) = {
+      override def process(context: Context) = {
         context.contains(i.toArray) should equal(true)
         context.value(i.toArray).get.sorted.deep should equal(data.toArray.deep)
         endCapsExecuted += 1
@@ -78,7 +79,7 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
     @volatile var endCapsExecuted = 0
 
     val data = List(1, 2, 3, 2)
-    val i = new Prototype[Int]("i")
+    val i = Prototype[Int]("i")
 
     val sampling = new ExplicitSampling(i, data)
 
@@ -93,7 +94,7 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
     val testT = new TestTask {
       val name = "Test"
       override val inputs = DataSet(i.toArray)
-      override def process(context: IContext) = {
+      override def process(context: Context) = {
         context.contains(i.toArray) should equal(true)
 
         context.value(i.toArray).get.getClass should equal(classOf[Array[Int]])
@@ -116,7 +117,7 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
     @volatile var endCapsExecuted = 0
 
     val data = 0 to 1000
-    val i = new Prototype[Int]("i")
+    val i = Prototype[Int]("i")
 
     val sampling = new ExplicitSampling(i, data)
 
@@ -131,7 +132,7 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
     val testT = new TestTask {
       val name = "Test"
       override val inputs = DataSet(i.toArray)
-      override def process(context: IContext) = {
+      override def process(context: Context) = {
         context.contains(i.toArray) should equal(true)
         context.value(i.toArray).get.sorted.deep should equal(data.toArray.deep)
         endCapsExecuted += 1

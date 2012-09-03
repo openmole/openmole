@@ -17,26 +17,14 @@
 
 package org.openmole.core.implementation.mole
 
-import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.eventdispatcher.Event
-import org.openmole.misc.eventdispatcher.EventListener
-import org.openmole.misc.exception.{ InternalProcessingError, UserBadDataError }
-import org.openmole.misc.tools.service.Priority
-import org.openmole.core.implementation.job.MoleJob
-import org.openmole.core.implementation.transition.Slot
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.{ IMoleExecution, ISubMoleExecution }
-import org.openmole.core.model.task.ITask
-import org.openmole.core.model.transition.ITransition
-import org.openmole.core.model.mole.ITicket
-import org.openmole.core.model.data.{ IContext, IDataChannel }
-import org.openmole.core.model.job.{ IMoleJob, MoleJobId }
-import org.openmole.core.model.job.State
+import org.openmole.core.implementation.transition._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.task._
+import org.openmole.core.model.transition._
+import org.openmole.core.model.data._
+import org.openmole.core.model.job._
 import org.openmole.core.model.job.State._
-import org.openmole.core.model.transition.ISlot
 
-import org.openmole.core.implementation.data.DataSet
-import org.openmole.core.model.data.IDataSet
 import scala.collection.mutable.ListBuffer
 
 class Capsule(var _task: Option[ITask] = None) extends ICapsule {
@@ -47,15 +35,15 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
   private val _defaultInputSlot = new Slot(this)
   private val _outputTransitions = new ListBuffer[ITransition]
 
-  private val _outputDataChannels = new ListBuffer[IDataChannel]
+  private val _outputIDataChannels = new ListBuffer[IDataChannel]
 
-  override def inputs: IDataSet =
+  override def inputs: DataSet =
     task match {
       case None ⇒ DataSet.empty
       case Some(t) ⇒ t.inputs
     }
 
-  override def outputs: IDataSet =
+  override def outputs: DataSet =
     task match {
       case None ⇒ DataSet.empty
       case Some(t) ⇒ t.outputs
@@ -68,12 +56,12 @@ class Capsule(var _task: Option[ITask] = None) extends ICapsule {
     this
   }
 
-  def outputDataChannels: Iterable[IDataChannel] = _outputDataChannels
+  def outputIDataChannels: Iterable[IDataChannel] = _outputIDataChannels
 
   override def outputTransitions: Iterable[ITransition] = _outputTransitions
 
-  override def addOutputDataChannel(dataChannel: IDataChannel): this.type = {
-    _outputDataChannels += dataChannel
+  override def addOutputIDataChannel(dataChannel: IDataChannel): this.type = {
+    _outputIDataChannels += dataChannel
     this
   }
 

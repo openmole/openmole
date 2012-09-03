@@ -29,7 +29,7 @@ import org.openmole.core.model.mole._
  */
 class NumberOfBatchGrouping(numberOfBatch: Int) extends IGrouping {
 
-  override def apply(context: IContext, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup = {
+  override def apply(context: Context, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup = {
     if (groups.size < numberOfBatch) MoleJobGroup()
     else groups.minBy { case (_, g) ⇒ g.size }._1
   }

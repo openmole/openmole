@@ -17,46 +17,43 @@
 
 package org.openmole.core.implementation.hook
 
-import org.openmole.core.implementation.mole.{ Capsule, MasterCapsule }
-import org.openmole.core.implementation.data.DataSet
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.mole.Mole
-import org.openmole.core.implementation.mole.MoleExecution
-import org.openmole.core.implementation.task.EmptyTask
-import org.openmole.core.implementation.task.Task
-import org.openmole.core.implementation.task.TestTask
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.job.IMoleJob
+import org.openmole.core.implementation.mole._
+import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.task._
+import org.openmole.core.model.data._
+import org.openmole.core.model.job._
+import org.openmole.core.model.mole._
+
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class CapsuleExecutionHookSpec extends FlatSpec with ShouldMatchers {
+class HookSpec extends FlatSpec with ShouldMatchers {
 
   "A capsule execution hook" should "intersept the execution of a capsule" in {
     var executed = false
 
-    val p = new Prototype[String]("p")
+    val p = Prototype[String]("p")
 
     val t1 = new TestTask {
       val name = "Test"
       override val outputs = DataSet(p)
-      override def process(context: IContext) = context + (p -> "test")
+      override def process(context: Context) = context + (p -> "test")
     }
 
     val t1c = new Capsule(t1)
-    val ex = new MoleExecution(new Mole(t1c))
 
-    new CapsuleExecutionHook(ex, t1c) {
+    val hook = new IHook {
       override def process(moleJob: IMoleJob) = {
         moleJob.context.contains(p) should equal(true)
         moleJob.context.value(p).get should equal("test")
         executed = true
       }
-      def inputs = DataSet(p)
     }
+
+    val ex = new MoleExecution(new Mole(t1c), hooks = List(t1c -> hook))
 
     ex.start.waitUntilEnded
 
@@ -66,51 +63,30 @@ class CapsuleExecutionHookSpec extends FlatSpec with ShouldMatchers {
   "A capsule execution hook" should "intersept the execution of a master capsule" in {
     var executed = false
 
-    val p = new Prototype[String]("p")
+    val p = Prototype[String]("p")
 
     val t1 = new TestTask {
       val name = "Test"
       override val outputs = DataSet(p)
-      override def process(context: IContext) = context + (p -> "test")
+      override def process(context: Context) = context + (p -> "test")
 
     }
 
     val t1c = new MasterCapsule(t1)
-    val ex = new MoleExecution(new Mole(t1c))
 
-    new CapsuleExecutionHook(ex, t1c) {
+    val hook = new IHook {
       override def process(moleJob: IMoleJob) = {
         moleJob.context.contains(p) should equal(true)
         moleJob.context.value(p).get should equal("test")
         executed = true
       }
-      def inputs = DataSet(p)
     }
+
+    val ex = new MoleExecution(new Mole(t1c), hooks = List(t1c -> hook))
 
     ex.start.waitUntilEnded
 
     executed should equal(true)
-  }
-
-  "After release a capsule execution hook" should "not be executed" in {
-    var executed = false
-
-    val t1 = EmptyTask("Test")
-
-    val t1c = new Capsule(t1)
-    val ex = new MoleExecution(new Mole(t1c))
-
-    val hook = new CapsuleExecutionHook(ex, t1c) {
-      override def process(moleJob: IMoleJob) = {
-        executed = true
-      }
-      def inputs = DataSet.empty
-    }
-
-    hook.release
-    ex.start.waitUntilEnded
-
-    executed should equal(false)
   }
 
 }

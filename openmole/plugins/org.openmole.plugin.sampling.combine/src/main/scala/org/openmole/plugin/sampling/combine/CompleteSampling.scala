@@ -17,19 +17,16 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.implementation.data.DataSet
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.sampling.ISampling
-import scala.util.control.Breaks._
+import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
+import org.openmole.core.model.sampling._
 
 sealed class CompleteSampling(samplings: ISampling*) extends ISampling {
 
-  override def inputs = DataSet.empty ++ samplings.flatMap { _.inputs }
-  override def prototypes: Iterable[IPrototype[_]] = samplings.flatMap { _.prototypes }
+  override def inputs = DataSet(samplings.flatMap { _.inputs })
+  override def prototypes: Iterable[Prototype[_]] = samplings.flatMap { _.prototypes }
 
-  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] =
+  override def build(context: Context): Iterator[Iterable[Variable[_]]] =
     if (samplings.isEmpty) Iterator.empty
     else {
       val values = samplings.map { _.build(context).toList }

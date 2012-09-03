@@ -17,21 +17,16 @@
 
 package org.openmole.core.implementation.sampling
 
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IIterable
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.model.sampling.IDiscreteFactor
-import org.openmole.core.model.sampling.IFactor
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
+import org.openmole.core.model.sampling._
 
 object DiscreteFactor {
 
   implicit def iterableFactorConversion[T, D <: IDomain[T] with IIterable[T]](f: Factor[T, D]) = this(f)
 
   implicit def iterableFactorDecorator[T, D <: IDomain[T] with IIterable[T]](f: Factor[T, D]) = new {
-    def build(context: IContext): Iterator[Iterable[IVariable[T]]] =
+    def build(context: Context): Iterator[Iterable[Variable[T]]] =
       iterableFactorConversion(f).build(context)
   }
 
@@ -40,12 +35,12 @@ object DiscreteFactor {
 }
 
 class DiscreteFactor[T, +D <: IDomain[T] with IIterable[T]](
-    prototype: IPrototype[T],
+    prototype: Prototype[T],
     domain: D) extends Factor[T, D](prototype, domain) with IDiscreteFactor[T, D] with Sampling {
 
   override def prototypes = List(prototype)
 
-  override def build(context: IContext): Iterator[Iterable[IVariable[T]]] =
-    domain.iterator(context).map { v ⇒ List(new Variable(prototype, v)) }
+  override def build(context: Context): Iterator[Iterable[Variable[T]]] =
+    domain.iterator(context).map { v ⇒ List(Variable(prototype, v)) }
 
 }

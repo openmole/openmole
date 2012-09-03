@@ -17,14 +17,11 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.implementation.data.DataSet
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.sampling.IFactor
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.sampling.ISampling
-import scala.collection.immutable.TreeMap
-import scala.collection.mutable.ArrayBuffer
+import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
+import org.openmole.core.model.sampling._
+import org.openmole.core.model.domain._
+import org.openmole.core.model.sampling._
 import scala.collection.mutable.ListBuffer
 
 sealed class ZipSampling(samplings: Iterable[ISampling]) extends ISampling {
@@ -32,23 +29,23 @@ sealed class ZipSampling(samplings: Iterable[ISampling]) extends ISampling {
   def this(samplings: ISampling*) = this(samplings)
   def this(head: ISampling, samplings: Array[ISampling]) = this(List(head) ++ samplings)
 
-  override def inputs = DataSet.empty ++ samplings.flatMap(_.inputs)
+  override def inputs = DataSet(samplings.flatMap(_.inputs))
   override def prototypes = samplings.flatMap(_.prototypes)
 
-  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] =
+  override def build(context: Context): Iterator[Iterable[Variable[_]]] =
     samplings.headOption match {
       case Some(reference) ⇒
         /* Compute plans */
         val cachedSample = samplings.tail.map { _.build(context) }.toArray
 
         /* Compose plans */
-        val factorValuesCollection = new ListBuffer[Iterable[IVariable[_]]]
+        val factorValuesCollection = new ListBuffer[Iterable[Variable[_]]]
 
         val valuesIterator = reference.build(context)
         var oneFinished = false
 
         while (valuesIterator.hasNext && !oneFinished) {
-          val values = new ListBuffer[IVariable[_]]
+          val values = new ListBuffer[Variable[_]]
 
           for (it ← cachedSample) {
             if (!it.hasNext) oneFinished = true

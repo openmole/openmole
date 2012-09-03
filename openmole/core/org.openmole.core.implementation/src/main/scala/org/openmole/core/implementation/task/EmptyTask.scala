@@ -17,16 +17,12 @@
 
 package org.openmole.core.implementation.task
 
-import org.openmole.core.implementation.data.DataSet
-import org.openmole.core.implementation.data.ParameterSet
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IDataSet
-import org.openmole.core.model.data.IParameterSet
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
 
 object EmptyTask {
 
-  def apply(name: String)(implicit plugins: IPluginSet = PluginSet.empty) =
+  def apply(name: String)(implicit plugins: PluginSet = PluginSet.empty) =
     new TaskBuilder { builder ⇒
       def toTask =
         new EmptyTask(name) {
@@ -38,6 +34,6 @@ object EmptyTask {
 
 }
 
-sealed abstract class EmptyTask(val name: String)(implicit val plugins: IPluginSet) extends Task {
-  override def process(context: IContext) = context
+sealed abstract class EmptyTask(val name: String)(implicit val plugins: PluginSet) extends Task {
+  override def process(context: Context) = context
 }

@@ -19,23 +19,21 @@ package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.task.Task
-import org.openmole.core.implementation.task.TaskBuilder
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.implementation.task._
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
 import scala.collection.mutable.ListBuffer
 
 object ToIndividualArrayTask {
 
   def apply[T <: GAGenome](
-    name: String, genome: IPrototype[T],
-    individual: IPrototype[Individual[T]])(implicit plugins: IPluginSet) =
+    name: String, genome: Prototype[T],
+    individual: Prototype[Individual[T]])(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
 
-      private var objectives = new ListBuffer[(IPrototype[Double], Double)]
+      private var objectives = new ListBuffer[(Prototype[Double], Double)]
 
-      def addObjective(p: IPrototype[Double], v: Double) = {
+      def addObjective(p: Prototype[Double], v: Double) = {
         this addInput p
         objectives += (p -> v)
         this
@@ -53,13 +51,13 @@ object ToIndividualArrayTask {
 
 sealed abstract class ToIndividualArrayTask[T <: GAGenome](
     val name: String,
-    genome: IPrototype[T],
-    individual: IPrototype[Individual[T]])(implicit val plugins: IPluginSet) extends Task { task ⇒
+    genome: Prototype[T],
+    individual: Prototype[Individual[T]])(implicit val plugins: PluginSet) extends Task { task ⇒
 
-  def objectives: List[(IPrototype[Double], Double)]
+  def objectives: List[(Prototype[Double], Double)]
 
-  override def process(context: IContext) =
-    context + new Variable(
+  override def process(context: Context) =
+    Variable(
       individual.toArray,
       Array[Individual[T]](
         Individual[T](

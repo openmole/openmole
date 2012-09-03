@@ -17,18 +17,14 @@
 
 package org.openmole.plugin.instantrerun.filesystem
 
-import org.openmole.misc.workspace.Workspace
-import org.openmole.core.implementation.mole.Mole
-import org.openmole.core.implementation.mole.MoleExecution
+import org.openmole.misc.workspace._
+import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.transition.Transition
-import org.openmole.core.implementation.mole.Capsule
-import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.data.DataSet
-import org.openmole.core.implementation.data.ParameterSet
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.model.data.IContext
-
+import org.openmole.core.implementation.mole._
+import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
@@ -43,7 +39,7 @@ import scala.collection.mutable.ListBuffer
 class FileSystemInstantRerunSpec extends FlatSpec with ShouldMatchers {
 
   "The instant rerun" should "avoid the second execution of the task" in {
-    val p = new Prototype[Long]("p")
+    val p = Prototype[Long]("p")
     val res = new ListBuffer[Long]
 
     val t1 = new Task {
@@ -52,7 +48,7 @@ class FileSystemInstantRerunSpec extends FlatSpec with ShouldMatchers {
       val outputs = DataSet(p)
       val parameters = ParameterSet.empty
       val plugins = PluginSet.empty
-      override def process(context: IContext) = Context.empty + (p -> System.currentTimeMillis)
+      override def process(context: Context) = Context.empty + (p -> System.currentTimeMillis)
     }
 
     val t2 = new Task {
@@ -63,7 +59,7 @@ class FileSystemInstantRerunSpec extends FlatSpec with ShouldMatchers {
       val parameters = ParameterSet.empty
       val plugins = PluginSet.empty
 
-      override def process(context: IContext) = {
+      override def process(context: Context) = {
         res += context.value(p).get
         context
       }

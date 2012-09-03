@@ -19,7 +19,7 @@ package org.openmole.core.model.job
 
 import org.openmole.core.model.tools.ITimeStamp
 import org.openmole.core.model.task.ITask
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 
 object IMoleJob {
 
@@ -41,10 +41,10 @@ trait IMoleJob {
   def task: ITask
   def state: State.State
   def finished: Boolean
-  def context: IContext
+  def context: Context
   def exception: Option[Throwable]
   def timeStamps: Seq[ITimeStamp[State.State]]
-  def finish(context: IContext, timeStamps: Seq[ITimeStamp[State.State]])
+  def finish(context: Context, timeStamps: Seq[ITimeStamp[State.State]])
   def perform
   def id: MoleJobId
   def cancel

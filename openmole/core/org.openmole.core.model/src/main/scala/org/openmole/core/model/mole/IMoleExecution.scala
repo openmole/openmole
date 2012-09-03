@@ -21,9 +21,9 @@ import org.openmole.core.model.job.State.State
 import org.openmole.core.model.tools.IRegistryWithTicket
 import org.openmole.misc.eventdispatcher.Event
 import java.util.logging.Level
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 import org.openmole.core.model.data.IDataChannel
-import org.openmole.core.model.data.IVariable
+import org.openmole.core.model.data.Variable
 import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.MoleJobId
@@ -50,8 +50,10 @@ trait IMoleExecution {
   def exceptions: Iterable[Throwable]
 
   def mole: IMole
+  def hooks: Iterable[(ICapsule, IHook)]
+  def profiler: IHook
 
-  def dataChannelRegistry: IRegistryWithTicket[IDataChannel, Buffer[IVariable[_]]]
+  def dataChannelRegistry: IRegistryWithTicket[IDataChannel, Buffer[Variable[_]]]
 
   def moleJobs: Iterable[IMoleJob]
   def id: String

@@ -19,15 +19,13 @@ package org.openmole.plugin.hook.file
 
 import java.io.File
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.job._
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.hook.CapsuleExecutionHook
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.data.{ IContext, IPrototype }
-import org.openmole.misc.exception.UserBadDataError
+import org.openmole.core.model.mole._
+import org.openmole.core.model.data._
+import org.openmole.misc.exception._
 
-class DeleteFileHook(moleExecution: IMoleExecution, capsule: ICapsule, toDelete: IPrototype[File]*) extends CapsuleExecutionHook(moleExecution, capsule) {
+class DeleteFileHook(toDelete: Prototype[File]*) extends IHook {
 
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
@@ -41,6 +39,6 @@ class DeleteFileHook(moleExecution: IMoleExecution, capsule: ICapsule, toDelete:
     }
   }
 
-  override def inputs = DataSet(toDelete)
+  override def requiered = DataSet(toDelete)
 
 }

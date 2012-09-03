@@ -28,7 +28,7 @@ import fr.iscpif.mgo._
 
 object SelectPopulationTask {
 
-  def apply(evolution: Modifier with G with MF with Selection with Lambda)(name: String, archive: IPrototype[Population[evolution.G, evolution.MF]])(implicit plugins: IPluginSet) = {
+  def apply(evolution: Modifier with G with MF with Selection with Lambda)(name: String, archive: Prototype[Population[evolution.G, evolution.MF]])(implicit plugins: PluginSet) = {
     val (_archive) = (archive)
 
     new TaskBuilder { builder ⇒
@@ -37,7 +37,7 @@ object SelectPopulationTask {
 
       def toTask =
         new SelectPopulationTask(name, evolution) {
-          val archive = _archive.asInstanceOf[IPrototype[Population[evolution.G, evolution.MF]]]
+          val archive = _archive.asInstanceOf[Prototype[Population[evolution.G, evolution.MF]]]
           val inputs = builder.inputs
           val outputs = builder.outputs
           val parameters = builder.parameters
@@ -48,13 +48,13 @@ object SelectPopulationTask {
 
 }
 
-sealed abstract class SelectPopulationTask(val name: String, val evolution: Modifier with G with MF with Selection with Lambda)(implicit val plugins: IPluginSet) extends Task {
+sealed abstract class SelectPopulationTask(val name: String, val evolution: Modifier with G with MF with Selection with Lambda)(implicit val plugins: PluginSet) extends Task {
 
-  def archive: IPrototype[Population[evolution.G, evolution.MF]]
+  def archive: Prototype[Population[evolution.G, evolution.MF]]
 
-  override def process(context: IContext) = {
+  override def process(context: Context) = {
     implicit val rng = newRNG(context.valueOrException(openMOLESeed))
     val p = context.valueOrException(archive)
-    context + new Variable(archive, evolution.toPopulation((0 until evolution.lambda).map { i ⇒ evolution.selection(p) }))
+    context + Variable(archive, evolution.toPopulation((0 until evolution.lambda).map { i ⇒ evolution.selection(p) }))
   }
 }

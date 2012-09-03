@@ -17,8 +17,8 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IVariable
+import org.openmole.core.model.data.Context
+import org.openmole.core.model.data.Variable
 import org.openmole.core.model.sampling.ISampling
 
 sealed class TakeSampling(sampling: ISampling, n: Int) extends ISampling {
@@ -26,7 +26,7 @@ sealed class TakeSampling(sampling: ISampling, n: Int) extends ISampling {
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
 
-  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] =
+  override def build(context: Context): Iterator[Iterable[Variable[_]]] =
     sampling.build(context).take(n)
 
 }

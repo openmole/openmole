@@ -21,7 +21,6 @@ import org.openmole.misc.exception._
 import org.openmole.core.implementation.tools.ContextAggregator._
 import org.openmole.core.implementation.tools._
 import org.openmole.core.implementation.validation.TypeUtil._
-import org.openmole.core.implementation.data.Context._
 import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.tools._
@@ -49,13 +48,13 @@ class Transition(
     !end.transitions.exists(!registry.isRegistred(_, ticket))
   }
 
-  protected def submitNextJobsIfReady(context: Buffer[IVariable[_]], ticket: ITicket, subMole: ISubMoleExecution) = subMole.transitionRegistry.synchronized {
+  protected def submitNextJobsIfReady(context: Buffer[Variable[_]], ticket: ITicket, subMole: ISubMoleExecution) = subMole.transitionRegistry.synchronized {
     import subMole.moleExecution
     val registry = subMole.transitionRegistry
     registry.register(this, ticket, context)
     if (nextTaskReady(ticket, subMole)) {
       val combinaison =
-        end.inputDataChannels.toList.flatMap { _.consums(ticket, moleExecution) } ++
+        end.inputIDataChannels.toList.flatMap { _.consums(ticket, moleExecution) } ++
           end.transitions.toList.flatMap(registry.remove(_, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable)
 
       val newTicket =
@@ -75,14 +74,14 @@ class Transition(
     case None ⇒
   }
 
-  override def perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) =
+  override def perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) =
     if (isConditionTrue(context)) _perform(context.filterNot { case (n, _) ⇒ filter(n) }, ticket, subMole)
 
-  override def isConditionTrue(context: IContext): Boolean = condition.evaluate(context)
+  override def isConditionTrue(context: Context): Boolean = condition.evaluate(context)
 
   override def data = start.outputs.filterNot(d ⇒ filter(d.prototype.name))
 
-  protected def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = submitNextJobsIfReady(ListBuffer() ++ context.values, ticket, subMole)
+  protected def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = submitNextJobsIfReady(ListBuffer() ++ context.values, ticket, subMole)
 
   override def toString = "Transition from " + start + " to " + end
 

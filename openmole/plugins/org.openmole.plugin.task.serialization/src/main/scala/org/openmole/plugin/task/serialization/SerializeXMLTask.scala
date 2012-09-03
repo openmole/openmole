@@ -18,19 +18,17 @@
 package org.openmole.plugin.task.serialization
 
 import java.io.File
-import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.task.Task
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.task.IPluginSet
-import org.openmole.core.serializer.SerializerService
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.task._
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
+import org.openmole.core.serializer._
+import org.openmole.misc.workspace._
 
 object SerializeXMLTask {
 
   def apply(
-    name: String)(implicit plugins: IPluginSet) =
+    name: String)(implicit plugins: PluginSet) =
     new SerializeXMLTaskBuilder { builder ⇒
 
       def toTask = new SerializeXMLTask(name, builder.serialize) {
@@ -45,14 +43,14 @@ object SerializeXMLTask {
 
 sealed abstract class SerializeXMLTask(
     val name: String,
-    serialize: List[(IPrototype[_], IPrototype[File])])(implicit val plugins: IPluginSet) extends Task {
+    serialize: List[(Prototype[_], Prototype[File])])(implicit val plugins: PluginSet) extends Task {
 
-  override def process(context: IContext) =
+  override def process(context: Context) =
     Context.empty ++ serialize.map {
       case (input, output) ⇒
         val file = Workspace.newFile
         SerializerService.serialize(context.value(input).get, file)
-        new Variable(output, file)
+        Variable(output, file)
     }
 
 }

@@ -23,35 +23,33 @@ import org.openmole.core.implementation.sampling._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.data._
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.sampling.IDiscreteFactor
-import org.openmole.core.model.sampling.ISampling
-import org.openmole.core.model.task.IPluginSet
-import org.openmole.plugin.builder.Builder._
+import org.openmole.core.model.data._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.sampling._
+import org.openmole.core.model.task._
 import org.openmole.plugin.task.stat._
 
 package object stochastic {
 
   class Statistics {
-    var medians: List[(IPrototype[Double], IPrototype[Double])] = Nil
-    var medianAbsoluteDeviations: List[(IPrototype[Double], IPrototype[Double])] = Nil
-    var averages: List[(IPrototype[Double], IPrototype[Double])] = Nil
-    var sums: List[(IPrototype[Double], IPrototype[Double])] = Nil
-    var mses: List[(IPrototype[Double], IPrototype[Double])] = Nil
+    var medians: List[(Prototype[Double], Prototype[Double])] = Nil
+    var medianAbsoluteDeviations: List[(Prototype[Double], Prototype[Double])] = Nil
+    var averages: List[(Prototype[Double], Prototype[Double])] = Nil
+    var sums: List[(Prototype[Double], Prototype[Double])] = Nil
+    var mses: List[(Prototype[Double], Prototype[Double])] = Nil
 
-    def addMedian(output: IPrototype[Double], median: IPrototype[Double]) = medians ::= (output, median)
-    def addMedianAbsoluteDeviation(output: IPrototype[Double], deviation: IPrototype[Double]) = medianAbsoluteDeviations ::= (output, deviation)
-    def addAverage(output: IPrototype[Double], average: IPrototype[Double]) = averages ::= (output, average)
-    def addSum(output: IPrototype[Double], sum: IPrototype[Double]) = sums ::= (output, sum)
-    def addMeanSquareError(output: IPrototype[Double], mse: IPrototype[Double]) = mses ::= (output, mse)
+    def addMedian(output: Prototype[Double], median: Prototype[Double]) = medians ::= (output, median)
+    def addMedianAbsoluteDeviation(output: Prototype[Double], deviation: Prototype[Double]) = medianAbsoluteDeviations ::= (output, deviation)
+    def addAverage(output: Prototype[Double], average: Prototype[Double]) = averages ::= (output, average)
+    def addSum(output: Prototype[Double], sum: Prototype[Double]) = sums ::= (output, sum)
+    def addMeanSquareError(output: Prototype[Double], mse: Prototype[Double]) = mses ::= (output, mse)
   }
 
   def statistics(
     name: String,
     model: Puzzle,
     replicationFactor: DiscreteFactor[_, _],
-    statistics: Statistics)(implicit plugins: IPluginSet): Puzzle = {
+    statistics: Statistics)(implicit plugins: PluginSet): Puzzle = {
     val exploration = ExplorationTask(name + "Replication", replicationFactor)
     val explorationCapsule = new StrainerCapsule(exploration)
     val aggregationCapsule = new StrainerCapsule(EmptyTask(name + "Aggregation"))
@@ -88,7 +86,7 @@ package object stochastic {
   def replicate(
     name: String,
     model: Puzzle,
-    replications: ISampling)(implicit plugins: IPluginSet) = {
+    replications: ISampling)(implicit plugins: PluginSet) = {
     val exploration = ExplorationTask(name + "Replication", replications)
     val explorationCapsule = new StrainerCapsule(exploration)
     val aggregationCapsule = new StrainerCapsule(EmptyTask(name + "Aggregation"))

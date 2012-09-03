@@ -23,7 +23,6 @@ import org.openmole.misc.exception._
 import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.data.Context._
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.core.model.mole._
@@ -33,10 +32,10 @@ import org.openmole.core.model.task._
 
 object MoleTask {
 
-  def apply(name: String, puzzle: Puzzle)(implicit plugins: IPluginSet): TaskBuilder =
+  def apply(name: String, puzzle: Puzzle)(implicit plugins: PluginSet): TaskBuilder =
     apply(name, new Mole(puzzle.first), puzzle.lasts.head)
 
-  def apply(name: String, mole: IMole, last: ICapsule)(implicit plugins: IPluginSet) = {
+  def apply(name: String, mole: IMole, last: ICapsule)(implicit plugins: PluginSet) = {
     new TaskBuilder { builder ⇒
       def toTask = new MoleTask(name, mole, last) {
         val inputs = builder.inputs + mole.root.inputs
@@ -51,10 +50,10 @@ object MoleTask {
 sealed abstract class MoleTask(
     val name: String,
     val mole: IMole,
-    val last: ICapsule)(implicit val plugins: IPluginSet) extends Task with IMoleTask {
+    val last: ICapsule)(implicit val plugins: PluginSet) extends Task with IMoleTask {
 
   class ResultGathering extends EventListener[IMoleExecution] {
-    var lastContext: Option[IContext] = None
+    var lastContext: Option[Context] = None
     var exceptions: List[Throwable] = List.empty
 
     override def triggered(obj: IMoleExecution, ev: Event[IMoleExecution]) = synchronized {
@@ -68,8 +67,8 @@ sealed abstract class MoleTask(
     }
   }
 
-  override protected def process(context: IContext) = {
-    val firstTaskContext = inputs.foldLeft(List.empty[IVariable[_]]) {
+  override protected def process(context: Context) = {
+    val firstTaskContext = inputs.foldLeft(List.empty[Variable[_]]) {
       (acc, input) ⇒
         if (!(input.mode is optional) || ((input.mode is optional) && context.contains(input.prototype)))
           context.variable(input.prototype).getOrElse(throw new InternalProcessingError("Bug: variable not found.")) :: acc

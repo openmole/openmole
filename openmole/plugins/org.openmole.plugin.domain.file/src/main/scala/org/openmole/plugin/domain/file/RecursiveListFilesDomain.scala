@@ -19,7 +19,7 @@ package org.openmole.plugin.domain.file
 
 import java.io.File
 import java.io.FileFilter
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IFinite
 import org.openmole.misc.tools.io.FileUtil._
@@ -32,6 +32,6 @@ sealed class RecursiveListFilesDomain(dir: File, filter: FileFilter) extends IDo
     })
   }
 
-  override def computeValues(context: IContext) = dir.listRecursive(filter)
+  override def computeValues(context: Context) = dir.listRecursive(filter)
 
 }

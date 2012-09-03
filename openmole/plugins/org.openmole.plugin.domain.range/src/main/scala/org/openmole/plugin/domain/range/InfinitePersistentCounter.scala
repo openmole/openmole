@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IIterable
 
@@ -40,5 +40,5 @@ sealed class InfinitePersistentCounter(counter: Iterator[Long]) extends IDomain[
 
   def this() = this(0L, 1L)
 
-  override def iterator(context: IContext): Iterator[Long] = counter
+  override def iterator(context: Context): Iterator[Long] = counter
 }

@@ -17,16 +17,18 @@
 
 package org.openmole.core.implementation.mole
 
-import org.openmole.core.implementation.task.TestTask
+import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.transition._
-import org.openmole.core.implementation.sampling.ExplicitSampling
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.mole.IMoleJobGroup
-import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.mole.IGrouping
-import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.implementation.sampling._
+import org.openmole.core.model.data._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.job._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.sampling._
+import org.openmole.core.model.task._
+
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
@@ -40,7 +42,7 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
 
   class JobGroupingBy2Test extends IGrouping {
 
-    def apply(context: IContext, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup = {
+    def apply(context: Context, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup = {
       groups.find { case (_, g) ⇒ g.size < 2 } match {
         case Some((mg, _)) ⇒ mg
         case None ⇒ MoleJobGroup()
@@ -51,7 +53,7 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
 
   "Grouping jobs" should "not impact a normal mole execution" in {
     val data = List("A", "A", "B", "C")
-    val i = new Prototype[String]("i")
+    val i = Prototype[String]("i")
 
     val sampling = new ExplicitSampling(i, data)
 
@@ -66,7 +68,7 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
     val testT = new TestTask {
       val name = "Test"
       override val inputs = DataSet(i.toArray)
-      override def process(context: IContext) = {
+      override def process(context: Context) = {
         context.contains(i.toArray) should equal(true)
         context.value(i.toArray).get.sorted.deep should equal(data.toArray.deep)
         context
