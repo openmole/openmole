@@ -17,18 +17,18 @@
 
 package org.openmole.ide.plugin.prototype.base
 
-import org.openmole.ide.core.model.data.IPrototypeDataUI
-import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.implementation.data._
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data._
+
+import org.openmole.ide.core.model.data.IPrototypeDataUI
 import java.math.BigDecimal
 
 class BigDecimalPrototypeDataUI(val name: String = "", d: Int = 0) extends GenericPrototypeDataUI[BigDecimal](d) {
   def displayTypedName = toString + " : BigDecimal"
 
-  def coreClass = classOf[IPrototype[BigDecimal]]
+  def coreClass = classOf[Prototype[BigDecimal]]
 
-  def coreObject = new Prototype[BigDecimal](name).toArray(dim).asInstanceOf[IPrototype[BigDecimal]]
+  def coreObject = Prototype[BigDecimal](name).toArray(dim).asInstanceOf[Prototype[BigDecimal]]
 
   def fatImagePath = "img/bigdecimal_fat.png"
 

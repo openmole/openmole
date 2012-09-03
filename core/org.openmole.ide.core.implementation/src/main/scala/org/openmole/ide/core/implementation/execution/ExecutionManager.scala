@@ -72,7 +72,7 @@ class ExecutionManager(manager: IMoleSceneManager,
     State.FAILED -> new AtomicInteger,
     State.CANCELED -> new AtomicInteger)
 
-  var hooksInExecution = List.empty[IHook]
+  //var hooksInExecution = List.empty[IHook]
   val wfPiePlotter = new PiePlotter
   val envBarPlotter = new XYPlotter(5000, 120)
 
@@ -123,8 +123,10 @@ class ExecutionManager(manager: IMoleSceneManager,
     tabbedPane.selection.index = 0
     cancel
     initBarPlotter
+
     MoleMaker.buildMoleExecution(mole,
       manager,
+      hooks.flatMap { case (panel, caps) ⇒ List(capsuleMapping(caps)).zip(panel.saveContent.coreObject(this)) }.toList,
       capsuleMapping,
       groupings) match {
         case Right((mExecution, environments)) ⇒
@@ -162,11 +164,6 @@ class ExecutionManager(manager: IMoleSceneManager,
             splitPane.repaint
           }
           initPieChart
-          hooksInExecution = hooks.flatMap {
-            case (panel, caps) ⇒ panel.saveContent.coreObject(this,
-              mExecution,
-              capsuleMapping(caps))
-          }.toList
           repaint
           revalidate
           timer.start
@@ -188,7 +185,6 @@ class ExecutionManager(manager: IMoleSceneManager,
 
   def cancel = synchronized {
     timer.stop
-    hooksInExecution.foreach { _.release }
     moleExecution match {
       case Some(me: IMoleExecution) ⇒ me.cancel
       case _ ⇒

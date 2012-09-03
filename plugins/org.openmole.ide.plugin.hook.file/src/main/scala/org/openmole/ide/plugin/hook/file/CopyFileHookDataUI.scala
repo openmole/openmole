@@ -18,7 +18,7 @@
 package org.openmole.ide.plugin.hook.file
 
 import java.io.File
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.Prototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.model.control.IExecutionManager
@@ -34,12 +34,9 @@ class CopyFileHookDataUI(var activated: Boolean = true,
 
   def coreClass = classOf[CopyFileHook]
 
-  def coreObject(executionManager: IExecutionManager,
-                 moleExecution: IMoleExecution,
-                 capsule: ICapsule) = toBeHooked.map { h ⇒
-    new CopyFileHook(moleExecution,
-      capsule,
-      executionManager.prototypeMapping(h._1).asInstanceOf[IPrototype[File]],
+  def coreObject(executionManager: IExecutionManager) = toBeHooked.map { h ⇒
+    new CopyFileHook(
+      executionManager.prototypeMapping(h._1).asInstanceOf[Prototype[File]],
       h._2)
   }
 

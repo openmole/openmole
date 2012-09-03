@@ -29,12 +29,12 @@ import scala.tools.nsc.Settings
 import scala.tools.nsc.interpreter.ILoop
 import scala.tools.nsc.interpreter.JLineCompletion
 import scala.tools.nsc.interpreter.JLineReader
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.model.task._
 import java.util.concurrent.TimeUnit
 import scala.tools.nsc.io.{ File ⇒ SFile }
 import java.io.File
 
-class Console(plugins: IPluginSet, password: Option[String], script: Option[String]) { console ⇒
+class Console(plugins: PluginSet, password: Option[String], script: Option[String]) { console ⇒
 
   def setPassword(password: String) =
     try {

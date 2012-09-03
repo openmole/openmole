@@ -33,12 +33,9 @@ class ToStringHookDataUI(var activated: Boolean = true,
 
   def coreClass = classOf[ToStringHook]
 
-  def coreObject(executionManager: IExecutionManager,
-                 moleExecution: IMoleExecution,
-                 capsule: ICapsule) = {
+  def coreObject(executionManager: IExecutionManager) = {
 
-    List(new ToStringHook(moleExecution,
-      capsule,
+    List(new ToStringHook(
       executionManager.printStream,
       toBeHooked.map { executionManager.prototypeMapping }.toSeq: _*))
   }

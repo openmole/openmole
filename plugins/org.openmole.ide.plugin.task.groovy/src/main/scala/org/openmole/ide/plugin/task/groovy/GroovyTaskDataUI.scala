@@ -6,9 +6,8 @@
 package org.openmole.ide.plugin.task.groovy
 
 import java.io.File
-import org.openmole.core.model.data.IDataSet
-import org.openmole.core.model.data.IParameterSet
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.plugin.task.groovy.GroovyTask
 
@@ -16,7 +15,7 @@ class GroovyTaskDataUI(val name: String = "",
                        val code: String = "",
                        val libs: List[String] = List.empty) extends TaskDataUI {
 
-  def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = {
+  def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) = {
     val gtBuilder = GroovyTask(name, code)(plugins)
     libs.foreach { l ⇒ gtBuilder.addLib(new File(l)) }
     gtBuilder addInput inputs

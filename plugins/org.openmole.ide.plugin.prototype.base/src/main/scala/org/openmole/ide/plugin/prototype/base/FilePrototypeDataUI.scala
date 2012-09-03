@@ -17,16 +17,15 @@
 
 package org.openmole.ide.plugin.prototype.base
 import java.io.File
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.data.Prototype._
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
 
 class FilePrototypeDataUI(val name: String = "", d: Int = 0) extends GenericPrototypeDataUI[File](d) {
   def displayTypedName = toString + " : File"
 
-  def coreClass = classOf[IPrototype[File]]
+  def coreClass = classOf[Prototype[File]]
 
-  def coreObject = new Prototype[File](name).toArray(dim).asInstanceOf[IPrototype[File]]
+  def coreObject = Prototype[File](name).toArray(dim).asInstanceOf[Prototype[File]]
 
   def fatImagePath = "img/file_fat.png"
 

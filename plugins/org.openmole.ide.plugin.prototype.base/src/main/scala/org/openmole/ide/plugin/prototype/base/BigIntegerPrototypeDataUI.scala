@@ -17,17 +17,16 @@
 
 package org.openmole.ide.plugin.prototype.base
 
+import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
 import java.math.BigInteger
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.data.Prototype._
-import org.openmole.core.model.data.IPrototype
 
 class BigIntegerPrototypeDataUI(val name: String = "", d: Int = 0) extends GenericPrototypeDataUI[BigInteger](d) {
   def displayTypedName = toString + " : BigInt"
 
-  def coreClass = classOf[IPrototype[BigInteger]]
+  def coreClass = classOf[Prototype[BigInteger]]
 
-  def coreObject = new Prototype[BigInteger](name).toArray(dim).asInstanceOf[IPrototype[BigInteger]]
+  def coreObject = Prototype[BigInteger](name).toArray(dim).asInstanceOf[Prototype[BigInteger]]
 
   def fatImagePath = "img/biginteger_fat.png"
 

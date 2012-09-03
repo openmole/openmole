@@ -32,9 +32,7 @@ trait IHookDataUI {
 
   def coreClass: Class[_ <: IHook]
 
-  def coreObject(executionManager: IExecutionManager,
-                 moleExecution: IMoleExecution,
-                 capsule: ICapsule): Iterable[IHook]
+  def coreObject(executionManager: IExecutionManager): List[IHook]
 
   def buildPanelUI(task: ITaskDataProxyUI): IHookPanelUI
 }

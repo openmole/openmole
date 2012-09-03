@@ -51,6 +51,7 @@ object MoleMaker {
 
   def buildMoleExecution(mole: IMole,
                          manager: IMoleSceneManager,
+                         hooks: List[(ICapsule, IHook)],
                          capsuleMap: Map[ICapsuleUI, ICapsule],
                          groupingStrategies: List[(IGrouping, ICapsule)]): Either[Throwable, (IMoleExecution, Iterable[(IEnvironment, String)])] =
     try {
@@ -66,7 +67,7 @@ object MoleMaker {
           case _ ⇒
         }
       }
-      Right((new MoleExecution(mole, strat.toMap, groupingStrategies.map { case (s, c) ⇒ c -> s }.toMap), envs.toSet))
+      Right((new MoleExecution(mole, hooks, strat.toMap, groupingStrategies.map { case (s, c) ⇒ c -> s }.toMap), envs.toSet))
     } catch {
       case e ⇒
         Left(e)

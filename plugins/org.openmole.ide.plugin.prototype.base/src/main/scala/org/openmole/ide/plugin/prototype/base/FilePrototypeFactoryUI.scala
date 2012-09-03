@@ -18,7 +18,7 @@
 package org.openmole.ide.plugin.prototype.base
 
 import java.io.File
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
@@ -28,7 +28,7 @@ class FilePrototypeFactoryUI extends IPrototypeFactoryUI[File] {
 
   def buildDataUI = new FilePrototypeDataUI
 
-  def buildDataUI(prototype: IPrototype[_],
+  def buildDataUI(prototype: Prototype[_],
                   dim: Int = 0) = new FilePrototypeDataUI(prototype.name, dim)
 
   def category = ComponentCategories.PROTOTYPE

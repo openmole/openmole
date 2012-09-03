@@ -28,7 +28,7 @@ import org.eclipse.equinox.app.IApplicationContext
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
-import org.openmole.core.implementation.task.PluginSet
+import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.dialog.GUIApplication
 import org.openmole.ui.console.Console
 import scala.actors.threadpool.locks.ReentrantLock
@@ -92,7 +92,7 @@ class Application extends IApplication with Logger {
         val userPlugins = config.userPlugins.map { new File(_) }.toSet
         PluginManager.load(userPlugins)
 
-        val console = new Console(new PluginSet(userPlugins), config.password, config.scriptFile)
+        val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
         console.run
       } else {
 
