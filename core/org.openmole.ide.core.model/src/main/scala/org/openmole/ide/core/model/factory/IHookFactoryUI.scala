@@ -5,7 +5,7 @@
 
 package org.openmole.ide.core.model.factory
 
-import org.openmole.core.model.hook.ICapsuleExecutionHook
+import org.openmole.core.model.mole._
 import org.openmole.ide.core.model.data.IHookDataUI
 
 trait IHookFactoryUI extends IFactoryUI {
@@ -13,5 +13,5 @@ trait IHookFactoryUI extends IFactoryUI {
 
   def buildDataUI: IHookDataUI
 
-  def coreClass: Class[_ <: ICapsuleExecutionHook]
+  def coreClass: Class[_ <: IHook]
 }

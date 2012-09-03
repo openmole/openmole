@@ -17,13 +17,13 @@ package org.openmole.ide.misc.tools.check
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import org.openmole.core.model.data.IPrototype
-import org.openmole.misc.tools.script.GroovyProxy
+import org.openmole.core.model.data._
+import org.openmole.misc.tools.script._
 
 object TypeCheck {
 
   def apply(code: String,
-            prototype: IPrototype[_]): (String, Option[Object]) = {
+            prototype: Prototype[_]): (String, Option[Object]) = {
     try {
       apply(new GroovyProxy(code).execute(), prototype)
     } catch {
@@ -32,7 +32,7 @@ object TypeCheck {
   }
 
   def apply(groovyObject: Object,
-            prototype: IPrototype[_]): (String, Option[Object]) =
+            prototype: Prototype[_]): (String, Option[Object]) =
     prototype.accepts(groovyObject) match {
       case true ⇒ ("", Some(groovyObject))
       case false ⇒ ("The default value for the prototype " + prototype.name + " is not valid ( " + prototype.`type` + " is required )", None)

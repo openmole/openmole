@@ -80,7 +80,6 @@ class Console(plugins: IPluginSet, password: Option[String], script: Option[Stri
             "org.openmole.core.implementation.data.Data._",
             "org.openmole.core.implementation.execution._",
             "org.openmole.core.implementation.execution.local._",
-            "org.openmole.core.implementation.hook._",
             "org.openmole.core.implementation.job._",
             "org.openmole.core.implementation.mole._",
             "org.openmole.core.implementation.sampling._",

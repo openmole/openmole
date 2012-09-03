@@ -17,10 +17,8 @@
 
 package org.openmole.ide.core.model.data
 
-import org.openmole.core.model.data.IDataSet
-import org.openmole.core.model.data.IParameterSet
-import org.openmole.core.model.task.IExplorationTask
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 
 trait IExplorationTaskDataUI extends ITaskDataUI {
@@ -29,5 +27,5 @@ trait IExplorationTaskDataUI extends ITaskDataUI {
 
   def sampling_=(s: Option[ISamplingDataProxyUI])
 
-  def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet): IExplorationTask
+  def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet): IExplorationTask
 }
