@@ -18,11 +18,8 @@
 package org.openmole.ide.core.model.control
 
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IGrouping
-import org.openmole.core.model.mole.IMole
-import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.data._
+import org.openmole.core.model.mole._
 import java.io.PrintStream
 import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
@@ -32,7 +29,7 @@ trait IExecutionManager {
 
   def moleExecution: Option[IMoleExecution]
 
-  def prototypeMapping: Map[IPrototypeDataProxyUI, IPrototype[_]]
+  def prototypeMapping: Map[IPrototypeDataProxyUI, Prototype[_]]
 
   def capsuleMapping: Map[ICapsuleUI, ICapsule]
 

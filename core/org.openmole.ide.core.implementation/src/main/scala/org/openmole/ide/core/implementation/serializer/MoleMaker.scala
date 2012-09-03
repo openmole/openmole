@@ -72,10 +72,10 @@ object MoleMaker {
         Left(e)
     }
 
-  def buildMole(manager: IMoleSceneManager): Either[String, (IMole, Map[ICapsuleUI, ICapsule], Map[IPrototypeDataProxyUI, IPrototype[_]], Iterable[(ICapsuleUI, Throwable)])] = {
+  def buildMole(manager: IMoleSceneManager): Either[String, (IMole, Map[ICapsuleUI, ICapsule], Map[IPrototypeDataProxyUI, Prototype[_]], Iterable[(ICapsuleUI, Throwable)])] = {
     try {
       if (manager.startingCapsule.isDefined) {
-        val prototypeMap: Map[IPrototypeDataProxyUI, IPrototype[_]] = Proxys.prototypes.map { p ⇒ p -> p.dataUI.coreObject }.toMap
+        val prototypeMap: Map[IPrototypeDataProxyUI, Prototype[_]] = Proxys.prototypes.map { p ⇒ p -> p.dataUI.coreObject }.toMap
         val builds = manager.capsules.map { c ⇒
           (c._2 -> buildCapsule(c._2.dataUI, manager.dataUI), None)
         }.toMap
@@ -107,7 +107,7 @@ object MoleMaker {
     }
   }
 
-  def prototypeMapping: Map[IPrototypeDataProxyUI, IPrototype[_]] = (Proxys.prototypes.toList :::
+  def prototypeMapping: Map[IPrototypeDataProxyUI, Prototype[_]] = (Proxys.prototypes.toList :::
     List(EmptyDataUIs.emptyPrototypeProxy)).map { p ⇒ p -> p.dataUI.coreObject }.toMap
 
   def keyPrototypeMapping: Map[PrototypeKey, IPrototypeDataProxyUI] = (Proxys.prototypes.toList :::
@@ -137,7 +137,7 @@ object MoleMaker {
       Right(proxy.dataUI.coreObject(inputs(proxy),
         outputs(proxy),
         parameters(proxy),
-        new PluginSet(plugins)))
+        PluginSet(plugins)))
     } catch {
       case e ⇒
         StatusBar.warn(e.getMessage, Some(proxy), e.getStackTraceString, e.getClass.getCanonicalName)
@@ -152,13 +152,13 @@ object MoleMaker {
   def outputs(proxy: ITaskDataProxyUI) = DataSet(proxy.dataUI.prototypesOut.map { _.dataUI.coreObject })
 
   def parameters(proxy: ITaskDataProxyUI) =
-    new ParameterSet(proxy.dataUI.inputParameters.flatMap {
+    ParameterSet(proxy.dataUI.inputParameters.flatMap {
       case (protoProxy, v) ⇒
         if (!v.isEmpty) {
           val proto = protoProxy.dataUI.coreObject
           val (msg, obj) = TypeCheck(v, proto)
           obj match {
-            case Some(x: Object) ⇒ Some(new Parameter(proto.asInstanceOf[IPrototype[Any]], x))
+            case Some(x: Object) ⇒ Some(new Parameter(proto.asInstanceOf[Prototype[Any]], x))
             case _ ⇒ None
           }
         } else None
@@ -173,7 +173,7 @@ object MoleMaker {
   def buildTransition(sourceCapsule: ICapsule,
                       targetSlot: ISlot,
                       t: ITransitionUI,
-                      prototypeMap: Map[IPrototypeDataProxyUI, IPrototype[_]]) {
+                      prototypeMap: Map[IPrototypeDataProxyUI, Prototype[_]]) {
     val filtered = t.filteredPrototypes.map { p ⇒ prototypeMap(p).name }
     val condition: ICondition = if (t.condition.isDefined) new Condition(t.condition.get) else ICondition.True
     t.transitionType match {

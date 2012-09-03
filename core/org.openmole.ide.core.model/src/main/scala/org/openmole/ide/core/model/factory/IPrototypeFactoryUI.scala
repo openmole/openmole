@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.model.factory
 
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data._
 import org.openmole.ide.core.model.data.IPrototypeDataUI
 
 trait IPrototypeFactoryUI[T] extends IFactoryUI with IMoleComponent {
@@ -25,6 +25,6 @@ trait IPrototypeFactoryUI[T] extends IFactoryUI with IMoleComponent {
 
   def buildDataUI: IPrototypeDataUI[T]
 
-  def buildDataUI(prototype: IPrototype[_],
+  def buildDataUI(prototype: Prototype[_],
                   dim: Int): IPrototypeDataUI[T]
 }

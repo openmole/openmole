@@ -18,13 +18,13 @@
 package org.openmole.ide.core.model.data
 
 import org.openmole.ide.core.model.commons.Constants._
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.domain.IDomain
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 
 trait IDomainDataUI extends IDataUI {
 
-  def coreObject(proto: IPrototype[_]): IDomain[_]
+  def coreObject(proto: Prototype[_]): IDomain[_]
 
   def buildPanelUI: IDomainPanelUI
 }

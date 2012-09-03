@@ -20,7 +20,7 @@ package org.openmole.ide.core.model.data
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.core.model.hook.ICapsuleExecutionHook
+import org.openmole.core.model.mole._
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.commons.TransitionType._
 import scala.collection.mutable.HashMap
@@ -40,9 +40,9 @@ trait ICapsuleDataUI {
 
   def environment_=(e: Option[IEnvironmentDataProxyUI])
 
-  def hooks: HashMap[Class[_ <: ICapsuleExecutionHook], IHookDataUI]
+  def hooks: HashMap[Class[_ <: IHook], IHookDataUI]
 
-  def hooks_=(hm: HashMap[Class[_ <: ICapsuleExecutionHook], IHookDataUI])
+  def hooks_=(hm: HashMap[Class[_ <: IHook], IHookDataUI])
 
   def transitionType: TransitionType.Value
 }

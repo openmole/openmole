@@ -16,16 +16,15 @@
  */
 
 package org.openmole.ide.core.implementation.data
-import org.openmole.core.implementation.mole.Capsule
-import org.openmole.core.implementation.validation.DataflowProblem
-import org.openmole.core.implementation.validation.Validation
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.mole.ICapsule
+
+import org.openmole.core.implementation.mole._
+import org.openmole.core.implementation.validation._
+import org.openmole.core.model.data._
+import org.openmole.core.model.mole._
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.registry._
-import org.openmole.core.model.mole.IMole
-import org.openmole.core.model.task.ITask
+import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyFactory
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
@@ -53,7 +52,7 @@ object CheckData extends Logger {
                 error_capsules._2.foreach { _.setAsInvalid("A capsule has to be encapsulated to be run") }
 
                 val capsuleMap: Map[ICapsule, ICapsuleUI] = cMap.map { case (k, v) ⇒ v -> k }
-                val prototypeMap: Map[IPrototype[_], IPrototypeDataProxyUI] = pMap.map { case (k, v) ⇒ v -> k }.toMap
+                val prototypeMap: Map[Prototype[_], IPrototypeDataProxyUI] = pMap.map { case (k, v) ⇒ v -> k }.toMap
 
                 // Compute implicit input / output
                 capsuleMap.foreach {
@@ -113,7 +112,7 @@ object CheckData extends Logger {
 
     (coreCapsule.inputs.toList ++ coreCapsule.outputs) foreach { d ⇒
       if (!protoMapping.keys.contains(KeyPrototypeGenerator(d.prototype))) {
-        val (key, dim) = KeyGenerator(d.prototype: IPrototype[_])
+        val (key, dim) = KeyGenerator(d.prototype: Prototype[_])
         Proxys.prototypes +=
           new PrototypeDataProxyFactory(KeyRegistry.prototypes(key)).buildDataProxyUI(d.prototype, true, dim)
 

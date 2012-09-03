@@ -21,11 +21,11 @@ import java.awt.Cursor
 import org.openmole.ide.misc.tools.image.Images._
 import org.openmole.ide.misc.widget.dialog.DialogFactory
 import scala.swing.Action
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data._
 import org.openmole.ide.misc.tools.check.TypeCheck
 
 class PrototypeGroovyTextFieldEditor(val title: String,
-                                     prototype: IPrototype[_],
+                                     prototype: Prototype[_],
                                      var editorText: String = "") extends LinkLabel("", new Action("") { def apply = {} }) {
   setIcon(editorText)
   cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)

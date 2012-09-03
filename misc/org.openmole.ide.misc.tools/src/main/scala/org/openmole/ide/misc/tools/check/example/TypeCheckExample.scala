@@ -17,15 +17,15 @@
 
 package org.openmole.ide.misc.tools.check.example
 
-import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.model.data._
 import org.openmole.ide.misc.tools.check.TypeCheck
 
 object TypeCheckExample extends App {
 
-  println(TypeCheck.apply("12.5", new Prototype[Int]("proto1")))
-  println(TypeCheck.apply("125", new Prototype[Int]("proto1")))
-  println(TypeCheck.apply("125", new Prototype[String]("proto1")))
-  println(TypeCheck.apply("\"125\"", new Prototype[String]("proto1")))
-  println(TypeCheck.apply("12.5d", new Prototype[Double]("proto1")))
+  println(TypeCheck.apply("12.5", Prototype[Int]("proto1")))
+  println(TypeCheck.apply("125", Prototype[Int]("proto1")))
+  println(TypeCheck.apply("125", Prototype[String]("proto1")))
+  println(TypeCheck.apply("\"125\"", Prototype[String]("proto1")))
+  println(TypeCheck.apply("12.5d", Prototype[Double]("proto1")))
 
 }

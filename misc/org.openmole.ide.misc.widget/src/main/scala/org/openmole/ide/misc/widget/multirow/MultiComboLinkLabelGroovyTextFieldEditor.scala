@@ -18,7 +18,7 @@
 package org.openmole.ide.misc.widget.multirow
 
 import javax.swing.Icon
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data._
 import org.openmole.ide.misc.widget.ContentAction
 import org.openmole.ide.misc.widget._
 import org.openmole.ide.misc.widget.PrototypeGroovyTextFieldEditor
@@ -31,7 +31,7 @@ import scala.swing.event.SelectionChanged
 
 object MultiComboLinkLabelGroovyTextFieldEditor {
 
-  class ComboLinkLabelGroovyTextFieldEditorPanel[A](val comboContent: List[(A, IPrototype[_], ContentAction[A])],
+  class ComboLinkLabelGroovyTextFieldEditorPanel[A](val comboContent: List[(A, Prototype[_], ContentAction[A])],
                                                     val image: Icon,
                                                     val data: ComboLinkLabelGroovyTextFieldEditorData[A]) extends PluginPanel("wrap 3") with IPanel[ComboLinkLabelGroovyTextFieldEditorData[A]] {
     val comboBox = new MyComboBox(comboContent.sortBy { _._1.toString }.map(c ⇒ c._1)) {
@@ -73,11 +73,11 @@ object MultiComboLinkLabelGroovyTextFieldEditor {
     }
   }
 
-  class ComboLinkLabelGroovyTextFieldEditorData[A](val prototype: IPrototype[_],
+  class ComboLinkLabelGroovyTextFieldEditorData[A](val prototype: Prototype[_],
                                                    val content: Option[A] = None,
                                                    val editorValue: String = "") extends IData
 
-  class ComboLinkLabelGroovyTextFieldEditorFactory[A](comboContent: List[(A, IPrototype[_], ContentAction[A])],
+  class ComboLinkLabelGroovyTextFieldEditorFactory[A](comboContent: List[(A, Prototype[_], ContentAction[A])],
                                                       image: Icon) extends IFactory[ComboLinkLabelGroovyTextFieldEditorData[A]] {
     def apply =
       new ComboLinkLabelGroovyTextFieldEditorPanel(comboContent,
@@ -90,7 +90,7 @@ object MultiComboLinkLabelGroovyTextFieldEditor {
 
 import MultiComboLinkLabelGroovyTextFieldEditor._
 class MultiComboLinkLabelGroovyTextFieldEditor[A](title: String,
-                                                  comboContent: List[(A, IPrototype[_], ContentAction[A])],
+                                                  comboContent: List[(A, Prototype[_], ContentAction[A])],
                                                   initPanels: List[ComboLinkLabelGroovyTextFieldEditorPanel[A]],
                                                   image: Icon,
                                                   minus: Minus = NO_EMPTY,

@@ -28,20 +28,20 @@ import org.openmole.ide.misc.widget.multirow.MultiComboTextField
 import org.openmole.ide.misc.widget.multirow.MultiPanel
 import org.openmole.ide.misc.widget.multirow.MultiTextField
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data._
 import org.openmole.ide.misc.tools.image.Images._
 import org.openmole.ide.misc.widget._
 import org.openmole.ide.misc.widget.multirow._
 import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor
-import org.openmole.core.implementation.data.Prototype
+import org.openmole.core.model.data._
 import scala.swing.TextField
 
 object MultiRowExample extends SimpleSwingApplication {
   def top = new MainFrame {
     peer.setLayout(new BorderLayout)
-    val proto1 = new Prototype[Int]("proto1")
-    val proto2 = new Prototype[Double]("proto2")
+    val proto1 = Prototype[Int]("proto1")
+    val proto2 = Prototype[Double]("proto2")
     val fake1 = new Fake(proto1)
     val fake2 = new Fake(proto2)
     val action = new ContentAction("Action ", fake1) { override def apply = println("view " + fake1.toString) }
@@ -53,7 +53,7 @@ object MultiRowExample extends SimpleSwingApplication {
     size = new Dimension(250, 200)
   }
 
-  class Fake(p: IPrototype[_]) {
+  class Fake(p: Prototype[_]) {
     override def toString = p.name
   }
 
