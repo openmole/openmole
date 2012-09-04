@@ -163,12 +163,12 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val t2 = EmptyTask("t2")
     t2 addInput p
 
-    val c1 = new Capsule(t1)
-    val c2 = new Capsule(t2)
+    val c1 = Capsule(t1)
+    val c2 = Capsule(t2)
 
     val mt = MoleTask("mt", c1 -- c2, c2)
 
-    val errors = Validation(new Mole(new Capsule(mt)))
+    val errors = Validation(new Mole(mt))
 
     errors.headOption match {
       case Some(MissingInput(_, d)) ⇒ assert(d.prototype == p)

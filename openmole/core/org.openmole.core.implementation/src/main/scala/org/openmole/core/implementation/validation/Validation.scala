@@ -79,8 +79,11 @@ object Validation {
     }
   }
 
-  def typeErrorsTopMole(mole: IMole, implicits: Iterable[Prototype[_]]) = typeErrors(mole)(mole.capsules, implicits)
-  def typeErrorsMoleTask(mole: IMole, implicits: Iterable[Prototype[_]]) = typeErrors(mole)(mole.capsules.drop(1), implicits)
+  def typeErrorsTopMole(mole: IMole, implicits: Iterable[Prototype[_]]) =
+    typeErrors(mole)(mole.capsules, implicits)
+
+  def typeErrorsMoleTask(mole: IMole, implicits: Iterable[Prototype[_]]) =
+    typeErrors(mole)(mole.capsules.filterNot(_ == mole.root), implicits)
 
   def topologyErrors(mole: IMole) = {
     val errors = new ListBuffer[TopologyProblem]

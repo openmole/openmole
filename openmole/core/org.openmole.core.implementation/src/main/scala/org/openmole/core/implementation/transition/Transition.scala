@@ -77,6 +77,6 @@ class Transition(
 
   protected def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = submitNextJobsIfReady(ListBuffer() ++ context.values, ticket, subMole)
 
-  override def toString = "Transition from " + start + " to " + end
+  override def toString = this.getClass.getSimpleName + " from " + start + " to " + end
 
 }
