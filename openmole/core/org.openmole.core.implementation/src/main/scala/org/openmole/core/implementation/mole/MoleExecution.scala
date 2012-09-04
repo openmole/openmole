@@ -83,7 +83,7 @@ class MoleExecution(
   private val ticketNumber = Ref(0L)
   private val jobId = Ref(0L)
 
-  @transient lazy val indexedHooks: Map[ICapsule, Iterable[IHook]] =
+  @transient lazy val indexedHooks =
     hooks.groupBy { case (c, _) ⇒ c }.map { case (c, hs) ⇒ c -> hs.map { _._2 } }
 
   private val waitingJobs: TMap[ICapsule, TMap[IMoleJobGroup, Ref[List[IMoleJob]]]] =

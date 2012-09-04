@@ -38,6 +38,6 @@ trait Slot {
    */
   def capsule: ICapsule
 
-  override def toString = "Slot of " + capsule
+  override def toString = "Slot hash " + hashCode + " of " + capsule
 
 }

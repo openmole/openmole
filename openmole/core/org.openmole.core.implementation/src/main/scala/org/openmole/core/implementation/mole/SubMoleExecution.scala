@@ -97,13 +97,25 @@ class SubMoleExecution(
   private def -=(submoleExecution: SubMoleExecution) =
     _childs.single -= submoleExecution
 
+  private def secureHookExecution(hook: IHook, moleJob: IMoleJob) =
+    try hook.process(moleJob)
+    catch {
+      case e ⇒
+        EventDispatcher.trigger(moleExecution, new IMoleExecution.HookExceptionRaised(hook, moleJob, e, WARNING))
+        logger.log(WARNING, "Error in execution of hook " + hook, e)
+    }
+
   override def jobs =
     atomic { implicit txn ⇒ _jobs().keys.toList ::: TSet.asSet(_childs).flatMap(_.jobs.toList).toList }
 
   private def jobFailedOrCanceled(job: IMoleJob) = {
     val (capsule, ticket) = _jobs.single().get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registred."))
+
+    secureHookExecution(moleExecution.profiler, job)
+
     rmJob(job)
     checkFinished(ticket)
+
     moleExecution.jobFailedOrCanceled(job, capsule)
   }
 
@@ -113,8 +125,8 @@ class SubMoleExecution(
     try {
       EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleFinished(job, capsule))
 
-      moleExecution.indexedHooks.getOrElse(capsule, List.empty).foreach { _.process(job) }
-      moleExecution.profiler.process(job)
+      moleExecution.indexedHooks.getOrElse(capsule, List.empty).foreach { secureHookExecution(_, job) }
+      secureHookExecution(moleExecution.profiler, job)
 
       mole.outputDataChannels(capsule).foreach { _.provides(job.context, ticket, moleExecution) }
       mole.outputTransitions(capsule).foreach { _.perform(job.context, ticket, this) }
