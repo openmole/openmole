@@ -63,9 +63,9 @@ class EndExplorationTransitionSpec extends FlatSpec with ShouldMatchers {
 
     val testC = new Capsule(testT)
 
-    exc -< emptyC >| (testC, "true")
+    val ex = exc -< emptyC >| (testC, "true")
 
-    new MoleExecution(new Mole(exc)).start.waitUntilEnded
+    ex.start.waitUntilEnded
     endCapsExecuted should equal(1)
   }
 

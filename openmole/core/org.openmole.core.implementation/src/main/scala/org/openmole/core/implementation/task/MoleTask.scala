@@ -24,7 +24,6 @@ import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.mole._
-import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
@@ -33,13 +32,13 @@ import org.openmole.core.model.task._
 object MoleTask {
 
   def apply(name: String, puzzle: Puzzle)(implicit plugins: PluginSet): TaskBuilder =
-    apply(name, new Mole(puzzle.first), puzzle.lasts.head)
+    apply(name, puzzle toMole, puzzle.lasts.head)
 
   def apply(name: String, mole: IMole, last: ICapsule)(implicit plugins: PluginSet) = {
     new TaskBuilder { builder ⇒
       def toTask = new MoleTask(name, mole, last) {
-        val inputs = builder.inputs + mole.root.inputs
-        val outputs = builder.outputs + last.outputs
+        val inputs = builder.inputs + mole.root.inputs(mole)
+        val outputs = builder.outputs + last.outputs(mole)
         val parameters = builder.parameters
       }
     }
@@ -70,7 +69,7 @@ sealed abstract class MoleTask(
   override protected def process(context: Context) = {
     val firstTaskContext = inputs.foldLeft(List.empty[Variable[_]]) {
       (acc, input) ⇒
-        if (!(input.mode is optional) || ((input.mode is optional) && context.contains(input.prototype)))
+        if (!(input.mode is Optional) || ((input.mode is Optional) && context.contains(input.prototype)))
           context.variable(input.prototype).getOrElse(throw new InternalProcessingError("Bug: variable not found.")) :: acc
         else acc
     }.toContext

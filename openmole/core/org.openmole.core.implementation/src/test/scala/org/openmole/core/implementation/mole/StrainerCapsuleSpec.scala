@@ -53,10 +53,8 @@ class StrainerCapsuleSpec extends FlatSpec with ShouldMatchers {
     val strainerC = new StrainerCapsule(strainer)
     val t2c = new Capsule(t2)
 
-    new Transition(t1c, strainerC)
-    new Transition(strainerC, t2c)
-
-    new MoleExecution(new Mole(t1c)).start.waitUntilEnded
+    val ex = t1c -- strainerC -- t2c
+    ex.start.waitUntilEnded
   }
 
 }

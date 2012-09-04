@@ -27,6 +27,7 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.sampling._
 import org.openmole.core.model.task._
+import org.openmole.core.model.transition._
 import org.openmole.plugin.task.stat._
 
 package object stochastic {
@@ -74,13 +75,11 @@ package object stochastic {
     statistics.mses.foreach { case (out, stat) ⇒ mseTask addSequence (out.toArray, stat) }
     val mseCapsule = new Capsule(mseTask)
 
-    val endCapsule = new StrainerCapsule(EmptyTask(name + "End"))
-
-    new DataChannel(explorationCapsule, endCapsule)
+    val endCapsule = Slot(new StrainerCapsule(EmptyTask(name + "End")))
 
     explorationCapsule -< model >- aggregationCapsule --
       (medianCapsule, medianAbsoluteDeviationCapsule, averageCapsule, sumCapsule, mseCapsule) --
-      endCapsule
+      endCapsule + explorationCapsule oo endCapsule
   }
 
   def replicate(
@@ -89,9 +88,8 @@ package object stochastic {
     replications: ISampling)(implicit plugins: PluginSet) = {
     val exploration = ExplorationTask(name + "Replication", replications)
     val explorationCapsule = new StrainerCapsule(exploration)
-    val aggregationCapsule = new StrainerCapsule(EmptyTask(name + "Aggregation"))
-    new DataChannel(explorationCapsule, aggregationCapsule)
-    explorationCapsule -< model >- aggregationCapsule
+    val aggregationCapsule = Slot(new StrainerCapsule(EmptyTask(name + "Aggregation")))
+    explorationCapsule -< model >- aggregationCapsule + explorationCapsule oo explorationCapsule
   }
 
 }

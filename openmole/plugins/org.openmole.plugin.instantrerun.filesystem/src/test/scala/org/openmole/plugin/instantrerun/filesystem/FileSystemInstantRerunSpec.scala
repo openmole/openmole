@@ -20,7 +20,7 @@ package org.openmole.plugin.instantrerun.filesystem
 import org.openmole.misc.workspace._
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.task._
-import org.openmole.core.implementation.transition.Transition
+import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
@@ -68,14 +68,14 @@ class FileSystemInstantRerunSpec extends FlatSpec with ShouldMatchers {
     val t1c = new Capsule(t1)
     val t2c = new Capsule(t2)
 
-    new Transition(t1c, t2c)
+    val mole = t1c -- t2c
 
     val dir = File.createTempFile("testInstantRerun", "")
     dir.delete
     dir.mkdir
 
-    new MoleExecution(new Mole(t1c), rerun = new FileSystemInstantRerun(dir, t1c)).start.waitUntilEnded
-    new MoleExecution(new Mole(t1c), rerun = new FileSystemInstantRerun(dir, t1c)).start.waitUntilEnded
+    new MoleExecution(mole, rerun = new FileSystemInstantRerun(dir, t1c)).start.waitUntilEnded
+    new MoleExecution(mole, rerun = new FileSystemInstantRerun(dir, t1c)).start.waitUntilEnded
     dir.recursiveDelete
 
     res.distinct.size should equal(1)

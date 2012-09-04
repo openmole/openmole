@@ -21,6 +21,7 @@ import org.openmole.core.implementation.execution.local._
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.data._
+import org.openmole.core.model.transition._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.scalatest.FlatSpec
@@ -52,9 +53,7 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
     val t1c = new Capsule(t1)
     val t2c = new Capsule(t2)
 
-    new Transition(t1c, t2c)
-
-    new MoleExecution(new Mole(t1c)).start.waitUntilEnded
+    (t1c -- t2c).start.waitUntilEnded
   }
 
   "A conjonctive pattern" should "enable variable values to be transmitted from a task to another" in {
@@ -88,14 +87,11 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
     val initc = new Capsule(init)
     val t1c = new Capsule(t1)
     val t2c = new Capsule(t2)
-    val t3c = new Capsule(t3)
+    val t3c = Slot(Capsule(t3))
 
-    new Transition(initc, t1c)
-    new Transition(initc, t2c)
-    new Transition(t1c, t3c)
-    new Transition(t2c, t3c)
+    val ex = (initc -- t1c -- t3c) + (initc -- t2c -- t3c)
 
-    new MoleExecution(new Mole(initc)).start.waitUntilEnded
+    ex.start.waitUntilEnded
 
   }
 
@@ -132,17 +128,13 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
-    val initc = new Capsule(init)
-    val t1c = new Capsule(t1)
-    val t2c = new Capsule(t2)
-    val t3c = new Capsule(t3)
+    val initc = Capsule(init)
+    val t1c = Capsule(t1)
+    val t2c = Capsule(t2)
+    val t3c = Slot(t3)
 
-    new Transition(initc, t1c)
-    new Transition(initc, t2c)
-    new Transition(t1c, t3c)
-    new Transition(t2c, t3c)
-
-    new MoleExecution(new Mole(initc)).start.waitUntilEnded
+    val ex = (initc -- t1c -- t3c) + (initc -- t2c -- t3c)
+    ex.start.waitUntilEnded
 
   }
 
@@ -180,24 +172,15 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
     val initc = new Capsule(init)
     val t1c = new Capsule(t1)
 
-    val t3c = new Capsule(t3)
-
-    val t2CList = (0 until 100).map {
-      i ⇒
-        val t2c = new Capsule(t2)
-        new Transition(initc, t2c)
-        new Transition(t2c, t3c)
-        t2c
-    }
-
-    new Transition(initc, t1c)
-    new Transition(t1c, t3c)
+    val t3c = Slot(t3)
 
     val env = new LocalEnvironment(20)
 
-    new MoleExecution(
-      new Mole(initc),
-      selection = t2CList.map { _ -> new FixedEnvironmentSelection(env) }.toMap).start.waitUntilEnded
+    val mole = initc -- t1c -- t3c + (0 until 100).map {
+      i ⇒ initc -- (Capsule(t2) on env) -- t3c
+    }.reduce(_ + _)
+
+    mole.start.waitUntilEnded
     executed should equal(1)
   }
 
@@ -235,17 +218,13 @@ class TransitionSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
-    val initc = new Capsule(init)
-    val t1c = new Capsule(t1)
-    val t2c = new Capsule(t2)
-    val t3c = new Capsule(t3)
+    val initc = Capsule(init)
+    val t1c = Capsule(t1)
+    val t2c = Capsule(t2)
+    val t3c = Slot(t3)
 
-    new Transition(initc, t1c)
-    new Transition(initc, t2c)
-    new Transition(t1c, t3c)
-    new Transition(t2c, t3c)
-
-    new MoleExecution(new Mole(initc)).start.waitUntilEnded
+    val mole = (initc -- t1c -- t3c) + (initc -- t2c -- t3c)
+    mole.start.waitUntilEnded
   }
 
 }

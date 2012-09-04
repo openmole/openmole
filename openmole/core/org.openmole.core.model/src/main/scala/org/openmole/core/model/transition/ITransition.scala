@@ -37,7 +37,7 @@ trait ITransition {
    *
    * @return the ending capsule of this transition
    */
-  def end: ISlot
+  def end: Slot
 
   /**
    *
@@ -70,7 +70,7 @@ trait ITransition {
    *
    * @return the unfiltred output data of the staring capsule
    */
-  def data: Iterable[Data[_]]
+  def data(mole: IMole): Iterable[Data[_]]
 
   /**
    *

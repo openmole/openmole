@@ -69,7 +69,7 @@ object Sensitivity {
 
     val puzzle = explorationCapsule -< model >- aggregateCapsule -- (firstOrderCapsule, totalOrderCapsule)
 
-    new Puzzle(puzzle.first, puzzle.lasts, puzzle.hooks, puzzle.selection, puzzle.grouping) {
+    new Puzzle(puzzle) {
       def firtOrderEffect = firstOrderCapsule
       def totalOrderEffect = totalOrderCapsule
     }

@@ -21,6 +21,7 @@ import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
+import org.openmole.core.model.transition._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
@@ -29,7 +30,6 @@ import scala.collection.mutable.ListBuffer
 import org.openmole.core.implementation.sampling._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.transition._
-import org.openmole.core.model.data.DataModeMask._
 
 @RunWith(classOf[JUnitRunner])
 class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
@@ -57,9 +57,9 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
     val t1c = new MasterCapsule(t1)
     val t2c = new MasterCapsule(t2)
 
-    new Transition(t1c, t2c)
+    val ex = t1c -- t2c toExecution
 
-    new MoleExecution(new Mole(t1c)).start.waitUntilEnded
+    ex.start.waitUntilEnded
   }
 
   "A master capsule" should "keep value of a variable from on execution to another" in {
@@ -75,8 +75,6 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
     emptyT.addInput(i)
     emptyT.addOutput(i)
 
-    val emptyC = new Capsule(emptyT)
-
     val select = new TestTask {
       val name = "select"
       override val inputs = DataSet(n, i)
@@ -88,13 +86,15 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
+    val emptyC = new Capsule(emptyT)
+    val slot1 = Slot(emptyC)
+    val slot2 = Slot(emptyC)
+
     val selectCaps = new MasterCapsule(select, n)
 
-    new ExplorationTransition(exc, emptyC)
-    new Transition(emptyC, selectCaps)
-    new Transition(selectCaps, new Slot(emptyC), "n <= 100")
+    val ex = exc -< slot1 -- selectCaps -- (slot2, "n <= 100")
 
-    new MoleExecution(new Mole(exc)).start.waitUntilEnded
+    ex.start.waitUntilEnded
   }
 
   "A end of exploration transition" should "end the master slave process" in {
@@ -113,8 +113,6 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
     emptyT.addInput(i)
     emptyT.addOutput(i)
 
-    val emptyC = new Capsule(emptyT)
-
     val testT = new TestTask {
       val name = "Test end"
       override val inputs = DataSet(isaved)
@@ -125,8 +123,6 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
         context
       }
     }
-
-    val testC = new Capsule(testT)
 
     val select = new TestTask {
       val name = "select"
@@ -145,12 +141,15 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
 
     val selectCaps = new MasterCapsule(select, n, isaved)
 
-    new ExplorationTransition(exc, emptyC)
-    new Transition(emptyC, selectCaps)
-    new Transition(selectCaps, new Slot(emptyC))
-    new EndExplorationTransition(selectCaps, testC, "n >= 100")
+    val emptyC = Capsule(emptyT)
+    val slot1 = Slot(emptyC)
+    val slot2 = Slot(emptyC)
 
-    new MoleExecution(new Mole(exc)).start.waitUntilEnded
+    val testC = Capsule(testT)
+
+    val ex = (exc -< slot1 -- selectCaps -- slot2) + (selectCaps >| (testC, "n >= 100"))
+
+    ex.start.waitUntilEnded
     endCapsExecuted should equal(1)
   }
 

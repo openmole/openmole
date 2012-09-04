@@ -47,7 +47,7 @@ trait IDataChannel {
    *
    * @return the slot to which the data channel ends.
    */
-  def end: ISlot
+  def end: Slot
 
   /**
    *
@@ -66,7 +66,7 @@ trait IDataChannel {
    *
    * @return the transmitted data
    */
-  def data: Iterable[Data[_]]
+  def data(mole: IMole): Iterable[Data[_]]
 
   /**
    * Provides the variable for future consuption by the matching execution of

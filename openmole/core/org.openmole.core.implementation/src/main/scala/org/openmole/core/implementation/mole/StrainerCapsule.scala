@@ -19,10 +19,10 @@ package org.openmole.core.implementation.mole
 
 import org.openmole.core.model.data._
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.task.Task
-import org.openmole.core.implementation.validation.TypeUtil._
-import org.openmole.core.model.task.ITask
-import org.openmole.core.model.task.ITask
+import org.openmole.core.implementation.task._
+import org.openmole.core.implementation.validation._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.task._
 
 object StrainerCapsule {
   class StrainerTaskDecorator(val task: ITask) extends Task {
@@ -36,16 +36,16 @@ object StrainerCapsule {
   }
 }
 
-class StrainerCapsule(t: Option[ITask] = None) extends Capsule(t.map(new StrainerCapsule.StrainerTaskDecorator(_))) {
+class StrainerCapsule(task: ITask) extends Capsule(new StrainerCapsule.StrainerTaskDecorator(task)) {
 
-  def this(t: ITask) = this(Some(t))
+  def received(mole: IMole) = TypeUtil.intersect(mole.slots(this).map { TypeUtil.receivedTypes(mole) }).map(Data(_))
 
-  override def task_=(task: Option[ITask]) = super.task = t.map(new StrainerCapsule.StrainerTaskDecorator(_))
+  override def inputs(mole: IMole) =
+    received(mole).filterNot(d ⇒ super.inputs(mole).contains(d.prototype.name)) ++
+      super.inputs(mole)
 
-  override def inputs =
-    receivedTypes(defaultInputSlot).filterNot(d ⇒ super.inputs.contains(d: Data[_])).map(Data(_)) ++ super.inputs
-
-  override def outputs =
-    receivedTypes(defaultInputSlot).filterNot(d ⇒ super.outputs.contains(d: Data[_])).map(Data(_)) ++ super.outputs
+  override def outputs(mole: IMole) =
+    received(mole).filterNot(d ⇒ super.outputs(mole).contains(d.prototype.name)) ++
+      super.outputs(mole)
 
 }

@@ -40,7 +40,7 @@ trait Task extends ITask {
 
   protected def verifyInput(context: Context) = {
     for (d ← inputs) {
-      if (!(d.mode is optional)) {
+      if (!(d.mode is Optional)) {
         val p = d.prototype
         context.variable(p.name) match {
           case None ⇒ throw new UserBadDataError("Input data named \"" + p.name + "\" of type \"" + p.`type`.toString + "\" required by the task \"" + name + "\" has not been found");
@@ -57,7 +57,7 @@ trait Task extends ITask {
         val p = d.prototype
         context.variable(p) match {
           case None ⇒
-            if (!(d.mode is optional)) throw new UserBadDataError("Variable " + p.name + " of type " + p.`type`.toString + " in not optional and has not found in output of task " + name + ".")
+            if (!(d.mode is Optional)) throw new UserBadDataError("Variable " + p.name + " of type " + p.`type`.toString + " in not optional and has not found in output of task " + name + ".")
             else Option.empty[Variable[_]]
           case Some(v) ⇒
             if (p.accepts(v.value)) Some(v)

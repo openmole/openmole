@@ -20,7 +20,7 @@ package org.openmole.core.implementation.validation
 import org.openmole.core.model.data.Data
 import org.openmole.core.model.data.Prototype
 import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.transition.ISlot
+import org.openmole.core.model.transition.Slot
 
 object DataflowProblem {
 
@@ -29,17 +29,17 @@ object DataflowProblem {
   case object Output extends SlotType
 
   case class WrongType(
-      val slot: ISlot,
+      val slot: Slot,
       val data: Data[_],
       val provided: Prototype[_]) extends DataflowProblem {
 
     def capsule: ICapsule = slot.capsule
 
-    override def toString = "Wrong type from " + slot + ", data " + data.prototype + " is expected but " + provided + " is provided."
+    override def toString = "Wrong type received at " + slot + ", data " + data.prototype + " is expected but " + provided + " is provided."
   }
 
   case class MissingInput(
-      val slot: ISlot,
+      val slot: Slot,
       val data: Data[_]) extends DataflowProblem {
 
     def capsule: ICapsule = slot.capsule

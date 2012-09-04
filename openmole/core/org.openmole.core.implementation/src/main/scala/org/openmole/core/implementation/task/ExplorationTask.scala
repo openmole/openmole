@@ -33,7 +33,7 @@ object ExplorationTask {
     new TaskBuilder { builder ⇒
 
       addInput(sampling.inputs)
-      addOutput(sampling.prototypes.map { p ⇒ Data(p, DataModeMask.explore).toArray })
+      addOutput(sampling.prototypes.map { p ⇒ Data(p, Explore).toArray })
 
       def toTask =
         new ExplorationTask(name, sampling) {

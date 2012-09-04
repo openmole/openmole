@@ -77,11 +77,10 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
 
     val testC = new Capsule(testT)
 
-    new ExplorationTransition(exc, emptyC)
-    new AggregationTransition(emptyC, testC)
+    val ex = exc -< emptyC >- testC
 
     new MoleExecution(
-      mole = new Mole(exc),
+      mole = ex,
       grouping = Map(emptyC -> new JobGroupingBy2Test)).start.waitUntilEnded
   }
 }

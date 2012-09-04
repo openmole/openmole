@@ -44,7 +44,7 @@ object BreedTask {
 
     new TaskBuilder { builder ⇒
       addInput(archive)
-      addOutput(Data(genome toArray, DataModeMask.explore))
+      addOutput(Data(genome toArray, Explore))
       addParameter(archive -> Population.empty)
 
       def toTask =

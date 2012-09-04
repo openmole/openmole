@@ -15,38 +15,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.data
+package org.openmole.core.model.transition
 
-import DataModeMask._
+import org.openmole.core.model.mole._
 
-object DataMode {
-  val NONE = apply(0)
+object Slot {
 
-  def apply(masks: DataModeMask*): DataMode =
-    DataMode(masks.map(_.value).foldLeft(0)(_ | _))
-
-  def apply(m: Int) = new DataMode {
-    val mask = m
-
-    def is(mode: DataModeMask): Boolean = (mask & mode.value) != 0
-
-    override def toString = {
-      val toDisplay = values.flatMap { m ⇒ if (this is m) Some(m.toString) else None }
-      if (toDisplay.isEmpty) "None" else toDisplay.mkString(", ")
-    }
+  def apply(c: ICapsule) = new Slot {
+    val capsule = c
   }
+
 }
 
-/**
- * The data mode give meta-information about the circulation of data in the
- * mole.
- */
-trait DataMode {
+trait Slot {
 
   /**
-   * Test a data mode mask against this mode
+   *
+   * Get the capsule this slot belongs to.
+   *
+   *
+   * @return the capsule this slot belongs to
    */
-  def is(mode: DataModeMask): Boolean
+  def capsule: ICapsule
 
-  def mask: Int
+  override def toString = "Slot of " + capsule
+
 }

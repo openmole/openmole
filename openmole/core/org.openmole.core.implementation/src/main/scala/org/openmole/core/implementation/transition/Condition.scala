@@ -17,10 +17,10 @@
 
 package org.openmole.core.implementation.transition
 
-import org.openmole.core.model.data.Context
-import org.openmole.core.model.transition.ICondition
-import org.openmole.misc.tools.script.GroovyProxy
-import org.openmole.core.implementation.tools.GroovyContextAdapter
+import org.openmole.core.model.data._
+import org.openmole.core.model.transition._
+import org.openmole.misc.tools.script._
+import org.openmole.core.implementation.tools._
 
 class Condition(code: String) extends ICondition {
 

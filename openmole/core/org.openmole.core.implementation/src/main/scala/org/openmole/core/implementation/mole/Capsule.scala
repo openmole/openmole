@@ -25,60 +25,15 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.job._
 import org.openmole.core.model.job.State._
 
-import scala.collection.mutable.ListBuffer
+object Capsule {
 
-class Capsule(var _task: Option[ITask] = None) extends ICapsule {
+  def apply(task: ITask) = new Capsule(task)
 
-  def this(t: ITask) = this(Some(t))
+}
 
-  private val _inputSlots = new ListBuffer[ISlot]
-  private val _defaultInputSlot = new Slot(this)
-  private val _outputTransitions = new ListBuffer[ITransition]
+class Capsule(val task: ITask) extends ICapsule {
+  override def inputs(mole: IMole): DataSet = task.inputs
+  override def outputs(mole: IMole): DataSet = task.outputs
 
-  private val _outputIDataChannels = new ListBuffer[IDataChannel]
-
-  override def inputs: DataSet =
-    task match {
-      case None ⇒ DataSet.empty
-      case Some(t) ⇒ t.inputs
-    }
-
-  override def outputs: DataSet =
-    task match {
-      case None ⇒ DataSet.empty
-      case Some(t) ⇒ t.outputs
-    }
-
-  override def defaultInputSlot: ISlot = _defaultInputSlot
-
-  override def addInputSlot(slot: ISlot): this.type = {
-    _inputSlots += slot
-    this
-  }
-
-  def outputIDataChannels: Iterable[IDataChannel] = _outputIDataChannels
-
-  override def outputTransitions: Iterable[ITransition] = _outputTransitions
-
-  override def addOutputIDataChannel(dataChannel: IDataChannel): this.type = {
-    _outputIDataChannels += dataChannel
-    this
-  }
-
-  def addOutputTransition(transition: ITransition): this.type = {
-    _outputTransitions += transition
-    this
-  }
-
-  override def intputSlots: Iterable[ISlot] = _inputSlots
-
-  override def task_=(task: ITask) = this.task = Some(task)
-  override def task_=(task: Option[ITask]) = _task = task
-  override def task = _task
-
-  override def toString = task match {
-    case Some(t) ⇒ t.toString
-    case None ⇒ "[None]"
-  }
-
+  override def toString = task.toString
 }

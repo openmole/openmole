@@ -19,7 +19,6 @@ package org.openmole.core.implementation.transition
 
 import org.openmole.misc.exception._
 import org.openmole.core.implementation.tools._
-import org.openmole.core.implementation.mole.Capsule._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.data._
 import org.openmole.core.model.job._
@@ -31,9 +30,10 @@ import org.openmole.misc.tools.obj.ClassUtils._
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
-class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition = True, filter: IFilter[String] = Filter.empty, trigger: ICondition = ICondition.False) extends Transition(start, end, condition, filter) with IAggregationTransition {
+class AggregationTransition(start: ICapsule, end: Slot, condition: ICondition = True, filter: IFilter[String] = Filter.empty, trigger: ICondition = ICondition.False) extends Transition(start, end, condition, filter) with IAggregationTransition {
 
   override def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = subMole.aggregationTransitionRegistry.synchronized {
+    val mole = subMole.moleExecution.mole
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration."))
 
     if (!hasBeenPerformed(subMole, parentTicket)) {
@@ -42,8 +42,8 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
           results ++= context.values
 
           if (trigger != ICondition.False) {
-            val toArrayManifests = Map.empty[String, Manifest[_]] ++ start.outputs.toList.map { d ⇒ d.prototype.name -> d.prototype.`type` }
-            val context = ContextAggregator.aggregate(start.outputs, toArrayManifests, results.toIterable)
+            val toArrayManifests = Map.empty[String, Manifest[_]] ++ start.outputs(mole).toList.map { d ⇒ d.prototype.name -> d.prototype.`type` }
+            val context = ContextAggregator.aggregate(start.outputs(mole), toArrayManifests, results.toIterable)
             if (trigger.evaluate(context)) {
               aggregate(subMole, ticket)
               if (allAggregationTransitionsPerformed(subMole, parentTicket)) subMole.cancel
@@ -76,6 +76,7 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
   protected def allAggregationTransitionsPerformed(subMole: ISubMoleExecution, ticket: ITicket) = !oneAggregationTransitionNotPerformed(subMole, ticket)
 
   private def oneAggregationTransitionNotPerformed(subMole: ISubMoleExecution, ticket: ITicket): Boolean = {
+    val mole = subMole.moleExecution.mole
     val alreadySeen = new HashSet[ICapsule]
     val toProcess = new ListBuffer[(ICapsule, Int)]
     toProcess += ((this.start, 0))
@@ -85,14 +86,14 @@ class AggregationTransition(start: ICapsule, end: ISlot, condition: ICondition =
 
       if (!alreadySeen(capsule)) {
         alreadySeen += capsule
-        capsule.intputSlots.toList.flatMap { _.transitions }.foreach {
+        mole.slots(capsule).toList.flatMap { mole.inputTransitions }.foreach {
           case t: IExplorationTransition ⇒ if (level > 0) toProcess += ((t.start, level - 1))
           case t: IAggregationTransition ⇒
             if (level == 0 && t != this && !t.hasBeenPerformed(subMole, ticket)) return true
             toProcess += ((t.start, level + 1))
           case t ⇒ toProcess += ((t.start, level))
         }
-        capsule.outputTransitions.foreach {
+        mole.outputTransitions(capsule).foreach {
           case t: IExplorationTransition ⇒ toProcess += ((t.end.capsule, level + 1))
           case t: IAggregationTransition ⇒
             if (level == 0 && t != this && !t.hasBeenPerformed(subMole, ticket)) return true

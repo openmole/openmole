@@ -29,15 +29,9 @@ import task._
 import data._
 
 package object mole {
-  implicit def slotToCapsuleConverter(slot: ISlot) = slot.capsule
-  implicit def capsuleToSlotConverter(capsule: ICapsule) = capsule.defaultInputSlot
-  implicit def puzzleToMoleConverter(puzzle: Puzzle) = new Mole(puzzle.first.capsule)
-
-  //implicit def moleToMoleExecutionConverter(mole: IMole) = new MoleExecution(mole)
+  implicit def slotToCapsuleConverter(slot: Slot) = slot.capsule
 
   class PuzzleMoleExecutionDecorator(puzzle: Puzzle) {
-    def toExecution: MoleExecution = toExecution(IProfiler.empty)
-    def toExecution(profiler: IProfiler) = new MoleExecution(new Mole(puzzle.first.capsule), puzzle.hooks, puzzle.selection, puzzle.grouping, profiler)
     def on(env: IEnvironment) =
       puzzle.copy(selection = puzzle.selection ++ puzzle.lasts.map(_ -> new FixedEnvironmentSelection(env)))
     def hook(hook: IHook) =
@@ -53,14 +47,8 @@ package object mole {
   implicit def taskMoleBuilderDecoraton(taskBuilder: TaskBuilder) = taskMoleExecutionDecoration(taskBuilder.toTask)
   implicit def environmentToFixedEnvironmentSelectionConverter(env: IEnvironment) = new FixedEnvironmentSelection(env)
 
-  implicit def caspuleSlotDecorator(capsule: ICapsule) = new {
-    def slot(i: Int) = {
-      (0 to (i - capsule.intputSlots.size)).foreach { i ⇒ newSlot }
-      capsule.intputSlots.toIndexedSeq(i)
-    }
-    def newSlot = new Slot(capsule)
-
-    def channel(slot: ISlot, filtered: String*) = new DataChannel(capsule, slot, filtered: _*)
-  }
+  implicit def puzzleMoleExecutionConverter(puzzle: Puzzle) = puzzle.toExecution
+  implicit def puzzleMoleConverter(puzzle: Puzzle) = puzzle.toMole
+  implicit def moleToMoleExecutionConverter(mole: IMole) = new MoleExecution(mole)
 
 }

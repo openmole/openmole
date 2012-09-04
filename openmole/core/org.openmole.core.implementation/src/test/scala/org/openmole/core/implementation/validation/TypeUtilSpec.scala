@@ -24,7 +24,7 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.transition._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
-
+import org.openmole.core.model.transition._
 import org.scalatest.FlatSpec
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers
@@ -44,12 +44,12 @@ class TypeUtilSpec extends FlatSpec with ShouldMatchers {
     val t2 = EmptyTask("T2")
     t2 addInput p
 
-    val t1c = new Capsule(t1)
-    val t2c = new Capsule(t2)
+    val t1c = Capsule(t1)
+    val t2c = Slot(t2)
 
-    new Transition(t1c, t2c)
+    val mole = t1c -- t2c
 
-    val manifests = TypeUtil.computeManifests(t2c.defaultInputSlot)
+    val manifests = TypeUtil.computeManifests(mole)(t2c)
 
     manifests.filter(_.toArray).isEmpty should equal(true)
     val tc = manifests.filter(_.name == p.name).head
@@ -70,12 +70,11 @@ class TypeUtilSpec extends FlatSpec with ShouldMatchers {
 
     val t1c = new Capsule(t1)
     val t2c = new Capsule(t2)
-    val t3c = new Capsule(t3)
+    val t3c = Slot(t3)
 
-    new Transition(t1c, t3c)
-    new Transition(t2c, t3c)
+    val mole = (t1c -- t3c) + (t2c -- t3c)
 
-    val manifests = TypeUtil.computeManifests(t3c.defaultInputSlot)
+    val manifests = TypeUtil.computeManifests(mole)(t3c)
     val m = manifests.filter(_.name == p.name).head
     m.toArray should equal(true)
     m.manifest.erasure should equal(classOf[Int])
@@ -94,15 +93,11 @@ class TypeUtilSpec extends FlatSpec with ShouldMatchers {
 
     val testC = new Capsule(testT)
     val noOPC = new Capsule(noOP)
-    val aggC = new Capsule(aggT)
+    val aggC = Slot(aggT)
 
-    new ExplorationTransition(exc, testC)
-    new Transition(testC, noOPC)
-    new AggregationTransition(noOPC, aggC)
+    val mole = (exc -< testC -- noOPC >- aggC) + (testC oo aggC)
 
-    new DataChannel(testC, aggC)
-
-    val m = TypeUtil.computeManifests(aggC.defaultInputSlot).head
+    val m = TypeUtil.computeManifests(mole)(aggC).head
     m.toArray should equal(true)
     m.manifest.erasure should equal(classOf[String])
   }

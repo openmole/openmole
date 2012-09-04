@@ -66,12 +66,11 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
 
     val testC = new Capsule(testT)
 
-    new ExplorationTransition(exc, emptyC)
-    new AggregationTransition(emptyC, testC)
+    val mole = exc -< emptyC >- testC toMole
 
-    new MoleExecution(new Mole(exc)).start.waitUntilEnded
+    new MoleExecution(mole).start.waitUntilEnded
     endCapsExecuted should equal(1)
-    new MoleExecution(new Mole(exc)).start.waitUntilEnded
+    new MoleExecution(mole).start.waitUntilEnded
     endCapsExecuted should equal(2)
   }
 
@@ -106,10 +105,9 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
 
     val testC = new Capsule(testT)
 
-    new ExplorationTransition(exc, emptyC)
-    new AggregationTransition(emptyC, testC)
+    val ex = exc -< emptyC >- testC
 
-    new MoleExecution(new Mole(exc)).start.waitUntilEnded
+    ex.start.waitUntilEnded
     endCapsExecuted should equal(1)
   }
 
@@ -142,12 +140,11 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
 
     val testC = new Capsule(testT)
 
-    new ExplorationTransition(exc, emptyC)
-    new AggregationTransition(emptyC, testC)
+    val mole = exc -< emptyC >- testC toMole
 
-    new MoleExecution(new Mole(exc)).start.cancel
+    new MoleExecution(mole).start.cancel
     endCapsExecuted = 0
-    new MoleExecution(new Mole(exc)).start.waitUntilEnded
+    new MoleExecution(mole).start.waitUntilEnded
     endCapsExecuted should equal(1)
   }
 

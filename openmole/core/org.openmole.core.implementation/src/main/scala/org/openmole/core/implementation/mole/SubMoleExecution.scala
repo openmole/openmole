@@ -108,6 +108,7 @@ class SubMoleExecution(
   }
 
   private def jobFinished(job: IMoleJob) = {
+    val mole = moleExecution.mole
     val (capsule, ticket) = _jobs.single().get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registred."))
     try {
       EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleFinished(job, capsule))
@@ -115,8 +116,8 @@ class SubMoleExecution(
       moleExecution.indexedHooks.getOrElse(capsule, List.empty).foreach { _.process(job) }
       moleExecution.profiler.process(job)
 
-      capsule.outputIDataChannels.foreach { _.provides(job.context, ticket, moleExecution) }
-      capsule.outputTransitions.foreach { _.perform(job.context, ticket, this) }
+      mole.outputDataChannels(capsule).foreach { _.provides(job.context, ticket, moleExecution) }
+      mole.outputTransitions(capsule).foreach { _.perform(job.context, ticket, this) }
     } catch {
       case e ⇒ throw new InternalProcessingError(e, "Error at the end of a MoleJob for capsule " + capsule)
     } finally {
@@ -136,7 +137,7 @@ class SubMoleExecution(
     if (!canceled) {
       def implicits =
         Context.empty ++
-          moleExecution.mole.implicits.values.filter(v ⇒ capsule.taskOrException.inputs.contains(v.prototype.name)) +
+          moleExecution.mole.implicits.values.filter(v ⇒ capsule.task.inputs.contains(v.prototype.name)) +
           Variable(Task.openMOLESeed, moleExecution.newSeed)
 
       //FIXME: Factorize code
@@ -144,7 +145,7 @@ class SubMoleExecution(
         case c: IMasterCapsule ⇒
           synchronized {
             val savedContext = masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(Context.empty)
-            val moleJob: IMoleJob = new MoleJob(capsule.taskOrException, implicits + context + savedContext, moleExecution.nextJobId, stateChanged)
+            val moleJob: IMoleJob = new MoleJob(capsule.task, implicits + context + savedContext, moleExecution.nextJobId, stateChanged)
             EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleStarting(moleJob, capsule))
             EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobSubmitted(moleJob))
             val instant = moleExecution.instantRerun(moleJob, capsule)
@@ -153,7 +154,7 @@ class SubMoleExecution(
             masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(moleJob.context))
           }
         case _ ⇒
-          val moleJob: IMoleJob = new MoleJob(capsule.taskOrException, implicits + context, moleExecution.nextJobId, stateChanged)
+          val moleJob: IMoleJob = new MoleJob(capsule.task, implicits + context, moleExecution.nextJobId, stateChanged)
           addJob(moleJob, capsule, ticket)
           EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleStarting(moleJob, capsule))
           EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobSubmitted(moleJob))

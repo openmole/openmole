@@ -25,8 +25,10 @@ package object puzzle {
   implicit def capsulePuzzleDecorator(capsule: ICapsule) = new {
     def toPuzzle: Puzzle =
       Puzzle(
-        capsule.defaultInputSlot,
+        Slot(capsule),
         List(capsule),
+        Iterable.empty,
+        Iterable.empty,
         Iterable.empty,
         Map.empty,
         Map.empty)
@@ -34,17 +36,19 @@ package object puzzle {
 
   implicit def capsuleToPuzzleConverter(capsule: ICapsule) = capsule.toPuzzle
 
-  implicit def slotDecorator(slot: ISlot) = new {
+  implicit def slotDecorator(slot: Slot) = new {
     def toPuzzle =
       Puzzle(
         slot,
         List(slot.capsule),
         Iterable.empty,
+        Iterable.empty,
+        Iterable.empty,
         Map.empty,
         Map.empty)
   }
 
-  implicit def slotToPuzzleConverter(slot: ISlot) = slot.toPuzzle
+  implicit def slotToPuzzleConverter(slot: Slot) = slot.toPuzzle
 
   implicit def puzzleDecoraton(puzzle: Puzzle) = new {
     def last = puzzle.lasts.head

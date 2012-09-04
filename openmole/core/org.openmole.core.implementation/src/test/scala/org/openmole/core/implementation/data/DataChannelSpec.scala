@@ -21,9 +21,11 @@ import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.transition._
-import org.openmole.core.implementation.sampling.ExplicitSampling
+import org.openmole.core.implementation.sampling._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
+import org.openmole.core.model.transition._
+
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
@@ -58,14 +60,11 @@ class IDataChannelSpec extends FlatSpec with ShouldMatchers {
 
     val t1c = new Capsule(t1)
     val t2c = new Capsule(t2)
-    val t3c = new Capsule(t3)
+    val t3c = Slot(new Capsule(t3))
 
-    new Transition(t1c, t2c)
-    new Transition(t2c, t3c)
+    val ex = (t1c -- t2c -- t3c) + (t1c oo t3c)
 
-    new DataChannel(t1c, t3c)
-
-    new MoleExecution(new Mole(t1c)).start.waitUntilEnded
+    ex.start.waitUntilEnded
   }
 
   "A data channel" should "be able to transmit the value to the multiple execution of an explored task" in {
@@ -97,14 +96,11 @@ class IDataChannelSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
-    val twc = new Capsule(tw)
-    val tc = new Capsule(t)
+    val twc = Capsule(tw)
+    val tc = Slot(t)
 
-    new DataChannel(twc, tc)
-
-    new Transition(twc, exc)
-    new ExplorationTransition(exc, tc)
-    new MoleExecution(new Mole(twc)).start.waitUntilEnded
+    val ex = (twc -- exc -< tc) + (twc oo tc)
+    ex.start.waitUntilEnded
     res.toArray.sorted.deep should equal(data.toArray.deep)
   }
 
@@ -116,7 +112,7 @@ class IDataChannelSpec extends FlatSpec with ShouldMatchers {
 
     val sampling = new ExplicitSampling(i, data)
 
-    val exc = new Capsule(ExplorationTask("Exploration", sampling))
+    val exc = Capsule(ExplorationTask("Exploration", sampling))
 
     val t = new TestTask {
       val name = "Test"
@@ -136,13 +132,11 @@ class IDataChannelSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
-    val tc = new Capsule(t)
-    val noOPC = new Capsule(noOP)
-    val trc = new Capsule(tr)
+    val tc = Capsule(t)
+    val noOPC = Capsule(noOP)
+    val trc = Slot(tr)
 
-    new DataChannel(tc, trc)
-
-    val ex = exc -< tc -- noOPC >- trc toExecution
+    val ex = (exc -< tc -- noOPC >- trc) + (tc oo trc)
 
     ex.start.waitUntilEnded
     executed should equal(true)

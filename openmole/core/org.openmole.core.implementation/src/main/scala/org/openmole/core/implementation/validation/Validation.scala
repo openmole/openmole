@@ -17,6 +17,7 @@
 
 package org.openmole.core.implementation.validation
 
+import org.openmole.core.implementation.mole._
 import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
 import TypeUtil.receivedTypes
@@ -29,7 +30,6 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Queue
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.tools.LevelComputing._
 
 object Validation {
 
@@ -37,37 +37,30 @@ object Validation {
     (mole, false) ::
       mole.capsules.flatMap {
         _.task match {
-          case Some(task) ⇒
-            task match {
-              case mt: IMoleTask ⇒ Some((mt.mole, true))
-              case _ ⇒ None
-            }
+          case mt: IMoleTask ⇒ Some((mt.mole, true))
           case _ ⇒ None
         }
       }.toList
 
-  def typeErrors(capsules: Iterable[ICapsule], implicits: Iterable[Prototype[_]] = List.empty) = {
+  def typeErrors(mole: IMole)(capsules: Iterable[ICapsule], implicits: Iterable[Prototype[_]] = List.empty) = {
     val implicitMap = implicits.map { i ⇒ i.name -> i }.toMap[String, Prototype[_]]
     capsules.flatMap {
       c ⇒
-        c.intputSlots.map {
+        mole.slots(c).map {
           s ⇒
-            (c, s, TreeMap(receivedTypes(s).map { p ⇒ p.name -> p }.toSeq: _*), c.task match {
-              case Some(t) ⇒
-                def paramsToMap(params: Iterable[IParameter[_]]) =
-                  params.map {
-                    p ⇒ p.variable.prototype.name -> p.variable.prototype
-                  }.toMap[String, Prototype[_]]
+            (c, s, TreeMap(receivedTypes(mole)(s).map { p ⇒ p.name -> p }.toSeq: _*), {
+              def paramsToMap(params: Iterable[IParameter[_]]) =
+                params.map {
+                  p ⇒ p.variable.prototype.name -> p.variable.prototype
+                }.toMap[String, Prototype[_]]
 
-                val (parametersOverride, parameterNonOverride) = t.parameters.partition(_.`override`)
+              val (parametersOverride, parameterNonOverride) = c.task.parameters.partition(_.`override`)
 
-                (paramsToMap(parametersOverride), paramsToMap(parameterNonOverride))
-              case None ⇒ (Map.empty[String, Prototype[_]], Map.empty[String, Prototype[_]])
+              (paramsToMap(parametersOverride), paramsToMap(parameterNonOverride))
             })
         }.flatMap {
-
           case (capsule, slot, received, (parametersOverride, parameterNonOverride)) ⇒
-            capsule.inputs.filterNot(_.mode is optional).flatMap {
+            capsule.inputs(mole).filterNot(_.mode is Optional).flatMap {
               input ⇒
                 def checkPrototypeMatch(p: Prototype[_]) =
                   if (!input.prototype.isAssignableFrom(p)) Some(new WrongType(slot, input, p))
@@ -86,8 +79,8 @@ object Validation {
     }
   }
 
-  def typeErrorsTopMole(mole: IMole, implicits: Iterable[Prototype[_]]) = typeErrors(mole.capsules, implicits)
-  def typeErrorsMoleTask(mole: IMole, implicits: Iterable[Prototype[_]]) = typeErrors(mole.capsules.drop(1), implicits)
+  def typeErrorsTopMole(mole: IMole, implicits: Iterable[Prototype[_]]) = typeErrors(mole)(mole.capsules, implicits)
+  def typeErrorsMoleTask(mole: IMole, implicits: Iterable[Prototype[_]]) = typeErrors(mole)(mole.capsules.drop(1), implicits)
 
   def topologyErrors(mole: IMole) = {
     val errors = new ListBuffer[TopologyProblem]
@@ -100,7 +93,7 @@ object Validation {
     while (!toProcess.isEmpty) {
       val (capsule, level, path) = toProcess.dequeue
 
-      nextCaspules(capsule, level).foreach {
+      Mole.nextCaspules(mole)(capsule, level).foreach {
         case (nCap, nLvl) ⇒
           if (!seen.contains(nCap)) toProcess.enqueue((nCap, nLvl, capsule :: path))
           seen(nCap) = ((capsule :: path) -> nLvl) :: seen.getOrElse(nCap, List.empty)
@@ -119,9 +112,9 @@ object Validation {
   def duplicatedTransitions(mole: IMole) =
     mole.capsules.flatMap {
       end ⇒
-        end.intputSlots.flatMap {
+        mole.slots(end).flatMap {
           slot ⇒
-            slot.transitions.toList.map { t ⇒ t.start -> t }.groupBy { case (c, t) ⇒ c }.filter {
+            mole.inputTransitions(slot).toList.map { t ⇒ t.start -> t }.groupBy { case (c, t) ⇒ c }.filter {
               case (_, transitions) ⇒ transitions.size > 1
             }.map {
               case (_, transitions) ⇒ transitions.map { case (_, t) ⇒ t }
@@ -135,8 +128,8 @@ object Validation {
 
     mole.capsules.flatMap {
       c ⇒
-        duplicated(c.inputs).map { case (name, data) ⇒ new DuplicatedName(c, name, data, Input) } ++
-          duplicated(c.outputs).map { case (name, data) ⇒ new DuplicatedName(c, name, data, Output) }
+        duplicated(c.inputs(mole)).map { case (name, data) ⇒ new DuplicatedName(c, name, data, Input) } ++
+          duplicated(c.outputs(mole)).map { case (name, data) ⇒ new DuplicatedName(c, name, data, Output) }
     }
   }
 

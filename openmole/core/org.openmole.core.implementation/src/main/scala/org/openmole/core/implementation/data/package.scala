@@ -75,8 +75,6 @@ package object data {
 
   implicit def variablesToContextConverter(variables: Traversable[Variable[_]]): Context = variables.toContext
 
-  val optional = DataModeMask.optional
-
   implicit def prototypeDecorator[T](prototype: Prototype[T]) = new {
     def withName(name: String) = Prototype[T](name)(prototype.`type`)
   }

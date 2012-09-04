@@ -56,9 +56,8 @@ class ExplorationTransitionSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
-    new ExplorationTransition(exc, new Capsule(t))
-    new MoleExecution(new Mole(exc)).start.waitUntilEnded
-
+    val ex = exc -< t
+    ex.start.waitUntilEnded
     res.toArray.sorted.deep should equal(data.toArray.deep)
   }
 
@@ -83,7 +82,7 @@ class ExplorationTransitionSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
-    (explo -< t).toExecution.start.waitUntilEnded
+    (explo -< t).start.waitUntilEnded
     res.toArray.sorted.deep should equal(data.toArray.deep)
   }
 }

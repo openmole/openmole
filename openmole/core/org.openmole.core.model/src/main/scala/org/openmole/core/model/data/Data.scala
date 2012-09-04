@@ -57,4 +57,6 @@ trait Data[T] {
    */
   def prototype: Prototype[T]
 
+  override def toString = "Data " + prototype + " with mode " + mode
+
 }

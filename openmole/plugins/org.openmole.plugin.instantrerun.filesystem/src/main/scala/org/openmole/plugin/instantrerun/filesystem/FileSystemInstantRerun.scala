@@ -72,7 +72,7 @@ class FileSystemInstantRerun(dir: File, capsules: Set[ICapsule]) extends IInstan
   def rerun(job: IMoleJob, capsule: ICapsule): Boolean = synchronized {
     if (!capsules.contains(capsule)) return false
 
-    val taskHash = hashTask(capsule.taskOrException)
+    val taskHash = hashTask(capsule.task)
     val taskDir = new File(contextDir, taskHash.toString)
 
     val serializedContext = saveContext(job)
