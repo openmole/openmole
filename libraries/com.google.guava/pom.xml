@@ -23,6 +23,11 @@
     	    <version>${lib.com.google.guava.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>${lib.com.google.code.findbugs.jsr305.version}</version>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->
