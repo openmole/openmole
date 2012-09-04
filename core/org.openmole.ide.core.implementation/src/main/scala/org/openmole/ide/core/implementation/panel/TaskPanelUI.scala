@@ -190,7 +190,7 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
       contents += protoOutEditor.panel
     }
 
-    CheckData.checkTaskProxyImplicitsPrototypes(scene, TaskPanelUI.this.proxy)
+    CheckData.checkMole(scene)
     peer.removeAll
     peer.add(protoIn.peer, BorderLayout.WEST)
     peer.add((new Separator).peer)
