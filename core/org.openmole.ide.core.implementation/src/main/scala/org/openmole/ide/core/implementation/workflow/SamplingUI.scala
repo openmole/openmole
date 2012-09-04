@@ -15,9 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.misc.widget
+package org.openmole.ide.core.implementation.workflow
 
-import scala.swing.Component
-import scala.swing.event.ActionEvent
+import org.netbeans.api.visual.widget.Widget
+import org.openmole.ide.core.model.workflow._
 
-class PluginPanelResizedEvent(c: Component) extends ActionEvent(c)
+class SamplingUI(val scene: IMoleScene) extends Widget(scene.graphScene) with ISamplingUI {
+
+  val samplingComponentWidget = new SceneComponentWidget(scene, new SamplingWidget(scene, this),400,200)
+
+  addChild(samplingComponentWidget)
+}
