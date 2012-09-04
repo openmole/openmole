@@ -66,20 +66,10 @@ class Command {
     }
   }
 
-  def structure(mole: IMole): Unit = {
-    mole.capsules.zipWithIndex.foreach {
-      case (c, i) ⇒
-        println(i + " " + c + " (" + c.outputTransitions.map {
-          t ⇒
-            (t match {
-              case _: IExplorationTransition ⇒ "< "
-              case _: IAggregationTransition ⇒ "> "
-              case _ ⇒ "- "
-            }) + t.end.capsule.toString
-        }.foldLeft("") {
-          (acc, c) ⇒ if (acc.isEmpty) c else acc + ", " + c
-        } + ")")
-    }
+  def print(mole: IMole): Unit = {
+    println("root: " + mole.root)
+    mole.transitions.foreach(println)
+    mole.dataChannels.foreach(println)
   }
 
   def print(moleExecution: IMoleExecution): Unit = {

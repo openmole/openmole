@@ -76,8 +76,6 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
           loop.bind("implicits", new Implicits()(plugins))
           loop.addImports(
             "org.openmole.core.implementation.data._",
-            "org.openmole.core.implementation.data.Prototype._",
-            "org.openmole.core.implementation.data.Data._",
             "org.openmole.core.implementation.execution._",
             "org.openmole.core.implementation.execution.local._",
             "org.openmole.core.implementation.job._",
