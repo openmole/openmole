@@ -6,11 +6,11 @@
 package org.openmole.ide.plugin.method.sensitivity
 
 import org.openmole.core.implementation.sampling.Factor
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.model.data.IBoundedDomainDataUI
 import org.openmole.ide.core.model.data.ISamplingDataUI
-import org.openmole.ide.core.model.dataproxy.IBoundedDomainDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.method.sensitivity.SaltelliSampling
@@ -29,7 +29,7 @@ class SaltelliSamplingDataUI(val name: String = "",
       },
       factors.map {
         f ⇒
-          val proto = f._1.dataUI.coreObject.asInstanceOf[IPrototype[Double]]
+          val proto = f._1.dataUI.coreObject.asInstanceOf[Prototype[Double]]
           new Factor(proto, f._3.coreObject(proto))
       }: _*)
 

@@ -6,10 +6,8 @@
 package org.openmole.ide.plugin.task.systemexec
 
 import java.io.File
-import org.openmole.core.model.data.IDataSet
-import org.openmole.core.model.data.IParameterSet
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.task.systemexec.SystemExecTask
@@ -23,7 +21,7 @@ class SystemExecTaskDataUI(val name: String = "",
                            val outputMap: List[(String, IPrototypeDataProxyUI)] = List.empty,
                            val variables: List[IPrototypeDataProxyUI] = List.empty) extends TaskDataUI {
 
-  def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = {
+  def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) = {
     val syet = SystemExecTask(name, lauchingCommands.filterNot(_ == '\n'), workdir)(plugins)
     syet addInput inputs
     syet addOutput outputs
@@ -31,8 +29,8 @@ class SystemExecTaskDataUI(val name: String = "",
     resources.foreach(syet addResource new File(_))
     variables.foreach { p ⇒ syet addVariable (p.dataUI.coreObject) }
 
-    outputMap.foreach(i ⇒ syet addOutput (i._1, i._2.dataUI.coreObject.asInstanceOf[IPrototype[File]]))
-    inputMap.foreach(i ⇒ syet addInput (i._1.dataUI.coreObject.asInstanceOf[IPrototype[File]], i._2))
+    outputMap.foreach(i ⇒ syet addOutput (i._1, i._2.dataUI.coreObject.asInstanceOf[Prototype[File]]))
+    inputMap.foreach(i ⇒ syet addInput (i._1.dataUI.coreObject.asInstanceOf[Prototype[File]], i._2))
     syet
   }
 

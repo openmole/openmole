@@ -9,7 +9,7 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.data._
 import org.openmole.plugin.sampling.lhs._
 import org.openmole.core.implementation.sampling.Factor
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.Prototype
 import scala.collection.JavaConversions._
 import org.openmole.misc.exception.UserBadDataError
 
@@ -26,7 +26,7 @@ class LHSSamplingDataUI(val name: String = "",
         case e: NumberFormatException ⇒ throw new UserBadDataError("An integer is exepected as number of samples")
       }, factors.map {
         f ⇒
-          val proto = f._1.dataUI.coreObject.asInstanceOf[IPrototype[Double]]
+          val proto = f._1.dataUI.coreObject.asInstanceOf[Prototype[Double]]
           new Factor(proto, f._3.coreObject(proto))
       }: _*)
 

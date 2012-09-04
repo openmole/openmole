@@ -5,11 +5,9 @@
 
 package org.openmole.ide.plugin.task.netlogo
 
-import java.awt.Color
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.core.model.data.IDataSet
-import org.openmole.core.model.data.IParameterSet
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.plugin.task.netlogo4.NetLogo4Task
 import scala.collection.JavaConversions._
@@ -25,7 +23,7 @@ class NetLogo4TaskDataUI(val name: String = "",
                          val resources: List[String] = List(),
                          val globals: List[String] = List()) extends TaskDataUI {
 
-  def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) =
+  def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) =
     {
       val builder = NetLogo4Task(
         name,

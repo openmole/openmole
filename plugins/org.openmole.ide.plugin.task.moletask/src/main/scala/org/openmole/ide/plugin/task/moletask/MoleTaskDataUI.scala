@@ -8,9 +8,8 @@ package org.openmole.ide.plugin.task.moletask
 import java.awt.Color
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.core.model.data.IDataSet
-import org.openmole.core.model.data.IParameterSet
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.core.implementation.task.MoleTask
 import org.openmole.ide.core.implementation.workflow.MoleSceneManager
@@ -32,7 +31,7 @@ class MoleTaskDataUI(val name: String = "",
                      val mole: Option[Int] = None,
                      val finalCapsule: Option[ITaskDataProxyUI] = None) extends TaskDataUI {
 
-  def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = mole match {
+  def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) = mole match {
     case Some(x: Int) ⇒ manager(x) match {
       case Some(y: IMoleSceneManager) ⇒
         finalCapsule match {
