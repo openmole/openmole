@@ -38,9 +38,7 @@ object TypeUtil {
 
     val r: Iterable[Option[Prototype[_]]] = indexedD.map {
       case (name, prototypes) ⇒
-        if (prototypes.size == d.size) {
-          Some(Prototype(name)(superType(prototypes)))
-        } else None
+        if (prototypes.size == d.size) Some(Prototype(name)(superType(prototypes))) else None
     }
     r.flatten
   }

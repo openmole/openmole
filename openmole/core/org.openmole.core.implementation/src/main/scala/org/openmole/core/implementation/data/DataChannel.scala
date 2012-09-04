@@ -68,7 +68,6 @@ class DataChannel(
       val toContext = dataChannelRegistry.getOrElseUpdate(this, workingOnTicket, new ListBuffer[Variable[_]])
       toContext ++= fromContext.values.filterNot(v ⇒ filter(v.prototype.name))
     }
-
   }
 
   def data(mole: IMole) = start.outputs(mole).filterNot(d ⇒ filter(d.prototype.name))

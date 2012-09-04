@@ -56,12 +56,12 @@ trait IMole {
   def dataChannels: Iterable[IDataChannel]
   def implicits: Context
 
-  lazy val slots = IMole.slots(this).groupBy(_.capsule).withDefault(c ⇒ Iterable.empty)
+  lazy val slots = IMole.slots(this).groupBy(_.capsule).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
   lazy val capsules = slots.unzip._1
-  lazy val inputTransitions = transitions.groupBy(_.end).withDefault(c ⇒ Iterable.empty)
-  lazy val outputTransitions = transitions.groupBy(_.start).withDefault(c ⇒ Iterable.empty)
-  lazy val inputDataChannels = dataChannels.groupBy(_.end).withDefault(c ⇒ Iterable.empty)
-  lazy val outputDataChannels = dataChannels.groupBy(_.start).withDefault(c ⇒ Iterable.empty)
+  lazy val inputTransitions = transitions.groupBy(_.end).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
+  lazy val outputTransitions = transitions.groupBy(_.start).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
+  lazy val inputDataChannels = dataChannels.groupBy(_.end).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
+  lazy val outputDataChannels = dataChannels.groupBy(_.start).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
 
   def level(c: ICapsule): Int
 }

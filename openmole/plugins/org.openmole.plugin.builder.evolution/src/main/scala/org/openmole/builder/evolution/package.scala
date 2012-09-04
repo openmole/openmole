@@ -71,7 +71,7 @@ package object evolution {
       case (o, v) ⇒ toIndividualTask addObjective (o, v)
     }
 
-    val toIndividualCapsule = Slot(new Capsule(toIndividualTask))
+    val toIndividualSlot = Slot(Capsule(toIndividualTask))
 
     val elitismTask = ElitismTask(evolution)(
       name + "ElitismTask",
@@ -115,14 +115,14 @@ package object evolution {
         initialBreedTask -<
         scalingCaps --
         (model, filter = Filter(genome)) --
-        toIndividualCapsule --
+        toIndividualSlot --
         elitismCaps --
         scalingArchiveCapsule >| (endCapsule, terminated.name + " == true")) +
         (
           scalingArchiveCapsule --
           (breedingCaps, condition = generation.name + " % " + evolution.lambda + " == 0") -<-
           scalingCaps) +
-          (scalingCaps oo toIndividualCapsule) +
+          (scalingCaps oo toIndividualSlot) +
           (firstCapsule oo (model.first, Filter(archive))) +
           (firstCapsule oo (endCapsule, Filter(archive))) +
           (firstCapsule oo (elitismCaps, filter = Filter not archive))
@@ -194,7 +194,7 @@ package object evolution {
 
     val preIslandCapsule = new StrainerCapsule(preIslandTask)
 
-    val islandCapsule = Slot(new Capsule(MoleTask(name + "MoleTask", model)))
+    val islandSlot = Slot(new Capsule(MoleTask(name + "MoleTask", model)))
 
     val renameArchiveCapsule = new Capsule(RenameTask(name + "RenameArchive", archive, initialArchive))
 
@@ -222,7 +222,7 @@ package object evolution {
       (
         firstCapsule -<
         (preIslandCapsule, size = island.toString) --
-        islandCapsule --
+        islandSlot --
         archiveToIndividual --
         elitismCaps --
         scalingArchiveCapsule >| (endCapsule, terminated.name + " == true")) +
@@ -230,9 +230,10 @@ package object evolution {
           scalingArchiveCapsule --
           filterPopulationCapsule --
           breedingTask --
-          preIslandCapsule) +
+          preIslandCapsule
+        ) +
           (preIslandCapsule -- (renameArchiveCapsule, filter = Filter not archive) -- filterPopulationCapsule) +
-          (firstCapsule oo islandCapsule) +
+          (firstCapsule oo islandSlot) +
           (firstCapsule oo endCapsule)
 
     val (_state, _generation, _genome, _individual) = (state, generation, model.genome, model.individual)
@@ -242,7 +243,7 @@ package object evolution {
       def state = _state
       def generation = _generation
       def genome = _genome
-      def island = islandCapsule
+      def island = islandSlot.capsule
     }
   }
 

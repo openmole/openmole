@@ -21,6 +21,7 @@ import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.sampling._
 import org.openmole.core.implementation.task._
+import org.openmole.core.implementation.tools._
 import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
@@ -77,9 +78,8 @@ package object stochastic {
 
     val endCapsule = Slot(new StrainerCapsule(EmptyTask(name + "End")))
 
-    explorationCapsule -< model >- aggregationCapsule --
-      (medianCapsule, medianAbsoluteDeviationCapsule, averageCapsule, sumCapsule, mseCapsule) --
-      endCapsule + explorationCapsule oo endCapsule
+    (explorationCapsule -< model >- aggregationCapsule -- (medianCapsule, medianAbsoluteDeviationCapsule, averageCapsule, sumCapsule, mseCapsule) -- endCapsule) +
+      (explorationCapsule oo (endCapsule, filter = Filter(replicationFactor.prototype)))
   }
 
   def replicate(
