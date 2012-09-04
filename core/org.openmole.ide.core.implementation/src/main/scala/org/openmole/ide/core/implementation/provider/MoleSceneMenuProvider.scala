@@ -31,9 +31,8 @@ import scala.swing.MenuItem
 class MoleSceneMenuProvider(moleScene: IMoleScene) extends GenericMenuProvider {
 
   def initMenu = {
-    val itemTCapsule = new JMenuItem("Add a Task Capsule")
-    itemTCapsule.addActionListener(new AddCapsuleAction(moleScene, this))
-    items += itemTCapsule
+    val itemCapsule = new MenuItem(new AddCapsuleAction(moleScene, this))
+    items += itemCapsule.peer
   }
 
   override def getPopupMenu(widget: Widget,
