@@ -10,12 +10,12 @@
     <parent>
         <groupId>org.openmole.core</groupId>
         <artifactId>libraries</artifactId>
-        <version>0.6-RC2-SNAPSHOT</version>
+        <version>0.6</version>
     </parent>
 
     <!--Used to build the symbolic name of the bundle-->
     <artifactId>org.scala-lang.scala-library.netlogo4</artifactId>
-    <version>42.8.0.r17517-b20090416021636</version>
+    <version>0.6</version>
 
     <dependencies>
         <dependency>
