@@ -52,7 +52,7 @@
         <lib.org.eclipse.core.jobs.version>3.5.1.R36x_v20100824</lib.org.eclipse.core.jobs.version>
    
         <!--<lib.com.db4o.version>7.4.58</lib.com.db4o.version>-->
-        <lib.org.scalatest.version>1.6.1</lib.org.scalatest.version>
+        <lib.org.scalatest.version>1.9-2.10.0-M7-B1</lib.org.scalatest.version>
         <lib.org.scala-tools.testing.scalacheck.version>1.9</lib.org.scala-tools.testing.scalacheck.version>
         <lib.com.db4o.version>8.0-SNAPSHOT</lib.com.db4o.version>
         <lib.com.ice.tar.version>1.1.4-2</lib.com.ice.tar.version>
@@ -79,7 +79,7 @@
         <lib.au.com.bytecode.opencsv.version>2.0</lib.au.com.bytecode.opencsv.version>
         <lib.org.jfree.jfreechart.version>1.0.13</lib.org.jfree.jfreechart.version>
         <lib.org.jfree.jcommon.version>1.0.15</lib.org.jfree.jcommon.version>
-        <lib.org.scala-lang.scala.version>2.9.2</lib.org.scala-lang.scala.version>
+        <lib.org.scala-lang.scala.version>2.10.0-M7</lib.org.scala-lang.scala.version>
         <lib.org.objenesis.version>1.2</lib.org.objenesis.version>
         <lib.org.apache.commons.exec.version>1.1</lib.org.apache.commons.exec.version>
         <lib.org.joda.time.version>1.6</lib.org.joda.time.version>
@@ -107,7 +107,7 @@
         <lib.org.apache.sling.scripting.scala.script.version>0.9.0-SNAPSHOT</lib.org.apache.sling.scripting.scala.script.version>
         <lib.com.github.scopt.version>2.0.0</lib.com.github.scopt.version>
         <lib.fr.iscpif.mgo.version>1.33</lib.fr.iscpif.mgo.version>
-        <lib.com.typesafe.akka.version>2.0.3</lib.com.typesafe.akka.version>
+        <lib.com.typesafe.akka.version>2.1-M2</lib.com.typesafe.akka.version>
         <lib.de.erichseifert.gral.version>0.9-SNAPSHOT</lib.de.erichseifert.gral.version>
         <lib.runtime.jvm.version>7-u5</lib.runtime.jvm.version>
         <plugin.org.scala-tools.maven-scala-plugin.version>2.15.2</plugin.org.scala-tools.maven-scala-plugin.version>
@@ -283,9 +283,9 @@
                 <configuration>
                     <scalaVersion>${maven.scala.version}</scalaVersion>
                     <encoding>${project.build.sourceEncoding}</encoding>
-                    <args>
+                    <!--<args>
                         <arg>-Ydependent-method-types</arg>
-                    </args>
+                    </args>-->
                 </configuration>
            </plugin>
 
