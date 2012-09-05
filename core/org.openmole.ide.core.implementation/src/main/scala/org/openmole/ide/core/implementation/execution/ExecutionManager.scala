@@ -14,13 +14,10 @@ import javax.swing.Timer
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.implementation.execution.local._
 import org.openmole.core.model.execution.IEnvironment
-import org.openmole.core.model.hook.IHook
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.misc.visualization._
 import org.openmole.ide.misc.widget._
-import org.openmole.core.model.mole.IGrouping
-import org.openmole.core.model.mole.IMole
-import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.mole._
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.model.panel._
@@ -41,7 +38,7 @@ import org.openmole.misc.exception.UserBadDataError
 import scala.collection.JavaConversions._
 import scala.swing.TextArea
 import org.openmole.core.model.job.State
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data._
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import TextAreaOutputStream._
@@ -55,7 +52,7 @@ object ExecutionManager {
 class ExecutionManager(manager: IMoleSceneManager,
                        val mole: IMole,
                        val capsuleMapping: Map[ICapsuleUI, ICapsule],
-                       val prototypeMapping: Map[IPrototypeDataProxyUI, IPrototype[_]]) extends PluginPanel("", "[grow,fill]", "")
+                       val prototypeMapping: Map[IPrototypeDataProxyUI, Prototype[_]]) extends PluginPanel("", "[grow,fill]", "")
     with IExecutionManager
     with Publisher {
   val logTextArea = new TextArea {
@@ -75,7 +72,7 @@ class ExecutionManager(manager: IMoleSceneManager,
     State.FAILED -> new AtomicInteger,
     State.CANCELED -> new AtomicInteger)
 
-  var hooksInExecution = List.empty[IHook]
+  //var hooksInExecution = List.empty[IHook]
   val wfPiePlotter = new PiePlotter
   val envBarPlotter = new XYPlotter(5000, 120)
 
@@ -126,8 +123,10 @@ class ExecutionManager(manager: IMoleSceneManager,
     tabbedPane.selection.index = 0
     cancel
     initBarPlotter
+
     MoleMaker.buildMoleExecution(mole,
       manager,
+      hooks.flatMap { case (panel, caps) ⇒ List(capsuleMapping(caps)).zip(panel.saveContent.coreObject(this)) }.toList,
       capsuleMapping,
       groupings) match {
         case Right((mExecution, environments)) ⇒
@@ -165,11 +164,6 @@ class ExecutionManager(manager: IMoleSceneManager,
             splitPane.repaint
           }
           initPieChart
-          hooksInExecution = hooks.flatMap {
-            case (panel, caps) ⇒ panel.saveContent.coreObject(this,
-              mExecution,
-              capsuleMapping(caps))
-          }.toList
           repaint
           revalidate
           timer.start
@@ -191,7 +185,6 @@ class ExecutionManager(manager: IMoleSceneManager,
 
   def cancel = synchronized {
     timer.stop
-    hooksInExecution.foreach { _.release }
     moleExecution match {
       case Some(me: IMoleExecution) ⇒ me.cancel
       case _ ⇒

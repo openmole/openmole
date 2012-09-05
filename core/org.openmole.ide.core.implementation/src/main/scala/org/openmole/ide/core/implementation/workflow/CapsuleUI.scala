@@ -50,7 +50,9 @@ class CapsuleUI(val scene: IMoleScene,
                 val dataUI: ICapsuleDataUI = new CapsuleDataUI) extends Widget(scene.graphScene)
     with ICapsuleUI {
 
-  val taskComponentWidget = new TaskComponentWidget(scene, this, new TaskWidget(scene, this))
+  val taskComponentWidget = new SceneComponentWidget(scene, new TaskWidget(scene, this),
+                                                     TASK_CONTAINER_WIDTH, 
+                                                     TASK_CONTAINER_HEIGHT)
   var environmentWidget: Option[LinkedImageWidget] = None
   var samplingWidget: Option[LinkedImageWidget] = None
   var inputPrototypeWidget: Option[PrototypeWidget] = None

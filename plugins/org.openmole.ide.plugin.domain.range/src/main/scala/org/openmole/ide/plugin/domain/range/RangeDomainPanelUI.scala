@@ -19,7 +19,6 @@ package org.openmole.ide.plugin.domain.range
 
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.core.model.data.IPrototype
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper

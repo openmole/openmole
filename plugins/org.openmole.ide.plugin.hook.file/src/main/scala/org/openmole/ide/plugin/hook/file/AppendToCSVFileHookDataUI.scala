@@ -17,7 +17,6 @@
 
 package org.openmole.ide.plugin.hook.file
 
-import org.openmole.core.model.data.IPrototype
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.model.control.IExecutionManager
@@ -37,11 +36,8 @@ class AppendToCSVFileHookDataUI(var activated: Boolean = true,
 
   def coreClass = classOf[AppendToCSVFileHook]
 
-  def coreObject(executionManager: IExecutionManager,
-                 moleExecution: IMoleExecution,
-                 capsule: ICapsule) =
-    List(new AppendToCSVFileHook(moleExecution,
-      capsule,
+  def coreObject(executionManager: IExecutionManager) =
+    List(new AppendToCSVFileHook(
       fileName,
       prototypes.map { executionManager.prototypeMapping }.toSeq: _*))
 }

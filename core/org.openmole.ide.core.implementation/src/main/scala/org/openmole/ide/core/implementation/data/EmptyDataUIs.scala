@@ -17,12 +17,12 @@
 
 package org.openmole.ide.core.implementation.data
 
-import org.openmole.core.model.data.IVariable
+import org.openmole.core.model.data._
 import org.openmole.core.model.sampling.ISampling
 import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
 import org.openmole.ide.core.model.data.IPrototypeDataUI
@@ -32,12 +32,7 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import java.awt.Color
 import java.util.Locale
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.task.EmptyTask
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IDataSet
-import org.openmole.core.model.data.IParameterSet
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.implementation.task._
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import scala.swing.TabbedPane
 
@@ -50,8 +45,8 @@ object EmptyDataUIs {
   class EmptyPrototypeDataUI extends IPrototypeDataUI[Any] {
     def name = ""
     def dim = 0
-    def coreClass = classOf[IPrototype[_]]
-    def coreObject = new Prototype[Any]("")
+    def coreClass = classOf[Prototype[_]]
+    def coreObject = Prototype[Any]("")
     def fatImagePath = "img/empty.png"
     def buildPanelUI = new EmptyPrototypePanelUI
     def displayTypedName = ""
@@ -80,7 +75,7 @@ object EmptyDataUIs {
 
   class EmptySampling extends Sampling {
     def prototypes = List.empty
-    def build(context: IContext) = List[Iterable[IVariable[_]]]().toIterator
+    def build(context: Context) = List[Iterable[Variable[_]]]().toIterator
   }
 
   class EmptyTaskDataUI extends TaskDataUI {
@@ -90,7 +85,7 @@ object EmptyDataUIs {
     def updateImplicts(ipList: List[IPrototypeDataProxyUI],
                        opList: List[IPrototypeDataProxyUI]) = {}
 
-    def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = {
+    def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) = {
       val taskBuilder = EmptyTask(name)(plugins)
       taskBuilder addInput inputs
       taskBuilder addOutput outputs

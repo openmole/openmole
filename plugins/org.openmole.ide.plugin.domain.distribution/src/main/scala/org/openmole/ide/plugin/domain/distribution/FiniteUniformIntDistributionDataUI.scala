@@ -6,7 +6,7 @@
 package org.openmole.ide.plugin.domain.distribution
 
 import java.io.File
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.plugin.domain.distribution._
 import org.openmole.plugin.domain.modifier._
@@ -16,7 +16,7 @@ class FiniteUniformIntDistributionDataUI(
     val name: String = "",
     val size: Int = 1) extends IDomainDataUI {
 
-  def coreObject(proto: IPrototype[_]) = new FiniteUniformIntDistribution(size)
+  def coreObject(proto: Prototype[_]) = new FiniteUniformIntDistribution(size)
 
   def coreClass = classOf[FiniteUniformIntDistribution]
 

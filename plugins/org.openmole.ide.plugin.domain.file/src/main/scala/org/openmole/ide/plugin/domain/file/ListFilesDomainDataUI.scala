@@ -18,7 +18,7 @@
 package org.openmole.ide.plugin.domain.file
 
 import java.io.File
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.misc.tools.io.FromString._
 import org.openmole.plugin.domain.file.ListFilesDomain
@@ -27,7 +27,7 @@ class ListFilesDomainDataUI(val name: String = "",
                             val directoryPath: String = "",
                             val regexp: String = ".*") extends IDomainDataUI {
 
-  def coreObject(prototypeObject: IPrototype[_]) = new ListFilesDomain(new File(directoryPath), regexp)
+  def coreObject(prototypeObject: Prototype[_]) = new ListFilesDomain(new File(directoryPath), regexp)
 
   def coreClass = classOf[ListFilesDomain]
 

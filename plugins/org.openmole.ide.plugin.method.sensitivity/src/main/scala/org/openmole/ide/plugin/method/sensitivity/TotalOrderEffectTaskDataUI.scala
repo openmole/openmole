@@ -6,10 +6,8 @@
 package org.openmole.ide.plugin.method.sensitivity
 
 import java.awt.Color
-import org.openmole.core.model.data.IDataSet
-import org.openmole.core.model.data.IParameterSet
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.method.sensitivity.TotalOrderEffectTask
@@ -18,10 +16,10 @@ class TotalOrderEffectTaskDataUI(val name: String = "",
                                  val modelInputs: Iterable[IPrototypeDataProxyUI] = List.empty,
                                  val modelOutputs: Iterable[IPrototypeDataProxyUI] = List.empty) extends TaskDataUI {
 
-  def coreObject(inputs: IDataSet, outputs: IDataSet, parameters: IParameterSet, plugins: IPluginSet) = {
+  def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) = {
     val builder = TotalOrderEffectTask(name,
-      modelInputs.map { _.dataUI.coreObject.asInstanceOf[IPrototype[Double]] },
-      modelOutputs.map { _.dataUI.coreObject.asInstanceOf[IPrototype[Double]] })(plugins)
+      modelInputs.map { _.dataUI.coreObject.asInstanceOf[Prototype[Double]] },
+      modelOutputs.map { _.dataUI.coreObject.asInstanceOf[Prototype[Double]] })(plugins)
     builder addOutput inputs
     builder addOutput outputs
     builder addParameter parameters

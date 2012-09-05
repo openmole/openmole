@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Romain Reuillon
+ * Copyright (C) 2012 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,13 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ui.console
+package org.openmole.ide.core.model.workflow
 
-import java.io.File
-import org.openmole.core.model.task.PluginSet
-
-class Implicits(
-    implicit val plugins: PluginSet) {
-  implicit def stringToFile(path: String) = new File(path)
-}
-
+trait ISamplingUI

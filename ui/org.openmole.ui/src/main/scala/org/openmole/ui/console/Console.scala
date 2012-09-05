@@ -29,12 +29,12 @@ import scala.tools.nsc.Settings
 import scala.tools.nsc.interpreter.ILoop
 import scala.tools.nsc.interpreter.JLineCompletion
 import scala.tools.nsc.interpreter.JLineReader
-import org.openmole.core.model.task.IPluginSet
+import org.openmole.core.model.task._
 import java.util.concurrent.TimeUnit
 import scala.tools.nsc.io.{ File ⇒ SFile }
 import java.io.File
 
-class Console(plugins: IPluginSet, password: Option[String], script: Option[String]) { console ⇒
+class Console(plugins: PluginSet, password: Option[String], script: Option[String]) { console ⇒
 
   def setPassword(password: String) =
     try {
@@ -76,11 +76,8 @@ class Console(plugins: IPluginSet, password: Option[String], script: Option[Stri
           loop.bind("implicits", new Implicits()(plugins))
           loop.addImports(
             "org.openmole.core.implementation.data._",
-            "org.openmole.core.implementation.data.Prototype._",
-            "org.openmole.core.implementation.data.Data._",
             "org.openmole.core.implementation.execution._",
             "org.openmole.core.implementation.execution.local._",
-            "org.openmole.core.implementation.hook._",
             "org.openmole.core.implementation.job._",
             "org.openmole.core.implementation.mole._",
             "org.openmole.core.implementation.sampling._",
@@ -88,6 +85,11 @@ class Console(plugins: IPluginSet, password: Option[String], script: Option[Stri
             "org.openmole.core.implementation.transition._",
             "org.openmole.core.implementation.tools._",
             "org.openmole.core.implementation.puzzle._",
+            "org.openmole.core.model.data._",
+            "org.openmole.core.model.transition._",
+            "org.openmole.core.model.mole._",
+            "org.openmole.core.model.sampling._",
+            "org.openmole.core.model.task._",
             "org.openmole.core.batch.authentication._",
             "org.openmole.misc.workspace._",
             "org.openmole.misc.tools.io.FromString._",

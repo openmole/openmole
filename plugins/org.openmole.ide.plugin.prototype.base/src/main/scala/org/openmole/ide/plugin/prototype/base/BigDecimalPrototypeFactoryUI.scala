@@ -17,7 +17,7 @@
 
 package org.openmole.ide.plugin.prototype.base
 
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 import java.math.BigDecimal
@@ -28,7 +28,7 @@ class BigDecimalPrototypeFactoryUI extends IPrototypeFactoryUI[BigDecimal] {
 
   override def buildDataUI = new BigDecimalPrototypeDataUI
 
-  def buildDataUI(prototype: IPrototype[_],
+  def buildDataUI(prototype: Prototype[_],
                   dim: Int = 0) = new BigDecimalPrototypeDataUI(prototype.name, dim)
 
   def category = ComponentCategories.PROTOTYPE

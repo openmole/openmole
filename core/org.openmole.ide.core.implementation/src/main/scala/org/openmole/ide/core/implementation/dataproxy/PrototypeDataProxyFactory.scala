@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.implementation.dataproxy
 
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyFactory
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 import scala.collection.JavaConversions._
@@ -26,7 +26,7 @@ class PrototypeDataProxyFactory(val factory: IPrototypeFactoryUI[_]) extends IPr
 
   def buildDataProxyUI = new PrototypeDataProxyUI(factory.buildDataUI, false)
 
-  def buildDataProxyUI(prototype: IPrototype[_],
+  def buildDataProxyUI(prototype: Prototype[_],
                        generated: Boolean = false,
                        dim: Int = 0) = new PrototypeDataProxyUI(factory.buildDataUI(prototype, dim), generated)
 }

@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.implementation.registry
 
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data._
 import org.openmole.misc.tools.obj.ClassUtils._
 import scala.annotation.tailrec
 
@@ -27,7 +27,7 @@ object KeyGenerator {
     else (m, dim)
   }
 
-  def apply(proto: IPrototype[_]): (DefaultKey, Int) = {
+  def apply(proto: Prototype[_]): (DefaultKey, Int) = {
     val (manifest, dim) = stripArrays(proto.`type`)
     (new DefaultKey(manifest.erasure), dim)
   }
