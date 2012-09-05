@@ -15,12 +15,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.data
+package org.openmole.core.model.task
 
+import java.io.File
 import scala.collection.SetLike
 
-trait IParameterSet extends SetLike[IParameter[_], IParameterSet with Set[IParameter[_]]] {
+object PluginSet {
+  val empty = PluginSet(Set.empty)
 
-  def +[T](prototype: IPrototype[T], v: T, `override`: Boolean = false): IParameterSet
+  def apply(p: Traversable[File]) = new PluginSet {
+    val plugins = p.toSet
+  }
+
+  def apply(p: File*): PluginSet = PluginSet(p)
 
 }
+
+trait PluginSet extends Set[File] with SetLike[File, PluginSet] {
+  def plugins: Set[File]
+
+  override def empty = PluginSet.empty
+  override def -(f: File) = PluginSet(plugins - f)
+  override def +(f: File) = PluginSet(plugins + f)
+  override def contains(f: File) = plugins.contains(f)
+  override def iterator = plugins.iterator
+}
+

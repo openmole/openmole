@@ -46,9 +46,9 @@ class SubMoleExecution(
   private val _jobs = Ref(TreeMap.empty[IMoleJob, (ICapsule, ITicket)])
   private val _canceled = Ref(false)
 
-  val masterCapsuleRegistry = new RegistryWithTicket[IMasterCapsule, IContext]
-  val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, Buffer[IVariable[_]]]
-  val transitionRegistry = new RegistryWithTicket[ITransition, Buffer[IVariable[_]]]
+  val masterCapsuleRegistry = new RegistryWithTicket[IMasterCapsule, Context]
+  val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, Buffer[Variable[_]]]
+  val transitionRegistry = new RegistryWithTicket[ITransition, Buffer[Variable[_]]]
 
   parrentApply(_.+=(this))
 
@@ -97,23 +97,39 @@ class SubMoleExecution(
   private def -=(submoleExecution: SubMoleExecution) =
     _childs.single -= submoleExecution
 
+  private def secureHookExecution(hook: IHook, moleJob: IMoleJob) =
+    try hook.process(moleJob)
+    catch {
+      case e ⇒
+        EventDispatcher.trigger(moleExecution, new IMoleExecution.HookExceptionRaised(hook, moleJob, e, WARNING))
+        logger.log(WARNING, "Error in execution of hook " + hook, e)
+    }
+
   override def jobs =
     atomic { implicit txn ⇒ _jobs().keys.toList ::: TSet.asSet(_childs).flatMap(_.jobs.toList).toList }
 
   private def jobFailedOrCanceled(job: IMoleJob) = {
     val (capsule, ticket) = _jobs.single().get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registred."))
+
+    secureHookExecution(moleExecution.profiler, job)
+
     rmJob(job)
     checkFinished(ticket)
+
     moleExecution.jobFailedOrCanceled(job, capsule)
   }
 
   private def jobFinished(job: IMoleJob) = {
+    val mole = moleExecution.mole
     val (capsule, ticket) = _jobs.single().get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registred."))
     try {
       EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleFinished(job, capsule))
 
-      capsule.outputDataChannels.foreach { _.provides(job.context, ticket, moleExecution) }
-      capsule.outputTransitions.foreach { _.perform(job.context, ticket, this) }
+      moleExecution.indexedHooks.getOrElse(capsule, List.empty).foreach { secureHookExecution(_, job) }
+      secureHookExecution(moleExecution.profiler, job)
+
+      mole.outputDataChannels(capsule).foreach { _.provides(job.context, ticket, moleExecution) }
+      mole.outputTransitions(capsule).foreach { _.perform(job.context, ticket, this) }
     } catch {
       case e ⇒ throw new InternalProcessingError(e, "Error at the end of a MoleJob for capsule " + capsule)
     } finally {
@@ -129,19 +145,19 @@ class SubMoleExecution(
       parrentApply(_.-=(this))
     }
 
-  override def submit(capsule: ICapsule, context: IContext, ticket: ITicket) = {
+  override def submit(capsule: ICapsule, context: Context, ticket: ITicket) = {
     if (!canceled) {
       def implicits =
         Context.empty ++
-          moleExecution.mole.implicits.values.filter(v ⇒ capsule.taskOrException.inputs.contains(v.prototype.name)) +
-          new Variable(Task.openMOLESeed, moleExecution.newSeed)
+          moleExecution.mole.implicits.values.filter(v ⇒ capsule.task.inputs.contains(v.prototype.name)) +
+          Variable(Task.openMOLESeed, moleExecution.newSeed)
 
       //FIXME: Factorize code
       capsule match {
         case c: IMasterCapsule ⇒
           synchronized {
-            val savedContext = masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(new Context)
-            val moleJob: IMoleJob = new MoleJob(capsule.taskOrException, implicits + context + savedContext, moleExecution.nextJobId, stateChanged)
+            val savedContext = masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(Context.empty)
+            val moleJob: IMoleJob = new MoleJob(capsule.task, implicits + context + savedContext, moleExecution.nextJobId, stateChanged)
             EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleStarting(moleJob, capsule))
             EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobSubmitted(moleJob))
             val instant = moleExecution.instantRerun(moleJob, capsule)
@@ -150,7 +166,7 @@ class SubMoleExecution(
             masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(moleJob.context))
           }
         case _ ⇒
-          val moleJob: IMoleJob = new MoleJob(capsule.taskOrException, implicits + context, moleExecution.nextJobId, stateChanged)
+          val moleJob: IMoleJob = new MoleJob(capsule.task, implicits + context, moleExecution.nextJobId, stateChanged)
           addJob(moleJob, capsule, ticket)
           EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleStarting(moleJob, capsule))
           EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobSubmitted(moleJob))

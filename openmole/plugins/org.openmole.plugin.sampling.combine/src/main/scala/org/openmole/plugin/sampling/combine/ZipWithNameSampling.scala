@@ -18,22 +18,18 @@
 package org.openmole.plugin.sampling.combine
 
 import java.io.File
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.sampling.Sampling
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IIterable
-import org.openmole.core.model.sampling.IFactor
-import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.sampling._
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
+import org.openmole.core.model.sampling._
 
-sealed class ZipWithNameSampling(factor: IFactor[File, IDomain[File] with IIterable[File]], name: IPrototype[String]) extends Sampling {
+sealed class ZipWithNameSampling(factor: IFactor[File, IDomain[File] with IIterable[File]], name: Prototype[String]) extends Sampling {
 
   override def prototypes = List(factor.prototype, name)
 
-  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] =
+  override def build(context: Context): Iterator[Iterable[Variable[_]]] =
     factor.domain.iterator(context).map {
-      v ⇒ List(new Variable(factor.prototype, v), new Variable(name, v.getName))
+      v ⇒ List(Variable(factor.prototype, v), Variable(name, v.getName))
     }
 }

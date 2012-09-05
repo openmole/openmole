@@ -18,14 +18,9 @@
 package org.openmole.plugin.task.external
 
 import java.io.File
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.task.Task
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IDataSet
-import org.openmole.core.model.data.IPrototype
-
-import org.openmole.core.implementation.data.Context._
+import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.task._
+import org.openmole.core.model.data._
 
 import org.openmole.core.implementation.tools._
 import org.openmole.misc.exception.UserBadDataError
@@ -33,37 +28,37 @@ import scala.collection.mutable.ListBuffer
 import org.openmole.misc.tools.io.FileUtil._
 
 object ExternalTask {
-  val PWD = new Prototype[String]("PWD")
+  val PWD = Prototype[String]("PWD")
 }
 
 trait ExternalTask extends Task {
 
-  def inputFiles: Iterable[(IPrototype[File], String, Boolean)]
-  def outputFiles: Iterable[(String, IPrototype[File])]
+  def inputFiles: Iterable[(Prototype[File], String, Boolean)]
+  def outputFiles: Iterable[(String, Prototype[File])]
   def resources: Iterable[(File, String, Boolean)]
 
   protected class ToPut(val file: File, val name: String, val link: Boolean)
   protected class ToGet(val name: String, val file: File)
 
-  protected def listInputFiles(context: IContext): Iterable[ToPut] =
+  protected def listInputFiles(context: Context): Iterable[ToPut] =
     inputFiles.map {
       case (prototype, name, link) ⇒ new ToPut(context.valueOrException(prototype), VariableExpansion(context, name), link)
 
     }
 
-  protected def listResources(context: IContext): Iterable[ToPut] =
+  protected def listResources(context: Context): Iterable[ToPut] =
     resources.map {
       case (file, name, link) ⇒ new ToPut(file, VariableExpansion(context, name), link)
     }
 
-  protected def listOutputFiles(context: IContext, localDir: File): (IContext, Iterable[ToGet]) = {
+  protected def listOutputFiles(context: Context, localDir: File): (Context, Iterable[ToGet]) = {
     val files =
       outputFiles.map {
         case (name, prototype) ⇒
           val fileName = VariableExpansion(context, name)
           val file = new File(localDir, fileName)
 
-          val fileVariable = new Variable(prototype, file)
+          val fileVariable = Variable(prototype, file)
           new ToGet(fileName, file) -> fileVariable
       }
     context ++ files.map { _._2 } -> files.map { _._1 }
@@ -82,7 +77,7 @@ trait ExternalTask extends Task {
     }
   }
 
-  def prepareInputFiles(context: IContext, tmpDir: File, workDirPath: String = "") = {
+  def prepareInputFiles(context: Context, tmpDir: File, workDirPath: String = "") = {
     val workDir = new File(tmpDir, workDirPath)
     Set.empty[File] ++
       listInputFiles(context).flatMap(
@@ -91,7 +86,7 @@ trait ExternalTask extends Task {
           f ⇒ copy(f, new File(tmpDir, f.name)))
   }
 
-  def fetchOutputFiles(context: IContext, localDir: File, links: Set[File]): IContext = {
+  def fetchOutputFiles(context: Context, localDir: File, links: Set[File]): Context = {
     val (resultContext, outputFiles) = listOutputFiles(context, localDir)
 
     val usedFiles = outputFiles.map(

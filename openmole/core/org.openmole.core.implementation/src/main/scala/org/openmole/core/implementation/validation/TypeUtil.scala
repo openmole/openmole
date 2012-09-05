@@ -20,30 +20,45 @@ package org.openmole.core.implementation.validation
 import org.openmole.core.model.mole._
 import org.openmole.core.model.transition._
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.tools.obj.ClassUtils._
-import org.openmole.core.model.data.DataModeMask._
+import org.openmole.misc.tools.obj._
 import org.openmole.core.model.data._
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.data.Prototype._
-import org.openmole.core.implementation.data.DataChannel
-import org.openmole.core.implementation.data.DataChannel._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
 object TypeUtil {
 
-  def receivedTypes(slot: ISlot): Iterable[IPrototype[_]] =
-    computeManifests(slot).map {
+  def intersect(d: Iterable[Iterable[Prototype[_]]]) = {
+
+    def superType(d: Iterable[Prototype[_]]) =
+      ClassUtils.intersectionArray(d.map { _.`type`.erasure })
+
+    val indexedD = d.flatten.toList.groupBy(_.name)
+
+    val r: Iterable[Option[Prototype[_]]] = indexedD.map {
+      case (name, prototypes) ⇒
+        if (prototypes.size == d.size) Some(Prototype(name)(superType(prototypes))) else None
+    }
+    r.flatten
+  }
+
+  def receivedTypes(mole: IMole)(slot: Slot): Iterable[Prototype[_]] =
+    computeManifests(mole)(slot).map {
       t ⇒
-        if (t.toArray) new Prototype(t.name)(t.manifest.arrayManifest)
-        else new Prototype(t.name)(t.manifest)
+        if (t.toArray) Prototype(t.name)(t.manifest.arrayManifest)
+        else Prototype(t.name)(t.manifest)
     }
 
   class ComputedType(val name: String, val manifest: Manifest[_], val toArray: Boolean)
 
-  def computeManifests(slot: ISlot): Iterable[ComputedType] = {
-    val (varNames, direct, toArray, fromArray) = computeManifests(slot.transitions, slot.inputDataChannels)
+  def computeManifests(mole: IMole)(slot: Slot): Iterable[ComputedType] = {
+    import ClassUtils._
+
+    val (varNames, direct, toArray, fromArray) =
+      computeTransmissions(mole)(
+        mole.inputTransitions(slot),
+        mole.inputDataChannels(slot))
 
     varNames.map {
       import ListBuffer.empty
@@ -61,17 +76,17 @@ object TypeUtil {
     }
   }
 
-  private def s(m: Iterable[Manifest[_]]) = intersectionArray(m map (_.erasure))
+  private def s(m: Iterable[Manifest[_]]) = ClassUtils.intersectionArray(m map (_.erasure))
 
-  private def computeManifests(transitions: Iterable[ITransition], dataChannels: Iterable[IDataChannel]) = {
+  private def computeTransmissions(mole: IMole)(transitions: Iterable[ITransition], dataChannels: Iterable[IDataChannel]) = {
     val direct = new HashMap[String, ListBuffer[Manifest[_]]] // Direct transmission through transition or data channel
     val toArray = new HashMap[String, ListBuffer[Manifest[_]]] // Transmission through exploration transition
     val fromArray = new HashMap[String, ListBuffer[Manifest[_]]] // Transmission through aggregation transition
     val varNames = new HashSet[String]
 
-    for (t ← transitions; d ← t.data) {
+    for (t ← transitions; d ← t.data(mole)) {
       def setFromArray =
-        if (d.mode is explore) fromArray.getOrElseUpdate(d.prototype.name, new ListBuffer[Manifest[_]]) += d.prototype.`type`
+        if (d.mode is Explore) fromArray.getOrElseUpdate(d.prototype.name, new ListBuffer[Manifest[_]]) += d.prototype.`type`
         else direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
 
       varNames += d.prototype.name
@@ -84,9 +99,9 @@ object TypeUtil {
       }
     }
 
-    for (dc ← dataChannels; d ← dc.data) {
+    for (dc ← dataChannels; d ← dc.data(mole)) {
       varNames += d.prototype.name
-      if (DataChannel.levelDelta(dc) >= 0) direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
+      if (DataChannel.levelDelta(mole)(dc) >= 0) direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
       else toArray.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
     }
 

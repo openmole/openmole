@@ -19,19 +19,15 @@ package org.openmole.plugin.hook.file
 
 import java.io.File
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.hook.CapsuleExecutionHook
-import org.openmole.core.implementation.tools.VariableExpansion
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.implementation.tools._
+import org.openmole.core.model.data._
+import org.openmole.core.model.job._
+import org.openmole.core.model.mole._
 import org.openmole.misc.tools.io.FileUtil._
 
 class AppendArrayToFileHook(
-    moleExecution: IMoleExecution,
-    capsule: ICapsule,
     fileName: String,
-    content: IPrototype[Array[_]]) extends CapsuleExecutionHook(moleExecution, capsule) {
+    content: Prototype[Array[_]]) extends IHook {
 
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
@@ -41,6 +37,6 @@ class AppendArrayToFileHook(
     file.lockApply(_.appendLine(toWrite))
   }
 
-  def inputs = DataSet(content)
+  override def requiered = DataSet(content)
 
 }

@@ -18,6 +18,6 @@
 package org.openmole.plugin.task
 
 import java.io.File
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.Prototype
 
 package object external {}

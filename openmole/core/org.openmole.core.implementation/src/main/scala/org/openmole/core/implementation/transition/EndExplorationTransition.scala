@@ -25,9 +25,9 @@ import org.openmole.core.model.transition.ICondition._
 import org.openmole.core.model.transition._
 import org.openmole.misc.exception._
 
-class EndExplorationTransition(start: ICapsule, end: ISlot, trigger: ICondition, filter: IFilter[String] = Filter.empty) extends Transition(start, end, True, filter) {
+class EndExplorationTransition(start: ICapsule, end: Slot, trigger: ICondition, filter: IFilter[String] = Filter.empty) extends Transition(start, end, True, filter) {
 
-  override protected def _perform(context: IContext, ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
+  override protected def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
     if (trigger.evaluate(context)) {
       val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("End exploration transition should take place after an exploration."))
       val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))

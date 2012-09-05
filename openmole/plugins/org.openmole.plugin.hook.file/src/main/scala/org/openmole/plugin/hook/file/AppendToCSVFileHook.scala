@@ -21,22 +21,18 @@ import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.hook.CapsuleExecutionHook
-import org.openmole.core.implementation.tools.VariableExpansion
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.implementation.tools._
+import org.openmole.core.model.data._
+import org.openmole.core.model.job._
+import org.openmole.core.model.mole._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.Prettifier._
 import scala.annotation.tailrec
 
 class AppendToCSVFileHook(
-    moleExecution: IMoleExecution,
-    capsule: ICapsule,
     fileName: String,
-    prototypes: IPrototype[_]*) extends CapsuleExecutionHook(moleExecution, capsule) {
+    prototypes: Prototype[_]*) extends IHook {
 
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
@@ -83,6 +79,6 @@ class AppendToCSVFileHook(
 
   }
 
-  def inputs = DataSet(prototypes)
+  override def requiered = DataSet(prototypes)
 
 }

@@ -17,44 +17,38 @@
 
 package org.openmole.core.implementation
 
-import org.openmole.core.implementation.transition.Slot
-import org.openmole.core.model.execution.IEnvironment
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IMole
+import org.openmole.core.model.execution._
+import org.openmole.core.model.job._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.task._
+import org.openmole.core.model.transition._
 
-import org.openmole.core.model.task.ITask
-import org.openmole.core.model.transition.ISlot
+import transition._
 import puzzle._
 import task._
 import data._
 
 package object mole {
-  implicit def slotToCapsuleConverter(slot: ISlot) = slot.capsule
-  implicit def capsuleToSlotConverter(capsule: ICapsule) = capsule.defaultInputSlot
-  implicit def puzzleToMoleConverter(puzzle: Puzzle) = new Mole(puzzle.first.capsule)
-
-  implicit def moleToMoleExecutionConverter(mole: IMole) = new MoleExecution(mole)
+  implicit def slotToCapsuleConverter(slot: Slot) = slot.capsule
 
   class PuzzleMoleExecutionDecorator(puzzle: Puzzle) {
-    def toExecution = new MoleExecution(new Mole(puzzle.first.capsule), puzzle.selection, puzzle.grouping)
     def on(env: IEnvironment) =
       puzzle.copy(selection = puzzle.selection ++ puzzle.lasts.map(_ -> new FixedEnvironmentSelection(env)))
+    def hook(hook: IHook) =
+      puzzle.copy(hooks = puzzle.hooks.toList ::: puzzle.lasts.map(_ -> hook).toList)
   }
 
+  implicit def hookToProfilerConverter(hook: IHook) = new IProfiler {
+    override def process(job: IMoleJob) = hook.process(job)
+  }
   implicit def puzzleMoleExecutionDecoration(puzzle: Puzzle) = new PuzzleMoleExecutionDecorator(puzzle)
   implicit def capsuleMoleExecutionDecoration(capsule: ICapsule) = puzzleMoleExecutionDecoration(capsule.toPuzzle)
   implicit def taskMoleExecutionDecoration(task: ITask): PuzzleMoleExecutionDecorator = capsuleMoleExecutionDecoration(task.toCapsule)
   implicit def taskMoleBuilderDecoraton(taskBuilder: TaskBuilder) = taskMoleExecutionDecoration(taskBuilder.toTask)
   implicit def environmentToFixedEnvironmentSelectionConverter(env: IEnvironment) = new FixedEnvironmentSelection(env)
 
-  implicit def caspuleSlotDecorator(capsule: ICapsule) = new {
-    def slot(i: Int) = {
-      (0 to (i - capsule.intputSlots.size)).foreach { i ⇒ newSlot }
-      capsule.intputSlots.toIndexedSeq(i)
-    }
-    def newSlot = new Slot(capsule)
-
-    def channel(slot: ISlot, filtered: String*) = new DataChannel(capsule, slot, filtered: _*)
-  }
+  implicit def puzzleMoleExecutionConverter(puzzle: Puzzle) = puzzle.toExecution
+  implicit def puzzleMoleConverter(puzzle: Puzzle) = puzzle.toMole
+  implicit def moleToMoleExecutionConverter(mole: IMole) = new MoleExecution(mole)
 
 }

@@ -20,24 +20,21 @@ package org.openmole.plugin.task.template
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.data.Data
-import org.openmole.core.implementation.task.Task
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IData
-import org.openmole.core.model.data.IPrototype
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.task._
+import org.openmole.core.model.data._
+import org.openmole.misc.workspace._
 import org.openmole.core.implementation.tools.VariableExpansion._
 
 abstract class AbstractTemplateFileTask extends Task {
 
-  def output: IPrototype[File]
+  def output: Prototype[File]
 
-  override def process(context: IContext) = {
+  override def process(context: Context) = {
     val outputFile = Workspace.newFile("output", "template")
     expandBufferData(context, new FileInputStream(file(context)), new FileOutputStream(outputFile))
     Context.empty + (output, outputFile)
   }
 
-  def file(context: IContext): File
+  def file(context: Context): File
 }

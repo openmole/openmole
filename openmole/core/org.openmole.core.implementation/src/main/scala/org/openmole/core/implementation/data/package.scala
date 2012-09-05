@@ -19,7 +19,6 @@ package org.openmole.core.implementation
 
 import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.task._
-import org.openmole.core.implementation.data.Context._
 import org.openmole.core.model.data._
 import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.misc.tools.service._
@@ -30,20 +29,20 @@ package object data {
 
   import Context._
 
-  implicit def tupleToParameter[T](t: (IPrototype[T], T)) = new Parameter(t._1, t._2)
-  implicit def tuple3ToParameter[T](t: (IPrototype[T], T, Boolean)) = new Parameter(t._1, t._2, t._3)
-  implicit def prototypeToData[T](p: IPrototype[T]) = new Data[T](p)
-  implicit def dataIterableDecorator(data: Traversable[IData[_]]) = new DataSet(data.toList)
-  //  implicit def iterableOfPrototypeToIterableOfDataConverter(prototypes: Traversable[IPrototype[_]]): Traversable[IData[_]] = DataSet(prototypes)
-  implicit def prototypeToStringConverter(p: IPrototype[_]) = p.name
-  implicit def dataToStringConverter(d: IData[_]) = d.prototype.name
+  implicit def tupleToParameter[T](t: (Prototype[T], T)) = new Parameter(t._1, t._2)
+  implicit def tuple3ToParameter[T](t: (Prototype[T], T, Boolean)) = new Parameter(t._1, t._2, t._3)
+  implicit def prototypeToData[T](p: Prototype[T]) = Data[T](p)
+  implicit def dataIterableDecorator(data: Traversable[Data[_]]) = DataSet(data.toList)
+  implicit def iterableOfPrototypeToIterableOfDataConverter(prototypes: Traversable[Prototype[_]]) = DataSet(prototypes.map { p ⇒ prototypeToData(p) })
+  implicit def prototypeToStringConverter(p: Prototype[_]) = p.name
+  implicit def dataToStringConverter(d: Data[_]) = d.prototype.name
 
-  implicit def prototypeToArrayDecorator[T](prototype: IPrototype[T]) = new {
-    def toArray(level: Int): IPrototype[_] = {
-      def toArrayRecursive[A](prototype: IPrototype[A], level: Int): IPrototype[_] = {
+  implicit def prototypeToArrayDecorator[T](prototype: Prototype[T]) = new {
+    def toArray(level: Int): Prototype[_] = {
+      def toArrayRecursive[A](prototype: Prototype[A], level: Int): Prototype[_] = {
         if (level <= 0) prototype
         else {
-          val arrayProto = new Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[IPrototype[Array[_]]]
+          val arrayProto = Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[Prototype[Array[_]]]
           if (level <= 1) arrayProto
           else toArrayRecursive(arrayProto, level - 1)
         }
@@ -52,34 +51,32 @@ package object data {
       toArrayRecursive(prototype, level)
     }
 
-    def toArray: IPrototype[Array[T]] =
-      new Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[IPrototype[Array[T]]]
+    def toArray: Prototype[Array[T]] =
+      Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[Prototype[Array[T]]]
 
   }
 
-  implicit def prototypeFromArrayDecorator[T](prototype: IPrototype[Array[T]]) = new {
+  implicit def prototypeFromArrayDecorator[T](prototype: Prototype[Array[T]]) = new {
 
-    def fromArray: IPrototype[T] =
-      (new Prototype(prototype.name)(prototype.`type`.fromArray.toManifest)).asInstanceOf[IPrototype[T]]
+    def fromArray: Prototype[T] =
+      (Prototype(prototype.name)(prototype.`type`.fromArray.toManifest)).asInstanceOf[Prototype[T]]
 
   }
 
-  implicit def dataToArrayDecorator[T](data: IData[T]) = new {
-    def toArray: IData[Array[T]] = new Data[Array[T]](data.prototype.toArray, data.mode)
+  implicit def dataToArrayDecorator[T](data: Data[T]) = new {
+    def toArray: Data[Array[T]] = Data[Array[T]](data.prototype.toArray, data.mode)
   }
 
-  implicit def decorateVariableIterable(variables: Traversable[IVariable[_]]) = new {
+  implicit def decorateVariableIterable(variables: Traversable[Variable[_]]) = new {
     def toContext: Context = Context(variables)
   }
 
-  implicit def variableToContextConverter(variable: IVariable[_]) = Context(variable)
+  implicit def variableToContextConverter(variable: Variable[_]) = Context(variable)
 
-  implicit def variablesToContextConverter(variables: Traversable[IVariable[_]]): Context = variables.toContext
+  implicit def variablesToContextConverter(variables: Traversable[Variable[_]]): Context = variables.toContext
 
-  val optional = DataModeMask.optional
-
-  implicit def prototypeDecorator[T](prototype: IPrototype[T]) = new {
-    def withName(name: String) = new Prototype[T](name)(prototype.`type`)
+  implicit def prototypeDecorator[T](prototype: Prototype[T]) = new {
+    def withName(name: String) = Prototype[T](name)(prototype.`type`)
   }
 
 }

@@ -17,15 +17,15 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 
 trait IRangeConverter[A, B] extends IRange[B] {
   def convert(e: A): B
   def underlyingRange: IRange[A]
 
-  override def computeValues(context: IContext): Iterable[B] = underlyingRange.computeValues(context).map { convert(_) }
-  override def step(context: IContext): B = convert(underlyingRange.step(context))
-  override def min(context: IContext): B = convert(underlyingRange.min(context))
-  override def max(context: IContext): B = convert(underlyingRange.max(context))
-  override def center(context: IContext): B = convert(underlyingRange.center(context))
+  override def computeValues(context: Context): Iterable[B] = underlyingRange.computeValues(context).map { convert(_) }
+  override def step(context: Context): B = convert(underlyingRange.step(context))
+  override def min(context: Context): B = convert(underlyingRange.min(context))
+  override def max(context: Context): B = convert(underlyingRange.max(context))
+  override def center(context: Context): B = convert(underlyingRange.center(context))
 }

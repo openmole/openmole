@@ -17,27 +17,65 @@
 
 package org.openmole.core.implementation.puzzle
 
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IEnvironmentSelection
-import org.openmole.core.model.mole.IGrouping
-import org.openmole.core.model.transition.ISlot
+import org.openmole.core.model.data._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.transition._
+import org.openmole.core.implementation.mole._
 
 object Puzzle {
 
+  def merge(p1: Puzzle, p2: Puzzle) =
+    new Puzzle(
+      p1.first,
+      p1.lasts,
+      p1.transitions.toList ::: p2.transitions.toList,
+      p1.dataChannels.toList ::: p2.dataChannels.toList,
+      p1.hooks.toList ::: p2.hooks.toList,
+      p1.selection ++ p2.selection,
+      p1.grouping ++ p2.grouping)
+
   def merge(
-    first: ISlot,
+    first: Slot,
     lasts: Iterable[ICapsule],
-    puzzles: Iterable[Puzzle]) =
+    puzzles: Iterable[Puzzle],
+    transitions: Iterable[ITransition] = Iterable.empty,
+    dataChannels: Iterable[IDataChannel] = Iterable.empty) =
     new Puzzle(
       first,
       lasts,
+      puzzles.flatMap { _.transitions }.toList ::: transitions.toList,
+      puzzles.flatMap { _.dataChannels }.toList ::: dataChannels.toList,
+      puzzles.flatMap(_.hooks),
       puzzles.flatMap { _.selection }.toMap,
       puzzles.flatMap { _.grouping }.toMap)
 
 }
 
 case class Puzzle(
-  val first: ISlot,
-  val lasts: Iterable[ICapsule],
-  val selection: Map[ICapsule, IEnvironmentSelection],
-  val grouping: Map[ICapsule, IGrouping])
+    val first: Slot,
+    val lasts: Iterable[ICapsule],
+    val transitions: Iterable[ITransition],
+    val dataChannels: Iterable[IDataChannel],
+    val hooks: Iterable[(ICapsule, IHook)],
+    val selection: Map[ICapsule, IEnvironmentSelection],
+    val grouping: Map[ICapsule, IGrouping]) {
+
+  def this(p: Puzzle) =
+    this(
+      p.first,
+      p.lasts,
+      p.transitions,
+      p.dataChannels,
+      p.hooks,
+      p.selection,
+      p.grouping)
+
+  def toMole = new Mole(first.capsule, transitions, dataChannels)
+  def toExecution =
+    new MoleExecution(toMole, hooks, selection, grouping)
+
+  def toExecution(profiler: IProfiler) =
+    new MoleExecution(toMole, hooks, selection, grouping, profiler)
+
+  def +(p: Puzzle) = Puzzle.merge(this, p)
+}

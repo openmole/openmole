@@ -17,10 +17,9 @@
 
 package org.openmole.plugin.domain.modifier
 
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.data.Context
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
+import org.openmole.core.implementation.data._
 
 import org.openmole.core.model.domain.IIterable
 import org.scalatest.FlatSpec
@@ -35,7 +34,7 @@ class GroupedDomainSpec extends FlatSpec with ShouldMatchers {
     val r1 = (1 to 10)
 
     val d1 = new IDomain[Int] with IIterable[Int] {
-      override def iterator(context: IContext) = r1.iterator
+      override def iterator(context: Context) = r1.iterator
     }
 
     val md = new GroupDomain(d1, 3).iterator(Context.empty)

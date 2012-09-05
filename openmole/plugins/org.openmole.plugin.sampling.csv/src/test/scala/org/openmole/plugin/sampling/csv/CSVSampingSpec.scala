@@ -21,8 +21,8 @@ import au.com.bytecode.opencsv.CSVReader
 import java.io.File
 import java.io.FileReader
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.data.Context
+import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
@@ -33,8 +33,8 @@ import org.openmole.misc.tools.io.FileUtil._
 class CSVSamplingSpec extends FlatSpec with ShouldMatchers {
 
   "CSVSampling" should "detect the correct mapping between csv header defined column" in {
-    val p1 = new Prototype[String]("col1")
-    val p2 = new Prototype[Int]("col2")
+    val p1 = Prototype[String]("col1")
+    val p2 = Prototype[Int]("col2")
 
     val tmpCsvFile = File.createTempFile("tmp", ".csv")
     getClass.getClassLoader.getResourceAsStream("csvTest.csv").copy(tmpCsvFile)

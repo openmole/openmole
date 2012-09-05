@@ -18,28 +18,18 @@
 package org.openmole.plugin.hook.csvprofiler
 
 import au.com.bytecode.opencsv.CSVWriter
-import java.io.OutputStreamWriter
-import java.io.Writer
-import org.openmole.core.implementation.hook.MoleExecutionHook
-import org.openmole.core.model.job.IMoleJob
+import org.openmole.core.model.job._
 import org.openmole.core.model.job.State._
-import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.mole._
 import ToCSV._
-import scala.ref.WeakReference
 
-class CSVProfiler(val moleExecution: WeakReference[IMoleExecution], writer: CSVWriter) extends MoleExecutionHook {
+class CSVProfiler(writer: CSVWriter) extends IProfiler {
 
-  def this(moleExecution: IMoleExecution, out: Writer) = this(new WeakReference(moleExecution), new CSVWriter(out))
-
-  def this(moleExecution: IMoleExecution) = this(new WeakReference(moleExecution), new CSVWriter(new OutputStreamWriter(System.out)))
-
-  override def stateChanged(moleJob: IMoleJob, newState: State, oldState: State) = synchronized {
-    if (moleJob.state.isFinal) {
-      writer.writeNext(toColumns(moleJob))
-      writer.flush
-    }
+  override def process(moleJob: IMoleJob) = synchronized {
+    writer.writeNext(toColumns(moleJob))
+    writer.flush
   }
 
-  override def executionFinished = writer.flush
+  override def finished = writer.flush
 
 }

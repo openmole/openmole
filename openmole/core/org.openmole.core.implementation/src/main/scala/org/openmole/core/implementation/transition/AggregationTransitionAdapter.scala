@@ -17,10 +17,9 @@
 
 package org.openmole.core.implementation.transition
 
-import org.openmole.core.model.mole.ISubMoleExecution
-import org.openmole.core.model.transition.IAggregationTransition
-import org.openmole.misc.eventdispatcher.Event
-import org.openmole.misc.eventdispatcher.EventListener
+import org.openmole.core.model.mole._
+import org.openmole.core.model.transition._
+import org.openmole.misc.eventdispatcher._
 
 class AggregationTransitionAdapter(transition: IAggregationTransition) extends EventListener[ISubMoleExecution] {
 

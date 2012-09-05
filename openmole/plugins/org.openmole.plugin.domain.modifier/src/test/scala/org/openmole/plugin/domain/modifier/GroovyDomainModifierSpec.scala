@@ -17,10 +17,9 @@
 
 package org.openmole.plugin.domain.modifier
 
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.data.Context
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
+import org.openmole.core.implementation.data._
 
 import org.openmole.core.model.domain.IIterable
 import org.scalatest.FlatSpec
@@ -32,11 +31,11 @@ import org.junit.runner.RunWith
 class GroovyDomainModifierSpec extends FlatSpec with ShouldMatchers {
 
   "GroovyDomainModifier" should "change the values of a domain using groovy code" in {
-    val p1 = new Prototype[Int]("p1")
+    val p1 = Prototype[Int]("p1")
     val r1 = (1 to 3)
 
     val d1 = new IDomain[Int] with IIterable[Int] {
-      override def iterator(context: IContext) = r1.iterator
+      override def iterator(context: Context) = r1.iterator
     }
 
     val md = new GroovyDomainModifier(p1, d1, "p1 * 2").iterator(Context.empty)

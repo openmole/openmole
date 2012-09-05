@@ -31,7 +31,7 @@ trait IParameter[T] {
    *
    * @return the variable
    */
-  def variable: IVariable[T]
+  def variable: Variable[T]
 
   /**
    * Get if an existing value in the context should be overriden. If override

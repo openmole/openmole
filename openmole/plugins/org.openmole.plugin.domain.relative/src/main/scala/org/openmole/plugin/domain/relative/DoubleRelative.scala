@@ -23,7 +23,7 @@ import org.openmole.core.model.data._
 
 sealed class DoubleRelative(val nominal: String, val percent: String, val size: String) extends IRelative[Double] {
 
-  override def computeValues(context: IContext): Iterable[Double] = {
+  override def computeValues(context: Context): Iterable[Double] = {
     val nom = VariableExpansion(context, nominal).toDouble
     val pe = VariableExpansion(context, percent).toDouble
     val s = VariableExpansion(context, size).toInt

@@ -21,7 +21,6 @@ import java.io.File
 
 import org.openmole.core.model.mole._
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.hook._
 import org.openmole.core.model.data._
 import org.openmole.core.model.job._
 import org.openmole.misc.tools.io.FileUtil._
@@ -29,12 +28,10 @@ import org.openmole.core.implementation.tools._
 import org.openmole.misc.exception.UserBadDataError
 
 class CopyFileHook(
-    moleExecution: IMoleExecution,
-    capsule: ICapsule,
-    filePrototype: IPrototype[File],
+    filePrototype: Prototype[File],
     destination: String,
     remove: Boolean = false,
-    compress: Boolean = false) extends CapsuleExecutionHook(moleExecution, capsule) {
+    compress: Boolean = false) extends IHook {
 
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
@@ -52,6 +49,6 @@ class CopyFileHook(
     }
   }
 
-  def inputs = DataSet(filePrototype)
+  override def requiered = DataSet(filePrototype)
 
 }

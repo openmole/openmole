@@ -17,15 +17,15 @@
 
 package org.openmole.plugin.domain.collection
 
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.Context
+import org.openmole.core.model.data.Prototype
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IIterable
 import org.openmole.misc.exception.UserBadDataError
 
-sealed class ScalaIterableVariableDomain[T](variable: IPrototype[Iterable[_ <: T]]) extends IDomain[T] with IIterable[T] {
+sealed class ScalaIterableVariableDomain[T](variable: Prototype[Iterable[_ <: T]]) extends IDomain[T] with IIterable[T] {
 
-  override def iterator(context: IContext): Iterator[T] =
+  override def iterator(context: Context): Iterator[T] =
     context.value(variable).getOrElse(throw new UserBadDataError("Value not found in context for prototype " + variable.toString())).iterator
 
 }

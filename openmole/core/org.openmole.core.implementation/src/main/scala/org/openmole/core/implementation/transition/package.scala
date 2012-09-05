@@ -34,9 +34,11 @@ package object transition {
 
   implicit def transitionsPuzzleDecorator(from: Puzzle) = new TransitionDecorator(from)
   implicit def transitionsCapsuleDecorator(from: ICapsule) = new TransitionDecorator(from.toPuzzle)
-  implicit def transitionsTaskDecorator(from: ITask) = new TransitionDecorator(from)
-  implicit def transitionsTaskBuilderDecorator(from: TaskBuilder) = new TransitionDecorator(from.toTask)
+  implicit def transitionsTaskDecorator(from: ITask) = new TransitionDecorator(from.toCapsule.toPuzzle)
+  implicit def transitionsTaskBuilderDecorator(from: TaskBuilder) = new TransitionDecorator(from.toTask.toCapsule.toPuzzle)
+  implicit def transitionsSlotDecorator(slot: Slot) = new TransitionDecorator(slot.capsule.toPuzzle)
 
+  implicit def taskToSlotConverter(task: ITask) = Slot(Capsule(task))
   implicit def transitionToSlotConverter(transition: ITransition) = transition.end
   implicit def conditionStringConverter(condition: String) = new Condition(condition)
 
@@ -48,7 +50,7 @@ package object transition {
       filter: IFilter[String] = Filter.empty,
       size: Option[String] = None) = {
 
-      from.lasts.foreach {
+      val transitions = from.lasts.map {
         c ⇒
           size match {
             case None ⇒ new ExplorationTransition(c, to.first, condition, filter)
@@ -56,13 +58,13 @@ package object transition {
           }
       }
 
-      Puzzle.merge(from.first, to.lasts, from :: to :: Nil)
+      Puzzle.merge(from.first, to.lasts, from :: to :: Nil, transitions)
     }
 
     def -<(toHead: Puzzle, toTail: Puzzle*) = {
       val toPuzzles = (toHead :: toTail.toList)
-      for (f ← from.lasts; l ← toPuzzles) new ExplorationTransition(f, l.first)
-      Puzzle.merge(from.first, toPuzzles.flatMap { _.lasts }, from :: toPuzzles ::: Nil)
+      val transitions = for (f ← from.lasts; l ← toPuzzles) yield new ExplorationTransition(f, l.first)
+      Puzzle.merge(from.first, toPuzzles.flatMap { _.lasts }, from :: toPuzzles ::: Nil, transitions)
     }
 
     def -<-(
@@ -70,17 +72,17 @@ package object transition {
       condition: ICondition = ICondition.True,
       filter: IFilter[String] = Filter.empty) = {
 
-      from.lasts.foreach {
+      val transitions = from.lasts.map {
         c ⇒ new SlaveTransition(c, to.first, condition, filter)
       }
 
-      Puzzle.merge(from.first, to.lasts, from :: to :: Nil)
+      Puzzle.merge(from.first, to.lasts, from :: to :: Nil, transitions)
     }
 
     def -<-(toHead: Puzzle, toTail: Puzzle*) = {
       val toPuzzles = (toHead :: toTail.toList)
-      for (f ← from.lasts; l ← toPuzzles) new SlaveTransition(f, l.first)
-      Puzzle.merge(from.first, toPuzzles.flatMap { _.lasts }, from :: toPuzzles ::: Nil)
+      val transitions = for (f ← from.lasts; l ← toPuzzles) yield new SlaveTransition(f, l.first)
+      Puzzle.merge(from.first, toPuzzles.flatMap { _.lasts }, from :: toPuzzles ::: Nil, transitions)
     }
 
     def >-(
@@ -88,35 +90,42 @@ package object transition {
       condition: ICondition = ICondition.True,
       filter: IFilter[String] = Filter.empty,
       trigger: ICondition = ICondition.False) = {
-      from.lasts.foreach { c ⇒ new AggregationTransition(c, to.first, condition, filter, trigger) }
-      Puzzle.merge(from.first, to.lasts, from :: to :: Nil)
+      val transitions = from.lasts.map { c ⇒ new AggregationTransition(c, to.first, condition, filter, trigger) }
+      Puzzle.merge(from.first, to.lasts, from :: to :: Nil, transitions)
     }
 
     def >-(toHead: Puzzle, toTail: Puzzle*) = {
       val toPuzzles = (toHead :: toTail.toList)
-      for (f ← from.lasts; l ← toPuzzles) new AggregationTransition(f, l.first)
-      Puzzle.merge(from.first, toPuzzles.flatMap { _.lasts }, from :: toPuzzles ::: Nil)
+      val transitions = for (f ← from.lasts; l ← toPuzzles) yield new AggregationTransition(f, l.first)
+      Puzzle.merge(from.first, toPuzzles.flatMap { _.lasts }, from :: toPuzzles ::: Nil, transitions)
     }
 
     def >|(
       to: Puzzle,
       trigger: ICondition,
       filter: IFilter[String] = Filter.empty) = {
-      from.lasts.foreach { c ⇒ new EndExplorationTransition(c, to.first, trigger, filter) }
-      Puzzle.merge(from.first, to.lasts, from :: to :: Nil)
+      val transitions = from.lasts.map { c ⇒ new EndExplorationTransition(c, to.first, trigger, filter) }
+      Puzzle.merge(from.first, to.lasts, from :: to :: Nil, transitions)
     }
 
     def --(to: Puzzle, condition: ICondition = ICondition.True, filter: IFilter[String] = Filter.empty) = {
-      from.lasts.foreach {
+      val transitions = from.lasts.map {
         c ⇒ new Transition(c, to.first, condition, filter)
       }
-      Puzzle.merge(from.first, to.lasts, from :: to :: Nil)
+      Puzzle.merge(from.first, to.lasts, from :: to :: Nil, transitions)
     }
 
     def --(toHead: Puzzle, toTail: Puzzle*) = {
       val toPuzzles = (toHead :: toTail.toList)
-      for (f ← from.lasts; l ← toPuzzles) new Transition(f, l.first)
-      Puzzle.merge(from.first, toPuzzles.flatMap { _.lasts }, from :: toPuzzles ::: Nil)
+      val transitions = for (f ← from.lasts; l ← toPuzzles) yield new Transition(f, l.first)
+      Puzzle.merge(from.first, toPuzzles.flatMap { _.lasts }, from :: toPuzzles ::: Nil, transitions)
+    }
+
+    def oo(to: Puzzle, filter: IFilter[String] = Filter.empty) = {
+      val channels = from.lasts.map {
+        c ⇒ new DataChannel(c, to.first, filter)
+      }
+      Puzzle.merge(from.first, to.lasts, from :: to :: Nil, dataChannels = channels)
     }
 
   }

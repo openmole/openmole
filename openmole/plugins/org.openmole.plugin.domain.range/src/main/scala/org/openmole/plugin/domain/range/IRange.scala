@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 import org.openmole.core.model.domain.ICenter
 import org.openmole.core.model.domain.IBounded
 import org.openmole.core.model.domain.IDomain
@@ -28,5 +28,5 @@ trait IRange[+T] extends IDomain[T] with IFinite[T] with ICenter[T] with IBounde
   def max: String
   def step: String
 
-  def step(context: IContext): T
+  def step(context: Context): T
 }

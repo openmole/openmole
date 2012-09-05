@@ -19,7 +19,7 @@ package org.openmole.plugin.domain.file
 
 import java.io.File
 import org.openmole.core.implementation.tools._
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 import org.openmole.core.model.domain.IDomain
 import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
@@ -30,7 +30,7 @@ object ListFilesDomain extends Logger
 
 sealed class ListFilesDomain(base: File, subdirectory: String = "", filter: File ⇒ Boolean = f ⇒ true) extends IDomain[File] with IFinite[File] {
 
-  override def computeValues(context: IContext): Iterable[File] = {
+  override def computeValues(context: Context): Iterable[File] = {
     val dir = new File(base, VariableExpansion(context, subdirectory))
 
     Option(dir.listFiles(filter)) match {

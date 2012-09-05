@@ -17,15 +17,31 @@
 
 package org.openmole.core.model.data
 
+import org.openmole.misc.exception.UserBadDataError
+import scala.collection.immutable.MapLike
+import scala.collection.immutable.TreeMap
+
+object Context {
+
+  def fromMap(v: Traversable[(String, Variable[_])]) = new Context {
+    val variables = TreeMap.empty[String, Variable[_]] ++ v
+  }
+
+  def apply(v: Variable[_]*): Context = apply(v)
+  def apply(v: Traversable[Variable[_]]): Context = Context.fromMap(v.map { v ⇒ v.prototype.name -> v })
+
+  val empty = apply(Iterable.empty)
+
+}
+
 /**
- * IContext represents a bunch of variables used by the task excutions.
+ * Context represents a bunch of variables used by the task excutions.
  * A task execution can remove variables from context, change the values of
  * the variables and add values to it.
  */
-import org.openmole.misc.exception.UserBadDataError
-import scala.collection.immutable.MapLike
+trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_], Context] {
 
-trait IContext extends MapLike[String, IVariable[_], IContext with Map[String, IVariable[_]]] {
+  def variables: TreeMap[String, Variable[_]]
 
   /**
    * Get a variable given its name.
@@ -34,7 +50,7 @@ trait IContext extends MapLike[String, IVariable[_], IContext with Map[String, I
    * @return Some(variable) if a variable with the given name is present None
    * otherwise
    */
-  def variable[T](name: String): Option[IVariable[T]]
+  def variable[T](name: String): Option[Variable[T]] = variables.get(name).asInstanceOf[Option[Variable[T]]]
 
   /**
    * Get a variable given a prototype name. This method get the variable by its
@@ -44,7 +60,12 @@ trait IContext extends MapLike[String, IVariable[_], IContext with Map[String, I
    * @return Some(variable) if a variable with the given name is present None
    * otherwise
    */
-  def variable[T](proto: IPrototype[T]): Option[IVariable[T]]
+  def variable[T](proto: Prototype[T]): Option[Variable[T]] = {
+    variables.get(proto.name) match {
+      case None ⇒ None
+      case Some(v) ⇒ Some(v.asInstanceOf[Variable[T]])
+    }
+  }
 
   /**
    * Get a variable value given its name.
@@ -53,7 +74,10 @@ trait IContext extends MapLike[String, IVariable[_], IContext with Map[String, I
    * @return Some(value) if a variable with the given name is present None
    * otherwise
    */
-  def value[T](name: String): Option[T]
+  def value[T](name: String): Option[T] = variables.get(name) match {
+    case None ⇒ None
+    case Some(v) ⇒ Some(v.asInstanceOf[Variable[T]].value)
+  }
 
   /**
    * Get a variable value given a prototype name. This method get the variable by its
@@ -63,7 +87,8 @@ trait IContext extends MapLike[String, IVariable[_], IContext with Map[String, I
    * @return Some(value) if a variable with the given name is present None
    * otherwise
    */
-  def value[T](proto: IPrototype[T]): Option[T]
+
+  def value[T](proto: Prototype[T]) = value[T](proto.name)
 
   /**
    * Get a variable valaue given a prototype name. This method get the variable by its
@@ -83,7 +108,7 @@ trait IContext extends MapLike[String, IVariable[_], IContext with Map[String, I
    * @return value the value
    * @throws a UserBadDataError if the variable hasn't been found
    */
-  def valueOrException[T](proto: IPrototype[T]): T = value(proto).getOrElse(throw new UserBadDataError("Variable " + proto + " has not been found in the context"))
+  def valueOrException[T](proto: Prototype[T]): T = value(proto).getOrElse(throw new UserBadDataError("Variable " + proto + " has not been found in the context"))
 
   /**
    * Build a new context containing the variables of the current context plus the
@@ -93,7 +118,7 @@ trait IContext extends MapLike[String, IVariable[_], IContext with Map[String, I
    * @param value the value of the variable
    * @return the new context
    */
-  def +[T](proto: IPrototype[T], value: T): IContext
+  def +[T](p: Prototype[T], value: T) = Context.fromMap(variables + (p.name -> Variable[T](p, value)))
 
   /**
    * Build a new context containing the variables of the current context plus the
@@ -102,11 +127,13 @@ trait IContext extends MapLike[String, IVariable[_], IContext with Map[String, I
    * @param tuple a tuple (prototype, value) to construct the variable
    * @return the new context
    */
-  def +[T](tuple: (IPrototype[T], T)): IContext = this.+(tuple._1, tuple._2)
+  def +[T](tuple: (Prototype[T], T)): Context = this.+(tuple._1, tuple._2)
 
-  def +[T](variable: IVariable[T]): IContext
+  def +[T](v: Variable[T]) = Context.fromMap(variables + (v.prototype.name -> v))
 
-  def +(ctx: IContext): IContext
+  def +(ctx: Context) = Context.fromMap(variables ++ ctx)
+
+  override def +[B1 >: Variable[_]](kv: (String, B1)) = variables + kv
 
   /**
    * Build a new context containing the variables of the current context plus the
@@ -115,7 +142,8 @@ trait IContext extends MapLike[String, IVariable[_], IContext with Map[String, I
    * @param variables the variables to add
    * @return the new context
    */
-  def ++(variables: Traversable[IVariable[_]]): IContext
+
+  def ++(vs: Traversable[Variable[_]]): Context = Context.fromMap(variables ++ (vs.map { v ⇒ v.prototype.name -> v }))
 
   /**
    * Build a new context containing the variables of the current context minus the
@@ -124,8 +152,23 @@ trait IContext extends MapLike[String, IVariable[_], IContext with Map[String, I
    * @param names the names of the variables
    * @return the new context
    */
-  def --(name: Traversable[String]): IContext
+  def --(names: Traversable[String]): Context = Context.fromMap(variables -- names)
 
-  def contains(p: IPrototype[_]): Boolean
+  def contains(p: Prototype[_]): Boolean = {
+    variable(p.name) match {
+      case None ⇒ false
+      case Some(v) ⇒ p.isAssignableFrom(v.prototype)
+    }
+  }
+
+  def -(name: String) = Context.fromMap(variables - name)
+
+  override def empty = Context.empty
+
+  def get(key: String) = variables.get(key)
+
+  override def iterator = variables.iterator
+
+  override def toString = "{" + (if (variables.values.isEmpty) "" else variables.values.mkString(", ")) + "}"
 
 }

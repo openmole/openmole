@@ -15,9 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.hook
+package org.openmole.core.model.data
 
-trait IHook {
-  def release
-  def resume
+import org.openmole.misc.tools.io.Prettifier._
+
+object Variable {
+  def apply[T](p: Prototype[T], v: T) = new Variable[T] {
+    val prototype = p
+    val value = v
+  }
 }
+
+trait Variable[T] {
+  def prototype: Prototype[T]
+  def value: T
+
+  override def toString: String =
+    prototype.name + "=" + (if (value != null) value.prettify else "null")
+}
+

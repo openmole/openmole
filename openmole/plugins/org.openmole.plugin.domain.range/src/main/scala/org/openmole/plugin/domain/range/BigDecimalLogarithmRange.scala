@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IBounded
 import java.math.MathContext
@@ -35,7 +35,7 @@ object BigDecimalLogarithmRange {
 sealed class BigDecimalLogarithmRange(val min: String, val max: String, val nbStep: String) extends IDomain[BigDecimal] with IFinite[BigDecimal] with IBounded[BigDecimal] {
   import BigDecimalLogarithmRange._
 
-  override def computeValues(context: IContext): Iterable[BigDecimal] = {
+  override def computeValues(context: Context): Iterable[BigDecimal] = {
     val minValue = min(context)
     val mi = ln(minValue, scale)
 
@@ -59,7 +59,7 @@ sealed class BigDecimalLogarithmRange(val min: String, val max: String, val nbSt
     }
   }
 
-  def nbStep(context: IContext): BigDecimal = new BigDecimal(VariableExpansion(context, nbStep))
-  def min(context: IContext): BigDecimal = new BigDecimal(VariableExpansion(context, min))
-  def max(context: IContext): BigDecimal = new BigDecimal(VariableExpansion(context, max))
+  def nbStep(context: Context): BigDecimal = new BigDecimal(VariableExpansion(context, nbStep))
+  def min(context: Context): BigDecimal = new BigDecimal(VariableExpansion(context, min))
+  def max(context: Context): BigDecimal = new BigDecimal(VariableExpansion(context, max))
 }

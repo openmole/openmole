@@ -15,26 +15,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.data
+package org.openmole.core.model.transition
 
-import org.openmole.core.model.data.{ DataModeMask, IDataMode }
-import org.openmole.core.model.data.DataModeMask._
+import org.openmole.core.model.mole._
 
-object DataMode {
-  val NONE = new DataMode(0)
+object Slot {
 
-  def apply(masks: DataModeMask*) = {
-    var mask = 0
-    for (m ← masks) mask |= m.value
-    new DataMode(mask)
+  def apply(c: ICapsule) = new Slot {
+    val capsule = c
   }
 
 }
 
-class DataMode(mask: Int) extends IDataMode {
-  override def is(mode: DataModeMask): Boolean = (mask & mode.value) != 0
-  override def toString = {
-    val toDisplay = values.flatMap { m ⇒ if (this is m) Some(m.toString) else None }
-    if (toDisplay.isEmpty) "None" else toDisplay.mkString(", ")
-  }
+trait Slot {
+
+  /**
+   *
+   * Get the capsule this slot belongs to.
+   *
+   *
+   * @return the capsule this slot belongs to
+   */
+  def capsule: ICapsule
+
+  override def toString = "Slot hash " + hashCode + " of " + capsule
+
 }

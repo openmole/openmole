@@ -20,7 +20,7 @@ package org.openmole.plugin.task.external
 import java.io.File
 import org.openmole.core.implementation.task.TaskBuilder
 import org.openmole.core.implementation.data._
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.Prototype
 import scala.collection.mutable.ListBuffer
 
 /**
@@ -33,8 +33,8 @@ import scala.collection.mutable.ListBuffer
  */
 abstract class ExternalTaskBuilder extends TaskBuilder {
 
-  private var _inputFiles = new ListBuffer[(IPrototype[File], String, Boolean)]
-  private var _outputFiles = new ListBuffer[(String, IPrototype[File])]
+  private var _inputFiles = new ListBuffer[(Prototype[File], String, Boolean)]
+  private var _outputFiles = new ListBuffer[(String, Prototype[File])]
   private var _resources = new ListBuffer[(File, String, Boolean)]
 
   def inputFiles = _inputFiles.toList
@@ -69,13 +69,13 @@ abstract class ExternalTaskBuilder extends TaskBuilder {
    * @param link @see addResouce
    *
    */
-  def addInput(p: IPrototype[File], name: String, link: Boolean): this.type = {
+  def addInput(p: Prototype[File], name: String, link: Boolean): this.type = {
     _inputFiles += ((p, name, link))
     this addInput p
     this
   }
 
-  def addInput(p: IPrototype[File], name: String): ExternalTaskBuilder.this.type = this.addInput(p, name, false)
+  def addInput(p: Prototype[File], name: String): ExternalTaskBuilder.this.type = this.addInput(p, name, false)
 
   /**
    * Get a file generate by the task and inject it in the dataflow
@@ -84,7 +84,7 @@ abstract class ExternalTaskBuilder extends TaskBuilder {
    * @param p the prototype that is injected
    *
    */
-  def addOutput(name: String, p: IPrototype[File]): this.type = {
+  def addOutput(name: String, p: Prototype[File]): this.type = {
     _outputFiles += ((name, p))
     this addOutput p
     this

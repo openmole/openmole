@@ -17,12 +17,51 @@
 
 package org.openmole.core.model.mole
 
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.task.ITask
+import org.openmole.core.model.transition._
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
+
+import scala.collection.mutable.HashSet
+import scala.collection.mutable.ListBuffer
+
+object IMole {
+
+  def slots(mole: IMole): Seq[Slot] = {
+    val visited = new HashSet[ICapsule]
+    val list = new ListBuffer[Slot]
+    val toExplore = new ListBuffer[ICapsule]
+
+    toExplore += mole.root
+    list += Slot(mole.root)
+
+    while (!(toExplore.isEmpty)) {
+      val current = toExplore.remove(0)
+
+      if (!visited.contains(current)) {
+        for (transition ← mole.outputTransitions(current)) {
+          toExplore += transition.end.capsule
+          list += transition.end
+        }
+        visited += current
+      }
+    }
+    list
+  }
+
+}
 
 trait IMole {
   def root: ICapsule
-  def capsules: Seq[ICapsule]
-  def tasks: Iterable[ITask]
-  def implicits: IContext
+  def transitions: Iterable[ITransition]
+  def dataChannels: Iterable[IDataChannel]
+  def implicits: Context
+
+  lazy val slots = IMole.slots(this).groupBy(_.capsule).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
+  lazy val capsules = slots.unzip._1
+  lazy val inputTransitions = transitions.groupBy(_.end).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
+  lazy val outputTransitions = transitions.groupBy(_.start).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
+  lazy val inputDataChannels = dataChannels.groupBy(_.end).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
+  lazy val outputDataChannels = dataChannels.groupBy(_.start).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
+
+  def level(c: ICapsule): Int
 }

@@ -18,19 +18,12 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
-import fr.iscpif.mgo.ga._
-import fr.iscpif.mgo.ranking._
-import fr.iscpif.mgo.breed.Breeding
-import fr.iscpif.mgo.diversity._
 
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.task.Task
-import org.openmole.core.implementation.task.TaskBuilder
-import org.openmole.core.model.data.DataModeMask
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.task.IPluginSet
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.implementation.task._
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
+import org.openmole.misc.workspace._
 import org.openmole.misc.tools.service.Random._
 import org.openmole.core.implementation.task.Task._
 
@@ -38,26 +31,26 @@ object BreedTask {
 
   def apply(evolution: Breeding with GManifest)(
     name: String,
-    archive: IPrototype[Population[evolution.G, evolution.MF]],
-    genome: IPrototype[evolution.G])(implicit plugins: IPluginSet) = sized(evolution)(name, archive, genome, None)
+    archive: Prototype[Population[evolution.G, evolution.MF]],
+    genome: Prototype[evolution.G])(implicit plugins: PluginSet) = sized(evolution)(name, archive, genome, None)
 
   def sized(evolution: Breeding with GManifest)(
     name: String,
-    archive: IPrototype[Population[evolution.G, evolution.MF]],
-    genome: IPrototype[evolution.G],
-    size: Option[Int])(implicit plugins: IPluginSet) = {
+    archive: Prototype[Population[evolution.G, evolution.MF]],
+    genome: Prototype[evolution.G],
+    size: Option[Int])(implicit plugins: PluginSet) = {
 
     val (_archive, _genome) = (archive, genome)
 
     new TaskBuilder { builder ⇒
       addInput(archive)
-      addOutput(new Data(genome toArray, DataModeMask.explore))
+      addOutput(Data(genome toArray, Explore))
       addParameter(archive -> Population.empty)
 
       def toTask =
         new BreedTask(name, evolution, size) {
-          val archive = _archive.asInstanceOf[IPrototype[Population[evolution.G, evolution.MF]]]
-          val genome = _genome.asInstanceOf[IPrototype[evolution.G]]
+          val archive = _archive.asInstanceOf[Prototype[Population[evolution.G, evolution.MF]]]
+          val genome = _genome.asInstanceOf[Prototype[evolution.G]]
 
           val inputs = builder.inputs
           val outputs = builder.outputs
@@ -69,12 +62,12 @@ object BreedTask {
 
 sealed abstract class BreedTask(
     val name: String,
-    val evolution: Breeding with GManifest, size: Option[Int])(implicit val plugins: IPluginSet) extends Task {
+    val evolution: Breeding with GManifest, size: Option[Int])(implicit val plugins: PluginSet) extends Task {
 
-  def archive: IPrototype[Population[evolution.G, evolution.MF]]
-  def genome: IPrototype[evolution.G]
+  def archive: Prototype[Population[evolution.G, evolution.MF]]
+  def genome: Prototype[evolution.G]
 
-  override def process(context: IContext) = {
+  override def process(context: Context) = {
     import evolution._
 
     val rng = newRNG(context.valueOrException(openMOLESeed))
@@ -83,7 +76,7 @@ sealed abstract class BreedTask(
       case None ⇒ evolution.breed(a)(rng).toArray
       case Some(s) ⇒ evolution.breed(a, s)(rng).toArray
     }
-    context + new Variable(genome toArray, newGenome)
+    context + Variable(genome toArray, newGenome)
   }
 
 }

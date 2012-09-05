@@ -19,6 +19,6 @@ package org.openmole.core.implementation.data
 
 import org.openmole.core.model.data._
 
-class DynamicParameter[T](prototype: IPrototype[T], f: ⇒ T, val `override`: Boolean = false) extends IParameter[T] {
-  def variable: IVariable[T] = new Variable(prototype, f)
+class DynamicParameter[T](prototype: Prototype[T], f: ⇒ T, val `override`: Boolean = false) extends IParameter[T] {
+  def variable: Variable[T] = Variable(prototype, f)
 }

@@ -17,7 +17,8 @@
 
 package org.openmole.plugin.task.groovy
 
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
 
@@ -33,7 +34,7 @@ class GroovyTaskSpec extends FlatSpec with ShouldMatchers {
   implicit val plugins = PluginSet.empty
 
   "GroovyTask" should "run a groovy code" in {
-    val p1 = new Prototype[Int]("p1")
+    val p1 = Prototype[Int]("p1")
 
     val groovyTask = GroovyTask("GroovyTask", "p1 *= 2")
     groovyTask addOutput p1
@@ -44,7 +45,7 @@ class GroovyTaskSpec extends FlatSpec with ShouldMatchers {
   }
 
   "GroovyTask" should "allow importing namespace" in {
-    val p1 = new Prototype[AtomicBoolean]("p1")
+    val p1 = Prototype[AtomicBoolean]("p1")
 
     val groovyTask = GroovyTask("GroovyTask", "p1 = new AtomicBoolean()")
     groovyTask addImport "java.util.concurrent.atomic.*"

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Romain Reuillon
+ * Copyright (C) 2012 romain
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.puzzle
+package org.openmole.core.model.mole
 
-/*trait PuzzleBuilder {
-  def toPuzzle: Puzzle
-}*/
+import org.openmole.core.model.job._
+
+object IProfiler {
+  val empty = new IProfiler {
+    def process(job: IMoleJob) = {}
+  }
+}
+
+trait IProfiler extends IHook {
+  def finished = {}
+}

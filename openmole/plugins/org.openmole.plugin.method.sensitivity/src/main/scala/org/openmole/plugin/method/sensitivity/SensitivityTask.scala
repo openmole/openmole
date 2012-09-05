@@ -20,20 +20,20 @@ package org.openmole.plugin.method.sensitivity
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task.Task
 import org.openmole.core.implementation.task.TaskBuilder
-import org.openmole.core.model.data.IDataSet
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.DataSet
+import org.openmole.core.model.data.Prototype
 import SaltelliSampling._
 
 object SensitivityTask {
-  def indice(name: String, input: IPrototype[Double], output: IPrototype[Double]) = new Prototype[Double](name + input.name.capitalize + output.name.capitalize)
+  def indice(name: String, input: Prototype[Double], output: Prototype[Double]) = Prototype[Double](name + input.name.capitalize + output.name.capitalize)
 
   abstract class Builder extends TaskBuilder {
     val name: String
-    val matrixName: IPrototype[String]
-    val modelInputs: Iterable[IPrototype[Double]]
-    val modelOutputs: Iterable[IPrototype[Double]]
+    val matrixName: Prototype[String]
+    val modelInputs: Iterable[Prototype[Double]]
+    val modelOutputs: Iterable[Prototype[Double]]
 
-    override def inputs: IDataSet = super.inputs + DataSet(modelInputs.map(_.toArray)) + DataSet(modelOutputs.map(_.toArray)) + matrixName.toArray
+    override def inputs: DataSet = super.inputs + DataSet(modelInputs.map(_.toArray)) + DataSet(modelOutputs.map(_.toArray)) + matrixName.toArray
   }
 }
 
@@ -41,9 +41,9 @@ import SensitivityTask._
 
 trait SensitivityTask extends Task {
 
-  def matrixName: IPrototype[String]
-  def modelInputs: Iterable[IPrototype[Double]]
-  def modelOutputs: Iterable[IPrototype[Double]]
+  def matrixName: Prototype[String]
+  def modelInputs: Iterable[Prototype[Double]]
+  def modelOutputs: Iterable[Prototype[Double]]
 
   def computeSensitivity(a: Seq[Double], b: Seq[Double], c: Seq[Double]): Double
 

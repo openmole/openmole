@@ -25,8 +25,7 @@ import java.util.logging.Level
 import java.util.logging.Logger
 
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.model.data.IVariable
+import org.openmole.core.model.data.Variable
 import org.openmole.misc.workspace.Workspace
 
 object CloningService {
@@ -60,7 +59,7 @@ object CloningService {
     cloner.deepClone(value)
   }
 
-  def clone[T](variable: IVariable[T]): IVariable[T] = {
+  def clone[T](variable: Variable[T]): Variable[T] = {
     Logger.getLogger(CloningService.getClass.getName).log(Level.FINE, "Clonning {0}", variable.prototype)
 
     //val cloned = cloner.deepClone(variable.value)
@@ -69,6 +68,6 @@ object CloningService {
      throw new InternalProcessingError(new MultipleException(exceptions));
      }*/
 
-    new Variable(variable.prototype, clone(variable.value))
+    Variable(variable.prototype, clone(variable.value))
   }
 }

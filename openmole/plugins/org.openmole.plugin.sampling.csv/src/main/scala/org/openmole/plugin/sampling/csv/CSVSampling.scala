@@ -21,14 +21,13 @@ import java.io.File
 import scala.collection.mutable.HashMap
 import scala.collection.immutable.TreeMap
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.core.implementation.sampling.Sampling
-import org.openmole.core.implementation.sampling.SamplingBuilder
+import org.openmole.core.implementation.sampling._
 import org.openmole.core.model.data._
 import java.io.FileReader
 import java.math.BigInteger
 import java.math.BigDecimal
 import org.openmole.core.implementation.data._
-import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.model.sampling._
 import au.com.bytecode.opencsv.CSVReader
 import collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
@@ -37,24 +36,24 @@ object CSVSampling {
 
   def apply(
     file: File) = new SamplingBuilder { builder ⇒
-    private var _columns = new ListBuffer[(String, IPrototype[_])]
-    private var _fileColumns = new ListBuffer[(String, File, IPrototype[File])]
+    private var _columns = new ListBuffer[(String, Prototype[_])]
+    private var _fileColumns = new ListBuffer[(String, File, Prototype[File])]
 
     def columns = _columns.toList
     def fileColumns = _fileColumns.toList
 
-    def addColumn(proto: IPrototype[_]): this.type = this.addColumn(proto.name, proto)
-    def addColumn(name: String, proto: IPrototype[_]): builder.type = {
+    def addColumn(proto: Prototype[_]): this.type = this.addColumn(proto.name, proto)
+    def addColumn(name: String, proto: Prototype[_]): builder.type = {
       _columns += (name -> proto)
       this
     }
 
-    def addFileColumn(name: String, dir: File, proto: IPrototype[File]): builder.type = {
+    def addFileColumn(name: String, dir: File, proto: Prototype[File]): builder.type = {
       _fileColumns += ((name, dir, proto))
       this
     }
 
-    def addFileColumn(dir: File, proto: IPrototype[File]): this.type = this.addFileColumn(proto.name, dir, proto)
+    def addFileColumn(dir: File, proto: Prototype[File]): this.type = this.addFileColumn(proto.name, dir, proto)
 
     def toSampling = new CSVSampling(file) {
       val columns = builder.columns
@@ -70,14 +69,14 @@ abstract sealed class CSVSampling(file: File) extends Sampling {
     columns.map { case (_, p) ⇒ p } :::
       fileColumns.map { case (_, _, p) ⇒ p } ::: Nil
 
-  def columns: List[(String, IPrototype[_])]
-  def fileColumns: List[(String, File, IPrototype[File])]
+  def columns: List[(String, Prototype[_])]
+  def fileColumns: List[(String, File, Prototype[File])]
 
   /**
    * Builds the plan.
    *
    */
-  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = {
+  override def build(context: Context): Iterator[Iterable[Variable[_]]] = {
     val reader = new CSVReader(new FileReader(file))
     val headers = reader.readNext.toArray
 
@@ -100,10 +99,10 @@ abstract sealed class CSVSampling(file: File) extends Sampling {
     Iterator.continually(reader.readNext).takeWhile(_ != null).map {
       line ⇒
         (columns zip columnsIndexes).map {
-          case ((_, p), i) ⇒ new Variable(p.asInstanceOf[IPrototype[Any]], converter(p)(line(i)))
+          case ((_, p), i) ⇒ Variable(p.asInstanceOf[Prototype[Any]], converter(p)(line(i)))
         } :::
           (fileColumns zip fileColumnsIndexes).map {
-            case ((_, f, p), i) ⇒ new Variable(p, new File(f, line(i)))
+            case ((_, f, p), i) ⇒ Variable(p, new File(f, line(i)))
           } ::: Nil
     }
 
@@ -119,7 +118,7 @@ abstract sealed class CSVSampling(file: File) extends Sampling {
     classOf[Float] -> ((_: String).toFloat),
     classOf[Long] -> ((_: String).toLong))
 
-  def converter[T](p: IPrototype[_]): String ⇒ _ =
+  def converter[T](p: Prototype[_]): String ⇒ _ =
     conveters.getOrElse(p.`type`.erasure, throw new UserBadDataError("Unmanaged type for csv sampling for column binded to prototype " + p))
 
 }

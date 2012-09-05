@@ -17,11 +17,9 @@
 
 package org.openmole.core.implementation.sampling
 
-import org.openmole.core.implementation.data.Prototype._
-import org.openmole.core.implementation.data.DataSet
-import org.openmole.core.model.data.IDataSet
-import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.model.data._
+import org.openmole.core.model.sampling._
 
 trait Sampling extends ISampling {
-  override def inputs: IDataSet = DataSet.empty
+  override def inputs: DataSet = DataSet.empty
 }

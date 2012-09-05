@@ -19,14 +19,11 @@ package org.openmole.plugin.task.netlogo
 
 import java.io.File
 import java.util.AbstractCollection
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.tools.VariableExpansion
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IDataSet
-import org.openmole.core.model.data.IParameterSet
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.task.IPluginSet
-import org.openmole.plugin.task.external.ExternalTask
+import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.tools._
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
+import org.openmole.plugin.task.external._
 
 object NetLogoTask {
 
@@ -41,15 +38,15 @@ class NetLogoTask(
     val name: String,
     val workspace: NetLogoTask.Workspace,
     val launchingCommands: Iterable[String],
-    val netLogoInputs: Iterable[(IPrototype[_], String)],
-    val netLogoOutputs: Iterable[(String, IPrototype[_])],
+    val netLogoInputs: Iterable[(Prototype[_], String)],
+    val netLogoOutputs: Iterable[(String, Prototype[_])],
     val netLogoFactory: NetLogoFactory,
-    val inputs: IDataSet,
-    val outputs: IDataSet,
-    val parameters: IParameterSet,
-    val inputFiles: Iterable[(IPrototype[File], String, Boolean)],
-    val outputFiles: Iterable[(String, IPrototype[File])],
-    val resources: Iterable[(File, String, Boolean)])(implicit val plugins: IPluginSet) extends ExternalTask {
+    val inputs: DataSet,
+    val outputs: DataSet,
+    val parameters: ParameterSet,
+    val inputFiles: Iterable[(Prototype[File], String, Boolean)],
+    val outputFiles: Iterable[(String, Prototype[File])],
+    val resources: Iterable[(File, String, Boolean)])(implicit val plugins: PluginSet) extends ExternalTask {
 
   val scriptPath =
     workspace.location match {
@@ -57,7 +54,7 @@ class NetLogoTask(
       case Right(s) ⇒ s.getName
     }
 
-  override def process(context: IContext): IContext = {
+  override def process(context: Context): Context = {
 
     val tmpDir = org.openmole.misc.workspace.Workspace.newDir("netLogoTask")
     val links = prepareInputFiles(context, tmpDir)
@@ -77,13 +74,13 @@ class NetLogoTask(
       fetchOutputFiles(context, tmpDir, links) ++ netLogoOutputs.map {
         case (name, prototype) ⇒
           val outputValue = netLogo.report(name)
-          if (!prototype.`type`.erasure.isArray) new Variable(prototype.asInstanceOf[IPrototype[Any]], outputValue)
+          if (!prototype.`type`.erasure.isArray) Variable(prototype.asInstanceOf[Prototype[Any]], outputValue)
           else {
             val netlogoCollection = outputValue.asInstanceOf[AbstractCollection[Any]]
             val array = java.lang.reflect.Array.newInstance(prototype.`type`.erasure.getComponentType, netlogoCollection.size)
             val it = netlogoCollection.iterator
             for (i ← 0 until netlogoCollection.size) java.lang.reflect.Array.set(array, i, it.next)
-            new Variable(prototype.asInstanceOf[IPrototype[Any]], array)
+            Variable(prototype.asInstanceOf[Prototype[Any]], array)
           }
       }
     } finally netLogo.dispose

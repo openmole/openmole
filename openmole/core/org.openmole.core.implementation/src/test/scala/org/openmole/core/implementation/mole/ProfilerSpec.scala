@@ -17,18 +17,14 @@
 
 package org.openmole.core.implementation.hook
 
-import org.openmole.core.implementation.mole.Capsule
-import org.openmole.core.implementation.data.DataSet
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.mole.Mole
-import org.openmole.core.implementation.mole.MoleExecution
-import org.openmole.core.implementation.task.EmptyTask
-import org.openmole.core.implementation.task.Task
+import org.openmole.core.implementation.mole._
+import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.mole._
+import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.tools._
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.implementation.task.TestTask
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.job.IMoleJob
+import org.openmole.core.model.data._
+import org.openmole.core.model.job._
+import org.openmole.core.model.mole._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
@@ -40,53 +36,29 @@ class MoleExecutionHookSpec extends FlatSpec with ShouldMatchers {
   "A execution hook" should "intersept finished jobs in mole execution" in {
     var executed = false
 
-    val p = new Prototype[String]("p")
+    val p = Prototype[String]("p")
 
     val t1 = new TestTask {
       val name = "Test"
       override val outputs = DataSet(p)
-      override def process(context: IContext) = context + (p -> "test")
+      override def process(context: Context) = context + (p -> "test")
     }
 
     val t1c = new Capsule(t1)
-    val ex = new MoleExecution(new Mole(t1c))
 
-    new MoleExecutionHook {
-      def moleExecution = ex
-
-      override def jobFinished(moleJob: IMoleJob, capsule: ICapsule) = {
-        capsule should equal(t1c)
+    val profiler = new IProfiler {
+      override def process(moleJob: IMoleJob) = {
         moleJob.context.contains(p) should equal(true)
         moleJob.context.value(p).get should equal("test")
         executed = true
       }
     }
 
+    val ex = new MoleExecution(new Mole(t1c), profiler = profiler)
+
     ex.start.waitUntilEnded
 
     executed should equal(true)
-  }
-
-  "After a release, an execution hook" should "not intersept finished jobs in mole execution" in {
-    var executed = false
-
-    val t1 = EmptyTask("Test")
-
-    val t1c = new Capsule(t1)
-    val ex = new MoleExecution(new Mole(t1c))
-
-    val hook = new MoleExecutionHook {
-      def moleExecution = ex
-
-      override def jobFinished(moleJob: IMoleJob, capsule: ICapsule) = {
-        executed = true
-      }
-    }
-
-    hook.release
-    ex.start.waitUntilEnded
-
-    executed should equal(false)
   }
 
 }

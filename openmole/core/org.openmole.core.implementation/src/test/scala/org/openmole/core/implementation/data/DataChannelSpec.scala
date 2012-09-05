@@ -17,13 +17,15 @@
 
 package org.openmole.core.implementation.data
 
-import org.openmole.core.implementation.data.Prototype._
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.transition._
-import org.openmole.core.implementation.sampling.ExplicitSampling
-import org.openmole.core.model.data.IContext
+import org.openmole.core.implementation.sampling._
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
+import org.openmole.core.model.transition._
+
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
@@ -31,18 +33,18 @@ import org.junit.runner.RunWith
 import scala.collection.mutable.ListBuffer
 
 @RunWith(classOf[JUnitRunner])
-class DataChannelSpec extends FlatSpec with ShouldMatchers {
+class IDataChannelSpec extends FlatSpec with ShouldMatchers {
 
   implicit val plugins = PluginSet.empty
 
   "A datachannel" should "enable variable values to be transmitted from a task to another" in {
-    val p = new Prototype[String]("p")
+    val p = Prototype[String]("p")
 
     val t1 =
       new TestTask {
         val name = "Test write"
         override val outputs = DataSet(p)
-        override def process(context: IContext) = context + (p -> "Test")
+        override def process(context: Context) = context + (p -> "Test")
       }
 
     val t2 = EmptyTask("Inter task")
@@ -50,7 +52,7 @@ class DataChannelSpec extends FlatSpec with ShouldMatchers {
     val t3 = new TestTask {
       val name = "Test read"
       override val inputs = DataSet(p)
-      override def process(context: IContext) = {
+      override def process(context: Context) = {
         context.value(p).get should equal("Test")
         context
       }
@@ -58,27 +60,24 @@ class DataChannelSpec extends FlatSpec with ShouldMatchers {
 
     val t1c = new Capsule(t1)
     val t2c = new Capsule(t2)
-    val t3c = new Capsule(t3)
+    val t3c = Slot(new Capsule(t3))
 
-    new Transition(t1c, t2c)
-    new Transition(t2c, t3c)
+    val ex = (t1c -- t2c -- t3c) + (t1c oo t3c)
 
-    new DataChannel(t1c, t3c)
-
-    new MoleExecution(new Mole(t1c)).start.waitUntilEnded
+    ex.start.waitUntilEnded
   }
 
   "A data channel" should "be able to transmit the value to the multiple execution of an explored task" in {
 
-    val j = new Prototype[String]("j")
+    val j = Prototype[String]("j")
     val tw = new TestTask {
       val name = "Test write"
       override def outputs = DataSet(j)
-      override def process(context: IContext) = context + (j -> "J")
+      override def process(context: Context) = context + (j -> "J")
     }
 
     val data = List("A", "B", "C")
-    val i = new Prototype[String]("i")
+    val i = Prototype[String]("i")
 
     val sampling = new ExplicitSampling(i, data)
 
@@ -89,7 +88,7 @@ class DataChannelSpec extends FlatSpec with ShouldMatchers {
     val t = new TestTask {
       val name = "Test"
       override val inputs = DataSet(i, j)
-      override def process(context: IContext) = synchronized {
+      override def process(context: Context) = synchronized {
         context.contains(i) should equal(true)
         context.contains(j) should equal(true)
         res += context.value(i).get
@@ -97,31 +96,28 @@ class DataChannelSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
-    val twc = new Capsule(tw)
-    val tc = new Capsule(t)
+    val twc = Capsule(tw)
+    val tc = Slot(t)
 
-    new DataChannel(twc, tc)
-
-    new Transition(twc, exc)
-    new ExplorationTransition(exc, tc)
-    new MoleExecution(new Mole(twc)).start.waitUntilEnded
+    val ex = (twc -- exc -< tc) + (twc oo tc)
+    ex.start.waitUntilEnded
     res.toArray.sorted.deep should equal(data.toArray.deep)
   }
 
   "A data channel" should "be able to gather the values of the multiple execution of an explored task" in {
     var executed = false
     val data = List("A", "B", "C")
-    val i = new Prototype[String]("i")
-    val j = new Prototype[String]("j")
+    val i = Prototype[String]("i")
+    val j = Prototype[String]("j")
 
     val sampling = new ExplicitSampling(i, data)
 
-    val exc = new Capsule(ExplorationTask("Exploration", sampling))
+    val exc = Capsule(ExplorationTask("Exploration", sampling))
 
     val t = new TestTask {
       val name = "Test"
       override val outputs = DataSet(j)
-      override def process(context: IContext) = context + (j -> "J")
+      override def process(context: Context) = context + (j -> "J")
     }
 
     val noOP = EmptyTask("NoOP")
@@ -129,20 +125,18 @@ class DataChannelSpec extends FlatSpec with ShouldMatchers {
     val tr = new TestTask {
       val name = "Test read"
       override val inputs = DataSet(j.toArray)
-      override def process(context: IContext) = {
+      override def process(context: Context) = {
         context.value(j.toArray).get.size should equal(data.size)
         executed = true
         context
       }
     }
 
-    val tc = new Capsule(t)
-    val noOPC = new Capsule(noOP)
-    val trc = new Capsule(tr)
+    val tc = Capsule(t)
+    val noOPC = Capsule(noOP)
+    val trc = Slot(tr)
 
-    new DataChannel(tc, trc)
-
-    val ex = exc -< tc -- noOPC >- trc toExecution
+    val ex = (exc -< tc -- noOPC >- trc) + (tc oo trc)
 
     ex.start.waitUntilEnded
     executed should equal(true)

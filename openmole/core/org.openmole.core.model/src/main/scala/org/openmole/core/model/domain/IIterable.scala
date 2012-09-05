@@ -17,9 +17,9 @@
 
 package org.openmole.core.model.domain
 
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 
 trait IIterable[+T] { this: IDomain[T] ⇒
 
-  def iterator(context: IContext): Iterator[T]
+  def iterator(context: Context): Iterator[T]
 }

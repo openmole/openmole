@@ -23,8 +23,8 @@ import java.io.OutputStream
 import java.io.OutputStreamWriter
 import java.io.InputStream
 import org.openmole.misc.tools.script.GroovyProxy
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IVariable
+import org.openmole.core.model.data.Context
+import org.openmole.core.model.data.Variable
 import scala.math.BigDecimal
 import scala.util.control.Breaks._
 
@@ -34,22 +34,22 @@ object VariableExpansion {
   private val patternEnd = '}'
   private val eval = "$" + patternBegin
 
-  def expandBigDecimal(context: IContext, s: String): BigDecimal =
+  def expandBigDecimal(context: Context, s: String): BigDecimal =
     BigDecimal(apply(context, s))
 
-  def expandDouble(context: IContext, s: String): Double =
+  def expandDouble(context: Context, s: String): Double =
     apply(context, s).toDouble
 
-  def expandInt(context: IContext, s: String): Int =
+  def expandInt(context: Context, s: String): Int =
     apply(context, s).toInt
 
-  def apply(context: IContext, s: String): String =
+  def apply(context: Context, s: String): String =
     apply(context, Iterable.empty, s)
 
-  def apply(context: IContext, tmpVariable: Iterable[IVariable[_]], s: String): String =
+  def apply(context: Context, tmpVariable: Iterable[Variable[_]], s: String): String =
     expandDataInernal(context, tmpVariable, s)
 
-  private def expandDataInernal(context: IContext, tmpVariable: Iterable[IVariable[_]], s: String): String = {
+  private def expandDataInernal(context: Context, tmpVariable: Iterable[Variable[_]], s: String): String = {
     var ret = s
     val allVariables = context ++ tmpVariable
     var cur = 0
@@ -85,11 +85,11 @@ object VariableExpansion {
     ret
   }
 
-  def expandData(replace: Map[String, String], tmpVariable: Iterable[IVariable[_]], s: String): String = {
+  def expandData(replace: Map[String, String], tmpVariable: Iterable[Variable[_]], s: String): String = {
     expandDataInternal(replace, tmpVariable, s)
   }
 
-  def expandDataInternal(replace: Map[String, String], tmpVariable: Iterable[IVariable[_]], s: String): String = {
+  def expandDataInternal(replace: Map[String, String], tmpVariable: Iterable[Variable[_]], s: String): String = {
     var ret = s
     var beginIndex = -1
     var endIndex = -1
@@ -119,7 +119,7 @@ object VariableExpansion {
     str.substring(1, str.length - 1)
   }
 
-  protected def expandOneData(allVariables: IContext, variableExpression: String): String = {
+  protected def expandOneData(allVariables: Context, variableExpression: String): String = {
     allVariables.variable(variableExpression) match {
       case Some(variable) ⇒ variable.value.toString
       case None ⇒
@@ -128,7 +128,7 @@ object VariableExpansion {
     }
   }
 
-  def expandBufferData(context: IContext, is: InputStream, os: OutputStream) = {
+  def expandBufferData(context: Context, is: InputStream, os: OutputStream) = {
     val isreader = new InputStreamReader(is, "UTF-8")
     val oswriter = new OutputStreamWriter(os)
 
@@ -166,7 +166,7 @@ object VariableExpansion {
   }
 
   implicit def stringExpansionDecorator(s: String) = new {
-    def expand(context: IContext) = apply(context, s)
+    def expand(context: Context) = apply(context, s)
   }
 
 }

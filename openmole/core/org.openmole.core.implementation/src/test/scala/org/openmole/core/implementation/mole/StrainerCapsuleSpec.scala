@@ -20,7 +20,8 @@ package org.openmole.core.implementation.mole
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.transition._
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data._
+import org.openmole.core.model.transition._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
@@ -30,12 +31,12 @@ import org.junit.runner.RunWith
 class StrainerCapsuleSpec extends FlatSpec with ShouldMatchers {
 
   "The strainer capsule" should "let the data pass through" in {
-    val p = new Prototype[String]("p")
+    val p = Prototype[String]("p")
 
     val t1 = new TestTask {
       val name = "Test write"
       override def outputs = DataSet(p)
-      override def process(context: IContext) = context + (p -> "Test")
+      override def process(context: Context) = context + (p -> "Test")
     }
 
     val strainer = EmptyTask("Strainer")
@@ -43,7 +44,7 @@ class StrainerCapsuleSpec extends FlatSpec with ShouldMatchers {
     val t2 = new TestTask {
       val name = "Test read"
       override def inputs = DataSet(p)
-      override def process(context: IContext) = {
+      override def process(context: Context) = {
         context.value(p).get should equal("Test")
         context
       }
@@ -53,10 +54,39 @@ class StrainerCapsuleSpec extends FlatSpec with ShouldMatchers {
     val strainerC = new StrainerCapsule(strainer)
     val t2c = new Capsule(t2)
 
-    new Transition(t1c, strainerC)
-    new Transition(strainerC, t2c)
+    val ex = t1c -- strainerC -- t2c
+    ex.start.waitUntilEnded
+  }
 
-    new MoleExecution(new Mole(t1c)).start.waitUntilEnded
+  "The strainer capsule" should "let the data pass through even if linked with a data channel to the root" in {
+    val p = Prototype[String]("p")
+
+    val root = new StrainerCapsule(EmptyTask("root"))
+
+    val t1 = new TestTask {
+      val name = "Test write"
+      override def outputs = DataSet(p)
+      override def process(context: Context) = context + (p -> "Test")
+    }
+
+    val tNone = new StrainerCapsule(EmptyTask("None"))
+    val tNone2 = new StrainerCapsule(EmptyTask("None"))
+
+    val strainer = EmptyTask("Strainer")
+
+    val t2 = new TestTask {
+      val name = "Test read"
+      override def inputs = DataSet(p)
+      override def process(context: Context) = {
+        context.value(p).get should equal("Test")
+        context
+      }
+    }
+
+    val strainerC = Slot(new StrainerCapsule(strainer))
+
+    val ex = (root -- tNone -- (t1, tNone2) -- strainerC -- t2) + (root oo strainerC)
+    ex.start.waitUntilEnded
   }
 
 }

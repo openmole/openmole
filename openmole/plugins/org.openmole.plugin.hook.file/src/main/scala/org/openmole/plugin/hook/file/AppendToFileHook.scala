@@ -18,21 +18,16 @@
 package org.openmole.plugin.hook.file
 
 import java.io.File
-import org.openmole.core.implementation.data.DataSet
-import org.openmole.core.implementation.hook.CapsuleExecutionHook
-import org.openmole.core.implementation.tools.VariableExpansion
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.misc.exception.UserBadDataError
+import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.tools._
+import org.openmole.core.model.data._
+import org.openmole.core.model.job._
+import org.openmole.core.model.mole._
 import org.openmole.misc.tools.io.FileUtil._
 
 class AppendToFileHook(
-    moleExecution: IMoleExecution,
-    capsule: ICapsule,
     fileName: String,
-    content: String) extends CapsuleExecutionHook(moleExecution, capsule) {
+    content: String) extends IHook {
 
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
@@ -40,7 +35,5 @@ class AppendToFileHook(
     file.createParentDir
     file.lockApply(_.append(VariableExpansion(context, content)))
   }
-
-  def inputs = DataSet.empty
 
 }

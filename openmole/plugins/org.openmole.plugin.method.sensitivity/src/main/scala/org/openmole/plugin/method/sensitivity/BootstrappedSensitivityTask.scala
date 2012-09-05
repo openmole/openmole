@@ -29,7 +29,7 @@ import SensitivityTask._
 object BootstrappedSensitivityTask {
 
   abstract class Builder extends SensitivityTask.Builder {
-    override def outputs: IDataSet = super.outputs + DataSet(for (i ← modelInputs; o ← modelOutputs) yield indice(name, i, o).toArray)
+    override def outputs: DataSet = super.outputs + DataSet(for (i ← modelInputs; o ← modelOutputs) yield indice(name, i, o).toArray)
   }
 
   def bootstrapMatrix(m: Seq[Double])(implicit rng: Random) =
@@ -43,14 +43,14 @@ trait BootstrappedSensitivityTask extends SensitivityTask {
 
   def bootstrap: Int
 
-  override def process(context: IContext): IContext = {
+  override def process(context: Context): Context = {
     implicit val rng = buildRNG(context)
     val matrixNames = context.valueOrException(matrixName.toArray)
 
     Context.empty ++
       (for (i ← modelInputs; o ← modelOutputs) yield {
         val (a, b, c) = extractValues(context.valueOrException(o.toArray), matrixNames, i)
-        new Variable(
+        Variable(
           indice(name, i, o).toArray,
           bootstraped(a, b, c).toArray)
       })

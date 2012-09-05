@@ -17,14 +17,11 @@
 
 package org.openmole.plugin.sampling.filter
 
-import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.implementation.sampling.Sampling
-import org.openmole.core.model.data.IContext
-import org.openmole.core.implementation.sampling.Factor
-import org.openmole.core.implementation.data.Prototype
-import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.data.Variable
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
+import org.openmole.core.implementation.sampling._
+import org.openmole.core.implementation.sampling._
+import org.openmole.core.implementation.data._
 
 import org.openmole.core.model.sampling.ISampling
 import org.scalatest.FlatSpec
@@ -37,26 +34,26 @@ class FiltredSamplingSpec extends FlatSpec with ShouldMatchers {
 
   "Filtred sampling" should "remove all value which doesn't match the filters" in {
 
-    val p1 = new Prototype[Int]("p1")
-    val p2 = new Prototype[Int]("p2")
-    val p3 = new Prototype[Int]("p3")
+    val p1 = Prototype[Int]("p1")
+    val p2 = Prototype[Int]("p2")
+    val p3 = Prototype[Int]("p3")
 
-    def pList(i: Int, j: Int, k: Int) = List(i, j, k).zip(List(p1, p2, p3)).map { case (v, p) ⇒ new Variable(p, v) }
+    def pList(i: Int, j: Int, k: Int) = List(i, j, k).zip(List(p1, p2, p3)).map { case (v, p) ⇒ Variable(p, v) }
 
     val sampling = new Sampling {
       override def prototypes = List(p1, p2, p3)
-      override def build(context: IContext) = List(pList(1, 2, 3), pList(4, 3, 4), pList(1, 5, 3), pList(2, 3, 4), pList(6, 7, 8)).iterator
+      override def build(context: Context) = List(pList(1, 2, 3), pList(4, 3, 4), pList(1, 5, 3), pList(2, 3, 4), pList(6, 7, 8)).iterator
     }
 
     val f1 = new IFilter {
-      override def apply(factorsValues: IContext) = factorsValues.value(p1).get != 1
+      override def apply(factorsValues: Context) = factorsValues.value(p1).get != 1
     }
 
     val f2 = new IFilter {
-      override def apply(factorsValues: IContext) = factorsValues.value(p3).get < 5
+      override def apply(factorsValues: Context) = factorsValues.value(p3).get < 5
     }
 
-    val s2 = new FiltredSampling(sampling, f1, f2).build(new Context)
+    val s2 = new FiltredSampling(sampling, f1, f2).build(Context.empty)
     s2.size should equal(2)
   }
 

@@ -18,9 +18,9 @@
 package org.openmole.core.model.sampling
 
 import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.Prototype
 
 trait IFactor[T, +D <: IDomain[T]] {
   def domain: D
-  def prototype: IPrototype[T]
+  def prototype: Prototype[T]
 }

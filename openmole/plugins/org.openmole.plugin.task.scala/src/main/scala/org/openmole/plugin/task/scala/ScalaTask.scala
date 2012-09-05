@@ -20,21 +20,19 @@ package org.openmole.plugin.task.scala
 import java.io.File
 import java.io.PrintWriter
 import java.util.logging.Logger
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.task.IPluginSet
-import org.openmole.misc.tools.io.FileUtil.fileOrdering
-import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.task.PluginSet
-import org.openmole.core.model.data.IContext
-import org.openmole.misc.tools.script.ScalaREPL
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
+import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.task._
+import org.openmole.misc.tools.script._
 import org.openmole.plugin.task.code._
 
 object ScalaTask {
 
   def apply(
     name: String,
-    code: String)(implicit plugins: IPluginSet = PluginSet.empty) = {
+    code: String)(implicit plugins: PluginSet = PluginSet.empty) = {
     val _plugins = plugins
     new CodeTaskBuilder { builder ⇒
 
@@ -60,15 +58,15 @@ sealed abstract class ScalaTask(
     val name: String,
     val code: String,
     imports: Iterable[String],
-    libraries: Iterable[File])(implicit val plugins: IPluginSet) extends CodeTask {
+    libraries: Iterable[File])(implicit val plugins: PluginSet) extends CodeTask {
 
-  override def processCode(context: IContext) = {
+  override def processCode(context: Context) = {
     val interpreter = new ScalaREPL
     context.values.foreach { v ⇒ interpreter.bind(v.prototype.name, v.value) }
     interpreter.addImports(imports.toSeq: _*)
     libraries.foreach { l ⇒ interpreter.addClasspath(l.getAbsolutePath) }
     interpreter.interpret(code)
-    Context.empty ++ outputs.map { o ⇒ new Variable(o.prototype.asInstanceOf[IPrototype[Any]], interpreter.valueOfTerm(o.prototype.name)) }
+    Context.empty ++ outputs.map { o ⇒ Variable(o.prototype.asInstanceOf[Prototype[Any]], interpreter.valueOfTerm(o.prototype.name)) }
   }
 }
 

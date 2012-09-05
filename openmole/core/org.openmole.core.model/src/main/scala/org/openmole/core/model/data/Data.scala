@@ -17,28 +17,46 @@
 
 package org.openmole.core.model.data
 
+object Data {
+
+  implicit lazy val dataOrderingOnName = new Ordering[Data[_]] {
+    override def compare(left: Data[_], right: Data[_]) =
+      Prototype.prototypeOrderingOnName.compare(left.prototype, right.prototype)
+  }
+
+  def apply[T](p: Prototype[T], m: DataMode) = new Data[T] {
+    val prototype = p
+    val mode = m
+  }
+
+  def apply[T](prototype: Prototype[T], masks: DataModeMask*): Data[T] = apply(prototype, DataMode(masks: _*))
+
+}
+
 /**
- * It modelizes atomic elements of data-flows. IData is a typed data chunk with
- * meta-information. Tasks takes IData in input and produce IData in output.
- * IData travels through transitions and data channels.
+ * It modelizes atomic elements of data-flows. Data is a typed data chunk with
+ * meta-information. Tasks takes Data in input and produce Data in output.
+ * Data travels through transitions and data channels.
  *
  */
-trait IData[T] {
+trait Data[T] {
 
   /**
-   * The mode is meta-information on the IData. It indicates the manner a task
+   * The mode is meta-information on the Data. It indicates the manner a task
    * uses it. For a list of modalties see {@see DataModeMask}.
    *
    * @return mode of the data
    */
-  def mode: IDataMode
+  def mode: DataMode
 
   /**
    * Data chunks are named and typed. Get the prototype (type and name) of
    * this data chunk.
    *
-   * @return the prototype of the IData
+   * @return the prototype of the Data
    */
-  def prototype: IPrototype[T]
+  def prototype: Prototype[T]
+
+  override def toString = "Data " + prototype + " with mode " + mode
 
 }

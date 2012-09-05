@@ -17,37 +17,53 @@
 
 package org.openmole.core.implementation.mole
 
-import org.openmole.core.implementation.data.Context
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IMole
-import org.openmole.core.model.task.ITask
-import scala.collection.mutable.HashSet
+import org.openmole.core.model.data._
+import org.openmole.core.model.mole._
+import org.openmole.core.model.task._
+import org.openmole.core.model.transition._
+import org.openmole.misc.exception.UserBadDataError
+import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 
-class Mole(val root: ICapsule, val implicits: IContext = Context.empty) extends IMole {
+object Mole {
 
-  override def tasks: Iterable[ITask] = capsules.flatMap(_.task).toSet
+  def nextCaspules(mole: IMole)(from: ICapsule, lvl: Int) =
+    nextTransitions(mole)(from, lvl).map { case (t, lvl) ⇒ t.end.capsule -> lvl }
 
-  override def capsules: Seq[ICapsule] = {
-    val visited = new HashSet[ICapsule]
-    val list = new ListBuffer[ICapsule]
-    val toExplore = new ListBuffer[ICapsule]
+  def nextTransitions(mole: IMole)(from: ICapsule, lvl: Int) =
+    mole.outputTransitions(from).map {
+      case t: IAggregationTransition ⇒ t -> (lvl - 1)
+      case t: IEndExplorationTransition ⇒ t -> (lvl - 1)
+      case t: ISlaveTransition ⇒ t -> lvl
+      case t: IExplorationTransition ⇒ t -> (lvl + 1)
+      case t: ITransition ⇒ t -> lvl
+    }
 
-    toExplore += root
+  def levels(mole: IMole) = {
+    val cache = HashMap(mole.root -> 0)
+    val toProceed = ListBuffer(mole.root -> 0)
 
-    while (!(toExplore.isEmpty)) {
-      val current = toExplore.remove(0)
-
-      if (!visited.contains(current)) {
-        for (transition ← current.outputTransitions) {
-          toExplore += transition.end.capsule
-        }
-        visited += current
-        list += current
+    while (!toProceed.isEmpty) {
+      val (capsule, level) = toProceed.remove(0)
+      nextCaspules(mole)(capsule, level).foreach {
+        case (c, l) ⇒
+          val continue = !cache.contains(c)
+          val lvl = cache.getOrElseUpdate(c, l)
+          if (lvl != l) throw new UserBadDataError("Inconsistent level found for capsule " + c)
+          if (continue) toProceed += (c -> l)
       }
     }
-    list
+    cache
   }
 
+}
+
+class Mole(
+    val root: ICapsule,
+    val transitions: Iterable[ITransition] = Iterable.empty,
+    val dataChannels: Iterable[IDataChannel] = Iterable.empty,
+    val implicits: Context = Context.empty) extends IMole {
+
+  lazy val levels = Mole.levels(this)
+  def level(c: ICapsule) = levels(c)
 }

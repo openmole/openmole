@@ -19,7 +19,7 @@ package org.openmole.core.implementation.job
 
 import org.openmole.core.implementation.tools.TimeStamp
 import org.openmole.core.model.tools.ITimeStamp
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.MoleJobId
 import org.openmole.core.model.job.State._
@@ -45,7 +45,7 @@ import MoleJob._
 
 class MoleJob(
     val task: ITask,
-    private var _context: IContext,
+    private var _context: Context,
     val id: MoleJobId,
     val stateChangedCallBack: MoleJob.StateChangedCallBack) extends IMoleJob {
 
@@ -59,7 +59,7 @@ class MoleJob(
   state = READY
 
   override def state: State = _state
-  override def context: IContext = _context
+  override def context: Context = _context
 
   def state_=(state: State) = {
     val changed = synchronized {
@@ -95,7 +95,7 @@ class MoleJob(
       }
     }
 
-  override def finish(context: IContext, timeStamps: Seq[ITimeStamp[State.State]]) = {
+  override def finish(context: Context, timeStamps: Seq[ITimeStamp[State.State]]) = {
     _context = context
     this.timeStamps ++= timeStamps
     state = COMPLETED

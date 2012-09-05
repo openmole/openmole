@@ -33,7 +33,6 @@ import org.openmole.misc.exception.MultipleException
 import org.openmole.misc.eventdispatcher._
 import org.openmole.misc.tools.service.Priority
 import org.openmole.core.implementation.execution.local._
-import org.openmole.core.implementation.hook._
 import org.openmole.core.implementation.job._
 import org.openmole.core.implementation.tools._
 import org.openmole.misc.tools.service.Random
@@ -44,10 +43,12 @@ import scala.collection.immutable.HashMap
 import scala.collection.mutable.Buffer
 import scala.concurrent.stm._
 
-object MoleExecution extends Logger {
+/*object MoleExecution extends Logger {
 
   def apply(
     mole: IMole,
+      def hooks: Iterable[(ICapsule, IHook)]
+  def profiler: IHook
     selection: Map[ICapsule, IEnvironmentSelection] = Map.empty,
     grouping: Map[ICapsule, IGrouping] = Map.empty,
     rerun: IInstantRerun = IInstantRerun.empty,
@@ -57,15 +58,17 @@ object MoleExecution extends Logger {
     ex -> hook
   }
 
-}
+}*/
 
 import MoleExecution._
 
 class MoleExecution(
     val mole: IMole,
-    selection: Map[ICapsule, IEnvironmentSelection] = Map.empty,
-    grouping: Map[ICapsule, IGrouping] = Map.empty,
-    rerun: IInstantRerun = IInstantRerun.empty,
+    val hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
+    val selection: Map[ICapsule, IEnvironmentSelection] = Map.empty,
+    val grouping: Map[ICapsule, IGrouping] = Map.empty,
+    val profiler: IProfiler = IProfiler.empty,
+    val rerun: IInstantRerun = IInstantRerun.empty,
     rng: java.util.Random = Random.newRNG(Workspace.newSeed)) extends IMoleExecution {
 
   import IMoleExecution._
@@ -80,6 +83,9 @@ class MoleExecution(
   private val ticketNumber = Ref(0L)
   private val jobId = Ref(0L)
 
+  @transient lazy val indexedHooks =
+    hooks.groupBy { case (c, _) ⇒ c }.map { case (c, hs) ⇒ c -> hs.map { _._2 } }
+
   private val waitingJobs: TMap[ICapsule, TMap[IMoleJobGroup, Ref[List[IMoleJob]]]] =
     TMap(grouping.map { case (c, g) ⇒ c -> TMap.empty[IMoleJobGroup, Ref[List[IMoleJob]]] }.toSeq: _*)
 
@@ -88,7 +94,7 @@ class MoleExecution(
   val rootSubMoleExecution = new SubMoleExecution(None, this)
   val rootTicket = Ticket(id, ticketNumber.next)
 
-  val dataChannelRegistry = new RegistryWithTicket[IDataChannel, Buffer[IVariable[_]]]
+  val dataChannelRegistry = new RegistryWithTicket[IDataChannel, Buffer[Variable[_]]]
 
   val _exceptions = Ref(List.empty[Throwable])
 
@@ -144,7 +150,7 @@ class MoleExecution(
 
   private def allWaiting = atomic { implicit txn ⇒ numberOfJobs <= nbWaiting() }
 
-  def start(context: IContext): this.type = {
+  def start(context: Context): this.type = {
     rootSubMoleExecution.newChild.submit(mole.root, context, nextTicket(rootTicket))
     if (allWaiting) submitAll
     this
@@ -163,6 +169,7 @@ class MoleExecution(
     if (!_canceled.getUpdate(_ ⇒ true)) {
       rootSubMoleExecution.cancel
       EventDispatcher.trigger(this, new IMoleExecution.Finished)
+      profiler.finished
       _finished.single() = true
     }
     this
@@ -192,6 +199,7 @@ class MoleExecution(
       rerun.synchronized { rerun.jobFinished(job, capsule) }
       if (numberOfJobs == 0) {
         EventDispatcher.trigger(this, new IMoleExecution.Finished)
+        profiler.finished
         _finished.single() = true
       }
     }

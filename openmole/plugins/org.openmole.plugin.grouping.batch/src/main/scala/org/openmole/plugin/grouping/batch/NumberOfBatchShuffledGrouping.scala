@@ -33,7 +33,7 @@ import org.openmole.core.implementation.task.Task._
  */
 class NumberOfBatchShuffledGrouping(numberOfBatch: Int) extends IGrouping {
 
-  override def apply(context: IContext, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup =
+  override def apply(context: Context, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup =
     new MoleJobGroup(newRNG(context.valueOrException(openMOLESeed)).nextInt(numberOfBatch))
 
 }

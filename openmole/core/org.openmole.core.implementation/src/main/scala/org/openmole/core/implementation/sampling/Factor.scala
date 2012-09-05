@@ -17,8 +17,8 @@
 
 package org.openmole.core.implementation.sampling
 
-import org.openmole.core.model.data.IPrototype
+import org.openmole.core.model.data.Prototype
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.sampling.IFactor
 
-class Factor[T, +D <: IDomain[T]](val prototype: IPrototype[T], val domain: D) extends IFactor[T, D]
+class Factor[T, +D <: IDomain[T]](val prototype: Prototype[T], val domain: D) extends IFactor[T, D]

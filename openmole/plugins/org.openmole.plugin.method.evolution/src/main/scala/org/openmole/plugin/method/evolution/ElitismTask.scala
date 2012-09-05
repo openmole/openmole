@@ -28,11 +28,11 @@ object ElitismTask {
 
   def apply(evolution: Elitism with Termination with Modifier)(
     name: String,
-    individuals: IPrototype[Array[Individual[evolution.G]]],
-    archive: IPrototype[Population[evolution.G, evolution.MF]],
-    generation: IPrototype[Int],
-    state: IPrototype[evolution.STATE],
-    terminated: IPrototype[Boolean])(implicit plugins: IPluginSet) = {
+    individuals: Prototype[Array[Individual[evolution.G]]],
+    archive: Prototype[Population[evolution.G, evolution.MF]],
+    generation: Prototype[Int],
+    state: Prototype[evolution.STATE],
+    terminated: Prototype[Boolean])(implicit plugins: PluginSet) = {
     val (_individuals, _archive, _generation, _state, _terminated) = (individuals, archive, generation, state, terminated)
 
     new TaskBuilder { builder ⇒
@@ -52,10 +52,10 @@ object ElitismTask {
 
       def toTask = new ElitismTask(name, evolution) {
 
-        val individuals = _individuals.asInstanceOf[IPrototype[Array[Individual[evolution.G]]]]
-        val archive = _archive.asInstanceOf[IPrototype[Population[evolution.G, evolution.MF]]]
+        val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G]]]]
+        val archive = _archive.asInstanceOf[Prototype[Population[evolution.G, evolution.MF]]]
         val generation = _generation
-        val state = _state.asInstanceOf[IPrototype[evolution.STATE]]
+        val state = _state.asInstanceOf[Prototype[evolution.STATE]]
         val terminated = _terminated
 
         val inputs = builder.inputs
@@ -67,15 +67,15 @@ object ElitismTask {
 }
 
 sealed abstract class ElitismTask[E <: Elitism with Termination with Modifier](
-    val name: String, val evolution: E)(implicit val plugins: IPluginSet) extends Task {
+    val name: String, val evolution: E)(implicit val plugins: PluginSet) extends Task {
 
-  def individuals: IPrototype[Array[Individual[evolution.G]]]
-  def archive: IPrototype[Population[evolution.G, evolution.MF]]
-  def state: IPrototype[evolution.STATE]
-  def generation: IPrototype[Int]
-  def terminated: IPrototype[Boolean]
+  def individuals: Prototype[Array[Individual[evolution.G]]]
+  def archive: Prototype[Population[evolution.G, evolution.MF]]
+  def state: Prototype[evolution.STATE]
+  def generation: Prototype[Int]
+  def terminated: Prototype[Boolean]
 
-  override def process(context: IContext) = {
+  override def process(context: Context) = {
     val currentArchive = context.valueOrException(archive).asInstanceOf[Population[evolution.G, evolution.MF]]
     val globalArchive = context.valueOrException(individuals).toList ::: currentArchive.toIndividuals.toList
 
@@ -86,13 +86,13 @@ sealed abstract class ElitismTask[E <: Elitism with Termination with Modifier](
       newArchive,
       context.valueOrException(state))
 
-    val terminatedVariable = new Variable(terminated, term)
-    val newStateVariable = new Variable(state, newState)
+    val terminatedVariable = Variable(terminated, term)
+    val newStateVariable = Variable(state, newState)
     Context(
-      new Variable(archive, newArchive),
+      Variable(archive, newArchive),
       terminatedVariable,
       newStateVariable,
-      new Variable(generation, context.valueOrException(generation) + 1))
+      Variable(generation, context.valueOrException(generation) + 1))
   }
 
 }

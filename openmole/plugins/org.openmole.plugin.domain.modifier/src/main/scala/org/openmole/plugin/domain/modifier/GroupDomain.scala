@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.domain.modifier
 
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 import org.openmole.core.model.domain.IDomain
 import collection.JavaConversions._
 import org.openmole.core.model.domain.IIterable
@@ -25,7 +25,7 @@ import org.openmole.misc.tools.obj.ClassUtils._
 
 sealed class GroupDomain[T](val domain: IDomain[T] with IIterable[T], val size: Int)(implicit m: Manifest[T]) extends IDomain[Array[T]] with IIterable[Array[T]] {
 
-  override def iterator(context: IContext): Iterator[Array[T]] =
+  override def iterator(context: Context): Iterator[Array[T]] =
     domain.iterator(context).grouped(size).map {
       i ⇒ i.toArray
     }

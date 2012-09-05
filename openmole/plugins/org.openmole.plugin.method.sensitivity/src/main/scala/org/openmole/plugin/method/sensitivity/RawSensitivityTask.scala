@@ -17,10 +17,8 @@
 
 package org.openmole.plugin.method.sensitivity
 
-import org.openmole.core.implementation.data.DataSet
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IDataSet
 import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
 
 import SensitivityTask._
 import SaltelliSampling._
@@ -28,7 +26,7 @@ import SaltelliSampling._
 object RawSensitivityTask {
 
   abstract class Builder extends SensitivityTask.Builder {
-    override def outputs: IDataSet = super.outputs + DataSet(for (i ← modelInputs; o ← modelOutputs) yield indice(name, i, o))
+    override def outputs: DataSet = super.outputs + DataSet(for (i ← modelInputs; o ← modelOutputs) yield indice(name, i, o))
   }
 
 }
@@ -37,13 +35,13 @@ import SensitivityTask._
 
 trait RawSensitivityTask extends SensitivityTask {
 
-  override def process(context: IContext): IContext = {
+  override def process(context: Context): Context = {
     val matrixNames = context.valueOrException(matrixName.toArray)
 
     Context.empty ++
       (for (i ← modelInputs; o ← modelOutputs) yield {
         val (a, b, c) = extractValues(context.valueOrException(o.toArray), matrixNames, i)
-        new Variable(
+        Variable(
           indice(name, i, o),
           computeSensitivity(a, b, c))
       })

@@ -18,18 +18,18 @@
 package org.openmole.plugin.hook.display
 
 import java.io.PrintStream
-import org.openmole.core.implementation.data.DataSet
-import org.openmole.core.implementation.hook.CapsuleExecutionHook
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.data.IVariable
-import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.mole._
+import org.openmole.core.model.data._
+import org.openmole.core.model.job._
+import org.openmole.core.model.mole._
+
+import org.openmole.core.implementation.data._
+
 import org.openmole.misc.tools.io.Prettifier._
 
-class ToStringHook(execution: IMoleExecution, capsule: ICapsule, out: PrintStream, prototypes: IPrototype[_]*) extends CapsuleExecutionHook(execution, capsule) {
+class ToStringHook(out: PrintStream, prototypes: Prototype[_]*) extends IHook {
 
-  def this(execution: IMoleExecution, capsule: ICapsule, prototypes: IPrototype[_]*) = this(execution, capsule, System.out, prototypes: _*)
+  def this(prototypes: Prototype[_]*) = this(System.out, prototypes: _*)
 
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
@@ -45,6 +45,6 @@ class ToStringHook(execution: IMoleExecution, capsule: ICapsule, out: PrintStrea
     else out.println(context.values.mkString(", "))
   }
 
-  def inputs = DataSet(prototypes)
+  override def requiered = DataSet(prototypes)
 
 }

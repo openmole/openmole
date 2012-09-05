@@ -17,15 +17,33 @@
 
 package org.openmole.core.model.data
 
+import org.openmole.misc.tools.obj.ClassUtils._
+import org.openmole.misc.tools.obj.Id
+import scala.reflect.Manifest
+
+object Prototype {
+
+  implicit lazy val prototypeOrderingOnName = new Ordering[Prototype[_]] {
+    override def compare(left: Prototype[_], right: Prototype[_]) =
+      left.name compare right.name
+  }
+
+  def apply[T](n: String)(implicit t: Manifest[T]) = new Prototype[T] {
+    val name = n
+    val `type` = t
+  }
+
+}
+
 /**
- * {@link IPrototype} is a prototype in the sens of C language prototypes. It is
+ * {@link Prototype} is a prototype in the sens of C language prototypes. It is
  * composed of a type and a name. It allows specifying typed data transfert in
  * OpenMOLE.
  *
  * @type T the type of the prototype. Values associated to this prototype should
  * always be a subtype of T.
  */
-trait IPrototype[T] {
+trait Prototype[T] extends Id {
 
   /**
    * Get the name of the prototype.
@@ -48,9 +66,14 @@ trait IPrototype[T] {
    * @param prototype the prototype to test
    * @return true if the prototype is assignable from the given prototype
    */
-  def isAssignableFrom(prototype: IPrototype[_]): Boolean
+  def isAssignableFrom(p: Prototype[_]): Boolean =
+    `type`.isAssignableFromHighOrder(p.`type`)
 
-  def accepts(obj: Any): Boolean
+  def accepts(obj: Any): Boolean =
+    obj == null || `type`.isAssignableFromHighOrder(manifest(clazzOf(obj)))
+
+  override def id = (name, `type`.erasure)
+  override def toString = name + ": " + `type`.toString
 
 }
 

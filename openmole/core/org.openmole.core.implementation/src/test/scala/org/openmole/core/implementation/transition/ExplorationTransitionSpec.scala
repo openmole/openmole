@@ -20,9 +20,10 @@ package org.openmole.core.implementation.transition
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
-import org.openmole.core.implementation.sampling.ExplicitSampling
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.implementation.sampling._
+import org.openmole.core.model.data._
+import org.openmole.core.model.sampling._
+import org.openmole.core.model.task._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
@@ -37,7 +38,7 @@ class ExplorationTransitionSpec extends FlatSpec with ShouldMatchers {
   "Exploration transition" should "submit one MoleJob for each value in the sampling" in {
 
     val data = List("A", "B", "C")
-    val i = new Prototype[String]("i")
+    val i = Prototype[String]("i")
 
     val sampling = new ExplicitSampling(i, data)
 
@@ -48,16 +49,15 @@ class ExplorationTransitionSpec extends FlatSpec with ShouldMatchers {
     val t = new TestTask {
       val name = "Test"
       override def inputs = DataSet(i)
-      override def process(context: IContext) = synchronized {
+      override def process(context: Context) = synchronized {
         context.contains(i) should equal(true)
         res += context.value(i).get
         context
       }
     }
 
-    new ExplorationTransition(exc, new Capsule(t))
-    new MoleExecution(new Mole(exc)).start.waitUntilEnded
-
+    val ex = exc -< t
+    ex.start.waitUntilEnded
     res.toArray.sorted.deep should equal(data.toArray.deep)
   }
 
@@ -66,7 +66,7 @@ class ExplorationTransitionSpec extends FlatSpec with ShouldMatchers {
     println("Test")
 
     val data = List("A", "B", "C")
-    val i = new Prototype[String]("i")
+    val i = Prototype[String]("i")
 
     val explo = ExplorationTask("Exploration", new ExplicitSampling(i, data))
 
@@ -75,14 +75,14 @@ class ExplorationTransitionSpec extends FlatSpec with ShouldMatchers {
     val t = new TestTask {
       val name = "Test"
       override def inputs = DataSet(i)
-      override def process(context: IContext) = synchronized {
+      override def process(context: Context) = synchronized {
         context.contains(i) should equal(true)
         res += context.value(i).get
         context
       }
     }
 
-    (explo -< t).toExecution.start.waitUntilEnded
+    (explo -< t).start.waitUntilEnded
     res.toArray.sorted.deep should equal(data.toArray.deep)
   }
 }

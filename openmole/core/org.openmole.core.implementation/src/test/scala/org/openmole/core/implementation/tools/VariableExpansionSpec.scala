@@ -21,8 +21,9 @@ import org.openmole.implementation.tools.TemplateData
 import org.openmole.misc.hashservice.HashService
 import org.scalatest.FlatSpec
 import org.scalatest.junit.JUnitRunner
-import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.tools.VariableExpansion._
+import org.openmole.core.model.data._
+import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.tools._
 import org.scalatest.matchers.ShouldMatchers
 import java.io.File
 import java.io.FileInputStream
@@ -35,7 +36,7 @@ class VariableExpansionSpec extends FlatSpec with ShouldMatchers {
   "A expandData" should "expand all the ${} sequence from an inputStream and return a parsed OuputStream" in {
 
     val of = File.createTempFile("expand", ".test")
-    expandBufferData(Context.empty, new FileInputStream(TemplateData.templateFile), new FileOutputStream(of))
+    VariableExpansion.expandBufferData(Context.empty, new FileInputStream(TemplateData.templateFile), new FileOutputStream(of))
     HashService.computeHash(of).equals(HashService.computeHash(TemplateData.targetFile)) should equal(true)
   }
 }

@@ -17,7 +17,36 @@
 
 package org.openmole.core.model.data
 
-trait IVariable[T] {
-  def prototype: IPrototype[T]
-  def value: T
+import DataModeMask._
+
+object DataMode {
+  val NONE = apply(0)
+
+  def apply(masks: DataModeMask*): DataMode =
+    DataMode(masks.map(_.value).foldLeft(0)(_ | _))
+
+  def apply(m: Int) = new DataMode {
+    val mask = m
+
+    def is(mode: DataModeMask): Boolean = (mask & mode.value) != 0
+
+    override def toString = {
+      val toDisplay = values.flatMap { m ⇒ if (this is m) Some(m.toString) else None }
+      if (toDisplay.isEmpty) "None" else toDisplay.mkString(", ")
+    }
+  }
+}
+
+/**
+ * The data mode give meta-information about the circulation of data in the
+ * mole.
+ */
+trait DataMode {
+
+  /**
+   * Test a data mode mask against this mode
+   */
+  def is(mode: DataModeMask): Boolean
+
+  def mask: Int
 }

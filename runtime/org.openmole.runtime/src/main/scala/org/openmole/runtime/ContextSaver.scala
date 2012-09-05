@@ -18,10 +18,9 @@
 package org.openmole.runtime
 
 import java.util.concurrent.Semaphore
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.tools.ITimeStamp
-import org.openmole.core.model.job.MoleJobId
+import org.openmole.core.model.data._
+import org.openmole.core.model.job._
+import org.openmole.core.model.tools._
 import org.openmole.core.model.job.State._
 import scala.collection.immutable.TreeMap
 
@@ -30,7 +29,7 @@ class ContextSaver(val nbJobs: Int) {
   val allFinished = new Semaphore(0)
 
   var nbFinished = 0
-  var _results = new TreeMap[MoleJobId, (Either[IContext, Throwable], Seq[ITimeStamp[State]])]
+  var _results = new TreeMap[MoleJobId, (Either[Context, Throwable], Seq[ITimeStamp[State]])]
   def results = _results
 
   def save(job: IMoleJob, oldState: State, newState: State) = synchronized {

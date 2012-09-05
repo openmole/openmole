@@ -17,11 +17,11 @@
 
 package org.openmole.plugin.domain.collection
 
-import org.openmole.core.model.data.IContext
+import org.openmole.core.model.data.Context
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IFinite
 
 sealed class ListDomain[T](values: T*) extends IDomain[T] with IFinite[T] {
-  override def computeValues(context: IContext): Iterable[T] = values
+  override def computeValues(context: Context): Iterable[T] = values
 }
 

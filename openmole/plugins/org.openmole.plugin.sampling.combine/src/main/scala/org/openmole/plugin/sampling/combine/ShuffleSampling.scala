@@ -18,8 +18,8 @@
 package org.openmole.plugin.sampling.combine
 
 import java.util.Random
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.data.IVariable
+import org.openmole.core.model.data.Context
+import org.openmole.core.model.data.Variable
 import org.openmole.core.model.sampling.ISampling
 import org.openmole.misc.tools.service.Random._
 import org.openmole.core.implementation.task.Task._
@@ -29,7 +29,7 @@ sealed class ShuffleSampling(sampling: ISampling) extends ISampling {
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
 
-  override def build(context: IContext): Iterator[Iterable[IVariable[_]]] = {
+  override def build(context: Context): Iterator[Iterable[Variable[_]]] = {
     val random = newRNG(context.valueOrException(openMOLESeed))
     shuffled(sampling.build(context).toList)(random).toIterator
   }

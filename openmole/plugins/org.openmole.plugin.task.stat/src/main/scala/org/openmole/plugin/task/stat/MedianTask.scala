@@ -17,17 +17,15 @@
 
 package org.openmole.plugin.task.stat
 
-import org.openmole.core.implementation.data.Context
-import org.openmole.core.implementation.data.Variable
-import org.openmole.core.implementation.task.Task
-import org.openmole.core.model.data.IPrototype
-import org.openmole.core.model.data.IContext
-import org.openmole.core.model.task.IPluginSet
-import org.openmole.misc.math.Stat
+import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.task._
+import org.openmole.core.model.data._
+import org.openmole.core.model.task._
+import org.openmole.misc.math._
 
 object MedianTask {
 
-  def apply(name: String)(implicit plugins: IPluginSet) = new DoubleSequenceStatTaskBuilder { builder ⇒
+  def apply(name: String)(implicit plugins: PluginSet) = new DoubleSequenceStatTaskBuilder { builder ⇒
     def toTask = new MedianTask(name) {
       val sequences = builder.sequences
       val inputs = builder.inputs
@@ -38,7 +36,7 @@ object MedianTask {
 
 }
 
-sealed abstract class MedianTask(val name: String)(implicit val plugins: IPluginSet) extends DoubleSequenceStatTask {
+sealed abstract class MedianTask(val name: String)(implicit val plugins: PluginSet) extends DoubleSequenceStatTask {
 
   override def stat(seq: Array[Double]) = Stat.median(seq)
 

@@ -17,19 +17,19 @@
 
 package org.openmole.plugin.task.code
 
-import org.openmole.core.model.data.IContext
-import org.openmole.core.implementation.data.Context._
+import org.openmole.core.model.data._
+import org.openmole.core.implementation.data._
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.task.external.ExternalTask
 
 trait CodeTask extends ExternalTask {
 
-  override def process(context: IContext) = {
+  override def process(context: Context) = {
     val pwd = Workspace.newDir
     val links = prepareInputFiles(context, pwd.getCanonicalFile)
     fetchOutputFiles(processCode(context), pwd.getCanonicalFile, links)
   }
 
-  def processCode(context: IContext): IContext
+  def processCode(context: Context): Context
 
 }

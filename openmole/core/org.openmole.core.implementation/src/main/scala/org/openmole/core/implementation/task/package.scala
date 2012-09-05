@@ -28,6 +28,7 @@ import java.io.File
 package object task {
   implicit def taskBuilderToTask[TB <: TaskBuilder](builder: TB) = builder.toTask
   implicit def taskToCapsuleConveter(task: ITask) = new Capsule(task)
+  implicit def taskBuilderToCapsuleConveter[TB <: TaskBuilder](builder: TB) = new Capsule(builder)
 
   implicit def taskToPuzzleConveter(task: ITask) = new Capsule(task).toPuzzle
 
