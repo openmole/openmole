@@ -19,10 +19,13 @@ package org.apache.clerezza.scala.console
 
 import org.apache.clerezza.scala.Activator
 import org.apache.clerezza.scala.scripting.BundleContextScalaCompiler
+import scala.reflect.runtime.AbstractFile
 import scala.tools.nsc.Settings
 import scala.tools.nsc.interpreter.AbstractFileClassLoader
 import scala.tools.nsc.interpreter.IMain
 import scala.tools.nsc.reporters.Reporter
+import scala.tools.nsc.util.ClassPath
+import scala.tools.util.PathResolver
 
 class Interpreter extends IMain {
 

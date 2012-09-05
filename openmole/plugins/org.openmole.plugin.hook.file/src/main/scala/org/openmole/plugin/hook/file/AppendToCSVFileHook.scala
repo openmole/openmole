@@ -71,7 +71,7 @@ class AppendToCSVFileHook(
           }
 
         def writeLine(list: List[_]) =
-          bfos.appendLine(list.map { _.prettify }.mkString(","))
+          bfos.appendLine(list.map(l ⇒ prettify(l)).mkString(","))
 
         write(lists)
       } finally lock.release

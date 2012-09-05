@@ -19,13 +19,13 @@
     <dependencies>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-transactor</artifactId>
+            <artifactId>akka-transactor_${lib.org.scala-lang.scala.version}</artifactId>
 	    <version>${lib.com.typesafe.akka.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-actor</artifactId>
+            <artifactId>akka-actor_${lib.org.scala-lang.scala.version}</artifactId>
 	    <version>${lib.com.typesafe.akka.version}</version>
             <scope>provided</scope>
         </dependency>

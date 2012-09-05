@@ -25,7 +25,7 @@ object Retry {
       try {
         return callable
       } catch {
-        case e ⇒
+        case e: Throwable ⇒
           if (!exceptions.contains(e.getClass)) throw e
           Thread.sleep(wait)
       }
@@ -40,7 +40,7 @@ object Retry {
       try {
         return callable
       } catch {
-        case e ⇒
+        case e: Throwable ⇒
       }
       _nbTry -= 1
     }

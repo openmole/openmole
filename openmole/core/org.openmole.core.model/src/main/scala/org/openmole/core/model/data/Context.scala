@@ -88,7 +88,7 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    * otherwise
    */
 
-  def value[T](proto: Prototype[T]) = value[T](proto.name)
+  def value[T](proto: Prototype[T]): Option[T] = value[T](proto.name)
 
   /**
    * Get a variable valaue given a prototype name. This method get the variable by its

@@ -26,7 +26,6 @@ import akka.dispatch.UnboundedPriorityMailbox
 import akka.routing.DefaultResizer
 import akka.routing.RoundRobinRouter
 import akka.routing.SmallestMailboxRouter
-import akka.util.duration._
 import org.openmole.core.batch.file.URIFile
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.IEnvironment
@@ -37,6 +36,8 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.environment.BatchEnvironment.JobManagmentThreads
+
+import scala.concurrent.util.duration._
 
 object JobManager extends Logger
 
@@ -65,6 +66,7 @@ akka {
 """))
 
   import environment._
+  import system.dispatcher
 
   val resizer = DefaultResizer(lowerBound = 10, upperBound = Workspace.preferenceAsInt(JobManagmentThreads))
   // val workerForEach = Workspace.preferenceAsInt(JobManagmentThreads)

@@ -230,8 +230,7 @@ package object evolution {
           scalingArchiveCapsule --
           filterPopulationCapsule --
           breedingTask --
-          preIslandCapsule
-        ) +
+          preIslandCapsule) +
           (preIslandCapsule -- (renameArchiveCapsule, filter = Filter not archive) -- filterPopulationCapsule) +
           (firstCapsule oo islandSlot) +
           (firstCapsule oo endCapsule)

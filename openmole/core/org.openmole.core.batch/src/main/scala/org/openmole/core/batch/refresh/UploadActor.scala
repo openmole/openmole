@@ -61,7 +61,7 @@ import scala.collection.mutable.HashSet
 import org.openmole.misc.hashservice.HashService._
 import org.openmole.core.model.execution.ExecutionState._
 
-import actors.Futures._
+//import actors.futures._
 
 object UploadActor extends Logger
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Romain Reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,29 +15,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.tools.collection
+package org.apache.clerezza.scala.scripting
 
-import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
+import org.osgi.framework.Bundle
 
-@RunWith(classOf[JUnitRunner])
-class OrderedSlidingListSpec extends FlatSpec with ShouldMatchers {
-  "OrderedSlidingList" should "preserve the max size" in {
-    val list = new OrderedSlidingList[Int](5)
-    list += 2
-    list += 8
-    list += 7
-    list += 7
+/**
+ * A helper class to determine if the class loader provides access to an OSGi Bundle instance
+ */
+object BundleClassLoader {
 
-    list.size should equal(4)
-
-    list += 3
-    list += 9
-    list += 7
-
-    list.size should equal(5)
+  type BundleClassLoader = {
+    def getBundle: Bundle
   }
 
+  def unapply(ref: AnyRef): Option[BundleClassLoader] = {
+    if (ref == null) return None
+    try {
+      val method = ref.getClass.getMethod("getBundle")
+      if (method.getReturnType == classOf[Bundle])
+        Some(ref.asInstanceOf[BundleClassLoader])
+      else
+        None
+    } catch {
+      case e: NoSuchMethodException ⇒ None
+    }
+  }
 }

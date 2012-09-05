@@ -31,6 +31,7 @@ import java.net._
 import scala.tools.nsc.io.AbstractFile
 import scala.tools.nsc.reporters.Reporter
 import scala.tools.util.PathResolver
+import collection.mutable.ListBuffer
 
 /*
  * unfortunately there seems to be no way to change the classpath, so this doesn't
@@ -39,9 +40,43 @@ import scala.tools.util.PathResolver
 class BundleContextScalaCompiler(
     bundleContext: BundleContext,
     settings: Settings,
-    reporter: Reporter) extends Global(settings, reporter) { compiler ⇒
+    reporter: Reporter) extends Global(settings, reporter) with ReplGlobal { compiler ⇒
 
-  override val classPath = initClassPath
+  lazy val internalClassPath = {
+    require(!forMSIL, "MSIL not supported")
+    createClassPath(super.classPath)
+  }
+
+  override def classPath = internalClassPath
+
+  def createClassPath[T](original: ClassPath[T]) = {
+    /* val classPathOrig: ClassPath[AbstractFile] = new PathResolver(settings).result
+    var bundles: Array[Bundle] = bundleContext.getBundles
+    val classPathAbstractFiles =
+      for (bundle ← bundles; val url = bundle.getResource("/"); if url != null) yield {
+        if ("file".equals(url.getProtocol())) new PlainFile(new File(url.toURI()))
+        else BundleFS.create(bundle);
+      }
+    val classPaths: List[ClassPath[AbstractFile]] =
+      (for (abstractFile ← classPathAbstractFiles) yield {
+        new DirectoryClassPath(abstractFile, classPathOrig.context)
+      }) toList
+
+    new MergedClassPath(classPathOrig :: classPaths, classPathOrig.context)*/
+
+    var result = ListBuffer(original)
+    val files = List.concat(
+      BundleClassPathBuilder.fromBundle(bundleContext.getBundle),
+      List(BundleClassPathBuilder.create(BundleClassLoader.unapply(classOf[scala.Application].getClassLoader).get.getBundle) /*,
+        BundleClassPathBuilder.create(BundleClassLoader.unapply(classOf[ScalaCompiler].getClassLoader).get.getBundle),
+        BundleClassPathBuilder.create(BundleClassLoader.unapply(classOf[ClassPathBuilder].getClassLoader).get.getBundle)*/ ))
+    files.foreach(file ⇒ {
+      result += original.context.newClassPath(file)
+    })
+    new MergedClassPath(result.toList.reverse, original.context)
+  }
+
+  /*override val classPath = initClassPath
 
   override def rootLoader: LazyType = new loaders.JavaPackageLoader(classPath)
 
@@ -59,8 +94,7 @@ class BundleContextScalaCompiler(
       }) toList
 
     new MergedClassPath[AbstractFile](classPathOrig :: classPaths, classPathOrig.context)
-
   }
-
+*/
 }
 

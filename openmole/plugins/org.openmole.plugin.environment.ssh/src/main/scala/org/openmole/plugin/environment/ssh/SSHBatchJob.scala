@@ -17,11 +17,11 @@
 
 package org.openmole.plugin.environment.ssh
 
+import java.util.concurrent.atomic.AtomicInteger
 import org.ogf.saga.job.Job
-import org.openmole.core.batch.environment.BatchJob
+import org.openmole.core.batch.environment._
 import org.openmole.core.model.execution.ExecutionState._
-import org.openmole.plugin.environment.jsaga.JSAGAJob
-import scala.actors.threadpool.AtomicInteger
+import org.openmole.plugin.environment.jsaga._
 
 object SSHBatchJob {
 

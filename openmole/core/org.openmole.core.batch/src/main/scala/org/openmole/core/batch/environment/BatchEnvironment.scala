@@ -54,10 +54,10 @@ import org.openmole.misc.tools.collection.OrderedSlidingList
 import akka.actor.Actor
 import akka.actor.Props
 import akka.routing.SmallestMailboxRouter
-import akka.util.duration._
 import scala.collection.mutable.SynchronizedMap
 import scala.collection.mutable.WeakHashMap
 import org.openmole.misc.tools.service.ThreadUtil._
+import scala.concurrent.util.duration._
 
 object BatchEnvironment extends Logger {
 
@@ -156,6 +156,8 @@ akka {
 
   val jobManager = system.actorOf(Props(new JobManager(this)))
   val watcher = system.actorOf(Props(new BatchJobWatcher(this)))
+
+  import system.dispatcher
 
   system.scheduler.schedule(
     Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval) milliseconds,

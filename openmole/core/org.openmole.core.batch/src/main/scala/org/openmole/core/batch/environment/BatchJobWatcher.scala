@@ -39,7 +39,7 @@ class BatchJobWatcher(environment: BatchEnvironment) extends Actor {
 
       logger.fine("Watch jobs " + registry.allJobs.size)
       registry.synchronized {
-        for (val job ← registry.allJobs) {
+        for (job ← registry.allJobs) {
           if (job.finished) {
             for (ej ← registry.executionJobs(job)) environment.jobManager ! Kill(ej)
             jobGroupsToRemove += job

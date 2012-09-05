@@ -27,7 +27,7 @@ object LocalHostName extends Logger {
     try {
       InetAddress.getLocalHost.getCanonicalHostName
     } catch {
-      case ex ⇒
+      case ex: Throwable ⇒
         logger.log(WARNING, "Was not able to get local host name.", ex)
         UUID.randomUUID.toString
     }

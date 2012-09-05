@@ -27,7 +27,7 @@ object IEnvironment {
   case class JobSubmitted(val job: IExecutionJob) extends Event[IEnvironment]
   case class JobStateChanged(val job: IExecutionJob, val newState: ExecutionState, oldState: ExecutionState) extends Event[IEnvironment]
   case class ExceptionRaised(val job: IExecutionJob, val exception: Throwable, val level: Level) extends Event[IEnvironment]
-  case class MoleJobExceptionRaised(override val job: IExecutionJob, override val exception: Throwable, override val level: Level, val moleJob: IMoleJob) extends ExceptionRaised(job, exception, level)
+  case class MoleJobExceptionRaised(val job: IExecutionJob, val exception: Throwable, val level: Level, val moleJob: IMoleJob) extends Event[IEnvironment]
 }
 
 trait IEnvironment {

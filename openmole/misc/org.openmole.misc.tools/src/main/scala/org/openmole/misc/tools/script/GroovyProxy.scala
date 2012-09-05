@@ -41,7 +41,7 @@ class GroovyProxy(code: String, jars: Iterable[File] = Iterable.empty) {
     val groovyShell = new GroovyShell(config)
     try groovyShell.parse("package script\n" + code)
     catch {
-      case t ⇒ throw new UserBadDataError("Script compilation error !\n The script was :\n" + code + "\n Error message was:" + t.getMessage);
+      case t: Throwable ⇒ throw new UserBadDataError("Script compilation error !\n The script was :\n" + code + "\n Error message was:" + t.getMessage);
     }
   }
 
