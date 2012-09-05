@@ -9,7 +9,7 @@
     <parent>
         <groupId>org.openmole.core</groupId>
         <artifactId>openmole-ecosystem</artifactId>
-        <version>0.6</version>
+        <version>0.6.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>openmole</artifactId>
