@@ -53,7 +53,7 @@ class GliteJob(
         val probability = 1 - math.pow(0.5, nbInterval)
 
         lastShaked = System.currentTimeMillis
-        
+
         if (Workspace.rng.nextDouble < probability) throw new ShouldBeKilledException("Killed in shaking process")
       }
     }
