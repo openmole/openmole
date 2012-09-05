@@ -56,7 +56,7 @@ object StatusBar extends MigPanel("wrap 3") { statusBar ⇒
             exceptionName: String = ""): Unit = printError("[CRITICAL] ", b, proxy, exceptionName + "\n" + stack)
 
   def errorStack(e: Throwable) =
-    Iterator.iterate(e)(_.getCause).takeWhile(_ != null).map(e ⇒ e.getCause.getMessage + e.getCause.getStackTraceString).mkString(EOL)
+    Iterator.iterate(e)(_.getCause).takeWhile(_ != null).map(e ⇒ e.getMessage + e.getStackTraceString).mkString(EOL)
 
   def printError(header: String,
                  error: String,
