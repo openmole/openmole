@@ -126,7 +126,7 @@ object ConceptMenu {
   def createTab(proxy: IDataProxyUI,
                 mode: Value) = DialogFactory.newTabName match {
     case Some(y: BuildMoleSceneContainer) ⇒ y.scene.displayPropertyPanel(proxy, mode)
-    case None ⇒
+    case _ ⇒
   }
 
   def addItem(proxy: IDataProxyUI): MenuItem = addItem(proxyName(proxy), proxy)
