@@ -19,22 +19,34 @@ package org.openmole.ide.plugin.domain.bounded
 
 import org.openmole.core.model.domain.IBounded
 import org.openmole.plugin.domain.bounded.Bounded
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FromString._
 import org.openmole.core.model.data.Prototype
-import org.openmole.ide.core.model.data.IBoundedDomainDataUI
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.core.model.domain.IDomain
+import org.openmole.ide.core.model.data.IDomainDataUI
 
 class BoundedDomainDataUI(val name: String = "",
                           val min: String = "",
-                          val max: String = "") extends IBoundedDomainDataUI {
+                          val max: String = "") extends IDomainDataUI {
 
-  def coreObject(prototypeObject: Prototype[Double]) = prototypeObject.`type` match {
+  def coreObject(prototypeObject: Prototype[_]) = prototypeObject.`type` match {
     case x: Manifest[Double] ⇒ new Bounded[Double](min, max)
+    case _ ⇒ throw new UserBadDataError("The prototype " + prototypeObject + " has to be a Double on a bounded domain")
   }
 
-  def coreClass = classOf[IBounded[Double]]
+  //Fix me with 2.10 reflexion
+  // manifest[IDomain[Double] with IBounded[Double]]
+  def coreClass = classOf[IDomain[Double]]
 
   def imagePath = "img/domain_range.png"
 
   def buildPanelUI = new BoundedDomainPanelUI(this)
+
+  override def toString = "Bounded"
+
+  //FIXME : try to be changed in 2.10
+  def isAcceptable(p: IPrototypeDataProxyUI) =
+    p.dataUI.coreObject.`type`.erasure.isAssignableFrom(classOf[Double])
 
 }

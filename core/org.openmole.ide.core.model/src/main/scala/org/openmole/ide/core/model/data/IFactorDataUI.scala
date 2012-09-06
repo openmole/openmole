@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
+ * Copyright (C) 2012 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,14 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.dataproxy
+package org.openmole.ide.core.model.data
 
-import org.openmole.ide.core.model.data.IBoundedDomainDataUI
-import org.openmole.ide.core.model.dataproxy.IBoundedDomainDataProxyUI
-import org.openmole.ide.misc.tools.Counter
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
-class BoundedDomainDataProxyUI(name: String,
-                               var dataUI: IBoundedDomainDataUI,
-                               val id: Int = Counter.id.getAndIncrement) extends IBoundedDomainDataProxyUI {
-  override def toString = name
+trait IFactorDataUI {
+  def prototype: Option[IPrototypeDataProxyUI]
+
+  def domain: Option[IDomainDataUI]
 }

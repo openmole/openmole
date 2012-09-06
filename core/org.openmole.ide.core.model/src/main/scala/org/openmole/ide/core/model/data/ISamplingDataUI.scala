@@ -19,9 +19,14 @@ package org.openmole.ide.core.model.data
 
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.core.model.sampling.ISampling
+import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 
 trait ISamplingDataUI extends IDataUI {
+
+  def factors: Iterable[IFactorDataUI] = List.empty
+
+  def samplings: Iterable[ISamplingDataProxyUI]
 
   def coreObject: ISampling
 

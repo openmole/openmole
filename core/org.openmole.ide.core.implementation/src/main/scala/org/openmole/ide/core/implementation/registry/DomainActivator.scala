@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.implementation.registry
 
+import org.openmole.core.model.domain.IDomain
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext

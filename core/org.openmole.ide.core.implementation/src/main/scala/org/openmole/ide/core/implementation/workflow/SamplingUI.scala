@@ -22,7 +22,7 @@ import org.openmole.ide.core.model.workflow._
 
 class SamplingUI(val scene: IMoleScene) extends Widget(scene.graphScene) with ISamplingUI {
 
-  val samplingComponentWidget = new SceneComponentWidget(scene, new SamplingWidget(scene, this),400,200)
+  val samplingComponentWidget = new SceneComponentWidget(scene, new SamplingWidget(scene, this), 400, 200)
 
   addChild(samplingComponentWidget)
 }

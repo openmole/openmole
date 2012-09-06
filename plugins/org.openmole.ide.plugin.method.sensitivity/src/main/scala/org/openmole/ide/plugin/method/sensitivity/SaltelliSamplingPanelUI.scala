@@ -7,7 +7,7 @@ package org.openmole.ide.plugin.method.sensitivity
 
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.implementation.dataproxy.BoundedDomainDataProxyFactory
+import org.openmole.ide.core.implementation.data.FactorDataUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
@@ -15,8 +15,8 @@ import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.URL
-import org.openmole.ide.plugin.sampling.tools.MultiGenericBoundedSamplingPanel
-import org.openmole.ide.plugin.sampling.tools.MultiGenericBoundedSamplingPanel._
+import org.openmole.ide.plugin.sampling.tools.MultiGenericSamplingPanel
+import org.openmole.ide.plugin.sampling.tools.MultiGenericSamplingPanel._
 import scala.swing.Label
 import scala.swing.TabbedPane
 import scala.swing.TextField
@@ -26,14 +26,12 @@ class SaltelliSamplingPanelUI(cud: SaltelliSamplingDataUI) extends PluginPanel("
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val sampleTextField = new TextField(cud.samples, 4)
-  val multiPanel = new MultiGenericBoundedSamplingPanel(Proxys.prototypes.toList,
+  val multiPanel = new MultiGenericSamplingPanel(Proxys.prototypes.toList,
     domains,
     cud.factors.map { f ⇒
-      new GenericBoundedSamplingPanel(Proxys.prototypes.toList,
+      new GenericSamplingPanel(Proxys.prototypes.toList,
         domains,
-        new GenericBoundedSamplingData(Some(f._1),
-          Some(f._2.toString),
-          Some(f._3)))
+        new GenericSamplingData(f))
     })
 
   tabbedPane.pages += new TabbedPane.Page("Settings",
@@ -43,14 +41,11 @@ class SaltelliSamplingPanelUI(cud: SaltelliSamplingDataUI) extends PluginPanel("
       contents += multiPanel.panel
     })
 
-  def domains = KeyRegistry.boundedDomains.values.map { f ⇒ new BoundedDomainDataProxyFactory(f).buildDataProxyUI }.toList
+  def domains = KeyRegistry.domains.values.map { _.buildDataUI }.toList
 
   override def saveContent(name: String) = new SaltelliSamplingDataUI(name,
     sampleTextField.text,
-    multiPanel.content.map { c ⇒
-      (c.prototypeProxy.get,
-        c.boundedDomainProxy.get,
-        c.boundedDomainDataUI.get)
+    multiPanel.content.map { c ⇒ new FactorDataUI(c.factor.prototype, c.factor.domain)
     })
 
   override val help = new Helper(List(new URL(i18n.getString("samplingPermalinkText"),

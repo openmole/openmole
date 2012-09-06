@@ -17,12 +17,12 @@
 
 package org.openmole.ide.plugin.domain.bounded
 
-import org.openmole.ide.core.model.panel.IBoundedDomainPanelUI
+import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
 import scala.swing.TextField
 
-class BoundedDomainPanelUI(bud: BoundedDomainDataUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IBoundedDomainPanelUI {
+class BoundedDomainPanelUI(bud: BoundedDomainDataUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IDomainPanelUI {
   val minField = new TextField(6) { text = bud.min }
   val maxField = new TextField(6) { text = bud.max }
 

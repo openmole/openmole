@@ -19,7 +19,9 @@ package org.openmole.ide.plugin.domain.file
 
 import java.io.File
 import org.openmole.core.model.data.Prototype
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FromString._
 import org.openmole.plugin.domain.file.ListFilesDomain
 
@@ -27,9 +29,20 @@ class ListFilesDomainDataUI(val name: String = "",
                             val directoryPath: String = "",
                             val regexp: String = ".*") extends IDomainDataUI {
 
-  def coreObject(prototypeObject: Prototype[_]) = new ListFilesDomain(new File(directoryPath), regexp)
+  def coreObject(prototypeObject: Prototype[_]) = prototypeObject.`type` match {
+    case x: Manifest[File] ⇒ new ListFilesDomain(new File(directoryPath), regexp)
+    case _ ⇒ throw new UserBadDataError("The prototype " + prototypeObject + " has to be a File on a file domain")
+  }
+
+  new ListFilesDomain(new File(directoryPath), regexp)
 
   def coreClass = classOf[ListFilesDomain]
 
   def buildPanelUI = new ListFilesDomainPanelUI(this)
+
+  //FIXME : try to be changed in 2.10
+  def isAcceptable(p: IPrototypeDataProxyUI) =
+    p.dataUI.coreObject.`type`.erasure.isAssignableFrom(classOf[File])
+
+  override def toString = "File list"
 }

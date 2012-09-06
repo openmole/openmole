@@ -25,13 +25,10 @@ import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
-import org.openmole.ide.core.model.data.IPrototypeDataUI
-import org.openmole.ide.core.model.data.ISamplingDataUI
+import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
-import java.awt.Color
-import java.util.Locale
 import org.openmole.core.implementation.task._
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import scala.swing.TabbedPane
@@ -66,6 +63,8 @@ object EmptyDataUIs {
     def fatImagePath = "img/empty.png"
     def buildPanelUI = new EmptySamplingPanelUI
     def displayTypedName = ""
+    override def factors = List.empty
+    def samplings = List.empty
   }
 
   class EmptySamplingPanelUI extends ISamplingPanelUI {

@@ -19,6 +19,7 @@ package org.openmole.ide.plugin.domain.range
 
 import org.openmole.core.model.data.Prototype
 import org.openmole.core.model.domain.IDomain
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.plugin.domain.range._
 import org.openmole.misc.exception.UserBadDataError
@@ -42,4 +43,7 @@ class RangeDomainDataUI(
 
   def buildPanelUI = new RangeDomainPanelUI(this)
 
+  override def toString = "Range"
+
+  def isAcceptable(p: IPrototypeDataProxyUI) = true
 }

@@ -25,8 +25,8 @@ import scala.swing.Panel
 
 class SceneComponentWidget(scene: IMoleScene,
                            panel: Panel,
-                           w : Int,
-                           h : Int) extends ComponentWidget(scene.graphScene, panel.peer) {
-  setPreferredSize(new Dimension(w,h))
+                           w: Int,
+                           h: Int) extends ComponentWidget(scene.graphScene, panel.peer) {
+  setPreferredSize(new Dimension(w, h))
   setOpaque(true)
 }

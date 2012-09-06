@@ -19,6 +19,7 @@ package org.openmole.ide.core.implementation.workflow
 
 import org.netbeans.api.visual.graph.GraphScene
 
-class SamplingScene extends GraphScene.StringGraph { 
-
-}
+class SamplingScene
+//extends GraphScene.StringGraph {
+//
+//}
