@@ -31,15 +31,7 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.dialog.GUIApplication
 import org.openmole.ui.console.Console
-import scala.actors.threadpool.locks.ReentrantLock
 import scala.swing.SimpleSwingApplication
-import scala.tools.nsc.Settings
-import scala.tools.nsc.interpreter.ILoop
-import scala.tools.nsc.interpreter.JLineCompletion
-import scala.tools.nsc.interpreter.JLineReader
-import scala.tools.nsc.interpreter.NoCompletion
-import scala.tools.nsc.interpreter.ProductCompletion
-import scala.tools.nsc.interpreter.SeqCompletion
 import scopt.generic.OptionDefinition
 import scopt.immutable._
 
@@ -84,7 +76,7 @@ class Application extends IApplication with Logger {
           val headless = GraphicsEnvironment.getLocalGraphicsEnvironment.isHeadlessInstance
           if (!headless && SplashScreen.getSplashScreen != null) SplashScreen.getSplashScreen.close
         } catch {
-          case e ⇒ logger.log(FINE, "Error in splash screen closing", e)
+          case e: Throwable ⇒ logger.log(FINE, "Error in splash screen closing", e)
         }
 
         config.pluginsDirs.foreach { PluginManager.loadDir }
