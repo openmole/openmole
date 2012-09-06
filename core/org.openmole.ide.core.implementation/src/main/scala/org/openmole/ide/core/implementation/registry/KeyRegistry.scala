@@ -18,7 +18,6 @@
 package org.openmole.ide.core.implementation.registry
 
 import org.openmole.ide.core.model.factory.IAuthentificationFactoryUI
-import org.openmole.ide.core.model.factory.IBoundedDomainFactoryUI
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
 import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
 import org.openmole.ide.core.model.factory.IGroupingFactoryUI
@@ -26,6 +25,7 @@ import org.openmole.ide.core.model.factory.IHookFactoryUI
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
+import org.openmole.core.model.domain.IDomain
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
@@ -41,8 +41,6 @@ object KeyRegistry {
   val environments = new HashMap[DefaultKey, IEnvironmentFactoryUI] with SynchronizedMap[DefaultKey, IEnvironmentFactoryUI]
 
   val domains = new HashMap[DefaultKey, IDomainFactoryUI] with SynchronizedMap[DefaultKey, IDomainFactoryUI]
-
-  val boundedDomains = new HashMap[DefaultKey, IBoundedDomainFactoryUI] with SynchronizedMap[DefaultKey, IBoundedDomainFactoryUI]
 
   val hooks = new HashMap[DefaultKey, IHookFactoryUI] with SynchronizedMap[DefaultKey, IHookFactoryUI]
 

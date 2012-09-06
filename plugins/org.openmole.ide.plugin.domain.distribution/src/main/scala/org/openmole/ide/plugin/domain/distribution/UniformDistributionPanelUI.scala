@@ -25,16 +25,19 @@ import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.BorderPanel.Position._
 
-class FiniteUniformIntDistributionPanelUI(pud: FiniteUniformIntDistributionDataUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IDomainPanelUI {
+class UniformDistributionPanelUI(pud: UniformDistributionDataUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IDomainPanelUI {
   val sizeField = new TextField(6)
+  val maxField = new TextField(6)
 
   contents += (new Label("Size"), "gap para")
   contents += (sizeField, "wrap")
+  //FIXME 2.10, just for Finite uniform domains
+  //contents += (maxField, "wrap")
 
   sizeField.text = pud.size.toString
 
   override def saveContent(name: String) = {
-    new FiniteUniformIntDistributionDataUI(
+    new UniformDistributionDataUI(
       name,
       sizeField.text.toInt)
   }

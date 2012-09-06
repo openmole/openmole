@@ -22,7 +22,7 @@ import swing.Swing._
 import swing.ListView._
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.implementation.dataproxy.BoundedDomainDataProxyFactory
+import org.openmole.ide.core.implementation.data._
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.model.dataproxy._
@@ -33,8 +33,8 @@ import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.BorderPanel.Position._
 import org.openmole.ide.misc.widget.URL
-import org.openmole.ide.plugin.sampling.tools.MultiGenericBoundedSamplingPanel
-import org.openmole.ide.plugin.sampling.tools.MultiGenericBoundedSamplingPanel._
+import org.openmole.ide.plugin.sampling.tools.MultiGenericSamplingPanel
+import org.openmole.ide.plugin.sampling.tools.MultiGenericSamplingPanel._
 import scala.collection.JavaConversions._
 
 class LHSSamplingPanelUI(cud: LHSSamplingDataUI) extends PluginPanel("wrap 2", "", "") with ISamplingPanelUI {
@@ -42,14 +42,12 @@ class LHSSamplingPanelUI(cud: LHSSamplingDataUI) extends PluginPanel("wrap 2", "
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val sampleTextField = new TextField(cud.samples, 4)
-  val multiPanel = new MultiGenericBoundedSamplingPanel(Proxys.prototypes.toList,
+  val multiPanel = new MultiGenericSamplingPanel(Proxys.prototypes.toList,
     domains,
     cud.factors.map { f ⇒
-      new GenericBoundedSamplingPanel(Proxys.prototypes.toList,
+      new GenericSamplingPanel(Proxys.prototypes.toList,
         domains,
-        new GenericBoundedSamplingData(Some(f._1),
-          Some(f._2.toString),
-          Some(f._3)))
+        new GenericSamplingData(f))
     })
 
   tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("wrap 2") {
@@ -58,14 +56,12 @@ class LHSSamplingPanelUI(cud: LHSSamplingDataUI) extends PluginPanel("wrap 2", "
     contents += multiPanel.panel
   })
 
-  def domains = KeyRegistry.boundedDomains.values.map { f ⇒ new BoundedDomainDataProxyFactory(f).buildDataProxyUI }.toList
+  def domains = KeyRegistry.domains.values.map { _.buildDataUI }.toList
 
   override def saveContent(name: String) = new LHSSamplingDataUI(name,
     sampleTextField.text,
     multiPanel.content.map { d ⇒
-      (d.prototypeProxy.get,
-        d.boundedDomainProxy.get,
-        d.boundedDomainDataUI.get)
+      new FactorDataUI(d.factor.prototype, d.factor.domain)
     })
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {

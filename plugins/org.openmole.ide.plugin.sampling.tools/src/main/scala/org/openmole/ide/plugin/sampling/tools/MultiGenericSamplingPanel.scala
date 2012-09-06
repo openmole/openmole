@@ -22,13 +22,13 @@ import swing.Swing._
 import scala.swing.event.SelectionChanged
 import swing.ListView._
 import org.openmole.ide.core.implementation.dataproxy._
-import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.panel._
+import org.openmole.ide.core.implementation.data._
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.misc.widget.PluginPanel
-import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import org.openmole.ide.misc.widget.multirow.IData
 import org.openmole.ide.misc.widget.multirow.IFactory
 import org.openmole.ide.misc.widget.multirow.IPanel
@@ -46,21 +46,21 @@ import scala.collection.JavaConversions._
 object MultiGenericSamplingPanel {
 
   class GenericSamplingPanel(protoContent: List[IPrototypeDataProxyUI],
-                             domainContent: List[IDomainDataProxyUI],
+                             domainContent: List[IDomainDataUI],
                              data: GenericSamplingData) extends PluginPanel("wrap")
       with IPanel[GenericSamplingData] {
 
     val protoComboBox = new MyComboBox(protoContent)
-    val domainComboBox = new MyComboBox(domainContent.map { _.toString })
-    var dPanel = data.domainDataUI.getOrElse { domainContent(0).dataUI }.buildPanelUI
+    val domainComboBox = new MyComboBox(domainContent)
+    var dPanel = data.factor.domain.getOrElse { domainContent(0) }.buildPanelUI
 
-    data.prototypeProxy match {
+    data.factor.prototype match {
       case Some(x: IPrototypeDataProxyUI) ⇒ protoComboBox.selection.item = x
       case _ ⇒
     }
 
-    data.domainProxy match {
-      case Some(x: String) ⇒
+    data.factor.domain match {
+      case Some(x: IDomainDataUI) ⇒
         domainComboBox.selection.item = x
       case _ ⇒
     }
@@ -77,32 +77,29 @@ object MultiGenericSamplingPanel {
         if (contents.size == 2) contents.remove(1)
         dPanel = domainContent.filter { it ⇒
           domainComboBox.selection.item == it.toString
-        }.head.dataUI.buildPanelUI
+        }.head.buildPanelUI
         contents += dPanel.peer
     }
 
     def content = {
-      new GenericSamplingData(Some(protoComboBox.selection.item),
-        Some(domainComboBox.selection.item),
-        Some(dPanel.saveContent("")))
+      new GenericSamplingData(new FactorDataUI(Some(protoComboBox.selection.item),
+        Some(dPanel.saveContent(""))))
     }
   }
 
-  class GenericSamplingData(val prototypeProxy: Option[IPrototypeDataProxyUI] = None,
-                            val domainProxy: Option[String] = None,
-                            val domainDataUI: Option[IDomainDataUI] = None) extends IData
+  class GenericSamplingData(val factor: IFactorDataUI) extends IData
 
   class GenericSamplingFactory(protoContent: List[IPrototypeDataProxyUI],
-                               domainContent: List[IDomainDataProxyUI]) extends IFactory[GenericSamplingData] {
+                               domainContent: List[IDomainDataUI]) extends IFactory[GenericSamplingData] {
     def apply = new GenericSamplingPanel(protoContent,
       domainContent,
-      new GenericSamplingData)
+      new GenericSamplingData(factor = new FactorDataUI))
   }
-
 }
+
 import MultiGenericSamplingPanel._
 class MultiGenericSamplingPanel(protoContent: List[IPrototypeDataProxyUI] = List.empty,
-                                domainContent: List[IDomainDataProxyUI] = List.empty,
+                                domainContent: List[IDomainDataUI] = List.empty,
                                 initPanels: List[GenericSamplingPanel]) extends MultiPanel("Factors",
   new GenericSamplingFactory(protoContent, domainContent),
   initPanels)

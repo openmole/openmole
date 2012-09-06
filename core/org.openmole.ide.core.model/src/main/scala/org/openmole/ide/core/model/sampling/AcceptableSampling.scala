@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
+ * Copyright (C) 2012 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.model.dataproxy
+package org.openmole.ide.core.model.sampling
 
-trait IDomainDataProxyFactory extends IDataProxyFactory {
-  def buildDataProxyUI: IDomainDataProxyUI
+trait AcceptableSampling extends Acceptable {
+  def isAcceptable(o: Object): Boolean
 }

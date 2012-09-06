@@ -51,8 +51,8 @@ class CapsuleUI(val scene: IMoleScene,
     with ICapsuleUI {
 
   val taskComponentWidget = new SceneComponentWidget(scene, new TaskWidget(scene, this),
-                                                     TASK_CONTAINER_WIDTH, 
-                                                     TASK_CONTAINER_HEIGHT)
+    TASK_CONTAINER_WIDTH,
+    TASK_CONTAINER_HEIGHT)
   var environmentWidget: Option[LinkedImageWidget] = None
   var samplingWidget: Option[LinkedImageWidget] = None
   var inputPrototypeWidget: Option[PrototypeWidget] = None

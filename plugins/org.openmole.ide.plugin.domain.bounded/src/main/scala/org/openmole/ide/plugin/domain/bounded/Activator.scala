@@ -18,9 +18,9 @@
 package org.openmole.ide.plugin.domain.bounded
 
 import org.openmole.ide.core.implementation.registry.OSGiActivator
-import org.openmole.ide.core.implementation.registry.BoundedDomainActivator
+import org.openmole.ide.core.implementation.registry.DomainActivator
 
-class Activator extends OSGiActivator with BoundedDomainActivator {
+class Activator extends OSGiActivator with DomainActivator {
 
-  override def boundedDomainFactories = List(new BoundedDomainFactoryUI)
+  override def domainFactories = List(new BoundedDomainFactoryUI)
 }

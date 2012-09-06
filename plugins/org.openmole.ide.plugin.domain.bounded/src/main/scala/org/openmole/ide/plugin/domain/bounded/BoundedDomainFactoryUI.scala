@@ -17,9 +17,9 @@
 
 package org.openmole.ide.plugin.domain.bounded
 
-import org.openmole.ide.core.model.factory.IBoundedDomainFactoryUI
+import org.openmole.ide.core.model.factory.IDomainFactoryUI
 
-class BoundedDomainFactoryUI extends IBoundedDomainFactoryUI {
+class BoundedDomainFactoryUI extends IDomainFactoryUI {
   def name = "Bounded"
   override def buildDataUI = new BoundedDomainDataUI
 }

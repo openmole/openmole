@@ -23,7 +23,7 @@ import org.openmole.ide.plugin.sampling.tools.MultiGenericSamplingPanel
 import org.openmole.ide.plugin.sampling.tools.MultiGenericSamplingPanel._
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.implementation.dataproxy.DomainDataProxyFactory
+import org.openmole.ide.core.implementation.data.FactorDataUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.model.dataproxy._
@@ -42,20 +42,16 @@ class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends PluginPanel("
     cud.factors.map { f ⇒
       new GenericSamplingPanel(Proxys.prototypes.toList,
         domains,
-        new GenericSamplingData(Some(f._1),
-          Some(f._2.toString),
-          Some(f._3)))
+        new GenericSamplingData(f))
     })
 
   tabbedPane.pages += new TabbedPane.Page("Settings", samplingPanel.panel)
 
-  def domains = KeyRegistry.domains.values.map { f ⇒ new DomainDataProxyFactory(f).buildDataProxyUI }.toList
+  def domains = KeyRegistry.domains.values.map { _.buildDataUI }.toList
 
   override def saveContent(name: String) = new CompleteSamplingDataUI(name, samplingPanel.content.map { c ⇒
-    (c.prototypeProxy.get,
-      c.domainProxy.get,
-      c.domainDataUI.get)
-  })
+    new FactorDataUI(c.factor.prototype, c.factor.domain)
+  }, List.empty)
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     add(samplingPanel, new Help(i18n.getString("domain")))

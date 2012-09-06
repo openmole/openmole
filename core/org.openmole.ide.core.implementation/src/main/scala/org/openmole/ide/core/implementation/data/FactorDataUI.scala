@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
+ * Copyright (C) 2012 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,12 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.model.dataproxy
+package org.openmole.ide.core.implementation.data
 
-import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.ide.core.model.data._
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
-trait IDomainDataProxyUI extends IDataProxyUI {
-  def dataUI_=(d: IDomainDataUI)
-
-  override def dataUI: IDomainDataUI
-}
+class FactorDataUI(val prototype: Option[IPrototypeDataProxyUI] = None,
+                   val domain: Option[IDomainDataUI] = None) extends IFactorDataUI
