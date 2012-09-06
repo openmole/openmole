@@ -41,7 +41,7 @@ import MultiWidget._
 class MultiWidget[S, T <: IRowWidget[S]](title: String = "",
                                          rWidgets: List[T],
                                          factory: IRowWidgetFactory[S, T],
-                                         allowEmpty: Minus = NO_EMPTY,
+                                         allowEmpty: MultiWidget.Minus = MultiWidget.NO_EMPTY,
                                          buildRowFromFactory: Boolean = false) extends Component {
   val rowWidgets = new HashSet[T]
   val panel = new PluginPanel("wrap " + {
