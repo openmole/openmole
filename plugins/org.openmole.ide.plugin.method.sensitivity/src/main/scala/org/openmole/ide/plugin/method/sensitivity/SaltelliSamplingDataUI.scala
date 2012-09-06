@@ -49,4 +49,9 @@ class SaltelliSamplingDataUI(val name: String = "",
   override def fatImagePath = "img/saltelliSampling_fat.png"
 
   def buildPanelUI = new SaltelliSamplingPanelUI(this)
+
+  //FIXME 2.10
+  def isAcceptable(factor: IFactorDataUI) = false
+
+  def isAcceptable(sampling: ISamplingDataUI) = true
 }

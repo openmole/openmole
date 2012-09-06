@@ -35,4 +35,8 @@ trait ISamplingDataUI extends IDataUI {
   def imagePath: String
 
   def fatImagePath: String
+
+  def isAcceptable(factor: IFactorDataUI): Boolean
+
+  def isAcceptable(sampling: ISamplingDataUI): Boolean
 }

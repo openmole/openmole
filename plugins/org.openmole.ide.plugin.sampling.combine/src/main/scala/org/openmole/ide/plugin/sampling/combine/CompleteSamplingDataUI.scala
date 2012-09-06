@@ -43,4 +43,9 @@ class CompleteSamplingDataUI(val name: String = "",
   def fatImagePath = "img/completeSampling_fat.png"
 
   def buildPanelUI = new CompleteSamplingPanelUI(this)
+
+  //FIXME 2.10
+  def isAcceptable(factor: IFactorDataUI) = false
+
+  def isAcceptable(sampling: ISamplingDataUI) = true
 }
