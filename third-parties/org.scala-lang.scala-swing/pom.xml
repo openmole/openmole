@@ -39,7 +39,7 @@
 
     <!--optional. Use this property to tune the exported packages-->
     <properties>
-        <export.packages>scala.swing.*</export.packages>
+        <export.packages>scala.swing.*,scala.actors.*</export.packages>
     </properties>
 
 </project>

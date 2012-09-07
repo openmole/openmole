@@ -220,6 +220,7 @@
 			<excludeTransitive>true</excludeTransitive>
 			<excludeScope>compile</excludeScope>
 			<!--<outputDirectory>${project.parent.build.directory}/openmole/openmole-plugins</outputDirectory>-->
+                        <excludeArtifactIds>scalatest_${lib.org.scala-lang.scala.version},junit</excludeArtifactIds>
 		</configuration>
                 <executions>
                     <execution>
