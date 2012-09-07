@@ -23,6 +23,40 @@
 	   <version>${lib.org.scala-lang.scala.version}</version>
 	   <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-reflect</artifactId>
+            <version>${lib.org.scala-lang.scala.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-transactor_${lib.org.scala-lang.scala.version}</artifactId>
+	    <version>${lib.com.typesafe.akka.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-actor_${lib.org.scala-lang.scala.version}</artifactId>
+	    <version>${lib.com.typesafe.akka.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-actors</artifactId>
+            <version>${lib.org.scala-lang.scala.version}</version>
+        </dependency>
+	<dependency>
+    	   <groupId>org.scala-lang</groupId>
+    	   <artifactId>scala-compiler</artifactId>
+	   <version>${lib.org.scala-lang.scala.version}</version>
+	   <scope>provided</scope>
+        </dependency>
+        <dependency>
+           <groupId>org.scala-lang</groupId>
+           <artifactId>jline</artifactId>
+           <version>${lib.org.scala-lang.scala.version}</version>
+           <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->
@@ -38,7 +72,10 @@
     <packaging>bundle</packaging>
 
     
+    <!--optional. Use this property to tune the exported packages-->
     <properties>
+        <libraries.export.packages>akka.*,com.typesafe.*,scala.*</libraries.export.packages>
+        <eclipse.buddypolicy>global</eclipse.buddypolicy>
         <embed-dep>*;type=!pom;inline=true</embed-dep>
     </properties>
 

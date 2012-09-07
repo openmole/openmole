@@ -34,11 +34,6 @@
 	<dependencies>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>org.scala-lang.scala-compiler</artifactId>
-	    <version>${project.version}</version>
- 	</dependency>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
             <artifactId>org.scala-lang.scala-library</artifactId>
 	    <version>${project.version}</version>
  	</dependency>

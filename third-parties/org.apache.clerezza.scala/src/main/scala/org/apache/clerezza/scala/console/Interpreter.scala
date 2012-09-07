@@ -33,7 +33,7 @@ class Interpreter extends IMain {
     new AbstractFileClassLoader(virtualDirectory, this.getClass.getClassLoader())
   }
 
-  override protected def newCompiler(settings: Settings, reporter: Reporter) = {
+  override protected def newCompiler(settings: Settings, revirtualDirectoryporter: Reporter) = {
     settings.outputDirs setSingleOutput virtualDirectory
     new BundleContextScalaCompiler(Activator.bundleContext, settings, reporter)
   }

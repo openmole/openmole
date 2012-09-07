@@ -60,11 +60,6 @@
             <artifactId>org.openmole.misc.pluginmanager</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>com.typesafe.akka</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->

@@ -28,7 +28,7 @@ import scala.collection.mutable.ListBuffer
 import org.osgi.framework.BundleEvent
 import org.osgi.framework.BundleListener
 import scala.collection.JavaConversions._
-import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.exception._
 
 object PluginManager {
 
@@ -125,7 +125,7 @@ object PluginManager {
     resolvedPluginDependenciesCache.getOrElseUpdate(b, dependencies(List(b)).filter(b ⇒ !providedDependencies.contains(b)))
   }
 
-  private def installBundle(f: File) = {
+  private def installBundle(f: File) = try {
     if (!f.exists) throw new UserBadDataError("Bundle file " + f + " doesn't exists.")
     val file = f.getAbsoluteFile
 
@@ -144,6 +144,8 @@ object PluginManager {
         }
         bundle
     }
+  } catch {
+    case t: Throwable ⇒ throw new InternalProcessingError(t, "Installing bundle " + f)
   }
 
   private def updateDependencies = synchronized {

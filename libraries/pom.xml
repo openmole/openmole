@@ -24,7 +24,6 @@
         <module>fr.iscpif.mgo</module>
         <module>com.google.guava</module>
         <module>com.thoughtworks.xstream</module>
-	<module>com.typesafe.akka</module>
         <module>org.codehaus.groovy</module>
         <module>org.apache.commons.compress</module>
 	<module>org.apache.log4j</module>
@@ -39,7 +38,6 @@
 	<module>org.scala-lang.scala-library</module>
 	<module>org.scala-lang.scala-library.netlogo4</module>
 	<module>org.scala-lang.scala-library.netlogo5</module>
-	<module>org.scala-lang.scala-compiler</module>
 	<module>org.apache.commons.exec</module>
 	<module>ccl.northwestern.edu.netlogo4</module>
 	<module>ccl.northwestern.edu.netlogo4.noscala</module>
