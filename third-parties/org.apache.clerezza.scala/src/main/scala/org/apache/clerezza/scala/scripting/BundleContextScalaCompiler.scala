@@ -42,7 +42,7 @@ class BundleContextScalaCompiler(
     settings: Settings,
     reporter: Reporter) extends Global(settings, reporter) with ReplGlobal { compiler ⇒
 
-  val internalClassPath = {
+  lazy val internalClassPath = {
     require(!forMSIL, "MSIL not supported")
     createClassPath(super.classPath)
   }
@@ -50,36 +50,38 @@ class BundleContextScalaCompiler(
   override def classPath = internalClassPath
 
   def createClassPath[T](original: ClassPath[T]) = {
-    val classPathOrig: ClassPath[AbstractFile] = new PathResolver(settings).result
-    var bundles: Array[Bundle] = bundleContext.getBundles
-    val classPathAbstractFiles =
-      for (bundle ← bundles; val url = bundle.getResource("/"); if url != null) yield {
-        if ("file".equals(url.getProtocol())) new PlainFile(new File(url.toURI()))
-        else BundleFS.create(bundle)
-      }
-    /*val classPaths: List[ClassPath[AbstractFile]] =
-      (for (abstractFile ← classPathAbstractFiles) yield {
-        new DirectoryClassPath(abstractFile, classPathOrig.context)
-      }) toList*/
+    //    val classPathOrig: ClassPath[AbstractFile] = new PathResolver(settings).result
+    //    var bundles: Array[Bundle] = bundleContext.getBundles
+    //    val classPathAbstractFiles =
+    //      for (bundle ← bundles; val url = bundle.getResource("/"); if url != null) yield {
+    //        if ("file".equals(url.getProtocol())) new PlainFile(new File(url.toURI()))
+    //        else BundleFS.create(bundle)
+    //      }
+    //    /*val classPaths: List[ClassPath[AbstractFile]] =
+    //      (for (abstractFile ← classPathAbstractFiles) yield {
+    //        new DirectoryClassPath(abstractFile, classPathOrig.context)
+    //      }) toList*/
+    //
+    //    val classPaths = classPathAbstractFiles.map(original.context.newClassPath)
+    //
+    //    println("Load " + classPaths.flatMap { _.classes }.mkString(","))
+    //    //    println(classPathOrig)
+    //
+    //    new MergedClassPath(classPaths, original.context)
 
-    val classPaths = classPathAbstractFiles.map(original.context.newClassPath)
+    println("Create class path")
 
-//    println("Load " + classPaths.flatMap { _.classes }.mkString(","))
-//    println(classPathOrig)
-
-    new MergedClassPath(classPaths, original.context)
-
-    /*var result = ListBuffer(original)
+    var result = ListBuffer(original)
     val files = List.concat(
       BundleClassPathBuilder.fromBundle(bundleContext.getBundle),
-      List(BundleClassPathBuilder.create(BundleClassLoader.unapply(classOf[scala.Application].getClassLoader).get.getBundle) /*,
-        BundleClassPathBuilder.create(BundleClassLoader.unapply(classOf[ScalaCompiler].getClassLoader).get.getBundle),
-        BundleClassPathBuilder.create(BundleClassLoader.unapply(classOf[ClassPathBuilder].getClassLoader).get.getBundle)*/ ))
+      List(BundleClassPathBuilder.create(BundleClassLoader.unapply(classOf[scala.Application].getClassLoader).get.getBundle),
+        BundleClassPathBuilder.create(BundleClassLoader.unapply(classOf[BundleContextScalaCompiler].getClassLoader).get.getBundle)))
+    //,        BundleClassPathBuilder.create(BundleClassLoader.unapply(classOf[ClassPathBuilder].getClassLoader).get.getBundle)))
     files.foreach(file ⇒ {
       result += original.context.newClassPath(file)
-    })*/
+    })
 
-    // new MergedClassPath(result.toList.reverse, original.context)
+    new MergedClassPath(result.toList.reverse, original.context)
   }
 
   /*override val classPath = initClassPath
