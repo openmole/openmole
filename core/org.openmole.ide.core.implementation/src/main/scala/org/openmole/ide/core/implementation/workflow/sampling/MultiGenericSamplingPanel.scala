@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.sampling.tools
+package org.openmole.ide.core.implementation.workflow.sampling
 
 import scala.swing._
 import swing.Swing._

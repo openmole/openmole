@@ -15,11 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.workflow
+package org.openmole.ide.core.model.sampling
 
-import org.netbeans.api.visual.graph.GraphScene
+import org.openmole.ide.core.model.data.IFactorDataUI
+import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 
-class SamplingScene
-//extends GraphScene.StringGraph {
-//
-//}
+trait IInputSampling {
+  def samplingSlots: Iterable[ISamplingSlot]
+
+  def factors: Iterable[IFactorDataUI]
+
+  def samplings: Iterable[ISamplingDataProxyUI]
+}

@@ -6,7 +6,9 @@
 package org.openmole.ide.plugin.sampling.combine
 
 import org.openmole.ide.core.model.dataproxy._
+import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.core.model.data._
+import org.openmole.ide.core.implementation.workflow.sampling._
 import org.openmole.plugin.sampling.combine.CompleteSampling
 import org.openmole.core.implementation.sampling.DiscreteFactor
 import org.openmole.core.model.data.Prototype
@@ -16,8 +18,7 @@ import scala.collection.JavaConversions._
 
 class CompleteSamplingDataUI(val name: String = "",
                              // val factors: List[(IPrototypeDataProxyUI, String, IDomainDataUI)] = List.empty) extends ISamplingDataUI {
-                             override val factors: List[IFactorDataUI] = List.empty,
-                             val samplings: List[ISamplingDataProxyUI] = List.empty) extends ISamplingDataUI {
+                             val factors: List[IFactorDataUI] = List.empty) extends ISamplingDataUI {
 
   def coreObject =
     new CompleteSampling(
@@ -35,6 +36,10 @@ class CompleteSamplingDataUI(val name: String = "",
   //      factors.map(f ⇒ new DiscreteFactor(
   //          f._1.dataUI.coreObject.asInstanceOf[Prototype[Any]],
   //          f._3.coreObject(f._1.dataUI.coreObject).asInstanceOf[IDomain[Any] with IIterable[Any]])).toSeq: _*)
+
+  def inputs = new InputSampling(List(new InputFactorSlot),
+    factors,
+    List.empty)
 
   def coreClass = classOf[CompleteSampling]
 

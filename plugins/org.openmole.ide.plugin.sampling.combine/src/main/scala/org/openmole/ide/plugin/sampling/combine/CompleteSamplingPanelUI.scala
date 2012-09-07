@@ -19,14 +19,13 @@ package org.openmole.ide.plugin.sampling.combine
 
 import scala.swing._
 import org.openmole.ide.misc.widget.URL
-import org.openmole.ide.plugin.sampling.tools.MultiGenericSamplingPanel
-import org.openmole.ide.plugin.sampling.tools.MultiGenericSamplingPanel._
 import java.util.Locale
 import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.data.FactorDataUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
-import org.openmole.ide.core.implementation.registry.KeyRegistry
+import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.core.model.dataproxy._
+import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.panel._
 import org.openmole.ide.misc.widget.Help
@@ -37,23 +36,10 @@ class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends PluginPanel("
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
-  val samplingPanel = new MultiGenericSamplingPanel(Proxys.prototypes.toList,
-    domains,
-    cud.factors.map { f ⇒
-      new GenericSamplingPanel(Proxys.prototypes.toList,
-        domains,
-        new GenericSamplingData(f))
-    })
+  override def saveContent(name: String,
+                           ssDataUI: ISamplingSceneDataUI) = new CompleteSamplingDataUI(name, ssDataUI.factors.map { c ⇒
+    new FactorDataUI(c.prototype, c.domain)
+  }.toList)
 
-  tabbedPane.pages += new TabbedPane.Page("Settings", samplingPanel.panel)
-
-  def domains = KeyRegistry.domains.values.map { _.buildDataUI }.toList
-
-  override def saveContent(name: String) = new CompleteSamplingDataUI(name, samplingPanel.content.map { c ⇒
-    new FactorDataUI(c.factor.prototype, c.factor.domain)
-  }, List.empty)
-
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(samplingPanel, new Help(i18n.getString("domain")))
-  }
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
 }

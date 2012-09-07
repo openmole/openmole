@@ -15,11 +15,11 @@ import org.openmole.core.implementation.sampling.Factor
 import org.openmole.core.model.data.Prototype
 import scala.collection.JavaConversions._
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.implementation.workflow.sampling._
 
 class LHSSamplingDataUI(val name: String = "",
                         val samples: String = "1",
-                        override val factors: List[IFactorDataUI] = List.empty,
-                        val samplings: List[ISamplingDataProxyUI] = List.empty) extends ISamplingDataUI {
+                        val factors: List[IFactorDataUI] = List.empty) extends ISamplingDataUI {
 
   implicit def string2Int(s: String): Int = augmentString(s).toInt
 
@@ -52,6 +52,10 @@ class LHSSamplingDataUI(val name: String = "",
   //          }
   //          case _ ⇒ Nil
   //        }).toSeq: _*)
+
+  def inputs = new InputSampling(List(new InputFactorSlot),
+    factors,
+    List.empty)
 
   def coreClass = classOf[LHS]
 

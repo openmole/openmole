@@ -19,15 +19,10 @@ package org.openmole.ide.core.model.data
 
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.core.model.sampling.ISampling
-import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
+import org.openmole.ide.core.model.sampling._
 
 trait ISamplingDataUI extends IDataUI {
-
-  def factors: Iterable[IFactorDataUI] = List.empty
-
-  def samplings: Iterable[ISamplingDataProxyUI]
-
   def coreObject: ISampling
 
   def buildPanelUI: ISamplingPanelUI
@@ -39,4 +34,6 @@ trait ISamplingDataUI extends IDataUI {
   def isAcceptable(factor: IFactorDataUI): Boolean
 
   def isAcceptable(sampling: ISamplingDataUI): Boolean
+
+  def inputs: IInputSampling
 }

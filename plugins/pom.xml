@@ -28,7 +28,6 @@
         <module>org.openmole.ide.plugin.domain.range</module>
         <module>org.openmole.ide.plugin.domain.file</module>
         <module>org.openmole.ide.plugin.domain.distribution</module>
-        <module>org.openmole.ide.plugin.sampling.tools</module>
         <module>org.openmole.ide.plugin.sampling.combine</module>
         <module>org.openmole.ide.plugin.sampling.lhs</module>
         <module>org.openmole.ide.plugin.sampling.csv</module>
