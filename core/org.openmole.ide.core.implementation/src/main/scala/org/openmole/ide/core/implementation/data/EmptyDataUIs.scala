@@ -65,6 +65,8 @@ object EmptyDataUIs {
     def displayTypedName = ""
     override def factors = List.empty
     def samplings = List.empty
+    def isAcceptable(sampling: ISamplingDataUI) = false
+    def isAcceptable(factor: IFactorDataUI) = false
   }
 
   class EmptySamplingPanelUI extends ISamplingPanelUI {

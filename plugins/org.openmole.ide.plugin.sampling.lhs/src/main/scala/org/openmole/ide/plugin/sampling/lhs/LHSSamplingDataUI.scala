@@ -60,4 +60,9 @@ class LHSSamplingDataUI(val name: String = "",
   override def fatImagePath = "img/lhsSampling_fat.png"
 
   def buildPanelUI = new LHSSamplingPanelUI(this)
+
+  //FIXME 2.10
+  def isAcceptable(factor: IFactorDataUI) = false
+
+  def isAcceptable(sampling: ISamplingDataUI) = true
 }

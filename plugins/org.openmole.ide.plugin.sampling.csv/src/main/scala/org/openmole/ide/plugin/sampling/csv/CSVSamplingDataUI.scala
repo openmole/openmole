@@ -8,6 +8,7 @@ package org.openmole.ide.plugin.sampling.csv
 import java.io.File
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.dataproxy._
+import org.openmole.ide.core.model.data.IFactorDataUI
 import org.openmole.ide.core.model.data.ISamplingDataUI
 import org.openmole.plugin.sampling.csv.CSVSampling
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
@@ -35,4 +36,8 @@ class CSVSamplingDataUI(val name: String = "",
   override def fatImagePath = "img/csvSampling_fat.png"
 
   def buildPanelUI = new CSVSamplingPanelUI(this)
+
+  def isAcceptable(factor: IFactorDataUI) = false
+
+  def isAcceptable(sampling: ISamplingDataUI) = true
 }

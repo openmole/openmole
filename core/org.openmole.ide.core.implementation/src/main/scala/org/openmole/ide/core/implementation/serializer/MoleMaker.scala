@@ -69,7 +69,7 @@ object MoleMaker {
       }
       Right((new MoleExecution(mole, hooks, strat.toMap, groupingStrategies.map { case (s, c) ⇒ c -> s }.toMap), envs.toSet))
     } catch {
-      case e ⇒
+      case e: Throwable ⇒
         Left(e)
     }
 
@@ -117,7 +117,7 @@ object MoleMaker {
         Right((new Mole(capsuleMap(manager.startingCapsule.get), transitions, dataChannels), capsuleMap, prototypeMap, errors))
       } else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")
     } catch {
-      case e ⇒
+      case e: Throwable ⇒
         Left(e.getMessage)
     }
   }
@@ -156,7 +156,7 @@ object MoleMaker {
         parameters(proxy),
         PluginSet(plugins)))
     } catch {
-      case e ⇒
+      case e: Throwable ⇒
         StatusBar.warn(e.getMessage, Some(proxy), e.getStackTraceString, e.getClass.getCanonicalName)
         Left(e)
     }

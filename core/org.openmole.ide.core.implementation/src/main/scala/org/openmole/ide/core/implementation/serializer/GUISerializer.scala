@@ -108,7 +108,7 @@ class GUISerializer {
   def readStream(f: File) = try {
     Right(xstream.createObjectInputStream(new FileReader(f)))
   } catch {
-    case e ⇒
+    case e: Throwable ⇒
       StatusBar.block("An error occured when loading " + f.getAbsolutePath + "\n" + e.getMessage,
         stack = e.getStackTraceString,
         exceptionName = e.getClass.getCanonicalName)
@@ -140,7 +140,7 @@ class GUISerializer {
             }
           } catch {
             case eof: EOFException ⇒ StatusBar.inform("Project loaded")
-            case e ⇒ StatusBar.block("Failed to unserialize a data of type " + concept,
+            case e: Throwable ⇒ StatusBar.block("Failed to unserialize a data of type " + concept,
               stack = e.getMessage + "\n" + e.getStackTraceString,
               exceptionName = e.getClass.getCanonicalName)
           } finally {

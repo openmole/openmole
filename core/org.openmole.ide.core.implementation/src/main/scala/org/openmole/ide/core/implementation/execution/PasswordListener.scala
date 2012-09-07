@@ -46,7 +46,7 @@ class PasswordListener extends EventListener[Workspace] {
           else PasswordDialog.ok(false)
         } catch {
           case e: UserBadDataError ⇒ StatusBar.warn("The preference password is not set. All the actions requiring encrypted data are unvailable")
-          case x ⇒ println(" other exception " + x)
+          case _: Throwable ⇒
         }
       case _ ⇒
     }
