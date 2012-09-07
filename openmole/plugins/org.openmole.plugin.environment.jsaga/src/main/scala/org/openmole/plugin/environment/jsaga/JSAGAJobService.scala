@@ -17,37 +17,43 @@
 
 package org.openmole.plugin.environment.jsaga
 
-import java.io.BufferedOutputStream
-import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStream
+import java.io._
 import java.net.URI
 import java.util.concurrent.TimeUnit
 import org.joda.time.format.ISOPeriodFormat
-import org.ogf.saga.job.Job
-import org.ogf.saga.job.JobDescription
 import org.ogf.saga.job.JobFactory
-import org.ogf.saga.task.TaskMode
+import org.ogf.saga.job.JobDescription
+import org.ogf.saga.job.{ JobService ⇒ JSJobService }
+import org.ogf.saga.task._
+import org.ogf.saga.error._
 import org.ogf.saga.url.URLFactory
-import org.openmole.core.batch.control.ServiceDescription
+import org.openmole.core.batch.control._
 import org.openmole.core.batch.authentication._
-import org.openmole.core.batch.environment.BatchJob
-import org.openmole.core.batch.environment.Runtime
-import org.openmole.core.batch.environment.JobService
-import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.environment.SerializedJob
-import org.openmole.core.batch.file.IURIFile
-import org.openmole.core.batch.authentication.JSAGASessionService
-import org.openmole.misc.workspace.ConfigurationLocation
-import org.openmole.misc.workspace.Workspace
-import org.openmole.misc.tools.service.Logger
+import org.openmole.core.batch.environment._
+import org.openmole.core.batch.control._
+import org.openmole.core.batch.file._
+import org.openmole.core.batch.authentication._
+import org.openmole.misc.workspace._
+import org.openmole.misc.tools.service._
 import org.openmole.misc.tools.io.FileUtil._
+import java.util.concurrent.ExecutionException
 import scala.io.Source._
 
 object JSAGAJobService extends Logger {
   val CreationTimeout = new ConfigurationLocation("JSAGAJobService", "CreationeTimout")
 
   Workspace += (CreationTimeout, "PT2M")
+
+  def trycatch[A](t: Task[_, _], f: ⇒ A): A =
+    try f
+    catch {
+      case (e: TimeoutException) ⇒
+        t.cancel(true)
+        throw e
+      case (e: IOException) ⇒ throw e
+      case e: ExecutionException ⇒ throw e.getCause
+    }
+
 }
 
 trait JSAGAJobService extends JobService {
@@ -60,13 +66,9 @@ trait JSAGAJobService extends JobService {
   def environment: JSAGAEnvironment
   def uri: URI
 
-  def createJobService(uri: URI) = {
-    val task = {
-      val url = URLFactory.createURL(uri.toString)
-      JobFactory.createJobService(TaskMode.ASYNC, JSAGASessionService.session(uri.toString), url)
-    }
-
-    task.get(Workspace.preferenceAsDurationInMs(JSAGAJobService.CreationTimeout), TimeUnit.MILLISECONDS)
+  def createJobService(uri: URI): JSJobService = {
+    val t = JobFactory.createJobService(TaskMode.ASYNC, JSAGASessionService.session(uri.toString), URLFactory.createURL(uri.toString))
+    trycatch(t, t.get(Workspace.preferenceAsDurationInMs(JSAGAJobService.CreationTimeout), TimeUnit.MILLISECONDS))
   }
 
   def newJobDescription = {

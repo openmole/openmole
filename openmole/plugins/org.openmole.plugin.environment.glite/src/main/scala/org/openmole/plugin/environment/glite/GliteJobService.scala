@@ -37,6 +37,7 @@ import org.openmole.plugin.environment.jsaga.JSAGAJobService
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.misc.tools.io.FileUtil._
 import scala.collection.JavaConversions._
+import org.ogf.saga.error._
 import scala.io.Source
 
 object GliteJobService extends Logger
@@ -62,8 +63,10 @@ class GliteJobService(
 
       val jobDescription = buildJobDescription(runtime, script)
       val job = jobService.createJob(jobDescription)
-      job.run
-
+      try job.run
+      catch {
+        case t: TimeoutException ⇒ job.cancel(true)
+      }
       //logger.fine(Source.fromFile(script).getLines.mkString)
 
       new GliteJob(JSAGAJob.id(job), outputFilePath, this, environment.authentication.expires)
