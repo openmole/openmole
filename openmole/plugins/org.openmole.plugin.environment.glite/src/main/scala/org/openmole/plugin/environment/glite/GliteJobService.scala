@@ -61,14 +61,8 @@ class GliteJobService(
       try generateScript(serializedJob, outputFilePath, environment.runtimeMemory.intValue, os)
       finally os.close
 
-      val jobDescription = buildJobDescription(runtime, script)
-      val job = jobService.createJob(jobDescription)
-      try job.run
-      catch {
-        case t: TimeoutException ⇒ job.cancel(true)
-      }
+      val job = submit(buildJobDescription(runtime, script))
       //logger.fine(Source.fromFile(script).getLines.mkString)
-
       new GliteJob(JSAGAJob.id(job), outputFilePath, this, environment.authentication.expires)
     } finally script.delete
   }

@@ -49,8 +49,7 @@ class PBSJobService(
       case None ⇒
     }
 
-    val job = jobService.createJob(jobDesc)
-    job.run
+    val job = submit(jobDesc)
     JSAGAJob(JSAGAJob.id(job), result.path, this)
   }
 

@@ -41,7 +41,7 @@ class SSHBatchJob(job: Job, override val resultPath: String, jobService: SSHJobS
   }
 
   def unqueue = synchronized {
-    job.run
+    JSAGAJobService.submit(job)
     jobIdOption = Some(JSAGAJob.id(job))
   }
 

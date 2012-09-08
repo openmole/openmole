@@ -24,6 +24,7 @@ import org.joda.time.format.ISOPeriodFormat
 import org.ogf.saga.job.JobFactory
 import org.ogf.saga.job.JobDescription
 import org.ogf.saga.job.{ JobService ⇒ JSJobService }
+import org.ogf.saga.job.Job
 import org.ogf.saga.task._
 import org.ogf.saga.error._
 import org.ogf.saga.url.URLFactory
@@ -54,11 +55,14 @@ object JSAGAJobService extends Logger {
       case e: ExecutionException ⇒ throw e.getCause
     }
 
+  def submit(job: Job) =
+    trycatch(job, job.run)
+
 }
 
 trait JSAGAJobService extends JobService {
 
-  import JSAGAJobService._
+  //import JSAGAJobService._
 
   @transient override lazy val description = new ServiceDescription(uri.toString)
   @transient lazy val jobService = createJobService(uri)
@@ -68,7 +72,7 @@ trait JSAGAJobService extends JobService {
 
   def createJobService(uri: URI): JSJobService = {
     val t = JobFactory.createJobService(TaskMode.ASYNC, JSAGASessionService.session(uri.toString), URLFactory.createURL(uri.toString))
-    trycatch(t, t.get(Workspace.preferenceAsDurationInMs(JSAGAJobService.CreationTimeout), TimeUnit.MILLISECONDS))
+    JSAGAJobService.trycatch(t, t.get(Workspace.preferenceAsDurationInMs(JSAGAJobService.CreationTimeout), TimeUnit.MILLISECONDS))
   }
 
   def newJobDescription = {
@@ -88,6 +92,12 @@ trait JSAGAJobService extends JobService {
     }
 
     description
+  }
+
+  def submit(jobDescription: JobDescription): Job = {
+    val job = jobService.createJob(jobDescription)
+    JSAGAJobService.submit(job)
+    job
   }
 
 }
