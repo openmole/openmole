@@ -33,16 +33,15 @@ import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
-import BasePanelUI._
 import scala.swing.Component
 import scala.swing.event.FocusGained
 
 class SamplingPanelUI(proxy: ISamplingDataProxyUI,
                       scene: IMoleScene,
-                      mode: Value = CREATION) extends BasePanelUI(proxy, scene, mode, new Color(80, 118, 152)) {
+                      mode: Value = CREATION) extends BasePanelUI(Some(proxy), scene, mode) {
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
   val panelUI = proxy.dataUI.buildPanelUI
-  val samplingScene = new SamplingScene(proxy.dataUI)
+  val samplingScene = new SamplingScene(scene, proxy.dataUI)
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {

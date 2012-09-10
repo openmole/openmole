@@ -43,18 +43,20 @@ import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.tools.image.Images._
 
-abstract class BasePanelUI(proxy: IDataProxyUI,
+abstract class BasePanelUI(proxy: Option[IDataProxyUI],
                            scene: IMoleScene,
-                           mode: Value,
-                           borderColor: Color = new Color(200, 200, 200)) extends MyPanel with Publisher {
-  background = Color.WHITE
+                           mode: Value) extends MyPanel with Publisher {
   opaque = true
   peer.setLayout(new BorderLayout)
   val iconLabel = new Label { icon = new ImageIcon(EMPTY) }
 
-  val nameTextField = new TextField(15) {
-    text = proxy.dataUI.name
+  val nameTextField = new TextField(15)
+
+  proxy match {
+    case Some(p: IDataProxyUI) ⇒ nameTextField.text = p.dataUI.name
+    case _ ⇒
   }
+
   val createLabelLink = new MainLinkLabel("create", new Action("") { def apply = baseCreate })
   val mainLinksPanel = new PluginPanel("")
   if (mode != CREATION) deleteLink
@@ -72,17 +74,20 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
       })
     }
 
-    add(new PluginPanel("wrap 3", "[left]", "[center]") {
-      contents += iconLabel
-      contents += nameTextField
-      contents += createLabelLink
-    }, "gapbottom 10")
+    proxy match {
+      case Some(p: IDataProxyUI) ⇒
+        add(new PluginPanel("wrap 3", "[left]", "[center]") {
+          contents += iconLabel
+          contents += nameTextField
+          contents += createLabelLink
+        }, "gapbottom 10")
+        listenTo(nameTextField)
+      case _ ⇒
+    }
   }
 
-  listenTo(nameTextField)
   preferredSize.width = 300
   foreground = Color.white
-  background = borderColor
 
   listenTo(this)
   reactions += {
@@ -119,7 +124,10 @@ abstract class BasePanelUI(proxy: IDataProxyUI,
 
   def baseSave: Unit = {
     save
-    ConceptMenu.refreshItem(proxy)
+    proxy match {
+      case Some(p: IDataProxyUI) ⇒ ConceptMenu.refreshItem(p)
+      case _ ⇒
+    }
     ScenesManager.currentSceneContainer match {
       case Some(x: ISceneContainer) ⇒ CheckData.checkMole(x.scene)
       case None ⇒

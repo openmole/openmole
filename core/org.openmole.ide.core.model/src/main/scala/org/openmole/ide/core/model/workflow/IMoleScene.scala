@@ -22,6 +22,7 @@ import org.netbeans.api.visual.graph.GraphScene
 import org.openmole.ide.core.model.panel.PanelMode
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.widget.LayerWidget
+import org.openmole.ide.core.model.sampling.IFactorWidget
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import scala.swing.Panel
 
@@ -51,6 +52,8 @@ trait IMoleScene {
   def displayPropertyPanel(proxy: IDataProxyUI, mode: PanelMode.Value)
 
   def displayExtraPropertyPanel(proxy: IDataProxyUI)
+
+  def displayExtraPropertyPanel(factorWidget: IFactorWidget)
 
   def closeExtraPropertyPanel
 

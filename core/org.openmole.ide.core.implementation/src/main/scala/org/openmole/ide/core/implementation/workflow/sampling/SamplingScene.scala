@@ -20,23 +20,34 @@ package org.openmole.ide.core.implementation.workflow.sampling
 import org.openmole.ide.core.implementation.data.FactorDataUI
 import org.openmole.ide.core.model.sampling.ISamplingScene
 import java.awt.Rectangle
+import java.awt.Color
 import java.awt.Point
 import org.netbeans.api.visual.widget._
-import java.awt.Dimension
+import org.netbeans.api.visual.action.ActionFactory
 import org.openmole.ide.core.model.data.ISamplingDataUI
+import org.openmole.ide.core.model.workflow.IMoleScene
 
-class SamplingScene(dataUI: ISamplingDataUI) extends Scene with ISamplingScene {
+class SamplingScene(moleScene: IMoleScene,
+                    dataUI: ISamplingDataUI) extends Scene with ISamplingScene {
 
+  setBackground(new Color(77, 77, 77))
   val boxLayer = new LayerWidget(this)
   addChild(boxLayer)
 
   this.setPreferredBounds(new Rectangle(0, 0, 400, 20))
 
-  boxLayer.addChild(new ComponentWidget(this, new FactorWidget(new FactorDataUI).peer) {
-    setPreferredSize(new Dimension(200, 50))
-    setOpaque(true)
-    setPreferredLocation(new Point(0, 0))
-  })
+  addFactor(new FactorDataUI, new Point(0, 0))
+  addFactor(new FactorDataUI, new Point(0, 60))
+  addFactor(new FactorDataUI, new Point(0, 120))
+
+  def addFactor(factorDataUI: FactorDataUI,
+                location: Point) = {
+    boxLayer.addChild(new ComponentWidget(this, new FactorWidget(moleScene, factorDataUI).peer) {
+      setOpaque(true)
+      setPreferredLocation(location)
+      getActions.addAction(ActionFactory.createMoveAction)
+    })
+  }
   //
   //  override def attachEdgeSourceAnchor(edge: String, oldSourceNode: String, sourceNode: String) = {
   //    println("attachEdgeSourceAnchor Not implemented yet")

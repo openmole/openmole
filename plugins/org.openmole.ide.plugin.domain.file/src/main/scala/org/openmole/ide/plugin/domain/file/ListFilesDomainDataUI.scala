@@ -41,8 +41,12 @@ class ListFilesDomainDataUI(val name: String = "",
   def buildPanelUI = new ListFilesDomainPanelUI(this)
 
   //FIXME : try to be changed in 2.10
-  def isAcceptable(p: IPrototypeDataProxyUI) =
+  def isAcceptable(p: IPrototypeDataProxyUI) = {
+    //p.dataUI.coreObject.`type`.baseClasses.contains(typeOf[File].typeSymbol)
     p.dataUI.coreObject.`type`.erasure.isAssignableFrom(classOf[File])
+  }
+
+  def preview = " in " + new File(directoryPath).getName
 
   override def toString = "File list"
 }

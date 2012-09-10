@@ -17,49 +17,47 @@
 
 package org.openmole.ide.core.implementation.workflow.sampling
 
-import scala.swing.Panel
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.BorderLayout
-import scala.swing.MyComboBox
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.misc.widget.MigPanel
+import scala.swing.Action
 import org.openmole.ide.core.model.data.IDomainDataUI
-import org.openmole.ide.core.implementation.registry.KeyRegistry
-import org.openmole.ide.core.implementation.dataproxy.Proxys
-import org.openmole.ide.core.implementation.data.FactorDataUI
-import scala.swing.event.SelectionChanged
+import org.openmole.ide.core.model.data.IFactorDataUI
+import org.openmole.ide.core.model.sampling.IFactorWidget
+import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.misc.widget.LinkLabel
+import org.openmole.ide.misc.widget.MigPanel
 
-class FactorWidget(factor: FactorDataUI) extends Panel {
-  background = Color.BLUE
-  preferredSize = new Dimension(200, 50)
-
+class FactorWidget(val moleScene: IMoleScene,
+                   var factor: IFactorDataUI) extends IFactorWidget { factorWidget ⇒
+  preferredSize = new Dimension(100, 25)
+  background = new Color(2, 240, 240)
+  opaque = true
   peer.setLayout(new BorderLayout)
+  val link = new LinkLabel(factorPreview,
+    new Action("") { def apply = moleScene.displayExtraPropertyPanel(factorWidget) },
+    3,
+    "73a5d2",
+    true)
 
-  val prototypeComboBox = new MyComboBox(prototypeContent(factor.domain))
-  val domainComboBox = new MyComboBox(domainContent(factor.prototype))
+  def factorPreview =
+    factor.prototype.getOrElse("") + {
+      factor.domain match {
+        case Some(d: IDomainDataUI) ⇒ d.preview
+        case _ ⇒ ""
+      }
+    } match {
+      case "" ⇒ "define Factor"
+      case x: String ⇒ x
+    }
 
-  listenTo(domainComboBox.selection)
-  reactions += {
-    case SelectionChanged(`domainComboBox`) ⇒
-      prototypeComboBox.peer.setModel(MyComboBox.newConstantModel(prototypeContent(Some(domainComboBox.selection.item))))
+  def update = {
+    link.link(factorPreview)
+    revalidate
+    repaint
   }
 
   peer.add(new MigPanel("") {
-    contents += prototypeComboBox
-    contents += domainComboBox
+    contents += link
   }.peer, BorderLayout.NORTH)
-
-  def prototypeContent(domain: Option[IDomainDataUI]) = Proxys.prototypes.filter { p ⇒
-    domain match {
-      case Some(d: IDomainDataUI) ⇒ d.isAcceptable(p)
-      case _ ⇒ false
-    }
-  }.toList
-
-  def domainContent(prototype: Option[IPrototypeDataProxyUI]) =
-    prototype match {
-      case Some(p: IPrototypeDataProxyUI) ⇒ KeyRegistry.domains.values.map { _.buildDataUI }.filter { _.isAcceptable(p) }.toList
-      case _ ⇒ List.empty
-    }
 }

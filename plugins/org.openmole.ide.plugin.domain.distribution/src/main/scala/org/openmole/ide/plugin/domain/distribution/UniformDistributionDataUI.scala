@@ -36,7 +36,9 @@ class UniformDistributionDataUI(
 
   //FIXME : try to be changed in 2.10 test if domain is finite for finiteUniformDistribution 
   def isAcceptable(p: IPrototypeDataProxyUI) =
-    p.dataUI.coreObject.`type`.erasure.isAssignableFrom(classOf[Int])
+    p.dataUI.coreObject.`type`.erasure.isAssignableFrom(classOf[Int]) || p.dataUI.coreObject.`type`.erasure.isAssignableFrom(classOf[Long])
+
+  def preview = " of size " + size
 
   override def toString = "Uniform distribution"
 }
