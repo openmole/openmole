@@ -25,6 +25,7 @@ import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.data._
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.registry.KeyRegistry
+import org.openmole.ide.core.model.sampling.ISamplingSceneDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.panel._
@@ -33,8 +34,6 @@ import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.BorderPanel.Position._
 import org.openmole.ide.misc.widget.URL
-import org.openmole.ide.plugin.sampling.tools.MultiGenericSamplingPanel
-import org.openmole.ide.plugin.sampling.tools.MultiGenericSamplingPanel._
 import scala.collection.JavaConversions._
 
 class LHSSamplingPanelUI(cud: LHSSamplingDataUI) extends PluginPanel("wrap 2", "", "") with ISamplingPanelUI {
@@ -42,29 +41,20 @@ class LHSSamplingPanelUI(cud: LHSSamplingDataUI) extends PluginPanel("wrap 2", "
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val sampleTextField = new TextField(cud.samples, 4)
-  val multiPanel = new MultiGenericSamplingPanel(Proxys.prototypes.toList,
-    domains,
-    cud.factors.map { f ⇒
-      new GenericSamplingPanel(Proxys.prototypes.toList,
-        domains,
-        new GenericSamplingData(f))
-    })
 
   tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("wrap 2") {
     contents += new Label("Number of samples")
     contents += sampleTextField
-    contents += multiPanel.panel
   })
 
   def domains = KeyRegistry.domains.values.map { _.buildDataUI }.toList
 
-  override def saveContent(name: String) = new LHSSamplingDataUI(name,
+  override def saveContent(name: String,
+                           ssDataUI: ISamplingSceneDataUI) = new LHSSamplingDataUI(name,
     sampleTextField.text,
-    multiPanel.content.map { d ⇒
-      new FactorDataUI(d.factor.prototype, d.factor.domain)
-    })
+    ssDataUI.factors.map { d ⇒
+      new FactorDataUI(d.prototype, d.domain)
+    }.toList)
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(sampleTextField, new Help(i18n.getString("sample"), i18n.getString("sampleEx")))
-  }
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
 }

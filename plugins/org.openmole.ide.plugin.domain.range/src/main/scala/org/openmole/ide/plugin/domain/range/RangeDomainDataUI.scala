@@ -45,5 +45,9 @@ class RangeDomainDataUI(
 
   override def toString = "Range"
 
-  def isAcceptable(p: IPrototypeDataProxyUI) = true
+  def preview = " on [" + min + "," + max + "," + step + "]"
+
+  def isAcceptable(p: IPrototypeDataProxyUI) =
+    //p.dataUI.coreObject.`type`.baseClasses.contains(typeOf[File].typeSymbol)
+    p.dataUI.coreObject.`type`.erasure.isAssignableFrom(classOf[Double])
 }

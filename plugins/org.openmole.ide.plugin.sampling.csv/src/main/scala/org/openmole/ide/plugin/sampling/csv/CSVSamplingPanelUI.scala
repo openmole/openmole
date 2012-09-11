@@ -32,6 +32,7 @@ import java.util.Locale
 import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
+import org.openmole.ide.core.model.sampling.ISamplingSceneDataUI
 import org.openmole.ide.misc.widget.CSVChooseFileTextField
 import org.openmole.ide.misc.widget.DialogClosedEvent
 import org.openmole.ide.misc.widget.Help
@@ -87,7 +88,8 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("", "[][gro
     }
   }
 
-  override def saveContent(name: String) = {
+  override def saveContent(name: String,
+                           ssDataUI: ISamplingSceneDataUI) = {
     if (comboMulti.isDefined)
       new CSVSamplingDataUI(name,
         csvTextField.text,

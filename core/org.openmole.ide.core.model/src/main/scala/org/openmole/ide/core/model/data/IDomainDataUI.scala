@@ -29,5 +29,7 @@ trait IDomainDataUI extends IDataUI {
 
   def buildPanelUI: IDomainPanelUI
 
+  def preview: String
+
   def isAcceptable(protoProxy: IPrototypeDataProxyUI): Boolean
 }

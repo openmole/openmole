@@ -39,6 +39,7 @@ import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.panel._
 import org.openmole.ide.core.model.workflow._
+import org.openmole.ide.core.model.sampling.IFactorWidget
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.panel._
@@ -122,6 +123,14 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
       case x: BasePanelUI ⇒ x.nameTextField.requestFocus
       case _ ⇒
     }
+    refresh
+  }
+
+  def displayExtraPropertyPanel(factorWidget: IFactorWidget) = {
+    currentExtraPanel.contents.removeAll
+    currentExtraPanel.contents.add(new FactorPanelUI(factorWidget, this, EXTRA))
+    extraPropertyWidget.setVisible(true)
+    extraPropertyWidget.setPreferredLocation(new Point(propertyWidget.getBounds.x.toInt + currentPanel.bounds.width + 40, 20))
     refresh
   }
 

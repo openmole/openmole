@@ -32,13 +32,12 @@ import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import scala.collection.JavaConversions._
-import BasePanelUI._
 import scala.swing.Component
 import scala.swing.event.FocusGained
 
 class PrototypePanelUI[T](proxy: IPrototypeDataProxyUI,
                           scene: IMoleScene,
-                          mode: Value = CREATION) extends BasePanelUI(proxy, scene, mode, new Color(255, 204, 0)) {
+                          mode: Value = CREATION) extends BasePanelUI(Some(proxy), scene, mode) {
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
   val panelUI = proxy.dataUI.buildPanelUI
 

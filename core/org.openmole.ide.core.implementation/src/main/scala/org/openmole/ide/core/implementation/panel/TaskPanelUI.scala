@@ -52,13 +52,12 @@ import scala.swing.Label
 import scala.swing.Separator
 import scala.collection.JavaConversions._
 import org.openmole.ide.misc.tools.image.Images._
-import BasePanelUI._
 import scala.swing.TabbedPane
 import scala.swing.event.FocusGained
 
 class TaskPanelUI(proxy: ITaskDataProxyUI,
                   scene: IMoleScene,
-                  mode: Value = CREATION) extends BasePanelUI(proxy, scene, mode, new Color(73, 90, 105)) {
+                  mode: Value = CREATION) extends BasePanelUI(Some(proxy), scene, mode) {
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.imagePath)))
 
   val panelUI = proxy.dataUI.buildPanelUI

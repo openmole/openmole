@@ -15,8 +15,7 @@ import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.URL
-import org.openmole.ide.plugin.sampling.tools.MultiGenericSamplingPanel
-import org.openmole.ide.plugin.sampling.tools.MultiGenericSamplingPanel._
+import org.openmole.ide.core.model.sampling.ISamplingSceneDataUI
 import scala.swing.Label
 import scala.swing.TabbedPane
 import scala.swing.TextField
@@ -26,27 +25,20 @@ class SaltelliSamplingPanelUI(cud: SaltelliSamplingDataUI) extends PluginPanel("
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val sampleTextField = new TextField(cud.samples, 4)
-  val multiPanel = new MultiGenericSamplingPanel(Proxys.prototypes.toList,
-    domains,
-    cud.factors.map { f ⇒
-      new GenericSamplingPanel(Proxys.prototypes.toList,
-        domains,
-        new GenericSamplingData(f))
-    })
 
   tabbedPane.pages += new TabbedPane.Page("Settings",
     new PluginPanel("wrap 2") {
       contents += new Label("Number of samples")
       contents += sampleTextField
-      contents += multiPanel.panel
     })
 
   def domains = KeyRegistry.domains.values.map { _.buildDataUI }.toList
 
-  override def saveContent(name: String) = new SaltelliSamplingDataUI(name,
+  override def saveContent(name: String,
+                           ssDataUI: ISamplingSceneDataUI) = new SaltelliSamplingDataUI(name,
     sampleTextField.text,
-    multiPanel.content.map { c ⇒ new FactorDataUI(c.factor.prototype, c.factor.domain)
-    })
+    ssDataUI.factors.map { c ⇒ new FactorDataUI(c.prototype, c.domain)
+    }.toList)
 
   override val help = new Helper(List(new URL(i18n.getString("samplingPermalinkText"),
     i18n.getString("samplingPermalink")),

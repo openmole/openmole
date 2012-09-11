@@ -17,11 +17,14 @@
 
 package org.openmole.ide.core.implementation.panel
 
+import java.awt.Dimension
 import java.awt.BorderLayout
 import java.awt.Color
+import javax.swing.JScrollPane
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import javax.imageio.ImageIO
 import javax.swing.ImageIcon
+import org.openmole.ide.core.implementation.workflow.sampling.SamplingScene
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
@@ -30,20 +33,21 @@ import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
-import BasePanelUI._
 import scala.swing.Component
 import scala.swing.event.FocusGained
 
 class SamplingPanelUI(proxy: ISamplingDataProxyUI,
                       scene: IMoleScene,
-                      mode: Value = CREATION) extends BasePanelUI(proxy, scene, mode, new Color(80, 118, 152)) {
+                      mode: Value = CREATION) extends BasePanelUI(Some(proxy), scene, mode) {
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
   val panelUI = proxy.dataUI.buildPanelUI
+  val samplingScene = new SamplingScene(scene, proxy.dataUI)
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
     contents += panelUI.tabbedPane
     contents += panelUI.help
+    peer.add(new JScrollPane(samplingScene.graphScene.createView) { setMinimumSize(new Dimension(400, 200)) })
   }.peer, BorderLayout.CENTER)
 
   listenTo(nameTextField)
@@ -73,5 +77,5 @@ class SamplingPanelUI(proxy: ISamplingDataProxyUI,
     }
   }
 
-  def save = proxy.dataUI = panelUI.saveContent(nameTextField.text)
+  def save = proxy.dataUI = panelUI.saveContent(nameTextField.text, samplingScene.content)
 }

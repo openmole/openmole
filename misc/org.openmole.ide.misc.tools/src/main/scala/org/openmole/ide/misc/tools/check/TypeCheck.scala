@@ -27,7 +27,7 @@ object TypeCheck {
     try {
       apply(new GroovyProxy(code).execute(), prototype)
     } catch {
-      case e : Throwable ⇒ (e.getMessage, None)
+      case e: Throwable ⇒ (e.getMessage, None)
     }
   }
 

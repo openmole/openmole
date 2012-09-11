@@ -18,11 +18,12 @@
 package org.openmole.ide.core.implementation.data
 
 import org.openmole.core.model.data._
-import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.model.sampling._
 import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.core.model.task._
+import org.openmole.ide.core.implementation.workflow.sampling.InputSampling
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
 import org.openmole.ide.core.model.data._
@@ -30,6 +31,7 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import org.openmole.core.implementation.task._
+import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import scala.swing.TabbedPane
 
@@ -63,15 +65,15 @@ object EmptyDataUIs {
     def fatImagePath = "img/empty.png"
     def buildPanelUI = new EmptySamplingPanelUI
     def displayTypedName = ""
-    override def factors = List.empty
     def samplings = List.empty
     def isAcceptable(sampling: ISamplingDataUI) = false
     def isAcceptable(factor: IFactorDataUI) = false
+    def inputs = new InputSampling
   }
 
   class EmptySamplingPanelUI extends ISamplingPanelUI {
     def peer = new PluginPanel("").peer
-    def saveContent(name: String) = new EmptySamplingDataUI
+    def saveContent(name: String, sd: ISamplingSceneDataUI) = new EmptySamplingDataUI
   }
 
   class EmptySampling extends Sampling {
