@@ -17,17 +17,40 @@
 
 package org.openmole.misc.tools.script
 
-import org.apache.clerezza.scala.console.Interpreter
-import scala.tools.nsc.Settings
-import scala.tools.nsc.interpreter.ILoop
-import scala.tools.nsc.interpreter.JLineCompletion
-import scala.tools.nsc.interpreter.JLineReader
+import scala.tools.nsc.interpreter._
+import scala.tools.nsc._
+import org.openmole.misc.osgi._
+import scala.tools.nsc.reporters._
+import scala.tools.nsc.util._
 
 class ScalaREPL extends ILoop {
+
   System.setProperty("jline.shutdownhook", "true")
+  //System.setProperty("scala.repl.debug", "true")
   override val prompt = "OpenMOLE>"
-  settings = new Settings()
-  settings.processArgumentString("-Yrepl-sync")
-  intp = new Interpreter
+
+  settings = new Settings
+  settings.Yreplsync.value = true
+
+  intp = new IMain {
+
+    override protected def newCompiler(settings: Settings, reporter: Reporter) = {
+      settings.outputDirs setSingleOutput virtualDirectory
+      settings.exposeEmptyPackage.value = true
+      new OSGiScalaCompiler(settings, reporter, virtualDirectory)
+    }
+
+    override def interpret(s: String) = {
+      val r = super.interpret(s)
+      virtualDirectory.clear
+      r
+    }
+
+    override lazy val classLoader =
+      new AbstractFileClassLoader(virtualDirectory, classOf[OSGiScalaCompiler].getClassLoader)
+
+  }
+
   in = new JLineReader(new JLineCompletion(this))
+
 }

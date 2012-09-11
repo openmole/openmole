@@ -17,7 +17,6 @@
 
     <modules>
 	<module>com.ice.tar</module>
-	<module>org.apache.clerezza.scala</module>	
 	<module>com.github.scopt</module>	
     </modules>
 

@@ -8,46 +8,43 @@
     <!-- ************************************************************* -->
 
     <parent>
-        <artifactId>openmole</artifactId>
+        <artifactId>misc</artifactId>
         <groupId>org.openmole.core</groupId>
         <version>0.7-SNAPSHOT</version>
     </parent>
 
-    <artifactId>misc</artifactId>
+    <artifactId>org.openmole.misc.osgi</artifactId>
 
-    <properties>
-        <include />
-    </properties>
-
-    <modules>
-	<module>org.openmole.misc.eventdispatcher</module>
-	<module>org.openmole.misc.exception</module>
-	<module>org.openmole.misc.tools</module>
-        <module>org.openmole.misc.hashservice</module>
-        <module>org.openmole.misc.pluginmanager</module>
-        <module>org.openmole.misc.updater</module>
-        <module>org.openmole.misc.workspace</module>
-	<module>org.openmole.misc.math</module>
-	<module>org.openmole.misc.logging</module>
-        <module>org.openmole.misc.fileservice</module>
-	<module>org.openmole.misc.filecache</module>
-	<module>org.openmole.misc.filedeleter</module>
-	<module>org.openmole.misc.osgi</module>
-	<module>org.openmole.misc.replication</module>
-	<module>org.openmole.misc.sftpserver</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>org.openmole.misc.exception</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.equinox</groupId>
+            <artifactId>org.eclipse.osgi</artifactId>
+        </dependency>     
+    </dependencies>
 
     <!-- ************************************************************* -->
     <!-- *** Project Information ************************************* -->
     <!-- ************************************************************* -->
 
-    <name>${project.artifactId}</name>
-    <description>Miscileanous software used by OpenMOLE</description>
+    <name>${project.artifactId} ${project.version}</name>
+    <description />
 
     <!-- ************************************************************* -->
     <!-- *** Build Settings ****************************************** -->
     <!-- ************************************************************* -->
 
-    <packaging>pom</packaging>
+    <packaging>bundle</packaging>
+
+    <properties>
+        <bundle.activator>${project.artifactId}.Activator</bundle.activator>
+        <eclipse.buddypolicy>global</eclipse.buddypolicy>
+    </properties>
+
 
 </project>
+

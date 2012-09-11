@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 reuillon
+ * Copyright (C) 2012 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,29 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.apache.clerezza.scala.scripting
+package org.openmole.misc.osgi
 
-import org.osgi.framework.Bundle
+import org.osgi.framework.BundleActivator
+import org.osgi.framework.BundleContext
 
-/**
- * A helper class to determine if the class loader provides access to an OSGi Bundle instance
- */
-object BundleClassLoader {
+object Activator {
+  var bundleContext: BundleContext = null
+}
 
-  type BundleClassLoader = {
-    def getBundle: Bundle
+class Activator extends BundleActivator {
+
+  override def start(componentContext: BundleContext) = {
+    Activator.bundleContext = componentContext
   }
 
-  def unapply(ref: AnyRef): Option[BundleClassLoader] = {
-    if (ref == null) return None
-    try {
-      val method = ref.getClass.getMethod("getBundle")
-      if (method.getReturnType == classOf[Bundle])
-        Some(ref.asInstanceOf[BundleClassLoader])
-      else
-        None
-    } catch {
-      case e: NoSuchMethodException ⇒ None
-    }
+  override def stop(componentContext: BundleContext) = {
+    //currentSharedCompiler = null
+    // Activator.bundleContext.removeBundleListener(this)
   }
 }

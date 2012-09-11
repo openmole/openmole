@@ -21,6 +21,7 @@ import java.io.File
 import java.io.FileFilter
 import java.io.FileInputStream
 import org.openmole.misc.pluginmanager.internal.Activator
+import org.openmole.misc.tools.service.Logger
 import org.osgi.framework.Bundle
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
@@ -29,8 +30,9 @@ import org.osgi.framework.BundleEvent
 import org.osgi.framework.BundleListener
 import scala.collection.JavaConversions._
 import org.openmole.misc.exception._
+import org.openmole.misc.osgi._
 
-object PluginManager {
+object PluginManager extends Logger {
 
   private val defaultPatern = ".*\\.jar"
 
@@ -47,29 +49,6 @@ object PluginManager {
       if (event.getType == BundleEvent.RESOLVED || event.getType == BundleEvent.UNRESOLVED || event.getType == BundleEvent.UPDATED) updateDependencies
     }
   })
-
-  val OpenMOLEScope = "OpenMOLE-Scope"
-  private implicit def bundleDecorator(b: Bundle) = new {
-
-    def isSystem = b.getLocation.toLowerCase.contains("system bundle") || b.getLocation.startsWith("netigso:")
-
-    def isProvided = b.getHeaders.toMap.exists { case (k, v) ⇒ k.toString.toLowerCase.contains("openmole-scope") && v.toString.toLowerCase.contains("provided") }
-
-    def file = {
-      val url = if (b.getLocation.startsWith("reference:"))
-        b.getLocation.substring("reference:".length)
-      else if (b.getLocation.startsWith("initial@reference:")) b.getLocation.substring("initial@reference:".length)
-      else b.getLocation
-
-      val location = {
-        val protocol = url.indexOf(':')
-        val noProtocol = if (protocol == -1) url else url.substring(protocol + 1)
-        if (noProtocol.endsWith("/")) noProtocol.substring(0, noProtocol.length - 1)
-        else noProtocol
-      }
-      new File(location)
-    }
-  }
 
   def isClassProvidedByAPlugin(c: Class[_]) = {
     val b = Activator.packageAdmin.getBundle(c)

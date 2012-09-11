@@ -67,7 +67,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>org.apache.clerezza.scala</artifactId>
+            <artifactId>org.openmole.misc.osgi</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
