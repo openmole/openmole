@@ -18,7 +18,6 @@
 package org.openmole.ui.console
 
 import java.util.concurrent.Executors
-import org.apache.clerezza.scala.console.Interpreter
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.logging.LoggerService
 import org.openmole.misc.pluginmanager.PluginManager

@@ -22,7 +22,6 @@ import java.awt.SplashScreen
 import java.io.File
 import java.io.PrintWriter
 import java.util.concurrent.Semaphore
-import org.apache.clerezza.scala.console.Interpreter
 import org.eclipse.equinox.app.IApplication
 import org.eclipse.equinox.app.IApplicationContext
 import org.openmole.misc.pluginmanager.PluginManager
