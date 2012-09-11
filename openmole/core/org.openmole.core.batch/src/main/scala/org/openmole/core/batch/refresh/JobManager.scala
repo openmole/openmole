@@ -63,7 +63,7 @@ akka {
     }
   }
 }
-"""))
+""").withFallback(ConfigFactory.load(classOf[ConfigFactory].getClassLoader)))
 
   import environment._
   import system.dispatcher

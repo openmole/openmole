@@ -35,12 +35,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-actor_${lib.org.scala-lang.scala.version}</artifactId>
-	    <version>${lib.com.typesafe.akka.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-actors</artifactId>
             <version>${lib.org.scala-lang.scala.version}</version>
@@ -56,6 +50,12 @@
            <artifactId>jline</artifactId>
            <version>${lib.org.scala-lang.scala.version}</version>
            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.akka</groupId>
+            <artifactId>akka-actor_${lib.org.scala-lang.scala.version}</artifactId>
+	    <version>${lib.com.typesafe.akka.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

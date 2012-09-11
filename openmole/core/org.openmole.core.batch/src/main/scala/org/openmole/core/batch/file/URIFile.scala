@@ -88,7 +88,7 @@ akka {
     }
   }
 }
-"""))
+""").withFallback(ConfigFactory.load(classOf[ConfigFactory].getClassLoader)))
 
   val cleaners = system.actorOf(Props(new CleanerActor).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(CleanerWorkers))), name = "cleaner")
 

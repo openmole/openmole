@@ -58,7 +58,7 @@ object JSAGASessionService extends Logger {
   }
 
   def addContext(expr: String, context: Context) = synchronized {
-    sessions.filter(_ == expr).headOption match {
+    sessions.filter { case (e, _) ⇒ e == expr }.headOption match {
       case None ⇒
         val session = SessionFactory.createSession(false)
         timeout(session.addContext(context))(Workspace.preferenceAsLong(BatchEnvironment.AuthenticationTimeout))

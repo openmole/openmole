@@ -51,6 +51,11 @@
             <artifactId>org.apache.commons.cli</artifactId>
             <version>${project.version}</version>
         </dependency>
+	<dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.apache.commons.logging</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>org.eclipse.equinox.app</artifactId>

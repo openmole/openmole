@@ -152,7 +152,7 @@ akka {
     }
   }
 }
-"""))
+""").withFallback(ConfigFactory.load(classOf[ConfigFactory].getClassLoader)))
 
   val jobManager = system.actorOf(Props(new JobManager(this)))
   val watcher = system.actorOf(Props(new BatchJobWatcher(this)))
