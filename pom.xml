@@ -63,6 +63,7 @@
         <lib.org.apache.commons.collections15.version>4.01</lib.org.apache.commons.collections15.version>
         <lib.org.apache.commons.compress.version>1.0</lib.org.apache.commons.compress.version>
         <lib.org.apache.commons.pool.version>1.5.4</lib.org.apache.commons.pool.version>
+        <lib.org.apache.commons.logging.version>1.1.1</lib.org.apache.commons.logging.version>
         <lib.org.apache.log4j.version>1.2.16</lib.org.apache.log4j.version>
         <lib.org.apache.commons.cli.version>1.2</lib.org.apache.commons.cli.version>
         <lib.org.apache.commons.configuration.version>1.6</lib.org.apache.commons.configuration.version>
