@@ -17,17 +17,23 @@
 
 package org.openmole.ide.core.implementation.sampling
 
+import org.openmole.misc.exception.UserBadDataError
+import org.openmole.core.model.sampling.ISampling
 import org.openmole.ide.core.model.data._
+import java.awt.Point
 
 class SamplingCompositionDataUI(val name: String = "",
-                                val factors: List[IFactorDataUI] = List.empty,
-                                val samplings: List[ISamplingDataUI] = List.empty) extends ISamplingCompositionDataUI {
+                                val factors: List[(IFactorDataUI, Point)] = List.empty,
+                                val samplings: List[(ISamplingDataUI, Point)] = List.empty,
+                                val finalSampling: Option[ISamplingDataUI] = None) extends ISamplingCompositionDataUI {
 
-  //FIXME
-  def coreClass = classOf[String]
+  def coreClass = classOf[ISampling]
 
-  //FiXME
-  def coreObject = samplings(0).coreObject(factors, samplings)
+  def coreObject = finalSampling match {
+    case Some(fs: ISamplingDataUI) ⇒ fs.coreObject(factors.map { _._1 },
+      samplings.map { _._1 })
+    case _ ⇒ throw new UserBadDataError("No final Sampling has been defined in the Composition. The Composition sampling can not be built")
+  }
 
   def imagePath = "img/samplingComposition.png"
 

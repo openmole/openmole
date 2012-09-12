@@ -29,7 +29,7 @@ import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.MigPanel
 
-class SamplingWidget(var sampling: ISamplingDataUI) extends ISamplingCompositionWidget { samplingWidget ⇒
+class SamplingWidget(var sampling: ISamplingDataUI) extends ISamplingWidget { samplingWidget ⇒
   preferredSize = new Dimension(130, 25)
   background = new Color(2, 240, 240)
   opaque = true

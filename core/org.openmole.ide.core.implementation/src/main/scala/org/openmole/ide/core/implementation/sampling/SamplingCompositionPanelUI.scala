@@ -25,12 +25,15 @@ import java.awt.Point
 import org.netbeans.api.visual.widget._
 import javax.swing.JScrollPane
 import org.netbeans.api.visual.action.ActionFactory
-import org.openmole.ide.core.model.data.ISamplingCompositionDataUI
-import org.openmole.ide.core.model.data.ISamplingDataUI
+import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.openmole.ide.core.model.workflow.IMoleScene
+import scala.collection.mutable.HashSet
 
 class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Scene with ISamplingCompositionPanelUI {
+
+  val factors = new HashSet[(FactorWidget, ComponentWidget)]
+  val samplings = new HashSet[(SamplingWidget, ComponentWidget)]
 
   setBackground(new Color(77, 77, 77))
   val boxLayer = new LayerWidget(this)
@@ -38,19 +41,26 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
 
   this.setPreferredBounds(new Rectangle(0, 0, 400, 20))
 
-  addFactor(new FactorDataUI, new Point(0, 0))
-  addFactor(new FactorDataUI, new Point(0, 60))
-  addFactor(new FactorDataUI, new Point(0, 120))
+  dataUI.factors.foreach { f ⇒ addFactor(f._1, f._2) }
+
+  if (factors.size == 0) {
+    addFactor(new FactorDataUI, new Point(0, 0))
+    addFactor(new FactorDataUI, new Point(0, 60))
+    addFactor(new FactorDataUI, new Point(0, 120))
+  }
 
   def peer = new MigPanel("") { peer.add(createView) }.peer
 
-  def addFactor(factorDataUI: FactorDataUI,
+  def addFactor(factorDataUI: IFactorDataUI,
                 location: Point) = {
-    boxLayer.addChild(new ComponentWidget(this, new FactorWidget(factorDataUI).peer) {
+    val fw = new FactorWidget(factorDataUI)
+    val cw = new ComponentWidget(this, fw.peer) {
       setOpaque(true)
       setPreferredLocation(location)
       getActions.addAction(ActionFactory.createMoveAction)
-    })
+    }
+    boxLayer.addChild(cw)
+    factors += fw -> cw
   }
   //
   //  override def attachEdgeSourceAnchor(edge: String, oldSourceNode: String, sourceNode: String) = {
@@ -73,5 +83,7 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
 
   def graphScene = this
 
-  def saveContent(name: String) = new SamplingCompositionDataUI(name, dataUI.factors.toList, dataUI.samplings.toList)
+  def saveContent(name: String) = new SamplingCompositionDataUI(name,
+    factors.map { f ⇒ f._1.factor -> f._2.getPreferredLocation }.toList,
+    samplings.map { s ⇒ s._1.sampling -> s._2.getPreferredLocation }.toList)
 }
