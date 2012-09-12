@@ -15,13 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.workflow.sampling
+package org.openmole.ide.core.model.panel
 
-import org.openmole.ide.core.model.sampling.ISamplingSceneDataUI
-import org.openmole.ide.core.model.sampling._
-import org.openmole.ide.core.model.data.IFactorDataUI
-import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
+import org.openmole.ide.core.model.data._
 
-class SamplingSceneDataUI(val samplingSlots: List[ISamplingSlot] = List.empty,
-                          val factors: List[IFactorDataUI] = List.empty,
-                          val samplings: List[ISamplingDataProxyUI] = List.empty) extends ISamplingSceneDataUI
+trait ISamplingCompositionPanelUI extends IPanelUI {
+  def saveContent(name: String): ISamplingCompositionDataUI
+}

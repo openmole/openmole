@@ -15,20 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.workflow.sampling
+package org.openmole.ide.core.implementation.sampling
 
-import org.openmole.ide.core.implementation.data.FactorDataUI
-import org.openmole.ide.core.model.sampling.ISamplingScene
+import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.core.implementation.data._
 import java.awt.Rectangle
 import java.awt.Color
 import java.awt.Point
 import org.netbeans.api.visual.widget._
+import javax.swing.JScrollPane
 import org.netbeans.api.visual.action.ActionFactory
+import org.openmole.ide.core.model.data.ISamplingCompositionDataUI
 import org.openmole.ide.core.model.data.ISamplingDataUI
+import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 
-class SamplingScene(moleScene: IMoleScene,
-                    dataUI: ISamplingDataUI) extends Scene with ISamplingScene {
+class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Scene with ISamplingCompositionPanelUI {
 
   setBackground(new Color(77, 77, 77))
   val boxLayer = new LayerWidget(this)
@@ -40,9 +42,11 @@ class SamplingScene(moleScene: IMoleScene,
   addFactor(new FactorDataUI, new Point(0, 60))
   addFactor(new FactorDataUI, new Point(0, 120))
 
+  def peer = new MigPanel("") { peer.add(createView) }.peer
+
   def addFactor(factorDataUI: FactorDataUI,
                 location: Point) = {
-    boxLayer.addChild(new ComponentWidget(this, new FactorWidget(moleScene, factorDataUI).peer) {
+    boxLayer.addChild(new ComponentWidget(this, new FactorWidget(factorDataUI).peer) {
       setOpaque(true)
       setPreferredLocation(location)
       getActions.addAction(ActionFactory.createMoveAction)
@@ -69,5 +73,5 @@ class SamplingScene(moleScene: IMoleScene,
 
   def graphScene = this
 
-  def content = new SamplingSceneDataUI
+  def saveContent(name: String) = new SamplingCompositionDataUI(name, dataUI.factors.toList, dataUI.samplings.toList)
 }

@@ -39,7 +39,7 @@ import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.panel._
 import org.openmole.ide.core.model.workflow._
-import org.openmole.ide.core.model.sampling.IFactorWidget
+import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.panel._
@@ -109,10 +109,10 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     closePropertyPanel
     currentPanel.contents.removeAll
     proxy match {
-      case x: ITaskDataProxyUI ⇒ currentPanel.contents += new TaskPanelUI(x, this, mode)
-      case x: IPrototypeDataProxyUI ⇒ currentPanel.contents += new PrototypePanelUI(x, this, mode)
-      case x: IEnvironmentDataProxyUI ⇒ currentPanel.contents += new EnvironmentPanelUI(x, this, mode)
-      case x: ISamplingDataProxyUI ⇒ currentPanel.contents += new SamplingPanelUI(x, this, mode)
+      case x: ITaskDataProxyUI ⇒ currentPanel.contents += new TaskPanel(x, this, mode)
+      case x: IPrototypeDataProxyUI ⇒ currentPanel.contents += new PrototypePanel(x, this, mode)
+      case x: IEnvironmentDataProxyUI ⇒ currentPanel.contents += new EnvironmentPanel(x, this, mode)
+      case x: ISamplingCompositionDataProxyUI ⇒ currentPanel.contents += new SamplingCompositionPanel(x, this, mode)
       case _ ⇒
     }
     propertyWidget.setPreferredLocation(new Point(getView.getBounds().x.toInt + 20, 20))
@@ -120,15 +120,20 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     propertyWidget.setVisible(true)
 
     currentPanel.contents.get(currentPanel.contents.size - 1) match {
-      case x: BasePanelUI ⇒ x.nameTextField.requestFocus
+      case x: BasePanel ⇒ x.nameTextField.requestFocus
       case _ ⇒
     }
     refresh
   }
 
-  def displayExtraPropertyPanel(factorWidget: IFactorWidget) = {
+  def displayExtraPropertyPanel(compositionSamplingWidget: ISamplingCompositionWidget) = {
     currentExtraPanel.contents.removeAll
-    currentExtraPanel.contents.add(new FactorPanelUI(factorWidget, this, EXTRA))
+    currentExtraPanel.contents.add(compositionSamplingWidget match {
+      case s: ISamplingWidget ⇒ new SamplingPanel(s, this, EXTRA)
+      case f: IFactorWidget ⇒ new FactorPanel(f, this, EXTRA)
+    })
+
+    //currentExtraPanel.contents.add(new FactorPanelUI(factorWidget, this, EXTRA))
     extraPropertyWidget.setVisible(true)
     extraPropertyWidget.setPreferredLocation(new Point(propertyWidget.getBounds.x.toInt + currentPanel.bounds.width + 40, 20))
     refresh
@@ -140,8 +145,9 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     currentExtraPanel.contents.add(dproxy match {
       case x: IPrototypeDataProxyUI ⇒
         freeze = x.generated
-        new PrototypePanelUI(x, this, EXTRA)
-      case x: ISamplingDataProxyUI ⇒ new SamplingPanelUI(x, this, EXTRA)
+        new PrototypePanel(x, this, EXTRA)
+      // case _ ⇒
+      // case x: ISamplingDataProxyUI ⇒ new SamplingPanelUI(x, this, EXTRA)
     })
     if (freeze) currentExtraPanel.contents.foreach { _.enabled = !freeze }
     extraPropertyWidget.setVisible(true)
@@ -161,7 +167,7 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   def savePropertyPanel(panel: Panel) =
     if (panel.contents.size > 0) {
       panel.contents(0) match {
-        case x: BasePanelUI ⇒ x.baseSave
+        case x: BasePanel ⇒ x.baseSave
         case _ ⇒
       }
     }
@@ -169,7 +175,7 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   def closePropertyPanel: Unit = {
     if (currentPanel.contents.size > 0) {
       currentPanel.contents(0) match {
-        case x: BasePanelUI ⇒
+        case x: BasePanel ⇒
           if (!x.created) {
             if (DialogFactory.closePropertyPanelConfirmation(x))
               saveAndClose

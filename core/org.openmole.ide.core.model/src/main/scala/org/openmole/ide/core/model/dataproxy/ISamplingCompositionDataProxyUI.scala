@@ -15,10 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.dataproxy
-import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyFactory
-import org.openmole.ide.core.model.factory.ISamplingFactoryUI
+package org.openmole.ide.core.model.dataproxy
 
-class SamplingDataProxyFactory(val factory: ISamplingFactoryUI) extends ISamplingDataProxyFactory {
-  def buildDataProxyUI = new SamplingDataProxyUI(factory.buildDataUI)
+import org.openmole.ide.core.model.data._
+
+trait ISamplingCompositionDataProxyUI extends IDataProxyUI {
+  override def toString = dataUI.name
+
+  def dataUI_=(d: ISamplingCompositionDataUI)
+
+  override def dataUI: ISamplingCompositionDataUI
 }

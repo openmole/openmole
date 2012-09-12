@@ -32,7 +32,6 @@ import java.util.Locale
 import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
-import org.openmole.ide.core.model.sampling.ISamplingSceneDataUI
 import org.openmole.ide.misc.widget.CSVChooseFileTextField
 import org.openmole.ide.misc.widget.DialogClosedEvent
 import org.openmole.ide.misc.widget.Help
@@ -88,13 +87,11 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("", "[][gro
     }
   }
 
-  override def saveContent(name: String,
-                           ssDataUI: ISamplingSceneDataUI) = {
+  override def saveContent = {
     if (comboMulti.isDefined)
-      new CSVSamplingDataUI(name,
-        csvTextField.text,
+      new CSVSamplingDataUI(csvTextField.text,
         comboMulti.get.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) })
-    else new CSVSamplingDataUI(name, csvTextField.text, List[(String, PrototypeDataProxyUI)]())
+    else new CSVSamplingDataUI(csvTextField.text, List[(String, PrototypeDataProxyUI)]())
   }
 
   def comboContent: List[IPrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxys.prototypes.toList

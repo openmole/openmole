@@ -17,6 +17,11 @@
 
 package org.openmole.ide.core.model.sampling
 
-trait ISamplingScene {
-  def content: ISamplingSceneDataUI
+import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.model.data.ISamplingDataUI
+
+trait ISamplingWidget extends ISamplingCompositionWidget {
+  def sampling: ISamplingDataUI
+
+  def sampling_=(f: ISamplingDataUI)
 }

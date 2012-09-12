@@ -20,6 +20,8 @@ package org.openmole.ide.core.model.dataproxy
 import org.openmole.ide.core.model.data.ITaskDataUI
 
 trait ITaskDataProxyUI extends IDataProxyUI {
+  override def toString = dataUI.name
+
   def dataUI_=(d: ITaskDataUI)
 
   override def dataUI: ITaskDataUI

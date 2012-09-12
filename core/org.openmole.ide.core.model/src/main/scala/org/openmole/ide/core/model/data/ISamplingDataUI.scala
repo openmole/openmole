@@ -23,7 +23,11 @@ import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import org.openmole.ide.core.model.sampling._
 
 trait ISamplingDataUI extends IDataUI {
-  def coreObject: ISampling
+
+  def name: String = "Sampling"
+
+  def coreObject(factors: List[IFactorDataUI],
+                 samplings: List[ISamplingDataUI]): ISampling
 
   def buildPanelUI: ISamplingPanelUI
 
@@ -34,6 +38,4 @@ trait ISamplingDataUI extends IDataUI {
   def isAcceptable(factor: IFactorDataUI): Boolean
 
   def isAcceptable(sampling: ISamplingDataUI): Boolean
-
-  def inputs: IInputSampling
 }

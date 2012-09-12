@@ -11,19 +11,18 @@ import org.openmole.core.model.domain.IBounded
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
-import org.openmole.ide.core.implementation.workflow.sampling._
+import org.openmole.ide.core.implementation.sampling._
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.method.sensitivity.SaltelliSampling
 
-class SaltelliSamplingDataUI(val name: String = "",
-                             val samples: String = "1",
-                             val factors: List[IFactorDataUI] = List.empty) extends ISamplingDataUI {
+class SaltelliSamplingDataUI(val samples: String = "1") extends ISamplingDataUI {
 
   implicit def string2Int(s: String): Int = augmentString(s).toInt
 
-  def coreObject =
+  def coreObject(factors: List[IFactorDataUI],
+                 samplings: List[ISamplingDataUI]) =
     new SaltelliSampling(
       try samples
       catch {
@@ -49,9 +48,6 @@ class SaltelliSamplingDataUI(val name: String = "",
   override def fatImagePath = "img/saltelliSampling_fat.png"
 
   def buildPanelUI = new SaltelliSamplingPanelUI(this)
-
-  def inputs = new InputSampling(List(new InputFactorSlot),
-    factors)
 
   //FIXME 2.10
   def isAcceptable(factor: IFactorDataUI) = false

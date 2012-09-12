@@ -29,7 +29,7 @@ object Proxys {
 
   var tasks = new HashSet[ITaskDataProxyUI]
   var prototypes = new HashSet[IPrototypeDataProxyUI]
-  var samplings = new HashSet[ISamplingDataProxyUI]
+  var samplings = new HashSet[ISamplingCompositionDataProxyUI]
   var environments = new HashSet[IEnvironmentDataProxyUI]
 
   def allPrototypesByName = prototypes.map { _.dataUI.name }

@@ -24,28 +24,21 @@ import javax.imageio.ImageIO
 import javax.swing.ImageIcon
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dialog.DialogFactory
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
+import org.openmole.ide.core.model.workflow.IMoleScene
+import scala.collection.JavaConversions._
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
-import scala.collection.JavaConversions._
 import scala.swing.Component
 import scala.swing.event.FocusGained
 
-class PrototypePanelUI[T](proxy: IPrototypeDataProxyUI,
-                          scene: IMoleScene,
-                          mode: Value = CREATION) extends BasePanelUI(Some(proxy), scene, mode) {
+class EnvironmentPanel(proxy: IEnvironmentDataProxyUI,
+                       scene: IMoleScene,
+                       mode: Value = CREATION) extends BasePanel(Some(proxy), scene, mode) {
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
-  val panelUI = proxy.dataUI.buildPanelUI
 
-  peer.add(mainPanel.peer, BorderLayout.NORTH)
-  peer.add(new PluginPanel("wrap") {
-    contents += panelUI.peer
-    contents += panelUI.help
-  }.peer, BorderLayout.CENTER)
+  val panelUI = proxy.dataUI.buildPanelUI
 
   listenTo(panelUI.help.components.toSeq: _*)
   reactions += {
@@ -53,40 +46,36 @@ class PrototypePanelUI[T](proxy: IPrototypeDataProxyUI,
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
   }
 
+  peer.add(mainPanel.peer, BorderLayout.NORTH)
+  peer.add(new PluginPanel("wrap") {
+    if (panelUI.tabbedPane.pages.size == 0) contents += panelUI.peer
+    else contents += panelUI.tabbedPane
+    contents += panelUI.help
+  }.peer, BorderLayout.CENTER)
+
   def create = {
-    Proxys.prototypes += proxy
-    ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(nameTextField.text,
-      proxy)
+    Proxys.environments += proxy
+    ConceptMenu.environmentMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
 
   def delete = {
-    //remove in Tasks
-    val capsulesWithProtos: List[ICapsuleUI] = ScenesManager.moleScenes.flatMap {
-      _.manager.capsules.values.flatMap { c ⇒
-        c.dataUI.task match {
-          case Some(x: ITaskDataProxyUI) ⇒ if (x.dataUI.filterPrototypeOccurencies(proxy).isEmpty) None else Some(c)
-          case _ ⇒ None
-        }
+    val capsulesWithEnv = ScenesManager.moleScenes.flatMap {
+      _.manager.capsules.values.filter {
+        _.dataUI.environment == Some(proxy)
       }
     }.toList
-
-    capsulesWithProtos match {
-      case Nil ⇒ erase
+    capsulesWithEnv match {
+      case Nil ⇒
+        scene.closePropertyPanel
+        Proxys.environments -= proxy
+        ConceptMenu.removeItem(proxy)
       case _ ⇒
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
-          erase
-          capsulesWithProtos.foreach { _.dataUI.task.get.dataUI.removePrototypeOccurencies(proxy) }
-          scene.manager.connectors.foreach { dc ⇒ dc.filteredPrototypes = dc.filteredPrototypes.filterNot { _ == proxy } }
+          capsulesWithEnv.foreach { _.setEnvironment(None) }
+          delete
         }
-    }
-
-    def erase = {
-      scene.closePropertyPanel
-      Proxys.prototypes -= proxy
-      ConceptMenu.removeItem(proxy)
     }
   }
 
   def save = proxy.dataUI = panelUI.saveContent(nameTextField.text)
-
 }

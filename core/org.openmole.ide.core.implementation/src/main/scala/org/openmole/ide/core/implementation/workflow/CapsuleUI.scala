@@ -204,7 +204,7 @@ class CapsuleUI(val scene: IMoleScene,
     scene.refresh
   }
 
-  def setSampling(sampletask: Option[ISamplingDataProxyUI]) = {
+  def setSampling(sampletask: Option[ISamplingCompositionDataProxyUI]) = {
     dataUI.sampling = sampletask
     updateSamplingWidget
   }
@@ -213,7 +213,7 @@ class CapsuleUI(val scene: IMoleScene,
     removeWidget(samplingWidget)
 
     dataUI.sampling match {
-      case Some(x: ISamplingDataProxyUI) ⇒
+      case Some(x: ISamplingCompositionDataProxyUI) ⇒
         samplingWidget = Some(new LinkedImageWidget(scene,
           new ImageIcon(ImageIO.read(x.dataUI.getClass.getClassLoader.getResource(x.dataUI.imagePath))),
           0, TASK_CONTAINER_HEIGHT - 3,

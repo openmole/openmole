@@ -43,9 +43,9 @@ import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.tools.image.Images._
 
-abstract class BasePanelUI(proxy: Option[IDataProxyUI],
-                           scene: IMoleScene,
-                           mode: Value) extends MyPanel with Publisher {
+abstract class BasePanel(proxy: Option[IDataProxyUI],
+                         scene: IMoleScene,
+                         mode: Value) extends MyPanel with Publisher {
   opaque = true
   peer.setLayout(new BorderLayout)
   val iconLabel = new Label { icon = new ImageIcon(EMPTY) }

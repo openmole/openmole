@@ -25,7 +25,6 @@ import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.data._
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.registry.KeyRegistry
-import org.openmole.ide.core.model.sampling.ISamplingSceneDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.panel._
@@ -49,12 +48,7 @@ class LHSSamplingPanelUI(cud: LHSSamplingDataUI) extends PluginPanel("wrap 2", "
 
   def domains = KeyRegistry.domains.values.map { _.buildDataUI }.toList
 
-  override def saveContent(name: String,
-                           ssDataUI: ISamplingSceneDataUI) = new LHSSamplingDataUI(name,
-    sampleTextField.text,
-    ssDataUI.factors.map { d ⇒
-      new FactorDataUI(d.prototype, d.domain)
-    }.toList)
+  override def saveContent = new LHSSamplingDataUI(sampleTextField.text)
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
 }

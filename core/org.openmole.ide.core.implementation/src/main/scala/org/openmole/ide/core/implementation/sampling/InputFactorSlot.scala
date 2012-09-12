@@ -15,12 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.workflow.sampling
+package org.openmole.ide.core.implementation.sampling
 
 import org.openmole.ide.core.model.sampling._
-import org.openmole.ide.core.model.data.IFactorDataUI
-import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
 
-class InputSampling(val samplingSlots: List[ISamplingSlot] = List.empty,
-                    val factors: List[IFactorDataUI] = List.empty,
-                    val samplings: List[ISamplingDataProxyUI] = List.empty) extends IInputSampling
+class InputFactorSlot(val arity: ISamplingSlot.Arity = ISamplingSlot.One) extends IInputFactorSlot
+

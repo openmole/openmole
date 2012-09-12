@@ -48,7 +48,7 @@ class GUISerializer {
 
   val xstream = new XStream(new DomDriver)
   val prototypeConverter = new PrototypeConverter(xstream.getMapper, xstream.getReflectionProvider)
-  val samplingConverter = new SamplingConverter(xstream.getMapper, xstream.getReflectionProvider, prototypeConverter)
+  val samplingConverter = new SamplingCompositionConverter(xstream.getMapper, xstream.getReflectionProvider, prototypeConverter)
   val environmentConverter = new EnvironmentConverter(xstream.getMapper, xstream.getReflectionProvider)
 
   xstream.registerConverter(new MoleSceneConverter(this))
@@ -57,7 +57,7 @@ class GUISerializer {
   xstream.registerConverter(environmentConverter)
 
   xstream.alias("molescene", classOf[MoleScene])
-  xstream.alias("sampling", classOf[ISamplingDataProxyUI])
+  xstream.alias("sampling", classOf[ISamplingCompositionDataProxyUI])
   xstream.alias("prototype", classOf[IPrototypeDataProxyUI])
   xstream.alias("environment", classOf[IEnvironmentDataProxyUI])
 
@@ -132,7 +132,7 @@ class GUISerializer {
             readObject match {
               case t: ITaskDataProxyUI ⇒ addTask(t)
               case p: IPrototypeDataProxyUI ⇒ prototypeConverter.addPrototype(p)
-              case s: ISamplingDataProxyUI ⇒ samplingConverter.addSampling(s)
+              case s: ISamplingCompositionDataProxyUI ⇒ samplingConverter.addSampling(s)
               case e: IEnvironmentDataProxyUI ⇒ environmentConverter.addEnvironment(e)
               case ms: BuildMoleScene ⇒ ScenesManager.addBuildSceneContainer(ms)
               case _ ⇒

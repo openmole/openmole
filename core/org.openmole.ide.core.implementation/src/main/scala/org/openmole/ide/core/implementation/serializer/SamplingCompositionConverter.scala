@@ -24,17 +24,16 @@ import com.thoughtworks.xstream.converters.reflection.ReflectionProvider
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import com.thoughtworks.xstream.mapper.Mapper
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.registry._
-import org.openmole.ide.core.implementation.dataproxy.SamplingDataProxyUI
 import org.openmole.ide.core.implementation.panel.ConceptMenu
-import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
+import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
 import org.openmole.ide.core.implementation.registry.KeyGenerator
 import scala.collection.mutable.HashSet
 
-class SamplingConverter(mapper: Mapper,
-                        provider: ReflectionProvider,
-                        prototypeConverter: PrototypeConverter) extends ReflectionConverter(mapper, provider) {
+class SamplingCompositionConverter(mapper: Mapper,
+                                   provider: ReflectionProvider,
+                                   prototypeConverter: PrototypeConverter) extends ReflectionConverter(mapper, provider) {
 
   val added = new HashSet[Int]
 
@@ -42,7 +41,7 @@ class SamplingConverter(mapper: Mapper,
                        writer: HierarchicalStreamWriter,
                        mc: MarshallingContext) = {
     o match {
-      case s: ISamplingDataProxyUI ⇒ added += s.id
+      case s: ISamplingCompositionDataProxyUI ⇒ added += s.id
       case _ ⇒
     }
     super.marshal(o, writer, mc)
@@ -52,14 +51,14 @@ class SamplingConverter(mapper: Mapper,
                          uc: UnmarshallingContext) = {
     val samplingProxy = super.unmarshal(reader, uc)
     samplingProxy match {
-      case s: ISamplingDataProxyUI ⇒ addSampling(s)
+      case s: ISamplingCompositionDataProxyUI ⇒ addSampling(s)
       case _ ⇒ samplingProxy
     }
   }
 
-  override def canConvert(t: Class[_]) = t.isAssignableFrom(classOf[SamplingDataProxyUI])
+  override def canConvert(t: Class[_]) = t.isAssignableFrom(classOf[SamplingCompositionDataProxyUI])
 
-  def addSampling(s: ISamplingDataProxyUI): ISamplingDataProxyUI = {
+  def addSampling(s: ISamplingCompositionDataProxyUI): ISamplingCompositionDataProxyUI = {
     val key = KeyGenerator(s.getClass)
     if (!KeyRegistry.samplingProxyKeyMap.contains(key)) {
       Proxys.samplings += s

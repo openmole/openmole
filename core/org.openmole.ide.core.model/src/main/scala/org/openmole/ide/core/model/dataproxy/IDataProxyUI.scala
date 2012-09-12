@@ -23,6 +23,4 @@ trait IDataProxyUI {
   def id: Int
 
   def dataUI: IDataUI
-
-  override def toString = dataUI.name
 }

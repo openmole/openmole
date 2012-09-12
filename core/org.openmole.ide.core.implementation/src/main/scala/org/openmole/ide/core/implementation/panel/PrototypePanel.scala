@@ -17,40 +17,36 @@
 
 package org.openmole.ide.core.implementation.panel
 
-import java.awt.Dimension
 import java.awt.BorderLayout
 import java.awt.Color
-import javax.swing.JScrollPane
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import javax.imageio.ImageIO
 import javax.swing.ImageIcon
-import org.openmole.ide.core.implementation.workflow.sampling.SamplingScene
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dialog.DialogFactory
-import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
-import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
+import scala.collection.JavaConversions._
 import scala.swing.Component
 import scala.swing.event.FocusGained
 
-class SamplingPanelUI(proxy: ISamplingDataProxyUI,
-                      scene: IMoleScene,
-                      mode: Value = CREATION) extends BasePanelUI(Some(proxy), scene, mode) {
+class PrototypePanel[T](proxy: IPrototypeDataProxyUI,
+                        scene: IMoleScene,
+                        mode: Value = CREATION) extends BasePanel(Some(proxy), scene, mode) {
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
   val panelUI = proxy.dataUI.buildPanelUI
-  val samplingScene = new SamplingScene(scene, proxy.dataUI)
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
-    contents += panelUI.tabbedPane
+    contents += panelUI.peer
     contents += panelUI.help
-    peer.add(new JScrollPane(samplingScene.graphScene.createView) { setMinimumSize(new Dimension(400, 200)) })
   }.peer, BorderLayout.CENTER)
 
-  listenTo(nameTextField)
   listenTo(panelUI.help.components.toSeq: _*)
   reactions += {
     case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
@@ -58,24 +54,39 @@ class SamplingPanelUI(proxy: ISamplingDataProxyUI,
   }
 
   def create = {
-    Proxys.samplings += proxy
-    ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
+    Proxys.prototypes += proxy
+    ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(nameTextField.text,
+      proxy)
   }
 
   def delete = {
-    val toBeRemovedSamplings = ScenesManager.explorationCapsules.filter { case (c, d) ⇒ d.sampling == Some(proxy) }
-    toBeRemovedSamplings match {
-      case Nil ⇒
-        scene.closePropertyPanel
-        Proxys.samplings -= proxy
-        ConceptMenu.removeItem(proxy)
+    //remove in Tasks
+    val capsulesWithProtos: List[ICapsuleUI] = ScenesManager.moleScenes.flatMap {
+      _.manager.capsules.values.flatMap { c ⇒
+        c.dataUI.task match {
+          case Some(x: ITaskDataProxyUI) ⇒ if (x.dataUI.filterPrototypeOccurencies(proxy).isEmpty) None else Some(c)
+          case _ ⇒ None
+        }
+      }
+    }.toList
+
+    capsulesWithProtos match {
+      case Nil ⇒ erase
       case _ ⇒
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
-          toBeRemovedSamplings.foreach { case (c, d) ⇒ c.scene.graphScene.removeNodeWithEdges(c.scene.manager.removeCapsuleUI(c)) }
-          delete
+          erase
+          capsulesWithProtos.foreach { _.dataUI.task.get.dataUI.removePrototypeOccurencies(proxy) }
+          scene.manager.connectors.foreach { dc ⇒ dc.filteredPrototypes = dc.filteredPrototypes.filterNot { _ == proxy } }
         }
+    }
+
+    def erase = {
+      scene.closePropertyPanel
+      Proxys.prototypes -= proxy
+      ConceptMenu.removeItem(proxy)
     }
   }
 
-  def save = proxy.dataUI = panelUI.saveContent(nameTextField.text, samplingScene.content)
+  def save = proxy.dataUI = panelUI.saveContent(nameTextField.text)
+
 }

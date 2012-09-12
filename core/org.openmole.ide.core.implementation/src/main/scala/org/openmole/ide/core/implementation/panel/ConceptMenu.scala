@@ -27,7 +27,7 @@ import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
+import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import scala.collection.mutable.HashMap
 import scala.swing.Action
@@ -38,7 +38,7 @@ import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dataproxy.EnvironmentDataProxyFactory
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyFactory
-import org.openmole.ide.core.implementation.dataproxy.SamplingDataProxyFactory
+import org.openmole.ide.core.implementation.dataproxy.SamplingCompositionDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyFactory
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.implementation.workflow.BuildMoleSceneContainer
@@ -91,13 +91,10 @@ object ConceptMenu {
   }
 
   val samplingMenu = {
-    addCategoryComponents(ComponentCategories.SAMPLING)
-    KeyRegistry.samplings.values.map { f ⇒ new SamplingDataProxyFactory(f) }.toList.sortBy(_.factory.toString).foreach { d ⇒
-      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.toString) {
-        override def apply = display(d.buildDataProxyUI, CREATION)
-      })
-    }
-    new PopupToolBarPresenter("Sampling", mapping(ComponentCategories.SAMPLING), new Color(255, 85, 85))
+    val menu = new MenuItem(new Action("New Composition") {
+      override def apply = display(new SamplingCompositionDataProxyUI, CREATION)
+    })
+    new PopupToolBarPresenter("Sampling", menu, new Color(255, 85, 85))
   }
 
   def removeItem(proxy: IDataProxyUI) = {
@@ -105,7 +102,7 @@ object ConceptMenu {
       case x: IEnvironmentDataProxyUI ⇒ environmentMenu.remove(menuItemMapping(proxy))
       case x: IPrototypeDataProxyUI ⇒ prototypeMenu.remove(menuItemMapping(proxy))
       case x: ITaskDataProxyUI ⇒ taskMenu.remove(menuItemMapping(proxy))
-      case x: ISamplingDataProxyUI ⇒ samplingMenu.remove(menuItemMapping(proxy))
+      case x: ISamplingCompositionDataProxyUI ⇒ samplingMenu.remove(menuItemMapping(proxy))
     }
   }
 

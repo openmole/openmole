@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.panel
+package org.openmole.ide.core.implementation.sampling
 
 import scala.swing._
 import swing.Swing._
@@ -38,19 +38,14 @@ import org.openmole.ide.core.model.panel._
 import scala.swing.BorderPanel.Position._
 import scala.collection.JavaConversions._
 
-class FactorPanelUI(factorWidget: IFactorWidget,
-                    scene: IMoleScene,
-                    mode: PanelMode.Value) extends BasePanelUI(None,
-                                                               scene,
-                                                               mode) {
+class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IPanelUI {
 
-  val panelUI = new EmptySamplingPanelUI
   val domains = KeyRegistry.domains.values.map { _.buildDataUI }.toList
   val protoComboBox = new MyComboBox(prototypeContent(factorWidget.factor.domain))
   val domainComboBox = new MyComboBox(domainContent(factorWidget.factor.prototype))
   var dPanel = factorWidget.factor.domain.getOrElse { domainContent(factorWidget.factor.prototype)(0) }.buildPanelUI
   protoComboBox.peer.setModel(MyComboBox.newConstantModel(prototypeContent(Some(domainComboBox.selection.item))))
-  
+
   factorWidget.factor.prototype match {
     case Some(x: IPrototypeDataProxyUI) ⇒ protoComboBox.selection.item = x
     case _ ⇒
@@ -62,11 +57,6 @@ class FactorPanelUI(factorWidget: IFactorWidget,
     case _ ⇒
   }
 
-  /*  peer.add(new PluginPanel("", "[left]", "[top]") {
-   contents += new ImageLinkLabel(CLOSE, new Action("") {
-   def apply = factorWidget.moleScene.closeExtraPropertyPanel
-   })
-   }.peer)*/
   val protoDomainPanel = new PluginPanel("wrap") {
     contents += new PluginPanel("wrap 3") {
       contents += protoComboBox
@@ -76,8 +66,7 @@ class FactorPanelUI(factorWidget: IFactorWidget,
     contents += dPanel.peer
   }
 
-  peer.add(mainPanel.peer, BorderLayout.NORTH)
-  peer.add(protoDomainPanel.peer, BorderLayout.CENTER)
+  contents += protoDomainPanel
 
   domainComboBox.selection.reactions += {
     case SelectionChanged(`domainComboBox`) ⇒
@@ -117,13 +106,7 @@ class FactorPanelUI(factorWidget: IFactorWidget,
       case _ ⇒ domains
     }
 
-  def create = {}
+  def saveContent(name: String) = new FactorDataUI(Some(protoComboBox.selection.item),
+    Some(dPanel.saveContent("")))
 
-  def delete = {}
-
-  def save = {
-    factorWidget.factor = new FactorDataUI(Some(protoComboBox.selection.item),
-                                           Some(dPanel.saveContent("")))
-    factorWidget.update
-  }
 }

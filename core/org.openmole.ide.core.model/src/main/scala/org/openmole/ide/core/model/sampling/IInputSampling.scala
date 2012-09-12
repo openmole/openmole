@@ -17,13 +17,10 @@
 
 package org.openmole.ide.core.model.sampling
 
-import org.openmole.ide.core.model.data.IFactorDataUI
-import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
+import org.openmole.ide.core.model.data._
 
 trait IInputSampling {
-  def samplingSlots: Iterable[ISamplingSlot]
-
   def factors: Iterable[IFactorDataUI]
 
-  def samplings: Iterable[ISamplingDataProxyUI]
+  def samplings: Iterable[ISamplingDataUI]
 }

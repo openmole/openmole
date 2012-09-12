@@ -17,7 +17,6 @@
 
 package org.openmole.ide.core.model.data
 
-import java.awt.Color
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.core.model.data._
@@ -26,6 +25,9 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 
 trait ITaskDataUI extends IDataUI {
+  def name: String
+
+  override def toString: String = name
 
   def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet): ITask
 

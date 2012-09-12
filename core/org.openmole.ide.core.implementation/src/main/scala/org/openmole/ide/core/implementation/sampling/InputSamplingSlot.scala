@@ -15,15 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.model.sampling
+package org.openmole.ide.core.implementation.sampling
 
-import org.openmole.ide.core.model.data.IFactorDataUI
-import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
+import org.openmole.ide.core.model.sampling._
 
-trait ISamplingSceneDataUI {
-  def samplingSlots: Iterable[ISamplingSlot]
-
-  def factors: Iterable[IFactorDataUI]
-
-  def samplings: Iterable[ISamplingDataProxyUI]
-}
+class InputSamplingSlot(val arity: ISamplingSlot.Arity = ISamplingSlot.One) extends IInputSamplingSlot

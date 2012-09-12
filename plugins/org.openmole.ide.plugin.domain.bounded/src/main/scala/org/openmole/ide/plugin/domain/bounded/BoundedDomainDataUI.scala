@@ -44,7 +44,7 @@ class BoundedDomainDataUI(val name: String = "",
   def buildPanelUI = new BoundedDomainPanelUI(this)
 
   override def toString = "Bounded"
-  
+
   def preview = " on [" + min + "," + max + "]"
 
   //FIXME : try to be changed in 2.10

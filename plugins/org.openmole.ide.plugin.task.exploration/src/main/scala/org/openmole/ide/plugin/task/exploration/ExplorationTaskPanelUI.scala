@@ -32,11 +32,11 @@ import org.openmole.ide.core.implementation.dataproxy._
 import java.util.Locale
 import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
-import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
+import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 
 object ExplorationTaskPanelUI {
-  val emptyProxy = new SamplingDataProxyUI(new EmptySamplingDataUI)
+  val emptyProxy = new SamplingCompositionDataProxyUI(new EmptySamplingCompositionDataUI)
 }
 
 import ExplorationTaskPanelUI._
@@ -62,14 +62,14 @@ class ExplorationTaskPanelUI(pud: ExplorationTaskDataUI) extends PluginPanel("wr
   }
   contents += linkLabel
 
-  def contentAction(proxy: ISamplingDataProxyUI) = new ContentAction(proxy.dataUI.name, proxy) {
+  def contentAction(proxy: ISamplingCompositionDataProxyUI) = new ContentAction(proxy.dataUI.name, proxy) {
     override def apply = ScenesManager.currentSceneContainer.get.scene.displayExtraPropertyPanel(proxy)
   }
 
   override def saveContent(name: String) =
     new ExplorationTaskDataUI(name, if (samplingComboBox.selection.item == emptyProxy) None else Some(samplingComboBox.selection.item))
 
-  def comboContent: List[ISamplingDataProxyUI] = emptyProxy :: Proxys.samplings.toList
+  def comboContent: List[ISamplingCompositionDataProxyUI] = emptyProxy :: Proxys.samplings.toList
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     add(samplingComboBox,

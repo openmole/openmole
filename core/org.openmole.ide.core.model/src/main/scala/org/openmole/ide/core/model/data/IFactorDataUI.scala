@@ -20,6 +20,8 @@ package org.openmole.ide.core.model.data
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
 trait IFactorDataUI {
+  def name: String = "Factor"
+
   def prototype: Option[IPrototypeDataProxyUI]
 
   def domain: Option[IDomainDataUI]

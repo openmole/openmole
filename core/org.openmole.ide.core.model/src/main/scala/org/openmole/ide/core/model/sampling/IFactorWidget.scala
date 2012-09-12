@@ -19,10 +19,8 @@ package org.openmole.ide.core.model.sampling
 
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.data.IFactorDataUI
-import scala.swing.Panel
 
-trait IFactorWidget extends Panel {
-  def moleScene: IMoleScene
+trait IFactorWidget extends ISamplingCompositionWidget {
 
   def factor: IFactorDataUI
 

@@ -23,13 +23,12 @@ import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.core.model.task._
-import org.openmole.ide.core.implementation.workflow.sampling.InputSampling
+import org.openmole.ide.core.implementation.sampling.InputSampling
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
 import org.openmole.ide.core.model.data._
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.core.model.panel.IPrototypePanelUI
+import org.openmole.ide.core.model.dataproxy._
+import org.openmole.ide.core.model.panel._
 import org.openmole.core.implementation.task._
 import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
@@ -56,24 +55,24 @@ object EmptyDataUIs {
     def saveContent(name: String) = new EmptyPrototypeDataUI
   }
 
-  class EmptySamplingDataUI extends ISamplingDataUI {
-    def name = ""
+  class EmptySamplingCompositionDataUI extends ISamplingCompositionDataUI {
+    def name = "Empty sampling data UI"
     def dim = 0
     def coreClass = classOf[ISampling]
     def coreObject = new EmptySampling
     def imagePath = "img/empty.png"
     def fatImagePath = "img/empty.png"
-    def buildPanelUI = new EmptySamplingPanelUI
+    def buildPanelUI = new EmptySamplingCompositionPanelUI
     def displayTypedName = ""
-    def samplings = List.empty
     def isAcceptable(sampling: ISamplingDataUI) = false
     def isAcceptable(factor: IFactorDataUI) = false
-    def inputs = new InputSampling
+    def factors = List.empty
+    def samplings = List.empty
   }
 
-  class EmptySamplingPanelUI extends ISamplingPanelUI {
+  class EmptySamplingCompositionPanelUI extends ISamplingCompositionPanelUI {
     def peer = new PluginPanel("").peer
-    def saveContent(name: String, sd: ISamplingSceneDataUI) = new EmptySamplingDataUI
+    def saveContent(name: String) = new EmptySamplingCompositionDataUI
   }
 
   class EmptySampling extends Sampling {

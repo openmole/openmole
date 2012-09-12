@@ -26,6 +26,8 @@ import org.openmole.ide.core.model.panel.IHookPanelUI
 trait IHookDataUI {
   def id: Int
 
+  def name: String = "Factor"
+
   def activated: Boolean
 
   def activated_=(a: Boolean)

@@ -15,7 +15,6 @@ import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.URL
-import org.openmole.ide.core.model.sampling.ISamplingSceneDataUI
 import scala.swing.Label
 import scala.swing.TabbedPane
 import scala.swing.TextField
@@ -34,11 +33,7 @@ class SaltelliSamplingPanelUI(cud: SaltelliSamplingDataUI) extends PluginPanel("
 
   def domains = KeyRegistry.domains.values.map { _.buildDataUI }.toList
 
-  override def saveContent(name: String,
-                           ssDataUI: ISamplingSceneDataUI) = new SaltelliSamplingDataUI(name,
-    sampleTextField.text,
-    ssDataUI.factors.map { c ⇒ new FactorDataUI(c.prototype, c.domain)
-    }.toList)
+  override def saveContent = new SaltelliSamplingDataUI(sampleTextField.text)
 
   override val help = new Helper(List(new URL(i18n.getString("samplingPermalinkText"),
     i18n.getString("samplingPermalink")),

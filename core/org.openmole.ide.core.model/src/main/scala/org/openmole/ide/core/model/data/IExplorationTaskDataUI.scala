@@ -19,13 +19,16 @@ package org.openmole.ide.core.model.data
 
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
-import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
+import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
 
 trait IExplorationTaskDataUI extends ITaskDataUI {
+  def name: String
 
-  def sampling: Option[ISamplingDataProxyUI] = None
+  override def toString: String = name
 
-  def sampling_=(s: Option[ISamplingDataProxyUI])
+  def sampling: Option[ISamplingCompositionDataProxyUI] = None
+
+  def sampling_=(s: Option[ISamplingCompositionDataProxyUI])
 
   def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet): IExplorationTask
 }

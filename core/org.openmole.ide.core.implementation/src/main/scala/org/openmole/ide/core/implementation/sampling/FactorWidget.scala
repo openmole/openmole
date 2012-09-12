@@ -15,27 +15,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.workflow.sampling
+package org.openmole.ide.core.implementation.sampling
 
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.BorderLayout
 import scala.swing.Action
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.core.model.data.IFactorDataUI
 import org.openmole.ide.core.model.sampling.IFactorWidget
 import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.MigPanel
 
-class FactorWidget(val moleScene: IMoleScene,
-                   var factor: IFactorDataUI) extends IFactorWidget { factorWidget ⇒
-  preferredSize = new Dimension(100, 25)
+class FactorWidget(var factor: IFactorDataUI) extends IFactorWidget { factorWidget ⇒
+  preferredSize = new Dimension(130, 25)
   background = new Color(2, 240, 240)
   opaque = true
   peer.setLayout(new BorderLayout)
   val link = new LinkLabel(factorPreview,
-    new Action("") { def apply = moleScene.displayExtraPropertyPanel(factorWidget) },
+    new Action("") {
+      def apply = ScenesManager.currentSceneContainer match {
+        case Some(s: ISceneContainer) ⇒ s.scene.displayExtraPropertyPanel(factorWidget)
+        case _ ⇒
+      }
+    },
     3,
     "73a5d2",
     true)

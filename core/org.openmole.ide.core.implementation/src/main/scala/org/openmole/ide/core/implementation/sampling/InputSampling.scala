@@ -1,8 +1,8 @@
 /*
- * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
+ * Copyright (C) 2012 mathieu
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -11,16 +11,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.model.dataproxy
+package org.openmole.ide.core.implementation.sampling
 
+import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.core.model.data._
 
-trait ISamplingDataProxyUI extends IDataProxyUI {
-  def dataUI_=(d: ISamplingDataUI)
-
-  override def dataUI: ISamplingDataUI
-}
+class InputSampling(val factors: List[IFactorDataUI] = List.empty,
+                    val samplings: List[ISamplingDataUI] = List.empty) extends IInputSampling

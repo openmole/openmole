@@ -15,9 +15,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.workflow.sampling
+package org.openmole.ide.core.model.data
 
-import org.openmole.ide.core.model.sampling._
+import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
+import org.openmole.core.model.sampling.ISampling
 
-class InputFactorSlot(val arity: ISamplingSlot.Arity = ISamplingSlot.One) extends IInputFactorSlot
+trait ISamplingCompositionDataUI extends IDataUI {
+  def name: String
 
+  override def toString: String = name
+
+  def coreObject: ISampling
+
+  def imagePath: String
+
+  def fatImagePath: String
+
+  def factors: Iterable[IFactorDataUI]
+
+  def samplings: Iterable[ISamplingDataUI]
+
+  def buildPanelUI: ISamplingCompositionPanelUI
+}

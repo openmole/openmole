@@ -55,9 +55,9 @@ import org.openmole.ide.misc.tools.image.Images._
 import scala.swing.TabbedPane
 import scala.swing.event.FocusGained
 
-class TaskPanelUI(proxy: ITaskDataProxyUI,
-                  scene: IMoleScene,
-                  mode: Value = CREATION) extends BasePanelUI(Some(proxy), scene, mode) {
+class TaskPanel(proxy: ITaskDataProxyUI,
+                scene: IMoleScene,
+                mode: Value = CREATION) extends BasePanel(Some(proxy), scene, mode) {
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.imagePath)))
 
   val panelUI = proxy.dataUI.buildPanelUI
@@ -141,18 +141,18 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
     val incomboContent = availablePrototypes.map { p ⇒ (p, p.dataUI.coreObject, contentAction(p)) }.toList
     val protoInEditor = new MultiComboLinkLabelGroovyTextFieldEditor("",
       incomboContent,
-      TaskPanelUI.this.proxy.dataUI.prototypesIn.map { proto ⇒
+      TaskPanel.this.proxy.dataUI.prototypesIn.map { proto ⇒
         new ComboLinkLabelGroovyTextFieldEditorPanel(incomboContent,
           image,
           new ComboLinkLabelGroovyTextFieldEditorData(
             proto.dataUI.coreObject, Some(proto),
-            TaskPanelUI.this.proxy.dataUI.inputParameters.getOrElseUpdate(proto, "")))
+            TaskPanel.this.proxy.dataUI.inputParameters.getOrElseUpdate(proto, "")))
       }, image, CLOSE_IF_EMPTY)
 
     val outcomboContent = availablePrototypes.map { p ⇒ (p, contentAction(p)) }.toList
     val protoOutEditor =
       new MultiComboLinkLabel("", outcomboContent,
-        TaskPanelUI.this.proxy.dataUI.prototypesOut.map { proto ⇒
+        TaskPanel.this.proxy.dataUI.prototypesOut.map { proto ⇒
           new ComboLinkLabelPanel(outcomboContent, image, new ComboLinkLabelData(Some(proto)))
         }, image, CLOSE_IF_EMPTY)
 
@@ -163,29 +163,29 @@ class TaskPanelUI(proxy: ITaskDataProxyUI,
 
       //implicits
       contents += new PluginPanel("wrap") {
-        TaskPanelUI.this.proxy.dataUI.implicitPrototypesIn foreach { p ⇒
+        TaskPanel.this.proxy.dataUI.implicitPrototypesIn foreach { p ⇒
           contents += new PluginPanel("wrap 2") {
             contents += new MyComboBox(List(p)) {
               enabled = false
             }
-            implicitEditorsMapping += p -> new PrototypeGroovyTextFieldEditor("Default value", p.dataUI.coreObject, TaskPanelUI.this.proxy.dataUI.inputParameters.getOrElseUpdate(p, ""))
+            implicitEditorsMapping += p -> new PrototypeGroovyTextFieldEditor("Default value", p.dataUI.coreObject, TaskPanel.this.proxy.dataUI.inputParameters.getOrElseUpdate(p, ""))
             contents += implicitEditorsMapping(p)
           }
         }
       }
 
-      if (TaskPanelUI.this.proxy.dataUI.prototypesIn.isEmpty) protoInEditor.removeAllRows
+      if (TaskPanel.this.proxy.dataUI.prototypesIn.isEmpty) protoInEditor.removeAllRows
       contents += protoInEditor.panel
     }
 
     lazy val protoOut = new PluginPanel("wrap") {
       contents += new Label("Outputs") { foreground = Color.WHITE }
       contents += new PluginPanel("wrap") {
-        TaskPanelUI.this.proxy.dataUI.implicitPrototypesOut foreach { p ⇒
+        TaskPanel.this.proxy.dataUI.implicitPrototypesOut foreach { p ⇒
           contents += new MyComboBox(List(p)) { enabled = false }
         }
       }
-      if (TaskPanelUI.this.proxy.dataUI.prototypesOut.isEmpty) protoOutEditor.removeAllRows
+      if (TaskPanel.this.proxy.dataUI.prototypesOut.isEmpty) protoOutEditor.removeAllRows
       contents += protoOutEditor.panel
     }
 

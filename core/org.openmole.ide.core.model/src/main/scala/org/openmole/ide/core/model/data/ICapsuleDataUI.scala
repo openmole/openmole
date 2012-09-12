@@ -17,9 +17,7 @@
 
 package org.openmole.ide.core.model.data
 
-import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
-import org.openmole.ide.core.model.dataproxy.ISamplingDataProxyUI
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.model.dataproxy._
 import org.openmole.core.model.mole._
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.commons.TransitionType._
@@ -32,9 +30,9 @@ trait ICapsuleDataUI {
 
   def task_=(t: Option[ITaskDataProxyUI])
 
-  def sampling: Option[ISamplingDataProxyUI]
+  def sampling: Option[ISamplingCompositionDataProxyUI]
 
-  def sampling_=(s: Option[ISamplingDataProxyUI])
+  def sampling_=(s: Option[ISamplingCompositionDataProxyUI])
 
   def environment: Option[IEnvironmentDataProxyUI]
 

@@ -42,7 +42,7 @@ trait ICapsuleUI {
 
   def setEnvironment(environment: Option[IEnvironmentDataProxyUI])
 
-  def setSampling(sampling: Option[ISamplingDataProxyUI])
+  def setSampling(sampling: Option[ISamplingCompositionDataProxyUI])
 
   def addInputSlot(startingCapsule: Boolean): IInputSlotWidget
 

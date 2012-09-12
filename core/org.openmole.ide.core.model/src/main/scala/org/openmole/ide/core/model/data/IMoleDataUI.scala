@@ -21,6 +21,8 @@ trait IMoleDataUI extends IDataUI {
 
   def name = "mole name"
 
+  override def toString: String = name
+
   def coreClass = classOf[IMoleDataUI]
 
   def plugins: Iterable[String]

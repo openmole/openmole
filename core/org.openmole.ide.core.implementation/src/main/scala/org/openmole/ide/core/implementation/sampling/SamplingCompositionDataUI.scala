@@ -15,8 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.workflow.sampling
+package org.openmole.ide.core.implementation.sampling
 
-import org.openmole.ide.core.model.sampling._
+import org.openmole.ide.core.model.data._
 
-class InputSamplingSlot(val arity: ISamplingSlot.Arity = ISamplingSlot.One) extends IInputSamplingSlot
+class SamplingCompositionDataUI(val name: String = "",
+                                val factors: List[IFactorDataUI] = List.empty,
+                                val samplings: List[ISamplingDataUI] = List.empty) extends ISamplingCompositionDataUI {
+
+  //FIXME
+  def coreClass = classOf[String]
+
+  //FiXME
+  def coreObject = samplings(0).coreObject(factors, samplings)
+
+  def imagePath = "img/samplingComposition.png"
+
+  override def fatImagePath = "img/samplingComposition_fat.png"
+
+  def buildPanelUI = new SamplingCompositionPanelUI(this)
+}

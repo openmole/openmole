@@ -21,8 +21,6 @@ import scala.swing._
 import org.openmole.ide.misc.widget.URL
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.implementation.data.FactorDataUI
-import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.sampling._
@@ -36,10 +34,7 @@ class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends PluginPanel("
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
-  override def saveContent(name: String,
-                           ssDataUI: ISamplingSceneDataUI) = new CompleteSamplingDataUI(name, ssDataUI.factors.map { c ⇒
-    new FactorDataUI(c.prototype, c.domain)
-  }.toList)
+  override def saveContent = new CompleteSamplingDataUI
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
 }

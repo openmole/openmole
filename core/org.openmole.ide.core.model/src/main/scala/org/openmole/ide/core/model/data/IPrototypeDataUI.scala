@@ -22,6 +22,8 @@ import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import org.openmole.core.model.data._
 
 trait IPrototypeDataUI[T] extends IDataUI {
+  def name: String
+
   override def toString = if (dim > 0) name + "[" + dim + "]" else name
 
   def displayTypedName: String

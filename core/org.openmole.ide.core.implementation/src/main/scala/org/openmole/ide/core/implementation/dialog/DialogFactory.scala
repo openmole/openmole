@@ -25,7 +25,7 @@ import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.implementation.panel.BasePanelUI
+import org.openmole.ide.core.implementation.panel.BasePanel
 import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.workflow.ISceneContainer
@@ -77,7 +77,7 @@ object DialogFactory {
     "It will be deleted everywhere it appears. <br>" +
     "Delete anyway ?")
 
-  def closePropertyPanelConfirmation(panel: BasePanelUI): Boolean = confirmationDialog("Warning",
+  def closePropertyPanelConfirmation(panel: BasePanel): Boolean = confirmationDialog("Warning",
     "<html> The property panel " + panel.nameTextField.text + " has not been created yet.<br>" +
       "All the data will be lost. <br>" +
       "Close anyway ?</html>")

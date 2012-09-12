@@ -26,7 +26,7 @@ import org.openmole.ide.misc.tools.Counter
 import scala.collection.mutable.HashMap
 
 class CapsuleDataUI(var task: Option[ITaskDataProxyUI] = None,
-                    var sampling: Option[ISamplingDataProxyUI] = None,
+                    var sampling: Option[ISamplingCompositionDataProxyUI] = None,
                     var environment: Option[IEnvironmentDataProxyUI] = None) extends ICapsuleDataUI {
 
   var hooks = new HashMap[Class[_ <: IHook], IHookDataUI]

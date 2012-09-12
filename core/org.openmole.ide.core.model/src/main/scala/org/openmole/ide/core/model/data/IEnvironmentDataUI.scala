@@ -22,6 +22,8 @@ import org.openmole.core.model.execution.IEnvironment
 
 trait IEnvironmentDataUI extends IDataUI {
 
+  override def toString: String = name
+
   def coreObject: IEnvironment
 
   def buildPanelUI: IEnvironmentPanelUI
