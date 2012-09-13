@@ -27,12 +27,16 @@ import javax.swing.JScrollPane
 import org.netbeans.api.visual.action.ActionFactory
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
+import org.netbeans.api.visual.action.ActionFactory
+import org.openmole.ide.core.implementation.provider._
+import org.openmole.ide.core.model.sampling.IFactorWidget
 import org.openmole.ide.core.model.workflow.IMoleScene
+import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 
-class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Scene with ISamplingCompositionPanelUI {
+class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Scene with ISamplingCompositionPanelUI { samplingCompositionPanelUI ⇒
 
-  val factors = new HashSet[(FactorWidget, ComponentWidget)]
+  val factors = new HashMap[IFactorWidget, SamplingComponent]
   val samplings = new HashSet[(SamplingWidget, ComponentWidget)]
 
   setBackground(new Color(77, 77, 77))
@@ -40,28 +44,31 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
   addChild(boxLayer)
 
   this.setPreferredBounds(new Rectangle(0, 0, 400, 20))
+  getActions.addAction(ActionFactory.createPopupMenuAction(new SamplingSceneMenuProvider(this)))
 
-  dataUI.factors.foreach { f ⇒ addFactor(f._1, f._2) }
-
-  if (factors.size == 0) {
-    addFactor(new FactorDataUI, new Point(0, 0))
-    addFactor(new FactorDataUI, new Point(0, 60))
-    addFactor(new FactorDataUI, new Point(0, 120))
-  }
+  dataUI.factors.foreach { f ⇒ addFactor(f._1, f._2, false) }
 
   def peer = new MigPanel("") { peer.add(createView) }.peer
 
+  def removeFactor(factorWidget: IFactorWidget) = factors.isDefinedAt(factorWidget) match {
+    case true ⇒
+      println("true ... ")
+      boxLayer.removeChild(factors(factorWidget))
+      factors -= factorWidget
+      validate
+    case _ ⇒ println("... of  :" + factors.isDefinedAt(factorWidget))
+  }
+
   def addFactor(factorDataUI: IFactorDataUI,
-                location: Point) = {
-    val fw = new FactorWidget(factorDataUI)
-    val cw = new ComponentWidget(this, fw.peer) {
-      setOpaque(true)
-      setPreferredLocation(location)
-      getActions.addAction(ActionFactory.createMoveAction)
-    }
+                location: Point,
+                display: Boolean = true) = {
+    val fw = new FactorWidget(factorDataUI, display)
+    val cw = new SamplingComponent(this, fw, location)
     boxLayer.addChild(cw)
     factors += fw -> cw
   }
+
+  def scene = this
   //
   //  override def attachEdgeSourceAnchor(edge: String, oldSourceNode: String, sourceNode: String) = {
   //    println("attachEdgeSourceAnchor Not implemented yet")

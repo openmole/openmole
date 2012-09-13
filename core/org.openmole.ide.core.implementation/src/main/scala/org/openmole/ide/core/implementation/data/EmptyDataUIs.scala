@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.implementation.data
 
+import java.awt.Point
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 import org.openmole.core.implementation.sampling.Sampling
@@ -32,6 +33,7 @@ import org.openmole.ide.core.model.panel._
 import org.openmole.core.implementation.task._
 import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
+import org.netbeans.api.visual.widget.Scene
 import scala.swing.TabbedPane
 
 object EmptyDataUIs {
@@ -73,6 +75,11 @@ object EmptyDataUIs {
   class EmptySamplingCompositionPanelUI extends ISamplingCompositionPanelUI {
     def peer = new PluginPanel("").peer
     def saveContent(name: String) = new EmptySamplingCompositionDataUI
+    def addFactor(factorDataUI: IFactorDataUI,
+                  location: Point,
+                  display: Boolean) = {}
+    def removeFactor(factorWidget: IFactorWidget): Unit = {}
+    def scene = new Scene
   }
 
   class EmptySampling extends Sampling {

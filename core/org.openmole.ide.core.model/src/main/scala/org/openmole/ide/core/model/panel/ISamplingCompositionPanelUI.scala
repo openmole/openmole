@@ -17,8 +17,19 @@
 
 package org.openmole.ide.core.model.panel
 
+import org.openmole.ide.core.model.sampling.IFactorWidget
 import org.openmole.ide.core.model.data._
+import org.netbeans.api.visual.widget.Scene
+import java.awt.Point
 
 trait ISamplingCompositionPanelUI extends IPanelUI {
   def saveContent(name: String): ISamplingCompositionDataUI
+
+  def scene: Scene
+
+  def removeFactor(factorWidget: IFactorWidget)
+
+  def addFactor(factorDataUI: IFactorDataUI,
+                location: Point,
+                display: Boolean = true)
 }

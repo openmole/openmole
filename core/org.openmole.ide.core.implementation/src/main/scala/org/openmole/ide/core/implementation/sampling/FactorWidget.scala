@@ -30,21 +30,26 @@ import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.MigPanel
 
-class FactorWidget(var factor: IFactorDataUI) extends IFactorWidget { factorWidget ⇒
+class FactorWidget(var factor: IFactorDataUI,
+                   display: Boolean = false) extends IFactorWidget { factorWidget ⇒
   preferredSize = new Dimension(130, 25)
   background = new Color(2, 240, 240)
   opaque = true
   peer.setLayout(new BorderLayout)
   val link = new LinkLabel(factorPreview,
     new Action("") {
-      def apply = ScenesManager.currentSceneContainer match {
-        case Some(s: ISceneContainer) ⇒ s.scene.displayExtraPropertyPanel(factorWidget)
-        case _ ⇒
-      }
+      def apply = displayOnMoleScene
     },
     3,
     "73a5d2",
     true)
+
+  if (display) displayOnMoleScene
+
+  def displayOnMoleScene = ScenesManager.currentSceneContainer match {
+    case Some(s: ISceneContainer) ⇒ s.scene.displayExtraPropertyPanel(factorWidget)
+    case _ ⇒
+  }
 
   def factorPreview =
     factor.prototype.getOrElse("") + {
