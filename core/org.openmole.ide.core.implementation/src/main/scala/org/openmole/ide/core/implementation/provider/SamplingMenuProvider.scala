@@ -18,30 +18,32 @@
 package org.openmole.ide.core.implementation.provider
 
 import java.awt.Point
-import org.netbeans.api.visual.widget.Widget
+import org.netbeans.api.visual.widget._
+import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
+import org.openmole.ide.core.model.sampling.ISamplingWidget
 import scala.swing.Action
-import scala.swing.Menu
 import scala.swing.MenuItem
-import org.openmole.ide.core.implementation.registry.KeyRegistry
-import org.openmole.ide.core.implementation.data.FactorDataUI
-import org.openmole.ide.core.implementation.sampling.SamplingCompositionPanelUI
+import org.openmole.ide.core.implementation.sampling._
+import scala.swing.Panel
 
-class SamplingSceneMenuProvider(panelScene: SamplingCompositionPanelUI) extends GenericMenuProvider {
+class SamplingMenuProvider(panelScene: ISamplingCompositionPanelUI) extends GenericMenuProvider {
 
   override def getPopupMenu(widget: Widget,
                             point: Point) = {
     items.clear
-    val itAddFactor = new MenuItem(new Action("Add Factor") {
-      def apply = panelScene.addFactor(new FactorDataUI, point)
+    val itRemoveSampling = new MenuItem(new Action("Remove Sampling") {
+      def apply =
+        widget match {
+          case cw: SamplingComponent ⇒
+            cw.component match {
+              case samplingWidget: ISamplingWidget ⇒
+                panelScene.removeSampling(samplingWidget)
+              case _ ⇒
+            }
+          case _ ⇒
+        }
     })
-
-    val samplingMenu = new Menu("Add Sampling")
-    KeyRegistry.samplings.values.toList.sortBy { _.toString }.foreach { s ⇒
-      samplingMenu.contents += new MenuItem(new Action(s.toString) {
-        def apply = panelScene.addSampling(s.buildDataUI, point)
-      })
-    }
-    items += (itAddFactor.peer, samplingMenu.peer)
+    items += itRemoveSampling.peer
     super.getPopupMenu(widget, point)
   }
 }

@@ -38,4 +38,6 @@ trait ISamplingDataUI extends IDataUI {
   def isAcceptable(factor: IFactorDataUI): Boolean
 
   def isAcceptable(sampling: ISamplingDataUI): Boolean
+
+  def preview: String
 }

@@ -55,5 +55,8 @@ class SamplingPanel(samplingWidget: ISamplingWidget,
 
   def delete = {}
 
-  def save = samplingWidget.sampling = panelUI.saveContent
+  def save = {
+    samplingWidget.sampling = panelUI.saveContent
+    samplingWidget.update
+  }
 }

@@ -30,5 +30,4 @@ class SamplingComponent(samplingScene: ISamplingCompositionPanelUI,
   setOpaque(true)
   setPreferredLocation(location)
   getActions.addAction(ActionFactory.createMoveAction)
-  getActions.addAction(ActionFactory.createPopupMenuAction(new FactorMenuProvider(samplingScene)))
 }

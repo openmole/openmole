@@ -41,4 +41,6 @@ class CSVSamplingDataUI(var csvFilePath: String = "",
   def isAcceptable(factor: IFactorDataUI) = false
 
   def isAcceptable(sampling: ISamplingDataUI) = true
+
+  def preview = "from " + new File(csvFilePath).getName + " file"
 }

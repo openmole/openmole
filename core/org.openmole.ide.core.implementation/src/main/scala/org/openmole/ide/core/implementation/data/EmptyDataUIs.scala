@@ -79,6 +79,10 @@ object EmptyDataUIs {
                   location: Point,
                   display: Boolean) = {}
     def removeFactor(factorWidget: IFactorWidget): Unit = {}
+    def addSampling(samplingDataUI: ISamplingDataUI,
+                    location: Point,
+                    display: Boolean) = {}
+    def removeSampling(samplingWidget: ISamplingWidget): Unit = {}
     def scene = new Scene
   }
 

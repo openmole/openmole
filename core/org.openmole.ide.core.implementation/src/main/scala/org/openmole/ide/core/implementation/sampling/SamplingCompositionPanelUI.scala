@@ -30,6 +30,7 @@ import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.netbeans.api.visual.action.ActionFactory
 import org.openmole.ide.core.implementation.provider._
 import org.openmole.ide.core.model.sampling.IFactorWidget
+import org.openmole.ide.core.model.sampling.ISamplingWidget
 import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
@@ -37,35 +38,60 @@ import scala.collection.mutable.HashSet
 class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Scene with ISamplingCompositionPanelUI { samplingCompositionPanelUI ⇒
 
   val factors = new HashMap[IFactorWidget, SamplingComponent]
-  val samplings = new HashSet[(SamplingWidget, ComponentWidget)]
+  val samplings = new HashMap[ISamplingWidget, SamplingComponent]
 
   setBackground(new Color(77, 77, 77))
-  val boxLayer = new LayerWidget(this)
-  addChild(boxLayer)
+  val factorLayer = new LayerWidget(this)
+  val samplingLayer = new LayerWidget(this)
+  addChild(factorLayer)
+  addChild(samplingLayer)
 
   this.setPreferredBounds(new Rectangle(0, 0, 400, 20))
   getActions.addAction(ActionFactory.createPopupMenuAction(new SamplingSceneMenuProvider(this)))
 
   dataUI.factors.foreach { f ⇒ addFactor(f._1, f._2, false) }
+  dataUI.samplings.foreach { f ⇒ addSampling(f._1, f._2, false) }
 
   def peer = new MigPanel("") { peer.add(createView) }.peer
 
   def removeFactor(factorWidget: IFactorWidget) = factors.isDefinedAt(factorWidget) match {
     case true ⇒
-      println("true ... ")
-      boxLayer.removeChild(factors(factorWidget))
+      factorLayer.removeChild(factors(factorWidget))
       factors -= factorWidget
       validate
-    case _ ⇒ println("... of  :" + factors.isDefinedAt(factorWidget))
+    case _ ⇒
   }
 
   def addFactor(factorDataUI: IFactorDataUI,
                 location: Point,
                 display: Boolean = true) = {
     val fw = new FactorWidget(factorDataUI, display)
-    val cw = new SamplingComponent(this, fw, location)
-    boxLayer.addChild(cw)
+    val cw = new SamplingComponent(this, fw, location) {
+      getActions.addAction(ActionFactory.createPopupMenuAction(new FactorMenuProvider(samplingCompositionPanelUI)))
+    }
+    factorLayer.addChild(cw)
+    validate
     factors += fw -> cw
+  }
+
+  def addSampling(samplingDataUI: ISamplingDataUI,
+                  location: Point,
+                  display: Boolean = true) = {
+    val sw = new SamplingWidget(samplingDataUI, display)
+    val cw = new SamplingComponent(this, sw, location) {
+      getActions.addAction(ActionFactory.createPopupMenuAction(new SamplingMenuProvider(samplingCompositionPanelUI)))
+    }
+    samplingLayer.addChild(cw)
+    validate
+    samplings += sw -> cw
+  }
+
+  def removeSampling(samplingWidget: ISamplingWidget) = samplings.isDefinedAt(samplingWidget) match {
+    case true ⇒
+      samplingLayer.removeChild(samplings(samplingWidget))
+      samplings -= samplingWidget
+      validate
+    case _ ⇒
   }
 
   def scene = this
@@ -80,7 +106,7 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
   //
   //  override def attachNodeWidget(n: String) = {
   //    val w = new Widget(this)
-  //    boxLayer.addChild(w)
+  //    factorLayer.addChild(w)
   //    w
   //  }
   //

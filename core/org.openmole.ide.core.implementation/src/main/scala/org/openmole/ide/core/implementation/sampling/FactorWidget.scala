@@ -42,7 +42,7 @@ class FactorWidget(var factor: IFactorDataUI,
     },
     3,
     "73a5d2",
-    true)
+    true) { background = factorWidget.background; opaque = true }
 
   if (display) displayOnMoleScene
 
@@ -68,7 +68,5 @@ class FactorWidget(var factor: IFactorDataUI,
     repaint
   }
 
-  peer.add(new MigPanel("") {
-    contents += link
-  }.peer, BorderLayout.NORTH)
+  peer.add(link.peer, BorderLayout.NORTH)
 }

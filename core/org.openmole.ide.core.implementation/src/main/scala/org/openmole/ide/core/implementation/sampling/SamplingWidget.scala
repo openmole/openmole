@@ -29,12 +29,13 @@ import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.MigPanel
 
-class SamplingWidget(var sampling: ISamplingDataUI) extends ISamplingWidget { samplingWidget ⇒
-  preferredSize = new Dimension(130, 25)
+class SamplingWidget(var sampling: ISamplingDataUI,
+                     display: Boolean = false) extends ISamplingWidget { samplingWidget ⇒
+  preferredSize = new Dimension(130, 50)
   background = new Color(2, 240, 240)
   opaque = true
   peer.setLayout(new BorderLayout)
-  val link = new LinkLabel(samplingPreview,
+  val link = new LinkLabel(sampling.preview,
     new Action("") {
       def apply = ScenesManager.currentSceneContainer match {
         case Some(s: ISceneContainer) ⇒ s.scene.displayExtraPropertyPanel(samplingWidget)
@@ -42,18 +43,14 @@ class SamplingWidget(var sampling: ISamplingDataUI) extends ISamplingWidget { sa
       }
     },
     3,
-    "73a5d2",
-    true)
-
-  def samplingPreview = " my sampling "
+    "ff5555",
+    true) { background = samplingWidget.background; opaque = true }
 
   def update = {
-    link.link(samplingPreview)
+    link.link(sampling.preview)
     revalidate
     repaint
   }
 
-  peer.add(new MigPanel("") {
-    contents += link
-  }.peer, BorderLayout.NORTH)
+  peer.add(link.peer, BorderLayout.NORTH)
 }

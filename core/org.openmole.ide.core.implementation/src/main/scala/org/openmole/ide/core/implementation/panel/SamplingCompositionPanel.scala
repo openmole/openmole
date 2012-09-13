@@ -40,7 +40,7 @@ import scala.swing.event.FocusGained
 class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
                                scene: IMoleScene,
                                mode: Value = CREATION) extends BasePanel(Some(proxy), scene, mode) {
-  // iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
+  iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
   val panelUI = proxy.dataUI.buildPanelUI
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
@@ -62,7 +62,6 @@ class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
 
   def create = {
     Proxys.samplings += proxy
-    println("create :: " + nameTextField.text)
     ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
 

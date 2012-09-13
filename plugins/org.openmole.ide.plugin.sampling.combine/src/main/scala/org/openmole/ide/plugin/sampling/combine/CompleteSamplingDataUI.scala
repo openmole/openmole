@@ -47,4 +47,6 @@ class CompleteSamplingDataUI extends ISamplingDataUI {
   def isAcceptable(factor: IFactorDataUI) = false
 
   def isAcceptable(sampling: ISamplingDataUI) = true
+
+  def preview = "complete sampling"
 }
