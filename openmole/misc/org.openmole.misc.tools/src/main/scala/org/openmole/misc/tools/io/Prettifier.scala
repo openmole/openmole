@@ -19,18 +19,22 @@ package org.openmole.misc.tools.io
 
 import collection.JavaConversions._
 
-object Prettifier {
+object Prettifier extends Logger {
 
   implicit def objectPrettifer(o: Any) = new {
     def prettify = Prettifier.prettify(o)
   }
 
   def prettify(o: Any): String =
-    o match {
+    try o match {
       case null ⇒ "null"
       case o: Array[_] ⇒ "[" + o.map { prettify }.mkString(", ") + "]"
       case o: Iterable[_] ⇒ "[" + o.map { prettify }.mkString(", ") + "]"
       case o: java.lang.Iterable[_] ⇒ "[" + o.map { prettify }.mkString(", ") + "]"
       case o ⇒ o.toString
+    } catch {
+      case t: Throwable => 
+        logger.log(WARNING, "Error durring pretification", t)
+        o.toString
     }
 }
