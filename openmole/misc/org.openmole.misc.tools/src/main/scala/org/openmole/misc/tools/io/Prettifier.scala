@@ -18,6 +18,7 @@
 package org.openmole.misc.tools.io
 
 import collection.JavaConversions._
+import org.openmole.misc.tools.service.Logger
 
 object Prettifier extends Logger {
 
