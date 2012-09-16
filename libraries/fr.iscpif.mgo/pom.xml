@@ -23,6 +23,11 @@
 	    <version>${lib.fr.iscpif.mgo.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.scala-lang.scala-library</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->
@@ -40,7 +45,7 @@
 
     <!--optional. Use this property to tune the exported packages-->
     <properties>
-        <embed-dep>*;artifactId=!scala-library;type=!pom;inline=true</embed-dep>
+        <embed-dep>*;groupId=!org.openmole.core|org.scala-lang;type=!pom;inline=true</embed-dep>
         <libraries.export.packages>fr.iscpif.mgo.*</libraries.export.packages>
         <import.packages>scala.*,*;resolution:=optional</import.packages>
     </properties>
