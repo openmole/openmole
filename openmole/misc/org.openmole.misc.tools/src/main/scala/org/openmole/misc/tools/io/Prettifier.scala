@@ -34,7 +34,7 @@ object Prettifier extends Logger {
       case o: java.lang.Iterable[_] ⇒ "[" + o.map { prettify }.mkString(", ") + "]"
       case o ⇒ o.toString
     } catch {
-      case t: Throwable => 
+      case t: Throwable ⇒
         logger.log(WARNING, "Error durring pretification", t)
         o.toString
     }

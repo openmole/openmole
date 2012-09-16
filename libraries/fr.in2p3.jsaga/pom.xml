@@ -70,6 +70,11 @@
            <artifactId>xalan</artifactId>
            <version>2.7.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.apache.log4j</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->
@@ -86,8 +91,8 @@
 
     <properties>
         <!--<import.packages>com.google.common.*;resolution:=optional</import.packages>-->
-        <libraries.export.packages>org.ogf.saga.*,fr.in2p3.jsaga.*,org.globus.*,org.apache.log4j.*</libraries.export.packages>
-        <embed-dep>*;groupId=bouncycastle;artifactId=bcprov-jdk13,*;artifactId=!scala-library|guava|commons-logging;type=!pom;inline=true</embed-dep>
+        <libraries.export.packages>org.ogf.saga.*,fr.in2p3.jsaga.*,org.globus.*</libraries.export.packages>
+        <embed-dep>*;groupId=bouncycastle;artifactId=bcprov-jdk13,*;groupId=!org.openmole.core;artifactId=!scala-library|guava|commons-logging|log4j;type=!pom;inline=true</embed-dep>
         <bundle.classpath>bcprov-jdk13-140.jar,.</bundle.classpath>
     </properties>
 

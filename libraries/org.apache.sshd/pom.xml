@@ -22,11 +22,11 @@
             <artifactId>sshd-core</artifactId>
             <version>${lib.org.apache.sshd.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jul-to-slf4j</artifactId>
             <version>${lib.org.slf4j.version}</version>
-        </dependency>
+        </dependency>-->
     </dependencies>
 
     <!-- ************************************************************* -->
