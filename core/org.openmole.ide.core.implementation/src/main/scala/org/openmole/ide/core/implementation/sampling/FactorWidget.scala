@@ -17,32 +17,35 @@
 
 package org.openmole.ide.core.implementation.sampling
 
+import java.awt.BasicStroke
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.BorderLayout
 import scala.swing.Action
+import java.awt.GradientPaint
+import java.awt.LinearGradientPaint
+import java.awt.Graphics2D
+import org.openmole.ide.misc.widget.NimbusPainter
+import java.awt.Point
+import java.awt.RenderingHints
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.core.model.data.IFactorDataUI
 import org.openmole.ide.core.model.sampling.IFactorWidget
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.workflow.ISceneContainer
-import org.openmole.ide.misc.widget.LinkLabel
-import org.openmole.ide.misc.widget.MigPanel
+import org.openmole.ide.misc.widget._
 
 class FactorWidget(var factor: IFactorDataUI,
-                   display: Boolean = false) extends IFactorWidget { factorWidget ⇒
-  preferredSize = new Dimension(130, 25)
-  background = new Color(2, 240, 240)
-  opaque = true
-  peer.setLayout(new BorderLayout)
+                   display: Boolean = false) extends MigPanel("wrap", "[center]", "[center]") with IFactorWidget { factorWidget ⇒
+  preferredSize = new Dimension(130, 35)
   val link = new LinkLabel(factorPreview,
     new Action("") {
       def apply = displayOnMoleScene
     },
     3,
     "73a5d2",
-    true) { background = factorWidget.background; opaque = true }
+    true) { opaque = false; maximumSize = new Dimension(100, 25) }
 
   if (display) displayOnMoleScene
 
@@ -68,5 +71,19 @@ class FactorWidget(var factor: IFactorDataUI,
     repaint
   }
 
-  peer.add(link.peer, BorderLayout.NORTH)
+  override def paintComponent(g: Graphics2D) = {
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+      RenderingHints.VALUE_ANTIALIAS_ON)
+
+    val start = new Point(0, 0)
+    val end = new Point(0, size.height)
+    val dist = Array(0.0f, 0.5f, 0.8f)
+    val colors = Array(new Color(250, 250, 250), new Color(228, 228, 228), new Color(250, 250, 250))
+    val gp = new LinearGradientPaint(start, end, dist, colors)
+
+    g.setPaint(gp)
+    g.fillRoundRect(0, 0, size.width, size.height, 8, 8)
+    g.setColor(Color.WHITE)
+  }
+  contents += link
 }

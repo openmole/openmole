@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.implementation.sampling
 
+import java.awt.Color
 import java.awt.Point
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.action.ActionFactory
@@ -28,6 +29,7 @@ class SamplingComponent(samplingScene: ISamplingCompositionPanelUI,
                         val component: ISamplingCompositionWidget,
                         location: Point) extends ComponentWidget(samplingScene.scene, component.peer) {
   setOpaque(true)
+  setBackground(new Color(77, 77, 77, 0))
   setPreferredLocation(location)
   getActions.addAction(ActionFactory.createMoveAction)
 }

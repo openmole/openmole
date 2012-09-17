@@ -21,6 +21,10 @@ import java.awt.Color
 import java.awt.Dimension
 import java.awt.BorderLayout
 import scala.swing.Action
+import org.openmole.ide.misc.widget.MigPanel
+import java.awt.Graphics2D
+import java.awt.Point
+import java.awt.RenderingHints
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.data.ISamplingDataUI
 import org.openmole.ide.core.model.sampling._
@@ -28,13 +32,12 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.MigPanel
+import java.awt.LinearGradientPaint
 
 class SamplingWidget(var sampling: ISamplingDataUI,
-                     display: Boolean = false) extends ISamplingWidget { samplingWidget ⇒
-  preferredSize = new Dimension(130, 50)
-  background = new Color(2, 240, 240)
+                     display: Boolean = false) extends MigPanel("wrap", "[center]", "[center]") with ISamplingWidget { samplingWidget ⇒
+  preferredSize = new Dimension(130, 35)
   opaque = true
-  peer.setLayout(new BorderLayout)
   val link = new LinkLabel(sampling.preview,
     new Action("") {
       def apply = ScenesManager.currentSceneContainer match {
@@ -44,7 +47,7 @@ class SamplingWidget(var sampling: ISamplingDataUI,
     },
     3,
     "ff5555",
-    true) { background = samplingWidget.background; opaque = true }
+    true) { opaque = false; maximumSize = new Dimension(100, 25) }
 
   def update = {
     link.link(sampling.preview)
@@ -52,5 +55,19 @@ class SamplingWidget(var sampling: ISamplingDataUI,
     repaint
   }
 
-  peer.add(link.peer, BorderLayout.NORTH)
+  override def paintComponent(g: Graphics2D) = {
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+      RenderingHints.VALUE_ANTIALIAS_ON)
+
+    val start = new Point(0, 0)
+    val end = new Point(0, size.height)
+    val dist = Array(0.0f, 0.5f, 0.8f)
+    val colors = Array(new Color(250, 250, 250), new Color(228, 228, 228), new Color(250, 250, 250))
+    val gp = new LinearGradientPaint(start, end, dist, colors)
+
+    g.setPaint(gp)
+    g.fillRoundRect(0, 0, size.width, size.height, 8, 8)
+    g.setColor(Color.WHITE)
+  }
+  contents += link
 }
