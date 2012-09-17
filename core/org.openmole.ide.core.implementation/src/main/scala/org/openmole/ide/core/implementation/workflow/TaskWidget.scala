@@ -27,6 +27,8 @@ import java.awt.BasicStroke
 import java.awt.BorderLayout
 import java.awt.Graphics2D
 import java.awt.Dimension
+import java.awt.LinearGradientPaint
+import java.awt.Point
 import java.awt.Rectangle
 import java.awt.RenderingHints
 import org.openmole.ide.core.model.panel.PanelMode._
@@ -40,8 +42,10 @@ class TaskWidget(scene: IMoleScene,
   override def paint(g: Graphics2D) = {
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
       RenderingHints.VALUE_ANTIALIAS_ON)
-    g.setColor(backColor)
-    g.fillRect(0, 0, preferredSize.width, preferredSize.height)
+
+    g.setPaint(backColor)
+    // g.setColor(backColor)
+    g.fillRoundRect(0, 0, preferredSize.width, preferredSize.height, 5, 5)
     g.setColor(borderColor)
     g.setStroke(new BasicStroke(5))
     g.draw(new Rectangle(bounds.x, bounds.y, bounds.width - 1, bounds.height - 1))
@@ -54,12 +58,28 @@ class TaskWidget(scene: IMoleScene,
     }
   }
 
-  def backColor: Color = {
+  def backColor = {
+
+    val start = new Point(0, 0)
+    val end = new Point(0, preferredSize.height)
+    val dist = Array(0.0f, preferredSize.height * 0.5f, preferredSize.height * 0.8f)
     capsule.dataUI.task match {
       case Some(x: ITaskDataProxyUI) ⇒
         scene match {
-          case y: BuildMoleScene ⇒ new Color(215, 238, 244)
-          case _ ⇒ new Color(215, 238, 244, 64)
+          case y: BuildMoleScene ⇒
+
+            new LinearGradientPaint(start, end, dist,
+              Array(new Color(215, 238, 244),
+                new Color(228, 228, 228),
+                new Color(215, 238, 244)))
+
+          //new Color(215, 238, 244)
+          case _ ⇒
+            new LinearGradientPaint(start, end, dist,
+              Array(new Color(215, 238, 244, 64),
+                new Color(228, 228, 228),
+                new Color(215, 238, 244, 64)))
+          //new Color(215, 238, 244, 64)
         }
       case _ ⇒
         new Color(215, 238, 244)

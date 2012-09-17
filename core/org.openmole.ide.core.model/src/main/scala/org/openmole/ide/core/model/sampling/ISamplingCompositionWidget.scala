@@ -17,7 +17,6 @@
 
 package org.openmole.ide.core.model.sampling
 
-import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.swing.Panel
 
 trait ISamplingCompositionWidget extends Panel {
