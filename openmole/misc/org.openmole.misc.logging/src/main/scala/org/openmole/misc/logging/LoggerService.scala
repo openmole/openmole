@@ -17,14 +17,10 @@
 
 package org.openmole.misc.logging
 
-import java.io.File
-import java.util.logging.Level
-import java.util.logging.LogManager
-import org.slf4j.bridge.SLF4JBridgeHandler
-import org.openmole.misc.workspace.ConfigurationLocation
-import org.openmole.misc.workspace.Workspace
+import java.util.logging._
+import org.slf4j.bridge._
+import org.openmole.misc.workspace._
 import org.openmole.misc.tools.io.FileUtil._
-import org.apache.commons.logging.Log
 import collection.JavaConversions._
 
 object LoggerService {
@@ -34,14 +30,17 @@ object LoggerService {
 
   def level(levelLabel: String) = {
     val level = Level.parse(levelLabel)
-    SLF4JBridgeHandler.uninstall
+
+    //SLF4JBridgeHandler.uninstall
     SLF4JBridgeHandler.removeHandlersForRootLogger
-    //val handlers = rootLogger.getHandlers
-    //for (h ← handlers) rootLogger.removeHandler(h)
-    SLF4JBridgeHandler.install
-    
-    val rootLogger = LogManager.getLogManager.getLogger("")
+    LogManager.getLogManager.reset
+
+    //val rootLogger = LogManager.getLogManager.getLogger("")
+    val rootLogger = Logger.getLogger("")
     rootLogger.setLevel(level)
+    val ch = new ConsoleHandler
+    ch.setLevel(level)
+    rootLogger.addHandler(ch)
   }
 
   def init = level(Workspace.preference(LogLevel))

@@ -21,12 +21,12 @@
             <groupId>fr.iscpif</groupId>
             <artifactId>mgo</artifactId>
 	    <version>${lib.fr.iscpif.mgo.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.scala-lang.scala-library</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

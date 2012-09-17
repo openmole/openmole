@@ -72,7 +72,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>org.apache.log4j</artifactId>
+            <artifactId>org.slf4j</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

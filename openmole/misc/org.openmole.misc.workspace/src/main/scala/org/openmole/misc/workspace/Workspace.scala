@@ -24,18 +24,16 @@ import java.util.{ Random ⇒ JRandom }
 import java.util.UUID
 import java.util.logging.Level
 import java.util.logging.Logger
-import org.apache.commons.configuration.FileConfiguration
-import org.apache.commons.configuration.PropertiesConfiguration
-import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy
+import org.apache.commons.configuration._
+import org.apache.commons.configuration.reloading._
 import org.jasypt.util.text.BasicTextEncryptor
 import org.joda.time.format.ISOPeriodFormat
 import org.openmole.misc.tools.service.Random
 import org.openmole.misc.tools.service.Random._
 import scala.collection.mutable.HashMap
 import org.openmole.misc.eventdispatcher.{ EventDispatcher, Event }
-import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.replication.DBServerInfo
+import org.openmole.misc.exception._
+import org.openmole.misc.replication._
 import org.openmole.misc.tools.io.FileUtil._
 
 object Workspace {

@@ -17,6 +17,7 @@
 
 package org.openmole.core.batch.authentication
 
+import fr.in2p3.jsaga._
 import fr.in2p3.jsaga.impl.context.ContextImpl
 import java.util.logging.Level
 import java.util.logging.{ Logger ⇒ JLogger }
@@ -33,7 +34,7 @@ object JSAGASessionService extends Logger {
 
   private var sessions = List[(String, Session)]()
   private lazy val defaultSession = SessionFactory.createSession(false)
-  private val JSAGAConfigFile = "jsaga-universe.xml"
+  //private val JSAGAConfigFile = "jsaga-universe.xml"
   private val JSAGATimeOutFile = "jsaga-timeout.properties"
 
   init
@@ -43,16 +44,14 @@ object JSAGASessionService extends Logger {
     System.setProperty("saga.factory", "fr.in2p3.jsaga.impl.SagaFactoryImpl")
 
     // org.apache.log4j.Logger.getLogger(org.glite.security.util.FileEndingIterator.class.getName()).setLevel(org.apache.log4j.Level.FATAL);
-    org.apache.log4j.Logger.getRootLogger.setLevel(org.apache.log4j.Level.FATAL)
-    val universe = this.getClass.getClassLoader.getResource(JSAGAConfigFile)
+    //org.apache.log4j.Logger.getRootLogger.setLevel(org.apache.log4j.Level.FATAL)
+    //val universe = this.getClass.getClassLoader.getResource(JSAGAConfigFile)
 
-    if (universe != null) System.setProperty("jsaga.universe", universe.toString)
-    else JLogger.getLogger(JSAGASessionService.getClass.getName).log(Level.WARNING, JSAGAConfigFile + " JSAGA config file not found.");
+    //if (universe != null) System.setProperty(EngineProperties. "jsaga.universe", universe.toString)
+    //else JLogger.getLogger(JSAGASessionService.getClass.getName).log(Level.WARNING, JSAGAConfigFile + " JSAGA config file not found.");
 
     val timeout = this.getClass.getClassLoader.getResource(JSAGATimeOutFile)
-
-    if (universe != null) System.setProperty("jsaga.timeout", timeout.toString)
-    else JLogger.getLogger(JSAGASessionService.getClass.getName).log(Level.WARNING, JSAGAConfigFile + " JSAGA timeout file not found.")
+    System.setProperty(EngineProperties.JSAGA_TIMEOUT, timeout.toString)
 
     Unit
   }

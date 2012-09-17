@@ -21,7 +21,17 @@
             <groupId>commons-configuration</groupId>
             <artifactId>commons-configuration</artifactId>
             <version>${lib.org.apache.commons.configuration.version}</version>
-            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.slf4j</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
@@ -38,9 +48,9 @@
     <packaging>bundle</packaging>
 
 
-    <!--<properties>i-->
-        <!--<import.packages>com.google.common.*;resolution:=optional</import.packages>-->
-     <!--   <libraries.export.packages>org.apache.commons.configuration.*</libraries.export.packages>
-        <embed-dep>*;artifactId=!commons-logging;type=!pom;inline=true</embed-dep>
-    </properties>-->
+    <properties>
+        <embed-dep>*;groupId=!commons-logging|org.openmole.core;type=!pom;inline=true</embed-dep>
+        <libraries.export.packages>org.apache.commons.configuration.*</libraries.export.packages>
+    </properties>
+
 </project>

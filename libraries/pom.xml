@@ -26,8 +26,6 @@
         <module>com.thoughtworks.xstream</module>
         <module>org.codehaus.groovy</module>
         <module>org.apache.commons.compress</module>
-        <module>org.apache.commons.logging</module>
-	<module>org.apache.log4j</module>
         <module>org.apache.commons.pool</module>
         <module>org.apache.commons.cli</module>
 	<module>org.apache.commons.configuration</module>
