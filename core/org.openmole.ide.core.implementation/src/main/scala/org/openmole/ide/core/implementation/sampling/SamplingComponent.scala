@@ -31,5 +31,4 @@ class SamplingComponent(samplingScene: ISamplingCompositionPanelUI,
   setOpaque(true)
   setBackground(new Color(77, 77, 77, 0))
   setPreferredLocation(location)
-  getActions.addAction(ActionFactory.createMoveAction)
 }

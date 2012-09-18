@@ -19,19 +19,22 @@ package org.openmole.ide.core.implementation.sampling
 
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.core.implementation.data._
-import java.awt.Rectangle
-import java.awt.Color
-import java.awt.Point
+import java.awt._
+import org.netbeans.api.visual.anchor.AnchorShape
+import org.netbeans.api.visual.action.ConnectProvider
 import org.netbeans.api.visual.widget._
+import java.awt.event.InputEvent
+import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.JScrollPane
 import org.netbeans.api.visual.action.ActionFactory
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
-import org.netbeans.api.visual.action.ActionFactory
+import org.netbeans.api.visual.action._
 import org.openmole.ide.core.implementation.provider._
-import org.openmole.ide.core.model.sampling.IFactorWidget
-import org.openmole.ide.core.model.sampling.ISamplingWidget
+import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.core.model.workflow.IMoleScene
+import org.netbeans.api.visual.anchor.PointShape
+import org.netbeans.api.visual.anchor.AnchorFactory
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 
@@ -43,11 +46,20 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
   setBackground(new Color(77, 77, 77))
   val factorLayer = new LayerWidget(this)
   val samplingLayer = new LayerWidget(this)
+  val connectLayer = new LayerWidget(this)
   addChild(factorLayer)
   addChild(samplingLayer)
+  addChild(connectLayer)
 
   this.setPreferredBounds(new Rectangle(0, 0, 400, 20))
+
+  val transitionId = new AtomicInteger
+  val connectAction = ActionFactory.createExtendedConnectAction(null, connectLayer,
+    new SamplingConnectionProvider,
+    InputEvent.CTRL_MASK)
+
   getActions.addAction(ActionFactory.createPopupMenuAction(new SamplingSceneMenuProvider(this)))
+  val moveAction = ActionFactory.createMoveAction
 
   dataUI.factors.foreach { f ⇒ addFactor(f._1, f._2, false) }
   dataUI.samplings.foreach { f ⇒ addSampling(f._1, f._2, false) }
@@ -68,8 +80,11 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
     val fw = new FactorWidget(factorDataUI, display)
     val cw = new SamplingComponent(this, fw, location) {
       getActions.addAction(ActionFactory.createPopupMenuAction(new FactorMenuProvider(samplingCompositionPanelUI)))
+      getActions.addAction(connectAction)
+      getActions.addAction(moveAction)
     }
     factorLayer.addChild(cw)
+
     validate
     factors += fw -> cw
   }
@@ -80,6 +95,8 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
     val sw = new SamplingWidget(samplingDataUI, display)
     val cw = new SamplingComponent(this, sw, location) {
       getActions.addAction(ActionFactory.createPopupMenuAction(new SamplingMenuProvider(samplingCompositionPanelUI)))
+      getActions.addAction(connectAction)
+      getActions.addAction(moveAction)
     }
     samplingLayer.addChild(cw)
     validate
@@ -95,28 +112,58 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
   }
 
   def scene = this
-  //
-  //  override def attachEdgeSourceAnchor(edge: String, oldSourceNode: String, sourceNode: String) = {
-  //    println("attachEdgeSourceAnchor Not implemented yet")
-  //  }
-  //
-  //  override def attachEdgeTargetAnchor(edge: String, oldTargetNode: String, targetNode: String) = {
-  //    println("attachEdgeTargetAnchor Not implemented yet")
-  //  }
-  //
-  //  override def attachNodeWidget(n: String) = {
-  //    val w = new Widget(this)
-  //    factorLayer.addChild(w)
-  //    w
-  //  }
-  //
-  //  def attachEdgeWidget(e: String) = {
-  //    new ConnectionWidget(this)
-  //  }
-
-  def graphScene = this
 
   def saveContent(name: String) = new SamplingCompositionDataUI(name,
     factors.map { f ⇒ f._1.factor -> f._2.getPreferredLocation }.toList,
     samplings.map { s ⇒ s._1.sampling -> s._2.getPreferredLocation }.toList)
+
+  class SamplingConnectionProvider extends ConnectProvider {
+    var source: Option[ISamplingCompositionWidget] = None
+
+    override def isSourceWidget(sourceWidget: Widget): Boolean =
+      sourceWidget match {
+        case x: SamplingComponent ⇒
+          source = Some(x.component)
+          true
+        case _ ⇒
+          source = None
+          false
+      }
+
+    def boolToConnector(b: Boolean) = {
+      if (b) ConnectorState.ACCEPT
+      else ConnectorState.REJECT_AND_STOP
+    }
+
+    override def isTargetWidget(sourceWidget: Widget,
+                                targetWidget: Widget): ConnectorState = {
+      targetWidget match {
+        case s: SamplingComponent ⇒
+          s.component match {
+            case f: IFactorWidget ⇒ ConnectorState.REJECT_AND_STOP
+            case s: SamplingWidget ⇒ source match {
+              case Some(sw: ISamplingWidget) ⇒ boolToConnector(s.sampling.isAcceptable(sw.sampling))
+              case Some(fw: IFactorWidget) ⇒ boolToConnector(s.sampling.isAcceptable(fw.factor))
+              case _ ⇒ ConnectorState.REJECT_AND_STOP
+            }
+            case _ ⇒ ConnectorState.REJECT_AND_STOP
+          }
+        case _ ⇒ ConnectorState.REJECT_AND_STOP
+      }
+    }
+
+    override def hasCustomTargetWidgetResolver(scene: Scene): Boolean = false
+
+    override def resolveTargetWidget(scene: Scene, sceneLocation: Point): Widget = null
+
+    override def createConnection(sourceWidget: Widget, targetWidget: Widget) = {
+      val connection = new ConnectionWidget(samplingCompositionPanelUI.scene)
+      connection.setStroke(new BasicStroke(2))
+      connection.setLineColor(new Color(218, 218, 218))
+      connection.setSourceAnchor(AnchorFactory.createRectangularAnchor(sourceWidget))
+      connection.setTargetAnchor(AnchorFactory.createRectangularAnchor(targetWidget))
+      connection.setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
+      connectLayer.addChild(connection)
+    }
+  }
 }

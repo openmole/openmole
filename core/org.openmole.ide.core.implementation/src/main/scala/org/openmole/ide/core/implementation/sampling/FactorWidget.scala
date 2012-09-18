@@ -38,14 +38,14 @@ import org.openmole.ide.misc.widget._
 
 class FactorWidget(var factor: IFactorDataUI,
                    display: Boolean = false) extends MigPanel("wrap", "[center]", "[center]") with IFactorWidget { factorWidget ⇒
-  preferredSize = new Dimension(130, 35)
+  preferredSize = new Dimension(130, 38)
   val link = new LinkLabel(factorPreview,
     new Action("") {
       def apply = displayOnMoleScene
     },
     3,
     "73a5d2",
-    true) { opaque = false; maximumSize = new Dimension(100, 25) }
+    true) { opaque = false; maximumSize = new Dimension(100, 28) }
 
   if (display) displayOnMoleScene
 

@@ -36,7 +36,7 @@ import java.awt.LinearGradientPaint
 
 class SamplingWidget(var sampling: ISamplingDataUI,
                      display: Boolean = false) extends MigPanel("wrap", "[center]", "[center]") with ISamplingWidget { samplingWidget ⇒
-  preferredSize = new Dimension(130, 35)
+  preferredSize = new Dimension(130, 38)
   opaque = true
   val link = new LinkLabel(sampling.preview,
     new Action("") {
@@ -47,7 +47,7 @@ class SamplingWidget(var sampling: ISamplingDataUI,
     },
     3,
     "ff5555",
-    true) { opaque = false; maximumSize = new Dimension(100, 25) }
+    true) { opaque = false; maximumSize = new Dimension(100, 28) }
 
   def update = {
     link.link(sampling.preview)
