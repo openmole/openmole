@@ -202,6 +202,7 @@
                         </goals>
                         <configuration>
                             <excludeScope>provided</excludeScope>
+                            <excludeArtifactIds>scalatest_${lib.org.scala-lang.scala.version},junit,scala-actors,scala-library,scala-reflect,scala-swing,serializer,xalan,xml-apis</excludeArtifactIds>
                         </configuration>
                     </execution>
                 </executions>
