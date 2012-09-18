@@ -17,7 +17,6 @@
 
 package org.openmole.ide.core.model.sampling
 
-import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.data.IFactorDataUI
 
 trait IFactorWidget extends ISamplingCompositionWidget {
@@ -25,6 +24,4 @@ trait IFactorWidget extends ISamplingCompositionWidget {
   def factor: IFactorDataUI
 
   def factor_=(f: IFactorDataUI)
-
-  def update: Unit
 }

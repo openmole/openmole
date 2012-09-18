@@ -37,7 +37,13 @@ import org.netbeans.api.visual.anchor.PointShape
 import org.netbeans.api.visual.anchor.AnchorFactory
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
+import org.netbeans.api.visual.anchor.Anchor
 
+object SamplingCompositionPanelUI {
+  val DEFAULT_COLOR = new Color(250, 250, 250)
+}
+
+import SamplingCompositionPanelUI._
 class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Scene with ISamplingCompositionPanelUI { samplingCompositionPanelUI ⇒
 
   val factors = new HashMap[IFactorWidget, SamplingComponent]
@@ -51,12 +57,12 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
   addChild(samplingLayer)
   addChild(connectLayer)
 
-  this.setPreferredBounds(new Rectangle(0, 0, 400, 20))
+  setPreferredBounds(new Rectangle(0, 0, 400, 200))
 
   val transitionId = new AtomicInteger
   val connectAction = ActionFactory.createExtendedConnectAction(null, connectLayer,
     new SamplingConnectionProvider,
-    InputEvent.CTRL_MASK)
+    InputEvent.SHIFT_MASK)
 
   getActions.addAction(ActionFactory.createPopupMenuAction(new SamplingSceneMenuProvider(this)))
   val moveAction = ActionFactory.createMoveAction
@@ -84,7 +90,6 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
       getActions.addAction(moveAction)
     }
     factorLayer.addChild(cw)
-
     validate
     factors += fw -> cw
   }
@@ -123,6 +128,7 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
     override def isSourceWidget(sourceWidget: Widget): Boolean =
       sourceWidget match {
         case x: SamplingComponent ⇒
+          if (source.isDefined) source.get.color = DEFAULT_COLOR
           source = Some(x.component)
           true
         case _ ⇒
@@ -130,7 +136,8 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
           false
       }
 
-    def boolToConnector(b: Boolean) = {
+    def boolToConnector(scw: ISamplingCompositionWidget,
+                        b: Boolean) = {
       if (b) ConnectorState.ACCEPT
       else ConnectorState.REJECT_AND_STOP
     }
@@ -140,13 +147,15 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
       targetWidget match {
         case s: SamplingComponent ⇒
           s.component match {
-            case f: IFactorWidget ⇒ ConnectorState.REJECT_AND_STOP
-            case s: SamplingWidget ⇒ source match {
-              case Some(sw: ISamplingWidget) ⇒ boolToConnector(s.sampling.isAcceptable(sw.sampling))
-              case Some(fw: IFactorWidget) ⇒ boolToConnector(s.sampling.isAcceptable(fw.factor))
+            case f: IFactorWidget ⇒ boolToConnector(f, false)
+            case s: ISamplingWidget ⇒ source match {
+              case Some(sw: ISamplingWidget) ⇒ boolToConnector(s, s.sampling.isAcceptable(sw.sampling))
+              case Some(fw: IFactorWidget) ⇒ boolToConnector(s, s.sampling.isAcceptable(fw.factor))
               case _ ⇒ ConnectorState.REJECT_AND_STOP
             }
-            case _ ⇒ ConnectorState.REJECT_AND_STOP
+            case _ ⇒
+              boolToConnector(s.component, false)
+              ConnectorState.REJECT_AND_STOP
           }
         case _ ⇒ ConnectorState.REJECT_AND_STOP
       }
@@ -160,10 +169,21 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
       val connection = new ConnectionWidget(samplingCompositionPanelUI.scene)
       connection.setStroke(new BasicStroke(2))
       connection.setLineColor(new Color(218, 218, 218))
-      connection.setSourceAnchor(AnchorFactory.createRectangularAnchor(sourceWidget))
-      connection.setTargetAnchor(AnchorFactory.createRectangularAnchor(targetWidget))
+      connection.setSourceAnchor(sourceAnchor(sourceWidget))
+      connection.setTargetAnchor(targetAnchor(targetWidget))
       connection.setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
       connectLayer.addChild(connection)
+      source = None
+    }
+
+    def sourceAnchor(w: Widget) = new Anchor(w) {
+      override def compute(entry: Anchor.Entry) =
+        new Result(w.convertLocalToScene(new Point(130, 19)), Anchor.Direction.RIGHT)
+    }
+
+    def targetAnchor(w: Widget) = new Anchor(w) {
+      override def compute(entry: Anchor.Entry) =
+        new Result(w.convertLocalToScene(new Point(0, 19)), Anchor.Direction.LEFT)
     }
   }
 }

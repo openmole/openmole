@@ -17,9 +17,7 @@
 
 package org.openmole.ide.core.implementation.sampling
 
-import java.awt.Color
-import java.awt.Dimension
-import java.awt.BorderLayout
+import java.awt._
 import scala.swing.Action
 import org.openmole.ide.misc.widget.MigPanel
 import java.awt.Graphics2D
@@ -38,6 +36,9 @@ class SamplingWidget(var sampling: ISamplingDataUI,
                      display: Boolean = false) extends MigPanel("wrap", "[center]", "[center]") with ISamplingWidget { samplingWidget ⇒
   preferredSize = new Dimension(130, 38)
   opaque = true
+
+  var color = SamplingCompositionPanelUI.DEFAULT_COLOR
+
   val link = new LinkLabel(sampling.preview,
     new Action("") {
       def apply = ScenesManager.currentSceneContainer match {
@@ -62,12 +63,11 @@ class SamplingWidget(var sampling: ISamplingDataUI,
     val start = new Point(0, 0)
     val end = new Point(0, size.height)
     val dist = Array(0.0f, 0.5f, 0.8f)
-    val colors = Array(new Color(250, 250, 250), new Color(228, 228, 228), new Color(250, 250, 250))
+    val colors = Array(color, new Color(228, 228, 228), color)
     val gp = new LinearGradientPaint(start, end, dist, colors)
 
     g.setPaint(gp)
     g.fillRoundRect(0, 0, size.width, size.height, 8, 8)
-    g.setColor(Color.WHITE)
   }
   contents += link
 }

@@ -19,9 +19,12 @@ package org.openmole.ide.core.implementation.provider
 
 import java.awt.Point
 import org.netbeans.api.visual.widget.Widget
+import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.swing.Action
 import scala.swing.Menu
 import scala.swing.MenuItem
+import org.openmole.ide.core.model.workflow.ISceneContainer
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.data.FactorDataUI
 import org.openmole.ide.core.implementation.sampling.SamplingCompositionPanelUI
@@ -32,16 +35,28 @@ class SamplingSceneMenuProvider(panelScene: SamplingCompositionPanelUI) extends 
                             point: Point) = {
     items.clear
     val itAddFactor = new MenuItem(new Action("Add Factor") {
-      def apply = panelScene.addFactor(new FactorDataUI, point)
+      def apply = {
+        closeExtraPanel
+        panelScene.addFactor(new FactorDataUI, point)
+      }
     })
 
     val samplingMenu = new Menu("Add Sampling")
     KeyRegistry.samplings.values.toList.sortBy { _.toString }.foreach { s ⇒
       samplingMenu.contents += new MenuItem(new Action(s.toString) {
-        def apply = panelScene.addSampling(s.buildDataUI, point)
+        def apply = {
+          closeExtraPanel
+          panelScene.addSampling(s.buildDataUI, point)
+        }
       })
     }
     items += (itAddFactor.peer, samplingMenu.peer)
     super.getPopupMenu(widget, point)
   }
+
+  def closeExtraPanel =
+    ScenesManager.currentSceneContainer match {
+      case Some(x: ISceneContainer) ⇒ x.scene.closeExtraPropertyPanel
+      case _ ⇒
+    }
 }

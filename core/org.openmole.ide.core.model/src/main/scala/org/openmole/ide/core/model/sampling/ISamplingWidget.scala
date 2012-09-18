@@ -17,7 +17,6 @@
 
 package org.openmole.ide.core.model.sampling
 
-import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.data.ISamplingDataUI
 
 trait ISamplingWidget extends ISamplingCompositionWidget {

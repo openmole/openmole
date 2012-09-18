@@ -17,17 +17,9 @@
 
 package org.openmole.ide.core.implementation.sampling
 
-import java.awt.BasicStroke
-import java.awt.Color
-import java.awt.Dimension
-import java.awt.BorderLayout
+import java.awt._
 import scala.swing.Action
-import java.awt.GradientPaint
-import java.awt.LinearGradientPaint
-import java.awt.Graphics2D
 import org.openmole.ide.misc.widget.NimbusPainter
-import java.awt.Point
-import java.awt.RenderingHints
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.core.model.data.IFactorDataUI
@@ -46,6 +38,8 @@ class FactorWidget(var factor: IFactorDataUI,
     3,
     "73a5d2",
     true) { opaque = false; maximumSize = new Dimension(100, 28) }
+
+  var color = SamplingCompositionPanelUI.DEFAULT_COLOR
 
   if (display) displayOnMoleScene
 
@@ -78,12 +72,11 @@ class FactorWidget(var factor: IFactorDataUI,
     val start = new Point(0, 0)
     val end = new Point(0, size.height)
     val dist = Array(0.0f, 0.5f, 0.8f)
-    val colors = Array(new Color(250, 250, 250), new Color(228, 228, 228), new Color(250, 250, 250))
+    val colors = Array(color, new Color(228, 228, 228), color)
     val gp = new LinearGradientPaint(start, end, dist, colors)
 
     g.setPaint(gp)
     g.fillRoundRect(0, 0, size.width, size.height, 8, 8)
-    g.setColor(Color.WHITE)
   }
   contents += link
 }

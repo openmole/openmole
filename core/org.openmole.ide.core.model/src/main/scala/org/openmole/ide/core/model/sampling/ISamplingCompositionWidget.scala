@@ -18,7 +18,12 @@
 package org.openmole.ide.core.model.sampling
 
 import scala.swing.Panel
+import java.awt.Color
 
 trait ISamplingCompositionWidget extends Panel {
+  def color: Color
+
+  def color_=(c: Color)
+
   def update: Unit
 }

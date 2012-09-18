@@ -20,7 +20,8 @@ package org.openmole.ide.core.implementation.panel
 import java.awt.Dimension
 import java.awt.BorderLayout
 import java.awt.Color
-import javax.swing.JScrollPane
+import javax.swing._
+import javax.swing.ScrollPaneConstants._
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import javax.imageio.ImageIO
 import javax.swing.ImageIcon
@@ -48,7 +49,11 @@ class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
     contents += panelUI.tabbedPane
     contents += panelUI.help
     panelUI match {
-      case s: Scene ⇒ peer.add(new JScrollPane(s.createView) { setMinimumSize(new Dimension(400, 200)) })
+      case s: Scene ⇒ peer.add(new JScrollPane(s.createView) {
+        setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER)
+        setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER)
+        setMinimumSize(new Dimension(500, 300))
+      })
       case _ ⇒
     }
   }.peer, BorderLayout.CENTER)

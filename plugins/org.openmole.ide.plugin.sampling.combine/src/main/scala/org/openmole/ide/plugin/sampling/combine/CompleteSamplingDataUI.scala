@@ -44,7 +44,7 @@ class CompleteSamplingDataUI extends ISamplingDataUI {
   def buildPanelUI = new CompleteSamplingPanelUI(this)
 
   //FIXME 2.10
-  def isAcceptable(factor: IFactorDataUI) = false
+  def isAcceptable(factor: IFactorDataUI) = true
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 
