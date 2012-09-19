@@ -106,7 +106,8 @@ class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IP
       case _ ⇒ domains
     }
 
-  def saveContent = new FactorDataUI(prototype = Some(protoComboBox.selection.item),
-    domain = Some(dPanel.saveContent))
+  def saveContent = new FactorDataUI(factorWidget.dataUI.id,
+    Some(protoComboBox.selection.item),
+    Some(dPanel.saveContent))
 
 }

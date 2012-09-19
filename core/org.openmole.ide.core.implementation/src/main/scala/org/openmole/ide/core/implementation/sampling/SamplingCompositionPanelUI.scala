@@ -69,18 +69,10 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
   getActions.addAction(ActionFactory.createPopupMenuAction(new SamplingSceneMenuProvider(this)))
   val moveAction = ActionFactory.createMoveAction
 
-  dataUI.factors.foreach { f ⇒
-    println("add factor :: " + f._1.id)
-    addFactor(f._1, f._2, false)
-  }
-  dataUI.samplings.foreach { f ⇒
-    println("add sampling :: " + f._1.id)
-    addSampling(f._1, f._2, false)
-  }
+  dataUI.factors.foreach { f ⇒   addFactor(f._1, f._2, false) }
+  dataUI.samplings.foreach { f ⇒ addSampling(f._1, f._2, false) }
   val fAs = factorsAndSamplings
   dataUI.connections.foreach { c ⇒
-    println("add connection from  " + samplingComponentFromId(c._1) + " to " +
-      samplingComponentFromId(c._2))
     connectProvider.createConnection(samplingComponentFromId(c._1),
       samplingComponentFromId(c._2))
   }
