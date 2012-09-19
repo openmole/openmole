@@ -14,10 +14,8 @@ import org.openmole.plugin.domain.modifier._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.workspace._
 
-class UniformDistributionDataUI(
-    val name: String = "",
-    val size: Int = 1,
-    val max: Option[Int] = None) extends IDomainDataUI {
+class UniformDistributionDataUI(val size: Int = 1,
+                                val max: Option[Int] = None) extends IDomainDataUI {
 
   //FIXME with 2.10 : test if domain is finite for finiteUniformDistribution 
   def coreObject(proto: Prototype[_]) = proto.`type` match {

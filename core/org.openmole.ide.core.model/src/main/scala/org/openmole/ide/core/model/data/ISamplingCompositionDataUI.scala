@@ -18,6 +18,7 @@
 package org.openmole.ide.core.model.data
 
 import java.awt.Point
+import org.openmole.ide.core.model.sampling.ISamplingCompositionWidget
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.openmole.core.model.sampling.ISampling
 
@@ -35,6 +36,8 @@ trait ISamplingCompositionDataUI extends IDataUI {
   def factors: Iterable[(IFactorDataUI, Point)]
 
   def samplings: Iterable[(ISamplingDataUI, Point)]
+
+  def connections: Iterable[(String, String)]
 
   def buildPanelUI: ISamplingCompositionPanelUI
 }

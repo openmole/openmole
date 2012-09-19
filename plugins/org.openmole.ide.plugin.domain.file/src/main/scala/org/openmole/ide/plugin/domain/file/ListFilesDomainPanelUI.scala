@@ -37,8 +37,7 @@ class ListFilesDomainPanelUI(dataUI: ListFilesDomainDataUI) extends PluginPanel(
   contents += (new Label("Regular expression"), "gap para")
   contents += (regexpTextField, "wrap")
 
-  def saveContent(name: String) = new ListFilesDomainDataUI(name,
-    directoryTextField.text,
+  def saveContent = new ListFilesDomainDataUI(directoryTextField.text,
     regexpTextField.text)
 
 }

@@ -36,9 +36,6 @@ class UniformDistributionPanelUI(pud: UniformDistributionDataUI) extends PluginP
 
   sizeField.text = pud.size.toString
 
-  override def saveContent(name: String) = {
-    new UniformDistributionDataUI(
-      name,
-      sizeField.text.toInt)
-  }
+  def saveContent = new UniformDistributionDataUI(sizeField.text.toInt)
+
 }

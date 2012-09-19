@@ -16,8 +16,10 @@ import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.method.sensitivity.SaltelliSampling
+import org.openmole.ide.misc.tools.Counter
 
-class SaltelliSamplingDataUI(val samples: String = "1") extends ISamplingDataUI {
+class SaltelliSamplingDataUI(val samples: String = "1",
+                             val id: String = "sampling" + Counter.id.getAndIncrement) extends ISamplingDataUI {
 
   implicit def string2Int(s: String): Int = augmentString(s).toInt
 

@@ -32,14 +32,14 @@ import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.MigPanel
 import java.awt.LinearGradientPaint
 
-class SamplingWidget(var sampling: ISamplingDataUI,
+class SamplingWidget(var dataUI: ISamplingDataUI,
                      display: Boolean = false) extends MigPanel("wrap", "[center]", "[center]") with ISamplingWidget { samplingWidget ⇒
   preferredSize = new Dimension(130, 38)
   opaque = true
 
   var color = SamplingCompositionPanelUI.DEFAULT_COLOR
 
-  val link = new LinkLabel(sampling.preview,
+  val link = new LinkLabel(dataUI.preview,
     new Action("") {
       def apply = ScenesManager.currentSceneContainer match {
         case Some(s: ISceneContainer) ⇒ s.scene.displayExtraPropertyPanel(samplingWidget)
@@ -51,7 +51,7 @@ class SamplingWidget(var sampling: ISamplingDataUI,
     true) { opaque = false; maximumSize = new Dimension(100, 28) }
 
   def update = {
-    link.link(sampling.preview)
+    link.link(dataUI.preview)
     revalidate
     repaint
   }

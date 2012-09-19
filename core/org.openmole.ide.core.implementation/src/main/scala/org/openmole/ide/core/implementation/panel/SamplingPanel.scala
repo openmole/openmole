@@ -43,7 +43,7 @@ class SamplingPanel(samplingWidget: ISamplingWidget,
                     mode: PanelMode.Value) extends BasePanel(None,
   scene,
   mode) {
-  val panelUI = samplingWidget.sampling.buildPanelUI
+  val panelUI = samplingWidget.dataUI.buildPanelUI
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
@@ -56,7 +56,7 @@ class SamplingPanel(samplingWidget: ISamplingWidget,
   def delete = {}
 
   def save = {
-    samplingWidget.sampling = panelUI.saveContent
+    samplingWidget.dataUI = panelUI.saveContent
     samplingWidget.update
   }
 }

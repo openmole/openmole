@@ -19,7 +19,6 @@ package org.openmole.ide.core.implementation.sampling
 
 import java.awt._
 import scala.swing.Action
-import org.openmole.ide.misc.widget.NimbusPainter
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.core.model.data.IFactorDataUI
@@ -28,7 +27,7 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget._
 
-class FactorWidget(var factor: IFactorDataUI,
+class FactorWidget(var dataUI: IFactorDataUI,
                    display: Boolean = false) extends MigPanel("wrap", "[center]", "[center]") with IFactorWidget { factorWidget ⇒
   preferredSize = new Dimension(130, 38)
   val link = new LinkLabel(factorPreview,
@@ -49,8 +48,8 @@ class FactorWidget(var factor: IFactorDataUI,
   }
 
   def factorPreview =
-    factor.prototype.getOrElse("") + {
-      factor.domain match {
+    dataUI.prototype.getOrElse("") + {
+      dataUI.domain match {
         case Some(d: IDomainDataUI) ⇒ d.preview
         case _ ⇒ ""
       }

@@ -9,6 +9,7 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.core.model.domain.IBounded
 import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.sampling.IFactor
+import org.openmole.ide.misc.tools.Counter
 import org.openmole.ide.core.model.data._
 import org.openmole.plugin.sampling.lhs._
 import org.openmole.core.implementation.sampling.Factor
@@ -17,7 +18,8 @@ import scala.collection.JavaConversions._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.sampling._
 
-class LHSSamplingDataUI(val samples: String = "1") extends ISamplingDataUI {
+class LHSSamplingDataUI(val samples: String = "1",
+                        val id: String = "sampling" + Counter.id.getAndIncrement) extends ISamplingDataUI {
 
   implicit def string2Int(s: String): Int = augmentString(s).toInt
 

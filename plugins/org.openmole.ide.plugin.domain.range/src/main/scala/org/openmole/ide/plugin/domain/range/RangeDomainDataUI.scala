@@ -26,7 +26,6 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FromString._
 
 class RangeDomainDataUI(
-    val name: String = "",
     val min: String = "0",
     val max: String = "",
     val step: String = "1") extends IDomainDataUI {

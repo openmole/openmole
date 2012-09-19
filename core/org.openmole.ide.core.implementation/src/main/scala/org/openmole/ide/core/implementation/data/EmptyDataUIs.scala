@@ -70,6 +70,7 @@ object EmptyDataUIs {
     def isAcceptable(factor: IFactorDataUI) = false
     def factors = List.empty
     def samplings = List.empty
+    def connections = List.empty
   }
 
   class EmptySamplingCompositionPanelUI extends ISamplingCompositionPanelUI {

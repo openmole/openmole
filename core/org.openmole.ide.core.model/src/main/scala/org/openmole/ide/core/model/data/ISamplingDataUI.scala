@@ -22,7 +22,9 @@ import org.openmole.core.model.sampling.ISampling
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import org.openmole.ide.core.model.sampling._
 
-trait ISamplingDataUI extends IDataUI {
+trait ISamplingDataUI extends IDataUI with ISamplingCompositionElementDataUI {
+
+  def id: String
 
   def name: String = "Sampling"
 

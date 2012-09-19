@@ -30,6 +30,7 @@ import org.netbeans.api.visual.action.ActionFactory
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.netbeans.api.visual.action._
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.provider._
 import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.core.model.workflow.IMoleScene
@@ -48,6 +49,7 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
 
   val factors = new HashMap[IFactorWidget, SamplingComponent]
   val samplings = new HashMap[ISamplingWidget, SamplingComponent]
+  val connections = new HashSet[(String, String)]
 
   setBackground(new Color(77, 77, 77))
   val factorLayer = new LayerWidget(this)
@@ -60,15 +62,28 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
   setPreferredBounds(new Rectangle(0, 0, 400, 200))
 
   val transitionId = new AtomicInteger
+  val connectProvider = new SamplingConnectionProvider
   val connectAction = ActionFactory.createExtendedConnectAction(null, connectLayer,
     new SamplingConnectionProvider,
     InputEvent.SHIFT_MASK)
-
   getActions.addAction(ActionFactory.createPopupMenuAction(new SamplingSceneMenuProvider(this)))
   val moveAction = ActionFactory.createMoveAction
 
-  dataUI.factors.foreach { f ⇒ addFactor(f._1, f._2, false) }
-  dataUI.samplings.foreach { f ⇒ addSampling(f._1, f._2, false) }
+  dataUI.factors.foreach { f ⇒
+    println("add factor :: " + f._1.id)
+    addFactor(f._1, f._2, false)
+  }
+  dataUI.samplings.foreach { f ⇒
+    println("add sampling :: " + f._1.id)
+    addSampling(f._1, f._2, false)
+  }
+  val fAs = factorsAndSamplings
+  dataUI.connections.foreach { c ⇒
+    println("add connection from  " + samplingComponentFromId(c._1) + " to " +
+      samplingComponentFromId(c._2))
+    connectProvider.createConnection(samplingComponentFromId(c._1),
+      samplingComponentFromId(c._2))
+  }
 
   def peer = new MigPanel("") { peer.add(createView) }.peer
 
@@ -118,9 +133,25 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
 
   def scene = this
 
-  def saveContent(name: String) = new SamplingCompositionDataUI(name,
-    factors.map { f ⇒ f._1.factor -> f._2.getPreferredLocation }.toList,
-    samplings.map { s ⇒ s._1.sampling -> s._2.getPreferredLocation }.toList)
+  def saveContent(name: String) = {
+    new SamplingCompositionDataUI(name,
+      factors.map { f ⇒ f._1.dataUI -> f._2.getPreferredLocation }.toList,
+      samplings.map { s ⇒ s._1.dataUI -> s._2.getPreferredLocation }.toList,
+      connections.toList)
+  }
+
+  def factorsAndSamplings = factors ++ samplings
+
+  def samplingComponentFromId(id: String) = factorsAndSamplings.keys.find { _.id == id } match {
+    case Some(x: ISamplingCompositionWidget) ⇒ factorsAndSamplings(x)
+    case _ ⇒ throw new UserBadDataError("The sampling composition element " + id + " can not be found")
+  }
+
+  def idFromSamplingComponent(sc: SamplingComponent) = sc.component match {
+    case f: IFactorWidget ⇒ f.dataUI.id
+    case s: ISamplingWidget ⇒ s.dataUI.id
+    case _ ⇒ throw new UserBadDataError("The sampling widget element " + sc + " can not be found")
+  }
 
   class SamplingConnectionProvider extends ConnectProvider {
     var source: Option[ISamplingCompositionWidget] = None
@@ -149,8 +180,8 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
           s.component match {
             case f: IFactorWidget ⇒ boolToConnector(f, false)
             case s: ISamplingWidget ⇒ source match {
-              case Some(sw: ISamplingWidget) ⇒ boolToConnector(s, s.sampling.isAcceptable(sw.sampling))
-              case Some(fw: IFactorWidget) ⇒ boolToConnector(s, s.sampling.isAcceptable(fw.factor))
+              case Some(sw: ISamplingWidget) ⇒ boolToConnector(s, s.dataUI.isAcceptable(sw.dataUI))
+              case Some(fw: IFactorWidget) ⇒ boolToConnector(s, s.dataUI.isAcceptable(fw.dataUI))
               case _ ⇒ ConnectorState.REJECT_AND_STOP
             }
             case _ ⇒
@@ -173,6 +204,8 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
       connection.setTargetAnchor(targetAnchor(targetWidget))
       connection.setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
       connectLayer.addChild(connection)
+      connections += idFromSamplingComponent(sourceWidget.asInstanceOf[SamplingComponent]) ->
+        idFromSamplingComponent(targetWidget.asInstanceOf[SamplingComponent])
       source = None
     }
 

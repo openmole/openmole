@@ -17,14 +17,4 @@
 
 package org.openmole.ide.core.model.data
 
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-
-trait IFactorDataUI extends ISamplingCompositionElementDataUI {
-  def id: String
-
-  def name: String = "Factor"
-
-  def prototype: Option[IPrototypeDataProxyUI]
-
-  def domain: Option[IDomainDataUI]
-}
+trait ISamplingCompositionElementDataUI

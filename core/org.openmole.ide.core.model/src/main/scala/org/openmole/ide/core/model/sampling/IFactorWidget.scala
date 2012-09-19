@@ -20,8 +20,9 @@ package org.openmole.ide.core.model.sampling
 import org.openmole.ide.core.model.data.IFactorDataUI
 
 trait IFactorWidget extends ISamplingCompositionWidget {
+  def id = dataUI.id
 
-  def factor: IFactorDataUI
+  def dataUI: IFactorDataUI
 
-  def factor_=(f: IFactorDataUI)
+  def dataUI_=(f: IFactorDataUI)
 }

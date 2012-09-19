@@ -90,8 +90,8 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("", "[][gro
   override def saveContent = {
     if (comboMulti.isDefined)
       new CSVSamplingDataUI(csvTextField.text,
-        comboMulti.get.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) })
-    else new CSVSamplingDataUI(csvTextField.text, List[(String, PrototypeDataProxyUI)]())
+        comboMulti.get.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) }, pud.id)
+    else new CSVSamplingDataUI(csvTextField.text, List[(String, PrototypeDataProxyUI)](), pud.id)
   }
 
   def comboContent: List[IPrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxys.prototypes.toList

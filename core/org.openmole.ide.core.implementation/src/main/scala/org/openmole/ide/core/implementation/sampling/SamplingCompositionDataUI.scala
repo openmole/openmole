@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.implementation.sampling
 
+import org.openmole.ide.core.model.sampling.ISamplingCompositionWidget
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.sampling.ISampling
 import org.openmole.ide.core.model.data._
@@ -25,6 +26,7 @@ import java.awt.Point
 class SamplingCompositionDataUI(val name: String = "",
                                 val factors: List[(IFactorDataUI, Point)] = List.empty,
                                 val samplings: List[(ISamplingDataUI, Point)] = List.empty,
+                                val connections: List[(String, String)] = List.empty,
                                 val finalSampling: Option[ISamplingDataUI] = None) extends ISamplingCompositionDataUI {
 
   def coreClass = classOf[ISampling]

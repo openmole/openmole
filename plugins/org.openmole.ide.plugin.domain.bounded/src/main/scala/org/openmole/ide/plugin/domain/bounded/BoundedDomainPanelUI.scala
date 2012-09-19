@@ -31,8 +31,7 @@ class BoundedDomainPanelUI(bud: BoundedDomainDataUI) extends PluginPanel("fillx"
   contents += (new Label("Max"), "gap para")
   contents += maxField
 
-  def saveContent(name: String) = new BoundedDomainDataUI(name,
-    minField.text,
+  def saveContent = new BoundedDomainDataUI(minField.text,
     maxField.text)
 
 }

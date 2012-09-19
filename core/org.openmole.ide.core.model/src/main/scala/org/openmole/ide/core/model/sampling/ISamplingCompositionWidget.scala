@@ -17,13 +17,20 @@
 
 package org.openmole.ide.core.model.sampling
 
+import org.openmole.ide.core.model.data.ISamplingCompositionElementDataUI
 import scala.swing.Panel
 import java.awt.Color
 
 trait ISamplingCompositionWidget extends Panel {
+  def id: String
+
   def color: Color
 
   def color_=(c: Color)
 
   def update: Unit
+
+  // def dataUI: ISamplingCompositionElementDataUI
+
+  //def dataUI_=(elementDataUI: ISamplingCompositionElementDataUI)
 }

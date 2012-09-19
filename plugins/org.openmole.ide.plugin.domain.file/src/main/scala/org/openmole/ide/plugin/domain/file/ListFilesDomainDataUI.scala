@@ -25,8 +25,7 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FromString._
 import org.openmole.plugin.domain.file.ListFilesDomain
 
-class ListFilesDomainDataUI(val name: String = "",
-                            val directoryPath: String = "",
+class ListFilesDomainDataUI(val directoryPath: String = "",
                             val regexp: String = ".*") extends IDomainDataUI {
 
   def coreObject(prototypeObject: Prototype[_]) = prototypeObject.`type` match {

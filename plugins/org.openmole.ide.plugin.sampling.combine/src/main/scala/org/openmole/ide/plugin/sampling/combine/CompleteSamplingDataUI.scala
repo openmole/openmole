@@ -8,6 +8,7 @@ package org.openmole.ide.plugin.sampling.combine
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.core.model.data._
+import org.openmole.ide.misc.tools.Counter
 import org.openmole.plugin.sampling.combine.CompleteSampling
 import org.openmole.core.implementation.sampling.DiscreteFactor
 import org.openmole.core.model.data.Prototype
@@ -15,7 +16,7 @@ import org.openmole.core.model.domain.IDomain
 import org.openmole.core.model.domain.IIterable
 import scala.collection.JavaConversions._
 
-class CompleteSamplingDataUI extends ISamplingDataUI {
+class CompleteSamplingDataUI(val id: String = "sampling" + Counter.id.getAndIncrement) extends ISamplingDataUI {
 
   def coreObject(factors: List[IFactorDataUI],
                  samplings: List[ISamplingDataUI]) =

@@ -41,17 +41,17 @@ import scala.collection.JavaConversions._
 class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IPanelUI {
 
   val domains = KeyRegistry.domains.values.map { _.buildDataUI }.toList
-  val protoComboBox = new MyComboBox(prototypeContent(factorWidget.factor.domain))
-  val domainComboBox = new MyComboBox(domainContent(factorWidget.factor.prototype))
-  var dPanel = factorWidget.factor.domain.getOrElse { domainContent(factorWidget.factor.prototype)(0) }.buildPanelUI
+  val protoComboBox = new MyComboBox(prototypeContent(factorWidget.dataUI.domain))
+  val domainComboBox = new MyComboBox(domainContent(factorWidget.dataUI.prototype))
+  var dPanel = factorWidget.dataUI.domain.getOrElse { domainContent(factorWidget.dataUI.prototype)(0) }.buildPanelUI
   protoComboBox.peer.setModel(MyComboBox.newConstantModel(prototypeContent(Some(domainComboBox.selection.item))))
 
-  factorWidget.factor.prototype match {
+  factorWidget.dataUI.prototype match {
     case Some(x: IPrototypeDataProxyUI) ⇒ protoComboBox.selection.item = x
     case _ ⇒
   }
 
-  factorWidget.factor.domain match {
+  factorWidget.dataUI.domain match {
     case Some(x: IDomainDataUI) ⇒
       domainComboBox.selection.item = x
     case _ ⇒
@@ -106,7 +106,7 @@ class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IP
       case _ ⇒ domains
     }
 
-  def saveContent(name: String) = new FactorDataUI(Some(protoComboBox.selection.item),
-    Some(dPanel.saveContent("")))
+  def saveContent = new FactorDataUI(prototype = Some(protoComboBox.selection.item),
+    domain = Some(dPanel.saveContent))
 
 }

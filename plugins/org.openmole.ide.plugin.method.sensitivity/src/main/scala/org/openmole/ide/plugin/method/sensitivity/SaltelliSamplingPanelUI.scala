@@ -33,7 +33,7 @@ class SaltelliSamplingPanelUI(cud: SaltelliSamplingDataUI) extends PluginPanel("
 
   def domains = KeyRegistry.domains.values.map { _.buildDataUI }.toList
 
-  override def saveContent = new SaltelliSamplingDataUI(sampleTextField.text)
+  override def saveContent = new SaltelliSamplingDataUI(sampleTextField.text, cud.id)
 
   override val help = new Helper(List(new URL(i18n.getString("samplingPermalinkText"),
     i18n.getString("samplingPermalink")),

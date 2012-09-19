@@ -41,8 +41,7 @@ class RangeDomainPanelUI(pud: RangeDomainDataUI) extends PluginPanel("fillx", "[
   contents += (new Label("Step"), "gap para")
   contents += (stepField, "wrap")
 
-  def saveContent(name: String) = new RangeDomainDataUI(name,
-    minField.text,
+  def saveContent = new RangeDomainDataUI(minField.text,
     maxField.text,
     stepField.text)
 

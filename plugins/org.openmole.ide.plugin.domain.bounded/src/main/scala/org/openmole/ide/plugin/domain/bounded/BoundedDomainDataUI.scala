@@ -26,8 +26,7 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.core.model.domain.IDomain
 import org.openmole.ide.core.model.data.IDomainDataUI
 
-class BoundedDomainDataUI(val name: String = "",
-                          val min: String = "",
+class BoundedDomainDataUI(val min: String = "",
                           val max: String = "") extends IDomainDataUI {
 
   def coreObject(prototypeObject: Prototype[_]) = prototypeObject.`type` match {
