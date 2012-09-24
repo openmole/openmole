@@ -37,5 +37,11 @@ trait ISamplingCompositionPanelUI extends IPanelUI {
 
   def removeFactor(factorWidget: IFactorWidget)
 
+  def setFinalSampling(samplingWidget: ISamplingWidget)
+
+  def setSamplingWidget(id: Option[String], b: Boolean): Unit
+
+  def setSamplingWidget(samplingWidget: ISamplingWidget, b: Boolean): Unit
+
   def removeSampling(samplingWidget: ISamplingWidget)
 }

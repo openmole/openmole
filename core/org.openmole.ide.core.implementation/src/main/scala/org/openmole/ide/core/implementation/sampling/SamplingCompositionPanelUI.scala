@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.implementation.sampling
 
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.core.implementation.data._
 import java.awt._
@@ -50,6 +51,7 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
   val factors = new HashMap[IFactorWidget, SamplingComponent]
   val samplings = new HashMap[ISamplingWidget, SamplingComponent]
   val connections = new HashSet[(String, String)]
+  var finalSampling: Option[String] = None
 
   setBackground(new Color(77, 77, 77))
   val factorLayer = new LayerWidget(this)
@@ -69,13 +71,14 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
   getActions.addAction(ActionFactory.createPopupMenuAction(new SamplingSceneMenuProvider(this)))
   val moveAction = ActionFactory.createMoveAction
 
-  dataUI.factors.foreach { f ⇒   addFactor(f._1, f._2, false) }
+  dataUI.factors.foreach { f ⇒ addFactor(f._1, f._2, false) }
   dataUI.samplings.foreach { f ⇒ addSampling(f._1, f._2, false) }
-  val fAs = factorsAndSamplings
   dataUI.connections.foreach { c ⇒
     connectProvider.createConnection(samplingComponentFromId(c._1),
       samplingComponentFromId(c._2))
   }
+  finalSampling = dataUI.finalSampling
+  setSamplingWidget(finalSampling, true)
 
   def peer = new MigPanel("") { peer.add(createView) }.peer
 
@@ -125,11 +128,31 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
 
   def scene = this
 
+  def setFinalSampling(fsampling: ISamplingWidget) = {
+    setSamplingWidget(finalSampling, false)
+    setSamplingWidget(fsampling, true)
+    finalSampling = Some(fsampling.id)
+    revalidate
+    repaint
+  }
+
+  def setSamplingWidget(samplingWidget: ISamplingWidget,
+                        b: Boolean): Unit = samplingWidget.isFinalSamplingWidget = b
+
+  def setSamplingWidget(id: Option[String], b: Boolean): Unit = id match {
+    case Some(i: String) ⇒ samplings.keys.find { _.dataUI.id == i } match {
+      case Some(x: ISamplingWidget) ⇒ setSamplingWidget(x, b)
+      case _ ⇒
+    }
+    case _ ⇒
+  }
+
   def saveContent(name: String) = {
     new SamplingCompositionDataUI(name,
       factors.map { f ⇒ f._1.dataUI -> f._2.getPreferredLocation }.toList,
       samplings.map { s ⇒ s._1.dataUI -> s._2.getPreferredLocation }.toList,
-      connections.toList)
+      connections.toList,
+      finalSampling)
   }
 
   def factorsAndSamplings = factors ++ samplings

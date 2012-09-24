@@ -20,9 +20,13 @@ package org.openmole.ide.core.model.sampling
 import org.openmole.ide.core.model.data.ISamplingDataUI
 
 trait ISamplingWidget extends ISamplingCompositionWidget {
-  def id = dataUI.id
+  def id: String = dataUI.id
 
   def dataUI: ISamplingDataUI
 
   def dataUI_=(f: ISamplingDataUI)
+
+  def isFinalSamplingWidget: Boolean
+
+  def isFinalSamplingWidget_=(b: Boolean)
 }
