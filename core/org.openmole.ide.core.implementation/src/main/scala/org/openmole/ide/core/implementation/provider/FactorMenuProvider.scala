@@ -21,6 +21,7 @@ import java.awt.Point
 import org.netbeans.api.visual.widget._
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.openmole.ide.core.model.sampling.IFactorWidget
+import org.openmole.ide.core.model.sampling.ISamplingComponent
 import scala.swing.Action
 import scala.swing.MenuItem
 import org.openmole.ide.core.implementation.sampling._
@@ -34,12 +35,7 @@ class FactorMenuProvider(panelScene: ISamplingCompositionPanelUI) extends Generi
     val itRemoveFactor = new MenuItem(new Action("Remove Factor") {
       def apply =
         widget match {
-          case cw: SamplingComponent ⇒
-            cw.component match {
-              case factorWidget: IFactorWidget ⇒
-                panelScene.removeFactor(factorWidget)
-              case _ ⇒
-            }
+          case cw: ISamplingComponent ⇒ panelScene.remove(cw)
           case _ ⇒
         }
     })

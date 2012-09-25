@@ -82,13 +82,14 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
 
   def peer = new MigPanel("") { peer.add(createView) }.peer
 
-  def removeFactor(factorWidget: IFactorWidget) = factors.isDefinedAt(factorWidget) match {
-    case true ⇒
-      factorLayer.removeChild(factors(factorWidget))
-      factors -= factorWidget
-      validate
-    case _ ⇒
-  }
+  //  def removeFactor(factorWidget: IFactorWidget) = factors.isDefinedAt(factorWidget) match {
+  //    case true ⇒
+  //      //factorLayer.removeChild(factors(factorWidget))
+  //      removeNodeWithEdges(factors(factorWidget))
+  //      factors -= factorWidget
+  //      validate
+  //    case _ ⇒
+  //  }
 
   def addFactor(factorDataUI: IFactorDataUI,
                 location: Point,
@@ -118,12 +119,30 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
     samplings += sw -> cw
   }
 
-  def removeSampling(samplingWidget: ISamplingWidget) = samplings.isDefinedAt(samplingWidget) match {
-    case true ⇒
-      samplingLayer.removeChild(samplings(samplingWidget))
-      samplings -= samplingWidget
-      validate
-    case _ ⇒
+  def remove(samplingComponent: ISamplingComponent) = {
+    samplingComponent.component match {
+      case (s: ISamplingWidget) ⇒
+        samplings.isDefinedAt(s) match {
+          case true ⇒
+            samplingLayer.removeChild(samplings(s))
+            samplings -= s
+          case _ ⇒
+        }
+      case (f: IFactorWidget) ⇒ factors.isDefinedAt(f) match {
+        case true ⇒
+          factorLayer.removeChild(factors(f))
+          factors -= f
+        case _ ⇒
+      }
+      case _ ⇒
+    }
+    samplingComponent.connections.foreach { cw ⇒ connectLayer.removeChild(cw) }
+    samplingComponent.connections.clear
+    connections.filter { c ⇒
+      (c._1 == samplingComponent.component.id) || (c._2 == samplingComponent.component.id)
+    }.foreach { e ⇒ connections -= e }
+    revalidate
+    repaint
   }
 
   def scene = this
@@ -219,8 +238,12 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
       connection.setTargetAnchor(targetAnchor(targetWidget))
       connection.setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
       connectLayer.addChild(connection)
-      connections += idFromSamplingComponent(sourceWidget.asInstanceOf[SamplingComponent]) ->
-        idFromSamplingComponent(targetWidget.asInstanceOf[SamplingComponent])
+      val sourceW = sourceWidget.asInstanceOf[SamplingComponent]
+      val targetW = targetWidget.asInstanceOf[SamplingComponent]
+      sourceW.connections += connection
+      targetW.connections += connection
+      connections += idFromSamplingComponent(sourceW) ->
+        idFromSamplingComponent(targetW)
       source = None
     }
 

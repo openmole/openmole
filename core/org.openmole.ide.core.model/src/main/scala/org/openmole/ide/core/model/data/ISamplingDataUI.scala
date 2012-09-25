@@ -29,7 +29,7 @@ trait ISamplingDataUI extends IDataUI with ISamplingCompositionElementDataUI {
   def name: String = "Sampling"
 
   def coreObject(factors: List[IFactorDataUI],
-                 samplings: List[ISamplingDataUI]): ISampling
+                 samplings: List[ISampling]): ISampling
 
   def buildPanelUI: ISamplingPanelUI
 

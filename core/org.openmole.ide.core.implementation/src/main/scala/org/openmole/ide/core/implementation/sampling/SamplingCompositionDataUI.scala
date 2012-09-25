@@ -31,23 +31,43 @@ class SamplingCompositionDataUI(val name: String = "",
                                 val connections: List[(String, String)] = List.empty,
                                 val finalSampling: Option[String] = None) extends ISamplingCompositionDataUI {
 
+  var builtSampling = scala.collection.mutable.Map.empty[ISamplingDataUI, ISampling]
   def coreClass = classOf[ISampling]
 
-  def coreObject = samplingWidget(finalSampling) match {
-    case Some(data: ISamplingDataUI) ⇒ data.coreObject(factors.map { _._1 },
-      samplings.map { _._1 })
-    case _ ⇒ throw new UserBadDataError("The final sampling is not properly set")
+  def coreObject = {
+    println("------------ start coreObject")
+    builtSampling = scala.collection.mutable.Map.empty[ISamplingDataUI, ISampling]
+    val connectionMap = connections.groupBy { _._2 }.map { case (k, v) ⇒ k -> v.map { _._1 } }
+    val factorMap = factors.map { f ⇒ f._1.id -> f._1 }.toMap
+    val samplingMap: Map[String, ISamplingDataUI] = samplings.map { s ⇒ s._1.id -> s._1 }.toMap
+    finalSampling match {
+      case Some(fs: String) ⇒ samplingMap(fs) match {
+        case data: ISamplingDataUI ⇒ buildSamplingCore(data, connectionMap, factorMap, samplingMap)
+        case _ ⇒ throw new UserBadDataError("ERROR ... ")
+      }
+      case _ ⇒ throw new UserBadDataError("The final sampling is not properly set")
+    }
   }
+
+  def buildSamplingCore(data: ISamplingDataUI,
+                        connectionMap: Map[String, List[String]],
+                        factorMap: Map[String, IFactorDataUI],
+                        samplingMap: Map[String, ISamplingDataUI]): ISampling = {
+    println("buildSamplingCore")
+    if (!builtSampling.contains(data)) {
+      println("build :: " + data.id)
+      val partition = connectionMap(data.id).partition { _.substring(0, 4) == "samp" }
+      builtSampling += data -> data.coreObject(partition._2.map { factorMap },
+        partition._1.map { s ⇒ buildSamplingCore(samplingMap(s), connectionMap, factorMap, samplingMap) })
+    }
+    builtSampling(data)
+  }
+
+  //def connectedFactorsTo(sampling: ISamplingDataUI) = connections.filter { _._2 == sampling.id }.map { s ⇒ samplingDataUI(s._2) }
 
   def imagePath = "img/samplingComposition.png"
 
   override def fatImagePath = "img/samplingComposition_fat.png"
 
   def buildPanelUI = new SamplingCompositionPanelUI(this)
-
-  def samplingWidget(id: Option[String]): Option[ISamplingDataUI] = id match {
-    case Some(i: String) ⇒ samplings.map { _._1 }.find { _.id == i }
-    case _ ⇒ throw new UserBadDataError("No final sampling is defined ! The Composition sampling can not be built")
-  }
-
 }
