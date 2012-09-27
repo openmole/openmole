@@ -40,6 +40,7 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.panel._
 import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.core.model.sampling._
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.panel._
@@ -66,7 +67,7 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   val propertyLayer = new LayerWidget(this)
   val extraPropertyLayer = new LayerWidget(this)
   var currentSlotIndex = 1
-  val _selection = new HashSet[ICapsuleUI]
+  // val _selection = new HashSet[ICapsuleUI]
 
   val currentPanel = new MigPanel("")
   val currentExtraPanel = new MigPanel("")
@@ -235,39 +236,39 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   def isSelectionAllowed(w: Widget, point: Point, b: Boolean) = true
 
   def select(w: Widget, point: Point, change: Boolean) {
-    if (w == this) clearSelection
+    if (w == this) ScenesManager.clearSelection
     else {
       w match {
         case widget: CapsuleUI ⇒
           if (change) {
-            if (_selection.contains(widget)) removeFromSelection(widget)
-            else addToSelection(widget)
+            if (ScenesManager.selection.contains(widget)) ScenesManager.removeFromSelection(widget)
+            else ScenesManager.addToSelection(widget)
           } else {
-            if (!_selection.contains(widget)) {
-              clearSelection
-              addToSelection(widget)
+            if (!ScenesManager.selection.contains(widget)) {
+              ScenesManager.clearSelection
+              ScenesManager.addToSelection(widget)
             }
           }
         case _ ⇒
       }
     }
   }
-
-  def selection = _selection.toSet
-
-  def addToSelection(widget: ICapsuleUI) = {
-    widget.selected = true
-    _selection += widget
-  }
-
-  def removeFromSelection(widget: ICapsuleUI) = {
-    widget.selected = false
-    _selection -= widget
-  }
-
-  def clearSelection = _selection.foreach { removeFromSelection }
-
-  def clearRemovedCapsulesFromSelection = _selection.clear
+  //
+  //  def selection = _selection.toSet
+  //
+  //  def addToSelection(widget: ICapsuleUI) = {
+  //    widget.selected = true
+  //    _selection += widget
+  //  }
+  //
+  //  def removeFromSelection(widget: ICapsuleUI) = {
+  //    widget.selected = false
+  //    _selection -= widget
+  //  }
+  //
+  //  def clearSelection = _selection.foreach { removeFromSelection }
+  //
+  //  def clearRemovedCapsulesFromSelection = _selection.clear
 
   def createSelectionWidget = {
     val widget = new Widget(this)
@@ -295,14 +296,14 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
           val r = new Rectangle(w.getBounds)
           r.setLocation(w.getLocation)
           if (r.intersects(rectangle)) {
-            if (!_selection.contains(w)) {
+            if (!ScenesManager.selection.contains(w)) {
               changed = true
-              addToSelection(w)
+              ScenesManager.addToSelection(w)
             }
           } else {
-            if (_selection.contains(w)) {
+            if (ScenesManager.selection.contains(w)) {
               changed = true
-              removeFromSelection(w)
+              ScenesManager.removeFromSelection(w)
             }
           }
         case x ⇒
@@ -316,7 +317,7 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     var original: Option[Point] = None
 
     def movementStarted(widget: Widget) = {
-      _selection.foreach { o ⇒
+      ScenesManager.selection.foreach { o ⇒
         originals += o -> o.widget.getPreferredLocation
       }
     }
@@ -329,15 +330,15 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     def getOriginalLocation(widget: Widget) = {
       widget match {
         case x: ICapsuleUI ⇒
-          if (!_selection.contains(x)) {
-            clearSelection
-            addToSelection(x)
+          if (!ScenesManager.selection.contains(x)) {
+            ScenesManager.clearSelection
+            ScenesManager.addToSelection(x)
             x.repaint
           }
           original = Some(widget.getPreferredLocation)
           original.get
         case _ ⇒
-          clearSelection
+          ScenesManager.clearSelection
           new Point
       }
     }

@@ -43,6 +43,7 @@ import scala.swing.Action
 import scala.swing.Button
 import scala.swing.Label
 import scala.swing.TabbedPane
+import scala.collection.mutable.HashSet
 
 object ScenesManager {
 
@@ -50,7 +51,7 @@ object ScenesManager {
 
   var countBuild = new AtomicInteger
   var countExec = new AtomicInteger
-  var copied = Map.empty[ICapsuleUI, (ICapsuleUI, HashMap[IInputSlotWidget, IInputSlotWidget])]
+  val _selection = new HashSet[ICapsuleUI]
 
   PasswordListner.apply
 
@@ -67,14 +68,35 @@ object ScenesManager {
     }
   }
 
+  def currentScene = currentSceneContainer match {
+    case Some(sc: ISceneContainer) ⇒ sc.scene
+    case _ ⇒ None
+  }
+
+  def selection = _selection.toSet
+
+  def addToSelection(widget: ICapsuleUI) = {
+    widget.selected = true
+    _selection += widget
+  }
+
+  def removeFromSelection(widget: ICapsuleUI) = {
+    widget.selected = false
+    _selection -= widget
+  }
+
+  def clearSelection = _selection.foreach { removeFromSelection }
+
+  def clearRemovedCapsulesFromSelection = _selection.clear
+
   def pasteCapsules(ms: IMoleScene,
                     point: Point) = {
-    copied = ms.selection.map { z ⇒
+    val copied = _selection.map { z ⇒
       z -> z.copy(ms)
     }.toMap
 
-    val dx = (point.x - ms.selection.map { _.widget.getPreferredLocation.x }.min).toInt
-    val dy = (point.y - ms.selection.map { _.widget.getPreferredLocation.y }.min).toInt
+    val dx = (point.x - _selection.map { _.widget.getPreferredLocation.x }.min).toInt
+    val dy = (point.y - _selection.map { _.widget.getPreferredLocation.y }.min).toInt
 
     copied.foreach {
       case (old, neo) ⇒
@@ -86,29 +108,34 @@ object ScenesManager {
           case _ ⇒
         }
         ms.refresh
+      case _ ⇒
     }
 
-    val islots = ms.manager.capsules.values.flatMap { _.islots }
-    val connectors = ms.manager.connectors
-    connectors.foreach { con ⇒
-      if (ms.selection.contains(con.source) && islots.contains(con.target)) {
-        con match {
-          case (t: ITransitionUI) ⇒
-            SceneItemFactory.createTransition(ms,
-              copied(t.source)._1,
-              copied(t.target.capsule)._1.islots.find { s ⇒ t.target.index == s.index }.get,
-              t.transitionType,
-              t.condition,
-              t.filteredPrototypes)
-          case (t: IDataChannelUI) ⇒
-            SceneItemFactory.createDataChannel(ms,
-              copied(t.source)._1,
-              copied(t.target.capsule)._1.islots.find { s ⇒ t.target.index == s.index }.get,
-              t.filteredPrototypes)
+    val islots = _selection.flatMap { _.islots }
+    _selection.headOption match {
+      case Some(c: ICapsuleUI) ⇒
+        val connectors = c.scene.manager.connectors
+        connectors.foreach { con ⇒
+          if (_selection.contains(con.source) && islots.contains(con.target)) {
+            con match {
+              case (t: ITransitionUI) ⇒
+                SceneItemFactory.createTransition(ms,
+                  copied(t.source)._1,
+                  copied(t.target.capsule)._1.islots.find { s ⇒ t.target.index == s.index }.get,
+                  t.transitionType,
+                  t.condition,
+                  t.filteredPrototypes)
+              case (t: IDataChannelUI) ⇒
+                SceneItemFactory.createDataChannel(ms,
+                  copied(t.source)._1,
+                  copied(t.target.capsule)._1.islots.find { s ⇒ t.target.index == s.index }.get,
+                  t.filteredPrototypes)
+            }
+          }
         }
-      }
+        ms.refresh
+      case _ ⇒
     }
-    ms.refresh
   }
 
   def closeAll = tabPane.pages.clear
@@ -184,6 +211,7 @@ object ScenesManager {
   def addTab(page: TabbedPane.Page, title: String, action: Action) = {
     tabPane.pages += page
     tabPane.peer.setTabComponentAt(tabPane.peer.getTabCount - 1, new CloseableTab(title, page, action).peer)
+    tabPane.selection.page = page
   }
 
   class CloseableTab(title: String,

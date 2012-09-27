@@ -19,6 +19,7 @@ package org.openmole.ide.core.implementation.action
 
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
@@ -26,10 +27,10 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 class RemoveCapsuleAction(scene: IMoleScene, capsule: ICapsuleUI) extends ActionListener {
 
   override def actionPerformed(ae: ActionEvent) = {
-    scene.selection.map { c ⇒ c }.foreach { c ⇒
+    ScenesManager.selection.map { c ⇒ c }.foreach { c ⇒
       scene.graphScene.removeNodeWithEdges(scene.manager.removeCapsuleUI(c))
     }
-    scene.clearRemovedCapsulesFromSelection
+    ScenesManager.clearRemovedCapsulesFromSelection
     CheckData.checkMole(scene)
   }
 }
