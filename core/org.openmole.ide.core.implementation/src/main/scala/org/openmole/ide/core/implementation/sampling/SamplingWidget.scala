@@ -23,19 +23,24 @@ import org.openmole.ide.misc.widget.MigPanel
 import java.awt.Graphics2D
 import java.awt.Point
 import java.awt.RenderingHints
+import org.netbeans.api.visual.widget.ImageWidget
 import org.openmole.ide.core.implementation.execution.ScenesManager
+import org.openmole.ide.core.model.data.ISamplingCompositionDataUI
 import org.openmole.ide.core.model.data.ISamplingDataUI
+import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.MigPanel
 import java.awt.LinearGradientPaint
+import javax.imageio.ImageIO
 
 class SamplingWidget(var dataUI: ISamplingDataUI,
                      display: Boolean = false) extends MigPanel("wrap", "[center]", "[center]") with ISamplingWidget { samplingWidget ⇒
   preferredSize = new Dimension(130, 38)
   opaque = true
+  var isFinalSamplingWidget = false
 
   var color = SamplingCompositionPanelUI.DEFAULT_COLOR
 
@@ -48,7 +53,7 @@ class SamplingWidget(var dataUI: ISamplingDataUI,
     },
     3,
     "ff5555",
-    true) { opaque = false; maximumSize = new Dimension(100, 28) }
+    true) { opaque = false; maximumSize = new Dimension(100, 30) }
 
   def update = {
     link.link(dataUI.preview)
@@ -68,6 +73,9 @@ class SamplingWidget(var dataUI: ISamplingDataUI,
 
     g.setPaint(gp)
     g.fillRoundRect(0, 0, size.width, size.height, 8, 8)
+
+    if (isFinalSamplingWidget)
+      g.drawImage(ImageIO.read(getClass.getClassLoader.getResource("img/finalSampling.png")), 115, 19, 10, 14, peer)
   }
   contents += link
 }

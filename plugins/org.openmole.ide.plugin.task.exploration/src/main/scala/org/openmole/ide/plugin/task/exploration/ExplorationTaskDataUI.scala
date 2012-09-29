@@ -32,7 +32,9 @@ class ExplorationTaskDataUI(
 
   def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) = {
     val taskBuilder = sampling match {
-      case Some(x: ISamplingCompositionDataProxyUI) ⇒ ExplorationTask(name, x.dataUI.coreObject)(plugins)
+      case Some(x: ISamplingCompositionDataProxyUI) ⇒
+        println("++  building EXPLO")
+        ExplorationTask(name, x.dataUI.coreObject)(plugins)
       case None ⇒ throw new UserBadDataError("Sampling missing to instanciate the exploration task " + name)
     }
     taskBuilder addInput inputs

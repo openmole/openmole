@@ -20,6 +20,7 @@ package org.openmole.ide.core.implementation.provider
 import java.awt.Point
 import org.netbeans.api.visual.widget._
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
+import org.openmole.ide.core.model.sampling.ISamplingComponent
 import org.openmole.ide.core.model.sampling.ISamplingWidget
 import scala.swing.Action
 import scala.swing.MenuItem
@@ -34,16 +35,23 @@ class SamplingMenuProvider(panelScene: ISamplingCompositionPanelUI) extends Gene
     val itRemoveSampling = new MenuItem(new Action("Remove Sampling") {
       def apply =
         widget match {
-          case cw: SamplingComponent ⇒
-            cw.component match {
-              case samplingWidget: ISamplingWidget ⇒
-                panelScene.removeSampling(samplingWidget)
-              case _ ⇒
-            }
+          case cw: ISamplingComponent ⇒ panelScene.remove(cw)
           case _ ⇒
         }
     })
-    items += itRemoveSampling.peer
+
+    val itSetAsFinalSampling = new MenuItem(new Action("Set as final Sampling") {
+      def apply = widget match {
+        case cw: SamplingComponent ⇒
+          cw.component match {
+            case samplingWidget: ISamplingWidget ⇒
+              panelScene.setFinalSampling(samplingWidget)
+            case _ ⇒
+          }
+        case _ ⇒
+      }
+    })
+    items += (itRemoveSampling.peer, itSetAsFinalSampling.peer)
     super.getPopupMenu(widget, point)
   }
 }

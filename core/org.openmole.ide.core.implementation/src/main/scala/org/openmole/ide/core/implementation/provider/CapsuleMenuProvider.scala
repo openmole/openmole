@@ -28,6 +28,7 @@ import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.factory.IHookFactoryUI
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.action._
 import org.openmole.ide.core.implementation.registry.KeyRegistry
@@ -39,47 +40,43 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
 
   def initMenu = {
     items.clear
-    scene match {
-      case x: BuildMoleScene ⇒
-        if (x.selection.size == 0) x.addToSelection(capsule)
-        val selectionSize = x.selection.size
-        val itStart = new JMenuItem("Define as starting capsule")
-        val itIS = new JMenuItem("Add an input slot")
-        val itRIS = new JMenuItem("Remove an input slot")
-        val itR = new JMenuItem("Remove " + selectionSize + " capsule" + (if (selectionSize > 1) "s" else ""))
-        val menuTask = new Menu("Task")
+    if (ScenesManager.selection.size == 0) ScenesManager.addToSelection(capsule)
+    val selectionSize = ScenesManager.selection.size
+    val itStart = new JMenuItem("Define as starting capsule")
+    val itIS = new JMenuItem("Add an input slot")
+    val itRIS = new JMenuItem("Remove an input slot")
+    val itR = new JMenuItem("Remove " + selectionSize + " capsule" + (if (selectionSize > 1) "s" else ""))
+    val menuTask = new Menu("Task")
 
-        itIS.addActionListener(new AddInputSlotAction(capsule))
-        itR.addActionListener(new RemoveCapsuleAction(scene, capsule))
-        itStart.addActionListener(new DefineMoleStartAction(scene, capsule))
-        itRIS.addActionListener(new RemoveInputSlot(capsule))
+    itIS.addActionListener(new AddInputSlotAction(capsule))
+    itR.addActionListener(new RemoveCapsuleAction(scene, capsule))
+    itStart.addActionListener(new DefineMoleStartAction(scene, capsule))
+    itRIS.addActionListener(new RemoveInputSlot(capsule))
 
-        //Tasks
-        Proxys.tasks.foreach { p ⇒
-          menuTask.contents += new CheckMenuItem(p.dataUI.name) {
-            action = new TaskEnvAction(p.dataUI.name, this) {
-              def apply = {
-                capsule.decapsule
-                capsule.encapsule(p)
-                selectOneItem(menuTask, item)
-              }
-            }
-            capsule.dataUI.task match {
-              case Some(t: ITaskDataProxyUI) ⇒
-                selected = { p.dataUI.name == t.dataUI.name }
-              case _ ⇒
-            }
+    //Tasks
+    Proxys.tasks.foreach { p ⇒
+      menuTask.contents += new CheckMenuItem(p.dataUI.name) {
+        action = new TaskEnvAction(p.dataUI.name, this) {
+          def apply = {
+            capsule.decapsule
+            capsule.encapsule(p)
+            selectOneItem(menuTask, item)
           }
         }
-
-        menuTask.peer.insert(new CheckMenuItem("None") {
-          action = new Action("None") {
-            def apply = capsule.decapsule
-          }
-        }.peer, 0)
-        items += (itIS, itRIS, itR, itStart, menuTask.peer)
-      case _ ⇒
+        capsule.dataUI.task match {
+          case Some(t: ITaskDataProxyUI) ⇒
+            selected = { p.dataUI.name == t.dataUI.name }
+          case _ ⇒
+        }
+      }
     }
+
+    menuTask.peer.insert(new CheckMenuItem("None") {
+      action = new Action("None") {
+        def apply = capsule.decapsule
+      }
+    }.peer, 0)
+    items += (itIS, itRIS, itR, itStart, menuTask.peer)
 
     //Environments
     val menuEnv = new Menu("Environment")

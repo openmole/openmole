@@ -86,7 +86,7 @@ class BuildMoleScene(n: String = "") extends MoleScene(n) { buildMoleScene ⇒
     connectionWidget
   }
 
-  def removeSelectedWidgets = selection.foreach { c ⇒
+  def removeSelectedWidgets = ScenesManager.selection.foreach { c ⇒
     graphScene.removeNodeWithEdges(manager.removeCapsuleUI(c))
     CheckData.checkMole(buildMoleScene)
   }

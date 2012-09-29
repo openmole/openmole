@@ -17,7 +17,9 @@
 
 package org.openmole.ide.core.implementation.sampling
 
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.sampling.ISamplingCompositionWidget
+import org.openmole.ide.core.model.sampling.ISamplingWidget
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.sampling.ISampling
 import org.openmole.ide.core.model.data._
@@ -27,15 +29,41 @@ class SamplingCompositionDataUI(val name: String = "",
                                 val factors: List[(IFactorDataUI, Point)] = List.empty,
                                 val samplings: List[(ISamplingDataUI, Point)] = List.empty,
                                 val connections: List[(String, String)] = List.empty,
-                                val finalSampling: Option[ISamplingDataUI] = None) extends ISamplingCompositionDataUI {
+                                val finalSampling: Option[String] = None) extends ISamplingCompositionDataUI {
 
+  var builtSampling = scala.collection.mutable.Map.empty[ISamplingDataUI, ISampling]
   def coreClass = classOf[ISampling]
 
-  def coreObject = finalSampling match {
-    case Some(fs: ISamplingDataUI) ⇒ fs.coreObject(factors.map { _._1 },
-      samplings.map { _._1 })
-    case _ ⇒ throw new UserBadDataError("No final Sampling has been defined in the Composition. The Composition sampling can not be built")
+  def coreObject = {
+    println("------------ start coreObject")
+    builtSampling = scala.collection.mutable.Map.empty[ISamplingDataUI, ISampling]
+    val connectionMap = connections.groupBy { _._2 }.map { case (k, v) ⇒ k -> v.map { _._1 } }
+    val factorMap = factors.map { f ⇒ f._1.id -> f._1 }.toMap
+    val samplingMap: Map[String, ISamplingDataUI] = samplings.map { s ⇒ s._1.id -> s._1 }.toMap
+    finalSampling match {
+      case Some(fs: String) ⇒ samplingMap(fs) match {
+        case data: ISamplingDataUI ⇒ buildSamplingCore(data, connectionMap, factorMap, samplingMap)
+        case _ ⇒ throw new UserBadDataError("ERROR ... ")
+      }
+      case _ ⇒ throw new UserBadDataError("The final sampling is not properly set")
+    }
   }
+
+  def buildSamplingCore(data: ISamplingDataUI,
+                        connectionMap: Map[String, List[String]],
+                        factorMap: Map[String, IFactorDataUI],
+                        samplingMap: Map[String, ISamplingDataUI]): ISampling = {
+    println("buildSamplingCore")
+    if (!builtSampling.contains(data)) {
+      println("build :: " + data.id)
+      val partition = connectionMap(data.id).partition { _.substring(0, 4) == "samp" }
+      builtSampling += data -> data.coreObject(partition._2.map { factorMap },
+        partition._1.map { s ⇒ buildSamplingCore(samplingMap(s), connectionMap, factorMap, samplingMap) })
+    }
+    builtSampling(data)
+  }
+
+  //def connectedFactorsTo(sampling: ISamplingDataUI) = connections.filter { _._2 == sampling.id }.map { s ⇒ samplingDataUI(s._2) }
 
   def imagePath = "img/samplingComposition.png"
 

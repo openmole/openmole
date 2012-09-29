@@ -17,16 +17,14 @@
 
 package org.openmole.ide.core.model.sampling
 
-import org.openmole.ide.core.model.data.ISamplingDataUI
+import scala.collection.mutable.HashSet
+import org.netbeans.api.visual.widget.ConnectionWidget
 
-trait ISamplingWidget extends ISamplingCompositionWidget {
-  def id: String = dataUI.id
+trait ISamplingComponent {
 
-  def dataUI: ISamplingDataUI
+  def component: ISamplingCompositionWidget
 
-  def dataUI_=(f: ISamplingDataUI)
+  def connections: HashSet[ConnectionWidget]
 
-  def isFinalSamplingWidget: Boolean
-
-  def isFinalSamplingWidget_=(b: Boolean)
+  def connections_=(cw: HashSet[ConnectionWidget])
 }

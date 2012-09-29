@@ -23,11 +23,16 @@ import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.action.ActionFactory
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.openmole.ide.core.model.sampling.ISamplingCompositionWidget
+import org.netbeans.api.visual.widget.ConnectionWidget
+import org.openmole.ide.core.model.sampling.ISamplingComponent
 import org.openmole.ide.core.implementation.provider.FactorMenuProvider
+import scala.collection.mutable.HashSet
 
 class SamplingComponent(samplingScene: ISamplingCompositionPanelUI,
                         val component: ISamplingCompositionWidget,
-                        location: Point) extends ComponentWidget(samplingScene.scene, component.peer) {
+                        location: Point) extends ComponentWidget(samplingScene.scene, component.peer) with ISamplingComponent {
+
+  var connections = HashSet.empty[ConnectionWidget]
   setOpaque(true)
   setBackground(new Color(77, 77, 77, 0))
   setPreferredLocation(location)

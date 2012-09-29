@@ -124,12 +124,14 @@ class ExecutionManager(manager: IMoleSceneManager,
     cancel
     initBarPlotter
 
+    println("starting building mole Exe ...")
     MoleMaker.buildMoleExecution(mole,
       manager,
       hooks.flatMap { case (panel, caps) ⇒ List(capsuleMapping(caps)).zip(panel.saveContent.coreObject(this)) }.toList,
       capsuleMapping,
       groupings) match {
         case Right((mExecution, environments)) ⇒
+          println("RIGHT ... ")
           this.moleExecution = Some(mExecution)
 
           EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.OneJobStatusChanged])
@@ -166,7 +168,9 @@ class ExecutionManager(manager: IMoleSceneManager,
           initPieChart
           repaint
           revalidate
+          println("TIMER START ... ")
           timer.start
+          println("MEXECUTION START ... ")
           mExecution.start
         case Left(e) ⇒
           StatusBar.blockException(e)

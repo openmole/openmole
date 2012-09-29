@@ -68,18 +68,18 @@ class TaskWidget(scene: IMoleScene,
         scene match {
           case y: BuildMoleScene ⇒
 
-            new LinearGradientPaint(start, end, dist,
-              Array(new Color(215, 238, 244),
-                new Color(228, 228, 228),
-                new Color(215, 238, 244)))
+            //            new LinearGradientPaint(start, end, dist,
+            //              Array(new Color(215, 238, 244),
+            //                new Color(228, 228, 228),
+            //                new Color(215, 238, 244)))
 
-          //new Color(215, 238, 244)
+            new Color(215, 238, 244)
           case _ ⇒
-            new LinearGradientPaint(start, end, dist,
-              Array(new Color(215, 238, 244, 64),
-                new Color(228, 228, 228),
-                new Color(215, 238, 244, 64)))
-          //new Color(215, 238, 244, 64)
+            //            new LinearGradientPaint(start, end, dist,
+            //              Array(new Color(215, 238, 244, 64),
+            //                new Color(228, 228, 228),
+            //                new Color(215, 238, 244, 64)))
+            new Color(215, 238, 244, 64)
         }
       case _ ⇒
         new Color(215, 238, 244)

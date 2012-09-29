@@ -71,6 +71,7 @@ object EmptyDataUIs {
     def factors = List.empty
     def samplings = List.empty
     def connections = List.empty
+    def finalSampling: Option[String] = None
   }
 
   class EmptySamplingCompositionPanelUI extends ISamplingCompositionPanelUI {
@@ -79,11 +80,13 @@ object EmptyDataUIs {
     def addFactor(factorDataUI: IFactorDataUI,
                   location: Point,
                   display: Boolean) = {}
-    def removeFactor(factorWidget: IFactorWidget): Unit = {}
     def addSampling(samplingDataUI: ISamplingDataUI,
                     location: Point,
                     display: Boolean) = {}
-    def removeSampling(samplingWidget: ISamplingWidget): Unit = {}
+    def remove(samplingComponent: ISamplingComponent): Unit = {}
+    def setSamplingWidget(samplingWidget: ISamplingWidget, b: Boolean) {}
+    def setSamplingWidget(id: Option[String], b: Boolean) {}
+    def setFinalSampling(samplingWidget: ISamplingWidget) = {}
     def scene = new Scene
   }
 
