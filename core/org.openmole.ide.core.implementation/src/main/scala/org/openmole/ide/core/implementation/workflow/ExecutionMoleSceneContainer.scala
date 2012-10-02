@@ -24,7 +24,7 @@ import javax.swing.ScrollPaneConstants._
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openmole.core.model.mole.IHook
-import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.ide.core.implementation.execution.MultiGenericGroupingStrategyPanel
 import org.openmole.ide.core.implementation.execution.ExecutionManager
 import org.openmole.ide.core.implementation.execution.MoleFinishedEvent
@@ -35,16 +35,15 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget._
 import scala.collection.mutable.HashMap
-import scala.swing.Action
-import scala.swing.Button
-import scala.swing.Label
-import scala.swing.Orientation
-import scala.swing.Panel
-import scala.swing.ScrollPane
-import scala.swing.Separator
-import scala.swing.SplitPane
-import scala.swing.TabbedPane
+import scala.swing._
 import org.openmole.ide.misc.tools.image.Images._
+import java.io.File
+import scala.swing.FileChooser.SelectionMode._
+import org.openmole.ide.core.implementation.dialog.DialogFactory
+import org.openmole.ide.core.implementation.serializer.GUISerializer
+import scala.swing.FileChooser.Result._
+import org.openmole.core.serializer.SerializerService
+import org.openmole.ide.core.implementation.dialog.StatusBar
 
 class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
                                   val page: TabbedPane.Page,
@@ -63,6 +62,10 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
 
   val startStopButton = new Button(start) {
     background = new Color(125, 160, 0)
+  }
+
+  val exportButton = new Button(export) {
+    background = new Color(55, 170, 200)
   }
 
   var groupingPanel: Option[MultiGenericGroupingStrategyPanel] = None
@@ -106,9 +109,10 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
 
         peer.add(new PluginPanel("wrap") {
           contents += new TitleLabel("Execution control")
-          contents += new PluginPanel("wrap 2", "[]30[]") {
+          contents += new PluginPanel("wrap 2", "[]-20[]") {
             //Start / Stop
             contents += startStopButton
+            contents += exportButton
 
             // View Mole execution
             contents += new MainLinkLabel("Mole execution", new Action("") {
@@ -139,6 +143,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         }
         startStopButton.background = new Color(170, 0, 0)
         startStopButton.action = stop
+        exportButton.enabled = false
         x.start(panelHooks.map { ph ⇒ ph._1 -> ph._2._1 }.toMap,
           groupingPanel.get.coreObjects)
       case _ ⇒
@@ -148,6 +153,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   def startLook = {
     startStopButton.background = new Color(125, 160, 0)
     startStopButton.action = start
+    exportButton.enabled = true
   }
 
   def stop: Action = new Action("Stop") {
@@ -160,22 +166,42 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
     }
   }
 
-  def started = executionManager match {
-    case Some(x: ExecutionManager) ⇒
-      x match {
-        case me: IMoleExecution ⇒ me.started
-        case _ ⇒ false
+  def export = new Action("Export") {
+    override def apply = {
+      val fc = DialogFactory.fileChooser(" Export a Mole execution",
+        "*.xml",
+        "xml")
+      if (fc.showDialog(new Label, "OK") == Approve) {
+        val text = fc.selectedFile.getPath
+        if (new File(text).getParentFile.isDirectory) Some(text.split('.')(0) + ".xml")
+        else None
+      } match {
+        case Some(t: String) ⇒ executionManager match {
+          case Some(x: ExecutionManager) ⇒ x.buildMoleExecution(panelHooks.map { ph ⇒ ph._1 -> ph._2._1 }.toMap,
+            groupingPanel.get.coreObjects) match {
+              case Right((mExecution, environments)) ⇒ SerializerService.serialize(mExecution, new File(t))
+              case Left(e) ⇒ StatusBar.blockException(e)
+            }
+          case _ ⇒
+        }
+        case _ ⇒
       }
-    case None ⇒ false
+    }
   }
 
-  def finished = executionManager match {
-    case Some(x: ExecutionManager) ⇒
-      x match {
-        case me: IMoleExecution ⇒ me.finished
-        case _ ⇒ true
-      }
-    case None ⇒ true
+  def moleExecution = executionManager match {
+    case Some(x: ExecutionManager) ⇒ x.moleExecution
+    case _ ⇒ None
+  }
+
+  def started = moleExecution match {
+    case Some(me: MoleExecution) ⇒ me.started
+    case _ ⇒ false
+  }
+
+  def finished = moleExecution match {
+    case Some(me: MoleExecution) ⇒ me.finished
+    case _ ⇒ false
   }
 
   class ExecutionPanel extends Panel {
