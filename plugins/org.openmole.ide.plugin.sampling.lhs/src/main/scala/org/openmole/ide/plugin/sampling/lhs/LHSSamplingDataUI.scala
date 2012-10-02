@@ -16,6 +16,7 @@ import org.openmole.core.implementation.sampling.Factor
 import org.openmole.core.model.data.Prototype
 import scala.collection.JavaConversions._
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.core.model.sampling.ISampling
 import org.openmole.ide.core.implementation.sampling._
 
 class LHSSamplingDataUI(val samples: String = "1",
@@ -24,7 +25,7 @@ class LHSSamplingDataUI(val samples: String = "1",
   implicit def string2Int(s: String): Int = augmentString(s).toInt
 
   def coreObject(factors: List[IFactorDataUI],
-                 samplings: List[ISamplingDataUI]) =
+                 samplings: List[ISampling]) =
     new LHS(
       try samples
       catch {

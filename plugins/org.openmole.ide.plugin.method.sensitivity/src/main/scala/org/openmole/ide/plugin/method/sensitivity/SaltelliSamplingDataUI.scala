@@ -9,6 +9,7 @@ import org.openmole.core.implementation.sampling.Factor
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain.IBounded
 import org.openmole.core.model.domain.IDomain
+import org.openmole.core.model.sampling.ISampling
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.sampling._
@@ -24,7 +25,7 @@ class SaltelliSamplingDataUI(val samples: String = "1",
   implicit def string2Int(s: String): Int = augmentString(s).toInt
 
   def coreObject(factors: List[IFactorDataUI],
-                 samplings: List[ISamplingDataUI]) =
+                 samplings: List[ISampling]) =
     new SaltelliSampling(
       try samples
       catch {
