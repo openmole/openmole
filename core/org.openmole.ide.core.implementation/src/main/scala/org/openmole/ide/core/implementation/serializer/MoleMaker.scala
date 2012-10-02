@@ -198,6 +198,7 @@ object MoleMaker {
       case BASIC_TRANSITION ⇒ new Transition(sourceCapsule, targetSlot, condition, Filter(filtered: _*))
       case AGGREGATION_TRANSITION ⇒ new AggregationTransition(sourceCapsule, targetSlot, condition, Filter(filtered: _*))
       case EXPLORATION_TRANSITION ⇒ new ExplorationTransition(sourceCapsule, targetSlot, condition, Filter(filtered: _*))
+      case END_TRANSITION ⇒ new EndExplorationTransition(sourceCapsule, targetSlot, condition, Filter(filtered: _*))
       case _ ⇒ throw new UserBadDataError("No matching type between capsule " + sourceCapsule + " and " + targetSlot + ". The transition can not be built")
     }
   }

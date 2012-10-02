@@ -22,6 +22,16 @@ class CompleteSamplingDataUI(val id: String = "sampling" + Counter.id.getAndIncr
   def coreObject(factors: List[IFactorDataUI],
                  samplings: List[ISampling]) = {
     println("build sampling :: " + factors.size + ", " + samplings.size + " " + (factors ::: samplings).size)
+    println((factors.flatMap(f ⇒
+      f.prototype match {
+        case Some(p: IPrototypeDataProxyUI) ⇒ f.domain match {
+          case Some(d: IDomainDataUI) ⇒ List(new DiscreteFactor(p.dataUI.coreObject.asInstanceOf[Prototype[Any]],
+            d.coreObject(p.dataUI.coreObject).asInstanceOf[IDomain[Any] with IIterable[Any]]))
+          case _ ⇒ Nil
+        }
+        case _ ⇒ Nil
+      }) ::: samplings))
+
     new CompleteSampling(
       (factors.flatMap(f ⇒
         f.prototype match {
@@ -31,7 +41,7 @@ class CompleteSamplingDataUI(val id: String = "sampling" + Counter.id.getAndIncr
             case _ ⇒ Nil
           }
           case _ ⇒ Nil
-        }) ::: samplings).toSeq: _*)
+        }) ::: samplings) : _*)
   }
   //      new CompleteSampling(
   //      factors.map(f ⇒ new DiscreteFactor(
