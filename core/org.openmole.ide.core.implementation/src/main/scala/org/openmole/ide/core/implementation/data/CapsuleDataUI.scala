@@ -18,6 +18,7 @@
 package org.openmole.ide.core.implementation.data
 
 import org.openmole.core.model.mole._
+import org.openmole.ide.core.model.commons._
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.model.dataproxy._
@@ -27,7 +28,8 @@ import scala.collection.mutable.HashMap
 
 class CapsuleDataUI(var task: Option[ITaskDataProxyUI] = None,
                     var sampling: Option[ISamplingCompositionDataProxyUI] = None,
-                    var environment: Option[IEnvironmentDataProxyUI] = None) extends ICapsuleDataUI {
+                    var environment: Option[IEnvironmentDataProxyUI] = None,
+                    var capsuleType: CapsuleType = new BasicCapsuleType) extends ICapsuleDataUI {
 
   var hooks = new HashMap[Class[_ <: IHook], IHookDataUI]
 

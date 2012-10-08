@@ -21,6 +21,7 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.core.model.mole._
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.commons.TransitionType._
+import org.openmole.ide.core.model.commons.CapsuleType
 import scala.collection.mutable.HashMap
 
 trait ICapsuleDataUI {
@@ -43,4 +44,8 @@ trait ICapsuleDataUI {
   def hooks_=(hm: HashMap[Class[_ <: IHook], IHookDataUI])
 
   def transitionType: TransitionType.Value
+
+  def capsuleType: CapsuleType
+
+  def capsuleType_=(t: CapsuleType)
 }

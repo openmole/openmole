@@ -19,6 +19,7 @@ package org.openmole.ide.core.implementation.serializer
 
 import org.openmole.core.model.data._
 import org.openmole.core.model.execution._
+import org.openmole.ide.core.model.commons._
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.registry.PrototypeKey
 import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
@@ -130,9 +131,20 @@ object MoleMaker {
 
   def buildCapsule(
     proxy: ITaskDataProxyUI,
-    plugins: Set[File] = Set.empty) =
+    plugins: Set[File] = Set.empty,
+    capsuleType: CapsuleType = new BasicCapsuleType) =
     taskCoreObject(proxy, plugins) match {
-      case Right(x: ITask) ⇒ new Capsule(x)
+      case Right(x: ITask) ⇒ capsuleType match {
+        case y: MasterCapsuleType ⇒
+          println("build Master")
+          new MasterCapsule(x, y.persistList.map { _.dataUI.name }.toSet)
+        case y: StrainerCapsuleType ⇒
+          println("build Strainer")
+          new StrainerCapsule(x)
+        case _ ⇒
+          println("build CApsule")
+          new Capsule(x)
+      }
       case Left(x: Throwable) ⇒ new Capsule(EmptyTask(proxy.dataUI.name))
     }
 
@@ -141,7 +153,7 @@ object MoleMaker {
     moleDataUI: IMoleDataUI): ICapsule =
     capsuleDataUI.task match {
       case Some(x: ITaskDataProxyUI) ⇒
-        buildCapsule(x, moleDataUI.plugins.map { p ⇒ new File(p) }.toSet)
+        buildCapsule(x, moleDataUI.plugins.map { p ⇒ new File(p) }.toSet, capsuleDataUI.capsuleType)
       case _ ⇒
         StatusBar.inform("A capsule without Task can not be run")
         new Capsule(EmptyTask("None"))

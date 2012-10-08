@@ -32,11 +32,14 @@ import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.action._
 import org.openmole.ide.core.implementation.registry.KeyRegistry
+import org.openmole.ide.core.model.commons._
 import scala.swing.CheckMenuItem
 import scala.swing.Menu
+import scala.swing.MenuItem
 
 class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends GenericMenuProvider {
   var taskMenu = new JMenu
+  var itChangeCapsule = new Menu("to ")
 
   def initMenu = {
     items.clear
@@ -121,6 +124,12 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
 
   override def getPopupMenu(widget: Widget, point: Point) = {
     initMenu
+    itChangeCapsule.peer.removeAll
+    items -= itChangeCapsule.peer
+    List(new MasterCapsuleType, new StrainerCapsuleType, new BasicCapsuleType).filterNot(_ == capsule.dataUI.capsuleType).foreach { ctype ⇒
+      itChangeCapsule.peer.add(new MenuItem(new ChangeCapsuleAction(capsule, ctype)).peer)
+    }
+    items += itChangeCapsule.peer
     super.getPopupMenu(widget, point)
   }
 

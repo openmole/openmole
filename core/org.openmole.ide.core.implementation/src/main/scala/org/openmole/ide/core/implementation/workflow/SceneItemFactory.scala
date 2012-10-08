@@ -19,6 +19,7 @@ package org.openmole.ide.core.implementation.workflow
 
 import java.awt.Point
 import org.openmole.ide.core.implementation.data._
+import org.openmole.ide.core.model.commons._
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
@@ -38,8 +39,9 @@ object SceneItemFactory {
 
   def createCapsule(scene: IMoleScene,
                     locationPoint: Point,
-                    taskProxy: Option[ITaskDataProxyUI] = None): ICapsuleUI =
-    createCapsule(new CapsuleUI(scene, new CapsuleDataUI(task = taskProxy)), scene, locationPoint)
+                    taskProxy: Option[ITaskDataProxyUI] = None,
+                    cType: CapsuleType = new BasicCapsuleType): ICapsuleUI =
+    createCapsule(new CapsuleUI(scene, new CapsuleDataUI(task = taskProxy, capsuleType = cType)), scene, locationPoint)
 
   def createTransition(scene: IMoleScene,
                        s: ICapsuleUI,

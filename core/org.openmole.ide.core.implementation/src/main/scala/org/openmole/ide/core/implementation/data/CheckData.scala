@@ -60,7 +60,7 @@ object CheckData extends Logger {
                     capsUI.dataUI.task match {
                       case Some(x: ITaskDataProxyUI) ⇒
                         buildUnknownPrototypes(mole, caps)
-                        computeImplicitPrototypes(mole, x)
+                        computeImplicitPrototypes(mole, capsUI, x)
                       case _ ⇒
                     }
                 }
@@ -132,10 +132,16 @@ object CheckData extends Logger {
         .filterNot { n ⇒ proxy.dataUI.prototypesOut.map { p ⇒ KeyPrototypeGenerator(p) }.contains(n) }
         .map { protoMapping })
 
-  def computeImplicitPrototypes(mole: IMole, proxy: ITaskDataProxyUI): Unit =
+  def computeImplicitPrototypes(mole: IMole,
+                                capsUI: ICapsuleUI,
+                                proxy: ITaskDataProxyUI): Unit =
     MoleMaker.taskCoreObject(proxy) match {
       case Right(x: ITask) ⇒
-        val capsule = new Capsule(x)
+        val capsule = MoleMaker.buildCapsule(
+          proxy: ITaskDataProxyUI,
+          capsuleType = capsUI.dataUI.capsuleType)
+        println("capsule Class :: " + capsule.getClass)
+        //  val capsule = new Capsule(x)
         buildUnknownPrototypes(mole, capsule)
         computeImplicitPrototypes(mole, proxy,
           MoleMaker.keyPrototypeMapping,
@@ -143,23 +149,23 @@ object CheckData extends Logger {
       case Left(e: Throwable) ⇒
     }
 
-  def checkTaskProxyImplicitsPrototypes(
-    mole: IMole,
-    scene: IMoleScene,
-    proxy: ITaskDataProxyUI,
-    clear: Boolean = true) = {
-    if (clear) StatusBar.clear
-    scene match {
-      case x: BuildMoleScene ⇒
-        try {
-          x.manager.capsules.values.flatMap { _.dataUI.task }.contains(proxy) match {
-            case true ⇒ checkMole(x)
-            case false ⇒ computeImplicitPrototypes(mole, proxy)
-          }
-        } catch { case e: UserBadDataError ⇒ }
-      case _ ⇒
-    }
-  }
+  //  def checkTaskProxyImplicitsPrototypes(
+  //    mole: IMole,
+  //    scene: IMoleScene,
+  //    proxy: ITaskDataProxyUI,
+  //    clear: Boolean = true) = {
+  //    if (clear) StatusBar.clear
+  //    scene match {
+  //      case x: BuildMoleScene ⇒
+  //        try {
+  //          x.manager.capsules.values.flatMap { _.dataUI.task }.contains(proxy) match {
+  //            case true ⇒ checkMole(x)
+  //            case false ⇒ computeImplicitPrototypes(mole, proxy)
+  //          }
+  //        } catch { case e: UserBadDataError ⇒ }
+  //      case _ ⇒
+  //    }
+  //  }
 
   def checkNoEmptyCapsule(scene: IMoleScene) =
     scene.manager.capsulesInMole.foreach { c ⇒

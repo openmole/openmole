@@ -23,6 +23,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import org.openmole.ide.core.model.workflow.ITransitionUI
+import org.openmole.ide.core.model.commons.CapsuleFactory
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 import java.awt.Point
@@ -66,7 +67,6 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
 
     molescene.manager.capsules.values.foreach(view ⇒ {
       writer.startNode("capsule")
-      //  writer.addAttribute("start", view.dataUI.startingCapsule.toString)
       writer.addAttribute("start", molescene.manager.startingCapsule match {
         case Some(c: ICapsuleUI) ⇒ if (c == view) "true"
         else "false"
@@ -74,6 +74,7 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
       })
       writer.addAttribute("x", String.valueOf(view.x / 2 / Toolkit.getDefaultToolkit.getScreenSize.width))
       writer.addAttribute("y", String.valueOf(view.y / 2 / Toolkit.getDefaultToolkit.getScreenSize.height))
+      writer.addAttribute("type", view.dataUI.capsuleType.toString)
 
       //Input slot
       slotcount += 1
@@ -172,7 +173,7 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
           val p = new Point
           p.setLocation(reader.getAttribute("x").toDouble * Toolkit.getDefaultToolkit.getScreenSize.width,
             reader.getAttribute("y").toDouble * Toolkit.getDefaultToolkit.getScreenSize.height)
-          val caps = SceneItemFactory.createCapsule(scene, p)
+          val caps = SceneItemFactory.createCapsule(scene, p, cType = CapsuleFactory(reader.getAttribute("type")))
 
           val start = reader.getAttribute("start").toBoolean
           start match {

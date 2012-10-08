@@ -6,6 +6,7 @@
 package org.openmole.ide.core.model.workflow
 
 import org.netbeans.api.visual.widget.Widget
+import org.openmole.ide.core.model.commons.CapsuleType
 import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.core.implementation.validation.DataflowProblem
 import org.openmole.ide.core.model.dataproxy._
@@ -39,6 +40,8 @@ trait ICapsuleUI {
   def deepcopy(sc: IMoleScene): (ICapsuleUI, HashMap[IInputSlotWidget, IInputSlotWidget])
 
   def setTask(dpu: ITaskDataProxyUI)
+
+  def setCapsuleType(cType: CapsuleType)
 
   def setEnvironment(environment: Option[IEnvironmentDataProxyUI])
 
