@@ -160,6 +160,7 @@ class CapsuleUI(val scene: IMoleScene,
 
   def decapsule = {
     dataUI.task = None
+    dataUI.unhookAll
     removeWidget(inputPrototypeWidget)
     removeWidget(outputPrototypeWidget)
     removeWidget(environmentWidget)

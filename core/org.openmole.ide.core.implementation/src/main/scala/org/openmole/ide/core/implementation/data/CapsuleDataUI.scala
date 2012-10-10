@@ -47,4 +47,6 @@ class CapsuleDataUI(var task: Option[ITaskDataProxyUI] = None,
     }
     case _ ⇒ BASIC_TRANSITION
   }
+
+  def unhookAll = hooks = new HashMap[Class[_ <: IHook], IHookDataUI]
 }
