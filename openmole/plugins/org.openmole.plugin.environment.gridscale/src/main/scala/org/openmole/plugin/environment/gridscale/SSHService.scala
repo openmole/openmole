@@ -19,13 +19,10 @@ package org.openmole.plugin.environment.gridscale
 
 import fr.iscpif.gridscale.tools.SSHHost
 import fr.iscpif.gridscale.authentication.SSHAuthentication
-import org.openmole.core.batch.environment.BatchService
+import org.openmole.core.batch.environment._
 import java.net.URI
 
 trait SSHService extends SSHHost with BatchService {
-
   def authentication: SSHAuthentication
-
   val url = new URI("ssh", null, host, port, null, null, null)
-  def id = url.toString
 }

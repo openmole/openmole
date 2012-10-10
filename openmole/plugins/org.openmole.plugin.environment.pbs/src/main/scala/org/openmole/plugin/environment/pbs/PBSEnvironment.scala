@@ -46,13 +46,6 @@ class PBSEnvironment(
   type SS = PersistentStorageService
   type JS = PBSJobService
 
-  /*trait ThisSSHHost extends SSHHost {
-    def user = env.user
-    def host = env.host
-    override def port = env.port
-    def authentication = env.authentication
-  }*/
-
   val id = new URI("pbs", env.user, env.host, env.port, null, null, null).toString
 
   val storage =
@@ -67,25 +60,10 @@ class PBSEnvironment(
     def queue = env.queue
     def environment = env
     def root = env.path
+    val id = url.toString
   }
 
   def allStorages = List(storage)
   def allJobServices = List(jobService)
 
-  //    new PersistentStorageService(
-  //      this,
-  //      URI.create("sftp://" + login + "@" + host),
-  //      dir,
-  //      Workspace.preferenceAsInt(MaxConnections))
-
-  //  val jobService = new PBSJobService(
-  //    URI.create("pbs-ssh://" + login + '@' + host + "/" + dir),
-  //    storage,
-  //    this,
-  //    Workspace.preferenceAsInt(MaxConnections))
-  //
-  //  def allStorages = List(storage)
-  //  def allJobServices: Iterable[JobService] = List(jobService)
-  //
-  //  override def authentication = PBSAuthentication(login, host)
 }

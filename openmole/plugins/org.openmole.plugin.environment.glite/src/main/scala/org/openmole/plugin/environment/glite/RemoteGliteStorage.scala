@@ -21,6 +21,7 @@ import org.openmole.core.batch.storage.Storage
 import org.openmole.misc.exception._
 import fr.iscpif.gridscale.storage.SRMStorage
 import fr.iscpif.gridscale.authentication.ProxyFileAuthentication
+import fr.iscpif.gridscale.authentication.VOMSAuthentication
 import java.io.File
 
 class RemoteGliteStorage(val storage: SRMStorage) extends Storage {
@@ -28,6 +29,14 @@ class RemoteGliteStorage(val storage: SRMStorage) extends Storage {
 
   @transient lazy val authentication: storage.A = new ProxyFileAuthentication {
     def proxy = {
+      val X509_CERT_DIR = System.getenv("X509_CERT_DIR")
+
+      val certificateDir =
+        if (X509_CERT_DIR != null && new File(X509_CERT_DIR).exists) new File(X509_CERT_DIR)
+        else throw new InternalProcessingError("X509_CERT_DIR environment variable not found or directory doesn't exists.")
+
+      VOMSAuthentication.setCARepository(certificateDir)
+
       val path = if (System.getenv.containsKey("X509_USER_PROXY") && new File(System.getenv.get("X509_USER_PROXY")).exists) System.getenv.get("X509_USER_PROXY")
       else throw new InternalProcessingError("The X509_USER_PROXY environment variable is not defined or point to an inexisting file.")
       new File(path)

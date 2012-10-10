@@ -44,7 +44,7 @@ class GliteJobService(
   delegateProxy
 
   def authentication = environment.authentication
-  def id = jobService.url.toString
+  val id = jobService.url.toString
 
   def delegateProxy = jobService.delegateProxy(environment.proxyFile)(authentication)
 

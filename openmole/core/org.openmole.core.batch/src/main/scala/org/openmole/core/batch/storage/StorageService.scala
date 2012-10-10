@@ -28,13 +28,12 @@ import fr.iscpif.gridscale.storage.FileType
 import java.io._
 
 trait StorageService extends BatchService with Storage {
-  StorageControl.register(id, new QualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))
 
   def remoteStorage: Storage
-  def url: URI
-  def id = url.toString
-
   def clean(implicit token: AccessToken, objectContainer: ObjectContainer)
+
+  def url: URI
+  lazy val id = url.toString
 
   @transient lazy val serializedRemoteStorage = {
     val file = Workspace.newFile("remoteStorage", ".xml")

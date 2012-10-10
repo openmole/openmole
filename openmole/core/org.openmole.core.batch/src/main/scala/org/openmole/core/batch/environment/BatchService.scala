@@ -20,9 +20,7 @@ package org.openmole.core.batch.environment
 import org.openmole.core.batch.control.UsageControl
 
 trait BatchService {
-  UsageControl.register(id, UsageControl(connections))
-
   def connections: Int
-  def id: String
+  val id: String
   def environment: BatchEnvironment
 }

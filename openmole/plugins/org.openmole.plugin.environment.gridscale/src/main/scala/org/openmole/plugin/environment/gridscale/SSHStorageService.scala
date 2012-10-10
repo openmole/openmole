@@ -31,7 +31,6 @@ trait SSHStorageService extends StorageService with SSHService { ss ⇒
     val root = ss.root
   }
 
-  override def id = (this: SSHService).id
   val remoteStorage = new LocalStorage(root)
 
 }

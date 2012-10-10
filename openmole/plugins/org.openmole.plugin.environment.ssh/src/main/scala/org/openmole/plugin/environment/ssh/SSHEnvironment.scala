@@ -58,6 +58,7 @@ class SSHEnvironment(
     def nbSlots = env.nbSlots
     def root = env.path
     def environment = env
+    val id = url.toString
   }
 
   def allStorages = List(storage)

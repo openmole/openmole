@@ -26,8 +26,6 @@ trait JobService extends BatchService { js ⇒
 
   type J
 
-  JobServiceControl.register(id, new JobServiceQualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))
-
   def submit(serializedJob: SerializedJob)(implicit token: AccessToken): BatchJob = token.synchronized {
     withQualityControl(_submit(serializedJob))
   }

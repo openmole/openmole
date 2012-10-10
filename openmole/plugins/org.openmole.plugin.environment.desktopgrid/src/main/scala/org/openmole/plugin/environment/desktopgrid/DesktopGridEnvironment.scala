@@ -65,7 +65,7 @@ class DesktopGridEnvironment(
   @transient override lazy val allJobServices = List(
     new DesktopGridJobService {
       def environment = env
-      def id = env.id
+      val id = env.id
     })
 
 }

@@ -29,6 +29,7 @@ class P12Certificate(val certificate: File, val cypheredPassword: String) extend
     proxyFile: File,
     lifeTime: Int,
     fqan: Option[String]) = {
+    VOMSAuthentication.setCARepository(GliteAuthentication.certificateDir)
     val (_serverURL, _voName, _proxyFile, _lifeTime, _fqan) = (serverURL, voName, proxyFile, lifeTime, fqan)
     new P12VOMSAuthentication {
       val certificate = a.certificate
