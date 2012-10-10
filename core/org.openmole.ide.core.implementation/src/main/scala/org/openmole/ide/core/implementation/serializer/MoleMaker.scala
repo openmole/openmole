@@ -136,13 +136,11 @@ object MoleMaker {
     taskCoreObject(proxy, plugins) match {
       case Right(x: ITask) ⇒ capsuleType match {
         case y: MasterCapsuleType ⇒
-          println("build Master")
           new MasterCapsule(x, y.persistList.map { _.dataUI.name }.toSet)
         case y: StrainerCapsuleType ⇒
-          println("build Strainer")
-          new StrainerCapsule(x)
+          val sc = new StrainerCapsule(x)
+          sc
         case _ ⇒
-          println("build CApsule")
           new Capsule(x)
       }
       case Left(x: Throwable) ⇒ new Capsule(EmptyTask(proxy.dataUI.name))

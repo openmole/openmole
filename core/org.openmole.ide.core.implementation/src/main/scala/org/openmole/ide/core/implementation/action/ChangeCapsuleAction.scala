@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.implementation.action
 
+import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.model.commons.CapsuleType
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 
@@ -26,6 +27,7 @@ class ChangeCapsuleAction(capsule: ICapsuleUI,
                           newType: CapsuleType) extends Action(newType.toString.toLowerCase) {
   override def apply = {
     capsule.setCapsuleType(newType)
+    CheckData.checkMole(capsule.scene)
     capsule.scene.graphScene.revalidate
     capsule.scene.graphScene.repaint
   }

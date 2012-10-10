@@ -60,7 +60,7 @@ object CheckData extends Logger {
                     capsUI.dataUI.task match {
                       case Some(x: ITaskDataProxyUI) ⇒
                         buildUnknownPrototypes(mole, caps)
-                        computeImplicitPrototypes(mole, capsUI, x)
+                        computeImplicitPrototypes(mole, caps, x)
                       case _ ⇒
                     }
                 }
@@ -124,48 +124,26 @@ object CheckData extends Logger {
     mole: IMole,
     proxy: ITaskDataProxyUI,
     protoMapping: Map[PrototypeKey, IPrototypeDataProxyUI],
-    coreCapsule: ICapsule): Unit =
+    coreCapsule: ICapsule): Unit = {
     proxy.dataUI.updateImplicits(coreCapsule.inputs(mole).map { i ⇒ KeyPrototypeGenerator(i.prototype) }.toList
       .filterNot { n ⇒ proxy.dataUI.prototypesIn.map { p ⇒ KeyPrototypeGenerator(p) }.contains(n) }
       .map { protoMapping },
       coreCapsule.outputs(mole).map { i ⇒ KeyPrototypeGenerator(i.prototype) }.toList
         .filterNot { n ⇒ proxy.dataUI.prototypesOut.map { p ⇒ KeyPrototypeGenerator(p) }.contains(n) }
         .map { protoMapping })
+  }
 
   def computeImplicitPrototypes(mole: IMole,
-                                capsUI: ICapsuleUI,
+                                capsule: ICapsule,
                                 proxy: ITaskDataProxyUI): Unit =
     MoleMaker.taskCoreObject(proxy) match {
       case Right(x: ITask) ⇒
-        val capsule = MoleMaker.buildCapsule(
-          proxy: ITaskDataProxyUI,
-          capsuleType = capsUI.dataUI.capsuleType)
-        println("capsule Class :: " + capsule.getClass)
-        //  val capsule = new Capsule(x)
         buildUnknownPrototypes(mole, capsule)
         computeImplicitPrototypes(mole, proxy,
           MoleMaker.keyPrototypeMapping,
           capsule)
       case Left(e: Throwable) ⇒
     }
-
-  //  def checkTaskProxyImplicitsPrototypes(
-  //    mole: IMole,
-  //    scene: IMoleScene,
-  //    proxy: ITaskDataProxyUI,
-  //    clear: Boolean = true) = {
-  //    if (clear) StatusBar.clear
-  //    scene match {
-  //      case x: BuildMoleScene ⇒
-  //        try {
-  //          x.manager.capsules.values.flatMap { _.dataUI.task }.contains(proxy) match {
-  //            case true ⇒ checkMole(x)
-  //            case false ⇒ computeImplicitPrototypes(mole, proxy)
-  //          }
-  //        } catch { case e: UserBadDataError ⇒ }
-  //      case _ ⇒
-  //    }
-  //  }
 
   def checkNoEmptyCapsule(scene: IMoleScene) =
     scene.manager.capsulesInMole.foreach { c ⇒
