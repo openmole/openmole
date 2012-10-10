@@ -43,6 +43,8 @@ trait ICapsuleDataUI {
 
   def hooks_=(hm: HashMap[Class[_ <: IHook], IHookDataUI])
 
+  def unhookAll: Unit
+
   def transitionType: TransitionType.Value
 
   def capsuleType: CapsuleType
