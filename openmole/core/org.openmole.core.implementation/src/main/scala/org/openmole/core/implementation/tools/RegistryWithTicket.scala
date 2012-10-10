@@ -19,15 +19,16 @@ package org.openmole.core.implementation.tools
 
 import org.openmole.core.model.mole.ITicket
 import org.openmole.core.model.tools.IRegistryWithTicket
-import org.openmole.misc.tools.collection.Registry
-import scala.collection.mutable.WeakHashMap
+import scala.collection.mutable.{ WeakHashMap, HashMap, SynchronizedMap }
 
 class RegistryWithTicket[K, V] extends IRegistryWithTicket[K, V] {
 
-  val registries = new WeakHashMap[ITicket, Registry[K, V]]
+  class Registry extends HashMap[K, V] with SynchronizedMap[K, V]
 
-  def registry(ticket: ITicket): Registry[K, V] = synchronized {
-    registries.getOrElseUpdate(ticket, new Registry[K, V])
+  val registries = new WeakHashMap[ITicket, Registry]
+
+  def registry(ticket: ITicket): Registry = synchronized {
+    registries.getOrElseUpdate(ticket, new Registry)
   }
 
   override def consult(key: K, ticket: ITicket): Option[V] = synchronized {
@@ -35,11 +36,11 @@ class RegistryWithTicket[K, V] extends IRegistryWithTicket[K, V] {
   }
 
   override def isRegistred(key: K, ticket: ITicket): Boolean = synchronized {
-    registry(ticket).isRegistred(key)
+    registry(ticket).contains(key)
   }
 
   override def register(key: K, ticket: ITicket, value: V) = synchronized {
-    registry(ticket) += (key, value)
+    registry(ticket) += (key -> value)
   }
 
   override def remove(key: K, ticket: ITicket): Option[V] = synchronized {
@@ -49,7 +50,7 @@ class RegistryWithTicket[K, V] extends IRegistryWithTicket[K, V] {
   }
 
   override def getOrElseUpdate(key: K, ticket: ITicket, f: ⇒ V): V = synchronized {
-    registries.getOrElseUpdate(ticket, new Registry[K, V]).getOrElseUpdate(key, f)
+    registries.getOrElseUpdate(ticket, new Registry).getOrElseUpdate(key, f)
   }
 
 }

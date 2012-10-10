@@ -18,19 +18,9 @@
 package org.openmole.plugin.environment.ssh
 
 import java.util.UUID
-import org.ogf.saga.job.Job
-import org.ogf.saga.job.JobDescription
-import org.ogf.saga.job.JobFactory
-import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.control.ServiceDescription
-import org.openmole.core.batch.control.UsageControl.withToken
-import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.core.batch.environment.Runtime
-import org.openmole.core.batch.environment.BatchJob
-import org.openmole.core.batch.environment.JobService
-import org.openmole.core.batch.environment.SerializedJob
-import org.openmole.core.batch.environment.Storage
-import org.openmole.core.batch.file.URIFile
+import org.openmole.core.batch.control._
+import org.openmole.core.batch.environment._
+import org.openmole.core.batch.jobservice.BatchJob
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventDispatcher
@@ -38,23 +28,27 @@ import org.openmole.misc.eventdispatcher.EventListener
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
-import org.openmole.plugin.environment.jsaga.JSAGAJob
-import org.openmole.plugin.environment.jsaga.JSAGAJobService
+import org.openmole.plugin.environment.gridscale._
+import fr.iscpif.gridscale.tools.SSHHost
+import fr.iscpif.gridscale.authentication._
+import fr.iscpif.gridscale.jobservice.{ SSHJobDescription, SSHJobService ⇒ GSSSHJobService }
 import java.net.URI
 import SSHBatchJob._
-import org.openmole.plugin.environment.jsaga.SharedFSJobService
 import scala.collection.immutable.TreeSet
 
 object SSHJobService extends Logger
 
 import SSHJobService._
 
-class SSHJobService(
-    val uri: URI,
-    val environment: SSHEnvironment,
-    val nbSlot: Int,
-    val sharedFS: Storage,
-    override val connections: Int) extends JSAGAJobService with SharedFSJobService {
+trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
+
+  def nbSlots: Int
+
+  val jobService = new GSSSHJobService {
+    def host = js.host
+    override def port = js.port
+    def user = js.user
+  }
 
   var queue = new TreeSet[SSHBatchJob]
   var nbRunning = 0
@@ -75,7 +69,7 @@ class SSHJobService(
                   val sshJob = queue.headOption match {
                     case Some(j) ⇒
                       queue -= j
-                      j.unqueue
+                      j.submit
                     case None ⇒ nbRunning -= 1
                   }
 
@@ -86,24 +80,33 @@ class SSHJobService(
     }
   }
 
-  protected def doSubmit(serializedJob: SerializedJob, token: AccessToken) = {
-    val (remoteScript, result) = buildScript(serializedJob, token)
-    val jobDesc = newJobDescription
-    jobDesc.setAttribute(JobDescription.EXECUTABLE, "/bin/bash")
-    jobDesc.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](remoteScript.path))
+  protected def _submit(serializedJob: SerializedJob) = {
+    val (remoteScript, result) = buildScript(serializedJob)
 
-    val job = jobService.createJob(jobDesc)
-    val sshJob = new SSHBatchJob(job, result.path, this)
+    val _jobDescription = new SSHJobDescription {
+      val executable = "/bin/bash"
+      val arguments = remoteScript
+      val workDirectory = root
+    }
 
-    EventDispatcher.listen(sshJob: BatchJob, BatchJobStatusListner, classOf[BatchJob.StateChanged])
+    val sshBatchJob = new SSHBatchJob {
+      val jobService = js
+      val jobDescription = _jobDescription
+      val resultPath = result
+    }
+
+    EventDispatcher.listen(sshBatchJob: BatchJob, BatchJobStatusListner, classOf[BatchJob.StateChanged])
 
     synchronized {
-      if (nbRunning < nbSlot) {
+      if (nbRunning < nbSlots) {
         nbRunning += 1
-        sshJob.unqueue
-      } else queue += sshJob
+        sshBatchJob.submit
+      } else queue += sshBatchJob
     }
-    sshJob
+    sshBatchJob
   }
+
+  private[ssh] def submit(description: SSHJobDescription)(implicit token: AccessToken) =
+    jobService.submit(description)(authentication)
 
 }

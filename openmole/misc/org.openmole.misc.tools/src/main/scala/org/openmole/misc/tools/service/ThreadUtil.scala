@@ -26,22 +26,19 @@ object ThreadUtil extends Logger {
     override def newThread(r: Runnable): Thread = {
       val t = new Thread(r)
       t.setDaemon(true)
-      /*t.setUncaughtExceptionHandler(
-        new UncaughtExceptionHandler {
-          override def uncaughtException(t: Thread, e: Throwable) = logger.warning("", e)
-          
-        })*/
       t
     }
 
   }
+
+  val defaultExecutor = Executors.newCachedThreadPool(daemonThreadFactory)
 
   implicit def future2Function[A](f: Future[A]) = () ⇒ f.get
   implicit def function2Runnable[F](f: ⇒ F) = new Callable[F] { def call = f }
 
   def fixedThreadPool(n: Int) = Executors.newFixedThreadPool(n, daemonThreadFactory)
 
-  def background[F](f: ⇒ F)(implicit executor: ExecutorService = Executors.newSingleThreadExecutor(daemonThreadFactory)): Future[F] = executor.submit(f)
+  def background[F](f: ⇒ F)(implicit executor: ExecutorService = defaultExecutor): Future[F] = executor.submit(f)
 
   def timeout[F](f: ⇒ F)(duration: Long)(implicit executor: ExecutorService = Executors.newSingleThreadExecutor(daemonThreadFactory)): F = {
     val r = executor.submit(f)

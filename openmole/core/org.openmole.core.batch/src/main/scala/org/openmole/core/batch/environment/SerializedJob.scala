@@ -17,8 +17,10 @@
 
 package org.openmole.core.batch.environment
 
+import org.openmole.core.batch.storage._
+
 class SerializedJob(
-  val communicationStorage: Storage,
-  val communicationDirPath: String,
-  val inputFilePath: String,
+  val storage: StorageService,
+  val path: String,
+  val inputFile: String,
   val runtime: Runtime)

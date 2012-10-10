@@ -39,10 +39,7 @@ object OverSubmissionAgent extends Logger
 
 import OverSubmissionAgent._
 
-class OverSubmissionAgent(
-    environment: WeakReference[GliteEnvironment]) extends IUpdatableWithVariableDelay {
-
-  def this(environment: GliteEnvironment) = this(new WeakReference(environment))
+class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends IUpdatableWithVariableDelay {
 
   override def delay = Workspace.preferenceAsDurationInMs(OverSubmissionInterval)
 
@@ -136,7 +133,7 @@ class OverSubmissionAgent(
         }
       }
     } catch {
-      case e ⇒ logger.log(SEVERE, "Exception in oversubmission agen", e)
+      case e: Throwable ⇒ logger.log(SEVERE, "Exception in oversubmission agen", e)
     }
     true
   }

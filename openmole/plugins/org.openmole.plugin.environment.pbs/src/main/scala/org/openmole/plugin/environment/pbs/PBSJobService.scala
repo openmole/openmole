@@ -17,40 +17,42 @@
 
 package org.openmole.plugin.environment.pbs
 
+import fr.iscpif.gridscale.authentication.SSHAuthentication
+import fr.iscpif.gridscale.jobservice.{ SSHJobService, PBSJobService ⇒ GSPBSJobService, PBSJobDescription }
+import fr.iscpif.gridscale.tools.SSHHost
 import java.net.URI
-import org.ogf.saga.job.Job
-import org.ogf.saga.job.JobDescription
-import org.ogf.saga.job.JobFactory
-import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.environment.BatchJob
-import org.openmole.core.batch.environment.SerializedJob
-import org.openmole.core.batch.environment.Storage
-import org.openmole.plugin.environment.jsaga.JSAGAJob
-import org.openmole.plugin.environment.jsaga.JSAGAJobService
-import org.openmole.plugin.environment.jsaga.SharedFSJobService
+import org.openmole.core.batch.control._
+import org.openmole.core.batch.environment._
+import org.openmole.core.batch.jobservice.{ BatchJob, BatchJobId }
+import org.openmole.core.batch.storage.SimpleStorage
+import org.openmole.plugin.environment.gridscale._
 
-class PBSJobService(
-    val uri: URI,
-    val sharedFS: Storage,
-    val environment: PBSEnvironment,
-    override val connections: Int) extends JSAGAJobService with SharedFSJobService {
+trait PBSJobService extends GridScaleJobService with SSHHost with SharedStorage { js ⇒
 
-  override def installJobService = createJobService(URI.create("ssh:" + uri.getSchemeSpecificPart))
+  def queue: Option[String]
 
-  protected def doSubmit(serializedJob: SerializedJob, token: AccessToken) = {
-    val (remoteScript, result) = buildScript(serializedJob, token)
-    val jobDesc = newJobDescription
-    jobDesc.setAttribute(JobDescription.EXECUTABLE, "/bin/bash")
-    jobDesc.setVectorAttribute(JobDescription.ARGUMENTS, Array[String](remoteScript.path))
+  val jobService = new GSPBSJobService {
+    def host = js.host
+    def user = js.user
+    override def port = js.port
+  }
 
-    environment.queue match {
-      case Some(queue) ⇒
-        jobDesc.setAttribute(JobDescription.QUEUE, queue)
-      case None ⇒
+  protected def _submit(serializedJob: SerializedJob) = {
+    val (remoteScript, result) = buildScript(serializedJob)
+    val jobDescription = new PBSJobDescription {
+      val executable = "/bin/bash"
+      val arguments = remoteScript
+      override val queue = js.queue
+      val workDirectory = serializedJob.path
     }
 
-    val job = submit(jobDesc)
-    JSAGAJob(JSAGAJob.id(job), result.path, this)
+    val jid = js.jobService.submit(jobDescription)(authentication)
+
+    new BatchJob with BatchJobId {
+      val jobService = js
+      val id = jid
+      val resultPath = result
+    }
   }
 
 }

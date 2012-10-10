@@ -17,10 +17,9 @@
 
 package org.openmole.core.batch.refresh
 
-import org.openmole.core.batch.environment.BatchExecutionJob
-import org.openmole.core.batch.environment.BatchJob
-import org.openmole.core.batch.environment.SerializedJob
-import org.openmole.core.model.job.IMoleJob
+import org.openmole.core.batch.environment._
+import org.openmole.core.batch.jobservice._
+import org.openmole.core.model.job._
 
 sealed trait JobMessage
 case class Upload(job: BatchExecutionJob) extends JobMessage
@@ -34,4 +33,4 @@ case class Kill(job: BatchExecutionJob) extends JobMessage
 case class KillBatchJob(batchJob: BatchJob) extends JobMessage
 case class GetResult(job: BatchExecutionJob, serializedJob: SerializedJob, outputFilePath: String) extends JobMessage
 case class MoleJobError(moleJob: IMoleJob, job: BatchExecutionJob, exception: Throwable)
-
+case class CleanSerializedJob(job: SerializedJob)

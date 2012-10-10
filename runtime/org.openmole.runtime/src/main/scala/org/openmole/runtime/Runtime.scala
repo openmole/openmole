@@ -31,7 +31,7 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.TarArchiver._
 import org.openmole.misc.tools.service._
 import org.openmole.core.batch.authentication._
-import org.openmole.core.batch.file._
+import org.openmole.core.batch.storage._
 import org.openmole.core.implementation.execution.local._
 import org.openmole.core.batch.message._
 import org.openmole.misc.tools.service.Retry._
@@ -50,9 +50,7 @@ class Runtime {
 
   import Runtime._
 
-  def apply(baseURI: String, communicationDirPath: String, executionMessageURI: String, resultMessageURI: String, debug: Boolean) = {
-
-    val path = new RelativePath(baseURI)
+  def apply(storage: SimpleStorage, communicationDirPath: String, inputMessagePath: String, outputMessagePath: String, debug: Boolean) = {
 
     val oldOut = System.out
     val oldErr = System.err
@@ -71,7 +69,8 @@ class Runtime {
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[File, File]
 
-    val executionMesageFileCache = path.cacheUnziped(executionMessageURI)
+    val executionMesageFileCache = Workspace.newFile
+    storage.downloadGZ(inputMessagePath, executionMesageFileCache)
     val executionMessage = SerializerService.deserialize[ExecutionMessage](executionMesageFileCache)
     executionMesageFileCache.delete
 
@@ -80,7 +79,7 @@ class Runtime {
 
       for (plugin ← executionMessage.plugins) {
         val inPluginDirLocalFile = File.createTempFile("plugin", ".jar", pluginDir)
-        val replicaFileCache = path.toGZURIFile(plugin.replicaPath).copy(inPluginDirLocalFile)
+        val replicaFileCache = storage.downloadGZ(plugin.path, inPluginDirLocalFile)
 
         if (HashService.computeHash(inPluginDirLocalFile) != plugin.hash)
           throw new InternalProcessingError("Hash of a plugin does't match.")
@@ -96,12 +95,12 @@ class Runtime {
 
         //To avoid getting twice the same plugin with different path
         if (!usedFiles.containsKey(repliURI.src)) {
-
-          val cache = path.cacheUnziped(repliURI.replicaPath)
+          val cache = Workspace.newFile
+          storage.downloadGZ(repliURI.path, cache)
           val cacheHash = HashService.computeHash(cache).toString
 
           if (cacheHash != repliURI.hash)
-            throw new InternalProcessingError("Hash is incorrect for file " + repliURI.src.toString + " replicated at " + path.toStringURI(repliURI.replicaPath))
+            throw new InternalProcessingError("Hash is incorrect for file " + repliURI.src.toString + " replicated at " + repliURI.path)
 
           val local = if (repliURI.directory) {
             val local = Workspace.newDir("dirReplica")
@@ -116,7 +115,8 @@ class Runtime {
         }
       }
 
-      val jobsFileCache = path.cacheUnziped(executionMessage.jobs.path)
+      val jobsFileCache = Workspace.newFile
+      storage.downloadGZ(executionMessage.jobs.path, jobsFileCache)
 
       if (HashService.computeHash(jobsFileCache).toString != executionMessage.jobs.hash) throw new InternalProcessingError("Hash of the execution job does't match.")
 
@@ -138,14 +138,14 @@ class Runtime {
       val contextResultFile = Workspace.newFile
 
       SerializerService.serializeAndArchiveFiles(contextResults, contextResultFile)
-      val uploadedcontextResults = new GZURIFile(path.toURIFile(executionMessage.communicationDirPath).newFileInDir("uplodedTar", ".tgz"))
-      val result = new FileMessage(uploadedcontextResults.path, HashService.computeHash(contextResultFile).toString)
-      retry(URIFile.copy(contextResultFile, uploadedcontextResults), NbRetry)
+      val uploadedcontextResults = storage.child(executionMessage.communicationDirPath, Storage.uniqName("uplodedTar", ".tgz"))
+      val result = new FileMessage(uploadedcontextResults, HashService.computeHash(contextResultFile).toString)
+      retry(storage.uploadGZ(contextResultFile, uploadedcontextResults), NbRetry)
       contextResultFile.delete
       Left(result)
 
     } catch {
-      case t ⇒ {
+      case t: Throwable ⇒ {
         if (debug) logger.log(SEVERE, "", t)
         Right(t)
       }
@@ -159,18 +159,18 @@ class Runtime {
 
     val outputMessage =
       if (out.length != 0) {
-        val output = new GZURIFile(path.toURIFile(executionMessage.communicationDirPath).newFileInDir("output", ".txt"))
-        URIFile.copy(out, output)
-        Some(new FileMessage(output.path, HashService.computeHash(out).toString))
+        val output = storage.child(executionMessage.communicationDirPath, Storage.uniqName("output", ".txt"))
+        storage.uploadGZ(out, output)
+        Some(new FileMessage(output, HashService.computeHash(out).toString))
       } else None
 
     out.delete
 
     val errorMessage =
       if (err.length != 0) {
-        val errout = new GZURIFile(path.toURIFile(executionMessage.communicationDirPath).newFileInDir("outputError", ".txt"))
-        URIFile.copy(err, errout)
-        Some(new FileMessage(errout.path, HashService.computeHash(err).toString))
+        val errout = storage.child(executionMessage.communicationDirPath, Storage.uniqName("outputError", ".txt"))
+        storage.uploadGZ(err, errout)
+        Some(new FileMessage(errout, HashService.computeHash(err).toString))
       } else None
 
     err.delete
@@ -179,10 +179,8 @@ class Runtime {
 
     val outputLocal = Workspace.newFile("output", ".res")
     SerializerService.serialize(runtimeResult, outputLocal)
-    try {
-      val output = path.toGZURIFile(resultMessageURI)
-      retry(URIFile.copy(outputLocal, output), NbRetry)
-    } finally outputLocal.delete
+    try retry(storage.uploadGZ(outputLocal, outputMessagePath), NbRetry)
+    finally outputLocal.delete
   }
 
 }

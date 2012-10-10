@@ -18,17 +18,21 @@
 package org.openmole.plugin.environment.desktopgrid
 
 import java.io.File
-import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.control.ServiceDescription
-import org.openmole.core.batch.environment.BatchJob
-import org.openmole.core.batch.environment.JobService
-import org.openmole.core.batch.environment.SerializedJob
+import org.openmole.core.batch.control._
+import org.openmole.core.batch.environment._
 import collection.JavaConversions._
+import org.openmole.core.batch.jobservice._
 import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.core.model.execution.ExecutionState._
 
-class DesktopGridJobService(val environment: DesktopGridEnvironment, val description: ServiceDescription) extends JobService {
-  import DesktopEnvironment._
+import DesktopGridEnvironment._
+
+trait DesktopGridJobService extends JobService { js ⇒
+
+  type J = String
+
+  def environment: DesktopGridEnvironment
 
   val timeStempsDir = new File(environment.path, timeStempsDirName) { mkdirs }
   val jobsDir = new File(environment.path, jobsDirName) { mkdirs }
@@ -41,17 +45,34 @@ class DesktopGridJobService(val environment: DesktopGridEnvironment, val descrip
   def resultExists(jobId: String) = resultsDir.list.exists { _.startsWith(jobId) }
   def results(jobId: String) = resultsDir.listFiles.filter { _.getName.startsWith(jobId) }
 
-  override protected def doSubmit(serializedJob: SerializedJob, token: AccessToken): BatchJob = {
-    val jobId = new File(serializedJob.communicationDirPath).getName
+  protected def _submit(serializedJob: SerializedJob): BatchJob = {
+    val jobId = new File(serializedJob.path).getName
     import serializedJob._
-    val desktopJobMessage = new DesktopGridJobMessage(runtime.runtime, runtime.environmentPlugins, environment.runtimeMemory, inputFilePath)
+    val desktopJobMessage = new DesktopGridJobMessage(runtime.runtime, runtime.environmentPlugins, environment.runtimeMemoryValue, inputFile)
 
     val os = jobSubmissionFile(jobId).gzipedBufferedOutputStream
     try SerializerService.serialize(desktopJobMessage, os)
     finally os.close
 
-    new DesktopGridJob(this, jobId)
+    new BatchJob with BatchJobId {
+      val id = jobId
+      val jobService = js
+      val resultPath = results(jobId).head.getAbsolutePath
+    }
   }
 
-  //override def test = true
+  protected def _state(j: J): ExecutionState = {
+    if (!timeStempsExists(j)) SUBMITTED
+    else if (!resultExists(j)) RUNNING
+    else DONE
+  }
+
+  protected def _cancel(j: J) = {}
+
+  protected def _purge(j: J) = {
+    jobSubmissionFile(j).delete
+    timeStemps(j).foreach { _.delete }
+    results(j).foreach { _.delete }
+  }
+
 }

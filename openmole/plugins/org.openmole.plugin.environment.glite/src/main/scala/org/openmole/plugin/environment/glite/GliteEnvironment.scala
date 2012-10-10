@@ -17,19 +17,21 @@
 
 package org.openmole.plugin.environment.glite
 
+import org.openmole.misc.filedeleter.FileDeleter
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.ConfigurationLocation
+import fr.iscpif.gridscale.information.BDII
 import java.net.URI
 import java.net.URISyntaxException
 import java.util.logging.Level
 import java.util.logging.Logger
-import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.core.batch.environment.ExecutionJobRegistry
-import org.openmole.core.batch.environment.PersistentStorage
+import org.openmole.core.batch.environment._
+import org.openmole.core.batch.storage._
 import org.openmole.misc.workspace.Workspace
-import org.openmole.plugin.environment.jsaga._
-
-import scala.collection.JavaConversions._
+import org.openmole.misc.exception._
+import org.openmole.plugin.environment.gridscale._
+import org.globus.gsi.gssapi.GlobusGSSCredentialImpl
+import ref.WeakReference
 
 object GliteEnvironment {
 
@@ -85,44 +87,67 @@ class GliteEnvironment(
     val voName: String,
     val vomsURL: String,
     val bdii: String,
-    val myProxy: Option[MyProxy] = None,
-    val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory,
-    val requirements: Iterable[Requirement] = List.empty,
-    val fqan: String = "") extends JSAGAEnvironment {
+    val fqan: Option[String] = None,
+    override val runtimeMemory: Option[Int] = None) extends BatchEnvironment { env ⇒
 
   import GliteEnvironment._
 
+  val id = voName + "@" + vomsURL
   val threadsBySE = Workspace.preferenceAsInt(LocalThreadsBySE)
   val threadsByWMS = Workspace.preferenceAsInt(LocalThreadsByWMS)
 
-  Updater.registerForUpdate(new OverSubmissionAgent(this))
+  type JS = GliteJobService
+  type SS = PersistentStorageService
 
-  override def allJobServices: Iterable[GliteJobService] = {
-    val jss = getBDII.queryWMSURIs(voName, Workspace.preferenceAsDurationInMs(FetchRessourcesTimeOut).toInt)
+  Updater.registerForUpdate(new OverSubmissionAgent(WeakReference(this)))
+  Updater.registerForUpdate(new ProxyChecker(WeakReference(this)))
 
-    val jobServices = jss.flatMap {
-      js ⇒
-        try {
-          val wms = new URI("wms:" + js.getRawSchemeSpecificPart)
-          val jobService = new GliteJobService(wms, this, threadsByWMS)
-          Some(jobService)
-        } catch {
-          case (e: URISyntaxException) ⇒
-            Logger.getLogger(GliteEnvironment.getClass.getName).log(Level.WARNING, "wms:" + js.getRawSchemeSpecificPart(), e);
-            None
-        }
+  @transient lazy val proxyFile = {
+    val f = Workspace.newFile("proxy", ".x509")
+    FileDeleter.deleteWhenGarbageCollected(f)
+    f
+  }
+
+  private def generateProxy = Workspace.persistentList(classOf[GliteAuthentication]).headOption match {
+    case Some(a) ⇒ a
+      ._2.apply(
+        vomsURL,
+        voName,
+        proxyFile,
+        Workspace.preferenceAsDurationInS(ProxyTime),
+        fqan)
+    case None ⇒ throw new UserBadDataError("No athentication has been initialized for glite.")
+  }
+
+  var authentication = generateProxy
+
+  def renewAuthentication = {
+    authentication = generateProxy
+    jobServices.foreach(_.delegateProxy)
+  }
+
+  override def allJobServices = {
+    val jss = getBDII.queryWMS(voName, Workspace.preferenceAsDurationInS(FetchRessourcesTimeOut).toInt)
+    jss.map {
+      js ⇒ new GliteJobService(js, this, threadsByWMS)
     }
-
-    Logger.getLogger(classOf[GliteEnvironment].getName).fine(jobServices.toString)
-    jobServices.toList
   }
 
   override def allStorages = {
-    val stors = getBDII.querySRMURIs(voName, Workspace.preferenceAsDurationInMs(GliteEnvironment.FetchRessourcesTimeOut).toInt)
-    stors.map { new PersistentStorage(this, _, threadsBySE) }
+    val stors = getBDII.querySRM(voName, Workspace.preferenceAsDurationInS(GliteEnvironment.FetchRessourcesTimeOut).toInt)
+    stors.map {
+      s ⇒
+        new PersistentStorageService {
+          val storage = s
+          val url = new URI("srm", null, s.host, s.port, null, null, null)
+          val remoteStorage = new RemoteGliteStorage(s)
+          val environment = env
+          val root = ""
+          val connections = threadsBySE
+          def authentication = env.authentication
+        }
+    }
   }
-
-  @transient lazy val authentication = new GliteAuthentication(voName, vomsURL, myProxy, fqan)
 
   private def getBDII: BDII = new BDII(bdii)
 

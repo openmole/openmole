@@ -17,8 +17,6 @@
 
 package org.openmole.plugin.environment.glite
 
-import fr.in2p3.jsaga.adaptor.security.VOMSContext
-import org.ogf.saga.context.Context
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.updater.IUpdatableWithVariableDelay
 import org.openmole.misc.workspace.Workspace
@@ -28,15 +26,12 @@ object ProxyChecker extends Logger
 
 import ProxyChecker._
 
-class ProxyChecker(
-    context: Context,
-    authentication: WeakReference[GliteAuthentication],
-    expires: Boolean) extends IUpdatableWithVariableDelay {
+class ProxyChecker(environment: WeakReference[GliteEnvironment]) extends IUpdatableWithVariableDelay {
 
   override def update: Boolean =
-    authentication.get match {
-      case Some(auth) ⇒
-        try auth.reinit(context, expires)
+    environment.get match {
+      case Some(env) ⇒
+        try env.renewAuthentication
         catch {
           case (ex: Throwable) ⇒ logger.log(SEVERE, "Error while renewing the proxy", ex)
         }
@@ -45,21 +40,13 @@ class ProxyChecker(
     }
 
   def delay =
-    try {
-      val remainingTime =
-        (if (context.getAttribute(Context.TYPE) == "VOMSMyProxy") context.getAttribute(VOMSContext.DELEGATIONLIFETIME).toLong
-        else context.getAttribute(Context.LIFETIME).toLong) * 1000
-      val interval =
+    environment.get match {
+      case Some(env) ⇒
+        val remainingTime = env.authentication.getRemainingLifetime
         math.max(
           (remainingTime * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong,
           Workspace.preferenceAsDurationInMs(GliteEnvironment.MinProxyRenewal))
-
-      logger.fine("Renew proxy in " + interval)
-      interval
-    } catch {
-      case e ⇒
-        logger.log(SEVERE, "Error while getting the check interval", e)
-        Workspace.preferenceAsDurationInMs(GliteEnvironment.MinProxyRenewal)
+      case None ⇒ 0
     }
 
 }

@@ -44,6 +44,7 @@ import java.util.logging.Logger
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import scala.io.Source
+import org.openmole.misc.tools.service._
 
 object FileUtil {
 
@@ -58,10 +59,10 @@ object FileUtil {
   }
 
   val DefaultBufferSize = 32 * 1024
+  implicit def inputStream2InputStreamDecorator(is: InputStream) = new InputStreamDecorator(is)
+  implicit def file2FileDecorator(file: File) = new FileDecorator(file)
 
   def copy(source: FileChannel, destination: FileChannel): Unit = destination.transferFrom(source, 0, source.size)
-
-  implicit def inputStream2InputStreamDecorator(is: InputStream) = new InputStreamDecorator(is)
 
   class InputStreamDecorator(is: InputStream) {
 
@@ -70,9 +71,15 @@ object FileUtil {
       Iterator.continually(is.read(buffer)).takeWhile(_ != -1).foreach { to.write(buffer, 0, _) }
     }
 
+    def copy(to: File, maxRead: Int, timeout: Long): Unit = {
+      val os = to.bufferedOutputStream
+      try copy(os, maxRead, timeout)
+      finally os.close
+    }
+
     def copy(to: OutputStream, maxRead: Int, timeout: Long) = {
       val buffer = new Array[Byte](maxRead)
-      val executor = Executors.newSingleThreadExecutor
+      val executor = ThreadUtil.defaultExecutor
       val reader = new ReaderRunnable(buffer, is, maxRead)
 
       Iterator.continually {
@@ -97,6 +104,8 @@ object FileUtil {
       }
     }
 
+    def toGZ = new GZIPInputStream(is)
+
     def copy(file: File): Unit = {
       val os = new FileOutputStream(file)
       try copy(os)
@@ -110,11 +119,11 @@ object FileUtil {
       finally os.close
     }
 
+    def toGZ = new GZIPOutputStream(os)
+
     def append(content: String) = new PrintWriter(os).append(content).flush
     def appendLine(line: String) = append(line + "\n")
   }
-
-  implicit def file2FileDecorator(file: File) = new FileDecorator(file)
 
   class FileDecorator(file: File) {
 
@@ -256,6 +265,12 @@ object FileUtil {
       try fromIS.copy(to) finally fromIS.close
     }
 
+    def copy(to: OutputStream, maxRead: Int, timeout: Long) = {
+      val is = bufferedInputStream
+      try is.copy(to, maxRead, timeout)
+      finally is.close
+    }
+
     def move(to: File) = {
       if (!file.renameTo(to)) {
         copy(to)
@@ -300,11 +315,9 @@ object FileUtil {
       }
 
     def bufferedInputStream = new BufferedInputStream(new FileInputStream(file))
-
     def bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(file))
 
     def gzipedBufferedInputStream = new GZIPInputStream(bufferedInputStream)
-
     def gzipedBufferedOutputStream = new GZIPOutputStream(bufferedOutputStream)
 
     def archiveDirWithRelativePathNoVariableContent(toArchive: File) = {

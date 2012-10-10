@@ -42,10 +42,10 @@ object DBServer extends App {
     configuration.common.objectClass(classOf[Replica]).cascadeOnDelete(true)
     configuration.common.bTreeNodeSize(256)
     configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
-    configuration.common.objectClass(classOf[Replica]).objectField("_source").indexed(true)
-    configuration.common.objectClass(classOf[Replica]).objectField("_storageDescription").indexed(true)
-    configuration.common.objectClass(classOf[Replica]).objectField("_authenticationKey").indexed(true)
-    configuration.common.objectClass(classOf[Replica]).objectField("_destination").indexed(true)
+    configuration.common.objectClass(classOf[Replica]).objectField("_storage").indexed(true)
+    configuration.common.objectClass(classOf[Replica]).objectField("_path").indexed(true)
+    configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
+    configuration.common.objectClass(classOf[Replica]).objectField("_environment").indexed(true)
     configuration.file.lockDatabaseFile(false)
     configuration
   }

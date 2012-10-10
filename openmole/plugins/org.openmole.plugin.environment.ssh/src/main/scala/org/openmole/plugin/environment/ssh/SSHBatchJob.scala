@@ -18,45 +18,49 @@
 package org.openmole.plugin.environment.ssh
 
 import java.util.concurrent.atomic.AtomicInteger
-import org.ogf.saga.job.Job
 import org.openmole.core.batch.environment._
+import org.openmole.core.batch.jobservice.BatchJob
 import org.openmole.core.model.execution.ExecutionState._
-import org.openmole.plugin.environment.jsaga._
+import org.openmole.misc.exception._
+import org.openmole.core.batch.control._
+import fr.iscpif.gridscale.jobservice.SSHJobDescription
 
 object SSHBatchJob {
 
-  val id = new AtomicInteger
-  implicit val oder = Ordering.by[SSHBatchJob, Int](j ⇒ j.id)
+  val sshId = new AtomicInteger
+  implicit val oder = Ordering.by[SSHBatchJob, Int](j ⇒ j.sshId)
 
 }
 
-class SSHBatchJob(job: Job, override val resultPath: String, jobService: SSHJobService) extends JSAGAJob(resultPath, jobService) {
+trait SSHBatchJob extends BatchJob {
 
-  val id = SSHBatchJob.id.getAndIncrement
-  var jobIdOption: Option[String] = None
+  val jobService: SSHJobService
+  def jobDescription: SSHJobDescription
+  var id: Option[jobService.J] = None
 
-  def jobId = jobIdOption match {
-    case Some(jobId) ⇒ jobId
-    case None ⇒ throw new InternalError("Bug: JSAGA job is not lanched yet.")
+  val sshId = SSHBatchJob.sshId.getAndIncrement
+
+  def submit = synchronized {
+    id = Some(withToken { implicit t ⇒ jobService.submit(jobDescription) })
   }
 
-  def unqueue = synchronized {
-    JSAGAJobService.submit(job)
-    jobIdOption = Some(JSAGAJob.id(job))
-  }
-
-  override def deleteJob = synchronized {
-    jobIdOption match {
-      case Some(j) ⇒ super.deleteJob
-      case None ⇒
-    }
-  }
-
-  override def updatedState = synchronized {
-    jobIdOption match {
-      case Some(j) ⇒ super.updatedState
+  def updateState(implicit token: AccessToken) = synchronized {
+    id match {
+      case Some(id) ⇒ super.updateState(id)
       case None ⇒ SUBMITTED
     }
   }
+
+  def kill(implicit token: AccessToken) =
+    id match {
+      case Some(id) ⇒ super.kill(id)
+      case None ⇒ state = KILLED
+    }
+
+  def purge(implicit token: AccessToken) =
+    id match {
+      case Some(id) ⇒ super.purge(id)
+      case None ⇒
+    }
 
 }

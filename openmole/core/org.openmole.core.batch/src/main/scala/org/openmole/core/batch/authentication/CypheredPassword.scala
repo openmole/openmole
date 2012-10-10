@@ -19,7 +19,7 @@ package org.openmole.core.batch.authentication
 
 import org.openmole.misc.workspace.Workspace
 
-trait CypheredPassword { this: AuthenticationMethod ⇒
+trait CypheredPassword extends Authentication {
   def cypheredPassword: String
 
   def password =

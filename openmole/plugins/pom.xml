@@ -21,7 +21,7 @@
 
     <modules>
         <module>org.openmole.plugin.tools.groovy</module>
-        <module>org.openmole.plugin.environment.jsaga</module>
+        <module>org.openmole.plugin.environment.gridscale</module>
         <module>org.openmole.plugin.environment.glite</module>
 	<module>org.openmole.plugin.environment.desktopgrid</module>
 	<module>org.openmole.plugin.environment.ssh</module>

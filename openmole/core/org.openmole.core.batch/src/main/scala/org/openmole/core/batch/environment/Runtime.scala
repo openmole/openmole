@@ -17,12 +17,11 @@
 
 package org.openmole.core.batch.environment
 
-import java.io.File
 import org.openmole.core.batch.message.FileMessage
 
 class Runtime(
+  val storage: FileMessage,
   val runtime: FileMessage,
   val environmentPlugins: Iterable[FileMessage],
-  val authentication: FileMessage,
   val jvmLinuxI386: FileMessage,
   val jvmLinuxX64: FileMessage)

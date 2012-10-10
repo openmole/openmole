@@ -21,14 +21,20 @@ import com.db4o.activation.ActivationPurpose
 import com.db4o.ta.Activatable
 import java.io.File
 
-class Replica(_source: String, _storageDescription: String, _hash: String, _authenticationKey: String, _destination: String, _lastCheckExists: java.lang.Long) extends Activatable {
+class Replica(
+    _source: String = null,
+    _storage: String = null,
+    _path: String = null,
+    _hash: String = null,
+    _environment: String = null,
+    _lastCheckExists: java.lang.Long = null) extends Activatable {
 
   @transient
   var activator: com.db4o.activation.Activator = null
 
-  def destination: String = {
+  def path: String = {
     activate(ActivationPurpose.READ)
-    _destination
+    _path
   }
 
   def lastCheckExists = {
@@ -43,14 +49,14 @@ class Replica(_source: String, _storageDescription: String, _hash: String, _auth
 
   def sourceFile = new File(source)
 
-  def storageDescriptionString = {
+  def storage = {
     activate(ActivationPurpose.READ)
-    _storageDescription
+    _storage
   }
 
-  def authenticationKey = {
+  def environment = {
     activate(ActivationPurpose.READ)
-    _authenticationKey
+    _environment
   }
 
   override def activate(purpose: ActivationPurpose) = synchronized {
@@ -71,17 +77,8 @@ class Replica(_source: String, _storageDescription: String, _hash: String, _auth
     _hash
   }
 
-  @transient lazy val tuple = (source, storageDescriptionString, hash, authenticationKey, destination)
-
-  override def hashCode = tuple.hashCode
-
-  override def equals(other: Any): Boolean = {
-    if (other == null) false
-    else if (!classOf[Replica].isAssignableFrom(other.asInstanceOf[AnyRef].getClass)) false
-    else tuple.equals(other.asInstanceOf[Replica].tuple)
-  }
-
   override def toString =
-    "Replica [destination=" + destination + ", authenticationKey=" + authenticationKey + ", hash=" + hash + ", source=" + source + ", storageDescription=" + storageDescriptionString + "," + lastCheckExists + "]";
+    "Replica [storage=" + storage + ", path=" + path + ", environment=" + environment + ", hash=" + hash + ", source=" + source + ", lastCheck=" + lastCheckExists + "]";
 
 }
+

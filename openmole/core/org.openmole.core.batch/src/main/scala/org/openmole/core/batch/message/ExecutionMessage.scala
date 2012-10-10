@@ -17,4 +17,8 @@
 
 package org.openmole.core.batch.message
 
-class ExecutionMessage(val plugins: Iterable[ReplicatedFile], val files: Iterable[ReplicatedFile], val jobs: FileMessage, val communicationDirPath: String)
+class ExecutionMessage(
+  val plugins: Iterable[ReplicatedFile],
+  val files: Iterable[ReplicatedFile],
+  val jobs: FileMessage,
+  val communicationDirPath: String)

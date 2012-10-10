@@ -18,13 +18,11 @@
 package org.openmole.plugin.environment.ssh
 
 import java.net.URI
-import org.openmole.core.batch.control.ServiceDescription
-import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.core.batch.environment.JobService
-import org.openmole.core.batch.environment.PersistentStorage
+import org.openmole.core.batch.environment._
+import org.openmole.plugin.environment.gridscale._
+import org.openmole.core.batch.storage.PersistentStorageService
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
-import org.openmole.plugin.environment.jsaga.JSAGAEnvironment
 
 object SSHEnvironment {
   val MaxConnections = new ConfigurationLocation("SSHEnvironment", "MaxConnections")
@@ -37,27 +35,33 @@ object SSHEnvironment {
 import SSHEnvironment._
 
 class SSHEnvironment(
-    login: String,
-    host: String,
-    nbSlots: Int,
-    dir: String = "/tmp/",
-    val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory) extends JSAGAEnvironment {
+    val user: String,
+    val host: String,
+    val nbSlots: Int,
+    override val port: Int = 22,
+    val path: String = "/tmp/",
+    override val runtimeMemory: Option[Int] = None) extends BatchEnvironment with SSHAccess { env ⇒
 
-  def requirements = List.empty
+  type SS = SSHStorageService
+  type JS = SSHJobService
 
-  val storage = PersistentStorage.createBaseDir(this, URI.create("sftp://" + login + "@" + host), dir, Workspace.preferenceAsInt(MaxConnections))
+  val id = new URI("ssh", env.user, env.host, env.port, null, null, null).toString
 
-  val jobService = new SSHJobService(
-    URI.create("ssh://" + login + '@' + host),
-    this,
-    nbSlots,
-    storage,
-    Workspace.preferenceAsInt(MaxConnections))
+  val storage = new PersistentStorageService with SSHStorageService with ThisHost {
+    def connections = Workspace.preferenceAsInt(MaxConnections)
+    def root = env.path
+    def environment = env
+  }
+
+  val jobService = new SSHJobService with ThisHost {
+    def connections = Workspace.preferenceAsInt(MaxConnections)
+    def nbSlots = env.nbSlots
+    def root = env.path
+    def environment = env
+  }
 
   def allStorages = List(storage)
-  def allJobServices: Iterable[JobService] = List(jobService)
-
-  override def authentication = SSHAuthentication(login, host)
+  def allJobServices = List(jobService)
 
   override def minUpdateInterval = Workspace.preferenceAsDurationInMs(UpdateInterval)
   override def maxUpdateInterval = Workspace.preferenceAsDurationInMs(UpdateInterval)

@@ -83,7 +83,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>fr.in2p3.jsaga</artifactId>
+            <artifactId>fr.iscpif.gridscale</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
@@ -100,10 +100,6 @@
     <!-- ************************************************************* -->
 
     <packaging>bundle</packaging>
-
-    <properties>
-        <bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
-    </properties>
     
 </project>
 

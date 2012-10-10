@@ -26,7 +26,6 @@ import akka.dispatch.UnboundedPriorityMailbox
 import akka.routing.DefaultResizer
 import akka.routing.RoundRobinRouter
 import akka.routing.SmallestMailboxRouter
-import org.openmole.core.batch.file.URIFile
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.execution.IEnvironment
 import org.openmole.misc.eventdispatcher.EventDispatcher
@@ -75,6 +74,7 @@ akka {
   val refresher = workers.actorOf(Props(new RefreshActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
   val resultGetters = workers.actorOf(Props(new GetResultActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
   val killer = workers.actorOf(Props(new KillerActor).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
+  val cleaner = workers.actorOf(Props(new CleanerActor).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
 
   def receive = {
     case Upload(job) ⇒ uploader ! Upload(job)
@@ -97,19 +97,8 @@ akka {
       resultGetters ! GetResult(job, sj, out)
     case Kill(job) ⇒
       job.state = ExecutionState.KILLED
-
-      job.batchJob match {
-        case Some(bj) ⇒ self ! KillBatchJob(bj)
-        case None ⇒
-      }
-
-      job.serializedJob match {
-        case Some(sj) ⇒
-          val path = sj.communicationStorage.path
-          URIFile.clean(path.toURIFile(sj.communicationDirPath))
-        case None ⇒
-      }
-
+      job.batchJob.foreach(bj ⇒ self ! KillBatchJob(bj))
+      job.serializedJob.foreach(j ⇒ cleaner ! CleanSerializedJob(j))
     case Error(job, exception) ⇒
       val level = exception match {
         case e: JobRemoteExecutionException ⇒ WARNING

@@ -28,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.plugin.environment.jsaga</artifactId>
+            <artifactId>org.openmole.plugin.environment.gridscale</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -49,11 +49,6 @@
 	<dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>com.ice.tar</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>fr.in2p3.jsaga</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

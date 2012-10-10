@@ -52,6 +52,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>com.github.scopt</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.equinox</groupId>
             <artifactId>org.eclipse.equinox.app</artifactId>
             <scope>provided</scope>

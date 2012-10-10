@@ -17,14 +17,15 @@
 
 package org.openmole.plugin.environment.pbs
 
+import fr.iscpif.gridscale.storage.SSHStorage
+import fr.iscpif.gridscale.tools.SSHHost
 import java.net.URI
-import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.core.batch.environment.JobService
-import org.openmole.core.batch.environment.PersistentStorage
-import org.openmole.misc.workspace.ConfigurationLocation
-import org.openmole.misc.workspace.Workspace
-import org.openmole.plugin.environment.jsaga.JSAGAEnvironment
-import org.openmole.plugin.environment.jsaga.Requirement
+import org.openmole.core.batch.authentication.SSHAuthentication
+import org.openmole.core.batch.environment._
+import org.openmole.core.batch.storage.PersistentStorageService
+import org.openmole.core.batch.storage.StorageService
+import org.openmole.misc.workspace._
+import org.openmole.plugin.environment.gridscale._
 
 object PBSEnvironment {
   val MaxConnections = new ConfigurationLocation("PBSEnvironment", "MaxConnections")
@@ -35,28 +36,56 @@ object PBSEnvironment {
 import PBSEnvironment._
 
 class PBSEnvironment(
-    login: String,
-    host: String,
-    dir: String,
+    val user: String,
+    val host: String,
+    val path: String,
+    override val port: Int = 22,
     val queue: Option[String] = None,
-    val requirements: Iterable[Requirement] = List.empty,
-    val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory) extends JSAGAEnvironment {
+    override val runtimeMemory: Option[Int] = None) extends BatchEnvironment with SSHAccess { env ⇒
+
+  type SS = PersistentStorageService
+  type JS = PBSJobService
+
+  /*trait ThisSSHHost extends SSHHost {
+    def user = env.user
+    def host = env.host
+    override def port = env.port
+    def authentication = env.authentication
+  }*/
+
+  val id = new URI("pbs", env.user, env.host, env.port, null, null, null).toString
 
   val storage =
-    PersistentStorage.createBaseDir(
-      this,
-      URI.create("sftp://" + login + "@" + host),
-      dir,
-      Workspace.preferenceAsInt(MaxConnections))
+    new PersistentStorageService with SSHStorageService with ThisHost {
+      def connections = Workspace.preferenceAsInt(MaxConnections)
+      def environment = env
+      def root = env.path
+    }
 
-  val jobService = new PBSJobService(
-    URI.create("pbs-ssh://" + login + '@' + host + "/" + dir),
-    storage,
-    this,
-    Workspace.preferenceAsInt(MaxConnections))
+  val jobService = new PBSJobService with ThisHost {
+    def connections = Workspace.preferenceAsInt(MaxConnections)
+    def queue = env.queue
+    def environment = env
+    def root = env.path
+  }
 
   def allStorages = List(storage)
-  def allJobServices: Iterable[JobService] = List(jobService)
+  def allJobServices = List(jobService)
 
-  override def authentication = PBSAuthentication(login, host)
+  //    new PersistentStorageService(
+  //      this,
+  //      URI.create("sftp://" + login + "@" + host),
+  //      dir,
+  //      Workspace.preferenceAsInt(MaxConnections))
+
+  //  val jobService = new PBSJobService(
+  //    URI.create("pbs-ssh://" + login + '@' + host + "/" + dir),
+  //    storage,
+  //    this,
+  //    Workspace.preferenceAsInt(MaxConnections))
+  //
+  //  def allStorages = List(storage)
+  //  def allJobServices: Iterable[JobService] = List(jobService)
+  //
+  //  override def authentication = PBSAuthentication(login, host)
 }

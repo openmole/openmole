@@ -21,53 +21,46 @@ import akka.actor.Actor
 import akka.actor.ActorRef
 import java.io.FileInputStream
 import java.io.IOException
-import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.control.UsageControl
-import org.openmole.core.batch.environment.BatchExecutionJob
-import org.openmole.core.batch.environment.StatisticSample
-import org.openmole.core.batch.environment.Storage
-import org.openmole.core.batch.message.ContextResults
-import org.openmole.core.batch.message.FileMessage
-import org.openmole.core.batch.message.RuntimeResult
-import org.openmole.core.model.execution.ExecutionState
-import org.openmole.core.model.job.IJob
-import org.openmole.core.model.job.State
+import org.openmole.core.batch.control._
+import org.openmole.core.batch.environment._
+import org.openmole.core.batch.message._
+import org.openmole.core.batch.storage._
+import org.openmole.core.model.execution._
+import org.openmole.core.model.job._
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.hashservice.HashService
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.service.Logger
+import org.openmole.misc.workspace._
 
 object GetResultActor extends Logger
 
 class GetResultActor(jobManager: ActorRef) extends Actor {
   def receive = {
     case GetResult(job, sj, resultPath) ⇒
-      try getResult(sj.communicationStorage, resultPath, job)
+      try getResult(sj.storage, resultPath, job)
       catch {
-        case e ⇒ jobManager ! Error(job, e)
+        case e: Throwable ⇒ jobManager ! Error(job, e)
       }
       jobManager ! Kill(job)
       System.runFinalization
   }
 
-  def getResult(communicationStorage: Storage, outputFilePath: String, batchJob: BatchExecutionJob): Unit = {
-    import communicationStorage._
+  def getResult(storage: StorageService, outputFilePath: String, batchJob: BatchExecutionJob): Unit = {
     import batchJob.job
 
-    val token = UsageControl.get(communicationStorage.description).waitAToken
+    UsageControl.withToken(storage.id) { implicit token ⇒
+      val runtimeResult = getRuntimeResult(outputFilePath, storage)
 
-    try {
-      val runtimeResult = getRuntimeResult(outputFilePath, communicationStorage, token)
-
-      display(runtimeResult.stdOut, "Output", communicationStorage, token)
-      display(runtimeResult.stdErr, "Error output", communicationStorage, token)
+      display(runtimeResult.stdOut, "Output", storage)
+      display(runtimeResult.stdErr, "Error output", storage)
 
       runtimeResult.result match {
         case Right(exception) ⇒ throw new JobRemoteExecutionException(exception, "Fatal exception thrown durring the execution of the job execution on the excution node")
         case Left(result) ⇒
-          val contextResults = getContextResults(result, communicationStorage, token)
+          val contextResults = getContextResults(result, storage)
 
           var firstRunning = Long.MaxValue
           var lastCompleted = 0L
@@ -82,11 +75,11 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
 
                   executionResult._1 match {
                     case Left(context) ⇒
-                      val timeStamps = executionResult._2
+                      /*val timeStamps = executionResult._2
                       val completed = timeStamps.view.reverse.find(_.state == State.COMPLETED).get.time
                       if (completed > lastCompleted) lastCompleted = completed
                       val running = timeStamps.view.reverse.find(_.state == State.RUNNING).get.time
-                      if (running < firstRunning) firstRunning = running
+                      if (running < firstRunning) firstRunning = running*/
                       moleJob.finish(context, executionResult._2)
                     case Right(e) ⇒
                       sender ! MoleJobError(moleJob, batchJob, e)
@@ -96,29 +89,31 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
             }
           }
 
-          environment.statistics += new StatisticSample(batchJob.batchJob.get)
+          batchJob.environment.statistics += new StatisticSample(batchJob.batchJob.get)
 
         /*if(firstRunning != Long.MaxValue && lastCompleted != 0L) 
-            environment.statistics += new StatisticSample(batchJob.batchJob.get.timeStamp(ExecutionState.SUBMITTED), firstRunning, lastCompleted)*/
+           environment.statistics += new StatisticSample(batchJob.batchJob.get.timeStamp(ExecutionState.SUBMITTED), firstRunning, lastCompleted)*/
 
       }
-    } finally UsageControl.get(communicationStorage.description).releaseToken(token)
+    }
   }
 
-  private def getRuntimeResult(outputFilePath: String, communicationStorage: Storage, token: AccessToken): RuntimeResult = {
-    import communicationStorage.path
-    val resultFile = signalDownload(path.cacheUnziped(outputFilePath, token), path.toURI(outputFilePath), communicationStorage)
-    try SerializerService.deserialize(resultFile)
-    finally resultFile.delete
+  private def getRuntimeResult(outputFilePath: String, storage: StorageService)(implicit token: AccessToken): RuntimeResult = {
+    val resultFile = Workspace.newFile
+    try {
+      signalDownload(storage.downloadGZ(outputFilePath, resultFile), outputFilePath, storage)
+      SerializerService.deserialize(resultFile)
+    } finally resultFile.delete
   }
 
-  private def display(message: Option[FileMessage], description: String, communicationStorage: Storage, token: AccessToken) = {
-    import communicationStorage.path
+  private def display(message: Option[FileMessage], description: String, storage: StorageService)(implicit token: AccessToken) = {
     message match {
       case Some(message) ⇒
         try {
-          val stdOutFile = signalDownload(path.cacheUnziped(message.path, token), path.toURI(message.path), communicationStorage)
+          val tmpFile = Workspace.newFile
           try {
+            signalDownload(storage.downloadGZ(message.path, tmpFile), message.path, storage)
+
             /*val stdOutHash = HashService.computeHash(stdOutFile)
              if (stdOutHash != message.hash)
              logger.log(WARNING, "The standard output has been corrupted durring the transfert.")
@@ -126,12 +121,11 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
 
             System.out.synchronized {
               System.out.println("-----------------" + description + " on remote host-----------------")
-              val fis = new FileInputStream(stdOutFile)
+              val fis = new FileInputStream(tmpFile)
               try fis.copy(System.out) finally fis.close
               System.out.println("-------------------------------------------------------")
             }
-          } finally stdOutFile.delete
-
+          } finally tmpFile.delete
         } catch {
           case (e: IOException) ⇒
             GetResultActor.logger.log(WARNING, description + " transfer has failed.")
@@ -141,11 +135,11 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
     }
   }
 
-  private def getContextResults(resultPath: FileMessage, communicationStorage: Storage, token: AccessToken): ContextResults = {
-    import communicationStorage.path
+  private def getContextResults(resultPath: FileMessage, storage: StorageService)(implicit token: AccessToken): ContextResults = {
     if (resultPath == null) throw new InternalProcessingError("Context results path is null")
-    val contextResutsFileCache = signalDownload(path.cacheUnziped(resultPath.path, token), path.toURI(resultPath.path), communicationStorage)
+    val contextResutsFileCache = Workspace.newFile
     try {
+      signalDownload(storage.downloadGZ(resultPath.path, contextResutsFileCache), resultPath.path, storage)
       if (HashService.computeHash(contextResutsFileCache) != resultPath.hash) throw new InternalProcessingError("Results have been corrupted durring the transfer.")
       SerializerService.deserializeAndExtractFiles(contextResutsFileCache)
     } finally contextResutsFileCache.delete

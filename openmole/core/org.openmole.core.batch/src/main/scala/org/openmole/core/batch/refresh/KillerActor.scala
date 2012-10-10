@@ -27,9 +27,11 @@ import KillerActor._
 class KillerActor extends Actor {
   def receive = {
     case KillBatchJob(bj) ⇒
-      try bj.kill
-      catch {
-        case e ⇒ logger.log(FINE, "Could not kill job.", e)
+      try bj.withToken { implicit t ⇒
+        try bj.kill
+        finally bj.purge
+      } catch {
+        case e: Throwable ⇒ logger.log(FINE, "Could not kill job.", e)
       }
       System.runFinalization
   }

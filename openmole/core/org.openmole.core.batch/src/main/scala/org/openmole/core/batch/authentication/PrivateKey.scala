@@ -17,38 +17,24 @@
 
 package org.openmole.core.batch.authentication
 
-import org.ogf.saga.context.Context
+import java.io.File
+import fr.iscpif.gridscale.authentication
 
 class PrivateKey(
-    val privateKeyPath: String,
-    val publicKeyPath: String,
+    val privateKey: File,
     val login: String,
     val cypheredPassword: String,
-    val target: String) extends HostAuthenticationMethod with CypheredPassword {
+    val target: String) extends SSHAuthentication with CypheredPassword { a ⇒
 
-  def this(login: String, cypheredPassword: String, keyType: String, target: String) =
-    this(
-      System.getProperty("user.home") + "/.ssh/id_" + keyType,
-      System.getProperty("user.home") + "/.ssh/id_" + keyType + ".pub",
-      login,
-      cypheredPassword,
-      target)
-
-  def this(login: String, keyType: String, target: String) = this(login, "", keyType, target)
-
-  override def context = {
-    val ctx = JSAGASessionService.createContext
-    ctx.setAttribute(Context.TYPE, "SSH")
-    ctx.setAttribute(Context.USERID, login)
-    ctx.setAttribute(Context.USERCERT, publicKeyPath)
-    ctx.setAttribute(Context.USERKEY, privateKeyPath)
-    ctx.setAttribute(Context.USERPASS, password)
-    ctx
+  override def apply = new authentication.SSHPrivateKeyAuthentication {
+    val privateKey = a.privateKey
+    val password = a.password
+    val user = a.login
   }
 
   override def toString =
-    super.toString + ", " + "PublicKey = " + publicKeyPath +
-      ", PrivateKey = " + privateKeyPath +
+    super.toString +
+      ", PrivateKey = " + privateKey +
       ", Login = " + login
 
 }

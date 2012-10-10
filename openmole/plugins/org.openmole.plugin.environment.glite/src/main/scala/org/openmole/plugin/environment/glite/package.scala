@@ -18,7 +18,6 @@
 package org.openmole.plugin.environment
 
 import org.openmole.core.implementation.tools._
-import jsaga.Requirement
 
 package object glite {
 
@@ -26,24 +25,18 @@ package object glite {
     new GliteEnvironment(
       "vo.complex-systems.eu",
       "voms://voms.grid.auth.gr:15160/C=GR/O=HellasGrid/OU=auth.gr/CN=voms.grid.auth.gr",
-      "ldap://topbdii.grif.fr:2170",
-      new MyProxy("myproxy.cern.ch"))
+      "ldap://topbdii.grif.fr:2170")
 
   lazy val biomed =
     new GliteEnvironment(
       "biomed",
       "voms://cclcgvomsli01.in2p3.fr:15000/O=GRID-FR/C=FR/O=CNRS/OU=CC-IN2P3/CN=cclcgvomsli01.in2p3.fr",
-      "ldap://topbdii.grif.fr:2170",
-      new MyProxy("myproxy.cern.ch"))
+      "ldap://topbdii.grif.fr:2170")
 
   lazy val francegrilles =
     new GliteEnvironment(
       "vo.france-grilles.fr",
       "voms://cclcgvomsli01.in2p3.fr:15017/O=GRID-FR/C=FR/O=CNRS/OU=CC-IN2P3/CN=cclcgvomsli01.in2p3.fr",
-      "ldap://topbdii.grif.fr:2170",
-      new MyProxy("myproxy.cern.ch"))
-
-  lazy val GLITE_REQUIREMENTS = "GLITE.REQUIREMENTS"
-  def gliteRequirements(requirement: String) = new Requirement(GLITE_REQUIREMENTS, requirement)
+      "ldap://topbdii.grif.fr:2170")
 
 }

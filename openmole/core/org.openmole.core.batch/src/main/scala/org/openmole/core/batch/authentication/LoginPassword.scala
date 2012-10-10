@@ -17,19 +17,16 @@
 
 package org.openmole.core.batch.authentication
 
-import org.ogf.saga.context.Context
+import fr.iscpif.gridscale.authentication._
 
 class LoginPassword(
     val login: String,
     val cypheredPassword: String,
-    val target: String) extends HostAuthenticationMethod with CypheredPassword {
+    val target: String) extends SSHAuthentication with CypheredPassword { a ⇒
 
-  override def context = {
-    val ctx = JSAGASessionService.createContext
-    ctx.setAttribute(Context.TYPE, "UserPass")
-    ctx.setAttribute(Context.USERID, login)
-    ctx.setAttribute(Context.USERPASS, password)
-    ctx
+  def apply = new SSHUserPasswordAuthentication {
+    val user = a.login
+    val password = a.password
   }
 
   override def toString = super.toString + ", Login / password, login = " + login

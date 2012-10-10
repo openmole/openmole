@@ -23,7 +23,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.plugin.environment.jsaga</artifactId>
+            <artifactId>org.openmole.plugin.environment.gridscale</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

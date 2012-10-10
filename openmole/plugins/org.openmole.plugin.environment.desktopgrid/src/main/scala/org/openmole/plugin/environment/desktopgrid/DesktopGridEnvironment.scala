@@ -18,19 +18,18 @@
 package org.openmole.plugin.environment.desktopgrid
 
 import org.openmole.core.batch.authentication.Authentication
-import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.core.batch.environment.JobService
-import org.openmole.core.batch.environment.VolatileStorage
+import org.openmole.core.batch.environment._
+import org.openmole.core.batch.storage._
 import java.util.concurrent.Executors
 
-import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.sftpserver.SFTPServer
 import org.openmole.misc.tools.io.FileUtil._
 import java.io.File
-import collection.JavaConversions._
+import java.net.URI
+import fr.iscpif.gridscale.storage.{ LocalStorage ⇒ GSLocalStorage }
 
-object DesktopEnvironment {
+object DesktopGridEnvironment {
   val timeStempsDirName = "timeStemps"
   val jobsDirName = "jobs"
   val resultsDirName = "results"
@@ -38,19 +37,35 @@ object DesktopEnvironment {
 }
 
 class DesktopGridEnvironment(
-    port: Int,
-    login: String, password: String,
-    val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory) extends BatchEnvironment {
+    val port: Int,
+    val login: String, password: String,
+    override val runtimeMemory: Option[Int] = None) extends BatchEnvironment { env ⇒
+
+  type SS = VolatileStorageService
+  type JS = DesktopGridJobService
 
   val path = Workspace.newDir
   new SFTPServer(path, login, password, port)
 
-  val description = new ServiceDescription(login + "@localhost:" + port)
+  val url = new URI("desktop", login, "localhost", port, null, null, null)
+  val id = url.toString
 
-  @transient lazy val batchStorage = new VolatileStorage(this, path.toURI, Int.MaxValue)
+  @transient lazy val batchStorage = new VolatileStorageService {
+    def environment = env
+    val remoteStorage = new DumyStorage
+    def url = env.url
+    def root = path.getAbsolutePath
+    def connections = Int.MaxValue
+    val storage = new GSLocalStorage {}
+    val authentication: Unit = Unit
+  }
 
   @transient override lazy val allStorages = List(batchStorage)
-  @transient override lazy val allJobServices = List(new DesktopGridJobService(this, DesktopGridEnvironment.this.description))
 
-  override def authentication = DesktopGridAuthentication
+  @transient override lazy val allJobServices = List(
+    new DesktopGridJobService {
+      def environment = env
+      def id = env.id
+    })
+
 }

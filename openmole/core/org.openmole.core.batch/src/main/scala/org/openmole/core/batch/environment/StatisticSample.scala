@@ -17,6 +17,7 @@
 
 package org.openmole.core.batch.environment
 
+import org.openmole.core.batch.jobservice._
 import org.openmole.core.model.execution.ExecutionState._
 
 object StatisticSample {

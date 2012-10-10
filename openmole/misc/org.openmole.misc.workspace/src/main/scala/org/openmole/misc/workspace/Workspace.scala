@@ -281,7 +281,7 @@ class Workspace(val location: File) {
         true
       } else true
     } catch {
-      case e ⇒
+      case e: Throwable ⇒
         Logger.getLogger(Workspace.getClass.getName).log(Level.FINE, "Password incorrect", e)
         false
     }

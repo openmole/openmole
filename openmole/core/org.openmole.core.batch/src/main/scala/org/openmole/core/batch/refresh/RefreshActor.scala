@@ -20,7 +20,6 @@ package org.openmole.core.batch.refresh
 import akka.actor.Actor
 import org.openmole.misc.tools.service.Logger
 import akka.actor.ActorRef
-import org.openmole.core.batch.environment.TemporaryErrorException
 import org.openmole.core.model.execution.ExecutionState._
 
 object RefreshActor extends Logger
@@ -33,7 +32,7 @@ class RefreshActor(jobManager: ActorRef) extends Actor {
       if (!job.state.isFinal) {
         try {
           val oldState = job.state
-          job.state = bj.updateState
+          job.state = bj.withToken(bj.updateState(_))
           if (job.state == DONE) {
             //logger.fine(sj.communicationStorage.path.toStringURI(sj.communicationDirPath))
             jobManager ! GetResult(job, sj, bj.resultPath)
@@ -42,8 +41,7 @@ class RefreshActor(jobManager: ActorRef) extends Actor {
             else jobManager ! Kill(job)
           }
         } catch {
-          case e: TemporaryErrorException ⇒ logger.log(FINE, "Temporary error durring job update.", e)
-          case e ⇒
+          case e: Throwable ⇒
             jobManager ! Error(job, e)
             jobManager ! Kill(job)
         }

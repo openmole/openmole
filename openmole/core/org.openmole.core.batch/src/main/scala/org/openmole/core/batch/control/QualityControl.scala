@@ -21,13 +21,13 @@ import org.openmole.misc.tools.service._
 
 object QualityControl {
 
-  def withFailureControl[A](qualityControl: Option[QualityControl], op: ⇒ A, isFailure: Throwable ⇒ Boolean = t ⇒ true): A = {
+  def withFailureControl[A](qualityControl: Option[QualityControl])(op: ⇒ A): A = {
     try {
       val ret = op
       qualityControl.map(_.success)
       ret
     } catch {
-      case e ⇒
+      case e: Throwable ⇒
         qualityControl.map(_.failed)
         throw e
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Romain Reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,19 +17,26 @@
 
 package org.openmole.plugin.environment.glite
 
-import org.ogf.saga.context.Context
-import fr.in2p3.jsaga.adaptor.security.VOMSContext
+import fr.iscpif.gridscale.authentication._
+import org.openmole.core.batch.authentication.CypheredPassword
+import java.io.File
 
-class P12Certificate(
-    val cypheredPassword: String,
-    val certificatePath: String) extends Certificate {
+class P12Certificate(val certificate: File, val cypheredPassword: String) extends GliteAuthentication with CypheredPassword { a ⇒
 
-  def this(cypheredPassword: String) = this(cypheredPassword, System.getProperty("user.home") + "/.globus/certificate.p12")
-
-  override protected def _init(ctx: Context) = {
-    ctx.setAttribute(VOMSContext.USERCERTKEY, certificatePath)
+  override def apply(
+    serverURL: String,
+    voName: String,
+    proxyFile: File,
+    lifeTime: Int,
+    fqan: Option[String]) = {
+    val (_serverURL, _voName, _proxyFile, _lifeTime, _fqan) = (serverURL, voName, proxyFile, lifeTime, fqan)
+    new P12VOMSAuthentication {
+      val certificate = a.certificate
+      val serverURL = _serverURL
+      val voName = _voName
+      val proxyFile = _proxyFile
+      val lifeTime = _lifeTime
+      override val fqan = _fqan
+    }.init(password)
   }
-
-  override def toString = "P12Path = " + certificatePath
-
 }

@@ -39,7 +39,7 @@ class SubmitActor(jobManager: ActorRef) extends Actor {
           job.state = SUBMITTED
           jobManager ! Submitted(job, sj, bj)
         } catch {
-          case e ⇒
+          case e: Throwable ⇒
             jobManager ! Error(job, e)
             jobManager ! Submit(job, sj)
         }
@@ -49,8 +49,8 @@ class SubmitActor(jobManager: ActorRef) extends Actor {
 
   private def trySubmit(serializedJob: SerializedJob, environment: BatchEnvironment) = {
     val (js, token) = environment.selectAJobService
-    try js.submit(serializedJob, token)
-    finally UsageControl.get(js.description).releaseToken(token)
+    try js.submit(serializedJob)(token)
+    finally UsageControl.get(js.id).releaseToken(token)
   }
 
 }

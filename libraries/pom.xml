@@ -20,14 +20,13 @@
         <module>com.db4o</module>
         <module>uk.com.robust-it.cloning</module>
 	<module>org.apache.ant</module>
-        <module>fr.in2p3.jsaga</module>
+        <module>fr.iscpif.gridscale</module>
         <module>fr.iscpif.mgo</module>
         <module>com.google.guava</module>
         <module>com.thoughtworks.xstream</module>
         <module>org.codehaus.groovy</module>
         <module>org.apache.commons.compress</module>
         <module>org.apache.commons.pool</module>
-        <module>org.apache.commons.cli</module>
 	<module>org.apache.commons.configuration</module>
 	<module>org.jasypt.encryption</module>
         <module>org.gnu.crypto</module>

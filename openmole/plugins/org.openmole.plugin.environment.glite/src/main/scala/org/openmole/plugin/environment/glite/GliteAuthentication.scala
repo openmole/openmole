@@ -18,10 +18,7 @@
 package org.openmole.plugin.environment.glite
 
 import com.ice.tar.TarInputStream
-import fr.in2p3.jsaga.adaptor.base.usage.UDuration
-import fr.in2p3.jsaga.adaptor.security.VOMSContext
-
-import fr.in2p3.jsaga.generated.parser.ParseException
+import fr.iscpif.gridscale.storage._
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -32,51 +29,50 @@ import java.nio.file.FileSystems
 import java.security.InvalidKeyException
 import java.security.NoSuchAlgorithmException
 import java.util.zip.GZIPInputStream
-import org.ogf.saga.context.Context
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.batch.authentication._
-import org.openmole.core.batch.file.URIFile
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.Workspace
 import GliteEnvironment._
-
+import org.globus.gsi.gssapi.GlobusGSSCredentialImpl
 import scala.collection.JavaConversions._
 import scala.ref.WeakReference
 
 object GliteAuthentication extends Logger {
 
   lazy val CACertificatesDir: File = {
-    /*val X509_CERT_DIR = System.getenv("X509_CERT_DIR")
+    val X509_CERT_DIR = System.getenv("X509_CERT_DIR")
 
-     if (X509_CERT_DIR != null && new File(X509_CERT_DIR).exists) new File(X509_CERT_DIR)
-     else {
-     val caDir = new File("/etc/grid-security/certificates/")
-     if (caDir.exists) caDir
-     else {*/
-    val caDir = Workspace.file("CACertificates")
+    if (X509_CERT_DIR != null && new File(X509_CERT_DIR).exists) new File(X509_CERT_DIR)
+    else {
+      val caDir = new File("/etc/grid-security/certificates/")
+      if (caDir.exists) caDir
+      else {
+        val caDir = Workspace.file("CACertificates")
 
-    if (!caDir.exists || !new File(caDir, ".complete").exists) {
-      caDir.mkdir
-      dowloadCACertificates(new URI(Workspace.preference(GliteEnvironment.CACertificatesSite)), caDir)
-      new File(caDir, ".complete").createNewFile
+        if (!caDir.exists || !new File(caDir, ".complete").exists) {
+          caDir.mkdir
+          dowloadCACertificates(Workspace.preference(GliteEnvironment.CACertificatesSite), caDir)
+          new File(caDir, ".complete").createNewFile
+        }
+        caDir
+      }
     }
-    caDir
-    /*  }
-     }*/
   }
 
-  def dowloadCACertificates(uri: URI, dir: File) = {
+  def dowloadCACertificates(address: String, dir: File) = {
     val fs = FileSystems.getDefault
 
-    val site = new URIFile(uri)
-
-    for (tarUrl ← site.list) {
+    val site = new HTTPStorage {
+      val url = address
+    }
+    for (tarUrl ← site.listNames("/")) {
       try {
-        val child = site.child(tarUrl)
-        val is = child.openInputStream
+        //val child = site.child(tarUrl)
+        val is = site.openInputStream(tarUrl)
 
         val tis = new TarInputStream(new GZIPInputStream(new BufferedInputStream(is)))
 
@@ -98,90 +94,85 @@ object GliteAuthentication extends Logger {
             case (file, linkTo) ⇒ file.createLink(linkTo)
           }
         } catch {
-          case (e: IOException) ⇒ logger.log(WARNING, "Unable to untar " + child.toString(), e)
+          case (e: IOException) ⇒ logger.log(WARNING, "Unable to untar " + tarUrl, e)
         } finally tis.close
       } catch {
-        case (e: IOException) ⇒ throw new IOException(tarUrl, e)
+        case e: Throwable ⇒ throw new IOException(tarUrl, e)
       }
     }
   }
-
-  def addContext(ctx: Context) =
-    try {
-      JSAGASessionService.addContext("wms://.*", ctx)
-      JSAGASessionService.addContext("srm://.*", ctx)
-    } catch {
-      case e: InternalError ⇒
-        throw new UserBadDataError(e, "Using OpenMOLE with glite requiers to use java 7 of Oracle and the JCE (see install section of OpenMOLE web site)")
-    }
-
-  def getTimeString: String = Workspace.preference(GliteEnvironment.ProxyTime)
-
-  def inMs(time: String) =
-    try UDuration.toInt(time) * 1000
-    catch {
-      case (ex: ParseException) ⇒ throw new UserBadDataError(ex)
-    }
 
 }
 
-class GliteAuthentication(
-    val voName: String,
-    val vomsURL: String,
-    val myProxy: Option[MyProxy],
-    val fqan: String) extends Authentication {
+trait GliteAuthentication extends Authentication {
 
-  import GliteAuthentication.{ logger, addContext }
+  def apply(
+    serverURL: String,
+    voName: String,
+    proxyFile: File,
+    lifeTime: Int,
+    fqan: Option[String]): GlobusGSSCredentialImpl
 
-  @transient private var _proxyExpiresTime = Long.MaxValue
-
-  val CACertificatesDir: File = GliteAuthentication.CACertificatesDir
-
-  override def key = "glite:" + (voName, vomsURL).toString
-
-  override def expires = _proxyExpiresTime
-
-  override def initialize(local: Boolean): Unit = {
-    if (!local) {
-      val globusProxy =
-        if (System.getenv.containsKey("X509_USER_PROXY") && new File(System.getenv.get("X509_USER_PROXY")).exists) System.getenv.get("X509_USER_PROXY")
-        else throw new InternalProcessingError("The X509_USER_PROXY environment variable is not defined or point to an inexisting file.")
-      myProxy match {
-        case Some(myProxy) ⇒ {
-          val ctx = JSAGASessionService.createContext
-          ctx.setAttribute(Context.TYPE, "VOMSMyProxy")
-          ctx.setAttribute(Context.USERPROXY, globusProxy)
-          ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
-          ctx.setAttribute(VOMSContext.MYPROXYUSERID, myProxy.userId)
-          ctx.setAttribute(VOMSContext.MYPROXYPASS, myProxy.pass)
-          ctx.setAttribute(VOMSContext.MYPROXYSERVER, myProxy.url)
-          ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME, GliteAuthentication.getTimeString)
-          ctx.setAttribute(VOMSContext.VOMSDIR, "")
-          init(ctx, false)
-        }
-        case None ⇒
-          val (ctx, expires) = new GlobusProxyFile(globusProxy).init(this)
-          init(ctx, expires)
-      }
-    } else {
-      val auth = Workspace.persistentList(classOf[GliteAuthenticationMethod]).headOption match {
-        case Some((i, a)) ⇒ a
-        case None ⇒ throw new UserBadDataError("Preferences not set for grid authentication")
-      }
-
-      val (ctx, expires) = auth.init(this)
-      init(ctx, expires)
-    }
-
-  }
-
-  def reinit(context: Context, expires: Boolean) = {
-    addContext(context)
-    if (expires) _proxyExpiresTime = System.currentTimeMillis + context.getAttribute(Context.LIFETIME).toLong * 1000
-  }
-
-  def init(context: Context, expires: Boolean) = {
-    reinit(context, expires)
-    Updater.delay(new ProxyChecker(context, new WeakReference(this), expires))
-  }
+  def category = classOf[GliteAuthentication]
 }
+
+//class GliteAuthentication(
+//  val voName: String,
+//  val vomsURL: String,
+//  val myProxy: Option[MyProxy],
+//  val fqan: String) extends Authentication {
+//
+//  import GliteAuthentication.{ logger, addContext }
+//
+//  @transient private var _proxyExpiresTime = Long.MaxValue
+//
+//  val CACertificatesDir: File = GliteAuthentication.CACertificatesDir
+//
+//  override def key = "glite:" + (voName, vomsURL).toString
+//
+//  override def expires = _proxyExpiresTime
+//
+//  override def initialize(local: Boolean): Unit = {
+//    if (!local) {
+//      val globusProxy =
+//        if (System.getenv.containsKey("X509_USER_PROXY") && new File(System.getenv.get("X509_USER_PROXY")).exists) System.getenv.get("X509_USER_PROXY")
+//      else throw new InternalProcessingError("The X509_USER_PROXY environment variable is not defined or point to an inexisting file.")
+//      myProxy match {
+//        case Some(myProxy) ⇒ {
+//            val ctx = JSAGASessionService.createContext
+//            ctx.setAttribute(Context.TYPE, "VOMSMyProxy")
+//            ctx.setAttribute(Context.USERPROXY, globusProxy)
+//            ctx.setAttribute(Context.CERTREPOSITORY, CACertificatesDir.getCanonicalPath)
+//            ctx.setAttribute(VOMSContext.MYPROXYUSERID, myProxy.userId)
+//            ctx.setAttribute(VOMSContext.MYPROXYPASS, myProxy.pass)
+//            ctx.setAttribute(VOMSContext.MYPROXYSERVER, myProxy.url)
+//            ctx.setAttribute(VOMSContext.DELEGATIONLIFETIME, GliteAuthentication.getTimeString)
+//            ctx.setAttribute(VOMSContext.VOMSDIR, "")
+//            init(ctx, false)
+//          }
+//        case None ⇒
+//          val (ctx, expires) = new GlobusProxyFile(globusProxy).init(this)
+//          init(ctx, expires)
+//      }
+//    } else {
+//      val auth = Workspace.persistentList(classOf[GliteAuthenticationMethod]).headOption match {
+//        case Some((i, a)) ⇒ a
+//        case None ⇒ throw new UserBadDataError("Preferences not set for grid authentication")
+//      }
+//
+//      val (ctx, expires) = auth.init(this)
+//      init(ctx, expires)
+//    }
+//
+//  }
+//
+//  def reinit(context: Context, expires: Boolean) = {
+//    addContext(context)
+//    if (expires) _proxyExpiresTime = System.currentTimeMillis + context.getAttribute(Context.LIFETIME).toLong * 1000
+//  }
+//
+//  def init(context: Context, expires: Boolean) = {
+//    reinit(context, expires)
+//    Updater.delay(new ProxyChecker(context, new WeakReference(this), expires))
+//  }
+//}

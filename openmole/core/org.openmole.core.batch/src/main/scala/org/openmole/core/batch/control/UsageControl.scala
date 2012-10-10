@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit
 import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.SynchronizedMap
+import java.net.URI
 
 import scala.concurrent.stm._
 
@@ -35,26 +36,25 @@ object UsageControl extends Logger {
     else new UsageControl(BotomlessTokenPool)
   }
 
-  def withUsageControl[B](usageControl: UsageControl, f: (AccessToken ⇒ B)): B = {
+  def withUsageControl[B](usageControl: UsageControl)(f: (AccessToken ⇒ B)): B = {
     val token = usageControl.waitAToken
     try f(token)
     finally usageControl.releaseToken(token)
   }
 
-  def withToken[B](desc: ServiceDescription, f: (AccessToken ⇒ B)): B = {
-    val usageControl = this.get(desc)
-    withUsageControl(usageControl, f)
+  def withToken[B](url: URI)(f: (AccessToken ⇒ B)): B = withToken(url.toString)(f)
+  def withToken[B](id: String)(f: (AccessToken ⇒ B)): B = withUsageControl(this.get(id))(f)
+
+  val controls = new HashMap[String, UsageControl] with SynchronizedMap[String, UsageControl]
+
+  def register(id: String, usageControl: UsageControl) = {
+    logger.fine("Register " + id)
+    controls.getOrElseUpdate(id, usageControl)
   }
 
-  val controls = new HashMap[ServiceDescription, UsageControl] with SynchronizedMap[ServiceDescription, UsageControl]
-
-  def register(ressource: ServiceDescription, usageControl: UsageControl) = {
-    logger.fine("Register " + ressource)
-    controls.getOrElseUpdate(ressource, usageControl)
-  }
-
-  def get(ressource: ServiceDescription) =
-    controls.get(ressource) match {
+  def get(url: URI): UsageControl = get(url.toString)
+  def get(id: String) =
+    controls.get(id) match {
       case Some(ctrl) ⇒ ctrl
       case None ⇒ botomlessUsage
     }

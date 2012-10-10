@@ -17,14 +17,6 @@
 
 package org.openmole.core.batch
 
-import org.openmole.core.batch.control.ServiceDescription
-import org.openmole.core.batch.file._
-
 package object replication {
-
-  implicit def replicaDecorator(r: Replica) = new {
-    def destinationURIFile: IURIFile = new GZURIFile(new URIFile(r.destination))
-    def storageDescription = new ServiceDescription(r.storageDescriptionString)
-  }
 
 }

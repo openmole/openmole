@@ -29,35 +29,34 @@ import org.openmole.misc.exception.InternalProcessingError
 import java.net.URI
 import java.util.concurrent.atomic.AtomicLong
 import java.util.logging.Level
-import org.openmole.core.batch.control.AccessToken
-import org.openmole.core.batch.control.StorageControl
-import org.openmole.core.batch.control.UsageControl
+import org.openmole.core.batch.control._
+import org.openmole.core.batch.storage._
+import org.openmole.core.batch.jobservice._
 import org.openmole.core.batch.environment.BatchJobWatcher.Watch
-import org.openmole.core.batch.file.URIFile
 import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.refresh._
 import org.openmole.core.batch.replication._
-import org.openmole.core.implementation.execution.Environment
-import org.openmole.misc.workspace.ConfigurationLocation
-
-import org.openmole.core.model.job.IJob
-import org.openmole.misc.tools.service.Logger
-import org.openmole.misc.updater.Updater
-import org.openmole.misc.workspace.Workspace
-import org.openmole.misc.pluginmanager.PluginManager
-import org.openmole.core.serializer.SerializerService
-import org.openmole.misc.eventdispatcher.Event
-import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.core.model.execution.ExecutionState
-import org.openmole.core.model.execution.IEnvironment
-import org.openmole.misc.tools.collection.OrderedSlidingList
+import org.openmole.core.implementation.execution._
+import org.openmole.misc.workspace._
+import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.core.model.job._
+import org.openmole.misc.tools.service._
+import org.openmole.misc.updater._
+import org.openmole.misc.workspace._
+import org.openmole.misc.pluginmanager._
+import org.openmole.misc.eventdispatcher._
+import org.openmole.core.model.execution._
+import org.openmole.misc.tools.collection._
 import akka.actor.Actor
 import akka.actor.Props
 import akka.routing.SmallestMailboxRouter
-import scala.collection.mutable.SynchronizedMap
-import scala.collection.mutable.WeakHashMap
+import scala.concurrent.stm._
+import collection.mutable.SynchronizedMap
+import collection.mutable.WeakHashMap
 import org.openmole.misc.tools.service.ThreadUtil._
-import scala.concurrent.util.duration._
+import concurrent.util.duration._
+import ref.WeakReference
+import annotation.tailrec
 
 object BatchEnvironment extends Logger {
 
@@ -67,24 +66,24 @@ object BatchEnvironment extends Logger {
 
   val transfertId = new AtomicLong
 
-  case class BeginUpload(val id: Long, val file: File, val storage: Storage) extends Event[BatchEnvironment] with Transfert
-  case class EndUpload(val id: Long, val file: File, val storage: Storage) extends Event[BatchEnvironment] with Transfert
+  case class BeginUpload(val id: Long, val path: String, val storage: StorageService) extends Event[BatchEnvironment] with Transfert
+  case class EndUpload(val id: Long, val path: String, val storage: StorageService) extends Event[BatchEnvironment] with Transfert
 
-  case class BeginDownload(val id: Long, val from: URI, val storage: Storage) extends Event[BatchEnvironment] with Transfert
-  case class EndDownload(val id: Long, val from: URI, val storage: Storage) extends Event[BatchEnvironment] with Transfert
+  case class BeginDownload(val id: Long, val path: String, val storage: StorageService) extends Event[BatchEnvironment] with Transfert
+  case class EndDownload(val id: Long, val path: String, val storage: StorageService) extends Event[BatchEnvironment] with Transfert
 
-  def signalUpload[T](upload: ⇒ T, file: File, storage: Storage) = {
+  def signalUpload[T](upload: ⇒ T, path: String, storage: StorageService) = {
     val id = transfertId.getAndIncrement
-    EventDispatcher.trigger(storage.environment, new BeginUpload(id, file, storage))
+    EventDispatcher.trigger(storage.environment, new BeginUpload(id, path, storage))
     try upload
-    finally EventDispatcher.trigger(storage.environment, new EndUpload(id, file, storage))
+    finally EventDispatcher.trigger(storage.environment, new EndUpload(id, path, storage))
   }
 
-  def signalDownload[T](download: ⇒ T, from: URI, storage: Storage) = {
+  def signalDownload[T](download: ⇒ T, path: String, storage: StorageService) = {
     val id = transfertId.getAndIncrement
-    EventDispatcher.trigger(storage.environment, new BeginDownload(id, from, storage))
+    EventDispatcher.trigger(storage.environment, new BeginDownload(id, path, storage))
     try download
-    finally EventDispatcher.trigger(storage.environment, new EndDownload(id, from, storage))
+    finally EventDispatcher.trigger(storage.environment, new EndDownload(id, path, storage))
   }
 
   val MemorySizeForRuntime = new ConfigurationLocation("BatchEnvironment", "MemorySizeForRuntime")
@@ -105,11 +104,13 @@ object BatchEnvironment extends Logger {
   val IncrementUpdateInterval = new ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval");
   val StatisticsHistorySize = new ConfigurationLocation("Environment", "StatisticsHistorySize")
 
-  val JobManagmentThreads = new ConfigurationLocation("Environment", "JobManagmentThreads")
+  val JobManagmentThreads = new ConfigurationLocation("BatchEnvironment", "JobManagmentThreads")
 
-  val EnvironmentCleaningThreads = new ConfigurationLocation("Environment", "EnvironmentCleaningThreads")
+  val EnvironmentCleaningThreads = new ConfigurationLocation("BatchEnvironment", "EnvironmentCleaningThreads")
 
-  val AuthenticationTimeout = new ConfigurationLocation("Environment", "AuthenticationTimeout")
+  val StoragesGCUpdateInterval = new ConfigurationLocation("BatchEnvironment", "StoragesGCUpdateInterval")
+
+  //val AuthenticationTimeout = new ConfigurationLocation("Environment", "AuthenticationTimeout")
 
   Workspace += (MinUpdateInterval, "PT1M")
   Workspace += (MaxUpdateInterval, "PT20M")
@@ -127,14 +128,16 @@ object BatchEnvironment extends Logger {
   Workspace += (StatisticsHistorySize, "10000")
   Workspace += (JobManagmentThreads, "100")
   Workspace += (EnvironmentCleaningThreads, "20")
-  Workspace += (AuthenticationTimeout, "120")
+  //Workspace += (AuthenticationTimeout, "PT2M")
+
+  Workspace += (StoragesGCUpdateInterval, "PT1H")
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
 }
 
 import BatchEnvironment._
 
-abstract class BatchEnvironment extends Environment { env ⇒
+trait BatchEnvironment extends Environment { env ⇒
 
   val system = ActorSystem("BatchEnvironment", ConfigFactory.parseString(
     """
@@ -168,9 +171,19 @@ akka {
   val jobRegistry = new ExecutionJobRegistry
   val statistics = new OrderedSlidingList[StatisticSample](Workspace.preferenceAsInt(StatisticsHistorySize))
 
-  AuthenticationRegistry.initAndRegisterIfNotAllreadyIs(authentication)
+  val id: String
 
-  def runtimeMemory: Int
+  type SS <: StorageService
+  type JS <: JobService
+
+  def allStorages: Iterable[SS]
+  def allJobServices: Iterable[JS]
+
+  def runtimeMemory: Option[Int] = None
+  def runtimeMemoryValue = runtimeMemory match {
+    case None ⇒ Workspace.preferenceAsInt(MemorySizeForRuntime)
+    case Some(m) ⇒ m
+  }
 
   override def submit(job: IJob) = {
     val bej = executionJob(job)
@@ -182,7 +195,12 @@ akka {
   def clean = ReplicaCatalog.withClient { implicit c ⇒
     val cleaningThreadPool = fixedThreadPool(Workspace.preferenceAsInt(EnvironmentCleaningThreads))
     allStorages.foreach {
-      s ⇒ background { UsageControl.withToken(s.description, s.clean) }(cleaningThreadPool)
+      s ⇒
+        background {
+          UsageControl.withToken(s.id) { implicit t ⇒
+            s.clean
+          }
+        }(cleaningThreadPool)
     }
   }
 
@@ -195,29 +213,115 @@ akka {
   @transient lazy val jobServices = {
     val jobServices = allJobServices
     if (jobServices.isEmpty) throw new InternalProcessingError("No job service available for the environment.")
-    new JobServiceGroup(this, jobServices)
+    jobServices
   }
 
   @transient lazy val storages = {
     val storages = allStorages
     if (storages.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
-    new StorageGroup(this, storages)
+    Updater.registerForUpdate(new StoragesGC(WeakReference(storages)), Workspace.preferenceAsDurationInMs(StoragesGCUpdateInterval))
+    storages
   }
 
-  def allStorages: Iterable[Storage]
-  def allJobServices: Iterable[JobService]
-
-  def authentication: Authentication
-
-  @transient lazy val serializedAuthentication = {
-    val authenticationFile = Workspace.newFile("environmentAuthentication", ".tar")
-    val authReplication = SerializerService.serializeAndArchiveFiles(authentication, authenticationFile)
-    authenticationFile
+  private def orMinForExploration(v: Double) = {
+    val min = Workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
+    if (v < min) min else v
   }
 
-  def selectAJobService: (JobService, AccessToken) = jobServices.selectAService
+  def selectAJobService: (JobService, AccessToken) = {
+    if (jobServices.size == 1) {
+      val r = jobServices.head
+      return (r, UsageControl.get(r.id).waitAToken)
+    }
 
-  def selectAStorage(usedFiles: Iterable[File]): (Storage, AccessToken) = storages.selectAService(usedFiles)
+    def fitness =
+      jobServices.flatMap {
+        cur ⇒
+          UsageControl.get(cur.id).tryGetToken match {
+            case None ⇒ None
+            case Some(token) ⇒
+              val q = JobServiceControl.qualityControl(cur.id).get
+
+              val nbSubmitted = q.submitted
+              val fitness = orMinForExploration(
+                if (q.submitted > 0)
+                  math.pow((q.runnig.toDouble / q.submitted) * q.successRate * (q.totalDone / q.totalSubmitted), 2)
+                else math.pow(q.successRate, 2))
+              Some((cur, token, fitness))
+          }
+      }
+
+    @tailrec def selected(value: Double, storages: List[(JobService, AccessToken, Double)]): Option[(JobService, AccessToken)] =
+      storages.headOption match {
+        case Some((js, token, fitness)) ⇒
+          if (value <= fitness) Some((js, token))
+          else selected(value - fitness, storages.tail)
+        case None ⇒ None
+      }
+
+    atomic { implicit txn ⇒
+      val notLoaded = fitness
+      selected(Random.default.nextDouble * notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum, notLoaded.toList) match {
+        case Some((jobService, token)) ⇒
+          for {
+            (s, t, _) ← notLoaded
+            if (s.id != jobService.id)
+          } UsageControl.get(s.id).releaseToken(t)
+          jobService -> token
+        case None ⇒ retry
+      }
+    }
+  }
+
+  def selectAStorage(usedFiles: Iterable[File]): (StorageService, AccessToken) = {
+    if (storages.size == 1) {
+      val r = storages.head
+      return (r, UsageControl.get(r.id).waitAToken)
+    }
+
+    val totalFileSize = usedFiles.map { _.size }.sum
+    val onStorage = ReplicaCatalog.withClient(ReplicaCatalog.inCatalog(env.id)(_))
+
+    def fitness =
+      storages.flatMap {
+        cur ⇒
+
+          UsageControl.get(cur.id).tryGetToken match {
+            case None ⇒ None
+            case Some(token) ⇒
+              val sizeOnStorage = usedFiles.filter(onStorage.getOrElse(_, Set.empty).contains(cur.id)).map(_.size).sum
+
+              val fitness = orMinForExploration(
+                StorageControl.qualityControl(cur.id) match {
+                  case Some(q) ⇒ math.pow(q.successRate, 2)
+                  case None ⇒ 1.
+                }) * (if (totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) else 1)
+              Some((cur, token, fitness))
+          }
+      }
+
+    @tailrec def selected(value: Double, storages: List[(StorageService, AccessToken, Double)]): Option[(StorageService, AccessToken)] =
+      storages.headOption match {
+        case Some((storage, token, fitness)) ⇒
+          if (value <= fitness) Some((storage, token))
+          else selected(value - fitness, storages.tail)
+        case None ⇒ None
+      }
+
+    atomic { implicit txn ⇒
+      val notLoaded = fitness
+      selected(Random.default.nextDouble * notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum, notLoaded.toList) match {
+        case Some((storage, token)) ⇒
+          for {
+            (s, t, _) ← notLoaded
+            if (s.id != storage.id)
+          } UsageControl.get(s.id).releaseToken(t)
+          storage -> token
+        case None ⇒ retry
+      }
+    }
+
+  }
 
   @transient lazy val plugins = PluginManager.pluginsForClass(this.getClass)
 
