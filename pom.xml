@@ -59,7 +59,7 @@
         <!--<lib.com.jcraft.jsch.version>0.1.42</lib.com.jcraft.jsch.version>-->
         <lib.com.thoughtworks.xstream.version>1.4.1</lib.com.thoughtworks.xstream.version>
         <lib.net.sf.kxml.version>2.3.0</lib.net.sf.kxml.version>
-        <lib.fr.in2p3.jsaga.version>0.9.15-SNAPSHOT</lib.fr.in2p3.jsaga.version>
+        <lib.fr.iscpif.gridscale.version>1.0-SNAPSHOT</lib.fr.iscpif.gridscale.version>
         <lib.org.apache.commons.collections15.version>4.01</lib.org.apache.commons.collections15.version>
         <lib.org.apache.commons.compress.version>1.0</lib.org.apache.commons.compress.version>
         <lib.org.apache.commons.pool.version>1.5.4</lib.org.apache.commons.pool.version>
@@ -266,7 +266,7 @@
                 </configuration>
             </plugin>
 
-	   <plugin>
+	   <!-- <plugin>
               <groupId>net.alchim31.maven</groupId>
               <artifactId>scala-maven-plugin</artifactId>
               <version>${plugin.scala-maven-plugin.version}</version>
@@ -284,13 +284,10 @@
                 <configuration>
                     <scalaVersion>${maven.scala.version}</scalaVersion>
                     <encoding>${project.build.sourceEncoding}</encoding>
-                    <!--<args>
-                        <arg>-Ydependent-method-types</arg>
-                    </args>-->
                 </configuration>
-           </plugin>
+           </plugin> -->
 
-            <!--<plugin>
+            <plugin>
                 <groupId>org.scala-tools</groupId>
                 <artifactId>maven-scala-plugin</artifactId>
                 <version>${plugin.org.scala-tools.maven-scala-plugin.version}</version>
@@ -309,7 +306,7 @@
                     <scalaVersion>${maven.scala.version}</scalaVersion>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
-            </plugin>-->
+            </plugin>
 
             <plugin>
                 <groupId>org.apache.felix</groupId>
