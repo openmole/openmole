@@ -198,6 +198,9 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
                 case Some(t: ITaskDataProxyUI) ⇒ caps.encapsule(t)
                 case None ⇒ errors += "An error occured when loading the Task for a capsule. No Task has been set."
               }
+              case "persistentPrototype" ⇒
+                caps.dataUI.capsuleType = new MasterCapsuleType(caps.dataUI.capsuleType.persistList ::: List(Proxys.prototypes.filter(_.dataUI.name == reader.getAttribute("name").toString).head))
+
               case "environment" ⇒
                 Proxys.environments.filter(e ⇒ e.id == reader.getAttribute("id").toInt).headOption match {
                   case Some(e: IEnvironmentDataProxyUI) ⇒ caps.setEnvironment(Some(e))
@@ -211,7 +214,6 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
                     caps.hooked(true)
                   case None ⇒ errors += "An error occured when loading the Hook for a capsule. No Hook has been set."
                 }
-              case "persistentPrototype" ⇒ caps.dataUI.capsuleType = new MasterCapsuleType(caps.dataUI.capsuleType.persistList ::: List(Proxys.prototypes.filter(_.dataUI.name == reader.getAttribute("persistentPrototype").toString).head))
               case _ ⇒ StatusBar.block("Unknown balise " + n1)
             }
             reader.moveUp
