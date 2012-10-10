@@ -37,16 +37,20 @@ import scala.swing.ScrollPane
 
 object MasterCapsulePrototypeDialog extends PrototypeDialog {
   def display(capsuleUI: ICapsuleUI) = {
-    openable(capsuleUI.dataUI) match {
-      case true ⇒
-        val prototypePanel = new MasterCapsulePrototypeDialog(capsuleUI, capsuleUI.dataUI.task.get)
-        if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel) {
-          verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
-        }.peer,
-          "Persistent prototypes")).equals(NotifyDescriptor.OK_OPTION)) {
-          capsuleUI.dataUI.capsuleType = new MasterCapsuleType(prototypePanel.multiPrototypeCombo.content.map { _.comboValue.get })
+    capsuleUI.dataUI.capsuleType match {
+      case x: MasterCapsuleType ⇒
+        openable(capsuleUI.dataUI) match {
+          case true ⇒
+            val prototypePanel = new MasterCapsulePrototypeDialog(capsuleUI, capsuleUI.dataUI.task.get)
+            if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel) {
+              verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
+            }.peer,
+              "Persistent prototypes")).equals(NotifyDescriptor.OK_OPTION)) {
+              capsuleUI.dataUI.capsuleType = new MasterCapsuleType(prototypePanel.multiPrototypeCombo.content.map { _.comboValue.get })
+            }
+          case false ⇒ StatusBar.warn("No Prototype is defined !")
         }
-      case false ⇒ StatusBar.warn("No Prototype is defined !")
+      case _ ⇒
     }
   }
 
