@@ -28,9 +28,8 @@ import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
 import org.openmole.core.model.task._
-//import org.openmole.ide.core.implementation.dialog.GUIApplication
+import org.openmole.ide.core.implementation.dialog.GUIApplication
 import org.openmole.ui.console.Console
-//import scala.swing.SimpleSwingApplication
 import scopt.generic.OptionDefinition
 import scopt.immutable._
 
