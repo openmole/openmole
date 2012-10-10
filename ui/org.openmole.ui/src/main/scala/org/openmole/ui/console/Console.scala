@@ -84,6 +84,7 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
             "org.openmole.core.implementation.transition._",
             "org.openmole.core.implementation.tools._",
             "org.openmole.core.implementation.puzzle._",
+            "org.openmole.core.batch.authentication._",
             "org.openmole.core.model.data._",
             "org.openmole.core.model.transition._",
             "org.openmole.core.model.mole._",

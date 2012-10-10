@@ -79,17 +79,7 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>org.apache.commons.cli</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
             <artifactId>org.apache.commons.logging</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>fr.in2p3.jsaga</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

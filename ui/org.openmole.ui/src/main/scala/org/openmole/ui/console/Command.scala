@@ -18,7 +18,6 @@
 package org.openmole.ui.console
 
 import java.util.concurrent.atomic.AtomicInteger
-import org.openmole.core.batch.control.ServiceDescription
 import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.implementation.execution.local._
@@ -57,11 +56,11 @@ class Command {
     }
 
     if (v > 0) {
-      val js = new HashMap[ServiceDescription, AtomicInteger]
+      val js = new HashMap[String, AtomicInteger]
       for (
         ej ← executionJobRegistry.allExecutionJobs;
         bj ← ej.batchJob
-      ) js.getOrElseUpdate(bj.jobServiceDescription, new AtomicInteger).incrementAndGet
+      ) js.getOrElseUpdate(bj.jobService.id, new AtomicInteger).incrementAndGet
       for ((js, i) ← js) println(js + ": " + i.get)
     }
   }
@@ -93,8 +92,8 @@ class Command {
   }
 
   def auth = new {
-    def update(index: Int, auth: AuthenticationMethod) =
-      Workspace.instance.persistentList(auth.method.asInstanceOf[Class[AuthenticationMethod]]).update(index, auth)
+    def update(index: Int, auth: Authentication) =
+      Workspace.instance.persistentList(auth.category.asInstanceOf[Class[Authentication]]).update(index, auth)
   }
 
 }
