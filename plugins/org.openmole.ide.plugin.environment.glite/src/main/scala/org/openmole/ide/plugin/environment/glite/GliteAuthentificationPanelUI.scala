@@ -23,7 +23,7 @@ import org.openmole.ide.core.model.panel.IAuthentificationPanelUI
 import org.openmole.ide.misc.widget.ChooseFileTextField
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.misc.workspace.Workspace
-import org.openmole.plugin.environment.glite.GliteAuthenticationMethod
+import org.openmole.plugin.environment.glite.GliteAuthentication
 import org.openmole.plugin.environment.glite.P12Certificate
 import org.openmole.plugin.environment.glite.PEMCertificate
 import org.openmole.plugin.environment.glite.VOMSProxyFile
@@ -71,7 +71,7 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
 
   addButtons
   try {
-    Workspace.persistentList(classOf[GliteAuthenticationMethod]).headOption match {
+    Workspace.persistentList(classOf[GliteAuthentication]).headOption match {
       case Some((i: Int, x: P12Certificate)) ⇒
         initButton = Some(p12Button)
         passString = Workspace.decrypt(x.cypheredPassword)
@@ -140,14 +140,14 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
     try {
       pemPassField match {
         case Some(x: PasswordField) ⇒
-          if (pemButton.selected) Workspace.persistentList(classOf[GliteAuthenticationMethod])(0) = new PEMCertificate(Workspace.encrypt(new String(x.password)),
+          if (pemButton.selected) Workspace.persistentList(classOf[GliteAuthentication])(0) = new PEMCertificate(Workspace.encrypt(new String(x.password)),
             pem1TextField.text,
             pem2TextField.text)
           else if (p12Button.selected)
-            Workspace.persistentList(classOf[GliteAuthenticationMethod])(0) = new P12Certificate(Workspace.encrypt(new String(p12PassField.get.password)),
+            Workspace.persistentList(classOf[GliteAuthentication])(0) = new P12Certificate(Workspace.encrypt(new String(p12PassField.get.password)),
               p12TextField.text)
           else if (proxyButton.selected) {
-            Workspace.persistentList(classOf[GliteAuthenticationMethod])(0) = new VOMSProxyFile(proxyTextField.text)
+            Workspace.persistentList(classOf[GliteAuthentication])(0) = new VOMSProxyFile(proxyTextField.text)
           }
       }
       (pem :: p12 :: proxy :: Nil).filterNot(_._1.selected).foreach(_._3)

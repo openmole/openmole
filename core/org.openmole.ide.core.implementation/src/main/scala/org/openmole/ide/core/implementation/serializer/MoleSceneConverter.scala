@@ -32,6 +32,7 @@ import java.awt.Toolkit
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.MoleDataUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.model.commons._
 import org.openmole.ide.core.model.workflow.IDataChannelUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.implementation.dialog.StatusBar
@@ -75,6 +76,12 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
       writer.addAttribute("x", String.valueOf(view.x / 2 / Toolkit.getDefaultToolkit.getScreenSize.width))
       writer.addAttribute("y", String.valueOf(view.y / 2 / Toolkit.getDefaultToolkit.getScreenSize.height))
       writer.addAttribute("type", view.dataUI.capsuleType.toString)
+
+      view.dataUI.capsuleType.persistList.foreach { p ⇒
+        writer.startNode("persistentPrototype")
+        writer.addAttribute("name", p.dataUI.name)
+        writer.endNode
+      }
 
       //Input slot
       slotcount += 1
@@ -204,6 +211,7 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
                     caps.hooked(true)
                   case None ⇒ errors += "An error occured when loading the Hook for a capsule. No Hook has been set."
                 }
+              case "persistentPrototype" ⇒ caps.dataUI.capsuleType = new MasterCapsuleType(caps.dataUI.capsuleType.persistList ::: List(Proxys.prototypes.filter(_.dataUI.name == reader.getAttribute("persistentPrototype").toString).head))
               case _ ⇒ StatusBar.block("Unknown balise " + n1)
             }
             reader.moveUp

@@ -17,11 +17,12 @@
 
 package org.openmole.ide.plugin.environment.ssh
 
+import java.io.File
 import java.awt.Dimension
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
-import org.openmole.core.batch.authentication.HostAuthenticationMethod
+import org.openmole.core.batch.authentication.SSHAuthentication
 import org.openmole.core.batch.authentication.LoginPassword
 import org.openmole.core.batch.authentication.PrivateKey
 import org.openmole.ide.core.model.panel.IAuthentificationPanelUI
@@ -86,8 +87,7 @@ object SSHAuthentificationPanelUI {
                        val login: String = "",
                        val password: String = "",
                        val target: String = "",
-                       val pritvateKey: String = "",
-                       val publicKey: String = "")
+                       val pritvateKey: String = "")
 
   class SSHAuthentificationFactory extends IFactory[SSHAuthentificationData] {
     def apply = new SSHAuthentificationPanel(new SSHAuthentificationData)
@@ -150,19 +150,15 @@ object SSHAuthentificationPanelUI {
       override def toString = "SSH Key"
 
       val privateKeyTextField = new TextField(data.pritvateKey, 15)
-      val publicKeyTextField = new TextField(data.publicKey, 15)
 
       contents += new Label("Private key")
       contents += privateKeyTextField
-      contents += new Label("Public key")
-      contents += publicKeyTextField
 
       override def content = new ConnectionData(SSHKey,
         loginTextField.text,
         new String(passwordTextField.password),
         targetTextField.text,
-        privateKeyTextField.text,
-        publicKeyTextField.text)
+        privateKeyTextField.text)
     }
 
     def content = new SSHAuthentificationData(authentificationTypeComboBox.selection.item.content)
@@ -173,7 +169,7 @@ import SSHAuthentificationPanelUI._
 class SSHAuthentificationPanelUI extends PluginPanel("") with IAuthentificationPanelUI {
 
   val panelList =
-    Workspace.persistentList(classOf[HostAuthenticationMethod]).map { hm ⇒
+    Workspace.persistentList(classOf[SSHAuthentication]).map { hm ⇒
       hm match {
         case (i: Int, x: LoginPassword) ⇒
           new SSHAuthentificationPanel(new SSHAuthentificationData(
@@ -187,8 +183,7 @@ class SSHAuthentificationPanelUI extends PluginPanel("") with IAuthentificationP
               x.login,
               Workspace.decrypt(x.cypheredPassword),
               x.target,
-              x.privateKeyPath,
-              x.publicKeyPath)))
+              x.privateKey.getPath)))
       }
     }.toList
 
@@ -201,17 +196,16 @@ class SSHAuthentificationPanelUI extends PluginPanel("") with IAuthentificationP
 
   def saveContent = {
     var i = 0
-    for (j ← 0 to Workspace.persistentList(classOf[HostAuthenticationMethod]).size)
-      Workspace.persistentList(classOf[HostAuthenticationMethod]) -= j
+    for (j ← 0 to Workspace.persistentList(classOf[SSHAuthentication]).size)
+      Workspace.persistentList(classOf[SSHAuthentication]) -= j
     multiPanel.content.foreach { data ⇒
       data.connectionData.connectionMethod match {
-        case Login ⇒ Workspace.persistentList(classOf[HostAuthenticationMethod])(i) =
+        case Login ⇒ Workspace.persistentList(classOf[SSHAuthentication])(i) =
           new LoginPassword(data.connectionData.login,
             Workspace.encrypt(new String(data.connectionData.password)),
             data.connectionData.target)
-        case SSHKey ⇒ Workspace.persistentList(classOf[HostAuthenticationMethod])(i) =
-          new PrivateKey(data.connectionData.pritvateKey,
-            data.connectionData.publicKey,
+        case SSHKey ⇒ Workspace.persistentList(classOf[SSHAuthentication])(i) =
+          new PrivateKey(new File(data.connectionData.pritvateKey),
             data.connectionData.login,
             Workspace.encrypt(new String(data.connectionData.password)),
             data.connectionData.target)

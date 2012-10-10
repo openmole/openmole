@@ -37,9 +37,11 @@ class GliteEnvironmentDataUI(
           voms,
           bdii,
           Some(new MyProxy(proxyURL)),
-          requirements = requirements.toMap,
-          runtimeMemory = rtm)
-      else new GliteEnvironment(vo, voms, bdii, requirements = requirements.toMap, runtimeMemory = rtm)
+          // requirements = requirements.toMap,
+          runtimeMemory = Some(rtm))
+      else new GliteEnvironment(vo, voms, bdii,
+        //requirements = requirements.toMap, 
+        runtimeMemory = Some(rtm))
     } catch {
       case e: UserBadDataError ⇒ throw e
       case e: Exception ⇒ throw new UserBadDataError(e, "An error occured when initializing the glite environment" + name + ". Please check your certificate settings in the Preferences menu.")

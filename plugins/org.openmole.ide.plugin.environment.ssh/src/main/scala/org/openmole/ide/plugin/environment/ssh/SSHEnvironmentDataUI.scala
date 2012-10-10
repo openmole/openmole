@@ -16,7 +16,7 @@ class SSHEnvironmentDataUI(val name: String = "",
                            val dir: String = "/tmp/",
                            val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory) extends IEnvironmentDataUI {
 
-  def coreObject = new SSHEnvironment(login, host, nbSlots, dir, runtimeMemory)
+  def coreObject = new SSHEnvironment(login, host, nbSlots, runtimeMemory, path = dir)
 
   def coreClass = classOf[SSHEnvironment]
 
