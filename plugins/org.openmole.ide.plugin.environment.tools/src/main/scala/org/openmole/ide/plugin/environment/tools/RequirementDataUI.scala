@@ -21,19 +21,18 @@ import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.ListBuffer
 import org.openmole.plugin.environment.glite._
-import org.openmole.plugin.environment.jsaga._
 
 class RequirementDataUI(val architecture64: Boolean = false,
                         val workerNodeMemory: String = "",
                         val maxCPUTime: String = "",
                         val otherRequirements: String = "") {
 
-  val toMap = {
-    val requirements = new ListBuffer[Requirement]
-    if (architecture64 == true) requirements += x86_64
-    if (workerNodeMemory != "") requirements += MEMORY -> workerNodeMemory
-    if (maxCPUTime != "") requirements += CPU_TIME -> maxCPUTime
-    if (otherRequirements != "") requirements += GLITE_REQUIREMENTS -> otherRequirements
-    requirements
-  }
+  //  val toMap = {
+  //    val requirements = new ListBuffer[Requirement]
+  //    if (architecture64 == true) requirements += x86_64
+  //    if (workerNodeMemory != "") requirements += MEMORY -> workerNodeMemory
+  //    if (maxCPUTime != "") requirements += CPU_TIME -> maxCPUTime
+  //    if (otherRequirements != "") requirements += GLITE_REQUIREMENTS -> otherRequirements
+  //    requirements
+  //  }
 }

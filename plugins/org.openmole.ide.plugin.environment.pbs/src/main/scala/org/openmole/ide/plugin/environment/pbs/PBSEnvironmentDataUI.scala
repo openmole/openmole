@@ -15,15 +15,16 @@ class PBSEnvironmentDataUI(val name: String = "",
                            val host: String = "",
                            val dir: String = "",
                            val queue: String = "",
-                           val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory,
-                           val requirements: RequirementDataUI = new RequirementDataUI) extends IEnvironmentDataUI {
+                           val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory)
+    //                           val requirements: RequirementDataUI = new RequirementDataUI) 
+    extends IEnvironmentDataUI {
 
   def coreObject = new PBSEnvironment(login,
     host,
     dir,
-    if (queue.isEmpty) None else Some(queue),
-    requirements.toMap,
-    runtimeMemory)
+    // requirements.toMap,
+    runtimeMemory = Some(runtimeMemory),
+    queue = { if (queue.isEmpty) None else Some(queue) })
 
   def coreClass = classOf[PBSEnvironment]
 

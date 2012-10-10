@@ -21,16 +21,9 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import javax.imageio.ImageIO
 import org.openmole.ide.core.model.commons.Constants._
+import org.openmole.ide.core.model.commons._
 import org.openmole.ide.core.model.workflow._
-import java.awt.Color
-import java.awt.BasicStroke
-import java.awt.BorderLayout
-import java.awt.Graphics2D
-import java.awt.Dimension
-import java.awt.LinearGradientPaint
-import java.awt.Point
-import java.awt.Rectangle
-import java.awt.RenderingHints
+import java.awt._
 import org.openmole.ide.core.model.panel.PanelMode._
 import scala.swing.Panel
 
@@ -56,6 +49,9 @@ class TaskWidget(scene: IMoleScene,
         g.drawImage(ImageIO.read(x.dataUI.getClass.getClassLoader.getResource(x.dataUI.fatImagePath)), 10, 30, 80, 80, peer)
       case None ⇒
     }
+    // g.setFont(new Font("Ubuntu", Font.PLAIN, 32))
+    // if (capsule.dataUI.capsuleType == CapsuleType.STRAINER_CAPSULE)
+    //   g.drawImage(ImageIO.read(capsule.dataUI.getClass.getClassLoader.getResource("img/" + CapsuleType.toString(capsule.dataUI.capsuleType).toLowerCase + "Capsule.png")), -5, -5, 20, 20, peer)
   }
 
   def backColor = {

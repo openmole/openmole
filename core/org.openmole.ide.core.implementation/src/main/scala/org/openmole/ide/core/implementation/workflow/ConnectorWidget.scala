@@ -109,8 +109,9 @@ class ConnectorWidget(val scene: IMoleScene,
     connector match {
       case x: ITransitionUI ⇒
         x.transitionType match {
-          case EXPLORATION_TRANSITION ⇒ setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(EXPLORATION_TRANSITON, false))
-          case AGGREGATION_TRANSITION ⇒ setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(AGGREGATION_TRANSITON, false))
+          case EXPLORATION_TRANSITION ⇒ setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(EXPLORATION_TRANSITION_IMAGE, false))
+          case AGGREGATION_TRANSITION ⇒ setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(AGGREGATION_TRANSITION_IMAGE, false))
+          case END_TRANSITION ⇒ setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(END_TRANSITION_IMAGE, false))
           case _ ⇒
         }
       case _ ⇒

@@ -17,9 +17,8 @@
 
 package org.openmole.ide.core.implementation.execution
 
+import org.openmole.core.model.mole.IMoleExecution.HookExceptionRaised
 import org.openmole.core.model.mole.IMoleExecution.ExceptionRaised
-import java.awt.Color
-import java.io.BufferedOutputStream
 import java.io.PrintStream
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.eventdispatcher.Event
@@ -30,14 +29,18 @@ class ExecutionExceptionListener(exeManager: ExecutionManager) extends EventList
 
   override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = synchronized {
     event match {
-      case x: ExceptionRaised ⇒
-        exeManager.executionJobExceptionTextArea.append(x.level + ": Exception in task " + x.moleJob)
-
-        val stream = new PrintStream(exeManager.executionJobExceptionTextArea.toStream)
-        try x.exception.printStackTrace(new PrintStream(stream))
-        finally stream.close
-
-      //exeManager.executionJobExceptionTextArea.background = Color.red
+      case e: ExceptionRaised ⇒
+        exeManager.executionJobExceptionTextArea.append(e.level + ": Exception in task " + e.moleJob)
+        printStack(e.exception)
+      case h: HookExceptionRaised ⇒
+        exeManager.executionJobExceptionTextArea.append(h.level + ": Exception in hook " + h.hook)
+        printStack(h.exception)
     }
+  }
+
+  def printStack(e: Throwable) = {
+    val stream = new PrintStream(exeManager.executionJobExceptionTextArea.toStream)
+    try e.printStackTrace(new PrintStream(stream))
+    finally stream.close
   }
 }

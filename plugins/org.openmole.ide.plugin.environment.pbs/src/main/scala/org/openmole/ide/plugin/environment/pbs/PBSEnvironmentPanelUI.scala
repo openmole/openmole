@@ -39,7 +39,7 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
   val queueTextField = new TextField(pud.queue, 15)
   val runTimeMemoryTextField = new TextField(pud.runtimeMemory.toString, 5)
 
-  val requirementsPanelUI = new RequirementPanelUI(pud.requirements)
+  // val requirementsPanelUI = new RequirementPanelUI(pud.requirements)
 
   tabbedPane.pages += new TabbedPane.Page("Settings",
     new PluginPanel("wrap 2") {
@@ -56,11 +56,11 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
       contents += runTimeMemoryTextField
     })
 
-  tabbedPane.pages += requirementsPanelUI
+  // tabbedPane.pages += requirementsPanelUI
   contents += tabbedPane
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    requirementsPanelUI.requirementHelp.foreach { hm ⇒ add(hm._1, hm._2) }
+    //  requirementsPanelUI.requirementHelp.foreach { hm ⇒ add(hm._1, hm._2) }
     add(loginTextField, new Help(i18n.getString("login"), i18n.getString("loginEx")))
     add(hostTextField, new Help(i18n.getString("host"), i18n.getString("hostEx")))
     add(dirTextField, new Help(i18n.getString("dir"), i18n.getString("dirEx")))
@@ -74,10 +74,9 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
       hostTextField.text,
       dirTextField.text,
       queueTextField.text,
-      runTimeMemoryTextField.text.toInt,
-      new RequirementDataUI(
+      runTimeMemoryTextField.text.toInt /*   new RequirementDataUI(
         requirementsPanelUI.architectureCheckBox.selected,
         requirementsPanelUI.workerNodeMemoryTextField.text,
         requirementsPanelUI.maxCPUTimeTextField.text,
-        requirementsPanelUI.otherRequirementTextField.text))
+        requirementsPanelUI.otherRequirementTextField.text)*/ )
 }

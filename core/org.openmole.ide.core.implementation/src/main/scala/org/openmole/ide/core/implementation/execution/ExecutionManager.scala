@@ -26,17 +26,10 @@ import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import scala.collection.mutable.HashMap
-import scala.swing.Menu
-import scala.swing.Orientation
-import scala.swing.Publisher
-import scala.swing.ScrollPane
-import scala.swing.SplitPane
-import scala.swing.SplitPane
-import scala.swing.TabbedPane
+import scala.swing._
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.exception.UserBadDataError
 import scala.collection.JavaConversions._
-import scala.swing.TextArea
 import org.openmole.core.model.job.State
 import org.openmole.core.model.data._
 import org.openmole.core.model.execution.ExecutionState
@@ -54,7 +47,7 @@ class ExecutionManager(manager: IMoleSceneManager,
                        val capsuleMapping: Map[ICapsuleUI, ICapsule],
                        val prototypeMapping: Map[IPrototypeDataProxyUI, Prototype[_]]) extends PluginPanel("", "[grow,fill]", "")
     with IExecutionManager
-    with Publisher {
+    with Publisher { executionManager ⇒
   val logTextArea = new TextArea {
     columns = 20
     rows = 10
@@ -124,58 +117,58 @@ class ExecutionManager(manager: IMoleSceneManager,
     cancel
     initBarPlotter
 
-    println("starting building mole Exe ...")
-    MoleMaker.buildMoleExecution(mole,
-      manager,
-      hooks.flatMap { case (panel, caps) ⇒ List(capsuleMapping(caps)).zip(panel.saveContent.coreObject(this)) }.toList,
-      capsuleMapping,
-      groupings) match {
-        case Right((mExecution, environments)) ⇒
-          println("RIGHT ... ")
-          this.moleExecution = Some(mExecution)
-
-          EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.OneJobStatusChanged])
-          EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.Finished])
-          EventDispatcher.listen(mExecution, new JobCreatedListener(this), classOf[IMoleExecution.OneJobSubmitted])
-          EventDispatcher.listen(mExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ExceptionRaised])
-          environments.foreach { e ⇒
-            e._1 match {
-              case be: BatchEnvironment ⇒
-                EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.BeginUpload])
-                EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.EndUpload])
-                EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.BeginDownload])
-                EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.EndDownload])
-              case _ ⇒
-            }
+    moleExecution = buildMoleExecution(hooks, groupings) match {
+      case Right((mExecution, environments)) ⇒
+        EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.OneJobStatusChanged])
+        EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.Finished])
+        EventDispatcher.listen(mExecution, new JobCreatedListener(this), classOf[IMoleExecution.OneJobSubmitted])
+        EventDispatcher.listen(mExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ExceptionRaised])
+        environments.foreach { e ⇒
+          e._1 match {
+            case be: BatchEnvironment ⇒
+              EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.BeginUpload])
+              EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.EndUpload])
+              EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.BeginDownload])
+              EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.EndDownload])
+            case _ ⇒
           }
-          environments.foreach {
-            case (env, _) ⇒ EventDispatcher.listen(env, new EnvironmentExceptionListener(this), classOf[IEnvironment.ExceptionRaised])
-          }
+        }
+        environments.foreach {
+          case (env, _) ⇒ EventDispatcher.listen(env, new EnvironmentExceptionListener(this), classOf[IEnvironment.ExceptionRaised])
+        }
 
-          environments.foreach(buildEmptyEnvPlotter)
-          if (envBarPanel.peer.getComponentCount == 2) envBarPanel.peer.remove(1)
+        environments.foreach(buildEmptyEnvPlotter)
+        if (envBarPanel.peer.getComponentCount == 2) envBarPanel.peer.remove(1)
 
-          //FIXME Displays several environments
-          if (environments.size > 0) {
-            envBarPanel.peer.add(new PluginPanel("wrap", "[center]", "") {
-              contents += new TitleLabel("Environment: " + environments.toList(0)._2)
-              contents += envBarPlotter.panel
-            }.peer)
-            // splitPane.dividerLocation = (preferredSize.width * 0.4).toInt
-            splitPane.revalidate
-            splitPane.repaint
-          }
-          initPieChart
-          repaint
-          revalidate
-          println("TIMER START ... ")
-          timer.start
-          println("MEXECUTION START ... ")
-          mExecution.start
-        case Left(e) ⇒
-          StatusBar.blockException(e)
-      }
+        //FIXME Displays several environments
+        if (environments.size > 0) {
+          envBarPanel.peer.add(new PluginPanel("wrap", "[center]", "") {
+            contents += new TitleLabel("Environment: " + environments.toList(0)._2)
+            contents += envBarPlotter.panel
+          }.peer)
+          // splitPane.dividerLocation = (preferredSize.width * 0.4).toInt
+          splitPane.revalidate
+          splitPane.repaint
+        }
+        initPieChart
+        repaint
+        revalidate
+        timer.start
+        mExecution.start
+        println("MEXECUTION STARTED ... ")
+        Some(mExecution)
+      case Left(e) ⇒
+        StatusBar.blockException(e)
+        None
+    }
   }
+
+  def buildMoleExecution(hooks: Map[IHookPanelUI, ICapsuleUI],
+                         groupings: List[(IGrouping, ICapsule)]) = MoleMaker.buildMoleExecution(mole,
+    manager,
+    hooks.flatMap { case (panel, caps) ⇒ List(capsuleMapping(caps)).zip(panel.saveContent.coreObject(this)) }.toList,
+    capsuleMapping,
+    groupings)
 
   def incrementEnvironmentState(environment: IEnvironment,
                                 state: ExecutionState.ExecutionState) = synchronized {

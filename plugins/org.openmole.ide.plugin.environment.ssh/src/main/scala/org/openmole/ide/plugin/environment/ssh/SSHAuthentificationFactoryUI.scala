@@ -18,12 +18,12 @@
 package org.openmole.ide.plugin.environment.ssh
 
 import org.openmole.ide.core.model.factory.IAuthentificationFactoryUI
-import org.openmole.core.batch.authentication
+import org.openmole.core.batch.authentication.SSHAuthentication
 
 class SSHAuthentificationFactoryUI extends IAuthentificationFactoryUI {
   override def toString = "SSH"
 
   override def buildPanelUI = new SSHAuthentificationPanelUI
 
-  override def coreClass = classOf[authentication.HostAuthenticationMethod]
+  override def coreClass = classOf[SSHAuthentication]
 }

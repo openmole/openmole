@@ -182,5 +182,4 @@ class GUISerializer {
     unserializeProxy(extractDir.getAbsolutePath, "task")
     unserializeProxy(extractDir.getAbsolutePath, "mole")
   }
-
 }

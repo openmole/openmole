@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ide.misc.tools.image
 
 import java.awt.Image
@@ -31,8 +30,9 @@ object Images {
   val INPUT_EXE_SLOT: Image = ImageIO.read(classLoader.getResource("img/inputSlotExe.png"))
   val OUTPUT_SLOT: Image = ImageIO.read(classLoader.getResource("img/outputSlot.png"))
   val OUTPUT_EXE_SLOT: Image = ImageIO.read(classLoader.getResource("img/outputSlotExe.png"))
-  val AGGREGATION_TRANSITON: Image = ImageIO.read(classLoader.getResource("img/aggregation.png"))
-  val EXPLORATION_TRANSITON: Image = ImageIO.read(classLoader.getResource("img/exploration.png"))
+  val AGGREGATION_TRANSITION_IMAGE: Image = ImageIO.read(classLoader.getResource("img/aggregation.png"))
+  val EXPLORATION_TRANSITION_IMAGE: Image = ImageIO.read(classLoader.getResource("img/exploration.png"))
+  val END_TRANSITION_IMAGE: Image = ImageIO.read(classLoader.getResource("img/endTransition.png"))
 
   val BUILD_EXECUTION = new ImageIcon(classLoader.getResource("img/build.png"))
   val CLEAN_BUILD_EXECUTION = new ImageIcon(classLoader.getResource("img/cleanAndBuild.png"))

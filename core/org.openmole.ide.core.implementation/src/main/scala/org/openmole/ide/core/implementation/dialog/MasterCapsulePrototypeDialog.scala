@@ -22,6 +22,8 @@ import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 import org.openmole.ide.core.implementation.data.CheckData
+import org.openmole.ide.core.model.commons.MasterCapsuleType
+import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IConnectorUI
@@ -33,27 +35,31 @@ import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.swing.ScrollPane
 
-object ConnectorPrototypeFilterDialog extends PrototypeDialog {
-  def display(connectorUI: IConnectorUI) = {
-    openable(connectorUI.source.dataUI) match {
-      case true ⇒
-        val prototypePanel = new FilteredPrototypePanel(connectorUI)
-        if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel) {
-          verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
-        }.peer,
-          "Add prototype filters")).equals(NotifyDescriptor.OK_OPTION)) {
-          connectorUI.filteredPrototypes = prototypePanel.multiPrototypeCombo.content.map { _.comboValue.get }
-          CheckData.checkMole(connectorUI.source.scene)
+object MasterCapsulePrototypeDialog extends PrototypeDialog {
+  def display(capsuleUI: ICapsuleUI) = {
+    capsuleUI.dataUI.capsuleType match {
+      case x: MasterCapsuleType ⇒
+        openable(capsuleUI.dataUI) match {
+          case true ⇒
+            val prototypePanel = new MasterCapsulePrototypeDialog(capsuleUI, capsuleUI.dataUI.task.get)
+            if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel) {
+              verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
+            }.peer,
+              "Persistent prototypes")).equals(NotifyDescriptor.OK_OPTION)) {
+              capsuleUI.dataUI.capsuleType = new MasterCapsuleType(prototypePanel.multiPrototypeCombo.content.map { _.comboValue.get })
+            }
+          case false ⇒ StatusBar.warn("No Prototype is defined !")
         }
-      case false ⇒ StatusBar.warn("No Prototype is defined !")
+      case _ ⇒
     }
   }
 
-  class FilteredPrototypePanel(connector: IConnectorUI) extends PluginPanel("") {
+  class MasterCapsulePrototypeDialog(capsuleUI: ICapsuleUI,
+                                     task: ITaskDataProxyUI) extends PluginPanel("") {
     preferredSize = new Dimension(250, 300)
-    val multiPrototypeCombo = new MultiCombo("Filtered Prototypes",
-      connector.availablePrototypes,
-      connector.filteredPrototypes.map { fp ⇒ new ComboPanel(connector.availablePrototypes, new ComboData(Some(fp))) },
+    val multiPrototypeCombo = new MultiCombo("Persistent Prototypes",
+      task.dataUI.prototypesOut,
+      capsuleUI.dataUI.capsuleType.persistList.map { p ⇒ new ComboPanel(task.dataUI.prototypesOut, new ComboData(Some(p))) },
       CLOSE_IF_EMPTY,
       ADD)
     // if (connector.filteredPrototypes.isEmpty) multiPrototypeCombo.removeAllRows

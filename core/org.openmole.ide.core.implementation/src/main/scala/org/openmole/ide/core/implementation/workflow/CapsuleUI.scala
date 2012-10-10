@@ -26,10 +26,12 @@ import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.widget.ImageWidget
 import org.netbeans.api.visual.widget.Widget
+import org.openmole.ide.core.implementation.dialog.MasterCapsulePrototypeDialog
 import org.openmole.ide.core.implementation.data.CapsuleDataUI
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.dataproxy.ProxyFreezer
 import org.openmole.ide.core.implementation.provider.CapsuleMenuProvider
+import org.openmole.ide.core.model.commons._
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.data.ICapsuleDataUI
@@ -48,11 +50,12 @@ import scala.swing.Action
 
 class CapsuleUI(val scene: IMoleScene,
                 val dataUI: ICapsuleDataUI = new CapsuleDataUI) extends Widget(scene.graphScene)
-    with ICapsuleUI {
+    with ICapsuleUI { capsuleUI ⇒
 
   val taskComponentWidget = new SceneComponentWidget(scene, new TaskWidget(scene, this),
     TASK_CONTAINER_WIDTH,
     TASK_CONTAINER_HEIGHT)
+  var capsuleTypeWidget: Option[LinkedImageWidget] = None
   var environmentWidget: Option[LinkedImageWidget] = None
   var samplingWidget: Option[LinkedImageWidget] = None
   var inputPrototypeWidget: Option[PrototypeWidget] = None
@@ -65,6 +68,7 @@ class CapsuleUI(val scene: IMoleScene,
 
   setEnvironment(dataUI.environment)
   setSampling(dataUI.sampling)
+  setCapsuleType(dataUI.capsuleType)
 
   val validationWidget = new ImageWidget(scene.graphScene,
     dataUI.task match {
@@ -156,6 +160,7 @@ class CapsuleUI(val scene: IMoleScene,
 
   def decapsule = {
     dataUI.task = None
+    dataUI.unhookAll
     removeWidget(inputPrototypeWidget)
     removeWidget(outputPrototypeWidget)
     removeWidget(environmentWidget)
@@ -186,6 +191,25 @@ class CapsuleUI(val scene: IMoleScene,
       case Some(y: ComponentWidget) ⇒
         removeChild(y)
       case None ⇒
+    }
+  }
+
+  def setCapsuleType(cType: CapsuleType) = {
+    dataUI.capsuleType = cType
+    updateCapsuleTypeWidget
+  }
+
+  private def updateCapsuleTypeWidget = {
+    removeWidget(capsuleTypeWidget)
+
+    dataUI.capsuleType match {
+      case x: BasicCapsuleType ⇒ capsuleTypeWidget = None
+      case x: CapsuleType ⇒
+        capsuleTypeWidget = Some(new LinkedImageWidget(scene,
+          new ImageIcon(ImageIO.read(dataUI.getClass.getClassLoader.getResource("img/" + x.toString.toLowerCase + "Capsule.png"))),
+          -1, -1,
+          new Action("") { def apply = MasterCapsulePrototypeDialog.display(capsuleUI) }))
+        addChild(capsuleTypeWidget.get)
     }
   }
 
