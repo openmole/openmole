@@ -126,7 +126,7 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
     initMenu
     itChangeCapsule.peer.removeAll
     items -= itChangeCapsule.peer
-    List(new MasterCapsuleType, new StrainerCapsuleType, new BasicCapsuleType).filterNot(_ == capsule.dataUI.capsuleType).foreach { ctype ⇒
+    List(new MasterCapsuleType, new StrainerCapsuleType, new BasicCapsuleType).filterNot(_.getClass == capsule.dataUI.capsuleType.getClass).foreach { ctype ⇒
       itChangeCapsule.peer.add(new MenuItem(new ChangeCapsuleAction(capsule, ctype)).peer)
     }
     items += itChangeCapsule.peer
