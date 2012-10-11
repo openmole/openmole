@@ -23,4 +23,5 @@ class SerializedJob(
   val storage: StorageService,
   val path: String,
   val inputFile: String,
-  val runtime: Runtime)
+  val runtime: Runtime,
+  var cleaned: Boolean = false)

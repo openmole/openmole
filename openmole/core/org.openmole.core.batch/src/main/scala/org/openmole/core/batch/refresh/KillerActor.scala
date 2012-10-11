@@ -22,14 +22,14 @@ import org.openmole.misc.tools.service.Logger
 
 object KillerActor extends Logger
 
+import org.openmole.core.model.execution.ExecutionState._
 import KillerActor._
 
 class KillerActor extends Actor {
   def receive = {
     case KillBatchJob(bj) ⇒
       try bj.withToken { implicit t ⇒
-        try bj.kill
-        finally bj.purge
+        bj.kill
       } catch {
         case e: Throwable ⇒ logger.log(FINE, "Could not kill job.", e)
       }

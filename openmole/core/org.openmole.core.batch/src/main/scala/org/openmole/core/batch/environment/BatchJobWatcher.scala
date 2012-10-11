@@ -41,7 +41,7 @@ class BatchJobWatcher(environment: BatchEnvironment) extends Actor {
       registry.synchronized {
         for (job ← registry.allJobs) {
           if (job.finished) {
-            for (ej ← registry.executionJobs(job)) environment.jobManager ! Kill(ej)
+            for (ej ← registry.executionJobs(job)) if (ej.state != KILLED) environment.jobManager ! Kill(ej)
             jobGroupsToRemove += job
           } else {
             val executionJobsToRemove = new ListBuffer[BatchExecutionJob]

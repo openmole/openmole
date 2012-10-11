@@ -65,12 +65,13 @@ trait BatchJob { bj ⇒
 
   def kill(implicit token: AccessToken)
   def updateState(implicit token: AccessToken): ExecutionState
-  def purge(implicit token: AccessToken)
 
   def kill(id: jobService.J)(implicit token: AccessToken) = token.synchronized {
     synchronized {
+      val oldState = state
       try if (state == SUBMITTED || state == RUNNING) jobService.cancel(id)
       finally state = KILLED
+      if (oldState != KILLED) jobService.purge(id)
     }
   }
 
@@ -84,8 +85,6 @@ trait BatchJob { bj ⇒
   def state: ExecutionState = _state
 
   def timeStamp(state: ExecutionState): Long = timeStamps(state.id)
-
-  def purge(id: jobService.J)(implicit token: AccessToken) = token.synchronized { jobService.purge(id) }
 
   def withToken[T](f: AccessToken ⇒ T) = UsageControl.withToken(jobService.id)(f)
 }

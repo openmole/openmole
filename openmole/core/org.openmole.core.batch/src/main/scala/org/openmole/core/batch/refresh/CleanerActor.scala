@@ -22,7 +22,11 @@ import akka.actor.Actor
 class CleanerActor extends Actor {
   def receive = {
     case CleanSerializedJob(sj) ⇒
-      sj.storage.withToken { implicit t ⇒ sj.storage.rmDir(sj.path) }
+      sj.synchronized {
+        if (!sj.cleaned) sj.storage.withToken { implicit t ⇒ sj.storage.rmDir(sj.path) }
+        sj.cleaned = true
+      }
       System.runFinalization
+
   }
 }

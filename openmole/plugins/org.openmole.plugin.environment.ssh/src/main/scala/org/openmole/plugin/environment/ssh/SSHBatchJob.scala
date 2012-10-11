@@ -57,10 +57,4 @@ trait SSHBatchJob extends BatchJob {
       case None ⇒ state = KILLED
     }
 
-  def purge(implicit token: AccessToken) =
-    id match {
-      case Some(id) ⇒ super.purge(id)
-      case None ⇒
-    }
-
 }
