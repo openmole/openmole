@@ -100,35 +100,32 @@ trait SharedStorage extends SSHService { js ⇒
           if (s != Done) throw new InternalProcessingError("Installation of runtime has failed.")
         } finally sharedFS.rmFile(sharedFS.child(workdir, scriptName))
 
-        installed = Some(sharedFS.child(workdir, runtime.runtime.hash))
-
-      case Some(i) ⇒ i
+        val path = sharedFS.child(workdir, runtime.runtime.hash)
+        installed = Some(path)
+        path
+      case Some(path) ⇒ path
     }
   }
 
   protected def buildScript(serializedJob: SerializedJob) = {
-    val installed = preparedRuntime(serializedJob.runtime)
-    import serializedJob.storage
-    storage.withToken { implicit token ⇒
-      val result = storage.child(serializedJob.path, Storage.uniqName("result", ".xml.gz"))
+    val runtime = preparedRuntime(serializedJob.runtime)
+    val result = sharedFS.child(serializedJob.path, Storage.uniqName("result", ".xml.gz"))
 
-      val script = Workspace.newFile("run", ".sh")
-      val remoteScript = try {
-        val workspace = UUID.randomUUID
-        val osgiWorkDir = UUID.randomUUID
-        script.content =
-          "export PATH=" + installed + "/jre/bin/" + ":$PATH; cd " + installed + "; export OPENMOLE_HOME=$PWD/" + workspace + " ; mkdir $OPENMOLE_HOME ; " +
-            "sh run.sh " + environment.runtimeMemoryValue + "m " + osgiWorkDir + " -s file:/" +
-            " -c " + serializedJob.path + " -p envplugins/ -i " + serializedJob.inputFile + " -o " + result +
-            "; rm -rf $OPENMOLE_HOME ; rm -rf " + osgiWorkDir + " ;"
+    val script = Workspace.newFile("run", ".sh")
+    val remoteScript = try {
+      val workspace = UUID.randomUUID
+      val osgiWorkDir = UUID.randomUUID
+      script.content =
+        "export PATH=" + runtime + "/jre/bin/" + ":$PATH; cd " + runtime + "; export OPENMOLE_HOME=$PWD/" + workspace + " ; mkdir $OPENMOLE_HOME ; " +
+          "sh run.sh " + environment.runtimeMemoryValue + "m " + osgiWorkDir + " -s " + serializedJob.runtime.storage.path +
+          " -c " + serializedJob.path + " -p envplugins/ -i " + serializedJob.inputFile + " -o " + result +
+          "; rm -rf $OPENMOLE_HOME ; rm -rf " + osgiWorkDir + " ;"
 
-        val remoteScript = storage.child(serializedJob.path, Storage.uniqName("run", ".sh"))
-        storage.upload(script, remoteScript)
-        remoteScript
-      } finally script.delete
-      (remoteScript, result)
-    }
-
+      val remoteScript = sharedFS.child(serializedJob.path, Storage.uniqName("run", ".sh"))
+      sharedFS.upload(script, remoteScript)
+      remoteScript
+    } finally script.delete
+    (remoteScript, result)
   }
 
 }

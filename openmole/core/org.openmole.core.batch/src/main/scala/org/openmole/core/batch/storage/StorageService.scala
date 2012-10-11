@@ -38,7 +38,7 @@ trait StorageService extends BatchService with Storage {
   @transient lazy val serializedRemoteStorage = {
     val file = Workspace.newFile("remoteStorage", ".xml")
     FileDeleter.deleteWhenGarbageCollected(file)
-    SerializerService.serialize(remoteStorage, file)
+    SerializerService.serializeAndArchiveFiles(remoteStorage, file)
     file
   }
 
@@ -50,21 +50,28 @@ trait StorageService extends BatchService with Storage {
     baseSpaceVar match {
       case Some(s) ⇒ s
       case None ⇒
-        val basePath =
-          Iterator.iterate(new File(root))(_.getParentFile).takeWhile(_ != null).toList.reverse.filterNot(_.getName.isEmpty).foldLeft(root) {
-            (path, file) ⇒
-              val childPath = child(path, file.getName)
-              if (!exists(childPath)) makeDir(childPath)
-              childPath
-          }
-
+        val basePath = mkBaseDir
         baseSpaceVar = Some(basePath)
         basePath
     }
   }
 
+  protected def mkBaseDir(implicit token: AccessToken): String = synchronized {
+    val rootFile = new File(root)
+    val baseDir = new File(rootFile, baseDirName)
+
+    Iterator.iterate(baseDir)(_.getParentFile).takeWhile(_ != null).toList.reverse.filterNot(_.getName.isEmpty).foldLeft("/") {
+      (path, file) ⇒
+        val childPath = child(path, file.getName)
+        if (!exists(childPath)) makeDir(childPath)
+        childPath
+    }
+
+  }
+
   override def toString: String = id
-  def withToken[A](a: (AccessToken) ⇒ A): A = UsageControl.withToken(id)(a)
+  def withToken[A](a: (AccessToken) ⇒ A): A =
+    UsageControl.withToken(id)(a)
 
   private def withFailureControl[A](a: ⇒ A): A = QualityControl.withFailureControl(StorageControl.qualityControl(id))(a)
 
@@ -81,5 +88,7 @@ trait StorageService extends BatchService with Storage {
   def uploadGZ(src: File, dest: String)(implicit token: AccessToken) = withFailureControl { super.uploadGZ(src, dest) }
   def download(src: String, dest: File)(implicit token: AccessToken) = withFailureControl { super.download(src, dest) }
   def downloadGZ(src: String, dest: File)(implicit token: AccessToken) = withFailureControl { super.downloadGZ(src, dest) }
+
+  def baseDirName = Workspace.preference(Workspace.uniqueID) + '/'
 
 }

@@ -37,9 +37,8 @@ trait BatchJob { bj ⇒
   val timeStamps = ExecutionState.values.toList.map { v ⇒ System.currentTimeMillis }.toArray
 
   var _state: ExecutionState = null
-  state = SUBMITTED
 
-  protected def state_=(state: ExecutionState) = synchronized {
+  protected[jobservice] def state_=(state: ExecutionState) = synchronized {
     if (_state != state) {
       timeStamps(state.id) = System.currentTimeMillis
 
@@ -85,15 +84,6 @@ trait BatchJob { bj ⇒
   def state: ExecutionState = _state
 
   def timeStamp(state: ExecutionState): Long = timeStamps(state.id)
-
-  /*def lastStateDurration: Long = {
-    val currentState = state
-    var previous: Long = 0
-    timeStamps.view.slice(0, currentState.id).reverse.find(_ != 0) match {
-      case Some(stemp) ⇒ return timeStamp(currentState) - stemp
-      case None ⇒ throw new InternalProcessingError("Bug should allways have submitted time stemp.")
-    }
-  }*/
 
   def purge(id: jobService.J)(implicit token: AccessToken) = token.synchronized { jobService.purge(id) }
 

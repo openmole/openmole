@@ -19,10 +19,24 @@ package org.openmole.core.batch.storage
 
 import org.openmole.core.batch.control._
 import org.openmole.misc.workspace._
+import org.openmole.core.batch.replication.ReplicaCatalog
 import collection.JavaConversions._
 import com.db4o.ObjectContainer
 
 trait VolatileStorageService extends StorageService { this: Storage ⇒
+
+  override protected def mkBaseDir(implicit token: AccessToken): String = {
+    ReplicaCatalog.withClient { implicit c ⇒
+      ReplicaCatalog.replicas(this).foreach {
+        r ⇒ ReplicaCatalog.remove(r)
+      }
+    }
+    val dir = super.mkBaseDir(token)
+    rmDir(dir)
+    makeDir(dir)
+    dir
+  }
+
   def persistentDir(implicit token: AccessToken, objectContainer: ObjectContainer) = baseDir(token)
   def tmpDir(implicit token: AccessToken) = baseDir(token)
   def clean(implicit token: AccessToken, objectContainer: ObjectContainer) = {}

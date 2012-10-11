@@ -39,6 +39,7 @@ import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import collection.JavaConversions._
 import scala.collection.immutable.TreeMap
+import com.ice.tar.TarInputStream
 
 object SerializerService extends Logger {
 

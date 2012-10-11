@@ -21,9 +21,12 @@ import org.eclipse.equinox.app._
 import scopt.immutable._
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.logging.LoggerService
+import org.openmole.misc.tools.io.FileUtil._
 import java.io.File
 import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.tools.service.Logger
+import org.openmole.misc.workspace._
+import org.openmole.core.batch.storage._
 
 class SimExplorer extends IApplication with Logger {
 
@@ -65,7 +68,12 @@ class SimExplorer extends IApplication with Logger {
 
         PluginManager.loadDir(new File(config.pluginPath.get))
 
-        val storage = SerializerService.deserializeAndExtractFiles(new File(config.storage.get))
+        val storageFile = Workspace.newFile("storage", ".xml")
+        val storage =
+          try {
+            new File(config.storage.get).copyUncompressFile(storageFile)
+            SerializerService.deserializeAndExtractFiles[SimpleStorage](storageFile)
+          } finally storageFile.delete
 
         new Runtime().apply(
           storage,

@@ -213,15 +213,15 @@ akka {
   @transient lazy val jobServices = {
     val jobServices = allJobServices
     if (jobServices.isEmpty) throw new InternalProcessingError("No job service available for the environment.")
-    jobServices.foreach(s ⇒ UsageControl.register(s.id, UsageControl(s.connections)))
-    jobServices.foreach(s ⇒ JobServiceControl.register(s.id, new JobServiceQualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis))))
+    jobServices.foreach { s ⇒ UsageControl.register(s.id, UsageControl(s.connections)) }
+    jobServices.foreach { s ⇒ JobServiceControl.register(s.id, new JobServiceQualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis))) }
     jobServices
   }
 
   @transient lazy val storages = {
     val storages = allStorages
     if (storages.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
-    storages.foreach(s ⇒ UsageControl.register(s.id, UsageControl(s.connections)))
+    storages.foreach { s ⇒ UsageControl.register(s.id, UsageControl(s.connections)) }
     storages.foreach(s ⇒ StorageControl.register(s.id, new QualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis))))
     Updater.registerForUpdate(new StoragesGC(WeakReference(storages)), Workspace.preferenceAsDurationInMs(StoragesGCUpdateInterval))
     storages
@@ -255,11 +255,11 @@ akka {
           }
       }
 
-    @tailrec def selected(value: Double, storages: List[(JobService, AccessToken, Double)]): Option[(JobService, AccessToken)] =
-      storages.headOption match {
+    @tailrec def selected(value: Double, jobServices: List[(JobService, AccessToken, Double)]): Option[(JobService, AccessToken)] =
+      jobServices.headOption match {
         case Some((js, token, fitness)) ⇒
           if (value <= fitness) Some((js, token))
-          else selected(value - fitness, storages.tail)
+          else selected(value - fitness, jobServices.tail)
         case None ⇒ None
       }
 

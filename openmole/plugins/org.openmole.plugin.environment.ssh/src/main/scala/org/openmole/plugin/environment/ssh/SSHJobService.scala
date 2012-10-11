@@ -106,7 +106,7 @@ trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
     sshBatchJob
   }
 
-  private[ssh] def submit(description: SSHJobDescription)(implicit token: AccessToken) =
+  private[ssh] def submit(description: SSHJobDescription) =
     jobService.submit(description)(authentication)
 
 }

@@ -17,9 +17,6 @@
 
 package org.openmole.core.batch.control
 
-import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.eventdispatcher.Event
-import java.util.concurrent.TimeUnit
 import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.SynchronizedMap
@@ -29,11 +26,14 @@ import scala.concurrent.stm._
 
 object UsageControl extends Logger {
 
-  val botomlessUsage = new UsageControl(BotomlessTokenPool)
+  val unlimitedAccess = new UsageControl with UnlimitedAccess
 
   def apply(nbAccess: Int) = {
-    if (nbAccess != Int.MaxValue) new UsageControl(AccessTokenPool(nbAccess));
-    else new UsageControl(BotomlessTokenPool)
+    if (nbAccess != Int.MaxValue)
+      new UsageControl with LimitedAccess {
+        val nbTokens = nbAccess
+      }
+    else unlimitedAccess
   }
 
   def withUsageControl[B](usageControl: UsageControl)(f: (AccessToken ⇒ B)): B = {
@@ -45,28 +45,23 @@ object UsageControl extends Logger {
   def withToken[B](url: URI)(f: (AccessToken ⇒ B)): B = withToken(url.toString)(f)
   def withToken[B](id: String)(f: (AccessToken ⇒ B)): B = withUsageControl(this.get(id))(f)
 
-  val controls = new HashMap[String, UsageControl] with SynchronizedMap[String, UsageControl]
+  private val controls = new HashMap[String, UsageControl] with SynchronizedMap[String, UsageControl]
 
-  def register(id: String, usageControl: UsageControl) = {
-    logger.fine("Register " + id)
+  def register(id: String, usageControl: UsageControl) =
     controls.getOrElseUpdate(id, usageControl)
-  }
 
   def get(url: URI): UsageControl = get(url.toString)
   def get(id: String) =
     controls.get(id) match {
       case Some(ctrl) ⇒ ctrl
-      case None ⇒ botomlessUsage
+      case None ⇒ unlimitedAccess
     }
 
 }
 
-class UsageControl(tokenPool: IAccessTokenPool) {
-
-  def waitAToken: AccessToken = tokenPool.waitAToken
-
-  def tryGetToken: Option[AccessToken] = tokenPool.tryGetToken
-
-  def releaseToken(token: AccessToken) = tokenPool.releaseToken(token)
-
+trait UsageControl {
+  def waitAToken: AccessToken
+  def tryGetToken: Option[AccessToken]
+  def releaseToken(token: AccessToken)
+  def available: Int
 }

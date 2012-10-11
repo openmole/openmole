@@ -242,7 +242,7 @@ object ReplicaCatalog extends Logger {
       logger.fine("Remove " + replica)
       if (!containsDestination(replica.storage, replica.path)) {
         logger.fine("Clean " + replica)
-        storage.rmFile(replica.path)
+        if (storage.exists(replica.path)) storage.rmFile(replica.path)
       }
     }
 

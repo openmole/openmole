@@ -19,12 +19,11 @@ package org.openmole.core.batch.control
 
 import scala.concurrent.stm._
 
-object AccessTokenPool {
-  def apply(nbTokens: Int): AccessTokenPool =
-    new AccessTokenPool(Ref((0 until nbTokens).map { i ⇒ new AccessToken }.toList))
-}
+trait LimitedAccess extends UsageControl {
 
-class AccessTokenPool(private val tokens: Ref[List[AccessToken]]) extends IAccessTokenPool {
+  def nbTokens: Int
+
+  private lazy val tokens: Ref[List[AccessToken]] = Ref((0 until nbTokens).map { i ⇒ new AccessToken }.toList)
 
   def add(token: AccessToken) = atomic { implicit txn ⇒ tokens() = token :: tokens() }
 
@@ -42,4 +41,6 @@ class AccessTokenPool(private val tokens: Ref[List[AccessToken]]) extends IAcces
   def waitAToken = atomic { implicit txn ⇒
     tryGetToken.getOrElse(retry)
   }
+
+  def available = tokens.single().size
 }

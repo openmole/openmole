@@ -24,6 +24,8 @@ import org.openmole.misc.tools.io.FileUtil._
 import collection.JavaConversions._
 
 object LoggerService {
+
+  val blackList = Set("ch.ethz.ssh2.log.Logger")
   private val LogLevel = new ConfigurationLocation("LoggerService", "LogLevel")
 
   Workspace += (LogLevel, "INFO")
@@ -40,6 +42,11 @@ object LoggerService {
     rootLogger.setLevel(level)
     val ch = new ConsoleHandler
     ch.setLevel(level)
+    ch.setFilter(
+      new Filter {
+        def isLoggable(record: LogRecord) = !blackList.contains(record.getSourceClassName)
+      })
+
     rootLogger.addHandler(ch)
   }
 

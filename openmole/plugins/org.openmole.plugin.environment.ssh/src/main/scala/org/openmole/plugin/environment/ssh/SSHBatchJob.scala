@@ -41,7 +41,7 @@ trait SSHBatchJob extends BatchJob {
   val sshId = SSHBatchJob.sshId.getAndIncrement
 
   def submit = synchronized {
-    id = Some(withToken { implicit t ⇒ jobService.submit(jobDescription) })
+    id = Some(jobService.submit(jobDescription))
   }
 
   def updateState(implicit token: AccessToken) = synchronized {

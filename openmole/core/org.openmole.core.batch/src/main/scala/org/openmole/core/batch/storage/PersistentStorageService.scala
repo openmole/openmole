@@ -64,7 +64,7 @@ trait PersistentStorageService extends StorageService {
         val persistentPath = child(baseDir, persistent)
         if (!super.exists(persistentPath)) super.makeDir(persistentPath)
 
-        for (file ← super.listNames(persistentDir))
+        for (file ← super.listNames(persistentPath))
           ReplicaCatalog.cleanIfNotContains(this, super.child(persistentPath, file))
 
         persistentSpaceVar = Some(persistentPath)
@@ -114,5 +114,4 @@ trait PersistentStorageService extends StorageService {
     tmpTimePath
   }
 
-  def baseDirName = Workspace.preference(Workspace.uniqueID) + '/'
 }

@@ -27,7 +27,9 @@ trait JobService extends BatchService { js ⇒
   type J
 
   def submit(serializedJob: SerializedJob)(implicit token: AccessToken): BatchJob = token.synchronized {
-    withQualityControl(_submit(serializedJob))
+    val job = withQualityControl(_submit(serializedJob))
+    job.state = SUBMITTED
+    job
   }
 
   def state(j: J)(implicit token: AccessToken) = token.synchronized {
