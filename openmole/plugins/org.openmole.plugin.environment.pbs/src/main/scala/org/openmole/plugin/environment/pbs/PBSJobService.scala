@@ -29,7 +29,7 @@ import org.openmole.plugin.environment.gridscale._
 
 trait PBSJobService extends GridScaleJobService with SSHHost with SharedStorage { js ⇒
 
-  def queue: Option[String]
+  def environment: PBSEnvironment
 
   val jobService = new GSPBSJobService {
     def host = js.host
@@ -42,8 +42,10 @@ trait PBSJobService extends GridScaleJobService with SSHHost with SharedStorage 
     val jobDescription = new PBSJobDescription {
       val executable = "/bin/bash"
       val arguments = remoteScript
-      override val queue = js.queue
+      override val queue = environment.queue
       val workDirectory = serializedJob.path
+      override val cpuTime = environment.cpuTime
+      override val memory = environment.memory
     }
 
     val jid = js.jobService.submit(jobDescription)(authentication)
