@@ -39,16 +39,43 @@ import scala.io.Source
 class GliteJobService(
     val jobService: WMSJobService,
     val environment: GliteEnvironment,
-    override val connections: Int) extends GridScaleJobService { js ⇒
+    override val connections: Int, var proxyFile: File) extends GridScaleJobService { js ⇒
 
-  delegateProxy
-
-  def authentication = environment.authentication
+  def authentication = environment.authentication._1
   val id = jobService.url.toString
 
-  def delegateProxy = jobService.delegateProxy(environment.proxyFile)(authentication)
+  var delegated = false
+
+  def delegateProxy = {
+    val proxyFile = environment.authentication._2
+    require(proxyFile != null)
+    jobService.delegateProxy(proxyFile)(authentication)
+  }
+
+  def checkDelegated = synchronized {
+    if (!delegated) {
+      delegateProxy
+      delegated = true
+    }
+  }
+
+  override protected def _purge(j: J) = {
+    checkDelegated
+    super._purge(j)
+  }
+
+  override protected def _cancel(j: J) = {
+    checkDelegated
+    super._cancel(j)
+  }
+
+  override protected def _state(j: J) = {
+    checkDelegated
+    super._state(j)
+  }
 
   override protected def _submit(serializedJob: SerializedJob) = {
+    checkDelegated
     import serializedJob._
 
     val script = Workspace.newFile("script", ".sh")
@@ -59,15 +86,14 @@ class GliteJobService(
       try generateScript(serializedJob, outputFilePath, environment.runtimeMemoryValue, os)
       finally os.close
 
-      val jid = jobService.submit(buildJobDescription(runtime, script))(authentication)
+      val jobDescription = buildJobDescription(runtime, script)
+      val jid = jobService.submit(jobDescription)(authentication)
 
       new GliteJob {
         val jobService = js
         val id = jid
         val resultPath = outputFilePath
       }
-      //logger.fine(Source.fromFile(script).getLines.mkString)
-      //new GliteJob(JSAGAJob.id(job), outputFilePath, this, environment.authentication.expires)
     } finally script.delete
   }
 
@@ -79,22 +105,22 @@ class GliteJobService(
     assert(runtime.runtime.path != null)
     writter.print("BASEPATH=$PWD;CUR=$PWD/ws$RANDOM;while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; export OPENMOLE_HOME=$CUR; ")
     writter.print("if [ `uname -m` = x86_64 ]; then ")
-    writter.print(mkLcgCpGunZipCmd(environment, storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz"))
+    writter.print(lcgCpGunZipCmd(environment, storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz"))
     writter.print("else ")
-    writter.print(mkLcgCpGunZipCmd(environment, storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz"))
+    writter.print(lcgCpGunZipCmd(environment, storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz"))
     writter.print("fi; ")
     writter.print("tar -xzf jvm.tar.gz >/dev/null; rm -f jvm.tar.gz; ")
-    writter.print(mkLcgCpGunZipCmd(environment, storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz"))
+    writter.print(lcgCpGunZipCmd(environment, storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz"))
     writter.print("tar -xzf openmole.tar.gz >/dev/null; rm -f openmole.tar.gz; ")
     writter.print("mkdir envplugins; PLUGIN=0;")
 
     for (plugin ← runtime.environmentPlugins) {
       assert(plugin.path != null)
-      writter.print(mkLcgCpGunZipCmd(environment, storage.url.resolve(plugin.path), "$CUR/envplugins/plugin$PLUGIN.jar"))
+      writter.print(lcgCpGunZipCmd(environment, storage.url.resolve(plugin.path), "$CUR/envplugins/plugin$PLUGIN.jar"))
       writter.print("PLUGIN=`expr $PLUGIN + 1`; ")
     }
 
-    writter.print(mkLcgCpGunZipCmd(environment, storage.url.resolve(runtime.storage.path), "$CUR/storage.xml"))
+    writter.print(lcpCpCmd(environment, storage.url.resolve(runtime.storage.path), "$CUR/storage.xml.gz"))
 
     writter.print(" export PATH=$PWD/jre/bin:$PATH; /bin/sh run.sh ")
     writter.print(Integer.toString(memorySizeForRuntime))
@@ -102,7 +128,7 @@ class GliteJobService(
     writter.print(UUID.randomUUID)
     writter.print(" -c ")
     writter.print(path)
-    writter.print(" -s $CUR/storage.xml ")
+    writter.print(" -s $CUR/storage.xml.gz ")
     writter.print(" -p $CUR/envplugins/ ")
     writter.print(" -i ")
     writter.print(inputFile)
@@ -112,7 +138,7 @@ class GliteJobService(
     writter.print("; cd .. ; rm -rf $CUR")
   }
 
-  private def mkLcgCpGunZipCmd(env: GliteEnvironment, from: URI, to: String) = {
+  private def lcpCpCmd(env: GliteEnvironment, from: URI, to: String) = {
     val builder = new StringBuilder
 
     builder.append("lcg-cp --vo ")
@@ -129,7 +155,14 @@ class GliteJobService(
     builder.append(from.toString)
     builder.append(" file:")
     builder.append(to)
-    builder.append(".gz; gunzip ")
+    builder.append("; ")
+    builder.toString
+  }
+
+  private def lcgCpGunZipCmd(env: GliteEnvironment, from: URI, to: String) = {
+    val builder = new StringBuilder
+    builder.append(lcpCpCmd(env, from, to + ".gz"))
+    builder.append("gunzip ")
     builder.append(to)
     builder.append(".gz; ")
 

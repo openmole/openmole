@@ -33,7 +33,8 @@ import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.core.batch.environment._
+import org.openmole.core.batch.storage._
 import org.openmole.core.batch.environment.BatchEnvironment.JobManagmentThreads
 
 import scala.concurrent.util.duration._
@@ -68,13 +69,13 @@ akka {
   import system.dispatcher
 
   val resizer = DefaultResizer(lowerBound = 10, upperBound = Workspace.preferenceAsInt(JobManagmentThreads))
-  // val workerForEach = Workspace.preferenceAsInt(JobManagmentThreads)
   val uploader = workers.actorOf(Props(new UploadActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
   val submitter = workers.actorOf(Props(new SubmitActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
   val refresher = workers.actorOf(Props(new RefreshActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
   val resultGetters = workers.actorOf(Props(new GetResultActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
   val killer = workers.actorOf(Props(new KillerActor).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
   val cleaner = workers.actorOf(Props(new CleanerActor).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
+  val deleter = workers.actorOf(Props(new DeleteActor).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
 
   def receive = {
     case Upload(job) ⇒ uploader ! Upload(job)
@@ -110,5 +111,6 @@ akka {
     case MoleJobError(mj, j, e) ⇒
       EventDispatcher.trigger(environment: IEnvironment, new IEnvironment.MoleJobExceptionRaised(j, e, WARNING, mj))
       logger.log(WARNING, "Error durring job execution, it will be resubmitted.", e)
+    case m: DeleteFile ⇒ deleter ! m
   }
 }

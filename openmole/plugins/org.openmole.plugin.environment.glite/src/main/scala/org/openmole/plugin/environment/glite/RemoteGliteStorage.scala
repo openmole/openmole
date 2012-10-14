@@ -17,23 +17,30 @@
 
 package org.openmole.plugin.environment.glite
 
-import org.openmole.core.batch.storage.Storage
+import org.openmole.core.batch.storage.SimpleStorage
 import org.openmole.misc.exception._
 import fr.iscpif.gridscale.storage.SRMStorage
 import fr.iscpif.gridscale.authentication.ProxyFileAuthentication
 import fr.iscpif.gridscale.authentication.VOMSAuthentication
 import java.io.File
 
-class RemoteGliteStorage(val storage: SRMStorage) extends Storage {
+class RemoteGliteStorage(val host: String, val port: Int, certificateDir: File) extends SimpleStorage { s ⇒
   def root = ""
 
-  @transient lazy val authentication: storage.A = new ProxyFileAuthentication {
-    def proxy = {
-      val X509_CERT_DIR = System.getenv("X509_CERT_DIR")
+  @transient lazy val storage =
+    new SRMStorage {
+      val host: String = s.host
+      val port: Int = s.port
+      val basePath: String = ""
+    }
 
-      val certificateDir =
-        if (X509_CERT_DIR != null && new File(X509_CERT_DIR).exists) new File(X509_CERT_DIR)
-        else throw new InternalProcessingError("X509_CERT_DIR environment variable not found or directory doesn't exists.")
+  @transient lazy val authentication: SRMStorage#A = new ProxyFileAuthentication {
+    def proxy = {
+      //val X509_CERT_DIR = System.getenv("X509_CERT_DIR")
+
+      //      val certificateDir =
+      //        if (X509_CERT_DIR != null && new File(X509_CERT_DIR).exists) new File(X509_CERT_DIR)
+      //        else throw new InternalProcessingError("X509_CERT_DIR environment variable not found or directory doesn't exists.")
 
       VOMSAuthentication.setCARepository(certificateDir)
 

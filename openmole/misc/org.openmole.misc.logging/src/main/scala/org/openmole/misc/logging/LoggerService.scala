@@ -25,7 +25,10 @@ import collection.JavaConversions._
 
 object LoggerService {
 
-  val blackList = Set("ch.ethz.ssh2.log.Logger")
+  val blackList = Set(
+    "ch.ethz.ssh2.log.Logger",
+    "org.glite.voms.contact.VOMSProxyInit"
+  )
   private val LogLevel = new ConfigurationLocation("LoggerService", "LogLevel")
 
   Workspace += (LogLevel, "INFO")

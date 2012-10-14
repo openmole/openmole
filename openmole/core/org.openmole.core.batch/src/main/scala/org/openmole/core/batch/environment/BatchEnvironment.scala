@@ -123,7 +123,7 @@ object BatchEnvironment extends Logger {
   Workspace += (MemorySizeForRuntime, "512")
   Workspace += (QualityHysteresis, "100")
   Workspace += (CheckInterval, "PT1M")
-  Workspace += (MinValueForSelectionExploration, "0.001")
+  Workspace += (MinValueForSelectionExploration, "0.0001")
   Workspace += (CheckFileExistsInterval, "PT1H")
   Workspace += (StatisticsHistorySize, "10000")
   Workspace += (JobManagmentThreads, "100")
@@ -296,10 +296,10 @@ akka {
               val sizeOnStorage = usedFiles.filter(onStorage.getOrElse(_, Set.empty).contains(cur.id)).map(_.size).sum
 
               val fitness = orMinForExploration(
-                StorageControl.qualityControl(cur.id) match {
+                (StorageControl.qualityControl(cur.id) match {
                   case Some(q) ⇒ math.pow(q.successRate, 2)
                   case None ⇒ 1.
-                }) * (if (totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) else 1)
+                }) * (if (totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) else 1))
               Some((cur, token, fitness))
           }
       }

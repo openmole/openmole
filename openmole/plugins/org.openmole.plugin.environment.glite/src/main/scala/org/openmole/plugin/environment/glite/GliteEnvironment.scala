@@ -21,6 +21,7 @@ import org.openmole.misc.filedeleter.FileDeleter
 import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.ConfigurationLocation
 import fr.iscpif.gridscale.information.BDII
+import java.io.File
 import java.net.URI
 import java.net.URISyntaxException
 import java.util.logging.Level
@@ -102,50 +103,38 @@ class GliteEnvironment(
   Updater.registerForUpdate(new OverSubmissionAgent(WeakReference(this)))
   Updater.registerForUpdate(new ProxyChecker(WeakReference(this)))
 
-  @transient lazy val proxyFile = {
-    val f = Workspace.newFile("proxy", ".x509")
-    FileDeleter.deleteWhenGarbageCollected(f)
-    f
-  }
-
   private def generateProxy = Workspace.persistentList(classOf[GliteAuthentication]).headOption match {
-    case Some(a) ⇒ a
-      ._2.apply(
+    case Some(a) ⇒
+      val file = Workspace.newFile("proxy", ".x509")
+      FileDeleter.deleteWhenGarbageCollected(file)
+      val proxy = a._2.apply(
         vomsURL,
         voName,
-        proxyFile,
+        file,
         Workspace.preferenceAsDurationInS(ProxyTime),
         fqan)
+      (proxy, file)
     case None ⇒ throw new UserBadDataError("No athentication has been initialized for glite.")
   }
 
   var authentication = generateProxy
 
-  def renewAuthentication = {
+  def renewAuthentication = synchronized {
     authentication = generateProxy
-    jobServices.foreach(_.delegateProxy)
+    jobServices.foreach { j ⇒ j.proxyFile = authentication._2; j.delegated = false }
   }
 
   override def allJobServices = {
     val jss = getBDII.queryWMS(voName, Workspace.preferenceAsDurationInS(FetchRessourcesTimeOut).toInt)
     jss.map {
-      js ⇒ new GliteJobService(js, this, threadsByWMS)
+      js ⇒ new GliteJobService(js, this, threadsByWMS, authentication._2)
     }
   }
 
   override def allStorages = {
     val stors = getBDII.querySRM(voName, Workspace.preferenceAsDurationInS(GliteEnvironment.FetchRessourcesTimeOut).toInt)
     stors.map {
-      s ⇒
-        new PersistentStorageService {
-          val storage = s
-          val url = new URI("srm", null, s.host, s.port, null, null, null)
-          val remoteStorage = new RemoteGliteStorage(s)
-          val environment = env
-          val root = ""
-          val connections = threadsBySE
-          def authentication = env.authentication
-        }
+      s ⇒ GliteStorageService(s, env, GliteAuthentication.CACertificatesDir)
     }
   }
 

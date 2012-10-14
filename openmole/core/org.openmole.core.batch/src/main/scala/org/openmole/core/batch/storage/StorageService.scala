@@ -20,6 +20,7 @@ package org.openmole.core.batch.storage
 import java.net.URI
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
+import org.openmole.core.batch.refresh._
 import org.openmole.core.serializer._
 import org.openmole.misc.filedeleter._
 import org.openmole.misc.workspace._
@@ -90,5 +91,8 @@ trait StorageService extends BatchService with Storage {
   def downloadGZ(src: String, dest: File)(implicit token: AccessToken) = withFailureControl { super.downloadGZ(src, dest) }
 
   def baseDirName = Workspace.preference(Workspace.uniqueID) + '/'
+
+  def backgroundRmFile(path: String) = environment.jobManager ! DeleteFile(this, path, false)
+  def backgroundRmDir(path: String) = environment.jobManager ! DeleteFile(this, path, true)
 
 }

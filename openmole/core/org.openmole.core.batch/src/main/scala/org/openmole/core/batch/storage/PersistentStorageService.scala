@@ -102,14 +102,15 @@ trait PersistentStorageService extends StorageService {
       if (fileType == DirectoryType) {
         try {
           val timeOfDir = (if (name.endsWith("/")) name.substring(0, name.length - 1) else name).toLong
-          if (timeOfDir < removalDate) super.rmDir(childPath)
+          if (timeOfDir < removalDate) backgroundRmDir(childPath)
         } catch {
-          case (ex: NumberFormatException) ⇒ super.rmDir(childPath)
+          case (ex: NumberFormatException) ⇒ backgroundRmDir(childPath)
         }
-      } else super.rmFile(childPath)
+      } else backgroundRmFile(childPath)
     }
 
     val tmpTimePath = super.child(tmpNoTime, time.toString)
+
     if (!super.exists(tmpTimePath)) super.makeDir(tmpTimePath)
     tmpTimePath
   }

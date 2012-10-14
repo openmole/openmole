@@ -253,7 +253,7 @@ object ReplicaCatalog extends Logger {
     else {
       val hash = matcher.group(1)
       withSemaphore(key(hash, storage), objectContainer) {
-        if (!containsDestination(storage.id, path)) storage.rmFile(path)
+        if (!containsDestination(storage.id, path)) storage.backgroundRmFile(path)
       }
     }
   }
