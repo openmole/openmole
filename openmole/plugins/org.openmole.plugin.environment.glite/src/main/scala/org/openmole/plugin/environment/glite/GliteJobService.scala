@@ -177,6 +177,11 @@ class GliteJobService(
       val arguments = script.getName
       val inputSandbox = List(script.getAbsolutePath)
       val outputSandbox = List.empty
+      override val memory = Some(environment.requieredMemory)
+      override val cpuTime = environment.cpuTime
+      override val cpuNumber = environment.cpuNumber
+      override val jobType = environment.jobType
+      override val smpGranularity = environment.smpGranularity
       override val fuzzy = true
     }
 

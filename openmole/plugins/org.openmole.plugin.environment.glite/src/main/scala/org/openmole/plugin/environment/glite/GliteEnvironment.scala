@@ -89,7 +89,12 @@ class GliteEnvironment(
     val vomsURL: String,
     val bdii: String,
     val fqan: Option[String] = None,
-    override val runtimeMemory: Option[Int] = None) extends BatchEnvironment { env ⇒
+    override val runtimeMemory: Option[Int] = None,
+    val memory: Option[Int] = None,
+    val cpuTime: Option[Int] = None,
+    val cpuNumber: Option[Int] = None,
+    val jobType: Option[String] = None,
+    val smpGranularity: Option[Int] = None) extends BatchEnvironment with MemoryRequirement { env ⇒
 
   import GliteEnvironment._
 

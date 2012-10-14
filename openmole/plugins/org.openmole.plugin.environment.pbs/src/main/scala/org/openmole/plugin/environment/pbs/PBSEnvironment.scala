@@ -43,7 +43,7 @@ class PBSEnvironment(
     val queue: Option[String] = None,
     override val runtimeMemory: Option[Int] = None,
     val cpuTime: Option[Int] = None,
-    val memory: Option[Int] = None) extends BatchEnvironment with SSHAccess { env ⇒
+    val memory: Option[Int] = None) extends BatchEnvironment with SSHAccess with MemoryRequirement { env ⇒
 
   type SS = PersistentStorageService
   type JS = PBSJobService

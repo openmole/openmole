@@ -45,7 +45,7 @@ trait PBSJobService extends GridScaleJobService with SSHHost with SharedStorage 
       override val queue = environment.queue
       val workDirectory = serializedJob.path
       override val cpuTime = environment.cpuTime
-      override val memory = environment.memory
+      override val memory = Some(environment.requieredMemory)
     }
 
     val jid = js.jobService.submit(jobDescription)(authentication)
