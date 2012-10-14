@@ -26,6 +26,7 @@ import org.openmole.core.batch.environment._
 import org.openmole.core.batch.jobservice.{ BatchJob, BatchJobId }
 import org.openmole.core.batch.storage.SimpleStorage
 import org.openmole.plugin.environment.gridscale._
+import org.openmole.misc.tools.service.Duration._
 
 trait PBSJobService extends GridScaleJobService with SSHHost with SharedStorage { js ⇒
 
@@ -44,7 +45,7 @@ trait PBSJobService extends GridScaleJobService with SSHHost with SharedStorage 
       val arguments = remoteScript
       override val queue = environment.queue
       val workDirectory = serializedJob.path
-      override val cpuTime = environment.cpuTime
+      override val cpuTime = environment.cpuTime.map(_.toSeconds)
       override val memory = Some(environment.requieredMemory)
     }
 

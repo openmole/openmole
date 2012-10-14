@@ -27,7 +27,6 @@ import java.util.logging.Logger
 import org.apache.commons.configuration._
 import org.apache.commons.configuration.reloading._
 import org.jasypt.util.text.BasicTextEncryptor
-import org.joda.time.format.ISOPeriodFormat
 import org.openmole.misc.tools.service.Random
 import org.openmole.misc.tools.service.Random._
 import scala.collection.mutable.HashMap
@@ -35,6 +34,7 @@ import org.openmole.misc.eventdispatcher.{ EventDispatcher, Event }
 import org.openmole.misc.exception._
 import org.openmole.misc.replication._
 import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.misc.tools.service.Duration._
 
 object Workspace {
 
@@ -289,14 +289,8 @@ class Workspace(val location: File) {
 
   def passwordChoosen = isPreferenceSet(passwordTest)
 
-  def preferenceAsDurationInMs(location: ConfigurationLocation): Long =
-    ISOPeriodFormat.standard.parsePeriod(preference(location)).toStandardSeconds.getSeconds * 1000L
-
-  def preferenceAsDurationInS(location: ConfigurationLocation): Int = {
-    val formatter = ISOPeriodFormat.standard
-    val period = formatter.parsePeriod(preference(location))
-    period.toStandardSeconds.getSeconds
-  }
+  def preferenceAsDurationInMs(location: ConfigurationLocation): Long = preference(location).toMilliSeconds
+  def preferenceAsDurationInS(location: ConfigurationLocation): Int = preference(location).toSeconds
 
   def isPreferenceSet(location: ConfigurationLocation): Boolean = synchronized {
     rawPreference(location) != null

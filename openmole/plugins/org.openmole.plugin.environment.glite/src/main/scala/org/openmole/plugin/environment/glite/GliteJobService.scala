@@ -35,6 +35,7 @@ import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import fr.iscpif.gridscale.jobservice.{ WMSJobService, WMSJobDescription }
 import scala.collection.JavaConversions._
 import scala.io.Source
+import org.openmole.misc.tools.service.Duration._
 
 class GliteJobService(
     val jobService: WMSJobService,
@@ -178,7 +179,7 @@ class GliteJobService(
       val inputSandbox = List(script.getAbsolutePath)
       val outputSandbox = List.empty
       override val memory = Some(environment.requieredMemory)
-      override val cpuTime = environment.cpuTime
+      override val cpuTime = environment.cpuTime.map(_.toSeconds)
       override val cpuNumber = environment.cpuNumber
       override val jobType = environment.jobType
       override val smpGranularity = environment.smpGranularity
