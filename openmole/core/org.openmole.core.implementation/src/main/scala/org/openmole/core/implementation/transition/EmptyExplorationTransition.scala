@@ -26,6 +26,7 @@ import scala.collection.mutable.ListBuffer
 
 class EmptyExplorationTransition(start: ICapsule, end: Slot, size: String, condition: ICondition = ICondition.True, filter: IFilter[String] = Filter.empty) extends ExplorationTransition(start, end, condition, filter) {
 
-  override def submitIn(context: Context, ticket: ITicket, subMole: ISubMoleExecution) =
-    for (i ← 0 until VariableExpansion.expandInt(context, size)) submitNextJobsIfReady(ListBuffer() ++ context.values, ticket, subMole)
+  override def submitIn(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = 
+    for (i ← 0 until VariableExpansion.expandInt(context, size)) submitNextJobsIfReady(ListBuffer() ++ context.values, subMole.moleExecution.nextTicket(ticket), subMole)
+
 }

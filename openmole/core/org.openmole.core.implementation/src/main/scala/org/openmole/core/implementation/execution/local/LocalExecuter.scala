@@ -59,12 +59,12 @@ class LocalExecuter(environment: LocalEnvironment) extends Runnable {
       } catch {
         case e: InterruptedException ⇒
           if (!stop) {
+            logger.log(WARNING, "Interrupted despite stop is false", e)
             EventDispatcher.trigger(environment: IEnvironment, new ExceptionRaised(executionJob, e, SEVERE))
-            logger.log(WARNING, "Interrupted despite stop is false.", e)
           }
-        case e ⇒
+        case e: Throwable ⇒
+          logger.log(SEVERE, "Error in execution", e)
           EventDispatcher.trigger(environment: IEnvironment, new ExceptionRaised(executionJob, e, SEVERE))
-          logger.log(SEVERE, null, e)
       } finally executionJob.state = ExecutionState.KILLED
     }
   }

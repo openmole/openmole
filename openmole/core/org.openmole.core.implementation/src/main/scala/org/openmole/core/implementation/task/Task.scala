@@ -22,12 +22,13 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.misc.pluginmanager._
+import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.tools.service.Random
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.service.Random._
 
-object Task {
+object Task extends Logger {
   val OpenMOLEVariablePrefix = new ConfigurationLocation("Task", "OpenMOLEVariablePrefix")
   Workspace += (OpenMOLEVariablePrefix, "oM")
 
@@ -35,6 +36,8 @@ object Task {
 
   def buildRNG(context: Context) = newRNG(context.valueOrException(Task.openMOLESeed))
 }
+
+import Task.logger
 
 trait Task extends ITask {
 
@@ -91,12 +94,11 @@ trait Task extends ITask {
   /* (non-Javadoc)
    * @see org.openmole.core.processors.ITask#run(org.openmole.core.processors.ApplicativeContext)
    */
-  override def perform(context: Context) = {
+  override def perform(context: Context) = 
     try end(context + process(init(context)))
     catch {
       case e ⇒ throw new InternalProcessingError(e, "Error in task " + name + " for context values " + context)
     }
-  }
 
   override def toString: String = name
 

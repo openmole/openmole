@@ -88,7 +88,7 @@ class MoleJob(
         _context = task.perform(context)
         state = COMPLETED
       } catch {
-        case t ⇒
+        case t: Throwable ⇒
           exception = Some(t)
           state = FAILED
           if (classOf[InterruptedException].isAssignableFrom(t.getClass)) throw t

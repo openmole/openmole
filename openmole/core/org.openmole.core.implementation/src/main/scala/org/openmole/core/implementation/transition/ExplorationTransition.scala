@@ -53,7 +53,6 @@ class ExplorationTransition(start: ICapsule, end: Slot, condition: ICondition = 
 
     for (value ← values) {
       val newTicket = subMole.moleExecution.nextTicket(ticket)
-
       val variables = new ListBuffer[Variable[_]]
 
       for (in ← outputs)

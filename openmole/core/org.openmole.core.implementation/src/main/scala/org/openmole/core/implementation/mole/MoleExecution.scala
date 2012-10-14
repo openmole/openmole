@@ -43,22 +43,7 @@ import scala.collection.immutable.HashMap
 import scala.collection.mutable.Buffer
 import scala.concurrent.stm._
 
-/*object MoleExecution extends Logger {
-
-  def apply(
-    mole: IMole,
-      def hooks: Iterable[(ICapsule, IHook)]
-  def profiler: IHook
-    selection: Map[ICapsule, IEnvironmentSelection] = Map.empty,
-    grouping: Map[ICapsule, IGrouping] = Map.empty,
-    rerun: IInstantRerun = IInstantRerun.empty,
-    rng: java.util.Random = Random.newRNG(Workspace.newSeed)) = {
-    val ex = new MoleExecution(mole, selection, grouping, rerun, rng)
-    val hook = new MoleExecutionStatHook(ex)
-    ex -> hook
-  }
-
-}*/
+object MoleExecution extends Logger
 
 import MoleExecution._
 
@@ -188,7 +173,8 @@ class MoleExecution(
   def jobFailedOrCanceled(moleJob: IMoleJob, capsule: ICapsule) = {
     moleJob.exception match {
       case None ⇒
-      case Some(e) ⇒ atomic { implicit txn ⇒ _exceptions() = e :: _exceptions() }
+      case Some(e) ⇒ 
+        atomic { implicit txn ⇒ _exceptions() = e :: _exceptions() }
     }
     jobOutputTransitionsPerformed(moleJob, capsule)
   }
