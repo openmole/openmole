@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>fr.iscpif</groupId>
-            <artifactId>mgo</artifactId>
+            <artifactId>mgo_2.10</artifactId>
 	    <version>${lib.fr.iscpif.mgo.version}</version>
         </dependency>
         <dependency>
