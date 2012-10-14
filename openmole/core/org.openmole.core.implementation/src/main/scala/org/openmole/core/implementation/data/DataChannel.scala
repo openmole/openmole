@@ -42,7 +42,7 @@ class DataChannel(
   override def consums(ticket: ITicket, moleExecution: IMoleExecution): Iterable[Variable[_]] = moleExecution.synchronized {
     val delta = levelDelta(moleExecution.mole)
     val dataChannelRegistry = moleExecution.dataChannelRegistry
-    
+
     {
       if (delta <= 0) dataChannelRegistry.remove(this, ticket).getOrElse(new ListBuffer[Variable[_]])
       else {
@@ -56,7 +56,7 @@ class DataChannel(
 
   override def provides(fromContext: Context, ticket: ITicket, moleExecution: IMoleExecution) = moleExecution.synchronized {
     val delta = levelDelta(moleExecution.mole)
-    
+
     val dataChannelRegistry = moleExecution.dataChannelRegistry
     if (delta >= 0) {
       val toContext = ListBuffer() ++ fromContext.values.filterNot(v ⇒ filter(v.prototype.name))

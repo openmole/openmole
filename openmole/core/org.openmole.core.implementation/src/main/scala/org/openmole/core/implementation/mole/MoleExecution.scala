@@ -173,7 +173,7 @@ class MoleExecution(
   def jobFailedOrCanceled(moleJob: IMoleJob, capsule: ICapsule) = {
     moleJob.exception match {
       case None ⇒
-      case Some(e) ⇒ 
+      case Some(e) ⇒
         atomic { implicit txn ⇒ _exceptions() = e :: _exceptions() }
     }
     jobOutputTransitionsPerformed(moleJob, capsule)

@@ -34,10 +34,10 @@ object Transition extends Logger
 import Transition._
 
 class Transition(
-  val start: ICapsule,
-  val end: Slot,
-  val condition: ICondition = ICondition.True,
-  val filter: IFilter[String] = Filter.empty) extends ITransition {
+    val start: ICapsule,
+    val end: Slot,
+    val condition: ICondition = ICondition.True,
+    val filter: IFilter[String] = Filter.empty) extends ITransition {
 
   private def nextTaskReady(ticket: ITicket, subMole: ISubMoleExecution): Boolean = {
     val registry = subMole.transitionRegistry
@@ -45,8 +45,8 @@ class Transition(
     mole.inputTransitions(end).forall(registry.isRegistred(_, ticket))
   }
 
-  protected def submitNextJobsIfReady(context: Buffer[Variable[_]], ticket: ITicket, subMole: ISubMoleExecution) = 
-    subMole.transitionRegistry.synchronized {   
+  protected def submitNextJobsIfReady(context: Buffer[Variable[_]], ticket: ITicket, subMole: ISubMoleExecution) =
+    subMole.transitionRegistry.synchronized {
       val moleExecution = subMole.moleExecution
       val registry = subMole.transitionRegistry
       val mole = subMole.moleExecution.mole
@@ -55,11 +55,11 @@ class Transition(
       if (nextTaskReady(ticket, subMole)) {
         val combinaison =
           mole.inputDataChannels(end).toList.flatMap { _.consums(ticket, moleExecution) } ++
-        mole.inputTransitions(end).toList.flatMap(registry.remove(_, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable)
+            mole.inputTransitions(end).toList.flatMap(registry.remove(_, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable)
 
         val newTicket =
           if (mole.slots(end.capsule).size <= 1) ticket
-        else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
+          else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
 
         val toAggregate = combinaison.groupBy(_.prototype.name)
 
@@ -70,13 +70,12 @@ class Transition(
         Some((end.capsule, newContext, newTicket))
       } else None
     } match {
-      case Some((capsule, context, ticket)) ⇒ 
+      case Some((capsule, context, ticket)) ⇒
         subMole.submit(capsule, context, ticket)
       case None ⇒
     }
 
-
-  override def perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = 
+  override def perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) =
     if (isConditionTrue(context)) _perform(context.filterNot { case (n, _) ⇒ filter(n) }, ticket, subMole)
 
   override def isConditionTrue(context: Context): Boolean = condition.evaluate(context)

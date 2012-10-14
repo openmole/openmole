@@ -94,7 +94,7 @@ trait Task extends ITask {
   /* (non-Javadoc)
    * @see org.openmole.core.processors.ITask#run(org.openmole.core.processors.ApplicativeContext)
    */
-  override def perform(context: Context) = 
+  override def perform(context: Context) =
     try end(context + process(init(context)))
     catch {
       case e ⇒ throw new InternalProcessingError(e, "Error in task " + name + " for context values " + context)
