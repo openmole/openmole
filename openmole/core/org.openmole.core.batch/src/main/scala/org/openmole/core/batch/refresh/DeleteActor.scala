@@ -18,12 +18,22 @@
 package org.openmole.core.batch.refresh
 
 import akka.actor.Actor
+import org.openmole.misc.tools.service.Logger
+
+object DeleteActor extends Logger
+
+import DeleteActor._
 
 class DeleteActor extends Actor {
   def receive = {
     case DeleteFile(storage, path, directory) ⇒
-      storage.withToken { implicit t ⇒
-        if (directory) storage.rmDir(path) else storage.rmFile(path)
+      try 
+        storage.withToken { implicit t ⇒
+          if (directory) storage.rmDir(path) else storage.rmFile(path)
+        }
+      catch {
+        case t: Throwable => 
+          logger.log(FINE, "Error when deleting a file", e)
       }
       System.runFinalization
   }

@@ -56,8 +56,8 @@ class DataChannel(
 
   override def provides(fromContext: Context, ticket: ITicket, moleExecution: IMoleExecution) = moleExecution.synchronized {
     val delta = levelDelta(moleExecution.mole)
-
     val dataChannelRegistry = moleExecution.dataChannelRegistry
+
     if (delta >= 0) {
       val toContext = ListBuffer() ++ fromContext.values.filterNot(v ⇒ filter(v.prototype.name))
       dataChannelRegistry.register(this, ticket, toContext)
@@ -65,7 +65,6 @@ class DataChannel(
       val workingOnTicket = (delta until 0).foldLeft(ticket) {
         (c, e) ⇒ c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
       }
-
       val toContext = dataChannelRegistry.getOrElseUpdate(this, workingOnTicket, new ListBuffer[Variable[_]])
       toContext ++= fromContext.values.filterNot(v ⇒ filter(v.prototype.name))
     }

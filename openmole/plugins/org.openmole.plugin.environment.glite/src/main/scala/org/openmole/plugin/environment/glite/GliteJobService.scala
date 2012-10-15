@@ -183,7 +183,7 @@ class GliteJobService(
       override val cpuNumber = environment.cpuNumber
       override val jobType = environment.jobType
       override val smpGranularity = environment.smpGranularity
-      override val fuzzy = true
+      //override val fuzzy =true
     }
 
   //  

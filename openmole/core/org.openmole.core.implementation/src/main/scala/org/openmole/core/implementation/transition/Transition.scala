@@ -45,7 +45,7 @@ class Transition(
     mole.inputTransitions(end).forall(registry.isRegistred(_, ticket))
   }
 
-  protected def submitNextJobsIfReady(context: Buffer[Variable[_]], ticket: ITicket, subMole: ISubMoleExecution) =
+  protected def submitNextJobsIfReady(context: Buffer[Variable[_]], ticket: ITicket, subMole: ISubMoleExecution) = try {
     subMole.transitionRegistry.synchronized {
       val moleExecution = subMole.moleExecution
       val registry = subMole.transitionRegistry
@@ -53,6 +53,7 @@ class Transition(
 
       registry.register(this, ticket, context)
       if (nextTaskReady(ticket, subMole)) {
+
         val combinaison =
           mole.inputDataChannels(end).toList.flatMap { _.consums(ticket, moleExecution) } ++
             mole.inputTransitions(end).toList.flatMap(registry.remove(_, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable)
@@ -74,9 +75,15 @@ class Transition(
         subMole.submit(capsule, context, ticket)
       case None ⇒
     }
+  } catch {
+    case e: Throwable ⇒
+      logger.log(SEVERE, "Error in " + this, e)
+      throw e
+  }
 
-  override def perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) =
+  override def perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = {
     if (isConditionTrue(context)) _perform(context.filterNot { case (n, _) ⇒ filter(n) }, ticket, subMole)
+  }
 
   override def isConditionTrue(context: Context): Boolean = condition.evaluate(context)
 
