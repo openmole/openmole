@@ -37,6 +37,10 @@ import scala.collection.JavaConversions._
 import scala.io.Source
 import org.openmole.misc.tools.service.Duration._
 
+object GliteJobService extends Logger
+
+import GliteJobService._
+
 class GliteJobService(
     val jobService: WMSJobService,
     val environment: GliteEnvironment,
@@ -88,6 +92,9 @@ class GliteJobService(
       finally os.close
 
       val jobDescription = buildJobDescription(runtime, script)
+      
+      //logger.fine(jobDescription.toJDL)
+      
       val jid = jobService.submit(jobDescription)(authentication)
 
       new GliteJob {
@@ -179,11 +186,11 @@ class GliteJobService(
       val inputSandbox = List(script.getAbsolutePath)
       val outputSandbox = List.empty
       override val memory = Some(environment.requieredMemory)
-      override val cpuTime = environment.cpuTime.map(_.toSeconds)
+      override val cpuTime = environment.cpuTime.map(_.toMinutes)
       override val cpuNumber = environment.cpuNumber
       override val jobType = environment.jobType
       override val smpGranularity = environment.smpGranularity
-      //override val fuzzy =true
+      override val fuzzy = true
     }
 
   //  
