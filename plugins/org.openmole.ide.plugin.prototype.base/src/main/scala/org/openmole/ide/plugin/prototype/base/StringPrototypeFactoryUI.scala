@@ -16,19 +16,22 @@
  */
 
 package org.openmole.ide.plugin.prototype.base
-
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.panel.ComponentCategories
+import org.openmole.ide.core.model.data.IPrototypeDataUI
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
-class StringPrototypeFactoryUI extends IPrototypeFactoryUI[String] {
+class StringPrototypeFactoryUI extends IPrototypeFactoryUI {
 
-  override def toString = "String"
+  def buildDataUI: IPrototypeDataUI[String] = new GenericPrototypeDataUI[String](this)
 
-  def buildDataUI = new StringPrototypeDataUI
+  def buildDataUI(name: String,
+                  dim: Int): IPrototypeDataUI[String] = new GenericPrototypeDataUI[String](this, name, dim)
 
   def buildDataUI(prototype: Prototype[_],
-                  dim: Int = 0) = new StringPrototypeDataUI(prototype.name, dim)
+                  dim: Int): IPrototypeDataUI[String] = buildDataUI(prototype.name, dim)
 
   def category = ComponentCategories.PROTOTYPE
+
+  override def toString = "String"
 }

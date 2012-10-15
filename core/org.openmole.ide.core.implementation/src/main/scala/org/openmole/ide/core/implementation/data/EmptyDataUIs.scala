@@ -28,7 +28,9 @@ import org.openmole.ide.core.implementation.sampling.InputSampling
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
 import org.openmole.ide.core.model.data._
+import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.dataproxy._
+import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 import org.openmole.ide.core.model.panel._
 import org.openmole.core.implementation.task._
 import org.openmole.ide.core.model.sampling._
@@ -42,14 +44,25 @@ object EmptyDataUIs {
 
   val emptyTaskProxy: ITaskDataProxyUI = new TaskDataProxyUI(new EmptyTaskDataUI)
 
+  class EmptyPrototypeFactoryUI extends IPrototypeFactoryUI {
+    def category = ComponentCategories.PROTOTYPE
+    def buildDataUI = new EmptyPrototypeDataUI
+
+    def buildDataUI(name: String,
+                    dim: Int) = buildDataUI
+
+    def buildDataUI(prototype: Prototype[_],
+                    dim: Int) = buildDataUI
+  }
+
   class EmptyPrototypeDataUI extends IPrototypeDataUI[Any] {
     def name = ""
     def dim = 0
+    def factory = new EmptyPrototypeFactoryUI
     def coreClass = classOf[Prototype[_]]
     def coreObject = Prototype[Any]("")
     def fatImagePath = "img/empty.png"
     def buildPanelUI = new EmptyPrototypePanelUI
-    def displayTypedName = ""
   }
 
   class EmptyPrototypePanelUI extends IPrototypePanelUI[Any] {
@@ -65,7 +78,6 @@ object EmptyDataUIs {
     def imagePath = "img/empty.png"
     def fatImagePath = "img/empty.png"
     def buildPanelUI = new EmptySamplingCompositionPanelUI
-    def displayTypedName = ""
     def isAcceptable(sampling: ISamplingDataUI) = false
     def isAcceptable(factor: IFactorDataUI) = false
     def factors = List.empty

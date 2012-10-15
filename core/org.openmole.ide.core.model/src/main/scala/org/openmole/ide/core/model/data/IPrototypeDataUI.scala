@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.model.data
 
+import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import org.openmole.core.model.data._
@@ -26,7 +27,7 @@ trait IPrototypeDataUI[T] extends IDataUI {
 
   override def toString = if (dim > 0) name + "[" + dim + "]" else name
 
-  def displayTypedName: String
+  def factory: IPrototypeFactoryUI
 
   def coreObject: Prototype[T]
 

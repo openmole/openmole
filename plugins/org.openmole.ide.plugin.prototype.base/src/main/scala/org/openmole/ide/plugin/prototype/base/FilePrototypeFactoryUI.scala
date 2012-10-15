@@ -16,20 +16,24 @@
  */
 
 package org.openmole.ide.plugin.prototype.base
-
-import java.io.File
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.panel.ComponentCategories
+import org.openmole.ide.core.model.data.IPrototypeDataUI
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
-class FilePrototypeFactoryUI extends IPrototypeFactoryUI[File] {
+import java.io.File
 
-  override def toString = "File"
+class FilePrototypeFactoryUI extends IPrototypeFactoryUI {
 
-  def buildDataUI = new FilePrototypeDataUI
+  def buildDataUI: IPrototypeDataUI[File] = new GenericPrototypeDataUI[File](this)
+
+  def buildDataUI(name: String,
+                  dim: Int): IPrototypeDataUI[File] = new GenericPrototypeDataUI[File](this, name, dim)
 
   def buildDataUI(prototype: Prototype[_],
-                  dim: Int = 0) = new FilePrototypeDataUI(prototype.name, dim)
+                  dim: Int): IPrototypeDataUI[File] = buildDataUI(prototype.name, dim)
 
   def category = ComponentCategories.PROTOTYPE
+
+  override def toString = "File"
 }

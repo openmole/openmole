@@ -36,10 +36,7 @@ import scala.swing.MenuBar
 import scala.swing.MenuItem
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.implementation.dataproxy.EnvironmentDataProxyFactory
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyFactory
-import org.openmole.ide.core.implementation.dataproxy.SamplingCompositionDataProxyUI
-import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyFactory
+import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.implementation.workflow.BuildMoleSceneContainer
 import org.openmole.ide.core.model.commons.Constants._
@@ -81,13 +78,10 @@ object ConceptMenu {
   }
 
   val prototypeMenu = {
-    addCategoryComponents(ComponentCategories.PROTOTYPE)
-    KeyRegistry.prototypes.values.map { f ⇒ new PrototypeDataProxyFactory(f) }.toList.sortBy(_.factory.toString).foreach { d ⇒
-      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.toString) {
-        override def apply = display(d.buildDataProxyUI, CREATION)
-      })
-    }
-    new PopupToolBarPresenter("Prototype", mapping(ComponentCategories.PROTOTYPE), new Color(212, 170, 0))
+    val menu = new MenuItem(new Action("New") {
+      override def apply = display(new PrototypeDataProxyUI(KeyRegistry.prototypes.values.head.buildDataUI, false), CREATION)
+    })
+    new PopupToolBarPresenter("Prototype", menu, new Color(212, 170, 0))
   }
 
   val samplingMenu = {

@@ -112,7 +112,7 @@ object CheckData extends Logger {
 
     (coreCapsule.inputs(mole).toList ++ coreCapsule.outputs(mole)) foreach { d ⇒
       if (!protoMapping.keys.contains(KeyPrototypeGenerator(d.prototype))) {
-        val (key, dim) = KeyGenerator(d.prototype: Prototype[_])
+        val (key, dim) = KeyGenerator(d.prototype)
         Proxys.prototypes +=
           new PrototypeDataProxyFactory(KeyRegistry.prototypes(key)).buildDataProxyUI(d.prototype, true, dim)
 

@@ -20,9 +20,10 @@ package org.openmole.ide.core.implementation.dataproxy
 import org.openmole.core.model.data._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyFactory
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
+import scala.reflect.runtime.universe._
 import scala.collection.JavaConversions._
 
-class PrototypeDataProxyFactory(val factory: IPrototypeFactoryUI[_]) extends IPrototypeDataProxyFactory {
+class PrototypeDataProxyFactory(val factory: IPrototypeFactoryUI) extends IPrototypeDataProxyFactory {
 
   def buildDataProxyUI = new PrototypeDataProxyUI(factory.buildDataUI, false)
 

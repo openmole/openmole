@@ -17,19 +17,23 @@
 
 package org.openmole.ide.plugin.prototype.base
 
+import java.math.BigDecimal
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.panel.ComponentCategories
+import org.openmole.ide.core.model.data.IPrototypeDataUI
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
-import java.math.BigDecimal
 
-class BigDecimalPrototypeFactoryUI extends IPrototypeFactoryUI[BigDecimal] {
+class BigDecimalPrototypeFactoryUI extends IPrototypeFactoryUI {
 
-  override def toString = "BigDecimal"
+  def buildDataUI: IPrototypeDataUI[BigDecimal] = new GenericPrototypeDataUI[BigDecimal](this)
 
-  override def buildDataUI = new BigDecimalPrototypeDataUI
+  def buildDataUI(name: String,
+                  dim: Int): IPrototypeDataUI[BigDecimal] = new GenericPrototypeDataUI[BigDecimal](this, name, dim)
 
   def buildDataUI(prototype: Prototype[_],
-                  dim: Int = 0) = new BigDecimalPrototypeDataUI(prototype.name, dim)
+                  dim: Int): IPrototypeDataUI[BigDecimal] = buildDataUI(prototype.name, dim)
 
   def category = ComponentCategories.PROTOTYPE
+
+  override def toString = "BigDecimal"
 }

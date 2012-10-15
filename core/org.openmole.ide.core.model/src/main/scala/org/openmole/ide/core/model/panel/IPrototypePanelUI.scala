@@ -18,7 +18,8 @@
 package org.openmole.ide.core.model.panel
 
 import org.openmole.ide.core.model.data.IPrototypeDataUI
+import scala.swing.Publisher
 
-trait IPrototypePanelUI[T] extends IPanelUI {
-  def saveContent(name: String): IPrototypeDataUI[T]
+trait IPrototypePanelUI[T] extends IPanelUI with Publisher {
+  def saveContent(name: String): IPrototypeDataUI[_]
 }

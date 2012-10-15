@@ -34,6 +34,8 @@ import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import scala.collection.JavaConversions._
 import scala.swing.Component
 import scala.swing.event.FocusGained
+import javax.imageio.ImageIO
+import BasePanel.IconChanged
 
 class PrototypePanel[T](proxy: IPrototypeDataProxyUI,
                         scene: IMoleScene,
@@ -47,10 +49,13 @@ class PrototypePanel[T](proxy: IPrototypeDataProxyUI,
     contents += panelUI.help
   }.peer, BorderLayout.CENTER)
 
+  listenTo(panelUI)
   listenTo(panelUI.help.components.toSeq: _*)
   reactions += {
     case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
+    case IconChanged(_, iconPath) ⇒
+      iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(iconPath)))
   }
 
   def create = {

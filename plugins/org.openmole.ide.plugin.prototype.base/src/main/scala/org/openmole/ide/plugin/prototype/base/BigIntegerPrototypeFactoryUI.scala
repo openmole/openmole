@@ -20,16 +20,20 @@ package org.openmole.ide.plugin.prototype.base
 import java.math.BigInteger
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.panel.ComponentCategories
+import org.openmole.ide.core.model.data.IPrototypeDataUI
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 
-class BigIntegerPrototypeFactoryUI extends IPrototypeFactoryUI[java.math.BigInteger] {
+class BigIntegerPrototypeFactoryUI extends IPrototypeFactoryUI {
 
-  override def toString = "BigInteger"
+  def buildDataUI: IPrototypeDataUI[BigInteger] = new GenericPrototypeDataUI[BigInteger](this)
 
-  def buildDataUI = new BigIntegerPrototypeDataUI
+  def buildDataUI(name: String,
+                  dim: Int): IPrototypeDataUI[BigInteger] = new GenericPrototypeDataUI[BigInteger](this, name, dim)
 
   def buildDataUI(prototype: Prototype[_],
-                  dim: Int = 0) = new BigIntegerPrototypeDataUI(prototype.name, dim)
+                  dim: Int): IPrototypeDataUI[BigInteger] = buildDataUI(prototype.name, dim)
 
   def category = ComponentCategories.PROTOTYPE
+
+  override def toString = "BigInteger"
 }

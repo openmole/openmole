@@ -23,11 +23,13 @@ import org.osgi.framework.BundleContext
 
 trait PrototypeActivator extends BundleActivator {
 
-  def prototypeFactories: Iterable[IPrototypeFactoryUI[_]]
+  def prototypeFactories: Iterable[IPrototypeFactoryUI]
 
   abstract override def start(context: BundleContext) = {
     super.start(context)
-    prototypeFactories.foreach { f ⇒ KeyRegistry.prototypes += KeyGenerator(f.buildDataUI.coreObject)._1 -> f }
+    prototypeFactories.foreach { f ⇒
+      KeyRegistry.prototypes += KeyGenerator(f.buildDataUI.coreObject)._1 -> f
+    }
   }
 
   abstract override def stop(context: BundleContext) = {

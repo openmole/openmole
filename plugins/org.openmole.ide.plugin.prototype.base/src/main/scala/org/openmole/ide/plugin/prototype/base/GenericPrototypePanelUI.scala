@@ -19,18 +19,42 @@ package org.openmole.ide.plugin.prototype.base
 
 import java.util.Locale
 import java.util.ResourceBundle
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyFactory
+import org.openmole.ide.core.implementation.registry.KeyRegistry
+import org.openmole.ide.core.model.data.IPrototypeDataUI
+import org.openmole.ide.core.implementation.panel.BasePanel._
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.URL
+import scala.reflect.runtime.universe._
+import scala.swing.Component
 import scala.swing.Label
+import scala.swing.MyComboBox
+import scala.swing.Publisher
 import scala.swing.TextField
+import scala.swing.event.ActionEvent
+import scala.swing.event.SelectionChanged
 
-abstract class GenericPrototypePanelUI[T](d: Int = 0) extends PluginPanel("wrap 2") with IPrototypePanelUI[T] {
-  val dimTextField = new TextField(if (d >= 0) d.toString else "0", 2)
+class GenericPrototypePanelUI[T: TypeTag](dataUI: GenericPrototypeDataUI[_ <: T]) extends PluginPanel("wrap 2") with IPrototypePanelUI[T] {
+
+  val protoValues = KeyRegistry.prototypes.values.map { f ⇒ f.buildDataUI }
+  val typeComboBox = new MyComboBox(protoValues.toList.sortBy(_.toString))
+  typeComboBox.selection.item = protoValues.filter { _.toString == dataUI.toString }.head
+
+  listenTo(`typeComboBox`)
+  typeComboBox.selection.reactions += {
+    case SelectionChanged(`typeComboBox`) ⇒
+      publish(new IconChanged(typeComboBox, typeComboBox.selection.item.fatImagePath))
+    case _ ⇒
+  }
+
+  val dimTextField = new TextField(if (dataUI.dim >= 0) dataUI.dim.toString else "0", 2)
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+  contents += new Label("Type")
+  contents += typeComboBox
   contents += new Label("Dimension")
   contents += dimTextField
 
@@ -39,4 +63,7 @@ abstract class GenericPrototypePanelUI[T](d: Int = 0) extends PluginPanel("wrap 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     add(dimTextField, new Help(i18n.getString("dimension"), i18n.getString("dimensionEx")))
   }
+  override def saveContent(name: String) =
+    typeComboBox.selection.item.factory.buildDataUI(name,
+      { if (dim.isEmpty) 0 else dim.toInt })
 }

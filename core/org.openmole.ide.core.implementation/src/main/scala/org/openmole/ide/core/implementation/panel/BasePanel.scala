@@ -34,6 +34,7 @@ import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import scala.swing.Action
 import scala.swing.Component
 import scala.swing.Label
+import scala.swing.event.ActionEvent
 import scala.swing.event.FocusGained
 import scala.swing.event.UIElementResized
 import scala.swing.Publisher
@@ -42,10 +43,16 @@ import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.tools.image.Images._
+import javax.imageio.ImageIO
+
+object BasePanel {
+  case class IconChanged(s: Component, imagePath: String) extends ActionEvent(s)
+}
 
 abstract class BasePanel(proxy: Option[IDataProxyUI],
                          scene: IMoleScene,
                          mode: Value) extends MyPanel with Publisher {
+
   opaque = true
   peer.setLayout(new BorderLayout)
   val iconLabel = new Label { icon = new ImageIcon(EMPTY) }
