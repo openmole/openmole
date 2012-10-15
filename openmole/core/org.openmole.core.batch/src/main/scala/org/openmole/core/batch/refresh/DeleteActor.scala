@@ -27,13 +27,13 @@ import DeleteActor._
 class DeleteActor extends Actor {
   def receive = {
     case DeleteFile(storage, path, directory) ⇒
-      try 
+      try
         storage.withToken { implicit t ⇒
           if (directory) storage.rmDir(path) else storage.rmFile(path)
         }
       catch {
-        case t: Throwable => 
-          logger.log(FINE, "Error when deleting a file", e)
+        case t: Throwable ⇒
+          logger.log(FINE, "Error when deleting a file", t)
       }
       System.runFinalization
   }
