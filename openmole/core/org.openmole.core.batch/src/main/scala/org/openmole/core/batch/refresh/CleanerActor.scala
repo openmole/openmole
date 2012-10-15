@@ -22,9 +22,14 @@ import akka.actor.Actor
 class CleanerActor extends Actor {
   def receive = {
     case CleanSerializedJob(sj) ⇒
-      sj.synchronized {
-        if (!sj.cleaned) sj.storage.withToken { implicit t ⇒ sj.storage.rmDir(sj.path) }
-        sj.cleaned = true
+      try
+        sj.synchronized {
+          if (!sj.cleaned) sj.storage.withToken { implicit t ⇒ sj.storage.rmDir(sj.path) }
+          sj.cleaned = true
+        }
+      catch {
+        case t: Throwable ⇒
+          logger.log(FINE, "Error when deleting a file", t)
       }
       System.runFinalization
 
