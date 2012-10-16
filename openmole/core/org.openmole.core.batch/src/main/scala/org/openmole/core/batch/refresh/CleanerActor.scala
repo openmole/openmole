@@ -24,7 +24,9 @@ class CleanerActor extends Actor {
     case CleanSerializedJob(sj) ⇒
       try
         sj.synchronized {
-          if (!sj.cleaned) sj.storage.withToken { implicit t ⇒ sj.storage.rmDir(sj.path) }
+          if (!sj.cleaned) sj.storage.withToken { implicit t ⇒ 
+              sj.storage.rmDir(sj.path)
+          }
           sj.cleaned = true
         }
       catch {
