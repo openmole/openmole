@@ -18,14 +18,19 @@
 package org.openmole.core.batch.refresh
 
 import akka.actor.Actor
+import org.openmole.misc.tools.service.Logger
+
+object CleanerActor extends Logger
+
+import CleanerActor._
 
 class CleanerActor extends Actor {
   def receive = {
     case CleanSerializedJob(sj) ⇒
       try
         sj.synchronized {
-          if (!sj.cleaned) sj.storage.withToken { implicit t ⇒ 
-              sj.storage.rmDir(sj.path)
+          if (!sj.cleaned) sj.storage.withToken { implicit t ⇒
+            sj.storage.rmDir(sj.path)
           }
           sj.cleaned = true
         }
