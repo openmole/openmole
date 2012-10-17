@@ -24,6 +24,7 @@ import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.core.model.task._
+import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.sampling.InputSampling
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
@@ -40,7 +41,7 @@ import scala.swing.TabbedPane
 
 object EmptyDataUIs {
 
-  val emptyPrototypeProxy: IPrototypeDataProxyUI = new PrototypeDataProxyUI(new EmptyPrototypeDataUI, false)
+  val emptyPrototypeProxy: IPrototypeDataProxyUI = new PrototypeDataProxyUI(GenericPrototypeDataUI[Int], false)
 
   val emptyTaskProxy: ITaskDataProxyUI = new TaskDataProxyUI(new EmptyTaskDataUI)
 
@@ -58,6 +59,7 @@ object EmptyDataUIs {
   class EmptyPrototypeDataUI extends IPrototypeDataUI[Any] {
     def name = ""
     def dim = 0
+    def typeClassString = ""
     def factory = new EmptyPrototypeFactoryUI
     def coreClass = classOf[Prototype[_]]
     def coreObject = Prototype[Any]("")

@@ -19,21 +19,16 @@ package org.openmole.ide.core.implementation.panel
 
 import java.awt.Color
 import java.awt.Dimension
-import org.openmole.ide.core.model.factory.IFactoryUI
-import org.openmole.ide.core.model.factory.IMoleComponent
-import org.openmole.ide.core.model.factory.IMoleComponent
+import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.panel.IComponentCategory
 import org.openmole.ide.core.model.panel.PanelMode._
-import org.openmole.ide.core.model.dataproxy.IDataProxyUI
-import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.model.dataproxy._
 import scala.collection.mutable.HashMap
 import scala.swing.Action
 import scala.swing.Menu
 import scala.swing.MenuBar
 import scala.swing.MenuItem
+import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dataproxy._
@@ -79,7 +74,7 @@ object ConceptMenu {
 
   val prototypeMenu = {
     val menu = new MenuItem(new Action("New") {
-      override def apply = display(new PrototypeDataProxyUI(KeyRegistry.prototypes.values.head.buildDataUI, false), CREATION)
+      override def apply = display(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], false), CREATION)
     })
     new PopupToolBarPresenter("Prototype", menu, new Color(212, 170, 0))
   }

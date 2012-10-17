@@ -21,11 +21,12 @@ import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.validation._
 import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
+import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.registry._
 import org.openmole.core.model.task._
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyFactory
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
@@ -114,8 +115,7 @@ object CheckData extends Logger {
       if (!protoMapping.keys.contains(KeyPrototypeGenerator(d.prototype))) {
         val (key, dim) = KeyGenerator(d.prototype)
         Proxys.prototypes +=
-          new PrototypeDataProxyFactory(KeyRegistry.prototypes(key)).buildDataProxyUI(d.prototype, true, dim)
-
+          new PrototypeDataProxyUI(GenericPrototypeDataUI(d.prototype.name, dim)(d.prototype.`type`), true)
       }
     }
   }

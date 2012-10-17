@@ -27,7 +27,9 @@ trait IPrototypeDataUI[T] extends IDataUI {
 
   override def toString = if (dim > 0) name + "[" + dim + "]" else name
 
-  def factory: IPrototypeFactoryUI
+  def typeClassString: String
+
+  //def factory: IPrototypeFactoryUI
 
   def coreObject: Prototype[T]
 

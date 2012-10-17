@@ -25,11 +25,13 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import com.thoughtworks.xstream.mapper.Mapper
 import org.openmole.ide.core.implementation.registry._
+import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import scala.collection.mutable.HashSet
+import org.openmole.misc.tools.obj.ClassUtils
 
 class PrototypeConverter(mapper: Mapper,
                          provider: ReflectionProvider) extends ReflectionConverter(mapper, provider) {
@@ -39,20 +41,20 @@ class PrototypeConverter(mapper: Mapper,
   override def marshal(o: Object,
                        writer: HierarchicalStreamWriter,
                        mc: MarshallingContext) = {
-    o match {
-      case s: IPrototypeDataProxyUI ⇒ added += s.id
-      case _ ⇒
-    }
-    super.marshal(o, writer, mc)
+    val proto = o.asInstanceOf[IPrototypeDataProxyUI]
+    added += proto.id
+    writer.addAttribute("id", proto.id.toString)
+    writer.addAttribute("name", proto.dataUI.name)
+    writer.addAttribute("type", proto.dataUI.typeClassString)
+    writer.addAttribute("dim", proto.dataUI.dim.toString)
   }
 
   override def unmarshal(reader: HierarchicalStreamReader,
                          uc: UnmarshallingContext) = {
-    val prototypeProxy = super.unmarshal(reader, uc)
-    prototypeProxy match {
-      case p: IPrototypeDataProxyUI ⇒ addPrototype(p)
-      case _ ⇒ prototypeProxy
-    }
+
+    addPrototype(new PrototypeDataProxyUI(GenericPrototypeDataUI(reader.getAttribute("name"),
+      reader.getAttribute("dim").toInt)(ClassUtils.nanifest(Class.forName(reader.getAttribute("type")))),
+      false, reader.getAttribute("id").toInt))
   }
 
   override def canConvert(t: Class[_]) = t.isAssignableFrom(classOf[PrototypeDataProxyUI])

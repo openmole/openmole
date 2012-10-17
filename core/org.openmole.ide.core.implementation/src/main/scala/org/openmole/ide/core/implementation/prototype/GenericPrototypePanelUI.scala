@@ -15,11 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.prototype.base
+package org.openmole.ide.core.implementation.prototype
 
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyFactory
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.model.data.IPrototypeDataUI
 import org.openmole.ide.core.implementation.panel.BasePanel._
@@ -37,11 +36,13 @@ import scala.swing.TextField
 import scala.swing.event.ActionEvent
 import scala.swing.event.SelectionChanged
 
-class GenericPrototypePanelUI[T: TypeTag](dataUI: GenericPrototypeDataUI[_ <: T]) extends PluginPanel("wrap 2") with IPrototypePanelUI[T] {
+class GenericPrototypePanelUI[T](dataUI: GenericPrototypeDataUI[_ <: T]) extends PluginPanel("wrap 2") with IPrototypePanelUI[T] {
 
-  val protoValues = KeyRegistry.prototypes.values.map { f ⇒ f.buildDataUI }
-  val typeComboBox = new MyComboBox(protoValues.toList.sortBy(_.toString))
-  typeComboBox.selection.item = protoValues.filter { _.toString == dataUI.toString }.head
+  val typeValues = GenericPrototypeDataUI.base
+  val typeComboBox = new MyComboBox(typeValues)
+  typeComboBox.selection.item = typeValues.filter {
+    _.typeClassString == dataUI.typeClassString
+  }.head
 
   listenTo(`typeComboBox`)
   typeComboBox.selection.reactions += {
@@ -64,6 +65,6 @@ class GenericPrototypePanelUI[T: TypeTag](dataUI: GenericPrototypeDataUI[_ <: T]
     add(dimTextField, new Help(i18n.getString("dimension"), i18n.getString("dimensionEx")))
   }
   override def saveContent(name: String) =
-    typeComboBox.selection.item.factory.buildDataUI(name,
+    typeComboBox.selection.item.newInstance(name,
       { if (dim.isEmpty) 0 else dim.toInt })
 }
