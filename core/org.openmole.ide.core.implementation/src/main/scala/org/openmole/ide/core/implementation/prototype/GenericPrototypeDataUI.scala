@@ -26,8 +26,8 @@ import org.openmole.misc.tools.obj.ClassUtils
 
 object GenericPrototypeDataUI {
 
-  def base = List(GenericPrototypeDataUI[Integer],
-    GenericPrototypeDataUI[Double],
+  def base = List(GenericPrototypeDataUI[java.lang.Integer],
+    GenericPrototypeDataUI[java.lang.Double],
     GenericPrototypeDataUI[String],
     GenericPrototypeDataUI[java.io.File],
     GenericPrototypeDataUI[java.math.BigInteger],
@@ -49,10 +49,10 @@ class GenericPrototypeDataUI[T](val name: String,
   def typeClassString = protoType.toString
 
   def coreClass = classOf[Prototype[T]]
-  
-  def coreObject =  Prototype[T](name)(protoType).toArray(dim).asInstanceOf[Prototype[T]]
 
-  def fatImagePath =  "img/" + canonicalClassName(protoType.toString).toLowerCase + "_fat.png"
+  def coreObject = Prototype[T](name)(protoType).toArray(dim).asInstanceOf[Prototype[T]]
+
+  def fatImagePath = "img/" + canonicalClassName(protoType.toString).toLowerCase + "_fat.png"
 
   def canonicalClassName(c: String) = c.substring(c.lastIndexOf('.') + 1, c.length)
 

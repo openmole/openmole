@@ -74,7 +74,7 @@ object ConceptMenu {
 
   val prototypeMenu = {
     val menu = new MenuItem(new Action("New") {
-      override def apply = display(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], false), CREATION)
+      override def apply = display(new PrototypeDataProxyUI(GenericPrototypeDataUI[java.lang.Double], false), CREATION)
     })
     new PopupToolBarPresenter("Prototype", menu, new Color(212, 170, 0))
   }
