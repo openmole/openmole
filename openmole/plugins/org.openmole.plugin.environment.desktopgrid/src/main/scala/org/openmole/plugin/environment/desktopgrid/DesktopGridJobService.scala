@@ -57,7 +57,7 @@ trait DesktopGridJobService extends JobService { js ⇒
     new BatchJob with BatchJobId {
       val id = jobId
       val jobService = js
-      val resultPath = results(jobId).head.getAbsolutePath
+      def resultPath = results(jobId).head.getAbsolutePath
     }
   }
 

@@ -76,12 +76,9 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       }
     }
 
-    //    val auth = new SFTPAuthentication(host, port, user, password)
-    //    auth.initialize(false)
-
     val storageFileGz = Workspace.withTmpFile {
       storageFile ⇒
-        SerializerService.serializeAndArchiveFiles(storage, storageFile)
+        SerializerService.serializeAndArchiveFiles(new LocalSimpleStorage, storageFile)
         val storageFileGz = Workspace.newFile("storage", ".xml.gz")
         storageFile.copyCompress(storageFileGz)
         storageFileGz
@@ -97,14 +94,6 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
   def runJobs(storageFile: File, storage: SimpleStorage) = {
     val id = UUID.randomUUID
     implicit val rng = new Random(id.getLeastSignificantBits ^ id.getMostSignificantBits)
-
-    //val storage = "sftp://" + user + '@' + host + ":" + port + "/"
-    //val relativePath = new RelativePath(storage)
-    //import relativePath._
-
-    //val resultsDir = toURIFile(resultsDirName)
-    //val jobsDir = toURIFile(jobsDirName)
-    //val timeStempsDir = toURIFile(timeStempsDirName)
 
     processJob(background { fetchAJob(id, storage) })
 
@@ -122,7 +111,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
                 val workspaceDir = Workspace.newDir("workspace")
                 val osgiDir = new File(runtime, UUID.randomUUID.toString)
 
-                val cmd = "java -Xmx" + memory + "m -Dosgi.configuration.area=" + osgiDir.getName + " -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration \"" + configurationDir.getAbsolutePath + "\" -s \"" + storageFile.getAbsolutePath + "\" -i \"" + localExecutionMessage.getAbsolutePath + "\" -o \"" + localResultFile.getAbsolutePath + "\" -c / -p \"" + pluginDir.getAbsolutePath + "\"" + (if (debug) " -d " else "")
+                val cmd = "java -Xmx" + memory + "m -Dosgi.configuration.area=" + osgiDir.getName + " -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration " + configurationDir.getAbsolutePath + " -s " + storageFile.getAbsolutePath + " -i " + localExecutionMessage.getAbsolutePath + " -o " + localResultFile.getAbsolutePath + " -c / -p " + pluginDir.getAbsolutePath + "" + (if (debug) " -d " else "")
 
                 logger.info("Executing runtime: " + cmd)
                 //val commandLine = CommandLine.parse(cmd)
@@ -217,7 +206,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     val jobs = storage.listNames(jobsDirName)
 
     if (!jobs.isEmpty) {
-      val timeStemps = storage.listNames(resultsDirName)
+      val timeStemps = storage.listNames(timeStempsDirName)
 
       val groupedStemps = timeStemps.map { ts ⇒ ts.split(timeStempSeparator).head -> ts }.groupBy { _._1 }
       val stempsByJob = jobs.map { j ⇒ j -> groupedStemps.getOrElse(j, Iterable.empty).map { _._2 } }
@@ -247,7 +236,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       }*/
 
       logger.info("Choosen job is " + job)
-      storage.touch(storage.child(timeStempsDirName, job + timeStempSeparator + id.toString))
+      storage.create(storage.child(timeStempsDirName, job + timeStempSeparator + id.toString))
 
       val jobMessage =
         Workspace.withTmpFile {
