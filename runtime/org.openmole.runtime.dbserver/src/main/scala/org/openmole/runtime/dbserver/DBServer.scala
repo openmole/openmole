@@ -17,6 +17,7 @@
 
 package org.openmole.runtime.dbserver
 
+import com.db4o.ObjectContainer
 import com.db4o.cs.Db4oClientServer
 import com.db4o.defragment.Defragment
 import com.db4o.defragment.DefragmentConfig
@@ -83,6 +84,7 @@ object DBServer extends App {
     val serverInfo = new DBServerInfo(server.ext.port, user, password)
     val dbInfoFile = DBServerInfo.dbInfoFile(base)
     dbInfoFile.deleteOnExit
+
     val out = new FileOutputStream(dbInfoFile)
     try new XStream().toXML(serverInfo, out) finally out.close
     server.openClient.close

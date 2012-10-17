@@ -28,8 +28,7 @@ object LoggerService {
   val blackList = Set(
     "ch.ethz.ssh2.log.Logger",
     "org.glite.voms.contact.VOMSProxyInit",
-    "org.globus.gsi.stores.ResourceSigningPolicyStore"
-  )
+    "org.globus.gsi.stores.ResourceSigningPolicyStore")
   private val LogLevel = new ConfigurationLocation("LoggerService", "LogLevel")
 
   Workspace += (LogLevel, "INFO")

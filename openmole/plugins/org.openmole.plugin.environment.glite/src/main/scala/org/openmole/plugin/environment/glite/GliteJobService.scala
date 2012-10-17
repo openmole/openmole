@@ -92,9 +92,9 @@ class GliteJobService(
       finally os.close
 
       val jobDescription = buildJobDescription(runtime, script)
-      
+
       //logger.fine(jobDescription.toJDL)
-      
+
       val jid = jobService.submit(jobDescription)(authentication)
 
       new GliteJob {
@@ -190,6 +190,7 @@ class GliteJobService(
       override val cpuNumber = environment.cpuNumber
       override val jobType = environment.jobType
       override val smpGranularity = environment.smpGranularity
+      override val retryCount = Some(0)
       //override val fuzzy = true
     }
 

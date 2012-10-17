@@ -46,11 +46,6 @@
             <artifactId>org.scala-lang.scala-library</artifactId>
             <version>${project.version}</version>
         </dependency>
-	<dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>org.apache.commons.cli</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>com.github.scopt</artifactId>

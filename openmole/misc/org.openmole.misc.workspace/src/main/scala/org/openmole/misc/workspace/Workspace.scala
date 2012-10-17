@@ -102,6 +102,8 @@ object Workspace {
 
   def preferenceAsDouble(location: ConfigurationLocation): Double = instance.preferenceAsDouble(location)
 
+  def withTmpFile[T](f: File ⇒ T): T = instance.withTmpFile(f)
+
   def newFile: File = instance.newFile
 
   def newDir: File = instance.newDir
@@ -233,6 +235,12 @@ class Workspace(val location: File) {
   def preferenceAsInt(location: ConfigurationLocation): Int = preference(location).toInt
 
   def preferenceAsDouble(location: ConfigurationLocation): Double = preference(location).toDouble
+
+  def withTmpFile[T](f: File ⇒ T): T = {
+    val file = newFile
+    try f(file)
+    finally file.delete
+  }
 
   def newFile: File = newFile(fixedPrefix, fixedPostfix)
 

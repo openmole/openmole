@@ -21,27 +21,20 @@ import java.io.File
 import java.util.Random
 import java.util.UUID
 import java.util.concurrent.Executors
-import org.openmole.core.batch.file.GZURIFile
-import org.openmole.core.batch.file.RelativePath
-import org.openmole.core.batch.file.URIFile
-import org.openmole.core.batch.file.IURIFile
-import org.openmole.plugin.environment.desktopgrid.DesktopGridJobMessage
-import org.openmole.plugin.environment.desktopgrid.SFTPAuthentication
-import org.openmole.plugin.environment.desktopgrid.DesktopEnvironment._
-import org.openmole.core.batch.message.ExecutionMessage
-import org.openmole.core.batch.message.FileMessage
-import org.openmole.core.batch.message.ReplicatedFile
-import org.openmole.core.batch.message.RuntimeResult
-import org.openmole.core.serializer.SerializerService
-import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.tools.service.Logger
-import org.openmole.misc.workspace.ConfigurationLocation
-import org.openmole.misc.workspace.Workspace
+import org.openmole.plugin.environment.desktopgrid._
+import DesktopGridEnvironment._
+import org.openmole.core.batch.message._
+import org.openmole.core.batch.storage._
+import org.openmole.core.serializer._
+import org.openmole.misc.exception._
+import org.openmole.misc.tools.service._
+import org.openmole.misc.workspace._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.service.ProcessUtil._
 import org.openmole.misc.tools.service.ThreadUtil._
 import org.openmole.misc.hashservice.HashService._
+import fr.iscpif.gridscale.storage.SSHStorage
+import fr.iscpif.gridscale.authentication.SSHUserPasswordAuthentication
 
 import org.openmole.core.batch.message.FileMessage._
 import scala.annotation.tailrec
@@ -60,47 +53,67 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
   val resultUploader = Executors.newSingleThreadScheduledExecutor(daemonThreadFactory)
 
-  def launch(userHostPort: String, password: String, nbWorkers: Int) = {
+  def launch(userHostPort: String, _password: String, nbWorkers: Int) = {
     val splitUser = userHostPort.split("@")
     if (splitUser.size != 2) throw new UserBadDataError("Host must be formated as user@hostname")
-    val user = splitUser(0)
+    val _user = splitUser(0)
     val splitHost = splitUser(1).split(":")
-    val port = if (splitHost.size == 2) splitHost(1).toInt else 22
-    val host = splitHost(0)
+    val _port = if (splitHost.size == 2) splitHost(1).toInt else 22
+    val _host = splitHost(0)
 
-    val auth = new SFTPAuthentication(host, port, user, password)
-    auth.initialize(false)
+    val storage = new SimpleStorage {
+      val storage = new SSHStorage {
+        val host = _host
+        override val port = _port
+        val user = _user
+      }
 
-    val authFile = Workspace.newFile("auth", ".xml")
-    SerializerService.serializeAndArchiveFiles(auth, authFile)
+      val root = ""
+
+      val authentication = new SSHUserPasswordAuthentication {
+        val user = _user
+        val password = _password
+      }
+    }
+
+    //    val auth = new SFTPAuthentication(host, port, user, password)
+    //    auth.initialize(false)
+
+    val storageFileGz = Workspace.withTmpFile {
+      storageFile ⇒
+        SerializerService.serializeAndArchiveFiles(storage, storageFile)
+        val storageFileGz = Workspace.newFile("storage", ".xml.gz")
+        storageFile.copyCompress(storageFileGz)
+        storageFileGz
+    }
 
     (0 until nbWorkers).foreach {
-      i ⇒ background { runJobs(user, host, port, password, authFile) }
+      i ⇒ background { runJobs(storageFileGz, storage) }
     }
 
     Thread.currentThread.join
   }
 
-  def runJobs(user: String, host: String, port: Int, password: String, authFile: File) = {
+  def runJobs(storageFile: File, storage: SimpleStorage) = {
     val id = UUID.randomUUID
     implicit val rng = new Random(id.getLeastSignificantBits ^ id.getMostSignificantBits)
 
-    val storage = "sftp://" + user + '@' + host + ":" + port + "/"
-    val relativePath = new RelativePath(storage)
-    import relativePath._
+    //val storage = "sftp://" + user + '@' + host + ":" + port + "/"
+    //val relativePath = new RelativePath(storage)
+    //import relativePath._
 
-    val resultsDir = toURIFile(resultsDirName)
-    val jobsDir = toURIFile(jobsDirName)
-    val timeStempsDir = toURIFile(timeStempsDirName)
+    //val resultsDir = toURIFile(resultsDirName)
+    //val jobsDir = toURIFile(jobsDirName)
+    //val timeStempsDir = toURIFile(timeStempsDirName)
 
-    processJob(background { fetchAJob(jobsDir, timeStempsDir, resultsDir, id, relativePath) })
+    processJob(background { fetchAJob(id, storage) })
 
     @tailrec def processJob(fetchJobResult: () ⇒ Option[(File, File, File, File, Int, ExecutionMessage, String, List[FileMessage])]): Unit = {
       val next = try {
         fetchJobResult() match {
 
           case Some((localExecutionMessage, localCommunicationDirPath, runtime, pluginDir, memory, executionMessage, job, cached)) ⇒
-            val next = background { fetchAJob(jobsDir, timeStempsDir, resultsDir, id, relativePath) }
+            val next = background { fetchAJob(id, storage) }
 
             val localResultFile =
               try {
@@ -109,7 +122,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
                 val workspaceDir = Workspace.newDir("workspace")
                 val osgiDir = new File(runtime, UUID.randomUUID.toString)
 
-                val cmd = "java -Xmx" + memory + "m -Dosgi.configuration.area=" + osgiDir.getName + " -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration \"" + configurationDir.getAbsolutePath + "\" -a \"" + authFile.getAbsolutePath + "\" -s \"" + "file://localhost" + "\" -i \"" + localExecutionMessage.getAbsolutePath + "\" -o \"" + new URIFile(localResultFile).location + "\" -c / -p \"" + pluginDir.getAbsolutePath + "\"" + (if (debug) " -d " else "")
+                val cmd = "java -Xmx" + memory + "m -Dosgi.configuration.area=" + osgiDir.getName + " -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration \"" + configurationDir.getAbsolutePath + "\" -s \"" + storageFile.getAbsolutePath + "\" -i \"" + localExecutionMessage.getAbsolutePath + "\" -o \"" + localResultFile.getAbsolutePath + "\" -c / -p \"" + pluginDir.getAbsolutePath + "\"" + (if (debug) " -d " else "")
 
                 logger.info("Executing runtime: " + cmd)
                 //val commandLine = CommandLine.parse(cmd)
@@ -128,7 +141,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
               }
 
             resultUploader.submit({
-              uploadResult(localResultFile, toURIFile(executionMessage.communicationDirPath), resultsDir, job)
+              uploadResult(localResultFile, executionMessage.communicationDirPath, job, storage)
               localCommunicationDirPath.recursiveDelete
               localResultFile.delete
             })
@@ -138,19 +151,19 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
           case None ⇒
             logger.info("Job list is empty on the remote host.")
             Thread.sleep(Workspace.preferenceAsDurationInMs(jobCheckInterval))
-            background { fetchAJob(jobsDir, timeStempsDir, resultsDir, id, relativePath) }
+            background { fetchAJob(id, storage) }
         }
       } catch {
         case e: Exception ⇒
           logger.log(WARNING, "Error while looking for jobs.", e)
           Thread.sleep(Workspace.preferenceAsDurationInMs(jobCheckInterval))
-          background { fetchAJob(jobsDir, timeStempsDir, resultsDir, id, relativePath) }
+          background { fetchAJob(id, storage) }
       }
       processJob(next)
     }
   }
 
-  def uploadResult(localResultFile: File, communicationDir: IURIFile, resultsDir: IURIFile, job: String) = {
+  def uploadResult(localResultFile: File, communicationDir: String, job: String, storage: SimpleStorage) = {
     val runtimeResult = {
       val is = localResultFile.gzipedBufferedInputStream
       try SerializerService.deserialize[RuntimeResult](is)
@@ -161,10 +174,10 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
     def uploadFileMessage(msg: FileMessage) = {
       val localFile = new File(msg.path)
-      val uploadedFile = communicationDir.newFileInDir("fileMsg", ".bin")
-      try URIFile.copy(localFile, uploadedFile)
+      val uploadedFile = storage.child(communicationDir, Storage.uniqName("fileMsg", ".bin"))
+      try storage.upload(localFile, uploadedFile)
       finally localFile.delete
-      new FileMessage(uploadedFile.path, msg.hash)
+      new FileMessage(uploadedFile, msg.hash)
     }
 
     val uplodadedResult = runtimeResult.result match {
@@ -190,21 +203,21 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       uplodadedResult)
 
     // Upload the result
-    val outputLocal = Workspace.newFile("output", ".res")
-    logger.info("Uploading job results")
-    SerializerService.serialize(resultToSend, outputLocal)
-    val resultFile = new GZURIFile(resultsDir.newFileInDir(job, ".res"))
-    try URIFile.copy(outputLocal, resultFile)
-    finally outputLocal.delete
-    logger.info("Job results uploaded at " + resultFile)
+    Workspace.withTmpFile { outputLocal ⇒
+      logger.info("Uploading job results")
+      SerializerService.serialize(resultToSend, outputLocal)
+      val resultFile = storage.child(resultsDirName, Storage.uniqName(job, ".res"))
+      storage.uploadGZ(outputLocal, resultFile)
+      logger.info("Job results uploaded at " + resultFile)
+    }
 
   }
 
-  def selectAJob(jobsDir: IURIFile, timeStempsDir: IURIFile, resultDir: IURIFile, id: UUID)(implicit rng: Random) = {
-    val jobs = jobsDir.list
+  def selectAJob(id: UUID, storage: SimpleStorage)(implicit rng: Random) = {
+    val jobs = storage.listNames(jobsDirName)
 
     if (!jobs.isEmpty) {
-      val timeStemps = timeStempsDir.list
+      val timeStemps = storage.listNames(resultsDirName)
 
       val groupedStemps = timeStemps.map { ts ⇒ ts.split(timeStempSeparator).head -> ts }.groupBy { _._1 }
       val stempsByJob = jobs.map { j ⇒ j -> groupedStemps.getOrElse(j, Iterable.empty).map { _._2 } }
@@ -218,7 +231,10 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
       logger.info("Choose between " + possibleChoices._2.size + " jobs with " + possibleChoices._1 + " timestemps ")
 
-      val job = if (possibleChoices._1 == 0) {
+      val index = rng.nextInt(possibleChoices._2.size)
+      val job = possibleChoices._2(index)
+
+      /*val job = if (possibleChoices._1 == 0) {
         logger.info("Choose a job at random")
         val index = rng.nextInt(possibleChoices._2.size)
         possibleChoices._2(index)
@@ -228,39 +244,39 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
         def olderTimeStemp(job: String) = groupedStemps(job).map { v ⇒ timeStempsDir.modificationTime(v._2) }.min
 
         possibleChoices._2.map { job ⇒ olderTimeStemp(job) -> job }.min(Ordering.by { j: (Long, _) ⇒ j._1 })._2
+      }*/
 
-      }
       logger.info("Choosen job is " + job)
-      timeStempsDir.child(job + timeStempSeparator + id.toString).touch
+      storage.touch(storage.child(timeStempsDirName, job + timeStempSeparator + id.toString))
 
-      val jobMessage = {
-        val os = jobsDir.child(job).cache.gzipedBufferedInputStream
-        try SerializerService.deserialize[DesktopGridJobMessage](os)
-        finally os.close
-      }
+      val jobMessage =
+        Workspace.withTmpFile {
+          f ⇒
+            storage.downloadGZ(storage.child(jobsDirName, job), f)
+            SerializerService.deserialize[DesktopGridJobMessage](f)
+        }
 
       logger.info("Job execution message is " + jobMessage.executionMessagePath)
       Some(job -> jobMessage)
     } else None
   }
 
-  def fetchAJob(jobsDir: IURIFile, timeStempsDir: IURIFile, resultsDir: IURIFile, id: UUID, relativePath: RelativePath)(implicit rng: Random) = {
-    import relativePath._
+  def fetchAJob(id: UUID, storage: SimpleStorage)(implicit rng: Random) = {
 
     def getFileUnzipVerifyHash(fileMessage: FileMessage) = {
-      import fileMessage._
-      val file = cacheUnziped(fileMessage.path)
-      if (file.hash.toString != hash) throw new InternalProcessingError("Wrong hash for file " + path + ".")
-      file -> hash
-    }
-
-    def getFile(fileMessage: FileMessage) = {
-      //import fileMessage.path._
-      val file = /*fileMessage.path.*/ cache(fileMessage.path)
+      val file = Workspace.newFile("cache", ".bin") //cacheUnziped(fileMessage.path)
+      storage.downloadGZ(fileMessage.path, file)
+      if (file.hash.toString != fileMessage.hash) throw new InternalProcessingError("Wrong hash for file " + fileMessage.path + ".")
       file -> fileMessage.hash
     }
 
-    selectAJob(jobsDir, timeStempsDir, resultsDir, id) match {
+    def getFile(fileMessage: FileMessage) = {
+      val file = Workspace.newFile("cache", ".bin")
+      storage.download(fileMessage.path, file)
+      file -> fileMessage.hash
+    }
+
+    selectAJob(id, storage) match {
       case Some((job, jobMessage)) ⇒
         var cached = List.empty[FileMessage]
 
@@ -285,7 +301,8 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
               plugin.copy(File.createTempFile("plugin", ".jar", pluginDir))
           }
 
-          val executionMesageFileCache = cacheUnziped(jobMessage.executionMessagePath)
+          val executionMesageFileCache = Workspace.newFile("executionMessage", ".xml")
+          storage.downloadGZ(jobMessage.executionMessagePath, executionMesageFileCache)
           val executionMessage = SerializerService.deserialize[ExecutionMessage](executionMesageFileCache)
           executionMesageFileCache.delete
 
@@ -293,23 +310,26 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
             val localFile = localCache.cache(replicatedFile, getFile)
             cached ::= replicatedFile
             import replicatedFile._
-            new ReplicatedFile(src, directory, hash, new URIFile(localFile).location, mode)
+            new ReplicatedFile(src, directory, hash, localFile.getAbsolutePath, mode)
           }
 
           val files = executionMessage.files.map(localCachedReplicatedFile)
           val plugins = executionMessage.plugins.map(localCachedReplicatedFile)
-          val jobs = new FileMessage(new URIFile(cache(executionMessage.jobs.path)).location, executionMessage.jobs.hash)
+
+          val jobsFile = Workspace.newFile("jobs", ".xml")
+          storage.download(executionMessage.jobs.path, jobsFile)
+          val jobs = new FileMessage(jobsFile.getAbsolutePath, executionMessage.jobs.hash)
 
           val localCommunicationDirPath = Workspace.newDir
           val localExecutionMessage = Workspace.newFile("executionMessage", ".gz")
 
           val os = localExecutionMessage.gzipedBufferedOutputStream
-          try SerializerService.serialize(new ExecutionMessage(plugins, files, jobs, new URIFile(localCommunicationDirPath).location), os)
+          try SerializerService.serialize(new ExecutionMessage(plugins, files, jobs, localCommunicationDirPath.getAbsolutePath), os)
           finally os.close
 
           Some((localExecutionMessage, localCommunicationDirPath, runtime, pluginDir, jobMessage.memory, executionMessage, job, cached))
         } catch {
-          case e ⇒
+          case e: Throwable ⇒
             localCache.release(cached)
             throw e
         }

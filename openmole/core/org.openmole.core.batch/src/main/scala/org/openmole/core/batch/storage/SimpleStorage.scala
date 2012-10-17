@@ -47,4 +47,10 @@ trait SimpleStorage extends Storage {
   override def uploadGZ(src: File, dest: String) = super.uploadGZ(src, dest)
   override def download(src: String, dest: File) = super.download(src, dest)
   override def downloadGZ(src: String, dest: File) = super.downloadGZ(src, dest)
+
+  def touch(dest: String) = {
+    val os = openOutputStream(dest)
+    os.close
+  }
+
 }
