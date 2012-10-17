@@ -67,7 +67,7 @@ object EmptyDataUIs {
     def buildPanelUI = new EmptyPrototypePanelUI
   }
 
-  class EmptyPrototypePanelUI extends IPrototypePanelUI[Any] {
+  class EmptyPrototypePanelUI extends IPrototypePanelUI {
     def peer = new PluginPanel("").peer
     def saveContent(name: String) = new EmptyPrototypeDataUI
   }

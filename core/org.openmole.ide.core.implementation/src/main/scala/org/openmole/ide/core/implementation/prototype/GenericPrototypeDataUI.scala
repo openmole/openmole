@@ -26,12 +26,16 @@ import org.openmole.misc.tools.obj.ClassUtils
 
 object GenericPrototypeDataUI {
 
-  def base = List(GenericPrototypeDataUI[java.lang.Integer],
+  def base: List[GenericPrototypeDataUI[_]] = List(GenericPrototypeDataUI[java.lang.Integer],
     GenericPrototypeDataUI[java.lang.Double],
     GenericPrototypeDataUI[String],
     GenericPrototypeDataUI[java.io.File],
     GenericPrototypeDataUI[java.math.BigInteger],
     GenericPrototypeDataUI[java.math.BigDecimal])
+
+  def extra: List[GenericPrototypeDataUI[_]] = extraPlugins.map { e ⇒ GenericPrototypeDataUI(ClassUtils.nanifest(Class.forName(e._2))) }
+
+  var extraPlugins = List.empty[(String, String)]
 
   def apply[T](n: String = "", d: Int = 0)(implicit t: Manifest[T]) = new GenericPrototypeDataUI[T](n, d, t)
 
@@ -52,7 +56,11 @@ class GenericPrototypeDataUI[T](val name: String,
 
   def coreObject = Prototype[T](name)(protoType).toArray(dim).asInstanceOf[Prototype[T]]
 
-  def fatImagePath = "img/" + canonicalClassName(protoType.toString).toLowerCase + "_fat.png"
+  def fatImagePath = {
+    val path = "img/" + canonicalClassName(protoType.toString).toLowerCase + "_fat.png"
+    if (new java.io.File(path).isFile) path
+    else "img/extra_fat.png"
+  }
 
   def canonicalClassName(c: String) = c.substring(c.lastIndexOf('.') + 1, c.length)
 
