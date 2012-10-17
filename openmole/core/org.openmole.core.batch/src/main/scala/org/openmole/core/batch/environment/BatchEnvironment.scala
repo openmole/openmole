@@ -54,7 +54,7 @@ import scala.concurrent.stm._
 import collection.mutable.SynchronizedMap
 import collection.mutable.WeakHashMap
 import org.openmole.misc.tools.service.ThreadUtil._
-import concurrent.util.duration._
+import scala.concurrent.duration.{ Duration ⇒ SDuration, MILLISECONDS }
 import ref.WeakReference
 import annotation.tailrec
 
@@ -163,8 +163,8 @@ akka {
   import system.dispatcher
 
   system.scheduler.schedule(
-    Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval) milliseconds,
-    Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval) milliseconds,
+    SDuration(Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval), MILLISECONDS),
+    SDuration(Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval), MILLISECONDS),
     watcher,
     Watch)
 

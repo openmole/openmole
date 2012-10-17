@@ -37,7 +37,7 @@ import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.environment.BatchEnvironment.JobManagmentThreads
 
-import scala.concurrent.util.duration._
+import scala.concurrent.duration._
 
 object JobManager extends Logger
 
