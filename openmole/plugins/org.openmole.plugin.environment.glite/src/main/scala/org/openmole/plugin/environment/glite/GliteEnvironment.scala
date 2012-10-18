@@ -30,6 +30,7 @@ import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage._
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.exception._
+import org.openmole.misc.tools.service.Duration._
 import org.openmole.plugin.environment.gridscale._
 import org.globus.gsi.gssapi.GlobusGSSCredentialImpl
 import ref.WeakReference
@@ -94,7 +95,8 @@ class GliteEnvironment(
     val cpuTime: Option[String] = None,
     val cpuNumber: Option[Int] = None,
     val jobType: Option[String] = None,
-    val smpGranularity: Option[Int] = None) extends BatchEnvironment with MemoryRequirement { env ⇒
+    val smpGranularity: Option[Int] = None,
+    val myProxy: Option[MyProxy] = None) extends BatchEnvironment with MemoryRequirement { env ⇒
 
   import GliteEnvironment._
 
@@ -118,6 +120,7 @@ class GliteEnvironment(
         file,
         Workspace.preferenceAsDurationInS(ProxyTime),
         fqan)
+      myProxy.foreach(mp ⇒ mp.delegate(proxy, mp.time.toSeconds))
       (proxy, file)
     case None ⇒ throw new UserBadDataError("No athentication has been initialized for glite.")
   }

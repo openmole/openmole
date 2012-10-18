@@ -191,6 +191,7 @@ class GliteJobService(
       override val jobType = environment.jobType
       override val smpGranularity = environment.smpGranularity
       override val retryCount = Some(0)
+      override val myProxyServer = environment.myProxy.map(_.url)
       //override val fuzzy = true
     }
 

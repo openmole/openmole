@@ -34,7 +34,7 @@ class RemoteGliteStorage(val host: String, val port: Int, certificateDir: File) 
       val basePath: String = ""
     }
 
-  @transient lazy val authentication: SRMStorage#A = new ProxyFileAuthentication {
+  def authentication: SRMStorage#A = new ProxyFileAuthentication {
     def proxy = {
       //val X509_CERT_DIR = System.getenv("X509_CERT_DIR")
 
