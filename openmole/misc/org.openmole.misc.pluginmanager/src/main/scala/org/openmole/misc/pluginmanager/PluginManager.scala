@@ -56,8 +56,25 @@ object PluginManager extends Logger {
     else false
   }
 
+  def fileProviding(c: Class[_]) =
+    Activator.contextOrException.getBundle(Activator.packageAdmin.getBundle(c).getBundleId).file
+
   def pluginsForClass(c: Class[_]): Iterable[File] = synchronized {
     allPluginDependencies(Activator.packageAdmin.getBundle(c).getBundleId).map { l ⇒ Activator.contextOrException.getBundle(l).file }
+  }
+
+  def unload(file: File) = synchronized {
+    bundle(file) match {
+      case Some(b) ⇒ b.uninstall
+      case None ⇒
+    }
+  }
+
+  def allDepending(file: File): Iterable[File] = synchronized {
+    bundle(file) match {
+      case Some(b) ⇒ allDependingBundles(b).map { _.file }
+      case None ⇒ Iterable.empty
+    }
   }
 
   def load(files: Iterable[File]) = synchronized {
@@ -134,10 +151,7 @@ object PluginManager extends Logger {
     bundles.foreach {
       b ⇒
         dependingBundles(b).foreach {
-          db ⇒
-            {
-              resolvedDirectDependencies.getOrElseUpdate(db.getBundleId, new HashSet[Long]) += b.getBundleId
-            }
+          db ⇒ resolvedDirectDependencies.getOrElseUpdate(db.getBundleId, new HashSet[Long]) += b.getBundleId
         }
     }
 
@@ -145,6 +159,9 @@ object PluginManager extends Logger {
     providedDependencies = dependencies(bundles.filter(b ⇒ b.isProvided).map { _.getBundleId }).toSet
     files = bundles.map(b ⇒ b.file.getAbsoluteFile -> ((b.getBundleId, b.file.lastModified))).toMap
   }
+
+  private def allDependingBundles(b: Bundle): Iterable[Bundle] =
+    b :: dependingBundles(b).flatMap(allDependingBundles).toList
 
   private def dependingBundles(b: Bundle): Iterable[Bundle] = {
     val exportedPackages = Activator.packageAdmin.getExportedPackages(b)
