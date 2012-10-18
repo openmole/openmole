@@ -48,6 +48,7 @@ object Workspace {
   val globalGroup = "Global"
   val tmpLocation = ".tmp"
   val persitentLocation = "persistent"
+  val pluginLocation = "plugins"
   val uniqueID = new ConfigurationLocation(globalGroup, "UniqueID")
 
   private val group = "Workspace"
@@ -79,6 +80,8 @@ object Workspace {
   def +=(location: ConfigurationLocation, defaultValue: String) = synchronized {
     configurations(location) = () ⇒ defaultValue
   }
+
+  def pluginDirLocation = instance.pluginDir
 
   def location = instance.location
 
@@ -137,12 +140,15 @@ object Workspace {
 
 class Workspace(val location: File) {
 
-  import Workspace.{ persitentLocation, fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, tmpLocation, preferences, configurations, sessionUUID, uniqueID }
+  import Workspace.{ persitentLocation, pluginLocation, fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, tmpLocation, preferences, configurations, sessionUUID, uniqueID }
 
   location.mkdirs
 
   val tmpDir = new File(new File(location, tmpLocation), sessionUUID.toString)
   tmpDir.mkdirs
+
+  val pluginDir = new File(location, pluginLocation)
+  pluginDir.mkdirs
 
   val persistentDir = new File(location, persitentLocation)
   persistentDir.mkdirs
