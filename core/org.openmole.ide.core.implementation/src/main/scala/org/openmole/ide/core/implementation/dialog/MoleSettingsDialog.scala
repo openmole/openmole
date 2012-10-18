@@ -31,7 +31,7 @@ object MoleSettingsDialog {
     if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(settingsPanel) {
       verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
     }.peer,
-      "Mole settings")).equals(NotifyDescriptor.OK_OPTION)) {
+      "Mole plugins")).equals(NotifyDescriptor.OK_OPTION)) {
       manager.dataUI = settingsPanel.saveContent("moleDataUI")
     }
   }

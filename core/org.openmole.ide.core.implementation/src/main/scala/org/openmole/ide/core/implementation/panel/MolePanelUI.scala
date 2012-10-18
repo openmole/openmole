@@ -25,14 +25,21 @@ import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
+import scala.swing.RadioButton
 import scala.swing.FileChooser.SelectionMode._
+import org.openmole.misc.workspace.Workspace
 
-class MolePanelUI(mdu: IMoleDataUI) extends PluginPanel("") with IPanelUI {
+class MolePanelUI(mdu: IMoleDataUI) extends PluginPanel("wrap") with IPanelUI {
   minimumSize = new Dimension(300, 400)
   preferredSize = new Dimension(300, 400)
-  val pluginMultiTextField = new MultiChooseFileTextField("Plugin",
-    mdu.plugins.map { p ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(p)) }.toList, minus = CLOSE_IF_EMPTY)
-  contents += pluginMultiTextField.panel
+  Workspace.pluginDirLocation.list.foreach { f ⇒
+    contents += new RadioButton(f) { selected = mdu.plugins.toList.contains(f) }
+  }
 
-  def saveContent(name: String) = new MoleDataUI(pluginMultiTextField.content.map { _.content })
+  def saveContent(name: String) = new MoleDataUI(contents.flatMap { c ⇒
+    c match {
+      case x: RadioButton ⇒ List(x)
+      case _ ⇒ Nil
+    }
+  }.toList.filter { _.selected }.map { _.text })
 }

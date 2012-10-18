@@ -19,12 +19,20 @@ import org.openide.DialogDescriptor._
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 import org.openide.NotifyDescriptor._
+import org.openmole.misc.workspace.Workspace
+import java.io.File
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.preference.PreferenceContent
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.action.LoadXML
 import org.openmole.ide.core.implementation.action.SaveXML
 import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
+import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField._
+import org.openmole.ide.misc.widget.multirow.MultiWidget._
+import scala.swing.FileChooser.SelectionMode._
+import org.openmole.misc.tools.io.FileUtil._
 
 class GUIPanel extends MainFrame { mainframe ⇒
   title = "OpenMOLE"
@@ -74,6 +82,17 @@ class GUIPanel extends MainFrame { mainframe ⇒
           if (DialogDisplayer.getDefault.notify(dd).equals(OK_OPTION)) pc.save
         }
       })
+      contents += new MenuItem(new Action("Plugins") {
+        override def apply = {
+          val pluginPanel = new PlatformPluginPanel
+          if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(pluginPanel) {
+            verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
+          }.peer,
+            "Plugins")).equals(NotifyDescriptor.OK_OPTION)) {
+            pluginPanel.saveContent
+          }
+        }
+      })
     }
   }
 
@@ -96,4 +115,28 @@ class GUIPanel extends MainFrame { mainframe ⇒
   StatusBar.inform("OpenMOLE - 0.7 - Daddy Django")
 
   PasswordListner.apply
+
+  class PlatformPluginPanel extends PluginPanel("") {
+    minimumSize = new Dimension(300, 400)
+    preferredSize = new Dimension(300, 400)
+    val pluginDirPath = Workspace.pluginDirLocation.getCanonicalPath
+    val pluginMultiTextField = new MultiChooseFileTextField("Plugin",
+      Workspace.pluginDirLocation.list.map { p ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(p)) }.toList, minus = CLOSE_IF_EMPTY)
+    contents += pluginMultiTextField.panel
+
+    def saveContent = {
+      pluginMultiTextField.content.foreach { path ⇒
+        val plugin = new File(path.content)
+        val targetFile = new File(Workspace.pluginDirLocation + "/" + plugin.getName)
+        if (!targetFile.exists) {
+          if (plugin.exists) {
+            if (!targetFile.exists) plugin.copy(targetFile)
+          } else StatusBar.warn("The file " + path.content + " does not exist. It has not been imported")
+        }
+        val a = Workspace.pluginDirLocation.list.map { f ⇒ new File(Workspace.pluginDirLocation + "/" + f) }
+        val b = pluginMultiTextField.content.map { c ⇒ new File(Workspace.pluginDirLocation + "/" + new File(c.content).getName) }
+        a diff b foreach { f ⇒ f.delete }
+      }
+    }
+  }
 }
