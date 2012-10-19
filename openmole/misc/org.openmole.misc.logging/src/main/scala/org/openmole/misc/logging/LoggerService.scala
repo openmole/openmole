@@ -17,8 +17,9 @@
 
 package org.openmole.misc.logging
 
+import org.apache.log4j.{ Logger ⇒ L4JLogger, Level ⇒ L4JLevel, Appender ⇒ L4JAppender }
 import java.util.logging._
-import org.slf4j.bridge._
+//import org.slf4j.bridge._
 import org.openmole.misc.workspace._
 import org.openmole.misc.tools.io.FileUtil._
 import collection.JavaConversions._
@@ -37,7 +38,7 @@ object LoggerService {
     val level = Level.parse(levelLabel)
 
     //SLF4JBridgeHandler.uninstall
-    SLF4JBridgeHandler.removeHandlersForRootLogger
+    //SLF4JBridgeHandler.removeHandlersForRootLogger
     LogManager.getLogManager.reset
 
     //val rootLogger = LogManager.getLogManager.getLogger("")
@@ -47,10 +48,14 @@ object LoggerService {
     ch.setLevel(level)
     ch.setFilter(
       new Filter {
-        def isLoggable(record: LogRecord) = !blackList.contains(record.getSourceClassName)
+        def isLoggable(record: LogRecord) =
+          !blackList.contains(record.getSourceClassName)
       })
 
     rootLogger.addHandler(ch)
+
+    L4JLogger.getRootLogger.setLevel(L4JLevel.toLevel(levelLabel))
+
   }
 
   def init = level(Workspace.preference(LogLevel))

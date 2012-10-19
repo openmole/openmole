@@ -304,16 +304,20 @@ akka {
           }
       }
 
-    @tailrec def selected(value: Double, storages: List[(StorageService, AccessToken, Double)]): Option[(StorageService, AccessToken)] =
+    @tailrec def selected(value: Double, storages: List[(StorageService, AccessToken, Double)]): Option[(StorageService, AccessToken)] = {
       storages.headOption match {
         case Some((storage, token, fitness)) ⇒
           if (value <= fitness) Some((storage, token))
           else selected(value - fitness, storages.tail)
         case None ⇒ None
       }
+    }
 
     atomic { implicit txn ⇒
       val notLoaded = fitness
+      val fitnessSum = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
+      val drawn = Random.default.nextDouble * fitnessSum
+
       selected(Random.default.nextDouble * notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum, notLoaded.toList) match {
         case Some((storage, token)) ⇒
           for {

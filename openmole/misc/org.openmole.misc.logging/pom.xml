@@ -28,14 +28,14 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.core</groupId>
-            <artifactId>org.slf4j</artifactId>
+            <artifactId>org.apache.log4j</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--<dependency>
+        <dependency>
             <groupId>org.openmole.core</groupId>
             <artifactId>org.apache.commons.logging</artifactId>
             <version>${project.version}</version>
-        </dependency>-->
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->

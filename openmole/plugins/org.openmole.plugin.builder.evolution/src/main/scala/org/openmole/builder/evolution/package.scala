@@ -222,22 +222,30 @@ package object evolution {
 
     val scalingArchiveCapsule = new Capsule(scalingArchiveTask)
 
-    val puzzle =
-      (
-        firstCapsule -<
+    val skel =
+      firstCapsule -<
         (preIslandCapsule, size = island.toString) --
         islandSlot --
         archiveToIndividual --
         elitismCaps --
-        scalingArchiveCapsule >| (endCapsule, terminated.name + " == true")) +
-        (
-          scalingArchiveCapsule --
-          filterPopulationCapsule --
-          breedingTask --
-          preIslandCapsule) +
-          (preIslandCapsule -- (renameArchiveCapsule, filter = Filter not archive) -- filterPopulationCapsule) +
-          (firstCapsule oo islandSlot) +
-          (firstCapsule oo endCapsule)
+        scalingArchiveCapsule >| (endCapsule, terminated.name + " == true")
+
+    val loop =
+      scalingArchiveCapsule --
+        filterPopulationCapsule --
+        breedingTask --
+        preIslandCapsule
+
+    val archivePath =
+      preIslandCapsule --
+        (renameArchiveCapsule, filter = Filter not archive) --
+        filterPopulationCapsule
+
+    val dataChannels =
+      (firstCapsule oo islandSlot) +
+        (firstCapsule oo endCapsule)
+
+    val puzzle = skel + loop + archivePath + dataChannels
 
     val (_state, _generation, _genome, _individual) = (state, generation, model.genome, model.individual)
 

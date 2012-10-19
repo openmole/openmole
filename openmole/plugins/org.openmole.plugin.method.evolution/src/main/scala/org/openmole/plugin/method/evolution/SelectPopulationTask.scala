@@ -48,7 +48,9 @@ object SelectPopulationTask {
 
 }
 
-sealed abstract class SelectPopulationTask(val name: String, val evolution: Modifier with G with MF with Selection with Lambda)(implicit val plugins: PluginSet) extends Task {
+sealed abstract class SelectPopulationTask(
+    val name: String,
+    val evolution: Modifier with G with MF with Selection with Lambda)(implicit val plugins: PluginSet) extends Task {
 
   def archive: Prototype[Population[evolution.G, evolution.MF]]
 
