@@ -18,6 +18,8 @@
 package org.openmole.ide.core.implementation.prototype
 
 import org.openmole.ide.core.model.data.IPrototypeDataUI
+import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import scala.reflect.runtime.universe._
@@ -26,22 +28,24 @@ import org.openmole.misc.tools.obj.ClassUtils
 
 object GenericPrototypeDataUI {
 
-  def base: List[GenericPrototypeDataUI[_]] = List(GenericPrototypeDataUI[java.lang.Integer],
-    GenericPrototypeDataUI[java.lang.Double],
-    GenericPrototypeDataUI[String],
-    GenericPrototypeDataUI[java.io.File],
-    GenericPrototypeDataUI[java.math.BigInteger],
-    GenericPrototypeDataUI[java.math.BigDecimal])
+  val baseType = List("java.lang.Integer", "java.lang.Double", "java.lang.String", "java.io.File", "java.math.BigInteger", "java.math.BigDecimal")
 
-  def extra: List[GenericPrototypeDataUI[_]] = extraPlugins.map { e ⇒ GenericPrototypeDataUI(ClassUtils.nanifest(Class.forName(e._2))) }
+  var extraType = List.empty[String]
 
-  var extraPlugins = List.empty[(String, String)]
+  def extra: List[GenericPrototypeDataUI[_]] = extraType map { stringToDataUI }
+
+  def base: List[GenericPrototypeDataUI[_]] = baseType map { stringToDataUI }
+
+  def stringToDataUI(s: String): GenericPrototypeDataUI[_] = try {
+    GenericPrototypeDataUI(ClassUtils.nanifest(Class.forName(s)))
+  } catch { case e: ClassNotFoundException ⇒ throw new UserBadDataError(s + " can not be loaded as a Class") }
 
   def apply[T](n: String = "", d: Int = 0)(implicit t: Manifest[T]) = new GenericPrototypeDataUI[T](n, d, t)
 
   def apply[T](implicit t: Manifest[T]): GenericPrototypeDataUI[T] = apply("", 0)
 }
 
+import GenericPrototypeDataUI._
 class GenericPrototypeDataUI[T](val name: String,
                                 val dim: Int,
                                 val protoType: Manifest[T]) extends IPrototypeDataUI[T] {
@@ -57,8 +61,7 @@ class GenericPrototypeDataUI[T](val name: String,
   def coreObject = Prototype[T](name)(protoType).toArray(dim).asInstanceOf[Prototype[T]]
 
   def fatImagePath = {
-    val path = "img/" + canonicalClassName(protoType.toString).toLowerCase + "_fat.png"
-    if (new java.io.File(path).isFile) path
+    if (baseType.contains(protoType.toString)) "img/" + canonicalClassName(protoType.toString).toLowerCase + "_fat.png"
     else "img/extra_fat.png"
   }
 

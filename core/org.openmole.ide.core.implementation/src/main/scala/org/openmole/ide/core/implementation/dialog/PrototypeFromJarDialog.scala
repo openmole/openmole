@@ -25,12 +25,13 @@ import scala.swing.ScrollPane
 import org.openmole.ide.core.implementation.prototype._
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.misc.pluginmanager.PluginManager
-import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextFieldTextField
-import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextFieldTextField._
+import org.openmole.ide.misc.widget.multirow.MultiTextField
+import org.openmole.ide.misc.widget.multirow.MultiTextField._
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.swing.MyComboBox
+import org.openmole.misc.workspace.Workspace
 
 object PrototypeFromJarDialog {
   def display(prototypePanel: GenericPrototypePanelUI) = {
@@ -39,27 +40,22 @@ object PrototypeFromJarDialog {
       verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
     }.peer,
       "Prototypes from jar files")).equals(NotifyDescriptor.OK_OPTION)) {
-      var l = List.empty[(String, String)]
-      panel.multiJarCombo.content.map { ep ⇒ (ep.chooseFileContent, ep.textFieldContent) }.foreach { ep ⇒
+      var l = List.empty[String]
+      panel.multiJarCombo.content.map { _.textFieldValue }.foreach { ep ⇒
         try {
-          PluginManager.load(ep._1)
-          Class.forName(ep._2)
-          l = l :+ (ep._1, ep._2)
-
-        } catch {
-          case e: ClassNotFoundException ⇒ StatusBar.warn("The class " + ep._2 + " has not been found")
-        }
+          Class.forName(ep)
+          l = l :+ ep
+        } catch { case e: ClassNotFoundException ⇒ StatusBar.warn("The class " + ep + " has not been found") }
       }
-      GenericPrototypeDataUI.extraPlugins = l
+      GenericPrototypeDataUI.extraType = l
       prototypePanel.typeComboBox.peer.setModel(MyComboBox.newConstantModel(GenericPrototypeDataUI.base ::: GenericPrototypeDataUI.extra))
     }
   }
 
   class PrototypeFromJarDialog extends PluginPanel("") {
     preferredSize = new Dimension(250, 300)
-    val multiJarCombo = new MultiChooseFileTextFieldTextField("Custom Types from jar files",
-      GenericPrototypeDataUI.extraPlugins.map { j ⇒ new ChooseFileTextFieldTextFieldPanel(new ChooseFileTextFieldTextFieldData(j._1, j._2)) },
-      extensions = Some("*.jar"),
+    val multiJarCombo = new MultiTextField("Custom Types from jar files",
+      GenericPrototypeDataUI.extraType.map { j ⇒ new TextFieldPanel(new TextFieldData(j)) },
       minus = CLOSE_IF_EMPTY,
       plus = ADD)
     contents += multiJarCombo.panel

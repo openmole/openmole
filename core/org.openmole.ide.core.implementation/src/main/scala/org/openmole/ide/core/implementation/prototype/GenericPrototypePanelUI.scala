@@ -40,6 +40,7 @@ import java.io.File
 class GenericPrototypePanelUI(dataUI: GenericPrototypeDataUI[_]) extends PluginPanel("wrap 3") with IPrototypePanelUI { protoPanel ⇒
 
   val typeValues = GenericPrototypeDataUI.base ::: GenericPrototypeDataUI.extra
+
   val typeComboBox = new MyComboBox(typeValues)
   typeComboBox.selection.item = typeValues.filter {
     _.typeClassString == dataUI.typeClassString
@@ -52,7 +53,7 @@ class GenericPrototypePanelUI(dataUI: GenericPrototypeDataUI[_]) extends PluginP
     case _ ⇒
   }
 
-  val customTypeLabel = new MainLinkLabel("Add type", new Action("") {
+  val customTypeLabel = new MainLinkLabel("More types", new Action("") {
     override def apply = PrototypeFromJarDialog.display(protoPanel)
   })
 

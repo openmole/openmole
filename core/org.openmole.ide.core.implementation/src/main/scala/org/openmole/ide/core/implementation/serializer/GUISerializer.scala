@@ -27,6 +27,7 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.FileReader
 import java.io.FileWriter
+import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.data.IHookDataUI
