@@ -109,23 +109,27 @@ package object evolution {
 
     val endCapsule = Slot(new StrainerCapsule(EmptyTask(name + "End")))
 
-    val puzzle =
-      (
-        firstCapsule --
+    val skel =
+      firstCapsule --
         initialBreedTask -<
         scalingCaps --
         (model, filter = Filter(genome)) --
         toIndividualSlot --
         elitismCaps --
-        scalingArchiveCapsule >| (endCapsule, terminated.name + " == true")) +
-        (
-          scalingArchiveCapsule --
-          (breedingCaps, condition = generation.name + " % " + evolution.lambda + " == 0") -<-
-          scalingCaps) +
-          (scalingCaps oo toIndividualSlot) +
-          (firstCapsule oo (model.first, Filter(archive))) +
-          (firstCapsule oo (endCapsule, Filter(archive))) +
-          (firstCapsule oo (elitismCaps, filter = Filter not archive))
+        scalingArchiveCapsule >| (endCapsule, terminated.name + " == true")
+
+    val loop =
+      scalingArchiveCapsule --
+        (breedingCaps, condition = generation.name + " % " + evolution.lambda + " == 0") -<-
+        scalingCaps
+
+    val dataChannels =
+      (scalingCaps oo toIndividualSlot) +
+        (firstCapsule oo (model.first, Filter(archive))) +
+        (firstCapsule oo (endCapsule, Filter(archive))) +
+        (firstCapsule oo (elitismCaps, filter = Filter not archive))
+
+    val puzzle = skel + loop + dataChannels
 
     val (_state, _generation, _genome, _individual, _archive, _inputs, _objectives, _populationSize) = (state, generation, genome, individual, archive, inputs, objectives, populationSize)
 
