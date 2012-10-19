@@ -19,8 +19,10 @@ import org.openide.DialogDescriptor._
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 import org.openide.NotifyDescriptor._
+import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.workspace.Workspace
 import java.io.File
+import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.preference.PreferenceContent
 import org.openmole.ide.core.implementation.execution.ScenesManager
@@ -130,12 +132,20 @@ class GUIPanel extends MainFrame { mainframe ⇒
         val targetFile = new File(Workspace.pluginDirLocation + "/" + plugin.getName)
         if (!targetFile.exists) {
           if (plugin.exists) {
-            if (!targetFile.exists) plugin.copy(targetFile)
+            if (!targetFile.exists) {
+              plugin.copy(targetFile)
+              PluginManager.load(targetFile)
+            }
           } else StatusBar.warn("The file " + path.content + " does not exist. It has not been imported")
         }
         val a = Workspace.pluginDirLocation.list.map { f ⇒ new File(Workspace.pluginDirLocation + "/" + f) }
         val b = pluginMultiTextField.content.map { c ⇒ new File(Workspace.pluginDirLocation + "/" + new File(c.content).getName) }
-        a diff b foreach { f ⇒ f.delete }
+        a diff b foreach { f ⇒
+
+          Proxys.prototypes.filter { p ⇒ GenericPrototypeDataUI.extra.contains(p.dataUI.typeClassString) }
+          PluginManager.unload(f)
+          f.delete
+        }
       }
     }
   }

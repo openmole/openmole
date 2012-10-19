@@ -64,6 +64,9 @@ class PrototypeConverter(mapper: Mapper,
     if (!KeyRegistry.protoProxyKeyMap.contains(key)) {
       Proxys.prototypes += p
       ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(p)
+      if (!(GenericPrototypeDataUI.baseType ::: GenericPrototypeDataUI.extraType contains p.dataUI.typeClassString)) {
+        GenericPrototypeDataUI.extraType = GenericPrototypeDataUI.extraType :+ p.dataUI.typeClassString
+      }
     }
     KeyRegistry.protoProxyKeyMap(key)
   }
