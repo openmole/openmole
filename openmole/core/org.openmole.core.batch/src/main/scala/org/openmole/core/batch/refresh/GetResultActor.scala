@@ -38,6 +38,7 @@ import org.openmole.misc.workspace._
 object GetResultActor extends Logger
 
 class GetResultActor(jobManager: ActorRef) extends Actor {
+
   def receive = {
     case GetResult(job, sj, resultPath) ⇒
       try getResult(sj.storage, resultPath, job)
@@ -101,7 +102,7 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
   private def getRuntimeResult(outputFilePath: String, storage: StorageService)(implicit token: AccessToken): RuntimeResult = {
     val resultFile = Workspace.newFile
     try {
-      signalDownload(storage.downloadGZ(outputFilePath, resultFile), outputFilePath, storage)
+      signalDownload(retryOnTimeout(storage.downloadGZ(outputFilePath, resultFile)), outputFilePath, storage)
       SerializerService.deserialize(resultFile)
     } finally resultFile.delete
   }
@@ -139,7 +140,7 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
     if (resultPath == null) throw new InternalProcessingError("Context results path is null")
     val contextResutsFileCache = Workspace.newFile
     try {
-      signalDownload(storage.downloadGZ(resultPath.path, contextResutsFileCache), resultPath.path, storage)
+      signalDownload(retryOnTimeout(storage.downloadGZ(resultPath.path, contextResutsFileCache)), resultPath.path, storage)
       if (HashService.computeHash(contextResutsFileCache) != resultPath.hash) throw new InternalProcessingError("Results have been corrupted durring the transfer.")
       SerializerService.deserializeAndExtractFiles(contextResutsFileCache)
     } finally contextResutsFileCache.delete

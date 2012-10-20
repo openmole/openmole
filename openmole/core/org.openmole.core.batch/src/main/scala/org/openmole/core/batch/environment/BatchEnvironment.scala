@@ -24,7 +24,7 @@ import akka.dispatch.Dispatchers
 import akka.routing.RoundRobinRouter
 import com.typesafe.config.ConfigFactory
 import java.io.File
-
+import java.util.concurrent.TimeoutException
 import org.openmole.misc.exception.InternalProcessingError
 import java.net.URI
 import java.util.concurrent.atomic.AtomicLong
@@ -110,6 +110,8 @@ object BatchEnvironment extends Logger {
 
   val StoragesGCUpdateInterval = new ConfigurationLocation("BatchEnvironment", "StoragesGCUpdateInterval")
 
+  val NbTryOnTimeout = new ConfigurationLocation("BatchEnvironment", "NbTryOnTimeout")
+
   //val AuthenticationTimeout = new ConfigurationLocation("Environment", "AuthenticationTimeout")
 
   Workspace += (MinUpdateInterval, "PT1M")
@@ -131,8 +133,18 @@ object BatchEnvironment extends Logger {
   //Workspace += (AuthenticationTimeout, "PT2M")
 
   Workspace += (StoragesGCUpdateInterval, "PT1H")
+  Workspace += (NbTryOnTimeout, "3")
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
+
+  def retryOnTimeout[T](f: ⇒ T, nbTry: Int = Workspace.preferenceAsInt(NbTryOnTimeout)): T =
+    try f
+    catch {
+      case t: TimeoutException ⇒
+        if (nbTry > 1) retryOnTimeout(f, nbTry - 1)
+        else throw t
+    }
+
 }
 
 import BatchEnvironment._
