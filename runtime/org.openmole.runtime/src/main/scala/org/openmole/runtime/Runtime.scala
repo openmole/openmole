@@ -34,7 +34,7 @@ import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.storage._
 import org.openmole.core.implementation.execution.local._
 import org.openmole.core.batch.message._
-import org.openmole.misc.tools.service.Retry._
+import org.openmole.misc.tools.service.Retry
 import org.openmole.core.serializer._
 import org.openmole.misc.hashservice._
 import org.openmole.misc.pluginmanager._
@@ -44,6 +44,8 @@ import scala.collection.mutable.HashMap
 
 object Runtime extends Logger {
   val NbRetry = 3
+
+  def retry[T](f: ⇒ T) = Retry.retry(f, NbRetry)
 }
 
 class Runtime {
@@ -69,17 +71,17 @@ class Runtime {
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[File, File]
 
-    val executionMesageFileCache = Workspace.newFile
-    storage.downloadGZ(inputMessagePath, executionMesageFileCache)
-    val executionMessage = SerializerService.deserialize[ExecutionMessage](executionMesageFileCache)
-    executionMesageFileCache.delete
+    val executionMessage = retry(Workspace.withTmpFile { executionMesageFileCache ⇒
+      storage.downloadGZ(inputMessagePath, executionMesageFileCache)
+      SerializerService.deserialize[ExecutionMessage](executionMesageFileCache)
+    })
 
     val result = try {
       val pluginDir = Workspace.newDir
 
       for (plugin ← executionMessage.plugins) {
         val inPluginDirLocalFile = File.createTempFile("plugin", ".jar", pluginDir)
-        val replicaFileCache = storage.downloadGZ(plugin.path, inPluginDirLocalFile)
+        val replicaFileCache = retry(storage.downloadGZ(plugin.path, inPluginDirLocalFile))
 
         if (HashService.computeHash(inPluginDirLocalFile) != plugin.hash)
           throw new InternalProcessingError("Hash of a plugin does't match.")
@@ -96,7 +98,7 @@ class Runtime {
         //To avoid getting twice the same plugin with different path
         if (!usedFiles.containsKey(repliURI.src)) {
           val cache = Workspace.newFile
-          storage.downloadGZ(repliURI.path, cache)
+          retry(storage.downloadGZ(repliURI.path, cache))
           val cacheHash = HashService.computeHash(cache).toString
 
           if (cacheHash != repliURI.hash)
@@ -116,7 +118,7 @@ class Runtime {
       }
 
       val jobsFileCache = Workspace.newFile
-      storage.downloadGZ(executionMessage.jobs.path, jobsFileCache)
+      retry(storage.downloadGZ(executionMessage.jobs.path, jobsFileCache))
 
       if (HashService.computeHash(jobsFileCache).toString != executionMessage.jobs.hash) throw new InternalProcessingError("Hash of the execution job does't match.")
 
@@ -140,7 +142,7 @@ class Runtime {
       SerializerService.serializeAndArchiveFiles(contextResults, contextResultFile)
       val uploadedcontextResults = storage.child(executionMessage.communicationDirPath, Storage.uniqName("uplodedTar", ".tgz"))
       val result = new FileMessage(uploadedcontextResults, HashService.computeHash(contextResultFile).toString)
-      retry(storage.uploadGZ(contextResultFile, uploadedcontextResults), NbRetry)
+      retry(storage.uploadGZ(contextResultFile, uploadedcontextResults))
       contextResultFile.delete
       Left(result)
 
@@ -179,7 +181,7 @@ class Runtime {
 
     val outputLocal = Workspace.newFile("output", ".res")
     SerializerService.serialize(runtimeResult, outputLocal)
-    try retry(storage.uploadGZ(outputLocal, outputMessagePath), NbRetry)
+    try retry(storage.uploadGZ(outputLocal, outputMessagePath))
     finally outputLocal.delete
   }
 

@@ -137,13 +137,7 @@ object BatchEnvironment extends Logger {
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
 
-  def retryOnTimeout[T](f: ⇒ T, nbTry: Int = Workspace.preferenceAsInt(NbTryOnTimeout)): T =
-    try f
-    catch {
-      case t: TimeoutException ⇒
-        if (nbTry > 1) retryOnTimeout(f, nbTry - 1)
-        else throw t
-    }
+  def retryOnTimeout[T](f: ⇒ T) = Retry.retryOnTimeout(f, Workspace.preferenceAsInt(NbTryOnTimeout))
 
 }
 
@@ -301,7 +295,6 @@ akka {
     def fitness =
       storages.flatMap {
         cur ⇒
-
           UsageControl.get(cur.id).tryGetToken match {
             case None ⇒ None
             case Some(token) ⇒
