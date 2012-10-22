@@ -57,7 +57,7 @@ object PluginManager extends Logger {
   }
 
   def fileProviding(c: Class[_]) =
-    Option(Activator.packageAdmin.getBundle(c)).map(b ⇒ Activator.contextOrException.getBundle(b.getBundleId).file)
+    Option(Activator.packageAdmin.getBundle(c)).map(b ⇒ Activator.contextOrException.getBundle(b.getBundleId).file.getCanonicalFile)
 
   def pluginsForClass(c: Class[_]): Iterable[File] = synchronized {
     allPluginDependencies(Activator.packageAdmin.getBundle(c).getBundleId).map { l ⇒ Activator.contextOrException.getBundle(l).file }
@@ -102,7 +102,7 @@ object PluginManager extends Logger {
   def loadDir(path: File, fiter: FileFilter): Unit =
     if (path.exists && path.isDirectory) load(path.listFiles(fiter))
 
-  def bundle(file: File) = files.get(file.getAbsoluteFile).map { id ⇒ Activator.contextOrException.getBundle(id._1) }
+  def bundle(file: File) = files.get(file.getCanonicalFile).map { id ⇒ Activator.contextOrException.getBundle(id._1) }
 
   private def dependencies(bundles: Iterable[Long]): Iterable[Long] = synchronized {
     val ret = new HashSet[Long]
@@ -123,7 +123,7 @@ object PluginManager extends Logger {
 
   private def installBundle(f: File) = try {
     if (!f.exists) throw new UserBadDataError("Bundle file " + f + " doesn't exists.")
-    val file = f.getAbsoluteFile
+    val file = f.getCanonicalFile
 
     files.get(file) match {
       case None ⇒
@@ -157,7 +157,7 @@ object PluginManager extends Logger {
 
     resolvedPluginDependenciesCache = new HashMap[Long, Iterable[Long]]
     providedDependencies = dependencies(bundles.filter(b ⇒ b.isProvided).map { _.getBundleId }).toSet
-    files = bundles.map(b ⇒ b.file.getAbsoluteFile -> ((b.getBundleId, b.file.lastModified))).toMap
+    files = bundles.map(b ⇒ b.file.getCanonicalFile -> ((b.getBundleId, b.file.lastModified))).toMap
   }
 
   private def allDependingBundles(b: Bundle): Iterable[Bundle] =
