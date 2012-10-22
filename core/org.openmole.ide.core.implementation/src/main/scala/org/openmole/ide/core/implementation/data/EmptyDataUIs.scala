@@ -24,7 +24,7 @@ import org.openmole.core.implementation.sampling.Sampling
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.core.model.task._
-import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
+import org.openmole.ide.core.implementation.prototype._
 import org.openmole.ide.core.implementation.sampling.InputSampling
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
@@ -37,6 +37,7 @@ import org.openmole.core.implementation.task._
 import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import org.netbeans.api.visual.widget.Scene
+import org.openmole.misc.tools.obj.ClassUtils
 import scala.swing.TabbedPane
 
 object EmptyDataUIs {
@@ -47,7 +48,7 @@ object EmptyDataUIs {
 
   class EmptyPrototypeFactoryUI extends IPrototypeFactoryUI {
     def category = ComponentCategories.PROTOTYPE
-    def buildDataUI = new EmptyPrototypeDataUI
+    def buildDataUI = GenericPrototypeDataUI[Any]
 
     def buildDataUI(name: String,
                     dim: Int) = buildDataUI
@@ -62,14 +63,10 @@ object EmptyDataUIs {
     def typeClassString = ""
     def factory = new EmptyPrototypeFactoryUI
     def coreClass = classOf[Prototype[_]]
+    def protoType = ClassUtils.nanifest(classOf[Any])
     def coreObject = Prototype[Any]("")
     def fatImagePath = "img/empty.png"
-    def buildPanelUI = new EmptyPrototypePanelUI
-  }
-
-  class EmptyPrototypePanelUI extends IPrototypePanelUI {
-    def peer = new PluginPanel("").peer
-    def saveContent(name: String) = new EmptyPrototypeDataUI
+    def buildPanelUI = new GenericPrototypePanelUI(GenericPrototypeDataUI.base.head)
   }
 
   class EmptySamplingCompositionDataUI extends ISamplingCompositionDataUI {

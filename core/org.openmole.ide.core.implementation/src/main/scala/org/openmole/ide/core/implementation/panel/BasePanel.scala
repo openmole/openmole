@@ -125,7 +125,7 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
     scene.refresh
   }
 
-  def baseDelete: Unit = {
+  def baseDelete: Boolean = {
     delete
   }
 
@@ -143,7 +143,7 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
 
   def create: Unit
 
-  def delete: Unit
+  def delete: Boolean
 
   def save: Unit
 

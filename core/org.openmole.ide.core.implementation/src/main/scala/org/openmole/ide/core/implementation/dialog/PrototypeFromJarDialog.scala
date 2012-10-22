@@ -32,6 +32,7 @@ import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.swing.MyComboBox
 import org.openmole.misc.workspace.Workspace
+import org.openmole.ide.misc.tools.util.ClassLoader
 
 object PrototypeFromJarDialog {
   def display(prototypePanel: GenericPrototypePanelUI) = {
@@ -42,13 +43,11 @@ object PrototypeFromJarDialog {
       "Prototypes from jar files")).equals(NotifyDescriptor.OK_OPTION)) {
       var l = List.empty[String]
       panel.multiJarCombo.content.map { _.textFieldValue }.foreach { ep ⇒
-        try {
-          Class.forName(ep)
-          l = l :+ ep
-        } catch { case e: ClassNotFoundException ⇒ StatusBar.warn("The class " + ep + " has not been found") }
+        ClassLoader.toManifest(ep)
+        l = l :+ ep
+        GenericPrototypeDataUI.extraType = l
+        prototypePanel.typeComboBox.peer.setModel(MyComboBox.newConstantModel(GenericPrototypeDataUI.base ::: GenericPrototypeDataUI.extra))
       }
-      GenericPrototypeDataUI.extraType = l
-      prototypePanel.typeComboBox.peer.setModel(MyComboBox.newConstantModel(GenericPrototypeDataUI.base ::: GenericPrototypeDataUI.extra))
     }
   }
 

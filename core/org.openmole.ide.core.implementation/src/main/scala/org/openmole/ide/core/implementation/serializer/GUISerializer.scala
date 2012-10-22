@@ -39,6 +39,7 @@ import org.openmole.ide.core.implementation.data._
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.implementation.workflow.MoleScene
+import org.openmole.ide.misc.tools.util.ClassLoader
 import org.openmole.misc.tools.io.FileUtil._
 import scala.collection.JavaConversions._
 import org.openmole.misc.tools.io.TarArchiver._
@@ -172,6 +173,7 @@ class GUISerializer {
     StatusBar.clear
     Proxys.clearAll
     ScenesManager.closeAll
+    ClassLoader.loadExtraPlugins
 
     val os = new TarInputStream(new FileInputStream(fromFile))
     val extractDir = Files.createTempDirectory("openmole").toFile

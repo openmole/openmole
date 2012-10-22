@@ -103,11 +103,12 @@ class TaskPanel(proxy: ITaskDataProxyUI,
         scene.closePropertyPanel
         Proxys.tasks -= proxy
         ConceptMenu.removeItem(proxy)
+        true
       case _ ⇒
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
           toBeRemovedCapsules.foreach { c ⇒ c.scene.graphScene.removeNodeWithEdges(c.scene.manager.removeCapsuleUI(c)) }
           delete
-        }
+        } else false
     }
   }
 

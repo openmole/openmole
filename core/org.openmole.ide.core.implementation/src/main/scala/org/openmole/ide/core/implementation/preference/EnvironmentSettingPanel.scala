@@ -29,10 +29,7 @@ import scala.swing.event.ButtonClicked
 class EnvironmentSettingPanel extends PluginPanel("wrap 2") {
 
   val combo = new ComboBox(Proxys.environments.filter { e ⇒
-    e.dataUI.coreClass match {
-      case _: BatchEnvironment ⇒ true
-      case _ ⇒ false
-    }
+    e.dataUI.coreClass.isAssignableFrom(classOf[BatchEnvironment])
   }.toList)
 
   val trashButton = new Button("Trash data") { background = new Color(170, 0, 0) }

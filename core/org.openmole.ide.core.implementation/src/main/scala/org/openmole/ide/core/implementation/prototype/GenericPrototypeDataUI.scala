@@ -24,7 +24,7 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import scala.reflect.runtime.universe._
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.tools.obj.ClassUtils
+import org.openmole.ide.misc.tools.util.ClassLoader
 
 object GenericPrototypeDataUI {
 
@@ -37,7 +37,7 @@ object GenericPrototypeDataUI {
   def base: List[GenericPrototypeDataUI[_]] = baseType map { stringToDataUI }
 
   def stringToDataUI(s: String): GenericPrototypeDataUI[_] = try {
-    GenericPrototypeDataUI(ClassUtils.nanifest(Class.forName(s)))
+    GenericPrototypeDataUI(ClassLoader.toManifest(s))
   } catch { case e: ClassNotFoundException ⇒ throw new UserBadDataError(s + " can not be loaded as a Class") }
 
   def apply[T](n: String = "", d: Int = 0)(implicit t: Manifest[T]) = new GenericPrototypeDataUI[T](n, d, t)

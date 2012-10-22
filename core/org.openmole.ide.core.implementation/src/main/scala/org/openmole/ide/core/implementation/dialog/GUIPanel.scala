@@ -22,6 +22,7 @@ import org.openide.NotifyDescriptor._
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.workspace.Workspace
 import java.io.File
+import org.openmole.ide.core.implementation.panel.PrototypePanel
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.preference.PreferenceContent
@@ -35,6 +36,7 @@ import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.swing.FileChooser.SelectionMode._
 import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.ide.misc.tools.util.ClassLoader
 
 class GUIPanel extends MainFrame { mainframe ⇒
   title = "OpenMOLE"
@@ -127,6 +129,9 @@ class GUIPanel extends MainFrame { mainframe ⇒
     contents += pluginMultiTextField.panel
 
     def saveContent = {
+      val requiredFiles = Proxys.prototypes.map { p ⇒ PluginManager.fileProviding(ClassLoader.toClass(p.dataUI.typeClassString)) -> p }.flatMap {
+        case (o, p) ⇒ o.map { _.getCanonicalFile -> p }
+      }
       pluginMultiTextField.content.foreach { path ⇒
         val plugin = new File(path.content)
         val targetFile = new File(Workspace.pluginDirLocation + "/" + plugin.getName)
@@ -141,12 +146,18 @@ class GUIPanel extends MainFrame { mainframe ⇒
         val a = Workspace.pluginDirLocation.list.map { f ⇒ new File(Workspace.pluginDirLocation + "/" + f) }
         val b = pluginMultiTextField.content.map { c ⇒ new File(Workspace.pluginDirLocation + "/" + new File(c.content).getName) }
         a diff b foreach { f ⇒
-
-          Proxys.prototypes.filter { p ⇒ GenericPrototypeDataUI.extra.contains(p.dataUI.typeClassString) }
-          PluginManager.unload(f)
-          f.delete
+          val allDepending = PluginManager.allDepending(f).map { _.getCanonicalFile }
+          requiredFiles.filter(x ⇒ allDepending.toList.contains(x._1)).foreach {
+            case (f, p) ⇒
+              if (PrototypePanel.deletePrototype(p)) {
+                PluginManager.unload(f)
+                f.delete
+              }
+            case _ ⇒
+          }
         }
       }
     }
   }
+
 }

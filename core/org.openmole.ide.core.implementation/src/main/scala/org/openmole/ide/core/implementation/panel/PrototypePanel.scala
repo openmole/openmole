@@ -22,6 +22,7 @@ import java.awt.Color
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import javax.imageio.ImageIO
 import javax.swing.ImageIcon
+import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
@@ -37,6 +38,43 @@ import scala.swing.event.FocusGained
 import javax.imageio.ImageIO
 import BasePanel.IconChanged
 
+object PrototypePanel {
+  def deletePrototype(proxy: IPrototypeDataProxyUI): Boolean = {
+    def erase = {
+      ScenesManager.closePropertyPanel
+      Proxys.prototypes -= proxy
+      ConceptMenu.removeItem(proxy)
+      true
+    }
+
+    //remove in Tasks
+    val capsulesWithProtos: List[ICapsuleUI] = ScenesManager.moleScenes.flatMap {
+      _.manager.capsules.values.flatMap { c ⇒
+        c.dataUI.task match {
+          case Some(x: ITaskDataProxyUI) ⇒ if (x.dataUI.filterPrototypeOccurencies(proxy).isEmpty) None else Some(c)
+          case _ ⇒ None
+        }
+      }
+    }.toList
+
+    capsulesWithProtos match {
+      case Nil ⇒ erase
+      case _ ⇒
+        if (DialogFactory.deleteProxyConfirmation(proxy)) {
+          erase
+          capsulesWithProtos.foreach { _.dataUI.task.get.dataUI.removePrototypeOccurencies(proxy) }
+          List(ScenesManager.currentScene).flatten.foreach {
+            _.manager.connectors.foreach {
+              dc ⇒ dc.filteredPrototypes = dc.filteredPrototypes.filterNot { _ == proxy }
+            }
+          }
+          true
+        } else false
+    }
+  }
+}
+
+import PrototypePanel._
 class PrototypePanel[T](proxy: IPrototypeDataProxyUI,
                         scene: IMoleScene,
                         mode: Value = CREATION) extends BasePanel(Some(proxy), scene, mode) {
@@ -64,33 +102,7 @@ class PrototypePanel[T](proxy: IPrototypeDataProxyUI,
       proxy)
   }
 
-  def delete = {
-    //remove in Tasks
-    val capsulesWithProtos: List[ICapsuleUI] = ScenesManager.moleScenes.flatMap {
-      _.manager.capsules.values.flatMap { c ⇒
-        c.dataUI.task match {
-          case Some(x: ITaskDataProxyUI) ⇒ if (x.dataUI.filterPrototypeOccurencies(proxy).isEmpty) None else Some(c)
-          case _ ⇒ None
-        }
-      }
-    }.toList
-
-    capsulesWithProtos match {
-      case Nil ⇒ erase
-      case _ ⇒
-        if (DialogFactory.deleteProxyConfirmation(proxy)) {
-          erase
-          capsulesWithProtos.foreach { _.dataUI.task.get.dataUI.removePrototypeOccurencies(proxy) }
-          scene.manager.connectors.foreach { dc ⇒ dc.filteredPrototypes = dc.filteredPrototypes.filterNot { _ == proxy } }
-        }
-    }
-
-    def erase = {
-      scene.closePropertyPanel
-      Proxys.prototypes -= proxy
-      ConceptMenu.removeItem(proxy)
-    }
-  }
+  def delete = deletePrototype(proxy)
 
   def save = proxy.dataUI = panelUI.saveContent(nameTextField.text)
 

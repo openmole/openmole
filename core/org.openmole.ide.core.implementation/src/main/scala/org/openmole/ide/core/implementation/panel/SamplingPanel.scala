@@ -53,7 +53,7 @@ class SamplingPanel(samplingWidget: ISamplingWidget,
 
   def create = {}
 
-  def delete = {}
+  def delete = true
 
   def save = {
     samplingWidget.dataUI = panelUI.saveContent

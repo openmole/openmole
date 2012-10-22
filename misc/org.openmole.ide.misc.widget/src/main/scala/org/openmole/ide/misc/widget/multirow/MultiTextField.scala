@@ -26,7 +26,7 @@ object MultiTextField {
 
   class TextFieldPanel(val data: TextFieldData) extends PluginPanel("wrap 2") with IPanel[TextFieldData] {
 
-    val textField = new TextField(data.textFieldValue)
+    val textField = new TextField(data.textFieldValue, 15)
 
     contents += textField
 

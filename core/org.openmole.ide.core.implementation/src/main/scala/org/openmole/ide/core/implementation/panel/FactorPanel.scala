@@ -41,7 +41,7 @@ class FactorPanel(factorWidget: IFactorWidget,
 
   def create = {}
 
-  def delete = {}
+  def delete = true
 
   def save = {
     factorWidget.dataUI = panelUI.saveContent

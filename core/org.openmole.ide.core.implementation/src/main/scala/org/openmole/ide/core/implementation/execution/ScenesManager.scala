@@ -69,9 +69,11 @@ object ScenesManager {
   }
 
   def currentScene = currentSceneContainer match {
-    case Some(sc: ISceneContainer) ⇒ sc.scene
+    case Some(sc: ISceneContainer) ⇒ Some(sc.scene)
     case _ ⇒ None
   }
+
+  def closePropertyPanel = List(currentScene).flatten.foreach { _.closePropertyPanel }
 
   def selection = _selection.toSet
 

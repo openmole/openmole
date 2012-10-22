@@ -24,6 +24,7 @@ import com.thoughtworks.xstream.converters.reflection.ReflectionProvider
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import com.thoughtworks.xstream.mapper.Mapper
+import org.openmole.ide.misc.tools.util.ClassLoader
 import org.openmole.ide.core.implementation.registry._
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
@@ -31,7 +32,6 @@ import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import scala.collection.mutable.HashSet
-import org.openmole.misc.tools.obj.ClassUtils
 
 class PrototypeConverter(mapper: Mapper,
                          provider: ReflectionProvider) extends ReflectionConverter(mapper, provider) {
@@ -53,7 +53,7 @@ class PrototypeConverter(mapper: Mapper,
                          uc: UnmarshallingContext) = {
 
     addPrototype(new PrototypeDataProxyUI(GenericPrototypeDataUI(reader.getAttribute("name"),
-      reader.getAttribute("dim").toInt)(ClassUtils.nanifest(Class.forName(reader.getAttribute("type")))),
+      reader.getAttribute("dim").toInt)(ClassLoader.toManifest(reader.getAttribute("type"))),
       false, reader.getAttribute("id").toInt))
   }
 
