@@ -21,7 +21,7 @@ import org.openmole.misc.logging.LoggerService
 import org.openmole.misc.tools.service.OSGiActivator
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
-import org.slf4j.bridge._
+//import org.slf4j.bridge._
 
 object Activator extends OSGiActivator {
   var context: Option[BundleContext] = None
@@ -31,7 +31,7 @@ class Activator extends BundleActivator {
 
   override def start(context: BundleContext) = {
     Activator.context = Some(context)
-    SLF4JBridgeHandler.install
+    // SLF4JBridgeHandler.install
     LoggerService.init
   }
 

@@ -40,6 +40,12 @@ object QualityControl {
     a
   }
 
+  def apply(hysteresis: Int, nbSuccess: Int) = {
+    val q = new QualityControl(hysteresis)
+    for (i ← 0 until nbSuccess) q.success
+    q
+  }
+
 }
 
 class QualityControl(hysteresis: Int) {

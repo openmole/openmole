@@ -21,6 +21,7 @@ import akka.actor.Actor
 import akka.actor.ActorRef
 import org.openmole.core.batch.control.UsageControl
 import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.core.batch.environment.SerializedJob
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.misc.tools.service.Logger
@@ -49,7 +50,7 @@ class SubmitActor(jobManager: ActorRef) extends Actor {
 
   private def trySubmit(serializedJob: SerializedJob, environment: BatchEnvironment) = {
     val (js, token) = environment.selectAJobService
-    try js.submit(serializedJob)(token)
+    try retryOnTimeout(js.submit(serializedJob)(token))
     finally UsageControl.get(js.id).releaseToken(token)
   }
 

@@ -17,33 +17,39 @@
 
 package org.openmole.misc.tools.service
 
+import java.util.concurrent.TimeoutException
+
 object Retry {
 
-  def waitAndRetryFor[T](callable: ⇒ T, nbTry: Int, exceptions: Set[Class[_]], wait: Long): T = {
-    var _nbTry = nbTry - 1
-    while (_nbTry <= 0) {
-      try {
-        return callable
-      } catch {
-        case e: Throwable ⇒
-          if (!exceptions.contains(e.getClass)) throw e
-          Thread.sleep(wait)
-      }
-      _nbTry -= 1
+  def retryOnTimeout[T](f: ⇒ T, nbTry: Int): T =
+    try f
+    catch {
+      case t: TimeoutException ⇒
+        if (nbTry > 1) retryOnTimeout(f, nbTry - 1)
+        else throw t
     }
-    callable
-  }
 
-  def retry[T](callable: ⇒ T, nbTry: Int): T = {
-    var _nbTry = nbTry - 1
-    while (_nbTry <= 0) {
-      try {
-        return callable
-      } catch {
-        case e: Throwable ⇒
-      }
-      _nbTry -= 1
+  def retry[T](f: ⇒ T, nbTry: Int): T =
+    try f
+    catch {
+      case t: Throwable ⇒
+        if (nbTry > 1) retry(f, nbTry - 1)
+        else throw t
     }
-    callable
-  }
+
+  //  def waitAndRetryFor[T](callable: ⇒ T, nbTry: Int, exceptions: Set[Class[_]], wait: Long): T = {
+  //    var _nbTry = nbTry - 1
+  //    while (_nbTry <= 0) {
+  //      try {
+  //        return callable
+  //      } catch {
+  //        case e: Throwable ⇒
+  //          if (!exceptions.contains(e.getClass)) throw e
+  //          Thread.sleep(wait)
+  //      }
+  //      _nbTry -= 1
+  //    }
+  //    callable
+  //  }
+
 }

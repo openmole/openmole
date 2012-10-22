@@ -28,6 +28,8 @@
         <module>org.apache.commons.compress</module>
         <module>org.apache.commons.pool</module>
 	<module>org.apache.commons.configuration</module>
+	<module>org.apache.commons.logging</module>
+	<module>org.apache.log4j</module>
 	<module>org.jasypt.encryption</module>
         <module>org.gnu.crypto</module>
         <module>com.ibm.icu</module>
@@ -42,7 +44,6 @@
 	<module>ccl.northwestern.edu.netlogo5</module>
 	<module>ccl.northwestern.edu.netlogo5.noscala</module>
 	<module>org.apache.commons.math</module>
-	<module>org.slf4j</module>
 	<module>net.java.dev.j3d</module>
 	<module>org.objenesis</module>
 	<module>org.apache.sshd</module>

@@ -24,7 +24,7 @@ import akka.dispatch.Dispatchers
 import akka.routing.RoundRobinRouter
 import com.typesafe.config.ConfigFactory
 import java.io.File
-
+import java.util.concurrent.TimeoutException
 import org.openmole.misc.exception.InternalProcessingError
 import java.net.URI
 import java.util.concurrent.atomic.AtomicLong
@@ -110,6 +110,8 @@ object BatchEnvironment extends Logger {
 
   val StoragesGCUpdateInterval = new ConfigurationLocation("BatchEnvironment", "StoragesGCUpdateInterval")
 
+  val NbTryOnTimeout = new ConfigurationLocation("BatchEnvironment", "NbTryOnTimeout")
+
   //val AuthenticationTimeout = new ConfigurationLocation("Environment", "AuthenticationTimeout")
 
   Workspace += (MinUpdateInterval, "PT1M")
@@ -131,8 +133,12 @@ object BatchEnvironment extends Logger {
   //Workspace += (AuthenticationTimeout, "PT2M")
 
   Workspace += (StoragesGCUpdateInterval, "PT1H")
+  Workspace += (NbTryOnTimeout, "3")
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
+
+  def retryOnTimeout[T](f: ⇒ T) = Retry.retryOnTimeout(f, Workspace.preferenceAsInt(NbTryOnTimeout))
+
 }
 
 import BatchEnvironment._
@@ -289,7 +295,6 @@ akka {
     def fitness =
       storages.flatMap {
         cur ⇒
-
           UsageControl.get(cur.id).tryGetToken match {
             case None ⇒ None
             case Some(token) ⇒
@@ -304,16 +309,20 @@ akka {
           }
       }
 
-    @tailrec def selected(value: Double, storages: List[(StorageService, AccessToken, Double)]): Option[(StorageService, AccessToken)] =
+    @tailrec def selected(value: Double, storages: List[(StorageService, AccessToken, Double)]): Option[(StorageService, AccessToken)] = {
       storages.headOption match {
         case Some((storage, token, fitness)) ⇒
           if (value <= fitness) Some((storage, token))
           else selected(value - fitness, storages.tail)
         case None ⇒ None
       }
+    }
 
     atomic { implicit txn ⇒
       val notLoaded = fitness
+      val fitnessSum = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
+      val drawn = Random.default.nextDouble * fitnessSum
+
       selected(Random.default.nextDouble * notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum, notLoaded.toList) match {
         case Some((storage, token)) ⇒
           for {

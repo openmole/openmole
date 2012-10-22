@@ -21,6 +21,7 @@ import akka.actor.Actor
 import org.openmole.misc.tools.service.Logger
 import akka.actor.ActorRef
 import org.openmole.core.model.execution.ExecutionState._
+import org.openmole.core.batch.environment.BatchEnvironment._
 
 object RefreshActor extends Logger
 
@@ -32,7 +33,7 @@ class RefreshActor(jobManager: ActorRef) extends Actor {
       if (!job.state.isFinal) {
         try {
           val oldState = job.state
-          job.state = bj.withToken(bj.updateState(_))
+          job.state = retryOnTimeout(bj.withToken(bj.updateState(_)))
           if (job.state == DONE) {
             //logger.fine(sj.communicationStorage.path.toStringURI(sj.communicationDirPath))
             jobManager ! GetResult(job, sj, bj.resultPath)
