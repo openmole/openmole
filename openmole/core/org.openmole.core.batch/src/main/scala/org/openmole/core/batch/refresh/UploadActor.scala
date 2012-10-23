@@ -69,7 +69,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
           case e: Throwable ⇒
             logger.log(FINE, "Exception raised durring job upload.", e)
             jobManager ! Error(job, e)
-            jobManager ! Kill(job)
+            jobManager ! Upload(job)
         }
       }
       System.runFinalization

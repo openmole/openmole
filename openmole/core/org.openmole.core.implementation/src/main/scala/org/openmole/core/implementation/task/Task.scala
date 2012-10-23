@@ -97,7 +97,7 @@ trait Task extends ITask {
   override def perform(context: Context) =
     try end(context + process(init(context)))
     catch {
-      case e ⇒ throw new InternalProcessingError(e, "Error in task " + name + " for context values " + context)
+      case e: Throwable ⇒ throw new InternalProcessingError(e, "Error in task " + name + " for context values " + context)
     }
 
   override def toString: String = name
