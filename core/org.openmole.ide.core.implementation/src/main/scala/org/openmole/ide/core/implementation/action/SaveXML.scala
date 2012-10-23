@@ -34,7 +34,7 @@ object SaveXML {
     if (title != "") {
       Settings.currentProject = Some(title)
       frame.title = "OpenMOLE - " + title
-      (new GUISerializer).serialize(title)
+      (new GUISerializer(title)).serialize
     } else Settings.currentProject = None
   }
 

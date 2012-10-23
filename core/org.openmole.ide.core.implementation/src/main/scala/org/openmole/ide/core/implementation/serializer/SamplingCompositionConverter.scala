@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.implementation.serializer
 
+import SerializerState._
 import com.thoughtworks.xstream.converters.MarshallingContext
 import com.thoughtworks.xstream.converters.UnmarshallingContext
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
@@ -33,18 +34,25 @@ import scala.collection.mutable.HashSet
 
 class SamplingCompositionConverter(mapper: Mapper,
                                    provider: ReflectionProvider,
-                                   prototypeConverter: PrototypeConverter) extends ReflectionConverter(mapper, provider) {
+                                   val serializer: GUISerializer,
+                                   var state: SerializerState) extends ReflectionConverter(mapper, provider) {
 
   val added = new HashSet[Int]
 
   override def marshal(o: Object,
                        writer: HierarchicalStreamWriter,
                        mc: MarshallingContext) = {
-    o match {
-      case s: ISamplingCompositionDataProxyUI ⇒ added += s.id
-      case _ ⇒
+    val sc = o.asInstanceOf[ISamplingCompositionDataProxyUI]
+    state.content.get(sc) match {
+      case None ⇒
+        state.content += sc -> new Serializing(sc.id)
+        marshal(o, writer, mc)
+      case Some(Serializing(id)) ⇒
+        state.content(sc) = new Serialized(id)
+        super.marshal(sc, writer, mc)
+      case Some(Serialized(id)) ⇒
+        writer.addAttribute("id", id.toString)
     }
-    super.marshal(o, writer, mc)
   }
 
   override def unmarshal(reader: HierarchicalStreamReader,

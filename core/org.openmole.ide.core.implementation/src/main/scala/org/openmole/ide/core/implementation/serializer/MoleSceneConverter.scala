@@ -102,7 +102,7 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
       //Task
       view.dataUI.task match {
         case Some(x: ITaskDataProxyUI) ⇒
-          writer.startNode("task");
+          writer.startNode("task")
           writer.addAttribute("id", x.id.toString)
           writer.endNode
         case _ ⇒

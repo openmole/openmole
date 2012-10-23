@@ -17,6 +17,8 @@
 
 package org.openmole.ide.core.implementation.serializer
 
+import org.openmole.ide.core.implementation.serializer.SerializerState._
+import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.converters.MarshallingContext
 import com.thoughtworks.xstream.converters.UnmarshallingContext
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
@@ -34,19 +36,25 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import scala.collection.mutable.HashSet
 
 class PrototypeConverter(mapper: Mapper,
-                         provider: ReflectionProvider) extends ReflectionConverter(mapper, provider) {
-
-  val added = new HashSet[Int]
+                         provider: ReflectionProvider,
+                         val serializer: GUISerializer,
+                         var state: SerializerState) extends ReflectionConverter(mapper, provider) {
 
   override def marshal(o: Object,
                        writer: HierarchicalStreamWriter,
                        mc: MarshallingContext) = {
     val proto = o.asInstanceOf[IPrototypeDataProxyUI]
-    added += proto.id
-    writer.addAttribute("id", proto.id.toString)
-    writer.addAttribute("name", proto.dataUI.name)
-    writer.addAttribute("type", proto.dataUI.typeClassString)
-    writer.addAttribute("dim", proto.dataUI.dim.toString)
+    state.content.get(proto) match {
+      case Some(Serializing(id)) ⇒
+      case Some(Serialized(id)) ⇒
+        writer.addAttribute("id", id.toString)
+      case None ⇒
+        state.content += proto -> new Serialized(proto.id)
+        writer.addAttribute("id", proto.id.toString)
+        writer.addAttribute("name", proto.dataUI.name)
+        writer.addAttribute("type", proto.dataUI.typeClassString)
+        writer.addAttribute("dim", proto.dataUI.dim.toString)
+    }
   }
 
   override def unmarshal(reader: HierarchicalStreamReader,

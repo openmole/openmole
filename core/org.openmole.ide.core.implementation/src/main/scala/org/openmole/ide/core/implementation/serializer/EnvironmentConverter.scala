@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.implementation.serializer
 
+import SerializerState._
 import com.thoughtworks.xstream.converters.MarshallingContext
 import com.thoughtworks.xstream.converters.UnmarshallingContext
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
@@ -33,18 +34,26 @@ import org.openmole.ide.core.implementation.registry.KeyGenerator
 import scala.collection.mutable.HashSet
 
 class EnvironmentConverter(mapper: Mapper,
-                           provider: ReflectionProvider) extends ReflectionConverter(mapper, provider) {
+                           provider: ReflectionProvider,
+                           val serializer: GUISerializer,
+                           var state: SerializerState) extends ReflectionConverter(mapper, provider) {
 
   val added = new HashSet[Int]
 
   override def marshal(o: Object,
                        writer: HierarchicalStreamWriter,
                        mc: MarshallingContext) = {
-    o match {
-      case s: IEnvironmentDataProxyUI ⇒ added += s.id
-      case _ ⇒
+    val env = o.asInstanceOf[IEnvironmentDataProxyUI]
+    state.content.get(env) match {
+      case None ⇒
+        state.content += env -> new Serializing(env.id)
+        marshal(o, writer, mc)
+      case Some(Serializing(id)) ⇒
+        state.content(env) = new Serialized(id)
+        super.marshal(env, writer, mc)
+      case Some(Serialized(id)) ⇒
+        writer.addAttribute("id", id.toString)
     }
-    super.marshal(o, writer, mc)
   }
 
   override def unmarshal(reader: HierarchicalStreamReader,
