@@ -72,9 +72,9 @@ trait StorageService extends BatchService with Storage {
 
   override def toString: String = id
   def withToken[A](a: (AccessToken) ⇒ A): A =
-    UsageControl.withToken(id)(a)
+    UsageControl.withToken(this)(a)
 
-  private def withFailureControl[A](a: ⇒ A): A = QualityControl.withFailureControl(StorageControl.qualityControl(id))(a)
+  private def withFailureControl[A](a: ⇒ A): A = StorageControl.withQualityControl(this)(a)
 
   def exists(path: String)(implicit token: AccessToken): Boolean = withFailureControl { super.exists(path) }
   def listNames(path: String)(implicit token: AccessToken): Seq[String] = withFailureControl { super.listNames(path) }

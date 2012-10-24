@@ -21,22 +21,22 @@ import org.openmole.misc.tools.service._
 
 object QualityControl {
 
-  def withFailureControl[A](qualityControl: Option[QualityControl])(op: ⇒ A): A = {
+  def withFailureControl[A](qualityControl: QualityControl)(op: ⇒ A): A = {
     try {
       val ret = op
-      qualityControl.map(_.success)
+      qualityControl.success
       ret
     } catch {
       case e: Throwable ⇒
-        qualityControl.map(_.failed)
+        qualityControl.failed
         throw e
     }
   }
 
-  def timed[A](qualityControl: Option[QualityControl], op: ⇒ A): A = {
+  def timed[A](qualityControl: QualityControl, op: ⇒ A): A = {
     val begin = System.currentTimeMillis
     val a = op
-    qualityControl.map(_.timed(System.currentTimeMillis - begin))
+    qualityControl.timed(System.currentTimeMillis - begin)
     a
   }
 

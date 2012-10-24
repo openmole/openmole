@@ -20,18 +20,16 @@ package org.openmole.core.batch.jobservice
 import org.openmole.core.batch.control._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.SynchronizedMap
+import org.openmole.misc.workspace._
+import org.openmole.core.batch.environment.BatchEnvironment
 
 object JobServiceControl {
   val ressources = new HashMap[String, JobServiceQualityControl] with SynchronizedMap[String, JobServiceQualityControl]
 
-  def register(ressource: String, failureControl: JobServiceQualityControl) =
-    ressources.getOrElseUpdate(ressource, failureControl)
+  def apply(js: JobService) = ressources.getOrElseUpdate(js.id, new JobServiceQualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))
 
-  def qualityControl(ressource: String) =
-    ressources.get(ressource)
-
-  def withQualityControl[A](desc: String)(op: ⇒ A) = {
-    val qc = qualityControl(desc)
+  def withQualityControl[A](js: JobService)(op: ⇒ A) = {
+    val qc = apply(js)
     QualityControl.timed(qc, QualityControl.withFailureControl(qc)(op))
   }
 }

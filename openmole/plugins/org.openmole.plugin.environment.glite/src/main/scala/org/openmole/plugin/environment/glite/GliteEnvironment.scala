@@ -29,6 +29,7 @@ import java.util.logging.Logger
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage._
 import org.openmole.misc.workspace.Workspace
+import org.openmole.core.model.job.IJob
 import org.openmole.misc.exception._
 import org.openmole.misc.tools.service.Duration._
 import org.openmole.plugin.environment.gridscale._
@@ -100,15 +101,22 @@ class GliteEnvironment(
 
   import GliteEnvironment._
 
-  val id = voName + "@" + vomsURL
-  val threadsBySE = Workspace.preferenceAsInt(LocalThreadsBySE)
-  val threadsByWMS = Workspace.preferenceAsInt(LocalThreadsByWMS)
+  @transient lazy val id = voName + "@" + vomsURL
+  @transient lazy val threadsBySE = Workspace.preferenceAsInt(LocalThreadsBySE)
+  @transient lazy val threadsByWMS = Workspace.preferenceAsInt(LocalThreadsByWMS)
 
   type JS = GliteJobService
   type SS = PersistentStorageService
 
-  Updater.registerForUpdate(new OverSubmissionAgent(WeakReference(this)))
-  Updater.registerForUpdate(new ProxyChecker(WeakReference(this)))
+  @transient lazy val registerAgents: Unit = {
+    Updater.registerForUpdate(new OverSubmissionAgent(WeakReference(this)))
+    Updater.registerForUpdate(new ProxyChecker(WeakReference(this)))
+  }
+
+  override def submit(job: IJob) = {
+    registerAgents
+    super.submit(job)
+  }
 
   private def generateProxy = Workspace.persistentList(classOf[GliteAuthentication]).headOption match {
     case Some(a) ⇒
@@ -125,17 +133,23 @@ class GliteEnvironment(
     case None ⇒ throw new UserBadDataError("No athentication has been initialized for glite.")
   }
 
-  var authentication = generateProxy
+  @transient @volatile var _authentication = generateProxy
 
-  def renewAuthentication = synchronized {
-    authentication = generateProxy
-    jobServices.foreach { j ⇒ j.proxyFile = authentication._2; j.delegated = false }
+  def authentication = synchronized {
+    if (_authentication == null) _authentication = authenticate
+    _authentication
+  }
+
+  def authenticate = synchronized {
+    _authentication = generateProxy
+    jobServices.foreach { _.delegated = false }
+    _authentication
   }
 
   override def allJobServices = {
     val jss = getBDII.queryWMS(voName, Workspace.preferenceAsDurationInS(FetchRessourcesTimeOut).toInt)
     jss.map {
-      js ⇒ new GliteJobService(js, this, threadsByWMS, authentication._2)
+      js ⇒ new GliteJobService(js, this, threadsByWMS)
     }
   }
 

@@ -31,7 +31,7 @@ class ProxyChecker(environment: WeakReference[GliteEnvironment]) extends IUpdata
   override def update: Boolean =
     environment.get match {
       case Some(env) ⇒
-        try env.renewAuthentication
+        try env.authenticate
         catch {
           case (ex: Throwable) ⇒ logger.log(SEVERE, "Error while renewing the proxy", ex)
         }

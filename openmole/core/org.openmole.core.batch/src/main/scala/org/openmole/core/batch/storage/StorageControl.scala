@@ -20,12 +20,17 @@ package org.openmole.core.batch.storage
 import org.openmole.core.batch.control._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.SynchronizedMap
-import java.net.URI
+import org.openmole.misc.workspace._
+import org.openmole.core.batch.environment.BatchEnvironment
 
 object StorageControl {
   val ressources = new HashMap[String, QualityControl] with SynchronizedMap[String, QualityControl]
-  def register(url: URI, failureControl: QualityControl): Unit = register(url.toString, failureControl)
-  def register(id: String, failureControl: QualityControl): Unit = ressources.getOrElseUpdate(id, failureControl)
-  def qualityControl(id: String): Option[QualityControl] = ressources.get(id)
-  def qualityControl(url: URI): Option[QualityControl] = qualityControl(url.toString)
+
+  def apply(service: StorageService) = ressources.getOrElseUpdate(service.id, new QualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis)))
+
+  def withQualityControl[A](service: StorageService)(op: ⇒ A): A = {
+    val qc = apply(service)
+    QualityControl.withFailureControl(qc)(op)
+  }
+
 }

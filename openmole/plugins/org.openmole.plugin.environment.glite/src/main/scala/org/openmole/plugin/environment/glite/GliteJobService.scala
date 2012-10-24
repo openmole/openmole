@@ -44,18 +44,16 @@ import GliteJobService._
 class GliteJobService(
     val jobService: WMSJobService,
     val environment: GliteEnvironment,
-    override val connections: Int, var proxyFile: File) extends GridScaleJobService { js ⇒
+    override val connections: Int) extends GridScaleJobService { js ⇒
 
   def authentication = environment.authentication._1
+  def proxyFile = environment.authentication._2
+
   val id = jobService.url.toString
 
   var delegated = false
 
-  def delegateProxy = {
-    val proxyFile = environment.authentication._2
-    require(proxyFile != null)
-    jobService.delegateProxy(proxyFile)(authentication)
-  }
+  def delegateProxy = jobService.delegateProxy(proxyFile)(authentication)
 
   def checkDelegated = synchronized {
     if (!delegated) {
@@ -92,8 +90,6 @@ class GliteJobService(
       finally os.close
 
       val jobDescription = buildJobDescription(runtime, script)
-
-      //logger.fine(jobDescription.toJDL)
 
       val jid = jobService.submit(jobDescription)(authentication)
 

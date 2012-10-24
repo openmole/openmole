@@ -43,15 +43,15 @@ trait BatchJob { bj ⇒
       timeStamps(state.id) = System.currentTimeMillis
 
       _state match {
-        case SUBMITTED ⇒ JobServiceControl.qualityControl(jobService.id).map(_.decrementSubmitted)
-        case RUNNING ⇒ JobServiceControl.qualityControl(jobService.id).map(_.decrementRunning)
+        case SUBMITTED ⇒ JobServiceControl(jobService).decrementSubmitted
+        case RUNNING ⇒ JobServiceControl(jobService).decrementRunning
         case _ ⇒
       }
 
       state match {
-        case SUBMITTED ⇒ JobServiceControl.qualityControl(jobService.id).map(_.incrementSubmitted)
-        case RUNNING ⇒ JobServiceControl.qualityControl(jobService.id).map(_.incrementRunning)
-        case DONE ⇒ JobServiceControl.qualityControl(jobService.id).map(_.incrementDone)
+        case SUBMITTED ⇒ JobServiceControl(jobService).incrementSubmitted
+        case RUNNING ⇒ JobServiceControl(jobService).incrementRunning
+        case DONE ⇒ JobServiceControl(jobService).incrementDone
         case _ ⇒
       }
 
@@ -86,5 +86,5 @@ trait BatchJob { bj ⇒
 
   def timeStamp(state: ExecutionState): Long = timeStamps(state.id)
 
-  def withToken[T](f: AccessToken ⇒ T) = UsageControl.withToken(jobService.id)(f)
+  def withToken[T](f: AccessToken ⇒ T) = UsageControl.withToken(jobService)(f)
 }

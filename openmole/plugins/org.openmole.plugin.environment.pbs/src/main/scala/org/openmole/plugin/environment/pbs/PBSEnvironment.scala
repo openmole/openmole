@@ -48,16 +48,16 @@ class PBSEnvironment(
   type SS = PersistentStorageService
   type JS = PBSJobService
 
-  val id = new URI("pbs", env.user, env.host, env.port, null, null, null).toString
+  @transient lazy val id = new URI("pbs", env.user, env.host, env.port, null, null, null).toString
 
-  val storage =
+  @transient lazy val storage =
     new PersistentStorageService with SSHStorageService with ThisHost {
       def connections = Workspace.preferenceAsInt(MaxConnections)
       def environment = env
       def root = env.path
     }
 
-  val jobService = new PBSJobService with ThisHost {
+  @transient lazy val jobService = new PBSJobService with ThisHost {
     def connections = Workspace.preferenceAsInt(MaxConnections)
     def queue = env.queue
     def environment = env

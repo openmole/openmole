@@ -20,6 +20,7 @@ package org.openmole.core.batch.control
 import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.SynchronizedMap
+import org.openmole.core.batch.environment.BatchService
 import java.net.URI
 
 import scala.concurrent.stm._
@@ -42,21 +43,12 @@ object UsageControl extends Logger {
     finally usageControl.releaseToken(token)
   }
 
-  def withToken[B](url: URI)(f: (AccessToken ⇒ B)): B = withToken(url.toString)(f)
-  def withToken[B](id: String)(f: (AccessToken ⇒ B)): B = withUsageControl(this.get(id))(f)
+  def withToken[B](service: BatchService)(f: (AccessToken ⇒ B)): B = withUsageControl(get(service))(f)
 
   private val controls = new HashMap[String, UsageControl] with SynchronizedMap[String, UsageControl]
 
-  def register(id: String, usageControl: UsageControl) =
-    controls.getOrElseUpdate(id, usageControl)
-
-  def get(url: URI): UsageControl = get(url.toString)
-  def get(id: String) =
-    controls.get(id) match {
-      case Some(ctrl) ⇒ ctrl
-      case None ⇒ unlimitedAccess
-    }
-
+  def get(service: BatchService): UsageControl =
+    controls.getOrElseUpdate(service.id, UsageControl(service.connections))
 }
 
 trait UsageControl {

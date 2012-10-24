@@ -49,7 +49,7 @@ trait JobService extends BatchService { js ⇒
   protected def _cancel(j: J)
   protected def _purge(j: J)
 
-  def withQualityControl[T](f: ⇒ T) = JobServiceControl.withQualityControl(id)(f)
+  def withQualityControl[T](f: ⇒ T) = JobServiceControl.withQualityControl(this)(f)
 
   override def toString: String = id
 

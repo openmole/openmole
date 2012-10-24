@@ -45,15 +45,15 @@ class SSHEnvironment(
   type SS = SSHStorageService
   type JS = SSHJobService
 
-  val id = new URI("ssh", env.user, env.host, env.port, null, null, null).toString
+  @transient lazy val id = new URI("ssh", env.user, env.host, env.port, null, null, null).toString
 
-  val storage = new PersistentStorageService with SSHStorageService with ThisHost {
+  @transient lazy val storage = new PersistentStorageService with SSHStorageService with ThisHost {
     def connections = Workspace.preferenceAsInt(MaxConnections)
     def root = env.path
     def environment = env
   }
 
-  val jobService = new SSHJobService with ThisHost {
+  @transient lazy val jobService = new SSHJobService with ThisHost {
     def connections = Workspace.preferenceAsInt(MaxConnections)
     def nbSlots = env.nbSlots
     def root = env.path

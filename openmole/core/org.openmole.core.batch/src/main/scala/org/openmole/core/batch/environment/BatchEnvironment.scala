@@ -145,7 +145,7 @@ import BatchEnvironment._
 
 trait BatchEnvironment extends Environment { env ⇒
 
-  val system = ActorSystem("BatchEnvironment", ConfigFactory.parseString(
+  @transient lazy val system = ActorSystem("BatchEnvironment", ConfigFactory.parseString(
     """
 akka {
   daemonic="on"
@@ -163,19 +163,21 @@ akka {
 }
 """).withFallback(ConfigFactory.load(classOf[ConfigFactory].getClassLoader)))
 
-  val jobManager = system.actorOf(Props(new JobManager(this)))
-  val watcher = system.actorOf(Props(new BatchJobWatcher(this)))
+  @transient lazy val jobManager = system.actorOf(Props(new JobManager(this)))
+  @transient lazy val watcher = system.actorOf(Props(new BatchJobWatcher(this)))
 
   import system.dispatcher
 
-  system.scheduler.schedule(
-    SDuration(Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval), MILLISECONDS),
-    SDuration(Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval), MILLISECONDS),
-    watcher,
-    Watch)
+  @transient lazy val registerWatcher: Unit = {
+    system.scheduler.schedule(
+      SDuration(Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval), MILLISECONDS),
+      SDuration(Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval), MILLISECONDS),
+      watcher,
+      Watch)
+  }
 
   val jobRegistry = new ExecutionJobRegistry
-  val statistics = new OrderedSlidingList[StatisticSample](Workspace.preferenceAsInt(StatisticsHistorySize))
+  @transient lazy val statistics = new OrderedSlidingList[StatisticSample](Workspace.preferenceAsInt(StatisticsHistorySize))
 
   val id: String
 
@@ -192,6 +194,7 @@ akka {
   }
 
   override def submit(job: IJob) = {
+    registerWatcher
     val bej = executionJob(job)
     EventDispatcher.trigger(this, new IEnvironment.JobSubmitted(bej))
     jobRegistry.register(bej)
@@ -203,7 +206,7 @@ akka {
     allStorages.foreach {
       s ⇒
         background {
-          UsageControl.withToken(s.id) { implicit t ⇒
+          UsageControl.withToken(s) { implicit t ⇒
             s.clean
           }
         }(cleaningThreadPool)
@@ -219,16 +222,16 @@ akka {
   @transient lazy val jobServices = {
     val jobServices = allJobServices
     if (jobServices.isEmpty) throw new InternalProcessingError("No job service available for the environment.")
-    jobServices.foreach { s ⇒ UsageControl.register(s.id, UsageControl(s.connections)) }
-    jobServices.foreach { s ⇒ JobServiceControl.register(s.id, new JobServiceQualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis))) }
+    //    jobServices.foreach { s ⇒ UsageControl.register(s.id, UsageControl(s.connections)) }
+    //jobServices.foreach { s ⇒ JobServiceControl.register(s.id, new JobServiceQualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis))) }
     jobServices
   }
 
   @transient lazy val storages = {
     val storages = allStorages
     if (storages.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
-    storages.foreach { s ⇒ UsageControl.register(s.id, UsageControl(s.connections)) }
-    storages.foreach(s ⇒ StorageControl.register(s.id, new QualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis))))
+    //  storages.foreach { s ⇒ UsageControl.register(s.id, UsageControl(s.connections)) }
+    //storages.foreach(s ⇒ StorageControl.register(s.id, new QualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis))))
     Updater.registerForUpdate(new StoragesGC(WeakReference(storages)), Workspace.preferenceAsDurationInMs(StoragesGCUpdateInterval))
     storages
   }
@@ -241,16 +244,16 @@ akka {
   def selectAJobService: (JobService, AccessToken) = {
     if (jobServices.size == 1) {
       val r = jobServices.head
-      return (r, UsageControl.get(r.id).waitAToken)
+      return (r, UsageControl.get(r).waitAToken)
     }
 
     def fitness =
       jobServices.flatMap {
         cur ⇒
-          UsageControl.get(cur.id).tryGetToken match {
+          UsageControl.get(cur).tryGetToken match {
             case None ⇒ None
             case Some(token) ⇒
-              val q = JobServiceControl.qualityControl(cur.id).get
+              val q = JobServiceControl(cur)
 
               val nbSubmitted = q.submitted
               val fitness = orMinForExploration(
@@ -276,7 +279,7 @@ akka {
           for {
             (s, t, _) ← notLoaded
             if (s.id != jobService.id)
-          } UsageControl.get(s.id).releaseToken(t)
+          } UsageControl.get(s).releaseToken(t)
           jobService -> token
         case None ⇒ retry
       }
@@ -286,7 +289,7 @@ akka {
   def selectAStorage(usedFiles: Iterable[File]): (StorageService, AccessToken) = {
     if (storages.size == 1) {
       val r = storages.head
-      return (r, UsageControl.get(r.id).waitAToken)
+      return (r, UsageControl.get(r).waitAToken)
     }
 
     val totalFileSize = usedFiles.map { _.size }.sum
@@ -295,16 +298,13 @@ akka {
     def fitness =
       storages.flatMap {
         cur ⇒
-          UsageControl.get(cur.id).tryGetToken match {
+          UsageControl.get(cur).tryGetToken match {
             case None ⇒ None
             case Some(token) ⇒
               val sizeOnStorage = usedFiles.filter(onStorage.getOrElse(_, Set.empty).contains(cur.id)).map(_.size).sum
 
               val fitness = orMinForExploration(
-                (StorageControl.qualityControl(cur.id) match {
-                  case Some(q) ⇒ math.pow(q.successRate, 2)
-                  case None ⇒ 1.
-                }) * (if (totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) else 1))
+                math.pow(StorageControl(cur).successRate, 2) * (if (totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) else 1))
               Some((cur, token, fitness))
           }
       }
@@ -328,7 +328,7 @@ akka {
           for {
             (s, t, _) ← notLoaded
             if (s.id != storage.id)
-          } UsageControl.get(s.id).releaseToken(t)
+          } UsageControl.get(s).releaseToken(t)
           storage -> token
         case None ⇒ retry
       }
