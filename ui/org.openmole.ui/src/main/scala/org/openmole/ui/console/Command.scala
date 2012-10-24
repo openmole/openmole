@@ -17,6 +17,7 @@
 
 package org.openmole.ui.console
 
+import java.io.File
 import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.core.batch.authentication._
 import org.openmole.core.batch.environment.BatchEnvironment
@@ -28,6 +29,7 @@ import org.openmole.core.model.mole.IMole
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.IExplorationTransition
+import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.HashMap
 
@@ -95,5 +97,8 @@ class Command {
     def update(index: Int, auth: Authentication) =
       Workspace.instance.persistentList(auth.category.asInstanceOf[Class[Authentication]]).update(index, auth)
   }
+
+  def load[T](f: File) = SerializerService.deserialize[T](f)
+  def save(o: Any, f: File) = SerializerService.serialize(o, f)
 
 }
