@@ -30,7 +30,10 @@ import org.openmole.misc.tools.service.Random._
 
 object Task extends Logger {
   val OpenMOLEVariablePrefix = new ConfigurationLocation("Task", "OpenMOLEVariablePrefix")
+  val ErrorArraySnipSize = new ConfigurationLocation("Task", "ErrorArraySnipSize")
+
   Workspace += (OpenMOLEVariablePrefix, "oM")
+  Workspace += (ErrorArraySnipSize, "10")
 
   val openMOLESeed = Prototype[Long](Workspace.preference(OpenMOLEVariablePrefix) + "Seed")
 
@@ -97,7 +100,8 @@ trait Task extends ITask {
   override def perform(context: Context) =
     try end(context + process(init(context)))
     catch {
-      case e: Throwable ⇒ throw new InternalProcessingError(e, "Error in task " + name + " for context values " + context)
+      case e: Throwable ⇒
+        throw new InternalProcessingError(e, "Error in task " + name + " for context values " + context.prettified(Workspace.preferenceAsInt(Task.ErrorArraySnipSize)))
     }
 
   override def toString: String = name

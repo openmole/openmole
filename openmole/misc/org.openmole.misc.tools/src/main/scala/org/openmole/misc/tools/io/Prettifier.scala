@@ -23,15 +23,21 @@ import org.openmole.misc.tools.service.Logger
 object Prettifier extends Logger {
 
   implicit def objectPrettifer(o: Any) = new {
-    def prettify = Prettifier.prettify(o)
+    def prettify(snipArray: Int = Int.MaxValue) = Prettifier.prettify(o, snipArray)
   }
 
-  def prettify(o: Any): String =
+  def snip[T <: Any](o: Iterable[T], size: Int = Int.MaxValue) =
+    "[" +
+      (if (o.size <= size) o.map { e ⇒ prettify(e, size) }.mkString(", ")
+      else o.take(size - 1).map { e ⇒ prettify(e, size) }.mkString(", ") + "..., " + o.last) +
+      "]"
+
+  def prettify(o: Any, snipArray: Int = Int.MaxValue): String =
     try o match {
       case null ⇒ "null"
-      case o: Array[_] ⇒ "[" + o.map { prettify }.mkString(", ") + "]"
-      case o: Iterable[_] ⇒ "[" + o.map { prettify }.mkString(", ") + "]"
-      case o: java.lang.Iterable[_] ⇒ "[" + o.map { prettify }.mkString(", ") + "]"
+      case o: Array[_] ⇒ snip(o, snipArray)
+      case o: Iterable[_] ⇒ snip(o, snipArray)
+      case o: java.lang.Iterable[_] ⇒ snip(o, snipArray)
       case o ⇒ o.toString
     } catch {
       case t: Throwable ⇒

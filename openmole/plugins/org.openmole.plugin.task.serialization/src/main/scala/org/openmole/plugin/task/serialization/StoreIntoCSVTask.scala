@@ -72,7 +72,7 @@ sealed abstract class StoreIntoCSVTask(
 
       //body
       for (i ← 0 until listSize)
-        writer.writeNext(columnIts.map { e ⇒ e.next.prettify }.toArray)
+        writer.writeNext(columnIts.map { e ⇒ e.next.prettify() }.toArray)
 
     } finally writer.close
     context + (filePrototype -> file)

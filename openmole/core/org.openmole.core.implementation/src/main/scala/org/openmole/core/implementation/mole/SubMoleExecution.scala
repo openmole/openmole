@@ -100,7 +100,7 @@ class SubMoleExecution(
   private def secureHookExecution(hook: IHook, moleJob: IMoleJob) =
     try hook.process(moleJob)
     catch {
-      case e ⇒
+      case e: Throwable ⇒
         EventDispatcher.trigger(moleExecution, new IMoleExecution.HookExceptionRaised(hook, moleJob, e, WARNING))
         logger.log(WARNING, "Error in execution of hook " + hook, e)
     }
@@ -131,7 +131,7 @@ class SubMoleExecution(
       mole.outputDataChannels(capsule).foreach { _.provides(job.context, ticket, moleExecution) }
       mole.outputTransitions(capsule).foreach { _.perform(job.context, ticket, this) }
     } catch {
-      case e ⇒ throw new InternalProcessingError(e, "Error at the end of a MoleJob for capsule " + capsule)
+      case e: Throwable ⇒ throw new InternalProcessingError(e, "Error at the end of a MoleJob for capsule " + capsule)
     } finally {
       rmJob(job)
       checkFinished(ticket)

@@ -30,7 +30,8 @@ trait Variable[T] {
   def prototype: Prototype[T]
   def value: T
 
-  override def toString: String =
-    prototype.name + "=" + (if (value != null) value.prettify else "null")
+  override def toString: String = prettified(Int.MaxValue)
+
+  def prettified(snipArray: Int) = prototype.name + "=" + (if (value != null) value.prettify(snipArray) else "null")
 }
 
