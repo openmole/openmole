@@ -18,8 +18,8 @@
 package org.openmole.core.implementation.execution.local
 
 import org.openmole.core.model.execution.ExecutionState
-import org.openmole.core.model.execution.IEnvironment
-import org.openmole.core.model.execution.IEnvironment._
+import org.openmole.core.model.execution._
+import org.openmole.core.model.execution.Environment._
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.State
 import org.openmole.core.model.task.IMoleTask
@@ -50,7 +50,7 @@ class LocalExecuter(environment: LocalEnvironment) extends Runnable {
             moleJob.perform
 
             moleJob.exception match {
-              case Some(e) ⇒ EventDispatcher.trigger(environment: IEnvironment, new MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
+              case Some(e) ⇒ EventDispatcher.trigger(environment: Environment, new MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
               case _ ⇒
             }
           }
@@ -60,11 +60,11 @@ class LocalExecuter(environment: LocalEnvironment) extends Runnable {
         case e: InterruptedException ⇒
           if (!stop) {
             logger.log(WARNING, "Interrupted despite stop is false", e)
-            EventDispatcher.trigger(environment: IEnvironment, new ExceptionRaised(executionJob, e, SEVERE))
+            EventDispatcher.trigger(environment: Environment, new ExceptionRaised(executionJob, e, SEVERE))
           }
         case e: Throwable ⇒
           logger.log(SEVERE, "Error in execution", e)
-          EventDispatcher.trigger(environment: IEnvironment, new ExceptionRaised(executionJob, e, SEVERE))
+          EventDispatcher.trigger(environment: Environment, new ExceptionRaised(executionJob, e, SEVERE))
       } finally executionJob.state = ExecutionState.KILLED
     }
   }

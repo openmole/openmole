@@ -32,7 +32,7 @@ import scala.annotation.tailrec
 
 class AppendToCSVFileHook(
     fileName: String,
-    prototypes: Prototype[_]*) extends IHook {
+    prototypes: Prototype[_]*) extends Hook {
 
   override def process(moleJob: IMoleJob) = {
     import moleJob.context

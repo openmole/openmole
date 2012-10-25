@@ -97,7 +97,7 @@ class SubMoleExecution(
   private def -=(submoleExecution: SubMoleExecution) =
     _childs.single -= submoleExecution
 
-  private def secureHookExecution(hook: IHook, moleJob: IMoleJob) =
+  private def secureHookExecution(hook: Hook, moleJob: IMoleJob) =
     try hook.process(moleJob)
     catch {
       case e: Throwable ⇒

@@ -27,7 +27,7 @@ import org.openmole.core.model.job.State.State
 import ToCSV._
 import org.openmole.core.model.job.State._
 
-class CSVFileProfiler(file: File) extends IProfiler {
+class CSVFileProfiler(file: File) extends Profiler {
 
   file.getParentFile.mkdirs
   @transient lazy val writer = new CSVWriter(new BufferedWriter(new FileWriter(file)))

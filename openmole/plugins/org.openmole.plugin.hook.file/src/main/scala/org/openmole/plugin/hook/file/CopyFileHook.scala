@@ -31,7 +31,7 @@ class CopyFileHook(
     filePrototype: Prototype[File],
     destination: String,
     remove: Boolean = false,
-    compress: Boolean = false) extends IHook {
+    compress: Boolean = false) extends Hook {
 
   override def process(moleJob: IMoleJob) = {
     import moleJob.context

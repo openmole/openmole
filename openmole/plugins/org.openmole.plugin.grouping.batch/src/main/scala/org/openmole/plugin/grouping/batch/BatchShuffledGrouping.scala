@@ -21,20 +21,19 @@ import org.openmole.core.implementation.mole._
 import org.openmole.core.model.data._
 import org.openmole.core.model.job._
 import org.openmole.core.model.mole._
+import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.tools.service._
+import org.openmole.core.implementation.task.Task._
 
 /**
- * Group mole jobs by group of numberOfMoleJobs.
+ * Group the mole jobs by distributing them at random among {{{numberOfBatch}}}
+ * groups.
  *
- * @param numberOfMoleJobs size of each batch
+ * @param numberOfBatch total number of groups
  */
-class NumberOfMoleJobsGrouping(numberOfMoleJobs: Int) extends IGrouping {
+class BatchShuffledGrouping(numberOfBatch: Int) extends Grouping {
 
-  override def apply(context: Context, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup = {
-    groups.find { case (_, g) ⇒ g.size < numberOfMoleJobs } match {
-      case Some((mg, _)) ⇒ mg
-      case None ⇒ MoleJobGroup()
-    }
-  }
+  override def apply(context: Context, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup =
+    new MoleJobGroup(newRNG(context.valueOrException(openMOLESeed)).nextInt(numberOfBatch))
 
-  override def complete(jobs: Iterable[IMoleJob]) = jobs.size >= numberOfMoleJobs
 }

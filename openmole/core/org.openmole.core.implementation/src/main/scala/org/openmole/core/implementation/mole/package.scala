@@ -32,20 +32,20 @@ package object mole {
   implicit def slotToCapsuleConverter(slot: Slot) = slot.capsule
 
   class PuzzleMoleExecutionDecorator(puzzle: Puzzle) {
-    def on(env: IEnvironment) =
+    def on(env: Environment) =
       puzzle.copy(selection = puzzle.selection ++ puzzle.lasts.map(_ -> new FixedEnvironmentSelection(env)))
-    def hook(hook: IHook) =
+    def hook(hook: Hook) =
       puzzle.copy(hooks = puzzle.hooks.toList ::: puzzle.lasts.map(_ -> hook).toList)
   }
 
-  implicit def hookToProfilerConverter(hook: IHook) = new IProfiler {
+  implicit def hookToProfilerConverter(hook: Hook) = new Profiler {
     override def process(job: IMoleJob) = hook.process(job)
   }
   implicit def puzzleMoleExecutionDecoration(puzzle: Puzzle) = new PuzzleMoleExecutionDecorator(puzzle)
   implicit def capsuleMoleExecutionDecoration(capsule: ICapsule) = puzzleMoleExecutionDecoration(capsule.toPuzzle)
   implicit def taskMoleExecutionDecoration(task: ITask): PuzzleMoleExecutionDecorator = capsuleMoleExecutionDecoration(task.toCapsule)
   implicit def taskMoleBuilderDecoraton(taskBuilder: TaskBuilder) = taskMoleExecutionDecoration(taskBuilder.toTask)
-  implicit def environmentToFixedEnvironmentSelectionConverter(env: IEnvironment) = new FixedEnvironmentSelection(env)
+  implicit def environmentToFixedEnvironmentSelectionConverter(env: Environment) = new FixedEnvironmentSelection(env)
 
   implicit def puzzleMoleExecutionConverter(puzzle: Puzzle) = puzzle.toExecution
   implicit def puzzleMoleConverter(puzzle: Puzzle) = puzzle.toMole

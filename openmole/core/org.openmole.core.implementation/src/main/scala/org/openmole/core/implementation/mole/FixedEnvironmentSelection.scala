@@ -21,6 +21,6 @@ import org.openmole.core.model.execution._
 import org.openmole.core.model.job._
 import org.openmole.core.model.mole._
 
-class FixedEnvironmentSelection(environment: IEnvironment) extends IEnvironmentSelection {
+class FixedEnvironmentSelection(environment: Environment) extends EnvironmentSelection {
   def apply(job: IJob) = environment
 }

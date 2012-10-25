@@ -33,7 +33,7 @@ import org.openmole.misc.exception._
  * In the case of directories, all the files of the original directory are append to the
  * files of the target one.
  */
-class AppendFileHook(prototype: Prototype[File], outputFile: String) extends IHook {
+class AppendFileHook(prototype: Prototype[File], outputFile: String) extends Hook {
 
   override def process(moleJob: IMoleJob) = {
     import moleJob.context

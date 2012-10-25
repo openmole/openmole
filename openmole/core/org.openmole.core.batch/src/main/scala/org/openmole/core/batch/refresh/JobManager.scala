@@ -26,8 +26,7 @@ import akka.dispatch.UnboundedPriorityMailbox
 import akka.routing.DefaultResizer
 import akka.routing.RoundRobinRouter
 import akka.routing.SmallestMailboxRouter
-import org.openmole.core.model.execution.ExecutionState
-import org.openmole.core.model.execution.IEnvironment
+import org.openmole.core.model.execution._
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
@@ -105,11 +104,11 @@ akka {
         case e: JobRemoteExecutionException ⇒ WARNING
         case _ ⇒ FINE
       }
-      EventDispatcher.trigger(environment: IEnvironment, new IEnvironment.ExceptionRaised(job, exception, level))
+      EventDispatcher.trigger(environment: Environment, new Environment.ExceptionRaised(job, exception, level))
       logger.log(level, "Error in job refresh", exception)
     case KillBatchJob(bj) ⇒ killer ! KillBatchJob(bj)
     case MoleJobError(mj, j, e) ⇒
-      EventDispatcher.trigger(environment: IEnvironment, new IEnvironment.MoleJobExceptionRaised(j, e, WARNING, mj))
+      EventDispatcher.trigger(environment: Environment, new Environment.MoleJobExceptionRaised(j, e, WARNING, mj))
       logger.log(WARNING, "Error durring job execution, it will be resubmitted.", e)
     case m: DeleteFile ⇒ deleter ! m
   }

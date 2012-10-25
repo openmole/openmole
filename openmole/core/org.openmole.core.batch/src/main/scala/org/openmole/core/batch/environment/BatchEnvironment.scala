@@ -196,7 +196,7 @@ akka {
   override def submit(job: IJob) = {
     registerWatcher
     val bej = executionJob(job)
-    EventDispatcher.trigger(this, new IEnvironment.JobSubmitted(bej))
+    EventDispatcher.trigger(this, new Environment.JobSubmitted(bej))
     jobRegistry.register(bej)
     jobManager ! Upload(bej)
   }

@@ -56,9 +56,9 @@ case class Puzzle(
     val lasts: Iterable[ICapsule],
     val transitions: Iterable[ITransition],
     val dataChannels: Iterable[IDataChannel],
-    val hooks: Iterable[(ICapsule, IHook)],
-    val selection: Map[ICapsule, IEnvironmentSelection],
-    val grouping: Map[ICapsule, IGrouping]) {
+    val hooks: Iterable[(ICapsule, Hook)],
+    val selection: Map[ICapsule, EnvironmentSelection],
+    val grouping: Map[ICapsule, Grouping]) {
 
   def this(p: Puzzle) =
     this(
@@ -74,7 +74,7 @@ case class Puzzle(
   def toExecution =
     new MoleExecution(toMole, hooks, selection, grouping)
 
-  def toExecution(profiler: IProfiler) =
+  def toExecution(profiler: Profiler) =
     new MoleExecution(toMole, hooks, selection, grouping, profiler)
 
   def +(p: Puzzle) = Puzzle.merge(this, p)

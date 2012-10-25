@@ -17,17 +17,9 @@
 
 package org.openmole.core.model.mole
 
+import org.openmole.core.model.execution._
 import org.openmole.core.model.job._
-import org.openmole.core.model.data._
 
-object IHook {
-  val empty = new IHook {
-    def process(job: IMoleJob) = {}
-  }
-}
-
-trait IHook {
-  def requiered: DataSet = DataSet.empty
-
-  def process(moleJob: IMoleJob)
+trait EnvironmentSelection {
+  def apply(job: IJob): Environment
 }

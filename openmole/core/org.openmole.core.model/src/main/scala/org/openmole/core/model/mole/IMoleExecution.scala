@@ -37,7 +37,7 @@ object IMoleExecution {
   case class JobInCapsuleFinished(val moleJob: IMoleJob, val capsule: ICapsule) extends Event[IMoleExecution]
   case class JobInCapsuleStarting(val moleJob: IMoleJob, val capsule: ICapsule) extends Event[IMoleExecution]
   case class ExceptionRaised(val moleJob: IMoleJob, val exception: Throwable, val level: Level) extends Event[IMoleExecution]
-  case class HookExceptionRaised(val hook: IHook, val moleJob: IMoleJob, val exception: Throwable, val level: Level) extends Event[IMoleExecution]
+  case class HookExceptionRaised(val hook: Hook, val moleJob: IMoleJob, val exception: Throwable, val level: Level) extends Event[IMoleExecution]
 }
 
 trait IMoleExecution {
@@ -51,8 +51,8 @@ trait IMoleExecution {
   def exceptions: Iterable[Throwable]
 
   def mole: IMole
-  def hooks: Iterable[(ICapsule, IHook)]
-  def profiler: IHook
+  def hooks: Iterable[(ICapsule, Hook)]
+  def profiler: Hook
 
   def dataChannelRegistry: IRegistryWithTicket[IDataChannel, Buffer[Variable[_]]]
 

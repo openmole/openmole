@@ -23,7 +23,7 @@ import org.openmole.core.model.job.State._
 import org.openmole.core.model.mole._
 import ToCSV._
 
-class CSVProfiler(writer: CSVWriter) extends IProfiler {
+class CSVProfiler(writer: CSVWriter) extends Profiler {
 
   override def process(moleJob: IMoleJob) = synchronized {
     writer.writeNext(toColumns(moleJob))

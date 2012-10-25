@@ -27,7 +27,7 @@ import org.openmole.core.implementation.data._
 
 import org.openmole.misc.tools.io.Prettifier._
 
-class ToStringHook(out: PrintStream, prototypes: Prototype[_]*) extends IHook {
+class ToStringHook(out: PrintStream, prototypes: Prototype[_]*) extends Hook {
 
   def this(prototypes: Prototype[_]*) = this(System.out, prototypes: _*)
 

@@ -27,7 +27,7 @@ import org.openmole.misc.tools.io.FileUtil._
 
 class AppendArrayToFileHook(
     fileName: String,
-    content: Prototype[Array[_]]) extends IHook {
+    content: Prototype[Array[_]]) extends Hook {
 
   override def process(moleJob: IMoleJob) = {
     import moleJob.context

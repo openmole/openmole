@@ -25,7 +25,7 @@ import org.openmole.core.model.mole._
 import org.openmole.core.model.data._
 import org.openmole.misc.exception._
 
-class DeleteFileHook(toDelete: Prototype[File]*) extends IHook {
+class DeleteFileHook(toDelete: Prototype[File]*) extends Hook {
 
   override def process(moleJob: IMoleJob) = {
     import moleJob.context

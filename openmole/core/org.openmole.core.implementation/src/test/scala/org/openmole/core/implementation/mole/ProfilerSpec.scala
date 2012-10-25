@@ -46,7 +46,7 @@ class MoleExecutionHookSpec extends FlatSpec with ShouldMatchers {
 
     val t1c = new Capsule(t1)
 
-    val profiler = new IProfiler {
+    val profiler = new Profiler {
       override def process(moleJob: IMoleJob) = {
         moleJob.context.contains(p) should equal(true)
         moleJob.context.value(p).get should equal("test")

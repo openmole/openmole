@@ -40,7 +40,7 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
 
   implicit val plugins = PluginSet.empty
 
-  class JobGroupingBy2Test extends IGrouping {
+  class JobGroupingBy2Test extends Grouping {
 
     def apply(context: Context, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup = {
       groups.find { case (_, g) ⇒ g.size < 2 } match {

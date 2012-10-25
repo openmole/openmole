@@ -15,8 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.execution
+package org.openmole.core.model.mole
 
-import org.openmole.core.model.execution.IEnvironment
+import org.openmole.core.model.job._
+import org.openmole.core.model.data._
 
-abstract class Environment extends IEnvironment
+object Hook {
+  val empty = new Hook {
+    def process(job: IMoleJob) = {}
+  }
+}
+
+trait Hook {
+  def requiered: DataSet = DataSet.empty
+
+  def process(moleJob: IMoleJob)
+}

@@ -23,7 +23,7 @@ import org.openmole.core.implementation.tools._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.job._
 
-class DisplayHook(toDisplay: String, out: PrintStream = System.out) extends IHook {
+class DisplayHook(toDisplay: String, out: PrintStream = System.out) extends Hook {
 
   override def process(moleJob: IMoleJob) = out.println(VariableExpansion(moleJob.context, toDisplay))
 

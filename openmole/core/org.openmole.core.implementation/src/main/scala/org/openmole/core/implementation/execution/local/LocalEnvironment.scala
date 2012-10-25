@@ -18,17 +18,13 @@
 package org.openmole.core.implementation.execution.local
 
 import java.util.concurrent.Semaphore
-import org.openmole.core.implementation.execution.Environment
 import org.openmole.core.implementation.job.Job
-import org.openmole.core.model.execution.ExecutionState
-import org.openmole.core.model.job.IJob
-import org.openmole.core.model.job.IMoleJob
-import org.openmole.core.model.task.IMoleTask
-import org.openmole.misc.workspace.ConfigurationLocation
-import org.openmole.misc.workspace.Workspace
-import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.core.model.execution._
+import org.openmole.core.model.job._
+import org.openmole.core.model.task._
+import org.openmole.misc.workspace._
+import org.openmole.misc.eventdispatcher._
 import org.openmole.misc.tools.service.ThreadUtil._
-import org.openmole.core.model.execution.IEnvironment
 import scala.collection.immutable.TreeMap
 
 object LocalEnvironment extends Environment {
@@ -82,7 +78,7 @@ class LocalEnvironment(val nbThreads: Int) extends Environment {
   def submit(moleJob: IMoleJob): Unit = submit(new LocalExecutionJob(this, List(moleJob)))
 
   private def submit(ejob: LocalExecutionJob) = {
-    EventDispatcher.trigger(this, new IEnvironment.JobSubmitted(ejob))
+    EventDispatcher.trigger(this, new Environment.JobSubmitted(ejob))
     ejob.state = ExecutionState.SUBMITTED
     jobs.enqueue(ejob)
   }

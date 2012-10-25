@@ -49,10 +49,10 @@ import MoleExecution._
 
 class MoleExecution(
     val mole: IMole,
-    val hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
-    val selection: Map[ICapsule, IEnvironmentSelection] = Map.empty,
-    val grouping: Map[ICapsule, IGrouping] = Map.empty,
-    val profiler: IProfiler = IProfiler.empty,
+    val hooks: Iterable[(ICapsule, Hook)] = Iterable.empty,
+    val selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
+    val grouping: Map[ICapsule, Grouping] = Map.empty,
+    val profiler: Profiler = Profiler.empty,
     val rerun: IInstantRerun = IInstantRerun.empty,
     rng: java.util.Random = Random.newRNG(Workspace.newSeed)) extends IMoleExecution {
 

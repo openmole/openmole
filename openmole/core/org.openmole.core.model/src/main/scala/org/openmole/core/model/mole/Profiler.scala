@@ -19,12 +19,12 @@ package org.openmole.core.model.mole
 
 import org.openmole.core.model.job._
 
-object IProfiler {
-  val empty = new IProfiler {
+object Profiler {
+  val empty = new Profiler {
     def process(job: IMoleJob) = {}
   }
 }
 
-trait IProfiler extends IHook {
+trait Profiler extends Hook {
   def finished = {}
 }
