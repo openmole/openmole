@@ -18,8 +18,9 @@
 package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
+import fr.iscpif.mgo.tools.Lazy
 
-sealed class CounterIsland[E <: GAG with MF with GenomeFactory with Dominance with GManifest with Mu with ReferencePoint](val evolution: E)(
+sealed class CounterIsland[E <: GAG with MF with GenomeFactory with Dominance with GManifest with Mu with DiversityMetric](val evolution: E)(
   val mu: Int,
   val steps: Int)
     extends BinaryTournamentSelection
@@ -28,7 +29,7 @@ sealed class CounterIsland[E <: GAG with MF with GenomeFactory with Dominance wi
     with NonDominatedElitism
     with CounterTermination
     with TerminationManifest
-    with HypervolumeDiversity
+    with DiversityMetric
     with ParetoRanking
     with RankDiversityModifier
     with GenomeFactory
@@ -44,5 +45,5 @@ sealed class CounterIsland[E <: GAG with MF with GenomeFactory with Dominance wi
 
   def lambda = evolution.mu
   def isDominated(p1: Seq[Double], p2: Seq[Double]) = evolution.isDominated(p1, p2)
-  def referencePoint = evolution.referencePoint
+  def diversity(individuals: IndexedSeq[(Individual[G], Lazy[Int])]): IndexedSeq[Lazy[Double]] = evolution.diversity(individuals)
 }
