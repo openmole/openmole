@@ -35,7 +35,6 @@ class SamplingCompositionDataUI(val name: String = "",
   def coreClass = classOf[ISampling]
 
   def coreObject = {
-    println("------------ start coreObject")
     builtSampling = scala.collection.mutable.Map.empty[ISamplingDataUI, ISampling]
     val connectionMap = connections.groupBy { _._2 }.map { case (k, v) ⇒ k -> v.map { _._1 } }
     val factorMap = factors.map { f ⇒ f._1.id -> f._1 }.toMap

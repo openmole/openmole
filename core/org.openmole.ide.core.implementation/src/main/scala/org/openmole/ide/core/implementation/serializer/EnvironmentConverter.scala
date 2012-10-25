@@ -32,6 +32,7 @@ import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.implementation.registry.KeyGenerator
 import scala.collection.mutable.HashSet
+import org.openmole.misc.exception.UserBadDataError
 
 class EnvironmentConverter(mapper: Mapper,
                            provider: ReflectionProvider,
@@ -58,21 +59,30 @@ class EnvironmentConverter(mapper: Mapper,
 
   override def unmarshal(reader: HierarchicalStreamReader,
                          uc: UnmarshallingContext) = {
-    val environmentProxy = super.unmarshal(reader, uc)
-    environmentProxy match {
-      case e: IEnvironmentDataProxyUI ⇒ addEnvironment(e)
-      case _ ⇒ environmentProxy
+    if (reader.getAttributeCount != 0) {
+      val existingEnvironment = Proxys.environments.find(_.id == reader.getAttribute("id").toInt)
+      existingEnvironment match {
+        case Some(y: IEnvironmentDataProxyUI) ⇒ y
+        case _ ⇒
+          serializer.unserializeProxy("environment")
+          unmarshal(reader, uc)
+      }
+    } else {
+      val o = super.unmarshal(reader, uc)
+      o match {
+        case y: IEnvironmentDataProxyUI ⇒
+          if (Proxys.environments.contains(y)) y
+          else addEnvironment(y)
+        case _ ⇒ throw new UserBadDataError("Can not load object " + o)
+      }
     }
   }
 
   override def canConvert(t: Class[_]) = t.isAssignableFrom(classOf[EnvironmentDataProxyUI])
 
   def addEnvironment(e: IEnvironmentDataProxyUI): IEnvironmentDataProxyUI = {
-    val key = KeyGenerator(e.getClass)
-    if (!KeyRegistry.environmentProxyKeyMap.contains(key)) {
-      Proxys.environments += e
-      ConceptMenu.environmentMenu.popup.contents += ConceptMenu.addItem(e)
-    }
-    KeyRegistry.environmentProxyKeyMap(key)
+    Proxys.environments += e
+    ConceptMenu.environmentMenu.popup.contents += ConceptMenu.addItem(e)
+    e
   }
 }

@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.implementation.serializer
 
+import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.serializer.SerializerState._
 import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.converters.MarshallingContext
@@ -57,25 +58,40 @@ class PrototypeConverter(mapper: Mapper,
     }
   }
 
+  def extract(reader: HierarchicalStreamReader) =
+    new PrototypeDataProxyUI(GenericPrototypeDataUI(reader.getAttribute("name"),
+      reader.getAttribute("dim").toInt)(ClassLoader.toManifest(reader.getAttribute("type"))),
+      false, reader.getAttribute("id").toInt)
+
   override def unmarshal(reader: HierarchicalStreamReader,
                          uc: UnmarshallingContext) = {
+    if (reader.getAttributeCount == 1) {
+      val existingPrototype = Proxys.prototypes.find(_.id == reader.getAttribute("id").toInt)
+      existingPrototype match {
+        case Some(y: IPrototypeDataProxyUI) ⇒ y
+        case _ ⇒
+          serializer.unserializeProxy("prototype")
+          unmarshal(reader, uc)
+      }
+    } else {
+      val o = extract(reader)
+      o match {
+        case y: IPrototypeDataProxyUI ⇒
+          if (Proxys.prototypes.contains(y)) y
+          else addPrototype(y)
+        case _ ⇒ throw new UserBadDataError("Can not load object " + o)
+      }
+    }
+  }
 
-    addPrototype(new PrototypeDataProxyUI(GenericPrototypeDataUI(reader.getAttribute("name"),
-      reader.getAttribute("dim").toInt)(ClassLoader.toManifest(reader.getAttribute("type"))),
-      false, reader.getAttribute("id").toInt))
+  def addPrototype(p: IPrototypeDataProxyUI): IPrototypeDataProxyUI = {
+    Proxys.prototypes += p
+    ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(p)
+    if (!(GenericPrototypeDataUI.baseType ::: GenericPrototypeDataUI.extraType contains p.dataUI.typeClassString)) {
+      GenericPrototypeDataUI.extraType = GenericPrototypeDataUI.extraType :+ p.dataUI.typeClassString
+    }
+    p
   }
 
   override def canConvert(t: Class[_]) = t.isAssignableFrom(classOf[PrototypeDataProxyUI])
-
-  def addPrototype(p: IPrototypeDataProxyUI): IPrototypeDataProxyUI = {
-    val key = KeyPrototypeGenerator(p)
-    if (!KeyRegistry.protoProxyKeyMap.contains(key)) {
-      Proxys.prototypes += p
-      ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(p)
-      if (!(GenericPrototypeDataUI.baseType ::: GenericPrototypeDataUI.extraType contains p.dataUI.typeClassString)) {
-        GenericPrototypeDataUI.extraType = GenericPrototypeDataUI.extraType :+ p.dataUI.typeClassString
-      }
-    }
-    KeyRegistry.protoProxyKeyMap(key)
-  }
 }

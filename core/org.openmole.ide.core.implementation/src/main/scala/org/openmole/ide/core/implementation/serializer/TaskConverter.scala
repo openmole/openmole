@@ -27,6 +27,9 @@ import com.thoughtworks.xstream.converters.reflection.ReflectionProvider
 import com.thoughtworks.xstream.mapper.Mapper
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.panel.ConceptMenu
+import org.openmole.misc.exception.UserBadDataError
 
 class TaskConverter(mapper: Mapper,
                     provider: ReflectionProvider,
@@ -51,7 +54,29 @@ class TaskConverter(mapper: Mapper,
 
   override def unmarshal(reader: HierarchicalStreamReader,
                          uc: UnmarshallingContext) = {
-    super.unmarshal(reader, uc)
+    if (reader.getAttributeCount != 0) {
+      val existingTask = Proxys.tasks.find(_.id == reader.getAttribute("id").toInt)
+      existingTask match {
+        case Some(y: ITaskDataProxyUI) ⇒ y
+        case _ ⇒
+          serializer.unserializeProxy("task")
+          unmarshal(reader, uc)
+      }
+    } else {
+      val o = super.unmarshal(reader, uc)
+      o match {
+        case y: ITaskDataProxyUI ⇒
+          if (Proxys.tasks.contains(y)) y
+          else addTask(y)
+        case _ ⇒ throw new UserBadDataError("Can not load object " + o)
+      }
+    }
+  }
+
+  def addTask(t: ITaskDataProxyUI): ITaskDataProxyUI = {
+    Proxys.tasks += t
+    ConceptMenu.taskMenu.popup.contents += ConceptMenu.addItem(t)
+    t
   }
 
   override def canConvert(t: Class[_]) = t.isAssignableFrom(classOf[TaskDataProxyUI])

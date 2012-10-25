@@ -31,6 +31,7 @@ import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
 import org.openmole.ide.core.implementation.registry.KeyGenerator
 import scala.collection.mutable.HashSet
+import org.openmole.misc.exception.UserBadDataError
 
 class SamplingCompositionConverter(mapper: Mapper,
                                    provider: ReflectionProvider,
@@ -57,21 +58,30 @@ class SamplingCompositionConverter(mapper: Mapper,
 
   override def unmarshal(reader: HierarchicalStreamReader,
                          uc: UnmarshallingContext) = {
-    val samplingProxy = super.unmarshal(reader, uc)
-    samplingProxy match {
-      case s: ISamplingCompositionDataProxyUI ⇒ addSampling(s)
-      case _ ⇒ samplingProxy
+    if (reader.getAttributeCount != 0) {
+      val existingSamplingComposition = Proxys.samplings.find(_.id == reader.getAttribute("id").toInt)
+      existingSamplingComposition match {
+        case Some(y: ISamplingCompositionDataProxyUI) ⇒ y
+        case _ ⇒
+          serializer.unserializeProxy("sampling")
+          unmarshal(reader, uc)
+      }
+    } else {
+      val o = super.unmarshal(reader, uc)
+      o match {
+        case y: ISamplingCompositionDataProxyUI ⇒
+          if (Proxys.samplings.contains(y)) y
+          else addSampling(y)
+        case _ ⇒ throw new UserBadDataError("Can not load object " + o)
+      }
     }
   }
 
   override def canConvert(t: Class[_]) = t.isAssignableFrom(classOf[SamplingCompositionDataProxyUI])
 
   def addSampling(s: ISamplingCompositionDataProxyUI): ISamplingCompositionDataProxyUI = {
-    val key = KeyGenerator(s.getClass)
-    if (!KeyRegistry.samplingProxyKeyMap.contains(key)) {
-      Proxys.samplings += s
-      ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(s)
-    }
-    KeyRegistry.samplingProxyKeyMap(key)
+    Proxys.samplings += s
+    ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(s)
+    s
   }
 }

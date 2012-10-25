@@ -17,6 +17,7 @@
 
 package org.openmole.ide.core.implementation.serializer
 
+import scala.util.Try
 import com.ice.tar.TarInputStream
 import com.ice.tar.TarOutputStream
 import com.thoughtworks.xstream.XStream
@@ -58,6 +59,9 @@ class GUISerializer(val toFromFile: String) {
   val tmpDir = (Workspace.newFile)
   val path = tmpDir.getCanonicalPath
 
+  val extractDir = Files.createTempDirectory("openmole").toFile
+  val extractPath = extractDir.getAbsolutePath
+
   val xstream = new XStream(new DomDriver)
   val taskConverter = new TaskConverter(xstream.getMapper,
     xstream.getReflectionProvider,
@@ -83,8 +87,8 @@ class GUISerializer(val toFromFile: String) {
   xstream.registerConverter(environmentConverter)
 
   xstream.alias("molescene", classOf[MoleScene])
-  xstream.alias("sampling", classOf[ISamplingCompositionDataProxyUI])
   xstream.alias("task", classOf[ITaskDataProxyUI])
+  xstream.alias("sampling", classOf[ISamplingCompositionDataProxyUI])
   xstream.alias("prototype", classOf[IPrototypeDataProxyUI])
   xstream.alias("environment", classOf[IEnvironmentDataProxyUI])
 
@@ -93,7 +97,6 @@ class GUISerializer(val toFromFile: String) {
   def serializeConcept(concept: String,
                        set: List[(_, Int)]) = {
     val conceptFile = new File(path + "/" + concept)
-    println("write " + concept + " in " + conceptFile)
     conceptFile.mkdirs
     set.foreach {
       case (s, id) ⇒
@@ -106,7 +109,6 @@ class GUISerializer(val toFromFile: String) {
   }
 
   def serialize = {
-    println("PATH : " + path)
     if (tmpDir.getParentFile.isDirectory) {
       serializeConcept("prototype", Proxys.prototypes.map { s ⇒ s -> s.id }.toList)
       serializeConcept("environment", Proxys.environments.map { s ⇒ s -> s.id }.toList)
@@ -119,7 +121,6 @@ class GUISerializer(val toFromFile: String) {
       serializeConcept("task", Proxys.tasks.map { s ⇒ s -> s.id }.toList)
       serializeConcept("mole", ScenesManager.moleScenes.map { ms ⇒ ms -> ms.manager.id }.toList)
       val os = new TarOutputStream(new FileOutputStream(toFromFile))
-      println("ARCHIVE : " + toFromFile)
       try os.createDirArchiveWithRelativePathNoVariableContent(tmpDir)
       finally os.close
       new File(serializePrefix(tmpDir)).recursiveDelete
@@ -136,28 +137,15 @@ class GUISerializer(val toFromFile: String) {
       Left
   }
 
-  def addTask(t: ITaskDataProxyUI) =
-    if (!Proxys.tasks.contains(t)) {
-      Proxys.tasks += t
-      ConceptMenu.taskMenu.popup.contents += ConceptMenu.addItem(t)
-    }
-
-  def unserializeProxy(prefixFile: String,
-                       concept: String) = {
-    new File(prefixFile + "/" + concept).listFiles.toList.foreach { f ⇒
-
+  def unserializeProxy(concept: String) = {
+    new File(extractPath + "/" + concept).listFiles.toList.foreach { f ⇒
       readStream(f) match {
         case Right(x: ObjectInputStream) ⇒
           try {
             val readObject = x.readObject
             readObject match {
-              case t: ITaskDataProxyUI ⇒ addTask(t)
-              case p: IPrototypeDataProxyUI ⇒ prototypeConverter.addPrototype(p)
-              case s: ISamplingCompositionDataProxyUI ⇒ samplingConverter.addSampling(s)
-              case e: IEnvironmentDataProxyUI ⇒ environmentConverter.addEnvironment(e)
               case ms: BuildMoleScene ⇒ ScenesManager.addBuildSceneContainer(ms)
               case _ ⇒
-                StatusBar.block("Failed to unserialize the " + concept + " " + readObject.toString)
             }
           } catch {
             case eof: EOFException ⇒ StatusBar.inform("Project loaded")
@@ -167,25 +155,24 @@ class GUISerializer(val toFromFile: String) {
           } finally {
             x.close
           }
-        case Left ⇒
       }
     }
   }
 
-  def unserializeHook(prefixFile: String) = {
+  def unserializeHook = {
     hookList.clear
-    new File(prefixFile + "/hook").listFiles.toList.flatMap { f ⇒
+    new File(extractPath + "/hook").listFiles.toList.flatMap { f ⇒
       readStream(f) match {
         case Right(x: ObjectInputStream) ⇒
           try {
             val readObject = x.readObject
             readObject match {
-              case h: IHookDataUI ⇒ Some(h)
+              case h: IHookDataUI ⇒ hookList += h
               case _ ⇒ Nil
             }
           }
       }
-    }.foreach { hookList += }
+    }
   }
 
   def unserialize = {
@@ -195,13 +182,12 @@ class GUISerializer(val toFromFile: String) {
     ClassLoader.loadExtraPlugins
 
     val os = new TarInputStream(new FileInputStream(toFromFile))
-    val extractDir = Files.createTempDirectory("openmole").toFile
     os.extractDirArchiveWithRelativePathAndClose(extractDir)
-    unserializeProxy(extractDir.getAbsolutePath, "sampling")
-    unserializeProxy(extractDir.getAbsolutePath, "environment")
-    unserializeHook(extractDir.getAbsolutePath)
-    unserializeProxy(extractDir.getAbsolutePath, "prototype")
-    unserializeProxy(extractDir.getAbsolutePath, "task")
-    unserializeProxy(extractDir.getAbsolutePath, "mole")
+    unserializeHook
+    unserializeProxy("prototype")
+    unserializeProxy("sampling")
+    unserializeProxy("environment")
+    unserializeProxy("task")
+    unserializeProxy("mole")
   }
 }
