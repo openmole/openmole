@@ -21,6 +21,18 @@ import com.db4o.activation.ActivationPurpose
 import com.db4o.ta.Activatable
 import java.io.File
 
+object Replica {
+  
+  def assertNotNull[T](f: => T): T = {
+    val ret = f
+    assert(ret != null)
+    ret
+  }
+  
+}
+
+import Replica._
+
 class Replica(
     _source: String = null,
     _storage: String = null,
@@ -32,8 +44,9 @@ class Replica(
   @transient
   var activator: com.db4o.activation.Activator = null
 
-  def path: String = {
+  def path: String = assertNotNull {
     activate(ActivationPurpose.READ)
+    assert(_path != null)
     _path
   }
 
@@ -42,19 +55,19 @@ class Replica(
     if (_lastCheckExists == null) new java.lang.Long(0) else _lastCheckExists
   }
 
-  def source = {
+  def source = assertNotNull {
     activate(ActivationPurpose.READ)
     _source
   }
 
   def sourceFile = new File(source)
 
-  def storage = {
+  def storage = assertNotNull {
     activate(ActivationPurpose.READ)
     _storage
   }
 
-  def environment = {
+  def environment = assertNotNull {
     activate(ActivationPurpose.READ)
     _environment
   }
@@ -72,7 +85,7 @@ class Replica(
 
   def hashOfSrcMatch(hash: String) = this.hash == hash
 
-  def hash = {
+  def hash = assertNotNull {
     activate(ActivationPurpose.READ)
     _hash
   }
