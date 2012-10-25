@@ -22,13 +22,13 @@ import com.db4o.ta.Activatable
 import java.io.File
 
 object Replica {
-  
-  def assertNotNull[T](f: => T): T = {
+
+  def assertNotNull[T](f: ⇒ T): T = {
     val ret = f
     assert(ret != null)
     ret
   }
-  
+
 }
 
 import Replica._
