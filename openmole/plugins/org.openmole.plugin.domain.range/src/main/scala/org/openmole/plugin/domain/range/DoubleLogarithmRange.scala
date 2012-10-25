@@ -22,7 +22,7 @@ import org.openmole.core.model.domain._
 import org.openmole.core.implementation.tools._
 import math._
 
-sealed class DoubleLogarithmRange(val min: String, val max: String, val nbStep: String) extends IDomain[Double] with IFinite[Double] with IBounded[Double] {
+sealed class DoubleLogarithmRange(val min: String, val max: String, val nbStep: String) extends Domain[Double] with Finite[Double] with Bounds[Double] {
 
   def this(min: Double, max: Double, nbStep: Int) = this(min.toString, max.toString, nbStep.toString)
 

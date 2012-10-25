@@ -15,13 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.domain.relative
+package org.openmole.core.model.domain
 
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IFinite
+import org.openmole.core.model.data._
 
-trait IRelative[T] extends IDomain[T] with IFinite[T] {
-  def nominal: String
-  def percent: String
-  def size: String
+trait Center[+T] extends Domain[T] {
+  def center(context: Context): T
 }

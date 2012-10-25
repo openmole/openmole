@@ -18,13 +18,12 @@
 package org.openmole.plugin.sampling.combine
 
 import java.util.Random
-import org.openmole.core.model.data.Context
-import org.openmole.core.model.data.Variable
-import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.model.data._
+import org.openmole.core.model.sampling._
 import org.openmole.misc.tools.service.Random._
 import org.openmole.core.implementation.task.Task._
 
-sealed class ShuffleSampling(sampling: ISampling) extends ISampling {
+sealed class ShuffleSampling(sampling: Sampling) extends Sampling {
 
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes

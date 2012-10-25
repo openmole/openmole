@@ -21,7 +21,6 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 import org.openmole.core.implementation.data._
 
-import org.openmole.core.model.domain.IIterable
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
@@ -34,7 +33,7 @@ class GroovyDomainModifierSpec extends FlatSpec with ShouldMatchers {
     val p1 = Prototype[Int]("p1")
     val r1 = (1 to 3)
 
-    val d1 = new IDomain[Int] with IIterable[Int] {
+    val d1 = new Domain[Int] with Discrete[Int] {
       override def iterator(context: Context) = r1.iterator
     }
 

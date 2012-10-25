@@ -17,11 +17,8 @@
 
 package org.openmole.plugin.method.sensitivity
 
-import org.openmole.core.model.sampling.ISampling
 import org.openmole.misc.tools.service.Scaling._
 import java.util.Random
-import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.sampling._
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 import org.openmole.core.model.sampling._
@@ -47,7 +44,7 @@ object SaltelliSampling {
   def generateMatrix(
     context: Context,
     samples: Int,
-    factors: Seq[IFactor[Double, IDomain[Double] with IBounded[Double]]],
+    factors: Seq[Factor[Double, Domain[Double] with Bounds[Double]]],
     rng: Random): Array[Array[Double]] =
     (for (s ← 0 until samples) yield {
       factors.map(f ⇒ rng.nextDouble.scale(f.domain.min(context), f.domain.max(context))).toArray
@@ -84,9 +81,9 @@ import SaltelliSampling._
 class SaltelliSampling(
     samples: Int,
     val matrixName: Prototype[String],
-    factors: IFactor[Double, IDomain[Double] with IBounded[Double]]*) extends Sampling {
+    factors: Factor[Double, Domain[Double] with Bounds[Double]]*) extends Sampling {
 
-  def this(samples: Int, factors: IFactor[Double, IDomain[Double] with IBounded[Double]]*) =
+  def this(samples: Int, factors: Factor[Double, Domain[Double] with Bounds[Double]]*) =
     this(
       samples,
       SaltelliSampling.matrixName,

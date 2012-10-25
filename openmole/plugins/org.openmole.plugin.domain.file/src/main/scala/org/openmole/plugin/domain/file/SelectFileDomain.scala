@@ -22,7 +22,7 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 import org.openmole.core.implementation.tools._
 
-class SelectFileDomain(val base: File, val path: String) extends IDomain[File] with IFinite[File] {
+class SelectFileDomain(val base: File, val path: String) extends Domain[File] with Finite[File] {
 
   override def computeValues(context: Context): Iterable[File] =
     List(new File(base, VariableExpansion(context, path)))

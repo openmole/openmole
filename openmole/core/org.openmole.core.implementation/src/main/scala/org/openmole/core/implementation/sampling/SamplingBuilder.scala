@@ -17,8 +17,8 @@
 
 package org.openmole.core.implementation.sampling
 
-import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.model.sampling._
 
 trait SamplingBuilder {
-  def toSampling: ISampling
+  def toSampling: Sampling
 }

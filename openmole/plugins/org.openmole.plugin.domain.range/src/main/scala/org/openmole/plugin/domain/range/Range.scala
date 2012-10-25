@@ -17,11 +17,12 @@
 
 package org.openmole.plugin.domain.range
 
+import org.openmole.core.model.domain._
 import org.openmole.misc.tools.io.FromString
-import org.openmole.core.model.data.Context
+import org.openmole.core.model.data._
 import org.openmole.core.implementation.tools._
 
-sealed class Range[T](val min: String, val max: String, val step: String = "1")(implicit integral: Integral[T], fs: FromString[T]) extends IRange[T] {
+sealed class Range[T](val min: String, val max: String, val step: String = "1")(implicit integral: Integral[T], fs: FromString[T]) extends Domain[T] with Finite[T] with Center[T] with Bounds[T] {
 
   import integral._
   import fs._
@@ -41,7 +42,7 @@ sealed class Range[T](val min: String, val max: String, val step: String = "1")(
     mi + ((max(context) - mi) / fromInt(2))
   }
 
-  override def step(context: Context): T = fromString(VariableExpansion(context, step))
+  def step(context: Context): T = fromString(VariableExpansion(context, step))
   override def max(context: Context): T = fromString(VariableExpansion(context, max))
   override def min(context: Context): T = fromString(VariableExpansion(context, min))
 

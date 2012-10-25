@@ -19,7 +19,6 @@ package org.openmole.plugin.builder
 
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.puzzle._
-import org.openmole.core.implementation.sampling._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.tools._
 import org.openmole.core.implementation.transition._
@@ -85,7 +84,7 @@ package object stochastic {
   def replicate(
     name: String,
     model: Puzzle,
-    replications: ISampling)(implicit plugins: PluginSet) = {
+    replications: Sampling)(implicit plugins: PluginSet) = {
     val exploration = ExplorationTask(name + "Replication", replications)
     val explorationCapsule = new StrainerCapsule(exploration)
     val aggregationCapsule = Slot(new StrainerCapsule(EmptyTask(name + "Aggregation")))

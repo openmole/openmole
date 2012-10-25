@@ -15,18 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.domain.range
+package org.openmole.plugin.sampling.filter
 
 import org.openmole.core.model.data.Context
-import org.openmole.core.model.domain.ICenter
-import org.openmole.core.model.domain.IBounded
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IFinite
 
-trait IRange[+T] extends IDomain[T] with IFinite[T] with ICenter[T] with IBounded[T] {
-  def min: String
-  def max: String
-  def step: String
-
-  def step(context: Context): T
+trait Filter {
+  def apply(factorsValues: Context): Boolean
 }

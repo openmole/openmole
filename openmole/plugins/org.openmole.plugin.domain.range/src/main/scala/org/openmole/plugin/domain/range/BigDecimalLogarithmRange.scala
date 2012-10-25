@@ -17,14 +17,12 @@
 
 package org.openmole.plugin.domain.range
 
-import org.openmole.core.model.data.Context
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IBounded
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
 import java.math.MathContext
 import java.math.RoundingMode
 import java.util.logging.Logger
 import org.openmole.core.implementation.tools._
-import org.openmole.core.model.domain.IFinite
 import org.openmole.misc.math.BigDecimalOperations._
 import java.math.BigDecimal
 
@@ -32,7 +30,7 @@ object BigDecimalLogarithmRange {
   val scale = 128
 }
 
-sealed class BigDecimalLogarithmRange(val min: String, val max: String, val nbStep: String) extends IDomain[BigDecimal] with IFinite[BigDecimal] with IBounded[BigDecimal] {
+sealed class BigDecimalLogarithmRange(val min: String, val max: String, val nbStep: String) extends Domain[BigDecimal] with Finite[BigDecimal] with Bounds[BigDecimal] {
   import BigDecimalLogarithmRange._
 
   override def computeValues(context: Context): Iterable[BigDecimal] = {

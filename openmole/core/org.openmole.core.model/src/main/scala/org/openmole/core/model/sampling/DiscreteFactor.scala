@@ -15,9 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.domain.collection
+package org.openmole.core.model.sampling
 
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IFinite
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
 
-trait IValueSetDomain[T] extends IDomain[T] with IFinite[T]
+object DiscreteFactor {
+
+  def apply[T, D <: Domain[T] with Discrete[T]](f: Factor[T, D]) =
+    new DiscreteFactor[T, D] {
+      val prototype = f.prototype
+      val domain = f.domain
+    }
+
+}
+
+trait DiscreteFactor[T, +D <: Domain[T] with Discrete[T]] extends Factor[T, D] with Sampling {
+
+  override def prototypes = List(prototype)
+
+  override def build(context: Context): Iterator[collection.Iterable[Variable[T]]] =
+    domain.iterator(context).map { v ⇒ List(Variable(prototype, v)) }
+
+}

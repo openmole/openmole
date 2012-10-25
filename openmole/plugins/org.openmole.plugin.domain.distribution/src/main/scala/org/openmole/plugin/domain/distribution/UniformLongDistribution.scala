@@ -18,14 +18,13 @@
 package org.openmole.plugin.domain.distribution
 
 import java.util.Random
-import org.openmole.core.model.data.Context
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IIterable
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
+import org.openmole.misc.workspace._
 import org.openmole.misc.tools.service.Random._
 import org.openmole.core.implementation.task.Task._
 
-sealed class UniformLongDistribution extends IDomain[Long] with IIterable[Long] {
+sealed class UniformLongDistribution extends Domain[Long] with Discrete[Long] {
 
   override def iterator(context: Context): Iterator[Long] = {
     val rng = newRNG(context.valueOrException(openMOLESeed))

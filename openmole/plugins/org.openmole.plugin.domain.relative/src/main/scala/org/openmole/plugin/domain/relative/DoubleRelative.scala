@@ -17,11 +17,10 @@
 
 package org.openmole.plugin.domain.relative
 
-import java.lang.Double
 import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data._
 
-sealed class DoubleRelative(val nominal: String, val percent: String, val size: String) extends IRelative[Double] {
+sealed class DoubleRelative(val nominal: String, val percent: String, val size: String) extends Relative[Double] {
 
   override def computeValues(context: Context): Iterable[Double] = {
     val nom = VariableExpansion(context, nominal).toDouble
@@ -31,9 +30,9 @@ sealed class DoubleRelative(val nominal: String, val percent: String, val size: 
     val min = nom * (1 - pe / 100.)
     if (s > 1) {
       val step = 2 * nom * pe / 100. / (s - 1)
-      for (i ← 0 to s) yield new Double(min + i * s)
+      for (i ← 0 to s) yield (min + i * s)
     } else {
-      List(min, nom, nom * (1 + pe / 100.)).map { new Double(_) }
+      List(min, nom, nom * (1 + pe / 100.))
     }
   }
 }

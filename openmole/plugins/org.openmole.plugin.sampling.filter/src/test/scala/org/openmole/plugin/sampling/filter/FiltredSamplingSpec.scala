@@ -19,11 +19,7 @@ package org.openmole.plugin.sampling.filter
 
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
-import org.openmole.core.implementation.sampling._
-import org.openmole.core.implementation.sampling._
-import org.openmole.core.implementation.data._
-
-import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.model.sampling._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
@@ -45,15 +41,15 @@ class FiltredSamplingSpec extends FlatSpec with ShouldMatchers {
       override def build(context: Context) = List(pList(1, 2, 3), pList(4, 3, 4), pList(1, 5, 3), pList(2, 3, 4), pList(6, 7, 8)).iterator
     }
 
-    val f1 = new IFilter {
+    val f1 = new Filter {
       override def apply(factorsValues: Context) = factorsValues.value(p1).get != 1
     }
 
-    val f2 = new IFilter {
+    val f2 = new Filter {
       override def apply(factorsValues: Context) = factorsValues.value(p3).get < 5
     }
 
-    val s2 = new FiltredSampling(sampling, f1, f2).build(Context.empty)
+    val s2 = sampling.filter(f1, f2).build(Context.empty)
     s2.size should equal(2)
   }
 

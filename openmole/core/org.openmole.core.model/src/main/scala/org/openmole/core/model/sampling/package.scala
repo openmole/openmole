@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 2012 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,11 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.domain
+package org.openmole.core.model
 
-import org.openmole.core.model.data.Context
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
 
-trait IFinite[+T] extends IIterable[T] { this: IDomain[T] ⇒
-  def computeValues(context: Context): Iterable[T]
-  override def iterator(context: Context): Iterator[T] = computeValues(context).iterator
+package object sampling {
+
+  implicit def factorWithIterableToDiscreteFactor[T, D <: Domain[T] with Discrete[T]](f: Factor[T, D]) = DiscreteFactor(f)
+
 }

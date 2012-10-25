@@ -18,6 +18,7 @@
 package org.openmole.core.implementation.sampling
 
 import org.openmole.core.model.data._
+import org.openmole.core.model.sampling._
 
 class ExplicitSampling[T](prototype: Prototype[T], data: Iterable[T]) extends Sampling {
   override def prototypes = List(prototype)

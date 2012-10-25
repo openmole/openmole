@@ -18,14 +18,13 @@
 package org.openmole.plugin.domain.collection
 
 import org.openmole.core.implementation.tools.VariableExpansion
-import org.openmole.core.model.data.Context
+import org.openmole.core.model.data._
 import scala.collection.mutable.ArrayBuffer
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IFinite
+import org.openmole.core.model.domain._
 import scala.collection.JavaConversions
 import scala.collection.mutable.ListBuffer
 
-sealed class DynamicListDomain[+T](values: String*) extends IDomain[T] with IFinite[T] {
+sealed class DynamicListDomain[+T](values: String*) extends Domain[T] with Finite[T] {
 
   override def computeValues(context: Context): Iterable[T] =
     values.map { VariableExpansion(context, _).asInstanceOf[T] }

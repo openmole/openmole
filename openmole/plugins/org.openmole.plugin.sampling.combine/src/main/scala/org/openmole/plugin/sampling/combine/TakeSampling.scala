@@ -17,11 +17,10 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.model.data.Context
-import org.openmole.core.model.data.Variable
-import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.model.data._
+import org.openmole.core.model.sampling._
 
-sealed class TakeSampling(sampling: ISampling, n: Int) extends ISampling {
+sealed class TakeSampling(sampling: Sampling, n: Int) extends Sampling {
 
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes

@@ -17,22 +17,17 @@
 
 package org.openmole.plugin.sampling.combine
 
-import org.openmole.core.implementation.sampling.DiscreteFactor
-import org.openmole.core.implementation.sampling.Sampling
-import org.openmole.core.model.data.Context
-import org.openmole.core.model.data.Variable
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IIterable
-import org.openmole.core.model.sampling.IFactor
-import org.openmole.core.model.sampling.ISampling
-import org.openmole.plugin.domain.modifier.TakeDomain
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
+import org.openmole.core.model.sampling._
+import org.openmole.plugin.domain.modifier._
 
-sealed class ReplicationSampling[T](sampling: ISampling, seederFactor: IFactor[T, IDomain[T] with IIterable[T]], nbReplication: Int) extends ISampling {
+sealed class ReplicationSampling[T](sampling: Sampling, seederFactor: Factor[T, Domain[T] with Discrete[T]], nbReplication: Int) extends Sampling {
 
   override def inputs = sampling.inputs
   override def prototypes = seederFactor.prototype :: sampling.prototypes.toList
 
   override def build(context: Context): Iterator[Iterable[Variable[_]]] =
-    new CompleteSampling(sampling, new DiscreteFactor(seederFactor.prototype, new TakeDomain(seederFactor.domain, nbReplication))).build(context)
+    new CompleteSampling(sampling, Factor(seederFactor.prototype, seederFactor.domain.take(nbReplication))).build(context)
 
 }

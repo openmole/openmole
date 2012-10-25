@@ -15,10 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.sampling
+package org.openmole.core.model.domain
 
-import org.openmole.core.model.data.Prototype
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.sampling.IFactor
-
-class Factor[T, +D <: IDomain[T]](val prototype: Prototype[T], val domain: D) extends IFactor[T, D]
+trait Domain[+T]

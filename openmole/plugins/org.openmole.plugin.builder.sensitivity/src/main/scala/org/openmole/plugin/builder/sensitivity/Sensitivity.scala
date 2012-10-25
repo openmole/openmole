@@ -19,7 +19,6 @@ package org.openmole.plugin.builder.sensitivity
 
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.puzzle._
-import org.openmole.core.implementation.sampling._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.data._
@@ -39,7 +38,7 @@ object Sensitivity {
     model: Puzzle,
     samples: Int,
     bootstrap: Int,
-    factors: Iterable[IFactor[Double, IDomain[Double] with IBounded[Double]]],
+    factors: Iterable[Factor[Double, Domain[Double] with Bounds[Double]]],
     outputs: Iterable[Prototype[Double]])(implicit plugins: PluginSet) = {
     val matrixName = Prototype[String](name + "Matrix")
     val sampling = new SaltelliSampling(samples, matrixName, factors.toSeq: _*)

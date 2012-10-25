@@ -21,7 +21,7 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 
-class CombineSampling(samplings: ISampling*) extends ISampling {
+class CombineSampling(samplings: Sampling*) extends Sampling {
 
   override def inputs = DataSet.empty ++ samplings.flatMap { _.inputs }
   override def prototypes: Iterable[Prototype[_]] = samplings.flatMap { _.prototypes }
@@ -33,7 +33,7 @@ class CombineSampling(samplings: ISampling*) extends ISampling {
         (a, b) ⇒ combine(a, b, context)
       }
 
-  def combine(s1: Iterator[Iterable[Variable[_]]], s2: ISampling, context: Context) =
+  def combine(s1: Iterator[Iterable[Variable[_]]], s2: Sampling, context: Context) =
     for (x ← s1; y ← s2.build(context ++ x)) yield x ++ y
 
 }

@@ -21,7 +21,7 @@ import org.openmole.misc.tools.script.GroovyProxy
 import org.openmole.core.implementation.tools.GroovyContextAdapter
 import org.openmole.core.model.data.Context
 
-class GroovyFilter(code: String) extends IFilter {
+class GroovyFilter(code: String) extends Filter {
   @transient lazy val groovyProxy = new GroovyProxy(code, Iterable.empty) with GroovyContextAdapter
 
   def apply(factorsValues: Context) = groovyProxy.execute(factorsValues).asInstanceOf[Boolean]

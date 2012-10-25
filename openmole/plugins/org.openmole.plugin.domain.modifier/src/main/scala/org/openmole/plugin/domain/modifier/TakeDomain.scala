@@ -17,13 +17,9 @@
 
 package org.openmole.plugin.domain.modifier
 
-import org.openmole.core.model.data.Context
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IFinite
-import org.openmole.core.model.domain.IIterable
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
 
-sealed class TakeDomain[+T](val domain: IDomain[T] with IIterable[T], val size: Int) extends IDomain[T] with IFinite[T] {
-
+sealed class TakeDomain[+T](val domain: Domain[T] with Discrete[T], val size: Int) extends Domain[T] with Finite[T] {
   override def computeValues(context: Context): Iterable[T] = domain.iterator(context).slice(0, size).toIterable
-
 }

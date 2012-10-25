@@ -17,15 +17,11 @@
 
 package org.openmole.plugin.domain.collection
 
-import org.openmole.core.model.data.Context
-import org.openmole.core.model.data.Prototype
-import org.openmole.core.model.domain.IDomain
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
 
-import org.openmole.core.model.domain.IIterable
 import scala.collection.JavaConversions._
 
-sealed class IterableVariableDomain[T](variable: Prototype[java.lang.Iterable[_ <: T]]) extends IDomain[T] with IIterable[T] {
-
+sealed class IterableVariableDomain[T](variable: Prototype[Iterable[_ <: T]]) extends Domain[T] with Discrete[T] {
   override def iterator(context: Context): Iterator[T] = context.valueOrException(variable).iterator
-
 }

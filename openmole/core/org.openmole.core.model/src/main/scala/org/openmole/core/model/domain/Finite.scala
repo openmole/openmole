@@ -17,9 +17,9 @@
 
 package org.openmole.core.model.domain
 
-import org.openmole.core.model.data.Context
+import org.openmole.core.model.data._
 
-trait IBounded[+T] { this: IDomain[T] ⇒
-  def min(context: Context): T
-  def max(context: Context): T
+trait Finite[+T] extends Domain[T] with Discrete[T] {
+  def computeValues(context: Context): collection.Iterable[T]
+  override def iterator(context: Context): Iterator[T] = computeValues(context).iterator
 }

@@ -15,30 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.domain.range
+package org.openmole.core.model.sampling
 
-import org.openmole.core.model.data.Context
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IIterable
+import org.openmole.core.model.domain._
+import org.openmole.core.model.data._
 
-sealed class InfinitePersistentCounter(counter: Iterator[Long]) extends IDomain[Long] with IIterable[Long] {
+object Factor {
 
-  def this(start: Long, step: Long) = {
-    this(new Iterator[Long] {
-
-      var value = start
-
-      override def hasNext: Boolean = true
-
-      override def next: Long = {
-        val ret = value;
-        value += step;
-        ret
-      }
-    })
+  def apply[T, D <: Domain[T]](prototype: Prototype[T], domain: D) = {
+    val (_domain, _prototype) = (domain, prototype)
+    new Factor[T, D] {
+      val domain = _domain
+      val prototype = _prototype
+    }
   }
 
-  def this() = this(0L, 1L)
+}
 
-  override def iterator(context: Context): Iterator[Long] = counter
+trait Factor[T, +D <: Domain[T]] {
+  def domain: D
+  def prototype: Prototype[T]
 }

@@ -15,23 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.domain.file
+package org.openmole.plugin.domain.relative
 
-import java.io.File
-import java.io.FileFilter
-import org.openmole.core.model.data.Context
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IFinite
-import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.core.model.domain._
 
-sealed class RecursiveListFilesDomain(dir: File, filter: FileFilter) extends IDomain[File] with IFinite[File] {
-
-  def this(dir: File, pattern: String, shouldBeAFile: Boolean) = {
-    this(dir, new FileFilter {
-      override def accept(file: File) = file.getName.matches(pattern) && (if (shouldBeAFile) file.isFile else true)
-    })
-  }
-
-  override def computeValues(context: Context) = dir.listRecursive(filter)
-
+trait Relative[T] extends Domain[T] with Finite[T] {
+  def nominal: String
+  def percent: String
+  def size: String
 }

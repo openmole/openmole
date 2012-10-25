@@ -17,13 +17,12 @@
 
 package org.openmole.plugin.domain.modifier
 
-import org.openmole.core.model.data.Context
-import org.openmole.core.model.domain.IDomain
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
 import collection.JavaConversions._
-import org.openmole.core.model.domain.IIterable
 import org.openmole.misc.tools.obj.ClassUtils._
 
-sealed class GroupDomain[T](val domain: IDomain[T] with IIterable[T], val size: Int)(implicit m: Manifest[T]) extends IDomain[Array[T]] with IIterable[Array[T]] {
+sealed class GroupDomain[T](val domain: Domain[T] with Discrete[T], val size: Int)(implicit m: Manifest[T]) extends Domain[Array[T]] with Discrete[Array[T]] {
 
   override def iterator(context: Context): Iterator[Array[T]] =
     domain.iterator(context).grouped(size).map {

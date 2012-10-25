@@ -19,9 +19,8 @@ package org.openmole.plugin.domain.file
 
 import java.io.File
 import java.util.regex.Pattern
-import org.openmole.core.model.data.Context
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IFinite
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.service.Logger
 
@@ -31,7 +30,7 @@ object SlidingSliceFilesDomain extends Logger {
 
 import SlidingSliceFilesDomain._
 
-sealed class SlidingSliceFilesDomain(dir: File, numberPattern: String, sliceSize: Int, filter: File ⇒ Boolean) extends IDomain[Array[File]] with IFinite[Array[File]] {
+sealed class SlidingSliceFilesDomain(dir: File, numberPattern: String, sliceSize: Int, filter: File ⇒ Boolean) extends Domain[Array[File]] with Finite[Array[File]] {
 
   def this(dir: File, numberPattern: String, sliceSize: Int) = this(dir, numberPattern, sliceSize, f ⇒ true)
 

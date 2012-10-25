@@ -17,9 +17,8 @@
 
 package org.openmole.core.model.domain
 
-import org.openmole.core.model.data.Context
+import org.openmole.core.model.data._
 
-trait IIterable[+T] { this: IDomain[T] ⇒
-
+trait Discrete[+T] extends Domain[T] {
   def iterator(context: Context): Iterator[T]
 }

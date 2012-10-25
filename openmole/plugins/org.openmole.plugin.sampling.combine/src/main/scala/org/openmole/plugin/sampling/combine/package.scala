@@ -19,31 +19,29 @@ package org.openmole.plugin.sampling
 
 import java.io.File
 import java.util.Random
-import org.openmole.core.model.data.Prototype
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.domain.IIterable
-import org.openmole.core.model.sampling.IFactor
-import org.openmole.core.model.sampling.ISampling
-import org.openmole.misc.workspace.Workspace
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
+import org.openmole.core.model.sampling._
+import org.openmole.misc.workspace._
 import org.openmole.core.implementation.sampling._
 
 package object combine {
 
-  implicit def combineSamplingDecorator(s: ISampling) = new {
-    def +(s2: ISampling) = new CombineSampling(s, s2)
-    def x(s2: ISampling) = new CompleteSampling(s, s2)
-    def zip(s2: ISampling) = new ZipSampling(s, s2)
+  implicit def combineSamplingDecorator(s: Sampling) = new {
+    def +(s2: Sampling) = new CombineSampling(s, s2)
+    def x(s2: Sampling) = new CompleteSampling(s, s2)
+    def zip(s2: Sampling) = new ZipSampling(s, s2)
     def zipWithIndex(index: Prototype[Int]) = new ZipWithIndexSampling(s, index)
     def take(n: Int) = new TakeSampling(s, n)
     def shuffle = new ShuffleSampling(s)
   }
 
-  implicit def zipWithNameFactorDecorator(factor: IFactor[File, IDomain[File] with IIterable[File]]) = new {
+  implicit def zipWithNameFactorDecorator(factor: Factor[File, Domain[File] with Discrete[File]]) = new {
     def zipWithName(name: Prototype[String]) = new ZipWithNameSampling(factor, name)
   }
 
-  implicit def combineFactorDecorator[T, D <: IDomain[T] with IIterable[T]](f: IFactor[T, D]) = new {
-    def x(s: ISampling) = new CompleteSampling(f, s)
+  implicit def combineFactorDecorator[T, D <: Domain[T] with Discrete[T]](f: Factor[T, D]) = new {
+    def x(s: Sampling) = new CompleteSampling(f, s)
   }
 
 }

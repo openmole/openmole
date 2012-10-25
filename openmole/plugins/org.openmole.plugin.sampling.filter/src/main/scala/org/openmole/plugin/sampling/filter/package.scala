@@ -15,6 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.domain
+package org.openmole.plugin.sampling
 
-trait IDomain[+T]
+import org.openmole.core.model.sampling._
+
+package object filter {
+
+  implicit def stringToGroovyFilterConversion(s: String) = new GroovyFilter(s)
+  implicit def filterSamplingDecorator(s: Sampling) = new {
+    def filter(filters: Filter*) = new FiltredSampling(s, filters: _*)
+  }
+
+}

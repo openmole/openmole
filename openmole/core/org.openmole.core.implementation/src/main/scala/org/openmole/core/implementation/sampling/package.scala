@@ -22,9 +22,7 @@ import org.openmole.core.model.domain._
 import org.openmole.core.model.sampling._
 
 package object sampling {
-  implicit def samplingBuilderToSampling(s: SamplingBuilder) = s.toSampling
 
-  implicit def factorWithIterableToDiscreteFactor[T, D <: IDomain[T] with IIterable[T]](f: IFactor[T, D]) =
-    new DiscreteFactor(f.prototype, f.domain)
+  implicit def samplingBuilderToSampling(s: SamplingBuilder) = s.toSampling
 
 }

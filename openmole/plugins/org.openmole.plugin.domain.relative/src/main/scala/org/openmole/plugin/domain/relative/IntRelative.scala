@@ -19,11 +19,10 @@ package org.openmole.plugin.domain.relative
 
 import org.openmole.core.model.data.Context
 import org.openmole.core.implementation.tools._
-import java.lang.Integer
 
-sealed class IntegerRelative(val nominal: String, val percent: String, val size: String) extends IRelative[Integer] {
+sealed class IntRelative(val nominal: String, val percent: String, val size: String) extends Relative[Int] {
 
-  override def computeValues(context: Context): Iterable[Integer] = {
+  override def computeValues(context: Context): Iterable[Int] = {
     val nom = VariableExpansion(context, nominal).toInt
     val pe = VariableExpansion(context, percent).toInt
     val s = VariableExpansion(context, size).toInt
@@ -31,9 +30,9 @@ sealed class IntegerRelative(val nominal: String, val percent: String, val size:
     val min = nom * (1 - pe / 100.)
     if (s > 1) {
       val step = 2 * nom * pe / 100. / (s - 1)
-      for (i ← 0 to s) yield new Integer(BigDecimal(min + i * s).toInt)
+      for (i ← 0 to s) yield BigDecimal(min + i * s).toInt
     } else {
-      List(min, nom, nom * (1 + pe / 100.)).map { e ⇒ new Integer(BigDecimal(e).toInt) }
+      List(min, nom, nom * (1 + pe / 100.)).map { e ⇒ BigDecimal(e).toInt }
     }
   }
 }

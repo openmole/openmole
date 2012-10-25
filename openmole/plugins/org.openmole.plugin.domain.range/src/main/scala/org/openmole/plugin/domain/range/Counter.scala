@@ -15,12 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.sampling
+package org.openmole.plugin.domain.range
 
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.data.Prototype
+import org.openmole.core.model.data._
+import org.openmole.core.model.domain._
 
-trait IFactor[T, +D <: IDomain[T]] {
-  def domain: D
-  def prototype: Prototype[T]
+sealed class Counter(start: Long = 0L, step: Long = 1L) extends Domain[Long] with Discrete[Long] {
+  override def iterator(context: Context): Iterator[Long] = Iterator.iterate(0L)(_ + 1L)
 }
