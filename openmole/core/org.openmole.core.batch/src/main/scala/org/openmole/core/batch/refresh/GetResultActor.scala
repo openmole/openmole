@@ -52,7 +52,7 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
   def getResult(storage: StorageService, outputFilePath: String, batchJob: BatchExecutionJob): Unit = {
     import batchJob.job
 
-    UsageControl.withToken(storage) { implicit token ⇒
+    storage.withToken { implicit token ⇒
       val runtimeResult = getRuntimeResult(outputFilePath, storage)
 
       display(runtimeResult.stdOut, "Output", storage)

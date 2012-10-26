@@ -26,6 +26,8 @@ import org.openmole.misc.workspace._
 trait GliteJob extends BatchJob with BatchJobId {
   var lastShaked = System.currentTimeMillis
 
+  val jobService: GliteJobService
+
   override def updateState(implicit token: AccessToken) = {
     val state = super.updateState
 
@@ -49,4 +51,23 @@ trait GliteJob extends BatchJob with BatchJobId {
     }
     state
   }
+
+  override def state_=(state: ExecutionState) = synchronized {
+    if (_state != state) {
+      _state match {
+        case SUBMITTED ⇒ jobService.qualityControl.decrementSubmitted
+        case RUNNING ⇒ jobService.qualityControl.decrementRunning
+        case _ ⇒
+      }
+
+      state match {
+        case SUBMITTED ⇒ jobService.qualityControl.incrementSubmitted
+        case RUNNING ⇒ jobService.qualityControl.incrementRunning
+        case DONE ⇒ jobService.qualityControl.incrementDone
+        case _ ⇒
+      }
+    }
+    super.state = state
+  }
+
 }

@@ -50,6 +50,7 @@ class GliteJobService(
   def proxyFile = environment.authentication._2
 
   val id = jobService.url.toString
+  @transient lazy val qualityControl = new JobServiceQualityControl(Workspace.preferenceAsInt(GliteEnvironment.QualityHysteresis))
 
   var delegated = false
 
@@ -62,22 +63,25 @@ class GliteJobService(
     }
   }
 
-  override protected def _purge(j: J) = {
+  def withQualityControl[A](op: ⇒ A) =
+    QualityControl.timed(qualityControl, QualityControl.withFailureControl(qualityControl)(op))
+
+  override protected def _purge(j: J) = withQualityControl {
     checkDelegated
     super._purge(j)
   }
 
-  override protected def _cancel(j: J) = {
+  override protected def _cancel(j: J) = withQualityControl {
     checkDelegated
     super._cancel(j)
   }
 
-  override protected def _state(j: J) = {
+  override protected def _state(j: J) = withQualityControl {
     checkDelegated
     super._state(j)
   }
 
-  override protected def _submit(serializedJob: SerializedJob) = {
+  override protected def _submit(serializedJob: SerializedJob) = withQualityControl {
     checkDelegated
     import serializedJob._
 

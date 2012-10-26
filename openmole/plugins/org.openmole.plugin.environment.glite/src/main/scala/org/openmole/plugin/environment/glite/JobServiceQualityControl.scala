@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.batch.jobservice
+package org.openmole.plugin.environment.glite
 
 import org.openmole.core.batch.control._
 import java.util.concurrent.atomic._

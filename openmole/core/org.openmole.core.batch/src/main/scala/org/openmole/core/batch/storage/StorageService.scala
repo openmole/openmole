@@ -71,24 +71,20 @@ trait StorageService extends BatchService with Storage {
   }
 
   override def toString: String = id
-  def withToken[A](a: (AccessToken) ⇒ A): A =
-    UsageControl.withToken(this)(a)
 
-  private def withFailureControl[A](a: ⇒ A): A = StorageControl.withQualityControl(this)(a)
+  def exists(path: String)(implicit token: AccessToken): Boolean = token.synchronized { super.exists(path) }
+  def listNames(path: String)(implicit token: AccessToken): Seq[String] = token.synchronized { super.listNames(path) }
+  def list(path: String)(implicit token: AccessToken): Seq[(String, FileType)] = token.synchronized { super.list(path) }
+  def makeDir(path: String)(implicit token: AccessToken): Unit = token.synchronized { super.makeDir(path) }
+  def rmDir(path: String)(implicit token: AccessToken): Unit = token.synchronized { super.rmDir(path) }
+  def rmFile(path: String)(implicit token: AccessToken): Unit = token.synchronized { super.rmFile(path) }
+  def openInputStream(path: String)(implicit token: AccessToken): InputStream = token.synchronized { super.openInputStream(path) }
+  def openOutputStream(path: String)(implicit token: AccessToken): OutputStream = token.synchronized { super.openOutputStream(path) }
 
-  def exists(path: String)(implicit token: AccessToken): Boolean = withFailureControl { super.exists(path) }
-  def listNames(path: String)(implicit token: AccessToken): Seq[String] = withFailureControl { super.listNames(path) }
-  def list(path: String)(implicit token: AccessToken): Seq[(String, FileType)] = withFailureControl { super.list(path) }
-  def makeDir(path: String)(implicit token: AccessToken): Unit = withFailureControl { super.makeDir(path) }
-  def rmDir(path: String)(implicit token: AccessToken): Unit = withFailureControl { super.rmDir(path) }
-  def rmFile(path: String)(implicit token: AccessToken): Unit = withFailureControl { super.rmFile(path) }
-  def openInputStream(path: String)(implicit token: AccessToken): InputStream = withFailureControl { super.openInputStream(path) }
-  def openOutputStream(path: String)(implicit token: AccessToken): OutputStream = withFailureControl { super.openOutputStream(path) }
-
-  def upload(src: File, dest: String)(implicit token: AccessToken) = withFailureControl { super.upload(src, dest) }
-  def uploadGZ(src: File, dest: String)(implicit token: AccessToken) = withFailureControl { super.uploadGZ(src, dest) }
-  def download(src: String, dest: File)(implicit token: AccessToken) = withFailureControl { super.download(src, dest) }
-  def downloadGZ(src: String, dest: File)(implicit token: AccessToken) = withFailureControl { super.downloadGZ(src, dest) }
+  def upload(src: File, dest: String)(implicit token: AccessToken) = token.synchronized { super.upload(src, dest) }
+  def uploadGZ(src: File, dest: String)(implicit token: AccessToken) = token.synchronized { super.uploadGZ(src, dest) }
+  def download(src: String, dest: File)(implicit token: AccessToken) = token.synchronized { super.download(src, dest) }
+  def downloadGZ(src: String, dest: File)(implicit token: AccessToken) = token.synchronized { super.downloadGZ(src, dest) }
 
   def baseDirName = Workspace.preference(Workspace.uniqueID) + '/'
 

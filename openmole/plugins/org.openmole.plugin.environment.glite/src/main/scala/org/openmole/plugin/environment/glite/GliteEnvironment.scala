@@ -33,6 +33,14 @@ import org.openmole.core.model.job.IJob
 import org.openmole.misc.exception._
 import org.openmole.misc.tools.service.Duration._
 import org.openmole.plugin.environment.gridscale._
+import org.openmole.core.batch.jobservice._
+import org.openmole.core.batch.control._
+import org.openmole.misc.tools.service._
+import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.core.batch.replication._
+import org.openmole.misc.workspace._
+import concurrent.stm._
+import annotation.tailrec
 import org.globus.gsi.gssapi.GlobusGSSCredentialImpl
 import ref.WeakReference
 
@@ -58,6 +66,8 @@ object GliteEnvironment {
   val JobShakingMaxReady = new ConfigurationLocation("GliteEnvironment", "JobShakingMaxReady")
 
   val LCGCPTimeOut = new ConfigurationLocation("GliteEnvironment", "RuntimeCopyOnWNTimeOut")
+  val QualityHysteresis = new ConfigurationLocation("GliteEnvironment", "QualityHysteresis")
+  val MinValueForSelectionExploration = new ConfigurationLocation("GliteEnvironment", "MinValueForSelectionExploration")
 
   Workspace += (ProxyTime, "PT24H")
   Workspace += (MyProxyTime, "P7D")
@@ -84,6 +94,9 @@ object GliteEnvironment {
   Workspace += (JobShakingMaxReady, "100")
 
   Workspace += (LCGCPTimeOut, "PT5M")
+
+  Workspace += (MinValueForSelectionExploration, "0.0001")
+  Workspace += (QualityHysteresis, "100")
 }
 
 class GliteEnvironment(
@@ -106,7 +119,7 @@ class GliteEnvironment(
   @transient lazy val threadsByWMS = Workspace.preferenceAsInt(LocalThreadsByWMS)
 
   type JS = GliteJobService
-  type SS = PersistentStorageService
+  type SS = GliteStorageService
 
   @transient lazy val registerAgents: Unit = {
     Updater.registerForUpdate(new OverSubmissionAgent(WeakReference(this)))
@@ -159,6 +172,100 @@ class GliteEnvironment(
       s ⇒ GliteStorageService(s, env, GliteAuthentication.CACertificatesDir)
     }
   }
+
+  private def orMinForExploration(v: Double) = {
+    val min = Workspace.preferenceAsDouble(GliteEnvironment.MinValueForSelectionExploration)
+    if (v < min) min else v
+  }
+
+  override def selectAJobService =
+    if (jobServices.size == 1) super.selectAJobService
+    else {
+      def fitness =
+        jobServices.flatMap {
+          cur ⇒
+            cur.usageControl.tryGetToken match {
+              case None ⇒ None
+              case Some(token) ⇒
+                val q = cur.qualityControl
+
+                val nbSubmitted = q.submitted
+                val fitness = orMinForExploration(
+                  if (q.submitted > 0)
+                    math.pow((q.runnig.toDouble / q.submitted) * q.successRate * (q.totalDone / q.totalSubmitted), 2)
+                  else math.pow(q.successRate, 2))
+                Some((cur, token, fitness))
+            }
+        }
+
+      @tailrec def selected(value: Double, jobServices: List[(JobService, AccessToken, Double)]): Option[(JobService, AccessToken)] =
+        jobServices.headOption match {
+          case Some((js, token, fitness)) ⇒
+            if (value <= fitness) Some((js, token))
+            else selected(value - fitness, jobServices.tail)
+          case None ⇒ None
+        }
+
+      atomic { implicit txn ⇒
+        val notLoaded = fitness
+        selected(Random.default.nextDouble * notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum, notLoaded.toList) match {
+          case Some((jobService, token)) ⇒
+            for {
+              (s, t, _) ← notLoaded
+              if (s.id != jobService.id)
+            } s.usageControl.releaseToken(t)
+            jobService -> token
+          case None ⇒ retry
+        }
+      }
+    }
+
+  override def selectAStorage(usedFiles: Iterable[File]) =
+    if (storages.size == 1) super.selectAStorage(usedFiles)
+    else {
+      val totalFileSize = usedFiles.map { _.size }.sum
+      val onStorage = ReplicaCatalog.withClient(ReplicaCatalog.inCatalog(env.id)(_))
+
+      def fitness =
+        storages.flatMap {
+          cur ⇒
+            cur.usageControl.tryGetToken match {
+              case None ⇒ None
+              case Some(token) ⇒
+                val sizeOnStorage = usedFiles.filter(onStorage.getOrElse(_, Set.empty).contains(cur.id)).map(_.size).sum
+
+                val fitness = orMinForExploration(
+                  math.pow(cur.qualityControl.successRate, 2) * (if (totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) else 1))
+                Some((cur, token, fitness))
+            }
+        }
+
+      @tailrec def selected(value: Double, storages: List[(StorageService, AccessToken, Double)]): Option[(StorageService, AccessToken)] = {
+        storages.headOption match {
+          case Some((storage, token, fitness)) ⇒
+            if (value <= fitness) Some((storage, token))
+            else selected(value - fitness, storages.tail)
+          case None ⇒ None
+        }
+      }
+
+      atomic { implicit txn ⇒
+        val notLoaded = fitness
+        val fitnessSum = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
+        val drawn = Random.default.nextDouble * fitnessSum
+
+        selected(Random.default.nextDouble * notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum, notLoaded.toList) match {
+          case Some((storage, token)) ⇒
+            for {
+              (s, t, _) ← notLoaded
+              if (s.id != storage.id)
+            } s.usageControl.releaseToken(t)
+            storage -> token
+          case None ⇒ retry
+        }
+      }
+
+    }
 
   private def getBDII: BDII = new BDII(bdii)
 

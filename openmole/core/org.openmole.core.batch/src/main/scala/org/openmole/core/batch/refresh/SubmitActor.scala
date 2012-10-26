@@ -51,7 +51,7 @@ class SubmitActor(jobManager: ActorRef) extends Actor {
   private def trySubmit(serializedJob: SerializedJob, environment: BatchEnvironment) = {
     val (js, token) = environment.selectAJobService
     try retryOnTimeout(js.submit(serializedJob)(token))
-    finally UsageControl.get(js).releaseToken(token)
+    finally js.usageControl.releaseToken(token)
   }
 
 }

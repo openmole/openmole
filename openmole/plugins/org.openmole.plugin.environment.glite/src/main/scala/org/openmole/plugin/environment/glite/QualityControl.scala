@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.batch.control
+package org.openmole.plugin.environment.glite
 
 import org.openmole.misc.tools.service._
 

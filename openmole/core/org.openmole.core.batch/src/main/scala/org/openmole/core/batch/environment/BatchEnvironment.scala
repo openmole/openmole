@@ -89,12 +89,8 @@ object BatchEnvironment extends Logger {
   val MemorySizeForRuntime = new ConfigurationLocation("BatchEnvironment", "MemorySizeForRuntime")
   val RuntimeLocation = new ConfigurationLocation("BatchEnvironment", "RuntimeLocation")
   val JVMLinuxI386Location = new ConfigurationLocation("BatchEnvironment", "JVMLinuxI386Location")
-
   val JVMLinuxX64Location = new ConfigurationLocation("BatchEnvironment", "JVMLinuxX64Location")
 
-  val MinValueForSelectionExploration = new ConfigurationLocation("BatchEnvironment", "MinValueForSelectionExploration")
-
-  val QualityHysteresis = new ConfigurationLocation("BatchEnvironment", "QualityHysteresis")
   val CheckInterval = new ConfigurationLocation("BatchEnvironment", "CheckInterval")
 
   val CheckFileExistsInterval = new ConfigurationLocation("BatchEnvironment", "CheckFileExistsInterval")
@@ -102,7 +98,6 @@ object BatchEnvironment extends Logger {
   val MinUpdateInterval = new ConfigurationLocation("BatchEnvironment", "MinUpdateInterval")
   val MaxUpdateInterval = new ConfigurationLocation("BatchEnvironment", "MaxUpdateInterval")
   val IncrementUpdateInterval = new ConfigurationLocation("BatchEnvironment", "IncrementUpdateInterval");
-  val StatisticsHistorySize = new ConfigurationLocation("Environment", "StatisticsHistorySize")
 
   val JobManagmentThreads = new ConfigurationLocation("BatchEnvironment", "JobManagmentThreads")
 
@@ -111,8 +106,7 @@ object BatchEnvironment extends Logger {
   val StoragesGCUpdateInterval = new ConfigurationLocation("BatchEnvironment", "StoragesGCUpdateInterval")
 
   val NbTryOnTimeout = new ConfigurationLocation("BatchEnvironment", "NbTryOnTimeout")
-
-  //val AuthenticationTimeout = new ConfigurationLocation("Environment", "AuthenticationTimeout")
+  val StatisticsHistorySize = new ConfigurationLocation("BatchEnvironment", "StatisticsHistorySize")
 
   Workspace += (MinUpdateInterval, "PT1M")
   Workspace += (MaxUpdateInterval, "PT20M")
@@ -123,17 +117,14 @@ object BatchEnvironment extends Logger {
   Workspace += (JVMLinuxX64Location, () ⇒ new File(new File(Workspace.location, "runtime"), "jvm-linux-x64.tar.gz").getAbsolutePath)
 
   Workspace += (MemorySizeForRuntime, "512")
-  Workspace += (QualityHysteresis, "100")
   Workspace += (CheckInterval, "PT1M")
-  Workspace += (MinValueForSelectionExploration, "0.0001")
   Workspace += (CheckFileExistsInterval, "PT1H")
-  Workspace += (StatisticsHistorySize, "10000")
-  Workspace += (JobManagmentThreads, "100")
+  Workspace += (JobManagmentThreads, "200")
   Workspace += (EnvironmentCleaningThreads, "20")
-  //Workspace += (AuthenticationTimeout, "PT2M")
 
   Workspace += (StoragesGCUpdateInterval, "PT1H")
   Workspace += (NbTryOnTimeout, "3")
+  Workspace += (StatisticsHistorySize, "10000")
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
 
@@ -206,7 +197,7 @@ akka {
     allStorages.foreach {
       s ⇒
         background {
-          UsageControl.withToken(s) { implicit t ⇒
+          s.withToken { implicit t ⇒
             s.clean
           }
         }(cleaningThreadPool)
@@ -222,118 +213,24 @@ akka {
   @transient lazy val jobServices = {
     val jobServices = allJobServices
     if (jobServices.isEmpty) throw new InternalProcessingError("No job service available for the environment.")
-    //    jobServices.foreach { s ⇒ UsageControl.register(s.id, UsageControl(s.connections)) }
-    //jobServices.foreach { s ⇒ JobServiceControl.register(s.id, new JobServiceQualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis))) }
     jobServices
   }
 
   @transient lazy val storages = {
     val storages = allStorages
     if (storages.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
-    //  storages.foreach { s ⇒ UsageControl.register(s.id, UsageControl(s.connections)) }
-    //storages.foreach(s ⇒ StorageControl.register(s.id, new QualityControl(Workspace.preferenceAsInt(BatchEnvironment.QualityHysteresis))))
     Updater.registerForUpdate(new StoragesGC(WeakReference(storages)), Workspace.preferenceAsDurationInMs(StoragesGCUpdateInterval))
     storages
   }
 
-  private def orMinForExploration(v: Double) = {
-    val min = Workspace.preferenceAsDouble(BatchEnvironment.MinValueForSelectionExploration)
-    if (v < min) min else v
-  }
-
   def selectAJobService: (JobService, AccessToken) = {
-    if (jobServices.size == 1) {
-      val r = jobServices.head
-      return (r, UsageControl.get(r).waitAToken)
-    }
-
-    def fitness =
-      jobServices.flatMap {
-        cur ⇒
-          UsageControl.get(cur).tryGetToken match {
-            case None ⇒ None
-            case Some(token) ⇒
-              val q = JobServiceControl(cur)
-
-              val nbSubmitted = q.submitted
-              val fitness = orMinForExploration(
-                if (q.submitted > 0)
-                  math.pow((q.runnig.toDouble / q.submitted) * q.successRate * (q.totalDone / q.totalSubmitted), 2)
-                else math.pow(q.successRate, 2))
-              Some((cur, token, fitness))
-          }
-      }
-
-    @tailrec def selected(value: Double, jobServices: List[(JobService, AccessToken, Double)]): Option[(JobService, AccessToken)] =
-      jobServices.headOption match {
-        case Some((js, token, fitness)) ⇒
-          if (value <= fitness) Some((js, token))
-          else selected(value - fitness, jobServices.tail)
-        case None ⇒ None
-      }
-
-    atomic { implicit txn ⇒
-      val notLoaded = fitness
-      selected(Random.default.nextDouble * notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum, notLoaded.toList) match {
-        case Some((jobService, token)) ⇒
-          for {
-            (s, t, _) ← notLoaded
-            if (s.id != jobService.id)
-          } UsageControl.get(s).releaseToken(t)
-          jobService -> token
-        case None ⇒ retry
-      }
-    }
+    val r = jobServices.head
+    (r, r.usageControl.waitAToken)
   }
 
   def selectAStorage(usedFiles: Iterable[File]): (StorageService, AccessToken) = {
-    if (storages.size == 1) {
-      val r = storages.head
-      return (r, UsageControl.get(r).waitAToken)
-    }
-
-    val totalFileSize = usedFiles.map { _.size }.sum
-    val onStorage = ReplicaCatalog.withClient(ReplicaCatalog.inCatalog(env.id)(_))
-
-    def fitness =
-      storages.flatMap {
-        cur ⇒
-          UsageControl.get(cur).tryGetToken match {
-            case None ⇒ None
-            case Some(token) ⇒
-              val sizeOnStorage = usedFiles.filter(onStorage.getOrElse(_, Set.empty).contains(cur.id)).map(_.size).sum
-
-              val fitness = orMinForExploration(
-                math.pow(StorageControl(cur).successRate, 2) * (if (totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) else 1))
-              Some((cur, token, fitness))
-          }
-      }
-
-    @tailrec def selected(value: Double, storages: List[(StorageService, AccessToken, Double)]): Option[(StorageService, AccessToken)] = {
-      storages.headOption match {
-        case Some((storage, token, fitness)) ⇒
-          if (value <= fitness) Some((storage, token))
-          else selected(value - fitness, storages.tail)
-        case None ⇒ None
-      }
-    }
-
-    atomic { implicit txn ⇒
-      val notLoaded = fitness
-      val fitnessSum = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
-      val drawn = Random.default.nextDouble * fitnessSum
-
-      selected(Random.default.nextDouble * notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum, notLoaded.toList) match {
-        case Some((storage, token)) ⇒
-          for {
-            (s, t, _) ← notLoaded
-            if (s.id != storage.id)
-          } UsageControl.get(s).releaseToken(t)
-          storage -> token
-        case None ⇒ retry
-      }
-    }
-
+    val r = storages.head
+    (r, r.usageControl.waitAToken)
   }
 
   @transient lazy val plugins = PluginManager.pluginsForClass(this.getClass)

@@ -41,22 +41,7 @@ trait BatchJob { bj ⇒
   protected[jobservice] def state_=(state: ExecutionState) = synchronized {
     if (_state != state) {
       timeStamps(state.id) = System.currentTimeMillis
-
-      _state match {
-        case SUBMITTED ⇒ JobServiceControl(jobService).decrementSubmitted
-        case RUNNING ⇒ JobServiceControl(jobService).decrementRunning
-        case _ ⇒
-      }
-
-      state match {
-        case SUBMITTED ⇒ JobServiceControl(jobService).incrementSubmitted
-        case RUNNING ⇒ JobServiceControl(jobService).incrementRunning
-        case DONE ⇒ JobServiceControl(jobService).incrementDone
-        case _ ⇒
-      }
-
       EventDispatcher.trigger(this, new BatchJob.StateChanged(state, _state))
-
       _state = state
     }
   }
@@ -86,5 +71,5 @@ trait BatchJob { bj ⇒
 
   def timeStamp(state: ExecutionState): Long = timeStamps(state.id)
 
-  def withToken[T](f: AccessToken ⇒ T) = UsageControl.withToken(jobService)(f)
+  def withToken[T](f: AccessToken ⇒ T) = jobService.withToken(f)
 }
