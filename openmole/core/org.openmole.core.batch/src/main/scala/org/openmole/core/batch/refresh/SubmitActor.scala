@@ -36,7 +36,7 @@ class SubmitActor(jobManager: ActorRef) extends Actor {
     case Submit(job, sj) ⇒
       if (!job.state.isFinal) {
         try {
-          val bj = retryOnTimeout(trySubmit(sj, job.environment))
+          val bj = trySubmit(sj, job.environment)
           job.state = SUBMITTED
           jobManager ! Submitted(job, sj, bj)
         } catch {
