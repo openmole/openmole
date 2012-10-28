@@ -63,9 +63,14 @@ object ReplicaCatalog extends Logger {
   Workspace += (InCatalogCacheTime, "PT2M")
   Workspace += (ReplicaCacheTime, "PT30M")
 
-  val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
-  val inCatalogCache = new TimeCache[Map[File, Set[String]]]
-  val localLock = new LockRepository[String]
+  lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
+  lazy val inCatalogCache = new TimeCache[Map[String, Set[String]]]
+  lazy val lockContainer = openClient
+
+  lazy val lockCache = new LockCache {
+    def lock(k: String) = lockContainer.ext.setSemaphore(k, Int.MaxValue)
+    def unlock(k: String) = lockContainer.ext.releaseSemaphore(k)
+  }
 
   type ReplicaCacheKey = (String, String, String, String)
   val replicaCache = CacheBuilder.newBuilder.asInstanceOf[CacheBuilder[ReplicaCacheKey, Replica]].
@@ -113,20 +118,16 @@ object ReplicaCatalog extends Logger {
 
   def inCatalog(environment: String)(implicit objectContainer: ObjectContainer) = inCatalogCache(inCatalogQuery(environment), Workspace.preferenceAsDurationInMs(InCatalogCacheTime))
 
-  private def inCatalogQuery(environment: String)(implicit objectContainer: ObjectContainer): Map[File, Set[String]] =
+  private def inCatalogQuery(environment: String)(implicit objectContainer: ObjectContainer): Map[String, Set[String]] =
     objectContainer.queryByExample[Replica](new Replica(_environment = environment)).map {
-      replica ⇒ replica.sourceFile -> replica.storage
+      replica ⇒ replica.hash -> replica.storage
     }.groupBy(_._1).map { case (k, v) ⇒ k -> v.unzip._2.toSet }
 
   private def key(hash: String, storage: String, environment: String): String = hash + "_" + storage + "_" + environment
   private def key(r: Replica): String = key(r.hash, r.storage, r.environment)
   private def key(hash: String, storage: StorageService): String = key(hash, storage.id, storage.environment.id)
 
-  private def withSemaphore[T](key: String, objectContainer: ObjectContainer)(op: ⇒ T) = localLock.withLock(key) {
-    objectContainer.ext.setSemaphore(key, Int.MaxValue)
-    try op
-    finally objectContainer.ext.releaseSemaphore(key)
-  }
+  private def withSemaphore[T](key: String, objectContainer: ObjectContainer)(op: ⇒ T) = lockCache.withLock(key) { op }
 
   def uploadAndGet(
     src: File,

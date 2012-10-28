@@ -17,7 +17,7 @@
 
 package org.openmole.misc.tools.service
 
-object IHash {
+object Hash {
   val HEX_CHAR_TABLE = List('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f').map { _.toByte }.toArray
 
   def hexString(raw: Array[Byte]): String = {
@@ -34,14 +34,14 @@ object IHash {
     new String(hex, "ASCII")
   }
 
-  implicit val ordering = new Ordering[IHash] {
-    override def compare(left: IHash, right: IHash) = {
+  implicit val ordering = new Ordering[Hash] {
+    override def compare(left: Hash, right: Hash) = {
       left.toString.compare(right.toString)
     }
   }
 }
 
-trait IHash {
+trait Hash {
   def ==(hash: String) = this.toString == hash
   def !=(hash: String) = !this.==(hash)
   def equals(hash: String) = this == hash

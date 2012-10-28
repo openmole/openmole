@@ -33,7 +33,7 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.serializer._
 import org.openmole.core.serializer.structure.FileInfo
 import org.openmole.misc.hashservice.HashService._
-import org.openmole.misc.tools.service.IHash
+import org.openmole.misc.tools.service._
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.io.FileUtil._
 import scala.collection.immutable.TreeMap
@@ -67,7 +67,7 @@ class FileSystemInstantRerun(dir: File, capsules: Set[ICapsule]) extends IInstan
     ret
   }
 
-  private var jobsInProgressHash = new TreeMap[MoleJobId, (IHash, IHash)]
+  private var jobsInProgressHash = new TreeMap[MoleJobId, (Hash, Hash)]
 
   def rerun(job: IMoleJob, capsule: ICapsule): Boolean = synchronized {
     if (!capsules.contains(capsule)) return false

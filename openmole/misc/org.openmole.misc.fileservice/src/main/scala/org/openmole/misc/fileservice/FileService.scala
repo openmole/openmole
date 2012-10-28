@@ -24,7 +24,7 @@ import java.util.logging.Logger
 import org.openmole.misc.tools.cache.AssociativeCache
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.TarArchiver._
-import org.openmole.misc.tools.service.IHash
+import org.openmole.misc.tools.service.Hash
 import org.openmole.misc.filecache.FileCacheDeleteOnFinalize
 import org.openmole.misc.filecache.IFileCache
 import org.openmole.misc.hashservice.HashService
@@ -38,12 +38,12 @@ object FileService {
 
   class CachedArchiveForDir(file: File, val lastModified: Long) extends FileCacheDeleteOnFinalize(file)
 
-  private[fileservice] val hashCache = new AssociativeCache[String, IHash]
+  private[fileservice] val hashCache = new AssociativeCache[String, Hash]
   private[fileservice] val archiveCache = new AssociativeCache[String, CachedArchiveForDir]
 
   Updater.delay(new FileServiceGC, Workspace.preferenceAsDurationInMs(FileService.GCInterval))
 
-  def hash(file: File): IHash =
+  def hash(file: File): Hash =
     if (file.isDirectory) hash(archiveForDir(file).file(false), file)
     else hash(file, file)
 
@@ -51,7 +51,7 @@ object FileService {
 
   def archiveForDir(file: File): IFileCache = archiveForDir(file, file)
 
-  def hash(key: Object, file: File): IHash = hashCache.cache(key, file.getAbsolutePath, HashService.computeHash(file))
+  def hash(key: Object, file: File): Hash = hashCache.cache(key, file.getAbsolutePath, HashService.computeHash(file))
 
   def archiveForDir(key: Object, file: File): IFileCache = {
     archiveCache.cache(key, file.getAbsolutePath, {

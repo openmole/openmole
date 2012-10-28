@@ -17,11 +17,11 @@
 
 package org.openmole.misc.hashservice
 
-import org.openmole.misc.tools.service.IHash
+import org.openmole.misc.tools.service.Hash
 
-class SHA1Hash(val content: Array[Byte]) extends IHash {
+class SHA1Hash(val content: Array[Byte]) extends Hash {
 
-  override def toString: String = IHash.hexString(content)
+  override def toString: String = Hash.hexString(content)
 
   override def hashCode: Int = content.deep.hashCode
 

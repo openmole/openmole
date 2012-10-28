@@ -26,6 +26,8 @@ class LockRepository[T] {
 
   val locks = new HashMap[T, (Lock, AtomicInteger)]
 
+  def nbLocked(k: T) = synchronized(locks.get(k).map { _._2.get }.getOrElse(0))
+
   def lock(obj: T) = synchronized {
     val lock = locks.getOrElseUpdate(obj, (new ReentrantLock, new AtomicInteger(0)))
     lock._2.incrementAndGet

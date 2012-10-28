@@ -236,10 +236,10 @@ class GliteEnvironment(
       }
     }
 
-  override def selectAStorage(usedFiles: Iterable[File]) =
-    if (storages.size == 1) super.selectAStorage(usedFiles)
+  override def selectAStorage(usedFileHashes: Iterable[(File, Hash)]) =
+    if (storages.size == 1) super.selectAStorage(usedFileHashes)
     else {
-      val totalFileSize = usedFiles.map { _.size }.sum
+      val totalFileSize = usedFileHashes.map { case (f, _) ⇒ f.size }.sum
       val onStorage = ReplicaCatalog.withClient(ReplicaCatalog.inCatalog(env.id)(_))
       val maxTime = jobServices.map(_.time).max
 
@@ -249,7 +249,7 @@ class GliteEnvironment(
             cur.tryGetToken match {
               case None ⇒ None
               case Some(token) ⇒
-                val sizeOnStorage = usedFiles.filter(onStorage.getOrElse(_, Set.empty).contains(cur.id)).map(_.size).sum
+                val sizeOnStorage = usedFileHashes.filter { case (_, h) ⇒ onStorage.getOrElse(h.toString, Set.empty).contains(cur.id) }.map { case (f, _) ⇒ f.size }.sum
                 val sizeFactor =
                   if (totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) else 1.
 

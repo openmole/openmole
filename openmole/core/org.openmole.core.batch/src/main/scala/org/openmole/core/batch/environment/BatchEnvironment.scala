@@ -228,7 +228,7 @@ akka {
     (r, r.waitAToken)
   }
 
-  def selectAStorage(usedFiles: Iterable[File]): (StorageService, AccessToken) = {
+  def selectAStorage(usedFileHashes: Iterable[(File, Hash)]): (StorageService, AccessToken) = {
     val r = storages.head
     (r, r.waitAToken)
   }

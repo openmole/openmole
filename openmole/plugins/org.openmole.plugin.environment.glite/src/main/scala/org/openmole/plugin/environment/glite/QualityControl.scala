@@ -22,13 +22,12 @@ import org.openmole.misc.tools.service._
 trait QualityControl {
   def hysteresis: Int
 
-  private lazy val _successRate = new MovingAverage(hysteresis, 1.)
+  private lazy val _successRate = new MovingAverage(hysteresis, 0.)
   private lazy val operationTime = new MovingAverage(hysteresis)
 
-  def failed = _successRate.apply(0)
-  def success = _successRate.apply(1)
+  def failed = _successRate(0)
+  def success = _successRate(1)
   def successRate = _successRate.get
-  def reinit = { _successRate.reset(1.); operationTime.reset() }
   def timed(t: Double) = operationTime(t)
   def time = operationTime.get
 

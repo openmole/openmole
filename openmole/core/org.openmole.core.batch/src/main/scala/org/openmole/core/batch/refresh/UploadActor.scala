@@ -84,12 +84,12 @@ class UploadActor(jobManager: ActorRef) extends Actor {
       val serialisationPluginFiles = new TreeSet[File] ++ serializatonPlugins.flatMap { PluginManager.pluginsForClass }
 
       val (storage, token) = environment.selectAStorage(
-        serializationFile +
+        (serializationFile +
           environment.runtime +
           environment.jvmLinuxI386 +
           environment.jvmLinuxX64 ++
           environment.plugins ++
-          serialisationPluginFiles)
+          serialisationPluginFiles).map(f ⇒ f -> FileService.hash(job.moleExecution, f)))
 
       implicit val t = token
       try ReplicaCatalog.withClient { implicit client ⇒

@@ -17,8 +17,8 @@
 
 package org.openmole.core.serializer.structure
 
-import org.openmole.misc.tools.service.IHash
+import org.openmole.misc.tools.service._
 
-class FileInfo(val fileHash: IHash, val filePathHash: IHash, val isDir: Boolean) {
+class FileInfo(val fileHash: Hash, val filePathHash: Hash, val isDir: Boolean) {
   override def toString = "fileHash = " + fileHash + ", filePathHash = " + filePathHash + ", isDir=" + isDir
 }
