@@ -17,10 +17,9 @@
 
 package org.openmole.plugin.environment.desktopgrid
 
-import org.openmole.core.batch.authentication.Authentication
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage._
-import java.util.concurrent.Executors
+import org.openmole.core.batch.control._
 
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.sftpserver.SFTPServer
@@ -50,12 +49,11 @@ class DesktopGridEnvironment(
   val url = new URI("desktop", login, "localhost", port, null, null, null)
   val id = url.toString
 
-  @transient lazy val batchStorage = new VolatileStorageService {
+  @transient lazy val batchStorage = new VolatileStorageService with UnlimitedAccess {
     def environment = env
     val remoteStorage = new DumyStorage
     def url = env.url
     def root = path.getAbsolutePath
-    def connections = Int.MaxValue
     val storage = new GSLocalStorage {}
     val authentication: Unit = Unit
   }

@@ -19,42 +19,36 @@ package org.openmole.plugin.environment.glite
 
 import org.openmole.misc.tools.service._
 
-object QualityControl {
+trait QualityControl {
+  def hysteresis: Int
 
-  def withFailureControl[A](qualityControl: QualityControl)(op: ⇒ A): A = {
-    try {
-      val ret = op
-      qualityControl.success
-      ret
-    } catch {
-      case e: Throwable ⇒
-        qualityControl.failed
-        throw e
-    }
-  }
-
-  def timed[A](qualityControl: QualityControl, op: ⇒ A): A = {
-    val begin = System.currentTimeMillis
-    val a = op
-    qualityControl.timed(System.currentTimeMillis - begin)
-    a
-  }
-
-  def apply(hysteresis: Int, nbSuccess: Int) = {
-    val q = new QualityControl(hysteresis)
-    for (i ← 0 until nbSuccess) q.success
-    q
-  }
-
-}
-
-class QualityControl(hysteresis: Int) {
-  private val _successRate = new MovingAverage(hysteresis, 1.)
-  private val operationTime = new MovingAverage(hysteresis)
+  private lazy val _successRate = new MovingAverage(hysteresis, 1.)
+  private lazy val operationTime = new MovingAverage(hysteresis)
 
   def failed = _successRate.apply(0)
   def success = _successRate.apply(1)
   def successRate = _successRate.get
   def reinit = { _successRate.reset(1.); operationTime.reset() }
   def timed(t: Double) = operationTime(t)
+  def time = operationTime.get
+
+  def quality[A](op: ⇒ A): A = timed {
+    try {
+      val ret = op
+      success
+      ret
+    } catch {
+      case e: Throwable ⇒
+        failed
+        throw e
+    }
+  }
+
+  def timed[A](op: ⇒ A): A = {
+    val begin = System.currentTimeMillis
+    val a = op
+    timed(System.currentTimeMillis - begin)
+    a
+  }
+
 }

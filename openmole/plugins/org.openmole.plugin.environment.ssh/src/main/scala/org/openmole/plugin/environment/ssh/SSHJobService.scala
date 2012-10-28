@@ -40,7 +40,7 @@ object SSHJobService extends Logger
 
 import SSHJobService._
 
-trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
+trait SSHJobService extends GridScaleJobService with SharedStorage with LimitedAccess { js ⇒
 
   def nbSlots: Int
 

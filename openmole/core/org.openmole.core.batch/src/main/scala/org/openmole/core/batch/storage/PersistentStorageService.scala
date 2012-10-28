@@ -46,7 +46,7 @@ trait PersistentStorageService extends StorageService {
 
   @transient protected var tmpSpaceVar: Option[String] = None
   @transient protected var persistentSpaceVar: Option[String] = None
-  @transient protected var time = System.currentTimeMillis
+  @transient private var time = System.currentTimeMillis
 
   override def clean(implicit token: AccessToken, objectContainer: ObjectContainer) = synchronized {
     for (r ← ReplicaCatalog.replicas(this)) ReplicaCatalog.remove(r)

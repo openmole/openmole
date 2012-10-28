@@ -24,11 +24,10 @@ import fr.iscpif.gridscale.information.BDII
 import java.io.File
 import java.net.URI
 import java.net.URISyntaxException
-import java.util.logging.Level
-import java.util.logging.Logger
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage._
 import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.tools.service.Logger
 import org.openmole.core.model.job.IJob
 import org.openmole.misc.exception._
 import org.openmole.misc.tools.service.Duration._
@@ -44,7 +43,7 @@ import annotation.tailrec
 import org.globus.gsi.gssapi.GlobusGSSCredentialImpl
 import ref.WeakReference
 
-object GliteEnvironment {
+object GliteEnvironment extends Logger {
 
   val ProxyTime = new ConfigurationLocation("GliteEnvironment", "ProxyTime")
   val MyProxyTime = new ConfigurationLocation("GliteEnvironment", "MyProxyTime")
@@ -162,7 +161,12 @@ class GliteEnvironment(
   override def allJobServices = {
     val jss = getBDII.queryWMS(voName, Workspace.preferenceAsDurationInS(FetchRessourcesTimeOut).toInt)
     jss.map {
-      js ⇒ new GliteJobService(js, this, threadsByWMS)
+      js ⇒
+        new GliteJobService {
+          val jobService = js
+          val environment = env
+          val nbTokens = threadsByWMS
+        }
     }
   }
 
@@ -181,19 +185,24 @@ class GliteEnvironment(
   override def selectAJobService =
     if (jobServices.size == 1) super.selectAJobService
     else {
+      val maxTime = jobServices.map(_.time).max
+
       def fitness =
         jobServices.flatMap {
           cur ⇒
-            cur.usageControl.tryGetToken match {
+            cur.tryGetToken match {
               case None ⇒ None
               case Some(token) ⇒
-                val q = cur.qualityControl
+                val time = cur.time
+                val timeFactor =
+                  if (time.isNaN || maxTime.isNaN || maxTime == 0.0) 1.0
+                  else 1 - (time / maxTime)
 
-                val nbSubmitted = q.submitted
-                val fitness = orMinForExploration(
-                  if (q.submitted > 0)
-                    math.pow((q.runnig.toDouble / q.submitted) * q.successRate * (q.totalDone / q.totalSubmitted), 2)
-                  else math.pow(q.successRate, 2))
+                val jobFactor =
+                  if (cur.submitted > 0 && cur.totalSubmitted > 0) (cur.runnig.toDouble / cur.submitted) * (cur.totalDone / cur.totalSubmitted)
+                  else 1.0
+
+                val fitness = orMinForExploration(math.pow(jobFactor * cur.successRate * timeFactor, 2))
                 Some((cur, token, fitness))
             }
         }
@@ -208,14 +217,18 @@ class GliteEnvironment(
 
       atomic { implicit txn ⇒
         val notLoaded = fitness
-        selected(Random.default.nextDouble * notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum, notLoaded.toList) match {
+        val totalFitness = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
+
+        selected(Random.default.nextDouble * totalFitness, notLoaded.toList) match {
           case Some((jobService, token)) ⇒
             for {
               (s, t, _) ← notLoaded
               if (s.id != jobService.id)
-            } s.usageControl.releaseToken(t)
+            } s.releaseToken(t)
             jobService -> token
-          case None ⇒ retry
+          case None ⇒
+            for { (s, t, _) ← notLoaded } s.releaseToken(t)
+            retry
         }
       }
     }
@@ -225,17 +238,24 @@ class GliteEnvironment(
     else {
       val totalFileSize = usedFiles.map { _.size }.sum
       val onStorage = ReplicaCatalog.withClient(ReplicaCatalog.inCatalog(env.id)(_))
+      val maxTime = jobServices.map(_.time).max
 
       def fitness =
         storages.flatMap {
           cur ⇒
-            cur.usageControl.tryGetToken match {
+            cur.tryGetToken match {
               case None ⇒ None
               case Some(token) ⇒
                 val sizeOnStorage = usedFiles.filter(onStorage.getOrElse(_, Set.empty).contains(cur.id)).map(_.size).sum
+                val sizeFactor =
+                  if (totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) else 1.
 
-                val fitness = orMinForExploration(
-                  math.pow(cur.qualityControl.successRate, 2) * (if (totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) else 1))
+                val time = cur.time
+                val timeFactor =
+                  if (time.isNaN || maxTime.isNaN || maxTime == 0.0) 1.0
+                  else 1 - (time / maxTime)
+
+                val fitness = orMinForExploration(math.pow(cur.successRate * sizeFactor * timeFactor, 2))
                 Some((cur, token, fitness))
             }
         }
@@ -253,15 +273,18 @@ class GliteEnvironment(
         val notLoaded = fitness
         val fitnessSum = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
         val drawn = Random.default.nextDouble * fitnessSum
-
-        selected(Random.default.nextDouble * notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum, notLoaded.toList) match {
+        val totalFitness = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
+        //GliteEnvironment.logger.fine("Total fitness " + totalFitness + " among " + notLoaded.size)
+        selected(Random.default.nextDouble * totalFitness, notLoaded.toList) match {
           case Some((storage, token)) ⇒
             for {
               (s, t, _) ← notLoaded
               if (s.id != storage.id)
-            } s.usageControl.releaseToken(t)
+            } s.releaseToken(t)
             storage -> token
-          case None ⇒ retry
+          case None ⇒
+            for { (s, t, _) ← notLoaded } s.releaseToken(t)
+            retry
         }
       }
 

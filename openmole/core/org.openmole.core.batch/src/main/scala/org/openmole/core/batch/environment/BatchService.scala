@@ -19,11 +19,7 @@ package org.openmole.core.batch.environment
 
 import org.openmole.core.batch.control._
 
-trait BatchService {
-  def connections: Int
+trait BatchService extends UsageControl {
   val id: String
   def environment: BatchEnvironment
-
-  @transient lazy val usageControl = UsageControl(connections)
-  def withToken[A](a: (AccessToken) ⇒ A): A = usageControl.withToken(a)
 }

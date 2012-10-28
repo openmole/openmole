@@ -36,7 +36,7 @@ class SubmitActor(jobManager: ActorRef) extends Actor {
     case Submit(job, sj) ⇒
       if (!job.state.isFinal) {
         try {
-          val bj = trySubmit(sj, job.environment)
+          val bj = retryOnTimeout(trySubmit(sj, job.environment))
           job.state = SUBMITTED
           jobManager ! Submitted(job, sj, bj)
         } catch {
@@ -50,8 +50,8 @@ class SubmitActor(jobManager: ActorRef) extends Actor {
 
   private def trySubmit(serializedJob: SerializedJob, environment: BatchEnvironment) = {
     val (js, token) = environment.selectAJobService
-    try retryOnTimeout(js.submit(serializedJob)(token))
-    finally js.usageControl.releaseToken(token)
+    try js.submit(serializedJob)(token)
+    finally js.releaseToken(token)
   }
 
 }

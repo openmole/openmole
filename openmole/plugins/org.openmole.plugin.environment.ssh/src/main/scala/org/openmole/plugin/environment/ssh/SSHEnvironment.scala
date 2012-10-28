@@ -18,6 +18,7 @@
 package org.openmole.plugin.environment.ssh
 
 import java.net.URI
+import org.openmole.core.batch.control.LimitedAccess
 import org.openmole.core.batch.environment._
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.core.batch.storage.PersistentStorageService
@@ -47,14 +48,14 @@ class SSHEnvironment(
 
   @transient lazy val id = new URI("ssh", env.user, env.host, env.port, null, null, null).toString
 
-  @transient lazy val storage = new PersistentStorageService with SSHStorageService with ThisHost {
-    def connections = Workspace.preferenceAsInt(MaxConnections)
+  @transient lazy val storage = new PersistentStorageService with SSHStorageService with ThisHost with LimitedAccess {
+    def nbTokens = Workspace.preferenceAsInt(MaxConnections)
     def root = env.path
     def environment = env
   }
 
   @transient lazy val jobService = new SSHJobService with ThisHost {
-    def connections = Workspace.preferenceAsInt(MaxConnections)
+    def nbTokens = Workspace.preferenceAsInt(MaxConnections)
     def nbSlots = env.nbSlots
     def root = env.path
     def environment = env

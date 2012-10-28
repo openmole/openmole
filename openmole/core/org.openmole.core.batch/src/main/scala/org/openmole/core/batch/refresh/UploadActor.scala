@@ -117,7 +117,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
         } finally executionMessageFile.delete
 
         new SerializedJob(storage, communicationPath, inputPath, runtime)
-      } finally storage.usageControl.releaseToken(token)
+      } finally storage.releaseToken(token)
     } finally jobFile.delete
   }
 

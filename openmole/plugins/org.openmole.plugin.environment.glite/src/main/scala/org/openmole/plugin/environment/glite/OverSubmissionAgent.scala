@@ -25,7 +25,6 @@ import org.openmole.core.model.job.IJob
 import org.openmole.misc.tools.cache.AssociativeCache
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.updater.IUpdatableWithVariableDelay
-import org.openmole.plugin.environment.glite.GliteEnvironment._
 import org.openmole.misc.workspace.Workspace
 import scala.collection.mutable.HashMap
 import scala.collection.immutable.TreeSet
@@ -41,7 +40,7 @@ import OverSubmissionAgent._
 
 class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends IUpdatableWithVariableDelay {
 
-  override def delay = Workspace.preferenceAsDurationInMs(OverSubmissionInterval)
+  override def delay = Workspace.preferenceAsDurationInMs(GliteEnvironment.OverSubmissionInterval)
 
   override def update: Boolean = {
     try {
@@ -72,11 +71,11 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
 
         logger.fine("still running samples " + stillRunningSamples.size + " samples size " + samples.size)
 
-        var nbRessub = if (!samples.isEmpty && jobs.size > Workspace.preferenceAsInt(OverSubmissionMinNumberOfJob)) {
-          val windowSize = (jobs.size * Workspace.preferenceAsDouble(OverSubmissionSamplingWindowFactor)).toInt
+        var nbRessub = if (!samples.isEmpty && jobs.size > Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob)) {
+          val windowSize = (jobs.size * Workspace.preferenceAsDouble(GliteEnvironment.OverSubmissionSamplingWindowFactor)).toInt
           val windowStart = if (samples.size - 1 > windowSize) samples.size - 1 - windowSize else 0
 
-          val nbSamples = Workspace.preferenceAsInt(OverSubmissionNbSampling)
+          val nbSamples = Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionNbSampling)
           val interval = (samples.last.done - samples(windowStart).submitted) / (nbSamples)
 
           //Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"interval " + interval)
@@ -86,12 +85,12 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
 
           logger.fine("max running " + maxNbRunning)
 
-          val minOversub = Workspace.preferenceAsInt(OverSubmissionMinNumberOfJob)
+          val minOversub = Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob)
           if (maxNbRunning < minOversub) minOversub - jobs.size else maxNbRunning - (stillRunning.size + stillReady.size)
-        } else Workspace.preferenceAsInt(OverSubmissionMinNumberOfJob) - jobs.size
+        } else Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob) - jobs.size
 
         logger.fine("NbRessub " + nbRessub)
-        val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = Workspace.preferenceAsInt(OverSubmissionNumberOfJobUnderMin)
+        val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionNumberOfJobUnderMin)
 
         if (nbRessub > 0) {
           // Resubmit nbRessub jobs in a fair manner

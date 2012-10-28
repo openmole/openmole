@@ -21,6 +21,7 @@ import fr.iscpif.gridscale.storage.SSHStorage
 import fr.iscpif.gridscale.tools.SSHHost
 import java.net.URI
 import org.openmole.core.batch.authentication.SSHAuthentication
+import org.openmole.core.batch.control.LimitedAccess
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage.PersistentStorageService
 import org.openmole.core.batch.storage.StorageService
@@ -51,14 +52,14 @@ class PBSEnvironment(
   @transient lazy val id = new URI("pbs", env.user, env.host, env.port, null, null, null).toString
 
   @transient lazy val storage =
-    new PersistentStorageService with SSHStorageService with ThisHost {
-      def connections = Workspace.preferenceAsInt(MaxConnections)
+    new PersistentStorageService with SSHStorageService with ThisHost with LimitedAccess {
+      def nbTokens = Workspace.preferenceAsInt(MaxConnections)
       def environment = env
       def root = env.path
     }
 
-  @transient lazy val jobService = new PBSJobService with ThisHost {
-    def connections = Workspace.preferenceAsInt(MaxConnections)
+  @transient lazy val jobService = new PBSJobService with ThisHost with LimitedAccess {
+    def nbTokens = Workspace.preferenceAsInt(MaxConnections)
     def queue = env.queue
     def environment = env
     def root = env.path

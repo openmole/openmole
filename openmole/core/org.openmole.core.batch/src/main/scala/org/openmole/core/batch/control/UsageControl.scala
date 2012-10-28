@@ -17,23 +17,7 @@
 
 package org.openmole.core.batch.control
 
-import org.openmole.misc.tools.service.Logger
-
 import scala.concurrent.stm._
-
-object UsageControl extends Logger {
-
-  val unlimitedAccess = new UsageControl with UnlimitedAccess
-
-  def apply(nbAccess: Int) = {
-    if (nbAccess != Int.MaxValue)
-      new UsageControl with LimitedAccess {
-        val nbTokens = nbAccess
-      }
-    else unlimitedAccess
-  }
-
-}
 
 trait UsageControl {
   def waitAToken: AccessToken

@@ -225,12 +225,12 @@ akka {
 
   def selectAJobService: (JobService, AccessToken) = {
     val r = jobServices.head
-    (r, r.usageControl.waitAToken)
+    (r, r.waitAToken)
   }
 
   def selectAStorage(usedFiles: Iterable[File]): (StorageService, AccessToken) = {
     val r = storages.head
-    (r, r.usageControl.waitAToken)
+    (r, r.waitAToken)
   }
 
   @transient lazy val plugins = PluginManager.pluginsForClass(this.getClass)

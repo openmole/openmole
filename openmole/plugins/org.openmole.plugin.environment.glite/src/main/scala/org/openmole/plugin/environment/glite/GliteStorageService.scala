@@ -40,27 +40,26 @@ object GliteStorageService {
     val remoteStorage = new RemoteGliteStorage(s.host, s.port, caCertDir)
     val environment = _environment
     val root = s.basePath
-    val connections = _environment.threadsBySE
+    def nbTokens = _environment.threadsBySE
     def authentication = environment.authentication._1
   }
 
 }
 
-trait GliteStorageService extends PersistentStorageService {
-  @transient lazy val qualityControl = new QualityControl(Workspace.preferenceAsInt(GliteEnvironment.QualityHysteresis))
-  def withQualityControl[A](op: ⇒ A) = QualityControl.withFailureControl(qualityControl)(op)
+trait GliteStorageService extends PersistentStorageService with QualityControl with LimitedAccess {
+  def hysteresis = Workspace.preferenceAsInt(GliteEnvironment.QualityHysteresis)
 
-  override def exists(path: String)(implicit token: AccessToken): Boolean = withQualityControl { super.exists(path)(token) }
-  override def listNames(path: String)(implicit token: AccessToken): Seq[String] = withQualityControl { super.listNames(path)(token) }
-  override def list(path: String)(implicit token: AccessToken): Seq[(String, FileType)] = withQualityControl { super.list(path)(token) }
-  override def makeDir(path: String)(implicit token: AccessToken): Unit = withQualityControl { super.makeDir(path)(token) }
-  override def rmDir(path: String)(implicit token: AccessToken): Unit = withQualityControl { super.rmDir(path)(token) }
-  override def rmFile(path: String)(implicit token: AccessToken): Unit = withQualityControl { super.rmFile(path)(token) }
-  override def openInputStream(path: String)(implicit token: AccessToken): InputStream = withQualityControl { super.openInputStream(path)(token) }
-  override def openOutputStream(path: String)(implicit token: AccessToken): OutputStream = withQualityControl { super.openOutputStream(path)(token) }
+  override def exists(path: String)(implicit token: AccessToken): Boolean = quality { super.exists(path)(token) }
+  override def listNames(path: String)(implicit token: AccessToken): Seq[String] = quality { super.listNames(path)(token) }
+  override def list(path: String)(implicit token: AccessToken): Seq[(String, FileType)] = quality { super.list(path)(token) }
+  override def makeDir(path: String)(implicit token: AccessToken): Unit = quality { super.makeDir(path)(token) }
+  override def rmDir(path: String)(implicit token: AccessToken): Unit = quality { super.rmDir(path)(token) }
+  override def rmFile(path: String)(implicit token: AccessToken): Unit = quality { super.rmFile(path)(token) }
+  override def openInputStream(path: String)(implicit token: AccessToken): InputStream = quality { super.openInputStream(path)(token) }
+  override def openOutputStream(path: String)(implicit token: AccessToken): OutputStream = quality { super.openOutputStream(path)(token) }
 
-  override def upload(src: File, dest: String)(implicit token: AccessToken) = withQualityControl { super.upload(src, dest)(token) }
-  override def uploadGZ(src: File, dest: String)(implicit token: AccessToken) = withQualityControl { super.uploadGZ(src, dest)(token) }
-  override def download(src: String, dest: File)(implicit token: AccessToken) = withQualityControl { super.download(src, dest)(token) }
-  override def downloadGZ(src: String, dest: File)(implicit token: AccessToken) = withQualityControl { super.downloadGZ(src, dest)(token) }
+  override def upload(src: File, dest: String)(implicit token: AccessToken) = quality { super.upload(src, dest)(token) }
+  override def uploadGZ(src: File, dest: String)(implicit token: AccessToken) = quality { super.uploadGZ(src, dest)(token) }
+  override def download(src: String, dest: File)(implicit token: AccessToken) = quality { super.download(src, dest)(token) }
+  override def downloadGZ(src: String, dest: File)(implicit token: AccessToken) = quality { super.downloadGZ(src, dest)(token) }
 }

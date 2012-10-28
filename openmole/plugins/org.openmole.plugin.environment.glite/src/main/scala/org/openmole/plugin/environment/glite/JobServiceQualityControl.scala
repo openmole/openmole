@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.glite
 import org.openmole.core.batch.control._
 import java.util.concurrent.atomic._
 
-class JobServiceQualityControl(hysteresis: Int) extends QualityControl(hysteresis) {
+trait JobServiceQualityControl extends QualityControl {
   private val _nbSubmitted = new AtomicInteger
   private val _nbRunning = new AtomicInteger
   private val _totalDone = new AtomicLong

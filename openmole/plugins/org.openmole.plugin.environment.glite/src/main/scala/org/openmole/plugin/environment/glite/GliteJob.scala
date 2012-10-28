@@ -55,15 +55,15 @@ trait GliteJob extends BatchJob with BatchJobId {
   override def state_=(state: ExecutionState) = synchronized {
     if (_state != state) {
       _state match {
-        case SUBMITTED ⇒ jobService.qualityControl.decrementSubmitted
-        case RUNNING ⇒ jobService.qualityControl.decrementRunning
+        case SUBMITTED ⇒ jobService.decrementSubmitted
+        case RUNNING ⇒ jobService.decrementRunning
         case _ ⇒
       }
 
       state match {
-        case SUBMITTED ⇒ jobService.qualityControl.incrementSubmitted
-        case RUNNING ⇒ jobService.qualityControl.incrementRunning
-        case DONE ⇒ jobService.qualityControl.incrementDone
+        case SUBMITTED ⇒ jobService.incrementSubmitted
+        case RUNNING ⇒ jobService.incrementRunning
+        case DONE ⇒ jobService.incrementDone
         case _ ⇒
       }
     }

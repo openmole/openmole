@@ -22,6 +22,7 @@ import java.io.OutputStream
 import java.io.PrintStream
 import java.net.URI
 import java.util.UUID
+import org.openmole.core.batch.control._
 import org.openmole.core.batch.storage.Storage
 import org.openmole.core.batch.environment.SerializedJob
 import org.openmole.misc.exception.InternalProcessingError
@@ -41,16 +42,16 @@ object GliteJobService extends Logger
 
 import GliteJobService._
 
-class GliteJobService(
-    val jobService: WMSJobService,
-    val environment: GliteEnvironment,
-    override val connections: Int) extends GridScaleJobService { js ⇒
+trait GliteJobService extends GridScaleJobService with JobServiceQualityControl with LimitedAccess { js ⇒
+
+  val jobService: WMSJobService
+  def environment: GliteEnvironment
 
   def authentication = environment.authentication._1
   def proxyFile = environment.authentication._2
 
-  val id = jobService.url.toString
-  @transient lazy val qualityControl = new JobServiceQualityControl(Workspace.preferenceAsInt(GliteEnvironment.QualityHysteresis))
+  lazy val id = jobService.url.toString
+  def hysteresis = Workspace.preferenceAsInt(GliteEnvironment.QualityHysteresis)
 
   var delegated = false
 
@@ -63,25 +64,22 @@ class GliteJobService(
     }
   }
 
-  def withQualityControl[A](op: ⇒ A) =
-    QualityControl.timed(qualityControl, QualityControl.withFailureControl(qualityControl)(op))
-
-  override protected def _purge(j: J) = withQualityControl {
+  override protected def _purge(j: J) = quality {
     checkDelegated
     super._purge(j)
   }
 
-  override protected def _cancel(j: J) = withQualityControl {
+  override protected def _cancel(j: J) = quality {
     checkDelegated
     super._cancel(j)
   }
 
-  override protected def _state(j: J) = withQualityControl {
+  override protected def _state(j: J) = quality {
     checkDelegated
     super._state(j)
   }
 
-  override protected def _submit(serializedJob: SerializedJob) = withQualityControl {
+  override protected def _submit(serializedJob: SerializedJob) = quality {
     checkDelegated
     import serializedJob._
 

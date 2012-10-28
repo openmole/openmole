@@ -28,7 +28,7 @@ import org.openmole.core.model.execution.ExecutionState._
 
 import DesktopGridEnvironment._
 
-trait DesktopGridJobService extends JobService { js ⇒
+trait DesktopGridJobService extends JobService with UnlimitedAccess { js ⇒
 
   type J = String
 
@@ -38,7 +38,6 @@ trait DesktopGridJobService extends JobService { js ⇒
   val jobsDir = new File(environment.path, jobsDirName) { mkdirs }
   val resultsDir = new File(environment.path, resultsDirName) { mkdirs }
 
-  def connections = Int.MaxValue
   def jobSubmissionFile(jobId: String) = new File(jobsDir, jobId)
   def timeStemps(jobId: String) = timeStempsDir.listFiles.filter { _.getName.startsWith(jobId) }
   def timeStempsExists(jobId: String) = timeStempsDir.list.exists { _.startsWith(jobId) }
