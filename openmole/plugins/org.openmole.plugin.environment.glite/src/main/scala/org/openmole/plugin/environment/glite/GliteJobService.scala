@@ -188,7 +188,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
       override val cpuNumber = environment.cpuNumber
       override val jobType = environment.jobType
       override val smpGranularity = environment.smpGranularity
-      override val retryCount = Some(0)
+      override val retryCount = Some(Workspace.preferenceAsInt(GliteEnvironment.WMSRetryCount))
       override val myProxyServer = environment.myProxy.map(_.url)
       //override val fuzzy = true
     }

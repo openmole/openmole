@@ -67,6 +67,7 @@ object GliteEnvironment extends Logger {
   val LCGCPTimeOut = new ConfigurationLocation("GliteEnvironment", "RuntimeCopyOnWNTimeOut")
   val QualityHysteresis = new ConfigurationLocation("GliteEnvironment", "QualityHysteresis")
   val MinValueForSelectionExploration = new ConfigurationLocation("GliteEnvironment", "MinValueForSelectionExploration")
+  val WMSRetryCount = new ConfigurationLocation("GliteEnvironment", "WMSRetryCount")
 
   Workspace += (ProxyTime, "PT24H")
   Workspace += (MyProxyTime, "P7D")
@@ -96,6 +97,8 @@ object GliteEnvironment extends Logger {
 
   Workspace += (MinValueForSelectionExploration, "0.0001")
   Workspace += (QualityHysteresis, "100")
+
+  Workspace += (WMSRetryCount, "10")
 }
 
 class GliteEnvironment(
