@@ -65,7 +65,23 @@ object ReplicaCatalog extends Logger {
 
   lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
   lazy val inCatalogCache = new TimeCache[Map[String, Set[String]]]
-  lazy val lockContainer = openClient
+
+  var _lockContainer: Option[ObjectContainer] = None
+  def lockContainer = synchronized {
+    def updateClient = {
+      val client = openClient
+      _lockContainer = Some(client)
+      client
+    }
+
+    _lockContainer match {
+      case Some(c) ⇒
+        if (c.ext.isClosed) updateClient
+        else c
+      case None ⇒
+        updateClient
+    }
+  }
 
   lazy val lockCache = new LockCache {
     def lock(k: String) = lockContainer.ext.setSemaphore(k, Int.MaxValue)
