@@ -33,7 +33,7 @@ class RefreshActor(jobManager: ActorRef) extends Actor {
       if (!job.state.isFinal) {
         try {
           val oldState = job.state
-          job.state = retryOnTimeout(bj.withToken(bj.updateState(_)))
+          job.state = bj.withToken(bj.updateState(_))
           if (job.state == DONE) {
             //logger.fine(sj.communicationStorage.path.toStringURI(sj.communicationDirPath))
             jobManager ! GetResult(job, sj, bj.resultPath)

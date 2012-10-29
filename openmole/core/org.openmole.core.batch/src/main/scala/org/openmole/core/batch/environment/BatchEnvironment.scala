@@ -105,7 +105,7 @@ object BatchEnvironment extends Logger {
 
   val StoragesGCUpdateInterval = new ConfigurationLocation("BatchEnvironment", "StoragesGCUpdateInterval")
 
-  val NbTryOnTimeout = new ConfigurationLocation("BatchEnvironment", "NbTryOnTimeout")
+  // val NbTryOnTimeout = new ConfigurationLocation("BatchEnvironment", "NbTryOnTimeout")
   val StatisticsHistorySize = new ConfigurationLocation("BatchEnvironment", "StatisticsHistorySize")
 
   Workspace += (MinUpdateInterval, "PT1M")
@@ -123,12 +123,10 @@ object BatchEnvironment extends Logger {
   Workspace += (EnvironmentCleaningThreads, "20")
 
   Workspace += (StoragesGCUpdateInterval, "PT1H")
-  Workspace += (NbTryOnTimeout, "3")
+  //Workspace += (NbTryOnTimeout, "3")
   Workspace += (StatisticsHistorySize, "10000")
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
-
-  def retryOnTimeout[T](f: ⇒ T) = Retry.retryOnTimeout(f, Workspace.preferenceAsInt(NbTryOnTimeout))
 
 }
 

@@ -64,7 +64,7 @@ object GliteEnvironment extends Logger {
   val JobShakingHalfLife = new ConfigurationLocation("GliteEnvironment", "JobShakingHalfLife")
   val JobShakingMaxReady = new ConfigurationLocation("GliteEnvironment", "JobShakingMaxReady")
 
-  val LCGCPTimeOut = new ConfigurationLocation("GliteEnvironment", "RuntimeCopyOnWNTimeOut")
+  val RemoteTimeout = new ConfigurationLocation("GliteEnvironment", "RemoteTimeout")
   val QualityHysteresis = new ConfigurationLocation("GliteEnvironment", "QualityHysteresis")
   val MinValueForSelectionExploration = new ConfigurationLocation("GliteEnvironment", "MinValueForSelectionExploration")
   val WMSRetryCount = new ConfigurationLocation("GliteEnvironment", "WMSRetryCount")
@@ -72,7 +72,7 @@ object GliteEnvironment extends Logger {
   Workspace += (ProxyTime, "PT24H")
   Workspace += (MyProxyTime, "P7D")
 
-  Workspace += (FetchRessourcesTimeOut, "PT5M")
+  Workspace += (FetchRessourcesTimeOut, "PT2M")
   Workspace += (CACertificatesSite, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/")
 
   Workspace += (LocalThreadsBySE, "10")
@@ -93,7 +93,7 @@ object GliteEnvironment extends Logger {
   Workspace += (JobShakingHalfLife, "PT30M")
   Workspace += (JobShakingMaxReady, "100")
 
-  Workspace += (LCGCPTimeOut, "PT5M")
+  Workspace += (RemoteTimeout, "PT5M")
 
   Workspace += (MinValueForSelectionExploration, "0.0001")
   Workspace += (QualityHysteresis, "100")

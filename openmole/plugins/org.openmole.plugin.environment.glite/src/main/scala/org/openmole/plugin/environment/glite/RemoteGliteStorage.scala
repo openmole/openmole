@@ -18,6 +18,7 @@
 package org.openmole.plugin.environment.glite
 
 import org.openmole.core.batch.storage.SimpleStorage
+import org.openmole.misc.workspace._
 import org.openmole.misc.exception._
 import fr.iscpif.gridscale.storage.SRMStorage
 import fr.iscpif.gridscale.authentication.ProxyFileAuthentication
@@ -32,6 +33,7 @@ class RemoteGliteStorage(val host: String, val port: Int, certificateDir: File) 
       val host: String = s.host
       val port: Int = s.port
       val basePath: String = ""
+      override val timeout = Workspace.preferenceAsDurationInS(GliteEnvironment.RemoteTimeout)
     }
 
   def authentication: SRMStorage#A = new ProxyFileAuthentication {

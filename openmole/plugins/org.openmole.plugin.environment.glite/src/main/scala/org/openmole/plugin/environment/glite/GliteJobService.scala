@@ -175,7 +175,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     builder.toString
   }
 
-  private def getTimeOut = Workspace.preferenceAsDurationInS(GliteEnvironment.LCGCPTimeOut).toString
+  private def getTimeOut = Workspace.preferenceAsDurationInS(GliteEnvironment.RemoteTimeout).toString
 
   protected def buildJobDescription(runtime: Runtime, script: File) =
     new WMSJobDescription {
