@@ -16,3 +16,6 @@ release/*
 *.iml
 .idea/
 .idea/*
+*~
+.project
+.settings

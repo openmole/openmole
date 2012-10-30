@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ************************************************************* -->
+    <!-- *** POM Relationships *************************************** -->
+    <!-- ************************************************************* -->
+    <parent>
+        <groupId>org.openmole.ide</groupId>
+        <artifactId>gui</artifactId>
+        <version>0.7-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>core</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>org.openmole.ide.core.model</module>
+        <module>org.openmole.ide.core.implementation</module>
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.scala-lang.scala-swing</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+     </dependencies>
+</project>
