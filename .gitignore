@@ -13,10 +13,6 @@ release/*
 *.iml
 *.ipr
 *.iws
-<<<<<<< HEAD
 *.iml
-.idea
-=======
 .idea/
->>>>>>> core
 .idea/*
