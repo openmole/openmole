@@ -1,0 +1,13 @@
+<assembly>
+  <id>daemon</id>
+  <baseDirectory></baseDirectory>
+  <formats>
+    <format>tar.gz</format>
+  </formats>
+  <fileSets>
+    <fileSet>
+      <directory>${project.build.directory}/product</directory>
+      <outputDirectory>/openmole-daemon/</outputDirectory>
+    </fileSet>
+  </fileSets>
+</assembly>

@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ************************************************************* -->
+    <!-- *** POM Relationships *************************************** -->
+    <!-- ************************************************************* -->
+
+    <parent>
+        <groupId>org.openmole</groupId>
+        <artifactId>openmole</artifactId>
+        <version>0.7-SNAPSHOT</version>
+    </parent>
+
+    <groupId>org.openmole.core</groupId>
+    <artifactId>openmole-ecosystem</artifactId>
+    <version>0.7-SNAPSHOT</version>
+
+    <modules>
+        <module>libraries</module>
+        <module>third-parties</module>
+        <module>openmole</module>
+        <module>runtime</module>
+    </modules>
+
+    <!-- ************************************************************* -->
+    <!-- *** Project Information ************************************* -->
+    <!-- ************************************************************* -->
+
+    <name>${project.artifactId} ${project.version}</name>
+    <url>http://www.openmole.org/</url>
+
+    <licenses>
+        <license>
+            <name>AGPLv3.0</name>
+            <url>http://www.gnu.org/licenses/agpl-3.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <!-- ************************************************************* -->
+    <!-- *** Build Settings ****************************************** -->
+    <!-- ************************************************************* -->
+
+    <packaging>pom</packaging>
+
+    
+
+    <distributionManagement>
+        <repository>
+            <id>maven.openmole.org</id>
+            <url>http://maven.openmole.org/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>maven.openmole.org</id>
+            <url>http://maven.openmole.org/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <!-- ************************************************************* -->
+    <!-- *** Build Environment  ************************************** -->
+    <!-- ************************************************************* -->
+
+    <mailingLists>
+        <mailingList>
+            <name>OpenMole users mailing-list</name>
+            <archive>http://sympa.lyon.cemagref.fr/wws/admin/simexplorer-users</archive>
+        </mailingList>
+        <mailingList>
+            <name>OpenMole developers mailing-list</name>
+            <archive>http://sympa.lyon.cemagref.fr/wws/admin/simexplorer-dev</archive>
+        </mailingList>
+    </mailingLists>
+
+    <scm>
+        <connection>scm:git:git://git.openmole.org:openmole-core</connection>
+        <developerConnection>scm:git:gitosis@git.openmole.org:openmole-core</developerConnection>
+        <url>git://git.openmole.org:openmole-core</url>
+    </scm>
+
+    <issueManagement>
+        <system>redmine</system>
+        <url>https://forge.iscpif.fr/projects/openmole/issues</url>
+    </issueManagement>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>maven.openmole.org</id>
+            <name>OpenMole repository</name>
+            <url>http://maven.openmole.org/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <repositories>
+        <repository>
+            <id>maven.openmole.org</id>
+            <name>OpenMole repository</name>
+            <url>http://maven.openmole.org/public/</url>
+        </repository>
+    </repositories>
+
+</project>
+
+
