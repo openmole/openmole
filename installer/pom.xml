@@ -39,7 +39,14 @@
             <version>${project.version}</version>
             <type>pom</type>
 	    <scope>provided</scope>
-        </dependency>-->
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.runtime.daemon</artifactId>
+            <version>${version}</version>
+            <type>tar.gz</type>
+        </dependency>
+-->
     </dependencies>
 
     <properties>
@@ -86,6 +93,13 @@
                                     <type>tgz</type>
                                     <outputDirectory>${project.build.directory}</outputDirectory>
                                     <destFileName>jvm-linux-x64.tar.gz</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.openmole.core</groupId>
+                                    <artifactId>org.openmole.runtime.daemon</artifactId>
+                                    <version>${version}</version>
+                                    <type>tar.gz</type>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
