@@ -32,9 +32,9 @@ trait IHookDataUI {
 
   def activated_=(a: Boolean)
 
-  def coreClass: Class[_ <: IHook]
+  def coreClass: Class[_ <: Hook]
 
-  def coreObject(executionManager: IExecutionManager): List[IHook]
+  def coreObject(executionManager: IExecutionManager): List[Hook]
 
   def buildPanelUI(task: ITaskDataProxyUI): IHookPanelUI
 }

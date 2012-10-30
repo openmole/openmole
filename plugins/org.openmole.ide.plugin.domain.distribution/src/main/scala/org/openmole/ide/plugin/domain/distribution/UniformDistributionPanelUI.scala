@@ -21,21 +21,23 @@ import scala.swing._
 import swing.Swing._
 import swing.ListView._
 import scala.swing.Table.ElementMode._
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.BorderPanel.Position._
 
-class UniformDistributionPanelUI(pud: UniformDistributionDataUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IDomainPanelUI {
-  val sizeField = new TextField(6)
+class UniformDistributionPanelUI(pud: UniformDistributionDataUI[_],
+                                 prototype: IPrototypeDataProxyUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IDomainPanelUI {
   val maxField = new TextField(6)
 
-  contents += (new Label("Size"), "gap para")
-  contents += (sizeField, "wrap")
-  //FIXME 2.10, just for Finite uniform domains
-  //contents += (maxField, "wrap")
+  prototype.dataUI.toString match {
+    case "Int" ⇒
+      contents += (new Label("Size"), "gap para")
+      contents += (maxField, "wrap")
+      maxField.text = pud.max.get.toString
+    case _ ⇒
+  }
 
-  sizeField.text = pud.size.toString
-
-  def saveContent = new UniformDistributionDataUI(sizeField.text.toInt)
-
+  def saveContent = UniformDistributionDataUI({ if (maxField.text.isEmpty) scala.None else Some(maxField.text.toInt) },
+    prototype.dataUI.toString)
 }

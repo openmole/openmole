@@ -15,12 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.domain.bounded
+package org.openmole.ide.plugin.domain.range
 
-import org.openmole.ide.core.implementation.registry.OSGiActivator
-import org.openmole.ide.core.implementation.registry.DomainActivator
+import java.math.BigDecimal
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.plugin.domain.range.BigDecimalLogarithmRange
+import org.openmole.core.model.domain.Domain
 
-class Activator extends OSGiActivator with DomainActivator {
+class BigDecimalLogarithmRangeDataUI(val min: String = "0.0", val max: String = "", val step: Option[String] = None) extends GenericRangeDomainDataUI[BigDecimal] {
 
-  override def domainFactories = List(new BoundedDomainFactoryUI)
+  def availableTypes = List("BigDecimal")
+
+  def coreObject(prototype: IPrototypeDataProxyUI): Domain[BigDecimal] = new BigDecimalLogarithmRange(min, max, stepString)
+
+  def coreClass = classOf[Domain[BigDecimal]]
 }

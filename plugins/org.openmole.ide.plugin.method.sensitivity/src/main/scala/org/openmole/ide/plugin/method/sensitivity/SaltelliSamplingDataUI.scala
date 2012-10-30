@@ -5,11 +5,10 @@
 
 package org.openmole.ide.plugin.method.sensitivity
 
-import org.openmole.core.implementation.sampling.Factor
+import org.openmole.core.model.sampling.Factor
 import org.openmole.core.model.data._
-import org.openmole.core.model.domain.IBounded
-import org.openmole.core.model.domain.IDomain
-import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.model.domain._
+import org.openmole.core.model.sampling.Sampling
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.sampling._
@@ -25,7 +24,7 @@ class SaltelliSamplingDataUI(val samples: String = "1",
   implicit def string2Int(s: String): Int = augmentString(s).toInt
 
   def coreObject(factors: List[IFactorDataUI],
-                 samplings: List[ISampling]) =
+                 samplings: List[Sampling]) =
     new SaltelliSampling(
       try samples
       catch {
@@ -34,10 +33,9 @@ class SaltelliSamplingDataUI(val samples: String = "1",
       factors.flatMap { f ⇒
         f.prototype match {
           case Some(p: IPrototypeDataProxyUI) ⇒ f.domain match {
-            case Some(d: IDomainDataUI) ⇒
-              val proto = p.dataUI.coreObject.asInstanceOf[Prototype[Double]]
-              List(new Factor(proto,
-                d.coreObject(proto).asInstanceOf[IDomain[Double] with IBounded[Double]]))
+            case Some(d: IDomainDataUI[_]) ⇒
+              List(Factor(p.dataUI.coreObject.asInstanceOf[Prototype[Double]],
+                d.coreObject(p).asInstanceOf[Domain[Double] with Bounds[Double]]))
             case _ ⇒ Nil
           }
           case _ ⇒ Nil

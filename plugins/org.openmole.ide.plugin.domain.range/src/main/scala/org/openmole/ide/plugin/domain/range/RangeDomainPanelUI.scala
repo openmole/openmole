@@ -19,35 +19,57 @@ package org.openmole.ide.plugin.domain.range
 
 import java.util.Locale
 import java.util.ResourceBundle
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
+import scala.swing.event._
 import scala.swing.TextField
+import scala.swing.CheckBox
 import scala.swing.Label
 
-class RangeDomainPanelUI(pud: RangeDomainDataUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IDomainPanelUI {
+class RangeDomainPanelUI(pud: GenericRangeDomainDataUI[_],
+                         //  prototype: IPrototypeDataProxyUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IDomainPanelUI {
+                         prototype: IPrototypeDataProxyUI) extends PluginPanel("wrap 2") with IDomainPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val minField = new TextField(6) { text = pud.min }
   val maxField = new TextField(6) { text = pud.max }
-  val stepField = new TextField(6) { text = pud.step }
+  val stepCheckBox = new CheckBox("Step")
+  val stepField = new TextField(6) { text = pud.stepString }
+  val logCheckBox = new CheckBox("Logarithmic")
+
+  stepField.visible = stepContent.isDefined
+  stepCheckBox.selected = stepContent.isDefined
+
+  listenTo(`stepCheckBox`)
+  reactions += {
+    case ButtonClicked(`stepCheckBox`) ⇒ stepField.visible = stepCheckBox.selected
+  }
 
   contents += (new Label("Min"), "gap para")
   contents += minField
   contents += (new Label("Max"), "gap para")
   contents += maxField
-  contents += (new Label("Step"), "gap para")
-  contents += (stepField, "wrap")
+  contents += (stepCheckBox, "gap para")
+  contents += stepField
+  contents += logCheckBox
 
-  def saveContent = new RangeDomainDataUI(minField.text,
+  logCheckBox.visible = (prototype.dataUI.toString == "BigDecimal" ||
+    prototype.dataUI.toString == "Double")
+
+  def stepContent: Option[String] = {
+    if (stepCheckBox.selected) {
+      if (stepField.text.isEmpty) None
+      else Some(stepField.text)
+    } else None
+  }
+
+  def saveContent = GenericRangeDomainDataUI(minField.text,
     maxField.text,
-    stepField.text)
-
-  //  override val help = new Helper {
-  //    add(minField, new Help(i18n.getString("min"), i18n.getString("minEX")))
-  //    add(maxField, new Help(i18n.getString("max"), i18n.getString("maxEX")))
-  //    add(stepField, new Help(i18n.getString("step"), i18n.getString("stepEX")))
-  //  }
+    stepContent,
+    logCheckBox.selected,
+    prototype.dataUI.toString)
 }

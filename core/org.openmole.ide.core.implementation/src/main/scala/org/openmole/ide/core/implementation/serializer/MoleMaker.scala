@@ -52,12 +52,12 @@ object MoleMaker {
 
   def buildMoleExecution(mole: IMole,
                          manager: IMoleSceneManager,
-                         hooks: List[(ICapsule, IHook)],
+                         hooks: List[(ICapsule, Hook)],
                          capsuleMap: Map[ICapsuleUI, ICapsule],
-                         groupingStrategies: List[(IGrouping, ICapsule)]): Either[Throwable, (IMoleExecution, Iterable[(IEnvironment, String)])] =
+                         groupingStrategies: List[(Grouping, ICapsule)]): Either[Throwable, (IMoleExecution, Iterable[(Environment, String)])] =
     try {
-      var envs = new HashSet[(IEnvironment, String)]
-      val strat = new ListBuffer[(ICapsule, IEnvironmentSelection)]
+      var envs = new HashSet[(Environment, String)]
+      val strat = new ListBuffer[(ICapsule, EnvironmentSelection)]
 
       manager.capsules.values.foreach { c ⇒
         c.dataUI.environment match {

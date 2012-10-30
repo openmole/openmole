@@ -18,7 +18,7 @@
 package org.openmole.ide.core.model.data
 
 import org.openmole.ide.core.model.commons.Constants._
-import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.model.sampling.Sampling
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import org.openmole.ide.core.model.sampling._
 
@@ -29,7 +29,7 @@ trait ISamplingDataUI extends IDataUI with ISamplingCompositionElementDataUI {
   def name: String = "Sampling"
 
   def coreObject(factors: List[IFactorDataUI],
-                 samplings: List[ISampling]): ISampling
+                 samplings: List[Sampling]): Sampling
 
   def buildPanelUI: ISamplingPanelUI
 

@@ -43,7 +43,7 @@ class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IP
   val domains = KeyRegistry.domains.values.map { _.buildDataUI }.toList
   val protoComboBox = new MyComboBox(prototypeContent(factorWidget.dataUI.domain))
   val domainComboBox = new MyComboBox(domainContent(factorWidget.dataUI.prototype))
-  var dPanel = factorWidget.dataUI.domain.getOrElse { domainContent(factorWidget.dataUI.prototype)(0) }.buildPanelUI
+  var dPanel = factorWidget.dataUI.domain.getOrElse { domainContent(factorWidget.dataUI.prototype)(0) }.buildPanelUI(protoComboBox.selection.item)
   protoComboBox.peer.setModel(MyComboBox.newConstantModel(prototypeContent(Some(domainComboBox.selection.item))))
 
   factorWidget.dataUI.prototype match {
@@ -52,7 +52,7 @@ class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IP
   }
 
   factorWidget.dataUI.domain match {
-    case Some(x: IDomainDataUI) ⇒
+    case Some(x: IDomainDataUI[_]) ⇒
       domainComboBox.selection.item = x
     case _ ⇒
   }
@@ -72,7 +72,7 @@ class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IP
     case SelectionChanged(`domainComboBox`) ⇒
       if (protoDomainPanel.contents.size == 2) protoDomainPanel.contents.remove(1)
       protoComboBox.peer.setModel(MyComboBox.newConstantModel(prototypeContent(Some(domainComboBox.selection.item))))
-      dPanel = domainComboBox.selection.item.buildPanelUI
+      dPanel = domainComboBox.selection.item.buildPanelUI(protoComboBox.selection.item)
       protoDomainPanel.contents += dPanel.peer
   }
 
@@ -84,18 +84,18 @@ class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IP
       displayDomainPanel(dContent)
   }
 
-  def displayDomainPanel(dContent: List[IDomainDataUI]) = dContent.filter { it ⇒
+  def displayDomainPanel(dContent: List[IDomainDataUI[_]]) = dContent.filter { it ⇒
     domainComboBox.selection.item.toString == it.toString
   }.headOption match {
-    case Some(d: IDomainDataUI) ⇒
-      dPanel = d.buildPanelUI
+    case Some(d: IDomainDataUI[_]) ⇒
+      dPanel = d.buildPanelUI(protoComboBox.selection.item)
       protoDomainPanel.contents += dPanel.peer
     case _ ⇒
   }
 
-  def prototypeContent(domain: Option[IDomainDataUI]) = Proxys.prototypes.filter { p ⇒
+  def prototypeContent(domain: Option[IDomainDataUI[_]]) = Proxys.prototypes.filter { p ⇒
     domain match {
-      case Some(d: IDomainDataUI) ⇒ d.isAcceptable(p)
+      case Some(d: IDomainDataUI[_]) ⇒ d.isAcceptable(p)
       case _ ⇒ true
     }
   }.toList

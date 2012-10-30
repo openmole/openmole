@@ -31,7 +31,7 @@ class CapsuleDataUI(var task: Option[ITaskDataProxyUI] = None,
                     var environment: Option[IEnvironmentDataProxyUI] = None,
                     var capsuleType: CapsuleType = new BasicCapsuleType) extends ICapsuleDataUI {
 
-  var hooks = new HashMap[Class[_ <: IHook], IHookDataUI]
+  var hooks = new HashMap[Class[_ <: Hook], IHookDataUI]
 
   def id = Counter.id.getAndIncrement
 
@@ -48,5 +48,5 @@ class CapsuleDataUI(var task: Option[ITaskDataProxyUI] = None,
     case _ ⇒ BASIC_TRANSITION
   }
 
-  def unhookAll = hooks = new HashMap[Class[_ <: IHook], IHookDataUI]
+  def unhookAll = hooks = new HashMap[Class[_ <: Hook], IHookDataUI]
 }

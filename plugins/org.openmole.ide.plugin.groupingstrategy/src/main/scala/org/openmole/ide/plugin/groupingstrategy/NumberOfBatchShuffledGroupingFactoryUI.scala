@@ -19,12 +19,12 @@ package org.openmole.ide.plugin.groupingstrategy
 
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.factory.IGroupingFactoryUI
-import org.openmole.plugin.grouping.batch.NumberOfBatchShuffledGrouping
+import org.openmole.plugin.grouping.batch.BatchShuffledGrouping
 
 class NumberOfBatchShuffledGroupingFactoryUI extends IGroupingFactoryUI {
   override def toString = "by shuffled groups"
 
-  def coreClass = classOf[NumberOfBatchShuffledGrouping]
+  def coreClass = classOf[BatchShuffledGrouping]
 
   def buildPanelUI(executionManager: IExecutionManager) =
     new NumberOfBatchShuffledGroupingPanelUI(executionManager)

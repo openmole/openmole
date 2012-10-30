@@ -21,7 +21,7 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.sampling.ISamplingCompositionWidget
 import org.openmole.ide.core.model.sampling.ISamplingWidget
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.model.sampling.Sampling
 import org.openmole.ide.core.model.data._
 import java.awt.Point
 
@@ -31,11 +31,11 @@ class SamplingCompositionDataUI(val name: String = "",
                                 val connections: List[(String, String)] = List.empty,
                                 val finalSampling: Option[String] = None) extends ISamplingCompositionDataUI {
 
-  var builtSampling = scala.collection.mutable.Map.empty[ISamplingDataUI, ISampling]
-  def coreClass = classOf[ISampling]
+  var builtSampling = scala.collection.mutable.Map.empty[ISamplingDataUI, Sampling]
+  def coreClass = classOf[Sampling]
 
   def coreObject = {
-    builtSampling = scala.collection.mutable.Map.empty[ISamplingDataUI, ISampling]
+    builtSampling = scala.collection.mutable.Map.empty[ISamplingDataUI, Sampling]
     val connectionMap = connections.groupBy { _._2 }.map { case (k, v) ⇒ k -> v.map { _._1 } }
     val factorMap = factors.map { f ⇒ f._1.id -> f._1 }.toMap
     val samplingMap: Map[String, ISamplingDataUI] = samplings.map { s ⇒ s._1.id -> s._1 }.toMap
@@ -51,7 +51,7 @@ class SamplingCompositionDataUI(val name: String = "",
   def buildSamplingCore(data: ISamplingDataUI,
                         connectionMap: Map[String, List[String]],
                         factorMap: Map[String, IFactorDataUI],
-                        samplingMap: Map[String, ISamplingDataUI]): ISampling = {
+                        samplingMap: Map[String, ISamplingDataUI]): Sampling = {
     println("buildSamplingCore")
     if (!builtSampling.contains(data)) {
       println("build :: " + data.id)

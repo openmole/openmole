@@ -17,36 +17,63 @@
 
 package org.openmole.ide.plugin.domain.range
 
+import java.math.BigDecimal
+import java.math.BigInteger
 import org.openmole.core.model.data.Prototype
-import org.openmole.core.model.domain.IDomain
+import org.openmole.core.model.domain.Domain
+import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.plugin.domain.range._
-import org.openmole.misc.exception.UserBadDataError
+import org.openmole.plugin.domain.bounded._
+import org.openmole.misc.tools.io.FromString
 import org.openmole.misc.tools.io.FromString._
+import org.openmole.misc.exception.UserBadDataError
 
-class RangeDomainDataUI(
-    val min: String = "0",
-    val max: String = "",
-    val step: String = "1") extends IDomainDataUI {
+object RangeDomainDataUI {
 
-  override def coreObject(prototypeObject: Prototype[_]): IDomain[_] = {
-    if (prototypeObject.`type`.erasure == java.lang.Integer.TYPE) new Range[Int](min, max, step)
-    else if (prototypeObject.`type`.erasure == java.lang.Double.TYPE) new Range[Double](min, max, step)
-    else if (prototypeObject.`type`.erasure == classOf[java.math.BigDecimal]) new Range[java.math.BigDecimal](min, max, step)
-    else if (prototypeObject.`type`.erasure == classOf[java.math.BigInteger]) new Range[java.math.BigInteger](min, max, step)
-    else throw new UserBadDataError("Unsupported range type " + prototypeObject.`type`.erasure)
+  def apply[T](min: String = "0", max: String = "", step: Option[String] = None, classString: String) =
+    {
+      classString match {
+        case "Int" ⇒ new RangeDomainDataUI[Int](min, max, step)
+        case "Double" ⇒ new RangeDomainDataUI[Double](min, max, step)
+        case "BigDecimal" ⇒ new RangeDomainDataUI[BigDecimal](min, max, step)
+        case "BigInteger" ⇒ new RangeDomainDataUI[BigInteger](min, max, step)
+        case "Long" ⇒ new RangeDomainDataUI[Long](min, max, step)
+        case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
+      }
+    }
+}
+
+class RangeDomainDataUI[T](
+  val min: String = "0",
+  val max: String = "",
+  val step: Option[String] = None)(
+    implicit domainType: Manifest[T],
+    fs: FromString[T],
+    integral: Integral[T])
+    extends GenericRangeDomainDataUI[T] {
+
+  override def coreObject(prototype: IPrototypeDataProxyUI): Domain[T] = step match {
+    case Some(s: String) ⇒
+      if (s.isEmpty) {
+        println("bounded")
+        new Bounded[T](min, max)
+      } else {
+        println("range")
+        new Range[T](min, max, stepString)
+      }
+    case _ ⇒ {
+      println("bounded")
+      new Bounded[T](min, max)
+    }
   }
 
-  def coreClass = classOf[IDomain[_]]
+  val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long")
 
-  def buildPanelUI = new RangeDomainPanelUI(this)
+  def coreClass = classOf[Domain[T]]
 
   override def toString = "Range"
 
-  def preview = " on [" + min + "," + max + "," + step + "]"
-
-  def isAcceptable(p: IPrototypeDataProxyUI) =
-    //p.dataUI.coreObject.`type`.baseClasses.contains(typeOf[File].typeSymbol)
-    p.dataUI.coreObject.`type`.erasure.isAssignableFrom(classOf[Double])
 }

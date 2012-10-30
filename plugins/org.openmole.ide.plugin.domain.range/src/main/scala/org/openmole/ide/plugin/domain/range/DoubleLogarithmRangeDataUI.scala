@@ -15,11 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.domain.bounded
+package org.openmole.ide.plugin.domain.range
 
-import org.openmole.ide.core.model.factory.IDomainFactoryUI
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.plugin.domain.range.DoubleLogarithmRange
+import org.openmole.core.model.domain.Domain
 
-class BoundedDomainFactoryUI extends IDomainFactoryUI {
-  def name = "Bounded"
-  override def buildDataUI = new BoundedDomainDataUI
+class DoubleLogarithmRangeDataUI(val min: String = "0.0", val max: String = "", val step: Option[String] = None) extends GenericRangeDomainDataUI[Double] {
+
+  def availableTypes = List("Double")
+
+  def coreObject(prototype: IPrototypeDataProxyUI): Domain[Double] = new DoubleLogarithmRange(min, max, stepString)
+
+  def coreClass = classOf[Domain[BigDecimal]]
 }

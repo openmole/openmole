@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.swing.Timer
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.implementation.execution.local._
-import org.openmole.core.model.execution.IEnvironment
+import org.openmole.core.model.execution.Environment
 import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.misc.visualization._
 import org.openmole.ide.misc.widget._
@@ -82,7 +82,7 @@ class ExecutionManager(manager: IMoleSceneManager,
       envBarPlotter.update(states)
     }
   })
-  var environments = new HashMap[IEnvironment, (String, HashMap[ExecutionState.ExecutionState, AtomicInteger])]
+  var environments = new HashMap[Environment, (String, HashMap[ExecutionState.ExecutionState, AtomicInteger])]
 
   val hookMenu = new Menu("Hooks")
 
@@ -112,7 +112,7 @@ class ExecutionManager(manager: IMoleSceneManager,
   contents += tabbedPane
 
   def start(hooks: Map[IHookPanelUI, ICapsuleUI],
-            groupings: List[(IGrouping, ICapsule)]) = synchronized {
+            groupings: List[(Grouping, ICapsule)]) = synchronized {
     tabbedPane.selection.index = 0
     cancel
     initBarPlotter
@@ -134,7 +134,7 @@ class ExecutionManager(manager: IMoleSceneManager,
           }
         }
         environments.foreach {
-          case (env, _) ⇒ EventDispatcher.listen(env, new EnvironmentExceptionListener(this), classOf[IEnvironment.ExceptionRaised])
+          case (env, _) ⇒ EventDispatcher.listen(env, new EnvironmentExceptionListener(this), classOf[Environment.ExceptionRaised])
         }
 
         environments.foreach(buildEmptyEnvPlotter)
@@ -164,18 +164,18 @@ class ExecutionManager(manager: IMoleSceneManager,
   }
 
   def buildMoleExecution(hooks: Map[IHookPanelUI, ICapsuleUI],
-                         groupings: List[(IGrouping, ICapsule)]) = MoleMaker.buildMoleExecution(mole,
+                         groupings: List[(Grouping, ICapsule)]) = MoleMaker.buildMoleExecution(mole,
     manager,
     hooks.flatMap { case (panel, caps) ⇒ List(capsuleMapping(caps)).zip(panel.saveContent.coreObject(this)) }.toList,
     capsuleMapping,
     groupings)
 
-  def incrementEnvironmentState(environment: IEnvironment,
+  def incrementEnvironmentState(environment: Environment,
                                 state: ExecutionState.ExecutionState) = synchronized {
     states = States.factory(states, state, environments(environment)._2(state).incrementAndGet)
   }
 
-  def decrementEnvironmentState(environment: IEnvironment,
+  def decrementEnvironmentState(environment: Environment,
                                 state: ExecutionState.ExecutionState) = synchronized {
     states = States.factory(states, state, environments(environment)._2(state).decrementAndGet)
   }
@@ -190,10 +190,10 @@ class ExecutionManager(manager: IMoleSceneManager,
 
   def initBarPlotter = synchronized {
     environments.clear
-    buildEmptyEnvPlotter((LocalEnvironment.asInstanceOf[IEnvironment], "Local"))
+    buildEmptyEnvPlotter((LocalEnvironment.asInstanceOf[Environment], "Local"))
   }
 
-  def buildEmptyEnvPlotter(e: (IEnvironment, String)) = {
+  def buildEmptyEnvPlotter(e: (Environment, String)) = {
     val m = HashMap(ExecutionState.SUBMITTED -> new AtomicInteger,
       ExecutionState.READY -> new AtomicInteger,
       ExecutionState.RUNNING -> new AtomicInteger,
@@ -204,7 +204,7 @@ class ExecutionManager(manager: IMoleSceneManager,
 
     moleExecution match {
       case Some(me: IMoleExecution) ⇒
-        EventDispatcher.listen(e._1, new JobStateChangedOnEnvironmentListener(this, me, e._1), classOf[IEnvironment.JobStateChanged])
+        EventDispatcher.listen(e._1, new JobStateChangedOnEnvironmentListener(this, me, e._1), classOf[Environment.JobStateChanged])
       case _ ⇒
     }
   }

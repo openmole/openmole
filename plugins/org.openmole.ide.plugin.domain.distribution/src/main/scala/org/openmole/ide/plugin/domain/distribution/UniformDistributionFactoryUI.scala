@@ -21,5 +21,5 @@ import org.openmole.ide.core.model.factory.IDomainFactoryUI
 
 class UniformDistributionFactoryUI extends IDomainFactoryUI {
   def name = "Uniform distribution"
-  override def buildDataUI = new UniformDistributionDataUI
+  override def buildDataUI = new UniformIntDistributionDataUI
 }

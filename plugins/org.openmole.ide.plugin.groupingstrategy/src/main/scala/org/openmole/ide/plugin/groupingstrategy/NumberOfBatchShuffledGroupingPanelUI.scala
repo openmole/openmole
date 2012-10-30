@@ -20,7 +20,7 @@ package org.openmole.ide.plugin.groupingstrategy
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.panel.IGroupingPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
-import org.openmole.plugin.grouping.batch.NumberOfBatchShuffledGrouping
+import org.openmole.plugin.grouping.batch.BatchShuffledGrouping
 import scala.swing.Label
 import scala.swing.TextField
 
@@ -32,5 +32,5 @@ class NumberOfBatchShuffledGroupingPanelUI(executionManager: IExecutionManager)
   contents += new Label("Number of jobs per group : ")
   contents += numberTextField
 
-  def coreObject = new NumberOfBatchShuffledGrouping(numberTextField.text.toInt)
+  def coreObject = new BatchShuffledGrouping(numberTextField.text.toInt)
 }

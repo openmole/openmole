@@ -31,8 +31,6 @@ trait IPrototypeDataUI[T] extends IDataUI {
 
   def typeClassString: String
 
-  //def factory: IPrototypeFactoryUI
-
   def coreObject: Prototype[T]
 
   def buildPanelUI: IPrototypePanelUI

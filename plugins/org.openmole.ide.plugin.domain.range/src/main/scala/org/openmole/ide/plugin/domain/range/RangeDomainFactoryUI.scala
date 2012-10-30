@@ -17,10 +17,14 @@
 
 package org.openmole.ide.plugin.domain.range
 
+import org.openmole.ide.plugin.domain.range.RangeDomainDataUI._
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
+import org.openmole.misc.tools.obj.ClassUtils
+import org.openmole.misc.tools.io.FromString._
+import scala.math.Integral._
 
 class RangeDomainFactoryUI extends IDomainFactoryUI {
   def name = "Range"
 
-  override def buildDataUI = new RangeDomainDataUI
+  override def buildDataUI = new RangeDomainDataUI[Double]("0.0", "")
 }

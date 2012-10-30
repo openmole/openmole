@@ -20,7 +20,7 @@ package org.openmole.ide.core.implementation.data
 import java.awt.Point
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
-import org.openmole.core.implementation.sampling.Sampling
+import org.openmole.core.model.sampling.Sampling
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.core.model.task._
@@ -72,7 +72,7 @@ object EmptyDataUIs {
   class EmptySamplingCompositionDataUI extends ISamplingCompositionDataUI {
     def name = "Empty sampling data UI"
     def dim = 0
-    def coreClass = classOf[ISampling]
+    def coreClass = classOf[Sampling]
     def coreObject = new EmptySampling
     def imagePath = "img/empty.png"
     def fatImagePath = "img/empty.png"

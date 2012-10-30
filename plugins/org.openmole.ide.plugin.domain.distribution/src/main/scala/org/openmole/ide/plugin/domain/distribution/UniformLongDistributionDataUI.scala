@@ -15,25 +15,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.registry
+package org.openmole.ide.plugin.domain.distribution
 
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.plugin.domain.distribution._
 import org.openmole.core.model.domain.Domain
-import org.openmole.ide.core.model.factory.IDomainFactoryUI
-import org.osgi.framework.BundleActivator
-import org.osgi.framework.BundleContext
 
-trait DomainActivator extends BundleActivator {
+class UniformLongDistributionDataUI extends UniformDistributionDataUI[Long] {
 
-  def domainFactories: Iterable[IDomainFactoryUI]
+  val max = None
 
-  abstract override def start(context: BundleContext) = {
-    super.start(context)
-    domainFactories.foreach { f ⇒ KeyRegistry.domains += KeyGenerator(f.buildDataUI.coreClass) -> f }
-  }
+  val availableTypes = List("Long")
 
-  abstract override def stop(context: BundleContext) = {
-    super.stop(context)
-    domainFactories.foreach { f ⇒ KeyRegistry.domains -= KeyGenerator(f.buildDataUI.coreClass) }
-  }
+  def buildPanelUI(p: IPrototypeDataProxyUI) = new UniformDistributionPanelUI(this, p)
+
+  def coreClass = classOf[Domain[Long]]
+
+  def coreObject(prototype: IPrototypeDataProxyUI): Domain[Long] = new UniformLongDistribution
 }
-

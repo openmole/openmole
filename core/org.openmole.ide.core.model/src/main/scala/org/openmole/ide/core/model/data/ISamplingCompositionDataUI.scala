@@ -20,14 +20,14 @@ package org.openmole.ide.core.model.data
 import java.awt.Point
 import org.openmole.ide.core.model.sampling.ISamplingWidget
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
-import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.model.sampling.Sampling
 
 trait ISamplingCompositionDataUI extends IDataUI {
   def name: String
 
   override def toString: String = name
 
-  def coreObject: ISampling
+  def coreObject: Sampling
 
   def imagePath: String
 

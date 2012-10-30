@@ -1,5 +1,5 @@
 
 #!/bin/bash
 
-find ./ -type f | grep -i -E "\.java$|\.scal|" | xargs sed -i "s/$1/$2/g"
+find ./ -type f | grep -i -E "\.scala|" | xargs sed -i "s/$1/$2/g"
 

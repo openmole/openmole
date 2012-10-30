@@ -18,7 +18,7 @@
 package org.openmole.ide.core.implementation.execution
 
 import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IGrouping
+import org.openmole.core.model.mole.Grouping
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.misc.widget.PluginPanel
@@ -59,7 +59,7 @@ object MultiGenericGroupingStrategyPanel {
     def buildPanelUI = hookFactoryComboBox.selection.item.buildPanelUI(executionManager)
   }
 
-  class GroupingStrategyData(val coreObject: IGrouping,
+  class GroupingStrategyData(val coreObject: Grouping,
                              val capsule: ICapsule) extends IData
 
   class GroupingStrategyFactory(executionManager: IExecutionManager) extends IFactory[GroupingStrategyData] {

@@ -24,7 +24,7 @@ import org.openmole.ide.misc.widget.multirow.MultiComboTextField
 import org.openmole.ide.misc.widget.multirow.MultiComboTextField._
 import org.openmole.ide.core.model.panel.IGroupingPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
-import org.openmole.plugin.grouping.batch.NumberOfMoleJobsGrouping
+import org.openmole.plugin.grouping.batch.MoleJobsGrouping
 import scala.swing.Label
 import scala.swing.TextField
 
@@ -34,5 +34,5 @@ class NumberOfMoleJobsGroupingPanelUI(executionManager: IExecutionManager) exten
   contents += new Label("Number of jobs per group : ")
   contents += numberTextField
 
-  def coreObject = new NumberOfMoleJobsGrouping(numberTextField.text.toInt)
+  def coreObject = new MoleJobsGrouping(numberTextField.text.toInt)
 }

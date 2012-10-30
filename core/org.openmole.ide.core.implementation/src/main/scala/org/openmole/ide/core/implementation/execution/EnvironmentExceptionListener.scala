@@ -17,18 +17,18 @@
 
 package org.openmole.ide.core.implementation.execution
 
-import org.openmole.core.model.execution.IEnvironment.ExceptionRaised
+import org.openmole.core.model.execution.Environment.ExceptionRaised
 import java.awt.Color
 import java.io.BufferedOutputStream
 import java.io.PrintStream
-import org.openmole.core.model.execution.IEnvironment
+import org.openmole.core.model.execution.Environment
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
 import TextAreaOutputStream._
 
-class EnvironmentExceptionListener(exeManager: ExecutionManager) extends EventListener[IEnvironment] {
+class EnvironmentExceptionListener(exeManager: ExecutionManager) extends EventListener[Environment] {
 
-  override def triggered(environment: IEnvironment, event: Event[IEnvironment]) = synchronized {
+  override def triggered(environment: Environment, event: Event[Environment]) = synchronized {
     event match {
       case x: ExceptionRaised ⇒
         exeManager.moleExecutionExceptionTextArea.append(x.level + ": Exception in task " + x.job)

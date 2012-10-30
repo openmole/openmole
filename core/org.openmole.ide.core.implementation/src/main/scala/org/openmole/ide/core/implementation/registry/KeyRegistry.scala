@@ -25,7 +25,7 @@ import org.openmole.ide.core.model.factory.IHookFactoryUI
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
-import org.openmole.core.model.domain.IDomain
+import org.openmole.core.model.domain.Domain
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap

@@ -18,13 +18,13 @@
 package org.openmole.ide.core.model.data
 
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
-import org.openmole.core.model.execution.IEnvironment
+import org.openmole.core.model.execution.Environment
 
 trait IEnvironmentDataUI extends IDataUI {
 
   override def toString: String = name
 
-  def coreObject: IEnvironment
+  def coreObject: Environment
 
   def buildPanelUI: IEnvironmentPanelUI
 

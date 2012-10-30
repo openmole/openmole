@@ -13,14 +13,14 @@ import org.openmole.plugin.sampling.csv.CSVSampling
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.core.implementation.sampling.InputSampling
 import org.openmole.ide.misc.tools.Counter
-import org.openmole.core.model.sampling.ISampling
+import org.openmole.core.model.sampling.Sampling
 
 class CSVSamplingDataUI(var csvFilePath: String = "",
                         var prototypeMapping: List[(String, IPrototypeDataProxyUI)] = List.empty,
                         val id: String = "sampling" + Counter.id.getAndIncrement) extends ISamplingDataUI {
 
   def coreObject(factors: List[IFactorDataUI],
-                 samplings: List[ISampling]) = {
+                 samplings: List[Sampling]) = {
     if (csvFilePath != "") {
       val fi = new File(csvFilePath)
       if (fi.isFile) {

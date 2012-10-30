@@ -23,9 +23,8 @@
         <module>org.openmole.ide.plugin.task.serialization</module>
         <module>org.openmole.ide.plugin.task.moletask</module>
         <module>org.openmole.ide.plugin.task.stat</module>
-        <module>org.openmole.ide.plugin.domain.bounded</module>
         <module>org.openmole.ide.plugin.domain.range</module>
-        <module>org.openmole.ide.plugin.domain.file</module>
+        <!--module>org.openmole.ide.plugin.domain.file</module-->
         <module>org.openmole.ide.plugin.domain.distribution</module>
         <module>org.openmole.ide.plugin.sampling.combine</module>
         <module>org.openmole.ide.plugin.sampling.lhs</module>

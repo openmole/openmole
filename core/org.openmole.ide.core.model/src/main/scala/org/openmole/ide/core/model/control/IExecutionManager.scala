@@ -36,5 +36,5 @@ trait IExecutionManager {
   def printStream: PrintStream
 
   def start(hooks: Map[IHookPanelUI, ICapsuleUI],
-            groupings: List[(IGrouping, ICapsule)])
+            groupings: List[(Grouping, ICapsule)])
 }

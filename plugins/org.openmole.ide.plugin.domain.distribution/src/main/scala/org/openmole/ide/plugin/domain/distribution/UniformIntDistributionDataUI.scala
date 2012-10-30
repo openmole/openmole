@@ -15,23 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.domain.bounded
+package org.openmole.ide.plugin.domain.distribution
 
-import org.openmole.ide.core.model.panel.IDomainPanelUI
-import org.openmole.ide.misc.widget.PluginPanel
-import scala.swing.Label
-import scala.swing.TextField
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.plugin.domain.distribution._
+import org.openmole.core.model.domain.Domain
 
-class BoundedDomainPanelUI(bud: BoundedDomainDataUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IDomainPanelUI {
-  val minField = new TextField(6) { text = bud.min }
-  val maxField = new TextField(6) { text = bud.max }
+class UniformIntDistributionDataUI(val max: Option[Int] = None) extends UniformDistributionDataUI[Int] {
 
-  contents += (new Label("Min"), "gap para")
-  contents += minField
-  contents += (new Label("Max"), "gap para")
-  contents += maxField
+  val availableTypes = List("Int")
 
-  def saveContent = new BoundedDomainDataUI(minField.text,
-    maxField.text)
+  def buildPanelUI(p: IPrototypeDataProxyUI) = new UniformDistributionPanelUI(this, p)
 
+  def coreClass = classOf[Domain[Int]]
+
+  def coreObject(prototype: IPrototypeDataProxyUI): Domain[Int] =
+    new UniformIntDistribution(max)
 }
