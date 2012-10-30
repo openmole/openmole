@@ -81,9 +81,9 @@ class Runtime {
 
       for (plugin ← executionMessage.plugins) {
         val inPluginDirLocalFile = File.createTempFile("plugin", ".jar", pluginDir)
-        val replicaFileCache = retry(storage.downloadGZ(plugin.path, inPluginDirLocalFile))
+        storage.downloadGZ(plugin.path, inPluginDirLocalFile)
 
-        if (HashService.computeHash(inPluginDirLocalFile) != plugin.hash)
+        if (HashService.computeHash(inPluginDirLocalFile).toString != plugin.hash)
           throw new InternalProcessingError("Hash of a plugin does't match.")
 
         usedFiles.put(plugin.src, inPluginDirLocalFile)
@@ -98,7 +98,7 @@ class Runtime {
         //To avoid getting twice the same plugin with different path
         if (!usedFiles.containsKey(repliURI.src)) {
           val cache = Workspace.newFile
-          retry(storage.downloadGZ(repliURI.path, cache))
+          storage.downloadGZ(repliURI.path, cache)
           val cacheHash = HashService.computeHash(cache).toString
 
           if (cacheHash != repliURI.hash)
@@ -118,7 +118,7 @@ class Runtime {
       }
 
       val jobsFileCache = Workspace.newFile
-      retry(storage.downloadGZ(executionMessage.jobs.path, jobsFileCache))
+      storage.downloadGZ(executionMessage.jobs.path, jobsFileCache)
 
       if (HashService.computeHash(jobsFileCache).toString != executionMessage.jobs.hash) throw new InternalProcessingError("Hash of the execution job does't match.")
 
