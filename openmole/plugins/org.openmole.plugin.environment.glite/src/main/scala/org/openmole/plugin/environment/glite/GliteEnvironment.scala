@@ -113,7 +113,7 @@ class GliteEnvironment(
     val jobType: Option[String] = None,
     val smpGranularity: Option[Int] = None,
     val myProxy: Option[MyProxy] = None,
-    val def architecture: Option[String] = None) extends BatchEnvironment with MemoryRequirement { env ⇒
+    val architecture: Option[String] = None) extends BatchEnvironment with MemoryRequirement { env ⇒
 
   import GliteEnvironment._
 
