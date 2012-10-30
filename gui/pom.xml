@@ -23,7 +23,6 @@
         <module>core</module>
         <module>plugins</module>
         <module>osgi</module>
-	<module>ui</module>
     </modules>
 
     <!-- ************************************************************* -->

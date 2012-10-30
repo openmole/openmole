@@ -8,8 +8,8 @@
     <!-- ************************************************************* -->
 
     <parent>
-        <groupId>org.openmole.ide</groupId>
-        <artifactId>gui</artifactId>
+        <groupId>org.openmole</groupId>
+        <artifactId>openmole</artifactId>
         <version>0.7-SNAPSHOT</version>
     </parent>
 
