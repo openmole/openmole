@@ -10,10 +10,10 @@
     <artifactId>openmole</artifactId>
     <version>0.7-SNAPSHOT</version>
 
-<!--    <modules>
-        <module>openmole-core</module>
-        <module>openmole-gui</module>
-    </modules>-->
+    <modules>
+        <module>core</module>
+        <module>gui</module>
+    </modules>
 
 
     <!-- ************************************************************* -->
