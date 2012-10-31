@@ -37,25 +37,26 @@ import org.openmole.ide.misc.tools.image.Images.CLOSE
 import org.openmole.ide.core.model.panel._
 import scala.swing.BorderPanel.Position._
 import scala.collection.JavaConversions._
+import org.openmole.misc.exception.UserBadDataError
 
 class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IPanelUI {
 
-  val domains = KeyRegistry.domains.values.map { _.buildDataUI }.toList
-  val protoComboBox = new MyComboBox(prototypeContent(factorWidget.dataUI.domain))
-  val domainComboBox = new MyComboBox(domainContent(factorWidget.dataUI.prototype))
-  var dPanel = factorWidget.dataUI.domain.getOrElse { domainContent(factorWidget.dataUI.prototype)(0) }.buildPanelUI(protoComboBox.selection.item)
-  protoComboBox.peer.setModel(MyComboBox.newConstantModel(prototypeContent(Some(domainComboBox.selection.item))))
+  val domains = KeyRegistry.domains.values
 
+  val protoComboBox = new MyComboBox(Proxys.prototypes.toList)
   factorWidget.dataUI.prototype match {
     case Some(x: IPrototypeDataProxyUI) ⇒ protoComboBox.selection.item = x
     case _ ⇒
   }
 
+  val domainComboBox = new MyComboBox(domainContent(factorWidget.dataUI.prototype.getOrElse(Proxys.prototypes.head)))
   factorWidget.dataUI.domain match {
     case Some(x: IDomainDataUI[_]) ⇒
       domainComboBox.selection.item = x
     case _ ⇒
   }
+
+  var dPanel = factorWidget.dataUI.domain.getOrElse { domainComboBox.selection.item }.buildPanelUI(protoComboBox.selection.item)
 
   val protoDomainPanel = new PluginPanel("wrap") {
     contents += new PluginPanel("wrap 3") {
@@ -71,16 +72,16 @@ class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IP
   domainComboBox.selection.reactions += {
     case SelectionChanged(`domainComboBox`) ⇒
       if (protoDomainPanel.contents.size == 2) protoDomainPanel.contents.remove(1)
-      protoComboBox.peer.setModel(MyComboBox.newConstantModel(prototypeContent(Some(domainComboBox.selection.item))))
       dPanel = domainComboBox.selection.item.buildPanelUI(protoComboBox.selection.item)
       protoDomainPanel.contents += dPanel.peer
+      repaint
   }
 
   protoComboBox.selection.reactions += {
     case SelectionChanged(`protoComboBox`) ⇒
       if (protoDomainPanel.contents.size == 2) protoDomainPanel.contents.remove(1)
-      val dContent = domainContent(Some(protoComboBox.selection.item))
-      // domainComboBox.peer.setModel(MyComboBox.newConstantModel(dContent))
+      val dContent = domainContent(protoComboBox.selection.item)
+      domainComboBox.peer.setModel(MyComboBox.newConstantModel(dContent))
       displayDomainPanel(dContent)
   }
 
@@ -93,18 +94,7 @@ class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IP
     case _ ⇒
   }
 
-  def prototypeContent(domain: Option[IDomainDataUI[_]]) = Proxys.prototypes.filter { p ⇒
-    domain match {
-      case Some(d: IDomainDataUI[_]) ⇒ d.isAcceptable(p)
-      case _ ⇒ true
-    }
-  }.toList
-
-  def domainContent(proto: Option[IPrototypeDataProxyUI]) =
-    proto match {
-      case Some(p: IPrototypeDataProxyUI) ⇒ domains.filter { _.isAcceptable(p) }
-      case _ ⇒ domains
-    }
+  def domainContent(proto: IPrototypeDataProxyUI) = domains.map { _.buildDataUI }.filter(_.isAcceptable(proto)).toList
 
   def saveContent = new FactorDataUI(factorWidget.dataUI.id,
     Some(protoComboBox.selection.item),

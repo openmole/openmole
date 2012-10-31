@@ -22,9 +22,8 @@ import org.openmole.ide.core.model.factory.IDomainFactoryUI
 import org.openmole.misc.tools.obj.ClassUtils
 import org.openmole.misc.tools.io.FromString._
 import scala.math.Integral._
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
-class RangeDomainFactoryUI extends IDomainFactoryUI {
+trait RangeDomainFactoryUI extends IDomainFactoryUI {
   def name = "Range"
-
-  override def buildDataUI = new RangeDomainDataUI[Double]("0.0", "")
 }

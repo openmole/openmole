@@ -27,7 +27,7 @@ class UniformIntDistributionDataUI(val max: Option[Int] = None) extends UniformD
 
   def buildPanelUI(p: IPrototypeDataProxyUI) = new UniformDistributionPanelUI(this, p)
 
-  def coreClass = classOf[Domain[Int]]
+  def coreClass = classOf[UniformIntDistribution]
 
   def coreObject(prototype: IPrototypeDataProxyUI): Domain[Int] =
     new UniformIntDistribution(max)

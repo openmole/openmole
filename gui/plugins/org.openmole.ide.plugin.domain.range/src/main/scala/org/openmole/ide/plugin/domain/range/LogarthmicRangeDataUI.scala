@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2012 Mathieu Leclaire 
+ * < mathieu.leclaire at openmole.org >
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,19 +18,6 @@
 
 package org.openmole.ide.plugin.domain.range
 
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.plugin.domain.range.DoubleLogarithmRange
-import org.openmole.core.model.domain.Domain
+import org.openmole.ide.core.model.data.IDomainDataUI
 
-class DoubleLogarithmRangeDataUI(val min: String = "0.0", val max: String = "", val step: Option[String] = None) extends LogarthmicRangeDataUI[Double] {
-
-  def availableTypes = List("Double")
-
-  def coreObject(prototype: IPrototypeDataProxyUI): Domain[Double] = new DoubleLogarithmRange(min, max, stepString)
-
-  def coreClass = classOf[DoubleLogarithmRangeDataUI]
-
-  def buildPanelUI(p: IPrototypeDataProxyUI) = new LogarithmicRangePanelUI(this, p)
-
-  override def toString = "Log Range"
-}
+abstract class LogarthmicRangeDataUI[T] extends GenericRangeDomainDataUI[T]

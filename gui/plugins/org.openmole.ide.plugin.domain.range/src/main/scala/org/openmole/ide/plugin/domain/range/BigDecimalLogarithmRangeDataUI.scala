@@ -21,12 +21,17 @@ import java.math.BigDecimal
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.domain.range.BigDecimalLogarithmRange
 import org.openmole.core.model.domain.Domain
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
-class BigDecimalLogarithmRangeDataUI(val min: String = "0.0", val max: String = "", val step: Option[String] = None) extends GenericRangeDomainDataUI[BigDecimal] {
+class BigDecimalLogarithmRangeDataUI(val min: String = "0.0", val max: String = "", val step: Option[String] = None) extends LogarthmicRangeDataUI[BigDecimal] {
 
   def availableTypes = List("BigDecimal")
 
   def coreObject(prototype: IPrototypeDataProxyUI): Domain[BigDecimal] = new BigDecimalLogarithmRange(min, max, stepString)
 
-  def coreClass = classOf[Domain[BigDecimal]]
+  def coreClass = classOf[BigDecimalLogarithmRangeDataUI]
+
+  def buildPanelUI(p: IPrototypeDataProxyUI) = new LogarithmicRangePanelUI(this, p)
+
+  override def toString = "Log Range"
 }

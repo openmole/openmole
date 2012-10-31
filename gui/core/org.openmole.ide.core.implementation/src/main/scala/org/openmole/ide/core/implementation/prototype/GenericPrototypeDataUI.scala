@@ -28,7 +28,13 @@ import org.openmole.ide.misc.tools.util.ClassLoader
 
 object GenericPrototypeDataUI {
 
-  val baseType = List("java.lang.Integer", "java.lang.Double", "java.lang.String", "java.io.File", "java.math.BigInteger", "java.math.BigDecimal")
+  val baseType = List("scala.Int",
+    classOf[java.lang.Long].getName,
+    classOf[String].getName,
+    classOf[java.lang.Double].getName,
+    classOf[java.io.File].getName,
+    classOf[java.math.BigInteger].getName,
+    classOf[java.math.BigDecimal].getName)
 
   var extraType = List.empty[String]
 

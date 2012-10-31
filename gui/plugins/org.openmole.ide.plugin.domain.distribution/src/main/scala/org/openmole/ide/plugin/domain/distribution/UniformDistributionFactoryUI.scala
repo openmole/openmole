@@ -18,8 +18,9 @@
 package org.openmole.ide.plugin.domain.distribution
 
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.model.data.IDomainDataUI
 
-class UniformDistributionFactoryUI extends IDomainFactoryUI {
+trait UniformDistributionFactoryUI extends IDomainFactoryUI {
   def name = "Uniform distribution"
-  override def buildDataUI = new UniformIntDistributionDataUI
 }

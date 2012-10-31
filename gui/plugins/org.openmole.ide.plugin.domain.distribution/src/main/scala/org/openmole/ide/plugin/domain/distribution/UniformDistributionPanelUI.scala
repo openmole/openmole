@@ -34,7 +34,7 @@ class UniformDistributionPanelUI(pud: UniformDistributionDataUI[_],
     case "Int" ⇒
       contents += (new Label("Size"), "gap para")
       contents += (maxField, "wrap")
-      maxField.text = pud.max.get.toString
+      maxField.text = pud.max.getOrElse(0).toString
     case _ ⇒
   }
 

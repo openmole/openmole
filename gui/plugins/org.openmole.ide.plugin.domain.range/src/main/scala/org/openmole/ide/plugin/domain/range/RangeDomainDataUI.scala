@@ -33,17 +33,16 @@ import org.openmole.misc.exception.UserBadDataError
 
 object RangeDomainDataUI {
 
-  def apply[T](min: String = "0", max: String = "", step: Option[String] = None, classString: String) =
-    {
-      classString match {
-        case "Int" ⇒ new RangeDomainDataUI[Int](min, max, step)
-        case "Double" ⇒ new RangeDomainDataUI[Double](min, max, step)
-        case "BigDecimal" ⇒ new RangeDomainDataUI[BigDecimal](min, max, step)
-        case "BigInteger" ⇒ new RangeDomainDataUI[BigInteger](min, max, step)
-        case "Long" ⇒ new RangeDomainDataUI[Long](min, max, step)
-        case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
-      }
+  def apply[T](min: String = "0", max: String = "", step: Option[String] = None, classString: String) = {
+    classString match {
+      case "Int" ⇒ new RangeDomainDataUI[Int](min, max, step)
+      case "Double" ⇒ new RangeDomainDataUI[Double](min, max, step)
+      case "BigDecimal" ⇒ new RangeDomainDataUI[BigDecimal](min, max, step)
+      case "BigInteger" ⇒ new RangeDomainDataUI[BigInteger](min, max, step)
+      case "Long" ⇒ new RangeDomainDataUI[Long](min, max, step)
+      case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
     }
+  }
 }
 
 class RangeDomainDataUI[T](
@@ -57,22 +56,16 @@ class RangeDomainDataUI[T](
 
   override def coreObject(prototype: IPrototypeDataProxyUI): Domain[T] = step match {
     case Some(s: String) ⇒
-      if (s.isEmpty) {
-        println("bounded")
-        new Bounded[T](min, max)
-      } else {
-        println("range")
-        new Range[T](min, max, stepString)
-      }
-    case _ ⇒ {
-      println("bounded")
-      new Bounded[T](min, max)
-    }
+      if (s.isEmpty) new Bounded[T](min, max)
+      else new Range[T](min, max, stepString)
+    case _ ⇒ new Bounded[T](min, max)
   }
+
+  def buildPanelUI(p: IPrototypeDataProxyUI) = new RangeDomainPanelUI(this, p)
 
   val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long")
 
-  def coreClass = classOf[Domain[T]]
+  def coreClass = classOf[RangeDomainDataUI[T]]
 
   override def toString = "Range"
 

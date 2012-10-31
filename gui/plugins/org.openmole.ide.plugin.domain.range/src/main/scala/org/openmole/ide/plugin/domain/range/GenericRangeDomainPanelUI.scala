@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2012 Mathieu Leclaire 
+ * < mathieu.leclaire at openmole.org >
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,25 +15,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.ide.plugin.domain.range
 
-package org.openmole.ide.plugin.domain.file
-
-import java.io.File
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import java.util.Locale
+import java.util.ResourceBundle
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
-import scala.swing.Label
 import scala.swing.TextField
+import scala.swing.Label
 
-class ListFilesDomainPanelUI(val dataUI: ListFilesDomainDataUI) extends FileDomainPanelUI {
+abstract class GenericRangeDomainPanelUI extends PluginPanel("wrap 2") with IDomainPanelUI {
 
-  val regexpTextField = new TextField(8) { text = dataUI.regexp }
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
-  val filePrototypes = Proxys.classPrototypes(classOf[File])
+  val minField = new TextField(6)
+  val maxField = new TextField(6)
 
-  contents += (new Label("Regular expression"), "gap para")
-  contents += (regexpTextField, "wrap")
-
-  def saveContent = new ListFilesDomainDataUI(directoryTextField.text, regexpTextField.text)
-
+  contents += (new Label("Min"), "gap para")
+  contents += minField
+  contents += (new Label("Max"), "gap para")
+  contents += maxField
 }

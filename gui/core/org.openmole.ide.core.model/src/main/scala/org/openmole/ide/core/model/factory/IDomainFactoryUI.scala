@@ -18,10 +18,15 @@
 package org.openmole.ide.core.model.factory
 
 import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
 trait IDomainFactoryUI extends IFactoryUI {
   def name: String
 
   def buildDataUI: IDomainDataUI[_]
+
+  //def availableTypes: List[String]
+
+  //def isAcceptable(p: IPrototypeDataProxyUI) = availableTypes.contains(p.dataUI.toString)
 }
 
