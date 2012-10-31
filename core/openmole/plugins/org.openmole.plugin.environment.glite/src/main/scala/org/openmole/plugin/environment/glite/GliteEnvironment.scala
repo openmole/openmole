@@ -95,7 +95,7 @@ object GliteEnvironment extends Logger {
 
   Workspace += (RemoteTimeout, "PT5M")
 
-  Workspace += (MinValueForSelectionExploration, "0.0001")
+  Workspace += (MinValueForSelectionExploration, "0.001")
   Workspace += (QualityHysteresis, "100")
 
   Workspace += (WMSRetryCount, "10")
@@ -181,9 +181,14 @@ class GliteEnvironment(
     }
   }
 
-  private def orMinForExploration(v: Double) = {
-    val min = Workspace.preferenceAsDouble(GliteEnvironment.MinValueForSelectionExploration)
-    if (v < min) min else v
+  protected def normalizedFitness[T, S](fitness: ⇒ Iterable[(T, S, Double)]): Iterable[(T, S, Double)] = {
+    def orMinForExploration(v: Double) = {
+      val min = Workspace.preferenceAsDouble(GliteEnvironment.MinValueForSelectionExploration)
+      if (v < min) min else v
+    }
+    val fit = fitness
+    val maxFit = fit.map(_._3).max
+    fit.map { case (c, t, f) ⇒ (c, t, orMinForExploration(f / maxFit)) }
   }
 
   override def selectAJobService =
@@ -199,14 +204,15 @@ class GliteEnvironment(
               case Some(token) ⇒
                 val time = cur.time
                 val timeFactor =
-                  if (time.isNaN || maxTime.isNaN || maxTime == 0.0) 1.0
+                  if (time.isNaN || maxTime.isNaN || maxTime == 0.0) 0.0
                   else 1 - (time / maxTime)
 
                 val jobFactor =
                   if (cur.submitted > 0 && cur.totalSubmitted > 0) (cur.runnig.toDouble / cur.submitted) * (cur.totalDone / cur.totalSubmitted)
-                  else 1.0
+                  else 0.0
 
-                val fitness = orMinForExploration(math.pow(jobFactor * cur.successRate * timeFactor, 2))
+                val availabilty = (cur.available.toDouble + 1) / cur.nbTokens
+                val fitness = jobFactor + cur.successRate + timeFactor + availabilty
                 Some((cur, token, fitness))
             }
         }
@@ -220,7 +226,7 @@ class GliteEnvironment(
         }
 
       atomic { implicit txn ⇒
-        val notLoaded = fitness
+        val notLoaded = normalizedFitness(fitness)
         val totalFitness = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
 
         selected(Random.default.nextDouble * totalFitness, notLoaded.toList) match {
@@ -252,14 +258,16 @@ class GliteEnvironment(
               case Some(token) ⇒
                 val sizeOnStorage = usedFileHashes.filter { case (_, h) ⇒ onStorage.getOrElse(h.toString, Set.empty).contains(cur.id) }.map { case (f, _) ⇒ f.size }.sum
                 val sizeFactor =
-                  if (totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) else 1.
+                  if (totalFileSize != 0) (sizeOnStorage.toDouble / totalFileSize) else 0.0
 
                 val time = cur.time
                 val timeFactor =
-                  if (time.isNaN || maxTime.isNaN || maxTime == 0.0) 1.0
+                  if (time.isNaN || maxTime.isNaN || maxTime == 0.0) 0.0
                   else 1 - (time / maxTime)
 
-                val fitness = orMinForExploration(math.pow(cur.successRate * sizeFactor * timeFactor, 2))
+                val availabilty = (cur.available.toDouble + 1) / cur.nbTokens
+
+                val fitness = cur.successRate + sizeFactor + timeFactor + availabilty
                 Some((cur, token, fitness))
             }
         }
@@ -274,7 +282,7 @@ class GliteEnvironment(
       }
 
       atomic { implicit txn ⇒
-        val notLoaded = fitness
+        val notLoaded = normalizedFitness(fitness)
         val fitnessSum = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
         val drawn = Random.default.nextDouble * fitnessSum
         val totalFitness = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
