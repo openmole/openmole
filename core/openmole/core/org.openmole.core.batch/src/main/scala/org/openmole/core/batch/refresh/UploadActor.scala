@@ -79,9 +79,9 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     val jobFile = Workspace.newFile("job", ".tar")
 
     try {
-      val (serializationFile, serializatonPlugins) = serializeJob(jobFile, job)
+      val (serializationFile, serializatonClasses) = serializeJob(jobFile, job)
 
-      val serialisationPluginFiles = new TreeSet[File] ++ serializatonPlugins.flatMap { PluginManager.pluginsForClass }
+      val serialisationPluginFiles = new TreeSet[File] ++ serializatonClasses.flatMap { PluginManager.pluginsForClass }
 
       val (storage, token) = environment.selectAStorage(
         (serializationFile +
@@ -169,7 +169,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     environment: BatchEnvironment,
     storage: StorageService)(implicit token: AccessToken, objectContainer: ObjectContainer) = {
 
-    val environmentPluginPath = environment.plugins.view.map { p ⇒ toReplicatedFile(job, p, storage) }.map { f ⇒ new FileMessage(f) }
+    val environmentPluginPath = environment.plugins.map { p ⇒ toReplicatedFile(job, p, storage) }.map { f ⇒ new FileMessage(f) }
     val runtimeFileMessage = new FileMessage(toReplicatedFile(job, environment.runtime, storage))
     val jvmLinuxI386FileMessage = new FileMessage(toReplicatedFile(job, environment.jvmLinuxI386, storage))
     val jvmLinuxX64FileMessage = new FileMessage(toReplicatedFile(job, environment.jvmLinuxX64, storage))
@@ -179,7 +179,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     new Runtime(
       storageReplication,
       runtimeFileMessage,
-      environmentPluginPath.force,
+      environmentPluginPath,
       jvmLinuxI386FileMessage,
       jvmLinuxX64FileMessage)
   }
@@ -197,12 +197,12 @@ class UploadActor(jobManager: ActorRef) extends Actor {
       storage.uploadGZ(jobFile, jobForRuntimePath), jobForRuntimePath, storage)
     val jobHash = HashService.computeHash(jobFile).toString
 
-    val pluginReplicas = serializationPlugin.view.map { p ⇒ { toReplicatedFile(job, p, storage) } }
-    val files = serializationFile.view.map { f ⇒ { toReplicatedFile(job, f, storage) } }
+    val pluginReplicas = serializationPlugin.map { toReplicatedFile(job, _, storage) }
+    val files = serializationFile.map { toReplicatedFile(job, _, storage) }
 
     new ExecutionMessage(
-      pluginReplicas.force,
-      files.force,
+      pluginReplicas,
+      files,
       new FileMessage(jobForRuntimePath, jobHash),
       path)
   }

@@ -66,28 +66,6 @@ object ReplicaCatalog extends Logger {
   lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
   lazy val inCatalogCache = new TimeCache[Map[String, Set[String]]]
 
-  var _lockContainer: Option[ObjectContainer] = None
-  def lockContainer = synchronized {
-    def updateClient = {
-      val client = openClient
-      _lockContainer = Some(client)
-      client
-    }
-
-    _lockContainer match {
-      case Some(c) ⇒
-        if (c.ext.isClosed) updateClient
-        else c
-      case None ⇒
-        updateClient
-    }
-  }
-
-  lazy val lockCache = new LockCache {
-    def lock(k: String) = lockContainer.ext.setSemaphore(k, Int.MaxValue)
-    def unlock(k: String) = lockContainer.ext.releaseSemaphore(k)
-  }
-
   type ReplicaCacheKey = (String, String, String, String)
   val replicaCache = CacheBuilder.newBuilder.asInstanceOf[CacheBuilder[ReplicaCacheKey, Replica]].
     expireAfterWrite(Workspace.preferenceAsDurationInS(ReplicaCacheTime), TimeUnit.SECONDS).build[ReplicaCacheKey, Replica]
@@ -143,7 +121,11 @@ object ReplicaCatalog extends Logger {
   private def key(r: Replica): String = key(r.hash, r.storage, r.environment)
   private def key(hash: String, storage: StorageService): String = key(hash, storage.id, storage.environment.id)
 
-  private def withSemaphore[T](key: String, objectContainer: ObjectContainer)(op: ⇒ T) = lockCache.withLock(key) { op }
+  def withSemaphore[T](key: String, objectContainer: ObjectContainer)(op: ⇒ T) = {
+    objectContainer.ext.setSemaphore(key, Int.MaxValue)
+    try op
+    finally objectContainer.ext.releaseSemaphore(key)
+  }
 
   def uploadAndGet(
     src: File,
