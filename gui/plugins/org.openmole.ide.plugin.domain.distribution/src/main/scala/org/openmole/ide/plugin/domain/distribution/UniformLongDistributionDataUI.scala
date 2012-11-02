@@ -29,7 +29,7 @@ class UniformLongDistributionDataUI extends UniformDistributionDataUI[Long] {
 
   def buildPanelUI(p: IPrototypeDataProxyUI) = new UniformDistributionPanelUI(this, p)
 
-  def coreClass = classOf[Domain[Long]]
+  def coreClass = classOf[UniformLongDistribution]
 
   def coreObject(prototype: IPrototypeDataProxyUI): Domain[Long] = new UniformLongDistribution
 }

@@ -22,5 +22,10 @@ import org.openmole.ide.core.implementation.registry.DomainActivator
 
 class Activator extends OSGiActivator with DomainActivator {
 
-  override def domainFactories = List(new UniformDistributionFactoryUI)
+  override def domainFactories = List(new UniformDistributionFactoryUI {
+    def buildDataUI = new UniformIntDistributionDataUI
+  },
+    new UniformDistributionFactoryUI {
+      def buildDataUI = new UniformLongDistributionDataUI
+    })
 }

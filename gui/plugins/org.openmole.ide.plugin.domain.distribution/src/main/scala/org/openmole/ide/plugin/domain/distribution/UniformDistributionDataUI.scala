@@ -27,7 +27,7 @@ import org.openmole.misc.exception.UserBadDataError
 
 object UniformDistributionDataUI {
 
-  def apply[T](max: Option[Int], classString: String) = classString match {
+  def apply[T](max: Option[Int] = None, classString: String) = classString match {
     case "Int" ⇒ new UniformIntDistributionDataUI(max)
     case "Long" ⇒ new UniformLongDistributionDataUI
     case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")

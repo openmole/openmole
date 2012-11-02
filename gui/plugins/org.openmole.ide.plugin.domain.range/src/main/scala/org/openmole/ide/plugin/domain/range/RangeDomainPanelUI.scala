@@ -29,36 +29,27 @@ import scala.swing.TextField
 import scala.swing.CheckBox
 import scala.swing.Label
 
-class RangeDomainPanelUI(pud: GenericRangeDomainDataUI[_],
-                         //  prototype: IPrototypeDataProxyUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IDomainPanelUI {
-                         prototype: IPrototypeDataProxyUI) extends PluginPanel("wrap 2") with IDomainPanelUI {
+class RangeDomainPanelUI(pud: RangeDomainDataUI[_],
+                         prototype: IPrototypeDataProxyUI) extends GenericRangeDomainPanelUI {
 
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+  minField.text = pud.min
+  maxField.text = pud.max
 
-  val minField = new TextField(6) { text = pud.min }
-  val maxField = new TextField(6) { text = pud.max }
   val stepCheckBox = new CheckBox("Step")
-  val stepField = new TextField(6) { text = pud.stepString }
-  val logCheckBox = new CheckBox("Logarithmic")
+  val stepField = new TextField(6) {
+    text = pud.step.getOrElse("")
+  }
 
-  stepField.visible = stepContent.isDefined
-  stepCheckBox.selected = stepContent.isDefined
+  stepField.visible = pud.step.isDefined
+  stepCheckBox.selected = pud.step.isDefined
 
   listenTo(`stepCheckBox`)
   reactions += {
     case ButtonClicked(`stepCheckBox`) ⇒ stepField.visible = stepCheckBox.selected
   }
 
-  contents += (new Label("Min"), "gap para")
-  contents += minField
-  contents += (new Label("Max"), "gap para")
-  contents += maxField
   contents += (stepCheckBox, "gap para")
   contents += stepField
-  contents += logCheckBox
-
-  logCheckBox.visible = (prototype.dataUI.toString == "BigDecimal" ||
-    prototype.dataUI.toString == "Double")
 
   def stepContent: Option[String] = {
     if (stepCheckBox.selected) {
@@ -70,6 +61,6 @@ class RangeDomainPanelUI(pud: GenericRangeDomainDataUI[_],
   def saveContent = GenericRangeDomainDataUI(minField.text,
     maxField.text,
     stepContent,
-    logCheckBox.selected,
+    false,
     prototype.dataUI.toString)
 }

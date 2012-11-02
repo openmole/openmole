@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2012 Mathieu Leclaire 
+ * < mathieu.leclaire at openmole.org >
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,13 +15,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ide.plugin.domain.file
 
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
+import org.openmole.ide.core.model.data.IDomainDataUI
+import java.io.File
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
-class ListFilesDomainFactoryUI extends IDomainFactoryUI {
-  def name = "File list"
-
-  override def buildDataUI = new ListFilesDomainDataUI
+trait FileDomainFactoryUI extends IDomainFactoryUI {
+  def name = "File"
 }

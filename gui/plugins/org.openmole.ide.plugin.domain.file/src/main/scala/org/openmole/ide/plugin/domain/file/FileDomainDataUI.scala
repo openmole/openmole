@@ -17,22 +17,11 @@
 
 package org.openmole.ide.plugin.domain.file
 
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.model.data.IDomainDataUI
 import java.io.File
-import org.openmole.ide.core.implementation.dataproxy.Proxys
-import org.openmole.ide.core.model.panel.IDomainPanelUI
-import org.openmole.ide.misc.widget.PluginPanel
-import scala.swing.Label
-import scala.swing.TextField
 
-class ListFilesDomainPanelUI(val dataUI: ListFilesDomainDataUI) extends FileDomainPanelUI {
+abstract class FileDomainDataUI(val directoryPath: String) extends IDomainDataUI[File] {
 
-  val regexpTextField = new TextField(8) { text = dataUI.regexp }
-
-  val filePrototypes = Proxys.classPrototypes(classOf[File])
-
-  contents += (new Label("Regular expression"), "gap para")
-  contents += (regexpTextField, "wrap")
-
-  def saveContent = new ListFilesDomainDataUI(directoryTextField.text, regexpTextField.text)
-
+  def isAcceptable(p: IPrototypeDataProxyUI) = p.dataUI.toString == "File"
 }

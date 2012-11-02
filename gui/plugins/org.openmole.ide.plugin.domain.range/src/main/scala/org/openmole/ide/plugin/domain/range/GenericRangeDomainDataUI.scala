@@ -26,26 +26,18 @@ import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.misc.exception.UserBadDataError
 
 object GenericRangeDomainDataUI {
-  def apply[T](min: String = "0", max: String = "", step: Option[String] = None, log: Boolean = false, classString: String): IDomainDataUI[_] =
-    {
-      println("Test on : " + classString + " " + min + " " + max + " " + step)
-      if (log) {
-        classString match {
-          case "Double" ⇒ new DoubleLogarithmRangeDataUI(min, max, step)
-          case "BigDecimal" ⇒ new BigDecimalLogarithmRangeDataUI(min, max, step)
-          case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported in logarithm scale")
-        }
-      } else
-        RangeDomainDataUI(min, max, step, classString)
-    }
+
+  def apply[T](min: String = "0", max: String = "", step: Option[String] = None, log: Boolean, classString: String): IDomainDataUI[_] =
+    if (log) {
+      classString match {
+        case "Double" ⇒ new DoubleLogarithmRangeDataUI(min, max, step)
+        case "BigDecimal" ⇒ new BigDecimalLogarithmRangeDataUI(min, max, step)
+        case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported in logarithm scale")
+      }
+    } else RangeDomainDataUI(min, max, step, classString)
 }
 
-import GenericRangeDomainDataUI._
 abstract class GenericRangeDomainDataUI[T] extends IDomainDataUI[T] {
-
-  def buildPanelUI(p: IPrototypeDataProxyUI) = new RangeDomainPanelUI(this, p)
-
-  def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], false))
 
   def preview = " on [" + min + "," + max + stepString + "]"
 
@@ -55,6 +47,8 @@ abstract class GenericRangeDomainDataUI[T] extends IDomainDataUI[T] {
       else "," + step.get
     } else ""
   }
+
+  def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], false))
 
   def isAcceptable(p: IPrototypeDataProxyUI) = availableTypes.contains(p.dataUI.toString)
 
