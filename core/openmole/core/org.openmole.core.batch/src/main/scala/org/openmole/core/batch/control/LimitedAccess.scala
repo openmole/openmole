@@ -17,7 +17,7 @@
 
 package org.openmole.core.batch.control
 
-import concurrent.stm._
+import scala.concurrent.stm._
 
 trait LimitedAccess extends UsageControl {
 
@@ -25,11 +25,11 @@ trait LimitedAccess extends UsageControl {
 
   private lazy val tokens: Ref[List[AccessToken]] = Ref((0 until nbTokens).map { i ⇒ new AccessToken }.toList)
 
-  def add(token: AccessToken)(implicit txn: InTxn) = { tokens() = token :: tokens() }
+  def add(token: AccessToken) = atomic { implicit txn ⇒ tokens() = token :: tokens() }
 
-  def releaseToken(token: AccessToken)(implicit txn: InTxn) = add(token)
+  def releaseToken(token: AccessToken) = add(token)
 
-  def tryGetToken: Option[AccessToken](implicit txn: InTxn) = {
+  def tryGetToken: Option[AccessToken] = atomic { implicit txn ⇒
     tokens() match {
       case head :: tail ⇒
         tokens() = tail
