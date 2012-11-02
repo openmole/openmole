@@ -250,7 +250,7 @@ class GliteEnvironment(
       val onStorage = ReplicaCatalog.withClient(ReplicaCatalog.inCatalog(env.id)(_))
       val maxTime = jobServices.map(_.time).max
 
-      def fitness =
+      def fitness(implicit tx: InTxn) =
         storages.flatMap {
           cur ⇒
             cur.tryGetToken match {
