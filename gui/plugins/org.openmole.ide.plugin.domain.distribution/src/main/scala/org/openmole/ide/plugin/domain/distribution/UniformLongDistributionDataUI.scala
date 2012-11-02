@@ -23,6 +23,8 @@ import org.openmole.core.model.domain.Domain
 
 class UniformLongDistributionDataUI extends UniformDistributionDataUI[Long] {
 
+  val name = "Uniform distribution"
+
   val max = None
 
   val availableTypes = List("Long")

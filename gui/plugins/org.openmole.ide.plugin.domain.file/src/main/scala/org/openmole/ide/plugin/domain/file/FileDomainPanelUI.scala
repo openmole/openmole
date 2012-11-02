@@ -1,10 +1,3 @@
-package org.openmole.ide.plugin.domain.file
-
-import org.openmole.ide.core.model.panel.IDomainPanelUI
-import org.openmole.ide.misc.widget.ChooseFileTextField
-import org.openmole.ide.misc.widget.PluginPanel
-import swing.Label
-
 /*
 * Copyright (C) 2012 Mathieu Leclaire
 * < mathieu.leclaire at openmole.org >
@@ -22,12 +15,24 @@ import swing.Label
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+package org.openmole.ide.plugin.domain.file
 
-abstract class FileDomainPanelUI extends PluginPanel("fillx", "[left][grow,fill]", "") with IDomainPanelUI {
+import org.openmole.ide.misc.widget.ChooseFileTextField
+import org.openmole.ide.misc.widget.PluginPanel
+import swing._
 
-  val directoryTextField = new ChooseFileTextField(dataUI.directoryPath)
-  contents += (new Label("List of files"), "gap para")
-  contents += (directoryTextField, "wrap")
+object FileDomainPanelUI {
+  def panel(cList: List[(Component, String)]) = {
+    val pp = new PluginPanel("fillx", "[left][grow,fill]", "")
+    cList.foreach {
+      case (c, t) ⇒
+        if (!t.isEmpty) pp.contents += (new Label(t), "gap para")
+        pp.contents += (c, "wrap")
+    }
+    pp
+  }
+}
 
-  def dataUI: FileDomainDataUI
+trait FileDomainPanelUI {
+  def directoryTextField(dir: String) = new ChooseFileTextField(dir)
 }

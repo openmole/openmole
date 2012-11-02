@@ -54,6 +54,8 @@ class RangeDomainDataUI[T](
     integral: Integral[T])
     extends GenericRangeDomainDataUI[T] {
 
+  val name = "Range"
+
   override def coreObject(prototype: IPrototypeDataProxyUI): Domain[T] = step match {
     case Some(s: String) ⇒
       if (s.isEmpty) new Bounded[T](min, max)

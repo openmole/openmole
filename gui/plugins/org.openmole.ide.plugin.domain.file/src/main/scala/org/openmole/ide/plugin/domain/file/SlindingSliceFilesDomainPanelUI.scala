@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2012 Mathieu Leclaire 
+ * < mathieu.leclaire at openmole.org >
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,24 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ide.plugin.domain.file
 
-import java.io.File
-import org.openmole.ide.core.implementation.dataproxy.Proxys
-import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
-import swing.{ CheckBox, Label, TextField }
+import org.openmole.ide.core.model.panel.IDomainPanelUI
+import swing.{ CheckBox, TextField }
 
-class ListFilesDomainPanelUI(val dataUI: ListFilesDomainDataUI) extends PluginPanel("wrap") with IDomainPanelUI with FileDomainPanelUI {
+class SlindingSliceFilesDomainPanelUI(val dataUI: SlindingSliceFilesDomainDataUI) extends PluginPanel("wrap") with IDomainPanelUI with FileDomainPanelUI {
 
   val dirTField = directoryTextField(dataUI.directoryPath)
-  val regexpTextField = new TextField(8) { text = dataUI.regexp }
-  val recursiveCheckBox = new CheckBox("Recursive") { selected = dataUI.recursive }
+  val numberPatternTextField = new TextField(8) { text = dataUI.numberPattern }
+  val sliceSizeTextField = new TextField(8) { text = dataUI.sliceSize.toString }
 
-  contents += FileDomainPanelUI.panel(List((dirTField, "Directory"), (regexpTextField, "wrap"), (recursiveCheckBox, "")))
+  contents += FileDomainPanelUI.panel(List((dirTField, "Directory"), (numberPatternTextField, "Number pattern"), (sliceSizeTextField, "Slice size")))
 
   override def toString = dataUI.name
 
-  def saveContent = new ListFilesDomainDataUI(dirTField.text, regexpTextField.text, recursiveCheckBox.selected)
+  def saveContent = new SlindingSliceFilesDomainDataUI(dirTField.text, numberPatternTextField.text, sliceSizeTextField.text.toInt)
 }

@@ -18,22 +18,26 @@
 package org.openmole.ide.plugin.domain.file
 
 import java.io.File
-import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.domain.file.ListFilesDomain
 
-class ListFilesDomainDataUI(directoryPath: String = "",
-                            val regexp: String = ".*") extends FileDomainDataUI(directoryPath) {
-  def coreObject(prototype: IPrototypeDataProxyUI) = new ListFilesDomain(new File(directoryPath), regexp)
+object ListFilesDomainDataUI {
+  def apply(d: SubDataUI[File]) = d match {
+    case x: ListFilesDomainDataUI ⇒ x
+    case _ ⇒ new ListFilesDomainDataUI
+  }
+}
+
+class ListFilesDomainDataUI(val directoryPath: String = "",
+                            val regexp: String = ".*",
+                            val recursive: Boolean = false) extends SubDataUI[File] {
+  override def name = "Multiple"
+
+  def coreObject(prototype: IPrototypeDataProxyUI) = new ListFilesDomain(new File(directoryPath), regexp, recursive)
 
   def coreClass = classOf[ListFilesDomain]
 
   def preview = " in " + new File(directoryPath).getName
 
   def buildPanelUI(p: IPrototypeDataProxyUI) = new ListFilesDomainPanelUI(this)
-
-  def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[File], false))
-
-  override def toString = "File list"
 }
