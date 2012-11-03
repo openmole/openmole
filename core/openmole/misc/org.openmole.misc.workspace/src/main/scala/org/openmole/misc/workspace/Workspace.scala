@@ -334,6 +334,10 @@ class Workspace(val location: File) {
 
     def -=(i: Int) = wsync { file(i).delete }
 
+    def get(i: Int): Option[T] = wsync {
+      if (file(i).exists) Some(apply(i)) else None
+    }
+
     def apply(i: Int): T = wsync { serializer.fromXML(file(i).content).asInstanceOf[T] }
 
     def update(i: Int, obj: T) = wsync { file(i).content = serializer.toXML(obj) }

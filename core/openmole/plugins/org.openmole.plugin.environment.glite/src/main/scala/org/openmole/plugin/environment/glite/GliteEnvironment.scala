@@ -140,11 +140,11 @@ class GliteEnvironment(
     super.submit(job)
   }
 
-  private def generateProxy = Workspace.persistentList(classOf[GliteAuthentication]).headOption match {
+  private def generateProxy = GliteAuthentication.get match {
     case Some(a) ⇒
       val file = Workspace.newFile("proxy", ".x509")
       FileDeleter.deleteWhenGarbageCollected(file)
-      val proxy = a._2.apply(
+      val proxy = a(
         vomsURL,
         voName,
         file,

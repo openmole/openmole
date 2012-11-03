@@ -21,7 +21,13 @@ import fr.iscpif.gridscale.authentication._
 import org.openmole.core.batch.authentication.CypheredPassword
 import java.io.File
 
-class PEMCertificate(val certificate: File, val key: File, val cypheredPassword: String) extends GliteAuthentication with CypheredPassword { a ⇒
+class PEMCertificate(val cypheredPassword: String, val certificate: File, val key: File) extends GliteAuthentication with CypheredPassword { a ⇒
+
+  def this(cypheredPassword: String) =
+    this(
+      cypheredPassword,
+      new File(new File(System.getProperty("user.home")), ".globus/usercert.pem"),
+      new File(new File(System.getProperty("user.home")), ".globus/userkey.pem"))
 
   override def apply(
     serverURL: String,
