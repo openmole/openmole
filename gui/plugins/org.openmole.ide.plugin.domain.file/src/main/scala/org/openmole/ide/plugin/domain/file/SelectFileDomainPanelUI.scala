@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2012 Mathieu Leclaire 
+ * < mathieu.leclaire at openmole.org >
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,15 +15,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ide.plugin.domain.file
 
-import org.openmole.ide.core.implementation.registry.OSGiActivator
-import org.openmole.ide.core.implementation.registry.DomainActivator
+import swing.{ TextField, Label }
+import org.openmole.ide.core.model.panel.IDomainPanelUI
+import org.openmole.ide.misc.widget.PluginPanel
 
-class Activator extends OSGiActivator with DomainActivator {
+class SelectFileDomainPanelUI(val dataUI: SelectFileDomainDataUI) extends PluginPanel("wrap") with IDomainPanelUI with FileDomainPanelUI {
 
-  override def domainFactories = List(new FileDomainFactoryUI { def buildDataUI = new ListFilesDomainDataUI },
-    new FileDomainFactoryUI { def buildDataUI = new SelectFileDomainDataUI("") },
-    new FileDomainFactoryUI { def buildDataUI = new SlindingSliceFilesDomainDataUI("") })
+  val dirTField = directoryTextField(dataUI.directoryPath)
+  val pathTextField = new TextField(8) { text = dataUI.path }
+  contents += FileDomainPanelUI.panel(List((dirTField, "Directory"), (pathTextField, "Reg Exp")))
+
+  override def toString = dataUI.name
+
+  def saveContent = new SelectFileDomainDataUI(dirTField.text, pathTextField.text)
 }

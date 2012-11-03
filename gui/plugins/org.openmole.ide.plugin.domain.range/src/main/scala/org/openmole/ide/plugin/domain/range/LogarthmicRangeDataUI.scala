@@ -20,4 +20,6 @@ package org.openmole.ide.plugin.domain.range
 
 import org.openmole.ide.core.model.data.IDomainDataUI
 
-abstract class LogarthmicRangeDataUI[T] extends GenericRangeDomainDataUI[T]
+abstract class LogarthmicRangeDataUI[T] extends GenericRangeDomainDataUI[T] {
+  val name = "Log Range"
+}

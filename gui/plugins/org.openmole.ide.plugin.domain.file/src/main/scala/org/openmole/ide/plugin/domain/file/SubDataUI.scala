@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2012 Mathieu Leclaire 
+ * < mathieu.leclaire at openmole.org >
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,22 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.domain.distribution
+package org.openmole.ide.plugin.domain.file
 
+import org.openmole.ide.core.model.data.IDomainDataUI
+import java.io.File
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.plugin.domain.distribution._
-import org.openmole.core.model.domain.Domain
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 
-class UniformIntDistributionDataUI(val max: Option[Int] = None) extends UniformDistributionDataUI[Int] {
+trait SubDataUI[T] extends IDomainDataUI[T] {
+  def name = "File"
 
-  val name = "Uniform distribution"
+  def directoryPath: String
 
-  val availableTypes = List("Int")
+  def isAcceptable(p: IPrototypeDataProxyUI) = p.dataUI.toString == "File"
 
-  def buildPanelUI(p: IPrototypeDataProxyUI) = new UniformDistributionPanelUI(this, p)
-
-  def coreClass = classOf[UniformIntDistribution]
-
-  def coreObject(prototype: IPrototypeDataProxyUI): Domain[Int] =
-    new UniformIntDistribution(max)
+  def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[File], false))
 }

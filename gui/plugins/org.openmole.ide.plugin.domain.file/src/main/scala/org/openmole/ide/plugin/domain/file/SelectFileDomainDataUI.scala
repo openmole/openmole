@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2012 Mathieu Leclaire 
+ * < mathieu.leclaire at openmole.org >
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,14 +15,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ide.plugin.domain.file
 
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.plugin.domain.file.SelectFileDomain
 import java.io.File
 
-abstract class FileDomainDataUI(val directoryPath: String) extends IDomainDataUI[File] {
+object SelectFileDomainDataUI {
+  def apply(d: SubDataUI[File]) = d match {
+    case x: SelectFileDomainDataUI ⇒ x
+    case _ ⇒ new SelectFileDomainDataUI
+  }
+}
 
-  def isAcceptable(p: IPrototypeDataProxyUI) = p.dataUI.toString == "File"
+class SelectFileDomainDataUI(val directoryPath: String = "", val path: String = "") extends SubDataUI[File] {
+
+  override def name = "Single"
+
+  def coreObject(proto: IPrototypeDataProxyUI) = new SelectFileDomain(new File(directoryPath), path)
+
+  def buildPanelUI(p: IPrototypeDataProxyUI) = new SelectFileDomainPanelUI(this)
+
+  def preview = " as " + new File(path).getName
+
+  def coreClass = classOf[SelectFileDomainDataUI]
 }
