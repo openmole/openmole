@@ -69,6 +69,9 @@ object GliteEnvironment extends Logger {
   val MinValueForSelectionExploration = new ConfigurationLocation("GliteEnvironment", "MinValueForSelectionExploration")
   val WMSRetryCount = new ConfigurationLocation("GliteEnvironment", "WMSRetryCount")
 
+  val JobServiceFitnessPower = new ConfigurationLocation("GliteEnvironment", "JobServiceFitnessPower")
+  val StorageFitnessPower = new ConfigurationLocation("GliteEnvironment", "StorageFitnessPower")
+
   Workspace += (ProxyTime, "PT24H")
   Workspace += (MyProxyTime, "P7D")
 
@@ -99,6 +102,9 @@ object GliteEnvironment extends Logger {
   Workspace += (QualityHysteresis, "100")
 
   Workspace += (WMSRetryCount, "10")
+
+  Workspace += (JobServiceFitnessPower, "2")
+  Workspace += (StorageFitnessPower, "2")
 }
 
 class GliteEnvironment(
@@ -212,7 +218,7 @@ class GliteEnvironment(
                   else 0.0
 
                 val availabilty = (cur.available.toDouble + 1) / cur.nbTokens
-                val fitness = jobFactor + cur.successRate + timeFactor + availabilty
+                val fitness = math.pow(jobFactor + cur.successRate + timeFactor + availabilty, Workspace.preferenceAsDouble(JobServiceFitnessPower))
                 Some((cur, token, fitness))
             }
         }
@@ -267,7 +273,7 @@ class GliteEnvironment(
 
                 val availabilty = (cur.available.toDouble + 1) / cur.nbTokens
 
-                val fitness = cur.successRate + sizeFactor + timeFactor + availabilty
+                val fitness = math.pow(cur.successRate + sizeFactor + timeFactor + availabilty, Workspace.preferenceAsDouble(StorageFitnessPower))
                 Some((cur, token, fitness))
             }
         }
