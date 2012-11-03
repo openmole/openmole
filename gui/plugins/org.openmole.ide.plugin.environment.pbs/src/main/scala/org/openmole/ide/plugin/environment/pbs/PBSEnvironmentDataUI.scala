@@ -21,7 +21,7 @@ class PBSEnvironmentDataUI(val name: String = "",
 
   def coreObject = new PBSEnvironment(login,
     host,
-    dir,
+    path = Some(dir),
     // requirements.toMap,
     openMOLEMemory = Some(ui.openMOLEMemory),
     queue = { if (queue.isEmpty) None else Some(queue) })
