@@ -176,8 +176,8 @@ akka {
   def allStorages: Iterable[SS]
   def allJobServices: Iterable[JS]
 
-  def runtimeMemory: Option[Int] = None
-  def runtimeMemoryValue = runtimeMemory match {
+  def openMOLEMemory: Option[Int] = None
+  def openMOLEMemoryValue = openMOLEMemory match {
     case None ⇒ Workspace.preferenceAsInt(MemorySizeForRuntime)
     case Some(m) ⇒ m
   }

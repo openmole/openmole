@@ -117,7 +117,7 @@ trait SharedStorage extends SSHService { js ⇒
       val osgiWorkDir = UUID.randomUUID
       script.content =
         "export PATH=" + runtime + "/jre/bin/" + ":$PATH; cd " + runtime + "; export OPENMOLE_HOME=$PWD/" + workspace + " ; mkdir $OPENMOLE_HOME ; " +
-          "sh run.sh " + environment.runtimeMemoryValue + "m " + osgiWorkDir + " -s " + serializedJob.runtime.storage.path +
+          "sh run.sh " + environment.openMOLEMemoryValue + "m " + osgiWorkDir + " -s " + serializedJob.runtime.storage.path +
           " -c " + serializedJob.path + " -p envplugins/ -i " + serializedJob.inputFile + " -o " + result +
           "; rm -rf $OPENMOLE_HOME ; rm -rf " + osgiWorkDir + " ;"
 

@@ -38,7 +38,7 @@ object DesktopGridEnvironment {
 class DesktopGridEnvironment(
     val port: Int,
     val login: String, password: String,
-    override val runtimeMemory: Option[Int] = None) extends BatchEnvironment { env ⇒
+    override val openMOLEMemory: Option[Int] = None) extends BatchEnvironment { env ⇒
 
   type SS = VolatileStorageService
   type JS = DesktopGridJobService
