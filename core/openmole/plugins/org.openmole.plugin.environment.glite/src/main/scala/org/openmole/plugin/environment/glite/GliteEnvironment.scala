@@ -103,7 +103,7 @@ object GliteEnvironment extends Logger {
 
   Workspace += (WMSRetryCount, "10")
 
-  Workspace += (JobServiceFitnessPower, "2")
+  Workspace += (JobServiceFitnessPower, "1")
   Workspace += (StorageFitnessPower, "2")
 }
 

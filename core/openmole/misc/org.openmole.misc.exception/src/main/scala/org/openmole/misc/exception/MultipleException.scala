@@ -50,8 +50,6 @@ class MultipleException(exceptions: Iterable[Throwable]) extends Exception with 
     s.println("----------------------------------------")
   }
 
-  def iterator: Iterator[Throwable] = {
-    exceptions.iterator
-  }
+  def iterator: Iterator[Throwable] = exceptions.iterator
 
 }
