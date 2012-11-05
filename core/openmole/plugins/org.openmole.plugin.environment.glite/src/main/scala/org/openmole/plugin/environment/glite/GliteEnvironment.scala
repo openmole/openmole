@@ -69,6 +69,9 @@ object GliteEnvironment extends Logger {
   val MinValueForSelectionExploration = new ConfigurationLocation("GliteEnvironment", "MinValueForSelectionExploration")
   val WMSRetryCount = new ConfigurationLocation("GliteEnvironment", "WMSRetryCount")
 
+  val JobServiceFitnessPower = new ConfigurationLocation("GliteEnvironment", "JobServiceFitnessPower")
+  val StorageFitnessPower = new ConfigurationLocation("GliteEnvironment", "StorageFitnessPower")
+
   Workspace += (ProxyTime, "PT24H")
   Workspace += (MyProxyTime, "P7D")
 
@@ -99,6 +102,9 @@ object GliteEnvironment extends Logger {
   Workspace += (QualityHysteresis, "100")
 
   Workspace += (WMSRetryCount, "10")
+
+  Workspace += (JobServiceFitnessPower, "1")
+  Workspace += (StorageFitnessPower, "2")
 }
 
 class GliteEnvironment(
@@ -106,7 +112,7 @@ class GliteEnvironment(
     val vomsURL: String,
     val bdii: String,
     val fqan: Option[String] = None,
-    override val runtimeMemory: Option[Int] = None,
+    override val openMOLEMemory: Option[Int] = None,
     val memory: Option[Int] = None,
     val cpuTime: Option[String] = None,
     val cpuNumber: Option[Int] = None,
@@ -134,11 +140,11 @@ class GliteEnvironment(
     super.submit(job)
   }
 
-  private def generateProxy = Workspace.persistentList(classOf[GliteAuthentication]).headOption match {
+  private def generateProxy = GliteAuthentication.get match {
     case Some(a) ⇒
       val file = Workspace.newFile("proxy", ".x509")
       FileDeleter.deleteWhenGarbageCollected(file)
-      val proxy = a._2.apply(
+      val proxy = a(
         vomsURL,
         voName,
         file,
@@ -212,7 +218,7 @@ class GliteEnvironment(
                   else 0.0
 
                 val availabilty = (cur.available.toDouble + 1) / cur.nbTokens
-                val fitness = jobFactor + cur.successRate + timeFactor + availabilty
+                val fitness = math.pow(jobFactor + cur.successRate + timeFactor + availabilty, Workspace.preferenceAsDouble(JobServiceFitnessPower))
                 Some((cur, token, fitness))
             }
         }
@@ -267,7 +273,7 @@ class GliteEnvironment(
 
                 val availabilty = (cur.available.toDouble + 1) / cur.nbTokens
 
-                val fitness = cur.successRate + sizeFactor + timeFactor + availabilty
+                val fitness = math.pow(cur.successRate + sizeFactor + timeFactor + availabilty, Workspace.preferenceAsDouble(StorageFitnessPower))
                 Some((cur, token, fitness))
             }
         }

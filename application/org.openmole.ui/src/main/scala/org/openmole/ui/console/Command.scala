@@ -87,17 +87,6 @@ class Command {
     Workspace.encrypt(password)
   }
 
-  def auth(method: Class[_]) {
-    Workspace.persistentList(method).foreach {
-      case (i, m) ⇒ println(i + ": " + m)
-    }
-  }
-
-  def auth = new {
-    def update(index: Int, auth: Authentication) =
-      Workspace.instance.persistentList(auth.category.asInstanceOf[Class[Authentication]]).update(index, auth)
-  }
-
   def load[T](f: File) = SerializerService.deserialize[T](f)
   def save(o: Any, f: File) = SerializerService.serialize(o, f)
 

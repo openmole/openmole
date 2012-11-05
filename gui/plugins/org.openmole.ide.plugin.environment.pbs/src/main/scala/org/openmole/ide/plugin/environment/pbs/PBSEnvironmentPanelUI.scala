@@ -37,7 +37,7 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
   val hostTextField = new TextField(pud.host, 15)
   val dirTextField = new TextField(pud.dir, 15)
   val queueTextField = new TextField(pud.queue, 15)
-  val runTimeMemoryTextField = new TextField(pud.runtimeMemory.toString, 5)
+  val openMOLEMemoryTextField = new TextField(pud.openMOLEMemory.toString, 5)
 
   // val requirementsPanelUI = new RequirementPanelUI(pud.requirements)
 
@@ -52,8 +52,8 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
       contents += (new Label("Directory"), "gap para")
       contents += dirTextField
 
-      contents += (new Label("Runtime memory"), "gap para")
-      contents += runTimeMemoryTextField
+      contents += (new Label("OpenMOLE memory"), "gap para")
+      contents += openMOLEMemoryTextField
     })
 
   // tabbedPane.pages += requirementsPanelUI
@@ -65,7 +65,7 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
     add(hostTextField, new Help(i18n.getString("host"), i18n.getString("hostEx")))
     add(dirTextField, new Help(i18n.getString("dir"), i18n.getString("dirEx")))
     add(queueTextField, new Help(i18n.getString("queue"), i18n.getString("queueEx")))
-    add(runTimeMemoryTextField, new Help(i18n.getString("runtimeMemory"), i18n.getString("runtimeMemoryEx")))
+    add(openMOLEMemoryTextField, new Help(i18n.getString("runtimeMemory"), i18n.getString("runtimeMemoryEx")))
   }
 
   override def saveContent(name: String) =
@@ -74,7 +74,7 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
       hostTextField.text,
       dirTextField.text,
       queueTextField.text,
-      runTimeMemoryTextField.text.toInt /*   new RequirementDataUI(
+      openMOLEMemoryTextField.text.toInt /*   new RequirementDataUI(
         requirementsPanelUI.architectureCheckBox.selected,
         requirementsPanelUI.workerNodeMemoryTextField.text,
         requirementsPanelUI.maxCPUTimeTextField.text,

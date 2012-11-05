@@ -21,7 +21,9 @@ import fr.iscpif.gridscale.authentication._
 import org.openmole.core.batch.authentication.CypheredPassword
 import java.io.File
 
-class P12Certificate(val certificate: File, val cypheredPassword: String) extends GliteAuthentication with CypheredPassword { a ⇒
+class P12Certificate(val cypheredPassword: String, val certificate: File) extends GliteAuthentication with CypheredPassword { a ⇒
+
+  def this(cypheredPassword: String) = this(cypheredPassword, new File(new File(System.getProperty("user.home")), ".globus/certificate.p12"))
 
   override def apply(
     serverURL: String,

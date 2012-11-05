@@ -41,7 +41,7 @@ class SSHEnvironment(
     val nbSlots: Int,
     override val port: Int = 22,
     val path: String = "/tmp/",
-    override val runtimeMemory: Option[Int] = None) extends BatchEnvironment with SSHAccess { env ⇒
+    override val openMOLEMemory: Option[Int] = None) extends BatchEnvironment with SSHAccess { env ⇒
 
   type SS = SSHStorageService
   type JS = SSHJobService

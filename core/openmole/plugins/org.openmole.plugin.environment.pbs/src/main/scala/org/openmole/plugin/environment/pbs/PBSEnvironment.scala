@@ -39,12 +39,12 @@ import PBSEnvironment._
 class PBSEnvironment(
     val user: String,
     val host: String,
-    val path: String,
     override val port: Int = 22,
     val queue: Option[String] = None,
-    override val runtimeMemory: Option[Int] = None,
+    override val openMOLEMemory: Option[Int] = None,
     val cpuTime: Option[String] = None,
-    val memory: Option[Int] = None) extends BatchEnvironment with SSHAccess with MemoryRequirement { env ⇒
+    val memory: Option[Int] = None,
+    val path: Option[String]) extends BatchEnvironment with SSHAccess with MemoryRequirement { env ⇒
 
   type SS = PersistentStorageService
   type JS = PBSJobService
@@ -55,14 +55,20 @@ class PBSEnvironment(
     new PersistentStorageService with SSHStorageService with ThisHost with LimitedAccess {
       def nbTokens = Workspace.preferenceAsInt(MaxConnections)
       def environment = env
-      def root = env.path
+      lazy val root = env.path match {
+        case Some(p) ⇒ p
+        case None ⇒ home
+      }
     }
 
   @transient lazy val jobService = new PBSJobService with ThisHost with LimitedAccess {
     def nbTokens = Workspace.preferenceAsInt(MaxConnections)
     def queue = env.queue
     def environment = env
-    def root = env.path
+    lazy val root = env.path match {
+      case Some(p) ⇒ p
+      case None ⇒ storage.home
+    }
     val id = url.toString
   }
 

@@ -88,7 +88,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
       val outputFilePath = storage.child(path, Storage.uniqName("job", ".out"))
 
       val os = script.bufferedOutputStream
-      try generateScript(serializedJob, outputFilePath, environment.runtimeMemoryValue, os)
+      try generateScript(serializedJob, outputFilePath, os)
       finally os.close
 
       val jobDescription = buildJobDescription(runtime, script)
@@ -103,7 +103,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     } finally script.delete
   }
 
-  protected def generateScript(serializedJob: SerializedJob, resultPath: String, memorySizeForRuntime: Int, os: OutputStream) = {
+  protected def generateScript(serializedJob: SerializedJob, resultPath: String, os: OutputStream) = {
     import serializedJob._
 
     val writter = new PrintStream(os)
@@ -129,7 +129,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     writter.print(lcpCpCmd(environment, storage.url.resolve(runtime.storage.path), "$CUR/storage.xml.gz"))
 
     writter.print(" export PATH=$PWD/jre/bin:$PATH; /bin/sh run.sh ")
-    writter.print(Integer.toString(memorySizeForRuntime))
+    writter.print(environment.openMOLEMemoryValue)
     writter.print("m ")
     writter.print(UUID.randomUUID)
     writter.print(" -c ")

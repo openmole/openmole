@@ -47,7 +47,7 @@ trait DesktopGridJobService extends JobService with UnlimitedAccess { js ⇒
   protected def _submit(serializedJob: SerializedJob): BatchJob = {
     val jobId = new File(serializedJob.path).getName
     import serializedJob._
-    val desktopJobMessage = new DesktopGridJobMessage(runtime.runtime, runtime.environmentPlugins, environment.runtimeMemoryValue, inputFile)
+    val desktopJobMessage = new DesktopGridJobMessage(runtime.runtime, runtime.environmentPlugins, environment.openMOLEMemoryValue, inputFile)
 
     val os = jobSubmissionFile(jobId).gzipedBufferedOutputStream
     try SerializerService.serialize(desktopJobMessage, os)

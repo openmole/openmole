@@ -27,10 +27,10 @@ import java.io.File
 
 package object task {
   implicit def taskBuilderToTask[TB <: TaskBuilder](builder: TB) = builder.toTask
-  implicit def taskToCapsuleConveter(task: ITask) = new Capsule(task)
-  implicit def taskBuilderToCapsuleConveter[TB <: TaskBuilder](builder: TB) = new Capsule(builder)
+  implicit def taskToCapsuleConverter(task: ITask) = new Capsule(task)
+  implicit def taskBuilderToCapsuleConverter[TB <: TaskBuilder](builder: TB) = new Capsule(builder)
 
-  implicit def taskToPuzzleConveter(task: ITask) = new Capsule(task).toPuzzle
+  implicit def taskToPuzzleConverter(task: ITask) = new Capsule(task).toPuzzle
 
   class TaskToCapsuleDecorator(task: ITask) {
     def toCapsule = new Capsule(task)
@@ -39,7 +39,6 @@ package object task {
 
   implicit def taskToCapsuleDecorator(task: ITask) = new TaskToCapsuleDecorator(task)
   implicit def taskBuilderToCapsuleDecorator(task: TaskBuilder) = taskToCapsuleDecorator(task)
-
   implicit def taskBuilderToPuzzleConverter(t: TaskBuilder) = t.toTask.toCapsule.toPuzzle
 
 }

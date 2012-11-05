@@ -31,6 +31,8 @@ trait SSHStorageService extends StorageService with SSHService { ss ⇒
     val root = ss.root
   }
 
+  def home = storage.home(authentication)
+
   val remoteStorage = new LocalStorage(root)
 
 }

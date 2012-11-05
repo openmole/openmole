@@ -102,9 +102,12 @@ object GliteAuthentication extends Logger {
     }
   }
 
+  def update(a: GliteAuthentication) = Workspace.persistentList(classOf[GliteAuthentication])(0) = a
+  def apply() = Workspace.persistentList(classOf[GliteAuthentication])(0)
+  def get = Workspace.persistentList(classOf[GliteAuthentication]).get(0)
 }
 
-trait GliteAuthentication extends Authentication {
+trait GliteAuthentication {
 
   def apply(
     serverURL: String,
@@ -113,7 +116,6 @@ trait GliteAuthentication extends Authentication {
     lifeTime: Int,
     fqan: Option[String]): GlobusGSSCredentialImpl
 
-  def category = classOf[GliteAuthentication]
 }
 
 //class GliteAuthentication(
