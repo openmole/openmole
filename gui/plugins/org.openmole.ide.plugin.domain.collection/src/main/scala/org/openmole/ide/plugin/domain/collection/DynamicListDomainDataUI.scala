@@ -36,6 +36,7 @@ object DynamicListDomainDataUI {
       case "BigDecimal" ⇒ new DynamicListDomainDataUI[BigDecimal](values)
       case "BigInteger" ⇒ new DynamicListDomainDataUI[BigInteger](values)
       case "Long" ⇒ new DynamicListDomainDataUI[Long](values)
+      case "String" ⇒ new DynamicListDomainDataUI[String](values)
       case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
     }
   }
@@ -58,10 +59,10 @@ class DynamicListDomainDataUI[T](
 
   def isAcceptable(p: IPrototypeDataProxyUI) = availableTypes.contains(p.dataUI.toString)
 
-  val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long")
+  val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
 
   def coreClass = classOf[DynamicListDomainDataUI[T]]
 
-  override def toString = "Value list"
+  override def toString = name
 
 }

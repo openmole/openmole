@@ -34,6 +34,8 @@ class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends PluginPanel("
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
+  contents += new Label("<html><i>No more information is required for this Sampling</i></html>")
+
   override def saveContent = new CompleteSamplingDataUI(cud.id)
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))

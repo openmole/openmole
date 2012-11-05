@@ -52,6 +52,7 @@ class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IP
   val domainComboBox = new MyComboBox(domainContent(factorWidget.dataUI.prototype.getOrElse(Proxys.prototypes.head)))
   factorWidget.dataUI.domain match {
     case Some(x: IDomainDataUI[_]) ⇒
+      println("and set " + x)
       domainComboBox.selection.item = x
     case _ ⇒
   }
