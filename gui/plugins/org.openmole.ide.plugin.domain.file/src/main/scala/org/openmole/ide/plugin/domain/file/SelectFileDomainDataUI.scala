@@ -21,6 +21,7 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.domain.file.SelectFileDomain
 import java.io.File
 import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.core.model.domain.Domain
 
 object SelectFileDomainDataUI {
   def apply(d: SubDataUI[File]) = d match {
@@ -34,7 +35,7 @@ class SelectFileDomainDataUI(val directoryPath: String = "", val path: String = 
   override def name = "Single"
 
   def coreObject(proto: IPrototypeDataProxyUI,
-                 domain: Option[IDomainDataUI[_]]) = new SelectFileDomain(new File(directoryPath), path)
+                 domain: Option[Domain[_]]) = new SelectFileDomain(new File(directoryPath), path)
 
   def buildPanelUI(p: IPrototypeDataProxyUI) = new SelectFileDomainPanelUI(this)
 

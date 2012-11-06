@@ -19,6 +19,4 @@ package org.openmole.ide.plugin.domain.modifier
 
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
 
-trait TakeDomainFactoryUI extends IDomainFactoryUI {
-  def name = "Take"
-}
+trait TakeDomainFactoryUI extends IDomainFactoryUI

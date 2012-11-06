@@ -45,9 +45,7 @@ abstract class UniformDistributionDataUI[T] extends IDomainDataUI[T] {
 
   def imagePath = "img/domain_uniform_distribution.png"
 
-  override def toString = "Uniform distribution"
-
   def isAcceptable(p: IPrototypeDataProxyUI) = availableTypes.contains(p.dataUI.toString)
 
-  def preview = "uniform" + { if (max.isDefined) max.get else "" }
+  def preview = "uniform " + { if (max.isDefined) max.get else "" }
 }

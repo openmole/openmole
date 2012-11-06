@@ -21,6 +21,7 @@ import java.io.File
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.domain.file.ListFilesDomain
 import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.core.model.domain.Domain
 
 object ListFilesDomainDataUI {
   def apply(d: SubDataUI[File]) = d match {
@@ -35,7 +36,7 @@ class ListFilesDomainDataUI(val directoryPath: String = "",
   override def name = "Multiple"
 
   def coreObject(prototype: IPrototypeDataProxyUI,
-                 domain: Option[IDomainDataUI[_]]) = new ListFilesDomain(new File(directoryPath), regexp, recursive)
+                 domain: Option[Domain[_]]) = new ListFilesDomain(new File(directoryPath), regexp, recursive)
 
   def coreClass = classOf[ListFilesDomain]
 

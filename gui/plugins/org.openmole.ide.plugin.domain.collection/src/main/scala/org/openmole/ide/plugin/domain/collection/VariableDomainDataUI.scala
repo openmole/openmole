@@ -30,6 +30,7 @@ import org.openmole.core.model.data.Prototype
 import scala.swing.Label
 import org.openmole.ide.core.model.panel.{ IDomainPanelUI, IPanelUI }
 import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.core.model.domain.Domain
 
 object VariableDomainDataUI {
   def apply[T](prototypeArray: IPrototypeDataProxyUI, classString: String) = {
@@ -52,7 +53,7 @@ class VariableDomainDataUI[T](val prototypeArray: IPrototypeDataProxyUI)(implici
   val name = "Prototype Array"
 
   def coreObject(proto: IPrototypeDataProxyUI,
-                 domain: Option[IDomainDataUI[_]]) = new VariableDomain(prototypeArray.dataUI.coreObject.asInstanceOf[Prototype[Array[T]]])
+                 domain: Option[Domain[_]]) = new VariableDomain(prototypeArray.dataUI.coreObject.asInstanceOf[Prototype[Array[T]]])
 
   def buildPanelUI(p: IPrototypeDataProxyUI) = buildPanelUI
 
@@ -67,7 +68,4 @@ class VariableDomainDataUI[T](val prototypeArray: IPrototypeDataProxyUI)(implici
   def isAcceptable(protoProxy: IPrototypeDataProxyUI) = availableTypes.contains(protoProxy.dataUI.toString) && (protoProxy.dataUI.dim == 1)
 
   def coreClass = classOf[VariableDomainDataUI[T]]
-
-  override def toString = name
-
 }

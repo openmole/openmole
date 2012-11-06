@@ -19,6 +19,4 @@ package org.openmole.ide.plugin.domain.collection
 
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
 
-trait DynamicListFactoryUI extends IDomainFactoryUI {
-  def name = "Value list"
-}
+trait DynamicListFactoryUI extends IDomainFactoryUI

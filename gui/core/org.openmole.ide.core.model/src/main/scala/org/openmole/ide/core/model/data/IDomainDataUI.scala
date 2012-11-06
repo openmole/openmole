@@ -24,10 +24,9 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 
 trait IDomainDataUI[T] extends IDataUI {
-  def name: String
 
   def coreObject(proto: IPrototypeDataProxyUI,
-                 domain: Option[IDomainDataUI[_]]): Domain[T]
+                 domain: Option[Domain[_]]): Domain[T]
 
   def buildPanelUI(p: IPrototypeDataProxyUI): IDomainPanelUI
 

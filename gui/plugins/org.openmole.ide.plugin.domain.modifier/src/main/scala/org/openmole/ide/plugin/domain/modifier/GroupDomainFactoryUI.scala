@@ -19,6 +19,4 @@ package org.openmole.ide.plugin.domain.modifier
 
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
 
-trait GroupDomainFactoryUI extends IDomainFactoryUI {
-  def name = "GroupTake"
-}
+trait GroupDomainFactoryUI extends IDomainFactoryUI
