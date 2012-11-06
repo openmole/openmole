@@ -45,17 +45,20 @@ object VariableDomainDataUI {
   }
 }
 
-class VariableDomainDataUI[T](val prototypeArray: IPrototypeDataProxyUI)(implicit domainType: Manifest[T]) extends IDomainDataUI[T] { vdomainDataUI ⇒
+class VariableDomainDataUI[T](val prototypeArray: IPrototypeDataProxyUI)(implicit domainType: Manifest[T]) extends IDomainDataUI[T] {
+  vdomainDataUI ⇒
   val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String", "File")
 
   val name = "Prototype Array"
 
-  def coreObject(proto: IPrototypeDataProxyUI) = new VariableDomain(prototypeArray.dataUI.coreObject.asInstanceOf[Prototype[Array[T]]])
+  def coreObject(proto: IPrototypeDataProxyUI,
+                 domain: Option[IDomainDataUI[_]]) = new VariableDomain(prototypeArray.dataUI.coreObject.asInstanceOf[Prototype[Array[T]]])
 
   def buildPanelUI(p: IPrototypeDataProxyUI) = buildPanelUI
 
   def buildPanelUI = new PluginPanel("") with IDomainPanelUI {
     contents += new Label("<html><i>No more information is required for this domain</i></html>")
+
     def saveContent = vdomainDataUI
   }
 

@@ -20,6 +20,7 @@ package org.openmole.ide.plugin.domain.file
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.domain.file.SlidingSliceFilesDomain
 import java.io.File
+import org.openmole.ide.core.model.data.IDomainDataUI
 
 object SlindingSliceFilesDomainDataUI {
   def apply(d: SubDataUI[Array[File]]) = d match {
@@ -33,7 +34,8 @@ class SlindingSliceFilesDomainDataUI(val directoryPath: String = "",
                                      val sliceSize: Int = 1) extends SubDataUI[Array[File]] {
   override def name = "Slinding Slices"
 
-  def coreObject(proto: IPrototypeDataProxyUI) = new SlidingSliceFilesDomain(new File(directoryPath), numberPattern, sliceSize)
+  def coreObject(proto: IPrototypeDataProxyUI,
+                 domain: Option[IDomainDataUI[_]]) = new SlidingSliceFilesDomain(new File(directoryPath), numberPattern, sliceSize)
 
   def buildPanelUI(p: IPrototypeDataProxyUI) = new SlindingSliceFilesDomainPanelUI(this)
 

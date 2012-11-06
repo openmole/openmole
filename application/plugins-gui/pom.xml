@@ -87,6 +87,12 @@
             <artifactId>org.openmole.ide.plugin.domain.collection</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
+	</dependency>
+        <dependency>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.openmole.ide.plugin.domain.modifier</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.openmole.ide</groupId>

@@ -52,8 +52,9 @@ class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IP
   val domainComboBox = new MyComboBox(domainContent(factorWidget.dataUI.prototype.getOrElse(Proxys.prototypes.head)))
   factorWidget.dataUI.domain match {
     case Some(x: IDomainDataUI[_]) ⇒
-      println("and set " + x)
+      println("and set " + x + domainComboBox.selection.item)
       domainComboBox.selection.item = x
+      println("and after" + domainComboBox.selection.item)
     case _ ⇒
   }
 
@@ -95,7 +96,8 @@ class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IP
     case _ ⇒
   }
 
-  def domainContent(proto: IPrototypeDataProxyUI) = domains.map { _.buildDataUI }.filter(_.isAcceptable(proto)).toList
+  def domainContent(proto: IPrototypeDataProxyUI) =
+    domains.map { _.buildDataUI }.filter(_.isAcceptable(proto)).toList
 
   def saveContent = new FactorDataUI(factorWidget.dataUI.id,
     Some(protoComboBox.selection.item),

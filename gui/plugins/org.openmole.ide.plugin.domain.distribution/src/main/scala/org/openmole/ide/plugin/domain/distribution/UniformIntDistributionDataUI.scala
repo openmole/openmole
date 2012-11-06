@@ -20,6 +20,7 @@ package org.openmole.ide.plugin.domain.distribution
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.domain.distribution._
 import org.openmole.core.model.domain.Domain
+import org.openmole.ide.core.model.data.IDomainDataUI
 
 class UniformIntDistributionDataUI(val max: Option[Int] = None) extends UniformDistributionDataUI[Int] {
 
@@ -31,6 +32,7 @@ class UniformIntDistributionDataUI(val max: Option[Int] = None) extends UniformD
 
   def coreClass = classOf[UniformIntDistribution]
 
-  def coreObject(prototype: IPrototypeDataProxyUI): Domain[Int] =
+  def coreObject(prototype: IPrototypeDataProxyUI,
+                 domain: Option[IDomainDataUI[_]]): Domain[Int] =
     new UniformIntDistribution(max)
 }

@@ -50,7 +50,8 @@ class DynamicListDomainDataUI[T](
 
   def preview = " in " + values.headOption.getOrElse("") + " ..."
 
-  override def coreObject(prototype: IPrototypeDataProxyUI): Domain[T] =
+  override def coreObject(prototype: IPrototypeDataProxyUI,
+                          domain: Option[IDomainDataUI[_]]): Domain[T] =
     new DynamicListDomain(values.toSeq: _*)
 
   def buildPanelUI(p: IPrototypeDataProxyUI) = new DynamicListDomainPanelUI(this, p)
