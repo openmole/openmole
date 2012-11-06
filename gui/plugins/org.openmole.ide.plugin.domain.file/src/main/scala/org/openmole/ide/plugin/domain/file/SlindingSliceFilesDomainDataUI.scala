@@ -21,6 +21,7 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.domain.file.SlidingSliceFilesDomain
 import java.io.File
 import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.core.model.domain.Domain
 
 object SlindingSliceFilesDomainDataUI {
   def apply(d: SubDataUI[Array[File]]) = d match {
@@ -35,7 +36,7 @@ class SlindingSliceFilesDomainDataUI(val directoryPath: String = "",
   override def name = "Slinding Slices"
 
   def coreObject(proto: IPrototypeDataProxyUI,
-                 domain: Option[IDomainDataUI[_]]) = new SlidingSliceFilesDomain(new File(directoryPath), numberPattern, sliceSize)
+                 domain: Option[Domain[_]]) = new SlidingSliceFilesDomain(new File(directoryPath), numberPattern, sliceSize)
 
   def buildPanelUI(p: IPrototypeDataProxyUI) = new SlindingSliceFilesDomainPanelUI(this)
 
@@ -44,5 +45,4 @@ class SlindingSliceFilesDomainDataUI(val directoryPath: String = "",
   def coreClass = classOf[SlidingSliceFilesDomain]
 
   override def isAcceptable(p: IPrototypeDataProxyUI) = p.dataUI.toString == "File" && p.dataUI.dim == 1
-
 }

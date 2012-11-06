@@ -52,7 +52,7 @@ class TakeDomainDataUI[T](val size: String = "0")(implicit domainType: Manifest[
   def isAcceptable(protoProxy: IPrototypeDataProxyUI) = availableTypes.contains(protoProxy.dataUI.toString)
 
   override def coreObject(prototype: IPrototypeDataProxyUI,
-                          domain: Option[IDomainDataUI[_]]): Domain[T] = domain match {
+                          domain: Option[Domain[_]]): Domain[T] = domain match {
     case Some(d: Domain[T] with Discrete[T]) ⇒ new TakeDomain[T](d, size.toInt)
     case _ ⇒ throw new UserBadDataError("No input domain has been found, it is required for a Take Domain.")
   }

@@ -19,6 +19,4 @@ package org.openmole.ide.plugin.domain.collection
 
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
 
-trait VariableDomainFactoryUI extends IDomainFactoryUI {
-  def name = "Prototype Array"
-}
+trait VariableDomainFactoryUI extends IDomainFactoryUI

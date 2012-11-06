@@ -22,6 +22,4 @@ import org.openmole.ide.core.model.data.IDomainDataUI
 import java.io.File
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
-trait FileDomainFactoryUI extends IDomainFactoryUI {
-  def name = "File"
-}
+trait FileDomainFactoryUI extends IDomainFactoryUI

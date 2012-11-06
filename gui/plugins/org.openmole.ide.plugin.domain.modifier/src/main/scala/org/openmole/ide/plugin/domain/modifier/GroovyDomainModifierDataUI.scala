@@ -15,46 +15,50 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.domain.collection
+package org.openmole.ide.plugin.domain.modifier
 
 import java.math.BigDecimal
 import java.math.BigInteger
-import org.openmole.core.model.domain.Domain
+import org.openmole.core.model.domain.{ Discrete, Domain }
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.plugin.domain.collection.DynamicListDomain
+import org.openmole.plugin.domain.modifier.GroovyDomainModifier
+import org.openmole.core.model.data.Prototype
 
-object DynamicListDomainDataUI {
+object GroovyModifierDomainDataUI {
 
-  def apply[T](values: List[String] = List(), classString: String) = {
+  def apply[T](code: String = "", classString: String) = {
     classString match {
-      case "Int" ⇒ new DynamicListDomainDataUI[Int](values)
-      case "Double" ⇒ new DynamicListDomainDataUI[Double](values)
-      case "BigDecimal" ⇒ new DynamicListDomainDataUI[BigDecimal](values)
-      case "BigInteger" ⇒ new DynamicListDomainDataUI[BigInteger](values)
-      case "Long" ⇒ new DynamicListDomainDataUI[Long](values)
-      case "String" ⇒ new DynamicListDomainDataUI[String](values)
+      case "Int" ⇒ new GroovyModifierDomainDataUI[Int](code)
+      case "Double" ⇒ new GroovyModifierDomainDataUI[Double](code)
+      case "BigDecimal" ⇒ new GroovyModifierDomainDataUI[BigDecimal](code)
+      case "BigInteger" ⇒ new GroovyModifierDomainDataUI[BigInteger](code)
+      case "Long" ⇒ new GroovyModifierDomainDataUI[Long](code)
+      case "String" ⇒ new GroovyModifierDomainDataUI[String](code)
       case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
     }
   }
 }
 
-class DynamicListDomainDataUI[T](
-  val values: List[String])(implicit domainType: Manifest[T])
+class GroovyModifierDomainDataUI[T](
+  val code: String)(implicit domainType: Manifest[T])
     extends IDomainDataUI[T] {
 
-  val name = "Value list"
+  val name = "Map"
 
-  def preview = " in " + values.headOption.getOrElse("") + " ..."
+  def preview = " map( " + code.split("\n")(0) + " ...)"
 
   override def coreObject(prototype: IPrototypeDataProxyUI,
-                          domain: Option[Domain[_]]): Domain[T] =
-    new DynamicListDomain(values.toSeq: _*)
+                          domain: Option[Domain[_]]): Domain[T] = domain match {
+    case Some(d: Domain[_]) ⇒ new GroovyDomainModifier(prototype.dataUI.coreObject.asInstanceOf[Prototype[Any]],
+      d.asInstanceOf[Domain[T] with Discrete[T]], code)
+    case _ ⇒ throw new UserBadDataError("No input domain has been found, it is required for a Take Domain.")
+  }
 
-  def buildPanelUI(p: IPrototypeDataProxyUI) = new DynamicListDomainPanelUI(this, p)
+  def buildPanelUI(p: IPrototypeDataProxyUI) = new GroovyModifierDomainPanelUI(this, p)
 
   def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], false))
 
@@ -62,5 +66,5 @@ class DynamicListDomainDataUI[T](
 
   val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
 
-  def coreClass = classOf[DynamicListDomainDataUI[T]]
+  def coreClass = classOf[GroovyModifierDomainDataUI[T]]
 }

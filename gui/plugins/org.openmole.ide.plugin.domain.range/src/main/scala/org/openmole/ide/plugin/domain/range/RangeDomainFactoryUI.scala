@@ -24,6 +24,4 @@ import org.openmole.misc.tools.io.FromString._
 import scala.math.Integral._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
-trait RangeDomainFactoryUI extends IDomainFactoryUI {
-  def name = "Range"
-}
+trait RangeDomainFactoryUI extends IDomainFactoryUI
