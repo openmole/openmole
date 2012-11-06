@@ -201,6 +201,7 @@ class GliteEnvironment(
     if (jobServices.size == 1) super.selectAJobService
     else {
       val maxTime = jobServices.map(_.time).max
+      val minTime = jobServices.map(_.time).min
 
       def fitness =
         jobServices.flatMap {
@@ -210,15 +211,15 @@ class GliteEnvironment(
               case Some(token) ⇒
                 val time = cur.time
                 val timeFactor =
-                  if (time.isNaN || maxTime.isNaN || maxTime == 0.0) 0.0
-                  else 1 - (time / maxTime)
+                  if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0) 0.0
+                  else 1 - ((time - minTime) / (maxTime - minTime))
 
                 val jobFactor =
                   if (cur.submitted > 0 && cur.totalSubmitted > 0) (cur.runnig.toDouble / cur.submitted) * (cur.totalDone / cur.totalSubmitted)
                   else 0.0
 
                 val availabilty = (cur.available.toDouble + 1) / cur.nbTokens
-                val fitness = math.pow(jobFactor + cur.successRate + 2 * timeFactor + availabilty, Workspace.preferenceAsDouble(JobServiceFitnessPower))
+                val fitness = math.pow(jobFactor + cur.successRate + timeFactor + availabilty, Workspace.preferenceAsDouble(JobServiceFitnessPower))
                 Some((cur, token, fitness))
             }
         }
@@ -254,7 +255,8 @@ class GliteEnvironment(
     else {
       val totalFileSize = usedFileHashes.map { case (f, _) ⇒ f.size }.sum
       val onStorage = ReplicaCatalog.withClient(ReplicaCatalog.inCatalog(env.id)(_))
-      val maxTime = jobServices.map(_.time).max
+      val maxTime = storages.map(_.time).max
+      val minTime = storages.map(_.time).min
 
       def fitness =
         storages.flatMap {
@@ -268,8 +270,8 @@ class GliteEnvironment(
 
                 val time = cur.time
                 val timeFactor =
-                  if (time.isNaN || maxTime.isNaN || maxTime == 0.0) 0.0
-                  else 1 - (time / maxTime)
+                  if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0) 0.0
+                  else 1 - ((time - minTime) / (maxTime - minTime))
 
                 val availabilty = (cur.available.toDouble + 1) / cur.nbTokens
 
