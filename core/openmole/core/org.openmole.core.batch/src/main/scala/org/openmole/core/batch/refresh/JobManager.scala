@@ -42,7 +42,7 @@ object JobManager extends Logger
 
 import JobManager._
 
-class JobManager(environment: BatchEnvironment) extends Actor {
+class JobManager(val environment: BatchEnvironment) extends Actor {
 
   val workers = ActorSystem.create("JobManagment", ConfigFactory.parseString(
     """
@@ -70,7 +70,7 @@ akka {
   val resizer = DefaultResizer(lowerBound = 10, upperBound = Workspace.preferenceAsInt(JobManagmentThreads))
   val uploader = workers.actorOf(Props(new UploadActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
   val submitter = workers.actorOf(Props(new SubmitActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
-  val refresher = workers.actorOf(Props(new RefreshActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
+  val refresher = workers.actorOf(Props(new RefreshActor(self, environment)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
   val resultGetters = workers.actorOf(Props(new GetResultActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
   val killer = workers.actorOf(Props(new KillerActor).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
   val cleaner = workers.actorOf(Props(new CleanerActor).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
@@ -84,14 +84,10 @@ akka {
     case Submit(job, sj) ⇒ submitter ! Submit(job, sj)
     case Submitted(job, sj, bj) ⇒
       job.batchJob = Some(bj)
-      self ! RefreshDelay(job, sj, bj, minUpdateInterval, true)
-    case RefreshDelay(job, sj, bj, delay, stateChanged) ⇒
-      logger.fine("Refresh delay")
-      val newDelay =
-        if (!stateChanged) math.min(delay + incrementUpdateInterval, maxUpdateInterval) else minUpdateInterval
-      logger.fine("Next state refresh in " + newDelay + " " + job)
-      context.system.scheduler.scheduleOnce(newDelay milliseconds) {
-        refresher ! Refresh(job, sj, bj, newDelay)
+      self ! RefreshDelay(job, sj, bj, minUpdateInterval)
+    case RefreshDelay(job, sj, bj, delay) ⇒
+      context.system.scheduler.scheduleOnce(delay milliseconds) {
+        refresher ! Refresh(job, sj, bj, delay)
       }
     case GetResult(job, sj, out) ⇒
       resultGetters ! GetResult(job, sj, out)

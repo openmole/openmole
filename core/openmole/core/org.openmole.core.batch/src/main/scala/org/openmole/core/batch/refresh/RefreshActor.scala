@@ -22,24 +22,31 @@ import org.openmole.misc.tools.service.Logger
 import akka.actor.ActorRef
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.batch.environment.BatchEnvironment._
+import org.openmole.core.batch.environment.BatchEnvironment
 
 object RefreshActor extends Logger
 
 import RefreshActor._
 
-class RefreshActor(jobManager: ActorRef) extends Actor {
+class RefreshActor(jobManager: ActorRef, environment: BatchEnvironment) extends Actor {
   def receive = {
     case Refresh(job, sj, bj, delay) ⇒
       if (!job.state.isFinal) {
         try {
-          val oldState = job.state
-          job.state = bj.withToken(bj.updateState(_))
-          if (job.state == DONE) {
-            //logger.fine(sj.communicationStorage.path.toStringURI(sj.communicationDirPath))
-            jobManager ! GetResult(job, sj, bj.resultPath)
-          } else {
-            if (!job.state.isFinal) jobManager ! RefreshDelay(job, sj, bj, delay, oldState != job.state)
-            else jobManager ! Kill(job)
+          bj.jobService.tryGetToken match {
+            case Some(token) ⇒
+              try {
+                val oldState = job.state
+                job.state = bj.updateState(token)
+                if (job.state == DONE) jobManager ! GetResult(job, sj, bj.resultPath)
+                else if (!job.state.isFinal) {
+                  val newDelay =
+                    if (oldState == job.state) math.min(delay + environment.incrementUpdateInterval, environment.maxUpdateInterval)
+                    else environment.minUpdateInterval
+                  jobManager ! RefreshDelay(job, sj, bj, newDelay)
+                } else jobManager ! Kill(job)
+              } finally bj.jobService.releaseToken(token)
+            case None ⇒ jobManager ! RefreshDelay(job, sj, bj, delay)
           }
         } catch {
           case e: Throwable ⇒

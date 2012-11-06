@@ -218,7 +218,7 @@ class GliteEnvironment(
                   else 0.0
 
                 val availabilty = (cur.available.toDouble + 1) / cur.nbTokens
-                val fitness = math.pow(jobFactor + cur.successRate + timeFactor + availabilty, Workspace.preferenceAsDouble(JobServiceFitnessPower))
+                val fitness = math.pow(jobFactor + cur.successRate + 2 * timeFactor + availabilty, Workspace.preferenceAsDouble(JobServiceFitnessPower))
                 Some((cur, token, fitness))
             }
         }
