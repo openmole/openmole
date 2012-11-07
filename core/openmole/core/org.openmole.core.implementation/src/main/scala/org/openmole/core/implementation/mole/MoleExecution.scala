@@ -53,7 +53,6 @@ class MoleExecution(
     val selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
     val grouping: Map[ICapsule, Grouping] = Map.empty,
     val profiler: Profiler = Profiler.empty,
-    val rerun: IInstantRerun = IInstantRerun.empty,
     rng: java.util.Random = Random.newRNG(Workspace.newSeed)) extends IMoleExecution {
 
   import IMoleExecution._
@@ -86,9 +85,6 @@ class MoleExecution(
   def numberOfJobs = rootSubMoleExecution.numberOfJobs
 
   def exceptions = _exceptions.single()
-
-  def instantRerun(moleJob: IMoleJob, capsule: ICapsule) =
-    rerun.synchronized { rerun.rerun(moleJob, capsule) }
 
   def group(moleJob: IMoleJob, capsule: ICapsule, submole: ISubMoleExecution) =
     atomic { implicit txn ⇒
@@ -182,7 +178,6 @@ class MoleExecution(
   def jobOutputTransitionsPerformed(job: IMoleJob, capsule: ICapsule) =
     if (!_canceled.single()) {
       if (allWaiting) submitAll
-      rerun.synchronized { rerun.jobFinished(job, capsule) }
       if (numberOfJobs == 0) {
         EventDispatcher.trigger(this, new IMoleExecution.Finished)
         profiler.finished

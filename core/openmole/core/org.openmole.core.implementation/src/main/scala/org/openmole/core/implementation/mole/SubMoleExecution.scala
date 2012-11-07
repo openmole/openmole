@@ -160,9 +160,8 @@ class SubMoleExecution(
             val moleJob: IMoleJob = new MoleJob(capsule.task, implicits + context + savedContext, moleExecution.nextJobId, stateChanged)
             EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleStarting(moleJob, capsule))
             EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobSubmitted(moleJob))
-            val instant = moleExecution.instantRerun(moleJob, capsule)
             addJob(moleJob, capsule, ticket)
-            if (!instant) moleJob.perform
+            moleJob.perform
             masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(moleJob.context))
           }
         case _ ⇒
@@ -170,8 +169,7 @@ class SubMoleExecution(
           addJob(moleJob, capsule, ticket)
           EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleStarting(moleJob, capsule))
           EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobSubmitted(moleJob))
-          val instant = moleExecution.instantRerun(moleJob, capsule)
-          if (!instant) moleExecution.group(moleJob, capsule, this)
+          moleExecution.group(moleJob, capsule, this)
       }
     }
   }

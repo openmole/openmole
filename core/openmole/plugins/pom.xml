@@ -53,7 +53,6 @@
         <module>org.openmole.plugin.sampling.lhs</module>
         <module>org.openmole.plugin.sampling.combine</module>
         <module>org.openmole.plugin.sampling.filter</module>
-	<module>org.openmole.plugin.instantrerun.filesystem</module>
 	<module>org.openmole.plugin.method.evolution</module>
 	<module>org.openmole.plugin.method.sensitivity</module>
 	<module>org.openmole.plugin.builder.evolution</module>

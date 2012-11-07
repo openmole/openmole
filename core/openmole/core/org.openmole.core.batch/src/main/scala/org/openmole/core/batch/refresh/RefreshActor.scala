@@ -34,14 +34,14 @@ class RefreshActor(jobManager: ActorRef, environment: BatchEnvironment) extends 
       if (!job.state.isFinal) {
         try {
           val oldState = job.state
-                job.state = bj.withToken(bj.updateState(_))
-                if (job.state == DONE) jobManager ! GetResult(job, sj, bj.resultPath)
-                else if (!job.state.isFinal) {
-                  val newDelay =
-                    if (oldState == job.state) math.min(delay + environment.incrementUpdateInterval, environment.maxUpdateInterval)
-                    else environment.minUpdateInterval
-                  jobManager ! RefreshDelay(job, sj, bj, newDelay)
-                } else jobManager ! Kill(job)
+          job.state = bj.withToken(bj.updateState(_))
+          if (job.state == DONE) jobManager ! GetResult(job, sj, bj.resultPath)
+          else if (!job.state.isFinal) {
+            val newDelay =
+              if (oldState == job.state) math.min(delay + environment.incrementUpdateInterval, environment.maxUpdateInterval)
+              else environment.minUpdateInterval
+            jobManager ! RefreshDelay(job, sj, bj, newDelay)
+          } else jobManager ! Kill(job)
         } catch {
           case e: Throwable ⇒
             jobManager ! Error(job, e)
