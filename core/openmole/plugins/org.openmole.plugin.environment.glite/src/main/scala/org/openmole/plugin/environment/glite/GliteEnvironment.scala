@@ -42,6 +42,7 @@ import concurrent.stm._
 import annotation.tailrec
 import org.globus.gsi.gssapi.GlobusGSSCredentialImpl
 import ref.WeakReference
+import org.openmole.misc.tools.service.Scaling._
 
 object GliteEnvironment extends Logger {
 
@@ -200,8 +201,15 @@ class GliteEnvironment(
   override def selectAJobService =
     if (jobServices.size == 1) super.selectAJobService
     else {
-      val maxTime = jobServices.map(_.time).max
-      val minTime = jobServices.map(_.time).min
+      def jobFactor(j: GliteJobService) = (j.runnig.toDouble / j.submitted) * (j.totalDone.toDouble / j.totalSubmitted)
+
+      val times = jobServices.map(_.time)
+      val maxTime = times.max
+      val minTime = times.min
+
+      val jobFactors = jobServices.map(jobFactor)
+      val maxJobFactor = jobFactors.max
+      val minJobFactor = jobFactors.min
 
       def fitness =
         jobServices.flatMap {
@@ -210,15 +218,17 @@ class GliteEnvironment(
               case None ⇒ None
               case Some(token) ⇒
                 val time = cur.time
+
                 val timeFactor =
                   if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0) 0.0
-                  else 1 - ((time - minTime) / (maxTime - minTime))
+                  else 1 - time.normalize(minTime, maxTime)
 
                 val jobFactor =
-                  if (cur.submitted > 0 && cur.totalSubmitted > 0) (cur.runnig.toDouble / cur.submitted) * (cur.totalDone / cur.totalSubmitted)
+                  if (cur.submitted > 0 && cur.totalSubmitted > 0) ((cur.runnig.toDouble / cur.submitted) * (cur.totalDone / cur.totalSubmitted)).normalize(minJobFactor, maxJobFactor)
                   else 0.0
 
                 val availabilty = (cur.available.toDouble + 1) / cur.nbTokens
+
                 val fitness = math.pow(jobFactor + cur.successRate + timeFactor + availabilty, Workspace.preferenceAsDouble(JobServiceFitnessPower))
                 Some((cur, token, fitness))
             }
@@ -271,7 +281,7 @@ class GliteEnvironment(
                 val time = cur.time
                 val timeFactor =
                   if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0) 0.0
-                  else 1 - ((time - minTime) / (maxTime - minTime))
+                  else 1 - time.normalize(minTime, maxTime)
 
                 val availabilty = (cur.available.toDouble + 1) / cur.nbTokens
 
@@ -293,9 +303,7 @@ class GliteEnvironment(
         val notLoaded = normalizedFitness(fitness)
         val fitnessSum = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
         val drawn = Random.default.nextDouble * fitnessSum
-        val totalFitness = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
-        //GliteEnvironment.logger.fine("Total fitness " + totalFitness + " among " + notLoaded.size)
-        selected(Random.default.nextDouble * totalFitness, notLoaded.toList) match {
+        selected(drawn, notLoaded.toList) match {
           case Some((storage, token)) ⇒
             for {
               (s, t, _) ← notLoaded
