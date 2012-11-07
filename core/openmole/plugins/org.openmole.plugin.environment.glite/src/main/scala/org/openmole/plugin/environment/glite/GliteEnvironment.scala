@@ -43,6 +43,7 @@ import annotation.tailrec
 import org.globus.gsi.gssapi.GlobusGSSCredentialImpl
 import ref.WeakReference
 import org.openmole.misc.tools.service.Scaling._
+import org.openmole.misc.tools.service.Random._
 
 object GliteEnvironment extends Logger {
 
@@ -234,29 +235,28 @@ class GliteEnvironment(
             }
         }
 
-      @tailrec def selected(value: Double, jobServices: List[(JobService, AccessToken, Double)]): Option[(JobService, AccessToken)] =
-        jobServices.headOption match {
-          case Some((js, token, fitness)) ⇒
-            if (value <= fitness) Some((js, token))
-            else selected(value - fitness, jobServices.tail)
-          case None ⇒ None
+      @tailrec def selected(value: Double, jobServices: List[(JobService, AccessToken, Double)]): (JobService, AccessToken) =
+        jobServices match {
+          case (js, token, fitness) :: Nil ⇒ (js, token)
+          case (js, token, fitness) :: tail ⇒
+            if (value <= fitness) (js, token)
+            else selected(value - fitness, tail)
         }
 
       atomic { implicit txn ⇒
-        val notLoaded = normalizedFitness(fitness)
-        val totalFitness = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
+        val notLoaded = normalizedFitness(fitness).shuffled(Random.default)
 
-        selected(Random.default.nextDouble * totalFitness, notLoaded.toList) match {
-          case Some((jobService, token)) ⇒
-            for {
-              (s, t, _) ← notLoaded
-              if (s.id != jobService.id)
-            } s.releaseToken(t)
-            jobService -> token
-          case None ⇒
-            for { (s, t, _) ← notLoaded } s.releaseToken(t)
-            retry
-        }
+        if (!notLoaded.isEmpty) {
+          val totalFitness = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
+
+          val (jobService, token) = selected(Random.default.nextDouble * totalFitness, notLoaded.toList)
+          for {
+            (s, t, _) ← notLoaded
+            if (s.id != jobService.id)
+          } s.releaseToken(t)
+          jobService -> token
+        } else retry
+
       }
     }
 
@@ -290,30 +290,27 @@ class GliteEnvironment(
             }
         }
 
-      @tailrec def selected(value: Double, storages: List[(StorageService, AccessToken, Double)]): Option[(StorageService, AccessToken)] = {
-        storages.headOption match {
-          case Some((storage, token, fitness)) ⇒
-            if (value <= fitness) Some((storage, token))
-            else selected(value - fitness, storages.tail)
-          case None ⇒ None
+      @tailrec def selected(value: Double, storages: List[(StorageService, AccessToken, Double)]): (StorageService, AccessToken) = {
+        storages match {
+          case (storage, token, _) :: Nil ⇒ (storage, token)
+          case (storage, token, fitness) :: tail ⇒
+            if (value <= fitness) (storage, token)
+            else selected(value - fitness, tail)
         }
       }
 
       atomic { implicit txn ⇒
-        val notLoaded = normalizedFitness(fitness)
-        val fitnessSum = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
-        val drawn = Random.default.nextDouble * fitnessSum
-        selected(drawn, notLoaded.toList) match {
-          case Some((storage, token)) ⇒
-            for {
-              (s, t, _) ← notLoaded
-              if (s.id != storage.id)
-            } s.releaseToken(t)
-            storage -> token
-          case None ⇒
-            for { (s, t, _) ← notLoaded } s.releaseToken(t)
-            retry
-        }
+        val notLoaded = normalizedFitness(fitness).shuffled(Random.default)
+        if (!notLoaded.isEmpty) {
+          val fitnessSum = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
+          val drawn = Random.default.nextDouble * fitnessSum
+          val (storage, token) = selected(drawn, notLoaded.toList)
+          for {
+            (s, t, _) ← notLoaded
+            if (s.id != storage.id)
+          } s.releaseToken(t)
+          storage -> token
+        } else retry
       }
 
     }
