@@ -3,9 +3,7 @@
 CURDIR=$PWD
 LOCATION=`dirname $0`
 
-cd $LOCATION
-
-nohup sh dbserver/bin/openmole-dbserver &
+nohup sh $LOCATION/dbserver/bin/openmole-dbserver &
 
 MEM="1G"
 
@@ -17,16 +15,11 @@ case "$JVMVERSION" in
   *64-Bit*) FLAG="-XX:+UseCompressedOops";;
 esac
 
-CONFIGDIR=$RANDOM
+CONFIGDIR=$LOCATION/$RANDOM
 
-rm -Rf ./configuration/org*
-rm ./configuration/*.log
-java -Dosgi.locking=none -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area=${CONFIGDIR} -splash:splashscreen.png -Xmx${MEM} $FLAG -XX:MaxPermSize=128M -XX:+UseParallelGC \
-     -jar ./plugins/org.eclipse.equinox.launcher.jar \
-     -cp ./openmole-plugins -gp ./openmole-plugins-gui "$@"
-#cat $LOCATION/configuration/*.log
+java -Dosgi.locking=none -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area=${CONFIGDIR} -splash:$LOCATION/splashscreen.png -Xmx${MEM} $FLAG -XX:MaxPermSize=128M -XX:+UseParallelGC \
+     -jar $LOCATION/plugins/org.eclipse.equinox.launcher.jar \
+     -cp $LOCATION/openmole-plugins -gp $LOCATION/openmole-plugins-gui "$@"
 
 rm -rf ${CONFIGDIR} 
-
-cd $CURDIR
 
