@@ -21,25 +21,22 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.core.implementation.data._
 import java.awt._
+import org.netbeans.api.visual.action.ActionFactory
+import org.netbeans.api.visual.action.ConnectorState
+import org.netbeans.api.visual.action.ConnectorState._
+import org.netbeans.api.visual.anchor.Anchor
 import org.netbeans.api.visual.anchor.AnchorShape
 import org.netbeans.api.visual.action.ConnectProvider
 import org.netbeans.api.visual.widget._
 import java.awt.event.InputEvent
 import java.util.concurrent.atomic.AtomicInteger
-import javax.swing.JScrollPane
-import org.netbeans.api.visual.action.ActionFactory
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
-import org.netbeans.api.visual.action._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.provider._
 import org.openmole.ide.core.model.sampling._
-import org.openmole.ide.core.model.workflow.IMoleScene
-import org.netbeans.api.visual.anchor.PointShape
-import org.netbeans.api.visual.anchor.AnchorFactory
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
-import org.netbeans.api.visual.anchor.Anchor
 
 object SamplingCompositionPanelUI {
   val DEFAULT_COLOR = new Color(250, 250, 250)
@@ -242,8 +239,14 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
       val targetW = targetWidget.asInstanceOf[SamplingComponent]
       sourceW.connections += connection
       targetW.connections += connection
-      connections += idFromSamplingComponent(sourceW) ->
-        idFromSamplingComponent(targetW)
+      targetW match {
+        case tfw: IFactorWidget ⇒ sourceW match {
+          case sfw: IFactorWidget ⇒ tfw.dataUI.previousFactor = Some(sfw.dataUI)
+          case _ ⇒
+        }
+        case _ ⇒
+      }
+      connections += idFromSamplingComponent(sourceW) -> idFromSamplingComponent(targetW)
       source = None
     }
 

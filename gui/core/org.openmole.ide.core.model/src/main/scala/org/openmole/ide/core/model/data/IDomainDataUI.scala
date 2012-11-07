@@ -25,12 +25,13 @@ import org.openmole.ide.core.model.panel.IDomainPanelUI
 
 trait IDomainDataUI[T] extends IDataUI {
 
-  def coreObject(proto: IPrototypeDataProxyUI,
-                 domain: Option[Domain[_]]): Domain[T]
+  def coreObject(proto: IPrototypeDataProxyUI): Domain[T]
 
   def buildPanelUI(p: IPrototypeDataProxyUI): IDomainPanelUI
 
   def preview: String
 
   def isAcceptable(protoProxy: IPrototypeDataProxyUI): Boolean
+
+  def previousFactor: Option[IFactorDataUI] = None
 }

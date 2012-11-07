@@ -35,8 +35,7 @@ class SlindingSliceFilesDomainDataUI(val directoryPath: String = "",
                                      val sliceSize: Int = 1) extends SubDataUI[Array[File]] {
   override def name = "Slinding Slices"
 
-  def coreObject(proto: IPrototypeDataProxyUI,
-                 domain: Option[Domain[_]]) = new SlidingSliceFilesDomain(new File(directoryPath), numberPattern, sliceSize)
+  def coreObject(proto: IPrototypeDataProxyUI) = new SlidingSliceFilesDomain(new File(directoryPath), numberPattern, sliceSize)
 
   def buildPanelUI(p: IPrototypeDataProxyUI) = new SlindingSliceFilesDomainPanelUI(this)
 

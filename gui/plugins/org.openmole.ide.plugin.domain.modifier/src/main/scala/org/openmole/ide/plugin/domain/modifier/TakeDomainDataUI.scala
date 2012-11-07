@@ -21,7 +21,7 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import org.openmole.core.model.domain.{ Discrete, Domain }
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.domain.modifier.TakeDomain
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
@@ -51,10 +51,12 @@ class TakeDomainDataUI[T](val size: String = "0")(implicit domainType: Manifest[
 
   def isAcceptable(protoProxy: IPrototypeDataProxyUI) = availableTypes.contains(protoProxy.dataUI.toString)
 
-  override def coreObject(prototype: IPrototypeDataProxyUI,
-                          domain: Option[Domain[_]]): Domain[T] = domain match {
-    case Some(d: Domain[T] with Discrete[T]) ⇒ new TakeDomain[T](d, size.toInt)
-    case _ ⇒ throw new UserBadDataError("No input domain has been found, it is required for a Take Domain.")
+  override def coreObject(prototype: IPrototypeDataProxyUI): Domain[T] = previousFactor match {
+    case Some(f: IFactorDataUI) ⇒ f.domain match {
+      case Some(d: Domain[_] with Discrete[T]) ⇒ new TakeDomain[T](d, size.toInt)
+      case _ ⇒ throw new UserBadDataError("No input domain has been found, it is required for a Take Domain.")
+    }
+    case _ ⇒ throw new UserBadDataError("No input factor has been found, it is required for a Take Domain.")
   }
 
   def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Int], false))

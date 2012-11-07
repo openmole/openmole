@@ -26,8 +26,7 @@ class DoubleLogarithmRangeDataUI(val min: String = "0.0", val max: String = "", 
 
   def availableTypes = List("Double")
 
-  def coreObject(prototype: IPrototypeDataProxyUI,
-                 domain: Option[Domain[_]]): Domain[Double] = new DoubleLogarithmRange(min, max, stepString)
+  def coreObject(prototype: IPrototypeDataProxyUI): Domain[Double] = new DoubleLogarithmRange(min, max, stepString)
 
   def coreClass = classOf[DoubleLogarithmRangeDataUI]
 

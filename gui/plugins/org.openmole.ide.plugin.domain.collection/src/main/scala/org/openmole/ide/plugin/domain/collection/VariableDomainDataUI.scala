@@ -52,8 +52,7 @@ class VariableDomainDataUI[T](val prototypeArray: IPrototypeDataProxyUI)(implici
 
   val name = "Prototype Array"
 
-  def coreObject(proto: IPrototypeDataProxyUI,
-                 domain: Option[Domain[_]]) = new VariableDomain(prototypeArray.dataUI.coreObject.asInstanceOf[Prototype[Array[T]]])
+  def coreObject(proto: IPrototypeDataProxyUI) = new VariableDomain(prototypeArray.dataUI.coreObject.asInstanceOf[Prototype[Array[T]]])
 
   def buildPanelUI(p: IPrototypeDataProxyUI) = buildPanelUI
 

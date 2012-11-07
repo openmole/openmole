@@ -34,6 +34,5 @@ class UniformLongDistributionDataUI extends UniformDistributionDataUI[Long] {
 
   def coreClass = classOf[UniformLongDistribution]
 
-  def coreObject(prototype: IPrototypeDataProxyUI,
-                 domain: Option[Domain[_]]): Domain[Long] = new UniformLongDistribution
+  def coreObject(prototype: IPrototypeDataProxyUI): Domain[Long] = new UniformLongDistribution
 }
