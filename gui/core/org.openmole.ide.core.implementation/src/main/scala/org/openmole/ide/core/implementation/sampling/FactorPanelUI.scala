@@ -43,22 +43,24 @@ class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IP
 
   val domains = KeyRegistry.domains.values
 
+  val domainComboBox = new MyComboBox(domainContent(factorWidget.dataUI.prototype.getOrElse(Proxys.prototypes.head)))
+  factorWidget.dataUI.domain match {
+    case Some(x: IDomainDataUI[_]) ⇒
+      println("and set " + domainComboBox.selection.item)
+      domainComboBox.selection.item = x
+      println("and after" + domainComboBox.selection.item)
+    case _ ⇒
+  }
+
   val protoComboBox = new MyComboBox(Proxys.prototypes.toList)
   factorWidget.dataUI.prototype match {
     case Some(x: IPrototypeDataProxyUI) ⇒ protoComboBox.selection.item = x
     case _ ⇒
   }
 
-  val domainComboBox = new MyComboBox(domainContent(factorWidget.dataUI.prototype.getOrElse(Proxys.prototypes.head)))
-  factorWidget.dataUI.domain match {
-    case Some(x: IDomainDataUI[_]) ⇒
-      println("and set " + x + domainComboBox.selection.item)
-      domainComboBox.selection.item = x
-      println("and after" + domainComboBox.selection.item)
-    case _ ⇒
-  }
-
-  var dPanel = factorWidget.dataUI.domain.getOrElse { domainComboBox.selection.item }.buildPanelUI(protoComboBox.selection.item)
+  var dPanel = factorWidget.dataUI.domain.getOrElse {
+    domainComboBox.selection.item
+  }.buildPanelUI(protoComboBox.selection.item)
 
   val protoDomainPanel = new PluginPanel("wrap") {
     contents += new PluginPanel("wrap 3") {
@@ -87,8 +89,9 @@ class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IP
       displayDomainPanel(dContent)
   }
 
-  def displayDomainPanel(dContent: List[IDomainDataUI[_]]) = dContent.filter { it ⇒
-    domainComboBox.selection.item.toString == it.toString
+  def displayDomainPanel(dContent: List[IDomainDataUI[_]]) = dContent.filter {
+    it ⇒
+      domainComboBox.selection.item.toString == it.toString
   }.headOption match {
     case Some(d: IDomainDataUI[_]) ⇒
       dPanel = d.buildPanelUI(protoComboBox.selection.item)
@@ -96,11 +99,18 @@ class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IP
     case _ ⇒
   }
 
-  def domainContent(proto: IPrototypeDataProxyUI) =
-    domains.map { _.buildDataUI }.filter(_.isAcceptable(proto)).toList
+  def domainContent(proto: IPrototypeDataProxyUI) = {
+    println("domain Conmetnt :: " + domains.map {
+      _.buildDataUI
+    }.filter(_.isAcceptable(proto)).toList)
+    domains.map {
+      _.buildDataUI
+    }.filter(_.isAcceptable(proto)).toList
+  }
 
   def saveContent = new FactorDataUI(factorWidget.dataUI.id,
     Some(protoComboBox.selection.item),
-    Some(dPanel.saveContent))
+    Some(dPanel.saveContent),
+    factorWidget.dataUI.previousFactor)
 
 }

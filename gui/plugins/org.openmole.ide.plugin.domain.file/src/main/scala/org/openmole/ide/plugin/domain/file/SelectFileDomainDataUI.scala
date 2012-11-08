@@ -34,8 +34,7 @@ class SelectFileDomainDataUI(val directoryPath: String = "", val path: String = 
 
   override def name = "Single"
 
-  def coreObject(proto: IPrototypeDataProxyUI,
-                 domain: Option[Domain[_]]) = new SelectFileDomain(new File(directoryPath), path)
+  def coreObject(proto: IPrototypeDataProxyUI) = new SelectFileDomain(new File(directoryPath), path)
 
   def buildPanelUI(p: IPrototypeDataProxyUI) = new SelectFileDomainPanelUI(this)
 

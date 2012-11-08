@@ -35,8 +35,7 @@ class ListFilesDomainDataUI(val directoryPath: String = "",
                             val recursive: Boolean = false) extends SubDataUI[File] {
   override def name = "Multiple"
 
-  def coreObject(prototype: IPrototypeDataProxyUI,
-                 domain: Option[Domain[_]]) = new ListFilesDomain(new File(directoryPath), regexp, recursive)
+  def coreObject(prototype: IPrototypeDataProxyUI) = new ListFilesDomain(new File(directoryPath), regexp, recursive)
 
   def coreClass = classOf[ListFilesDomain]
 

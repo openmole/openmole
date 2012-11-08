@@ -24,6 +24,9 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.sampling.Sampling
 import org.openmole.ide.core.model.data._
 import java.awt.Point
+import java.security.DomainCombiner
+import org.openmole.core.model.domain.Domain
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
 class SamplingCompositionDataUI(val name: String = "",
                                 val factors: List[(IFactorDataUI, Point)] = List.empty,

@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.model.factory
 
-import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
 trait IDomainFactoryUI extends IFactoryUI {

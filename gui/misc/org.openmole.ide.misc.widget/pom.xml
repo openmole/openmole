@@ -35,11 +35,6 @@
         </dependency>
         <dependency>
             <groupId>org.openmole.ide</groupId>
-            <artifactId>org.netbeans.api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole.ide</groupId>
             <artifactId>jsyntaxpane</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -47,7 +42,13 @@
             <groupId>org.openmole.ide</groupId>
             <artifactId>net.miginfocom.swing.miglayout</artifactId>
             <version>${project.version}</version>
+        </dependency> 
+        <dependency>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.netbeans.api</artifactId>
+            <version>${project.version}</version>
         </dependency>
+
     </dependencies>
 
     <name>${project.artifactId} ${project.version}</name>

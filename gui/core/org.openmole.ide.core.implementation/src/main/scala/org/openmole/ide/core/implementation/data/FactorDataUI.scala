@@ -23,4 +23,5 @@ import org.openmole.ide.misc.tools.Counter
 
 class FactorDataUI(val id: String = "factor" + Counter.id.getAndIncrement,
                    val prototype: Option[IPrototypeDataProxyUI] = None,
-                   val domain: Option[IDomainDataUI[_]] = None) extends IFactorDataUI
+                   val domain: Option[IDomainDataUI[_]] = None,
+                   var previousFactor: Option[IFactorDataUI] = None) extends IFactorDataUI

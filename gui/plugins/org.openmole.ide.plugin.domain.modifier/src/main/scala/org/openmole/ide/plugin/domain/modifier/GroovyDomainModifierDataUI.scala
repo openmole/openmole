@@ -23,6 +23,7 @@ import org.openmole.core.model.domain.{ Discrete, Domain }
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.model.data.IFactorDataUI
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.domain.modifier.GroovyDomainModifier
@@ -43,19 +44,20 @@ object GroovyModifierDomainDataUI {
   }
 }
 
-class GroovyModifierDomainDataUI[T](
-  val code: String)(implicit domainType: Manifest[T])
+class GroovyModifierDomainDataUI[T](val code: String)(implicit domainType: Manifest[T])
     extends IDomainDataUI[T] {
 
   val name = "Map"
 
   def preview = " map( " + code.split("\n")(0) + " ...)"
 
-  override def coreObject(prototype: IPrototypeDataProxyUI,
-                          domain: Option[Domain[_]]): Domain[T] = domain match {
-    case Some(d: Domain[_]) ⇒ new GroovyDomainModifier(prototype.dataUI.coreObject.asInstanceOf[Prototype[Any]],
-      d.asInstanceOf[Domain[T] with Discrete[T]], code)
-    case _ ⇒ throw new UserBadDataError("No input domain has been found, it is required for a Take Domain.")
+  override def coreObject(prototype: IPrototypeDataProxyUI): Domain[T] = previousFactor match {
+    case Some(f: IFactorDataUI) ⇒ f.domain match {
+      case Some(d: Domain[_]) ⇒ new GroovyDomainModifier(prototype.dataUI.coreObject.asInstanceOf[Prototype[Any]],
+        d.asInstanceOf[Domain[T] with Discrete[T]], code)
+      case _ ⇒ throw new UserBadDataError("No input domain has been found, it is required for a Map Domain.")
+    }
+    case _ ⇒ throw new UserBadDataError("No input factor has been found, it is required for a Map Domain.")
   }
 
   def buildPanelUI(p: IPrototypeDataProxyUI) = new GroovyModifierDomainPanelUI(this, p)
