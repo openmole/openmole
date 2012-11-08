@@ -378,8 +378,11 @@ object FileUtil {
     }
 
     def createParentDir = {
-      if (!file.getParentFile.exists) file.getParentFile.mkdirs
-      if (!file.getParentFile.isDirectory) throw new UserBadDataError("Cannot create directory " + file.getParentFile)
+      val parent = file.getCanonicalFile.getParentFile
+      if (parent != null) {
+        if (!parent.exists) parent.mkdirs
+        if (!parent.isDirectory) throw new UserBadDataError("Cannot create directory " + file.getParentFile)
+      }
     }
 
   }
