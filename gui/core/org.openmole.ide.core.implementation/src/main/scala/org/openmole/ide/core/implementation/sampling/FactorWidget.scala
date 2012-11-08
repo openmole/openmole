@@ -48,11 +48,8 @@ class FactorWidget(var dataUI: IFactorDataUI,
   }
 
   def factorPreview =
-    dataUI.prototype.getOrElse("") + {
-      dataUI.domain match {
-        case Some(d: IDomainDataUI[_]) ⇒ d.preview
-        case _ ⇒ ""
-      }
+    dataUI.prototype + {
+      dataUI.domain.preview
     } match {
       case "" ⇒ "define Factor"
       case x: String ⇒ x

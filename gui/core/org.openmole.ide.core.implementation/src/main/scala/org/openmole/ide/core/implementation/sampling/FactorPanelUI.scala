@@ -18,49 +18,27 @@
 package org.openmole.ide.core.implementation.sampling
 
 import scala.swing._
-import swing.Swing._
-import java.awt.BorderLayout
 import scala.swing.event.SelectionChanged
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.data._
-import org.openmole.ide.core.model.dataproxy._
-import org.openmole.ide.core.model.factory._
-import org.openmole.ide.core.model.panel._
-import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.data._
-import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.core.model.sampling.IFactorWidget
-import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.widget._
-import org.openmole.ide.misc.tools.image.Images.CLOSE
 import org.openmole.ide.core.model.panel._
-import scala.swing.BorderPanel.Position._
-import scala.collection.JavaConversions._
-import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.implementation.sampling.DefaultFactor._
 
 class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IPanelUI {
 
   val domains = KeyRegistry.domains.values
 
-  val domainComboBox = new MyComboBox(domainContent(factorWidget.dataUI.prototype.getOrElse(Proxys.prototypes.head)))
-  factorWidget.dataUI.domain match {
-    case Some(x: IDomainDataUI[_]) ⇒
-      println("and set " + domainComboBox.selection.item)
-      domainComboBox.selection.item = x
-      println("and after" + domainComboBox.selection.item)
-    case _ ⇒
-  }
+  val domainComboBox = new MyComboBox(domainContent(factorWidget.dataUI.prototype))
+  domainComboBox.selection.item = factorWidget.dataUI.domain
 
   val protoComboBox = new MyComboBox(Proxys.prototypes.toList)
-  factorWidget.dataUI.prototype match {
-    case Some(x: IPrototypeDataProxyUI) ⇒ protoComboBox.selection.item = x
-    case _ ⇒
-  }
+  protoComboBox.selection.item = factorWidget.dataUI.prototype
 
-  var dPanel = factorWidget.dataUI.domain.getOrElse {
-    domainComboBox.selection.item
-  }.buildPanelUI(protoComboBox.selection.item)
+  var dPanel = factorWidget.dataUI.domain.buildPanelUI(protoComboBox.selection.item)
 
   val protoDomainPanel = new PluginPanel("wrap") {
     contents += new PluginPanel("wrap 3") {
@@ -99,18 +77,9 @@ class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IP
     case _ ⇒
   }
 
-  def domainContent(proto: IPrototypeDataProxyUI) = {
-    println("domain Conmetnt :: " + domains.map {
-      _.buildDataUI
-    }.filter(_.isAcceptable(proto)).toList)
-    domains.map {
-      _.buildDataUI
-    }.filter(_.isAcceptable(proto)).toList
-  }
-
   def saveContent = new FactorDataUI(factorWidget.dataUI.id,
-    Some(protoComboBox.selection.item),
-    Some(dPanel.saveContent),
+    protoComboBox.selection.item,
+    dPanel.saveContent,
     factorWidget.dataUI.previousFactor)
 
 }

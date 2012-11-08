@@ -59,7 +59,7 @@ class RangeDomainDataUI[T](
   override def coreObject(prototype: IPrototypeDataProxyUI): Domain[T] = step match {
     case Some(s: String) ⇒
       if (s.isEmpty) new Bounded[T](min, max)
-      else new Range[T](min, max, stepString)
+      else new Range[T](min, max, s)
     case _ ⇒ new Bounded[T](min, max)
   }
 
@@ -67,7 +67,12 @@ class RangeDomainDataUI[T](
 
   val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long")
 
-  def coreClass = classOf[RangeDomainDataUI[T]]
+  def coreClass = step match {
+    case Some(s: String) ⇒
+      if (s.isEmpty) classOf[Bounded[T]]
+      else classOf[Range[T]]
+    case _ ⇒ classOf[Bounded[T]]
+  }
 
   override def toString = "Range"
 

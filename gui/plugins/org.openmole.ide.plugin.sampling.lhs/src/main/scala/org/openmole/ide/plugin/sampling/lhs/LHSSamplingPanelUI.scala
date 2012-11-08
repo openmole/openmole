@@ -39,14 +39,15 @@ class LHSSamplingPanelUI(cud: LHSSamplingDataUI) extends PluginPanel("wrap 2", "
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
-  val sampleTextField = new TextField(cud.samples, 4)
+  val sampleTextField = new TextField(cud.samples, 8)
 
-  tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("wrap 2") {
-    contents += new Label("Number of samples")
+  tabbedPane.pages += new TabbedPane.Page("Samples", new PluginPanel("wrap") {
     contents += sampleTextField
   })
 
-  def domains = KeyRegistry.domains.values.map { _.buildDataUI }.toList
+  def domains = KeyRegistry.domains.values.map {
+    _.buildDataUI
+  }.toList
 
   override def saveContent = new LHSSamplingDataUI(sampleTextField.text, cud.id)
 

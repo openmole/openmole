@@ -55,10 +55,10 @@ class SamplingCompositionDataUI(val name: String = "",
                         connectionMap: Map[String, List[String]],
                         factorMap: Map[String, IFactorDataUI],
                         samplingMap: Map[String, ISamplingDataUI]): Sampling = {
-    println("buildSamplingCore")
+    println("samplingdataui : " + data + " " + builtSampling.contains(data))
     if (!builtSampling.contains(data)) {
-      println("build :: " + data.id)
       val partition = connectionMap(data.id).partition { _.substring(0, 4) == "samp" }
+      println("partition " + partition)
       builtSampling += data -> data.coreObject(partition._2.map { factorMap },
         partition._1.map { s ⇒ buildSamplingCore(samplingMap(s), connectionMap, factorMap, samplingMap) })
     }

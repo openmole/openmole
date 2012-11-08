@@ -20,8 +20,9 @@ package org.openmole.ide.core.implementation.data
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.misc.tools.Counter
+import org.openmole.ide.core.implementation.sampling.DefaultFactor._
 
 class FactorDataUI(val id: String = "factor" + Counter.id.getAndIncrement,
-                   val prototype: Option[IPrototypeDataProxyUI] = None,
-                   val domain: Option[IDomainDataUI[_]] = None,
+                   val prototype: IPrototypeDataProxyUI = aPrototype,
+                   val domain: IDomainDataUI[_] = aDomain,
                    var previousFactor: Option[IFactorDataUI] = None) extends IFactorDataUI
