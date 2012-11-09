@@ -20,7 +20,7 @@ package org.openmole.ide.plugin.domain.distribution
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.domain.distribution._
 import org.openmole.core.model.domain.Domain
-import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 
 class UniformLongDistributionDataUI extends UniformDistributionDataUI[Long] {
 
@@ -34,5 +34,6 @@ class UniformLongDistributionDataUI extends UniformDistributionDataUI[Long] {
 
   def coreClass = classOf[UniformLongDistribution]
 
-  def coreObject(prototype: IPrototypeDataProxyUI): Domain[Long] = new UniformLongDistribution
+  def coreObject(prototype: IPrototypeDataProxyUI,
+                 previousFactor: Option[IFactorDataUI]): Domain[Long] = new UniformLongDistribution
 }

@@ -33,7 +33,7 @@ class SaltelliSamplingDataUI(val samples: String = "1",
       },
       factors.map { f ⇒
         Factor(f.prototype.dataUI.coreObject.asInstanceOf[Prototype[Double]],
-          f.domain.coreObject(f.prototype).asInstanceOf[Domain[Double] with Bounds[Double]])
+          f.domain.coreObject(f.prototype, f.previousFactor).asInstanceOf[Domain[Double] with Bounds[Double]])
       }.toSeq: _*)
 
   def coreClass = classOf[SaltelliSampling]
@@ -47,7 +47,7 @@ class SaltelliSamplingDataUI(val samples: String = "1",
   //FIXME 2.10
   def isAcceptable(factor: IFactorDataUI) =
     if ((factor.prototype.dataUI.toString == "Double") &&
-      (factor.domain.coreObject(factor.prototype) match {
+      (factor.domain.coreObject(factor.prototype, factor.previousFactor) match {
         case x: Domain[Double] with Bounds[Double] ⇒ true
         case _ ⇒ false
       })) true

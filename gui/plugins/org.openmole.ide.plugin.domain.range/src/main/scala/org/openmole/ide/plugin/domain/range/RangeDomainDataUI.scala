@@ -24,7 +24,7 @@ import org.openmole.core.model.domain.Domain
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.plugin.domain.range._
 import org.openmole.plugin.domain.bounded._
 import org.openmole.misc.tools.io.FromString
@@ -56,7 +56,8 @@ class RangeDomainDataUI[T](
 
   val name = "Range"
 
-  override def coreObject(prototype: IPrototypeDataProxyUI): Domain[T] = step match {
+  override def coreObject(prototype: IPrototypeDataProxyUI,
+                          previousFactor: Option[IFactorDataUI]): Domain[T] = step match {
     case Some(s: String) ⇒
       if (s.isEmpty) new Bounded[T](min, max)
       else new Range[T](min, max, s)

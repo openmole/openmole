@@ -13,6 +13,8 @@ import org.openmole.core.model.sampling._
 import org.openmole.core.model.data.Prototype
 import org.openmole.core.model.domain.Domain
 import org.openmole.core.model.domain.Discrete
+import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.misc.exception.UserBadDataError
 
 class CompleteSamplingDataUI(val id: String = "sampling" + Counter.id.getAndIncrement) extends ISamplingDataUI {
 
@@ -20,7 +22,7 @@ class CompleteSamplingDataUI(val id: String = "sampling" + Counter.id.getAndIncr
                  samplings: List[Sampling]) = {
     new CompleteSampling(
       (factors.map(f ⇒ DiscreteFactor(Factor(f.prototype.dataUI.coreObject.asInstanceOf[Prototype[Any]],
-        f.domain.coreObject(f.prototype).asInstanceOf[Domain[Any] with Discrete[Any]])))
+        f.domain.coreObject(f.prototype, f.previousFactor).asInstanceOf[Domain[Any] with Discrete[Any]])))
         ::: samplings): _*)
   }
 
@@ -32,12 +34,18 @@ class CompleteSamplingDataUI(val id: String = "sampling" + Counter.id.getAndIncr
 
   def buildPanelUI = new CompleteSamplingPanelUI(this)
 
-  //FIXME 2.10
-  def isAcceptable(factor: IFactorDataUI) =
-    factor.domain.coreObject(factor.prototype) match {
+  def isAcceptable(factor: IFactorDataUI) = try {
+    factor.domain.coreObject(factor.prototype, factor.previousFactor) match {
       case x: Domain[Any] with Discrete[Any] ⇒ true
-      case _ => false
+      case _ ⇒
+        StatusBar.warn("A Discrete Domain is required for a Complete Sampling")
+        false
     }
+  } catch {
+    case u: UserBadDataError ⇒
+      StatusBar.warn("This factor is not valid : " + u.getMessage)
+      false
+  }
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 

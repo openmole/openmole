@@ -31,5 +31,7 @@ trait SubDataUI[T] extends IDomainDataUI[T] {
 
   def isAcceptable(p: IPrototypeDataProxyUI) = p.dataUI.toString == "File"
 
+  def isAcceptable(domain: IDomainDataUI[_]) = false
+
   def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[File], false))
 }

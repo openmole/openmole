@@ -26,6 +26,7 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.domain.modifier.GroupDomain
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
+import org.openmole.ide.core.implementation.dialog.StatusBar
 
 object GroupDomainDataUI {
 
@@ -51,9 +52,17 @@ class GroupDomainDataUI[T](val size: String = "0")(implicit domainType: Manifest
 
   def isAcceptable(protoProxy: IPrototypeDataProxyUI) = availableTypes.contains(protoProxy.dataUI.toString)
 
-  override def coreObject(prototype: IPrototypeDataProxyUI) = previousFactor match {
+  def isAcceptable(domain: IDomainDataUI[_]) = domain match {
+    case d: Domain[_] with Discrete[T] ⇒ true
+    case _ ⇒
+      StatusBar.warn("A Discrete Domain range is required as input of a Map Factor")
+      false
+  }
+
+  override def coreObject(prototype: IPrototypeDataProxyUI,
+                          previousFactor: Option[IFactorDataUI]) = previousFactor match {
     case Some(f: IFactorDataUI) ⇒ f.domain match {
-      case Some(d: Domain[_] with Discrete[T]) ⇒ new GroupDomain[T](d, size.toInt)
+      case d: Domain[_] with Discrete[T] ⇒ new GroupDomain[T](d, size.toInt)
       case _ ⇒ throw new UserBadDataError("No input domain has been found, it is required for a Group Domain.")
     }
     case _ ⇒ throw new UserBadDataError("No input factor has been found, it is required for a Group Domain.")
