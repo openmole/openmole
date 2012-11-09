@@ -44,7 +44,7 @@ package object mole {
 
   implicit def puzzleMoleExecutionDecoration(puzzle: Puzzle) = new PuzzleDecorator(puzzle)
   implicit def capsuleMoleExecutionDecoration(capsule: ICapsule) = new PuzzleDecorator(capsule.toPuzzle)
-  implicit def slotPuzzleDecoration(slot: Slot) = new PuzzleDecorator(slot.capsule.toPuzzle)
+  implicit def slotPuzzleDecoration(slot: Slot) = new PuzzleDecorator(slot.toPuzzle)
   implicit def taskMoleExecutionDecoration(task: ITask): PuzzleDecorator = new PuzzleDecorator(task.toCapsule.toPuzzle)
   implicit def taskMoleBuilderDecoration(taskBuilder: TaskBuilder) = new PuzzleDecorator(taskBuilder.toTask.toCapsule.toPuzzle)
   implicit def environmentToFixedEnvironmentSelectionConverter(env: Environment) = new FixedEnvironmentSelection(env)
