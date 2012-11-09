@@ -238,7 +238,7 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
       val sourceW = sourceWidget.asInstanceOf[SamplingComponent]
       val targetW = targetWidget.asInstanceOf[SamplingComponent]
       sourceW.connections += connection
-      targetW.connections += connection
+      // targetW.connections += connection
       targetW match {
         case tfw: IFactorWidget ⇒ sourceW match {
           case sfw: IFactorWidget ⇒ tfw.dataUI.previousFactor = Some(sfw.dataUI)
@@ -246,6 +246,7 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
         }
         case _ ⇒
       }
+      println("connection from " + idFromSamplingComponent(sourceW) + " to " + idFromSamplingComponent(targetW))
       connections += idFromSamplingComponent(sourceW) -> idFromSamplingComponent(targetW)
       source = None
     }

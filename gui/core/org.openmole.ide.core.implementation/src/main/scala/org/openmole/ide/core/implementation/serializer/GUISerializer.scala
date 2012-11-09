@@ -161,14 +161,14 @@ class GUISerializer(val toFromFile: String) {
 
   def unserializeHook = {
     hookList.clear
-    new File(extractPath + "/hook").listFiles.toList.flatMap { f ⇒
+    new File(extractPath + "/hook").listFiles.toList.foreach { f ⇒
       readStream(f) match {
         case Right(x: ObjectInputStream) ⇒
           try {
             val readObject = x.readObject
             readObject match {
               case h: IHookDataUI ⇒ hookList += h
-              case _ ⇒ Nil
+              case _ ⇒
             }
           }
       }
@@ -183,10 +183,10 @@ class GUISerializer(val toFromFile: String) {
 
     val os = new TarInputStream(new FileInputStream(toFromFile))
     os.extractDirArchiveWithRelativePathAndClose(extractDir)
-    unserializeHook
     unserializeProxy("prototype")
     unserializeProxy("sampling")
     unserializeProxy("environment")
+    unserializeHook
     unserializeProxy("task")
     unserializeProxy("mole")
   }

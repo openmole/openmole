@@ -23,7 +23,7 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 object KeyPrototypeGenerator {
 
   def apply(proxy: IPrototypeDataProxyUI): PrototypeKey = {
-    val (manifest, dim) = KeyGenerator.stripArrays(proxy.dataUI.coreObject.`type`)
+    val (manifest, dim) = KeyGenerator.stripArrays(proxy.dataUI.protoType)
     new PrototypeKey(proxy.dataUI.name, manifest.erasure, dim)
   }
 

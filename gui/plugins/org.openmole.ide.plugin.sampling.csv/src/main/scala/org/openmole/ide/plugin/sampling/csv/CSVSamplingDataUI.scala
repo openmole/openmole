@@ -20,15 +20,15 @@ class CSVSamplingDataUI(var csvFilePath: String = "",
                         val id: String = "sampling" + Counter.id.getAndIncrement) extends ISamplingDataUI {
 
   def coreObject(factors: List[IFactorDataUI],
-                 samplings: List[Sampling]) = {
-    if (csvFilePath != "") {
-      val fi = new File(csvFilePath)
-      if (fi.isFile) {
-        val sampling = CSVSampling(fi)
-        prototypeMapping.filter(!_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI]).foreach { m ⇒ sampling addColumn (m._1, m._2.dataUI.coreObject) }
-        sampling
-      } else throw new UserBadDataError("CSV file " + csvFilePath + " does not exist")
-    } else throw new UserBadDataError("CSV file path missing to instanciate the CSV Sampling")
+                 samplings: List[Sampling]) = try {
+    val fi = new File(csvFilePath)
+    val sampling = CSVSampling(fi)
+    prototypeMapping.filter(!_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI]).foreach {
+      m ⇒ sampling addColumn (m._1, m._2.dataUI.coreObject)
+    }
+    sampling
+  } catch {
+    case e: Throwable ⇒ throw new UserBadDataError("CSV file path is not correct for the CSV Sampling")
   }
 
   def coreClass = classOf[CSVSampling]
@@ -41,9 +41,9 @@ class CSVSamplingDataUI(var csvFilePath: String = "",
 
   def inputs = new InputSampling
 
-  def isAcceptable(factor: IFactorDataUI) = false
+  def isAcceptable(factor: IFactorDataUI) = factor.prototype.dataUI.toString == "File"
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 
-  def preview = "from " + new File(csvFilePath).getName + " file"
+  def preview = "from " + new File(csvFilePath).getName
 }

@@ -109,10 +109,8 @@ object CheckData extends Logger {
   }
 
   def buildUnknownPrototypes(mole: IMole, coreCapsule: ICapsule) = {
-    var protoMapping = MoleMaker.keyPrototypeMapping
-
     (coreCapsule.inputs(mole).toList ++ coreCapsule.outputs(mole)) foreach { d ⇒
-      if (!protoMapping.keys.contains(KeyPrototypeGenerator(d.prototype))) {
+      if (!MoleMaker.keyPrototypeMapping.keys.contains(KeyPrototypeGenerator(d.prototype))) {
         val (key, dim) = KeyGenerator(d.prototype)
         Proxys.prototypes +=
           new PrototypeDataProxyUI(GenericPrototypeDataUI(d.prototype.name, dim)(d.prototype.`type`), true)

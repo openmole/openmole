@@ -6,8 +6,6 @@
 package org.openmole.ide.plugin.sampling.combine
 
 import org.openmole.ide.core.model.dataproxy._
-import org.openmole.ide.core.model.sampling._
-import org.openmole.core.model.sampling.Sampling
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.misc.tools.Counter
 import org.openmole.plugin.sampling.combine.CompleteSampling
@@ -15,27 +13,16 @@ import org.openmole.core.model.sampling._
 import org.openmole.core.model.data.Prototype
 import org.openmole.core.model.domain.Domain
 import org.openmole.core.model.domain.Discrete
-import scala.collection.JavaConversions._
 
 class CompleteSamplingDataUI(val id: String = "sampling" + Counter.id.getAndIncrement) extends ISamplingDataUI {
 
   def coreObject(factors: List[IFactorDataUI],
                  samplings: List[Sampling]) = {
     new CompleteSampling(
-      (factors.flatMap(f ⇒
-        f.prototype match {
-          case Some(p: IPrototypeDataProxyUI) ⇒ f.domain match {
-            case Some(d: IDomainDataUI[_]) ⇒ List(DiscreteFactor(Factor(p.dataUI.coreObject.asInstanceOf[Prototype[Any]],
-              d.coreObject(p).asInstanceOf[Domain[Any] with Discrete[Any]])))
-            case _ ⇒ Nil
-          }
-          case _ ⇒ Nil
-        }) ::: samplings): _*)
+      (factors.map(f ⇒ DiscreteFactor(Factor(f.prototype.dataUI.coreObject.asInstanceOf[Prototype[Any]],
+        f.domain.coreObject(f.prototype).asInstanceOf[Domain[Any] with Discrete[Any]])))
+        ::: samplings): _*)
   }
-  //      new CompleteSampling(
-  //      factors.map(f ⇒ DiscreteFactor(
-  //          f._1.dataUI.coreObject.asInstanceOf[Prototype[Any]],
-  //          f._3.coreObject(f._1.dataUI.coreObject).asInstanceOf[Domain[Any] with IIterable[Any]])).toSeq: _*)
 
   def coreClass = classOf[CompleteSampling]
 
@@ -46,7 +33,11 @@ class CompleteSamplingDataUI(val id: String = "sampling" + Counter.id.getAndIncr
   def buildPanelUI = new CompleteSamplingPanelUI(this)
 
   //FIXME 2.10
-  def isAcceptable(factor: IFactorDataUI) = true
+  def isAcceptable(factor: IFactorDataUI) =
+    factor.domain.coreObject(factor.prototype) match {
+      case x: Domain[Any] with Discrete[Any] ⇒ true
+      case _ => false
+    }
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 

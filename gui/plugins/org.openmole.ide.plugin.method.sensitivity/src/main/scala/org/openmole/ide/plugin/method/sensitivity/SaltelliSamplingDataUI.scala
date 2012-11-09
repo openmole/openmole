@@ -17,6 +17,7 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.method.sensitivity.SaltelliSampling
 import org.openmole.ide.misc.tools.Counter
+import org.openmole.ide.core.implementation.dialog.StatusBar
 
 class SaltelliSamplingDataUI(val samples: String = "1",
                              val id: String = "sampling" + Counter.id.getAndIncrement) extends ISamplingDataUI {
@@ -30,16 +31,9 @@ class SaltelliSamplingDataUI(val samples: String = "1",
       catch {
         case e: NumberFormatException ⇒ throw new UserBadDataError("An integer is exepected as number of samples")
       },
-      factors.flatMap { f ⇒
-        f.prototype match {
-          case Some(p: IPrototypeDataProxyUI) ⇒ f.domain match {
-            case Some(d: IDomainDataUI[_]) ⇒
-              List(Factor(p.dataUI.coreObject.asInstanceOf[Prototype[Double]],
-                d.coreObject(p).asInstanceOf[Domain[Double] with Bounds[Double]]))
-            case _ ⇒ Nil
-          }
-          case _ ⇒ Nil
-        }
+      factors.map { f ⇒
+        Factor(f.prototype.dataUI.coreObject.asInstanceOf[Prototype[Double]],
+          f.domain.coreObject(f.prototype).asInstanceOf[Domain[Double] with Bounds[Double]])
       }.toSeq: _*)
 
   def coreClass = classOf[SaltelliSampling]
@@ -51,7 +45,16 @@ class SaltelliSamplingDataUI(val samples: String = "1",
   def buildPanelUI = new SaltelliSamplingPanelUI(this)
 
   //FIXME 2.10
-  def isAcceptable(factor: IFactorDataUI) = false
+  def isAcceptable(factor: IFactorDataUI) =
+    if ((factor.prototype.dataUI.toString == "Double") &&
+      (factor.domain.coreObject(factor.prototype) match {
+        case x: Domain[Double] with Bounds[Double] ⇒ true
+        case _ ⇒ false
+      })) true
+    else {
+      StatusBar.warn("A Bounded range of Double is required for a Saltelli Sampling")
+      false
+    }
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 
