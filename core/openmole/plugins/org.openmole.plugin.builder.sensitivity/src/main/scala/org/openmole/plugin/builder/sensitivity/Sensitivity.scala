@@ -42,7 +42,7 @@ object Sensitivity {
     outputs: Iterable[Prototype[Double]])(implicit plugins: PluginSet) = {
     val matrixName = Prototype[String](name + "Matrix")
     val sampling = new SaltelliSampling(samples, matrixName, factors.toSeq: _*)
-    val explorationCapsule = new StrainerCapsule(ExplorationTask(name + "Exploration", sampling))
+    val explorationCapsule = StrainerCapsule(ExplorationTask(name + "Exploration", sampling))
 
     val firstOrderTask =
       BootstrappedFirstOrderEffectTask(
@@ -52,7 +52,7 @@ object Sensitivity {
         outputs,
         bootstrap)
 
-    val firstOrderCapsule = new Capsule(firstOrderTask)
+    val firstOrderCapsule = Capsule(firstOrderTask)
 
     val totalOrderTask =
       BootstrappedTotalOrderEffectTask(
@@ -62,9 +62,9 @@ object Sensitivity {
         outputs,
         bootstrap)
 
-    val totalOrderCapsule = new Capsule(totalOrderTask)
+    val totalOrderCapsule = Capsule(totalOrderTask)
 
-    val aggregateCapsule = new StrainerCapsule(EmptyTask(name + "Aggregate"))
+    val aggregateCapsule = StrainerCapsule(EmptyTask(name + "Aggregate"))
 
     val puzzle = explorationCapsule -< model >- aggregateCapsule -- (firstOrderCapsule, totalOrderCapsule)
 

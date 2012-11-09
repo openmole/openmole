@@ -23,12 +23,12 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import org.openmole.core.model.job._
 
+object MasterCapsule {
+  def apply(task: ITask, persist: Set[String] = Set.empty) = new MasterCapsule(task, persist)
+  def apply(t: ITask, persist: String*): MasterCapsule = apply(t, persist.toSet)
+  def apply(t: ITask, head: Prototype[_], persist: Prototype[_]*): MasterCapsule = apply(t, (head :: persist.toList).map { _.name }.toSet)
+}
+
 class MasterCapsule(task: ITask, val persist: Set[String] = Set.empty) extends Capsule(task) with IMasterCapsule {
-
-  def this(t: ITask, persist: String*) = this(t, persist.toSet)
-
-  def this(t: ITask, head: Prototype[_], persist: Prototype[_]*) = this(t, (head :: persist.toList).map { _.name }.toSet)
-
   override def toPersist(context: Context) = persist.flatMap { n ⇒ context.variable(n).toList }.toContext
-
 }

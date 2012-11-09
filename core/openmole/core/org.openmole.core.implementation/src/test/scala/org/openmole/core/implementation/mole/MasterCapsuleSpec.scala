@@ -90,7 +90,7 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
     val slot1 = Slot(emptyC)
     val slot2 = Slot(emptyC)
 
-    val selectCaps = new MasterCapsule(select, n)
+    val selectCaps = MasterCapsule(select, n)
 
     val ex = exc -< slot1 -- selectCaps -- (slot2, "n <= 100")
 
@@ -139,7 +139,7 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
-    val selectCaps = new MasterCapsule(select, n, isaved)
+    val selectCaps = MasterCapsule(select, n, isaved)
 
     val emptyC = Capsule(emptyT)
     val slot1 = Slot(emptyC)
