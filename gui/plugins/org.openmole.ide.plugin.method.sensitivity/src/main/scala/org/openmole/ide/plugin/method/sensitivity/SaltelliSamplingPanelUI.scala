@@ -25,13 +25,12 @@ class SaltelliSamplingPanelUI(cud: SaltelliSamplingDataUI) extends PluginPanel("
 
   val sampleTextField = new TextField(cud.samples, 4)
 
-  tabbedPane.pages += new TabbedPane.Page("Settings",
-    new PluginPanel("wrap 2") {
-      contents += new Label("Number of samples")
-      contents += sampleTextField
-    })
+  contents += new Label("Number of samples")
+  contents += sampleTextField
 
-  def domains = KeyRegistry.domains.values.map { _.buildDataUI }.toList
+  def domains = KeyRegistry.domains.values.map {
+    _.buildDataUI
+  }.toList
 
   override def saveContent = new SaltelliSamplingDataUI(sampleTextField.text, cud.id)
 
