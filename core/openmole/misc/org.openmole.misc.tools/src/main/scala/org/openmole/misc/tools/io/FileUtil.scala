@@ -52,6 +52,8 @@ object FileUtil {
   val write = 2 + 16 + 128
   val read = 4 + 32 + 256
 
+  lazy val vmFileLock = new LockRepository[String]
+
   implicit val fileOrdering = new Ordering[File] {
     override def compare(left: File, right: File) = {
       left.getAbsolutePath.compareTo(right.getAbsolutePath)
@@ -340,27 +342,27 @@ object FileUtil {
     def extractUncompressDirArchiveWithRelativePath(dest: File) =
       new TarInputStream(gzipedBufferedInputStream).extractDirArchiveWithRelativePathAndClose(dest)
 
-    def lockApply(operation: OutputStream ⇒ Unit) = {
+    def withLock[T](f: OutputStream ⇒ T) = vmFileLock.withLock(file.getCanonicalPath) {
       val fos = new FileOutputStream(file, true)
       try {
         val lock = fos.getChannel.lock
-        try operation(fos)
+        try f(fos)
         finally lock.release
       } finally fos.close
     }
 
     def lockAndAppendFile(to: String): Unit = lockAndAppendFile(new File(to))
 
-    def lockAndAppendFile(from: File): Unit = {
+    def lockAndAppendFile(from: File): Unit = vmFileLock.withLock(file.getCanonicalPath) {
       val channelI = new FileInputStream(from).getChannel
       try {
         val channelO = new FileOutputStream(file, true).getChannel
         try {
           val lock = channelO.lock
           try FileUtil.copy(channelO, channelI)
-          finally lock release
-        } finally channelO close
-      } finally channelI close
+          finally lock.release
+        } finally channelO.close
+      } finally channelI.close
     }
 
     def createLink(target: String) = {
