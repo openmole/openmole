@@ -24,15 +24,18 @@ import fr.iscpif.gridscale.storage.SSHStorage
 import java.net.URI
 
 trait SSHStorageService extends StorageService with SSHService { ss ⇒
-  val storage = new SSHStorage {
+
+  def createStorage(_root: String) = new SSHStorage {
     val host = ss.host
     override val port = ss.port
     val user = ss.user
-    val root = ss.root
+    val root = _root
   }
 
-  def home = storage.home(authentication)
+  lazy val storage = createStorage(root)
 
-  val remoteStorage = new LocalStorage(root)
+  def home = createStorage("/").home(authentication)
+
+  lazy val remoteStorage = new LocalStorage(root)
 
 }

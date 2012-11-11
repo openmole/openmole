@@ -57,7 +57,7 @@ class PBSEnvironment(
       def environment = env
       lazy val root = env.path match {
         case Some(p) ⇒ p
-        case None ⇒ home
+        case None ⇒ createStorage("/").child(home, ".openmole")
       }
     }
 
@@ -65,10 +65,7 @@ class PBSEnvironment(
     def nbTokens = Workspace.preferenceAsInt(MaxConnections)
     def queue = env.queue
     def environment = env
-    lazy val root = env.path match {
-      case Some(p) ⇒ p
-      case None ⇒ storage.home
-    }
+    lazy val root = storage.root
     val id = url.toString
   }
 
