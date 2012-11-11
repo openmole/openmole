@@ -29,12 +29,6 @@ object Range {
     max: String,
     step: String = "1")(implicit integral: Integral[T], fs: FromString[T]) = new Range[T](min, max, step)
 
-  def sized[T](
-    min: String,
-    max: String,
-    size: String)(implicit integral: Integral[T], fs: FromString[T]) =
-    new Range[T](min, max, "${(" + max + " - " + min + ").abs() / " + size + "}")
-
 }
 
 sealed class Range[T](val min: String, val max: String, val step: String = "1")(implicit integral: Integral[T], fs: FromString[T]) extends Domain[T] with Finite[T] with Center[T] with Bounds[T] {
