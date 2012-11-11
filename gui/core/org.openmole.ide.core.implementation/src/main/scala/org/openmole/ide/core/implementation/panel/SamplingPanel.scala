@@ -18,12 +18,14 @@
 package org.openmole.ide.core.implementation.panel
 
 import scala.swing._
+import event.FocusGained
 import swing.Swing._
 import javax.swing.{ ImageIcon, JScrollPane }
 import java.awt.BorderLayout
 import org.openmole.ide.core.model.sampling.ISamplingWidget
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.widget._
+import multirow.ComponentFocusedEvent
 import org.openmole.ide.core.model.panel._
 import javax.imageio.ImageIO
 
@@ -33,14 +35,21 @@ class SamplingPanel(samplingWidget: ISamplingWidget,
   scene,
   mode) {
   val panelUI = samplingWidget.dataUI.buildPanelUI
+
+  listenTo(panelUI.help.components.toSeq: _*)
+  reactions += {
+    case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
+    case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
+  }
+
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap 2") {
     contents += new Label {
       icon = new ImageIcon(ImageIO.read(samplingWidget.dataUI.getClass.getClassLoader.getResource(samplingWidget.dataUI.fatImagePath)))
     }
     contents += panelUI.peer
-    contents += panelUI.help
   }.peer, BorderLayout.CENTER)
+  peer.add(panelUI.help.peer,BorderLayout.SOUTH)
 
   def create = {}
 
