@@ -45,34 +45,31 @@ class AppendToCSVFileHook(
 
     file.withLock {
       fos ⇒
-        val bfos = new BufferedOutputStream(fos)
-        try {
-          if (file.size == 0) fos.appendLine(ps.map { _.name }.mkString(","))
+        if (file.size == 0) fos.appendLine(ps.map { _.name }.mkString(","))
 
-          val lists = ps.map {
-            p ⇒
-              context.value(p) match {
-                case Some(v) ⇒
-                  v match {
-                    case v: Array[_] ⇒ v.toList
-                    case v ⇒ List(v)
-                  }
-                case None ⇒ List("not found")
-              }
-          }.toList
-
-          @tailrec def write(lists: List[List[_]]): Unit =
-            if (!lists.exists(_.size > 1)) writeLine(lists.map { _.head })
-            else {
-              writeLine(lists.map { _.head })
-              write(lists.map { l ⇒ if (l.size > 1) l.tail else l })
+        val lists = ps.map {
+          p ⇒
+            context.value(p) match {
+              case Some(v) ⇒
+                v match {
+                  case v: Array[_] ⇒ v.toList
+                  case v ⇒ List(v)
+                }
+              case None ⇒ List("not found")
             }
+        }.toList
 
-          def writeLine[T](list: List[T]) =
-            bfos.appendLine(list.map(l ⇒ l.prettify()).mkString(","))
+        @tailrec def write(lists: List[List[_]]): Unit =
+          if (!lists.exists(_.size > 1)) writeLine(lists.map { _.head })
+          else {
+            writeLine(lists.map { _.head })
+            write(lists.map { l ⇒ if (l.size > 1) l.tail else l })
+          }
 
-          write(lists)
-        } finally bfos.close
+        def writeLine[T](list: List[T]) =
+          fos.appendLine(list.map(l ⇒ l.prettify()).mkString(","))
+
+        write(lists)
     }
   }
 

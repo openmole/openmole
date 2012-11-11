@@ -344,11 +344,12 @@ object FileUtil {
 
     def withLock[T](f: OutputStream ⇒ T) = vmFileLock.withLock(file.getCanonicalPath) {
       val fos = new FileOutputStream(file, true)
+      val bfos = new BufferedOutputStream(fos)
       try {
         val lock = fos.getChannel.lock
-        try f(fos)
+        try f(bfos)
         finally lock.release
-      } finally fos.close
+      } finally bfos.close
     }
 
     def lockAndAppendFile(to: String): Unit = lockAndAppendFile(new File(to))
