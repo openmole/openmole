@@ -19,10 +19,12 @@ package org.openmole.core.batch.environment
 
 trait MemoryRequirement extends BatchEnvironment {
 
+  // Margin for the thread stack allocations
+  def margin = 512
   def memory: Option[Int]
 
   def requieredMemory = memory match {
-    case Some(m) ⇒ math.min(openMOLEMemoryValue, m)
-    case None ⇒ openMOLEMemoryValue
+    case Some(m) ⇒ math.min(openMOLEMemoryValue + margin, m)
+    case None ⇒ openMOLEMemoryValue + margin
   }
 }
