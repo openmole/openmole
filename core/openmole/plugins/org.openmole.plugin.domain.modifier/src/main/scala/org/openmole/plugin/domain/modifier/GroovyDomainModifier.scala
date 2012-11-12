@@ -22,9 +22,9 @@ import org.openmole.core.model.domain._
 import org.openmole.plugin.tools.groovy.ContextToGroovyCode
 import org.openmole.core.implementation.tools.GroovyContextAdapter._
 
-sealed class GroovyDomainModifier[-I, +O](name: String, domain: Domain[I] with Discrete[I], code: String) extends Domain[O] with Discrete[O] {
+sealed class GroovyDomainModifier[-I, +O](domain: Domain[I] with Discrete[I], name: String, code: String) extends Domain[O] with Discrete[O] {
 
-  def this(prototype: Prototype[I], domain: Domain[I] with Discrete[I], code: String) = this(prototype.name, domain, code)
+  def this(domain: Domain[I] with Discrete[I], prototype: Prototype[I], code: String) = this(domain, prototype.name, code)
 
   @transient lazy val contextToGroovyCode = new ContextToGroovyCode(code, Iterable.empty)
 
