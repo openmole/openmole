@@ -113,7 +113,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     val homeCacheDir = cacheDir("$ORIGINAL_HOME")
 
     writter.print("ORIGINAL_HOME=$HOME; ")
-    writter.print("mkdir -p " + homeCacheDir +"; ")
+    writter.print("mkdir -p " + homeCacheDir + "; ")
     writter.print("BASEPATH=$PWD; CUR=$PWD/ws$RANDOM; while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; export OPENMOLE_HOME=$CUR; ")
     writter.print("if [ `uname -m` = x86_64 ]; then ")
     writter.print(cachedLcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz", homeCacheDir, runtime.jvmLinuxX64.hash))
@@ -160,7 +160,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     "if [ -f " + fileCachePath + " ]; then cp " + fileCachePath + " " + to + ".gz" +
       " ; else " + lcpCpCmd(from, to + ".gz") +
       " CACHE_ID=$RANDOM ; " + "cp " + to + ".gz " + fileCachePath + "_$CACHE_ID ; " +
-      "if [ ! -f " + fileCachePath + " ]; then mv " + fileCachePath + "_$CACHE_ID " + fileCachePath +  "; else rm " + fileCachePath + "_$CACHE_ID ; fi" +
+      "if [ ! -f " + fileCachePath + " ]; then mv " + fileCachePath + "_$CACHE_ID " + fileCachePath + "; else rm " + fileCachePath + "_$CACHE_ID ; fi" +
       "; fi; " +
       "gunzip " + to + ".gz; "
   }
