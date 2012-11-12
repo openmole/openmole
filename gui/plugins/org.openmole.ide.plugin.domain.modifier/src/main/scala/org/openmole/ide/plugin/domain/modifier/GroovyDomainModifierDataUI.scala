@@ -55,8 +55,7 @@ class GroovyModifierDomainDataUI[T](val code: String)(implicit domainType: Manif
   override def coreObject(prototype: IPrototypeDataProxyUI,
                           previousFactor: Option[IFactorDataUI]): Domain[T] = previousFactor match {
     case Some(f: IFactorDataUI) ⇒ f.domain match {
-      case d: Domain[_] ⇒ new GroovyDomainModifier(prototype.dataUI.coreObject.asInstanceOf[Prototype[Any]],
-        d.asInstanceOf[Domain[T] with Discrete[T]], code)
+      case d: Domain[_] ⇒ new GroovyDomainModifier(d.asInstanceOf[Domain[T] with Discrete[T]], prototype.dataUI.coreObject.asInstanceOf[Prototype[Any]], code)
       case _ ⇒ throw new UserBadDataError("No input domain has been found, it is required for a Map Domain.")
     }
     case _ ⇒ throw new UserBadDataError("No input factor has been found, it is required for a Map Domain.")
