@@ -19,12 +19,15 @@ package org.openmole.ide.plugin.domain.modifier
 
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IDomainPanelUI
-import org.openmole.ide.misc.widget.{ GroovyEditor, PluginPanel }
+import org.openmole.ide.misc.widget._
 import swing.ScrollPane.BarPolicy._
 import swing._
+import java.util.{ Locale, ResourceBundle }
 
 class GroovyModifierDomainPanelUI(pud: GroovyModifierDomainDataUI[_],
                                   prototype: IPrototypeDataProxyUI) extends PluginPanel("fillx") with IDomainPanelUI {
+
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val codeTextArea = new GroovyEditor {
     editor.text = pud.code
@@ -35,4 +38,9 @@ class GroovyModifierDomainPanelUI(pud: GroovyModifierDomainDataUI[_],
 
   def saveContent = GroovyModifierDomainDataUI(codeTextArea.editor.text,
     prototype.dataUI.toString)
+
+  override lazy val help =
+    new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
+      add(codeTextArea, new Help(i18n.getString("mapCode"), i18n.getString("mapCodeEx")))
+    }
 }
