@@ -24,20 +24,22 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel._
 import org.openmole.ide.misc.widget.PluginPanel
 import java.awt.BorderLayout
+import swing.event.FocusGained
+import swing.Component
+import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 
 class FactorPanel(factorWidget: IFactorWidget,
                   scene: IMoleScene,
                   mode: PanelMode.Value) extends BasePanel(None,
   scene,
   mode) {
-
-  val panelUI = new FactorPanelUI(factorWidget)
+  val panelUI = new FactorPanelUI(factorWidget, this)
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
     contents += panelUI.peer
-    contents += panelUI.help
   }.peer, BorderLayout.CENTER)
+  peer.add(panelUI.dPanel.help.peer, BorderLayout.SOUTH)
 
   def create = {}
 
@@ -46,5 +48,12 @@ class FactorPanel(factorWidget: IFactorWidget,
   def save = {
     factorWidget.dataUI = panelUI.saveContent
     factorWidget.update
+  }
+
+  def updateHelp = {
+    if (peer.getComponentCount == 3) peer.remove(2)
+    peer.add(panelUI.dPanel.help.peer, BorderLayout.SOUTH)
+    revalidate
+    repaint
   }
 }

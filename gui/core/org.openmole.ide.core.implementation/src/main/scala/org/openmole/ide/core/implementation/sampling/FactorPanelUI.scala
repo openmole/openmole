@@ -18,17 +18,20 @@
 package org.openmole.ide.core.implementation.sampling
 
 import scala.swing._
-import scala.swing.event.SelectionChanged
+import event.{ FocusGained, SelectionChanged }
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.data._
 import org.openmole.ide.core.model.sampling.IFactorWidget
 import org.openmole.ide.misc.widget._
+import multirow.ComponentFocusedEvent
 import org.openmole.ide.core.model.panel._
 import org.openmole.ide.core.implementation.sampling.DefaultFactor._
+import org.openmole.ide.core.implementation.panel.FactorPanel
 
-class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IPanelUI {
+class FactorPanelUI(factorWidget: IFactorWidget,
+                    factorPanel: FactorPanel) extends PluginPanel("") with IPanelUI {
 
   val domains = KeyRegistry.domains.values
 
@@ -55,6 +58,7 @@ class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IP
     case SelectionChanged(`domainComboBox`) ⇒
       if (protoDomainPanel.contents.size == 2) protoDomainPanel.contents.remove(1)
       dPanel = domainComboBox.selection.item.buildPanelUI(protoComboBox.selection.item)
+      listenToDomain
       protoDomainPanel.contents += dPanel.peer
       repaint
   }
@@ -65,6 +69,15 @@ class FactorPanelUI(factorWidget: IFactorWidget) extends PluginPanel("") with IP
       val dContent = domainContent(protoComboBox.selection.item)
       domainComboBox.peer.setModel(MyComboBox.newConstantModel(dContent))
       displayDomainPanel(dContent)
+  }
+
+  def listenToDomain = {
+    listenTo(dPanel.help.components.toSeq: _*)
+    reactions += {
+      case FocusGained(source: Component, _, _) ⇒ dPanel.help.switchTo(source)
+      case ComponentFocusedEvent(source: Component) ⇒ dPanel.help.switchTo(source)
+    }
+    factorPanel.updateHelp
   }
 
   def displayDomainPanel(dContent: List[IDomainDataUI[_]]) = dContent.filter {
