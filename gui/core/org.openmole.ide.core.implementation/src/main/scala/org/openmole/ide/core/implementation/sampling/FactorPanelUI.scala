@@ -87,6 +87,7 @@ class FactorPanelUI(factorWidget: IFactorWidget,
     case Some(d: IDomainDataUI[_]) ⇒
       dPanel = d.buildPanelUI(protoComboBox.selection.item)
       protoDomainPanel.contents += dPanel.peer
+      listenToDomain
     case _ ⇒
   }
 
