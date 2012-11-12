@@ -21,9 +21,7 @@ import java.util.Locale
 import java.util.ResourceBundle
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IDomainPanelUI
-import org.openmole.ide.misc.widget.Help
-import org.openmole.ide.misc.widget.Helper
-import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget.{ URL, Help, Helper, PluginPanel }
 import scala.swing.event._
 import scala.swing.TextField
 import scala.swing.CheckBox
@@ -63,4 +61,11 @@ class RangeDomainPanelUI(pud: RangeDomainDataUI[_],
     stepContent,
     false,
     prototype.dataUI.toString)
+
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
+    add(minField, new Help(i18n.getString("min"), i18n.getString("minEx")))
+    add(maxField, new Help(i18n.getString("max"), i18n.getString("maxEx")))
+    add(stepField, new Help(i18n.getString("step"), i18n.getString("stepEx")))
+  }
+
 }
