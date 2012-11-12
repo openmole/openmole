@@ -76,7 +76,7 @@ trait PersistentStorageService extends StorageService {
   override def tmpDir(implicit token: AccessToken) = synchronized {
     tmpSpaceVar match {
       case Some(space) ⇒
-        if (time + Workspace.preferenceAsDurationInMs(TmpDirRegenerate) < System.currentTimeMillis) {
+        if (time + Workspace.preferenceAsDuration(TmpDirRegenerate).toMilliSeconds < System.currentTimeMillis) {
           val tmpDir = createTmpDir
           tmpSpaceVar = Some(tmpDir)
           tmpDir
@@ -95,7 +95,7 @@ trait PersistentStorageService extends StorageService {
     val tmpNoTime = child(baseDir, tmp)
     if (!super.exists(tmpNoTime)) super.makeDir(tmpNoTime)
 
-    val removalDate = System.currentTimeMillis - Workspace.preferenceAsDurationInMs(TmpDirRemoval)
+    val removalDate = System.currentTimeMillis - Workspace.preferenceAsDuration(TmpDirRemoval).toMilliSeconds
 
     for ((name, fileType) ← super.list(tmpNoTime)) {
       val childPath = child(tmpNoTime, name)

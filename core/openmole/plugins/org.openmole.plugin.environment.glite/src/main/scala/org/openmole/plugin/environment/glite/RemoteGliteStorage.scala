@@ -33,7 +33,7 @@ class RemoteGliteStorage(val host: String, val port: Int, certificateDir: File) 
       val host: String = s.host
       val port: Int = s.port
       val basePath: String = ""
-      override val timeout = Workspace.preferenceAsDurationInS(GliteEnvironment.RemoteTimeout)
+      override val timeout = Workspace.preferenceAsDuration(GliteEnvironment.RemoteTimeout).toSeconds
     }
 
   def authentication: SRMStorage#A = new ProxyFileAuthentication {

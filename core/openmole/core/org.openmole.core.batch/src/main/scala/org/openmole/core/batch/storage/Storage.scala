@@ -86,5 +86,5 @@ trait Storage {
   }
 
   private def bufferSize = Workspace.preferenceAsInt(Storage.BufferSize)
-  private def copyTimeout = Workspace.preferenceAsDurationInMs(Storage.CopyTimeout)
+  private def copyTimeout = Workspace.preferenceAsDuration(Storage.CopyTimeout).toMilliSeconds
 }

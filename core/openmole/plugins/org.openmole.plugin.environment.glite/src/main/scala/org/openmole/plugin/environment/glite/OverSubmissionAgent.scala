@@ -40,7 +40,7 @@ import OverSubmissionAgent._
 
 class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends IUpdatableWithVariableDelay {
 
-  override def delay = Workspace.preferenceAsDurationInMs(GliteEnvironment.OverSubmissionInterval)
+  override def delay = Workspace.preferenceAsDuration(GliteEnvironment.OverSubmissionInterval).toMilliSeconds
 
   override def update: Boolean = {
     try {

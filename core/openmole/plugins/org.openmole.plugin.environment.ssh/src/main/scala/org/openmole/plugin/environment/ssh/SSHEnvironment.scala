@@ -65,8 +65,8 @@ class SSHEnvironment(
   def allStorages = List(storage)
   def allJobServices = List(jobService)
 
-  override def minUpdateInterval = Workspace.preferenceAsDurationInMs(UpdateInterval)
-  override def maxUpdateInterval = Workspace.preferenceAsDurationInMs(UpdateInterval)
+  override def minUpdateInterval = Workspace.preferenceAsDuration(UpdateInterval).toMilliSeconds
+  override def maxUpdateInterval = Workspace.preferenceAsDuration(UpdateInterval).toMilliSeconds
   override def incrementUpdateInterval = 0
 
 }

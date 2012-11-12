@@ -45,7 +45,7 @@ class ProxyChecker(environment: WeakReference[GliteEnvironment]) extends IUpdata
         val remainingTime = env.authentication._1.getRemainingLifetime * 1000
         math.max(
           (remainingTime * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong,
-          Workspace.preferenceAsDurationInMs(GliteEnvironment.MinProxyRenewal))
+          Workspace.preferenceAsDuration(GliteEnvironment.MinProxyRenewal).toMilliSeconds)
       case None ⇒ 0
     }
 

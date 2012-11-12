@@ -95,7 +95,7 @@ trait SharedStorage extends SSHService { js ⇒
           }
 
           val j = installJobService.submit(jobDescription)(authentication)
-          val s = untilFinished { Thread.sleep(Workspace.preferenceAsDurationInMs(UpdateInstallJobInterval)); installJobService.state(j)(authentication) }
+          val s = untilFinished { Thread.sleep(Workspace.preferenceAsDuration(UpdateInstallJobInterval).toMilliSeconds); installJobService.state(j)(authentication) }
 
           if (s != Done) throw new InternalProcessingError("Installation of runtime has failed.")
         } finally sharedFS.rmFile(sharedFS.child(workdir, scriptName))
