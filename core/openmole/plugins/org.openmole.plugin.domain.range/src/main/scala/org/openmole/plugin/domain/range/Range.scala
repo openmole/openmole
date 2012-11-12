@@ -22,6 +22,15 @@ import org.openmole.misc.tools.io.FromString
 import org.openmole.core.model.data._
 import org.openmole.core.implementation.tools._
 
+object Range {
+
+  def apply[T](
+    min: String,
+    max: String,
+    step: String = "1")(implicit integral: Integral[T], fs: FromString[T]) = new Range[T](min, max, step)
+
+}
+
 sealed class Range[T](val min: String, val max: String, val step: String = "1")(implicit integral: Integral[T], fs: FromString[T]) extends Domain[T] with Finite[T] with Center[T] with Bounds[T] {
 
   import integral._

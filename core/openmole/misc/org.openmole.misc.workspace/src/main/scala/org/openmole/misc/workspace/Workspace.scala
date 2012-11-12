@@ -38,7 +38,7 @@ import org.openmole.misc.tools.service.Duration._
 
 object Workspace {
 
-  case class PasswordRequired extends Event[Workspace]
+  case object PasswordRequired extends Event[Workspace]
 
   val sessionUUID = UUID.randomUUID
 
@@ -121,11 +121,7 @@ object Workspace {
 
   def passwordChoosen = instance.passwordChoosen
 
-  def preferenceAsDurationInMs(location: ConfigurationLocation): Long = instance.preferenceAsDurationInMs(location)
-
-  def preferenceAsDurationInS(location: ConfigurationLocation): Int = instance.preferenceAsDurationInS(location)
-
-  def isPreferenceSet(location: ConfigurationLocation): Boolean = instance.isPreferenceSet(location)
+  def preferenceAsDuration(location: ConfigurationLocation) = instance.preferenceAsDuration(location)
 
   def persistentList[T](clazz: Class[T]) = instance.persistentList(clazz)
 
@@ -273,7 +269,7 @@ class Workspace(val location: File) {
     if (s.isEmpty) s
     else {
       _password match {
-        case None ⇒ EventDispatcher.trigger(this, new Workspace.PasswordRequired)
+        case None ⇒ EventDispatcher.trigger(this, Workspace.PasswordRequired)
         case Some(p) ⇒
       }
       textEncryptor(_password).decrypt(s)
@@ -281,7 +277,7 @@ class Workspace(val location: File) {
 
   def encrypt(s: String) = {
     _password match {
-      case None ⇒ EventDispatcher.trigger(this, new Workspace.PasswordRequired)
+      case None ⇒ EventDispatcher.trigger(this, Workspace.PasswordRequired)
       case Some(p) ⇒
     }
     textEncryptor(_password).encrypt(s)
@@ -303,8 +299,7 @@ class Workspace(val location: File) {
 
   def passwordChoosen = isPreferenceSet(passwordTest)
 
-  def preferenceAsDurationInMs(location: ConfigurationLocation): Long = preference(location).toMilliSeconds
-  def preferenceAsDurationInS(location: ConfigurationLocation): Int = preference(location).toSeconds
+  def preferenceAsDuration(location: ConfigurationLocation) = new DurationStringDecorator(preference(location))
 
   def isPreferenceSet(location: ConfigurationLocation): Boolean = synchronized {
     rawPreference(location) != null

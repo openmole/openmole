@@ -15,7 +15,7 @@
 
     <!--Used to build the symbolic name of the bundle-->
     <artifactId>ccl.northwestern.edu.netlogo5.noscala</artifactId>
-    <version>5.0</version>
+    <version>${lib.ccl.northwestern.edu.netlogo5.version}</version>
 
     <dependencies>
         <dependency>

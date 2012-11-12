@@ -26,9 +26,7 @@ import org.openmole.core.model.job._
 import org.openmole.core.model.job.State._
 
 object Capsule {
-
   def apply(task: ITask) = new Capsule(task)
-
 }
 
 class Capsule(val task: ITask) extends ICapsule {

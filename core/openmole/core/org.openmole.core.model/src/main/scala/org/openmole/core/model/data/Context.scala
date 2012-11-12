@@ -60,12 +60,8 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    * @return Some(variable) if a variable with the given name is present None
    * otherwise
    */
-  def variable[T](proto: Prototype[T]): Option[Variable[T]] = {
-    variables.get(proto.name) match {
-      case None ⇒ None
-      case Some(v) ⇒ Some(v.asInstanceOf[Variable[T]])
-    }
-  }
+  def variable[T](p: Prototype[T]): Option[Variable[T]] =
+    variables.get(p.name).map(_.asInstanceOf[Variable[T]])
 
   /**
    * Get a variable value given its name.
@@ -74,10 +70,8 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    * @return Some(value) if a variable with the given name is present None
    * otherwise
    */
-  def value[T](name: String): Option[T] = variables.get(name) match {
-    case None ⇒ None
-    case Some(v) ⇒ Some(v.asInstanceOf[Variable[T]].value)
-  }
+  def value[T](name: String): Option[T] =
+    variables.get(name).map(_.asInstanceOf[Variable[T]].value)
 
   /**
    * Get a variable value given a prototype name. This method get the variable by its
@@ -154,12 +148,11 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    */
   def --(names: Traversable[String]): Context = Context.fromMap(variables -- names)
 
-  def contains(p: Prototype[_]): Boolean = {
+  def contains(p: Prototype[_]): Boolean =
     variable(p.name) match {
       case None ⇒ false
       case Some(v) ⇒ p.isAssignableFrom(v.prototype)
     }
-  }
 
   def -(name: String) = Context.fromMap(variables - name)
 

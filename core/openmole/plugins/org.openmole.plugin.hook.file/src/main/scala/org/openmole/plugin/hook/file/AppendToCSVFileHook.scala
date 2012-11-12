@@ -37,18 +37,14 @@ class AppendToCSVFileHook(
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
     val file = new File(VariableExpansion(context, fileName))
-    if (!file.getParentFile.exists) file.getParentFile.mkdirs
-    if (!file.getParentFile.isDirectory) throw new UserBadDataError("Cannot create directory " + file.getParentFile)
+    file.createParentDir
 
     val ps =
       if (prototypes.isEmpty) context.values.map { _.prototype }
       else prototypes
 
-    val fos = new FileOutputStream(file, true)
-    val bfos = new BufferedOutputStream(fos)
-    try {
-      val lock = fos.getChannel.lock
-      try {
+    file.withLock {
+      fos ⇒
         if (file.size == 0) fos.appendLine(ps.map { _.name }.mkString(","))
 
         val lists = ps.map {
@@ -71,12 +67,10 @@ class AppendToCSVFileHook(
           }
 
         def writeLine[T](list: List[T]) =
-          bfos.appendLine(list.map(l ⇒ l.prettify()).mkString(","))
+          fos.appendLine(list.map(l ⇒ l.prettify()).mkString(","))
 
         write(lists)
-      } finally lock.release
-    } finally bfos.close
-
+    }
   }
 
   override def requiered = DataSet(prototypes)

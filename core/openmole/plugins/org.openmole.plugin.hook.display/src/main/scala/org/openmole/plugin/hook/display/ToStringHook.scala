@@ -34,15 +34,10 @@ class ToStringHook(out: PrintStream, prototypes: Prototype[_]*) extends Hook {
   override def process(moleJob: IMoleJob) = {
     import moleJob.context
 
-    if (!prototypes.isEmpty)
-      out.println(
-        prototypes.map(p ⇒ p -> context.variable(p)).map {
-          _ match {
-            case (p, Some(v)) ⇒ v
-            case (p, None) ⇒ p.name + " not found"
-          }
-        }.mkString(","))
-    else out.println(context.values.mkString(", "))
+    if (!prototypes.isEmpty) {
+      val filtred = Context(prototypes.flatMap(p ⇒ context.variable(p.asInstanceOf[Prototype[Any]])))
+      out.println(filtred.toString)
+    } else out.println(context.toString)
   }
 
   override def requiered = DataSet(prototypes)

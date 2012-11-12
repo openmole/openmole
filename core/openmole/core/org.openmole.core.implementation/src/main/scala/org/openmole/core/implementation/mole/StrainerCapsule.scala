@@ -26,6 +26,9 @@ import org.openmole.core.model.task._
 import org.openmole.core.model.transition._
 
 object StrainerCapsule {
+
+  def apply(task: ITask) = new StrainerCapsule(task)
+
   class StrainerTaskDecorator(val task: ITask) extends Task {
     override def name = task.name
     override def inputs = task.inputs

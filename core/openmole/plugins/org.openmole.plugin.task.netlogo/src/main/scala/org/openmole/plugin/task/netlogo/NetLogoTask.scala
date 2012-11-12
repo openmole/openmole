@@ -74,10 +74,10 @@ class NetLogoTask(
       fetchOutputFiles(context, tmpDir, links) ++ netLogoOutputs.map {
         case (name, prototype) ⇒
           val outputValue = netLogo.report(name)
-          if (!prototype.`type`.erasure.isArray) Variable(prototype.asInstanceOf[Prototype[Any]], outputValue)
+          if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Prototype[Any]], outputValue)
           else {
             val netlogoCollection = outputValue.asInstanceOf[AbstractCollection[Any]]
-            val array = java.lang.reflect.Array.newInstance(prototype.`type`.erasure.getComponentType, netlogoCollection.size)
+            val array = java.lang.reflect.Array.newInstance(prototype.`type`.runtimeClass.getComponentType, netlogoCollection.size)
             val it = netlogoCollection.iterator
             for (i ← 0 until netlogoCollection.size) java.lang.reflect.Array.set(array, i, it.next)
             Variable(prototype.asInstanceOf[Prototype[Any]], array)

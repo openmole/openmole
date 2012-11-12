@@ -144,7 +144,14 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     writter.print("; cd .. ; rm -rf $CUR")
   }
 
-  private def lcpCpCmd(env: GliteEnvironment, from: URI, to: String) = {
+  protected def cacheDir(home: String) =
+    home + "/" + Workspace.preference(GliteEnvironment.CECacheDir) + "_" + Workspace.uniqueID + "/"
+
+  protected def clearCacheCmd(cache: String) = {
+
+  }
+
+  protected def lcpCpCmd(env: GliteEnvironment, from: URI, to: String) = {
     val builder = new StringBuilder
 
     builder.append("lcg-cp --vo ")
@@ -175,7 +182,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     builder.toString
   }
 
-  private def getTimeOut = Workspace.preferenceAsDurationInS(GliteEnvironment.RemoteTimeout).toString
+  private def getTimeOut = Workspace.preferenceAsDuration(GliteEnvironment.RemoteTimeout).toSeconds.toString
 
   protected def buildJobDescription(runtime: Runtime, script: File) =
     new WMSJobDescription {

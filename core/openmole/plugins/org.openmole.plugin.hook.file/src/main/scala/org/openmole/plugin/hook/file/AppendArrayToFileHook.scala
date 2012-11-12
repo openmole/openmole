@@ -34,7 +34,7 @@ class AppendArrayToFileHook(
     val file = new File(VariableExpansion(context, fileName))
     file.createParentDir
     val toWrite = context.value(content).getOrElse(Array("not found")).mkString(",")
-    file.lockApply(_.appendLine(toWrite))
+    file.withLock(_.appendLine(toWrite))
   }
 
   override def requiered = DataSet(content)

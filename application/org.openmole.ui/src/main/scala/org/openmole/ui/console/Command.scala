@@ -41,7 +41,6 @@ class Command {
   }
 
   def print(environment: BatchEnvironment, v: Int = 0): Unit = {
-
     val accounting = new Array[AtomicInteger](ExecutionState.values.size)
     val executionJobRegistry = environment.jobRegistry
 
@@ -58,12 +57,17 @@ class Command {
     }
 
     if (v > 0) {
-      val js = new HashMap[String, AtomicInteger]
-      for (
-        ej ← executionJobRegistry.allExecutionJobs;
-        bj ← ej.batchJob
-      ) js.getOrElseUpdate(bj.jobService.id, new AtomicInteger).incrementAndGet
-      for ((js, i) ← js) println(js + ": " + i.get)
+      val states =
+        for {
+          ej ← executionJobRegistry.allExecutionJobs
+          bj ← ej.batchJob
+        } yield { bj.jobService.id -> bj.state }
+
+      states.groupBy(_._1).foreach {
+        case (js, s) ⇒
+          val stateString = s.groupBy(_._2).map { case (k, v) ⇒ k -> v.size }.mkString(", ")
+          println(js + ": " + stateString)
+      }
     }
   }
 

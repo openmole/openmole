@@ -40,7 +40,7 @@ trait GliteJob extends BatchJob with BatchJobId {
 
       if (nbReady < maxNbReady) {
 
-        val jobShakingAverageTime = Workspace.preferenceAsDurationInMs(GliteEnvironment.JobShakingHalfLife)
+        val jobShakingAverageTime = Workspace.preferenceAsDuration(GliteEnvironment.JobShakingHalfLife).toMilliSeconds
         val nbInterval = ((System.currentTimeMillis - lastShaked.toDouble) / jobShakingAverageTime)
         val probability = 1 - math.pow(0.5, nbInterval)
 

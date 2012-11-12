@@ -18,16 +18,18 @@
 package org.openmole.misc.tools.service
 
 import java.util.concurrent.TimeoutException
+import java.net.SocketTimeoutException
 
 object Retry {
 
-  def retryOnTimeout[T](f: ⇒ T, nbTry: Int): T =
+  def retryOnTimeout[T](f: ⇒ T, nbTry: Int): T = {
+    def retryOrElse[T](f: ⇒ T): T = if (nbTry > 1) retryOnTimeout(f, nbTry - 1) else f
     try f
     catch {
-      case t: TimeoutException ⇒
-        if (nbTry > 1) retryOnTimeout(f, nbTry - 1)
-        else throw t
+      case t: TimeoutException ⇒ retryOrElse(throw t)
+      case t: SocketTimeoutException ⇒ retryOrElse(throw t)
     }
+  }
 
   def retry[T](f: ⇒ T, nbTry: Int): T =
     try f

@@ -33,7 +33,7 @@ class AppendToFileHook(
     import moleJob.context
     val file = new File(VariableExpansion(context, fileName))
     file.createParentDir
-    file.lockApply(_.append(VariableExpansion(context, content)))
+    file.withLock(_.append(VariableExpansion(context, content)))
   }
 
 }

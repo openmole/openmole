@@ -24,5 +24,6 @@ object Duration {
     def toSeconds = ISOPeriodFormat.standard.parsePeriod(s).toStandardSeconds.getSeconds
     def toMilliSeconds = toSeconds * 1000L
     def toMinutes = ISOPeriodFormat.standard.parsePeriod(s).toStandardMinutes.getMinutes
+    def toDay = ISOPeriodFormat.standard.parsePeriod(s).toStandardDays.getDays
   }
 }

@@ -44,7 +44,7 @@ class PBSEnvironment(
     override val openMOLEMemory: Option[Int] = None,
     val cpuTime: Option[String] = None,
     val memory: Option[Int] = None,
-    val path: Option[String]) extends BatchEnvironment with SSHAccess with MemoryRequirement { env ⇒
+    val path: Option[String] = None) extends BatchEnvironment with SSHAccess with MemoryRequirement { env ⇒
 
   type SS = PersistentStorageService
   type JS = PBSJobService
@@ -57,7 +57,7 @@ class PBSEnvironment(
       def environment = env
       lazy val root = env.path match {
         case Some(p) ⇒ p
-        case None ⇒ home
+        case None ⇒ createStorage("/").child(home, ".openmole")
       }
     }
 
@@ -65,10 +65,7 @@ class PBSEnvironment(
     def nbTokens = Workspace.preferenceAsInt(MaxConnections)
     def queue = env.queue
     def environment = env
-    lazy val root = env.path match {
-      case Some(p) ⇒ p
-      case None ⇒ storage.home
-    }
+    lazy val root = storage.root
     val id = url.toString
   }
 

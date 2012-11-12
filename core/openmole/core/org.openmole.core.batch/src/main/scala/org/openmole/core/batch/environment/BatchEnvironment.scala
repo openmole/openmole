@@ -159,8 +159,8 @@ akka {
 
   @transient lazy val registerWatcher: Unit = {
     system.scheduler.schedule(
-      SDuration(Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval), MILLISECONDS),
-      SDuration(Workspace.preferenceAsDurationInMs(BatchEnvironment.CheckInterval), MILLISECONDS),
+      SDuration(Workspace.preferenceAsDuration(BatchEnvironment.CheckInterval).toMilliSeconds, MILLISECONDS),
+      SDuration(Workspace.preferenceAsDuration(BatchEnvironment.CheckInterval).toMilliSeconds, MILLISECONDS),
       watcher,
       Watch)
   }
@@ -217,7 +217,7 @@ akka {
   @transient lazy val storages = {
     val storages = allStorages
     if (storages.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
-    Updater.registerForUpdate(new StoragesGC(WeakReference(storages)), Workspace.preferenceAsDurationInMs(StoragesGCUpdateInterval))
+    Updater.registerForUpdate(new StoragesGC(WeakReference(storages)), Workspace.preferenceAsDuration(StoragesGCUpdateInterval).toMilliSeconds)
     storages
   }
 
@@ -233,8 +233,8 @@ akka {
 
   @transient lazy val plugins = PluginManager.pluginsForClass(this.getClass)
 
-  def minUpdateInterval = Workspace.preferenceAsDurationInMs(MinUpdateInterval)
-  def maxUpdateInterval = Workspace.preferenceAsDurationInMs(MaxUpdateInterval)
-  def incrementUpdateInterval = Workspace.preferenceAsDurationInMs(IncrementUpdateInterval)
+  def minUpdateInterval = Workspace.preferenceAsDuration(MinUpdateInterval).toMilliSeconds
+  def maxUpdateInterval = Workspace.preferenceAsDuration(MaxUpdateInterval).toMilliSeconds
+  def incrementUpdateInterval = Workspace.preferenceAsDuration(IncrementUpdateInterval).toMilliSeconds
 
 }
