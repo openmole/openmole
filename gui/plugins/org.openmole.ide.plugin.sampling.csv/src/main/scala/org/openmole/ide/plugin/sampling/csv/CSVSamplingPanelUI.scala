@@ -42,20 +42,16 @@ import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos._
 import scala.swing.BorderPanel.Position._
 
-class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("", "[][grow,fill]", "") with ISamplingPanelUI {
+class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("wrap") with ISamplingPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val csvTextField = new CSVChooseFileTextField(pud.csvFilePath)
   var comboMulti: Option[MultiTwoCombos[String, IPrototypeDataProxyUI]] = None
 
-  tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("wrap") {
-    contents += new Label("CSV file")
-    add(csvTextField, "gapbottom 20")
-  })
-
-  val mappingTab = new TabbedPane.Page("Mapping", new Label("No variable to be mapped"))
-  tabbedPane.pages += mappingTab
+  contents += new Label("CSV file")
+  contents += csvTextField
+  contents += comboMulti.getOrElse(new Label("<html><i>Nothing to be mapped yet</html></i>"))
 
   readFile(pud.csvFilePath)
 
@@ -74,15 +70,17 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("", "[][gro
           headers.toList,
           comboContent,
           "with",
-          pud.prototypeMapping.map { pm ⇒
-            new TwoCombosPanel(
-              headers.toList,
-              comboContent,
-              "with",
-              new TwoCombosData(Some(pm._1), Some(pm._2)))
+          pud.prototypeMapping.map {
+            pm ⇒
+              new TwoCombosPanel(
+                headers.toList,
+                comboContent,
+                "with",
+                new TwoCombosData(Some(pm._1), Some(pm._2)))
           }))
       help.add(comboMulti.get, new Help(i18n.getString("mapping")))
-      mappingTab.content = comboMulti.get.panel
+      contents.remove(2)
+      contents += comboMulti.get.panel
       reader.close
     }
   }
@@ -90,7 +88,9 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("", "[][gro
   override def saveContent = {
     if (comboMulti.isDefined)
       new CSVSamplingDataUI(csvTextField.text,
-        comboMulti.get.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) }, pud.id)
+        comboMulti.get.content.map {
+          c ⇒ (c.comboValue1.get, c.comboValue2.get)
+        }, pud.id)
     else new CSVSamplingDataUI(csvTextField.text, List[(String, PrototypeDataProxyUI)](), pud.id)
   }
 

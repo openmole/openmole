@@ -23,7 +23,7 @@ import org.openmole.core.model.domain.Domain
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.domain.collection.DynamicListDomain
 
@@ -42,15 +42,15 @@ object DynamicListDomainDataUI {
   }
 }
 
-class DynamicListDomainDataUI[T](
-  val values: List[String])(implicit domainType: Manifest[T])
+class DynamicListDomainDataUI[T](val values: List[String])(implicit domainType: Manifest[T])
     extends IDomainDataUI[T] {
 
   val name = "Value list"
 
   def preview = " in " + values.headOption.getOrElse("") + " ..."
 
-  override def coreObject(prototype: IPrototypeDataProxyUI): Domain[T] =
+  override def coreObject(prototype: IPrototypeDataProxyUI,
+                          previousFactor: Option[IFactorDataUI]): Domain[T] =
     new DynamicListDomain(values.toSeq: _*)
 
   def buildPanelUI(p: IPrototypeDataProxyUI) = new DynamicListDomainPanelUI(this, p)
@@ -58,6 +58,8 @@ class DynamicListDomainDataUI[T](
   def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], false))
 
   def isAcceptable(p: IPrototypeDataProxyUI) = availableTypes.contains(p.dataUI.toString)
+
+  def isAcceptable(domain: IDomainDataUI[_]) = false
 
   val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
 

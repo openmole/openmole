@@ -18,7 +18,7 @@
 
 package org.openmole.ide.plugin.domain.collection
 
-import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
@@ -52,7 +52,8 @@ class VariableDomainDataUI[T](val prototypeArray: IPrototypeDataProxyUI)(implici
 
   val name = "Prototype Array"
 
-  def coreObject(proto: IPrototypeDataProxyUI) = new VariableDomain(prototypeArray.dataUI.coreObject.asInstanceOf[Prototype[Array[T]]])
+  def coreObject(proto: IPrototypeDataProxyUI,
+                 previousFactor: Option[IFactorDataUI]) = new VariableDomain(prototypeArray.dataUI.coreObject.asInstanceOf[Prototype[Array[T]]])
 
   def buildPanelUI(p: IPrototypeDataProxyUI) = buildPanelUI
 
@@ -65,6 +66,8 @@ class VariableDomainDataUI[T](val prototypeArray: IPrototypeDataProxyUI)(implici
   def preview = "in " + prototypeArray.toString
 
   def isAcceptable(protoProxy: IPrototypeDataProxyUI) = availableTypes.contains(protoProxy.dataUI.toString) && (protoProxy.dataUI.dim == 1)
+
+  def isAcceptable(domain: IDomainDataUI[_]) = false
 
   def coreClass = classOf[VariableDomainDataUI[T]]
 }

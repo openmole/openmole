@@ -21,22 +21,18 @@ import scala.swing._
 import org.openmole.ide.misc.widget.URL
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.model.sampling._
-import org.openmole.ide.core.model.dataproxy._
-import org.openmole.ide.core.model.sampling._
-import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.panel._
-import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
+import swing.TabbedPane.Page
 
-class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends PluginPanel("wrap", "", "[]40[]") with ISamplingPanelUI {
+class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends PluginPanel("wrap") with ISamplingPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   contents += new Label("<html><i>No more information is required for this Sampling</i></html>")
 
-  override def saveContent = new CompleteSamplingDataUI(cud.id)
+  def saveContent = new CompleteSamplingDataUI(cud.id)
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
 }

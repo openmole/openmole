@@ -43,7 +43,9 @@ object SamplingCompositionPanelUI {
 }
 
 import SamplingCompositionPanelUI._
-class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Scene with ISamplingCompositionPanelUI { samplingCompositionPanelUI ⇒
+
+class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Scene with ISamplingCompositionPanelUI {
+  samplingCompositionPanelUI ⇒
 
   val factors = new HashMap[IFactorWidget, SamplingComponent]
   val samplings = new HashMap[ISamplingWidget, SamplingComponent]
@@ -68,16 +70,23 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
   getActions.addAction(ActionFactory.createPopupMenuAction(new SamplingSceneMenuProvider(this)))
   val moveAction = ActionFactory.createMoveAction
 
-  dataUI.factors.foreach { f ⇒ addFactor(f._1, f._2, false) }
-  dataUI.samplings.foreach { f ⇒ addSampling(f._1, f._2, false) }
-  dataUI.connections.foreach { c ⇒
-    connectProvider.createConnection(samplingComponentFromId(c._1),
-      samplingComponentFromId(c._2))
+  dataUI.factors.foreach {
+    f ⇒ addFactor(f._1, f._2, false)
+  }
+  dataUI.samplings.foreach {
+    f ⇒ addSampling(f._1, f._2, false)
+  }
+  dataUI.connections.foreach {
+    c ⇒
+      connectProvider.createConnection(samplingComponentFromId(c._1),
+        samplingComponentFromId(c._2))
   }
   finalSampling = dataUI.finalSampling
   setSamplingWidget(finalSampling, true)
 
-  def peer = new MigPanel("") { peer.add(createView) }.peer
+  def peer = new MigPanel("") {
+    peer.add(createView)
+  }.peer
 
   //  def removeFactor(factorWidget: IFactorWidget) = factors.isDefinedAt(factorWidget) match {
   //    case true ⇒
@@ -133,11 +142,16 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
       }
       case _ ⇒
     }
-    samplingComponent.connections.foreach { cw ⇒ connectLayer.removeChild(cw) }
+    samplingComponent.connections.foreach {
+      cw ⇒ connectLayer.removeChild(cw)
+    }
     samplingComponent.connections.clear
-    connections.filter { c ⇒
-      (c._1 == samplingComponent.component.id) || (c._2 == samplingComponent.component.id)
-    }.foreach { e ⇒ connections -= e }
+    connections.filter {
+      c ⇒
+        (c._1 == samplingComponent.component.id) || (c._2 == samplingComponent.component.id)
+    }.foreach {
+      e ⇒ connections -= e
+    }
     revalidate
     repaint
   }
@@ -156,7 +170,9 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
                         b: Boolean): Unit = samplingWidget.isFinalSamplingWidget = b
 
   def setSamplingWidget(id: Option[String], b: Boolean): Unit = id match {
-    case Some(i: String) ⇒ samplings.keys.find { _.dataUI.id == i } match {
+    case Some(i: String) ⇒ samplings.keys.find {
+      _.dataUI.id == i
+    } match {
       case Some(x: ISamplingWidget) ⇒ setSamplingWidget(x, b)
       case _ ⇒
     }
@@ -165,15 +181,21 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
 
   def saveContent(name: String) = {
     new SamplingCompositionDataUI(name,
-      factors.map { f ⇒ f._1.dataUI -> f._2.getPreferredLocation }.toList,
-      samplings.map { s ⇒ s._1.dataUI -> s._2.getPreferredLocation }.toList,
+      factors.map {
+        f ⇒ f._1.dataUI -> f._2.getPreferredLocation
+      }.toList,
+      samplings.map {
+        s ⇒ s._1.dataUI -> s._2.getPreferredLocation
+      }.toList,
       connections.toList,
       finalSampling)
   }
 
   def factorsAndSamplings = factors ++ samplings
 
-  def samplingComponentFromId(id: String) = factorsAndSamplings.keys.find { _.id == id } match {
+  def samplingComponentFromId(id: String) = factorsAndSamplings.keys.find {
+    _.id == id
+  } match {
     case Some(x: ISamplingCompositionWidget) ⇒ factorsAndSamplings(x)
     case _ ⇒ throw new UserBadDataError("The sampling composition element " + id + " can not be found")
   }
@@ -198,8 +220,7 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
           false
       }
 
-    def boolToConnector(scw: ISamplingCompositionWidget,
-                        b: Boolean) = {
+    def boolToConnector(b: Boolean) = {
       if (b) ConnectorState.ACCEPT
       else ConnectorState.REJECT_AND_STOP
     }
@@ -209,15 +230,17 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
       targetWidget match {
         case s: SamplingComponent ⇒
           s.component match {
-            case f: IFactorWidget ⇒ boolToConnector(f, false)
-            case s: ISamplingWidget ⇒ source match {
-              case Some(sw: ISamplingWidget) ⇒ boolToConnector(s, s.dataUI.isAcceptable(sw.dataUI))
-              case Some(fw: IFactorWidget) ⇒ boolToConnector(s, s.dataUI.isAcceptable(fw.dataUI))
+            case f: IFactorWidget ⇒ source match {
+              case Some(sw: ISamplingWidget) ⇒ boolToConnector(false)
+              case Some(fw: IFactorWidget) ⇒ boolToConnector(f.dataUI.domain.isAcceptable(fw.dataUI.domain))
               case _ ⇒ ConnectorState.REJECT_AND_STOP
             }
-            case _ ⇒
-              boolToConnector(s.component, false)
-              ConnectorState.REJECT_AND_STOP
+            case s: ISamplingWidget ⇒ source match {
+              case Some(sw: ISamplingWidget) ⇒ boolToConnector(s.dataUI.isAcceptable(sw.dataUI))
+              case Some(fw: IFactorWidget) ⇒ boolToConnector(s.dataUI.isAcceptable(fw.dataUI))
+              case _ ⇒ ConnectorState.REJECT_AND_STOP
+            }
+            case _ ⇒ ConnectorState.REJECT_AND_STOP
           }
         case _ ⇒ ConnectorState.REJECT_AND_STOP
       }
@@ -239,11 +262,16 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
       val targetW = targetWidget.asInstanceOf[SamplingComponent]
       sourceW.connections += connection
       // targetW.connections += connection
-      targetW match {
-        case tfw: IFactorWidget ⇒ sourceW match {
-          case sfw: IFactorWidget ⇒ tfw.dataUI.previousFactor = Some(sfw.dataUI)
-          case _ ⇒
-        }
+      targetW.component match {
+        case tfw: IFactorWidget ⇒
+          println("targeted")
+          sourceW.component match {
+            case sfw: IFactorWidget ⇒
+              println("sourced")
+              tfw.dataUI.previousFactor = Some(sfw.dataUI)
+              println("previous done : " + sfw.dataUI.id + " is previous of " + tfw.dataUI + tfw.dataUI.previousFactor)
+            case _ ⇒
+          }
         case _ ⇒
       }
       println("connection from " + idFromSamplingComponent(sourceW) + " to " + idFromSamplingComponent(targetW))
@@ -261,4 +289,5 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
         new Result(w.convertLocalToScene(new Point(0, 19)), Anchor.Direction.LEFT)
     }
   }
+
 }

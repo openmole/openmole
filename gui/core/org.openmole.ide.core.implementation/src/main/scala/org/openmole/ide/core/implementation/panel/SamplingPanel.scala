@@ -18,25 +18,16 @@
 package org.openmole.ide.core.implementation.panel
 
 import scala.swing._
+import event.FocusGained
 import swing.Swing._
-import javax.swing.JScrollPane
+import javax.swing.{ ImageIcon, JScrollPane }
 import java.awt.BorderLayout
-import scala.swing.event.SelectionChanged
-import org.openmole.ide.core.implementation.dataproxy._
-import org.openmole.ide.core.model.data._
-import org.openmole.ide.core.model.dataproxy._
-import org.openmole.ide.core.model.factory._
-import org.openmole.ide.core.model.panel._
-import org.openmole.ide.core.implementation.registry.KeyRegistry
-import org.openmole.ide.core.implementation.data._
-import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.core.model.sampling.ISamplingWidget
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.widget._
-import org.openmole.ide.misc.tools.image.Images.CLOSE
+import multirow.ComponentFocusedEvent
 import org.openmole.ide.core.model.panel._
-import scala.swing.BorderPanel.Position._
-import scala.collection.JavaConversions._
+import javax.imageio.ImageIO
 
 class SamplingPanel(samplingWidget: ISamplingWidget,
                     scene: IMoleScene,
@@ -45,11 +36,20 @@ class SamplingPanel(samplingWidget: ISamplingWidget,
   mode) {
   val panelUI = samplingWidget.dataUI.buildPanelUI
 
+  listenTo(panelUI.help.components.toSeq: _*)
+  reactions += {
+    case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
+    case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
+  }
+
   peer.add(mainPanel.peer, BorderLayout.NORTH)
-  peer.add(new PluginPanel("wrap") {
-    contents += panelUI.tabbedPane
-    contents += panelUI.help
+  peer.add(new PluginPanel("wrap 2") {
+    contents += new Label {
+      icon = new ImageIcon(ImageIO.read(samplingWidget.dataUI.getClass.getClassLoader.getResource(samplingWidget.dataUI.fatImagePath)))
+    }
+    contents += panelUI.peer
   }.peer, BorderLayout.CENTER)
+  peer.add(panelUI.help.peer,BorderLayout.SOUTH)
 
   def create = {}
 

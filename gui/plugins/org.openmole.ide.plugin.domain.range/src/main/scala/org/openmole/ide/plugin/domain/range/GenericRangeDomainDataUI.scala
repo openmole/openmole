@@ -19,7 +19,7 @@ package org.openmole.ide.plugin.domain.range
 
 import java.math.BigInteger
 import java.math.BigDecimal
-import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
@@ -51,6 +51,8 @@ abstract class GenericRangeDomainDataUI[T] extends IDomainDataUI[T] {
   def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], false))
 
   def isAcceptable(p: IPrototypeDataProxyUI) = availableTypes.contains(p.dataUI.toString)
+
+  def isAcceptable(domain: IDomainDataUI[_]) = false
 
   def availableTypes: List[String]
 

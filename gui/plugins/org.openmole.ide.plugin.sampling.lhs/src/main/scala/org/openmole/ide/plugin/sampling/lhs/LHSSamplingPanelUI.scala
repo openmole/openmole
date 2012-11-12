@@ -41,9 +41,8 @@ class LHSSamplingPanelUI(cud: LHSSamplingDataUI) extends PluginPanel("wrap 2", "
 
   val sampleTextField = new TextField(cud.samples, 8)
 
-  tabbedPane.pages += new TabbedPane.Page("Samples", new PluginPanel("wrap") {
-    contents += sampleTextField
-  })
+  contents += new Label("Samples")
+  contents += sampleTextField
 
   def domains = KeyRegistry.domains.values.map {
     _.buildDataUI

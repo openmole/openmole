@@ -17,7 +17,7 @@
 
 package org.openmole.ide.plugin.domain.distribution
 
-import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
@@ -46,6 +46,8 @@ abstract class UniformDistributionDataUI[T] extends IDomainDataUI[T] {
   def imagePath = "img/domain_uniform_distribution.png"
 
   def isAcceptable(p: IPrototypeDataProxyUI) = availableTypes.contains(p.dataUI.toString)
+
+  def isAcceptable(domain: IDomainDataUI[_]) = false
 
   def preview = "uniform " + { if (max.isDefined) max.get else "" }
 }

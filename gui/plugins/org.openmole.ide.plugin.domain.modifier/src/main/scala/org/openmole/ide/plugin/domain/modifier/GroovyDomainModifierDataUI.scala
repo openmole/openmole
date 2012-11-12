@@ -28,6 +28,7 @@ import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.domain.modifier.GroovyDomainModifier
 import org.openmole.core.model.data.Prototype
+import org.openmole.ide.core.implementation.dialog.StatusBar
 
 object GroovyModifierDomainDataUI {
 
@@ -51,9 +52,10 @@ class GroovyModifierDomainDataUI[T](val code: String)(implicit domainType: Manif
 
   def preview = " map( " + code.split("\n")(0) + " ...)"
 
-  override def coreObject(prototype: IPrototypeDataProxyUI): Domain[T] = previousFactor match {
+  override def coreObject(prototype: IPrototypeDataProxyUI,
+                          previousFactor: Option[IFactorDataUI]): Domain[T] = previousFactor match {
     case Some(f: IFactorDataUI) ⇒ f.domain match {
-      case Some(d: Domain[_]) ⇒ new GroovyDomainModifier(prototype.dataUI.coreObject.asInstanceOf[Prototype[Any]],
+      case d: Domain[_] ⇒ new GroovyDomainModifier(prototype.dataUI.coreObject.asInstanceOf[Prototype[Any]],
         d.asInstanceOf[Domain[T] with Discrete[T]], code)
       case _ ⇒ throw new UserBadDataError("No input domain has been found, it is required for a Map Domain.")
     }
@@ -63,6 +65,13 @@ class GroovyModifierDomainDataUI[T](val code: String)(implicit domainType: Manif
   def buildPanelUI(p: IPrototypeDataProxyUI) = new GroovyModifierDomainPanelUI(this, p)
 
   def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], false))
+
+  def isAcceptable(domain: IDomainDataUI[_]) = domain match {
+    case d: Domain[_] with Discrete[T] ⇒ true
+    case _ ⇒
+      StatusBar.warn("A Discrete Domain range is required as input of a Map Factor")
+      false
+  }
 
   def isAcceptable(p: IPrototypeDataProxyUI) = availableTypes.contains(p.dataUI.toString)
 

@@ -27,6 +27,7 @@ import java.awt.Point
 import java.security.DomainCombiner
 import org.openmole.core.model.domain.Domain
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import collection.mutable.HashMap
 
 class SamplingCompositionDataUI(val name: String = "",
                                 val factors: List[(IFactorDataUI, Point)] = List.empty,
@@ -34,11 +35,11 @@ class SamplingCompositionDataUI(val name: String = "",
                                 val connections: List[(String, String)] = List.empty,
                                 val finalSampling: Option[String] = None) extends ISamplingCompositionDataUI {
 
-  var builtSampling = scala.collection.mutable.Map.empty[ISamplingDataUI, Sampling]
+  val builtSampling = new HashMap[ISamplingDataUI, Sampling]
   def coreClass = classOf[Sampling]
 
   def coreObject = {
-    builtSampling = scala.collection.mutable.Map.empty[ISamplingDataUI, Sampling]
+    builtSampling.clear
     val connectionMap = connections.groupBy { _._2 }.map { case (k, v) ⇒ k -> v.map { _._1 } }
     val factorMap = factors.map { f ⇒ f._1.id -> f._1 }.toMap
     val samplingMap: Map[String, ISamplingDataUI] = samplings.map { s ⇒ s._1.id -> s._1 }.toMap
@@ -55,17 +56,13 @@ class SamplingCompositionDataUI(val name: String = "",
                         connectionMap: Map[String, List[String]],
                         factorMap: Map[String, IFactorDataUI],
                         samplingMap: Map[String, ISamplingDataUI]): Sampling = {
-    println("samplingdataui : " + data + " " + builtSampling.contains(data))
     if (!builtSampling.contains(data)) {
-      val partition = connectionMap(data.id).partition { _.substring(0, 4) == "samp" }
-      println("partition " + partition)
+      val partition = connectionMap.getOrElse(data.id, List()).partition { _.substring(0, 4) == "samp" }
       builtSampling += data -> data.coreObject(partition._2.map { factorMap },
-        partition._1.map { s ⇒ buildSamplingCore(samplingMap(s), connectionMap, factorMap, samplingMap) })
+        partition._1.filterNot(_ == data.id).map { s ⇒ buildSamplingCore(samplingMap(s), connectionMap, factorMap, samplingMap) })
     }
     builtSampling(data)
   }
-
-  //def connectedFactorsTo(sampling: ISamplingDataUI) = connections.filter { _._2 == sampling.id }.map { s ⇒ samplingDataUI(s._2) }
 
   def imagePath = "img/samplingComposition.png"
 
