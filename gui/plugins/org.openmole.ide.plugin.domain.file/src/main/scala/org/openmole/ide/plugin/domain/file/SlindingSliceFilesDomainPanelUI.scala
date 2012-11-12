@@ -17,12 +17,14 @@
  */
 package org.openmole.ide.plugin.domain.file
 
-import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget.{ Help, URL, Helper, PluginPanel }
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import swing.{ CheckBox, TextField }
+import java.util.{ Locale, ResourceBundle }
 
 class SlindingSliceFilesDomainPanelUI(val dataUI: SlindingSliceFilesDomainDataUI) extends PluginPanel("wrap") with IDomainPanelUI with FileDomainPanelUI {
 
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
   val dirTField = directoryTextField(dataUI.directoryPath)
   val numberPatternTextField = new TextField(8) { text = dataUI.numberPattern }
   val sliceSizeTextField = new TextField(8) { text = dataUI.sliceSize.toString }
@@ -32,4 +34,10 @@ class SlindingSliceFilesDomainPanelUI(val dataUI: SlindingSliceFilesDomainDataUI
   override def toString = dataUI.name
 
   def saveContent = new SlindingSliceFilesDomainDataUI(dirTField.text, numberPatternTextField.text, sliceSizeTextField.text.toInt)
+
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
+    add(dirTField, new Help(i18n.getString("dir"), i18n.getString("dirEx")))
+    add(numberPatternTextField, new Help(i18n.getString("selectionPattern"), i18n.getString("selectionPatternEx")))
+    add(sliceSizeTextField, new Help(i18n.getString("sliceSize"), i18n.getString("sliceSizeEx")))
+  }
 }

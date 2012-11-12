@@ -20,6 +20,7 @@ package org.openmole.ide.plugin.domain.range
 
 import swing.{ Label, TextField }
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.misc.widget.{ URL, Help, Helper }
 
 class LogarithmicRangePanelUI(pud: LogarthmicRangeDataUI[_],
                               prototype: IPrototypeDataProxyUI) extends GenericRangeDomainPanelUI {
@@ -32,4 +33,10 @@ class LogarithmicRangePanelUI(pud: LogarthmicRangeDataUI[_],
   contents += stepField
 
   def saveContent = GenericRangeDomainDataUI(minField.text, maxField.text, Some(stepField.text), true, prototype.dataUI.toString)
+
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
+    add(minField, new Help(i18n.getString("min"), i18n.getString("minEx")))
+    add(maxField, new Help(i18n.getString("max"), i18n.getString("maxEx")))
+    add(stepField, new Help(i18n.getString("step"), i18n.getString("stepEx")))
+  }
 }

@@ -21,14 +21,13 @@ import java.util.Locale
 import java.util.ResourceBundle
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IDomainPanelUI
-import org.openmole.ide.misc.widget.Help
-import org.openmole.ide.misc.widget.Helper
-import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget.{ URL, Help, Helper, PluginPanel }
 import scala.swing.TextField
 
 class TakeDomainPanelUI(pud: TakeDomainDataUI[_],
                         prototype: IPrototypeDataProxyUI) extends PluginPanel("") with IDomainPanelUI {
 
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
   val sizeTextField = new TextField(pud.size, 6)
 
   contents += (sizeTextField, "gap para")
@@ -36,4 +35,9 @@ class TakeDomainPanelUI(pud: TakeDomainDataUI[_],
 
   def saveContent = TakeDomainDataUI(sizeTextField.text,
     prototype.dataUI.toString)
+
+  override lazy val help =
+    new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
+      add(sizeTextField, new Help(i18n.getString("takeSize"), i18n.getString("takeSizeEx")))
+    }
 }
