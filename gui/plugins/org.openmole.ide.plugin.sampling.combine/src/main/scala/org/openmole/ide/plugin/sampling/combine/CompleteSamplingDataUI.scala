@@ -22,7 +22,7 @@ class CompleteSamplingDataUI extends ISamplingDataUI {
                  samplings: List[Sampling]) = {
     new CompleteSampling(
       (factors.map(f ⇒ DiscreteFactor(Factor(f.prototype.dataUI.coreObject.asInstanceOf[Prototype[Any]],
-        f.domain.coreObject(None).asInstanceOf[Domain[Any] with Discrete[Any]])))
+        f.domain.coreObject.asInstanceOf[Domain[Any] with Discrete[Any]])))
         ::: samplings): _*)
   }
 
@@ -35,7 +35,7 @@ class CompleteSamplingDataUI extends ISamplingDataUI {
   def buildPanelUI = new CompleteSamplingPanelUI(this)
 
   def isAcceptable(domain: IDomainDataUI[_]) = try {
-    domain.coreObject(None) match {
+    domain.coreObject match {
       case x: Domain[Any] with Discrete[Any] ⇒ true
       case _ ⇒
         StatusBar.warn("A Discrete Domain is required for a Complete Sampling")
