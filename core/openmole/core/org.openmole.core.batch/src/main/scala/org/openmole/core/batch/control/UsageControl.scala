@@ -28,7 +28,7 @@ trait UsageControl {
   def tryWithToken[B](f: Option [AccessToken] => B) = {
     val t = tryGetToken
     try f(t)
-    finally t.map(releaseToken)
+    finally t.foreach(releaseToken)
   }
 
   def withToken[B](f: (AccessToken ⇒ B)): B = {
