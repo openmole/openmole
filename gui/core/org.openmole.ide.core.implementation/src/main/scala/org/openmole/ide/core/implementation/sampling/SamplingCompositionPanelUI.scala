@@ -237,7 +237,7 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
             }
             case s: ISamplingWidget ⇒ source match {
               case Some(sw: ISamplingWidget) ⇒ boolToConnector(s.dataUI.isAcceptable(sw.dataUI))
-              case Some(dw: IDomainWidget) ⇒ boolToConnector(s.dataUI.isAcceptable(Some(dw.dataUI)))
+              case Some(dw: IDomainWidget) ⇒ boolToConnector(s.dataUI.isAcceptable(dw.dataUI))
               case _ ⇒ ConnectorState.REJECT_AND_STOP
             }
             case _ ⇒ ConnectorState.REJECT_AND_STOP
