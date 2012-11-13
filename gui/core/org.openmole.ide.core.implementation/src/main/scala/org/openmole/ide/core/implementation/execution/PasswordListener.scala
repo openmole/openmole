@@ -30,7 +30,7 @@ import org.openmole.misc.workspace.Workspace
 object PasswordListner {
 
   lazy val apply = {
-    EventDispatcher.listen(Workspace.instance, new PasswordListener, classOf[Workspace.PasswordRequired])
+    EventDispatcher.listen(Workspace.instance, new PasswordListener, Workspace.PasswordRequired.getClass)
     Unit
   }
 }
@@ -38,7 +38,7 @@ object PasswordListner {
 class PasswordListener extends EventListener[Workspace] {
   override def triggered(obj: Workspace, event: Event[Workspace]): Unit = {
     event match {
-      case event: Workspace.PasswordRequired ⇒
+      case Workspace.PasswordRequired ⇒
         try {
           val dd = new DialogDescriptor(PasswordDialog.panel.peer, "Preferences access")
           val result = DialogDisplayer.getDefault.notify(dd)

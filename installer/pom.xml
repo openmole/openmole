@@ -11,7 +11,7 @@
 
     <groupId>org.openmole</groupId>
     <artifactId>openmole-installer</artifactId>
-    <version>${version}</version>
+    <version>0.7-SNAPSHOT</version>
     <packaging>pom</packaging>
  
     <name>OpenMOLE installer</name>
@@ -74,7 +74,7 @@
                                 <artifactItem>
                                     <groupId>org.openmole.core</groupId>
                                     <artifactId>org.openmole.runtime</artifactId>
-                                    <version>${version}</version>
+                                    <version>${project.version}</version>
                                     <type>tar.gz</type>
                                     <destFileName>org.openmole.runtime.tar.gz</destFileName>
                                 </artifactItem>
@@ -97,7 +97,7 @@
                                 <artifactItem>
                                     <groupId>org.openmole.core</groupId>
                                     <artifactId>org.openmole.runtime.daemon</artifactId>
-                                    <version>${version}</version>
+                                    <version>${project.version}</version>
                                     <type>tar.gz</type>
                                     <outputDirectory>${project.build.directory}</outputDirectory>
                                 </artifactItem>
@@ -115,7 +115,7 @@
                                 <artifactItem>
                                     <groupId>org.openmole.ui</groupId>
                                     <artifactId>openmole-ui-package</artifactId>
-                                    <version>${version}</version>
+                                    <version>${project.version}</version>
                                     <type>tar.gz</type>
                                     <outputDirectory>${project.build.directory}/openmole/</outputDirectory>
                                 </artifactItem>
@@ -195,7 +195,7 @@
                   <outputFile>target/izpack-staging/install.xml</outputFile>
                   <regex>false</regex>
                   <token>$VERSION$</token>
-                  <value>${version}</value>
+                  <value>${project.version}</value>
                </configuration>
             </plugin>
         </plugins>

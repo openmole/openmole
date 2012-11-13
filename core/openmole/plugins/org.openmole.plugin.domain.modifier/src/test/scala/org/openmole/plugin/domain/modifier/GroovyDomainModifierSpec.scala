@@ -30,14 +30,13 @@ import org.junit.runner.RunWith
 class GroovyDomainModifierSpec extends FlatSpec with ShouldMatchers {
 
   "GroovyDomainModifier" should "change the values of a domain using groovy code" in {
-    val p1 = Prototype[Int]("p1")
     val r1 = (1 to 3)
 
     val d1 = new Domain[Int] with Discrete[Int] {
       override def iterator(context: Context) = r1.iterator
     }
 
-    val md = new GroovyDomainModifier(p1, d1, "p1 * 2").iterator(Context.empty)
+    val md = new GroovyDomainModifier(d1, "p1", "p1 * 2").iterator(Context.empty)
 
     md.toList == r1.map { _ * 2 } should equal(true)
   }

@@ -19,7 +19,7 @@ package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
 
-class TimedEpsilonNSGAIISigma(
+class TimedEpsilonNSGA2Sigma(
   val distributionIndex: Double,
   val duration: Long,
   val genomeSize: Int,

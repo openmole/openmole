@@ -19,7 +19,7 @@ package org.openmole.ide.plugin.domain.modifier
 
 import java.math.BigDecimal
 import java.math.BigInteger
-import org.openmole.core.model.domain.{ Discrete, Domain }
+import org.openmole.core.model.domain.{Discrete, Domain}
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
@@ -48,7 +48,7 @@ object GroovyModifierDomainDataUI {
 
 class GroovyModifierDomainDataUI[T](val prototypeName: String,
                                     val code: String)(implicit val domainType: Manifest[T])
-    extends IDomainDataUI[T] {
+  extends IDomainDataUI[T] {
 
   val name = "Map"
 
