@@ -184,7 +184,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     builder.toString
   }
 
-/*  private def lcgCpGunZipCmd(from: URI, to: String) = {
+  /*  private def lcgCpGunZipCmd(from: URI, to: String) = {
     val builder = new StringBuilder
     builder.append(lcpCpCmd(from, to + ".gz"))
     builder.append(" && gunzip ")

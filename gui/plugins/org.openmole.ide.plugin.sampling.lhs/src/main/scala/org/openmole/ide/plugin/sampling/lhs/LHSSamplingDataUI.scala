@@ -19,8 +19,7 @@ import org.openmole.core.model.sampling.Sampling
 import org.openmole.ide.core.implementation.sampling._
 import org.openmole.ide.core.implementation.dialog.StatusBar
 
-class LHSSamplingDataUI(val samples: String = "1",
-                        val id: String = "sampling" + Counter.id.getAndIncrement) extends ISamplingDataUI {
+class LHSSamplingDataUI(val samples: String = "1") extends ISamplingDataUI {
 
   implicit def string2Int(s: String): Int = augmentString(s).toInt
 
@@ -34,7 +33,7 @@ class LHSSamplingDataUI(val samples: String = "1",
       factors.map {
         f ⇒
           Factor(f.prototype.dataUI.coreObject.asInstanceOf[Prototype[Double]],
-            f.domain.coreObject(f.prototype, f.previousFactor).asInstanceOf[Domain[Double] with Bounds[Double]])
+            f.domain.coreObject(None).asInstanceOf[Domain[Double] with Bounds[Double]])
       }.toSeq: _*)
 
   def coreClass = classOf[LHS]
@@ -46,15 +45,12 @@ class LHSSamplingDataUI(val samples: String = "1",
   def buildPanelUI = new LHSSamplingPanelUI(this)
 
   //FIXME 2.10
-  def isAcceptable(factor: IFactorDataUI) =
-    if ((factor.prototype.dataUI.toString == "Double") &&
-      (factor.domain.coreObject(factor.prototype, factor.previousFactor) match {
-        case x: Domain[Double] with Bounds[Double] ⇒ true
-        case _ ⇒ false
-      })) true
-    else {
-      StatusBar.warn("A Bounded range of Double is required for a LHS Sampling")
-      false
+  def isAcceptable(domain: IDomainDataUI[_]) =
+    domain.coreObject(None) match {
+      case x: Domain[Double] with Bounds[Double] ⇒ true
+      case _ ⇒
+        StatusBar.warn("A Bounded range of Double is required for a LHS Sampling")
+        false
     }
 
   def isAcceptable(sampling: ISamplingDataUI) = true

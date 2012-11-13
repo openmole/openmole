@@ -19,8 +19,7 @@ import org.openmole.plugin.method.sensitivity.SaltelliSampling
 import org.openmole.ide.misc.tools.Counter
 import org.openmole.ide.core.implementation.dialog.StatusBar
 
-class SaltelliSamplingDataUI(val samples: String = "1",
-                             val id: String = "sampling" + Counter.id.getAndIncrement) extends ISamplingDataUI {
+class SaltelliSamplingDataUI(val samples: String = "1") extends ISamplingDataUI {
 
   implicit def string2Int(s: String): Int = augmentString(s).toInt
 
@@ -31,9 +30,10 @@ class SaltelliSamplingDataUI(val samples: String = "1",
       catch {
         case e: NumberFormatException ⇒ throw new UserBadDataError("An integer is exepected as number of samples")
       },
-      factors.map { f ⇒
-        Factor(f.prototype.dataUI.coreObject.asInstanceOf[Prototype[Double]],
-          f.domain.coreObject(f.prototype, f.previousFactor).asInstanceOf[Domain[Double] with Bounds[Double]])
+      factors.map {
+        f ⇒
+          Factor(f.prototype.dataUI.coreObject.asInstanceOf[Prototype[Double]],
+            f.domain.coreObject(None).asInstanceOf[Domain[Double] with Bounds[Double]])
       }.toSeq: _*)
 
   def coreClass = classOf[SaltelliSampling]
@@ -45,15 +45,12 @@ class SaltelliSamplingDataUI(val samples: String = "1",
   def buildPanelUI = new SaltelliSamplingPanelUI(this)
 
   //FIXME 2.10
-  def isAcceptable(factor: IFactorDataUI) =
-    if ((factor.prototype.dataUI.toString == "Double") &&
-      (factor.domain.coreObject(factor.prototype, factor.previousFactor) match {
-        case x: Domain[Double] with Bounds[Double] ⇒ true
-        case _ ⇒ false
-      })) true
-    else {
-      StatusBar.warn("A Bounded range of Double is required for a Saltelli Sampling")
-      false
+  def isAcceptable(domain: IDomainDataUI[_]) =
+    domain match {
+      case x: Domain[Double] with Bounds[Double] ⇒ true
+      case _ ⇒
+        StatusBar.warn("A Bounded range of Double is required for a Saltelli Sampling")
+        false
     }
 
   def isAcceptable(sampling: ISamplingDataUI) = true

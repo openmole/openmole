@@ -48,7 +48,7 @@ class LHSSamplingPanelUI(cud: LHSSamplingDataUI) extends PluginPanel("wrap 2", "
     _.buildDataUI
   }.toList
 
-  override def saveContent = new LHSSamplingDataUI(sampleTextField.text, cud.id)
+  override def saveContent = new LHSSamplingDataUI(sampleTextField.text)
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
 }
