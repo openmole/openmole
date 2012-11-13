@@ -234,7 +234,7 @@ class GliteEnvironment(
                   if (cur.submitted > 0 && cur.totalSubmitted > 0) ((cur.runnig.toDouble / cur.submitted) * (cur.totalDone / cur.totalSubmitted)).normalize(minJobFactor, maxJobFactor)
                   else 0.0
 
-                val fitness = math.pow((jobFactor + timeFactor + 2 * cur.availability + cur.successRate), Workspace.preferenceAsDouble(JobServiceFitnessPower))
+                val fitness = math.pow((jobFactor + timeFactor + 10 * cur.availability + 10 * cur.successRate), Workspace.preferenceAsDouble(JobServiceFitnessPower))
                 Some((cur, token, fitness))
             }
         }
@@ -287,7 +287,7 @@ class GliteEnvironment(
                   if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0) 0.0
                   else 1 - time.normalize(minTime, maxTime)
 
-                val fitness = math.pow((2 * sizeFactor + timeFactor + cur.availability + cur.successRate), Workspace.preferenceAsDouble(StorageFitnessPower))
+                val fitness = math.pow((5 * sizeFactor + timeFactor + cur.availability + 10 * cur.successRate), Workspace.preferenceAsDouble(StorageFitnessPower))
                 Some((cur, token, fitness))
             }
         }
