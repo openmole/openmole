@@ -46,7 +46,7 @@ object GliteStorageService {
 
 }
 
-trait GliteStorageService extends PersistentStorageService with QualityControl with LimitedAccess {
+trait GliteStorageService extends PersistentStorageService with QualityControl with LimitedAccess with AvailabitityQuality {
   def hysteresis = Workspace.preferenceAsInt(GliteEnvironment.QualityHysteresis)
 
   override def exists(path: String)(implicit token: AccessToken): Boolean = quality { super.exists(path)(token) }
@@ -62,4 +62,5 @@ trait GliteStorageService extends PersistentStorageService with QualityControl w
   override def uploadGZ(src: File, dest: String)(implicit token: AccessToken) = quality { super.uploadGZ(src, dest)(token) }
   override def download(src: String, dest: File)(implicit token: AccessToken) = quality { super.download(src, dest)(token) }
   override def downloadGZ(src: String, dest: File)(implicit token: AccessToken) = quality { super.downloadGZ(src, dest)(token) }
+
 }
