@@ -32,7 +32,7 @@ class RefreshActor(jobManager: ActorRef, environment: BatchEnvironment) extends 
   def receive = {
     case Refresh(job, sj, bj, delay) ⇒
       if (!job.state.isFinal) {
-        bj.jobService.tryWithToken match {
+        bj.jobService.tryWithToken {
           case Some(t) ⇒
             try {
               val oldState = job.state
