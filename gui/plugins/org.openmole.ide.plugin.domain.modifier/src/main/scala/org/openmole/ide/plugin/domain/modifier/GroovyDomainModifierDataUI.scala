@@ -30,7 +30,7 @@ import org.openmole.plugin.domain.modifier.GroovyDomainModifier
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.dialog.StatusBar
 
-object GroovyModifierDomainDataUI {
+/*object GroovyModifierDomainDataUI {
 
   def apply[T](protoName: String = "",
                code: String = "", classString: String) = {
@@ -44,36 +44,26 @@ object GroovyModifierDomainDataUI {
       case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
     }
   }
-}
+}   */
 
-class GroovyModifierDomainDataUI[T](val prototypeName: String,
-                                    val code: String)(implicit val domainType: Manifest[T])
-    extends IDomainDataUI[T] {
+class GroovyModifierDomainDataUI(val prototypeName: String = "",
+                                 val code: String = "")
+    extends ModifierDomainDataUI[Any] {
 
   val name = "Map"
 
   def preview = " map( " + code.split("\n")(0) + " ...)"
 
-  override def coreObject(previousDomain: Option[IDomainDataUI[_]]): Domain[T] = previousDomain match {
-    case Some(d: IDomainDataUI[_]) ⇒ d.coreObject(None) match {
-      case coreDomain: Domain[T] with Discrete[T] ⇒ new GroovyDomainModifier(coreDomain, prototypeName, code)
-      case _ ⇒ throw new UserBadDataError("The input domain has a wrong type.")
-    }
-    case _ ⇒ throw new UserBadDataError("No input domain has been found, it is required for a Map Domain.")
+  val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
+
+  override def coreObject: Domain[Any] = inputDomain match {
+    case Some(id: DOMAINTYPE) ⇒ new GroovyDomainModifier(id, prototypeName, code)
+    case _ ⇒ throw new UserBadDataError("An input Domain is required for a Map modifier Domain")
   }
 
-  def buildPanelUI(p: IPrototypeDataProxyUI) = new GroovyModifierDomainPanelUI(this, p)
+  def buildPanelUI(p: IPrototypeDataProxyUI) = new GroovyModifierDomainPanelUI(this)
 
   def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], false))
 
-  def isAcceptable(domain: Option[IDomainDataUI[_]]) = domain match {
-    case Some(d: Domain[_] with Discrete[T]) ⇒ true
-    case _ ⇒
-      StatusBar.warn("A Discrete Domain range is required as input of a Map Factor")
-      false
-  }
-
-  val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
-
-  def coreClass = classOf[GroovyModifierDomainDataUI[T]]
+  def coreClass = classOf[GroovyModifierDomainDataUI]
 }

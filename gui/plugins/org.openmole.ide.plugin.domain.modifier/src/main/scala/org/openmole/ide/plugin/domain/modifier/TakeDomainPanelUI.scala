@@ -24,19 +24,14 @@ import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.{ URL, Help, Helper, PluginPanel }
 import swing.{ MyComboBox, TextField }
 
-class TakeDomainPanelUI(pud: TakeDomainDataUI[_]) extends PluginPanel("") with IDomainPanelUI {
+class TakeDomainPanelUI(pud: TakeDomainDataUI) extends PluginPanel("") with IDomainPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
   val sizeTextField = new TextField(pud.size, 6)
-  val typeCombo = new MyComboBox(pud.availableTypes) {
-    selection.item = pud.domainType.toString.split('.').last
-  }
 
-  contents += typeCombo
   contents += sizeTextField
 
-  def saveContent = TakeDomainDataUI(sizeTextField.text,
-    typeCombo.selection.item)
+  def saveContent = new TakeDomainDataUI(sizeTextField.text)
 
   override lazy val help =
     new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {

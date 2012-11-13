@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2012 Mathieu Leclaire 
- * < mathieu.leclaire at openmole.org >
+ * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,13 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.ide.plugin.domain.modifier
 
-package org.openmole.ide.plugin.domain.range
-
+import org.openmole.core.model.domain.{ Discrete, Domain }
 import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.ide.core.implementation.dialog.StatusBar
 
-abstract class LogarthmicRangeDataUI[T] extends GenericRangeDomainDataUI[T] {
-  val name = "Log Range"
+abstract class ModifierDomainDataUI[T] extends IDomainDataUI[T] {
+  type DOMAINTYPE = Domain[T] with Discrete[T]
+  var inputDomain: Option[DOMAINTYPE] = None
 
-  override def preview = " Log Range [" + min + "," + max + stepString + "]"
+  override def isAcceptable(domain: IDomainDataUI[_]) = domain.coreObject match {
+    case d: Domain[_] with Discrete[T] ⇒
+      inputDomain = Some(d)
+      true
+    case _ ⇒
+      StatusBar.warn("A Discrete Domain is required as input of a Modifier Domain (Map, Take, Group, ...)")
+      false
+  }
+
 }

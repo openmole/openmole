@@ -32,6 +32,7 @@ abstract class GenericRangeDomainPanelUI extends PluginPanel("wrap 2") with IDom
   val minField = new TextField(6)
   val maxField = new TextField(6)
 
+  contents += (new Label("Type"), "gap para")
   contents += (typeCombo, "span 2")
   contents += (new Label("Min"), "gap para")
   contents += minField

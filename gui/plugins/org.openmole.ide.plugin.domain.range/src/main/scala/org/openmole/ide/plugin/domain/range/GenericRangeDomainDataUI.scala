@@ -24,6 +24,7 @@ import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.core.model.domain.{ Bounds, Domain }
 
 object GenericRangeDomainDataUI {
 
@@ -39,7 +40,11 @@ object GenericRangeDomainDataUI {
 
 abstract class GenericRangeDomainDataUI[T] extends IDomainDataUI[T] {
 
-  def preview = " on [" + min + "," + max + stepString + "]"
+  var previousType = classOf[Domain[T]]
+
+  def preview =
+    if (step.isDefined) " Range [" + min + "," + max + stepString + "]"
+    else " Bounds [" + min + "," + max + "]"
 
   def stepString = {
     if (step.isDefined) {
@@ -47,8 +52,6 @@ abstract class GenericRangeDomainDataUI[T] extends IDomainDataUI[T] {
       else "," + step.get
     } else ""
   }
-
-  def isAcceptable(domain: Option[IDomainDataUI[_]]) = false
 
   def availableTypes: List[String]
 

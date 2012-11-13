@@ -32,7 +32,7 @@ class UniformLongDistributionDataUI extends UniformDistributionDataUI[Long] {
 
   def buildPanelUI = new UniformDistributionPanelUI(this)
 
-  def coreClass = classOf[UniformLongDistribution]
+  def coreClass = classOf[UniformIntDistribution]
 
-  def coreObject(previousDomain: Option[IDomainDataUI[_]]): Domain[Long] = new UniformLongDistribution
+  def coreObject: Domain[Long] = new UniformLongDistribution
 }

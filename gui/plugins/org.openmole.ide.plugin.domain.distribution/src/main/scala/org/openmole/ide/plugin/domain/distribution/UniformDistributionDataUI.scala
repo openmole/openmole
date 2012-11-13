@@ -43,7 +43,5 @@ abstract class UniformDistributionDataUI[T] extends IDomainDataUI[T] {
 
   def imagePath = "img/domain_uniform_distribution.png"
 
-  def isAcceptable(domain: Option[IDomainDataUI[_]]) = false
-
   def preview = " uniform " + { if (max.isDefined) max.get else "" }
 }

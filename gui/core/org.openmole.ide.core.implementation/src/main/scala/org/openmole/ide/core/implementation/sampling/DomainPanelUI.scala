@@ -34,7 +34,7 @@ class DomainPanelUI(domainWidget: IDomainWidget,
 
   val domains = KeyRegistry.domains.values.map {
     _.buildDataUI
-  }.toList
+  }.toList.sorted
 
   //val protoComboBox = new MyComboBox(Proxys.prototypes.toList)
   //protoComboBox.selection.item = domainWidget.dataUI.prototype
@@ -44,7 +44,7 @@ class DomainPanelUI(domainWidget: IDomainWidget,
   val domainComboBox = new MyComboBox(domains)
   domainComboBox.selection.item = domains.filter { _.toString == domainWidget.dataUI.toString }.head
 
-  var dPanel = domainComboBox.selection.item.buildPanelUI
+  var dPanel = domainWidget.dataUI.buildPanelUI
 
   val protoDomainPanel = new PluginPanel("wrap") {
     contents += domainComboBox

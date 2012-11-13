@@ -24,14 +24,18 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.tools.Counter
 
+object IDomainDataUI {
+  implicit val ordering = Ordering.by((_: IDomainDataUI[_]).name)
+}
+
 trait IDomainDataUI[T] extends IDataUI with ISamplingCompositionElementDataUI {
   def id: String = "domain" + Counter.id.getAndIncrement
 
-  def coreObject(previousDomain: Option[IDomainDataUI[_]]): Domain[T]
+  def coreObject: Domain[T]
 
   def buildPanelUI: IDomainPanelUI
 
   def preview: String
 
-  def isAcceptable(domain: Option[IDomainDataUI[_]]): Boolean
+  def isAcceptable(domain: IDomainDataUI[_]): Boolean = false
 }

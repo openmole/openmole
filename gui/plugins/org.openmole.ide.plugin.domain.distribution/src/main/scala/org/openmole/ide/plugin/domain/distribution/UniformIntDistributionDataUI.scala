@@ -32,5 +32,5 @@ class UniformIntDistributionDataUI(val max: Option[Int] = None) extends UniformD
 
   def coreClass = classOf[UniformIntDistribution]
 
-  def coreObject(previousFactor: Option[IDomainDataUI[_]]): Domain[Int] = new UniformIntDistribution(max)
+  def coreObject: Domain[Int] = new UniformIntDistribution(max)
 }

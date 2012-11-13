@@ -28,6 +28,4 @@ trait SubDataUI[T] extends IDomainDataUI[T] {
   def name = "File"
 
   def directoryPath: String
-
-  def isAcceptable(domain: Option[IDomainDataUI[_]]) = false
 }

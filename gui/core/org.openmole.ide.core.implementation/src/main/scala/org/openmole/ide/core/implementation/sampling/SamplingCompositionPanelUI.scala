@@ -226,25 +226,24 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
     }
 
     override def isTargetWidget(sourceWidget: Widget,
-                                targetWidget: Widget): ConnectorState = {
+                                targetWidget: Widget): ConnectorState =
       targetWidget match {
         case s: SamplingComponent ⇒
           s.component match {
             case d: IDomainWidget ⇒ source match {
               case Some(sw: ISamplingWidget) ⇒ boolToConnector(false)
-              case Some(dw: IDomainWidget) ⇒ boolToConnector(d.dataUI.isAcceptable(dw.previousDomain))
-              case _ ⇒ ConnectorState.REJECT_AND_STOP
-            }
-            case s: ISamplingWidget ⇒ source match {
-              case Some(sw: ISamplingWidget) ⇒ boolToConnector(s.dataUI.isAcceptable(sw.dataUI))
-              case Some(dw: IDomainWidget) ⇒ boolToConnector(s.dataUI.isAcceptable(dw.dataUI))
+              case Some(dw: IDomainWidget) ⇒ boolToConnector(d.dataUI.isAcceptable(dw.dataUI))
               case _ ⇒ ConnectorState.REJECT_AND_STOP
             }
             case _ ⇒ ConnectorState.REJECT_AND_STOP
           }
+        case s: ISamplingWidget ⇒ source match {
+          case Some(sw: ISamplingWidget) ⇒ boolToConnector(s.dataUI.isAcceptable(sw.dataUI))
+          case Some(dw: IDomainWidget) ⇒ boolToConnector(s.dataUI.isAcceptable(dw.dataUI))
+          case _ ⇒ ConnectorState.REJECT_AND_STOP
+        }
         case _ ⇒ ConnectorState.REJECT_AND_STOP
       }
-    }
 
     override def hasCustomTargetWidgetResolver(scene: Scene): Boolean = false
 

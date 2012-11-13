@@ -28,7 +28,7 @@ import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
 
-object TakeDomainDataUI {
+/*object TakeDomainDataUI {
 
   def apply[T](size: String = "1",
                classString: String) =
@@ -41,34 +41,25 @@ object TakeDomainDataUI {
       case "String" ⇒ new TakeDomainDataUI[String](size)
       case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
     }
-}
+}   */
 
-class TakeDomainDataUI[T](val size: String = "0")(implicit val domainType: Manifest[T])
-    extends IDomainDataUI[T] {
+class TakeDomainDataUI(val size: String = "0")
+    extends ModifierDomainDataUI[Any] {
 
   val name = "Take"
 
   def preview = " take " + size
 
-  def isAcceptable(protoProxy: IPrototypeDataProxyUI) = availableTypes.contains(protoProxy.dataUI.toString)
+  val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
 
-  override def coreObject(previousDomain: Option[IDomainDataUI[_]]): Domain[T] = previousDomain match {
-    case d: Domain[_] with Discrete[T] ⇒ new TakeDomain[T](d, size.toInt)
-    case _ ⇒ throw new UserBadDataError("No Discrete Domain is required for a Take Domain.")
+  override def coreObject: Domain[Any] = inputDomain match {
+    case d: DOMAINTYPE ⇒ new TakeDomain[Any](d, size.toInt)
+    case _ ⇒ throw new UserBadDataError("A Discrete Domain is required as input of a Take Domain.")
   }
 
   def buildPanelUI = new TakeDomainPanelUI(this)
 
-  val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
-
-  def coreClass = classOf[TakeDomainDataUI[T]]
+  def coreClass = classOf[TakeDomainDataUI]
 
   override def toString = "Take"
-
-  def isAcceptable(domain: Option[IDomainDataUI[_]]) = domain match {
-    case Some(d: Domain[_] with Discrete[T]) ⇒ true
-    case _ ⇒
-      StatusBar.warn("A Discrete Domain is required as input of a Take Factor")
-      false
-  }
 }

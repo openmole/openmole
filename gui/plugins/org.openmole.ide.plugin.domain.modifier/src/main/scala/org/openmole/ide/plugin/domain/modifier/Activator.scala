@@ -23,7 +23,7 @@ import org.openmole.ide.core.implementation.registry.DomainActivator
 class Activator extends OSGiActivator with DomainActivator {
 
   override def domainFactories = List(
-    new TakeDomainFactoryUI { def buildDataUI = TakeDomainDataUI(classString = "Double") },
+    new TakeDomainFactoryUI { def buildDataUI = new TakeDomainDataUI },
     new GroupDomainFactoryUI { def buildDataUI = GroupDomainDataUI(classString = "Double") },
-    new GroovyDomainModifierFactoryUI { def buildDataUI = GroovyModifierDomainDataUI(classString = "Double") })
+    new GroovyDomainModifierFactoryUI { def buildDataUI = new GroovyModifierDomainDataUI })
 }
