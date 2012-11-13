@@ -23,32 +23,31 @@ import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.data._
-import org.openmole.ide.core.model.sampling.IFactorWidget
+import org.openmole.ide.core.model.sampling.IDomainWidget
 import org.openmole.ide.misc.widget._
 import multirow.ComponentFocusedEvent
 import org.openmole.ide.core.model.panel._
-import org.openmole.ide.core.implementation.sampling.DefaultFactor._
-import org.openmole.ide.core.implementation.panel.FactorPanel
+import org.openmole.ide.core.implementation.panel.DomainPanel
 
-class FactorPanelUI(factorWidget: IFactorWidget,
-                    factorPanel: FactorPanel) extends PluginPanel("") with IPanelUI {
+class DomainPanelUI(domainWidget: IDomainWidget,
+                    domainPanel: DomainPanel) extends PluginPanel("") with IPanelUI {
 
-  val domains = KeyRegistry.domains.values
+  val domains = KeyRegistry.domains.values.map {
+    _.buildDataUI
+  }.toList.sorted
 
-  val domainComboBox = new MyComboBox(domainContent(factorWidget.dataUI.prototype))
-  domainComboBox.selection.item = factorWidget.dataUI.domain
+  //val protoComboBox = new MyComboBox(Proxys.prototypes.toList)
+  //protoComboBox.selection.item = domainWidget.dataUI.prototype
 
-  val protoComboBox = new MyComboBox(Proxys.prototypes.toList)
-  protoComboBox.selection.item = factorWidget.dataUI.prototype
+  //val ddcc = domainContent(domainWidget.dataUI.prototype)
 
-  var dPanel = factorWidget.dataUI.domain.buildPanelUI(protoComboBox.selection.item)
+  val domainComboBox = new MyComboBox(domains)
+  domainComboBox.selection.item = domains.filter { _.toString == domainWidget.dataUI.toString }.head
+
+  var dPanel = domainWidget.dataUI.buildPanelUI
 
   val protoDomainPanel = new PluginPanel("wrap") {
-    contents += new PluginPanel("wrap 3") {
-      contents += protoComboBox
-      contents += new Label(" defined on ")
-      contents += domainComboBox
-    }
+    contents += domainComboBox
     contents += dPanel.peer
   }
 
@@ -57,19 +56,19 @@ class FactorPanelUI(factorWidget: IFactorWidget,
   domainComboBox.selection.reactions += {
     case SelectionChanged(`domainComboBox`) ⇒
       if (protoDomainPanel.contents.size == 2) protoDomainPanel.contents.remove(1)
-      dPanel = domainComboBox.selection.item.buildPanelUI(protoComboBox.selection.item)
+      dPanel = domainComboBox.selection.item.buildPanelUI
       listenToDomain
       protoDomainPanel.contents += dPanel.peer
       repaint
   }
 
-  protoComboBox.selection.reactions += {
+  /*protoComboBox.selection.reactions += {
     case SelectionChanged(`protoComboBox`) ⇒
       if (protoDomainPanel.contents.size == 2) protoDomainPanel.contents.remove(1)
       val dContent = domainContent(protoComboBox.selection.item)
       domainComboBox.peer.setModel(MyComboBox.newConstantModel(dContent))
       displayDomainPanel(dContent)
-  }
+  }*/
 
   def listenToDomain = {
     listenTo(dPanel.help.components.toSeq: _*)
@@ -77,7 +76,7 @@ class FactorPanelUI(factorWidget: IFactorWidget,
       case FocusGained(source: Component, _, _) ⇒ dPanel.help.switchTo(source)
       case ComponentFocusedEvent(source: Component) ⇒ dPanel.help.switchTo(source)
     }
-    factorPanel.updateHelp
+    domainPanel.updateHelp
   }
 
   def displayDomainPanel(dContent: List[IDomainDataUI[_]]) = dContent.filter {
@@ -85,15 +84,12 @@ class FactorPanelUI(factorWidget: IFactorWidget,
       domainComboBox.selection.item.toString == it.toString
   }.headOption match {
     case Some(d: IDomainDataUI[_]) ⇒
-      dPanel = d.buildPanelUI(protoComboBox.selection.item)
+      dPanel = d.buildPanelUI
       protoDomainPanel.contents += dPanel.peer
       listenToDomain
     case _ ⇒
   }
 
-  def saveContent = new FactorDataUI(factorWidget.dataUI.id,
-    protoComboBox.selection.item,
-    dPanel.saveContent,
-    factorWidget.dataUI.previousFactor)
+  def saveContent = dPanel.saveContent
 
 }

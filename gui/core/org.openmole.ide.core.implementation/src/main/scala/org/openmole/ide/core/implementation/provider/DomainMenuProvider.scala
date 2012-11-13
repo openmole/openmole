@@ -20,19 +20,16 @@ package org.openmole.ide.core.implementation.provider
 import java.awt.Point
 import org.netbeans.api.visual.widget._
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
-import org.openmole.ide.core.model.sampling.IFactorWidget
 import org.openmole.ide.core.model.sampling.ISamplingComponent
 import scala.swing.Action
 import scala.swing.MenuItem
-import org.openmole.ide.core.implementation.sampling._
-import scala.swing.Panel
 
-class FactorMenuProvider(panelScene: ISamplingCompositionPanelUI) extends GenericMenuProvider {
+class DomainMenuProvider(panelScene: ISamplingCompositionPanelUI) extends GenericMenuProvider {
 
   override def getPopupMenu(widget: Widget,
                             point: Point) = {
     items.clear
-    val itRemoveFactor = new MenuItem(new Action("Remove Factor") {
+    val itRemoveFactor = new MenuItem(new Action("Remove Domain") {
       def apply =
         widget match {
           case cw: ISamplingComponent ⇒ panelScene.remove(cw)

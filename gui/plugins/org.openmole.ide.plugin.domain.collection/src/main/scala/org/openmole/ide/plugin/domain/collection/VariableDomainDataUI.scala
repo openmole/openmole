@@ -52,22 +52,14 @@ class VariableDomainDataUI[T](val prototypeArray: IPrototypeDataProxyUI)(implici
 
   val name = "Prototype Array"
 
-  def coreObject(proto: IPrototypeDataProxyUI,
-                 previousFactor: Option[IFactorDataUI]) = new VariableDomain(prototypeArray.dataUI.coreObject.asInstanceOf[Prototype[Array[T]]])
-
-  def buildPanelUI(p: IPrototypeDataProxyUI) = buildPanelUI
+  def coreObject = new VariableDomain(prototypeArray.dataUI.coreObject.asInstanceOf[Prototype[Array[T]]])
 
   def buildPanelUI = new PluginPanel("") with IDomainPanelUI {
     contents += new Label("<html><i>No more information is required for this domain</i></html>")
-
     def saveContent = vdomainDataUI
   }
 
   def preview = "in " + prototypeArray.toString
-
-  def isAcceptable(protoProxy: IPrototypeDataProxyUI) = availableTypes.contains(protoProxy.dataUI.toString) && (protoProxy.dataUI.dim == 1)
-
-  def isAcceptable(domain: IDomainDataUI[_]) = false
 
   def coreClass = classOf[VariableDomainDataUI[T]]
 }

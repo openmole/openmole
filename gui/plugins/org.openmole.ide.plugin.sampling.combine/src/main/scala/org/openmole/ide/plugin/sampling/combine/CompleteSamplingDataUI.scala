@@ -16,13 +16,13 @@ import org.openmole.core.model.domain.Discrete
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.misc.exception.UserBadDataError
 
-class CompleteSamplingDataUI(val id: String = "sampling" + Counter.id.getAndIncrement) extends ISamplingDataUI {
+class CompleteSamplingDataUI extends ISamplingDataUI {
 
   def coreObject(factors: List[IFactorDataUI],
                  samplings: List[Sampling]) = {
     new CompleteSampling(
       (factors.map(f ⇒ DiscreteFactor(Factor(f.prototype.dataUI.coreObject.asInstanceOf[Prototype[Any]],
-        f.domain.coreObject(f.prototype, f.previousFactor).asInstanceOf[Domain[Any] with Discrete[Any]])))
+        f.domain.coreObject(None).asInstanceOf[Domain[Any] with Discrete[Any]])))
         ::: samplings): _*)
   }
 
@@ -34,8 +34,8 @@ class CompleteSamplingDataUI(val id: String = "sampling" + Counter.id.getAndIncr
 
   def buildPanelUI = new CompleteSamplingPanelUI(this)
 
-  def isAcceptable(factor: IFactorDataUI) = try {
-    factor.domain.coreObject(factor.prototype, factor.previousFactor) match {
+  def isAcceptable(domain: IDomainDataUI[_]) = try {
+    domain.coreObject(None) match {
       case x: Domain[Any] with Discrete[Any] ⇒ true
       case _ ⇒
         StatusBar.warn("A Discrete Domain is required for a Complete Sampling")

@@ -25,7 +25,7 @@ import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.openmole.ide.core.model.sampling.ISamplingCompositionWidget
 import org.netbeans.api.visual.widget.ConnectionWidget
 import org.openmole.ide.core.model.sampling.ISamplingComponent
-import org.openmole.ide.core.implementation.provider.FactorMenuProvider
+import org.openmole.ide.core.implementation.provider.DomainMenuProvider
 import scala.collection.mutable.HashSet
 
 class SamplingComponent(samplingScene: ISamplingCompositionPanelUI,

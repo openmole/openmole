@@ -131,7 +131,7 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     currentExtraPanel.contents.removeAll
     currentExtraPanel.contents.add(compositionSamplingWidget match {
       case s: ISamplingWidget ⇒ new SamplingPanel(s, this, EXTRA)
-      case f: IFactorWidget ⇒ new FactorPanel(f, this, EXTRA)
+      case f: IDomainWidget ⇒ new DomainPanel(f, this, EXTRA)
     })
 
     //currentExtraPanel.contents.add(new FactorPanelUI(factorWidget, this, EXTRA))

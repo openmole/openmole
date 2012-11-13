@@ -17,4 +17,6 @@
 
 package org.openmole.ide.core.model.data
 
-trait ISamplingCompositionElementDataUI
+trait ISamplingCompositionElementDataUI {
+  def id: String
+}

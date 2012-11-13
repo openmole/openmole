@@ -79,7 +79,7 @@ object EmptyDataUIs {
     def buildPanelUI = new EmptySamplingCompositionPanelUI
     def isAcceptable(sampling: ISamplingDataUI) = false
     def isAcceptable(factor: IFactorDataUI) = false
-    def factors = List.empty
+    def domains = List.empty
     def samplings = List.empty
     def connections = List.empty
     def finalSampling: Option[String] = None
@@ -88,7 +88,7 @@ object EmptyDataUIs {
   class EmptySamplingCompositionPanelUI extends ISamplingCompositionPanelUI {
     def peer = new PluginPanel("").peer
     def saveContent(name: String) = new EmptySamplingCompositionDataUI
-    def addFactor(factorDataUI: IFactorDataUI,
+    def addDomain(domainDataUI: IDomainDataUI[_],
                   location: Point,
                   display: Boolean) = {}
     def addSampling(samplingDataUI: ISamplingDataUI,

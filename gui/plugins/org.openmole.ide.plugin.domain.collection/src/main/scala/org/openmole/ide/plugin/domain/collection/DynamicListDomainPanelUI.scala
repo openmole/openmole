@@ -25,11 +25,11 @@ import swing._
 import java.awt.Color
 import java.util.{ Locale, ResourceBundle }
 
-class DynamicListDomainPanelUI(pud: DynamicListDomainDataUI[_],
-                               prototype: IPrototypeDataProxyUI) extends PluginPanel("") with IDomainPanelUI {
+class DynamicListDomainPanelUI(pud: DynamicListDomainDataUI[_]) extends PluginPanel("") with IDomainPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
+  val typeCombo = new MyComboBox(pud.availableTypes)
   val textArea = new TextArea(pud.values.mkString("\n"), 10, 20) {
     override val foreground = Color.black
   }
@@ -40,7 +40,7 @@ class DynamicListDomainPanelUI(pud: DynamicListDomainDataUI[_],
   }
 
   def saveContent = DynamicListDomainDataUI(textArea.text.split('\n').toSet.toList,
-    prototype.dataUI.toString)
+    typeCombo.selection.item)
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     add(textArea, new Help(i18n.getString("valueList"), i18n.getString("valueListEx")))

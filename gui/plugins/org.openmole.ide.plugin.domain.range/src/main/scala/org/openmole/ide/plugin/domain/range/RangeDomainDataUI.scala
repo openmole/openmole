@@ -49,22 +49,21 @@ class RangeDomainDataUI[T](
   val min: String = "0",
   val max: String = "",
   val step: Option[String] = None)(
-    implicit domainType: Manifest[T],
+    implicit val domainType: Manifest[T],
     fs: FromString[T],
     integral: Integral[T])
     extends GenericRangeDomainDataUI[T] {
 
   val name = "Range"
 
-  override def coreObject(prototype: IPrototypeDataProxyUI,
-                          previousFactor: Option[IFactorDataUI]): Domain[T] = step match {
+  def coreObject: Domain[T] = step match {
     case Some(s: String) ⇒
       if (s.isEmpty) new Bounded[T](min, max)
       else new Range[T](min, max, s)
     case _ ⇒ new Bounded[T](min, max)
   }
 
-  def buildPanelUI(p: IPrototypeDataProxyUI) = new RangeDomainPanelUI(this, p)
+  def buildPanelUI = new RangeDomainPanelUI(this)
 
   val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long")
 

@@ -7,8 +7,6 @@ package org.openmole.ide.plugin.method.sensitivity
 
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.implementation.data.FactorDataUI
-import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import org.openmole.ide.misc.widget.Help
@@ -32,7 +30,7 @@ class SaltelliSamplingPanelUI(cud: SaltelliSamplingDataUI) extends PluginPanel("
     _.buildDataUI
   }.toList
 
-  override def saveContent = new SaltelliSamplingDataUI(sampleTextField.text, cud.id)
+  override def saveContent = new SaltelliSamplingDataUI(sampleTextField.text)
 
   override val help = new Helper(List(new URL(i18n.getString("samplingPermalinkText"),
     i18n.getString("samplingPermalink")),

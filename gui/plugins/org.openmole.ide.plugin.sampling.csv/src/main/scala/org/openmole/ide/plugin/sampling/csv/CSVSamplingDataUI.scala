@@ -16,8 +16,7 @@ import org.openmole.ide.misc.tools.Counter
 import org.openmole.core.model.sampling.Sampling
 
 class CSVSamplingDataUI(var csvFilePath: String = "",
-                        var prototypeMapping: List[(String, IPrototypeDataProxyUI)] = List.empty,
-                        val id: String = "sampling" + Counter.id.getAndIncrement) extends ISamplingDataUI {
+                        var prototypeMapping: List[(String, IPrototypeDataProxyUI)] = List.empty) extends ISamplingDataUI {
 
   def coreObject(factors: List[IFactorDataUI],
                  samplings: List[Sampling]) = try {
@@ -41,7 +40,7 @@ class CSVSamplingDataUI(var csvFilePath: String = "",
 
   def inputs = new InputSampling
 
-  def isAcceptable(factor: IFactorDataUI) = factor.prototype.dataUI.toString == "File"
+  def isAcceptable(factor: IDomainDataUI[_]) = true
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 

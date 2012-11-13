@@ -21,10 +21,10 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.core.model.sampling.Sampling
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import org.openmole.ide.core.model.sampling._
+import org.openmole.ide.misc.tools.Counter
 
 trait ISamplingDataUI extends IDataUI with ISamplingCompositionElementDataUI {
-
-  def id: String
+  def id = "sampling" + Counter.id.getAndIncrement
 
   def name: String = "Sampling"
 
@@ -37,7 +37,7 @@ trait ISamplingDataUI extends IDataUI with ISamplingCompositionElementDataUI {
 
   def fatImagePath: String
 
-  def isAcceptable(factor: IFactorDataUI): Boolean
+  def isAcceptable(domain: IDomainDataUI[_]): Boolean
 
   def isAcceptable(sampling: ISamplingDataUI): Boolean
 

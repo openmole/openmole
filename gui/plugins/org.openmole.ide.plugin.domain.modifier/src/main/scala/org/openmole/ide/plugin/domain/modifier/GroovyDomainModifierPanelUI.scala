@@ -24,20 +24,23 @@ import swing.ScrollPane.BarPolicy._
 import swing._
 import java.util.{ Locale, ResourceBundle }
 
-class GroovyModifierDomainPanelUI(pud: GroovyModifierDomainDataUI[_],
-                                  prototype: IPrototypeDataProxyUI) extends PluginPanel("fillx") with IDomainPanelUI {
+class GroovyModifierDomainPanelUI(pud: GroovyModifierDomainDataUI) extends PluginPanel("wrap 3") with IDomainPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+
+  val protoNameTextField = new TextField(pud.prototypeName, 15)
 
   val codeTextArea = new GroovyEditor {
     editor.text = pud.code
     preferredSize = new Dimension(300, 80)
   }
 
-  contents += codeTextArea
+  contents += new Label("Variable")
+  contents += protoNameTextField
+  contents += new Label(" => ")
+  contents += (codeTextArea, "span 5")
 
-  def saveContent = GroovyModifierDomainDataUI(codeTextArea.editor.text,
-    prototype.dataUI.toString)
+  def saveContent = new GroovyModifierDomainDataUI(protoNameTextField.text, codeTextArea.editor.text)
 
   override lazy val help =
     new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {

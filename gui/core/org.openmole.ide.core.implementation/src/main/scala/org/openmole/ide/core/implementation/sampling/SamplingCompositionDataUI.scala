@@ -30,7 +30,7 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import collection.mutable.HashMap
 
 class SamplingCompositionDataUI(val name: String = "",
-                                val factors: List[(IFactorDataUI, Point)] = List.empty,
+                                val domains: List[(IDomainDataUI[_], Point)] = List.empty,
                                 val samplings: List[(ISamplingDataUI, Point)] = List.empty,
                                 val connections: List[(String, String)] = List.empty,
                                 val finalSampling: Option[String] = None) extends ISamplingCompositionDataUI {
@@ -41,11 +41,11 @@ class SamplingCompositionDataUI(val name: String = "",
   def coreObject = {
     builtSampling.clear
     val connectionMap = connections.groupBy { _._2 }.map { case (k, v) ⇒ k -> v.map { _._1 } }
-    val factorMap = factors.map { f ⇒ f._1.id -> f._1 }.toMap
+    val domainMap: Map[String, IDomainDataUI[_]] = domains.map { f ⇒ f._1.id -> f._1 }.toMap
     val samplingMap: Map[String, ISamplingDataUI] = samplings.map { s ⇒ s._1.id -> s._1 }.toMap
     finalSampling match {
       case Some(fs: String) ⇒ samplingMap(fs) match {
-        case data: ISamplingDataUI ⇒ buildSamplingCore(data, connectionMap, factorMap, samplingMap)
+        case data: ISamplingDataUI ⇒ buildSamplingCore(data, connectionMap, domainMap, samplingMap)
         case _ ⇒ throw new UserBadDataError("ERROR ... ")
       }
       case _ ⇒ throw new UserBadDataError("The final sampling is not properly set")
@@ -54,12 +54,13 @@ class SamplingCompositionDataUI(val name: String = "",
 
   def buildSamplingCore(data: ISamplingDataUI,
                         connectionMap: Map[String, List[String]],
-                        factorMap: Map[String, IFactorDataUI],
+                        domainMap: Map[String, IDomainDataUI[_]],
                         samplingMap: Map[String, ISamplingDataUI]): Sampling = {
     if (!builtSampling.contains(data)) {
       val partition = connectionMap.getOrElse(data.id, List()).partition { _.substring(0, 4) == "samp" }
-      builtSampling += data -> data.coreObject(partition._2.map { factorMap },
-        partition._1.filterNot(_ == data.id).map { s ⇒ buildSamplingCore(samplingMap(s), connectionMap, factorMap, samplingMap) })
+      //FIXME : add prototypes and build factors
+      //  builtSampling += data -> data.coreObject(partition._2.map { domainMap },
+      //   partition._1.filterNot(_ == data.id).map { s ⇒ buildSamplingCore(samplingMap(s), connectionMap, domainMap, samplingMap) })
     }
     builtSampling(data)
   }

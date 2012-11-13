@@ -17,8 +17,8 @@
 
 package org.openmole.ide.core.implementation.panel
 
-import org.openmole.ide.core.implementation.sampling.FactorPanelUI
-import org.openmole.ide.core.model.sampling.IFactorWidget
+import org.openmole.ide.core.implementation.sampling.DomainPanelUI
+import org.openmole.ide.core.model.sampling.IDomainWidget
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel._
@@ -28,12 +28,12 @@ import swing.event.FocusGained
 import swing.Component
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 
-class FactorPanel(factorWidget: IFactorWidget,
+class DomainPanel(domainWidget: IDomainWidget,
                   scene: IMoleScene,
                   mode: PanelMode.Value) extends BasePanel(None,
   scene,
   mode) {
-  val panelUI = new FactorPanelUI(factorWidget, this)
+  val panelUI = new DomainPanelUI(domainWidget, this)
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
@@ -46,8 +46,8 @@ class FactorPanel(factorWidget: IFactorWidget,
   def delete = true
 
   def save = {
-    factorWidget.dataUI = panelUI.saveContent
-    factorWidget.update
+    domainWidget.dataUI = panelUI.saveContent
+    domainWidget.update
   }
 
   def updateHelp = {

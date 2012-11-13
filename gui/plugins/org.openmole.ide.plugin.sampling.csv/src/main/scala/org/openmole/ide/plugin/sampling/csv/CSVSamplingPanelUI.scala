@@ -90,8 +90,8 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("wrap") wit
       new CSVSamplingDataUI(csvTextField.text,
         comboMulti.get.content.map {
           c ⇒ (c.comboValue1.get, c.comboValue2.get)
-        }, pud.id)
-    else new CSVSamplingDataUI(csvTextField.text, List[(String, PrototypeDataProxyUI)](), pud.id)
+        })
+    else new CSVSamplingDataUI(csvTextField.text, List[(String, PrototypeDataProxyUI)]())
   }
 
   def comboContent: List[IPrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxys.prototypes.toList

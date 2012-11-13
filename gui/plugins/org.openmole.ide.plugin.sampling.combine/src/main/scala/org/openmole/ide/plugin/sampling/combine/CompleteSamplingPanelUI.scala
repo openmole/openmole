@@ -32,7 +32,7 @@ class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends PluginPanel("
 
   contents += new Label("<html><i>No more information is required for this Sampling</i></html>")
 
-  def saveContent = new CompleteSamplingDataUI(cud.id)
+  def saveContent = new CompleteSamplingDataUI
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
 }
