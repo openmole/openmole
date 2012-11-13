@@ -41,13 +41,9 @@ abstract class UniformDistributionDataUI[T] extends IDomainDataUI[T] {
 
   def max: Option[Int]
 
-  def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Int], false))
-
   def imagePath = "img/domain_uniform_distribution.png"
 
-  def isAcceptable(p: IPrototypeDataProxyUI) = availableTypes.contains(p.dataUI.toString)
+  def isAcceptable(domain: Option[IDomainDataUI[_]]) = false
 
-  def isAcceptable(domain: IDomainDataUI[_]) = false
-
-  def preview = "uniform " + { if (max.isDefined) max.get else "" }
+  def preview = " uniform " + { if (max.isDefined) max.get else "" }
 }

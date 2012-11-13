@@ -22,16 +22,17 @@ import java.util.ResourceBundle
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
-import scala.swing.TextField
-import scala.swing.Label
+import swing.{ MyComboBox, TextField, Label }
 
 abstract class GenericRangeDomainPanelUI extends PluginPanel("wrap 2") with IDomainPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
+  val typeCombo = new MyComboBox(List("Double"))
   val minField = new TextField(6)
   val maxField = new TextField(6)
 
+  contents += (typeCombo, "span 2")
   contents += (new Label("Min"), "gap para")
   contents += minField
   contents += (new Label("Max"), "gap para")

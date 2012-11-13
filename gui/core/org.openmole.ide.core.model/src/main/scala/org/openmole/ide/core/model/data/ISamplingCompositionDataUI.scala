@@ -18,7 +18,6 @@
 package org.openmole.ide.core.model.data
 
 import java.awt.Point
-import org.openmole.ide.core.model.sampling.ISamplingWidget
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.openmole.core.model.sampling.Sampling
 
@@ -33,7 +32,7 @@ trait ISamplingCompositionDataUI extends IDataUI {
 
   def fatImagePath: String
 
-  def factors: Iterable[(IFactorDataUI, Point)]
+  def domains: Iterable[(IDomainDataUI[_], Point)]
 
   def samplings: Iterable[(ISamplingDataUI, Point)]
 

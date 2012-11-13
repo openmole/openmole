@@ -47,7 +47,7 @@ import SamplingCompositionPanelUI._
 class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Scene with ISamplingCompositionPanelUI {
   samplingCompositionPanelUI ⇒
 
-  val factors = new HashMap[IFactorWidget, SamplingComponent]
+  val domains = new HashMap[IDomainWidget, SamplingComponent]
   val samplings = new HashMap[ISamplingWidget, SamplingComponent]
   val connections = new HashSet[(String, String)]
   var finalSampling: Option[String] = None
@@ -70,8 +70,8 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
   getActions.addAction(ActionFactory.createPopupMenuAction(new SamplingSceneMenuProvider(this)))
   val moveAction = ActionFactory.createMoveAction
 
-  dataUI.factors.foreach {
-    f ⇒ addFactor(f._1, f._2, false)
+  dataUI.domains.foreach {
+    d ⇒ addDomain(d._1, d._2, false)
   }
   dataUI.samplings.foreach {
     f ⇒ addSampling(f._1, f._2, false)
@@ -88,27 +88,27 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
     peer.add(createView)
   }.peer
 
-  //  def removeFactor(factorWidget: IFactorWidget) = factors.isDefinedAt(factorWidget) match {
+  //  def removeFactor(DomainWidget: IDomainWidget) = factors.isDefinedAt(DomainWidget) match {
   //    case true ⇒
-  //      //factorLayer.removeChild(factors(factorWidget))
-  //      removeNodeWithEdges(factors(factorWidget))
-  //      factors -= factorWidget
+  //      //factorLayer.removeChild(factors(DomainWidget))
+  //      removeNodeWithEdges(factors(DomainWidget))
+  //      factors -= DomainWidget
   //      validate
   //    case _ ⇒
   //  }
 
-  def addFactor(factorDataUI: IFactorDataUI,
+  def addDomain(domainDataUI: IDomainDataUI[_],
                 location: Point,
-                display: Boolean = true) = {
-    val fw = new FactorWidget(factorDataUI, display)
-    val cw = new SamplingComponent(this, fw, location) {
-      getActions.addAction(ActionFactory.createPopupMenuAction(new FactorMenuProvider(samplingCompositionPanelUI)))
+                d: Boolean = true) = {
+    val dw = new DomainWidget(domainDataUI, display = d)
+    val cw = new SamplingComponent(this, dw, location) {
+      getActions.addAction(ActionFactory.createPopupMenuAction(new DomainMenuProvider(samplingCompositionPanelUI)))
       getActions.addAction(connectAction)
       getActions.addAction(moveAction)
     }
     factorLayer.addChild(cw)
     validate
-    factors += fw -> cw
+    domains += dw -> cw
   }
 
   def addSampling(samplingDataUI: ISamplingDataUI,
@@ -134,10 +134,10 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
             samplings -= s
           case _ ⇒
         }
-      case (f: IFactorWidget) ⇒ factors.isDefinedAt(f) match {
+      case (d: IDomainWidget) ⇒ domains.isDefinedAt(d) match {
         case true ⇒
-          factorLayer.removeChild(factors(f))
-          factors -= f
+          factorLayer.removeChild(domains(d))
+          domains -= d
         case _ ⇒
       }
       case _ ⇒
@@ -181,7 +181,7 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
 
   def saveContent(name: String) = {
     new SamplingCompositionDataUI(name,
-      factors.map {
+      domains.map {
         f ⇒ f._1.dataUI -> f._2.getPreferredLocation
       }.toList,
       samplings.map {
@@ -191,7 +191,7 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
       finalSampling)
   }
 
-  def factorsAndSamplings = factors ++ samplings
+  def factorsAndSamplings = domains ++ samplings
 
   def samplingComponentFromId(id: String) = factorsAndSamplings.keys.find {
     _.id == id
@@ -201,7 +201,7 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
   }
 
   def idFromSamplingComponent(sc: SamplingComponent) = sc.component match {
-    case f: IFactorWidget ⇒ f.dataUI.id
+    case f: IDomainWidget ⇒ f.id
     case s: ISamplingWidget ⇒ s.dataUI.id
     case _ ⇒ throw new UserBadDataError("The sampling widget element " + sc + " can not be found")
   }
@@ -230,14 +230,14 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
       targetWidget match {
         case s: SamplingComponent ⇒
           s.component match {
-            case f: IFactorWidget ⇒ source match {
+            case d: IDomainWidget ⇒ source match {
               case Some(sw: ISamplingWidget) ⇒ boolToConnector(false)
-              case Some(fw: IFactorWidget) ⇒ boolToConnector(f.dataUI.domain.isAcceptable(fw.dataUI.domain))
+              case Some(dw: IDomainWidget) ⇒ boolToConnector(d.dataUI.isAcceptable(dw.previousDomain))
               case _ ⇒ ConnectorState.REJECT_AND_STOP
             }
             case s: ISamplingWidget ⇒ source match {
               case Some(sw: ISamplingWidget) ⇒ boolToConnector(s.dataUI.isAcceptable(sw.dataUI))
-              case Some(fw: IFactorWidget) ⇒ boolToConnector(s.dataUI.isAcceptable(fw.dataUI))
+              case Some(dw: IDomainWidget) ⇒ boolToConnector(s.dataUI.isAcceptable(Some(dw.dataUI)))
               case _ ⇒ ConnectorState.REJECT_AND_STOP
             }
             case _ ⇒ ConnectorState.REJECT_AND_STOP
@@ -263,13 +263,13 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
       sourceW.connections += connection
       // targetW.connections += connection
       targetW.component match {
-        case tfw: IFactorWidget ⇒
+        case tfw: IDomainWidget ⇒
           println("targeted")
           sourceW.component match {
-            case sfw: IFactorWidget ⇒
+            case sfw: IDomainWidget ⇒
               println("sourced")
-              tfw.dataUI.previousFactor = Some(sfw.dataUI)
-              println("previous done : " + sfw.dataUI.id + " is previous of " + tfw.dataUI + tfw.dataUI.previousFactor)
+              tfw.previousDomain = Some(sfw.dataUI)
+              println("previous done : " + sfw.id + " is previous of " + tfw.dataUI + " " + tfw.previousDomain)
             case _ ⇒
           }
         case _ ⇒

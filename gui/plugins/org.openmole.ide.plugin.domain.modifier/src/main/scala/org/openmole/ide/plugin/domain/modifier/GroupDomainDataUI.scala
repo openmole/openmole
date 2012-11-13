@@ -43,34 +43,26 @@ object GroupDomainDataUI {
     }
 }
 
-class GroupDomainDataUI[T](val size: String = "0")(implicit domainType: Manifest[T])
+class GroupDomainDataUI[T](val size: String = "0")(implicit val domainType: Manifest[T])
     extends IDomainDataUI[Array[T]] {
 
   val name = "Group"
 
   def preview = " group by " + size
 
-  def isAcceptable(protoProxy: IPrototypeDataProxyUI) = availableTypes.contains(protoProxy.dataUI.toString)
-
-  def isAcceptable(domain: IDomainDataUI[_]) = domain match {
-    case d: Domain[_] with Discrete[T] ⇒ true
+  def isAcceptable(domain: Option[IDomainDataUI[_]]) = domain match {
+    case Some(d: Domain[_] with Discrete[T]) ⇒ true
     case _ ⇒
       StatusBar.warn("A Discrete Domain range is required as input of a Map Factor")
       false
   }
 
-  override def coreObject(prototype: IPrototypeDataProxyUI,
-                          previousFactor: Option[IFactorDataUI]) = previousFactor match {
-    case Some(f: IFactorDataUI) ⇒ f.domain match {
-      case d: Domain[_] with Discrete[T] ⇒ new GroupDomain[T](d, size.toInt)
-      case _ ⇒ throw new UserBadDataError("No input domain has been found, it is required for a Group Domain.")
-    }
-    case _ ⇒ throw new UserBadDataError("No input factor has been found, it is required for a Group Domain.")
+  override def coreObject(previousDomain: Option[IDomainDataUI[_]]) = previousDomain match {
+    case Some(d: Domain[_] with Discrete[T]) ⇒ new GroupDomain[T](d, size.toInt)
+    case _ ⇒ throw new UserBadDataError("No input domain has been found, it is required for a Group Domain.")
   }
 
-  def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Int], false))
-
-  def buildPanelUI(p: IPrototypeDataProxyUI) = new GroupDomainPanelUI(this, p)
+  def buildPanelUI = new GroupDomainPanelUI(this)
 
   val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
 

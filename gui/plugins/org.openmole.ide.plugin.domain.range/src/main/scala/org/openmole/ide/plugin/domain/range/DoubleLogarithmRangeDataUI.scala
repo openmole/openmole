@@ -26,10 +26,9 @@ class DoubleLogarithmRangeDataUI(val min: String = "0.0", val max: String = "", 
 
   def availableTypes = List("Double")
 
-  def coreObject(prototype: IPrototypeDataProxyUI,
-                 previousFactor: Option[IFactorDataUI]): Domain[Double] = new DoubleLogarithmRange(min, max, stepString)
+  def coreObject(previousDomain: Option[IDomainDataUI[_]]): Domain[Double] = new DoubleLogarithmRange(min, max, stepString)
 
   def coreClass = classOf[DoubleLogarithmRangeDataUI]
 
-  def buildPanelUI(p: IPrototypeDataProxyUI) = new LogarithmicRangePanelUI(this, p)
+  def buildPanelUI = new LogarithmicRangePanelUI(this)
 }

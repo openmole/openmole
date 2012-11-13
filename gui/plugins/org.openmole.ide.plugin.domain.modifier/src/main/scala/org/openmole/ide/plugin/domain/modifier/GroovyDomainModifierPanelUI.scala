@@ -25,19 +25,28 @@ import swing._
 import java.util.{ Locale, ResourceBundle }
 
 class GroovyModifierDomainPanelUI(pud: GroovyModifierDomainDataUI[_],
-                                  prototype: IPrototypeDataProxyUI) extends PluginPanel("fillx") with IDomainPanelUI {
+                                  prototype: IPrototypeDataProxyUI) extends PluginPanel("wrap 5") with IDomainPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+
+  val protoNameTextField = new TextField(pud.prototypeName, 15)
+  val typeCombo = new MyComboBox(pud.availableTypes) {
+    selection.item = pud.domainType.toString.split('.').last
+  }
 
   val codeTextArea = new GroovyEditor {
     editor.text = pud.code
     preferredSize = new Dimension(300, 80)
   }
 
-  contents += codeTextArea
+  contents += new Label("Variable")
+  contents += protoNameTextField
+  contents += new Label("of type")
+  contents += typeCombo
+  contents += new Label("to be mapped with")
+  contents += (codeTextArea, "span 5")
 
-  def saveContent = GroovyModifierDomainDataUI(codeTextArea.editor.text,
-    prototype.dataUI.toString)
+  def saveContent = GroovyModifierDomainDataUI(protoNameTextField.text, codeTextArea.editor.text, typeCombo.selection.item)
 
   override lazy val help =
     new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {

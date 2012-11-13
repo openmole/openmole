@@ -22,41 +22,40 @@ import scala.swing.Action
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.core.model.data.IFactorDataUI
-import org.openmole.ide.core.model.sampling.IFactorWidget
+import org.openmole.ide.core.model.sampling.IDomainWidget
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget._
 
-class FactorWidget(var dataUI: IFactorDataUI,
-                   display: Boolean = false) extends MigPanel("wrap", "[center]", "[center]") with IFactorWidget { factorWidget ⇒
+class DomainWidget(var dataUI: IDomainDataUI[_],
+                   var previousDomain: Option[IDomainDataUI[_]] = None,
+                   display: Boolean = false) extends MigPanel("wrap", "[center]", "[center]") with IDomainWidget {
+  domainWidget ⇒
   preferredSize = new Dimension(130, 38)
-  val link = new LinkLabel(factorPreview,
+  val link = new LinkLabel(domainPreview,
     new Action("") {
       def apply = displayOnMoleScene
     },
     3,
     "73a5d2",
-    true) { opaque = false; maximumSize = new Dimension(100, 28) }
+    true) {
+    opaque = false;
+    maximumSize = new Dimension(100, 28)
+  }
 
   var color = SamplingCompositionPanelUI.DEFAULT_COLOR
 
   if (display) displayOnMoleScene
 
   def displayOnMoleScene = ScenesManager.currentSceneContainer match {
-    case Some(s: ISceneContainer) ⇒ s.scene.displayExtraPropertyPanel(factorWidget)
+    case Some(s: ISceneContainer) ⇒ s.scene.displayExtraPropertyPanel(domainWidget)
     case _ ⇒
   }
 
-  def factorPreview =
-    dataUI.prototype + {
-      dataUI.domain.preview
-    } match {
-      case "" ⇒ "define Factor"
-      case x: String ⇒ x
-    }
+  def domainPreview = dataUI.preview
 
   def update = {
-    link.link(factorPreview)
+    link.link(domainPreview)
     revalidate
     repaint
   }
@@ -74,5 +73,6 @@ class FactorWidget(var dataUI: IFactorDataUI,
     g.setPaint(gp)
     g.fillRoundRect(0, 0, size.width, size.height, 8, 8)
   }
+
   contents += link
 }

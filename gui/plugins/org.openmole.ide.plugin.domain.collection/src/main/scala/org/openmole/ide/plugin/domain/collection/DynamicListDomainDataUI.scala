@@ -49,17 +49,12 @@ class DynamicListDomainDataUI[T](val values: List[String])(implicit domainType: 
 
   def preview = " in " + values.headOption.getOrElse("") + " ..."
 
-  override def coreObject(prototype: IPrototypeDataProxyUI,
-                          previousFactor: Option[IFactorDataUI]): Domain[T] =
+  override def coreObject(previousDomain: Option[IDomainDataUI[_]]): Domain[T] =
     new DynamicListDomain(values.toSeq: _*)
 
-  def buildPanelUI(p: IPrototypeDataProxyUI) = new DynamicListDomainPanelUI(this, p)
+  def buildPanelUI = new DynamicListDomainPanelUI(this)
 
-  def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], false))
-
-  def isAcceptable(p: IPrototypeDataProxyUI) = availableTypes.contains(p.dataUI.toString)
-
-  def isAcceptable(domain: IDomainDataUI[_]) = false
+  def isAcceptable(domain: Option[IDomainDataUI[_]]) = false
 
   val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
 

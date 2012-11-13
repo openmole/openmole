@@ -28,10 +28,9 @@ class BigDecimalLogarithmRangeDataUI(val min: String = "0.0", val max: String = 
 
   def availableTypes = List("BigDecimal")
 
-  def coreObject(prototype: IPrototypeDataProxyUI,
-                 previousFactor: Option[IFactorDataUI]): Domain[BigDecimal] = new BigDecimalLogarithmRange(min, max, stepString)
+  def coreObject(previousDomain: Option[IDomainDataUI[_]]): Domain[BigDecimal] = new BigDecimalLogarithmRange(min, max, stepString)
 
   def coreClass = classOf[BigDecimalLogarithmRangeDataUI]
 
-  def buildPanelUI(p: IPrototypeDataProxyUI) = new LogarithmicRangePanelUI(this, p)
+  def buildPanelUI = new LogarithmicRangePanelUI(this)
 }

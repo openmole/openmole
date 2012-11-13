@@ -23,15 +23,13 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.{ URL, Help, Helper, PluginPanel }
 import scala.swing.event._
-import scala.swing.TextField
-import scala.swing.CheckBox
-import scala.swing.Label
+import swing.{ MyComboBox, TextField, CheckBox, Label }
 
-class RangeDomainPanelUI(pud: RangeDomainDataUI[_],
-                         prototype: IPrototypeDataProxyUI) extends GenericRangeDomainPanelUI {
+class RangeDomainPanelUI(pud: RangeDomainDataUI[_]) extends GenericRangeDomainPanelUI {
 
   minField.text = pud.min
   maxField.text = pud.max
+  typeCombo.peer.setModel(MyComboBox.newConstantModel(pud.availableTypes))
 
   val stepCheckBox = new CheckBox("Step")
   val stepField = new TextField(6) {
@@ -60,7 +58,7 @@ class RangeDomainPanelUI(pud: RangeDomainDataUI[_],
     maxField.text,
     stepContent,
     false,
-    prototype.dataUI.toString)
+    typeCombo.selection.item)
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     add(minField, new Help(i18n.getString("min"), i18n.getString("minEx")))

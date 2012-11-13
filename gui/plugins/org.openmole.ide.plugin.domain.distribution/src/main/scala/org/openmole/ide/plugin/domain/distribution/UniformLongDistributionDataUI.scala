@@ -30,10 +30,9 @@ class UniformLongDistributionDataUI extends UniformDistributionDataUI[Long] {
 
   val availableTypes = List("Long")
 
-  def buildPanelUI(p: IPrototypeDataProxyUI) = new UniformDistributionPanelUI(this, p)
+  def buildPanelUI = new UniformDistributionPanelUI(this)
 
   def coreClass = classOf[UniformLongDistribution]
 
-  def coreObject(prototype: IPrototypeDataProxyUI,
-                 previousFactor: Option[IFactorDataUI]): Domain[Long] = new UniformLongDistribution
+  def coreObject(previousDomain: Option[IDomainDataUI[_]]): Domain[Long] = new UniformLongDistribution
 }

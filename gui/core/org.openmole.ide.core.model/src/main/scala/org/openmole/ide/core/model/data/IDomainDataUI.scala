@@ -22,17 +22,16 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IDomainPanelUI
+import org.openmole.ide.misc.tools.Counter
 
-trait IDomainDataUI[T] extends IDataUI {
+trait IDomainDataUI[T] extends IDataUI with ISamplingCompositionElementDataUI {
+  def id: String = "domain" + Counter.id.getAndIncrement
 
-  def coreObject(proto: IPrototypeDataProxyUI,
-                 previousFactor: Option[IFactorDataUI]): Domain[T]
+  def coreObject(previousDomain: Option[IDomainDataUI[_]]): Domain[T]
 
-  def buildPanelUI(p: IPrototypeDataProxyUI): IDomainPanelUI
+  def buildPanelUI: IDomainPanelUI
 
   def preview: String
 
-  def isAcceptable(protoProxy: IPrototypeDataProxyUI): Boolean
-
-  def isAcceptable(domain: IDomainDataUI[_]): Boolean
+  def isAcceptable(domain: Option[IDomainDataUI[_]]): Boolean
 }

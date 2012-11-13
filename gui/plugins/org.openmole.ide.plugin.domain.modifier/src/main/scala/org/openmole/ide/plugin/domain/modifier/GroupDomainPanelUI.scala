@@ -22,19 +22,21 @@ import java.util.ResourceBundle
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.{ URL, Help, Helper, PluginPanel }
-import scala.swing.TextField
+import swing.{ MyComboBox, TextField }
 
-class GroupDomainPanelUI(pud: GroupDomainDataUI[_],
-                         prototype: IPrototypeDataProxyUI) extends PluginPanel("") with IDomainPanelUI {
+class GroupDomainPanelUI(pud: GroupDomainDataUI[_]) extends PluginPanel("wrap") with IDomainPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
   val sizeTextField = new TextField(pud.size, 6)
+  val typeCombo = new MyComboBox(pud.availableTypes) {
+    selection.item = pud.domainType.toString.split('.').last
+  }
 
-  contents += (sizeTextField, "gap para")
+  contents += typeCombo
   contents += sizeTextField
 
   def saveContent = GroupDomainDataUI(sizeTextField.text,
-    prototype.dataUI.toString)
+    typeCombo.selection.item)
 
   override lazy val help =
     new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {

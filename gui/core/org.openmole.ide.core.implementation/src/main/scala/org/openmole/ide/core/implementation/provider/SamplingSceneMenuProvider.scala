@@ -26,7 +26,6 @@ import scala.swing.MenuItem
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.registry.KeyRegistry
-import org.openmole.ide.core.implementation.data.FactorDataUI
 import org.openmole.ide.core.implementation.sampling.SamplingCompositionPanelUI
 
 class SamplingSceneMenuProvider(panelScene: SamplingCompositionPanelUI) extends GenericMenuProvider {
@@ -34,21 +33,28 @@ class SamplingSceneMenuProvider(panelScene: SamplingCompositionPanelUI) extends 
   override def getPopupMenu(widget: Widget,
                             point: Point) = {
     items.clear
-    val itAddFactor = new MenuItem(new Action("Add Factor") {
+    val itAddFactor = new MenuItem(new Action("Add Domain") {
       def apply = {
         closeExtraPanel
-        panelScene.addFactor(new FactorDataUI, point)
+        val domainFactories = KeyRegistry.domains.values
+        panelScene.addDomain(domainFactories.map {
+          _.buildDataUI
+        }.filter(_.name == "Range").headOption.getOrElse(domainFactories.head.buildDataUI),
+          point)
       }
     })
 
     val samplingMenu = new Menu("Add Sampling")
-    KeyRegistry.samplings.values.toList.sortBy { _.toString }.foreach { s ⇒
-      samplingMenu.contents += new MenuItem(new Action(s.toString) {
-        def apply = {
-          closeExtraPanel
-          panelScene.addSampling(s.buildDataUI, point)
-        }
-      })
+    KeyRegistry.samplings.values.toList.sortBy {
+      _.toString
+    }.foreach {
+      s ⇒
+        samplingMenu.contents += new MenuItem(new Action(s.toString) {
+          def apply = {
+            closeExtraPanel
+            panelScene.addSampling(s.buildDataUI, point)
+          }
+        })
     }
     items += (itAddFactor.peer, samplingMenu.peer)
     super.getPopupMenu(widget, point)

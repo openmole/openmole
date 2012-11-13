@@ -48,11 +48,7 @@ abstract class GenericRangeDomainDataUI[T] extends IDomainDataUI[T] {
     } else ""
   }
 
-  def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], false))
-
-  def isAcceptable(p: IPrototypeDataProxyUI) = availableTypes.contains(p.dataUI.toString)
-
-  def isAcceptable(domain: IDomainDataUI[_]) = false
+  def isAcceptable(domain: Option[IDomainDataUI[_]]) = false
 
   def availableTypes: List[String]
 

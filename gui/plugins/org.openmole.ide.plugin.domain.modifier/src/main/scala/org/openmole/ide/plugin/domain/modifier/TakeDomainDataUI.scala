@@ -43,7 +43,7 @@ object TakeDomainDataUI {
     }
 }
 
-class TakeDomainDataUI[T](val size: String = "0")(implicit domainType: Manifest[T])
+class TakeDomainDataUI[T](val size: String = "0")(implicit val domainType: Manifest[T])
     extends IDomainDataUI[T] {
 
   val name = "Take"
@@ -52,19 +52,12 @@ class TakeDomainDataUI[T](val size: String = "0")(implicit domainType: Manifest[
 
   def isAcceptable(protoProxy: IPrototypeDataProxyUI) = availableTypes.contains(protoProxy.dataUI.toString)
 
-  override def coreObject(prototype: IPrototypeDataProxyUI,
-                          previousFactor: Option[IFactorDataUI]): Domain[T] = previousFactor match {
-    case Some(f: IFactorDataUI) ⇒ f.domain match {
-      case d: Domain[_] with Discrete[T] ⇒ new TakeDomain[T](d, size.toInt)
-      case _ ⇒ throw new UserBadDataError("No Discrete Domain is required for a Take Domain.")
-    }
-    case _ ⇒
-      throw new UserBadDataError("No input factor has been found, it is required for a Take Domain.")
+  override def coreObject(previousDomain: Option[IDomainDataUI[_]]): Domain[T] = previousDomain match {
+    case d: Domain[_] with Discrete[T] ⇒ new TakeDomain[T](d, size.toInt)
+    case _ ⇒ throw new UserBadDataError("No Discrete Domain is required for a Take Domain.")
   }
 
-  def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Int], false))
-
-  def buildPanelUI(p: IPrototypeDataProxyUI) = new TakeDomainPanelUI(this, p)
+  def buildPanelUI = new TakeDomainPanelUI(this)
 
   val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
 
@@ -72,8 +65,8 @@ class TakeDomainDataUI[T](val size: String = "0")(implicit domainType: Manifest[
 
   override def toString = "Take"
 
-  def isAcceptable(domain: IDomainDataUI[_]) = domain match {
-    case d: Domain[_] with Discrete[T] ⇒ true
+  def isAcceptable(domain: Option[IDomainDataUI[_]]) = domain match {
+    case Some(d: Domain[_] with Discrete[T]) ⇒ true
     case _ ⇒
       StatusBar.warn("A Discrete Domain is required as input of a Take Factor")
       false

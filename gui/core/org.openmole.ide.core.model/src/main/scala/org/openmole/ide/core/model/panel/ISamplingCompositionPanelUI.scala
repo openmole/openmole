@@ -27,7 +27,7 @@ trait ISamplingCompositionPanelUI extends IPanelUI {
 
   def scene: Scene
 
-  def addFactor(factorDataUI: IFactorDataUI,
+  def addDomain(domainDataUI: IDomainDataUI[_],
                 location: Point,
                 display: Boolean = true)
 
