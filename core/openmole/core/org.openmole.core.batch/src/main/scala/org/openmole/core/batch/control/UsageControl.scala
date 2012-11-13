@@ -25,6 +25,12 @@ trait UsageControl {
   def releaseToken(token: AccessToken)
   def available: Int
 
+  def tryWithToken[B](f: Option [AccessToken] => B) = {
+    val t = tryGetToken
+    try f(t)
+    finally t.map(releaseToken)
+  }
+
   def withToken[B](f: (AccessToken ⇒ B)): B = {
     val token = waitAToken
     try f(token)
