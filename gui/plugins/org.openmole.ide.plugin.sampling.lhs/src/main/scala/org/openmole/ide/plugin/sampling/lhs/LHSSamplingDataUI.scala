@@ -33,7 +33,7 @@ class LHSSamplingDataUI(val samples: String = "1") extends ISamplingDataUI {
       factors.map {
         f ⇒
           Factor(f.prototype.dataUI.coreObject.asInstanceOf[Prototype[Double]],
-            f.domain.coreObject(None).asInstanceOf[Domain[Double] with Bounds[Double]])
+            f.domain.coreObject.asInstanceOf[Domain[Double] with Bounds[Double]])
       }.toSeq: _*)
 
   def coreClass = classOf[LHS]
@@ -46,7 +46,7 @@ class LHSSamplingDataUI(val samples: String = "1") extends ISamplingDataUI {
 
   //FIXME 2.10
   def isAcceptable(domain: IDomainDataUI[_]) =
-    domain.coreObject(None) match {
+    domain.coreObject match {
       case x: Domain[Double] with Bounds[Double] ⇒ true
       case _ ⇒
         StatusBar.warn("A Bounded range of Double is required for a LHS Sampling")

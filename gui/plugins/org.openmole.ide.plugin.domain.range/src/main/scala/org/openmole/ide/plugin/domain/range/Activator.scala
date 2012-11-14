@@ -24,6 +24,5 @@ class Activator extends OSGiActivator with DomainActivator {
 
   override def domainFactories = List(
     new RangeDomainFactoryUI { def buildDataUI = RangeDomainDataUI(classString = "Double") },
-    new RangeDomainFactoryUI { def buildDataUI = new BigDecimalLogarithmRangeDataUI },
-    new RangeDomainFactoryUI { def buildDataUI = new DoubleLogarithmRangeDataUI })
+    new RangeDomainFactoryUI { def buildDataUI = new BigDecimalLogarithmRangeDataUI })
 }

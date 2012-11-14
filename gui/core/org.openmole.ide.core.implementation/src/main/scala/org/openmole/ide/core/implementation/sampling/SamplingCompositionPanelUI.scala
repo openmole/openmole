@@ -37,6 +37,7 @@ import org.openmole.ide.core.implementation.provider._
 import org.openmole.ide.core.model.sampling._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
+import org.openmole.ide.core.implementation.dialog.StatusBar
 
 object SamplingCompositionPanelUI {
   val DEFAULT_COLOR = new Color(250, 250, 250)
@@ -232,7 +233,11 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
           s.component match {
             case d: IDomainWidget ⇒ source match {
               case Some(sw: ISamplingWidget) ⇒ boolToConnector(false)
-              case Some(dw: IDomainWidget) ⇒ boolToConnector(d.dataUI.isAcceptable(dw.dataUI))
+              case Some(dw: IDomainWidget) ⇒
+                if (connections.map { _._2 }.contains(d.id)) {
+                  StatusBar.warn("Only one connection between Domains is allowed")
+                  ConnectorState.REJECT_AND_STOP
+                } else boolToConnector(d.dataUI.isAcceptable(dw.dataUI))
               case _ ⇒ ConnectorState.REJECT_AND_STOP
             }
             case _ ⇒ ConnectorState.REJECT_AND_STOP
