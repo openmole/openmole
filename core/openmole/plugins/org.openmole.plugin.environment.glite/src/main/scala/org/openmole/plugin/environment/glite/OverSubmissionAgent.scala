@@ -38,10 +38,10 @@ object OverSubmissionAgent extends Logger {
 
   class TimeInt(val value: Int, val time: Long = System.currentTimeMillis)
 
-  implicit class FiniteQueue[A <: {def time: Long}](q: mutable.Queue[A]) {
+  implicit class FiniteQueue[A <: { def time: Long }](q: mutable.Queue[A]) {
     def enqueueFinite(elem: A, oldest: Long) = {
       q.enqueue(elem)
-      q.dequeueFirst(e => e.time < oldest)
+      q.dequeueFirst(e ⇒ e.time < oldest)
     }
   }
 }
@@ -74,7 +74,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
 
         logger.fine("still running " + stillRunning)
 
-        val maxRunning = runningHistory.max
+        val maxRunning = runningHistory.map(_.value).max
         logger.fine("max running " + maxRunning)
 
         var nbRessub = if (jobs.size > Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob)) {

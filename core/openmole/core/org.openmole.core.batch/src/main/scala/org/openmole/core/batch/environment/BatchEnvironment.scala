@@ -105,7 +105,6 @@ object BatchEnvironment extends Logger {
 
   val StoragesGCUpdateInterval = new ConfigurationLocation("BatchEnvironment", "StoragesGCUpdateInterval")
 
-
   Workspace += (MinUpdateInterval, "PT1M")
   Workspace += (MaxUpdateInterval, "PT20M")
   Workspace += (IncrementUpdateInterval, "PT1M")
