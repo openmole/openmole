@@ -44,6 +44,7 @@ import org.globus.gsi.gssapi.GlobusGSSCredentialImpl
 import ref.WeakReference
 import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.service.Random._
+import collection.mutable
 
 object GliteEnvironment extends Logger {
 
@@ -76,6 +77,8 @@ object GliteEnvironment extends Logger {
 
   val CECacheDir = new ConfigurationLocation("GliteEnvironment", "CECacheDir")
   val CECacheDuration = new ConfigurationLocation("GliteEnvironment", "CECacheDuration")
+
+  val StatisticsHistorySize = new ConfigurationLocation("GliteEnvironment", "StatisticsHistorySize")
 
   Workspace += (ProxyTime, "PT24H")
   Workspace += (MyProxyTime, "P7D")
@@ -113,6 +116,8 @@ object GliteEnvironment extends Logger {
 
   Workspace += (CECacheDir, "openmole_cache")
   Workspace += (CECacheDuration, "P7D")
+
+  Workspace += (StatisticsHistorySize, "360")
 }
 
 class GliteEnvironment(

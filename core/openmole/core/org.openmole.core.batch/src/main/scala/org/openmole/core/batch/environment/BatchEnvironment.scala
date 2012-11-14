@@ -106,7 +106,6 @@ object BatchEnvironment extends Logger {
   val StoragesGCUpdateInterval = new ConfigurationLocation("BatchEnvironment", "StoragesGCUpdateInterval")
 
   // val NbTryOnTimeout = new ConfigurationLocation("BatchEnvironment", "NbTryOnTimeout")
-  val StatisticsHistorySize = new ConfigurationLocation("BatchEnvironment", "StatisticsHistorySize")
 
   Workspace += (MinUpdateInterval, "PT1M")
   Workspace += (MaxUpdateInterval, "PT20M")
@@ -124,7 +123,6 @@ object BatchEnvironment extends Logger {
 
   Workspace += (StoragesGCUpdateInterval, "PT1H")
   //Workspace += (NbTryOnTimeout, "3")
-  Workspace += (StatisticsHistorySize, "10000")
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
 
@@ -166,7 +164,6 @@ akka {
   }
 
   val jobRegistry = new ExecutionJobRegistry
-  @transient lazy val statistics = new OrderedSlidingList[StatisticSample](Workspace.preferenceAsInt(StatisticsHistorySize))
 
   val id: String
 

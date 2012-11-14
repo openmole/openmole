@@ -19,7 +19,6 @@ package org.openmole.plugin.environment.glite
 
 import org.openmole.core.batch.environment.BatchExecutionJob
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.batch.environment.StatisticSample
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.model.job.IJob
 import org.openmole.misc.tools.cache.AssociativeCache
@@ -33,12 +32,23 @@ import scala.collection.mutable.Set
 import scala.collection.mutable.MultiMap
 import scala.ref.WeakReference
 import scala.math._
+import scala.collection.mutable
 
-object OverSubmissionAgent extends Logger
+object OverSubmissionAgent extends Logger {
+
+  implicit class FiniteQueue[A](q: mutable.Queue[A]) {
+    def enqueueFinite(elem: A, maxSize: Int) = {
+      q.enqueue(elem)
+      while (q.size > maxSize) { q.dequeue }
+    }
+  }
+}
 
 import OverSubmissionAgent._
 
 class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends IUpdatableWithVariableDelay {
+
+  @transient lazy val runningHistory = new mutable.Queue[Int]
 
   override def delay = Workspace.preferenceAsDuration(GliteEnvironment.OverSubmissionInterval).toMilliSeconds
 
@@ -53,40 +63,21 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
 
       val registry = env.jobRegistry
       registry.synchronized {
-
         val jobs = registry.allExecutionJobs
-        // registry.allExecutionJobs.groupBy(ejob => (ejob.job.executionId, new StatisticKey(ejob.job))).
-        //                         filter( elt => {elt._1 != null && elt._2.size > 0} )
-        //Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"size " + toProceed.size + " all " + registry.allExecutionJobs)
-
         val now = System.currentTimeMillis
-        val stillRunning = jobs.filter(_.state == RUNNING)
-        val stillReady = jobs.filter(_.state == READY)
+        val stillRunning = jobs.count(_.state == RUNNING)
+        val stillReady = jobs.count(_.state == READY)
 
-        logger.fine("still running " + stillRunning.size)
+        runningHistory.enqueueFinite(stillRunning, Workspace.preferenceAsInt(GliteEnvironment.StatisticsHistorySize))
 
-        val stillRunningSamples = jobs.view.flatMap { _.batchJob }.filter(_.state == RUNNING).map { j ⇒ new StatisticSample(j.timeStamp(SUBMITTED), j.timeStamp(RUNNING), now) }
+        logger.fine("still running " + stillRunning)
 
-        val samples = (env.statistics ++ stillRunningSamples).toArray
+        val maxRunning = runningHistory.max
+        logger.fine("max running " + maxRunning)
 
-        logger.fine("still running samples " + stillRunningSamples.size + " samples size " + samples.size)
-
-        var nbRessub = if (!samples.isEmpty && jobs.size > Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob)) {
-          val windowSize = (jobs.size * Workspace.preferenceAsDouble(GliteEnvironment.OverSubmissionSamplingWindowFactor)).toInt
-          val windowStart = if (samples.size - 1 > windowSize) samples.size - 1 - windowSize else 0
-
-          val nbSamples = Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionNbSampling)
-          val interval = (samples.last.done - samples(windowStart).submitted) / (nbSamples)
-
-          //Logger.getLogger(classOf[OverSubmissionAgent].getName).log(Level.FINE,"interval " + interval)
-
-          val maxNbRunning =
-            (for (date ← (samples(windowStart).submitted) until (samples.last.done, interval)) yield samples.count(s ⇒ s.running <= date && s.done >= date)).max
-
-          logger.fine("max running " + maxNbRunning)
-
+        var nbRessub = if (jobs.size > Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob)) {
           val minOversub = Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob)
-          if (maxNbRunning < minOversub) minOversub - jobs.size else maxNbRunning - (stillRunning.size + stillReady.size)
+          if (maxRunning < minOversub) minOversub - jobs.size else maxRunning - (stillRunning + stillReady)
         } else Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob) - jobs.size
 
         logger.fine("NbRessub " + nbRessub)
