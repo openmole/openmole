@@ -33,7 +33,7 @@ class SaltelliSamplingDataUI(val samples: String = "1") extends ISamplingDataUI 
       factors.map {
         f ⇒
           Factor(f.prototype.dataUI.coreObject.asInstanceOf[Prototype[Double]],
-            f.domain.coreObject(None).asInstanceOf[Domain[Double] with Bounds[Double]])
+            f.domain.coreObject.asInstanceOf[Domain[Double] with Bounds[Double]])
       }.toSeq: _*)
 
   def coreClass = classOf[SaltelliSampling]
