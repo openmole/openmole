@@ -66,7 +66,6 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
       val registry = env.jobRegistry
       registry.synchronized {
         val jobs = registry.allExecutionJobs
-        val now = System.currentTimeMillis
         val stillRunning = jobs.count(_.state == RUNNING)
         val stillReady = jobs.count(_.state == READY)
 
