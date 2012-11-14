@@ -78,7 +78,7 @@ object GliteEnvironment extends Logger {
   val CECacheDir = new ConfigurationLocation("GliteEnvironment", "CECacheDir")
   val CECacheDuration = new ConfigurationLocation("GliteEnvironment", "CECacheDuration")
 
-  val StatisticsHistorySize = new ConfigurationLocation("GliteEnvironment", "StatisticsHistorySize")
+  val RunningHistoryDuration = new ConfigurationLocation("GliteEnvironment", "RunningHistoryDuration")
 
   Workspace += (ProxyTime, "PT24H")
   Workspace += (MyProxyTime, "P7D")
@@ -117,7 +117,7 @@ object GliteEnvironment extends Logger {
   Workspace += (CECacheDir, "openmole_cache")
   Workspace += (CECacheDuration, "P7D")
 
-  Workspace += (StatisticsHistorySize, "360")
+  Workspace += (RunningHistoryDuration, "PT3H")
 }
 
 class GliteEnvironment(

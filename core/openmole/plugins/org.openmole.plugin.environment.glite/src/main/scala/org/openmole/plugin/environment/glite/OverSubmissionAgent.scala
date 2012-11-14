@@ -36,10 +36,12 @@ import scala.collection.mutable
 
 object OverSubmissionAgent extends Logger {
 
-  implicit class FiniteQueue[A](q: mutable.Queue[A]) {
-    def enqueueFinite(elem: A, maxSize: Int) = {
+  class TimeInt(val value: Int, val time: Long = System.currentTimeMillis)
+
+  implicit class FiniteQueue[A <: {def time: Long}](q: mutable.Queue[A]) {
+    def enqueueFinite(elem: A, oldest: Long) = {
       q.enqueue(elem)
-      while (q.size > maxSize) { q.dequeue }
+      q.dequeueFirst(e => e.time < oldest)
     }
   }
 }
@@ -48,7 +50,7 @@ import OverSubmissionAgent._
 
 class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends IUpdatableWithVariableDelay {
 
-  @transient lazy val runningHistory = new mutable.Queue[Int]
+  @transient lazy val runningHistory = new mutable.Queue[TimeInt]
 
   override def delay = Workspace.preferenceAsDuration(GliteEnvironment.OverSubmissionInterval).toMilliSeconds
 
@@ -68,7 +70,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
         val stillRunning = jobs.count(_.state == RUNNING)
         val stillReady = jobs.count(_.state == READY)
 
-        runningHistory.enqueueFinite(stillRunning, Workspace.preferenceAsInt(GliteEnvironment.StatisticsHistorySize))
+        runningHistory.enqueueFinite(new TimeInt(stillRunning), Workspace.preferenceAsDuration(GliteEnvironment.RunningHistoryDuration).toMilliSeconds)
 
         logger.fine("still running " + stillRunning)
 
