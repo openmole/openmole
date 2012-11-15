@@ -18,6 +18,7 @@
 package org.openmole.misc.logging
 
 import org.apache.log4j.{ Logger ⇒ L4JLogger, Level ⇒ L4JLevel, Appender ⇒ L4JAppender }
+import org.apache.log4j.BasicConfigurator
 import java.util.logging._
 //import org.slf4j.bridge._
 import org.openmole.misc.workspace._
@@ -58,5 +59,9 @@ object LoggerService {
 
   }
 
-  def init = level(Workspace.preference(LogLevel))
+  def init = {
+    BasicConfigurator.configure
+    L4JLogger.getRootLogger.setLevel(L4JLevel.INFO)
+    level(Workspace.preference(LogLevel))
+  }
 }
