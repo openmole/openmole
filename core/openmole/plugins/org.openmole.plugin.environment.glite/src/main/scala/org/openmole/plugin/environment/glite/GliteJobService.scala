@@ -110,10 +110,10 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
 
     assert(runtime.runtime.path != null)
 
-    val homeCacheDir = cacheDir("$ORIGINAL_HOME")
+    //val homeCacheDir = cacheDir("$ORIGINAL_HOME")
 
-    writter.print("ORIGINAL_HOME=$HOME; ")
-    writter.print("mkdir -p " + homeCacheDir + "; ")
+    //writter.print("ORIGINAL_HOME=$HOME; ")
+    //writter.print("mkdir -p " + homeCacheDir + "; ")
     writter.print("BASEPATH=$PWD; CUR=$PWD/ws$RANDOM; while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; export OPENMOLE_HOME=$CUR; ")
     writter.print("if [ `uname -m` = x86_64 ]; then ")
     writter.print(lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz")) //, homeCacheDir, runtime.jvmLinuxX64.hash))
@@ -146,7 +146,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     writter.print(" -o ")
     writter.print(resultPath)
     writter.print("; cd .. ; rm -rf $CUR ; ")
-    writter.print(clearCacheCmd(homeCacheDir))
+    //writter.print(clearCacheCmd(homeCacheDir))
   }
 
   protected def cacheDir(home: String) =
