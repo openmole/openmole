@@ -52,9 +52,6 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
   def getResult(storage: StorageService, outputFilePath: String, batchJob: BatchExecutionJob): Unit = {
     import batchJob.job
 
-
-
-
     storage.withToken { implicit token ⇒
       val runtimeResult = getRuntimeResult(outputFilePath, storage)
 
@@ -93,7 +90,7 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
             }
           }
 
-          batchJob.environment.statistics += new StatisticSample(batchJob.batchJob.get)
+        //batchJob.environment.statistics += new StatisticSample(batchJob.batchJob.get)
 
         /*if(firstRunning != Long.MaxValue && lastCompleted != 0L) 
            environment.statistics += new StatisticSample(batchJob.batchJob.get.timeStamp(ExecutionState.SUBMITTED), firstRunning, lastCompleted)*/
