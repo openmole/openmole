@@ -292,7 +292,7 @@ class GliteEnvironment(
                   if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0) 0.0
                   else 1 - time.normalize(minTime, maxTime)
 
-                val fitness = math.pow((5 * sizeFactor + timeFactor + cur.availability + 10 * cur.successRate), Workspace.preferenceAsDouble(StorageFitnessPower))
+                val fitness = math.pow((5 * sizeFactor + timeFactor + 10 * cur.availability + 10 * cur.successRate), Workspace.preferenceAsDouble(StorageFitnessPower))
                 Some((cur, token, fitness))
             }
         }

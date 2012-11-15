@@ -17,22 +17,28 @@
 
 package org.openmole.core.batch.refresh
 
-import akka.actor.Actor
+import akka.actor.{ Actor, ActorRef }
 import org.openmole.misc.tools.service.Logger
+import org.openmole.misc.workspace._
+import org.openmole.core.batch.environment.BatchEnvironment
 
 object CleanerActor extends Logger
 
 import CleanerActor._
 
-class CleanerActor extends Actor {
+class CleanerActor(jobManager: ActorRef) extends Actor {
   def receive = {
-    case CleanSerializedJob(sj) ⇒
+    case msg @ CleanSerializedJob(sj) ⇒
       try
         sj.synchronized {
-          if (!sj.cleaned) sj.storage.withToken { implicit t ⇒
-            sj.storage.rmDir(sj.path)
+          if (!sj.cleaned) sj.storage.tryWithToken {
+            case Some(t) ⇒
+              sj.storage.rmDir(sj.path)(t)
+              sj.cleaned = true
+            case None ⇒
+              jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForSerivceRetryInterval).toMilliSeconds)
           }
-          sj.cleaned = true
+
         }
       catch {
         case t: Throwable ⇒

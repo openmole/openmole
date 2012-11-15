@@ -17,11 +17,10 @@
 
 package org.openmole.core.batch.refresh
 
-import akka.actor.Actor
+import akka.actor.{ Actor, ActorRef }
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
 import org.openmole.core.batch.environment.BatchEnvironment
-import akka.actor.ActorRef
 
 object KillerActor extends Logger
 
@@ -30,12 +29,11 @@ import KillerActor._
 
 class KillerActor(jobManager: ActorRef) extends Actor {
   def receive = {
-    case KillBatchJob(bj, nbTry) ⇒
+    case msg @ KillBatchJob(bj) ⇒
       try bj.jobService.tryWithToken {
         case Some(t) ⇒ bj.kill(t)
         case None ⇒
-          if (nbTry < Workspace.preferenceAsInt(BatchEnvironment.NoTokenForSerivceRetry))
-            jobManager ! Delay(KillBatchJob(bj, nbTry + 1), Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForSerivceRetryInterval).toMilliSeconds)
+          jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForSerivceRetryInterval).toMilliSeconds)
       } catch {
         case e: Throwable ⇒ logger.log(FINE, "Could not kill job.", e)
       }

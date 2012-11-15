@@ -73,8 +73,8 @@ akka {
   val refresher = workers.actorOf(Props(new RefreshActor(self, environment)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
   val resultGetters = workers.actorOf(Props(new GetResultActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
   val killer = workers.actorOf(Props(new KillerActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
-  val cleaner = workers.actorOf(Props(new CleanerActor).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
-  val deleter = workers.actorOf(Props(new DeleteActor).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
+  val cleaner = workers.actorOf(Props(new CleanerActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
+  val deleter = workers.actorOf(Props(new DeleteActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
 
   def receive = {
     case msg: Upload ⇒ uploader ! msg
@@ -82,7 +82,8 @@ akka {
     case msg: Refresh ⇒ refresher ! msg
     case msg: GetResult ⇒ resultGetters ! msg
     case msg: KillBatchJob ⇒ killer ! msg
-    case m: DeleteFile ⇒ deleter ! m
+    case msg: DeleteFile ⇒ deleter ! msg
+    case msg: CleanSerializedJob ⇒ cleaner ! msg
 
     case Delay(msg, delay) ⇒
       context.system.scheduler.scheduleOnce(delay milliseconds) {
@@ -91,7 +92,7 @@ akka {
 
     case Uploaded(job, sj) ⇒
       job.serializedJob = Some(sj)
-      submitter ! Submit(job, sj)
+      self ! Submit(job, sj)
 
     case Submitted(job, sj, bj) ⇒
       job.batchJob = Some(bj)
@@ -100,7 +101,7 @@ akka {
     case Kill(job) ⇒
       job.state = ExecutionState.KILLED
       job.batchJob.foreach(bj ⇒ self ! KillBatchJob(bj))
-      job.serializedJob.foreach(j ⇒ cleaner ! CleanSerializedJob(j))
+      job.serializedJob.foreach(j ⇒ self ! CleanSerializedJob(j))
 
     case Error(job, exception) ⇒
       val level = exception match {
