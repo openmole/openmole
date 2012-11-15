@@ -52,13 +52,13 @@ object LoggerService {
 
     rootLogger.addHandler(ch)
 
-    L4JLogger.getRootLogger.setLevel(L4JLevel.toLevel(levelLabel))
+    //L4JLogger.getRootLogger.setLevel(L4JLevel.toLevel(levelLabel))
 
   }
 
   def init = {
     BasicConfigurator.configure
-    L4JLogger.getRootLogger.setLevel(L4JLevel.INFO)
+    L4JLogger.getRootLogger.setLevel(L4JLevel.WARN)
     level(Workspace.preference(LogLevel))
   }
 }
