@@ -25,7 +25,6 @@ import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.prototype._
-import org.openmole.ide.core.implementation.sampling.InputSampling
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
 import org.openmole.ide.core.model.data._
@@ -82,23 +81,19 @@ object EmptyDataUIs {
     def domains = List.empty
     def samplings = List.empty
     def connections = List.empty
-    def finalSampling: Option[String] = None
+    def finalSampling = None
   }
 
   class EmptySamplingCompositionPanelUI extends ISamplingCompositionPanelUI {
     def peer = new PluginPanel("").peer
+    def addDomain(domainProxy: IDomainProxyUI, location: Point, d: Boolean) {}
+    def addSampling(samplingProxy: ISamplingProxyUI, location: Point, display: Boolean) {}
+    def setFinalSampling(samplingProxy: ISamplingProxyUI) {}
+    def setSamplingProxy(samplingProxy: ISamplingProxyUI, b: Boolean) {}
     def saveContent(name: String) = new EmptySamplingCompositionDataUI
-    def addDomain(domainDataUI: IDomainDataUI[_],
-                  location: Point,
-                  display: Boolean) = {}
-    def addSampling(samplingDataUI: ISamplingDataUI,
-                    location: Point,
-                    display: Boolean) = {}
     def remove(samplingComponent: ISamplingComponent): Unit = {}
-    def setSamplingWidget(samplingWidget: ISamplingWidget, b: Boolean) {}
-    def setSamplingWidget(id: Option[String], b: Boolean) {}
-    def setFinalSampling(samplingWidget: ISamplingWidget) = {}
     def scene = new Scene
+    def testConnections = {}
   }
 
   class EmptySampling extends Sampling {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.ide.core.model.sampling
 
-package org.openmole.ide.core.implementation.sampling
+import org.openmole.ide.misc.tools.Counter
+import org.openmole.ide.core.model.data.ISamplingDataUI
 
-import org.openmole.ide.core.model.sampling._
+trait ISamplingProxyUI extends ISamplingCompositionProxyUI {
 
-class InputSamplingSlot(val arity: ISamplingSlot.Arity = ISamplingSlot.One) extends IInputSamplingSlot
+  def id = "sampling" + Counter.id.getAndIncrement
+
+  def dataUI: ISamplingDataUI
+
+  def dataUI_=(d: ISamplingDataUI)
+
+  def isFinal: Boolean
+
+  def isFinal_=(b: Boolean)
+}

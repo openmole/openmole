@@ -43,7 +43,7 @@ import org.openmole.ide.core.implementation.dialog.StatusBar
     }
 }   */
 
-class TakeDomainDataUI(val size: String = "0")
+class TakeDomainDataUI(val size: String = "1")
     extends ModifierDomainDataUI[Any] {
 
   val name = "Take"

@@ -22,16 +22,18 @@ import scala.swing.Action
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.core.model.data.IFactorDataUI
-import org.openmole.ide.core.model.sampling.IDomainWidget
+import org.openmole.ide.core.model.sampling.{ IDomainProxyUI, IDomainWidget }
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget._
+import javax.swing.BorderFactory
+import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 
-class DomainWidget(var dataUI: IDomainDataUI[_],
-                   var previousDomain: Option[IDomainDataUI[_]] = None,
+class DomainWidget(val proxy: IDomainProxyUI,
+                   scenePaneUI: ISamplingCompositionPanelUI,
                    display: Boolean = false) extends MigPanel("wrap", "[center]", "[center]") with IDomainWidget {
   domainWidget ⇒
-  preferredSize = new Dimension(130, 38)
+  preferredSize = new Dimension(100, 38)
   val link = new LinkLabel(domainPreview,
     new Action("") {
       def apply = displayOnMoleScene
@@ -39,8 +41,9 @@ class DomainWidget(var dataUI: IDomainDataUI[_],
     3,
     "73a5d2",
     true) {
-    opaque = false;
-    maximumSize = new Dimension(100, 28)
+    opaque = false
+    border = BorderFactory.createLineBorder(Color.red)
+    maximumSize = new Dimension(80, 25)
   }
 
   var color = SamplingCompositionPanelUI.DEFAULT_COLOR
@@ -52,10 +55,11 @@ class DomainWidget(var dataUI: IDomainDataUI[_],
     case _ ⇒
   }
 
-  def domainPreview = dataUI.preview
+  def domainPreview = proxy.dataUI.preview
 
   def update = {
     link.link(domainPreview)
+    scenePaneUI.testConnections
     revalidate
     repaint
   }

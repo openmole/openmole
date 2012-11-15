@@ -45,7 +45,7 @@ class SamplingMenuProvider(panelScene: ISamplingCompositionPanelUI) extends Gene
         case cw: SamplingComponent ⇒
           cw.component match {
             case samplingWidget: ISamplingWidget ⇒
-              panelScene.setFinalSampling(samplingWidget)
+              panelScene.setFinalSampling(samplingWidget.proxy)
             case _ ⇒
           }
         case _ ⇒

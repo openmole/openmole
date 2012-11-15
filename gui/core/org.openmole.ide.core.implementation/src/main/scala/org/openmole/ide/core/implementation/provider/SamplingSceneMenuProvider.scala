@@ -26,7 +26,8 @@ import scala.swing.MenuItem
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.registry.KeyRegistry
-import org.openmole.ide.core.implementation.sampling.SamplingCompositionPanelUI
+import org.openmole.ide.core.implementation.sampling._
+import scala.Some
 
 class SamplingSceneMenuProvider(panelScene: SamplingCompositionPanelUI) extends GenericMenuProvider {
 
@@ -37,10 +38,10 @@ class SamplingSceneMenuProvider(panelScene: SamplingCompositionPanelUI) extends 
       def apply = {
         closeExtraPanel
         val domainFactories = KeyRegistry.domains.values
-        panelScene.addDomain(domainFactories.map {
+        panelScene.addDomain(new DomainProxyUI(domainFactories.map {
           _.buildDataUI
-        }.filter(_.name == "Range").headOption.getOrElse(domainFactories.head.buildDataUI),
-          point)
+        }.filter(_.name == "Range").headOption.getOrElse(domainFactories.head.buildDataUI)),
+          point, true)
       }
     })
 
@@ -52,7 +53,7 @@ class SamplingSceneMenuProvider(panelScene: SamplingCompositionPanelUI) extends 
         samplingMenu.contents += new MenuItem(new Action(s.toString) {
           def apply = {
             closeExtraPanel
-            panelScene.addSampling(s.buildDataUI, point)
+            panelScene.addSampling(new SamplingProxyUI(s.buildDataUI), point, true)
           }
         })
     }

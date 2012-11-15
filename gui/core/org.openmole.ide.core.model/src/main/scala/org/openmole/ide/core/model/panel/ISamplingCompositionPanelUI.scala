@@ -27,19 +27,19 @@ trait ISamplingCompositionPanelUI extends IPanelUI {
 
   def scene: Scene
 
-  def addDomain(domainDataUI: IDomainDataUI[_],
+  def addDomain(domainProxy: IDomainProxyUI,
                 location: Point,
-                display: Boolean = true)
+                d: Boolean = true)
 
-  def addSampling(samplingDataUI: ISamplingDataUI,
+  def addSampling(samplingProxy: ISamplingProxyUI,
                   location: Point,
                   display: Boolean = true)
 
   def remove(factorWidget: ISamplingComponent)
 
-  def setFinalSampling(samplingWidget: ISamplingWidget)
+  def setFinalSampling(samplingProxy: ISamplingProxyUI)
 
-  def setSamplingWidget(id: Option[String], b: Boolean): Unit
+  def setSamplingProxy(samplingProxy: ISamplingProxyUI, b: Boolean): Unit
 
-  def setSamplingWidget(samplingWidget: ISamplingWidget, b: Boolean): Unit
+  def testConnections: Unit
 }

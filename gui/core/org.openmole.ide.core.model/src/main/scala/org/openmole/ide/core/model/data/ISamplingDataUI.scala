@@ -24,8 +24,6 @@ import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.misc.tools.Counter
 
 trait ISamplingDataUI extends IDataUI with ISamplingCompositionElementDataUI {
-  def id = "sampling" + Counter.id.getAndIncrement
-
   def name: String = "Sampling"
 
   def coreObject(factors: List[IFactorDataUI],

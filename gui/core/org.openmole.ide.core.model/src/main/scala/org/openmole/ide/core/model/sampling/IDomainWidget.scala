@@ -18,15 +18,8 @@
 package org.openmole.ide.core.model.sampling
 
 import org.openmole.ide.core.model.data.{ IDomainDataUI, IFactorDataUI }
+import org.openmole.ide.misc.tools.Counter
 
 trait IDomainWidget extends ISamplingCompositionWidget {
-  def id = dataUI.id
-
-  def dataUI: IDomainDataUI[_]
-
-  def dataUI_=(d: IDomainDataUI[_])
-
-  def previousDomain: Option[IDomainDataUI[_]]
-
-  def previousDomain_=(pd: Option[IDomainDataUI[_]])
+  def proxy: IDomainProxyUI
 }

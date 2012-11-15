@@ -18,8 +18,7 @@
 package org.openmole.ide.core.implementation.sampling
 
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.ide.core.model.sampling.ISamplingCompositionWidget
-import org.openmole.ide.core.model.sampling.ISamplingWidget
+import org.openmole.ide.core.model.sampling._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.sampling.Sampling
 import org.openmole.ide.core.model.data._
@@ -28,41 +27,56 @@ import java.security.DomainCombiner
 import org.openmole.core.model.domain.Domain
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import collection.mutable.HashMap
+import scala.Some
 
 class SamplingCompositionDataUI(val name: String = "",
-                                val domains: List[(IDomainDataUI[_], Point)] = List.empty,
-                                val samplings: List[(ISamplingDataUI, Point)] = List.empty,
-                                val connections: List[(String, String)] = List.empty,
-                                val finalSampling: Option[String] = None) extends ISamplingCompositionDataUI {
+                                val domains: List[(IDomainProxyUI, Point)] = List.empty,
+                                val samplings: List[(ISamplingProxyUI, Point)] = List.empty,
+                                val connections: List[(ISamplingCompositionProxyUI, ISamplingCompositionProxyUI)] = List.empty,
+                                val finalSampling: Option[ISamplingProxyUI] = None) extends ISamplingCompositionDataUI {
 
-  val builtSampling = new HashMap[ISamplingDataUI, Sampling]
+  val builtSampling = new HashMap[ISamplingProxyUI, Sampling]
+
   def coreClass = classOf[Sampling]
 
   def coreObject = {
     builtSampling.clear
-    val connectionMap = connections.groupBy { _._2 }.map { case (k, v) ⇒ k -> v.map { _._1 } }
-    val domainMap: Map[String, IDomainDataUI[_]] = domains.map { f ⇒ f._1.id -> f._1 }.toMap
-    val samplingMap: Map[String, ISamplingDataUI] = samplings.map { s ⇒ s._1.id -> s._1 }.toMap
-    finalSampling match {
-      case Some(fs: String) ⇒ samplingMap(fs) match {
-        case data: ISamplingDataUI ⇒ buildSamplingCore(data, connectionMap, domainMap, samplingMap)
-        case _ ⇒ throw new UserBadDataError("ERROR ... ")
+    val connectionMap = connections.groupBy {
+      _._2
+    }.map {
+      case (k, v) ⇒ k -> v.map {
+        _._1
       }
+    }
+    val domainMap: Map[String, IDomainProxyUI] = domains.map {
+      f ⇒ f._1.id -> f._1
+    }.toMap
+    val samplingMap: Map[String, ISamplingProxyUI] = samplings.map {
+      s ⇒ s._1.id -> s._1
+    }.toMap
+    finalSampling match {
+      case Some(fs: ISamplingProxyUI) ⇒ buildSamplingCore(fs, connectionMap, domainMap, samplingMap)
       case _ ⇒ throw new UserBadDataError("The final sampling is not properly set")
     }
   }
 
-  def buildSamplingCore(data: ISamplingDataUI,
-                        connectionMap: Map[String, List[String]],
-                        domainMap: Map[String, IDomainDataUI[_]],
-                        samplingMap: Map[String, ISamplingDataUI]): Sampling = {
-    if (!builtSampling.contains(data)) {
-      val partition = connectionMap.getOrElse(data.id, List()).partition { _.substring(0, 4) == "samp" }
+  def buildSamplingCore(widget: ISamplingProxyUI,
+                        connectionMap: Map[ISamplingCompositionProxyUI, List[ISamplingCompositionProxyUI]],
+                        domainMap: Map[String, IDomainProxyUI],
+                        samplingMap: Map[String, ISamplingProxyUI]): Sampling = {
+    if (!builtSampling.contains(widget)) {
+      val partition = connectionMap.getOrElse(widget, List()).partition {
+        _ match {
+          case s: ISamplingWidget ⇒ true
+          case _ ⇒ false
+        }
+      }
+      //_.substring(0, 4) == "samp" }
       //FIXME : add prototypes and build factors
       //  builtSampling += data -> data.coreObject(partition._2.map { domainMap },
       //   partition._1.filterNot(_ == data.id).map { s ⇒ buildSamplingCore(samplingMap(s), connectionMap, domainMap, samplingMap) })
     }
-    builtSampling(data)
+    builtSampling(widget)
   }
 
   def imagePath = "img/samplingComposition.png"

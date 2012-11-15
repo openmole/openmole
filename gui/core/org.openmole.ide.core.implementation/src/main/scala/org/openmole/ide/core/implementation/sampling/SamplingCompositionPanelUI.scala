@@ -48,17 +48,15 @@ import SamplingCompositionPanelUI._
 class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Scene with ISamplingCompositionPanelUI {
   samplingCompositionPanelUI ⇒
 
-  val domains = new HashMap[IDomainWidget, SamplingComponent]
-  val samplings = new HashMap[ISamplingWidget, SamplingComponent]
-  val connections = new HashSet[(String, String)]
-  var finalSampling: Option[String] = None
+  val domains = new HashMap[IDomainProxyUI, SamplingComponent]
+  val samplings = new HashMap[ISamplingProxyUI, SamplingComponent]
+  var connections = new HashSet[(SamplingComponent, SamplingComponent)]
+  var finalSampling: Option[ISamplingProxyUI] = None
 
   setBackground(new Color(77, 77, 77))
-  val factorLayer = new LayerWidget(this)
-  val samplingLayer = new LayerWidget(this)
+  val boxLayer = new LayerWidget(this)
   val connectLayer = new LayerWidget(this)
-  addChild(factorLayer)
-  addChild(samplingLayer)
+  addChild(boxLayer)
   addChild(connectLayer)
 
   setPreferredBounds(new Rectangle(0, 0, 400, 200))
@@ -78,78 +76,74 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
     f ⇒ addSampling(f._1, f._2, false)
   }
   dataUI.connections.foreach {
-    c ⇒
-      connectProvider.createConnection(samplingComponentFromId(c._1),
-        samplingComponentFromId(c._2))
+    c ⇒ connectProvider.createConnection(toSamplingComponent(c._1), toSamplingComponent(c._2))
   }
-  finalSampling = dataUI.finalSampling
-  setSamplingWidget(finalSampling, true)
+
+  dataUI.finalSampling match {
+    case Some(fs: ISamplingProxyUI) ⇒ setFinalSampling(fs)
+    case _ ⇒
+  }
 
   def peer = new MigPanel("") {
     peer.add(createView)
   }.peer
 
-  //  def removeFactor(DomainWidget: IDomainWidget) = factors.isDefinedAt(DomainWidget) match {
-  //    case true ⇒
-  //      //factorLayer.removeChild(factors(DomainWidget))
-  //      removeNodeWithEdges(factors(DomainWidget))
-  //      factors -= DomainWidget
-  //      validate
-  //    case _ ⇒
-  //  }
+  def toSamplingComponent(scw: ISamplingCompositionProxyUI) =
+    domainsAndSamplings.getOrElse(scw, throw new UserBadDataError("The graphical representation for the element " + scw.id + " does not exist"))
 
-  def addDomain(domainDataUI: IDomainDataUI[_],
+  def addDomain(domainProxy: IDomainProxyUI,
                 location: Point,
                 d: Boolean = true) = {
-    val dw = new DomainWidget(domainDataUI, display = d)
-    val cw = new SamplingComponent(this, dw, location) {
+    val cw = new SamplingComponent(this, new DomainWidget(domainProxy, this), location) {
       getActions.addAction(ActionFactory.createPopupMenuAction(new DomainMenuProvider(samplingCompositionPanelUI)))
       getActions.addAction(connectAction)
       getActions.addAction(moveAction)
     }
-    factorLayer.addChild(cw)
+    boxLayer.addChild(cw)
     validate
-    domains += dw -> cw
+    domains += domainProxy -> cw
   }
 
-  def addSampling(samplingDataUI: ISamplingDataUI,
+  def addSampling(samplingProxy: ISamplingProxyUI,
                   location: Point,
                   display: Boolean = true) = {
-    val sw = new SamplingWidget(samplingDataUI, display)
-    val cw = new SamplingComponent(this, sw, location) {
+    val cw = new SamplingComponent(this, new SamplingWidget(samplingProxy), location) {
       getActions.addAction(ActionFactory.createPopupMenuAction(new SamplingMenuProvider(samplingCompositionPanelUI)))
       getActions.addAction(connectAction)
       getActions.addAction(moveAction)
     }
-    samplingLayer.addChild(cw)
+    boxLayer.addChild(cw)
     validate
-    samplings += sw -> cw
+    samplings += samplingProxy -> cw
   }
 
   def remove(samplingComponent: ISamplingComponent) = {
     samplingComponent.component match {
-      case (s: ISamplingWidget) ⇒
-        samplings.isDefinedAt(s) match {
+      case (s: ISamplingCompositionWidget) ⇒
+        domainsAndSamplings.isDefinedAt(s.proxy) match {
           case true ⇒
-            samplingLayer.removeChild(samplings(s))
-            samplings -= s
+            boxLayer.removeChild(domainsAndSamplings(s.proxy))
+            connections = connections.filterNot { case (s, t) ⇒ (s == samplingComponent) || (t == samplingComponent) }
+            samplingComponent.connections.foreach {
+              c ⇒ connectLayer.removeChild(c)
+            }
+            s match {
+              case (d: IDomainWidget) ⇒ domains -= d.proxy
+              case (s: ISamplingWidget) ⇒ samplings -= s.proxy
+              case _ ⇒
+            }
           case _ ⇒
         }
-      case (d: IDomainWidget) ⇒ domains.isDefinedAt(d) match {
-        case true ⇒
-          factorLayer.removeChild(domains(d))
-          domains -= d
-        case _ ⇒
-      }
       case _ ⇒
     }
+
     samplingComponent.connections.foreach {
       cw ⇒ connectLayer.removeChild(cw)
     }
     samplingComponent.connections.clear
     connections.filter {
       c ⇒
-        (c._1 == samplingComponent.component.id) || (c._2 == samplingComponent.component.id)
+        (c._1 == samplingComponent.component.proxy.id) || (c._2 == samplingComponent.component.proxy.id)
     }.foreach {
       e ⇒ connections -= e
     }
@@ -159,66 +153,83 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
 
   def scene = this
 
-  def setFinalSampling(fsampling: ISamplingWidget) = {
-    setSamplingWidget(finalSampling, false)
-    setSamplingWidget(fsampling, true)
-    finalSampling = Some(fsampling.id)
+  def setFinalSampling(fsampling: ISamplingProxyUI) = {
+    finalSampling match {
+      case Some(sp: ISamplingProxyUI) ⇒ setSamplingProxy(sp, false)
+      case _ ⇒
+    }
+    setSamplingProxy(fsampling, true)
+    finalSampling = Some(fsampling)
     revalidate
     repaint
   }
 
-  def setSamplingWidget(samplingWidget: ISamplingWidget,
-                        b: Boolean): Unit = samplingWidget.isFinalSamplingWidget = b
-
-  def setSamplingWidget(id: Option[String], b: Boolean): Unit = id match {
-    case Some(i: String) ⇒ samplings.keys.find {
-      _.dataUI.id == i
-    } match {
-      case Some(x: ISamplingWidget) ⇒ setSamplingWidget(x, b)
-      case _ ⇒
-    }
-    case _ ⇒
-  }
+  def setSamplingProxy(samplingProxy: ISamplingProxyUI,
+                       b: Boolean): Unit = samplingProxy.isFinal = b
 
   def saveContent(name: String) = {
     new SamplingCompositionDataUI(name,
       domains.map {
-        f ⇒ f._1.dataUI -> f._2.getPreferredLocation
+        f ⇒ f._1 -> f._2.getPreferredLocation
       }.toList,
       samplings.map {
-        s ⇒ s._1.dataUI -> s._2.getPreferredLocation
+        s ⇒ s._1 -> s._2.getPreferredLocation
       }.toList,
-      connections.toList,
+      connections.toList.map {
+        case ((a, b)) ⇒ (a.component.proxy, b.component.proxy)
+      },
       finalSampling)
   }
 
-  def factorsAndSamplings = domains ++ samplings
+  def domainsAndSamplings: Map[ISamplingCompositionProxyUI, SamplingComponent] = domains ++ samplings toMap
 
-  def samplingComponentFromId(id: String) = factorsAndSamplings.keys.find {
+  def samplingComponentFromId(id: String) = domainsAndSamplings.keys.find {
     _.id == id
   } match {
-    case Some(x: ISamplingCompositionWidget) ⇒ factorsAndSamplings(x)
+    case Some(x: ISamplingCompositionWidget) ⇒ domainsAndSamplings(x.proxy)
     case _ ⇒ throw new UserBadDataError("The sampling composition element " + id + " can not be found")
   }
 
-  def idFromSamplingComponent(sc: SamplingComponent) = sc.component match {
-    case f: IDomainWidget ⇒ f.id
-    case s: ISamplingWidget ⇒ s.dataUI.id
-    case _ ⇒ throw new UserBadDataError("The sampling widget element " + sc + " can not be found")
+  def testConnections = connections.foreach {
+    case ((source, target)) ⇒
+      println("test " + source + " to " + target)
+      if (!testConnection(source, target)) {
+        println("Not good from " + source + " to " + target)
+      }
   }
 
+  def testConnection(sourceWidget: ISamplingCompositionWidget,
+                     targetWidget: ISamplingCompositionWidget): Boolean =
+    targetWidget match {
+      case domainT: IDomainWidget ⇒ sourceWidget match {
+        case sw: ISamplingWidget ⇒ false
+        case dw: IDomainWidget ⇒ if (connections.map {
+          _._2.component
+        }.contains(domainT)) {
+          StatusBar.warn("Only one connection between Domains is allowed")
+          false
+        } else domainT.proxy.dataUI.isAcceptable(dw.proxy.dataUI)
+        case _ ⇒ false
+      }
+      case samplingT: ISamplingWidget ⇒
+        sourceWidget match {
+          case sw: ISamplingWidget ⇒ samplingT.proxy.dataUI.isAcceptable(sw.proxy.dataUI)
+          case dw: IDomainWidget ⇒ samplingT.proxy.dataUI.isAcceptable(dw.proxy.dataUI)
+          case _ ⇒ false
+        }
+      case _ ⇒ false
+    }
+
+  def testConnection(sourceComponent: ISamplingComponent,
+                     targetComponent: ISamplingComponent): Boolean =
+    testConnection(sourceComponent.component, targetComponent.component)
+
   class SamplingConnectionProvider extends ConnectProvider {
-    var source: Option[ISamplingCompositionWidget] = None
 
     override def isSourceWidget(sourceWidget: Widget): Boolean =
       sourceWidget match {
-        case x: SamplingComponent ⇒
-          if (source.isDefined) source.get.color = DEFAULT_COLOR
-          source = Some(x.component)
-          true
-        case _ ⇒
-          source = None
-          false
+        case x: SamplingComponent ⇒ true
+        case _ ⇒ false
       }
 
     def boolToConnector(b: Boolean) = {
@@ -227,28 +238,15 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
     }
 
     override def isTargetWidget(sourceWidget: Widget,
-                                targetWidget: Widget): ConnectorState =
+                                targetWidget: Widget): ConnectorState = {
       targetWidget match {
-        case s: SamplingComponent ⇒
-          s.component match {
-            case d: IDomainWidget ⇒ source match {
-              case Some(sw: ISamplingWidget) ⇒ boolToConnector(false)
-              case Some(dw: IDomainWidget) ⇒
-                if (connections.map { _._2 }.contains(d.id)) {
-                  StatusBar.warn("Only one connection between Domains is allowed")
-                  ConnectorState.REJECT_AND_STOP
-                } else boolToConnector(d.dataUI.isAcceptable(dw.dataUI))
-              case _ ⇒ ConnectorState.REJECT_AND_STOP
-            }
-            case _ ⇒ ConnectorState.REJECT_AND_STOP
-          }
-        case s: ISamplingWidget ⇒ source match {
-          case Some(sw: ISamplingWidget) ⇒ boolToConnector(s.dataUI.isAcceptable(sw.dataUI))
-          case Some(dw: IDomainWidget) ⇒ boolToConnector(s.dataUI.isAcceptable(dw.dataUI))
+        case t: ISamplingComponent ⇒ sourceWidget match {
+          case s: ISamplingComponent ⇒ boolToConnector(samplingCompositionPanelUI.testConnection(s, t))
           case _ ⇒ ConnectorState.REJECT_AND_STOP
         }
         case _ ⇒ ConnectorState.REJECT_AND_STOP
       }
+    }
 
     override def hasCustomTargetWidgetResolver(scene: Scene): Boolean = false
 
@@ -265,22 +263,8 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
       val sourceW = sourceWidget.asInstanceOf[SamplingComponent]
       val targetW = targetWidget.asInstanceOf[SamplingComponent]
       sourceW.connections += connection
-      // targetW.connections += connection
-      targetW.component match {
-        case tfw: IDomainWidget ⇒
-          println("targeted")
-          sourceW.component match {
-            case sfw: IDomainWidget ⇒
-              println("sourced")
-              tfw.previousDomain = Some(sfw.dataUI)
-              println("previous done : " + sfw.id + " is previous of " + tfw.dataUI + " " + tfw.previousDomain)
-            case _ ⇒
-          }
-        case _ ⇒
-      }
-      println("connection from " + idFromSamplingComponent(sourceW) + " to " + idFromSamplingComponent(targetW))
-      connections += idFromSamplingComponent(sourceW) -> idFromSamplingComponent(targetW)
-      source = None
+      targetW.connections += connection
+      connections += sourceW -> targetW
     }
 
     def sourceAnchor(w: Widget) = new Anchor(w) {

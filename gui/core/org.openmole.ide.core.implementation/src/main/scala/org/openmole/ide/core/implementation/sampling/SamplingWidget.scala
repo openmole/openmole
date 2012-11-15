@@ -36,15 +36,16 @@ import org.openmole.ide.misc.widget.MigPanel
 import java.awt.LinearGradientPaint
 import javax.imageio.ImageIO
 
-class SamplingWidget(var dataUI: ISamplingDataUI,
-                     display: Boolean = false) extends MigPanel("wrap", "[center]", "[center]") with ISamplingWidget { samplingWidget ⇒
-  preferredSize = new Dimension(130, 38)
+class SamplingWidget(val proxy: ISamplingProxyUI,
+                     display: Boolean = false) extends MigPanel("wrap", "[center]", "[center]") with ISamplingWidget {
+  samplingWidget ⇒
+  preferredSize = new Dimension(100, 38)
   opaque = true
   var isFinalSamplingWidget = false
 
   var color = SamplingCompositionPanelUI.DEFAULT_COLOR
 
-  val link = new LinkLabel(dataUI.preview,
+  val link = new LinkLabel(proxy.dataUI.preview,
     new Action("") {
       def apply = ScenesManager.currentSceneContainer match {
         case Some(s: ISceneContainer) ⇒ s.scene.displayExtraPropertyPanel(samplingWidget)
@@ -53,10 +54,12 @@ class SamplingWidget(var dataUI: ISamplingDataUI,
     },
     3,
     "ff5555",
-    true) { opaque = false; maximumSize = new Dimension(100, 30) }
+    true) {
+    opaque = false; maximumSize = new Dimension(80, 25)
+  }
 
   def update = {
-    link.link(dataUI.preview)
+    link.link(proxy.dataUI.preview)
     revalidate
     repaint
   }
@@ -77,5 +80,6 @@ class SamplingWidget(var dataUI: ISamplingDataUI,
     if (isFinalSamplingWidget)
       g.drawImage(ImageIO.read(getClass.getClassLoader.getResource("img/finalSampling.png")), 115, 19, 10, 14, peer)
   }
+
   contents += link
 }

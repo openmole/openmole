@@ -20,6 +20,7 @@ package org.openmole.ide.core.model.data
 import java.awt.Point
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.openmole.core.model.sampling.Sampling
+import org.openmole.ide.core.model.sampling._
 
 trait ISamplingCompositionDataUI extends IDataUI {
   def name: String
@@ -32,13 +33,13 @@ trait ISamplingCompositionDataUI extends IDataUI {
 
   def fatImagePath: String
 
-  def domains: Iterable[(IDomainDataUI[_], Point)]
+  def domains: Iterable[(IDomainProxyUI, Point)]
 
-  def samplings: Iterable[(ISamplingDataUI, Point)]
+  def samplings: Iterable[(ISamplingProxyUI, Point)]
 
-  def finalSampling: Option[String]
+  def finalSampling: Option[ISamplingProxyUI]
 
-  def connections: Iterable[(String, String)]
+  def connections: Iterable[(ISamplingCompositionProxyUI, ISamplingCompositionProxyUI)]
 
   def buildPanelUI: ISamplingCompositionPanelUI
 }
