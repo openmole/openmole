@@ -123,7 +123,9 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
         domainsAndSamplings.isDefinedAt(s.proxy) match {
           case true ⇒
             boxLayer.removeChild(domainsAndSamplings(s.proxy))
-            connections = connections.filterNot { case (s, t) ⇒ (s == samplingComponent) || (t == samplingComponent) }
+            connections = connections.filterNot {
+              case (s, t) ⇒ (s == samplingComponent) || (t == samplingComponent)
+            }
             samplingComponent.connections.foreach {
               c ⇒ connectLayer.removeChild(c)
             }
@@ -190,27 +192,34 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
     case _ ⇒ throw new UserBadDataError("The sampling composition element " + id + " can not be found")
   }
 
-  def testConnections = connections.foreach {
+  def testConnections(arityTest: Boolean) = connections.foreach {
     case ((source, target)) ⇒
-      println("test " + source + " to " + target)
-      if (!testConnection(source, target)) {
+      println("test " + source.component.proxy.id + " to " + target.component.proxy.id)
+      if (!testConnection(source.component, target.component, arityTest)) {
         println("Not good from " + source + " to " + target)
       }
   }
 
   def testConnection(sourceWidget: ISamplingCompositionWidget,
-                     targetWidget: ISamplingCompositionWidget): Boolean =
+                     targetWidget: ISamplingCompositionWidget,
+                     arityTest: Boolean = true): Boolean = {
+    StatusBar.clear
     targetWidget match {
-      case domainT: IDomainWidget ⇒ sourceWidget match {
-        case sw: ISamplingWidget ⇒ false
-        case dw: IDomainWidget ⇒ if (connections.map {
-          _._2.component
-        }.contains(domainT)) {
-          StatusBar.warn("Only one connection between Domains is allowed")
-          false
-        } else domainT.proxy.dataUI.isAcceptable(dw.proxy.dataUI)
-        case _ ⇒ false
-      }
+      case domainT: IDomainWidget ⇒
+        sourceWidget match {
+          case sw: ISamplingWidget ⇒ false
+          case dw: IDomainWidget ⇒ {
+            if (arityTest) {
+              if (connections.map {
+                _._2.component.proxy
+              }.contains(domainT.proxy)) {
+                StatusBar.warn("Only one connection between Domains is allowed")
+                false
+              } else true
+            } else true
+          } &&
+            domainT.proxy.dataUI.isAcceptable(dw.proxy.dataUI)
+        }
       case samplingT: ISamplingWidget ⇒
         sourceWidget match {
           case sw: ISamplingWidget ⇒ samplingT.proxy.dataUI.isAcceptable(sw.proxy.dataUI)
@@ -219,10 +228,12 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
         }
       case _ ⇒ false
     }
+  }
 
   def testConnection(sourceComponent: ISamplingComponent,
-                     targetComponent: ISamplingComponent): Boolean =
-    testConnection(sourceComponent.component, targetComponent.component)
+                     targetComponent: ISamplingComponent,
+                     arityTest: Boolean): Boolean =
+    testConnection(sourceComponent.component, targetComponent.component, arityTest)
 
   class SamplingConnectionProvider extends ConnectProvider {
 
@@ -238,15 +249,20 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
     }
 
     override def isTargetWidget(sourceWidget: Widget,
-                                targetWidget: Widget): ConnectorState = {
-      targetWidget match {
-        case t: ISamplingComponent ⇒ sourceWidget match {
-          case s: ISamplingComponent ⇒ boolToConnector(samplingCompositionPanelUI.testConnection(s, t))
+                                targetWidget: Widget): ConnectorState =
+      sourceWidget match {
+        case s: ISamplingComponent ⇒ targetWidget match {
+          case t: ISamplingComponent ⇒ t.component match {
+            case dp: IDomainWidget ⇒
+              if (t.component.proxy.id == s.component.proxy.id) ConnectorState.REJECT_AND_STOP
+              else boolToConnector(samplingCompositionPanelUI.testConnection(s.component, dp, true))
+            case sp: ISamplingWidget ⇒
+              boolToConnector(samplingCompositionPanelUI.testConnection(s.component, sp, false))
+            case _ ⇒ ConnectorState.REJECT_AND_STOP
+          }
           case _ ⇒ ConnectorState.REJECT_AND_STOP
         }
-        case _ ⇒ ConnectorState.REJECT_AND_STOP
       }
-    }
 
     override def hasCustomTargetWidgetResolver(scene: Scene): Boolean = false
 

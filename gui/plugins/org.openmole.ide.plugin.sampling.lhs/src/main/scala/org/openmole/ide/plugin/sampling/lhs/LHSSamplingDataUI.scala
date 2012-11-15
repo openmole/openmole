@@ -45,7 +45,7 @@ class LHSSamplingDataUI(val samples: String = "1") extends ISamplingDataUI {
   def buildPanelUI = new LHSSamplingPanelUI(this)
 
   //FIXME 2.10
-  def isAcceptable(domain: IDomainDataUI[_]) =
+  def isAcceptable(domain: IDomainDataUI) =
     domain.coreObject match {
       case x: Domain[Double] with Bounds[Double] ⇒ true
       case _ ⇒

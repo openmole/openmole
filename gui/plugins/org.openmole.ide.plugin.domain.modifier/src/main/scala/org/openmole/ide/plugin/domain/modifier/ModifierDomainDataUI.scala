@@ -19,12 +19,13 @@ package org.openmole.ide.plugin.domain.modifier
 import org.openmole.core.model.domain.{ Discrete, Domain }
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.core.model.sampling.IModifier
 
-abstract class ModifierDomainDataUI[T] extends IDomainDataUI[T] {
+trait ModifierDomainDataUI extends IDomainDataUI with IModifier {
   type DOMAINTYPE = Domain[T] with Discrete[T]
   var inputDomain: Option[DOMAINTYPE] = None
 
-  override def isAcceptable(domain: IDomainDataUI[_]) = domain.coreObject match {
+  override def isAcceptable(domain: IDomainDataUI) = domain.coreObject match {
     case d: Domain[_] with Discrete[T] ⇒
       inputDomain = Some(d)
       true
@@ -32,5 +33,4 @@ abstract class ModifierDomainDataUI[T] extends IDomainDataUI[T] {
       StatusBar.warn("A Discrete Domain is required as input of a Modifier Domain (Map, Take, Group, ...)")
       false
   }
-
 }

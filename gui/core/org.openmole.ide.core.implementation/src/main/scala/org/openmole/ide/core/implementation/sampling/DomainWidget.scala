@@ -58,7 +58,7 @@ class DomainWidget(val proxy: IDomainProxyUI,
 
   def update = {
     link.link(domainPreview)
-    scenePaneUI.testConnections
+    scenePaneUI.testConnections(false)
     revalidate
     repaint
   }

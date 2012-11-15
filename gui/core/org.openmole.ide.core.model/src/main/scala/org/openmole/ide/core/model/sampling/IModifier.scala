@@ -14,9 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.ide.core.implementation.sampling
+package org.openmole.ide.core.model.sampling
 
-import org.openmole.ide.core.model.data.{ ISamplingCompositionElementDataUI, IDomainDataUI }
-import org.openmole.ide.core.model.sampling.IDomainProxyUI
-
-class DomainProxyUI(var dataUI: IDomainDataUI) extends IDomainProxyUI
+trait IModifier

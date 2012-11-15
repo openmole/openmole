@@ -20,8 +20,7 @@ import org.openmole.ide.misc.tools.Counter
 import org.openmole.ide.core.model.data.ISamplingDataUI
 
 trait ISamplingProxyUI extends ISamplingCompositionProxyUI {
-
-  def id = "sampling" + Counter.id.getAndIncrement
+  val id = "sampling" + Counter.id.getAndIncrement
 
   def dataUI: ISamplingDataUI
 

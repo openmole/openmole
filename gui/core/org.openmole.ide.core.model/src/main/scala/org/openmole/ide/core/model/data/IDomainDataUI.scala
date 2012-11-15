@@ -25,15 +25,17 @@ import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.tools.Counter
 
 object IDomainDataUI {
-  implicit val ordering = Ordering.by((_: IDomainDataUI[_]).name)
+  implicit val ordering = Ordering.by((_: IDomainDataUI).name)
 }
 
-trait IDomainDataUI[T] extends IDataUI with ISamplingCompositionElementDataUI {
+trait IDomainDataUI extends IDataUI with ISamplingCompositionElementDataUI {
+  type T
+
   def coreObject: Domain[T]
 
   def buildPanelUI: IDomainPanelUI
 
   def preview: String
 
-  def isAcceptable(domain: IDomainDataUI[_]): Boolean = false
+  def isAcceptable(domain: IDomainDataUI): Boolean = false
 }

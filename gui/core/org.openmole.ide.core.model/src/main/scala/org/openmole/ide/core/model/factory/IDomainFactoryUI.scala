@@ -21,6 +21,6 @@ import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
 trait IDomainFactoryUI extends IFactoryUI {
-  def buildDataUI: IDomainDataUI[_]
+  def buildDataUI: IDomainDataUI
 }
 

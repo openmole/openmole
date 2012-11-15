@@ -35,7 +35,9 @@ object UniformDistributionDataUI {
 }
 
 import UniformDistributionDataUI._
-abstract class UniformDistributionDataUI[T] extends IDomainDataUI[T] {
+abstract class UniformDistributionDataUI[S] extends IDomainDataUI {
+
+  type T = S
 
   def availableTypes: List[String]
 

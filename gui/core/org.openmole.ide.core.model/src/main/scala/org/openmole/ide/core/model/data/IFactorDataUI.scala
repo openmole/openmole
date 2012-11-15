@@ -26,7 +26,7 @@ trait IFactorDataUI extends ISamplingCompositionElementDataUI {
 
   def prototype: IPrototypeDataProxyUI
 
-  def domain: IDomainDataUI[_]
+  def domain: IDomainDataUI
 
   def previousFactor: Option[IFactorDataUI]
 

@@ -36,11 +36,6 @@ class DomainPanelUI(domainWidget: IDomainWidget,
     _.buildDataUI
   }.toList.sorted
 
-  //val protoComboBox = new MyComboBox(Proxys.prototypes.toList)
-  //protoComboBox.selection.item = domainWidget.dataUI.prototype
-
-  //val ddcc = domainContent(domainWidget.dataUI.prototype)
-
   val domainComboBox = new MyComboBox(domains)
   domainComboBox.selection.item = domains.filter { _.toString == domainWidget.proxy.dataUI.toString }.head
 
@@ -62,14 +57,6 @@ class DomainPanelUI(domainWidget: IDomainWidget,
       repaint
   }
 
-  /*protoComboBox.selection.reactions += {
-    case SelectionChanged(`protoComboBox`) ⇒
-      if (protoDomainPanel.contents.size == 2) protoDomainPanel.contents.remove(1)
-      val dContent = domainContent(protoComboBox.selection.item)
-      domainComboBox.peer.setModel(MyComboBox.newConstantModel(dContent))
-      displayDomainPanel(dContent)
-  }*/
-
   def listenToDomain = {
     listenTo(dPanel.help.components.toSeq: _*)
     reactions += {
@@ -79,11 +66,11 @@ class DomainPanelUI(domainWidget: IDomainWidget,
     domainPanel.updateHelp
   }
 
-  def displayDomainPanel(dContent: List[IDomainDataUI[_]]) = dContent.filter {
+  def displayDomainPanel(dContent: List[IDomainDataUI]) = dContent.filter {
     it ⇒
       domainComboBox.selection.item.toString == it.toString
   }.headOption match {
-    case Some(d: IDomainDataUI[_]) ⇒
+    case Some(d: IDomainDataUI) ⇒
       dPanel = d.buildPanelUI
       protoDomainPanel.contents += dPanel.peer
       listenToDomain

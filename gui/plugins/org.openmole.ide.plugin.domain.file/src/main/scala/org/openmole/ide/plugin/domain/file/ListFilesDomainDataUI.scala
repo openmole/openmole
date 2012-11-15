@@ -24,7 +24,7 @@ import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.core.model.domain.Domain
 
 object ListFilesDomainDataUI {
-  def apply(d: SubDataUI[File]) = d match {
+  def apply(d: SubDataUI) = d match {
     case x: ListFilesDomainDataUI ⇒ x
     case _ ⇒ new ListFilesDomainDataUI
   }
@@ -32,7 +32,9 @@ object ListFilesDomainDataUI {
 
 class ListFilesDomainDataUI(val directoryPath: String = "",
                             val regexp: String = ".*",
-                            val recursive: Boolean = false) extends SubDataUI[File] {
+                            val recursive: Boolean = false) extends SubDataUI {
+  type T = File
+
   override def name = "Multiple"
 
   def coreObject = new ListFilesDomain(new File(directoryPath), regexp, recursive)

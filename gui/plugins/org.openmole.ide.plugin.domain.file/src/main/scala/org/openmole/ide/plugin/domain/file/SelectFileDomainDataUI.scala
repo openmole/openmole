@@ -24,13 +24,14 @@ import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.core.model.domain.Domain
 
 object SelectFileDomainDataUI {
-  def apply(d: SubDataUI[File]) = d match {
+  def apply(d: SubDataUI) = d match {
     case x: SelectFileDomainDataUI ⇒ x
     case _ ⇒ new SelectFileDomainDataUI
   }
 }
 
-class SelectFileDomainDataUI(val directoryPath: String = "", val path: String = "") extends SubDataUI[File] {
+class SelectFileDomainDataUI(val directoryPath: String = "", val path: String = "") extends SubDataUI {
+  type T = File
 
   override def name = "Single"
 

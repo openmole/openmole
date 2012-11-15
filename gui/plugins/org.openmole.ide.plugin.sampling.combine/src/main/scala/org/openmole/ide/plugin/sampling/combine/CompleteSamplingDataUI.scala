@@ -34,15 +34,20 @@ class CompleteSamplingDataUI extends ISamplingDataUI {
 
   def buildPanelUI = new CompleteSamplingPanelUI(this)
 
-  def isAcceptable(domain: IDomainDataUI[_]) = try {
+  def isAcceptable(domain: IDomainDataUI) = try {
+    println("try sampling")
     domain.coreObject match {
-      case x: Domain[Any] with Discrete[Any] ⇒ true
+      case x: Domain[Any] with Discrete[Any] ⇒
+        println("good domain")
+        true
       case _ ⇒
+        println("_")
         StatusBar.warn("A Discrete Domain is required for a Complete Sampling")
         false
     }
   } catch {
     case u: UserBadDataError ⇒
+      println("UBE : " + u.getMessage)
       StatusBar.warn("This domain is not valid : " + u.getMessage)
       false
   }

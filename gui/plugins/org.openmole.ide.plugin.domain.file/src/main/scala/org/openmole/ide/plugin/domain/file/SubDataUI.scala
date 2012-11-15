@@ -24,7 +24,7 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 
-trait SubDataUI[T] extends IDomainDataUI[T] {
+trait SubDataUI extends IDomainDataUI {
   def name = "File"
 
   def directoryPath: String

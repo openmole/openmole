@@ -28,7 +28,7 @@ import org.openmole.core.model.domain.{ Bounds, Domain }
 
 object GenericRangeDomainDataUI {
 
-  def apply[T](min: String = "0", max: String = "", step: Option[String] = None, log: Boolean, classString: String): IDomainDataUI[_] =
+  def apply[T](min: String = "0", max: String = "", step: Option[String] = None, log: Boolean, classString: String): IDomainDataUI =
     if (log) {
       classString match {
         case "Double" ⇒ new DoubleLogarithmRangeDataUI(min, max, step)
@@ -38,7 +38,7 @@ object GenericRangeDomainDataUI {
     } else RangeDomainDataUI(min, max, step, classString)
 }
 
-abstract class GenericRangeDomainDataUI[T] extends IDomainDataUI[T] {
+abstract class GenericRangeDomainDataUI[T] extends IDomainDataUI {
 
   var previousType = classOf[Domain[T]]
 

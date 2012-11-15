@@ -23,6 +23,7 @@ import org.openmole.core.model.domain.Domain
 import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 
 class DoubleLogarithmRangeDataUI(val min: String = "0.0", val max: String = "", val step: Option[String] = None) extends LogarthmicRangeDataUI[Double] {
+  type T = Double
 
   def availableTypes = List("Double")
 

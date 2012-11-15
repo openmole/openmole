@@ -43,8 +43,9 @@ object GroupDomainDataUI {
     }
 }
 
-class GroupDomainDataUI[T](val size: String = "0")(implicit val domainType: Manifest[T])
-    extends ModifierDomainDataUI[Array[T]] {
+class GroupDomainDataUI[S](val size: String = "0")(implicit val domainType: Manifest[S])
+    extends ModifierDomainDataUI {
+  type T = Array[S]
 
   val name = "Group"
 
@@ -53,13 +54,13 @@ class GroupDomainDataUI[T](val size: String = "0")(implicit val domainType: Mani
   val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
 
   override def coreObject = inputDomain match {
-    case Some(d: Domain[_] with Discrete[T]) ⇒ new GroupDomain[T](d, size.toInt)
+    case Some(d: Domain[_] with Discrete[S]) ⇒ new GroupDomain[S](d, size.toInt)
     case _ ⇒ throw new UserBadDataError("No input domain has been found, it is required for a Group Domain.")
   }
 
   def buildPanelUI = new GroupDomainPanelUI(this)
 
-  def coreClass = classOf[GroupDomainDataUI[T]]
+  def coreClass = classOf[GroupDomainDataUI[S]]
 
   override def toString = "Group"
 

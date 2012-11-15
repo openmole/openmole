@@ -35,7 +35,7 @@ trait ISamplingDataUI extends IDataUI with ISamplingCompositionElementDataUI {
 
   def fatImagePath: String
 
-  def isAcceptable(domain: IDomainDataUI[_]): Boolean
+  def isAcceptable(domain: IDomainDataUI): Boolean
 
   def isAcceptable(sampling: ISamplingDataUI): Boolean
 

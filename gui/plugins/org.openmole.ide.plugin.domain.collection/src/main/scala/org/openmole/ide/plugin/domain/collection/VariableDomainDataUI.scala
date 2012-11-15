@@ -46,7 +46,7 @@ object VariableDomainDataUI {
   }
 }
 
-class VariableDomainDataUI[T](val prototypeArray: IPrototypeDataProxyUI)(implicit domainType: Manifest[T]) extends IDomainDataUI[T] {
+class VariableDomainDataUI[T](val prototypeArray: IPrototypeDataProxyUI)(implicit domainType: Manifest[T]) extends IDomainDataUI {
   vdomainDataUI ⇒
   val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String", "File")
 

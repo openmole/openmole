@@ -42,8 +42,9 @@ object DynamicListDomainDataUI {
   }
 }
 
-class DynamicListDomainDataUI[T](val values: List[String])(implicit domainType: Manifest[T])
-    extends IDomainDataUI[T] {
+class DynamicListDomainDataUI[S](val values: List[String])(implicit domainType: Manifest[S])
+    extends IDomainDataUI {
+  type T = S
 
   val name = "Value list"
 

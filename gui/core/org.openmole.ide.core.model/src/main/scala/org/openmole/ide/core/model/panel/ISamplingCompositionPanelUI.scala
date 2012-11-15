@@ -41,5 +41,5 @@ trait ISamplingCompositionPanelUI extends IPanelUI {
 
   def setSamplingProxy(samplingProxy: ISamplingProxyUI, b: Boolean): Unit
 
-  def testConnections: Unit
+  def testConnections(arityTest: Boolean): Unit
 }

@@ -45,14 +45,16 @@ object RangeDomainDataUI {
   }
 }
 
-class RangeDomainDataUI[T](
+class RangeDomainDataUI[S](
   val min: String = "0",
   val max: String = "",
   val step: Option[String] = None)(
-    implicit val domainType: Manifest[T],
-    fs: FromString[T],
-    integral: Integral[T])
-    extends GenericRangeDomainDataUI[T] {
+    implicit val domainType: Manifest[S],
+    fs: FromString[S],
+    integral: Integral[S])
+    extends GenericRangeDomainDataUI[S] {
+
+  type T = S
 
   val name = "Range"
 

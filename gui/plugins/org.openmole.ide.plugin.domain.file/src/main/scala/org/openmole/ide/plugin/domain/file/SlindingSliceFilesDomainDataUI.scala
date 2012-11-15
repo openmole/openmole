@@ -24,7 +24,7 @@ import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.core.model.domain.Domain
 
 object SlindingSliceFilesDomainDataUI {
-  def apply(d: SubDataUI[Array[File]]) = d match {
+  def apply(d: SubDataUI) = d match {
     case x: SlindingSliceFilesDomainDataUI ⇒ x
     case _ ⇒ new SlindingSliceFilesDomainDataUI
   }
@@ -32,7 +32,9 @@ object SlindingSliceFilesDomainDataUI {
 
 class SlindingSliceFilesDomainDataUI(val directoryPath: String = "",
                                      val numberPattern: String = "",
-                                     val sliceSize: Int = 1) extends SubDataUI[Array[File]] {
+                                     val sliceSize: Int = 1) extends SubDataUI {
+  type T = Array[File]
+
   override def name = "Slinding Slices"
 
   def coreObject =

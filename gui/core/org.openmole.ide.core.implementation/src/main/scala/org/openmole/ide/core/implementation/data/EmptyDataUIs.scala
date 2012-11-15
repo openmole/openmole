@@ -93,7 +93,7 @@ object EmptyDataUIs {
     def saveContent(name: String) = new EmptySamplingCompositionDataUI
     def remove(samplingComponent: ISamplingComponent): Unit = {}
     def scene = new Scene
-    def testConnections = {}
+    def testConnections(arityTest: Boolean) = {}
   }
 
   class EmptySampling extends Sampling {

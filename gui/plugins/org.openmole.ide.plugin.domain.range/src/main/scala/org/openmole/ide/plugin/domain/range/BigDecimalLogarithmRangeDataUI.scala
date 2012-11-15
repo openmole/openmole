@@ -25,6 +25,7 @@ import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 
 class BigDecimalLogarithmRangeDataUI(val min: String = "0.0", val max: String = "", val step: Option[String] = None) extends LogarthmicRangeDataUI[BigDecimal] {
+  type T = BigDecimal
 
   def availableTypes = List("BigDecimal")
 

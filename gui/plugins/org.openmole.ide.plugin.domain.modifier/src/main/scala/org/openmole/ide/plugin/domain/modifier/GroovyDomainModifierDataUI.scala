@@ -30,25 +30,9 @@ import org.openmole.plugin.domain.modifier.GroovyDomainModifier
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.dialog.StatusBar
 
-/*object GroovyModifierDomainDataUI {
-
-  def apply[T](protoName: String = "",
-               code: String = "", classString: String) = {
-    classString match {
-      case "Int" ⇒ new GroovyModifierDomainDataUI[Int](protoName, code)
-      case "Double" ⇒ new GroovyModifierDomainDataUI[Double](protoName, code)
-      case "BigDecimal" ⇒ new GroovyModifierDomainDataUI[BigDecimal](protoName, code)
-      case "BigInteger" ⇒ new GroovyModifierDomainDataUI[BigInteger](protoName, code)
-      case "Long" ⇒ new GroovyModifierDomainDataUI[Long](protoName, code)
-      case "String" ⇒ new GroovyModifierDomainDataUI[String](protoName, code)
-      case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
-    }
-  }
-}   */
-
 class GroovyModifierDomainDataUI(val prototypeName: String = "",
                                  val code: String = "")
-    extends ModifierDomainDataUI[Any] {
+    extends ModifierDomainDataUI {
 
   val name = "Map"
 
@@ -56,7 +40,7 @@ class GroovyModifierDomainDataUI(val prototypeName: String = "",
 
   val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
 
-  override def coreObject: Domain[Any] = inputDomain match {
+  override def coreObject: Domain[T] = inputDomain match {
     case Some(id: DOMAINTYPE) ⇒ new GroovyDomainModifier(id, prototypeName, code)
     case _ ⇒ throw new UserBadDataError("An input Domain is required for a Map modifier Domain")
   }
