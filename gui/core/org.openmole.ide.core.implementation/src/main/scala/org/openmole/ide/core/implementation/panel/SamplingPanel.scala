@@ -34,7 +34,7 @@ class SamplingPanel(samplingWidget: ISamplingWidget,
                     mode: PanelMode.Value) extends BasePanel(None,
   scene,
   mode) {
-  val panelUI = samplingWidget.dataUI.buildPanelUI
+  val panelUI = samplingWidget.proxy.dataUI.buildPanelUI
 
   listenTo(panelUI.help.components.toSeq: _*)
   reactions += {
@@ -45,7 +45,7 @@ class SamplingPanel(samplingWidget: ISamplingWidget,
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap 2") {
     contents += new Label {
-      icon = new ImageIcon(ImageIO.read(samplingWidget.dataUI.getClass.getClassLoader.getResource(samplingWidget.dataUI.fatImagePath)))
+      icon = new ImageIcon(ImageIO.read(samplingWidget.proxy.dataUI.getClass.getClassLoader.getResource(samplingWidget.proxy.dataUI.fatImagePath)))
     }
     contents += panelUI.peer
   }.peer, BorderLayout.CENTER)
@@ -56,7 +56,7 @@ class SamplingPanel(samplingWidget: ISamplingWidget,
   def delete = true
 
   def save = {
-    samplingWidget.dataUI = panelUI.saveContent
+    samplingWidget.proxy.dataUI = panelUI.saveContent
     samplingWidget.update
   }
 }

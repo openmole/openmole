@@ -42,9 +42,9 @@ class DomainPanelUI(domainWidget: IDomainWidget,
   //val ddcc = domainContent(domainWidget.dataUI.prototype)
 
   val domainComboBox = new MyComboBox(domains)
-  domainComboBox.selection.item = domains.filter { _.toString == domainWidget.dataUI.toString }.head
+  domainComboBox.selection.item = domains.filter { _.toString == domainWidget.proxy.dataUI.toString }.head
 
-  var dPanel = domainWidget.dataUI.buildPanelUI
+  var dPanel = domainWidget.proxy.dataUI.buildPanelUI
 
   val protoDomainPanel = new PluginPanel("wrap") {
     contents += domainComboBox

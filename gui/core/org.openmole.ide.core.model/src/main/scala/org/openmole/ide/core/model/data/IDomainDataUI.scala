@@ -29,8 +29,6 @@ object IDomainDataUI {
 }
 
 trait IDomainDataUI[T] extends IDataUI with ISamplingCompositionElementDataUI {
-  val id: String = "domain" + Counter.id.getAndIncrement
-
   def coreObject: Domain[T]
 
   def buildPanelUI: IDomainPanelUI

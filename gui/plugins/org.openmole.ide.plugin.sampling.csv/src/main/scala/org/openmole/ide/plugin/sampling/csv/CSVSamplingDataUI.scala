@@ -11,7 +11,6 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.data._
 import org.openmole.plugin.sampling.csv.CSVSampling
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
-import org.openmole.ide.core.implementation.sampling.InputSampling
 import org.openmole.ide.misc.tools.Counter
 import org.openmole.core.model.sampling.Sampling
 
@@ -38,11 +37,13 @@ class CSVSamplingDataUI(var csvFilePath: String = "",
 
   def buildPanelUI = new CSVSamplingPanelUI(this)
 
-  def inputs = new InputSampling
-
   def isAcceptable(factor: IDomainDataUI[_]) = true
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 
-  def preview = "from " + new File(csvFilePath).getName
+  def preview = "from " + {
+    val n = new File(csvFilePath).getName
+    if (n.isEmpty) "CSV file"
+    else n
+  }
 }

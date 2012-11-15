@@ -22,15 +22,7 @@ import scala.swing.Panel
 import java.awt.Color
 
 trait ISamplingCompositionWidget extends Panel {
-  def id: String
-
-  def color: Color
-
-  def color_=(c: Color)
+  def proxy: ISamplingCompositionProxyUI
 
   def update: Unit
-
-  // def dataUI: ISamplingCompositionElementDataUI
-
-  //def dataUI_=(elementDataUI: ISamplingCompositionElementDataUI)
 }

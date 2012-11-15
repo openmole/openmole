@@ -43,11 +43,11 @@ class CompleteSamplingDataUI extends ISamplingDataUI {
     }
   } catch {
     case u: UserBadDataError ⇒
-      StatusBar.warn("This factor is not valid : " + u.getMessage)
+      StatusBar.warn("This domain is not valid : " + u.getMessage)
       false
   }
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 
-  def preview = "complete sampling"
+  def preview = "Complete"
 }

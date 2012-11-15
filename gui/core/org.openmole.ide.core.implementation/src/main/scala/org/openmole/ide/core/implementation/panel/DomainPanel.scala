@@ -46,7 +46,7 @@ class DomainPanel(domainWidget: IDomainWidget,
   def delete = true
 
   def save = {
-    domainWidget.dataUI = panelUI.saveContent
+    domainWidget.proxy.dataUI = panelUI.saveContent
     domainWidget.update
   }
 
