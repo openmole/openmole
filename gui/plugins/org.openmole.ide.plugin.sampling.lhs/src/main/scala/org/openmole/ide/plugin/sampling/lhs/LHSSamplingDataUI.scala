@@ -55,5 +55,5 @@ class LHSSamplingDataUI(val samples: String = "1") extends ISamplingDataUI {
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 
-  def preview = "LHS with " + samples + "samples"
+  def preview = "LHS (" + samples + ")"
 }

@@ -49,5 +49,5 @@ class CompleteSamplingDataUI extends ISamplingDataUI {
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 
-  def preview = "complete sampling"
+  def preview = "Complete"
 }

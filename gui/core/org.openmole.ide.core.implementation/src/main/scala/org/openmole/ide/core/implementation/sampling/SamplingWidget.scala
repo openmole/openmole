@@ -55,7 +55,7 @@ class SamplingWidget(val proxy: ISamplingProxyUI,
     3,
     "ff5555",
     true) {
-    opaque = false; maximumSize = new Dimension(80, 25)
+    opaque = false; maximumSize = new Dimension(80, 30)
   }
 
   def update = {

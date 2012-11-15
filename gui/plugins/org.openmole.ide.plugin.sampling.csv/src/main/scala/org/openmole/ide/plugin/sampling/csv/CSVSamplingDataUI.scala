@@ -41,5 +41,9 @@ class CSVSamplingDataUI(var csvFilePath: String = "",
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 
-  def preview = "from " + new File(csvFilePath).getName
+  def preview = "from " + {
+    val n = new File(csvFilePath).getName
+    if (n.isEmpty) "CSV file"
+    else n
+  }
 }

@@ -269,7 +269,7 @@ class SamplingCompositionPanelUI(dataUI: ISamplingCompositionDataUI) extends Sce
 
     def sourceAnchor(w: Widget) = new Anchor(w) {
       override def compute(entry: Anchor.Entry) =
-        new Result(w.convertLocalToScene(new Point(130, 19)), Anchor.Direction.RIGHT)
+        new Result(w.convertLocalToScene(new Point(100, 19)), Anchor.Direction.RIGHT)
     }
 
     def targetAnchor(w: Widget) = new Anchor(w) {

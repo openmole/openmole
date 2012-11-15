@@ -48,7 +48,7 @@ class GroupDomainDataUI[T](val size: String = "0")(implicit val domainType: Mani
 
   val name = "Group"
 
-  def preview = " group by " + size
+  def preview = "Group (" + size + ")"
 
   val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
 

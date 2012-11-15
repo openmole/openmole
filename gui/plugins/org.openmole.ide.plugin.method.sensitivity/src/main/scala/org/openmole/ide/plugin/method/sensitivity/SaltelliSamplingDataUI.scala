@@ -55,5 +55,5 @@ class SaltelliSamplingDataUI(val samples: String = "1") extends ISamplingDataUI 
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 
-  def preview = "Saltelli with " + samples + "samples"
+  def preview = "Saltelli (" + samples + ")"
 }

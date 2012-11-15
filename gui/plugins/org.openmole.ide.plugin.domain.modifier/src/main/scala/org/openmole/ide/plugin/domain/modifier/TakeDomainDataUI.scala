@@ -48,7 +48,7 @@ class TakeDomainDataUI(val size: String = "1")
 
   val name = "Take"
 
-  def preview = " take " + size
+  def preview = "Take (" + size + ")"
 
   val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
 

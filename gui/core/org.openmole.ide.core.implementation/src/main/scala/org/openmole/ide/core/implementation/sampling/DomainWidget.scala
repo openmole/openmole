@@ -42,8 +42,7 @@ class DomainWidget(val proxy: IDomainProxyUI,
     "73a5d2",
     true) {
     opaque = false
-    border = BorderFactory.createLineBorder(Color.red)
-    maximumSize = new Dimension(80, 25)
+    maximumSize = new Dimension(80, 30)
   }
 
   var color = SamplingCompositionPanelUI.DEFAULT_COLOR

@@ -52,7 +52,7 @@ class GroovyModifierDomainDataUI(val prototypeName: String = "",
 
   val name = "Map"
 
-  def preview = " map( " + code.split("\n")(0) + " ...)"
+  def preview = "Map( " + code.split("\n").take(2).mkString(",") + " ...)"
 
   val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
 
