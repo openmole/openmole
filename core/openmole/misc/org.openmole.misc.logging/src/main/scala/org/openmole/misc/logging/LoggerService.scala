@@ -30,7 +30,7 @@ object LoggerService {
   val blackList = Set(
     "ch.ethz.ssh2.log.Logger",
     "org.glite.voms.contact.VOMSProxyInit",
-    "org.globus.gsi.stores.ResourceSigningPolicyStore")
+    "org.globus.gsi")
   private val LogLevel = new ConfigurationLocation("LoggerService", "LogLevel")
 
   Workspace += (LogLevel, "INFO")
@@ -38,11 +38,8 @@ object LoggerService {
   def level(levelLabel: String) = {
     val level = Level.parse(levelLabel)
 
-    //SLF4JBridgeHandler.uninstall
-    //SLF4JBridgeHandler.removeHandlersForRootLogger
     LogManager.getLogManager.reset
 
-    //val rootLogger = LogManager.getLogManager.getLogger("")
     val rootLogger = Logger.getLogger("")
     rootLogger.setLevel(level)
     val ch = new ConsoleHandler
@@ -50,7 +47,7 @@ object LoggerService {
     ch.setFilter(
       new Filter {
         def isLoggable(record: LogRecord) =
-          !blackList.contains(record.getSourceClassName)
+          !blackList.exists(record.getSourceClassName.contains(_))
       })
 
     rootLogger.addHandler(ch)
