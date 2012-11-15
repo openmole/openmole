@@ -35,7 +35,7 @@ class KillerActor(jobManager: ActorRef) extends Actor {
         case Some(t) ⇒ bj.kill(t)
         case None ⇒
           if (nbTry < Workspace.preferenceAsInt(BatchEnvironment.NoTokenForSerivceRetry))
-            jobManager ! Delay(() ⇒ jobManager ! KillBatchJob(bj, nbTry + 1), Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForSerivceRetryInterval).toMilliSeconds)
+            jobManager ! Delay(KillBatchJob(bj, nbTry + 1), Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForSerivceRetryInterval).toMilliSeconds)
       } catch {
         case e: Throwable ⇒ logger.log(FINE, "Could not kill job.", e)
       }
