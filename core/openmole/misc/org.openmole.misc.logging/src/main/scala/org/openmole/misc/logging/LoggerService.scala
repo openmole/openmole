@@ -58,7 +58,7 @@ object LoggerService {
 
   def init = {
     BasicConfigurator.configure
-    L4JLogger.getRootLogger.setLevel(L4JLevel.WARN)
+    L4JLogger.getRootLogger.setLevel(L4JLevel.ERROR)
     level(Workspace.preference(LogLevel))
   }
 }
