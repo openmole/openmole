@@ -75,8 +75,8 @@ object GliteEnvironment extends Logger {
   val JobServiceFitnessPower = new ConfigurationLocation("GliteEnvironment", "JobServiceFitnessPower")
   val StorageFitnessPower = new ConfigurationLocation("GliteEnvironment", "StorageFitnessPower")
 
-  val CECacheDir = new ConfigurationLocation("GliteEnvironment", "CECacheDir")
-  val CECacheDuration = new ConfigurationLocation("GliteEnvironment", "CECacheDuration")
+  //val CECacheDir = new ConfigurationLocation("GliteEnvironment", "CECacheDir")
+  //val CECacheDuration = new ConfigurationLocation("GliteEnvironment", "CECacheDuration")
 
   val RunningHistoryDuration = new ConfigurationLocation("GliteEnvironment", "RunningHistoryDuration")
 
@@ -114,8 +114,8 @@ object GliteEnvironment extends Logger {
   Workspace += (JobServiceFitnessPower, "2")
   Workspace += (StorageFitnessPower, "2")
 
-  Workspace += (CECacheDir, "openmole_cache")
-  Workspace += (CECacheDuration, "P7D")
+  //Workspace += (CECacheDir, "openmole_cache")
+  //Workspace += (CECacheDuration, "P7D")
 
   Workspace += (RunningHistoryDuration, "PT3H")
 }

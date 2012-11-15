@@ -149,11 +149,11 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     //writter.print(clearCacheCmd(homeCacheDir))
   }
 
-  protected def cacheDir(home: String) =
-    home + "/" + Workspace.preference(GliteEnvironment.CECacheDir) + "_" + Workspace.preference(Workspace.uniqueID)
+  //protected def cacheDir(home: String) =
+  //  home + "/" + Workspace.preference(GliteEnvironment.CECacheDir) + "_" + Workspace.preference(Workspace.uniqueID)
 
-  protected def clearCacheCmd(cache: String) =
-    "find " + cache + " -atime " + Workspace.preference(GliteEnvironment.CECacheDuration).toDays + " -delete ; "
+  //protected def clearCacheCmd(cache: String) =
+  //  "find " + cache + " -atime " + Workspace.preference(GliteEnvironment.CECacheDuration).toDays + " -delete ; "
 
   protected def lcgCpGunZipCmd(from: URI, to: String) = {
     val builder = new StringBuilder
@@ -212,7 +212,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
       override val retryCount = Some(Workspace.preferenceAsInt(GliteEnvironment.WMSRetryCount))
       override val myProxyServer = environment.myProxy.map(_.url)
       override val architecture = environment.architecture
-      //override val fuzzy = true
+      override val fuzzy = true
     }
 
 }
