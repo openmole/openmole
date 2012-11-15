@@ -28,10 +28,10 @@ case class Uploaded(job: BatchExecutionJob, serializedJob: SerializedJob) extend
 case class Submit(job: BatchExecutionJob, serializedJob: SerializedJob) extends JobMessage
 case class Submitted(job: BatchExecutionJob, serializedJob: SerializedJob, batchJob: BatchJob) extends JobMessage
 case class Refresh(job: BatchExecutionJob, serializedJob: SerializedJob, batchJob: BatchJob, delay: Long) extends JobMessage
-case class RefreshDelay(job: BatchExecutionJob, serializedJob: SerializedJob, batchJob: BatchJob, delay: Long) extends JobMessage
+case class Delay(action: () ⇒ Unit, delay: Long) extends JobMessage
 case class Error(job: BatchExecutionJob, exception: Throwable) extends JobMessage
 case class Kill(job: BatchExecutionJob) extends JobMessage
-case class KillBatchJob(batchJob: BatchJob) extends JobMessage
+case class KillBatchJob(batchJob: BatchJob, nbTry: Int = 1) extends JobMessage
 case class GetResult(job: BatchExecutionJob, serializedJob: SerializedJob, outputFilePath: String) extends JobMessage
 case class MoleJobError(moleJob: IMoleJob, job: BatchExecutionJob, exception: Throwable)
 case class CleanSerializedJob(job: SerializedJob)

@@ -42,14 +42,14 @@ class RefreshActor(jobManager: ActorRef, environment: BatchEnvironment) extends 
                 val newDelay =
                   if (oldState == job.state) math.min(delay + environment.incrementUpdateInterval, environment.maxUpdateInterval)
                   else environment.minUpdateInterval
-                jobManager ! RefreshDelay(job, sj, bj, newDelay)
+                jobManager ! Delay(() ⇒ Refresh(job, sj, bj, newDelay), newDelay)
               } else jobManager ! Kill(job)
             } catch {
               case e: Throwable ⇒
                 jobManager ! Error(job, e)
                 jobManager ! Kill(job)
             }
-          case None ⇒ jobManager ! RefreshDelay(job, sj, bj, delay)
+          case None ⇒ jobManager ! Delay(() ⇒ Refresh(job, sj, bj, delay), delay)
         }
       }
       System.runFinalization

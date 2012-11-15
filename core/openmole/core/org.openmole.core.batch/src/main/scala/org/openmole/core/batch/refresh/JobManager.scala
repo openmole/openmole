@@ -72,7 +72,7 @@ akka {
   val submitter = workers.actorOf(Props(new SubmitActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
   val refresher = workers.actorOf(Props(new RefreshActor(self, environment)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
   val resultGetters = workers.actorOf(Props(new GetResultActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
-  val killer = workers.actorOf(Props(new KillerActor).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
+  val killer = workers.actorOf(Props(new KillerActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
   val cleaner = workers.actorOf(Props(new CleanerActor).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
   val deleter = workers.actorOf(Props(new DeleteActor).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
 
@@ -84,10 +84,10 @@ akka {
     case Submit(job, sj) ⇒ submitter ! Submit(job, sj)
     case Submitted(job, sj, bj) ⇒
       job.batchJob = Some(bj)
-      self ! RefreshDelay(job, sj, bj, minUpdateInterval)
-    case RefreshDelay(job, sj, bj, delay) ⇒
+      self ! Delay(() ⇒ refresher ! Refresh(job, sj, bj, minUpdateInterval), minUpdateInterval)
+    case Delay(closure, delay) ⇒
       context.system.scheduler.scheduleOnce(delay milliseconds) {
-        refresher ! Refresh(job, sj, bj, delay)
+        closure()
       }
     case GetResult(job, sj, out) ⇒
       resultGetters ! GetResult(job, sj, out)
@@ -102,7 +102,7 @@ akka {
       }
       EventDispatcher.trigger(environment: Environment, new Environment.ExceptionRaised(job, exception, level))
       logger.log(level, "Error in job refresh", exception)
-    case KillBatchJob(bj) ⇒ killer ! KillBatchJob(bj)
+    case msg: KillBatchJob ⇒ killer ! msg
     case MoleJobError(mj, j, e) ⇒
       EventDispatcher.trigger(environment: Environment, new Environment.MoleJobExceptionRaised(j, e, WARNING, mj))
       logger.log(WARNING, "Error durring job execution, it will be resubmitted.", e)
