@@ -24,7 +24,7 @@ import org.openmole.misc.updater._
 import org.openmole.misc.workspace._
 import scala.ref.WeakReference
 
-class StoragesGC(storageRef: WeakReference[Iterable[StorageService]], environment: BatchEnvironment) extends IUpdatable {
+class StoragesGC(storagesRef: WeakReference[Iterable[StorageService]], environment: BatchEnvironment) extends IUpdatable {
 
   override def update: Boolean =
     storagesRef.get match {
