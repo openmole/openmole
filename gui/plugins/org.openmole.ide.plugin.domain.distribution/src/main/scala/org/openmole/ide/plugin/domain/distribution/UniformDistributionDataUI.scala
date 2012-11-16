@@ -18,26 +18,20 @@
 package org.openmole.ide.plugin.domain.distribution
 
 import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
-import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.plugin.domain.distribution._
-import org.openmole.core.model.domain.Domain
+import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.misc.exception.UserBadDataError
 
 object UniformDistributionDataUI {
 
   def apply[T](max: Option[Int] = None, classString: String) = classString match {
-    case "Int" ⇒ new UniformIntDistributionDataUI(max)
-    case "Long" ⇒ new UniformLongDistributionDataUI
+    case INT ⇒ new UniformIntDistributionDataUI(max)
+    case LONG ⇒ new UniformLongDistributionDataUI
     case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
   }
 }
 
 import UniformDistributionDataUI._
 abstract class UniformDistributionDataUI[S] extends IDomainDataUI {
-
-  type T = S
 
   def availableTypes: List[String]
 

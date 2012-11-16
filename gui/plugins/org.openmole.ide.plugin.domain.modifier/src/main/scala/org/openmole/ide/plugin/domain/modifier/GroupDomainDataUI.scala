@@ -20,41 +20,41 @@ package org.openmole.ide.plugin.domain.modifier
 import java.math.BigDecimal
 import java.math.BigInteger
 import org.openmole.core.model.domain.{ Discrete, Domain }
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
+import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.domain.modifier.GroupDomain
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
-import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
-import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.core.model.data.IDomainDataUI
 
 object GroupDomainDataUI {
 
-  def apply[T](size: String = "1",
-               classString: String) =
+  def apply[S](size: String = "1",
+               classString: String,
+               previousDomain: Option[IDomainDataUI] = None) = {
     classString match {
-      case "Int" ⇒ new GroupDomainDataUI[Int](size)
-      case "Double" ⇒ new GroupDomainDataUI[Double](size)
-      case "BigDecimal" ⇒ new GroupDomainDataUI[BigDecimal](size)
-      case "BigInteger" ⇒ new GroupDomainDataUI[BigInteger](size)
-      case "Long" ⇒ new GroupDomainDataUI[Long](size)
-      case "String" ⇒ new GroupDomainDataUI[String](size)
+      case INT ⇒ new GroupDomainDataUI[Int](size, previousDomain)
+      case DOUBLE ⇒ new GroupDomainDataUI[Double](size, previousDomain)
+      case BIG_DECIMAL ⇒ new GroupDomainDataUI[BigDecimal](size, previousDomain)
+      case BIG_INTEGER ⇒ new GroupDomainDataUI[BigInteger](size, previousDomain)
+      case LONG ⇒ new GroupDomainDataUI[Long](size, previousDomain)
+      case STRING ⇒ new GroupDomainDataUI[String](size, previousDomain)
       case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
     }
+  }
 }
 
-class GroupDomainDataUI[S](val size: String = "0")(implicit val domainType: Manifest[S])
+class GroupDomainDataUI[S](val size: String = "0",
+                           var previousDomain: Option[IDomainDataUI] = None)(implicit val domainType: Manifest[S])
     extends ModifierDomainDataUI {
-  type T = Array[S]
 
   val name = "Group"
 
   def preview = "Group (" + size + ")"
 
-  val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
-
-  override def coreObject = inputDomain match {
-    case Some(d: Domain[_] with Discrete[S]) ⇒ new GroupDomain[S](d, size.toInt)
+  override def coreObject: Domain[Any] = previousDomain match {
+    case Some(pD: IDomainDataUI) ⇒ pD.coreObject match {
+      case d: DOMAINTYPE ⇒ new GroupDomain(d, size.toInt)
+      case _ ⇒ throw new UserBadDataError("No input domain has been found, it is required for a Group Domain.")
+    }
     case _ ⇒ throw new UserBadDataError("No input domain has been found, it is required for a Group Domain.")
   }
 

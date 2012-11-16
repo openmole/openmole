@@ -17,15 +17,18 @@
 
 package org.openmole.ide.plugin.domain.range
 
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.domain.range.DoubleLogarithmRange
 import org.openmole.core.model.domain.Domain
 import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
+import org.openmole.ide.misc.tools.util.Types._
 
-class DoubleLogarithmRangeDataUI(val min: String = "0.0", val max: String = "", val step: Option[String] = None) extends LogarthmicRangeDataUI[Double] {
-  type T = Double
+class DoubleLogarithmRangeDataUI(val min: String = "0.0",
+                                 val max: String = "",
+                                 val step: Option[String] = None) extends LogarthmicRangeDataUI {
 
-  def availableTypes = List("Double")
+  val domainType = manifest[Double]
+
+  override def availableTypes = List(DOUBLE)
 
   def coreObject: Domain[Double] = new DoubleLogarithmRange(min, max, stepString)
 

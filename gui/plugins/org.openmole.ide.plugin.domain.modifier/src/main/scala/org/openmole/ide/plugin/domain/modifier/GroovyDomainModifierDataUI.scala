@@ -31,17 +31,24 @@ import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.dialog.StatusBar
 
 class GroovyModifierDomainDataUI(val prototypeName: String = "",
-                                 val code: String = "")
+                                 val code: String = "",
+                                 var previousDomain: Option[IDomainDataUI] = None)
     extends ModifierDomainDataUI {
+
+  val domainType = previousDomain match {
+    case Some(dt: IDomainDataUI) ⇒ dt.domainType
+    case _ ⇒ manifest[Double]
+  }
 
   val name = "Map"
 
   def preview = "Map( " + code.split("\n").take(2).mkString(",") + " ...)"
 
-  val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
-
-  override def coreObject: Domain[T] = inputDomain match {
-    case Some(id: DOMAINTYPE) ⇒ new GroovyDomainModifier(id, prototypeName, code)
+  override def coreObject: Domain[Any] = previousDomain match {
+    case Some(pD: IDomainDataUI) ⇒ pD.coreObject match {
+      case id: DOMAINTYPE ⇒ new GroovyDomainModifier(id, prototypeName, code)
+      case _ ⇒ throw new UserBadDataError("An input Domain is required for a Map modifier Domain")
+    }
     case _ ⇒ throw new UserBadDataError("An input Domain is required for a Map modifier Domain")
   }
 

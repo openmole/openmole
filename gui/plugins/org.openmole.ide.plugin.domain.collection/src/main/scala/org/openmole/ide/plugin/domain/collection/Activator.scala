@@ -22,15 +22,16 @@ import org.openmole.ide.core.implementation.registry.DomainActivator
 import org.openmole.ide.core.implementation.data.EmptyDataUIs.EmptyPrototypeDataUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
+import org.openmole.ide.misc.tools.util.Types._
 
 class Activator extends OSGiActivator with DomainActivator {
 
   override def domainFactories = List(
     new DynamicListFactoryUI {
-      def buildDataUI = DynamicListDomainDataUI(classString = "Double")
+      def buildDataUI = DynamicListDomainDataUI(classString = DOUBLE)
     },
     new VariableDomainFactoryUI {
       def buildDataUI = VariableDomainDataUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], false),
-        classString = "Double")
+        classString = DOUBLE)
     })
 }

@@ -17,25 +17,25 @@
 
 package org.openmole.ide.core.model.data
 
-import org.openmole.ide.core.model.commons.Constants._
-import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IDomainPanelUI
-import org.openmole.ide.misc.tools.Counter
+import org.openmole.ide.misc.tools.util.Types._
 
 object IDomainDataUI {
   implicit val ordering = Ordering.by((_: IDomainDataUI).name)
 }
 
 trait IDomainDataUI extends IDataUI with ISamplingCompositionElementDataUI {
-  type T
 
-  def coreObject: Domain[T]
+  def domainType: Manifest[_]
+
+  def coreObject: Domain[_]
 
   def buildPanelUI: IDomainPanelUI
 
   def preview: String
 
   def isAcceptable(domain: IDomainDataUI): Boolean = false
+
+  def availableTypes: List[String] = List(INT, DOUBLE, BIG_DECIMAL, BIG_INTEGER, LONG)
 }

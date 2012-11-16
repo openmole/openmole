@@ -23,6 +23,6 @@ import org.openmole.ide.core.implementation.registry.DomainActivator
 class Activator extends OSGiActivator with DomainActivator {
 
   override def domainFactories = List(
-    new RangeDomainFactoryUI { def buildDataUI = RangeDomainDataUI(classString = "Double") },
+    new RangeDomainFactoryUI { def buildDataUI = RangeDomainDataUI.empty },
     new RangeDomainFactoryUI { def buildDataUI = new BigDecimalLogarithmRangeDataUI })
 }

@@ -27,21 +27,22 @@ import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.{ Help, URL, Helper, PluginPanel }
 import scala.swing.BorderPanel.Position._
 import java.util.{ Locale, ResourceBundle }
+import org.openmole.ide.misc.tools.util.Types._
 
 class UniformDistributionPanelUI(pud: UniformDistributionDataUI[_]) extends PluginPanel("fillx", "[left][grow,fill]", "") with IDomainPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
-  val typeCombo = new MyComboBox(List("Int", "Long"))
+  val typeCombo = new MyComboBox(List(INT, LONG))
   val maxField = new TextField(6)
 
-  val initialType = if (pud.max.isDefined) "Int" else "Long"
+  val initialType = if (pud.max.isDefined) INT else LONG
   typeCombo.selection.item = initialType
   setContents(initialType)
 
   def setContents(t: String) = {
     contents.removeAll
     t match {
-      case "Int" ⇒
+      case INT ⇒
         contents += (new Label("Size"), "gap para")
         contents += (maxField, "wrap")
       case _ ⇒ contents += new Label("<html><i>No more information is required for this Domain</i></html>")

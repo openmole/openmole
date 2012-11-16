@@ -28,17 +28,24 @@ import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
 
-class TakeDomainDataUI(val size: String = "1")
+class TakeDomainDataUI(val size: String = "1",
+                       val previousDomain: Option[IDomainDataUI] = None)
     extends ModifierDomainDataUI {
+
+  val domainType = previousDomain match {
+    case Some(dt: IDomainDataUI) ⇒ dt.domainType
+    case _ ⇒ manifest[Double]
+  }
 
   val name = "Take"
 
   def preview = "Take (" + size + ")"
 
-  val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
-
-  override def coreObject: Domain[T] = inputDomain match {
-    case Some(d: DOMAINTYPE) ⇒ new TakeDomain[T](d, size.toInt)
+  override def coreObject = previousDomain match {
+    case Some(pD: IDomainDataUI) ⇒ pD.coreObject match {
+      case d: DOMAINTYPE ⇒ new TakeDomain(d, size.toInt)
+      case _ ⇒ throw new UserBadDataError("A Discrete Domain is required as input of a Take Domain.")
+    }
     case _ ⇒ throw new UserBadDataError("A Discrete Domain is required as input of a Take Domain.")
   }
 

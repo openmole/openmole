@@ -17,18 +17,20 @@
 
 package org.openmole.ide.plugin.domain.distribution
 
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.plugin.domain.distribution._
 import org.openmole.core.model.domain.Domain
 import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 
 class UniformLongDistributionDataUI extends UniformDistributionDataUI[Long] {
 
+  val domainType = manifest[Long]
+
   val name = "Uniform distribution"
 
   val max = None
 
-  val availableTypes = List("Long")
+  override val availableTypes = List(LONG)
 
   def buildPanelUI = new UniformDistributionPanelUI(this)
 

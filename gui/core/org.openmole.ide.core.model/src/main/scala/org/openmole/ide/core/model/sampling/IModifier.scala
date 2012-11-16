@@ -16,4 +16,8 @@
  */
 package org.openmole.ide.core.model.sampling
 
-trait IModifier
+import org.openmole.ide.core.model.data.IDomainDataUI
+
+trait IModifier {
+  def previousDomain: Option[IDomainDataUI]
+}

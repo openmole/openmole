@@ -30,10 +30,11 @@ object SlindingSliceFilesDomainDataUI {
   }
 }
 
-class SlindingSliceFilesDomainDataUI(val directoryPath: String = "",
-                                     val numberPattern: String = "",
-                                     val sliceSize: Int = 1) extends SubDataUI {
-  type T = Array[File]
+case class SlindingSliceFilesDomainDataUI(val directoryPath: String = "",
+                                          val numberPattern: String = "",
+                                          val sliceSize: Int = 1) extends SubDataUI {
+
+  val domainType = manifest[File]
 
   override def name = "Slinding Slices"
 

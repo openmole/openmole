@@ -30,8 +30,9 @@ object SelectFileDomainDataUI {
   }
 }
 
-class SelectFileDomainDataUI(val directoryPath: String = "", val path: String = "") extends SubDataUI {
-  type T = File
+case class SelectFileDomainDataUI(val directoryPath: String = "", val path: String = "") extends SubDataUI {
+
+  val domainType = manifest[File]
 
   override def name = "Single"
 

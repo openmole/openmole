@@ -23,11 +23,15 @@ import org.openmole.plugin.domain.range.BigDecimalLogarithmRange
 import org.openmole.core.model.domain.Domain
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
+import org.openmole.ide.misc.tools.util.Types._
 
-class BigDecimalLogarithmRangeDataUI(val min: String = "0.0", val max: String = "", val step: Option[String] = None) extends LogarthmicRangeDataUI[BigDecimal] {
-  type T = BigDecimal
+case class BigDecimalLogarithmRangeDataUI(val min: String = "0.0",
+                                          val max: String = "",
+                                          val step: Option[String] = None) extends LogarthmicRangeDataUI {
 
-  def availableTypes = List("BigDecimal")
+  val domainType = manifest[BigDecimal]
+
+  override def availableTypes = List(BIG_DECIMAL)
 
   def coreObject: Domain[BigDecimal] = new BigDecimalLogarithmRange(min, max, stepString)
 

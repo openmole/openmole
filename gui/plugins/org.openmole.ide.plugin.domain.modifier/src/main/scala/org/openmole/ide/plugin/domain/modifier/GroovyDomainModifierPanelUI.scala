@@ -40,7 +40,9 @@ class GroovyModifierDomainPanelUI(pud: GroovyModifierDomainDataUI) extends Plugi
   contents += new Label(" => ")
   contents += (codeTextArea, "span 5")
 
-  def saveContent = new GroovyModifierDomainDataUI(protoNameTextField.text, codeTextArea.editor.text)
+  def saveContent = new GroovyModifierDomainDataUI(protoNameTextField.text,
+    codeTextArea.editor.text,
+    pud.previousDomain)
 
   override lazy val help =
     new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {

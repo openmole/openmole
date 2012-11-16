@@ -14,20 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.ide.plugin.domain.modifier
+package org.openmole.ide.misc.tools.util
 
-import org.openmole.core.model.domain.{ Discrete, Domain }
-import org.openmole.ide.core.model.data.IDomainDataUI
-import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.model.sampling.IModifier
-
-trait ModifierDomainDataUI extends IDomainDataUI with IModifier {
-  type DOMAINTYPE = Domain[Any] with Discrete[Any]
-
-  override def isAcceptable(domain: IDomainDataUI) = domain.coreObject match {
-    case d: DOMAINTYPE ⇒ true
-    case _ ⇒
-      StatusBar.warn("A Discrete Domain is required as input of a Modifier Domain (Map, Take, Group, ...)")
-      false
-  }
+object Types {
+  val INT = classOf[Int].getSimpleName
+  val LONG = classOf[Long].getSimpleName
+  val DOUBLE = classOf[Double].getSimpleName
+  val FILE = classOf[java.io.File].getSimpleName
+  val STRING = classOf[String].getSimpleName
+  val BIG_DECIMAL = classOf[java.math.BigDecimal].getSimpleName
+  val BIG_INTEGER = classOf[java.math.BigInteger].getSimpleName
 }

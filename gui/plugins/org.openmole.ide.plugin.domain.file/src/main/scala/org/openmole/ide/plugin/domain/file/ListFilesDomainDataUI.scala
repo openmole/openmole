@@ -30,10 +30,11 @@ object ListFilesDomainDataUI {
   }
 }
 
-class ListFilesDomainDataUI(val directoryPath: String = "",
-                            val regexp: String = ".*",
-                            val recursive: Boolean = false) extends SubDataUI {
-  type T = File
+case class ListFilesDomainDataUI(val directoryPath: String = "",
+                                 val regexp: String = ".*",
+                                 val recursive: Boolean = false) extends SubDataUI {
+
+  val domainType = manifest[File]
 
   override def name = "Multiple"
 

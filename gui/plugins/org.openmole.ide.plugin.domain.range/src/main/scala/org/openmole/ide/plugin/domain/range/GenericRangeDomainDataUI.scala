@@ -20,27 +20,23 @@ package org.openmole.ide.plugin.domain.range
 import java.math.BigInteger
 import java.math.BigDecimal
 import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
-import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.domain.{ Bounds, Domain }
+import org.openmole.ide.misc.tools.util.Types._
 
 object GenericRangeDomainDataUI {
 
-  def apply[T](min: String = "0", max: String = "", step: Option[String] = None, log: Boolean, classString: String): IDomainDataUI =
+  def apply[S](min: String = "0", max: String = "", step: Option[String] = None, log: Boolean, classString: String): IDomainDataUI =
     if (log) {
       classString match {
-        case "Double" ⇒ new DoubleLogarithmRangeDataUI(min, max, step)
-        case "BigDecimal" ⇒ new BigDecimalLogarithmRangeDataUI(min, max, step)
+        case DOUBLE ⇒ new DoubleLogarithmRangeDataUI(min, max, step)
+        case BIG_DECIMAL ⇒ new BigDecimalLogarithmRangeDataUI(min, max, step)
         case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported in logarithm scale")
       }
     } else RangeDomainDataUI(min, max, step, classString)
 }
 
-abstract class GenericRangeDomainDataUI[T] extends IDomainDataUI {
-
-  var previousType = classOf[Domain[T]]
+abstract class GenericRangeDomainDataUI extends IDomainDataUI {
 
   def preview =
     if (step.isDefined) " Range [" + min + "," + max + stepString + "]"
@@ -52,8 +48,6 @@ abstract class GenericRangeDomainDataUI[T] extends IDomainDataUI {
       else "," + step.get
     } else ""
   }
-
-  def availableTypes: List[String]
 
   def min: String
 
