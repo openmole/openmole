@@ -24,7 +24,7 @@ import org.openmole.misc.updater._
 import org.openmole.misc.workspace._
 import scala.ref.WeakReference
 
-class StoragesGC(storagesRef: WeakReference[Iterable[StorageService]], environment: BatchEnvironment) extends IUpdatable {
+class StoragesGC(storagesRef: WeakReference[Iterable[StorageService]]) extends IUpdatable {
 
   override def update: Boolean =
     storagesRef.get match {
@@ -40,7 +40,7 @@ class StoragesGC(storagesRef: WeakReference[Iterable[StorageService]], environme
                 storage.backgroundRmFile(replica.path)
               }
             catch {
-              case t: Throwable =>
+              case t: Throwable ⇒
                 ReplicaCatalog.remove(replica)
                 storage.backgroundRmFile(replica.path)
             }
