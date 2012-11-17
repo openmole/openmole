@@ -79,6 +79,7 @@ object GliteEnvironment extends Logger {
   //val CECacheDuration = new ConfigurationLocation("GliteEnvironment", "CECacheDuration")
 
   val RunningHistoryDuration = new ConfigurationLocation("GliteEnvironment", "RunningHistoryDuration")
+  val EagerSubmissionThreshold = new ConfigurationLocation("GliteEnvironment", "EagerSubmissionThreshold")
 
   Workspace += (ProxyTime, "PT24H")
   Workspace += (MyProxyTime, "P7D")
@@ -118,6 +119,7 @@ object GliteEnvironment extends Logger {
   //Workspace += (CECacheDuration, "P7D")
 
   Workspace += (RunningHistoryDuration, "PT3H")
+  Workspace += (EagerSubmissionThreshold, "0.8")
 }
 
 class GliteEnvironment(

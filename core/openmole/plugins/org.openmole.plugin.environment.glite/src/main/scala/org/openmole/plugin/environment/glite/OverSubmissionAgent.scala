@@ -73,7 +73,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
 
         logger.fine("still running " + stillRunning)
 
-        val maxRunning = runningHistory.map(_.value).max
+        val maxRunning = runningHistory.map(_.value).max * Workspace.preferenceAsDouble(GliteEnvironment.EagerSubmissionThreshold)
         logger.fine("max running " + maxRunning)
 
         var nbRessub = if (jobs.size > Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob)) {
