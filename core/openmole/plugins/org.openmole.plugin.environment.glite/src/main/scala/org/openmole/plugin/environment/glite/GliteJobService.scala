@@ -118,7 +118,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     writter.print("if [ `uname -m` = x86_64 ]; then ")
     writter.print(lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz")) //, homeCacheDir, runtime.jvmLinuxX64.hash))
     writter.print("; else ")
-    writter.print(lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz"))//, homeCacheDir, runtime.jvmLinuxI386.hash))
+    writter.print(lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz")) //, homeCacheDir, runtime.jvmLinuxI386.hash))
     writter.print("; fi; ")
     writter.print("tar -xzf jvm.tar.gz >/dev/null; rm -f jvm.tar.gz; ")
     writter.print(lcgCpGunZipCmd(storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")) //, homeCacheDir, runtime.runtime.hash))
@@ -127,7 +127,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
 
     for (plugin ← runtime.environmentPlugins) {
       assert(plugin.path != null)
-      writter.print(lcgCpGunZipCmd(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin$PLUGIN.jar"))//, homeCacheDir, plugin.hash))
+      writter.print(lcgCpGunZipCmd(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin$PLUGIN.jar")) //, homeCacheDir, plugin.hash))
       writter.print("; PLUGIN=`expr $PLUGIN + 1`; ")
     }
 
@@ -193,8 +193,6 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     builder.append(to)
     builder.toString
   }
-
-
 
   private def getTimeOut = Workspace.preferenceAsDuration(GliteEnvironment.RemoteTimeout).toSeconds.toString
 

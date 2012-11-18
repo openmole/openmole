@@ -255,9 +255,10 @@ class GliteEnvironment(
         }
 
       atomic { implicit txn ⇒
-        val notLoaded = normalizedFitness(fitness).shuffled(Random.default)
+        val fitnesses = fitness
 
-        if (!notLoaded.isEmpty) {
+        if (!fitnesses.isEmpty) {
+          val notLoaded = normalizedFitness(fitnesses).shuffled(Random.default)
           val totalFitness = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
 
           val (jobService, token) = selected(Random.default.nextDouble * totalFitness, notLoaded.toList)
@@ -309,8 +310,9 @@ class GliteEnvironment(
       }
 
       atomic { implicit txn ⇒
-        val notLoaded = normalizedFitness(fitness).shuffled(Random.default)
-        if (!notLoaded.isEmpty) {
+        val fitenesses = fitness
+        if (!fitenesses.isEmpty) {
+          val notLoaded = normalizedFitness(fitenesses).shuffled(Random.default)
           val fitnessSum = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
           val drawn = Random.default.nextDouble * fitnessSum
           val (storage, token) = selected(drawn, notLoaded.toList)
