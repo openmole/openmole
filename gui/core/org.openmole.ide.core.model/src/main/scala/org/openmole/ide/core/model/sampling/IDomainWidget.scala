@@ -17,9 +17,17 @@
 
 package org.openmole.ide.core.model.sampling
 
-import org.openmole.ide.core.model.data.{ IDomainDataUI, IFactorDataUI }
-import org.openmole.ide.misc.tools.Counter
-
 trait IDomainWidget extends ISamplingCompositionWidget {
   def proxy: IDomainProxyUI
+
+  def incomings: List[IDomainWidget] = {
+    scenePanelUI.connections.filter {
+      _._2.component.proxy.id == proxy.id
+    }.flatMap {
+      _._1.component match {
+        case d: IDomainWidget ⇒ Some(d)
+        case _ ⇒ Nil
+      }
+    }
+  }
 }

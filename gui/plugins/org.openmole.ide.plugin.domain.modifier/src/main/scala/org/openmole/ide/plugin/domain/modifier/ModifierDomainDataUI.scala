@@ -30,4 +30,14 @@ trait ModifierDomainDataUI extends IDomainDataUI with IModifier {
       StatusBar.warn("A Discrete Domain is required as input of a Modifier Domain (Map, Take, Group, ...)")
       false
   }
+
+  def validPreviousDomains: (Boolean, List[DOMAINTYPE]) = {
+    val dL = previousDomain.flatMap {
+      _.coreObject match {
+        case id: DOMAINTYPE ⇒ List(id)
+        case _ ⇒ Nil
+      }
+    }
+    (!dL.isEmpty, dL)
+  }
 }

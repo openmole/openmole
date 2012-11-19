@@ -28,11 +28,11 @@ import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
 
-class TakeDomainDataUI(val size: String = "1",
-                       val previousDomain: Option[IDomainDataUI] = None)
+case class TakeDomainDataUI(val size: String = "1",
+                            val previousDomain: List[IDomainDataUI] = List.empty)
     extends ModifierDomainDataUI {
 
-  val domainType = previousDomain match {
+  val domainType = previousDomain.headOption match {
     case Some(dt: IDomainDataUI) ⇒ dt.domainType
     case _ ⇒ manifest[Double]
   }
@@ -41,12 +41,11 @@ class TakeDomainDataUI(val size: String = "1",
 
   def preview = "Take (" + size + ")"
 
-  override def coreObject = previousDomain match {
-    case Some(pD: IDomainDataUI) ⇒ pD.coreObject match {
-      case d: DOMAINTYPE ⇒ new TakeDomain(d, size.toInt)
-      case _ ⇒ throw new UserBadDataError("A Discrete Domain is required as input of a Take Domain.")
-    }
-    case _ ⇒ throw new UserBadDataError("A Discrete Domain is required as input of a Take Domain.")
+  override def coreObject = {
+    println("previous domain : " + previousDomain)
+    val valid = validPreviousDomains
+    if (valid._1) new TakeDomain(valid._2.head, size.toInt)
+    else throw new UserBadDataError("A Discrete Domain is required as input of a Take Domain2. ")
   }
 
   def buildPanelUI = new TakeDomainPanelUI(this)
@@ -54,4 +53,6 @@ class TakeDomainDataUI(val size: String = "1",
   def coreClass = classOf[TakeDomainDataUI]
 
   override def toString = "Take"
+
+  def clone(pD: List[IDomainDataUI]) = copy(previousDomain = pD)
 }

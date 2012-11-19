@@ -26,10 +26,11 @@ import org.openmole.plugin.domain.modifier.GroupDomain
 import org.openmole.ide.core.model.data.IDomainDataUI
 
 object GroupDomainDataUI {
+  def empty = apply("1", DOUBLE, List())
 
-  def apply[S](size: String = "1",
-               classString: String,
-               previousDomain: Option[IDomainDataUI] = None) = {
+  def apply(size: String,
+            classString: String,
+            previousDomain: List[IDomainDataUI]) = {
     classString match {
       case INT ⇒ new GroupDomainDataUI[Int](size, previousDomain)
       case DOUBLE ⇒ new GroupDomainDataUI[Double](size, previousDomain)
@@ -42,20 +43,18 @@ object GroupDomainDataUI {
   }
 }
 
-class GroupDomainDataUI[S](val size: String = "0",
-                           var previousDomain: Option[IDomainDataUI] = None)(implicit val domainType: Manifest[S])
+case class GroupDomainDataUI[S](val size: String = "0",
+                                var previousDomain: List[IDomainDataUI] = List.empty)(implicit val domainType: Manifest[S])
     extends ModifierDomainDataUI {
 
   val name = "Group"
 
   def preview = "Group (" + size + ")"
 
-  override def coreObject: Domain[Any] = previousDomain match {
-    case Some(pD: IDomainDataUI) ⇒ pD.coreObject match {
-      case d: DOMAINTYPE ⇒ new GroupDomain(d, size.toInt)
-      case _ ⇒ throw new UserBadDataError("No input domain has been found, it is required for a Group Domain.")
-    }
-    case _ ⇒ throw new UserBadDataError("No input domain has been found, it is required for a Group Domain.")
+  override def coreObject: Domain[Any] = {
+    val valid = validPreviousDomains
+    if (valid._1) new GroupDomain(valid._2.head, size.toInt)
+    else throw new UserBadDataError("No input domain has been found, it is required for a Group Domain.")
   }
 
   def buildPanelUI = new GroupDomainPanelUI(this)
@@ -64,4 +63,5 @@ class GroupDomainDataUI[S](val size: String = "0",
 
   override def toString = "Group"
 
+  def clone(pD: List[IDomainDataUI]) = copy(previousDomain = pD)
 }

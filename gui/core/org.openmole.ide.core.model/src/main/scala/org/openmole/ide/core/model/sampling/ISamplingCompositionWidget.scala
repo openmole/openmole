@@ -20,9 +20,12 @@ package org.openmole.ide.core.model.sampling
 import org.openmole.ide.core.model.data.ISamplingCompositionElementDataUI
 import scala.swing.Panel
 import java.awt.Color
+import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 
 trait ISamplingCompositionWidget extends Panel {
   def proxy: ISamplingCompositionProxyUI
 
   def update: Unit
+
+  def scenePanelUI: ISamplingCompositionPanelUI
 }

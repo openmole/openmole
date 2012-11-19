@@ -30,13 +30,13 @@ import org.openmole.plugin.domain.modifier.GroovyDomainModifier
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.dialog.StatusBar
 
-class GroovyModifierDomainDataUI(val prototypeName: String = "",
-                                 val code: String = "",
-                                 var previousDomain: Option[IDomainDataUI] = None)
+case class GroovyModifierDomainDataUI(val prototypeName: String = "",
+                                      val code: String = "",
+                                      var previousDomain: List[IDomainDataUI] = List.empty)
     extends ModifierDomainDataUI {
 
-  val domainType = previousDomain match {
-    case Some(dt: IDomainDataUI) ⇒ dt.domainType
+  val domainType = previousDomain.headOption match {
+    case Some(d: IDomainDataUI) ⇒ d.domainType
     case _ ⇒ manifest[Double]
   }
 
@@ -44,12 +44,10 @@ class GroovyModifierDomainDataUI(val prototypeName: String = "",
 
   def preview = "Map( " + code.split("\n").take(2).mkString(",") + " ...)"
 
-  override def coreObject: Domain[Any] = previousDomain match {
-    case Some(pD: IDomainDataUI) ⇒ pD.coreObject match {
-      case id: DOMAINTYPE ⇒ new GroovyDomainModifier(id, prototypeName, code)
-      case _ ⇒ throw new UserBadDataError("An input Domain is required for a Map modifier Domain")
-    }
-    case _ ⇒ throw new UserBadDataError("An input Domain is required for a Map modifier Domain")
+  override def coreObject: Domain[Any] = {
+    val valid = validPreviousDomains
+    if (valid._1) new GroovyDomainModifier(valid._2.head, prototypeName, code)
+    else throw new UserBadDataError("An input Domain is required for a Map modifier Domain")
   }
 
   def buildPanelUI(p: IPrototypeDataProxyUI) = new GroovyModifierDomainPanelUI(this)
@@ -57,4 +55,6 @@ class GroovyModifierDomainDataUI(val prototypeName: String = "",
   def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], false))
 
   def coreClass = classOf[GroovyModifierDomainDataUI]
+
+  def clone(pD: List[IDomainDataUI]) = copy(previousDomain = pD)
 }

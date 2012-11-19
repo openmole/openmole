@@ -19,5 +19,7 @@ package org.openmole.ide.core.model.sampling
 import org.openmole.ide.core.model.data.IDomainDataUI
 
 trait IModifier {
-  def previousDomain: Option[IDomainDataUI]
+  def previousDomain: List[IDomainDataUI]
+
+  def clone(previousDomain: List[IDomainDataUI]): IDomainDataUI
 }

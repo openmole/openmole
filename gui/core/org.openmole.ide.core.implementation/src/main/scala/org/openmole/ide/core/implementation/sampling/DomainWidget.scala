@@ -30,7 +30,7 @@ import javax.swing.BorderFactory
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 
 class DomainWidget(val proxy: IDomainProxyUI,
-                   scenePaneUI: ISamplingCompositionPanelUI,
+                   val scenePanelUI: ISamplingCompositionPanelUI,
                    display: Boolean = false) extends MigPanel("wrap", "[center]", "[center]") with IDomainWidget {
   domainWidget ⇒
   preferredSize = new Dimension(100, 38)
@@ -58,7 +58,7 @@ class DomainWidget(val proxy: IDomainProxyUI,
 
   def update = {
     link.link(domainPreview)
-    scenePaneUI.testConnections(false)
+    scenePanelUI.testConnections(false)
     revalidate
     repaint
   }

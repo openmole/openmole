@@ -23,7 +23,7 @@ import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.data._
-import org.openmole.ide.core.model.sampling.IDomainWidget
+import org.openmole.ide.core.model.sampling.{ IModifier, IDomainWidget }
 import org.openmole.ide.misc.widget._
 import multirow.ComponentFocusedEvent
 import org.openmole.ide.core.model.panel._
@@ -34,10 +34,22 @@ class DomainPanelUI(domainWidget: IDomainWidget,
 
   val domains = KeyRegistry.domains.values.map {
     _.buildDataUI
-  }.toList.sorted
+  }.toList.sorted.filter {
+    d ⇒
+      if (domainWidget.incomings.isEmpty) true
+      else {
+        d match {
+          case dm: IModifier ⇒ true
+          case _ ⇒ false
+        }
+      }
+  }
+  val previous: List[IDomainWidget] = domainWidget.incomings
 
   val domainComboBox = new MyComboBox(domains)
-  domainComboBox.selection.item = domains.filter { _.toString == domainWidget.proxy.dataUI.toString }.head
+  domainComboBox.selection.item = domains.filter {
+    _.toString == domainWidget.proxy.dataUI.toString
+  }.head
 
   var dPanel = domainWidget.proxy.dataUI.buildPanelUI
 
@@ -77,6 +89,9 @@ class DomainPanelUI(domainWidget: IDomainWidget,
     case _ ⇒
   }
 
-  def saveContent = dPanel.saveContent
+  def saveContent = dPanel.saveContent match {
+    case m: IModifier ⇒ m.clone(previousDomain = previous.map { _.proxy.dataUI })
+    case x: Any ⇒ x
+  }
 
 }
