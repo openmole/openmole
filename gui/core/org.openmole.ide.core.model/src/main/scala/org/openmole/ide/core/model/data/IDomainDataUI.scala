@@ -25,7 +25,7 @@ object IDomainDataUI {
   implicit val ordering = Ordering.by((_: IDomainDataUI).name)
 }
 
-trait IDomainDataUI extends IDataUI with ISamplingCompositionElementDataUI {
+trait IDomainDataUI extends IDataUI {
 
   def domainType: Manifest[_]
 

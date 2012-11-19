@@ -270,15 +270,19 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
     override def resolveTargetWidget(scene: Scene, sceneLocation: Point): Widget = null
 
     override def createConnection(sourceWidget: Widget, targetWidget: Widget) = {
-      val connection = new ConnectionWidget(samplingCompositionPanelUI.scene)
+      val sourceW = sourceWidget.asInstanceOf[SamplingComponent]
+      val targetW = targetWidget.asInstanceOf[SamplingComponent]
+      val connection = new SamplingConnectorWidget(sourceW,
+        targetW,
+        FactorDataUI.empty,
+        samplingCompositionPanelUI)
+      /*val connection = new ConnectionWidget(samplingCompositionPanelUI.scene)
       connection.setStroke(new BasicStroke(2))
       connection.setLineColor(new Color(218, 218, 218))
       connection.setSourceAnchor(sourceAnchor(sourceWidget))
       connection.setTargetAnchor(targetAnchor(targetWidget))
-      connection.setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
+      connection.setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)   */
       connectLayer.addChild(connection)
-      val sourceW = sourceWidget.asInstanceOf[SamplingComponent]
-      val targetW = targetWidget.asInstanceOf[SamplingComponent]
       sourceW.connections += connection
       targetW.connections += connection
       _connections += sourceW -> targetW
@@ -288,6 +292,8 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
       }
     }
 
+    //def getConnector(sourceWidget: Widget, targetWidget: Widget)
+
     def updatePrevious(source: IDomainWidget,
                        target: ISamplingCompositionWidget): Unit = {
       target.proxy match {
@@ -295,7 +301,9 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
           case modifier: IDomainDataUI with IModifier ⇒ source.proxy match {
             case sp: IDomainProxyUI ⇒
               tp.dataUI = modifier.clone(previousDomain = scala.collection.immutable.List(sp.dataUI))
-              source.incomings.foreach { i ⇒ updatePrevious(i, source) }
+              source.incomings.foreach {
+                i ⇒ updatePrevious(i, source)
+              }
             case _ ⇒
           }
           case _ ⇒
@@ -303,7 +311,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
         case _ ⇒
       }
     }
-
+    /*
     def sourceAnchor(w: Widget) = new Anchor(w) {
       override def compute(entry: Anchor.Entry) =
         new Result(w.convertLocalToScene(new Point(100, 19)), Anchor.Direction.RIGHT)
@@ -312,7 +320,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
     def targetAnchor(w: Widget) = new Anchor(w) {
       override def compute(entry: Anchor.Entry) =
         new Result(w.convertLocalToScene(new Point(0, 19)), Anchor.Direction.LEFT)
-    }
+    }    */
   }
 
 }

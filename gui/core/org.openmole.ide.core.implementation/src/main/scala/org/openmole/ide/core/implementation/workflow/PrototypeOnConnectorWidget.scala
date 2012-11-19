@@ -21,21 +21,20 @@ import java.awt.BasicStroke
 import java.awt.Color
 import java.awt.Rectangle
 import java.awt.RenderingHints
-import org.netbeans.api.visual.widget.ComponentWidget
-import org.openmole.ide.core.model.workflow.IConnectorUI
-import org.openmole.ide.core.model.workflow.IMoleScene
+import org.netbeans.api.visual.widget._
+import org.openmole.ide.core.model.workflow.{ IConnectorViewUI, IConnectorUI, IMoleScene }
 import org.openmole.ide.misc.widget.LinkLabel
 
-class PrototypeOnConnectorWidget(scene: IMoleScene,
-                                 connectorUI: IConnectorUI,
-                                 val link: LinkLabel) extends ComponentWidget(scene.graphScene, link.peer) {
+class PrototypeOnConnectorWidget(scene: Scene,
+                                 connectorUI: IConnectorViewUI,
+                                 val link: LinkLabel) extends ComponentWidget(scene, link.peer) {
   link.foreground = Color.WHITE
   val dim = 30
   val pos = link.size.width / 2 + 1
   setPreferredBounds(new Rectangle(dim, dim))
 
   override def paintBackground = {
-    val g = scene.graphScene.getGraphics
+    val g = scene.getGraphics
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
       RenderingHints.VALUE_ANTIALIAS_ON)
     g.setColor(new Color(0, 0, 0, 180))
@@ -45,7 +44,7 @@ class PrototypeOnConnectorWidget(scene: IMoleScene,
   }
 
   override def paintBorder = {
-    val g = scene.graphScene.getGraphics
+    val g = scene.getGraphics
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
       RenderingHints.VALUE_ANTIALIAS_ON)
     g.setStroke(new BasicStroke(3f))

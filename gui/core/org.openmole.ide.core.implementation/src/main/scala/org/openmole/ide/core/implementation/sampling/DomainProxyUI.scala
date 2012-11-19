@@ -16,7 +16,7 @@
  */
 package org.openmole.ide.core.implementation.sampling
 
-import org.openmole.ide.core.model.data.{ ISamplingCompositionElementDataUI, IDomainDataUI }
+import org.openmole.ide.core.model.data.{ IDomainDataUI }
 import org.openmole.ide.core.model.sampling.IDomainProxyUI
 
 class DomainProxyUI(var dataUI: IDomainDataUI) extends IDomainProxyUI

@@ -18,17 +18,13 @@
 package org.openmole.ide.core.model.data
 
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.core.model.sampling.Factor
+import org.openmole.ide.core.model.sampling.IDomainProxyUI
 
-trait IFactorDataUI extends ISamplingCompositionElementDataUI {
-  def id: String
+trait IFactorDataUI {
+  def prototype: Option[IPrototypeDataProxyUI]
 
-  def name: String = "Factor"
+  def domain: Option[IDomainProxyUI]
 
-  def prototype: IPrototypeDataProxyUI
-
-  def domain: IDomainDataUI
-
-  def previousFactor: Option[IFactorDataUI]
-
-  def previousFactor_=(d: Option[IFactorDataUI])
+  def coreObject: Factor[_, _]
 }

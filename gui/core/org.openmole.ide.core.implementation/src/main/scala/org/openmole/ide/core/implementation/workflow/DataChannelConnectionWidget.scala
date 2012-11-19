@@ -41,7 +41,7 @@ class DataChannelConnectionWidget(scene: IMoleScene, val dataChannelUI: IDataCha
   setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
   var labeled = false
 
-  val componentWidget = new PrototypeOnConnectorWidget(scene,
+  val componentWidget = new PrototypeOnConnectorWidget(scene.graphScene,
     dataChannelUI,
     new LinkLabel(dataChannelUI.nbPrototypes.toString,
       new Action("") { def apply = edit }, 10))
