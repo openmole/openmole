@@ -17,20 +17,24 @@
 
 package org.openmole.core.batch.refresh
 
-import akka.actor.Actor
 import org.openmole.misc.tools.service.Logger
+import akka.actor.{ Actor, ActorRef }
+import org.openmole.core.batch.environment.BatchEnvironment
+import org.openmole.misc.workspace._
 
 object DeleteActor extends Logger
 
 import DeleteActor._
 
-class DeleteActor extends Actor {
+class DeleteActor(jobManager: ActorRef) extends Actor {
   def receive = {
-    case DeleteFile(storage, path, directory) ⇒
-      try
-        storage.withToken { implicit t ⇒
-          if (directory) storage.rmDir(path) else storage.rmFile(path)
-        }
+    case msg @ DeleteFile(storage, path, directory) ⇒
+      try storage.tryWithToken {
+        case Some(t) ⇒
+          if (directory) storage.rmDir(path)(t) else storage.rmFile(path)(t)
+        case None ⇒
+          jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForSerivceRetryInterval).toMilliSeconds)
+      }
       catch {
         case t: Throwable ⇒
           logger.log(FINE, "Error when deleting a file", t)

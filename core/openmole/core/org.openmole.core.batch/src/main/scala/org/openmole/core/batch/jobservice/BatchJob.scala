@@ -71,5 +71,4 @@ trait BatchJob { bj ⇒
 
   def timeStamp(state: ExecutionState): Long = timeStamps(state.id)
 
-  def withToken[T](f: AccessToken ⇒ T) = jobService.withToken(f)
 }

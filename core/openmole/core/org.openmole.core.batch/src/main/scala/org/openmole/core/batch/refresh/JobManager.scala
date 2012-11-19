@@ -72,29 +72,37 @@ akka {
   val submitter = workers.actorOf(Props(new SubmitActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
   val refresher = workers.actorOf(Props(new RefreshActor(self, environment)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
   val resultGetters = workers.actorOf(Props(new GetResultActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
-  val killer = workers.actorOf(Props(new KillerActor).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
-  val cleaner = workers.actorOf(Props(new CleanerActor).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
-  val deleter = workers.actorOf(Props(new DeleteActor).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
+  val killer = workers.actorOf(Props(new KillerActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
+  val cleaner = workers.actorOf(Props(new CleanerActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
+  val deleter = workers.actorOf(Props(new DeleteActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
 
   def receive = {
-    case Upload(job) ⇒ uploader ! Upload(job)
+    case msg: Upload ⇒ uploader ! msg
+    case msg: Submit ⇒ submitter ! msg
+    case msg: Refresh ⇒ refresher ! msg
+    case msg: GetResult ⇒ resultGetters ! msg
+    case msg: KillBatchJob ⇒ killer ! msg
+    case msg: DeleteFile ⇒ deleter ! msg
+    case msg: CleanSerializedJob ⇒ cleaner ! msg
+
+    case Delay(msg, delay) ⇒
+      context.system.scheduler.scheduleOnce(delay milliseconds) {
+        self ! msg
+      }
+
     case Uploaded(job, sj) ⇒
       job.serializedJob = Some(sj)
-      submitter ! Submit(job, sj)
-    case Submit(job, sj) ⇒ submitter ! Submit(job, sj)
+      self ! Submit(job, sj)
+
     case Submitted(job, sj, bj) ⇒
       job.batchJob = Some(bj)
-      self ! RefreshDelay(job, sj, bj, minUpdateInterval)
-    case RefreshDelay(job, sj, bj, delay) ⇒
-      context.system.scheduler.scheduleOnce(delay milliseconds) {
-        refresher ! Refresh(job, sj, bj, delay)
-      }
-    case GetResult(job, sj, out) ⇒
-      resultGetters ! GetResult(job, sj, out)
+      self ! Delay(Refresh(job, sj, bj, minUpdateInterval), minUpdateInterval)
+
     case Kill(job) ⇒
       job.state = ExecutionState.KILLED
       job.batchJob.foreach(bj ⇒ self ! KillBatchJob(bj))
-      job.serializedJob.foreach(j ⇒ cleaner ! CleanSerializedJob(j))
+      job.serializedJob.foreach(j ⇒ self ! CleanSerializedJob(j))
+
     case Error(job, exception) ⇒
       val level = exception match {
         case e: JobRemoteExecutionException ⇒ WARNING
@@ -102,10 +110,10 @@ akka {
       }
       EventDispatcher.trigger(environment: Environment, new Environment.ExceptionRaised(job, exception, level))
       logger.log(level, "Error in job refresh", exception)
-    case KillBatchJob(bj) ⇒ killer ! KillBatchJob(bj)
+
     case MoleJobError(mj, j, e) ⇒
       EventDispatcher.trigger(environment: Environment, new Environment.MoleJobExceptionRaised(j, e, WARNING, mj))
       logger.log(WARNING, "Error durring job execution, it will be resubmitted.", e)
-    case m: DeleteFile ⇒ deleter ! m
+
   }
 }

@@ -40,62 +40,54 @@ object GetResultActor extends Logger
 class GetResultActor(jobManager: ActorRef) extends Actor {
 
   def receive = {
-    case GetResult(job, sj, resultPath) ⇒
-      try getResult(sj.storage, resultPath, job)
-      catch {
-        case e: Throwable ⇒ jobManager ! Error(job, e)
+    case msg @ GetResult(job, sj, resultPath) ⇒
+      try sj.storage.tryWithToken {
+        case Some(token) ⇒
+          getResult(sj.storage, resultPath, job)(token)
+          jobManager ! Kill(job)
+        case None ⇒
+          jobManager ! Delay(msg, Workspace.preferenceAsDuration(BatchEnvironment.NoTokenForSerivceRetryInterval).toMilliSeconds)
+      } catch {
+        case e: Throwable ⇒
+          jobManager ! Error(job, e)
+          jobManager ! Kill(job)
       }
-      jobManager ! Kill(job)
       System.runFinalization
   }
 
-  def getResult(storage: StorageService, outputFilePath: String, batchJob: BatchExecutionJob): Unit = {
+  def getResult(storage: StorageService, outputFilePath: String, batchJob: BatchExecutionJob)(implicit token: AccessToken): Unit = {
     import batchJob.job
+    val runtimeResult = getRuntimeResult(outputFilePath, storage)
 
-    storage.withToken { implicit token ⇒
-      val runtimeResult = getRuntimeResult(outputFilePath, storage)
+    display(runtimeResult.stdOut, "Output", storage)
+    display(runtimeResult.stdErr, "Error output", storage)
 
-      display(runtimeResult.stdOut, "Output", storage)
-      display(runtimeResult.stdErr, "Error output", storage)
+    runtimeResult.result match {
+      case Right(exception) ⇒ throw new JobRemoteExecutionException(exception, "Fatal exception thrown durring the execution of the job execution on the excution node")
+      case Left(result) ⇒
+        val contextResults = getContextResults(result, storage)
 
-      runtimeResult.result match {
-        case Right(exception) ⇒ throw new JobRemoteExecutionException(exception, "Fatal exception thrown durring the execution of the job execution on the excution node")
-        case Left(result) ⇒
-          val contextResults = getContextResults(result, storage)
+        var firstRunning = Long.MaxValue
+        var lastCompleted = 0L
 
-          var firstRunning = Long.MaxValue
-          var lastCompleted = 0L
+        //Try to download the results for all the jobs of the group
+        for (moleJob ← job.moleJobs) {
+          if (contextResults.results.isDefinedAt(moleJob.id)) {
+            val executionResult = contextResults.results(moleJob.id)
 
-          //Try to download the results for all the jobs of the group
-          for (moleJob ← job.moleJobs) {
-            if (contextResults.results.isDefinedAt(moleJob.id)) {
-              val executionResult = contextResults.results(moleJob.id)
+            moleJob.synchronized {
+              if (!moleJob.finished) {
 
-              moleJob.synchronized {
-                if (!moleJob.finished) {
-
-                  executionResult._1 match {
-                    case Left(context) ⇒
-                      /*val timeStamps = executionResult._2
-                      val completed = timeStamps.view.reverse.find(_.state == State.COMPLETED).get.time
-                      if (completed > lastCompleted) lastCompleted = completed
-                      val running = timeStamps.view.reverse.find(_.state == State.RUNNING).get.time
-                      if (running < firstRunning) firstRunning = running*/
-                      moleJob.finish(context, executionResult._2)
-                    case Right(e) ⇒
-                      sender ! MoleJobError(moleJob, batchJob, e)
-                  }
+                executionResult._1 match {
+                  case Left(context) ⇒
+                    moleJob.finish(context, executionResult._2)
+                  case Right(e) ⇒
+                    sender ! MoleJobError(moleJob, batchJob, e)
                 }
               }
             }
           }
-
-        //batchJob.environment.statistics += new StatisticSample(batchJob.batchJob.get)
-
-        /*if(firstRunning != Long.MaxValue && lastCompleted != 0L) 
-           environment.statistics += new StatisticSample(batchJob.batchJob.get.timeStamp(ExecutionState.SUBMITTED), firstRunning, lastCompleted)*/
-
-      }
+        }
     }
   }
 

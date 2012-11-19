@@ -3,7 +3,7 @@
 CURDIR=$PWD
 LOCATION=`dirname $0`
 
-nohup sh $LOCATION/dbserver/bin/openmole-dbserver &
+(nohup sh $LOCATION/dbserver/bin/openmole-dbserver >/dev/null &) 2>/dev/null
 
 MEM="1G"
 

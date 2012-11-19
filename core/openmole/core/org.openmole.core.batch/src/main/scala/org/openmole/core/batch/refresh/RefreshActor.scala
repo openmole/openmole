@@ -32,24 +32,22 @@ class RefreshActor(jobManager: ActorRef, environment: BatchEnvironment) extends 
   def receive = {
     case Refresh(job, sj, bj, delay) ⇒
       if (!job.state.isFinal) {
-        bj.jobService.tryWithToken {
+        try bj.jobService.tryWithToken {
           case Some(t) ⇒
-            try {
-              val oldState = job.state
-              job.state = bj.updateState(t)
-              if (job.state == DONE) jobManager ! GetResult(job, sj, bj.resultPath)
-              else if (!job.state.isFinal) {
-                val newDelay =
-                  if (oldState == job.state) math.min(delay + environment.incrementUpdateInterval, environment.maxUpdateInterval)
-                  else environment.minUpdateInterval
-                jobManager ! RefreshDelay(job, sj, bj, newDelay)
-              } else jobManager ! Kill(job)
-            } catch {
-              case e: Throwable ⇒
-                jobManager ! Error(job, e)
-                jobManager ! Kill(job)
-            }
-          case None ⇒ jobManager ! RefreshDelay(job, sj, bj, delay)
+            val oldState = job.state
+            job.state = bj.updateState(t)
+            if (job.state == DONE) jobManager ! GetResult(job, sj, bj.resultPath)
+            else if (!job.state.isFinal) {
+              val newDelay =
+                if (oldState == job.state) math.min(delay + environment.incrementUpdateInterval, environment.maxUpdateInterval)
+                else environment.minUpdateInterval
+              jobManager ! Delay(Refresh(job, sj, bj, newDelay), newDelay)
+            } else jobManager ! Kill(job)
+          case None ⇒ jobManager ! Delay(Refresh(job, sj, bj, delay), delay)
+        } catch {
+          case e: Throwable ⇒
+            jobManager ! Error(job, e)
+            jobManager ! Kill(job)
         }
       }
       System.runFinalization

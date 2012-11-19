@@ -75,10 +75,11 @@ object GliteEnvironment extends Logger {
   val JobServiceFitnessPower = new ConfigurationLocation("GliteEnvironment", "JobServiceFitnessPower")
   val StorageFitnessPower = new ConfigurationLocation("GliteEnvironment", "StorageFitnessPower")
 
-  val CECacheDir = new ConfigurationLocation("GliteEnvironment", "CECacheDir")
-  val CECacheDuration = new ConfigurationLocation("GliteEnvironment", "CECacheDuration")
+  //val CECacheDir = new ConfigurationLocation("GliteEnvironment", "CECacheDir")
+  //val CECacheDuration = new ConfigurationLocation("GliteEnvironment", "CECacheDuration")
 
   val RunningHistoryDuration = new ConfigurationLocation("GliteEnvironment", "RunningHistoryDuration")
+  val EagerSubmissionThreshold = new ConfigurationLocation("GliteEnvironment", "EagerSubmissionThreshold")
 
   Workspace += (ProxyTime, "PT24H")
   Workspace += (MyProxyTime, "P7D")
@@ -114,10 +115,11 @@ object GliteEnvironment extends Logger {
   Workspace += (JobServiceFitnessPower, "2")
   Workspace += (StorageFitnessPower, "2")
 
-  Workspace += (CECacheDir, "openmole_cache")
-  Workspace += (CECacheDuration, "P7D")
+  //Workspace += (CECacheDir, "openmole_cache")
+  //Workspace += (CECacheDuration, "P7D")
 
   Workspace += (RunningHistoryDuration, "PT3H")
+  Workspace += (EagerSubmissionThreshold, "0.8")
 }
 
 class GliteEnvironment(
@@ -253,9 +255,10 @@ class GliteEnvironment(
         }
 
       atomic { implicit txn ⇒
-        val notLoaded = normalizedFitness(fitness).shuffled(Random.default)
+        val fitnesses = fitness
 
-        if (!notLoaded.isEmpty) {
+        if (!fitnesses.isEmpty) {
+          val notLoaded = normalizedFitness(fitnesses).shuffled(Random.default)
           val totalFitness = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
 
           val (jobService, token) = selected(Random.default.nextDouble * totalFitness, notLoaded.toList)
@@ -292,7 +295,7 @@ class GliteEnvironment(
                   if (time.isNaN || maxTime.isNaN || minTime.isNaN || maxTime == 0.0) 0.0
                   else 1 - time.normalize(minTime, maxTime)
 
-                val fitness = math.pow((5 * sizeFactor + timeFactor + cur.availability + 10 * cur.successRate), Workspace.preferenceAsDouble(StorageFitnessPower))
+                val fitness = math.pow((5 * sizeFactor + timeFactor + 10 * cur.availability + 10 * cur.successRate), Workspace.preferenceAsDouble(StorageFitnessPower))
                 Some((cur, token, fitness))
             }
         }
@@ -307,8 +310,9 @@ class GliteEnvironment(
       }
 
       atomic { implicit txn ⇒
-        val notLoaded = normalizedFitness(fitness).shuffled(Random.default)
-        if (!notLoaded.isEmpty) {
+        val fitenesses = fitness
+        if (!fitenesses.isEmpty) {
+          val notLoaded = normalizedFitness(fitenesses).shuffled(Random.default)
           val fitnessSum = notLoaded.map { case (_, _, fitness) ⇒ fitness }.sum
           val drawn = Random.default.nextDouble * fitnessSum
           val (storage, token) = selected(drawn, notLoaded.toList)

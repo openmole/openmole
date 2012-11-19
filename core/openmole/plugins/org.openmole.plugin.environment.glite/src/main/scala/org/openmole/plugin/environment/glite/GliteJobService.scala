@@ -110,24 +110,24 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
 
     assert(runtime.runtime.path != null)
 
-    val homeCacheDir = cacheDir("$ORIGINAL_HOME")
+    //val homeCacheDir = cacheDir("$ORIGINAL_HOME")
 
-    writter.print("ORIGINAL_HOME=$HOME; ")
-    writter.print("mkdir -p " + homeCacheDir + "; ")
+    //writter.print("ORIGINAL_HOME=$HOME; ")
+    //writter.print("mkdir -p " + homeCacheDir + "; ")
     writter.print("BASEPATH=$PWD; CUR=$PWD/ws$RANDOM; while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; export OPENMOLE_HOME=$CUR; ")
     writter.print("if [ `uname -m` = x86_64 ]; then ")
-    writter.print(cachedLcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz", homeCacheDir, runtime.jvmLinuxX64.hash))
+    writter.print(lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz")) //, homeCacheDir, runtime.jvmLinuxX64.hash))
     writter.print("; else ")
-    writter.print(cachedLcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz", homeCacheDir, runtime.jvmLinuxI386.hash))
+    writter.print(lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz")) //, homeCacheDir, runtime.jvmLinuxI386.hash))
     writter.print("; fi; ")
     writter.print("tar -xzf jvm.tar.gz >/dev/null; rm -f jvm.tar.gz; ")
-    writter.print(cachedLcgCpGunZipCmd(storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz", homeCacheDir, runtime.runtime.hash))
+    writter.print(lcgCpGunZipCmd(storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")) //, homeCacheDir, runtime.runtime.hash))
     writter.print("; tar -xzf openmole.tar.gz >/dev/null; rm -f openmole.tar.gz; ")
     writter.print("mkdir envplugins; PLUGIN=0;")
 
     for (plugin ← runtime.environmentPlugins) {
       assert(plugin.path != null)
-      writter.print(cachedLcgCpGunZipCmd(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin$PLUGIN.jar", homeCacheDir, plugin.hash))
+      writter.print(lcgCpGunZipCmd(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin$PLUGIN.jar")) //, homeCacheDir, plugin.hash))
       writter.print("; PLUGIN=`expr $PLUGIN + 1`; ")
     }
 
@@ -146,23 +146,33 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     writter.print(" -o ")
     writter.print(resultPath)
     writter.print("; cd .. ; rm -rf $CUR ; ")
-    writter.print(clearCacheCmd(homeCacheDir))
+    //writter.print(clearCacheCmd(homeCacheDir))
   }
 
-  protected def cacheDir(home: String) =
-    home + "/" + Workspace.preference(GliteEnvironment.CECacheDir) + "_" + Workspace.preference(Workspace.uniqueID)
+  //protected def cacheDir(home: String) =
+  //  home + "/" + Workspace.preference(GliteEnvironment.CECacheDir) + "_" + Workspace.preference(Workspace.uniqueID)
 
-  protected def clearCacheCmd(cache: String) =
-    "find " + cache + " -atime " + Workspace.preference(GliteEnvironment.CECacheDuration).toDays + " -delete ; "
+  //protected def clearCacheCmd(cache: String) =
+  //  "find " + cache + " -atime " + Workspace.preference(GliteEnvironment.CECacheDuration).toDays + " -delete ; "
 
-  protected def cachedLcgCpGunZipCmd(from: URI, to: String, cacheDir: String, hash: String): String = {
+  protected def lcgCpGunZipCmd(from: URI, to: String) = {
+    val builder = new StringBuilder
+    builder.append(lcpCpCmd(from, to + ".gz"))
+    builder.append(" && gunzip ")
+    builder.append(to)
+    builder.append(".gz ")
+    builder.toString
+  }
+  /*protected def cachedLcgCpGunZipCmd(from: URI, to: String, cacheDir: String, hash: String): String = {
     val fileCachePath = cacheDir + "/" + hash
     "(if [ -f " + fileCachePath + " ]; then cp " + fileCachePath + " " + to + ".gz" +
       " ; else " + lcpCpCmd(from, to + ".gz") +
-      " && CACHE_ID=$RANDOM && " + "cp " + to + ".gz " + fileCachePath + "_$CACHE_ID && " +
-      "(if [ ! -f " + fileCachePath + " ]; then mv " + fileCachePath + "_$CACHE_ID " + fileCachePath + "; else rm " + fileCachePath + "_$CACHE_ID ; fi) " +
+      " && CACHE_ID=$RANDOM && " +
+      "( cp " + to + ".gz " + fileCachePath + "_$CACHE_ID && " +
+      "(if [ ! -f " + fileCachePath + " ]; then mv " + fileCachePath + "_$CACHE_ID " + fileCachePath + "; fi)" +
+      "); rm " + fileCachePath + "_$CACHE_ID ; " +
       "; fi) && gunzip " + to + ".gz "
-  }
+  }  */
 
   protected def lcpCpCmd(from: URI, to: String) = {
     val builder = new StringBuilder
@@ -183,16 +193,6 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     builder.append(to)
     builder.toString
   }
-
-  /*  private def lcgCpGunZipCmd(from: URI, to: String) = {
-    val builder = new StringBuilder
-    builder.append(lcpCpCmd(from, to + ".gz"))
-    builder.append(" && gunzip ")
-    builder.append(to)
-    builder.append(".gz; ")
-
-    builder.toString
-  }   */
 
   private def getTimeOut = Workspace.preferenceAsDuration(GliteEnvironment.RemoteTimeout).toSeconds.toString
 

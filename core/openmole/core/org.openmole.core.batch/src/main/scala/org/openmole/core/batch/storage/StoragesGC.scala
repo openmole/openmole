@@ -34,8 +34,16 @@ class StoragesGC(storagesRef: WeakReference[Iterable[StorageService]]) extends I
             storage ← storages
             replica ← ReplicaCatalog.replicas(storage)
           } {
-            if (!replica.sourceFile.exists || System.currentTimeMillis - replica.lastCheckExists > Workspace.preferenceAsDuration(ReplicaCatalog.NoAccessCleanTime).toMilliSeconds)
-              storage.withToken { implicit t ⇒ ReplicaCatalog.clean(replica, storage) }
+            try
+              if (!replica.sourceFile.exists || System.currentTimeMillis - replica.lastCheckExists > Workspace.preferenceAsDuration(ReplicaCatalog.NoAccessCleanTime).toMilliSeconds) {
+                ReplicaCatalog.remove(replica)
+                storage.backgroundRmFile(replica.path)
+              }
+            catch {
+              case t: Throwable ⇒
+                ReplicaCatalog.remove(replica)
+                storage.backgroundRmFile(replica.path)
+            }
           }
         }
         true
