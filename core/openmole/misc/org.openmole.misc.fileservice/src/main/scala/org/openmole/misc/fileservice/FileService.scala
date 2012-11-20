@@ -44,14 +44,18 @@ object FileService {
   Updater.delay(new FileServiceGC, Workspace.preferenceAsDuration(FileService.GCInterval).toMilliSeconds)
 
   def hash(file: File): Hash =
-    if (file.isDirectory) hash(archiveForDir(file).file(false), file)
-    else hash(file, file)
+    hash(file, if (file.isDirectory) archiveForDir(file).file(false) else file)
 
   def invalidate(key: Object, file: File) = hashCache.invalidateCache(key, file.getAbsolutePath)
 
   def archiveForDir(file: File): IFileCache = archiveForDir(file, file)
 
-  def hash(key: Object, file: File): Hash = hashCache.cache(key, file.getAbsolutePath, HashService.computeHash(file))
+  def hash(key: Object, file: File): Hash =
+    hashCache.cache(
+      key,
+      file.getAbsolutePath,
+      hash(key, if (file.isDirectory) archiveForDir(key, file).file(false) else file)
+    )
 
   def archiveForDir(key: Object, file: File): IFileCache = {
     archiveCache.cache(key, file.getAbsolutePath, {
