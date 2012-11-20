@@ -44,8 +44,7 @@ object FileService {
   Updater.delay(new FileServiceGC, Workspace.preferenceAsDuration(FileService.GCInterval).toMilliSeconds)
 
   def hash(file: File): Hash =
-    if (file.isDirectory) hash(archiveForDir(file).file(false), file)
-    else hash(file, file)
+    hash(file, if (file.isDirectory) archiveForDir(file).file(false) else file)
 
   def invalidate(key: Object, file: File) = hashCache.invalidateCache(key, file.getAbsolutePath)
 
@@ -55,8 +54,7 @@ object FileService {
     hashCache.cache(
       key,
       file.getAbsolutePath,
-      if (file.isDirectory) hash(archiveForDir(key, file).file(false), file)
-      else hash(key, file)
+      hash(key, if (file.isDirectory) archiveForDir(key, file).file(false) else file)
     )
 
   def archiveForDir(key: Object, file: File): IFileCache = {
