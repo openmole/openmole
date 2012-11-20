@@ -51,7 +51,13 @@ object FileService {
 
   def archiveForDir(file: File): IFileCache = archiveForDir(file, file)
 
-  def hash(key: Object, file: File): Hash = hashCache.cache(key, file.getAbsolutePath, HashService.computeHash(file))
+  def hash(key: Object, file: File): Hash =
+    hashCache.cache(
+      key,
+      file.getAbsolutePath,
+      if (file.isDirectory) hash(archiveForDir(key, file).file(false), file)
+      else hash(key, file)
+    )
 
   def archiveForDir(key: Object, file: File): IFileCache = {
     archiveCache.cache(key, file.getAbsolutePath, {
