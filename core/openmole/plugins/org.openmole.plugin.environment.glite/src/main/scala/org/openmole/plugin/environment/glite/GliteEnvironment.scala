@@ -97,7 +97,7 @@ object GliteEnvironment extends Logger {
   Workspace += (OverSubmissionNbSampling, "10")
   Workspace += (OverSubmissionSamplingWindowFactor, "5")
 
-  Workspace += (OverSubmissionInterval, "PT2M")
+  Workspace += (OverSubmissionInterval, "PT5M")
 
   Workspace += (OverSubmissionMinNumberOfJob, "100")
   Workspace += (OverSubmissionNumberOfJobUnderMin, "10")
@@ -119,7 +119,7 @@ object GliteEnvironment extends Logger {
   //Workspace += (CECacheDuration, "P7D")
 
   Workspace += (RunningHistoryDuration, "PT3H")
-  Workspace += (EagerSubmissionThreshold, "0.8")
+  Workspace += (EagerSubmissionThreshold, "0.5")
 }
 
 class GliteEnvironment(
