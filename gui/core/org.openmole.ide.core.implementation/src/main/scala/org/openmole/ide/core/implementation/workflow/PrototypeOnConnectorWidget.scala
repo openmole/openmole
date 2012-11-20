@@ -25,9 +25,17 @@ import org.netbeans.api.visual.widget._
 import org.openmole.ide.core.model.workflow.{ IConnectorViewUI, IConnectorUI, IMoleScene }
 import org.openmole.ide.misc.widget.LinkLabel
 
+object PrototypeOnConnectorWidget {
+  val darkOnLight = (new Color(200, 200, 200), new Color(0, 0, 0, 180))
+
+  val lightOnDark = (new Color(0, 0, 0, 180), new Color(200, 200, 200))
+}
+
+import PrototypeOnConnectorWidget._
 class PrototypeOnConnectorWidget(scene: Scene,
                                  connectorUI: IConnectorViewUI,
-                                 val link: LinkLabel) extends ComponentWidget(scene, link.peer) {
+                                 val link: LinkLabel,
+                                 val colorPattern: (Color, Color) = PrototypeOnConnectorWidget.lightOnDark) extends ComponentWidget(scene, link.peer) {
   link.foreground = Color.WHITE
   val dim = 30
   val pos = link.size.width / 2 + 1
@@ -37,7 +45,7 @@ class PrototypeOnConnectorWidget(scene: Scene,
     val g = scene.getGraphics
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
       RenderingHints.VALUE_ANTIALIAS_ON)
-    g.setColor(new Color(0, 0, 0, 180))
+    g.setColor(colorPattern._1)
     g.fillOval(pos, pos, dim, dim)
     link.text = connectorUI.nbPrototypes.toString
     revalidate
@@ -48,7 +56,7 @@ class PrototypeOnConnectorWidget(scene: Scene,
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
       RenderingHints.VALUE_ANTIALIAS_ON)
     g.setStroke(new BasicStroke(3f))
-    g.setColor(new Color(200, 200, 200))
+    g.setColor(colorPattern._2)
     g.drawOval(pos, pos, dim - 2, dim - 2)
     revalidate
   }
