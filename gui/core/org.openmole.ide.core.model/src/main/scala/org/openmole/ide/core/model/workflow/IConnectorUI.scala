@@ -42,5 +42,5 @@ trait IConnectorUI extends IConnectorViewUI {
 
   def filteredPrototypes_=(li: List[IPrototypeDataProxyUI])
 
-  def preview = nbPrototypes.toString
+  var preview = nbPrototypes.toString
 }

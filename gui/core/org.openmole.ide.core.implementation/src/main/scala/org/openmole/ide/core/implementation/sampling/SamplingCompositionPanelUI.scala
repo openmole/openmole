@@ -272,34 +272,30 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
     override def createConnection(sourceWidget: Widget, targetWidget: Widget) = {
       val sourceW = sourceWidget.asInstanceOf[SamplingComponent]
       val targetW = targetWidget.asInstanceOf[SamplingComponent]
-      val factorDataUI = sourceW.component match {
-        case d: IDomainWidget ⇒
-          updatePrevious(d, targetW.component)
-          targetW.component match {
-            case s: ISamplingWidget ⇒ Some(new FactorDataUI(d.proxy))
-            case _ ⇒ None
-          }
-        case _ ⇒ None
-      }
+      val factorDataUI =
+        sourceW.component match {
+          case d: IDomainWidget ⇒
+            updatePrevious(d, targetW.component)
+            d.proxy.factorDataUI match {
+              case Some(f: IFactorDataUI) ⇒ Some(f)
+              case _ ⇒ targetW.component match {
+                case s: ISamplingWidget ⇒ Some(new FactorDataUI(d.proxy, s.proxy))
+                case _ ⇒ None
+              }
+            }
+          case _ ⇒ None
+        }
 
       val connection = new SamplingConnectorWidget(sourceW,
         targetW,
         samplingCompositionPanelUI,
         factorDataUI)
-      /*val connection = new ConnectionWidget(samplingCompositionPanelUI.scene)
-      connection.setStroke(new BasicStroke(2))
-      connection.setLineColor(new Color(218, 218, 218))
-      connection.setSourceAnchor(sourceAnchor(sourceWidget))
-      connection.setTargetAnchor(targetAnchor(targetWidget))
-      connection.setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)   */
       connectLayer.addChild(connection)
       sourceW.connections += connection
       targetW.connections += connection
       _connections += sourceW -> targetW
 
     }
-
-    //def getConnector(sourceWidget: Widget, targetWidget: Widget)
 
     def updatePrevious(source: IDomainWidget,
                        target: ISamplingCompositionWidget): Unit = {
@@ -318,17 +314,6 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
         case _ ⇒
       }
     }
-
-    /*
-def sourceAnchor(w: Widget) = new Anchor(w) {
-  override def compute(entry: Anchor.Entry) =
-    new Result(w.convertLocalToScene(new Point(100, 19)), Anchor.Direction.RIGHT)
-}
-
-def targetAnchor(w: Widget) = new Anchor(w) {
-  override def compute(entry: Anchor.Entry) =
-    new Result(w.convertLocalToScene(new Point(0, 19)), Anchor.Direction.LEFT)
-}    */
   }
 
 }

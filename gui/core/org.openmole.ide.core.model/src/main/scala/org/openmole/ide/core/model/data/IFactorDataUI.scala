@@ -19,12 +19,18 @@ package org.openmole.ide.core.model.data
 
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.core.model.sampling.Factor
-import org.openmole.ide.core.model.sampling.IDomainProxyUI
+import org.openmole.ide.core.model.sampling.{ ISamplingProxyUI, IDomainProxyUI }
 
 trait IFactorDataUI {
   def prototype: Option[IPrototypeDataProxyUI]
 
   def domain: IDomainProxyUI
 
+  def target: ISamplingProxyUI
+
   def coreObject: Factor[_, _]
+
+  def clone(p: IPrototypeDataProxyUI): IFactorDataUI
+
+  def clone(d: IDomainProxyUI): IFactorDataUI
 }

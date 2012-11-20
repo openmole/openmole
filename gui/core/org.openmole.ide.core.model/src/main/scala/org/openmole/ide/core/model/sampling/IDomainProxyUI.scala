@@ -17,7 +17,7 @@
 package org.openmole.ide.core.model.sampling
 
 import org.openmole.ide.misc.tools.Counter
-import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 
 trait IDomainProxyUI extends ISamplingCompositionProxyUI {
   val id = "domain" + Counter.id.getAndIncrement
@@ -25,4 +25,8 @@ trait IDomainProxyUI extends ISamplingCompositionProxyUI {
   def dataUI: IDomainDataUI
 
   def dataUI_=(d: IDomainDataUI)
+
+  def factorDataUI: Option[IFactorDataUI]
+
+  def factorDataUI_=(f: Option[IFactorDataUI])
 }

@@ -17,9 +17,9 @@
 package org.openmole.ide.misc.tools.util
 
 object Types {
-  val INT = classOf[Int].getSimpleName
-  val LONG = classOf[Long].getSimpleName
-  val DOUBLE = classOf[Double].getSimpleName
+  val INT = "Int"
+  val LONG = "Long"
+  val DOUBLE = "Double"
   val FILE = classOf[java.io.File].getSimpleName
   val STRING = classOf[String].getSimpleName
   val BIG_DECIMAL = classOf[java.math.BigDecimal].getSimpleName

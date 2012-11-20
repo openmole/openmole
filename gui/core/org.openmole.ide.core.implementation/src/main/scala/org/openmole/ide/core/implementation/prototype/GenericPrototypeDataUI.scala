@@ -19,6 +19,7 @@ package org.openmole.ide.core.implementation.prototype
 
 import org.openmole.ide.core.model.data.IPrototypeDataUI
 import org.openmole.core.implementation.data._
+import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.core.model.data._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.tools.util.ClassLoader

@@ -20,4 +20,6 @@ trait IConnectorViewUI {
   def nbPrototypes = 1
 
   def preview: String
+
+  def preview_=(p: String)
 }
