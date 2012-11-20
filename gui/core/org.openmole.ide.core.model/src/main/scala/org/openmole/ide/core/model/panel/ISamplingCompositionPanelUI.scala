@@ -20,12 +20,15 @@ package org.openmole.ide.core.model.panel
 import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.core.model.data._
 import org.netbeans.api.visual.widget.Scene
+import scala.collection.mutable.Set
 import java.awt.Point
 
 trait ISamplingCompositionPanelUI extends IPanelUI {
   def saveContent(name: String): ISamplingCompositionDataUI
 
   def scene: Scene
+
+  def connections: List[(ISamplingComponent, ISamplingComponent)]
 
   def addDomain(domainProxy: IDomainProxyUI,
                 location: Point,
@@ -41,5 +44,7 @@ trait ISamplingCompositionPanelUI extends IPanelUI {
 
   def setSamplingProxy(samplingProxy: ISamplingProxyUI, b: Boolean): Unit
 
-  def testConnections: Unit
+  def testConnections(arityTest: Boolean): Unit
+
+  def dataUI: ISamplingCompositionDataUI
 }

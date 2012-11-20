@@ -17,10 +17,7 @@
 
 package org.openmole.ide.plugin.domain.range
 
-import java.util.Locale
-import java.util.ResourceBundle
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.panel.IDomainPanelUI
+import scala.math.Numeric._
 import org.openmole.ide.misc.widget.{ URL, Help, Helper, PluginPanel }
 import scala.swing.event._
 import swing.{ MyComboBox, TextField, CheckBox, Label }

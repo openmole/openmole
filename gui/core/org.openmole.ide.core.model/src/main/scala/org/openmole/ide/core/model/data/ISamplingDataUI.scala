@@ -23,7 +23,7 @@ import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.misc.tools.Counter
 
-trait ISamplingDataUI extends IDataUI with ISamplingCompositionElementDataUI {
+trait ISamplingDataUI extends IDataUI {
   def name: String = "Sampling"
 
   def coreObject(factors: List[IFactorDataUI],
@@ -35,7 +35,7 @@ trait ISamplingDataUI extends IDataUI with ISamplingCompositionElementDataUI {
 
   def fatImagePath: String
 
-  def isAcceptable(domain: IDomainDataUI[_]): Boolean
+  def isAcceptable(domain: IDomainDataUI): Boolean
 
   def isAcceptable(sampling: ISamplingDataUI): Boolean
 

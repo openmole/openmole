@@ -38,6 +38,7 @@ import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import org.netbeans.api.visual.widget.Scene
 import org.openmole.misc.tools.obj.ClassUtils
 import scala.swing.TabbedPane
+import collection.mutable
 
 object EmptyDataUIs {
 
@@ -93,7 +94,10 @@ object EmptyDataUIs {
     def saveContent(name: String) = new EmptySamplingCompositionDataUI
     def remove(samplingComponent: ISamplingComponent): Unit = {}
     def scene = new Scene
-    def testConnections = {}
+    def testConnections(arityTest: Boolean) = {}
+    def dataUI = new EmptySamplingCompositionDataUI
+    def connections_=(s: mutable.Set[(ISamplingComponent, ISamplingComponent)]) {}
+    def connections = List()
   }
 
   class EmptySampling extends Sampling {

@@ -19,13 +19,19 @@
 package org.openmole.ide.plugin.domain.file
 
 import org.openmole.ide.core.model.data.IDomainDataUI
-import java.io.File
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
-import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
+import org.openmole.ide.misc.tools.util.Types.FILE
 
-trait SubDataUI[T] extends IDomainDataUI[T] {
+trait SubDataUI extends IDomainDataUI {
   def name = "File"
 
+  override def availableTypes = List(FILE)
+
   def directoryPath: String
+
+  /*StatusBar.warn("A Discrete Domain is required as input of a Modifier Domain (Map, Take, Group, ...)")
+  false
+
+  override def isAcceptable(domain: IDomainDataUI) = {
+    domain.
+  }         */
 }

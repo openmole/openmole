@@ -20,9 +20,7 @@ package org.openmole.ide.plugin.domain.collection
 import java.math.BigDecimal
 import java.math.BigInteger
 import org.openmole.core.model.domain.Domain
-import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.domain.collection.DynamicListDomain
@@ -31,29 +29,27 @@ object DynamicListDomainDataUI {
 
   def apply[T](values: List[String] = List(), classString: String) = {
     classString match {
-      case "Int" ⇒ new DynamicListDomainDataUI[Int](values)
-      case "Double" ⇒ new DynamicListDomainDataUI[Double](values)
-      case "BigDecimal" ⇒ new DynamicListDomainDataUI[BigDecimal](values)
-      case "BigInteger" ⇒ new DynamicListDomainDataUI[BigInteger](values)
-      case "Long" ⇒ new DynamicListDomainDataUI[Long](values)
-      case "String" ⇒ new DynamicListDomainDataUI[String](values)
+      case INT ⇒ new DynamicListDomainDataUI[Int](values)
+      case DOUBLE ⇒ new DynamicListDomainDataUI[Double](values)
+      case BIG_DECIMAL ⇒ new DynamicListDomainDataUI[BigDecimal](values)
+      case BIG_INTEGER ⇒ new DynamicListDomainDataUI[BigInteger](values)
+      case LONG ⇒ new DynamicListDomainDataUI[Long](values)
+      case STRING ⇒ new DynamicListDomainDataUI[String](values)
       case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
     }
   }
 }
 
-class DynamicListDomainDataUI[T](val values: List[String])(implicit domainType: Manifest[T])
-    extends IDomainDataUI[T] {
+case class DynamicListDomainDataUI[S](val values: List[String])(implicit val domainType: Manifest[S])
+    extends IDomainDataUI {
 
   val name = "Value list"
 
   def preview = " in " + values.headOption.getOrElse("") + " ..."
 
-  override def coreObject: Domain[T] = new DynamicListDomain(values.toSeq: _*)
+  override def coreObject: Domain[S] = new DynamicListDomain(values.toSeq: _*)
 
   def buildPanelUI = new DynamicListDomainPanelUI(this)
 
-  val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
-
-  def coreClass = classOf[DynamicListDomainDataUI[T]]
+  def coreClass = classOf[DynamicListDomainDataUI[S]]
 }

@@ -37,6 +37,7 @@ import java.awt.LinearGradientPaint
 import javax.imageio.ImageIO
 
 class SamplingWidget(val proxy: ISamplingProxyUI,
+                     val scenePanelUI: ISamplingCompositionPanelUI,
                      display: Boolean = false) extends MigPanel("wrap", "[center]", "[center]") with ISamplingWidget {
   samplingWidget ⇒
   preferredSize = new Dimension(100, 38)
@@ -55,7 +56,8 @@ class SamplingWidget(val proxy: ISamplingProxyUI,
     3,
     "ff5555",
     true) {
-    opaque = false; maximumSize = new Dimension(80, 30)
+    opaque = false;
+    maximumSize = new Dimension(80, 30)
   }
 
   def update = {
@@ -82,4 +84,6 @@ class SamplingWidget(val proxy: ISamplingProxyUI,
   }
 
   contents += link
+
+  def sceneDataUI = scenePanelUI.dataUI
 }

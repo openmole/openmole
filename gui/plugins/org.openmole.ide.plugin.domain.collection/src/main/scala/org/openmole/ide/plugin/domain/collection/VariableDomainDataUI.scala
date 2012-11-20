@@ -20,8 +20,7 @@ package org.openmole.ide.plugin.domain.collection
 
 import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
-import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
+import org.openmole.ide.misc.tools.util.Types._
 import java.math.BigInteger
 import java.math.BigDecimal
 import org.openmole.misc.exception.UserBadDataError
@@ -30,29 +29,27 @@ import org.openmole.core.model.data.Prototype
 import scala.swing.Label
 import org.openmole.ide.core.model.panel.{ IDomainPanelUI, IPanelUI }
 import org.openmole.ide.misc.widget.PluginPanel
-import org.openmole.core.model.domain.Domain
 
 object VariableDomainDataUI {
   def apply[T](prototypeArray: IPrototypeDataProxyUI, classString: String) = {
     classString match {
-      case "Int" ⇒ new VariableDomainDataUI[Int](prototypeArray)
-      case "Double" ⇒ new VariableDomainDataUI[Double](prototypeArray)
-      case "BigDecimal" ⇒ new VariableDomainDataUI[BigDecimal](prototypeArray)
-      case "BigInteger" ⇒ new VariableDomainDataUI[BigInteger](prototypeArray)
-      case "Long" ⇒ new VariableDomainDataUI[Long](prototypeArray)
-      case "String" ⇒ new VariableDomainDataUI[String](prototypeArray)
+      case INT ⇒ new VariableDomainDataUI[Int](prototypeArray)
+      case DOUBLE ⇒ new VariableDomainDataUI[Double](prototypeArray)
+      case BIG_DECIMAL ⇒ new VariableDomainDataUI[BigDecimal](prototypeArray)
+      case BIG_INTEGER ⇒ new VariableDomainDataUI[BigInteger](prototypeArray)
+      case LONG ⇒ new VariableDomainDataUI[Long](prototypeArray)
+      case STRING ⇒ new VariableDomainDataUI[String](prototypeArray)
       case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
     }
   }
 }
 
-class VariableDomainDataUI[T](val prototypeArray: IPrototypeDataProxyUI)(implicit domainType: Manifest[T]) extends IDomainDataUI[T] {
+class VariableDomainDataUI[S](val prototypeArray: IPrototypeDataProxyUI)(implicit val domainType: Manifest[S]) extends IDomainDataUI {
   vdomainDataUI ⇒
-  val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String", "File")
 
   val name = "Prototype Array"
 
-  def coreObject = new VariableDomain(prototypeArray.dataUI.coreObject.asInstanceOf[Prototype[Array[T]]])
+  def coreObject = new VariableDomain(prototypeArray.dataUI.coreObject.asInstanceOf[Prototype[Array[S]]])
 
   def buildPanelUI = new PluginPanel("") with IDomainPanelUI {
     contents += new Label("<html><i>No more information is required for this domain</i></html>")
@@ -61,5 +58,5 @@ class VariableDomainDataUI[T](val prototypeArray: IPrototypeDataProxyUI)(implici
 
   def preview = "in " + prototypeArray.toString
 
-  def coreClass = classOf[VariableDomainDataUI[T]]
+  def coreClass = classOf[VariableDomainDataUI[S]]
 }

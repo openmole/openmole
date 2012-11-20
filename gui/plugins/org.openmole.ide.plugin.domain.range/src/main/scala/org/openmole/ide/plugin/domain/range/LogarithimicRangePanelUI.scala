@@ -19,10 +19,10 @@
 package org.openmole.ide.plugin.domain.range
 
 import swing.{ MyComboBox, Label, TextField }
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.misc.widget.{ URL, Help, Helper }
+import org.openmole.ide.misc.tools.util.Types._
 
-class LogarithmicRangePanelUI(pud: LogarthmicRangeDataUI[_]) extends GenericRangeDomainPanelUI {
+class LogarithmicRangePanelUI(pud: LogarthmicRangeDataUI) extends GenericRangeDomainPanelUI {
 
   val stepField = new TextField(6) { text = pud.step.getOrElse(1.0).toString }
   minField.text = pud.min
@@ -31,7 +31,7 @@ class LogarithmicRangePanelUI(pud: LogarthmicRangeDataUI[_]) extends GenericRang
   contents += (new Label("Step"), "gap para")
   contents += stepField
 
-  typeCombo.peer.setModel(MyComboBox.newConstantModel(List("Double", "BigDecimal")))
+  typeCombo.peer.setModel(MyComboBox.newConstantModel(List(DOUBLE, BIG_DECIMAL)))
 
   def saveContent = GenericRangeDomainDataUI(minField.text, maxField.text, Some(stepField.text), true, typeCombo.selection.item)
 

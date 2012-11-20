@@ -19,8 +19,8 @@ package org.openmole.ide.plugin.domain.modifier
 
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IDomainPanelUI
+import org.openmole.ide.misc.tools.util.ClassLoader._
 import org.openmole.ide.misc.widget.{ URL, Help, Helper, PluginPanel }
 import swing.{ MyComboBox, TextField }
 
@@ -36,7 +36,7 @@ class GroupDomainPanelUI(pud: GroupDomainDataUI[_]) extends PluginPanel("wrap") 
   contents += sizeTextField
 
   def saveContent = GroupDomainDataUI(sizeTextField.text,
-    typeCombo.selection.item)
+    typeCombo.selection.item, pud.previousDomain)
 
   override lazy val help =
     new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {

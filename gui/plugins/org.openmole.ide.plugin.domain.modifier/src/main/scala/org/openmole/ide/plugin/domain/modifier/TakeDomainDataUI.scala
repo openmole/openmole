@@ -28,33 +28,24 @@ import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
 
-/*object TakeDomainDataUI {
+case class TakeDomainDataUI(val size: String = "1",
+                            val previousDomain: List[IDomainDataUI] = List.empty)
+    extends ModifierDomainDataUI {
 
-  def apply[T](size: String = "1",
-               classString: String) =
-    classString match {
-      case "Int" ⇒ new TakeDomainDataUI[Int](size)
-      case "Double" ⇒ new TakeDomainDataUI[Double](size)
-      case "BigDecimal" ⇒ new TakeDomainDataUI[BigDecimal](size)
-      case "BigInteger" ⇒ new TakeDomainDataUI[BigInteger](size)
-      case "Long" ⇒ new TakeDomainDataUI[Long](size)
-      case "String" ⇒ new TakeDomainDataUI[String](size)
-      case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
-    }
-}   */
-
-class TakeDomainDataUI(val size: String = "1")
-    extends ModifierDomainDataUI[Any] {
+  val domainType = previousDomain.headOption match {
+    case Some(dt: IDomainDataUI) ⇒ dt.domainType
+    case _ ⇒ manifest[Double]
+  }
 
   val name = "Take"
 
   def preview = "Take (" + size + ")"
 
-  val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
-
-  override def coreObject: Domain[Any] = inputDomain match {
-    case d: DOMAINTYPE ⇒ new TakeDomain[Any](d, size.toInt)
-    case _ ⇒ throw new UserBadDataError("A Discrete Domain is required as input of a Take Domain.")
+  override def coreObject = {
+    println("previous domain : " + previousDomain)
+    val valid = validPreviousDomains
+    if (valid._1) new TakeDomain(valid._2.head, size.toInt)
+    else throw new UserBadDataError("A Discrete Domain is required as input of a Take Domain2. ")
   }
 
   def buildPanelUI = new TakeDomainPanelUI(this)
@@ -62,4 +53,6 @@ class TakeDomainDataUI(val size: String = "1")
   def coreClass = classOf[TakeDomainDataUI]
 
   override def toString = "Take"
+
+  def clone(pD: List[IDomainDataUI]) = copy(previousDomain = pD)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.ide.misc.tools.util
 
-package org.openmole.ide.core.implementation.workflow
-
-import scala.swing.Panel
-import java.awt.Color
-import org.openmole.ide.core.model.workflow._
-
-class SamplingWidget(scene: IMoleScene,
-                     samplingUI: ISamplingUI) extends Panel {
-  background = Color.GREEN
+object Types {
+  val INT = classOf[Int].getSimpleName
+  val LONG = classOf[Long].getSimpleName
+  val DOUBLE = classOf[Double].getSimpleName
+  val FILE = classOf[java.io.File].getSimpleName
+  val STRING = classOf[String].getSimpleName
+  val BIG_DECIMAL = classOf[java.math.BigDecimal].getSimpleName
+  val BIG_INTEGER = classOf[java.math.BigInteger].getSimpleName
 }

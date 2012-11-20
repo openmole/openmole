@@ -23,7 +23,7 @@ import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.data._
-import org.openmole.ide.core.model.sampling.IDomainWidget
+import org.openmole.ide.core.model.sampling.{ IModifier, IDomainWidget }
 import org.openmole.ide.misc.widget._
 import multirow.ComponentFocusedEvent
 import org.openmole.ide.core.model.panel._
@@ -34,15 +34,22 @@ class DomainPanelUI(domainWidget: IDomainWidget,
 
   val domains = KeyRegistry.domains.values.map {
     _.buildDataUI
-  }.toList.sorted
-
-  //val protoComboBox = new MyComboBox(Proxys.prototypes.toList)
-  //protoComboBox.selection.item = domainWidget.dataUI.prototype
-
-  //val ddcc = domainContent(domainWidget.dataUI.prototype)
+  }.toList.sorted.filter {
+    d ⇒
+      if (domainWidget.incomings.isEmpty) true
+      else {
+        d match {
+          case dm: IModifier ⇒ true
+          case _ ⇒ false
+        }
+      }
+  }
+  val previous: List[IDomainWidget] = domainWidget.incomings
 
   val domainComboBox = new MyComboBox(domains)
-  domainComboBox.selection.item = domains.filter { _.toString == domainWidget.proxy.dataUI.toString }.head
+  domainComboBox.selection.item = domains.filter {
+    _.toString == domainWidget.proxy.dataUI.toString
+  }.head
 
   var dPanel = domainWidget.proxy.dataUI.buildPanelUI
 
@@ -62,14 +69,6 @@ class DomainPanelUI(domainWidget: IDomainWidget,
       repaint
   }
 
-  /*protoComboBox.selection.reactions += {
-    case SelectionChanged(`protoComboBox`) ⇒
-      if (protoDomainPanel.contents.size == 2) protoDomainPanel.contents.remove(1)
-      val dContent = domainContent(protoComboBox.selection.item)
-      domainComboBox.peer.setModel(MyComboBox.newConstantModel(dContent))
-      displayDomainPanel(dContent)
-  }*/
-
   def listenToDomain = {
     listenTo(dPanel.help.components.toSeq: _*)
     reactions += {
@@ -79,17 +78,20 @@ class DomainPanelUI(domainWidget: IDomainWidget,
     domainPanel.updateHelp
   }
 
-  def displayDomainPanel(dContent: List[IDomainDataUI[_]]) = dContent.filter {
+  def displayDomainPanel(dContent: List[IDomainDataUI]) = dContent.filter {
     it ⇒
       domainComboBox.selection.item.toString == it.toString
   }.headOption match {
-    case Some(d: IDomainDataUI[_]) ⇒
+    case Some(d: IDomainDataUI) ⇒
       dPanel = d.buildPanelUI
       protoDomainPanel.contents += dPanel.peer
       listenToDomain
     case _ ⇒
   }
 
-  def saveContent = dPanel.saveContent
+  def saveContent = dPanel.saveContent match {
+    case m: IModifier ⇒ m.clone(previousDomain = previous.map { _.proxy.dataUI })
+    case x: Any ⇒ x
+  }
 
 }

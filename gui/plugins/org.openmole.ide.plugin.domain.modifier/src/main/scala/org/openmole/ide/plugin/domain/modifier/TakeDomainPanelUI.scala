@@ -31,7 +31,7 @@ class TakeDomainPanelUI(pud: TakeDomainDataUI) extends PluginPanel("") with IDom
 
   contents += sizeTextField
 
-  def saveContent = new TakeDomainDataUI(sizeTextField.text)
+  def saveContent = new TakeDomainDataUI(sizeTextField.text, pud.previousDomain)
 
   override lazy val help =
     new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {

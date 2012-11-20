@@ -19,59 +19,59 @@ package org.openmole.ide.plugin.domain.range
 
 import java.math.BigDecimal
 import java.math.BigInteger
-import org.openmole.core.model.data.Prototype
 import org.openmole.core.model.domain.Domain
-import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.plugin.domain.range._
 import org.openmole.plugin.domain.bounded._
 import org.openmole.misc.tools.io.FromString
 import org.openmole.misc.tools.io.FromString._
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.misc.tools.util.Types._
 
 object RangeDomainDataUI {
+  def empty = apply("0", "", Some("1"), DOUBLE)
 
-  def apply[T](min: String = "0", max: String = "", step: Option[String] = None, classString: String) = {
-    classString match {
-      case "Int" ⇒ new RangeDomainDataUI[Int](min, max, step)
-      case "Double" ⇒ new RangeDomainDataUI[Double](min, max, step)
-      case "BigDecimal" ⇒ new RangeDomainDataUI[BigDecimal](min, max, step)
-      case "BigInteger" ⇒ new RangeDomainDataUI[BigInteger](min, max, step)
-      case "Long" ⇒ new RangeDomainDataUI[Long](min, max, step)
+  def apply(min: String,
+            max: String,
+            step: Option[String],
+            cString: String) = {
+    import Numeric.BigDecimalAsIfIntegral
+    cString match {
+      case INT ⇒ new RangeDomainDataUI[Int](min, max, step)
+      case DOUBLE ⇒ new RangeDomainDataUI[Double](min, max, step)
+      case BIG_DECIMAL ⇒ new RangeDomainDataUI[BigDecimal](min, max, step)
+      case BIG_INTEGER ⇒ new RangeDomainDataUI[BigInteger](min, max, step)
+      case LONG ⇒ new RangeDomainDataUI[Long](min, max, step)
       case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
     }
   }
 }
 
-class RangeDomainDataUI[T](
+case class RangeDomainDataUI[S](
   val min: String = "0",
   val max: String = "",
   val step: Option[String] = None)(
-    implicit val domainType: Manifest[T],
-    fs: FromString[T],
-    integral: Integral[T])
-    extends GenericRangeDomainDataUI[T] {
+    implicit val domainType: Manifest[S],
+    fs: FromString[S],
+    integral: Integral[S])
+    extends GenericRangeDomainDataUI {
 
   val name = "Range"
 
-  def coreObject: Domain[T] = step match {
+  def coreObject: Domain[S] = step match {
     case Some(s: String) ⇒
-      if (s.isEmpty) new Bounded[T](min, max)
-      else new Range[T](min, max, s)
-    case _ ⇒ new Bounded[T](min, max)
+      if (s.isEmpty) new Bounded[S](min, max)
+      else new Range[S](min, max, s)
+    case _ ⇒ new Bounded[S](min, max)
   }
 
   def buildPanelUI = new RangeDomainPanelUI(this)
 
-  val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long")
-
   def coreClass = step match {
     case Some(s: String) ⇒
-      if (s.isEmpty) classOf[Bounded[T]]
-      else classOf[Range[T]]
-    case _ ⇒ classOf[Bounded[T]]
+      if (s.isEmpty) classOf[Bounded[S]]
+      else classOf[Range[S]]
+    case _ ⇒ classOf[Bounded[S]]
   }
 
   override def toString = "Range"

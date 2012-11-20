@@ -20,12 +20,12 @@ package org.openmole.ide.core.model.workflow
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 
-trait IConnectorUI {
+trait IConnectorUI extends IConnectorViewUI {
   def source: ICapsuleUI
 
   def target: IInputSlotWidget
 
-  def nbPrototypes: Int = {
+  override def nbPrototypes: Int = {
     val availables = availablePrototypes
     availables.size - filteredPrototypes.filter { p ⇒ availables.contains(p) }.size
   }
@@ -42,4 +42,5 @@ trait IConnectorUI {
 
   def filteredPrototypes_=(li: List[IPrototypeDataProxyUI])
 
+  def preview = nbPrototypes.toString
 }

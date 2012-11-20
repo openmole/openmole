@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.ide.core.model.sampling
 
-package org.openmole.ide.core.model.data
+import org.openmole.ide.core.model.data.IDomainDataUI
 
-trait ISamplingCompositionElementDataUI
+trait IModifier {
+  def previousDomain: List[IDomainDataUI]
+
+  def clone(previousDomain: List[IDomainDataUI]): IDomainDataUI
+}

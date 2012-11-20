@@ -16,8 +16,6 @@
  */
 package org.openmole.ide.core.model.sampling
 
-import org.openmole.ide.core.model.data.ISamplingCompositionElementDataUI
-
 trait ISamplingCompositionProxyUI {
   def id: String
 }

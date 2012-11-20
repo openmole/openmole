@@ -30,35 +30,24 @@ import org.openmole.plugin.domain.modifier.GroovyDomainModifier
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.dialog.StatusBar
 
-/*object GroovyModifierDomainDataUI {
+case class GroovyModifierDomainDataUI(val prototypeName: String = "",
+                                      val code: String = "",
+                                      var previousDomain: List[IDomainDataUI] = List.empty)
+    extends ModifierDomainDataUI {
 
-  def apply[T](protoName: String = "",
-               code: String = "", classString: String) = {
-    classString match {
-      case "Int" ⇒ new GroovyModifierDomainDataUI[Int](protoName, code)
-      case "Double" ⇒ new GroovyModifierDomainDataUI[Double](protoName, code)
-      case "BigDecimal" ⇒ new GroovyModifierDomainDataUI[BigDecimal](protoName, code)
-      case "BigInteger" ⇒ new GroovyModifierDomainDataUI[BigInteger](protoName, code)
-      case "Long" ⇒ new GroovyModifierDomainDataUI[Long](protoName, code)
-      case "String" ⇒ new GroovyModifierDomainDataUI[String](protoName, code)
-      case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
-    }
+  val domainType = previousDomain.headOption match {
+    case Some(d: IDomainDataUI) ⇒ d.domainType
+    case _ ⇒ manifest[Double]
   }
-}   */
-
-class GroovyModifierDomainDataUI(val prototypeName: String = "",
-                                 val code: String = "")
-    extends ModifierDomainDataUI[Any] {
 
   val name = "Map"
 
   def preview = "Map( " + code.split("\n").take(2).mkString(",") + " ...)"
 
-  val availableTypes = List("Int", "Double", "BigDecimal", "BigInteger", "Long", "String")
-
-  override def coreObject: Domain[Any] = inputDomain match {
-    case Some(id: DOMAINTYPE) ⇒ new GroovyDomainModifier(id, prototypeName, code)
-    case _ ⇒ throw new UserBadDataError("An input Domain is required for a Map modifier Domain")
+  override def coreObject: Domain[Any] = {
+    val valid = validPreviousDomains
+    if (valid._1) new GroovyDomainModifier(valid._2.head, prototypeName, code)
+    else throw new UserBadDataError("An input Domain is required for a Map modifier Domain")
   }
 
   def buildPanelUI(p: IPrototypeDataProxyUI) = new GroovyModifierDomainPanelUI(this)
@@ -66,4 +55,6 @@ class GroovyModifierDomainDataUI(val prototypeName: String = "",
   def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], false))
 
   def coreClass = classOf[GroovyModifierDomainDataUI]
+
+  def clone(pD: List[IDomainDataUI]) = copy(previousDomain = pD)
 }

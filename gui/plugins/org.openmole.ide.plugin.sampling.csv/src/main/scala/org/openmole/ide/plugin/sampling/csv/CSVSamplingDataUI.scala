@@ -37,7 +37,7 @@ class CSVSamplingDataUI(var csvFilePath: String = "",
 
   def buildPanelUI = new CSVSamplingPanelUI(this)
 
-  def isAcceptable(factor: IDomainDataUI[_]) = true
+  def isAcceptable(factor: IDomainDataUI) = true
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 
