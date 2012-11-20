@@ -36,10 +36,10 @@ object FileService {
   val GCInterval = new ConfigurationLocation("FileService", "GCInterval")
   Workspace += (GCInterval, "PT5M")
 
-  class CachedArchiveForDir(file: File, val lastModified: Long) extends FileCacheDeleteOnFinalize(file)
+  //class CachedArchiveForDir(file: File, val lastModified: Long) extends FileCacheDeleteOnFinalize(file)
 
   private[fileservice] val hashCache = new AssociativeCache[String, Hash]
-  private[fileservice] val archiveCache = new AssociativeCache[String, CachedArchiveForDir]
+  private[fileservice] val archiveCache = new AssociativeCache[String, IFileCache]
 
   Updater.delay(new FileServiceGC, Workspace.preferenceAsDuration(FileService.GCInterval).toMilliSeconds)
 
@@ -54,17 +54,15 @@ object FileService {
     hashCache.cache(
       key,
       file.getAbsolutePath,
-      hash(key, if (file.isDirectory) archiveForDir(key, file).file(false) else file)
-    )
+      HashService.computeHash(if (file.isDirectory) archiveForDir(key, file).file(false) else file))
 
-  def archiveForDir(key: Object, file: File): IFileCache = {
+  def archiveForDir(key: Object, file: File) = {
     archiveCache.cache(key, file.getAbsolutePath, {
-      val ret = Workspace.newFile("archive", ".tar");
+      val ret = Workspace.newFile("archive", ".tar")
       val os = new TarOutputStream(new FileOutputStream(ret))
       try os.createDirArchiveWithRelativePathNoVariableContent(file)
       finally os.close
-
-      new CachedArchiveForDir(ret, file.lastModification)
+      new FileCacheDeleteOnFinalize(ret)
     })
   }
 
