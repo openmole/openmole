@@ -71,10 +71,6 @@ class SamplingCompositionDataUI(val name: String = "",
           case _ ⇒ false
         }
       }
-      //_.substring(0, 4) == "samp" }
-      //FIXME : add prototypes and build factors
-      //  builtSampling += data -> data.coreObject(partition._2.map { domainMap },
-      //   partition._1.filterNot(_ == data.id).map { s ⇒ buildSamplingCore(samplingMap(s), connectionMap, domainMap, samplingMap) })
     }
     builtSampling(widget)
   }

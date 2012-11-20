@@ -31,7 +31,8 @@ import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget.multirow.MultiCombo._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
-import swing.{ MyComboBox, ScrollPane }
+import swing.{ Label, MyComboBox, ScrollPane }
+import org.openmole.ide.core.implementation.sampling.SamplingConnectorWidget
 
 object ConnectorPrototypeFilterDialog extends PrototypeDialog {
   def display(connectorUI: IConnectorUI) = {
@@ -51,18 +52,25 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
     }
   }
 
-  class FactorPrototypeDialog(availablePrototypes: List[IPrototypeDataProxyUI]) extends PluginPanel("") {
-    preferredSize = new Dimension(250, 200)
+  class FactorPrototypeDialog(availablePrototypes: List[IPrototypeDataProxyUI],
+                              connectorWidget: SamplingConnectorWidget) extends PluginPanel("wrap") {
+    preferredSize = new Dimension(150, 100)
     val protoCombo = new MyComboBox(availablePrototypes)
+    contents += new Label("Prototype to be applied on the domain")
     contents += protoCombo
 
     def content = protoCombo.selection.item
+    connectorWidget.factor.get.prototype match {
+      case Some(p: IPrototypeDataProxyUI) ⇒ protoCombo.selection.item = p
+      case _ ⇒
+    }
 
-    def display =
+    def display: Unit =
       if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(this) {
         verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
       }.peer,
-        "Prototype to be applied on the defined Domain")).equals(NotifyDescriptor.OK_OPTION)) {
+        "Prototype")).equals(NotifyDescriptor.OK_OPTION)) {
+        connectorWidget.updateFactor(protoCombo.selection.item)
         println("OK computer")
       }
   }

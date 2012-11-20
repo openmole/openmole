@@ -26,17 +26,18 @@ import org.openmole.ide.core.model.workflow.{ IConnectorViewUI, IConnectorUI, IM
 import org.openmole.ide.misc.widget.LinkLabel
 
 object PrototypeOnConnectorWidget {
-  val darkOnLight = (new Color(200, 200, 200), new Color(0, 0, 0, 180))
+  val darkOnLight = (new Color(218, 218, 218), new Color(0, 0, 0, 180))
 
   val lightOnDark = (new Color(0, 0, 0, 180), new Color(200, 200, 200))
 }
 
 import PrototypeOnConnectorWidget._
+
 class PrototypeOnConnectorWidget(scene: Scene,
-                                 connectorUI: IConnectorViewUI,
+                                 var connectorUI: IConnectorViewUI,
                                  val link: LinkLabel,
                                  val colorPattern: (Color, Color) = PrototypeOnConnectorWidget.lightOnDark) extends ComponentWidget(scene, link.peer) {
-  link.foreground = Color.WHITE
+  link.foreground = colorPattern._2
   val dim = 30
   val pos = link.size.width / 2 + 1
   setPreferredBounds(new Rectangle(dim, dim))
@@ -47,7 +48,7 @@ class PrototypeOnConnectorWidget(scene: Scene,
       RenderingHints.VALUE_ANTIALIAS_ON)
     g.setColor(colorPattern._1)
     g.fillOval(pos, pos, dim, dim)
-    link.text = connectorUI.nbPrototypes.toString
+    link.text = connectorUI.preview
     revalidate
   }
 
@@ -57,7 +58,8 @@ class PrototypeOnConnectorWidget(scene: Scene,
       RenderingHints.VALUE_ANTIALIAS_ON)
     g.setStroke(new BasicStroke(3f))
     g.setColor(colorPattern._2)
-    g.drawOval(pos, pos, dim - 2, dim - 2)
+    if (colorPattern == lightOnDark)
+      g.drawOval(pos, pos, dim - 2, dim - 2)
     revalidate
   }
 }

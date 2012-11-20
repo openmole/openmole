@@ -41,10 +41,12 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 class SamplingConnectorWidget(sourceWidget: Widget,
                               targetWidget: Widget,
                               scene: ISamplingCompositionPanelUI,
-                              factor: Option[IFactorDataUI] = None) extends ConnectionWidget(scene.scene) {
+                              var factor: Option[IFactorDataUI] = None) extends ConnectionWidget(scene.scene) {
+  samplingConnectorWidget ⇒
 
   val sourceW = sourceWidget.asInstanceOf[SamplingComponent]
   val targetW = targetWidget.asInstanceOf[SamplingComponent]
+  var componentWidget: Option[PrototypeOnConnectorWidget] = None
 
   setStroke(new BasicStroke(2))
   setLineColor(new Color(218, 218, 218))
@@ -53,27 +55,45 @@ class SamplingConnectorWidget(sourceWidget: Widget,
   setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
 
   factor match {
-    case Some(f: IFactorDataUI) ⇒
-      val componentWidget = buildPrototypeFilterWidget(f)
-      addChild(componentWidget)
-      setConstraint(componentWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
+    case Some(f: IFactorDataUI) ⇒ buildPrototypeFilterWidget
     case _ ⇒
   }
 
-  def buildPrototypeFilterWidget(factor: IFactorDataUI) =
-    new PrototypeOnConnectorWidget(scene.scene,
-      new IConnectorViewUI {
-        def preview = factor.prototype match {
-          case Some(p: IPrototypeDataProxyUI) ⇒ p.toString
-          case _ ⇒ "?"
-        }
-      },
-      new LinkLabel(factor.prototype.toString,
+  def updateFactor(p: IPrototypeDataProxyUI) = factor match {
+    case Some(f: IFactorDataUI) ⇒
+      factor = Some(f.clone(p))
+      factor.get.domain.factorDataUI = factor
+      componentWidget.get.connectorUI = preview(factor.get)
+      repaint
+      revalidate
+    case _ ⇒
+  }
+
+  def preview(factor: IFactorDataUI) = new IConnectorViewUI {
+    var preview = factor.prototype match {
+      case Some(p: IPrototypeDataProxyUI) ⇒ p.toString
+      case _ ⇒ "?"
+    }
+  }
+
+  def buildPrototypeFilterWidget = {
+    preview(factor.get)
+    componentWidget = Some(new PrototypeOnConnectorWidget(scene.scene,
+      preview(factor.get),
+      new LinkLabel(factor.get.prototype.toString,
         new Action("") {
-          def apply = (new FactorPrototypeDialog(prototypes.filter {
-            p ⇒ factor.domain.dataUI.domainType == p.dataUI.protoType
-          }.toList)).display
-        }, 2), darkOnLight)
+          def apply = {
+            println("apply")
+            (new FactorPrototypeDialog(prototypes.filter {
+              p ⇒ factor.get.domain.dataUI.domainType.toString == p.dataUI.protoType.toString.split('.').last
+            }.toList, samplingConnectorWidget)).display
+          }
+        }, 2, bold = true), darkOnLight))
+    removeChildren
+    addChild(componentWidget.get)
+    setConstraint(componentWidget.get, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
+    componentWidget.get.setOpaque(true)
+  }
 
   def sourceAnchor(w: Widget) = new Anchor(w) {
     override def compute(entry: Anchor.Entry) =
