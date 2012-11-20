@@ -21,9 +21,12 @@ class CompleteSamplingDataUI extends ISamplingDataUI {
   def coreObject(factors: List[IFactorDataUI],
                  samplings: List[Sampling]) = {
     new CompleteSampling(
-      (factors.map(f ⇒ DiscreteFactor(Factor(f.prototype.dataUI.coreObject.asInstanceOf[Prototype[Any]],
-        f.domain.coreObject.asInstanceOf[Domain[Any] with Discrete[Any]])))
-        ::: samplings): _*)
+      (factors.map(f ⇒ f.prototype match {
+        case Some(p: IPrototypeDataProxyUI) ⇒
+          DiscreteFactor(Factor(p.dataUI.coreObject.asInstanceOf[Prototype[Any]],
+            f.domain.dataUI.coreObject.asInstanceOf[Domain[Any] with Discrete[Any]]))
+        case _ ⇒ throw new UserBadDataError("No Prototype is define for the domain " + f.domain.dataUI.preview)
+      }) ::: samplings): _*)
   }
 
   def coreClass = classOf[CompleteSampling]

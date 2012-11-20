@@ -24,18 +24,11 @@ import org.openmole.core.model.domain.Domain
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.data.Prototype
 
-object FactorDataUI {
-  def empty = new FactorDataUI(None, None)
-}
-
-class FactorDataUI[T](val prototype: Option[IPrototypeDataProxyUI],
-                      val domain: Option[IDomainProxyUI]) extends IFactorDataUI {
+class FactorDataUI[T](val domain: IDomainProxyUI,
+                      val prototype: Option[IPrototypeDataProxyUI] = None) extends IFactorDataUI {
   def coreObject = prototype match {
-    case Some(p: IPrototypeDataProxyUI) ⇒ domain match {
-      case Some(d: IDomainProxyUI) ⇒ Factor(p.dataUI.coreObject.asInstanceOf[Prototype[T]],
-        d.dataUI.coreObject.asInstanceOf[Domain[T]])
-      case _ ⇒ throw new UserBadDataError("No Domain has been found to be linked with a Sampling")
-    }
+    case Some(p: IPrototypeDataProxyUI) ⇒ Factor(p.dataUI.coreObject.asInstanceOf[Prototype[T]],
+      domain.dataUI.coreObject.asInstanceOf[Domain[T]])
     case _ ⇒ throw new UserBadDataError("A Prototype is required to link Domains and Samplings")
   }
 }

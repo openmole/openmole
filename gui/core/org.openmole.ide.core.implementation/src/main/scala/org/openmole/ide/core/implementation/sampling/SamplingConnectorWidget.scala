@@ -22,6 +22,7 @@ import swing.{ Action, Label }
 import java.awt.{ Cursor, Dimension, Color }
 import swing.event.MousePressed
 import org.openmole.ide.core.implementation.workflow.PrototypeOnConnectorWidget
+import org.openmole.ide.core.implementation.workflow.PrototypeOnConnectorWidget._
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.core.model.data.IFactorDataUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys._
@@ -35,11 +36,12 @@ import org.netbeans.api.visual.layout.LayoutFactory
 import org.netbeans.api.visual.widget._
 import java.awt._
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
 class SamplingConnectorWidget(sourceWidget: Widget,
                               targetWidget: Widget,
-                              factor: IFactorDataUI,
-                              scene: ISamplingCompositionPanelUI) extends ConnectionWidget(scene.scene) {
+                              scene: ISamplingCompositionPanelUI,
+                              factor: Option[IFactorDataUI] = None) extends ConnectionWidget(scene.scene) {
 
   val sourceW = sourceWidget.asInstanceOf[SamplingComponent]
   val targetW = targetWidget.asInstanceOf[SamplingComponent]
@@ -50,29 +52,28 @@ class SamplingConnectorWidget(sourceWidget: Widget,
   setTargetAnchor(targetAnchor(targetWidget))
   setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
 
-  targetW.component match {
-    case t: ISamplingWidget ⇒
-      val componentWidget = buildPrototypeFilterWidget
+  factor match {
+    case Some(f: IFactorDataUI) ⇒
+      val componentWidget = buildPrototypeFilterWidget(f)
       addChild(componentWidget)
       setConstraint(componentWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
     case _ ⇒
   }
 
-  def buildPrototypeFilterWidget =
-    sourceW.component.proxy match {
-      case d: IDomainProxyUI ⇒
-        new PrototypeOnConnectorWidget(scene.scene,
-          new IConnectorViewUI {
-            def preview = factor.prototype.toString
-          },
-          new LinkLabel(factor.prototype.toString,
-            new Action("") {
-              def apply = (new FactorPrototypeDialog(prototypes.filter {
-                p ⇒ d.dataUI.domainType == p.dataUI.protoType
-              }.toList)).display
-            }, 2))
-      case _ ⇒ throw new UserBadDataError("No Factor representation is available.")
-    }
+  def buildPrototypeFilterWidget(factor: IFactorDataUI) =
+    new PrototypeOnConnectorWidget(scene.scene,
+      new IConnectorViewUI {
+        def preview = factor.prototype match {
+          case Some(p: IPrototypeDataProxyUI) ⇒ p.toString
+          case _ ⇒ "?"
+        }
+      },
+      new LinkLabel(factor.prototype.toString,
+        new Action("") {
+          def apply = (new FactorPrototypeDialog(prototypes.filter {
+            p ⇒ factor.domain.dataUI.domainType == p.dataUI.protoType
+          }.toList)).display
+        }, 2), darkOnLight)
 
   def sourceAnchor(w: Widget) = new Anchor(w) {
     override def compute(entry: Anchor.Entry) =

@@ -272,10 +272,20 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
     override def createConnection(sourceWidget: Widget, targetWidget: Widget) = {
       val sourceW = sourceWidget.asInstanceOf[SamplingComponent]
       val targetW = targetWidget.asInstanceOf[SamplingComponent]
+      val factorDataUI = sourceW.component match {
+        case d: IDomainWidget ⇒
+          updatePrevious(d, targetW.component)
+          targetW.component match {
+            case s: ISamplingWidget ⇒ Some(new FactorDataUI(d.proxy))
+            case _ ⇒ None
+          }
+        case _ ⇒ None
+      }
+
       val connection = new SamplingConnectorWidget(sourceW,
         targetW,
-        FactorDataUI.empty,
-        samplingCompositionPanelUI)
+        samplingCompositionPanelUI,
+        factorDataUI)
       /*val connection = new ConnectionWidget(samplingCompositionPanelUI.scene)
       connection.setStroke(new BasicStroke(2))
       connection.setLineColor(new Color(218, 218, 218))
@@ -286,10 +296,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
       sourceW.connections += connection
       targetW.connections += connection
       _connections += sourceW -> targetW
-      sourceW.component match {
-        case d: IDomainWidget ⇒ updatePrevious(d, targetW.component)
-        case _ ⇒
-      }
+
     }
 
     //def getConnector(sourceWidget: Widget, targetWidget: Widget)
@@ -311,16 +318,17 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
         case _ ⇒
       }
     }
-    /*
-    def sourceAnchor(w: Widget) = new Anchor(w) {
-      override def compute(entry: Anchor.Entry) =
-        new Result(w.convertLocalToScene(new Point(100, 19)), Anchor.Direction.RIGHT)
-    }
 
-    def targetAnchor(w: Widget) = new Anchor(w) {
-      override def compute(entry: Anchor.Entry) =
-        new Result(w.convertLocalToScene(new Point(0, 19)), Anchor.Direction.LEFT)
-    }    */
+    /*
+def sourceAnchor(w: Widget) = new Anchor(w) {
+  override def compute(entry: Anchor.Entry) =
+    new Result(w.convertLocalToScene(new Point(100, 19)), Anchor.Direction.RIGHT)
+}
+
+def targetAnchor(w: Widget) = new Anchor(w) {
+  override def compute(entry: Anchor.Entry) =
+    new Result(w.convertLocalToScene(new Point(0, 19)), Anchor.Direction.LEFT)
+}    */
   }
 
 }
