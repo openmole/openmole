@@ -26,34 +26,38 @@ import org.openmole.core.model.task._
 
 object ElitismTask {
 
-  def apply(evolution: Elitism with Termination with Modifier)(
+  def apply(evolution: Elitism with Termination with Modifier with Archive)(
     name: String,
-    individuals: Prototype[Array[Individual[evolution.G]]],
-    archive: Prototype[Population[evolution.G, evolution.MF]],
+    individuals: Prototype[Array[Individual[evolution.G, evolution.F]]],
+    population: Prototype[Population[evolution.G, evolution.F, evolution.MF]],
+    archive: Prototype[evolution.A],
     generation: Prototype[Int],
     state: Prototype[evolution.STATE],
     terminated: Prototype[Boolean])(implicit plugins: PluginSet) = {
-    val (_individuals, _archive, _generation, _state, _terminated) = (individuals, archive, generation, state, terminated)
+    val (_individuals, _population, _archive, _generation, _state, _terminated) = (individuals, population, archive, generation, state, terminated)
 
     new TaskBuilder { builder ⇒
-
+      addInput(population)
       addInput(archive)
       addInput(individuals)
       addInput(generation)
       addInput(state)
+      addOutput(population)
       addOutput(archive)
       addOutput(generation)
       addOutput(state)
       addOutput(terminated)
 
-      addParameter(archive -> evolution.emptyPopulation)
+      addParameter(population -> Population.empty)
+      addParameter(archive -> evolution.initialArchive)
       addParameter(generation -> 0)
-      addParameter(new DynamicParameter(state, evolution.initialState(evolution.emptyPopulation)))
+      addParameter(new DynamicParameter(state, evolution.initialState(Population.empty)))
 
       def toTask = new ElitismTask(name, evolution) {
 
-        val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G]]]]
-        val archive = _archive.asInstanceOf[Prototype[Population[evolution.G, evolution.MF]]]
+        val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.F]]]]
+        val population = _population.asInstanceOf[Prototype[Population[evolution.G, evolution.F, evolution.MF]]]
+        val archive = _archive.asInstanceOf[Prototype[evolution.A]]
         val generation = _generation
         val state = _state.asInstanceOf[Prototype[evolution.STATE]]
         val terminated = _terminated
@@ -69,27 +73,30 @@ object ElitismTask {
 sealed abstract class ElitismTask[E <: Elitism with Termination with Modifier](
     val name: String, val evolution: E)(implicit val plugins: PluginSet) extends Task {
 
-  def individuals: Prototype[Array[Individual[evolution.G]]]
-  def archive: Prototype[Population[evolution.G, evolution.MF]]
+  def individuals: Prototype[Array[Individual[evolution.G, evolution.F]]]
+  def population: Prototype[Population[evolution.G, evolution.F, evolution.MF]]
+  def archive: Prototype[evolution.A]
   def state: Prototype[evolution.STATE]
   def generation: Prototype[Int]
   def terminated: Prototype[Boolean]
 
   override def process(context: Context) = {
-    val currentArchive = context.valueOrException(archive).asInstanceOf[Population[evolution.G, evolution.MF]]
-    val globalArchive = context.valueOrException(individuals).toList ::: currentArchive.toIndividuals.toList
+    val currentPopulation = context.valueOrException(population) //.asInstanceOf[Population[evolution.G, evolution.F, evolution.MF]]
+    val globalPopulation = context.valueOrException(individuals).toList ::: currentPopulation.toIndividuals.toList
+    val currentArchive = context.valueOrException(archive)
 
-    val population = evolution.toPopulation(globalArchive.toIndexedSeq)
-    val newArchive = evolution.elitism(population)
+    val (computedPopulation, computedArchive) = evolution.toPopulation(globalPopulation, currentArchive)
+    val newPopulation = evolution.elitism(computedPopulation)
 
     val (term, newState) = evolution.terminated(
-      newArchive,
+      newPopulation,
       context.valueOrException(state))
 
     val terminatedVariable = Variable(terminated, term)
     val newStateVariable = Variable(state, newState)
     Context(
-      Variable(archive, newArchive),
+      Variable(population, computedPopulation),
+      Variable(archive, computedArchive),
       terminatedVariable,
       newStateVariable,
       Variable(generation, context.valueOrException(generation) + 1))

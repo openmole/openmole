@@ -28,9 +28,9 @@ import scala.collection.mutable.ListBuffer
 
 object ScalingGAArchiveTask {
 
-  def apply[G <: GAGenome, MF](
+  def apply[G <: GAGenome, F <: MGFitness, MF](
     name: String,
-    archive: Prototype[Population[G, MF]],
+    population: Prototype[Population[G, F, MF]],
     modelInputs: (Prototype[Double], (Double, Double))*)(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
 
@@ -42,10 +42,10 @@ object ScalingGAArchiveTask {
         this
       }
 
-      addInput(archive)
+      addInput(population)
       modelInputs foreach { case (p, _) ⇒ this addOutput p.toArray }
 
-      def toTask = new ScalingGAArchiveTask(name, archive, modelInputs: _*) {
+      def toTask = new ScalingGAArchiveTask(name, population, modelInputs: _*) {
         val inputs = builder.inputs
         val outputs = builder.outputs
         val parameters = builder.parameters
@@ -55,22 +55,22 @@ object ScalingGAArchiveTask {
 
 }
 
-sealed abstract class ScalingGAArchiveTask[G <: GAGenome, MF](
+sealed abstract class ScalingGAArchiveTask[G <: GAGenome, F <: MGFitness, MF](
     val name: String,
-    archive: Prototype[Population[G, MF]],
+    population: Prototype[Population[G, F, MF]],
     modelInputs: (Prototype[Double], (Double, Double))*)(implicit val plugins: PluginSet) extends Task {
 
   def objectives: List[Prototype[Double]]
 
   override def process(context: Context) = {
-    val archiveValue = context.valueOrException(archive)
+    val populationValue = context.valueOrException(population)
 
     (
       modelInputs.zipWithIndex.map {
         case ((prototype, (min, max)), i) ⇒
           Variable(
             prototype.toArray,
-            archiveValue.map {
+            populationValue.map {
               _.genome.values(i).scale(min, max)
             }.toArray)
       } ++
@@ -78,7 +78,7 @@ sealed abstract class ScalingGAArchiveTask[G <: GAGenome, MF](
         case (p, i) ⇒
           Variable(
             p.toArray,
-            archiveValue.map { _.fitness.values(i) }.toArray)
+            populationValue.map { _.fitness.values(i) }.toArray)
       }).toContext
   }
 

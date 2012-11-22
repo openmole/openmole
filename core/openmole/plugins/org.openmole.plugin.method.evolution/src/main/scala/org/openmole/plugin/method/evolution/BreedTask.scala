@@ -26,30 +26,31 @@ import org.openmole.core.model.task._
 import org.openmole.misc.workspace._
 import org.openmole.misc.tools.service.Random._
 import org.openmole.core.implementation.task.Task._
+import algorithm._
 
 object BreedTask {
 
   def apply(evolution: Breeding with GManifest)(
     name: String,
-    archive: Prototype[Population[evolution.G, evolution.MF]],
-    genome: Prototype[evolution.G])(implicit plugins: PluginSet) = sized(evolution)(name, archive, genome, None)
+    population: Prototype[Population[evolution.G, evolution.F, evolution.MF]],
+    genome: Prototype[evolution.G])(implicit plugins: PluginSet) = sized(evolution)(name, population, genome, None)
 
   def sized(evolution: Breeding with GManifest)(
     name: String,
-    archive: Prototype[Population[evolution.G, evolution.MF]],
+    population: Prototype[Population[evolution.G, evolution.F, evolution.MF]],
     genome: Prototype[evolution.G],
     size: Option[Int])(implicit plugins: PluginSet) = {
 
-    val (_archive, _genome) = (archive, genome)
+    val (_population, _genome) = (population, genome)
 
     new TaskBuilder { builder ⇒
-      addInput(archive)
+      addInput(population)
       addOutput(Data(genome toArray, Explore))
-      addParameter(archive -> Population.empty)
+      addParameter(population -> Population.empty)
 
       def toTask =
         new BreedTask(name, evolution, size) {
-          val archive = _archive.asInstanceOf[Prototype[Population[evolution.G, evolution.MF]]]
+          val population = _population.asInstanceOf[Prototype[Population[evolution.G, evolution.F, evolution.MF]]]
           val genome = _genome.asInstanceOf[Prototype[evolution.G]]
 
           val inputs = builder.inputs
@@ -64,17 +65,17 @@ sealed abstract class BreedTask(
     val name: String,
     val evolution: Breeding with GManifest, size: Option[Int])(implicit val plugins: PluginSet) extends Task {
 
-  def archive: Prototype[Population[evolution.G, evolution.MF]]
+  def population: Prototype[Population[evolution.G, evolution.F, evolution.MF]]
   def genome: Prototype[evolution.G]
 
   override def process(context: Context) = {
     import evolution._
 
     val rng = newRNG(context.valueOrException(openMOLESeed))
-    val a = context.valueOrException(archive)
+    val p = context.valueOrException(population)
     val newGenome = size match {
-      case None ⇒ evolution.breed(a)(rng).toArray
-      case Some(s) ⇒ evolution.breed(a, s)(rng).toArray
+      case None ⇒ evolution.breed(p)(rng).toArray
+      case Some(s) ⇒ evolution.breed(p, s)(rng).toArray
     }
     context + Variable(genome toArray, newGenome)
   }

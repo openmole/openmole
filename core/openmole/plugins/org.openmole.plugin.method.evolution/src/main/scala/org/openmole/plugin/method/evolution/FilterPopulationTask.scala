@@ -25,17 +25,17 @@ import org.openmole.core.model.task._
 
 object FilterPopulationTask {
 
-  def apply[G <: GAGenome, MF](
+  def apply[G, F, MF](
     name: String,
-    archive: Prototype[Population[G, MF]],
-    filtered: Prototype[Population[G, MF]])(implicit plugins: PluginSet) =
+    population: Prototype[Population[G, F, MF]],
+    filtered: Prototype[Population[G, F, MF]])(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
 
-      addInput(archive)
+      addInput(population)
       addInput(filtered)
-      addOutput(archive)
+      addOutput(population)
 
-      def toTask = new FilterPopulationTask(name, archive, filtered) {
+      def toTask = new FilterPopulationTask(name, population, filtered) {
         val inputs = builder.inputs
         val outputs = builder.outputs
         val parameters = builder.parameters
@@ -44,16 +44,16 @@ object FilterPopulationTask {
 
 }
 
-sealed abstract class FilterPopulationTask[G <: GAGenome, MF](
+sealed abstract class FilterPopulationTask[G, F, MF](
     val name: String,
-    archive: Prototype[Population[G, MF]],
-    filtered: Prototype[Population[G, MF]])(implicit val plugins: PluginSet) extends Task { task ⇒
+    population: Prototype[Population[G, F, MF]],
+    filtered: Prototype[Population[G, F, MF]])(implicit val plugins: PluginSet) extends Task { task ⇒
 
   override def process(context: Context) = {
     val filter = context.valueOrException(filtered).content.map { _.genome }.toSet
     Variable(
-      archive,
-      context.valueOrException(archive).content.filterNot(e ⇒ filter.contains(e.genome)): Population[G, MF])
+      population,
+      context.valueOrException(population).content.filterNot(e ⇒ filter.contains(e.genome)): Population[G, F, MF])
   }
 
 }

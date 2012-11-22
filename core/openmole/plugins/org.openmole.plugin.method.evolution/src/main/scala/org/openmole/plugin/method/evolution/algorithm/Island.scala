@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Romain Reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,18 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution
+package org.openmole.plugin.method.evolution.algorithm
 
 import fr.iscpif.mgo._
 
-sealed class HyperVolumeIsland[E <: GAG with MF with GenomeFactory with Dominance with GManifest with Mu with ReferencePoint](val evolution: E)(val mu: Int, val windowSize: Int, val deviationEpsilon: Double)
+sealed class Island[E](val evolution: E)(
+  val mu: Int,
+  val steps: Int) /*
     extends BinaryTournamentSelection
-    with GAG
     with GManifest
     with NonDominatedElitism
-    with HyperVolumeStabilityTermination
+    with CounterTermination
     with TerminationManifest
-    with HypervolumeDiversity
+    with DiversityMetric
     with ParetoRanking
     with RankDiversityModifier
     with GenomeFactory
@@ -34,6 +35,8 @@ sealed class HyperVolumeIsland[E <: GAG with MF with GenomeFactory with Dominanc
     with CloneRemoval {
 
   type G = evolution.G
+  type F = evolution.F
+  type DIVERSIFIED = evolution.DIVERSIFIED
 
   val gManifest = evolution.gManifest
   val stateManifest = manifest[STATE]
@@ -42,5 +45,5 @@ sealed class HyperVolumeIsland[E <: GAG with MF with GenomeFactory with Dominanc
 
   def lambda = evolution.mu
   def isDominated(p1: Seq[Double], p2: Seq[Double]) = evolution.isDominated(p1, p2)
-  def referencePoint = evolution.referencePoint
-}
+  def diversity(individuals: Seq[DIVERSIFIED], ranks: Seq[Lazy[Int]]): IndexedSeq[Lazy[Double]] = evolution.diversity(individuals, ranks)
+}       */

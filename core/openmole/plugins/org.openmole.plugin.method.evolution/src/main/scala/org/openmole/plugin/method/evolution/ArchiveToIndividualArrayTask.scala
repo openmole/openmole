@@ -25,16 +25,16 @@ import org.openmole.core.model.task._
 
 object ArchiveToIndividualArrayTask {
 
-  def apply[G <: Genome, MF](
+  def apply[G <: Genome, F, MF](
     name: String,
-    archive: Prototype[Population[G, MF]],
-    individual: Prototype[Individual[G]])(implicit plugins: PluginSet) =
+    population: Prototype[Population[G, F, MF]],
+    individual: Prototype[Individual[G, F]])(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
 
-      addInput(archive)
+      addInput(population)
       addOutput(individual.toArray)
 
-      def toTask = new ArchiveToIndividualArrayTask(name, archive, individual) {
+      def toTask = new ArchiveToIndividualArrayTask(name, population, individual) {
         val inputs = builder.inputs
         val outputs = builder.outputs
         val parameters = builder.parameters
@@ -42,14 +42,14 @@ object ArchiveToIndividualArrayTask {
     }
 }
 
-sealed abstract class ArchiveToIndividualArrayTask[G <: Genome, MF](
+sealed abstract class ArchiveToIndividualArrayTask[G <: Genome, F, MF](
     val name: String,
-    archive: Prototype[Population[G, MF]],
-    individual: Prototype[Individual[G]])(implicit val plugins: PluginSet) extends Task { task ⇒
+    population: Prototype[Population[G, F, MF]],
+    individual: Prototype[Individual[G, F]])(implicit val plugins: PluginSet) extends Task { task ⇒
 
   override def process(context: Context) =
     context + Variable(
       individual.toArray,
-      context.valueOrException(archive).toIndividuals.toArray)
+      context.valueOrException(population).toIndividuals.toArray)
 
 }

@@ -28,16 +28,22 @@ import fr.iscpif.mgo._
 
 object SelectPopulationTask {
 
-  def apply(evolution: Modifier with G with MF with Selection with Lambda)(name: String, archive: Prototype[Population[evolution.G, evolution.MF]])(implicit plugins: PluginSet) = {
-    val (_archive) = (archive)
+  def apply(evolution: Modifier with G with MF with Selection with Lambda)(
+    name: String,
+    population: Prototype[Population[evolution.G, evolution.F, evolution.MF]],
+    archive: Prototype[evolution.A])(implicit plugins: PluginSet) = {
+    val (_archive, _population) = (archive, population)
 
     new TaskBuilder { builder ⇒
       addInput(archive)
+      addInput(population)
       addOutput(archive)
+      addOutput(population)
 
       def toTask =
         new SelectPopulationTask(name, evolution) {
-          val archive = _archive.asInstanceOf[Prototype[Population[evolution.G, evolution.MF]]]
+          val population = _population.asInstanceOf[Prototype[Population[evolution.G, evolution.F, evolution.MF]]]
+          val archive = _archive.asInstanceOf[Prototype[evolution.A]]
           val inputs = builder.inputs
           val outputs = builder.outputs
           val parameters = builder.parameters
@@ -50,13 +56,16 @@ object SelectPopulationTask {
 
 sealed abstract class SelectPopulationTask(
     val name: String,
-    val evolution: Modifier with G with MF with Selection with Lambda)(implicit val plugins: PluginSet) extends Task {
+    val evolution: Modifier with G with MF with F with Selection with Lambda)(implicit val plugins: PluginSet) extends Task {
 
-  def archive: Prototype[Population[evolution.G, evolution.MF]]
+  def population: Prototype[Population[evolution.G, evolution.F, evolution.MF]]
+  def archive: Prototype[evolution.A]
 
   override def process(context: Context) = {
     implicit val rng = newRNG(context.valueOrException(openMOLESeed))
-    val p = context.valueOrException(archive)
-    context + Variable(archive, evolution.toPopulation((0 until evolution.lambda).map { i ⇒ evolution.selection(p) }))
+    val p = context.valueOrException(population)
+    val a = context.valueOrException(archive)
+    val (newP, _) = evolution.toPopulation((0 until evolution.lambda).map { i ⇒ evolution.selection(p) }, a)
+    context + Variable(population, newP) + Variable(archive, a)
   }
 }
