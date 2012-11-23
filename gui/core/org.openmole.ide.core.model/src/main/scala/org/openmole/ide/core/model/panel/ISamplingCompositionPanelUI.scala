@@ -30,6 +30,11 @@ trait ISamplingCompositionPanelUI extends IPanelUI {
 
   def connections: List[(ISamplingComponent, ISamplingComponent)]
 
+  def factors: List[IFactorProxyUI]
+
+  def computeFactor(sourceProxy: ISamplingCompositionProxyUI,
+                    targetProxy: ISamplingCompositionProxyUI): Option[IFactorProxyUI]
+
   def addDomain(domainProxy: IDomainProxyUI,
                 location: Point,
                 d: Boolean = true)
@@ -47,4 +52,18 @@ trait ISamplingCompositionPanelUI extends IPanelUI {
   def testConnections(arityTest: Boolean): Unit
 
   def dataUI: ISamplingCompositionDataUI
+
+  def firstNoneModifierDomain(domain: IDomainDataUI): Option[IDomainDataUI]
+
+  def update(domain: IDomainWidget): Unit
+
+  def updateNext(domain: IDomainWidget): (ISamplingCompositionWidget, Option[ISamplingCompositionWidget])
+
+  def updateNext(source: ISamplingComponent,
+                 target: ISamplingComponent): (ISamplingCompositionWidget, Option[ISamplingCompositionWidget])
+
+  def updatePrevious(source: IDomainWidget,
+                     target: ISamplingCompositionWidget): Unit
+
+  def updatePrevious(domain: IDomainWidget): Unit
 }

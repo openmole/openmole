@@ -36,7 +36,7 @@ import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 
 object ExplorationTaskPanelUI {
-  val emptyProxy = new SamplingCompositionDataProxyUI(new EmptySamplingCompositionDataUI)
+  val emptyProxy = new SamplingCompositionDataProxyUI
 }
 
 import ExplorationTaskPanelUI._

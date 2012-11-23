@@ -33,6 +33,8 @@ import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import swing.{ Label, MyComboBox, ScrollPane }
 import org.openmole.ide.core.implementation.sampling.SamplingConnectorWidget
+import org.openmole.ide.core.model.sampling.IFactorProxyUI
+import org.openmole.ide.core.implementation.dataproxy.Proxys
 
 object ConnectorPrototypeFilterDialog extends PrototypeDialog {
   def display(connectorUI: IConnectorUI) = {
@@ -52,27 +54,46 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
     }
   }
 
-  class FactorPrototypeDialog(availablePrototypes: List[IPrototypeDataProxyUI],
-                              connectorWidget: SamplingConnectorWidget) extends PluginPanel("wrap") {
+  class FactorPrototypeDialog(connectorWidget: SamplingConnectorWidget) extends PluginPanel("wrap") {
     preferredSize = new Dimension(150, 100)
     val protoCombo = new MyComboBox(availablePrototypes)
     contents += new Label("Prototype to be applied on the domain")
     contents += protoCombo
 
     def content = protoCombo.selection.item
-    connectorWidget.factor.get.prototype match {
-      case Some(p: IPrototypeDataProxyUI) ⇒ protoCombo.selection.item = p
+
+    connectorWidget.computeFactor match {
+      case Some(f: IFactorProxyUI) ⇒
+        f.dataUI.prototype match {
+          case Some(p: IPrototypeDataProxyUI) ⇒
+            protoCombo.selection.item = p
+          case _ ⇒
+        }
       case _ ⇒
     }
 
-    def display: Unit =
+    def availablePrototypes = connectorWidget.computeFactor match {
+      case Some(f: IFactorProxyUI) ⇒ Proxys.prototypes.filter {
+        p ⇒
+          f.dataUI.domain.dataUI.domainType.toString == p.dataUI.protoType.toString.split('.').last
+      }.toList
+      case _ ⇒ List()
+    }
+
+    def display: Unit = {
+      protoCombo.peer.setModel(MyComboBox.newConstantModel(availablePrototypes))
       if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(this) {
         verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
       }.peer,
         "Prototype")).equals(NotifyDescriptor.OK_OPTION)) {
-        connectorWidget.updateFactor(protoCombo.selection.item)
-        println("OK computer")
+        connectorWidget.computeFactor match {
+          case Some(f: IFactorProxyUI) ⇒
+            f.dataUI.prototype = Some(protoCombo.selection.item)
+          case _ ⇒
+        }
+        connectorWidget.update
       }
+    }
   }
 
   class FilteredPrototypePanel(connector: IConnectorUI) extends PluginPanel("") {

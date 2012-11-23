@@ -29,29 +29,37 @@ import scala.swing.BorderPanel.Position._
 import java.util.{ Locale, ResourceBundle }
 import org.openmole.ide.misc.tools.util.Types._
 
-class UniformDistributionPanelUI(pud: UniformDistributionDataUI[_]) extends PluginPanel("fillx", "[left][grow,fill]", "") with IDomainPanelUI {
+class UniformDistributionPanelUI(pud: UniformDistributionDataUI[_]) extends PluginPanel("wrap 2") with IDomainPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
   val typeCombo = new MyComboBox(List(INT, LONG))
-  val maxField = new TextField(6)
+  val maxField = new TextField(pud.max.getOrElse("").toString, 6)
 
-  val initialType = if (pud.max.isDefined) INT else LONG
+  val initialType = pud.availableTypes.head
   typeCombo.selection.item = initialType
+
+  val maxPanel = new PluginPanel("wrap 2")
+  contents += typeCombo
+  contents += maxPanel
   setContents(initialType)
 
-  def setContents(t: String) = {
-    contents.removeAll
-    t match {
-      case INT ⇒
-        contents += (new Label("Size"), "gap para")
-        contents += (maxField, "wrap")
-      case _ ⇒ contents += new Label("<html><i>No more information is required for this Domain</i></html>")
-    }
+  listenTo(`typeCombo`)
+  typeCombo.selection.reactions += {
+    case SelectionChanged(`typeCombo`) ⇒ setContents(typeCombo.selection.item)
   }
 
-  listenTo(`typeCombo`)
-  reactions += {
-    case SelectionChanged(`typeCombo`) ⇒ setContents(typeCombo.selection.item)
+  def setContents(t: String) = {
+    println("set content : " + t)
+    maxPanel.contents.removeAll
+    t match {
+      case INT ⇒
+        maxPanel.contents += (new Label("Size"), "gap para")
+        maxPanel.contents += (maxField, "wrap")
+      case LONG ⇒ maxPanel.contents += new Label("<html><i>No more information is required for this Domain</i></html>")
+      case _ ⇒
+    }
+    revalidate
+    repaint
   }
 
   def saveContent = UniformDistributionDataUI({

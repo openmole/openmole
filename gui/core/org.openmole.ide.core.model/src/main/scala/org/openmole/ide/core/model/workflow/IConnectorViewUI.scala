@@ -21,5 +21,5 @@ trait IConnectorViewUI {
 
   def preview: String
 
-  def preview_=(p: String)
+  // def preview_=(p: String)
 }

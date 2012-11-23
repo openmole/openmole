@@ -54,6 +54,7 @@ import org.openmole.ide.core.model.panel.PanelMode._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.swing.Panel
+import org.openmole.misc.exception.UserBadDataError
 
 abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMoleScene
     with SelectProvider
@@ -103,6 +104,11 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     getGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
     getGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
     super.paintChildren
+  }
+
+  def currentPanelUI = currentPanel.contents.headOption match {
+    case Some(x: BasePanel) ⇒ x.panelUI
+    case _ ⇒ throw new UserBadDataError("There is no current panel.")
   }
 
   def displayPropertyPanel(proxy: IDataProxyUI,

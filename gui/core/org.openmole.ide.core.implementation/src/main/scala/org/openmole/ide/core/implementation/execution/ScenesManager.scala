@@ -44,6 +44,8 @@ import scala.swing.Button
 import scala.swing.Label
 import scala.swing.TabbedPane
 import scala.collection.mutable.HashSet
+import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 
 object ScenesManager {
 
@@ -71,6 +73,16 @@ object ScenesManager {
   def currentScene = currentSceneContainer match {
     case Some(sc: ISceneContainer) ⇒ Some(sc.scene)
     case _ ⇒ None
+  }
+
+  def currentPanelUI = currentScene match {
+    case Some(s: IMoleScene) ⇒ s.currentPanelUI
+    case _ ⇒ throw new UserBadDataError("There is no current scene")
+  }
+
+  def currentSamplingCompositionPanelUI = currentPanelUI match {
+    case scp: ISamplingCompositionPanelUI ⇒ scp
+    case _ ⇒ throw new UserBadDataError("There is no current sampling panel")
   }
 
   def closePropertyPanel = List(currentScene).flatten.foreach { _.closePropertyPanel }
