@@ -74,8 +74,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
 
     def availablePrototypes = connectorWidget.computeFactor match {
       case Some(f: IFactorProxyUI) ⇒ Proxys.prototypes.filter {
-        p ⇒
-          f.dataUI.domain.dataUI.domainType.toString == p.dataUI.protoType.toString.split('.').last
+        p ⇒ f.dataUI.domain.dataUI.domainType.toString.split('.').last == p.dataUI.protoType.toString.split('.').last
       }.toList
       case _ ⇒ List()
     }

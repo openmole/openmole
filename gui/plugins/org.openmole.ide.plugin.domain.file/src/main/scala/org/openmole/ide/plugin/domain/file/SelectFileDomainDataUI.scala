@@ -34,7 +34,7 @@ case class SelectFileDomainDataUI(val directoryPath: String = "", val path: Stri
 
   val domainType = manifest[File]
 
-  override def name = "Single"
+  override def name = "Single file"
 
   def coreObject = new SelectFileDomain(new File(directoryPath), path)
 

@@ -56,6 +56,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
   var _connections = new HashSet[(SamplingComponent, SamplingComponent)]
   val factorWidgets = new mutable.HashMap[IFactorProxyUI, SamplingConnectorWidget]
   var finalSampling: Option[ISamplingProxyUI] = None
+  var editedDomainProxy: Option[IDomainDataUI] = None
 
   dataUI.factors.foreach {
     f ⇒ _factors += f
@@ -145,9 +146,10 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
             _connections = _connections.filterNot {
               case (ss, tt) ⇒ (ss == samplingComponent) || (tt == samplingComponent)
             }
-            _factors = _factors.filterNot { f ⇒
-              f.dataUI.domain.id == s.proxy.id ||
-                f.dataUI.target.id == s.proxy.id
+            _factors = _factors.filterNot {
+              f ⇒
+                f.dataUI.domain.id == s.proxy.id ||
+                  f.dataUI.target.id == s.proxy.id
             }
             samplingComponent.connections.foreach {
               c ⇒ connectLayer.removeChild(c)
@@ -208,13 +210,6 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
   }
 
   def domainsAndSamplings: Map[ISamplingCompositionProxyUI, SamplingComponent] = domains ++ samplings toMap
-
-  def samplingComponentFromId(id: String) = domainsAndSamplings.keys.find {
-    _.id == id
-  } match {
-    case Some(x: ISamplingCompositionWidget) ⇒ domainsAndSamplings(x.proxy)
-    case _ ⇒ throw new UserBadDataError("The sampling composition element " + id + " can not be found")
-  }
 
   def testConnections(arityTest: Boolean) = {
     _connections.foreach {
@@ -284,15 +279,15 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
           updatePrevious(w)
           t match {
             case Some(samp: ISamplingWidget) ⇒
-              computeFactor(w.proxy, samp.proxy) match {
+              val factor = computeFactor(w.proxy, samp.proxy)
+              factor match {
                 case Some(f: IFactorProxyUI) ⇒
-                  println("OH YEAH for " + f)
-                  val w = factorWidgets(f)
-                  f.dataUI.prototype = None
-                  w.update
+                  println("OH YEAH for " + Some(domain.proxy.dataUI) + " " + editedDomainProxy)
+                  if (editedDomainProxy != Some(domain.proxy.dataUI)) f.dataUI.prototype = None
+                  factorWidgets(f).update
                 case _ ⇒
               }
-            case _=>
+            case _ ⇒
           }
       }
   }
@@ -318,9 +313,10 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
             case modifier: IDomainDataUI with IModifier ⇒
               println("MODIFIER")
               tp.dataUI = modifier.clone(scala.collection.immutable.List(sp.dataUI))
-              connections.filter { cc ⇒
-                println("MODIFER FILTER :: " + cc._1.component.proxy.id + " " + source.proxy.id)
-                cc._1.component.proxy.id == source.proxy.id
+              connections.filter {
+                cc ⇒
+                  println("MODIFER FILTER :: " + cc._1.component.proxy.id + " " + source.proxy.id)
+                  cc._1.component.proxy.id == source.proxy.id
               }.headOption match {
                 case Some((_, c: ISamplingComponent)) ⇒ updateNext(target, c.component)
                 case _ ⇒ (source, Some(target))
@@ -361,21 +357,6 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
       case _ ⇒
     }
   }
-
-  /*def clearConnection(domain: IDomainWidget) =
-    connections.map {
-      _._1
-    }.filter {
-      _.component.proxy.id == domain.proxy.id
-    }.headOption match {
-      case Some(c: ISamplingComponent) ⇒ c.connections.foreach {
-        _ match {
-          case c: SamplingConnectorWidget ⇒ c.reset
-          case _ ⇒
-        }
-      }
-      case _ ⇒
-    }  */
 
   class SamplingConnectionProvider extends ConnectProvider {
 
@@ -431,7 +412,6 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
                 case _ ⇒ None
               }
           }
-        case _ ⇒ None
       }
       //}
 

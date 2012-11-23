@@ -46,7 +46,9 @@ class DomainWidget(val proxy: IDomainProxyUI,
   if (display) displayOnMoleScene
 
   def displayOnMoleScene = ScenesManager.currentSceneContainer match {
-    case Some(s: ISceneContainer) ⇒ s.scene.displayExtraPropertyPanel(domainWidget)
+    case Some(s: ISceneContainer) ⇒
+      s.scene.displayExtraPropertyPanel(domainWidget)
+      scenePanelUI.editedDomainProxy = Some(proxy.dataUI)
     case _ ⇒
   }
 

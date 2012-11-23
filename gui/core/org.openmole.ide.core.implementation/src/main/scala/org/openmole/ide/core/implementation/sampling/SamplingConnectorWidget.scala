@@ -24,7 +24,7 @@ import swing.event.MousePressed
 import org.openmole.ide.core.implementation.workflow.PrototypeOnConnectorWidget
 import org.openmole.ide.core.implementation.workflow.PrototypeOnConnectorWidget._
 import org.openmole.ide.misc.widget.LinkLabel
-import org.openmole.ide.core.model.data.IFactorDataUI
+import org.openmole.ide.core.model.data.{ IDomainDataUI, IFactorDataUI }
 import org.openmole.ide.core.implementation.dataproxy.Proxys._
 import org.openmole.ide.core.implementation.dialog.ConnectorPrototypeFilterDialog.FactorPrototypeDialog
 import org.openmole.ide.core.model.workflow.IConnectorViewUI
@@ -56,7 +56,6 @@ class SamplingConnectorWidget(sourceWidget: Widget,
   buildPrototypeFilterWidget
 
   def update = {
-    println("IN UPDATE")
     componentWidget match {
       case Some(x: PrototypeOnConnectorWidget) ⇒ x.connectorUI = preview
       case _ ⇒
@@ -73,7 +72,6 @@ class SamplingConnectorWidget(sourceWidget: Widget,
         case Some(factor: IFactorProxyUI) ⇒
           factor.dataUI.prototype match {
             case Some(p: IPrototypeDataProxyUI) ⇒
-              println("to be displayed : " + p.toString)
               p.toString
             case _ ⇒ "?"
           }
@@ -91,7 +89,6 @@ class SamplingConnectorWidget(sourceWidget: Widget,
           new LinkLabel(factor.dataUI.prototype.toString,
             new Action("") {
               def apply = {
-                println("apply")
                 dialog.display
               }
             }, 2, bold = true), darkOnLight))
