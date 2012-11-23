@@ -65,7 +65,7 @@ sealed abstract class SelectPopulationTask(
     implicit val rng = newRNG(context.valueOrException(openMOLESeed))
     val p = context.valueOrException(population)
     val a = context.valueOrException(archive)
-    val (newP, _) = evolution.toPopulation((0 until evolution.lambda).map { i ⇒ evolution.selection(p) }, a)
+    val newP = evolution.toPopulation((0 until evolution.lambda).map { i ⇒ evolution.selection(p) }, a)
     context + Variable(population, newP) + Variable(archive, a)
   }
 }

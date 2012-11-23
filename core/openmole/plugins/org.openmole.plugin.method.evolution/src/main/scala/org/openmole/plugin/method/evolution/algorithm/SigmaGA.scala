@@ -19,15 +19,25 @@ package org.openmole.plugin.method.evolution.algorithm
 
 import fr.iscpif.mgo._
 import fr.iscpif.mgo.tools.Lazy
+import java.security.spec.MGF1ParameterSpec
 
-object EpsilonSigmaGA {
-  def counter(_steps: Int) = new CounterTermination {
-    val steps = _steps
+object SigmaGA {
+  trait SGATermination extends Termination with TerminationManifest with MG {
+    type G = GAGenomeWithSigma
+    type MF = Rank with Diversity
   }
 
-  def timed(_duration: Long) = new TimedTermination {
-    val duration = _duration
-  }
+  def counter(_steps: Int) =
+    new CounterTermination with SGATermination {
+      val steps = _steps
+      val stateManifest = manifest[STATE]
+    }
+
+  def timed(_duration: Long) =
+    new TimedTermination {
+      val duration = _duration
+      val stateManifest = manifest[STATE]
+    }
 
   trait DiversityMetricBuilder {
     def apply(dominance: Dominance): DiversityMetric { type DIVERSIFIED = MGFitness }
@@ -47,23 +57,28 @@ object EpsilonSigmaGA {
     }
   }
 
+  def epsilon(_epsilons: Seq[Double]) = new EpsilonDominance {
+    val epsilons = _epsilons
+  }
+
+  def strict = new StrictDominance {}
+  def nonStrict = new NonStrictDominance {}
+
 }
 
-sealed class EpsilonSigmaGA(
+sealed class SigmaGA(
   val distributionIndex: Double,
-  val steps: Int,
   val genomeSize: Int,
   val mu: Int,
   val lambda: Int,
-  val epsilons: Seq[Double],
-  val termination: Termination with TerminationManifest { type G = GAGenomeWithSigma; type F = MGFitness; type MF = Rank with Diversity },
-  val diversityMetric: EpsilonSigmaGA.DiversityMetricBuilder) extends NSGAIISigma
+  val dominance: Dominance,
+  val termination: SigmaGA.SGATermination,
+  val diversityMetric: SigmaGA.DiversityMetricBuilder) extends NSGAIISigma
     with BinaryTournamentSelection
     with NonDominatedElitism
     with CoEvolvingSigmaValuesMutation
     with SBXBoundedCrossover
     with ParetoRanking
-    with EpsilonDominance
     with RankDiversityModifier
     with EvolutionManifest
     with TerminationManifest
@@ -80,5 +95,7 @@ sealed class EpsilonSigmaGA(
 
   def initialState(p: Population[G, F, MF]): STATE = termination.initialState(p)
   def terminated(population: Population[G, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
-  def diversity(individuals: Seq[DIVERSIFIED], ranks: Seq[Lazy[Int]]): Seq[Lazy[Double]] = diversityMetric(this).diversity(individuals, ranks)
+  def diversity(individuals: Seq[DIVERSIFIED], ranks: Seq[Lazy[Int]]): Seq[Lazy[Double]] = diversityMetric(dominance).diversity(individuals, ranks)
+  def isDominated(p1: Seq[scala.Double], p2: Seq[scala.Double]) = dominance.isDominated(p1, p2)
+
 }

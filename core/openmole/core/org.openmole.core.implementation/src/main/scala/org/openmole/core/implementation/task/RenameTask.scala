@@ -23,13 +23,16 @@ import org.openmole.core.model.task._
 
 object RenameTask {
 
-  def apply[T](name: String, source: Prototype[T], destination: Prototype[T])(implicit plugins: PluginSet = PluginSet.empty) =
+  def apply[T](name: String, renamings: (Prototype[T], Prototype[T])*)(implicit plugins: PluginSet = PluginSet.empty) =
     new TaskBuilder { builder ⇒
-      addInput(source)
-      addOutput(destination)
+
+      for ((from, to) ← renamings) {
+        addInput(from)
+        addOutput(to)
+      }
 
       def toTask =
-        new RenameTask(name, source, destination) {
+        new RenameTask(name, renamings: _*) {
           val inputs = builder.inputs
           val outputs = builder.outputs
           val parameters = builder.parameters
@@ -37,6 +40,9 @@ object RenameTask {
     }
 
 }
-sealed abstract class RenameTask[T](val name: String, val source: Prototype[T], val destination: Prototype[T])(implicit val plugins: PluginSet) extends Task {
-  override def process(context: Context) = Variable(destination, context.valueOrException(source))
+sealed abstract class RenameTask[T](val name: String, val renamings: (Prototype[T], Prototype[T])*)(implicit val plugins: PluginSet) extends Task {
+
+  override def process(context: Context) =
+    renamings.map { case (from, to) ⇒ Variable(to, context.valueOrException(from)) }
+
 }

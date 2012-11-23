@@ -26,7 +26,7 @@ import org.openmole.core.model.domain._
 import org.openmole.core.model.task._
 import scala.collection.mutable.ListBuffer
 
-object ScalingGAArchiveTask {
+object ScalingGAPopulationTask {
 
   def apply[G <: GAGenome, F <: MGFitness, MF](
     name: String,
@@ -45,7 +45,7 @@ object ScalingGAArchiveTask {
       addInput(population)
       modelInputs foreach { case (p, _) ⇒ this addOutput p.toArray }
 
-      def toTask = new ScalingGAArchiveTask(name, population, modelInputs: _*) {
+      def toTask = new ScalingGAPopulationTask(name, population, modelInputs: _*) {
         val inputs = builder.inputs
         val outputs = builder.outputs
         val parameters = builder.parameters
@@ -55,7 +55,7 @@ object ScalingGAArchiveTask {
 
 }
 
-sealed abstract class ScalingGAArchiveTask[G <: GAGenome, F <: MGFitness, MF](
+sealed abstract class ScalingGAPopulationTask[G <: GAGenome, F <: MGFitness, MF](
     val name: String,
     population: Prototype[Population[G, F, MF]],
     modelInputs: (Prototype[Double], (Double, Double))*)(implicit val plugins: PluginSet) extends Task {

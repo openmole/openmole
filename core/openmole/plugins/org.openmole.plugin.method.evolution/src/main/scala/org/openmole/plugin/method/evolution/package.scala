@@ -18,6 +18,6 @@
 package org.openmole.plugin.method
 
 package object evolution {
-  type EpsilonSigmaGA = algorithm.EpsilonSigmaGA
-  val EpsilonSigmaGA = algorithm.EpsilonSigmaGA
+  type SigmaGA = algorithm.SigmaGA
+  val SigmaGA = algorithm.SigmaGA
 }
