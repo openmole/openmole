@@ -28,6 +28,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.io.OutputStreamWriter
 import java.io.PrintWriter
+import java.io.Writer
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 import java.nio.file.FileSystems
@@ -321,6 +322,12 @@ object FileUtil {
 
     def gzipedBufferedInputStream = new GZIPInputStream(bufferedInputStream)
     def gzipedBufferedOutputStream = new GZIPOutputStream(bufferedOutputStream)
+
+    def withWriter[T](f: Writer ⇒ T): T = {
+      val w = new OutputStreamWriter(bufferedOutputStream)
+      try f(w)
+      finally w.close
+    }
 
     def archiveDirWithRelativePathNoVariableContent(toArchive: File) = {
       val os = new TarOutputStream(new FileOutputStream(file))

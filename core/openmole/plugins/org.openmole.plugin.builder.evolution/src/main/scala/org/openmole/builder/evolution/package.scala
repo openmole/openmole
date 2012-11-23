@@ -34,17 +34,18 @@ import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.tools._
 import org.openmole.plugin.method.evolution.algorithm._
+import org.openmole.misc.exception.UserBadDataError
 
 package object evolution {
 
-  def steadyGA(evolution: GAEvolution with Elitism with Termination with Breeding with EvolutionManifest with MG)(
+  def steadyGA(evolutionBuilder: Int ⇒ GAEvolution with Elitism with Termination with Breeding with EvolutionManifest with MG)(
     name: String,
     model: Puzzle,
     populationSize: Int,
     inputs: Iterable[(Prototype[Double], (Double, Double))],
     objectives: Iterable[(Prototype[Double], Double)])(implicit plugins: PluginSet) = {
 
-    require(evolution.genomeSize == inputs.size)
+    val evolution = evolutionBuilder(inputs.size)
 
     import evolution._
 

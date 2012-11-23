@@ -73,6 +73,6 @@ class AppendToCSVFileHook(
     }
   }
 
-  override def requiered = DataSet(prototypes)
+  override def required = DataSet(prototypes)
 
 }

@@ -40,6 +40,6 @@ class ToStringHook(out: PrintStream, prototypes: Prototype[_]*) extends Hook {
     } else out.println(context.toString)
   }
 
-  override def requiered = DataSet(prototypes)
+  override def required = DataSet(prototypes)
 
 }

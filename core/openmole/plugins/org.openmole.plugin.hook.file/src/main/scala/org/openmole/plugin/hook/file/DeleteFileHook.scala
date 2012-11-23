@@ -39,6 +39,6 @@ class DeleteFileHook(toDelete: Prototype[File]*) extends Hook {
     }
   }
 
-  override def requiered = DataSet(toDelete)
+  override def required = DataSet(toDelete)
 
 }
