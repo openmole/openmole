@@ -20,23 +20,32 @@ package org.openmole.ide.plugin.domain.modifier
 import java.util.Locale
 import java.util.ResourceBundle
 import org.openmole.ide.core.model.panel.IDomainPanelUI
+import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.ide.misc.tools.util.ClassLoader._
 import org.openmole.ide.misc.widget.{ URL, Help, Helper, PluginPanel }
 import swing.{ MyComboBox, TextField }
+import org.openmole.ide.core.implementation.execution.ScenesManager
+import org.openmole.ide.core.model.data.IDomainDataUI
 
 class GroupDomainPanelUI(pud: GroupDomainDataUI[_]) extends PluginPanel("wrap") with IDomainPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
   val sizeTextField = new TextField(pud.size, 6)
-  val typeCombo = new MyComboBox(pud.availableTypes) {
-    selection.item = pud.domainType.toString.split('.').last
-  }
 
-  contents += typeCombo
   contents += sizeTextField
 
-  def saveContent = GroupDomainDataUI(sizeTextField.text,
-    typeCombo.selection.item, pud.previousDomain)
+  def saveContent = {
+
+    println("SSSSSSSSS :  " + ScenesManager.currentSamplingCompositionPanelUI.firstNoneModifierDomain(pud))
+    val classString =
+      ScenesManager.currentSamplingCompositionPanelUI.firstNoneModifierDomain(pud) match {
+        case Some(d: IDomainDataUI) ⇒ d.domainType.toString.split('.').last
+        case _ ⇒ DOUBLE
+      }
+
+    println("save group domain with : " + classString)
+    GroupDomainDataUI(sizeTextField.text, classString, pud.previousDomain)
+  }
 
   override lazy val help =
     new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {

@@ -20,13 +20,9 @@ package org.openmole.ide.core.implementation.sampling
 import java.awt._
 import scala.swing.Action
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.model.data.IDomainDataUI
-import org.openmole.ide.core.model.data.IFactorDataUI
 import org.openmole.ide.core.model.sampling.{ IDomainProxyUI, IDomainWidget }
-import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget._
-import javax.swing.BorderFactory
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 
 class DomainWidget(val proxy: IDomainProxyUI,
@@ -50,7 +46,9 @@ class DomainWidget(val proxy: IDomainProxyUI,
   if (display) displayOnMoleScene
 
   def displayOnMoleScene = ScenesManager.currentSceneContainer match {
-    case Some(s: ISceneContainer) ⇒ s.scene.displayExtraPropertyPanel(domainWidget)
+    case Some(s: ISceneContainer) ⇒
+      s.scene.displayExtraPropertyPanel(domainWidget)
+      scenePanelUI.editedDomainProxy = Some(proxy.dataUI)
     case _ ⇒
   }
 
@@ -59,6 +57,7 @@ class DomainWidget(val proxy: IDomainProxyUI,
   def update = {
     link.link(domainPreview)
     scenePanelUI.testConnections(false)
+    scenePanelUI.update(this)
     revalidate
     repaint
   }

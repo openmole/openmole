@@ -36,7 +36,7 @@ case class SlindingSliceFilesDomainDataUI(val directoryPath: String = "",
 
   val domainType = manifest[File]
 
-  override def name = "Slinding Slices"
+  override def name = "Slinding Slice files"
 
   def coreObject =
     new SlidingSliceFilesDomain(new File(directoryPath), numberPattern, sliceSize)

@@ -24,12 +24,13 @@ import org.openmole.ide.core.model.sampling.IModifier
 trait ModifierDomainDataUI extends IDomainDataUI with IModifier {
   type DOMAINTYPE = Domain[Any] with Discrete[Any]
 
-  override def isAcceptable(domain: IDomainDataUI) = domain.coreObject match {
-    case d: DOMAINTYPE ⇒ true
-    case _ ⇒
-      StatusBar.warn("A Discrete Domain is required as input of a Modifier Domain (Map, Take, Group, ...)")
-      false
-  }
+  override def isAcceptable(domain: IDomainDataUI): Boolean =
+    domain.coreObject match {
+      case d: DOMAINTYPE ⇒ domain.domainType == domainType
+      case _ ⇒
+        StatusBar.warn("A Discrete Domain is required as input of a Modifier Domain (Map, Take, Group, ...)")
+        false
+    }
 
   def validPreviousDomains: (Boolean, List[DOMAINTYPE]) = {
     val dL = previousDomain.flatMap {

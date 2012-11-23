@@ -19,7 +19,7 @@ package org.openmole.ide.core.model.workflow
 
 import java.awt.Point
 import org.netbeans.api.visual.graph.GraphScene
-import org.openmole.ide.core.model.panel.PanelMode
+import org.openmole.ide.core.model.panel.{ IPanelUI, PanelMode }
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.widget.LayerWidget
 import org.openmole.ide.core.model.sampling.ISamplingCompositionWidget
@@ -54,6 +54,8 @@ trait IMoleScene {
   def displayExtraPropertyPanel(proxy: IDataProxyUI)
 
   def displayExtraPropertyPanel(samplingCompositionWidget: ISamplingCompositionWidget)
+
+  def currentPanelUI: IPanelUI
 
   def closeExtraPropertyPanel
 

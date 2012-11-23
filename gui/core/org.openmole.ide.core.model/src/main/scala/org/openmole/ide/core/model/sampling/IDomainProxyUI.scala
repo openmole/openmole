@@ -25,8 +25,4 @@ trait IDomainProxyUI extends ISamplingCompositionProxyUI {
   def dataUI: IDomainDataUI
 
   def dataUI_=(d: IDomainDataUI)
-
-  def factorDataUI: Option[IFactorDataUI]
-
-  def factorDataUI_=(f: Option[IFactorDataUI])
 }

@@ -20,6 +20,7 @@ package org.openmole.ide.plugin.domain.file
 
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.misc.tools.util.Types.FILE
+import org.openmole.ide.core.implementation.dialog.StatusBar
 
 trait SubDataUI extends IDomainDataUI {
   def name = "File"
@@ -27,6 +28,11 @@ trait SubDataUI extends IDomainDataUI {
   override def availableTypes = List(FILE)
 
   def directoryPath: String
+
+  override def isAcceptable(domain: IDomainDataUI) = {
+    StatusBar.warn("A file domain can not modify another Domain")
+    super.isAcceptable(domain)
+  }
 
   /*StatusBar.warn("A Discrete Domain is required as input of a Modifier Domain (Map, Take, Group, ...)")
   false

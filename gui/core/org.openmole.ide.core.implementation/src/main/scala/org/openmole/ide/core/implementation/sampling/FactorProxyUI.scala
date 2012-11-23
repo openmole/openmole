@@ -14,19 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.ide.core.model.sampling
+package org.openmole.ide.core.implementation.sampling
 
-import org.openmole.ide.misc.tools.Counter
-import org.openmole.ide.core.model.data.{ IFactorDataUI, ISamplingDataUI }
+import org.openmole.ide.core.model.data.IFactorDataUI
+import org.openmole.ide.core.model.sampling.IFactorProxyUI
 
-trait ISamplingProxyUI extends ISamplingCompositionProxyUI {
-  val id = "sampling" + Counter.id.getAndIncrement
-
-  def dataUI: ISamplingDataUI
-
-  def dataUI_=(d: ISamplingDataUI)
-
-  def isFinal: Boolean
-
-  def isFinal_=(b: Boolean)
-}
+class FactorProxyUI(var dataUI: IFactorDataUI) extends IFactorProxyUI

@@ -26,7 +26,7 @@ import org.openmole.core.model.data.Prototype
 
 case class FactorDataUI[T](val domain: IDomainProxyUI,
                            val target: ISamplingProxyUI,
-                           val prototype: Option[IPrototypeDataProxyUI] = None) extends IFactorDataUI {
+                           var prototype: Option[IPrototypeDataProxyUI] = None) extends IFactorDataUI {
   def coreObject = prototype match {
     case Some(p: IPrototypeDataProxyUI) ⇒ Factor(p.dataUI.coreObject.asInstanceOf[Prototype[T]],
       domain.dataUI.coreObject.asInstanceOf[Domain[T]])

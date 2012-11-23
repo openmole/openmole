@@ -24,6 +24,8 @@ import org.openmole.ide.core.model.sampling.{ ISamplingProxyUI, IDomainProxyUI }
 trait IFactorDataUI {
   def prototype: Option[IPrototypeDataProxyUI]
 
+  def prototype_=(p: Option[IPrototypeDataProxyUI])
+
   def domain: IDomainProxyUI
 
   def target: ISamplingProxyUI

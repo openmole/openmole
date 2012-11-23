@@ -16,17 +16,10 @@
  */
 package org.openmole.ide.core.model.sampling
 
-import org.openmole.ide.misc.tools.Counter
-import org.openmole.ide.core.model.data.{ IFactorDataUI, ISamplingDataUI }
+import org.openmole.ide.core.model.data.IFactorDataUI
 
-trait ISamplingProxyUI extends ISamplingCompositionProxyUI {
-  val id = "sampling" + Counter.id.getAndIncrement
+trait IFactorProxyUI {
+  def dataUI: IFactorDataUI
 
-  def dataUI: ISamplingDataUI
-
-  def dataUI_=(d: ISamplingDataUI)
-
-  def isFinal: Boolean
-
-  def isFinal_=(b: Boolean)
+  def dataUI_=(d: IFactorDataUI)
 }

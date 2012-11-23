@@ -39,6 +39,7 @@ import org.netbeans.api.visual.widget.Scene
 import org.openmole.misc.tools.obj.ClassUtils
 import scala.swing.TabbedPane
 import collection.mutable
+import org.openmole.ide.core.implementation.sampling.DomainWidget
 
 object EmptyDataUIs {
 
@@ -67,37 +68,6 @@ object EmptyDataUIs {
     def coreObject = Prototype[Any]("")
     def fatImagePath = "img/empty.png"
     def buildPanelUI = new GenericPrototypePanelUI(GenericPrototypeDataUI.base.head)
-  }
-
-  class EmptySamplingCompositionDataUI extends ISamplingCompositionDataUI {
-    def name = "Empty sampling data UI"
-    def dim = 0
-    def coreClass = classOf[Sampling]
-    def coreObject = new EmptySampling
-    def imagePath = "img/empty.png"
-    def fatImagePath = "img/empty.png"
-    def buildPanelUI = new EmptySamplingCompositionPanelUI
-    def isAcceptable(sampling: ISamplingDataUI) = false
-    def isAcceptable(factor: IFactorDataUI) = false
-    def domains = List.empty
-    def samplings = List.empty
-    def connections = List.empty
-    def finalSampling = None
-  }
-
-  class EmptySamplingCompositionPanelUI extends ISamplingCompositionPanelUI {
-    def peer = new PluginPanel("").peer
-    def addDomain(domainProxy: IDomainProxyUI, location: Point, d: Boolean) {}
-    def addSampling(samplingProxy: ISamplingProxyUI, location: Point, display: Boolean) {}
-    def setFinalSampling(samplingProxy: ISamplingProxyUI) {}
-    def setSamplingProxy(samplingProxy: ISamplingProxyUI, b: Boolean) {}
-    def saveContent(name: String) = new EmptySamplingCompositionDataUI
-    def remove(samplingComponent: ISamplingComponent): Unit = {}
-    def scene = new Scene
-    def testConnections(arityTest: Boolean) = {}
-    def dataUI = new EmptySamplingCompositionDataUI
-    def connections_=(s: mutable.Set[(ISamplingComponent, ISamplingComponent)]) {}
-    def connections = List()
   }
 
   class EmptySampling extends Sampling {

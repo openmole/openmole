@@ -24,6 +24,7 @@ import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.domain.modifier.GroupDomain
 import org.openmole.ide.core.model.data.IDomainDataUI
+import java.io.File
 
 object GroupDomainDataUI {
   def empty = apply("1", DOUBLE, List())
@@ -38,6 +39,7 @@ object GroupDomainDataUI {
       case BIG_INTEGER ⇒ new GroupDomainDataUI[BigInteger](size, previousDomain)
       case LONG ⇒ new GroupDomainDataUI[Long](size, previousDomain)
       case STRING ⇒ new GroupDomainDataUI[String](size, previousDomain)
+      case FILE ⇒ new GroupDomainDataUI[File](size, previousDomain)
       case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
     }
   }

@@ -28,6 +28,7 @@ import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.sampling._
 import scala.Some
+import org.openmole.ide.core.implementation.data.FactorDataUI
 
 class SamplingSceneMenuProvider(panelScene: SamplingCompositionPanelUI) extends GenericMenuProvider {
 

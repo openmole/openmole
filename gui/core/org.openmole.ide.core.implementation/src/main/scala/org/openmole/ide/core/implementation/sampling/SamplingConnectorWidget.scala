@@ -16,7 +16,7 @@
  */
 package org.openmole.ide.core.implementation.sampling
 
-import org.openmole.ide.core.model.sampling.{ ISamplingWidget, IDomainProxyUI, ISamplingCompositionWidget }
+import org.openmole.ide.core.model.sampling.{ IFactorProxyUI, ISamplingWidget, IDomainProxyUI, ISamplingCompositionWidget }
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import swing.{ Action, Label }
 import java.awt.{ Cursor, Dimension, Color }
@@ -24,7 +24,7 @@ import swing.event.MousePressed
 import org.openmole.ide.core.implementation.workflow.PrototypeOnConnectorWidget
 import org.openmole.ide.core.implementation.workflow.PrototypeOnConnectorWidget._
 import org.openmole.ide.misc.widget.LinkLabel
-import org.openmole.ide.core.model.data.IFactorDataUI
+import org.openmole.ide.core.model.data.{ IDomainDataUI, IFactorDataUI }
 import org.openmole.ide.core.implementation.dataproxy.Proxys._
 import org.openmole.ide.core.implementation.dialog.ConnectorPrototypeFilterDialog.FactorPrototypeDialog
 import org.openmole.ide.core.model.workflow.IConnectorViewUI
@@ -40,8 +40,7 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
 class SamplingConnectorWidget(sourceWidget: Widget,
                               targetWidget: Widget,
-                              scene: ISamplingCompositionPanelUI,
-                              var factor: Option[IFactorDataUI] = None) extends ConnectionWidget(scene.scene) {
+                              scene: ISamplingCompositionPanelUI) extends ConnectionWidget(scene.scene) {
   samplingConnectorWidget ⇒
 
   val sourceW = sourceWidget.asInstanceOf[SamplingComponent]
@@ -54,45 +53,52 @@ class SamplingConnectorWidget(sourceWidget: Widget,
   setTargetAnchor(targetAnchor(targetWidget))
   setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
 
-  factor match {
-    case Some(f: IFactorDataUI) ⇒ buildPrototypeFilterWidget
-    case _ ⇒
-  }
+  buildPrototypeFilterWidget
 
-  def updateFactor(p: IPrototypeDataProxyUI) = factor match {
-    case Some(f: IFactorDataUI) ⇒
-      factor = Some(f.clone(p))
-      factor.get.domain.factorDataUI = factor
-      componentWidget.get.connectorUI = preview(factor.get)
-      repaint
-      revalidate
-    case _ ⇒
-  }
-
-  def preview(factor: IFactorDataUI) = new IConnectorViewUI {
-    var preview = factor.prototype match {
-      case Some(p: IPrototypeDataProxyUI) ⇒ p.toString
-      case _ ⇒ "?"
+  def update = {
+    componentWidget match {
+      case Some(x: PrototypeOnConnectorWidget) ⇒ x.connectorUI = preview
+      case _ ⇒
     }
+    repaint
+    revalidate
+  }
+
+  def computeFactor = scene.computeFactor(sourceW.component.proxy, targetW.component.proxy)
+
+  def preview = new IConnectorViewUI {
+    val preview =
+      computeFactor match {
+        case Some(factor: IFactorProxyUI) ⇒
+          factor.dataUI.prototype match {
+            case Some(p: IPrototypeDataProxyUI) ⇒
+              p.toString
+            case _ ⇒ "?"
+          }
+        case _ ⇒ "?"
+      }
   }
 
   def buildPrototypeFilterWidget = {
-    preview(factor.get)
-    componentWidget = Some(new PrototypeOnConnectorWidget(scene.scene,
-      preview(factor.get),
-      new LinkLabel(factor.get.prototype.toString,
-        new Action("") {
-          def apply = {
-            println("apply")
-            (new FactorPrototypeDialog(prototypes.filter {
-              p ⇒ factor.get.domain.dataUI.domainType.toString == p.dataUI.protoType.toString.split('.').last
-            }.toList, samplingConnectorWidget)).display
-          }
-        }, 2, bold = true), darkOnLight))
-    removeChildren
-    addChild(componentWidget.get)
-    setConstraint(componentWidget.get, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
-    componentWidget.get.setOpaque(true)
+    computeFactor match {
+      case Some(factor: IFactorProxyUI) ⇒
+        val dialog = new FactorPrototypeDialog(samplingConnectorWidget)
+
+        componentWidget = Some(new PrototypeOnConnectorWidget(scene.scene,
+          preview,
+          new LinkLabel(factor.dataUI.prototype.toString,
+            new Action("") {
+              def apply = {
+                dialog.display
+              }
+            }, 2, bold = true), darkOnLight))
+        removeChildren
+        addChild(componentWidget.get)
+        setConstraint(componentWidget.get, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
+        componentWidget.get.setOpaque(true)
+        dialog.availablePrototypes
+      case _ ⇒
+    }
   }
 
   def sourceAnchor(w: Widget) = new Anchor(w) {

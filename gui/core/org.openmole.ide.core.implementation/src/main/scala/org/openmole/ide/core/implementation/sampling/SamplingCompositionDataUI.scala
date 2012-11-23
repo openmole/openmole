@@ -32,6 +32,7 @@ import scala.Some
 class SamplingCompositionDataUI(val name: String = "",
                                 val domains: List[(IDomainProxyUI, Point)] = List.empty,
                                 val samplings: List[(ISamplingProxyUI, Point)] = List.empty,
+                                val factors: List[IFactorProxyUI] = List.empty,
                                 val connections: List[(ISamplingCompositionProxyUI, ISamplingCompositionProxyUI)] = List.empty,
                                 val finalSampling: Option[ISamplingProxyUI] = None) extends ISamplingCompositionDataUI {
 
@@ -60,19 +61,23 @@ class SamplingCompositionDataUI(val name: String = "",
     }
   }
 
-  def buildSamplingCore(widget: ISamplingProxyUI,
+  def buildSamplingCore(proxy: ISamplingProxyUI,
                         connectionMap: Map[ISamplingCompositionProxyUI, List[ISamplingCompositionProxyUI]],
                         domainMap: Map[String, IDomainProxyUI],
                         samplingMap: Map[String, ISamplingProxyUI]): Sampling = {
-    if (!builtSampling.contains(widget)) {
-      val partition = connectionMap.getOrElse(widget, List()).partition {
+    if (!builtSampling.contains(proxy)) {
+      val partition = connectionMap.getOrElse(proxy, List()).partition {
         _ match {
           case s: ISamplingWidget ⇒ true
           case _ ⇒ false
         }
       }
+      builtSampling += proxy -> proxy.dataUI.coreObject(factors.map { _.dataUI },
+        partition._1.map {
+          s ⇒ buildSamplingCore(samplingMap(s.id), connectionMap, domainMap, samplingMap)
+        })
     }
-    builtSampling(widget)
+    builtSampling(proxy)
   }
 
   def imagePath = "img/samplingComposition.png"

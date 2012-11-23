@@ -35,6 +35,7 @@ import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.MigPanel
 import java.awt.LinearGradientPaint
 import javax.imageio.ImageIO
+import java.io.File
 
 class SamplingWidget(val proxy: ISamplingProxyUI,
                      val scenePanelUI: ISamplingCompositionPanelUI,
@@ -79,8 +80,9 @@ class SamplingWidget(val proxy: ISamplingProxyUI,
     g.setPaint(gp)
     g.fillRoundRect(0, 0, size.width, size.height, 8, 8)
 
-    if (isFinalSamplingWidget)
-      g.drawImage(ImageIO.read(getClass.getClassLoader.getResource("img/finalSampling.png")), 115, 19, 10, 14, peer)
+    println("is final ?" + proxy.isFinal)
+    if (proxy.isFinal)
+      g.drawImage(ImageIO.read(getClass.getClassLoader.getResource("img/finalSampling.png")), 85, 19, 10, 14, peer)
   }
 
   contents += link

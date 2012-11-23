@@ -36,7 +36,7 @@ case class ListFilesDomainDataUI(val directoryPath: String = "",
 
   val domainType = manifest[File]
 
-  override def name = "Multiple"
+  override def name = "Multiple files"
 
   def coreObject = new ListFilesDomain(new File(directoryPath), regexp, recursive)
 
