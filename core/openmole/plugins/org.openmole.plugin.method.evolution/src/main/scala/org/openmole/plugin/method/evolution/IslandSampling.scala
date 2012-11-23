@@ -22,6 +22,7 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 import org.openmole.misc.tools.service.Random._
 import org.openmole.core.implementation.task.Task._
+import algorithm._
 
 object IslandSampling {
 
