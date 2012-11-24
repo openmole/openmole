@@ -37,8 +37,8 @@ import org.openmole.plugin.method.evolution.algorithm._
 import org.openmole.misc.exception.UserBadDataError
 
 package object evolution {
-
-  def steadyGA(evolutionBuilder: Int ⇒ GAEvolution with Elitism with Termination with Breeding with EvolutionManifest with MG)(
+  //GA with Archive with Elitism with Modifier with Termination with Breeding with EvolutionManifest with MG
+  def steadyGA(evolutionBuilder: Int ⇒ SigmaGA)(
     name: String,
     model: Puzzle,
     populationSize: Int,
@@ -67,7 +67,7 @@ package object evolution {
 
     val firstCapsule = StrainerCapsule(firstTask)
 
-    val initialBreedTask = BreedTask.sized(evolution)(name + "InitialBreed", population, genome, Some(populationSize))
+    val initialBreedTask = ExplorationTask(name + "InitialBreed", BreedSampling(evolution)(population, genome, populationSize))
 
     val scalingTask = ScalingGAGenomeTask(name + "ScalingGenome", genome, inputs.toSeq: _*)
     val scalingCaps = Capsule(scalingTask)
@@ -92,30 +92,26 @@ package object evolution {
 
     val elitismCaps = MasterCapsule(elitismTask, archive, state, generation, population)
 
-    val scalingArchiveTask = ScalingGAPopulationTask(name + "ScalingPopulation", population, inputs.toSeq: _*)
+    val scalingPopulationTask = ScalingGAPopulationTask(name + "ScalingPopulation", population, inputs.toSeq: _*)
 
     objectives.foreach {
-      case (o, _) ⇒ scalingArchiveTask addObjective o
+      case (o, _) ⇒ scalingPopulationTask addObjective o
     }
 
-    scalingArchiveTask addInput state
-    scalingArchiveTask addInput generation
-    scalingArchiveTask addInput terminated
-    scalingArchiveTask addInput archive
+    scalingPopulationTask addInput state
+    scalingPopulationTask addInput generation
+    scalingPopulationTask addInput terminated
+    scalingPopulationTask addInput archive
 
-    scalingArchiveTask addOutput state
-    scalingArchiveTask addOutput generation
-    scalingArchiveTask addOutput terminated
-    scalingArchiveTask addOutput population
-    scalingArchiveTask addOutput archive
+    scalingPopulationTask addOutput state
+    scalingPopulationTask addOutput generation
+    scalingPopulationTask addOutput terminated
+    scalingPopulationTask addOutput population
+    scalingPopulationTask addOutput archive
 
-    val scalingArchiveCapsule = Capsule(scalingArchiveTask)
+    val scalingPopulationCapsule = Capsule(scalingPopulationTask)
 
-    val breedingTask = BreedTask(evolution)(
-      name + "Breeding",
-      population,
-      genome)
-
+    val breedingTask = ExplorationTask(name + "Breeding", BreedSampling(evolution)(population, genome, 1))
     val breedingCaps = StrainerCapsule(breedingTask)
 
     val endCapsule = Slot(StrainerCapsule(EmptyTask(name + "End")))
@@ -127,10 +123,10 @@ package object evolution {
         (model, filter = Filter(genome)) --
         toIndividualSlot --
         elitismCaps --
-        scalingArchiveCapsule >| (endCapsule, terminated.name + " == true")
+        scalingPopulationCapsule >| (endCapsule, terminated.name + " == true")
 
     val loop =
-      scalingArchiveCapsule --
+      scalingPopulationCapsule --
         (breedingCaps, condition = generation.name + " % " + evolution.lambda + " == 0") -<-
         scalingCaps
 
@@ -145,7 +141,7 @@ package object evolution {
     val (_state, _generation, _genome, _individual, _population, _archive, _inputs, _objectives, _populationSize) = (state, generation, genome, individual, population, archive, inputs, objectives, populationSize)
 
     new Puzzle(puzzle) {
-      def outputCapsule = scalingArchiveCapsule
+      def outputCapsule = scalingPopulationCapsule
       def state = _state
       def generation = _generation
       def genome = _genome

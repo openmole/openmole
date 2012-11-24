@@ -15,9 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.method.evolution.algorithm
-
-import fr.iscpif.mgo._
+package org.openmole.plugin.method.evolution
 
 sealed class Island[E](val evolution: E)(
   val mu: Int,
