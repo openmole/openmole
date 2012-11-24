@@ -41,7 +41,7 @@ package object evolution {
   def steadyGA(evolutionBuilder: Int ⇒ SigmaGA)(
     name: String,
     model: Puzzle,
-    populationSize: Int,
+    workers: Int,
     inputs: Iterable[(Prototype[Double], (Double, Double))],
     objectives: Iterable[(Prototype[Double], Double)])(implicit plugins: PluginSet) = {
 
@@ -67,7 +67,7 @@ package object evolution {
 
     val firstCapsule = StrainerCapsule(firstTask)
 
-    val initialBreedTask = ExplorationTask(name + "InitialBreed", BreedSampling(evolution)(population, genome, populationSize))
+    val initialBreedTask = ExplorationTask(name + "InitialBreed", BreedSampling(evolution)(population, genome, workers))
 
     val scalingTask = ScalingGAGenomeTask(name + "ScalingGenome", genome, inputs.toSeq: _*)
     val scalingCaps = Capsule(scalingTask)
@@ -138,7 +138,7 @@ package object evolution {
 
     val puzzle = skel + loop + dataChannels
 
-    val (_state, _generation, _genome, _individual, _population, _archive, _inputs, _objectives, _populationSize) = (state, generation, genome, individual, population, archive, inputs, objectives, populationSize)
+    val (_state, _generation, _genome, _individual, _population, _archive, _inputs, _objectives, _workers) = (state, generation, genome, individual, population, archive, inputs, objectives, workers)
 
     new Puzzle(puzzle) {
       def outputCapsule = scalingPopulationCapsule
