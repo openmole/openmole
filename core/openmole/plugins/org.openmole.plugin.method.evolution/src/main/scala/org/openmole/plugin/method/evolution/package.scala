@@ -18,5 +18,5 @@
 package org.openmole.plugin.method
 
 package object evolution {
-  val SigmaGA = algorithm.SigmaGA
+  val GA = algorithm.GA
 }

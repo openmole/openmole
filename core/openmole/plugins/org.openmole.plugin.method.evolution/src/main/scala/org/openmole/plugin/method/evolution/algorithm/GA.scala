@@ -21,9 +21,9 @@ import fr.iscpif.mgo._
 import fr.iscpif.mgo.tools.Lazy
 import java.util.Random
 
-object SigmaGA {
+object GA {
 
-  trait SGA extends G with MG with MF with RankDiversityMF with GASigma {
+  trait GA extends G with MG with MF with RankDiversityMF with GASigma {
     type MF <: Rank with Diversity
     type RANKED = MGFitness
     type DIVERSIFIED = MGFitness
@@ -33,44 +33,44 @@ object SigmaGA {
     val fManifest = manifest[F]
   }
 
-  trait SGATermination extends Termination with TerminationManifest with MG with SGA
+  trait GATermination extends Termination with TerminationManifest with MG with GA
 
   def counter(_steps: Int) =
-    new CounterTermination with SGATermination {
+    new CounterTermination with GATermination {
       val steps = _steps
       val stateManifest = manifest[STATE]
     }
 
   def timed(_duration: Long) =
-    new TimedTermination with SGATermination {
+    new TimedTermination with GATermination {
       val duration = _duration
       val stateManifest = manifest[STATE]
     }
 
-  trait SGARanking extends Ranking with SGA
+  trait GARanking extends Ranking with GA
 
-  trait SGARankingBuilder {
-    def apply(dominance: Dominance): SGARanking
+  trait GARankingBuilder {
+    def apply(dominance: Dominance): GARanking
   }
 
-  def pareto = new SGARankingBuilder {
-    def apply(_dominance: Dominance) = new ParetoRanking with SGARanking {
+  def pareto = new GARankingBuilder {
+    def apply(_dominance: Dominance) = new ParetoRanking with GARanking {
       def isDominated(p1: Seq[Double], p2: Seq[Double]) = _dominance.isDominated(p1, p2)
     }
   }
 
-  trait SGADiversityMetric extends DiversityMetric with SGA
+  trait GADiversityMetric extends DiversityMetric with GA
 
   trait DiversityMetricBuilder {
-    def apply(dominance: Dominance): SGADiversityMetric
+    def apply(dominance: Dominance): GADiversityMetric
   }
 
   def crowding = new DiversityMetricBuilder {
-    def apply(dominance: Dominance) = new CrowdingDiversity with SGADiversityMetric
+    def apply(dominance: Dominance) = new CrowdingDiversity with GADiversityMetric
   }
 
   def hypervolume(_referencePoint: Seq[Double]) = new DiversityMetricBuilder {
-    def apply(dominance: Dominance) = new HypervolumeDiversity with SGADiversityMetric {
+    def apply(dominance: Dominance) = new HypervolumeDiversity with GADiversityMetric {
       def isDominated(p1: Seq[Double], p2: Seq[Double]) = dominance.isDominated(p1, p2)
       val referencePoint = _referencePoint
     }
@@ -83,22 +83,22 @@ object SigmaGA {
   def strict = new StrictDominance {}
   def nonStrict = new NonStrictDominance {}
 
-  trait SGAModifier extends Modifier with SGA
-  trait SGAArchive extends Archive with ArchiveManifest with SGA with SGAModifier {
-    val diversityMetric: SGADiversityMetric
-    val ranking: SGARanking
+  trait GAModifier extends Modifier with GA
+  trait GAArchive extends Archive with ArchiveManifest with GA with GAModifier {
+    val diversityMetric: GADiversityMetric
+    val ranking: GARanking
     def diversity(individuals: Seq[DIVERSIFIED], ranks: Seq[Lazy[Int]]): Seq[Lazy[Double]] = diversityMetric.diversity(individuals, ranks)
     def rank(individuals: Seq[RANKED]) = ranking.rank(individuals)
 
   }
 
-  trait SGAArchiveBuilder extends A {
-    def apply(diversityMetric: SGADiversityMetric, ranking: SGARanking): SGAArchive
+  trait GAArchiveBuilder extends A {
+    def apply(diversityMetric: GADiversityMetric, ranking: GARanking): GAArchive
   }
 
-  def noArchive = new SGAArchiveBuilder {
-    def apply(_diversityMetric: SGADiversityMetric, _ranking: SGARanking) =
-      new NoArchive with RankDiversityModifier with SGAArchive {
+  def noArchive = new GAArchiveBuilder {
+    def apply(_diversityMetric: GADiversityMetric, _ranking: GARanking) =
+      new NoArchive with RankDiversityModifier with GAArchive {
         override type DIVERSIFIED = MGFitness
         override type RANKED = MGFitness
         val aManifest = manifest[A]
@@ -107,10 +107,10 @@ object SigmaGA {
       }
   }
 
-  def mapArchive(_plotter: SGAPlotter, _aggregation: SGAAggregation, _neighbors: Int = 8) =
-    new SGAArchiveBuilder {
-      def apply(_diversityMetric: SGADiversityMetric, _ranking: SGARanking) =
-        new MapArchive with SGAArchive with MapModifier {
+  def mapArchive(_plotter: GAPlotter, _aggregation: GAAggregation, _neighbors: Int = 8) =
+    new GAArchiveBuilder {
+      def apply(_diversityMetric: GADiversityMetric, _ranking: GARanking) =
+        new MapArchive with GAArchive with MapModifier {
           override type DIVERSIFIED = MGFitness
           override type RANKED = MGFitness
           val aManifest = manifest[A]
@@ -122,40 +122,40 @@ object SigmaGA {
         }
     }
 
-  trait SGAAggregation extends Aggregation with MG
-  trait SGAPlotter extends Plotter with SGA with MG
+  trait GAAggregation extends Aggregation with MG
+  trait GAPlotter extends Plotter with GA with MG
 
-  def max = new MaxAggregation with SGAAggregation {}
+  def max = new MaxAggregation with GAAggregation {}
 
-  def genomePlotter(_x: Int, _y: Int, _nX: Int = 100, _nY: Int = 100) = new GenomePlotter with SGAPlotter {
+  def genomePlotter(_x: Int, _y: Int, _nX: Int = 100, _nY: Int = 100) = new GenomePlotter with GAPlotter {
     val x = _x
     val y = _y
     val nX = _nX
     val nY = _nY
   }
 
-  trait SGACrossover extends CrossOver with SGA
+  trait GACrossover extends CrossOver with GA
 
-  trait SGACrossoverBuilder {
-    def apply(genomeSize: Factory[SGA#G]): SGACrossover
+  trait GACrossoverBuilder {
+    def apply(genomeSize: Factory[GA#G]): GACrossover
   }
 
-  def sbx(_distributionIndex: Double = 2.0) = new SGACrossoverBuilder {
-    def apply(_genomeFactory: Factory[SGA#G]) =
-      new SBXBoundedCrossover with SGACrossover {
+  def sbx(_distributionIndex: Double = 2.0) = new GACrossoverBuilder {
+    def apply(_genomeFactory: Factory[GA#G]) =
+      new SBXBoundedCrossover with GACrossover {
         val distributionIndex = _distributionIndex
         val genomeFactory = _genomeFactory
       }
   }
 
-  trait SGAMutation extends Mutation with SGA
+  trait GAMutation extends Mutation with GA
 
-  trait SGAMutationBuilder extends SGA {
-    def apply(genomeFactory: Factory[SGA#G]): SGAMutation
+  trait GAMutationBuilder extends GA {
+    def apply(genomeFactory: Factory[GA#G]): GAMutation
   }
 
-  def coEvolvingSigma = new SGAMutationBuilder {
-    def apply(_genomeFactory: Factory[SGA#G]) = new CoEvolvingSigmaValuesMutation with SGAMutation {
+  def coEvolvingSigma = new GAMutationBuilder {
+    def apply(_genomeFactory: Factory[GA#G]) = new CoEvolvingSigmaValuesMutation with GAMutation {
       val genomeFactory = _genomeFactory
     }
   }
@@ -163,34 +163,34 @@ object SigmaGA {
   def apply(
     mu: Int,
     lambda: Int,
-    termination: SigmaGA.SGATermination,
-    mutation: SigmaGA.SGAMutationBuilder = coEvolvingSigma,
-    crossover: SigmaGA.SGACrossoverBuilder = sbx(),
-    dominance: Dominance = SigmaGA.strict,
-    diversityMetric: SigmaGA.DiversityMetricBuilder = SigmaGA.crowding,
-    ranking: SigmaGA.SGARankingBuilder = SigmaGA.pareto,
-    archiving: SigmaGA.SGAArchiveBuilder = SigmaGA.noArchive) =
-    new SigmaGA(mu, lambda, termination, mutation, crossover, dominance, diversityMetric, ranking, archiving)(_)
+    termination: GATermination,
+    mutation: GAMutationBuilder = coEvolvingSigma,
+    crossover: GACrossoverBuilder = sbx(),
+    dominance: Dominance = strict,
+    diversityMetric: DiversityMetricBuilder = crowding,
+    ranking: GARankingBuilder = pareto,
+    archiving: GAArchiveBuilder = noArchive) =
+    new org.openmole.plugin.method.evolution.algorithm.GA(mu, lambda, termination, mutation, crossover, dominance, diversityMetric, ranking, archiving)(_)
 
 }
 
-sealed class SigmaGA(
+sealed class GA(
   val mu: Int,
   val lambda: Int,
-  val termination: SigmaGA.SGATermination,
-  val mutation: SigmaGA.SGAMutationBuilder = SigmaGA.coEvolvingSigma,
-  val crossover: SigmaGA.SGACrossoverBuilder = SigmaGA.sbx(),
-  val dominance: Dominance = SigmaGA.strict,
-  val diversityMetric: SigmaGA.DiversityMetricBuilder = SigmaGA.crowding,
-  val ranking: SigmaGA.SGARankingBuilder = SigmaGA.pareto,
-  val archiving: SigmaGA.SGAArchiveBuilder = SigmaGA.noArchive)(val genomeSize: Int)
+  val termination: GA.GATermination,
+  val mutation: GA.GAMutationBuilder = GA.coEvolvingSigma,
+  val crossover: GA.GACrossoverBuilder = GA.sbx(),
+  val dominance: Dominance = GA.strict,
+  val diversityMetric: GA.DiversityMetricBuilder = GA.crowding,
+  val ranking: GA.GARankingBuilder = GA.pareto,
+  val archiving: GA.GAArchiveBuilder = GA.noArchive)(val genomeSize: Int)
     extends MuPlusLambda
     with GASigmaFactory
     with BinaryTournamentSelection
     with NonDominatedElitism
     with EvolutionManifest
     with TerminationManifest
-    with SigmaGA.SGA
+    with GA.GA
     with Archive
     with Termination
     with Breeding
