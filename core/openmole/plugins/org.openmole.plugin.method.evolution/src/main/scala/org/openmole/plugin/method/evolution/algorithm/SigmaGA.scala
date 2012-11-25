@@ -201,8 +201,8 @@ sealed class SigmaGA(
   lazy val thisRanking = ranking(dominance)
   lazy val thisDiversityMetric = diversityMetric(dominance)
   lazy val thisArchiving = archiving(thisDiversityMetric, thisRanking)
-  lazy val thisCrossover = crossover(this.asInstanceOf[Factory[SigmaGA.SGA#G]])
-  lazy val thisMutation = mutation(this.asInstanceOf[Factory[SigmaGA.SGA#G]])
+  lazy val thisCrossover = crossover(genomeFactory)
+  lazy val thisMutation = mutation(genomeFactory)
 
   type STATE = termination.STATE
   type A = thisArchiving.A
