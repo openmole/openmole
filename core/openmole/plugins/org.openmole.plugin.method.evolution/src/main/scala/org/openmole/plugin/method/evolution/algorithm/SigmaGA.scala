@@ -19,8 +19,7 @@ package org.openmole.plugin.method.evolution.algorithm
 
 import fr.iscpif.mgo._
 import fr.iscpif.mgo.tools.Lazy
-import java.security.spec.MGF1ParameterSpec
-import org.openmole.core.implementation.tools.GroovyContextAdapter
+import java.util.Random
 
 object SigmaGA {
 
@@ -135,16 +134,43 @@ object SigmaGA {
     val nY = _nY
   }
 
+  trait SGACrossover extends CrossOver with SGA
+
+  trait SGACrossoverBuilder {
+    def apply(genomeSize: Factory[SGA#G]): SGACrossover
+  }
+
+  def sbx(_distributionIndex: Double = 2.0) = new SGACrossoverBuilder {
+    def apply(_genomeFactory: Factory[SGA#G]) =
+      new SBXBoundedCrossover with SGACrossover {
+        val distributionIndex = _distributionIndex
+        val genomeFactory = _genomeFactory
+      }
+  }
+
+  trait SGAMutation extends Mutation with SGA
+
+  trait SGAMutationBuilder extends SGA {
+    def apply(genomeFactory: Factory[SGA#G]): SGAMutation
+  }
+
+  def coEvolvingSigma = new SGAMutationBuilder {
+    def apply(_genomeFactory: Factory[SGA#G]) = new CoEvolvingSigmaValuesMutation with SGAMutation {
+      val genomeFactory = _genomeFactory
+    }
+  }
+
   def apply(
     mu: Int,
     lambda: Int,
     termination: SigmaGA.SGATermination,
+    mutation: SigmaGA.SGAMutationBuilder = coEvolvingSigma,
+    crossover: SigmaGA.SGACrossoverBuilder = sbx(),
     dominance: Dominance = SigmaGA.strict,
     diversityMetric: SigmaGA.DiversityMetricBuilder = SigmaGA.crowding,
-    distributionIndex: Double = 2.0,
     ranking: SigmaGA.SGARankingBuilder = SigmaGA.pareto,
     archiving: SigmaGA.SGAArchiveBuilder = SigmaGA.noArchive) =
-    new SigmaGA(mu, lambda, termination, dominance, diversityMetric, distributionIndex, ranking, archiving)(_)
+    new SigmaGA(mu, lambda, termination, mutation, crossover, dominance, diversityMetric, ranking, archiving)(_)
 
 }
 
@@ -152,17 +178,16 @@ sealed class SigmaGA(
   val mu: Int,
   val lambda: Int,
   val termination: SigmaGA.SGATermination,
+  val mutation: SigmaGA.SGAMutationBuilder = SigmaGA.coEvolvingSigma,
+  val crossover: SigmaGA.SGACrossoverBuilder = SigmaGA.sbx(),
   val dominance: Dominance = SigmaGA.strict,
   val diversityMetric: SigmaGA.DiversityMetricBuilder = SigmaGA.crowding,
-  val distributionIndex: Double = 2.0,
   val ranking: SigmaGA.SGARankingBuilder = SigmaGA.pareto,
   val archiving: SigmaGA.SGAArchiveBuilder = SigmaGA.noArchive)(val genomeSize: Int)
     extends MuPlusLambda
     with GASigmaFactory
     with BinaryTournamentSelection
     with NonDominatedElitism
-    with CoEvolvingSigmaValuesMutation
-    with SBXBoundedCrossover
     with EvolutionManifest
     with TerminationManifest
     with SigmaGA.SGA
@@ -176,6 +201,8 @@ sealed class SigmaGA(
   lazy val thisRanking = ranking(dominance)
   lazy val thisDiversityMetric = diversityMetric(dominance)
   lazy val thisArchiving = archiving(thisDiversityMetric, thisRanking)
+  lazy val thisCrossover = crossover(this.asInstanceOf[Factory[SigmaGA.SGA#G]])
+  lazy val thisMutation = mutation(this.asInstanceOf[Factory[SigmaGA.SGA#G]])
 
   type STATE = termination.STATE
   type A = thisArchiving.A
@@ -192,4 +219,6 @@ sealed class SigmaGA(
   def combine(a1: A, a2: A) = thisArchiving.combine(a1, a2)
   def initialArchive = thisArchiving.initialArchive
   def modify(individuals: Seq[Individual[G, F]], archive: A) = thisArchiving.modify(individuals, archive)
+  def crossover(g1: G, g2: G)(implicit aprng: Random) = thisCrossover.crossover(g1, g2)
+  def mutate(genome: G)(implicit aprng: Random) = thisMutation.mutate(genome)
 }
