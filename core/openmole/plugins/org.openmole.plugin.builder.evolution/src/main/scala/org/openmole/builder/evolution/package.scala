@@ -38,7 +38,7 @@ import org.openmole.misc.exception.UserBadDataError
 
 package object evolution {
   //GA with Archive with Elitism with Modifier with Termination with Breeding with EvolutionManifest with MG
-  def steadyGA(evolutionBuilder: Int ⇒ SigmaGA)(
+  def steadyGA(evolutionBuilder: Int ⇒ Archive with Elitism with Modifier with Termination with Breeding with EvolutionManifest with MG { type G <: GAGenome })(
     name: String,
     model: Puzzle,
     workers: Int,
