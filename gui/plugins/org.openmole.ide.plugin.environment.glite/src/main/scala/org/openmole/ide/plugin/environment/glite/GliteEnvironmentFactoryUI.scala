@@ -23,8 +23,6 @@ import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
 class GliteEnvironmentFactoryUI extends IEnvironmentFactoryUI {
   override def toString = "Grid"
 
-  def category = ComponentCategories.ENVIRONMENT
-
   def buildDataUI = new GliteEnvironmentDataUI
 
 }

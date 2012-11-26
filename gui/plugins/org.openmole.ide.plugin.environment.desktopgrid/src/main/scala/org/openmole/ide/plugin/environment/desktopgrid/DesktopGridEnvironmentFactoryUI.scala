@@ -24,7 +24,4 @@ class DesktopGridEnvironmentFactoryUI extends IEnvironmentFactoryUI {
   override def toString = "Desktop grid"
 
   def buildDataUI = new DesktopGridEnvironmentDataUI
-
-  def category = ComponentCategories.ENVIRONMENT
-
 }

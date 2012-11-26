@@ -18,10 +18,13 @@
 package org.openmole.ide.core.model.factory
 
 import org.openmole.ide.core.model.data.ITaskDataUI
+import org.openmole.ide.core.model.panel.IComponentCategory
 
-trait ITaskFactoryUI extends IFactoryUI with IMoleComponent {
+trait ITaskFactoryUI extends IFactoryUI {
 
   override def toString: String = buildDataUI.coreClass.getSimpleName
 
   def buildDataUI: ITaskDataUI
+
+  def category: IComponentCategory
 }

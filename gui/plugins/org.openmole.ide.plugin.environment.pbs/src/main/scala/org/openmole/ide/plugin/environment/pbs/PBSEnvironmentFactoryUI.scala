@@ -24,6 +24,4 @@ class PBSEnvironmentFactoryUI extends IEnvironmentFactoryUI {
   override def toString = "PBS"
 
   def buildDataUI = new PBSEnvironmentDataUI
-
-  def category = ComponentCategories.ENVIRONMENT
 }

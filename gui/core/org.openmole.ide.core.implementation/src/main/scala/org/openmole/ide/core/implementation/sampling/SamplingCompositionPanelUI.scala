@@ -411,6 +411,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
                   Some(fp)
                 case _ ⇒ None
               }
+            case _ ⇒
           }
       }
       //}

@@ -24,6 +24,4 @@ class SSHEnvironmentFactoryUI extends IEnvironmentFactoryUI {
   override def toString = "SSH"
 
   def buildDataUI = new SSHEnvironmentDataUI
-
-  def category = ComponentCategories.ENVIRONMENT
 }

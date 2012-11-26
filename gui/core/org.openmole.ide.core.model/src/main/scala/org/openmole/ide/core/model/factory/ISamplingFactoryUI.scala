@@ -19,7 +19,7 @@ package org.openmole.ide.core.model.factory
 
 import org.openmole.ide.core.model.data.ISamplingDataUI
 
-trait ISamplingFactoryUI extends IFactoryUI with IMoleComponent {
+trait ISamplingFactoryUI extends IFactoryUI {
 
   override def toString: String = buildDataUI.coreClass.getSimpleName
 

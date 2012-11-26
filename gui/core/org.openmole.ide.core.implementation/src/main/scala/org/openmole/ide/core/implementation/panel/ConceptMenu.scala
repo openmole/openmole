@@ -65,7 +65,7 @@ object ConceptMenu {
   val environmentMenu = {
     addCategoryComponents(ComponentCategories.ENVIRONMENT)
     KeyRegistry.environments.values.map { f ⇒ new EnvironmentDataProxyFactory(f) }.toList.sortBy(_.factory.toString).foreach { d ⇒
-      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.toString) {
+      mapping(ComponentCategories.ENVIRONMENT).contents += new MenuItem(new Action(d.factory.toString) {
         override def apply = display(d.buildDataProxyUI, CREATION)
       })
     }

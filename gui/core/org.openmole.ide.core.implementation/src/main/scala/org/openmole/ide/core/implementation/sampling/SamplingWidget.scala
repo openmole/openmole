@@ -80,7 +80,6 @@ class SamplingWidget(val proxy: ISamplingProxyUI,
     g.setPaint(gp)
     g.fillRoundRect(0, 0, size.width, size.height, 8, 8)
 
-    println("is final ?" + proxy.isFinal)
     if (proxy.isFinal)
       g.drawImage(ImageIO.read(getClass.getClassLoader.getResource("img/finalSampling.png")), 85, 19, 10, 14, peer)
   }
