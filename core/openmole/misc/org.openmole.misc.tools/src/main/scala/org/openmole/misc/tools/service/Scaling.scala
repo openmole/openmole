@@ -19,8 +19,10 @@ package org.openmole.misc.tools.service
 
 object Scaling {
 
-  implicit def double2Scalable(d: Double) = new {
-    def scale(min: Double, max: Double) = Scaling.scale(d, 0, 1, min, max)
+  implicit class Double2Scalable(d: Double) {
+    def scale(min: Double, max: Double, originalMin: Double = 0, originalMax: Double = 1) =
+      Scaling.scale(d, originalMin, originalMax, min, max)
+
     def normalize(min: Double, max: Double) = Scaling.scale(d, min, max, 0, 1)
   }
 
