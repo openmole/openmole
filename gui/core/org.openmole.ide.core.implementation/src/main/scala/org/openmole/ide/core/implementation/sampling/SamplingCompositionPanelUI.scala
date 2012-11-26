@@ -43,6 +43,8 @@ import org.openmole.ide.core.model.workflow.IConnectorViewUI
 
 object SamplingCompositionPanelUI {
   val DEFAULT_COLOR = new Color(250, 250, 250)
+  val DEFAULT_COLOR_CENTER = new Color(228, 228, 228)
+  val ERROR_COLOR = new Color(50, 0, 0)
 }
 
 import SamplingCompositionPanelUI._
@@ -258,6 +260,16 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
                      arityTest: Boolean): Boolean =
     testConnection(sourceComponent.component, targetComponent.component, arityTest)
 
+  def firstSampling(proxy: ISamplingCompositionProxyUI) = {
+    connections.filter {
+      _._1.component.proxy.id == proxy.id
+    }.map { _._2.component.proxy }.headOption match {
+      case Some(next: IDomainProxyUI) ⇒ firstSampling(next)
+      case Some(x: ISamplingProxyUI) ⇒ x
+      case _ ⇒ proxy
+    }
+  }
+
   def firstNoneModifierDomain(domain: IDomainDataUI): Option[IDomainDataUI] =
     domain match {
       case modifier: IDomainDataUI with IModifier ⇒
@@ -308,14 +320,12 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
     source.proxy match {
       case sp: IDomainProxyUI ⇒ target.proxy match {
         case tp: IDomainProxyUI ⇒
-          println("TP ID " + tp.id)
           tp.dataUI match {
             case modifier: IDomainDataUI with IModifier ⇒
               println("MODIFIER")
               tp.dataUI = modifier.clone(scala.collection.immutable.List(sp.dataUI))
               connections.filter {
                 cc ⇒
-                  println("MODIFER FILTER :: " + cc._1.component.proxy.id + " " + source.proxy.id)
                   cc._1.component.proxy.id == source.proxy.id
               }.headOption match {
                 case Some((_, c: ISamplingComponent)) ⇒ updateNext(target, c.component)

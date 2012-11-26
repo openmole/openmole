@@ -30,4 +30,6 @@ trait IDomainWidget extends ISamplingCompositionWidget {
       }
     }
   }
+
+  def inError(b: Boolean): Unit
 }

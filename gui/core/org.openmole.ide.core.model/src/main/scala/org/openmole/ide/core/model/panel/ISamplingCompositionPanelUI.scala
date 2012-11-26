@@ -59,6 +59,8 @@ trait ISamplingCompositionPanelUI extends IPanelUI {
 
   def firstNoneModifierDomain(domain: IDomainDataUI): Option[IDomainDataUI]
 
+  def firstSampling(proxy: ISamplingCompositionProxyUI): ISamplingCompositionProxyUI
+
   def update(domain: IDomainWidget): Unit
 
   def updateNext(domain: IDomainWidget): (ISamplingCompositionWidget, Option[ISamplingCompositionWidget])
