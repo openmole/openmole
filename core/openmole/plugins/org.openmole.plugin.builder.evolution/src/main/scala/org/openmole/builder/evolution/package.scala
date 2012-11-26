@@ -33,7 +33,7 @@ import org.openmole.plugin.method.evolution._
 import org.openmole.core.implementation.puzzle._
 import org.openmole.core.implementation.transition._
 import org.openmole.core.implementation.tools._
-import org.openmole.plugin.method.evolution.algorithm._
+import org.openmole.plugin.method.evolution.algorithm.{ EvolutionManifest, TerminationManifest }
 import org.openmole.misc.exception.UserBadDataError
 
 package object evolution {
@@ -155,19 +155,40 @@ package object evolution {
   }
 
   def islandGA(
-    island: Island[Evolution with EvolutionManifest with Elitism with Termination with Modifier with Termination with Lambda with Selection { type G <: GAGenome; type F <: MGFitness }])(
+    evolution: Evolution with EvolutionManifest with Elitism with Termination with Modifier with Termination with Lambda with Selection { type G <: GAGenome; type F <: MGFitness })(
       name: String,
       model: Puzzle {
-        def population: Prototype[Population[island.evolution.G, island.evolution.F, island.evolution.MF]]
-        def archive: Prototype[island.evolution.A]
-        def genome: Prototype[island.evolution.G]
-        def individual: Prototype[Individual[island.evolution.G, island.evolution.F]]
+        def population: Prototype[Population[evolution.G, evolution.F, evolution.MF]]
+        def archive: Prototype[evolution.A]
+        def genome: Prototype[evolution.G]
+        def individual: Prototype[Individual[evolution.G, evolution.F]]
         def inputs: Iterable[(Prototype[Double], (Double, Double))]
         def objectives: Iterable[(Prototype[Double], Double)]
       },
-      number: Int)(implicit plugins: PluginSet) = {
+      number: Int,
+      mu: Int,
+      termination: GA.GATermination { type G = evolution.G; type F = evolution.F; type MF = evolution.MF })(implicit plugins: PluginSet) = {
 
-    import island.evolution._
+    val islandElitism = new Elitism with Termination with Modifier with Archive with TerminationManifest {
+      type G = evolution.G
+      type A = evolution.A
+      type MF = evolution.MF
+      type F = evolution.F
+      type STATE = termination.STATE
+
+      val stateManifest = termination.stateManifest
+
+      def initialArchive = evolution.initialArchive
+      def combine(a1: A, a2: A) = evolution.combine(a1, a2)
+      def toArchive(individuals: Seq[Individual[G, F]]) = evolution.toArchive(individuals)
+      def modify(individuals: Seq[Individual[G, F]], archive: A) = evolution.modify(individuals, archive)
+      def elitism(population: Population[G, F, MF]) = evolution.elitism(population)
+
+      def initialState(p: Population[G, F, MF]) = termination.initialState(p)
+      def terminated(population: Population[G, F, MF], terminationState: STATE) = termination.terminated(population, terminationState)
+    }
+
+    import evolution._
 
     val population = model.population.asInstanceOf[Prototype[Population[G, F, MF]]]
     val archive = model.archive.asInstanceOf[Prototype[A]]
@@ -179,7 +200,7 @@ package object evolution {
 
     val genome = model.genome.asInstanceOf[Prototype[G]]
 
-    val state = Prototype[STATE](name + "State")
+    val state = Prototype[islandElitism.STATE](name + "State")(islandElitism.stateManifest)
     val generation = Prototype[Int](name + "Generation")
     val terminated = Prototype[Boolean](name + "Terminated")
 
@@ -189,7 +210,7 @@ package object evolution {
 
     val renameArchiveTask = RenameTask(name + "RenameArchive", archive -> newArchive)
 
-    val elitismTask = ElitismTask(island.evolution)(
+    val elitismTask = ElitismTask(islandElitism)(
       name + "ElitismTask",
       individual.toArray,
       population,
@@ -201,7 +222,7 @@ package object evolution {
 
     val elitismCaps = MasterCapsule(elitismTask, archive, population, state, generation)
 
-    val breedingTask = SelectPopulationTask(island.evolution)(
+    val breedingTask = SelectPopulationTask(evolution)(
       name + "Breeding",
       population,
       archive)
@@ -214,7 +235,7 @@ package object evolution {
     preIslandTask addOutput population
     preIslandTask addOutput archive
     preIslandTask addParameter (population -> Population.empty)
-    preIslandTask addParameter (archive -> island.evolution.initialArchive)
+    preIslandTask addParameter (archive -> evolution.initialArchive)
 
     val preIslandCapsule = StrainerCapsule(preIslandTask)
 
