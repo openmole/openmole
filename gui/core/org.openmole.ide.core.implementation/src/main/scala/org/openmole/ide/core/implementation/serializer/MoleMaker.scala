@@ -140,8 +140,7 @@ object MoleMaker {
         case y: StrainerCapsuleType ⇒
           val sc = new StrainerCapsule(x)
           sc
-        case _ ⇒
-          new Capsule(x)
+        case _ ⇒ new Capsule(x)
       }
       case Left(x: Throwable) ⇒ new Capsule(EmptyTask(proxy.dataUI.name))
     }
