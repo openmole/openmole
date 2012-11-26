@@ -26,19 +26,26 @@ import org.openmole.core.implementation.data._
 import org.openmole.misc.tools.io.FileUtil._
 import java.io.File
 import org.openmole.core.implementation.tools.VariableExpansion
+import org.openmole.misc.tools.service.Scaling._
 
 //FIXME scala type system is not yet able to match the correct prototype (use a cast)
-sealed class SaveMapHook(val archive: Prototype[_], val path: String) extends Hook {
+sealed class SaveMapHook(
+    val archive: Prototype[_],
+    val path: String,
+    val xScale: (Double, Double, Int) = (0.0, 1.0, 100),
+    val yScale: (Double, Double, Int) = (0.0, 1.0, 100)) extends Hook {
 
   override def required = DataSet(archive)
 
   def process(moleJob: IMoleJob) {
+    val (xMin, xMax, nbX) = xScale
+    val (yMin, yMax, nbY) = yScale
     val a = moleJob.context.valueOrException(archive).asInstanceOf[MapArchive#A]
     val file = new File(VariableExpansion(moleJob.context, path))
     file.createParentDir
-    file.withWriter { w =>
+    file.withWriter { w ⇒
       a.foreach {
-        case((x, y), MapElement(value, _)) => w.write(s"$x,$y,$value\n")
+        case ((x, y), MapElement(value, _)) ⇒ w.write("" + x.toDouble.scale(xMin, xMax, 0, nbX) + "," + y.toDouble.scale(yMin, yMax, 0, nbY) + "," + value + "\n")
       }
     }
 

@@ -196,7 +196,8 @@ sealed class GA(
     with Breeding
     with MG
     with Elitism
-    with Modifier { sga ⇒
+    with Modifier
+    with CloneRemoval { sga ⇒
 
   lazy val thisRanking = ranking(dominance)
   lazy val thisDiversityMetric = diversityMetric(dominance)
