@@ -26,7 +26,7 @@ import scala.collection.mutable.ListBuffer
 
 object ModelToArchiveIndividualTask {
 
-  def apply(evolution: Evolution with G with F with Archive { type F = MGFitness })(
+  def apply(evolution: G with F with Archive with MG)(
     name: String,
     genome: Prototype[evolution.G],
     individual: Prototype[Individual[evolution.G, evolution.F]],
@@ -61,7 +61,7 @@ object ModelToArchiveIndividualTask {
 
 }
 
-sealed abstract class ModelToArchiveIndividualTask(val evolution: Evolution with G with F { type F = MGFitness })(
+sealed abstract class ModelToArchiveIndividualTask(val evolution: G with F with Archive with MG)(
     val name: String)(implicit val plugins: PluginSet) extends Task { task ⇒
 
   def genome: Prototype[evolution.G]

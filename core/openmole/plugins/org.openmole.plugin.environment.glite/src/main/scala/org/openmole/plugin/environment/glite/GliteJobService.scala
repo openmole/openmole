@@ -93,6 +93,8 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
 
       val jobDescription = buildJobDescription(runtime, script)
 
+      logger.fine(jobDescription.toJDL)
+
       val jid = jobService.submit(jobDescription)(authentication)
 
       new GliteJob {

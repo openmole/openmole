@@ -36,10 +36,12 @@ object ScalingGAGenomeTask {
     scale: (Prototype[Double], (Double, Double))*)(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
       scale foreach { case (p, _) ⇒ this.addOutput(p) }
+      addInput(genome)
+      addOutput(genome)
 
       def toTask = new ScalingGAGenomeTask[T](name, genome, scale: _*) {
-        val inputs = builder.inputs + genome
-        val outputs = builder.outputs + genome
+        val inputs = builder.inputs
+        val outputs = builder.outputs
         val parameters = builder.parameters
       }
     }

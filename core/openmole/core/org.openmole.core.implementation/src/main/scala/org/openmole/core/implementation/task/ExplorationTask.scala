@@ -37,7 +37,7 @@ object ExplorationTask {
 
       def toTask =
         new ExplorationTask(name, sampling) {
-          val inputs = builder.inputs + sampling.inputs
+          val inputs = builder.inputs
           val outputs = builder.outputs
           val parameters = builder.parameters
         }

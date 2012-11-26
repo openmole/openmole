@@ -37,6 +37,6 @@ class AppendArrayToFileHook(
     file.withLock(_.appendLine(toWrite))
   }
 
-  override def requiered = DataSet(content)
+  override def required = DataSet(content)
 
 }

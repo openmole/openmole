@@ -27,7 +27,7 @@ object Hook {
 }
 
 trait Hook {
-  def requiered: DataSet = DataSet.empty
+  def required: DataSet = DataSet.empty
 
   def process(moleJob: IMoleJob)
 }

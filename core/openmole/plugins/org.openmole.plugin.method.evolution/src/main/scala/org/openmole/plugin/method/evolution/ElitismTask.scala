@@ -73,7 +73,7 @@ object ElitismTask {
   }
 }
 
-sealed abstract class ElitismTask[E <: Elitism with Termination with Modifier](
+sealed abstract class ElitismTask[E <: Elitism with Termination with Modifier with Archive](
     val name: String, val evolution: E)(implicit val plugins: PluginSet) extends Task {
 
   def individuals: Prototype[Array[Individual[evolution.G, evolution.F]]]
@@ -95,13 +95,11 @@ sealed abstract class ElitismTask[E <: Elitism with Termination with Modifier](
         computedPopulation,
         context.valueOrException(state))
 
-    val terminatedVariable = Variable(terminated, term)
-    val newStateVariable = Variable(state, newState)
     Context(
       Variable(population, computedPopulation),
       Variable(archive, computedArchive),
-      terminatedVariable,
-      newStateVariable,
+      Variable(terminated, term),
+      Variable(state, newState),
       Variable(generation, context.valueOrException(generation) + 1))
   }
 
