@@ -33,7 +33,7 @@ object GA {
     val fManifest = manifest[F]
   }
 
-  trait GATermination extends Termination with TerminationManifest with MG with GA
+  trait GATermination extends Termination with TerminationManifest with GA
 
   def counter(_steps: Int) =
     new CounterTermination with GATermination {
@@ -69,14 +69,14 @@ object GA {
     def apply(dominance: Dominance) = new CrowdingDiversity with GADiversityMetric
   }
 
-  def hypervolume(_referencePoint: Seq[Double]) = new DiversityMetricBuilder {
+  def hypervolume(_referencePoint: Double*) = new DiversityMetricBuilder {
     def apply(dominance: Dominance) = new HypervolumeDiversity with GADiversityMetric {
       def isDominated(p1: Seq[Double], p2: Seq[Double]) = dominance.isDominated(p1, p2)
       val referencePoint = _referencePoint
     }
   }
 
-  def epsilon(_epsilons: Seq[Double]) = new EpsilonDominance {
+  def epsilon(_epsilons: Double*) = new EpsilonDominance {
     val epsilons = _epsilons
   }
 
@@ -170,11 +170,26 @@ object GA {
     diversityMetric: DiversityMetricBuilder = crowding,
     ranking: GARankingBuilder = pareto,
     archiving: GAArchiveBuilder = noArchive) =
-    new org.openmole.plugin.method.evolution.algorithm.GA(mu, lambda, termination, mutation, crossover, dominance, diversityMetric, ranking, archiving)(_)
+    new org.openmole.plugin.method.evolution.algorithm.GAImpl(mu, lambda, termination, mutation, crossover, dominance, diversityMetric, ranking, archiving)(_)
 
 }
 
-sealed class GA(
+trait GA extends MuPlusLambda
+  with GASigmaFactory
+  with BinaryTournamentSelection
+  with NonDominatedElitism
+  with EvolutionManifest
+  with TerminationManifest
+  with GA.GA
+  with Archive
+  with Termination
+  with Breeding
+  with MG
+  with Elitism
+  with Modifier
+  with CloneRemoval
+
+sealed class GAImpl(
   val mu: Int,
   val lambda: Int,
   val termination: GA.GATermination,
@@ -184,20 +199,7 @@ sealed class GA(
   val diversityMetric: GA.DiversityMetricBuilder = GA.crowding,
   val ranking: GA.GARankingBuilder = GA.pareto,
   val archiving: GA.GAArchiveBuilder = GA.noArchive)(val genomeSize: Int)
-    extends MuPlusLambda
-    with GASigmaFactory
-    with BinaryTournamentSelection
-    with NonDominatedElitism
-    with EvolutionManifest
-    with TerminationManifest
-    with GA.GA
-    with Archive
-    with Termination
-    with Breeding
-    with MG
-    with Elitism
-    with Modifier
-    with CloneRemoval { sga ⇒
+    extends GA { sga ⇒
 
   lazy val thisRanking = ranking(dominance)
   lazy val thisDiversityMetric = diversityMetric(dominance)
@@ -218,6 +220,7 @@ sealed class GA(
   def isDominated(p1: Seq[scala.Double], p2: Seq[scala.Double]) = dominance.isDominated(p1, p2)
   def toArchive(individuals: Seq[Individual[G, F]]) = thisArchiving.toArchive(individuals)
   def combine(a1: A, a2: A) = thisArchiving.combine(a1, a2)
+  def diff(a1: A, a2: A) = thisArchiving.diff(a1, a2)
   def initialArchive = thisArchiving.initialArchive
   def modify(individuals: Seq[Individual[G, F]], archive: A) = thisArchiving.modify(individuals, archive)
   def crossover(g1: G, g2: G)(implicit aprng: Random) = thisCrossover.crossover(g1, g2)
