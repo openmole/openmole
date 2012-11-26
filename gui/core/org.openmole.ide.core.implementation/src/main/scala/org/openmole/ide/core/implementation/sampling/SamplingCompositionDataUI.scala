@@ -44,37 +44,40 @@ class SamplingCompositionDataUI(val name: String = "",
     builtSampling.clear
     val connectionMap = connections.groupBy {
       _._2
-    }.map {
-      case (k, v) ⇒ k -> v.map {
-        _._1
-      }
     }
-    val domainMap: Map[String, IDomainProxyUI] = domains.map {
-      f ⇒ f._1.id -> f._1
-    }.toMap
+      .map {
+        case (k, v) ⇒ k -> v.map {
+          _._1
+        }
+      }
+
     val samplingMap: Map[String, ISamplingProxyUI] = samplings.map {
       s ⇒ s._1.id -> s._1
     }.toMap
     finalSampling match {
-      case Some(fs: ISamplingProxyUI) ⇒ buildSamplingCore(fs, connectionMap, domainMap, samplingMap)
+      case Some(fs: ISamplingProxyUI) ⇒ buildSamplingCore(fs, connectionMap, samplingMap)
       case _ ⇒ throw new UserBadDataError("The final sampling is not properly set")
     }
   }
 
   def buildSamplingCore(proxy: ISamplingProxyUI,
                         connectionMap: Map[ISamplingCompositionProxyUI, List[ISamplingCompositionProxyUI]],
-                        domainMap: Map[String, IDomainProxyUI],
                         samplingMap: Map[String, ISamplingProxyUI]): Sampling = {
     if (!builtSampling.contains(proxy)) {
       val partition = connectionMap.getOrElse(proxy, List()).partition {
         _ match {
-          case s: ISamplingWidget ⇒ true
-          case _ ⇒ false
+          case s: ISamplingProxyUI ⇒ true
+          case d: IDomainProxyUI ⇒ false
         }
       }
-      builtSampling += proxy -> proxy.dataUI.coreObject(factors.map { _.dataUI },
+      val domainsForFactory = domains.filter {
+        d ⇒ partition._2.contains(d._1)
+      }.map { _._1 }
+      builtSampling += proxy -> proxy.dataUI.coreObject(factors.filter {
+        f ⇒ domainsForFactory.contains(f.dataUI.domain)
+      }.map(_.dataUI),
         partition._1.map {
-          s ⇒ buildSamplingCore(samplingMap(s.id), connectionMap, domainMap, samplingMap)
+          p1 ⇒ buildSamplingCore(samplingMap(p1.id), connectionMap, samplingMap)
         })
     }
     builtSampling(proxy)
