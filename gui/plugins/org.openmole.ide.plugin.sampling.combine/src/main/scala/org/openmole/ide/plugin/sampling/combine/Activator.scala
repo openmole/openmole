@@ -19,8 +19,16 @@ package org.openmole.ide.plugin.sampling.combine
 
 import org.openmole.ide.core.implementation.registry.OSGiActivator
 import org.openmole.ide.core.implementation.registry.SamplingActivator
+import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 
 class Activator extends OSGiActivator with SamplingActivator {
 
-  override def samplingFactories = List(new CompleteSamplingFactoryUI)
+  override def samplingFactories = List(
+    new ISamplingFactoryUI {
+      override def toString = "Complete"
+      def buildDataUI = new CompleteSamplingDataUI
+    }, new ISamplingFactoryUI {
+      override def toString = "Combine"
+      def buildDataUI = new CombineSamplingDataUI
+    })
 }

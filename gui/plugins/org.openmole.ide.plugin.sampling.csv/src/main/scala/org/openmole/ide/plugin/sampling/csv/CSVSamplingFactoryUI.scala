@@ -24,6 +24,4 @@ class CSVSamplingFactoryUI extends ISamplingFactoryUI {
   override def toString = "CSV"
 
   def buildDataUI = new CSVSamplingDataUI
-
-  def category = ComponentCategories.SAMPLING
 }

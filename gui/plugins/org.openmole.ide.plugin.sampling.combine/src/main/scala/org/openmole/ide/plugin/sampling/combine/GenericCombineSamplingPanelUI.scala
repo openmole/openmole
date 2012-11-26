@@ -25,14 +25,13 @@ import org.openmole.ide.core.model.panel._
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import swing.TabbedPane.Page
+import org.openmole.ide.core.model.data.ISamplingDataUI
 
-class CompleteSamplingPanelUI(cud: CompleteSamplingDataUI) extends PluginPanel("wrap") with ISamplingPanelUI {
+class GenericCombineSamplingPanelUI(cud: ISamplingDataUI) extends PluginPanel("wrap") with ISamplingPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   contents += new Label("<html><i>No more information is required for this Sampling</i></html>")
 
-  def saveContent = new CompleteSamplingDataUI
-
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
+  def saveContent = cud
 }

@@ -19,7 +19,7 @@ package org.openmole.ide.core.model.factory
 
 import org.openmole.ide.core.model.data.IEnvironmentDataUI
 
-trait IEnvironmentFactoryUI extends IFactoryUI with IMoleComponent {
+trait IEnvironmentFactoryUI extends IFactoryUI {
 
   override def toString: String = buildDataUI.coreClass.getSimpleName
 

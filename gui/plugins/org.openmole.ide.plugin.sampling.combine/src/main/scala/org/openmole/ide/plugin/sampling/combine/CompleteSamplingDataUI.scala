@@ -15,6 +15,7 @@ import org.openmole.core.model.domain.Domain
 import org.openmole.core.model.domain.Discrete
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.misc.widget.{ URL, Helper }
 
 class CompleteSamplingDataUI extends ISamplingDataUI {
 
@@ -35,7 +36,10 @@ class CompleteSamplingDataUI extends ISamplingDataUI {
 
   def fatImagePath = "img/completeSampling_fat.png"
 
-  def buildPanelUI = new CompleteSamplingPanelUI(this)
+  def buildPanelUI = new GenericCombineSamplingPanelUI(this) {
+    override val help = new Helper(List(new URL(i18n.getString("completePermalinkText"),
+      i18n.getString("completePermalink"))))
+  }
 
   def isAcceptable(domain: IDomainDataUI) = try {
     println("try sampling")

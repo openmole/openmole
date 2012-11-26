@@ -24,6 +24,4 @@ class LHSSamplingFactoryUI extends ISamplingFactoryUI {
   override def toString = "LHS"
 
   def buildDataUI = new LHSSamplingDataUI
-
-  def category = ComponentCategories.SAMPLING
 }

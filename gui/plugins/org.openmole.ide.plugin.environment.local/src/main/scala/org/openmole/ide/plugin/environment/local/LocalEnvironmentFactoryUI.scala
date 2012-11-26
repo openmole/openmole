@@ -24,6 +24,4 @@ class LocalEnvironmentFactoryUI extends IEnvironmentFactoryUI {
   override def toString = "Multi threading"
 
   def buildDataUI = new LocalEnvironmentDataUI
-
-  def category = ComponentCategories.ENVIRONMENT
 }
