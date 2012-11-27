@@ -65,7 +65,7 @@ trait PersistentStorageService extends StorageService {
         if (!super.exists(persistentPath)) super.makeDir(persistentPath)
 
         for (file ← super.listNames(persistentPath))
-          ReplicaCatalog.cleanIfNotContains(this, super.child(persistentPath, file))
+          ReplicaCatalog.rmFileIfNotUsed(this, super.child(persistentPath, file))
 
         persistentSpaceVar = Some(persistentPath)
         persistentPath

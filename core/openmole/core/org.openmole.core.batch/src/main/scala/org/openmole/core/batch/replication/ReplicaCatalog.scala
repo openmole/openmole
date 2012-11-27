@@ -245,10 +245,10 @@ object ReplicaCatalog extends Logger {
       }
     }
 
-  def rmFileIfNotUsed(storage: StorageService, path: String)(implicit token: AccessToken, objectContainer: ObjectContainer) = {
+  def rmFileIfNotUsed(storage: StorageService, path: String)(implicit objectContainer: ObjectContainer) = {
     val name = new File(path).getName
     val matcher = replicationPattern.matcher(name)
-    if (!matcher.matches) storage.rmFile(path)
+    if (!matcher.matches) storage.backgroundRmFile(path)
     else {
       val hash = matcher.group(1)
       withSemaphore(key(hash, storage), objectContainer) {
