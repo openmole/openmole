@@ -27,6 +27,8 @@ import java.awt.BorderLayout
 import swing.event.FocusGained
 import swing.Component
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
+import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.implementation.dialog.StatusBar
 
 class DomainPanel(domainWidget: IDomainWidget,
                   scene: IMoleScene,
@@ -46,8 +48,10 @@ class DomainPanel(domainWidget: IDomainWidget,
   def delete = true
 
   def save = {
-    domainWidget.proxy.dataUI = panelUI.saveContent
-    domainWidget.update
+    try {
+      domainWidget.proxy.dataUI = panelUI.saveContent
+      domainWidget.update
+    } catch { case e: UserBadDataError ⇒ domainWidget.inError(true) }
   }
 
   def updateHelp = {

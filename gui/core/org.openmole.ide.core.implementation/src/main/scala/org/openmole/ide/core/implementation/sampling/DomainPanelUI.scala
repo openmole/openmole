@@ -23,27 +23,41 @@ import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.data._
-import org.openmole.ide.core.model.sampling.{ IModifier, IDomainWidget }
+import org.openmole.ide.core.model.sampling.{ ISamplingProxyUI, IModifier, IDomainWidget }
 import org.openmole.ide.misc.widget._
 import multirow.ComponentFocusedEvent
 import org.openmole.ide.core.model.panel._
 import org.openmole.ide.core.implementation.panel.DomainPanel
+import org.openmole.misc.exception.UserBadDataError
 
 class DomainPanelUI(domainWidget: IDomainWidget,
                     domainPanel: DomainPanel) extends PluginPanel("") with IPanelUI {
 
+  val finalProxy = domainWidget.scenePanelUI.firstSampling(domainWidget.proxy)
+
+  println("firstSampling : " + finalProxy.id)
   val domains = KeyRegistry.domains.values.map {
     _.buildDataUI
   }.toList.sorted.filter {
     d ⇒
-      if (domainWidget.incomings.isEmpty) true
-      else {
-        d match {
+      try {
+        println("   FINAL PROXY : " + finalProxy)
+        finalProxy match {
+          case s: ISamplingProxyUI ⇒
+            println("IS ACCEPTABLE : " + s.dataUI.isAcceptable(d))
+            s.dataUI.isAcceptable(d)
+          case _ ⇒ true
+        }
+      } catch {
+        case e: UserBadDataError ⇒ d match {
           case dm: IModifier ⇒ true
           case _ ⇒ false
         }
       }
   }
+
+  println("DOMAINS AVAILABEL : " + domains)
+
   val previous: List[IDomainWidget] = domainWidget.incomings
 
   val domainComboBox = new MyComboBox(domains)
@@ -90,7 +104,9 @@ class DomainPanelUI(domainWidget: IDomainWidget,
   }
 
   def saveContent = dPanel.saveContent match {
-    case m: IModifier ⇒ m.clone(previousDomain = previous.map { _.proxy.dataUI })
+    case m: IModifier ⇒ m.clone(previousDomain = previous.map {
+      _.proxy.dataUI
+    })
     case x: Any ⇒ x
   }
 

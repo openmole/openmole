@@ -76,8 +76,9 @@ class SamplingCompositionDataUI(val name: String = "",
       builtSampling += proxy -> proxy.dataUI.coreObject(factors.filter {
         f ⇒ domainsForFactory.contains(f.dataUI.domain)
       }.map(_.dataUI),
-        partition._1.map {
-          p1 ⇒ buildSamplingCore(samplingMap(p1.id), connectionMap, samplingMap)
+        partition._1.filterNot { _.id == proxy.id }.map {
+          p1 ⇒
+            buildSamplingCore(samplingMap(p1.id), connectionMap, samplingMap)
         })
     }
     builtSampling(proxy)

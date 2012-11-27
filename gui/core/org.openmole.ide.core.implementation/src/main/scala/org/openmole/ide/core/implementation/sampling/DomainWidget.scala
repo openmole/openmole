@@ -41,7 +41,7 @@ class DomainWidget(val proxy: IDomainProxyUI,
     maximumSize = new Dimension(80, 30)
   }
 
-  var color = SamplingCompositionPanelUI.DEFAULT_COLOR
+  var color = SamplingCompositionPanelUI.DEFAULT_COLOR_CENTER
 
   if (display) displayOnMoleScene
 
@@ -58,8 +58,17 @@ class DomainWidget(val proxy: IDomainProxyUI,
     link.link(domainPreview)
     scenePanelUI.testConnections(false)
     scenePanelUI.update(this)
+    inError(false)
     revalidate
     repaint
+  }
+
+  def inError(b: Boolean) = {
+    println("++ IN ERROR ++ " + b)
+    color = {
+      if (b) SamplingCompositionPanelUI.DEFAULT_COLOR_CENTER
+      else SamplingCompositionPanelUI.ERROR_COLOR
+    }
   }
 
   override def paintComponent(g: Graphics2D) = {
@@ -69,7 +78,9 @@ class DomainWidget(val proxy: IDomainProxyUI,
     val start = new Point(0, 0)
     val end = new Point(0, size.height)
     val dist = Array(0.0f, 0.5f, 0.8f)
-    val colors = Array(color, new Color(228, 228, 228), color)
+    val colors = Array(SamplingCompositionPanelUI.DEFAULT_COLOR,
+      color,
+      SamplingCompositionPanelUI.DEFAULT_COLOR)
     val gp = new LinearGradientPaint(start, end, dist, colors)
 
     g.setPaint(gp)
