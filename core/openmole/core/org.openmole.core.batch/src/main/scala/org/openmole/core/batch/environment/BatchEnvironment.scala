@@ -216,7 +216,7 @@ akka {
   @transient lazy val storages = {
     val storages = allStorages
     if (storages.isEmpty) throw new InternalProcessingError("No storage service available for the environment.")
-    Updater.registerForUpdate(new StoragesGC(WeakReference(storages)), Workspace.preferenceAsDuration(StoragesGCUpdateInterval).toMilliSeconds)
+    Updater.delay(new StoragesGC(WeakReference(storages)), Workspace.preferenceAsDuration(StoragesGCUpdateInterval).toMilliSeconds)
     storages
   }
 
