@@ -259,22 +259,6 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
       }
     }
   }
-  //
-  //  def selection = _selection.toSet
-  //
-  //  def addToSelection(widget: ICapsuleUI) = {
-  //    widget.selected = true
-  //    _selection += widget
-  //  }
-  //
-  //  def removeFromSelection(widget: ICapsuleUI) = {
-  //    widget.selected = false
-  //    _selection -= widget
-  //  }
-  //
-  //  def clearSelection = _selection.foreach { removeFromSelection }
-  //
-  //  def clearRemovedCapsulesFromSelection = _selection.clear
 
   def createSelectionWidget = {
     val widget = new Widget(this)

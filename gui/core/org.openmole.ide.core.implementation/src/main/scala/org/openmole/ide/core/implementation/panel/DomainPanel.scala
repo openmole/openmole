@@ -47,11 +47,11 @@ class DomainPanel(domainWidget: IDomainWidget,
 
   def delete = true
 
-  def save = {
-    try {
-      domainWidget.proxy.dataUI = panelUI.saveContent
-      domainWidget.update
-    } catch { case e: UserBadDataError ⇒ domainWidget.inError(true) }
+  def save = try {
+    domainWidget.proxy.dataUI = panelUI.saveContent
+    domainWidget.update
+  } catch {
+    case e: UserBadDataError ⇒
   }
 
   def updateHelp = {

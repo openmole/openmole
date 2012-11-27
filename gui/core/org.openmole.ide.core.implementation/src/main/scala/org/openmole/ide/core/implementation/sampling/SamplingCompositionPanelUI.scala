@@ -40,11 +40,11 @@ import scala.collection.mutable.HashSet
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import collection.mutable
 import org.openmole.ide.core.model.workflow.IConnectorViewUI
+import org.openmole.ide.core.implementation.workflow.MoleRouter
 
 object SamplingCompositionPanelUI {
   val DEFAULT_COLOR = new Color(250, 250, 250)
   val DEFAULT_COLOR_CENTER = new Color(228, 228, 228)
-  val ERROR_COLOR = new Color(50, 0, 0)
 }
 
 import SamplingCompositionPanelUI._
@@ -404,16 +404,12 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
     override def createConnection(sourceWidget: Widget, targetWidget: Widget) = {
       val sourceW = sourceWidget.asInstanceOf[SamplingComponent]
       val targetW = targetWidget.asInstanceOf[SamplingComponent]
-      // val factorProxyUI = computeFactor(targetW.component.proxy) match {
       val factorProxyUI = computeFactor(sourceW.component.proxy, targetW.component.proxy) match {
         case Some(f: IFactorProxyUI) ⇒ Some(f)
         case _ ⇒
           sourceW.component match {
             case d: IDomainWidget ⇒
               updatePrevious(d, targetW.component)
-              // samplingCompositionPanelUI.computeFactor(targetW.component.proxy) match {
-              //   case Some(f: IFactorProxyUI) ⇒ Some(f)
-              //  case _ ⇒ targetW.component match {
               targetW.component match {
                 case s: ISamplingWidget ⇒
                   val fp = new FactorProxyUI(new FactorDataUI(d.proxy, s.proxy))
@@ -424,20 +420,16 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
             case _ ⇒
           }
       }
-      //}
 
       val connection = new SamplingConnectorWidget(sourceW,
         targetW,
         samplingCompositionPanelUI)
 
-      println("in CREATE CONNECTION : " + factorProxyUI)
+      connection.setRouter(new MoleRouter(boxLayer))
 
       factorProxyUI match {
-        case Some(f: IFactorProxyUI) ⇒
-          println("in CREATE CONNECTION ADDED " + f)
-          factorWidgets += f -> connection
-        case x: Any ⇒
-          println("in CREATE CONNECTION  - NOT ADDED")
+        case Some(f: IFactorProxyUI) ⇒ factorWidgets += f -> connection
+        case _ ⇒
       }
 
       connectLayer.addChild(connection)

@@ -19,16 +19,16 @@ package org.openmole.ide.core.implementation.workflow
 
 import org.netbeans.api.visual.router.Router
 import org.netbeans.api.visual.router.RouterFactory
+import org.netbeans.api.visual.widget.LayerWidget
 import org.netbeans.api.visual.widget.ConnectionWidget
-import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.JavaConversions._
 
-class MoleRouter(scene: IMoleScene) extends Router {
+class MoleRouter(layer: LayerWidget) extends Router {
   def routeConnection(widget: ConnectionWidget) = {
     widget.setControlPoints(List(), false)
     (widget.getTargetAnchor.compute(widget.getSourceAnchorEntry).getAnchorSceneLocation.x -
       widget.getSourceAnchor.compute(widget.getSourceAnchorEntry).getAnchorSceneLocation.x) < 0 match {
-        case true ⇒ RouterFactory.createOrthogonalSearchRouter(scene.capsuleLayer).routeConnection(widget)
+        case true ⇒ RouterFactory.createOrthogonalSearchRouter(layer).routeConnection(widget)
         case false ⇒ RouterFactory.createFreeRouter.routeConnection(widget)
       }
   }

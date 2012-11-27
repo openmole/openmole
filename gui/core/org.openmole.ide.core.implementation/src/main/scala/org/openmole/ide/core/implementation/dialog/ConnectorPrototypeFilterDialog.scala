@@ -22,7 +22,7 @@ import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 import org.openmole.ide.core.implementation.data.CheckData
-import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ITaskDataProxyUI }
+import org.openmole.ide.core.model.dataproxy.{IPrototypeDataProxyUI, ITaskDataProxyUI}
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IConnectorUI
 import org.openmole.ide.core.model.workflow.IConnectorUI
@@ -31,7 +31,7 @@ import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget.multirow.MultiCombo._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
-import swing.{ Label, MyComboBox, ScrollPane }
+import swing.{Label, MyComboBox, ScrollPane}
 import org.openmole.ide.core.implementation.sampling.SamplingConnectorWidget
 import org.openmole.ide.core.model.sampling.IFactorProxyUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
@@ -55,7 +55,6 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
   }
 
   class FactorPrototypeDialog(connectorWidget: SamplingConnectorWidget) extends PluginPanel("wrap") {
-    StatusBar.clear
     preferredSize = new Dimension(150, 100)
     val protoCombo = new MyComboBox(availablePrototypes)
     contents += new Label("Prototype to be applied on the domain")
@@ -81,6 +80,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
     }
 
     def display: Unit = {
+      StatusBar.clear
       protoCombo.peer.setModel(MyComboBox.newConstantModel(availablePrototypes))
       if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(this) {
         verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
