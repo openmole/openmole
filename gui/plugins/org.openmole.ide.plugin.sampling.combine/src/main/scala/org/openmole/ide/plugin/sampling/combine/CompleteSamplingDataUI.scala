@@ -16,19 +16,13 @@ import org.openmole.core.model.domain.Discrete
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.widget.{ URL, Helper }
+import org.openmole.ide.core.model.sampling.ISamplingProxyUI
 
 class CompleteSamplingDataUI extends ISamplingDataUI {
 
   def coreObject(factors: List[IFactorDataUI],
-                 samplings: List[Sampling]) = {
-    new CompleteSampling(
-      (factors.map(f ⇒ f.prototype match {
-        case Some(p: IPrototypeDataProxyUI) ⇒
-          DiscreteFactor(Factor(p.dataUI.coreObject.asInstanceOf[Prototype[Any]],
-            f.domain.dataUI.coreObject.asInstanceOf[Domain[Any] with Discrete[Any]]))
-        case _ ⇒ throw new UserBadDataError("No Prototype is define for the domain " + f.domain.dataUI.preview)
-      }) ::: samplings): _*)
-  }
+                 samplings: List[Sampling]) =
+    new CompleteSampling((CombineSamplingCoreFactory(factors) ::: samplings): _*)
 
   def coreClass = classOf[CompleteSampling]
 
@@ -54,7 +48,6 @@ class CompleteSamplingDataUI extends ISamplingDataUI {
     }
   } catch {
     case u: UserBadDataError ⇒
-      println("UBE : " + u.getMessage)
       StatusBar.warn("This domain is not valid : " + u.getMessage)
       false
   }

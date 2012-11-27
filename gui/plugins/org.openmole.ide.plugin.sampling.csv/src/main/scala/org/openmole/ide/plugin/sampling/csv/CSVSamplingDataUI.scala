@@ -13,6 +13,7 @@ import org.openmole.plugin.sampling.csv.CSVSampling
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.misc.tools.Counter
 import org.openmole.core.model.sampling.Sampling
+import org.openmole.ide.core.implementation.dialog.StatusBar
 
 class CSVSamplingDataUI(var csvFilePath: String = "",
                         var prototypeMapping: List[(String, IPrototypeDataProxyUI)] = List.empty) extends ISamplingDataUI {
@@ -22,7 +23,7 @@ class CSVSamplingDataUI(var csvFilePath: String = "",
     val fi = new File(csvFilePath)
     val sampling = CSVSampling(fi)
     prototypeMapping.filter(!_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI]).foreach {
-      m ⇒ sampling addColumn (m._1, m._2.dataUI.coreObject)
+      m ⇒ sampling addColumn(m._1, m._2.dataUI.coreObject)
     }
     sampling
   } catch {
@@ -37,9 +38,15 @@ class CSVSamplingDataUI(var csvFilePath: String = "",
 
   def buildPanelUI = new CSVSamplingPanelUI(this)
 
-  def isAcceptable(factor: IDomainDataUI) = true
+  def isAcceptable(factor: IDomainDataUI) = {
+    StatusBar.warn("A CSV Sampling does not accept any Domain or Sampling as input")
+    false
+  }
 
-  def isAcceptable(sampling: ISamplingDataUI) = true
+  def isAcceptable(sampling: ISamplingDataUI) = {
+    StatusBar.warn("A CSV Sampling does not accept any Domain or Sampling as input")
+    false
+  }
 
   def preview = "from " + {
     val n = new File(csvFilePath).getName

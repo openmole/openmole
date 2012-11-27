@@ -58,17 +58,8 @@ class DomainWidget(val proxy: IDomainProxyUI,
     link.link(domainPreview)
     scenePanelUI.testConnections(false)
     scenePanelUI.update(this)
-    inError(false)
     revalidate
     repaint
-  }
-
-  def inError(b: Boolean) = {
-    println("++ IN ERROR ++ " + b)
-    color = {
-      if (b) SamplingCompositionPanelUI.DEFAULT_COLOR_CENTER
-      else SamplingCompositionPanelUI.ERROR_COLOR
-    }
   }
 
   override def paintComponent(g: Graphics2D) = {
@@ -79,7 +70,7 @@ class DomainWidget(val proxy: IDomainProxyUI,
     val end = new Point(0, size.height)
     val dist = Array(0.0f, 0.5f, 0.8f)
     val colors = Array(SamplingCompositionPanelUI.DEFAULT_COLOR,
-      color,
+      SamplingCompositionPanelUI.DEFAULT_COLOR_CENTER,
       SamplingCompositionPanelUI.DEFAULT_COLOR)
     val gp = new LinearGradientPaint(start, end, dist, colors)
 

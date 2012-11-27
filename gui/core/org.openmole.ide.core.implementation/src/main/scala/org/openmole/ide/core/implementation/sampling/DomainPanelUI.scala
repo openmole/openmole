@@ -35,35 +35,33 @@ class DomainPanelUI(domainWidget: IDomainWidget,
 
   val finalProxy = domainWidget.scenePanelUI.firstSampling(domainWidget.proxy)
 
-  println("firstSampling : " + finalProxy.id)
   val domains = KeyRegistry.domains.values.map {
     _.buildDataUI
   }.toList.sorted.filter {
     d ⇒
       try {
-        println("   FINAL PROXY : " + finalProxy)
         finalProxy match {
-          case s: ISamplingProxyUI ⇒
-            println("IS ACCEPTABLE : " + s.dataUI.isAcceptable(d))
-            s.dataUI.isAcceptable(d)
+          case s: ISamplingProxyUI ⇒ s.dataUI.isAcceptable(d)
           case _ ⇒ true
         }
       } catch {
-        case e: UserBadDataError ⇒ d match {
-          case dm: IModifier ⇒ true
-          case _ ⇒ false
-        }
+        case e: UserBadDataError ⇒
+          d match {
+            case dm: IModifier ⇒ true
+            case _ ⇒ false
+          }
       }
   }
-
-  println("DOMAINS AVAILABEL : " + domains)
 
   val previous: List[IDomainWidget] = domainWidget.incomings
 
   val domainComboBox = new MyComboBox(domains)
-  domainComboBox.selection.item = domains.filter {
+  domains.filter {
     _.toString == domainWidget.proxy.dataUI.toString
-  }.head
+  }.headOption match {
+    case Some(d: IDomainDataUI) ⇒ domainComboBox.selection.item = d
+    case _ ⇒
+  }
 
   var dPanel = domainWidget.proxy.dataUI.buildPanelUI
 

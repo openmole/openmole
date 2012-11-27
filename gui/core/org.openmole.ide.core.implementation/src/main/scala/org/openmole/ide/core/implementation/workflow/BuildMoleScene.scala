@@ -80,7 +80,7 @@ class BuildMoleScene(n: String = "") extends MoleScene(n) { buildMoleScene ⇒
     val connectionWidget = new ConnectorWidget(this, manager.connector(e))
     connectionWidget.setEndPointShape(PointShape.SQUARE_FILLED_BIG)
     connectionWidget.getActions.addAction(ActionFactory.createPopupMenuAction(new ConnectorMenuProvider(this, connectionWidget)))
-    connectionWidget.setRouter(new MoleRouter(this))
+    connectionWidget.setRouter(new MoleRouter(capsuleLayer))
     connectLayer.addChild(connectionWidget)
     connectionWidget.getActions.addAction(createObjectHoverAction)
     connectionWidget

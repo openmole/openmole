@@ -55,7 +55,6 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
   }
 
   class FactorPrototypeDialog(connectorWidget: SamplingConnectorWidget) extends PluginPanel("wrap") {
-    StatusBar.clear
     preferredSize = new Dimension(150, 100)
     val protoCombo = new MyComboBox(availablePrototypes)
     contents += new Label("Prototype to be applied on the domain")
@@ -81,6 +80,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
     }
 
     def display: Unit = {
+      StatusBar.clear
       protoCombo.peer.setModel(MyComboBox.newConstantModel(availablePrototypes))
       if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(this) {
         verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
