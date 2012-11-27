@@ -29,7 +29,7 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.tools.util.Types._
 
 object RangeDomainDataUI {
-  def empty = apply("0", "", Some("1"), DOUBLE)
+  def empty = apply("0", "1", Some("1"), DOUBLE)
 
   def apply(min: String,
             max: String,
@@ -58,12 +58,15 @@ case class RangeDomainDataUI[S](
 
   val name = "Range"
 
-  def coreObject: Domain[S] = step match {
-    case Some(s: String) ⇒
-      if (s.isEmpty) new Bounded[S](min, max)
-      else new Range[S](min, max, s)
-    case _ ⇒ new Bounded[S](min, max)
-  }
+  def coreObject: Domain[S] =
+    if (min.isEmpty || max.isEmpty)
+      throw new UserBadDataError("Min and Max values are required for defining a Range Domain")
+    else step match {
+      case Some(s: String) ⇒
+        if (s.isEmpty) new Bounded[S](min, max)
+        else new Range[S](min, max, s)
+      case _ ⇒ new Bounded[S](min, max)
+    }
 
   def buildPanelUI = new RangeDomainPanelUI(this)
 
