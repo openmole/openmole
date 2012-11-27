@@ -282,7 +282,7 @@ package object evolution {
 
     val puzzle = skel + loop + dataChannels + archiveDiff
 
-    val (_state, _generation, _genome, _individual) = (state, generation, model.genome, model.individual)
+    val (_state, _generation, _genome, _individual, _archive) = (state, generation, model.genome, model.individual, archive)
 
     new Puzzle(puzzle) {
       def outputCapsule = scalingPopulationCapsule
@@ -290,6 +290,7 @@ package object evolution {
       def generation = _generation
       def genome = _genome
       def island = islandSlot.capsule
+      def archive = _archive
     }
   }
 

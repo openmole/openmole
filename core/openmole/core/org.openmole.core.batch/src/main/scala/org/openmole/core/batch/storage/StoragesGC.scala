@@ -37,12 +37,12 @@ class StoragesGC(storagesRef: WeakReference[Iterable[StorageService]]) extends I
             try
               if (!replica.sourceFile.exists || System.currentTimeMillis - replica.lastCheckExists > Workspace.preferenceAsDuration(ReplicaCatalog.NoAccessCleanTime).toMilliSeconds) {
                 ReplicaCatalog.remove(replica)
-                storage.backgroundRmFile(replica.path)
+                ReplicaCatalog.rmFileIfNotUsed(storage, replica.path)
               }
             catch {
               case t: Throwable ⇒
                 ReplicaCatalog.remove(replica)
-                storage.backgroundRmFile(replica.path)
+                ReplicaCatalog.rmFileIfNotUsed(storage, replica.path)
             }
           }
         }
