@@ -39,5 +39,7 @@ trait ISamplingDataUI extends IDataUI {
 
   def isAcceptable(sampling: ISamplingDataUI): Boolean
 
+  def inputNumberConstrainst: Option[Int] = None
+
   def preview: String
 }

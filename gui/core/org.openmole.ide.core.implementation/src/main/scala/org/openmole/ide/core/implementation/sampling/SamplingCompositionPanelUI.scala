@@ -246,8 +246,16 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
         }
       case samplingT: ISamplingWidget ⇒
         sourceWidget match {
-          case sw: ISamplingWidget ⇒
-            samplingT.proxy.dataUI.isAcceptable(sw.proxy.dataUI)
+          case sw: ISamplingWidget ⇒ samplingT.proxy.dataUI.inputNumberConstrainst match {
+            case Some(i: Int) ⇒
+              if (connections.filter {
+                _._2.component.proxy.id == samplingT.proxy.id
+              }.size >= i) {
+                StatusBar.warn("The maximum number of Sampling input is here limited to " + i)
+                false
+              } else samplingT.proxy.dataUI.isAcceptable(sw.proxy.dataUI)
+            case _ ⇒ samplingT.proxy.dataUI.isAcceptable(sw.proxy.dataUI)
+          }
           case dw: IDomainWidget ⇒ samplingT.proxy.dataUI.isAcceptable(dw.proxy.dataUI)
           case _ ⇒ false
         }
@@ -263,7 +271,9 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
   def firstSampling(proxy: ISamplingCompositionProxyUI) = {
     connections.filter {
       _._1.component.proxy.id == proxy.id
-    }.map { _._2.component.proxy }.headOption match {
+    }.map {
+      _._2.component.proxy
+    }.headOption match {
       case Some(next: IDomainProxyUI) ⇒ firstSampling(next)
       case Some(x: ISamplingProxyUI) ⇒ x
       case _ ⇒ proxy
@@ -322,7 +332,6 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
         case tp: IDomainProxyUI ⇒
           tp.dataUI match {
             case modifier: IDomainDataUI with IModifier ⇒
-              println("MODIFIER")
               tp.dataUI = modifier.clone(scala.collection.immutable.List(sp.dataUI))
               connections.filter {
                 cc ⇒
@@ -350,8 +359,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
     }
 
   def updatePrevious(source: IDomainWidget,
-                     target: ISamplingCompositionWidget): Unit = {
-    println("BACK update : from " + source.proxy.id + " to " + target.proxy.id)
+                     target: ISamplingCompositionWidget): Unit =
     target.proxy match {
       case tp: IDomainProxyUI ⇒ tp.dataUI match {
         case modifier: IDomainDataUI with IModifier ⇒ source.proxy match {
@@ -366,7 +374,6 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
       }
       case _ ⇒
     }
-  }
 
   class SamplingConnectionProvider extends ConnectProvider {
 

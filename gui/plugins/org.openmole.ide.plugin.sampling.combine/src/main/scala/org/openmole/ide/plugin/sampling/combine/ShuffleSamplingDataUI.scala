@@ -17,32 +17,30 @@
 package org.openmole.ide.plugin.sampling.combine
 
 import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI, ISamplingDataUI }
-import org.openmole.core.model.sampling.{ DiscreteFactor, Factor, Sampling }
-import org.openmole.plugin.sampling.combine.CombineSampling
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.core.model.data.Prototype
+import org.openmole.core.model.sampling.Sampling
+import org.openmole.plugin.sampling.combine.ShuffleSampling
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.ide.misc.widget.{ URL, Helper }
-import org.openmole.core.model.domain.{ Discrete, Domain }
 
-class CombineSamplingDataUI extends ISamplingDataUI {
+class ShuffleSamplingDataUI extends ISamplingDataUI {
   def coreObject(factors: List[IFactorDataUI], samplings: List[Sampling]) =
-    new CombineSampling((CombineSamplingCoreFactory(factors) ::: samplings): _*)
+    samplings.headOption match {
+      case Some(s: Sampling) ⇒ new ShuffleSampling(s)
+      case _ ⇒ throw new UserBadDataError("A Sampling is required as input of a Shuffle Sampling")
+    }
 
-  def buildPanelUI = new GenericCombineSamplingPanelUI(this) {
-    override val help = new Helper(List(new URL(i18n.getString("completePermalinkText"),
-      i18n.getString("combinePermalink"))))
-  }
+  def buildPanelUI = new GenericCombineSamplingPanelUI(this)
 
-  def imagePath = "img/combineSampling.png"
+  def imagePath = "img/shuffleSampling.png"
 
-  def fatImagePath = "img/combineSampling_fat.png"
+  def fatImagePath = "img/shuffleSampling_fat.png"
 
   def isAcceptable(domain: IDomainDataUI) = false
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 
-  def preview = "Combine"
+  override def inputNumberConstrainst = Some(1)
 
-  def coreClass = classOf[CombineSampling]
+  def preview = "Shuffle"
+
+  def coreClass = classOf[ShuffleSampling]
 }
