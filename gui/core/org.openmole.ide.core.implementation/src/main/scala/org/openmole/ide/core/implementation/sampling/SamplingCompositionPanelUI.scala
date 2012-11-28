@@ -127,6 +127,12 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
   def addSampling(samplingProxy: ISamplingProxyUI,
                   location: Point,
                   display: Boolean = true) = {
+    finalSampling match {
+      case None ⇒
+        samplingProxy.isFinal = true
+        finalSampling = Some(samplingProxy)
+      case _ ⇒
+    }
     val cw = new SamplingComponent(this, new SamplingWidget(samplingProxy, this), location) {
       getActions.addAction(ActionFactory.createPopupMenuAction(new SamplingMenuProvider(samplingCompositionPanelUI)))
       getActions.addAction(connectAction)
@@ -156,7 +162,9 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
             }
             s match {
               case (d: IDomainWidget) ⇒ domains -= d.proxy
-              case (s: ISamplingWidget) ⇒ samplings -= s.proxy
+              case (s: ISamplingWidget) ⇒
+                finalSampling = None
+                samplings -= s.proxy
               case _ ⇒
             }
           case _ ⇒

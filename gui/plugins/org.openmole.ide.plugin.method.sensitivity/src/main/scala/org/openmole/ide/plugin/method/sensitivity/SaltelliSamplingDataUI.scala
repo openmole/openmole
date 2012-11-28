@@ -48,7 +48,6 @@ class SaltelliSamplingDataUI(val samples: String = "1") extends ISamplingDataUI 
 
   def buildPanelUI = new SaltelliSamplingPanelUI(this)
 
-  //FIXME 2.10
   override def isAcceptable(domain: IDomainDataUI) =
     if (super.isAcceptable(domain)) true
     else {
