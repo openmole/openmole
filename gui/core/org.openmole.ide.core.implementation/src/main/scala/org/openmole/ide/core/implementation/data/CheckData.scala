@@ -184,7 +184,6 @@ object CheckData extends Logger {
     }
 
   def fullCheck(scene: IMoleScene) = {
-    println("++  fullcheck")
     checkMole(scene) match {
       case Right((mole, _, _, errors)) ⇒
         if (errors.isEmpty) {

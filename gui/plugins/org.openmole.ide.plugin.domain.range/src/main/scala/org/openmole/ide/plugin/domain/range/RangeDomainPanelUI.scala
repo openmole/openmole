@@ -21,12 +21,13 @@ import scala.math.Numeric._
 import org.openmole.ide.misc.widget.{ URL, Help, Helper, PluginPanel }
 import scala.swing.event._
 import swing.{ MyComboBox, TextField, CheckBox, Label }
+import org.openmole.ide.misc.tools.util.Types
 
 class RangeDomainPanelUI(pud: RangeDomainDataUI[_]) extends GenericRangeDomainPanelUI {
 
   minField.text = pud.min
   maxField.text = pud.max
-  typeCombo.peer.setModel(MyComboBox.newConstantModel(pud.availableTypes))
+  typeCombo.peer.setModel(MyComboBox.newConstantModel(pud.availableTypes.map(t ⇒ Types.pretify(t))))
   typeCombo.selection.item = pud.domainType.toString.split('.').last
 
   val stepCheckBox = new CheckBox("Step")

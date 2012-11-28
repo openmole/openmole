@@ -26,13 +26,36 @@ import org.openmole.misc.exception.UserBadDataError
 
 object ClassLoader {
 
-  def toClass(s: String) = try {
-    classOf[GroovyShell].getClassLoader.loadClass(s)
-  } catch { case e: ClassNotFoundException ⇒ throw new UserBadDataError("The class " + s + " has not been found") }
+  def toClass(s: String) = s match {
+    case "Byte" ⇒ classOf[Byte]
+    case "Short" ⇒ classOf[Short]
+    case "Int" ⇒ classOf[Int]
+    case "int" ⇒ classOf[Int]
+    case "Long" ⇒ classOf[Long]
+    case "long" ⇒ classOf[Long]
+    case "Float" ⇒ classOf[Float]
+    case "Double" ⇒ classOf[Double]
+    case "double" ⇒ classOf[Double]
+    case "Char" ⇒ classOf[Char]
+    case "Boolean" ⇒ classOf[Boolean]
+    case "String" ⇒ classOf[String]
+    case "File" ⇒ classOf[java.io.File]
+    case "BigInteger" ⇒ classOf[java.math.BigInteger]
+    case "BigDecimal" ⇒ classOf[java.math.BigDecimal]
+    case _ ⇒ try {
+      classOf[GroovyShell].getClassLoader.loadClass(s)
+    } catch {
+      case e: ClassNotFoundException ⇒ throw new UserBadDataError("The class " + s + " has not been found")
+    }
+  }
 
   def toManifest(s: String) = nanifest(toClass(s))
 
   def loadExtraPlugins = {
-    Workspace.pluginDirLocation.list.map { f ⇒ new File(Workspace.pluginDirLocation + "/" + f) } foreach { PluginManager.load }
+    Workspace.pluginDirLocation.list.map {
+      f ⇒ new File(Workspace.pluginDirLocation + "/" + f)
+    } foreach {
+      PluginManager.load
+    }
   }
 }

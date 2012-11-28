@@ -155,7 +155,6 @@ class ExecutionManager(manager: IMoleSceneManager,
         revalidate
         timer.start
         mExecution.start
-        println("MEXECUTION STARTED ... ")
         Some(mExecution)
       case Left(e) ⇒
         StatusBar.blockException(e)

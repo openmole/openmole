@@ -35,7 +35,11 @@ trait ISamplingDataUI extends IDataUI {
 
   def fatImagePath: String
 
-  def isAcceptable(domain: IDomainDataUI): Boolean
+  def isAcceptable(domain: IDomainDataUI): Boolean =
+    domain match {
+      case dm: IModifier ⇒ true
+      case _ ⇒ false
+    }
 
   def isAcceptable(sampling: ISamplingDataUI): Boolean
 

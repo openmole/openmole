@@ -24,16 +24,20 @@ import org.openmole.core.model.domain.Domain
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.ide.misc.tools.util.Types._
+import org.openmole.misc.exception.UserBadDataError
 
 case class BigDecimalLogarithmRangeDataUI(val min: String = "0.0",
-                                          val max: String = "",
-                                          val step: Option[String] = None) extends LogarthmicRangeDataUI {
+                                          val max: String = "1.0",
+                                          val step: Option[String] = Some("1.0")) extends LogarthmicRangeDataUI {
 
   val domainType = manifest[BigDecimal]
 
   override def availableTypes = List(BIG_DECIMAL)
 
-  def coreObject: Domain[BigDecimal] = new BigDecimalLogarithmRange(min, max, stepString)
+  def coreObject: Domain[BigDecimal] =
+    if (min.isEmpty || max.isEmpty || !step.isDefined)
+      throw new UserBadDataError("Min, Max ant Step values are required for defining a Logarithm Range Domain")
+    else new BigDecimalLogarithmRange(min, max, stepString)
 
   def coreClass = classOf[BigDecimalLogarithmRangeDataUI]
 
