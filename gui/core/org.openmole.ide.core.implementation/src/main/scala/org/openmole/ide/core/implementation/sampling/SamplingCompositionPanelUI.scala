@@ -163,7 +163,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
             s match {
               case (d: IDomainWidget) ⇒ domains -= d.proxy
               case (s: ISamplingWidget) ⇒
-                finalSampling = None
+                if (s.proxy.isFinal) finalSampling = None
                 samplings -= s.proxy
               case _ ⇒
             }
