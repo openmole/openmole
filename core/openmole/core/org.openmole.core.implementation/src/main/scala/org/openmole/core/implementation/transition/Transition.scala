@@ -37,7 +37,7 @@ class Transition(
     val start: ICapsule,
     val end: Slot,
     val condition: ICondition = ICondition.True,
-    val filter: IFilter[String] = Filter.empty) extends ITransition {
+    val filter: Filter[String] = Filter.empty) extends ITransition {
 
   private def nextTaskReady(ticket: ITicket, subMole: ISubMoleExecution): Boolean = {
     val registry = subMole.transitionRegistry

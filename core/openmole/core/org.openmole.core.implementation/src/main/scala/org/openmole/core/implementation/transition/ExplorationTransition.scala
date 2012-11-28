@@ -34,7 +34,7 @@ import org.openmole.misc.tools.service.Priority
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
-class ExplorationTransition(start: ICapsule, end: Slot, condition: ICondition = ICondition.True, filter: IFilter[String] = Filter.empty) extends Transition(start, end, condition, filter) with IExplorationTransition {
+class ExplorationTransition(start: ICapsule, end: Slot, condition: ICondition = ICondition.True, filter: Filter[String] = Filter.empty) extends Transition(start, end, condition, filter) with IExplorationTransition {
 
   override def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = {
     val subSubMole = subMole.newChild

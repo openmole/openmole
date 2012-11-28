@@ -25,7 +25,7 @@ import org.openmole.core.model.transition.ICondition._
 import org.openmole.core.model.transition._
 import org.openmole.misc.exception._
 
-class EndExplorationTransition(start: ICapsule, end: Slot, trigger: ICondition, filter: IFilter[String] = Filter.empty) extends Transition(start, end, True, filter) with IEndExplorationTransition {
+class EndExplorationTransition(start: ICapsule, end: Slot, trigger: ICondition, filter: Filter[String] = Filter.empty) extends Transition(start, end, True, filter) with IEndExplorationTransition {
 
   override protected def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
     if (trigger.evaluate(context)) {

@@ -22,7 +22,17 @@ import org.openmole.core.model.transition._
 import org.openmole.misc.tools.script._
 import org.openmole.core.implementation.tools._
 
-class Condition(code: String) extends ICondition {
+object Condition {
+
+  def apply(_code: String) = new Condition {
+    val code = _code
+  }
+
+}
+
+trait Condition extends ICondition {
+
+  def code: String
 
   @transient lazy val groovyProxy = new GroovyProxy(code, Iterable.empty) with GroovyContextAdapter
 

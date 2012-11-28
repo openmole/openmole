@@ -45,7 +45,7 @@ package object evolution {
     name: String,
     evolution: OMGA,
     inputs: Inputs,
-    objectives: Objectives)(implicit plugins: PluginSet) = new {
+    objectives: Objectives)(implicit plugins: PluginSet) = new { components ⇒
     import evolution._
 
     val genome = Prototype[evolution.G](name + "Genome")
@@ -64,9 +64,9 @@ package object evolution {
     firstTask addOutput (Data(archive, Optional))
     firstTask addOutput (Data(population, Optional))
 
-    val initialBreedTask = ExplorationTask(name + "InitialBreed", BreedSampling(evolution)(population, genome, evolution.lambda))
+    val breedTask = ExplorationTask(name + "InitialBreed", BreedSampling(evolution)(population, genome, evolution.lambda))
 
-    val scalingTask = ScalingGAGenomeTask(name + "ScalingGenome", genome, inputs.toSeq: _*)
+    val scalingGenomeTask = ScalingGAGenomeTask(name + "ScalingGenome", genome, inputs.toSeq: _*)
 
     val toIndividualTask = ModelToArchiveIndividualTask(evolution)(name + "ModelToArchiveIndividual", genome, individual, newArchive)
     objectives.foreach {
@@ -100,6 +100,65 @@ package object evolution {
     scalingPopulationTask addOutput terminated
     scalingPopulationTask addOutput population
     scalingPopulationTask addOutput archive
+
+    val terminatedCondition = Condition(terminated.name + " == true")
+
+    val (_evolution, _inputs, _objectives) = (evolution, inputs, objectives)
+
+    def puzzle(puzzle: Puzzle, output: Capsule) =
+      new Puzzle(puzzle) with Island {
+        val evolution = _evolution
+
+        val population = components.population
+        val archive = components.archive.asInstanceOf[Prototype[evolution.A]]
+        val genome = components.genome
+        val individual = components.individual
+
+        def inputs = _inputs
+        def objectives = _objectives
+
+        def outputCapsule = output
+        def state = components.state
+        def generation = components.generation
+      }
+
+  }
+
+  def generationalGA(evolutionBuilder: Int ⇒ OMGA)(
+    name: String,
+    model: Puzzle,
+    inputs: Inputs,
+    objectives: Objectives)(implicit plugins: PluginSet) = {
+
+    val evolution = evolutionBuilder(inputs.size)
+    val cs = components(name, evolution, inputs, objectives)
+    import cs._
+
+    val firstCapsule = StrainerCapsule(firstTask)
+    val breedingCaps = StrainerCapsule(breedTask)
+    val breedingCapsItSlot = Slot(StrainerCapsule(breedTask))
+    val scalingCaps = Capsule(scalingGenomeTask)
+    val toIndividualSlot = Slot(Capsule(toIndividualTask))
+    val elitismSlot = Slot(elitismTask)
+    val scalingPopulationCapsule = Capsule(scalingPopulationTask)
+    val endCapsule = Slot(StrainerCapsule(EmptyTask(name + "End")))
+
+    val skel =
+      firstCapsule -- breedingCaps -< scalingCaps -- model -- toIndividualSlot >- elitismSlot -- scalingPopulationCapsule -- (endCapsule, terminatedCondition)
+
+    val loop =
+      scalingPopulationCapsule -- (breedingCapsItSlot, !terminatedCondition)
+
+    val dataChannels =
+      (scalingCaps -- toIndividualSlot) +
+        (firstCapsule oo (model.first, filter = Filter(archive, population))) +
+        (firstCapsule -- (endCapsule, filter = Filter(archive, population))) +
+        (breedingCaps -- (elitismSlot, filter = Keep(archive, population))) +
+        (breedingCaps -- (breedingCapsItSlot, filter = Keep(archive, population)))
+
+    val gaPuzzle = skel + loop + dataChannels
+
+    cs.puzzle(gaPuzzle, scalingPopulationCapsule)
   }
 
   def steadyGA(evolutionBuilder: Int ⇒ OMGA)(
@@ -113,53 +172,36 @@ package object evolution {
     import cs._
 
     val firstCapsule = StrainerCapsule(firstTask)
-    val scalingCaps = Capsule(scalingTask)
+    val scalingCaps = Capsule(scalingGenomeTask)
     val toIndividualSlot = Slot(Capsule(toIndividualTask))
     val elitismCaps = MasterCapsule(elitismTask, archive, state, generation, population)
     val scalingPopulationCapsule = Capsule(scalingPopulationTask)
-    val breedingCaps = StrainerCapsule(ExplorationTask(name + "Breeding", BreedSampling(evolution)(population, genome, 1)))
+    val steadyBreedingCaps = StrainerCapsule(ExplorationTask(name + "Breeding", BreedSampling(evolution)(population, genome, 1)))
     val endCapsule = Slot(StrainerCapsule(EmptyTask(name + "End")))
 
     val skel =
       firstCapsule --
-        initialBreedTask -<
+        breedTask -<
         scalingCaps --
         (model, filter = Filter(genome)) --
         toIndividualSlot --
         elitismCaps --
-        scalingPopulationCapsule >| (endCapsule, terminated.name + " == true")
+        scalingPopulationCapsule >| (endCapsule, terminatedCondition)
 
     val loop =
       scalingPopulationCapsule --
-        (breedingCaps /*, condition = generation.name + " % " + evolution.lambda + " == 0"*/ ) -<-
+        steadyBreedingCaps -<-
         scalingCaps
 
     val dataChannels =
-      (scalingCaps oo toIndividualSlot) +
+      (scalingCaps -- toIndividualSlot) +
         (firstCapsule oo (model.first, Filter(archive, population))) +
         (firstCapsule oo (endCapsule, Filter(archive, population))) +
-        (firstCapsule oo (elitismCaps, filter = Filter not (archive, population)))
+        (firstCapsule oo (elitismCaps, Keep(archive, population)))
 
-    val puzzle = skel + loop + dataChannels
+    val gaPuzzle = skel + loop + dataChannels
 
-    val (_state, _generation, _genome, _individual, _population, _archive, _inputs, _objectives, _evolution) = (state, generation, genome, individual, population, archive, inputs, objectives, evolution)
-
-    new Puzzle(puzzle) with Island {
-      val evolution = _evolution
-
-      val population = _population
-      val archive = _archive.asInstanceOf[Prototype[evolution.A]]
-      val genome = _genome
-      val individual = _individual
-
-      def inputs = _inputs
-      def objectives = _objectives
-
-      def outputCapsule = scalingPopulationCapsule
-      def state = _state
-      def generation = _generation
-    }
-
+    cs.puzzle(gaPuzzle, scalingPopulationCapsule)
   }
 
   trait Island {

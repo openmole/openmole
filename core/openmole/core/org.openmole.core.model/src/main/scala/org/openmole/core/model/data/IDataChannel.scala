@@ -55,7 +55,7 @@ trait IDataChannel {
    *
    * @return a filter on the name of the variable not transported by this data channel.
    */
-  def filter: IFilter[String]
+  def filter: Filter[String]
 
   /**
    *

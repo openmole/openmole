@@ -40,14 +40,14 @@ package object transition {
 
   implicit def taskToSlotConverter(task: ITask) = Slot(Capsule(task))
   implicit def transitionToSlotConverter(transition: ITransition) = transition.end
-  implicit def conditionStringConverter(condition: String) = new Condition(condition)
+  implicit def conditionStringConverter(condition: String) = Condition(condition)
 
   class TransitionDecorator(from: Puzzle) {
 
     def -<(
       to: Puzzle,
       condition: ICondition = ICondition.True,
-      filter: IFilter[String] = Filter.empty,
+      filter: Filter[String] = Filter.empty,
       size: Option[String] = None) = {
 
       val transitions = from.lasts.map {
@@ -70,7 +70,7 @@ package object transition {
     def -<-(
       to: Puzzle,
       condition: ICondition = ICondition.True,
-      filter: IFilter[String] = Filter.empty) = {
+      filter: Filter[String] = Filter.empty) = {
 
       val transitions = from.lasts.map {
         c ⇒ new SlaveTransition(c, to.first, condition, filter)
@@ -88,7 +88,7 @@ package object transition {
     def >-(
       to: Puzzle,
       condition: ICondition = ICondition.True,
-      filter: IFilter[String] = Filter.empty,
+      filter: Filter[String] = Filter.empty,
       trigger: ICondition = ICondition.False) = {
       val transitions = from.lasts.map { c ⇒ new AggregationTransition(c, to.first, condition, filter, trigger) }
       Puzzle.merge(from.first, to.lasts, from :: to :: Nil, transitions)
@@ -103,12 +103,12 @@ package object transition {
     def >|(
       to: Puzzle,
       trigger: ICondition,
-      filter: IFilter[String] = Filter.empty) = {
+      filter: Filter[String] = Filter.empty) = {
       val transitions = from.lasts.map { c ⇒ new EndExplorationTransition(c, to.first, trigger, filter) }
       Puzzle.merge(from.first, to.lasts, from :: to :: Nil, transitions)
     }
 
-    def --(to: Puzzle, condition: ICondition = ICondition.True, filter: IFilter[String] = Filter.empty) = {
+    def --(to: Puzzle, condition: ICondition = ICondition.True, filter: Filter[String] = Filter.empty) = {
       val transitions = from.lasts.map {
         c ⇒ new Transition(c, to.first, condition, filter)
       }
@@ -121,7 +121,7 @@ package object transition {
       Puzzle.merge(from.first, toPuzzles.flatMap { _.lasts }, from :: toPuzzles ::: Nil, transitions)
     }
 
-    def oo(to: Puzzle, filter: IFilter[String] = Filter.empty) = {
+    def oo(to: Puzzle, filter: Filter[String] = Filter.empty) = {
       val channels = from.lasts.map {
         c ⇒ new DataChannel(c, to.first, filter)
       }

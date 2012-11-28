@@ -202,7 +202,7 @@ object MoleMaker {
     t: ITransitionUI,
     prototypeMap: Map[IPrototypeDataProxyUI, Prototype[_]]): ITransition = {
     val filtered = t.filteredPrototypes.map { p ⇒ prototypeMap(p).name }
-    val condition: ICondition = if (t.condition.isDefined) new Condition(t.condition.get) else ICondition.True
+    val condition: ICondition = if (t.condition.isDefined) Condition(t.condition.get) else ICondition.True
     t.transitionType match {
       case BASIC_TRANSITION ⇒ new Transition(sourceCapsule, targetSlot, condition, Filter(filtered: _*))
       case AGGREGATION_TRANSITION ⇒ new AggregationTransition(sourceCapsule, targetSlot, condition, Filter(filtered: _*))

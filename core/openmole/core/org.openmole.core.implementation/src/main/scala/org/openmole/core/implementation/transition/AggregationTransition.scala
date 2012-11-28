@@ -30,7 +30,7 @@ import org.openmole.misc.tools.obj.ClassUtils._
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
 
-class AggregationTransition(start: ICapsule, end: Slot, condition: ICondition = True, filter: IFilter[String] = Filter.empty, trigger: ICondition = ICondition.False) extends Transition(start, end, condition, filter) with IAggregationTransition {
+class AggregationTransition(start: ICapsule, end: Slot, condition: ICondition = True, filter: Filter[String] = Filter.empty, trigger: ICondition = ICondition.False) extends Transition(start, end, condition, filter) with IAggregationTransition {
 
   override def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = subMole.aggregationTransitionRegistry.synchronized {
     val mole = subMole.moleExecution.mole

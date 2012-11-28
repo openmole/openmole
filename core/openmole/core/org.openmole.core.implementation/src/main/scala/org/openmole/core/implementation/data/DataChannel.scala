@@ -35,7 +35,7 @@ object DataChannel {
 class DataChannel(
     val start: ICapsule,
     val end: Slot,
-    val filter: IFilter[String]) extends IDataChannel {
+    val filter: Filter[String]) extends IDataChannel {
 
   def this(start: ICapsule, end: Slot, filtered: String*) = this(start, end, Filter(filtered: _*))
 

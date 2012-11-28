@@ -62,7 +62,7 @@ trait ITransition {
    *
    * @return filter on the names of the variables which are filtred by this transition
    */
-  def filter: IFilter[String]
+  def filter: Filter[String]
 
   /**
    * Get the unfiltred user output data of the starting capsule going through
