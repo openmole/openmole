@@ -23,7 +23,7 @@ class CSVSamplingDataUI(var csvFilePath: String = "",
     val fi = new File(csvFilePath)
     val sampling = CSVSampling(fi)
     prototypeMapping.filter(!_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI]).foreach {
-      m ⇒ sampling addColumn(m._1, m._2.dataUI.coreObject)
+      m ⇒ sampling addColumn (m._1, m._2.dataUI.coreObject)
     }
     sampling
   } catch {
@@ -38,7 +38,7 @@ class CSVSamplingDataUI(var csvFilePath: String = "",
 
   def buildPanelUI = new CSVSamplingPanelUI(this)
 
-  def isAcceptable(factor: IDomainDataUI) = {
+  override def isAcceptable(factor: IDomainDataUI) = {
     StatusBar.warn("A CSV Sampling does not accept any Domain or Sampling as input")
     false
   }

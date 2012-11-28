@@ -35,6 +35,7 @@ import swing.{ Label, MyComboBox, ScrollPane }
 import org.openmole.ide.core.implementation.sampling.SamplingConnectorWidget
 import org.openmole.ide.core.model.sampling.IFactorProxyUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.misc.tools.util.Types
 
 object ConnectorPrototypeFilterDialog extends PrototypeDialog {
   def display(connectorUI: IConnectorUI) = {
@@ -74,7 +75,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
 
     def availablePrototypes = connectorWidget.computeFactor match {
       case Some(f: IFactorProxyUI) ⇒ Proxys.prototypes.filter {
-        p ⇒ f.dataUI.domain.dataUI.domainType.toString.split('.').last == p.dataUI.protoType.toString.split('.').last
+        p ⇒ Types(f.dataUI.domain.dataUI.domainType.toString, p.dataUI.protoType.toString)
       }.toList
       case _ ⇒ List()
     }

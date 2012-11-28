@@ -36,14 +36,15 @@ import scala.swing.TextField
 import scala.swing.event.ActionEvent
 import scala.swing.event.SelectionChanged
 import java.io.File
+import org.openmole.ide.misc.tools.util.Types
 
 class GenericPrototypePanelUI(dataUI: GenericPrototypeDataUI[_]) extends PluginPanel("wrap 3") with IPrototypePanelUI { protoPanel ⇒
 
   val typeValues = GenericPrototypeDataUI.base ::: GenericPrototypeDataUI.extra
 
   val typeComboBox = new MyComboBox(typeValues)
-  typeComboBox.selection.item = typeValues.filter {
-    _.typeClassString == dataUI.typeClassString
+  typeComboBox.selection.item = typeValues.filter { t ⇒
+    Types(t.typeClassString, dataUI.typeClassString)
   }.head
 
   listenTo(`typeComboBox`)

@@ -48,13 +48,15 @@ class SaltelliSamplingDataUI(val samples: String = "1") extends ISamplingDataUI 
 
   def buildPanelUI = new SaltelliSamplingPanelUI(this)
 
-  //FIXME 2.10
-  def isAcceptable(domain: IDomainDataUI) =
-    domain match {
-      case x: Domain[Double] with Bounds[Double] ⇒ true
-      case _ ⇒
-        StatusBar.warn("A Bounded range of Double is required for a Saltelli Sampling")
-        false
+  override def isAcceptable(domain: IDomainDataUI) =
+    if (super.isAcceptable(domain)) true
+    else {
+      domain match {
+        case x: Domain[Double] with Bounds[Double] ⇒ true
+        case _ ⇒
+          StatusBar.warn("A Bounded range of Double is required for a Saltelli Sampling")
+          false
+      }
     }
 
   def isAcceptable(sampling: ISamplingDataUI) = true

@@ -17,5 +17,15 @@
             <artifactId>org.openmole.plugin.sampling.lhs</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.plugin.domain.bounded</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.ide</groupId>
+            <artifactId>org.openmole.ide.plugin.domain.range</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

@@ -35,22 +35,22 @@ class CompleteSamplingDataUI extends ISamplingDataUI {
       i18n.getString("completePermalink"))))
   }
 
-  def isAcceptable(domain: IDomainDataUI) = try {
-    println("try sampling")
-    domain.coreObject match {
-      case x: Domain[Any] with Discrete[Any] ⇒
-        println("good domain")
-        true
-      case _ ⇒
-        println("_")
-        StatusBar.warn("A Discrete Domain is required for a Complete Sampling")
-        false
+  override def isAcceptable(domain: IDomainDataUI) =
+    if (super.isAcceptable(domain)) true
+    else {
+      try {
+        domain.coreObject match {
+          case x: Domain[Any] with Discrete[Any] ⇒ true
+          case _ ⇒
+            StatusBar.warn("A Discrete Domain is required for a Complete Sampling")
+            false
+        }
+      } catch {
+        case u: UserBadDataError ⇒
+          StatusBar.warn("This domain is not valid : " + u.getMessage)
+          false
+      }
     }
-  } catch {
-    case u: UserBadDataError ⇒
-      StatusBar.warn("This domain is not valid : " + u.getMessage)
-      false
-  }
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 

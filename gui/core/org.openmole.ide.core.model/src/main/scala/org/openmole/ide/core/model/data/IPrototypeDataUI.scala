@@ -21,11 +21,12 @@ import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import org.openmole.core.model.data._
+import org.openmole.ide.misc.tools.util.Types
 
 trait IPrototypeDataUI[T] extends IDataUI {
   def name: String
 
-  override def toString = if (dim > 0) name + "[" + dim + "]" else name
+  override def toString = if (dim > 0) Types.pretify(name) + "[" + dim + "]" else Types.pretify(name)
 
   def protoType: Manifest[T]
 

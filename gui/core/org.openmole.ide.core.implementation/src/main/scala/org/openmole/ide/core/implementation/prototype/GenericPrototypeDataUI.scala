@@ -22,17 +22,19 @@ import org.openmole.core.implementation.data._
 import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.core.model.data._
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.ide.misc.tools.util.ClassLoader
+import org.openmole.ide.misc.tools.util.{ Types, ClassLoader }
 
 object GenericPrototypeDataUI {
 
-  val baseType = List("scala.Int",
-    classOf[java.lang.Long].getName,
-    classOf[String].getName,
-    classOf[java.lang.Double].getName,
-    classOf[java.io.File].getName,
-    classOf[java.math.BigInteger].getName,
-    classOf[java.math.BigDecimal].getName)
+  val baseType = List(INT,
+    LONG,
+    STRING,
+    DOUBLE,
+    FILE,
+    BIG_INTEGER,
+    BIG_DECIMAL)
+
+  val upperBaseType = baseType.map { _.toUpperCase }
 
   var extraType = List.empty[String]
 
@@ -72,11 +74,11 @@ class GenericPrototypeDataUI[T](val name: String,
   def coreObject = Prototype[T](name)(protoType).toArray(dim).asInstanceOf[Prototype[T]]
 
   def fatImagePath = {
-    if (baseType.contains(protoType.toString)) "img/" + canonicalClassName(protoType.toString).toLowerCase + "_fat.png"
+    if (upperBaseType.contains(canonicalClassName(protoType.toString).toUpperCase)) "img/" + canonicalClassName(protoType.toString).toLowerCase + "_fat.png"
     else "img/extra_fat.png"
   }
 
-  def canonicalClassName(c: String) = c.substring(c.lastIndexOf('.') + 1, c.length)
+  def canonicalClassName(c: String) = Types.pretify(c.split('.').last)
 
   def buildPanelUI = new GenericPrototypePanelUI(this)
 }

@@ -14,19 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.ide.misc.tools.util
+package org.openmole.ide.plugin.sampling.combine
 
-object Types {
-  val INT = "int"
-  val LONG = "long"
-  val DOUBLE = "Double"
-  val FILE = classOf[java.io.File].getSimpleName
-  val STRING = classOf[String].getSimpleName
-  val BIG_DECIMAL = classOf[java.math.BigDecimal].getSimpleName
-  val BIG_INTEGER = classOf[java.math.BigInteger].getSimpleName
+import org.openmole.ide.misc.widget.{ URL, Helper, PluginPanel }
+import org.openmole.ide.core.model.panel.ISamplingPanelUI
+import java.util.{ Locale, ResourceBundle }
+import swing.{ Label, TextField }
 
-  def apply(c1: String, c2: String) =
-    c1.split('.').last.toUpperCase == c2.split('.').last.toUpperCase
+class TakeSamplingPanelUI(cud: TakeSamplingDataUI) extends PluginPanel("wrap 2", "", "") with ISamplingPanelUI {
 
-  def pretify(c: String) = c.head.toUpper + c.tail
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+
+  val sizeTextField = new TextField(cud.size, 8)
+
+  contents += new Label("Size")
+  contents += sizeTextField
+
+  override def saveContent = new TakeSamplingDataUI(sizeTextField.text)
 }

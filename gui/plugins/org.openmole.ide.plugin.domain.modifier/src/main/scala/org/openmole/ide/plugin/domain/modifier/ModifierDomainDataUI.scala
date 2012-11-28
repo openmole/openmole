@@ -26,7 +26,7 @@ trait ModifierDomainDataUI extends IDomainDataUI with IModifier {
 
   override def isAcceptable(domain: IDomainDataUI): Boolean =
     domain.coreObject match {
-      case d: DOMAINTYPE ⇒ domain.domainType == domainType
+      case d: DOMAINTYPE ⇒ true
       case _ ⇒
         StatusBar.warn("A Discrete Domain is required as input of a Modifier Domain (Map, Take, Group, ...)")
         false

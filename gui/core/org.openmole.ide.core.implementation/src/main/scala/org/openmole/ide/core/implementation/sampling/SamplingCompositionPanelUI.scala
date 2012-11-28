@@ -69,7 +69,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
   addChild(boxLayer)
   addChild(connectLayer)
 
-  setPreferredBounds(new Rectangle(0, 0, 400, 200))
+  setPreferredBounds(new Rectangle(0, 0, 700, 400))
 
   val transitionId = new AtomicInteger
   val connectProvider = new SamplingConnectionProvider
@@ -101,9 +101,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
 
   def computeFactor(sourceProxy: ISamplingCompositionProxyUI,
                     targetProxy: ISamplingCompositionProxyUI) = factors.filter {
-    f ⇒
-      println("comute f :: " + f.dataUI.target.id + "  " + sourceProxy.id + " " + targetProxy.id)
-      f.dataUI.target.id == targetProxy.id && f.dataUI.domain.id == sourceProxy.id
+    f ⇒ f.dataUI.target.id == targetProxy.id && f.dataUI.domain.id == sourceProxy.id
   }.headOption
 
   def peer = new MigPanel("") {
@@ -129,6 +127,12 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
   def addSampling(samplingProxy: ISamplingProxyUI,
                   location: Point,
                   display: Boolean = true) = {
+    finalSampling match {
+      case None ⇒
+        samplingProxy.isFinal = true
+        finalSampling = Some(samplingProxy)
+      case _ ⇒
+    }
     val cw = new SamplingComponent(this, new SamplingWidget(samplingProxy, this), location) {
       getActions.addAction(ActionFactory.createPopupMenuAction(new SamplingMenuProvider(samplingCompositionPanelUI)))
       getActions.addAction(connectAction)
@@ -158,7 +162,9 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
             }
             s match {
               case (d: IDomainWidget) ⇒ domains -= d.proxy
-              case (s: ISamplingWidget) ⇒ samplings -= s.proxy
+              case (s: ISamplingWidget) ⇒
+                if (s.proxy.isFinal) finalSampling = None
+                samplings -= s.proxy
               case _ ⇒
             }
           case _ ⇒
@@ -219,8 +225,6 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
         if (!testConnection(source.component, target.component, arityTest)) {
           println("Not good from " + source + " to " + target)
         }
-
-      //updateNext(source, target)
     }
   }
 
@@ -304,7 +308,6 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
               val factor = computeFactor(w.proxy, samp.proxy)
               factor match {
                 case Some(f: IFactorProxyUI) ⇒
-                  println("OH YEAH for " + Some(domain.proxy.dataUI) + " " + editedDomainProxy)
                   if (editedDomainProxy != Some(domain.proxy.dataUI)) f.dataUI.prototype = None
                   factorWidgets(f).update
                 case _ ⇒
@@ -325,8 +328,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
                  target: ISamplingComponent) = updateNext(source.component, target.component)
 
   def updateNext(source: ISamplingCompositionWidget,
-                 target: ISamplingCompositionWidget): (ISamplingCompositionWidget, Option[ISamplingCompositionWidget]) = {
-    println("FWD update : from " + source.proxy.id + " to " + target.proxy.id)
+                 target: ISamplingCompositionWidget): (ISamplingCompositionWidget, Option[ISamplingCompositionWidget]) =
     source.proxy match {
       case sp: IDomainProxyUI ⇒ target.proxy match {
         case tp: IDomainProxyUI ⇒
@@ -345,7 +347,6 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
       }
       case _ ⇒ (source, Some(target))
     }
-  }
 
   def updatePrevious(domain: IDomainWidget) =
     connections.filter {

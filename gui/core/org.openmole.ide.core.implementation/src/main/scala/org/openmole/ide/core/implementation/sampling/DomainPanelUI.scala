@@ -39,19 +39,27 @@ class DomainPanelUI(domainWidget: IDomainWidget,
     _.buildDataUI
   }.toList.sorted.filter {
     d ⇒
-      try {
-        finalProxy match {
-          case s: ISamplingProxyUI ⇒ s.dataUI.isAcceptable(d)
-          case _ ⇒ true
-        }
-      } catch {
-        case e: UserBadDataError ⇒
-          d match {
-            case dm: IModifier ⇒ true
-            case _ ⇒ false
+      if (domainWidget.incomings.isEmpty) {
+        try {
+          // d match {
+          // case dm: IModifier ⇒ true
+          // case _ ⇒
+          finalProxy match {
+            case s: ISamplingProxyUI ⇒ s.dataUI.isAcceptable(d)
+            case _ ⇒ true
+            //   }
           }
-      }
+        } catch {
+          case e: UserBadDataError ⇒ false
+        }
+      } else acceptModifiers(d)
   }
+
+  def acceptModifiers(domain: IDomainDataUI) =
+    domain match {
+      case dm: IModifier ⇒ true
+      case _ ⇒ false
+    }
 
   val previous: List[IDomainWidget] = domainWidget.incomings
 
@@ -59,7 +67,8 @@ class DomainPanelUI(domainWidget: IDomainWidget,
   domains.filter {
     _.toString == domainWidget.proxy.dataUI.toString
   }.headOption match {
-    case Some(d: IDomainDataUI) ⇒ domainComboBox.selection.item = d
+    case Some(d: IDomainDataUI) ⇒
+      domainComboBox.selection.item = d
     case _ ⇒
   }
 

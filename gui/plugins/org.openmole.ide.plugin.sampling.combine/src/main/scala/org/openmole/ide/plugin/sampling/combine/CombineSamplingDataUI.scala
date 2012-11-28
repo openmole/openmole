@@ -30,7 +30,7 @@ class CombineSamplingDataUI extends ISamplingDataUI {
     new CombineSampling((CombineSamplingCoreFactory(factors) ::: samplings): _*)
 
   def buildPanelUI = new GenericCombineSamplingPanelUI(this) {
-    override val help = new Helper(List(new URL(i18n.getString("completePermalinkText"),
+    override val help = new Helper(List(new URL(i18n.getString("combinePermalinkText"),
       i18n.getString("combinePermalink"))))
   }
 
@@ -38,7 +38,7 @@ class CombineSamplingDataUI extends ISamplingDataUI {
 
   def fatImagePath = "img/combineSampling_fat.png"
 
-  def isAcceptable(domain: IDomainDataUI) = false
+  override def isAcceptable(domain: IDomainDataUI) = false
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 

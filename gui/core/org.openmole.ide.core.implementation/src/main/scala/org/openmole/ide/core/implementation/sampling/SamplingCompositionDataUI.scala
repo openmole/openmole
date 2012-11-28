@@ -70,6 +70,7 @@ class SamplingCompositionDataUI(val name: String = "",
           case d: IDomainProxyUI ⇒ false
         }
       }
+      partition._1.foreach { s ⇒ println("SAMPLING :: " + s.id) }
       val domainsForFactory = domains.filter {
         d ⇒ partition._2.contains(d._1)
       }.map { _._1 }
