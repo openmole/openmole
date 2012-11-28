@@ -84,7 +84,8 @@ object GA {
   def nonStrict = new NonStrictDominance {}
 
   trait GAModifier extends Modifier with GA
-  trait GAArchive extends Archive with ArchiveManifest with GA with GAModifier {
+
+  trait GAAlgorithm extends Archive with ArchiveManifest with GA with GAModifier with Elitism {
     val diversityMetric: GADiversityMetric
     val ranking: GARanking
     def diversity(individuals: Seq[DIVERSIFIED], ranks: Seq[Lazy[Int]]): Seq[Lazy[Double]] = diversityMetric.diversity(individuals, ranks)
@@ -92,25 +93,26 @@ object GA {
 
   }
 
-  trait GAArchiveBuilder extends A {
-    def apply(diversityMetric: GADiversityMetric, ranking: GARanking): GAArchive
+  trait GAAlgorithmBuilder extends A {
+    def apply(diversityMetric: GADiversityMetric, ranking: GARanking): GAAlgorithm
   }
 
-  def noArchive = new GAArchiveBuilder {
+  def optimization(_mu: Int) = new GAAlgorithmBuilder {
     def apply(_diversityMetric: GADiversityMetric, _ranking: GARanking) =
-      new NoArchive with RankDiversityModifier with GAArchive {
+      new NoArchive with RankDiversityModifier with GAAlgorithm with NonDominatedElitism {
         override type DIVERSIFIED = MGFitness
         override type RANKED = MGFitness
         val aManifest = manifest[A]
         val diversityMetric = _diversityMetric
         val ranking = _ranking
+        val mu = _mu
       }
   }
 
-  def mapArchive(_plotter: GAPlotter, _aggregation: GAAggregation, _neighbors: Int = 8) =
-    new GAArchiveBuilder {
+  def map(_plotter: GAPlotter, _aggregation: GAAggregation, _neighbors: Int = 8) =
+    new GAAlgorithmBuilder {
       def apply(_diversityMetric: GADiversityMetric, _ranking: GARanking) =
-        new MapArchive with GAArchive with MapModifier {
+        new MapArchive with GAAlgorithm with MapModifier with MapElitism {
           override type DIVERSIFIED = MGFitness
           override type RANKED = MGFitness
           val aManifest = manifest[A]
@@ -161,23 +163,20 @@ object GA {
   }
 
   def apply(
-    mu: Int,
+    algorithm: GAAlgorithmBuilder,
     lambda: Int,
     termination: GATermination,
     mutation: GAMutationBuilder = coEvolvingSigma,
     crossover: GACrossoverBuilder = sbx(),
     dominance: Dominance = strict,
     diversityMetric: DiversityMetricBuilder = crowding,
-    ranking: GARankingBuilder = pareto,
-    archiving: GAArchiveBuilder = noArchive) =
-    new org.openmole.plugin.method.evolution.algorithm.GAImpl(mu, lambda, termination, mutation, crossover, dominance, diversityMetric, ranking, archiving)(_)
+    ranking: GARankingBuilder = pareto) =
+    new org.openmole.plugin.method.evolution.algorithm.GAImpl(algorithm, lambda, termination, mutation, crossover, dominance, diversityMetric, ranking)(_)
 
 }
 
-trait GA extends MuPlusLambda
-  with GASigmaFactory
+trait GA extends GASigmaFactory
   with BinaryTournamentSelection
-  with NonDominatedElitism
   with EvolutionManifest
   with TerminationManifest
   with GA.GA
@@ -190,27 +189,26 @@ trait GA extends MuPlusLambda
   with CloneRemoval
 
 sealed class GAImpl(
-  val mu: Int,
+  val algorithm: GA.GAAlgorithmBuilder,
   val lambda: Int,
   val termination: GA.GATermination,
   val mutation: GA.GAMutationBuilder = GA.coEvolvingSigma,
   val crossover: GA.GACrossoverBuilder = GA.sbx(),
   val dominance: Dominance = GA.strict,
   val diversityMetric: GA.DiversityMetricBuilder = GA.crowding,
-  val ranking: GA.GARankingBuilder = GA.pareto,
-  val archiving: GA.GAArchiveBuilder = GA.noArchive)(val genomeSize: Int)
+  val ranking: GA.GARankingBuilder = GA.pareto)(val genomeSize: Int)
     extends GA { sga ⇒
 
   lazy val thisRanking = ranking(dominance)
   lazy val thisDiversityMetric = diversityMetric(dominance)
-  lazy val thisArchiving = archiving(thisDiversityMetric, thisRanking)
+  lazy val thisAlgorithm = algorithm(thisDiversityMetric, thisRanking)
   lazy val thisCrossover = crossover(genomeFactory)
   lazy val thisMutation = mutation(genomeFactory)
 
   type STATE = termination.STATE
-  type A = thisArchiving.A
+  type A = thisAlgorithm.A
 
-  implicit val aManifest = thisArchiving.aManifest
+  implicit val aManifest = thisAlgorithm.aManifest
 
   implicit val stateManifest = termination.stateManifest
 
@@ -218,11 +216,12 @@ sealed class GAImpl(
   def terminated(population: Population[G, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
   def diversity(individuals: Seq[DIVERSIFIED], ranks: Seq[Lazy[Int]]): Seq[Lazy[Double]] = thisDiversityMetric.diversity(individuals, ranks)
   def isDominated(p1: Seq[scala.Double], p2: Seq[scala.Double]) = dominance.isDominated(p1, p2)
-  def toArchive(individuals: Seq[Individual[G, F]]) = thisArchiving.toArchive(individuals)
-  def combine(a1: A, a2: A) = thisArchiving.combine(a1, a2)
-  def diff(a1: A, a2: A) = thisArchiving.diff(a1, a2)
-  def initialArchive = thisArchiving.initialArchive
-  def modify(individuals: Seq[Individual[G, F]], archive: A) = thisArchiving.modify(individuals, archive)
+  def toArchive(individuals: Seq[Individual[G, F]]) = thisAlgorithm.toArchive(individuals)
+  def combine(a1: A, a2: A) = thisAlgorithm.combine(a1, a2)
+  def diff(a1: A, a2: A) = thisAlgorithm.diff(a1, a2)
+  def initialArchive = thisAlgorithm.initialArchive
+  def modify(individuals: Seq[Individual[G, F]], archive: A) = thisAlgorithm.modify(individuals, archive)
   def crossover(g1: G, g2: G)(implicit aprng: Random) = thisCrossover.crossover(g1, g2)
   def mutate(genome: G)(implicit aprng: Random) = thisMutation.mutate(genome)
+  def elitism(population: Population[G, F, MF]) = thisAlgorithm.elitism(population)
 }
