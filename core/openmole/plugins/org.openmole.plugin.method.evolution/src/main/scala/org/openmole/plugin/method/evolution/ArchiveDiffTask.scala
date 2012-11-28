@@ -28,15 +28,15 @@ object ArchiveDiffTask {
   def apply(evolution: Archive)(
     name: String,
     originalArchive: Prototype[evolution.A],
-    archive: Prototype[evolution.A])(implicit plugins: PluginSet) = {
+    newArchive: Prototype[evolution.A])(implicit plugins: PluginSet) = {
 
-    val (_originalArchive, _archive) = (originalArchive, archive)
+    val (_originalArchive, _newArchive) = (originalArchive, newArchive)
 
     new TaskBuilder { builder ⇒
 
       addInput(originalArchive)
-      addInput(archive)
-      addOutput(archive)
+      addInput(newArchive)
+      addOutput(newArchive)
 
       def toTask =
         new ArchiveDiffTask(evolution)(name) {
@@ -45,7 +45,7 @@ object ArchiveDiffTask {
           val parameters = builder.parameters
 
           val originalArchive = _originalArchive.asInstanceOf[Prototype[evolution.A]]
-          val archive = _archive.asInstanceOf[Prototype[evolution.A]]
+          val newArchive = _newArchive.asInstanceOf[Prototype[evolution.A]]
         }
     }
   }
@@ -56,12 +56,13 @@ abstract sealed class ArchiveDiffTask(val evolution: Archive)(
     val name: String)(implicit val plugins: PluginSet) extends Task { task ⇒
 
   def originalArchive: Prototype[evolution.A]
-  def archive: Prototype[evolution.A]
+  def newArchive: Prototype[evolution.A]
 
-  override def process(context: Context) =
-    Context(Variable(
-      archive,
-      evolution.diff(
-        context.valueOrException(originalArchive),
-        context.valueOrException(archive))))
+  override def process(context: Context) = {
+    val diff = evolution.diff(
+      context.valueOrException(originalArchive),
+      context.valueOrException(newArchive))
+    // println("Diff " + diff)
+    Context(Variable(newArchive, diff))
+  }
 }

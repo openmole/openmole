@@ -90,7 +90,6 @@ object GA {
     val ranking: GARanking
     def diversity(individuals: Seq[DIVERSIFIED], ranks: Seq[Lazy[Int]]): Seq[Lazy[Double]] = diversityMetric.diversity(individuals, ranks)
     def rank(individuals: Seq[RANKED]) = ranking.rank(individuals)
-
   }
 
   trait GAAlgorithmBuilder extends A {
@@ -109,10 +108,11 @@ object GA {
       }
   }
 
-  def map(_plotter: GAPlotter, _aggregation: GAAggregation, _neighbors: Int = 8) =
+  def map(_plotter: GAPlotter, _aggregation: GAAggregation, neighbors: Int = 8, elitism: GAElitismBuilder = mapped) = {
+    val (_neighbors, _elitism) = (neighbors, elitism)
     new GAAlgorithmBuilder {
       def apply(_diversityMetric: GADiversityMetric, _ranking: GARanking) =
-        new MapArchive with GAAlgorithm with MapModifier with MapElitism {
+        new MapArchive with GAAlgorithm with MapModifier {
           override type DIVERSIFIED = MGFitness
           override type RANKED = MGFitness
           val aManifest = manifest[A]
@@ -121,8 +121,10 @@ object GA {
           val diversityMetric = _diversityMetric
           val ranking = _ranking
           val neighbors = _neighbors
+          def elitism(population: Population[G, F, MF]) = _elitism(_plotter, _aggregation).elitism(population)
         }
     }
+  }
 
   trait GAAggregation extends Aggregation with MG
   trait GAPlotter extends Plotter with GA with MG
@@ -134,6 +136,26 @@ object GA {
     val y = _y
     val nX = _nX
     val nY = _nY
+  }
+
+  trait GAElitism extends Elitism with GA
+
+  trait GAElitismBuilder {
+    def apply(plotter: GAPlotter, aggregation: GAAggregation): GAElitism
+  }
+
+  def nonDominated(_mu: Int) =
+    new GAElitismBuilder {
+      def apply(plotter: GAPlotter, aggregation: GAAggregation) = new GAElitism with NonDominatedElitism {
+        val mu = _mu
+      }
+    }
+
+  def mapped = new GAElitismBuilder {
+    def apply(_plotter: GAPlotter, _aggregation: GAAggregation) = new GAElitism with MapElitism {
+      def plot(i: Individual[G, F]) = _plotter.plot(i)
+      def aggregate(fitness: F) = _aggregation.aggregate(fitness)
+    }
   }
 
   trait GACrossover extends CrossOver with GA

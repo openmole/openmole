@@ -28,10 +28,11 @@ import fr.iscpif.mgo._
 
 object SelectPopulationTask {
 
-  def apply(evolution: Modifier with G with MF with Selection with Lambda)(
+  def apply(evolution: Modifier with G with MF with F)(
     name: String,
     population: Prototype[Population[evolution.G, evolution.F, evolution.MF]],
-    archive: Prototype[evolution.A])(implicit plugins: PluginSet) = {
+    archive: Prototype[evolution.A],
+    size: Int)(implicit plugins: PluginSet) = {
     val (_archive, _population) = (archive, population)
 
     new TaskBuilder { builder ⇒
@@ -41,7 +42,7 @@ object SelectPopulationTask {
       addOutput(population)
 
       def toTask =
-        new SelectPopulationTask(name, evolution) {
+        new SelectPopulationTask(name, evolution, size) {
           val population = _population.asInstanceOf[Prototype[Population[evolution.G, evolution.F, evolution.MF]]]
           val archive = _archive.asInstanceOf[Prototype[evolution.A]]
           val inputs = builder.inputs
@@ -56,7 +57,8 @@ object SelectPopulationTask {
 
 sealed abstract class SelectPopulationTask(
     val name: String,
-    val evolution: Modifier with G with MF with F with Selection with Lambda)(implicit val plugins: PluginSet) extends Task {
+    val evolution: Modifier with G with MF with F,
+    val size: Int)(implicit val plugins: PluginSet) extends Task {
 
   def population: Prototype[Population[evolution.G, evolution.F, evolution.MF]]
   def archive: Prototype[evolution.A]
@@ -65,7 +67,9 @@ sealed abstract class SelectPopulationTask(
     implicit val rng = newRNG(context.valueOrException(openMOLESeed))
     val p = context.valueOrException(population)
     val a = context.valueOrException(archive)
-    val newP = evolution.toPopulation((0 until evolution.lambda).map { i ⇒ evolution.selection(p) }, a)
-    context + Variable(population, newP) + Variable(archive, a)
+    val individuals = p.toIndividuals
+
+    val newP = evolution.toPopulation((0 until size).map { i ⇒ individuals(rng.nextInt(individuals.size)) }, a)
+    context + Variable(population, newP)
   }
 }

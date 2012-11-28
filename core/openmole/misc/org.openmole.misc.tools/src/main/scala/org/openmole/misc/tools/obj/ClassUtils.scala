@@ -182,10 +182,10 @@ object ClassUtils {
     java.lang.Float.TYPE -> classOf[java.lang.Float])
 
   implicit def manifestDecoration(m: Manifest[_]) = new {
-    def isAssignableFromPrimitive(m2: Manifest[_]) = m.erasure.isAssignableFromPrimitive(m2.erasure)
-    def isAssignableFromHighOrder(from: Manifest[_]) = m.erasure.isAssignableFromHighOrder(from.erasure)
-    def isArray = m.erasure.isArray
-    def fromArray = m.erasure.fromArray
+    def isAssignableFromPrimitive(m2: Manifest[_]) = m.runtimeClass.isAssignableFromPrimitive(m2.runtimeClass)
+    def isAssignableFromHighOrder(from: Manifest[_]) = m.runtimeClass.isAssignableFromHighOrder(from.runtimeClass)
+    def isArray = m.runtimeClass.isArray
+    def fromArray = m.runtimeClass.fromArray
   }
 
 }

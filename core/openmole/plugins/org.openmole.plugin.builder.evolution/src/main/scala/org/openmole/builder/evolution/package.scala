@@ -38,15 +38,14 @@ import org.openmole.misc.exception.UserBadDataError
 
 package object evolution {
 
-  def steadyGA(evolutionBuilder: Int ⇒ OMGA /*Archive with Elitism with Modifier with Termination with Breeding with EvolutionManifest with MG { type G <: GAGenome }*/ )(
+  type Inputs = Iterable[(Prototype[Double], (Double, Double))]
+  type Objectives = Iterable[(Prototype[Double], Double)]
+
+  private def components(
     name: String,
-    model: Puzzle,
-    workers: Int,
-    inputs: Iterable[(Prototype[Double], (Double, Double))],
-    objectives: Iterable[(Prototype[Double], Double)])(implicit plugins: PluginSet) = {
-
-    val evolution = evolutionBuilder(inputs.size)
-
+    evolution: OMGA,
+    inputs: Inputs,
+    objectives: Objectives)(implicit plugins: PluginSet) = new {
     import evolution._
 
     val genome = Prototype[evolution.G](name + "Genome")
@@ -65,19 +64,14 @@ package object evolution {
     firstTask addOutput (Data(archive, Optional))
     firstTask addOutput (Data(population, Optional))
 
-    val firstCapsule = StrainerCapsule(firstTask)
-
-    val initialBreedTask = ExplorationTask(name + "InitialBreed", BreedSampling(evolution)(population, genome, workers))
+    val initialBreedTask = ExplorationTask(name + "InitialBreed", BreedSampling(evolution)(population, genome, evolution.lambda))
 
     val scalingTask = ScalingGAGenomeTask(name + "ScalingGenome", genome, inputs.toSeq: _*)
-    val scalingCaps = Capsule(scalingTask)
 
     val toIndividualTask = ModelToArchiveIndividualTask(evolution)(name + "ModelToArchiveIndividual", genome, individual, newArchive)
     objectives.foreach {
       case (o, v) ⇒ toIndividualTask addObjective (o, v)
     }
-
-    val toIndividualSlot = Slot(Capsule(toIndividualTask))
 
     val elitismTask =
       ElitismTask(evolution)(
@@ -89,8 +83,6 @@ package object evolution {
         generation,
         state,
         terminated)
-
-    val elitismCaps = MasterCapsule(elitismTask, archive, state, generation, population)
 
     val scalingPopulationTask = ScalingGAPopulationTask(name + "ScalingPopulation", population, inputs.toSeq: _*)
 
@@ -108,12 +100,24 @@ package object evolution {
     scalingPopulationTask addOutput terminated
     scalingPopulationTask addOutput population
     scalingPopulationTask addOutput archive
+  }
 
+  def steadyGA(evolutionBuilder: Int ⇒ OMGA)(
+    name: String,
+    model: Puzzle,
+    inputs: Inputs,
+    objectives: Objectives)(implicit plugins: PluginSet) = {
+
+    val evolution = evolutionBuilder(inputs.size)
+    val cs = components(name, evolution, inputs, objectives)
+    import cs._
+
+    val firstCapsule = StrainerCapsule(firstTask)
+    val scalingCaps = Capsule(scalingTask)
+    val toIndividualSlot = Slot(Capsule(toIndividualTask))
+    val elitismCaps = MasterCapsule(elitismTask, archive, state, generation, population)
     val scalingPopulationCapsule = Capsule(scalingPopulationTask)
-
-    val breedingTask = ExplorationTask(name + "Breeding", BreedSampling(evolution)(population, genome, 1))
-    val breedingCaps = StrainerCapsule(breedingTask)
-
+    val breedingCaps = StrainerCapsule(ExplorationTask(name + "Breeding", BreedSampling(evolution)(population, genome, 1)))
     val endCapsule = Slot(StrainerCapsule(EmptyTask(name + "End")))
 
     val skel =
@@ -127,7 +131,7 @@ package object evolution {
 
     val loop =
       scalingPopulationCapsule --
-        (breedingCaps, condition = generation.name + " % " + evolution.lambda + " == 0") -<-
+        (breedingCaps /*, condition = generation.name + " % " + evolution.lambda + " == 0"*/ ) -<-
         scalingCaps
 
     val dataChannels =
@@ -172,8 +176,8 @@ package object evolution {
   def islandGA(model: Puzzle with Island)(
     name: String,
     number: Int,
-    mu: Int,
-    termination: GA.GATermination)(implicit plugins: PluginSet) = {
+    termination: GA.GATermination,
+    sampling: Int = model.evolution.lambda)(implicit plugins: PluginSet) = {
 
     import model.evolution
     import evolution._
@@ -237,7 +241,8 @@ package object evolution {
     val breedingTask = SelectPopulationTask(evolution)(
       name + "Breeding",
       population,
-      archive)
+      archive,
+      sampling)
 
     val endCapsule = Slot(StrainerCapsule(EmptyTask(name + "End")))
 
@@ -291,6 +296,7 @@ package object evolution {
       def genome = _genome
       def island = islandSlot.capsule
       def archive = _archive
+      def elitismCapsule = elitismCaps
     }
   }
 
