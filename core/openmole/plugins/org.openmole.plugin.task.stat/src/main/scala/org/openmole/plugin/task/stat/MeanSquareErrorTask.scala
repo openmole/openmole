@@ -18,7 +18,7 @@
 package org.openmole.plugin.task.stat
 
 import org.openmole.core.model.task.PluginSet
-import org.openmole.misc.math.Stat
+import org.openmole.misc.tools.math._
 
 object MeanSquareErrorTask {
 

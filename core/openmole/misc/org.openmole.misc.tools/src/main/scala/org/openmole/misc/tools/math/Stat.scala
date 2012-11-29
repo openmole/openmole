@@ -15,21 +15,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.math
+package org.openmole.misc.tools.math
 
-import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
+object Stat {
 
-@RunWith(classOf[JUnitRunner])
-class StatSpec extends FlatSpec with ShouldMatchers {
-
-  "The median" should "be correct" in {
-    Stat.median(List(1., 7, 6, 9, 9)) should equal(7)
-    Stat.median(List(1., 1, 1, 1)) should equal(1)
-    Stat.median(List(1., 2, 3, 4)) should equal(2.5)
-    Stat.medianAbsoluteDeviation(List(1., 1, 2, 2, 4, 6, 9)) should equal(1)
+  def median(serie: Iterable[Double]): Double = {
+    val sortedSerie = serie.toArray.sorted
+    val size = sortedSerie.size
+    if (size % 2 == 0) (sortedSerie(size / 2) + sortedSerie((size / 2) - 1)) / 2 else sortedSerie((size / 2))
   }
 
+  def medianAbsoluteDeviation(serie: Iterable[Double]): Double = {
+    val m = median(serie)
+    median(serie.map { v ⇒ math.abs(v - m) })
+  }
+
+  def average(serie: Iterable[Double]) = serie.sum / serie.size
+
+  def meanSquareError(serie: Iterable[Double]) = {
+    val avg = average(serie)
+    average(serie.map { v ⇒ math.pow(v - avg, 2) })
+  }
 }

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.math
+package org.openmole.misc.tools.math
 
 import java.math.BigDecimal
 import java.math.BigInteger

@@ -27,7 +27,6 @@
         <module>org.openmole.misc.pluginmanager</module>
         <module>org.openmole.misc.updater</module>
         <module>org.openmole.misc.workspace</module>
-	<module>org.openmole.misc.math</module>
 	<module>org.openmole.misc.logging</module>
         <module>org.openmole.misc.fileservice</module>
 	<module>org.openmole.misc.filecache</module>

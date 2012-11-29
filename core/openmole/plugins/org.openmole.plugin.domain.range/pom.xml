@@ -20,11 +20,6 @@
             <artifactId>org.openmole.misc.exception</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.misc.math</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->

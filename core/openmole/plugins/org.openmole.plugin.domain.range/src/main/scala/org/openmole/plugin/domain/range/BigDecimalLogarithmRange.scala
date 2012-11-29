@@ -23,7 +23,7 @@ import java.math.MathContext
 import java.math.RoundingMode
 import java.util.logging.Logger
 import org.openmole.core.implementation.tools._
-import org.openmole.misc.math.BigDecimalOperations._
+import org.openmole.misc.tools.math.BigDecimalOperations._
 import java.math.BigDecimal
 
 object BigDecimalLogarithmRange {
