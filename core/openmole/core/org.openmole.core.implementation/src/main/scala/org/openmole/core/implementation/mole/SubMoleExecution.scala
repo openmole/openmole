@@ -129,7 +129,7 @@ class SubMoleExecution(
       secureHookExecution(moleExecution.profiler, job)
 
       mole.outputDataChannels(capsule).foreach { _.provides(job.context, ticket, moleExecution) }
-      mole.outputTransitions(capsule).foreach { _.perform(job.context, ticket, this) }
+      mole.outputTransitions(capsule).toList.sortBy(t ⇒ mole.slots(t.end.capsule).size).reverse.foreach { _.perform(job.context, ticket, this) }
     } catch {
       case e: Throwable ⇒ throw new InternalProcessingError(e, "Error at the end of a MoleJob for capsule " + capsule)
     } finally {

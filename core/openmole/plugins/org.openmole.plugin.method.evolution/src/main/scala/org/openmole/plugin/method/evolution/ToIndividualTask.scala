@@ -24,13 +24,12 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import scala.collection.mutable.ListBuffer
 
-object ModelToArchiveIndividualTask {
+object ToIndividualTask {
 
-  def apply(evolution: G with F with Archive with MG)(
+  def apply(evolution: G with F with MG)(
     name: String,
     genome: Prototype[evolution.G],
-    individual: Prototype[Individual[evolution.G, evolution.F]],
-    newArchive: Prototype[evolution.A])(implicit plugins: PluginSet) =
+    individual: Prototype[Individual[evolution.G, evolution.F]])(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
 
       private var objectives = new ListBuffer[(Prototype[Double], Double)]
@@ -42,15 +41,13 @@ object ModelToArchiveIndividualTask {
       }
 
       addInput(genome)
-      addOutput(individual.toArray)
-      addOutput(newArchive)
+      addOutput(individual)
 
-      val (_genome, _individual, _newArchive) = (genome, individual, newArchive)
+      val (_genome, _individual) = (genome, individual)
 
-      def toTask = new ModelToArchiveIndividualTask(evolution)(name) {
+      def toTask = new ToIndividualTask(evolution)(name) {
         val genome = _genome.asInstanceOf[Prototype[evolution.G]]
         val individual = _individual.asInstanceOf[Prototype[Individual[evolution.G, evolution.F]]]
-        val newArchive = _newArchive.asInstanceOf[Prototype[evolution.A]]
 
         val inputs = builder.inputs
         val outputs = builder.outputs
@@ -61,12 +58,11 @@ object ModelToArchiveIndividualTask {
 
 }
 
-sealed abstract class ModelToArchiveIndividualTask(val evolution: G with F with Archive with MG)(
+sealed abstract class ToIndividualTask(val evolution: G with F with MG)(
     val name: String)(implicit val plugins: PluginSet) extends Task { task ⇒
 
   def genome: Prototype[evolution.G]
   def individual: Prototype[Individual[evolution.G, evolution.F]]
-  def newArchive: Prototype[evolution.A]
 
   def objectives: List[(Prototype[Double], Double)]
 
@@ -78,9 +74,6 @@ sealed abstract class ModelToArchiveIndividualTask(val evolution: G with F with 
           objectives.map {
             case (o, v) ⇒ math.abs(context.valueOrException(o) - v)
           }))
-    val individuals = Seq(i).toArray
-    Context(
-      Variable(individual.toArray, individuals),
-      Variable(newArchive, evolution.toArchive(individuals.toSeq)))
+    Context(Variable(individual, i))
   }
 }

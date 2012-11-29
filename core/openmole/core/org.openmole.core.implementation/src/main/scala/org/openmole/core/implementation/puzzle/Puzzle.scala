@@ -43,8 +43,8 @@ object Puzzle {
     new Puzzle(
       first,
       lasts,
-      puzzles.flatMap { _.transitions }.toList ::: transitions.toList,
-      puzzles.flatMap { _.dataChannels }.toList ::: dataChannels.toList,
+      transitions.toList ::: puzzles.flatMap { _.transitions }.toList,
+      dataChannels.toList ::: puzzles.flatMap { _.dataChannels }.toList,
       puzzles.flatMap(_.hooks),
       puzzles.flatMap { _.selection }.toMap,
       puzzles.flatMap { _.grouping }.toMap)

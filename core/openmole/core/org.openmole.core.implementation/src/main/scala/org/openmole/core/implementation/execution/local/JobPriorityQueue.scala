@@ -80,7 +80,8 @@ object JobPriorityQueue {
   //    def isEmpty = size == 0
   //  }
 
-  def priority(jobs: Iterable[IMoleJob]) = jobs.count(mj ⇒ classOf[IMoleTask].isAssignableFrom(mj.task.getClass))
+  def priority(jobs: Iterable[IMoleJob]) =
+    jobs.count(mj ⇒ classOf[IMoleTask].isAssignableFrom(mj.task.getClass))
 
 }
 

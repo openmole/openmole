@@ -50,11 +50,6 @@ object ElitismTask {
       addOutput(state)
       addOutput(terminated)
 
-      addParameter(population -> Population.empty)
-      addParameter(archive -> evolution.initialArchive)
-      addParameter(generation -> 0)
-      addParameter(new DynamicParameter(state, evolution.initialState(Population.empty)))
-
       def toTask = new ElitismTask(name, evolution) {
 
         val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.F]]]]
@@ -87,6 +82,7 @@ sealed abstract class ElitismTask[E <: Elitism with Termination with Modifier wi
   override def process(context: Context) = {
     val currentPopulation = context.valueOrException(population) //.asInstanceOf[Population[evolution.G, evolution.F, evolution.MF]]
     val globalPopulation = context.valueOrException(individuals).toList ::: currentPopulation.toIndividuals.toList
+
     val computedArchive = evolution.combine(context.valueOrException(archive), context.valueOrException(newArchive))
     val computedPopulation = evolution.elitism(evolution.toPopulation(globalPopulation, computedArchive))
 
