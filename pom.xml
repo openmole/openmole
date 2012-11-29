@@ -53,14 +53,14 @@
         <lib.org.eclipse.core.jobs.version>3.5.1.R36x_v20100824</lib.org.eclipse.core.jobs.version>
    
         <!--<lib.com.db4o.version>7.4.58</lib.com.db4o.version>-->
-        <lib.org.scalatest.version>1.8</lib.org.scalatest.version>
+        <lib.org.scalatest.version>1.8-B1</lib.org.scalatest.version>
         <lib.org.scala-tools.testing.scalacheck.version>1.9</lib.org.scala-tools.testing.scalacheck.version>
         <lib.com.db4o.version>8.0-SNAPSHOT</lib.com.db4o.version>
         <lib.com.ice.tar.version>1.1.4-2</lib.com.ice.tar.version>
         <!--<lib.com.jcraft.jsch.version>0.1.42</lib.com.jcraft.jsch.version>-->
         <lib.com.thoughtworks.xstream.version>1.4.1</lib.com.thoughtworks.xstream.version>
         <lib.net.sf.kxml.version>2.3.0</lib.net.sf.kxml.version>
-        <lib.fr.iscpif.gridscale.version>1.15</lib.fr.iscpif.gridscale.version>
+        <lib.fr.iscpif.gridscale.version>1.16</lib.fr.iscpif.gridscale.version>
         <lib.org.apache.commons.collections15.version>4.01</lib.org.apache.commons.collections15.version>
         <lib.org.apache.commons.compress.version>1.0</lib.org.apache.commons.compress.version>
         <lib.org.apache.commons.pool.version>1.5.4</lib.org.apache.commons.pool.version>
@@ -108,8 +108,8 @@
         <lib.org.apache.sling.scripting.scala.script.version>0.9.0-SNAPSHOT</lib.org.apache.sling.scripting.scala.script.version>
         <lib.com.github.scopt.version>2.0.0</lib.com.github.scopt.version>
         <lib.fr.iscpif.mgo.version>1.40</lib.fr.iscpif.mgo.version>
-        <lib.org.scala-lang.scala.version>2.10.0-RC2</lib.org.scala-lang.scala.version>
-        <lib.com.typesafe.akka.version>2.1.0-RC2</lib.com.typesafe.akka.version>
+        <lib.org.scala-lang.scala.version>2.10.0-RC3</lib.org.scala-lang.scala.version>
+        <lib.com.typesafe.akka.version>2.1.0-RC3</lib.com.typesafe.akka.version>
         <lib.de.erichseifert.gral.version>0.9-SNAPSHOT</lib.de.erichseifert.gral.version>
         <lib.runtime.jvm.version>7-u5</lib.runtime.jvm.version>
 	<plugin.scala-maven-plugin.version>3.1.0</plugin.scala-maven-plugin.version>
