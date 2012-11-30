@@ -55,11 +55,7 @@ object FileUtil {
 
   lazy val vmFileLock = new LockRepository[String]
 
-  implicit val fileOrdering = new Ordering[File] {
-    override def compare(left: File, right: File) = {
-      left.getAbsolutePath.compareTo(right.getAbsolutePath)
-    }
-  }
+  implicit val fileOrdering = Ordering.by((_: File).getCanonicalPath)
 
   val DefaultBufferSize = 32 * 1024
   implicit def inputStream2InputStreamDecorator(is: InputStream) = new InputStreamDecorator(is)

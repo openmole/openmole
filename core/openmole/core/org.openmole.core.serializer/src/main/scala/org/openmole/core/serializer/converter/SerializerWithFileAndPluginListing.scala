@@ -22,7 +22,7 @@ import java.io.OutputStream
 import org.openmole.misc.tools.io.FileUtil.fileOrdering
 import scala.collection.immutable.TreeSet
 
-class SerializerWithFileAndPluginListing extends SerializerWithPluginClassListing {
+class SerializerWithFileAndPluginListing extends SerializerWithPluginListing {
 
   var files: TreeSet[File] = null
   registerConverter(new FileConverterNotifier(this))
@@ -31,9 +31,9 @@ class SerializerWithFileAndPluginListing extends SerializerWithPluginClassListin
     files += file
   }
 
-  override def toXMLAndListPlugableClasses(obj: Object, outputStream: OutputStream) = {
+  override def toXMLAndListPluginFiles(obj: Object, outputStream: OutputStream) = {
     files = new TreeSet[File]
-    super.toXMLAndListPlugableClasses(obj, outputStream)
+    super.toXMLAndListPluginFiles(obj, outputStream)
   }
 
   override def clean = {

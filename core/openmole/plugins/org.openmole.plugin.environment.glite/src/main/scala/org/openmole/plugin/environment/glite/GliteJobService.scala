@@ -91,9 +91,11 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
       try generateScript(serializedJob, outputFilePath, os)
       finally os.close
 
+      //logger.fine(Source.fromFile(script).mkString)
+
       val jobDescription = buildJobDescription(runtime, script)
 
-      logger.fine(jobDescription.toJDL)
+      //logger.fine(jobDescription.toJDL)
 
       val jid = jobService.submit(jobDescription)(authentication)
 

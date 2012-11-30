@@ -19,23 +19,26 @@ package org.openmole.core.serializer.converter
 
 import java.io.OutputStream
 import scala.collection.mutable.HashSet
+import java.io.File
+import org.openmole.misc.tools.io.FileUtil.fileOrdering
+import collection.immutable.TreeSet
 
-class SerializerWithPluginClassListing extends Serializer {
+class SerializerWithPluginListing extends Serializer {
 
-  var classes: HashSet[Class[_]] = null
+  var plugins: TreeSet[File] = null
 
-  //xstream.registerConverter(new PluginManifestConverter(this))
   xstream.registerConverter(new PluginConverter(this, reflectionConverter))
   xstream.registerConverter(new PluginClassConverter(this))
 
-  def classUsed(c: Class[_]): Unit = classes.add(c)
+  def pluginUsed(f: File): Unit =
+    plugins += f
 
-  def toXMLAndListPlugableClasses(obj: Object, outputStream: OutputStream) = {
-    classes = new HashSet[Class[_]]
+  def toXMLAndListPluginFiles(obj: Object, outputStream: OutputStream) = {
+    plugins = new TreeSet
     xstream.toXML(obj, outputStream)
   }
 
   def clean: Unit = {
-    classes = null
+    plugins = null
   }
 }

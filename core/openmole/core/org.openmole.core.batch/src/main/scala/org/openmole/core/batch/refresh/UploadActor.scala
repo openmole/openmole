@@ -79,9 +79,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
     val jobFile = Workspace.newFile("job", ".tar")
 
     try {
-      val (serializationFile, serializatonClasses) = serializeJob(jobFile, job)
-
-      val serialisationPluginFiles = new TreeSet[File] ++ serializatonClasses.flatMap { PluginManager.pluginsForClass }
+      val (serializationFile, serialisationPluginFiles) = serializeJob(jobFile, job)
 
       val (storage, token) = environment.selectAStorage(
         (serializationFile +
@@ -122,8 +120,8 @@ class UploadActor(jobManager: ActorRef) extends Actor {
   }
 
   def serializeJob(file: File, job: IJob) = {
-    val files = new HashSet[File]
-    val classes = new HashSet[Class[_]]
+    var files = new TreeSet[File]
+    var plugins = new TreeSet[File]
 
     val tos = new TarOutputStream(new FileOutputStream(file))
     try {
@@ -132,19 +130,19 @@ class UploadActor(jobManager: ActorRef) extends Actor {
           val moleJobFile = Workspace.newFile("job", ".tar")
           try {
             val serializationResult =
-              SerializerService.serializeGetPluginClassAndFiles(
+              SerializerService.serializeGetPluginsAndFiles(
                 RunnableTask(moleJob),
                 moleJobFile)
 
             files ++= serializationResult.files
-            classes ++= serializationResult.classes
+            plugins ++= serializationResult.plugins
 
             tos.addFile(moleJobFile, UUID.randomUUID.toString)
           } finally moleJobFile.delete
         }
       }
     } finally tos.close
-    (files, classes)
+    (files, plugins)
   }
 
   def toReplicatedFile(job: IJob, file: File, storage: StorageService)(implicit token: AccessToken, objectContainer: ObjectContainer): ReplicatedFile = {

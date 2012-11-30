@@ -47,7 +47,7 @@ object SerializerService extends Logger {
   private val filesInfo = "filesInfo.xml"
   private val content = "content.xml"
 
-  private type FilesInfo = TreeMap[String, (File, Boolean)]
+  private type FilesInfo = TreeMap[String, (File, Boolean, Boolean)]
 
   def deserialize[T](file: File): T = {
     val is = new FileInputStream(file)
@@ -67,10 +67,10 @@ object SerializerService extends Logger {
 
     val fileReplacement =
       new TreeMap[File, File] ++ fi.map {
-        case (name, (file, isDirectory)) ⇒
+        case (name, (file, isDirectory, exists)) ⇒
           val f = new File(extractDir, name)
           val dest = Workspace.newFile("extracted", ".bin")
-          f.move(dest)
+          if (exists) f.move(dest)
 
           file ->
             (if (isDirectory) {
@@ -92,7 +92,7 @@ object SerializerService extends Logger {
 
   def serializeAndArchiveFiles(obj: Any, file: File) = {
     val objSerial = Workspace.newFile
-    val serializationResult = serializeGetPluginClassAndFiles(obj, objSerial)
+    val serializationResult = serializeGetPluginsAndFiles(obj, objSerial)
 
     val tos = new TarOutputStream(new FileOutputStream(file))
 
@@ -115,9 +115,10 @@ object SerializerService extends Logger {
               toArchive
             } else file
 
-          tos.addFile(toArchive, name.toString)
+          if (toArchive.exists)
+            tos.addFile(toArchive, name.toString)
 
-          (name.toString, (file, file.isDirectory))
+          (name.toString, (file, file.isDirectory, file.exists))
       }
 
       val filesInfoSerial = Workspace.newFile
@@ -139,17 +140,17 @@ object SerializerService extends Logger {
     serializer.files
   }
 
-  def serializeGetPluginClassAndFiles(obj: Any, file: File): PluginClassAndFiles = {
+  def serializeGetPluginsAndFiles(obj: Any, file: File): PluginClassAndFiles = {
     val os = file.bufferedOutputStream
-    try serializeGetPluginClassAndFiles(obj, os)
+    try serializeGetPluginsAndFiles(obj, os)
     finally os.close
   }
 
-  def serializeGetPluginClassAndFiles(obj: Any, os: OutputStream): PluginClassAndFiles =
+  def serializeGetPluginsAndFiles(obj: Any, os: OutputStream): PluginClassAndFiles =
     SerializerWithFileAndPluginListingFactory.exec {
       serializer ⇒
-        serializer.toXMLAndListPlugableClasses(obj.asInstanceOf[AnyRef], os)
-        new PluginClassAndFiles(serializer.files, serializer.classes)
+        serializer.toXMLAndListPluginFiles(obj.asInstanceOf[AnyRef], os)
+        new PluginClassAndFiles(serializer.files, serializer.plugins)
     }
 
   def deserializeReplaceFiles[T](file: File, files: PartialFunction[File, File]): T = {

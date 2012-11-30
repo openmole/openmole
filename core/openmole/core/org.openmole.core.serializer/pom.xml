@@ -18,6 +18,11 @@
     <dependencies>
         <dependency>
             <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.core.model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
             <artifactId>org.openmole.misc.workspace</artifactId>
             <version>${project.version}</version>
         </dependency>

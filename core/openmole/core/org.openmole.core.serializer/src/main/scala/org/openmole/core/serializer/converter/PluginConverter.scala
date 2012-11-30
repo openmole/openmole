@@ -26,15 +26,18 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.tools.service.Logger
+import org.openmole.core.model.task.ITask
+import java.io.File
 
 object PluginConverter extends Logger
 
 import PluginConverter._
 
-class PluginConverter[A <: { def classUsed(c: Class[_]) }](serializer: A, reflectionConverter: ReflectionConverter) extends Converter {
+class PluginConverter[A <: { def pluginUsed(f: File) }](serializer: A, reflectionConverter: ReflectionConverter) extends Converter {
 
   override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) = {
-    serializer.classUsed(o.getClass)
+    if(PluginManager.isClassProvidedByAPlugin(o.getClass)) PluginManager.pluginsForClass(o.getClass).foreach(serializer.pluginUsed)
+    if (classOf[ITask].isAssignableFrom(o.getClass)) o.asInstanceOf[ITask].plugins.foreach(serializer.pluginUsed)
     reflectionConverter.marshal(o, writer, mc)
   }
 
@@ -42,6 +45,7 @@ class PluginConverter[A <: { def classUsed(c: Class[_]) }](serializer: A, reflec
     throw new UnsupportedOperationException("Bug: Should never be called.")
   }
 
-  override def canConvert(c: Class[_]): Boolean = PluginManager.isClassProvidedByAPlugin(c)
+  override def canConvert(c: Class[_]): Boolean =
+    classOf[ITask].isAssignableFrom(c) || PluginManager.isClassProvidedByAPlugin(c)
 
 }
