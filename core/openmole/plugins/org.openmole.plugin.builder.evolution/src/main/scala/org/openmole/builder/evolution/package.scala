@@ -301,8 +301,14 @@ package object evolution {
     val populationToIndividuals = PopulationToIndividualArrayTask(name + "PopulationToInidividualArray", model.population, model.individual)
 
     val renameArchiveTask = RenameTask(name + "RenameNewArchive", archive -> newArchive)
+    renameArchiveTask addInput originalArchive
+    renameArchiveTask addOutput originalArchive
 
     val renameOriginalArchiveTask = RenameTask(name + "RenameOriginalArchive", archive -> originalArchive)
+    renameOriginalArchiveTask addOutput archive
+
+    val renameOriginalArchiveCapsule = StrainerCapsule(renameOriginalArchiveTask)
+
     val archiveDiffSlot = Slot(ArchiveDiffTask(evolution)(name + "ArchiveDiff", originalArchive, newArchive))
 
     val elitismTask = ElitismTask(islandElitism)(
@@ -338,7 +344,11 @@ package object evolution {
 
     val preIslandCapsule = StrainerCapsule(preIslandTask)
 
-    val islandSlot = Slot(Capsule(MoleTask(name + "MoleTask", model)))
+    val islandTask = MoleTask(name + "MoleTask", model)
+    islandTask addInput originalArchive
+    islandTask addOutput originalArchive
+
+    val islandSlot = Slot(Capsule(islandTask))
 
     val scalingPopulationTask = ScalingGAPopulationTask(name + "ScalingPopulation", population, model.inputs.toSeq: _*)
 
@@ -351,12 +361,11 @@ package object evolution {
     val skel =
       firstCapsule -<
         (preIslandCapsule, size = number.toString) --
+        renameOriginalArchiveCapsule --
         islandSlot --
         (populationToIndividuals, renameArchiveTask -- archiveDiffSlot) --
         elitismCaps --
         scalingPopulationCapsule >| (endCapsule, terminated.name + " == true")
-
-    val archiveDiff = preIslandCapsule -- renameOriginalArchiveTask -- archiveDiffSlot
 
     val loop =
       scalingPopulationCapsule --
@@ -367,7 +376,7 @@ package object evolution {
       (firstCapsule oo islandSlot) +
         (firstCapsule -- endCapsule)
 
-    val puzzle = skel + loop + dataChannels + archiveDiff
+    val puzzle = skel + loop + dataChannels
 
     val (_state, _generation, _genome, _individual, _archive) = (state, generation, model.genome, model.individual, archive)
 
