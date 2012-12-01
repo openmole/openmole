@@ -44,9 +44,11 @@ sealed class SaveMapHook(
     val file = new File(VariableExpansion(moleJob.context, path))
     file.createParentDir
     file.withWriter { w ⇒
-      a.foreach {
-        case ((x, y), MapElement(value, _)) ⇒ w.write("" + x.toDouble.scale(xMin, xMax, 0, nbX) + "," + y.toDouble.scale(yMin, yMax, 0, nbY) + "," + value + "\n")
-      }
+      for {
+        (l, x) ← a.content.zipWithIndex
+        (e, y) ← l.zipWithIndex
+        if !e.value.isPosInfinity
+      } w.write("" + x.toDouble.scale(xMin, xMax, 0, nbX) + "," + y.toDouble.scale(yMin, yMax, 0, nbY) + "," + e.value + "\n")
     }
 
   }
