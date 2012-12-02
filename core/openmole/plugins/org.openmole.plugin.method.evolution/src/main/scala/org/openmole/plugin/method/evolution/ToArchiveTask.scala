@@ -57,7 +57,7 @@ sealed abstract class ToArchiveTask(val evolution: G with F with MG with Archive
   def archive: Prototype[evolution.A]
 
   override def process(context: Context) = {
-    Context(
-      Variable(archive, evolution.toArchive(context.valueOrException(individuals))))
+    val a = evolution.toArchive(context.valueOrException(individuals))
+    Context(Variable(archive, a))
   }
 }

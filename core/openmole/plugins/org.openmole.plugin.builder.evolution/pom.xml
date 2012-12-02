@@ -26,6 +26,11 @@
             <artifactId>org.openmole.plugin.method.evolution</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openmole.core</groupId>
+            <artifactId>org.openmole.plugin.task.groovy</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <!-- ************************************************************* -->

@@ -39,7 +39,7 @@
 
     <properties>
         <!--<import.packages>com.google.common.*;resolution:=optional</import.packages>-->
-        <libraries.export.packages>fr.iscpif.gridscale.*,ch.ethz.ssh2.*,org.glite.*,org.globus.*,org.ogf.*</libraries.export.packages>
+        <libraries.export.packages>fr.iscpif.gridscale.*,net.schmizz.sshj.*,org.glite.*,org.globus.*,org.ogf.*</libraries.export.packages>
         <embed-dep>*;groupId=org.bouncycastle;artifactId=bcprov-jdk15,*;groupId=!org.openmole.core;artifactId=!scala-library|guava|commons-logging|log4j;type=!pom;inline=true</embed-dep>
         <bundle.classpath>bcprov-jdk15-1.45.jar,.</bundle.classpath>
     </properties>

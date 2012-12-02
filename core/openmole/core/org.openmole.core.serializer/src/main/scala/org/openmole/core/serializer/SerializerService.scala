@@ -43,7 +43,7 @@ import com.ice.tar.TarInputStream
 
 object SerializerService extends Logger {
 
-  private val xstream = XStreamFactory()
+  private val xstream = new XStream
   private val filesInfo = "filesInfo.xml"
   private val content = "content.xml"
 
@@ -137,7 +137,6 @@ object SerializerService extends Logger {
   def serializeFilePathAsHashGetFiles(obj: Any, os: OutputStream): Map[File, FileInfo] = {
     val serializer = new SerializerWithPathHashInjection
     serializer.toXML(obj.asInstanceOf[AnyRef], os)
-    serializer.files
   }
 
   def serializeGetPluginsAndFiles(obj: Any, file: File): PluginClassAndFiles = {
@@ -149,8 +148,8 @@ object SerializerService extends Logger {
   def serializeGetPluginsAndFiles(obj: Any, os: OutputStream): PluginClassAndFiles =
     SerializerWithFileAndPluginListingFactory.exec {
       serializer ⇒
-        serializer.toXMLAndListPluginFiles(obj.asInstanceOf[AnyRef], os)
-        new PluginClassAndFiles(serializer.files, serializer.plugins)
+        val (files, plugins) = serializer.toXMLAndListPluginFiles(obj.asInstanceOf[AnyRef], os)
+        new PluginClassAndFiles(files, plugins)
     }
 
   def deserializeReplaceFiles[T](file: File, files: PartialFunction[File, File]): T = {

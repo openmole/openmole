@@ -21,9 +21,10 @@ import com.thoughtworks.xstream.converters.Converter
 import com.thoughtworks.xstream.converters.SingleValueConverter
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
 import java.io.InputStream
+import com.thoughtworks.xstream.XStream
 
-class Deserializer {
-  private val xstream = XStreamFactory()
+trait Deserializer {
+  private val xstream = new XStream
 
   protected val reflectionConverter = new ReflectionConverter(xstream.getMapper, xstream.getReflectionProvider)
 

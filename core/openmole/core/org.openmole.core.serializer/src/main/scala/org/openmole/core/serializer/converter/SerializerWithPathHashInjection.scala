@@ -25,15 +25,23 @@ import org.openmole.misc.hashservice.HashService
 import scala.collection.immutable.TreeMap
 import java.io.OutputStream
 import org.openmole.core.serializer.structure.FileInfo
+import com.thoughtworks.xstream.XStream
+import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
 
-class SerializerWithPathHashInjection extends Serializer {
+class SerializerWithPathHashInjection {
 
-  var files = new TreeMap[File, FileInfo]
-  registerConverter(new FilePathHashNotifier(this, reflectionConverter))
+  val xStream = new XStream
+  val reflectionConverter = new ReflectionConverter(xStream.getMapper, xStream.getReflectionProvider)
 
-  override def toXML(obj: Object, outputStream: OutputStream) = {
-    clean
-    super.toXML(obj, outputStream)
+  private var files: TreeMap[File, FileInfo] = null
+  xStream.registerConverter(new FilePathHashNotifier(this, reflectionConverter))
+
+  def toXML(obj: Object, outputStream: OutputStream) = {
+    files = new TreeMap[File, FileInfo]
+    xStream.toXML(obj, outputStream)
+    val retFiles = files
+    files = null
+    retFiles
   }
 
   def fileUsed(file: File) = {
@@ -49,8 +57,6 @@ class SerializerWithPathHashInjection extends Serializer {
     hash
   }
 
-  def clean = {
-    files = new TreeMap[File, FileInfo]
-  }
+  def clean {}
 
 }

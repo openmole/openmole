@@ -21,23 +21,48 @@ import java.io.File
 import java.io.OutputStream
 import org.openmole.misc.tools.io.FileUtil.fileOrdering
 import scala.collection.immutable.TreeSet
+import com.thoughtworks.xstream.XStream
+import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
 
-class SerializerWithFileAndPluginListing extends SerializerWithPluginListing {
+class SerializerWithFileAndPluginListing {
 
-  var files: TreeSet[File] = null
-  registerConverter(new FileConverterNotifier(this))
+  private var files: TreeSet[File] = null
+  private var plugins: TreeSet[File] = null
 
-  def fileUsed(file: File) = {
+  val fileXStream = new XStream
+  fileXStream.registerConverter(new FileConverterNotifier(this))
+
+  val pluginXStream = new XStream
+  val reflectionConverter = new ReflectionConverter(pluginXStream.getMapper, pluginXStream.getReflectionProvider)
+
+  pluginXStream.registerConverter(new PluginConverter(this, reflectionConverter))
+  pluginXStream.registerConverter(new PluginClassConverter(this))
+
+  def pluginUsed(f: File): Unit =
+    plugins += f
+
+  def fileUsed(file: File) =
     files += file
-  }
 
-  override def toXMLAndListPluginFiles(obj: Object, outputStream: OutputStream) = {
-    files = new TreeSet[File]
-    super.toXMLAndListPluginFiles(obj, outputStream)
-  }
+  def toXMLAndListPluginFiles(obj: Object, outputStream: OutputStream) = {
+    files = new TreeSet
+    plugins = new TreeSet
 
-  override def clean = {
-    super.clean
+    pluginXStream.toXML(obj, new OutputStream {
+      def write(p1: Int) {}
+    })
+
+    fileXStream.toXML(obj, outputStream)
+
+    val retFiles = files
+    val retPlugins = plugins
+
     files = null
+    plugins = null
+
+    (retFiles, retPlugins)
   }
+
+  def clean {}
+
 }

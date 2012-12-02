@@ -62,7 +62,6 @@ abstract sealed class ArchiveDiffTask(val evolution: Archive)(
     val diff = evolution.diff(
       context.valueOrException(originalArchive),
       context.valueOrException(newArchive))
-    // println("Diff " + diff)
     Context(Variable(newArchive, diff))
   }
 }

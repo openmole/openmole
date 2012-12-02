@@ -130,9 +130,13 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
               }
 
             resultUploader.submit({
-              uploadResult(localResultFile, executionMessage.communicationDirPath, job, storage)
-              localCommunicationDirPath.recursiveDelete
-              localResultFile.delete
+              try {
+                uploadResult(localResultFile, executionMessage.communicationDirPath, job, storage)
+                localCommunicationDirPath.recursiveDelete
+                localResultFile.delete
+              } catch {
+                case e: Throwable ⇒ logger.log(WARNING, "Error durring result upload", e)
+              }
             })
 
             //if(ret != 0) throw new InternalProcessingError("Error executing: " + commandLine +" return code was not 0 but " + ret)
@@ -164,8 +168,10 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     def uploadFileMessage(msg: FileMessage) = {
       val localFile = new File(msg.path)
       val uploadedFile = storage.child(communicationDir, Storage.uniqName("fileMsg", ".bin"))
+      logger.info("Uploading " + localFile)
       try storage.upload(localFile, uploadedFile)
       finally localFile.delete
+      logger.info("Uploaded " + localFile)
       new FileMessage(uploadedFile, msg.hash)
     }
 
@@ -236,7 +242,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
       }*/
 
       logger.info("Choosen job is " + job)
-      storage.create(storage.child(timeStempsDirName, job + timeStempSeparator + id.toString))
+      storage.create(storage.child(timeStempsDirName, job + timeStempSeparator + UUID.randomUUID))
 
       val jobMessage =
         Workspace.withTmpFile {
