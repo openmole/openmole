@@ -35,7 +35,7 @@ object Storage {
   val CopyTimeout = new ConfigurationLocation("Storage", "CopyTimeout")
 
   Workspace += (Timeout, "PT2M")
-  Workspace += (BufferSize, "65536")
+  Workspace += (BufferSize, "8192")
   Workspace += (CopyTimeout, "PT1M")
 
   def uniqName(prefix: String, sufix: String) = prefix + "_" + UUID.randomUUID.toString + sufix
@@ -60,6 +60,7 @@ trait Storage {
   protected def rmFile(path: String): Unit = storage.rmFile(path)(authentication)
   protected def openInputStream(path: String): InputStream = storage.openInputStream(path)(authentication)
   protected def openOutputStream(path: String): OutputStream = storage.openOutputStream(path)(authentication)
+  protected def mv(from: String, to: String) = storage.mv(from, to)(authentication)
 
   protected def upload(src: File, dest: String) = {
     val os = openOutputStream(dest)

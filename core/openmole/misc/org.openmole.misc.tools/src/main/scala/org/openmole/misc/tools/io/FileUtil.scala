@@ -57,7 +57,7 @@ object FileUtil {
 
   implicit val fileOrdering = Ordering.by((_: File).getCanonicalPath)
 
-  val DefaultBufferSize = 32 * 1024
+  val DefaultBufferSize = 8 * 1024
   implicit def inputStream2InputStreamDecorator(is: InputStream) = new InputStreamDecorator(is)
   implicit def file2FileDecorator(file: File) = new FileDecorator(file)
 

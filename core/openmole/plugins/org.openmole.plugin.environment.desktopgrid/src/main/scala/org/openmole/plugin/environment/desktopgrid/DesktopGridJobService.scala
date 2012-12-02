@@ -37,6 +37,7 @@ trait DesktopGridJobService extends JobService with UnlimitedAccess { js ⇒
   val timeStempsDir = new File(environment.path, timeStempsDirName) { mkdirs }
   val jobsDir = new File(environment.path, jobsDirName) { mkdirs }
   val resultsDir = new File(environment.path, resultsDirName) { mkdirs }
+  val tmpResultsDir = new File(environment.path, tmpResultsDirName) { mkdirs }
 
   def jobSubmissionFile(jobId: String) = new File(jobsDir, jobId)
   def timeStemps(jobId: String) = timeStempsDir.listFiles.filter { _.getName.startsWith(jobId) }

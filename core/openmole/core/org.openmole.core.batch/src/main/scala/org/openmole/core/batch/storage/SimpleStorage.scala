@@ -40,6 +40,8 @@ trait SimpleStorage extends Storage {
   override def makeDir(path: String): Unit = super.makeDir(path)
   override def rmDir(path: String): Unit = super.rmDir(path)
   override def rmFile(path: String): Unit = super.rmFile(path)
+  override def mv(from: String, to: String) = super.mv(from, to)
+
   override def openInputStream(path: String): InputStream = super.openInputStream(path)
   override def openOutputStream(path: String): OutputStream = super.openOutputStream(path)
 

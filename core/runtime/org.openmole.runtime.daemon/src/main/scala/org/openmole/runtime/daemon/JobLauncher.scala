@@ -168,7 +168,7 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     def uploadFileMessage(msg: FileMessage) = {
       val localFile = new File(msg.path)
       val uploadedFile = storage.child(communicationDir, Storage.uniqName("fileMsg", ".bin"))
-      logger.info("Uploading " + localFile)
+      logger.info("Uploading " + localFile + " to " + uploadedFile)
       try storage.upload(localFile, uploadedFile)
       finally localFile.delete
       logger.info("Uploaded " + localFile)
@@ -201,8 +201,10 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     Workspace.withTmpFile { outputLocal ⇒
       logger.info("Uploading job results")
       SerializerService.serialize(resultToSend, outputLocal)
+      val tmpResultFile = storage.child(tmpResultsDirName, Storage.uniqName(job, ".res"))
+      storage.uploadGZ(outputLocal, tmpResultFile)
       val resultFile = storage.child(resultsDirName, Storage.uniqName(job, ".res"))
-      storage.uploadGZ(outputLocal, resultFile)
+      storage.mv(tmpResultFile, resultFile)
       logger.info("Job results uploaded at " + resultFile)
     }
 

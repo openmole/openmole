@@ -78,6 +78,7 @@ trait StorageService extends BatchService with Storage {
   def makeDir(path: String)(implicit token: AccessToken): Unit = token.synchronized { super.makeDir(path) }
   def rmDir(path: String)(implicit token: AccessToken): Unit = token.synchronized { super.rmDir(path) }
   def rmFile(path: String)(implicit token: AccessToken): Unit = token.synchronized { super.rmFile(path) }
+  def mv(from: String, to: String)(implicit token: AccessToken) = token.synchronized { super.mv(from, to) }
   def openInputStream(path: String)(implicit token: AccessToken): InputStream = token.synchronized { super.openInputStream(path) }
   def openOutputStream(path: String)(implicit token: AccessToken): OutputStream = token.synchronized { super.openOutputStream(path) }
 

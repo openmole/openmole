@@ -32,6 +32,7 @@ object DesktopGridEnvironment {
   val timeStempsDirName = "timeStemps"
   val jobsDirName = "jobs"
   val resultsDirName = "results"
+  val tmpResultsDirName = "tmpresults"
   val timeStempSeparator = '@'
 }
 
