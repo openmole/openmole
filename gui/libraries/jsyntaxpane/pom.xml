@@ -1,41 +1,30 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-    <modelVersion>4.0.0</modelVersion>
-
-    <!-- ************************************************************* -->
-    <!-- *** POM Relationships *************************************** -->
-    <!-- ************************************************************* -->
-
-    <parent>
-        <artifactId>libraries</artifactId>
-        <groupId>org.openmole.ide</groupId>
-        <version>0.7-SNAPSHOT</version>
-    </parent>
-
-    <!--Used to build the symbolic name of the bundle-->
-    <artifactId>jsyntaxpane</artifactId>
-
-    <dependencies>
-        <dependency>
-            <groupId>jsyntaxpane</groupId>
-            <artifactId>jsyntaxpane</artifactId>
-           <version>0.9.6</version>
-           <scope>provided</scope>
-        </dependency>
-    </dependencies>
-
-    <!-- ************************************************************* -->
-    <!-- *** Project Information ************************************* -->
-    <!-- ************************************************************* -->
-
-    <name>${project.artifactId}</name>
-
-    <!-- ************************************************************* -->
-    <!-- *** Build Settings ****************************************** -->
-    <!-- ************************************************************* -->
-
-    <packaging>bundle</packaging>
-
-
+  <modelVersion>4.0.0</modelVersion>
+  <!-- ************************************************************* -->
+  <!-- *** POM Relationships *************************************** -->
+  <!-- ************************************************************* -->
+  <parent>
+    <artifactId>libraries</artifactId>
+    <groupId>org.openmole.ide</groupId>
+    <version>0.7-SNAPSHOT</version>
+  </parent>
+  <!--Used to build the symbolic name of the bundle-->
+  <artifactId>jsyntaxpane</artifactId>
+  <!-- ************************************************************* -->
+  <!-- *** Build Settings ****************************************** -->
+  <!-- ************************************************************* -->
+  <packaging>bundle</packaging>
+  <!-- ************************************************************* -->
+  <!-- *** Project Information ************************************* -->
+  <!-- ************************************************************* -->
+  <name>${project.artifactId}</name>
+  <dependencies>
+    <dependency>
+      <groupId>jsyntaxpane</groupId>
+      <artifactId>jsyntaxpane</artifactId>
+      <version>0.9.6</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
 </project>

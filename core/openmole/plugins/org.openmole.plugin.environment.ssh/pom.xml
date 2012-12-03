@@ -1,60 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-    <modelVersion>4.0.0</modelVersion>
-
-    <!-- ************************************************************* -->
-    <!-- *** POM Relationships *************************************** -->
-    <!-- ************************************************************* -->
-
-    <parent>
-        <artifactId>plugins</artifactId>
-        <groupId>org.openmole.core</groupId>
-        <version>0.7-SNAPSHOT</version>
-    </parent>
-
-    <artifactId>org.openmole.plugin.environment.ssh</artifactId>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.misc.exception</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.plugin.environment.gridscale</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>org.openmole.misc.workspace</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.equinox</groupId>
-            <artifactId>org.eclipse.osgi</artifactId>
-        </dependency>
-    </dependencies>
-
-    <!-- ************************************************************* -->
-    <!-- *** Project Information ************************************* -->
-    <!-- ************************************************************* -->
-
-    <name>${project.artifactId} ${project.version}</name>
-    <description />
-
-    <!-- ************************************************************* -->
-    <!-- *** Build Settings ****************************************** -->
-    <!-- ************************************************************* -->
-
-    <packaging>bundle</packaging>
-
+  <modelVersion>4.0.0</modelVersion>
+  <!-- ************************************************************* -->
+  <!-- *** POM Relationships *************************************** -->
+  <!-- ************************************************************* -->
+  <parent>
+    <artifactId>plugins</artifactId>
+    <groupId>org.openmole.core</groupId>
+    <version>0.7-SNAPSHOT</version>
+  </parent>
+  <artifactId>org.openmole.plugin.environment.ssh</artifactId>
+  <!-- ************************************************************* -->
+  <!-- *** Build Settings ****************************************** -->
+  <!-- ************************************************************* -->
+  <packaging>bundle</packaging>
+  <!-- ************************************************************* -->
+  <!-- *** Project Information ************************************* -->
+  <!-- ************************************************************* -->
+  <name>${project.artifactId} ${project.version}</name>
+  <description></description>
+  <dependencies>
+    <dependency>
+      <groupId>org.openmole.core</groupId>
+      <artifactId>org.openmole.misc.exception</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openmole.core</groupId>
+      <artifactId>org.openmole.plugin.environment.gridscale</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openmole.core</groupId>
+      <artifactId>org.openmole.misc.workspace</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.equinox</groupId>
+      <artifactId>org.eclipse.osgi</artifactId>
+    </dependency>
+  </dependencies>
 </project>
-
-
-
-
-
-
-

@@ -1,52 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-    <modelVersion>4.0.0</modelVersion>
-
-    <!-- ************************************************************* -->
-    <!-- *** POM Relationships *************************************** -->
-    <!-- ************************************************************* -->
-
-    <parent>
-        <artifactId>openmole</artifactId>
-        <groupId>org.openmole.core</groupId>
-        <version>0.7-SNAPSHOT</version>
-    </parent>
-
-    <artifactId>misc</artifactId>
-
-    <properties>
-        <include />
-    </properties>
-
-    <modules>
-	<module>org.openmole.misc.eventdispatcher</module>
-	<module>org.openmole.misc.exception</module>
-	<module>org.openmole.misc.tools</module>
-        <module>org.openmole.misc.hashservice</module>
-        <module>org.openmole.misc.pluginmanager</module>
-        <module>org.openmole.misc.updater</module>
-        <module>org.openmole.misc.workspace</module>
-	<module>org.openmole.misc.logging</module>
-        <module>org.openmole.misc.fileservice</module>
-	<module>org.openmole.misc.filecache</module>
-	<module>org.openmole.misc.filedeleter</module>
-	<module>org.openmole.misc.osgi</module>
-	<module>org.openmole.misc.replication</module>
-	<module>org.openmole.misc.sftpserver</module>
-    </modules>
-
-    <!-- ************************************************************* -->
-    <!-- *** Project Information ************************************* -->
-    <!-- ************************************************************* -->
-
-    <name>${project.artifactId}</name>
-    <description>Miscileanous software used by OpenMOLE</description>
-
-    <!-- ************************************************************* -->
-    <!-- *** Build Settings ****************************************** -->
-    <!-- ************************************************************* -->
-
-    <packaging>pom</packaging>
-
+  <modelVersion>4.0.0</modelVersion>
+  <!-- ************************************************************* -->
+  <!-- *** POM Relationships *************************************** -->
+  <!-- ************************************************************* -->
+  <parent>
+    <artifactId>openmole</artifactId>
+    <groupId>org.openmole.core</groupId>
+    <version>0.7-SNAPSHOT</version>
+  </parent>
+  <artifactId>misc</artifactId>
+  <!-- ************************************************************* -->
+  <!-- *** Build Settings ****************************************** -->
+  <!-- ************************************************************* -->
+  <packaging>pom</packaging>
+  <!-- ************************************************************* -->
+  <!-- *** Project Information ************************************* -->
+  <!-- ************************************************************* -->
+  <name>${project.artifactId}</name>
+  <description>Miscileanous software used by OpenMOLE</description>
+  <modules>
+    <module>org.openmole.misc.eventdispatcher</module>
+    <module>org.openmole.misc.exception</module>
+    <module>org.openmole.misc.tools</module>
+    <module>org.openmole.misc.hashservice</module>
+    <module>org.openmole.misc.pluginmanager</module>
+    <module>org.openmole.misc.updater</module>
+    <module>org.openmole.misc.workspace</module>
+    <module>org.openmole.misc.logging</module>
+    <module>org.openmole.misc.fileservice</module>
+    <module>org.openmole.misc.filecache</module>
+    <module>org.openmole.misc.filedeleter</module>
+    <module>org.openmole.misc.osgi</module>
+    <module>org.openmole.misc.replication</module>
+    <module>org.openmole.misc.sftpserver</module>
+  </modules>
+  <properties>
+    <include></include>
+  </properties>
 </project>

@@ -1,31 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-    <modelVersion>4.0.0</modelVersion>
-
-    <!-- ************************************************************* -->
-    <!-- *** POM Relationships *************************************** -->
-    <!-- ************************************************************* -->
-
-    <parent>
-        <artifactId>misc</artifactId>
-        <groupId>org.openmole.core</groupId>
-        <version>0.7-SNAPSHOT</version>
-    </parent>
-
-    <artifactId>org.openmole.misc.exception</artifactId>
-
-    <!-- ************************************************************* -->
-    <!-- *** Project Information ************************************* -->
-    <!-- ************************************************************* -->
-
-    <name>${project.artifactId} ${project.version}</name>
-    <description>Exceptions defined for SimExplorer runtime</description>
-   
-    <!-- ************************************************************* -->
-    <!-- *** Build Settings ****************************************** -->
-    <!-- ************************************************************* -->
-
-    <packaging>bundle</packaging>
-
+  <modelVersion>4.0.0</modelVersion>
+  <!-- ************************************************************* -->
+  <!-- *** POM Relationships *************************************** -->
+  <!-- ************************************************************* -->
+  <parent>
+    <artifactId>misc</artifactId>
+    <groupId>org.openmole.core</groupId>
+    <version>0.7-SNAPSHOT</version>
+  </parent>
+  <artifactId>org.openmole.misc.exception</artifactId>
+  <!-- ************************************************************* -->
+  <!-- *** Build Settings ****************************************** -->
+  <!-- ************************************************************* -->
+  <packaging>bundle</packaging>
+  <!-- ************************************************************* -->
+  <!-- *** Project Information ************************************* -->
+  <!-- ************************************************************* -->
+  <name>${project.artifactId} ${project.version}</name>
+  <description>Exceptions defined for SimExplorer runtime</description>
 </project>

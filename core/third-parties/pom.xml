@@ -1,38 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-    <modelVersion>4.0.0</modelVersion>
-
-    <!-- ************************************************************* -->
-    <!-- *** POM Relationships *************************************** -->
-    <!-- ************************************************************* -->
-
-    <parent>
-        <artifactId>openmole-ecosystem</artifactId>
-        <groupId>org.openmole.core</groupId>
-        <version>0.7-SNAPSHOT</version>
-    </parent>
-
-    <artifactId>third-parties</artifactId>
-
-    <modules>
-	<module>com.ice.tar</module>
-	<module>com.github.scopt</module>	
-    </modules>
-
-    <!-- ************************************************************* -->
-    <!-- *** Project Information ************************************* -->
-    <!-- ************************************************************* -->
-
-    <name>${project.artifactId}</name>
-
-    <!-- ************************************************************* -->
-    <!-- *** Build Settings ****************************************** -->
-    <!-- ************************************************************* -->
-
-    <packaging>pom</packaging>
-
-    <!--<properties>
+  <modelVersion>4.0.0</modelVersion>
+  <!-- ************************************************************* -->
+  <!-- *** POM Relationships *************************************** -->
+  <!-- ************************************************************* -->
+  <parent>
+    <artifactId>openmole-ecosystem</artifactId>
+    <groupId>org.openmole.core</groupId>
+    <version>0.7-SNAPSHOT</version>
+  </parent>
+  <artifactId>third-parties</artifactId>
+  <!-- ************************************************************* -->
+  <!-- *** Build Settings ****************************************** -->
+  <!-- ************************************************************* -->
+  <packaging>pom</packaging>
+  <!-- ************************************************************* -->
+  <!-- *** Project Information ************************************* -->
+  <!-- ************************************************************* -->
+  <name>${project.artifactId}</name>
+  <modules>
+    <module>com.ice.tar</module>
+    <module>com.github.scopt</module>
+  </modules>
+  <!--<properties>
         <embed-dep>*;scope=provided;type=!pom;inline=true</embed-dep>
         <embed-transitive>true</embed-transitive>
         <import.packages>*;resolution:=optional</import.packages>
