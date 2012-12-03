@@ -45,10 +45,10 @@ sealed class SaveMapHook(
     file.createParentDir
     file.withWriter { w ⇒
       for {
-        (l, x) ← a.content.zipWithIndex
+        (l, x) ← a.values.zipWithIndex
         (e, y) ← l.zipWithIndex
-        if !e.value.isPosInfinity
-      } w.write("" + x.toDouble.scale(xMin, xMax, 0, nbX) + "," + y.toDouble.scale(yMin, yMax, 0, nbY) + "," + e.value + "\n")
+        if !e.isPosInfinity
+      } w.write("" + x.toDouble.scale(xMin, xMax, 0, nbX) + "," + y.toDouble.scale(yMin, yMax, 0, nbY) + "," + e + "\n")
     }
 
   }
