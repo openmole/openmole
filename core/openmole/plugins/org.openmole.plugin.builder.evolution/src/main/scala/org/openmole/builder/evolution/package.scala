@@ -64,7 +64,7 @@ package object evolution {
     firstTask addOutput (Data(archive, Optional))
     firstTask addOutput (Data(population, Optional))
 
-    val breedTask = ExplorationTask(name + "InitialBreed", BreedSampling(evolution)(population, genome, evolution.lambda))
+    val breedTask = ExplorationTask(name + "Breed", BreedSampling(evolution)(population, genome, evolution.lambda))
 
     val scalingGenomeTask = ScalingGAGenomeTask(name + "ScalingGenome", genome, inputs.toSeq: _*)
 
