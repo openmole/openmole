@@ -27,6 +27,7 @@ import org.openmole.core.serializer.SerializerService
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace._
 import org.openmole.core.batch.storage._
+import org.openmole.core.implementation.execution.local.LocalEnvironment
 
 class SimExplorer extends IApplication with Logger {
 
@@ -39,7 +40,8 @@ class SimExplorer extends IApplication with Logger {
         inputMessage: Option[String] = None,
         outputMessage: Option[String] = None,
         path: Option[String] = None,
-        pluginPath: Option[String] = None)
+        pluginPath: Option[String] = None,
+        nbThread: Option[Int] = None)
 
       val parser = new OptionParser[Config]("openmole", "0.x") {
         def options = Seq(
@@ -57,7 +59,11 @@ class SimExplorer extends IApplication with Logger {
           },
           opt("p", "plugin", "Path for plugin dir to preload") {
             (v: String, c: Config) ⇒ c.copy(pluginPath = Some(v))
-          })
+          },
+          opt("t", "nbThread", "Number of thread for the execution") {
+            (v: String, c: Config) => c.copy(nbThread = Some(v.toInt))
+          }
+        )
       }
 
       val debug = args.contains("-d")
@@ -74,6 +80,8 @@ class SimExplorer extends IApplication with Logger {
             new File(config.storage.get).copyUncompressFile(storageFile)
             SerializerService.deserializeAndExtractFiles[SimpleStorage](storageFile)
           } finally storageFile.delete
+
+        LocalEnvironment.initializationNumberOfThread = config.nbThread
 
         new Runtime().apply(
           storage,

@@ -27,10 +27,11 @@ import org.openmole.core.implementation.job.MoleJob._
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
+import ref.WeakReference
 
 object LocalExecuter extends Logger
 
-class LocalExecuter(environment: LocalEnvironment) extends Runnable {
+class LocalExecuter(environment: WeakReference[LocalEnvironment]) extends Runnable {
 
   import LocalExecuter._
 
@@ -39,38 +40,43 @@ class LocalExecuter(environment: LocalEnvironment) extends Runnable {
   override def run = {
 
     while (!stop) {
-      val executionJob = environment.takeNextjob
-      try {
-        executionJob.state = ExecutionState.RUNNING
-        val running = System.currentTimeMillis
+      environment.get match {
+        case Some(environment) ⇒
+          def jobGoneIdle {
+            environment.addExecuters(1)
+            stop = true
+          }
 
-        for (moleJob ← executionJob.moleJobs) {
-          if (moleJob.state != State.CANCELED) {
-            if (classOf[IMoleTask].isAssignableFrom(moleJob.task.getClass)) jobGoneIdle
-            moleJob.perform
+          val executionJob = environment.takeNextjob
+          try {
+            executionJob.state = ExecutionState.RUNNING
+            val running = System.currentTimeMillis
 
-            moleJob.exception match {
-              case Some(e) ⇒ EventDispatcher.trigger(environment: Environment, new MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
-              case _ ⇒
+            for (moleJob ← executionJob.moleJobs) {
+              if (moleJob.state != State.CANCELED) {
+                if (classOf[IMoleTask].isAssignableFrom(moleJob.task.getClass)) jobGoneIdle
+                moleJob.perform
+
+                moleJob.exception match {
+                  case Some(e) ⇒ EventDispatcher.trigger(environment: Environment, new MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
+                  case _ ⇒
+                }
+              }
             }
-          }
-        }
-        executionJob.state = ExecutionState.DONE
-      } catch {
-        case e: InterruptedException ⇒
-          if (!stop) {
-            logger.log(WARNING, "Interrupted despite stop is false", e)
-            EventDispatcher.trigger(environment: Environment, new ExceptionRaised(executionJob, e, SEVERE))
-          }
-        case e: Throwable ⇒
-          logger.log(SEVERE, "Error in execution", e)
-          EventDispatcher.trigger(environment: Environment, new ExceptionRaised(executionJob, e, SEVERE))
-      } finally executionJob.state = ExecutionState.KILLED
+            executionJob.state = ExecutionState.DONE
+          } catch {
+            case e: InterruptedException ⇒
+              if (!stop) {
+                logger.log(WARNING, "Interrupted despite stop is false", e)
+                EventDispatcher.trigger(environment: Environment, new ExceptionRaised(executionJob, e, SEVERE))
+              }
+            case e: Throwable ⇒
+              logger.log(SEVERE, "Error in execution", e)
+              EventDispatcher.trigger(environment: Environment, new ExceptionRaised(executionJob, e, SEVERE))
+          } finally executionJob.state = ExecutionState.KILLED
+        case None ⇒ stop = true
+      }
     }
   }
 
-  def jobGoneIdle {
-    environment.addExecuters(1)
-    stop = true
-  }
 }

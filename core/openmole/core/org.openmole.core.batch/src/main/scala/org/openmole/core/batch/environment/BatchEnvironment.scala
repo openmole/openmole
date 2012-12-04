@@ -181,6 +181,9 @@ akka {
     case Some(m) ⇒ m
   }
 
+  def threads: Option[Int] = None
+  def threadsValue = threads.getOrElse(1)
+
   override def submit(job: IJob) = {
     registerWatcher
     val bej = executionJob(job)

@@ -1,63 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
-    <modelVersion>4.0.0</modelVersion>
-
-    <!-- ************************************************************* -->
-    <!-- *** POM Relationships *************************************** -->
-    <!-- ************************************************************* -->
-
-    <parent>
-        <groupId>org.openmole</groupId>
-        <artifactId>openmole</artifactId>
-        <version>0.7-SNAPSHOT</version>
-    </parent>
-
-    <groupId>org.openmole.ui</groupId>
-    <artifactId>ui</artifactId>
-
-    <modules>
-        <module>org.openmole.ui</module>
-        <module>plugins</module>
-        <module>plugins-gui</module>
-	<module>openmole-ui-package</module>
-    </modules>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.openmole.core</groupId>
-            <artifactId>org.scala-lang.scala-library</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_${lib.org.scala-lang.scala.version}</artifactId>
-            <version>${lib.org.scalatest.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-           <groupId>junit</groupId>
-           <artifactId>junit</artifactId>
-           <version>${lib.org.junit.version}</version>
-           <scope>test</scope>
-        </dependency>
-    </dependencies>
-
- 
-    <!-- ************************************************************* -->
-    <!-- *** Project Information ************************************* -->
-    <!-- ************************************************************* -->
-
-    <name>${project.artifactId} ${project.version}</name>
-    <description />
-
-    <!-- ************************************************************* -->
-    <!-- *** Build Settings ****************************************** -->
-    <!-- ************************************************************* -->
-
-    <packaging>pom</packaging>
-
-    <!--build>
+  <modelVersion>4.0.0</modelVersion>
+  <!-- ************************************************************* -->
+  <!-- *** POM Relationships *************************************** -->
+  <!-- ************************************************************* -->
+  <parent>
+    <artifactId>openmole</artifactId>
+    <groupId>org.openmole</groupId>
+    <version>0.7-SNAPSHOT</version>
+  </parent>
+  <groupId>org.openmole.ui</groupId>
+  <artifactId>ui</artifactId>
+  <!-- ************************************************************* -->
+  <!-- *** Build Settings ****************************************** -->
+  <!-- ************************************************************* -->
+  <packaging>pom</packaging>
+  <!-- ************************************************************* -->
+  <!-- *** Project Information ************************************* -->
+  <!-- ************************************************************* -->
+  <name>${project.artifactId} ${project.version}</name>
+  <description></description>
+  <modules>
+    <module>org.openmole.ui</module>
+    <module>plugins</module>
+    <module>plugins-gui</module>
+    <module>openmole-ui-package</module>
+  </modules>
+  <dependencies>
+    <dependency>
+      <groupId>org.openmole.core</groupId>
+      <artifactId>org.scala-lang.scala-library</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_${lib.org.scala-lang.scala.version}</artifactId>
+      <version>${lib.org.scalatest.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${lib.org.junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <!--build>
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -80,13 +68,3 @@
         </plugins>
     </build-->
 </project>
-
-
-
-
-
-
-
-
-
-

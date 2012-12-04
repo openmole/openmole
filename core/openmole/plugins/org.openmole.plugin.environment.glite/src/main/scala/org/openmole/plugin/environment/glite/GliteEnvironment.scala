@@ -130,11 +130,13 @@ class GliteEnvironment(
     override val openMOLEMemory: Option[Int] = None,
     val memory: Option[Int] = None,
     val cpuTime: Option[String] = None,
+    val wallTime: Option[String] = None,
     val cpuNumber: Option[Int] = None,
     val jobType: Option[String] = None,
     val smpGranularity: Option[Int] = None,
     val myProxy: Option[MyProxy] = None,
-    val architecture: Option[String] = None) extends BatchEnvironment with MemoryRequirement { env ⇒
+    val architecture: Option[String] = None,
+    override val threads: Option[Int] = None) extends BatchEnvironment with MemoryRequirement { env ⇒
 
   import GliteEnvironment._
 
