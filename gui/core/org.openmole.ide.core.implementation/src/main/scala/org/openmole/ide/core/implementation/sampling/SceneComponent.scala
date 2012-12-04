@@ -18,13 +18,17 @@ package org.openmole.ide.core.implementation.sampling
 
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.netbeans.api.visual.widget.ComponentWidget
+import org.netbeans.api.visual.widget.ConnectionWidget
 import swing.Panel
 import java.awt.{ Color, Point }
-import javax.swing.JPanel
+import org.openmole.ide.core.model.sampling.ISceneComponent
+import scala.collection.mutable.HashSet
 
 class SceneComponent(samplingScene: ISamplingCompositionPanelUI,
                      val panel: Panel,
-                     location: Point) extends ComponentWidget(samplingScene.scene, panel.peer) {
+                     location: Point) extends ComponentWidget(samplingScene.scene, panel.peer) with ISceneComponent {
+  var connections = HashSet.empty[ConnectionWidget]
+
   setOpaque(true)
   setBackground(new Color(77, 77, 77, 0))
   setPreferredLocation(location)

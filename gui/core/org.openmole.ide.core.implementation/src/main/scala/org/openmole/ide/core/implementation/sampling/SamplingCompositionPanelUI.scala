@@ -488,7 +488,11 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
         case sc: SamplingComponent ⇒
           sc.connections += connection
           _connections += sourceW -> sc
-        case _ ⇒ setFinalSampling(sourceW.component.proxy)
+        case _ ⇒
+          finalComponent.connections.foreach { c ⇒ connectLayer.removeChild(c) }
+          finalComponent.connections.clear
+          finalComponent.connections += connection
+          setFinalSampling(sourceW.component.proxy)
       }
 
       connection.setRouter(new MoleRouter(boxLayer))

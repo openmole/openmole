@@ -17,20 +17,11 @@
 
 package org.openmole.ide.core.implementation.sampling
 
-import java.awt.Color
 import java.awt.Point
-import org.netbeans.api.visual.widget.ComponentWidget
-import org.netbeans.api.visual.action.ActionFactory
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.openmole.ide.core.model.sampling.ISamplingCompositionWidget
-import org.netbeans.api.visual.widget.ConnectionWidget
 import org.openmole.ide.core.model.sampling.ISamplingComponent
-import org.openmole.ide.core.implementation.provider.DomainMenuProvider
-import scala.collection.mutable.HashSet
 
 class SamplingComponent(samplingScene: ISamplingCompositionPanelUI,
                         val component: ISamplingCompositionWidget,
-                        location: Point) extends SceneComponent(samplingScene, component, location) with ISamplingComponent {
-
-  var connections = HashSet.empty[ConnectionWidget]
-}
+                        location: Point) extends SceneComponent(samplingScene, component, location) with ISamplingComponent
