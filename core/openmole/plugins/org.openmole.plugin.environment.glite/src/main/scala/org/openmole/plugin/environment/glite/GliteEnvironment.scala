@@ -135,7 +135,7 @@ class GliteEnvironment(
     val smpGranularity: Option[Int] = None,
     val myProxy: Option[MyProxy] = None,
     val architecture: Option[String] = None,
-    override val nbThread: Option[Int] = None) extends BatchEnvironment with MemoryRequirement { env ⇒
+    override val threads: Option[Int] = None) extends BatchEnvironment with MemoryRequirement { env ⇒
 
   import GliteEnvironment._
 

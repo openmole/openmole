@@ -150,7 +150,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     writter.print(" -o ")
     writter.print(resultPath)
     writter.print(" -t ")
-    writter.print(environment.nbThreadValue)
+    writter.print(environment.threadsValue)
     writter.print("; cd .. ; rm -rf $CUR ; ")
     //writter.print(clearCacheCmd(homeCacheDir))
   }
@@ -210,9 +210,9 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
       val outputSandbox = List.empty
       override val memory = Some(environment.requieredMemory)
       override val cpuTime = environment.cpuTime.map(_.toMinutes)
-      override val cpuNumber = environment.cpuNumber orElse environment.nbThread
+      override val cpuNumber = environment.cpuNumber orElse environment.threads
       override val jobType = environment.jobType
-      override val smpGranularity = environment.smpGranularity orElse environment.nbThread
+      override val smpGranularity = environment.smpGranularity orElse environment.threads
       override val retryCount = Some(Workspace.preferenceAsInt(GliteEnvironment.WMSRetryCount))
       override val myProxyServer = environment.myProxy.map(_.url)
       override val architecture = environment.architecture
