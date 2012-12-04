@@ -42,7 +42,7 @@ class PBSEnvironment(
     override val port: Int = 22,
     val queue: Option[String] = None,
     override val openMOLEMemory: Option[Int] = None,
-    val cpuTime: Option[String] = None,
+    val wallTime: Option[String] = None,
     val memory: Option[Int] = None,
     val path: Option[String] = None,
     override val threads: Option[Int] = None,

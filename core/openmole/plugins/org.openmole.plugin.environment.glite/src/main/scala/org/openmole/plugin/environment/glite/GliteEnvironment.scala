@@ -130,7 +130,7 @@ class GliteEnvironment(
     override val openMOLEMemory: Option[Int] = None,
     val memory: Option[Int] = None,
     val cpuTime: Option[String] = None,
-    val wallClockTime: Option[String] = None,
+    val wallTime: Option[String] = None,
     val cpuNumber: Option[Int] = None,
     val jobType: Option[String] = None,
     val smpGranularity: Option[Int] = None,

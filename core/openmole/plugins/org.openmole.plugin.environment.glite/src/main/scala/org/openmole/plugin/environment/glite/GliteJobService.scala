@@ -210,7 +210,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
       val outputSandbox = List.empty
       override val memory = Some(environment.requieredMemory)
       override val cpuTime = environment.cpuTime.map(_.toMinutes)
-      override val wallClockTime = environment.wallClockTime.map(_.toMinutes)
+      override val wallTime = environment.wallTime.map(_.toMinutes)
       override val cpuNumber = environment.cpuNumber orElse environment.threads
       override val jobType = environment.jobType
       override val smpGranularity = environment.smpGranularity orElse environment.threads
