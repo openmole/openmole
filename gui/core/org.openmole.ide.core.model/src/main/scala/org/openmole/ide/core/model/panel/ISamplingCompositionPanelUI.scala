@@ -32,8 +32,7 @@ trait ISamplingCompositionPanelUI extends IPanelUI {
 
   def factors: List[IFactorProxyUI]
 
-  def computeFactor(sourceProxy: ISamplingCompositionProxyUI,
-                    targetProxy: ISamplingCompositionProxyUI): Option[IFactorProxyUI]
+  def computeFactor(sourceProxy: ISamplingCompositionProxyUI): Option[IFactorProxyUI]
 
   def addDomain(domainProxy: IDomainProxyUI,
                 location: Point,
@@ -49,9 +48,9 @@ trait ISamplingCompositionPanelUI extends IPanelUI {
 
   def editedDomainProxy_=(f: Option[IDomainDataUI])
 
-  def setFinalSampling(samplingProxy: ISamplingProxyUI)
+  def setFinalSampling(samplingProxy: ISamplingCompositionProxyUI)
 
-  def setSamplingProxy(samplingProxy: ISamplingProxyUI, b: Boolean): Unit
+  def setSamplingProxy(samplingProxy: ISamplingCompositionProxyUI, b: Boolean): Unit
 
   def testConnections(arityTest: Boolean): Unit
 

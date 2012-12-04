@@ -29,11 +29,12 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.domain.modifier.GroovyDomainModifier
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.core.model.sampling.IDiscrete
 
 case class GroovyModifierDomainDataUI(val prototypeName: String = "",
                                       val code: String = "",
                                       var previousDomain: List[IDomainDataUI] = List.empty)
-    extends ModifierDomainDataUI {
+    extends ModifierDomainDataUI with IDiscrete {
 
   val domainType = previousDomain.headOption match {
     case Some(d: IDomainDataUI) ⇒ d.domainType

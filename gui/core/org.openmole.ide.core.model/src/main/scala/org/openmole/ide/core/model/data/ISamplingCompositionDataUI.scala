@@ -39,7 +39,7 @@ trait ISamplingCompositionDataUI extends IDataUI {
 
   def factors: Iterable[IFactorProxyUI]
 
-  def finalSampling: Option[ISamplingProxyUI]
+  def finalSampling: Option[ISamplingCompositionProxyUI]
 
   def connections: Iterable[(ISamplingCompositionProxyUI, ISamplingCompositionProxyUI)]
 

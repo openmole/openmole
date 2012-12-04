@@ -18,4 +18,8 @@ package org.openmole.ide.core.model.sampling
 
 trait ISamplingCompositionProxyUI {
   def id: String
+
+  def isFinal: Boolean
+
+  def isFinal_=(b: Boolean)
 }

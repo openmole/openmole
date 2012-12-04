@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,25 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.ide.core.model.sampling
 
-package org.openmole.ide.core.model.data
-
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.core.model.sampling.Factor
-import org.openmole.ide.core.model.sampling.{ ISamplingCompositionProxyUI, ISamplingProxyUI, IDomainProxyUI }
-
-trait IFactorDataUI {
-  def prototype: Option[IPrototypeDataProxyUI]
-
-  def prototype_=(p: Option[IPrototypeDataProxyUI])
-
-  def domain: IDomainProxyUI
-
-  def target: Option[ISamplingCompositionProxyUI]
-
-  def coreObject: Factor[_, _]
-
-  def clone(p: IPrototypeDataProxyUI): IFactorDataUI
-
-  def clone(d: IDomainProxyUI): IFactorDataUI
-}
+trait IDiscrete

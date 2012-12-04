@@ -25,6 +25,7 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.domain.modifier.GroupDomain
 import org.openmole.ide.core.model.data.IDomainDataUI
 import java.io.File
+import org.openmole.ide.core.model.sampling.IDiscrete
 
 object GroupDomainDataUI {
   def empty = apply("1", DOUBLE, List())
@@ -47,7 +48,7 @@ object GroupDomainDataUI {
 
 case class GroupDomainDataUI[S](val size: String = "0",
                                 var previousDomain: List[IDomainDataUI] = List.empty)(implicit val domainType: Manifest[S])
-    extends ModifierDomainDataUI {
+    extends ModifierDomainDataUI with IDiscrete {
 
   val name = "Group"
 

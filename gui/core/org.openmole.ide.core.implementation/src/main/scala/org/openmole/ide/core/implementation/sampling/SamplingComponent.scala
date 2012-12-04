@@ -30,10 +30,7 @@ import scala.collection.mutable.HashSet
 
 class SamplingComponent(samplingScene: ISamplingCompositionPanelUI,
                         val component: ISamplingCompositionWidget,
-                        location: Point) extends ComponentWidget(samplingScene.scene, component.peer) with ISamplingComponent {
+                        location: Point) extends SceneComponent(samplingScene, component, location) with ISamplingComponent {
 
   var connections = HashSet.empty[ConnectionWidget]
-  setOpaque(true)
-  setBackground(new Color(77, 77, 77, 0))
-  setPreferredLocation(location)
 }

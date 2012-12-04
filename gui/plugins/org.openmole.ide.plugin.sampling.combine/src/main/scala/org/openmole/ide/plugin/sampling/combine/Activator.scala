@@ -36,5 +36,8 @@ class Activator extends OSGiActivator with SamplingActivator {
     }, new ISamplingFactoryUI {
       override def toString = "Take"
       def buildDataUI = new TakeSamplingDataUI
+    }, new ISamplingFactoryUI {
+      override def toString = "Zip"
+      def buildDataUI = new ZipSamplingDataUI
     })
 }

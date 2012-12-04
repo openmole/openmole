@@ -27,10 +27,11 @@ import org.openmole.plugin.domain.modifier.TakeDomain
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.core.model.sampling.IDiscrete
 
 case class TakeDomainDataUI(val size: String = "1",
                             val previousDomain: List[IDomainDataUI] = List.empty)
-    extends ModifierDomainDataUI {
+    extends ModifierDomainDataUI with IDiscrete {
 
   val domainType = previousDomain.headOption match {
     case Some(dt: IDomainDataUI) ⇒ dt.domainType
@@ -45,7 +46,7 @@ case class TakeDomainDataUI(val size: String = "1",
     println("previous domain : " + previousDomain)
     val valid = validPreviousDomains
     if (valid._1) new TakeDomain(valid._2.head, size.toInt)
-    else throw new UserBadDataError("A Discrete Domain is required as input of a Take Domain2. ")
+    else throw new UserBadDataError("A Discrete Domain is required as input of a Take Domain. ")
   }
 
   def buildPanelUI = new TakeDomainPanelUI(this)

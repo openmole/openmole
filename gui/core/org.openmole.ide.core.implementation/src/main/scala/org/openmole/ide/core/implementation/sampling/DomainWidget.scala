@@ -24,6 +24,7 @@ import org.openmole.ide.core.model.sampling.{ IDomainProxyUI, IDomainWidget }
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget._
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
+import javax.imageio.ImageIO
 
 class DomainWidget(val proxy: IDomainProxyUI,
                    val scenePanelUI: ISamplingCompositionPanelUI,

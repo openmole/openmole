@@ -24,6 +24,7 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.domain.{ Bounds, Domain }
 import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.core.model.sampling.IDiscrete
 
 object GenericRangeDomainDataUI {
 
@@ -37,7 +38,7 @@ object GenericRangeDomainDataUI {
     } else RangeDomainDataUI(min, max, step, classString)
 }
 
-abstract class GenericRangeDomainDataUI extends IDomainDataUI {
+abstract class GenericRangeDomainDataUI extends IDomainDataUI with IDiscrete {
 
   override def isAcceptable(domain: IDomainDataUI) = {
     StatusBar.warn("Only modifier Domain (Map, Take, Group, ...) can take another Domain as input")

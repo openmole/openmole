@@ -21,7 +21,8 @@ import org.openmole.ide.core.model.sampling.{ IFactorProxyUI, IDomainProxyUI }
 import org.openmole.ide.core.implementation.data.FactorDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
-class DomainProxyUI(var dataUI: IDomainDataUI) extends IDomainProxyUI {
+class DomainProxyUI(var dataUI: IDomainDataUI,
+                    var isFinal: Boolean = false) extends IDomainProxyUI {
 
   def testTypes = true
 

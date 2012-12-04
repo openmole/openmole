@@ -24,8 +24,6 @@ import java.awt._
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.action.ConnectorState
 import org.netbeans.api.visual.action.ConnectorState._
-import org.netbeans.api.visual.anchor.Anchor
-import org.netbeans.api.visual.anchor.AnchorShape
 import org.netbeans.api.visual.action.ConnectProvider
 import org.netbeans.api.visual.widget._
 import java.awt.event.InputEvent
@@ -57,7 +55,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
   var _factors = new HashSet[IFactorProxyUI]
   var _connections = new HashSet[(SamplingComponent, SamplingComponent)]
   val factorWidgets = new mutable.HashMap[IFactorProxyUI, SamplingConnectorWidget]
-  var finalSampling: Option[ISamplingProxyUI] = None
+  var finalSampling: Option[ISamplingCompositionProxyUI] = None
   var editedDomainProxy: Option[IDomainDataUI] = None
 
   dataUI.factors.foreach {
@@ -71,13 +69,19 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
 
   setPreferredBounds(new Rectangle(0, 0, 700, 400))
 
-  val transitionId = new AtomicInteger
   val connectProvider = new SamplingConnectionProvider
   val connectAction = ActionFactory.createExtendedConnectAction(null, connectLayer,
     new SamplingConnectionProvider,
     InputEvent.SHIFT_MASK)
   getActions.addAction(ActionFactory.createPopupMenuAction(new SamplingSceneMenuProvider(this)))
   val moveAction = ActionFactory.createMoveAction
+
+  val size = getPreferredBounds
+  val finalComponent = new SceneComponent(this, new FinalWidget, new Point(size.getWidth.toInt / 2, size.getHeight.toInt / 2 - 50)) {
+    getActions.addAction(connectAction)
+    getActions.addAction(moveAction)
+  }
+  boxLayer.addChild(finalComponent)
 
   dataUI.domains.foreach {
     d ⇒ addDomain(d._1, d._2, false)
@@ -91,7 +95,9 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
   }
 
   dataUI.finalSampling match {
-    case Some(fs: ISamplingProxyUI) ⇒ setFinalSampling(fs)
+    case Some(sp: ISamplingCompositionProxyUI) ⇒
+      setFinalSampling(sp)
+      connectProvider.createConnection(domainsAndSamplings(sp), finalComponent)
     case _ ⇒
   }
 
@@ -99,9 +105,14 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
 
   def factors = _factors.toList
 
-  def computeFactor(sourceProxy: ISamplingCompositionProxyUI,
-                    targetProxy: ISamplingCompositionProxyUI) = factors.filter {
-    f ⇒ f.dataUI.target.id == targetProxy.id && f.dataUI.domain.id == sourceProxy.id
+  def computeFactor(sourceProxy: ISamplingCompositionProxyUI) = factors.filter {
+    f ⇒
+      f.dataUI.domain.id == sourceProxy.id && {
+        f.dataUI.target match {
+          case Some(s: ISamplingProxyUI) ⇒ s.id == s.id
+          case _ ⇒ true
+        }
+      }
   }.headOption
 
   def peer = new MigPanel("") {
@@ -143,6 +154,13 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
     samplings += samplingProxy -> cw
   }
 
+  def addFactor(d: IDomainProxyUI,
+                s: Option[ISamplingProxyUI]) = {
+    val f = new FactorProxyUI(new FactorDataUI(d, s))
+    _factors += f
+    f
+  }
+
   def remove(samplingComponent: ISamplingComponent) = {
     samplingComponent.component match {
       case (s: ISamplingCompositionWidget) ⇒
@@ -154,8 +172,12 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
             }
             _factors = _factors.filterNot {
               f ⇒
-                f.dataUI.domain.id == s.proxy.id ||
-                  f.dataUI.target.id == s.proxy.id
+                f.dataUI.domain.id == s.proxy.id || {
+                  f.dataUI.target match {
+                    case Some(sp: ISamplingProxyUI) ⇒ sp.id == s.proxy.id
+                    case _ ⇒ true
+                  }
+                }
             }
             samplingComponent.connections.foreach {
               c ⇒ connectLayer.removeChild(c)
@@ -188,7 +210,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
 
   def scene = this
 
-  def setFinalSampling(fsampling: ISamplingProxyUI) = {
+  def setFinalSampling(fsampling: ISamplingCompositionProxyUI) = {
     finalSampling match {
       case Some(sp: ISamplingProxyUI) ⇒ setSamplingProxy(sp, false)
       case _ ⇒
@@ -199,7 +221,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
     repaint
   }
 
-  def setSamplingProxy(samplingProxy: ISamplingProxyUI,
+  def setSamplingProxy(samplingProxy: ISamplingCompositionProxyUI,
                        b: Boolean): Unit = samplingProxy.isFinal = b
 
   def saveContent(name: String) = {
@@ -303,17 +325,17 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
       s match {
         case w: IDomainWidget ⇒
           updatePrevious(w)
-          t match {
-            case Some(samp: ISamplingWidget) ⇒
-              val factor = computeFactor(w.proxy, samp.proxy)
-              factor match {
-                case Some(f: IFactorProxyUI) ⇒
-                  if (editedDomainProxy != Some(domain.proxy.dataUI)) f.dataUI.prototype = None
-                  factorWidgets(f).update
-                case _ ⇒
-              }
+          //  t match {
+          //  case Some(samp: ISamplingWidget) ⇒
+          val factor = computeFactor(w.proxy)
+          factor match {
+            case Some(f: IFactorProxyUI) ⇒
+              if (editedDomainProxy != Some(domain.proxy.dataUI)) f.dataUI.prototype = None
+              factorWidgets(f).update
             case _ ⇒
           }
+        // case _ ⇒
+        // }
       }
   }
 
@@ -393,16 +415,25 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
                                 targetWidget: Widget): ConnectorState =
       sourceWidget match {
         case s: ISamplingComponent ⇒ targetWidget match {
-          case t: ISamplingComponent ⇒ t.component match {
-            case dp: IDomainWidget ⇒
-              if (t.component.proxy.id == s.component.proxy.id) ConnectorState.REJECT_AND_STOP
-              else boolToConnector(samplingCompositionPanelUI.testConnection(s.component, dp, true))
-            case sp: ISamplingWidget ⇒
-              boolToConnector(samplingCompositionPanelUI.testConnection(s.component, sp, false))
-            case _ ⇒ ConnectorState.REJECT_AND_STOP
-          }
+          case sc: SceneComponent ⇒
+            sc.panel match {
+              case dp: IDomainWidget ⇒
+                if (dp.proxy.id == s.component.proxy.id) ConnectorState.REJECT_AND_STOP
+                else boolToConnector(samplingCompositionPanelUI.testConnection(s.component, dp, true))
+              case sp: ISamplingWidget ⇒
+                boolToConnector(samplingCompositionPanelUI.testConnection(s.component, sp, false))
+              case f: FinalWidget ⇒ s.component.proxy match {
+                case samp: ISamplingProxyUI ⇒ ConnectorState.ACCEPT
+                case dom: IDomainProxyUI ⇒ dom.dataUI match {
+                  case discrete: IDomainDataUI with IDiscrete ⇒ ConnectorState.ACCEPT
+                  case x: Any ⇒ ConnectorState.REJECT_AND_STOP
+                }
+              }
+              case _ ⇒ ConnectorState.REJECT_AND_STOP
+            }
           case _ ⇒ ConnectorState.REJECT_AND_STOP
         }
+        case _ ⇒ ConnectorState.REJECT_AND_STOP
       }
 
     override def hasCustomTargetWidgetResolver(scene: Scene): Boolean = false
@@ -411,21 +442,34 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
 
     override def createConnection(sourceWidget: Widget, targetWidget: Widget) = {
       val sourceW = sourceWidget.asInstanceOf[SamplingComponent]
-      val targetW = targetWidget.asInstanceOf[SamplingComponent]
-      val factorProxyUI = computeFactor(sourceW.component.proxy, targetW.component.proxy) match {
-        case Some(f: IFactorProxyUI) ⇒ Some(f)
-        case _ ⇒
-          sourceW.component match {
-            case d: IDomainWidget ⇒
-              updatePrevious(d, targetW.component)
-              targetW.component match {
-                case s: ISamplingWidget ⇒
-                  val fp = new FactorProxyUI(new FactorDataUI(d.proxy, s.proxy))
-                  _factors += fp
-                  Some(fp)
-                case _ ⇒ None
-              }
-            case _ ⇒
+
+      val targetW = targetWidget.asInstanceOf[SceneComponent].panel match {
+        case sw: ISamplingCompositionWidget ⇒ targetWidget.asInstanceOf[SamplingComponent]
+        case x: Any ⇒ targetWidget.asInstanceOf[SceneComponent]
+      }
+
+      val factorProxyUI = targetW match {
+        case sc: SamplingComponent ⇒ sc.component.proxy match {
+          case td: ISamplingProxyUI ⇒
+            computeFactor(sourceW.component.proxy) match {
+              case Some(f: IFactorProxyUI) ⇒ Some(f)
+              case _ ⇒
+                sourceW.panel match {
+                  case d: IDomainWidget ⇒
+                    updatePrevious(d, sc.component)
+                    sc.component match {
+                      case s: ISamplingWidget ⇒ Some(addFactor(d.proxy, Some(s.proxy)))
+                      case _ ⇒ None
+                    }
+                  case _ ⇒ None
+                }
+            }
+          case _ ⇒ None
+        }
+        case scC: SceneComponent ⇒
+          sourceW.panel match {
+            case d: IDomainWidget ⇒ Some(addFactor(d.proxy, None))
+            case _ ⇒ None
           }
       }
 
@@ -433,17 +477,22 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
         targetW,
         samplingCompositionPanelUI)
 
-      connection.setRouter(new MoleRouter(boxLayer))
-
       factorProxyUI match {
-        case Some(f: IFactorProxyUI) ⇒ factorWidgets += f -> connection
+        case Some(f: IFactorProxyUI) ⇒
+          factorWidgets += f -> connection
         case _ ⇒
       }
 
-      connectLayer.addChild(connection)
       sourceW.connections += connection
-      targetW.connections += connection
-      _connections += sourceW -> targetW
+      targetW match {
+        case sc: SamplingComponent ⇒
+          sc.connections += connection
+          _connections += sourceW -> sc
+        case _ ⇒ setFinalSampling(sourceW.component.proxy)
+      }
+
+      connection.setRouter(new MoleRouter(boxLayer))
+      connectLayer.addChild(connection)
 
     }
   }

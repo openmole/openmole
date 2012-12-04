@@ -20,6 +20,7 @@ package org.openmole.ide.plugin.domain.distribution
 import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.model.sampling.IDiscrete
 
 object UniformDistributionDataUI {
 
@@ -31,7 +32,7 @@ object UniformDistributionDataUI {
 }
 
 import UniformDistributionDataUI._
-abstract class UniformDistributionDataUI[S] extends IDomainDataUI {
+abstract class UniformDistributionDataUI[S] extends IDomainDataUI with IDiscrete {
 
   def availableTypes: List[String]
 

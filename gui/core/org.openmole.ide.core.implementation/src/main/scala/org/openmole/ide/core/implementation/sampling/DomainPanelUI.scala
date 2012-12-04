@@ -63,6 +63,8 @@ class DomainPanelUI(domainWidget: IDomainWidget,
 
   val previous: List[IDomainWidget] = domainWidget.incomings
 
+  println("PREVIOUS : " + previous)
+
   val domainComboBox = new MyComboBox(domains)
   domains.filter {
     _.toString == domainWidget.proxy.dataUI.toString
@@ -111,9 +113,10 @@ class DomainPanelUI(domainWidget: IDomainWidget,
   }
 
   def saveContent = dPanel.saveContent match {
-    case m: IModifier ⇒ m.clone(previousDomain = previous.map {
-      _.proxy.dataUI
-    })
+    case m: IModifier ⇒
+      m.clone(previousDomain = previous.map {
+        _.proxy.dataUI
+      })
     case x: Any ⇒ x
   }
 
