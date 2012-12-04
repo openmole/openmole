@@ -149,6 +149,8 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     writter.print(inputFile)
     writter.print(" -o ")
     writter.print(resultPath)
+    writter.print(" -t ")
+    writter.print(environment.nbThreadValue)
     writter.print("; cd .. ; rm -rf $CUR ; ")
     //writter.print(clearCacheCmd(homeCacheDir))
   }
