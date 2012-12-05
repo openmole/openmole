@@ -20,15 +20,14 @@ import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI, ISamplin
 import org.openmole.core.model.sampling.Sampling
 import org.openmole.plugin.sampling.combine.ShuffleSampling
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.model.sampling.IFinite
+import org.openmole.ide.core.implementation.dialog.StatusBar
 
 class ShuffleSamplingDataUI extends ISamplingDataUI {
   def name = "Shuffle"
 
   def coreObject(factors: List[IFactorDataUI], samplings: List[Sampling]) =
-    samplings.headOption match {
-      case Some(s: Sampling) ⇒ new ShuffleSampling(s)
-      case _ ⇒ throw new UserBadDataError("A Sampling is required as input of a Shuffle Sampling")
-    }
+    new ShuffleSampling((CombineSamplingCoreFactory(factors) ::: samplings).head)
 
   def buildPanelUI = new GenericCombineSamplingPanelUI(this)
 
@@ -36,7 +35,12 @@ class ShuffleSamplingDataUI extends ISamplingDataUI {
 
   def fatImagePath = "img/shuffleSampling_fat.png"
 
-  override def isAcceptable(domain: IDomainDataUI) = false
+  override def isAcceptable(domain: IDomainDataUI) = domain match {
+    case f: IFinite ⇒ true
+    case _ ⇒
+      StatusBar.warn("A Finite Domain is required for a Shuffle Sampling")
+      false
+  }
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 

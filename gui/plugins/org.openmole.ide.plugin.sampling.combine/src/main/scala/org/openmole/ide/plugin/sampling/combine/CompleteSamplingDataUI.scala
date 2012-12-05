@@ -16,7 +16,7 @@ import org.openmole.core.model.domain.Discrete
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.widget.{ URL, Helper }
-import org.openmole.ide.core.model.sampling.ISamplingProxyUI
+import org.openmole.ide.core.model.sampling.{ IFinite, ISamplingProxyUI }
 
 class CompleteSamplingDataUI extends ISamplingDataUI {
   val name = "Complete"
@@ -38,22 +38,12 @@ class CompleteSamplingDataUI extends ISamplingDataUI {
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 
-  override def isAcceptable(domain: IDomainDataUI) =
-    if (super.isAcceptable(domain)) true
-    else {
-      try {
-        domain.coreObject match {
-          case x: Domain[Any] with Discrete[Any] ⇒ true
-          case _ ⇒
-            StatusBar.warn("A Discrete Domain is required for a Complete Sampling")
-            false
-        }
-      } catch {
-        case u: UserBadDataError ⇒
-          StatusBar.warn("This domain is not valid : " + u.getMessage)
-          false
-      }
-    }
+  override def isAcceptable(domain: IDomainDataUI) = domain match {
+    case f: IFinite ⇒ true
+    case _ ⇒
+      StatusBar.warn("A Finite Domain is required for a Complete Sampling")
+      false
+  }
 
   def preview = name
 }

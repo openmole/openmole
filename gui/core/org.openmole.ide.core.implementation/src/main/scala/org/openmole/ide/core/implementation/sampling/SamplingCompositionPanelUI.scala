@@ -270,22 +270,24 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
           } &&
             domainT.proxy.dataUI.isAcceptable(dw.proxy.dataUI)
         }
-      case samplingT: ISamplingWidget ⇒
+      case samplingT: ISamplingWidget ⇒ {
+        samplingT.proxy.dataUI.inputNumberConstrainst match {
+          case Some(i: Int) ⇒
+            if (connections.filter {
+              _._2.component.proxy.id == samplingT.proxy.id
+            }.size >= i) {
+              StatusBar.warn("The maximum number of Sampling input is here limited to " + i)
+              false
+            } else true
+          case _ ⇒ true
+        }
+      } && {
         sourceWidget match {
-          case sw: ISamplingWidget ⇒ samplingT.proxy.dataUI.inputNumberConstrainst match {
-            case Some(i: Int) ⇒
-              if (connections.filter {
-                _._2.component.proxy.id == samplingT.proxy.id
-              }.size >= i) {
-                StatusBar.warn("The maximum number of Sampling input is here limited to " + i)
-                false
-              } else samplingT.proxy.dataUI.isAcceptable(sw.proxy.dataUI)
-            case _ ⇒ samplingT.proxy.dataUI.isAcceptable(sw.proxy.dataUI)
-          }
+          case sw: ISamplingWidget ⇒ samplingT.proxy.dataUI.isAcceptable(sw.proxy.dataUI)
           case dw: IDomainWidget ⇒ samplingT.proxy.dataUI.isAcceptable(dw.proxy.dataUI)
           case _ ⇒ false
         }
-      case _ ⇒ false
+      }
     }
   }
 
