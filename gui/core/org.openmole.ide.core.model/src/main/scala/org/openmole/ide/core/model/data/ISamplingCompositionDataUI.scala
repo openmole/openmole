@@ -41,6 +41,8 @@ trait ISamplingCompositionDataUI extends IDataUI {
 
   def finalSampling: Option[ISamplingCompositionProxyUI]
 
+  def finalPosition: (Int, Int)
+
   def connections: Iterable[(ISamplingCompositionProxyUI, ISamplingCompositionProxyUI)]
 
   def buildPanelUI: ISamplingCompositionPanelUI

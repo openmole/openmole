@@ -77,7 +77,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
   val moveAction = ActionFactory.createMoveAction
 
   val size = getPreferredBounds
-  val finalComponent = new SceneComponent(this, new FinalWidget, new Point(size.getWidth.toInt / 2, size.getHeight.toInt / 2 - 50)) {
+  val finalComponent = new SceneComponent(this, new FinalWidget, new Point(dataUI.finalPosition._1, dataUI.finalPosition._2)) {
     getActions.addAction(connectAction)
     getActions.addAction(moveAction)
   }
@@ -224,7 +224,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
   def setSamplingProxy(samplingProxy: ISamplingCompositionProxyUI,
                        b: Boolean): Unit = samplingProxy.isFinal = b
 
-  def saveContent(name: String) = {
+  def saveContent(name: String) =
     new SamplingCompositionDataUI(name,
       domains.map {
         f ⇒ f._1 -> f._2.getPreferredLocation
@@ -236,8 +236,8 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
       _connections.toList.map {
         case ((a, b)) ⇒ (a.component.proxy, b.component.proxy)
       },
-      finalSampling)
-  }
+      finalSampling,
+      (finalComponent.getPreferredLocation.x, finalComponent.getPreferredLocation.y))
 
   def domainsAndSamplings: Map[ISamplingCompositionProxyUI, SamplingComponent] = domains ++ samplings toMap
 
@@ -489,7 +489,9 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
           sc.connections += connection
           _connections += sourceW -> sc
         case _ ⇒
-          finalComponent.connections.foreach { c ⇒ connectLayer.removeChild(c) }
+          finalComponent.connections.foreach {
+            c ⇒ connectLayer.removeChild(c)
+          }
           finalComponent.connections.clear
           finalComponent.connections += connection
           setFinalSampling(sourceW.component.proxy)

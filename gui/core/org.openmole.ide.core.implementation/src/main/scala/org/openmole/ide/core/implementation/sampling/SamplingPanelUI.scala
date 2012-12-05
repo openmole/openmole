@@ -34,7 +34,8 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget,
   val samplings = KeyRegistry.samplings.values.map {
     _.buildDataUI
   }.toList.sorted.filter {
-    s ⇒ incomings.forall {
+    s ⇒
+      incomings.forall {
         _ match {
           case dw: IDomainWidget ⇒ s.isAcceptable(dw.proxy.dataUI)
           case sw: ISamplingWidget ⇒ s.isAcceptable(sw.proxy.dataUI)

@@ -34,7 +34,8 @@ class SamplingCompositionDataUI(val name: String = "",
                                 val samplings: List[(ISamplingProxyUI, Point)] = List.empty,
                                 val factors: List[IFactorProxyUI] = List.empty,
                                 val connections: List[(ISamplingCompositionProxyUI, ISamplingCompositionProxyUI)] = List.empty,
-                                val finalSampling: Option[ISamplingCompositionProxyUI] = None) extends ISamplingCompositionDataUI {
+                                val finalSampling: Option[ISamplingCompositionProxyUI] = None,
+                                val finalPosition: (Int, Int) = (450, 130)) extends ISamplingCompositionDataUI {
 
   type T = Domain[Any] with Discrete[Any]
 
@@ -110,9 +111,6 @@ class SamplingCompositionDataUI(val name: String = "",
     builtSampling(proxy)
 
   }
-
-  //def discreteFactor(factor: IFactorProxyUI) = DiscreteFactor(
-  // factor.dataUI.coreObject.asInstanceOf[Factor[Any, Domain[Any] with Discrete[Any]]])
 
   def imagePath = "img/samplingComposition.png"
 
