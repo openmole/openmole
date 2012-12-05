@@ -22,6 +22,8 @@ import org.openmole.plugin.sampling.combine.ZipSampling
 import org.openmole.ide.misc.widget.{ URL, Helper }
 
 class ZipSamplingDataUI extends GenericCombineSamplingDataUI {
+  def name = "Zip"
+
   def coreObject(factors: List[IFactorDataUI],
                  samplings: List[Sampling]) = {
     println("zamplings : " + samplings)
@@ -38,7 +40,7 @@ class ZipSamplingDataUI extends GenericCombineSamplingDataUI {
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 
-  def preview = "Zip"
+  def preview = name
 
   def coreClass = classOf[ZipSampling]
 }

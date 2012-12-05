@@ -17,6 +17,7 @@ import org.openmole.ide.core.implementation.dialog.StatusBar
 
 class CSVSamplingDataUI(var csvFilePath: String = "",
                         var prototypeMapping: List[(String, IPrototypeDataProxyUI)] = List.empty) extends ISamplingDataUI {
+  def name = "CSV"
 
   def coreObject(factors: List[IFactorDataUI],
                  samplings: List[Sampling]) = try {

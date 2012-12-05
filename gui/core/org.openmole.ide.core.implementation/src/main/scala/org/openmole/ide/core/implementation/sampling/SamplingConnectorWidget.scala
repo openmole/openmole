@@ -80,7 +80,6 @@ class SamplingConnectorWidget(sourceWidget: Widget,
   }
 
   def buildPrototypeFilterWidget = {
-    println(" + buildPrototypeFilterWidget " + computeFactor)
     computeFactor match {
       case Some(factor: IFactorProxyUI) ⇒
         val dialog = new FactorPrototypeDialog(samplingConnectorWidget)

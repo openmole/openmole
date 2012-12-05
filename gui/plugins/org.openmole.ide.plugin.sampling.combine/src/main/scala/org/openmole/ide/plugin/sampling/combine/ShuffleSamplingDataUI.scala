@@ -22,6 +22,8 @@ import org.openmole.plugin.sampling.combine.ShuffleSampling
 import org.openmole.misc.exception.UserBadDataError
 
 class ShuffleSamplingDataUI extends ISamplingDataUI {
+  def name = "Shuffle"
+
   def coreObject(factors: List[IFactorDataUI], samplings: List[Sampling]) =
     samplings.headOption match {
       case Some(s: Sampling) ⇒ new ShuffleSampling(s)
@@ -40,7 +42,7 @@ class ShuffleSamplingDataUI extends ISamplingDataUI {
 
   override def inputNumberConstrainst = Some(1)
 
-  def preview = "Shuffle"
+  def preview = name
 
   def coreClass = classOf[ShuffleSampling]
 }

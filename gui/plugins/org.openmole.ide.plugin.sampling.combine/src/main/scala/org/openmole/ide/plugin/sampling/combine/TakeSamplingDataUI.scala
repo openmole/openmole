@@ -23,6 +23,9 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.widget.{ URL, Helper }
 
 class TakeSamplingDataUI(val size: String = "1") extends ISamplingDataUI {
+
+  val name = "Take"
+
   def coreObject(factors: List[IFactorDataUI], samplings: List[Sampling]) =
     samplings.headOption match {
       case Some(s: Sampling) ⇒ new TakeSampling(s, size.toInt)

@@ -35,19 +35,16 @@ class DomainPanelUI(domainWidget: IDomainWidget,
 
   val finalProxy = domainWidget.scenePanelUI.firstSampling(domainWidget.proxy)
 
+  val incomings = domainWidget.incomings
   val domains = KeyRegistry.domains.values.map {
     _.buildDataUI
   }.toList.sorted.filter {
     d ⇒
-      if (domainWidget.incomings.isEmpty) {
+      if (incomings.isEmpty) {
         try {
-          // d match {
-          // case dm: IModifier ⇒ true
-          // case _ ⇒
           finalProxy match {
             case s: ISamplingProxyUI ⇒ s.dataUI.isAcceptable(d)
             case _ ⇒ true
-            //   }
           }
         } catch {
           case e: UserBadDataError ⇒ false
@@ -62,8 +59,6 @@ class DomainPanelUI(domainWidget: IDomainWidget,
     }
 
   val previous: List[IDomainWidget] = domainWidget.incomings
-
-  println("PREVIOUS : " + previous)
 
   val domainComboBox = new MyComboBox(domains)
   domains.filter {
@@ -99,17 +94,6 @@ class DomainPanelUI(domainWidget: IDomainWidget,
       case ComponentFocusedEvent(source: Component) ⇒ dPanel.help.switchTo(source)
     }
     domainPanel.updateHelp
-  }
-
-  def displayDomainPanel(dContent: List[IDomainDataUI]) = dContent.filter {
-    it ⇒
-      domainComboBox.selection.item.toString == it.toString
-  }.headOption match {
-    case Some(d: IDomainDataUI) ⇒
-      dPanel = d.buildPanelUI
-      protoDomainPanel.contents += dPanel.peer
-      listenToDomain
-    case _ ⇒
   }
 
   def saveContent = dPanel.saveContent match {

@@ -46,18 +46,17 @@ class SamplingSceneMenuProvider(panelScene: SamplingCompositionPanelUI) extends 
       }
     })
 
-    val samplingMenu = new Menu("Add Sampling")
-    KeyRegistry.samplings.values.toList.sortBy {
-      _.toString
-    }.foreach {
-      s ⇒
-        samplingMenu.contents += new MenuItem(new Action(s.toString) {
-          def apply = {
-            closeExtraPanel
-            panelScene.addSampling(new SamplingProxyUI(s.buildDataUI), point, true)
-          }
-        })
-    }
+    val samplingMenu = new MenuItem(new Action("Add Sampling") {
+      def apply = {
+        closeExtraPanel
+        val samplingFactories = KeyRegistry.samplings.values
+        panelScene.addSampling(new SamplingProxyUI(samplingFactories.map {
+          _.buildDataUI
+        }.filter(_.name == "Complete").headOption.getOrElse(samplingFactories.head.buildDataUI)),
+          point, true)
+      }
+    })
+
     items += (itAddFactor.peer, samplingMenu.peer)
     super.getPopupMenu(widget, point)
   }

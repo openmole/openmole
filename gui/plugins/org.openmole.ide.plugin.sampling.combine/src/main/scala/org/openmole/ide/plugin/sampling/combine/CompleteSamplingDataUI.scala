@@ -19,6 +19,7 @@ import org.openmole.ide.misc.widget.{ URL, Helper }
 import org.openmole.ide.core.model.sampling.ISamplingProxyUI
 
 class CompleteSamplingDataUI extends GenericCombineSamplingDataUI {
+  val name = "Complete"
 
   def coreObject(factors: List[IFactorDataUI],
                  samplings: List[Sampling]) =
@@ -37,5 +38,5 @@ class CompleteSamplingDataUI extends GenericCombineSamplingDataUI {
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 
-  def preview = "Complete"
+  def preview = name
 }

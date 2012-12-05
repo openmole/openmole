@@ -23,4 +23,8 @@ import org.openmole.ide.misc.tools.Counter
 trait ISamplingWidget extends ISamplingCompositionWidget {
   def proxy: ISamplingProxyUI
 
+  def incomings: List[ISamplingCompositionWidget] =
+    scenePanelUI.connections.filter {
+      _._2.component.proxy.id == proxy.id
+    }.map { _._1.component }
 }

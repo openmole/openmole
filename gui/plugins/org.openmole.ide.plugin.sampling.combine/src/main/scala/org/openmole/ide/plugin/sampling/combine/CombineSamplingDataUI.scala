@@ -26,6 +26,8 @@ import org.openmole.ide.misc.widget.{ URL, Helper }
 import org.openmole.core.model.domain.{ Discrete, Domain }
 
 class CombineSamplingDataUI extends ISamplingDataUI {
+  val name = "Combine"
+
   def coreObject(factors: List[IFactorDataUI], samplings: List[Sampling]) =
     new CombineSampling((CombineSamplingCoreFactory(factors) ::: samplings): _*)
 
@@ -42,7 +44,7 @@ class CombineSamplingDataUI extends ISamplingDataUI {
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 
-  def preview = "Combine"
+  def preview = name
 
   def coreClass = classOf[CombineSampling]
 }
