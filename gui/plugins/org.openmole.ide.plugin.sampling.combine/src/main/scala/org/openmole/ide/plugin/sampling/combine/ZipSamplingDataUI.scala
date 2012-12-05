@@ -16,29 +16,30 @@
  */
 package org.openmole.ide.plugin.sampling.combine
 
-import org.openmole.ide.core.model.data.{ IFactorDataUI, ISamplingDataUI }
+import org.openmole.ide.core.model.data.{ IDomainDataUI, IFactorDataUI, ISamplingDataUI }
 import org.openmole.core.model.sampling.Sampling
 import org.openmole.plugin.sampling.combine.ZipSampling
 import org.openmole.ide.misc.widget.{ URL, Helper }
 
-class ZipSamplingDataUI extends GenericCombineSamplingDataUI {
+class ZipSamplingDataUI extends ISamplingDataUI {
   def name = "Zip"
 
   def coreObject(factors: List[IFactorDataUI],
-                 samplings: List[Sampling]) = {
-    println("zamplings : " + samplings)
+                 samplings: List[Sampling]) =
     new ZipSampling(samplings: _*)
-  }
 
   def buildPanelUI = new GenericCombineSamplingPanelUI(this) {
     override val help = new Helper(List(new URL(i18n.getString("zipPermalinkText"),
       i18n.getString("zipPermalink"))))
   }
+
   def imagePath = "img/zipSampling.png"
 
   def fatImagePath = "img/zipSampling_fat.png"
 
   def isAcceptable(sampling: ISamplingDataUI) = true
+
+  override def isAcceptable(domain: IDomainDataUI) = false
 
   def preview = name
 

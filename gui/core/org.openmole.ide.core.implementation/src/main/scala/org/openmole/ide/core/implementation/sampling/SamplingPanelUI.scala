@@ -34,11 +34,10 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget,
   val samplings = KeyRegistry.samplings.values.map {
     _.buildDataUI
   }.toList.sorted.filter {
-    s ⇒
-      incomings.forall {
+    s ⇒ incomings.forall {
         _ match {
-          case d: IDomainWidget ⇒ samplingWidget.proxy.dataUI.isAcceptable(d.proxy.dataUI)
-          case s: ISamplingWidget ⇒ samplingWidget.proxy.dataUI.isAcceptable(s.proxy.dataUI)
+          case dw: IDomainWidget ⇒ s.isAcceptable(dw.proxy.dataUI)
+          case sw: ISamplingWidget ⇒ s.isAcceptable(sw.proxy.dataUI)
           case _ ⇒ false
         }
       }
@@ -78,5 +77,6 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget,
     }
     samplingPanel.updateHelp
   }
+
   def saveContent = sPanel.saveContent
 }
