@@ -24,6 +24,7 @@ import org.openmole.core.model.data.Prototype
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.widget.{ URL, Helper }
 import org.openmole.core.model.domain.{ Discrete, Domain }
+import org.openmole.ide.core.model.sampling.IFinite
 
 class CombineSamplingDataUI extends ISamplingDataUI {
   val name = "Combine"
@@ -40,7 +41,10 @@ class CombineSamplingDataUI extends ISamplingDataUI {
 
   def fatImagePath = "img/combineSampling_fat.png"
 
-  override def isAcceptable(domain: IDomainDataUI) = false
+  override def isAcceptable(domain: IDomainDataUI) = domain match {
+    case f: IFinite ⇒ true
+    case _ ⇒ false
+  }
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 
