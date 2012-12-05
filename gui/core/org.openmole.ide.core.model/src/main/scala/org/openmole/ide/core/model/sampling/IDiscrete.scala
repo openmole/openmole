@@ -16,4 +16,4 @@
  */
 package org.openmole.ide.core.model.sampling
 
-trait IDiscrete
+trait IFinite

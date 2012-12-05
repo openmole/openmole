@@ -27,11 +27,11 @@ import org.openmole.plugin.domain.modifier.TakeDomain
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.model.sampling.IDiscrete
+import org.openmole.ide.core.model.sampling.IFinite
 
 case class TakeDomainDataUI(val size: String = "1",
                             val previousDomain: List[IDomainDataUI] = List.empty)
-    extends ModifierDomainDataUI with IDiscrete {
+    extends ModifierDomainDataUI with IFinite {
 
   val domainType = previousDomain.headOption match {
     case Some(dt: IDomainDataUI) ⇒ dt.domainType

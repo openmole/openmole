@@ -21,8 +21,9 @@ package org.openmole.ide.plugin.domain.file
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.misc.tools.util.Types.FILE
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.core.model.sampling.IFinite
 
-trait SubDataUI extends IDomainDataUI {
+trait SubDataUI extends IDomainDataUI with IFinite {
   def name = "File"
 
   override def availableTypes = List(FILE)

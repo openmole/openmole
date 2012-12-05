@@ -35,7 +35,7 @@ class SamplingCompositionDataUI(val name: String = "",
                                 val factors: List[IFactorProxyUI] = List.empty,
                                 val connections: List[(ISamplingCompositionProxyUI, ISamplingCompositionProxyUI)] = List.empty,
                                 val finalSampling: Option[ISamplingCompositionProxyUI] = None,
-                                val finalPosition: (Int, Int) = (450, 130)) extends ISamplingCompositionDataUI {
+                                val finalPosition: (Int, Int) = (750, 230)) extends ISamplingCompositionDataUI {
 
   type T = Domain[Any] with Discrete[Any]
 
