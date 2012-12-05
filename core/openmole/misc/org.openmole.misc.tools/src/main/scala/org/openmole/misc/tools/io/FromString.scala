@@ -63,6 +63,11 @@ object FromString {
       def fromString(s: String) = BigInt(s).underlying
     }
 
+  implicit val stringFromString =
+    new FromString[String] {
+      def fromString(s: String) = s
+    }
+
   implicit val doubleAsIfIntegral = Numeric.DoubleAsIfIntegral
   implicit val bigDecimalAsIfIntegral = Numeric.BigDecimalAsIfIntegral
   implicit val floatAsIfIntegral = Numeric.FloatAsIfIntegral
