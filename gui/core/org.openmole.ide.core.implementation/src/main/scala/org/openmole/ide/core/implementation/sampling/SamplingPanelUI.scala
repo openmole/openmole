@@ -38,7 +38,9 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget,
       incomings.forall {
         _ match {
           case dw: IDomainWidget ⇒ s.isAcceptable(dw.proxy.dataUI)
-          case sw: ISamplingWidget ⇒ s.isAcceptable(sw.proxy.dataUI)
+          case sw: ISamplingWidget ⇒
+            s.isAcceptable(sw.proxy.dataUI) &&
+              contraintsGreaterThanOrEqual(s.inputNumberConstrainst, sw.proxy.dataUI.inputNumberConstrainst)
           case _ ⇒ false
         }
       }
@@ -80,4 +82,13 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget,
   }
 
   def saveContent = sPanel.saveContent
+
+  def contraintsGreaterThanOrEqual(c1: Option[Int], c2: Option[Int]) =
+    c1 match {
+      case Some(i: Int) ⇒ c2 match {
+        case Some(j: Int) ⇒ i >= j
+        case _ ⇒ false
+      }
+      case _ ⇒ true
+    }
 }

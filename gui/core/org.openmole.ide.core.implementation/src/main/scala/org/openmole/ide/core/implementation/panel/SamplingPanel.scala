@@ -36,7 +36,6 @@ class SamplingPanel(samplingWidget: ISamplingWidget,
   scene,
   mode) {
   val panelUI = new SamplingPanelUI(samplingWidget, this)
-  //val panelUI = samplingWidget.proxy.dataUI.buildPanelUI
 
   listenTo(panelUI.help.components.toSeq: _*)
   reactions += {
