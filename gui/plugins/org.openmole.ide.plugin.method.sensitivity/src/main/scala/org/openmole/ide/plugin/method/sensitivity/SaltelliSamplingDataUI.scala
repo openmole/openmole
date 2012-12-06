@@ -23,6 +23,8 @@ class SaltelliSamplingDataUI(val samples: String = "1") extends ISamplingDataUI 
 
   implicit def string2Int(s: String): Int = augmentString(s).toInt
 
+  def name = "Saltelli"
+
   def coreObject(factors: List[IFactorDataUI],
                  samplings: List[Sampling]) =
     new SaltelliSampling(

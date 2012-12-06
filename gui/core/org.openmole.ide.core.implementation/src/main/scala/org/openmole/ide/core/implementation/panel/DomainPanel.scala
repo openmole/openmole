@@ -49,9 +49,10 @@ class DomainPanel(domainWidget: IDomainWidget,
 
   def save = try {
     domainWidget.proxy.dataUI = panelUI.saveContent
+    println("saved ..")
     domainWidget.update
   } catch {
-    case e: UserBadDataError ⇒
+    case e: UserBadDataError ⇒ StatusBar.block(e.getMessage, stack = e.getCause.getMessage)
   }
 
   def updateHelp = {

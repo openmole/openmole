@@ -25,8 +25,4 @@ trait ISamplingProxyUI extends ISamplingCompositionProxyUI {
   def dataUI: ISamplingDataUI
 
   def dataUI_=(d: ISamplingDataUI)
-
-  def isFinal: Boolean
-
-  def isFinal_=(b: Boolean)
 }

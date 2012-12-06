@@ -16,39 +16,39 @@
  */
 package org.openmole.ide.plugin.sampling.combine
 
-import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI, ISamplingDataUI }
-import org.openmole.core.model.sampling.{ DiscreteFactor, Factor, Sampling }
-import org.openmole.plugin.sampling.combine.CombineSampling
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.core.model.data.Prototype
-import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.model.data.{ IDomainDataUI, IFactorDataUI, ISamplingDataUI }
+import org.openmole.core.model.sampling.Sampling
+import org.openmole.plugin.sampling.combine.ZipSampling
 import org.openmole.ide.misc.widget.{ URL, Helper }
-import org.openmole.core.model.domain.{ Discrete, Domain }
 import org.openmole.ide.core.model.sampling.IFinite
+import org.openmole.ide.core.implementation.dialog.StatusBar
 
-class CombineSamplingDataUI extends ISamplingDataUI {
-  val name = "Combine"
+class ZipSamplingDataUI extends ISamplingDataUI {
+  def name = "Zip"
 
-  def coreObject(factors: List[IFactorDataUI], samplings: List[Sampling]) =
-    new CombineSampling((CombineSamplingCoreFactory(factors) ::: samplings): _*)
+  def coreObject(factors: List[IFactorDataUI],
+                 samplings: List[Sampling]) =
+    new ZipSampling((CombineSamplingCoreFactory(factors) ::: samplings): _*)
 
   def buildPanelUI = new GenericCombineSamplingPanelUI(this) {
-    override val help = new Helper(List(new URL(i18n.getString("combinePermalinkText"),
-      i18n.getString("combinePermalink"))))
+    override val help = new Helper(List(new URL(i18n.getString("zipPermalinkText"),
+      i18n.getString("zipPermalink"))))
   }
 
-  def imagePath = "img/combineSampling.png"
+  def imagePath = "img/zipSampling.png"
 
-  def fatImagePath = "img/combineSampling_fat.png"
-
-  override def isAcceptable(domain: IDomainDataUI) = domain match {
-    case f: IFinite ⇒ true
-    case _ ⇒ false
-  }
+  def fatImagePath = "img/zipSampling_fat.png"
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 
+  override def isAcceptable(domain: IDomainDataUI) = domain match {
+    case f: IFinite ⇒ true
+    case _ ⇒
+      StatusBar.warn("A Finite Domain is required for a Zip Sampling")
+      false
+  }
+
   def preview = name
 
-  def coreClass = classOf[CombineSampling]
+  def coreClass = classOf[ZipSampling]
 }

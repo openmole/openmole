@@ -23,6 +23,8 @@ class LHSSamplingDataUI(val samples: String = "1") extends ISamplingDataUI {
 
   implicit def string2Int(s: String): Int = augmentString(s).toInt
 
+  def name = "LHS"
+
   def coreObject(factors: List[IFactorDataUI],
                  samplings: List[Sampling]) =
     new LHS(

@@ -17,14 +17,7 @@
 
 package org.openmole.ide.core.model.sampling
 
-import scala.collection.mutable.HashSet
-import org.netbeans.api.visual.widget.ConnectionWidget
-
-trait ISamplingComponent {
+trait ISamplingComponent extends ISceneComponent {
 
   def component: ISamplingCompositionWidget
-
-  def connections: HashSet[ConnectionWidget]
-
-  def connections_=(cw: HashSet[ConnectionWidget])
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,20 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.ide.core.implementation.sampling
 
-package org.openmole.ide.plugin.method.sensitivity
+import org.openmole.ide.misc.widget.MigPanel
+import java.awt.{ Dimension, Color, RenderingHints, Graphics2D }
+import javax.imageio.ImageIO
 
-import org.openmole.ide.core.implementation.registry.OSGiActivator
-import org.openmole.ide.core.implementation.registry.SamplingActivator
-import org.openmole.ide.core.implementation.registry.TaskActivator
-import org.openmole.ide.core.model.factory.ISamplingFactoryUI
+class FinalWidget extends MigPanel("") {
 
-class Activator extends OSGiActivator with SamplingActivator with TaskActivator {
+  preferredSize = new Dimension(40, 40)
+  override def paintComponent(g: Graphics2D) = {
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+      RenderingHints.VALUE_ANTIALIAS_ON)
 
-  override def samplingFactories = List(new ISamplingFactoryUI {
-    def buildDataUI = new SaltelliSamplingDataUI
-  })
+    g.setPaint(Color.WHITE)
+    g.fillOval(0, 0, 30, 30)
+    g.drawImage(ImageIO.read(getClass.getClassLoader.getResource("img/finalSampling.png")), 10, 8, 10, 14, peer)
 
-  override def taskFactories = List(new FirstOrderEffectTaskFactoryUI,
-    new TotalOrderEffectTaskFactoryUI)
+  }
 }

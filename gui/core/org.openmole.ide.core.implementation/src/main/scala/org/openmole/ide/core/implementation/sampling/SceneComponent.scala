@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,14 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ide.core.implementation.sampling
 
-import java.awt.Point
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
-import org.openmole.ide.core.model.sampling.ISamplingCompositionWidget
-import org.openmole.ide.core.model.sampling.ISamplingComponent
+import org.netbeans.api.visual.widget.ComponentWidget
+import org.netbeans.api.visual.widget.ConnectionWidget
+import swing.Panel
+import java.awt.{ Color, Point }
+import org.openmole.ide.core.model.sampling.ISceneComponent
+import scala.collection.mutable.HashSet
 
-class SamplingComponent(samplingScene: ISamplingCompositionPanelUI,
-                        val component: ISamplingCompositionWidget,
-                        location: Point) extends SceneComponent(samplingScene, component, location) with ISamplingComponent
+class SceneComponent(samplingScene: ISamplingCompositionPanelUI,
+                     val panel: Panel,
+                     location: Point) extends ComponentWidget(samplingScene.scene, panel.peer) with ISceneComponent {
+  var connections = HashSet.empty[ConnectionWidget]
+
+  setOpaque(true)
+  setBackground(new Color(77, 77, 77, 0))
+  setPreferredLocation(location)
+
+}

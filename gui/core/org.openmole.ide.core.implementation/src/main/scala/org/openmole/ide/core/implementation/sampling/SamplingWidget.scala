@@ -77,11 +77,9 @@ class SamplingWidget(val proxy: ISamplingProxyUI,
     val colors = Array(color, new Color(228, 228, 228), color)
     val gp = new LinearGradientPaint(start, end, dist, colors)
 
+    g.setBackground(new Color(77, 77, 77))
     g.setPaint(gp)
     g.fillRoundRect(0, 0, size.width, size.height, 8, 8)
-
-    if (proxy.isFinal)
-      g.drawImage(ImageIO.read(getClass.getClassLoader.getResource("img/finalSampling.png")), 85, 19, 10, 14, peer)
   }
 
   contents += link

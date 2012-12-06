@@ -24,12 +24,14 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.domain.{ Bounds, Domain }
 import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.core.model.sampling.IFinite
+import org.openmole.ide.misc.tools.util.Types
 
 object GenericRangeDomainDataUI {
 
   def apply[S](min: String = "0", max: String = "", step: Option[String] = None, log: Boolean, classString: String): IDomainDataUI =
     if (log) {
-      classString match {
+      Types.standardize(classString) match {
         case DOUBLE ⇒ new DoubleLogarithmRangeDataUI(min, max, step)
         case BIG_DECIMAL ⇒ new BigDecimalLogarithmRangeDataUI(min, max, step)
         case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported in logarithm scale")
@@ -37,7 +39,7 @@ object GenericRangeDomainDataUI {
     } else RangeDomainDataUI(min, max, step, classString)
 }
 
-abstract class GenericRangeDomainDataUI extends IDomainDataUI {
+abstract class GenericRangeDomainDataUI extends IDomainDataUI with IFinite {
 
   override def isAcceptable(domain: IDomainDataUI) = {
     StatusBar.warn("Only modifier Domain (Map, Take, Group, ...) can take another Domain as input")

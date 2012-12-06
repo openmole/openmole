@@ -21,22 +21,5 @@ import org.openmole.ide.core.model.sampling.{ IFactorProxyUI, IDomainProxyUI }
 import org.openmole.ide.core.implementation.data.FactorDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
-class DomainProxyUI(var dataUI: IDomainDataUI) extends IDomainProxyUI {
-
-  def testTypes = true
-
-  /*def testTypes = {
-
- println("COMPARE ON " + id)
- factorDataUI match {
-   case Some(f: IFactorDataUI) ⇒ f.prototype match {
-     case p: IPrototypeDataProxyUI ⇒
-       println("-- " + p.dataUI.protoType.toString.split('.').last)
-       println("-- " + dataUI.domainType.toString.split('.').last)
-       p.dataUI.protoType.toString.split('.').last == dataUI.domainType.toString.split('.').last
-     case _ ⇒ println("no proto"); true
-   }
-   case _ ⇒ println("no factor"); true
- }
-}   */
-}
+class DomainProxyUI(var dataUI: IDomainDataUI,
+                    var isFinal: Boolean = false) extends IDomainProxyUI

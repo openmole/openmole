@@ -21,14 +21,18 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import org.openmole.core.model.domain.Domain
 import org.openmole.ide.misc.tools.util.Types._
-import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
+import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.domain.collection.DynamicListDomain
+import org.openmole.ide.core.model.sampling.IFinite
+import org.openmole.ide.misc.tools.util.Types
+import org.openmole.misc.tools.io.FromString
+//import org.openmole.misc.tools.io.FromString._
 
 object DynamicListDomainDataUI {
 
   def apply[T](values: List[String] = List(), classString: String) = {
-    classString match {
+    Types.standardize(classString) match {
       case INT ⇒ new DynamicListDomainDataUI[Int](values)
       case DOUBLE ⇒ new DynamicListDomainDataUI[Double](values)
       case BIG_DECIMAL ⇒ new DynamicListDomainDataUI[BigDecimal](values)
@@ -40,12 +44,14 @@ object DynamicListDomainDataUI {
   }
 }
 
-case class DynamicListDomainDataUI[S](val values: List[String])(implicit val domainType: Manifest[S])
-    extends IDomainDataUI {
-
+case class DynamicListDomainDataUI[S](val values: List[String])(implicit val domainType: Manifest[S],
+                                                                fs: FromString[S])
+    extends IDomainDataUI with IFinite {
   val name = "Value list"
 
   def preview = " in " + values.headOption.getOrElse("") + " ..."
+
+  override def availableTypes = super.availableTypes :+ STRING
 
   override def coreObject: Domain[S] = new DynamicListDomain(values.toSeq: _*)
 

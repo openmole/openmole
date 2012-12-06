@@ -18,14 +18,14 @@ package org.openmole.ide.core.implementation.data
 
 import org.openmole.ide.core.model.data.IFactorDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.sampling.{ ISamplingProxyUI, IDomainProxyUI }
+import org.openmole.ide.core.model.sampling.{ ISamplingCompositionProxyUI, ISamplingProxyUI, IDomainProxyUI }
 import org.openmole.core.model.sampling.Factor
 import org.openmole.core.model.domain.Domain
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.data.Prototype
 
 case class FactorDataUI[T](val domain: IDomainProxyUI,
-                           val target: ISamplingProxyUI,
+                           val target: Option[ISamplingCompositionProxyUI],
                            var prototype: Option[IPrototypeDataProxyUI] = None) extends IFactorDataUI {
   def coreObject = prototype match {
     case Some(p: IPrototypeDataProxyUI) ⇒ Factor(p.dataUI.coreObject.asInstanceOf[Prototype[T]],

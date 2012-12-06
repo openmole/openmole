@@ -23,8 +23,11 @@ import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.misc.tools.Counter
 
+object ISamplingDataUI {
+  implicit val ordering = Ordering.by((_: ISamplingDataUI).name)
+}
+
 trait ISamplingDataUI extends IDataUI {
-  def name: String = "Sampling"
 
   def coreObject(factors: List[IFactorDataUI],
                  samplings: List[Sampling]): Sampling

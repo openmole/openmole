@@ -27,6 +27,7 @@ import org.openmole.misc.tools.io.FromString
 import org.openmole.misc.tools.io.FromString._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.tools.util.Types._
+import org.openmole.ide.misc.tools.util.Types
 
 object RangeDomainDataUI {
   def empty = apply("0", "1", Some("1"), DOUBLE)
@@ -36,7 +37,7 @@ object RangeDomainDataUI {
             step: Option[String],
             cString: String) = {
     import Numeric.BigDecimalAsIfIntegral
-    cString match {
+    Types.standardize(cString) match {
       case INT ⇒ new RangeDomainDataUI[Int](min, max, step)
       case DOUBLE ⇒ new RangeDomainDataUI[Double](min, max, step)
       case BIG_DECIMAL ⇒ new RangeDomainDataUI[BigDecimal](min, max, step)
@@ -55,7 +56,6 @@ case class RangeDomainDataUI[S](
     fs: FromString[S],
     integral: Integral[S])
     extends GenericRangeDomainDataUI {
-
   val name = "Range"
 
   def coreObject: Domain[S] =

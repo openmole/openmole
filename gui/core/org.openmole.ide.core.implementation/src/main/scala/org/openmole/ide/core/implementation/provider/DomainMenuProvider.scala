@@ -20,9 +20,10 @@ package org.openmole.ide.core.implementation.provider
 import java.awt.Point
 import org.netbeans.api.visual.widget._
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
-import org.openmole.ide.core.model.sampling.ISamplingComponent
+import org.openmole.ide.core.model.sampling.{ IDomainWidget, ISamplingComponent }
 import scala.swing.Action
 import scala.swing.MenuItem
+import org.openmole.ide.core.implementation.sampling.SamplingComponent
 
 class DomainMenuProvider(panelScene: ISamplingCompositionPanelUI) extends GenericMenuProvider {
 
@@ -35,6 +36,18 @@ class DomainMenuProvider(panelScene: ISamplingCompositionPanelUI) extends Generi
           case cw: ISamplingComponent ⇒ panelScene.remove(cw)
           case _ ⇒
         }
+    })
+
+    val itSetAsFinalDomain = new MenuItem(new Action("Set as final") {
+      def apply = widget match {
+        case cw: SamplingComponent ⇒
+          cw.component match {
+            case domainWidget: IDomainWidget ⇒
+              panelScene.setFinalSampling(domainWidget.proxy)
+            case _ ⇒
+          }
+        case _ ⇒
+      }
     })
     items += itRemoveFactor.peer
     super.getPopupMenu(widget, point)

@@ -34,12 +34,15 @@ class DynamicListDomainPanelUI(pud: DynamicListDomainDataUI[_]) extends PluginPa
     override val foreground = Color.black
   }
 
+  typeCombo.selection.item = pud.domainType.toString.split('.').last
+
+  contents += typeCombo
   contents += new ScrollPane(textArea) {
     horizontalScrollBarPolicy = Never
     verticalScrollBarPolicy = AsNeeded
   }
 
-  def saveContent = DynamicListDomainDataUI(textArea.text.split('\n').toSet.toList,
+  def saveContent = DynamicListDomainDataUI(textArea.text.split('\n').toList,
     typeCombo.selection.item)
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {

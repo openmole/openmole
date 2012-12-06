@@ -21,13 +21,15 @@ import org.openmole.core.model.sampling.Sampling
 import org.openmole.plugin.sampling.combine.TakeSampling
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.widget.{ URL, Helper }
+import org.openmole.ide.core.model.sampling.IFinite
+import org.openmole.ide.core.implementation.dialog.StatusBar
 
 class TakeSamplingDataUI(val size: String = "1") extends ISamplingDataUI {
+
+  val name = "Take"
+
   def coreObject(factors: List[IFactorDataUI], samplings: List[Sampling]) =
-    samplings.headOption match {
-      case Some(s: Sampling) ⇒ new TakeSampling(s, size.toInt)
-      case x: Any ⇒ throw new UserBadDataError("A Sampling is required as input of a Take Sampling " + x)
-    }
+    new TakeSampling((CombineSamplingCoreFactory(factors) ::: samplings).head, size.toInt)
 
   def buildPanelUI = new TakeSamplingPanelUI(this) {
     override val help = new Helper(List(new URL(i18n.getString("takePermalinkText"),
@@ -38,7 +40,12 @@ class TakeSamplingDataUI(val size: String = "1") extends ISamplingDataUI {
 
   def fatImagePath = "img/takeSampling_fat.png"
 
-  override def isAcceptable(domain: IDomainDataUI) = false
+  override def isAcceptable(domain: IDomainDataUI) = domain match {
+    case f: IFinite ⇒ true
+    case _ ⇒
+      StatusBar.warn("A Finite Domain is required for a Take Sampling")
+      false
+  }
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 

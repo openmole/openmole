@@ -28,13 +28,15 @@ import org.openmole.ide.misc.widget._
 import multirow.ComponentFocusedEvent
 import org.openmole.ide.core.model.panel._
 import javax.imageio.ImageIO
+import org.openmole.ide.core.implementation.sampling.SamplingPanelUI
 
 class SamplingPanel(samplingWidget: ISamplingWidget,
                     scene: IMoleScene,
                     mode: PanelMode.Value) extends BasePanel(None,
   scene,
   mode) {
-  val panelUI = samplingWidget.proxy.dataUI.buildPanelUI
+  val panelUI = new SamplingPanelUI(samplingWidget, this)
+  //val panelUI = samplingWidget.proxy.dataUI.buildPanelUI
 
   listenTo(panelUI.help.components.toSeq: _*)
   reactions += {
@@ -58,5 +60,12 @@ class SamplingPanel(samplingWidget: ISamplingWidget,
   def save = {
     samplingWidget.proxy.dataUI = panelUI.saveContent
     samplingWidget.update
+  }
+
+  def updateHelp = {
+    if (peer.getComponentCount == 3) peer.remove(2)
+    peer.add(panelUI.sPanel.help.peer, BorderLayout.SOUTH)
+    revalidate
+    repaint
   }
 }

@@ -40,7 +40,7 @@ class SamplingMenuProvider(panelScene: ISamplingCompositionPanelUI) extends Gene
         }
     })
 
-    val itSetAsFinalSampling = new MenuItem(new Action("Set as final Sampling") {
+    val itSetAsFinalSampling = new MenuItem(new Action("Set as final") {
       def apply = widget match {
         case cw: SamplingComponent ⇒
           cw.component match {

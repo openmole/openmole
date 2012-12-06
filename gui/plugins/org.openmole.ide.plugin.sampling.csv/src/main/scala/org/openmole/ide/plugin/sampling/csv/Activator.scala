@@ -19,8 +19,11 @@ package org.openmole.ide.plugin.sampling.csv
 
 import org.openmole.ide.core.implementation.registry.OSGiActivator
 import org.openmole.ide.core.implementation.registry.SamplingActivator
+import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 
 class Activator extends OSGiActivator with SamplingActivator {
 
-  override def samplingFactories = List(new CSVSamplingFactoryUI)
+  override def samplingFactories = List(new ISamplingFactoryUI {
+    def buildDataUI = new CSVSamplingDataUI
+  })
 }

@@ -44,7 +44,7 @@ class SamplingConnectorWidget(sourceWidget: Widget,
   samplingConnectorWidget ⇒
 
   val sourceW = sourceWidget.asInstanceOf[SamplingComponent]
-  val targetW = targetWidget.asInstanceOf[SamplingComponent]
+  val targetW = targetWidget.asInstanceOf[SceneComponent]
   var componentWidget: Option[PrototypeOnConnectorWidget] = None
 
   setStroke(new BasicStroke(2))
@@ -64,7 +64,7 @@ class SamplingConnectorWidget(sourceWidget: Widget,
     revalidate
   }
 
-  def computeFactor = scene.computeFactor(sourceW.component.proxy, targetW.component.proxy)
+  def computeFactor = scene.computeFactor(sourceW.component.proxy)
 
   def preview = new IConnectorViewUI {
     val preview =
@@ -83,7 +83,6 @@ class SamplingConnectorWidget(sourceWidget: Widget,
     computeFactor match {
       case Some(factor: IFactorProxyUI) ⇒
         val dialog = new FactorPrototypeDialog(samplingConnectorWidget)
-
         componentWidget = Some(new PrototypeOnConnectorWidget(scene.scene,
           preview,
           new LinkLabel(factor.dataUI.prototype.toString,

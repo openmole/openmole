@@ -29,10 +29,12 @@ import org.openmole.core.model.data.Prototype
 import scala.swing.Label
 import org.openmole.ide.core.model.panel.{ IDomainPanelUI, IPanelUI }
 import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.core.model.sampling.IFinite
+import org.openmole.ide.misc.tools.util.Types
 
 object VariableDomainDataUI {
   def apply[T](prototypeArray: IPrototypeDataProxyUI, classString: String) = {
-    classString match {
+    Types.standardize(classString) match {
       case INT ⇒ new VariableDomainDataUI[Int](prototypeArray)
       case DOUBLE ⇒ new VariableDomainDataUI[Double](prototypeArray)
       case BIG_DECIMAL ⇒ new VariableDomainDataUI[BigDecimal](prototypeArray)
@@ -44,7 +46,8 @@ object VariableDomainDataUI {
   }
 }
 
-class VariableDomainDataUI[S](val prototypeArray: IPrototypeDataProxyUI)(implicit val domainType: Manifest[S]) extends IDomainDataUI {
+class VariableDomainDataUI[S](val prototypeArray: IPrototypeDataProxyUI)(implicit val domainType: Manifest[S])
+    extends IDomainDataUI with IFinite {
   vdomainDataUI ⇒
 
   val name = "Prototype Array"

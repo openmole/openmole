@@ -25,16 +25,14 @@ class Activator extends OSGiActivator with SamplingActivator {
 
   override def samplingFactories = List(
     new ISamplingFactoryUI {
-      override def toString = "Complete"
       def buildDataUI = new CompleteSamplingDataUI
     }, new ISamplingFactoryUI {
-      override def toString = "Combine"
       def buildDataUI = new CombineSamplingDataUI
     }, new ISamplingFactoryUI {
-      override def toString = "Shuffle"
       def buildDataUI = new ShuffleSamplingDataUI
     }, new ISamplingFactoryUI {
-      override def toString = "Take"
       def buildDataUI = new TakeSamplingDataUI
+    }, new ISamplingFactoryUI {
+      def buildDataUI = new ZipSamplingDataUI
     })
 }

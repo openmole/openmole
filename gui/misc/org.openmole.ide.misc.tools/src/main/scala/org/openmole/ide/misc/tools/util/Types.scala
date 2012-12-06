@@ -29,4 +29,8 @@ object Types {
     c1.split('.').last.toUpperCase == c2.split('.').last.toUpperCase
 
   def pretify(c: String) = c.head.toUpper + c.tail
+
+  def standardize(c: String) =
+    if (c == "Int" || c == "Long") c.head.toLower + c.tail
+    else c
 }

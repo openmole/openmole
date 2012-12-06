@@ -33,9 +33,10 @@ import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import swing.{ Label, MyComboBox, ScrollPane }
 import org.openmole.ide.core.implementation.sampling.SamplingConnectorWidget
-import org.openmole.ide.core.model.sampling.IFactorProxyUI
+import org.openmole.ide.core.model.sampling.{ IDomainProxyUI, IFactorProxyUI }
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.misc.tools.util.Types
+import org.openmole.ide.core.model.data.IDomainDataUI
 
 object ConnectorPrototypeFilterDialog extends PrototypeDialog {
   def display(connectorUI: IConnectorUI) = {
@@ -73,12 +74,23 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
       case _ ⇒
     }
 
-    def availablePrototypes = connectorWidget.computeFactor match {
-      case Some(f: IFactorProxyUI) ⇒ Proxys.prototypes.filter {
-        p ⇒ Types(f.dataUI.domain.dataUI.domainType.toString, p.dataUI.protoType.toString)
-      }.toList
-      case _ ⇒ List()
-    }
+    def availablePrototypes =
+      /* connectorWidget.sourceW.component.proxy match {
+        case d: IDomainProxyUI ⇒
+          val availables = d.dataUI.availableTypes.map { _.toUpperCase }
+          Proxys.prototypes.filter {
+            p ⇒
+              availables.contains(p.dataUI.comparable)
+          }.toList
+        case _ ⇒ List()
+      }   */
+
+      connectorWidget.computeFactor match {
+        case Some(f: IFactorProxyUI) ⇒ Proxys.prototypes.filter {
+          p ⇒ Types(f.dataUI.domain.dataUI.domainType.toString, p.dataUI.protoType.toString)
+        }.toList
+        case _ ⇒ List()
+      }
 
     def display: Unit = {
       StatusBar.clear
