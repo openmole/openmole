@@ -21,10 +21,12 @@ import org.openmole.ide.core.implementation.panel.{ SamplingPanel }
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.core.model.panel.IPanelUI
 import org.openmole.ide.core.implementation.registry.KeyRegistry
-import swing.{ Component, MyComboBox }
+import swing.{ Label, Component, MyComboBox }
 import org.openmole.ide.core.model.data.ISamplingDataUI
 import swing.event.{ FocusGained, SelectionChanged }
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
+import javax.swing.ImageIcon
+import javax.imageio.ImageIO
 
 class SamplingPanelUI(samplingWidget: ISamplingWidget,
                       samplingPanel: SamplingPanel) extends PluginPanel("") with IPanelUI {
@@ -59,17 +61,24 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget,
 
   val mainSamplingPanel = new PluginPanel("wrap") {
     contents += samplingComboBox
-    contents += sPanel.peer
+    contents += buildPanel(samplingWidget.proxy.dataUI)
   }
 
   contents += mainSamplingPanel
   samplingComboBox.selection.reactions += {
     case SelectionChanged(`samplingComboBox`) ⇒
       if (mainSamplingPanel.contents.size == 2) mainSamplingPanel.contents.remove(1)
-      sPanel = samplingComboBox.selection.item.buildPanelUI
+      mainSamplingPanel.contents += buildPanel(samplingComboBox.selection.item)
       listenToSampling
-      mainSamplingPanel.contents += sPanel.peer
       repaint
+  }
+
+  def buildPanel(s: ISamplingDataUI) = new PluginPanel("wrap 2") {
+    contents += new Label {
+      icon = new ImageIcon(ImageIO.read(s.getClass.getClassLoader.getResource(s.fatImagePath)))
+    }
+    sPanel = s.buildPanelUI
+    contents += sPanel.peer
   }
 
   def listenToSampling = {

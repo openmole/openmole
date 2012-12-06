@@ -44,10 +44,7 @@ class SamplingPanel(samplingWidget: ISamplingWidget,
   }
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
-  peer.add(new PluginPanel("wrap 2") {
-    contents += new Label {
-      icon = new ImageIcon(ImageIO.read(samplingWidget.proxy.dataUI.getClass.getClassLoader.getResource(samplingWidget.proxy.dataUI.fatImagePath)))
-    }
+  peer.add(new PluginPanel("") {
     contents += panelUI.peer
   }.peer, BorderLayout.CENTER)
   peer.add(panelUI.help.peer, BorderLayout.SOUTH)
@@ -62,7 +59,7 @@ class SamplingPanel(samplingWidget: ISamplingWidget,
   }
 
   def updateHelp = {
-    if (peer.getComponentCount == 3) peer.remove(2)
+    if (peer.getComponentCount == 2) peer.remove(1)
     peer.add(panelUI.sPanel.help.peer, BorderLayout.SOUTH)
     revalidate
     repaint
