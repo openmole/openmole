@@ -22,18 +22,16 @@ import org.openmole.core.model.task._
 import org.openmole.core.implementation.data._
 import reflect.ClassTag
 
-object ToArrayTask {
+object FlattenTask {
 
-  def apply(name: String, prototypes: Prototype[T] forSome { type T }*)(implicit plugins: PluginSet = PluginSet.empty) =
+  def apply[S, T <: Array[S]](name: String, prototypes: Iterable[Prototype[_ <: T]], result: Prototype[Array[S]])(implicit plugins: PluginSet = PluginSet.empty) =
     new TaskBuilder { builder ⇒
 
-      for (p ← prototypes) {
-        addInput(p)
-        addOutput(p.toArray)
-      }
+      for (p ← prototypes) addInput(p)
+      addOutput(result)
 
       def toTask =
-        new ToArrayTask(name, prototypes: _*) {
+        new FlattenTask[S, T](name, prototypes, result) {
           val inputs = builder.inputs
           val outputs = builder.outputs
           val parameters = builder.parameters
@@ -41,11 +39,12 @@ object ToArrayTask {
     }
 
 }
-sealed abstract class ToArrayTask(val name: String, val prototypes: Prototype[T] forSome { type T }*)(implicit val plugins: PluginSet) extends Task {
 
-  override def process(context: Context) =
-    prototypes.map {
-      p ⇒ Variable(p.toArray.asInstanceOf[Prototype[Any]], Array(context(p))(ClassTag(p.`type`.runtimeClass)))
-    }
+sealed abstract class FlattenTask[S, T <: Array[S]](val name: String, prototypes: Iterable[Prototype[_ <: T]], result: Prototype[Array[S]])(implicit val plugins: PluginSet) extends Task {
+
+  override def process(context: Context) = {
+    val flattened = prototypes.map { p ⇒ context(p) }.flatten.toArray[S](ClassTag(result.fromArray.`type`.runtimeClass))
+    Variable(result, flattened)
+  }
 
 }

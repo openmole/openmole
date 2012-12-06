@@ -26,25 +26,21 @@ import org.openmole.misc.tools.service.Random._
 
 import fr.iscpif.mgo._
 
-object SelectPopulationTask {
+object SelectIndividualsTask {
 
   def apply(evolution: Modifier with G with MF with F)(
     name: String,
-    population: Prototype[Population[evolution.G, evolution.F, evolution.MF]],
-    archive: Prototype[evolution.A],
+    individuals: Prototype[Array[Individual[evolution.G, evolution.F]]],
     size: Int)(implicit plugins: PluginSet) = {
-    val (_archive, _population) = (archive, population)
+    val (_individuals) = (individuals)
 
     new TaskBuilder { builder ⇒
-      addInput(archive)
-      addInput(population)
-      addOutput(archive)
-      addOutput(population)
+      addInput(individuals)
+      addOutput(individuals)
 
       def toTask =
-        new SelectPopulationTask(name, evolution, size) {
-          val population = _population.asInstanceOf[Prototype[Population[evolution.G, evolution.F, evolution.MF]]]
-          val archive = _archive.asInstanceOf[Prototype[evolution.A]]
+        new SelectIndividualsTask(name, evolution, size) {
+          val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.F]]]]
           val inputs = builder.inputs
           val outputs = builder.outputs
           val parameters = builder.parameters
@@ -55,21 +51,18 @@ object SelectPopulationTask {
 
 }
 
-sealed abstract class SelectPopulationTask(
+sealed abstract class SelectIndividualsTask(
     val name: String,
     val evolution: Modifier with G with MF with F,
     val size: Int)(implicit val plugins: PluginSet) extends Task {
 
-  def population: Prototype[Population[evolution.G, evolution.F, evolution.MF]]
-  def archive: Prototype[evolution.A]
+  def individuals: Prototype[Array[Individual[evolution.G, evolution.F]]]
 
   override def process(context: Context) = {
-    implicit val rng = newRNG(context.valueOrException(openMOLESeed))
-    val p = context.valueOrException(population)
-    val a = context.valueOrException(archive)
-    val individuals = p.toIndividuals
-
-    val newP = evolution.toPopulation((0 until size).map { i ⇒ individuals(rng.nextInt(individuals.size)) }, a)
-    context + Variable(population, newP)
+    implicit val rng = newRNG(context(openMOLESeed))
+    val is = context(individuals)
+    val newIs = (0 until size).map { i ⇒ is(rng.nextInt(is.size)) }.toArray
+    Variable(individuals, newIs)
   }
+
 }

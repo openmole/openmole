@@ -50,7 +50,7 @@ package object puzzle {
 
   implicit def slotToPuzzleConverter(slot: Slot) = slot.toPuzzle
 
-  implicit def puzzleDecoraton(puzzle: Puzzle) = new {
+  implicit def puzzleDecoration(puzzle: Puzzle) = new {
     def last = puzzle.lasts.head
   }
 

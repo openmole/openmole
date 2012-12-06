@@ -26,11 +26,11 @@ import org.openmole.core.model.domain._
 import org.openmole.core.model.task._
 import scala.collection.mutable.ListBuffer
 
-object ScalingGAPopulationTask {
+object ScalingGAIndividualsTask {
 
   def apply[G <: GAGenome, F <: MGFitness, MF](
     name: String,
-    population: Prototype[Population[G, F, MF]],
+    individuals: Prototype[Array[Individual[G, F]]],
     modelInputs: (Prototype[Double], (Double, Double))*)(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
 
@@ -42,10 +42,10 @@ object ScalingGAPopulationTask {
         this
       }
 
-      addInput(population)
+      addInput(individuals)
       modelInputs foreach { case (p, _) ⇒ this addOutput p.toArray }
 
-      def toTask = new ScalingGAPopulationTask(name, population, modelInputs: _*) {
+      def toTask = new ScalingGAIndividualsTask(name, individuals, modelInputs: _*) {
         val inputs = builder.inputs
         val outputs = builder.outputs
         val parameters = builder.parameters
@@ -55,22 +55,22 @@ object ScalingGAPopulationTask {
 
 }
 
-sealed abstract class ScalingGAPopulationTask[G <: GAGenome, F <: MGFitness, MF](
+sealed abstract class ScalingGAIndividualsTask[G <: GAGenome, F <: MGFitness, MF](
     val name: String,
-    population: Prototype[Population[G, F, MF]],
+    individuals: Prototype[Array[Individual[G, F]]],
     modelInputs: (Prototype[Double], (Double, Double))*)(implicit val plugins: PluginSet) extends Task {
 
   def objectives: List[Prototype[Double]]
 
   override def process(context: Context) = {
-    val populationValue = context.valueOrException(population)
+    val individualsValue = context.valueOrException(individuals)
 
     (
       modelInputs.zipWithIndex.map {
         case ((prototype, (min, max)), i) ⇒
           Variable(
             prototype.toArray,
-            populationValue.map {
+            individualsValue.map {
               _.genome.values(i).scale(min, max)
             }.toArray)
       } ++
@@ -78,7 +78,7 @@ sealed abstract class ScalingGAPopulationTask[G <: GAGenome, F <: MGFitness, MF]
         case (p, i) ⇒
           Variable(
             p.toArray,
-            populationValue.map { _.fitness.values(i) }.toArray)
+            individualsValue.map { _.fitness.values(i) }.toArray)
       }).toContext
   }
 
