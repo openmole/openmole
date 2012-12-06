@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2012 Mathieu Leclaire 
- * < mathieu.leclaire at openmole.org >
+ * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,23 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.ide.plugin.sampling.combine
 
-package org.openmole.ide.plugin.domain.file
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
-import org.openmole.ide.core.model.data.IDomainDataUI
-import org.openmole.ide.misc.tools.util.Types.FILE
-import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.model.sampling.IFinite
-
-trait SubDataUI extends IDomainDataUI with IFinite {
-  def name = "File"
-
-  override def availableTypes = List(FILE)
-
-  def directoryPath: String
-
-  override def isAcceptable(domain: IDomainDataUI) = {
-    StatusBar.warn("A file domain can not modify another Domain")
-    super.isAcceptable(domain)
-  }
+trait ZipWithPrototypeSamplingDataUI {
+  def prototype: Option[IPrototypeDataProxyUI]
 }

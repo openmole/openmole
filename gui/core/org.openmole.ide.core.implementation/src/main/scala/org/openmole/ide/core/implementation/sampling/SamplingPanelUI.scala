@@ -40,15 +40,13 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget,
       incomings.forall {
         _ match {
           case dw: IDomainWidget ⇒ s.isAcceptable(dw.proxy.dataUI)
-          case sw: ISamplingWidget ⇒
-            s.isAcceptable(sw.proxy.dataUI) &&
-              contraintsGreaterThanOrEqual(s.inputNumberConstrainst, sw.proxy.dataUI.inputNumberConstrainst)
+          case sw: ISamplingWidget ⇒ s.isAcceptable(sw.proxy.dataUI)
           case _ ⇒ false
         }
       }
-  }
+  }.filter { s ⇒ testConstraints(s.inputNumberConstrainst) }
 
-  val samplingComboBox = new MyComboBox(samplings)
+  val samplingComboBox = new MyComboBox(samplings) { peer.setMaximumRowCount(15) }
   samplings.filter {
     _.toString == samplingWidget.proxy.dataUI.toString
   }.headOption match {
@@ -91,6 +89,13 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget,
   }
 
   def saveContent = sPanel.saveContent
+
+  def testConstraints(c: Option[Int]) = {
+    c match {
+      case Some(i: Int) ⇒ i >= incomings.size
+      case _ ⇒ true
+    }
+  }
 
   def contraintsGreaterThanOrEqual(c1: Option[Int], c2: Option[Int]) =
     c1 match {

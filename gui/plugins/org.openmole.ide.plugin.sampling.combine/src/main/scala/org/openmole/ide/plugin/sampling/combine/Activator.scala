@@ -34,5 +34,9 @@ class Activator extends OSGiActivator with SamplingActivator {
       def buildDataUI = new TakeSamplingDataUI
     }, new ISamplingFactoryUI {
       def buildDataUI = new ZipSamplingDataUI
+    }, new ISamplingFactoryUI {
+      def buildDataUI = new ZipWithIndexSamplingDataUI
+    }, new ISamplingFactoryUI {
+      def buildDataUI = new ZipWithNameSamplingDataUI
     })
 }
