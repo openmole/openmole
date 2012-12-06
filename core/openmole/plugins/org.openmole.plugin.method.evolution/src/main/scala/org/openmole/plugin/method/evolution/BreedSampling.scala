@@ -30,29 +30,32 @@ import org.openmole.core.model.sampling.Sampling
 
 object BreedSampling {
 
-  def apply(evolution: Breeding with GManifest)(
-    population: Prototype[Population[evolution.G, evolution.F, evolution.MF]],
+  def apply(evolution: Breeding with GManifest with Archive)(
+    individuals: Prototype[Array[Individual[evolution.G, evolution.F]]],
+    archive: Prototype[evolution.A],
     genome: Prototype[evolution.G],
     size: Int)(implicit plugins: PluginSet) = {
-    val (_population, _genome) = (population, genome)
+    val (_individuals, _archive, _genome) = (individuals, archive, genome)
     new BreedSampling(evolution, size) {
-      val population = _population.asInstanceOf[Prototype[Population[evolution.G, evolution.F, evolution.MF]]]
+      val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.F]]]]
+      val archive = _archive.asInstanceOf[Prototype[evolution.A]]
       val genome = _genome.asInstanceOf[Prototype[evolution.G]]
     }
   }
 }
 
-sealed abstract class BreedSampling(val evolution: Breeding with GManifest, val size: Int) extends Sampling {
-  def population: Prototype[Population[evolution.G, evolution.F, evolution.MF]]
+sealed abstract class BreedSampling(val evolution: Breeding with GManifest with Archive, val size: Int) extends Sampling {
+  def individuals: Prototype[Array[Individual[evolution.G, evolution.F]]]
+  def archive: Prototype[evolution.A]
   def genome: Prototype[evolution.G]
 
   def prototypes = List(genome)
-  override def inputs = DataSet(Data(population, Optional))
+  override def inputs = DataSet(individuals, archive)
 
   override def build(context: Context) = {
-    val rng = newRNG(context.valueOrException(openMOLESeed))
-    val p = context.value(population).getOrElse(Population.empty)
-
-    evolution.breed(p, size)(rng).map(g ⇒ List(Variable(genome, g))).toIterator
+    val rng = newRNG(context(openMOLESeed))
+    val is = context(individuals)
+    val a = context(archive)
+    evolution.breed(is.toSeq, a, size)(rng).map(g ⇒ List(Variable(genome, g))).toIterator
   }
 }

@@ -23,7 +23,7 @@ import org.openmole.core.model.data._
 import org.openmole.core.implementation.task._
 import org.openmole.core.implementation.data._
 
-object ToArchiveTask {
+object UpdateArchiveTask {
 
   def apply(evolution: G with F with MG with Archive)(
     name: String,
@@ -35,9 +35,10 @@ object ToArchiveTask {
     new TaskBuilder { builder ⇒
 
       addInput(individuals)
+      addInput(archive)
       addOutput(archive)
 
-      def toTask = new ToArchiveTask(evolution)(name) {
+      def toTask = new UpdateArchiveTask(evolution)(name) {
         val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.F]]]]
         val archive = _archive.asInstanceOf[Prototype[evolution.A]]
         val inputs = builder.inputs
@@ -50,14 +51,14 @@ object ToArchiveTask {
 
 }
 
-sealed abstract class ToArchiveTask(val evolution: G with F with MG with Archive)(
+sealed abstract class UpdateArchiveTask(val evolution: G with F with MG with Archive)(
     val name: String)(implicit val plugins: PluginSet) extends Task { task ⇒
 
   def individuals: Prototype[Array[Individual[evolution.G, evolution.F]]]
   def archive: Prototype[evolution.A]
 
   override def process(context: Context) = {
-    val a = evolution.toArchive(context.valueOrException(individuals))
+    val a = evolution.combine(evolution.toArchive(context(individuals)), context(archive))
     Context(Variable(archive, a))
   }
 }

@@ -108,11 +108,11 @@ object GA {
       }
   }
 
-  def map(_plotter: GAPlotter, _aggregation: GAAggregation, neighbors: Int = 8, elitism: GAElitismBuilder = mapped) = {
-    val (_neighbors, _elitism) = (neighbors, elitism)
+  def map(_plotter: GAPlotter, _aggregation: GAAggregation, neighbors: Int = 8) = {
+    val (_neighbors) = (neighbors)
     new GAAlgorithmBuilder {
       def apply(_diversityMetric: GADiversityMetric, _ranking: GARanking) =
-        new MapArchive with GAAlgorithm with MapModifier {
+        new MapArchive with GAAlgorithm with MapModifier with MapElitism {
           override type DIVERSIFIED = MGFitness
           override type RANKED = MGFitness
           val aManifest = manifest[A]
@@ -121,7 +121,6 @@ object GA {
           val diversityMetric = _diversityMetric
           val ranking = _ranking
           val neighbors = _neighbors
-          def elitism(population: Population[G, F, MF]) = _elitism(_plotter, _aggregation).elitism(population)
         }
     }
   }
@@ -136,26 +135,6 @@ object GA {
     val y = _y
     val nX = _nX
     val nY = _nY
-  }
-
-  trait GAElitism extends Elitism with GA
-
-  trait GAElitismBuilder {
-    def apply(plotter: GAPlotter, aggregation: GAAggregation): GAElitism
-  }
-
-  def nonDominated(_mu: Int) =
-    new GAElitismBuilder {
-      def apply(plotter: GAPlotter, aggregation: GAAggregation) = new GAElitism with NonDominatedElitism {
-        val mu = _mu
-      }
-    }
-
-  def mapped = new GAElitismBuilder {
-    def apply(_plotter: GAPlotter, _aggregation: GAAggregation) = new GAElitism with MapElitism {
-      def plot(i: Individual[G, F]) = _plotter.plot(i)
-      def aggregate(fitness: F) = _aggregation.aggregate(fitness)
-    }
   }
 
   trait GACrossover extends CrossOver with GA
@@ -234,8 +213,8 @@ sealed class GAImpl(
 
   implicit val stateManifest = termination.stateManifest
 
-  def initialState(p: Population[G, F, MF]): STATE = termination.initialState(p)
-  def terminated(population: Population[G, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
+  def initialState: STATE = termination.initialState
+  def terminated(population: ⇒ Population[G, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
   def diversity(individuals: Seq[DIVERSIFIED], ranks: Seq[Lazy[Int]]): Seq[Lazy[Double]] = thisDiversityMetric.diversity(individuals, ranks)
   def isDominated(p1: Seq[scala.Double], p2: Seq[scala.Double]) = dominance.isDominated(p1, p2)
   def toArchive(individuals: Seq[Individual[G, F]]) = thisAlgorithm.toArchive(individuals)
@@ -245,5 +224,5 @@ sealed class GAImpl(
   def modify(individuals: Seq[Individual[G, F]], archive: A) = thisAlgorithm.modify(individuals, archive)
   def crossover(g1: G, g2: G)(implicit aprng: Random) = thisCrossover.crossover(g1, g2)
   def mutate(genome: G)(implicit aprng: Random) = thisMutation.mutate(genome)
-  def elitism(population: Population[G, F, MF]) = thisAlgorithm.elitism(population)
+  def elitism(individuals: Seq[Individual[G, F]], a: A) = thisAlgorithm.elitism(individuals, a)
 }

@@ -20,7 +20,7 @@ package org.openmole.core.implementation.validation
 import org.openmole.core.implementation.mole._
 import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
-import TypeUtil.receivedTypes
+import TypeUtil.computeManifests
 import scala.collection.immutable.TreeMap
 import org.openmole.core.model.task._
 import org.openmole.misc.tools.obj.ClassUtils._
@@ -48,7 +48,7 @@ object Validation {
       c ⇒
         mole.slots(c).map {
           s ⇒
-            (c, s, TreeMap(receivedTypes(mole)(s).map { p ⇒ p.name -> p }.toSeq: _*), {
+            (c, s, TreeMap(computeManifests(mole)(s).map { p ⇒ p.name -> p }.toSeq: _*), {
               def paramsToMap(params: Iterable[IParameter[_]]) =
                 params.map {
                   p ⇒ p.variable.prototype.name -> p.variable.prototype
@@ -60,19 +60,22 @@ object Validation {
             })
         }.flatMap {
           case (capsule, slot, received, (parametersOverride, parameterNonOverride)) ⇒
-            capsule.inputs(mole).filterNot(_.mode is Optional).flatMap {
+            capsule.inputs(mole).flatMap {
               input ⇒
                 def checkPrototypeMatch(p: Prototype[_]) =
-                  if (!input.prototype.isAssignableFrom(p)) Some(new WrongType(slot, input, p))
+                  if (!input.prototype.isAssignableFrom(p)) Some(WrongType(slot, input, p))
                   else None
 
                 val name = input.prototype.name
                 (parametersOverride.get(name), received.get(name), implicitMap.get(name), parameterNonOverride.get(name)) match {
                   case (Some(parameter), _, _, _) ⇒ checkPrototypeMatch(parameter)
-                  case (None, Some(recieved), _, _) ⇒ checkPrototypeMatch(recieved)
+                  case (None, Some(received), impl, param) ⇒
+                    checkPrototypeMatch(received.toPrototype) orElse
+                      (if (received.isOptional && !impl.isDefined && !param.isDefined) Some(OptionalOutput(slot, input)) else None)
                   case (None, None, Some(impl), _) ⇒ checkPrototypeMatch(impl)
                   case (None, None, None, Some(parameter)) ⇒ checkPrototypeMatch(parameter)
-                  case (None, None, None, None) ⇒ Some(new MissingInput(slot, input))
+                  case (None, None, None, None) ⇒
+                    if (!(input.mode is Optional)) Some(MissingInput(slot, input)) else None
                 }
             }
         }

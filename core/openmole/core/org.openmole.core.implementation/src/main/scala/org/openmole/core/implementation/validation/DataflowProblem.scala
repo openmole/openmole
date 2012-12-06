@@ -47,6 +47,15 @@ object DataflowProblem {
     override def toString = "Input " + data + " is missing when reaching the " + slot + "."
   }
 
+  case class OptionalOutput(
+      val slot: Slot,
+      val data: Data[_]) extends DataflowProblem {
+
+    def capsule: ICapsule = slot.capsule
+
+    override def toString = "Input " + data + " is provided by an optional output when reaching the " + slot + " and no default value (parameter) is provided."
+  }
+
   case class DuplicatedName(
       val capsule: ICapsule,
       val name: String,

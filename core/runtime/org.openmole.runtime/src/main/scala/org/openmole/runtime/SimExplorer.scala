@@ -61,9 +61,8 @@ class SimExplorer extends IApplication with Logger {
             (v: String, c: Config) ⇒ c.copy(pluginPath = Some(v))
           },
           opt("t", "nbThread", "Number of thread for the execution") {
-            (v: String, c: Config) => c.copy(nbThread = Some(v.toInt))
-          }
-        )
+            (v: String, c: Config) ⇒ c.copy(nbThread = Some(v.toInt))
+          })
       }
 
       val debug = args.contains("-d")

@@ -36,7 +36,7 @@ package object transition {
   implicit def transitionsCapsuleDecorator(from: ICapsule) = new TransitionDecorator(from.toPuzzle)
   implicit def transitionsTaskDecorator(from: ITask) = new TransitionDecorator(from.toCapsule.toPuzzle)
   implicit def transitionsTaskBuilderDecorator(from: TaskBuilder) = new TransitionDecorator(from.toTask.toCapsule.toPuzzle)
-  implicit def transitionsSlotDecorator(slot: Slot) = new TransitionDecorator(slot.capsule.toPuzzle)
+  implicit def transitionsSlotDecorator(slot: Slot) = new TransitionDecorator(slot.toPuzzle)
 
   implicit def taskToSlotConverter(task: ITask) = Slot(Capsule(task))
   implicit def transitionToSlotConverter(transition: ITransition) = transition.end
@@ -93,6 +93,8 @@ package object transition {
       val transitions = from.lasts.map { c ⇒ new AggregationTransition(c, to.first, condition, filter, trigger) }
       Puzzle.merge(from.first, to.lasts, from :: to :: Nil, transitions)
     }
+
+    //def >-(ch: ICapsule, ct: Puzzle*): Puzzle = >-(ch.toPuzzle, ct: _*)
 
     def >-(toHead: Puzzle, toTail: Puzzle*) = {
       val toPuzzles = (toHead :: toTail.toList)

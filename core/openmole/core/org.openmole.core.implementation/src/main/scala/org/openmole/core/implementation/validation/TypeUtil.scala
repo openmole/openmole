@@ -26,6 +26,7 @@ import org.openmole.core.implementation.data._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
+import collection.mutable
 
 object TypeUtil {
 
@@ -44,18 +45,18 @@ object TypeUtil {
   }
 
   def receivedTypes(mole: IMole)(slot: Slot): Iterable[Prototype[_]] =
-    computeManifests(mole)(slot).map {
-      t ⇒
-        if (t.toArray) Prototype(t.name)(t.manifest.arrayManifest)
-        else Prototype(t.name)(t.manifest)
-    }
+    computeManifests(mole)(slot).map { _.toPrototype }
 
-  class ComputedType(val name: String, val manifest: Manifest[_], val toArray: Boolean)
+  class ComputedType(val name: String, val manifest: Manifest[_], val toArray: Boolean, val isOptional: Boolean) {
+    def toPrototype =
+      if (toArray) Prototype(name)(manifest.arrayManifest)
+      else Prototype(name)(manifest)
+  }
 
   def computeManifests(mole: IMole)(slot: Slot): Iterable[ComputedType] = {
     import ClassUtils._
 
-    val (varNames, direct, toArray, fromArray) =
+    val (varNames, direct, toArray, fromArray, optional) =
       computeTransmissions(mole)(
         mole.inputTransitions(slot),
         mole.inputDataChannels(slot))
@@ -65,23 +66,24 @@ object TypeUtil {
 
       name ⇒
         (direct.getOrElse(name, empty), toArray.getOrElse(name, empty), fromArray.getOrElse(name, empty)) match {
-          case (ListBuffer(d), ListBuffer(), ListBuffer()) ⇒ new ComputedType(name, d, false)
-          case (ListBuffer(), ListBuffer(t), ListBuffer()) ⇒ new ComputedType(name, t, true)
-          case (d, t, ListBuffer()) ⇒ new ComputedType(name, s(d ++ t), true)
+          case (ListBuffer(d), ListBuffer(), ListBuffer()) ⇒ new ComputedType(name, d, false, optional(name))
+          case (ListBuffer(), ListBuffer(t), ListBuffer()) ⇒ new ComputedType(name, t, true, optional(name))
+          case (d, t, ListBuffer()) ⇒ new ComputedType(name, s(d ++ t), true, optional(name))
           case (ListBuffer(), ListBuffer(), ListBuffer(f)) ⇒
-            if (f.isArray) new ComputedType(name, f.fromArray.toManifest, false)
-            else new ComputedType(name, f, false)
+            if (f.isArray) new ComputedType(name, f.fromArray.toManifest, false, optional(name))
+            else new ComputedType(name, f, false, optional(name))
           case (d, t, f) ⇒ throw new UserBadDataError("Type computation doesn't match specification, direct " + d + ", toArray " + t + ", fromArray " + f + " in " + slot)
         }
     }
   }
 
-  private def s(m: Iterable[Manifest[_]]) = ClassUtils.intersectionArray(m map (_.erasure))
+  private def s(m: Iterable[Manifest[_]]) = ClassUtils.intersectionArray(m map (_.runtimeClass))
 
   private def computeTransmissions(mole: IMole)(transitions: Iterable[ITransition], dataChannels: Iterable[IDataChannel]) = {
     val direct = new HashMap[String, ListBuffer[Manifest[_]]] // Direct transmission through transition or data channel
     val toArray = new HashMap[String, ListBuffer[Manifest[_]]] // Transmission through exploration transition
     val fromArray = new HashMap[String, ListBuffer[Manifest[_]]] // Transmission through aggregation transition
+    val optional = new HashMap[String, ListBuffer[Boolean]]
     val varNames = new HashSet[String]
 
     for (t ← transitions; d ← t.data(mole)) {
@@ -90,6 +92,7 @@ object TypeUtil {
         else direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
 
       varNames += d.prototype.name
+
       t match {
         case _: IAggregationTransition ⇒
           toArray.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
@@ -97,14 +100,17 @@ object TypeUtil {
         case _: ISlaveTransition ⇒ setFromArray
         case _ ⇒ direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
       }
+
+      optional.getOrElseUpdate(d.prototype.name, new ListBuffer) += (d.mode is Optional)
     }
 
     for (dc ← dataChannels; d ← dc.data(mole)) {
       varNames += d.prototype.name
       if (DataChannel.levelDelta(mole)(dc) >= 0) direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
       else toArray.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
+      optional.getOrElseUpdate(d.prototype.name, new ListBuffer) += (d.mode is Optional)
     }
-
-    (varNames.toSet, direct.toMap, toArray.toMap, fromArray.toMap)
+    val optionalMap = optional.map { case (k, v) ⇒ k -> v.forall(_ == true) }.withDefault(s ⇒ false).toMap
+    (varNames.toSet, direct.toMap, toArray.toMap, fromArray.toMap, optionalMap)
   }
 }

@@ -60,8 +60,7 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    * @return Some(variable) if a variable with the given name is present None
    * otherwise
    */
-  def variable[T](p: Prototype[T]): Option[Variable[T]] =
-    variables.get(p.name).map(_.asInstanceOf[Variable[T]])
+  def variable[T](p: Prototype[T]): Option[Variable[T]] = variables.get(p.name).map(_.asInstanceOf[Variable[T]])
 
   /**
    * Get a variable value given its name.
@@ -70,8 +69,8 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    * @return Some(value) if a variable with the given name is present None
    * otherwise
    */
-  def value[T](name: String): Option[T] =
-    variables.get(name).map(_.asInstanceOf[Variable[T]].value)
+  @deprecated("Use option instead") def value[T](name: String): Option[T] = option[T](name)
+  def option[T](name: String): Option[T] = variables.get(name).map(_.asInstanceOf[Variable[T]].value)
 
   /**
    * Get a variable value given a prototype name. This method get the variable by its
@@ -81,18 +80,8 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    * @return Some(value) if a variable with the given name is present None
    * otherwise
    */
-
-  def value[T](proto: Prototype[T]): Option[T] = value[T](proto.name)
-
-  /**
-   * Get a variable valaue given a prototype name. This method get the variable by its
-   * name and then cast it to the correct type.
-   *
-   * @param proto the prototype that matches the name of the variable
-   * @return value the value
-   * @throws a UserBadDataError if the variable hasn't been found
-   */
-  def valueOrException[T](name: String): T = value(name).getOrElse(throw new UserBadDataError("Variable " + name + " has not been found in the context"))
+  @deprecated("Use option instead") def value[T](proto: Prototype[T]): Option[T] = option[T](proto)
+  def option[T](proto: Prototype[T]): Option[T] = option[T](proto.name)
 
   /**
    * Get a variable valaue given a prototype name. This method get the variable by its
@@ -102,7 +91,19 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
    * @return value the value
    * @throws a UserBadDataError if the variable hasn't been found
    */
-  def valueOrException[T](proto: Prototype[T]): T = value(proto).getOrElse(throw new UserBadDataError("Variable " + proto + " has not been found in the context"))
+  @deprecated("Use apply instead") def valueOrException[T](name: String): T = apply(name)
+  def apply[T](name: String): T = value(name).getOrElse(throw new UserBadDataError("Variable " + name + " has not been found in the context"))
+
+  /**
+   * Get a variable valaue given a prototype name. This method get the variable by its
+   * name and then cast it to the correct type.
+   *
+   * @param proto the prototype that matches the name of the variable
+   * @return value the value
+   * @throws a UserBadDataError if the variable hasn't been found
+   */
+  @deprecated("Use apply instead") def valueOrException[T](proto: Prototype[T]): T = apply[T](proto)
+  def apply[T](proto: Prototype[T]): T = value(proto).getOrElse(throw new UserBadDataError("Variable " + proto + " has not been found in the context"))
 
   /**
    * Build a new context containing the variables of the current context plus the
