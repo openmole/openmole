@@ -28,7 +28,7 @@
     <module>org.openmole.ide.plugin.sampling.lhs</module>
     <module>org.openmole.ide.plugin.sampling.csv</module>
     <module>org.openmole.ide.plugin.environment.tools</module>
-    <!--module>org.openmole.ide.plugin.environment.glite</module-->
+    <module>org.openmole.ide.plugin.environment.glite</module>
     <module>org.openmole.ide.plugin.environment.pbs</module>
     <module>org.openmole.ide.plugin.environment.local</module>
     <module>org.openmole.ide.plugin.environment.desktopgrid</module>

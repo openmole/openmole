@@ -140,12 +140,12 @@
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>
-    <!--dependency>
-            <groupId>org.openmole.ide</groupId>
-            <artifactId>org.openmole.ide.plugin.environment.glite</artifactId>
-            <version>${project.version}</version>
-            <scope>runtime</scope>
-        </dependency-->
+    <dependency>
+      <groupId>org.openmole.ide</groupId>
+      <artifactId>org.openmole.ide.plugin.environment.glite</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
     <dependency>
       <groupId>org.openmole.ide</groupId>
       <artifactId>org.openmole.ide.plugin.environment.pbs</artifactId>

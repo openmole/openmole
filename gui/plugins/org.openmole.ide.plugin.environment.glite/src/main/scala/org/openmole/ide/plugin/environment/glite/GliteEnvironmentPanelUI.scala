@@ -30,6 +30,17 @@ import scala.swing.event.ButtonClicked
 
 class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IEnvironmentPanelUI {
 
+  implicit def intToString(i: Option[Int]) = i match {
+    case Some(ii: Int) ⇒ ii.toString
+    case _ ⇒ ""
+  }
+
+  implicit def stringToInt(s: String) = s match {
+    case "" ⇒ None
+    case s: String ⇒ try { Some(s.toInt) } catch { case e: NumberFormatException ⇒ None }
+    case _ ⇒ None
+  }
+
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val voTextField = new TextField(pud.vo, 20)
@@ -42,8 +53,12 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
     case ButtonClicked(`proxyCheckBox`) ⇒ showProxy(proxyCheckBox.selected)
   }
 
-  val proxyURLTextField = new TextField(pud.proxyURL, 18)
-  val proxyURLLabel = new Label("url")
+  val proxyTimeTextField = new TextField(pud.proxyTime, 18)
+  val proxyTimeLabel = new Label("Time")
+  val proxyHostTextField = new TextField(pud.proxyHost, 18)
+  val proxyHostLabel = new Label("Host")
+  val proxyPortTextField = new TextField(pud.proxyPort, 18)
+  val proxyPortLabel = new Label("(Port)")
 
   val requirementsPanelUI = new RequirementPanelUI(pud.requirements)
 
@@ -62,15 +77,19 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
   tabbedPane.pages += requirementsPanelUI
   tabbedPane.pages += new TabbedPane.Page("MyProxy", new PluginPanel("") {
     contents += (proxyCheckBox, "wrap")
-    contents += (proxyURLLabel, "gap para")
-    contents += proxyURLTextField
+    contents += (proxyTimeLabel, "gap para")
+    contents += (proxyTimeTextField, "wrap")
+    contents += (proxyHostLabel, "gap para")
+    contents += (proxyHostTextField, "wrap")
+    contents += (proxyPortLabel, "gap para")
+    contents += proxyPortTextField
   })
 
   proxyCheckBox.selected = pud.proxy
   showProxy(pud.proxy)
 
   private def showProxy(b: Boolean) = {
-    List(proxyURLLabel, proxyURLLabel, proxyURLTextField).foreach {
+    List(proxyTimeLabel, proxyTimeTextField, proxyHostLabel, proxyHostTextField, proxyPortLabel, proxyPortTextField).foreach {
       _.visible = b
     }
   }
@@ -82,7 +101,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
     add(bdiiTextField, new Help(i18n.getString("bdii"), i18n.getString("bdiiEx")))
     add(proxyCheckBox, new Help(i18n.getString("runtimeMemory"), i18n.getString("runtimeMemoryEx")))
     add(runtimeMemoryTextField, new Help(i18n.getString("myProxy")))
-    add(proxyURLTextField, new Help(i18n.getString("proxyURL"), i18n.getString("proxyURLEx")))
+    // add(proxyURLTextField, new Help(i18n.getString("proxyURL"), i18n.getString("proxyURLEx")))
   }
 
   def saveContent(name: String) =
@@ -91,7 +110,12 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
       vomsTextField.text,
       bdiiTextField.text,
       proxyCheckBox.selected,
-      proxyURLTextField.text,
+      proxyTimeTextField.text,
+      proxyHostTextField.text,
+      proxyPortTextField.text.isEmpty match {
+        case true ⇒ None
+        case false ⇒ proxyPortTextField.text
+      },
       runtimeMemoryTextField.text,
       new RequirementDataUI(
         requirementsPanelUI.architectureCheckBox.selected,

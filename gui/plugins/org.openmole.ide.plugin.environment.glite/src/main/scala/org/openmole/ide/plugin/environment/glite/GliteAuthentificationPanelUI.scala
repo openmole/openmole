@@ -23,10 +23,7 @@ import org.openmole.ide.core.model.panel.IAuthentificationPanelUI
 import org.openmole.ide.misc.widget.ChooseFileTextField
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.misc.workspace.Workspace
-import org.openmole.plugin.environment.glite.GliteAuthentication
-import org.openmole.plugin.environment.glite.P12Certificate
-import org.openmole.plugin.environment.glite.PEMCertificate
-import org.openmole.plugin.environment.glite.VOMSProxyFile
+import org.openmole.plugin.environment.glite._
 import scala.swing.ButtonGroup
 import scala.swing.FileChooser.SelectionMode._
 import scala.swing.Label
@@ -35,6 +32,9 @@ import scala.swing.RadioButton
 import scala.swing.event.ButtonClicked
 import org.openmole.misc.workspace.Workspace
 import scala.swing.event.Key._
+import java.io.File
+import swing.event.ButtonClicked
+import scala.Some
 
 object GliteAuthentificationPanelUI {
   val RED = new Color(212, 0, 0)
@@ -75,17 +75,17 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
       case Some((i: Int, x: P12Certificate)) ⇒
         initButton = Some(p12Button)
         passString = Workspace.decrypt(x.cypheredPassword)
-        p12TextField.text = x.certificatePath
+        p12TextField.text = x.certificate.getAbsolutePath
         addP12
       case Some((i: Int, x: PEMCertificate)) ⇒
         initButton = Some(pemButton)
-        pem1TextField.text = x.certificatePath
-        pem2TextField.text = x.keyPath
+        pem1TextField.text = x.certificate.getAbsolutePath
+        pem2TextField.text = x.key.getAbsolutePath
         passString = Workspace.decrypt(x.cypheredPassword)
         addPem
-      case Some((i: Int, x: VOMSProxyFile)) ⇒
+      case Some((i: Int, x: ProxyFile)) ⇒
         initButton = Some(proxyButton)
-        proxyTextField.text = x.proxyFile
+        proxyTextField.text = x.proxy.getAbsolutePath
         addProxy
       case _ ⇒
         initButton = Some(p12Button)
@@ -104,7 +104,7 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
 
     groupButton.select(initButton.get)
 
-  } catch { case e: Throwable ⇒ StatusBar.block(e.getMessage, stack = e.getStackTraceString) }
+  } catch { case e: Throwable ⇒ StatusBar().block(e.getMessage, stack = e.getStackTraceString) }
 
   def addButtons =
     contents += new PluginPanel("wrap", "", "[]15[]15[]") {
@@ -140,18 +140,21 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
     try {
       pemPassField match {
         case Some(x: PasswordField) ⇒
-          if (pemButton.selected) Workspace.persistentList(classOf[GliteAuthentication])(0) = new PEMCertificate(Workspace.encrypt(new String(x.password)),
-            pem1TextField.text,
-            pem2TextField.text)
+          if (pemButton.selected) Workspace.persistentList(classOf[GliteAuthentication])(0) =
+            new PEMCertificate(Workspace.encrypt(new String(x.password)),
+              new File(pem1TextField.text),
+              new File(pem2TextField.text))
           else if (p12Button.selected)
-            Workspace.persistentList(classOf[GliteAuthentication])(0) = new P12Certificate(Workspace.encrypt(new String(p12PassField.get.password)),
-              p12TextField.text)
+            Workspace.persistentList(classOf[GliteAuthentication])(0) =
+              new P12Certificate(Workspace.encrypt(new String(p12PassField.get.password)),
+                new File(p12TextField.text))
           else if (proxyButton.selected) {
-            Workspace.persistentList(classOf[GliteAuthentication])(0) = new VOMSProxyFile(proxyTextField.text)
+            Workspace.persistentList(classOf[GliteAuthentication])(0) =
+              new ProxyFile(new File(proxyTextField.text))
           }
       }
       (pem :: p12 :: proxy :: Nil).filterNot(_._1.selected).foreach(_._3)
-    } catch { case e: Throwable ⇒ StatusBar.block(e.getMessage, stack = e.getStackTraceString) }
+    } catch { case e: Throwable ⇒ StatusBar().block(e.getMessage, stack = e.getStackTraceString) }
 
   def buildPemPanel =
     new PluginPanel("fillx,wrap 2", "[left][grow,fill]", "[top]") {
