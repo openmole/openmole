@@ -27,26 +27,35 @@ import swing.event.{ FocusGained, SelectionChanged }
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import javax.swing.ImageIcon
 import javax.imageio.ImageIO
+import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.implementation.dialog.StatusBar
 
 class SamplingPanelUI(samplingWidget: ISamplingWidget,
                       samplingPanel: SamplingPanel) extends PluginPanel("") with IPanelUI {
 
   val incomings = samplingWidget.incomings
 
-  val samplings = KeyRegistry.samplings.values.map {
-    _.buildDataUI
-  }.toList.sorted.filter {
-    s ⇒
-      incomings.forall {
-        _ match {
-          case dw: IDomainWidget ⇒ s.isAcceptable(dw.proxy.dataUI)
-          case sw: ISamplingWidget ⇒ s.isAcceptable(sw.proxy.dataUI)
-          case _ ⇒ false
+  val samplings =
+    KeyRegistry.samplings.values.map {
+      _.buildDataUI
+    }.toList.sorted.filter {
+      s ⇒
+        incomings.forall {
+          _ match {
+            case dw: IDomainWidget ⇒ s.isAcceptable(dw.proxy.dataUI)
+            case sw: ISamplingWidget ⇒ s.isAcceptable(sw.proxy.dataUI)
+            case _ ⇒ false
+          }
         }
-      }
-  }.filter { s ⇒ testConstraints(s.inputNumberConstrainst) }
+    }.filter {
+      s ⇒ testConstraints(s.inputNumberConstrainst)
+    }
 
-  val samplingComboBox = new MyComboBox(samplings) { peer.setMaximumRowCount(15) }
+  StatusBar.clear
+
+  val samplingComboBox = new MyComboBox(samplings) {
+    peer.setMaximumRowCount(15)
+  }
   samplings.filter {
     _.toString == samplingWidget.proxy.dataUI.toString
   }.headOption match {
@@ -96,13 +105,4 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget,
       case _ ⇒ true
     }
   }
-
-  def contraintsGreaterThanOrEqual(c1: Option[Int], c2: Option[Int]) =
-    c1 match {
-      case Some(i: Int) ⇒ c2 match {
-        case Some(j: Int) ⇒ i >= j
-        case _ ⇒ false
-      }
-      case _ ⇒ true
-    }
 }
