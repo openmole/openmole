@@ -253,7 +253,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
   def testConnection(sourceWidget: ISamplingCompositionWidget,
                      targetWidget: ISamplingCompositionWidget,
                      arityTest: Boolean = true): Boolean = {
-    StatusBar.clear
+    StatusBar().clear
     targetWidget match {
       case domainT: IDomainWidget ⇒
         sourceWidget match {
@@ -263,7 +263,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
               if (_connections.map {
                 _._2.component.proxy
               }.contains(domainT.proxy)) {
-                StatusBar.warn("Only one connection between Domains is allowed")
+                StatusBar().warn("Only one connection between Domains is allowed")
                 false
               } else true
             } else true
@@ -276,7 +276,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
             if (connections.filter {
               _._2.component.proxy.id == samplingT.proxy.id
             }.size >= i) {
-              StatusBar.warn("The maximum number of Sampling input is here limited to " + i)
+              StatusBar().warn("The maximum number of Sampling input is here limited to " + i)
               false
             } else true
           case _ ⇒ true

@@ -38,7 +38,7 @@ class ShuffleSamplingDataUI extends ISamplingDataUI {
   override def isAcceptable(domain: IDomainDataUI) = domain match {
     case f: IFinite ⇒ true
     case _ ⇒
-      StatusBar.warn("A Finite Domain is required for a Shuffle Sampling")
+      StatusBar().warn("A Finite Domain is required for a Shuffle Sampling")
       false
   }
 

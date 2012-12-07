@@ -41,7 +41,7 @@ class CompleteSamplingDataUI extends ISamplingDataUI {
   override def isAcceptable(domain: IDomainDataUI) = domain match {
     case f: IFinite ⇒ true
     case _ ⇒
-      StatusBar.warn("A Finite Domain is required for a Complete Sampling")
+      StatusBar().warn("A Finite Domain is required for a Complete Sampling")
       false
   }
 

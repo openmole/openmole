@@ -41,7 +41,7 @@ object CheckData extends Logger {
 
   def checkMole(scene: IMoleScene,
                 clear: Boolean = true) = {
-    if (clear) StatusBar.clear
+    if (clear) StatusBar().clear
     scene match {
       case y: BuildMoleScene ⇒
         y.manager.startingCapsule match {
@@ -115,8 +115,8 @@ object CheckData extends Logger {
   def displayCapsuleErrors(capsule: ICapsuleUI,
                            errorMsg: String) = {
     capsule.dataUI.task match {
-      case Some(x: ITaskDataProxyUI) ⇒ StatusBar.warn(errorMsg, Some(x))
-      case None ⇒ StatusBar.warn(errorMsg)
+      case Some(x: ITaskDataProxyUI) ⇒ StatusBar().warn(errorMsg, Some(x))
+      case None ⇒ StatusBar().warn(errorMsg)
     }
   }
 
@@ -179,7 +179,7 @@ object CheckData extends Logger {
       c ⇒
         c.task match {
           case Some(x: ITaskDataProxyUI) ⇒
-          case _ ⇒ StatusBar.warn("A capsule without task can not be run")
+          case _ ⇒ StatusBar().warn("A capsule without task can not be run")
         }
     }
 

@@ -28,7 +28,7 @@ trait ModifierDomainDataUI extends IDomainDataUI with IModifier {
     domain.coreObject match {
       case d: DOMAINTYPE ⇒ true
       case _ ⇒
-        StatusBar.warn("A Discrete Domain is required as input of a Modifier Domain (Map, Take, Group, ...)")
+        StatusBar().warn("A Discrete Domain is required as input of a Modifier Domain (Map, Take, Group, ...)")
         false
     }
 

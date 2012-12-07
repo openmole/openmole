@@ -43,7 +43,7 @@ class ZipWithIndexSamplingDataUI(val prototype: Option[IPrototypeDataProxyUI] = 
   override def isAcceptable(domain: IDomainDataUI) = domain match {
     case f: IFinite ⇒ true
     case _ ⇒
-      StatusBar.warn("A Finite Domain is required for a Zip with index Sampling")
+      StatusBar().warn("A Finite Domain is required for a Zip with index Sampling")
       false
   }
 

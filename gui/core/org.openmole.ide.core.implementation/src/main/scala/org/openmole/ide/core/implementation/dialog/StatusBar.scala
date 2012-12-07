@@ -27,8 +27,17 @@ import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.Action
 import scala.swing.Label
 import compat.Platform.EOL
+import org.openmole.ide.core.implementation.workflow.{ ExecutionMoleSceneContainer, BuildMoleSceneContainer }
 
-object StatusBar extends MigPanel("wrap 3") { statusBar ⇒
+object StatusBar {
+  def apply() = ScenesManager.currentSceneContainer match {
+    case Some(b: BuildMoleSceneContainer) ⇒ b.statusBar
+    case Some(e: ExecutionMoleSceneContainer) ⇒ e.bmsc.statusBar
+    case _ ⇒ new StatusBar
+  }
+}
+
+class StatusBar extends MigPanel("wrap 3") { statusBar ⇒
   background = Color.WHITE
   opaque = true
 

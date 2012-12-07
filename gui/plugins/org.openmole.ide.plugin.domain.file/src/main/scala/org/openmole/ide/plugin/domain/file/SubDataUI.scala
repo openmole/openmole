@@ -31,7 +31,7 @@ trait SubDataUI extends IDomainDataUI with IFinite {
   def directoryPath: String
 
   override def isAcceptable(domain: IDomainDataUI) = {
-    StatusBar.warn("A file domain can not modify another Domain")
+    StatusBar().warn("A file domain can not modify another Domain")
     super.isAcceptable(domain)
   }
 }

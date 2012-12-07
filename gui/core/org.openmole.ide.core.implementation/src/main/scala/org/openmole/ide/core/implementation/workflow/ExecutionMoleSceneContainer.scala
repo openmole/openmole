@@ -47,7 +47,7 @@ import org.openmole.ide.core.implementation.dialog.StatusBar
 
 class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
                                   val page: TabbedPane.Page,
-                                  bmsc: BuildMoleSceneContainer) extends Panel with ISceneContainer {
+                                  val bmsc: BuildMoleSceneContainer) extends Panel with ISceneContainer {
   peer.setLayout(new BorderLayout)
 
   val executionManager =
@@ -180,7 +180,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
           case Some(x: ExecutionManager) ⇒ x.buildMoleExecution(panelHooks.map { ph ⇒ ph._1 -> ph._2._1 }.toMap,
             groupingPanel.get.coreObjects) match {
               case Right((mExecution, environments)) ⇒ SerializerService.serialize(mExecution, new File(t))
-              case Left(e) ⇒ StatusBar.blockException(e)
+              case Left(e) ⇒ StatusBar().blockException(e)
             }
           case _ ⇒
         }

@@ -138,7 +138,7 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
         outputMappingPage.content = multiStringProto.get.panel
       }
     } catch {
-      case e: Throwable ⇒ StatusBar.block(e.getMessage,
+      case e: Throwable ⇒ StatusBar().block(e.getMessage,
         stack = e.getStackTraceString)
     }
 

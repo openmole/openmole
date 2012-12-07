@@ -152,7 +152,7 @@ object MoleMaker {
       case Some(x: ITaskDataProxyUI) ⇒
         buildCapsule(x, moleDataUI.plugins.map { p ⇒ new File(p) }.toSet, capsuleDataUI.capsuleType)
       case _ ⇒
-        StatusBar.inform("A capsule without Task can not be run")
+        StatusBar().inform("A capsule without Task can not be run")
         new Capsule(EmptyTask("None"))
 
     }
@@ -166,7 +166,7 @@ object MoleMaker {
         PluginSet(plugins)))
     } catch {
       case e: Throwable ⇒
-        StatusBar.warn(e.getMessage, Some(proxy), e.getStackTraceString, e.getClass.getCanonicalName)
+        StatusBar().warn(e.getMessage, Some(proxy), e.getStackTraceString, e.getClass.getCanonicalName)
         Left(e)
     }
 

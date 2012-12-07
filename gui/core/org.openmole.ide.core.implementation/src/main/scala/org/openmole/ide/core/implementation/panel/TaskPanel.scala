@@ -64,7 +64,7 @@ class TaskPanel(proxy: ITaskDataProxyUI,
 
   val protoPanel = Proxys.prototypes.size match {
     case 0 ⇒
-      StatusBar.inform("No Prototype has been created yet")
+      StatusBar().inform("No Prototype has been created yet")
       panelUI.tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", new Label("First define Prototypes !")))
       None
     case _ ⇒

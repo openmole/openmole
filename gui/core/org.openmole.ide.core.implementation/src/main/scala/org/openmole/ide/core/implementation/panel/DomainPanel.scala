@@ -52,7 +52,7 @@ class DomainPanel(domainWidget: IDomainWidget,
     println("saved ..")
     domainWidget.update
   } catch {
-    case e: UserBadDataError ⇒ StatusBar.block(e.getMessage, stack = e.getCause.getMessage)
+    case e: UserBadDataError ⇒ StatusBar().block(e.getMessage, stack = e.getCause.getMessage)
   }
 
   def updateHelp = {

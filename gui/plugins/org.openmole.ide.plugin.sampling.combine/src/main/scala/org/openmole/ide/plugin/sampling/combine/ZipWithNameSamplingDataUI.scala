@@ -47,11 +47,11 @@ class ZipWithNameSamplingDataUI(val prototype: Option[IPrototypeDataProxyUI] = N
     case f: IFinite ⇒
       if (Types(domain.domainType.toString, Types.FILE)) true
       else {
-        StatusBar.warn("A File domain is required here.")
+        StatusBar().warn("A File domain is required here.")
         false
       }
     case _ ⇒
-      StatusBar.warn("A Finite Domain is required for a Zip with name Sampling")
+      StatusBar().warn("A Finite Domain is required for a Zip with name Sampling")
       false
   }
 

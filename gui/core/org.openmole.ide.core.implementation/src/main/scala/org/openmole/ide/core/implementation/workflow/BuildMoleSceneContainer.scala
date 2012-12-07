@@ -18,25 +18,23 @@
 package org.openmole.ide.core.implementation.workflow
 
 import java.awt.BorderLayout
-import java.awt.event.ActionEvent
-import javax.swing.AbstractAction
-import javax.swing.JScrollPane
-import javax.swing.KeyStroke
+import javax.swing.{ JSplitPane, JScrollPane }
 import org.openmole.ide.core.implementation.data.CheckData
-import org.openmole.ide.core.implementation.dialog.MoleSettingsDialog
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.misc.widget.ToolBarButton
-import org.openmole.ide.misc.tools.image.Images._
 import scala.collection.mutable.HashSet
-import scala.swing.Action
-import scala.swing.Panel
+import swing._
 import org.openmole.ide.misc.tools.image.Images._
+import java.awt.Toolkit
+import org.openmole.ide.core.implementation.dialog.{ MoleSettingsDialog, StatusBar }
 
-class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISceneContainer { buildContainer ⇒
+class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISceneContainer {
+  buildContainer ⇒
 
   val executionMoleSceneContainers = new HashSet[ExecutionMoleSceneContainer]
+  val statusBar = new StatusBar
 
   peer.setLayout(new BorderLayout)
 
@@ -60,13 +58,16 @@ class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISce
   val view = scene.graphScene.createView
   view.setFocusable(true)
 
-  peer.add(new JScrollPane(scene.graphScene.createView), BorderLayout.CENTER)
+  val spane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, new JScrollPane(view), statusBar.peer)
+  spane.setResizeWeight(1 - (50.0 / Toolkit.getDefaultToolkit.getScreenSize.height))
+  peer.add(spane, BorderLayout.CENTER)
   CheckData.checkMole(scene, false)
 
   def stopAndCloseExecutions = {
-    executionMoleSceneContainers.foreach { emc ⇒
-      emc.stop
-      ScenesManager.tabPane.pages.remove(emc.page.index)
+    executionMoleSceneContainers.foreach {
+      emc ⇒
+        emc.stop
+        ScenesManager.tabPane.pages.remove(emc.page.index)
     }
     executionMoleSceneContainers.clear
   }

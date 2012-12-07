@@ -40,12 +40,12 @@ class CSVSamplingDataUI(var csvFilePath: String = "",
   def buildPanelUI = new CSVSamplingPanelUI(this)
 
   override def isAcceptable(factor: IDomainDataUI) = {
-    StatusBar.warn("A CSV Sampling does not accept any Domain or Sampling as input")
+    StatusBar().warn("A CSV Sampling does not accept any Domain or Sampling as input")
     false
   }
 
   def isAcceptable(sampling: ISamplingDataUI) = {
-    StatusBar.warn("A CSV Sampling does not accept any Domain or Sampling as input")
+    StatusBar().warn("A CSV Sampling does not accept any Domain or Sampling as input")
     false
   }
 

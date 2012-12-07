@@ -131,7 +131,7 @@ class GUISerializer(val toFromFile: String) {
     Right(xstream.createObjectInputStream(new FileReader(f)))
   } catch {
     case e: Throwable ⇒
-      StatusBar.block("An error occured when loading " + f.getAbsolutePath + "\n" + e.getMessage,
+      StatusBar().block("An error occured when loading " + f.getAbsolutePath + "\n" + e.getMessage,
         stack = e.getStackTraceString,
         exceptionName = e.getClass.getCanonicalName)
       Left
@@ -148,8 +148,8 @@ class GUISerializer(val toFromFile: String) {
               case _ ⇒
             }
           } catch {
-            case eof: EOFException ⇒ StatusBar.inform("Project loaded")
-            case e: Throwable ⇒ StatusBar.block("Failed to unserialize a data of type " + concept,
+            case eof: EOFException ⇒ StatusBar().inform("Project loaded")
+            case e: Throwable ⇒ StatusBar().block("Failed to unserialize a data of type " + concept,
               stack = e.getMessage + "\n" + e.getStackTraceString,
               exceptionName = e.getClass.getCanonicalName)
           } finally {
@@ -176,7 +176,7 @@ class GUISerializer(val toFromFile: String) {
   }
 
   def unserialize = {
-    StatusBar.clear
+    StatusBar().clear
     Proxys.clearAll
     ScenesManager.closeAll
     ClassLoader.loadExtraPlugins

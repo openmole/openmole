@@ -56,7 +56,7 @@ class SaltelliSamplingDataUI(val samples: String = "1") extends ISamplingDataUI 
       domain match {
         case x: Domain[Double] with Bounds[Double] ⇒ true
         case _ ⇒
-          StatusBar.warn("A Bounded range of Double is required for a Saltelli Sampling")
+          StatusBar().warn("A Bounded range of Double is required for a Saltelli Sampling")
           false
       }
     }

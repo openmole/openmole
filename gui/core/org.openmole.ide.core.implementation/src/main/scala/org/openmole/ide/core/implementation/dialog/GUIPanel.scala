@@ -109,14 +109,16 @@ class GUIPanel extends MainFrame { mainframe ⇒
     contents += ConceptMenu.environmentMenu
   }).peer, BorderLayout.NORTH)
 
-  val splitPane = new SplitPane(Orientation.Horizontal) {
-    leftComponent = ScenesManager.tabPane
-    rightComponent = new ScrollPane(StatusBar)
-    resizeWeight = 1 - (40.0 / Toolkit.getDefaultToolkit.getScreenSize.height)
-  }
+  val splitPane =
+    //new SplitPane(Orientation.Horizontal) {
+    // leftComponent =
+    ScenesManager.tabPane
+  //rightComponent = new ScrollPane(StatusBar().
+  // resizeWeight = 1 - (40.0 / Toolkit.getDefaultToolkit.getScreenSize.height)
+  // }
 
   peer.add(splitPane.peer, BorderLayout.CENTER)
-  StatusBar.inform("OpenMOLE - 0.7 - Daddy Django")
+  StatusBar().inform("OpenMOLE - 0.7 - Daddy Django")
 
   PasswordListner.apply
 
@@ -141,7 +143,7 @@ class GUIPanel extends MainFrame { mainframe ⇒
               plugin.copy(targetFile)
               PluginManager.load(targetFile)
             }
-          } else StatusBar.warn("The file " + path.content + " does not exist. It has not been imported")
+          } else StatusBar().warn("The file " + path.content + " does not exist. It has not been imported")
         }
         val a = Workspace.pluginDirLocation.list.map { f ⇒ new File(Workspace.pluginDirLocation + "/" + f) }
         val b = pluginMultiTextField.content.map { c ⇒ new File(Workspace.pluginDirLocation + "/" + new File(c.content).getName) }

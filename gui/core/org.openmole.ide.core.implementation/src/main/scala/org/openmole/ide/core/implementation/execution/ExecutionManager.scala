@@ -157,7 +157,7 @@ class ExecutionManager(manager: IMoleSceneManager,
         mExecution.start
         Some(mExecution)
       case Left(e) ⇒
-        StatusBar.blockException(e)
+        StatusBar().blockException(e)
         None
     }
   }
@@ -214,7 +214,7 @@ class ExecutionManager(manager: IMoleSceneManager,
   }
 
   def displayFileTransfer = {
-    StatusBar.clear
-    StatusBar.inform("Downloads : " + downloads._1 + " / " + downloads._2 + "  Uploads : " + uploads._1 + " / " + uploads._2)
+    StatusBar().clear
+    StatusBar().inform("Downloads : " + downloads._1 + " / " + downloads._2 + "  Uploads : " + uploads._1 + " / " + uploads._2)
   }
 }

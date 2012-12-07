@@ -52,7 +52,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
           }
           CheckData.checkMole(connectorUI.source.scene)
         }
-      case false ⇒ StatusBar.warn("No Prototype is defined !")
+      case false ⇒ StatusBar().warn("No Prototype is defined !")
     }
   }
 
@@ -93,7 +93,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
       }
 
     def display: Unit = {
-      StatusBar.clear
+      StatusBar().clear
       protoCombo.peer.setModel(MyComboBox.newConstantModel(availablePrototypes))
       if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(this) {
         verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded

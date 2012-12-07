@@ -214,7 +214,7 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
                     caps.hooked(true)
                   case None ⇒ errors += "An error occured when loading the Hook for a capsule. No Hook has been set."
                 }
-              case _ ⇒ StatusBar.block("Unknown balise " + n1)
+              case _ ⇒ StatusBar().block("Unknown balise " + n1)
             }
             reader.moveUp
           }
@@ -238,7 +238,7 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
       reader.moveUp
     }
 
-    errors.foreach(s ⇒ StatusBar.block(s))
+    errors.foreach(s ⇒ StatusBar().block(s))
     scene
   }
 
@@ -249,7 +249,7 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
       val p = reader.getNodeName
       p match {
         case "filteredPrototype" ⇒ protoIds += reader.getAttribute("id").toInt
-        case _ ⇒ StatusBar.block("Unknown balise " + p)
+        case _ ⇒ StatusBar().block("Unknown balise " + p)
       }
       reader.moveUp
     }

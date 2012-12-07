@@ -201,7 +201,7 @@ object ScenesManager {
   def addExecutionSceneContainer(bmsc: BuildMoleSceneContainer) =
     CheckData.fullCheck(bmsc.scene) match {
       case Right(_) ⇒
-        if (StatusBar.isValid) {
+        if (StatusBar().isValid) {
           val clone = bmsc.scene.copyScene
           clone.manager.name = { bmsc.scene.manager.name + "_" + countExec.incrementAndGet }
           val page = new TabbedPane.Page(clone.manager.name, new MigPanel(""))
@@ -218,8 +218,8 @@ object ScenesManager {
           })
           tabPane.selection.index = page.index
         } else
-          StatusBar.block("The Mole can not be built due to the previous errors")
-      case Left(msg: String) ⇒ StatusBar.block(msg)
+          StatusBar().block("The Mole can not be built due to the previous errors")
+      case Left(msg: String) ⇒ StatusBar().block(msg)
     }
 
   def addTab(page: TabbedPane.Page, title: String, action: Action) = {

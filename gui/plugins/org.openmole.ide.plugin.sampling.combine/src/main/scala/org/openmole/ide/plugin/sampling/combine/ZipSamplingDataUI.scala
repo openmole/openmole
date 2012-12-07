@@ -44,7 +44,7 @@ class ZipSamplingDataUI extends ISamplingDataUI {
   override def isAcceptable(domain: IDomainDataUI) = domain match {
     case f: IFinite ⇒ true
     case _ ⇒
-      StatusBar.warn("A Finite Domain is required for a Zip Sampling")
+      StatusBar().warn("A Finite Domain is required for a Zip Sampling")
       false
   }
 

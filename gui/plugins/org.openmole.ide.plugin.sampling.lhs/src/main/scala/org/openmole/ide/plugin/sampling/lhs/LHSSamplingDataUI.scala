@@ -55,7 +55,7 @@ class LHSSamplingDataUI(val samples: String = "1") extends ISamplingDataUI {
     domain match {
       case x: RangeDomainDataUI[_] ⇒ true
       case _ ⇒
-        StatusBar.warn("A Bounded range of Double is required for a LHS Sampling")
+        StatusBar().warn("A Bounded range of Double is required for a LHS Sampling")
         false
     }
 

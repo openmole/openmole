@@ -42,7 +42,7 @@ object GenericRangeDomainDataUI {
 abstract class GenericRangeDomainDataUI extends IDomainDataUI with IFinite {
 
   override def isAcceptable(domain: IDomainDataUI) = {
-    StatusBar.warn("Only modifier Domain (Map, Take, Group, ...) can take another Domain as input")
+    StatusBar().warn("Only modifier Domain (Map, Take, Group, ...) can take another Domain as input")
     super.isAcceptable(domain)
   }
 
