@@ -9,40 +9,52 @@ import org.openmole.plugin.environment.glite._
 import org.openmole.ide.core.model.data.IEnvironmentDataUI
 import org.openmole.plugin.environment.glite.MyProxy
 import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.ide.plugin.environment.tools.RequirementDataUI
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
 
-class GliteEnvironmentDataUI(
-    val name: String = "",
-    val vo: String = "",
-    val voms: String = "",
-    val bdii: String = "",
-    val proxy: Boolean = false,
-    val proxyTime: String = "",
-    val proxyHost: String = "",
-    val proxyPort: Option[Int] = None,
-    val runtimeMemory: String = Workspace.preference(BatchEnvironment.MemorySizeForRuntime),
-    val requirements: RequirementDataUI = new RequirementDataUI) extends IEnvironmentDataUI {
+class GliteEnvironmentDataUI(val name: String = "",
+                             val vo: String = "",
+                             val voms: String = "",
+                             val bdii: String = "",
+                             val proxy: Boolean = false,
+                             val proxyTime: Option[String] = None,
+                             val proxyHost: Option[String] = None,
+                             val proxyPort: Option[Int] = None,
+                             val fqan: Option[String] = None,
+                             val openMOLEMemory: Option[Int] = Some(Workspace.preference(BatchEnvironment.MemorySizeForRuntime).toInt),
+                             val memory: Option[Int] = None,
+                             val cpuTime: Option[String] = None,
+                             val wallTime: Option[String] = None,
+                             val cpuNumber: Option[Int] = None,
+                             val jobType: Option[String] = None,
+                             val smpGranularity: Option[Int] = None,
+                             val architecture: Boolean = false,
+                             val threads: Option[Int] = None) extends IEnvironmentDataUI {
 
   def coreObject = {
-    val rtm = if (runtimeMemory != "") runtimeMemory.toInt else Workspace.preference(BatchEnvironment.MemorySizeForRuntime).toInt
 
     if (vo == "" || voms == "" || bdii == "") throw new UserBadDataError("The glite environment " + name + " is not properly set")
-
+    val myProxy = {
+      if (proxy && proxyTime.isDefined && proxyHost.isDefined) Some(new MyProxy(proxyTime.get, proxyHost.get, proxyPort))
+      else None
+    }
     try {
-      if (proxy && proxyTime != "" && proxyHost != "")
-        new GliteEnvironment(
-          vo,
-          voms,
-          bdii,
-          myProxy = Some(new MyProxy(proxyTime, proxyHost, proxyPort)),
-          // requirements = requirements.toMap,
-          openMOLEMemory = Some(rtm))
-      else new GliteEnvironment(vo, voms, bdii,
-        //requirements = requirements.toMap, 
-        openMOLEMemory = Some(rtm))
+      new GliteEnvironment(
+        vo,
+        voms,
+        bdii,
+        fqan,
+        openMOLEMemory,
+        memory,
+        cpuTime,
+        wallTime,
+        cpuNumber,
+        jobType,
+        smpGranularity,
+        myProxy,
+        if (architecture) Some("x86_64") else None,
+        threads)
     } catch {
       case e: UserBadDataError ⇒ throw e
       case e: Exception ⇒ throw new UserBadDataError(e, "An error occured when initializing the glite environment" + name + ". Please check your certificate settings in the Preferences menu.")

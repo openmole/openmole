@@ -25,14 +25,19 @@ import org.openmole.plugin.environment.glite._
 class RequirementDataUI(val architecture64: Boolean = false,
                         val workerNodeMemory: String = "",
                         val maxCPUTime: String = "",
+                        val wallTime: String = "",
+                        val cpuNumber: Option[Int] = None,
+                        val jobType: String = "",
+                        val smpGranularity: Option[Int] = None,
+                        val threads: Option[Int],
                         val otherRequirements: String = "") {
 
-  //  val toMap = {
-  //    val requirements = new ListBuffer[Requirement]
-  //    if (architecture64 == true) requirements += x86_64
-  //    if (workerNodeMemory != "") requirements += MEMORY -> workerNodeMemory
-  //    if (maxCPUTime != "") requirements += CPU_TIME -> maxCPUTime
-  //    if (otherRequirements != "") requirements += GLITE_REQUIREMENTS -> otherRequirements
-  //    requirements
-  //  }
+    val toMap = {
+      val requirements = new ListBuffer[Requirement]
+      if (architecture64 == true) requirements += x86_64
+      if (workerNodeMemory != "") requirements += MEMORY -> workerNodeMemory
+      if (maxCPUTime != "") requirements += CPU_TIME -> maxCPUTime
+      if (otherRequirements != "") requirements += GLITE_REQUIREMENTS -> otherRequirements
+      requirements
+    }
 }
