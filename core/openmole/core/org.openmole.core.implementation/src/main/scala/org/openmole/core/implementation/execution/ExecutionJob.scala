@@ -25,19 +25,16 @@ import org.openmole.core.implementation.tools.TimeStamp
 import org.openmole.core.model.execution.ExecutionState._
 
 trait ExecutionJob extends IExecutionJob {
-  val timeStamps: ListBuffer[ITimeStamp[ExecutionState]] = new ListBuffer
 
   private var _state: ExecutionState = READY
 
   override def state = _state
 
-  def state_=(state: ExecutionState) =
-    synchronized {
-      if (!this.state.isFinal) {
-        timeStamps += (new TimeStamp(state))
-        EventDispatcher.trigger(environment, new Environment.JobStateChanged(this, state, this.state))
-        _state = state
-      }
+  def state_=(state: ExecutionState) = synchronized {
+    if (!this.state.isFinal) {
+      EventDispatcher.trigger(environment, new Environment.JobStateChanged(this, state, this.state))
+      _state = state
     }
+  }
 
 }

@@ -25,6 +25,6 @@ import collection.JavaConversions._
 sealed class VariableDomain[A](variable: Prototype[Array[A]]) extends Domain[A] with Discrete[A] with Finite[A] {
 
   override def computeValues(context: Context): Iterable[A] =
-    context.valueOrException(variable)
+    context(variable)
 
 }
