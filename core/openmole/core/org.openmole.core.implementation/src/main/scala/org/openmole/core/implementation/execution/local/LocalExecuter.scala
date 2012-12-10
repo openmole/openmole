@@ -56,7 +56,6 @@ class LocalExecuter(environment: WeakReference[LocalEnvironment]) extends Runnab
               if (moleJob.state != State.CANCELED) {
                 if (classOf[IMoleTask].isAssignableFrom(moleJob.task.getClass)) jobGoneIdle
                 moleJob.perform
-
                 moleJob.exception match {
                   case Some(e) ⇒ EventDispatcher.trigger(environment: Environment, new MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
                   case _ ⇒

@@ -23,30 +23,30 @@ import scala.collection.immutable.TreeMap
 object ParameterSet {
   val empty = ParameterSet(Iterable.empty)
 
-  def apply(p: Traversable[IParameter[_]]): ParameterSet =
+  def apply(p: Traversable[Parameter[_]]): ParameterSet =
     new ParameterSet {
       val parameters = p.toIterable
     }
 
-  def apply(p: IParameter[_]*): ParameterSet =
+  def apply(p: Parameter[_]*): ParameterSet =
     ParameterSet(p)
 
 }
 
-trait ParameterSet extends Set[IParameter[_]] with SetLike[IParameter[_], ParameterSet] { self ⇒
+trait ParameterSet extends Set[Parameter[_]] with SetLike[Parameter[_], ParameterSet] { self ⇒
 
-  def parameters: Iterable[IParameter[_]]
+  def parameters: Iterable[Parameter[_]]
 
   @transient lazy val parameterMap =
-    TreeMap.empty[String, IParameter[_]] ++ parameters.map { p ⇒ (p.variable.prototype.name, p) }
+    TreeMap.empty[String, Parameter[_]] ++ parameters.map { p ⇒ (p.variable.prototype.name, p) }
 
   override def empty = ParameterSet.empty
-  override def iterator: Iterator[IParameter[_]] = parameterMap.values.iterator
+  override def iterator: Iterator[Parameter[_]] = parameterMap.values.iterator
 
-  def +(p: IParameter[_]) = ParameterSet(p :: parameters.toList)
+  def +(p: Parameter[_]) = ParameterSet(p :: parameters.toList)
 
-  def -(p: IParameter[_]) = ParameterSet((parameterMap - p.variable.prototype.name).values.toList)
+  def -(p: Parameter[_]) = ParameterSet((parameterMap - p.variable.prototype.name).values.toList)
 
-  def contains(p: IParameter[_]) = parameterMap.contains(p.variable.prototype.name)
+  def contains(p: Parameter[_]) = parameterMap.contains(p.variable.prototype.name)
 
 }

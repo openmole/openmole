@@ -49,7 +49,7 @@ object Validation {
         mole.slots(c).map {
           s ⇒
             (c, s, TreeMap(computeManifests(mole)(s).map { p ⇒ p.name -> p }.toSeq: _*), {
-              def paramsToMap(params: Iterable[IParameter[_]]) =
+              def paramsToMap(params: Iterable[Parameter[_]]) =
                 params.map {
                   p ⇒ p.variable.prototype.name -> p.variable.prototype
                 }.toMap[String, Prototype[_]]

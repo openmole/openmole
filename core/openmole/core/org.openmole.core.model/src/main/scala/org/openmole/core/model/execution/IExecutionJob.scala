@@ -24,6 +24,5 @@ import ExecutionState._
 trait IExecutionJob {
   def state: ExecutionState
   def environment: Environment
-  def timeStamps: Seq[ITimeStamp[ExecutionState]]
   def moleJobs: Iterable[IMoleJob]
 }
