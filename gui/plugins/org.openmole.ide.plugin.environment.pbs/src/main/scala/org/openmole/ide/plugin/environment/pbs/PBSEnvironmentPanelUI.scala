@@ -28,18 +28,45 @@ import org.openmole.ide.plugin.environment.tools._
 import scala.swing.Label
 import scala.swing.TabbedPane
 import scala.swing.TextField
+import swing.TabbedPane.Page
 
 class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fillx,wrap 2", "", "") with IEnvironmentPanelUI {
+
+  implicit def stringToStringOpt(s: String) = s.isEmpty match {
+    case true ⇒ None
+    case false ⇒ Some(s)
+  }
+
+  implicit def stringToIntOpt(s: String) = try {
+    Some(s.toInt)
+  } catch {
+    case e: NumberFormatException ⇒ None
+  }
+
+  implicit def stringToInt(s: String) = try {
+    s.toInt
+  } catch {
+    case e: NumberFormatException ⇒ 0
+  }
+
+  implicit def intToString(i: Option[Int]) = i match {
+    case Some(ii: Int) ⇒ ii.toString
+    case _ ⇒ ""
+  }
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val loginTextField = new TextField(pud.login, 15)
   val hostTextField = new TextField(pud.host, 15)
-  val dirTextField = new TextField(pud.dir, 15)
-  val queueTextField = new TextField(pud.queue, 15)
-  val openMOLEMemoryTextField = new TextField(pud.openMOLEMemory.toString, 5)
-
-  // val requirementsPanelUI = new RequirementPanelUI(pud.requirements)
+  val portTextField = new TextField(pud.port.toString, 4)
+  val pathTextField = new TextField(pud.path.getOrElse(""), 15)
+  val queueTextField = new TextField(pud.queue.getOrElse(""), 15)
+  val openMOLEMemoryTextField = new TextField(pud.openMOLEMemory, 4)
+  val wallTimeTextField = new TextField(pud.wallTime.getOrElse(""), 4)
+  val memoryTextField = new TextField(pud.memory, 4)
+  val threadsTextField = new TextField(pud.threads, 4)
+  val nodesTextField = new TextField(pud.nodes, 4)
+  val coreByNodeTextField = new TextField(pud.coreByNode, 4)
 
   tabbedPane.pages += new TabbedPane.Page("Settings",
     new PluginPanel("wrap 2") {
@@ -49,21 +76,48 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
       contents += (new Label("Host"), "gap para")
       contents += hostTextField
 
-      contents += (new Label("Directory"), "gap para")
-      contents += dirTextField
-
-      contents += (new Label("OpenMOLE memory"), "gap para")
-      contents += openMOLEMemoryTextField
+      contents += (new Label("Port"), "gap para")
+      contents += portTextField
     })
 
-  // tabbedPane.pages += requirementsPanelUI
+  tabbedPane.pages += new TabbedPane.Page("Options",
+    new PluginPanel("wrap 2") {
+      contents += new PluginPanel("wrap 2") {
+        contents += (new Label("Path"), "gap para")
+        contents += pathTextField
+
+        contents += (new Label("Queue"), "gap para")
+        contents += queueTextField
+
+        contents += (new Label("OpenMOLE memory"), "gap para")
+        contents += openMOLEMemoryTextField
+
+        contents += (new Label("Memory"), "gap para")
+        contents += memoryTextField
+      }
+      contents += new PluginPanel("wrap 2") {
+        contents += (new Label("Wall time"), "gap para")
+        contents += wallTimeTextField
+
+        contents += (new Label("Threads"), "gap para")
+        contents += threadsTextField
+
+        contents += (new Label("Nodes"), "gap para")
+        contents += nodesTextField
+
+        contents += (new Label("Cores by Node"), "gap para")
+        contents += coreByNodeTextField
+
+      }
+    })
+
   contents += tabbedPane
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     //  requirementsPanelUI.requirementHelp.foreach { hm ⇒ add(hm._1, hm._2) }
     add(loginTextField, new Help(i18n.getString("login"), i18n.getString("loginEx")))
     add(hostTextField, new Help(i18n.getString("host"), i18n.getString("hostEx")))
-    add(dirTextField, new Help(i18n.getString("dir"), i18n.getString("dirEx")))
+    add(pathTextField, new Help(i18n.getString("dir"), i18n.getString("dirEx")))
     add(queueTextField, new Help(i18n.getString("queue"), i18n.getString("queueEx")))
     add(openMOLEMemoryTextField, new Help(i18n.getString("runtimeMemory"), i18n.getString("runtimeMemoryEx")))
   }
@@ -72,11 +126,13 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
     new PBSEnvironmentDataUI(name,
       loginTextField.text,
       hostTextField.text,
-      dirTextField.text,
+      portTextField.text,
       queueTextField.text,
-      openMOLEMemoryTextField.text.toInt /*   new RequirementDataUI(
-        requirementsPanelUI.architectureCheckBox.selected,
-        requirementsPanelUI.workerNodeMemoryTextField.text,
-        requirementsPanelUI.maxCPUTimeTextField.text,
-        requirementsPanelUI.otherRequirementTextField.text)*/ )
+      openMOLEMemoryTextField.text,
+      wallTimeTextField.text,
+      memoryTextField.text,
+      pathTextField.text,
+      threadsTextField.text,
+      nodesTextField.text,
+      coreByNodeTextField.text)
 }

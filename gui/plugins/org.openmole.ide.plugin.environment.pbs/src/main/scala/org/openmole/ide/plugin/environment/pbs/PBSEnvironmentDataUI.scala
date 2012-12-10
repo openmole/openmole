@@ -13,18 +13,29 @@ import org.openmole.ide.core.model.data.IEnvironmentDataUI
 class PBSEnvironmentDataUI(val name: String = "",
                            val login: String = "",
                            val host: String = "",
-                           val dir: String = "",
-                           val queue: String = "",
-                           val openMOLEMemory: Int = BatchEnvironment.defaultRuntimeMemory)
-    //                           val requirements: RequirementDataUI = new RequirementDataUI) 
-    extends IEnvironmentDataUI { ui ⇒
+                           val port: Int = 22,
+                           val queue: Option[String] = None,
+                           val openMOLEMemory: Option[Int] = Some(BatchEnvironment.defaultRuntimeMemory),
+                           val wallTime: Option[String] = None,
+                           val memory: Option[Int] = None,
+                           val path: Option[String] = None,
+                           val threads: Option[Int] = None,
+                           val nodes: Option[Int] = None,
+                           val coreByNode: Option[Int] = None)
+    extends IEnvironmentDataUI {
+  ui ⇒
 
   def coreObject = new PBSEnvironment(login,
     host,
-    path = Some(dir),
-    // requirements.toMap,
-    openMOLEMemory = Some(ui.openMOLEMemory),
-    queue = { if (queue.isEmpty) None else Some(queue) })
+    port,
+    queue,
+    openMOLEMemory,
+    wallTime,
+    memory,
+    path,
+    threads,
+    nodes,
+    coreByNode)
 
   def coreClass = classOf[PBSEnvironment]
 
