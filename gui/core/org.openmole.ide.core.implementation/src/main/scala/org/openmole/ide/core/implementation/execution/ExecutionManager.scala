@@ -35,6 +35,7 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import TextAreaOutputStream._
+import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
 
 object ExecutionManager {
   implicit def executionStatesDecorator(s: scala.collection.mutable.Map[ExecutionState.ExecutionState, AtomicInteger]) = new {
@@ -43,19 +44,25 @@ object ExecutionManager {
 }
 
 class ExecutionManager(manager: IMoleSceneManager,
+                       executionContainer: ExecutionMoleSceneContainer,
                        val mole: IMole,
                        val capsuleMapping: Map[ICapsuleUI, ICapsule],
                        val prototypeMapping: Map[IPrototypeDataProxyUI, Prototype[_]]) extends PluginPanel("", "[grow,fill]", "")
     with IExecutionManager
-    with Publisher { executionManager ⇒
+    with Publisher {
+  executionManager ⇒
   val logTextArea = new TextArea {
     columns = 20
     rows = 10
     editable = false
   }
-  val executionJobExceptionTextArea = new TextArea { editable = false }
+  val executionJobExceptionTextArea = new TextArea {
+    editable = false
+  }
 
-  val moleExecutionExceptionTextArea = new TextArea { editable = false }
+  val moleExecutionExceptionTextArea = new TextArea {
+    editable = false
+  }
 
   override val printStream = new PrintStream(new TextAreaOutputStream(logTextArea), true)
   var moleExecution: Option[IMoleExecution] = None
@@ -123,15 +130,16 @@ class ExecutionManager(manager: IMoleSceneManager,
         EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.Finished])
         EventDispatcher.listen(mExecution, new JobCreatedListener(this), classOf[IMoleExecution.OneJobSubmitted])
         EventDispatcher.listen(mExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ExceptionRaised])
-        environments.foreach { e ⇒
-          e._1 match {
-            case be: BatchEnvironment ⇒
-              EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.BeginUpload])
-              EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.EndUpload])
-              EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.BeginDownload])
-              EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.EndDownload])
-            case _ ⇒
-          }
+        environments.foreach {
+          e ⇒
+            e._1 match {
+              case be: BatchEnvironment ⇒
+                EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.BeginUpload])
+                EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.EndUpload])
+                EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.BeginDownload])
+                EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.EndDownload])
+              case _ ⇒
+            }
         }
         environments.foreach {
           case (env, _) ⇒ EventDispatcher.listen(env, new EnvironmentExceptionListener(this), classOf[Environment.ExceptionRaised])
@@ -165,7 +173,9 @@ class ExecutionManager(manager: IMoleSceneManager,
   def buildMoleExecution(hooks: Map[IHookPanelUI, ICapsuleUI],
                          groupings: List[(Grouping, ICapsule)]) = MoleMaker.buildMoleExecution(mole,
     manager,
-    hooks.flatMap { case (panel, caps) ⇒ List(capsuleMapping(caps)).zip(panel.saveContent.coreObject(this)) }.toList,
+    hooks.flatMap {
+      case (panel, caps) ⇒ List(capsuleMapping(caps)).zip(panel.saveContent.coreObject(this))
+    }.toList,
     capsuleMapping,
     groupings)
 
@@ -213,8 +223,7 @@ class ExecutionManager(manager: IMoleSceneManager,
     environments.values.foreach(env ⇒ env._2.keys.foreach(k ⇒ env._2(k) = new AtomicInteger))
   }
 
-  def displayFileTransfer = {
-    StatusBar().clear
-    StatusBar().inform("Downloads : " + downloads._1 + " / " + downloads._2 + "  Uploads : " + uploads._1 + " / " + uploads._2)
-  }
+  def displayFileTransfer =
+    executionContainer.updateFileTransferLabels(downloads._1 + " / " + downloads._2,
+      uploads._1 + " / " + uploads._2)
 }

@@ -17,8 +17,7 @@
 
 package org.openmole.ide.core.implementation.workflow
 
-import java.awt.BorderLayout
-import java.awt.Color
+import java.awt.{ BorderLayout, Color }
 import javax.swing.JScrollPane
 import javax.swing.ScrollPaneConstants._
 import org.openide.DialogDescriptor
@@ -54,6 +53,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
     MoleMaker.buildMole(bmsc.scene.manager) match {
       case Right((mole, prototypeMapping, capsuleMapping, errors)) ⇒
         Some(new ExecutionManager(bmsc.scene.manager,
+          this,
           mole,
           prototypeMapping,
           capsuleMapping))
@@ -68,6 +68,9 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
     background = new Color(55, 170, 200)
   }
 
+  val dlLabel = new Label("0/0")
+  val ulLabel = new Label("0/0")
+
   var groupingPanel: Option[MultiGenericGroupingStrategyPanel] = None
 
   var panelHooks = new HashMap[IHookPanelUI, (ICapsuleUI, Class[_ <: Hook])]
@@ -81,26 +84,33 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
           val hookTabbedPane = new TabbedPane
 
           //Hooks
-          contents += new Label { text = "<html><b><font \"size=\"5\" >Hooks</font></b></html>" }
+          contents += new Label {
+            text = "<html><b><font \"size=\"5\" >Hooks</font></b></html>"
+          }
           contents += hookTabbedPane
-          eManager.capsuleMapping.keys.foreach { c ⇒
-            c.dataUI.task match {
-              case Some(t: ITaskDataProxyUI) ⇒
-                val activated = c.dataUI.hooks.filter { _._2.activated }
-                if (!activated.isEmpty) {
-                  hookTabbedPane.pages += new TabbedPane.Page("<html><b>" + t.dataUI.name + "</b></html>",
-                    new PluginPanel("", "", "[top]") {
-                      activated.foreach {
-                        case (hClass, hDataUI) ⇒
-                          val p = hDataUI.buildPanelUI(t)
-                          panelHooks += p -> (c, hClass)
-                          contents += p.peer
-                          contents += new Separator(Orientation.Vertical) { foreground = Color.WHITE }
-                      }
-                    })
-                }
-              case _ ⇒
-            }
+          eManager.capsuleMapping.keys.foreach {
+            c ⇒
+              c.dataUI.task match {
+                case Some(t: ITaskDataProxyUI) ⇒
+                  val activated = c.dataUI.hooks.filter {
+                    _._2.activated
+                  }
+                  if (!activated.isEmpty) {
+                    hookTabbedPane.pages += new TabbedPane.Page("<html><b>" + t.dataUI.name + "</b></html>",
+                      new PluginPanel("", "", "[top]") {
+                        activated.foreach {
+                          case (hClass, hDataUI) ⇒
+                            val p = hDataUI.buildPanelUI(t)
+                            panelHooks += p -> (c, hClass)
+                            contents += p.peer
+                            contents += new Separator(Orientation.Vertical) {
+                              foreground = Color.WHITE
+                            }
+                        }
+                      })
+                  }
+                case _ ⇒
+              }
           }
           contents += new TitleLabel("Grouping strategy")
           groupingPanel = Some(new MultiGenericGroupingStrategyPanel(eManager))
@@ -109,10 +119,17 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
 
         peer.add(new PluginPanel("wrap") {
           contents += new TitleLabel("Execution control")
-          contents += new PluginPanel("wrap 2", "[]-20[]") {
+          contents += new PluginPanel("wrap 3", "[]-20[]5[]") {
             //Start / Stop
             contents += startStopButton
             contents += exportButton
+
+            contents += new PluginPanel("wrap 4") {
+              contents += new Label("Downloads:")
+              contents += dlLabel
+              contents += new Label("Uploads:")
+              contents += ulLabel
+            }
 
             // View Mole execution
             contents += new MainLinkLabel("Mole execution", new Action("") {
@@ -144,7 +161,9 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         startStopButton.background = new Color(170, 0, 0)
         startStopButton.action = stop
         exportButton.enabled = false
-        x.start(panelHooks.map { ph ⇒ ph._1 -> ph._2._1 }.toMap,
+        x.start(panelHooks.map {
+          ph ⇒ ph._1 -> ph._2._1
+        }.toMap,
           groupingPanel.get.coreObjects)
       case _ ⇒
     }
@@ -177,7 +196,9 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         else None
       } match {
         case Some(t: String) ⇒ executionManager match {
-          case Some(x: ExecutionManager) ⇒ x.buildMoleExecution(panelHooks.map { ph ⇒ ph._1 -> ph._2._1 }.toMap,
+          case Some(x: ExecutionManager) ⇒ x.buildMoleExecution(panelHooks.map {
+            ph ⇒ ph._1 -> ph._2._1
+          }.toMap,
             groupingPanel.get.coreObjects) match {
               case Right((mExecution, environments)) ⇒ SerializerService.serialize(mExecution, new File(t))
               case Left(e) ⇒ StatusBar().blockException(e)
@@ -187,6 +208,12 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         case _ ⇒
       }
     }
+  }
+
+  def updateFileTransferLabels(dl: String, ul: String) = {
+    dlLabel.text = dl
+    ulLabel.text = ul
+    revalidate
   }
 
   def moleExecution = executionManager match {
@@ -207,4 +234,5 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   class ExecutionPanel extends Panel {
     background = new Color(77, 77, 77)
   }
+
 }
