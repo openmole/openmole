@@ -18,6 +18,7 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.method.sensitivity.SaltelliSampling
 import org.openmole.ide.misc.tools.Counter
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.misc.widget.{ URL, Helper }
 
 class SaltelliSamplingDataUI(val samples: String = "1") extends ISamplingDataUI {
 

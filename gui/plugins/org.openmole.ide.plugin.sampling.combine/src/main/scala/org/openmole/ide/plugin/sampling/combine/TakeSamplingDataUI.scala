@@ -31,10 +31,7 @@ class TakeSamplingDataUI(val size: String = "1") extends ISamplingDataUI {
   def coreObject(factors: List[IFactorDataUI], samplings: List[Sampling]) =
     new TakeSampling((CombineSamplingCoreFactory(factors) ::: samplings).head, size.toInt)
 
-  def buildPanelUI = new TakeSamplingPanelUI(this) {
-    override val help = new Helper(List(new URL(i18n.getString("takePermalinkText"),
-      i18n.getString("takePermalink"))))
-  }
+  def buildPanelUI = new TakeSamplingPanelUI(this)
 
   def imagePath = "img/takeSampling.png"
 

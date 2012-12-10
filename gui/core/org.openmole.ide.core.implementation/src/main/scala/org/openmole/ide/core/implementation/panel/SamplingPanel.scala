@@ -59,7 +59,7 @@ class SamplingPanel(samplingWidget: ISamplingWidget,
   }
 
   def updateHelp = {
-    if (peer.getComponentCount == 2) peer.remove(1)
+    if (peer.getComponentCount == 3) peer.remove(2)
     peer.add(panelUI.sPanel.help.peer, BorderLayout.SOUTH)
     revalidate
     repaint

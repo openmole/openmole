@@ -32,10 +32,10 @@ class SaltelliSamplingPanelUI(cud: SaltelliSamplingDataUI) extends PluginPanel("
 
   override def saveContent = new SaltelliSamplingDataUI(sampleTextField.text)
 
-  override val help = new Helper(List(new URL(i18n.getString("samplingPermalinkText"),
-    i18n.getString("samplingPermalink")),
-    new URL(i18n.getString("samplingPermalink1Text"),
-      i18n.getString("samplingPermalink1")))) {
+  override val help = new Helper(List(new URL(i18n.getString("saltelliPermalinkText"),
+    i18n.getString("saltelliPermalink")),
+    new URL(i18n.getString("saltelliPermalink1Text"),
+      i18n.getString("saltelliPermalink1")))) {
     add(sampleTextField, new Help(i18n.getString("sample"), i18n.getString("sampleEx")))
   }
 }

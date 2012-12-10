@@ -16,7 +16,7 @@
  */
 package org.openmole.ide.plugin.sampling.combine
 
-import org.openmole.ide.misc.widget.{ URL, Helper, PluginPanel }
+import org.openmole.ide.misc.widget.{ Help, URL, Helper, PluginPanel }
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import java.util.{ Locale, ResourceBundle }
 import swing.{ Label, TextField }
@@ -31,4 +31,10 @@ class TakeSamplingPanelUI(cud: TakeSamplingDataUI) extends PluginPanel("wrap 2",
   contents += sizeTextField
 
   override def saveContent = new TakeSamplingDataUI(sizeTextField.text)
+
+  override val help = new Helper(List(new URL(i18n.getString("takePermalinkText"),
+    i18n.getString("takePermalink")))) {
+    add(sizeTextField,
+      new Help(i18n.getString("takeSize"), i18n.getString("takeSizeEx")))
+  }
 }

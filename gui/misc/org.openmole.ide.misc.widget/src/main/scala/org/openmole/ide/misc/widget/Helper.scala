@@ -28,15 +28,19 @@ import scala.swing.TextArea
 class Helper(val permalinks: List[URL] = List.empty) extends PluginPanel("wrap") {
   val helpMap = new HashMap[Component, Help]
 
+  addPermalinks
+
   def add(component: Component,
           help: Help) = helpMap += component -> help
 
   def components = helpMap.keys
 
+  def addPermalinks = permalinks foreach { addExternalLink(_, true) }
+
   def switchTo(help: Help) = {
     contents += new HelpTextArea(help.message)
     contents += new ExampleHelpTextArea(help.example)
-    permalinks foreach { addExternalLink(_, true) }
+    addPermalinks
     help.urls foreach { addExternalLink(_, false) }
   }
 

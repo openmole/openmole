@@ -27,15 +27,21 @@ import java.io.File
 import org.openmole.core.model.domain.{ Discrete, Domain }
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.misc.tools.util.Types
+import org.openmole.ide.misc.widget.{ URL, Helper }
+import java.util.{ ResourceBundle, Locale }
 
 class ZipWithNameSamplingDataUI(val prototype: Option[IPrototypeDataProxyUI] = None) extends ISamplingDataUI with ZipWithPrototypeSamplingDataUI {
+
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   def coreObject(factors: List[IFactorDataUI], samplings: List[Sampling]) =
     new ZipWithNameSampling(factors.headOption.getOrElse(throw new UserBadDataError("A factor is required to build a Zip with name Sampling"))
       .coreObject.asInstanceOf[Factor[File, Domain[File] with Discrete[File]]],
       prototype.getOrElse(throw new UserBadDataError("A string prototype is required to build a Zip with name Sampling")).dataUI.coreObject.asInstanceOf[Prototype[String]])
 
-  def buildPanelUI = new ZipWithPrototypeSamplingPanelUI(this)
+  def buildPanelUI = new ZipWithPrototypeSamplingPanelUI(this) {
+    override def help = new Helper(List(new URL(i18n.getString("zipWithNamePermalinkText"), i18n.getString("takePermalink"))))
+  }
 
   def imagePath = "img/zipWithNameSampling.png"
 

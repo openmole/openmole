@@ -46,6 +46,8 @@ class RangeDomainPanelUI(pud: RangeDomainDataUI[_]) extends GenericRangeDomainPa
   contents += (stepCheckBox, "gap para")
   contents += stepField
 
+  help.add(stepField, new Help(i18n.getString("step"), i18n.getString("stepEx")))
+
   def stepContent: Option[String] = {
     if (stepCheckBox.selected) {
       if (stepField.text.isEmpty) None
@@ -58,11 +60,4 @@ class RangeDomainPanelUI(pud: RangeDomainDataUI[_]) extends GenericRangeDomainPa
     stepContent,
     false,
     typeCombo.selection.item)
-
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(minField, new Help(i18n.getString("min"), i18n.getString("minEx")))
-    add(maxField, new Help(i18n.getString("max"), i18n.getString("maxEx")))
-    add(stepField, new Help(i18n.getString("step"), i18n.getString("stepEx")))
-  }
-
 }

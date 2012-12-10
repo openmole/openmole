@@ -46,6 +46,7 @@ class GroovyModifierDomainPanelUI(pud: GroovyModifierDomainDataUI) extends Plugi
 
   override lazy val help =
     new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-      add(codeTextArea, new Help(i18n.getString("mapCode"), i18n.getString("mapCodeEx")))
+      add(protoNameTextField, new Help(i18n.getString("mapVariable"), i18n.getString("mapVariableEx")))
+      add(codeTextArea.editor, new Help(i18n.getString("mapCode"), i18n.getString("mapCodeEx")))
     }
 }

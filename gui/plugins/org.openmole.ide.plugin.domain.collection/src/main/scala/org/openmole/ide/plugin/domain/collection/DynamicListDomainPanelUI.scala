@@ -25,7 +25,7 @@ import swing._
 import java.awt.Color
 import java.util.{ Locale, ResourceBundle }
 
-class DynamicListDomainPanelUI(pud: DynamicListDomainDataUI[_]) extends PluginPanel("") with IDomainPanelUI {
+class DynamicListDomainPanelUI(pud: DynamicListDomainDataUI[_]) extends PluginPanel("wrap") with IDomainPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 

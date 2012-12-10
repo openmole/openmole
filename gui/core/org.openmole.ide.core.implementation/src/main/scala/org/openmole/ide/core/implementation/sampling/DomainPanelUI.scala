@@ -18,12 +18,12 @@
 package org.openmole.ide.core.implementation.sampling
 
 import scala.swing._
-import event.{FocusGained, SelectionChanged}
+import event.{ FocusGained, SelectionChanged }
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.data._
-import org.openmole.ide.core.model.sampling.{ISamplingProxyUI, IModifier, IDomainWidget}
+import org.openmole.ide.core.model.sampling.{ ISamplingProxyUI, IModifier, IDomainWidget }
 import org.openmole.ide.misc.widget._
 import multirow.ComponentFocusedEvent
 import org.openmole.ide.core.model.panel._

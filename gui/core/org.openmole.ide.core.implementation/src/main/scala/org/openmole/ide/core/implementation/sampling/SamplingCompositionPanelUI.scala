@@ -67,7 +67,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
   addChild(boxLayer)
   addChild(connectLayer)
 
-  setPreferredBounds(new Rectangle(0, 0, 1000, 600))
+  setPreferredBounds(new Rectangle(0, 0, 900, 600))
 
   val connectProvider = new SamplingConnectionProvider
   val connectAction = ActionFactory.createExtendedConnectAction(null, connectLayer,

@@ -20,7 +20,7 @@ package org.openmole.ide.plugin.domain.range
 import java.util.Locale
 import java.util.ResourceBundle
 import org.openmole.ide.core.model.panel.IDomainPanelUI
-import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget.{ Help, URL, Helper, PluginPanel }
 import swing.{ MyComboBox, TextField, Label }
 import org.openmole.ide.misc.tools.util.Types._
 
@@ -38,4 +38,10 @@ abstract class GenericRangeDomainPanelUI extends PluginPanel("wrap 2") with IDom
   contents += minField
   contents += (new Label("Max"), "gap para")
   contents += maxField
+
+  minField.peer
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
+    add(minField, new Help(i18n.getString("min"), i18n.getString("minEx")))
+    add(maxField, new Help(i18n.getString("max"), i18n.getString("maxEx")))
+  }
 }

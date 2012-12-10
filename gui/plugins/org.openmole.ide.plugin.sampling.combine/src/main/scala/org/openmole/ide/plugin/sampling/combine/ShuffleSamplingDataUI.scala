@@ -22,6 +22,7 @@ import org.openmole.plugin.sampling.combine.ShuffleSampling
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.misc.widget.{ URL, Helper }
 
 class ShuffleSamplingDataUI extends ISamplingDataUI {
   def name = "Shuffle"
@@ -29,7 +30,10 @@ class ShuffleSamplingDataUI extends ISamplingDataUI {
   def coreObject(factors: List[IFactorDataUI], samplings: List[Sampling]) =
     new ShuffleSampling((CombineSamplingCoreFactory(factors) ::: samplings).head)
 
-  def buildPanelUI = new GenericCombineSamplingPanelUI(this)
+  def buildPanelUI = new GenericCombineSamplingPanelUI(this) {
+    override val help = new Helper(List(new URL(i18n.getString("shufflePermalinkText"),
+      i18n.getString("shufflePermalink"))))
+  }
 
   def imagePath = "img/shuffleSampling.png"
 

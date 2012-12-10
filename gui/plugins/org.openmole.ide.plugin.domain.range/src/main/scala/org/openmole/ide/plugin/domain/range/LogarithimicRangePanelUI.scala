@@ -35,9 +35,4 @@ class LogarithmicRangePanelUI(pud: LogarthmicRangeDataUI) extends GenericRangeDo
 
   def saveContent = GenericRangeDomainDataUI(minField.text, maxField.text, Some(stepField.text), true, typeCombo.selection.item)
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(minField, new Help(i18n.getString("min"), i18n.getString("minEx")))
-    add(maxField, new Help(i18n.getString("max"), i18n.getString("maxEx")))
-    add(stepField, new Help(i18n.getString("step"), i18n.getString("stepEx")))
-  }
 }

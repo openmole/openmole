@@ -17,12 +17,15 @@
 package org.openmole.ide.plugin.sampling.combine
 
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
-import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget.{ Help, PluginPanel }
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import swing.MyComboBox
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import java.util.{ Locale, ResourceBundle }
 
 class ZipWithPrototypeSamplingPanelUI(dataUI: ZipWithPrototypeSamplingDataUI) extends PluginPanel("") with ISamplingPanelUI {
+
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val availablePrototypes: List[IPrototypeDataProxyUI] = {
     dataUI match {
@@ -40,9 +43,16 @@ class ZipWithPrototypeSamplingPanelUI(dataUI: ZipWithPrototypeSamplingDataUI) ex
 
   contents += protoCombo
 
+  help.add(protoCombo, new Help(i18n.getString("zipPrototype")))
+
   def saveContent = dataUI match {
-    case i: ZipWithIndexSamplingDataUI ⇒ new ZipWithIndexSamplingDataUI(Some(protoCombo.selection.item))
-    case n: ZipWithNameSamplingDataUI ⇒ new ZipWithNameSamplingDataUI(Some(protoCombo.selection.item))
+    case i: ZipWithIndexSamplingDataUI ⇒ new ZipWithIndexSamplingDataUI(proto)
+    case n: ZipWithNameSamplingDataUI ⇒ new ZipWithNameSamplingDataUI(proto)
     case _ ⇒ new ZipWithIndexSamplingDataUI
+  }
+
+  def proto = protoCombo.selection.item match {
+    case p: IPrototypeDataProxyUI ⇒ Some(p)
+    case _ ⇒ None
   }
 }

@@ -43,13 +43,18 @@ class DomainPanel(domainWidget: IDomainWidget,
   }.peer, BorderLayout.CENTER)
   peer.add(panelUI.dPanel.help.peer, BorderLayout.SOUTH)
 
+  listenTo(panelUI.help.components.toSeq: _*)
+  reactions += {
+    case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
+    case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
+  }
+
   def create = {}
 
   def delete = true
 
   def save = try {
     domainWidget.proxy.dataUI = panelUI.saveContent
-    println("saved ..")
     domainWidget.update
   } catch {
     case e: UserBadDataError ⇒ StatusBar().block(e.getMessage, stack = e.getCause.getMessage)
