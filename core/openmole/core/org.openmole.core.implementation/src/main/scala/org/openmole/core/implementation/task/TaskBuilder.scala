@@ -31,7 +31,7 @@ abstract class TaskBuilder {
   def addOutput(d: DataSet) = { _outputs ++= d; this }
   def addOutput(d: Data[_]) = { _outputs += d; this }
 
-  def addParameter(p: IParameter[_]) = { _parameters += p; this }
+  def addParameter(p: Parameter[_]) = { _parameters += p; this }
   def addParameter(p: ParameterSet) = { _parameters ++= p; this }
 
   def inputs = _inputs

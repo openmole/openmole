@@ -17,6 +17,27 @@
 
 package org.openmole.core.model.data
 
+object Parameter {
+  implicit def tuple2IterableToParameters(values: Iterable[(Prototype[T], T) forSome { type T }]) = values.map { case (p, v) ⇒ Parameter(p, v) }
+
+  def apply[T](prototype: Prototype[T], value: T, `override`: Boolean = false) = {
+    val o = `override`
+    new Parameter[T] {
+      val variable = Variable(prototype, value)
+      val `override` = o
+    }
+  }
+
+  def delayed[T](prototype: Prototype[T], value: ⇒ T, `override`: Boolean = false) = {
+    val o = `override`
+    new Parameter[T] {
+      def variable: Variable[T] = Variable(prototype, value)
+      val `override` = o
+    }
+  }
+
+}
+
 /**
  * The parameter is a variable wich is injected in the data flow durring the
  * workflow execution just before the begining of a task execution. It can be
@@ -24,7 +45,7 @@ package org.openmole.core.model.data
  * task.
  *
  */
-trait IParameter[T] {
+trait Parameter[T] {
 
   /**
    * Get the variable which is injected.
