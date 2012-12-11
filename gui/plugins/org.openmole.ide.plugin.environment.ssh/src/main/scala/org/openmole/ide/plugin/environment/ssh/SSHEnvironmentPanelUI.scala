@@ -32,11 +32,30 @@ class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fill
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
+  implicit def stringToStringOpt(s: String) = s.isEmpty match {
+    case true ⇒ None
+    case false ⇒ Some(s)
+  }
+
+  implicit def stringToIntOpt(s: String) = try {
+    Some(s.toInt)
+  } catch {
+    case e: NumberFormatException ⇒ None
+  }
+
+  implicit def stringToInt(s: String) = try {
+    s.toInt
+  } catch {
+    case e: NumberFormatException ⇒ 0
+  }
+
   val loginTextField = new TextField(pud.login, 15)
   val hostTextField = new TextField(pud.host, 15)
   val nbSlotTextField = new TextField(pud.nbSlots.toString, 3)
+  val portTextField = new TextField(pud.port.toString, 3)
   val dirTextField = new TextField(pud.dir, 15)
-  val runTimeMemoryTextField = new TextField(pud.runtimeMemory.toString, 5)
+  val openMOLEMemoryTextField = new TextField(pud.openMOLEMemory.getOrElse("").toString, 5)
+  val threadTextField = new TextField(pud.threads.getOrElse("").toString, 5)
 
   tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("wrap 2") {
     contents += (new Label("Login"), "gap para")
@@ -45,6 +64,9 @@ class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fill
     contents += (new Label("Host"), "gap para")
     contents += hostTextField
 
+    contents += (new Label("Port"), "gap para")
+    contents += portTextField
+
     contents += (new Label("Number of slots"), "gap para")
     contents += nbSlotTextField
 
@@ -52,9 +74,12 @@ class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fill
     contents += dirTextField
   })
 
-  tabbedPane.pages += new TabbedPane.Page("Memory", new PluginPanel("wrap 2") {
+  tabbedPane.pages += new TabbedPane.Page("Options", new PluginPanel("wrap 2") {
     contents += (new Label("Runtime memory"), "gap para")
-    contents += runTimeMemoryTextField
+    contents += openMOLEMemoryTextField
+
+    contents += (new Label("Threads"), "gap para")
+    contents += threadTextField
   })
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
@@ -70,7 +95,7 @@ class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fill
     add(dirTextField,
       new Help(i18n.getString("dir"),
         i18n.getString("dirEx")))
-    add(runTimeMemoryTextField,
+    add(openMOLEMemoryTextField,
       new Help(i18n.getString("runtimeMemory"),
         i18n.getString("runtimeMemoryEx")))
 
@@ -79,7 +104,9 @@ class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fill
   override def saveContent(name: String) = new SSHEnvironmentDataUI(name,
     loginTextField.text,
     hostTextField.text,
-    nbSlotTextField.text.toInt,
+    nbSlotTextField.text,
+    portTextField.text,
     dirTextField.text,
-    runTimeMemoryTextField.text.toInt)
+    openMOLEMemoryTextField.text,
+    threadTextField.text)
 }
