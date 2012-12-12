@@ -13,10 +13,18 @@ class SSHEnvironmentDataUI(val name: String = "",
                            val login: String = "",
                            val host: String = "",
                            val nbSlots: Int = 1,
+                           val port: Int = 22,
                            val dir: String = "/tmp/",
-                           val runtimeMemory: Int = BatchEnvironment.defaultRuntimeMemory) extends IEnvironmentDataUI {
+                           val openMOLEMemory: Option[Int] = Some(BatchEnvironment.defaultRuntimeMemory),
+                           var threads: Option[Int] = None) extends IEnvironmentDataUI {
 
-  def coreObject = new SSHEnvironment(login, host, nbSlots, runtimeMemory, path = dir)
+  def coreObject = new SSHEnvironment(login,
+    host,
+    nbSlots,
+    port,
+    dir,
+    openMOLEMemory,
+    threads)
 
   def coreClass = classOf[SSHEnvironment]
 
