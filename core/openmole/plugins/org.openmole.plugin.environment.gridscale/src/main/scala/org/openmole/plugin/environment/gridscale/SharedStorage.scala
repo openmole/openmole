@@ -44,6 +44,7 @@ trait SharedStorage extends SSHService { js ⇒
       def host = js.host
       def user = js.user
       override def port = js.port
+      override def timeout = Workspace.preferenceAsDuration(SSHService.timeout).toMilliSeconds.toInt
     }
     val root = js.root
     def authentication = js.authentication
@@ -54,6 +55,7 @@ trait SharedStorage extends SSHService { js ⇒
     def host = js.host
     def user = js.user
     override def port = js.port
+    override def timeout = Workspace.preferenceAsDuration(SSHService.timeout).toMilliSeconds.toInt
   }
 
   def root: String
@@ -87,18 +89,17 @@ trait SharedStorage extends SSHService { js ⇒
             (workdir, scriptName)
           } finally script.delete
         }
-        try {
-          val jobDescription = new SSHJobDescription {
-            val executable = "/bin/bash"
-            val arguments = scriptName
-            val workDirectory = workdir
-          }
 
-          val j = installJobService.submit(jobDescription)(authentication)
-          val s = untilFinished { Thread.sleep(Workspace.preferenceAsDuration(UpdateInstallJobInterval).toMilliSeconds); installJobService.state(j)(authentication) }
+        val jobDescription = new SSHJobDescription {
+          val executable = "/bin/bash"
+          val arguments = scriptName
+          val workDirectory = workdir
+        }
 
-          if (s != Done) throw new InternalProcessingError("Installation of runtime has failed.")
-        } finally sharedFS.rmFile(sharedFS.child(workdir, scriptName))
+        val j = installJobService.submit(jobDescription)(authentication)
+        val s = untilFinished { Thread.sleep(Workspace.preferenceAsDuration(UpdateInstallJobInterval).toMilliSeconds); installJobService.state(j)(authentication) }
+
+        if (s != Done) throw new InternalProcessingError("Installation of runtime has failed.")
 
         val path = sharedFS.child(workdir, runtime.runtime.hash)
         installed = Some(path)
