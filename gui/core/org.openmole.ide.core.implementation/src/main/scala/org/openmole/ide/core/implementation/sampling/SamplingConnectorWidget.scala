@@ -40,6 +40,7 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
 class SamplingConnectorWidget(sourceWidget: Widget,
                               targetWidget: Widget,
+                              val factorProxyUI: Option[IFactorProxyUI],
                               scene: ISamplingCompositionPanelUI) extends ConnectionWidget(scene.scene) {
   samplingConnectorWidget ⇒
 
@@ -64,11 +65,9 @@ class SamplingConnectorWidget(sourceWidget: Widget,
     revalidate
   }
 
-  def computeFactor = scene.computeFactor(sourceW.component.proxy)
-
   def preview = new IConnectorViewUI {
     val preview =
-      computeFactor match {
+      factorProxyUI match {
         case Some(factor: IFactorProxyUI) ⇒
           factor.dataUI.prototype match {
             case Some(p: IPrototypeDataProxyUI) ⇒
@@ -80,7 +79,7 @@ class SamplingConnectorWidget(sourceWidget: Widget,
   }
 
   def buildPrototypeFilterWidget = {
-    computeFactor match {
+    factorProxyUI match {
       case Some(factor: IFactorProxyUI) ⇒
         val dialog = new FactorPrototypeDialog(samplingConnectorWidget)
         componentWidget = Some(new PrototypeOnConnectorWidget(scene.scene,
