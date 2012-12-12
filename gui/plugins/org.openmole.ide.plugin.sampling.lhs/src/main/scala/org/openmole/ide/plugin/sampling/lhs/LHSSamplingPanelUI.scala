@@ -50,7 +50,7 @@ class LHSSamplingPanelUI(cud: LHSSamplingDataUI) extends PluginPanel("wrap 2", "
 
   override def saveContent = new LHSSamplingDataUI(sampleTextField.text)
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))){
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     add(sampleTextField, new Help(i18n.getString("sample"), i18n.getString("sampleEx")))
   }
 }

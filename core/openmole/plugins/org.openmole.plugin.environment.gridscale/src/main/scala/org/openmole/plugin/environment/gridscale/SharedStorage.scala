@@ -64,7 +64,7 @@ trait SharedStorage extends SSHService { js ⇒
     installed match {
       case None ⇒
         val (workdir, scriptName) = {
-          val workdir = sharedFS.child(sharedFS.root, "install")
+          val workdir = sharedFS.child(sharedFS.root, Workspace.preference(Workspace.uniqueID))
           if (!sharedFS.exists(workdir)) sharedFS.makeDir(workdir)
 
           val script = Workspace.newFile("install", ".sh")
