@@ -4,7 +4,7 @@
   <parent>
     <artifactId>plugins</artifactId>
     <groupId>org.openmole.core</groupId>
-    <version>0.7.0-RC1</version>
+    <version>0.7.0-RC2-SNAPSHOT</version>
   </parent>
   <artifactId>org.openmole.plugin.grouping.batch</artifactId>
   <!-- ************************************************************* -->
@@ -15,7 +15,7 @@
   <!-- *** Project Information ************************************* -->
   <!-- ************************************************************* -->
   <name>${project.artifactId} ${project.version}</name>
-  <description></description>
+  <description />
   <dependencies>
     <dependency>
       <groupId>org.eclipse.equinox</groupId>

@@ -4,7 +4,7 @@
   <parent>
     <artifactId>plugins</artifactId>
     <groupId>org.openmole.ide</groupId>
-    <version>0.7.0-RC1</version>
+    <version>0.7.0-RC2-SNAPSHOT</version>
   </parent>
   <artifactId>org.openmole.ide.plugin.sampling.lhs</artifactId>
   <packaging>bundle</packaging>
