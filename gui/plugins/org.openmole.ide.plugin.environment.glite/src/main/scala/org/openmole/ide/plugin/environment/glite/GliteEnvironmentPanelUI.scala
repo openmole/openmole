@@ -19,7 +19,6 @@ package org.openmole.ide.plugin.environment.glite
 
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.plugin.environment.tools._
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget._
 import scala.swing.CheckBox

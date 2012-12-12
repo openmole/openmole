@@ -24,7 +24,6 @@ import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.URL
-import org.openmole.ide.plugin.environment.tools._
 import scala.swing.Label
 import scala.swing.TabbedPane
 import scala.swing.TextField
