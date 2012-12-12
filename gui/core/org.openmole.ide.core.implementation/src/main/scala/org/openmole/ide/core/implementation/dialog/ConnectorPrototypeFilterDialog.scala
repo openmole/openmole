@@ -64,7 +64,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
 
     def content = protoCombo.selection.item
 
-    connectorWidget.computeFactor match {
+    connectorWidget.factorProxyUI match {
       case Some(f: IFactorProxyUI) ⇒
         f.dataUI.prototype match {
           case Some(p: IPrototypeDataProxyUI) ⇒
@@ -85,7 +85,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
         case _ ⇒ List()
       }   */
 
-      connectorWidget.computeFactor match {
+      connectorWidget.factorProxyUI match {
         case Some(f: IFactorProxyUI) ⇒ Proxys.prototypes.filter {
           p ⇒ Types(f.dataUI.domain.dataUI.domainType.toString, p.dataUI.protoType.toString)
         }.toList
@@ -99,7 +99,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
         verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
       }.peer,
         "Prototype")).equals(NotifyDescriptor.OK_OPTION)) {
-        connectorWidget.computeFactor match {
+        connectorWidget.factorProxyUI match {
           case Some(f: IFactorProxyUI) ⇒
             f.dataUI.prototype = Some(protoCombo.selection.item)
           case _ ⇒

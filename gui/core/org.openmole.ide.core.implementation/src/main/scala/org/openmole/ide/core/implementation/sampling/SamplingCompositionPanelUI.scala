@@ -327,8 +327,6 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
       s match {
         case w: IDomainWidget ⇒
           updatePrevious(w)
-          //  t match {
-          //  case Some(samp: ISamplingWidget) ⇒
           val factor = computeFactor(w.proxy)
           factor match {
             case Some(f: IFactorProxyUI) ⇒
@@ -336,8 +334,6 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
               if (factorWidgets.contains(f)) factorWidgets(f).update
             case _ ⇒
           }
-        // case _ ⇒
-        // }
       }
   }
 
@@ -477,6 +473,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
 
       val connection = new SamplingConnectorWidget(sourceW,
         targetW,
+        factorProxyUI,
         samplingCompositionPanelUI)
 
       factorProxyUI match {
