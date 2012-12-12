@@ -7,7 +7,7 @@
   <parent>
     <artifactId>ui</artifactId>
     <groupId>org.openmole.ui</groupId>
-    <version>0.7-SNAPSHOT</version>
+    <version>0.7.0-RC1</version>
   </parent>
   <artifactId>openmole-ui-package</artifactId>
   <!-- ************************************************************* -->

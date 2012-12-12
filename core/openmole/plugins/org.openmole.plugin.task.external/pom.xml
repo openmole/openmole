@@ -4,7 +4,7 @@
   <parent>
     <artifactId>plugins</artifactId>
     <groupId>org.openmole.core</groupId>
-    <version>0.7-SNAPSHOT</version>
+    <version>0.7.0-RC1</version>
   </parent>
   <artifactId>org.openmole.plugin.task.external</artifactId>
   <!-- ************************************************************* -->
