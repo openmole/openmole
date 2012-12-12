@@ -21,6 +21,13 @@ import fr.iscpif.gridscale.tools.SSHHost
 import fr.iscpif.gridscale.authentication.SSHAuthentication
 import org.openmole.core.batch.environment._
 import java.net.URI
+import org.openmole.misc.workspace.{ Workspace, ConfigurationLocation }
+
+object SSHService {
+  val timeout = new ConfigurationLocation("SSH", "TimeOut")
+  Workspace += (timeout, "PT120S")
+
+}
 
 trait SSHService extends SSHHost with BatchService {
   def authentication: SSHAuthentication

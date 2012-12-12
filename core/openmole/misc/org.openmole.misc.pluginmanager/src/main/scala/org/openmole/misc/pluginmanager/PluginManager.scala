@@ -34,7 +34,7 @@ import org.openmole.misc.osgi._
 
 object PluginManager extends Logger {
 
-  private val defaultPatern = ".*\\.jar"
+  private val defaultPattern = ".*\\.jar"
 
   private var files = Map.empty[File, (Long, Long)]
   private var resolvedDirectDependencies = HashMap.empty[Long, HashSet[Long]]
@@ -90,7 +90,7 @@ object PluginManager extends Logger {
   def load(path: File): Unit = synchronized { installBundle(path).start }
 
   def loadDir(path: String): Unit = loadDir(new File(path))
-  def loadDir(path: File): Unit = loadDir(path, defaultPatern)
+  def loadDir(path: File): Unit = loadDir(path, defaultPattern)
   def loadDir(path: File, pattern: String): Unit = {
     loadDir(path, new FileFilter {
       override def accept(file: File): Boolean = {

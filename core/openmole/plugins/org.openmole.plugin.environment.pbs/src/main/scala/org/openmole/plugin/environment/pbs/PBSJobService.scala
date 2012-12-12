@@ -27,6 +27,7 @@ import org.openmole.core.batch.jobservice.{ BatchJob, BatchJobId }
 import org.openmole.core.batch.storage.SimpleStorage
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.misc.tools.service.Duration._
+import org.openmole.misc.workspace.Workspace
 
 trait PBSJobService extends GridScaleJobService with SSHHost with SharedStorage { js ⇒
 
@@ -36,6 +37,7 @@ trait PBSJobService extends GridScaleJobService with SSHHost with SharedStorage 
     def host = js.host
     def user = js.user
     override def port = js.port
+    override def timeout = Workspace.preferenceAsDuration(SSHService.timeout).toMilliSeconds.toInt
   }
 
   protected def _submit(serializedJob: SerializedJob) = {

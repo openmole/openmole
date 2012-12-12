@@ -48,6 +48,7 @@ trait SSHJobService extends GridScaleJobService with SharedStorage with LimitedA
     def host = js.host
     override def port = js.port
     def user = js.user
+    override def timeout = Workspace.preferenceAsDuration(SSHService.timeout).toMilliSeconds.toInt
   }
 
   var queue = new TreeSet[SSHBatchJob]

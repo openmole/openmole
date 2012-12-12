@@ -22,6 +22,7 @@ import org.openmole.core.batch.environment.BatchEnvironment
 import fr.iscpif.gridscale.authentication.SSHAuthentication
 import fr.iscpif.gridscale.storage.SSHStorage
 import java.net.URI
+import org.openmole.misc.workspace.Workspace
 
 trait SSHStorageService extends StorageService with SSHService { ss ⇒
 
@@ -30,6 +31,7 @@ trait SSHStorageService extends StorageService with SSHService { ss ⇒
     override val port = ss.port
     val user = ss.user
     val root = _root
+    override def timeout = Workspace.preferenceAsDuration(SSHService.timeout).toMilliSeconds.toInt
   }
 
   lazy val storage = createStorage(root)
