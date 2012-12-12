@@ -41,12 +41,14 @@ class ZipSamplingDataUI extends ISamplingDataUI {
 
   def isAcceptable(sampling: ISamplingDataUI) = true
 
-  override def isAcceptable(domain: IDomainDataUI) = domain match {
+  override def isAcceptable(domain: IDomainDataUI) = true
+
+  /*domain match {
     case f: IFinite ⇒ true
     case _ ⇒
       StatusBar().warn("A Finite Domain is required for a Zip Sampling")
       false
-  }
+  }   */
 
   def preview = name
 
