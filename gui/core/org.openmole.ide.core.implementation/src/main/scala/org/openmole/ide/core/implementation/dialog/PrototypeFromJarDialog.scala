@@ -33,6 +33,7 @@ import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.swing.MyComboBox
 import org.openmole.misc.workspace.Workspace
 import org.openmole.ide.misc.tools.util.ClassLoader
+import org.openmole.misc.exception.UserBadDataError
 
 object PrototypeFromJarDialog {
   def display(prototypePanel: GenericPrototypePanelUI) = {
@@ -43,10 +44,12 @@ object PrototypeFromJarDialog {
       "Prototypes from jar files")).equals(NotifyDescriptor.OK_OPTION)) {
       var l = List.empty[String]
       panel.multiJarCombo.content.map { _.textFieldValue }.foreach { ep ⇒
-        ClassLoader.toManifest(ep)
-        l = l :+ ep
-        GenericPrototypeDataUI.extraType = l
-        prototypePanel.typeComboBox.peer.setModel(MyComboBox.newConstantModel(GenericPrototypeDataUI.base ::: GenericPrototypeDataUI.extra))
+        try {
+          ClassLoader.toManifest(ep)
+          l = l :+ ep
+          GenericPrototypeDataUI.extraType = l
+          prototypePanel.typeComboBox.peer.setModel(MyComboBox.newConstantModel(GenericPrototypeDataUI.base ::: GenericPrototypeDataUI.extra))
+        } catch { case e: UserBadDataError ⇒ StatusBar().block(e.message, stack = e.getStackTraceString) }
       }
     }
   }

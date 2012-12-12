@@ -27,7 +27,7 @@ import com.thoughtworks.xstream.converters.reflection.ReflectionProvider
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import com.thoughtworks.xstream.mapper.Mapper
-import org.openmole.ide.misc.tools.util.ClassLoader
+import org.openmole.ide.misc.tools.util.{ Types, ClassLoader }
 import org.openmole.ide.core.implementation.registry._
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
@@ -53,7 +53,7 @@ class PrototypeConverter(mapper: Mapper,
         state.content += proto -> new Serialized(proto.id)
         writer.addAttribute("id", proto.id.toString)
         writer.addAttribute("name", proto.dataUI.name)
-        writer.addAttribute("type", proto.dataUI.typeClassString)
+        writer.addAttribute("type", Types.pretify(proto.dataUI.typeClassString))
         writer.addAttribute("dim", proto.dataUI.dim.toString)
     }
   }
@@ -85,7 +85,7 @@ class PrototypeConverter(mapper: Mapper,
   def addPrototype(p: IPrototypeDataProxyUI): IPrototypeDataProxyUI = {
     Proxys.prototypes += p
     ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(p)
-    if (!(GenericPrototypeDataUI.baseType ::: GenericPrototypeDataUI.extraType contains p.dataUI.typeClassString)) {
+    if (!(GenericPrototypeDataUI.baseType ::: GenericPrototypeDataUI.extraType contains Types.pretify(p.dataUI.typeClassString))) {
       GenericPrototypeDataUI.extraType = GenericPrototypeDataUI.extraType :+ p.dataUI.typeClassString
     }
     p

@@ -38,13 +38,15 @@ import scala.swing.FileChooser.SelectionMode._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.ide.misc.tools.util.ClassLoader
 
-class GUIPanel extends MainFrame { mainframe ⇒
+class GUIPanel extends MainFrame {
+  mainframe ⇒
   title = "OpenMOLE"
 
   menuBar = new MenuBar {
     contents += new Menu("File") {
       contents += new MenuItem(new Action("New Mole") {
         override def apply = DialogFactory.newTabName
+
         accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_N, Event.CTRL_MASK))
       })
 
@@ -53,6 +55,7 @@ class GUIPanel extends MainFrame { mainframe ⇒
           Proxys.clearAll
           mainframe.title = "OpenMOLE - " + LoadXML.show
         }
+
         accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_L, Event.CTRL_MASK))
       })
 
@@ -61,6 +64,7 @@ class GUIPanel extends MainFrame { mainframe ⇒
           ScenesManager.saveCurrentPropertyWidget
           SaveXML.save(mainframe)
         }
+
         accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_S, Event.CTRL_MASK))
       })
 
@@ -127,39 +131,56 @@ class GUIPanel extends MainFrame { mainframe ⇒
     preferredSize = new Dimension(300, 400)
     val pluginDirPath = Workspace.pluginDirLocation.getCanonicalPath
     val pluginMultiTextField = new MultiChooseFileTextField("Plugin",
-      Workspace.pluginDirLocation.list.map { p ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(p)) }.toList, minus = CLOSE_IF_EMPTY)
+      Workspace.pluginDirLocation.list.map {
+        p ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(p))
+      }.toList, minus = CLOSE_IF_EMPTY)
     contents += pluginMultiTextField.panel
 
     def saveContent = {
-      val requiredFiles = Proxys.prototypes.map { p ⇒ PluginManager.fileProviding(ClassLoader.toClass(p.dataUI.typeClassString)) -> p }.flatMap {
-        case (o, p) ⇒ o.map { _.getCanonicalFile -> p }
+      val requiredFiles = Proxys.prototypes.map {
+        p ⇒ PluginManager.fileProviding(ClassLoader.toClass(p.dataUI.typeClassString)) -> p
+      }.flatMap {
+        case (o, p) ⇒ o.map {
+          _.getCanonicalFile -> p
+        }
       }
-      pluginMultiTextField.content.foreach { path ⇒
-        val plugin = new File(path.content)
-        val targetFile = new File(Workspace.pluginDirLocation + "/" + plugin.getName)
-        if (!targetFile.exists) {
-          if (plugin.exists) {
-            if (!targetFile.exists) {
-              plugin.copy(targetFile)
-              PluginManager.load(targetFile)
-            }
-          } else StatusBar().warn("The file " + path.content + " does not exist. It has not been imported")
-        }
-        val a = Workspace.pluginDirLocation.list.map { f ⇒ new File(Workspace.pluginDirLocation + "/" + f) }
-        val b = pluginMultiTextField.content.map { c ⇒ new File(Workspace.pluginDirLocation + "/" + new File(c.content).getName) }
-        a diff b foreach { f ⇒
-          val allDepending = PluginManager.allDepending(f).map { _.getCanonicalFile }
-          requiredFiles.filter(x ⇒ allDepending.toList.contains(x._1)).foreach {
-            case (f, p) ⇒
-              if (PrototypePanel.deletePrototype(p)) {
-                PluginManager.unload(f)
-                f.delete
+      pluginMultiTextField.content.foreach {
+        path ⇒
+          val plugin = new File(path.content)
+          val targetFile = new File(Workspace.pluginDirLocation + "/" + plugin.getName)
+          if (!targetFile.exists) {
+            if (plugin.exists) {
+              if (!targetFile.exists) {
+                plugin.copy(targetFile)
+                PluginManager.load(targetFile)
               }
-            case _ ⇒
+            } else StatusBar().warn("The file " + path.content + " does not exist. It has not been imported")
           }
-        }
+          val a = Workspace.pluginDirLocation.list.map {
+            f ⇒ new File(Workspace.pluginDirLocation + "/" + f)
+          }
+          val b = pluginMultiTextField.content.map {
+            c ⇒ new File(Workspace.pluginDirLocation + "/" + new File(c.content).getName)
+          }
+          a diff b foreach {
+            f ⇒
+              val allDepending = PluginManager.allDepending(f).map {
+                _.getCanonicalFile
+              }
+              requiredFiles.filter(x ⇒ allDepending.toList.contains(x._1)).foreach {
+                case (fi, p) ⇒
+                  if (PrototypePanel.deletePrototype(p))
+                    unloadAndDelete(fi)
+                case _ ⇒
+              }
+              unloadAndDelete(f)
+          }
       }
     }
   }
 
+  def unloadAndDelete(f: File) = {
+    PluginManager.unload(f)
+    f.delete
+  }
 }

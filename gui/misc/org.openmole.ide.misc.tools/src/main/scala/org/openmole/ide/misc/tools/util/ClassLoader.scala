@@ -45,7 +45,7 @@ object ClassLoader {
     case _ ⇒ try {
       classOf[GroovyShell].getClassLoader.loadClass(s)
     } catch {
-      case e: ClassNotFoundException ⇒ throw new UserBadDataError("The class " + s + " has not been found")
+      case e: ClassNotFoundException ⇒ throw new UserBadDataError(e, "The class " + s + " has not been found")
     }
   }
 
