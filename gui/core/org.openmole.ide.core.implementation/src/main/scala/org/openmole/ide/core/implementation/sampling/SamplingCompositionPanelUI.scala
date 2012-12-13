@@ -466,14 +466,17 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
         }
         case scC: SceneComponent ⇒
           sourceW.panel match {
-            case d: IDomainWidget ⇒ Some(addFactor(d.proxy, None))
-            case _ ⇒ None
+            case d: IDomainWidget ⇒
+              computeFactor(sourceW.component.proxy) match {
+                case Some(f: IFactorProxyUI) ⇒ Some(f)
+                case _ ⇒ Some(addFactor(d.proxy, None))
+              }
+            case _ ⇒
           }
       }
 
       val connection = new SamplingConnectorWidget(sourceW,
         targetW,
-        factorProxyUI,
         samplingCompositionPanelUI)
 
       factorProxyUI match {
@@ -481,6 +484,8 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
           factorWidgets += f -> connection
         case _ ⇒
       }
+
+      connection.buildPrototypeFilterWidget
 
       sourceW.connections += connection
       targetW match {

@@ -37,16 +37,22 @@ import org.netbeans.api.visual.widget._
 import java.awt._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.misc.tools.Counter
 
 class SamplingConnectorWidget(sourceWidget: Widget,
                               targetWidget: Widget,
-                              val factorProxyUI: Option[IFactorProxyUI],
-                              scene: ISamplingCompositionPanelUI) extends ConnectionWidget(scene.scene) {
+                              scene: SamplingCompositionPanelUI) extends ConnectionWidget(scene.scene) {
   samplingConnectorWidget ⇒
 
   val sourceW = sourceWidget.asInstanceOf[SamplingComponent]
   val targetW = targetWidget.asInstanceOf[SceneComponent]
   var componentWidget: Option[PrototypeOnConnectorWidget] = None
+  lazy val factorProxyUI = scene.factorWidgets.find {
+    case (factor, connector) ⇒ connector == this
+  }.map { _._1 }.headOption match {
+    case Some(f: IFactorProxyUI) ⇒ Some(f)
+    case _ ⇒ None
+  }
 
   setStroke(new BasicStroke(2))
   setLineColor(new Color(218, 218, 218))
@@ -54,7 +60,7 @@ class SamplingConnectorWidget(sourceWidget: Widget,
   setTargetAnchor(targetAnchor(targetWidget))
   setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
 
-  buildPrototypeFilterWidget
+  // buildPrototypeFilterWidget
 
   def update = {
     componentWidget match {
@@ -70,8 +76,7 @@ class SamplingConnectorWidget(sourceWidget: Widget,
       factorProxyUI match {
         case Some(factor: IFactorProxyUI) ⇒
           factor.dataUI.prototype match {
-            case Some(p: IPrototypeDataProxyUI) ⇒
-              p.toString
+            case Some(p: IPrototypeDataProxyUI) ⇒ p.toString
             case _ ⇒ "?"
           }
         case _ ⇒ "?"

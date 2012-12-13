@@ -75,16 +75,6 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
     }
 
     def availablePrototypes =
-      /* connectorWidget.sourceW.component.proxy match {
-        case d: IDomainProxyUI ⇒
-          val availables = d.dataUI.availableTypes.map { _.toUpperCase }
-          Proxys.prototypes.filter {
-            p ⇒
-              availables.contains(p.dataUI.comparable)
-          }.toList
-        case _ ⇒ List()
-      }   */
-
       connectorWidget.factorProxyUI match {
         case Some(f: IFactorProxyUI) ⇒ Proxys.prototypes.filter {
           p ⇒ Types(f.dataUI.domain.dataUI.domainType.toString, p.dataUI.protoType.toString)
@@ -100,8 +90,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
       }.peer,
         "Prototype")).equals(NotifyDescriptor.OK_OPTION)) {
         connectorWidget.factorProxyUI match {
-          case Some(f: IFactorProxyUI) ⇒
-            f.dataUI.prototype = Some(protoCombo.selection.item)
+          case Some(f: IFactorProxyUI) ⇒ f.dataUI.prototype = Some(protoCombo.selection.item)
           case _ ⇒
         }
         connectorWidget.update
@@ -118,7 +107,6 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
       },
       CLOSE_IF_EMPTY,
       ADD)
-    // if (connector.filteredPrototypes.isEmpty) multiPrototypeCombo.removeAllRows
     contents += multiPrototypeCombo.panel
   }
 
