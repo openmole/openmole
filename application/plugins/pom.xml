@@ -7,7 +7,7 @@
   <parent>
     <artifactId>ui</artifactId>
     <groupId>org.openmole.ui</groupId>
-    <version>0.7-SNAPSHOT</version>
+    <version>0.7.0-RC2-SNAPSHOT</version>
   </parent>
   <artifactId>plugins</artifactId>
   <!-- ************************************************************* -->
@@ -18,7 +18,7 @@
   <!-- *** Project Information ************************************* -->
   <!-- ************************************************************* -->
   <name>${project.artifactId} ${project.version}</name>
-  <description></description>
+  <description />
   <dependencies>
     <dependency>
       <groupId>org.openmole.core</groupId>

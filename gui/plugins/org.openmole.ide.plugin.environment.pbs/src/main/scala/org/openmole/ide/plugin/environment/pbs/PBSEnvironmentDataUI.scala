@@ -5,7 +5,6 @@
 
 package org.openmole.ide.plugin.environment.pbs
 
-import org.openmole.ide.plugin.environment.tools.RequirementDataUI
 import org.openmole.plugin.environment.pbs.PBSEnvironment
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.ide.core.model.data.IEnvironmentDataUI
