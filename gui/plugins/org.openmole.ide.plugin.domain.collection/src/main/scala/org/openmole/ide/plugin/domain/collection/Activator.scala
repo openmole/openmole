@@ -31,7 +31,6 @@ class Activator extends OSGiActivator with DomainActivator {
       def buildDataUI = DynamicListDomainDataUI(classString = DOUBLE)
     },
     new VariableDomainFactoryUI {
-      def buildDataUI = VariableDomainDataUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], false),
-        classString = DOUBLE)
+      def buildDataUI = VariableDomainDataUI(None, DOUBLE)
     })
 }

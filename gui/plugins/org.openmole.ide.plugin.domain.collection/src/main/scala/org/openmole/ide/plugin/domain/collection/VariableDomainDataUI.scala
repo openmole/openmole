@@ -33,7 +33,7 @@ import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.ide.misc.tools.util.Types
 
 object VariableDomainDataUI {
-  def apply[T](prototypeArray: IPrototypeDataProxyUI, classString: String) = {
+  def apply[T](prototypeArray: Option[IPrototypeDataProxyUI], classString: String) = {
     Types.standardize(classString) match {
       case INT ⇒ new VariableDomainDataUI[Int](prototypeArray)
       case DOUBLE ⇒ new VariableDomainDataUI[Double](prototypeArray)
@@ -46,20 +46,20 @@ object VariableDomainDataUI {
   }
 }
 
-class VariableDomainDataUI[S](val prototypeArray: IPrototypeDataProxyUI)(implicit val domainType: Manifest[S])
+class VariableDomainDataUI[S](val prototypeArray: Option[IPrototypeDataProxyUI] = None)(implicit val domainType: Manifest[S])
     extends IDomainDataUI with IFinite {
   vdomainDataUI ⇒
 
   val name = "Prototype Array"
 
-  def coreObject = new VariableDomain(prototypeArray.dataUI.coreObject.asInstanceOf[Prototype[Array[S]]])
-
-  def buildPanelUI = new PluginPanel("") with IDomainPanelUI {
-    contents += new Label("<html><i>No more information is required for this domain</i></html>")
-    def saveContent = vdomainDataUI
+  def coreObject = prototypeArray match {
+    case Some(p: IPrototypeDataProxyUI) ⇒ new VariableDomain(p.dataUI.coreObject.asInstanceOf[Prototype[Array[S]]])
+    case _ ⇒ throw new UserBadDataError("An array of Prototypes is required for a Prototype Array Domain")
   }
 
-  def preview = "in " + prototypeArray.toString
+  def buildPanelUI = new VariableDomainPanelUI(this)
+
+  def preview = "in " + prototypeArray.getOrElse("None").toString
 
   def coreClass = classOf[VariableDomainDataUI[S]]
 }
