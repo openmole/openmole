@@ -22,6 +22,7 @@ import org.openmole.ide.misc.widget.{ Help, Helper, PluginPanel, URL }
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.misc.tools.util.Types._
+import org.openmole.ide.misc.tools.util.Types
 import swing.MyComboBox
 
 class VariableDomainPanelUI(dataUI: VariableDomainDataUI[_]) extends PluginPanel("wrap") with IDomainPanelUI {
@@ -42,11 +43,16 @@ class VariableDomainPanelUI(dataUI: VariableDomainDataUI[_]) extends PluginPanel
   contents += protoCombo
 
   def saveContent = {
+    println("SAVE CONTENT")
     val params = protoCombo.selection.item match {
       case p: IPrototypeDataProxyUI ⇒ (Some(p), p.dataUI.typeClassString)
       case _ ⇒ (None, DOUBLE)
     }
-    VariableDomainDataUI(params._1, params._2)
+    println("PARAMS : " + params._1)
+    println("PARAMS : " + Types.pretify(params._2))
+    val d = VariableDomainDataUI(params._1, Types.pretify(params._2))
+    println("DDD : " + d)
+    d
   }
 
   override def help = new Helper(List(new URL(i18n.getString("variableDomainPermalink"),

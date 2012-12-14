@@ -35,13 +35,17 @@ class Helper(val permalinks: List[URL] = List.empty) extends PluginPanel("wrap")
 
   def components = helpMap.keys
 
-  def addPermalinks = permalinks foreach { addExternalLink(_, true) }
+  def addPermalinks = permalinks foreach {
+    addExternalLink(_, true)
+  }
 
   def switchTo(help: Help) = {
     contents += new HelpTextArea(help.message)
     contents += new ExampleHelpTextArea(help.example)
     addPermalinks
-    help.urls foreach { addExternalLink(_, false) }
+    help.urls foreach {
+      addExternalLink(_, false)
+    }
   }
 
   def switchTo(component: Component): Unit = {
@@ -49,7 +53,9 @@ class Helper(val permalinks: List[URL] = List.empty) extends PluginPanel("wrap")
     contents += new PluginPanel("wrap") {
       helpMap.contains(component) match {
         case true ⇒ switchTo(helpMap(component))
-        case false ⇒ permalinks foreach { addExternalLink(_, true) }
+        case false ⇒ permalinks foreach {
+          addExternalLink(_, true)
+        }
       }
     }
     revalidate
@@ -66,7 +72,10 @@ class Helper(val permalinks: List[URL] = List.empty) extends PluginPanel("wrap")
     editable = false
   }
 
-  class ExampleHelpTextArea(t: String) extends HelpTextArea({ if (!t.isEmpty) "Ex: " else "" } + t) {
+  class ExampleHelpTextArea(t: String) extends HelpTextArea({
+    if (!t.isEmpty) "Ex: " else ""
+  } + t) {
     font = new Font(font.getFamily, ITALIC, font.getSize)
   }
+
 }

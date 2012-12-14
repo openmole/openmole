@@ -139,8 +139,6 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
       case s: ISamplingWidget ⇒ new SamplingPanel(s, this, EXTRA)
       case f: IDomainWidget ⇒ new DomainPanel(f, this, EXTRA)
     })
-
-    //currentExtraPanel.contents.add(new FactorPanelUI(factorWidget, this, EXTRA))
     extraPropertyWidget.setVisible(true)
     extraPropertyWidget.setPreferredLocation(new Point(propertyWidget.getBounds.x.toInt + currentPanel.bounds.width + 40, 20))
     refresh
@@ -153,8 +151,6 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
       case x: IPrototypeDataProxyUI ⇒
         freeze = x.generated
         new PrototypePanel(x, this, EXTRA)
-      // case _ ⇒
-      // case x: ISamplingDataProxyUI ⇒ new SamplingPanelUI(x, this, EXTRA)
     })
     if (freeze) currentExtraPanel.contents.foreach { _.enabled = !freeze }
     extraPropertyWidget.setVisible(true)

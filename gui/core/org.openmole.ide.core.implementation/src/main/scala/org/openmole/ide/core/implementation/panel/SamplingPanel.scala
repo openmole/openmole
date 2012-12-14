@@ -47,7 +47,7 @@ class SamplingPanel(samplingWidget: ISamplingWidget,
   peer.add(new PluginPanel("") {
     contents += panelUI.peer
   }.peer, BorderLayout.CENTER)
-  peer.add(panelUI.help.peer, BorderLayout.SOUTH)
+  peer.add(panelUI.sPanel.help.peer, BorderLayout.SOUTH)
 
   def create = {}
 
