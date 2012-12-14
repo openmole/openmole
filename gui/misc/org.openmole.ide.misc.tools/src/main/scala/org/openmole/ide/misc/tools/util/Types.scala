@@ -30,10 +30,7 @@ object Types {
 
   def pretify(s: String) = {
     val c = s.split('.')
-    val ss = c.init.mkString(".")
-    ss + {
-      if (!ss.isEmpty) "." else ""
-    } + c.last.head.toUpper.toString + c.last.tail
+    c.last.head.toUpper.toString + c.last.tail
   }
 
   def standardize(c: String) =
