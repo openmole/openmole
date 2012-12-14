@@ -49,7 +49,7 @@ class AppendToCSVFileHook(
 
         val lists = ps.map {
           p ⇒
-            context(p) match {
+            context.option(p) match {
               case Some(v) ⇒
                 v match {
                   case v: Array[_] ⇒ v.toList

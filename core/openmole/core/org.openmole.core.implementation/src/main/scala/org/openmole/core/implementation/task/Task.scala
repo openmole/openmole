@@ -37,7 +37,7 @@ object Task extends Logger {
 
   val openMOLESeed = Prototype[Long](Workspace.preference(OpenMOLEVariablePrefix) + "Seed")
 
-  def buildRNG(context: Context) = newRNG(context.valueOrException(Task.openMOLESeed))
+  def buildRNG(context: Context) = newRNG(context(Task.openMOLESeed))
 }
 
 import Task.logger

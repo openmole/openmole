@@ -42,7 +42,7 @@ trait ExternalTask extends Task {
 
   protected def listInputFiles(context: Context): Iterable[ToPut] =
     inputFiles.map {
-      case (prototype, name, link) ⇒ new ToPut(context.valueOrException(prototype), VariableExpansion(context, name), link)
+      case (prototype, name, link) ⇒ new ToPut(context(prototype), VariableExpansion(context, name), link)
 
     }
 
