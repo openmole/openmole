@@ -118,7 +118,7 @@ sealed abstract class SystemExecTask(
       //logger.fine(f + " " + f.exists)
       val process = Runtime.getRuntime.exec(
         commandLine.toString,
-        variables.map { case (p, v) ⇒ v + "=" + context.valueOrException(p).toString }.toArray,
+        variables.map { case (p, v) ⇒ v + "=" + context(p).toString }.toArray,
         workDir)
 
       execute(process, context) match {

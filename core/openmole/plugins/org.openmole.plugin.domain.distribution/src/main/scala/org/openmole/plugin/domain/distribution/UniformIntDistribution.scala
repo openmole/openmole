@@ -27,7 +27,7 @@ import org.openmole.core.implementation.task.Task._
 sealed class UniformIntDistribution(max: Option[Int] = None) extends Domain[Int] with Discrete[Int] {
 
   override def iterator(context: Context): Iterator[Int] = {
-    val rng = newRNG(context.valueOrException(openMOLESeed))
+    val rng = newRNG(context(openMOLESeed))
     Iterator.continually {
       max match {
         case Some(i) ⇒ rng.nextInt(i)
