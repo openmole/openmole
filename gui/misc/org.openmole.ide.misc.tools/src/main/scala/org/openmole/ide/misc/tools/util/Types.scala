@@ -29,7 +29,6 @@ object Types {
     c1.split('.').last.toUpperCase == c2.split('.').last.toUpperCase
 
   def pretify(s: String) = {
-    println("to be pretified : " + s)
     val c = s.split('.')
     val ss = c.init.mkString(".")
     ss + {
