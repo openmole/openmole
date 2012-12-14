@@ -31,7 +31,7 @@ object ListFilesDomainDataUI {
 }
 
 case class ListFilesDomainDataUI(val directoryPath: String = "",
-                                 val regexp: String = ".*",
+                                 val regexp: String = "",
                                  val recursive: Boolean = false) extends SubDataUI {
 
   val domainType = manifest[File]
