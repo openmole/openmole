@@ -33,9 +33,13 @@ import org.openmole.misc.exception._
 import org.openmole.core.implementation.job.MoleJob._
 import scala.collection.immutable.TreeMap
 import collection.JavaConversions._
+import org.openmole.misc.tools.service.ThreadUtil.background
 import scala.collection.mutable.Buffer
 
 import scala.concurrent.stm._
+import concurrent.Lock
+import actors.threadpool.locks.ReentrantLock
+import java.util.concurrent.Executors
 
 class SubMoleExecution(
     val parent: Option[SubMoleExecution],
@@ -50,7 +54,7 @@ class SubMoleExecution(
   val aggregationTransitionRegistry = new RegistryWithTicket[IAggregationTransition, Buffer[Variable[_]]]
   val transitionRegistry = new RegistryWithTicket[ITransition, Buffer[Variable[_]]]
 
-  parrentApply(_.+=(this))
+  parentApply(_.+=(this))
 
   override def canceled: Boolean = atomic { implicit txn ⇒
     _canceled() || (parent match {
@@ -71,7 +75,7 @@ class SubMoleExecution(
 
   private def nbJobs_+=(v: Int): Unit = atomic { implicit txn ⇒
     _nbJobs += v
-    parrentApply(_.nbJobs_+=(v))
+    parentApply(_.nbJobs_+=(v))
   }
 
   def numberOfJobs = _nbJobs.single()
@@ -84,7 +88,7 @@ class SubMoleExecution(
       cancelJobs
       TSet.asSet(_childs)
     }.foreach { _.cancel }
-    parrentApply(_.-=(this))
+    parentApply(_.-=(this))
   }
 
   def cancelJobs = _jobs.single().keys.foreach { _.cancel }
@@ -145,7 +149,7 @@ class SubMoleExecution(
   private def checkFinished(ticket: ITicket) =
     if (_nbJobs.single() == 0) {
       EventDispatcher.trigger(this, new ISubMoleExecution.Finished(ticket))
-      parrentApply(_.-=(this))
+      parentApply(_.-=(this))
     }
 
   override def submit(capsule: ICapsule, context: Context, ticket: ITicket) = {
@@ -183,13 +187,13 @@ class SubMoleExecution(
     subMole
   }
 
-  private def parrentApply(f: SubMoleExecution ⇒ Unit) =
+  private def parentApply(f: SubMoleExecution ⇒ Unit) =
     parent match {
       case None ⇒
       case Some(p) ⇒ f(p)
     }
 
-  def stateChanged(job: IMoleJob, oldState: State, newState: State) = {
+  def stateChanged(job: IMoleJob, oldState: State, newState: State) = background {
     newState match {
       case COMPLETED ⇒ jobFinished(job)
       case FAILED | CANCELED ⇒ jobFailedOrCanceled(job)

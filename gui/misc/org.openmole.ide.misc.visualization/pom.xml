@@ -15,7 +15,7 @@
   <!-- *** Project Information ************************************* -->
   <!-- ************************************************************* -->
   <name>${project.artifactId} ${project.version}</name>
-  <description />
+  <description></description>
   <dependencies>
     <dependency>
       <groupId>org.openmole.ide</groupId>

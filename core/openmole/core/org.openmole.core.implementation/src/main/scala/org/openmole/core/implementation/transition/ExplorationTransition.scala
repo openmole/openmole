@@ -40,7 +40,7 @@ class ExplorationTransition(start: ICapsule, end: Slot, condition: ICondition = 
     val subSubMole = subMole.newChild
 
     registerAggregationTransitions(ticket, subSubMole)
-    submitIn(context, ticket, subSubMole)
+    subSubMole.synchronized { submitIn(context, ticket, subSubMole) }
   }
 
   def submitIn(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = {

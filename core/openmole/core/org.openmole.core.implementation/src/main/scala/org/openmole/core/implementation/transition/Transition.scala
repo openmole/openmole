@@ -71,8 +71,7 @@ class Transition(
         Some((end.capsule, newContext, newTicket))
       } else None
     } match {
-      case Some((capsule, context, ticket)) ⇒
-        subMole.submit(capsule, context, ticket)
+      case Some((capsule, context, ticket)) ⇒ subMole.submit(capsule, context, ticket)
       case None ⇒
     }
 

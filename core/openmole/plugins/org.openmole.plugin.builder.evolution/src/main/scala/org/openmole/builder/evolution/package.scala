@@ -324,16 +324,20 @@ package object evolution {
     val mergeArchiveSlot = Slot(MasterCapsule(mergeArchiveTask, archive))
 
     val renameIndividualsTask = RenameTask(name + "RenameIndividuals", individual.toArray -> newIndividual.toArray)
+
     val mergeIndividualsTask = FlattenTask(name + "MergeIndividuals", List(individual.toArray, newIndividual.toArray), individual.toArray)
-    mergeIndividualsTask addParameter (individual.toArray -> Array.empty[Individual[evolution.G, evolution.F]])
-    val mergeIndividualsCaps = MasterCapsule(mergeIndividualsTask, individual.toArray)
+    mergeIndividualsTask addInput archive
+    mergeIndividualsTask addOutput archive
 
     val elitismTask = ElitismTask(islandElitism)(
       name + "ElitismTask",
       individual.toArray,
       archive)
 
-    val elitismCaps = Capsule(elitismTask)
+    val moleElitismTask = MoleTask(name + "MoleElitism", mergeIndividualsTask -- elitismTask)
+    moleElitismTask addParameter (individual.toArray -> Array.empty[Individual[evolution.G, evolution.F]])
+
+    val moleElitismCaps = MasterCapsule(moleElitismTask, individual.toArray)
 
     val terminationTask = TerminationTask(islandElitism)(
       name + "TerminationTask",
@@ -394,8 +398,8 @@ package object evolution {
       firstCapsule -<
         (preIslandCapsule, size = number.toString) --
         islandSlot --
-        (renameIndividualsTask -- mergeIndividualsCaps, archiveDiffSlot -- mergeArchiveSlot) --
-        elitismCaps --
+        (renameIndividualsTask, archiveDiffSlot -- mergeArchiveSlot) --
+        moleElitismCaps --
         terminationSlot --
         scalingIndividualsSlot >| (endCapsule, terminated.name + " == true")
 
