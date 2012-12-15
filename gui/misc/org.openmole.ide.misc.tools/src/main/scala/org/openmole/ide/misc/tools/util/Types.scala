@@ -28,7 +28,10 @@ object Types {
   def apply(c1: String, c2: String) =
     c1.split('.').last.toUpperCase == c2.split('.').last.toUpperCase
 
-  def pretify(c: String) = c.head.toUpper + c.tail
+  def pretify(s: String) = {
+    val c = s.split('.')
+    c.last.head.toUpper.toString + c.last.tail
+  }
 
   def standardize(c: String) =
     if (c == "Int" || c == "Long") c.head.toLower + c.tail
