@@ -11,7 +11,7 @@
 
     <groupId>org.openmole</groupId>
     <artifactId>openmole-installer</artifactId>
-    <version>0.7-SNAPSHOT</version>
+    <version>0.7.0.RC2-SNAPSHOT</version>
     <packaging>pom</packaging>
  
     <name>OpenMOLE installer</name>
