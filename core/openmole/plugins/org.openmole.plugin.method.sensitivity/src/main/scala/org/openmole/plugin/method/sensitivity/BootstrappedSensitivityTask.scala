@@ -45,18 +45,18 @@ trait BootstrappedSensitivityTask extends SensitivityTask {
 
   override def process(context: Context): Context = {
     implicit val rng = buildRNG(context)
-    val matrixNames = context.valueOrException(matrixName.toArray)
+    val matrixNames = context(matrixName.toArray)
 
     Context.empty ++
       (for (i ← modelInputs; o ← modelOutputs) yield {
-        val (a, b, c) = extractValues(context.valueOrException(o.toArray), matrixNames, i)
+        val (a, b, c) = extractValues(context(o.toArray), matrixNames, i)
         Variable(
           indice(name, i, o).toArray,
-          bootstraped(a, b, c).toArray)
+          bootstrapped(a, b, c).toArray)
       })
   }
 
-  def bootstraped(a: Seq[Double], b: Seq[Double], c: Seq[Double])(implicit rng: Random): Seq[Double] =
+  def bootstrapped(a: Seq[Double], b: Seq[Double], c: Seq[Double])(implicit rng: Random): Seq[Double] =
     (0 until bootstrap).map {
       i ⇒
         computeSensitivity(

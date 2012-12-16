@@ -39,11 +39,15 @@ import scala.collection.mutable.Buffer
 import scala.concurrent.stm._
 import concurrent.Lock
 import actors.threadpool.locks.ReentrantLock
-import java.util.concurrent.Executors
+import java.util.concurrent.{ locks, Executors }
+import org.openmole.misc.tools.service.LockUtil._
 
 class SubMoleExecution(
     val parent: Option[SubMoleExecution],
     val moleExecution: MoleExecution) extends ISubMoleExecution {
+
+  @transient lazy val transitionLock = new locks.ReentrantLock()
+  @transient lazy val masterCapsuleLock = new locks.ReentrantLock()
 
   private val _nbJobs = Ref(0)
   private val _childs = TSet.empty[SubMoleExecution]
@@ -162,7 +166,7 @@ class SubMoleExecution(
       //FIXME: Factorize code
       capsule match {
         case c: IMasterCapsule ⇒
-          synchronized {
+          masterCapsuleLock {
             val savedContext = masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(Context.empty)
             val moleJob: IMoleJob = new MoleJob(capsule.task, implicits + context + savedContext, moleExecution.nextJobId, stateChanged)
             EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleStarting(moleJob, capsule))

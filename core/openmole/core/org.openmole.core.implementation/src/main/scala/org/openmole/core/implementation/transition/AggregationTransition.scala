@@ -29,10 +29,11 @@ import org.openmole.core.model.transition.ICondition._
 import org.openmole.misc.tools.obj.ClassUtils._
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
+import org.openmole.misc.tools.service.LockUtil._
 
 class AggregationTransition(start: ICapsule, end: Slot, condition: ICondition = True, filter: Filter[String] = Filter.empty, trigger: ICondition = ICondition.False) extends Transition(start, end, condition, filter) with IAggregationTransition {
 
-  override def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = subMole.synchronized {
+  override def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = subMole.transitionLock {
     val mole = subMole.moleExecution.mole
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration."))
 
@@ -55,15 +56,12 @@ class AggregationTransition(start: ICapsule, end: Slot, condition: ICondition = 
     }
   }
 
-  override def aggregate(subMole: ISubMoleExecution, ticket: ITicket) = subMole.synchronized {
+  override def aggregate(subMole: ISubMoleExecution, ticket: ITicket) = subMole.transitionLock {
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration"))
 
     if (!subMole.canceled && !hasBeenPerformed(subMole, parentTicket)) {
       val result = subMole.aggregationTransitionRegistry.remove(this, parentTicket).getOrElse(throw new InternalProcessingError("No context registred for the aggregation transition"))
-      //val endTask = end.capsule.task.getOrElse(throw new UserBadDataError("No task assigned for end capsule"))
-      //val startTask = start.task.getOrElse(throw new UserBadDataError("No task assigned for start capsule"))
       val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
-
       Some((result, parentTicket, subMoleParent))
     } else None
   } match {
