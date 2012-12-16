@@ -50,7 +50,6 @@
     </dependencies>
 
     <properties>
-	<lib.runtime.jvm.version>7-u3-2.1</lib.runtime.jvm.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <izpack.staging.dir>${project.build.directory}/izpack-staging</izpack.staging.dir> 
         <izpack.standalone.compiler.version>4.3.5</izpack.standalone.compiler.version>
