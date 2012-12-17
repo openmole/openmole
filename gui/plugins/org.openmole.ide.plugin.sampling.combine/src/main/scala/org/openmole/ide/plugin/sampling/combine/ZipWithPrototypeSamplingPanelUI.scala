@@ -22,6 +22,7 @@ import org.openmole.ide.core.implementation.dataproxy.Proxys
 import swing.MyComboBox
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import java.util.{ Locale, ResourceBundle }
+import org.openmole.misc.exception.UserBadDataError
 
 class ZipWithPrototypeSamplingPanelUI(dataUI: ZipWithPrototypeSamplingDataUI) extends PluginPanel("") with ISamplingPanelUI {
 
@@ -48,7 +49,7 @@ class ZipWithPrototypeSamplingPanelUI(dataUI: ZipWithPrototypeSamplingDataUI) ex
   def saveContent = dataUI match {
     case i: ZipWithIndexSamplingDataUI ⇒ new ZipWithIndexSamplingDataUI(proto)
     case n: ZipWithNameSamplingDataUI ⇒ new ZipWithNameSamplingDataUI(proto)
-    case _ ⇒ new ZipWithIndexSamplingDataUI
+    case _ ⇒ throw new UserBadDataError("The data for the 'Zip with' Sampling is not correct ")
   }
 
   def proto = protoCombo.selection.item match {

@@ -36,7 +36,7 @@ class GroupDomainPanelUI(pud: GroupDomainDataUI[_]) extends PluginPanel("wrap") 
 
   def saveContent = {
 
-     val classString =
+    val classString =
       ScenesManager.currentSamplingCompositionPanelUI.firstNoneModifierDomain(pud) match {
         case Some(d: IDomainDataUI) ⇒ d.domainType.toString.split('.').last
         case _ ⇒ DOUBLE
