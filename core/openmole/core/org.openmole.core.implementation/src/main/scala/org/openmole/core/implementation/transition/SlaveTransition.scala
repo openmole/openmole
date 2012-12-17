@@ -26,6 +26,7 @@ import org.openmole.misc.exception._
 
 class SlaveTransition(start: ICapsule, end: Slot, condition: ICondition = ICondition.True, filter: Filter[String] = Filter.empty) extends ExplorationTransition(start, end, condition, filter) with ISlaveTransition {
 
-  override def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = submitIn(context, ticket.parent.getOrElse(throw new UserBadDataError("Slave transition should take place after an master transition.")), subMole)
+  override def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) =
+    submitIn(context, ticket.parent.getOrElse(throw new UserBadDataError("Slave transition should take place after an master transition.")), subMole)
 
 }

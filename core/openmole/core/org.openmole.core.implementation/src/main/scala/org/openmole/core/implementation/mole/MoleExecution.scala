@@ -18,7 +18,7 @@
 package org.openmole.core.implementation.mole
 
 import java.util.UUID
-import java.util.concurrent.Semaphore
+import java.util.concurrent.{ Executors, Executor, Semaphore }
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import org.openmole.core.implementation.data._
@@ -129,7 +129,7 @@ class MoleExecution(
       case (capsule, jobs) ⇒ submit(new Job(this, jobs), capsule)
     }
 
-  private def allWaiting = atomic { implicit txn ⇒ numberOfJobs <= nbWaiting() }
+  def allWaiting = atomic { implicit txn ⇒ numberOfJobs <= nbWaiting() }
 
   def start(context: Context): this.type = {
     rootSubMoleExecution.newChild.submit(mole.root, context, nextTicket(rootTicket))

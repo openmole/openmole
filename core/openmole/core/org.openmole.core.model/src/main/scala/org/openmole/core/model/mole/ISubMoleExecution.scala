@@ -26,6 +26,7 @@ import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.ITransition
 import org.openmole.misc.eventdispatcher.Event
 import scala.collection.mutable.Buffer
+import java.util.concurrent.locks.Lock
 
 object ISubMoleExecution {
   case class Finished(val ticket: ITicket) extends Event[ISubMoleExecution]
@@ -47,6 +48,7 @@ trait ISubMoleExecution {
   def masterCapsuleRegistry: IRegistryWithTicket[IMasterCapsule, Context]
   def aggregationTransitionRegistry: IRegistryWithTicket[IAggregationTransition, Buffer[Variable[_]]]
   def transitionRegistry: IRegistryWithTicket[ITransition, Buffer[Variable[_]]]
+  def transitionLock: Lock
 
   def submit(capsule: ICapsule, context: Context, ticket: ITicket)
   def newChild: ISubMoleExecution

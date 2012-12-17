@@ -74,7 +74,7 @@ sealed abstract class MoleTask(
         else acc
     }.toContext
 
-    val execution = new MoleExecution(mole, rng = Random.newRNG(context.valueOrException(Task.openMOLESeed)))
+    val execution = new MoleExecution(mole, rng = Random.newRNG(context(Task.openMOLESeed)))
     val resultGathering = new ResultGathering
 
     EventDispatcher.listen(execution: IMoleExecution, resultGathering, classOf[IMoleExecution.JobInCapsuleFinished])

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.builder.sensitivity
+package org.openmole.plugin.builder
 
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.puzzle._
@@ -29,7 +29,7 @@ import org.openmole.core.model.sampling._
 import org.openmole.core.model.task._
 import org.openmole.plugin.method.sensitivity._
 
-object Sensitivity {
+package object sensitivity {
 
   def indice(name: String, input: Prototype[Double], output: Prototype[Double]) = SensitivityTask.indice(name, input, output)
 
@@ -69,7 +69,7 @@ object Sensitivity {
     val puzzle = explorationCapsule -< model >- aggregateCapsule -- (firstOrderCapsule, totalOrderCapsule)
 
     new Puzzle(puzzle) {
-      def firtOrderEffect = firstOrderCapsule
+      def firstOrderEffect = firstOrderCapsule
       def totalOrderEffect = totalOrderCapsule
     }
 

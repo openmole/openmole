@@ -33,6 +33,7 @@ import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.misc.tools.service.Priority
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
+import org.openmole.misc.tools.service.LockUtil._
 
 class ExplorationTransition(start: ICapsule, end: Slot, condition: ICondition = ICondition.True, filter: Filter[String] = Filter.empty) extends Transition(start, end, condition, filter) with IExplorationTransition {
 
@@ -40,16 +41,14 @@ class ExplorationTransition(start: ICapsule, end: Slot, condition: ICondition = 
     val subSubMole = subMole.newChild
 
     registerAggregationTransitions(ticket, subSubMole)
-    submitIn(context, ticket, subSubMole)
+    subSubMole.transitionLock { submitIn(context, ticket, subSubMole) }
   }
 
   def submitIn(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = {
     val mole = subMole.moleExecution.mole
     val (factors, outputs) = start.outputs(mole).partition(d ⇒ (d.mode is Explore) && d.prototype.`type`.isArray)
     val typedFactors = factors.map(_.prototype.asInstanceOf[Prototype[Array[Any]]])
-    val values = typedFactors.toList.map(context.value(_).get.toIterable).transpose
-
-    val endTask = end.capsule.task
+    val values = typedFactors.toList.map(context(_).toIterable).transpose
 
     for (value ← values) {
       val newTicket = subMole.moleExecution.nextTicket(ticket)
