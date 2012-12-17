@@ -76,7 +76,11 @@ object GA {
     }
   }
 
-  def epsilon(_epsilons: Double*) = new EpsilonDominance {
+  def strictEpsilon(_epsilons: Double*) = new StrictEpsilonDominance {
+    val epsilons = _epsilons
+  }
+
+  def nonStrictEpsilon(_epsilons: Double*) = new NonStrictEpsilonDominance {
     val epsilons = _epsilons
   }
 
