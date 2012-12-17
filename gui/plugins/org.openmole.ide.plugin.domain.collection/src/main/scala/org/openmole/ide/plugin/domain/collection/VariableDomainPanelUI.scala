@@ -43,16 +43,11 @@ class VariableDomainPanelUI(dataUI: VariableDomainDataUI[_]) extends PluginPanel
   contents += protoCombo
 
   def saveContent = {
-    println("SAVE CONTENT")
     val params = protoCombo.selection.item match {
       case p: IPrototypeDataProxyUI ⇒ (Some(p), p.dataUI.typeClassString)
       case _ ⇒ (None, DOUBLE)
     }
-    println("PARAMS : " + params._1)
-    println("PARAMS : " + Types.pretify(params._2))
-    val d = VariableDomainDataUI(params._1, Types.pretify(params._2))
-    println("DDD : " + d)
-    d
+    VariableDomainDataUI(params._1, Types.pretify(params._2))
   }
 
   override def help = new Helper(List(new URL(i18n.getString("variableDomainPermalink"),
