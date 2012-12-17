@@ -7,7 +7,7 @@
   <parent>
     <artifactId>openmole-ecosystem</artifactId>
     <groupId>org.openmole.core</groupId>
-    <version>0.7.0-RC2-SNAPSHOT</version>
+    <version>0.7.0-RC2</version>
   </parent>
   <artifactId>openmole</artifactId>
   <packaging>pom</packaging>
