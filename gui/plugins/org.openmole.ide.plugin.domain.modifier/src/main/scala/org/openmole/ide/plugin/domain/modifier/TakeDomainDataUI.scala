@@ -43,7 +43,6 @@ case class TakeDomainDataUI(val size: String = "1",
   def preview = "Take (" + size + ")"
 
   override def coreObject = {
-    println("previous domain : " + previousDomain)
     val valid = validPreviousDomains
     if (valid._1) new TakeDomain(valid._2.head, size.toInt)
     else throw new UserBadDataError("A Discrete Domain is required as input of a Take Domain. ")

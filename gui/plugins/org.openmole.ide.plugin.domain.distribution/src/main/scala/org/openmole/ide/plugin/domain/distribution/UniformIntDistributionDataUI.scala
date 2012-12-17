@@ -28,7 +28,8 @@ class UniformIntDistributionDataUI(val max: Option[Int] = None) extends UniformD
 
   val name = "Uniform distribution"
 
-  override val availableTypes = List(INT)
+  override val availableTypes =
+    List(INT)
 
   def buildPanelUI = new UniformDistributionPanelUI(this)
 

@@ -49,11 +49,10 @@ class UniformDistributionPanelUI(pud: UniformDistributionDataUI[_]) extends Plug
   }
 
   def setContents(t: String) = {
-    println("set content : " + t)
     maxPanel.contents.removeAll
     t match {
       case INT ⇒
-        maxPanel.contents += (new Label("Size"), "gap para")
+        maxPanel.contents += (new Label("Max"), "gap para")
         maxPanel.contents += (maxField, "wrap")
       case LONG ⇒ maxPanel.contents += new Label("<html><i>No more information is required for this Domain</i></html>")
       case _ ⇒

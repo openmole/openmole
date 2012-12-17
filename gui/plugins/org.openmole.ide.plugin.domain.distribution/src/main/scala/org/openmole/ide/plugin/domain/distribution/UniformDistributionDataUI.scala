@@ -35,8 +35,6 @@ object UniformDistributionDataUI {
 import UniformDistributionDataUI._
 abstract class UniformDistributionDataUI[S] extends IDomainDataUI {
 
-  def availableTypes: List[String]
-
   def max: Option[Int]
 
   def imagePath = "img/domain_uniform_distribution.png"
