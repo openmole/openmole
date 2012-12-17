@@ -7,7 +7,7 @@
   <parent>
     <artifactId>core</artifactId>
     <groupId>org.openmole.core</groupId>
-    <version>0.7.0-RC2</version>
+    <version>0.7.0-RC3-SNAPSHOT</version>
   </parent>
   <artifactId>org.openmole.core.implementation</artifactId>
   <!-- ************************************************************* -->
@@ -18,7 +18,7 @@
   <!-- *** Project Information ************************************* -->
   <!-- ************************************************************* -->
   <name>${project.artifactId} ${project.version}</name>
-  <description></description>
+  <description />
   <dependencies>
     <dependency>
       <groupId>org.openmole.core</groupId>
