@@ -368,7 +368,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
       case _ ⇒ (source, Some(target))
     }
 
-  def updatePrevious(domain: IDomainWidget) =
+  def updatePrevious(domain: IDomainWidget) = {
     connections.filter {
       _._2.component.proxy.id == domain.proxy.id
     }.headOption match {
@@ -378,6 +378,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
       }
       case _ ⇒
     }
+  }
 
   def updatePrevious(source: IDomainWidget,
                      target: ISamplingCompositionWidget): Unit =
@@ -448,7 +449,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
 
       val factorProxyUI = targetW match {
         case sc: SamplingComponent ⇒ sc.component.proxy match {
-          case td: ISamplingProxyUI ⇒
+          case ts: ISamplingProxyUI ⇒
             computeFactor(sourceW.component.proxy) match {
               case Some(f: IFactorProxyUI) ⇒ Some(f)
               case _ ⇒
@@ -492,6 +493,11 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
         case sc: SamplingComponent ⇒
           sc.connections += connection
           _connections += sourceW -> sc
+          sc.component match {
+            case d: IDomainWidget ⇒
+              update(d)
+            case _ ⇒
+          }
         case scc: SceneComponent ⇒
           finalComponent.connections.foreach {
             c ⇒ connectLayer.removeChild(c)
@@ -504,7 +510,6 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
 
       connection.setRouter(new MoleRouter(boxLayer))
       connectLayer.addChild(connection)
-
     }
   }
 

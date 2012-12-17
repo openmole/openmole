@@ -26,9 +26,11 @@ class UniformIntDistributionDataUI(val max: Option[Int] = None) extends UniformD
 
   val domainType = manifest[Int]
 
+  println("INIT UNIFORM INT : " + domainType.toString)
   val name = "Uniform distribution"
 
-  override val availableTypes = List(INT)
+  override val availableTypes =
+    List(INT)
 
   def buildPanelUI = new UniformDistributionPanelUI(this)
 
