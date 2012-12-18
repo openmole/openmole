@@ -52,8 +52,8 @@ sealed abstract class MoleTask(
     val last: ICapsule)(implicit val plugins: PluginSet) extends Task with IMoleTask {
 
   class ResultGathering extends EventListener[IMoleExecution] {
-    var lastContext: Option[Context] = None
-    var exceptions: List[Throwable] = List.empty
+    @volatile var lastContext: Option[Context] = None
+    @volatile var exceptions: List[Throwable] = List.empty
 
     override def triggered(obj: IMoleExecution, ev: Event[IMoleExecution]) = synchronized {
       ev match {
