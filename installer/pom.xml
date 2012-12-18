@@ -1,25 +1,24 @@
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
-    <parent>
-    	<groupId>org.openmole</groupId>
-	<artifactId>openmole</artifactId>
-        <version>0.7.0-RC2-SNAPSHOT</version>
-    </parent>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>openmole</artifactId>
     <groupId>org.openmole</groupId>
-    <artifactId>openmole-installer</artifactId>
-    <!--<version>0.7.0.RC2-SNAPSHOT</version>-->
-    <packaging>pom</packaging>
- 
-    <name>OpenMOLE installer</name>
- 
-    <url>http://www.openmole.org/</url>
- 
-    <dependencies>
-<!--        <dependency>
+    <version>0.7.0-RC3-SNAPSHOT</version>
+  </parent>
+  <groupId>org.openmole</groupId>
+  <artifactId>openmole-installer</artifactId>
+  <!--<version>0.7.0.RC2-SNAPSHOT</version>-->
+  <packaging>pom</packaging>
+  <name>OpenMOLE installer</name>
+  <url>http://www.openmole.org/</url>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <izpack.staging.dir>${project.build.directory}/izpack-staging</izpack.staging.dir>
+    <izpack.standalone.compiler.version>4.3.5</izpack.standalone.compiler.version>
+  </properties>
+  <dependencies>
+    <!--        <dependency>
             <groupId>org.openmole.ui.console</groupId>
             <artifactId>org.openmole.ui.console</artifactId>
             <version>${project.version}</version>
@@ -47,166 +46,150 @@
             <type>tar.gz</type>
         </dependency>
 -->
-    </dependencies>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <izpack.staging.dir>${project.build.directory}/izpack-staging</izpack.staging.dir> 
-        <izpack.standalone.compiler.version>4.3.5</izpack.standalone.compiler.version>
-    </properties>
- 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.2</version>
-                <executions>
-                    <execution>
-                        <id>copy</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.openmole.core</groupId>
-                                    <artifactId>org.openmole.runtime</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>tar.gz</type>
-                                    <destFileName>org.openmole.runtime.tar.gz</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.oracle</groupId>
-                                    <artifactId>java-jre-linux-i386</artifactId>
-                                    <version>${lib.runtime.jvm.version}</version>
-                                    <type>tgz</type>
-                                    <outputDirectory>${project.build.directory}</outputDirectory>
-                                    <destFileName>jvm-linux-i386.tar.gz</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>com.oracle</groupId>
-                                    <artifactId>java-jre-linux-x64</artifactId>
-                                    <version>${lib.runtime.jvm.version}</version>
-                                    <type>tgz</type>
-                                    <outputDirectory>${project.build.directory}</outputDirectory>
-                                    <destFileName>jvm-linux-x64.tar.gz</destFileName>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.openmole.core</groupId>
-                                    <artifactId>org.openmole.runtime.daemon</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>tar.gz</type>
-                                    <outputDirectory>${project.build.directory}</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>unpack</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.openmole.ui</groupId>
-                                    <artifactId>openmole-ui-package</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>tar.gz</type>
-                                    <outputDirectory>${project.build.directory}/openmole/</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-   <!-- IzPack Installer -->
- 
-            <plugin>
-                <groupId>org.codehaus.izpack</groupId>
-                <artifactId>izpack-maven-plugin</artifactId>
-                <version>1.0-alpha-5</version>
- 
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>izpack</goal>
- 
-                        </goals>
-                        <configuration>
-                            <attach>false</attach>
-                            <izpackBasedir>${izpack.staging.dir}</izpackBasedir>
-                        </configuration>
-                    </execution>
- 
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.codehaus.izpack</groupId>
-                        <artifactId>izpack-standalone-compiler</artifactId>
-                        <version>${izpack.standalone.compiler.version}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
- 
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>2.4.2</version>
-                <executions>
-                    <execution>
-                        <id>copy-resources</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        
-                        <configuration>
-                            <encoding>UTF-8</encoding>
-                            <outputDirectory>${izpack.staging.dir}</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>src/main/resources</directory>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-               <groupId>com.google.code.maven-replacer-plugin</groupId>
-               <artifactId>maven-replacer-plugin</artifactId>
-               <version>1.3.9</version>
-               <executions>
-                  <execution>
-                     <phase>prepare-package</phase>
-                       <goals>
-                           <goal>replace</goal>
-                       </goals>                    
-                   </execution>
-               </executions>
-               <configuration>
-                  <ignoreMissingFile>false</ignoreMissingFile>
-                  <file>target/izpack-staging/install-tpl.xml</file>
-                  <outputFile>target/izpack-staging/install.xml</outputFile>
-                  <regex>false</regex>
-                  <token>$VERSION$</token>
-                  <value>${project.version}</value>
-               </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
-    <repositories>
-        <repository>
-            <id>maven.openmole.org</id>
-            <name>OpenMole repository</name>
-            <url>http://maven.openmole.org/public/</url>
-        </repository>
-    </repositories>
-
+  </dependencies>
+  <repositories>
+    <repository>
+      <id>maven.openmole.org</id>
+      <name>OpenMole repository</name>
+      <url>http://maven.openmole.org/public/</url>
+    </repository>
+  </repositories>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.2</version>
+        <executions>
+          <execution>
+            <id>copy</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.openmole.core</groupId>
+                  <artifactId>org.openmole.runtime</artifactId>
+                  <version>${project.version}</version>
+                  <type>tar.gz</type>
+                  <destFileName>org.openmole.runtime.tar.gz</destFileName>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.oracle</groupId>
+                  <artifactId>java-jre-linux-i386</artifactId>
+                  <version>${lib.runtime.jvm.version}</version>
+                  <type>tgz</type>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                  <destFileName>jvm-linux-i386.tar.gz</destFileName>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>com.oracle</groupId>
+                  <artifactId>java-jre-linux-x64</artifactId>
+                  <version>${lib.runtime.jvm.version}</version>
+                  <type>tgz</type>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                  <destFileName>jvm-linux-x64.tar.gz</destFileName>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.openmole.core</groupId>
+                  <artifactId>org.openmole.runtime.daemon</artifactId>
+                  <version>${project.version}</version>
+                  <type>tar.gz</type>
+                  <outputDirectory>${project.build.directory}</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+          <execution>
+            <id>unpack</id>
+            <phase>package</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.openmole.ui</groupId>
+                  <artifactId>openmole-ui-package</artifactId>
+                  <version>${project.version}</version>
+                  <type>tar.gz</type>
+                  <outputDirectory>${project.build.directory}/openmole/</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- IzPack Installer -->
+      <plugin>
+        <groupId>org.codehaus.izpack</groupId>
+        <artifactId>izpack-maven-plugin</artifactId>
+        <version>1.0-alpha-5</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>izpack</goal>
+            </goals>
+            <configuration>
+              <attach>false</attach>
+              <izpackBasedir>${izpack.staging.dir}</izpackBasedir>
+            </configuration>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.izpack</groupId>
+            <artifactId>izpack-standalone-compiler</artifactId>
+            <version>${izpack.standalone.compiler.version}</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.4.2</version>
+        <executions>
+          <execution>
+            <id>copy-resources</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <encoding>UTF-8</encoding>
+              <outputDirectory>${izpack.staging.dir}</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/main/resources</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>com.google.code.maven-replacer-plugin</groupId>
+        <artifactId>maven-replacer-plugin</artifactId>
+        <version>1.3.9</version>
+        <executions>
+          <execution>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>replace</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <ignoreMissingFile>false</ignoreMissingFile>
+          <file>target/izpack-staging/install-tpl.xml</file>
+          <outputFile>target/izpack-staging/install.xml</outputFile>
+          <regex>false</regex>
+          <token>$VERSION$</token>
+          <value>${project.version}</value>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
-
