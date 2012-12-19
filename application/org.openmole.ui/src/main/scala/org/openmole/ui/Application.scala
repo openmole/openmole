@@ -30,8 +30,6 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.dialog.GUIApplication
 import org.openmole.ui.console.Console
-import scopt.generic.OptionDefinition
-import scopt.immutable._
 import annotation.tailrec
 
 class Application extends IApplication with Logger {
@@ -46,7 +44,7 @@ class Application extends IApplication with Logger {
       password: Option[String] = None,
       console: Boolean = false)
 
-    def takeArgs(args: List[String]) = args.takeWhile(_.startsWith("-"))
+    def takeArgs(args: List[String]) = args.takeWhile(!_.startsWith("-"))
     def dropArgs(args: List[String]) = args.dropWhile(!_.startsWith("-"))
 
     @tailrec def parse(args: List[String], c: Config = Config()): Config =
