@@ -22,7 +22,7 @@ import org.openmole.core.model.domain._
 import org.openmole.core.model.data._
 import org.openmole.misc.exception._
 
-class SortFileDomain(val domain: Domain[File] with Finite[File]) extends Domain[File] with Finite[File] {
+class SortByNameDomain(val domain: Domain[File] with Finite[File]) extends Domain[File] with Finite[File] {
 
   override def computeValues(context: Context): Iterable[File] = {
     def extractNumber(name: String) = {

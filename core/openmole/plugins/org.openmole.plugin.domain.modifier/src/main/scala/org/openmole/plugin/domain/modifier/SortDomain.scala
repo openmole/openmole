@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Romain Reuillon
+ * Copyright (C) 19/12/12 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -11,21 +11,19 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.domain
+package org.openmole.plugin.domain.modifier
 
-import java.io.File
-import org.openmole.core.model.domain.{ Finite, Domain }
+import org.openmole.core.model.domain._
+import org.openmole.core.model.data._
 
-package object file {
+class SortDomain[T](val domain: Domain[T] with Finite[T])(implicit ord: Ordering[T]) extends Domain[T] with Finite[T] {
 
-  implicit def stringToFilter(pattern: String) = (_: File).getName.matches(pattern)
-
-  implicit class FileDomainDecorator(d: Domain[File] with Finite[File]) {
-    def sortByName = new SortByNameDomain(d)
-  }
+  override def computeValues(context: Context): Iterable[T] =
+    domain.computeValues(context).toList.sorted
 
 }
+
