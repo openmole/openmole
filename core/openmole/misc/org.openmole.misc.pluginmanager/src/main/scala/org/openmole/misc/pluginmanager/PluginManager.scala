@@ -88,8 +88,7 @@ object PluginManager extends Logger {
   }
 
   def load(path: File): Unit = synchronized {
-    if(path.isDirectory) loadDir(path)
-    else installBundle(path).start
+    installBundle(path).start
   }
 
   def loadDir(path: File): Unit = loadDir(path, defaultPattern)

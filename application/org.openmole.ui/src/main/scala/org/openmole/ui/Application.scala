@@ -32,6 +32,7 @@ import org.openmole.ide.core.implementation.dialog.GUIApplication
 import org.openmole.ui.console.Console
 import scopt.generic.OptionDefinition
 import scopt.immutable._
+import annotation.tailrec
 
 class Application extends IApplication with Logger {
   override def start(context: IApplicationContext) = {
@@ -42,64 +43,57 @@ class Application extends IApplication with Logger {
       userPlugins: List[String] = Nil,
       workspaceDir: Option[String] = None,
       scriptFile: Option[String] = None,
-      password: Option[String] = None)
+      password: Option[String] = None,
+      console: Boolean = false)
 
-    val parser = new OptionParser[Config]("openmole", "0.x") {
-      def options = Seq(
-        opt("cp", "pluginDirectories", "Plugins directories (seperated by \" \")") {
-          (v: String, c: Config) ⇒ c.copy(pluginsDirs = v.split(' ').toList)
-        },
-        opt("gp", "guiPluginDirectories", "GUI plugins directories (seperated by \" \")") {
-          (v: String, c: Config) ⇒ c.copy(guiPluginsDirs = v.split(' ').toList)
-        },
-        opt("p", "userPlugins", "Plugins (seperated by \" \")") {
-          (v: String, c: Config) ⇒ c.copy(userPlugins = v.split(' ').toList)
-        },
-        opt("s", "script", "Script file to execute") {
-          (v: String, c: Config) ⇒ c.copy(scriptFile = Some(v))
-        },
-        opt("pw", "password", "Password for the preferences encryption") {
-          (v: String, c: Config) ⇒ c.copy(password = Some(v))
-        })
-    }
+    def takeArgs(args: List[String]) = args.takeWhile(_.startsWith("-"))
+    def dropArgs(args: List[String]) = args.dropWhile(!_.startsWith("-"))
+
+    @tailrec def parse(args: List[String], c: Config = Config()): Config =
+      args match {
+        case "-cp" :: tail ⇒ parse(dropArgs(tail), c.copy(pluginsDirs = takeArgs(tail)))
+        case "-gp" :: tail ⇒ parse(dropArgs(tail), c.copy(guiPluginsDirs = takeArgs(tail)))
+        case "-p" :: tail ⇒ parse(dropArgs(tail), c.copy(userPlugins = takeArgs(tail)))
+        case "-s" :: tail ⇒ parse(tail.tail, c.copy(scriptFile = Some(tail.head)))
+        case "-pw" :: tail ⇒ parse(tail.tail, c.copy(password = Some(tail.head)))
+        case "-c" :: tail ⇒ parse(tail, c.copy(console = true))
+        case Nil ⇒ c
+        case s :: tail ⇒ println("Ignored arg " + s); c
+      }
 
     val args: Array[String] = context.getArguments.get("application.args").asInstanceOf[Array[String]]
 
-    val console = args.contains("-c")
-    val filtredArgs = args.filterNot((_: String) == "-c")
+    val config = parse(args.toList)
 
-    parser.parse(filtredArgs, Config()) foreach { config ⇒
+    config.pluginsDirs.foreach { PluginManager.load }
 
-      config.pluginsDirs.foreach { PluginManager.load }
+    val userPlugins = config.userPlugins.map { new File(_) }.toSet
+    PluginManager.load(userPlugins)
 
-      val userPlugins = config.userPlugins.map { new File(_) }.toSet
-      PluginManager.load(userPlugins)
-
-      if (console) {
-        try {
-          val headless = GraphicsEnvironment.getLocalGraphicsEnvironment.isHeadlessInstance
-          if (!headless && SplashScreen.getSplashScreen != null) SplashScreen.getSplashScreen.close
-        } catch {
-          case e: Throwable ⇒ logger.log(FINE, "Error in splash screen closing", e)
-        }
-
-        val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
-        console.run
-      } else {
-
-        config.guiPluginsDirs.foreach { PluginManager.load }
-
-        val waitClose = new Semaphore(0)
-        val application = new GUIApplication() {
-          override def closeOperation = {
-            super.closeOperation
-            waitClose.release(1)
-          }
-        }
-
-        application.display
-        waitClose.acquire(1)
+    if (config.console) {
+      try {
+        val headless = GraphicsEnvironment.getLocalGraphicsEnvironment.isHeadlessInstance
+        if (!headless && SplashScreen.getSplashScreen != null) SplashScreen.getSplashScreen.close
+      } catch {
+        case e: Throwable ⇒ logger.log(FINE, "Error in splash screen closing", e)
       }
+
+      val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
+      console.run
+    } else {
+
+      config.guiPluginsDirs.foreach { PluginManager.load }
+
+      val waitClose = new Semaphore(0)
+      val application = new GUIApplication() {
+        override def closeOperation = {
+          super.closeOperation
+          waitClose.release(1)
+        }
+      }
+
+      application.display
+      waitClose.acquire(1)
 
     }
     IApplication.EXIT_OK
