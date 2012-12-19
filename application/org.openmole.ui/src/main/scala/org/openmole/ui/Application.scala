@@ -69,6 +69,12 @@ class Application extends IApplication with Logger {
     val filtredArgs = args.filterNot((_: String) == "-c")
 
     parser.parse(filtredArgs, Config()) foreach { config ⇒
+
+      config.pluginsDirs.foreach { PluginManager.loadDir }
+
+      val userPlugins = config.userPlugins.map { new File(_) }.toSet
+      PluginManager.load(userPlugins)
+
       if (console) {
         try {
           val headless = GraphicsEnvironment.getLocalGraphicsEnvironment.isHeadlessInstance
@@ -77,16 +83,10 @@ class Application extends IApplication with Logger {
           case e: Throwable ⇒ logger.log(FINE, "Error in splash screen closing", e)
         }
 
-        config.pluginsDirs.foreach { PluginManager.loadDir }
-
-        val userPlugins = config.userPlugins.map { new File(_) }.toSet
-        PluginManager.load(userPlugins)
-
         val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
         console.run
       } else {
 
-        config.pluginsDirs.foreach { PluginManager.loadDir }
         config.guiPluginsDirs.foreach { PluginManager.loadDir }
 
         val waitClose = new Semaphore(0)
