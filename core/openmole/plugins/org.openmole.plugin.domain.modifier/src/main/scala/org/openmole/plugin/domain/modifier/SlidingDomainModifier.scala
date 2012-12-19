@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Romain Reuillon
+ * Copyright (C) 19/12/12 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -11,21 +11,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.domain
+package org.openmole.plugin.domain.modifier
 
-import java.io.File
-import org.openmole.core.model.domain.{ Finite, Domain }
+import org.openmole.core.model.domain._
+import org.openmole.core.model.data._
 
-package object file {
+class SlidingDomainModifier[T](val domain: Domain[T] with Discrete[T], val size: Int, val step: Int = 1)(implicit m: Manifest[T]) extends Domain[Array[T]] with Discrete[Array[T]] {
 
-  implicit def stringToFilter(pattern: String) = (_: File).getName.matches(pattern)
-
-  implicit class FileDomainDecorator(d: Domain[File] with Finite[File]) {
-    def sortByName = new SortFileDomain(d)
-  }
+  override def iterator(context: Context): Iterator[Array[T]] =
+    domain.iterator(context).sliding(size, step).map(_.toArray)
 
 }
