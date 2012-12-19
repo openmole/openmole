@@ -27,4 +27,8 @@ package object modifier {
     def sliding(n: Int, s: Int = 1)(implicit m: Manifest[T]) = new SlidingDomainModifier(domain, n, s)
   }
 
+  implicit def finiteDomainModifierDecorator[T](domain: Domain[T] with Finite[T]) = new {
+    def sort(implicit o: Ordering[T]) = new SortDomain(domain)
+  }
+
 }
