@@ -70,7 +70,7 @@ class Application extends IApplication with Logger {
 
     parser.parse(filtredArgs, Config()) foreach { config ⇒
 
-      config.pluginsDirs.foreach { PluginManager.loadDir }
+      config.pluginsDirs.foreach { PluginManager.load }
 
       val userPlugins = config.userPlugins.map { new File(_) }.toSet
       PluginManager.load(userPlugins)
@@ -87,7 +87,7 @@ class Application extends IApplication with Logger {
         console.run
       } else {
 
-        config.guiPluginsDirs.foreach { PluginManager.loadDir }
+        config.guiPluginsDirs.foreach { PluginManager.load }
 
         val waitClose = new Semaphore(0)
         val application = new GUIApplication() {
