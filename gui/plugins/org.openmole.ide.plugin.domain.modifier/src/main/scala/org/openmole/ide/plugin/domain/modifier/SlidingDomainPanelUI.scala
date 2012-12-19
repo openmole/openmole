@@ -15,29 +15,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.ide.plugin.domain.file
+package org.openmole.ide.plugin.domain.modifier
 
 import org.openmole.ide.misc.widget.{ Help, URL, Helper, PluginPanel }
 import org.openmole.ide.core.model.panel.IDomainPanelUI
-import swing.{ CheckBox, TextField }
+import swing.{ Label, TextField }
 import java.util.{ Locale, ResourceBundle }
+import org.openmole.ide.core.implementation.execution.ScenesManager
+import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.ide.misc.tools.util.Types._
 
-class SlindingSliceFilesDomainPanelUI(val dataUI: SlindingSliceFilesDomainDataUI) extends PluginPanel("wrap") with IDomainPanelUI with FileDomainPanelUI {
+class SlidingDomainPanelUI(val dataUI: SlidingDomainDataUI[_]) extends PluginPanel("wrap 2") with IDomainPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
-  val dirTField = directoryTextField(dataUI.directoryPath)
-  val numberPatternTextField = new TextField(8) { text = dataUI.numberPattern }
-  val sliceSizeTextField = new TextField(8) { text = dataUI.sliceSize.toString }
+  val sizeField = new TextField(dataUI.size, 5)
+  val stepTextField = new TextField(dataUI.step, 5)
 
-  contents += FileDomainPanelUI.panel(List((dirTField, "Directory"), (numberPatternTextField, "Number pattern"), (sliceSizeTextField, "Slice size")))
+  contents += (new Label("Size"), "gap para")
+  contents += sizeField
+  contents += (new Label("Step"), "gap para")
+  contents += stepTextField
 
   override def toString = dataUI.name
 
-  def saveContent = new SlindingSliceFilesDomainDataUI(dirTField.text, numberPatternTextField.text, sliceSizeTextField.text.toInt)
+  def saveContent = {
+
+    val classString =
+      ScenesManager.currentSamplingCompositionPanelUI.firstNoneModifierDomain(dataUI) match {
+        case Some(d: IDomainDataUI) ⇒ d.domainType.toString.split('.').last
+        case _ ⇒ DOUBLE
+      }
+    SlidingDomainDataUI(sizeField.text, stepTextField.text, classString, dataUI.previousDomain)
+  }
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(dirTField, new Help(i18n.getString("dir"), i18n.getString("dirEx")))
-    add(numberPatternTextField, new Help(i18n.getString("selectionPattern"), i18n.getString("selectionPatternEx")))
-    add(sliceSizeTextField, new Help(i18n.getString("sliceSize"), i18n.getString("sliceSizeEx")))
+    add(sizeField, new Help(i18n.getString("size"), i18n.getString("sizeEx")))
+    add(stepTextField, new Help(i18n.getString("step"), i18n.getString("stepEx")))
   }
 }

@@ -22,13 +22,14 @@ import java.util.ResourceBundle
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.{ URL, Help, Helper, PluginPanel }
-import swing.{ MyComboBox, TextField }
+import swing._
 
-class TakeDomainPanelUI(pud: TakeDomainDataUI) extends PluginPanel("") with IDomainPanelUI {
+class TakeDomainPanelUI(pud: TakeDomainDataUI) extends PluginPanel("wrap 2") with IDomainPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
   val sizeTextField = new TextField(pud.size, 6)
 
+  contents += (new Label("Size"), "gap para")
   contents += sizeTextField
 
   def saveContent = new TakeDomainDataUI(sizeTextField.text, pud.previousDomain)

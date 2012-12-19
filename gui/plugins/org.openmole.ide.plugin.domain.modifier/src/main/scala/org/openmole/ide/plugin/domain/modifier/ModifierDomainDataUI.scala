@@ -16,13 +16,25 @@
  */
 package org.openmole.ide.plugin.domain.modifier
 
-import org.openmole.core.model.domain.{ Discrete, Domain }
+import org.openmole.core.model.domain.{ Finite, Discrete, Domain }
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.model.sampling.IModifier
+import org.openmole.ide.core.implementation.execution.ScenesManager
+import org.openmole.ide.misc.tools.util.Types._
+
+object ModifierDomainDataUI {
+
+  def computeClassString(pud: IDomainDataUI) =
+    ScenesManager.currentSamplingCompositionPanelUI.firstNoneModifierDomain(pud) match {
+      case Some(d: IDomainDataUI) ⇒ d.domainType.toString.split('.').last
+      case _ ⇒ DOUBLE
+    }
+}
 
 trait ModifierDomainDataUI extends IDomainDataUI with IModifier {
   type DOMAINTYPE = Domain[Any] with Discrete[Any]
+  type FINITDOMAINTYPE = Domain[Any] with Finite[Any]
 
   override def isAcceptable(domain: IDomainDataUI): Boolean =
     domain.coreObject match {
@@ -36,6 +48,16 @@ trait ModifierDomainDataUI extends IDomainDataUI with IModifier {
     val dL = previousDomain.flatMap {
       _.coreObject match {
         case id: DOMAINTYPE ⇒ List(id)
+        case _ ⇒ Nil
+      }
+    }
+    (!dL.isEmpty, dL)
+  }
+
+  def validFinitePreviousDomains: (Boolean, List[FINITDOMAINTYPE]) = {
+    val dL = previousDomain.flatMap {
+      _.coreObject match {
+        case id: FINITDOMAINTYPE ⇒ List(id)
         case _ ⇒ Nil
       }
     }

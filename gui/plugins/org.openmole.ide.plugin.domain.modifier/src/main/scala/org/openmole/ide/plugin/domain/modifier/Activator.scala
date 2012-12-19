@@ -20,11 +20,13 @@ package org.openmole.ide.plugin.domain.modifier
 import org.openmole.ide.core.implementation.registry.OSGiActivator
 import org.openmole.ide.core.implementation.registry.DomainActivator
 import org.openmole.ide.misc.tools.util.Types._
+import org.openmole.ide.core.model.factory.IDomainFactoryUI
 
 class Activator extends OSGiActivator with DomainActivator {
 
   override def domainFactories = List(
-    new TakeDomainFactoryUI { def buildDataUI = new TakeDomainDataUI },
-    new GroupDomainFactoryUI { def buildDataUI = GroupDomainDataUI.empty },
-    new GroovyDomainModifierFactoryUI { def buildDataUI = new GroovyModifierDomainDataUI })
+    new IDomainFactoryUI { def buildDataUI = new TakeDomainDataUI },
+    new IDomainFactoryUI { def buildDataUI = GroupDomainDataUI.empty },
+    new IDomainFactoryUI { def buildDataUI = new GroovyModifierDomainDataUI },
+    new IDomainFactoryUI { def buildDataUI = SlidingDomainDataUI.empty })
 }

@@ -17,18 +17,13 @@
 
 package org.openmole.ide.plugin.domain.modifier
 
-import java.math.BigDecimal
-import java.math.BigInteger
-import org.openmole.core.model.domain.{ Discrete, Domain }
+import org.openmole.core.model.domain.Domain
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.data.IFactorDataUI
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.domain.modifier.GroovyDomainModifier
-import org.openmole.core.model.data.Prototype
-import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.model.sampling.IFinite
 
 case class GroovyModifierDomainDataUI(val prototypeName: String = "",

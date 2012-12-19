@@ -23,6 +23,5 @@ import org.openmole.ide.core.implementation.registry.DomainActivator
 class Activator extends OSGiActivator with DomainActivator {
 
   override def domainFactories = List(new FileDomainFactoryUI { def buildDataUI = new ListFilesDomainDataUI },
-    new FileDomainFactoryUI { def buildDataUI = new SelectFileDomainDataUI("") },
-    new FileDomainFactoryUI { def buildDataUI = new SlindingSliceFilesDomainDataUI("") })
+    new FileDomainFactoryUI { def buildDataUI = new SelectFileDomainDataUI("") })
 }

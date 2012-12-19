@@ -35,14 +35,7 @@ class GroupDomainPanelUI(pud: GroupDomainDataUI[_]) extends PluginPanel("wrap") 
   contents += sizeTextField
 
   def saveContent = {
-
-    val classString =
-      ScenesManager.currentSamplingCompositionPanelUI.firstNoneModifierDomain(pud) match {
-        case Some(d: IDomainDataUI) ⇒ d.domainType.toString.split('.').last
-        case _ ⇒ DOUBLE
-      }
-
-    GroupDomainDataUI(sizeTextField.text, classString, pud.previousDomain)
+    GroupDomainDataUI(sizeTextField.text, ModifierDomainDataUI.computeClassString(pud), pud.previousDomain)
   }
 
   override lazy val help =
