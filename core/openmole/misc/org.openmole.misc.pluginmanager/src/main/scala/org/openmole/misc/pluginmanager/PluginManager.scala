@@ -87,9 +87,11 @@ object PluginManager extends Logger {
     bundles.foreach { _.start }
   }
 
-  def load(path: File): Unit = synchronized { installBundle(path).start }
+  def load(path: File): Unit = synchronized {
+    if (path.isDirectory) loadDir(path)
+    else installBundle(path).start
+  }
 
-  def loadDir(path: String): Unit = loadDir(new File(path))
   def loadDir(path: File): Unit = loadDir(path, defaultPattern)
   def loadDir(path: File, pattern: String): Unit = {
     loadDir(path, new FileFilter {
