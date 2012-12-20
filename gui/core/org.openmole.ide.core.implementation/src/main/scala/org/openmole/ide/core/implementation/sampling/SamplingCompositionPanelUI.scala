@@ -354,6 +354,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
         case tp: IDomainProxyUI ⇒
           tp.dataUI match {
             case modifier: IDomainDataUI with IModifier ⇒
+              println("CLONE with previous" + sp.dataUI.domainType)
               tp.dataUI = modifier.clone(scala.collection.immutable.List(sp.dataUI))
               connections.filter {
                 cc ⇒
