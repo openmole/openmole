@@ -45,7 +45,7 @@ class DynamicListDomainPanelUI(pud: DynamicListDomainDataUI[_]) extends PluginPa
   def saveContent = DynamicListDomainDataUI(textArea.text.split('\n').toList,
     typeCombo.selection.item)
 
-  override val help = new Helper(List(new URL(i18n.getString("valueListPermalinkText"), i18n.getString("valueListpermalink")))) {
+  override val help = new Helper(List(new URL(i18n.getString("valueListPermalinkText"), i18n.getString("valueListPermalink")))) {
     add(textArea, new Help(i18n.getString("valueList"), i18n.getString("valueListEx")))
   }
 }

@@ -31,7 +31,7 @@ case class GroovyModifierDomainDataUI(val prototypeName: String = "",
                                       var previousDomain: List[IDomainDataUI] = List.empty)
     extends ModifierDomainDataUI with IFinite {
 
-  val domainType = previousDomain.headOption match {
+  def domainType = previousDomain.headOption match {
     case Some(d: IDomainDataUI) ⇒ d.domainType
     case _ ⇒ manifest[Double]
   }
@@ -52,5 +52,8 @@ case class GroovyModifierDomainDataUI(val prototypeName: String = "",
 
   def coreClass = classOf[GroovyModifierDomainDataUI]
 
-  def clone(pD: List[IDomainDataUI]) = copy(previousDomain = pD)
+  def clone(pD: List[IDomainDataUI]) = pD.headOption match {
+    case Some(d: IDomainDataUI) ⇒ GroovyModifierDomainDataUI(prototypeName, code, pD)
+    case _ ⇒ GroovyModifierDomainDataUI(prototypeName, code, List())
+  }
 }

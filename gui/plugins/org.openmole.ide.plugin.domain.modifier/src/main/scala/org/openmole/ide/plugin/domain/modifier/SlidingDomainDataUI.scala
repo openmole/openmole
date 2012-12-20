@@ -24,6 +24,7 @@ import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.ide.misc.tools.util.Types._
 import java.math.BigInteger
 import java.io.File
+import org.openmole.ide.misc.tools.util.Types
 
 object SlidingDomainDataUI {
   def empty = apply("1", "1", DOUBLE, List.empty)
@@ -31,8 +32,8 @@ object SlidingDomainDataUI {
   def apply(size: String,
             step: String,
             classString: String,
-            previousDomain: List[IDomainDataUI]) = {
-    classString match {
+            previousDomain: List[IDomainDataUI]): SlidingDomainDataUI[_] = {
+    Types.standardize(classString) match {
       case INT ⇒ new SlidingDomainDataUI[Int](size, step, previousDomain)
       case DOUBLE ⇒ new SlidingDomainDataUI[Double](size, step, previousDomain)
       case BIG_DECIMAL ⇒ new SlidingDomainDataUI[BigDecimal](size, step, previousDomain)
@@ -64,5 +65,8 @@ case class SlidingDomainDataUI[S](val size: String = "",
 
   def coreClass = classOf[SlidingDomainModifier[_]]
 
-  def clone(pD: List[IDomainDataUI]) = copy(previousDomain = pD)
+  def clone(pD: List[IDomainDataUI]) = pD.headOption match {
+    case Some(d: IDomainDataUI) ⇒ SlidingDomainDataUI(size, step, Types.pretify(d.domainType.toString), pD)
+    case _ ⇒ SlidingDomainDataUI(size, step, DOUBLE, List())
+  }
 }

@@ -27,7 +27,7 @@ class RangeDomainPanelUI(pud: RangeDomainDataUI[_]) extends GenericRangeDomainPa
 
   minField.text = pud.min
   maxField.text = pud.max
-  typeCombo.peer.setModel(MyComboBox.newConstantModel(pud.availableTypes.map(t ⇒ Types.pretify(t))))
+  typeCombo.peer.setModel(MyComboBox.newConstantModel(pud.availableTypes))
   typeCombo.selection.item = pud.domainType.toString.split('.').last
 
   val stepCheckBox = new CheckBox("Step")

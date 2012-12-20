@@ -22,7 +22,6 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.domain.modifier.SortDomain
 import org.openmole.ide.misc.tools.util.Types._
 import java.io.File
-import java.math.BigInteger
 import org.openmole.core.model.domain.{ Domain, Finite }
 import org.openmole.ide.misc.tools.util.Types
 
@@ -32,11 +31,11 @@ object SortDomainDataUI {
 
   def apply(classString: String,
             previousDomain: List[IDomainDataUI]): SortDomainDataUI[_] = {
-    classString match {
+    Types.standardize(classString) match {
       case INT ⇒ new SortDomainDataUI[Int](previousDomain)
       case DOUBLE ⇒ new SortDomainDataUI[Double](previousDomain)
-      case BIG_DECIMAL ⇒ new SortDomainDataUI[BigDecimal](previousDomain)
-      case BIG_INTEGER ⇒ new SortDomainDataUI[BigInteger](previousDomain)
+      case BIG_DECIMAL ⇒ new SortDomainDataUI[java.math.BigDecimal](previousDomain)
+      case BIG_INTEGER ⇒ new SortDomainDataUI[java.math.BigInteger](previousDomain)
       case LONG ⇒ new SortDomainDataUI[Long](previousDomain)
       case STRING ⇒ new SortDomainDataUI[String](previousDomain)
       case FILE ⇒ new SortDomainDataUI[File](previousDomain)
@@ -49,7 +48,7 @@ case class SortDomainDataUI[S](var previousDomain: List[IDomainDataUI] = List.em
     extends ModifierDomainDataUI with IFinite {
   sortDomainDataUI ⇒
 
-  val domainType = previousDomain.headOption match {
+  def domainType = previousDomain.headOption match {
     case Some(dt: IDomainDataUI) ⇒ dt.domainType
     case _ ⇒ manifest[Double]
   }
@@ -59,9 +58,7 @@ case class SortDomainDataUI[S](var previousDomain: List[IDomainDataUI] = List.em
   def preview = "Sort"
 
   override def coreObject = {
-    println(" in CoreO : " + m)
     val valid = validFinitePreviousDomains
-    println(" in head_2 : " + valid._2.head.asInstanceOf[Domain[S] with Finite[S]])
     if (valid._1) new SortDomain[S](valid._2.head.asInstanceOf[Domain[S] with Finite[S]])
     else throw new UserBadDataError("A Discrete Domain is required as input of a Sort Domain. ")
   }
@@ -73,7 +70,6 @@ case class SortDomainDataUI[S](var previousDomain: List[IDomainDataUI] = List.em
   override def toString = name
 
   def clone(pD: List[IDomainDataUI]) =
-    //copy(previousDomain = pD)
     pD.headOption match {
       case Some(d: IDomainDataUI) ⇒ SortDomainDataUI(Types.pretify(d.domainType.toString), pD)
       case _ ⇒ SortDomainDataUI(DOUBLE, List())

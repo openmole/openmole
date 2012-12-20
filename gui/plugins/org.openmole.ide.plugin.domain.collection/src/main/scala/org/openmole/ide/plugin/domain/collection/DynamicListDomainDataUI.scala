@@ -27,7 +27,6 @@ import org.openmole.plugin.domain.collection.DynamicListDomain
 import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.ide.misc.tools.util.Types
 import org.openmole.misc.tools.io.FromString
-//import org.openmole.misc.tools.io.FromString._
 
 object DynamicListDomainDataUI {
 
@@ -35,8 +34,8 @@ object DynamicListDomainDataUI {
     Types.standardize(classString) match {
       case INT ⇒ new DynamicListDomainDataUI[Int](values)
       case DOUBLE ⇒ new DynamicListDomainDataUI[Double](values)
-      case BIG_DECIMAL ⇒ new DynamicListDomainDataUI[BigDecimal](values)
-      case BIG_INTEGER ⇒ new DynamicListDomainDataUI[BigInteger](values)
+      case BIG_DECIMAL ⇒ new DynamicListDomainDataUI[java.math.BigDecimal](values)
+      case BIG_INTEGER ⇒ new DynamicListDomainDataUI[java.math.BigInteger](values)
       case LONG ⇒ new DynamicListDomainDataUI[Long](values)
       case STRING ⇒ new DynamicListDomainDataUI[String](values)
       case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")

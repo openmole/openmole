@@ -33,7 +33,7 @@ case class TakeDomainDataUI(val size: String = "1",
                             val previousDomain: List[IDomainDataUI] = List.empty)
     extends ModifierDomainDataUI with IFinite {
 
-  val domainType = previousDomain.headOption match {
+  def domainType = previousDomain.headOption match {
     case Some(dt: IDomainDataUI) ⇒ dt.domainType
     case _ ⇒ manifest[Double]
   }
@@ -54,5 +54,9 @@ case class TakeDomainDataUI(val size: String = "1",
 
   override def toString = "Take"
 
-  def clone(pD: List[IDomainDataUI]) = copy(previousDomain = pD)
+  def clone(pD: List[IDomainDataUI]) =
+    pD.headOption match {
+      case Some(d: IDomainDataUI) ⇒ new TakeDomainDataUI(size, pD)
+      case _ ⇒ new TakeDomainDataUI(size, List())
+    }
 }

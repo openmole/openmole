@@ -26,14 +26,15 @@ import org.openmole.plugin.domain.modifier.GroupDomain
 import org.openmole.ide.core.model.data.IDomainDataUI
 import java.io.File
 import org.openmole.ide.core.model.sampling.IFinite
+import org.openmole.ide.misc.tools.util.Types
 
 object GroupDomainDataUI {
   def empty = apply("1", DOUBLE, List())
 
   def apply(size: String,
             classString: String,
-            previousDomain: List[IDomainDataUI]) = {
-    classString match {
+            previousDomain: List[IDomainDataUI]): GroupDomainDataUI[_] = {
+    Types.standardize(classString) match {
       case INT ⇒ new GroupDomainDataUI[Int](size, previousDomain)
       case DOUBLE ⇒ new GroupDomainDataUI[Double](size, previousDomain)
       case BIG_DECIMAL ⇒ new GroupDomainDataUI[BigDecimal](size, previousDomain)
@@ -66,5 +67,9 @@ case class GroupDomainDataUI[S](val size: String = "0",
 
   override def toString = "Group"
 
-  def clone(pD: List[IDomainDataUI]) = copy(previousDomain = pD)
+  def clone(pD: List[IDomainDataUI]) = pD.headOption match {
+    case Some(d: IDomainDataUI) ⇒ GroupDomainDataUI(size, Types.pretify(d.domainType.toString), pD)
+    case _ ⇒ GroupDomainDataUI(size, DOUBLE, List())
+  }
+
 }

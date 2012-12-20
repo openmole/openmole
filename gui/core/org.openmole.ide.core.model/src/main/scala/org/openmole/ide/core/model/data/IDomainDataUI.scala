@@ -20,6 +20,7 @@ package org.openmole.ide.core.model.data
 import org.openmole.core.model.domain._
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.tools.util.Types._
+import org.openmole.ide.misc.tools.util.Types
 
 object IDomainDataUI {
   implicit val ordering = Ordering.by((_: IDomainDataUI).name)
@@ -37,5 +38,5 @@ trait IDomainDataUI extends IDataUI {
 
   def isAcceptable(domain: IDomainDataUI): Boolean = false
 
-  def availableTypes: List[String] = List(INT, DOUBLE, BIG_DECIMAL, BIG_INTEGER, LONG)
+  def availableTypes: List[String] = List(INT, DOUBLE, BIG_DECIMAL, BIG_INTEGER, LONG).map(Types.pretify)
 }
