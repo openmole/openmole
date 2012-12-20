@@ -42,10 +42,21 @@ class Application extends IApplication with Logger {
       workspaceDir: Option[String] = None,
       scriptFile: Option[String] = None,
       password: Option[String] = None,
-      console: Boolean = false)
+      console: Boolean = false,
+      help: Boolean = false,
+      ignored: List[String] = Nil)
 
     def takeArgs(args: List[String]) = args.takeWhile(!_.startsWith("-"))
     def dropArgs(args: List[String]) = args.dropWhile(!_.startsWith("-"))
+
+    def usage =
+      """openmole [options]
+
+[-p list of arg] plugins list of jar or dir containing jars to be loaded
+[-s path] a path of script to execute
+[-pw password] openmole password
+[-c] console mode
+[-h] print help"""
 
     @tailrec def parse(args: List[String], c: Config = Config()): Config =
       args match {
@@ -55,20 +66,23 @@ class Application extends IApplication with Logger {
         case "-s" :: tail ⇒ parse(tail.tail, c.copy(scriptFile = Some(tail.head)))
         case "-pw" :: tail ⇒ parse(tail.tail, c.copy(password = Some(tail.head)))
         case "-c" :: tail ⇒ parse(tail, c.copy(console = true))
+        case "-h" :: tail ⇒ parse(tail, c.copy(help = true))
+        case s :: tail ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil ⇒ c
-        case s :: tail ⇒ println("Ignored arg " + s); c
       }
 
     val args: Array[String] = context.getArguments.get("application.args").asInstanceOf[Array[String]]
 
     val config = parse(args.toList)
-
     config.pluginsDirs.foreach { PluginManager.load }
 
     val userPlugins = config.userPlugins.map { new File(_) }.toSet
     PluginManager.load(userPlugins)
 
-    if (config.console) {
+    if (!config.ignored.isEmpty) println("Ignored options: " + config.ignored.mkString(" "))
+
+    if (config.help) println(usage)
+    else if (config.console) {
       try {
         val headless = GraphicsEnvironment.getLocalGraphicsEnvironment.isHeadlessInstance
         if (!headless && SplashScreen.getSplashScreen != null) SplashScreen.getSplashScreen.close
