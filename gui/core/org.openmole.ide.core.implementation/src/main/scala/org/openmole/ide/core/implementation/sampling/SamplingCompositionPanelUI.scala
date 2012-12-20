@@ -56,7 +56,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
   var _connections = new HashSet[(SamplingComponent, SamplingComponent)]
   val factorWidgets = new mutable.HashMap[IFactorProxyUI, SamplingConnectorWidget]
   var finalSampling: Option[ISamplingCompositionProxyUI] = None
-  var editedDomainProxy: Option[IDomainDataUI] = None
+  var building = true
 
   dataUI.factors.foreach {
     f ⇒ _factors += f
@@ -100,6 +100,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
       connectProvider.createConnection(domainsAndSamplings(sp), finalComponent)
     case _ ⇒
   }
+  building = false
 
   def connections = _connections.toList
 
@@ -319,22 +320,21 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
       case _ ⇒ None
     }
 
-  def update(domain: IDomainWidget) = domain.proxy.dataUI match {
-    case modifier: IDomainDataUI with IModifier ⇒
-      updatePrevious(domain)
-    case d: IDomainDataUI ⇒
-      val (s, t) = updateNext(domain)
-      s match {
-        case w: IDomainWidget ⇒
-          updatePrevious(w)
-          val factor = computeFactor(w.proxy)
-          factor match {
-            case Some(f: IFactorProxyUI) ⇒
-              if (editedDomainProxy != Some(domain.proxy.dataUI)) f.dataUI.prototype = None
-              if (factorWidgets.contains(f)) factorWidgets(f).update
-            case _ ⇒
-          }
-      }
+  def update(domain: IDomainWidget) = {
+    updatePrevious(domain)
+    val (s, t) = updateNext(domain)
+    s match {
+      case w: IDomainWidget ⇒
+        updatePrevious(w)
+        val factor = computeFactor(w.proxy)
+        factor match {
+          case Some(f: IFactorProxyUI) ⇒
+            if (!building) f.dataUI.prototype = None
+            if (factorWidgets.contains(f)) factorWidgets(f).update
+          case _ ⇒
+        }
+      case _ ⇒
+    }
   }
 
   def updateNext(domain: IDomainWidget) = connections.filter {
@@ -354,7 +354,6 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
         case tp: IDomainProxyUI ⇒
           tp.dataUI match {
             case modifier: IDomainDataUI with IModifier ⇒
-              println("CLONE with previous" + sp.dataUI.domainType)
               tp.dataUI = modifier.clone(scala.collection.immutable.List(sp.dataUI))
               connections.filter {
                 cc ⇒
@@ -496,7 +495,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
           _connections += sourceW -> sc
           sc.component match {
             case d: IDomainWidget ⇒
-              update(d)
+              if (!building) update(d)
             case _ ⇒
           }
         case scc: SceneComponent ⇒

@@ -44,10 +44,6 @@ trait ISamplingCompositionPanelUI extends IPanelUI {
 
   def remove(factorWidget: ISamplingComponent)
 
-  def editedDomainProxy: Option[IDomainDataUI]
-
-  def editedDomainProxy_=(f: Option[IDomainDataUI])
-
   def setFinalSampling(samplingProxy: ISamplingCompositionProxyUI)
 
   def setSamplingProxy(samplingProxy: ISamplingCompositionProxyUI, b: Boolean): Unit
