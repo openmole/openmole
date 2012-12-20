@@ -39,19 +39,7 @@ class SamplingMenuProvider(panelScene: ISamplingCompositionPanelUI) extends Gene
           case _ ⇒
         }
     })
-
-    val itSetAsFinalSampling = new MenuItem(new Action("Set as final") {
-      def apply = widget match {
-        case cw: SamplingComponent ⇒
-          cw.component match {
-            case samplingWidget: ISamplingWidget ⇒
-              panelScene.setFinalSampling(samplingWidget.proxy)
-            case _ ⇒
-          }
-        case _ ⇒
-      }
-    })
-    items += (itRemoveSampling.peer, itSetAsFinalSampling.peer)
+    items += itRemoveSampling.peer
     super.getPopupMenu(widget, point)
   }
 }
