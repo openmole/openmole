@@ -20,7 +20,7 @@
   <!-- ************************************************************* -->
   <name>${project.artifactId}</name>
   <!--optional. Use this property to tune the exported packages-->
-  <properties />
+  <properties></properties>
   <dependencies>
     <dependency>
       <groupId>net.sf.opencsv</groupId>
