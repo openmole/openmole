@@ -18,6 +18,7 @@
 package org.openmole.plugin.domain
 
 import org.openmole.core.model.domain._
+import java.io.File
 
 package object modifier {
 
@@ -29,6 +30,10 @@ package object modifier {
 
   implicit def finiteDomainModifierDecorator[T](domain: Domain[T] with Finite[T]) = new {
     def sort(implicit o: Ordering[T]) = new SortDomain(domain)
+  }
+
+  implicit class FileDomainDecorator(d: Domain[File] with Finite[File]) {
+    def sortByName = new SortByNameDomain(d)
   }
 
 }

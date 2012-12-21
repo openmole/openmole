@@ -18,15 +18,9 @@
 package org.openmole.plugin.domain
 
 import java.io.File
-import modifier.SortByNameDomain
-import org.openmole.core.model.domain.{ Finite, Domain }
 
 package object file {
 
   implicit def stringToFilter(pattern: String) = (_: File).getName.matches(pattern)
-
-  implicit class FileDomainDecorator(d: Domain[File] with Finite[File]) {
-    def sortByName = new SortByNameDomain(d)
-  }
 
 }
