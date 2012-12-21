@@ -35,6 +35,7 @@ import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import scala.collection.mutable.HashSet
+import org.openmole.ide.misc.tools.Counter
 
 class PrototypeConverter(mapper: Mapper,
                          provider: ReflectionProvider,
@@ -53,15 +54,16 @@ class PrototypeConverter(mapper: Mapper,
         state.content += proto -> new Serialized(proto.id)
         writer.addAttribute("id", proto.id.toString)
         writer.addAttribute("name", proto.dataUI.name)
-        writer.addAttribute("type", Types.pretify(proto.dataUI.typeClassString))
+        writer.addAttribute("type", Types.extractTypeFromArray(Types.pretifyWithNameSpace(proto.dataUI.typeClassString)))
         writer.addAttribute("dim", proto.dataUI.dim.toString)
     }
   }
 
-  def extract(reader: HierarchicalStreamReader) =
+  def extract(reader: HierarchicalStreamReader) = {
     new PrototypeDataProxyUI(GenericPrototypeDataUI(reader.getAttribute("name"),
       reader.getAttribute("dim").toInt)(ClassLoader.toManifest(reader.getAttribute("type"))),
       false, reader.getAttribute("id").toInt)
+  }
 
   override def unmarshal(reader: HierarchicalStreamReader,
                          uc: UnmarshallingContext) = {
@@ -85,8 +87,9 @@ class PrototypeConverter(mapper: Mapper,
   def addPrototype(p: IPrototypeDataProxyUI): IPrototypeDataProxyUI = {
     Proxys.prototypes += p
     ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(p)
-    if (!(GenericPrototypeDataUI.baseType ::: GenericPrototypeDataUI.extraType contains Types.pretify(p.dataUI.typeClassString))) {
-      GenericPrototypeDataUI.extraType = GenericPrototypeDataUI.extraType :+ p.dataUI.typeClassString
+    Counter.id.getAndIncrement
+    if (!(GenericPrototypeDataUI.baseType ::: GenericPrototypeDataUI.extraType contains Types.standardize(p.dataUI.typeClassString))) {
+       GenericPrototypeDataUI.extraType = GenericPrototypeDataUI.extraType :+ Types.standardize(p.dataUI.typeClassString)
     }
     p
   }

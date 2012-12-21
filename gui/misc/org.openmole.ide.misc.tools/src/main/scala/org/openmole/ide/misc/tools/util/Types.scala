@@ -19,7 +19,7 @@ package org.openmole.ide.misc.tools.util
 object Types {
   val INT = "int"
   val LONG = "long"
-  val DOUBLE = "Double"
+  val DOUBLE = "double"
   val FILE = classOf[java.io.File].getSimpleName
   val STRING = classOf[String].getSimpleName
   val BIG_DECIMAL = classOf[java.math.BigDecimal].getSimpleName
@@ -33,7 +33,25 @@ object Types {
     c.last.head.toUpper.toString + c.last.tail
   }
 
-  def standardize(c: String) =
-    if (c == "Int" || c == "Long") c.head.toLower + c.tail
-    else c
+  def pretifyWithNameSpace(s: String) = {
+    val c = s.split('.')
+    val start = c.init.mkString(".")
+    start + {
+      if (!start.isEmpty) "." else ""
+    } + c.last.head.toUpper.toString + c.last.tail
+  }
+
+  def extractTypeFromArray(s: String) = s.replaceAllLiterally("Array[", "").replaceAllLiterally("]", "")
+
+  def standardize(c: String) = {
+    c match {
+      case "Int" ⇒ "int"
+      case "Double" ⇒ "double"
+      case "Long" ⇒ "long"
+      case "java.math.BigDecimal" ⇒ "BigDecimal"
+      case "java.math.BigInteger" ⇒ "BigInteger"
+      case "java.io.File" ⇒ "File"
+      case _ ⇒ c
+    }
+  }
 }

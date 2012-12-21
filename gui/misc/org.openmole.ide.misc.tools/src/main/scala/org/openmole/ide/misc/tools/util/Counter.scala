@@ -20,5 +20,5 @@ package org.openmole.ide.misc.tools
 import java.util.concurrent.atomic.AtomicInteger
 
 object Counter {
-  var id = new AtomicInteger
+  val id = new AtomicInteger
 }
