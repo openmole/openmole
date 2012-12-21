@@ -24,7 +24,7 @@ import swing.ScrollPane.BarPolicy._
 import swing._
 import java.util.{ Locale, ResourceBundle }
 
-class GroovyModifierDomainPanelUI(pud: GroovyModifierDomainDataUI) extends PluginPanel("wrap 3") with IDomainPanelUI {
+class MapDomainPanelUI(pud: GroovyModifierDomainDataUI) extends PluginPanel("wrap 3") with IDomainPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
@@ -40,7 +40,7 @@ class GroovyModifierDomainPanelUI(pud: GroovyModifierDomainDataUI) extends Plugi
   contents += new Label(" => ")
   contents += (codeTextArea, "span 5")
 
-  def saveContent = new GroovyModifierDomainDataUI(protoNameTextField.text,
+  def saveContent = new MapDomainDataUI(protoNameTextField.text,
     codeTextArea.editor.text,
     pud.previousDomain)
 

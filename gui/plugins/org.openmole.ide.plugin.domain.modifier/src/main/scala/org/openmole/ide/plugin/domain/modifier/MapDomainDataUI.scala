@@ -23,10 +23,10 @@ import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.plugin.domain.modifier.GroovyDomainModifier
+import org.openmole.plugin.domain.modifier.MapDomain
 import org.openmole.ide.core.model.sampling.IFinite
 
-case class GroovyModifierDomainDataUI(val prototypeName: String = "",
+case class MapDomainDataUI(val prototypeName: String = "",
                                       val code: String = "",
                                       var previousDomain: List[IDomainDataUI] = List.empty)
     extends ModifierDomainDataUI with IFinite {
@@ -42,18 +42,18 @@ case class GroovyModifierDomainDataUI(val prototypeName: String = "",
 
   override def coreObject: Domain[Any] = {
     val valid = validPreviousDomains
-    if (valid._1) new GroovyDomainModifier(valid._2.head, prototypeName, code)
+    if (valid._1) new MapDomain(valid._2.head, prototypeName, code)
     else throw new UserBadDataError("An input Domain is required for a Map modifier Domain")
   }
 
-  def buildPanelUI(p: IPrototypeDataProxyUI) = new GroovyModifierDomainPanelUI(this)
+  def buildPanelUI(p: IPrototypeDataProxyUI) = new MapDomainPanelUI(this)
 
   def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], false))
 
-  def coreClass = classOf[GroovyModifierDomainDataUI]
+  def coreClass = classOf[MapDomain]
 
   def clone(pD: List[IDomainDataUI]) = pD.headOption match {
-    case Some(d: IDomainDataUI) ⇒ GroovyModifierDomainDataUI(prototypeName, code, pD)
-    case _ ⇒ GroovyModifierDomainDataUI(prototypeName, code, List())
+    case Some(d: IDomainDataUI) ⇒ MapDomainDataUI(prototypeName, code, pD)
+    case _ ⇒ MapDomainDataUI(prototypeName, code, List())
   }
 }

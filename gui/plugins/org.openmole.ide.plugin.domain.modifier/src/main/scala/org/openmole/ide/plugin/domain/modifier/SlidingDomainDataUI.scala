@@ -25,6 +25,8 @@ import org.openmole.ide.misc.tools.util.Types._
 import java.math.BigInteger
 import java.io.File
 import org.openmole.ide.misc.tools.util.Types
+import org.openmole.core.model.domain.{ Domain, Discrete }
+import org.openmole.ide.core.implementation.dialog.StatusBar
 
 object SlidingDomainDataUI {
   def empty = apply("1", "1", DOUBLE, List.empty)
@@ -55,7 +57,7 @@ case class SlidingDomainDataUI[S](val size: String = "",
 
   def coreObject = {
     val valid = validPreviousDomains
-    if (valid._1) new SlidingDomainModifier(valid._2.head, size.toInt, step.toInt)
+    if (valid._1) new SlidingDomain[S](valid._2.head.asInstanceOf[Domain[S] with Discrete[S]], size.toInt, step.toInt)
     else throw new UserBadDataError("A Discrete Domain is required as input of a Sliding Domain. ")
   }
 

@@ -14,10 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.openmole.ide.plugin.domain.file
+package org.openmole.ide.plugin.domain.modifier
 
 import org.openmole.ide.core.model.data.IDomainDataUI
-import org.openmole.plugin.domain.file.SortByNameDomain
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label

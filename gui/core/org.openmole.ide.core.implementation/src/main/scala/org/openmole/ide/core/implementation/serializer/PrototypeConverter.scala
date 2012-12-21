@@ -89,7 +89,7 @@ class PrototypeConverter(mapper: Mapper,
     ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(p)
     Counter.id.getAndIncrement
     if (!(GenericPrototypeDataUI.baseType ::: GenericPrototypeDataUI.extraType contains Types.standardize(p.dataUI.typeClassString))) {
-       GenericPrototypeDataUI.extraType = GenericPrototypeDataUI.extraType :+ Types.standardize(p.dataUI.typeClassString)
+      GenericPrototypeDataUI.extraType = GenericPrototypeDataUI.extraType :+ Types.standardize(p.dataUI.typeClassString)
     }
     p
   }
