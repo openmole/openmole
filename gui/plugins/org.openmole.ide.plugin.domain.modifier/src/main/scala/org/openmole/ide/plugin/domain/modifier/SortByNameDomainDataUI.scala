@@ -27,6 +27,7 @@ import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.misc.tools.util.Types.FILE
 import org.openmole.ide.misc.tools.util.Types
 import org.openmole.ide.core.model.sampling.IFinite
+import org.openmole.plugin.domain.modifier.SortByNameDomain
 
 class SortByNameDomainDataUI(var previousDomain: List[IDomainDataUI] = List.empty)
     extends IDomainDataUI with IFinite {

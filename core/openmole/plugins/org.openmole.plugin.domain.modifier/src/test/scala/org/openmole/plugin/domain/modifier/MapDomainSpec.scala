@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 2011 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,20 +19,26 @@ package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
-import org.openmole.plugin.tools.groovy.ContextToGroovyCode
-import org.openmole.core.implementation.tools.GroovyContextAdapter._
+import org.openmole.core.implementation.data._
 
-sealed class GroovyDomainModifier[-I, +O](domain: Domain[I] with Discrete[I], name: String, code: String) extends Domain[O] with Discrete[O] {
+import org.scalatest.FlatSpec
+import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.junit.JUnitRunner
+import org.junit.runner.RunWith
 
-  def this(domain: Domain[I] with Discrete[I], prototype: Prototype[I], code: String) = this(domain, prototype.name, code)
+@RunWith(classOf[JUnitRunner])
+class MapDomainSpec extends FlatSpec with ShouldMatchers {
 
-  @transient lazy val contextToGroovyCode = new ContextToGroovyCode(code, Iterable.empty)
+  "MapDomain" should "change the values of a domain using groovy code" in {
+    val r1 = (1 to 3)
 
-  override def iterator(context: Context): Iterator[O] =
-    domain.iterator(context).map {
-      e ⇒
-        val b = context.toBinding
-        b.setVariable(name, e)
-        contextToGroovyCode.execute(b).asInstanceOf[O]
+    val d1 = new Domain[Int] with Discrete[Int] {
+      override def iterator(context: Context) = r1.iterator
     }
+
+    val md = new MapDomain(d1, "p1", "p1 * 2").iterator(Context.empty)
+
+    md.toList == r1.map { _ * 2 } should equal(true)
+  }
+
 }

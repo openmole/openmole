@@ -17,12 +17,20 @@
 
 package org.openmole.plugin.domain.modifier
 
+import java.io.File
 import org.openmole.core.model.domain._
 import org.openmole.core.model.data._
+import org.openmole.misc.exception._
 
-class SlidingDomainModifier[T](val domain: Domain[T] with Discrete[T], val size: Int, val step: Int = 1)(implicit m: Manifest[T]) extends Domain[Array[T]] with Discrete[Array[T]] {
+class SortByNameDomain(val domain: Domain[File] with Finite[File]) extends Domain[File] with Finite[File] {
 
-  override def iterator(context: Context): Iterator[Array[T]] =
-    domain.iterator(context).sliding(size, step).map(_.toArray)
+  override def computeValues(context: Context): Iterable[File] = {
+    def extractNumber(name: String) = {
+      val n = name.reverse.dropWhile(!_.isDigit).takeWhile(_.isDigit)
+      if (n.isEmpty) throw new UserBadDataError("File name " + name + " doesn't contains a number")
+      else n.toInt
+    }
+    domain.computeValues(context).toList.sortBy(f ⇒ extractNumber(f.getName))
+  }
 
 }

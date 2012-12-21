@@ -77,8 +77,15 @@ object PluginManager extends Logger {
     }
   }
 
+  def plugins(path: File) =
+    path.listFiles(new FileFilter {
+      override def accept(file: File): Boolean =
+        file.isFile && file.exists && file.getName.matches(defaultPattern)
+
+    })
+
   def load(files: Iterable[File]) = synchronized {
-    val bundles = files.map { installBundle }.toList
+    val bundles = files.flatMap { f ⇒ if (f.isDirectory) plugins(f) else List(f) }.map { installBundle }.toList
     bundles.foreach { _.start }
   }
 
@@ -92,17 +99,8 @@ object PluginManager extends Logger {
     else installBundle(path).start
   }
 
-  def loadDir(path: File): Unit = loadDir(path, defaultPattern)
-  def loadDir(path: File, pattern: String): Unit = {
-    loadDir(path, new FileFilter {
-      override def accept(file: File): Boolean = {
-        file.isFile && file.exists && file.getName().matches(pattern)
-      }
-    })
-  }
-
-  def loadDir(path: File, fiter: FileFilter): Unit =
-    if (path.exists && path.isDirectory) load(path.listFiles(fiter))
+  def loadDir(path: File): Unit =
+    if (path.exists && path.isDirectory) load(plugins(path))
 
   def bundle(file: File) = files.get(file.getCanonicalFile).map { id ⇒ Activator.contextOrException.getBundle(id._1) }
 

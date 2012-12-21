@@ -29,7 +29,7 @@ import org.junit.runner.RunWith
 @RunWith(classOf[JUnitRunner])
 class GroupDomainSpec extends FlatSpec with ShouldMatchers {
 
-  "SlicedIterablesDomain" should "change the values of a domain to iterables" in {
+  "GroupDomain" should "change the values of a domain to an iterable of array" in {
     val r1 = (1 to 10)
 
     val d1 = new Domain[Int] with Discrete[Int] {

@@ -24,7 +24,7 @@ package object modifier {
   implicit def domainModifierDecorator[T](domain: Domain[T] with Discrete[T]) = new {
     def take(n: Int) = new TakeDomain(domain, n)
     def group(n: Int)(implicit m: Manifest[T]) = new GroupDomain(domain, n)
-    def sliding(n: Int, s: Int = 1)(implicit m: Manifest[T]) = new SlidingDomainModifier(domain, n, s)
+    def sliding(n: Int, s: Int = 1)(implicit m: Manifest[T]) = new SlidingDomain(domain, n, s)
   }
 
   implicit def finiteDomainModifierDecorator[T](domain: Domain[T] with Finite[T]) = new {

@@ -17,7 +17,7 @@
  */
 package org.openmole.ide.plugin.domain.modifier
 
-import org.openmole.plugin.domain.modifier.SlidingDomainModifier
+import org.openmole.plugin.domain.modifier.SlidingDomain
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.core.model.sampling.IFinite
@@ -65,7 +65,7 @@ case class SlidingDomainDataUI[S](val size: String = "",
 
   def preview = "Sliding on " + size + " by " + step
 
-  def coreClass = classOf[SlidingDomainModifier[_]]
+  def coreClass = classOf[SlidingDomain[_]]
 
   def clone(pD: List[IDomainDataUI]) = pD.headOption match {
     case Some(d: IDomainDataUI) ⇒ SlidingDomainDataUI(size, step, Types.pretify(d.domainType.toString), pD)

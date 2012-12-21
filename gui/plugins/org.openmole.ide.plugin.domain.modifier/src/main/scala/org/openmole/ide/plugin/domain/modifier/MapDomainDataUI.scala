@@ -27,8 +27,8 @@ import org.openmole.plugin.domain.modifier.MapDomain
 import org.openmole.ide.core.model.sampling.IFinite
 
 case class MapDomainDataUI(val prototypeName: String = "",
-                                      val code: String = "",
-                                      var previousDomain: List[IDomainDataUI] = List.empty)
+                           val code: String = "",
+                           var previousDomain: List[IDomainDataUI] = List.empty)
     extends ModifierDomainDataUI with IFinite {
 
   def domainType = previousDomain.headOption match {
@@ -50,7 +50,7 @@ case class MapDomainDataUI(val prototypeName: String = "",
 
   def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], false))
 
-  def coreClass = classOf[MapDomain]
+  def coreClass = classOf[MapDomain[_]]
 
   def clone(pD: List[IDomainDataUI]) = pD.headOption match {
     case Some(d: IDomainDataUI) ⇒ MapDomainDataUI(prototypeName, code, pD)

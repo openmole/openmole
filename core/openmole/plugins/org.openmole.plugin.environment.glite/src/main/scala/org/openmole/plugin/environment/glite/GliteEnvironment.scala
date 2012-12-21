@@ -51,7 +51,7 @@ object GliteEnvironment extends Logger {
   val ProxyTime = new ConfigurationLocation("GliteEnvironment", "ProxyTime")
   val MyProxyTime = new ConfigurationLocation("GliteEnvironment", "MyProxyTime")
 
-  val FetchRessourcesTimeOut = new ConfigurationLocation("GliteEnvironment", "FetchRessourcesTimeOut")
+  val FetchResourcesTimeOut = new ConfigurationLocation("GliteEnvironment", "FetchResourcesTimeOut")
   val CACertificatesSite = new ConfigurationLocation("GliteEnvironment", "CACertificatesSite")
 
   val OverSubmissionInterval = new ConfigurationLocation("GliteEnvironment", "OverSubmissionInterval")
@@ -84,7 +84,7 @@ object GliteEnvironment extends Logger {
   Workspace += (ProxyTime, "PT24H")
   Workspace += (MyProxyTime, "P7D")
 
-  Workspace += (FetchRessourcesTimeOut, "PT2M")
+  Workspace += (FetchResourcesTimeOut, "PT2M")
   Workspace += (CACertificatesSite, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/")
 
   Workspace += (LocalThreadsBySE, "10")
@@ -186,7 +186,7 @@ class GliteEnvironment(
   }
 
   override def allJobServices = {
-    val jss = getBDII.queryWMS(voName, Workspace.preferenceAsDuration(FetchRessourcesTimeOut).toSeconds.toInt)
+    val jss = getBDII.queryWMS(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut).toSeconds.toInt)
     jss.map {
       js ⇒
         new GliteJobService {
@@ -198,7 +198,7 @@ class GliteEnvironment(
   }
 
   override def allStorages = {
-    val stors = getBDII.querySRM(voName, Workspace.preferenceAsDuration(GliteEnvironment.FetchRessourcesTimeOut).toSeconds.toInt)
+    val stors = getBDII.querySRM(voName, Workspace.preferenceAsDuration(GliteEnvironment.FetchResourcesTimeOut).toSeconds.toInt)
     stors.map {
       s ⇒ GliteStorageService(s, env, GliteAuthentication.CACertificatesDir)
     }

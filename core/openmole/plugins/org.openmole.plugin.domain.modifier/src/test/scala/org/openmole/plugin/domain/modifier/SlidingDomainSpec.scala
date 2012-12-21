@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 19/12/12 Romain Reuillon
+ * Copyright (C) 21/12/12 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,22 +15,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.domain.file
+package org.openmole.plugin.domain.modifier
 
-import java.io.File
-import org.openmole.core.model.domain._
 import org.openmole.core.model.data._
-import org.openmole.misc.exception._
+import org.openmole.core.model.domain._
+import org.openmole.core.implementation.data._
 
-class SortByNameDomain(val domain: Domain[File] with Finite[File]) extends Domain[File] with Finite[File] {
+import org.scalatest.FlatSpec
+import org.scalatest.matchers.ShouldMatchers
+import org.scalatest.junit.JUnitRunner
+import org.junit.runner.RunWith
 
-  override def computeValues(context: Context): Iterable[File] = {
-    def extractNumber(name: String) = {
-      val n = name.reverse.dropWhile(!_.isDigit).takeWhile(_.isDigit)
-      if (n.isEmpty) throw new UserBadDataError("File name " + name + " doesn't contains a number")
-      else n.toInt
+@RunWith(classOf[JUnitRunner])
+class SlidingDomainSpec extends FlatSpec with ShouldMatchers {
+
+  "SlidingDomain" should "change the values of a domain to array" in {
+    val r1 = (1 to 10)
+
+    val d1 = new Domain[Int] with Discrete[Int] {
+      override def iterator(context: Context) = r1.iterator
     }
-    domain.computeValues(context).toList.sortBy(f ⇒ extractNumber(f.getName))
+
+    val md = new SlidingDomain(d1, 2, 1).iterator(Context.empty)
+
+    md.toList.size should equal(9)
   }
 
 }

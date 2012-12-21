@@ -27,7 +27,7 @@ class Activator extends OSGiActivator with DomainActivator {
   override def domainFactories = List(
     new IDomainFactoryUI { def buildDataUI = new TakeDomainDataUI },
     new IDomainFactoryUI { def buildDataUI = GroupDomainDataUI.empty },
-    new IDomainFactoryUI { def buildDataUI = new GroovyModifierDomainDataUI },
+    new IDomainFactoryUI { def buildDataUI = new MapDomainDataUI },
     new IDomainFactoryUI { def buildDataUI = SlidingDomainDataUI.empty },
     new IDomainFactoryUI { def buildDataUI = SortDomainDataUI.empty })
 }
