@@ -30,7 +30,7 @@ import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.plugin.domain.modifier.SortByNameDomain
 
 class SortByNameDomainDataUI(var previousDomain: List[IDomainDataUI] = List.empty)
-    extends IDomainDataUI with IFinite {
+    extends ModifierDomainDataUI with IFinite {
 
   def domainType = manifest[File]
 
@@ -59,5 +59,10 @@ class SortByNameDomainDataUI(var previousDomain: List[IDomainDataUI] = List.empt
       StatusBar().warn("A file domain can not modify another Domain")
       false
     }
+  }
+
+  def clone(pD: List[IDomainDataUI]) = pD.headOption match {
+    case Some(d: IDomainDataUI) ⇒ new SortByNameDomainDataUI(pD)
+    case _ ⇒ new SortByNameDomainDataUI(List())
   }
 }

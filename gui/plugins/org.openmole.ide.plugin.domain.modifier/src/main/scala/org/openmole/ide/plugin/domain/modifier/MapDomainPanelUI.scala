@@ -24,7 +24,7 @@ import swing.ScrollPane.BarPolicy._
 import swing._
 import java.util.{ Locale, ResourceBundle }
 
-class MapDomainPanelUI(pud: GroovyModifierDomainDataUI) extends PluginPanel("wrap 3") with IDomainPanelUI {
+class MapDomainPanelUI(pud: MapDomainDataUI) extends PluginPanel("wrap 3") with IDomainPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 

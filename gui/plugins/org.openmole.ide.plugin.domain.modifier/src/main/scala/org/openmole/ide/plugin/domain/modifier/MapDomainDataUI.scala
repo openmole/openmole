@@ -50,7 +50,7 @@ case class MapDomainDataUI(val prototypeName: String = "",
 
   def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], false))
 
-  def coreClass = classOf[MapDomain[_]]
+  def coreClass = classOf[MapDomain[_, _]]
 
   def clone(pD: List[IDomainDataUI]) = pD.headOption match {
     case Some(d: IDomainDataUI) ⇒ MapDomainDataUI(prototypeName, code, pD)

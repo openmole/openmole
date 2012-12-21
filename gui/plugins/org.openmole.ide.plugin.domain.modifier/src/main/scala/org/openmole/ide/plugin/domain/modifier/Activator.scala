@@ -29,5 +29,6 @@ class Activator extends OSGiActivator with DomainActivator {
     new IDomainFactoryUI { def buildDataUI = GroupDomainDataUI.empty },
     new IDomainFactoryUI { def buildDataUI = new MapDomainDataUI },
     new IDomainFactoryUI { def buildDataUI = SlidingDomainDataUI.empty },
-    new IDomainFactoryUI { def buildDataUI = SortDomainDataUI.empty })
+    new IDomainFactoryUI { def buildDataUI = SortDomainDataUI.empty },
+    new IDomainFactoryUI { def buildDataUI = new SortByNameDomainDataUI })
 }
