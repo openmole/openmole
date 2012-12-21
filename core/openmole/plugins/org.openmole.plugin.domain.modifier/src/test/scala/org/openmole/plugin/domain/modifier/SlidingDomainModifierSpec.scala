@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Romain Reuillon
+ * Copyright (C) 21/12/12 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -11,7 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
@@ -27,18 +27,18 @@ import org.scalatest.junit.JUnitRunner
 import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
-class GroupDomainSpec extends FlatSpec with ShouldMatchers {
+class SlidingDomainModifierSpec extends FlatSpec with ShouldMatchers {
 
-  "GroupDomain" should "change the values of a domain to an iterable of array" in {
+  "SlidingDomain" should "change the values of a domain to array" in {
     val r1 = (1 to 10)
 
     val d1 = new Domain[Int] with Discrete[Int] {
       override def iterator(context: Context) = r1.iterator
     }
 
-    val md = new GroupDomain(d1, 3).iterator(Context.empty)
+    val md = new SlidingDomainModifier(d1, 2, 1).iterator(Context.empty)
 
-    md.toList.size should equal(4)
+    md.toList.size should equal(9)
   }
 
 }
