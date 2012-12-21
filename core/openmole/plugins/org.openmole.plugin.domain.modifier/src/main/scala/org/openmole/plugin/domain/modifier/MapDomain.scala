@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Romain Reuillon
+ * Copyright (C) 2010 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -19,26 +19,20 @@ package org.openmole.plugin.domain.modifier
 
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
-import org.openmole.core.implementation.data._
+import org.openmole.plugin.tools.groovy.ContextToGroovyCode
+import org.openmole.core.implementation.tools.GroovyContextAdapter._
 
-import org.scalatest.FlatSpec
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.junit.JUnitRunner
-import org.junit.runner.RunWith
+sealed class MapDomain[-I, +O](domain: Domain[I] with Discrete[I], name: String, code: String) extends Domain[O] with Discrete[O] {
 
-@RunWith(classOf[JUnitRunner])
-class GroovyDomainModifierSpec extends FlatSpec with ShouldMatchers {
+  def this(domain: Domain[I] with Discrete[I], prototype: Prototype[I], code: String) = this(domain, prototype.name, code)
 
-  "GroovyDomainModifier" should "change the values of a domain using groovy code" in {
-    val r1 = (1 to 3)
+  @transient lazy val contextToGroovyCode = new ContextToGroovyCode(code, Iterable.empty)
 
-    val d1 = new Domain[Int] with Discrete[Int] {
-      override def iterator(context: Context) = r1.iterator
+  override def iterator(context: Context): Iterator[O] =
+    domain.iterator(context).map {
+      e ⇒
+        val b = context.toBinding
+        b.setVariable(name, e)
+        contextToGroovyCode.execute(b).asInstanceOf[O]
     }
-
-    val md = new GroovyDomainModifier(d1, "p1", "p1 * 2").iterator(Context.empty)
-
-    md.toList == r1.map { _ * 2 } should equal(true)
-  }
-
 }

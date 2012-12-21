@@ -23,7 +23,7 @@ import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.plugin.domain.modifier.GroovyDomainModifier
+import org.openmole.plugin.domain.modifier.MapDomain
 import org.openmole.ide.core.model.sampling.IFinite
 
 case class GroovyModifierDomainDataUI(val prototypeName: String = "",
@@ -42,7 +42,7 @@ case class GroovyModifierDomainDataUI(val prototypeName: String = "",
 
   override def coreObject: Domain[Any] = {
     val valid = validPreviousDomains
-    if (valid._1) new GroovyDomainModifier(valid._2.head, prototypeName, code)
+    if (valid._1) new MapDomain(valid._2.head, prototypeName, code)
     else throw new UserBadDataError("An input Domain is required for a Map modifier Domain")
   }
 
