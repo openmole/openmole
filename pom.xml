@@ -81,7 +81,7 @@
     <!--<lib.com.jcraft.jsch.version>0.1.42</lib.com.jcraft.jsch.version>-->
     <lib.com.thoughtworks.xstream.version>1.4.1</lib.com.thoughtworks.xstream.version>
     <lib.net.sf.kxml.version>2.3.0</lib.net.sf.kxml.version>
-    <lib.fr.iscpif.gridscale.version>1.24</lib.fr.iscpif.gridscale.version>
+    <lib.fr.iscpif.gridscale.version>1.25</lib.fr.iscpif.gridscale.version>
     <lib.org.apache.commons.collections15.version>4.01</lib.org.apache.commons.collections15.version>
     <lib.org.apache.commons.compress.version>1.0</lib.org.apache.commons.compress.version>
     <lib.org.apache.commons.pool.version>1.5.4</lib.org.apache.commons.pool.version>
