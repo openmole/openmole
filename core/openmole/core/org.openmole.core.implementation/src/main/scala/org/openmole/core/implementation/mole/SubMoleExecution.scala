@@ -127,7 +127,7 @@ class SubMoleExecution(
     moleExecution.jobFailedOrCanceled(job, capsule)
   }
 
-  private def jobFinished(job: IMoleJob) = try {
+  private def jobFinished(job: IMoleJob) = {
     val mole = moleExecution.mole
     val (capsule, ticket) = _jobs.single().get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registred."))
     try {
@@ -138,16 +138,16 @@ class SubMoleExecution(
 
       mole.outputDataChannels(capsule).foreach { _.provides(job.context, ticket, moleExecution) }
       mole.outputTransitions(capsule).toList.sortBy(t ⇒ mole.slots(t.end.capsule).size).reverse.foreach { _.perform(job.context, ticket, this) }
+    } catch {
+      case t: Throwable ⇒
+        logger.log(SEVERE, "Error in submole execution", t)
+        EventDispatcher.trigger(moleExecution, new IMoleExecution.ExceptionRaised(job, t, SEVERE))
+        throw t
     } finally {
       rmJob(job)
       checkFinished(ticket)
       moleExecution.jobOutputTransitionsPerformed(job, capsule)
     }
-  } catch {
-    case t: Throwable ⇒
-      logger.log(SEVERE, "Error in submole execution", t)
-      EventDispatcher.trigger(moleExecution, new IMoleExecution.ExceptionRaised(job, t, SEVERE))
-      throw t
   }
 
   private def checkFinished(ticket: ITicket) =
@@ -198,16 +198,16 @@ class SubMoleExecution(
     }
 
   def stateChanged(job: IMoleJob, oldState: State, newState: State) = background {
-    newState match {
-      case COMPLETED ⇒ jobFinished(job)
-      case FAILED | CANCELED ⇒ jobFailedOrCanceled(job)
-      case _ ⇒
-    }
     EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobStatusChanged(job, newState, oldState))
     job.exception match {
       case Some(e) ⇒
         logger.log(SEVERE, "Error in user job execution, job state is FAILED.", e)
         EventDispatcher.trigger(moleExecution, new IMoleExecution.ExceptionRaised(job, e, SEVERE))
+      case _ ⇒
+    }
+    newState match {
+      case COMPLETED ⇒ jobFinished(job)
+      case FAILED | CANCELED ⇒ jobFailedOrCanceled(job)
       case _ ⇒
     }
   }
