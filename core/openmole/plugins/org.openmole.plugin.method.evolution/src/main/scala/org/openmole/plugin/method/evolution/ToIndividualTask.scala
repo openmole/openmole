@@ -23,8 +23,17 @@ import org.openmole.core.implementation.task._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import scala.collection.mutable.ListBuffer
+import org.openmole.core.implementation.tools.VariableExpansion
 
 object ToIndividualTask {
+
+  def expand(objectives: List[(Prototype[Double], String)], context: Context): List[(Prototype[Double], Double)] =
+    if (objectives.isEmpty) List.empty
+    else {
+      val (p, v) = objectives.head
+      val vDouble = VariableExpansion(context, v).toDouble
+      (p, vDouble) :: expand(objectives.tail, context + Variable(p, vDouble))
+    }
 
   def apply(evolution: G with F with MG)(
     name: String,
@@ -32,9 +41,9 @@ object ToIndividualTask {
     individual: Prototype[Individual[evolution.G, evolution.F]])(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
 
-      private var objectives = new ListBuffer[(Prototype[Double], Double)]
+      private var objectives = new ListBuffer[(Prototype[Double], String)]
 
-      def addObjective(p: Prototype[Double], v: Double) = {
+      def addObjective(p: Prototype[Double], v: String) = {
         this addInput p
         objectives += (p -> v)
         this
@@ -64,15 +73,15 @@ sealed abstract class ToIndividualTask(val evolution: G with F with MG)(
   def genome: Prototype[evolution.G]
   def individual: Prototype[Individual[evolution.G, evolution.F]]
 
-  def objectives: List[(Prototype[Double], Double)]
+  def objectives: List[(Prototype[Double], String)]
 
   override def process(context: Context) = {
     val i: Individual[evolution.G, evolution.F] =
       Individual(
-        context.valueOrException(task.genome),
+        context(task.genome),
         MGFitness(
-          objectives.map {
-            case (o, v) ⇒ math.abs(context.valueOrException(o) - v)
+          ToIndividualTask.expand(objectives.toList, context).map {
+            case (o, v) ⇒ math.abs(context(o) - v)
           }))
     Context(Variable(individual, i))
   }

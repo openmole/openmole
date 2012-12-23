@@ -15,7 +15,7 @@
   <!-- *** Project Information ************************************* -->
   <!-- ************************************************************* -->
   <name>${project.artifactId} ${project.version}</name>
-  <description />
+  <description></description>
   <properties>
     <bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
   </properties>

@@ -38,8 +38,8 @@ import org.openmole.misc.exception.UserBadDataError
 
 package object evolution {
 
-  type Inputs = Iterable[(Prototype[Double], (Double, Double))]
-  type Objectives = Iterable[(Prototype[Double], Double)]
+  type Inputs = Iterable[(Prototype[Double], (String, String))]
+  type Objectives = Iterable[(Prototype[Double], String)]
 
   private def components(
     name: String,
@@ -140,8 +140,8 @@ package object evolution {
     def archive: Prototype[evolution.A]
     def genome: Prototype[evolution.G]
     def individual: Prototype[Individual[evolution.G, evolution.F]]
-    def inputs: Iterable[(Prototype[Double], (Double, Double))]
-    def objectives: Iterable[(Prototype[Double], Double)]
+    def inputs: Inputs
+    def objectives: Objectives
   }
 
   def generationalGA(evolutionBuilder: Int ⇒ OMGA)(
