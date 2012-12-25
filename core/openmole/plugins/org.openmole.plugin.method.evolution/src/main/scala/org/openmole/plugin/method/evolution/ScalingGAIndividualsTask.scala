@@ -64,7 +64,12 @@ sealed abstract class ScalingGAIndividualsTask[G <: GAGenome, F <: MGFitness, MF
 
   override def process(context: Context) = {
     val individualsValue = context(individuals)
-    individualsValue.flatMap(i ⇒ ScalingGAGenomeTask.scaled(modelInputs.toList, i.genome.values.toList, context)).toList ++
+    val genomeValues =
+      individualsValue.toArray.map {
+        i ⇒ ScalingGAGenomeTask.scaled(modelInputs.toList, i.genome.values.toList, context).map(_.value).toArray
+      }.transpose
+
+    (genomeValues zip modelInputs.map(_._1)).map { case (g, p) ⇒ Variable(p.toArray, g) }.toList ++
       objectives.zipWithIndex.map {
         case (p, i) ⇒
           Variable(
