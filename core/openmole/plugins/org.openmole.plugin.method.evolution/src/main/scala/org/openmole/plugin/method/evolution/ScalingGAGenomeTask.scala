@@ -31,21 +31,14 @@ import org.openmole.core.implementation.tools.VariableExpansion
 
 object ScalingGAGenomeTask {
 
-  def min(p: Prototype[Double]) =
-    Prototype(p.name + "Min")(p.`type`)
-
-  def max(p: Prototype[Double]) =
-    Prototype(p.name + "Max")(p.`type`)
-
-  def expand(scale: List[(Prototype[Double], (String, String))], context: Context): List[(Prototype[Double], (Double, Double))] =
-    if (scale.isEmpty) List.empty
+  def scaled(scale: List[(Prototype[Double], (String, String))], genome: List[Double], context: Context): List[Variable[Double]] =
+    if (scale.isEmpty || genome.isEmpty) List.empty
     else {
       val (p, (vMin, vMax)) = scale.head
-      val dVMin = VariableExpansion(context, vMin).toDouble
-      val varMin = Variable(min(p), dVMin)
-      val dVMax = VariableExpansion(context + varMin, vMax).toDouble
-      val varMax = Variable(max(p), dVMax)
-      (p, dVMin -> dVMax) :: expand(scale.tail, context + varMin + varMax)
+      val dMin = VariableExpansion(context, vMin).toDouble
+      val dMax = VariableExpansion(context, vMax).toDouble
+      val scaledV = Variable(p, genome.head.scale(dMin, dMax))
+      scaledV :: scaled(scale.tail, genome.tail, context + scaledV)
     }
 
   def apply[T <: GAGenome](
@@ -71,12 +64,7 @@ sealed abstract class ScalingGAGenomeTask[T <: GAGenome](
     genome: Prototype[T],
     scale: (Prototype[Double], (String, String))*)(implicit val plugins: PluginSet) extends Task {
 
-  override def process(context: Context) = {
-    context ++
-      (ScalingGAGenomeTask.expand(scale.toList, context) zip context(genome).values).map {
-        case (s, g) ⇒
-          val (p, (min, max)) = s
-          Variable(p, g.scale(min, max))
-      }
-  }
+  override def process(context: Context) =
+    context ++ ScalingGAGenomeTask.scaled(scale.toList, context(genome).values.toList, context)
+
 }
