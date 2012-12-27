@@ -51,6 +51,6 @@ class MultipleException(exceptions: Iterable[Throwable]) extends Exception with 
 
   def iterator: Iterator[Throwable] = exceptions.iterator
 
-  override def toString() = exceptions.map(e => e.getMessage + ": " + e.getStackTrace.mkString("\n")).mkString("----------------------------------------\n")
+  override def toString() = exceptions.map(e ⇒ e.getMessage + ": " + e.getStackTrace.mkString("\n")).mkString("----------------------------------------\n")
 
 }
