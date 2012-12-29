@@ -121,8 +121,10 @@ class SubMoleExecution(
 
     secureHookExecution(moleExecution.profiler, job)
 
-    rmJob(job)
-    checkFinished(ticket)
+    atomic { implicit txn ⇒
+      rmJob(job)
+      checkFinished(ticket)
+    }
 
     moleExecution.jobFailedOrCanceled(job, capsule)
   }
@@ -144,8 +146,10 @@ class SubMoleExecution(
         EventDispatcher.trigger(moleExecution, new IMoleExecution.ExceptionRaised(job, t, SEVERE))
         throw t
     } finally {
-      rmJob(job)
-      checkFinished(ticket)
+      atomic { implicit txn ⇒
+        rmJob(job)
+        checkFinished(ticket)
+      }
       moleExecution.jobOutputTransitionsPerformed(job, capsule)
     }
   }

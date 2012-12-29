@@ -96,8 +96,8 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
       override def process(context: Context) = {
         context.contains(i.toArray) should equal(true)
 
-        context.value(i.toArray).get.getClass should equal(classOf[Array[Int]])
-        context.value(i.toArray).get.sorted.deep should equal(data.sorted.toArray.deep)
+        context(i.toArray).getClass should equal(classOf[Array[Int]])
+        context(i.toArray).sorted.deep should equal(data.sorted.toArray.deep)
         endCapsExecuted += 1
         context
       }
@@ -132,7 +132,7 @@ class AggregationTransitionSpec extends FlatSpec with ShouldMatchers {
       override val inputs = DataSet(i.toArray)
       override def process(context: Context) = {
         context.contains(i.toArray) should equal(true)
-        context.value(i.toArray).get.sorted.deep should equal(data.toArray.deep)
+        context(i.toArray).sorted.deep should equal(data.toArray.deep)
         endCapsExecuted += 1
         context
       }
