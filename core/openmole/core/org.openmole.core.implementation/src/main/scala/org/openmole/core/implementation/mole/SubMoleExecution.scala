@@ -121,10 +121,12 @@ class SubMoleExecution(
 
     secureHookExecution(moleExecution.profiler, job)
 
-    atomic { implicit txn ⇒
-      rmJob(job)
-      checkFinished(ticket)
-    }
+    val finished =
+      atomic { implicit txn ⇒
+        rmJob(job)
+        isFinished
+      }
+    if (finished) finish(ticket)
 
     moleExecution.jobFailedOrCanceled(job, capsule)
   }
@@ -146,19 +148,22 @@ class SubMoleExecution(
         EventDispatcher.trigger(moleExecution, new IMoleExecution.ExceptionRaised(job, t, SEVERE))
         throw t
     } finally {
-      atomic { implicit txn ⇒
-        rmJob(job)
-        checkFinished(ticket)
-      }
+      val finished =
+        atomic { implicit txn ⇒
+          rmJob(job)
+          isFinished
+        }
+      if (finished) finish(ticket)
       moleExecution.jobOutputTransitionsPerformed(job, capsule)
     }
   }
 
-  private def checkFinished(ticket: ITicket) =
-    if (_nbJobs.single() == 0) {
-      EventDispatcher.trigger(this, new ISubMoleExecution.Finished(ticket))
-      parentApply(_.-=(this))
-    }
+  private def isFinished = _nbJobs.single() == 0
+
+  private def finish(ticket: ITicket) = {
+    EventDispatcher.trigger(this, new ISubMoleExecution.Finished(ticket))
+    parentApply(_.-=(this))
+  }
 
   override def submit(capsule: ICapsule, context: Context, ticket: ITicket) = {
     if (!canceled) {
