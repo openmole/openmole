@@ -33,7 +33,7 @@ import org.openmole.misc.tools.service.LockUtil._
 
 class AggregationTransition(start: ICapsule, end: Slot, condition: ICondition = True, filter: Filter[String] = Filter.empty, trigger: ICondition = ICondition.False) extends Transition(start, end, condition, filter) with IAggregationTransition {
 
-  override def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = subMole.transitionLock {
+  override def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = {
     val mole = subMole.moleExecution.mole
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration."))
 
@@ -62,11 +62,8 @@ class AggregationTransition(start: ICapsule, end: Slot, condition: ICondition = 
     if (!subMole.canceled && !hasBeenPerformed(subMole, parentTicket)) {
       val result = subMole.aggregationTransitionRegistry.remove(this, parentTicket).getOrElse(throw new InternalProcessingError("No context registred for the aggregation transition"))
       val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
-      Some((result, parentTicket, subMoleParent))
-    } else None
-  } match {
-    case Some((result, ticket, subMole)) ⇒ submitNextJobsIfReady(result, ticket, subMole)
-    case None ⇒
+      submitNextJobsIfReady(result, parentTicket, subMoleParent)
+    }
   }
 
   override def hasBeenPerformed(subMole: ISubMoleExecution, ticket: ITicket) = !subMole.aggregationTransitionRegistry.isRegistred(this, ticket)

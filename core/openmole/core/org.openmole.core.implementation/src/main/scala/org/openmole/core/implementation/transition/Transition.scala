@@ -28,6 +28,7 @@ import org.openmole.core.model.transition._
 import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.ListBuffer
+import org.openmole.misc.tools.service.LockUtil._
 
 object Transition extends Logger
 
@@ -45,35 +46,31 @@ class Transition(
     mole.inputTransitions(end).forall(registry.isRegistred(_, ticket))
   }
 
-  protected def submitNextJobsIfReady(context: Buffer[Variable[_]], ticket: ITicket, subMole: ISubMoleExecution) =
-    subMole.transitionRegistry.synchronized {
-      val moleExecution = subMole.moleExecution
-      val registry = subMole.transitionRegistry
-      val mole = subMole.moleExecution.mole
+  protected def submitNextJobsIfReady(context: Buffer[Variable[_]], ticket: ITicket, subMole: ISubMoleExecution) = {
+    val moleExecution = subMole.moleExecution
+    val registry = subMole.transitionRegistry
+    val mole = subMole.moleExecution.mole
 
-      registry.register(this, ticket, context)
-      if (nextTaskReady(ticket, subMole)) {
+    registry.register(this, ticket, context)
+    if (nextTaskReady(ticket, subMole)) {
 
-        val combinaison =
-          mole.inputDataChannels(end).toList.flatMap { _.consums(ticket, moleExecution) } ++
-            mole.inputTransitions(end).toList.flatMap(registry.remove(_, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable)
+      val combinaison =
+        mole.inputDataChannels(end).toList.flatMap { _.consums(ticket, moleExecution) } ++
+          mole.inputTransitions(end).toList.flatMap(registry.remove(_, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable)
 
-        val newTicket =
-          if (mole.slots(end.capsule).size <= 1) ticket
-          else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
+      val newTicket =
+        if (mole.slots(end.capsule).size <= 1) ticket
+        else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
 
-        val toAggregate = combinaison.groupBy(_.prototype.name)
+      val toAggregate = combinaison.groupBy(_.prototype.name)
 
-        val toArrayManifests =
-          Map.empty[String, Manifest[_]] ++ computeManifests(mole)(end).filter(_.toArray).map(ct ⇒ ct.name -> ct.manifest)
+      val toArrayManifests =
+        Map.empty[String, Manifest[_]] ++ computeManifests(mole)(end).filter(_.toArray).map(ct ⇒ ct.name -> ct.manifest)
 
-        val newContext = aggregate(end.capsule.inputs(mole), toArrayManifests, combinaison)
-        Some((end.capsule, newContext, newTicket))
-      } else None
-    } match {
-      case Some((capsule, context, ticket)) ⇒ subMole.submit(capsule, context, ticket)
-      case None ⇒
+      val newContext = aggregate(end.capsule.inputs(mole), toArrayManifests, combinaison)
+      subMole.submit(end.capsule, newContext, newTicket)
     }
+  }
 
   override def perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) =
     try {

@@ -33,7 +33,7 @@ import org.junit.runner.RunWith
 import scala.collection.mutable.ListBuffer
 
 @RunWith(classOf[JUnitRunner])
-class IDataChannelSpec extends FlatSpec with ShouldMatchers {
+class DataChannelSpec extends FlatSpec with ShouldMatchers {
 
   implicit val plugins = PluginSet.empty
 
@@ -53,7 +53,7 @@ class IDataChannelSpec extends FlatSpec with ShouldMatchers {
       val name = "Test read"
       override val inputs = DataSet(p)
       override def process(context: Context) = {
-        context.value(p).get should equal("Test")
+        context(p) should equal("Test")
         context
       }
     }
@@ -91,7 +91,7 @@ class IDataChannelSpec extends FlatSpec with ShouldMatchers {
       override def process(context: Context) = synchronized {
         context.contains(i) should equal(true)
         context.contains(j) should equal(true)
-        res += context.value(i).get
+        res += context(i)
         context
       }
     }
@@ -126,7 +126,7 @@ class IDataChannelSpec extends FlatSpec with ShouldMatchers {
       val name = "Test read"
       override val inputs = DataSet(j.toArray)
       override def process(context: Context) = {
-        context.value(j.toArray).get.size should equal(data.size)
+        context(j.toArray).size should equal(data.size)
         executed = true
         context
       }
