@@ -17,20 +17,23 @@
 package org.openmole.ide.plugin.sampling.combine
 
 import org.openmole.ide.core.model.data.{ IDomainDataUI, IFactorDataUI, ISamplingDataUI }
-import org.openmole.core.model.sampling.Sampling
-import org.openmole.plugin.sampling.combine.ZipWithIndexSampling
+import org.openmole.core.model.sampling.{ Factor, DiscreteFactor, Sampling }
+import org.openmole.plugin.sampling.combine.{ ZipSampling, ZipWithIndexSampling }
 import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.misc.widget.{ URL, Helper }
+import org.openmole.core.model.domain.{ Discrete, Domain }
 
 class ZipWithIndexSamplingDataUI(val prototype: Option[IPrototypeDataProxyUI] = None)
     extends ISamplingDataUI with ZipWithPrototypeSamplingDataUI {
 
-  def coreObject(factors: List[IFactorDataUI], samplings: List[Sampling]) =
-    new ZipWithIndexSampling((CombineSamplingCoreFactory(factors) ::: samplings).headOption.getOrElse(throw new UserBadDataError("A sampling is required to build a Zip with index Sampling")),
+  def coreObject(factors: List[Factor[_, _]], samplings: List[Sampling]) =
+    new ZipWithIndexSampling((factors.map {
+      f ⇒ DiscreteFactor(f.asInstanceOf[Factor[Any, Domain[Any] with Discrete[Any]]])
+    } ::: samplings).headOption.getOrElse(throw new UserBadDataError("A sampling is required to build a Zip with index Sampling")),
       prototype.getOrElse(throw new UserBadDataError("A string prototype is required to build a Zip with name Sampling")).dataUI.coreObject.asInstanceOf[Prototype[Int]])
 
   def buildPanelUI = new ZipWithPrototypeSamplingPanelUI(this) {

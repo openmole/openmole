@@ -24,4 +24,4 @@ import org.openmole.ide.core.model.sampling.ISamplingComponent
 
 class SamplingComponent(samplingScene: ISamplingCompositionPanelUI,
                         val component: ISamplingCompositionWidget,
-                        location: Point) extends SceneComponent(samplingScene, component, location) with ISamplingComponent
+                        val location: Point) extends SceneComponent(samplingScene, component, location) with ISamplingComponent

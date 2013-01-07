@@ -18,10 +18,11 @@
 package org.openmole.ide.core.model.data
 
 import org.openmole.ide.core.model.commons.Constants._
-import org.openmole.core.model.sampling.Sampling
+import org.openmole.core.model.sampling.{ Factor, Sampling }
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.misc.tools.Counter
+import org.openmole.core.model.domain.{ Discrete, Domain }
 
 object ISamplingDataUI {
   implicit val ordering = Ordering.by((_: ISamplingDataUI).name)
@@ -29,7 +30,7 @@ object ISamplingDataUI {
 
 trait ISamplingDataUI extends IDataUI {
 
-  def coreObject(factors: List[IFactorDataUI],
+  def coreObject(factors: List[Factor[_, _]],
                  samplings: List[Sampling]): Sampling
 
   def buildPanelUI: ISamplingPanelUI

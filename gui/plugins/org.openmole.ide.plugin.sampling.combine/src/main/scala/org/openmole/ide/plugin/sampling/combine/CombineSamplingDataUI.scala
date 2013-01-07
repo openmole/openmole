@@ -24,13 +24,13 @@ import org.openmole.core.model.data.Prototype
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.widget.{ URL, Helper }
 import org.openmole.core.model.domain.{ Discrete, Domain }
-import org.openmole.ide.core.model.sampling.IFinite
+import org.openmole.ide.core.model.sampling.{ IFinite }
 
 class CombineSamplingDataUI extends ISamplingDataUI {
   val name = "Combine"
 
-  def coreObject(factors: List[IFactorDataUI], samplings: List[Sampling]) =
-    new CombineSampling((CombineSamplingCoreFactory(factors) ::: samplings): _*)
+  def coreObject(factors: List[Factor[_, _]], samplings: List[Sampling]) =
+    new CombineSampling((factors.map { f ⇒ DiscreteFactor(f.asInstanceOf[Factor[Any, Domain[Any] with Discrete[Any]]]) } ::: samplings): _*)
 
   def buildPanelUI = new GenericCombineSamplingPanelUI(this) {
     override val help = new Helper(List(new URL(i18n.getString("combinePermalinkText"),

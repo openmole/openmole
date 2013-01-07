@@ -25,7 +25,7 @@ class LHSSamplingDataUI(val samples: String = "1") extends ISamplingDataUI {
 
   def name = "LHS"
 
-  def coreObject(factors: List[IFactorDataUI],
+  def coreObject(factors: List[Factor[_, _]],
                  samplings: List[Sampling]) =
     new LHS(
       try samples
@@ -34,12 +34,8 @@ class LHSSamplingDataUI(val samples: String = "1") extends ISamplingDataUI {
       },
       factors.map {
         f ⇒
-          f.prototype match {
-            case Some(p: IPrototypeDataProxyUI) ⇒
-              Factor(p.dataUI.coreObject.asInstanceOf[Prototype[Double]],
-                f.domain.dataUI.coreObject.asInstanceOf[Bounded[Double]])
-            case _ ⇒ throw new UserBadDataError("No Prototype is define for the domain " + f.domain.dataUI.preview)
-          }
+          Factor(f.prototype.asInstanceOf[Prototype[Double]],
+            f.domain.asInstanceOf[Bounded[Double]])
       }.toSeq: _*)
 
   def coreClass = classOf[LHS]

@@ -17,7 +17,7 @@
 package org.openmole.ide.plugin.sampling.combine
 
 import org.openmole.ide.core.model.data.{ IDomainDataUI, IFactorDataUI, ISamplingDataUI }
-import org.openmole.core.model.sampling.{ Factor, Sampling }
+import org.openmole.core.model.sampling.{ DiscreteFactor, Factor, Sampling }
 import org.openmole.plugin.sampling.combine.ZipWithNameSampling
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
@@ -32,9 +32,10 @@ import java.util.{ ResourceBundle, Locale }
 
 class ZipWithNameSamplingDataUI(val prototype: Option[IPrototypeDataProxyUI] = None) extends ISamplingDataUI with ZipWithPrototypeSamplingDataUI {
 
-  def coreObject(factors: List[IFactorDataUI], samplings: List[Sampling]) =
-    new ZipWithNameSampling(factors.headOption.getOrElse(throw new UserBadDataError("A factor is required to build a Zip with name Sampling"))
-      .coreObject.asInstanceOf[Factor[File, Domain[File] with Discrete[File]]],
+  def coreObject(factors: List[Factor[_, _]], samplings: List[Sampling]) =
+    new ZipWithNameSampling(factors.map {
+      f ⇒ DiscreteFactor(f.asInstanceOf[Factor[File, Domain[File] with Discrete[File]]])
+    }.headOption.getOrElse(throw new UserBadDataError("A factor is required to build a Zip with name Sampling")),
       prototype.getOrElse(throw new UserBadDataError("A string prototype is required to build a Zip with name Sampling")).dataUI.coreObject.asInstanceOf[Prototype[String]])
 
   def buildPanelUI = new ZipWithPrototypeSamplingPanelUI(this) {

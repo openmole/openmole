@@ -17,18 +17,21 @@
 package org.openmole.ide.plugin.sampling.combine
 
 import org.openmole.ide.core.model.data.{ IDomainDataUI, IFactorDataUI, ISamplingDataUI }
-import org.openmole.core.model.sampling.Sampling
+import org.openmole.core.model.sampling.{ Factor, DiscreteFactor, Sampling }
 import org.openmole.plugin.sampling.combine.ZipSampling
 import org.openmole.ide.misc.widget.{ URL, Helper }
 import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.core.model.domain.{ Discrete, Domain }
 
 class ZipSamplingDataUI extends ISamplingDataUI {
   def name = "Zip"
 
-  def coreObject(factors: List[IFactorDataUI],
-                 samplings: List[Sampling]) =
-    new ZipSampling((CombineSamplingCoreFactory(factors) ::: samplings): _*)
+  def coreObject(factors: List[Factor[_, _]], samplings: List[Sampling]) =
+    new ZipSampling((factors.map {
+      f ⇒
+        DiscreteFactor(f.asInstanceOf[Factor[Any, Domain[Any] with Discrete[Any]]])
+    } ::: samplings): _*)
 
   def buildPanelUI = new GenericCombineSamplingPanelUI(this) {
     override val help = new Helper(List(new URL(i18n.getString("zipPermalinkText"),

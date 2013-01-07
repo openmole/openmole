@@ -21,9 +21,10 @@ import org.openmole.ide.core.model.sampling.{ IFinite, ISamplingProxyUI }
 class CompleteSamplingDataUI extends ISamplingDataUI {
   val name = "Complete"
 
-  def coreObject(factors: List[IFactorDataUI],
-                 samplings: List[Sampling]) =
-    new CompleteSampling((CombineSamplingCoreFactory(factors) ::: samplings): _*)
+  def coreObject(factors: List[Factor[_, _]], samplings: List[Sampling]) =
+    new CompleteSampling((factors.map {
+      f ⇒ DiscreteFactor(f.asInstanceOf[Factor[Any, Domain[Any] with Discrete[Any]]])
+    } ::: samplings): _*)
 
   def coreClass = classOf[CompleteSampling]
 
