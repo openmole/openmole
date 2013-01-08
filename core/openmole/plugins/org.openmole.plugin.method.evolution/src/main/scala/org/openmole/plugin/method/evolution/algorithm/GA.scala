@@ -112,7 +112,28 @@ object GA {
       }
   }
 
-  def map(_plotter: GAPlotter, _aggregation: GAAggregation, neighbors: Int = 8) = {
+  def profile(_plotter: GAProfilePlotter, _aggregation: GAAggregation) =
+    new GAAlgorithmBuilder {
+      def apply(_diversityMetric: GADiversityMetric, _ranking: GARanking) =
+        new ProfileArchive with GAAlgorithm with ProfileModifier with ProfileElitism {
+          override type DIVERSIFIED = MGFitness
+          override type RANKED = MGFitness
+          val aManifest = manifest[A]
+          def plot(i: Individual[G, F]) = _plotter.plot(i)
+          def aggregate(fitness: F) = _aggregation.aggregate(fitness)
+          val diversityMetric = _diversityMetric
+          val ranking = _ranking
+        }
+    }
+
+  trait GAProfilePlotter extends ProfilePlotter with GA with MG
+
+  def profileGenomePlotter(_x: Int, _nX: Int = 1000) = new ProfileGenomePlotter with GAProfilePlotter {
+    val x = _x
+    val nX = _nX
+  }
+
+  def map(_plotter: GAMapPlotter, _aggregation: GAAggregation, neighbors: Int = 8) = {
     val (_neighbors) = (neighbors)
     new GAAlgorithmBuilder {
       def apply(_diversityMetric: GADiversityMetric, _ranking: GARanking) =
@@ -130,11 +151,11 @@ object GA {
   }
 
   trait GAAggregation extends Aggregation with MG
-  trait GAPlotter extends Plotter with GA with MG
+  trait GAMapPlotter extends MapPlotter with GA with MG
 
   def max = new MaxAggregation with GAAggregation {}
 
-  def genomePlotter(_x: Int, _y: Int, _nX: Int = 100, _nY: Int = 100) = new GenomePlotter with GAPlotter {
+  def mapGenomePlotter(_x: Int, _y: Int, _nX: Int = 100, _nY: Int = 100) = new MapGenomePlotter with GAMapPlotter {
     val x = _x
     val y = _y
     val nX = _nX
