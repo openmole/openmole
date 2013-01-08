@@ -27,7 +27,7 @@ class SaltelliSamplingDataUI(val samples: String = "1") extends ISamplingDataUI 
 
   def name = "Saltelli"
 
-  def coreObject(factors: List[IFactorDataUI],
+  def coreObject(factors: List[Factor[_, _]],
                  samplings: List[Sampling]) =
     new SaltelliSampling(
       try samples
@@ -36,12 +36,8 @@ class SaltelliSamplingDataUI(val samples: String = "1") extends ISamplingDataUI 
       },
       factors.map {
         f ⇒
-          f.prototype match {
-            case Some(p: IPrototypeDataProxyUI) ⇒
-              Factor(p.dataUI.coreObject.asInstanceOf[Prototype[Double]],
-                f.domain.dataUI.coreObject.asInstanceOf[Domain[Double] with Bounds[Double]])
-            case _ ⇒ throw new UserBadDataError("No Prototype is define for the domain " + f.domain.dataUI.preview)
-          }
+          Factor(f.prototype.asInstanceOf[Prototype[Double]],
+            f.domain.asInstanceOf[Domain[Double] with Bounds[Double]])
       }.toSeq: _*)
 
   def coreClass = classOf[SaltelliSampling]

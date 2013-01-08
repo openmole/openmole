@@ -20,7 +20,7 @@ package org.openmole.ide.core.implementation.sampling
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.core.implementation.data._
-import java.awt._
+import java.awt.{ Point, Color, Rectangle }
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.action.ConnectorState
 import org.netbeans.api.visual.action.ConnectorState._
@@ -37,7 +37,6 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import collection.mutable
-import org.openmole.ide.core.model.workflow.IConnectorViewUI
 import org.openmole.ide.core.implementation.workflow.MoleRouter
 
 object SamplingCompositionPanelUI {

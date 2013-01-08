@@ -28,6 +28,7 @@ import org.openmole.core.model.domain.{ Discrete, Domain }
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import collection.mutable.HashMap
 import scala.Some
+import org.openmole.core.model.data.Prototype
 
 class SamplingCompositionDataUI(val name: String = "",
                                 val domains: List[(IDomainProxyUI, Point)] = List.empty,
@@ -40,6 +41,20 @@ class SamplingCompositionDataUI(val name: String = "",
   type T = Domain[Any] with Discrete[Any]
 
   val builtSampling = new HashMap[ISamplingCompositionProxyUI, Sampling]
+
+  val sortedSamplingProxys =
+    samplings.sortWith {
+      case ((sp1, p1), (sp2, p2)) ⇒ {
+        p1.y < p2.y
+      }
+    }
+
+  val sortedDomainProxys =
+    domains.sortWith {
+      case ((dp1, p1), (dp2, p2)) ⇒ {
+        p1.y < p2.y
+      }
+    }
 
   def coreClass = classOf[Sampling]
 
@@ -54,7 +69,7 @@ class SamplingCompositionDataUI(val name: String = "",
         }
       }
 
-    val samplingMap: Map[String, ISamplingProxyUI] = samplings.map {
+    val samplingMap: Map[String, ISamplingProxyUI] = sortedSamplingProxys.map {
       s ⇒ s._1.id -> s._1
     }.toMap
 
@@ -74,7 +89,7 @@ class SamplingCompositionDataUI(val name: String = "",
           case d: IDomainProxyUI ⇒ false
         }
       }
-      val domainsForFactory = domains.filter {
+      val domainsForFactory = sortedDomainProxys.filter {
         d ⇒ partition._2.contains(d._1)
       }.map {
         _._1
@@ -86,7 +101,7 @@ class SamplingCompositionDataUI(val name: String = "",
         proxy match {
           case s: ISamplingProxyUI ⇒ s.dataUI.coreObject(factors.filter {
             f ⇒ domainsForFactory.contains(f.dataUI.domain)
-          }.map(_.dataUI),
+          }.map(d ⇒ toFactor(d.dataUI)),
             partition._1.filterNot {
               _.id == proxy.id
             }.map {
@@ -108,6 +123,15 @@ class SamplingCompositionDataUI(val name: String = "",
         }
       }
     }
+
+    def toFactor(f: IFactorDataUI) =
+      f.prototype match {
+        case Some(p: IPrototypeDataProxyUI) ⇒
+          Factor(p.dataUI.coreObject.asInstanceOf[Prototype[Any]],
+            f.domain.dataUI.coreObject.asInstanceOf[Domain[Any]])
+        case _ ⇒ throw new UserBadDataError("No Prototype is define for the domain " + f.domain.dataUI.preview)
+      }
+
     builtSampling(proxy)
 
   }

@@ -17,19 +17,22 @@
 package org.openmole.ide.plugin.sampling.combine
 
 import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI, ISamplingDataUI }
-import org.openmole.core.model.sampling.Sampling
+import org.openmole.core.model.sampling.{ Factor, DiscreteFactor, Sampling }
 import org.openmole.plugin.sampling.combine.TakeSampling
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.widget.{ URL, Helper }
 import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.core.model.domain.{ Discrete, Domain }
 
 class TakeSamplingDataUI(val size: String = "1") extends ISamplingDataUI {
 
   val name = "Take"
 
-  def coreObject(factors: List[IFactorDataUI], samplings: List[Sampling]) =
-    new TakeSampling((CombineSamplingCoreFactory(factors) ::: samplings).head, size.toInt)
+  def coreObject(factors: List[Factor[_, _]], samplings: List[Sampling]) =
+    new TakeSampling((factors.map {
+      f ⇒ DiscreteFactor(f.asInstanceOf[Factor[Any, Domain[Any] with Discrete[Any]]])
+    } ::: samplings).head, size.toInt)
 
   def buildPanelUI = new TakeSamplingPanelUI(this)
 
