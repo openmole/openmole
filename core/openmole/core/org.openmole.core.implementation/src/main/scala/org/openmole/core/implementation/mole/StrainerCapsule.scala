@@ -26,7 +26,6 @@ import org.openmole.core.model.task._
 import org.openmole.core.model.transition._
 
 object StrainerCapsule {
-
   def apply(task: ITask) = new StrainerCapsule(task)
 
   class StrainerTaskDecorator(val task: ITask) extends Task {
@@ -39,40 +38,11 @@ object StrainerCapsule {
     override def parameters = task.parameters
   }
 
-  def isStrainer(c: ICapsule) =
-    c match {
-      case _: StrainerCapsule ⇒ true
-      case _ ⇒ false
-    }
-
-  /*def hasNoStrainer(mole: IMole)(slot: Slot) =    
-    mole.inputTransitions(slot).forall(t => !isStrainer(t.start)) && 
-    mole.inputDataChannels(slot).forall(dc => !isStrainer(dc.start))*/
-
-  def reachNoStrainer(mole: IMole)(slot: Slot, seen: Set[Slot] = Set.empty): Boolean = {
-    if (slot.capsule == mole.root) true
-    else if (seen.contains(slot)) false
-    else {
-      val capsules = mole.inputTransitions(slot).map { _.start } ++ mole.inputDataChannels(slot).map { _.start }
-      val noStrainer =
-        for (c ← capsules; if (isStrainer(c)); s ← mole.slots(c)) yield reachNoStrainer(mole)(s, seen + slot)
-      noStrainer.foldLeft(true)(_ & _)
-    }
-  }
-
 }
 
 import StrainerCapsule._
 
-class StrainerCapsule(task: ITask) extends Capsule(new StrainerCapsule.StrainerTaskDecorator(task)) {
-
-  def received(mole: IMole) =
-    if (this == mole.root) Iterable.empty
-    else {
-      val slots = mole.slots(this)
-      val noStrainer = slots.filter(s ⇒ reachNoStrainer(mole)(s))
-      TypeUtil.intersect(noStrainer.map { TypeUtil.receivedTypes(mole) }).map(Data(_))
-    }
+class StrainerCapsule(task: ITask) extends Capsule(new StrainerCapsule.StrainerTaskDecorator(task)) with Strainer {
 
   override def inputs(mole: IMole) =
     received(mole).filterNot(d ⇒ super.inputs(mole).contains(d.prototype.name)) ++
