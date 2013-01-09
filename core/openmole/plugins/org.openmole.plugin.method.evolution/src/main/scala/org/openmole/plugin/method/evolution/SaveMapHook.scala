@@ -36,11 +36,11 @@ sealed class SaveMapHook(
 
   override def required = DataSet(archive)
 
-  def process(moleJob: IMoleJob) {
+  def process(context: Context) {
     val (xMin, xMax, nbX) = xScale
     val (yMin, yMax, nbY) = yScale
-    val a = moleJob.context(archive).asInstanceOf[MapArchive#A]
-    val file = new File(VariableExpansion(moleJob.context, path))
+    val a = context(archive).asInstanceOf[MapArchive#A]
+    val file = new File(VariableExpansion(context, path))
     file.createParentDir
     file.withWriter { w ⇒
       for {

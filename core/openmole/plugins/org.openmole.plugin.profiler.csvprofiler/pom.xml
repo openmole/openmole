@@ -6,7 +6,7 @@
     <groupId>org.openmole.core</groupId>
     <version>0.7.0-RC4-SNAPSHOT</version>
   </parent>
-  <artifactId>org.openmole.plugin.hook.csvprofiler</artifactId>
+  <artifactId>org.openmole.plugin.profiler.csvprofiler</artifactId>
   <!-- ************************************************************* -->
   <!-- *** Build Settings ****************************************** -->
   <!-- ************************************************************* -->

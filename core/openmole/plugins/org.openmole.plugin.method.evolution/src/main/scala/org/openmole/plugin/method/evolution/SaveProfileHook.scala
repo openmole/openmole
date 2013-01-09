@@ -17,9 +17,8 @@
 
 package org.openmole.plugin.method.evolution
 
-import org.openmole.core.model.data.{ DataSet, Prototype }
-import org.openmole.core.model.mole.Hook
-import org.openmole.core.model.job.IMoleJob
+import org.openmole.core.model.data._
+import org.openmole.core.model.mole._
 import org.openmole.core.implementation.data._
 import org.openmole.misc.tools.io.FileUtil._
 import fr.iscpif.mgo._
@@ -34,10 +33,10 @@ class SaveProfileHook(
 
   override def required = DataSet(archive)
 
-  def process(moleJob: IMoleJob) {
+  def process(context: Context) {
     val (xMin, xMax, nbX) = xScale
-    val a = moleJob.context(archive).asInstanceOf[ProfileArchive#A]
-    val file = new File(VariableExpansion(moleJob.context, path))
+    val a = context(archive).asInstanceOf[ProfileArchive#A]
+    val file = new File(VariableExpansion(context, path))
     file.createParentDir
     file.withWriter { w ⇒
       for {

@@ -18,13 +18,13 @@
 package org.openmole.plugin.hook.display
 
 import java.io.PrintStream
-import org.openmole.core.implementation.data._
+import org.openmole.core.model.data._
 import org.openmole.core.implementation.tools._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.job._
 
 class DisplayHook(toDisplay: String, out: PrintStream = System.out) extends Hook {
 
-  override def process(moleJob: IMoleJob) = out.println(VariableExpansion(moleJob.context, toDisplay))
+  override def process(context: Context) = out.println(VariableExpansion(context, toDisplay))
 
 }

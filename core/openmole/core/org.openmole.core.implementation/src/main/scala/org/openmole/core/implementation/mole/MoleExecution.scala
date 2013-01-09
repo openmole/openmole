@@ -132,6 +132,7 @@ class MoleExecution(
   def allWaiting = atomic { implicit txn ⇒ numberOfJobs <= nbWaiting() }
 
   def start(context: Context): this.type = {
+    EventDispatcher.trigger(this, new IMoleExecution.Starting)
     rootSubMoleExecution.newChild.submit(mole.root, context, nextTicket(rootTicket))
     if (allWaiting) submitAll
     this

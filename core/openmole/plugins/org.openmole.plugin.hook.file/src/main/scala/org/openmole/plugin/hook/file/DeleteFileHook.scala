@@ -27,12 +27,10 @@ import org.openmole.misc.exception._
 
 class DeleteFileHook(toDelete: Prototype[File]*) extends Hook {
 
-  override def process(moleJob: IMoleJob) = {
-    import moleJob.context
-
+  override def process(context: Context) = {
     toDelete.foreach {
       prototype ⇒
-        context.value(prototype) match {
+        context.option(prototype) match {
           case Some(file) ⇒ file.recursiveDelete
           case None ⇒ throw new UserBadDataError("No variable " + prototype + " found.")
         }

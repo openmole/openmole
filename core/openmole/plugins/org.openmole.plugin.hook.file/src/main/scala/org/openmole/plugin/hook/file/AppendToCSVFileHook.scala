@@ -34,8 +34,7 @@ class AppendToCSVFileHook(
     fileName: String,
     prototypes: Prototype[_]*) extends Hook {
 
-  override def process(moleJob: IMoleJob) = {
-    import moleJob.context
+  override def process(context: Context) = {
     val file = new File(VariableExpansion(context, fileName))
     file.createParentDir
 

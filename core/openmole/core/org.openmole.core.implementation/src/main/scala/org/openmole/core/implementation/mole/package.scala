@@ -38,10 +38,6 @@ package object mole {
       puzzle.copy(hooks = puzzle.hooks.toList ::: puzzle.lasts.flatMap(c ⇒ hooks.map(c -> _)).toList)
   }
 
-  implicit def hookToProfilerConverter(hook: Hook) = new Profiler {
-    override def process(job: IMoleJob) = hook.process(job)
-  }
-
   implicit def puzzleMoleExecutionDecoration(puzzle: Puzzle) = new PuzzleDecorator(puzzle)
   implicit def capsuleMoleExecutionDecoration(capsule: ICapsule) = new PuzzleDecorator(capsule.toPuzzle)
   implicit def slotPuzzleDecoration(slot: Slot) = new PuzzleDecorator(slot.toPuzzle)

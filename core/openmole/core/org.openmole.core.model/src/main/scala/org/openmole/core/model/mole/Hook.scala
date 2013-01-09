@@ -22,12 +22,12 @@ import org.openmole.core.model.data._
 
 object Hook {
   val empty = new Hook {
-    def process(job: IMoleJob) = {}
+    def process(job: Context) = {}
   }
 }
 
 trait Hook {
   def required: DataSet = DataSet.empty
 
-  def process(moleJob: IMoleJob)
+  def process(context: Context)
 }

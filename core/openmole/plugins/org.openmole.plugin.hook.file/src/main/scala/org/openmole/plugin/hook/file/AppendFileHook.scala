@@ -35,10 +35,8 @@ import org.openmole.misc.exception._
  */
 class AppendFileHook(prototype: Prototype[File], outputFile: String) extends Hook {
 
-  override def process(moleJob: IMoleJob) = {
-    import moleJob.context
-
-    context.value(prototype) match {
+  override def process(context: Context) = {
+    context.option(prototype) match {
       case Some(from) ⇒
 
         val to = new File(VariableExpansion(context, outputFile))
