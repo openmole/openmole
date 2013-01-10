@@ -50,7 +50,7 @@ class SamplingConnectorWidget(sourceWidget: Widget,
     new LinkLabel(sourceW.component.proxy.ordering.toString,
       new Action("") {
         def apply = orderingDialog.display
-      }, 2, bold = true))
+      }, 2, bold = true) { preferredSize = new Dimension(150, 30) })
 
   addChild(orderingWidget)
   setConstraint(orderingWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.8f)
@@ -121,7 +121,7 @@ class SamplingConnectorWidget(sourceWidget: Widget,
               def apply = {
                 dialog.display
               }
-            }, 2, bold = true), darkOnLight))
+            }, 2, bold = true), darkOnLight, 35))
         addChild(componentWidget.get)
         setConstraint(componentWidget.get, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
         componentWidget.get.setOpaque(true)
