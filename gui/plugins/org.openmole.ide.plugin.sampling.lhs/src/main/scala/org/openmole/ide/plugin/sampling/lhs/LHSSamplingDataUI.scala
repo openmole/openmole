@@ -25,14 +25,13 @@ class LHSSamplingDataUI(val samples: String = "1") extends ISamplingDataUI {
 
   def name = "LHS"
 
-  def coreObject(factors: List[Factor[_, _]],
-                 samplings: List[Sampling]) =
+  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) =
     new LHS(
       try samples
       catch {
         case e: NumberFormatException ⇒ throw new UserBadDataError("An integer is exepected as number of samples")
       },
-      factors.map {
+      SamplingUtils.toFactors(factorOrSampling).map {
         f ⇒
           Factor(f.prototype.asInstanceOf[Prototype[Double]],
             f.domain.asInstanceOf[Bounded[Double]])

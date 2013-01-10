@@ -42,7 +42,7 @@ class SamplingCompositionDataUI(val name: String = "",
 
   val builtSampling = new HashMap[ISamplingCompositionProxyUI, Sampling]
 
-  val sortedSamplingProxys =
+  /*val sortedSamplingProxys =
     samplings.sortWith {
       case ((sp1, p1), (sp2, p2)) ⇒ {
         p1.y < p2.y
@@ -54,7 +54,7 @@ class SamplingCompositionDataUI(val name: String = "",
       case ((dp1, p1), (dp2, p2)) ⇒ {
         p1.y < p2.y
       }
-    }
+    }    */
 
   def coreClass = classOf[Sampling]
 
@@ -69,8 +69,8 @@ class SamplingCompositionDataUI(val name: String = "",
         }
       }
 
-    val samplingMap: Map[String, ISamplingProxyUI] = sortedSamplingProxys.map {
-      s ⇒ s._1.id -> s._1
+    val samplingMap: Map[String, (ISamplingProxyUI, Int)] = samplings.map {
+      s ⇒ s._1.id -> (s._1, s._1.ordering)
     }.toMap
 
     finalSampling match {
@@ -81,7 +81,7 @@ class SamplingCompositionDataUI(val name: String = "",
 
   def buildSamplingCore(proxy: ISamplingCompositionProxyUI,
                         connectionMap: Map[ISamplingCompositionProxyUI, List[ISamplingCompositionProxyUI]],
-                        samplingMap: Map[String, ISamplingProxyUI]): Sampling = {
+                        samplingMap: Map[String, (ISamplingProxyUI, Int)]): Sampling = {
     if (!builtSampling.contains(proxy)) {
       val partition = connectionMap.getOrElse(proxy, List()).partition {
         _ match {
@@ -89,7 +89,8 @@ class SamplingCompositionDataUI(val name: String = "",
           case d: IDomainProxyUI ⇒ false
         }
       }
-      val domainsForFactory = sortedDomainProxys.filter {
+
+      val domainsForFactory = domains.filter {
         d ⇒ partition._2.contains(d._1)
       }.map {
         _._1
@@ -101,12 +102,12 @@ class SamplingCompositionDataUI(val name: String = "",
         proxy match {
           case s: ISamplingProxyUI ⇒ s.dataUI.coreObject(factors.filter {
             f ⇒ domainsForFactory.contains(f.dataUI.domain)
-          }.map(d ⇒ toFactor(d.dataUI)),
+          }.map(d ⇒ Left(toFactor(d.dataUI), d.dataUI.domain.ordering)) :::
             partition._1.filterNot {
               _.id == proxy.id
             }.map {
               p1 ⇒
-                buildSamplingCore(samplingMap(p1.id), connectionMap, samplingMap)
+                Right(buildSamplingCore(samplingMap(p1.id)._1, connectionMap, samplingMap), samplingMap(p1.id)._2)
             })
           case d: IDomainProxyUI ⇒
             factors.filter {

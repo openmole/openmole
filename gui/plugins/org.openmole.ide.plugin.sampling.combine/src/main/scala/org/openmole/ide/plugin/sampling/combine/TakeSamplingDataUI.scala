@@ -24,15 +24,14 @@ import org.openmole.ide.misc.widget.{ URL, Helper }
 import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.core.model.domain.{ Discrete, Domain }
+import org.openmole.ide.core.implementation.sampling.SamplingUtils
 
 class TakeSamplingDataUI(val size: String = "1") extends ISamplingDataUI {
 
   val name = "Take"
 
-  def coreObject(factors: List[Factor[_, _]], samplings: List[Sampling]) =
-    new TakeSampling((factors.map {
-      f ⇒ DiscreteFactor(f.asInstanceOf[Factor[Any, Domain[Any] with Discrete[Any]]])
-    } ::: samplings).head, size.toInt)
+  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) =
+    new TakeSampling(SamplingUtils.toUnorderedFactorsAndSamplings(factorOrSampling).head, size.toInt)
 
   def buildPanelUI = new TakeSamplingPanelUI(this)
 

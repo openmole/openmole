@@ -38,7 +38,7 @@ class PrototypeOnConnectorWidget(scene: Scene,
                                  val link: LinkLabel,
                                  val colorPattern: (Color, Color) = PrototypeOnConnectorWidget.lightOnDark) extends ComponentWidget(scene, link.peer) {
   link.foreground = colorPattern._2
-  val dim = 30
+  val dim = 35
   val pos = link.size.width / 2 + 1
   setPreferredBounds(new Rectangle(dim, dim))
 
@@ -47,7 +47,7 @@ class PrototypeOnConnectorWidget(scene: Scene,
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
       RenderingHints.VALUE_ANTIALIAS_ON)
     g.setColor(colorPattern._1)
-    g.fillOval(pos, pos, dim, dim)
+    g.fillOval(pos, pos, (1.5 * dim).toInt, dim)
     link.text = connectorUI.preview
     revalidate
   }

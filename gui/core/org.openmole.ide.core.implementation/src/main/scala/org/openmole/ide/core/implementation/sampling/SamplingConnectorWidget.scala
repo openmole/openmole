@@ -16,17 +16,15 @@
  */
 package org.openmole.ide.core.implementation.sampling
 
-import org.openmole.ide.core.model.sampling.{ IFactorProxyUI, ISamplingWidget, IDomainProxyUI, ISamplingCompositionWidget }
-import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
+import org.openmole.ide.core.model.sampling._
 import swing.{ Action, Label }
-import java.awt.{ Cursor, Dimension, Color }
-import swing.event.MousePressed
 import org.openmole.ide.core.implementation.workflow.PrototypeOnConnectorWidget
 import org.openmole.ide.core.implementation.workflow.PrototypeOnConnectorWidget._
 import org.openmole.ide.misc.widget.LinkLabel
+import org.openmole.ide.core.model.sampling.IOrdering
 import org.openmole.ide.core.model.data.{ IDomainDataUI, IFactorDataUI }
 import org.openmole.ide.core.implementation.dataproxy.Proxys._
-import org.openmole.ide.core.implementation.dialog.ConnectorPrototypeFilterDialog.FactorPrototypeDialog
+import org.openmole.ide.core.implementation.dialog.ConnectorPrototypeFilterDialog.{ OrderingDialog, FactorPrototypeDialog }
 import org.openmole.ide.core.model.workflow.IConnectorViewUI
 import org.netbeans.api.visual.widget.ConnectionWidget
 import org.netbeans.api.visual.anchor.Anchor
@@ -35,9 +33,8 @@ import org.netbeans.api.visual.action.ConnectProvider
 import org.netbeans.api.visual.layout.LayoutFactory
 import org.netbeans.api.visual.widget._
 import java.awt._
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.misc.tools.Counter
+import scala.Some
 
 class SamplingConnectorWidget(sourceWidget: Widget,
                               targetWidget: Widget,
@@ -47,9 +44,24 @@ class SamplingConnectorWidget(sourceWidget: Widget,
   val sourceW = sourceWidget.asInstanceOf[SamplingComponent]
   val targetW = targetWidget.asInstanceOf[SceneComponent]
   var componentWidget: Option[PrototypeOnConnectorWidget] = None
+  val orderingDialog = new OrderingDialog(sourceW.component.proxy, this)
+  val orderingWidget = new OrderingOnConnectorWidget(scene,
+    sourceW.component.proxy,
+    new LinkLabel(sourceW.component.proxy.ordering.toString,
+      new Action("") {
+        def apply = orderingDialog.display
+      }, 2, bold = true))
+
+  addChild(orderingWidget)
+  setConstraint(orderingWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.8f)
+  orderingWidget.setOpaque(true)
+  updateOrderingWidget
+
   lazy val factorProxyUI = scene.factorWidgets.find {
     case (factor, connector) ⇒ connector == this
-  }.map { _._1 }.headOption match {
+  }.map {
+    _._1
+  }.headOption match {
     case Some(f: IFactorProxyUI) ⇒ Some(f)
     case _ ⇒ None
   }
@@ -60,15 +72,12 @@ class SamplingConnectorWidget(sourceWidget: Widget,
   setTargetAnchor(targetAnchor(targetWidget))
   setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
 
-  // buildPrototypeFilterWidget
-
   def update = {
     componentWidget match {
       case Some(x: PrototypeOnConnectorWidget) ⇒ x.connectorUI = preview
       case _ ⇒
     }
-    repaint
-    revalidate
+    updateOrderingWidget
   }
 
   def preview = new IConnectorViewUI {
@@ -83,11 +92,29 @@ class SamplingConnectorWidget(sourceWidget: Widget,
       }
   }
 
-  def buildPrototypeFilterWidget = {
+  def updateOrderingWidget = {
+    targetW match {
+      case sc: SamplingComponent ⇒ sc.component.proxy match {
+        case s: SamplingProxyUI ⇒
+          s.dataUI match {
+            case o: IOrdering ⇒
+              orderingWidget.setVisible(true)
+            case _ ⇒ orderingWidget.setVisible(false)
+          }
+        case _ ⇒ orderingWidget.setVisible(false)
+
+      }
+      case _ ⇒ orderingWidget.setVisible(false)
+    }
+    repaint
+    revalidate
+  }
+
+  def buildPrototypeFilterWidget =
     factorProxyUI match {
       case Some(factor: IFactorProxyUI) ⇒
         val dialog = new FactorPrototypeDialog(samplingConnectorWidget)
-        componentWidget = Some(new PrototypeOnConnectorWidget(scene.scene,
+        componentWidget = Some(new PrototypeOnConnectorWidget(scene,
           preview,
           new LinkLabel(factor.dataUI.prototype.toString,
             new Action("") {
@@ -95,14 +122,12 @@ class SamplingConnectorWidget(sourceWidget: Widget,
                 dialog.display
               }
             }, 2, bold = true), darkOnLight))
-        removeChildren
         addChild(componentWidget.get)
         setConstraint(componentWidget.get, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
         componentWidget.get.setOpaque(true)
         dialog.availablePrototypes
       case _ ⇒
     }
-  }
 
   def sourceAnchor(w: Widget) = new Anchor(w) {
     override def compute(entry: Anchor.Entry) =

@@ -20,4 +20,5 @@ import org.openmole.ide.core.model.sampling.ISamplingProxyUI
 import org.openmole.ide.core.model.data.ISamplingDataUI
 
 class SamplingProxyUI(var dataUI: ISamplingDataUI,
-                      var isFinal: Boolean = false) extends ISamplingProxyUI
+                      var isFinal: Boolean = false,
+                      var ordering: Int = 0) extends ISamplingProxyUI

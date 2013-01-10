@@ -17,14 +17,13 @@ import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.widget.{ URL, Helper }
 import org.openmole.ide.core.model.sampling.{ IFinite, ISamplingProxyUI }
+import org.openmole.ide.core.implementation.sampling.SamplingUtils
 
 class CompleteSamplingDataUI extends ISamplingDataUI {
   val name = "Complete"
 
-  def coreObject(factors: List[Factor[_, _]], samplings: List[Sampling]) =
-    new CompleteSampling((factors.map {
-      f ⇒ DiscreteFactor(f.asInstanceOf[Factor[Any, Domain[Any] with Discrete[Any]]])
-    } ::: samplings): _*)
+  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) =
+    new CompleteSampling(SamplingUtils.toUnorderedFactorsAndSamplings(factorOrSampling): _*)
 
   def coreClass = classOf[CompleteSampling]
 

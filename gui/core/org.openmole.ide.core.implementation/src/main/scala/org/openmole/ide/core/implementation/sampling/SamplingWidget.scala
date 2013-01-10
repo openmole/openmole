@@ -63,6 +63,7 @@ class SamplingWidget(val proxy: ISamplingProxyUI,
 
   def update = {
     link.link(proxy.dataUI.preview)
+    scenePanelUI.updateConnections
     revalidate
     repaint
   }
