@@ -20,6 +20,8 @@ package org.openmole.core.implementation
 import scala.ref.WeakReference
 
 import scala.concurrent.stm._
+import org.openmole.core.model.data.Context
+import groovy.lang.Binding
 
 package object tools {
 
@@ -33,5 +35,15 @@ package object tools {
   implicit def longRefDecorator(r: Ref[Long]) = new {
     def next: Long = r.getUpdate(_ + 1)
   }
+
+  implicit class ContextDecorator(variables: Context) {
+    def toBinding = {
+      val binding = new Binding
+      variables.values.foreach { v ⇒ binding.setVariable(v.prototype.name, v.value) }
+      binding
+    }
+  }
+
+  implicit def ContextToBindingConverter(c: Context) = c.toBinding
 
 }

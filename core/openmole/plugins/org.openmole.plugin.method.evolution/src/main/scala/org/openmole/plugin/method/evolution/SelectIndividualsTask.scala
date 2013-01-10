@@ -30,7 +30,7 @@ object SelectIndividualsTask {
 
   def apply(evolution: Modifier with G with MF with F)(
     name: String,
-    individuals: Prototype[Array[Individual[evolution.G, evolution.F]]],
+    individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]],
     size: Int)(implicit plugins: PluginSet) = {
     val (_individuals) = (individuals)
 
@@ -40,7 +40,7 @@ object SelectIndividualsTask {
 
       def toTask =
         new SelectIndividualsTask(name, evolution, size) {
-          val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.F]]]]
+          val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
           val inputs = builder.inputs
           val outputs = builder.outputs
           val parameters = builder.parameters
@@ -56,7 +56,7 @@ sealed abstract class SelectIndividualsTask(
     val evolution: Modifier with G with MF with F,
     val size: Int)(implicit val plugins: PluginSet) extends Task {
 
-  def individuals: Prototype[Array[Individual[evolution.G, evolution.F]]]
+  def individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
 
   override def process(context: Context) = {
     implicit val rng = newRNG(context(openMOLESeed))

@@ -62,7 +62,7 @@ class AggregationTransition(start: ICapsule, end: Slot, condition: ICondition = 
     if (!subMole.canceled && !hasBeenPerformed(subMole, parentTicket)) {
       val result = subMole.aggregationTransitionRegistry.remove(this, parentTicket).getOrElse(throw new InternalProcessingError("No context registred for the aggregation transition"))
       val subMoleParent = subMole.parent.getOrElse(throw new InternalProcessingError("Submole execution has no parent"))
-      submitNextJobsIfReady(result, parentTicket, subMoleParent)
+      subMoleParent.transitionLock { submitNextJobsIfReady(result, parentTicket, subMoleParent) }
     }
   }
 

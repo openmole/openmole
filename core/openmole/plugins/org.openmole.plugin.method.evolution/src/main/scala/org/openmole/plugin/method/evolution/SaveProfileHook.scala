@@ -17,33 +17,36 @@
 
 package org.openmole.plugin.method.evolution
 
+import algorithm.GA.{ GAAggregation, GAProfile }
 import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
 import org.openmole.core.implementation.data._
 import org.openmole.misc.tools.io.FileUtil._
 import fr.iscpif.mgo._
 import java.io.File
-import org.openmole.core.implementation.tools.VariableExpansion
+import org.openmole.core.implementation.tools._
 import org.openmole.misc.tools.service.Scaling._
+import org.openmole.misc.tools.script.GroovyProxyPool
 
-class SaveProfileHook(
-    val archive: Prototype[_],
-    val path: String,
-    val xScale: (Double, Double, Int)) extends Hook {
+sealed class SaveProfileHook(
+    val individual: Prototype[Individual[algorithm.GA#G, algorithm.GA#P, algorithm.GA#F]],
+    val x: String,
+    val aggregation: GAAggregation,
+    val path: String) extends Hook {
 
-  override def required = DataSet(archive)
+  override def required = DataSet(individual.toArray)
+
+  @transient lazy val xInterpreter = new GroovyProxyPool(x)
 
   def process(context: Context) {
-    val (xMin, xMax, nbX) = xScale
-    val a = context(archive).asInstanceOf[ProfileArchive#A]
     val file = new File(VariableExpansion(context, path))
     file.createParentDir
     file.withWriter { w ⇒
       for {
-        (e, x) ← a.values.zipWithIndex
-        if !e.isPosInfinity
-      } w.write("" + x.toDouble.scale(xMin, xMax, 0, nbX) + "," + e + "\n")
+        i ← context(individual.toArray)
+        xV = xInterpreter.execute(i.phenotype)
+      } w.write("" + xV + "," + aggregation.aggregate(i.fitness) + "\n")
     }
-
   }
+
 }

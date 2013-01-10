@@ -20,16 +20,19 @@ package org.openmole.plugin.method.evolution.algorithm
 import fr.iscpif.mgo._
 import fr.iscpif.mgo.tools.Lazy
 import java.util.Random
+import org.openmole.core.implementation.tools._
+import com.sun.org.glassfish.external.amx.AMX
+import org.openmole.misc.tools.script.GroovyProxyPool
 
 object GA {
 
-  trait GA extends G with MG with MF with RankDiversityMF with GASigma {
+  trait GA extends G with ContextPhenotype with MG with MF with RankDiversityMF with GASigma {
     type MF <: Rank with Diversity
     type RANKED = MGFitness
     type DIVERSIFIED = MGFitness
     val gManifest = manifest[G]
-    val individualManifest = manifest[Individual[G, F]]
-    val populationManifest = manifest[Population[G, F, MF]]
+    val individualManifest = manifest[Individual[G, P, F]]
+    val populationManifest = manifest[Population[G, P, F, MF]]
     val fManifest = manifest[F]
   }
 
@@ -112,14 +115,22 @@ object GA {
       }
   }
 
+  trait GAProfile extends GA {
+    def plotter: GAProfilePlotter
+    def aggregation: GAAggregation
+  }
+
   def profile(_plotter: GAProfilePlotter, _aggregation: GAAggregation) =
-    new GAAlgorithmBuilder {
+    new GAAlgorithmBuilder with GAProfile {
+      val plotter = _plotter
+      val aggregation = _aggregation
+
       def apply(_diversityMetric: GADiversityMetric, _ranking: GARanking) =
         new ProfileArchive with GAAlgorithm with ProfileModifier with ProfileElitism {
           override type DIVERSIFIED = MGFitness
           override type RANKED = MGFitness
           val aManifest = manifest[A]
-          def plot(i: Individual[G, F]) = _plotter.plot(i)
+          def plot(i: Individual[G, P, F]) = _plotter.plot(i)
           def aggregate(fitness: F) = _aggregation.aggregate(fitness)
           val diversityMetric = _diversityMetric
           val ranking = _ranking
@@ -128,9 +139,12 @@ object GA {
 
   trait GAProfilePlotter extends ProfilePlotter with GA with MG
 
-  def profileGenomePlotter(_x: Int, _nX: Int = 1000) = new ProfileGenomePlotter with GAProfilePlotter {
-    val x = _x
-    val nX = _nX
+  def profilePlotter(x: String) = new GAProfilePlotter {
+    @transient lazy val interpreter = new GroovyProxyPool(x)
+
+    def plot(individual: Individual[this.type#G, this.type#P, this.type#F]) =
+      interpreter.execute(individual.phenotype.toBinding).asInstanceOf[Double].toInt
+
   }
 
   def map(_plotter: GAMapPlotter, _aggregation: GAAggregation, neighbors: Int = 8) = {
@@ -141,7 +155,7 @@ object GA {
           override type DIVERSIFIED = MGFitness
           override type RANKED = MGFitness
           val aManifest = manifest[A]
-          def plot(i: Individual[G, F]) = _plotter.plot(i)
+          def plot(i: Individual[G, P, F]) = _plotter.plot(i)
           def aggregate(fitness: F) = _aggregation.aggregate(fitness)
           val diversityMetric = _diversityMetric
           val ranking = _ranking
@@ -155,11 +169,13 @@ object GA {
 
   def max = new MaxAggregation with GAAggregation {}
 
-  def mapGenomePlotter(_x: Int, _y: Int, _nX: Int = 100, _nY: Int = 100) = new MapGenomePlotter with GAMapPlotter {
-    val x = _x
-    val y = _y
-    val nX = _nX
-    val nY = _nY
+  def mapGenomePlotter(x: String, y: String) = new GAMapPlotter {
+    @transient lazy val xInterpreter = new GroovyProxyPool(x)
+    @transient lazy val yInterpreter = new GroovyProxyPool(y)
+
+    def plot(individual: Individual[this.type#G, this.type#P, this.type#F]) =
+      (xInterpreter.execute(individual.phenotype.toBinding).asInstanceOf[Double].toInt,
+        yInterpreter.execute(individual.phenotype.toBinding).asInstanceOf[Double].toInt)
   }
 
   trait GACrossover extends CrossOver with GA
@@ -213,6 +229,7 @@ trait GA extends GASigmaFactory
   with Elitism
   with Modifier
   with CloneRemoval
+  with ContextPhenotype
 
 sealed class GAImpl(
   val algorithm: GA.GAAlgorithmBuilder,
@@ -239,15 +256,15 @@ sealed class GAImpl(
   implicit val stateManifest = termination.stateManifest
 
   def initialState: STATE = termination.initialState
-  def terminated(population: ⇒ Population[G, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
+  def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
   def diversity(individuals: Seq[DIVERSIFIED], ranks: Seq[Lazy[Int]]): Seq[Lazy[Double]] = thisDiversityMetric.diversity(individuals, ranks)
   def isDominated(p1: Seq[scala.Double], p2: Seq[scala.Double]) = dominance.isDominated(p1, p2)
-  def toArchive(individuals: Seq[Individual[G, F]]) = thisAlgorithm.toArchive(individuals)
+  def toArchive(individuals: Seq[Individual[G, P, F]]) = thisAlgorithm.toArchive(individuals)
   def combine(a1: A, a2: A) = thisAlgorithm.combine(a1, a2)
   def diff(a1: A, a2: A) = thisAlgorithm.diff(a1, a2)
   def initialArchive = thisAlgorithm.initialArchive
-  def modify(individuals: Seq[Individual[G, F]], archive: A) = thisAlgorithm.modify(individuals, archive)
+  def modify(individuals: Seq[Individual[G, P, F]], archive: A) = thisAlgorithm.modify(individuals, archive)
   def crossover(g1: G, g2: G)(implicit aprng: Random) = thisCrossover.crossover(g1, g2)
   def mutate(genome: G)(implicit aprng: Random) = thisMutation.mutate(genome)
-  def elitism(individuals: Seq[Individual[G, F]], a: A) = thisAlgorithm.elitism(individuals, a)
+  def elitism(individuals: Seq[Individual[G, P, F]], a: A) = thisAlgorithm.elitism(individuals, a)
 }

@@ -17,34 +17,11 @@
 
 package org.openmole.core.implementation.tools
 
-import groovy.lang.Binding
 import org.openmole.core.implementation.data._
 import org.openmole.core.model.data.Context
 import org.openmole.misc.tools.script.GroovyProxy
 import org.openmole.misc.tools.obj.ClassUtils._
 
-object GroovyContextAdapter {
-  //val workspaceVar = Prototype[Workspace]("workspace")
-  //val rngVar = Prototype[Random]("rng")
-  //val seedVar = Prototype[Long]("seed")
-
-  implicit def contextDecorator(variables: Context) = new {
-    def toBinding = {
-      val binding = new Binding
-      //binding.setVariable(workspaceVar.name, Workspace)
-
-      //val seed = Workspace.newSeed
-      //val rng = Workspace.newRNG(seed)
-
-      //binding.setVariable(rngVar.name, variables.buildRNG)
-      //binding.setVariable(seedVar.name, seed)
-      variables.values.foreach { v ⇒ binding.setVariable(v.prototype.name, v.value) }
-      binding
-    }
-  }
-}
-
 trait GroovyContextAdapter extends GroovyProxy {
-  import GroovyContextAdapter._
   def execute(variables: Context): Object = execute(variables.toBinding)
 }

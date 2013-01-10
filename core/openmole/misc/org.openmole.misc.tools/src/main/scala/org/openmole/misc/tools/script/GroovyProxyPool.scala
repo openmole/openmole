@@ -21,7 +21,7 @@ import groovy.lang.Binding
 import java.io.File
 import org.openmole.misc.tools.service.ObjectPool
 
-class GroovyProxyPool(code: String, jars: Iterable[File]) extends {
+class GroovyProxyPool(code: String, jars: Iterable[File] = Iterable.empty) extends {
 
   //Don't use soft reference here, it leads to keep compiling the script in case of high memory load and make it worse
   @transient lazy private val pool = new ObjectPool({ new GroovyProxy(code, jars) })

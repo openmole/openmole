@@ -28,9 +28,9 @@ import scala.collection.mutable.ListBuffer
 
 object ScalingGAIndividualsTask {
 
-  def apply[G <: GAGenome, F <: MGFitness, MF](
+  def apply[G <: GAGenome, P, F <: MGFitness, MF](
     name: String,
-    individuals: Prototype[Array[Individual[G, F]]],
+    individuals: Prototype[Array[Individual[G, P, F]]],
     modelInputs: (Prototype[Double], (String, String))*)(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
 
@@ -55,9 +55,9 @@ object ScalingGAIndividualsTask {
 
 }
 
-sealed abstract class ScalingGAIndividualsTask[G <: GAGenome, F <: MGFitness, MF](
+sealed abstract class ScalingGAIndividualsTask[G <: GAGenome, P, F <: MGFitness, MF](
     val name: String,
-    individuals: Prototype[Array[Individual[G, F]]],
+    individuals: Prototype[Array[Individual[G, P, F]]],
     modelInputs: (Prototype[Double], (String, String))*)(implicit val plugins: PluginSet) extends Task {
 
   def objectives: List[Prototype[Double]]

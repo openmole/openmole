@@ -20,7 +20,7 @@ package org.openmole.plugin.domain.modifier
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 import org.openmole.plugin.tools.groovy.ContextToGroovyCode
-import org.openmole.core.implementation.tools.GroovyContextAdapter._
+import org.openmole.core.implementation.tools._
 
 sealed class MapDomain[-I, +O](domain: Domain[I] with Discrete[I], name: String, code: String) extends Domain[O] with Discrete[O] {
 
