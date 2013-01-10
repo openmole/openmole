@@ -33,10 +33,8 @@ class CopyFileHook(
     remove: Boolean = false,
     compress: Boolean = false) extends Hook {
 
-  override def process(moleJob: IMoleJob) = {
-    import moleJob.context
-
-    context.value(filePrototype) match {
+  override def process(context: Context) = {
+    context.option(filePrototype) match {
       case Some(from) ⇒
         val to = new File(VariableExpansion(context, destination))
 

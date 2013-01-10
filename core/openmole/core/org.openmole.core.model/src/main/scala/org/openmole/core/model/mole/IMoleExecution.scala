@@ -30,14 +30,15 @@ import org.openmole.core.model.job.MoleJobId
 import scala.collection.mutable.Buffer
 
 object IMoleExecution {
-  case class Starting extends Event[IMoleExecution]
-  case class Finished extends Event[IMoleExecution]
+  class Starting extends Event[IMoleExecution]
+  class Finished extends Event[IMoleExecution]
   case class OneJobStatusChanged(val moleJob: IMoleJob, val newState: State, val oldState: State) extends Event[IMoleExecution]
   case class OneJobSubmitted(val moleJob: IMoleJob) extends Event[IMoleExecution]
   case class JobInCapsuleFinished(val moleJob: IMoleJob, val capsule: ICapsule) extends Event[IMoleExecution]
   case class JobInCapsuleStarting(val moleJob: IMoleJob, val capsule: ICapsule) extends Event[IMoleExecution]
   case class ExceptionRaised(val moleJob: IMoleJob, val exception: Throwable, val level: Level) extends Event[IMoleExecution]
   case class HookExceptionRaised(val hook: Hook, val moleJob: IMoleJob, val exception: Throwable, val level: Level) extends Event[IMoleExecution]
+  case class ProfilerExceptionRaised(val profiler: Profiler, val moleJob: IMoleJob, val exception: Throwable, val level: Level) extends Event[IMoleExecution]
 }
 
 trait IMoleExecution {
@@ -52,7 +53,7 @@ trait IMoleExecution {
 
   def mole: IMole
   def hooks: Iterable[(ICapsule, Hook)]
-  def profiler: Hook
+  def profiler: Profiler
 
   def dataChannelRegistry: IRegistryWithTicket[IDataChannel, Buffer[Variable[_]]]
 

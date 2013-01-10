@@ -29,11 +29,10 @@ class AppendArrayToFileHook(
     fileName: String,
     content: Prototype[Array[_]]) extends Hook {
 
-  override def process(moleJob: IMoleJob) = {
-    import moleJob.context
+  override def process(context: Context) = {
     val file = new File(VariableExpansion(context, fileName))
     file.createParentDir
-    val toWrite = context.value(content).getOrElse(Array("not found")).mkString(",")
+    val toWrite = context.option(content).getOrElse(Array("not found")).mkString(",")
     file.withLock(_.appendLine(toWrite))
   }
 

@@ -46,9 +46,9 @@ class HookSpec extends FlatSpec with ShouldMatchers {
     val t1c = new Capsule(t1)
 
     val hook = new Hook {
-      override def process(moleJob: IMoleJob) = {
-        moleJob.context.contains(p) should equal(true)
-        moleJob.context.value(p).get should equal("test")
+      override def process(context: Context) = {
+        context.contains(p) should equal(true)
+        context(p) should equal("test")
         executed = true
       }
     }
@@ -75,9 +75,9 @@ class HookSpec extends FlatSpec with ShouldMatchers {
     val t1c = new MasterCapsule(t1)
 
     val hook = new Hook {
-      override def process(moleJob: IMoleJob) = {
-        moleJob.context.contains(p) should equal(true)
-        moleJob.context.value(p).get should equal("test")
+      override def process(context: Context) = {
+        context.contains(p) should equal(true)
+        context(p) should equal("test")
         executed = true
       }
     }

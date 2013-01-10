@@ -25,6 +25,7 @@ object Profiler {
   }
 }
 
-trait Profiler extends Hook {
+trait Profiler {
+  def process(job: IMoleJob)
   def finished = {}
 }
