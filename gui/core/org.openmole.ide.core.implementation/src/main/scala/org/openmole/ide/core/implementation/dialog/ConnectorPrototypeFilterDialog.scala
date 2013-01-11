@@ -31,9 +31,9 @@ import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget.multirow.MultiCombo._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
-import swing.{ Label, MyComboBox, ScrollPane }
+import swing.{ Label, MyComboBox, ScrollPane, TextField }
 import org.openmole.ide.core.implementation.sampling.SamplingConnectorWidget
-import org.openmole.ide.core.model.sampling.{ IDomainProxyUI, IFactorProxyUI }
+import org.openmole.ide.core.model.sampling.{ ISamplingCompositionProxyUI, IDomainProxyUI, IFactorProxyUI }
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.misc.tools.util.Types
 import org.openmole.ide.core.model.data.IDomainDataUI
@@ -53,6 +53,23 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
           CheckData.checkMole(connectorUI.source.scene)
         }
       case false ⇒ StatusBar().warn("No Prototype is defined !")
+    }
+  }
+
+  class OrderingDialog(compositionProxy: ISamplingCompositionProxyUI,
+                       connectorWidget: SamplingConnectorWidget) extends PluginPanel("wrap", "[grow,fill]", "") {
+    val orderTextField = new TextField(compositionProxy.ordering.toString, 5)
+    contents += orderTextField
+
+    def display: Unit = {
+      StatusBar().clear
+      if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(this) {
+        verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
+      }.peer,
+        "Order")).equals(NotifyDescriptor.OK_OPTION)) {
+        compositionProxy.ordering = orderTextField.text.toInt
+        connectorWidget.update
+      }
     }
   }
 

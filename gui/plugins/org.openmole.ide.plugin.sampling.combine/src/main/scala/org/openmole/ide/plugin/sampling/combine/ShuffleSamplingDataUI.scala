@@ -19,19 +19,17 @@ package org.openmole.ide.plugin.sampling.combine
 import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI, ISamplingDataUI }
 import org.openmole.core.model.sampling.{ Factor, DiscreteFactor, Sampling }
 import org.openmole.plugin.sampling.combine.ShuffleSampling
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.misc.widget.{ URL, Helper }
 import org.openmole.core.model.domain.{ Discrete, Domain }
+import org.openmole.ide.core.implementation.sampling.SamplingUtils
 
 class ShuffleSamplingDataUI extends ISamplingDataUI {
   def name = "Shuffle"
 
-  def coreObject(factors: List[Factor[_, _]], samplings: List[Sampling]) =
-    new ShuffleSampling((factors.map {
-      f ⇒ DiscreteFactor(f.asInstanceOf[Factor[Any, Domain[Any] with Discrete[Any]]])
-    } ::: samplings).head)
+  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) =
+    new ShuffleSampling(SamplingUtils.toUnorderedFactorsAndSamplings(factorOrSampling).head)
 
   def buildPanelUI = new GenericCombineSamplingPanelUI(this) {
     override val help = new Helper(List(new URL(i18n.getString("shufflePermalinkText"),

@@ -30,8 +30,7 @@ object ISamplingDataUI {
 
 trait ISamplingDataUI extends IDataUI {
 
-  def coreObject(factors: List[Factor[_, _]],
-                 samplings: List[Sampling]): Sampling
+  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]): Sampling
 
   def buildPanelUI: ISamplingPanelUI
 

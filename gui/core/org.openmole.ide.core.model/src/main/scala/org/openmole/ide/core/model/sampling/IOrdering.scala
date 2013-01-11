@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
+ * Copyright (C) 2013 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,14 +16,4 @@
  */
 package org.openmole.ide.core.model.sampling
 
-trait ISamplingCompositionProxyUI {
-  def id: String
-
-  def isFinal: Boolean
-
-  def isFinal_=(b: Boolean)
-
-  def ordering: Int
-
-  def ordering_=(o: Int)
-}
+trait IOrdering

@@ -22,4 +22,5 @@ import org.openmole.ide.core.implementation.data.FactorDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
 class DomainProxyUI(var dataUI: IDomainDataUI,
-                    var isFinal: Boolean = false) extends IDomainProxyUI
+                    var isFinal: Boolean = false,
+                    var ordering: Int = 0) extends IDomainProxyUI

@@ -27,14 +27,13 @@ class SaltelliSamplingDataUI(val samples: String = "1") extends ISamplingDataUI 
 
   def name = "Saltelli"
 
-  def coreObject(factors: List[Factor[_, _]],
-                 samplings: List[Sampling]) =
+  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) =
     new SaltelliSampling(
       try samples
       catch {
         case e: NumberFormatException ⇒ throw new UserBadDataError("An integer is exepected as number of samples")
       },
-      factors.map {
+      SamplingUtils.toFactors(factorOrSampling).map {
         f ⇒
           Factor(f.prototype.asInstanceOf[Prototype[Double]],
             f.domain.asInstanceOf[Domain[Double] with Bounds[Double]])

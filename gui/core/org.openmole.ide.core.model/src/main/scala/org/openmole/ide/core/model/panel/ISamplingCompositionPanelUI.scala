@@ -67,4 +67,6 @@ trait ISamplingCompositionPanelUI extends IPanelUI {
                      target: ISamplingCompositionWidget): Unit
 
   def updatePrevious(domain: IDomainWidget): Unit
+
+  def updateConnections: Unit
 }

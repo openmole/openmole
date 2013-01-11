@@ -38,6 +38,7 @@ import scala.collection.mutable.HashSet
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import collection.mutable
 import org.openmole.ide.core.implementation.workflow.MoleRouter
+import scala.collection.JavaConversions._
 
 object SamplingCompositionPanelUI {
   val DEFAULT_COLOR = new Color(250, 250, 250)
@@ -395,6 +396,13 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
       }
       case _ ⇒
     }
+
+  def updateConnections = connectLayer.getChildren.foreach {
+    _ match {
+      case s: SamplingConnectorWidget ⇒ s.update
+      case _ ⇒
+    }
+  }
 
   class SamplingConnectionProvider extends ConnectProvider {
 

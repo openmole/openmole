@@ -17,10 +17,11 @@
 
 package org.openmole.ide.misc.widget
 
-import java.awt.Cursor
+import java.awt.{ Color, Cursor }
 import scala.swing.Action
 import scala.swing.Label
 import scala.swing.event.MousePressed
+import javax.swing.BorderFactory
 
 class LinkLabel(textLink: String,
                 var action: Action,

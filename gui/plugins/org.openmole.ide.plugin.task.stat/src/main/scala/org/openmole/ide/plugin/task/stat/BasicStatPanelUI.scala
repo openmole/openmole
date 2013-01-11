@@ -34,11 +34,17 @@ import scala.swing.Label
 import scala.swing.TabbedPane
 
 abstract class BasicStatPanelUI(statType: String,
-                                sequences: List[(IPrototypeDataProxyUI, IPrototypeDataProxyUI)]) extends PluginPanel("wrap 2") with ITaskPanelUI {
+                                sequences: List[(IPrototypeDataProxyUI, IPrototypeDataProxyUI)],
+                                implicitPrototypes: List[IPrototypeDataProxyUI] = List.empty) extends PluginPanel("wrap 2") with ITaskPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
-  val arrayDoublePrototypes = Proxys.classPrototypes(classOf[Array[Double]])
-  val doublePrototypes = Proxys.classPrototypes(classOf[Double])
+  val arrayDoublePrototypes = Proxys.classPrototypes(classOf[Array[Double]]) :::
+    Proxys.classPrototypes(classOf[Array[Double]],
+      implicitPrototypes)
+
+  val doublePrototypes = Proxys.classPrototypes(classOf[Double]) :::
+    Proxys.classPrototypes(classOf[Double],
+      implicitPrototypes)
 
   if (arrayDoublePrototypes.isEmpty)
     StatusBar().inform("At least 1 Array of Prototype (Double) has to be created before using a" + statType + "  Tasks")
@@ -52,20 +58,25 @@ abstract class BasicStatPanelUI(statType: String,
         arrayDoublePrototypes,
         doublePrototypes,
         "to " + statType,
-        sequences.map { s ⇒
-          new TwoCombosPanel(arrayDoublePrototypes,
-            doublePrototypes,
-            "to " + statType,
-            new TwoCombosData(Some(s._1), Some(s._2)))
+        sequences.map {
+          s ⇒
+            new TwoCombosPanel(arrayDoublePrototypes,
+              doublePrototypes,
+              "to " + statType,
+              new TwoCombosData(Some(s._1), Some(s._2)))
         },
         NO_EMPTY,
         ADD))
     } else None
 
   if (multiPrototypeCombo.isDefined)
-    tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("") { add(multiPrototypeCombo.get.panel, "gap bottom 40") })
+    tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("") {
+      add(multiPrototypeCombo.get.panel, "gap bottom 40")
+    })
   else
-    tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("") { add(new Label("At least 2 Prototypes (a Double and an array of Double have to be created first.)"), "gap bottom 40") })
+    tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("") {
+      add(new Label("At least 2 Prototypes (a Double and an array of Double have to be created first.)"), "gap bottom 40")
+    })
 
   override val help = new Helper {
     multiPrototypeCombo match {

@@ -16,21 +16,18 @@
  */
 package org.openmole.ide.plugin.sampling.combine
 
-import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI, ISamplingDataUI }
-import org.openmole.core.model.sampling.{ DiscreteFactor, Factor, Sampling }
+import org.openmole.ide.core.model.data.{ IDomainDataUI, ISamplingDataUI }
+import org.openmole.core.model.sampling.{ Factor, Sampling }
 import org.openmole.plugin.sampling.combine.CombineSampling
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.core.model.data.Prototype
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.widget.{ URL, Helper }
-import org.openmole.core.model.domain.{ Discrete, Domain }
-import org.openmole.ide.core.model.sampling.{ IFinite }
+import org.openmole.ide.core.model.sampling.{ IOrdering, IFinite }
+import org.openmole.ide.core.implementation.sampling.SamplingUtils
 
-class CombineSamplingDataUI extends ISamplingDataUI {
+class CombineSamplingDataUI extends ISamplingDataUI with IOrdering {
   val name = "Combine"
 
-  def coreObject(factors: List[Factor[_, _]], samplings: List[Sampling]) =
-    new CombineSampling((factors.map { f ⇒ DiscreteFactor(f.asInstanceOf[Factor[Any, Domain[Any] with Discrete[Any]]]) } ::: samplings): _*)
+  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) =
+    new CombineSampling(SamplingUtils.toOrderedSamplings(factorOrSampling): _*)
 
   def buildPanelUI = new GenericCombineSamplingPanelUI(this) {
     override val help = new Helper(List(new URL(i18n.getString("combinePermalinkText"),

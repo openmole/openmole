@@ -36,18 +36,18 @@ import PrototypeOnConnectorWidget._
 class PrototypeOnConnectorWidget(scene: Scene,
                                  var connectorUI: IConnectorViewUI,
                                  val link: LinkLabel,
-                                 val colorPattern: (Color, Color) = PrototypeOnConnectorWidget.lightOnDark) extends ComponentWidget(scene, link.peer) {
+                                 val colorPattern: (Color, Color) = PrototypeOnConnectorWidget.lightOnDark,
+                                 dim: Int = 0) extends ComponentWidget(scene, link.peer) {
   link.foreground = colorPattern._2
-  val dim = 30
   val pos = link.size.width / 2 + 1
-  setPreferredBounds(new Rectangle(dim, dim))
+  setPreferredBounds(new Rectangle(30, 30))
 
   override def paintBackground = {
     val g = scene.getGraphics
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
       RenderingHints.VALUE_ANTIALIAS_ON)
     g.setColor(colorPattern._1)
-    g.fillOval(pos, pos, dim, dim)
+    g.fillOval(pos, pos, (dim + 30).toInt, 30)
     link.text = connectorUI.preview
     revalidate
   }
@@ -59,7 +59,7 @@ class PrototypeOnConnectorWidget(scene: Scene,
     g.setStroke(new BasicStroke(3f))
     g.setColor(colorPattern._2)
     if (colorPattern == lightOnDark)
-      g.drawOval(pos, pos, dim - 2, dim - 2)
+      g.drawOval(pos, pos, 28, 28)
     revalidate
   }
 }

@@ -19,8 +19,7 @@ class CSVSamplingDataUI(var csvFilePath: String = "",
                         var prototypeMapping: List[(String, IPrototypeDataProxyUI)] = List.empty) extends ISamplingDataUI {
   def name = "CSV"
 
-  def coreObject(factors: List[Factor[_, _]],
-                 samplings: List[Sampling]) = try {
+  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = try {
     val fi = new File(csvFilePath)
     val sampling = CSVSampling(fi)
     prototypeMapping.filter(!_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI]).foreach {
