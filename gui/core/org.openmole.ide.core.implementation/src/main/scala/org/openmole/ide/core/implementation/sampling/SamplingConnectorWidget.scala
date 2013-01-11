@@ -121,7 +121,7 @@ class SamplingConnectorWidget(sourceWidget: Widget,
               def apply = {
                 dialog.display
               }
-            }, 2, bold = true), darkOnLight, 35))
+            }, 2, bold = true), darkOnLight, 20))
         addChild(componentWidget.get)
         setConstraint(componentWidget.get, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
         componentWidget.get.setOpaque(true)
