@@ -28,7 +28,7 @@ object ElitismTask {
 
   def apply(evolution: Elitism with Termination with Modifier with Archive)(
     name: String,
-    individuals: Prototype[Array[Individual[evolution.G, evolution.F]]],
+    individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]],
     archive: Prototype[evolution.A])(implicit plugins: PluginSet) = {
     val (_individuals, _archive) = (individuals, archive)
 
@@ -39,7 +39,7 @@ object ElitismTask {
 
       def toTask = new ElitismTask(name, evolution) {
 
-        val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.F]]]]
+        val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
         val archive = _archive.asInstanceOf[Prototype[evolution.A]]
 
         val inputs = builder.inputs
@@ -53,7 +53,7 @@ object ElitismTask {
 sealed abstract class ElitismTask[E <: Elitism with Termination with Modifier with Archive](
     val name: String, val evolution: E)(implicit val plugins: PluginSet) extends Task {
 
-  def individuals: Prototype[Array[Individual[evolution.G, evolution.F]]]
+  def individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
   def archive: Prototype[evolution.A]
 
   override def process(context: Context) = {

@@ -22,7 +22,7 @@ import java.io.File
 import org.openmole.misc.exception._
 import org.openmole.misc.tools.script.GroovyProxyPool
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.tools.GroovyContextAdapter._
+import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data._
 
 class ContextToGroovyCode(source: String, libs: Iterable[File]) {

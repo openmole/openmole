@@ -25,9 +25,9 @@ import org.openmole.core.implementation.data._
 
 object UpdateArchiveTask {
 
-  def apply(evolution: G with F with MG with Archive)(
+  def apply(evolution: G with P with F with MG with Archive)(
     name: String,
-    individuals: Prototype[Array[Individual[evolution.G, evolution.F]]],
+    individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]],
     archive: Prototype[evolution.A])(implicit plugins: PluginSet) = {
 
     val (_individuals, _archive) = (individuals, archive)
@@ -39,7 +39,7 @@ object UpdateArchiveTask {
       addOutput(archive)
 
       def toTask = new UpdateArchiveTask(evolution)(name) {
-        val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.F]]]]
+        val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
         val archive = _archive.asInstanceOf[Prototype[evolution.A]]
         val inputs = builder.inputs
         val outputs = builder.outputs
@@ -54,7 +54,7 @@ object UpdateArchiveTask {
 sealed abstract class UpdateArchiveTask(val evolution: G with F with MG with Archive)(
     val name: String)(implicit val plugins: PluginSet) extends Task { task ⇒
 
-  def individuals: Prototype[Array[Individual[evolution.G, evolution.F]]]
+  def individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
   def archive: Prototype[evolution.A]
 
   override def process(context: Context) = {

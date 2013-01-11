@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.method.evolution
 
+import algorithm.GA.GAAggregation
 import org.openmole.core.model.mole.Hook
 import org.openmole.core.model.job.IMoleJob
 import fr.iscpif.mgo._
@@ -26,28 +27,31 @@ import org.openmole.misc.tools.io.FileUtil._
 import java.io.File
 import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.misc.tools.service.Scaling._
+import org.openmole.misc.tools.script.GroovyProxyPool
+import org.openmole.core.implementation.tools._
 
 //FIXME scala type system is not yet able to match the correct prototype (use a cast)
 sealed class SaveMapHook(
-    val archive: Prototype[_],
-    val path: String,
-    val xScale: (Double, Double, Int),
-    val yScale: (Double, Double, Int)) extends Hook {
+    val individual: Prototype[Individual[algorithm.GA#G, algorithm.GA#P, algorithm.GA#F]],
+    val x: String,
+    val y: String,
+    val aggregation: GAAggregation,
+    val path: String) extends Hook {
 
-  override def required = DataSet(archive)
+  override def required = DataSet(individual.toArray)
+
+  @transient lazy val xInterpreter = new GroovyProxyPool(x)
+  @transient lazy val yInterpreter = new GroovyProxyPool(y)
 
   def process(context: Context) {
-    val (xMin, xMax, nbX) = xScale
-    val (yMin, yMax, nbY) = yScale
-    val a = context(archive).asInstanceOf[MapArchive#A]
     val file = new File(VariableExpansion(context, path))
     file.createParentDir
     file.withWriter { w ⇒
       for {
-        (l, x) ← a.values.zipWithIndex
-        (e, y) ← l.zipWithIndex
-        if !e.isPosInfinity
-      } w.write("" + x.toDouble.scale(xMin, xMax, 0, nbX) + "," + y.toDouble.scale(yMin, yMax, 0, nbY) + "," + e + "\n")
+        i ← context(individual.toArray)
+        xV = xInterpreter.execute(i.phenotype)
+        yV = yInterpreter.execute(i.phenotype)
+      } w.write("" + xV + "," + yV + "," + aggregation.aggregate(i.fitness) + "\n")
     }
 
   }

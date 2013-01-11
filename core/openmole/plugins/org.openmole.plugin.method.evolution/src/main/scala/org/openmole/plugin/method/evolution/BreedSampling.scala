@@ -31,13 +31,13 @@ import org.openmole.core.model.sampling.Sampling
 object BreedSampling {
 
   def apply(evolution: Breeding with GManifest with Archive)(
-    individuals: Prototype[Array[Individual[evolution.G, evolution.F]]],
+    individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]],
     archive: Prototype[evolution.A],
     genome: Prototype[evolution.G],
     size: Int)(implicit plugins: PluginSet) = {
     val (_individuals, _archive, _genome) = (individuals, archive, genome)
     new BreedSampling(evolution, size) {
-      val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.F]]]]
+      val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
       val archive = _archive.asInstanceOf[Prototype[evolution.A]]
       val genome = _genome.asInstanceOf[Prototype[evolution.G]]
     }
@@ -45,7 +45,7 @@ object BreedSampling {
 }
 
 sealed abstract class BreedSampling(val evolution: Breeding with GManifest with Archive, val size: Int) extends Sampling {
-  def individuals: Prototype[Array[Individual[evolution.G, evolution.F]]]
+  def individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
   def archive: Prototype[evolution.A]
   def genome: Prototype[evolution.G]
 

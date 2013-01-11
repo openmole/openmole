@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 09/01/13 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -11,17 +11,24 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.tools
+package org.openmole.core.implementation.mole
 
+import org.openmole.core.model.mole._
+import org.openmole.core.model.task._
 import org.openmole.core.implementation.data._
-import org.openmole.core.model.data.Context
-import org.openmole.misc.tools.script.GroovyProxy
-import org.openmole.misc.tools.obj.ClassUtils._
 
-trait GroovyContextAdapter extends GroovyProxy {
-  def execute(variables: Context): Object = execute(variables.toBinding)
+object InputStrainerCapsule {
+  def apply(task: ITask) = new InputStrainerCapsule(task)
+}
+
+class InputStrainerCapsule(task: ITask) extends Capsule(task) with Strainer {
+
+  override def inputs(mole: IMole) =
+    received(mole).filterNot(d ⇒ super.inputs(mole).contains(d.prototype.name)) ++
+      super.inputs(mole)
+
 }
