@@ -165,7 +165,7 @@ class ExecutionManager(manager: IMoleSceneManager,
         mExecution.start
         Some(mExecution)
       case Left(e) ⇒
-        StatusBar().blockException(e)
+        StatusBar().block(e)
         None
     }
   }

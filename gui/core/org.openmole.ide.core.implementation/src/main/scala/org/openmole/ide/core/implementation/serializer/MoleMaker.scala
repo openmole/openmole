@@ -166,7 +166,7 @@ object MoleMaker {
         PluginSet(plugins)))
     } catch {
       case e: Throwable ⇒
-        StatusBar().warn(e.getMessage, Some(proxy), e.getStackTraceString, e.getClass.getCanonicalName)
+        StatusBar().warn(e, Some(proxy))
         Left(e)
     }
 

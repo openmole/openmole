@@ -132,8 +132,7 @@ class GUISerializer(val toFromFile: String) {
   } catch {
     case e: Throwable ⇒
       StatusBar().block("An error occured when loading " + f.getAbsolutePath + "\n" + e.getMessage,
-        stack = e.getStackTraceString,
-        exceptionName = e.getClass.getCanonicalName)
+        stack = e.getStackTraceString)
       Left
   }
 
@@ -150,8 +149,7 @@ class GUISerializer(val toFromFile: String) {
           } catch {
             case eof: EOFException ⇒ StatusBar().inform("Project loaded")
             case e: Throwable ⇒ StatusBar().block("Failed to unserialize a data of type " + concept,
-              stack = e.getMessage + "\n" + e.getStackTraceString,
-              exceptionName = e.getClass.getCanonicalName)
+              stack = e.getMessage + "\n" + e.getStackTraceString)
           } finally {
             x.close
           }

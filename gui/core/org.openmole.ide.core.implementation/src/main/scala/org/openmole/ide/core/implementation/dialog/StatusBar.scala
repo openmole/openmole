@@ -37,32 +37,36 @@ object StatusBar {
   }
 }
 
-class StatusBar extends MigPanel("wrap 3") { statusBar ⇒
+class StatusBar extends MigPanel("wrap 3") {
+  statusBar ⇒
   background = Color.WHITE
   opaque = true
 
   var strings = ""
 
-  def informException(t: Throwable, proxy: Option[IDataProxyUI] = None): Unit = inform(t.getMessage, proxy, errorStack(t), t.getClass.getCanonicalName)
+  def inform(t: Throwable, proxy: Option[IDataProxyUI]): Unit =
+    inform(t.getMessage, proxy, t.getClass.getCanonicalName + "\n" + errorStack(t))
 
   def inform(info: String,
              proxy: Option[IDataProxyUI] = None,
-             stack: String = "",
-             exceptionName: String = ""): Unit = printError("[INFO]", info, proxy, exceptionName + "\n" + stack)
+             stack: String = ""): Unit =
+    printError("[INFO]", info, proxy, stack)
 
-  def warnException(t: Throwable, proxy: Option[IDataProxyUI] = None): Unit = warn(t.getMessage, proxy, errorStack(t), t.getClass.getCanonicalName)
+  def warn(t: Throwable, proxy: Option[IDataProxyUI]): Unit =
+    warn(t.getMessage, proxy, t.getClass.getCanonicalName + "\n" + errorStack(t))
 
   def warn(warning: String,
            proxy: Option[IDataProxyUI] = None,
-           stack: String = "",
-           exceptionName: String = ""): Unit = printError("[WARNING] ", warning, proxy, exceptionName + "\n" + stack)
+           stack: String = ""): Unit = printError("[WARNING] ", warning, proxy, stack)
 
-  def blockException(t: Throwable, proxy: Option[IDataProxyUI] = None): Unit = block(t.getMessage, proxy, errorStack(t), t.getClass.getCanonicalName)
+  def block(t: Throwable): Unit = block(t, None)
+
+  def block(t: Throwable, proxy: Option[IDataProxyUI]): Unit =
+    block(t.getMessage, proxy, t.getClass.getCanonicalName + "\n" + errorStack(t))
 
   def block(b: String,
             proxy: Option[IDataProxyUI] = None,
-            stack: String = "",
-            exceptionName: String = ""): Unit = printError("[CRITICAL] ", b, proxy, exceptionName + "\n" + stack)
+            stack: String = ""): Unit = printError("[CRITICAL] ", b, proxy, stack)
 
   def errorStack(e: Throwable) =
     Iterator.iterate(e)(_.getCause).takeWhile(_ != null).map(e ⇒ e.getMessage + e.getStackTraceString).mkString(EOL)
@@ -76,7 +80,9 @@ class StatusBar extends MigPanel("wrap 3") { statusBar ⇒
       proxy match {
         case Some(x: IDataProxyUI) ⇒
           contents += new LinkLabel(header,
-            new Action("") { override def apply = displayProxy(x) },
+            new Action("") {
+              override def apply = displayProxy(x)
+            },
             3,
             "0088aa",
             true)
@@ -88,7 +94,9 @@ class StatusBar extends MigPanel("wrap 3") { statusBar ⇒
       } else {
         contents += new Label(error)
         contents += new LinkLabel(" details",
-          new Action("") { override def apply = DialogFactory.displayStack(stack) },
+          new Action("") {
+            override def apply = DialogFactory.displayStack(stack)
+          },
           3,
           "0088aa",
           true)

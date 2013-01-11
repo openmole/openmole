@@ -201,7 +201,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
           }.toMap,
             groupingPanel.get.coreObjects) match {
               case Right((mExecution, environments)) ⇒ SerializerService.serialize(mExecution, new File(t))
-              case Left(e) ⇒ StatusBar().blockException(e)
+              case Left(e) ⇒ StatusBar().block(e)
             }
           case _ ⇒
         }
