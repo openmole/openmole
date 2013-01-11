@@ -60,11 +60,6 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.ide</groupId>
-      <artifactId>org.apache.commons.collections15</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.openmole.core</groupId>
       <artifactId>org.apache.commons.configuration</artifactId>
       <version>${project.version}</version>

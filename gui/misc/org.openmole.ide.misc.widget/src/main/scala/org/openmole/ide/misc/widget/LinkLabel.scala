@@ -17,7 +17,7 @@
 
 package org.openmole.ide.misc.widget
 
-import java.awt.{Color, Cursor}
+import java.awt.{ Color, Cursor }
 import scala.swing.Action
 import scala.swing.Label
 import scala.swing.event.MousePressed
