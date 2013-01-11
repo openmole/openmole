@@ -46,16 +46,18 @@ class PrototypeConverter(mapper: Mapper,
                        writer: HierarchicalStreamWriter,
                        mc: MarshallingContext) = {
     val proto = o.asInstanceOf[IPrototypeDataProxyUI]
-    state.content.get(proto) match {
-      case Some(Serializing(id)) ⇒
-      case Some(Serialized(id)) ⇒
-        writer.addAttribute("id", id.toString)
-      case None ⇒
-        state.content += proto -> new Serialized(proto.id)
-        writer.addAttribute("id", proto.id.toString)
-        writer.addAttribute("name", proto.dataUI.name)
-        writer.addAttribute("type", Types.extractTypeFromArray(Types.pretifyWithNameSpace(proto.dataUI.typeClassString)))
-        writer.addAttribute("dim", proto.dataUI.dim.toString)
+    if (!proto.generated) {
+      state.content.get(proto) match {
+        case Some(Serializing(id)) ⇒
+        case Some(Serialized(id)) ⇒
+          writer.addAttribute("id", id.toString)
+        case None ⇒
+          state.content += proto -> new Serialized(proto.id)
+          writer.addAttribute("id", proto.id.toString)
+          writer.addAttribute("name", proto.dataUI.name)
+          writer.addAttribute("type", Types.extractTypeFromArray(Types.pretifyWithNameSpace(proto.dataUI.typeClassString)))
+          writer.addAttribute("dim", proto.dataUI.dim.toString)
+      }
     }
   }
 
