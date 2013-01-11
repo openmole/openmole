@@ -17,7 +17,7 @@
 
 package org.openmole.ide.plugin.task.stat
 
-class AverageTaskPanelUI(dataUI: AverageTaskDataUI) extends BasicStatPanelUI("median", dataUI.sequence) {
+class AverageTaskPanelUI(dataUI: AverageTaskDataUI) extends BasicStatPanelUI("median", dataUI.sequence, dataUI.implicitPrototypesIn) {
 
   def saveContent(name: String) = new AverageTaskDataUI(name,
     if (multiPrototypeCombo.isDefined)

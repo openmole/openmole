@@ -17,7 +17,7 @@
 
 package org.openmole.ide.plugin.task.stat
 
-class MedianTaskPanelUI(dataUI: MedianTaskDataUI) extends BasicStatPanelUI("median", dataUI.sequence) {
+class MedianTaskPanelUI(dataUI: MedianTaskDataUI) extends BasicStatPanelUI("median", dataUI.sequence, dataUI.implicitPrototypesIn) {
 
   def saveContent(name: String) = new MedianTaskDataUI(name,
     if (multiPrototypeCombo.isDefined)
