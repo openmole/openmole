@@ -217,7 +217,7 @@ class SubMoleExecution(
       case Some(p) ⇒ f(p)
     }
 
-  def stateChanged(job: IMoleJob, oldState: State, newState: State) = background {
+  def stateChanged(job: IMoleJob, oldState: State, newState: State) = {
     EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobStatusChanged(job, newState, oldState))
     job.exception match {
       case Some(e) ⇒
@@ -225,10 +225,12 @@ class SubMoleExecution(
         EventDispatcher.trigger(moleExecution, new IMoleExecution.ExceptionRaised(job, e, SEVERE))
       case _ ⇒
     }
-    newState match {
-      case COMPLETED ⇒ jobFinished(job)
-      case FAILED | CANCELED ⇒ jobFailedOrCanceled(job)
-      case _ ⇒
+    background {
+      newState match {
+        case COMPLETED ⇒ jobFinished(job)
+        case FAILED | CANCELED ⇒ jobFailedOrCanceled(job)
+        case _ ⇒
+      }
     }
   }
 
