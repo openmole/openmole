@@ -43,7 +43,7 @@ class CopyFileHookPanelUI(taskProxy: ITaskDataProxyUI,
   contents += new Label("<html><b>Files to be dumped</b></html>")
   contents += multiComboTextField.panel
 
-  def comboContent = Proxys.classPrototypes(classOf[File],
+  def comboContent = Proxys.classPrototypes(classOf[File], 0,
     taskProxy.dataUI.prototypesOut ::: taskProxy.dataUI.implicitPrototypesOut)
 
   def saveContent = new CopyFileHookDataUI(dataUI.activated,
