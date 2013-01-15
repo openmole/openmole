@@ -36,7 +36,7 @@ class ZipWithIndexSamplingDataUI(val prototype: Option[IPrototypeDataProxyUI] = 
       prototype.getOrElse(throw new UserBadDataError("A string prototype is required to build a Zip with name Sampling")).dataUI.coreObject.asInstanceOf[Prototype[Int]])
 
   def buildPanelUI = new ZipWithPrototypeSamplingPanelUI(this) {
-    override def help = new Helper(List(new URL(i18n.getString("zipWithIndexPermalinkText"), i18n.getString("takePermalink"))))
+    override def help = new Helper(List(new URL(i18n.getString("zipWithIndexPermalinkText"), i18n.getString("zipWithIndexPermalink"))))
   }
 
   def imagePath = "img/zipWithIndexSampling.png"
