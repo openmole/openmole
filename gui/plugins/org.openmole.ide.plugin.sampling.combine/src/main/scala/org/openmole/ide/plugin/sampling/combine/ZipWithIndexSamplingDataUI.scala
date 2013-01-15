@@ -54,9 +54,9 @@ class ZipWithIndexSamplingDataUI(val prototype: Option[IPrototypeDataProxyUI] = 
 
   override def inputNumberConstrainst = Some(1)
 
-  def preview = name
+  def preview = "Zip with " + prototype.getOrElse("").toString + " index"
 
-  def name = "Zip with " + prototype.getOrElse("").toString + " index"
+  def name = "Zip with index"
 
   def coreClass = classOf[ZipWithIndexSampling]
 }

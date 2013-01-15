@@ -66,9 +66,9 @@ class ZipWithNameSamplingDataUI(val prototype: Option[IPrototypeDataProxyUI] = N
       false
   }
 
-  def preview = name
+  def preview = "Zip with " + prototype.getOrElse("").toString + " name"
 
-  def name = "Zip with " + prototype.getOrElse("").toString + " name"
+  def name = "Zip with name"
 
   def coreClass = classOf[ZipWithNameSampling]
 }

@@ -37,6 +37,12 @@ object Proxys {
     _.dataUI.name
   }
 
+  def classPrototypes(prototypeClass: Class[_]) =
+    prototypes.toList.filter { p ⇒
+      Types(Types.extractTypeFromArray(p.dataUI.typeClassString),
+        prototypeClass.getCanonicalName.replaceAllLiterally("[", ""))
+    }
+
   def classPrototypes(prototypeClass: Class[_],
                       dim: Int = 0,
                       protoList: List[IPrototypeDataProxyUI] = prototypes.toList): List[IPrototypeDataProxyUI] = {
