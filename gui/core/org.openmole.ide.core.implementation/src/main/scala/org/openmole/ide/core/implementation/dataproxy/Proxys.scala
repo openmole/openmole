@@ -24,6 +24,7 @@ import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.data._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
+import org.openmole.ide.misc.tools.util.Types
 
 object Proxys {
 
@@ -32,18 +33,25 @@ object Proxys {
   var samplings = new HashSet[ISamplingCompositionDataProxyUI]
   var environments = new HashSet[IEnvironmentDataProxyUI]
 
-  def allPrototypesByName = prototypes.map { _.dataUI.name }
+  def allPrototypesByName = prototypes.map {
+    _.dataUI.name
+  }
 
   def classPrototypes(prototypeClass: Class[_],
-                      protoList: List[IPrototypeDataProxyUI]) =
-    protoList.filter(_.dataUI.coreObject.`type`.erasure == prototypeClass)
-
-  def classPrototypes(prototypeClass: Class[_]): List[IPrototypeDataProxyUI] =
-    classPrototypes(prototypeClass, prototypes.toList)
+                      dim: Int = 0,
+                      protoList: List[IPrototypeDataProxyUI] = prototypes.toList): List[IPrototypeDataProxyUI] = {
+    protoList.filter {
+      p ⇒
+        p.dataUI.dim == dim && Types(Types.extractTypeFromArray(p.dataUI.typeClassString),
+          prototypeClass.getCanonicalName.replaceAllLiterally("[", ""))
+    }
+  }
 
   def clearAll: Unit = {
     ConceptMenu.clearAllItems
-    List(tasks, prototypes, environments, samplings).foreach { _.clear }
+    List(tasks, prototypes, environments, samplings).foreach {
+      _.clear
+    }
   }
 }
 
