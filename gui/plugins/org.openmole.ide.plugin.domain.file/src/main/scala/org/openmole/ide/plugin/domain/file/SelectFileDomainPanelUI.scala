@@ -27,15 +27,15 @@ class SelectFileDomainPanelUI(val dataUI: SelectFileDomainDataUI) extends Plugin
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val dirTField = directoryTextField(dataUI.directoryPath)
-  val pathTextField = new TextField(8) { text = dataUI.path }
-  contents += FileDomainPanelUI.panel(List((dirTField, "Directory"), (pathTextField, "Reg Exp")))
+  val regExpTextField = new TextField(8) { text = dataUI.directoryPath }
+  contents += FileDomainPanelUI.panel(List((dirTField, "Directory"), (regExpTextField, "Reg Exp")))
 
   override def toString = dataUI.name
 
-  def saveContent = new SelectFileDomainDataUI(dirTField.text, pathTextField.text)
+  def saveContent = new SelectFileDomainDataUI(dirTField.text, regExpTextField.text)
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(dirTField, new Help(i18n.getString("dir"), i18n.getString("dirEx")))
-    add(pathTextField, new Help(i18n.getString("singleFilePath"), i18n.getString("singleFilePathEx")))
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("singleFilePermalink")))) {
+    add(dirTField, new Help(i18n.getString("file"), i18n.getString("fileEx")))
+    add(regExpTextField, new Help(i18n.getString("singleFilePath"), i18n.getString("singleFilePathEx")))
   }
 }
