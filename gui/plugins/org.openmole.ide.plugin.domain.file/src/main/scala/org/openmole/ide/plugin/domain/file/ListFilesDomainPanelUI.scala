@@ -38,7 +38,7 @@ class ListFilesDomainPanelUI(val dataUI: ListFilesDomainDataUI) extends PluginPa
 
   def saveContent = new ListFilesDomainDataUI(dirTField.text, regexpTextField.text, recursiveCheckBox.selected)
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("multipleFilePermalink")))) {
     add(dirTField, new Help(i18n.getString("dir"), i18n.getString("dirEx")))
     add(regexpTextField, new Help(i18n.getString("regularExp"), i18n.getString("regularExpEx")))
     add(recursiveCheckBox, new Help(i18n.getString("recursive"), i18n.getString("recursiveEx")))
