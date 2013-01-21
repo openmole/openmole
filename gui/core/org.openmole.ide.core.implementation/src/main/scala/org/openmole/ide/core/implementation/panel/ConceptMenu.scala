@@ -37,6 +37,7 @@ import org.openmole.ide.core.implementation.workflow.BuildMoleSceneContainer
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import scala.collection.JavaConversions._
+import org.openmole.ide.misc.tools.util.Types._
 
 object ConceptMenu {
 

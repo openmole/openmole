@@ -45,7 +45,7 @@ class MapDomainPanelUI(pud: MapDomainDataUI) extends PluginPanel("wrap 3") with 
     pud.previousDomain)
 
   override lazy val help =
-    new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
+    new Helper(List(new URL(i18n.getString("mapPermalinkText"), i18n.getString("mapPermalink")))) {
       add(protoNameTextField, new Help(i18n.getString("mapVariable"), i18n.getString("mapVariableEx")))
       add(codeTextArea.editor, new Help(i18n.getString("mapCode"), i18n.getString("mapCodeEx")))
     }

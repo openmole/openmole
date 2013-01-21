@@ -48,7 +48,7 @@ class SlidingDomainPanelUI(val dataUI: SlidingDomainDataUI[_]) extends PluginPan
     SlidingDomainDataUI(sizeField.text, stepTextField.text, classString, dataUI.previousDomain)
   }
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
+  override val help = new Helper(List(new URL(i18n.getString("slidingPermalinkText"), i18n.getString("slidingPermalink")))) {
     add(sizeField, new Help(i18n.getString("size"), i18n.getString("sizeEx")))
     add(stepTextField, new Help(i18n.getString("step"), i18n.getString("stepEx")))
   }

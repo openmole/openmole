@@ -34,7 +34,7 @@ class SelectFileDomainPanelUI(val dataUI: SelectFileDomainDataUI) extends Plugin
 
   def saveContent = new SelectFileDomainDataUI(dirTField.text, regExpTextField.text)
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("multipleFilePermalink")))) {
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("singleFilePermalink")))) {
     add(dirTField, new Help(i18n.getString("file"), i18n.getString("fileEx")))
     add(regExpTextField, new Help(i18n.getString("singleFilePath"), i18n.getString("singleFilePathEx")))
   }
