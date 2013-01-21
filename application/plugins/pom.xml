@@ -202,7 +202,7 @@
     </dependency>
     <dependency>
       <groupId>org.openmole.core</groupId>
-      <artifactId>org.openmole.plugin.hook.csvprofiler</artifactId>
+      <artifactId>org.openmole.plugin.profiler.csvprofiler</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>
