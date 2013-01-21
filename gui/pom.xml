@@ -20,14 +20,6 @@
   <!-- *** Project Information ************************************* -->
   <!-- ************************************************************* -->
   <name>${project.artifactId} ${project.version}</name>
-  <url>http://www.openmole.org/</url>
-  <licenses>
-    <license>
-      <name>AGPLv3.0</name>
-      <url>http://www.gnu.org/licenses/agpl-3.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
   <modules>
     <module>third-parties</module>
     <module>libraries</module>
@@ -36,28 +28,6 @@
     <module>plugins</module>
     <module>osgi</module>
   </modules>
-  <!-- ************************************************************* -->
-  <!-- *** Build Environment  ************************************** -->
-  <!-- ************************************************************* -->
-  <scm>
-    <connection>scm:git:git://git.openmole.org:openmole-gui</connection>
-    <developerConnection>scm:git:gitosis@git.openmole.org:openmole-gui</developerConnection>
-    <url>git://git.openmole.org:openmole-gui</url>
-  </scm>
-  <issueManagement>
-    <system>redmine</system>
-    <url>https://forge.iscpif.fr/projects/openmole/issues</url>
-  </issueManagement>
-  <distributionManagement>
-    <repository>
-      <id>maven.openmole.org</id>
-      <url>http://maven.openmole.org/releases</url>
-    </repository>
-    <snapshotRepository>
-      <id>maven.openmole.org</id>
-      <url>http://maven.openmole.org/snapshots</url>
-    </snapshotRepository>
-  </distributionManagement>
   <properties>
     <netbeans.version>RELEASE71</netbeans.version>
     <org.jfree.chart.jfree.version>1.0.13</org.jfree.chart.jfree.version>
@@ -65,18 +35,4 @@
     <com.miglayout.version>3.7.4</com.miglayout.version>
     <brandingToken>openmole_gui</brandingToken>
   </properties>
-  <repositories>
-    <repository>
-      <id>maven.openmole.org</id>
-      <name>OpenMole repository</name>
-      <url>http://maven.openmole.org/public/</url>
-    </repository>
-  </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>maven.openmole.org</id>
-      <name>OpenMole repository</name>
-      <url>http://maven.openmole.org/public/</url>
-    </pluginRepository>
-  </pluginRepositories>
 </project>
