@@ -4,7 +4,7 @@
   <parent>
     <artifactId>openmole</artifactId>
     <groupId>org.openmole</groupId>
-    <version>0.7.0-RC4-SNAPSHOT</version>
+    <version>0.7.0-RC5555555555555555555555555555555555555555555555555555555-SNAPSHOT</version>
   </parent>
   <groupId>org.openmole</groupId>
   <artifactId>openmole-installer</artifactId>
