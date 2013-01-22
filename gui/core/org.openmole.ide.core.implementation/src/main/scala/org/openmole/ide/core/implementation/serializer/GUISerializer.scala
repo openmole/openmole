@@ -177,7 +177,7 @@ class GUISerializer(val toFromFile: String) {
     StatusBar().clear
     Proxys.clearAll
     ScenesManager.closeAll
-    ClassLoader.loadExtraPlugins
+    //ClassLoader.loadExtraPlugins
 
     val os = new TarInputStream(new FileInputStream(toFromFile))
     os.extractDirArchiveWithRelativePathAndClose(extractDir)
