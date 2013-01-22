@@ -62,15 +62,5 @@
         </excludes>-->
       </resource>
     </resources>
-    <plugins>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>exec-maven-plugin</artifactId>
-        <version>1.1</version>
-        <configuration>
-          <mainClass>org.openmole.web.Openmolewebserver</mainClass>
-        </configuration>
-      </plugin>
-    </plugins>
   </build>
 </project>
