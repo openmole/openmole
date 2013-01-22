@@ -137,27 +137,27 @@ object CheckData extends Logger {
     protoMapping: Map[PrototypeKey, IPrototypeDataProxyUI],
     coreCapsule: ICapsule): Unit = {
     proxy.dataUI.updateImplicits(coreCapsule.inputs(mole).map {
-      i ⇒ KeyPrototypeGenerator(i.prototype)
+      i ⇒
+        KeyPrototypeGenerator(i.prototype)
     }.toList
       .filterNot {
         n ⇒
           proxy.dataUI.prototypesIn.map {
             p ⇒ KeyPrototypeGenerator(p)
           }.contains(n)
-      }
-      .map {
+      }.map {
         protoMapping
       },
       coreCapsule.outputs(mole).map {
-        i ⇒ KeyPrototypeGenerator(i.prototype)
+        i ⇒
+          KeyPrototypeGenerator(i.prototype)
       }.toList
         .filterNot {
           n ⇒
             proxy.dataUI.prototypesOut.map {
               p ⇒ KeyPrototypeGenerator(p)
             }.contains(n)
-        }
-        .map {
+        }.map {
           protoMapping
         })
   }

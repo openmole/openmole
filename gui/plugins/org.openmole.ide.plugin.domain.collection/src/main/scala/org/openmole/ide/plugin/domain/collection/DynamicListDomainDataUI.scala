@@ -48,7 +48,7 @@ case class DynamicListDomainDataUI[S](val values: List[String])(implicit val dom
     extends IDomainDataUI with IFinite {
   val name = "Value list"
 
-  def preview = " in " + values.headOption.getOrElse("") + " ..."
+  def preview = " in " + values.take(2).mkString(", ") + " ..."
 
   override def availableTypes = super.availableTypes :+ STRING
 

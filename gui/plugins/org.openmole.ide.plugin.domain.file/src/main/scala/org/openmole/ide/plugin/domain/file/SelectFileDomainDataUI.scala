@@ -30,17 +30,17 @@ object SelectFileDomainDataUI {
   }
 }
 
-case class SelectFileDomainDataUI(val directoryPath: String = "", val path: String = "") extends SubDataUI {
+case class SelectFileDomainDataUI(val directoryPath: String = "", val regExp: String = "") extends SubDataUI {
 
   val domainType = manifest[File]
 
   override def name = "Single file"
 
-  def coreObject = new SelectFileDomain(new File(directoryPath), path)
+  def coreObject = new SelectFileDomain(new File(directoryPath), regExp)
 
   def buildPanelUI = new SelectFileDomainPanelUI(this)
 
-  def preview = " as " + new File(path).getName
+  def preview = " as " + new File(directoryPath).getName
 
   def coreClass = classOf[SelectFileDomainDataUI]
 }

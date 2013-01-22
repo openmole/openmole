@@ -27,12 +27,13 @@ import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.{ Help, URL, Helper, PluginPanel }
 import scala.swing.BorderPanel.Position._
 import java.util.{ Locale, ResourceBundle }
+import org.openmole.ide.misc.tools.util.Types
 import org.openmole.ide.misc.tools.util.Types._
 
 class UniformDistributionPanelUI(pud: UniformDistributionDataUI[_]) extends PluginPanel("wrap 2") with IDomainPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
-  val typeCombo = new MyComboBox(List(INT, LONG))
+  val typeCombo = new MyComboBox(List(Types.pretify(INT), Types.pretify(LONG)))
   val maxField = new TextField(pud.max.getOrElse("").toString, 6)
 
   val initialType = pud.availableTypes.head
@@ -50,12 +51,12 @@ class UniformDistributionPanelUI(pud: UniformDistributionDataUI[_]) extends Plug
 
   def setContents(t: String) = {
     maxPanel.contents.removeAll
-    t match {
+    Types.standardize(t) match {
       case INT ⇒
         maxPanel.contents += (new Label("Max"), "gap para")
         maxPanel.contents += (maxField, "wrap")
       case LONG ⇒ maxPanel.contents += new Label("<html><i>No more information is required for this Domain</i></html>")
-      case _ ⇒
+      case _ ⇒ println("other : " + t)
     }
     revalidate
     repaint

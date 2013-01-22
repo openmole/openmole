@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 2013 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -9,27 +9,11 @@
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
+ * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.ide.core.model.data
 
-package org.openmole.plugin.profiler.csvprofiler
-
-import au.com.bytecode.opencsv.CSVWriter
-import org.openmole.core.model.job._
-import org.openmole.core.model.job.State._
-import org.openmole.core.model.mole._
-import ToCSV._
-
-class CSVProfiler(writer: CSVWriter) extends Profiler {
-
-  override def process(moleJob: IMoleJob) = synchronized {
-    writer.writeNext(toColumns(moleJob))
-    writer.flush
-  }
-
-  override def finished = writer.flush
-
-}
+trait NoMemoryHook

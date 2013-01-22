@@ -6,7 +6,7 @@
   <!-- ************************************************************* -->
   <groupId>org.openmole</groupId>
   <artifactId>openmole</artifactId>
-  <version>0.7.0-RC4-SNAPSHOT</version>
+  <version>0.7.0-RC5-SNAPSHOT</version>
   <!-- ************************************************************* -->
   <!-- *** Build Settings ****************************************** -->
   <!-- ************************************************************* -->
@@ -150,7 +150,7 @@
     <bundle.activationpolicy>lazy</bundle.activationpolicy>
     <bundle.include.resource></bundle.include.resource>
     <embed-transitive>false</embed-transitive>
-    <include></include>
+    <include />
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <dependencyManagement>

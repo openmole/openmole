@@ -17,14 +17,20 @@
 package org.openmole.ide.plugin.domain.modifier
 
 import org.openmole.ide.core.model.panel.IDomainPanelUI
-import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget.{ URL, Helper, PluginPanel }
 import scala.swing.Label
+import java.util.{ Locale, ResourceBundle }
 
 class SortDomainPanelUI(dataUI: SortDomainDataUI[_]) extends PluginPanel("") with IDomainPanelUI {
+  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+
   contents += new Label("<html><i>No more information is required for this Domain</i></html>")
 
   def saveContent = {
     val classString = ModifierDomainDataUI.computeClassString(dataUI)
     SortDomainDataUI(classString, dataUI.previousDomain)
   }
+
+  override lazy val help =
+    new Helper(List(new URL(i18n.getString("sortPermalinkText"), i18n.getString("sortPermalink"))))
 }
