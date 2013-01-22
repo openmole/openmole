@@ -141,8 +141,10 @@ class SubMoleExecution(
 
   private def jobFinished(job: IMoleJob) = {
     val mole = moleExecution.mole
-    val (capsule, ticket) = _jobs.single()(job)
+    val (capsule, ticket) = _jobs.single().get(job).getOrElse(throw new InternalProcessingError("Bug, job has not been registred."))
     try {
+      EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleFinished(job, capsule))
+
       moleExecution.indexedHooks.getOrElse(capsule, List.empty).foreach { secureHookExecution(_, job) }
       secureProfilerExecution(moleExecution.profiler, job)
 
@@ -223,12 +225,6 @@ class SubMoleExecution(
         EventDispatcher.trigger(moleExecution, new IMoleExecution.ExceptionRaised(job, e, SEVERE))
       case _ ⇒
     }
-
-    if (newState == COMPLETED) {
-      val (capsule, _) = _jobs.single()(job)
-      EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleFinished(job, capsule))
-    }
-
     background {
       newState match {
         case COMPLETED ⇒ jobFinished(job)
