@@ -166,6 +166,7 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
         _.activated
       }.size > 0) true
       else false)
+    }
   }
 
 }
