@@ -1,6 +1,7 @@
 package org.openmole.web
 
 import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.util.resource._
 import org.eclipse.jetty.webapp.WebAppContext
 
 class Openmolewebserver(port: Int) {
@@ -9,16 +10,26 @@ class Openmolewebserver(port: Int) {
 
   val context = new WebAppContext()
 
-  val res = classOf[Openmolewebserver].getResource("/WEB-INF/")
+  val res = classOf[Openmolewebserver].getResource("/")
+
+  val resor = Resource.newResource(res);
+
+  println(res.toString)
 
   context setContextPath "/"
-  context.setResourceBase(res.toString)
+  context.setBaseResource(resor)
 
   server.setHandler(context)
 
   def start() {
-    server.start
-    server.join
+    try {
+      server.start
+      server.join
+
+    } catch {
+      case e: Exception ⇒ e.printStackTrace()
+    }
+
   }
 
   def end() {

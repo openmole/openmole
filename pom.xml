@@ -148,6 +148,7 @@
     <bundle.version>${project.version}</bundle.version>
     <bundle.namespace>${project.artifactId}</bundle.namespace>
     <bundle.activationpolicy>lazy</bundle.activationpolicy>
+    <bundle.include.resource></bundle.include.resource>
     <embed-transitive>false</embed-transitive>
     <include></include>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -341,6 +342,9 @@
             <!--<Embed-Dependency>${embed-dep}</Embed-Dependency>-->
             <Eclipse-BuddyPolicy>${eclipse.buddypolicy}</Eclipse-BuddyPolicy>
             <Bundle-Activator>${bundle.activator}</Bundle-Activator>
+            <!-- <Include-Resource>
+                  ${bundle.include.resource}
+              </Include-Resource> -->
             <Bundle-ActivationPolicy>${bundle.activationpolicy}</Bundle-ActivationPolicy>
             <_include>${include}</_include>
           </instructions>
