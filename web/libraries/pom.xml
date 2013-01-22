@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <!-- ************************************************************* -->
+  <!-- *** POM Relationships *************************************** -->
+  <!-- ************************************************************* -->
+  <parent>
+    <artifactId>openmole-webserver</artifactId>
+    <groupId>org.openmole.web</groupId>
+    <version>0.7.0-RC4-SNAPSHOT</version>
+  </parent>
+  <artifactId>libraries</artifactId>
+  <!-- ************************************************************* -->
+  <!-- *** Build Settings ****************************************** -->
+  <!-- ************************************************************* -->
+  <packaging>pom</packaging>
+  <!-- ************************************************************* -->
+  <!-- *** Project Information ************************************* -->
+  <!-- ************************************************************* -->
+  <name>${project.artifactId}</name>
+  <description>Third-party OSGi bundles used by the OpenMoLE webserver</description>
+  <modules>
+    <module>org.scalatra</module>
+    <module>ch.qos.logback</module>
+    <module>org.eclipse.jetty</module>
+    <module>org.slf4j</module>
+  </modules>
+  <properties>
+    <!-- Default properties for bundles creation -->
+    <!--<embed-dep>*;type=!pom;inline=true</embed-dep>-->
+    <embed-dep>*;artifactId=!scala-library;type=!pom;inline=true</embed-dep>
+    <embed-transitive>true</embed-transitive>
+    <import.packages>*;resolution:=optional</import.packages>
+    <libraries.export.packages>*,${export.packages}</libraries.export.packages>
+    <bundle.name>${project.name}</bundle.name>
+    <bundle.description>${project.name}</bundle.description>
+    <bundle.classpath>.</bundle.classpath>
+  </properties>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <outputDirectory>${basedir}</outputDirectory>
+          <finalName>${symbolic.name}_${bundle.version}</finalName>
+          <instructions>
+            <Bundle-Name>${bundle.name}</Bundle-Name>
+            <Bundle-Version>${bundle.version}</Bundle-Version>
+            <Bundle-SymbolicName>${symbolic.name}</Bundle-SymbolicName>
+            <Bundle-Description>${bundle.description}</Bundle-Description>
+            <Export-Package>${libraries.export.packages}</Export-Package>
+            <Embed-Dependency>${embed-dep}</Embed-Dependency>
+            <Embed-Transitive>${embed-transitive}</Embed-Transitive>
+            <Eclipse-BuddyPolicy>${eclipse.buddypolicy}</Eclipse-BuddyPolicy>
+            <Bundle-ClassPath>${bundle.classpath}</Bundle-ClassPath>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

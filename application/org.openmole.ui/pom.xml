@@ -150,6 +150,17 @@
       <artifactId>org.openmole.ide.core.implementation</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <!-- Webserver Plugin -->
+    <dependency>
+      <groupId>org.openmole.web</groupId>
+      <artifactId>org.openmole.web.core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openmole.web</groupId>
+      <artifactId>openmole-webserver</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
