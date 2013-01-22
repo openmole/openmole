@@ -159,15 +159,25 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
   class HookAction(factory: IHookFactoryUI,
                    it: CheckMenuItem) extends Action(factory.toString) {
     def apply = {
-      if (!capsule.dataUI.hooks.contains(factory.coreClass))
-        factory.buildDataUI match {
-          case d: IHookDataUI with NoMemoryHook ⇒
-          case d: IHookDataUI ⇒ capsule.dataUI.hooks += factory.coreClass -> d
-          case _ ⇒
-        }
 
-      else capsule.dataUI.hooks(factory.coreClass).activated = it.selected
-      capsule.hooked(if (capsule.dataUI.hooks.values.filter {
+      activateHook(if (!capsule.dataUI.hooks.contains(factory.coreClass))
+        factory.buildDataUI match {
+        case d: IHookDataUI with NoMemoryHook ⇒
+          d.activated = it.selected
+          List(d)
+        case d: IHookDataUI ⇒
+          capsule.dataUI.hooks += factory.coreClass -> d
+          List()
+        case _ ⇒ List()
+      }
+      else {
+        capsule.dataUI.hooks(factory.coreClass).activated = it.selected
+        List()
+      })
+    }
+
+    def activateHook(dl: List[IHookDataUI]) = {
+      capsule.hooked(if ((dl ::: capsule.dataUI.hooks.values.toList).filter {
         _.activated
       }.size > 0) true
       else false)
