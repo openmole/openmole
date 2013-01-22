@@ -7,11 +7,11 @@
   <parent>
     <artifactId>openmole</artifactId>
     <groupId>org.openmole</groupId>
-    <version>0.7.0-RC4-SNAPSHOT</version>
+    <version>0.7.0-RC5-SNAPSHOT</version>
   </parent>
   <groupId>org.openmole.core</groupId>
   <artifactId>openmole-ecosystem</artifactId>
-  <version>0.7.0-RC4-SNAPSHOT</version>
+  <version>0.7.0-RC5-SNAPSHOT</version>
   <!-- ************************************************************* -->
   <!-- *** Build Settings ****************************************** -->
   <!-- ************************************************************* -->
@@ -20,64 +20,12 @@
   <!-- *** Project Information ************************************* -->
   <!-- ************************************************************* -->
   <name>${project.artifactId} ${project.version}</name>
-  <url>http://www.openmole.org/</url>
-  <licenses>
-    <license>
-      <name>AGPLv3.0</name>
-      <url>http://www.gnu.org/licenses/agpl-3.0.txt</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-  <!-- ************************************************************* -->
-  <!-- *** Build Environment  ************************************** -->
-  <!-- ************************************************************* -->
-  <mailingLists>
-    <mailingList>
-      <name>OpenMole users mailing-list</name>
-      <archive>http://sympa.lyon.cemagref.fr/wws/admin/simexplorer-users</archive>
-    </mailingList>
-    <mailingList>
-      <name>OpenMole developers mailing-list</name>
-      <archive>http://sympa.lyon.cemagref.fr/wws/admin/simexplorer-dev</archive>
-    </mailingList>
-  </mailingLists>
+
   <modules>
     <module>libraries</module>
     <module>third-parties</module>
     <module>openmole</module>
     <module>runtime</module>
   </modules>
-  <scm>
-    <connection>scm:git:git://git.openmole.org:openmole-core</connection>
-    <developerConnection>scm:git:gitosis@git.openmole.org:openmole-core</developerConnection>
-    <url>git://git.openmole.org:openmole-core</url>
-  </scm>
-  <issueManagement>
-    <system>redmine</system>
-    <url>https://forge.iscpif.fr/projects/openmole/issues</url>
-  </issueManagement>
-  <distributionManagement>
-    <repository>
-      <id>maven.openmole.org</id>
-      <url>http://maven.openmole.org/releases</url>
-    </repository>
-    <snapshotRepository>
-      <id>maven.openmole.org</id>
-      <url>http://maven.openmole.org/snapshots</url>
-    </snapshotRepository>
-  </distributionManagement>
-  <repositories>
-    <repository>
-      <id>maven.openmole.org</id>
-      <name>OpenMole repository</name>
-      <url>http://maven.openmole.org/public/</url>
-    </repository>
-  </repositories>
-  <pluginRepositories>
-    <pluginRepository>
-      <id>maven.openmole.org</id>
-      <name>OpenMole repository</name>
-      <url>http://maven.openmole.org/public/</url>
-    </pluginRepository>
-  </pluginRepositories>
+
 </project>

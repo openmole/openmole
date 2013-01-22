@@ -7,7 +7,7 @@
   <parent>
     <artifactId>misc</artifactId>
     <groupId>org.openmole.core</groupId>
-    <version>0.7.0-RC4-SNAPSHOT</version>
+    <version>0.7.0-RC5-SNAPSHOT</version>
   </parent>
   <artifactId>org.openmole.misc.eventdispatcher</artifactId>
   <!-- ************************************************************* -->
@@ -18,7 +18,7 @@
   <!-- *** Project Information ************************************* -->
   <!-- ************************************************************* -->
   <name>${project.artifactId} ${project.version}</name>
-  <description></description>
+  <description />
   <dependencies>
     <dependency>
       <groupId>org.openmole.core</groupId>

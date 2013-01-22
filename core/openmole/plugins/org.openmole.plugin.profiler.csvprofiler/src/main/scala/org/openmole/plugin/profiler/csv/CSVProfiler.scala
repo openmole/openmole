@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.hook.csvprofiler
+package org.openmole.plugin.profiler.csvprofiler
 
 import au.com.bytecode.opencsv.CSVWriter
 import org.openmole.core.model.job._

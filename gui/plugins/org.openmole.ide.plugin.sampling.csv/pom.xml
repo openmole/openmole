@@ -4,7 +4,7 @@
   <parent>
     <artifactId>plugins</artifactId>
     <groupId>org.openmole.ide</groupId>
-    <version>0.7.0-RC4-SNAPSHOT</version>
+    <version>0.7.0-RC5-SNAPSHOT</version>
   </parent>
   <artifactId>org.openmole.ide.plugin.sampling.csv</artifactId>
   <packaging>bundle</packaging>
