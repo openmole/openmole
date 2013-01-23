@@ -154,12 +154,10 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
   }
 
   "A master capsule" should "work with mole tasks" in {
-    val p = Prototype[String]("p")
 
     val t1 = new TestTask {
       val name = "Test write"
-      override val outputs = DataSet(p)
-      override def process(context: Context) = context + (p -> "Test")
+      override def process(context: Context) = context
     }
 
     val mole = t1 toMole
@@ -167,7 +165,12 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
     val mt = MoleTask("MoleTask", mole, mole.root)
 
     val t1c = new MasterCapsule(mt.toTask)
-    val ex = new Mole(t1c)
+
+    val i = Prototype[Int]("i")
+
+    val explo = ExplorationTask("Exploration", new ExplicitSampling(i, 0 to 100))
+
+    val ex = explo -< t1c
 
     ex.start.waitUntilEnded
   }

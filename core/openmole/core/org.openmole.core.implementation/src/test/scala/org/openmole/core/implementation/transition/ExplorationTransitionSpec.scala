@@ -77,7 +77,7 @@ class ExplorationTransitionSpec extends FlatSpec with ShouldMatchers {
       override def inputs = DataSet(i)
       override def process(context: Context) = synchronized {
         context.contains(i) should equal(true)
-        res += context.value(i).get
+        res += context(i)
         context
       }
     }

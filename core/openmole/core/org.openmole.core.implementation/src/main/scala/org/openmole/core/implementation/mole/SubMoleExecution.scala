@@ -67,11 +67,6 @@ class SubMoleExecution(
     })
   }
 
-  private def addJob(moleJob: IMoleJob, capsule: ICapsule, ticket: ITicket) = atomic { implicit txn ⇒
-    _jobs() = _jobs() + (moleJob -> (capsule, ticket))
-    nbJobs_+=(1)
-  }
-
   private def rmJob(moleJob: IMoleJob) = atomic { implicit txn ⇒
     _jobs() = _jobs() - moleJob
     nbJobs_+=(-1)
@@ -176,6 +171,12 @@ class SubMoleExecution(
 
   override def submit(capsule: ICapsule, context: Context, ticket: ITicket) = {
     if (!canceled) {
+      nbJobs_+=(1)
+
+      def addJob(moleJob: IMoleJob, capsule: ICapsule, ticket: ITicket) = atomic { implicit txn ⇒
+        _jobs() = _jobs() + (moleJob -> (capsule, ticket))
+      }
+
       def implicits =
         Context.empty ++
           moleExecution.mole.implicits.values.filter(v ⇒ capsule.task.inputs.contains(v.prototype.name)) +
@@ -184,20 +185,21 @@ class SubMoleExecution(
       //FIXME: Factorize code
       capsule match {
         case c: IMasterCapsule ⇒
-          val moleJob = masterCapsuleSemaphore {
-            def stateChanged(job: IMoleJob, oldState: State, newState: State) =
-              EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobStatusChanged(job, newState, oldState))
+          def stateChanged(job: IMoleJob, oldState: State, newState: State) =
+            EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobStatusChanged(job, newState, oldState))
 
-            val savedContext = masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(Context.empty)
-            val moleJob: IMoleJob = new MoleJob(capsule.task, implicits + context + savedContext, moleExecution.nextJobId, stateChanged)
-            EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleStarting(moleJob, capsule))
-            EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobSubmitted(moleJob))
-            addJob(moleJob, capsule, ticket)
-            moleJob.perform
-            masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(moleJob.context))
-            moleJob
+          background {
+            masterCapsuleSemaphore {
+              val savedContext = masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(Context.empty)
+              val moleJob: IMoleJob = new MoleJob(capsule.task, implicits + context + savedContext, moleExecution.nextJobId, stateChanged)
+              EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleStarting(moleJob, capsule))
+              EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobSubmitted(moleJob))
+              addJob(moleJob, capsule, ticket)
+              moleJob.perform
+              masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(moleJob.context))
+              finalState(moleJob, moleJob.state)
+            }
           }
-          finalState(moleJob, moleJob.state)
         case _ ⇒
           def stateChanged(job: IMoleJob, oldState: State, newState: State) = {
             EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobStatusChanged(job, newState, oldState))
@@ -210,6 +212,7 @@ class SubMoleExecution(
           EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobSubmitted(moleJob))
           moleExecution.group(moleJob, capsule, this)
       }
+
     }
   }
 
