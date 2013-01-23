@@ -18,6 +18,7 @@
 package org.openmole.misc.tools.service
 
 import java.util.concurrent.locks.Lock
+import java.util.concurrent.Semaphore
 
 object LockUtil {
 
@@ -29,4 +30,14 @@ object LockUtil {
       } finally lock.unlock()
     }
   }
+
+  implicit class SemaphoreDecorator(s: Semaphore) {
+    def apply[T](block: ⇒ T): T = {
+      s.acquire()
+      try {
+        block
+      } finally s.release()
+    }
+  }
+
 }

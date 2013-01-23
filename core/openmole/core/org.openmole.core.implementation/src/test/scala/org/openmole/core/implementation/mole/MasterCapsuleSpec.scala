@@ -49,7 +49,7 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
       val name = "Test read"
       override val inputs = DataSet(p)
       override def process(context: Context) = {
-        context.value(p).get should equal("Test")
+        context(p) should equal("Test")
         context
       }
     }
@@ -81,7 +81,7 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
       override val outputs = DataSet(n, i)
       override val parameters = ParameterSet(n -> 0)
       override def process(context: Context) = {
-        val nVal = context.value(n).get
+        val nVal = context(n)
         context + Variable(n, nVal + 1) + Variable(i, (nVal + 1).toString)
       }
     }
@@ -118,7 +118,7 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
       override val inputs = DataSet(isaved)
       override def process(context: Context) = {
         context.contains(isaved) should equal(true)
-        context.value(isaved).get.size should equal(10)
+        context(isaved).size should equal(10)
         endCapsExecuted += 1
         context
       }
@@ -130,7 +130,7 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
       override val outputs = DataSet(isaved, n, i)
       override val parameters = ParameterSet(n -> 0, isaved -> Array.empty[String])
       override def process(context: Context) = {
-        val nVal = context.value(n).get
+        val nVal = context(n)
         val isavedVar = (nVal.toString :: context.variable(isaved).get.value.toList)
 
         context +
@@ -151,6 +151,28 @@ class MasterCapsuleSpec extends FlatSpec with ShouldMatchers {
 
     ex.start.waitUntilEnded
     endCapsExecuted should equal(1)
+  }
+
+  "A master capsule" should "work with mole tasks" in {
+
+    val t1 = new TestTask {
+      val name = "Test write"
+      override def process(context: Context) = context
+    }
+
+    val mole = t1 toMole
+
+    val mt = MoleTask("MoleTask", mole, mole.root)
+
+    val t1c = new MasterCapsule(mt.toTask)
+
+    val i = Prototype[Int]("i")
+
+    val explo = ExplorationTask("Exploration", new ExplicitSampling(i, 0 to 100))
+
+    val ex = explo -< t1c
+
+    ex.start.waitUntilEnded
   }
 
 }
