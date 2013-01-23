@@ -10,14 +10,23 @@ class Openmolewebserver(port: Int) {
 
   val context = new WebAppContext()
 
-  val res = classOf[Openmolewebserver].getResource("/")
+  val res = classOf[Openmolewebserver].getResource("/") //Dear god this is a horrible hack
+  val bes = classOf[org.fusesource.scalate.servlet.ServletRenderContext]
+  val des = classOf[org.fusesource.scalate.console.ConsoleSnippets]
+  val ges = classOf[org.fusesource.scalate.Binding]
+  classOf[org.fusesource.scalate.support.Code]
 
-  val resor = Resource.newResource(res);
+  val ass = classOf[org.eclipse.jetty.servlet.listener.ELContextCleaner]
+
+  println(ass)
+
+  val resor = Resource.newResource(res)
 
   println(res.toString)
 
-  context setContextPath "/"
+  context.setContextPath("/")
   context.setBaseResource(resor)
+  context.setClassLoader(classOf[Openmolewebserver].getClassLoader)
 
   server.setHandler(context)
 

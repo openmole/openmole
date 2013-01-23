@@ -22,7 +22,7 @@
   <!--optional. Use this property to tune the exported packages-->
   <properties>
     <!--<import.packages>com.google.common.*;resolution:=optional</import.packages>-->
-    <libraries.export.packages>org.scalatra.*,org.fusesource.scalate</libraries.export.packages>
+    <libraries.export.packages>org.scalatra.*,org.fusesource.*</libraries.export.packages>
     <eclipse.buddypolicy>global</eclipse.buddypolicy>
     <embed-dep>*;groupId=!org.scala-lang|org.openmole.core|org.slf4j;type=!pom;inline=true</embed-dep>
   </properties>
