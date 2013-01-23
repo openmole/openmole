@@ -176,11 +176,7 @@ class ExecutionManager(manager: IMoleSceneManager,
                          groupings: List[(Grouping, ICapsule)]) = MoleMaker.buildMoleExecution(mole,
     manager,
     hooks.flatMap {
-      case (panel, caps) ⇒ panel.saveContent match {
-        case h: IHookDataUI with NoMemoryHook ⇒ List(capsuleMapping(caps)).zip(KeyRegistry.hooks(DefaultKey(h.coreClass)).buildDataUI.coreObject(this))
-        case h: IHookDataUI ⇒ List(capsuleMapping(caps)).zip(h.coreObject(this))
-        case _ ⇒ Nil
-      }
+      case (panel, caps) ⇒ List(capsuleMapping(caps)).zip(panel.saveContent.coreObject(this))
     }.toList,
     capsuleMapping,
     groupings)

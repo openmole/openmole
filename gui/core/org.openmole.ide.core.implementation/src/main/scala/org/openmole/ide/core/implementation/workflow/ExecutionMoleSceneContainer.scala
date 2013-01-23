@@ -43,6 +43,8 @@ import org.openmole.ide.core.implementation.serializer.GUISerializer
 import scala.swing.FileChooser.Result._
 import org.openmole.core.serializer.SerializerService
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.core.model.data.{ NoMemoryHook, IHookDataUI }
+import org.openmole.ide.core.implementation.registry.{ DefaultKey, KeyRegistry }
 
 class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
                                   val page: TabbedPane.Page,
@@ -92,9 +94,20 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
             c ⇒
               c.dataUI.task match {
                 case Some(t: ITaskDataProxyUI) ⇒
+
+                  //Replace no memory Hooks and with new HookDataUI instance
+                  c.dataUI.hooks.foreach {
+                    case (hclass, hdataUI) ⇒ hdataUI match {
+                      case x: IHookDataUI with NoMemoryHook ⇒
+                        c.dataUI.hooks(hclass) = KeyRegistry.hooks(DefaultKey(hdataUI.coreClass)).buildDataUI
+                      case _ ⇒
+                    }
+                  }
+
                   val activated = c.dataUI.hooks.filter {
                     _._2.activated
                   }
+
                   if (!activated.isEmpty) {
                     hookTabbedPane.pages += new TabbedPane.Page("<html><b>" + t.dataUI.name + "</b></html>",
                       new PluginPanel("", "", "[top]") {
