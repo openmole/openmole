@@ -21,6 +21,7 @@
   <!-- ************************************************************* -->
   <properties>
     <export.packages>org.openmole.web.*</export.packages>
+    <eclipse.buddypolicy>global</eclipse.buddypolicy>
     <bundle.include.resource>target/classes/Scalatra.class,src/main/webapp,src/main/resources/logback.xml</bundle.include.resource>
   </properties>
   <dependencies>
