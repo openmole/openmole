@@ -99,7 +99,9 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
                   c.dataUI.hooks.foreach {
                     case (hclass, hdataUI) ⇒ hdataUI match {
                       case x: IHookDataUI with NoMemoryHook ⇒
-                        c.dataUI.hooks(hclass) = KeyRegistry.hooks(DefaultKey(hdataUI.coreClass)).buildDataUI
+                        val hUI = KeyRegistry.hooks(DefaultKey(hdataUI.coreClass)).buildDataUI
+                        hUI.activated = true
+                        c.dataUI.hooks(hclass) = hUI
                       case _ ⇒
                     }
                   }
