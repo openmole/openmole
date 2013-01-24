@@ -23,6 +23,7 @@ import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.core.model.data._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.tools.util.{ Types, ClassLoader }
+import org.openmole.misc.tools.obj.ClassUtils._
 
 object GenericPrototypeDataUI {
 
@@ -47,7 +48,7 @@ object GenericPrototypeDataUI {
   }
 
   def stringToDataUI(s: String): GenericPrototypeDataUI[_] = try {
-    GenericPrototypeDataUI(ClassLoader.toManifest(s))
+    GenericPrototypeDataUI(manifest(s))
   } catch {
     case e: ClassNotFoundException ⇒ throw new UserBadDataError(s + " can not be loaded as a Class")
   }
