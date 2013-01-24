@@ -36,6 +36,6 @@
     <module>org.openmole.misc.sftpserver</module>
   </modules>
   <properties>
-    <include />
+    <include></include>
   </properties>
 </project>

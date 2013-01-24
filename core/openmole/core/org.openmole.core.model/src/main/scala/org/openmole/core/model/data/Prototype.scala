@@ -18,7 +18,7 @@
 package org.openmole.core.model.data
 
 import org.openmole.misc.tools.obj.ClassUtils._
-import org.openmole.misc.tools.obj.Id
+import org.openmole.misc.tools.obj.{ ClassUtils, Id }
 import scala.reflect.Manifest
 
 object Prototype {
@@ -67,12 +67,12 @@ trait Prototype[T] extends Id {
    * @return true if the prototype is assignable from the given prototype
    */
   def isAssignableFrom(p: Prototype[_]): Boolean =
-    `type`.isAssignableFromHighOrder(p.`type`)
+    ClassUtils.assignable(p.`type`.runtimeClass, `type`.runtimeClass)
 
   def accepts(obj: Any): Boolean =
-    obj == null || `type`.isAssignableFromHighOrder(manifest(clazzOf(obj)))
+    obj == null || assignable(manifest(clazzOf(obj)).runtimeClass, `type`.runtimeClass)
 
-  override def id = (name, `type`.erasure)
+  override def id = (name, `type`.runtimeClass)
   override def toString = name + ": " + `type`.toString
 
 }
