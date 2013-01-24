@@ -17,14 +17,12 @@
 
 package org.openmole.ide.core.implementation.dataproxy
 
-import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.ide.core.model.dataproxy._
-import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.implementation.panel.ConceptMenu
-import org.openmole.ide.core.model.data._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
 import org.openmole.ide.misc.tools.util.Types
+import org.openmole.misc.tools.obj.ClassUtils._
 
 object Proxys {
 
@@ -37,10 +35,17 @@ object Proxys {
     _.dataUI.name
   }
 
-  def classPrototypes(prototypeClass: Class[_]) =
+  def classPrototypes(prototypeClass: Class[_]): List[IPrototypeDataProxyUI] =
+    classPrototypes(prototypeClass, prototypes.toList)
+
+  def classPrototypes(prototypeClass: Class[_],
+                      protoList: List[IPrototypeDataProxyUI] = prototypes.toList): List[IPrototypeDataProxyUI] =
+    prototypes.toList.filter { p ⇒ assignable(prototypeClass, p.dataUI.protoType.runtimeClass) }
+
+  /*def classPrototypes(prototypeClass: Class[_]) =
     prototypes.toList.filter { p ⇒
-      Types(Types.extractTypeFromArray(p.dataUI.typeClassString),
-        prototypeClass.getCanonicalName.replaceAllLiterally("[", ""))
+      /*Types(Types.extractTypeFromArray(p.dataUI.typeClassString),
+        prototypeClass.getCanonicalName.replaceAllLiterally("[", ""))   */
     }
 
   def classPrototypes(prototypeClass: Class[_],
@@ -51,7 +56,7 @@ object Proxys {
         p.dataUI.dim == dim && Types(Types.extractTypeFromArray(p.dataUI.typeClassString),
           prototypeClass.getCanonicalName.replaceAllLiterally("[", ""))
     }
-  }
+  }    */
 
   def clearAll: Unit = {
     ConceptMenu.clearAllItems

@@ -30,6 +30,7 @@ import org.openmole.ide.misc.tools.util.Types
 import org.openmole.ide.misc.widget.{ URL, Helper }
 import java.util.{ ResourceBundle, Locale }
 import org.openmole.ide.core.implementation.sampling.SamplingUtils
+import org.openmole.misc.tools.obj.ClassUtils
 
 class ZipWithNameSamplingDataUI(val prototype: Option[IPrototypeDataProxyUI] = None) extends ISamplingDataUI with ZipWithPrototypeSamplingDataUI {
 
@@ -56,7 +57,7 @@ class ZipWithNameSamplingDataUI(val prototype: Option[IPrototypeDataProxyUI] = N
 
   override def isAcceptable(domain: IDomainDataUI) = domain match {
     case f: IFinite ⇒
-      if (Types(domain.domainType.toString, Types.FILE)) true
+      if (ClassUtils.assignable(domain.domainType.runtimeClass, classOf[File])) true
       else {
         StatusBar().warn("A File domain is required here.")
         false

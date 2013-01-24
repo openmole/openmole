@@ -25,9 +25,6 @@ object Types {
   val BIG_DECIMAL = classOf[java.math.BigDecimal].getSimpleName
   val BIG_INTEGER = classOf[java.math.BigInteger].getSimpleName
 
-  def apply(c1: String, c2: String) =
-    c1.split('.').last.toUpperCase == c2.split('.').last.toUpperCase
-
   def pretify(s: String) = {
     val c = s.split('.')
     c.last.head.toUpper.toString + c.last.tail
