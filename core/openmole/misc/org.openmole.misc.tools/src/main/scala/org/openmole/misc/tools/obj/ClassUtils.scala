@@ -17,17 +17,17 @@
 
 package org.openmole.misc.tools.obj
 
+import _root_.groovy.lang.GroovyShell
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import java.lang.reflect.{ Type ⇒ JType, Array ⇒ _, _ }
 import scala.reflect.Manifest.{ classType, intersectionType, arrayType, wildcardType }
 import scala.reflect.ClassManifest
+import org.openmole.misc.exception.UserBadDataError
 
 object ClassUtils {
 
-  implicit def Class2ClassDecorator[T](c: Class[T]) = new ClassDecorator[T](c)
-
-  class ClassDecorator[T](c: Class[T]) {
+  implicit class ClassDecorator[T](c: Class[T]) {
     def equivalence = classEquivalence(c).asInstanceOf[Class[T]]
 
     def listSuperClasses = {
@@ -80,19 +80,7 @@ object ClassUtils {
       ret
     }
 
-    def isAssignableFromPrimitive(c2: Class[_]) = {
-      if (primitiveWrapperMap.contains(c) || primitiveWrapperMap.contains(c2))
-        primitiveWrapperMap.getOrElse(c, c) == primitiveWrapperMap.getOrElse(c2, c2)
-      else c.isAssignableFrom(c2)
-    }
-
     def fromArray = c.getComponentType
-
-    def isAssignableFromHighOrder(from: Class[_]) =
-      unArrayify(c, from) match {
-        case (c1, c2, level) ⇒ c1.isAssignableFromPrimitive(c2)
-      }
-
     def toManifest = classType[T](c)
   }
 
@@ -118,13 +106,13 @@ object ClassUtils {
     }
 
   def intersection(t: Iterable[Class[_]]) = {
-    def intesectionClass(t1: Class[_], t2: Class[_]) = {
+    def intersectionClass(t1: Class[_], t2: Class[_]) = {
       val classes = (t1.listSuperClasses.toSet & t2.listSuperClasses.toSet)
       if (classes.isEmpty) classOf[Any]
       else classes.head
     }
 
-    val c = t.reduceLeft((t1, t2) ⇒ intesectionClass(t1, t2))
+    val c = t.reduceLeft((t1, t2) ⇒ intersectionClass(t1, t2))
     val interfaces = t.map(_.listImplementedInterfaces.toSet).reduceLeft((t1, t2) ⇒ t1 & t2)
 
     intersect((List(c) ++ interfaces))
@@ -132,7 +120,9 @@ object ClassUtils {
 
   def intersect(tps: Iterable[JType]): Manifest[_] = intersectionType(tps.toSeq map manifest: _*)
 
-  def nanifest[T](cls: Class[T]): Manifest[T] = classType(cls)
+  def manifest(s: String): Manifest[_] = manifest(toClass(s))
+
+  def manifest[T](cls: Class[T]): Manifest[T] = classType(cls)
 
   def manifest(tp: JType): Manifest[_] = tp match {
     case x: Class[_] ⇒ classType(x)
@@ -151,19 +141,40 @@ object ClassUtils {
     case x: TypeVariable[_] ⇒ intersect(x.getBounds())
   }
 
-  def classEquivalence(c: Class[_]) = {
-    if (c.isPrimitive) {
-      if (c == classOf[Byte]) java.lang.Byte.TYPE
-      else if (c == classOf[Short]) java.lang.Short.TYPE
-      else if (c == classOf[Int]) java.lang.Integer.TYPE
-      else if (c == classOf[Long]) java.lang.Long.TYPE
-      else if (c == classOf[Float]) java.lang.Float.TYPE
-      else if (c == classOf[Double]) java.lang.Double.TYPE
-      else if (c == classOf[Char]) java.lang.Character.TYPE
-      else if (c == classOf[Boolean]) java.lang.Boolean.TYPE
-      else c
-    } else c
-  }
+  def classEquivalence(c: Class[_]) =
+    if (c == classOf[Byte] || c == classOf[java.lang.Byte]) java.lang.Byte.TYPE
+    else if (c == classOf[Short] || c == classOf[java.lang.Short]) java.lang.Short.TYPE
+    else if (c == classOf[Int] || c == classOf[java.lang.Integer]) java.lang.Integer.TYPE
+    else if (c == classOf[Long] || c == classOf[java.lang.Long]) java.lang.Long.TYPE
+    else if (c == classOf[Float] || c == classOf[java.lang.Float]) java.lang.Float.TYPE
+    else if (c == classOf[Double] || c == classOf[java.lang.Double]) java.lang.Double.TYPE
+    else if (c == classOf[Char] || c == classOf[java.lang.Character]) java.lang.Character.TYPE
+    else if (c == classOf[Boolean] || c == classOf[java.lang.Boolean]) java.lang.Boolean.TYPE
+    else c
+
+  def toClass(s: String) = classEquivalence(
+    s match {
+      case "Byte" ⇒ classOf[Byte]
+      case "Short" ⇒ classOf[Short]
+      case "Int" ⇒ classOf[Int]
+      case "int" ⇒ classOf[Int]
+      case "Long" ⇒ classOf[Long]
+      case "long" ⇒ classOf[Long]
+      case "Float" ⇒ classOf[Float]
+      case "Double" ⇒ classOf[Double]
+      case "double" ⇒ classOf[Double]
+      case "Char" ⇒ classOf[Char]
+      case "Boolean" ⇒ classOf[Boolean]
+      case "String" ⇒ classOf[String]
+      case "File" ⇒ classOf[java.io.File]
+      case "BigInteger" ⇒ classOf[java.math.BigInteger]
+      case "BigDecimal" ⇒ classOf[java.math.BigDecimal]
+      case _ ⇒ try {
+        classOf[GroovyShell].getClassLoader.loadClass(s)
+      } catch {
+        case e: ClassNotFoundException ⇒ throw new UserBadDataError(e, "The class " + s + " has not been found")
+      }
+    })
 
   def clazzOf(v: Any) = {
     v match {
@@ -172,20 +183,23 @@ object ClassUtils {
     }
   }
 
-  private val primitiveWrapperMap = Map[Class[_], Class[_]](java.lang.Boolean.TYPE -> classOf[java.lang.Boolean],
-    java.lang.Byte.TYPE -> classOf[java.lang.Byte],
-    java.lang.Character.TYPE -> classOf[java.lang.Character],
-    java.lang.Short.TYPE -> classOf[java.lang.Short],
-    java.lang.Integer.TYPE -> classOf[java.lang.Integer],
-    java.lang.Long.TYPE -> classOf[java.lang.Long],
-    java.lang.Double.TYPE -> classOf[java.lang.Double],
-    java.lang.Float.TYPE -> classOf[java.lang.Float])
-
   implicit def manifestDecoration(m: Manifest[_]) = new {
-    def isAssignableFromPrimitive(m2: Manifest[_]) = m.runtimeClass.isAssignableFromPrimitive(m2.runtimeClass)
-    def isAssignableFromHighOrder(from: Manifest[_]) = m.runtimeClass.isAssignableFromHighOrder(from.runtimeClass)
     def isArray = m.runtimeClass.isArray
     def fromArray = m.runtimeClass.fromArray
+  }
+
+  implicit def manifestToClass[T](m: Manifest[T]) = m.runtimeClass
+
+  def assignable(from: Class[_], to: Class[_]) =
+    unArrayify(from, to) match {
+      case (c1, c2, _) ⇒ isAssignableFromPrimitive(c1, c2)
+    }
+
+  def isAssignableFromPrimitive(from: Class[_], to: Class[_]) = {
+    val fromEq = classEquivalence(from)
+    val toEq = classEquivalence(to)
+    if (fromEq.isPrimitive || toEq.isPrimitive) fromEq == toEq
+    else to.isAssignableFrom(from)
   }
 
 }
