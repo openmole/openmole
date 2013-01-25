@@ -28,6 +28,7 @@ import org.openmole.ide.misc.tools.util.Types.FILE
 import org.openmole.ide.misc.tools.util.Types
 import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.plugin.domain.modifier.SortByNameDomain
+import org.openmole.misc.tools.obj.ClassUtils
 
 class SortByNameDomainDataUI(var previousDomain: List[IDomainDataUI] = List.empty)
     extends ModifierDomainDataUI with IFinite {
@@ -54,7 +55,8 @@ class SortByNameDomainDataUI(var previousDomain: List[IDomainDataUI] = List.empt
   override def availableTypes = List(FILE)
 
   override def isAcceptable(domain: IDomainDataUI) = {
-    if (Types(domain.domainType.toString, FILE)) true
+    // if (Types(domain.domainType.toString, FILE)) true
+    if (ClassUtils.assignable(domain.domainType.runtimeClass, classOf[File])) true
     else {
       StatusBar().warn("A file domain can not modify another Domain")
       false

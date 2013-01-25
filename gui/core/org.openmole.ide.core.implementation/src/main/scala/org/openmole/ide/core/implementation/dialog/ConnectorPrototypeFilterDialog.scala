@@ -37,6 +37,7 @@ import org.openmole.ide.core.model.sampling.{ ISamplingCompositionProxyUI, IDoma
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.misc.tools.util.Types
 import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.misc.tools.obj.ClassUtils._
 
 object ConnectorPrototypeFilterDialog extends PrototypeDialog {
   def display(connectorUI: IConnectorUI) = {
@@ -94,7 +95,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
     def availablePrototypes =
       connectorWidget.factorProxyUI match {
         case Some(f: IFactorProxyUI) ⇒ Proxys.prototypes.filter {
-          p ⇒ Types(f.dataUI.domain.dataUI.domainType.toString, p.dataUI.protoType.toString)
+          p ⇒ assignable(f.dataUI.domain.dataUI.domainType.runtimeClass, p.dataUI.protoType.runtimeClass)
         }.toList
         case _ ⇒ List()
       }

@@ -36,6 +36,7 @@ import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import scala.collection.mutable.HashSet
 import org.openmole.ide.misc.tools.Counter
+import org.openmole.misc.tools.obj.ClassUtils._
 
 class PrototypeConverter(mapper: Mapper,
                          provider: ReflectionProvider,
@@ -63,7 +64,7 @@ class PrototypeConverter(mapper: Mapper,
 
   def extract(reader: HierarchicalStreamReader) = {
     new PrototypeDataProxyUI(GenericPrototypeDataUI(reader.getAttribute("name"),
-      reader.getAttribute("dim").toInt)(ClassLoader.toManifest(reader.getAttribute("type"))),
+      reader.getAttribute("dim").toInt)(manifest(reader.getAttribute("type"))),
       false, reader.getAttribute("id").toInt)
   }
 
