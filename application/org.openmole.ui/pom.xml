@@ -156,11 +156,6 @@
       <artifactId>org.openmole.web.core</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.openmole.web</groupId>
-      <artifactId>openmole-webserver</artifactId>
-      <version>${project.version}</version>
-    </dependency>
   </dependencies>
   <build>
     <plugins>

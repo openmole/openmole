@@ -19,9 +19,8 @@ class Openmolewebserver(port: Int) {
   server.setHandler(context)
 
   def start() {
-    try {
-      server.start
-      server.join
+    server.start
+    server.join
   }
 
   def end() {
