@@ -143,7 +143,8 @@ object CheckData extends Logger {
       .filterNot {
         n ⇒
           proxy.dataUI.prototypesIn.map {
-            p ⇒ KeyPrototypeGenerator(p)
+            p ⇒
+              KeyPrototypeGenerator(p)
           }.contains(n)
       }.map {
         protoMapping
