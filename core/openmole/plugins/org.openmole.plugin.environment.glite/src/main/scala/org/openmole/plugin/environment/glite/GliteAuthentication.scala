@@ -44,26 +44,26 @@ import scala.ref.WeakReference
 object GliteAuthentication extends Logger {
 
   lazy val CACertificatesDir: File = {
-    val X509_CERT_DIR = System.getenv("X509_CERT_DIR")
+    /*val X509_CERT_DIR = System.getenv("X509_CERT_DIR")
 
     if (X509_CERT_DIR != null && new File(X509_CERT_DIR).exists) new File(X509_CERT_DIR)
     else {
       val caDir = new File("/etc/grid-security/certificates/")
       if (caDir.exists) caDir
-      else {
-        val caDir = Workspace.file("CACertificates")
+      else {    */
+    val caDir = Workspace.file("CACertificates")
 
-        if (!caDir.exists || !new File(caDir, ".complete").exists) {
-          caDir.mkdir
-          dowloadCACertificates(Workspace.preference(GliteEnvironment.CACertificatesSite), caDir)
-          new File(caDir, ".complete").createNewFile
-        }
-        caDir
-      }
+    if (!caDir.exists || !new File(caDir, ".complete").exists) {
+      caDir.mkdir
+      downloadCACertificates(Workspace.preference(GliteEnvironment.CACertificatesSite), caDir)
+      new File(caDir, ".complete").createNewFile
     }
+    caDir
+    // }
+    // }
   }
 
-  def dowloadCACertificates(address: String, dir: File) = {
+  def downloadCACertificates(address: String, dir: File) = {
     val fs = FileSystems.getDefault
 
     val site = new HTTPStorage {
