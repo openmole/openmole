@@ -39,11 +39,8 @@ abstract class BasicStatPanelUI(statType: String,
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
-  val arrayDoublePrototypes = Proxys.classPrototypes(classOf[Double]).filter { _.dataUI.dim == 1 } :::
-    Proxys.classPrototypes(classOf[Double], implicitPrototypes).filter { _.dataUI.dim == 1 }
-
-  val doublePrototypes = Proxys.classPrototypes(classOf[Double]).filter { _.dataUI.dim == 0 } :::
-    Proxys.classPrototypes(classOf[Double], protoList = implicitPrototypes).filter { _.dataUI.dim == 0 }
+  val arrayDoublePrototypes = Proxys.classPrototypes(classOf[Array[Double]]) ::: Proxys.classPrototypes(classOf[Array[Double]], implicitPrototypes) distinct
+  val doublePrototypes = Proxys.classPrototypes(classOf[Double]) ::: Proxys.classPrototypes(classOf[Double], implicitPrototypes) distinct
 
   if (arrayDoublePrototypes.isEmpty)
     StatusBar().inform("At least 1 Array of Prototype (Double) has to be created before using a" + statType + "  Tasks")

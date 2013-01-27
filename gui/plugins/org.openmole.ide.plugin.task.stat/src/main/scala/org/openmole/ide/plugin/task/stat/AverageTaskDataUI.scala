@@ -18,11 +18,11 @@ class AverageTaskDataUI(val name: String = "",
   def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) = {
     val gtBuilder = AverageTask(name)(plugins)
 
-    sequence.foreach(s ⇒ println("XXXX sequence in constr : " + s._1 + " " + s._2))
     sequence foreach { s ⇒
       gtBuilder addSequence (s._1.dataUI.coreObject.asInstanceOf[Prototype[Array[Double]]],
         s._2.dataUI.coreObject.asInstanceOf[Prototype[Double]])
     }
+
     gtBuilder addInput inputs
     gtBuilder addOutput outputs
     gtBuilder addParameter parameters

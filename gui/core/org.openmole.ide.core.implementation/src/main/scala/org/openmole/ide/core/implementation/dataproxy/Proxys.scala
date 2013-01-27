@@ -39,24 +39,8 @@ object Proxys {
     classPrototypes(prototypeClass, prototypes.toList)
 
   def classPrototypes(prototypeClass: Class[_],
-                      protoList: List[IPrototypeDataProxyUI] = prototypes.toList): List[IPrototypeDataProxyUI] =
-    prototypes.toList.filter { p ⇒ assignable(prototypeClass, p.dataUI.protoType.runtimeClass) }
-
-  /*def classPrototypes(prototypeClass: Class[_]) =
-    prototypes.toList.filter { p ⇒
-      /*Types(Types.extractTypeFromArray(p.dataUI.typeClassString),
-        prototypeClass.getCanonicalName.replaceAllLiterally("[", ""))   */
-    }
-
-  def classPrototypes(prototypeClass: Class[_],
-                      dim: Int = 0,
-                      protoList: List[IPrototypeDataProxyUI] = prototypes.toList): List[IPrototypeDataProxyUI] = {
-    protoList.filter {
-      p ⇒
-        p.dataUI.dim == dim && Types(Types.extractTypeFromArray(p.dataUI.typeClassString),
-          prototypeClass.getCanonicalName.replaceAllLiterally("[", ""))
-    }
-  }    */
+                      protoList: List[IPrototypeDataProxyUI]): List[IPrototypeDataProxyUI] =
+    protoList.filter { p ⇒ assignable(prototypeClass, p.dataUI.coreObject.`type`.runtimeClass) }
 
   def clearAll: Unit = {
     ConceptMenu.clearAllItems
