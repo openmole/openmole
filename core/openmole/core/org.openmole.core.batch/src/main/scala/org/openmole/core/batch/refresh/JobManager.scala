@@ -55,7 +55,7 @@ akka {
       mailbox-type = """ + '"' + classOf[PriorityMailBox].getName + '"' + """
       
       fork-join-executor {
-        parallelism-min = """ + 10 + """
+        parallelism-min = """ + Workspace.preference(JobManagmentThreads) + """
         parallelism-max = """ + Workspace.preference(JobManagmentThreads) + """
       }
       throughput = 1
@@ -67,14 +67,14 @@ akka {
   import environment._
   import system.dispatcher
 
-  val resizer = DefaultResizer(lowerBound = 10, upperBound = Workspace.preferenceAsInt(JobManagmentThreads))
-  val uploader = workers.actorOf(Props(new UploadActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
-  val submitter = workers.actorOf(Props(new SubmitActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
-  val refresher = workers.actorOf(Props(new RefreshActor(self, environment)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
-  val resultGetters = workers.actorOf(Props(new GetResultActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
-  val killer = workers.actorOf(Props(new KillerActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
-  val cleaner = workers.actorOf(Props(new CleanerActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
-  val deleter = workers.actorOf(Props(new DeleteActor(self)).withRouter(SmallestMailboxRouter(resizer = Some(resizer))))
+  //val resizer = DefaultResizer(lowerBound = 10, upperBound = Workspace.preferenceAsInt(JobManagmentThreads))
+  val uploader = workers.actorOf(Props(new UploadActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
+  val submitter = workers.actorOf(Props(new SubmitActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
+  val refresher = workers.actorOf(Props(new RefreshActor(self, environment)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
+  val resultGetters = workers.actorOf(Props(new GetResultActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
+  val killer = workers.actorOf(Props(new KillerActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
+  val cleaner = workers.actorOf(Props(new CleanerActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
+  val deleter = workers.actorOf(Props(new DeleteActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
 
   def receive = {
     case msg: Upload ⇒ uploader ! msg
