@@ -1,0 +1,13 @@
+<%@ val body: String %>
+
+<html>
+<head></head>
+<body>
+    <%= unescape(body)%>
+
+    <form name="data" action="bort" method="POST">
+        <input type="text" name="bortText" />
+        <input type="submit" name="submit"/>
+    </form>
+
+</html>

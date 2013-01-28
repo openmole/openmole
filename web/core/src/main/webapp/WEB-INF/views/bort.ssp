@@ -1,0 +1,2 @@
+<%@ val text: String %>
+<b>${text}</b>
