@@ -122,6 +122,10 @@ class ExecutionManager(manager: IMoleSceneManager,
 
   def start(hooks: Map[IHookPanelUI, ICapsuleUI],
             groupings: List[(Grouping, ICapsule)]) = synchronized {
+    System.out.println("HOOKS ")
+    hooks.foreach {
+      System.out.println
+    }
     tabbedPane.selection.index = 0
     cancel
     initBarPlotter
@@ -174,10 +178,14 @@ class ExecutionManager(manager: IMoleSceneManager,
 
   def buildMoleExecution(hooks: Map[IHookPanelUI, ICapsuleUI],
                          groupings: List[(Grouping, ICapsule)]) = MoleMaker.buildMoleExecution(mole,
-    manager,
-    hooks.flatMap {
-      case (panel, caps) ⇒ List(capsuleMapping(caps)).zip(panel.saveContent.coreObject(this))
-    }.toList,
+    manager, {
+      val h = hooks.toList.flatMap {
+        case (panel, caps) ⇒
+          panel.saveContent.coreObject(this).map(h ⇒ capsuleMapping(caps) -> h)
+        case _ ⇒ Nil
+      }
+      h
+    },
     capsuleMapping,
     groupings)
 

@@ -36,7 +36,7 @@ class AppendToCSVFileHookDataUI(var activated: Boolean = true,
 
   def coreClass = classOf[AppendToCSVFileHook]
 
-  def coreObject(executionManager: IExecutionManager) =
+  def coreObject(executionManager: IExecutionManager) = {
     List(new AppendToCSVFileHook(
       fileName,
       prototypes.map { executionManager.prototypeMapping }.toSeq: _*))
