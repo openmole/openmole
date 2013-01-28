@@ -64,6 +64,7 @@ import GenericPrototypeDataUI._
 class GenericPrototypeDataUI[T](val name: String,
                                 val dim: Int,
                                 val protoType: Manifest[T]) extends IPrototypeDataUI[T] {
+
   def newInstance(n: String, d: Int) = GenericPrototypeDataUI(n, d)(protoType)
 
   override def toString = canonicalClassName(typeClassString)

@@ -126,7 +126,7 @@ object CheckData extends Logger {
         if (!MoleMaker.keyPrototypeMapping.keys.contains(KeyPrototypeGenerator(d.prototype))) {
           val (key, dim) = KeyGenerator(d.prototype)
           Proxys.prototypes +=
-            new PrototypeDataProxyUI(GenericPrototypeDataUI(d.prototype.name, dim)(d.prototype.`type`), true)
+            new PrototypeDataProxyUI(GenericPrototypeDataUI(d.prototype.name, dim)(KeyGenerator.stripArrays(d.prototype.`type`)._1), true)
         }
     }
   }
@@ -136,6 +136,7 @@ object CheckData extends Logger {
     proxy: ITaskDataProxyUI,
     protoMapping: Map[PrototypeKey, IPrototypeDataProxyUI],
     coreCapsule: ICapsule): Unit = {
+    coreCapsule.inputs(mole).foreach { p ⇒ println("PP : " + p.prototype.`type`) }
     proxy.dataUI.updateImplicits(coreCapsule.inputs(mole).map {
       i ⇒
         KeyPrototypeGenerator(i.prototype)

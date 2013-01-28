@@ -13,7 +13,7 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.task.stat.AverageTask
 
 class AverageTaskDataUI(val name: String = "",
-                        val sequence: List[(IPrototypeDataProxyUI, IPrototypeDataProxyUI)] = List.empty) extends TaskDataUI {
+                        val sequence: List[(IPrototypeDataProxyUI, IPrototypeDataProxyUI)] = List.empty) extends StatDataUI {
 
   def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) = {
     val gtBuilder = AverageTask(name)(plugins)

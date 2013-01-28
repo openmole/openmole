@@ -39,8 +39,13 @@ object Proxys {
     classPrototypes(prototypeClass, prototypes.toList)
 
   def classPrototypes(prototypeClass: Class[_],
-                      protoList: List[IPrototypeDataProxyUI]): List[IPrototypeDataProxyUI] =
-    protoList.filter { p ⇒ assignable(prototypeClass, p.dataUI.coreObject.`type`.runtimeClass) }
+                      protoList: List[IPrototypeDataProxyUI]): List[IPrototypeDataProxyUI] = {
+    val a = protoList.filter {
+      p ⇒
+        assignable(prototypeClass, p.dataUI.coreObject.`type`.runtimeClass)
+    }
+    a
+  }
 
   def clearAll: Unit = {
     ConceptMenu.clearAllItems
