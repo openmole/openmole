@@ -35,10 +35,11 @@ trait Factory[T <: { def clean }] {
   def make: T
 
   def borrow: T = synchronized {
-    pool.pop
+    if(!pool.isEmpty) pool.pop
+    else make
   }
 
-  def release(serial: T) = {
+  def release(serial: T) = synchronized {
     try serial.clean
     finally pool.push(serial)
   }
