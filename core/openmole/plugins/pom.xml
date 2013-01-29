@@ -55,6 +55,7 @@
     <module>org.openmole.plugin.sampling.filter</module>
     <module>org.openmole.plugin.method.evolution</module>
     <module>org.openmole.plugin.method.sensitivity</module>
+    <module>org.openmole.plugin.builder.base</module>
     <module>org.openmole.plugin.builder.evolution</module>
     <module>org.openmole.plugin.builder.stochastic</module>
     <module>org.openmole.plugin.builder.sensitivity</module>

@@ -40,5 +40,5 @@ class AppendToCSVFileHookDataUI(var activated: Boolean = true,
     List(new AppendToCSVFileHook(
       fileName,
       prototypes.map { executionManager.prototypeMapping }.toSeq: _*))
-}
+  }
 }

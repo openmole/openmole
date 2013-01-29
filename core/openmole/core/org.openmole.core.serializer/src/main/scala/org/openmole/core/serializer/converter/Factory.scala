@@ -35,7 +35,7 @@ trait Factory[T <: { def clean }] {
   def make: T
 
   def borrow: T = synchronized {
-    if(!pool.isEmpty) pool.pop
+    if (!pool.isEmpty) pool.pop
     else make
   }
 

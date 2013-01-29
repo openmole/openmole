@@ -232,6 +232,12 @@
     </dependency>
     <dependency>
       <groupId>org.openmole.core</groupId>
+      <artifactId>org.openmole.plugin.builder.base</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openmole.core</groupId>
       <artifactId>org.openmole.plugin.builder.evolution</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
