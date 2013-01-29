@@ -136,7 +136,6 @@ object CheckData extends Logger {
     proxy: ITaskDataProxyUI,
     protoMapping: Map[PrototypeKey, IPrototypeDataProxyUI],
     coreCapsule: ICapsule): Unit = {
-    coreCapsule.inputs(mole).foreach { p ⇒ println("PP : " + p.prototype.`type`) }
     proxy.dataUI.updateImplicits(coreCapsule.inputs(mole).map {
       i ⇒
         KeyPrototypeGenerator(i.prototype)
