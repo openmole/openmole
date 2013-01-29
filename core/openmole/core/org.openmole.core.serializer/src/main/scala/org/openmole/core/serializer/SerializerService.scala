@@ -47,6 +47,11 @@ object SerializerService extends Logger {
   private val filesInfo = "filesInfo.xml"
   private val content = "content.xml"
 
+  private val serializerWithPathHashInjectionFactory = Factory(new SerializerWithPathHashInjection)
+  private val serializerWithFileAndPluginListingFactory = Factory(new SerializerWithFileAndPluginListing)
+  private val deserializerWithFileInjectionFromFileFactory = Factory(new DeserializerWithFileInjectionFromFile)
+  private val deserializerWithFileInjectionFromPathHashFactory = Factory(new DeserializerWithFileInjectionFromPathHash)
+
   private type FilesInfo = TreeMap[String, (File, Boolean, Boolean)]
 
   def deserialize[T](file: File): T = {
@@ -134,10 +139,8 @@ object SerializerService extends Logger {
     finally os.close
   }
 
-  def serializeFilePathAsHashGetFiles(obj: Any, os: OutputStream): Map[File, FileInfo] = {
-    val serializer = new SerializerWithPathHashInjection
-    serializer.toXML(obj.asInstanceOf[AnyRef], os)
-  }
+  def serializeFilePathAsHashGetFiles(obj: Any, os: OutputStream): Map[File, FileInfo] =
+    serializerWithPathHashInjectionFactory.exec(_.toXML(obj.asInstanceOf[AnyRef], os))
 
   def serializeGetPluginsAndFiles(obj: Any, file: File): PluginClassAndFiles = {
     val os = file.bufferedOutputStream
@@ -146,7 +149,7 @@ object SerializerService extends Logger {
   }
 
   def serializeGetPluginsAndFiles(obj: Any, os: OutputStream): PluginClassAndFiles =
-    SerializerWithFileAndPluginListingFactory.exec {
+    serializerWithFileAndPluginListingFactory.exec {
       serializer ⇒
         val (files, plugins) = serializer.toXMLAndListPluginFiles(obj.asInstanceOf[AnyRef], os)
         new PluginClassAndFiles(files, plugins)
@@ -159,7 +162,7 @@ object SerializerService extends Logger {
   }
 
   def deserializeReplaceFiles[T](is: InputStream, files: PartialFunction[File, File]): T =
-    DeserializerWithFileInjectionFromFileFactory.exec {
+    deserializerWithFileInjectionFromFileFactory.exec {
       serializer ⇒
         serializer.files = files
         serializer.fromXML[T](is)
@@ -180,7 +183,7 @@ object SerializerService extends Logger {
   }
 
   def deserializeReplacePathHash[T](is: InputStream, files: PartialFunction[FileInfo, File]) =
-    DeserializerWithFileInjectionFromPathHashFactory.exec {
+    deserializerWithFileInjectionFromPathHashFactory.exec {
       deserializer ⇒
         deserializer.files = files
         deserializer.fromXML[T](is)

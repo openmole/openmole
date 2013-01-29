@@ -44,11 +44,6 @@
     </dependency>
     <dependency>
       <groupId>org.openmole.core</groupId>
-      <artifactId>org.apache.commons.pool</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openmole.core</groupId>
       <artifactId>org.openmole.misc.pluginmanager</artifactId>
       <version>${project.version}</version>
     </dependency>
