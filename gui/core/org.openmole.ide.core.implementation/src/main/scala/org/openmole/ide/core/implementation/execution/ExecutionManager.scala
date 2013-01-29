@@ -122,10 +122,6 @@ class ExecutionManager(manager: IMoleSceneManager,
 
   def start(hooks: Map[IHookPanelUI, ICapsuleUI],
             groupings: List[(Grouping, ICapsule)]) = synchronized {
-    System.out.println("HOOKS ")
-    hooks.foreach {
-      System.out.println
-    }
     tabbedPane.selection.index = 0
     cancel
     initBarPlotter

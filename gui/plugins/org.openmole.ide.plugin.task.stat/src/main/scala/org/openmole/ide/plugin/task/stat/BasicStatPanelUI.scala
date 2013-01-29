@@ -32,15 +32,15 @@ import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.swing.Label
 import scala.swing.TabbedPane
+import org.openmole.ide.core.model.data.ITaskDataUI
 
 abstract class BasicStatPanelUI(statType: String,
-                                sequences: List[(IPrototypeDataProxyUI, IPrototypeDataProxyUI)],
-                                implicitPrototypes: List[IPrototypeDataProxyUI] = List.empty) extends PluginPanel("wrap 2") with ITaskPanelUI {
+                                dataUI: StatDataUI) extends PluginPanel("wrap 2") with ITaskPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
-  val arrayDoublePrototypes = Proxys.classPrototypes(classOf[Array[Double]]) ::: Proxys.classPrototypes(classOf[Array[Double]], implicitPrototypes) distinct
-  val doublePrototypes = Proxys.classPrototypes(classOf[Double]) ::: Proxys.classPrototypes(classOf[Double], implicitPrototypes) distinct
+  val arrayDoublePrototypes = Proxys.classPrototypes(classOf[Array[Double]]) ::: Proxys.classPrototypes(classOf[Array[Double]], dataUI.implicitPrototypesIn) distinct
+  val doublePrototypes = Proxys.classPrototypes(classOf[Double]) ::: Proxys.classPrototypes(classOf[Double], dataUI.implicitPrototypesIn) distinct
 
   if (arrayDoublePrototypes.isEmpty)
     StatusBar().inform("At least 1 Array of Prototype (Double) has to be created before using a" + statType + "  Tasks")
@@ -54,7 +54,7 @@ abstract class BasicStatPanelUI(statType: String,
         arrayDoublePrototypes,
         doublePrototypes,
         "to " + statType,
-        sequences.map {
+        dataUI.sequence.map {
           s ⇒
             new TwoCombosPanel(arrayDoublePrototypes,
               doublePrototypes,

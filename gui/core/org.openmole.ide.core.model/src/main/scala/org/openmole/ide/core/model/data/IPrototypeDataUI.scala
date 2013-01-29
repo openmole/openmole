@@ -30,8 +30,6 @@ trait IPrototypeDataUI[T] extends IDataUI {
 
   def protoType: Manifest[T]
 
-  def comparable = protoType.toString.split('.').last.toUpperCase
-
   def typeClassString: String
 
   def coreObject: Prototype[T]
