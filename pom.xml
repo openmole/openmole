@@ -131,7 +131,8 @@
     <lib.fr.iscpif.mgo.version>1.50</lib.fr.iscpif.mgo.version>
     <lib.org.scala-lang.scala.version>2.10.0</lib.org.scala-lang.scala.version>
     <lib.com.typesafe.akka.version>2.1.0</lib.com.typesafe.akka.version>
-    <lib.com.typesafe.akka.scala.version>2.10</lib.com.typesafe.akka.scala.version>
+    <lib.com.typesafe.akka.scala.version>${scala.major.version}</lib.com.typesafe.akka.scala.version>
+    <scala.major.version>2.10</scala.major.version>
     <lib.de.erichseifert.gral.version>0.9-SNAPSHOT</lib.de.erichseifert.gral.version>
     <lib.runtime.jvm.version>7-u10</lib.runtime.jvm.version>
     <plugin.scala-maven-plugin.version>3.1.0</plugin.scala-maven-plugin.version>
