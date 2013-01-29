@@ -17,23 +17,32 @@
 
 package org.openmole.core.serializer.converter
 
-import org.apache.commons.pool.BasePoolableObjectFactory
-import org.apache.commons.pool.impl.SoftReferenceObjectPool
+import collection.mutable
+
+object Factory {
+
+  def apply[T <: { def clean }](f: ⇒ T) =
+    new Factory[T] {
+      def make = f
+    }
+
+}
 
 trait Factory[T <: { def clean }] {
 
-  val pool = new SoftReferenceObjectPool(new BasePoolableObjectFactory {
-    override def makeObject: T = Factory.this.make
-  })
+  val pool = new mutable.Stack[T]
 
   def make: T
 
-  def borrow: T =
-    pool.borrowObject.asInstanceOf[T]
+  def borrow: T = synchronized {
+    if(!pool.isEmpty) pool.pop
+    else make
+  }
 
-  def release(serial: T) =
+  def release(serial: T) = synchronized {
     try serial.clean
-    finally pool.returnObject(serial)
+    finally pool.push(serial)
+  }
 
   def exec[A](f: T ⇒ A): A = {
     val o = borrow
