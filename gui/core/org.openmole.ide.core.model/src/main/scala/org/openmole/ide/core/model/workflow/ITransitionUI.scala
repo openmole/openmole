@@ -18,6 +18,11 @@
 package org.openmole.ide.core.model.workflow
 
 import org.openmole.ide.core.model.commons.TransitionType
+import org.openmole.core.model.transition.{ Filter, ICondition, Slot }
+import org.openmole.core.implementation.transition._
+import org.openmole.ide.core.model.commons.TransitionType._
+import org.openmole.core.model.mole.ICapsule
+import org.openmole.misc.exception.UserBadDataError
 
 trait ITransitionUI extends IConnectorUI {
   def condition: Option[String]
@@ -27,4 +32,15 @@ trait ITransitionUI extends IConnectorUI {
   def transitionType: TransitionType.Value
 
   def transitionType_=(t: TransitionType.Value)
+
+  def coreObject(source: ICapsule,
+                 target: Slot,
+                 condition: ICondition,
+                 filtered: List[String]) = transitionType match {
+    case BASIC_TRANSITION ⇒ new Transition(source, target, condition, Filter(filtered: _*))
+    case AGGREGATION_TRANSITION ⇒ new AggregationTransition(source, target, condition, Filter(filtered: _*))
+    case EXPLORATION_TRANSITION ⇒ new ExplorationTransition(source, target, condition, Filter(filtered: _*))
+    case END_TRANSITION ⇒ new EndExplorationTransition(source, target, condition, Filter(filtered: _*))
+    case _ ⇒ throw new UserBadDataError("No matching type between capsule " + source + " and " + target + ". The transition can not be built")
+  }
 }

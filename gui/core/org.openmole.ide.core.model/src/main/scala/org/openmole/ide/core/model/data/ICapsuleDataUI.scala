@@ -50,4 +50,8 @@ trait ICapsuleDataUI {
   def capsuleType: CapsuleType
 
   def capsuleType_=(t: CapsuleType)
+
+  def coreObject = {
+
+  }
 }

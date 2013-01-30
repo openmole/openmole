@@ -24,8 +24,7 @@ import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.registry.PrototypeKey
 import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
 import org.openmole.ide.core.model.commons.TransitionType._
-import org.openmole.ide.core.model.data.ICapsuleDataUI
-import org.openmole.ide.core.model.data.IMoleDataUI
+import org.openmole.ide.core.model.data.{ ITaskDataUI, ICapsuleDataUI, IMoleDataUI }
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.core.implementation.task._
@@ -59,16 +58,19 @@ object MoleMaker {
       var envs = new HashSet[(Environment, String)]
       val strat = new ListBuffer[(ICapsule, EnvironmentSelection)]
 
-      manager.capsules.values.foreach { c ⇒
-        c.dataUI.environment match {
-          case Some(x: IEnvironmentDataProxyUI) ⇒
-            val env = x.dataUI.coreObject
-            envs += env -> x.dataUI.name
-            strat += capsuleMap(c) -> new FixedEnvironmentSelection(env)
-          case _ ⇒
-        }
+      manager.capsules.values.foreach {
+        c ⇒
+          c.dataUI.environment match {
+            case Some(x: IEnvironmentDataProxyUI) ⇒
+              val env = x.dataUI.coreObject
+              envs += env -> x.dataUI.name
+              strat += capsuleMap(c) -> new FixedEnvironmentSelection(env)
+            case _ ⇒
+          }
       }
-      Right((new MoleExecution(mole, hooks, strat.toMap, groupingStrategies.map { case (s, c) ⇒ c -> s }.toMap), envs.toSet))
+      Right((new MoleExecution(mole, hooks, strat.toMap, groupingStrategies.map {
+        case (s, c) ⇒ c -> s
+      }.toMap), envs.toSet))
     } catch {
       case e: Throwable ⇒
         Left(e)
@@ -77,43 +79,22 @@ object MoleMaker {
   def buildMole(manager: IMoleSceneManager): Either[String, (IMole, Map[ICapsuleUI, ICapsule], Map[IPrototypeDataProxyUI, Prototype[_]], Iterable[(ICapsuleUI, Throwable)])] = {
     try {
       if (manager.startingCapsule.isDefined) {
-        val prototypeMap: Map[IPrototypeDataProxyUI, Prototype[_]] = Proxys.prototypes.map { p ⇒ p -> p.dataUI.coreObject }.toMap
-        val builds = manager.capsules.map { c ⇒
-          (c._2 -> buildCapsule(c._2.dataUI, manager.dataUI), None)
+        val prototypeMap: Map[IPrototypeDataProxyUI, Prototype[_]] = Proxys.prototypes.map {
+          p ⇒ p -> p.dataUI.coreObject
+        }.toMap
+        val builds = manager.capsules.map {
+          c ⇒
+            (c._2 -> buildCapsule(c._2.dataUI, manager.dataUI), None)
         }.toMap
 
-        val capsuleMap: Map[ICapsuleUI, ICapsule] = builds.map { case ((cui, c), _) ⇒ cui -> c }
-        val errors = builds.flatMap { case ((_, _), e) ⇒ e }
-
-        val islotsMapping = new HashMap[IInputSlotWidget, Slot]
-
-        val transitions = capsuleMap.flatMap {
-          case (cui, ccore) ⇒
-            manager.capsuleConnections(cui.dataUI).flatMap {
-              _ match {
-                case x: ITransitionUI ⇒
-                  Some(buildTransition(capsuleMap(x.source),
-                    islotsMapping.getOrElseUpdate(x.target, Slot(capsuleMap(x.target.capsule))),
-                    x, prototypeMap))
-                case _ ⇒ None
-              }
-            }
+        val capsuleMap: Map[ICapsuleUI, ICapsule] = builds.map {
+          case ((cui, c), _) ⇒ cui -> c
+        }
+        val errors = builds.flatMap {
+          case ((_, _), e) ⇒ e
         }
 
-        val dataChannels = capsuleMap.flatMap {
-          case (cui, ccore) ⇒
-            manager.capsuleConnections(cui.dataUI).flatMap {
-              _ match {
-                case x: IDataChannelUI ⇒
-                  Some(
-                    new DataChannel(
-                      capsuleMap(x.source),
-                      islotsMapping.getOrElseUpdate(x.target, Slot(capsuleMap(x.target.capsule))),
-                      Filter(x.filteredPrototypes.map { p ⇒ prototypeMap(p).name }.toSeq: _*)))
-                case _ ⇒ None
-              }
-            }
-        }
+        val (transitions, dataChannels, islotsMap) = buildConnectors(capsuleMap, prototypeMap)
 
         Right((new Mole(capsuleMap(manager.startingCapsule.get), transitions, dataChannels), capsuleMap, prototypeMap, errors))
       } else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")
@@ -124,10 +105,14 @@ object MoleMaker {
   }
 
   def prototypeMapping: Map[IPrototypeDataProxyUI, Prototype[_]] = (Proxys.prototypes.toList :::
-    List(EmptyDataUIs.emptyPrototypeProxy)).map { p ⇒ p -> p.dataUI.coreObject }.toMap
+    List(EmptyDataUIs.emptyPrototypeProxy)).map {
+      p ⇒ p -> p.dataUI.coreObject
+    }.toMap
 
   def keyPrototypeMapping: Map[PrototypeKey, IPrototypeDataProxyUI] = (Proxys.prototypes.toList :::
-    List(EmptyDataUIs.emptyPrototypeProxy)).map { p ⇒ KeyPrototypeGenerator(p) -> p }.toMap
+    List(EmptyDataUIs.emptyPrototypeProxy)).map {
+      p ⇒ KeyPrototypeGenerator(p) -> p
+    }.toMap
 
   def buildCapsule(
     proxy: ITaskDataProxyUI,
@@ -136,7 +121,9 @@ object MoleMaker {
     taskCoreObject(proxy, plugins) match {
       case Right(x: ITask) ⇒ capsuleType match {
         case y: MasterCapsuleType ⇒
-          new MasterCapsule(x, y.persistList.map { _.dataUI.name }.toSet)
+          new MasterCapsule(x, y.persistList.map {
+            _.dataUI.name
+          }.toSet)
         case y: StrainerCapsuleType ⇒
           val sc = new StrainerCapsule(x)
           sc
@@ -150,7 +137,9 @@ object MoleMaker {
     moleDataUI: IMoleDataUI): ICapsule =
     capsuleDataUI.task match {
       case Some(x: ITaskDataProxyUI) ⇒
-        buildCapsule(x, moleDataUI.plugins.map { p ⇒ new File(p) }.toSet, capsuleDataUI.capsuleType)
+        buildCapsule(x, moleDataUI.plugins.map {
+          p ⇒ new File(p)
+        }.toSet, capsuleDataUI.capsuleType)
       case _ ⇒
         StatusBar().inform("A capsule without Task can not be run")
         new Capsule(EmptyTask("None"))
@@ -160,9 +149,9 @@ object MoleMaker {
   def taskCoreObject(proxy: ITaskDataProxyUI,
                      plugins: Set[File] = Set.empty): Either[Throwable, ITask] =
     try {
-      Right(proxy.dataUI.coreObject(inputs(proxy),
-        outputs(proxy),
-        parameters(proxy),
+      Right(proxy.dataUI.coreObject(inputs(proxy.dataUI),
+        outputs(proxy.dataUI),
+        parameters(proxy.dataUI),
         PluginSet(plugins)))
     } catch {
       case e: Throwable ⇒
@@ -174,11 +163,16 @@ object MoleMaker {
                      plugins: Set[File]): Either[Throwable, ITask] =
     taskCoreObject(capsuleDataUI.task.get, plugins)
 
-  def inputs(proxy: ITaskDataProxyUI) = DataSet(proxy.dataUI.prototypesIn.map { _.dataUI.coreObject })
-  def outputs(proxy: ITaskDataProxyUI) = DataSet(proxy.dataUI.prototypesOut.map { _.dataUI.coreObject })
+  def inputs(dataUI: ITaskDataUI) = DataSet(dataUI.prototypesIn.map {
+    _.dataUI.coreObject
+  })
 
-  def parameters(proxy: ITaskDataProxyUI) =
-    ParameterSet(proxy.dataUI.inputParameters.flatMap {
+  def outputs(dataUI: ITaskDataUI) = DataSet(dataUI.prototypesOut.map {
+    _.dataUI.coreObject
+  })
+
+  def parameters(dataUI: ITaskDataUI) =
+    ParameterSet(dataUI.inputParameters.flatMap {
       case (protoProxy, v) ⇒
         if (!v.isEmpty) {
           val proto = protoProxy.dataUI.coreObject
@@ -190,25 +184,60 @@ object MoleMaker {
         } else None
     }.toList)
 
-  def inputs(capsuleDataUI: ICapsuleDataUI): DataSet = inputs(capsuleDataUI.task.get)
+  def inputs(capsuleDataUI: ICapsuleDataUI): DataSet = inputs(capsuleDataUI.task.get.dataUI)
 
-  def outputs(capsuleDataUI: ICapsuleDataUI): DataSet = outputs(capsuleDataUI.task.get)
+  def outputs(capsuleDataUI: ICapsuleDataUI): DataSet = outputs(capsuleDataUI.task.get.dataUI)
 
-  def parameters(capsuleDataUI: ICapsuleDataUI): ParameterSet = parameters(capsuleDataUI.task.get)
+  def parameters(capsuleDataUI: ICapsuleDataUI): ParameterSet = parameters(capsuleDataUI.task.get.dataUI)
 
-  def buildTransition(
-    sourceCapsule: ICapsule,
-    targetSlot: Slot,
-    t: ITransitionUI,
-    prototypeMap: Map[IPrototypeDataProxyUI, Prototype[_]]): ITransition = {
-    val filtered = t.filteredPrototypes.map { p ⇒ prototypeMap(p).name }
-    val condition: ICondition = if (t.condition.isDefined) Condition(t.condition.get) else ICondition.True
-    t.transitionType match {
-      case BASIC_TRANSITION ⇒ new Transition(sourceCapsule, targetSlot, condition, Filter(filtered: _*))
-      case AGGREGATION_TRANSITION ⇒ new AggregationTransition(sourceCapsule, targetSlot, condition, Filter(filtered: _*))
-      case EXPLORATION_TRANSITION ⇒ new ExplorationTransition(sourceCapsule, targetSlot, condition, Filter(filtered: _*))
-      case END_TRANSITION ⇒ new EndExplorationTransition(sourceCapsule, targetSlot, condition, Filter(filtered: _*))
-      case _ ⇒ throw new UserBadDataError("No matching type between capsule " + sourceCapsule + " and " + targetSlot + ". The transition can not be built")
+  def buildConnectors(capsuleMap: Map[ICapsuleUI, ICapsule],
+                      prototypeMap: Map[IPrototypeDataProxyUI, Prototype[_]]) = {
+    val islotsMap = new HashMap[IInputSlotWidget, Slot]
+
+    if (capsuleMap.isEmpty) (List.empty, List.empty, islotsMap)
+    else {
+      val manager = capsuleMap.head._1.scene.manager
+      val transitions = capsuleMap.flatMap {
+        case (cui, ccore) ⇒
+          manager.capsuleConnections(cui.dataUI).flatMap {
+            _ match {
+              case x: ITransitionUI ⇒
+                Some(buildTransition(capsuleMap(x.source),
+                  islotsMap.getOrElseUpdate(x.target, Slot(capsuleMap(x.target.capsule))),
+                  x, prototypeMap))
+              case _ ⇒ None
+            }
+          }
+      }
+
+      val dataChannels = capsuleMap.flatMap {
+        case (cui, ccore) ⇒
+          manager.capsuleConnections(cui.dataUI).flatMap {
+            _ match {
+              case x: IDataChannelUI ⇒
+                Some(
+                  new DataChannel(
+                    capsuleMap(x.source),
+                    islotsMap.getOrElseUpdate(x.target, Slot(capsuleMap(x.target.capsule))),
+                    Filter(x.filteredPrototypes.map {
+                      p ⇒ prototypeMap(p).name
+                    }.toSeq: _*)))
+              case _ ⇒ None
+            }
+          }
+      }
+      (transitions, dataChannels, islotsMap)
     }
+  }
+
+  def buildTransition(sourceCapsule: ICapsule,
+                      targetSlot: Slot,
+                      t: ITransitionUI,
+                      prototypeMap: Map[IPrototypeDataProxyUI, Prototype[_]]): ITransition = {
+    val filtered = t.filteredPrototypes.map {
+      p ⇒ prototypeMap(p).name
+    }
+    val condition: ICondition = if (t.condition.isDefined) Condition(t.condition.get) else ICondition.True
+    t.coreObject(sourceCapsule, targetSlot, condition, filtered)
   }
 }
