@@ -21,6 +21,8 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.transition._
 import org.openmole.core.implementation.mole._
+import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.tools.service.Random
 
 object Puzzle {
 
@@ -71,11 +73,20 @@ case class Puzzle(
       p.grouping)
 
   def toMole = new Mole(first.capsule, transitions, dataChannels)
+
   def toExecution =
     new MoleExecution(toMole, hooks, selection, grouping)
 
   def toExecution(profiler: Profiler) =
     new MoleExecution(toMole, hooks, selection, grouping, profiler)
+
+  def toExecution(
+    hooks: Iterable[(ICapsule, Hook)] = Iterable.empty,
+    selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
+    grouping: Map[ICapsule, Grouping] = Map.empty,
+    profiler: Profiler = Profiler.empty,
+    rng: java.util.Random = Random.newRNG(Workspace.newSeed)) =
+    new MoleExecution(toMole, hooks, selection, grouping, profiler, rng)
 
   def +(p: Puzzle) = Puzzle.merge(this, p)
 }
