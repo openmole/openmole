@@ -58,10 +58,12 @@ object ReplicaCatalog extends Logger {
   val NoAccessCleanTime = new ConfigurationLocation("ReplicaCatalog", "NoAccessCleanTime")
   val InCatalogCacheTime = new ConfigurationLocation("ReplicaCatalog", "InCatalogCacheTime")
   val ReplicaCacheTime = new ConfigurationLocation("ReplicaCatalog", "ReplicaCacheTime")
+  val SocketTimeout = new ConfigurationLocation("ReplicaCatalog", "SocketTimeout")
 
   Workspace += (NoAccessCleanTime, "P30D")
   Workspace += (InCatalogCacheTime, "PT2M")
   Workspace += (ReplicaCacheTime, "PT30M")
+  Workspace += (SocketTimeout, "PT2M")
 
   lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
   lazy val inCatalogCache = new TimeCache[Map[String, Set[String]]]
@@ -84,6 +86,7 @@ object ReplicaCatalog extends Logger {
     configuration.common.objectClass(classOf[Replica]).objectField("_path").indexed(true)
     configuration.common.objectClass(classOf[Replica]).objectField("_hash").indexed(true)
     configuration.common.objectClass(classOf[Replica]).objectField("_environment").indexed(true)
+    configuration.timeoutClientSocket(Workspace.preferenceAsDuration(SocketTimeout).toMilliSeconds.toInt)
 
     Db4oClientServer.openClient(configuration, "localhost", info.port, info.user, info.password)
   }
