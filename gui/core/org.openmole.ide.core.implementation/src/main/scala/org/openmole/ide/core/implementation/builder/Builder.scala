@@ -21,10 +21,9 @@ import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.implementation.registry.{ DefaultKey, KeyRegistry }
 import org.openmole.ide.core.model.workflow.{ IMoleSceneManager, ICapsuleUI }
 import org.openmole.core.implementation.puzzle.Puzzle
-import org.openmole.ide.core.implementation.serializer.MoleMaker
 
 object Builder {
-  def samplingCompositionUI = new SamplingCompositionDataProxyUI
+  def samplingCompositionUI(g: Boolean) = new SamplingCompositionDataProxyUI(generated = g)
 
   def taskUI(t: ITask) = new TaskDataProxyUI((KeyRegistry.tasks(new DefaultKey(t.getClass)).buildDataUI))
 
@@ -44,16 +43,6 @@ object Builder {
       List.empty,
       Map.empty,
       Map.empty)
-
-    /*val _firsts = firsts(capsulesUI)
-    if (_firsts.isEmpty) throw new UserBadDataError("A Wizard can not be applied on an empty sequence of Tasks")
-    if (_lasts.size > 1) throw new UserBadDataError("A Wizard can only be applied on a single sequence of Tasks")
-
-
-    val _lasts = lasts(capsulesUI)
-    if (_lasts.isEmpty) throw new UserBadDataError("A Wizard can not be applied on an empty sequence of Tasks")
-    if (_lasts.size > 1) throw new UserBadDataError("A Wizard can only be applied on a single sequence of Tasks")  */
-
   }
 
   def firsts(capsulesUI: List[ICapsuleUI]) =
@@ -69,8 +58,8 @@ object Builder {
 
   def lasts(capsulesUI: List[ICapsuleUI]) =
     if (capsulesUI.isEmpty) List.empty
-    else capsulesUI.filterNot {
-      c ⇒ capsulesUI.head.scene.manager.capsuleConnections.contains(c.dataUI)
+    else capsulesUI.filter {
+      c ⇒ capsulesUI.head.scene.manager.capsuleConnections(c.dataUI).isEmpty
     }
 
 }

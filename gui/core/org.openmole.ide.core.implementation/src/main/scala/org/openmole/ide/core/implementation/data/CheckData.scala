@@ -27,7 +27,6 @@ import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.registry._
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
-import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
@@ -36,6 +35,7 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
+import org.openmole.ide.core.implementation.builder.MoleMaker
 
 object CheckData extends Logger {
 
@@ -126,7 +126,7 @@ object CheckData extends Logger {
         if (!MoleMaker.keyPrototypeMapping.keys.contains(KeyPrototypeGenerator(d.prototype))) {
           val (key, dim) = KeyGenerator(d.prototype)
           Proxys.prototypes +=
-            new PrototypeDataProxyUI(GenericPrototypeDataUI(d.prototype.name, dim)(KeyGenerator.stripArrays(d.prototype.`type`)._1), true)
+            new PrototypeDataProxyUI(GenericPrototypeDataUI(d.prototype.name, dim)(KeyGenerator.stripArrays(d.prototype.`type`)._1), generated = true)
         }
     }
   }

@@ -42,20 +42,6 @@ class SamplingCompositionDataUI(val name: String = "",
 
   val builtSampling = new HashMap[ISamplingCompositionProxyUI, Sampling]
 
-  /*val sortedSamplingProxys =
-    samplings.sortWith {
-      case ((sp1, p1), (sp2, p2)) ⇒ {
-        p1.y < p2.y
-      }
-    }
-
-  val sortedDomainProxys =
-    domains.sortWith {
-      case ((dp1, p1), (dp2, p2)) ⇒ {
-        p1.y < p2.y
-      }
-    }    */
-
   def coreClass = classOf[Sampling]
 
   def coreObject = {

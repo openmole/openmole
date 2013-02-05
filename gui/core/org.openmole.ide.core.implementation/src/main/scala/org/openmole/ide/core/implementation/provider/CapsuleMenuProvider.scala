@@ -37,6 +37,12 @@ import scala.swing.CheckMenuItem
 import scala.swing.Menu
 import scala.swing.MenuItem
 import org.openmole.ide.core.model.data.{ IHookDataUI, NoMemoryHook }
+import org.openide.DialogDescriptor
+import org.openide.DialogDisplayer
+import org.openide.NotifyDescriptor
+import scala.swing.ScrollPane
+import org.openmole.ide.core.implementation.builder._
+import org.openmole.misc.exception.UserBadDataError
 
 class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends GenericMenuProvider {
   var taskMenu = new JMenu
@@ -128,8 +134,36 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
           }
           action = new HookAction(h, this)
         }
-        items += (menuEnv.peer, menuHook.peer)
     }
+
+    val menuBuilder = new Menu("Builder")
+    KeyRegistry.builders.values.toList.sortBy {
+      _.name
+    }.foreach {
+      b ⇒
+        menuBuilder.contents += new MenuItem(b.name) {
+          action = new Action(b.name) {
+            def apply = {
+              val selection = ScenesManager.selection.toList
+
+              val firsts = Builder.firsts(selection)
+              if (firsts.isEmpty) throw new UserBadDataError("A Wizard can not be applied on an empty sequence of Tasks")
+              if (firsts.size > 1) throw new UserBadDataError("A Wizard can only be applied on a single sequence of Tasks")
+
+              val lasts = Builder.lasts(selection)
+              if (lasts.isEmpty) throw new UserBadDataError("A Wizard can not be applied on an empty sequence of Tasks")
+              if (lasts.size > 1) throw new UserBadDataError("A Wizard can only be applied on a single sequence of Tasks")
+
+              val panel = b.buildPanelUI(Builder.puzzle(selection, firsts.head, lasts), scene.manager)
+              if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(panel) {
+                verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
+              }.peer,
+                b.name + " Builder")).equals(NotifyDescriptor.OK_OPTION)) panel.build
+            }
+          }
+        }
+    }
+    items += (menuEnv.peer, menuHook.peer, menuBuilder.peer)
   }
 
   override def getPopupMenu(widget: Widget, point: Point) = {

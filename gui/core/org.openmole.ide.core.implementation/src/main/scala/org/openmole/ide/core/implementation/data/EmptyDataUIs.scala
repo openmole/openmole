@@ -43,7 +43,7 @@ import org.openmole.ide.core.implementation.sampling.DomainWidget
 
 object EmptyDataUIs {
 
-  val emptyPrototypeProxy: IPrototypeDataProxyUI = new PrototypeDataProxyUI(GenericPrototypeDataUI[Int], false)
+  val emptyPrototypeProxy: IPrototypeDataProxyUI = new PrototypeDataProxyUI(GenericPrototypeDataUI[Int], generated = false)
 
   val emptyTaskProxy: ITaskDataProxyUI = new TaskDataProxyUI(new EmptyTaskDataUI)
 

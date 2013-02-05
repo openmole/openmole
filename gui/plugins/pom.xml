@@ -37,6 +37,7 @@
     <module>org.openmole.ide.plugin.hook.tools</module>
     <module>org.openmole.ide.plugin.hook.display</module>
     <module>org.openmole.ide.plugin.hook.file</module>
+    <module>org.openmole.ide.plugin.builder.base</module>
   </modules>
   <properties>
     <bundle.activator>${project.artifactId}.Activator</bundle.activator>

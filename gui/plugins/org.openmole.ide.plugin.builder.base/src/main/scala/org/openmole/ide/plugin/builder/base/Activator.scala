@@ -15,10 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.registry
+package org.openmole.ide.plugin.builder.base
 
-case class DefaultKey(c: Class[_]) extends Key
+import org.openmole.ide.core.implementation.registry.{ BuilderActivator, OSGiActivator }
+import org.openmole.ide.core.model.factory.IBuilderFactoryUI
+import org.openmole.core.implementation.puzzle.Puzzle
+import org.openmole.ide.core.model.workflow.IMoleSceneManager
 
-case class NameKey(s: String) extends Key
+class Activator extends OSGiActivator with BuilderActivator {
 
-trait Key
+  override def builderFactories = List(new IBuilderFactoryUI {
+    def name = "Exploration"
+    def buildPanelUI(puzzle: Puzzle, manager: IMoleSceneManager) = new ExplorationBuilderPanelUI(puzzle, manager)
+  })
+}

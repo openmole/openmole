@@ -23,5 +23,5 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.misc.tools.Counter
 
 class PrototypeDataProxyUI(var dataUI: IPrototypeDataUI[_],
-                           val generated: Boolean,
-                           val id: Int = Counter.id.getAndIncrement) extends IPrototypeDataProxyUI
+                           val id: Int = Counter.id.getAndIncrement,
+                           override val generated: Boolean = false) extends IPrototypeDataProxyUI

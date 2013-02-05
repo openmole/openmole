@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ide.core.implementation.registry
 
-case class DefaultKey(c: Class[_]) extends Key
+import org.osgi.framework.{ BundleContext, BundleActivator }
+import org.openmole.ide.core.model.factory.IBuilderFactoryUI
 
-case class NameKey(s: String) extends Key
+trait BuilderActivator extends BundleActivator {
 
-trait Key
+  def builderFactories: Iterable[IBuilderFactoryUI]
+
+  abstract override def start(context: BundleContext) = {
+    super.start(context)
+    builderFactories.foreach { f ⇒ KeyRegistry.builders += KeyGenerator(f.name) -> f }
+  }
+
+  abstract override def stop(context: BundleContext) = {
+    super.stop(context)
+    builderFactories.foreach { f ⇒ KeyRegistry.builders -= KeyGenerator(f.name) }
+  }
+}

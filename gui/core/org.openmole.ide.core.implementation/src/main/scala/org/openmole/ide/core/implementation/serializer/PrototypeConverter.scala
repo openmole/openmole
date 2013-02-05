@@ -64,7 +64,7 @@ class PrototypeConverter(mapper: Mapper,
   def extract(reader: HierarchicalStreamReader) = {
     new PrototypeDataProxyUI(GenericPrototypeDataUI(reader.getAttribute("name"),
       reader.getAttribute("dim").toInt)(manifest(reader.getAttribute("type"))),
-      reader.getAttribute("generated").toBoolean, reader.getAttribute("id").toInt)
+      reader.getAttribute("id").toInt, generated = reader.getAttribute("generated").toBoolean)
   }
 
   override def unmarshal(reader: HierarchicalStreamReader,

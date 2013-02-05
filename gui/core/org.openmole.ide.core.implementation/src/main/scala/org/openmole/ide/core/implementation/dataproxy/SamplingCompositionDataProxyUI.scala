@@ -23,4 +23,5 @@ import org.openmole.ide.core.implementation.sampling.SamplingCompositionDataUI
 import org.openmole.ide.misc.tools.Counter
 
 class SamplingCompositionDataProxyUI(var dataUI: ISamplingCompositionDataUI = new SamplingCompositionDataUI,
-                                     val id: Int = Counter.id.getAndIncrement) extends ISamplingCompositionDataProxyUI
+                                     val id: Int = Counter.id.getAndIncrement,
+                                     override val generated: Boolean = false) extends ISamplingCompositionDataProxyUI
