@@ -20,9 +20,12 @@ package org.openmole.misc.tools.math
 object Stat {
 
   def median(serie: Iterable[Double]): Double = {
-    val sortedSerie = serie.toArray.sorted
+    val sortedSerie = serie.toArray.filterNot(_.isNaN).sorted
     val size = sortedSerie.size
-    if (size % 2 == 0) (sortedSerie(size / 2) + sortedSerie((size / 2) - 1)) / 2 else sortedSerie((size / 2))
+    if (size == serie.size)
+      if (size % 2 == 0) (sortedSerie(size / 2) + sortedSerie((size / 2) - 1)) / 2
+      else sortedSerie((size / 2))
+    else Double.NaN
   }
 
   def medianAbsoluteDeviation(serie: Iterable[Double]): Double = {
