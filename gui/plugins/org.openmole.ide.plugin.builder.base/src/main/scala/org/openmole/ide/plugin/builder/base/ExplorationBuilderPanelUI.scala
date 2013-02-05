@@ -17,16 +17,12 @@
 
 package org.openmole.ide.plugin.builder.base
 
-import org.openmole.ide.core.model.panel.IBuilderPanelUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
-import org.openmole.ide.misc.widget.PluginPanel
-import org.openmole.ide.core.implementation.builder.BuilderPanel
+import org.openmole.ide.core.implementation.builder._
 import org.openmole.core.implementation.puzzle.Puzzle
 import swing.{ MyComboBox, Label }
 import org.openmole.plugin.builder.base._
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
-import java.io.File
-import org.openmole.core.model.task.PluginSet
 
 class ExplorationBuilderPanelUI(puzzle: Puzzle, manager: IMoleSceneManager) extends BuilderPanel {
 
@@ -34,5 +30,5 @@ class ExplorationBuilderPanelUI(puzzle: Puzzle, manager: IMoleSceneManager) exte
   contents += new Label("Sampling")
   contents += samplingComboBox
 
-  def build = exploration(nameTextField.text, puzzle, samplingComboBox.selection.item.dataUI.coreObject)(manager.dataUI.pluginSet)
+  def build = exploration(nameTextField.text, puzzle, Proxys.getOrGenerateSamplingComposition(samplingComboBox.selection.item).dataUI.coreObject)(manager.dataUI.pluginSet)
 }

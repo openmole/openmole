@@ -48,11 +48,13 @@ object Proxys {
     a
   }
 
-  def getOrGenerateSamplingComposition(p: ISamplingCompositionDataProxyUI) = getOrGenerateProxy(p, x ⇒ Builder.samplingCompositionUI(true))
+  def getOrGenerateSamplingComposition(p: ISamplingCompositionDataProxyUI) =
+    if (isProxy(p)) p
+    else Builder.samplingCompositionUI(true)
 
-  def getOrGenerateProxy(p: IDataProxyUI, f: Unit ⇒ IDataProxyUI) = p match {
-    case exists: IDataProxyUI ⇒ exists
-    case _ ⇒ f()
+  def isProxy(p: IDataProxyUI) = p match {
+    case exists: IDataProxyUI ⇒ true
+    case _ ⇒ false
   }
 
   def clearAll: Unit = {
