@@ -19,7 +19,6 @@ import org.openmole.ide.misc.visualization._
 import org.openmole.ide.misc.widget._
 import org.openmole.core.model.mole._
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.model.panel._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.factory._
@@ -38,6 +37,7 @@ import TextAreaOutputStream._
 import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
 import org.openmole.ide.core.model.data.{ NoMemoryHook, IHookDataUI }
 import org.openmole.ide.core.implementation.registry.{ DefaultKey, KeyRegistry }
+import org.openmole.ide.core.implementation.builder.MoleMaker
 
 object ExecutionManager {
   implicit def executionStatesDecorator(s: scala.collection.mutable.Map[ExecutionState.ExecutionState, AtomicInteger]) = new {

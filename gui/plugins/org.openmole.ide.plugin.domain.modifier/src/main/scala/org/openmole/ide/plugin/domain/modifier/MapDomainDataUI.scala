@@ -48,7 +48,7 @@ case class MapDomainDataUI(val prototypeName: String = "",
 
   def buildPanelUI(p: IPrototypeDataProxyUI) = new MapDomainPanelUI(this)
 
-  def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], false))
+  def buildPanelUI = buildPanelUI(new PrototypeDataProxyUI(GenericPrototypeDataUI[Double], generated = false))
 
   def coreClass = classOf[MapDomain[_, _]]
 

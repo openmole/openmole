@@ -59,7 +59,8 @@ import org.openmole.misc.exception.UserBadDataError
 abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMoleScene
     with SelectProvider
     with RectangularSelectDecorator
-    with RectangularSelectProvider { moleScene ⇒
+    with RectangularSelectProvider {
+  moleScene ⇒
 
   val manager = new MoleSceneManager(n)
   var obUI: Option[Widget] = None
@@ -81,7 +82,9 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   addChild(propertyLayer)
   addChild(extraPropertyLayer)
 
-  val extraPropertyWidget = new ComponentWidget(this, currentExtraPanel.peer) { setVisible(false) }
+  val extraPropertyWidget = new ComponentWidget(this, currentExtraPanel.peer) {
+    setVisible(false)
+  }
   val propertyWidget = new ComponentWidget(this, currentPanel.peer) {
     setVisible(false)
   }
@@ -112,26 +115,29 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   }
 
   def displayPropertyPanel(proxy: IDataProxyUI,
-                           mode: PanelMode.Value) = {
-    closePropertyPanel
-    currentPanel.contents.removeAll
-    proxy match {
-      case x: ITaskDataProxyUI ⇒ currentPanel.contents += new TaskPanel(x, this, mode)
-      case x: IPrototypeDataProxyUI ⇒ currentPanel.contents += new PrototypePanel(x, this, mode)
-      case x: IEnvironmentDataProxyUI ⇒ currentPanel.contents += new EnvironmentPanel(x, this, mode)
-      case x: ISamplingCompositionDataProxyUI ⇒ currentPanel.contents += new SamplingCompositionPanel(x, this, mode)
+                           mode: PanelMode.Value) =
+    ScenesManager.currentSceneContainer match {
+      case (Some(exe: ExecutionMoleSceneContainer)) ⇒
       case _ ⇒
-    }
-    propertyWidget.setPreferredLocation(new Point(getView.getBounds().x.toInt + 20, 20))
-    propertyWidget.revalidate
-    propertyWidget.setVisible(true)
+        closePropertyPanel
+        currentPanel.contents.removeAll
+        proxy match {
+          case x: ITaskDataProxyUI ⇒ currentPanel.contents += new TaskPanel(x, this, mode)
+          case x: IPrototypeDataProxyUI ⇒ currentPanel.contents += new PrototypePanel(x, this, mode)
+          case x: IEnvironmentDataProxyUI ⇒ currentPanel.contents += new EnvironmentPanel(x, this, mode)
+          case x: ISamplingCompositionDataProxyUI ⇒ currentPanel.contents += new SamplingCompositionPanel(x, this, mode)
+          case _ ⇒
+        }
+        propertyWidget.setPreferredLocation(new Point(getView.getBounds().x.toInt + 20, 20))
+        propertyWidget.revalidate
+        propertyWidget.setVisible(true)
 
-    currentPanel.contents.get(currentPanel.contents.size - 1) match {
-      case x: BasePanel ⇒ x.nameTextField.requestFocus
-      case _ ⇒
+        currentPanel.contents.get(currentPanel.contents.size - 1) match {
+          case x: BasePanel ⇒ x.nameTextField.requestFocus
+          case _ ⇒
+        }
+        refresh
     }
-    refresh
-  }
 
   def displayExtraPropertyPanel(compositionSamplingWidget: ISamplingCompositionWidget) = {
     currentExtraPanel.contents.removeAll
@@ -152,7 +158,9 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
         freeze = x.generated
         new PrototypePanel(x, this, EXTRA)
     })
-    if (freeze) currentExtraPanel.contents.foreach { _.enabled = !freeze }
+    if (freeze) currentExtraPanel.contents.foreach {
+      _.enabled = !freeze
+    }
     extraPropertyWidget.setVisible(true)
     extraPropertyWidget.setPreferredLocation(new Point(propertyWidget.getBounds.x.toInt + currentPanel.bounds.width + 40, 20))
     refresh
@@ -200,7 +208,9 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
 
   def graphScene = this
 
-  def refresh = { validate; repaint }
+  def refresh = {
+    validate; repaint
+  }
 
   def createConnectEdge(sourceNodeID: String, targetNodeID: String, slotIndex: Int = 1) = {
     currentSlotIndex = slotIndex
@@ -276,24 +286,25 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     }
 
     var changed = false
-    getNodes.foreach { b ⇒
-      findWidget(b) match {
-        case w: CapsuleUI ⇒
-          val r = new Rectangle(w.getBounds)
-          r.setLocation(w.getLocation)
-          if (r.intersects(rectangle)) {
-            if (!ScenesManager.selection.contains(w)) {
-              changed = true
-              ScenesManager.addToSelection(w)
+    getNodes.foreach {
+      b ⇒
+        findWidget(b) match {
+          case w: CapsuleUI ⇒
+            val r = new Rectangle(w.getBounds)
+            r.setLocation(w.getLocation)
+            if (r.intersects(rectangle)) {
+              if (!ScenesManager.selection.contains(w)) {
+                changed = true
+                ScenesManager.addToSelection(w)
+              }
+            } else {
+              if (ScenesManager.selection.contains(w)) {
+                changed = true
+                ScenesManager.removeFromSelection(w)
+              }
             }
-          } else {
-            if (ScenesManager.selection.contains(w)) {
-              changed = true
-              ScenesManager.removeFromSelection(w)
-            }
-          }
-        case x ⇒
-      }
+          case x ⇒
+        }
     }
   }
 
@@ -303,8 +314,9 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     var original: Option[Point] = None
 
     def movementStarted(widget: Widget) = {
-      ScenesManager.selection.foreach { o ⇒
-        originals += o -> o.widget.getPreferredLocation
+      ScenesManager.selection.foreach {
+        o ⇒
+          originals += o -> o.widget.getPreferredLocation
       }
     }
 
@@ -353,7 +365,9 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
       if (isNode(o)) source = Some(o.asInstanceOf[String])
       var res = false
       sourceWidget match {
-        case x: ICapsuleUI ⇒ { res = source.isDefined }
+        case x: ICapsuleUI ⇒ {
+          res = source.isDefined
+        }
       }
       res
     }
@@ -403,4 +417,5 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
       widget
     }
   }
+
 }

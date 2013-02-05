@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.ide.core.implementation.builder
 
-package org.openmole.ide.core.implementation.registry
+import org.openmole.ide.misc.widget.PluginPanel
+import swing.{ Action, Button, TextField, Label }
+import org.openmole.ide.core.model.panel.IBuilderPanelUI
+import java.awt.{ Dimension, Color }
 
-case class DefaultKey(c: Class[_]) extends Key
+abstract class BuilderPanel extends PluginPanel("wrap 2 ") with IBuilderPanelUI {
+  val nameTextField = new TextField()
 
-case class NameKey(s: String) extends Key
+  contents += new Label("Name")
+  contents += new TextField(10)
 
-trait Key
+  preferredSize = new Dimension(300, 80)
+
+}

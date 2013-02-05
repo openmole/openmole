@@ -6,7 +6,6 @@
 package org.openmole.ide.plugin.task.moletask
 
 import java.awt.Color
-import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
@@ -18,6 +17,7 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.misc.exception.UserBadDataError
 import scala.collection.JavaConversions._
+import org.openmole.ide.core.implementation.builder.MoleMaker
 
 object MoleTaskDataUI {
   def manager(i: Int): Option[IMoleSceneManager] = ScenesManager.moleScenes.map { _.manager }.filter { _.id == i }.headOption

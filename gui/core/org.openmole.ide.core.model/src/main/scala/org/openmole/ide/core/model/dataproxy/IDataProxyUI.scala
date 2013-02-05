@@ -23,4 +23,6 @@ trait IDataProxyUI {
   def id: Int
 
   def dataUI: IDataUI
+
+  def generated: Boolean = false
 }

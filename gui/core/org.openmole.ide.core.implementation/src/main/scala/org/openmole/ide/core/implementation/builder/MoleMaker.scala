@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.serializer
+package org.openmole.ide.core.implementation.builder
 
 import org.openmole.core.model.data._
 import org.openmole.core.model.execution._
@@ -196,7 +196,9 @@ object MoleMaker {
 
     if (capsuleMap.isEmpty) (List.empty, List.empty, islotsMap)
     else {
-      val manager = capsuleMap.head._1.scene.manager
+      val firstCapsule = capsuleMap.head
+      val manager = firstCapsule._1.scene.manager
+      islotsMap.getOrElseUpdate(firstCapsule._1.islots.head, Slot(capsuleMap(firstCapsule._1)))
       val transitions = capsuleMap.flatMap {
         case (cui, ccore) ⇒
           manager.capsuleConnections(cui.dataUI).flatMap {

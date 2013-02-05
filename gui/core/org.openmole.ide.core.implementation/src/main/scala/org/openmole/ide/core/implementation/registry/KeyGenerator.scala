@@ -33,4 +33,6 @@ object KeyGenerator {
   }
 
   def apply(entityClass: Class[_]): DefaultKey = new DefaultKey(entityClass)
+
+  def apply(entityName: String): NameKey = new NameKey(entityName)
 }

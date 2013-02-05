@@ -23,6 +23,7 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
 import org.openmole.ide.misc.tools.util.Types
 import org.openmole.misc.tools.obj.ClassUtils._
+import org.openmole.ide.core.implementation.builder.Builder
 
 object Proxys {
 
@@ -45,6 +46,15 @@ object Proxys {
         assignable(prototypeClass, p.dataUI.coreObject.`type`.runtimeClass)
     }
     a
+  }
+
+  def getOrGenerateSamplingComposition(p: ISamplingCompositionDataProxyUI) =
+    if (isProxy(p)) p
+    else Builder.samplingCompositionUI(true)
+
+  def isProxy(p: IDataProxyUI) = p match {
+    case exists: IDataProxyUI ⇒ true
+    case _ ⇒ false
   }
 
   def clearAll: Unit = {
