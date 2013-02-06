@@ -19,26 +19,28 @@ package org.openmole.core.model.mole
 
 import org.openmole.core.model.transition._
 import org.openmole.core.model.data._
-import org.openmole.core.model.task._
-
-import scala.collection.mutable.HashSet
-import scala.collection.mutable.ListBuffer
+import collection._
 
 object IMole {
 
-  def slots(mole: IMole): Seq[Slot] = {
-    val visited = new HashSet[ICapsule]
-    val list = new ListBuffer[Slot]
-    val toExplore = new ListBuffer[ICapsule]
+  def slots(mole: IMole): Seq[Slot] = slots(mole.root, mole.outputTransitions)
 
-    toExplore += mole.root
-    list += Slot(mole.root)
+  def slots(initialCapsule: ICapsule, transitions: Iterable[ITransition]): Seq[Slot] =
+    slots(initialCapsule, transitions.groupBy(_.start).mapValues(_.toSet))
+
+  def slots(initialCapsule: ICapsule, outputTransitions: Map[ICapsule, Iterable[ITransition]]): Seq[Slot] = {
+    val visited = new mutable.HashSet[ICapsule]
+    val list = new mutable.ListBuffer[Slot]
+    val toExplore = new mutable.ListBuffer[ICapsule]
+
+    toExplore += initialCapsule
+    list += Slot(initialCapsule)
 
     while (!(toExplore.isEmpty)) {
       val current = toExplore.remove(0)
 
       if (!visited.contains(current)) {
-        for (transition ← mole.outputTransitions(current)) {
+        for (transition ← outputTransitions.getOrElse(current, Iterable.empty)) {
           toExplore += transition.end.capsule
           list += transition.end
         }
