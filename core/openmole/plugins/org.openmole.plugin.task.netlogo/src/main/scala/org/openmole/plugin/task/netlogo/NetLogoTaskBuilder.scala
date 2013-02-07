@@ -26,6 +26,7 @@ abstract class NetLogoTaskBuilder extends ExternalTaskBuilder {
 
   private var _netLogoInputs = new ListBuffer[(Prototype[_], String)]
   private var _netLogoOutputs = new ListBuffer[(String, Prototype[_])]
+  private var _netLogoArrayOutputs = new ListBuffer[(String, Int, Prototype[_])]
 
   def netLogoInputs = _netLogoInputs.toList
 
@@ -46,5 +47,13 @@ abstract class NetLogoTaskBuilder extends ExternalTaskBuilder {
   }
 
   def addNetLogoOutput(p: Prototype[_]): this.type = this.addNetLogoOutput(p.name, p)
+
+  def addNetLogoOutput(name: String, column: Int, p: Prototype[_]): this.type = {
+    _netLogoArrayOutputs += ((name, column, p))
+    this addOutput p
+    this
+  }
+
+  def netLogoArrayOutputs = _netLogoArrayOutputs.toList
 
 }

@@ -55,6 +55,7 @@ object NetLogo4Task {
         resources = builder.resources,
         netLogoInputs = builder.netLogoInputs,
         netLogoOutputs = builder.netLogoOutputs,
+        netLogoArrayOutputs = builder.netLogoArrayOutputs,
         netLogoFactory = factory)
     }
   }
@@ -80,6 +81,7 @@ object NetLogo4Task {
         resources = builder.resources,
         netLogoInputs = builder.netLogoInputs,
         netLogoOutputs = builder.netLogoOutputs,
+        netLogoArrayOutputs = builder.netLogoArrayOutputs,
         netLogoFactory = factory)
     }
   }
@@ -100,6 +102,7 @@ sealed class NetLogo4Task(
   launchingCommands: Iterable[String],
   netLogoInputs: Iterable[(Prototype[_], String)],
   netLogoOutputs: Iterable[(String, Prototype[_])],
+  netLogoArrayOutputs: Iterable[(String, Int, Prototype[_])],
   netLogoFactory: NetLogoFactory,
   inputs: DataSet,
   outputs: DataSet,
@@ -112,6 +115,7 @@ sealed class NetLogo4Task(
   launchingCommands,
   netLogoInputs,
   netLogoOutputs,
+  netLogoArrayOutputs,
   netLogoFactory,
   inputs,
   outputs,

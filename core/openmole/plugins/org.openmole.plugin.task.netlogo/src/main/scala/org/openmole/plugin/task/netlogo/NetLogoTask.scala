@@ -40,6 +40,7 @@ class NetLogoTask(
     val launchingCommands: Iterable[String],
     val netLogoInputs: Iterable[(Prototype[_], String)],
     val netLogoOutputs: Iterable[(String, Prototype[_])],
+    val netLogoArrayOutputs: Iterable[(String, Int, Prototype[_])],
     val netLogoFactory: NetLogoFactory,
     val inputs: DataSet,
     val outputs: DataSet,
@@ -65,7 +66,7 @@ class NetLogoTask(
       netLogo.open(script.getAbsolutePath)
 
       for (inBinding ← netLogoInputs) {
-        val v = context.value(inBinding._1).get
+        val v = context(inBinding._1)
         netLogo.command("set " + inBinding._2 + " " + v.toString)
       }
 
@@ -76,15 +77,26 @@ class NetLogoTask(
           val outputValue = netLogo.report(name)
           if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Prototype[Any]], outputValue)
           else {
-            val netlogoCollection = outputValue.asInstanceOf[AbstractCollection[Any]]
-            val array = java.lang.reflect.Array.newInstance(prototype.`type`.runtimeClass.getComponentType, netlogoCollection.size)
-            val it = netlogoCollection.iterator
-            for (i ← 0 until netlogoCollection.size) java.lang.reflect.Array.set(array, i, it.next)
-            Variable(prototype.asInstanceOf[Prototype[Any]], array)
+            val netLogoCollection = outputValue.asInstanceOf[AbstractCollection[Any]]
+            netLogoArrayToVariable(netLogoCollection, prototype)
           }
+      } ++ netLogoArrayOutputs.map {
+        case (name, column, prototype) ⇒
+          val netLogoCollection = netLogo.report(name)
+          val outputValue = netLogoCollection.asInstanceOf[AbstractCollection[Any]].toArray()(column)
+          if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Prototype[Any]], outputValue)
+          else netLogoArrayToVariable(outputValue.asInstanceOf[AbstractCollection[Any]], prototype)
       }
+
     } finally netLogo.dispose
 
+  }
+
+  def netLogoArrayToVariable(netlogoCollection: AbstractCollection[Any], prototype: Prototype[_]) = {
+    val array = java.lang.reflect.Array.newInstance(prototype.`type`.runtimeClass.getComponentType, netlogoCollection.size)
+    val it = netlogoCollection.iterator
+    for (i ← 0 until netlogoCollection.size) java.lang.reflect.Array.set(array, i, it.next)
+    Variable(prototype.asInstanceOf[Prototype[Any]], array)
   }
 
 }
