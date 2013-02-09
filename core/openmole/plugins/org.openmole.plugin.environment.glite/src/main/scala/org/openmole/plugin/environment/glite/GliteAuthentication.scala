@@ -19,10 +19,7 @@ package org.openmole.plugin.environment.glite
 
 import com.ice.tar.TarInputStream
 import fr.iscpif.gridscale.storage._
-import java.io.BufferedInputStream
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
+import java.io._
 import java.net.URI
 import org.openmole.misc.tools.service.Logger
 import java.nio.file.FileSystems
@@ -40,17 +37,13 @@ import GliteEnvironment._
 import org.globus.gsi.gssapi.GlobusGSSCredentialImpl
 import scala.collection.JavaConversions._
 import scala.ref.WeakReference
+import scala.Some
+import scala.Some
 
 object GliteAuthentication extends Logger {
 
   lazy val CACertificatesDir: File = {
-    /*val X509_CERT_DIR = System.getenv("X509_CERT_DIR")
-
-    if (X509_CERT_DIR != null && new File(X509_CERT_DIR).exists) new File(X509_CERT_DIR)
-    else {
-      val caDir = new File("/etc/grid-security/certificates/")
-      if (caDir.exists) caDir
-      else {    */
+    Workspace.file("ca.lock").withLock { _ =>
     val caDir = Workspace.file("CACertificates")
 
     if (!caDir.exists || !new File(caDir, ".complete").exists) {
@@ -59,8 +52,7 @@ object GliteAuthentication extends Logger {
       new File(caDir, ".complete").createNewFile
     }
     caDir
-    // }
-    // }
+    }
   }
 
   def downloadCACertificates(address: String, dir: File) = {
@@ -100,6 +92,46 @@ object GliteAuthentication extends Logger {
         case e: Throwable ⇒ throw new IOException(tarUrl, e)
       }
     }
+  }
+
+  def voCards = {
+      val voCards = Workspace.file("voCards.xml")
+      if(!voCards.exists) {
+        val tmpVoCards = Workspace.newFile
+        HTTPStorage.withConnection(
+          new URI(Workspace.preference(GliteEnvironment.VOInformationSite)),
+            Workspace.preferenceAsDuration(GliteEnvironment.VOCardDownloadTimeOut).toSeconds) { http =>
+          val is: InputStream = http.getInputStream
+          try is.copy(tmpVoCards)
+          finally is.close
+        tmpVoCards move voCards
+      }
+    }
+    voCards
+  }
+
+  def getVOMS(vo: String): String = getVOMS(vo, xml.XML.loadFile(voCards))
+
+  def getVOMS(vo: String, x: xml.Node) =  {
+    import xml._
+
+    def attributeIsDefined(name: String, value: String) =
+      (_: Node).attribute(name).filter(_.text==value).isDefined
+
+    val card = (x \ "IDCard" filter (attributeIsDefined("Name", "vo.grand-est.fr"))).headOption
+
+
+    val voms =
+      card match {
+        case Some(card) => (card \ "gLiteConf" \ "VOMSServers" \ "VOMS_Server").head
+        case None => throw new UserBadDataError(s"VO with name $vo not found in the xml file.")
+      }
+
+    val host = (voms \ "hostname").head.text
+    val port = (voms.attribute("VomsesPort").get.text)
+    val dn = (voms \ "X509Cert" \ "DN").head.text
+
+    s"voms://$host:${port}$dn"
   }
 
   def update(a: GliteAuthentication) = Workspace.persistentList(classOf[GliteAuthentication])(0) = a

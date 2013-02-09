@@ -53,6 +53,8 @@ object GliteEnvironment extends Logger {
 
   val FetchResourcesTimeOut = new ConfigurationLocation("GliteEnvironment", "FetchResourcesTimeOut")
   val CACertificatesSite = new ConfigurationLocation("GliteEnvironment", "CACertificatesSite")
+  val VOInformationSite = new ConfigurationLocation("GliteEnvironment", "VOInformationSite")
+  val VOCardDownloadTimeOut = new ConfigurationLocation("GliteEnvironment", "VOCardDownloadTimeOut")
 
   val OverSubmissionInterval = new ConfigurationLocation("GliteEnvironment", "OverSubmissionInterval")
   val OverSubmissionMinNumberOfJob = new ConfigurationLocation("GliteEnvironment", "OverSubmissionMinNumberOfJob")
@@ -75,17 +77,18 @@ object GliteEnvironment extends Logger {
   val JobServiceFitnessPower = new ConfigurationLocation("GliteEnvironment", "JobServiceFitnessPower")
   val StorageFitnessPower = new ConfigurationLocation("GliteEnvironment", "StorageFitnessPower")
 
-  //val CECacheDir = new ConfigurationLocation("GliteEnvironment", "CECacheDir")
-  //val CECacheDuration = new ConfigurationLocation("GliteEnvironment", "CECacheDuration")
-
   val RunningHistoryDuration = new ConfigurationLocation("GliteEnvironment", "RunningHistoryDuration")
   val EagerSubmissionThreshold = new ConfigurationLocation("GliteEnvironment", "EagerSubmissionThreshold")
+
+  val DefaultBDII = new ConfigurationLocation("GliteEnvironment", "DefaultBDII")
 
   Workspace += (ProxyTime, "PT24H")
   Workspace += (MyProxyTime, "P7D")
 
   Workspace += (FetchResourcesTimeOut, "PT2M")
   Workspace += (CACertificatesSite, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/")
+  Workspace += (VOInformationSite, "http://operations-portal.egi.eu/xml/voIDCard/public/all/true")
+  Workspace += (VOCardDownloadTimeOut, "PT2M")
 
   Workspace += (LocalThreadsBySE, "10")
   Workspace += (LocalThreadsByWMS, "10")
@@ -115,28 +118,28 @@ object GliteEnvironment extends Logger {
   Workspace += (JobServiceFitnessPower, "2")
   Workspace += (StorageFitnessPower, "2")
 
-  //Workspace += (CECacheDir, "openmole_cache")
-  //Workspace += (CECacheDuration, "P7D")
-
   Workspace += (RunningHistoryDuration, "PT3H")
   Workspace += (EagerSubmissionThreshold, "0.5")
+
+  Workspace += (DefaultBDII, "ldap://cclcgtopbdii02.in2p3.fr:2170")
+
 }
 
 class GliteEnvironment(
-    val voName: String,
-    val vomsURL: String,
-    val bdii: String,
-    val fqan: Option[String] = None,
-    override val openMOLEMemory: Option[Int] = None,
-    val memory: Option[Int] = None,
-    val cpuTime: Option[String] = None,
-    val wallTime: Option[String] = None,
-    val cpuNumber: Option[Int] = None,
-    val jobType: Option[String] = None,
-    val smpGranularity: Option[Int] = None,
-    val myProxy: Option[MyProxy] = None,
-    val architecture: Option[String] = None,
-    override val threads: Option[Int] = None) extends BatchEnvironment with MemoryRequirement { env ⇒
+    val voName: String)(
+        val bdii: String = Workspace.preference(GliteEnvironment.DefaultBDII),
+        val vomsURL: String = GliteAuthentication.getVOMS(voName),
+        val fqan: Option[String] = None,
+        override val openMOLEMemory: Option[Int] = None,
+        val memory: Option[Int] = None,
+        val cpuTime: Option[String] = None,
+        val wallTime: Option[String] = None,
+        val cpuNumber: Option[Int] = None,
+        val jobType: Option[String] = None,
+        val smpGranularity: Option[Int] = None,
+        val myProxy: Option[MyProxy] = None,
+        val architecture: Option[String] = None,
+        override val threads: Option[Int] = None) extends BatchEnvironment with MemoryRequirement { env ⇒
 
   import GliteEnvironment._
 

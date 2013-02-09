@@ -40,21 +40,20 @@ class GliteEnvironmentDataUI(val name: String = "",
       else None
     }
     try {
-      new GliteEnvironment(
-        vo,
-        voms,
-        bdii,
-        fqan,
-        openMOLEMemory,
-        memory,
-        cpuTime,
-        wallTime,
-        cpuNumber,
-        jobType,
-        smpGranularity,
-        myProxy,
-        if (architecture) Some("x86_64") else None,
-        threads)
+      new GliteEnvironment(vo)(
+        vomsURL = voms,
+        bdii = bdii,
+        fqan = fqan,
+        openMOLEMemory = openMOLEMemory,
+        memory = memory,
+        cpuTime = cpuTime,
+        wallTime = wallTime,
+        cpuNumber = cpuNumber,
+        jobType = jobType,
+        smpGranularity = smpGranularity,
+        myProxy = myProxy,
+        architecture = if (architecture) Some("x86_64") else None,
+        threads = threads)
     } catch {
       case e: UserBadDataError ⇒ throw e
       case e: Exception ⇒ throw new UserBadDataError(e, "An error occured when initializing the glite environment" + name + ". Please check your certificate settings in the Preferences menu.")
