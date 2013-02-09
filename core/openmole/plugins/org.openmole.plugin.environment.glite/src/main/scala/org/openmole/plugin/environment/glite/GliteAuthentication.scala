@@ -110,7 +110,7 @@ object GliteAuthentication extends Logger {
     voCards
   }
 
-  def getVOMS(vo: String): String = getVOMS(vo, xml.XML.loadFile(voCards))
+  def getVOMS(vo: String): Option[String] = getVOMS(vo, xml.XML.loadFile(voCards))
 
   def getVOMS(vo: String, x: xml.Node) =  {
     import xml._
@@ -120,18 +120,15 @@ object GliteAuthentication extends Logger {
 
     val card = (x \ "IDCard" filter (attributeIsDefined("Name", vo))).headOption
 
+     card map {
+        card =>
+          val voms = (card \ "gLiteConf" \ "VOMSServers" \ "VOMS_Server").head
+          val host = (voms \ "hostname").head.text
+          val port = (voms.attribute("VomsesPort").get.text)
+          val dn = (voms \ "X509Cert" \ "DN").headOption.map(_.text)
 
-    val voms =
-      card match {
-        case Some(card) => (card \ "gLiteConf" \ "VOMSServers" \ "VOMS_Server").head
-        case None => throw new UserBadDataError(s"VO with name $vo not found in the xml file.")
+          s"voms://$host:${port}${dn.getOrElse("")}"
       }
-
-    val host = (voms \ "hostname").head.text
-    val port = (voms.attribute("VomsesPort").get.text)
-    val dn = (voms \ "X509Cert" \ "DN").head.text
-
-    s"voms://$host:${port}$dn"
   }
 
   def update(a: GliteAuthentication) = Workspace.persistentList(classOf[GliteAuthentication])(0) = a

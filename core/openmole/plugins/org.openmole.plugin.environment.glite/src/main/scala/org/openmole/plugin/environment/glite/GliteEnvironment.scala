@@ -128,7 +128,7 @@ object GliteEnvironment extends Logger {
 class GliteEnvironment(
     val voName: String)(
         val bdii: String = Workspace.preference(GliteEnvironment.DefaultBDII),
-        val vomsURL: String = GliteAuthentication.getVOMS(voName),
+        val vomsURL: String = GliteAuthentication.getVOMS(voName).getOrElse(throw new UserBadDataError(s"ID card for VO $voName not found.")),
         val fqan: Option[String] = None,
         override val openMOLEMemory: Option[Int] = None,
         val memory: Option[Int] = None,

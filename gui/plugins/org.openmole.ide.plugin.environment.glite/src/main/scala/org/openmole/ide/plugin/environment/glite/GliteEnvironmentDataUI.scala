@@ -16,7 +16,7 @@ import scala.collection.JavaConversions._
 class GliteEnvironmentDataUI(val name: String = "",
                              val vo: String = "",
                              val voms: String = "",
-                             val bdii: String = "",
+                             val bdii: String = Workspace.preference(GliteEnvironment.DefaultBDII),
                              val proxy: Boolean = false,
                              val proxyTime: Option[String] = None,
                              val proxyHost: Option[String] = None,
