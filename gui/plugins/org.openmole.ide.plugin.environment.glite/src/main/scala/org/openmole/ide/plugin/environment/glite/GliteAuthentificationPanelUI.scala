@@ -39,6 +39,15 @@ import scala.Some
 object GliteAuthentificationPanelUI {
   val RED = new Color(212, 0, 0)
   val GREEN = new Color(136, 170, 0)
+
+  lazy val vomses = {
+    val x = xml.XML.loadFile(GliteAuthentication.voCards)
+    val cards = (x \ "IDCard")
+    val names = cards map (_.attribute("Name").get.text)
+    val urls = cards map (c ⇒ (c \ "EnrollmentUrl").head.text)
+    names zip urls
+  }
+
 }
 
 class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") with IAuthentificationPanelUI {
