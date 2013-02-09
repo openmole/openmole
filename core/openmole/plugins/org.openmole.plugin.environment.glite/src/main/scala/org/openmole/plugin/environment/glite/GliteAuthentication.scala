@@ -118,7 +118,7 @@ object GliteAuthentication extends Logger {
     def attributeIsDefined(name: String, value: String) =
       (_: Node).attribute(name).filter(_.text==value).isDefined
 
-    val card = (x \ "IDCard" filter (attributeIsDefined("Name", "vo.grand-est.fr"))).headOption
+    val card = (x \ "IDCard" filter (attributeIsDefined("Name", value))).headOption
 
 
     val voms =
