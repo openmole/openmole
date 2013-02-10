@@ -63,7 +63,7 @@ object ReplicaCatalog extends Logger {
   Workspace += (NoAccessCleanTime, "P30D")
   Workspace += (InCatalogCacheTime, "PT2M")
   Workspace += (ReplicaCacheTime, "PT30M")
-  Workspace += (SocketTimeout, "PT2M")
+  Workspace += (SocketTimeout, "PT10M")
 
   lazy val replicationPattern = Pattern.compile("(\\p{XDigit}*)_.*")
   lazy val inCatalogCache = new TimeCache[Map[String, Set[String]]]
