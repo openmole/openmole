@@ -2,54 +2,52 @@ package org.openmole.web
 
 import org.scalatra._
 import scalate.ScalateSupport
-import servlet.FileUploadSupport
-import java.io.File
+import servlet.{ FileUploadSupport }
+import java.io.{ InputStream, File }
+import javax.servlet.annotation.MultipartConfig
+import xml.XML
+import org.openmole.core.serializer._
+import org.openmole.core.implementation.mole.MoleExecution
 
-class MyServlet extends ScalatraServlet with ScalateSupport with FileUploadSupport {
-  get("/") {
-    <html>
-      <body>
-        <img src="images/small-bart.jpg"></img>
-        <h1>Hello, world!</h1>
-        Say<a href="hello-scalate">hello to Scalate</a>
-        .
-        <form name="file" action="/" method="POST">
-          <input type="File" name="imgfile"></input>
-          <input type="Submit"/>
-        </form>
-      </body>
-    </html>
+@MultipartConfig(maxFileSize = 3 * 1024 * 1024) //research scala multipart config
+class MyServlet extends ScalatraServlet with ScalateSupport with FileUploadSupport with FlashMapSupport {
+  get("/bort.html") {
+    contentType = "text/html"
+    ssp("/bort", "body" -> "<img src=\"images/small-bart.jpg\"></img>\n        <h1>Hello, world!</h1>\n        Say<a href=\"hello-scalate\">hello to Scalate</a>.")
   }
 
-  post("/") {
-    contentType = "text/html"
-    val file = new File(servletContext.getRealPath("images/new.jpg"))
-    val img = if (file.createNewFile()) {
-      fileParams.get("file") map (data ⇒ {; file.getPath }) getOrElse ("images/small-bart.jpg")
-    } else "images/small-bart.jpg"
+  println("servlet init")
+  var moleExecs: Map[String, MoleExecution] = Map("test" -> null)
 
-    <html>
-      <body>
-        <img src={ img }></img>
-        <h1>Hello, world!</h1>
-        Say<a href="hello-scalate"> hello to Scalate</a>
-        .
-        <form name="file" action="/" method="POST">
-          <input type="File" name="imgfile"></input>
-          <input type="Submit"/>
-        </form>
-      </body>
-    </html>
+  post("/bort.html") {
+    contentType = "text/html"
+    val moleExec = fileParams.get("imgfile") match {
+      case Some(data) ⇒
+        if (data.getContentType.isDefined && data.getContentType.get == "text/xml")
+          Some(SerializerService.deserialize[MoleExecution](data.getInputStream))
+        else
+          None
+      case None ⇒ None
+    }
+
+    moleExec foreach { exec ⇒
+      exec.start
+      println(exec.finished)
+      moleExecs = moleExecs + (exec.id -> exec)
+    }
+
+    redirect("/loadedExecutions")
   }
 
-  get("/bort") {
+  get("/loadedExecutions") {
     contentType = "text/html"
-    ssp("/bort", "layout" -> "WEB-INF/layouts/bort.ssp", "text" -> "Openmole is great!")
+
+    ssp("/loadedExecutions", "moleExecs" -> moleExecs.keys.toList)
+
   }
 
-  post("/bort") {
-    contentType = "text/html"
-    ssp("/bort", "layout" -> "WEB-INF/layouts/bort.ssp", "text" -> params.get("bortText").getOrElse(""))
+  post("/xml/addMole") {
+    println(XML.loadString(request.body))
   }
 
   notFound {

@@ -7,6 +7,10 @@
 <servlet>
     <servlet-name>MyServlet    </servlet-name>
     <servlet-class>org.openmole.web.MyServlet</servlet-class>
+
+    <multipart-config>
+        <max-file-size>3145728</max-file-size>
+    </multipart-config>
 </servlet>
 
   <!-- 

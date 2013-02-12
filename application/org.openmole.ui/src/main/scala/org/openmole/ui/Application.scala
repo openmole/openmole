@@ -46,7 +46,8 @@ class Application extends IApplication with Logger {
       console: Boolean = false,
       help: Boolean = false,
       ignored: List[String] = Nil,
-      server: Boolean = false)
+      server: Boolean = false,
+      serverPort: Option[Int] = None)
 
     def takeArgs(args: List[String]) = args.takeWhile(!_.startsWith("-"))
     def dropArgs(args: List[String]) = args.dropWhile(!_.startsWith("-"))
@@ -70,13 +71,12 @@ class Application extends IApplication with Logger {
         case "-c" :: tail ⇒ parse(tail, c.copy(console = true))
         case "-h" :: tail ⇒ parse(tail, c.copy(help = true))
         case "-ws" :: tail ⇒ parse(tail, c.copy(server = true))
+        case "-sp" :: tail ⇒ parse(tail.tail, c.copy(serverPort = Some(tail.head.toInt)))
         case s :: tail ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil ⇒ c
       }
 
     val args: Array[String] = context.getArguments.get("application.args").asInstanceOf[Array[String]]
-
-    val server = new Openmolewebserver(8080)
 
     val config = parse(args.toList)
     config.pluginsDirs.foreach { PluginManager.load }
@@ -97,7 +97,17 @@ class Application extends IApplication with Logger {
 
       val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
       console.run
-    } else if (config.server) { server.start() } else {
+    } else if (config.server) {
+      try {
+        if (SplashScreen.getSplashScreen != null) SplashScreen.getSplashScreen.close
+      } catch {
+        case e: Throwable ⇒ logger.log(FINE, "Error in splash screen closing", e)
+      }
+
+      val server = new Openmolewebserver(config.serverPort getOrElse 80)
+
+      server.start()
+    } else {
 
       config.guiPluginsDirs.foreach { PluginManager.load }
 

@@ -1,0 +1,10 @@
+#set (title)
+List of Mole Executions
+#end
+
+<%@ val ids: List[String] %>
+<ul>
+<%=
+    for(id <- ids) yield <li>{id}</li>
+%>
+</ul>
