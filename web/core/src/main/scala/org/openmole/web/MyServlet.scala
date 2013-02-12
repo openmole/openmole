@@ -42,7 +42,7 @@ class MyServlet extends ScalatraServlet with ScalateSupport with FileUploadSuppo
   get("/loadedExecutions") {
     contentType = "text/html"
 
-    ssp("/loadedExecutions", "moleExecs" -> moleExecs.keys.toList)
+    ssp("/loadedExecutions", "ids" -> moleExecs.keys.toList)
 
   }
 
