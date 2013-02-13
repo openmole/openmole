@@ -22,7 +22,7 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 import org.openmole.core.model.sampling._
 
-sealed class ZipWithNameSampling(factor: Factor[File, Domain[File] with Discrete[File]], name: Prototype[String]) extends Sampling {
+sealed class ZipWithNameSampling(val factor: Factor[File, Domain[File] with Discrete[File]], val name: Prototype[String]) extends Sampling {
 
   override def prototypes = List(factor.prototype, name)
 
