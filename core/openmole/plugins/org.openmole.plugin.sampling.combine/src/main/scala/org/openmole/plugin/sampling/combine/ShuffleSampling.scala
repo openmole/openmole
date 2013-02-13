@@ -23,7 +23,7 @@ import org.openmole.core.model.sampling._
 import org.openmole.misc.tools.service.Random._
 import org.openmole.core.implementation.task.Task._
 
-sealed class ShuffleSampling(sampling: Sampling) extends Sampling {
+sealed class ShuffleSampling(val sampling: Sampling) extends Sampling {
 
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
