@@ -1,12 +1,14 @@
 <%@ val title: String %>
 <%@ val headline: String = title %>
 <%@ val body: String %>
+<%@ val js: String %>
 <html>
   <head>
       <link href='http://fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'>
       <link  href="http://fonts.googleapis.com/css?family=Terminal+Dosis+Light:regular" rel="stylesheet" type="text/css" >
-      <LINK href="css/style.css" rel="stylesheet" type="text/css">
-      <script type="text/javascript" src="js/jquery-1.9.0.js"></script>
+      <LINK href="/css/style.css" rel="stylesheet" type="text/css">
+      <script type="text/javascript" src="/js/jquery-1.9.0.js"></script>
+      <script type="text/javascript" src="/js/errorHandler.js"></script>
     <title><%= unescape(title)%></title>
     <meta content="">
   </head>
@@ -19,6 +21,10 @@
     <div class="body-div">
        <%= unescape(body)%>
     </div>
+
+    <script>
+        <%= unescape(js)%>
+    </script>
 
     <hr style="width:800px;margin-left:auto;margin-right:auto">
     <div class="template-banner">

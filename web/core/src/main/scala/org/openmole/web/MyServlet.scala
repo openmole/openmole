@@ -8,6 +8,7 @@ import javax.servlet.annotation.MultipartConfig
 import xml.XML
 import org.openmole.core.serializer._
 import org.openmole.core.implementation.mole.MoleExecution
+import com.thoughtworks.xstream.mapper.CannotResolveClassException
 
 @MultipartConfig(maxFileSize = 3 * 1024 * 1024) //research scala multipart config
 class MyServlet extends ScalatraServlet with ScalateSupport with FileUploadSupport with FlashMapSupport {
@@ -19,31 +20,59 @@ class MyServlet extends ScalatraServlet with ScalateSupport with FileUploadSuppo
   println("servlet init")
   var moleExecs: Map[String, MoleExecution] = Map("test" -> null)
 
+  def getStatus(id: String): String = {
+    val exec = moleExecs(id)
+    if (!exec.started)
+      "Stopped"
+    else if (!exec.finished)
+      "Running"
+    else
+      "Finished"
+  }
+
   post("/bort.html") {
     contentType = "text/html"
     val moleExec = fileParams.get("imgfile") match {
       case Some(data) ⇒
         if (data.getContentType.isDefined && data.getContentType.get == "text/xml")
-          Some(SerializerService.deserialize[MoleExecution](data.getInputStream))
+          try {
+            Some(SerializerService.deserialize[MoleExecution](data.getInputStream)) -> ""
+          } catch {
+            case e: CannotResolveClassException ⇒ None -> "The uploaded xml was not a valid serialized object."
+          }
         else
-          None
-      case None ⇒ None
+          None -> "The uploaded data was not of type text/xml"
+      case None ⇒ None -> "No data was uploaded."
     }
 
-    moleExec foreach { exec ⇒
-      exec.start
-      println(exec.finished)
-      moleExecs = moleExecs + (exec.id -> exec)
+    moleExec match {
+      case (Some(exec), _) ⇒ {
+        moleExecs = moleExecs + (exec.id -> exec)
+        redirect("/execs")
+      }
+      case (_, error) ⇒ ssp("/bort.html", "body" -> "", "errors" -> List(error))
     }
-
-    redirect("/loadedExecutions")
   }
 
-  get("/loadedExecutions") {
+  get("/execs/:id/start") {
+    contentType = "text/html"
+
+    moleExecs(params("id")).start
+
+    redirect("/execs/" + params("id"))
+  }
+
+  get("/execs") {
     contentType = "text/html"
 
     ssp("/loadedExecutions", "ids" -> moleExecs.keys.toList)
 
+  }
+
+  get("/execs/:id") {
+    contentType = "text/html"
+
+    ssp("/executionData", "id" -> params("id"), "status" -> getStatus(params("id")))
   }
 
   post("/xml/addMole") {

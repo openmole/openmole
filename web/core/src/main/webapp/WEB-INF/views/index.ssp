@@ -2,6 +2,9 @@
 Start Page
 #end
 
+#set (js)
+#end
+
 <ul>
     <li><a href="bort.html"> Create a new mole execution </a></li>
     <li><a href="moles"> View currently running moles</a></li>

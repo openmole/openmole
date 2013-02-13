@@ -1,0 +1,11 @@
+<%@ val id: String %>
+
+#set (title)
+<%= id %>
+#end
+
+#set (js)
+#end
+
+<%@ val status: String %>
+<%= status %> - <a href="/execs/<%=id%>/start">start</a>

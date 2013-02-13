@@ -1,4 +1,6 @@
 #set (title) GPLv3 disclaimer #end
+#set (errors) #end
+
 
 This file is part of OpenMOLE.<br>
 <br>
