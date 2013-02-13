@@ -19,7 +19,15 @@ package org.openmole.misc.tools.collection
 
 object ArrayUtils {
 
-  def unsecureConcat(a1: Array[_], a2: Array[_], t: Manifest[_]): Array[_] = {
+  def unsecureBuild(t: Manifest[_], values: Any*) = {
+    val res = manifest.newArray(values.size)
+    values.zipWithIndex.foreach {
+      case(v, i) =>  java.lang.reflect.Array.set(res, i, v)
+    }
+    res
+  }
+
+  def unsecureConcat(t: Manifest[_], a1: Array[_], a2: Array[_]): Array[_] = {
     val res = t.newArray(a1.size + a2.size)
     (a1 ++ a2).zipWithIndex.foreach {
       case (v, i) ⇒ java.lang.reflect.Array.set(res, i, v)
