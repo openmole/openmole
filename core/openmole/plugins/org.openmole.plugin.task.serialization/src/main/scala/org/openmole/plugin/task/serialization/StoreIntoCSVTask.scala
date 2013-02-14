@@ -54,8 +54,8 @@ object StoreIntoCSVTask {
 
 sealed abstract class StoreIntoCSVTask(
     val name: String,
-    filePrototype: Prototype[File],
-    columns: Iterable[(Prototype[Array[_]], String)])(implicit val plugins: PluginSet) extends Task {
+    val filePrototype: Prototype[File],
+    val columns: Iterable[(Prototype[Array[_]], String)])(implicit val plugins: PluginSet) extends Task {
 
   override def process(context: Context) = {
     val valuesList = columns.map { elt ⇒ context.value(elt._1).getOrElse(throw new UserBadDataError("Variable " + elt._1 + " not found.")) }
