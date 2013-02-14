@@ -2,7 +2,7 @@ package org.openmole.web
 
 import org.scalatra._
 import scalate.ScalateSupport
-import servlet.{ FileUploadSupport }
+import servlet.{ FileItem, FileUploadSupport }
 import java.io.{ InputStream, File }
 import javax.servlet.annotation.MultipartConfig
 import xml.XML
@@ -30,13 +30,12 @@ class MyServlet extends ScalatraServlet with ScalateSupport with FileUploadSuppo
       "Finished"
   }
 
-  post("/bort.html") {
-    contentType = "text/html"
-    val moleExec = fileParams.get("imgfile") match {
+  def processXMLFile[A](file: Option[FileItem]) = {
+    file match {
       case Some(data) ⇒
         if (data.getContentType.isDefined && data.getContentType.get == "text/xml")
           try {
-            Some(SerializerService.deserialize[MoleExecution](data.getInputStream)) -> ""
+            Some(SerializerService.deserialize[A](data.getInputStream)) -> ""
           } catch {
             case e: CannotResolveClassException ⇒ None -> "The uploaded xml was not a valid serialized object."
           }
@@ -44,6 +43,11 @@ class MyServlet extends ScalatraServlet with ScalateSupport with FileUploadSuppo
           None -> "The uploaded data was not of type text/xml"
       case None ⇒ None -> "No data was uploaded."
     }
+  }
+
+  post("/bort.html") {
+    contentType = "text/html"
+    val moleExec = processXMLFile[MoleExecution](fileParams.get("imgfile"))
 
     moleExec match {
       case (Some(exec), _) ⇒ {
@@ -51,6 +55,18 @@ class MyServlet extends ScalatraServlet with ScalateSupport with FileUploadSuppo
         redirect("/execs")
       }
       case (_, error) ⇒ ssp("/bort.html", "body" -> "", "errors" -> List(error))
+    }
+  }
+
+  post("/xml/bort") {
+    val moleExec = processXMLFile[MoleExecution](fileParams.get("imgfile"))
+
+    moleExec match {
+      case (Some(exec), _) ⇒ {
+        moleExecs = moleExecs + (exec.id -> exec)
+        redirect("/xml/execs")
+      }
+      case (_, error) ⇒ <error>{ error }</error>
     }
   }
 
@@ -75,8 +91,12 @@ class MyServlet extends ScalatraServlet with ScalateSupport with FileUploadSuppo
     ssp("/executionData", "id" -> params("id"), "status" -> getStatus(params("id")))
   }
 
-  post("/xml/addMole") {
-    println(XML.loadString(request.body))
+  get("/xml/execs") {
+    contentType = "text/xml"
+
+    <mole-execs>
+      { for (key ← moleExecs.keys) yield <execID>{ key }</execID> }
+    </mole-execs>
   }
 
   notFound {
