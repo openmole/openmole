@@ -54,6 +54,7 @@ trait IMoleExecution {
   def mole: IMole
   def hooks: Iterable[(ICapsule, Hook)]
   def profiler: Profiler
+  def implicits: Context
 
   def dataChannelRegistry: IRegistryWithTicket[IDataChannel, Buffer[Variable[_]]]
 

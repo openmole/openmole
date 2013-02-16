@@ -53,6 +53,7 @@ class MoleExecution(
     val selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
     val grouping: Map[ICapsule, Grouping] = Map.empty,
     val profiler: Profiler = Profiler.empty,
+    val implicits: Context = Context.empty,
     rng: java.util.Random = Random.newRNG(Workspace.newSeed)) extends IMoleExecution {
 
   import IMoleExecution._
@@ -140,7 +141,7 @@ class MoleExecution(
 
   override def start = {
     if (!_started.getUpdate(_ ⇒ true)) {
-      val validationErrors = Validation(mole)
+      val validationErrors = Validation(mole, implicits)
       if (!validationErrors.isEmpty) throw new UserBadDataError("Formal validation of your mole has failed, several errors have been found: " + validationErrors.mkString("\n"))
       start(Context.empty)
     }

@@ -85,8 +85,9 @@ case class Puzzle(
     selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
     grouping: Map[ICapsule, Grouping] = Map.empty,
     profiler: Profiler = Profiler.empty,
+    implicits: Context = Context.empty,
     rng: java.util.Random = Random.newRNG(Workspace.newSeed)) =
-    new MoleExecution(toMole, hooks, selection, grouping, profiler, rng)
+    new MoleExecution(toMole, hooks, selection, grouping, profiler, implicits, rng)
 
   def +(p: Puzzle) = Puzzle.merge(this, p)
 
