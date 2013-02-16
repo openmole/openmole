@@ -19,7 +19,7 @@ package org.openmole.core.implementation.validation
 
 import org.openmole.core.model.data.Data
 import org.openmole.core.model.data.Prototype
-import org.openmole.core.model.mole.ICapsule
+import org.openmole.core.model.mole.{Hook, ICapsule}
 import org.openmole.core.model.transition.Slot
 
 object DataflowProblem {
@@ -68,14 +68,16 @@ object DataflowProblem {
 
   case class MissingHookInput(
       val capsule: ICapsule,
+      val hook: Hook,
       val input: Data[_]) extends Problem {
-    override def toString = "Input is missing " + input
+    override def toString = s"Input $input is missing for hook $hook"
   }
   case class WrongHookType(
       val capsule: ICapsule,
+      val hook: Hook,
       val input: Data[_],
       val found: Data[_]) extends Problem {
-    override def toString = "Input has incompatible type " + found + " expected " + input
+    override def toString = s"Input has incompatible type $found whereas $input was expected"
   }
   case class MissingMoleTaskImplicit(
       val capsule: ICapsule,

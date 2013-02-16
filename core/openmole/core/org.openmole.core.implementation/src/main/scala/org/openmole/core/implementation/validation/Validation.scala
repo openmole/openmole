@@ -30,6 +30,7 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Queue
 import org.openmole.core.implementation.data._
+import com.sun.corba.se.spi.transport.IIOPPrimaryToContactInfo
 
 object Validation {
 
@@ -150,6 +151,24 @@ object Validation {
     moleTask.implicits.filterNot(i ⇒ inputs.contains(i)).map(i ⇒ MissingMoleTaskImplicit(capsule, i))
   }
 
+  def hookErrors(m: IMole, hooks: Map[ICapsule, Iterable[Hook]]): Iterable[Problem] =
+    (for {
+      c ← m.capsules
+      outputs = c.outputs(m)
+      h ← hooks.getOrElse(c, List.empty)
+      r ← h.inputs
+    } yield {
+      val p: Option[Problem] =
+        outputs.toMap.get(r.prototype.name) match {
+          case None ⇒ Some(MissingHookInput(c, h, r))
+          case Some(o) ⇒
+            if (!r.prototype.isAssignableFrom(o.prototype))
+              Some(WrongHookType(c, h, r, o))
+            else None
+        }
+      p
+    }).flatten
+
   def apply(mole: IMole, implicits: Context = Context.empty, sources: Map[ICapsule, Iterable[Source]] = Map.empty, hooks: Map[ICapsule, Iterable[Hook]] = Map.empty) =
     allMoles(mole).flatMap {
       case (m, mt) ⇒
@@ -163,7 +182,8 @@ object Validation {
             moleTaskImplicitsErrors(t, c) ++
               typeErrorsMoleTask(m, moleTaskImplicits(t))
           case None ⇒
-            typeErrorsTopMole(m, implicits.prototypes)
+            hookErrors(m, hooks) ++
+              typeErrorsTopMole(m, implicits.prototypes)
         }) ++
           topologyErrors(m) ++
           duplicatedTransitions(m) ++

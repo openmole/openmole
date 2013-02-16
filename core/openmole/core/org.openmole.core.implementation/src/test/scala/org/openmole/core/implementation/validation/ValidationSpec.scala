@@ -220,4 +220,44 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     }
   }
 
+  "Validation" should "detect a missing input error for the hook" in {
+    val i = Prototype[Int]("t")
+
+    val t1 = EmptyTask("t1")
+
+    val c1 = new Capsule(t1)
+
+    val h = new Hook {
+      override def inputs = DataSet(i)
+      def process(context: Context) {}
+    }
+
+    val errors = Validation.hookErrors(new Mole(c1), Map(c1 -> List(h)))
+    errors.headOption match {
+      case Some(MissingHookInput(_, _, _)) ⇒
+      case _ ⇒ sys.error("Error should have been detected")
+    }
+  }
+
+  "Validation" should "detect a wrong input type error for the hook" in {
+    val iInt = Prototype[Int]("i")
+    val iString = Prototype[String]("i")
+
+    val t1 = EmptyTask("t1")
+    t1 addOutput iString
+
+    val c1 = new Capsule(t1)
+
+    val h = new Hook {
+      override def inputs = DataSet(iInt)
+      def process(context: Context) {}
+    }
+
+    val errors = Validation.hookErrors(new Mole(c1), Map(c1 -> List(h)))
+    errors.headOption match {
+      case Some(WrongHookType(_, _, _, _)) ⇒
+      case _ ⇒ sys.error("Error should have been detected")
+    }
+  }
+
 }
