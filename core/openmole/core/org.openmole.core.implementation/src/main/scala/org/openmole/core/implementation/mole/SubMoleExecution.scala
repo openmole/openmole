@@ -101,7 +101,7 @@ class SubMoleExecution(
     _childs.single -= submoleExecution
 
   private def secureHookExecution(hook: Hook, moleJob: IMoleJob) =
-    try hook.process(moleExecution.mole.implicits + moleJob.context)
+    try hook.process(moleExecution.implicits + moleJob.context)
     catch {
       case e: Throwable ⇒
         EventDispatcher.trigger(moleExecution, new IMoleExecution.HookExceptionRaised(hook, moleJob, e, WARNING))
