@@ -19,14 +19,14 @@ package org.openmole.core.model.mole
 
 import org.openmole.core.model.data._
 
-object DataSource {
-  val empty = new DataSource {
+object Source {
+  val empty = new Source {
     def outputs = DataSet.empty
     def process = Context.empty
   }
 }
 
-trait DataSource {
+trait Source {
   def outputs: DataSet
   def process: Context
 }
