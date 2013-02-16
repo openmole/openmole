@@ -32,6 +32,7 @@ object Puzzle {
       p1.lasts,
       p1.transitions.toList ::: p2.transitions.toList,
       p1.dataChannels.toList ::: p2.dataChannels.toList,
+      p1.sources.toList ::: p2.sources.toList,
       p1.hooks.toList ::: p2.hooks.toList,
       p1.selection ++ p2.selection,
       p1.grouping ++ p2.grouping)
@@ -47,6 +48,7 @@ object Puzzle {
       lasts,
       transitions.toList ::: puzzles.flatMap { _.transitions }.toList,
       dataChannels.toList ::: puzzles.flatMap { _.dataChannels }.toList,
+      puzzles.flatMap(_.sources),
       puzzles.flatMap(_.hooks),
       puzzles.flatMap { _.selection }.toMap,
       puzzles.flatMap { _.grouping }.toMap)
@@ -58,6 +60,7 @@ case class Puzzle(
     val lasts: Iterable[ICapsule],
     val transitions: Iterable[ITransition],
     val dataChannels: Iterable[IDataChannel],
+    val sources: Iterable[(ICapsule, Source)],
     val hooks: Iterable[(ICapsule, Hook)],
     val selection: Map[ICapsule, EnvironmentSelection],
     val grouping: Map[ICapsule, Grouping]) {
@@ -68,6 +71,7 @@ case class Puzzle(
       p.lasts,
       p.transitions,
       p.dataChannels,
+      p.sources,
       p.hooks,
       p.selection,
       p.grouping)
@@ -75,19 +79,20 @@ case class Puzzle(
   def toMole = new Mole(first.capsule, transitions, dataChannels)
 
   def toExecution =
-    new MoleExecution(toMole, hooks, selection, grouping)
+    new MoleExecution(toMole, sources, hooks, selection, grouping)
 
   def toExecution(profiler: Profiler) =
-    new MoleExecution(toMole, hooks, selection, grouping, profiler)
+    new MoleExecution(toMole, sources, hooks, selection, grouping, profiler)
 
   def toExecution(
+    sources: Iterable[(ICapsule, Source)] = Iterable.empty,
     hooks: Iterable[(ICapsule, Hook)] = Iterable.empty,
     selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
     grouping: Map[ICapsule, Grouping] = Map.empty,
     profiler: Profiler = Profiler.empty,
     implicits: Context = Context.empty,
     rng: java.util.Random = Random.newRNG(Workspace.newSeed)) =
-    new MoleExecution(toMole, hooks, selection, grouping, profiler, implicits, rng)
+    new MoleExecution(toMole, this.sources ++ sources, this.hooks ++ hooks, this.selection ++ selection, this.grouping ++ grouping, profiler, implicits, rng)
 
   def +(p: Puzzle) = Puzzle.merge(this, p)
 

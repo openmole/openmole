@@ -34,16 +34,19 @@ import org.openmole.core.implementation.data._
 object Validation {
 
   def allMoles(mole: IMole) =
-    (mole, false) ::
+    (mole, None) ::
       mole.capsules.flatMap {
-        _.task match {
-          case mt: IMoleTask ⇒ Some((mt.mole, true))
-          case _ ⇒ None
-        }
+        c ⇒
+          c.task match {
+            case mt: IMoleTask ⇒ Some(mt.mole -> Some(mt -> c))
+            case _ ⇒ None
+          }
       }.toList
 
   def typeErrors(mole: IMole)(capsules: Iterable[ICapsule], implicits: Iterable[Prototype[_]] = List.empty) = {
-    val implicitMap = implicits.map { i ⇒ i.name -> i }.toMap[String, Prototype[_]]
+    def prototypesToMap(prototypes: Iterable[Prototype[_]]) = prototypes.map { i ⇒ i.name -> i }.toMap[String, Prototype[_]]
+    val implicitMap = prototypesToMap(implicits)
+
     capsules.flatMap {
       c ⇒
         mole.slots(c).map {
@@ -139,10 +142,29 @@ object Validation {
     }
   }
 
-  def apply(mole: IMole, implicits: Context = Context.empty) =
+  private def moleTaskInputMaps(moleTask: IMoleTask) =
+    moleTask.mole.root.inputs(moleTask.mole).toList.map(i ⇒ i.prototype.name -> i.prototype).toMap[String, Prototype[_]]
+
+  def moleTaskImplicitsErrors(moleTask: IMoleTask, capsule: ICapsule) = {
+    val inputs = moleTaskInputMaps(moleTask)
+    moleTask.implicits.filterNot(i ⇒ inputs.contains(i)).map(i ⇒ MissingMoleTaskImplicit(capsule, i))
+  }
+
+  def apply(mole: IMole, implicits: Context = Context.empty, sources: Map[ICapsule, Iterable[Source]] = Map.empty, hooks: Map[ICapsule, Iterable[Hook]] = Map.empty) =
     allMoles(mole).flatMap {
       case (m, mt) ⇒
-        if (mt) typeErrorsMoleTask(m, implicits.values.map { _.prototype }) else typeErrorsTopMole(m, implicits.values.map { _.prototype }) ++
+        def moleTaskImplicits(moleTask: IMoleTask) = {
+          val inputs = moleTaskInputMaps(moleTask)
+          moleTask.implicits.flatMap(i ⇒ inputs.get(i))
+        }
+
+        (mt match {
+          case Some((t, c)) ⇒
+            moleTaskImplicitsErrors(t, c) ++
+              typeErrorsMoleTask(m, moleTaskImplicits(t))
+          case None ⇒
+            typeErrorsTopMole(m, implicits.prototypes)
+        }) ++
           topologyErrors(m) ++
           duplicatedTransitions(m) ++
           duplicatedName(m)

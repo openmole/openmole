@@ -77,6 +77,12 @@ object DataflowProblem {
       val found: Data[_]) extends Problem {
     override def toString = "Input has incompatible type " + found + " expected " + input
   }
+  case class MissingMoleTaskImplicit(
+      val capsule: ICapsule,
+      val `implicit`: String) extends Problem {
+    override def toString = s"Implicit ${`implicit`} not found in input of $capsule"
+  }
+
 
 }
 

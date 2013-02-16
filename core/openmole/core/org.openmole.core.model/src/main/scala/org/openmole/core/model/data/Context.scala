@@ -165,5 +165,7 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
 
   override def toString = prettified(Int.MaxValue)
 
+  def prototypes = values.map { _.prototype }
+
   def prettified(stripSize: Int) = "{" + (if (variables.values.isEmpty) "" else variables.values.mkString(", ")) + "}"
 }

@@ -68,7 +68,8 @@ object MoleMaker {
             case _ ⇒
           }
       }
-      Right((new MoleExecution(mole, hooks, strat.toMap, groupingStrategies.map {
+      //TODO implement sources
+      Right((new MoleExecution(mole, Iterable.empty, hooks, strat.toMap, groupingStrategies.map {
         case (s, c) ⇒ c -> s
       }.toMap), envs.toSet))
     } catch {

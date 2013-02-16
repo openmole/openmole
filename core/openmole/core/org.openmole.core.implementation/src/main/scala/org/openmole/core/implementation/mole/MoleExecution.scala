@@ -41,7 +41,8 @@ import scala.collection.JavaConversions._
 
 import scala.collection.immutable.HashMap
 import scala.collection.mutable.Buffer
-import scala.concurrent.stm._
+import scala.concurrent.stm.{ Ref, TMap, atomic, retry }
+import javax.xml.bind.annotation.XmlTransient
 
 object MoleExecution extends Logger
 
@@ -49,6 +50,7 @@ import MoleExecution._
 
 class MoleExecution(
     val mole: IMole,
+    val sources: Iterable[(ICapsule, Source)] = Iterable.empty,
     val hooks: Iterable[(ICapsule, Hook)] = Iterable.empty,
     val selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
     val grouping: Map[ICapsule, Grouping] = Map.empty,
@@ -67,6 +69,9 @@ class MoleExecution(
 
   private val ticketNumber = Ref(0L)
   private val jobId = Ref(0L)
+
+  @transient lazy val indexedSources =
+    sources.groupBy { case (c, _) ⇒ c }.map { case (c, ss) ⇒ c -> ss.map(_._2) }
 
   @transient lazy val indexedHooks =
     hooks.groupBy { case (c, _) ⇒ c }.map { case (c, hs) ⇒ c -> hs.map { _._2 } }
