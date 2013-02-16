@@ -142,7 +142,7 @@ object Validation {
   def apply(mole: IMole, implicits: Context = Context.empty) =
     allMoles(mole).flatMap {
       case (m, mt) ⇒
-        if (mt) typeErrorsMoleTask(m, implicits.values.map { _.prototype }) else typeErrorsTopMole(m, m.implicits.values.map { _.prototype }) ++
+        if (mt) typeErrorsMoleTask(m, implicits.values.map { _.prototype }) else typeErrorsTopMole(m, implicits.values.map { _.prototype }) ++
           topologyErrors(m) ++
           duplicatedTransitions(m) ++
           duplicatedName(m)

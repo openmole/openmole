@@ -179,7 +179,7 @@ class SubMoleExecution(
 
       def implicits =
         Context.empty ++
-          moleExecution.mole.implicits.values.filter(v ⇒ capsule.task.inputs.contains(v.prototype.name)) +
+          moleExecution.implicits.values.filter(v ⇒ capsule.task.inputs.contains(v.prototype.name)) +
           Variable(Task.openMOLESeed, moleExecution.newSeed)
 
       //FIXME: Factorize code
