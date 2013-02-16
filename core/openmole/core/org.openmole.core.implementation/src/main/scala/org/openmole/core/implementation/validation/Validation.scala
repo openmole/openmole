@@ -44,7 +44,7 @@ object Validation {
           }
       }.toList
 
-  def typeErrors(mole: IMole)(capsules: Iterable[ICapsule], implicits: Iterable[Prototype[_]] = List.empty) = {
+  def typeErrors(mole: IMole)(capsules: Iterable[ICapsule], implicits: Iterable[Prototype[_]]) = {
     def prototypesToMap(prototypes: Iterable[Prototype[_]]) = prototypes.map { i ⇒ i.name -> i }.toMap[String, Prototype[_]]
     val implicitMap = prototypesToMap(implicits)
 

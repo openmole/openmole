@@ -21,12 +21,14 @@ import org.openmole.core.model.data._
 
 object Source {
   val empty = new Source {
+    def inputs = DataSet.empty
     def outputs = DataSet.empty
-    def process = Context.empty
+    def process(context: Context) = Context.empty
   }
 }
 
 trait Source {
+  def inputs: DataSet
   def outputs: DataSet
-  def process: Context
+  def process(context: Context): Context
 }

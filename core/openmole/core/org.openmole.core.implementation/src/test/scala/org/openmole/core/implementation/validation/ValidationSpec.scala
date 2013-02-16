@@ -50,7 +50,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = c1 -- c2
 
-    val errors = Validation.typeErrors(mole)(mole.capsules)
+    val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty)
     errors.headOption match {
       case Some(MissingInput(_, d)) ⇒ assert(d.prototype == p)
       case _ ⇒ sys.error("Error should have been detected")
@@ -70,7 +70,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = c1 -- c2
 
-    Validation.typeErrors(mole)(mole.capsules).isEmpty should equal(true)
+    Validation.typeErrors(mole)(mole.capsules, Iterable.empty).isEmpty should equal(true)
   }
 
   "Validation" should "detect a type error" in {
@@ -88,7 +88,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = c1 -- c2
 
-    val errors = Validation.typeErrors(mole)(mole.capsules)
+    val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty)
     errors.headOption match {
       case Some(WrongType(_, d, t)) ⇒
         assert(d.prototype == pString)
@@ -147,7 +147,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = (c1 -- c2 -- c3) + (c1 oo (c3, Filter(p)))
 
-    val errors = Validation.typeErrors(mole)(mole.capsules)
+    val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty)
 
     errors.headOption match {
       case Some(MissingInput(_, d)) ⇒ assert(d.prototype == p)
