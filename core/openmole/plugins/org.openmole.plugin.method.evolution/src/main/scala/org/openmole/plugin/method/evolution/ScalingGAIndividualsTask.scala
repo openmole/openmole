@@ -45,10 +45,7 @@ object ScalingGAIndividualsTask {
       addInput(individuals)
       modelInputs foreach { case (p, _) ⇒ this addOutput p.toArray }
 
-      def toTask = new ScalingGAIndividualsTask(name, individuals, modelInputs: _*) {
-        val inputs = builder.inputs
-        val outputs = builder.outputs
-        val parameters = builder.parameters
+      def toTask = new ScalingGAIndividualsTask(name, individuals, modelInputs: _*) with Built {
         val objectives = builder.objectives.toList
       }
     }
@@ -58,7 +55,7 @@ object ScalingGAIndividualsTask {
 sealed abstract class ScalingGAIndividualsTask[G <: GAGenome, P, F <: MGFitness, MF](
     val name: String,
     individuals: Prototype[Array[Individual[G, P, F]]],
-    modelInputs: (Prototype[Double], (String, String))*)(implicit val plugins: PluginSet) extends Task {
+    modelInputs: (Prototype[Double], (String, String))*) extends Task {
 
   def objectives: List[Prototype[Double]]
 

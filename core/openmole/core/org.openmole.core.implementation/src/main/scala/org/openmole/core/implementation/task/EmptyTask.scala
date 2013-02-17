@@ -25,15 +25,11 @@ object EmptyTask {
   def apply(name: String)(implicit plugins: PluginSet = PluginSet.empty) =
     new TaskBuilder { builder ⇒
       def toTask =
-        new EmptyTask(name) {
-          val inputs = builder.inputs
-          val outputs = builder.outputs
-          val parameters = builder.parameters
-        }
+        new EmptyTask(name) with builder.Built
     }
 
 }
 
-sealed abstract class EmptyTask(val name: String)(implicit val plugins: PluginSet) extends Task {
+sealed abstract class EmptyTask(val name: String) extends Task {
   override def process(context: Context) = context
 }

@@ -19,7 +19,7 @@ package org.openmole.core.implementation.tools
 
 import org.openmole.core.model.data._
 
-trait InputOutputBuilder {
+trait InputOutputBuilder { builder ⇒
   private var _inputs = DataSet.empty
   private var _outputs = DataSet.empty
   private var _parameters = ParameterSet.empty
@@ -36,4 +36,10 @@ trait InputOutputBuilder {
   def inputs = _inputs
   def outputs = _outputs
   def parameters = _parameters
+
+  trait Built {
+    val inputs = builder.inputs
+    val outputs = builder.outputs
+    val parameters = builder.parameters
+  }
 }

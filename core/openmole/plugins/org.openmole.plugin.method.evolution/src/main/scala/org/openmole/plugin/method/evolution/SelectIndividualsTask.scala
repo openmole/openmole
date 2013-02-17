@@ -39,11 +39,8 @@ object SelectIndividualsTask {
       addOutput(individuals)
 
       def toTask =
-        new SelectIndividualsTask(name, evolution, size) {
+        new SelectIndividualsTask(name, evolution, size) with Built {
           val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
-          val inputs = builder.inputs
-          val outputs = builder.outputs
-          val parameters = builder.parameters
         }
     }
 
@@ -54,7 +51,7 @@ object SelectIndividualsTask {
 sealed abstract class SelectIndividualsTask(
     val name: String,
     val evolution: Modifier with G with MF with F,
-    val size: Int)(implicit val plugins: PluginSet) extends Task {
+    val size: Int) extends Task {
 
   def individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
 

@@ -23,11 +23,12 @@ import org.openmole.core.implementation.task.TaskBuilder
 import org.openmole.core.model.data.DataSet
 import org.openmole.core.model.data.Prototype
 import SaltelliSampling._
+import org.openmole.core.model.task.PluginSet
 
 object SensitivityTask {
   def indice(name: String, input: Prototype[Double], output: Prototype[Double]) = Prototype[Double](name + input.name.capitalize + output.name.capitalize)
 
-  abstract class Builder extends TaskBuilder {
+  abstract class Builder(implicit plugins: PluginSet) extends TaskBuilder {
     val name: String
     val matrixName: Prototype[String]
     val modelInputs: Iterable[Prototype[Double]]
@@ -36,8 +37,6 @@ object SensitivityTask {
     override def inputs: DataSet = super.inputs + DataSet(modelInputs.map(_.toArray)) + DataSet(modelOutputs.map(_.toArray)) + matrixName.toArray
   }
 }
-
-import SensitivityTask._
 
 trait SensitivityTask extends Task {
 

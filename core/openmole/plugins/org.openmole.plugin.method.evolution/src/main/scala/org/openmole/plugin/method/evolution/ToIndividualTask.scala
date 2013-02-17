@@ -63,13 +63,10 @@ object ToIndividualTask {
 
       val (_genome, _individual) = (genome, individual)
 
-      def toTask = new ToIndividualTask(evolution)(name) {
+      def toTask = new ToIndividualTask(evolution)(name) with Built {
         val genome = _genome.asInstanceOf[Prototype[evolution.G]]
         val individual = _individual.asInstanceOf[Prototype[Individual[evolution.G, evolution.P, evolution.F]]]
 
-        val inputs = builder.inputs
-        val outputs = builder.outputs
-        val parameters = builder.parameters
         val objectives = _objectives
       }
     }
@@ -78,7 +75,7 @@ object ToIndividualTask {
 }
 
 sealed abstract class ToIndividualTask(val evolution: G with ContextPhenotype with F with MG)(
-    val name: String)(implicit val plugins: PluginSet) extends Task { task ⇒
+    val name: String) extends Task { task ⇒
 
   def genome: Prototype[evolution.G]
   def individual: Prototype[Individual[evolution.G, evolution.P, evolution.F]]

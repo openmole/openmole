@@ -41,14 +41,7 @@ object ScalaTask {
       addImport("org.openmole.misc.workspace.Workspace.newDir")
 
       def toTask =
-        new ScalaTask(name, code, builder.imports, builder.libraries) {
-          val inputs = builder.inputs
-          val outputs = builder.outputs
-          val parameters = builder.parameters
-          val inputFiles = builder.inputFiles
-          val outputFiles = builder.outputFiles
-          val resources = builder.resources
-        }
+        new ScalaTask(name, code, builder.imports, builder.libraries) with builder.Built
     }
   }
 
@@ -58,7 +51,7 @@ sealed abstract class ScalaTask(
     val name: String,
     val code: String,
     imports: Iterable[String],
-    libraries: Iterable[File])(implicit val plugins: PluginSet) extends CodeTask {
+    libraries: Iterable[File]) extends CodeTask {
 
   override def processCode(context: Context) = {
     val interpreter = new ScalaREPL

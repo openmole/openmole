@@ -44,24 +44,20 @@ object TerminationTask {
       addOutput(state)
       addOutput(terminated)
 
-      def toTask = new TerminationTask(name, evolution) {
+      def toTask = new TerminationTask(name, evolution) with Built {
 
         val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
         val archive = _archive.asInstanceOf[Prototype[evolution.A]]
         val generation = _generation
         val state = _state.asInstanceOf[Prototype[evolution.STATE]]
         val terminated = _terminated
-
-        val inputs = builder.inputs
-        val outputs = builder.outputs
-        val parameters = builder.parameters
       }
     }
   }
 }
 
 sealed abstract class TerminationTask[E <: Termination with Modifier with Archive](
-    val name: String, val evolution: E)(implicit val plugins: PluginSet) extends Task {
+    val name: String, val evolution: E) extends Task {
 
   def individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
   def archive: Prototype[evolution.A]

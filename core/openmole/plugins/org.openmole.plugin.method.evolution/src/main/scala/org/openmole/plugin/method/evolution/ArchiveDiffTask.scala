@@ -39,11 +39,7 @@ object ArchiveDiffTask {
       addOutput(newArchive)
 
       def toTask =
-        new ArchiveDiffTask(evolution)(name) {
-          val inputs = builder.inputs
-          val outputs = builder.outputs
-          val parameters = builder.parameters
-
+        new ArchiveDiffTask(evolution)(name) with builder.Built {
           val originalArchive = _originalArchive.asInstanceOf[Prototype[evolution.A]]
           val newArchive = _newArchive.asInstanceOf[Prototype[evolution.A]]
         }
@@ -53,7 +49,7 @@ object ArchiveDiffTask {
 }
 
 abstract sealed class ArchiveDiffTask(val evolution: Archive)(
-    val name: String)(implicit val plugins: PluginSet) extends Task { task ⇒
+    val name: String) extends Task { task ⇒
 
   def originalArchive: Prototype[evolution.A]
   def newArchive: Prototype[evolution.A]

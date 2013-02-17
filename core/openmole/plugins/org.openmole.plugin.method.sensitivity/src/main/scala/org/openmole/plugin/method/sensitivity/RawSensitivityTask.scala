@@ -22,10 +22,11 @@ import org.openmole.core.model.data._
 
 import SensitivityTask._
 import SaltelliSampling._
+import org.openmole.core.model.task.PluginSet
 
 object RawSensitivityTask {
 
-  abstract class Builder extends SensitivityTask.Builder {
+  abstract class Builder(implicit plugins: PluginSet) extends SensitivityTask.Builder {
     override def outputs: DataSet = super.outputs + DataSet(for (i ← modelInputs; o ← modelOutputs) yield indice(name, i, o))
   }
 
@@ -36,7 +37,7 @@ import SensitivityTask._
 trait RawSensitivityTask extends SensitivityTask {
 
   override def process(context: Context): Context = {
-    val matrixNames = context.valueOrException(matrixName.toArray)
+    val matrixNames = context(matrixName.toArray)
 
     Context.empty ++
       (for (i ← modelInputs; o ← modelOutputs) yield {

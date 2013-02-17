@@ -31,16 +31,12 @@ object FlattenTask {
       addOutput(result)
 
       def toTask =
-        new FlattenTask[S, T](name, prototypes, result) {
-          val inputs = builder.inputs
-          val outputs = builder.outputs
-          val parameters = builder.parameters
-        }
+        new FlattenTask[S, T](name, prototypes, result) with builder.Built
     }
 
 }
 
-sealed abstract class FlattenTask[S, T <: Array[S]](val name: String, prototypes: Iterable[Prototype[_ <: T]], result: Prototype[Array[S]])(implicit val plugins: PluginSet) extends Task {
+sealed abstract class FlattenTask[S, T <: Array[S]](val name: String, prototypes: Iterable[Prototype[_ <: T]], result: Prototype[Array[S]]) extends Task {
 
   override def process(context: Context) = {
     val flattened = prototypes.map { p ⇒ context(p) }.flatten.toArray[S](ClassTag(result.fromArray.`type`.runtimeClass))

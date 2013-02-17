@@ -20,6 +20,7 @@ package org.openmole.plugin.task.code
 import java.io.File
 import org.openmole.plugin.task.external.ExternalTaskBuilder
 import scala.collection.mutable.ListBuffer
+import org.openmole.core.model.task.PluginSet
 
 /**
  * Builder for any code task
@@ -27,7 +28,7 @@ import scala.collection.mutable.ListBuffer
  * The code task builder is an external task builder, you may want to look
  * at the @see ExternalTaskBuilder for a complement of documentation.
  */
-abstract class CodeTaskBuilder extends ExternalTaskBuilder {
+abstract class CodeTaskBuilder(implicit plugins: PluginSet) extends ExternalTaskBuilder { builder ⇒
   private var _imports = new ListBuffer[String]
   private var _libraries = new ListBuffer[File]
 
@@ -61,6 +62,11 @@ abstract class CodeTaskBuilder extends ExternalTaskBuilder {
   def addLib(l: File) = {
     _libraries += l
     this
+  }
+
+  trait Built extends super.Built {
+    val imports = builder.imports
+    val libraries = builder.libraries
   }
 
 }

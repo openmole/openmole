@@ -84,14 +84,7 @@ object SystemExecTask {
 
     def addVariable(prototype: Prototype[_]): this.type = addVariable(prototype, prototype.name)
 
-    def toTask = new SystemExecTask(name, command, directory, errorOnReturnCode, returnValue, output, error, variables) {
-      val inputs = builder.inputs
-      val outputs = builder.outputs
-      val parameters = builder.parameters
-      val inputFiles = builder.inputFiles
-      val outputFiles = builder.outputFiles
-      val resources = builder.resources
-    }
+    def toTask = new SystemExecTask(name, command, directory, errorOnReturnCode, returnValue, output, error, variables) with builder.Built
   }
 
 }
@@ -104,7 +97,7 @@ sealed abstract class SystemExecTask(
     val returnValue: Option[Prototype[Int]],
     val output: Option[Prototype[String]],
     val error: Option[Prototype[String]],
-    val variables: Iterable[(Prototype[_], String)])(implicit val plugins: PluginSet) extends ExternalTask {
+    val variables: Iterable[(Prototype[_], String)]) extends ExternalTask {
 
   override protected def process(context: Context) = {
     val tmpDir = Workspace.newDir("systemExecTask")

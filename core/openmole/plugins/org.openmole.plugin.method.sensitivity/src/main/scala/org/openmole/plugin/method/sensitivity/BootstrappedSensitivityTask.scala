@@ -25,11 +25,17 @@ import org.openmole.core.model.data._
 import Task._
 import SaltelliSampling._
 import SensitivityTask._
+import org.openmole.core.model.task.PluginSet
 
 object BootstrappedSensitivityTask {
 
-  abstract class Builder extends SensitivityTask.Builder {
+  abstract class Builder(implicit plugins: PluginSet) extends SensitivityTask.Builder { builder ⇒
+    def bootstrap: Int
     override def outputs: DataSet = super.outputs + DataSet(for (i ← modelInputs; o ← modelOutputs) yield indice(name, i, o).toArray)
+
+    trait Built extends super.Built {
+      val bootstrap = builder.bootstrap
+    }
   }
 
   def bootstrapMatrix(m: Seq[Double])(implicit rng: Random) =

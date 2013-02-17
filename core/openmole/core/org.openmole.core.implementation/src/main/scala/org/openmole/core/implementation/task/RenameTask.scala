@@ -32,15 +32,12 @@ object RenameTask {
       }
 
       def toTask =
-        new RenameTask(name, renamings: _*) {
-          val inputs = builder.inputs
-          val outputs = builder.outputs
-          val parameters = builder.parameters
-        }
+        new RenameTask(name, renamings: _*) with builder.Built
+
     }
 
 }
-sealed abstract class RenameTask(val name: String, val renamings: (Prototype[T], Prototype[T]) forSome { type T }*)(implicit val plugins: PluginSet) extends Task {
+sealed abstract class RenameTask(val name: String, val renamings: (Prototype[T], Prototype[T]) forSome { type T }*) extends Task {
 
   override def process(context: Context) =
     renamings.map { case (from, to) ⇒ Variable(to, context.valueOrException(from)) }

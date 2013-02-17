@@ -21,6 +21,10 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.core.implementation.tools.InputOutputBuilder
 
-abstract class TaskBuilder extends InputOutputBuilder {
+abstract class TaskBuilder(implicit val plugins: PluginSet) extends InputOutputBuilder { builder ⇒
   def toTask: ITask
+
+  trait Built extends super.Built {
+    val plugins = builder.plugins
+  }
 }

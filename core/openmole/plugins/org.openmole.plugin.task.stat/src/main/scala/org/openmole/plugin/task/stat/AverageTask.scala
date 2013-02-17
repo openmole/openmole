@@ -23,17 +23,12 @@ import org.openmole.misc.tools.math._
 object AverageTask {
 
   def apply(name: String)(implicit plugins: PluginSet) = new DoubleSequenceStatTaskBuilder { builder ⇒
-    def toTask = new AverageTask(name) {
-      val sequences = builder.sequences
-      val inputs = builder.inputs
-      val outputs = builder.outputs
-      val parameters = builder.parameters
-    }
+    def toTask = new AverageTask(name) with builder.Built
   }
 
 }
 
-sealed abstract class AverageTask(val name: String)(implicit val plugins: PluginSet) extends DoubleSequenceStatTask {
+sealed abstract class AverageTask(val name: String) extends DoubleSequenceStatTask {
 
   override def stat(seq: Array[Double]) = Stat.average(seq)
 

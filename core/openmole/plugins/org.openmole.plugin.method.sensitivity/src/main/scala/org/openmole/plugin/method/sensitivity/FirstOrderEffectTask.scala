@@ -43,11 +43,7 @@ object FirstOrderEffectTask {
       val modelInputs: Iterable[Prototype[Double]],
       val modelOutputs: Iterable[Prototype[Double]])(implicit plugins: PluginSet) extends RawSensitivityTask.Builder { builder ⇒
 
-    def toTask = new FirstOrderEffectTask(name, matrixName, modelInputs, modelOutputs) {
-      val inputs: DataSet = builder.inputs
-      val outputs: DataSet = builder.outputs
-      val parameters = builder.parameters
-    }
+    def toTask = new FirstOrderEffectTask(name, matrixName, modelInputs, modelOutputs) with builder.Built
 
   }
 
@@ -57,4 +53,4 @@ abstract sealed class FirstOrderEffectTask(
   val name: String,
   val matrixName: Prototype[String],
   val modelInputs: Iterable[Prototype[Double]],
-  val modelOutputs: Iterable[Prototype[Double]])(implicit val plugins: PluginSet) extends RawSensitivityTask with FirstOrderEffect
+  val modelOutputs: Iterable[Prototype[Double]]) extends RawSensitivityTask with FirstOrderEffect

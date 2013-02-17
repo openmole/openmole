@@ -37,21 +37,16 @@ object ElitismTask {
       addInput(individuals)
       addOutput(individuals)
 
-      def toTask = new ElitismTask(name, evolution) {
-
+      def toTask = new ElitismTask(name, evolution) with builder.Built {
         val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
         val archive = _archive.asInstanceOf[Prototype[evolution.A]]
-
-        val inputs = builder.inputs
-        val outputs = builder.outputs
-        val parameters = builder.parameters
       }
     }
   }
 }
 
 sealed abstract class ElitismTask[E <: Elitism with Termination with Modifier with Archive](
-    val name: String, val evolution: E)(implicit val plugins: PluginSet) extends Task {
+    val name: String, val evolution: E) extends Task {
 
   def individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
   def archive: Prototype[evolution.A]
