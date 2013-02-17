@@ -77,7 +77,7 @@ sealed abstract class MoleTask(
 
     val implicitsValues = implicits.flatMap(i ⇒ context.get(i))
 
-    val execution = new MoleExecution(mole, implicits = implicitsValues, rng = Random.newRNG(context(Task.openMOLESeed)))
+    val execution = new MoleExecution(mole, implicits = implicitsValues, seed = context(Task.openMOLESeed))
     val resultGathering = new ResultGathering
 
     EventDispatcher.listen(execution: IMoleExecution, resultGathering, classOf[IMoleExecution.JobInCapsuleFinished])

@@ -91,8 +91,8 @@ case class Puzzle(
     grouping: Map[ICapsule, Grouping] = Map.empty,
     profiler: Profiler = Profiler.empty,
     implicits: Context = Context.empty,
-    rng: java.util.Random = Random.newRNG(Workspace.newSeed)) =
-    new MoleExecution(toMole, this.sources ++ sources, this.hooks ++ hooks, this.selection ++ selection, this.grouping ++ grouping, profiler, implicits, rng)
+    seed: Long = Workspace.newSeed) =
+    new MoleExecution(toMole, this.sources ++ sources, this.hooks ++ hooks, this.selection ++ selection, this.grouping ++ grouping, profiler, implicits, seed)
 
   def +(p: Puzzle) = Puzzle.merge(this, p)
 

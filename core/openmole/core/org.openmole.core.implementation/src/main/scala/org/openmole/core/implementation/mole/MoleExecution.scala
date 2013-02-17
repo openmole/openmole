@@ -56,7 +56,7 @@ class MoleExecution(
     val grouping: Map[ICapsule, Grouping] = Map.empty,
     val profiler: Profiler = Profiler.empty,
     val implicits: Context = Context.empty,
-    rng: java.util.Random = Random.newRNG(Workspace.newSeed)) extends IMoleExecution {
+    seed: Long = Workspace.newSeed) extends IMoleExecution {
 
   import IMoleExecution._
   import MoleExecution._
@@ -201,5 +201,7 @@ class MoleExecution(
   def nextJobId = new MoleJobId(id, jobId.next)
 
   def newSeed = rng.nextLong
+
+  lazy val rng = Random.newRNG(seed)
 
 }
