@@ -30,7 +30,6 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Queue
 import org.openmole.core.implementation.data._
-import com.sun.corba.se.spi.transport.IIOPPrimaryToContactInfo
 
 object Validation {
 
@@ -48,42 +47,35 @@ object Validation {
     def prototypesToMap(prototypes: Iterable[Prototype[_]]) = prototypes.map { i ⇒ i.name -> i }.toMap[String, Prototype[_]]
     val implicitMap = prototypesToMap(implicits)
 
-    capsules.flatMap {
-      c ⇒
-        mole.slots(c).map {
-          s ⇒
-            (c, s, TreeMap(computeManifests(mole)(s).map { p ⇒ p.name -> p }.toSeq: _*), {
-              def paramsToMap(params: Iterable[Parameter[_]]) =
-                params.map {
-                  p ⇒ p.variable.prototype.name -> p.variable.prototype
-                }.toMap[String, Prototype[_]]
+    def paramsToMap(params: Iterable[Parameter[_]]) =
+      params.map {
+        p ⇒ p.variable.prototype.name -> p.variable.prototype
+      }.toMap[String, Prototype[_]]
 
-              val (parametersOverride, parameterNonOverride) = c.task.parameters.partition(_.`override`)
+    (for {
+      c ← capsules
+      s ← mole.slots(c)
+      received = TreeMap(computeManifests(mole)(s).map { p ⇒ p.name -> p }.toSeq: _*)
+      (po, pno) = c.task.parameters.partition(_.`override`)
+      (parametersOverride, parameterNonOverride) = (paramsToMap(po), paramsToMap(pno))
+      input ← c.inputs(mole)
+    } yield {
+      def checkPrototypeMatch(p: Prototype[_]) =
+        if (!input.prototype.isAssignableFrom(p)) Some(WrongType(s, input, p))
+        else None
 
-              (paramsToMap(parametersOverride), paramsToMap(parameterNonOverride))
-            })
-        }.flatMap {
-          case (capsule, slot, received, (parametersOverride, parameterNonOverride)) ⇒
-            capsule.inputs(mole).flatMap {
-              input ⇒
-                def checkPrototypeMatch(p: Prototype[_]) =
-                  if (!input.prototype.isAssignableFrom(p)) Some(WrongType(slot, input, p))
-                  else None
-
-                val name = input.prototype.name
-                (parametersOverride.get(name), received.get(name), implicitMap.get(name), parameterNonOverride.get(name)) match {
-                  case (Some(parameter), _, _, _) ⇒ checkPrototypeMatch(parameter)
-                  case (None, Some(received), impl, param) ⇒
-                    checkPrototypeMatch(received.toPrototype) orElse
-                      (if (received.isOptional && !impl.isDefined && !param.isDefined) Some(OptionalOutput(slot, input)) else None)
-                  case (None, None, Some(impl), _) ⇒ checkPrototypeMatch(impl)
-                  case (None, None, None, Some(parameter)) ⇒ checkPrototypeMatch(parameter)
-                  case (None, None, None, None) ⇒
-                    if (!(input.mode is Optional)) Some(MissingInput(slot, input)) else None
-                }
-            }
-        }
-    }
+      val name = input.prototype.name
+      (parametersOverride.get(name), received.get(name), implicitMap.get(name), parameterNonOverride.get(name)) match {
+        case (Some(parameter), _, _, _) ⇒ checkPrototypeMatch(parameter)
+        case (None, Some(received), impl, param) ⇒
+          checkPrototypeMatch(received.toPrototype) orElse
+            (if (received.isOptional && !impl.isDefined && !param.isDefined) Some(OptionalOutput(s, input)) else None)
+        case (None, None, Some(impl), _) ⇒ checkPrototypeMatch(impl)
+        case (None, None, None, Some(parameter)) ⇒ checkPrototypeMatch(parameter)
+        case (None, None, None, None) ⇒
+          if (!(input.mode is Optional)) Some(MissingInput(s, input)) else None
+      }
+    }).flatten
   }
 
   def typeErrorsTopMole(mole: IMole, implicits: Iterable[Prototype[_]]) =
@@ -93,7 +85,6 @@ object Validation {
     typeErrors(mole)(mole.capsules.filterNot(_ == mole.root), implicits)
 
   def topologyErrors(mole: IMole) = {
-    val errors = new ListBuffer[TopologyProblem]
     val seen = new HashMap[ICapsule, (List[(List[ICapsule], Int)])]
     val toProcess = new Queue[(ICapsule, Int, List[ICapsule])]
 
@@ -120,17 +111,14 @@ object Validation {
   }
 
   def duplicatedTransitions(mole: IMole) =
-    mole.capsules.flatMap {
-      end ⇒
-        mole.slots(end).flatMap {
-          slot ⇒
-            mole.inputTransitions(slot).toList.map { t ⇒ t.start -> t }.groupBy { case (c, t) ⇒ c }.filter {
-              case (_, transitions) ⇒ transitions.size > 1
-            }.map {
-              case (_, transitions) ⇒ transitions.map { case (_, t) ⇒ t }
-            }
-        }
-    }.map { t ⇒ new DuplicatedTransition(t) }
+    for {
+      end ← mole.capsules
+      slot ← mole.slots(end)
+      (_, transitions) ← mole.inputTransitions(slot).toList.map { t ⇒ t.start -> t }.groupBy { case (c, _) ⇒ c }
+      if (transitions.size > 1)
+    } yield {
+      new DuplicatedTransition(transitions.unzip._2)
+    }
 
   def duplicatedName(mole: IMole) = {
     def duplicated(data: DataSet) =
@@ -158,15 +146,13 @@ object Validation {
       h ← hooks.getOrElse(c, List.empty)
       r ← h.inputs
     } yield {
-      val p: Option[Problem] =
-        outputs.toMap.get(r.prototype.name) match {
-          case None ⇒ Some(MissingHookInput(c, h, r))
-          case Some(o) ⇒
-            if (!r.prototype.isAssignableFrom(o.prototype))
-              Some(WrongHookType(c, h, r, o))
-            else None
-        }
-      p
+      outputs.toMap.get(r.prototype.name) match {
+        case None ⇒ Some(MissingHookInput(c, h, r))
+        case Some(o) ⇒
+          if (!r.prototype.isAssignableFrom(o.prototype))
+            Some(WrongHookType(c, h, r, o))
+          else None
+      }
     }).flatten
 
   def apply(mole: IMole, implicits: Context = Context.empty, sources: Map[ICapsule, Iterable[Source]] = Map.empty, hooks: Map[ICapsule, Iterable[Hook]] = Map.empty) =
