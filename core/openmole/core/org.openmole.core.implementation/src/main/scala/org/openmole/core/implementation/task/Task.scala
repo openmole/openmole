@@ -32,10 +32,8 @@ import util.{Try, Success, Failure}
 
 object Task extends Logger {
   val OpenMOLEVariablePrefix = new ConfigurationLocation("Task", "OpenMOLEVariablePrefix")
-  val ErrorArraySnipSize = new ConfigurationLocation("Task", "ErrorArraySnipSize")
 
   Workspace += (OpenMOLEVariablePrefix, "oM")
-  Workspace += (ErrorArraySnipSize, "10")
 
   val openMOLESeed = Prototype[Long](Workspace.preference(OpenMOLEVariablePrefix) + "Seed")
 
@@ -49,17 +47,17 @@ trait Task extends ITask with InputOutputCheck {
   override def perform(context: Context): Try[Context] = Try {
     val initializedContext = initializeInput(context)
     val inputErrors = verifyInput(initializedContext)
-    if(!inputErrors.isEmpty) throw new InternalProcessingError(s"Input errors have been found in task $name: ${inputErrors.mkString(", ")}.")
+    if(!inputErrors.isEmpty) throw new InternalProcessingError(s"Input errors in task $name: ${inputErrors.mkString(", ")}.")
 
     val result =
       try context + process(initializedContext)
       catch {
         case e: Throwable ⇒
-          throw new InternalProcessingError(e, s"Error in task $name for context values ${context.prettified(Workspace.preferenceAsInt(Task.ErrorArraySnipSize))}")
+          throw new InternalProcessingError(e, s"Error in task $name for context values ${context.prettified()}")
       }
 
     val outputErrors = verifyOutput(result)
-    if (!outputErrors.isEmpty) throw new InternalProcessingError(s"Output errors have been found in task $name: ${outputErrors.mkString(", ")}.")
+    if (!outputErrors.isEmpty) throw new InternalProcessingError(s"Output errors in task $name: ${outputErrors.mkString(", ")}.")
     filterOutput(result)
   }
 
