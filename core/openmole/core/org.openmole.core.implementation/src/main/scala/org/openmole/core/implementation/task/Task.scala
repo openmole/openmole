@@ -40,8 +40,6 @@ object Task extends Logger {
   def buildRNG(context: Context) = newRNG(context(Task.openMOLESeed))
 }
 
-import Task.logger
-
 trait Task extends ITask {
 
   protected def verifyInput(context: Context) = {
@@ -49,8 +47,8 @@ trait Task extends ITask {
       if (!(d.mode is Optional)) {
         val p = d.prototype
         context.variable(p.name) match {
-          case None ⇒ throw new UserBadDataError("Input data named \"" + p.name + "\" of type \"" + p.`type`.toString + "\" required by the task \"" + name + "\" has not been found");
-          case Some(v) ⇒ if (!p.isAssignableFrom(v.prototype)) throw new UserBadDataError("Input data named \"" + p.name + "\" required by the task \"" + name + "\" has the wrong type: \"" + v.prototype.`type`.toString + "\" instead of \"" + p.`type`.toString + "\" required")
+          case None ⇒ throw new UserBadDataError(s"Input data named ${p.name} of type ${p.`type`} required by the task $name has not been found")
+          case Some(v) ⇒ if (!p.isAssignableFrom(v.prototype)) throw new UserBadDataError(s"Input data named ${p.name} required by the task $name is of type ${v.prototype.`type`} which is incompatible with the required type ${p.`type`}")
         }
       }
     }
@@ -63,15 +61,15 @@ trait Task extends ITask {
         val p = d.prototype
         context.variable(p) match {
           case None ⇒
-            if (!(d.mode is Optional)) throw new UserBadDataError("Variable " + p.name + " of type " + p.`type`.toString + " in not optional and has not found in output of task " + name + ".")
+            if (!(d.mode is Optional)) throw new UserBadDataError(s"Variable ${p.name} of type ${p.`type`} is not optional and has not found in output of task $name")
             else Option.empty[Variable[_]]
           case Some(v) ⇒
             if (p.accepts(v.value)) Some(v)
-            else throw new UserBadDataError("Output value of variable " + p.name + " (prototype: " + v.prototype.`type`.toString + ") is instance of class '" + v.value.asInstanceOf[AnyRef].getClass + "' and doesn't match the expected class '" + p.`type`.toString + "' in task" + name + ".")
+            else throw new UserBadDataError(s"Value of variable ${p.name} (prototype: ${v.prototype.`type`}) is instance of class ${v.value.asInstanceOf[AnyRef].getClass} and doesn't match the expected class ${p.`type`} in output of task $name")
         }
     }.toContext
 
-  private def init(context: Context): Context = {
+  private def init(context: Context): Context =
     verifyInput(
       context ++
         parameters.flatMap {
@@ -79,26 +77,17 @@ trait Task extends ITask {
             if (parameter.`override` || !context.contains(parameter.variable.prototype.name)) Some(parameter.variable)
             else Option.empty[Variable[_]]
         })
-  }
+
 
   private def end(context: Context) = filterOutput(context)
 
-  /**
-   * The main operation of the processor.
-   * @param context
-   * @param progress
-   */
-  @throws(classOf[Throwable])
   protected def process(context: Context): Context
 
-  /* (non-Javadoc)
-   * @see org.openmole.core.processors.ITask#run(org.openmole.core.processors.ApplicativeContext)
-   */
   override def perform(context: Context) =
     try end(context + process(init(context)))
     catch {
       case e: Throwable ⇒
-        throw new InternalProcessingError(e, "Error in task " + name + " for context values " + context.prettified(Workspace.preferenceAsInt(Task.ErrorArraySnipSize)))
+        throw new InternalProcessingError(e, s"Error in task $name for context values ${context.prettified(Workspace.preferenceAsInt(Task.ErrorArraySnipSize))}")
     }
 
   override def toString: String = name

@@ -138,7 +138,7 @@ class SubMoleExecution(
     val mole = moleExecution.mole
     val (capsule, ticket) = _jobs.single()(job)
     try {
-      moleExecution.indexedHooks.getOrElse(capsule, List.empty).foreach { secureHookExecution(_, job) }
+      moleExecution.indexedHooks(capsule).foreach { secureHookExecution(_, job) }
       secureProfilerExecution(moleExecution.profiler, job)
 
       mole.outputDataChannels(capsule).foreach { _.provides(job.context, ticket, moleExecution) }
@@ -182,6 +182,11 @@ class SubMoleExecution(
           moleExecution.implicits.values.filter(v ⇒ capsule.task.inputs.contains(v.prototype.name)) +
           Variable(Task.openMOLESeed, moleExecution.newSeed)
 
+      val sourced =
+        moleExecution.indexedSources(capsule).foldLeft(Context.empty) {
+          case (a, s) ⇒ a + s.process(context)
+        }
+
       //FIXME: Factorize code
       capsule match {
         case c: IMasterCapsule ⇒
@@ -191,7 +196,7 @@ class SubMoleExecution(
           background {
             masterCapsuleSemaphore {
               val savedContext = masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(Context.empty)
-              val moleJob: IMoleJob = new MoleJob(capsule.task, implicits + context + savedContext, moleExecution.nextJobId, stateChanged)
+              val moleJob: IMoleJob = new MoleJob(capsule.task, implicits + sourced + context + savedContext, moleExecution.nextJobId, stateChanged)
               EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleStarting(moleJob, capsule))
               EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobSubmitted(moleJob))
               addJob(moleJob, capsule, ticket)
@@ -206,7 +211,7 @@ class SubMoleExecution(
             if (newState.isFinal) finalState(job, newState)
           }
 
-          val moleJob: IMoleJob = new MoleJob(capsule.task, implicits + context, moleExecution.nextJobId, stateChanged)
+          val moleJob: IMoleJob = new MoleJob(capsule.task, implicits + sourced + context, moleExecution.nextJobId, stateChanged)
           addJob(moleJob, capsule, ticket)
           EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleStarting(moleJob, capsule))
           EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobSubmitted(moleJob))

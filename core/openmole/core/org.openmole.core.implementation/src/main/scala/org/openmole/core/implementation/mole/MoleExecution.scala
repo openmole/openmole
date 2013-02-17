@@ -71,10 +71,10 @@ class MoleExecution(
   private val jobId = Ref(0L)
 
   @transient lazy val indexedSources =
-    sources.groupBy { case (c, _) ⇒ c }.map { case (c, ss) ⇒ c -> ss.map(_._2) }
+    sources.groupBy { case (c, _) ⇒ c }.map { case (c, ss) ⇒ c -> ss.map(_._2) }.withDefault(_ ⇒ List.empty)
 
   @transient lazy val indexedHooks =
-    hooks.groupBy { case (c, _) ⇒ c }.map { case (c, hs) ⇒ c -> hs.map { _._2 } }
+    hooks.groupBy { case (c, _) ⇒ c }.map { case (c, hs) ⇒ c -> hs.map { _._2 } }.withDefault(_ ⇒ List.empty)
 
   private val waitingJobs: TMap[ICapsule, TMap[IMoleJobGroup, Ref[List[IMoleJob]]]] =
     TMap(grouping.map { case (c, g) ⇒ c -> TMap.empty[IMoleJobGroup, Ref[List[IMoleJob]]] }.toSeq: _*)
