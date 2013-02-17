@@ -155,7 +155,7 @@ object Validation {
       }
     }).flatten
 
-  def apply(mole: IMole, implicits: Context = Context.empty, sources: Map[ICapsule, Iterable[Source]] = Map.empty, hooks: Map[ICapsule, Iterable[Hook]] = Map.empty) =
+  def apply(mole: IMole, implicits: Context = Context.empty, sources: Map[ICapsule, Iterable[ISource]] = Map.empty, hooks: Map[ICapsule, Iterable[Hook]] = Map.empty) =
     allMoles(mole).flatMap {
       case (m, mt) ⇒
         def moleTaskImplicits(moleTask: IMoleTask) = {

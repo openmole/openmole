@@ -19,16 +19,9 @@ package org.openmole.core.model.mole
 
 import org.openmole.core.model.data._
 
-object Source {
-  val empty = new Source {
-    def inputs = DataSet.empty
-    def outputs = DataSet.empty
-    def process(context: Context) = Context.empty
-  }
-}
-
-trait Source {
+trait ISource {
   def inputs: DataSet
   def outputs: DataSet
-  def process(context: Context): Context
+  def parameters: ParameterSet
+  def perform(context: Context): Context
 }

@@ -53,7 +53,7 @@ trait IMoleExecution {
 
   def mole: IMole
   def hooks: Iterable[(ICapsule, Hook)]
-  def sources: Iterable[(ICapsule, Source)]
+  def sources: Iterable[(ICapsule, ISource)]
   def profiler: Profiler
   def implicits: Context
 

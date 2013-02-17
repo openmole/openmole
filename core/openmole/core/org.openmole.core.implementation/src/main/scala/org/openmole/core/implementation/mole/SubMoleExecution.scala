@@ -184,7 +184,7 @@ class SubMoleExecution(
 
       val sourced =
         moleExecution.indexedSources(capsule).foldLeft(Context.empty) {
-          case (a, s) ⇒ a + s.process(context)
+          case (a, s) ⇒ a + s.perform(context)
         }
 
       //FIXME: Factorize code

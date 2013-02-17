@@ -50,7 +50,7 @@ import MoleExecution._
 
 class MoleExecution(
     val mole: IMole,
-    val sources: Iterable[(ICapsule, Source)] = Iterable.empty,
+    val sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
     val hooks: Iterable[(ICapsule, Hook)] = Iterable.empty,
     val selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
     val grouping: Map[ICapsule, Grouping] = Map.empty,

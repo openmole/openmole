@@ -19,12 +19,6 @@ package org.openmole.core.model.mole
 
 import org.openmole.core.model.data._
 
-object Hook {
-  val empty = new Hook {
-    def process(job: Context) = {}
-  }
-}
-
 trait Hook {
   def inputs: DataSet = DataSet.empty
   def process(context: Context)

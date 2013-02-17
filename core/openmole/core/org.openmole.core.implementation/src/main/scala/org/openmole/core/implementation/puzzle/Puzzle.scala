@@ -60,7 +60,7 @@ case class Puzzle(
     val lasts: Iterable[ICapsule],
     val transitions: Iterable[ITransition],
     val dataChannels: Iterable[IDataChannel],
-    val sources: Iterable[(ICapsule, Source)],
+    val sources: Iterable[(ICapsule, ISource)],
     val hooks: Iterable[(ICapsule, Hook)],
     val selection: Map[ICapsule, EnvironmentSelection],
     val grouping: Map[ICapsule, Grouping]) {
@@ -85,7 +85,7 @@ case class Puzzle(
     new MoleExecution(toMole, sources, hooks, selection, grouping, profiler)
 
   def toExecution(
-    sources: Iterable[(ICapsule, Source)] = Iterable.empty,
+    sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
     hooks: Iterable[(ICapsule, Hook)] = Iterable.empty,
     selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
     grouping: Map[ICapsule, Grouping] = Map.empty,
