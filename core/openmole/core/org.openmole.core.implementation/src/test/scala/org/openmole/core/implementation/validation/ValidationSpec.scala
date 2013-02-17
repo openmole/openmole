@@ -260,4 +260,26 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     }
   }
 
+  "Validation" should "take into account outputs produced by a source" in {
+    val t = Prototype[Int]("t")
+
+    val t1 = EmptyTask("t1")
+    t1 addInput t
+
+    val c1 = Capsule(t1)
+
+    val s = new SourceBuilder {
+      addOutput(t)
+
+      def toSource = new Source with Built {
+        def process(ctx: Context) = Context.empty
+      }
+    }.toSource
+
+    val mole = new Mole(c1)
+
+    val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Map(c1 -> List(s)))
+    errors.isEmpty should equal(true)
+  }
+
 }
