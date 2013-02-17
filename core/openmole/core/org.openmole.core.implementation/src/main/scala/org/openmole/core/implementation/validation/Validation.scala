@@ -27,9 +27,7 @@ import org.openmole.misc.tools.obj.ClassUtils._
 import DataflowProblem._
 import TopologyProblem._
 import scala.collection.mutable.HashMap
-import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Queue
-import org.openmole.core.implementation.data._
 
 object Validation {
 
@@ -43,7 +41,7 @@ object Validation {
           }
       }.toList
 
-  def typeErrors(mole: IMole)(capsules: Iterable[ICapsule], implicits: Iterable[Prototype[_]]) = {
+  def typeErrors(mole: IMole)(capsules: Iterable[ICapsule], implicits: Iterable[Prototype[_]], sources: Map[ICapsule, Iterable[ISource]]) = {
     def prototypesToMap(prototypes: Iterable[Prototype[_]]) = prototypes.map { i ⇒ i.name -> i }.toMap[String, Prototype[_]]
     val implicitMap = prototypesToMap(implicits)
 
@@ -54,6 +52,7 @@ object Validation {
 
     (for {
       c ← capsules
+      sourcesOutputs = TreeMap(sources.getOrElse(c, List.empty).flatMap(_.outputs).map(o ⇒ o.prototype.name -> o).toSeq: _*)
       s ← mole.slots(c)
       received = TreeMap(computeManifests(mole)(s).map { p ⇒ p.name -> p }.toSeq: _*)
       (po, pno) = c.task.parameters.partition(_.`override`)
@@ -65,24 +64,27 @@ object Validation {
         else None
 
       val name = input.prototype.name
-      (parametersOverride.get(name), received.get(name), implicitMap.get(name), parameterNonOverride.get(name)) match {
-        case (Some(parameter), _, _, _) ⇒ checkPrototypeMatch(parameter)
-        case (None, Some(received), impl, param) ⇒
+      (parametersOverride.get(name), received.get(name), implicitMap.get(name), sourcesOutputs.get(name), parameterNonOverride.get(name)) match {
+        case (Some(parameter), _, _, _, _) ⇒ checkPrototypeMatch(parameter)
+        case (None, Some(received), impl, source, param) ⇒
           checkPrototypeMatch(received.toPrototype) orElse
-            (if (received.isOptional && !impl.isDefined && !param.isDefined) Some(OptionalOutput(s, input)) else None)
-        case (None, None, Some(impl), _) ⇒ checkPrototypeMatch(impl)
-        case (None, None, None, Some(parameter)) ⇒ checkPrototypeMatch(parameter)
-        case (None, None, None, None) ⇒
+            (if (received.isOptional && !impl.isDefined && !source.isDefined && !param.isDefined) Some(OptionalOutput(s, input)) else None)
+        case (None, None, Some(impl), _, _) ⇒ checkPrototypeMatch(impl)
+        case (None, None, None, Some(source), param) ⇒
+          checkPrototypeMatch(source.prototype) orElse
+            (if ((source.mode is Optional) && !param.isDefined) Some(OptionalOutput(s, input)) else None)
+        case (None, None, None, None, Some(parameter)) ⇒ checkPrototypeMatch(parameter)
+        case (None, None, None, None, None) ⇒
           if (!(input.mode is Optional)) Some(MissingInput(s, input)) else None
       }
     }).flatten
   }
 
-  def typeErrorsTopMole(mole: IMole, implicits: Iterable[Prototype[_]]) =
-    typeErrors(mole)(mole.capsules, implicits)
+  def typeErrorsTopMole(mole: IMole, implicits: Iterable[Prototype[_]], sources: Map[ICapsule, Iterable[ISource]]) =
+    typeErrors(mole)(mole.capsules, implicits, sources)
 
   def typeErrorsMoleTask(mole: IMole, implicits: Iterable[Prototype[_]]) =
-    typeErrors(mole)(mole.capsules.filterNot(_ == mole.root), implicits)
+    typeErrors(mole)(mole.capsules.filterNot(_ == mole.root), implicits, Map.empty)
 
   def topologyErrors(mole: IMole) = {
     val seen = new HashMap[ICapsule, (List[(List[ICapsule], Int)])]
@@ -169,7 +171,7 @@ object Validation {
               typeErrorsMoleTask(m, moleTaskImplicits(t))
           case None ⇒
             hookErrors(m, hooks) ++
-              typeErrorsTopMole(m, implicits.prototypes)
+              typeErrorsTopMole(m, implicits.prototypes, sources)
         }) ++
           topologyErrors(m) ++
           duplicatedTransitions(m) ++
