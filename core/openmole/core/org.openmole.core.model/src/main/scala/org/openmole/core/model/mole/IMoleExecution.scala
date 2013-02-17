@@ -32,13 +32,14 @@ import scala.collection.mutable.Buffer
 object IMoleExecution {
   class Starting extends Event[IMoleExecution]
   class Finished extends Event[IMoleExecution]
-  case class OneJobStatusChanged(val moleJob: IMoleJob, val newState: State, val oldState: State) extends Event[IMoleExecution]
-  case class OneJobSubmitted(val moleJob: IMoleJob) extends Event[IMoleExecution]
-  case class JobInCapsuleFinished(val moleJob: IMoleJob, val capsule: ICapsule) extends Event[IMoleExecution]
-  case class JobInCapsuleStarting(val moleJob: IMoleJob, val capsule: ICapsule) extends Event[IMoleExecution]
-  case class ExceptionRaised(val moleJob: IMoleJob, val exception: Throwable, val level: Level) extends Event[IMoleExecution]
-  case class HookExceptionRaised(val hook: Hook, val moleJob: IMoleJob, val exception: Throwable, val level: Level) extends Event[IMoleExecution]
-  case class ProfilerExceptionRaised(val profiler: Profiler, val moleJob: IMoleJob, val exception: Throwable, val level: Level) extends Event[IMoleExecution]
+  case class OneJobStatusChanged(moleJob: IMoleJob, newState: State, oldState: State) extends Event[IMoleExecution]
+  case class OneJobSubmitted(moleJob: IMoleJob) extends Event[IMoleExecution]
+  case class JobInCapsuleFinished(moleJob: IMoleJob, capsule: ICapsule) extends Event[IMoleExecution]
+  case class JobInCapsuleStarting(moleJob: IMoleJob, capsule: ICapsule) extends Event[IMoleExecution]
+  case class ExceptionRaised(moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution]
+  case class SourceExceptionRaised(source: ISource, capsule: ICapsule, exception: Throwable, level: Level) extends Event[IMoleExecution]
+  case class HookExceptionRaised(hook: Hook, moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution]
+  case class ProfilerExceptionRaised(profiler: Profiler, moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution]
 }
 
 trait IMoleExecution {

@@ -184,7 +184,15 @@ class SubMoleExecution(
 
       val sourced =
         moleExecution.indexedSources(capsule).foldLeft(Context.empty) {
-          case (a, s) ⇒ a + s.perform(context)
+            case (a, s) ⇒
+              val ctx = try s.perform(context)
+              catch {
+                case t: Throwable =>
+                  logger.log(SEVERE, "Error in submole execution", t)
+                  EventDispatcher.trigger(moleExecution, new IMoleExecution.SourceExceptionRaised(s, capsule, t, SEVERE))
+                  throw new InternalProcessingError(t, s"Error in source execution that is plugged to $capsule")
+              }
+              a + ctx
         }
 
       //FIXME: Factorize code
