@@ -25,6 +25,7 @@ import org.openmole.core.model.execution.Environment
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
 import TextAreaOutputStream._
+import org.openmole.misc.exception.ExceptionUtils
 
 class EnvironmentExceptionListener(exeManager: ExecutionManager) extends EventListener[Environment] {
 
@@ -32,12 +33,7 @@ class EnvironmentExceptionListener(exeManager: ExecutionManager) extends EventLi
     event match {
       case x: ExceptionRaised ⇒
         exeManager.moleExecutionExceptionTextArea.append(x.level + ": Exception in task " + x.job)
-
-        val stream = new PrintStream(exeManager.moleExecutionExceptionTextArea.toStream)
-        try x.exception.printStackTrace(stream)
-        finally stream.close
-
-      // exeManager.moleExecutionExceptionTextArea.background = Color.red
+        exeManager.moleExecutionExceptionTextArea.append(ExceptionUtils.prettify(x.exception))
     }
   }
 }

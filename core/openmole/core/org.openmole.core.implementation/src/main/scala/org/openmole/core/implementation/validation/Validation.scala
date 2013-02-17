@@ -141,6 +141,10 @@ object Validation {
     moleTask.implicits.filterNot(i ⇒ inputs.contains(i)).map(i ⇒ MissingMoleTaskImplicit(capsule, i))
   }
 
+  def sourcesError(m: IMole, sources: Map[ICapsule, Iterable[Source]]) = {
+
+  }
+
   def hookErrors(m: IMole, hooks: Map[ICapsule, Iterable[Hook]]): Iterable[Problem] =
     (for {
       c ← m.capsules
