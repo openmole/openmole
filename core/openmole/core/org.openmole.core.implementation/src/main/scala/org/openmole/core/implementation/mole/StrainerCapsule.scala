@@ -24,6 +24,7 @@ import org.openmole.core.implementation.validation._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.task._
 import org.openmole.core.model.transition._
+import util.{ Failure, Success }
 
 object StrainerCapsule {
   def apply(task: ITask) = new StrainerCapsule(task)
@@ -33,8 +34,19 @@ object StrainerCapsule {
     override def inputs = task.inputs
     override def outputs = task.outputs
     override def plugins = task.plugins
-    override def perform(context: Context) = process(context)
-    override def process(context: Context) = context + task.perform(context)
+
+    override def perform(context: Context) =
+      try Success(process(context))
+      catch {
+        case t: Throwable ⇒ Failure(t)
+      }
+
+    override def process(context: Context) =
+      task.perform(context) match {
+        case Success(c) ⇒ context + c
+        case Failure(t) ⇒ throw t
+      }
+
     override def parameters = task.parameters
   }
 

@@ -28,6 +28,7 @@ import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.service.Random._
 import org.openmole.core.implementation.tools.InputOutputCheck
+import util.{Try, Success, Failure}
 
 object Task extends Logger {
   val OpenMOLEVariablePrefix = new ConfigurationLocation("Task", "OpenMOLEVariablePrefix")
@@ -45,16 +46,17 @@ trait Task extends ITask with InputOutputCheck {
 
   protected def process(context: Context): Context
 
-  override def perform(context: Context) =  {
+  override def perform(context: Context): Try[Context] = Try {
     val initializedContext = initializeInput(context)
     val inputErrors = verifyInput(initializedContext)
     if(!inputErrors.isEmpty) throw new InternalProcessingError(s"Input errors have been found in task $name: ${inputErrors.mkString(", ")}.")
 
-    val result = try context + process(initializedContext)
-    catch {
-      case e: Throwable ⇒
-        throw new InternalProcessingError(e, s"Error in task $name for context values ${context.prettified(Workspace.preferenceAsInt(Task.ErrorArraySnipSize))}")
-    }
+    val result =
+      try context + process(initializedContext)
+      catch {
+        case e: Throwable ⇒
+          throw new InternalProcessingError(e, s"Error in task $name for context values ${context.prettified(Workspace.preferenceAsInt(Task.ErrorArraySnipSize))}")
+      }
 
     val outputErrors = verifyOutput(result)
     if (!outputErrors.isEmpty) throw new InternalProcessingError(s"Output errors have been found in task $name: ${outputErrors.mkString(", ")}.")
