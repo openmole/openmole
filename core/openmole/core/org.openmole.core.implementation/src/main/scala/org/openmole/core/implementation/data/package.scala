@@ -54,6 +54,8 @@ package object data {
     def toArray: Prototype[Array[T]] =
       Prototype(prototype.name)(prototype.`type`.arrayManifest).asInstanceOf[Prototype[Array[T]]]
 
+    def unsecureType = prototype.`type`.asInstanceOf[Manifest[Any]]
+
   }
 
   implicit def prototypeFromArrayDecorator[T](prototype: Prototype[Array[T]]) = new {

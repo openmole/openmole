@@ -20,6 +20,7 @@ package org.openmole.core.model.data
 import org.openmole.misc.exception.UserBadDataError
 import scala.collection.immutable.MapLike
 import scala.collection.immutable.TreeMap
+import org.openmole.misc.workspace.Workspace
 
 object Context {
 
@@ -165,5 +166,10 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
 
   override def toString = prettified(Int.MaxValue)
 
-  def prettified(stripSize: Int) = "{" + (if (variables.values.isEmpty) "" else variables.values.mkString(", ")) + "}"
+  def prototypes = values.map { _.prototype }
+
+  def prettified(stripSize: Int = Workspace.preferenceAsInt(Workspace.ErrorArraySnipSize)) =
+    "{" + (if (variables.values.isEmpty) ""
+    else variables.values.map(v ⇒ if (v != null) v.prettified(stripSize) else v).mkString(", ")) + "}"
+
 }

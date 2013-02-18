@@ -38,4 +38,6 @@ trait IMoleTask extends ITask {
 
   def last: ICapsule
 
+  def implicits: Iterable[String]
+
 }

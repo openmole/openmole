@@ -19,24 +19,12 @@ package org.openmole.core.implementation.task
 
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
+import org.openmole.core.implementation.tools.InputOutputBuilder
 
-abstract class TaskBuilder {
-  private var _inputs = DataSet.empty
-  private var _outputs = DataSet.empty
-  private var _parameters = ParameterSet.empty
-
-  def addInput(d: DataSet) = { _inputs ++= d; this }
-  def addInput(d: Data[_]) = { _inputs += d; this }
-
-  def addOutput(d: DataSet) = { _outputs ++= d; this }
-  def addOutput(d: Data[_]) = { _outputs += d; this }
-
-  def addParameter(p: Parameter[_]) = { _parameters += p; this }
-  def addParameter(p: ParameterSet) = { _parameters ++= p; this }
-
-  def inputs = _inputs
-  def outputs = _outputs
-  def parameters = _parameters
-
+abstract class TaskBuilder(implicit val plugins: PluginSet) extends InputOutputBuilder { builder ⇒
   def toTask: ITask
+
+  trait Built extends super.Built {
+    val plugins = builder.plugins
+  }
 }

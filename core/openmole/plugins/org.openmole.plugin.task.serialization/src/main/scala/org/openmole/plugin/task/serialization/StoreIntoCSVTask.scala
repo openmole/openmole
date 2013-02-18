@@ -42,11 +42,7 @@ object StoreIntoCSVTask {
 
       addOutput(outputFile)
 
-      def toTask = new StoreIntoCSVTask(name, outputFile, builder.columns) {
-        val inputs = builder.inputs
-        val outputs = builder.outputs
-        val parameters = builder.parameters
-      }
+      def toTask = new StoreIntoCSVTask(name, outputFile, builder.columns) with builder.Built
 
     }
 
@@ -55,10 +51,10 @@ object StoreIntoCSVTask {
 sealed abstract class StoreIntoCSVTask(
     val name: String,
     val filePrototype: Prototype[File],
-    val columns: Iterable[(Prototype[Array[_]], String)])(implicit val plugins: PluginSet) extends Task {
+    val columns: Iterable[(Prototype[Array[_]], String)]) extends Task {
 
   override def process(context: Context) = {
-    val valuesList = columns.map { elt ⇒ context.value(elt._1).getOrElse(throw new UserBadDataError("Variable " + elt._1 + " not found.")) }
+    val valuesList = columns.map { elt ⇒ context(elt._1) }
 
     val file = Workspace.newFile("storeIntoCSV", ".csv")
     val writer = new CSVWriter(new BufferedWriter(new FileWriter(file)), ',', CSVWriter.NO_QUOTE_CHARACTER)

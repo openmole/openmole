@@ -101,7 +101,7 @@ class SubMoleExecution(
     _childs.single -= submoleExecution
 
   private def secureHookExecution(hook: Hook, moleJob: IMoleJob) =
-    try hook.process(moleExecution.mole.implicits + moleJob.context)
+    try hook.process(moleExecution.implicits + moleJob.context)
     catch {
       case e: Throwable ⇒
         EventDispatcher.trigger(moleExecution, new IMoleExecution.HookExceptionRaised(hook, moleJob, e, WARNING))
@@ -138,7 +138,7 @@ class SubMoleExecution(
     val mole = moleExecution.mole
     val (capsule, ticket) = _jobs.single()(job)
     try {
-      moleExecution.indexedHooks.getOrElse(capsule, List.empty).foreach { secureHookExecution(_, job) }
+      moleExecution.indexedHooks(capsule).foreach { secureHookExecution(_, job) }
       secureProfilerExecution(moleExecution.profiler, job)
 
       mole.outputDataChannels(capsule).foreach { _.provides(job.context, ticket, moleExecution) }
@@ -179,8 +179,21 @@ class SubMoleExecution(
 
       def implicits =
         Context.empty ++
-          moleExecution.mole.implicits.values.filter(v ⇒ capsule.task.inputs.contains(v.prototype.name)) +
+          moleExecution.implicits.values.filter(v ⇒ capsule.task.inputs.contains(v.prototype.name)) +
           Variable(Task.openMOLESeed, moleExecution.newSeed)
+
+      val sourced =
+        moleExecution.indexedSources(capsule).foldLeft(Context.empty) {
+            case (a, s) ⇒
+              val ctx = try s.perform(context)
+              catch {
+                case t: Throwable =>
+                  logger.log(SEVERE, "Error in submole execution", t)
+                  EventDispatcher.trigger(moleExecution, new IMoleExecution.SourceExceptionRaised(s, capsule, t, SEVERE))
+                  throw new InternalProcessingError(t, s"Error in source execution that is plugged to $capsule")
+              }
+              a + ctx
+        }
 
       //FIXME: Factorize code
       capsule match {
@@ -191,7 +204,7 @@ class SubMoleExecution(
           background {
             masterCapsuleSemaphore {
               val savedContext = masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(Context.empty)
-              val moleJob: IMoleJob = new MoleJob(capsule.task, implicits + context + savedContext, moleExecution.nextJobId, stateChanged)
+              val moleJob: IMoleJob = new MoleJob(capsule.task, implicits + sourced + context + savedContext, moleExecution.nextJobId, stateChanged)
               EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleStarting(moleJob, capsule))
               EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobSubmitted(moleJob))
               addJob(moleJob, capsule, ticket)
@@ -206,7 +219,7 @@ class SubMoleExecution(
             if (newState.isFinal) finalState(job, newState)
           }
 
-          val moleJob: IMoleJob = new MoleJob(capsule.task, implicits + context, moleExecution.nextJobId, stateChanged)
+          val moleJob: IMoleJob = new MoleJob(capsule.task, implicits + sourced + context, moleExecution.nextJobId, stateChanged)
           addJob(moleJob, capsule, ticket)
           EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleStarting(moleJob, capsule))
           EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobSubmitted(moleJob))

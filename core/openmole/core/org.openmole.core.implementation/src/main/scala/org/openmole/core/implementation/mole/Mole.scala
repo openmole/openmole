@@ -61,8 +61,7 @@ object Mole {
 class Mole(
     val root: ICapsule,
     val transitions: Iterable[ITransition] = Iterable.empty,
-    val dataChannels: Iterable[IDataChannel] = Iterable.empty,
-    val implicits: Context = Context.empty) extends IMole {
+    val dataChannels: Iterable[IDataChannel] = Iterable.empty) extends IMole {
 
   lazy val levels = Mole.levels(this)
   def level(c: ICapsule) = levels(c)

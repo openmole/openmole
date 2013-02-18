@@ -31,18 +31,14 @@ object TemplateFileTask {
 
     addOutput(output)
 
-    def toTask = new TemplateFileTask(name, template, output) {
-      val inputs = builder.inputs
-      val outputs = builder.outputs
-      val parameters = builder.parameters
-    }
+    def toTask = new TemplateFileTask(name, template, output) with builder.Built
   }
 }
 
 sealed abstract class TemplateFileTask(
     val name: String,
     template: File,
-    val output: Prototype[File])(implicit val plugins: PluginSet) extends AbstractTemplateFileTask {
+    val output: Prototype[File]) extends AbstractTemplateFileTask {
 
   override def file(context: Context) = template
 }

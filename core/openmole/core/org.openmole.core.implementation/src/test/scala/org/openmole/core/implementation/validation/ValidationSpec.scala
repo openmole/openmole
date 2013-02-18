@@ -50,7 +50,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = c1 -- c2
 
-    val errors = Validation.typeErrors(mole)(mole.capsules)
+    val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Map.empty)
     errors.headOption match {
       case Some(MissingInput(_, d)) ⇒ assert(d.prototype == p)
       case _ ⇒ sys.error("Error should have been detected")
@@ -70,7 +70,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = c1 -- c2
 
-    Validation.typeErrors(mole)(mole.capsules).isEmpty should equal(true)
+    Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Map.empty).isEmpty should equal(true)
   }
 
   "Validation" should "detect a type error" in {
@@ -88,7 +88,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = c1 -- c2
 
-    val errors = Validation.typeErrors(mole)(mole.capsules)
+    val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Map.empty)
     errors.headOption match {
       case Some(WrongType(_, d, t)) ⇒
         assert(d.prototype == pString)
@@ -147,7 +147,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = (c1 -- c2 -- c3) + (c1 oo (c3, Filter(p)))
 
-    val errors = Validation.typeErrors(mole)(mole.capsules)
+    val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Map.empty)
 
     errors.headOption match {
       case Some(MissingInput(_, d)) ⇒ assert(d.prototype == p)
@@ -166,7 +166,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val c1 = Capsule(t1)
     val c2 = Capsule(t2)
 
-    val mt = MoleTask("mt", c1 -- c2, c2)
+    val mt = MoleTask("mt", c1 -- c2)
 
     val errors = Validation(new Mole(mt))
 
@@ -193,7 +193,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     t2 addInput p
     val c2 = new Capsule(t2)
 
-    val mt = MoleTask("mt", new Mole(c2), c2)
+    val mt = MoleTask("mt", c2)
 
     val mtC = new Capsule(mt)
 
@@ -218,6 +218,68 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
       case Some(DuplicatedName(_, _, _, Output)) ⇒
       case _ ⇒ sys.error("Error should have been detected")
     }
+  }
+
+  "Validation" should "detect a missing input error for the hook" in {
+    val i = Prototype[Int]("t")
+
+    val t1 = EmptyTask("t1")
+
+    val c1 = new Capsule(t1)
+
+    val h = new Hook {
+      override def inputs = DataSet(i)
+      def process(context: Context) {}
+    }
+
+    val errors = Validation.hookErrors(new Mole(c1), Map(c1 -> List(h)))
+    errors.headOption match {
+      case Some(MissingHookInput(_, _, _)) ⇒
+      case _ ⇒ sys.error("Error should have been detected")
+    }
+  }
+
+  "Validation" should "detect a wrong input type error for the hook" in {
+    val iInt = Prototype[Int]("i")
+    val iString = Prototype[String]("i")
+
+    val t1 = EmptyTask("t1")
+    t1 addOutput iString
+
+    val c1 = new Capsule(t1)
+
+    val h = new Hook {
+      override def inputs = DataSet(iInt)
+      def process(context: Context) {}
+    }
+
+    val errors = Validation.hookErrors(new Mole(c1), Map(c1 -> List(h)))
+    errors.headOption match {
+      case Some(WrongHookType(_, _, _, _)) ⇒
+      case _ ⇒ sys.error("Error should have been detected")
+    }
+  }
+
+  "Validation" should "take into account outputs produced by a source" in {
+    val t = Prototype[Int]("t")
+
+    val t1 = EmptyTask("t1")
+    t1 addInput t
+
+    val c1 = Capsule(t1)
+
+    val s = new SourceBuilder {
+      addOutput(t)
+
+      def toSource = new Source with Built {
+        def process(ctx: Context) = Context.empty
+      }
+    }.toSource
+
+    val mole = new Mole(c1)
+
+    val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Map(c1 -> List(s)))
+    errors.isEmpty should equal(true)
   }
 
 }

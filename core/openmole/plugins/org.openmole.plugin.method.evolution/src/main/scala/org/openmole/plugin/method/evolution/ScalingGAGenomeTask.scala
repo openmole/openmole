@@ -50,11 +50,7 @@ object ScalingGAGenomeTask {
       addInput(genome)
       addOutput(genome)
 
-      def toTask = new ScalingGAGenomeTask[T](name, genome, scale: _*) {
-        val inputs = builder.inputs
-        val outputs = builder.outputs
-        val parameters = builder.parameters
-      }
+      def toTask = new ScalingGAGenomeTask[T](name, genome, scale: _*) with Built
     }
 
 }
@@ -62,7 +58,7 @@ object ScalingGAGenomeTask {
 sealed abstract class ScalingGAGenomeTask[T <: GAGenome](
     val name: String,
     genome: Prototype[T],
-    scale: (Prototype[Double], (String, String))*)(implicit val plugins: PluginSet) extends Task {
+    scale: (Prototype[Double], (String, String))*) extends Task {
 
   override def process(context: Context) =
     context ++ ScalingGAGenomeTask.scaled(scale.toList, context(genome).values.toList, context)

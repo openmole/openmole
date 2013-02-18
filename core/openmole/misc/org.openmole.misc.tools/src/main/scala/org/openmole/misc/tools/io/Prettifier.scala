@@ -44,4 +44,5 @@ object Prettifier extends Logger {
         logger.log(WARNING, "Error durring pretification", t)
         o.toString
     }
+
 }

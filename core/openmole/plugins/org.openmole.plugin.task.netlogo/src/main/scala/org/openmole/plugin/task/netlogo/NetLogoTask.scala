@@ -24,6 +24,7 @@ import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.plugin.task.external._
+import org.openmole.misc.exception.UserBadDataError
 
 object NetLogoTask {
 
@@ -71,23 +72,29 @@ class NetLogoTask(
       }
 
       for (cmd ← launchingCommands) netLogo.command(VariableExpansion(context, cmd))
-
-      fetchOutputFiles(context, tmpDir, links) ++ netLogoOutputs.map {
+        fetchOutputFiles(context, tmpDir, links) ++ netLogoOutputs.map {
         case (name, prototype) ⇒
-          val outputValue = netLogo.report(name)
-          if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Prototype[Any]], outputValue)
-          else {
-            val netLogoCollection = outputValue.asInstanceOf[AbstractCollection[Any]]
-            netLogoArrayToVariable(netLogoCollection, prototype)
+          try {
+            val outputValue = netLogo.report(name)
+            if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Prototype[Any]], outputValue)
+            else {
+              val netLogoCollection = outputValue.asInstanceOf[AbstractCollection[Any]]
+              netLogoArrayToVariable(netLogoCollection, prototype)
+            }
+          } catch {
+            case e: Throwable => throw new UserBadDataError(e, s"Error when fetching netlogo output $name in variable $prototype")
           }
-      } ++ netLogoArrayOutputs.map {
+        } ++ netLogoArrayOutputs.map {
         case (name, column, prototype) ⇒
+          try {
           val netLogoCollection = netLogo.report(name)
           val outputValue = netLogoCollection.asInstanceOf[AbstractCollection[Any]].toArray()(column)
           if (!prototype.`type`.runtimeClass.isArray) Variable(prototype.asInstanceOf[Prototype[Any]], outputValue)
           else netLogoArrayToVariable(outputValue.asInstanceOf[AbstractCollection[Any]], prototype)
-      }
-
+          } catch {
+            case e: Throwable => throw new UserBadDataError(e, s"Error when fetching column $column of netlogo output $name in variable $prototype")
+          }
+        }
     } finally netLogo.dispose
 
   }

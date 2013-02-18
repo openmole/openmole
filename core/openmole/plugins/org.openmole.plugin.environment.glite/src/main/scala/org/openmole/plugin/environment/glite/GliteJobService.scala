@@ -91,7 +91,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
       try generateScript(serializedJob, outputFilePath, os)
       finally os.close
 
-      //logger.fine(Source.fromFile(script).mkString)
+      //logger.fine(ISource.fromFile(script).mkString)
 
       val jobDescription = buildJobDescription(runtime, script)
 
@@ -217,7 +217,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
       override val retryCount = Some(Workspace.preferenceAsInt(GliteEnvironment.WMSRetryCount))
       override val myProxyServer = environment.myProxy.map(_.url)
       override val architecture = environment.architecture
-      //override val fuzzy = true
+      override val fuzzy = true
     }
 
 }

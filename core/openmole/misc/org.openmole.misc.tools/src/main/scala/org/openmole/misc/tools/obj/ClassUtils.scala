@@ -189,6 +189,7 @@ object ClassUtils {
   }
 
   implicit def manifestToClass[T](m: Manifest[T]) = m.runtimeClass
+  implicit def classToManifestDecorator[T](c: Class[T]) = manifest(c)
 
   def assignable(from: Class[_], to: Class[_]) =
     unArrayify(from, to) match {

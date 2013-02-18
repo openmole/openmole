@@ -61,8 +61,11 @@ object Workspace {
 
   private val configurations = new HashMap[ConfigurationLocation, () ⇒ String]
 
+  val ErrorArraySnipSize = new ConfigurationLocation(group, "ErrorArraySnipSize")
+
   this += (uniqueID, UUID.randomUUID.toString)
   this += (passwordTest, passwordTestString)
+  this += (ErrorArraySnipSize, "10")
 
   lazy val defaultLocation = DBServerInfo.base //new File(System.getProperty("user.home"), openMoleDir)
   lazy val instance = new Workspace(defaultLocation)

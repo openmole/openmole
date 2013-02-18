@@ -47,6 +47,6 @@ class CopyFileHook(
     }
   }
 
-  override def required = DataSet(filePrototype)
+  override def inputs = DataSet(filePrototype)
 
 }

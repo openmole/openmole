@@ -74,4 +74,6 @@ trait DataSet extends Set[Data[_]] with SetLike[Data[_], DataSet] { self ⇒
 
   override def contains(data: Data[_]) = dataMap.contains(data.prototype.name)
 
+  def toMap = map(d ⇒ d.prototype.name -> d).toMap[String, Data[_]]
+
 }

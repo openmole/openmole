@@ -34,7 +34,7 @@ sealed class SaveProfileHook(
     val aggregation: GAAggregation,
     val path: String) extends Hook {
 
-  override def required = DataSet(individual.toArray)
+  override def inputs = DataSet(individual.toArray)
 
   @transient lazy val xInterpreter = new GroovyProxyPool(x)
 

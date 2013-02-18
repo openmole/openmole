@@ -38,12 +38,9 @@ object UpdateArchiveTask {
       addInput(archive)
       addOutput(archive)
 
-      def toTask = new UpdateArchiveTask(evolution)(name) {
+      def toTask = new UpdateArchiveTask(evolution)(name) with Built {
         val individuals = _individuals.asInstanceOf[Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]]
         val archive = _archive.asInstanceOf[Prototype[evolution.A]]
-        val inputs = builder.inputs
-        val outputs = builder.outputs
-        val parameters = builder.parameters
       }
 
     }
@@ -52,7 +49,7 @@ object UpdateArchiveTask {
 }
 
 sealed abstract class UpdateArchiveTask(val evolution: G with F with MG with Archive)(
-    val name: String)(implicit val plugins: PluginSet) extends Task { task ⇒
+    val name: String) extends Task { task ⇒
 
   def individuals: Prototype[Array[Individual[evolution.G, evolution.P, evolution.F]]]
   def archive: Prototype[evolution.A]

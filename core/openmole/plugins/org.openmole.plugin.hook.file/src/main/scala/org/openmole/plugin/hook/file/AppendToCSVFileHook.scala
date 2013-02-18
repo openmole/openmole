@@ -72,6 +72,6 @@ class AppendToCSVFileHook(
     }
   }
 
-  override def required = DataSet(prototypes)
+  override def inputs = DataSet(prototypes)
 
 }

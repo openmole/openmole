@@ -31,11 +31,7 @@ object SerializeXMLTask {
     name: String)(implicit plugins: PluginSet) =
     new SerializeXMLTaskBuilder { builder ⇒
 
-      def toTask = new SerializeXMLTask(name, builder.serialize) {
-        val inputs = builder.inputs
-        val outputs = builder.outputs
-        val parameters = builder.parameters
-      }
+      def toTask = new SerializeXMLTask(name, builder.serialize) with builder.Built
 
     }
 
@@ -43,7 +39,7 @@ object SerializeXMLTask {
 
 sealed abstract class SerializeXMLTask(
     val name: String,
-    serialize: List[(Prototype[_], Prototype[File])])(implicit val plugins: PluginSet) extends Task {
+    serialize: List[(Prototype[_], Prototype[File])]) extends Task {
 
   override def process(context: Context) =
     Context.empty ++ serialize.map {

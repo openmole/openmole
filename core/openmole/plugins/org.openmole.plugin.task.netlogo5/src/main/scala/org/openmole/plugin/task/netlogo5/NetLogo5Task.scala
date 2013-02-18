@@ -90,8 +90,8 @@ object NetLogo5Task {
     name: String,
     script: File,
     launchingCommands: Iterable[String],
-    embedWorkpsace: Boolean)(implicit plugins: PluginSet): NetLogoTaskBuilder =
-    if (embedWorkpsace) apply(name, script.getParentFile, script.getName, launchingCommands)
+    embedWorkspace: Boolean)(implicit plugins: PluginSet): NetLogoTaskBuilder =
+    if (embedWorkspace) apply(name, script.getParentFile, script.getName, launchingCommands)
     else apply(name, script, launchingCommands)
 
 }

@@ -24,6 +24,7 @@ import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
 import TextAreaOutputStream._
+import org.openmole.misc.exception.ExceptionUtils
 
 class ExecutionExceptionListener(exeManager: ExecutionManager) extends EventListener[IMoleExecution] {
 
@@ -31,16 +32,10 @@ class ExecutionExceptionListener(exeManager: ExecutionManager) extends EventList
     event match {
       case e: ExceptionRaised ⇒
         exeManager.executionJobExceptionTextArea.append(e.level + ": Exception in task " + e.moleJob)
-        printStack(e.exception)
+        exeManager.executionJobExceptionTextArea.append(ExceptionUtils.prettify(e.exception))
       case h: HookExceptionRaised ⇒
         exeManager.executionJobExceptionTextArea.append(h.level + ": Exception in hook " + h.hook)
-        printStack(h.exception)
+        exeManager.executionJobExceptionTextArea.append(ExceptionUtils.prettify(h.exception))
     }
-  }
-
-  def printStack(e: Throwable) = {
-    val stream = new PrintStream(exeManager.executionJobExceptionTextArea.toStream)
-    try e.printStackTrace(new PrintStream(stream))
-    finally stream.close
   }
 }

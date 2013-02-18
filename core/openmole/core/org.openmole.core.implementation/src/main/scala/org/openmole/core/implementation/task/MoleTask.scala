@@ -31,16 +31,15 @@ import org.openmole.core.model.task._
 
 object MoleTask {
 
-  def apply(name: String, puzzle: Puzzle)(implicit plugins: PluginSet): TaskBuilder =
-    apply(name, puzzle toMole, puzzle.lasts.head)
+  def apply(name: String, puzzle: Puzzle, implicits: Iterable[String] = Iterable.empty)(implicit plugins: PluginSet): TaskBuilder =
+    apply(name, puzzle toMole, puzzle.lasts.head, implicits)
 
-  def apply(name: String, mole: IMole, last: ICapsule)(implicit plugins: PluginSet) = {
+  def apply(name: String, mole: IMole, last: ICapsule, implicits: Iterable[String])(implicit plugins: PluginSet) = {
     new TaskBuilder { builder ⇒
-      def toTask = new MoleTask(name, mole, last) {
-        val inputs = builder.inputs + mole.root.inputs(mole)
-        val outputs = builder.outputs + last.outputs(mole)
-        val parameters = builder.parameters
-      }
+      mole.root.inputs(mole).foreach(addInput)
+      last.outputs(mole).foreach(addOutput)
+
+      def toTask = new MoleTask(name, mole, last, implicits) with builder.Built
     }
   }
 
@@ -49,7 +48,8 @@ object MoleTask {
 sealed abstract class MoleTask(
     val name: String,
     val mole: IMole,
-    val last: ICapsule)(implicit val plugins: PluginSet) extends Task with IMoleTask {
+    val last: ICapsule,
+    val implicits: Iterable[String]) extends Task with IMoleTask {
 
   class ResultGathering extends EventListener[IMoleExecution] {
     @volatile var lastContext: Option[Context] = None
@@ -74,7 +74,9 @@ sealed abstract class MoleTask(
         else acc
     }.toContext
 
-    val execution = new MoleExecution(mole, rng = Random.newRNG(context(Task.openMOLESeed)))
+    val implicitsValues = implicits.flatMap(i ⇒ context.get(i))
+
+    val execution = new MoleExecution(mole, implicits = implicitsValues, seed = context(Task.openMOLESeed))
     val resultGathering = new ResultGathering
 
     EventDispatcher.listen(execution: IMoleExecution, resultGathering, classOf[IMoleExecution.JobInCapsuleFinished])

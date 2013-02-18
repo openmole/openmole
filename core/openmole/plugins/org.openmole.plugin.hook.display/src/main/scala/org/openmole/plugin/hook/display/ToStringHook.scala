@@ -33,11 +33,11 @@ class ToStringHook(out: PrintStream, prototypes: Prototype[_]*) extends Hook {
 
   override def process(context: Context) = {
     if (!prototypes.isEmpty) {
-      val filtred = Context(prototypes.flatMap(p ⇒ context.variable(p.asInstanceOf[Prototype[Any]])))
-      out.println(filtred.toString)
+      val filtered = Context(prototypes.flatMap(p ⇒ context.variable(p.asInstanceOf[Prototype[Any]])))
+      out.println(filtered.toString)
     } else out.println(context.toString)
   }
 
-  override def required = DataSet(prototypes)
+  override def inputs = DataSet(prototypes)
 
 }

@@ -46,12 +46,7 @@ object BootstrappedFirstOrderEffectTask {
       val modelOutputs: Iterable[Prototype[Double]],
       val bootstrap: Int)(implicit plugins: PluginSet) extends BootstrappedSensitivityTask.Builder { builder ⇒
 
-    def toTask = new BootstrappedFirstOrderEffectTask(name, matrixName, modelInputs, modelOutputs) {
-      val inputs: DataSet = builder.inputs
-      val outputs: DataSet = builder.outputs
-      val parameters = builder.parameters
-      val bootstrap = builder.bootstrap
-    }
+    def toTask = new BootstrappedFirstOrderEffectTask(name, matrixName, modelInputs, modelOutputs) with builder.Built
 
   }
 
@@ -61,4 +56,4 @@ abstract sealed class BootstrappedFirstOrderEffectTask(
   val name: String,
   val matrixName: Prototype[String],
   val modelInputs: Iterable[Prototype[Double]],
-  val modelOutputs: Iterable[Prototype[Double]])(implicit val plugins: PluginSet) extends BootstrappedSensitivityTask with FirstOrderEffect
+  val modelOutputs: Iterable[Prototype[Double]]) extends BootstrappedSensitivityTask with FirstOrderEffect

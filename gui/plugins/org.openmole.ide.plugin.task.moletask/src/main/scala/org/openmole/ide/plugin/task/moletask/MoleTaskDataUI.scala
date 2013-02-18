@@ -40,7 +40,7 @@ class MoleTaskDataUI(val name: String = "",
               case Some(w: ICapsuleDataUI) ⇒
                 MoleMaker.buildMole(y) match {
                   case Right((m, capsMap, protoMap, errs)) ⇒
-                    val builder = MoleTask(name, m, capsMap.find { case (k, _) ⇒ k.dataUI == w }.get._2)(plugins)
+                    val builder = MoleTask(name, m, capsMap.find { case (k, _) ⇒ k.dataUI == w }.get._2, List.empty)(plugins)
                     builder addInput inputs
                     builder addOutput outputs
                     builder addParameter parameters

@@ -62,7 +62,7 @@ class AppendFileHook(prototype: Prototype[File], outputFile: String) extends Hoo
     }
   }
 
-  override def required = DataSet(prototype)
+  override def inputs = DataSet(prototype)
 
 }
 

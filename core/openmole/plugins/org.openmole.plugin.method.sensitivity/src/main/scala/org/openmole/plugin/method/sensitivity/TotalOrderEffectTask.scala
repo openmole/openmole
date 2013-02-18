@@ -44,11 +44,7 @@ object TotalOrderEffectTask {
       val modelInputs: Iterable[Prototype[Double]],
       val modelOutputs: Iterable[Prototype[Double]])(implicit plugins: PluginSet) extends RawSensitivityTask.Builder { builder ⇒
 
-    def toTask = new TotalOrderEffectTask(name, matrixName, modelInputs, modelOutputs) {
-      val inputs: DataSet = builder.inputs
-      val outputs: DataSet = builder.outputs
-      val parameters = builder.parameters
-    }
+    def toTask = new TotalOrderEffectTask(name, matrixName, modelInputs, modelOutputs) with builder.Built
 
   }
 
@@ -58,4 +54,4 @@ abstract sealed class TotalOrderEffectTask(
   val name: String,
   val matrixName: Prototype[String],
   val modelInputs: Iterable[Prototype[Double]],
-  val modelOutputs: Iterable[Prototype[Double]])(implicit val plugins: PluginSet) extends RawSensitivityTask with TotalOrderEffect
+  val modelOutputs: Iterable[Prototype[Double]]) extends RawSensitivityTask with TotalOrderEffect

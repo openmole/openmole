@@ -27,80 +27,40 @@ import org.openmole.misc.tools.service.Random
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.service.Random._
+import org.openmole.core.implementation.tools.InputOutputCheck
+import util.{Try, Success, Failure}
 
 object Task extends Logger {
   val OpenMOLEVariablePrefix = new ConfigurationLocation("Task", "OpenMOLEVariablePrefix")
-  val ErrorArraySnipSize = new ConfigurationLocation("Task", "ErrorArraySnipSize")
 
   Workspace += (OpenMOLEVariablePrefix, "oM")
-  Workspace += (ErrorArraySnipSize, "10")
 
   val openMOLESeed = Prototype[Long](Workspace.preference(OpenMOLEVariablePrefix) + "Seed")
 
   def buildRNG(context: Context) = newRNG(context(Task.openMOLESeed))
 }
 
-import Task.logger
+trait Task extends ITask with InputOutputCheck {
 
-trait Task extends ITask {
-
-  protected def verifyInput(context: Context) = {
-    for (d ← inputs) {
-      if (!(d.mode is Optional)) {
-        val p = d.prototype
-        context.variable(p.name) match {
-          case None ⇒ throw new UserBadDataError("Input data named \"" + p.name + "\" of type \"" + p.`type`.toString + "\" required by the task \"" + name + "\" has not been found");
-          case Some(v) ⇒ if (!p.isAssignableFrom(v.prototype)) throw new UserBadDataError("Input data named \"" + p.name + "\" required by the task \"" + name + "\" has the wrong type: \"" + v.prototype.`type`.toString + "\" instead of \"" + p.`type`.toString + "\" required")
-        }
-      }
-    }
-    context
-  }
-
-  protected def filterOutput(context: Context): Context =
-    outputs.flatMap {
-      d ⇒
-        val p = d.prototype
-        context.variable(p) match {
-          case None ⇒
-            if (!(d.mode is Optional)) throw new UserBadDataError("Variable " + p.name + " of type " + p.`type`.toString + " in not optional and has not found in output of task " + name + ".")
-            else Option.empty[Variable[_]]
-          case Some(v) ⇒
-            if (p.accepts(v.value)) Some(v)
-            else throw new UserBadDataError("Output value of variable " + p.name + " (prototype: " + v.prototype.`type`.toString + ") is instance of class '" + v.value.asInstanceOf[AnyRef].getClass + "' and doesn't match the expected class '" + p.`type`.toString + "' in task" + name + ".")
-        }
-    }.toContext
-
-  private def init(context: Context): Context = {
-    verifyInput(
-      context ++
-        parameters.flatMap {
-          parameter ⇒
-            if (parameter.`override` || !context.contains(parameter.variable.prototype.name)) Some(parameter.variable)
-            else Option.empty[Variable[_]]
-        })
-  }
-
-  private def end(context: Context) = filterOutput(context)
-
-  /**
-   * The main operation of the processor.
-   * @param context
-   * @param progress
-   */
-  @throws(classOf[Throwable])
   protected def process(context: Context): Context
 
-  /* (non-Javadoc)
-   * @see org.openmole.core.processors.ITask#run(org.openmole.core.processors.ApplicativeContext)
-   */
-  override def perform(context: Context) =
-    try end(context + process(init(context)))
-    catch {
-      case e: Throwable ⇒
-        throw new InternalProcessingError(e, "Error in task " + name + " for context values " + context.prettified(Workspace.preferenceAsInt(Task.ErrorArraySnipSize)))
-    }
+  override def perform(context: Context): Try[Context] = Try {
+    val initializedContext = initializeInput(context)
+    val inputErrors = verifyInput(initializedContext)
+    if(!inputErrors.isEmpty) throw new InternalProcessingError(s"Input errors in task $name: ${inputErrors.mkString(", ")}.")
 
-  override def toString: String = name
+    val result =
+      try context + process(initializedContext)
+      catch {
+        case e: Throwable ⇒
+          throw new InternalProcessingError(e, s"Error in task $name for context values ${context.prettified()}")
+      }
+
+    val outputErrors = verifyOutput(result)
+    if (!outputErrors.isEmpty) throw new InternalProcessingError(s"Output errors in task $name: ${outputErrors.mkString(", ")}.")
+    filterOutput(result)
+  }
+
+    override def toString: String = name
 
 }

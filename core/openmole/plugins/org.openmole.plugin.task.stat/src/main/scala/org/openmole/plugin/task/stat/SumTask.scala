@@ -22,17 +22,12 @@ import org.openmole.core.model.task.PluginSet
 object SumTask {
 
   def apply(name: String)(implicit plugins: PluginSet) = new DoubleSequenceStatTaskBuilder { builder ⇒
-    def toTask = new SumTask(name) {
-      val sequences = builder.sequences
-      val inputs = builder.inputs
-      val outputs = builder.outputs
-      val parameters = builder.parameters
-    }
+    def toTask = new SumTask(name) with builder.Built
   }
 
 }
 
-sealed abstract class SumTask(val name: String)(implicit val plugins: PluginSet) extends DoubleSequenceStatTask {
+sealed abstract class SumTask(val name: String) extends DoubleSequenceStatTask {
 
   override def stat(seq: Array[Double]) = seq.sum
 

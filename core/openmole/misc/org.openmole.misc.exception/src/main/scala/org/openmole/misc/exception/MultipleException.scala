@@ -21,36 +21,9 @@ import java.io.{ PrintStream, PrintWriter }
 
 class MultipleException(exceptions: Iterable[Throwable]) extends Exception with Iterable[Throwable] {
 
-  /*override def printStackTrace = {
-    super.printStackTrace
-    for (t ← exceptions) {
-      System.err.println("---------------------------------------")
-      t.printStackTrace
-    }
-    System.err.println("---------------------------------------")
-  }
-
-  override def printStackTrace(s: PrintStream) = {
-    super.printStackTrace(s)
-
-    for (t ← exceptions) {
-      s.println("----------------------------------------")
-      t.printStackTrace(s)
-    }
-    s.println("----------------------------------------")
-  }
-
-  override def printStackTrace(s: PrintWriter) = {
-    super.printStackTrace(s)
-    for (t ← exceptions) {
-      s.println("----------------------------------------")
-      t.printStackTrace(s)
-    }
-    s.println("----------------------------------------")
-  }*/
-
   def iterator: Iterator[Throwable] = exceptions.iterator
 
-  override def toString() = exceptions.map(e ⇒ e.getMessage + ": " + e.getStackTrace.mkString("\n")).mkString("----------------------------------------\n")
+  override def toString() =
+    exceptions.map(e ⇒ ExceptionUtils.prettify(e)).mkString("----------------------------------------\n")
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Romain Reuillon
+ * Copyright (C) 13/02/13 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -11,25 +11,28 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.task
+package org.openmole.misc.tools.collection
 
-import org.openmole.core.model.data._
-import org.openmole.core.model.task._
+object ArrayUtils {
 
-object EmptyTask {
-
-  def apply(name: String)(implicit plugins: PluginSet = PluginSet.empty) =
-    new TaskBuilder { builder ⇒
-      def toTask =
-        new EmptyTask(name) with builder.Built
+  def unsecureBuild(t: Manifest[_], values: Any*) = {
+    val res = t.newArray(values.size)
+    values.zipWithIndex.foreach {
+      case (v, i) ⇒ java.lang.reflect.Array.set(res, i, v)
     }
+    res
+  }
 
-}
+  def unsecureConcat(t: Manifest[_], a1: Array[_], a2: Array[_]): Array[_] = {
+    val res = t.newArray(a1.size + a2.size)
+    (a1 ++ a2).zipWithIndex.foreach {
+      case (v, i) ⇒ java.lang.reflect.Array.set(res, i, v)
+    }
+    res
+  }
 
-sealed abstract class EmptyTask(val name: String) extends Task {
-  override def process(context: Context) = context
 }

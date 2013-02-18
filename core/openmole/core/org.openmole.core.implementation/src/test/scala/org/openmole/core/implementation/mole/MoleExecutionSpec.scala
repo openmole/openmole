@@ -70,7 +70,7 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
       override val inputs = DataSet(i.toArray)
       override def process(context: Context) = {
         context.contains(i.toArray) should equal(true)
-        context.value(i.toArray).get.sorted.deep should equal(data.toArray.deep)
+        context(i.toArray).sorted.deep should equal(data.toArray.deep)
         context
       }
     }
@@ -82,5 +82,16 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
     new MoleExecution(
       mole = ex,
       grouping = Map(emptyC -> new JobGroupingBy2Test)).start.waitUntilEnded
+  }
+
+  "Implicits" should "be used when input is missing" in {
+    val i = Prototype[String]("i")
+    val emptyT = EmptyTask("Empty")
+    emptyT.addInput(i)
+
+    val emptyC = new Capsule(emptyT)
+    new MoleExecution(
+      mole = new Mole(emptyC),
+      implicits = Context(Variable(i, "test"))).start.waitUntilEnded
   }
 }

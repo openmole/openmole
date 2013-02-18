@@ -23,7 +23,7 @@ import org.openmole.core.model.data.Prototype
 import org.openmole.core.model.task.PluginSet
 import scala.collection.mutable.ListBuffer
 
-abstract class DoubleSequenceStatTaskBuilder(implicit plugins: PluginSet) extends TaskBuilder {
+abstract class DoubleSequenceStatTaskBuilder(implicit plugins: PluginSet) extends TaskBuilder { builder ⇒
   private var _sequences = new ListBuffer[(Prototype[Array[Double]], Prototype[Double])]
 
   def sequences = _sequences.toList
@@ -33,6 +33,10 @@ abstract class DoubleSequenceStatTaskBuilder(implicit plugins: PluginSet) extend
     this addOutput stat
     _sequences += sequence -> stat
     this
+  }
+
+  trait Built extends super.Built {
+    val sequences = builder.sequences
   }
 
 }

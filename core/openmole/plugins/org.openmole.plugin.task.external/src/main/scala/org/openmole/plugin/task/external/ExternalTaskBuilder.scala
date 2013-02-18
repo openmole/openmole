@@ -22,6 +22,7 @@ import org.openmole.core.implementation.task.TaskBuilder
 import org.openmole.core.implementation.data._
 import org.openmole.core.model.data.Prototype
 import scala.collection.mutable.ListBuffer
+import org.openmole.core.model.task.PluginSet
 
 /**
  * Builder for task using external files or directories
@@ -31,7 +32,7 @@ import scala.collection.mutable.ListBuffer
  * task after its execution.
  *
  */
-abstract class ExternalTaskBuilder extends TaskBuilder {
+abstract class ExternalTaskBuilder(implicit plugins: PluginSet) extends TaskBuilder { builder ⇒
 
   private var _inputFiles = new ListBuffer[(Prototype[File], String, Boolean)]
   private var _outputFiles = new ListBuffer[(String, Prototype[File])]
@@ -88,6 +89,12 @@ abstract class ExternalTaskBuilder extends TaskBuilder {
     _outputFiles += ((name, p))
     this addOutput p
     this
+  }
+
+  trait Built extends super.Built {
+    val inputFiles = builder.inputFiles
+    val outputFiles = builder.outputFiles
+    val resources = builder.resources
   }
 
 }

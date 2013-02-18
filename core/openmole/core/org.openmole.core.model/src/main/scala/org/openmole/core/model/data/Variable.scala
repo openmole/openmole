@@ -24,6 +24,12 @@ object Variable {
     val prototype = p
     val value = v
   }
+
+  def unsecure[T](p: Prototype[T], v: Any) = new Variable[T] {
+    val prototype = p
+    val value = v.asInstanceOf[T]
+  }
+
 }
 
 trait Variable[T] {

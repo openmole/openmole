@@ -30,6 +30,7 @@ package object puzzle {
         Iterable.empty,
         Iterable.empty,
         Iterable.empty,
+        Iterable.empty,
         Map.empty,
         Map.empty)
   }
@@ -41,6 +42,7 @@ package object puzzle {
       Puzzle(
         slot,
         List(slot.capsule),
+        Iterable.empty,
         Iterable.empty,
         Iterable.empty,
         Iterable.empty,
