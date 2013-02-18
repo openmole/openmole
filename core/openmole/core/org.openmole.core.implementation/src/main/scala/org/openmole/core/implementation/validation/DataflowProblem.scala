@@ -23,6 +23,11 @@ import org.openmole.core.model.transition.Slot
 
 object DataflowProblem {
 
+  trait SlotDataflowProblem extends DataflowProblem {
+    def slot: Slot
+    def capsule = slot.capsule
+  }
+
   sealed trait SlotType
   case object Input extends SlotType
   case object Output extends SlotType
@@ -30,27 +35,21 @@ object DataflowProblem {
   case class WrongType(
       slot: Slot,
       data: Data[_],
-      provided: Prototype[_]) extends DataflowProblem {
-
-    def capsule: ICapsule = slot.capsule
+      provided: Prototype[_]) extends SlotDataflowProblem {
 
     override def toString = "Wrong type received at " + slot + ", data " + data.prototype + " is expected but " + provided + " is provided."
   }
 
   case class MissingInput(
-      slot: Slot,
-      data: Data[_]) extends DataflowProblem {
-
-    def capsule: ICapsule = slot.capsule
+    slot: Slot,
+    data: Data[_]) extends SlotDataflowProblem {
 
     override def toString = "Input " + data + " is missing when reaching the " + slot + "."
   }
 
   case class OptionalOutput(
-      slot: Slot,
-      data: Data[_]) extends DataflowProblem {
-
-    def capsule: ICapsule = slot.capsule
+    slot: Slot,
+    data: Data[_]) extends SlotDataflowProblem {
 
     override def toString = "Input " + data + " is provided by an optional output when reaching the " + slot + " and no default value (parameter) is provided."
   }
@@ -63,57 +62,58 @@ object DataflowProblem {
     override def toString = name + " has been found several time in capsule in " + slotType + " of capsule " + capsule + ": " + data.mkString(", ") + "."
   }
 
-  sealed trait HookProblem extends DataflowProblem
+    sealed trait SourceProblem extends SlotDataflowProblem
 
   case class MissingSourceInput(
       slot: Slot,
       source: ISource,
-      input: Data[_]) extends Problem {
+      input: Data[_]) extends SourceProblem {
+
     override def toString = s"Input $input is missing for source $source at $slot"
   }
 
-   case class WrongSourceType(
+  case class WrongSourceType(
       slot: Slot,
       source: ISource,
       data: Data[_],
-      provided: Prototype[_]) extends Problem {
+      provided: Prototype[_]) extends SourceProblem {
 
      override def toString = s"Wrong type received for source $source at $slot, data ${data.prototype} is expected but $provided is provided."
   }
 
-   case class OptionalSourceOutput(
+  case class OptionalSourceOutput(
       slot: Slot,
       source: ISource,
-      data: Data[_]) extends DataflowProblem {
-
-    def capsule: ICapsule = slot.capsule
+      data: Data[_]) extends SourceProblem {
 
     override def toString = "Input " + data + " is provided by an optional output for source $source when reaching the " + slot + " and no default value (parameter) is provided."
   }
 
 
+  sealed trait HookProblem extends DataflowProblem
+
   case class MissingHookInput(
       capsule: ICapsule,
       hook: Hook,
-      input: Data[_]) extends Problem {
+      input: Data[_]) extends HookProblem {
     override def toString = s"Input $input is missing for hook $hook"
   }
   case class WrongHookType(
       capsule: ICapsule,
       hook: Hook,
       input: Data[_],
-      found: Data[_]) extends Problem {
+      found: Data[_]) extends HookProblem {
     override def toString = s"Input has incompatible type $found whereas $input was expected"
   }
   case class MissingMoleTaskImplicit(
       capsule: ICapsule,
-      `implicit`: String) extends Problem {
+      `implicit`: String) extends DataflowProblem {
     override def toString = s"Implicit ${`implicit`} not found in input of $capsule"
   }
-
 
 }
 
 trait DataflowProblem extends Problem {
   def capsule: ICapsule
 }
+
