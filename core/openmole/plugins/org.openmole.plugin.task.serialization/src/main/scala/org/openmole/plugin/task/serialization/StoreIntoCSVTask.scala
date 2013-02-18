@@ -50,8 +50,8 @@ object StoreIntoCSVTask {
 
 sealed abstract class StoreIntoCSVTask(
     val name: String,
-    filePrototype: Prototype[File],
-    columns: Iterable[(Prototype[Array[_]], String)]) extends Task {
+    val filePrototype: Prototype[File],
+    val columns: Iterable[(Prototype[Array[_]], String)]) extends Task {
 
   override def process(context: Context) = {
     val valuesList = columns.map { elt ⇒ context(elt._1) }

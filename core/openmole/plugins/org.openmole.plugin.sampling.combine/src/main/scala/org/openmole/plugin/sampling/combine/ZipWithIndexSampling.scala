@@ -20,7 +20,7 @@ package org.openmole.plugin.sampling.combine
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 
-sealed class ZipWithIndexSampling(reference: Sampling, index: Prototype[Int]) extends Sampling {
+sealed class ZipWithIndexSampling(val reference: Sampling, val index: Prototype[Int]) extends Sampling {
 
   override def inputs = reference.inputs
   override def prototypes = index :: reference.prototypes.toList

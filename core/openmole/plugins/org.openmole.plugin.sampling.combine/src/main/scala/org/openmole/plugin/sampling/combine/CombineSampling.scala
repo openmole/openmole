@@ -21,7 +21,7 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 
-class CombineSampling(samplings: Sampling*) extends Sampling {
+class CombineSampling(val samplings: Sampling*) extends Sampling {
 
   override def inputs = DataSet.empty ++ samplings.flatMap { _.inputs }
   override def prototypes: Iterable[Prototype[_]] = samplings.flatMap { _.prototypes }

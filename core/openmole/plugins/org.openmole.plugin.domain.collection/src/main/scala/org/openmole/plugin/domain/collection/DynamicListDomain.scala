@@ -25,7 +25,7 @@ import scala.collection.JavaConversions
 import scala.collection.mutable.ListBuffer
 import org.openmole.misc.tools.io.FromString
 
-sealed class DynamicListDomain[+T](values: String*)(implicit s: FromString[T]) extends Domain[T] with Finite[T] {
+sealed class DynamicListDomain[+T](val values: String*)(implicit s: FromString[T]) extends Domain[T] with Finite[T] {
 
   override def computeValues(context: Context): Iterable[T] =
     values.map { p ⇒ s.fromString(VariableExpansion(context, p)) }

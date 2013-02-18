@@ -63,7 +63,7 @@ object CSVSampling {
 
 }
 
-abstract sealed class CSVSampling(file: File) extends Sampling {
+abstract sealed class CSVSampling(val file: File) extends Sampling {
 
   override def prototypes =
     columns.map { case (_, p) ⇒ p } :::
