@@ -103,7 +103,7 @@ object Validation {
   def sourceTypeErrors(mole: IMole, sources: Map[ICapsule, Iterable[ISource]], implicits: Iterable[Prototype[_]]) = {
     val implicitMap = prototypesToMap(implicits)
 
-    for {
+    (for {
       c ← mole.capsules
       so ← sources.getOrElse(c, List.empty)
       (po, pno) = so.parameters.partition(_.`override`)
@@ -137,7 +137,7 @@ object Validation {
             Some(MissingSourceInput(sl, so, i))
           else None
       }
-    }
+    }).flatten
   }
 
   def typeErrorsTopMole(mole: IMole, implicits: Iterable[Prototype[_]], sources: Map[ICapsule, Iterable[ISource]]) =

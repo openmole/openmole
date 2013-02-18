@@ -59,6 +59,7 @@ object DataflowProblem {
     name: String,
     data: Iterable[Data[_]],
     slotType: SlotType) extends DataflowProblem {
+
     override def toString = name + " has been found several time in capsule in " + slotType + " of capsule " + capsule + ": " + data.mkString(", ") + "."
   }
 
