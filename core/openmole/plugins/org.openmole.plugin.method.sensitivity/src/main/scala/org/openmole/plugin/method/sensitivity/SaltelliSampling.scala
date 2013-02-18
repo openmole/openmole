@@ -79,9 +79,9 @@ object SaltelliSampling {
 import SaltelliSampling._
 
 class SaltelliSampling(
-    samples: Int,
+    val samples: Int,
     val matrixName: Prototype[String],
-    factors: Factor[Double, Domain[Double] with Bounds[Double]]*) extends Sampling {
+    val factors: Factor[Double, Domain[Double] with Bounds[Double]]*) extends Sampling {
 
   def this(samples: Int, factors: Factor[Double, Domain[Double] with Bounds[Double]]*) =
     this(

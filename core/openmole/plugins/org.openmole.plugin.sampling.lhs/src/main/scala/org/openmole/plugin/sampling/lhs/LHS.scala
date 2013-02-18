@@ -27,7 +27,7 @@ import org.openmole.core.model.sampling._
 import org.openmole.misc.workspace._
 import org.openmole.core.implementation.task.Task._
 
-sealed class LHS(val samples: Int,val factors: Factor[Double, Domain[Double] with Bounds[Double]]*) extends Sampling {
+sealed class LHS(val samples: Int, val factors: Factor[Double, Domain[Double] with Bounds[Double]]*) extends Sampling {
 
   override def prototypes = factors.map { _.prototype }
 

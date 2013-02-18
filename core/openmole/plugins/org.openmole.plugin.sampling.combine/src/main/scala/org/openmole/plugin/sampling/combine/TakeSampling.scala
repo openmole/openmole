@@ -20,7 +20,7 @@ package org.openmole.plugin.sampling.combine
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 
-sealed class TakeSampling(val sampling: Sampling,val n: Int) extends Sampling {
+sealed class TakeSampling(val sampling: Sampling, val n: Int) extends Sampling {
 
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes
