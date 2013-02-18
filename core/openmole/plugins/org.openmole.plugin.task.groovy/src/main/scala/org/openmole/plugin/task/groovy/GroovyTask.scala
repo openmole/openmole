@@ -52,7 +52,7 @@ object GroovyTask {
       addImport("static org.openmole.plugin.task.groovy.GroovyTask.newDir")
 
       def toTask =
-        new GroovyTask(name, code, builder.imports, builder.libraries) with builder.Built
+        new GroovyTask(name, code, builder.imports, builder.libraries) with Built
     }
 
 }
