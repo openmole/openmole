@@ -41,14 +41,16 @@ object Validation {
           }
       }.toList
 
-  def typeErrors(mole: IMole)(capsules: Iterable[ICapsule], implicits: Iterable[Prototype[_]], sources: Map[ICapsule, Iterable[ISource]]) = {
-    def prototypesToMap(prototypes: Iterable[Prototype[_]]) = prototypes.map { i ⇒ i.name -> i }.toMap[String, Prototype[_]]
-    val implicitMap = prototypesToMap(implicits)
+  private def paramsToMap(params: Iterable[Parameter[_]]) =
+    params.map {
+      p ⇒ p.variable.prototype.name -> p.variable.prototype
+    }.toMap[String, Prototype[_]]
 
-    def paramsToMap(params: Iterable[Parameter[_]]) =
-      params.map {
-        p ⇒ p.variable.prototype.name -> p.variable.prototype
-      }.toMap[String, Prototype[_]]
+  private def prototypesToMap(prototypes: Iterable[Prototype[_]]) = prototypes.map { i ⇒ i.name -> i }.toMap[String, Prototype[_]]
+
+  def typeErrors(mole: IMole)(capsules: Iterable[ICapsule], implicits: Iterable[Prototype[_]], sources: Map[ICapsule, Iterable[ISource]]) = {
+
+    val implicitMap = prototypesToMap(implicits)
 
     (for {
       c ← capsules
@@ -67,8 +69,8 @@ object Validation {
 
       val parameterOverride = parametersOverride.get(inputName)
       val receivedInput = receivedInputs.get(inputName)
-      val receivedImplicit = implicitMap.get(inputName)
       val receivedSource = sourcesOutputs.get(inputName)
+      val receivedImplicit = implicitMap.get(inputName)
       val parameterNonOverride = parametersNonOverride.get(inputName)
 
       (parameterOverride, receivedInput, receivedSource, receivedImplicit, parameterNonOverride) match {
@@ -80,7 +82,7 @@ object Validation {
             (if (received.isOptional && !providedAfterward) Some(OptionalOutput(s, input))
             else None)
 
-        case (None, None, Some(source), impl,  param) ⇒
+        case (None, None, Some(source), impl, param) ⇒
           def providedAfterward = impl.isDefined || param.isDefined
 
           checkPrototypeMatch(source.prototype) orElse
@@ -96,6 +98,46 @@ object Validation {
           else None
       }
     }).flatten
+  }
+
+  def sourceTypeErrors(mole: IMole, sources: Map[ICapsule, Iterable[ISource]], implicits: Iterable[Prototype[_]]) = {
+    val implicitMap = prototypesToMap(implicits)
+
+    for {
+      c ← mole.capsules
+      so ← sources.getOrElse(c, List.empty)
+      (po, pno) = so.parameters.partition(_.`override`)
+      (parametersOverride, parametersNonOverride) = (paramsToMap(po), paramsToMap(pno))
+      sl ← mole.slots(c)
+      receivedInputs = TreeMap(computeManifests(mole)(sl).map { p ⇒ p.name -> p }.toSeq: _*)
+      i ← so.inputs
+    } yield {
+      def checkPrototypeMatch(p: Prototype[_]) =
+        if (!i.prototype.isAssignableFrom(p)) Some(WrongSourceType(sl, so, i, p))
+        else None
+
+      val inputName = i.prototype.name
+
+      val parameterOverride = parametersOverride.get(inputName)
+      val receivedInput = receivedInputs.get(inputName)
+      val receivedImplicit = implicitMap.get(inputName)
+      val parameterNonOverride = parametersNonOverride.get(inputName)
+
+      (parameterOverride, receivedInput, receivedImplicit, parameterNonOverride) match {
+        case (Some(parameter), _, _, _) ⇒ checkPrototypeMatch(parameter)
+        case (None, Some(received), impl, param) ⇒
+          def providedAfterward = impl.isDefined || param.isDefined
+
+          checkPrototypeMatch(received.toPrototype) orElse
+            (if (received.isOptional && !providedAfterward) Some(OptionalSourceOutput(sl, so, i)) else None)
+        case (None, None, Some(impl), _) ⇒ checkPrototypeMatch(impl)
+        case (None, None, None, Some(param)) ⇒ checkPrototypeMatch(param)
+        case (None, None, None, None) ⇒
+          if (!(i.mode is Optional))
+            Some(MissingSourceInput(sl, so, i))
+          else None
+      }
+    }
   }
 
   def typeErrorsTopMole(mole: IMole, implicits: Iterable[Prototype[_]], sources: Map[ICapsule, Iterable[ISource]]) =
@@ -188,7 +230,8 @@ object Validation {
             moleTaskImplicitsErrors(t, c) ++
               typeErrorsMoleTask(m, moleTaskImplicits(t))
           case None ⇒
-            hookErrors(m, hooks) ++
+            sourceTypeErrors(m, sources, implicits.prototypes) ++
+              hookErrors(m, hooks) ++
               typeErrorsTopMole(m, implicits.prototypes, sources)
         }) ++
           topologyErrors(m) ++
