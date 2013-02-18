@@ -71,22 +71,24 @@ object Validation {
       val receivedSource = sourcesOutputs.get(inputName)
       val parameterNonOverride = parametersNonOverride.get(inputName)
 
-      (parameterOverride, receivedInput, receivedImplicit, receivedSource, parameterNonOverride) match {
+      (parameterOverride, receivedInput, receivedSource, receivedImplicit, parameterNonOverride) match {
         case (Some(parameter), _, _, _, _) ⇒ checkPrototypeMatch(parameter)
         case (None, Some(received), impl, source, param) ⇒
           def providedAfterward = impl.isDefined || source.isDefined || param.isDefined
 
           checkPrototypeMatch(received.toPrototype) orElse
             (if (received.isOptional && !providedAfterward) Some(OptionalOutput(s, input))
-              else None)
-        case (None, None, Some(impl), _, _) ⇒ checkPrototypeMatch(impl)
-        case (None, None, None, Some(source), param) ⇒
-          def providedAfterward = param.isDefined
+            else None)
+
+        case (None, None, Some(source), impl,  param) ⇒
+          def providedAfterward = impl.isDefined || param.isDefined
 
           checkPrototypeMatch(source.prototype) orElse
             (if ((source.mode is Optional) && !providedAfterward)
               Some(OptionalOutput(s, input))
             else None)
+
+        case (None, None, None, Some(impl), _) ⇒ checkPrototypeMatch(impl)
         case (None, None, None, None, Some(parameter)) ⇒ checkPrototypeMatch(parameter)
         case (None, None, None, None, None) ⇒
           if (!(input.mode is Optional))
