@@ -62,8 +62,9 @@ sealed abstract class GroovyTask(
     val code: String) extends CodeTask {
 
   def imports: Iterable[String]
+  def libraries: Iterable[File]
 
-  @transient lazy val contextToCode = new ContextToGroovyCode(codeWithImports, libs)
+  @transient lazy val contextToCode = new ContextToGroovyCode(codeWithImports, libraries)
 
   def processCode(context: Context) = contextToCode.execute(context, outputs)
 
