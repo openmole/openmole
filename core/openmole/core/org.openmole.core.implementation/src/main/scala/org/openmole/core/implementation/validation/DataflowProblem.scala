@@ -33,9 +33,9 @@ object DataflowProblem {
   case object Output extends SlotType
 
   case class WrongType(
-      slot: Slot,
-      data: Data[_],
-      provided: Prototype[_]) extends SlotDataflowProblem {
+    slot: Slot,
+    data: Data[_],
+    provided: Prototype[_]) extends SlotDataflowProblem {
 
     override def toString = "Wrong type received at " + slot + ", data " + data.prototype + " is expected but " + provided + " is provided."
   }
@@ -55,36 +55,36 @@ object DataflowProblem {
   }
 
   case class DuplicatedName(
-      capsule: ICapsule,
-      name: String,
-      data: Iterable[Data[_]],
-      slotType: SlotType) extends DataflowProblem {
+    capsule: ICapsule,
+    name: String,
+    data: Iterable[Data[_]],
+    slotType: SlotType) extends DataflowProblem {
     override def toString = name + " has been found several time in capsule in " + slotType + " of capsule " + capsule + ": " + data.mkString(", ") + "."
   }
 
     sealed trait SourceProblem extends SlotDataflowProblem
 
   case class MissingSourceInput(
-      slot: Slot,
-      source: ISource,
-      input: Data[_]) extends SourceProblem {
+    slot: Slot,
+    source: ISource,
+    input: Data[_]) extends SourceProblem {
 
     override def toString = s"Input $input is missing for source $source at $slot"
   }
 
   case class WrongSourceType(
-      slot: Slot,
-      source: ISource,
-      data: Data[_],
-      provided: Prototype[_]) extends SourceProblem {
+    slot: Slot,
+    source: ISource,
+    data: Data[_],
+    provided: Prototype[_]) extends SourceProblem {
 
-     override def toString = s"Wrong type received for source $source at $slot, data ${data.prototype} is expected but $provided is provided."
+    override def toString = s"Wrong type received for source $source at $slot, data ${data.prototype} is expected but $provided is provided."
   }
 
   case class OptionalSourceOutput(
-      slot: Slot,
-      source: ISource,
-      data: Data[_]) extends SourceProblem {
+    slot: Slot,
+    source: ISource,
+    data: Data[_]) extends SourceProblem {
 
     override def toString = "Input " + data + " is provided by an optional output for source $source when reaching the " + slot + " and no default value (parameter) is provided."
   }
@@ -93,21 +93,24 @@ object DataflowProblem {
   sealed trait HookProblem extends DataflowProblem
 
   case class MissingHookInput(
-      capsule: ICapsule,
-      hook: Hook,
-      input: Data[_]) extends HookProblem {
+    capsule: ICapsule,
+    hook: Hook,
+    input: Data[_]) extends HookProblem {
+
     override def toString = s"Input $input is missing for hook $hook"
   }
   case class WrongHookType(
-      capsule: ICapsule,
-      hook: Hook,
-      input: Data[_],
-      found: Data[_]) extends HookProblem {
+    capsule: ICapsule,
+    hook: Hook,
+    input: Data[_],
+    found: Data[_]) extends HookProblem {
+
     override def toString = s"Input has incompatible type $found whereas $input was expected"
   }
   case class MissingMoleTaskImplicit(
-      capsule: ICapsule,
-      `implicit`: String) extends DataflowProblem {
+    capsule: ICapsule,
+    `implicit`: String) extends DataflowProblem {
+
     override def toString = s"Implicit ${`implicit`} not found in input of $capsule"
   }
 
