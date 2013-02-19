@@ -17,24 +17,36 @@
 
 package org.openmole.core.model.transition
 
-trait Filter[T] extends (T ⇒ Boolean)
+trait IFilter[T] extends (T ⇒ Boolean)
+
+trait Filter[T] extends IFilter[T] {
+  def filtered: Set[T]
+  def apply(t: T) = filtered.contains(t)
+}
+
+trait Keep[T] extends IFilter[T] {
+  def kept: Set[T]
+  def apply(t: T) = !kept.contains(t)
+}
+
+class EmptyFilter[T] extends IFilter[T] {
+  def apply(t: T) = false
+}
 
 object Filter {
 
   def apply[T](ts: T*) = new Filter[T] {
-    @transient lazy val tsSet = ts.toSet
-    def apply(t: T) = ts.contains(t)
+    lazy val filtered = ts.toSet
   }
 
-  def empty[T] = new Filter[T] {
-    def apply(t: T) = false
-  }
+  def empty[T] = new EmptyFilter[T]
 
 }
 
 object Keep {
-  def apply[T](ts: T*) = new Filter[T] {
-    @transient lazy val tsSet = ts.toSet
-    def apply(t: T) = !ts.contains(t)
+
+  def apply[T](ts: T*) = new Keep[T] {
+    @transient lazy val kept = ts.toSet
   }
+
 }
