@@ -52,18 +52,19 @@ object GroovyTask {
       addImport("static org.openmole.plugin.task.groovy.GroovyTask.newDir")
 
       def toTask =
-        new GroovyTask(name, code, builder.imports, builder.libraries) with builder.Built
+        new GroovyTask(name, code) with Built
     }
 
 }
 
 sealed abstract class GroovyTask(
     val name: String,
-    val code: String,
-    val imports: Iterable[String],
-    val libs: Iterable[File]) extends CodeTask {
+    val code: String) extends CodeTask {
 
-  @transient lazy val contextToCode = new ContextToGroovyCode(codeWithImports, libs)
+  def imports: Iterable[String]
+  def libraries: Iterable[File]
+
+  @transient lazy val contextToCode = new ContextToGroovyCode(codeWithImports, libraries)
 
   def processCode(context: Context) = contextToCode.execute(context, outputs)
 

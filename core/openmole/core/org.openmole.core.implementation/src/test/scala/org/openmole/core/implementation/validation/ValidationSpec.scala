@@ -282,4 +282,28 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     errors.isEmpty should equal(true)
   }
 
+  "Validation" should "detect a missing input for a source" in {
+    val t = Prototype[Int]("t")
+
+    val t1 = EmptyTask("t1")
+
+    val c1 = Capsule(t1)
+
+    val s = new SourceBuilder {
+      addInput(t)
+
+      def toSource = new Source with Built {
+        def process(ctx: Context) = Context.empty
+      }
+    }.toSource
+
+    val mole = new Mole(c1)
+
+    val errors = Validation.sourceTypeErrors(mole, Map(c1 -> List(s)), List.empty)
+    errors.headOption match {
+      case Some(MissingSourceInput(_, _, _)) ⇒
+      case _ ⇒ sys.error("Error should have been detected")
+    }
+  }
+
 }
