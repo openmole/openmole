@@ -33,6 +33,6 @@ class GroovyTaskFactoryUI extends ITaskFactoryUI {
 
   def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
     val t = SceneFactory.as[GroovyTask](task)
-    uiMap.task(task, x ⇒ new GroovyTaskDataUI(t.name, t.code, t.libs.toList.map { _.getCanonicalPath }))
+    uiMap.task(task, x ⇒ new GroovyTaskDataUI(t.name, t.code, t.libraries.toList.map { _.getCanonicalPath }))
   }
 }

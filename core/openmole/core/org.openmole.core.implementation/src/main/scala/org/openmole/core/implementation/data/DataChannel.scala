@@ -37,7 +37,7 @@ class DataChannel(
     val end: Slot,
     val filter: Filter[String]) extends IDataChannel {
 
-  def this(start: ICapsule, end: Slot, filtered: String*) = this(start, end, Filter(filtered: _*))
+  def this(start: ICapsule, end: Slot, filtered: String*) = this(start, end, Block(filtered: _*))
 
   override def consums(ticket: ITicket, moleExecution: IMoleExecution): Iterable[Variable[_]] = moleExecution.synchronized {
     val delta = levelDelta(moleExecution.mole)

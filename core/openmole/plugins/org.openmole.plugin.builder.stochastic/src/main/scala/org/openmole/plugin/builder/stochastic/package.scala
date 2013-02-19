@@ -78,7 +78,7 @@ package object stochastic {
     val endCapsule = Slot(new StrainerCapsule(EmptyTask(name + "End")))
 
     (explorationCapsule -< model >- aggregationCapsule -- (medianCapsule, medianAbsoluteDeviationCapsule, averageCapsule, sumCapsule, mseCapsule) -- endCapsule) +
-      (explorationCapsule oo (endCapsule, filter = Filter(replicationFactor.prototype)))
+      (explorationCapsule oo (endCapsule, filter = Block(replicationFactor.prototype)))
   }
 
   def replicate(

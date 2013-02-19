@@ -38,4 +38,6 @@ trait Condition extends ICondition {
 
   override def evaluate(context: Context) = groovyProxy.execute(context).asInstanceOf[Boolean]
 
+  def unary_! = Condition(s"!($code)")
+
 }

@@ -20,6 +20,7 @@ package org.openmole.core.model.transition
 import org.openmole.core.model.data.Context
 
 object ICondition {
+
   val True = new ICondition {
     def evaluate(context: Context): Boolean = true
   }
@@ -31,21 +32,6 @@ object ICondition {
   implicit def function2IConditionConverter(f: Context ⇒ Boolean) = new ICondition {
     override def evaluate(context: Context) = f(context)
   }
-
-  def not(c: ICondition) =
-    new ICondition {
-      def evaluate(context: Context) = !c.evaluate(context)
-    }
-
-  def or(c1: ICondition, c2: ICondition) =
-    new ICondition {
-      def evaluate(context: Context) = c1.evaluate(context) || c2.evaluate(context)
-    }
-
-  def and(c1: ICondition, c2: ICondition) =
-    new ICondition {
-      def evaluate(context: Context) = c1.evaluate(context) && c2.evaluate(context)
-    }
 
 }
 
@@ -59,9 +45,5 @@ trait ICondition {
    * @return the value of this condition
    */
   def evaluate(context: Context): Boolean
-
-  def unary_! = ICondition.not(this)
-  def |(other: ICondition) = ICondition.or(this, other)
-  def &(other: ICondition) = ICondition.and(this, other)
 
 }

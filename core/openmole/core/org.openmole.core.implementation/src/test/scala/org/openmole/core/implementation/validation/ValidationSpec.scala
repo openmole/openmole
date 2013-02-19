@@ -145,7 +145,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     val c2 = new Capsule(t2)
     val c3 = Slot(t3)
 
-    val mole = (c1 -- c2 -- c3) + (c1 oo (c3, Filter(p)))
+    val mole = (c1 -- c2 -- c3) + (c1 oo (c3, Block(p)))
 
     val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Map.empty)
 

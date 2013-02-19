@@ -229,7 +229,7 @@ object MoleFactory {
                   new DataChannel(
                     capsuleMap(x.source),
                     islotsMap.getOrElseUpdate(x.target, Slot(capsuleMap(x.target.capsule))),
-                    Filter(x.filteredPrototypes.map {
+                    Block(x.filteredPrototypes.map {
                       p ⇒ prototypeMap(p).name
                     }.toSeq: _*)))
               case _ ⇒ None

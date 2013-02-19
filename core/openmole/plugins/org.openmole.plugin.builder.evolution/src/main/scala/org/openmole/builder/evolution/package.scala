@@ -197,9 +197,9 @@ package object evolution {
       (scalingCaps -- (toIndividualSlot, filter = Keep((inputs.map(_._1) ++ List(genome)).map(_.name).toSeq: _*))) +
         (breedingCaps -- (mergeArchiveSlot, filter = Keep(archive))) +
         (breedingCaps -- (mergeIndividualsSlot, filter = Keep(individual.toArray))) +
-        (breedingCaps oo (model.first, filter = Filter(archive, individual.toArray))) +
-        (breedingCaps -- (endSlot, filter = Filter(archive, individual.toArray, state, generation, terminated))) +
-        (breedingCaps -- (terminationSlot, filter = Filter(archive, individual.toArray))) +
+        (breedingCaps oo (model.first, filter = Block(archive, individual.toArray))) +
+        (breedingCaps -- (endSlot, filter = Block(archive, individual.toArray, state, generation, terminated))) +
+        (breedingCaps -- (terminationSlot, filter = Block(archive, individual.toArray))) +
         (mergeArchiveSlot -- (terminationSlot, filter = Keep(archive)))
 
     val gaPuzzle = skel + loop + dataChannels
@@ -250,7 +250,7 @@ package object evolution {
       firstCapsule --
         breedTask -<
         scalingCaps --
-        (model, filter = Filter(genome)) --
+        (model, filter = Block(genome)) --
         toIndividualSlot --
         toIndividualArrayCaps --
         (mergeArchiveCaps, renameIndividualsTask -- mergeIndividualsCaps) --
@@ -265,8 +265,8 @@ package object evolution {
 
     val dataChannels =
       (scalingCaps -- (toIndividualSlot, filter = Keep((inputs.map(_._1) ++ List(genome)).map(_.name).toSeq: _*))) +
-        (firstCapsule oo (model.first, filter = Filter(archive, individual.toArray))) +
-        (firstCapsule -- (endCapsule, filter = Filter(archive, individual.toArray))) +
+        (firstCapsule oo (model.first, filter = Block(archive, individual.toArray))) +
+        (firstCapsule -- (endCapsule, filter = Block(archive, individual.toArray))) +
         (firstCapsule oo (mergeArchiveCaps, filter = Keep(archive))) +
         (firstCapsule oo (mergeIndividualsCaps, filter = Keep(individual.toArray))) +
         (mergeArchiveCaps -- (terminationSlot, filter = Keep(archive)))
