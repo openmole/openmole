@@ -36,7 +36,7 @@ class EmptyFilter[T] extends IFilter[T] {
 object Filter {
 
   def apply[T](ts: T*) = new Filter[T] {
-    lazy val filtered = ts.toSet
+    @transient lazy val filtered = ts.toSet
   }
 
   def empty[T] = new EmptyFilter[T]
