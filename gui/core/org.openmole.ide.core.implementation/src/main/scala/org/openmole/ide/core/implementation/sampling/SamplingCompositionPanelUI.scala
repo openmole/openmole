@@ -55,7 +55,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
   var _factors = new HashSet[IFactorProxyUI]
   var _connections = new HashSet[(SamplingComponent, SamplingComponent)]
   val factorWidgets = new mutable.HashMap[IFactorProxyUI, SamplingConnectorWidget]
-  var finalSampling: Option[ISamplingCompositionProxyUI] = None
+  var finalSampling: Option[ISamplingOrDomainProxyUI] = None
   var building = true
 
   dataUI.factors.foreach {
@@ -95,7 +95,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
   }
 
   dataUI.finalSampling match {
-    case Some(sp: ISamplingCompositionProxyUI) ⇒
+    case Some(sp: ISamplingOrDomainProxyUI) ⇒
       setFinalSampling(sp)
       connectProvider.createConnection(domainsAndSamplings(sp), finalComponent)
     case _ ⇒
@@ -106,7 +106,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
 
   def factors = _factors.toList
 
-  def computeFactor(sourceProxy: ISamplingCompositionProxyUI) = factors.filter {
+  def computeFactor(sourceProxy: ISamplingOrDomainProxyUI) = factors.filter {
     f ⇒
       f.dataUI.domain.id == sourceProxy.id && {
         f.dataUI.target match {
@@ -120,7 +120,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
     peer.add(createView)
   }.peer
 
-  def toSamplingComponent(scw: ISamplingCompositionProxyUI) =
+  def toSamplingComponent(scw: ISamplingOrDomainProxyUI) =
     domainsAndSamplings.getOrElse(scw, throw new UserBadDataError("The graphical representation for the element " + scw.id + " does not exist"))
 
   def addDomain(domainProxy: IDomainProxyUI,
@@ -141,7 +141,6 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
                   display: Boolean = true) = {
     finalSampling match {
       case None ⇒
-        samplingProxy.isFinal = true
         finalSampling = Some(samplingProxy)
       case _ ⇒
     }
@@ -186,7 +185,6 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
             s match {
               case (d: IDomainWidget) ⇒ domains -= d.proxy
               case (s: ISamplingWidget) ⇒
-                if (s.proxy.isFinal) finalSampling = None
                 samplings -= s.proxy
               case _ ⇒
             }
@@ -211,19 +209,11 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
 
   def scene = this
 
-  def setFinalSampling(fsampling: ISamplingCompositionProxyUI) = {
-    finalSampling match {
-      case Some(sp: ISamplingProxyUI) ⇒ setSamplingProxy(sp, false)
-      case _ ⇒
-    }
-    setSamplingProxy(fsampling, true)
+  def setFinalSampling(fsampling: ISamplingOrDomainProxyUI) = {
     finalSampling = Some(fsampling)
     revalidate
     repaint
   }
-
-  def setSamplingProxy(samplingProxy: ISamplingCompositionProxyUI,
-                       b: Boolean): Unit = samplingProxy.isFinal = b
 
   def saveContent(name: String) =
     new SamplingCompositionDataUI(name,
@@ -240,7 +230,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
       finalSampling,
       (finalComponent.getPreferredLocation.x, finalComponent.getPreferredLocation.y))
 
-  def domainsAndSamplings: Map[ISamplingCompositionProxyUI, SamplingComponent] = domains ++ samplings toMap
+  def domainsAndSamplings: Map[ISamplingOrDomainProxyUI, SamplingComponent] = domains ++ samplings toMap
 
   def testConnections(arityTest: Boolean) = {
     _connections.foreach {
@@ -297,7 +287,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
                      arityTest: Boolean): Boolean =
     testConnection(sourceComponent.component, targetComponent.component, arityTest)
 
-  def firstSampling(proxy: ISamplingCompositionProxyUI) = {
+  def firstSampling(proxy: ISamplingOrDomainProxyUI) = {
     connections.filter {
       _._1.component.proxy.id == proxy.id
     }.map {

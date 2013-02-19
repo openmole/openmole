@@ -21,11 +21,16 @@ import org.openmole.ide.core.implementation.registry.OSGiActivator
 import org.openmole.ide.core.implementation.registry.DomainActivator
 import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.ide.core.model.factory.IDomainFactoryUI
+import org.openmole.core.model.domain.Domain
 
 class Activator extends OSGiActivator with DomainActivator {
 
   override def domainFactories = List(
-    new IDomainFactoryUI { def buildDataUI = new TakeDomainDataUI },
+    new IDomainFactoryUI {
+      def buildDataUI = new TakeDomainDataUI
+
+      def fromCoreObject(d: Domain[_]) = ???
+    },
     new IDomainFactoryUI { def buildDataUI = GroupDomainDataUI.empty },
     new IDomainFactoryUI { def buildDataUI = new MapDomainDataUI },
     new IDomainFactoryUI { def buildDataUI = SlidingDomainDataUI.empty },

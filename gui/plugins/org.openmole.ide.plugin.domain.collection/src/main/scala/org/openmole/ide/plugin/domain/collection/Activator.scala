@@ -17,12 +17,11 @@
 
 package org.openmole.ide.plugin.domain.collection
 
-import org.openmole.ide.core.implementation.registry.OSGiActivator
-import org.openmole.ide.core.implementation.registry.DomainActivator
-import org.openmole.ide.core.implementation.data.EmptyDataUIs.EmptyPrototypeDataUI
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
-import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
+import org.openmole.ide.core.implementation.registry._
+import org.openmole.ide.core.implementation.builder._
 import org.openmole.ide.misc.tools.util.Types._
+import org.openmole.core.model.domain.Domain
+import org.openmole.plugin.domain.collection.DynamicListDomain
 
 class Activator extends OSGiActivator with DomainActivator {
 

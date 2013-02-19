@@ -19,12 +19,26 @@ package org.openmole.ide.plugin.task.exploration
 
 import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
+import org.openmole.core.model.task.ITask
+import org.openmole.ide.core.implementation.builder._
+import org.openmole.core.implementation.task.ExplorationTask
+import org.openmole.ide.core.implementation.builder.SceneFactory
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.model.builder.IPuzzleUIMap
+import org.openmole.ide.core.implementation.dataproxy.{ SamplingCompositionDataProxyUI, TaskDataProxyUI }
+import org.openmole.ide.core.implementation.sampling.SamplingCompositionDataUI
 
 class ExplorationTaskFactoryUI extends ITaskFactoryUI {
   override def toString = "Exploration"
 
+  def category = ComponentCategories.TASK
+
   def buildDataUI = new ExplorationTaskDataUI
 
-  def category = ComponentCategories.TASK
+  def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
+    val t = SceneFactory.as[ExplorationTask](task)
+    uiMap.task(task, x ⇒ (new ExplorationTaskDataUI(t.name, Some(uiMap.sampling(t.sampling, s ⇒ new SamplingCompositionDataUI(task.name + "Sampling"))))))
+  }
+
 }
 

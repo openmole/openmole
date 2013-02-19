@@ -46,8 +46,12 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.collection.mutable.ListBuffer
+import org.openmole.core.model.sampling.Sampling
+import org.openmole.ide.core.model.sampling.{ ISamplingProxyUI, IDomainProxyUI }
+import org.openmole.core.model.domain.{ Finite, Domain }
+import org.openmole.ide.core.implementation.execution.ScenesManager
 
-object MoleMaker {
+object MoleFactory {
 
   def buildMoleExecution(mole: IMole,
                          manager: IMoleSceneManager,
@@ -105,15 +109,18 @@ object MoleMaker {
     }
   }
 
+  def samplingMapping: Map[ISamplingCompositionDataProxyUI, Sampling] = Proxys.samplings.map {
+    s ⇒ s -> s.dataUI.coreObject
+  }.toMap
+
   def prototypeMapping: Map[IPrototypeDataProxyUI, Prototype[_]] = (Proxys.prototypes.toList :::
     List(EmptyDataUIs.emptyPrototypeProxy)).map {
       p ⇒ p -> p.dataUI.coreObject
     }.toMap
 
-  def keyPrototypeMapping: Map[PrototypeKey, IPrototypeDataProxyUI] = (Proxys.prototypes.toList :::
-    List(EmptyDataUIs.emptyPrototypeProxy)).map {
-      p ⇒ KeyPrototypeGenerator(p) -> p
-    }.toMap
+  def moleMapping: Map[IMoleScene, IMole] = ScenesManager.moleScenes.map {
+    m ⇒ m.graphScene -> buildMole(m.manager).right.get._1
+  }.toMap
 
   def buildCapsule(
     proxy: ITaskDataProxyUI,

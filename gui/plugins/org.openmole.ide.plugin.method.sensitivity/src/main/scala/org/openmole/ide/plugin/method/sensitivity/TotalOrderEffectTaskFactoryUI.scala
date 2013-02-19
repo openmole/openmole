@@ -19,6 +19,10 @@ package org.openmole.ide.plugin.method.sensitivity
 
 import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
+import org.openmole.core.model.task.ITask
+import org.openmole.ide.core.model.builder.IPuzzleUIMap
+import org.openmole.ide.core.implementation.builder.SceneFactory
+import org.openmole.plugin.method.sensitivity.TotalOrderEffectTask
 
 class TotalOrderEffectTaskFactoryUI extends ITaskFactoryUI {
   override def toString = "Total Order effect"
@@ -26,4 +30,11 @@ class TotalOrderEffectTaskFactoryUI extends ITaskFactoryUI {
   def buildDataUI = new TotalOrderEffectTaskDataUI
 
   def category = ComponentCategories.SALTELLI_TASK
+
+  def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
+    val t = SceneFactory.as[TotalOrderEffectTask](task)
+    uiMap.task(t, x ⇒ new FirstOrderEffectTaskDataUI(t.name,
+      t.modelInputs.map { p ⇒ uiMap.prototype(p)(p.`type`) },
+      t.modelOutputs.map { p ⇒ uiMap.prototype(p)(p.`type`) }))
+  }
 }

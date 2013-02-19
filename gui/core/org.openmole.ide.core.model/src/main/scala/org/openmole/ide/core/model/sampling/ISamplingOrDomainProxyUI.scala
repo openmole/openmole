@@ -16,12 +16,8 @@
  */
 package org.openmole.ide.core.model.sampling
 
-trait ISamplingCompositionProxyUI {
+trait ISamplingOrDomainProxyUI {
   def id: String
-
-  def isFinal: Boolean
-
-  def isFinal_=(b: Boolean)
 
   def ordering: Int
 

@@ -2,6 +2,7 @@ package org.openmole.ide.core.model.panel
 
 import org.openmole.core.implementation.puzzle.Puzzle
 import swing.Component
+import org.openmole.ide.core.model.builder.IPuzzleUIMap
 
 /*
 * Copyright (C) 2013 Mathieu Mathieu Leclaire <mathieu.Mathieu Leclaire at openmole.org>
@@ -21,5 +22,5 @@ import swing.Component
 */
 
 trait IBuilderPanelUI extends Component {
-  def build: Puzzle
+  def build(uiMap: IPuzzleUIMap): (Puzzle, IPuzzleUIMap)
 }

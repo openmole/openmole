@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.workflow
+package org.openmole.ide.core.implementation.builder
 
 import java.awt.Point
 import org.openmole.ide.core.implementation.data._
@@ -26,10 +26,17 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.implementation.workflow.{ DataChannelUI, TransitionUI, CapsuleUI }
+import org.openmole.core.model.task.ITask
+import org.openmole.misc.exception.UserBadDataError
 
-object SceneItemFactory {
+object SceneFactory {
 
-  def createCapsule(caps: ICapsuleUI, scene: IMoleScene, locationPoint: Point): ICapsuleUI = {
+  def as[T: Manifest](x: Any): T =
+    if (manifest.runtimeClass.isInstance(x)) x.asInstanceOf[T]
+    else throw new UserBadDataError("The Object " + x + " can not be loaded in the GUI")
+
+  def capsuleUI(caps: ICapsuleUI, scene: IMoleScene, locationPoint: Point): ICapsuleUI = {
     scene.initCapsuleAdd(caps)
     scene.manager.registerCapsuleUI(caps)
     scene.graphScene.addNode(scene.manager.getNodeID).setPreferredLocation(locationPoint)
@@ -37,26 +44,26 @@ object SceneItemFactory {
     caps
   }
 
-  def createCapsule(scene: IMoleScene,
-                    locationPoint: Point,
-                    taskProxy: Option[ITaskDataProxyUI] = None,
-                    cType: CapsuleType = new BasicCapsuleType): ICapsuleUI =
-    createCapsule(new CapsuleUI(scene, new CapsuleDataUI(task = taskProxy, capsuleType = cType)), scene, locationPoint)
+  def capsuleUI(scene: IMoleScene,
+                locationPoint: Point,
+                taskProxy: Option[ITaskDataProxyUI] = None,
+                cType: CapsuleType = new BasicCapsuleType): ICapsuleUI =
+    capsuleUI(new CapsuleUI(scene, new CapsuleDataUI(task = taskProxy, capsuleType = cType)), scene, locationPoint)
 
-  def createTransition(scene: IMoleScene,
-                       s: ICapsuleUI,
-                       t: IInputSlotWidget,
-                       transitionType: TransitionType.Value,
-                       cond: Option[String] = None,
-                       li: List[IPrototypeDataProxyUI] = List.empty) = {
+  def transition(scene: IMoleScene,
+                 s: ICapsuleUI,
+                 t: IInputSlotWidget,
+                 transitionType: TransitionType.Value,
+                 cond: Option[String] = None,
+                 li: List[IPrototypeDataProxyUI] = List.empty) = {
     if (scene.manager.registerConnector(new TransitionUI(s, t, transitionType, cond, li)))
       scene.createConnectEdge(scene.manager.capsuleID(s), scene.manager.capsuleID(t.capsule), t.index)
   }
 
-  def createDataChannel(scene: IMoleScene,
-                        s: ICapsuleUI,
-                        t: IInputSlotWidget,
-                        li: List[IPrototypeDataProxyUI] = List.empty) = {
+  def dataChannel(scene: IMoleScene,
+                  s: ICapsuleUI,
+                  t: IInputSlotWidget,
+                  li: List[IPrototypeDataProxyUI] = List.empty) = {
     if (scene.manager.registerConnector(new DataChannelUI(s, t, li)))
       scene.createConnectEdge(scene.manager.capsuleID(s), scene.manager.capsuleID(t.capsule))
   }

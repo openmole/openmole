@@ -15,8 +15,8 @@ import org.openmole.ide.misc.tools.Counter
 import org.openmole.core.model.sampling.{ Factor, Sampling }
 import org.openmole.ide.core.implementation.dialog.StatusBar
 
-class CSVSamplingDataUI(var csvFilePath: String = "",
-                        var prototypeMapping: List[(String, IPrototypeDataProxyUI)] = List.empty) extends ISamplingDataUI {
+class CSVSamplingDataUI(val csvFilePath: String = "",
+                        val prototypeMapping: List[(String, IPrototypeDataProxyUI)] = List.empty) extends ISamplingDataUI {
   def name = "CSV"
 
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = try {

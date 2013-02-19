@@ -19,6 +19,10 @@ package org.openmole.ide.plugin.task.stat
 
 import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
+import org.openmole.core.model.task.ITask
+import org.openmole.ide.core.model.builder.IPuzzleUIMap
+import org.openmole.ide.core.implementation.builder.SceneFactory
+import org.openmole.plugin.task.stat.SumTask
 
 class SumTaskFactoryUI extends ITaskFactoryUI {
   override def toString = "Sum"
@@ -26,4 +30,9 @@ class SumTaskFactoryUI extends ITaskFactoryUI {
   def buildDataUI = new SumTaskDataUI
 
   def category = ComponentCategories.STAT_TASK
+
+  def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
+    val t = SceneFactory.as[SumTask](task)
+    uiMap.task(t, x ⇒ new MedianTaskDataUI(t.name, t.sequences.toList.map { p ⇒ (uiMap.prototype(p._1), uiMap.prototype(p._2)) }))
+  }
 }

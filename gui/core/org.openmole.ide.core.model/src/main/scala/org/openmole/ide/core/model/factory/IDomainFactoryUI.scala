@@ -19,8 +19,12 @@ package org.openmole.ide.core.model.factory
 
 import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.core.model.domain.Domain
+import org.openmole.ide.core.model.sampling.{ IBuiltCompositionSampling, IDomainProxyUI }
 
 trait IDomainFactoryUI extends IFactoryUI {
   def buildDataUI: IDomainDataUI
+
+  //def fromCoreObject(d: Domain[_]): (IDomainProxyUI, IBuiltCompositionSampling)
 }
 

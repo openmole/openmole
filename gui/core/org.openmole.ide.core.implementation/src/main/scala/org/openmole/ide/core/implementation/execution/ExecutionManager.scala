@@ -37,7 +37,7 @@ import TextAreaOutputStream._
 import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
 import org.openmole.ide.core.model.data.{ NoMemoryHook, IHookDataUI }
 import org.openmole.ide.core.implementation.registry.{ DefaultKey, KeyRegistry }
-import org.openmole.ide.core.implementation.builder.MoleMaker
+import org.openmole.ide.core.implementation.builder.MoleFactory
 
 object ExecutionManager {
   implicit def executionStatesDecorator(s: scala.collection.mutable.Map[ExecutionState.ExecutionState, AtomicInteger]) = new {
@@ -173,7 +173,7 @@ class ExecutionManager(manager: IMoleSceneManager,
   }
 
   def buildMoleExecution(hooks: Map[IHookPanelUI, ICapsuleUI],
-                         groupings: List[(Grouping, ICapsule)]) = MoleMaker.buildMoleExecution(mole,
+                         groupings: List[(Grouping, ICapsule)]) = MoleFactory.buildMoleExecution(mole,
     manager, {
       val h = hooks.toList.flatMap {
         case (panel, caps) ⇒
