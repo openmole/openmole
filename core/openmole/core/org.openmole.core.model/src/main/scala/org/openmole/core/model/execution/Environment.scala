@@ -24,10 +24,10 @@ import org.openmole.misc.eventdispatcher.Event
 import ExecutionState._
 
 object Environment {
-  case class JobSubmitted(val job: IExecutionJob) extends Event[Environment]
-  case class JobStateChanged(val job: IExecutionJob, val newState: ExecutionState, oldState: ExecutionState) extends Event[Environment]
-  case class ExceptionRaised(val job: IExecutionJob, val exception: Throwable, val level: Level) extends Event[Environment]
-  case class MoleJobExceptionRaised(val job: IExecutionJob, val exception: Throwable, val level: Level, val moleJob: IMoleJob) extends Event[Environment]
+  case class JobSubmitted(job: IExecutionJob) extends Event[Environment]
+  case class JobStateChanged(job: IExecutionJob, newState: ExecutionState, oldState: ExecutionState) extends Event[Environment]
+  case class ExceptionRaised(job: IExecutionJob, exception: Throwable, level: Level) extends Event[Environment]
+  case class MoleJobExceptionRaised(job: IExecutionJob, exception: Throwable, level: Level, moleJob: IMoleJob) extends Event[Environment]
 }
 
 trait Environment {

@@ -33,6 +33,7 @@ import org.openmole.misc.exception.MultipleException
 import org.openmole.misc.eventdispatcher._
 import org.openmole.misc.tools.service.Priority
 import org.openmole.core.implementation.execution.local._
+import org.openmole.misc.tools.collection._
 import org.openmole.core.implementation.job._
 import org.openmole.core.implementation.tools._
 import org.openmole.misc.tools.service.Random
@@ -43,6 +44,8 @@ import scala.collection.immutable.HashMap
 import scala.collection.mutable.Buffer
 import scala.concurrent.stm.{ Ref, TMap, atomic, retry }
 import javax.xml.bind.annotation.XmlTransient
+import org.openmole.core.model.execution.Environment
+import collection.mutable
 
 object MoleExecution extends Logger
 
@@ -115,10 +118,12 @@ class MoleExecution(
 
   private def submit(job: IJob, capsule: ICapsule) =
     if (!job.finished) {
-      (selection.get(capsule) match {
-        case Some(selection) ⇒ selection.apply(job)
-        case None ⇒ LocalEnvironment
-      }).submit(job)
+      val env =
+        selection.get(capsule) match {
+          case Some(selection) ⇒ selection(job)
+          case None ⇒ LocalEnvironment
+        }
+      env.submit(job)
     }
 
   def submitAll =

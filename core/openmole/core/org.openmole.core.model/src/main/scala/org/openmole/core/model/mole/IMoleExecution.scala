@@ -28,6 +28,7 @@ import org.openmole.core.model.job.IJob
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.job.MoleJobId
 import scala.collection.mutable.Buffer
+import org.openmole.core.model.execution.Environment
 
 object IMoleExecution {
   class Starting extends Event[IMoleExecution]
