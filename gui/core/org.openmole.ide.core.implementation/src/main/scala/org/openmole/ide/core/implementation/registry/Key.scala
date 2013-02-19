@@ -17,7 +17,13 @@
 
 package org.openmole.ide.core.implementation.registry
 
-case class DefaultKey(c: Class[_]) extends Key
+object Key {
+  def apply(c: Class[_]) = new DefaultKey(c)
+
+  def apply(s: String) = new NameKey(s)
+}
+
+case class DefaultKey(val key: Class[_]) extends Key
 
 case class NameKey(s: String) extends Key
 

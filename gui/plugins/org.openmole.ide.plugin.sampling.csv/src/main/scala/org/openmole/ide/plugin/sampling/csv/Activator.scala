@@ -17,13 +17,26 @@
 
 package org.openmole.ide.plugin.sampling.csv
 
-import org.openmole.ide.core.implementation.registry.OSGiActivator
-import org.openmole.ide.core.implementation.registry.SamplingActivator
+import org.openmole.ide.core.implementation.registry._
+import org.openmole.ide.core.implementation.builder._
 import org.openmole.ide.core.model.factory.ISamplingFactoryUI
+import org.openmole.core.model.sampling.Sampling
+import org.openmole.ide.core.model.sampling.IBuiltCompositionSampling
+import org.openmole.plugin.sampling.csv.CSVSampling
+import org.openmole.ide.core.implementation.sampling.SamplingProxyUI
 
 class Activator extends OSGiActivator with SamplingActivator {
 
   override def samplingFactories = List(new ISamplingFactoryUI {
     def buildDataUI = new CSVSamplingDataUI
+
+    def fromCoreObject(sampling: Sampling, bSC: IBuiltCompositionSampling) = {
+      sampling match {
+        case cs: CSVSampling ⇒
+          val proxy = new SamplingProxyUI(new CSVSamplingDataUI(cs.file.getCanonicalPath))
+          (proxy, Builder.buildConnectedSamplings(proxy, Seq(), bSC))
+        case _ ⇒ (new SamplingProxyUI(buildDataUI), bSC)
+      }
+    }
   })
 }

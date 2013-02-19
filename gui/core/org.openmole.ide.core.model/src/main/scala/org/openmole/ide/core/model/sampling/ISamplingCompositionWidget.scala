@@ -22,7 +22,7 @@ import java.awt.Color
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 
 trait ISamplingCompositionWidget extends Panel {
-  def proxy: ISamplingCompositionProxyUI
+  def proxy: ISamplingOrDomainProxyUI
 
   def update: Unit
 

@@ -27,7 +27,6 @@ import org.openmole.ide.core.model.commons.CapsuleFactory
 import scala.collection.JavaConversions
 import scala.collection.JavaConversions._
 import java.awt.Point
-import org.openmole.ide.core.implementation.workflow.SceneItemFactory
 import java.awt.Toolkit
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.MoleDataUI
@@ -44,6 +43,7 @@ import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import scala.collection.immutable.HashSet
 import scala.collection.mutable.HashMap
+import org.openmole.ide.core.implementation.builder.SceneFactory
 
 class MoleSceneConverter(serializer: GUISerializer) extends Converter {
   override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) = {
@@ -180,7 +180,7 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
           val p = new Point
           p.setLocation(reader.getAttribute("x").toDouble * Toolkit.getDefaultToolkit.getScreenSize.width,
             reader.getAttribute("y").toDouble * Toolkit.getDefaultToolkit.getScreenSize.height)
-          val caps = SceneItemFactory.createCapsule(scene, p, cType = CapsuleFactory(reader.getAttribute("type")))
+          val caps = SceneFactory.capsuleUI(scene, p, cType = CapsuleFactory(reader.getAttribute("type")))
 
           val start = reader.getAttribute("start").toBoolean
           start match {
@@ -221,7 +221,7 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
         }
         case "transition" ⇒
           val condition = reader.getAttribute("condition")
-          SceneItemFactory.createTransition(scene,
+          SceneFactory.transition(scene,
             oslots(reader.getAttribute("source")),
             islots(reader.getAttribute("target")),
             TransitionType.fromString(reader.getAttribute("type")),
@@ -229,7 +229,7 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
             Proxys.prototypes.filter { p ⇒ readFiltered(reader).contains(p.id) }.toList)
 
         case "datachannel" ⇒
-          SceneItemFactory.createDataChannel(scene,
+          SceneFactory.dataChannel(scene,
             oslots(reader.getAttribute("source")),
             islots(reader.getAttribute("target")),
             Proxys.prototypes.filter { p ⇒ readFiltered(reader).contains(p.id) }.toList)

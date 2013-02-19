@@ -18,13 +18,18 @@
 package org.openmole.ide.core.model.factory
 
 import org.openmole.ide.core.model.data.ITaskDataUI
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.IComponentCategory
+import org.openmole.core.model.task._
+import org.openmole.ide.core.model.builder.IPuzzleUIMap
 
 trait ITaskFactoryUI extends IFactoryUI {
 
   override def toString: String = buildDataUI.coreClass.getSimpleName
 
   def buildDataUI: ITaskDataUI
+
+  def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap): ITaskDataProxyUI
 
   def category: IComponentCategory
 }

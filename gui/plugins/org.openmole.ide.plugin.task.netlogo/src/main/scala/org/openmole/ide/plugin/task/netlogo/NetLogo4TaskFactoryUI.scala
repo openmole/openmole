@@ -19,6 +19,10 @@ package org.openmole.ide.plugin.task.netlogo
 
 import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
+import org.openmole.core.model.task.ITask
+import org.openmole.ide.core.model.builder.IPuzzleUIMap
+import org.openmole.ide.core.implementation.builder.SceneFactory
+import org.openmole.plugin.task.netlogo4.NetLogo4Task
 
 class NetLogo4TaskFactoryUI extends ITaskFactoryUI {
 
@@ -27,4 +31,19 @@ class NetLogo4TaskFactoryUI extends ITaskFactoryUI {
   def buildDataUI = new NetLogo4TaskDataUI
 
   def category = ComponentCategories.ABM_TASK
+
+  def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
+    val t = SceneFactory.as[NetLogo4Task](task)
+    val embededWS = t.workspace.location match {
+      case Right(r) ⇒ true
+      case Left(l) ⇒ false
+    }
+    uiMap.task(t, x ⇒ new NetLogo4TaskDataUI(t.name,
+      embededWS,
+      t.scriptPath,
+      t.launchingCommands.mkString("\n"),
+      t.netLogoInputs.toList.map { p ⇒ (uiMap.prototype(p._1), p._2) },
+      t.netLogoOutputs.toList.map { p ⇒ (p._1, uiMap.prototype(p._2)) },
+      t.resources.map { _._2 }.toList))
+  }
 }

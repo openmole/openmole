@@ -18,11 +18,8 @@
 package org.openmole.ide.misc.tools.util
 
 import java.io.File
-import groovy.lang.GroovyShell
 import org.openmole.misc.workspace.Workspace
-import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.misc.pluginmanager.PluginManager
-import org.openmole.misc.exception.UserBadDataError
 
 object ClassLoader {
 

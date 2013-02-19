@@ -55,6 +55,7 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import scala.swing.Panel
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.implementation.builder.SceneFactory
 
 abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMoleScene
     with SelectProvider
@@ -392,7 +393,7 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
 
     override def createConnection(sourceWidget: Widget, targetWidget: Widget) = {
       val sourceCapsuleUI = sourceWidget.asInstanceOf[CapsuleUI]
-      SceneItemFactory.createTransition(moleScene,
+      SceneFactory.transition(moleScene,
         sourceCapsuleUI,
         targetWidget.asInstanceOf[InputSlotWidget],
         sourceCapsuleUI.dataUI.transitionType)
@@ -402,7 +403,7 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
 
   class MoleSceneDataChannelProvider extends MoleSceneTransitionProvider {
     override def createConnection(sourceWidget: Widget, targetWidget: Widget) = {
-      SceneItemFactory.createDataChannel(moleScene,
+      SceneFactory.dataChannel(moleScene,
         sourceWidget.asInstanceOf[CapsuleUI],
         targetWidget.asInstanceOf[InputSlotWidget])
       CheckData.checkMole(moleScene)

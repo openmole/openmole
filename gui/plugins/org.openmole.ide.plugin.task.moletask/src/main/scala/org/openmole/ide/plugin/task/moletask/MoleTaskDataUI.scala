@@ -17,7 +17,7 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.misc.exception.UserBadDataError
 import scala.collection.JavaConversions._
-import org.openmole.ide.core.implementation.builder.MoleMaker
+import org.openmole.ide.core.implementation.builder.MoleFactory
 
 object MoleTaskDataUI {
   def manager(i: Int): Option[IMoleSceneManager] = ScenesManager.moleScenes.map { _.manager }.filter { _.id == i }.headOption
@@ -38,7 +38,7 @@ class MoleTaskDataUI(val name: String = "",
           case Some(z: ITaskDataProxyUI) ⇒
             MoleTaskDataUI.capsule(z, y) match {
               case Some(w: ICapsuleDataUI) ⇒
-                MoleMaker.buildMole(y) match {
+                MoleFactory.buildMole(y) match {
                   case Right((m, capsMap, protoMap, errs)) ⇒
                     val builder = MoleTask(name, m, capsMap.find { case (k, _) ⇒ k.dataUI == w }.get._2, List.empty)(plugins)
                     builder addInput inputs

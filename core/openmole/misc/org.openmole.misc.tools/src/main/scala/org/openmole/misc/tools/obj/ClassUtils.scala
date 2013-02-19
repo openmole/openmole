@@ -33,7 +33,9 @@ object ClassUtils {
     def listSuperClasses = {
       new Iterator[Class[_]] {
         var cur: Class[_] = c
+
         override def hasNext = cur != null
+
         override def next: Class[_] = {
           val ret = cur
           cur = cur.getSuperclass
@@ -42,20 +44,23 @@ object ClassUtils {
       }.toIterable
     }
 
-    def listSuperClassesAndInterfaces = {
+    def listSuperClassesAndInterfaces = listIndexedSuperClassesAndInterfaces.unzip._1
+
+    def listIndexedSuperClassesAndInterfaces = {
       val toExplore = new ListBuffer[Class[_]]
       toExplore += c
 
-      val ret = new ListBuffer[Class[_]]
+      val ret = new ListBuffer[(Class[_], Int)]
+      var index = 0
 
       while (!toExplore.isEmpty) {
         val current = toExplore.remove(0)
-        ret += current
+        ret += current -> index
         val superClass = current.getSuperclass
         if (superClass != null) toExplore += superClass
         for (inter ← current.getInterfaces) toExplore += inter
+        index += 1
       }
-
       ret
     }
 
@@ -81,6 +86,7 @@ object ClassUtils {
     }
 
     def fromArray = c.getComponentType
+
     def toManifest = classType[T](c)
   }
 
@@ -92,7 +98,9 @@ object ClassUtils {
   def unArrayify(c: Iterable[Class[_]]): (Iterable[Class[_]], Int) = {
     @tailrec def rec(c: Iterable[Class[_]], level: Int = 0): (Iterable[Class[_]], Int) = {
       if (c.isEmpty || c.exists(!_.isArray)) (c, level)
-      else rec(c.map { _.getComponentType }, level + 1)
+      else rec(c.map {
+        _.getComponentType
+      }, level + 1)
     }
     rec(c)
   }
@@ -128,7 +136,9 @@ object ClassUtils {
     case x: Class[_] ⇒ classType(x)
     case x: ParameterizedType ⇒
       val owner = x.getOwnerType
-      val raw = x.getRawType() match { case clazz: Class[_] ⇒ clazz }
+      val raw = x.getRawType() match {
+        case clazz: Class[_] ⇒ clazz
+      }
       val targs = x.getActualTypeArguments() map manifest
 
       (owner == null, targs.isEmpty) match {
@@ -185,10 +195,12 @@ object ClassUtils {
 
   implicit def manifestDecoration(m: Manifest[_]) = new {
     def isArray = m.runtimeClass.isArray
+
     def fromArray = m.runtimeClass.fromArray
   }
 
   implicit def manifestToClass[T](m: Manifest[T]) = m.runtimeClass
+
   implicit def classToManifestDecorator[T](c: Class[T]) = manifest(c)
 
   def assignable(from: Class[_], to: Class[_]) =

@@ -154,11 +154,19 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
               if (lasts.isEmpty) throw new UserBadDataError("A Wizard can not be applied on an empty sequence of Tasks")
               if (lasts.size > 1) throw new UserBadDataError("A Wizard can only be applied on a single sequence of Tasks")
 
-              val panel = b.buildPanelUI(Builder.puzzle(selection, firsts.head, lasts), scene.manager)
+              val (puzzle, uiMap) = Builder.puzzle(selection, firsts.head, lasts)
+              val panel = b.buildPanelUI(puzzle, scene.manager)
               if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(panel) {
                 verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
               }.peer,
-                b.name + " Builder")).equals(NotifyDescriptor.OK_OPTION)) panel.build
+                b.name + " Builder")).equals(NotifyDescriptor.OK_OPTION)) {
+                val (puzzle, updatedUIMap) = panel.build(uiMap)
+                Builder.fromPuzzle(puzzle,
+                  scene,
+                  new Point(firsts.head.x.toInt, firsts.head.y.toInt),
+                  new Point(lasts.head.x.toInt, lasts.head.y.toInt),
+                  updatedUIMap)
+              }
             }
           }
         }

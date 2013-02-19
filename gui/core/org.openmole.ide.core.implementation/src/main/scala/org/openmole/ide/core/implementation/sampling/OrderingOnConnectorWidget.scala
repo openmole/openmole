@@ -20,10 +20,10 @@ import java.awt.{ Color, Rectangle, RenderingHints }
 import org.netbeans.api.visual.widget._
 import org.openmole.ide.core.model.workflow.{ IConnectorViewUI, IConnectorUI, IMoleScene }
 import org.openmole.ide.misc.widget.LinkLabel
-import org.openmole.ide.core.model.sampling.ISamplingCompositionProxyUI
+import org.openmole.ide.core.model.sampling.ISamplingOrDomainProxyUI
 
 class OrderingOnConnectorWidget(scene: Scene,
-                                val proxy: ISamplingCompositionProxyUI,
+                                val proxy: ISamplingOrDomainProxyUI,
                                 val link: LinkLabel) extends ComponentWidget(scene, link.peer) {
   val dim = 15
   val pos = link.size.width / 2 + 1

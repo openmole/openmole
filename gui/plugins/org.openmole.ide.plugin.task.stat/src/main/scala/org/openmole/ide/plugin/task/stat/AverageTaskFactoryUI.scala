@@ -19,6 +19,10 @@ package org.openmole.ide.plugin.task.stat
 
 import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
+import org.openmole.core.model.task.ITask
+import org.openmole.ide.core.model.builder.IPuzzleUIMap
+import org.openmole.plugin.task.stat.AverageTask
+import org.openmole.ide.core.implementation.builder.SceneFactory
 
 class AverageTaskFactoryUI extends ITaskFactoryUI {
   override def toString = "Average"
@@ -26,4 +30,9 @@ class AverageTaskFactoryUI extends ITaskFactoryUI {
   def buildDataUI = new AverageTaskDataUI
 
   def category = ComponentCategories.STAT_TASK
+
+  def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
+    val t = SceneFactory.as[AverageTask](task)
+    uiMap.task(t, x ⇒ new AverageTaskDataUI(t.name, t.sequences.toList.map { p ⇒ (uiMap.prototype(p._1), uiMap.prototype(p._2)) }))
+  }
 }

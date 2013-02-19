@@ -34,13 +34,13 @@ class SamplingCompositionDataUI(val name: String = "",
                                 val domains: List[(IDomainProxyUI, Point)] = List.empty,
                                 val samplings: List[(ISamplingProxyUI, Point)] = List.empty,
                                 val factors: List[IFactorProxyUI] = List.empty,
-                                val connections: List[(ISamplingCompositionProxyUI, ISamplingCompositionProxyUI)] = List.empty,
-                                val finalSampling: Option[ISamplingCompositionProxyUI] = None,
+                                val connections: List[(ISamplingOrDomainProxyUI, ISamplingOrDomainProxyUI)] = List.empty,
+                                val finalSampling: Option[ISamplingOrDomainProxyUI] = None,
                                 val finalPosition: (Int, Int) = (750, 230)) extends ISamplingCompositionDataUI {
 
   type T = Domain[Any] with Discrete[Any]
 
-  val builtSampling = new HashMap[ISamplingCompositionProxyUI, Sampling]
+  val builtSampling = new HashMap[ISamplingOrDomainProxyUI, Sampling]
 
   def coreClass = classOf[Sampling]
 
@@ -60,13 +60,13 @@ class SamplingCompositionDataUI(val name: String = "",
     }.toMap
 
     finalSampling match {
-      case Some(fs: ISamplingCompositionProxyUI) ⇒ buildSamplingCore(fs, connectionMap, samplingMap)
+      case Some(fs: ISamplingOrDomainProxyUI) ⇒ buildSamplingCore(fs, connectionMap, samplingMap)
       case _ ⇒ throw new UserBadDataError("The final Sampling is not properly set")
     }
   }
 
-  def buildSamplingCore(proxy: ISamplingCompositionProxyUI,
-                        connectionMap: Map[ISamplingCompositionProxyUI, List[ISamplingCompositionProxyUI]],
+  def buildSamplingCore(proxy: ISamplingOrDomainProxyUI,
+                        connectionMap: Map[ISamplingOrDomainProxyUI, List[ISamplingOrDomainProxyUI]],
                         samplingMap: Map[String, (ISamplingProxyUI, Int)]): Sampling = {
     if (!builtSampling.contains(proxy)) {
       val partition = connectionMap.getOrElse(proxy, List()).partition {
@@ -84,7 +84,7 @@ class SamplingCompositionDataUI(val name: String = "",
 
       builtSampling += proxy -> coreObject(proxy)
 
-      def coreObject(proxy: ISamplingCompositionProxyUI): Sampling = {
+      def coreObject(proxy: ISamplingOrDomainProxyUI): Sampling = {
         proxy match {
           case s: ISamplingProxyUI ⇒ s.dataUI.coreObject(factors.filter {
             f ⇒ domainsForFactory.contains(f.dataUI.domain)

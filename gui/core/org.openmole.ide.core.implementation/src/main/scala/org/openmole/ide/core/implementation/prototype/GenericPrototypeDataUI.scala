@@ -18,6 +18,7 @@
 package org.openmole.ide.core.implementation.prototype
 
 import org.openmole.ide.core.model.data.IPrototypeDataUI
+import org.openmole.ide.core.implementation.registry.KeyGenerator
 import org.openmole.core.implementation.data._
 import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.core.model.data._
@@ -57,6 +58,8 @@ object GenericPrototypeDataUI {
     new GenericPrototypeDataUI[T](n, d, t)
 
   def apply[T](implicit t: Manifest[T]): GenericPrototypeDataUI[T] = apply("", 0)
+
+  def apply[T](p: Prototype[T]): GenericPrototypeDataUI[T] = apply(p.name, KeyGenerator.stripArrays(p.`type`)._2)(p.`type`)
 }
 
 import GenericPrototypeDataUI._

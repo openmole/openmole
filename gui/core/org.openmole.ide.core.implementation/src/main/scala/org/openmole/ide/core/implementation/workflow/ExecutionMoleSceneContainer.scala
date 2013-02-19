@@ -44,7 +44,7 @@ import org.openmole.core.serializer.SerializerService
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.model.data.{ NoMemoryHook, IHookDataUI }
 import org.openmole.ide.core.implementation.registry.{ DefaultKey, KeyRegistry }
-import org.openmole.ide.core.implementation.builder.MoleMaker
+import org.openmole.ide.core.implementation.builder.MoleFactory
 
 class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
                                   val page: TabbedPane.Page,
@@ -52,7 +52,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   peer.setLayout(new BorderLayout)
 
   val executionManager =
-    MoleMaker.buildMole(bmsc.scene.manager) match {
+    MoleFactory.buildMole(bmsc.scene.manager) match {
       case Right((mole, prototypeMapping, capsuleMapping, errors)) ⇒
         Some(new ExecutionManager(bmsc.scene.manager,
           this,

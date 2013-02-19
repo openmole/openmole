@@ -19,6 +19,12 @@ package org.openmole.ide.plugin.task.serialization
 
 import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
+import org.openmole.core.model.task.ITask
+import org.openmole.ide.core.model.builder.IPuzzleUIMap
+import org.openmole.ide.core.implementation.builder.SceneFactory
+import org.openmole.plugin.task.serialization.StoreIntoCSVTask
+import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
+import org.openmole.core.model.data.Prototype
 
 class StoreIntoCSVTaskFactoryUI extends ITaskFactoryUI {
   override def toString = "Merge prototypes in file"
@@ -26,4 +32,11 @@ class StoreIntoCSVTaskFactoryUI extends ITaskFactoryUI {
   def buildDataUI = new StoreIntoCSVTaskDataUI
 
   def category = ComponentCategories.STORAGE_TASK
+
+  def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
+    val t = SceneFactory.as[StoreIntoCSVTask](task)
+    uiMap.task(task, x ⇒ new StoreIntoCSVTaskDataUI(t.name,
+      t.columns.toList.map { e ⇒ (uiMap.prototype(e._1.asInstanceOf[Prototype[Array[Any]]]), e._2) },
+      Some(uiMap.prototype(t.filePrototype))))
+  }
 }

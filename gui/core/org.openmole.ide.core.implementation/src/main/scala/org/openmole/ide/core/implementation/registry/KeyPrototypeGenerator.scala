@@ -19,6 +19,8 @@ package org.openmole.ide.core.implementation.registry
 
 import org.openmole.core.model.data._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.data.EmptyDataUIs
 
 object KeyPrototypeGenerator {
 
@@ -29,6 +31,15 @@ object KeyPrototypeGenerator {
     val (manifest, dim) = KeyGenerator.stripArrays(proto.`type`)
     new PrototypeKey(proto.name, manifest.runtimeClass, dim)
   }
+
+  def keyPrototypeMapping: Map[PrototypeKey, IPrototypeDataProxyUI] = (Proxys.prototypes.toList :::
+    List(EmptyDataUIs.emptyPrototypeProxy)).map {
+      p ⇒ KeyPrototypeGenerator(p) -> p
+    }.toMap
+
+  def isPrototype(p: Prototype[_]) = keyPrototypeMapping.keys.toList.contains(KeyPrototypeGenerator(p))
+
+  def isPrototype(p: IPrototypeDataProxyUI) = keyPrototypeMapping.keys.toList.contains(KeyPrototypeGenerator(p))
 }
 
 case class PrototypeKey(val name: String, val protoClass: Class[_], val dim: Int)
