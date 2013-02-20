@@ -43,7 +43,7 @@ trait ICapsule {
    * 
    * @return the input of the capsule
    */
-  def inputs(mole: IMole): DataSet
+  def inputs(mole: IMole, sources: Sources, hooks: Hooks): DataSet
 
   /*
    * Get the outputs data taken by this capsule, generally it is empty if the capsule
@@ -52,6 +52,6 @@ trait ICapsule {
    * 
    * @return the output of the capsule
    */
-  def outputs(mole: IMole): DataSet
+  def outputs(mole: IMole, sources: Sources, hooks: Hooks): DataSet
 
 }

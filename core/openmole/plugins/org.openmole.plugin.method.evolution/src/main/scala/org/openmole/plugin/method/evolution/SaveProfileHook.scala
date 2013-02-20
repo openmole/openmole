@@ -27,18 +27,31 @@ import java.io.File
 import org.openmole.core.implementation.tools._
 import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.script.GroovyProxyPool
+import org.openmole.core.implementation.mole._
 
-sealed class SaveProfileHook(
+object SaveProfileHook {
+
+  def apply(
+    individual: Prototype[Individual[algorithm.GA#G, algorithm.GA#P, algorithm.GA#F]],
+    x: String,
+    aggregation: GAAggregation,
+    path: String) =
+    new HookBuilder {
+      addInput(individual.toArray)
+      def toHook = new SaveProfileHook(individual, x, aggregation, path) with Built
+    }
+
+}
+
+abstract class SaveProfileHook(
     val individual: Prototype[Individual[algorithm.GA#G, algorithm.GA#P, algorithm.GA#F]],
     val x: String,
     val aggregation: GAAggregation,
     val path: String) extends Hook {
 
-  override def inputs = DataSet(individual.toArray)
-
   @transient lazy val xInterpreter = new GroovyProxyPool(x)
 
-  def process(context: Context) {
+  def process(context: Context) = {
     val file = new File(VariableExpansion(context, path))
     file.createParentDir
     file.withWriter { w ⇒
@@ -47,6 +60,7 @@ sealed class SaveProfileHook(
         xV = xInterpreter.execute(i.phenotype)
       } w.write("" + xV + "," + aggregation.aggregate(i.fitness) + "\n")
     }
+    context
   }
 
 }

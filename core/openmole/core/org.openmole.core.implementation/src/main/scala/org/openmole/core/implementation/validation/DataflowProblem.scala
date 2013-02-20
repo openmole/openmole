@@ -18,7 +18,7 @@
 package org.openmole.core.implementation.validation
 
 import org.openmole.core.model.data._
-import org.openmole.core.model.mole.{ISource, Hook, ICapsule}
+import org.openmole.core.model.mole.{ISource, IHook, ICapsule}
 import org.openmole.core.model.transition.Slot
 
 object DataflowProblem {
@@ -95,14 +95,14 @@ object DataflowProblem {
 
   case class MissingHookInput(
     capsule: ICapsule,
-    hook: Hook,
+    hook: IHook,
     input: Data[_]) extends HookProblem {
 
     override def toString = s"Input $input is missing for hook $hook"
   }
   case class WrongHookType(
     capsule: ICapsule,
-    hook: Hook,
+    hook: IHook,
     input: Data[_],
     found: Data[_]) extends HookProblem {
 

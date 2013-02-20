@@ -20,11 +20,10 @@ package org.openmole.plugin.hook.file
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data._
-import org.openmole.core.model.mole._
 import java.io.File
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.core.model.job._
 import org.openmole.misc.exception._
+import org.openmole.core.implementation.mole._
 
 /**
  * Appends a variable content to an existing file.
@@ -33,7 +32,18 @@ import org.openmole.misc.exception._
  * In the case of directories, all the files of the original directory are append to the
  * files of the target one.
  */
-class AppendFileHook(prototype: Prototype[File], outputFile: String) extends Hook {
+object AppendFileHook {
+
+  def apply(prototype: Prototype[File], outputFile: String) =
+    new HookBuilder {
+      addInput(prototype)
+
+      def toHook = new AppendFileHook(prototype, outputFile) with Built
+    }
+
+}
+
+abstract class AppendFileHook(prototype: Prototype[File], outputFile: String) extends Hook {
 
   override def process(context: Context) = {
     context.option(prototype) match {
@@ -60,9 +70,8 @@ class AppendFileHook(prototype: Prototype[File], outputFile: String) extends Hoo
         else throw new UserBadDataError("The merge can only be done from a file to another or from a directory to another. (" + from.toString + " and " + to.toString + " found)")
       case None ⇒ throw new UserBadDataError("Variable not found " + prototype)
     }
+    context
   }
-
-  override def inputs = DataSet(prototype)
 
 }
 

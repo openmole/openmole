@@ -36,8 +36,8 @@ object MoleTask {
 
   def apply(name: String, mole: IMole, last: ICapsule, implicits: Iterable[String])(implicit plugins: PluginSet) = {
     new TaskBuilder { builder ⇒
-      mole.root.inputs(mole).foreach(addInput)
-      last.outputs(mole).foreach(addOutput)
+      mole.root.inputs(mole, Sources.empty, Hooks.empty).foreach(addInput)
+      last.outputs(mole, Sources.empty, Hooks.empty).foreach(addOutput)
 
       def toTask = new MoleTask(name, mole, last, implicits) with builder.Built
     }

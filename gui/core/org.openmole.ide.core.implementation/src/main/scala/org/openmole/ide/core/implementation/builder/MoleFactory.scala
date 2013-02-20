@@ -55,7 +55,7 @@ object MoleFactory {
 
   def buildMoleExecution(mole: IMole,
                          manager: IMoleSceneManager,
-                         hooks: List[(ICapsule, Hook)],
+                         hooks: List[(ICapsule, IHook)],
                          capsuleMap: Map[ICapsuleUI, ICapsule],
                          groupingStrategies: List[(Grouping, ICapsule)]): Either[Throwable, (IMoleExecution, Iterable[(Environment, String)])] =
     try {
@@ -73,7 +73,7 @@ object MoleFactory {
           }
       }
       //TODO implement sources
-      Right((new MoleExecution(mole, Iterable.empty, hooks, strat.toMap, groupingStrategies.map {
+      Right((MoleExecution(mole, Iterable.empty, hooks, strat.toMap, groupingStrategies.map {
         case (s, c) ⇒ c -> s
       }.toMap), envs.toSet))
     } catch {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 20/02/13 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -11,15 +11,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.mole
+package org.openmole.core.implementation.mole
 
-import org.openmole.core.model.data._
+import org.openmole.core.implementation.tools.InputOutputBuilder
+import org.openmole.core.model.mole.IHook
 
-trait Hook {
-  def inputs: DataSet = DataSet.empty
-  def process(context: Context)
+abstract class HookBuilder extends InputOutputBuilder {
+  def toHook: IHook
 }

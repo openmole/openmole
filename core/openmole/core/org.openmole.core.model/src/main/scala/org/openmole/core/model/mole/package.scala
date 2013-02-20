@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 09/01/13 Romain Reuillon
+ * Copyright (C) 20/02/13 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,20 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.mole
+package org.openmole.core.model
 
-import org.openmole.core.model.mole._
-import org.openmole.core.model.task._
-import org.openmole.core.implementation.data._
+package object mole {
+  type Hooks = Map[ICapsule, Iterable[IHook]]
+  type Sources = Map[ICapsule, Iterable[ISource]]
 
-object InputStrainerCapsule {
-  def apply(task: ITask) = new InputStrainerCapsule(task)
-}
+  object Hooks {
+    def empty = Map.empty[ICapsule, Iterable[IHook]].withDefault(_ ⇒ List.empty)
+  }
 
-class InputStrainerCapsule(task: ITask) extends Capsule(task) with Strainer {
-
-  override def inputs(mole: IMole, sources: Sources, hooks: Hooks) =
-    received(mole, sources, hooks).filterNot(d ⇒ super.inputs(mole, sources, hooks).contains(d.prototype.name)) ++
-      super.inputs(mole, sources, hooks)
+  object Sources {
+    def empty = Map.empty[ICapsule, Iterable[ISource]].withDefault(_ ⇒ List.empty)
+  }
 
 }

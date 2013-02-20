@@ -57,9 +57,9 @@ class CopyFileHookSpec extends FlatSpec with ShouldMatchers {
 
     val fDest = File.createTempFile("test", ".tmp")
 
-    val hook = new CopyFileHook(p, fDest.getAbsolutePath)
+    val hook = CopyFileHook(p, fDest.getAbsolutePath)
 
-    val ex = new MoleExecution(new Mole(t1c), hooks = List(t1c -> hook))
+    val ex = MoleExecution(new Mole(t1c), hooks = List(t1c -> hook))
 
     ex.start.waitUntilEnded
 

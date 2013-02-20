@@ -18,14 +18,21 @@
 package org.openmole.plugin.hook.file
 
 import java.io.File
-import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data._
-import org.openmole.core.model.job._
-import org.openmole.core.model.mole._
 import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.core.implementation.mole._
 
-class AppendToFileHook(
+object AppendToFileIHook {
+
+  def apply(fileName: String, content: String) =
+    new HookBuilder {
+      def toHook = new AppendToFileHook(fileName, content) with Built
+    }
+
+}
+
+abstract class AppendToFileHook(
     fileName: String,
     content: String) extends Hook {
 
@@ -33,6 +40,7 @@ class AppendToFileHook(
     val file = new File(VariableExpansion(context, fileName))
     file.createParentDir
     file.withLock(_.append(VariableExpansion(context, content)))
+    context
   }
 
 }

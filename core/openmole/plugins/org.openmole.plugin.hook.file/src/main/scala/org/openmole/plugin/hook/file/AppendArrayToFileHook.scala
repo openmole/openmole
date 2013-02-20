@@ -21,11 +21,21 @@ import java.io.File
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data._
-import org.openmole.core.model.job._
-import org.openmole.core.model.mole._
 import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.core.implementation.mole._
 
-class AppendArrayToFileHook(
+object AppendArrayToFileHook {
+
+  def apply(fileName: String, content: Prototype[Array[_]]) =
+    new HookBuilder {
+      addInput(content)
+
+      def toHook = new AppendArrayToFileIHook(fileName, content) with Built
+    }
+
+}
+
+abstract class AppendArrayToFileIHook(
     fileName: String,
     content: Prototype[Array[_]]) extends Hook {
 
@@ -34,8 +44,7 @@ class AppendArrayToFileHook(
     file.createParentDir
     val toWrite = context.option(content).getOrElse(Array("not found")).mkString(",")
     file.withLock(_.appendLine(toWrite))
+    context
   }
-
-  override def inputs = DataSet(content)
 
 }

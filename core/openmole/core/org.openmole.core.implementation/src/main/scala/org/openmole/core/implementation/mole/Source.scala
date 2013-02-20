@@ -19,28 +19,5 @@ package org.openmole.core.implementation.mole
 
 import org.openmole.core.model.mole._
 import org.openmole.core.implementation.tools.InputOutputCheck
-import org.openmole.core.model.data._
-import org.openmole.misc.exception._
 
-trait Source extends ISource with InputOutputCheck {
-
-  protected def process(context: Context): Context
-
-  override def perform(context: Context) = {
-    val initializedContext = initializeInput(context)
-    val inputErrors = verifyInput(initializedContext)
-    if(!inputErrors.isEmpty) throw new InternalProcessingError(s"Input errors have been found: ${inputErrors.mkString(", ")}.")
-
-    val result =
-      try context + process(initializedContext)
-      catch {
-        case e: Throwable ⇒
-          throw new InternalProcessingError(e, s"Error for context values ${context.prettified()}")
-      }
-
-    val outputErrors = verifyOutput(result)
-    if (!outputErrors.isEmpty) throw new InternalProcessingError(s"Output errors: ${outputErrors.mkString(", ")}.")
-    filterOutput(result)
-  }
-
-}
+trait Source extends ISource with InputOutputCheck

@@ -100,14 +100,6 @@ class SubMoleExecution(
   private def -=(submoleExecution: SubMoleExecution) =
     _childs.single -= submoleExecution
 
-  private def secureHookExecution(hook: Hook, moleJob: IMoleJob) =
-    try hook.process(moleExecution.implicits + moleJob.context)
-    catch {
-      case e: Throwable ⇒
-        EventDispatcher.trigger(moleExecution, new IMoleExecution.HookExceptionRaised(hook, moleJob, e, WARNING))
-        logger.log(WARNING, "Error in execution of hook " + hook, e)
-    }
-
   private def secureProfilerExecution(profiler: Profiler, moleJob: IMoleJob) =
     try profiler.process(moleJob)
     catch {
@@ -138,13 +130,23 @@ class SubMoleExecution(
     val mole = moleExecution.mole
     val (capsule, ticket) = _jobs.single()(job)
     try {
-      moleExecution.indexedHooks(capsule).foreach { secureHookExecution(_, job) }
-      secureProfilerExecution(moleExecution.profiler, job)
+      val ctxForHooks = moleExecution.implicits + job.context
 
-      mole.outputDataChannels(capsule).foreach { _.provides(job.context, ticket, moleExecution) }
+      def executeHook(h: IHook) =
+        try  h.perform(ctxForHooks)
+        catch {
+        case e: Throwable ⇒
+          EventDispatcher.trigger(moleExecution, new IMoleExecution.HookExceptionRaised(h, job, e, SEVERE))
+          logger.log(SEVERE, "Error in execution of hook " + h + "at the end of task " + job.task, e)
+          throw e
+        }
+
+      val context = ctxForHooks ++ moleExecution.hooks(capsule).flatMap(executeHook).unzip._2
+      secureProfilerExecution(moleExecution.profiler, job)
+      mole.outputDataChannels(capsule).foreach { _.provides(context, ticket, moleExecution) }
 
       transitionLock {
-        mole.outputTransitions(capsule).toList.sortBy(t ⇒ mole.slots(t.end.capsule).size).reverse.foreach { _.perform(job.context, ticket, this) }
+        mole.outputTransitions(capsule).toList.sortBy(t ⇒ mole.slots(t.end.capsule).size).reverse.foreach { _.perform(context, ticket, this) }
       }
     } catch {
       case t: Throwable ⇒
@@ -183,7 +185,7 @@ class SubMoleExecution(
           Variable(Task.openMOLESeed, moleExecution.newSeed)
 
       val sourced =
-        moleExecution.indexedSources(capsule).foldLeft(Context.empty) {
+        moleExecution.sources(capsule).foldLeft(Context.empty) {
             case (a, s) ⇒
               val ctx = try s.perform(context)
               catch {

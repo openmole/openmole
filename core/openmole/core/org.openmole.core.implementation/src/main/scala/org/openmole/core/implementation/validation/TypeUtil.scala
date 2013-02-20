@@ -33,7 +33,7 @@ object TypeUtil {
   def intersect(d: Iterable[Iterable[Prototype[_]]]) = {
 
     def superType(d: Iterable[Prototype[_]]) =
-      ClassUtils.intersectionArray(d.map { _.`type`.erasure })
+      ClassUtils.intersectionArray(d.map { _.`type`.runtimeClass })
 
     val indexedD = d.flatten.toList.groupBy(_.name)
 
@@ -44,8 +44,8 @@ object TypeUtil {
     r.flatten
   }
 
-  def receivedTypes(mole: IMole)(slot: Slot): Iterable[Prototype[_]] =
-    computeManifests(mole)(slot).map { _.toPrototype }
+  def receivedTypes(mole: IMole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[Prototype[_]] =
+    computeManifests(mole, sources, hooks)(slot).map { _.toPrototype }
 
   class ComputedType(val name: String, val manifest: Manifest[_], val toArray: Boolean, val isOptional: Boolean) {
     def toPrototype =
@@ -53,11 +53,11 @@ object TypeUtil {
       else Prototype(name)(manifest)
   }
 
-  def computeManifests(mole: IMole)(slot: Slot): Iterable[ComputedType] = {
+  def computeManifests(mole: IMole, sources: Sources, hooks: Hooks)(slot: Slot): Iterable[ComputedType] = {
     import ClassUtils._
 
     val (varNames, direct, toArray, fromArray, optional) =
-      computeTransmissions(mole)(
+      computeTransmissions(mole, sources, hooks)(
         mole.inputTransitions(slot),
         mole.inputDataChannels(slot))
 
@@ -79,14 +79,14 @@ object TypeUtil {
 
   private def s(m: Iterable[Manifest[_]]) = ClassUtils.intersectionArray(m map (_.runtimeClass))
 
-  private def computeTransmissions(mole: IMole)(transitions: Iterable[ITransition], dataChannels: Iterable[IDataChannel]) = {
+  private def computeTransmissions(mole: IMole, sources: Sources, hooks: Hooks)(transitions: Iterable[ITransition], dataChannels: Iterable[IDataChannel]) = {
     val direct = new HashMap[String, ListBuffer[Manifest[_]]] // Direct transmission through transition or data channel
     val toArray = new HashMap[String, ListBuffer[Manifest[_]]] // Transmission through exploration transition
     val fromArray = new HashMap[String, ListBuffer[Manifest[_]]] // Transmission through aggregation transition
     val optional = new HashMap[String, ListBuffer[Boolean]]
     val varNames = new HashSet[String]
 
-    for (t ← transitions; d ← t.data(mole)) {
+    for (t ← transitions; d ← t.data(mole, sources, hooks)) {
       def setFromArray =
         if (d.mode is Explore) fromArray.getOrElseUpdate(d.prototype.name, new ListBuffer[Manifest[_]]) += d.prototype.`type`
         else direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
@@ -104,7 +104,7 @@ object TypeUtil {
       optional.getOrElseUpdate(d.prototype.name, new ListBuffer) += (d.mode is Optional)
     }
 
-    for (dc ← dataChannels; d ← dc.data(mole)) {
+    for (dc ← dataChannels; d ← dc.data(mole, sources, hooks)) {
       varNames += d.prototype.name
       if (DataChannel.levelDelta(mole)(dc) >= 0) direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
       else toArray.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`

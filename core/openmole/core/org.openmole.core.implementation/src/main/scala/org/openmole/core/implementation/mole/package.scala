@@ -34,7 +34,7 @@ package object mole {
   class PuzzleDecorator(puzzle: Puzzle) {
     def on(env: Environment) =
       puzzle.copy(selection = puzzle.selection ++ puzzle.lasts.map(_ -> new FixedEnvironmentSelection(env)))
-    def hook(hooks: Hook*) =
+    def hook(hooks: IHook*) =
       puzzle.copy(hooks = puzzle.hooks.toList ::: puzzle.lasts.flatMap(c ⇒ hooks.map(c -> _)).toList)
     def source(sources: ISource*) =
       puzzle.copy(sources = puzzle.sources.toList ::: puzzle.lasts.flatMap(c ⇒ sources.map(c -> _)).toList)
@@ -50,5 +50,8 @@ package object mole {
   implicit def puzzleMoleExecutionConverter(puzzle: Puzzle) = puzzle.toExecution
   implicit def puzzleMoleConverter(puzzle: Puzzle) = puzzle.toMole
   implicit def moleToMoleExecutionConverter(mole: IMole) = new MoleExecution(mole)
+
+  implicit def hookBuilderToHookConverter(hb: HookBuilder) = hb.toHook
+  implicit def sourceBuilderToSourceConverter(sb: SourceBuilder) = sb.toSource
 
 }

@@ -25,6 +25,7 @@ import org.openmole.core.implementation.transition._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.core.model.transition._
+import org.openmole.core.model.mole._
 import org.scalatest.FlatSpec
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.ShouldMatchers
@@ -49,7 +50,7 @@ class TypeUtilSpec extends FlatSpec with ShouldMatchers {
 
     val mole = t1c -- t2c
 
-    val manifests = TypeUtil.computeManifests(mole)(t2c)
+    val manifests = TypeUtil.computeManifests(mole, Sources.empty, Hooks.empty)(t2c)
 
     manifests.filter(_.toArray).isEmpty should equal(true)
     val tc = manifests.filter(_.name == p.name).head
@@ -74,10 +75,10 @@ class TypeUtilSpec extends FlatSpec with ShouldMatchers {
 
     val mole = (t1c -- t3c) + (t2c -- t3c)
 
-    val manifests = TypeUtil.computeManifests(mole)(t3c)
+    val manifests = TypeUtil.computeManifests(mole, Sources.empty, Hooks.empty)(t3c)
     val m = manifests.filter(_.name == p.name).head
     m.toArray should equal(true)
-    m.manifest.erasure should equal(classOf[Int])
+    m.manifest.runtimeClass should equal(classOf[Int])
   }
 
   "Type system" should "detect an toArray case when a data channel is going from a level to a lower level" in {
@@ -97,9 +98,9 @@ class TypeUtilSpec extends FlatSpec with ShouldMatchers {
 
     val mole = (exc -< testC -- noOPC >- aggC) + (testC oo aggC)
 
-    val m = TypeUtil.computeManifests(mole)(aggC).head
+    val m = TypeUtil.computeManifests(mole, Sources.empty, Hooks.empty)(aggC).head
     m.toArray should equal(true)
-    m.manifest.erasure should equal(classOf[String])
+    m.manifest.runtimeClass should equal(classOf[String])
   }
 
 }

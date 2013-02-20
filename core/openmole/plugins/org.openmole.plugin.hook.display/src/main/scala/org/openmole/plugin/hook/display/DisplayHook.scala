@@ -20,11 +20,22 @@ package org.openmole.plugin.hook.display
 import java.io.PrintStream
 import org.openmole.core.model.data._
 import org.openmole.core.implementation.tools._
-import org.openmole.core.model.mole._
-import org.openmole.core.model.job._
+import org.openmole.core.implementation.mole._
 
-class DisplayHook(toDisplay: String, out: PrintStream = System.out) extends Hook {
+object DisplayHook {
 
-  override def process(context: Context) = out.println(VariableExpansion(context, toDisplay))
+  def apply(toDisplay: String, out: PrintStream = System.out) =
+    new HookBuilder {
+      def toHook = new DisplayHook(toDisplay, out) with Built
+    }
+
+}
+
+abstract class DisplayHook(toDisplay: String, out: PrintStream = System.out) extends Hook {
+
+  override def process(context: Context) = {
+    out.println(VariableExpansion(context, toDisplay))
+    context
+  }
 
 }

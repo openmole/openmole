@@ -27,7 +27,7 @@ trait ITask {
    *
    * @param context the context in which the task will be executed
    */
-  def perform(context: Context): Try[Context]
+  def perform(context: Context): Context
 
   /**
    *

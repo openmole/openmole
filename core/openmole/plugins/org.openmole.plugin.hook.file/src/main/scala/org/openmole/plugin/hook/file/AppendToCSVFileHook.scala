@@ -17,20 +17,26 @@
 
 package org.openmole.plugin.hook.file
 
-import java.io.BufferedOutputStream
 import java.io.File
-import java.io.FileOutputStream
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data._
-import org.openmole.core.model.job._
-import org.openmole.core.model.mole._
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.Prettifier._
 import scala.annotation.tailrec
+import org.openmole.core.implementation.mole._
 
-class AppendToCSVFileHook(
+object AppendToCSVFileHook {
+
+  def apply(fileName: String, prototypes: Prototype[_]*) =
+    new HookBuilder {
+      prototypes.foreach(addInput(_))
+      def toHook = new AppendToCSVFileHook(fileName, prototypes: _*) with Built
+    }
+
+}
+
+abstract class AppendToCSVFileHook(
     fileName: String,
     prototypes: Prototype[_]*) extends Hook {
 
@@ -70,8 +76,7 @@ class AppendToCSVFileHook(
 
         write(lists)
     }
+    context
   }
-
-  override def inputs = DataSet(prototypes)
 
 }

@@ -22,7 +22,7 @@ import javax.swing.JScrollPane
 import javax.swing.ScrollPaneConstants._
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
-import org.openmole.core.model.mole.Hook
+import org.openmole.core.model.mole.IHook
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.ide.core.implementation.execution.MultiGenericGroupingStrategyPanel
 import org.openmole.ide.core.implementation.execution.ExecutionManager
@@ -75,7 +75,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
 
   var groupingPanel: Option[MultiGenericGroupingStrategyPanel] = None
 
-  var panelHooks = new HashMap[IHookPanelUI, (ICapsuleUI, Class[_ <: Hook])]
+  var panelHooks = new HashMap[IHookPanelUI, (ICapsuleUI, Class[_ <: IHook])]
   executionManager match {
     case Some(eManager: ExecutionManager) ⇒
 

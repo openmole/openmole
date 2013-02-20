@@ -19,13 +19,22 @@ package org.openmole.plugin.hook.file
 
 import java.io.File
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.core.model.job._
 import org.openmole.core.implementation.data._
-import org.openmole.core.model.mole._
 import org.openmole.core.model.data._
 import org.openmole.misc.exception._
+import org.openmole.core.implementation.mole._
 
-class DeleteFileHook(toDelete: Prototype[File]*) extends Hook {
+object DeleteFileHook {
+
+  def apply(toDelete: Prototype[File]*) =
+    new HookBuilder {
+      toDelete.foreach(addInput(_))
+      def toHook = new DeleteFileHook(toDelete: _*) with Built
+    }
+
+}
+
+abstract class DeleteFileHook(toDelete: Prototype[File]*) extends Hook {
 
   override def process(context: Context) = {
     toDelete.foreach {
@@ -35,8 +44,7 @@ class DeleteFileHook(toDelete: Prototype[File]*) extends Hook {
           case None ⇒ throw new UserBadDataError("No variable " + prototype + " found.")
         }
     }
+    context
   }
-
-  override def inputs = DataSet(toDelete)
 
 }

@@ -50,7 +50,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = c1 -- c2
 
-    val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Map.empty)
+    val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
     errors.headOption match {
       case Some(MissingInput(_, d)) ⇒ assert(d.prototype == p)
       case _ ⇒ sys.error("Error should have been detected")
@@ -70,7 +70,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = c1 -- c2
 
-    Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Map.empty).isEmpty should equal(true)
+    Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty).isEmpty should equal(true)
   }
 
   "Validation" should "detect a type error" in {
@@ -88,7 +88,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = c1 -- c2
 
-    val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Map.empty)
+    val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
     errors.headOption match {
       case Some(WrongType(_, d, t)) ⇒
         assert(d.prototype == pString)
@@ -147,7 +147,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = (c1 -- c2 -- c3) + (c1 oo (c3, Block(p)))
 
-    val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Map.empty)
+    val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
 
     errors.headOption match {
       case Some(MissingInput(_, d)) ⇒ assert(d.prototype == p)
@@ -213,7 +213,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val c1 = new Capsule(t1)
 
-    val errors = Validation.duplicatedName(new Mole(c1))
+    val errors = Validation.duplicatedName(new Mole(c1), Sources.empty, Hooks.empty)
     errors.headOption match {
       case Some(DuplicatedName(_, _, _, Output)) ⇒
       case _ ⇒ sys.error("Error should have been detected")
@@ -227,12 +227,15 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val c1 = new Capsule(t1)
 
-    val h = new Hook {
-      override def inputs = DataSet(i)
-      def process(context: Context) {}
+    val h = new HookBuilder {
+      addInput(i)
+
+      def toHook = new IHook with Built {
+        def perform(ctx: Context) = ctx
+      }
     }
 
-    val errors = Validation.hookErrors(new Mole(c1), Map(c1 -> List(h)))
+    val errors = Validation.hookErrors(new Mole(c1), Sources.empty, Map(c1 -> List(h)))
     errors.headOption match {
       case Some(MissingHookInput(_, _, _)) ⇒
       case _ ⇒ sys.error("Error should have been detected")
@@ -248,12 +251,15 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val c1 = new Capsule(t1)
 
-    val h = new Hook {
-      override def inputs = DataSet(iInt)
-      def process(context: Context) {}
+    val h = new HookBuilder {
+      addInput(iInt)
+
+      def toHook = new IHook with Built {
+        def perform(ctx: Context) = ctx
+      }
     }
 
-    val errors = Validation.hookErrors(new Mole(c1), Map(c1 -> List(h)))
+    val errors = Validation.hookErrors(new Mole(c1), Sources.empty, Map(c1 -> List(h)))
     errors.headOption match {
       case Some(WrongHookType(_, _, _, _)) ⇒
       case _ ⇒ sys.error("Error should have been detected")
@@ -278,7 +284,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = new Mole(c1)
 
-    val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Map(c1 -> List(s)))
+    val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Map(c1 -> List(s)), Hooks.empty)
     errors.isEmpty should equal(true)
   }
 
@@ -299,7 +305,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = new Mole(c1)
 
-    val errors = Validation.sourceTypeErrors(mole, Map(c1 -> List(s)), List.empty)
+    val errors = Validation.sourceTypeErrors(mole, List.empty, Map(c1 -> List(s)), Hooks.empty)
     errors.headOption match {
       case Some(MissingSourceInput(_, _, _)) ⇒
       case _ ⇒ sys.error("Error should have been detected")

@@ -39,7 +39,7 @@ object IMoleExecution {
   case class JobInCapsuleStarting(moleJob: IMoleJob, capsule: ICapsule) extends Event[IMoleExecution]
   case class ExceptionRaised(moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution]
   case class SourceExceptionRaised(source: ISource, capsule: ICapsule, exception: Throwable, level: Level) extends Event[IMoleExecution]
-  case class HookExceptionRaised(hook: Hook, moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution]
+  case class HookExceptionRaised(hook: IHook, moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution]
   case class ProfilerExceptionRaised(profiler: Profiler, moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution]
 }
 
@@ -54,8 +54,8 @@ trait IMoleExecution {
   def exceptions: Iterable[Throwable]
 
   def mole: IMole
-  def hooks: Iterable[(ICapsule, Hook)]
-  def sources: Iterable[(ICapsule, ISource)]
+  def hooks: Hooks
+  def sources: Sources
   def profiler: Profiler
   def implicits: Context
 

@@ -65,9 +65,9 @@ class Transition(
       val toAggregate = combinaison.groupBy(_.prototype.name)
 
       val toArrayManifests =
-        Map.empty[String, Manifest[_]] ++ computeManifests(mole)(end).filter(_.toArray).map(ct ⇒ ct.name -> ct.manifest)
+        Map.empty[String, Manifest[_]] ++ computeManifests(mole, moleExecution.sources, moleExecution.hooks)(end).filter(_.toArray).map(ct ⇒ ct.name -> ct.manifest)
 
-      val newContext = aggregate(end.capsule.inputs(mole), toArrayManifests, combinaison)
+      val newContext = aggregate(end.capsule.inputs(mole, moleExecution.sources, moleExecution.hooks), toArrayManifests, combinaison)
       subMole.submit(end.capsule, newContext, newTicket)
     }
   }
@@ -83,7 +83,8 @@ class Transition(
 
   override def isConditionTrue(context: Context): Boolean = condition.evaluate(context)
 
-  override def data(mole: IMole) = start.outputs(mole).filterNot(d ⇒ filter(d.prototype.name))
+  override def data(mole: IMole, sources: Sources, hooks: Hooks) =
+    start.outputs(mole, sources, hooks).filterNot(d ⇒ filter(d.prototype.name))
 
   protected def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = submitNextJobsIfReady(ListBuffer() ++ context.values, ticket, subMole)
 

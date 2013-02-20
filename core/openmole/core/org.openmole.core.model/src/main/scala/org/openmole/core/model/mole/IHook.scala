@@ -15,26 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.mole
+package org.openmole.core.model.mole
 
-import org.openmole.core.implementation.transition._
-import org.openmole.core.model.mole._
-import org.openmole.core.model.task._
-import org.openmole.core.model.transition._
 import org.openmole.core.model.data._
-import org.openmole.core.model.job._
-import org.openmole.core.model.job.State._
 
-object Capsule {
-  def apply(task: ITask) = new Capsule(task)
-}
-
-class Capsule(val task: ITask) extends ICapsule {
-  override def inputs(mole: IMole, sources: Sources, hooks: Hooks): DataSet =
-    task.inputs -- sources(this).flatMap(_.outputs) ++ sources(this).flatMap(_.inputs)
-
-  override def outputs(mole: IMole, sources: Sources, hooks: Hooks): DataSet =
-    task.outputs ++ hooks(this).flatMap(_.outputs)
-
-  override def toString = task.toString
+trait IHook {
+  def inputs: DataSet
+  def outputs: DataSet
+  def parameters: ParameterSet
+  def perform(context: Context): Context
 }
