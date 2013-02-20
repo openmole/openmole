@@ -50,7 +50,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = c1 -- c2
 
-    val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
+    val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
     errors.headOption match {
       case Some(MissingInput(_, d)) ⇒ assert(d.prototype == p)
       case _ ⇒ sys.error("Error should have been detected")
@@ -70,7 +70,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = c1 -- c2
 
-    Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty).isEmpty should equal(true)
+    Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty).isEmpty should equal(true)
   }
 
   "Validation" should "detect a type error" in {
@@ -88,7 +88,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = c1 -- c2
 
-    val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
+    val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
     errors.headOption match {
       case Some(WrongType(_, d, t)) ⇒
         assert(d.prototype == pString)
@@ -147,7 +147,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = (c1 -- c2 -- c3) + (c1 oo (c3, Block(p)))
 
-    val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
+    val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Sources.empty, Hooks.empty)
 
     errors.headOption match {
       case Some(MissingInput(_, d)) ⇒ assert(d.prototype == p)
@@ -235,7 +235,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
-    val errors = Validation.hookErrors(new Mole(c1), Sources.empty, Map(c1 -> List(h)))
+    val errors = Validation.hookErrors(new Mole(c1), Iterable.empty, Sources.empty, Map(c1 -> List(h)))
     errors.headOption match {
       case Some(MissingHookInput(_, _, _)) ⇒
       case _ ⇒ sys.error("Error should have been detected")
@@ -259,7 +259,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
       }
     }
 
-    val errors = Validation.hookErrors(new Mole(c1), Sources.empty, Map(c1 -> List(h)))
+    val errors = Validation.hookErrors(new Mole(c1), Iterable.empty, Sources.empty, Map(c1 -> List(h)))
     errors.headOption match {
       case Some(WrongHookType(_, _, _, _)) ⇒
       case _ ⇒ sys.error("Error should have been detected")
@@ -284,7 +284,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
 
     val mole = new Mole(c1)
 
-    val errors = Validation.typeErrors(mole)(mole.capsules, Iterable.empty, Map(c1 -> List(s)), Hooks.empty)
+    val errors = Validation.taskTypeErrors(mole)(mole.capsules, Iterable.empty, Map(c1 -> List(s)), Hooks.empty)
     errors.isEmpty should equal(true)
   }
 

@@ -87,7 +87,7 @@ object DataflowProblem {
     source: ISource,
     data: Data[_]) extends SourceProblem {
 
-    override def toString = "Input " + data + " is provided by an optional output for source $source when reaching the " + slot + " and no default value (parameter) is provided."
+    override def toString = s"Input $data is provided by an optional output for source $source when reaching the $slot and no default value (parameter) is provided."
   }
 
 
@@ -104,10 +104,21 @@ object DataflowProblem {
     capsule: ICapsule,
     hook: IHook,
     input: Data[_],
-    found: Data[_]) extends HookProblem {
+    found: Prototype[_]) extends HookProblem {
 
     override def toString = s"Input has incompatible type $found whereas $input was expected"
   }
+
+
+  case class OptionalHookOutput(
+    capsule: ICapsule,
+    hook: IHook,
+    data: Data[_]) extends HookProblem {
+
+    override def toString = s"Input $data is provided by an optional output for hook $hook of capsule $capsule and no default value (parameter) is provided."
+  }
+
+
   case class MissingMoleTaskImplicit(
     capsule: ICapsule,
     `implicit`: String) extends DataflowProblem {
