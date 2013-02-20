@@ -10,8 +10,9 @@ import xml.XML
 import org.openmole.core.serializer._
 import org.openmole.core.implementation.mole.MoleExecution
 import com.thoughtworks.xstream.mapper.CannotResolveClassException
-import concurrent.{ ExecutionContext, Future }
+import concurrent.{ Await, ExecutionContext, Future }
 import org.openmole.web.{ DataHandler, Datastore }
+import concurrent.duration._
 
 @MultipartConfig(maxFileSize = 3 * 1024 * 1024) //research scala multipart config
 class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSupport with FileUploadSupport with FlashMapSupport with FutureSupport {
@@ -21,7 +22,7 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
   get("/createMole") {
     contentType = "text/html"
     new AsyncResult() {
-      def is = Future {
+      val is = Future {
         ssp("/createMole", "body" -> "Please upload a serialized mole execution below!")
       }
     }
@@ -30,8 +31,7 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
   var moleExecs = Map.empty[String, MoleExecution]
   val testMoleData = new DataHandler[String, MoleExecution](system)
 
-  def getStatus(id: String): String = {
-    val exec = moleExecs(id)
+  def getStatus(exec: MoleExecution): String = {
     if (!exec.started)
       "Stopped"
     else if (!exec.finished)
@@ -40,14 +40,16 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
       "Finished"
   }
 
-  def processXMLFile[A](file: Option[FileItem]) = {
+  def processXMLFile[A](file: Option[FileItem], is: Option[InputStream]) = {
     file match {
       case Some(data) ⇒
         if (data.getContentType.isDefined && data.getContentType.get == "text/xml")
           try {
-            Some(SerializerService.deserialize[A](data.getInputStream)) -> ""
+            is.map(SerializerService.deserialize[A](_)) -> ""
           } catch {
             case e: CannotResolveClassException ⇒ None -> "The uploaded xml was not a valid serialized object."
+          } finally {
+            is.foreach(_.close())
           }
         else
           None -> "The uploaded data was not of type text/xml"
@@ -57,20 +59,36 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
 
   post("/createMole") {
     contentType = "text/html"
-    val moleExec = processXMLFile[MoleExecution](fileParams.get("file"))
 
-    moleExec match {
-      case (Some(exec), _) ⇒ {
-        moleExecs += (exec.id -> exec)
-        testMoleData.add(exec.id, exec)
-        redirect("/execs")
+    implicit def timeout = Duration(10, SECONDS)
+
+    val data = fileParams.get("file")
+
+    //TODO: Make sure this is not a problem
+    val ins = fileParams.get("file").map(_.getInputStream)
+
+    val x = new AsyncResult() {
+      val is = Future {
+        val moleExec = processXMLFile[MoleExecution](data, ins)
+
+        moleExec match {
+          case (Some(exec), _) ⇒ {
+            //moleExecs += (exec.id -> exec) // can't be used by async pages.
+            testMoleData.add(exec.id, exec)
+            println("added " + exec.id + "to testMoleData.")
+            halt(status = 301, headers = Map("Location" -> url("execs")))
+          }
+          case (_, error) ⇒ ssp("/createMole", "body" -> "Please upload a serialized mole execution below!", "errors" -> List(error))
+        }
       }
-      case (_, error) ⇒ ssp("/createMole", "body" -> "Please upload a serialized mole execution below!", "errors" -> List(error))
     }
+
+    println(x.timeout)
+    x
   }
 
   post("/xml/createMole") {
-    val moleExec = processXMLFile[MoleExecution](fileParams.get("file"))
+    val moleExec = processXMLFile[MoleExecution](fileParams.get("file"), fileParams.get("file").map(_.getInputStream))
 
     moleExec match {
       case (Some(exec), _) ⇒ {
@@ -84,24 +102,43 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
   get("/execs/:id/start") {
     contentType = "text/html"
 
-    moleExecs(params("id")).start
+    new AsyncResult() {
+      val is = Future {
+        testMoleData.get(params("id")).start
 
-    redirect("/execs/" + params("id"))
+        halt(status = 301, headers = Map("Location" -> url("execs/" + params("id"))))
+      }
+    }
   }
 
   get("/execs") {
     contentType = "text/html"
 
-    ssp("/loadedExecutions", "ids" -> moleExecs.keys.toList)
-
+    new AsyncResult() {
+      val is = Future {
+        ssp("/loadedExecutions", "ids" -> testMoleData.getKeys.toList)
+      }
+    }
   }
 
   get("/execs/:id") {
     contentType = "text/html"
 
-    println(testMoleData.get(params("id")).started)
+    new AsyncResult() {
+      val is = Future {
+        ssp("/executionData", "id" -> params("id"), "status" -> getStatus(testMoleData.get(params("id"))))
+      }
+    }
+  }
 
-    ssp("/executionData", "id" -> params("id"), "status" -> getStatus(params("id")))
+  get("/badAsyncTest") {
+    contentType = "text/html"
+
+    new AsyncResult() {
+      val is = Future {
+        redirect("/createMole")
+      }
+    }
   }
 
   get("/xml/execs") {
@@ -116,9 +153,6 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
     // remove content type in case it was set through an action
     contentType = null
     // Try to render a ScalateTemplate if no route matched
-    findTemplate(requestPath) map { path ⇒
-      contentType = "text/html"
-      layoutTemplate(path)
-    } orElse serveStaticResource() getOrElse resourceNotFound()
+    resourceNotFound()
   }
 }

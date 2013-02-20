@@ -10,8 +10,9 @@ import concurrent.Await
 class Datastore[T, U] extends Actor {
   var moleExecs = Map.empty[T, U]
   def receive = {
-    case pair: (T, U) ⇒ moleExecs += pair
-    case key: T ⇒ sender ! moleExecs(key)
+    case ("put", pair: (T, U)) ⇒ moleExecs += pair
+    case ("get", key: T) ⇒ sender ! moleExecs(key)
+    case "getKeys" ⇒ sender ! moleExecs.keys
   }
 }
 
@@ -20,9 +21,12 @@ class DataHandler[T, U](val system: ActorSystem) {
   val store = system.actorOf(Props[Datastore[T, U]])
 
   def add(key: T, data: U) {
-    store ! (key, data)
+    store ! ("put" -> (key -> data))
+    println("stored " + key + " " + data)
   }
 
-  def get(key: T) = Await.result((store ? key), Duration(1, SECONDS)).asInstanceOf[U]
+  def get(key: T) = Await.result(store ? ("get" -> key), Duration(1, SECONDS)).asInstanceOf[U]
+
+  def getKeys = Await.result(store ? "getKeys", Duration(1, SECONDS)).asInstanceOf[Iterable[T]]
 
 }
