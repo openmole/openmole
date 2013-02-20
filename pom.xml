@@ -135,7 +135,7 @@
     <lib.scala.major.version>2.10</lib.scala.major.version>
     <lib.de.erichseifert.gral.version>0.9-SNAPSHOT</lib.de.erichseifert.gral.version>
     <lib.runtime.jvm.version>7-u10</lib.runtime.jvm.version>
-    <lib.org.scalatra.version>2.2.0-RC3</lib.org.scalatra.version>
+    <lib.org.scalatra.version>2.2.0</lib.org.scalatra.version>
     <lib.org.eclipse.jetty.jetty-webapp.version>8.1.8.v20121106</lib.org.eclipse.jetty.jetty-webapp.version>
     <lib.org.eclipse.jetty.orbit.javax.servlet.version>3.0.0.v201112011016</lib.org.eclipse.jetty.orbit.javax.servlet.version>
     <plugin.scala-maven-plugin.version>3.1.0</plugin.scala-maven-plugin.version>

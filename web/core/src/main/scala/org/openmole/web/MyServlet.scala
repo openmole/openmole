@@ -1,5 +1,6 @@
 package org.openmole.web
 
+import _root_.akka.actor.{ Props, ActorSystem }
 import org.scalatra._
 import scalate.ScalateSupport
 import servlet.{ FileItem, FileUploadSupport }
@@ -9,16 +10,25 @@ import xml.XML
 import org.openmole.core.serializer._
 import org.openmole.core.implementation.mole.MoleExecution
 import com.thoughtworks.xstream.mapper.CannotResolveClassException
+import concurrent.{ ExecutionContext, Future }
+import org.openmole.web.{ DataHandler, Datastore }
 
 @MultipartConfig(maxFileSize = 3 * 1024 * 1024) //research scala multipart config
-class MyServlet extends ScalatraServlet with ScalateSupport with FileUploadSupport with FlashMapSupport {
-  get("/bort.html") {
+class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSupport with FileUploadSupport with FlashMapSupport with FutureSupport {
+
+  protected implicit def executor: ExecutionContext = system.dispatcher
+
+  get("/createMole") {
     contentType = "text/html"
-    ssp("/bort", "body" -> "<img src=\"images/small-bart.jpg\"></img>\n        <h1>Hello, world!</h1>\n        Say<a href=\"hello-scalate\">hello to Scalate</a>.")
+    new AsyncResult() {
+      def is = Future {
+        ssp("/createMole", "body" -> "Please upload a serialized mole execution below!")
+      }
+    }
   }
 
-  println("servlet init")
-  var moleExecs: Map[String, MoleExecution] = Map("test" -> null)
+  var moleExecs = Map.empty[String, MoleExecution]
+  val testMoleData = new DataHandler[String, MoleExecution](system)
 
   def getStatus(id: String): String = {
     val exec = moleExecs(id)
@@ -45,21 +55,22 @@ class MyServlet extends ScalatraServlet with ScalateSupport with FileUploadSuppo
     }
   }
 
-  post("/bort.html") {
+  post("/createMole") {
     contentType = "text/html"
-    val moleExec = processXMLFile[MoleExecution](fileParams.get("imgfile"))
+    val moleExec = processXMLFile[MoleExecution](fileParams.get("file"))
 
     moleExec match {
       case (Some(exec), _) ⇒ {
-        moleExecs = moleExecs + (exec.id -> exec)
+        moleExecs += (exec.id -> exec)
+        testMoleData.add(exec.id, exec)
         redirect("/execs")
       }
-      case (_, error) ⇒ ssp("/bort.html", "body" -> "", "errors" -> List(error))
+      case (_, error) ⇒ ssp("/createMole", "body" -> "Please upload a serialized mole execution below!", "errors" -> List(error))
     }
   }
 
-  post("/xml/bort") {
-    val moleExec = processXMLFile[MoleExecution](fileParams.get("imgfile"))
+  post("/xml/createMole") {
+    val moleExec = processXMLFile[MoleExecution](fileParams.get("file"))
 
     moleExec match {
       case (Some(exec), _) ⇒ {
@@ -87,6 +98,8 @@ class MyServlet extends ScalatraServlet with ScalateSupport with FileUploadSuppo
 
   get("/execs/:id") {
     contentType = "text/html"
+
+    println(testMoleData.get(params("id")).started)
 
     ssp("/executionData", "id" -> params("id"), "status" -> getStatus(params("id")))
   }

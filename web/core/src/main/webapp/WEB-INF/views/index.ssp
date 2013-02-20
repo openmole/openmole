@@ -6,6 +6,6 @@ Start Page
 #end
 
 <ul>
-    <li><a href="bort.html"> Create a new mole execution </a></li>
-    <li><a href="moles"> View currently running moles</a></li>
+    <li><a href="createMole"> Create a new mole execution </a></li>
+    <li><a href="execs"> View currently running moles</a></li>
 </ul>
