@@ -22,10 +22,10 @@ import org.openmole.ide.core.model.panel.IBuilderPanelUI
 import java.awt.{ Dimension, Color }
 
 abstract class BuilderPanel extends PluginPanel("wrap 2 ") with IBuilderPanelUI {
-  val nameTextField = new TextField()
+  val nameTextField = new TextField(10)
 
   contents += new Label("Name")
-  contents += new TextField(10)
+  contents += nameTextField
 
   preferredSize = new Dimension(300, 80)
 

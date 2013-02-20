@@ -16,13 +16,14 @@
  */
 package org.openmole.ide.core.implementation.builder
 
-import org.openmole.ide.core.implementation.dataproxy.SamplingCompositionDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.{ Proxys, SamplingCompositionDataProxyUI }
 import org.openmole.core.model.sampling.Sampling
 import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.implementation.registry._
 import org.openmole.ide.core.model.workflow.{ IMoleScene, ICapsuleUI }
 import org.openmole.core.implementation.puzzle.Puzzle
 import java.awt.Point
+import org.openmole.core.model.transition._
 import org.openmole.ide.core.model.sampling.IBuiltCompositionSampling
 import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
 import org.openmole.ide.core.implementation.sampling.{ FactorProxyUI, DomainProxyUI, SamplingProxyUI, SamplingCompositionDataUI }
@@ -86,7 +87,14 @@ object Builder {
                  lastPoint: Point,
                  uiMap: IPuzzleUIMap) = {
     val capsuleMap = p.slots.zipWithIndex.map { s ⇒
-      val cUI = SceneFactory.capsuleUI(scene, new Point(0, 0), Some(toTaskUI(s._1.capsule.task, uiMap))).addInputSlot(false)
+      val proxy = toTaskUI(s._1.capsule.task, uiMap)
+      val capsules = scene.manager.capsule(proxy)
+      val cUI = {
+        if (capsules.isEmpty) {
+          Proxys.tasks += proxy
+          SceneFactory.capsuleUI(scene, new Point(0, 0), Some(proxy)).addInputSlot(false)
+        } else capsules.head.islots.head
+      }
       if (s._2 == 0) scene.manager.setStartingCapsule(cUI.capsule)
       s._1.capsule -> cUI
     }.toMap
@@ -100,10 +108,12 @@ object Builder {
           case agg: IAggregationTransition ⇒ TransitionType.AGGREGATION_TRANSITION
           case end: IEndExplorationTransition ⇒ TransitionType.END_TRANSITION
           case _ ⇒ TransitionType.BASIC_TRANSITION
-        } //TransitionType.Value,
+        }, //TransitionType.Value,
         //  Some(t.condition.),
-        //uiMap.prototype(t.filter)} {t.filter}
-        )
+        li = t.filter match {
+          case b: Block[String] ⇒ b.filtered.toList.map { uiMap.prototype }
+          case _ ⇒ List()
+        })
     }
     CheckData.fullCheck(scene)
     scene.refresh

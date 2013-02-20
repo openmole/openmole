@@ -21,6 +21,7 @@ import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.data.IMoleDataUI
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 
 trait IMoleSceneManager {
   override def toString = name
@@ -46,6 +47,8 @@ trait IMoleSceneManager {
   def capsuleID(cv: ICapsuleUI): String
 
   def capsules: Map[String, ICapsuleUI]
+
+  def capsule(proxy: ITaskDataProxyUI): List[ICapsuleUI]
 
   def startingCapsule: Option[ICapsuleUI]
 

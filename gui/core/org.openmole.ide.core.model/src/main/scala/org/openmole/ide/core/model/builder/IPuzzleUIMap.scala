@@ -29,7 +29,7 @@ trait IPuzzleUIMap {
 
   def prototype[T](p: Prototype[T])(implicit t: Manifest[T]): IPrototypeDataProxyUI
 
-  def prototype[T](name: String)(implicit t: Manifest[T])
+  def prototype(name: String): IPrototypeDataProxyUI
 
   def sampling(s: Sampling, f: Unit ⇒ ISamplingCompositionDataUI): ISamplingCompositionDataProxyUI
 

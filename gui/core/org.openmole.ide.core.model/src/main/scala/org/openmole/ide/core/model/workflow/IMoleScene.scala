@@ -67,14 +67,6 @@ trait IMoleScene {
 
   def removeEdge(id: String)
 
-  //  def addToSelection(capsule: ICapsuleUI): Unit
-
-  //def clearSelection: Unit
-
-  //  def selection: Set[ICapsuleUI]
-
-  //  def clearRemovedCapsulesFromSelection: Unit
-
   override def toString = manager.name
 
   def toSceneCoordinates(p: Point): Point

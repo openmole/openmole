@@ -33,21 +33,17 @@ case class PuzzleUIMap(_task: Map[ITask, ITaskDataProxyUI],
                        _sampling: Map[Sampling, ISamplingCompositionDataProxyUI],
                        _mole: Map[IMole, IMoleScene]) extends IPuzzleUIMap {
 
-  def task(t: ITask, f: Unit ⇒ ITaskDataUI) = _task.getOrElse(t, new TaskDataProxyUI(f()))
+  def task(t: ITask, f: Unit ⇒ ITaskDataUI) =
+    _task.getOrElse(t, new TaskDataProxyUI(f()))
 
   def prototype[T](p: Prototype[T])(implicit t: Manifest[T]) = _prototype.getOrElse(p, new PrototypeDataProxyUI(GenericPrototypeDataUI.apply(p)))
 
-  def prototype[T](name: String)(implicit t: Manifest[T]) = _prototype.map { case (k, v) ⇒ k.name -> v }.getOrElse(name, new PrototypeDataProxyUI(GenericPrototypeDataUI(name)))
+  def prototype(name: String) = _prototype.map { case (k, v) ⇒ k.name -> v }.getOrElse(name, new PrototypeDataProxyUI(GenericPrototypeDataUI(name)))
 
   def sampling(s: Sampling, f: Unit ⇒ ISamplingCompositionDataUI) =
     _sampling.getOrElse(s, new SamplingCompositionDataProxyUI(f()))
 
   def mole(m: IMole) = _mole.getOrElse(m, ScenesManager.addBuildSceneContainer("A_NAME").scene)
 
-  def ::(uiMap: PuzzleUIMap): IPuzzleUIMap = uiMap.copy(_task ++ this._task,
-    _prototype ++ this._prototype,
-    _sampling ++ this._sampling,
-    _mole ++ this._mole)
-
-  def +=(s: Tuple2[Sampling, ISamplingCompositionDataProxyUI]) = copy(_sampling = _sampling ++ Map(s._1 -> s._2))
+  def +=(s: Tuple2[Sampling, ISamplingCompositionDataProxyUI]) = copy(_sampling = _sampling + (s._1 -> s._2))
 }
