@@ -30,7 +30,7 @@ package object base {
     name: String,
     model: Puzzle,
     sampling: Sampling)(implicit plugins: PluginSet): Puzzle =
-    new Capsule(ExplorationTask(name + "Exploration", sampling)) -< model
+    new Capsule(ExplorationTask(name + "Explore", sampling)) -< model
 
   def aggregation(
     name: String,

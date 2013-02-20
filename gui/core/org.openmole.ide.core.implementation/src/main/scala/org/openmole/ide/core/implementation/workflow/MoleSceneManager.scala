@@ -28,6 +28,8 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.misc.exception.UserBadDataError
 
 class MoleSceneManager(var name: String) extends IMoleSceneManager {
 
@@ -102,6 +104,8 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
   def connectors = _connectors.values
 
   def capsuleID(cv: ICapsuleUI) = _capsules.map { case (k, v) ⇒ v -> k }.get(cv).get
+
+  def capsule(proxy: ITaskDataProxyUI) = _capsules.toList.filter { _._2.dataUI.task == Some(proxy) }.map { _._2 }
 
   private def removeIncomingTransitions(capsule: ICapsuleUI) =
     _connectors.filter { _._2.target.capsule == capsule }.foreach { t ⇒
