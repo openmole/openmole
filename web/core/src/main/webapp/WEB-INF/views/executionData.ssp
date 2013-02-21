@@ -8,4 +8,4 @@
 #end
 
 <%@ val status: String %>
-<%= status %> - <a href="/execs/<%=id%>/start">start</a>
+<%= status %> - <a href="/start/<%=id%>">start</a>

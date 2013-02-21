@@ -19,6 +19,16 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
 
   protected implicit def executor: ExecutionContext = system.dispatcher
 
+  get("/index.html") {
+    contentType = "text/html"
+
+    new AsyncResult() {
+      val is = Future {
+        ssp("/index.ssp")
+      }
+    }
+  }
+
   get("/createMole") {
     contentType = "text/html"
     new AsyncResult() {
@@ -99,18 +109,6 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
     }
   }
 
-  get("/execs/:id/start") {
-    contentType = "text/html"
-
-    new AsyncResult() {
-      val is = Future {
-        testMoleData.get(params("id")).start
-
-        halt(status = 301, headers = Map("Location" -> url("execs/" + params("id"))))
-      }
-    }
-  }
-
   get("/execs") {
     contentType = "text/html"
 
@@ -124,9 +122,38 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
   get("/execs/:id") {
     contentType = "text/html"
 
+    val pRams = params("id")
+
     new AsyncResult() {
       val is = Future {
-        ssp("/executionData", "id" -> params("id"), "status" -> getStatus(testMoleData.get(params("id"))))
+        testMoleData.get(pRams) match {
+          case Some(exec) ⇒ {
+            println(getStatus(exec))
+            println(exec)
+            ssp("/executionData", "id" -> pRams, "status" -> getStatus(exec))
+          }
+          case _ ⇒ ssp("createMole", "body" -> "no such id")
+        }
+      }
+    }
+  }
+
+  get("/start/:id") {
+
+    println("here")
+
+    val x = params("id")
+    println("started starting")
+
+    new AsyncResult() {
+      override implicit def timeout = Duration(1, MINUTES)
+      val is = Future {
+
+        val exec = testMoleData.get(x)
+        println(exec)
+
+        exec foreach { x ⇒ x.start; println("started") }
+        //halt(status = 301, headers = Map("Location" -> ("/execs/" + x)))
       }
     }
   }
