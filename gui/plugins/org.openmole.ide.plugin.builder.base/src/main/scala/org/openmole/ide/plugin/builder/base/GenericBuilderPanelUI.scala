@@ -16,19 +16,13 @@
  */
 package org.openmole.ide.plugin.builder.base
 
-import org.openmole.core.implementation.puzzle.Puzzle
-import org.openmole.ide.core.model.workflow.IMoleSceneManager
-import org.openmole.ide.core.model.builder.IPuzzleUIMap
-import org.openmole.plugin.builder.base._
 import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.builder.BuilderPanel
+import scala.swing._
 
-class AggregationBuilderPanelUI(puzzleModel: Puzzle,
-                                puzzleAggregation: Puzzle,
-                                manager: IMoleSceneManager) extends GenericBuilderPanelUI {
+abstract class GenericBuilderPanelUI extends BuilderPanel {
+  val samplingComboBox = new MyComboBox(Proxys.samplings.toSeq)
+  contents += new Label("Sampling")
+  contents += samplingComboBox
 
-  override def build(uiMap: IPuzzleUIMap) = {
-    val samplingUI = Proxys.getOrGenerateSamplingComposition(samplingComboBox.selection.item)
-    val sampling = samplingUI.dataUI.coreObject
-    (aggregation(nameTextField.text, puzzleModel, sampling, puzzleAggregation)(manager.dataUI.pluginSet), uiMap += (sampling, samplingUI))
-  }
 }

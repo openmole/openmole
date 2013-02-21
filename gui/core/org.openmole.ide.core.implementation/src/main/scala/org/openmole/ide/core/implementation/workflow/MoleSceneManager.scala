@@ -165,6 +165,16 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
   def firstCapsules(caps: List[ICapsuleUI]) = caps.diff(transitions.map { _.target.capsule })
 
   def lastCapsules(caps: List[ICapsuleUI]) = caps.diff(transitions.map { _.source })
+
+  def connectedCapsulesFrom(caps: ICapsuleUI): List[ICapsuleUI] = {
+
+  def connectedCapsulesFrom0(caps:ICapsuleUI, connected: List[ICapsuleUI]): List[ICapsuleUI] = {
+    val connectors = capsuleConnections(caps.dataUI)
+    if (connectors.isEmpty) connected
+    else connectors.foreach{c=> connectedCapsulesFrom0(c.target.capsule,c.target.capsule +: connected)}
+  }
+        connectedCapsulesFrom0(caps,List(caps))
+  }
   /*
   def connectedSets(capsules: List[ICapsuleUI]): List[List[ICapsuleUI]] = {
     val _transitions = transitions
