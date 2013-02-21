@@ -149,13 +149,11 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
                 StatusBar().clear
                 val selection = ScenesManager.selection.toList
                 val firsts = scene.manager.firstCapsules(selection)
-                println("firsts " + firsts)
                 if (firsts.isEmpty) StatusBar().warn("A Wizard can not be applied on an empty sequence of Tasks")
                 else {
                   if (firsts.size > 1) StatusBar().warn("A Wizard can only be applied on a sequence of Tasks with only one first Capsule")
                   else {
                     val lasts = scene.manager.lastCapsules(selection)
-                    println("lastts " + lasts)
                     if (lasts.isEmpty) StatusBar().warn("A Wizard can not be applied on an empty sequence of Tasks")
                     else if (lasts.size > 1) StatusBar().warn("A Wizard can only be applied on a sequence of Tasks with only one last Capsule")
                     else {

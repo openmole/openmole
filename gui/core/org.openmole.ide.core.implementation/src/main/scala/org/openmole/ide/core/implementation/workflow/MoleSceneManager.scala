@@ -20,16 +20,12 @@ package org.openmole.ide.core.implementation.workflow
 import scala.collection.mutable.HashMap
 import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.data.IMoleDataUI
-import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.ide.core.implementation.data.MoleDataUI
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.misc.exception.UserBadDataError
 
 class MoleSceneManager(var name: String) extends IMoleSceneManager {
 
@@ -44,6 +40,9 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
   var dataUI: IMoleDataUI = new MoleDataUI
 
   def capsules = _capsules.toMap
+
+  def assignDefaultStartingCapsule =
+    if (!startingCapsule.isDefined) setStartingCapsule(_capsules.values.head)
 
   def setStartingCapsule(stCapsule: ICapsuleUI) = {
     startingCapsule match {
@@ -72,12 +71,16 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
       case None ⇒
       case Some(caps: ICapsuleUI) ⇒ if (capsules(nodeID) == caps) startingCapsule = None
     }
-    capsuleConnections(_capsules(nodeID).dataUI).foreach { x ⇒ connectorIDs -= x }
+    capsuleConnections(_capsules(nodeID).dataUI).foreach { x ⇒
+      removeConnector(connectorID(x))
+      connectorIDs -= x
+    }
     capsuleConnections -= _capsules(nodeID).dataUI
 
     removeIncomingTransitions(_capsules(nodeID))
 
     _capsules.remove(nodeID)
+    assignDefaultStartingCapsule
     nodeID
   }
 
@@ -108,7 +111,6 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
 
   private def removeIncomingTransitions(capsule: ICapsuleUI) =
     _connectors.filter { _._2.target.capsule == capsule }.foreach { t ⇒
-      println("remove " + t._1)
       removeConnector(t._1)
     }
 
@@ -124,7 +126,6 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
   def removeConnector(edgeID: String,
                       connector: IConnectorUI): Unit = {
     _connectors.remove(edgeID)
-    println("++ removeConnector " + connector.source.dataUI + " // " + capsuleConnections.contains(connector.source.dataUI))
     capsuleConnections.contains(connector.source.dataUI) match {
       case true ⇒ capsuleConnections(connector.source.dataUI) -= connector
       case _ ⇒
@@ -162,12 +163,7 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
 
   def capsuleGroups = connectedCapsules.filterNot(_._2.isEmpty).map { x ⇒ x._1 +: x._2 }.toList
 
-  def firstCapsules(caps: List[ICapsuleUI]) = {
-    println("xxx : " + caps)
-    println("yyy : " + transitions.map { _.target.capsule })
-    println("zzz : " + caps.diff(transitions.map { _.target.capsule }))
-    caps.diff(transitions.map { _.target.capsule })
-  }
+  def firstCapsules(caps: List[ICapsuleUI]) = caps.diff(transitions.map { _.target.capsule })
 
   def lastCapsules(caps: List[ICapsuleUI]) = caps.diff(transitions.map { _.source })
   /*
