@@ -73,7 +73,6 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
     }
     capsuleConnections(_capsules(nodeID).dataUI).foreach { x ⇒
       removeConnector(connectorID(x))
-      connectorIDs -= x
     }
     capsuleConnections -= _capsules(nodeID).dataUI
 
@@ -99,9 +98,7 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
 
   def connector(cID: String) = _connectors(cID)
 
-  def connectorIDs = _connectors.map { case (k, v) ⇒ v -> k }
-
-  def connectorID(c: IConnectorUI) = connectorIDs(c)
+  def connectorID(c: IConnectorUI) = _connectors.map { case (k, v) ⇒ v -> k }(c)
 
   def connectors = _connectors.values
 
