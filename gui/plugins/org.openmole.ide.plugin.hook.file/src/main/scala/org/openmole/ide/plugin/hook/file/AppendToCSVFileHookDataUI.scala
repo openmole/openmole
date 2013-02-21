@@ -24,7 +24,7 @@ import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.misc.tools.Counter
-import org.openmole.plugin.hook.file.AppendToCSVFileHook
+import org.openmole.plugin.hook.file._
 import org.openmole.ide.core.implementation.registry._
 
 class AppendToCSVFileHookDataUI(var activated: Boolean = true,
@@ -37,7 +37,7 @@ class AppendToCSVFileHookDataUI(var activated: Boolean = true,
   def coreClass = classOf[AppendToCSVFileHook]
 
   def coreObject(executionManager: IExecutionManager) = {
-    List(new AppendToCSVFileHook(
+    List(AppendToCSVFileHook(
       fileName,
       prototypes.map { executionManager.prototypeMapping }.toSeq: _*))
   }

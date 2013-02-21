@@ -17,7 +17,7 @@
 
 package org.openmole.core.implementation.mole
 
-import org.openmole.core.model.mole.{ ICapsule, IMole }
+import org.openmole.core.model.mole._
 import org.openmole.core.implementation.validation.TypeUtil
 import org.openmole.core.model.data.{ Context, Data }
 import org.openmole.core.model.task.ITask
@@ -48,11 +48,11 @@ import Strainer._
 
 trait Strainer extends ICapsule {
 
-  def received(mole: IMole) =
+  def received(mole: IMole, sources: Sources, hooks: Hooks) =
     if (this == mole.root) Iterable.empty
     else {
       val slots = mole.slots(this)
       val noStrainer = slots.filter(s ⇒ reachNoStrainer(mole)(s))
-      TypeUtil.intersect(noStrainer.map { TypeUtil.receivedTypes(mole) }).map(Data(_))
+      TypeUtil.intersect(noStrainer.map { TypeUtil.receivedTypes(mole, sources, hooks) }).map(Data(_))
     }
 }

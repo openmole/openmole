@@ -122,7 +122,7 @@ object CheckData extends Logger {
   }
 
   def buildUnknownPrototypes(mole: IMole, coreCapsule: ICapsule) = {
-    (coreCapsule.inputs(mole).toList ++ coreCapsule.outputs(mole)) foreach {
+    (coreCapsule.inputs(mole, Sources.empty, Hooks.empty).toList ++ coreCapsule.outputs(mole, Sources.empty, Hooks.empty)) foreach {
       d ⇒
         if (!KeyPrototypeGenerator.isPrototype(d.prototype)) {
           val (key, dim) = KeyGenerator(d.prototype)
@@ -137,7 +137,7 @@ object CheckData extends Logger {
     proxy: ITaskDataProxyUI,
     protoMapping: Map[PrototypeKey, IPrototypeDataProxyUI],
     coreCapsule: ICapsule): Unit = {
-    proxy.dataUI.updateImplicits(coreCapsule.inputs(mole).map {
+    proxy.dataUI.updateImplicits(coreCapsule.inputs(mole, Sources.empty, Hooks.empty).map {
       i ⇒
         KeyPrototypeGenerator(i.prototype)
     }.toList
@@ -150,7 +150,7 @@ object CheckData extends Logger {
       }.map {
         protoMapping
       },
-      coreCapsule.outputs(mole).map {
+      coreCapsule.outputs(mole, Sources.empty, Hooks.empty).map {
         i ⇒
           KeyPrototypeGenerator(i.prototype)
       }.toList
@@ -180,7 +180,7 @@ object CheckData extends Logger {
   def computePrototypeFromAggregation(mole: IMole) = {
     mole.transitions.foreach {
       _ match {
-        case t: ITransition with IAggregationTransition ⇒ t.data(mole).foreach {
+        case t: ITransition with IAggregationTransition ⇒ t.data(mole, Sources.empty, Hooks.empty).foreach {
           d ⇒
             val (protoType, dim) = KeyGenerator.stripArrays(d.prototype.`type`)
             val proto = new PrototypeDataProxyUI(GenericPrototypeDataUI(d.prototype.name, dim + 1)(protoType), generated = true)

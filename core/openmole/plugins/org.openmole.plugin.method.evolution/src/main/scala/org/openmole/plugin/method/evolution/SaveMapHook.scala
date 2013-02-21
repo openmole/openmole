@@ -18,7 +18,7 @@
 package org.openmole.plugin.method.evolution
 
 import algorithm.GA.GAAggregation
-import org.openmole.core.model.mole.Hook
+import org.openmole.core.model.mole.IHook
 import org.openmole.core.model.job.IMoleJob
 import fr.iscpif.mgo._
 import org.openmole.core.model.data._
@@ -29,21 +29,35 @@ import org.openmole.core.implementation.tools.VariableExpansion
 import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.script.GroovyProxyPool
 import org.openmole.core.implementation.tools._
+import org.openmole.core.implementation.mole._
+
+object SaveMapHook {
+
+  def apply(
+    individual: Prototype[Individual[algorithm.GA#G, algorithm.GA#P, algorithm.GA#F]],
+    x: String,
+    y: String,
+    aggregation: GAAggregation,
+    path: String) =
+    new HookBuilder {
+      addInput(individual.toArray)
+      def toHook = new SaveMapHook(individual, x, y, aggregation, path) with Built
+    }
+
+}
 
 //FIXME scala type system is not yet able to match the correct prototype (use a cast)
-sealed class SaveMapHook(
+abstract class SaveMapHook(
     val individual: Prototype[Individual[algorithm.GA#G, algorithm.GA#P, algorithm.GA#F]],
     val x: String,
     val y: String,
     val aggregation: GAAggregation,
     val path: String) extends Hook {
 
-  override def inputs = DataSet(individual.toArray)
-
   @transient lazy val xInterpreter = new GroovyProxyPool(x)
   @transient lazy val yInterpreter = new GroovyProxyPool(y)
 
-  def process(context: Context) {
+  def process(context: Context) = {
     val file = new File(VariableExpansion(context, path))
     file.createParentDir
     file.withWriter { w ⇒
@@ -53,6 +67,6 @@ sealed class SaveMapHook(
         yV = yInterpreter.execute(i.phenotype)
       } w.write("" + xV + "," + yV + "," + aggregation.aggregate(i.fitness) + "\n")
     }
-
+    context
   }
 }

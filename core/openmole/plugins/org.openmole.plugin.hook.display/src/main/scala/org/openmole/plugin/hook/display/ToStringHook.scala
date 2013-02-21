@@ -18,26 +18,31 @@
 package org.openmole.plugin.hook.display
 
 import java.io.PrintStream
-import org.openmole.core.model.mole._
 import org.openmole.core.model.data._
-import org.openmole.core.model.job._
-import org.openmole.core.model.mole._
-
+import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.data._
 
-import org.openmole.misc.tools.io.Prettifier._
+object ToStringHook {
 
-class ToStringHook(out: PrintStream, prototypes: Prototype[_]*) extends Hook {
+  def apply(prototypes: Prototype[_]*): HookBuilder = apply(System.out, prototypes: _*)
 
-  def this(prototypes: Prototype[_]*) = this(System.out, prototypes: _*)
+  def apply(out: PrintStream, prototypes: Prototype[_]*) =
+    new HookBuilder {
+      prototypes.foreach(addInput(_))
+
+      def toHook = new ToStringHook(out, prototypes: _*) with Built
+    }
+
+}
+
+abstract class ToStringHook(out: PrintStream, prototypes: Prototype[_]*) extends Hook {
 
   override def process(context: Context) = {
     if (!prototypes.isEmpty) {
       val filtered = Context(prototypes.flatMap(p ⇒ context.variable(p.asInstanceOf[Prototype[Any]])))
       out.println(filtered.toString)
     } else out.println(context.toString)
+    context
   }
-
-  override def inputs = DataSet(prototypes)
 
 }

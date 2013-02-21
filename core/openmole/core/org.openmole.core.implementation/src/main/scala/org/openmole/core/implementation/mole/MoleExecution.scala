@@ -47,14 +47,35 @@ import javax.xml.bind.annotation.XmlTransient
 import org.openmole.core.model.execution.Environment
 import collection.mutable
 
-object MoleExecution extends Logger
+object MoleExecution extends Logger {
+
+  def apply(
+    mole: IMole,
+    sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
+    hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
+    selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
+    grouping: Map[ICapsule, Grouping] = Map.empty,
+    profiler: Profiler = Profiler.empty,
+    implicits: Context = Context.empty,
+    seed: Long = Workspace.newSeed) =
+    new MoleExecution(
+      mole,
+      sources.groupBy { case (c, _) ⇒ c }.map { case (c, ss) ⇒ c -> ss.map(_._2) }.withDefault(_ ⇒ List.empty),
+      hooks.groupBy { case (c, _) ⇒ c }.map { case (c, hs) ⇒ c -> hs.map { _._2 } }.withDefault(_ ⇒ List.empty),
+      selection,
+      grouping,
+      profiler,
+      implicits,
+      seed)
+
+}
 
 import MoleExecution._
 
 class MoleExecution(
     val mole: IMole,
-    val sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
-    val hooks: Iterable[(ICapsule, Hook)] = Iterable.empty,
+    val sources: Sources = Sources.empty,
+    val hooks: Hooks = Hooks.empty,
     val selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
     val grouping: Map[ICapsule, Grouping] = Map.empty,
     val profiler: Profiler = Profiler.empty,
@@ -72,12 +93,6 @@ class MoleExecution(
 
   private val ticketNumber = Ref(0L)
   private val jobId = Ref(0L)
-
-  @transient lazy val indexedSources =
-    sources.groupBy { case (c, _) ⇒ c }.map { case (c, ss) ⇒ c -> ss.map(_._2) }.withDefault(_ ⇒ List.empty)
-
-  @transient lazy val indexedHooks =
-    hooks.groupBy { case (c, _) ⇒ c }.map { case (c, hs) ⇒ c -> hs.map { _._2 } }.withDefault(_ ⇒ List.empty)
 
   private val waitingJobs: TMap[ICapsule, TMap[IMoleJobGroup, Ref[List[IMoleJob]]]] =
     TMap(grouping.map { case (c, g) ⇒ c -> TMap.empty[IMoleJobGroup, Ref[List[IMoleJob]]] }.toSeq: _*)
@@ -124,6 +139,7 @@ class MoleExecution(
           case None ⇒ LocalEnvironment
         }
       env.submit(job)
+      EventDispatcher.trigger(this, new IMoleExecution.JobSubmitted(job, capsule, env))
     }
 
   def submitAll =
@@ -151,7 +167,7 @@ class MoleExecution(
 
   override def start = {
     if (!_started.getUpdate(_ ⇒ true)) {
-      val validationErrors = Validation(mole, implicits, indexedSources, indexedHooks)
+      val validationErrors = Validation(mole, implicits, sources, hooks)
       if (!validationErrors.isEmpty) throw new UserBadDataError("Formal validation of your mole has failed, several errors have been found: " + validationErrors.mkString("\n"))
       start(Context.empty)
     }

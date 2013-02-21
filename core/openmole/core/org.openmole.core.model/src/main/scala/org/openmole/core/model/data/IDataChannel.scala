@@ -66,7 +66,7 @@ trait IDataChannel {
    *
    * @return the transmitted data
    */
-  def data(mole: IMole): Iterable[Data[_]]
+  def data(mole: IMole, sources: Sources, hooks: Hooks): Iterable[Data[_]]
 
   /**
    * Provides the variable for future consuption by the matching execution of
@@ -74,7 +74,6 @@ trait IDataChannel {
    *
    * @param context the context containing the variables
    * @param ticket the ticket of the current execution
-   * @param toClone the set of variable wich should be cloned
    * @param moleExecution the current mole execution
    */
   def provides(context: Context, ticket: ITicket, moleExecution: IMoleExecution)
@@ -86,6 +85,6 @@ trait IDataChannel {
    * @param moleExecution the current mole execution
    * @return the variables wich have been transmited through this data channel
    */
-  def consums(sticket: ITicket, moleExecution: IMoleExecution): Iterable[Variable[_]]
+  def consums(ticket: ITicket, moleExecution: IMoleExecution): Iterable[Variable[_]]
 
 }

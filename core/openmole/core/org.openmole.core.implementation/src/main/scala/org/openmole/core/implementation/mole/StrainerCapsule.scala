@@ -35,18 +35,8 @@ object StrainerCapsule {
     override def outputs = task.outputs
     override def plugins = task.plugins
 
-    override def perform(context: Context) =
-      try Success(process(context))
-      catch {
-        case t: Throwable ⇒ Failure(t)
-      }
-
-    override def process(context: Context) =
-      task.perform(context) match {
-        case Success(c) ⇒ context + c
-        case Failure(t) ⇒ throw t
-      }
-
+    override def perform(context: Context) = process(context)
+    override def process(context: Context) = context + task.perform(context)
     override def parameters = task.parameters
   }
 
@@ -56,12 +46,12 @@ import StrainerCapsule._
 
 class StrainerCapsule(task: ITask) extends Capsule(new StrainerCapsule.StrainerTaskDecorator(task)) with Strainer {
 
-  override def inputs(mole: IMole) =
-    received(mole).filterNot(d ⇒ super.inputs(mole).contains(d.prototype.name)) ++
-      super.inputs(mole)
+  override def inputs(mole: IMole, sources: Sources, hooks: Hooks) =
+    received(mole, sources, hooks).filterNot(d ⇒ super.inputs(mole, sources, hooks).contains(d.prototype.name)) ++
+      super.inputs(mole, sources, hooks)
 
-  override def outputs(mole: IMole) =
-    received(mole).filterNot(d ⇒ super.outputs(mole).contains(d.prototype.name)) ++
-      super.outputs(mole)
+  override def outputs(mole: IMole, sources: Sources, hooks: Hooks) =
+    received(mole, sources, hooks).filterNot(d ⇒ super.outputs(mole, sources, hooks).contains(d.prototype.name)) ++
+      super.outputs(mole, sources, hooks)
 
 }

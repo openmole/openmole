@@ -19,6 +19,7 @@ package org.openmole.core.implementation.tools
 
 import org.openmole.core.model.data._
 import InputOutputCheck._
+import org.openmole.misc.exception.InternalProcessingError
 
 object InputOutputCheck {
 
@@ -82,5 +83,24 @@ trait InputOutputCheck {
             if (parameter.`override` || !context.contains(parameter.variable.prototype.name)) Some(parameter.variable)
             else Option.empty[Variable[_]]
         }
+
+  protected def process(context: Context): Context
+
+  def perform(context: Context) = {
+    val initializedContext = initializeInput(context)
+    val inputErrors = verifyInput(initializedContext)
+    if(!inputErrors.isEmpty) throw new InternalProcessingError(s"Input errors have been found in ${this}: ${inputErrors.mkString(", ")}.")
+
+    val result =
+      try context + process(initializedContext)
+      catch {
+        case e: Throwable ⇒
+          throw new InternalProcessingError(e, s"Error for context values in ${this} ${context.prettified()}")
+      }
+
+    val outputErrors = verifyOutput(result)
+    if (!outputErrors.isEmpty) throw new InternalProcessingError(s"Output errors in ${this}: ${outputErrors.mkString(", ")}.")
+    filterOutput(result)
+  }
 
 }

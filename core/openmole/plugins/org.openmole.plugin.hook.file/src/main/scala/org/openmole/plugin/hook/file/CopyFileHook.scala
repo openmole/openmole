@@ -19,15 +19,28 @@ package org.openmole.plugin.hook.file
 
 import java.io.File
 
-import org.openmole.core.model.mole._
 import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
-import org.openmole.core.model.job._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.implementation.tools._
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.core.implementation.mole._
 
-class CopyFileHook(
+object CopyFileHook {
+
+  def apply(
+    filePrototype: Prototype[File],
+    destination: String,
+    remove: Boolean = false,
+    compress: Boolean = false) =
+    new HookBuilder {
+      addInput(filePrototype)
+      def toHook = new CopyFileHook(filePrototype, destination, remove, compress) with Built
+    }
+
+}
+
+abstract class CopyFileHook(
     filePrototype: Prototype[File],
     destination: String,
     remove: Boolean = false,
@@ -45,8 +58,7 @@ class CopyFileHook(
         if (remove) from.recursiveDelete
       case None ⇒ throw new UserBadDataError("No variable " + filePrototype + " found.")
     }
+    context
   }
-
-  override def inputs = DataSet(filePrototype)
 
 }

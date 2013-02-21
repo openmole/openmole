@@ -56,14 +56,14 @@ object Puzzle {
 }
 
 case class Puzzle(
-    val first: Slot,
-    val lasts: Iterable[ICapsule],
-    val transitions: Iterable[ITransition],
-    val dataChannels: Iterable[IDataChannel],
-    val sources: Iterable[(ICapsule, ISource)],
-    val hooks: Iterable[(ICapsule, Hook)],
-    val selection: Map[ICapsule, EnvironmentSelection],
-    val grouping: Map[ICapsule, Grouping]) {
+    first: Slot,
+    lasts: Iterable[ICapsule],
+    transitions: Iterable[ITransition],
+    dataChannels: Iterable[IDataChannel],
+    sources: Iterable[(ICapsule, ISource)],
+    hooks: Iterable[(ICapsule, IHook)],
+    selection: Map[ICapsule, EnvironmentSelection],
+    grouping: Map[ICapsule, Grouping]) {
 
   def this(p: Puzzle) =
     this(
@@ -79,20 +79,17 @@ case class Puzzle(
   def toMole = new Mole(first.capsule, transitions, dataChannels)
 
   def toExecution =
-    new MoleExecution(toMole, sources, hooks, selection, grouping)
-
-  def toExecution(profiler: Profiler) =
-    new MoleExecution(toMole, sources, hooks, selection, grouping, profiler)
+    MoleExecution(toMole, sources, hooks, selection, grouping)
 
   def toExecution(
     sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
-    hooks: Iterable[(ICapsule, Hook)] = Iterable.empty,
+    hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
     selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
     grouping: Map[ICapsule, Grouping] = Map.empty,
     profiler: Profiler = Profiler.empty,
     implicits: Context = Context.empty,
     seed: Long = Workspace.newSeed) =
-    new MoleExecution(toMole, this.sources ++ sources, this.hooks ++ hooks, this.selection ++ selection, this.grouping ++ grouping, profiler, implicits, seed)
+    MoleExecution(toMole, this.sources ++ sources, this.hooks ++ hooks, this.selection ++ selection, this.grouping ++ grouping, profiler, implicits, seed)
 
   def +(p: Puzzle) = Puzzle.merge(this, p)
 

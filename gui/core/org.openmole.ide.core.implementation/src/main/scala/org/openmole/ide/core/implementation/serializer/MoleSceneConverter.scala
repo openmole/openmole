@@ -117,7 +117,7 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
         case _ ⇒
       }
 
-      //Hook
+      //IHook
       view.dataUI.hooks.values.foreach { hf ⇒
         writer.startNode("hook")
         writer.addAttribute("id", hf.id.toString)
@@ -212,7 +212,7 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
                   case Some(h: IHookDataUI) ⇒
                     caps.dataUI.hooks += h.coreClass -> h
                     caps.hooked(true)
-                  case None ⇒ errors += "An error occured when loading the Hook for a capsule. No Hook has been set."
+                  case None ⇒ errors += "An error occured when loading the IHook for a capsule. No IHook has been set."
                 }
               case _ ⇒ StatusBar().block("Unknown balise " + n1)
             }

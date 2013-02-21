@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 09/01/13 Romain Reuillon
+ * Copyright (C) 20/02/13 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,18 +17,9 @@
 
 package org.openmole.core.implementation.mole
 
-import org.openmole.core.model.mole._
-import org.openmole.core.model.task._
-import org.openmole.core.implementation.data._
+import org.openmole.core.implementation.tools.InputOutputBuilder
+import org.openmole.core.model.mole.IHook
 
-object InputStrainerCapsule {
-  def apply(task: ITask) = new InputStrainerCapsule(task)
-}
-
-class InputStrainerCapsule(task: ITask) extends Capsule(task) with Strainer {
-
-  override def inputs(mole: IMole, sources: Sources, hooks: Hooks) =
-    received(mole, sources, hooks).filterNot(d ⇒ super.inputs(mole, sources, hooks).contains(d.prototype.name)) ++
-      super.inputs(mole, sources, hooks)
-
+abstract class HookBuilder extends InputOutputBuilder {
+  def toHook: IHook
 }

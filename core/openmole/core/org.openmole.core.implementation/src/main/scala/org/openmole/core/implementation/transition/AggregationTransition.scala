@@ -34,7 +34,8 @@ import org.openmole.misc.tools.service.LockUtil._
 class AggregationTransition(start: ICapsule, end: Slot, condition: ICondition = True, filter: Filter[String] = Filter.empty, trigger: ICondition = ICondition.False) extends Transition(start, end, condition, filter) with IAggregationTransition {
 
   override def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = {
-    val mole = subMole.moleExecution.mole
+    val moleExecution = subMole.moleExecution
+    val mole = moleExecution.mole
     val parentTicket = ticket.parent.getOrElse(throw new UserBadDataError("Aggregation transition should take place after an exploration."))
 
     if (!subMole.canceled && !hasBeenPerformed(subMole, parentTicket)) {
@@ -43,8 +44,8 @@ class AggregationTransition(start: ICapsule, end: Slot, condition: ICondition = 
           results ++= context.values
 
           if (trigger != ICondition.False) {
-            val toArrayManifests = Map.empty[String, Manifest[_]] ++ start.outputs(mole).toList.map { d ⇒ d.prototype.name -> d.prototype.`type` }
-            val context = ContextAggregator.aggregate(start.outputs(mole), toArrayManifests, results.toIterable)
+            val toArrayManifests = Map.empty[String, Manifest[_]] ++ start.outputs(mole, moleExecution.sources, moleExecution.hooks).toList.map { d ⇒ d.prototype.name -> d.prototype.`type` }
+            val context = ContextAggregator.aggregate(start.outputs(mole, moleExecution.sources, moleExecution.hooks), toArrayManifests, results.toIterable)
             if (trigger.evaluate(context)) {
               aggregate(subMole, ticket)
               if (allAggregationTransitionsPerformed(subMole, parentTicket)) subMole.cancel

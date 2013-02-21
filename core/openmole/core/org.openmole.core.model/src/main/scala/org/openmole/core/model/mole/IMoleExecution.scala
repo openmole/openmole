@@ -18,7 +18,7 @@
 package org.openmole.core.model.mole
 
 import org.openmole.core.model.job.State.State
-import org.openmole.core.model.tools.IRegistryWithTicket
+import org.openmole.core.model.tools.{ExceptionEvent, IRegistryWithTicket}
 import org.openmole.misc.eventdispatcher.Event
 import java.util.logging.Level
 import org.openmole.core.model.data.Context
@@ -31,16 +31,20 @@ import scala.collection.mutable.Buffer
 import org.openmole.core.model.execution.Environment
 
 object IMoleExecution {
+
   class Starting extends Event[IMoleExecution]
   class Finished extends Event[IMoleExecution]
-  case class OneJobStatusChanged(moleJob: IMoleJob, newState: State, oldState: State) extends Event[IMoleExecution]
-  case class OneJobSubmitted(moleJob: IMoleJob) extends Event[IMoleExecution]
-  case class JobInCapsuleFinished(moleJob: IMoleJob, capsule: ICapsule) extends Event[IMoleExecution]
-  case class JobInCapsuleStarting(moleJob: IMoleJob, capsule: ICapsule) extends Event[IMoleExecution]
-  case class ExceptionRaised(moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution]
-  case class SourceExceptionRaised(source: ISource, capsule: ICapsule, exception: Throwable, level: Level) extends Event[IMoleExecution]
-  case class HookExceptionRaised(hook: Hook, moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution]
-  case class ProfilerExceptionRaised(profiler: Profiler, moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution]
+  case class JobStatusChanged(moleJob: IMoleJob, capsule: ICapsule, newState: State, oldState: State) extends Event[IMoleExecution]
+  case class JobCreated(moleJob: IMoleJob, capsule: ICapsule) extends Event[IMoleExecution]
+  case class JobSubmitted(moleJob: IJob, capsule: ICapsule, environment: Environment) extends Event[IMoleExecution]
+  case class JobFinished(moleJob: IMoleJob, capsule: ICapsule) extends Event[IMoleExecution]
+  case class JobFailed(moleJob: IMoleJob, capsule: ICapsule, exception: Throwable) extends Event[IMoleExecution] with ExceptionEvent {
+    def level = Level.SEVERE
+  }
+  case class ExceptionRaised(moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution] with ExceptionEvent
+  case class SourceExceptionRaised(source: ISource, capsule: ICapsule, exception: Throwable, level: Level) extends Event[IMoleExecution] with ExceptionEvent
+  case class HookExceptionRaised(hook: IHook, moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution] with ExceptionEvent
+  case class ProfilerExceptionRaised(profiler: Profiler, moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution] with ExceptionEvent
 }
 
 trait IMoleExecution {
@@ -54,8 +58,8 @@ trait IMoleExecution {
   def exceptions: Iterable[Throwable]
 
   def mole: IMole
-  def hooks: Iterable[(ICapsule, Hook)]
-  def sources: Iterable[(ICapsule, ISource)]
+  def hooks: Hooks
+  def sources: Sources
   def profiler: Profiler
   def implicits: Context
 

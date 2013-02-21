@@ -32,7 +32,7 @@ import org.junit.runner.RunWith
 @RunWith(classOf[JUnitRunner])
 class HookSpec extends FlatSpec with ShouldMatchers {
 
-  "A capsule execution hook" should "intersept the execution of a capsule" in {
+  "A capsule execution hook" should "intercept the execution of a capsule" in {
     var executed = false
 
     val p = Prototype[String]("p")
@@ -45,22 +45,25 @@ class HookSpec extends FlatSpec with ShouldMatchers {
 
     val t1c = new Capsule(t1)
 
-    val hook = new Hook {
-      override def process(context: Context) = {
-        context.contains(p) should equal(true)
-        context(p) should equal("test")
-        executed = true
+    val hook = new HookBuilder {
+      def toHook = new IHook with Built {
+        override def perform(context: Context) = {
+          context.contains(p) should equal(true)
+          context(p) should equal("test")
+          executed = true
+          context
+        }
       }
     }
 
-    val ex = new MoleExecution(new Mole(t1c), hooks = List(t1c -> hook))
+    val ex = MoleExecution(new Mole(t1c), hooks = List(t1c -> hook))
 
     ex.start.waitUntilEnded
 
     executed should equal(true)
   }
 
-  "A capsule execution hook" should "intersept the execution of a master capsule" in {
+  "A capsule execution hook" should "intercept the execution of a master capsule" in {
     var executed = false
 
     val p = Prototype[String]("p")
@@ -74,15 +77,18 @@ class HookSpec extends FlatSpec with ShouldMatchers {
 
     val t1c = new MasterCapsule(t1)
 
-    val hook = new Hook {
-      override def process(context: Context) = {
-        context.contains(p) should equal(true)
-        context(p) should equal("test")
-        executed = true
+    val hook = new HookBuilder {
+      def toHook = new IHook with Built {
+        override def perform(context: Context) = {
+          context.contains(p) should equal(true)
+          context(p) should equal("test")
+          executed = true
+          context
+        }
       }
     }
 
-    val ex = new MoleExecution(new Mole(t1c), hooks = List(t1c -> hook))
+    val ex = MoleExecution(new Mole(t1c), hooks = List(t1c -> hook))
 
     ex.start.waitUntilEnded
 

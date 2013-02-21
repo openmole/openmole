@@ -39,9 +39,9 @@ trait ICapsuleDataUI {
 
   def environment_=(e: Option[IEnvironmentDataProxyUI])
 
-  def hooks: HashMap[Class[_ <: Hook], IHookDataUI]
+  def hooks: HashMap[Class[_ <: IHook], IHookDataUI]
 
-  def hooks_=(hm: HashMap[Class[_ <: Hook], IHookDataUI])
+  def hooks_=(hm: HashMap[Class[_ <: IHook], IHookDataUI])
 
   def unhookAll: Unit
 

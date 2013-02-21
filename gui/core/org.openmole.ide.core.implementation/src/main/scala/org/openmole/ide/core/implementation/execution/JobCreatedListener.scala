@@ -18,14 +18,14 @@
 package org.openmole.ide.core.implementation.execution
 
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.mole.IMoleExecution.OneJobSubmitted
+import org.openmole.core.model.mole.IMoleExecution.JobCreated
 import org.openmole.misc.eventdispatcher._
 import org.openmole.core.model.job.State._
 
 class JobCreatedListener(exeManager: ExecutionManager) extends EventListener[IMoleExecution] {
   override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = {
     event match {
-      case x: OneJobSubmitted ⇒
+      case x: JobCreated ⇒
         exeManager.wfPiePlotter.update(READY, exeManager.status(READY).incrementAndGet)
     }
   }

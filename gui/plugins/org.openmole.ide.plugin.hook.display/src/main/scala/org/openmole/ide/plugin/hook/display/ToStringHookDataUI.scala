@@ -20,7 +20,7 @@ package org.openmole.ide.plugin.hook.display
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.misc.tools.Counter
-import org.openmole.plugin.hook.display.ToStringHook
+import org.openmole.plugin.hook.display._
 import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.ide.core.implementation.registry._
 import org.openmole.core.model.mole.ICapsule
@@ -35,7 +35,7 @@ class ToStringHookDataUI(var activated: Boolean = true,
 
   def coreObject(executionManager: IExecutionManager) = {
 
-    List(new ToStringHook(
+    List(ToStringHook(
       executionManager.printStream,
       toBeHooked.map { executionManager.prototypeMapping }.toSeq: _*))
   }
