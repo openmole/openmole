@@ -128,9 +128,9 @@ class ExecutionManager(manager: IMoleSceneManager,
 
     moleExecution = buildMoleExecution(hooks, groupings) match {
       case Right((mExecution, environments)) ⇒
-        EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.OneJobStatusChanged])
+        EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.JobStatusChanged])
         EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.Finished])
-        EventDispatcher.listen(mExecution, new JobCreatedListener(this), classOf[IMoleExecution.OneJobSubmitted])
+        EventDispatcher.listen(mExecution, new JobCreatedListener(this), classOf[IMoleExecution.JobCreated])
         EventDispatcher.listen(mExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ExceptionRaised])
         environments.foreach {
           e ⇒

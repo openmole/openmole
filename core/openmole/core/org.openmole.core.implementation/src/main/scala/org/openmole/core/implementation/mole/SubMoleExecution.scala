@@ -201,14 +201,14 @@ class SubMoleExecution(
       capsule match {
         case c: IMasterCapsule ⇒
           def stateChanged(job: IMoleJob, oldState: State, newState: State) =
-            EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobStatusChanged(job, newState, oldState))
+            EventDispatcher.trigger(moleExecution, new IMoleExecution.JobStatusChanged(job, newState, oldState))
 
           background {
             masterCapsuleSemaphore {
               val savedContext = masterCapsuleRegistry.remove(c, ticket.parentOrException).getOrElse(Context.empty)
               val moleJob: IMoleJob = new MoleJob(capsule.task, implicits + sourced + context + savedContext, moleExecution.nextJobId, stateChanged)
               EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleStarting(moleJob, capsule))
-              EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobSubmitted(moleJob))
+              EventDispatcher.trigger(moleExecution, new IMoleExecution.JobCreated(moleJob))
               addJob(moleJob, capsule, ticket)
               moleJob.perform
               masterCapsuleRegistry.register(c, ticket.parentOrException, c.toPersist(moleJob.context))
@@ -217,14 +217,14 @@ class SubMoleExecution(
           }
         case _ ⇒
           def stateChanged(job: IMoleJob, oldState: State, newState: State) = {
-            EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobStatusChanged(job, newState, oldState))
+            EventDispatcher.trigger(moleExecution, new IMoleExecution.JobStatusChanged(job, newState, oldState))
             if (newState.isFinal) finalState(job, newState)
           }
 
           val moleJob: IMoleJob = new MoleJob(capsule.task, implicits + sourced + context, moleExecution.nextJobId, stateChanged)
           addJob(moleJob, capsule, ticket)
           EventDispatcher.trigger(moleExecution, new IMoleExecution.JobInCapsuleStarting(moleJob, capsule))
-          EventDispatcher.trigger(moleExecution, new IMoleExecution.OneJobSubmitted(moleJob))
+          EventDispatcher.trigger(moleExecution, new IMoleExecution.JobCreated(moleJob))
           moleExecution.group(moleJob, capsule, this)
       }
 

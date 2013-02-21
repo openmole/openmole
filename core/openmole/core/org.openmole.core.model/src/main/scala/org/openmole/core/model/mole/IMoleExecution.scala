@@ -33,8 +33,8 @@ import org.openmole.core.model.execution.Environment
 object IMoleExecution {
   class Starting extends Event[IMoleExecution]
   class Finished extends Event[IMoleExecution]
-  case class OneJobStatusChanged(moleJob: IMoleJob, newState: State, oldState: State) extends Event[IMoleExecution]
-  case class OneJobSubmitted(moleJob: IMoleJob) extends Event[IMoleExecution]
+  case class JobStatusChanged(moleJob: IMoleJob, newState: State, oldState: State) extends Event[IMoleExecution]
+  case class JobCreated(moleJob: IMoleJob) extends Event[IMoleExecution]
   case class JobInCapsuleFinished(moleJob: IMoleJob, capsule: ICapsule) extends Event[IMoleExecution]
   case class JobInCapsuleStarting(moleJob: IMoleJob, capsule: ICapsule) extends Event[IMoleExecution]
   case class ExceptionRaised(moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution]
