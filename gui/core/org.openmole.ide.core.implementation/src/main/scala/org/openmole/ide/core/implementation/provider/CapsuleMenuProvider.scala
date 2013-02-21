@@ -150,6 +150,7 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
                 val selection = ScenesManager.selection.toList
                 val firsts = scene.manager.firstCapsules(selection)
                 println("firsts " + firsts)
+                firsts.foreach { x ⇒ println("GROUP: " + scene.manager.connectedCapsulesFrom(x)) }
                 if (firsts.isEmpty) StatusBar().warn("A Wizard can not be applied on an empty sequence of Tasks")
                 else {
                   if (firsts.size > 1) StatusBar().warn("A Wizard can only be applied on a sequence of Tasks with only one first Capsule")
@@ -158,7 +159,6 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
                     if (lasts.isEmpty) StatusBar().warn("A Wizard can not be applied on an empty sequence of Tasks")
                     else if (lasts.size > 1) StatusBar().warn("A Wizard can only be applied on a sequence of Tasks with only one last Capsule")
                     else {
-                      println("clusters : " + scene.manager.capsuleGroups)
                       val (puzzle, uiMap) = Builder.puzzle(selection, firsts.head, lasts)
                       val panel = b.buildPanelUI(puzzle, scene.manager)
                       if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(panel) {

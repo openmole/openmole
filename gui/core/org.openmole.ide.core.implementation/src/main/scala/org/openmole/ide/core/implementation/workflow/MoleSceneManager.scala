@@ -153,49 +153,20 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
     }
   }.toList
 
-  def connectedCapsules: Map[ICapsuleUI, List[ICapsuleUI]] = {
-    val _transitions = transitions
-    val targetCapsules = _capsules.map { c ⇒ c._2 -> _transitions.filter { _.source == c._2 }.map { _.target.capsule }.toList }.toList
-    val sourceCapsules = _capsules.map { c ⇒ c._2 -> _transitions.filter { _.target.capsule == c._2 }.map { _.source }.toList }
-    (targetCapsules ++ sourceCapsules).groupBy(_._1).map { case (k, v) ⇒ k -> v.flatMap { _._2 } }
-  }
-
-  def capsuleGroups = connectedCapsules.filterNot(_._2.isEmpty).map { x ⇒ x._1 +: x._2 }.toList
-
   def firstCapsules(caps: List[ICapsuleUI]) = caps.diff(transitions.map { _.target.capsule })
 
   def lastCapsules(caps: List[ICapsuleUI]) = caps.diff(transitions.map { _.source })
 
   def connectedCapsulesFrom(caps: ICapsuleUI): List[ICapsuleUI] = {
 
-  def connectedCapsulesFrom0(caps:ICapsuleUI, connected: List[ICapsuleUI]): List[ICapsuleUI] = {
-    val connectors = capsuleConnections(caps.dataUI)
-    if (connectors.isEmpty) connected
-    else connectors.foreach{c=> connectedCapsulesFrom0(c.target.capsule,c.target.capsule +: connected)}
-  }
-        connectedCapsulesFrom0(caps,List(caps))
-  }
-  /*
-  def connectedSets(capsules: List[ICapsuleUI]): List[List[ICapsuleUI]] = {
-    val _transitions = transitions
-
-    def findGroup(capsule: ICapsuleUI, gs: List[List[ICapsuleUI]], ind: Int): Int = {
-       if (gs.isEmpty) -1
+    def connectedCapsulesFrom0(toVisit: List[ICapsuleUI], connected: List[ICapsuleUI]): List[ICapsuleUI] = {
+      if (toVisit.isEmpty) connected
       else {
-         _transitions.filter{ t=>
-           t.source == capsule && t.target == gs.head
-
-         }
-       }
-    }
-
-    def connectedSets0(capsules0: List[ICapsuleUI], groups: List[List[ICapsuleUI]]) = {
-      if (capsules0.isEmpty) groups
-      else {
-           findGroup(capsules0.head,groups,0)
+        val head = toVisit.head
+        val connectors = capsuleConnections(head.dataUI)
+        connectedCapsulesFrom0(toVisit.tail ::: connectors.map { _.target.capsule }.toList, connected :+ head)
       }
     }
-     connectedSets0(capsules,List())
-
-  }*/
+    connectedCapsulesFrom0(List(caps), List())
+  }
 }

@@ -69,7 +69,6 @@ object Builder {
                  firstPoint: Point,
                  lastPoint: Point,
                  uiMap: IPuzzleUIMap) = {
-    println("groups :: " + scene.manager.capsuleGroups)
     val capsuleMap = p.slots.zipWithIndex.map { s ⇒
       val proxy = toTaskUI(s._1.capsule.task, uiMap)
       val capsules = scene.manager.capsule(proxy)
