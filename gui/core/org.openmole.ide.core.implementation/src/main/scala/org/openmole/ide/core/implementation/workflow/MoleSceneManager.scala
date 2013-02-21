@@ -98,7 +98,9 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
 
   def connector(cID: String) = _connectors(cID)
 
-  def connectorID(c: IConnectorUI) = _connectors.map { case (k, v) ⇒ v -> k }(c)
+  private def connectorIDs = _connectors.map { case (k, v) ⇒ v -> k }
+
+  def connectorID(c: IConnectorUI) = connectorIDs(c)
 
   def connectors = _connectors.values
 
