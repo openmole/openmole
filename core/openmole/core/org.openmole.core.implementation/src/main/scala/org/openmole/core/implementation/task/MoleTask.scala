@@ -57,7 +57,7 @@ sealed abstract class MoleTask(
 
     override def triggered(obj: IMoleExecution, ev: Event[IMoleExecution]) = synchronized {
       ev match {
-        case ev: IMoleExecution.JobInCapsuleFinished ⇒
+        case ev: IMoleExecution.JobFinished ⇒
           if (ev.capsule == last) lastContext = Some(ev.moleJob.context)
         case ev: IMoleExecution.ExceptionRaised ⇒
           exceptions ::= ev.exception
@@ -79,7 +79,7 @@ sealed abstract class MoleTask(
     val execution = new MoleExecution(mole, implicits = implicitsValues, seed = context(Task.openMOLESeed))
     val resultGathering = new ResultGathering
 
-    EventDispatcher.listen(execution: IMoleExecution, resultGathering, classOf[IMoleExecution.JobInCapsuleFinished])
+    EventDispatcher.listen(execution: IMoleExecution, resultGathering, classOf[IMoleExecution.JobFinished])
     EventDispatcher.listen(execution: IMoleExecution, resultGathering, classOf[IMoleExecution.ExceptionRaised])
 
     execution.start(firstTaskContext)

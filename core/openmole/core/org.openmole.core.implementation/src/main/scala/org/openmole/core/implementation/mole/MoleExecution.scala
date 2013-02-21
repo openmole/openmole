@@ -139,6 +139,7 @@ class MoleExecution(
           case None ⇒ LocalEnvironment
         }
       env.submit(job)
+      EventDispatcher.trigger(this, new IMoleExecution.JobSubmitted(job, capsule, env))
     }
 
   def submitAll =
