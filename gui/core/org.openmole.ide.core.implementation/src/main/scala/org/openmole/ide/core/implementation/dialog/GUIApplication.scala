@@ -38,13 +38,14 @@ class GUIApplication { application ⇒
   UIManager.put("Button.foreground", new ColorUIResource(new Color(77, 77, 77)))
   UIManager.put("Label.font", font)
 
-  val frame = new GUIPanel {
-    iconImage = APPLICATION_ICON.getImage
-    override def closeOperation = {
-      super.closeOperation
-      application.closeOperation
+  val frame =
+    new GUIPanel {
+      iconImage = APPLICATION_ICON.getImage
+      override def closeOperation = {
+        super.closeOperation
+        application.closeOperation
+      }
     }
-  }
 
   def display = {
     frame.minimumSize = new Dimension(600, 300)

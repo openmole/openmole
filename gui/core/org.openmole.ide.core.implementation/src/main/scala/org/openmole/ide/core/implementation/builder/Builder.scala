@@ -48,7 +48,7 @@ object Builder {
     }.toMap
     val prototypeMap = MoleFactory.prototypeMapping
     val (transitions, dataChannels, islotMap) = MoleFactory.buildConnectors(capsuleMap, prototypeMap)
-
+    islotMap += first.islots.head -> Slot(capsuleMap(first))
     (new Puzzle(islotMap(first.islots.head),
       lasts.map {
         capsuleMap
@@ -64,28 +64,12 @@ object Builder {
       MoleFactory.moleMapping.map { case (k, v) ⇒ v -> k }))
   }
 
-  def firsts(capsulesUI: List[ICapsuleUI]) =
-    if (capsulesUI.isEmpty) List.empty
-    else {
-      val connectorTargets = capsulesUI.head.scene.manager.connectors.toList.map {
-        _.target.capsule
-      }
-      capsulesUI.filterNot {
-        connectorTargets.contains
-      }
-    }
-
-  def lasts(capsulesUI: List[ICapsuleUI]) =
-    if (capsulesUI.isEmpty) List.empty
-    else capsulesUI.filter {
-      c ⇒ capsulesUI.head.scene.manager.capsuleConnections(c.dataUI).isEmpty
-    }
-
   def fromPuzzle(p: Puzzle,
                  scene: IMoleScene,
                  firstPoint: Point,
                  lastPoint: Point,
                  uiMap: IPuzzleUIMap) = {
+    println("groups :: " + scene.manager.capsuleGroups)
     val capsuleMap = p.slots.zipWithIndex.map { s ⇒
       val proxy = toTaskUI(s._1.capsule.task, uiMap)
       val capsules = scene.manager.capsule(proxy)

@@ -509,6 +509,5 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
       connectLayer.addChild(connection)
     }
   }
-
 }
 

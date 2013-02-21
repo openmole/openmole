@@ -43,6 +43,7 @@ import org.openide.NotifyDescriptor
 import scala.swing.ScrollPane
 import org.openmole.ide.core.implementation.builder._
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.implementation.dialog.StatusBar
 
 class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends GenericMenuProvider {
   var taskMenu = new JMenu
@@ -144,33 +145,43 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
         menuBuilder.contents += new MenuItem(b.name) {
           action = new Action(b.name) {
             def apply = {
-              val selection = ScenesManager.selection.toList
-
-              val firsts = Builder.firsts(selection)
-              if (firsts.isEmpty) throw new UserBadDataError("A Wizard can not be applied on an empty sequence of Tasks")
-              if (firsts.size > 1) throw new UserBadDataError("A Wizard can only be applied on a single sequence of Tasks")
-
-              val lasts = Builder.lasts(selection)
-              if (lasts.isEmpty) throw new UserBadDataError("A Wizard can not be applied on an empty sequence of Tasks")
-              if (lasts.size > 1) throw new UserBadDataError("A Wizard can only be applied on a single sequence of Tasks")
-
-              val (puzzle, uiMap) = Builder.puzzle(selection, firsts.head, lasts)
-              val panel = b.buildPanelUI(puzzle, scene.manager)
-              if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(panel) {
-                verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
-              }.peer,
-                b.name + " Builder")).equals(NotifyDescriptor.OK_OPTION)) {
-                val (puzzle, updatedUIMap) = panel.build(uiMap)
-                Builder.fromPuzzle(puzzle,
-                  scene,
-                  new Point(firsts.head.x.toInt, firsts.head.y.toInt),
-                  new Point(lasts.head.x.toInt, lasts.head.y.toInt),
-                  updatedUIMap)
-              }
+              try {
+                StatusBar().clear
+                val selection = ScenesManager.selection.toList
+                val firsts = scene.manager.firstCapsules(selection)
+                println("firsts " + firsts)
+                if (firsts.isEmpty) StatusBar().warn("A Wizard can not be applied on an empty sequence of Tasks")
+                else {
+                  if (firsts.size > 1) StatusBar().warn("A Wizard can only be applied on a sequence of Tasks with only one first Capsule")
+                  else {
+                    val lasts = scene.manager.lastCapsules(selection)
+                    println("lastts " + lasts)
+                    if (lasts.isEmpty) StatusBar().warn("A Wizard can not be applied on an empty sequence of Tasks")
+                    else if (lasts.size > 1) StatusBar().warn("A Wizard can only be applied on a sequence of Tasks with only one last Capsule")
+                    else {
+                      println("clusters : " + scene.manager.capsuleGroups)
+                      val (puzzle, uiMap) = Builder.puzzle(selection, firsts.head, lasts)
+                      val panel = b.buildPanelUI(puzzle, scene.manager)
+                      if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(panel) {
+                        verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
+                      }.peer,
+                        b.name + " Builder")).equals(NotifyDescriptor.OK_OPTION)) {
+                        val (puzzle, updatedUIMap) = panel.build(uiMap)
+                        Builder.fromPuzzle(puzzle,
+                          scene,
+                          new Point(firsts.head.x.toInt, firsts.head.y.toInt),
+                          new Point(lasts.head.x.toInt, lasts.head.y.toInt),
+                          updatedUIMap)
+                      }
+                    }
+                  }
+                }
+              } catch { case e: UserBadDataError ⇒ StatusBar().warn(e.getMessage) }
             }
           }
         }
     }
+
     items += (menuEnv.peer, menuHook.peer, menuBuilder.peer)
   }
 

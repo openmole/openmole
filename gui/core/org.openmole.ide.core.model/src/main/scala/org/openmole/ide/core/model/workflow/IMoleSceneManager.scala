@@ -77,4 +77,10 @@ trait IMoleSceneManager {
                       connector: IConnectorUI)
 
   def capsulesInMole: Iterable[ICapsuleDataUI]
+
+  def capsuleGroups: List[List[ICapsuleUI]]
+
+  def firstCapsules(caps: List[ICapsuleUI]): List[ICapsuleUI]
+
+  def lastCapsules(caps: List[ICapsuleUI]): List[ICapsuleUI]
 }

@@ -72,7 +72,6 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
       case None ⇒
       case Some(caps: ICapsuleUI) ⇒ if (capsules(nodeID) == caps) startingCapsule = None
     }
-
     capsuleConnections(_capsules(nodeID).dataUI).foreach { x ⇒ connectorIDs -= x }
     capsuleConnections -= _capsules(nodeID).dataUI
 
@@ -109,6 +108,7 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
 
   private def removeIncomingTransitions(capsule: ICapsuleUI) =
     _connectors.filter { _._2.target.capsule == capsule }.foreach { t ⇒
+      println("remove " + t._1)
       removeConnector(t._1)
     }
 
@@ -124,7 +124,7 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
   def removeConnector(edgeID: String,
                       connector: IConnectorUI): Unit = {
     _connectors.remove(edgeID)
-
+    println("++ removeConnector " + connector.source.dataUI + " // " + capsuleConnections.contains(connector.source.dataUI))
     capsuleConnections.contains(connector.source.dataUI) match {
       case true ⇒ capsuleConnections(connector.source.dataUI) -= connector
       case _ ⇒
@@ -145,4 +145,52 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
     }
     false
   }
+
+  def transitions = _connectors.map { _._2 }.filter {
+    _ match {
+      case t: ITransitionUI ⇒ true
+      case _ ⇒ false
+    }
+  }.toList
+
+  def connectedCapsules: Map[ICapsuleUI, List[ICapsuleUI]] = {
+    val _transitions = transitions
+    val targetCapsules = _capsules.map { c ⇒ c._2 -> _transitions.filter { _.source == c._2 }.map { _.target.capsule }.toList }.toList
+    val sourceCapsules = _capsules.map { c ⇒ c._2 -> _transitions.filter { _.target.capsule == c._2 }.map { _.source }.toList }
+    (targetCapsules ++ sourceCapsules).groupBy(_._1).map { case (k, v) ⇒ k -> v.flatMap { _._2 } }
+  }
+
+  def capsuleGroups = connectedCapsules.filterNot(_._2.isEmpty).map { x ⇒ x._1 +: x._2 }.toList
+
+  def firstCapsules(caps: List[ICapsuleUI]) = {
+    println("xxx : " + caps)
+    println("yyy : " + transitions.map { _.target.capsule })
+    println("zzz : " + caps.diff(transitions.map { _.target.capsule }))
+    caps.diff(transitions.map { _.target.capsule })
+  }
+
+  def lastCapsules(caps: List[ICapsuleUI]) = caps.diff(transitions.map { _.source })
+  /*
+  def connectedSets(capsules: List[ICapsuleUI]): List[List[ICapsuleUI]] = {
+    val _transitions = transitions
+
+    def findGroup(capsule: ICapsuleUI, gs: List[List[ICapsuleUI]], ind: Int): Int = {
+       if (gs.isEmpty) -1
+      else {
+         _transitions.filter{ t=>
+           t.source == capsule && t.target == gs.head
+
+         }
+       }
+    }
+
+    def connectedSets0(capsules0: List[ICapsuleUI], groups: List[List[ICapsuleUI]]) = {
+      if (capsules0.isEmpty) groups
+      else {
+           findGroup(capsules0.head,groups,0)
+      }
+    }
+     connectedSets0(capsules,List())
+
+  }*/
 }

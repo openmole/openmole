@@ -201,7 +201,6 @@ object MoleFactory {
   def buildConnectors(capsuleMap: Map[ICapsuleUI, ICapsule],
                       prototypeMap: Map[IPrototypeDataProxyUI, Prototype[_]]) = {
     val islotsMap = new HashMap[IInputSlotWidget, Slot]
-
     if (capsuleMap.isEmpty) (List.empty, List.empty, islotsMap)
     else {
       val firstCapsule = capsuleMap.head
@@ -212,9 +211,11 @@ object MoleFactory {
           manager.capsuleConnections(cui.dataUI).flatMap {
             _ match {
               case x: ITransitionUI ⇒
-                Some(buildTransition(capsuleMap(x.source),
-                  islotsMap.getOrElseUpdate(x.target, Slot(capsuleMap(x.target.capsule))),
-                  x, prototypeMap))
+                if (capsuleMap.contains(x.target.capsule))
+                  Some(buildTransition(capsuleMap(x.source),
+                    islotsMap.getOrElseUpdate(x.target, Slot(capsuleMap(x.target.capsule))),
+                    x, prototypeMap))
+                else None
               case _ ⇒ None
             }
           }
