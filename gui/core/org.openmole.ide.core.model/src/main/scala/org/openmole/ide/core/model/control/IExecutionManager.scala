@@ -21,8 +21,8 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
 import java.io.PrintStream
-import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
+import org.openmole.ide.core.model.data.IHookDataUI
 
 trait IExecutionManager {
   def mole: IMole
@@ -35,6 +35,6 @@ trait IExecutionManager {
 
   def printStream: PrintStream
 
-  def start(hooks: Map[IHookPanelUI, ICapsuleUI],
+  def start(hooks: Map[IHookDataUI, ICapsuleUI],
             groupings: List[(Grouping, ICapsule)])
 }
