@@ -78,9 +78,41 @@ trait IMoleSceneManager {
 
   def capsulesInMole: Iterable[ICapsuleDataUI]
 
-  def connectedCapsulesFrom(from: ICapsuleUI): List[ICapsuleUI]
-
   def firstCapsules(caps: List[ICapsuleUI]): List[ICapsuleUI]
 
   def lastCapsules(caps: List[ICapsuleUI]): List[ICapsuleUI]
+
+  def puzzlesCompliant: List[List[ICapsuleUI]] = groups.map { puzzleCompliant }
+
+  def puzzleCompliant(l: List[ICapsuleUI]): List[ICapsuleUI] = {
+    if (isPuzzleCompliant(l)) l
+    else List()
+  }
+
+  def isPuzzleCompliant: Boolean = isPuzzleCompliant(capsules.values.toList)
+
+  def isPuzzleCompliant(l: List[ICapsuleUI]): Boolean = {
+    val firsts = firstCapsules(l)
+    val lasts = lastCapsules(l)
+    if (firsts.isEmpty || firsts.size > 1 || lasts.isEmpty || lasts.size > 1) false
+    else true
+  }
+
+  def groups(l: List[ICapsuleUI]): List[List[ICapsuleUI]] = firstCapsules(l).map(connectedCapsulesFrom)
+
+  def groups: List[List[ICapsuleUI]] = groups(capsules.values.toList)
+
+  def connectedCapsulesFrom(from: ICapsuleUI): List[ICapsuleUI] = {
+    def connectedCapsulesFrom0(toVisit: List[ICapsuleUI], connected: List[ICapsuleUI]): List[ICapsuleUI] = {
+      if (toVisit.isEmpty) connected
+      else {
+        val head = toVisit.head
+        val connectors = capsuleConnections(head.dataUI)
+        connectedCapsulesFrom0(toVisit.tail ::: connectors.map {
+          _.target.capsule
+        }.toList, connected :+ head)
+      }
+    }
+    connectedCapsulesFrom0(List(from), List())
+  }
 }

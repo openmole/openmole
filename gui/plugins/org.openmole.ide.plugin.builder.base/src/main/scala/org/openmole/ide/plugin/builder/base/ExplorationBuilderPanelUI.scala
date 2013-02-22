@@ -25,12 +25,12 @@ import org.openmole.plugin.builder.base._
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.ide.core.model.builder.IPuzzleUIMap
 
-class ExplorationBuilderPanelUI(puzzle: Puzzle, manager: IMoleSceneManager) extends GenericBuilderPanelUI {
+class ExplorationBuilderPanelUI(puzzles: List[Puzzle], manager: IMoleSceneManager) extends GenericBuilderPanelUI(puzzles) {
 
   def build(uiMap: IPuzzleUIMap) = {
     val samplingUI = Proxys.getOrGenerateSamplingComposition(samplingComboBox.selection.item)
     val sampling = samplingUI.dataUI.coreObject
-    (exploration(nameTextField.text, puzzle,
+    (exploration(nameTextField.text, puzzles(0),
       sampling)(manager.dataUI.pluginSet), uiMap += (sampling, samplingUI))
   }
 }
