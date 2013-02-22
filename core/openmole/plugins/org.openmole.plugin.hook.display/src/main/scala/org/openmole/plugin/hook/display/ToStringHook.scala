@@ -21,6 +21,7 @@ import java.io.PrintStream
 import org.openmole.core.model.data._
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.data._
+import org.openmole.core.model.mole.ExecutionContext
 
 object ToStringHook {
 
@@ -30,18 +31,18 @@ object ToStringHook {
     new HookBuilder {
       prototypes.foreach(addInput(_))
 
-      def toHook = new ToStringHook(out, prototypes: _*) with Built
+      def toHook = new ToStringHook(prototypes: _*) with Built
     }
 
 }
 
-abstract class ToStringHook(out: PrintStream, prototypes: Prototype[_]*) extends Hook {
+abstract class ToStringHook(prototypes: Prototype[_]*) extends Hook {
 
-  override def process(context: Context) = {
+  override def process(context: Context, executionContext: ExecutionContext) = {
     if (!prototypes.isEmpty) {
       val filtered = Context(prototypes.flatMap(p ⇒ context.variable(p.asInstanceOf[Prototype[Any]])))
-      out.println(filtered.toString)
-    } else out.println(context.toString)
+      executionContext.out.println(filtered.toString)
+    } else executionContext.out.println(context.toString)
     context
   }
 

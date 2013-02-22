@@ -45,6 +45,7 @@ import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.model.data.{ NoMemoryHook, IHookDataUI }
 import org.openmole.ide.core.implementation.registry.{ DefaultKey, KeyRegistry }
 import org.openmole.ide.core.implementation.builder.MoleFactory
+import util.{ Failure, Success }
 
 class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
                                   val page: TabbedPane.Page,
@@ -221,8 +222,8 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
             ph ⇒ ph._1.saveContent -> ph._2._1
           }.toMap,
             groupingPanel.get.coreObjects) match {
-              case Right((mExecution, environments)) ⇒ SerializerService.serialize(mExecution, new File(t))
-              case Left(e) ⇒ StatusBar().block(e)
+              case Success((mExecution, environments)) ⇒ SerializerService.serialize(mExecution, new File(t))
+              case Failure(e) ⇒ StatusBar().block(e)
             }
           case _ ⇒
         }

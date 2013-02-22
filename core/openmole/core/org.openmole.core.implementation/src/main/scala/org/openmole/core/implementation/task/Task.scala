@@ -41,5 +41,10 @@ object Task extends Logger {
 }
 
 trait Task extends ITask with InputOutputCheck {
+
+  protected def process(context: Context): Context
+
+  def perform(context: Context) = perform(context, process)
+
   override def toString: String = name
 }

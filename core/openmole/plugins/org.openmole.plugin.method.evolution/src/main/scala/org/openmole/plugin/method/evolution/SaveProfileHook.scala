@@ -51,8 +51,8 @@ abstract class SaveProfileHook(
 
   @transient lazy val xInterpreter = new GroovyProxyPool(x)
 
-  def process(context: Context) = {
-    val file = new File(VariableExpansion(context, path))
+  def process(context: Context, executionContext: ExecutionContext) = {
+    val file = executionContext.directory.child(new File(VariableExpansion(context, path)))
     file.createParentDir
     file.withWriter { w ⇒
       for {

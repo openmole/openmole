@@ -25,6 +25,7 @@ import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.task._
 import org.openmole.core.model.data.Context
 import org.openmole.misc.hashservice.HashService._
+import org.openmole.misc.tools.io.FileUtil._
 import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.junit.JUnitRunner
@@ -62,6 +63,9 @@ class CopyFileHookSpec extends FlatSpec with ShouldMatchers {
     val ex = MoleExecution(new Mole(t1c), hooks = List(t1c -> hook))
 
     ex.start.waitUntilEnded
+
+    println(f.content)
+    println(fDest.content)
 
     f.hash should equal(fDest.hash)
     f.delete

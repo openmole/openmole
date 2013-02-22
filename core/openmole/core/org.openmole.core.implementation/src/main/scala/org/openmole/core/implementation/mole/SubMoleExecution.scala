@@ -133,7 +133,7 @@ class SubMoleExecution(
       val ctxForHooks = moleExecution.implicits + job.context
 
       def executeHook(h: IHook) =
-        try  h.perform(ctxForHooks)
+        try  h.perform(ctxForHooks, moleExecution.executionContext)
         catch {
         case e: Throwable ⇒
           EventDispatcher.trigger(moleExecution, new IMoleExecution.HookExceptionRaised(h, job, e, SEVERE))
@@ -187,7 +187,7 @@ class SubMoleExecution(
       val sourced =
         moleExecution.sources(capsule).foldLeft(Context.empty) {
             case (a, s) ⇒
-              val ctx = try s.perform(context)
+              val ctx = try s.perform(context, moleExecution.executionContext)
               catch {
                 case t: Throwable =>
                   logger.log(SEVERE, "Error in submole execution", t)

@@ -17,24 +17,24 @@
 
 package org.openmole.plugin.hook.display
 
-import java.io.PrintStream
 import org.openmole.core.model.data._
 import org.openmole.core.implementation.tools._
 import org.openmole.core.implementation.mole._
+import org.openmole.core.model.mole._
 
 object DisplayHook {
 
-  def apply(toDisplay: String, out: PrintStream = System.out) =
+  def apply(toDisplay: String) =
     new HookBuilder {
-      def toHook = new DisplayHook(toDisplay, out) with Built
+      def toHook = new DisplayHook(toDisplay) with Built
     }
 
 }
 
-abstract class DisplayHook(toDisplay: String, out: PrintStream = System.out) extends Hook {
+abstract class DisplayHook(toDisplay: String) extends Hook {
 
-  override def process(context: Context) = {
-    out.println(VariableExpansion(context, toDisplay))
+  override def process(context: Context, executionContext: ExecutionContext) = {
+    executionContext.out.println(VariableExpansion(context, toDisplay))
     context
   }
 

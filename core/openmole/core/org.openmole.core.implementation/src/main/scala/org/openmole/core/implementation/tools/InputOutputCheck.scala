@@ -84,9 +84,8 @@ trait InputOutputCheck {
             else Option.empty[Variable[_]]
         }
 
-  protected def process(context: Context): Context
 
-  def perform(context: Context) = {
+  def perform(context: Context, process: (Context => Context)) = {
     val initializedContext = initializeInput(context)
     val inputErrors = verifyInput(initializedContext)
     if(!inputErrors.isEmpty) throw new InternalProcessingError(s"Input errors have been found in ${this}: ${inputErrors.mkString(", ")}.")

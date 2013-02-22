@@ -23,6 +23,7 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import org.openmole.misc.exception._
 import org.openmole.core.implementation.mole._
+import org.openmole.core.model.mole.ExecutionContext
 
 object DeleteFileHook {
 
@@ -36,7 +37,7 @@ object DeleteFileHook {
 
 abstract class DeleteFileHook(toDelete: Prototype[File]*) extends Hook {
 
-  override def process(context: Context) = {
+  override def process(context: Context, executionContext: ExecutionContext) = {
     toDelete.foreach {
       prototype ⇒
         context.option(prototype) match {

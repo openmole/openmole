@@ -45,6 +45,7 @@ object IMoleExecution {
   case class SourceExceptionRaised(source: ISource, capsule: ICapsule, exception: Throwable, level: Level) extends Event[IMoleExecution] with ExceptionEvent
   case class HookExceptionRaised(hook: IHook, moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution] with ExceptionEvent
   case class ProfilerExceptionRaised(profiler: Profiler, moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution] with ExceptionEvent
+
 }
 
 trait IMoleExecution {

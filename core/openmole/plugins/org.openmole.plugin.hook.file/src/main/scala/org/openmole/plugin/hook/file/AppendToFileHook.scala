@@ -22,8 +22,9 @@ import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.implementation.mole._
+import org.openmole.core.model.mole.ExecutionContext
 
-object AppendToFileIHook {
+object AppendToFileHook {
 
   def apply(fileName: String, content: String) =
     new HookBuilder {
@@ -36,8 +37,8 @@ abstract class AppendToFileHook(
     fileName: String,
     content: String) extends Hook {
 
-  override def process(context: Context) = {
-    val file = new File(VariableExpansion(context, fileName))
+  override def process(context: Context, executionContext: ExecutionContext) = {
+    val file = executionContext.directory.child(new File(VariableExpansion(context, fileName)))
     file.createParentDir
     file.withLock(_.append(VariableExpansion(context, content)))
     context

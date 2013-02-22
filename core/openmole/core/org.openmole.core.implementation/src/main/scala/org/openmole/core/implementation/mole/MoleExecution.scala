@@ -46,8 +46,28 @@ import scala.concurrent.stm.{ Ref, TMap, atomic, retry }
 import javax.xml.bind.annotation.XmlTransient
 import org.openmole.core.model.execution.Environment
 import collection.mutable
+import java.io.File
 
 object MoleExecution extends Logger {
+
+  def partial(
+    mole: IMole,
+    sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
+    hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
+    selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
+    grouping: Map[ICapsule, Grouping] = Map.empty,
+    profiler: Profiler = Profiler.empty,
+    implicits: Context = Context.empty,
+    seed: Long = Workspace.newSeed): ExecutionContext ⇒ MoleExecution =
+    new MoleExecution(
+      mole,
+      sources.groupBy { case (c, _) ⇒ c }.map { case (c, ss) ⇒ c -> ss.map(_._2) }.withDefault(_ ⇒ List.empty),
+      hooks.groupBy { case (c, _) ⇒ c }.map { case (c, hs) ⇒ c -> hs.map { _._2 } }.withDefault(_ ⇒ List.empty),
+      selection,
+      grouping,
+      profiler,
+      implicits,
+      seed)(_)
 
   def apply(
     mole: IMole,
@@ -57,16 +77,17 @@ object MoleExecution extends Logger {
     grouping: Map[ICapsule, Grouping] = Map.empty,
     profiler: Profiler = Profiler.empty,
     implicits: Context = Context.empty,
-    seed: Long = Workspace.newSeed) =
-    new MoleExecution(
+    seed: Long = Workspace.newSeed,
+    executionContext: ExecutionContext = ExecutionContext.local) =
+    partial(
       mole,
-      sources.groupBy { case (c, _) ⇒ c }.map { case (c, ss) ⇒ c -> ss.map(_._2) }.withDefault(_ ⇒ List.empty),
-      hooks.groupBy { case (c, _) ⇒ c }.map { case (c, hs) ⇒ c -> hs.map { _._2 } }.withDefault(_ ⇒ List.empty),
+      sources,
+      hooks,
       selection,
       grouping,
       profiler,
       implicits,
-      seed)
+      seed)(executionContext)
 
 }
 
@@ -80,7 +101,7 @@ class MoleExecution(
     val grouping: Map[ICapsule, Grouping] = Map.empty,
     val profiler: Profiler = Profiler.empty,
     val implicits: Context = Context.empty,
-    seed: Long = Workspace.newSeed) extends IMoleExecution {
+    seed: Long = Workspace.newSeed)(implicit val executionContext: ExecutionContext = ExecutionContext.local) extends IMoleExecution {
 
   import IMoleExecution._
   import MoleExecution._

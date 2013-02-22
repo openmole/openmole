@@ -38,6 +38,7 @@ import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
 import org.openmole.ide.core.model.data.{ NoMemoryHook, IHookDataUI }
 import org.openmole.ide.core.implementation.registry.{ DefaultKey, KeyRegistry }
 import org.openmole.ide.core.implementation.builder.MoleFactory
+import util.{ Failure, Success }
 
 object ExecutionManager {
   implicit def executionStatesDecorator(s: scala.collection.mutable.Map[ExecutionState.ExecutionState, AtomicInteger]) = new {
@@ -127,7 +128,8 @@ class ExecutionManager(manager: IMoleSceneManager,
     initBarPlotter
 
     moleExecution = buildMoleExecution(hooks, groupings) match {
-      case Right((mExecution, environments)) ⇒
+      case Success((mE, environments)) ⇒
+        val mExecution = mE(ExecutionContext.local.copy(out = printStream))
         EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.JobStatusChanged])
         EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.Finished])
         EventDispatcher.listen(mExecution, new JobCreatedListener(this), classOf[IMoleExecution.JobCreated])
@@ -166,7 +168,7 @@ class ExecutionManager(manager: IMoleSceneManager,
         timer.start
         mExecution.start
         Some(mExecution)
-      case Left(e) ⇒
+      case Failure(e) ⇒
         StatusBar().block(e)
         None
     }

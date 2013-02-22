@@ -61,6 +61,8 @@ object FileUtil {
   implicit def inputStream2InputStreamDecorator(is: InputStream) = new InputStreamDecorator(is)
   implicit def file2FileDecorator(file: File) = new FileDecorator(file)
 
+  implicit def file2PathConverter(file: File) = file.toPath
+
   def copy(source: FileChannel, destination: FileChannel): Unit = destination.transferFrom(source, 0, source.size)
 
   class InputStreamDecorator(is: InputStream) {
@@ -390,6 +392,8 @@ object FileUtil {
         if (!parent.isDirectory) throw new UserBadDataError("Cannot create directory " + file.getParentFile)
       }
     }
+
+    def child(f: File) = new File(file, f.getPath)
 
   }
 

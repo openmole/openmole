@@ -19,5 +19,9 @@ package org.openmole.core.implementation.mole
 
 import org.openmole.core.implementation.tools.InputOutputCheck
 import org.openmole.core.model.mole._
+import org.openmole.core.model.data.Context
 
-trait Hook extends IHook with InputOutputCheck
+trait Hook extends IHook with InputOutputCheck {
+  protected def process(context: Context, executionContext: ExecutionContext): Context
+  def perform(context: Context, executionContext: ExecutionContext) = perform(context, process(_, executionContext))
+}
