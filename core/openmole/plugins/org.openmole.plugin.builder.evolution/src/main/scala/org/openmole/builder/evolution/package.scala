@@ -251,7 +251,7 @@ package object evolution {
         breedTask -<
         scalingCaps --
         (model, filter = Block(genome)) --
-        toIndividualSlot --
+        (toIndividualSlot, filter = Block(inputs.map(_._1).map(_.name).toSeq: _*)) --
         toIndividualArrayCaps --
         (mergeArchiveCaps, renameIndividualsTask -- mergeIndividualsCaps) --
         elitismCaps --
