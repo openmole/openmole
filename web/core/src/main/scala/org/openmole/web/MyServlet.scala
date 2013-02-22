@@ -1,17 +1,17 @@
 package org.openmole.web
 
-import _root_.akka.actor.{ Props, ActorSystem }
+import _root_.akka.actor.ActorSystem
 import org.scalatra._
 import scalate.ScalateSupport
 import servlet.{ FileItem, FileUploadSupport }
-import java.io.{ InputStream, File }
+import java.io.InputStream
 import javax.servlet.annotation.MultipartConfig
-import xml.XML
 import org.openmole.core.serializer._
 import org.openmole.core.implementation.mole.MoleExecution
 import com.thoughtworks.xstream.mapper.CannotResolveClassException
-import concurrent.{ Await, ExecutionContext, Future }
-import org.openmole.web.{ DataHandler, Datastore }
+import concurrent.{ ExecutionContext, Future }
+import org.openmole.web.DataHandler
+import org.openmole.core.model.job.State._
 import concurrent.duration._
 
 @MultipartConfig(maxFileSize = 3 * 1024 * 1024) //research scala multipart config
@@ -26,6 +26,12 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
       val is = Future {
         ssp("/index.ssp")
       }
+    }
+  }
+
+  get("/") {
+    new AsyncResult() {
+      val is = Future { halt(status = 301, headers = Map("Location" -> url("index.html"))) }
     }
   }
 
@@ -77,7 +83,7 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
     //TODO: Make sure this is not a problem
     val ins = fileParams.get("file").map(_.getInputStream)
 
-    val x = new AsyncResult() {
+    new AsyncResult() {
       val is = Future {
         val moleExec = processXMLFile[MoleExecution](data, ins)
 
@@ -92,9 +98,6 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
         }
       }
     }
-
-    println(x.timeout)
-    x
   }
 
   post("/xml/createMole") {
@@ -130,7 +133,16 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
           case Some(exec) ⇒ {
             println(getStatus(exec))
             println(exec)
-            ssp("/executionData", "id" -> pRams, "status" -> getStatus(exec))
+
+            val pageData = (exec.moleJobs foldLeft Map("READY" -> 0,
+              "RUNNING" -> 0,
+              "COMPLETED" -> 0,
+              "FAILED" -> 0,
+              "CANCELLED" -> 0)) {
+                case (statMap, job) ⇒ statMap.updated(job.state.name, statMap(job.state.name) + 1)
+              } + ("id" -> pRams) + ("status" -> getStatus(exec)) + ("totalJobs" -> exec.numberOfJobs)
+
+            ssp("/executionData", pageData.toSeq: _*)
           }
           case _ ⇒ ssp("createMole", "body" -> "no such id")
         }
@@ -139,6 +151,7 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
   }
 
   get("/start/:id") {
+    contentType = "text/html"
 
     println("here")
 
@@ -153,7 +166,9 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
         println(exec)
 
         exec foreach { x ⇒ x.start; println("started") }
-        //halt(status = 301, headers = Map("Location" -> ("/execs/" + x)))
+
+        halt(status = 301, headers = Map("Location" -> ("/execs/" + x)))
+        //ssp("/redirect", "body" -> ("Redirecting to execs/" + x + " in 5 seconds"), "title" -> "Started execution!", "redirectURL" -> ("execs/" + x))
       }
     }
   }

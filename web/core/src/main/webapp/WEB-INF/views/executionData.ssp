@@ -1,11 +1,25 @@
 <%@ val id: String %>
+<%@ val status: String %>
+<%@ val totalJobs: Int %>
+<%@ val READY: Int %>
+<%@ val RUNNING: Int %>
+<%@ val COMPLETED: Int %>
+<%@ val FAILED: Int %>
+<%@ val CANCELLED: Int %>
+
 
 #set (title)
-<%= id %>
+<%= id.take(15) + (if(id.length > 15) "..." else "") //Bandaid for page size %>
 #end
 
 #set (js)
 #end
 
-<%@ val status: String %>
-<%= status %> - <a href="/start/<%=id%>">start</a>
+Current Status: <%= status %> - <a href="/start/<%=id%>">start</a><br>
+<br><b>Job breakdown</b><br>
+Number of jobs: <%= totalJobs %><br>
+<br>
+Ready jobs: <%= READY %> Running Jobs: <%= RUNNING %><br>
+Completed jobs: <%= COMPLETED %> Failed Jobs: <%= FAILED %><br>
+Cancelled jobs: <%= CANCELLED %>
+
