@@ -21,8 +21,7 @@ import fr.iscpif.mgo._
 import fr.iscpif.mgo.tools.Lazy
 import java.util.Random
 import org.openmole.core.implementation.tools._
-import com.sun.org.glassfish.external.amx.AMX
-import org.openmole.misc.tools.script.GroovyProxyPool
+import org.openmole.misc.tools.script._
 
 object GA {
 

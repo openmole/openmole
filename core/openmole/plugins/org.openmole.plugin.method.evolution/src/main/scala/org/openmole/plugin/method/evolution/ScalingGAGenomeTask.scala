@@ -19,8 +19,8 @@ package org.openmole.plugin.method.evolution
 
 import fr.iscpif.mgo._
 import org.openmole.core.implementation.data._
-import org.openmole.core.implementation.task.Task
-import org.openmole.core.implementation.task.TaskBuilder
+import org.openmole.core.implementation.task._
+import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.core.model.sampling._
@@ -35,8 +35,8 @@ object ScalingGAGenomeTask {
     if (scale.isEmpty || genome.isEmpty) List.empty
     else {
       val (p, (vMin, vMax)) = scale.head
-      val dMin = VariableExpansion(context, vMin).toDouble
-      val dMax = VariableExpansion(context, vMax).toDouble
+      val dMin = vMin.interpret[Double](context)
+      val dMax = vMax.interpret[Double](context)
       val scaledV = Variable(p, genome.head.scale(dMin, dMax))
       scaledV :: scaled(scale.tail, genome.tail, context + scaledV)
     }

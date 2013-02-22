@@ -22,6 +22,7 @@ import scala.ref.WeakReference
 import scala.concurrent.stm._
 import org.openmole.core.model.data.Context
 import groovy.lang.Binding
+import org.openmole.misc.tools.script.GroovyProxy
 
 package object tools {
 
@@ -45,5 +46,10 @@ package object tools {
   }
 
   implicit def ContextToBindingConverter(c: Context) = c.toBinding
+
+  implicit class GroovyStringDecorator(s: String) {
+    def interpret[T](binding: Binding = new Binding) = new GroovyProxy(s).execute(binding).asInstanceOf[T]
+  }
+
 
 }
