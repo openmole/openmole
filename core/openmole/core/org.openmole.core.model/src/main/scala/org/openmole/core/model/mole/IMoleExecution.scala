@@ -18,7 +18,7 @@
 package org.openmole.core.model.mole
 
 import org.openmole.core.model.job.State.State
-import org.openmole.core.model.tools.{ExceptionEvent, IRegistryWithTicket}
+import org.openmole.core.model.tools.{ ExceptionEvent, IRegistryWithTicket }
 import org.openmole.misc.eventdispatcher.Event
 import java.util.logging.Level
 import org.openmole.core.model.data.Context
@@ -45,6 +45,7 @@ object IMoleExecution {
   case class SourceExceptionRaised(source: ISource, capsule: ICapsule, exception: Throwable, level: Level) extends Event[IMoleExecution] with ExceptionEvent
   case class HookExceptionRaised(hook: IHook, moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution] with ExceptionEvent
   case class ProfilerExceptionRaised(profiler: Profiler, moleJob: IMoleJob, exception: Throwable, level: Level) extends Event[IMoleExecution] with ExceptionEvent
+
 }
 
 trait IMoleExecution {

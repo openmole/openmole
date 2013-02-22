@@ -113,8 +113,6 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
   }
 
   "Validation" should "detect a duplicated transition" in {
-    val p = Prototype[String]("t")
-
     val t1 = EmptyTask("t1")
     val t2 = EmptyTask("t2")
 
@@ -231,7 +229,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
       addInput(i)
 
       def toHook = new IHook with Built {
-        def perform(ctx: Context) = ctx
+        def perform(ctx: Context, executionContext: ExecutionContext) = ctx
       }
     }
 
@@ -255,7 +253,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
       addInput(iInt)
 
       def toHook = new IHook with Built {
-        def perform(ctx: Context) = ctx
+        def perform(ctx: Context, executionContext: ExecutionContext) = ctx
       }
     }
 
@@ -278,7 +276,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
       addOutput(t)
 
       def toSource = new Source with Built {
-        def process(ctx: Context) = Context.empty
+        def process(ctx: Context, executionContext: ExecutionContext) = Context.empty
       }
     }.toSource
 
@@ -299,7 +297,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
       addInput(t)
 
       def toSource = new Source with Built {
-        def process(ctx: Context) = Context.empty
+        def process(ctx: Context, executionContext: ExecutionContext) = Context.empty
       }
     }.toSource
 

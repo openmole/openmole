@@ -23,5 +23,5 @@ trait ISource {
   def inputs: DataSet
   def outputs: DataSet
   def parameters: ParameterSet
-  def perform(context: Context): Context
+  def perform(context: Context, executionContext: ExecutionContext): Context
 }

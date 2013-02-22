@@ -25,6 +25,7 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.io.Prettifier._
 import scala.annotation.tailrec
 import org.openmole.core.implementation.mole._
+import org.openmole.core.model.mole.ExecutionContext
 
 object AppendToCSVFileHook {
 
@@ -40,8 +41,8 @@ abstract class AppendToCSVFileHook(
     fileName: String,
     prototypes: Prototype[_]*) extends Hook {
 
-  override def process(context: Context) = {
-    val file = new File(VariableExpansion(context, fileName))
+  override def process(context: Context, executionContext: ExecutionContext) = {
+    val file = executionContext.directory.child(new File(VariableExpansion(context, fileName)))
     file.createParentDir
 
     val ps =

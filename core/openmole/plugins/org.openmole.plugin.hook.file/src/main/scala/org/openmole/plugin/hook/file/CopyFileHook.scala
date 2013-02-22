@@ -25,6 +25,7 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.implementation.tools._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.implementation.mole._
+import org.openmole.core.model.mole.ExecutionContext
 
 object CopyFileHook {
 
@@ -46,10 +47,10 @@ abstract class CopyFileHook(
     remove: Boolean = false,
     compress: Boolean = false) extends Hook {
 
-  override def process(context: Context) = {
+  override def process(context: Context, executionContext: ExecutionContext) = {
     context.option(filePrototype) match {
       case Some(from) ⇒
-        val to = new File(VariableExpansion(context, destination))
+        val to = executionContext.directory.child(new File(VariableExpansion(context, destination)))
 
         to.getParentFile.mkdirs
         if (compress) from.copyCompress(to)

@@ -18,7 +18,7 @@
 package org.openmole.plugin.method.evolution
 
 import algorithm.GA.GAAggregation
-import org.openmole.core.model.mole.IHook
+import org.openmole.core.model.mole.{ ExecutionContext, IHook }
 import org.openmole.core.model.job.IMoleJob
 import fr.iscpif.mgo._
 import org.openmole.core.model.data._
@@ -57,8 +57,8 @@ abstract class SaveMapHook(
   @transient lazy val xInterpreter = new GroovyProxyPool(x)
   @transient lazy val yInterpreter = new GroovyProxyPool(y)
 
-  def process(context: Context) = {
-    val file = new File(VariableExpansion(context, path))
+  def process(context: Context, executionContext: ExecutionContext) = {
+    val file = executionContext.directory.child(new File(VariableExpansion(context, path)))
     file.createParentDir
     file.withWriter { w ⇒
       for {

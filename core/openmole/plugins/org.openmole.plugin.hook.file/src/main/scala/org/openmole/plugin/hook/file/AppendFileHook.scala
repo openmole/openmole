@@ -24,6 +24,7 @@ import java.io.File
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.exception._
 import org.openmole.core.implementation.mole._
+import org.openmole.core.model.mole.ExecutionContext
 
 /**
  * Appends a variable content to an existing file.
@@ -45,11 +46,11 @@ object AppendFileHook {
 
 abstract class AppendFileHook(prototype: Prototype[File], outputFile: String) extends Hook {
 
-  override def process(context: Context) = {
+  override def process(context: Context, executionContext: ExecutionContext) = {
     context.option(prototype) match {
       case Some(from) ⇒
 
-        val to = new File(VariableExpansion(context, outputFile))
+        val to = executionContext.directory.child(new File(VariableExpansion(context, outputFile)))
         if (!from.exists) throw new UserBadDataError("The file " + from + " does not exist.")
 
         if (!to.exists) {

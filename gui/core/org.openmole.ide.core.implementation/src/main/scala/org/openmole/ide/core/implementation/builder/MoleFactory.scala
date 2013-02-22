@@ -50,6 +50,7 @@ import org.openmole.core.model.sampling.Sampling
 import org.openmole.ide.core.model.sampling.{ ISamplingProxyUI, IDomainProxyUI }
 import org.openmole.core.model.domain.{ Finite, Domain }
 import org.openmole.ide.core.implementation.execution.ScenesManager
+import util.Try
 
 object MoleFactory {
 
@@ -57,8 +58,8 @@ object MoleFactory {
                          manager: IMoleSceneManager,
                          hooks: List[(ICapsule, IHook)],
                          capsuleMap: Map[ICapsuleUI, ICapsule],
-                         groupingStrategies: List[(Grouping, ICapsule)]): Either[Throwable, (IMoleExecution, Iterable[(Environment, String)])] =
-    try {
+                         groupingStrategies: List[(Grouping, ICapsule)]): Try[(ExecutionContext ⇒ IMoleExecution, Iterable[(Environment, String)])] =
+    Try {
       var envs = new HashSet[(Environment, String)]
       val strat = new ListBuffer[(ICapsule, EnvironmentSelection)]
 
@@ -73,12 +74,16 @@ object MoleFactory {
           }
       }
       //TODO implement sources
-      Right((MoleExecution(mole, Iterable.empty, hooks, strat.toMap, groupingStrategies.map {
-        case (s, c) ⇒ c -> s
-      }.toMap), envs.toSet))
-    } catch {
-      case e: Throwable ⇒
-        Left(e)
+      (
+        MoleExecution.partial(
+          mole,
+          Iterable.empty,
+          hooks,
+          strat.toMap,
+          groupingStrategies.map {
+            case (s, c) ⇒ c -> s
+          }.toMap),
+          envs.toSet)
     }
 
   def buildMole(manager: IMoleSceneManager): Either[String, (IMole, Map[ICapsuleUI, ICapsule], Map[IPrototypeDataProxyUI, Prototype[_]], Iterable[(ICapsuleUI, Throwable)])] = {

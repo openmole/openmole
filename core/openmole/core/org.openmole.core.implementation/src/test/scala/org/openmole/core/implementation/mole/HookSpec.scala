@@ -47,7 +47,7 @@ class HookSpec extends FlatSpec with ShouldMatchers {
 
     val hook = new HookBuilder {
       def toHook = new IHook with Built {
-        override def perform(context: Context) = {
+        override def perform(context: Context, executionContext: ExecutionContext) = {
           context.contains(p) should equal(true)
           context(p) should equal("test")
           executed = true
@@ -79,7 +79,7 @@ class HookSpec extends FlatSpec with ShouldMatchers {
 
     val hook = new HookBuilder {
       def toHook = new IHook with Built {
-        override def perform(context: Context) = {
+        override def perform(context: Context, executionContext: ExecutionContext) = {
           context.contains(p) should equal(true)
           context(p) should equal("test")
           executed = true
