@@ -24,6 +24,8 @@
     <module>ch.qos.logback</module>
     <module>org.eclipse.jetty</module>
     <module>org.slf4j</module>
+    <module>com.typesafe.slick</module>
+    <module>com.h2database</module>
   </modules>
   <properties>
     <!-- Default properties for bundles creation -->
