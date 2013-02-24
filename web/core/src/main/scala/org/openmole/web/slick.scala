@@ -8,8 +8,10 @@ import java.util.Properties
 import org.slf4j.LoggerFactory
 
 import slick.driver.H2Driver.simple._
-import scala.slick.session.Database
+
+//import scala.slick.session.Database
 import Database.threadLocalSession
+import java.io.IOException
 
 // Definition of the SUPPLIERS table
 object Suppliers extends Table[(Int, String, String, String, String, String)]("SUPPLIERS") {
@@ -43,7 +45,14 @@ trait SlickSupport extends ScalatraServlet {
 
   val cpds = {
     val props = new Properties
-    props.load(getClass.getResourceAsStream("/c3p0.properties"))
+    try {
+      props.load(getClass().getClassLoader().getResourceAsStream("/c3p0-config.properties"))
+    } catch {
+      case e: IOException ⇒ println("error when load propertie file " + e)
+    }
+
+    println("props driverclass = " + props.getProperty("c3p0.driverClass"))
+
     val cpds = new ComboPooledDataSource
     cpds.setProperties(props)
     logger.info("Created c3p0 connection pool")

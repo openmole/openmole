@@ -36,8 +36,9 @@ class Scalatra extends LifeCycle {
   override def init(context: ServletContext) {
 
     // Mount one or more servlets
-    context.mount(new MyServlet(system), "/*")
-    context.mount(new MyRepoServlet(system), "/repo/*")
+    //context.mount(new MyServlet(system), "/*")
+    context.mount(new SlickRoutes(), "/*")
+    //context.mount(new MyRepoServlet(system), "/repo/*")
   }
 
   override def destroy(context: ServletContext) {
