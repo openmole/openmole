@@ -22,8 +22,6 @@
   <name>${project.artifactId} ${project.version}</name>
 
   <modules>
-    <module>libraries</module>
-    <module>third-parties</module>
     <module>openmole</module>
     <module>runtime</module>
   </modules>

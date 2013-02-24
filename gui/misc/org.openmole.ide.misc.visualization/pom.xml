@@ -18,7 +18,7 @@
   <description></description>
   <dependencies>
     <dependency>
-      <groupId>org.openmole.ide</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>de.erichseifert.gral</artifactId>
       <version>${project.version}</version>
     </dependency>

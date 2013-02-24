@@ -100,47 +100,47 @@
     </dependency>
     <!-- dependencies for the runtime -->
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>net.sourceforge.jline</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.apache.ant</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>uk.com.robustit.cloning</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.joda.time</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.scala-lang.scala-library</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.jasypt.encryption</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.apache.commons.configuration</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.objenesis</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>com.github.scopt</artifactId>
       <version>${project.version}</version>
     </dependency>

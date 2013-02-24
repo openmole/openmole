@@ -30,17 +30,17 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.ide</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>jsyntaxpane</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.ide</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>net.miginfocom.swing.miglayout</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.ide</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.netbeans.api</artifactId>
       <version>${project.version}</version>
     </dependency>

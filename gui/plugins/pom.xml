@@ -44,7 +44,7 @@
   </properties>
   <dependencies>
     <dependency>
-      <groupId>org.openmole.ide</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.scala-lang.scala-swing</artifactId>
       <version>${project.version}</version>
     </dependency>

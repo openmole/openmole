@@ -40,6 +40,8 @@
     <module>core</module>
     <module>gui</module>
     <module>application</module>
+    <module>libraries</module>
+    <module>third-parties</module>
   </modules>
   <scm>
     <connection>scm:git:git://git.openmole.org:openmole</connection>
@@ -64,6 +66,8 @@
     <netbeans.hint.license>gpl30</netbeans.hint.license>
     <symbolic.name>${project.artifactId}</symbolic.name>
     <!-- versions of libraries used -->
+    <netbeans.version>RELEASE71</netbeans.version>
+    <com.miglayout.version>3.7.4</com.miglayout.version>
     <lib.org.eclipse.osgi.version>3.7.2.v20120110</lib.org.eclipse.osgi.version>
     <lib.org.eclipse.equinox.registry.version>3.5.0.v20100503</lib.org.eclipse.equinox.registry.version>
     <lib.org.eclipse.equinox.launcher.version>1.1.1.R36x_v20101122_1400</lib.org.eclipse.equinox.launcher.version>

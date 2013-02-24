@@ -27,7 +27,7 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.gnu.crypto</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -37,7 +37,7 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.apache.commons.pool</artifactId>
       <version>${project.version}</version>
     </dependency>

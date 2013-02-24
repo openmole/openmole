@@ -21,18 +21,9 @@
   <!-- ************************************************************* -->
   <name>${project.artifactId} ${project.version}</name>
   <modules>
-    <module>third-parties</module>
-    <module>libraries</module>
     <module>misc</module>
     <module>core</module>
     <module>plugins</module>
     <module>osgi</module>
   </modules>
-  <properties>
-    <netbeans.version>RELEASE71</netbeans.version>
-    <org.jfree.chart.jfree.version>1.0.13</org.jfree.chart.jfree.version>
-    <org.jfree.chart.jcommon.version>1.0.15</org.jfree.chart.jcommon.version>
-    <com.miglayout.version>3.7.4</com.miglayout.version>
-    <brandingToken>openmole_gui</brandingToken>
-  </properties>
 </project>

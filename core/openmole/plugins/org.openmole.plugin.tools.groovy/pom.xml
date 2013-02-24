@@ -28,13 +28,9 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.codehaus.groovy</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.equinox</groupId>
-      <artifactId>org.eclipse.osgi</artifactId>
     </dependency>
   </dependencies>
 </project>

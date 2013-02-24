@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <!-- ************************************************************* -->
+  <!-- *** POM Relationships *************************************** -->
+  <!-- ************************************************************* -->
+  <parent>
+    <artifactId>openmole</artifactId>
+    <groupId>org.openmole</groupId>
+    <version>0.8-SNAPSHOT</version>
+  </parent>
+  <artifactId>third-parties</artifactId>
+  <!-- ************************************************************* -->
+  <!-- *** Build Settings ****************************************** -->
+  <!-- ************************************************************* -->
+  <packaging>pom</packaging>
+  <!-- ************************************************************* -->
+  <!-- *** Project Information ************************************* -->
+  <!-- ************************************************************* -->
+  <name>${project.artifactId}</name>
+  <modules>
+    <module>com.ice.tar</module>
+    <module>com.github.scopt</module>
+    <module>org.scala-lang.scala-swing</module>
+  </modules>
+  <!--<properties>
+        <embed-dep>*;scope=provided;type=!pom;inline=true</embed-dep>
+        <embed-transitive>true</embed-transitive>
+        <import.packages>*;resolution:=optional</import.packages>
+        <libraries.export.packages>*,${export.packages}</libraries.export.packages>
+        <bundle.name>${pom.name}</bundle.name>
+        <bundle.description>${pom.name}</bundle.description>
+	<bundle.classpath>.</bundle.classpath>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <outputDirectory>${basedir}</outputDirectory>
+                    <instructions>
+                        <Bundle-Name>${bundle.name}</Bundle-Name>
+                        <Bundle-SymbolicName>${symbolic.name}</Bundle-SymbolicName>
+                        <Bundle-Description>${bundle.description}</Bundle-Description>
+                        <Import-Package>${import.packages}</Import-Package>
+                        <Export-Package>${libraries.export.packages}</Export-Package>
+                        <Embed-Dependency>${embed-dep}</Embed-Dependency>
+                        <Embed-Transitive>${embed-transitive}</Embed-Transitive>
+                        <Eclipse-BuddyPolicy>${eclipse.buddypolicy}</Eclipse-BuddyPolicy>
+			<Bundle-ClassPath>${bundle.classpath}</Bundle-ClassPath>
+		    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+-->
+</project>

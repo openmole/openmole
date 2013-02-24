@@ -10,7 +10,7 @@
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>uk.com.robustit.cloning</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -55,32 +55,32 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>com.thoughtworks.xstream</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.apache.commons.configuration</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.apache.log4j</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.codehaus.groovy</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.joda.time</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.ide</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.netbeans.api</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -100,7 +100,7 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.ide</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>de.erichseifert.gral</artifactId>
       <version>${project.version}</version>
     </dependency>

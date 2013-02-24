@@ -70,12 +70,12 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.scala-lang.scala-library</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.apache.commons.logging</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -85,18 +85,18 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>fr.iscpif.gridscale</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.joda.time</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>com.github.scopt</artifactId>
       <version>${project.version}</version>
     </dependency>

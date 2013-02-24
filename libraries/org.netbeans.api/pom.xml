@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <!-- ************************************************************* -->
+  <!-- *** POM Relationships *************************************** -->
+  <!-- ************************************************************* -->
+  <parent>
+    <artifactId>libraries</artifactId>
+    <groupId>org.openmole</groupId>
+    <version>0.8-SNAPSHOT</version>
+  </parent>
+  <!--Used to build the symbolic name of the bundle-->
+  <artifactId>org.netbeans.api</artifactId>
+  <packaging>bundle</packaging>
+  <!-- ************************************************************* -->
+  <!-- *** Project Information ************************************* -->
+  <!-- ************************************************************* -->
+  <name>${project.artifactId}</name>
+  <!-- ************************************************************* -->
+  <!-- *** Build Settings ****************************************** -->
+  <!-- ************************************************************* -->
+  <properties>
+    <libraries.export.packages>org.netbeans.api.*,org.openide.*</libraries.export.packages>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-api-visual</artifactId>
+      <version>${netbeans.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-netbeans-modules-settings</artifactId>
+      <version>${netbeans.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+</project>

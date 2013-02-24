@@ -45,17 +45,17 @@
       <artifactId>org.eclipse.osgi</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.jasypt.encryption</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.apache.commons.configuration</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>com.thoughtworks.xstream</artifactId>
       <version>${project.version}</version>
     </dependency>
