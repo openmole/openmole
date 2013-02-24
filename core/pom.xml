@@ -10,7 +10,7 @@
     <version>0.8-SNAPSHOT</version>
   </parent>
   <groupId>org.openmole.core</groupId>
-  <artifactId>openmole-ecosystem</artifactId>
+  <artifactId>openmole</artifactId>
   <version>0.8-SNAPSHOT</version>
   <!-- ************************************************************* -->
   <!-- *** Build Settings ****************************************** -->
@@ -22,8 +22,34 @@
   <name>${project.artifactId} ${project.version}</name>
 
   <modules>
-    <module>openmole</module>
+    <module>misc</module>
+    <module>core</module>
+    <module>plugins</module>
     <module>runtime</module>
   </modules>
+
+  <properties>
+    <include>src/main/resources/META-INF/MANIFEST.MF</include>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.openmole</groupId>
+      <artifactId>org.scala-lang.scala-library</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_${lib.org.scala-lang.scala.version}</artifactId>
+      <version>${lib.org.scalatest.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${lib.org.junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
 
 </project>
