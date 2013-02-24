@@ -21,11 +21,22 @@ import org.openmole.ide.core.implementation.registry.{ BuilderActivator, OSGiAct
 import org.openmole.ide.core.model.factory.IBuilderFactoryUI
 import org.openmole.core.implementation.puzzle.Puzzle
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
+import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.model.panel.IBuilderPanelUI
 
 class Activator extends OSGiActivator with BuilderActivator {
 
   override def builderFactories = List(new IBuilderFactoryUI {
-    def name = "Exploration"
-    def buildPanelUI(puzzle: Puzzle, manager: IMoleSceneManager) = new ExplorationBuilderPanelUI(puzzle, manager)
+    def name = "Explore"
+    def buildPanelUI(puzzle: List[Puzzle], manager: IMoleSceneManager): IBuilderPanelUI = {
+      if (puzzle.isEmpty) throw new UserBadDataError("The Explore builder can not be built - it requires at list a sequence of Tasks")
+      else new ExplorationBuilderPanelUI(puzzle, manager)
+    }
+  }, new IBuilderFactoryUI {
+    def name = "Explore and Merge"
+    def buildPanelUI(puzzle: List[Puzzle], manager: IMoleSceneManager) = {
+      if (puzzle.length < 2) throw new UserBadDataError("The Explore and Merge  builder can not be built - it requires at list a 2 sequences of Tasks")
+      else new AggregationBuilderPanelUI(puzzle, manager)
+    }
   })
 }

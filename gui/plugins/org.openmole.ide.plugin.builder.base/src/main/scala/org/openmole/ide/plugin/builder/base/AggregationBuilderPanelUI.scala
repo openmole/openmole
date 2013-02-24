@@ -22,13 +22,12 @@ import org.openmole.ide.core.model.builder.IPuzzleUIMap
 import org.openmole.plugin.builder.base._
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 
-class AggregationBuilderPanelUI(puzzleModel: Puzzle,
-                                puzzleAggregation: Puzzle,
-                                manager: IMoleSceneManager) extends GenericBuilderPanelUI {
+class AggregationBuilderPanelUI(puzzles: List[Puzzle],
+                                manager: IMoleSceneManager) extends GenericBuilderPanelUI(puzzles) {
 
   override def build(uiMap: IPuzzleUIMap) = {
     val samplingUI = Proxys.getOrGenerateSamplingComposition(samplingComboBox.selection.item)
     val sampling = samplingUI.dataUI.coreObject
-    (aggregation(nameTextField.text, puzzleModel, sampling, puzzleAggregation)(manager.dataUI.pluginSet), uiMap += (sampling, samplingUI))
+    (aggregation(nameTextField.text, puzzles(0), sampling, puzzles(1))(manager.dataUI.pluginSet), uiMap += (sampling, samplingUI))
   }
 }

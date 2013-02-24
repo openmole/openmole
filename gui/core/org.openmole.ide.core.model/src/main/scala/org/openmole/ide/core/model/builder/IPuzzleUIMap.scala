@@ -25,6 +25,14 @@ import org.openmole.core.model.mole.IMole
 import org.openmole.ide.core.model.workflow.IMoleScene
 
 trait IPuzzleUIMap {
+  def task: Map[ITask, ITaskDataProxyUI]
+
+  def prototype: Map[Prototype[_], IPrototypeDataProxyUI]
+
+  def sampling: Map[Sampling, ISamplingCompositionDataProxyUI]
+
+  def mole: Map[IMole, IMoleScene]
+
   def task(t: ITask, f: Unit ⇒ ITaskDataUI): ITaskDataProxyUI
 
   def prototype[T](p: Prototype[T])(implicit t: Manifest[T]): IPrototypeDataProxyUI

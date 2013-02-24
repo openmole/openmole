@@ -71,8 +71,9 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
       case None ⇒
       case Some(caps: ICapsuleUI) ⇒ if (capsules(nodeID) == caps) startingCapsule = None
     }
-    capsuleConnections(_capsules(nodeID).dataUI).foreach { x ⇒
-      removeConnector(connectorID(x))
+    capsuleConnections(_capsules(nodeID).dataUI).foreach {
+      x ⇒
+        removeConnector(connectorID(x))
     }
     capsuleConnections -= _capsules(nodeID).dataUI
 
@@ -88,9 +89,10 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
     capsuleConnections.foreach {
       case (capsuleData, connections) ⇒
         capsuleSet += capsuleData
-        connections.foreach { c ⇒
-          capsuleSet += c.source.dataUI
-          capsuleSet += c.target.capsule.dataUI
+        connections.foreach {
+          c ⇒
+            capsuleSet += c.source.dataUI
+            capsuleSet += c.target.capsule.dataUI
         }
     }
     capsuleSet
@@ -98,19 +100,30 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
 
   def connector(cID: String) = _connectors(cID)
 
-  private def connectorIDs = _connectors.map { case (k, v) ⇒ v -> k }
+  private def connectorIDs = _connectors.map {
+    case (k, v) ⇒ v -> k
+  }
 
   def connectorID(c: IConnectorUI) = connectorIDs(c)
 
   def connectors = _connectors.values
 
-  def capsuleID(cv: ICapsuleUI) = _capsules.map { case (k, v) ⇒ v -> k }.get(cv).get
+  def capsuleID(cv: ICapsuleUI) = _capsules.map {
+    case (k, v) ⇒ v -> k
+  }.get(cv).get
 
-  def capsule(proxy: ITaskDataProxyUI) = _capsules.toList.filter { _._2.dataUI.task == Some(proxy) }.map { _._2 }
+  def capsule(proxy: ITaskDataProxyUI) = _capsules.toList.filter {
+    _._2.dataUI.task == Some(proxy)
+  }.map {
+    _._2
+  }
 
   private def removeIncomingTransitions(capsule: ICapsuleUI) =
-    _connectors.filter { _._2.target.capsule == capsule }.foreach { t ⇒
-      removeConnector(t._1)
+    _connectors.filter {
+      _._2.target.capsule == capsule
+    }.foreach {
+      t ⇒
+        removeConnector(t._1)
     }
 
   def changeConnector(oldConnector: IConnectorUI,
@@ -146,27 +159,21 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
     false
   }
 
-  def transitions = _connectors.map { _._2 }.filter {
+  def transitions = _connectors.map {
+    _._2
+  }.filter {
     _ match {
       case t: ITransitionUI ⇒ true
       case _ ⇒ false
     }
   }.toList
 
-  def firstCapsules(caps: List[ICapsuleUI]) = caps.diff(transitions.map { _.target.capsule })
+  def firstCapsules(caps: List[ICapsuleUI]) = caps.diff(transitions.map {
+    _.target.capsule
+  })
 
-  def lastCapsules(caps: List[ICapsuleUI]) = caps.diff(transitions.map { _.source })
+  def lastCapsules(caps: List[ICapsuleUI]) = caps.diff(transitions.map {
+    _.source
+  })
 
-  def connectedCapsulesFrom(caps: ICapsuleUI): List[ICapsuleUI] = {
-
-    def connectedCapsulesFrom0(toVisit: List[ICapsuleUI], connected: List[ICapsuleUI]): List[ICapsuleUI] = {
-      if (toVisit.isEmpty) connected
-      else {
-        val head = toVisit.head
-        val connectors = capsuleConnections(head.dataUI)
-        connectedCapsulesFrom0(toVisit.tail ::: connectors.map { _.target.capsule }.toList, connected :+ head)
-      }
-    }
-    connectedCapsulesFrom0(List(caps), List())
-  }
 }

@@ -20,7 +20,7 @@ import org.openmole.ide.core.implementation.dataproxy.{ Proxys, SamplingComposit
 import org.openmole.core.model.sampling.Sampling
 import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.implementation.registry._
-import org.openmole.ide.core.model.workflow.{ IMoleScene, ICapsuleUI }
+import org.openmole.ide.core.model.workflow.{ IMoleSceneManager, IMoleScene, ICapsuleUI }
 import org.openmole.core.implementation.puzzle.Puzzle
 import java.awt.Point
 import org.openmole.core.model.transition._
@@ -35,14 +35,37 @@ import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.core.model.transition.{ IEndExplorationTransition, IExplorationTransition, IAggregationTransition }
+import org.openmole.ide.core.model.factory.IBuilderFactoryUI
+import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.core.implementation.execution.ScenesManager
+import org.openide.DialogDescriptor
+import org.openide.DialogDisplayer
+import org.openide.NotifyDescriptor
+import scala.swing.ScrollPane
+import org.openmole.misc.exception.UserBadDataError
 
 object Builder {
 
   def samplingCompositionUI(g: Boolean) = new SamplingCompositionDataProxyUI(generated = g)
 
+  def puzzles(listsPuzzleCompliant: List[List[ICapsuleUI]],
+              manager: IMoleSceneManager): (List[Puzzle], IPuzzleUIMap) = {
+
+    def puzzles0(toBeComputed: List[List[ICapsuleUI]], puzzleList: List[Puzzle], uiMap: IPuzzleUIMap): (List[Puzzle], IPuzzleUIMap) = {
+      if (toBeComputed.isEmpty) (puzzleList, uiMap)
+      else {
+        val tail = toBeComputed.tail
+        val (p, newUIMap) = puzzle(tail.head, manager.firstCapsules(tail.head).head, manager.lastCapsules(tail.head), uiMap)
+        puzzles0(tail, puzzleList :+ p, newUIMap)
+      }
+    }
+    puzzles0(listsPuzzleCompliant, List(), new PuzzleUIMap)
+  }
+
   def puzzle(capsulesUI: List[ICapsuleUI],
              first: ICapsuleUI,
-             lasts: Iterable[ICapsuleUI]) = {
+             lasts: Iterable[ICapsuleUI],
+             uiMap: IPuzzleUIMap = new PuzzleUIMap) = {
     val capsuleMap = capsulesUI.map {
       c ⇒ c -> MoleFactory.buildCapsule(c.dataUI, c.scene.manager.dataUI)
     }.toMap
@@ -58,10 +81,18 @@ object Builder {
       List.empty,
       List.empty,
       Map.empty,
-      Map.empty), new PuzzleUIMap(capsuleMap.map { case (ui, c) ⇒ c.task -> ui.dataUI.task.get },
-      prototypeMap.map { case (k, v) ⇒ v.asInstanceOf[Prototype[Any]] -> k },
-      MoleFactory.samplingMapping.map { case (k, v) ⇒ v -> k },
-      MoleFactory.moleMapping.map { case (k, v) ⇒ v -> k }))
+      Map.empty), new PuzzleUIMap(capsuleMap.map {
+      case (ui, c) ⇒ c.task -> ui.dataUI.task.get
+    } ++ uiMap.task,
+      prototypeMap.map {
+        case (k, v) ⇒ v.asInstanceOf[Prototype[Any]] -> k
+      } ++ uiMap.prototype,
+      MoleFactory.samplingMapping.map {
+        case (k, v) ⇒ v -> k
+      } ++ uiMap.sampling,
+      MoleFactory.moleMapping.map {
+        case (k, v) ⇒ v -> k
+      } ++ uiMap.mole))
   }
 
   def fromPuzzle(p: Puzzle,
@@ -69,34 +100,39 @@ object Builder {
                  firstPoint: Point,
                  lastPoint: Point,
                  uiMap: IPuzzleUIMap) = {
-    val capsuleMap = p.slots.zipWithIndex.map { s ⇒
-      val proxy = toTaskUI(s._1.capsule.task, uiMap)
-      val capsules = scene.manager.capsule(proxy)
-      val cUI = {
-        if (capsules.isEmpty) {
-          Proxys.tasks += proxy
-          SceneFactory.capsuleUI(scene, new Point(0, 0), Some(proxy)).addInputSlot(false)
-        } else capsules.head.islots.head
-      }
-      if (s._2 == 0) scene.manager.setStartingCapsule(cUI.capsule)
-      s._1.capsule -> cUI
+    val capsuleMap = p.slots.zipWithIndex.map {
+      s ⇒
+        val proxy = toTaskUI(s._1.capsule.task, uiMap)
+        val capsules = scene.manager.capsule(proxy)
+        val cUI = {
+          if (capsules.isEmpty) {
+            Proxys.tasks += proxy
+            SceneFactory.capsuleUI(scene, new Point(0, 0), Some(proxy)).addInputSlot(false)
+          } else capsules.head.islots.head
+        }
+        if (s._2 == 0) scene.manager.setStartingCapsule(cUI.capsule)
+        s._1.capsule -> cUI
     }.toMap
 
-    p.transitions.foreach { t ⇒
-      SceneFactory.transition(scene,
-        capsuleMap(t.start).capsule,
-        capsuleMap(t.end.capsule),
-        t match {
-          case ex: IExplorationTransition ⇒ TransitionType.EXPLORATION_TRANSITION
-          case agg: IAggregationTransition ⇒ TransitionType.AGGREGATION_TRANSITION
-          case end: IEndExplorationTransition ⇒ TransitionType.END_TRANSITION
-          case _ ⇒ TransitionType.BASIC_TRANSITION
-        }, //TransitionType.Value,
-        //  Some(t.condition.),
-        li = t.filter match {
-          case b: Block[String] ⇒ b.filtered.toList.map { uiMap.prototype }
-          case _ ⇒ List()
-        })
+    p.transitions.foreach {
+      t ⇒
+        SceneFactory.transition(scene,
+          capsuleMap(t.start).capsule,
+          capsuleMap(t.end.capsule),
+          t match {
+            case ex: IExplorationTransition ⇒ TransitionType.EXPLORATION_TRANSITION
+            case agg: IAggregationTransition ⇒ TransitionType.AGGREGATION_TRANSITION
+            case end: IEndExplorationTransition ⇒ TransitionType.END_TRANSITION
+            case _ ⇒ TransitionType.BASIC_TRANSITION
+          }, //TransitionType.Value,
+          //  Some(t.condition.),
+          li = t.filter match {
+            case b: Block[String] ⇒ b.filtered.toList.map {
+              p ⇒
+                uiMap.prototype(p)
+            }
+            case _ ⇒ List()
+          })
     }
     CheckData.fullCheck(scene)
     scene.refresh
@@ -163,5 +199,32 @@ object Builder {
     }
     buildSamplingUI0(connectedSamplings, bcs)
   }
-  // def toSamplingCompositionUI(s:Sampling): ISamplingDataUI
+
+  def apply(scene: IMoleScene,
+            b: IBuilderFactoryUI,
+            selection: List[ICapsuleUI] = List()) = {
+    try {
+      StatusBar().clear
+      val compliantPuzzles = (scene.manager.puzzlesCompliant :+ scene.manager.puzzleCompliant(selection)).distinct
+      if (compliantPuzzles.isEmpty) StatusBar().warn("No Sequence of Tasks can be applied for a Builder")
+      else {
+        val (puzzles, uiMap) = Builder.puzzles(compliantPuzzles, scene.manager)
+        val panel = b.buildPanelUI(puzzles, scene.manager)
+        if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(panel) {
+          verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
+        }.peer,
+          b.name + " Builder")).equals(NotifyDescriptor.OK_OPTION)) {
+          val (puzzle, updatedUIMap) = panel.build(uiMap)
+          Builder.fromPuzzle(puzzle,
+            scene,
+            new Point(0, 0),
+            new Point(0, 0),
+            updatedUIMap)
+        }
+      }
+    } catch {
+      case e: UserBadDataError ⇒ StatusBar().warn(e.getMessage)
+    }
+  }
+
 }

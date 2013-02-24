@@ -28,22 +28,22 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 
-case class PuzzleUIMap(_task: Map[ITask, ITaskDataProxyUI],
-                       _prototype: Map[Prototype[_], IPrototypeDataProxyUI],
-                       _sampling: Map[Sampling, ISamplingCompositionDataProxyUI],
-                       _mole: Map[IMole, IMoleScene]) extends IPuzzleUIMap {
+case class PuzzleUIMap(val task: Map[ITask, ITaskDataProxyUI] = Map(),
+                       val prototype: Map[Prototype[_], IPrototypeDataProxyUI] = Map(),
+                       val sampling: Map[Sampling, ISamplingCompositionDataProxyUI] = Map(),
+                       val mole: Map[IMole, IMoleScene] = Map()) extends IPuzzleUIMap {
 
   def task(t: ITask, f: Unit ⇒ ITaskDataUI) =
-    _task.getOrElse(t, new TaskDataProxyUI(f()))
+    task.getOrElse(t, new TaskDataProxyUI(f()))
 
-  def prototype[T](p: Prototype[T])(implicit t: Manifest[T]) = _prototype.getOrElse(p, new PrototypeDataProxyUI(GenericPrototypeDataUI.apply(p)))
+  def prototype[T](p: Prototype[T])(implicit t: Manifest[T]) = prototype.getOrElse(p, new PrototypeDataProxyUI(GenericPrototypeDataUI.apply(p)))
 
-  def prototype(name: String) = _prototype.map { case (k, v) ⇒ k.name -> v }.getOrElse(name, new PrototypeDataProxyUI(GenericPrototypeDataUI(name)))
+  def prototype(name: String) = prototype.map { case (k, v) ⇒ k.name -> v }.getOrElse(name, new PrototypeDataProxyUI(GenericPrototypeDataUI(name)))
 
   def sampling(s: Sampling, f: Unit ⇒ ISamplingCompositionDataUI) =
-    _sampling.getOrElse(s, new SamplingCompositionDataProxyUI(f()))
+    sampling.getOrElse(s, new SamplingCompositionDataProxyUI(f()))
 
-  def mole(m: IMole) = _mole.getOrElse(m, ScenesManager.addBuildSceneContainer("A_NAME").scene)
+  def mole(m: IMole) = mole.getOrElse(m, ScenesManager.addBuildSceneContainer("A_NAME").scene)
 
-  def +=(s: Tuple2[Sampling, ISamplingCompositionDataProxyUI]) = copy(_sampling = _sampling + (s._1 -> s._2))
+  def +=(s: Tuple2[Sampling, ISamplingCompositionDataProxyUI]) = copy(sampling = sampling + (s._1 -> s._2))
 }
