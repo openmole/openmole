@@ -18,25 +18,40 @@
 package org.openmole.core.serializer.converter
 
 import collection.mutable
+import com.thoughtworks.xstream.XStream
+import collection.mutable.ListBuffer
 
 object Factory {
 
-  def apply[T <: { def clean }](f: ⇒ T) =
-    new Factory[T] {
-      def make = f
-    }
+  trait Poolable {
+    def clean
+    def xStreams: Iterable[XStream]
+  }
 
 }
 
-trait Factory[T <: { def clean }] {
+import Factory._
 
-  val pool = new mutable.Stack[T]
+trait Factory {
+
+  private val pool = new mutable.Stack[T]
+  private val _instanciated = ListBuffer.empty[T]
+
+  type T <: Poolable
 
   def make: T
 
+  def initialize(t: T): T = t
+
+  def instantiated = synchronized(_instanciated.toList)
+
   def borrow: T = synchronized {
     if (!pool.isEmpty) pool.pop
-    else make
+    else {
+      val t = initialize(make)
+      _instanciated += t
+      t
+    }
   }
 
   def release(serial: T) = synchronized {

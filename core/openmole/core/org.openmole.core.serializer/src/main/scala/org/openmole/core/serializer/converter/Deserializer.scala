@@ -24,12 +24,14 @@ import java.io.InputStream
 import com.thoughtworks.xstream.XStream
 
 trait Deserializer {
-  private val xstream = new XStream
+  private val xStream = new XStream
 
-  protected val reflectionConverter = new ReflectionConverter(xstream.getMapper, xstream.getReflectionProvider)
+  val xStreams = List(xStream)
 
-  def registerConverter(converter: Converter) = xstream.registerConverter(converter)
-  def registerConverter(converter: SingleValueConverter) = xstream.registerConverter(converter)
+  protected val reflectionConverter = new ReflectionConverter(xStream.getMapper, xStream.getReflectionProvider)
 
-  def fromXML[T](is: InputStream): T = xstream.fromXML(is).asInstanceOf[T]
+  def registerConverter(converter: Converter) = xStream.registerConverter(converter)
+  def registerConverter(converter: SingleValueConverter) = xStream.registerConverter(converter)
+
+  def fromXML[T](is: InputStream): T = xStream.fromXML(is).asInstanceOf[T]
 }

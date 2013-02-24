@@ -19,7 +19,7 @@ package org.openmole.core.serializer.converter
 
 import java.io.File
 
-class DeserializerWithFileInjectionFromFile extends Deserializer {
+class DeserializerWithFileInjectionFromFile extends Deserializer with Factory.Poolable {
 
   var files: PartialFunction[File, File] = null
   registerConverter(new FileConverterInjecter(this))

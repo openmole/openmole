@@ -51,5 +51,4 @@ package object tools {
     def interpret[T](binding: Binding = new Binding) = new GroovyProxy(s).execute(binding).asInstanceOf[T]
   }
 
-
 }

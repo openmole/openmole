@@ -24,7 +24,7 @@ import scala.collection.immutable.TreeSet
 import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
 
-class SerializerWithFileAndPluginListing {
+class SerializerWithFileAndPluginListing extends Factory.Poolable {
 
   private var files: TreeSet[File] = null
   private var plugins: TreeSet[File] = null
@@ -37,6 +37,8 @@ class SerializerWithFileAndPluginListing {
 
   pluginXStream.registerConverter(new PluginConverter(this, reflectionConverter))
   pluginXStream.registerConverter(new PluginClassConverter(this))
+
+  val xStreams = List(fileXStream, pluginXStream)
 
   def pluginUsed(f: File): Unit =
     plugins += f
