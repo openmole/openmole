@@ -42,7 +42,6 @@
     <module>application</module>
     <module>libraries</module>
     <module>third-parties</module>
-    <module>runtime</module>
   </modules>
   <scm>
     <connection>scm:git:git://git.openmole.org:openmole</connection>
