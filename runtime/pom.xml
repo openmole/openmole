@@ -5,7 +5,7 @@
   <!-- *** POM Relationships *************************************** -->
   <!-- ************************************************************* -->
   <parent>
-    <artifactId>openmole-ecosystem</artifactId>
+    <artifactId>openmole</artifactId>
     <groupId>org.openmole.core</groupId>
     <version>0.8-SNAPSHOT</version>
   </parent>
