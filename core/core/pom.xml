@@ -19,6 +19,9 @@
   <!-- ************************************************************* -->
   <name>${project.artifactId}</name>
   <description>Third-party OSGi bundles used by SimExplorer</description>
+  <properties>
+    <include>src/main/resources/META-INF/MANIFEST.MF</include>
+  </properties>
   <modules>
     <module>org.openmole.core.batch</module>
     <module>org.openmole.core.model</module>

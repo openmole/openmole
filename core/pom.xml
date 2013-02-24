@@ -28,9 +28,6 @@
     <module>runtime</module>
   </modules>
 
-  <properties>
-    <include>src/main/resources/META-INF/MANIFEST.MF</include>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>org.openmole</groupId>
