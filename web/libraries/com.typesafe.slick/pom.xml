@@ -22,6 +22,7 @@
   <!--optional. Use this property to tune the exported packages-->
   <properties>
     <libraries.export.packages>scala.slick.*</libraries.export.packages>
+    <embed-dep>*;groupId=!org.scala-lang|org.slf4j;type=!pom;inline=true</embed-dep>
   </properties>
   <dependencies>
     <dependency>

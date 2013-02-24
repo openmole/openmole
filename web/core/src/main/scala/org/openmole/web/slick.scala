@@ -7,7 +7,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource
 import java.util.Properties
 import org.slf4j.LoggerFactory
 
-import scala.slick.driver._
+import slick.driver.H2Driver.simple._
 import scala.slick.session.Database
 import Database.threadLocalSession
 
