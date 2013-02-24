@@ -10,7 +10,7 @@
     <version>0.7.0-RC4-SNAPSHOT</version>
   </parent>
   <!--Used to build the symbolic name of the bundle-->
-  <artifactId>com.typesafe.slick</artifactId>
+  <artifactId>com.mchange</artifactId>
   <!-- ************************************************************* -->
   <!-- *** Build Settings ****************************************** -->
   <!-- ************************************************************* -->
@@ -20,14 +20,13 @@
   <!-- ************************************************************* -->
   <name>${project.artifactId}</name>
   <!--optional. Use this property to tune the exported packages-->
-  <properties>
-    <libraries.export.packages>scala.slick.*</libraries.export.packages>
-  </properties>
+  <properties></properties>
   <dependencies>
     <dependency>
-      <groupId>com.typesafe.slick</groupId>
-      <artifactId>slick_2.10</artifactId>
-      <version>1.0.0</version>
+      <groupId>com.mchange</groupId>
+      <artifactId>c3p0</artifactId>
+      <version>0.9.2</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>

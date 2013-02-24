@@ -26,6 +26,7 @@
     <module>org.slf4j</module>
     <module>com.typesafe.slick</module>
     <module>com.h2database</module>
+    <module>com.mchange</module>
   </modules>
   <properties>
     <!-- Default properties for bundles creation -->
