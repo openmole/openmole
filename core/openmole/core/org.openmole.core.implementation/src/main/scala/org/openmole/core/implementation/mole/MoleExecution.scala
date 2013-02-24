@@ -47,8 +47,11 @@ import javax.xml.bind.annotation.XmlTransient
 import org.openmole.core.model.execution.Environment
 import collection.mutable
 import java.io.File
+import org.openmole.core.serializer.SerializerService
 
 object MoleExecution extends Logger {
+
+  type PartialMoleExecution = ExecutionContext ⇒ MoleExecution
 
   def partial(
     mole: IMole,
@@ -58,7 +61,7 @@ object MoleExecution extends Logger {
     grouping: Map[ICapsule, Grouping] = Map.empty,
     profiler: Profiler = Profiler.empty,
     implicits: Context = Context.empty,
-    seed: Long = Workspace.newSeed): ExecutionContext ⇒ MoleExecution =
+    seed: Long = Workspace.newSeed): PartialMoleExecution =
     new MoleExecution(
       mole,
       sources.groupBy { case (c, _) ⇒ c }.map { case (c, ss) ⇒ c -> ss.map(_._2) }.withDefault(_ ⇒ List.empty),

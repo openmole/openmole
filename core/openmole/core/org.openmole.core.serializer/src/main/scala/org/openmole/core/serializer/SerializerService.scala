@@ -92,7 +92,7 @@ object SerializerService extends Logger {
       deserializerWithFileInjectionFromFileFactory.instantiated.flatMap(_.xStreams) :::
       deserializerWithFileInjectionFromPathHashFactory.instantiated.flatMap(_.xStreams)
 
-  def register(op: XStream ⇒ _) = lock.write {
+  def register(op: XStream ⇒ Unit) = lock.write {
     xStreamOperations += op
     xStreams.foreach(op)
   }

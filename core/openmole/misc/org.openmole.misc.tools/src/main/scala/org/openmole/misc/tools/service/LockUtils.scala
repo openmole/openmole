@@ -24,15 +24,15 @@ object LockUtils {
   implicit class ReadWriteLockDecorator(l: ReadWriteLock) {
 
     def read[T](t: ⇒ T) = {
-      val locked = l.readLock
+      l.readLock.lock
       try t
-      finally locked.unlock
+      finally l.readLock.unlock
     }
 
     def write[T](t: ⇒ T) = {
-      val locked = l.writeLock
+      l.writeLock.lock
       try t
-      finally locked.unlock
+      finally l.writeLock.unlock
     }
 
   }
