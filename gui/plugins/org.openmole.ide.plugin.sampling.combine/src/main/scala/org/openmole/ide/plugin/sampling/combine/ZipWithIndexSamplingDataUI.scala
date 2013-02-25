@@ -32,8 +32,8 @@ class ZipWithIndexSamplingDataUI(val prototype: Option[IPrototypeDataProxyUI] = 
     extends ISamplingDataUI with ZipWithPrototypeSamplingDataUI {
 
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) =
-    new ZipWithIndexSampling(SamplingUtils.toUnorderedFactorsAndSamplings(factorOrSampling).headOption.getOrElse(throw new UserBadDataError("A sampling is required to build a Zip with index Sampling")),
-      prototype.getOrElse(throw new UserBadDataError("A string prototype is required to build a Zip with name Sampling")).dataUI.coreObject.asInstanceOf[Prototype[Int]])
+    new ZipWithIndexSampling(SamplingUtils.toUnorderedFactorsAndSamplings(factorOrSampling).headOption.getOrElse(throw new UserBadDataError("A samplingMap is required to build a Zip with index Sampling")),
+      prototype.getOrElse(throw new UserBadDataError("A string prototypeMap is required to build a Zip with name Sampling")).dataUI.coreObject.asInstanceOf[Prototype[Int]])
 
   def buildPanelUI = new ZipWithPrototypeSamplingPanelUI(this) {
     override def help = new Helper(List(new URL(i18n.getString("zipWithIndexPermalinkText"), i18n.getString("zipWithIndexPermalink"))))

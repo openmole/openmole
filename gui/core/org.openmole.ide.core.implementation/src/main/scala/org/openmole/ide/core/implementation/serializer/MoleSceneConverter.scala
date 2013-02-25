@@ -102,7 +102,7 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
       //Task
       view.dataUI.task match {
         case Some(x: ITaskDataProxyUI) ⇒
-          writer.startNode("task")
+          writer.startNode("taskMap")
           writer.addAttribute("id", x.id.toString)
           writer.endNode
         case _ ⇒
@@ -194,7 +194,7 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
             n1 match {
               case "islot" ⇒ islots.put(reader.getAttribute("id"), caps.addInputSlot(start))
               case "oslot" ⇒ oslots.put(reader.getAttribute("id"), caps)
-              case "task" ⇒ Proxys.tasks.filter(p ⇒ p.id == reader.getAttribute("id").toInt).headOption match {
+              case "taskMap" ⇒ Proxys.tasks.filter(p ⇒ p.id == reader.getAttribute("id").toInt).headOption match {
                 case Some(t: ITaskDataProxyUI) ⇒ caps.encapsule(t)
                 case None ⇒ errors += "An error occured when loading the Task for a capsule. No Task has been set."
               }

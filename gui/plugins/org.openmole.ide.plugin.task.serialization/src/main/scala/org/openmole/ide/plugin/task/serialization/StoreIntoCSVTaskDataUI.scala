@@ -26,7 +26,7 @@ class StoreIntoCSVTaskDataUI(val name: String = "",
         StoreIntoCSVTask(
           name,
           protoFile.get.dataUI.coreObject.asInstanceOf[Prototype[File]])(plugins)
-      case None ⇒ throw new UserBadDataError("No output prototype file is defined !")
+      case None ⇒ throw new UserBadDataError("No output prototypeMap file is defined !")
     }
     columns.foreach { e ⇒ builder addColumn (e._1.dataUI.coreObject.asInstanceOf[Prototype[Array[_]]], e._2) }
     builder.toTask

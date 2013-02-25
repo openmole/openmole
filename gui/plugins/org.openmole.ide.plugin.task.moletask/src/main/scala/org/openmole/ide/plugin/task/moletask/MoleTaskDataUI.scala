@@ -49,7 +49,7 @@ class MoleTaskDataUI(val name: String = "",
                 }
               case _ ⇒ throw new UserBadDataError("No final Capsule is set in the " + name + "Task")
             }
-          case _ ⇒ throw new UserBadDataError("A capsule (in the " + name + "Task) without task can not be run")
+          case _ ⇒ throw new UserBadDataError("A capsule (in the " + name + "Task) without taskMap can not be run")
         }
       case _ ⇒ throw new UserBadDataError("No Mole is set in the " + name + "Task")
     }

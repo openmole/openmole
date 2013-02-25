@@ -197,7 +197,7 @@ object CheckData extends Logger {
       c ⇒
         c.task match {
           case Some(x: ITaskDataProxyUI) ⇒
-          case _ ⇒ StatusBar().warn("A capsule without task can not be run")
+          case _ ⇒ StatusBar().warn("A capsule without taskMap can not be run")
         }
     }
 

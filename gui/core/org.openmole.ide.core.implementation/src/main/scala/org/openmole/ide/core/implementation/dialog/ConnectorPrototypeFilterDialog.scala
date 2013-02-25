@@ -47,7 +47,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
         if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel) {
           verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
         }.peer,
-          "Add prototype filters")).equals(NotifyDescriptor.OK_OPTION)) {
+          "Add prototypeMap filters")).equals(NotifyDescriptor.OK_OPTION)) {
           connectorUI.filteredPrototypes = prototypePanel.multiPrototypeCombo.content.map {
             _.comboValue.get
           }

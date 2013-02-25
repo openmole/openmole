@@ -32,7 +32,7 @@ class EnvironmentExceptionListener(exeManager: ExecutionManager) extends EventLi
   override def triggered(environment: Environment, event: Event[Environment]) = synchronized {
     event match {
       case x: ExceptionRaised ⇒
-        exeManager.moleExecutionExceptionTextArea.append(x.level + ": Exception in task " + x.job)
+        exeManager.moleExecutionExceptionTextArea.append(x.level + ": Exception in taskMap " + x.job)
         exeManager.moleExecutionExceptionTextArea.append(ExceptionUtils.prettify(x.exception))
     }
   }

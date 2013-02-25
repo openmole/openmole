@@ -83,16 +83,16 @@ object Builder {
       Map.empty,
       Map.empty), new PuzzleUIMap(capsuleMap.map {
       case (ui, c) ⇒ c.task -> ui.dataUI.task.get
-    } ++ uiMap.task,
+    } ++ uiMap.taskMap,
       prototypeMap.map {
         case (k, v) ⇒ v.asInstanceOf[Prototype[Any]] -> k
-      } ++ uiMap.prototype,
+      } ++ uiMap.prototypeMap,
       MoleFactory.samplingMapping.map {
         case (k, v) ⇒ v -> k
-      } ++ uiMap.sampling,
+      } ++ uiMap.samplingMap,
       MoleFactory.moleMapping.map {
         case (k, v) ⇒ v -> k
-      } ++ uiMap.mole))
+      } ++ uiMap.moleMap))
   }
 
   def fromPuzzle(p: Puzzle,

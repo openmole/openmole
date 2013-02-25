@@ -34,7 +34,7 @@ class ExplorationTaskDataUI(
     val taskBuilder = sampling match {
       case Some(x: ISamplingCompositionDataProxyUI) ⇒
         ExplorationTask(name, x.dataUI.coreObject)(plugins)
-      case None ⇒ throw new UserBadDataError("Sampling missing to instanciate the exploration task " + name)
+      case None ⇒ throw new UserBadDataError("Sampling missing to instanciate the exploration taskMap " + name)
     }
     taskBuilder addInput inputs
     taskBuilder addOutput outputs

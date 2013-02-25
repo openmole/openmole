@@ -82,7 +82,7 @@ object ScenesManager {
 
   def currentSamplingCompositionPanelUI = currentPanelUI match {
     case scp: ISamplingCompositionPanelUI ⇒ scp
-    case _ ⇒ throw new UserBadDataError("There is no current sampling panel")
+    case _ ⇒ throw new UserBadDataError("There is no current samplingMap panel")
   }
 
   def closePropertyPanel = List(currentScene).flatten.foreach { _.closePropertyPanel }

@@ -36,7 +36,7 @@ class StoreIntoCSVTaskFactoryUI extends ITaskFactoryUI {
   def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
     val t = SceneFactory.as[StoreIntoCSVTask](task)
     uiMap.task(task, x ⇒ new StoreIntoCSVTaskDataUI(t.name,
-      t.columns.toList.map { e ⇒ (uiMap.prototype(e._1.asInstanceOf[Prototype[Array[Any]]]), e._2) },
-      Some(uiMap.prototype(t.filePrototype))))
+      t.columns.toList.map { e ⇒ (uiMap.prototypeMap(e._1.asInstanceOf[Prototype[Array[Any]]]), e._2) },
+      Some(uiMap.prototypeMap(t.filePrototype))))
   }
 }
