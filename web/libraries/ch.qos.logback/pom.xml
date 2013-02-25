@@ -20,7 +20,9 @@
   <!-- ************************************************************* -->
   <name>${project.artifactId}</name>
   <!--optional. Use this property to tune the exported packages-->
-  <properties></properties>
+  <properties>
+    <libraries.export.packages>ch.qos.*,org.slf4j.*</libraries.export.packages>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>ch.qos.logback</groupId>

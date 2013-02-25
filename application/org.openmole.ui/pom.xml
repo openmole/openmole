@@ -196,6 +196,7 @@
                   <directory>src/main/resources</directory>
                   <includes>
                     <include>config.ini</include>
+                    <include>logback.xml</include>
                   </includes>
                 </resource>
               </resources>

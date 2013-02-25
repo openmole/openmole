@@ -22,7 +22,7 @@
   <properties>
     <export.packages>org.openmole.web.*</export.packages>
     <eclipse.buddypolicy>global</eclipse.buddypolicy>
-    <bundle.include.resource>src/main/webapp,src/main/resources/logback.xml</bundle.include.resource>
+    <bundle.include.resource>src/main/webapp,src/main/resources</bundle.include.resource>
   </properties>
   <dependencies>
     <dependency>
@@ -33,11 +33,6 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>org.scalatra</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>org.slf4j</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
