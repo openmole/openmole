@@ -25,7 +25,7 @@
     <module>org.eclipse.jetty</module>
     <module>org.slf4j</module>
     <module>com.typesafe.slick</module>
-    <module>com.h2database</module>
+    <module>org.h2</module>
     <module>com.mchange.c3p0</module>
   </modules>
   <properties>

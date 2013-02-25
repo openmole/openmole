@@ -23,6 +23,7 @@
   <properties>
     <libraries.export.packages>scala.slick.*</libraries.export.packages>
     <embed-dep>*;groupId=!org.scala-lang|org.slf4j;type=!pom;inline=true</embed-dep>
+    <eclipse.buddypolicy>global</eclipse.buddypolicy>
   </properties>
   <dependencies>
     <dependency>

@@ -20,7 +20,9 @@
   <!-- ************************************************************* -->
   <name>${project.artifactId}</name>
   <!--optional. Use this property to tune the exported packages-->
-  <properties></properties>
+  <properties>
+    <eclipse.buddypolicy>global</eclipse.buddypolicy>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>com.mchange</groupId>
