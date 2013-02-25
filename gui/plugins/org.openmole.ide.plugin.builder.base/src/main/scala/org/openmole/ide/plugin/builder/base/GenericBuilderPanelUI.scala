@@ -21,12 +21,16 @@ import org.openmole.ide.core.implementation.builder.BuilderPanel
 import scala.swing._
 import org.openmole.core.implementation.puzzle.Puzzle
 
-abstract class GenericBuilderPanelUI(puzzles: List[Puzzle]) extends BuilderPanel {
+abstract class GenericBuilderPanelUI(puzzleTitle: String, puzzles: List[Puzzle], puzzleSelection: Option[Puzzle]) extends BuilderPanel {
   val puzzleComboBox = new MyComboBox(puzzles)
   val samplingComboBox = new MyComboBox(Proxys.samplings.toSeq)
 
-  contents += new Label("Puzzles")
+  contents += new Label(puzzleTitle)
   contents += puzzleComboBox
+  puzzleSelection match {
+    case Some(p: Puzzle) ⇒ puzzleComboBox.selection.item = p
+    case _ ⇒
+  }
 
   contents += new Label("Sampling")
   contents += samplingComboBox

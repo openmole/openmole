@@ -28,15 +28,15 @@ class Activator extends OSGiActivator with BuilderActivator {
 
   override def builderFactories = List(new IBuilderFactoryUI {
     def name = "Explore"
-    def buildPanelUI(puzzle: List[Puzzle], manager: IMoleSceneManager): IBuilderPanelUI = {
+    def buildPanelUI(puzzle: List[Puzzle], puzzleSelection: Option[Puzzle], manager: IMoleSceneManager): IBuilderPanelUI = {
       if (puzzle.isEmpty) throw new UserBadDataError("The Explore builder can not be built - it requires at list a sequence of Tasks")
-      else new ExplorationBuilderPanelUI(puzzle, manager)
+      else new ExplorationBuilderPanelUI(puzzle, puzzleSelection, manager)
     }
   }, new IBuilderFactoryUI {
     def name = "Explore and Merge"
-    def buildPanelUI(puzzle: List[Puzzle], manager: IMoleSceneManager) = {
+    def buildPanelUI(puzzle: List[Puzzle], puzzleSelection: Option[Puzzle], manager: IMoleSceneManager) = {
       if (puzzle.length < 2) throw new UserBadDataError("The Explore and Merge  builder can not be built - it requires at list a 2 sequences of Tasks")
-      else new AggregationBuilderPanelUI(puzzle, manager)
+      else new AggregationBuilderPanelUI(puzzle, puzzleSelection, manager)
     }
   })
 }
