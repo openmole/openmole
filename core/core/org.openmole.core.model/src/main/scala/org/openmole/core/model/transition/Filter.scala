@@ -39,8 +39,6 @@ object Filter {
 
 object Block {
 
-
-
   def apply[T](ts: T*) = new Block[T] {
     val filtered = ts.toSet
   }
