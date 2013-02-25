@@ -49,17 +49,21 @@ object Builder {
   def samplingCompositionUI(g: Boolean) = new SamplingCompositionDataProxyUI(generated = g)
 
   def puzzles(listsPuzzleCompliant: List[List[ICapsuleUI]],
-              manager: IMoleSceneManager): (List[Puzzle], IPuzzleUIMap) = {
+              manager: IMoleSceneManager,
+              uiMap: IPuzzleUIMap = new PuzzleUIMap): (List[Puzzle], IPuzzleUIMap) = {
 
-    def puzzles0(toBeComputed: List[List[ICapsuleUI]], puzzleList: List[Puzzle], uiMap: IPuzzleUIMap): (List[Puzzle], IPuzzleUIMap) = {
-      if (toBeComputed.isEmpty) (puzzleList, uiMap)
+    def puzzles0(toBeComputed: List[List[ICapsuleUI]], puzzleList: List[Puzzle], uiMap0: IPuzzleUIMap): (List[Puzzle], IPuzzleUIMap) = {
+      if (toBeComputed.isEmpty) (puzzleList, uiMap0)
       else {
-        val tail = toBeComputed.tail
-        val (p, newUIMap) = puzzle(tail.head, manager.firstCapsules(tail.head).head, manager.lastCapsules(tail.head), uiMap)
-        puzzles0(tail, puzzleList :+ p, newUIMap)
+        val firsts = manager.firstCapsules(toBeComputed.head)
+        val lasts = manager.lastCapsules(toBeComputed.head)
+        if (manager.isFirstCompliant(firsts) && manager.isLastCompliant(lasts)) {
+          val (p, newUIMap) = puzzle(toBeComputed.head, manager.firstCapsules(toBeComputed.head).head, manager.lastCapsules(toBeComputed.head), uiMap0)
+          puzzles0(toBeComputed.tail, puzzleList :+ p, newUIMap)
+        } else throw new UserBadDataError("A builder can be applied on a none empty sequence of Tasks containing only one first Task and only one final Task")
       }
     }
-    puzzles0(listsPuzzleCompliant, List(), new PuzzleUIMap)
+    puzzles0(listsPuzzleCompliant, List(), uiMap)
   }
 
   def puzzle(capsulesUI: List[ICapsuleUI],
@@ -202,14 +206,23 @@ object Builder {
 
   def apply(scene: IMoleScene,
             b: IBuilderFactoryUI,
-            selection: List[ICapsuleUI] = List()) = {
+            sel: List[ICapsuleUI] = List()) = {
     try {
       StatusBar().clear
-      val compliantPuzzles = (scene.manager.puzzlesCompliant :+ scene.manager.puzzleCompliant(selection)).distinct
+      val selection = {
+        if (sel.isEmpty) {
+          if (scene.manager.puzzlesCompliant.isEmpty) throw new UserBadDataError("Builder error: no Sequence of Task has been found.")
+          else scene.manager.puzzlesCompliant.head
+        } else sel
+      }
+      val selectedPuzzle = puzzles(List(scene.manager.puzzleCompliant(selection)), scene.manager)
+      val compliantPuzzles = scene.manager.puzzlesCompliant
       if (compliantPuzzles.isEmpty) StatusBar().warn("No Sequence of Tasks can be applied for a Builder")
       else {
-        val (puzzles, uiMap) = Builder.puzzles(compliantPuzzles, scene.manager)
-        val panel = b.buildPanelUI(puzzles, scene.manager)
+        val (puzzles, uiMap) = Builder.puzzles(compliantPuzzles, scene.manager, selectedPuzzle._2)
+        val panel = b.buildPanelUI(puzzles, {
+          if (selectedPuzzle._1.isEmpty) None else Some(selectedPuzzle._1.head)
+        }, scene.manager)
         if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(panel) {
           verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
         }.peer,

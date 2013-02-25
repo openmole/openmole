@@ -21,13 +21,19 @@ import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.ide.core.model.builder.IPuzzleUIMap
 import org.openmole.plugin.builder.base._
 import org.openmole.ide.core.implementation.dataproxy.Proxys
+import swing.{ Label, MyComboBox }
 
 class AggregationBuilderPanelUI(puzzles: List[Puzzle],
-                                manager: IMoleSceneManager) extends GenericBuilderPanelUI(puzzles) {
+                                puzzleSelection: Option[Puzzle],
+                                manager: IMoleSceneManager) extends GenericBuilderPanelUI("Explore on", puzzles, puzzleSelection) {
+
+  val aggregationPuzzleComboBox = new MyComboBox(puzzles)
+  contents += new Label("Aggregates on")
+  contents += aggregationPuzzleComboBox
 
   override def build(uiMap: IPuzzleUIMap) = {
     val samplingUI = Proxys.getOrGenerateSamplingComposition(samplingComboBox.selection.item)
     val sampling = samplingUI.dataUI.coreObject
-    (aggregation(nameTextField.text, puzzles(0), sampling, puzzles(1))(manager.dataUI.pluginSet), uiMap += (sampling, samplingUI))
+    (aggregation(nameTextField.text, puzzleComboBox.selection.item, sampling, aggregationPuzzleComboBox.selection.item)(manager.dataUI.pluginSet), uiMap += (sampling, samplingUI))
   }
 }

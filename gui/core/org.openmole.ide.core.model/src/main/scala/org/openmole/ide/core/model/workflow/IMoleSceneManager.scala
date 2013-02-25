@@ -92,10 +92,8 @@ trait IMoleSceneManager {
   def isPuzzleCompliant: Boolean = isPuzzleCompliant(capsules.values.toList)
 
   def isPuzzleCompliant(l: List[ICapsuleUI]): Boolean = {
-    val firsts = firstCapsules(l)
-    val lasts = lastCapsules(l)
-    if (firsts.isEmpty || firsts.size > 1 || lasts.isEmpty || lasts.size > 1) false
-    else true
+    if (isFirstCompliant(l) && isLastCompliant(l)) true
+    else false
   }
 
   def groups(l: List[ICapsuleUI]): List[List[ICapsuleUI]] = firstCapsules(l).map(connectedCapsulesFrom)
@@ -114,5 +112,19 @@ trait IMoleSceneManager {
       }
     }
     connectedCapsulesFrom0(List(from), List())
+  }
+
+  def isFirstCompliant(firsts: List[ICapsuleUI]) = if (firsts.isEmpty || firsts.size > 1) false else true
+
+  def isLastCompliant(lasts: List[ICapsuleUI]) = if (lasts.isEmpty || lasts.size > 1) false else true
+
+  def firstCompliant(f: List[ICapsuleUI]) = {
+    val firsts = firstCapsules(f)
+    if (isFirstCompliant(firsts)) List() else firsts
+  }
+
+  def lastCompliant(l: List[ICapsuleUI]) = {
+    val lasts = lastCapsules(l)
+    if (isLastCompliant(lasts)) List() else lasts
   }
 }
