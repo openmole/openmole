@@ -26,7 +26,7 @@
     <module>org.slf4j</module>
     <module>com.typesafe.slick</module>
     <module>org.h2</module>
-    <module>com.mchange.c3p0</module>
+    <module>com.jolbox.bonecp</module>
   </modules>
   <properties>
     <!-- Default properties for bundles creation -->

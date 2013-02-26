@@ -62,7 +62,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>com.mchange.c3p0</artifactId>
+      <artifactId>com.jolbox.bonecp</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

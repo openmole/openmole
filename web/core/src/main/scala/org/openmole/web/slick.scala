@@ -2,12 +2,13 @@ package org.openmole.web
 
 import org.scalatra.ScalatraServlet
 
-import com.mchange.v2.c3p0.ComboPooledDataSource
-
 import java.util.Properties
+import org.openmole.web.{ Suppliers, SlickSupport, Coffees }
 import org.slf4j.LoggerFactory
 
 import slick.driver.H2Driver.simple._
+import com.jolbox.bonecp._
+import java.sql.SQLException
 
 //import scala.slick.session.Database
 import Database.threadLocalSession
@@ -43,34 +44,35 @@ trait SlickSupport extends ScalatraServlet {
 
   val logger = LoggerFactory.getLogger(getClass)
 
-  /*val cpds = {
-    val props = new Properties
-    try {
-      props.load(getClass().getClassLoader().getResourceAsStream("/c3p0.properties"))
-    } catch {
-      case e: IOException ⇒ println("error when load propertie file " + e)
-    }
+  try {
+    Class.forName("org.h2.Driver")
+  } catch {
+    case e: ClassNotFoundException ⇒ println("Suffered irrecoverable error: " + e)
+  }
 
-    println(props.size())
+  var connectionPool = {
+    val boneCfg = new BoneCPConfig()
+    boneCfg.setJdbcUrl("jdbc:h2:~/test;TRACE_LEVEL_FILE=4")
+    boneCfg.setUser("root")
+    boneCfg.setPassword("")
+    boneCfg.setMinConnectionsPerPartition(5)
+    boneCfg.setMaxConnectionsPerPartition(10)
+    boneCfg.setPartitionCount(1)
 
-    println("props driverclass = " + props.getProperty("c3p0.driverClass"))
-
-    val cpds = new ComboPooledDataSource
-    cpds.setProperties(props)
-    logger.info("Created c3p0 connection pool")
-    cpds
+    new BoneCPDataSource(boneCfg)
   }
 
   def closeDbConnection() {
     logger.info("Closing c3po connection pool")
-    cpds.close
-  } */
+    connectionPool.close
+  }
 
-  val db = Database.forURL("jdbc:h2:~/test;TRACE_LEVEL_FILE=4", user = "root", password = "", driver = "org.h2.Driver") //.forDataSource(cpds)
+  val db = Database.forDataSource(connectionPool)
+  // Database.forURL("jdbc:h2:~/test;TRACE_LEVEL_FILE=4", user = "root", password = "", driver = "org.h2.Driver") //.forDataSource(cpds)
 
   override def destroy() {
     super.destroy()
-    //closeDbConnection
+    closeDbConnection
   }
 }
 

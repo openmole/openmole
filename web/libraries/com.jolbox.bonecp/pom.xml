@@ -10,7 +10,7 @@
     <version>0.7.0-RC4-SNAPSHOT</version>
   </parent>
   <!--Used to build the symbolic name of the bundle-->
-  <artifactId>com.mchange.c3p0</artifactId>
+  <artifactId>com.jolbox.bonecp</artifactId>
   <!-- ************************************************************* -->
   <!-- *** Build Settings ****************************************** -->
   <!-- ************************************************************* -->
@@ -22,12 +22,14 @@
   <!--optional. Use this property to tune the exported packages-->
   <properties>
     <eclipse.buddypolicy>global</eclipse.buddypolicy>
+    <embed-dep>*;groupId=!org.scala-lang|org.slf4j;type=!pom;inline=true</embed-dep>
+    <libraries.export.packages>com.jolbox.bonecp.*</libraries.export.packages>
   </properties>
   <dependencies>
     <dependency>
-      <groupId>com.mchange</groupId>
-      <artifactId>c3p0</artifactId>
-      <version>0.9.2</version>
+      <groupId>com.jolbox</groupId>
+      <artifactId>bonecp</artifactId>
+      <version>0.8.0-rc1</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
