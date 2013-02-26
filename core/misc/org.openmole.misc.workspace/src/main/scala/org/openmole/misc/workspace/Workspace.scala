@@ -184,7 +184,7 @@ class Workspace(val location: File) {
 
   def newDir(prefix: String): File = {
     val tempFile = newFile(prefix, "")
-    if (!tempFile.mkdir) throw new IOException
+    if (!tempFile.mkdirs) throw new IOException("Cannot create directory " + tempFile)
     tempFile
   }
 

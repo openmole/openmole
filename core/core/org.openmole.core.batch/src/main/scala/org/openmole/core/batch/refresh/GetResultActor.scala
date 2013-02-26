@@ -34,6 +34,7 @@ import org.openmole.misc.hashservice.HashService
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace._
+import util.{Failure, Success}
 
 object GetResultActor extends Logger
 
@@ -63,12 +64,9 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
     display(runtimeResult.stdErr, "Error output", storage)
 
     runtimeResult.result match {
-      case Right(exception) ⇒ throw new JobRemoteExecutionException(exception, "Fatal exception thrown durring the execution of the job execution on the excution node")
-      case Left(result) ⇒
+      case Failure(exception) ⇒ throw new JobRemoteExecutionException(exception, "Fatal exception thrown during the execution of the job execution on the execution node")
+      case Success(result) ⇒
         val contextResults = getContextResults(result, storage)
-
-        var firstRunning = Long.MaxValue
-        var lastCompleted = 0L
 
         //Try to download the results for all the jobs of the group
         for (moleJob ← job.moleJobs) {
@@ -79,9 +77,9 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
               if (!moleJob.finished) {
 
                 executionResult._1 match {
-                  case Left(context) ⇒
+                  case Success(context) ⇒
                     moleJob.finish(context, executionResult._2)
-                  case Right(e) ⇒
+                  case Failure(e) ⇒
                     sender ! MoleJobError(moleJob, batchJob, e)
                 }
               }
