@@ -28,7 +28,13 @@ import org.codehaus.groovy.runtime.InvokerHelper
 import org.openmole.misc.exception.UserBadDataError
 import collection.JavaConversions._
 
-class GroovyProxy(code: String, jars: Iterable[File] = Iterable.empty) {
+object GroovyProxy {
+
+  def apply(code: String, jars: Iterable[File] = Iterable.empty) = new GroovyProxy(code, jars)
+
+}
+
+class GroovyProxy(code: String, jars: Iterable[File] = Iterable.empty) extends GroovyFunction {
 
   @transient
   private lazy val compiledScript = {
@@ -44,6 +50,8 @@ class GroovyProxy(code: String, jars: Iterable[File] = Iterable.empty) {
       case t: Throwable ⇒ throw new UserBadDataError("Script compilation error !\n The script was :\n" + code + "\n Error message was:" + t.getMessage);
     }
   }
+
+  def apply(binding: Binding) = execute(binding)
 
   /**
    * This method run your compiled script.
