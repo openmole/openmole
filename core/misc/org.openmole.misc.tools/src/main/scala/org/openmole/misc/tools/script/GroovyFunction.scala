@@ -17,6 +17,8 @@
 
 package org.openmole.misc.tools.script
 
+import groovy.lang.Binding
+
 trait GroovyFunction {
   def apply(binding: Binding): Object
 }
