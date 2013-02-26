@@ -46,7 +46,7 @@ trait SlickSupport extends ScalatraServlet {
   val cpds = {
     val props = new Properties
     try {
-      props.load(getClass().getClassLoader().getResourceAsStream("/c3p0-config.properties"))
+      props.load(getClass().getClassLoader().getResourceAsStream("/c3p0.properties"))
     } catch {
       case e: IOException ⇒ println("error when load propertie file " + e)
     }
