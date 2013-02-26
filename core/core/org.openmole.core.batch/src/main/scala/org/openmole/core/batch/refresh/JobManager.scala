@@ -37,6 +37,7 @@ import org.openmole.core.batch.storage._
 import org.openmole.core.batch.environment.BatchEnvironment.JobManagmentThreads
 
 import scala.concurrent.duration._
+import org.openmole.misc.exception.UserBadDataError
 
 object JobManager extends Logger
 
@@ -105,6 +106,7 @@ akka {
 
     case Error(job, exception) ⇒
       val level = exception match {
+        case e: UserBadDataError => SEVERE
         case e: JobRemoteExecutionException ⇒ WARNING
         case _ ⇒ FINE
       }
