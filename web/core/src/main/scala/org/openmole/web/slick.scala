@@ -43,13 +43,15 @@ trait SlickSupport extends ScalatraServlet {
 
   val logger = LoggerFactory.getLogger(getClass)
 
-  val cpds = {
+  /*val cpds = {
     val props = new Properties
     try {
       props.load(getClass().getClassLoader().getResourceAsStream("/c3p0.properties"))
     } catch {
       case e: IOException ⇒ println("error when load propertie file " + e)
     }
+
+    println(props.size())
 
     println("props driverclass = " + props.getProperty("c3p0.driverClass"))
 
@@ -62,13 +64,13 @@ trait SlickSupport extends ScalatraServlet {
   def closeDbConnection() {
     logger.info("Closing c3po connection pool")
     cpds.close
-  }
+  } */
 
-  val db = Database.forDataSource(cpds)
+  val db = Database.forURL("jdbc:h2:~/test;TRACE_LEVEL_FILE=4", user = "root", password = "", driver = "org.h2.Driver") //.forDataSource(cpds)
 
   override def destroy() {
     super.destroy()
-    closeDbConnection
+    //closeDbConnection
   }
 }
 

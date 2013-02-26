@@ -20,7 +20,9 @@
   <!-- ************************************************************* -->
   <name>${project.artifactId}</name>
   <!--optional. Use this property to tune the exported packages-->
-  <properties></properties>
+  <properties>
+    <eclipse.buddypolicy>global</eclipse.buddypolicy>
+  </properties>
   <dependencies>
     <!--<dependency>
       <groupId>com.h2database</groupId>
@@ -32,6 +34,7 @@
       <groupId>com.h2database</groupId>
       <artifactId>com.springsource.org.h2</artifactId>
       <version>1.0.71</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
   <repositories>
