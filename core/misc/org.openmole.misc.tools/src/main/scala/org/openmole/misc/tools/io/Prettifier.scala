@@ -41,7 +41,7 @@ object Prettifier extends Logger {
       case o ⇒ o.toString
     } catch {
       case t: Throwable ⇒
-        logger.log(WARNING, "Error durring pretification", t)
+        logger.log(WARNING, "Error during pretification", t)
         o.toString
     }
 

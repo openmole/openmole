@@ -99,13 +99,13 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
                 case (hclass, hdataUI) ⇒ hdataUI match {
                   case x: IHookDataUI with NoMemoryHook ⇒
                     val hUI = KeyRegistry.hooks(DefaultKey(hdataUI.coreClass)).buildDataUI
-                    hUI.activated = true
+                    //  hUI.activated = true
                     c.dataUI.hooks.update(hclass, hUI)
                   case _ ⇒
                 }
               }
 
-              val activated = c.dataUI.hooks.filter {
+            /* val activated = c.dataUI.hooks.filter {
                 _._2.activated
               }
 
@@ -114,7 +114,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
                   new PluginPanel("", "", "[top]") {
                     activated.foreach {
                       case (hClass, hDataUI) ⇒
-                        val p = hDataUI.buildPanelUI(t)
+                        val p = hDataUI.buildPanelUI
                         panelHooks += p -> (c, hClass)
                         contents += p.peer
                         contents += new Separator(Orientation.Vertical) {
@@ -122,7 +122,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
                         }
                     }
                   })
-              }
+              }*/
             case _ ⇒
           }
       }
@@ -183,10 +183,10 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         startStopButton.background = new Color(170, 0, 0)
         startStopButton.action = stop
         exportButton.enabled = false
-        x.start(panelHooks.map {
+      /*  x.start(panelHooks.map {
           ph ⇒ ph._1.saveContent -> ph._2._1
         }.toMap,
-          groupingPanel.get.coreObjects)
+          groupingPanel.get.coreObjects)   */
       case _ ⇒
     }
   }
@@ -218,13 +218,13 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         else None
       } match {
         case Some(t: String) ⇒ executionManager match {
-          case Some(x: ExecutionManager) ⇒ x.buildMoleExecution(panelHooks.map {
+          case Some(x: ExecutionManager) ⇒ /*x.buildMoleExecution(panelHooks.map {
             ph ⇒ ph._1.saveContent -> ph._2._1
           }.toMap,
             groupingPanel.get.coreObjects) match {
               case Success((mExecution, environments)) ⇒ SerializerService.serialize(mExecution, new File(t))
               case Failure(e) ⇒ StatusBar().block(e)
-            }
+            }*/
           case _ ⇒
         }
         case _ ⇒

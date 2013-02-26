@@ -122,7 +122,7 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
     }.peer, 0)
 
     //Hooks
-    val menuHook = new Menu("IHook")
+    /*val menuHook = new Menu("IHook")
     KeyRegistry.hooks.values.toList.sortBy {
       _.toString
     }.foreach {
@@ -135,7 +135,7 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
           }
           action = new HookAction(h, this)
         }
-    }
+    }   */
 
     val menuBuilder = new Menu("Builder")
     KeyRegistry.builders.values.toList.sortBy {
@@ -149,7 +149,7 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
         }
     }
 
-    items += (menuEnv.peer, menuHook.peer, menuBuilder.peer)
+    items += (menuEnv.peer, menuBuilder.peer)
   }
 
   override def getPopupMenu(widget: Widget, point: Point) = {
@@ -181,11 +181,11 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
     def apply = {
       if (!capsule.dataUI.hooks.contains(factory.coreClass))
         capsule.dataUI.hooks += factory.coreClass -> factory.buildDataUI
-      else capsule.dataUI.hooks(factory.coreClass).activated = it.selected
-      capsule.hooked(if (capsule.dataUI.hooks.values.filter {
-        _.activated
-      }.size > 0) true
-      else false)
+      //  else capsule.dataUI.hooks(factory.coreClass).activated = it.selected
+      //  capsule.hooked(if (capsule.dataUI.hooks.values.filter {
+      //     _.activated
+      //  }.size > 0) true
+      //else false
     }
   }
 

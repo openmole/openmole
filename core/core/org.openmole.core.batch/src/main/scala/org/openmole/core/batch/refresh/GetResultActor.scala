@@ -106,7 +106,7 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
 
             /*val stdOutHash = HashService.computeHash(stdOutFile)
              if (stdOutHash != message.hash)
-             logger.log(WARNING, "The standard output has been corrupted durring the transfert.")
+             logger.log(WARNING, "The standard output has been corrupted during the transfer.")
              */
 
             System.out.synchronized {
@@ -119,7 +119,7 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
         } catch {
           case (e: IOException) ⇒
             GetResultActor.logger.log(WARNING, description + " transfer has failed.")
-            GetResultActor.logger.log(FINE, "Stack of the error durring tranfert", e)
+            GetResultActor.logger.log(FINE, "Stack of the error during tranfert", e)
         }
       case None ⇒
     }
@@ -130,7 +130,7 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
     val contextResutsFileCache = Workspace.newFile
     try {
       signalDownload(storage.downloadGZ(resultPath.path, contextResutsFileCache), resultPath.path, storage)
-      if (HashService.computeHash(contextResutsFileCache) != resultPath.hash) throw new InternalProcessingError("Results have been corrupted durring the transfer.")
+      if (HashService.computeHash(contextResutsFileCache) != resultPath.hash) throw new InternalProcessingError("Results have been corrupted during the transfer.")
       SerializerService.deserializeAndExtractFiles(contextResutsFileCache)
     } finally contextResutsFileCache.delete
   }

@@ -67,7 +67,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
           jobManager ! Uploaded(job, sj)
         } catch {
           case e: Throwable ⇒
-            logger.log(FINE, "Exception raised durring job upload.", e)
+            logger.log(FINE, "Exception raised during job upload.", e)
             jobManager ! Error(job, e)
             jobManager ! Upload(job)
         }

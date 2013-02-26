@@ -31,6 +31,7 @@ object Proxys {
   var prototypes = new HashSet[IPrototypeDataProxyUI]
   var samplings = new HashSet[ISamplingCompositionDataProxyUI]
   var environments = new HashSet[IEnvironmentDataProxyUI]
+  var hooks = new HashSet[IHookDataProxyUI]
 
   def allPrototypesByName = prototypes.map {
     _.dataUI.name
@@ -59,7 +60,7 @@ object Proxys {
 
   def clearAll: Unit = {
     ConceptMenu.clearAllItems
-    List(tasks, prototypes, environments, samplings).foreach {
+    List(tasks, prototypes, environments, samplings, hooks).foreach {
       _.clear
     }
   }

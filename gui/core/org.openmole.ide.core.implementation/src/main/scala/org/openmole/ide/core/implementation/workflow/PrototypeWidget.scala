@@ -46,6 +46,26 @@ object PrototypeWidget {
 
   val red = new Color(212, 0, 0)
 
+  def buildEmptySource(scene: IMoleScene) = {
+    new PrototypeWidget(scene, x ⇒ "0",
+      new LinkLabel("0", new Action("") {
+        def apply =
+          println("nada")
+      })) {
+      setPreferredLocation(new Point(19, TASK_CONTAINER_HEIGHT / 2))
+    }
+  }
+
+  def buildEmptyHook(scene: IMoleScene) = {
+    new PrototypeWidget(scene, x ⇒ "0",
+      new LinkLabel("0", new Action("") {
+        def apply =
+          println("nada")
+      })) {
+      setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 30, TASK_CONTAINER_HEIGHT / 2))
+    }
+  }
+
   def buildInput(scene: IMoleScene, taskproxy: ITaskDataProxyUI) = {
     new PrototypeWidget(scene, x ⇒ nbProtoIn(taskproxy),
       new LinkLabel(nbProtoIn(taskproxy), new Action("") {
