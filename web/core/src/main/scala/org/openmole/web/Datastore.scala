@@ -11,7 +11,7 @@ class Datastore[T, U] extends Actor {
   var moleExecs = Map.empty[T, U]
   def receive = {
     case ("put", pair: (T, U)) ⇒ moleExecs += pair
-    case ("get", key: T) ⇒ sender ! moleExecs(key)
+    case ("get", key: T) ⇒ sender ! moleExecs.get(key)
     case "getKeys" ⇒ sender ! moleExecs.keys
   }
 }
@@ -25,7 +25,7 @@ class DataHandler[T, U](val system: ActorSystem) {
     println("stored " + key + " " + data)
   }
 
-  def get(key: T) = Await.result(store ? ("get" -> key), Duration(1, SECONDS)).asInstanceOf[U]
+  def get(key: T): Option[U] = Await.result(store ? ("get" -> key), Duration(1, SECONDS)).asInstanceOf[Option[U]]
 
   def getKeys = Await.result(store ? "getKeys", Duration(1, SECONDS)).asInstanceOf[Iterable[T]]
 

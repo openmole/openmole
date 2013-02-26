@@ -22,7 +22,7 @@
   <properties>
     <export.packages>org.openmole.web.*</export.packages>
     <eclipse.buddypolicy>global</eclipse.buddypolicy>
-    <bundle.include.resource>src/main/webapp,src/main/resources</bundle.include.resource>
+    <bundle.include.resource>src/main/webapp</bundle.include.resource>
   </properties>
   <dependencies>
     <dependency>
