@@ -206,14 +206,13 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
                   case Some(e: IEnvironmentDataProxyUI) ⇒ caps.setEnvironment(Some(e))
                   case None ⇒ errors += "An error occured when loading the Environment for a capsule. No Environment has been set."
                 }
-
               case "hook" ⇒
-                serializer.hookList.filter(_.id == reader.getAttribute("id").toInt).headOption match {
-                  case Some(h: IHookDataUI) ⇒
-                    caps.dataUI.hooks += h.coreClass -> h
-                    caps.hooked(true)
-                  case None ⇒ errors += "An error occured when loading the IHook for a capsule. No IHook has been set."
+                Proxys.hooks.filter(e ⇒ e.id == reader.getAttribute("id").toInt).headOption match {
+                  case Some(h: IHookDataProxyUI) ⇒
+                  //caps.setHook(Some(h))
+                  case None ⇒ errors += "An error occured when loading the Environment for a capsule. No Environment has been set."
                 }
+
               case _ ⇒ StatusBar().block("Unknown balise " + n1)
             }
             reader.moveUp

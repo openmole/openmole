@@ -22,15 +22,12 @@ import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.plugin.hook.tools.MultiPrototypePanelUI
+import org.openmole.ide.core.implementation.dataproxy.Proxys
 
-class ToStringHookPanelUI(dataUI: ToStringHookDataUI,
-                          taskProxy: ITaskDataProxyUI) extends MultiPrototypePanelUI("Display prototypes",
-  taskProxy,
-  if (dataUI.toBeHooked.isEmpty)
-    taskProxy.dataUI.prototypesOut ::: taskProxy.dataUI.implicitPrototypesOut
-  else dataUI.toBeHooked)
-    with IHookPanelUI {
+class ToStringHookPanelUI(dataUI: ToStringHookDataUI) extends MultiPrototypePanelUI("Display prototypes",
+  dataUI.toBeHooked,
+  Proxys.prototypes.toList) with IHookPanelUI {
 
-  def saveContent = new ToStringHookDataUI(dataUI.activated,
+  def saveContent(name: String) = new ToStringHookDataUI(name,
     multiPrototypeCombo.content.map { _.comboValue.get })
 }

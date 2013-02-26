@@ -76,6 +76,7 @@ class CapsuleUI(val scene: IMoleScene,
         encapsule(t)
         Images.CHECK_VALID
       case _ ⇒
+        decapsule
         Images.CHECK_INVALID
     }) {
     setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 12, 2))
@@ -167,8 +168,10 @@ class CapsuleUI(val scene: IMoleScene,
     removeWidget(samplingWidget)
     environmentWidget = None
     samplingWidget = None
-    inputPrototypeWidget = None
-    outputPrototypeWidget = None
+    inputPrototypeWidget = Some(PrototypeWidget.buildEmptySource(scene))
+    addChild(inputPrototypeWidget.get)
+    outputPrototypeWidget = Some(PrototypeWidget.buildEmptyHook(scene))
+    addChild(outputPrototypeWidget.get)
   }
 
   def encapsule(dpu: ITaskDataProxyUI) = {

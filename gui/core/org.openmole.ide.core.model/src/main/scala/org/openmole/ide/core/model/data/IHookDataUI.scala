@@ -23,18 +23,14 @@ import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.IHookPanelUI
 
-trait IHookDataUI {
+trait IHookDataUI extends IDataUI {
   def id: Int
 
-  def name: String = "Factor"
-
-  def activated: Boolean
-
-  def activated_=(a: Boolean)
+  override def toString: String = name
 
   def coreClass: Class[_ <: IHook]
 
   def coreObject(executionManager: IExecutionManager): List[IHook]
 
-  def buildPanelUI(task: ITaskDataProxyUI): IHookPanelUI
+  def buildPanelUI: IHookPanelUI
 }
