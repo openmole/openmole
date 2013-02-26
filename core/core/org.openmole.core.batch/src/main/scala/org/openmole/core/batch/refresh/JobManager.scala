@@ -113,7 +113,7 @@ akka {
 
     case MoleJobError(mj, j, e) ⇒
       EventDispatcher.trigger(environment: Environment, new Environment.MoleJobExceptionRaised(j, e, WARNING, mj))
-      logger.log(WARNING, "Error durring job execution, it will be resubmitted.", e)
+      logger.log(WARNING, "Error during job execution, it will be resubmitted.", e)
 
   }
 }

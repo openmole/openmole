@@ -35,8 +35,8 @@ object ScalingGAGenomeTask {
     if (scale.isEmpty || genome.isEmpty) List.empty
     else {
       val (p, (vMin, vMax)) = scale.head
-      val dMin = vMin.interpret[Double](context)
-      val dMax = vMax.interpret[Double](context)
+      val dMin = vMin.interpret(context).toString.toDouble
+      val dMax = vMax.interpret(context).toString.toDouble
       val scaledV = Variable(p, genome.head.scale(dMin, dMax))
       scaledV :: scaled(scale.tail, genome.tail, context + scaledV)
     }
