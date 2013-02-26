@@ -36,11 +36,6 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>org.slf4j</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.openmole.web</groupId>
       <artifactId>ch.qos.logback</artifactId>
       <version>${project.version}</version>
