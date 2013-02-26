@@ -13,6 +13,7 @@ import concurrent.{ ExecutionContext, Future }
 import org.openmole.web.DataHandler
 import org.openmole.core.model.job.State._
 import concurrent.duration._
+import org.slf4j.impl.StaticLoggerBinder
 
 @MultipartConfig(maxFileSize = 3 * 1024 * 1024) //research scala multipart config
 class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSupport with FileUploadSupport with FlashMapSupport with FutureSupport {

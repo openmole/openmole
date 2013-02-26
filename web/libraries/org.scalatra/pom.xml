@@ -21,7 +21,6 @@
   <name>${project.artifactId}</name>
   <!--optional. Use this property to tune the exported packages-->
   <properties>
-    <!--<import.packages>com.google.common.*;resolution:=optional</import.packages>-->
     <libraries.export.packages>org.scalatra.*,org.fusesource.*</libraries.export.packages>
     <eclipse.buddypolicy>global</eclipse.buddypolicy>
     <embed-dep>*;groupId=!org.scala-lang|org.openmole.core|org.slf4j;type=!pom;inline=true</embed-dep>
@@ -45,11 +44,10 @@
       <version>${lib.org.scalatra.version}</version>
       <scope>provided</scope>
     </dependency>
-    <!-- <dependency>
-      <groupId>org.scalatra</groupId>
-      <artifactId>scalatra-akka_${lib.scala.major.version}</artifactId>
-      <version>2.2.0-RC3</version>
-      <scope>provided</scope>
-    </dependency>-->
+    <dependency>
+      <groupId>org.openmole.web</groupId>
+      <artifactId>ch.qos.logback</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 </project>
