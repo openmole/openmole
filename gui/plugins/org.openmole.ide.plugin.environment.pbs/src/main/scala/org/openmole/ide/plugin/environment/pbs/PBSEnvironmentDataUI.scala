@@ -24,7 +24,7 @@ class PBSEnvironmentDataUI(val name: String = "",
     extends IEnvironmentDataUI {
   ui ⇒
 
-  def coreObject = new PBSEnvironment(login,
+  def coreObject = PBSEnvironment(login,
     host,
     port,
     queue,
