@@ -150,7 +150,7 @@ class UploadActor(jobManager: ActorRef) extends Actor {
   }
 
   def toReplicatedFile(job: IJob, file: File, storage: StorageService)(implicit token: AccessToken, objectContainer: ObjectContainer): ReplicatedFile = {
-    if(!file.exists) throw new UserBadDataError(s"File/dir $file doesn't exist.")
+    if(!file.exists) throw new UserBadDataError(s"File/dir $file is requiered but doesn't exist.")
 
     val isDir = file.isDirectory
     var toReplicate = file
