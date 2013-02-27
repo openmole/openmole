@@ -149,6 +149,7 @@
     <bundle.namespace>${project.artifactId}</bundle.namespace>
     <bundle.activationpolicy>lazy</bundle.activationpolicy>
     <bundle.include.resource></bundle.include.resource>
+    <dynamic.import.packages></dynamic.import.packages>
     <embed-transitive>false</embed-transitive>
     <include></include>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -340,6 +341,7 @@
             <Bundle-SymbolicName>${symbolic.name}</Bundle-SymbolicName>
             <Bundle-Version>${bundle.version}</Bundle-Version>
             <Bundle-Description>${bundle.description}</Bundle-Description>
+	    <DynamicImport-Package>${dynamic.import.packages}</DynamicImport-Package>
             <Import-Package>${import.packages}</Import-Package>
             <Export-Package>${export.packages}</Export-Package>
             <Embed-Transitive>${embed-transitive}</Embed-Transitive>

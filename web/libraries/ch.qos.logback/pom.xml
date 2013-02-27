@@ -21,6 +21,7 @@
   <name>${project.artifactId}</name>
   <!--optional. Use this property to tune the exported packages-->
   <properties>
+    <eclipse.buddypolicy>dependent</eclipse.buddypolicy>
     <libraries.export.packages>ch.qos.*,org.slf4j.*</libraries.export.packages>
   </properties>
   <dependencies>

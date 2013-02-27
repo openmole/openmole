@@ -52,7 +52,7 @@ trait SlickSupport extends ScalatraServlet {
 
   var connectionPool = {
     val boneCfg = new BoneCPConfig()
-    boneCfg.setJdbcUrl("jdbc:h2:~/test;TRACE_LEVEL_FILE=4")
+    boneCfg.setJdbcUrl("jdbc:h2:~/db/romain;TRACE_LEVEL_FILE=4")
     boneCfg.setUser("root")
     boneCfg.setPassword("")
     boneCfg.setMinConnectionsPerPartition(5)
@@ -63,16 +63,17 @@ trait SlickSupport extends ScalatraServlet {
   }
 
   def closeDbConnection() {
-    logger.info("Closing c3po connection pool")
+    logger.info("Closing boneCP connection pool")
     connectionPool.close
   }
 
   val db = Database.forDataSource(connectionPool)
-  // Database.forURL("jdbc:h2:~/test;TRACE_LEVEL_FILE=4", user = "root", password = "", driver = "org.h2.Driver") //.forDataSource(cpds)
+
+  //val db = Database.forURL("jdbc:h2:~/test", "root", "")
 
   override def destroy() {
     super.destroy()
-    closeDbConnection
+    closeDbConnection()
   }
 }
 

@@ -77,8 +77,6 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
   post("/createMole") {
     contentType = "text/html"
 
-    implicit def timeout = Duration(10, SECONDS)
-
     val data = fileParams.get("file")
 
     //TODO: Make sure this is not a problem
