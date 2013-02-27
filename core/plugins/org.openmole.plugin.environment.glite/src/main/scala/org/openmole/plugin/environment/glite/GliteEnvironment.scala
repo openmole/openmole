@@ -148,7 +148,6 @@ object GliteEnvironment extends Logger {
       wallTime,
       cpuNumber,
       jobType,
-      jobType,
       smpGranularity,
       myProxy,
       architecture,
