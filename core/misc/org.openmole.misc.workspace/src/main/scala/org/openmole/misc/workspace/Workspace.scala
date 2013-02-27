@@ -122,7 +122,7 @@ object Workspace {
 
   def passwordIsCorrect(password: String) = instance.passwordIsCorrect(password)
 
-  def passwordChoosen = instance.passwordChoosen
+  def passwordChosen = instance.passwordChosen
 
   def preferenceAsDuration(location: ConfigurationLocation) = instance.preferenceAsDuration(location)
 
@@ -307,7 +307,7 @@ class Workspace(val location: File) {
     }
   }
 
-  def passwordChoosen = isPreferenceSet(passwordTest)
+  def passwordChosen = isPreferenceSet(passwordTest)
 
   def preferenceAsDuration(location: ConfigurationLocation) = new DurationStringDecorator(preference(location))
 

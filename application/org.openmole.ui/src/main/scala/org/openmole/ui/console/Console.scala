@@ -46,7 +46,7 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
     }
 
   @tailrec private def initPassword: Unit = {
-    val message = (if (Workspace.passwordChoosen) "Enter your OpenMOLE password" else "OpenMOLE Password has not been set yet, choose a  password") + "  (for preferences encryption):"
+    val message = (if (Workspace.passwordChosen) "Enter your OpenMOLE password" else "OpenMOLE Password has not been set yet, choose a  password") + "  (for preferences encryption):"
     val password = new jline.ConsoleReader().readLine(message, '*')
     if (!setPassword(password)) initPassword
   }
