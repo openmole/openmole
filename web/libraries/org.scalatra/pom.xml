@@ -7,7 +7,7 @@
   <parent>
     <artifactId>libraries</artifactId>
     <groupId>org.openmole.web</groupId>
-    <version>0.7.0-RC4-SNAPSHOT</version>
+    <version>0.8-alpha2</version>
   </parent>
   <!--Used to build the symbolic name of the bundle-->
   <artifactId>org.scalatra</artifactId>
@@ -27,20 +27,15 @@
   </properties>
   <dependencies>
     <dependency>
-      <groupId>org.openmole.core</groupId>
-      <artifactId>org.scala-lang.scala-library</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.scalatra</groupId>
-      <artifactId>scalatra_${lib.scala.major.version}</artifactId>
+      <artifactId>scalatra_${scala.major.version}</artifactId>
       <!-- todo ask romain -->
       <version>${lib.org.scalatra.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.scalatra</groupId>
-      <artifactId>scalatra-scalate_${lib.scala.major.version}</artifactId>
+      <artifactId>scalatra-scalate_${scala.major.version}</artifactId>
       <version>${lib.org.scalatra.version}</version>
       <scope>provided</scope>
     </dependency>
