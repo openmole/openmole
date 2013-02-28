@@ -26,7 +26,7 @@ import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.widget.ImageWidget
 import org.netbeans.api.visual.widget.Widget
-import org.openmole.ide.core.implementation.dialog.MasterCapsulePrototypeDialog
+import org.openmole.ide.core.implementation.dialog.{ StatusBar, MasterCapsulePrototypeDialog }
 import org.openmole.ide.core.implementation.data.CapsuleDataUI
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.dataproxy.ProxyFreezer
@@ -47,10 +47,15 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.implementation.validation.DataflowProblem
 import scala.swing.Action
+import org.openmole.ide.core.implementation.builder.{ SceneFactory, MoleFactory }
+import org.openmole.core.model.mole.{ Hooks, Sources, ICapsule, IMole }
+import org.openmole.core.model.data.{ Prototype, DataSet }
+import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
 
 class CapsuleUI(val scene: IMoleScene,
                 val dataUI: ICapsuleDataUI = new CapsuleDataUI) extends Widget(scene.graphScene)
-    with ICapsuleUI { capsuleUI ⇒
+    with ICapsuleUI {
+  capsuleUI ⇒
 
   val taskComponentWidget = new SceneComponentWidget(scene, new TaskWidget(scene, this),
     TASK_CONTAINER_WIDTH,
@@ -154,7 +159,9 @@ class CapsuleUI(val scene: IMoleScene,
   }
 
   def defineAsStartingCapsule(b: Boolean) = {
-    islots.foreach { _.setStartingSlot(b) }
+    islots.foreach {
+      _.setStartingSlot(b)
+    }
     scene.validate
     scene.refresh
   }
@@ -177,8 +184,8 @@ class CapsuleUI(val scene: IMoleScene,
   def encapsule(dpu: ITaskDataProxyUI) = {
     decapsule
     setTask(dpu)
-    inputPrototypeWidget = Some(PrototypeWidget.buildInput(scene, dpu))
-    outputPrototypeWidget = Some(PrototypeWidget.buildOutput(scene, dpu))
+    inputPrototypeWidget = Some(PrototypeWidget.buildInput(scene, dpu, x ⇒ inputs.length))
+    outputPrototypeWidget = Some(PrototypeWidget.buildOutput(scene, dpu, x ⇒ outputs.length))
     CheckData.checkMole(scene)
     addChild(inputPrototypeWidget.get)
     addChild(outputPrototypeWidget.get)
@@ -211,7 +218,9 @@ class CapsuleUI(val scene: IMoleScene,
         capsuleTypeWidget = Some(new LinkedImageWidget(scene,
           new ImageIcon(ImageIO.read(dataUI.getClass.getClassLoader.getResource("img/" + x.toString.toLowerCase + "Capsule.png"))),
           -1, -1,
-          new Action("") { def apply = MasterCapsulePrototypeDialog.display(capsuleUI) }))
+          new Action("") {
+            def apply = MasterCapsulePrototypeDialog.display(capsuleUI)
+          }))
         addChild(capsuleTypeWidget.get)
     }
   }
@@ -224,7 +233,9 @@ class CapsuleUI(val scene: IMoleScene,
         environmentWidget = Some(new LinkedImageWidget(scene,
           new ImageIcon(ImageIO.read(x.dataUI.getClass.getClassLoader.getResource(x.dataUI.imagePath))),
           TASK_CONTAINER_WIDTH - 10, TASK_CONTAINER_HEIGHT - 3,
-          new Action("") { def apply = scene.displayPropertyPanel(x, EDIT) }))
+          new Action("") {
+            def apply = scene.displayPropertyPanel(x, EDIT)
+          }))
         addChild(environmentWidget.get)
       case None ⇒ environmentWidget = None
     }
@@ -244,7 +255,9 @@ class CapsuleUI(val scene: IMoleScene,
         samplingWidget = Some(new LinkedImageWidget(scene,
           new ImageIcon(ImageIO.read(x.dataUI.getClass.getClassLoader.getResource(x.dataUI.imagePath))),
           0, TASK_CONTAINER_HEIGHT - 3,
-          new Action("") { def apply = scene.displayPropertyPanel(x, EDIT) }))
+          new Action("") {
+            def apply = scene.displayPropertyPanel(x, EDIT)
+          }))
         addChild(samplingWidget.get)
       case _ ⇒ samplingWidget = None
     }
@@ -288,6 +301,28 @@ class CapsuleUI(val scene: IMoleScene,
       case _ ⇒
     }
   }
+
+  def inputs(mole: IMole): List[IPrototypeDataProxyUI] =
+    MoleFactory.buildCapsule(dataUI, scene.manager.dataUI).inputs(mole, Sources.empty, Hooks.empty).toList.map {
+      ds ⇒ SceneFactory.prototype(ds.prototype)
+    }
+
+  def outputs(mole: IMole): List[IPrototypeDataProxyUI] =
+    MoleFactory.buildCapsule(dataUI, scene.manager.dataUI).outputs(mole, Sources.empty, Hooks.empty).toList.map {
+      ds ⇒ SceneFactory.prototype(ds.prototype)
+    }
+
+  def inputs: List[IPrototypeDataProxyUI] =
+    MoleFactory.buildMole(scene.manager) match {
+      case Right((mole, cMap, pMap, errs)) ⇒ inputs(mole)
+      case _ ⇒ List()
+    }
+
+  def outputs: List[IPrototypeDataProxyUI] =
+    MoleFactory.buildMole(scene.manager) match {
+      case Right((mole, cMap, pMap, errs)) ⇒ outputs(mole)
+      case _ ⇒ List()
+    }
 
   def x = convertLocalToScene(getLocation).getX
 

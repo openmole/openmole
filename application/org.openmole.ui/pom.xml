@@ -231,9 +231,9 @@
             </goals>
             <configuration>
               <target>
-                <chmod file="target/product/openmole" perm="755" />
-                <chmod file="target/product/openmole.bat" perm="755" />
-                <chmod file="target/product/debug.sh" perm="755" />
+                <chmod file="target/product/openmole" perm="755"></chmod>
+                <chmod file="target/product/openmole.bat" perm="755"></chmod>
+                <chmod file="target/product/debug.sh" perm="755"></chmod>
               </target>
             </configuration>
           </execution>

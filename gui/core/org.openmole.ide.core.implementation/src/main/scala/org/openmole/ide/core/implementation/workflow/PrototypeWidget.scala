@@ -27,17 +27,17 @@ import org.netbeans.api.visual.widget.ComponentWidget
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.model.workflow.{ ICapsuleUI, IMoleScene }
 import org.openmole.ide.misc.widget.LinkLabel
 import scala.swing.Action
 import scala.swing.Label
 
 object PrototypeWidget {
-  def nbProtoIn(taskproxy: ITaskDataProxyUI) =
-    (taskproxy.dataUI.prototypesIn.size + taskproxy.dataUI.implicitPrototypesIn.size).toString
+  def nbProtoIn(proxy: ITaskDataProxyUI, implicitSize: Unit ⇒ Int) =
+    (proxy.dataUI.prototypesIn.size + implicitSize()).toString
 
-  def nbProtoOut(taskproxy: ITaskDataProxyUI) =
-    (taskproxy.dataUI.prototypesOut.size + taskproxy.dataUI.implicitPrototypesOut.size).toString
+  def nbProtoOut(taskproxy: ITaskDataProxyUI, implicitSize: Unit ⇒ Int) =
+    (taskproxy.dataUI.prototypesOut.size + implicitSize()).toString
 
   def green(scene: IMoleScene) = scene match {
     case y: BuildMoleScene ⇒ new Color(180, 200, 7, 220)
@@ -66,9 +66,10 @@ object PrototypeWidget {
     }
   }
 
-  def buildInput(scene: IMoleScene, taskproxy: ITaskDataProxyUI) = {
-    new PrototypeWidget(scene, x ⇒ nbProtoIn(taskproxy),
-      new LinkLabel(nbProtoIn(taskproxy), new Action("") {
+  def buildInput(scene: IMoleScene, taskproxy: ITaskDataProxyUI, implicitSize: Unit ⇒ Int) = {
+
+    new PrototypeWidget(scene, x ⇒ nbProtoIn(taskproxy, implicitSize),
+      new LinkLabel(nbProtoIn(taskproxy, implicitSize), new Action("") {
         def apply =
           scene.displayPropertyPanel(taskproxy, IO)
       })) {
@@ -76,9 +77,9 @@ object PrototypeWidget {
     }
   }
 
-  def buildOutput(scene: IMoleScene, taskproxy: ITaskDataProxyUI) = {
-    new PrototypeWidget(scene, x ⇒ nbProtoOut(taskproxy),
-      new LinkLabel(nbProtoOut(taskproxy), new Action("") {
+  def buildOutput(scene: IMoleScene, taskproxy: ITaskDataProxyUI, implicitSize: Unit ⇒ Int) = {
+    new PrototypeWidget(scene, x ⇒ nbProtoOut(taskproxy, implicitSize),
+      new LinkLabel(nbProtoOut(taskproxy, implicitSize), new Action("") {
         def apply =
           scene.displayPropertyPanel(taskproxy, IO)
       })) {

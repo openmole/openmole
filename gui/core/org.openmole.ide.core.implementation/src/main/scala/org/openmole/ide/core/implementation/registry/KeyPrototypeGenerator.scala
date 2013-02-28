@@ -32,6 +32,8 @@ object KeyPrototypeGenerator {
     new PrototypeKey(proto.name, manifest.runtimeClass, dim)
   }
 
+  def prototype(proto: Prototype[_]): IPrototypeDataProxyUI = KeyPrototypeGenerator.keyPrototypeMapping(KeyPrototypeGenerator(proto))
+
   def keyPrototypeMapping: Map[PrototypeKey, IPrototypeDataProxyUI] = (Proxys.prototypes.toList :::
     List(EmptyDataUIs.emptyPrototypeProxy)).map {
       p ⇒ KeyPrototypeGenerator(p) -> p

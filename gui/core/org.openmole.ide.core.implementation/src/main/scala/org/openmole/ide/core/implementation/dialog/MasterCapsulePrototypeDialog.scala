@@ -39,7 +39,7 @@ object MasterCapsulePrototypeDialog extends PrototypeDialog {
   def display(capsuleUI: ICapsuleUI) = {
     capsuleUI.dataUI.capsuleType match {
       case x: MasterCapsuleType ⇒
-        openable(capsuleUI.dataUI) match {
+        openable(capsuleUI) match {
           case true ⇒
             val prototypePanel = new MasterCapsulePrototypeDialog(capsuleUI, capsuleUI.dataUI.task.get)
             if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel) {

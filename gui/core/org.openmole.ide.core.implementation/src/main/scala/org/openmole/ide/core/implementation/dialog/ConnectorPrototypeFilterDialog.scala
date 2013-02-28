@@ -41,7 +41,7 @@ import org.openmole.misc.tools.obj.ClassUtils._
 
 object ConnectorPrototypeFilterDialog extends PrototypeDialog {
   def display(connectorUI: IConnectorUI) = {
-    openable(connectorUI.source.dataUI) match {
+    openable(connectorUI.source) match {
       case true ⇒
         val prototypePanel = new FilteredPrototypePanel(connectorUI)
         if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel) {

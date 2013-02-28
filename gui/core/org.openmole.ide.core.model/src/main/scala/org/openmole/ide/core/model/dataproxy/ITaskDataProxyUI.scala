@@ -25,4 +25,6 @@ trait ITaskDataProxyUI extends IDataProxyUI {
   def dataUI_=(d: ITaskDataUI)
 
   override def dataUI: ITaskDataUI
+
+  def implicitPrototypes: (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI])
 }

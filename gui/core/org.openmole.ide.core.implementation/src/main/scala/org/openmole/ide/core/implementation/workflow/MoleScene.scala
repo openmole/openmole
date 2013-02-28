@@ -211,7 +211,8 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   def graphScene = this
 
   def refresh = {
-    validate; repaint
+    validate;
+    repaint
   }
 
   def createConnectEdge(sourceNodeID: String, targetNodeID: String, slotIndex: Int = 1) = {

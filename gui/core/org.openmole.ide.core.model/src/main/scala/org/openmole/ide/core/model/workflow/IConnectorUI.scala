@@ -35,7 +35,7 @@ trait IConnectorUI extends IConnectorViewUI {
     source.dataUI.task match {
       case Some(x: ITaskDataProxyUI) ⇒
         x.dataUI.prototypesOut ++
-          x.dataUI.implicitPrototypesOut
+          x.implicitPrototypes._2
       case None ⇒ List.empty
     }
 

@@ -23,6 +23,8 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.ITaskPanelUI
+import org.openmole.ide.core.model.workflow.{ IMoleScene, ICapsuleUI }
+import org.openmole.core.model.mole.{ IMole, ICapsule }
 
 trait ITaskDataUI extends IDataUI {
   def name: String
@@ -42,13 +44,6 @@ trait ITaskDataUI extends IDataUI {
   def prototypesOut: List[IPrototypeDataProxyUI]
 
   def prototypesOut_=(po: List[IPrototypeDataProxyUI])
-
-  def implicitPrototypesIn: List[IPrototypeDataProxyUI]
-
-  def implicitPrototypesOut: List[IPrototypeDataProxyUI]
-
-  def updateImplicits(ipList: List[IPrototypeDataProxyUI],
-                      opList: List[IPrototypeDataProxyUI])
 
   def filterPrototypeOccurencies(pproxy: IPrototypeDataProxyUI): List[IPrototypeDataProxyUI]
 
