@@ -21,13 +21,14 @@
   <name>${project.artifactId}</name>
   <!--optional. Use this property to tune the exported packages-->
   <properties>
-    <libraries.export.packages>ch.qos.*,org.slf4j.*</libraries.export.packages>
+    <embed-dep>*;groupId=!org.slf4j;type=!pom;inline=true</embed-dep>
+    <libraries.export.packages>ch.qos.*,org.slf4j.impl</libraries.export.packages>
   </properties>
   <dependencies>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>${lib.ch.qos.logback.version}</version>
+      <version>1.0.9</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>

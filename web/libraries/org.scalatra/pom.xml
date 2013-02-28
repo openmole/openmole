@@ -23,7 +23,7 @@
   <properties>
     <libraries.export.packages>org.scalatra.*,org.fusesource.*</libraries.export.packages>
     <eclipse.buddypolicy>global</eclipse.buddypolicy>
-    <embed-dep>*;groupId=!org.scala-lang|org.openmole.core|org.slf4j;type=!pom;inline=true</embed-dep>
+    <embed-dep>*;groupId=!org.scala-lang|org.openmole.core|org.openmole.web|org.slf4j;type=!pom;inline=true</embed-dep>
   </properties>
   <dependencies>
     <dependency>
@@ -47,6 +47,12 @@
     <dependency>
       <groupId>org.openmole.web</groupId>
       <artifactId>ch.qos.logback</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openmole.web</groupId>
+      <artifactId>org.slf4j</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>
