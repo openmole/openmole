@@ -19,7 +19,6 @@ import org.openmole.ide.misc.visualization._
 import org.openmole.ide.misc.widget._
 import org.openmole.core.model.mole._
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.model.panel._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.factory._
@@ -36,6 +35,10 @@ import org.openmole.core.model.execution.ExecutionState
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import TextAreaOutputStream._
 import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
+import org.openmole.ide.core.model.data.{ NoMemoryHook, IHookDataUI }
+import org.openmole.ide.core.implementation.registry.{ DefaultKey, KeyRegistry }
+import org.openmole.ide.core.implementation.builder.MoleFactory
+import util.{ Failure, Success }
 
 object ExecutionManager {
   implicit def executionStatesDecorator(s: scala.collection.mutable.Map[ExecutionState.ExecutionState, AtomicInteger]) = new {
@@ -51,18 +54,16 @@ class ExecutionManager(manager: IMoleSceneManager,
     with IExecutionManager
     with Publisher {
   executionManager ⇒
-  val logTextArea = new TextArea {
-    columns = 20
-    rows = 10
-    editable = false
-  }
-  val executionJobExceptionTextArea = new TextArea {
-    editable = false
-  }
+  val logTextArea = new TextArea
+  logTextArea.columns = 20
+  logTextArea.rows = 10
+  logTextArea.editable = false
 
-  val moleExecutionExceptionTextArea = new TextArea {
-    editable = false
-  }
+  val executionJobExceptionTextArea = new TextArea
+  executionJobExceptionTextArea.editable = false
+
+  val moleExecutionExceptionTextArea = new TextArea
+  moleExecutionExceptionTextArea.editable = false
 
   override val printStream = new PrintStream(new TextAreaOutputStream(logTextArea), true)
   var moleExecution: Option[IMoleExecution] = None
@@ -76,31 +77,33 @@ class ExecutionManager(manager: IMoleSceneManager,
   val wfPiePlotter = new PiePlotter
   val envBarPlotter = new XYPlotter(5000, 120)
 
-  val envBarPanel = new PluginPanel("", "[][grow,fill]", "[top]") {
-    contents += new PluginPanel("wrap", "[center]", "") {
-      contents += new TitleLabel("Workflow")
-      peer.add(wfPiePlotter.panel)
-    }
-  }
+  val titlePanel = new PluginPanel("wrap", "[center]", "")
+  titlePanel.contents += new TitleLabel("Workflow")
+  titlePanel.peer.add(wfPiePlotter.panel)
+
+  val envBarPanel = new PluginPanel("", "[][grow,fill]", "[top]")
+  envBarPanel.contents += titlePanel
 
   var states = new States(0, 0, 0)
-  val timer = new Timer(5000, new ActionListener {
+  val timerAction = new ActionListener {
     def actionPerformed(e: ActionEvent) = {
       envBarPlotter.update(states)
     }
-  })
+  }
+
+  val timer = new Timer(5000, timerAction)
   var environments = new HashMap[Environment, (String, HashMap[ExecutionState.ExecutionState, AtomicInteger])]
 
   val hookMenu = new Menu("Hooks")
 
-  val splitPane = new SplitPane(Orientation.Vertical) {
-    leftComponent = new PluginPanel("wrap", "[center]", "") {
-      contents += envBarPanel
-    }
+  val splitPane = new SplitPane(Orientation.Vertical)
+  val leftPanel = new PluginPanel("wrap", "[center]", "")
+  leftPanel.contents += envBarPanel
 
-    rightComponent = new ScrollPane(logTextArea)
-    resizeWeight = 0.65
-  }
+  splitPane.leftComponent = leftPanel
+
+  splitPane.rightComponent = new ScrollPane(logTextArea)
+  splitPane.resizeWeight = 0.65
 
   var downloads = (0, 0)
   var uploads = (0, 0)
@@ -118,17 +121,18 @@ class ExecutionManager(manager: IMoleSceneManager,
 
   contents += tabbedPane
 
-  def start(hooks: Map[IHookPanelUI, ICapsuleUI],
+  def start(hooks: Map[IHookDataUI, ICapsuleUI],
             groupings: List[(Grouping, ICapsule)]) = synchronized {
     tabbedPane.selection.index = 0
     cancel
     initBarPlotter
 
     moleExecution = buildMoleExecution(hooks, groupings) match {
-      case Right((mExecution, environments)) ⇒
-        EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.OneJobStatusChanged])
+      case Success((mE, environments)) ⇒
+        val mExecution = mE(ExecutionContext.local.copy(out = printStream))
+        EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.JobStatusChanged])
         EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.Finished])
-        EventDispatcher.listen(mExecution, new JobCreatedListener(this), classOf[IMoleExecution.OneJobSubmitted])
+        EventDispatcher.listen(mExecution, new JobCreatedListener(this), classOf[IMoleExecution.JobCreated])
         EventDispatcher.listen(mExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ExceptionRaised])
         environments.foreach {
           e ⇒
@@ -164,18 +168,22 @@ class ExecutionManager(manager: IMoleSceneManager,
         timer.start
         mExecution.start
         Some(mExecution)
-      case Left(e) ⇒
+      case Failure(e) ⇒
         StatusBar().block(e)
         None
     }
   }
 
-  def buildMoleExecution(hooks: Map[IHookPanelUI, ICapsuleUI],
-                         groupings: List[(Grouping, ICapsule)]) = MoleMaker.buildMoleExecution(mole,
-    manager,
-    hooks.flatMap {
-      case (panel, caps) ⇒ List(capsuleMapping(caps)).zip(panel.saveContent.coreObject(this))
-    }.toList,
+  def buildMoleExecution(hooks: Map[IHookDataUI, ICapsuleUI],
+                         groupings: List[(Grouping, ICapsule)]) = MoleFactory.buildMoleExecution(mole,
+    manager, {
+      @transient val h = hooks.toList.flatMap {
+        case (dataUI, caps) ⇒
+          dataUI.coreObject(this).map(h ⇒ capsuleMapping(caps) -> h)
+        case _ ⇒ Nil
+      }
+      h
+    },
     capsuleMapping,
     groupings)
 
@@ -226,4 +234,5 @@ class ExecutionManager(manager: IMoleSceneManager,
   def displayFileTransfer =
     executionContainer.updateFileTransferLabels(downloads._1 + " / " + downloads._2,
       uploads._1 + " / " + uploads._2)
+
 }

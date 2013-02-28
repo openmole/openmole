@@ -13,7 +13,7 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.task.stat.AverageTask
 
 class AverageTaskDataUI(val name: String = "",
-                        val sequence: List[(IPrototypeDataProxyUI, IPrototypeDataProxyUI)] = List.empty) extends TaskDataUI {
+                        val sequence: List[(IPrototypeDataProxyUI, IPrototypeDataProxyUI)] = List.empty) extends StatDataUI {
 
   sequence.foreach(s ⇒ println("sequence in constr : " + s._1 + " " + s._2))
   def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) = {
@@ -23,6 +23,7 @@ class AverageTaskDataUI(val name: String = "",
       gtBuilder addSequence (s._1.dataUI.coreObject.asInstanceOf[Prototype[Array[Double]]],
         s._2.dataUI.coreObject.asInstanceOf[Prototype[Double]])
     }
+
     gtBuilder addInput inputs
     gtBuilder addOutput outputs
     gtBuilder addParameter parameters

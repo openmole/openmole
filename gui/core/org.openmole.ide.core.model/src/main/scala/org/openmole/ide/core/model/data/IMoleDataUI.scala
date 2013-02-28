@@ -17,6 +17,9 @@
 
 package org.openmole.ide.core.model.data
 
+import org.openmole.core.model.task.PluginSet
+import java.io.File
+
 trait IMoleDataUI extends IDataUI {
 
   def name = "mole name"
@@ -27,4 +30,5 @@ trait IMoleDataUI extends IDataUI {
 
   def plugins: Iterable[String]
 
+  def pluginSet: PluginSet = PluginSet(plugins.map { p ⇒ new File(p) }.toSet)
 }

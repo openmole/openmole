@@ -36,6 +36,14 @@ import org.openmole.ide.core.model.commons._
 import scala.swing.CheckMenuItem
 import scala.swing.Menu
 import scala.swing.MenuItem
+import org.openmole.ide.core.model.data.{ IHookDataUI, NoMemoryHook }
+import org.openide.DialogDescriptor
+import org.openide.DialogDisplayer
+import org.openide.NotifyDescriptor
+import scala.swing.ScrollPane
+import org.openmole.ide.core.implementation.builder._
+import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.implementation.dialog.StatusBar
 
 class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends GenericMenuProvider {
   var taskMenu = new JMenu
@@ -57,21 +65,24 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
     itRIS.addActionListener(new RemoveInputSlot(capsule))
 
     //Tasks
-    Proxys.tasks.foreach { p ⇒
-      menuTask.contents += new CheckMenuItem(p.dataUI.name) {
-        action = new TaskEnvAction(p.dataUI.name, this) {
-          def apply = {
-            capsule.decapsule
-            capsule.encapsule(p)
-            selectOneItem(menuTask, item)
+    Proxys.tasks.foreach {
+      p ⇒
+        menuTask.contents += new CheckMenuItem(p.dataUI.name) {
+          action = new TaskEnvAction(p.dataUI.name, this) {
+            def apply = {
+              capsule.decapsule
+              capsule.encapsule(p)
+              selectOneItem(menuTask, item)
+            }
+          }
+          capsule.dataUI.task match {
+            case Some(t: ITaskDataProxyUI) ⇒
+              selected = {
+                p.dataUI.name == t.dataUI.name
+              }
+            case _ ⇒
           }
         }
-        capsule.dataUI.task match {
-          case Some(t: ITaskDataProxyUI) ⇒
-            selected = { p.dataUI.name == t.dataUI.name }
-          case _ ⇒
-        }
-      }
     }
 
     menuTask.peer.insert(new CheckMenuItem("None") {
@@ -84,21 +95,24 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
     //Environments
     val menuEnv = new Menu("Environment")
 
-    Proxys.environments.foreach { env ⇒
-      menuEnv.contents += new CheckMenuItem(env.dataUI.name) {
-        action = new TaskEnvAction(env.dataUI.name, this) {
-          def apply = {
-            capsule.setEnvironment(Some(env))
-            selectOneItem(menuEnv, item)
+    Proxys.environments.foreach {
+      env ⇒
+        menuEnv.contents += new CheckMenuItem(env.dataUI.name) {
+          action = new TaskEnvAction(env.dataUI.name, this) {
+            def apply = {
+              capsule.setEnvironment(Some(env))
+              selectOneItem(menuEnv, item)
+            }
+          }
+
+          capsule.dataUI.environment match {
+            case Some(e: IEnvironmentDataProxyUI) ⇒
+              selected = {
+                env.dataUI.name == e.dataUI.name
+              }
+            case _ ⇒ selected = false
           }
         }
-
-        capsule.dataUI.environment match {
-          case Some(e: IEnvironmentDataProxyUI) ⇒
-            selected = { env.dataUI.name == e.dataUI.name }
-          case _ ⇒ selected = false
-        }
-      }
     }
 
     menuEnv.peer.insert(new CheckMenuItem("None") {
@@ -108,37 +122,55 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
     }.peer, 0)
 
     //Hooks
-    val menuHook = new Menu("Hook")
-    KeyRegistry.hooks.values.toList.sortBy { _.toString }.foreach { h ⇒
-      menuHook.contents += new CheckMenuItem(h.toString) {
-        selected = {
-          if (capsule.dataUI.hooks.contains(h.coreClass)) {
-            capsule.dataUI.hooks(h.coreClass).activated
-          } else false
+    val menuHook = new Menu("IHook")
+    KeyRegistry.hooks.values.toList.sortBy {
+      _.toString
+    }.foreach {
+      h ⇒
+        menuHook.contents += new CheckMenuItem(h.toString) {
+          selected = {
+            if (capsule.dataUI.hooks.contains(h.coreClass)) {
+              capsule.dataUI.hooks(h.coreClass).activated
+            } else false
+          }
+          action = new HookAction(h, this)
         }
-        action = new HookAction(h, this)
-      }
-      items += (menuEnv.peer, menuHook.peer)
     }
+
+    val menuBuilder = new Menu("Builder")
+    KeyRegistry.builders.values.toList.sortBy {
+      _.name
+    }.foreach {
+      b ⇒
+        menuBuilder.contents += new MenuItem(b.name) {
+          action = new Action(b.name) {
+            def apply = Builder(scene, b, ScenesManager.selection.toList)
+          }
+        }
+    }
+
+    items += (menuEnv.peer, menuHook.peer, menuBuilder.peer)
   }
 
   override def getPopupMenu(widget: Widget, point: Point) = {
     initMenu
     itChangeCapsule.peer.removeAll
     items -= itChangeCapsule.peer
-    List(new MasterCapsuleType, new StrainerCapsuleType, new BasicCapsuleType).filterNot(_.getClass == capsule.dataUI.capsuleType.getClass).foreach { ctype ⇒
-      itChangeCapsule.peer.add(new MenuItem(new ChangeCapsuleAction(capsule, ctype)).peer)
+    List(new MasterCapsuleType, new StrainerCapsuleType, new BasicCapsuleType).filterNot(_.getClass == capsule.dataUI.capsuleType.getClass).foreach {
+      ctype ⇒
+        itChangeCapsule.peer.add(new MenuItem(new ChangeCapsuleAction(capsule, ctype)).peer)
     }
     items += itChangeCapsule.peer
     super.getPopupMenu(widget, point)
   }
 
   def selectOneItem(menu: Menu, item: CheckMenuItem) =
-    menu.contents.foreach { i ⇒
-      i match {
-        case mi: CheckMenuItem ⇒ mi.selected = false
-      }
-      item.selected = true
+    menu.contents.foreach {
+      i ⇒
+        i match {
+          case mi: CheckMenuItem ⇒ mi.selected = false
+        }
+        item.selected = true
     }
 
   abstract class TaskEnvAction(name: String,
@@ -150,7 +182,11 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
       if (!capsule.dataUI.hooks.contains(factory.coreClass))
         capsule.dataUI.hooks += factory.coreClass -> factory.buildDataUI
       else capsule.dataUI.hooks(factory.coreClass).activated = it.selected
-      capsule.hooked(if (capsule.dataUI.hooks.values.filter { _.activated }.size > 0) true else false)
+      capsule.hooked(if (capsule.dataUI.hooks.values.filter {
+        _.activated
+      }.size > 0) true
+      else false)
     }
   }
+
 }

@@ -57,7 +57,7 @@ import scala.swing.event.FocusGained
 
 class TaskPanel(proxy: ITaskDataProxyUI,
                 scene: IMoleScene,
-                mode: Value = CREATION) extends BasePanel(Some(proxy), scene, mode) {
+                mode: Value = CREATION) extends BasePanel(Some(proxy), scene, mode) { taskPanel ⇒
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.imagePath)))
 
   val panelUI = proxy.dataUI.buildPanelUI

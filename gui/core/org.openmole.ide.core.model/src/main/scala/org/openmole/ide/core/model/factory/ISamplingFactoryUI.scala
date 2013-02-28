@@ -18,7 +18,12 @@
 package org.openmole.ide.core.model.factory
 
 import org.openmole.ide.core.model.data.ISamplingDataUI
+import org.openmole.core.model.sampling.Sampling
+import org.openmole.ide.core.model.sampling.{ IBuiltCompositionSampling, ISamplingOrDomainProxyUI, ISamplingProxyUI, IDomainProxyUI }
 
 trait ISamplingFactoryUI extends IFactoryUI {
   def buildDataUI: ISamplingDataUI
+
+  def fromCoreObject(sampling: Sampling,
+                     bSC: IBuiltCompositionSampling): (ISamplingProxyUI, IBuiltCompositionSampling)
 }

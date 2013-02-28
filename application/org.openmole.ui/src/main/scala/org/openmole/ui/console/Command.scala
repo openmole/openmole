@@ -25,8 +25,7 @@ import org.openmole.core.implementation.execution.local._
 import org.openmole.core.implementation.validation.Validation
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.core.model.job.State
-import org.openmole.core.model.mole.IMole
-import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.mole.{ ExecutionContext, IMole, IMoleExecution }
 import org.openmole.core.model.transition.IAggregationTransition
 import org.openmole.core.model.transition.IExplorationTransition
 import org.openmole.core.serializer.SerializerService
@@ -93,5 +92,7 @@ class Command {
 
   def load[T](f: File) = SerializerService.deserialize[T](f)
   def save(o: Any, f: File) = SerializerService.serialize(o, f)
+
+  implicit lazy val executionContext = ExecutionContext.local
 
 }

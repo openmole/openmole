@@ -17,22 +17,17 @@
 
 package org.openmole.ide.core.implementation.registry
 
-import org.openmole.ide.core.model.factory.IAuthentificationFactoryUI
-import org.openmole.ide.core.model.factory.IDomainFactoryUI
-import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
-import org.openmole.ide.core.model.factory.IGroupingFactoryUI
-import org.openmole.ide.core.model.factory.IHookFactoryUI
-import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
-import org.openmole.ide.core.model.factory.ISamplingFactoryUI
-import org.openmole.ide.core.model.factory.ITaskFactoryUI
-import org.openmole.core.model.domain.Domain
+import org.openmole.ide.core.model.factory._
+import org.openmole.misc.tools.obj.ClassUtils.ClassDecorator
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.SynchronizedMap
+import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
+import org.openmole.misc.exception.UserBadDataError
 
 object KeyRegistry {
-  val prototypes = new HashMap[DefaultKey, IPrototypeFactoryUI] with SynchronizedMap[DefaultKey, IPrototypeFactoryUI]
+  val prototypes = new HashMap[PrototypeKey, IPrototypeFactoryUI] with SynchronizedMap[PrototypeKey, IPrototypeFactoryUI]
 
   val tasks = new HashMap[DefaultKey, ITaskFactoryUI] with SynchronizedMap[DefaultKey, ITaskFactoryUI]
 
@@ -44,9 +39,40 @@ object KeyRegistry {
 
   val hooks = new HashMap[DefaultKey, IHookFactoryUI] with SynchronizedMap[DefaultKey, IHookFactoryUI]
 
+  val builders = new HashMap[NameKey, IBuilderFactoryUI] with SynchronizedMap[NameKey, IBuilderFactoryUI]
+
   val authentifications = new HashMap[DefaultKey, IAuthentificationFactoryUI] with SynchronizedMap[DefaultKey, IAuthentificationFactoryUI]
 
   val groupingStrategies = new HashMap[DefaultKey, IGroupingFactoryUI] with SynchronizedMap[DefaultKey, IGroupingFactoryUI]
+
+  def task(c: Class[_]) = {
+    val key = Key(c)
+    if (tasks.contains(key)) tasks(key)
+    else {
+      val inter = intersection(c, tasks.keys.map { _.key }.toList)
+      if (!inter.isEmpty) {
+        val factory = tasks(Key(inter.head))
+        tasks += key -> factory
+        factory
+      } else throw new UserBadDataError("The class " + c + " can not be constructed")
+    }
+  }
+
+  def sampling(c: Class[_]) = {
+    val key = Key(c)
+    if (samplings.contains(key)) samplings(key)
+    else {
+      val inter = intersection(c, samplings.keys.map { _.key }.toList)
+      if (!inter.isEmpty) {
+        val factory = samplings(Key(inter.head))
+        samplings += key -> factory
+        factory
+      } else throw new UserBadDataError("The class " + c + " can not be constructed")
+    }
+  }
+
+  private def intersection(c: Class[_], lClass: List[Class[_]]) =
+    lClass.intersect(c.listSuperClassesAndInterfaces.tail)
 
   def protoProxyKeyMap = Proxys.prototypes.map { p ⇒ KeyPrototypeGenerator(p) -> p }.toMap
 

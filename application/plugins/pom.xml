@@ -7,7 +7,7 @@
   <parent>
     <artifactId>ui</artifactId>
     <groupId>org.openmole.ui</groupId>
-    <version>0.7.0-RC4-SNAPSHOT</version>
+    <version>0.8-alpha2</version>
   </parent>
   <artifactId>plugins</artifactId>
   <!-- ************************************************************* -->
@@ -202,7 +202,7 @@
     </dependency>
     <dependency>
       <groupId>org.openmole.core</groupId>
-      <artifactId>org.openmole.plugin.hook.csvprofiler</artifactId>
+      <artifactId>org.openmole.plugin.profiler.csvprofiler</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>
@@ -232,6 +232,12 @@
     </dependency>
     <dependency>
       <groupId>org.openmole.core</groupId>
+      <artifactId>org.openmole.plugin.builder.base</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openmole.core</groupId>
       <artifactId>org.openmole.plugin.builder.evolution</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
@@ -243,25 +249,25 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>au.com.bytecode.opencsv</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>ccl.northwestern.edu.netlogo4</artifactId>
       <version>${lib.ccl.northwestern.edu.netlogo4.version}</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>ccl.northwestern.edu.netlogo5</artifactId>
       <version>${lib.ccl.northwestern.edu.netlogo5.version}</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>fr.iscpif.mgo</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>

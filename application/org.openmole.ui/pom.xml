@@ -7,7 +7,7 @@
   <parent>
     <artifactId>ui</artifactId>
     <groupId>org.openmole.ui</groupId>
-    <version>0.7.0-RC4-SNAPSHOT</version>
+    <version>0.8-alpha2</version>
   </parent>
   <artifactId>org.openmole.ui</artifactId>
   <!-- ************************************************************* -->
@@ -83,7 +83,7 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.apache.commons.logging</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -92,7 +92,7 @@
       <artifactId>org.eclipse.equinox.app</artifactId>
       <scope>provided</scope>
     </dependency>
-    <!-- dependency added in scope provided for forcing exclusion in copy-dependencies task -->
+    <!-- dependency added in scope provided for forcing exclusion in copy-dependencies taskMap -->
     <dependency>
       <groupId>org.eclipse.equinox</groupId>
       <artifactId>org.eclipse.osgi</artifactId>
@@ -100,47 +100,47 @@
     </dependency>
     <!-- dependencies for the runtime -->
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>net.sourceforge.jline</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.apache.ant</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>uk.com.robustit.cloning</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.joda.time</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.scala-lang.scala-library</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.jasypt.encryption</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.apache.commons.configuration</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.objenesis</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>com.github.scopt</artifactId>
       <version>${project.version}</version>
     </dependency>

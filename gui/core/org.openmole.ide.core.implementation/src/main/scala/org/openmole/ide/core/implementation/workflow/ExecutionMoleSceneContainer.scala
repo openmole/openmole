@@ -22,12 +22,11 @@ import javax.swing.JScrollPane
 import javax.swing.ScrollPaneConstants._
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
-import org.openmole.core.model.mole.Hook
+import org.openmole.core.model.mole.IHook
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.ide.core.implementation.execution.MultiGenericGroupingStrategyPanel
 import org.openmole.ide.core.implementation.execution.ExecutionManager
 import org.openmole.ide.core.implementation.execution.MoleFinishedEvent
-import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
@@ -43,6 +42,10 @@ import org.openmole.ide.core.implementation.serializer.GUISerializer
 import scala.swing.FileChooser.Result._
 import org.openmole.core.serializer.SerializerService
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.core.model.data.{ NoMemoryHook, IHookDataUI }
+import org.openmole.ide.core.implementation.registry.{ DefaultKey, KeyRegistry }
+import org.openmole.ide.core.implementation.builder.MoleFactory
+import util.{ Failure, Success }
 
 class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
                                   val page: TabbedPane.Page,
@@ -50,7 +53,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   peer.setLayout(new BorderLayout)
 
   val executionManager =
-    MoleMaker.buildMole(bmsc.scene.manager) match {
+    MoleFactory.buildMole(bmsc.scene.manager) match {
       case Right((mole, prototypeMapping, capsuleMapping, errors)) ⇒
         Some(new ExecutionManager(bmsc.scene.manager,
           this,
@@ -73,80 +76,99 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
 
   var groupingPanel: Option[MultiGenericGroupingStrategyPanel] = None
 
-  var panelHooks = new HashMap[IHookPanelUI, (ICapsuleUI, Class[_ <: Hook])]
+  var panelHooks = new HashMap[IHookPanelUI, (ICapsuleUI, Class[_ <: IHook])]
   executionManager match {
     case Some(eManager: ExecutionManager) ⇒
 
       //peer.add(
-      val centerPanel = new ScrollPane(new ExecutionPanel {
-        peer.setLayout(new BorderLayout)
-        peer.add(new PluginPanel("wrap") {
-          val hookTabbedPane = new TabbedPane
+      val hookTabbedPane = new TabbedPane
+      val hookPanel = new PluginPanel("wrap")
+      hookPanel.contents += new Label {
+        text = "<html><b><font \"size=\"5\" >Hooks</font></b></html>"
+      }
+      hookPanel.contents += hookTabbedPane
+      //Hooks
 
-          //Hooks
-          contents += new Label {
-            text = "<html><b><font \"size=\"5\" >Hooks</font></b></html>"
-          }
-          contents += hookTabbedPane
-          eManager.capsuleMapping.keys.foreach {
-            c ⇒
-              c.dataUI.task match {
-                case Some(t: ITaskDataProxyUI) ⇒
-                  val activated = c.dataUI.hooks.filter {
-                    _._2.activated
-                  }
-                  if (!activated.isEmpty) {
-                    hookTabbedPane.pages += new TabbedPane.Page("<html><b>" + t.dataUI.name + "</b></html>",
-                      new PluginPanel("", "", "[top]") {
-                        activated.foreach {
-                          case (hClass, hDataUI) ⇒
-                            val p = hDataUI.buildPanelUI(t)
-                            panelHooks += p -> (c, hClass)
-                            contents += p.peer
-                            contents += new Separator(Orientation.Vertical) {
-                              foreground = Color.WHITE
-                            }
-                        }
-                      })
-                  }
-                case _ ⇒
+      eManager.capsuleMapping.keys.foreach {
+        c ⇒
+          c.dataUI.task match {
+            case Some(t: ITaskDataProxyUI) ⇒
+
+              //Replace no memory Hooks and with new HookDataUI instance
+              c.dataUI.hooks.foreach {
+                case (hclass, hdataUI) ⇒ hdataUI match {
+                  case x: IHookDataUI with NoMemoryHook ⇒
+                    val hUI = KeyRegistry.hooks(DefaultKey(hdataUI.coreClass)).buildDataUI
+                    hUI.activated = true
+                    c.dataUI.hooks.update(hclass, hUI)
+                  case _ ⇒
+                }
               }
+
+              val activated = c.dataUI.hooks.filter {
+                _._2.activated
+              }
+
+              if (!activated.isEmpty) {
+                hookTabbedPane.pages += new TabbedPane.Page("<html><b>" + t.dataUI.name + "</b></html>",
+                  new PluginPanel("", "", "[top]") {
+                    activated.foreach {
+                      case (hClass, hDataUI) ⇒
+                        val p = hDataUI.buildPanelUI(t)
+                        panelHooks += p -> (c, hClass)
+                        contents += p.peer
+                        contents += new Separator(Orientation.Vertical) {
+                          foreground = Color.WHITE
+                        }
+                    }
+                  })
+              }
+            case _ ⇒
           }
-          contents += new TitleLabel("Grouping strategy")
-          groupingPanel = Some(new MultiGenericGroupingStrategyPanel(eManager))
-          contents += groupingPanel.get.panel
-        }.peer, BorderLayout.CENTER)
+      }
+      hookPanel.contents += new TitleLabel("Grouping strategy")
+      groupingPanel = Some(new MultiGenericGroupingStrategyPanel(eManager))
+      hookPanel.contents += groupingPanel.get.panel
 
-        peer.add(new PluginPanel("wrap") {
-          contents += new TitleLabel("Execution control")
-          contents += new PluginPanel("wrap 3", "[]-20[]5[]") {
-            //Start / Stop
-            contents += startStopButton
-            contents += exportButton
+      val executionPanel = new ExecutionPanel
+      executionPanel.peer.setLayout(new BorderLayout)
+      // new ExecutionPanel {
+      executionPanel.peer.setLayout(new BorderLayout)
+      executionPanel.peer.add(hookPanel.peer, BorderLayout.CENTER)
 
-            contents += new PluginPanel("wrap 4") {
-              contents += new Label("Downloads:")
-              contents += dlLabel
-              contents += new Label("Uploads:")
-              contents += ulLabel
-            }
+      val centerPanel = new ScrollPane(executionPanel)
 
-            // View Mole execution
-            contents += new MainLinkLabel("Mole execution", new Action("") {
-              def apply =
-                DialogDisplayer.getDefault.notify(new DialogDescriptor(new JScrollPane(scene.graphScene.createView) {
-                  setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_AS_NEEDED)
-                }, "Mole execution"))
-            })
+      peer.add(new PluginPanel("wrap") {
+        contents += new TitleLabel("Execution control")
+        contents += new PluginPanel("wrap 3", "[]-20[]5[]") {
+          //Start / Stop
+          contents += startStopButton
+          contents += exportButton
+
+          contents += new PluginPanel("wrap 4") {
+            contents += new Label("Downloads:")
+            contents += dlLabel
+            contents += new Label("Uploads:")
+            contents += ulLabel
           }
-        }.peer, BorderLayout.SOUTH)
-      })
 
-      peer.add(new SplitPane(Orientation.Horizontal) {
-        leftComponent = centerPanel
-        rightComponent = eManager
-        resizeWeight = 1
-      }.peer)
+          // View Mole execution
+          contents += new MainLinkLabel("Mole execution", new Action("") {
+            def apply =
+              DialogDisplayer.getDefault.notify(new DialogDescriptor(new JScrollPane(scene.graphScene.createView) {
+                setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_AS_NEEDED)
+              }, "Mole execution"))
+          })
+        }
+      }.peer, BorderLayout.SOUTH)
+
+      val splitPane = new SplitPane(Orientation.Horizontal)
+
+      splitPane.leftComponent = centerPanel
+      splitPane.rightComponent = eManager
+      splitPane.resizeWeight = 1
+      peer.add(splitPane.peer)
+
     case None ⇒
   }
 
@@ -162,7 +184,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         startStopButton.action = stop
         exportButton.enabled = false
         x.start(panelHooks.map {
-          ph ⇒ ph._1 -> ph._2._1
+          ph ⇒ ph._1.saveContent -> ph._2._1
         }.toMap,
           groupingPanel.get.coreObjects)
       case _ ⇒
@@ -197,11 +219,11 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
       } match {
         case Some(t: String) ⇒ executionManager match {
           case Some(x: ExecutionManager) ⇒ x.buildMoleExecution(panelHooks.map {
-            ph ⇒ ph._1 -> ph._2._1
+            ph ⇒ ph._1.saveContent -> ph._2._1
           }.toMap,
             groupingPanel.get.coreObjects) match {
-              case Right((mExecution, environments)) ⇒ SerializerService.serialize(mExecution, new File(t))
-              case Left(e) ⇒ StatusBar().block(e)
+              case Success((mExecution, environments)) ⇒ SerializerService.serialize(mExecution, new File(t))
+              case Failure(e) ⇒ StatusBar().block(e)
             }
           case _ ⇒
         }

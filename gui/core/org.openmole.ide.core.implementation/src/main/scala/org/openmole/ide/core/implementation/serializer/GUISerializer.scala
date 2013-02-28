@@ -87,7 +87,7 @@ class GUISerializer(val toFromFile: String) {
   xstream.registerConverter(environmentConverter)
 
   xstream.alias("molescene", classOf[MoleScene])
-  xstream.alias("task", classOf[ITaskDataProxyUI])
+  xstream.alias("taskMap", classOf[ITaskDataProxyUI])
   xstream.alias("sampling", classOf[ISamplingCompositionDataProxyUI])
   xstream.alias("prototype", classOf[IPrototypeDataProxyUI])
   xstream.alias("environment", classOf[IEnvironmentDataProxyUI])
@@ -118,7 +118,7 @@ class GUISerializer(val toFromFile: String) {
           _.dataUI.hooks.values
         }
       }.map { h ⇒ h -> h.id }.toList)
-      serializeConcept("task", Proxys.tasks.map { s ⇒ s -> s.id }.toList)
+      serializeConcept("taskMap", Proxys.tasks.map { s ⇒ s -> s.id }.toList)
       serializeConcept("mole", ScenesManager.moleScenes.map { ms ⇒ ms -> ms.manager.id }.toList)
       val os = new TarOutputStream(new FileOutputStream(toFromFile))
       try os.createDirArchiveWithRelativePathNoVariableContent(tmpDir)
@@ -185,7 +185,7 @@ class GUISerializer(val toFromFile: String) {
     unserializeProxy("sampling")
     unserializeProxy("environment")
     unserializeHook
-    unserializeProxy("task")
+    unserializeProxy("taskMap")
     unserializeProxy("mole")
   }
 }

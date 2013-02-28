@@ -25,14 +25,26 @@ import org.openmole.ide.core.implementation.action.AddTaskAction
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.workflow.IMoleScene
-import scala.swing.Action
-import scala.swing.MenuItem
+import swing.{ Menu, Action, MenuItem }
+import org.openmole.ide.core.implementation.registry.KeyRegistry
+import org.openmole.ide.core.implementation.builder.Builder
 
 class MoleSceneMenuProvider(moleScene: IMoleScene) extends GenericMenuProvider {
 
   def initMenu = {
     val itemCapsule = new MenuItem(new AddCapsuleAction(moleScene, this))
-    items += itemCapsule.peer
+
+    val menuBuilder = new Menu("Builder")
+    KeyRegistry.builders.values.toList.sortBy {
+      _.name
+    }.foreach {
+      b ⇒
+        menuBuilder.contents += new MenuItem(b.name) {
+          action = new Action(b.name) { def apply = Builder(moleScene, b) }
+        }
+    }
+
+    items += (itemCapsule.peer, menuBuilder.peer)
   }
 
   override def getPopupMenu(widget: Widget,

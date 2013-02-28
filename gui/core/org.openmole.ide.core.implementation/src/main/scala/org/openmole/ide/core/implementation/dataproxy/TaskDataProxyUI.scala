@@ -23,4 +23,5 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.data.ITaskDataUI
 
 class TaskDataProxyUI(var dataUI: ITaskDataUI,
-                      val id: Int = Counter.id.getAndIncrement) extends ITaskDataProxyUI
+                      val id: Int = Counter.id.getAndIncrement,
+                      val generated: Boolean = false) extends ITaskDataProxyUI

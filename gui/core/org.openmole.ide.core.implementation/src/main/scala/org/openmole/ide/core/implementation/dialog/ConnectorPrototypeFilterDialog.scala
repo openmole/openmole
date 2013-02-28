@@ -33,10 +33,11 @@ import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import swing.{ Label, MyComboBox, ScrollPane, TextField }
 import org.openmole.ide.core.implementation.sampling.SamplingConnectorWidget
-import org.openmole.ide.core.model.sampling.{ ISamplingCompositionProxyUI, IDomainProxyUI, IFactorProxyUI }
+import org.openmole.ide.core.model.sampling.{ ISamplingOrDomainProxyUI, IDomainProxyUI, IFactorProxyUI }
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.misc.tools.util.Types
 import org.openmole.ide.core.model.data.IDomainDataUI
+import org.openmole.misc.tools.obj.ClassUtils._
 
 object ConnectorPrototypeFilterDialog extends PrototypeDialog {
   def display(connectorUI: IConnectorUI) = {
@@ -46,7 +47,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
         if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel) {
           verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
         }.peer,
-          "Add prototype filters")).equals(NotifyDescriptor.OK_OPTION)) {
+          "Add prototypeMap filters")).equals(NotifyDescriptor.OK_OPTION)) {
           connectorUI.filteredPrototypes = prototypePanel.multiPrototypeCombo.content.map {
             _.comboValue.get
           }
@@ -56,7 +57,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
     }
   }
 
-  class OrderingDialog(compositionProxy: ISamplingCompositionProxyUI,
+  class OrderingDialog(compositionProxy: ISamplingOrDomainProxyUI,
                        connectorWidget: SamplingConnectorWidget) extends PluginPanel("wrap", "[grow,fill]", "") {
     val orderTextField = new TextField(compositionProxy.ordering.toString, 5)
     contents += orderTextField
@@ -94,7 +95,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
     def availablePrototypes =
       connectorWidget.factorProxyUI match {
         case Some(f: IFactorProxyUI) ⇒ Proxys.prototypes.filter {
-          p ⇒ Types(f.dataUI.domain.dataUI.domainType.toString, p.dataUI.protoType.toString)
+          p ⇒ assignable(f.dataUI.domain.dataUI.domainType.runtimeClass, p.dataUI.protoType.runtimeClass)
         }.toList
         case _ ⇒ List()
       }

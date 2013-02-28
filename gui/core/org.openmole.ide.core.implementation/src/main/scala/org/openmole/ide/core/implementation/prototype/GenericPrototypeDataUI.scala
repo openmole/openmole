@@ -18,11 +18,13 @@
 package org.openmole.ide.core.implementation.prototype
 
 import org.openmole.ide.core.model.data.IPrototypeDataUI
+import org.openmole.ide.core.implementation.registry.KeyGenerator
 import org.openmole.core.implementation.data._
 import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.core.model.data._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.tools.util.{ Types, ClassLoader }
+import org.openmole.misc.tools.obj.ClassUtils._
 
 object GenericPrototypeDataUI {
 
@@ -47,7 +49,7 @@ object GenericPrototypeDataUI {
   }
 
   def stringToDataUI(s: String): GenericPrototypeDataUI[_] = try {
-    GenericPrototypeDataUI(ClassLoader.toManifest(s))
+    GenericPrototypeDataUI(manifest(s))
   } catch {
     case e: ClassNotFoundException ⇒ throw new UserBadDataError(s + " can not be loaded as a Class")
   }
@@ -56,6 +58,8 @@ object GenericPrototypeDataUI {
     new GenericPrototypeDataUI[T](n, d, t)
 
   def apply[T](implicit t: Manifest[T]): GenericPrototypeDataUI[T] = apply("", 0)
+
+  def apply[T](p: Prototype[T]): GenericPrototypeDataUI[T] = apply(p.name, KeyGenerator.stripArrays(p.`type`)._2)(p.`type`)
 }
 
 import GenericPrototypeDataUI._
@@ -63,6 +67,7 @@ import GenericPrototypeDataUI._
 class GenericPrototypeDataUI[T](val name: String,
                                 val dim: Int,
                                 val protoType: Manifest[T]) extends IPrototypeDataUI[T] {
+
   def newInstance(n: String, d: Int) = GenericPrototypeDataUI(n, d)(protoType)
 
   override def toString = canonicalClassName(typeClassString)

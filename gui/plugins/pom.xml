@@ -7,7 +7,7 @@
   <parent>
     <artifactId>gui</artifactId>
     <groupId>org.openmole.ide</groupId>
-    <version>0.7.0-RC4-SNAPSHOT</version>
+    <version>0.8-alpha2</version>
   </parent>
   <artifactId>plugins</artifactId>
   <packaging>pom</packaging>
@@ -37,13 +37,14 @@
     <module>org.openmole.ide.plugin.hook.tools</module>
     <module>org.openmole.ide.plugin.hook.display</module>
     <module>org.openmole.ide.plugin.hook.file</module>
+    <module>org.openmole.ide.plugin.builder.base</module>
   </modules>
   <properties>
     <bundle.activator>${project.artifactId}.Activator</bundle.activator>
   </properties>
   <dependencies>
     <dependency>
-      <groupId>org.openmole.ide</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.scala-lang.scala-swing</artifactId>
       <version>${project.version}</version>
     </dependency>

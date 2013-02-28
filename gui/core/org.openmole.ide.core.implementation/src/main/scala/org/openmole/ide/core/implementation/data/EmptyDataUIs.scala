@@ -43,7 +43,7 @@ import org.openmole.ide.core.implementation.sampling.DomainWidget
 
 object EmptyDataUIs {
 
-  val emptyPrototypeProxy: IPrototypeDataProxyUI = new PrototypeDataProxyUI(GenericPrototypeDataUI[Int], false)
+  val emptyPrototypeProxy: IPrototypeDataProxyUI = new PrototypeDataProxyUI(GenericPrototypeDataUI[Int], generated = false)
 
   val emptyTaskProxy: ITaskDataProxyUI = new TaskDataProxyUI(new EmptyTaskDataUI)
 
@@ -64,7 +64,7 @@ object EmptyDataUIs {
     def typeClassString = ""
     def factory = new EmptyPrototypeFactoryUI
     def coreClass = classOf[Prototype[_]]
-    def protoType = ClassUtils.nanifest(classOf[Any])
+    def protoType = ClassUtils.manifest(classOf[Any])
     def coreObject = Prototype[Any]("")
     def fatImagePath = "img/empty.png"
     def buildPanelUI = new GenericPrototypePanelUI(GenericPrototypeDataUI.base.head)

@@ -17,14 +17,13 @@
 
 package org.openmole.ide.core.implementation.dataproxy
 
-import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.ide.core.model.dataproxy._
-import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.implementation.panel.ConceptMenu
-import org.openmole.ide.core.model.data._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
 import org.openmole.ide.misc.tools.util.Types
+import org.openmole.misc.tools.obj.ClassUtils._
+import org.openmole.ide.core.implementation.builder.Builder
 
 object Proxys {
 
@@ -37,20 +36,25 @@ object Proxys {
     _.dataUI.name
   }
 
-  def classPrototypes(prototypeClass: Class[_]) =
-    prototypes.toList.filter { p ⇒
-      Types(Types.extractTypeFromArray(p.dataUI.typeClassString),
-        prototypeClass.getCanonicalName.replaceAllLiterally("[", ""))
-    }
+  def classPrototypes(prototypeClass: Class[_]): List[IPrototypeDataProxyUI] =
+    classPrototypes(prototypeClass, prototypes.toList)
 
   def classPrototypes(prototypeClass: Class[_],
-                      dim: Int = 0,
-                      protoList: List[IPrototypeDataProxyUI] = prototypes.toList): List[IPrototypeDataProxyUI] = {
-    protoList.filter {
+                      protoList: List[IPrototypeDataProxyUI]): List[IPrototypeDataProxyUI] = {
+    val a = protoList.filter {
       p ⇒
-        p.dataUI.dim == dim && Types(Types.extractTypeFromArray(p.dataUI.typeClassString),
-          prototypeClass.getCanonicalName.replaceAllLiterally("[", ""))
+        assignable(prototypeClass, p.dataUI.coreObject.`type`.runtimeClass)
     }
+    a
+  }
+
+  def getOrGenerateSamplingComposition(p: ISamplingCompositionDataProxyUI) =
+    if (isProxy(p)) p
+    else Builder.samplingCompositionUI(true)
+
+  def isProxy(p: IDataProxyUI) = p match {
+    case exists: IDataProxyUI ⇒ true
+    case _ ⇒ false
   }
 
   def clearAll: Unit = {

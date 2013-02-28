@@ -21,11 +21,23 @@ import java.util.Locale
 import java.util.ResourceBundle
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget._
-import scala.swing.CheckBox
-import scala.swing.Label
-import scala.swing.TabbedPane
-import scala.swing.TextField
-import scala.swing.event.ButtonClicked
+import swing._
+import event._
+import event.ButtonClicked
+import org.openmole.plugin.environment.glite.{ GliteEnvironment, GliteAuthentication }
+import org.openmole.misc.workspace.Workspace
+import scala.Some
+import scala.Some
+
+object GliteEnvironmentPanelUI {
+  lazy val vomses = {
+    val x = xml.XML.loadFile(GliteAuthentication.voCards)
+    val cards = (x \ "IDCard")
+    val names = cards map (_.attribute("Name").get.text)
+    val urls = cards map (c ⇒ (c \ "EnrollmentUrl").head.text)
+    names zip urls
+  }.toMap
+}
 
 class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IEnvironmentPanelUI {
 
@@ -47,7 +59,10 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
-  val voTextField = new TextField(pud.vo, 20)
+  val voComboBox = new MyComboBox[String]("" :: GliteEnvironmentPanelUI.vomses.keys.toList.sorted)
+  voComboBox.selection.item = pud.vo
+
+  //val voTextField = new TextField(pud.vo, 20)
   val vomsTextField = new TextField(pud.voms, 20)
   val bdiiTextField = new TextField(pud.bdii, 20)
   val runtimeMemoryTextField = new TextField(pud.openMOLEMemory, 4)
@@ -73,15 +88,22 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
   }
 
   val proxyCheckBox = new CheckBox("MyProxy")
+
   listenTo(`proxyCheckBox`)
+
   reactions += {
     case ButtonClicked(`proxyCheckBox`) ⇒ showProxy(proxyCheckBox.selected)
+  }
+
+  voComboBox.selection.reactions += {
+    case SelectionChanged(`voComboBox`) ⇒
+      GliteAuthentication.getVOMS(voComboBox.selection.item).orElse(Some("")) foreach (vomsTextField.text = _)
   }
 
   tabbedPane.pages += new TabbedPane.Page("Settings",
     new PluginPanel("wrap 2") {
       contents += (new Label("VO"), "gap para")
-      contents += voTextField
+      contents += voComboBox
       contents += (new Label("VOMS"), "gap para")
       contents += vomsTextField
       contents += (new Label("BDII"), "gap para")
@@ -136,7 +158,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
   }
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(voTextField, new Help(i18n.getString("vo"), i18n.getString("voEx")))
+    add(voComboBox, new Help(i18n.getString("vo"), i18n.getString("voEx")))
     add(vomsTextField, new Help(i18n.getString("voms"), i18n.getString("vomsEx")))
     add(bdiiTextField, new Help(i18n.getString("bdii"), i18n.getString("bdiiEx")))
     add(proxyCheckBox, new Help(i18n.getString("runtimeMemory"), i18n.getString("runtimeMemoryEx")))
@@ -145,7 +167,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
 
   def saveContent(name: String) =
     new GliteEnvironmentDataUI(name,
-      voTextField.text,
+      voComboBox.selection.item,
       vomsTextField.text,
       bdiiTextField.text,
       proxyCheckBox.selected,

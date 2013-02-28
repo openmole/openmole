@@ -6,7 +6,7 @@
   <!-- ************************************************************* -->
   <groupId>org.openmole</groupId>
   <artifactId>openmole</artifactId>
-  <version>0.7.0-RC4-SNAPSHOT</version>
+  <version>0.8-alpha2</version>
   <!-- ************************************************************* -->
   <!-- *** Build Settings ****************************************** -->
   <!-- ************************************************************* -->
@@ -40,7 +40,8 @@
     <module>core</module>
     <module>gui</module>
     <module>application</module>
-    <module>web</module>
+    <module>libraries</module>
+    <module>third-parties</module>
   </modules>
   <scm>
     <connection>scm:git:git://git.openmole.org:openmole</connection>
@@ -65,6 +66,8 @@
     <netbeans.hint.license>gpl30</netbeans.hint.license>
     <symbolic.name>${project.artifactId}</symbolic.name>
     <!-- versions of libraries used -->
+    <netbeans.version>RELEASE71</netbeans.version>
+    <com.miglayout.version>3.7.4</com.miglayout.version>
     <lib.org.eclipse.osgi.version>3.7.2.v20120110</lib.org.eclipse.osgi.version>
     <lib.org.eclipse.equinox.registry.version>3.5.0.v20100503</lib.org.eclipse.equinox.registry.version>
     <lib.org.eclipse.equinox.launcher.version>1.1.1.R36x_v20101122_1400</lib.org.eclipse.equinox.launcher.version>
@@ -82,7 +85,7 @@
     <!--<lib.com.jcraft.jsch.version>0.1.42</lib.com.jcraft.jsch.version>-->
     <lib.com.thoughtworks.xstream.version>1.4.1</lib.com.thoughtworks.xstream.version>
     <lib.net.sf.kxml.version>2.3.0</lib.net.sf.kxml.version>
-    <lib.fr.iscpif.gridscale.version>1.29</lib.fr.iscpif.gridscale.version>
+    <lib.fr.iscpif.gridscale.version>1.33</lib.fr.iscpif.gridscale.version>
     <lib.org.apache.commons.collections15.version>4.01</lib.org.apache.commons.collections15.version>
     <lib.org.apache.commons.compress.version>1.0</lib.org.apache.commons.compress.version>
     <lib.org.apache.commons.pool.version>1.5.4</lib.org.apache.commons.pool.version>
@@ -129,10 +132,11 @@
     <lib.org.nuiton.thirdparty.jri.version>0.7-0</lib.org.nuiton.thirdparty.jri.version>
     <lib.org.apache.sling.scripting.scala.script.version>0.9.0-SNAPSHOT</lib.org.apache.sling.scripting.scala.script.version>
     <lib.com.github.scopt.version>2.0.0</lib.com.github.scopt.version>
-    <lib.fr.iscpif.mgo.version>1.50</lib.fr.iscpif.mgo.version>
+    <lib.fr.iscpif.mgo.version>1.51</lib.fr.iscpif.mgo.version>
     <lib.org.scala-lang.scala.version>2.10.0</lib.org.scala-lang.scala.version>
     <lib.com.typesafe.akka.version>2.1.0</lib.com.typesafe.akka.version>
-    <lib.scala.major.version>2.10</lib.scala.major.version>
+    <lib.com.typesafe.akka.scala.version>${scala.major.version}</lib.com.typesafe.akka.scala.version>
+    <scala.major.version>2.10</scala.major.version>
     <lib.de.erichseifert.gral.version>0.9-SNAPSHOT</lib.de.erichseifert.gral.version>
     <lib.runtime.jvm.version>7-u10</lib.runtime.jvm.version>
     <lib.org.scalatra.version>2.2.1-SNAPSHOT</lib.org.scalatra.version>
@@ -148,7 +152,6 @@
     <bundle.version>${project.version}</bundle.version>
     <bundle.namespace>${project.artifactId}</bundle.namespace>
     <bundle.activationpolicy>lazy</bundle.activationpolicy>
-    <bundle.include.resource></bundle.include.resource>
     <embed-transitive>false</embed-transitive>
     <include></include>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -346,9 +349,6 @@
             <!--<Embed-Dependency>${embed-dep}</Embed-Dependency>-->
             <Eclipse-BuddyPolicy>${eclipse.buddypolicy}</Eclipse-BuddyPolicy>
             <Bundle-Activator>${bundle.activator}</Bundle-Activator>
-            <!-- <Include-Resource>
-                  ${bundle.include.resource}
-              </Include-Resource> -->
             <Bundle-ActivationPolicy>${bundle.activationpolicy}</Bundle-ActivationPolicy>
             <_include>${include}</_include>
           </instructions>

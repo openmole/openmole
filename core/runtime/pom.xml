@@ -5,9 +5,9 @@
   <!-- *** POM Relationships *************************************** -->
   <!-- ************************************************************* -->
   <parent>
-    <artifactId>openmole-ecosystem</artifactId>
+    <artifactId>openmole</artifactId>
     <groupId>org.openmole.core</groupId>
-    <version>0.7.0-RC4-SNAPSHOT</version>
+    <version>0.8-alpha2</version>
   </parent>
   <artifactId>runtime</artifactId>
   <!-- ************************************************************* -->
@@ -24,23 +24,4 @@
     <module>org.openmole.runtime.daemon</module>
     <module>org.openmole.runtime.dbserver</module>
   </modules>
-  <dependencies>
-    <dependency>
-      <groupId>org.openmole.core</groupId>
-      <artifactId>org.scala-lang.scala-library</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_${lib.org.scala-lang.scala.version}</artifactId>
-      <version>${lib.org.scalatest.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${lib.org.junit.version}</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
 </project>

@@ -17,15 +17,28 @@
 
 package org.openmole.ide.plugin.method.sensitivity
 
-import org.openmole.ide.core.implementation.registry.OSGiActivator
-import org.openmole.ide.core.implementation.registry.SamplingActivator
+import org.openmole.ide.core.implementation.builder._
+import org.openmole.ide.core.implementation.registry._
 import org.openmole.ide.core.implementation.registry.TaskActivator
 import org.openmole.ide.core.model.factory.ISamplingFactoryUI
+import org.openmole.core.model.sampling.Sampling
+import org.openmole.ide.core.model.sampling.IBuiltCompositionSampling
+import org.openmole.plugin.method.sensitivity.SaltelliSampling
+import org.openmole.ide.core.implementation.sampling.SamplingProxyUI
 
 class Activator extends OSGiActivator with SamplingActivator with TaskActivator {
 
   override def samplingFactories = List(new ISamplingFactoryUI {
     def buildDataUI = new SaltelliSamplingDataUI
+
+    def fromCoreObject(sampling: Sampling, bSC: IBuiltCompositionSampling) = {
+      sampling match {
+        case cs: SaltelliSampling ⇒
+          val proxy = new SamplingProxyUI(new SaltelliSamplingDataUI(cs.samples.toString))
+          (proxy, Builder.buildConnectedSamplings(proxy, Seq(), bSC))
+        case _ ⇒ (new SamplingProxyUI(buildDataUI), bSC)
+      }
+    }
   })
 
   override def taskFactories = List(new FirstOrderEffectTaskFactoryUI,

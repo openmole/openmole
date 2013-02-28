@@ -37,6 +37,7 @@ import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.swing.FileChooser.SelectionMode._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.ide.misc.tools.util.ClassLoader
+import org.openmole.misc.tools.obj.ClassUtils._
 
 class GUIPanel extends MainFrame {
   mainframe ⇒
@@ -138,7 +139,7 @@ class GUIPanel extends MainFrame {
 
     def saveContent = {
       val requiredFiles = Proxys.prototypes.map {
-        p ⇒ PluginManager.fileProviding(ClassLoader.toClass(p.dataUI.typeClassString)) -> p
+        p ⇒ PluginManager.fileProviding(toClass(p.dataUI.typeClassString)) -> p
       }.flatMap {
         case (o, p) ⇒ o.map {
           _.getCanonicalFile -> p

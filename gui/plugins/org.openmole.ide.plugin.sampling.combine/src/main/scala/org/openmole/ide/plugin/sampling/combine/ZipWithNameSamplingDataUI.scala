@@ -30,19 +30,20 @@ import org.openmole.ide.misc.tools.util.Types
 import org.openmole.ide.misc.widget.{ URL, Helper }
 import java.util.{ ResourceBundle, Locale }
 import org.openmole.ide.core.implementation.sampling.SamplingUtils
+import org.openmole.misc.tools.obj.ClassUtils
 
 class ZipWithNameSamplingDataUI(val prototype: Option[IPrototypeDataProxyUI] = None) extends ISamplingDataUI with ZipWithPrototypeSamplingDataUI {
 
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) =
     new ZipWithNameSampling(SamplingUtils.toFactors(factorOrSampling).asInstanceOf[List[Factor[File, Domain[File] with Discrete[File]]]]
       .headOption.getOrElse(throw new UserBadDataError("A factor is required to build a Zip with name Sampling")),
-      prototype.getOrElse(throw new UserBadDataError("A string prototype is required to build a Zip with name Sampling")).dataUI.coreObject.asInstanceOf[Prototype[String]])
+      prototype.getOrElse(throw new UserBadDataError("A string prototypeMap is required to build a Zip with name Sampling")).dataUI.coreObject.asInstanceOf[Prototype[String]])
 
   def coreObject(factors: List[Factor[_, _]], samplings: List[Sampling]) =
     new ZipWithNameSampling(factors.map {
       f ⇒ DiscreteFactor(f.asInstanceOf[Factor[File, Domain[File] with Discrete[File]]])
     }.headOption.getOrElse(throw new UserBadDataError("A factor is required to build a Zip with name Sampling")),
-      prototype.getOrElse(throw new UserBadDataError("A string prototype is required to build a Zip with name Sampling")).dataUI.coreObject.asInstanceOf[Prototype[String]])
+      prototype.getOrElse(throw new UserBadDataError("A string prototypeMap is required to build a Zip with name Sampling")).dataUI.coreObject.asInstanceOf[Prototype[String]])
 
   def buildPanelUI = new ZipWithPrototypeSamplingPanelUI(this) {
     override def help = new Helper(List(new URL(i18n.getString("zipWithNamePermalinkText"), i18n.getString("zipWithNamePermalink"))))
@@ -56,7 +57,7 @@ class ZipWithNameSamplingDataUI(val prototype: Option[IPrototypeDataProxyUI] = N
 
   override def isAcceptable(domain: IDomainDataUI) = domain match {
     case f: IFinite ⇒
-      if (Types(domain.domainType.toString, Types.FILE)) true
+      if (ClassUtils.assignable(domain.domainType.runtimeClass, classOf[File])) true
       else {
         StatusBar().warn("A File domain is required here.")
         false
