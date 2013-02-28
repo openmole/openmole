@@ -47,8 +47,4 @@ package object tools {
 
   implicit def ContextToBindingConverter(c: Context) = c.toBinding
 
-  implicit class GroovyStringDecorator(s: String) {
-    def interpret[T](binding: Binding = new Binding) = new GroovyProxy(s).execute(binding).asInstanceOf[T]
-  }
-
 }

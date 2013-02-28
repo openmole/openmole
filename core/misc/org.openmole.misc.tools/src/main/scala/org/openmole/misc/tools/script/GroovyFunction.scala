@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Romain Reuillon
+ * Copyright (C) 26/02/13 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -11,16 +11,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment
+package org.openmole.misc.tools.script
 
-import org.openmole.core.implementation.tools._
+import groovy.lang.Binding
 
-package object glite {
-  lazy val complexsystems = GliteEnvironment("vo.complex-systems.eu")()
-  lazy val biomed = GliteEnvironment("biomed")()
-  lazy val francegrilles = GliteEnvironment("vo.france-grilles.fr")()
+trait GroovyFunction {
+  def apply(binding: Binding): Object
 }

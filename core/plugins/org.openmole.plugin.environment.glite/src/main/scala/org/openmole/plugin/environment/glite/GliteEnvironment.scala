@@ -123,23 +123,53 @@ object GliteEnvironment extends Logger {
 
   Workspace += (DefaultBDII, "ldap://cclcgtopbdii02.in2p3.fr:2170")
 
+
+  def apply (voName: String)(
+        bdii: String = Workspace.preference(GliteEnvironment.DefaultBDII),
+        vomsURL: String = GliteAuthentication.getVOMS(voName).getOrElse(throw new UserBadDataError(s"ID card for VO $voName not found.")),
+        fqan: Option[String] = None,
+        openMOLEMemory: Option[Int] = None,
+        memory: Option[Int] = None,
+        cpuTime: Option[String] = None,
+        wallTime: Option[String] = None,
+        cpuNumber: Option[Int] = None,
+        jobType: Option[String] = None,
+        smpGranularity: Option[Int] = None,
+        myProxy: Option[MyProxy] = None,
+        architecture: Option[String] = None,
+        threads: Option[Int] = None) =
+    new GliteEnvironment(voName) (
+      bdii,
+      vomsURL,
+      fqan,
+      openMOLEMemory,
+      memory,
+      cpuTime,
+      wallTime,
+      cpuNumber,
+      jobType,
+      smpGranularity,
+      myProxy,
+      architecture,
+      threads)
+
 }
 
 class GliteEnvironment(
     val voName: String)(
-        val bdii: String = Workspace.preference(GliteEnvironment.DefaultBDII),
-        val vomsURL: String = GliteAuthentication.getVOMS(voName).getOrElse(throw new UserBadDataError(s"ID card for VO $voName not found.")),
-        val fqan: Option[String] = None,
-        override val openMOLEMemory: Option[Int] = None,
-        val memory: Option[Int] = None,
-        val cpuTime: Option[String] = None,
-        val wallTime: Option[String] = None,
-        val cpuNumber: Option[Int] = None,
-        val jobType: Option[String] = None,
-        val smpGranularity: Option[Int] = None,
-        val myProxy: Option[MyProxy] = None,
-        val architecture: Option[String] = None,
-        override val threads: Option[Int] = None) extends BatchEnvironment with MemoryRequirement { env ⇒
+        val bdii: String,
+        val vomsURL: String,
+        val fqan: Option[String],
+        override val openMOLEMemory: Option[Int],
+        val memory: Option[Int],
+        val cpuTime: Option[String],
+        val wallTime: Option[String],
+        val cpuNumber: Option[Int],
+        val jobType: Option[String],
+        val smpGranularity: Option[Int],
+        val myProxy: Option[MyProxy],
+        val architecture: Option[String],
+        override val threads: Option[Int]) extends BatchEnvironment with MemoryRequirement { env ⇒
 
   import GliteEnvironment._
 

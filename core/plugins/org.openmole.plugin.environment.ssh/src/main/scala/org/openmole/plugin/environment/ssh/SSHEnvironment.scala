@@ -31,6 +31,16 @@ object SSHEnvironment {
 
   Workspace += (UpdateInterval, "PT10S")
   Workspace += (MaxConnections, "10")
+
+  def apply(
+    user: String,
+    host: String,
+    nbSlots: Int,
+    port: Int = 22,
+    path: String = "/tmp/",
+    openMOLEMemory: Option[Int] = None,
+    threads: Option[Int] = None) =
+    new SSHEnvironment(user, host, nbSlots, port, path, openMOLEMemory, threads)
 }
 
 import SSHEnvironment._
@@ -39,10 +49,10 @@ class SSHEnvironment(
     val user: String,
     val host: String,
     val nbSlots: Int,
-    override val port: Int = 22,
-    val path: String = "/tmp/",
-    override val openMOLEMemory: Option[Int] = None,
-    override val threads: Option[Int] = None) extends BatchEnvironment with SSHAccess { env ⇒
+    override val port: Int,
+    val path: String,
+    override val openMOLEMemory: Option[Int],
+    override val threads: Option[Int]) extends BatchEnvironment with SSHAccess { env ⇒
 
   type SS = SSHStorageService
   type JS = SSHJobService

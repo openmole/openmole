@@ -27,7 +27,6 @@ import org.openmole.core.model.job.State
 import org.openmole.core.model.task.ITask
 import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.ListBuffer
-import util.{ Try, Failure, Success }
 
 object MoleJob extends Logger {
   type StateChangedCallBack = (IMoleJob, State, State) ⇒ Unit
@@ -84,12 +83,12 @@ class MoleJob(
 
   override def perform =
     if (!state.isFinal) {
-      state = RUNNING
-      Try(task.perform(context)) match {
-        case Success(c) ⇒
-          _context = c
-          state = COMPLETED
-        case Failure(t) ⇒
+      try {
+        state = RUNNING
+        _context = task.perform(context)
+        state = COMPLETED
+      } catch {
+        case t: Throwable ⇒
           exception = Some(t)
           state = FAILED
           if (classOf[InterruptedException].isAssignableFrom(t.getClass)) throw t

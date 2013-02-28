@@ -147,10 +147,9 @@ class Runtime {
       contextResultFile.delete
       Success(result)
     } catch {
-      case t: Throwable ⇒ {
+      case t: Throwable ⇒
         if (debug) logger.log(SEVERE, "", t)
         Failure(t)
-      }
     } finally {
       outSt.close
       errSt.close

@@ -220,6 +220,12 @@
     </dependency>
     <dependency>
       <groupId>org.openmole.core</groupId>
+      <artifactId>org.openmole.plugin.source.csv</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openmole.core</groupId>
       <artifactId>org.openmole.plugin.method.evolution</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>

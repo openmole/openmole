@@ -5,7 +5,7 @@
 <programGroup defaultName="OpenMOLE" location="applications"/>
 <shortcut
 	name="OpenMOLE"
-	target='openmole.bat'
+	target='$INSTALL_PATH/openmole.bat'
 	workingDirectory="$INSTALL_PATH"
 	description="Launch OpenMOLE"
 	iconFile="$INSTALL_PATH/openmole.ico" 
