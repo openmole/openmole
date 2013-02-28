@@ -301,27 +301,25 @@ class CapsuleUI(val scene: IMoleScene,
     }
   }
 
-  def inputs(mole: IMole): List[IPrototypeDataProxyUI] =
-    MoleFactory.buildCapsule(dataUI, scene.manager.dataUI).inputs(mole, Sources.empty, Hooks.empty).toList.map {
+  def inputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule]): List[IPrototypeDataProxyUI] =
+    cMap(this).inputs(mole, Sources.empty, Hooks.empty).toList.map {
       ds ⇒ SceneFactory.prototype(ds.prototype)
     }
 
-  def outputs(mole: IMole): List[IPrototypeDataProxyUI] =
-    MoleFactory.buildCapsule(dataUI, scene.manager.dataUI).outputs(mole, Sources.empty, Hooks.empty).toList.map {
+  def outputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule]): List[IPrototypeDataProxyUI] =
+    cMap(this).outputs(mole, Sources.empty, Hooks.empty).toList.map {
       ds ⇒ SceneFactory.prototype(ds.prototype)
     }
 
-  def inputs: List[IPrototypeDataProxyUI] =
-    MoleFactory.buildMole(scene.manager) match {
-      case Right((mole, cMap, pMap, errs)) ⇒ inputs(mole)
-      case _ ⇒ List()
-    }
+  def inputs: List[IPrototypeDataProxyUI] = scene.manager.cacheMole match {
+    case Some((m: IMole, cMap: Map[ICapsuleUI, ICapsule])) ⇒ inputs(m, cMap)
+    case _ ⇒ List()
+  }
 
-  def outputs: List[IPrototypeDataProxyUI] =
-    MoleFactory.buildMole(scene.manager) match {
-      case Right((mole, cMap, pMap, errs)) ⇒ outputs(mole)
-      case _ ⇒ List()
-    }
+  def outputs: List[IPrototypeDataProxyUI] = scene.manager.cacheMole match {
+    case Some((m: IMole, cMap: Map[ICapsuleUI, ICapsule])) ⇒ outputs(m, cMap)
+    case _ ⇒ List()
+  }
 
   def x = convertLocalToScene(getLocation).getX
 

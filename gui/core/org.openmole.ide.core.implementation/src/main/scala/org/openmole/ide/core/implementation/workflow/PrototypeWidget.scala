@@ -104,7 +104,7 @@ class PrototypeWidget(scene: IMoleScene,
     revalidate
   }
 
-  override def paintChildren = link.text = f.apply()
+  override def paintChildren = link.text = f()
 
   override def paintBackground = {
     val g = scene.graphScene.getGraphics
