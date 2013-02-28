@@ -23,7 +23,7 @@ import org.openmole.core.model.job._
 import org.openmole.core.model.tools._
 import org.openmole.core.model.job.State._
 import scala.collection.immutable.TreeMap
-import util.{Failure, Success, Try}
+import util.{ Failure, Success, Try }
 
 class ContextSaver(val nbJobs: Int) {
 

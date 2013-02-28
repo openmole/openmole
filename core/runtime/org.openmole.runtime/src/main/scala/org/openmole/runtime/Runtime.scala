@@ -41,7 +41,7 @@ import org.openmole.misc.pluginmanager._
 import org.openmole.misc.workspace._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
-import util.{Success, Failure}
+import util.{ Success, Failure }
 
 object Runtime extends Logger {
   val NbRetry = 3

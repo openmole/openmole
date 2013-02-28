@@ -28,11 +28,4 @@ import org.openmole.core.model.task.ITask
 
 class TaskDataProxyUI(var dataUI: ITaskDataUI,
                       val id: Int = Counter.id.getAndIncrement,
-                      val generated: Boolean = false) extends ITaskDataProxyUI {
-
-  def implicitPrototypes =
-    MoleFactory.taskCoreObject(this) match {
-      case Right(t: ITask) ⇒ ToolDataUI.implicitPrototypes(y ⇒ t.inputs, dataUI.prototypesIn, y ⇒ t.outputs, dataUI.prototypesOut)
-      case _ ⇒ (List(), List())
-    }
-}
+                      val generated: Boolean = false) extends ITaskDataProxyUI

@@ -28,7 +28,7 @@ import org.openmole.core.model.domain._
 
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.implementation.tools.VariableExpansion
-import org.openmole.misc.tools.script.{GroovyFunction, GroovyProxyPool, GroovyProxy}
+import org.openmole.misc.tools.script.{ GroovyFunction, GroovyProxyPool, GroovyProxy }
 
 object ScalingGAGenomeTask {
 
@@ -43,7 +43,7 @@ object ScalingGAGenomeTask {
     }
 
   def groovyProxies(scale: Iterable[(Prototype[Double], (String, String))]) =
-    scale.map{ case (p, (min, max)) => p -> (GroovyProxyPool(min), GroovyProxyPool(max))}
+    scale.map { case (p, (min, max)) ⇒ p -> (GroovyProxyPool(min), GroovyProxyPool(max)) }
 
   def apply[T <: GAGenome](
     name: String,

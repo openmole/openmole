@@ -55,7 +55,7 @@ object CheckData extends Logger {
                   case (caps, capsUI) ⇒
                     capsUI.dataUI.task match {
                       case Some(x: ITaskDataProxyUI) ⇒
-                        ToolDataUI.buildUnknownPrototypes(mole, caps)
+                        //ToolDataUI.buildUnknownPrototypes(mole, caps)
                         //x.dataUI.computeImplicitPrototypes(mole, caps)
                         ToolDataUI.computePrototypeFromAggregation(mole)
                       case _ ⇒

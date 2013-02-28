@@ -35,7 +35,7 @@ object DesktopGridEnvironment {
   val tmpResultsDirName = "tmpresults"
   val timeStempSeparator = '@'
 
-  def apply (
+  def apply(
     port: Int,
     login: String,
     password: String,

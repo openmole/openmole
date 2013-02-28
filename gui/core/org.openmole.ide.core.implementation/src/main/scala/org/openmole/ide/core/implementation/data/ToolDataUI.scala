@@ -33,7 +33,7 @@ object ToolDataUI {
     def protoFilter(ds: DataSet, protos: List[IPrototypeDataProxyUI]) = {
       ds.map { i ⇒ KeyPrototypeGenerator(i.prototype) }.toList.diff(protos.map {
         p ⇒ KeyPrototypeGenerator(p)
-      }).map { KeyPrototypeGenerator.keyPrototypeMapping }
+      }).map { KeyPrototypeGenerator.prototype }
     }
 
     (protoFilter(coreInputs(), prototypesIn), protoFilter(coreOutputs(), prototypesOut))
@@ -57,12 +57,7 @@ object ToolDataUI {
 
   def buildUnknownPrototypes(mole: IMole, coreCapsule: ICapsule) = {
     (coreCapsule.inputs(mole, Sources.empty, Hooks.empty).toList ++ coreCapsule.outputs(mole, Sources.empty, Hooks.empty)) foreach {
-      d ⇒
-        if (!KeyPrototypeGenerator.isPrototype(d.prototype)) {
-          val (key, dim) = KeyGenerator(d.prototype)
-          Proxys.prototypes +=
-            new PrototypeDataProxyUI(GenericPrototypeDataUI(d.prototype.name, dim)(KeyGenerator.stripArrays(d.prototype.`type`)._1), generated = true)
-        }
+      d ⇒ KeyPrototypeGenerator.buildUnknownPrototype(d.prototype)
     }
   }
 }

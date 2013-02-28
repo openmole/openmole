@@ -106,7 +106,7 @@ akka {
 
     case Error(job, exception) ⇒
       val level = exception match {
-        case e: UserBadDataError => SEVERE
+        case e: UserBadDataError ⇒ SEVERE
         case e: JobRemoteExecutionException ⇒ WARNING
         case _ ⇒ FINE
       }

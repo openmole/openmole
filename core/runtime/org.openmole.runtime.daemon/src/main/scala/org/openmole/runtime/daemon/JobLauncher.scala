@@ -38,7 +38,7 @@ import fr.iscpif.gridscale.authentication.SSHUserPasswordAuthentication
 
 import org.openmole.core.batch.message.FileMessage._
 import scala.annotation.tailrec
-import util.{Failure, Success}
+import util.{ Failure, Success }
 
 object JobLauncher extends Logger {
   val jobCheckInterval = new ConfigurationLocation("JobLauncher", "jobCheckInterval")

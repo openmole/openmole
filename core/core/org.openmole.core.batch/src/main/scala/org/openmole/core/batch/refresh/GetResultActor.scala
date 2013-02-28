@@ -34,7 +34,7 @@ import org.openmole.misc.hashservice.HashService
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace._
-import util.{Failure, Success}
+import util.{ Failure, Success }
 
 object GetResultActor extends Logger
 

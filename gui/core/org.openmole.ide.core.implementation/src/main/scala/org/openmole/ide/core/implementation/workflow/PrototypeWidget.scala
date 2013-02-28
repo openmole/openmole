@@ -33,12 +33,6 @@ import scala.swing.Action
 import scala.swing.Label
 
 object PrototypeWidget {
-  def nbProtoIn(proxy: ITaskDataProxyUI, implicitSize: Unit ⇒ Int) =
-    (proxy.dataUI.prototypesIn.size + implicitSize()).toString
-
-  def nbProtoOut(taskproxy: ITaskDataProxyUI, implicitSize: Unit ⇒ Int) =
-    (taskproxy.dataUI.prototypesOut.size + implicitSize()).toString
-
   def green(scene: IMoleScene) = scene match {
     case y: BuildMoleScene ⇒ new Color(180, 200, 7, 220)
     case _ ⇒ new Color(44, 137, 160, 64)
@@ -66,22 +60,20 @@ object PrototypeWidget {
     }
   }
 
-  def buildInput(scene: IMoleScene, taskproxy: ITaskDataProxyUI, implicitSize: Unit ⇒ Int) = {
+  def buildInput(scene: IMoleScene, capsule: ICapsuleUI) = {
 
-    new PrototypeWidget(scene, x ⇒ nbProtoIn(taskproxy, implicitSize),
-      new LinkLabel(nbProtoIn(taskproxy, implicitSize), new Action("") {
-        def apply =
-          scene.displayPropertyPanel(taskproxy, IO)
+    new PrototypeWidget(scene, x ⇒ capsule.inputs.size.toString,
+      new LinkLabel(capsule.inputs.size.toString, new Action("") {
+        def apply = println("display capsule execution panel center on sources")
       })) {
       setPreferredLocation(new Point(19, TASK_CONTAINER_HEIGHT / 2))
     }
   }
 
-  def buildOutput(scene: IMoleScene, taskproxy: ITaskDataProxyUI, implicitSize: Unit ⇒ Int) = {
-    new PrototypeWidget(scene, x ⇒ nbProtoOut(taskproxy, implicitSize),
-      new LinkLabel(nbProtoOut(taskproxy, implicitSize), new Action("") {
-        def apply =
-          scene.displayPropertyPanel(taskproxy, IO)
+  def buildOutput(scene: IMoleScene, capsule: ICapsuleUI) = {
+    new PrototypeWidget(scene, x ⇒ capsule.outputs.size.toString,
+      new LinkLabel(capsule.outputs.size.toString, new Action("") {
+        def apply = println("display capsule execution panel center on hooks")
       })) {
       setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 30, TASK_CONTAINER_HEIGHT / 2))
     }

@@ -22,12 +22,5 @@ import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 
 class PrototypeDialog {
-
-  def openable(capsuleUI: ICapsuleUI) =
-    capsuleUI.dataUI.task match {
-      case Some(x: ITaskDataProxyUI) ⇒
-        !(x.dataUI.prototypesOut ++
-          x.implicitPrototypes._2).isEmpty
-      case None ⇒ false
-    }
+  def openable(capsuleUI: ICapsuleUI) = !capsuleUI.outputs.isEmpty
 }

@@ -19,5 +19,4 @@ package org.openmole.core.batch.message
 
 import util.Try
 
-
 class RuntimeResult(val stdOut: Option[FileMessage], val stdErr: Option[FileMessage], val result: Try[FileMessage])

@@ -131,7 +131,7 @@ object MoleFactory {
     proxy: ITaskDataProxyUI,
     plugins: Set[File] = Set.empty,
     capsuleType: CapsuleType = new BasicCapsuleType) =
-    taskCoreObject(proxy, plugins) match {
+    taskCoreObject(proxy.dataUI, plugins) match {
       case Right(x: ITask) ⇒ capsuleType match {
         case y: MasterCapsuleType ⇒
           new MasterCapsule(x, y.persistList.map {
@@ -159,28 +159,23 @@ object MoleFactory {
 
     }
 
-  def taskCoreObject(proxy: ITaskDataProxyUI,
+  def taskCoreObject(dataUI: ITaskDataUI,
                      plugins: Set[File] = Set.empty): Either[Throwable, ITask] =
     try {
-      Right(proxy.dataUI.coreObject(inputs(proxy.dataUI),
-        outputs(proxy.dataUI),
-        parameters(proxy.dataUI),
+      Right(dataUI.coreObject(inputs(dataUI),
+        outputs(dataUI),
+        parameters(dataUI),
         PluginSet(plugins)))
     } catch {
       case e: Throwable ⇒
-        StatusBar().warn(e, Some(proxy))
         Left(e)
     }
 
-  def taskCoreObject(capsuleDataUI: ICapsuleDataUI,
-                     plugins: Set[File]): Either[Throwable, ITask] =
-    taskCoreObject(capsuleDataUI.task.get, plugins)
-
-  def inputs(dataUI: ITaskDataUI) = DataSet(dataUI.prototypesIn.map {
+  def inputs(dataUI: ITaskDataUI) = DataSet(dataUI.inputs.map {
     _.dataUI.coreObject
   })
 
-  def outputs(dataUI: ITaskDataUI) = DataSet(dataUI.prototypesOut.map {
+  def outputs(dataUI: ITaskDataUI) = DataSet(dataUI.outputs.map {
     _.dataUI.coreObject
   })
 

@@ -17,9 +17,5 @@
 package org.openmole.ide.core.model.workflow
 
 trait IConnectorViewUI {
-  def nbPrototypes = 1
-
   def preview: String
-
-  // def preview_=(p: String)
 }

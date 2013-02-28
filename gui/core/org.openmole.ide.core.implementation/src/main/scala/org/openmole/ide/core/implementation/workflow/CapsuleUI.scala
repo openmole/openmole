@@ -56,7 +56,6 @@ class CapsuleUI(val scene: IMoleScene,
                 val dataUI: ICapsuleDataUI = new CapsuleDataUI) extends Widget(scene.graphScene)
     with ICapsuleUI {
   capsuleUI ⇒
-
   val taskComponentWidget = new SceneComponentWidget(scene, new TaskWidget(scene, this),
     TASK_CONTAINER_WIDTH,
     TASK_CONTAINER_HEIGHT)
@@ -184,8 +183,8 @@ class CapsuleUI(val scene: IMoleScene,
   def encapsule(dpu: ITaskDataProxyUI) = {
     decapsule
     setTask(dpu)
-    inputPrototypeWidget = Some(PrototypeWidget.buildInput(scene, dpu, x ⇒ inputs.length))
-    outputPrototypeWidget = Some(PrototypeWidget.buildOutput(scene, dpu, x ⇒ outputs.length))
+    inputPrototypeWidget = Some(PrototypeWidget.buildInput(scene, this))
+    outputPrototypeWidget = Some(PrototypeWidget.buildOutput(scene, this))
     CheckData.checkMole(scene)
     addChild(inputPrototypeWidget.get)
     addChild(outputPrototypeWidget.get)

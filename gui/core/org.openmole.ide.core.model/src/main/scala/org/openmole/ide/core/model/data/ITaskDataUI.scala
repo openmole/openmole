@@ -37,17 +37,19 @@ trait ITaskDataUI extends IDataUI {
 
   def inputParameters_=(ip: scala.collection.mutable.Map[IPrototypeDataProxyUI, String])
 
-  def prototypesIn: List[IPrototypeDataProxyUI]
+  def inputs: List[IPrototypeDataProxyUI]
 
-  def prototypesIn_=(pi: List[IPrototypeDataProxyUI])
+  def inputs_=(pi: List[IPrototypeDataProxyUI])
 
-  def prototypesOut: List[IPrototypeDataProxyUI]
+  def outputs: List[IPrototypeDataProxyUI]
 
-  def prototypesOut_=(po: List[IPrototypeDataProxyUI])
+  def outputs_=(pi: List[IPrototypeDataProxyUI])
+
+  def implicitPrototypes: (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI])
 
   def filterPrototypeOccurencies(pproxy: IPrototypeDataProxyUI): List[IPrototypeDataProxyUI]
 
-  def removePrototypeOccurencies(pproxy: IPrototypeDataProxyUI): Unit
+  def removePrototypeOccurencies(pproxy: IPrototypeDataProxyUI)
 
   def buildPanelUI: ITaskPanelUI
 

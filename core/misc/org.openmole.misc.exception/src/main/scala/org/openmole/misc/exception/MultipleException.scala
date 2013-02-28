@@ -25,6 +25,6 @@ class MultipleException(exceptions: Iterable[Throwable]) extends Exception with 
 
   override def toString() =
     this.getClass.getName + ":\n" +
-    exceptions.map(e ⇒ ExceptionUtils.prettify(e)).mkString("----------------------------------------\n")
+      exceptions.map(e ⇒ ExceptionUtils.prettify(e)).mkString("----------------------------------------\n")
 
 }

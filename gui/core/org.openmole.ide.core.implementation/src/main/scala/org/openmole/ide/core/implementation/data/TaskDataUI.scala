@@ -17,59 +17,31 @@
 
 package org.openmole.ide.core.implementation.data
 
-import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.data.ITaskDataUI
-import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import scala.collection.mutable.HashMap
-import org.openmole.core.model.data.DataSet
 import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
-import org.openmole.ide.core.model.workflow.{ IMoleScene, ICapsuleUI }
 import org.openmole.ide.core.implementation.builder.MoleFactory
-import org.openmole.core.model.mole.{ IMole, ICapsule, Hooks, Sources }
-import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.core.model.task.ITask
 
 abstract class TaskDataUI extends ITaskDataUI {
   var inputParameters: scala.collection.mutable.Map[IPrototypeDataProxyUI, String] = HashMap.empty[IPrototypeDataProxyUI, String]
-  var prototypesIn = List.empty[IPrototypeDataProxyUI]
-  var prototypesOut = List.empty[IPrototypeDataProxyUI]
-  //@transient var _implicitPrototypesIn: List[IPrototypeDataProxyUI] = _
-  //@transient var _implicitPrototypesOut: List[IPrototypeDataProxyUI] = _
 
-  /*def implicitPrototypesIn = synchronized {
-    if (_implicitPrototypesIn == null)
-      _implicitPrototypesIn = List.empty
-    _implicitPrototypesIn
-  }
+  var inputs = List.empty[IPrototypeDataProxyUI]
 
-  def implicitPrototypesOut = synchronized {
-    if (_implicitPrototypesOut == null)
-      _implicitPrototypesOut = List.empty
-    _implicitPrototypesOut
-  }  */
+  var outputs = List.empty[IPrototypeDataProxyUI]
 
-  def filterPrototypeOccurencies(pproxy: IPrototypeDataProxyUI) =
-    (prototypesIn.filter(_ == pproxy) ++ prototypesOut.filter(_ == pproxy)).distinct
+  def implicitPrototypes: (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI]) =
+    MoleFactory.taskCoreObject(this) match {
+      case Right(x: ITask) ⇒ ToolDataUI.implicitPrototypes(y ⇒ x.inputs, inputs, y ⇒ x.outputs, outputs)
+      case _ ⇒ (List(), List())
+    }
 
   def removePrototypeOccurencies(pproxy: IPrototypeDataProxyUI) = {
-    prototypesIn = prototypesIn.filterNot {
-      _ == pproxy
-    }
-    prototypesOut = prototypesOut.filterNot {
-      _ == pproxy
-    }
+    inputs = inputs.filterNot { _ == pproxy }
+    outputs = outputs.filterNot { _ == pproxy }
   }
 
-  /*
-  def implicitPrototypes(mole: IMole, capsule: ICapsule): (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI]) =
-    ToolDataUI.implicitPrototypes(y ⇒ capsule.inputs(mole, Sources.empty, Hooks.empty), prototypesIn,
-      y ⇒ capsule.outputs(mole, Sources.empty, Hooks.empty), prototypesOut)
-
-  def implicitPrototypes(scene: IMoleScene, capsuleUI: ICapsuleUI): (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI]) =
-    MoleFactory.buildMole(scene.manager) match {
-      case Right((mole, cMap, pMap, errs)) ⇒ implicitPrototypes(mole, cMap(capsuleUI))
-      case _ ⇒
-        StatusBar().inform("The implicit prototypes can not be computed in capsule " + capsuleUI.dataUI.toString)
-        (List(), List())
-    }    */
+  def filterPrototypeOccurencies(pproxy: IPrototypeDataProxyUI) =
+    (inputs.filter(_ == pproxy) ++ outputs.filter(_ == pproxy)).distinct
 }

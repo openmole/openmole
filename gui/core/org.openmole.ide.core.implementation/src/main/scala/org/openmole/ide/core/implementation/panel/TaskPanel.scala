@@ -68,10 +68,10 @@ class TaskPanel(proxy: ITaskDataProxyUI,
       panelUI.tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", new Label("First define Prototypes !")))
       None
     case _ ⇒
-      val (implicitIP, implicitOP) = proxy.implicitPrototypes
+      val (implicitIP, implicitOP) = proxy.dataUI.implicitPrototypes
       val iop = Some(new IOPrototypePanel2(scene,
-        proxy.dataUI.prototypesIn,
-        proxy.dataUI.prototypesOut,
+        proxy.dataUI.inputs,
+        proxy.dataUI.outputs,
         implicitIP,
         implicitOP,
         proxy.dataUI.inputParameters.toMap))
@@ -97,9 +97,10 @@ class TaskPanel(proxy: ITaskDataProxyUI,
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
   }
 
-  def create =
+  def create = {
     Proxys.tasks += proxy
-  ConceptMenu.taskMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
+    ConceptMenu.taskMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
+  }
 
   def delete = {
     val toBeRemovedCapsules: List[ICapsuleUI] = ScenesManager.moleScenes.map {
@@ -155,6 +156,7 @@ class TaskPanel(proxy: ITaskDataProxyUI,
         }
     }
   }
+
   /*
     class IOPrototypePanel extends PluginPanel("") {
       val availablePrototypes = Proxys.prototypes.toList
@@ -164,7 +166,7 @@ class TaskPanel(proxy: ITaskDataProxyUI,
       val incomboContent = availablePrototypes.map { p ⇒ (p, p.dataUI.coreObject, contentAction(p)) }.toList
       val protoInEditor = new MultiComboLinkLabelGroovyTextFieldEditor("",
         incomboContent,
-        TaskPanel.this.proxy.dataUI.prototypesIn.map { proto ⇒
+        TaskPanel.this.proxy.dataUI.inputs.map { proto ⇒
           new ComboLinkLabelGroovyTextFieldEditorPanel(incomboContent,
             image,
             new ComboLinkLabelGroovyTextFieldEditorData(
@@ -175,7 +177,7 @@ class TaskPanel(proxy: ITaskDataProxyUI,
       val outcomboContent = availablePrototypes.map { p ⇒ (p, contentAction(p)) }.toList
       val protoOutEditor =
         new MultiComboLinkLabel("", outcomboContent,
-          TaskPanel.this.proxy.dataUI.prototypesOut.map { proto ⇒
+          TaskPanel.this.proxy.dataUI.outputs.map { proto ⇒
             new ComboLinkLabelPanel(outcomboContent, image, new ComboLinkLabelData(Some(proto)))
           }, image, CLOSE_IF_EMPTY)
 
@@ -197,7 +199,7 @@ class TaskPanel(proxy: ITaskDataProxyUI,
           }
         }
 
-        if (TaskPanel.this.proxy.dataUI.prototypesIn.isEmpty) protoInEditor.removeAllRows
+        if (TaskPanel.this.proxy.dataUI.inputs.isEmpty) protoInEditor.removeAllRows
         contents += protoInEditor.panel
       }
 
@@ -208,7 +210,7 @@ class TaskPanel(proxy: ITaskDataProxyUI,
             contents += new MyComboBox(List(p)) { enabled = false }
           }
         }
-        if (TaskPanel.this.proxy.dataUI.prototypesOut.isEmpty) protoOutEditor.removeAllRows
+        if (TaskPanel.this.proxy.dataUI.outputs.isEmpty) protoOutEditor.removeAllRows
         contents += protoOutEditor.panel
       }
 
