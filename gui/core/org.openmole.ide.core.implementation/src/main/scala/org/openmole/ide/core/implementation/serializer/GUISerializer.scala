@@ -45,7 +45,7 @@ object GUISerializer {
   def serializePrefix(path: File) = path.getParentFile + "/" + path.getName.split('.')(0)
 }
 import GUISerializer._
-class GUISerializer(val toFromFile: String) {
+class GUISerializer {
 
   val tmpDir = (Workspace.newFile)
   val path = tmpDir.getCanonicalPath
@@ -103,7 +103,7 @@ class GUISerializer(val toFromFile: String) {
     }
   }
 
-  def serialize = {
+  def serialize(fromFile: String) = {
     if (tmpDir.getParentFile.isDirectory) {
       serializeConcept("prototype", Proxys.prototypes.map { s ⇒ s -> s.id }.toList)
       serializeConcept("environment", Proxys.environments.map { s ⇒ s -> s.id }.toList)
@@ -111,7 +111,7 @@ class GUISerializer(val toFromFile: String) {
       serializeConcept("hook", Proxys.hooks.map { s ⇒ s -> s.id }.toList)
       serializeConcept("taskMap", Proxys.tasks.map { s ⇒ s -> s.id }.toList)
       serializeConcept("mole", ScenesManager.moleScenes.map { ms ⇒ ms -> ms.manager.id }.toList)
-      val os = new TarOutputStream(new FileOutputStream(toFromFile))
+      val os = new TarOutputStream(new FileOutputStream(fromFile))
       try os.createDirArchiveWithRelativePathNoVariableContent(tmpDir)
       finally os.close
       new File(serializePrefix(tmpDir)).recursiveDelete
@@ -148,12 +148,12 @@ class GUISerializer(val toFromFile: String) {
     }
   }
 
-  def unserialize = {
+  def unserialize(fromFile: String) = {
     StatusBar().clear
     Proxys.clearAll
     ScenesManager.closeAll
 
-    val os = new TarInputStream(new FileInputStream(toFromFile))
+    val os = new TarInputStream(new FileInputStream(fromFile))
     os.extractDirArchiveWithRelativePathAndClose(extractDir)
     unserializeProxy("prototype")
     unserializeProxy("sampling")
