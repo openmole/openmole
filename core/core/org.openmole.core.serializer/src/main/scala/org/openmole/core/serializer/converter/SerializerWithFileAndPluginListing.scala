@@ -24,7 +24,7 @@ import scala.collection.immutable.TreeSet
 import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
 
-class SerializerWithFileAndPluginListing extends Factory.Poolable {
+class SerializerWithFileAndPluginListing extends Factory.XStreamPool {
 
   private var files: TreeSet[File] = null
   private var plugins: TreeSet[File] = null
