@@ -33,7 +33,7 @@ import org.openmole.ide.misc.widget.multirow.MultiWidget.CLOSE_IF_EMPTY
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor.{ ComboLinkLabelGroovyTextFieldEditorData, ComboLinkLabelGroovyTextFieldEditorPanel }
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel.{ ComboLinkLabelData, ComboLinkLabelPanel }
 
-class IOPrototypePanel2(scene: IMoleScene,
+class IOPrototypePanel(scene: IMoleScene,
                         prototypesIn: List[IPrototypeDataProxyUI] = List.empty,
                         prototypesOut: List[IPrototypeDataProxyUI] = List.empty,
                         implicitPrototypeIn: List[IPrototypeDataProxyUI] = List.empty,
