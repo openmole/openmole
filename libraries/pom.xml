@@ -59,6 +59,9 @@
     <module>ch.qos.logback</module>
     <module>org.slf4j</module>
     <module>org.eclipse.jetty</module>
+    <module>com.jolbox.bonecp</module>
+    <module>com.typesafe.slick</module>
+    <module>org.h2</module>
   </modules>
   <properties>
     <!-- Default properties for bundles creation -->

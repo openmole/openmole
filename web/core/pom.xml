@@ -56,17 +56,17 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>com.jolbox.bonecp</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>com.typesafe.slick</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.h2</artifactId>
       <version>${project.version}</version>
     </dependency>

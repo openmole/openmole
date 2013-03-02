@@ -6,11 +6,11 @@
   <!-- ************************************************************* -->
   <parent>
     <artifactId>libraries</artifactId>
-    <groupId>org.openmole.web</groupId>
-    <version>0.7.0-RC4-SNAPSHOT</version>
+    <groupId>org.openmole</groupId>
+    <version>0.8-alpha2</version>
   </parent>
   <!--Used to build the symbolic name of the bundle-->
-  <artifactId>com.typesafe.slick</artifactId>
+  <artifactId>com.jolbox.bonecp</artifactId>
   <!-- ************************************************************* -->
   <!-- *** Build Settings ****************************************** -->
   <!-- ************************************************************* -->
@@ -21,15 +21,16 @@
   <name>${project.artifactId}</name>
   <!--optional. Use this property to tune the exported packages-->
   <properties>
-    <libraries.export.packages>scala.slick.*</libraries.export.packages>
-    <embed-dep>*;groupId=!org.scala-lang|org.slf4j;type=!pom;inline=true</embed-dep>
     <eclipse.buddypolicy>global</eclipse.buddypolicy>
+    <embed-dep>*;groupId=!org.scala-lang|org.slf4j;type=!pom;inline=true</embed-dep>
+    <libraries.export.packages>com.jolbox.bonecp.*</libraries.export.packages>
   </properties>
   <dependencies>
     <dependency>
-      <groupId>com.typesafe.slick</groupId>
-      <artifactId>slick_2.10</artifactId>
-      <version>1.0.0</version>
+      <groupId>com.jolbox</groupId>
+      <artifactId>bonecp</artifactId>
+      <version>0.8.0-rc1</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>
