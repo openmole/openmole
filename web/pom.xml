@@ -21,7 +21,6 @@
   <!-- ************************************************************* -->
   <name>${project.artifactId} ${project.version}</name>
   <modules>
-    <module>libraries</module>
     <module>core</module>
   </modules>
   <!-- ************************************************************* -->

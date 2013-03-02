@@ -26,17 +26,17 @@
   </properties>
   <dependencies>
     <dependency>
-      <groupId>org.openmole.web</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.eclipse.jetty</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>${project.groupId}</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.scalatra</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.web</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>ch.qos.logback</artifactId>
       <version>${project.version}</version>
     </dependency>

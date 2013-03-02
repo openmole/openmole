@@ -55,6 +55,10 @@
     <module>org.netbeans.api</module>
     <module>jsyntaxpane</module>
     <module>net.miginfocom.swing.miglayout</module>
+    <module>org.scalatra</module>
+    <module>ch.qos.logback</module>
+    <module>org.slf4j</module>
+    <module>org.eclipse.jetty</module>
   </modules>
   <properties>
     <!-- Default properties for bundles creation -->

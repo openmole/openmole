@@ -6,11 +6,11 @@
   <!-- ************************************************************* -->
   <parent>
     <artifactId>libraries</artifactId>
-    <groupId>org.openmole.web</groupId>
+    <groupId>org.openmole</groupId>
     <version>0.8-alpha2</version>
   </parent>
   <!--Used to build the symbolic name of the bundle-->
-  <artifactId>org.slf4j</artifactId>
+  <artifactId>org.eclipse.jetty</artifactId>
   <!-- ************************************************************* -->
   <!-- *** Build Settings ****************************************** -->
   <!-- ************************************************************* -->
@@ -22,11 +22,16 @@
   <!--optional. Use this property to tune the exported packages-->
   <properties></properties>
   <dependencies>
-    <!-- TODO make versions a property -->
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.7.2</version>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-webapp</artifactId>
+      <version>${lib.org.eclipse.jetty.jetty-webapp.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty.orbit</groupId>
+      <artifactId>javax.servlet</artifactId>
+      <version>${lib.org.eclipse.jetty.orbit.javax.servlet.version}</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>

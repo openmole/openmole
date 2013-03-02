@@ -6,11 +6,11 @@
   <!-- ************************************************************* -->
   <parent>
     <artifactId>libraries</artifactId>
-    <groupId>org.openmole.web</groupId>
+    <groupId>org.openmole</groupId>
     <version>0.8-alpha2</version>
   </parent>
   <!--Used to build the symbolic name of the bundle-->
-  <artifactId>ch.qos.logback</artifactId>
+  <artifactId>org.slf4j</artifactId>
   <!-- ************************************************************* -->
   <!-- *** Build Settings ****************************************** -->
   <!-- ************************************************************* -->
@@ -20,15 +20,13 @@
   <!-- ************************************************************* -->
   <name>${project.artifactId}</name>
   <!--optional. Use this property to tune the exported packages-->
-  <properties>
-    <embed-dep>*;groupId=!org.slf4j;type=!pom;inline=true</embed-dep>
-    <libraries.export.packages>ch.qos.*,org.slf4j.impl</libraries.export.packages>
-  </properties>
+  <properties></properties>
   <dependencies>
+    <!-- TODO make versions a property -->
     <dependency>
-      <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-classic</artifactId>
-      <version>1.0.9</version>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.2</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>
