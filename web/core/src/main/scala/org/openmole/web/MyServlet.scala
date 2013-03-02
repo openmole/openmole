@@ -4,12 +4,13 @@ import _root_.akka.actor.ActorSystem
 import org.scalatra._
 import scalate.ScalateSupport
 import servlet.{ FileItem, FileUploadSupport }
-import java.io.InputStream
+import java.io.{ File, InputStream }
 import javax.servlet.annotation.MultipartConfig
 import org.openmole.core.serializer._
 import org.openmole.core.implementation.mole.MoleExecution
 import com.thoughtworks.xstream.mapper.CannotResolveClassException
-import concurrent.{ ExecutionContext, Future }
+import concurrent.Future
+import org.openmole.core.model.mole.ExecutionContext
 import org.openmole.web.DataHandler
 import org.openmole.core.model.job.State._
 import concurrent.duration._
@@ -18,7 +19,7 @@ import org.slf4j.impl.StaticLoggerBinder
 @MultipartConfig(maxFileSize = 3 * 1024 * 1024) //research scala multipart config
 class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSupport with FileUploadSupport with FlashMapSupport with FutureSupport {
 
-  protected implicit def executor: ExecutionContext = system.dispatcher
+  protected implicit def executor: concurrent.ExecutionContext = system.dispatcher
 
   get("/index.html") {
     contentType = "text/html"
@@ -82,10 +83,13 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
     //TODO: Make sure this is not a problem
     val ins = fileParams.get("file").map(_.getInputStream)
 
-    val moleExec = processXMLFile[MoleExecution](data, ins)
+    val moleExec = processXMLFile[ExecutionContext ⇒ MoleExecution](data, ins)
+
+    val context = new ExecutionContext(System.out, directory = new File("~/execResults"))
 
     moleExec match {
-      case (Some(exec), _) ⇒ {
+      case (Some(pEx), _) ⇒ {
+        val exec = pEx(context)
         testMoleData.add(exec.id, exec)
         println("added " + exec.id + "to testMoleData.")
         halt(status = 301, headers = Map("Location" -> url("execs")))
