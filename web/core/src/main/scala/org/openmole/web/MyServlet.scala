@@ -77,27 +77,20 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
   post("/createMole") {
     contentType = "text/html"
 
-    implicit def timeout = Duration(10, SECONDS)
-
     val data = fileParams.get("file")
 
     //TODO: Make sure this is not a problem
     val ins = fileParams.get("file").map(_.getInputStream)
 
-    new AsyncResult() {
-      val is = Future {
-        val moleExec = processXMLFile[MoleExecution](data, ins)
+    val moleExec = processXMLFile[MoleExecution](data, ins)
 
-        moleExec match {
-          case (Some(exec), _) ⇒ {
-            //moleExecs += (exec.id -> exec) // can't be used by async pages.
-            testMoleData.add(exec.id, exec)
-            println("added " + exec.id + "to testMoleData.")
-            halt(status = 301, headers = Map("Location" -> url("execs")))
-          }
-          case (_, error) ⇒ ssp("/createMole", "body" -> "Please upload a serialized mole execution below!", "errors" -> List(error))
-        }
+    moleExec match {
+      case (Some(exec), _) ⇒ {
+        testMoleData.add(exec.id, exec)
+        println("added " + exec.id + "to testMoleData.")
+        halt(status = 301, headers = Map("Location" -> url("execs")))
       }
+      case (_, error) ⇒ ssp("/createMole", "body" -> "Please upload a serialized mole execution below!", "errors" -> List(error))
     }
   }
 
