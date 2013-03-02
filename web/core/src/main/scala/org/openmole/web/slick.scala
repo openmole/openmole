@@ -9,10 +9,21 @@ import org.slf4j.LoggerFactory
 import slick.driver.H2Driver.simple._
 import com.jolbox.bonecp._
 import java.sql.SQLException
+import java.util.UUID
 
 //import scala.slick.session.Database
 import Database.threadLocalSession
 import java.io.IOException
+
+object Workflows extends Table[(Int, String, UUID)]("WORKFLOWS") {
+  def id = column[Int]("WF_ID", O.PrimaryKey) // This is the primary key column
+  def name = column[String]("WF_NAME")
+  def version = column[String]("WF_VERSION")
+  def uuid = column[UUID]("WF_FOLDERUUID")
+
+  // Every table needs a * projection with the same type as the table's type parameter
+  def * = id ~ name ~ uuid
+}
 
 // Definition of the SUPPLIERS table
 object Suppliers extends Table[(Int, String, String, String, String, String)]("SUPPLIERS") {
@@ -52,7 +63,7 @@ trait SlickSupport extends ScalatraServlet {
 
   var connectionPool = {
     val boneCfg = new BoneCPConfig()
-    boneCfg.setJdbcUrl("jdbc:h2:~/db/romain;TRACE_LEVEL_FILE=4")
+    boneCfg.setJdbcUrl("jdbc:h2:~/tmp/test;TRACE_LEVEL_FILE=4")
     boneCfg.setUser("root")
     boneCfg.setPassword("")
     boneCfg.setMinConnectionsPerPartition(5)
