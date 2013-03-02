@@ -22,7 +22,23 @@ object Workflows extends Table[(Int, String, UUID)]("WORKFLOWS") {
   def uuid = column[UUID]("WF_FOLDERUUID")
 
   // Every table needs a * projection with the same type as the table's type parameter
-  def * = id ~ name ~ uuid
+  def * = id ~ name ~ version ~ uuid
+}
+
+object Tags extends Table[(Int, String)]("TAGS") {
+  def id = column[Int]("TAG_ID", O.PrimaryKey) // This is the primary key column
+  def name = column[String]("TAG_NAME")
+  // Every table needs a * projection with the same type as the table's type parameter
+  def * = id ~ name
+}
+
+object WFTag extends Table[(Int, Int)]("WFTag") {
+  def wfId = column[Int]("WF_ID")
+  def tagId = column[Int]("TAG_ID")
+  // Every table needs a * projection with the same type as the table's type parameter
+  def * = id ~ name
+  def workflow = foreignKey("WF_FK", wfiD, Workflows)(_.id)
+  def tag = foreignKey("TAG_FK", tagiD, Tags)(_.id)
 }
 
 // Definition of the SUPPLIERS table
