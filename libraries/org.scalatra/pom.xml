@@ -40,7 +40,7 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.openmole.web</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.slf4j</artifactId>
       <version>${project.version}</version>
     </dependency>
