@@ -17,17 +17,17 @@
 
 package org.openmole.ide.core.implementation.action
 
-import org.openmole.ide.core.implementation.workflow.SceneItemFactory
 import org.openmole.ide.core.implementation.provider.GenericMenuProvider
 import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.swing.Action
+import org.openmole.ide.core.implementation.builder.SceneFactory
 
 class AddCapsuleAction(moleScene: IMoleScene,
                        provider: GenericMenuProvider) extends Action("New Capsule") {
 
   override def apply = {
     val starting = !moleScene.manager.startingCapsule.isDefined
-    SceneItemFactory.createCapsule(moleScene, provider.currentPoint).addInputSlot(starting)
+    SceneFactory.capsuleUI(moleScene, provider.currentPoint).addInputSlot(starting)
     moleScene.refresh
   }
 }

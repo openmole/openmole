@@ -34,6 +34,7 @@ import scala.swing.MyComboBox
 import org.openmole.misc.workspace.Workspace
 import org.openmole.ide.misc.tools.util.ClassLoader
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.tools.obj.ClassUtils._
 
 object PrototypeFromJarDialog {
   def display(prototypePanel: GenericPrototypePanelUI) = {
@@ -45,7 +46,7 @@ object PrototypeFromJarDialog {
       var l = List.empty[String]
       panel.multiJarCombo.content.map { _.textFieldValue }.foreach { ep ⇒
         try {
-          ClassLoader.toManifest(ep)
+          manifest(ep)
           l = l :+ ep
           GenericPrototypeDataUI.extraType = l
           prototypePanel.typeComboBox.peer.setModel(MyComboBox.newConstantModel(GenericPrototypeDataUI.base ::: GenericPrototypeDataUI.extra))

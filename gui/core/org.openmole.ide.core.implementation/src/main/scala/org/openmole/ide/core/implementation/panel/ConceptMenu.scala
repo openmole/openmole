@@ -36,6 +36,7 @@ import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.implementation.workflow.BuildMoleSceneContainer
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow.ISceneContainer
+import org.openmole.ide.core.implementation.builder.Builder
 import scala.collection.JavaConversions._
 
 object ConceptMenu {
@@ -74,14 +75,14 @@ object ConceptMenu {
 
   val prototypeMenu = {
     val menu = new MenuItem(new Action("New") {
-      override def apply = display(new PrototypeDataProxyUI(GenericPrototypeDataUI[java.lang.Double], false), CREATION)
+      override def apply = display(new PrototypeDataProxyUI(GenericPrototypeDataUI[java.lang.Double], generated = false), CREATION)
     })
     new PopupToolBarPresenter("Prototype", menu, new Color(212, 170, 0))
   }
 
   val samplingMenu = {
     val menu = new MenuItem(new Action("New Composition") {
-      override def apply = display(new SamplingCompositionDataProxyUI, CREATION)
+      override def apply = display(Builder.samplingCompositionUI(false), CREATION)
     })
     new PopupToolBarPresenter("Sampling", menu, new Color(255, 85, 85))
   }

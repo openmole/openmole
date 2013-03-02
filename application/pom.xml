@@ -7,7 +7,7 @@
   <parent>
     <artifactId>openmole</artifactId>
     <groupId>org.openmole</groupId>
-    <version>0.7.0-RC4-SNAPSHOT</version>
+    <version>0.8-alpha2</version>
   </parent>
   <groupId>org.openmole.ui</groupId>
   <artifactId>ui</artifactId>
@@ -28,7 +28,7 @@
   </modules>
   <dependencies>
     <dependency>
-      <groupId>org.openmole.core</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.scala-lang.scala-library</artifactId>
       <version>${project.version}</version>
     </dependency>

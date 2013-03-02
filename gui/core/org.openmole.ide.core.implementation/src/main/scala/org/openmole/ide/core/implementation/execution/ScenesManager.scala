@@ -23,7 +23,6 @@ import java.awt.Color
 import java.awt.Dimension
 import java.awt.Point
 import java.util.concurrent.atomic.AtomicInteger
-import org.openmole.ide.core.implementation.workflow.SceneItemFactory
 import org.openmole.ide.core.model.data.IExplorationTaskDataUI
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.dialog.StatusBar
@@ -46,6 +45,7 @@ import scala.swing.TabbedPane
 import scala.collection.mutable.HashSet
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
+import org.openmole.ide.core.implementation.builder.SceneFactory
 
 object ScenesManager {
 
@@ -82,7 +82,7 @@ object ScenesManager {
 
   def currentSamplingCompositionPanelUI = currentPanelUI match {
     case scp: ISamplingCompositionPanelUI ⇒ scp
-    case _ ⇒ throw new UserBadDataError("There is no current sampling panel")
+    case _ ⇒ throw new UserBadDataError("There is no current samplingMap panel")
   }
 
   def closePropertyPanel = List(currentScene).flatten.foreach { _.closePropertyPanel }
@@ -115,7 +115,7 @@ object ScenesManager {
     copied.foreach {
       case (old, neo) ⇒
         val p = new Point((old.widget.getPreferredLocation.x + dx).toInt, (old.widget.getPreferredLocation.y + dy).toInt)
-        SceneItemFactory.createCapsule(neo._1, ms, p)
+        SceneFactory.capsuleUI(neo._1, ms, p)
         neo._1.setEnvironment(old.dataUI.environment)
         old.dataUI.task match {
           case Some(t: ITaskDataProxyUI) ⇒ neo._1.encapsule(t)
@@ -133,14 +133,14 @@ object ScenesManager {
           if (_selection.contains(con.source) && islots.contains(con.target)) {
             con match {
               case (t: ITransitionUI) ⇒
-                SceneItemFactory.createTransition(ms,
+                SceneFactory.transition(ms,
                   copied(t.source)._1,
                   copied(t.target.capsule)._1.islots.find { s ⇒ t.target.index == s.index }.get,
                   t.transitionType,
                   t.condition,
                   t.filteredPrototypes)
               case (t: IDataChannelUI) ⇒
-                SceneItemFactory.createDataChannel(ms,
+                SceneFactory.dataChannel(ms,
                   copied(t.source)._1,
                   copied(t.target.capsule)._1.islots.find { s ⇒ t.target.index == s.index }.get,
                   t.filteredPrototypes)
@@ -208,6 +208,7 @@ object ScenesManager {
           val container = new ExecutionMoleSceneContainer(clone, page, bmsc)
           page.content = container
           bmsc.executionMoleSceneContainers += container
+
           addTab(page, clone.manager.name, new Action("") {
             def apply = {
               container.panelHooks.foreach { ph ⇒
@@ -216,6 +217,7 @@ object ScenesManager {
               tabPane.pages.remove(page.index)
             }
           })
+
           tabPane.selection.index = page.index
         } else
           StatusBar().block("The Mole can not be built due to the previous errors")

@@ -34,6 +34,7 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.netbeans.api.visual.action.WidgetAction.State._
+import org.openmole.ide.core.implementation.builder.SceneFactory
 
 class BuildMoleScene(n: String = "") extends MoleScene(n) { buildMoleScene ⇒
   override val isBuildScene = true
@@ -45,7 +46,7 @@ class BuildMoleScene(n: String = "") extends MoleScene(n) { buildMoleScene ⇒
     manager.capsules.foreach(n ⇒ {
       val (caps, islotMapping) = n._2.deepcopy(ms)
       if (manager.startingCapsule == Some(n._2)) ms.manager.setStartingCapsule(caps)
-      SceneItemFactory.createCapsule(caps, ms, new Point(n._2.x.toInt / 2, n._2.y.toInt / 2))
+      SceneFactory.capsuleUI(caps, ms, new Point(n._2.x.toInt / 2, n._2.y.toInt / 2))
       capsuleMapping += n._2 -> caps
       islots ++= islotMapping
       caps.setAsValid
@@ -53,13 +54,13 @@ class BuildMoleScene(n: String = "") extends MoleScene(n) { buildMoleScene ⇒
     manager.connectors.foreach { c ⇒
       c match {
         case t: ITransitionUI ⇒
-          SceneItemFactory.createTransition(ms, capsuleMapping(t.source),
+          SceneFactory.transition(ms, capsuleMapping(t.source),
             islots(t.target),
             t.transitionType,
             t.condition,
             t.filteredPrototypes)
         case dc: IDataChannelUI ⇒
-          SceneItemFactory.createDataChannel(ms, capsuleMapping(dc.source),
+          SceneFactory.dataChannel(ms, capsuleMapping(dc.source),
             islots(dc.target),
             dc.filteredPrototypes)
         case _ ⇒

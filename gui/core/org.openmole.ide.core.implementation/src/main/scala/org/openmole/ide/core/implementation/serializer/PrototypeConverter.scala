@@ -36,6 +36,7 @@ import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import scala.collection.mutable.HashSet
 import org.openmole.ide.misc.tools.Counter
+import org.openmole.misc.tools.obj.ClassUtils._
 
 class PrototypeConverter(mapper: Mapper,
                          provider: ReflectionProvider,
@@ -46,25 +47,24 @@ class PrototypeConverter(mapper: Mapper,
                        writer: HierarchicalStreamWriter,
                        mc: MarshallingContext) = {
     val proto = o.asInstanceOf[IPrototypeDataProxyUI]
-    if (!proto.generated) {
-      state.content.get(proto) match {
-        case Some(Serializing(id)) ⇒
-        case Some(Serialized(id)) ⇒
-          writer.addAttribute("id", id.toString)
-        case None ⇒
-          state.content += proto -> new Serialized(proto.id)
-          writer.addAttribute("id", proto.id.toString)
-          writer.addAttribute("name", proto.dataUI.name)
-          writer.addAttribute("type", Types.extractTypeFromArray(Types.pretifyWithNameSpace(proto.dataUI.typeClassString)))
-          writer.addAttribute("dim", proto.dataUI.dim.toString)
-      }
+    state.content.get(proto) match {
+      case Some(Serializing(id)) ⇒
+      case Some(Serialized(id)) ⇒
+        writer.addAttribute("id", id.toString)
+      case None ⇒
+        state.content += proto -> new Serialized(proto.id)
+        writer.addAttribute("id", proto.id.toString)
+        writer.addAttribute("name", proto.dataUI.name)
+        writer.addAttribute("type", Types.extractTypeFromArray(Types.pretifyWithNameSpace(proto.dataUI.typeClassString)))
+        writer.addAttribute("dim", proto.dataUI.dim.toString)
+        writer.addAttribute("generated", proto.generated.toString)
     }
   }
 
   def extract(reader: HierarchicalStreamReader) = {
     new PrototypeDataProxyUI(GenericPrototypeDataUI(reader.getAttribute("name"),
-      reader.getAttribute("dim").toInt)(ClassLoader.toManifest(reader.getAttribute("type"))),
-      false, reader.getAttribute("id").toInt)
+      reader.getAttribute("dim").toInt)(manifest(reader.getAttribute("type"))),
+      reader.getAttribute("id").toInt, generated = reader.getAttribute("generated").toBoolean)
   }
 
   override def unmarshal(reader: HierarchicalStreamReader,
@@ -88,7 +88,8 @@ class PrototypeConverter(mapper: Mapper,
 
   def addPrototype(p: IPrototypeDataProxyUI): IPrototypeDataProxyUI = {
     Proxys.prototypes += p
-    ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(p)
+    if (!p.generated)
+      ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(p)
     Counter.id.getAndIncrement
     if (!(GenericPrototypeDataUI.baseType ::: GenericPrototypeDataUI.extraType contains Types.standardize(p.dataUI.typeClassString))) {
       GenericPrototypeDataUI.extraType = GenericPrototypeDataUI.extraType :+ Types.standardize(p.dataUI.typeClassString)

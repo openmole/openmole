@@ -27,7 +27,6 @@ import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.registry._
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
-import org.openmole.ide.core.implementation.serializer.MoleMaker
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
@@ -36,6 +35,8 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
+import org.openmole.ide.core.implementation.builder.MoleFactory
+import org.openmole.core.model.transition.{ IAggregationTransition, ITransition }
 
 object CheckData extends Logger {
 
@@ -46,7 +47,7 @@ object CheckData extends Logger {
       case y: BuildMoleScene ⇒
         y.manager.startingCapsule match {
           case Some(x: ICapsuleUI) ⇒
-            MoleMaker.buildMole(y.manager) match {
+            MoleFactory.buildMole(y.manager) match {
               case Right((mole, cMap, pMap, errs)) ⇒
                 val error_capsules = y.manager.capsules.values.partition {
                   _.dataUI.task.isDefined
@@ -121,12 +122,12 @@ object CheckData extends Logger {
   }
 
   def buildUnknownPrototypes(mole: IMole, coreCapsule: ICapsule) = {
-    (coreCapsule.inputs(mole).toList ++ coreCapsule.outputs(mole)) foreach {
+    (coreCapsule.inputs(mole, Sources.empty, Hooks.empty).toList ++ coreCapsule.outputs(mole, Sources.empty, Hooks.empty)) foreach {
       d ⇒
-        if (!MoleMaker.keyPrototypeMapping.keys.contains(KeyPrototypeGenerator(d.prototype))) {
+        if (!KeyPrototypeGenerator.isPrototype(d.prototype)) {
           val (key, dim) = KeyGenerator(d.prototype)
           Proxys.prototypes +=
-            new PrototypeDataProxyUI(GenericPrototypeDataUI(d.prototype.name, dim)(d.prototype.`type`), true)
+            new PrototypeDataProxyUI(GenericPrototypeDataUI(d.prototype.name, dim)(KeyGenerator.stripArrays(d.prototype.`type`)._1), generated = true)
         }
     }
   }
@@ -136,19 +137,20 @@ object CheckData extends Logger {
     proxy: ITaskDataProxyUI,
     protoMapping: Map[PrototypeKey, IPrototypeDataProxyUI],
     coreCapsule: ICapsule): Unit = {
-    proxy.dataUI.updateImplicits(coreCapsule.inputs(mole).map {
+    proxy.dataUI.updateImplicits(coreCapsule.inputs(mole, Sources.empty, Hooks.empty).map {
       i ⇒ KeyPrototypeGenerator(i.prototype)
     }.toList
       .filterNot {
         n ⇒
           proxy.dataUI.prototypesIn.map {
-            p ⇒ KeyPrototypeGenerator(p)
+            p ⇒
+              KeyPrototypeGenerator(p)
           }.contains(n)
       }
       .map {
         protoMapping
       },
-      coreCapsule.outputs(mole).map {
+      coreCapsule.outputs(mole, Sources.empty, Hooks.empty).map {
         i ⇒ KeyPrototypeGenerator(i.prototype)
       }.toList
         .filterNot {
@@ -160,26 +162,42 @@ object CheckData extends Logger {
         .map {
           protoMapping
         })
+    computePrototypeFromAggregation(mole)
   }
 
   def computeImplicitPrototypes(mole: IMole,
                                 capsule: ICapsule,
                                 proxy: ITaskDataProxyUI): Unit =
-    MoleMaker.taskCoreObject(proxy) match {
+    MoleFactory.taskCoreObject(proxy) match {
       case Right(x: ITask) ⇒
         buildUnknownPrototypes(mole, capsule)
         computeImplicitPrototypes(mole, proxy,
-          MoleMaker.keyPrototypeMapping,
+          KeyPrototypeGenerator.keyPrototypeMapping,
           capsule)
       case Left(e: Throwable) ⇒
     }
+
+  def computePrototypeFromAggregation(mole: IMole) = {
+    mole.transitions.foreach {
+      _ match {
+        case t: ITransition with IAggregationTransition ⇒ t.data(mole, Sources.empty, Hooks.empty).foreach {
+          d ⇒
+            val (protoType, dim) = KeyGenerator.stripArrays(d.prototype.`type`)
+            val proto = new PrototypeDataProxyUI(GenericPrototypeDataUI(d.prototype.name, dim + 1)(protoType), generated = true)
+            if (!KeyPrototypeGenerator.isPrototype(proto))
+              Proxys.prototypes += proto
+        }
+        case _ ⇒
+      }
+    }
+  }
 
   def checkNoEmptyCapsule(scene: IMoleScene) =
     scene.manager.capsulesInMole.foreach {
       c ⇒
         c.task match {
           case Some(x: ITaskDataProxyUI) ⇒
-          case _ ⇒ StatusBar().warn("A capsule without task can not be run")
+          case _ ⇒ StatusBar().warn("A capsule without taskMap can not be run")
         }
     }
 

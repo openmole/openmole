@@ -39,7 +39,7 @@ class GroupDomainPanelUI(pud: GroupDomainDataUI[_]) extends PluginPanel("wrap") 
   }
 
   override lazy val help =
-    new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
+    new Helper(List(new URL(i18n.getString("groupPermalinkText"), i18n.getString("groupPermalink")))) {
       add(sizeTextField, new Help(i18n.getString("groupSize"), i18n.getString("groupSizeEx")))
     }
 }

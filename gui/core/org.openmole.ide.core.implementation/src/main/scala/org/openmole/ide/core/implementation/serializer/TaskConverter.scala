@@ -59,7 +59,7 @@ class TaskConverter(mapper: Mapper,
       existingTask match {
         case Some(y: ITaskDataProxyUI) ⇒ y
         case _ ⇒
-          serializer.unserializeProxy("task")
+          serializer.unserializeProxy("taskMap")
           unmarshal(reader, uc)
       }
     } else {

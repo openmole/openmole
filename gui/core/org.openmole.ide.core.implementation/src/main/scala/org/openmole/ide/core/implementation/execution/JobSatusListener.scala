@@ -28,7 +28,7 @@ case object MoleFinishedEvent extends scala.swing.event.Event
 class JobSatusListener(exeManager: ExecutionManager) extends EventListener[IMoleExecution] {
   override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = {
     event match {
-      case x: OneJobStatusChanged ⇒
+      case x: JobStatusChanged ⇒
         exeManager.wfPiePlotter.update(x.oldState, exeManager.status(x.oldState).decrementAndGet)
         exeManager.wfPiePlotter.update(x.newState, exeManager.status(x.newState).incrementAndGet)
       case x: Finished ⇒

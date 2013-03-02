@@ -28,6 +28,4 @@ trait IPrototypeDataProxyUI extends IDataProxyUI {
     if (dataUI.dim > 0) dataUI.name + " [" + dataUI.dim + "]"
     else dataUI.name
   }
-
-  def generated: Boolean
 }

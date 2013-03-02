@@ -26,7 +26,7 @@ import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.misc.tools.Counter
-import org.openmole.plugin.hook.file.CopyFileHook
+import org.openmole.plugin.hook.file._
 
 class CopyFileHookDataUI(var activated: Boolean = true,
                          val toBeHooked: List[(IPrototypeDataProxyUI, String)] = List.empty,
@@ -35,9 +35,9 @@ class CopyFileHookDataUI(var activated: Boolean = true,
   def coreClass = classOf[CopyFileHook]
 
   def coreObject(executionManager: IExecutionManager) = toBeHooked.map { h ⇒
-    new CopyFileHook(
+    CopyFileHook(
       executionManager.prototypeMapping(h._1).asInstanceOf[Prototype[File]],
-      h._2)
+      h._2).toHook
   }
 
   def buildPanelUI(task: ITaskDataProxyUI) = new CopyFileHookPanelUI(task, this)
