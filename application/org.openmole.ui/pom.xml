@@ -88,13 +88,13 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.equinox</groupId>
+      <groupId>org.eclipse.core</groupId>
       <artifactId>org.eclipse.equinox.app</artifactId>
       <scope>provided</scope>
     </dependency>
     <!-- dependency added in scope provided for forcing exclusion in copy-dependencies taskMap -->
     <dependency>
-      <groupId>org.eclipse.equinox</groupId>
+      <groupId>org.eclipse.core</groupId>
       <artifactId>org.eclipse.osgi</artifactId>
       <scope>provided</scope>
     </dependency>
