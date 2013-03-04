@@ -33,12 +33,28 @@ import org.openmole.ide.misc.widget.multirow.MultiWidget.CLOSE_IF_EMPTY
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor.{ ComboLinkLabelGroovyTextFieldEditorData, ComboLinkLabelGroovyTextFieldEditorPanel }
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel.{ ComboLinkLabelData, ComboLinkLabelPanel }
 
+object IOPrototypePanel {
+  def save(protoPanel: Option[IOPrototypePanel]) = {
+    val (protoInEditorContent, implicitEditorsMapping, protoOutEditorContent) = protoPanel match {
+      case Some(x: IOPrototypePanel) ⇒ (x.protoInEditor.content,
+        x.implicitEditorsMapping.filterNot { _._2.editorText.isEmpty },
+        x.protoOutEditor.content)
+      case None ⇒ (List(), List(), List())
+    }
+    (protoInEditorContent.map { _.content.get },
+      new HashMap[IPrototypeDataProxyUI, String]() ++
+      protoInEditorContent.map { x ⇒ x.content.get -> x.editorValue } ++ implicitEditorsMapping.map {
+        case (k, v) ⇒ k -> v.editorText
+      }.toMap, protoOutEditorContent.map { _.content.get })
+  }
+}
+
 class IOPrototypePanel(scene: IMoleScene,
-                        prototypesIn: List[IPrototypeDataProxyUI] = List.empty,
-                        prototypesOut: List[IPrototypeDataProxyUI] = List.empty,
-                        implicitPrototypeIn: List[IPrototypeDataProxyUI] = List.empty,
-                        implicitPrototypeOut: List[IPrototypeDataProxyUI] = List.empty,
-                        inputParameters: Map[IPrototypeDataProxyUI, String] = Map.empty) extends PluginPanel("") {
+                       prototypesIn: List[IPrototypeDataProxyUI] = List.empty,
+                       prototypesOut: List[IPrototypeDataProxyUI] = List.empty,
+                       implicitPrototypeIn: List[IPrototypeDataProxyUI] = List.empty,
+                       implicitPrototypeOut: List[IPrototypeDataProxyUI] = List.empty,
+                       inputParameters: Map[IPrototypeDataProxyUI, String] = Map.empty) extends PluginPanel("") {
   val availablePrototypes = Proxys.prototypes.toList
   peer.setLayout(new BorderLayout)
   val image = EYE

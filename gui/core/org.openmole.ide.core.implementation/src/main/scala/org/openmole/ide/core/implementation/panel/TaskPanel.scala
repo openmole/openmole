@@ -125,28 +125,8 @@ class TaskPanel(proxy: ITaskDataProxyUI,
   }
 
   def save = {
-    val (protoInEditorContent, implicitEditorsMapping, protoOutEditorContent) = protoPanel match {
-      case Some(x: IOPrototypePanel) ⇒ (x.protoInEditor.content,
-        x.implicitEditorsMapping.filterNot {
-          _._2.editorText.isEmpty
-        },
-        x.protoOutEditor.content)
-      case None ⇒ (List(), List(), List())
-    }
-
-    proxy.dataUI = panelUI.save(nameTextField.text,
-      protoInEditorContent.map {
-        _.content.get
-      },
-      new HashMap[IPrototypeDataProxyUI, String]() ++
-        protoInEditorContent.map {
-          x ⇒ x.content.get -> x.editorValue
-        } ++ implicitEditorsMapping.map {
-          case (k, v) ⇒ k -> v.editorText
-        }.toMap,
-      protoOutEditorContent.map {
-        _.content.get
-      })
+    val protoPanelSave = IOPrototypePanel.save(protoPanel)
+    proxy.dataUI = panelUI.save(nameTextField.text, protoPanelSave._1, protoPanelSave._2, protoPanelSave._3)
 
     ScenesManager.capsules(proxy).foreach {
       c ⇒
