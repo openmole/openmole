@@ -34,12 +34,12 @@ object SaveXML {
     if (title != "") {
       Settings.currentProject = Some(title)
       frame.title = "OpenMOLE - " + title
-      (new GUISerializer(title)).serialize
+      (new GUISerializer).serialize(title)
     } else Settings.currentProject = None
   }
 
   def show: Option[String] = {
-    val fc = DialogFactory.fileChooser(" Save OpenMOLE project",
+    val fc = DialogFactory.fileChooser("Save OpenMOLE project",
       "*.om",
       "om")
 

@@ -20,7 +20,7 @@ package org.openmole.core.serializer.converter
 import java.io.File
 import org.openmole.core.serializer.structure.FileInfo
 
-class DeserializerWithFileInjectionFromPathHash extends Deserializer with Factory.Poolable {
+class DeserializerWithFileInjectionFromPathHash extends Deserializer with Factory.XStreamPool {
 
   var files: PartialFunction[FileInfo, File] = null
   registerConverter(new FilePathHashInjecter(this, reflectionConverter))

@@ -15,13 +15,13 @@
   <!-- *** Project Information ************************************* -->
   <!-- ************************************************************* -->
   <name>${project.artifactId} ${project.version}</name>
-  <description></description>
+  <description />
   <properties>
     <bundle.activator>${project.artifactId}.internal.Activator</bundle.activator>
   </properties>
   <dependencies>
     <dependency>
-      <groupId>org.eclipse.equinox</groupId>
+      <groupId>org.eclipse.core</groupId>
       <artifactId>org.eclipse.osgi</artifactId>
     </dependency>
     <dependency>

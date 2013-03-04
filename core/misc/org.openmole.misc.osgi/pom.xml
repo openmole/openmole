@@ -18,7 +18,7 @@
   <!-- *** Project Information ************************************* -->
   <!-- ************************************************************* -->
   <name>${project.artifactId} ${project.version}</name>
-  <description></description>
+  <description />
   <properties>
     <bundle.activator>${project.artifactId}.Activator</bundle.activator>
     <eclipse.buddypolicy>global</eclipse.buddypolicy>
@@ -30,7 +30,7 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.equinox</groupId>
+      <groupId>org.eclipse.core</groupId>
       <artifactId>org.eclipse.osgi</artifactId>
     </dependency>
   </dependencies>
