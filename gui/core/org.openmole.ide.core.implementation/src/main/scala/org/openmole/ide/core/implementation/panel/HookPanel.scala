@@ -21,22 +21,41 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode
 import org.openmole.ide.core.model.dataproxy.IHookDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
-import scala.swing.Component
-import java.awt.BorderLayout
+import swing.{ Label, TabbedPane, Component }
+import java.awt.{ Dimension, BorderLayout }
 import javax.swing.ImageIcon
 import javax.imageio.ImageIO
 import swing.event.FocusGained
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
+import org.openmole.ide.core.implementation.dialog.StatusBar
 
 class HookPanel(proxy: IHookDataProxyUI,
                 scene: IMoleScene,
-                mode: PanelMode.Value) extends BasePanel(Some(proxy), scene, mode) { capsulePanel ⇒
+                mode: PanelMode.Value) extends BasePanel(Some(proxy), scene, mode) { hookPanel ⇒
   iconLabel.icon = new ImageIcon(ImageIO.read(this.getClass.getClassLoader.getResource("img/hook.png")))
   /*listenTo(panelUI.help.components.toSeq: _*)
   reactions += {
     case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
   }   */
+  val panelUI = proxy.dataUI.buildPanelUI
+
+  val protoPanel = Proxys.prototypes.size match {
+    case 0 ⇒
+      StatusBar().inform("No Prototype has been created yet")
+      panelUI.tabbedPane.pages += new TabbedPane.Page("Inputs / Outputs", new Label("First define Prototypes !"))
+      None
+    case _ ⇒
+      val (implicitIP, implicitOP) = proxy.dataUI.implicitPrototypes
+      val iop = Some(new IOPrototypePanel(scene,
+        proxy.dataUI.inputs,
+        proxy.dataUI.outputs,
+        implicitIP,
+        implicitOP,
+        proxy.dataUI.inputParameters.toMap))
+      panelUI.tabbedPane.pages.insert(0, new TabbedPane.Page("Inputs / Outputs", iop.get))
+      iop
+  }
 
   def create = {
     Proxys.hooks += proxy
@@ -50,14 +69,20 @@ class HookPanel(proxy: IHookDataProxyUI,
     true
   }
 
-  def save = proxy.dataUI = panelUI.saveContent(nameTextField.text)
-
-  val panelUI = proxy.dataUI.buildPanelUI
+  def save = {
+    val protoPanelSave = IOPrototypePanel.save(protoPanel)
+    proxy.dataUI = panelUI.save(nameTextField.text, protoPanelSave._1, protoPanelSave._2, protoPanelSave._3)
+  }
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
-    if (panelUI.tabbedPane.pages.size == 0) contents += panelUI.peer
-    else contents += panelUI.tabbedPane
+    contents += panelUI.tabbedPane
     contents += panelUI.help
   }.peer, BorderLayout.CENTER)
+
+  listenTo(panelUI.help.components.toSeq: _*)
+  reactions += {
+    case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
+    case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
+  }
 }

@@ -20,17 +20,18 @@ package org.openmole.ide.core.model.data
 import org.openmole.core.model.mole._
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.control.IExecutionManager
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ITaskDataProxyUI }
 import org.openmole.ide.core.model.panel.IHookPanelUI
+import org.openmole.core.model.data.Prototype
 
-trait IHookDataUI extends IDataUI {
+trait IHookDataUI extends IDataUI with InputPrototype with OutputPrototype with ImplicitPrototype {
   def id: Int
 
   override def toString: String = name
 
   def coreClass: Class[_ <: IHook]
 
-  def coreObject(executionManager: IExecutionManager): List[IHook]
+  def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IHook]
 
   def buildPanelUI: IHookPanelUI
 }

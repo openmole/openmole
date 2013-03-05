@@ -23,10 +23,13 @@ import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.plugin.hook.tools.MultiPrototypePanelUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
+import swing.TabbedPane
 
 class ToStringHookPanelUI(dataUI: ToStringHookDataUI) extends MultiPrototypePanelUI("Display prototypes",
   dataUI.toBeHooked,
   Proxys.prototypes.toList) with IHookPanelUI {
+
+  tabbedPane.pages.insert(0, new TabbedPane.Page("Prototypes", this))
 
   def saveContent(name: String) = new ToStringHookDataUI(name,
     multiPrototypeCombo.content.map { _.comboValue.get })

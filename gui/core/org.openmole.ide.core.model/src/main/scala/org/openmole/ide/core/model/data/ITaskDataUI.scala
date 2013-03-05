@@ -26,26 +26,12 @@ import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.core.model.workflow.{ IMoleScene, ICapsuleUI }
 import org.openmole.core.model.mole.{ IMole, ICapsule }
 
-trait ITaskDataUI extends IDataUI {
+trait ITaskDataUI extends IDataUI with InputPrototype with OutputPrototype with ImplicitPrototype {
   def name: String
 
   override def toString: String = name
 
   def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet): ITask
-
-  def inputParameters: scala.collection.mutable.Map[IPrototypeDataProxyUI, String]
-
-  def inputParameters_=(ip: scala.collection.mutable.Map[IPrototypeDataProxyUI, String])
-
-  def inputs: List[IPrototypeDataProxyUI]
-
-  def inputs_=(pi: List[IPrototypeDataProxyUI])
-
-  def outputs: List[IPrototypeDataProxyUI]
-
-  def outputs_=(pi: List[IPrototypeDataProxyUI])
-
-  def implicitPrototypes: (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI])
 
   def filterPrototypeOccurencies(pproxy: IPrototypeDataProxyUI): List[IPrototypeDataProxyUI]
 

@@ -24,7 +24,7 @@ import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.registry.PrototypeKey
 import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
 import org.openmole.ide.core.model.commons.TransitionType._
-import org.openmole.ide.core.model.data.{ ITaskDataUI, ICapsuleDataUI, IMoleDataUI }
+import org.openmole.ide.core.model.data.{ IHookDataUI, ITaskDataUI, ICapsuleDataUI, IMoleDataUI }
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.core.implementation.task._
@@ -85,6 +85,11 @@ object MoleFactory {
           }.toMap),
           envs.toSet)
     }
+
+  def buildHook(hookUI: IHookDataUI,
+                protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IHook] = hookUI.coreObject(protoMapping)
+
+  def buildHook(hookUI: IHookDataUI): List[IHook] = buildHook(hookUI, prototypeMapping)
 
   def buildMole(manager: IMoleSceneManager): Either[String, (IMole, Map[ICapsuleUI, ICapsule], Map[IPrototypeDataProxyUI, Prototype[_]], Iterable[(ICapsuleUI, Throwable)])] = {
     try {

@@ -62,6 +62,6 @@
     <module>org.openmole.plugin.builder.sensitivity</module>
   </modules>
   <properties>
-    <include />
+    <include></include>
   </properties>
 </project>

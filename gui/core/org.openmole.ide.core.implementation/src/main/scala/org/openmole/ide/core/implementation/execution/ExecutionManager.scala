@@ -179,7 +179,7 @@ class ExecutionManager(manager: IMoleSceneManager,
     manager, {
       @transient val h = hooks.toList.flatMap {
         case (dataUI, caps) ⇒
-          dataUI.coreObject(this).map(h ⇒ capsuleMapping(caps) -> h)
+          dataUI.coreObject(prototypeMapping).map(h ⇒ capsuleMapping(caps) -> h)
         case _ ⇒ Nil
       }
       h
