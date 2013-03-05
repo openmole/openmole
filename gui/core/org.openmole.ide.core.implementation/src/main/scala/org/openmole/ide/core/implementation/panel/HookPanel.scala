@@ -16,46 +16,30 @@
  */
 package org.openmole.ide.core.implementation.panel
 
-import org.openmole.ide.misc.widget.{ LinkLabel, PluginPanel }
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.model.panel.PanelMode
+import org.openmole.ide.core.model.panel.{ IHookPanelUI, IOPanelUI, PanelMode }
 import org.openmole.ide.core.model.dataproxy.IHookDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
-import swing.{ Label, TabbedPane, Component }
-import java.awt.{ Dimension, BorderLayout }
+import swing.{ TabbedPane, Component, Label }
+import swing.event.{ SelectionChanged, FocusGained }
+import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import javax.swing.ImageIcon
 import javax.imageio.ImageIO
-import swing.event.FocusGained
-import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import java.awt.BorderLayout
+import org.openmole.ide.misc.widget.PluginPanel
 
 class HookPanel(proxy: IHookDataProxyUI,
                 scene: IMoleScene,
-                mode: PanelMode.Value) extends BasePanel(Some(proxy), scene, mode) { hookPanel ⇒
-  iconLabel.icon = new ImageIcon(ImageIO.read(this.getClass.getClassLoader.getResource("img/hook.png")))
-  /*listenTo(panelUI.help.components.toSeq: _*)
-  reactions += {
-    case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
-    case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
-  }   */
-  val panelUI = proxy.dataUI.buildPanelUI
+                mode: PanelMode.Value) extends BasePanel(Some(proxy), scene, mode) {
+  hookPanel ⇒
 
-  val protoPanel = Proxys.prototypes.size match {
-    case 0 ⇒
-      StatusBar().inform("No Prototype has been created yet")
-      panelUI.tabbedPane.pages += new TabbedPane.Page("Inputs / Outputs", new Label("First define Prototypes !"))
-      None
-    case _ ⇒
-      val (implicitIP, implicitOP) = proxy.dataUI.implicitPrototypes
-      val iop = Some(new IOPrototypePanel(scene,
-        proxy.dataUI.inputs,
-        proxy.dataUI.outputs,
-        implicitIP,
-        implicitOP,
-        proxy.dataUI.inputParameters.toMap))
-      panelUI.tabbedPane.pages.insert(0, new TabbedPane.Page("Inputs / Outputs", iop.get))
-      iop
-  }
+  val panelUI = proxy.dataUI.buildPanelUI
+  var protoPanel: Option[IOPrototypePanel] = None
+  panelUI.tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", new Label))
+  updatePanel
+
+  iconLabel.icon = new ImageIcon(ImageIO.read(this.getClass.getClassLoader.getResource("img/hook.png")))
 
   def create = {
     Proxys.hooks += proxy
@@ -74,6 +58,27 @@ class HookPanel(proxy: IHookDataProxyUI,
     proxy.dataUI = panelUI.save(nameTextField.text, protoPanelSave._1, protoPanelSave._2, protoPanelSave._3)
   }
 
+  def updatePanel = {
+    protoPanel = Proxys.prototypes.size match {
+      case 0 ⇒
+        StatusBar().inform("No Prototype has been created yet")
+        panelUI.tabbedPane.pages(1).content = new Label("First define Prototypes !")
+        None
+      case _ ⇒
+        save
+        val (implicitIP, implicitOP) = proxy.dataUI.implicitPrototypes
+        val iop = Some(new IOPrototypePanel(scene,
+          proxy.dataUI.inputs,
+          proxy.dataUI.outputs,
+          implicitIP,
+          implicitOP,
+          proxy.dataUI.inputParameters.toMap))
+        panelUI.tabbedPane.pages(1).content = iop.get
+        panelUI.tabbedPane.revalidate
+        iop
+    }
+  }
+
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
     contents += panelUI.tabbedPane
@@ -81,8 +86,11 @@ class HookPanel(proxy: IHookDataProxyUI,
   }.peer, BorderLayout.CENTER)
 
   listenTo(panelUI.help.components.toSeq: _*)
+  listenTo(panelUI.tabbedPane.selection)
   reactions += {
     case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
+    case SelectionChanged(panelUI.tabbedPane) ⇒ updatePanel
+    case _ ⇒
   }
 }

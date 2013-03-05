@@ -8,7 +8,9 @@ package org.openmole.ide.core.model.panel
 import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
-trait IHookPanelUI extends IPanelUI {
+trait IHookPanelUI extends IOPanelUI {
+
+  def saveContent(name: String): IHookDataUI
 
   def save(name: String,
            prototypesIn: List[IPrototypeDataProxyUI],
@@ -20,6 +22,4 @@ trait IHookPanelUI extends IPanelUI {
     dataUI.inputParameters = inputParameters
     dataUI
   }
-
-  def saveContent(name: String): IHookDataUI
 }

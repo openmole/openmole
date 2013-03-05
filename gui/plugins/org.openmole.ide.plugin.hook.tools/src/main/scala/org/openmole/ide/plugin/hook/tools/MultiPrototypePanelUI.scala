@@ -34,7 +34,7 @@ class MultiPrototypePanelUI(title: String,
       new ComboPanel(prototypeProxys,
         new ComboData(Some(p)))
     },
-    NO_EMPTY,
+    CLOSE_IF_EMPTY,
     ADD)
 
   contents += new Label("<html><b>" + title + "</b></html>")
