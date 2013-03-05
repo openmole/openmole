@@ -4,6 +4,7 @@ import _root_.akka.actor.{ Props, ActorSystem }
 import org.scalatra._
 import javax.servlet.ServletContext
 import org.openmole.web.MyServlet
+import org.openmole.web.MyRepoServlet
 import com.typesafe.config.ConfigFactory
 
 /**
@@ -36,7 +37,8 @@ class Scalatra extends LifeCycle {
 
     // Mount one or more servlets
     context.mount(new MyServlet(system), "/*")
-
+    context.mount(new SlickRoutes(), "/c/*")
+    context.mount(new MyRepoServlet(system), "/repo/*")
   }
 
   override def destroy(context: ServletContext) {

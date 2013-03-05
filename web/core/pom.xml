@@ -46,13 +46,28 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.openmole.ide</groupId>
+      <artifactId>org.openmole.ide.core.implementation</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.openmole.core</groupId>
       <artifactId>org.openmole.core.implementation</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.openmole.core</groupId>
-      <artifactId>org.openmole.core.model</artifactId>
+      <groupId>org.openmole</groupId>
+      <artifactId>com.jolbox.bonecp</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openmole</groupId>
+      <artifactId>com.typesafe.slick</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openmole</groupId>
+      <artifactId>org.h2</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>
