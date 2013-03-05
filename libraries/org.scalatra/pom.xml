@@ -7,7 +7,7 @@
   <parent>
     <artifactId>libraries</artifactId>
     <groupId>org.openmole</groupId>
-    <version>0.8-alpha2</version>
+    <version>0.8-alpha3</version>
   </parent>
   <!--Used to build the symbolic name of the bundle-->
   <artifactId>org.scalatra</artifactId>
@@ -40,7 +40,7 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.openmole.web</groupId>
+      <groupId>org.openmole</groupId>
       <artifactId>org.slf4j</artifactId>
       <version>${project.version}</version>
     </dependency>
