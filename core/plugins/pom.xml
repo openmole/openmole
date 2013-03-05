@@ -7,7 +7,7 @@
   <parent>
     <artifactId>openmole</artifactId>
     <groupId>org.openmole.core</groupId>
-    <version>0.8-alpha2</version>
+    <version>0.8-alpha3</version>
   </parent>
   <artifactId>plugins</artifactId>
   <!-- ************************************************************* -->
@@ -41,6 +41,7 @@
     <module>org.openmole.plugin.task.stat</module>
     <module>org.openmole.plugin.hook.file</module>
     <module>org.openmole.plugin.hook.display</module>
+    <module>org.openmole.plugin.source.csv</module>
     <module>org.openmole.plugin.domain.bounded</module>
     <module>org.openmole.plugin.profiler.csvprofiler</module>
     <module>org.openmole.plugin.domain.range</module>

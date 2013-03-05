@@ -40,7 +40,7 @@ class GliteEnvironmentDataUI(val name: String = "",
       else None
     }
     try {
-      new GliteEnvironment(vo)(
+      GliteEnvironment(vo)(
         vomsURL = voms,
         bdii = bdii,
         fqan = fqan,

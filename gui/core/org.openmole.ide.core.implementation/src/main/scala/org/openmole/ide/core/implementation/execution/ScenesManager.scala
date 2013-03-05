@@ -209,14 +209,14 @@ object ScenesManager {
           page.content = container
           bmsc.executionMoleSceneContainers += container
 
-          addTab(page, clone.manager.name, new Action("") {
+          /*addTab(page, clone.manager.name, new Action("") {
             def apply = {
               container.panelHooks.foreach { ph ⇒
                 ph._2._1.dataUI.hooks(ph._2._2) = ph._1.saveContent
               }
               tabPane.pages.remove(page.index)
             }
-          })
+          })  */
 
           tabPane.selection.index = page.index
         } else

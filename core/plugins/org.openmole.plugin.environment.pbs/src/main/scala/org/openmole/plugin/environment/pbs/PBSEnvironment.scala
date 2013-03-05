@@ -32,6 +32,20 @@ object PBSEnvironment {
   val MaxConnections = new ConfigurationLocation("PBSEnvironment", "MaxConnections")
 
   Workspace += (MaxConnections, "10")
+
+  def apply(
+    user: String,
+    host: String,
+    port: Int = 22,
+    queue: Option[String] = None,
+    openMOLEMemory: Option[Int] = None,
+    wallTime: Option[String] = None,
+    memory: Option[Int] = None,
+    path: Option[String] = None,
+    threads: Option[Int] = None,
+    nodes: Option[Int] = None,
+    coreByNode: Option[Int] = None) =
+    new PBSEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, path, threads, nodes, coreByNode)
 }
 
 import PBSEnvironment._
@@ -39,15 +53,15 @@ import PBSEnvironment._
 class PBSEnvironment(
     val user: String,
     val host: String,
-    override val port: Int = 22,
-    val queue: Option[String] = None,
-    override val openMOLEMemory: Option[Int] = None,
-    val wallTime: Option[String] = None,
-    val memory: Option[Int] = None,
-    val path: Option[String] = None,
-    override val threads: Option[Int] = None,
-    val nodes: Option[Int] = None,
-    val coreByNode: Option[Int] = None) extends BatchEnvironment with SSHAccess with MemoryRequirement { env ⇒
+    override val port: Int,
+    val queue: Option[String],
+    override val openMOLEMemory: Option[Int],
+    val wallTime: Option[String],
+    val memory: Option[Int],
+    val path: Option[String],
+    override val threads: Option[Int],
+    val nodes: Option[Int],
+    val coreByNode: Option[Int]) extends BatchEnvironment with SSHAccess with MemoryRequirement { env ⇒
 
   type SS = PersistentStorageService
   type JS = PBSJobService

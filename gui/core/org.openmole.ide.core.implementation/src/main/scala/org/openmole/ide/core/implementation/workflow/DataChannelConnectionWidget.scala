@@ -43,7 +43,7 @@ class DataChannelConnectionWidget(scene: IMoleScene, val dataChannelUI: IDataCha
 
   val componentWidget = new PrototypeOnConnectorWidget(scene.graphScene,
     dataChannelUI,
-    new LinkLabel(dataChannelUI.nbPrototypes.toString,
+    new LinkLabel(dataChannelUI.preview.toString,
       new Action("") { def apply = edit }, 10))
   setConstraint(componentWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER, 0.5f)
   componentWidget.setOpaque(true)

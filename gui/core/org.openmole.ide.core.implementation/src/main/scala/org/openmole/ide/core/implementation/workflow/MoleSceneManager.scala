@@ -26,6 +26,8 @@ import org.openmole.ide.core.model.workflow._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.implementation.builder.MoleFactory
+import org.openmole.core.model.mole.{ ICapsule, IMole }
 
 class MoleSceneManager(var name: String) extends IMoleSceneManager {
 
@@ -38,6 +40,13 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
   var edgeID = 0
 
   var dataUI: IMoleDataUI = new MoleDataUI
+
+  var cacheMole: Option[(IMole, Map[ICapsuleUI, ICapsule])] = None
+
+  def refreshCache = MoleFactory.buildMole(this) match {
+    case Right((m, cMap, _, _)) ⇒ cacheMole = Some((m, cMap))
+    case _ ⇒
+  }
 
   def capsules = _capsules.toMap
 

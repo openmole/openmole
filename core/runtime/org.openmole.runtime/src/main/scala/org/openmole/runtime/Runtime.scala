@@ -41,6 +41,7 @@ import org.openmole.misc.pluginmanager._
 import org.openmole.misc.workspace._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
+import util.{ Success, Failure }
 
 object Runtime extends Logger {
   val NbRetry = 3
@@ -144,13 +145,11 @@ class Runtime {
       val result = new FileMessage(uploadedcontextResults, HashService.computeHash(contextResultFile).toString)
       retry(storage.uploadGZ(contextResultFile, uploadedcontextResults))
       contextResultFile.delete
-      Left(result)
-
+      Success(result)
     } catch {
-      case t: Throwable ⇒ {
+      case t: Throwable ⇒
         if (debug) logger.log(SEVERE, "", t)
-        Right(t)
-      }
+        Failure(t)
     } finally {
       outSt.close
       errSt.close

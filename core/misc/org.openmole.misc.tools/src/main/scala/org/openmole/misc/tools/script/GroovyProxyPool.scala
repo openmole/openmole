@@ -21,10 +21,18 @@ import groovy.lang.Binding
 import java.io.File
 import org.openmole.misc.tools.service.ObjectPool
 
-class GroovyProxyPool(code: String, jars: Iterable[File] = Iterable.empty) extends {
+object GroovyProxyPool {
+
+  def apply(code: String, jars: Iterable[File] = Iterable.empty) = new GroovyProxyPool(code, jars)
+
+}
+
+class GroovyProxyPool(code: String, jars: Iterable[File] = Iterable.empty) extends GroovyFunction {
 
   //Don't use soft reference here, it leads to keep compiling the script in case of high memory load and make it worse
   @transient lazy private val pool = new ObjectPool({ new GroovyProxy(code, jars) })
+
+  def apply(binding: Binding) = execute(binding)
 
   def execute(binding: Binding): Object = pool.exec {
     _.executeUnsynchronized(binding)

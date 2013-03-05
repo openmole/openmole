@@ -38,6 +38,7 @@ import fr.iscpif.gridscale.authentication.SSHUserPasswordAuthentication
 
 import org.openmole.core.batch.message.FileMessage._
 import scala.annotation.tailrec
+import util.{ Failure, Success }
 
 object JobLauncher extends Logger {
   val jobCheckInterval = new ConfigurationLocation("JobLauncher", "jobCheckInterval")
@@ -176,8 +177,8 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
     }
 
     val uplodadedResult = runtimeResult.result match {
-      case Left(result) ⇒ Left(uploadFileMessage(result))
-      case Right(e) ⇒ Right(e)
+      case Success(result) ⇒ Success(uploadFileMessage(result))
+      case Failure(e) ⇒ Failure(e)
     }
 
     val uploadedStdOut = runtimeResult.stdOut match {

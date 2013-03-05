@@ -30,16 +30,12 @@ import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.registry._
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
-import org.openmole.ide.core.implementation.registry.KeyGenerator
-import scala.collection.mutable.HashSet
 import org.openmole.misc.exception.UserBadDataError
 
 class EnvironmentConverter(mapper: Mapper,
                            provider: ReflectionProvider,
                            val serializer: GUISerializer,
                            var state: SerializerState) extends ReflectionConverter(mapper, provider) {
-
-  val added = new HashSet[Int]
 
   override def marshal(o: Object,
                        writer: HierarchicalStreamWriter,

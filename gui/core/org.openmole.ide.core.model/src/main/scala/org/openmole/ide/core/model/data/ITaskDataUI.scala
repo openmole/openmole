@@ -23,6 +23,8 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.ITaskPanelUI
+import org.openmole.ide.core.model.workflow.{ IMoleScene, ICapsuleUI }
+import org.openmole.core.model.mole.{ IMole, ICapsule }
 
 trait ITaskDataUI extends IDataUI {
   def name: String
@@ -35,24 +37,19 @@ trait ITaskDataUI extends IDataUI {
 
   def inputParameters_=(ip: scala.collection.mutable.Map[IPrototypeDataProxyUI, String])
 
-  def prototypesIn: List[IPrototypeDataProxyUI]
+  def inputs: List[IPrototypeDataProxyUI]
 
-  def prototypesIn_=(pi: List[IPrototypeDataProxyUI])
+  def inputs_=(pi: List[IPrototypeDataProxyUI])
 
-  def prototypesOut: List[IPrototypeDataProxyUI]
+  def outputs: List[IPrototypeDataProxyUI]
 
-  def prototypesOut_=(po: List[IPrototypeDataProxyUI])
+  def outputs_=(pi: List[IPrototypeDataProxyUI])
 
-  def implicitPrototypesIn: List[IPrototypeDataProxyUI]
-
-  def implicitPrototypesOut: List[IPrototypeDataProxyUI]
-
-  def updateImplicits(ipList: List[IPrototypeDataProxyUI],
-                      opList: List[IPrototypeDataProxyUI])
+  def implicitPrototypes: (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI])
 
   def filterPrototypeOccurencies(pproxy: IPrototypeDataProxyUI): List[IPrototypeDataProxyUI]
 
-  def removePrototypeOccurencies(pproxy: IPrototypeDataProxyUI): Unit
+  def removePrototypeOccurencies(pproxy: IPrototypeDataProxyUI)
 
   def buildPanelUI: ITaskPanelUI
 

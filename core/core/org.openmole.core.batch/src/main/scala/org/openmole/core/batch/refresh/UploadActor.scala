@@ -51,6 +51,7 @@ import scala.collection.immutable.TreeSet
 import scala.collection.mutable.HashSet
 import org.openmole.misc.hashservice.HashService._
 import org.openmole.core.model.execution.ExecutionState._
+import org.openmole.misc.exception.UserBadDataError
 
 //import actors.futures._
 
@@ -59,6 +60,7 @@ object UploadActor extends Logger
 import UploadActor._
 
 class UploadActor(jobManager: ActorRef) extends Actor {
+
   def receive = {
     case Upload(job) ⇒
       if (!job.state.isFinal) {
@@ -66,13 +68,15 @@ class UploadActor(jobManager: ActorRef) extends Actor {
           val sj = initCommunication(job.environment, job.job)
           jobManager ! Uploaded(job, sj)
         } catch {
-          case e: Throwable ⇒
-            logger.log(FINE, "Exception raised durring job upload.", e)
-            jobManager ! Error(job, e)
-            jobManager ! Upload(job)
+          case e: Throwable ⇒ signalError(job, e)
         }
       }
       System.runFinalization
+  }
+
+  private def signalError(job: BatchExecutionJob, e: Throwable) = {
+    jobManager ! Error(job, e)
+    jobManager ! Upload(job)
   }
 
   private def initCommunication(environment: BatchEnvironment, job: IJob): SerializedJob = {
@@ -146,6 +150,8 @@ class UploadActor(jobManager: ActorRef) extends Actor {
   }
 
   def toReplicatedFile(job: IJob, file: File, storage: StorageService)(implicit token: AccessToken, objectContainer: ObjectContainer): ReplicatedFile = {
+    if(!file.exists) throw new UserBadDataError(s"File/dir $file is requiered but doesn't exist.")
+
     val isDir = file.isDirectory
     var toReplicate = file
     val toReplicatePath = file.getAbsoluteFile

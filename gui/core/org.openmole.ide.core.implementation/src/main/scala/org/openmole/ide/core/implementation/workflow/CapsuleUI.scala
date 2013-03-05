@@ -26,7 +26,7 @@ import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.widget.ImageWidget
 import org.netbeans.api.visual.widget.Widget
-import org.openmole.ide.core.implementation.dialog.MasterCapsulePrototypeDialog
+import org.openmole.ide.core.implementation.dialog.{ StatusBar, MasterCapsulePrototypeDialog }
 import org.openmole.ide.core.implementation.data.CapsuleDataUI
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.dataproxy.ProxyFreezer
@@ -47,11 +47,15 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.implementation.validation.DataflowProblem
 import scala.swing.Action
+import org.openmole.ide.core.implementation.builder.{ SceneFactory, MoleFactory }
+import org.openmole.core.model.mole.{ Hooks, Sources, ICapsule, IMole }
+import org.openmole.core.model.data.{ Prototype, DataSet }
+import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
 
 class CapsuleUI(val scene: IMoleScene,
                 val dataUI: ICapsuleDataUI = new CapsuleDataUI) extends Widget(scene.graphScene)
-    with ICapsuleUI { capsuleUI ⇒
-
+    with ICapsuleUI {
+  capsuleUI ⇒
   val taskComponentWidget = new SceneComponentWidget(scene, new TaskWidget(scene, this),
     TASK_CONTAINER_WIDTH,
     TASK_CONTAINER_HEIGHT)
@@ -76,6 +80,7 @@ class CapsuleUI(val scene: IMoleScene,
         encapsule(t)
         Images.CHECK_VALID
       case _ ⇒
+        decapsule
         Images.CHECK_INVALID
     }) {
     setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 12, 2))
@@ -153,7 +158,9 @@ class CapsuleUI(val scene: IMoleScene,
   }
 
   def defineAsStartingCapsule(b: Boolean) = {
-    islots.foreach { _.setStartingSlot(b) }
+    islots.foreach {
+      _.setStartingSlot(b)
+    }
     scene.validate
     scene.refresh
   }
@@ -167,15 +174,17 @@ class CapsuleUI(val scene: IMoleScene,
     removeWidget(samplingWidget)
     environmentWidget = None
     samplingWidget = None
-    inputPrototypeWidget = None
-    outputPrototypeWidget = None
+    inputPrototypeWidget = Some(PrototypeWidget.buildEmptySource(scene))
+    addChild(inputPrototypeWidget.get)
+    outputPrototypeWidget = Some(PrototypeWidget.buildEmptyHook(scene))
+    addChild(outputPrototypeWidget.get)
   }
 
   def encapsule(dpu: ITaskDataProxyUI) = {
     decapsule
     setTask(dpu)
-    inputPrototypeWidget = Some(PrototypeWidget.buildInput(scene, dpu))
-    outputPrototypeWidget = Some(PrototypeWidget.buildOutput(scene, dpu))
+    inputPrototypeWidget = Some(PrototypeWidget.buildInput(scene, this))
+    outputPrototypeWidget = Some(PrototypeWidget.buildOutput(scene, this))
     CheckData.checkMole(scene)
     addChild(inputPrototypeWidget.get)
     addChild(outputPrototypeWidget.get)
@@ -208,7 +217,9 @@ class CapsuleUI(val scene: IMoleScene,
         capsuleTypeWidget = Some(new LinkedImageWidget(scene,
           new ImageIcon(ImageIO.read(dataUI.getClass.getClassLoader.getResource("img/" + x.toString.toLowerCase + "Capsule.png"))),
           -1, -1,
-          new Action("") { def apply = MasterCapsulePrototypeDialog.display(capsuleUI) }))
+          new Action("") {
+            def apply = MasterCapsulePrototypeDialog.display(capsuleUI)
+          }))
         addChild(capsuleTypeWidget.get)
     }
   }
@@ -221,7 +232,9 @@ class CapsuleUI(val scene: IMoleScene,
         environmentWidget = Some(new LinkedImageWidget(scene,
           new ImageIcon(ImageIO.read(x.dataUI.getClass.getClassLoader.getResource(x.dataUI.imagePath))),
           TASK_CONTAINER_WIDTH - 10, TASK_CONTAINER_HEIGHT - 3,
-          new Action("") { def apply = scene.displayPropertyPanel(x, EDIT) }))
+          new Action("") {
+            def apply = scene.displayPropertyPanel(x, EDIT)
+          }))
         addChild(environmentWidget.get)
       case None ⇒ environmentWidget = None
     }
@@ -241,7 +254,9 @@ class CapsuleUI(val scene: IMoleScene,
         samplingWidget = Some(new LinkedImageWidget(scene,
           new ImageIcon(ImageIO.read(x.dataUI.getClass.getClassLoader.getResource(x.dataUI.imagePath))),
           0, TASK_CONTAINER_HEIGHT - 3,
-          new Action("") { def apply = scene.displayPropertyPanel(x, EDIT) }))
+          new Action("") {
+            def apply = scene.displayPropertyPanel(x, EDIT)
+          }))
         addChild(samplingWidget.get)
       case _ ⇒ samplingWidget = None
     }
@@ -284,6 +299,26 @@ class CapsuleUI(val scene: IMoleScene,
       case x: IExplorationTaskDataUI ⇒ setSampling(x.sampling)
       case _ ⇒
     }
+  }
+
+  def inputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule]): List[IPrototypeDataProxyUI] =
+    cMap(this).inputs(mole, Sources.empty, Hooks.empty).toList.map {
+      ds ⇒ SceneFactory.prototype(ds.prototype)
+    }
+
+  def outputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule]): List[IPrototypeDataProxyUI] =
+    cMap(this).outputs(mole, Sources.empty, Hooks.empty).toList.map {
+      ds ⇒ SceneFactory.prototype(ds.prototype)
+    }
+
+  def inputs: List[IPrototypeDataProxyUI] = scene.manager.cacheMole match {
+    case Some((m: IMole, cMap: Map[ICapsuleUI, ICapsule])) ⇒ inputs(m, cMap)
+    case _ ⇒ List()
+  }
+
+  def outputs: List[IPrototypeDataProxyUI] = scene.manager.cacheMole match {
+    case Some((m: IMole, cMap: Map[ICapsuleUI, ICapsule])) ⇒ outputs(m, cMap)
+    case _ ⇒ List()
   }
 
   def x = convertLocalToScene(getLocation).getX

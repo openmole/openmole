@@ -36,4 +36,6 @@ object ComponentCategories {
   val ENVIRONMENT = new ComponentCategory("New")
 
   val SAMPLING = new ComponentCategory("New")
+
+  val HOOK = new ComponentCategory("New")
 }

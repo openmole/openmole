@@ -41,19 +41,19 @@ import org.openmole.misc.tools.obj.ClassUtils._
 
 object ConnectorPrototypeFilterDialog extends PrototypeDialog {
   def display(connectorUI: IConnectorUI) = {
-    openable(connectorUI.source.dataUI) match {
-      case true ⇒
-        val prototypePanel = new FilteredPrototypePanel(connectorUI)
-        if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel) {
-          verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
-        }.peer,
-          "Add prototypeMap filters")).equals(NotifyDescriptor.OK_OPTION)) {
-          connectorUI.filteredPrototypes = prototypePanel.multiPrototypeCombo.content.map {
-            _.comboValue.get
-          }
-          CheckData.checkMole(connectorUI.source.scene)
+    if (connectorUI.source.outputs.isEmpty)
+      StatusBar().warn("No Prototype is defined !")
+    else {
+      val prototypePanel = new FilteredPrototypePanel(connectorUI)
+      if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel) {
+        verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
+      }.peer,
+        "Add prototypeMap filters")).equals(NotifyDescriptor.OK_OPTION)) {
+        connectorUI.filteredPrototypes = prototypePanel.multiPrototypeCombo.content.map {
+          _.comboValue.get
         }
-      case false ⇒ StatusBar().warn("No Prototype is defined !")
+        CheckData.checkMole(connectorUI.source.scene)
+      }
     }
   }
 
@@ -119,9 +119,9 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
   class FilteredPrototypePanel(connector: IConnectorUI) extends PluginPanel("") {
     preferredSize = new Dimension(250, 300)
     val multiPrototypeCombo = new MultiCombo("Filtered Prototypes",
-      connector.availablePrototypes,
+      connector.source.outputs,
       connector.filteredPrototypes.map {
-        fp ⇒ new ComboPanel(connector.availablePrototypes, new ComboData(Some(fp)))
+        fp ⇒ new ComboPanel(connector.source.outputs, new ComboData(Some(fp)))
       },
       CLOSE_IF_EMPTY,
       ADD)

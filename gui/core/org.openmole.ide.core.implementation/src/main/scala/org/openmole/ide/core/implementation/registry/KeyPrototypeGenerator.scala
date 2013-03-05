@@ -17,12 +17,18 @@
 
 package org.openmole.ide.core.implementation.registry
 
+import org.openmole.misc.tools.obj.ClassUtils
 import org.openmole.core.model.data._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxys }
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
+import scala.collection.mutable.WeakHashMap
+import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 
 object KeyPrototypeGenerator {
+
+  private val cacheMap = new WeakHashMap[PrototypeKey, IPrototypeDataProxyUI]
+  cacheMap += (KeyPrototypeGenerator(EmptyDataUIs.emptyPrototypeProxy) -> EmptyDataUIs.emptyPrototypeProxy)
 
   def apply(proxy: IPrototypeDataProxyUI): PrototypeKey =
     new PrototypeKey(proxy.dataUI.name, KeyGenerator.stripArrays(proxy.dataUI.protoType)._1.runtimeClass, proxy.dataUI.dim)
@@ -32,14 +38,34 @@ object KeyPrototypeGenerator {
     new PrototypeKey(proto.name, manifest.runtimeClass, dim)
   }
 
-  def keyPrototypeMapping: Map[PrototypeKey, IPrototypeDataProxyUI] = (Proxys.prototypes.toList :::
-    List(EmptyDataUIs.emptyPrototypeProxy)).map {
-      p ⇒ KeyPrototypeGenerator(p) -> p
-    }.toMap
+  def prototype(key: PrototypeKey): IPrototypeDataProxyUI = {
+    cacheMap.getOrElseUpdate(key, buildUnknownPrototype(key))
+  }
 
-  def isPrototype(p: Prototype[_]) = keyPrototypeMapping.keys.toList.contains(KeyPrototypeGenerator(p))
+  def prototype(proto: Prototype[_]): IPrototypeDataProxyUI =
+    cacheMap.getOrElseUpdate(KeyPrototypeGenerator(proto), buildUnknownPrototype(proto))
 
-  def isPrototype(p: IPrototypeDataProxyUI) = keyPrototypeMapping.keys.toList.contains(KeyPrototypeGenerator(p))
+  def buildUnknownPrototype(k: PrototypeKey): IPrototypeDataProxyUI =
+    buildUnknownPrototype(k.name, k.dim, KeyGenerator.stripArrays(ClassUtils.manifest(k.protoClass))._1)
+
+  def buildUnknownPrototype(p: Prototype[_]): IPrototypeDataProxyUI = {
+    val (_, dim) = KeyGenerator(p)
+    buildUnknownPrototype(p.name, dim, KeyGenerator.stripArrays(p.`type`)._1)
+  }
+
+  def buildUnknownPrototype(name: String, dim: Int, m: Manifest[_]): IPrototypeDataProxyUI = {
+    val proxy = new PrototypeDataProxyUI(GenericPrototypeDataUI(name, dim)(m), generated = true)
+    Proxys.prototypes += proxy
+    proxy
+  }
+
+  def keyPrototypeMapping: Map[PrototypeKey, IPrototypeDataProxyUI] = cacheMap.toMap
+
+  def isPrototype(k: PrototypeKey): Boolean = cacheMap.keys.toList.contains(k)
+
+  def isPrototype(p: Prototype[_]): Boolean = isPrototype(KeyPrototypeGenerator(p))
+
+  def isPrototype(p: IPrototypeDataProxyUI): Boolean = isPrototype(KeyPrototypeGenerator(p))
 }
 
 case class PrototypeKey(val name: String, val protoClass: Class[_], val dim: Int)

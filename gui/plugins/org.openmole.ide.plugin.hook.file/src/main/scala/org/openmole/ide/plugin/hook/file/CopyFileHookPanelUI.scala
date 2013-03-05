@@ -29,8 +29,7 @@ import org.openmole.ide.core.implementation.registry._
 import java.io.File
 import scala.swing.Label
 
-class CopyFileHookPanelUI(taskProxy: ITaskDataProxyUI,
-                          dataUI: CopyFileHookDataUI) extends PluginPanel("wrap") with IHookPanelUI {
+class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends PluginPanel("wrap") with IHookPanelUI {
 
   val multiComboTextField = new MultiComboTextField("",
     comboContent,
@@ -43,9 +42,8 @@ class CopyFileHookPanelUI(taskProxy: ITaskDataProxyUI,
   contents += new Label("<html><b>Files to be dumped</b></html>")
   contents += multiComboTextField.panel
 
-  def comboContent = Proxys.classPrototypes(classOf[File],
-    taskProxy.dataUI.prototypesOut ::: taskProxy.dataUI.implicitPrototypesOut).filter { _.dataUI.dim == 0 }
+  def comboContent = Proxys.classPrototypes(classOf[File]) filter { _.dataUI.dim == 0 }
 
-  def saveContent = new CopyFileHookDataUI(dataUI.activated,
+  def saveContent(name: String) = new CopyFileHookDataUI(name,
     multiComboTextField.content.map { m ⇒ (KeyRegistry.protoProxyKeyMap(KeyPrototypeGenerator(m.comboValue.get)), m.textFieldValue) })
 }

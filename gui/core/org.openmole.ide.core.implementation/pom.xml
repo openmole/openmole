@@ -4,7 +4,7 @@
   <parent>
     <artifactId>core</artifactId>
     <groupId>org.openmole.ide</groupId>
-    <version>0.8-alpha2</version>
+    <version>0.8-alpha3</version>
   </parent>
   <artifactId>org.openmole.ide.core.implementation</artifactId>
   <packaging>bundle</packaging>
@@ -105,7 +105,7 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.equinox</groupId>
+      <groupId>org.eclipse.core</groupId>
       <artifactId>org.eclipse.osgi</artifactId>
     </dependency>
   </dependencies>

@@ -7,7 +7,7 @@
   <parent>
     <artifactId>ui</artifactId>
     <groupId>org.openmole.ui</groupId>
-    <version>0.8-alpha2</version>
+    <version>0.8-alpha3</version>
   </parent>
   <artifactId>org.openmole.ui</artifactId>
   <!-- ************************************************************* -->
@@ -88,13 +88,13 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.equinox</groupId>
+      <groupId>org.eclipse.core</groupId>
       <artifactId>org.eclipse.equinox.app</artifactId>
       <scope>provided</scope>
     </dependency>
     <!-- dependency added in scope provided for forcing exclusion in copy-dependencies taskMap -->
     <dependency>
-      <groupId>org.eclipse.equinox</groupId>
+      <groupId>org.eclipse.core</groupId>
       <artifactId>org.eclipse.osgi</artifactId>
       <scope>provided</scope>
     </dependency>

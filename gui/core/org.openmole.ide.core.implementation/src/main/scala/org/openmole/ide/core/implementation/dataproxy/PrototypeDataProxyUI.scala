@@ -17,7 +17,6 @@
 
 package org.openmole.ide.core.implementation.dataproxy
 
-import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.model.data.IPrototypeDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.misc.tools.Counter

@@ -25,6 +25,7 @@ import org.netbeans.api.visual.widget.LayerWidget
 import org.openmole.ide.core.model.sampling.ISamplingCompositionWidget
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import scala.swing.Panel
+import org.openmole.core.model.mole.IMole
 
 trait IMoleScene {
   def manager: IMoleSceneManager

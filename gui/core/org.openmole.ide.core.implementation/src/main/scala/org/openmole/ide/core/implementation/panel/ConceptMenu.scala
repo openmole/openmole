@@ -47,28 +47,35 @@ object ConceptMenu {
   def addCategoryComponents(rootComponent: IComponentCategory): Menu = {
     val menu = new Menu(rootComponent.name)
     mapping += rootComponent -> menu
-    rootComponent.childs.foreach { cpt ⇒
-      menu.contents += addCategoryComponents(cpt)
+    rootComponent.childs.foreach {
+      cpt ⇒
+        menu.contents += addCategoryComponents(cpt)
     }
     menu
   }
 
   val taskMenu = {
     addCategoryComponents(ComponentCategories.TASK)
-    KeyRegistry.tasks.values.map { f ⇒ new TaskDataProxyFactory(f) }.toList.sortBy(_.factory.toString).foreach { d ⇒
-      mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.toString) {
-        override def apply = display(d.buildDataProxyUI, CREATION)
-      })
+    KeyRegistry.tasks.values.map {
+      f ⇒ new TaskDataProxyFactory(f)
+    }.toList.sortBy(_.factory.toString).foreach {
+      d ⇒
+        mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.toString) {
+          override def apply = display(d.buildDataProxyUI, CREATION)
+        })
     }
     new PopupToolBarPresenter("Task", mapping(ComponentCategories.TASK), new Color(107, 138, 166))
   }
 
   val environmentMenu = {
     addCategoryComponents(ComponentCategories.ENVIRONMENT)
-    KeyRegistry.environments.values.map { f ⇒ new EnvironmentDataProxyFactory(f) }.toList.sortBy(_.factory.toString).foreach { d ⇒
-      mapping(ComponentCategories.ENVIRONMENT).contents += new MenuItem(new Action(d.factory.toString) {
-        override def apply = display(d.buildDataProxyUI, CREATION)
-      })
+    KeyRegistry.environments.values.map {
+      f ⇒ new EnvironmentDataProxyFactory(f)
+    }.toList.sortBy(_.factory.toString).foreach {
+      d ⇒
+        mapping(ComponentCategories.ENVIRONMENT).contents += new MenuItem(new Action(d.factory.toString) {
+          override def apply = display(d.buildDataProxyUI, CREATION)
+        })
     }
     new PopupToolBarPresenter("Environment", mapping(ComponentCategories.ENVIRONMENT), new Color(68, 120, 33))
   }
@@ -87,17 +94,31 @@ object ConceptMenu {
     new PopupToolBarPresenter("Sampling", menu, new Color(255, 85, 85))
   }
 
+  val hookMenu = {
+    addCategoryComponents(ComponentCategories.HOOK)
+    KeyRegistry.hooks.values.map {
+      f ⇒ new HookDataProxyFactory(f)
+    }.toList.sortBy(_.factory.toString).foreach {
+      d ⇒
+        mapping(ComponentCategories.HOOK).contents += new MenuItem(new Action(d.factory.toString) {
+          override def apply = display(d.buildDataProxyUI, CREATION)
+        })
+    }
+    new PopupToolBarPresenter("Hook", mapping(ComponentCategories.HOOK), new Color(168, 120, 33))
+  }
+
   def removeItem(proxy: IDataProxyUI) = {
     proxy match {
       case x: IEnvironmentDataProxyUI ⇒ environmentMenu.remove(menuItemMapping(proxy))
       case x: IPrototypeDataProxyUI ⇒ prototypeMenu.remove(menuItemMapping(proxy))
       case x: ITaskDataProxyUI ⇒ taskMenu.remove(menuItemMapping(proxy))
       case x: ISamplingCompositionDataProxyUI ⇒ samplingMenu.remove(menuItemMapping(proxy))
+      case x: IHookDataProxyUI ⇒ hookMenu.remove(menuItemMapping(proxy))
     }
   }
 
   def menuBar = new MenuBar {
-    contents.append(prototypeMenu, taskMenu, samplingMenu, environmentMenu)
+    contents.append(prototypeMenu, taskMenu, samplingMenu, environmentMenu, hookMenu)
     minimumSize = new Dimension(size.width, 50)
   }
 
@@ -134,7 +155,9 @@ object ConceptMenu {
   }
 
   def clearAllItems = {
-    List(samplingMenu, prototypeMenu, taskMenu, environmentMenu).foreach { _.removeAll }
+    List(samplingMenu, prototypeMenu, taskMenu, environmentMenu, hookMenu).foreach {
+      _.removeAll
+    }
     menuItemMapping.clear
   }
 

@@ -29,6 +29,8 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.implementation.workflow.{ DataChannelUI, TransitionUI, CapsuleUI }
 import org.openmole.core.model.task.ITask
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.core.model.data.Prototype
+import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
 
 object SceneFactory {
 
@@ -67,4 +69,6 @@ object SceneFactory {
     if (scene.manager.registerConnector(new DataChannelUI(s, t, li)))
       scene.createConnectEdge(scene.manager.capsuleID(s), scene.manager.capsuleID(t.capsule))
   }
+
+  def prototype(p: Prototype[_]) = KeyPrototypeGenerator.prototype(p)
 }

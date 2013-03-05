@@ -127,6 +127,7 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
           case x: IPrototypeDataProxyUI ⇒ currentPanel.contents += new PrototypePanel(x, this, mode)
           case x: IEnvironmentDataProxyUI ⇒ currentPanel.contents += new EnvironmentPanel(x, this, mode)
           case x: ISamplingCompositionDataProxyUI ⇒ currentPanel.contents += new SamplingCompositionPanel(x, this, mode)
+          case x: IHookDataProxyUI ⇒ currentPanel.contents += new HookPanel(x, this, mode)
           case _ ⇒
         }
         propertyWidget.setPreferredLocation(new Point(getView.getBounds().x.toInt + 20, 20))
@@ -210,7 +211,9 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   def graphScene = this
 
   def refresh = {
-    validate; repaint
+    manager.refreshCache
+    validate
+    repaint
   }
 
   def createConnectEdge(sourceNodeID: String, targetNodeID: String, slotIndex: Int = 1) = {

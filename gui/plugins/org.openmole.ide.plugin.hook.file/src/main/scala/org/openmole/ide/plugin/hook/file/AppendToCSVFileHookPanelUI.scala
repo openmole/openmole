@@ -22,18 +22,18 @@ import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.misc.widget.CSVChooseFileTextField
 import org.openmole.ide.plugin.hook.tools.MultiPrototypePanelUI
 import scala.swing.Label
+import org.openmole.ide.core.implementation.dataproxy.Proxys
 
-class AppendToCSVFileHookPanelUI(dataUI: AppendToCSVFileHookDataUI,
-                                 taskProxy: ITaskDataProxyUI) extends MultiPrototypePanelUI("",
-  taskProxy,
-  dataUI.prototypes.toList) with IHookPanelUI {
+class AppendToCSVFileHookPanelUI(dataUI: AppendToCSVFileHookDataUI) extends MultiPrototypePanelUI("",
+  dataUI.prototypes.toList,
+  Proxys.prototypes.toList) with IHookPanelUI {
 
   val filePathTextField = new CSVChooseFileTextField(dataUI.fileName)
   contents.insert(0, filePathTextField)
   contents.insert(0, new Label("CSV file path"))
   contents.insert(0, new Label { text = "<html><b>Append prototypes to file</b></html>" })
 
-  def saveContent = new AppendToCSVFileHookDataUI(dataUI.activated,
+  def saveContent(name: String) = new AppendToCSVFileHookDataUI(name,
     multiPrototypeCombo.content.map { _.comboValue.get }.toList,
     filePathTextField.text)
 }

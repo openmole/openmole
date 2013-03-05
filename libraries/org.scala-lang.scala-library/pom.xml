@@ -7,7 +7,7 @@
   <parent>
     <artifactId>libraries</artifactId>
     <groupId>org.openmole</groupId>
-    <version>0.8-alpha2</version>
+    <version>0.8-alpha3</version>
   </parent>
   <!--Used to build the symbolic name of the bundle-->
   <artifactId>org.scala-lang.scala-library</artifactId>

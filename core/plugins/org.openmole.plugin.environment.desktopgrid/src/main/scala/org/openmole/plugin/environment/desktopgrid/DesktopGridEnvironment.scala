@@ -34,13 +34,21 @@ object DesktopGridEnvironment {
   val resultsDirName = "results"
   val tmpResultsDirName = "tmpresults"
   val timeStempSeparator = '@'
+
+  def apply(
+    port: Int,
+    login: String,
+    password: String,
+    openMOLEMemory: Option[Int] = None,
+    threads: Option[Int] = None) =
+    new DesktopGridEnvironment(port, login, password, openMOLEMemory, threads)
 }
 
 class DesktopGridEnvironment(
     val port: Int,
     val login: String, password: String,
-    override val openMOLEMemory: Option[Int] = None,
-    override val threads: Option[Int] = None) extends BatchEnvironment { env ⇒
+    override val openMOLEMemory: Option[Int],
+    override val threads: Option[Int]) extends BatchEnvironment { env ⇒
 
   type SS = VolatileStorageService
   type JS = DesktopGridJobService
