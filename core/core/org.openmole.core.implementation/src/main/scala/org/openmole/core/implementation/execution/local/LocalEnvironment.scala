@@ -41,6 +41,8 @@ object LocalEnvironment extends Environment {
 
   override def submit(job: IJob) = default.submit(job)
 
+  def apply(nbThreads: Int) = new LocalEnvironment(nbThreads)
+
 }
 
 class LocalEnvironment(val nbThreads: Int) extends Environment {

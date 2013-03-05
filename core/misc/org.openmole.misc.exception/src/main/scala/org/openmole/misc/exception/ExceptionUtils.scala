@@ -20,7 +20,7 @@ package org.openmole.misc.exception
 object ExceptionUtils {
   def prettify(e: Throwable) =  {
     s"${e.getClass.getName}: ${e.getMessage}\n ${stack(e.getStackTrace)}\n" +
-      Iterator.iterate(e.getCause)(_.getCause).takeWhile(_ != null).map(e => s"caused by ${e.getClass.getName}: ${e.getMessage}\n${stack(e.getStackTrace)}").mkString("\n")
+      Iterator.iterate(e.getCause)(_.getCause).takeWhile(_ != null).map(e => s"caused by ${e.getClass.getName}: ${e.getMessage}\n${stack(e.getStackTrace)}").mkString("\n") + "\n"
   }
 
   def stack(s: Array[StackTraceElement]) =

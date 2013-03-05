@@ -12,6 +12,7 @@ import org.openmole.core.implementation.validation.DataflowProblem
 import org.openmole.ide.core.model.dataproxy._
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.HashMap
+import org.openmole.core.model.mole.IMole
 
 trait ICapsuleUI {
   override def toString = dataUI.task match {
@@ -48,6 +49,10 @@ trait ICapsuleUI {
   def setSampling(sampling: Option[ISamplingCompositionDataProxyUI])
 
   def addInputSlot(startingCapsule: Boolean): IInputSlotWidget
+
+  def inputs: List[IPrototypeDataProxyUI]
+
+  def outputs: List[IPrototypeDataProxyUI]
 
   def hooked(b: Boolean)
 

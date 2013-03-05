@@ -28,18 +28,22 @@ import org.openmole.core.model.domain._
 
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.implementation.tools.VariableExpansion
+import org.openmole.misc.tools.script.{ GroovyFunction, GroovyProxyPool, GroovyProxy }
 
 object ScalingGAGenomeTask {
 
-  def scaled(scale: List[(Prototype[Double], (String, String))], genome: List[Double], context: Context): List[Variable[Double]] =
+  def scaled(scale: List[(Prototype[Double], (GroovyFunction, GroovyFunction))], genome: List[Double], context: Context): List[Variable[Double]] =
     if (scale.isEmpty || genome.isEmpty) List.empty
     else {
       val (p, (vMin, vMax)) = scale.head
-      val dMin = vMin.interpret[Double](context)
-      val dMax = vMax.interpret[Double](context)
+      val dMin = vMin(context).toString.toDouble
+      val dMax = vMax(context).toString.toDouble
       val scaledV = Variable(p, genome.head.scale(dMin, dMax))
       scaledV :: scaled(scale.tail, genome.tail, context + scaledV)
     }
+
+  def groovyProxies(scale: Iterable[(Prototype[Double], (String, String))]) =
+    scale.map { case (p, (min, max)) ⇒ p -> (GroovyProxyPool(min), GroovyProxyPool(max)) }
 
   def apply[T <: GAGenome](
     name: String,
@@ -60,7 +64,9 @@ sealed abstract class ScalingGAGenomeTask[T <: GAGenome](
     genome: Prototype[T],
     scale: (Prototype[Double], (String, String))*) extends Task {
 
+  @transient lazy val groovyScales = ScalingGAGenomeTask.groovyProxies(scale)
+
   override def process(context: Context) =
-    context ++ ScalingGAGenomeTask.scaled(scale.toList, context(genome).values.toList, context)
+    context ++ ScalingGAGenomeTask.scaled(groovyScales.toList, context(genome).values.toList, context)
 
 }

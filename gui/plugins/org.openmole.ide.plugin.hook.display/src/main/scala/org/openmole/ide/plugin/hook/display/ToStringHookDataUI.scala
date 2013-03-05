@@ -27,7 +27,7 @@ import org.openmole.core.model.mole.ICapsule
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.ide.core.model.control.IExecutionManager
 
-class ToStringHookDataUI(var activated: Boolean = true,
+class ToStringHookDataUI(val name: String = "",
                          val toBeHooked: List[IPrototypeDataProxyUI] = List.empty,
                          val id: Int = Counter.id.getAndIncrement) extends IHookDataUI {
 
@@ -38,5 +38,5 @@ class ToStringHookDataUI(var activated: Boolean = true,
       toBeHooked.map { executionManager.prototypeMapping }.toSeq: _*))
   }
 
-  def buildPanelUI(task: ITaskDataProxyUI) = new ToStringHookPanelUI(this, task)
+  def buildPanelUI = new ToStringHookPanelUI(this)
 }

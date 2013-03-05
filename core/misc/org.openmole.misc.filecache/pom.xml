@@ -4,7 +4,7 @@
   <parent>
     <artifactId>misc</artifactId>
     <groupId>org.openmole.core</groupId>
-    <version>0.8-alpha2</version>
+    <version>0.8-alpha3</version>
   </parent>
   <artifactId>org.openmole.misc.filecache</artifactId>
   <!-- ************************************************************* -->
@@ -18,7 +18,7 @@
   <description></description>
   <dependencies>
     <dependency>
-      <groupId>org.eclipse.equinox</groupId>
+      <groupId>org.eclipse.core</groupId>
       <artifactId>org.eclipse.osgi</artifactId>
     </dependency>
     <dependency>

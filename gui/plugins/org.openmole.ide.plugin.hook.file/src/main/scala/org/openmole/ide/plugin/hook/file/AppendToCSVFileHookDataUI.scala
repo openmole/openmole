@@ -27,12 +27,12 @@ import org.openmole.ide.misc.tools.Counter
 import org.openmole.plugin.hook.file._
 import org.openmole.ide.core.implementation.registry._
 
-class AppendToCSVFileHookDataUI(var activated: Boolean = true,
+class AppendToCSVFileHookDataUI(val name: String = "",
                                 val prototypes: Iterable[IPrototypeDataProxyUI] = List.empty,
                                 val fileName: String = "",
                                 val id: Int = Counter.id.getAndIncrement) extends IHookDataUI {
 
-  def buildPanelUI(task: ITaskDataProxyUI) = new AppendToCSVFileHookPanelUI(this, task)
+  def buildPanelUI = new AppendToCSVFileHookPanelUI(this)
 
   def coreClass = classOf[AppendToCSVFileHook]
 

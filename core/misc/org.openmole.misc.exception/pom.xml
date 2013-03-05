@@ -7,7 +7,7 @@
   <parent>
     <artifactId>misc</artifactId>
     <groupId>org.openmole.core</groupId>
-    <version>0.8-alpha2</version>
+    <version>0.8-alpha3</version>
   </parent>
   <artifactId>org.openmole.misc.exception</artifactId>
   <!-- ************************************************************* -->

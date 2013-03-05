@@ -22,6 +22,7 @@ import org.openmole.ide.core.model.data.IMoleDataUI
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.core.model.mole.{ ICapsule, IMole }
 
 trait IMoleSceneManager {
   override def toString = name
@@ -31,6 +32,12 @@ trait IMoleSceneManager {
   def name: String
 
   def name_=(n: String)
+
+  def cacheMole: Option[(IMole, Map[ICapsuleUI, ICapsule])]
+
+  def cacheMole_=(m: Option[(IMole, Map[ICapsuleUI, ICapsule])])
+
+  def refreshCache: Unit
 
   def dataUI: IMoleDataUI
 

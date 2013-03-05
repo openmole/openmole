@@ -19,6 +19,7 @@ package org.openmole.ide.core.model.data
 
 import org.openmole.core.model.task.PluginSet
 import java.io.File
+import org.openmole.core.model.mole.IMole
 
 trait IMoleDataUI extends IDataUI {
 

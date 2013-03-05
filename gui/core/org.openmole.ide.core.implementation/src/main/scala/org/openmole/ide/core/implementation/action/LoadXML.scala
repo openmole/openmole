@@ -35,7 +35,7 @@ object LoadXML {
     if (fc.showDialog(new Label, "OK") == Approve) text = fc.selectedFile.getPath
     if (new File(text).isFile) {
       Settings.currentProject = Some(text)
-      (new GUISerializer(text)).unserialize
+      (new GUISerializer).unserialize(text)
     }
     text
   }

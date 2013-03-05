@@ -27,6 +27,7 @@ import org.openmole.core.model.data.Context
 import org.openmole.core.model.data.Variable
 import scala.math.BigDecimal
 import scala.util.control.Breaks._
+import util.Try
 
 object VariableExpansion {
 
@@ -47,9 +48,9 @@ object VariableExpansion {
     apply(context, Iterable.empty, s)
 
   def apply(context: Context, tmpVariable: Iterable[Variable[_]], s: String): String =
-    expandDataInernal(context, tmpVariable, s)
+    expandDataInternal(context, tmpVariable, s)
 
-  private def expandDataInernal(context: Context, tmpVariable: Iterable[Variable[_]], s: String): String = {
+  private def expandDataInternal(context: Context, tmpVariable: Iterable[Variable[_]], s: String): String = {
     var ret = s
     val allVariables = context ++ tmpVariable
     var cur = 0
@@ -120,12 +121,15 @@ object VariableExpansion {
   }
 
   protected def expandOneData(allVariables: Context, variableExpression: String): String = {
-    allVariables.variable(variableExpression) match {
-      case Some(variable) ⇒ variable.value.toString
-      case None ⇒
-        val shell = new GroovyProxy(variableExpression, Iterable.empty) with GroovyContextAdapter
-        shell.execute(allVariables).toString
-    }
+    allVariables.variable(variableExpression).map((_: Variable[Any]).value) orElse
+      Try(variableExpression.toDouble).toOption orElse
+      Try(variableExpression.toLong).toOption orElse
+      Try(variableExpression.toLowerCase.toBoolean).toOption match {
+        case Some(value) ⇒ value.toString
+        case None ⇒
+          val shell = new GroovyProxy(variableExpression, Iterable.empty) with GroovyContextAdapter
+          shell.execute(allVariables).toString
+      }
   }
 
   def expandBufferData(context: Context, is: InputStream, os: OutputStream) = {

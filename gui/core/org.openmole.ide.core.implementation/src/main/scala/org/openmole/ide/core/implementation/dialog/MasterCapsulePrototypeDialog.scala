@@ -39,7 +39,7 @@ object MasterCapsulePrototypeDialog extends PrototypeDialog {
   def display(capsuleUI: ICapsuleUI) = {
     capsuleUI.dataUI.capsuleType match {
       case x: MasterCapsuleType ⇒
-        openable(capsuleUI.dataUI) match {
+        openable(capsuleUI) match {
           case true ⇒
             val prototypePanel = new MasterCapsulePrototypeDialog(capsuleUI, capsuleUI.dataUI.task.get)
             if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel) {
@@ -58,8 +58,8 @@ object MasterCapsulePrototypeDialog extends PrototypeDialog {
                                      task: ITaskDataProxyUI) extends PluginPanel("") {
     preferredSize = new Dimension(250, 300)
     val multiPrototypeCombo = new MultiCombo("Persistent Prototypes",
-      task.dataUI.prototypesOut,
-      capsuleUI.dataUI.capsuleType.persistList.map { p ⇒ new ComboPanel(task.dataUI.prototypesOut, new ComboData(Some(p))) },
+      task.dataUI.outputs,
+      capsuleUI.dataUI.capsuleType.persistList.map { p ⇒ new ComboPanel(task.dataUI.outputs, new ComboData(Some(p))) },
       CLOSE_IF_EMPTY,
       ADD)
     // if (connector.filteredPrototypes.isEmpty) multiPrototypeCombo.removeAllRows

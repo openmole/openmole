@@ -112,6 +112,7 @@ class GUIPanel extends MainFrame {
     contents += ConceptMenu.taskMenu
     contents += ConceptMenu.samplingMenu
     contents += ConceptMenu.environmentMenu
+    contents += ConceptMenu.hookMenu
   }).peer, BorderLayout.NORTH)
 
   val splitPane =

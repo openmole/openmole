@@ -23,7 +23,7 @@ import collection.mutable.ListBuffer
 
 object Factory {
 
-  trait Poolable {
+  trait XStreamPool {
     def clean
     def xStreams: Iterable[XStream]
   }
@@ -35,21 +35,21 @@ import Factory._
 trait Factory {
 
   private val pool = new mutable.Stack[T]
-  private val _instanciated = ListBuffer.empty[T]
+  private val _instantiated = ListBuffer.empty[T]
 
-  type T <: Poolable
+  type T <: XStreamPool
 
   def make: T
 
   def initialize(t: T): T = t
 
-  def instantiated = synchronized(_instanciated.toList)
+  def instantiated = synchronized(_instantiated.toList)
 
   def borrow: T = synchronized {
     if (!pool.isEmpty) pool.pop
     else {
       val t = initialize(make)
-      _instanciated += t
+      _instantiated += t
       t
     }
   }

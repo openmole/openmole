@@ -40,7 +40,7 @@ object Filter {
 object Block {
 
   def apply[T](ts: T*) = new Block[T] {
-    @transient lazy val filtered = ts.toSet
+    val filtered = ts.toSet
   }
 
 }
@@ -48,7 +48,7 @@ object Block {
 object Keep {
 
   def apply[T](ts: T*) = new Keep[T] {
-    @transient lazy val kept = ts.toSet
+    val kept = ts.toSet
   }
 
 }

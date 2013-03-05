@@ -28,7 +28,7 @@ import org.openmole.core.serializer.structure.FileInfo
 import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
 
-class SerializerWithPathHashInjection extends Factory.Poolable {
+class SerializerWithPathHashInjection extends Factory.XStreamPool {
 
   val xStream = new XStream
   val reflectionConverter = new ReflectionConverter(xStream.getMapper, xStream.getReflectionProvider)

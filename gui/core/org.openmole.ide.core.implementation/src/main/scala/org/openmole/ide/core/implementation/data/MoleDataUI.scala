@@ -19,6 +19,7 @@ package org.openmole.ide.core.implementation.data
 
 import org.openmole.ide.core.implementation.panel.MolePanelUI
 import org.openmole.ide.core.model.data.IMoleDataUI
+import org.openmole.ide.core.implementation.builder.MoleFactory
 
 class MoleDataUI(val plugins: List[String] = List.empty) extends IMoleDataUI {
 

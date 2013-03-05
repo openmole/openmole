@@ -27,7 +27,7 @@ trait IPanelUI {
   def peer: JPanel
 
   val tabbedPane = new TabbedPane {
-    tabPlacement(Alignment.Left)
+    tabPlacement = Alignment.Left
     opaque = true
     background = new Color(77, 77, 77)
   }

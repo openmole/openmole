@@ -26,22 +26,12 @@ trait IConnectorUI extends IConnectorViewUI {
 
   def target: IInputSlotWidget
 
-  override def nbPrototypes: Int = {
-    val availables = availablePrototypes
-    availables.size - filteredPrototypes.filter { p ⇒ availables.contains(p) }.size
+  override def preview: String = {
+    val availables = source.outputs
+    (availables.size - filteredPrototypes.filter { p ⇒ availables.contains(p) }.size).toString
   }
-
-  def availablePrototypes: List[IPrototypeDataProxyUI] =
-    source.dataUI.task match {
-      case Some(x: ITaskDataProxyUI) ⇒
-        x.dataUI.prototypesOut ++
-          x.dataUI.implicitPrototypesOut
-      case None ⇒ List.empty
-    }
 
   def filteredPrototypes: List[IPrototypeDataProxyUI]
 
   def filteredPrototypes_=(li: List[IPrototypeDataProxyUI])
-
-  var preview = nbPrototypes.toString
 }

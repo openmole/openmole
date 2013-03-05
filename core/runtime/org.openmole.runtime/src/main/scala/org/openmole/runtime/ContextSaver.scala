@@ -23,21 +23,22 @@ import org.openmole.core.model.job._
 import org.openmole.core.model.tools._
 import org.openmole.core.model.job.State._
 import scala.collection.immutable.TreeMap
+import util.{ Failure, Success, Try }
 
 class ContextSaver(val nbJobs: Int) {
 
   val allFinished = new Semaphore(0)
 
   var nbFinished = 0
-  var _results = new TreeMap[MoleJobId, (Either[Context, Throwable], Seq[ITimeStamp[State]])]
+  var _results = new TreeMap[MoleJobId, (Try[Context], Seq[ITimeStamp[State]])]
   def results = _results
 
   def save(job: IMoleJob, oldState: State, newState: State) = synchronized {
     newState match {
       case COMPLETED | FAILED ⇒
         job.exception match {
-          case None ⇒ _results += job.id -> (Left(job.context), job.timeStamps)
-          case Some(t) ⇒ _results += job.id -> (Right(t), job.timeStamps)
+          case None ⇒ _results += job.id -> (Success(job.context), job.timeStamps)
+          case Some(t) ⇒ _results += job.id -> (Failure(t), job.timeStamps)
         }
       case _ ⇒
     }

@@ -37,6 +37,7 @@ import org.openmole.core.batch.storage._
 import org.openmole.core.batch.environment.BatchEnvironment.JobManagmentThreads
 
 import scala.concurrent.duration._
+import org.openmole.misc.exception.UserBadDataError
 
 object JobManager extends Logger
 
@@ -105,6 +106,7 @@ akka {
 
     case Error(job, exception) ⇒
       val level = exception match {
+        case e: UserBadDataError ⇒ SEVERE
         case e: JobRemoteExecutionException ⇒ WARNING
         case _ ⇒ FINE
       }
@@ -113,7 +115,7 @@ akka {
 
     case MoleJobError(mj, j, e) ⇒
       EventDispatcher.trigger(environment: Environment, new Environment.MoleJobExceptionRaised(j, e, WARNING, mj))
-      logger.log(WARNING, "Error durring job execution, it will be resubmitted.", e)
+      logger.log(WARNING, "Error during job execution, it will be resubmitted.", e)
 
   }
 }

@@ -7,7 +7,7 @@
   <parent>
     <artifactId>ui</artifactId>
     <groupId>org.openmole.ui</groupId>
-    <version>0.8-alpha2</version>
+    <version>0.8-alpha3</version>
   </parent>
   <artifactId>plugins</artifactId>
   <!-- ************************************************************* -->
@@ -215,6 +215,12 @@
     <dependency>
       <groupId>org.openmole.core</groupId>
       <artifactId>org.openmole.plugin.hook.display</artifactId>
+      <version>${project.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openmole.core</groupId>
+      <artifactId>org.openmole.plugin.source.csv</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>

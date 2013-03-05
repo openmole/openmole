@@ -26,7 +26,7 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import org.apache.commons.configuration._
 import org.apache.commons.configuration.reloading._
-import org.jasypt.util.text.BasicTextEncryptor
+import org.jasypt.util.text._
 import org.openmole.misc.tools.service.Random
 import org.openmole.misc.tools.service.Random._
 import scala.collection.mutable.HashMap
@@ -122,7 +122,7 @@ object Workspace {
 
   def passwordIsCorrect(password: String) = instance.passwordIsCorrect(password)
 
-  def passwordChoosen = instance.passwordChoosen
+  def passwordChosen = instance.passwordChosen
 
   def preferenceAsDuration(location: ConfigurationLocation) = instance.preferenceAsDuration(location)
 
@@ -135,11 +135,16 @@ object Workspace {
   def rng = instance.rng
 
   def newSeed = instance.newSeed
+
+  object NoneTextEncryptor extends TextEncryptor {
+    def decrypt(encryptedMessage: String) = encryptedMessage
+    def encrypt(message: String) = message
+  }
 }
 
 class Workspace(val location: File) {
 
-  import Workspace.{ persitentLocation, pluginLocation, fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, tmpLocation, preferences, configurations, sessionUUID, uniqueID }
+  import Workspace.{ NoneTextEncryptor, persitentLocation, pluginLocation, fixedPrefix, fixedPostfix, fixedDir, passwordTest, passwordTestString, tmpLocation, preferences, configurations, sessionUUID, uniqueID }
 
   location.mkdirs
 
@@ -159,9 +164,11 @@ class Workspace(val location: File) {
   private def textEncryptor(password: Option[String]) = {
     password match {
       case Some(password) ⇒
-        val textEncryptor = new BasicTextEncryptor
-        textEncryptor.setPassword(password)
-        textEncryptor
+        if (!password.trim.isEmpty) {
+          val textEncryptor = new BasicTextEncryptor
+          textEncryptor.setPassword(password)
+          textEncryptor
+        } else NoneTextEncryptor
       case None ⇒ throw new UserBadDataError("Password is not set.")
     }
   }
@@ -184,7 +191,7 @@ class Workspace(val location: File) {
 
   def newDir(prefix: String): File = {
     val tempFile = newFile(prefix, "")
-    if (!tempFile.mkdir) throw new IOException
+    if (!tempFile.mkdirs) throw new IOException("Cannot create directory " + tempFile)
     tempFile
   }
 
@@ -300,7 +307,7 @@ class Workspace(val location: File) {
     }
   }
 
-  def passwordChoosen = isPreferenceSet(passwordTest)
+  def passwordChosen = isPreferenceSet(passwordTest)
 
   def preferenceAsDuration(location: ConfigurationLocation) = new DurationStringDecorator(preference(location))
 

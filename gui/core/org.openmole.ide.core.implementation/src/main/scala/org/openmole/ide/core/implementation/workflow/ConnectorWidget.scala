@@ -77,7 +77,7 @@ class ConnectorWidget(val scene: IMoleScene,
   def buildPrototypeFilterWidget = {
     new PrototypeOnConnectorWidget(scene.graphScene,
       connector,
-      new LinkLabel(connector.nbPrototypes.toString,
+      new LinkLabel(connector.preview.toString,
         new Action("") { def apply = editPrototypeFilter }, 10))
   }
 

@@ -27,18 +27,12 @@ import org.netbeans.api.visual.widget.ComponentWidget
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.model.workflow.{ ICapsuleUI, IMoleScene }
 import org.openmole.ide.misc.widget.LinkLabel
 import scala.swing.Action
 import scala.swing.Label
 
 object PrototypeWidget {
-  def nbProtoIn(taskproxy: ITaskDataProxyUI) =
-    (taskproxy.dataUI.prototypesIn.size + taskproxy.dataUI.implicitPrototypesIn.size).toString
-
-  def nbProtoOut(taskproxy: ITaskDataProxyUI) =
-    (taskproxy.dataUI.prototypesOut.size + taskproxy.dataUI.implicitPrototypesOut.size).toString
-
   def green(scene: IMoleScene) = scene match {
     case y: BuildMoleScene ⇒ new Color(180, 200, 7, 220)
     case _ ⇒ new Color(44, 137, 160, 64)
@@ -46,21 +40,40 @@ object PrototypeWidget {
 
   val red = new Color(212, 0, 0)
 
-  def buildInput(scene: IMoleScene, taskproxy: ITaskDataProxyUI) = {
-    new PrototypeWidget(scene, x ⇒ nbProtoIn(taskproxy),
-      new LinkLabel(nbProtoIn(taskproxy), new Action("") {
+  def buildEmptySource(scene: IMoleScene) = {
+    new PrototypeWidget(scene, x ⇒ "0",
+      new LinkLabel("0", new Action("") {
         def apply =
-          scene.displayPropertyPanel(taskproxy, IO)
+          println("nada")
       })) {
       setPreferredLocation(new Point(19, TASK_CONTAINER_HEIGHT / 2))
     }
   }
 
-  def buildOutput(scene: IMoleScene, taskproxy: ITaskDataProxyUI) = {
-    new PrototypeWidget(scene, x ⇒ nbProtoOut(taskproxy),
-      new LinkLabel(nbProtoOut(taskproxy), new Action("") {
+  def buildEmptyHook(scene: IMoleScene) = {
+    new PrototypeWidget(scene, x ⇒ "0",
+      new LinkLabel("0", new Action("") {
         def apply =
-          scene.displayPropertyPanel(taskproxy, IO)
+          println("nada")
+      })) {
+      setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 30, TASK_CONTAINER_HEIGHT / 2))
+    }
+  }
+
+  def buildInput(scene: IMoleScene, capsule: ICapsuleUI) = {
+
+    new PrototypeWidget(scene, x ⇒ capsule.inputs.size.toString,
+      new LinkLabel(capsule.inputs.size.toString, new Action("") {
+        def apply = println("display capsule execution panel center on sources")
+      })) {
+      setPreferredLocation(new Point(19, TASK_CONTAINER_HEIGHT / 2))
+    }
+  }
+
+  def buildOutput(scene: IMoleScene, capsule: ICapsuleUI) = {
+    new PrototypeWidget(scene, x ⇒ capsule.outputs.size.toString,
+      new LinkLabel(capsule.outputs.size.toString, new Action("") {
+        def apply = println("display capsule execution panel center on hooks")
       })) {
       setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 30, TASK_CONTAINER_HEIGHT / 2))
     }
@@ -91,7 +104,7 @@ class PrototypeWidget(scene: IMoleScene,
     revalidate
   }
 
-  override def paintChildren = link.text = f.apply()
+  override def paintChildren = link.text = f()
 
   override def paintBackground = {
     val g = scene.graphScene.getGraphics

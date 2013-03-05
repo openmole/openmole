@@ -20,7 +20,7 @@ package org.openmole.plugin.environment
 import org.openmole.core.implementation.tools._
 
 package object glite {
-  lazy val complexsystems = new GliteEnvironment("vo.complex-systems.eu")()
-  lazy val biomed = new GliteEnvironment("biomed")()
-  lazy val francegrilles = new GliteEnvironment("vo.france-grilles.fr")()
+  lazy val complexsystems = GliteEnvironment("vo.complex-systems.eu")()
+  lazy val biomed = GliteEnvironment("biomed")()
+  lazy val francegrilles = GliteEnvironment("vo.france-grilles.fr")()
 }
