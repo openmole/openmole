@@ -38,4 +38,6 @@ object ComponentCategories {
   val SAMPLING = new ComponentCategory("New")
 
   val HOOK = new ComponentCategory("New")
+
+  val SOURCE = new ComponentCategory("New")
 }

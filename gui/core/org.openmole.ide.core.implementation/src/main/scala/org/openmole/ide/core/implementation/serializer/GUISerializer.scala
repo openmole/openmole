@@ -74,6 +74,10 @@ class GUISerializer {
     xstream.getReflectionProvider,
     this,
     new SerializerState)
+  val sourceConverter = new SourceConverter(xstream.getMapper,
+    xstream.getReflectionProvider,
+    this,
+    new SerializerState)
 
   xstream.registerConverter(new MoleSceneConverter(this))
   xstream.registerConverter(taskConverter)
@@ -81,6 +85,7 @@ class GUISerializer {
   xstream.registerConverter(samplingConverter)
   xstream.registerConverter(environmentConverter)
   xstream.registerConverter(hookConverter)
+  xstream.registerConverter(sourceConverter)
 
   xstream.alias("molescene", classOf[MoleScene])
   xstream.alias("taskMap", classOf[ITaskDataProxyUI])
@@ -88,6 +93,7 @@ class GUISerializer {
   xstream.alias("prototype", classOf[IPrototypeDataProxyUI])
   xstream.alias("environment", classOf[IEnvironmentDataProxyUI])
   xstream.alias("hook", classOf[IHookDataProxyUI])
+  xstream.alias("source", classOf[ISourceDataProxyUI])
 
   def serializeConcept(concept: String,
                        set: List[(_, Int)]) = {
@@ -109,7 +115,8 @@ class GUISerializer {
       serializeConcept("environment", Proxys.environments.map { s ⇒ s -> s.id }.toList)
       serializeConcept("sampling", Proxys.samplings.map { s ⇒ s -> s.id }.toList)
       serializeConcept("hook", Proxys.hooks.map { s ⇒ s -> s.id }.toList)
-      serializeConcept("taskMap", Proxys.tasks.map { s ⇒ s -> s.id }.toList)
+      serializeConcept("source", Proxys.sources.map { s ⇒ s -> s.id }.toList)
+      serializeConcept("task", Proxys.tasks.map { s ⇒ s -> s.id }.toList)
       serializeConcept("mole", ScenesManager.moleScenes.map { ms ⇒ ms -> ms.manager.id }.toList)
       val os = new TarOutputStream(new FileOutputStream(fromFile))
       try os.createDirArchiveWithRelativePathNoVariableContent(tmpDir)
@@ -159,7 +166,8 @@ class GUISerializer {
     unserializeProxy("sampling")
     unserializeProxy("environment")
     unserializeProxy("hook")
-    unserializeProxy("taskMap")
+    unserializeProxy("source")
+    unserializeProxy("task")
     unserializeProxy("mole")
   }
 }

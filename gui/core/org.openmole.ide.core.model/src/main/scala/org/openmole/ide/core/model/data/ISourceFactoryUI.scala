@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2013 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,19 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.ide.core.model.data
 
-package org.openmole.ide.plugin.hook.file
+import org.openmole.ide.core.model.factory.IFactoryUI
+import org.openmole.core.model.mole.ISource
 
-import org.openmole.ide.core.model.control.IExecutionManager
-import org.openmole.ide.core.model.factory.IHookFactoryUI
-import org.openmole.plugin.hook.file._
+trait ISourceFactoryUI extends IFactoryUI {
+  override def toString: String = ""
 
-class AppendToCSVFileHookFactoryUI extends IHookFactoryUI {
+  def buildDataUI: ISourceDataUI
 
-  def buildDataUI = new AppendToCSVFileHookDataUI
-
-  def coreClass = classOf[AppendToCSVFileHook]
-
-  override def toString = "Append Prototype to file"
-
+  def coreClass: Class[_ <: ISource]
 }

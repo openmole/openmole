@@ -40,7 +40,7 @@ class ExecutionExceptionListener(exeManager: ExecutionManager) extends EventList
         exeManager.executionJobExceptionTextArea.append(e.level + ": Exception managing job " + e.moleJob)
         exeManager.executionJobExceptionTextArea.append(ExceptionUtils.prettify(e.exception))
       case h: HookExceptionRaised ⇒
-        exeManager.executionJobExceptionTextArea.append(h.level + ": Exception in hook " + h.hook)
+        exeManager.executionJobExceptionTextArea.append(h.level + ": Exception in misc " + h.hook)
         exeManager.executionJobExceptionTextArea.append(ExceptionUtils.prettify(h.exception))
       case s: SourceExceptionRaised ⇒
         exeManager.executionJobExceptionTextArea.append(s.level + ": Exception in source " + s.source)

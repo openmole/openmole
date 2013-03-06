@@ -128,6 +128,7 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
           case x: IEnvironmentDataProxyUI ⇒ currentPanel.contents += new EnvironmentPanel(x, this, mode)
           case x: ISamplingCompositionDataProxyUI ⇒ currentPanel.contents += new SamplingCompositionPanel(x, this, mode)
           case x: IHookDataProxyUI ⇒ currentPanel.contents += new HookPanel(x, this, mode)
+          case x: ISourceDataProxyUI ⇒ currentPanel.contents += new SourcePanel(x, this, mode)
           case _ ⇒
         }
         propertyWidget.setPreferredLocation(new Point(getView.getBounds().x.toInt + 20, 20))

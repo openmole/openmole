@@ -57,7 +57,7 @@ class HookConverter(mapper: Mapper,
       existingHook match {
         case Some(y: IHookDataProxyUI) ⇒ y
         case _ ⇒
-          serializer.unserializeProxy("hook")
+          serializer.unserializeProxy("misc")
           unmarshal(reader, uc)
       }
     } else {

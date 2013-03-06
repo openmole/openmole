@@ -98,7 +98,7 @@ object DataflowProblem {
     hook: IHook,
     input: Data[_]) extends HookProblem {
 
-    override def toString = s"Input $input is missing for hook $hook"
+    override def toString = s"Input $input is missing for misc $hook"
   }
   case class WrongHookType(
     capsule: ICapsule,
@@ -115,7 +115,7 @@ object DataflowProblem {
     hook: IHook,
     data: Data[_]) extends HookProblem {
 
-    override def toString = s"Input $data is provided by an optional output for hook $hook of capsule $capsule and no default value (parameter) is provided."
+    override def toString = s"Input $data is provided by an optional output for misc $hook of capsule $capsule and no default value (parameter) is provided."
   }
 
 

@@ -36,7 +36,7 @@ import scala.io.Source
 @RunWith(classOf[JUnitRunner])
 class CopyFileHookSpec extends FlatSpec with ShouldMatchers {
 
-  "A copy file hook" should "copy a file after the execution of a capsule" in {
+  "A copy file misc" should "copy a file after the execution of a capsule" in {
     val f = File.createTempFile("test", ".tmp")
 
     val fw = new FileWriter(f)

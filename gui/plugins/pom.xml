@@ -34,9 +34,10 @@
     <module>org.openmole.ide.plugin.environment.ssh</module>
     <module>org.openmole.ide.plugin.groupingstrategy</module>
     <module>org.openmole.ide.plugin.method.sensitivity</module>
-    <module>org.openmole.ide.plugin.hook.tools</module>
+    <module>org.openmole.ide.plugin.misc.tools</module>
     <module>org.openmole.ide.plugin.hook.display</module>
     <module>org.openmole.ide.plugin.hook.file</module>
+    <module>org.openmole.ide.plugin.source.csv</module>
     <module>org.openmole.ide.plugin.builder.base</module>
   </modules>
   <properties>

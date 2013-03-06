@@ -29,13 +29,14 @@ import org.openmole.ide.misc.tools.image.Images._
 
 class PopupToolBarPresenter(t: String,
                             basemenu: MenuItem,
-                            color: Color) extends Button(t) {
+                            bgColor: Color,
+                            fgColor: Color = Color.WHITE) extends Button(t) {
   val popup = new PopupMenu { contents += basemenu }
 
   icon = ARROW
   // background = new Color(204, 204, 204, 128)
-  background = color
-  foreground = Color.WHITE
+  background = bgColor
+  foreground = fgColor
   listenTo(mouse.clicks)
   reactions += {
     case x: ButtonClicked ⇒ popup.show(this, 0, size.height)

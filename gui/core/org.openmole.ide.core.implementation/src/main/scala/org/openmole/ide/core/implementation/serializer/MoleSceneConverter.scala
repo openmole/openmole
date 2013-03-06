@@ -118,11 +118,11 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
       }
 
       //IHook
-      view.dataUI.hooks.values.foreach { hf ⇒
-        writer.startNode("hook")
+      /* view.dataUI.hooks.values.foreach { hf ⇒
+        writer.startNode("misc")
         writer.addAttribute("id", hf.id.toString)
         writer.endNode
-      }
+      } */
 
       writer.endNode
     })
@@ -206,7 +206,7 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
                   case Some(e: IEnvironmentDataProxyUI) ⇒ caps.setEnvironment(Some(e))
                   case None ⇒ errors += "An error occured when loading the Environment for a capsule. No Environment has been set."
                 }
-              case "hook" ⇒
+              case "misc" ⇒
                 Proxys.hooks.filter(e ⇒ e.id == reader.getAttribute("id").toInt).headOption match {
                   case Some(h: IHookDataProxyUI) ⇒
                   //caps.setHook(Some(h))

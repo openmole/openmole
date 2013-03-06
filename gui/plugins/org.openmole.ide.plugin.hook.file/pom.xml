@@ -18,11 +18,6 @@
     </dependency>
     <dependency>
       <groupId>org.openmole.core</groupId>
-      <artifactId>org.openmole.core.implementation</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openmole.core</groupId>
       <artifactId>org.openmole.plugin.hook.file</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -33,7 +28,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>org.openmole.ide.plugin.hook.tools</artifactId>
+      <artifactId>org.openmole.ide.plugin.misc.tools</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>

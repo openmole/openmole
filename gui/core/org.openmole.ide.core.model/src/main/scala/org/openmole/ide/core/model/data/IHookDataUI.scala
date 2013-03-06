@@ -25,7 +25,6 @@ import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.core.model.data.Prototype
 
 trait IHookDataUI extends IDataUI with InputPrototype with OutputPrototype with ImplicitPrototype {
-  def id: Int
 
   override def toString: String = name
 
