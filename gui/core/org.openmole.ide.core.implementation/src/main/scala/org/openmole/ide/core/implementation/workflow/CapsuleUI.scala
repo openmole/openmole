@@ -302,14 +302,18 @@ class CapsuleUI(val scene: IMoleScene,
   }
 
   def inputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule]): List[IPrototypeDataProxyUI] =
-    cMap(this).inputs(mole, Sources.empty, Hooks.empty).toList.map {
-      ds ⇒ SceneFactory.prototype(ds.prototype)
-    }
+    if (cMap.contains(this)) {
+      cMap(this).inputs(mole, Sources.empty, Hooks.empty).toList.map {
+        ds ⇒ SceneFactory.prototype(ds.prototype)
+      }
+    } else List()
 
   def outputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule]): List[IPrototypeDataProxyUI] =
-    cMap(this).outputs(mole, Sources.empty, Hooks.empty).toList.map {
-      ds ⇒ SceneFactory.prototype(ds.prototype)
-    }
+    if (cMap.contains(this)) {
+      cMap(this).outputs(mole, Sources.empty, Hooks.empty).toList.map {
+        ds ⇒ SceneFactory.prototype(ds.prototype)
+      }
+    } else List()
 
   def inputs: List[IPrototypeDataProxyUI] = scene.manager.cacheMole match {
     case Some((m: IMole, cMap: Map[ICapsuleUI, ICapsule])) ⇒ inputs(m, cMap)
