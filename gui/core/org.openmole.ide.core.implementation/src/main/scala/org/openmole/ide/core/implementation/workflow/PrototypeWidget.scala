@@ -38,59 +38,36 @@ object PrototypeWidget {
     case _ ⇒ new Color(44, 137, 160, 64)
   }
 
+  val grey = new Color(180, 180, 180)
+
   val red = new Color(212, 0, 0)
 
-  def buildEmptySource(scene: IMoleScene) = {
-    new PrototypeWidget(scene, x ⇒ "0",
-      new LinkLabel("0", new Action("") {
-        def apply =
-          println("nada")
-      })) {
-      setPreferredLocation(new Point(19, TASK_CONTAINER_HEIGHT / 2))
-    }
-  }
+  def buildEmptySource(scene: IMoleScene, capsule: ICapsuleUI) = buildPrototype(scene, x ⇒ capsule.inputs.size.toString, new Action("") { def apply = println("empty s") }, new Point(19, TASK_CONTAINER_HEIGHT / 2), grey)
 
-  def buildEmptyHook(scene: IMoleScene) = {
-    new PrototypeWidget(scene, x ⇒ "0",
-      new LinkLabel("0", new Action("") {
-        def apply =
-          println("nada")
-      })) {
-      setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 30, TASK_CONTAINER_HEIGHT / 2))
-    }
-  }
+  def buildEmptyHook(scene: IMoleScene, capsule: ICapsuleUI) = buildPrototype(scene, x ⇒ capsule.inputs.size.toString, new Action("") { def apply = println("empty h") }, new Point(TASK_CONTAINER_WIDTH - 30, TASK_CONTAINER_HEIGHT / 2), grey)
 
-  def buildInput(scene: IMoleScene, capsule: ICapsuleUI) = {
+  def buildInput(scene: IMoleScene, capsule: ICapsuleUI) = buildPrototype(scene, x ⇒ capsule.inputs.size.toString, new Action("") { def apply = println("input") }, new Point(19, TASK_CONTAINER_HEIGHT / 2), green(scene))
 
-    new PrototypeWidget(scene, x ⇒ capsule.inputs.size.toString,
-      new LinkLabel(capsule.inputs.size.toString, new Action("") {
-        def apply = println("display capsule execution panel center on sources")
-      })) {
-      setPreferredLocation(new Point(19, TASK_CONTAINER_HEIGHT / 2))
-    }
-  }
+  def buildOutput(scene: IMoleScene, capsule: ICapsuleUI) = buildPrototype(scene, x ⇒ capsule.outputs.size.toString, new Action("") { def apply = println("input") }, new Point(TASK_CONTAINER_WIDTH - 30, TASK_CONTAINER_HEIGHT / 2), green(scene))
 
-  def buildOutput(scene: IMoleScene, capsule: ICapsuleUI) = {
-    new PrototypeWidget(scene, x ⇒ capsule.outputs.size.toString,
-      new LinkLabel(capsule.outputs.size.toString, new Action("") {
-        def apply = println("display capsule execution panel center on hooks")
-      })) {
-      setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 30, TASK_CONTAINER_HEIGHT / 2))
-    }
-  }
+  def buildPrototype(scene: IMoleScene, x: Unit ⇒ String, action: Action, point: Point, initColor: Color) = new PrototypeWidget(scene, x, new LinkLabel(x(), action), point, initColor)
 
 }
 
 import PrototypeWidget._
 class PrototypeWidget(scene: IMoleScene,
                       f: Unit ⇒ String,
-                      link: Label,
+                      link: LinkLabel,
+                      location: Point = new Point(0, 0),
+                      initColor: Color,
                       var hooked: Boolean = false) extends ComponentWidget(scene.graphScene, link.peer) {
+
   link.foreground = Color.WHITE
-  var validationColor = green(scene)
+  var validationColor = initColor
   val dim = 30
   val pos = link.size.width / 2 + 1
   setPreferredBounds(new Rectangle(dim, dim))
+  setPreferredLocation(location)
   setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR))
   setOpaque(true)
 
