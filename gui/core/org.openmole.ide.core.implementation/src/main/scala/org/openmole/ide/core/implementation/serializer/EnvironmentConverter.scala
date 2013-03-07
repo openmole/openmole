@@ -56,7 +56,7 @@ class EnvironmentConverter(mapper: Mapper,
   override def unmarshal(reader: HierarchicalStreamReader,
                          uc: UnmarshallingContext) = {
     if (reader.getAttributeCount != 0) {
-      val existingEnvironment = Proxys.environments.find(_.id == reader.getAttribute("id").toInt)
+      val existingEnvironment = Proxys.environment(reader.getAttribute("id"))
       existingEnvironment match {
         case Some(y: IEnvironmentDataProxyUI) ⇒ y
         case _ ⇒

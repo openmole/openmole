@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.hook.tools
+package org.openmole.ide.plugin.misc.tools
 
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
@@ -25,16 +25,16 @@ import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget.multirow.MultiCombo._
 import scala.swing.Label
 
-class MultiPrototypePanelUI(title: String,
-                            selected: List[IPrototypeDataProxyUI] = List.empty,
-                            prototypeProxys: List[IPrototypeDataProxyUI] = List.empty) extends PluginPanel("wrap") {
+class MultiPrototypePanel(title: String,
+                          selected: List[IPrototypeDataProxyUI] = List.empty,
+                          prototypeProxys: List[IPrototypeDataProxyUI] = List.empty) extends PluginPanel("wrap") {
   val multiPrototypeCombo = new MultiCombo("",
     prototypeProxys,
     selected.map { p ⇒
       new ComboPanel(prototypeProxys,
         new ComboData(Some(p)))
     },
-    NO_EMPTY,
+    CLOSE_IF_EMPTY,
     ADD)
 
   contents += new Label("<html><b>" + title + "</b></html>")

@@ -108,6 +108,19 @@ object ConceptMenu {
     new PopupToolBarPresenter("Hook", mapping(ComponentCategories.HOOK), new Color(168, 120, 33))
   }
 
+  val sourceMenu = {
+    addCategoryComponents(ComponentCategories.SOURCE)
+    KeyRegistry.sources.values.map {
+      f ⇒ new SourceDataProxyFactory(f)
+    }.toList.sortBy(_.factory.toString).foreach {
+      d ⇒
+        mapping(ComponentCategories.SOURCE).contents += new MenuItem(new Action(d.factory.toString) {
+          override def apply = display(d.buildDataProxyUI, CREATION)
+        })
+    }
+    new PopupToolBarPresenter("Source", mapping(ComponentCategories.SOURCE), new Color(60, 60, 60))
+  }
+
   def removeItem(proxy: IDataProxyUI) = {
     proxy match {
       case x: IEnvironmentDataProxyUI ⇒ environmentMenu.remove(menuItemMapping(proxy))
@@ -156,7 +169,7 @@ object ConceptMenu {
   }
 
   def clearAllItems = {
-    List(samplingMenu, prototypeMenu, taskMenu, environmentMenu, hookMenu).foreach {
+    List(samplingMenu, prototypeMenu, taskMenu, environmentMenu, hookMenu, sourceMenu).foreach {
       _.removeAll
     }
     menuItemMapping.clear

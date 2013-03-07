@@ -19,7 +19,7 @@ package org.openmole.ide.core.model.panel
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
-trait ITaskPanelUI extends IPanelUI {
+trait ITaskPanelUI extends IOPanelUI {
 
   def save(name: String,
            prototypesIn: List[IPrototypeDataProxyUI],

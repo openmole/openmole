@@ -55,7 +55,7 @@ class TaskConverter(mapper: Mapper,
   override def unmarshal(reader: HierarchicalStreamReader,
                          uc: UnmarshallingContext) = {
     if (reader.getAttributeCount != 0) {
-      val existingTask = Proxys.tasks.find(_.id == reader.getAttribute("id").toInt)
+      val existingTask = Proxys.task(reader.getAttribute("id"))
       existingTask match {
         case Some(y: ITaskDataProxyUI) ⇒ y
         case _ ⇒

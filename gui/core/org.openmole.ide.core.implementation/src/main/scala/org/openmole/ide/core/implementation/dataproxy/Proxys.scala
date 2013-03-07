@@ -33,12 +33,21 @@ object Proxys {
   private val _samplings = TMap[ID.Type, ISamplingCompositionDataProxyUI]()
   private val _environments = TMap[ID.Type, IEnvironmentDataProxyUI]()
   private val _hooks = TMap[ID.Type, IHookDataProxyUI]()
+  private val _sources = TMap[ID.Type, ISourceDataProxyUI]()
 
   def tasks = _tasks.single.values
   def prototypes = _prototypes.single.values
   def samplings = _samplings.single.values
   def environments = _environments.single.values
   def hooks = _hooks.single.values
+  def sources = _sources.single.values
+
+  def task(id: ID.Type) = _tasks.single.get(id)
+  def prototype(id: ID.Type) = _prototypes.single.get(id)
+  def sampling(id: ID.Type) = _samplings.single.get(id)
+  def environment(id: ID.Type) = _environments.single.get(id)
+  def hook(id: ID.Type) = _hooks.single.get(id)
+  def source(id: ID.Type) = _sources.single.get(id)
 
   def +=(t: ITaskDataProxyUI) = _tasks.single put (t.id, t)
   def -=(t: ITaskDataProxyUI) = _tasks.single remove (t.id)
@@ -59,6 +68,10 @@ object Proxys {
   def +=(t: IHookDataProxyUI) = _hooks.single put (t.id, t)
   def -=(t: IHookDataProxyUI) = _hooks.single remove (t.id)
   def contains(t: IHookDataProxyUI) = _hooks.single.contains(t.id)
+
+  def +=(t: ISourceDataProxyUI) = _sources.single put (t.id, t)
+  def -=(t: ISourceDataProxyUI) = _sources.single remove (t.id)
+  def contains(t: ISourceDataProxyUI) = _sources.single.contains(t.id)
 
   def allPrototypesByName = prototypes.map {
     _.dataUI.name

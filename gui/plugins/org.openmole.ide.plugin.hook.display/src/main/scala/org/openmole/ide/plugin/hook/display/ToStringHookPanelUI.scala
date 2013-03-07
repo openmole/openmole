@@ -17,15 +17,12 @@
 
 package org.openmole.ide.plugin.hook.display
 
-import org.openmole.ide.misc.widget.multirow.RowWidget._
-import org.openmole.ide.misc.widget.multirow.MultiWidget._
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.IHookPanelUI
-import org.openmole.ide.plugin.hook.tools.MultiPrototypePanelUI
+import org.openmole.ide.plugin.misc.tools.MultiPrototypePanel
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import swing.TabbedPane
 
-class ToStringHookPanelUI(dataUI: ToStringHookDataUI) extends MultiPrototypePanelUI("Display prototypes",
+class ToStringHookPanelUI(dataUI: ToStringHookDataUI) extends MultiPrototypePanel("Display prototypes",
   dataUI.toBeHooked,
   Proxys.prototypes.toList) with IHookPanelUI {
 

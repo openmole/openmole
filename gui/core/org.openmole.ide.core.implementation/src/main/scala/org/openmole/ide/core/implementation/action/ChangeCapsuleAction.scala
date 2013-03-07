@@ -28,6 +28,7 @@ class ChangeCapsuleAction(capsule: ICapsuleUI,
   override def apply = {
     capsule.setCapsuleType(newType)
     CheckData.checkMole(capsule.scene)
+    capsule.scene.manager.refreshCache
     capsule.scene.graphScene.revalidate
     capsule.scene.graphScene.repaint
   }

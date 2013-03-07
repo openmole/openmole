@@ -55,7 +55,7 @@ class SamplingCompositionConverter(mapper: Mapper,
   override def unmarshal(reader: HierarchicalStreamReader,
                          uc: UnmarshallingContext) = {
     if (reader.getAttributeCount != 0) {
-      val existingSamplingComposition = Proxys.samplings.find(_.id == reader.getAttribute("id").toInt)
+      val existingSamplingComposition = Proxys.sampling(reader.getAttribute("id"))
       existingSamplingComposition match {
         case Some(y: ISamplingCompositionDataProxyUI) ⇒ y
         case _ ⇒

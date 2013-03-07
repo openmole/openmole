@@ -71,6 +71,7 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
     _capsules += getNodeID -> cv
     if (_capsules.size == 1) setStartingCapsule(cv)
     capsuleConnections += cv.dataUI -> HashSet.empty[IConnectorUI]
+    refreshCache
   }
 
   def removeCapsuleUI(capsule: ICapsuleUI): String = removeCapsuleUI(capsuleID(capsule))
@@ -90,6 +91,7 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
 
     _capsules.remove(nodeID)
     assignDefaultStartingCapsule
+    refreshCache
     nodeID
   }
 

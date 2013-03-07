@@ -137,7 +137,7 @@ class SubMoleExecution(
         catch {
         case e: Throwable ⇒
           EventDispatcher.trigger(moleExecution, new IMoleExecution.HookExceptionRaised(h, job, e, SEVERE))
-          logger.log(SEVERE, "Error in execution of hook " + h + "at the end of task " + job.task, e)
+          logger.log(SEVERE, "Error in execution of misc " + h + "at the end of task " + job.task, e)
           throw e
         }
 

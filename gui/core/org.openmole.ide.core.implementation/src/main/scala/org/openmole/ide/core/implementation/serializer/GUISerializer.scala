@@ -81,6 +81,7 @@ class GUISerializer {
   xstream.alias("prototype", classOf[IPrototypeDataProxyUI])
   xstream.alias("environment", classOf[IEnvironmentDataProxyUI])
   xstream.alias("hook", classOf[IHookDataProxyUI])
+  xstream.alias("source", classOf[ISourceDataProxyUI])
 
   def serializeConcept(concept: String, set: List[(_, ID.Type)]) = {
     val conceptDir = new File(workDir, concept)
@@ -98,6 +99,7 @@ class GUISerializer {
     serializeConcept("environment", Proxys.environments.map { s ⇒ s -> s.id }.toList)
     serializeConcept("sampling", Proxys.samplings.map { s ⇒ s -> s.id }.toList)
     serializeConcept("hook", Proxys.hooks.map { s ⇒ s -> s.id }.toList)
+    serializeConcept("source", Proxys.hooks.map { s ⇒ s -> s.id }.toList)
     serializeConcept("taskMap", Proxys.tasks.map { s ⇒ s -> s.id }.toList)
     serializeConcept("mole", ScenesManager.moleScenes.map { ms ⇒ ms -> ms.manager.id }.toList)
     val os = new TarOutputStream(new FileOutputStream(fromFile))

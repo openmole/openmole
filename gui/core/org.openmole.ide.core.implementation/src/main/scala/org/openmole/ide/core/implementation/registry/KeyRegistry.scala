@@ -39,6 +39,8 @@ object KeyRegistry {
 
   val hooks = new HashMap[DefaultKey, IHookFactoryUI] with SynchronizedMap[DefaultKey, IHookFactoryUI]
 
+  val sources = new HashMap[DefaultKey, ISourceFactoryUI] with SynchronizedMap[DefaultKey, ISourceFactoryUI]
+
   val builders = new HashMap[NameKey, IBuilderFactoryUI] with SynchronizedMap[NameKey, IBuilderFactoryUI]
 
   val authentifications = new HashMap[DefaultKey, IAuthentificationFactoryUI] with SynchronizedMap[DefaultKey, IAuthentificationFactoryUI]

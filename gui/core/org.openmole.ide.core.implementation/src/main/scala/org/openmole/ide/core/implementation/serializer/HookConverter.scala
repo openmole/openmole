@@ -53,11 +53,11 @@ class HookConverter(mapper: Mapper,
   override def unmarshal(reader: HierarchicalStreamReader,
                          uc: UnmarshallingContext) = {
     if (reader.getAttributeCount != 0) {
-      val existingHook = Proxys.hooks.find(_.id == reader.getAttribute("id").toInt)
+      val existingHook = Proxys.hook(reader.getAttribute("id"))
       existingHook match {
         case Some(y: IHookDataProxyUI) ⇒ y
         case _ ⇒
-          serializer.unserializeProxy("hook")
+          serializer.unserializeProxy("misc")
           unmarshal(reader, uc)
       }
     } else {

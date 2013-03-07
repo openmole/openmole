@@ -70,7 +70,7 @@ class PrototypeConverter(mapper: Mapper,
   override def unmarshal(reader: HierarchicalStreamReader,
                          uc: UnmarshallingContext) = {
     if (reader.getAttributeCount <= 2) {
-      val existingPrototype = Proxys.prototypes.find(_.id == reader.getAttribute("id").toInt)
+      val existingPrototype = Proxys.prototype(reader.getAttribute("id"))
       existingPrototype match {
         case Some(y: IPrototypeDataProxyUI) ⇒ y
         case x: Any ⇒ super.unmarshal(reader, uc)

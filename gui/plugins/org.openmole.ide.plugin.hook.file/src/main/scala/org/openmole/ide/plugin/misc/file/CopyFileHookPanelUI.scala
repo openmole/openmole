@@ -20,7 +20,7 @@ package org.openmole.ide.plugin.hook.file
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.core.implementation.dataproxy.Proxys
-import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ITaskDataProxyUI }
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiComboTextField
@@ -28,7 +28,6 @@ import org.openmole.ide.misc.widget.multirow.MultiComboTextField._
 import org.openmole.ide.core.implementation.registry._
 import java.io.File
 import swing.{ TabbedPane, Label }
-import org.openmole.misc.exception.UserBadDataError
 
 class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends PluginPanel("wrap") with IHookPanelUI {
 
