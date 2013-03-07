@@ -99,7 +99,7 @@ class GUISerializer {
     serializeConcept("environment", Proxys.environments.map { s ⇒ s -> s.id }.toList)
     serializeConcept("sampling", Proxys.samplings.map { s ⇒ s -> s.id }.toList)
     serializeConcept("hook", Proxys.hooks.map { s ⇒ s -> s.id }.toList)
-    serializeConcept("source", Proxys.hooks.map { s ⇒ s -> s.id }.toList)
+    serializeConcept("source", Proxys.sources.map { s ⇒ s -> s.id }.toList)
     serializeConcept("taskMap", Proxys.tasks.map { s ⇒ s -> s.id }.toList)
     serializeConcept("mole", ScenesManager.moleScenes.map { ms ⇒ ms -> ms.manager.id }.toList)
     val os = new TarOutputStream(new FileOutputStream(fromFile))
