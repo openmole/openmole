@@ -149,6 +149,7 @@ class GUISerializer {
       unserializeProxy("sampling") ++
       unserializeProxy("environment") ++
       unserializeProxy("hook") ++
+      unserializeProxy("source") ++
       unserializeProxy("taskMap") ++
       unserializeProxy("mole")
     clear
