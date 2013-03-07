@@ -11,7 +11,6 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.data._
 import org.openmole.plugin.sampling.csv.CSVSampling
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
-import org.openmole.ide.misc.tools.Counter
 import org.openmole.core.model.sampling.{ Factor, Sampling }
 import org.openmole.ide.core.implementation.dialog.StatusBar
 

@@ -23,17 +23,15 @@ import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.data.ICapsuleDataUI
-import org.openmole.ide.misc.tools.Counter
+import org.openmole.ide.misc.tools.util._
 import scala.collection.mutable.HashMap
 
 class CapsuleDataUI(var task: Option[ITaskDataProxyUI] = None,
                     var sampling: Option[ISamplingCompositionDataProxyUI] = None,
                     var environment: Option[IEnvironmentDataProxyUI] = None,
-                    var capsuleType: CapsuleType = new BasicCapsuleType) extends ICapsuleDataUI {
+                    var capsuleType: CapsuleType = new BasicCapsuleType) extends ICapsuleDataUI with ID {
 
   var hooks = new HashMap[Class[_ <: IHook], IHookDataUI]
-
-  def id = Counter.id.getAndIncrement
 
   override def toString = task match {
     case Some(x: ITaskDataProxyUI) ⇒ x.dataUI.name

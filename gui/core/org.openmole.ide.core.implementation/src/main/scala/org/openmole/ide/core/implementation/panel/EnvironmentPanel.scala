@@ -54,7 +54,7 @@ class EnvironmentPanel(proxy: IEnvironmentDataProxyUI,
   }.peer, BorderLayout.CENTER)
 
   def create = {
-    Proxys.environments += proxy
+    Proxys += proxy
     ConceptMenu.environmentMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
 
@@ -67,7 +67,7 @@ class EnvironmentPanel(proxy: IEnvironmentDataProxyUI,
     capsulesWithEnv match {
       case Nil ⇒
         scene.closePropertyPanel
-        Proxys.environments -= proxy
+        Proxys -= proxy
         ConceptMenu.removeItem(proxy)
         true
       case _ ⇒

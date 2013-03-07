@@ -7,7 +7,6 @@ package org.openmole.ide.plugin.sampling.combine
 
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.data._
-import org.openmole.ide.misc.tools.Counter
 import org.openmole.plugin.sampling.combine.CompleteSampling
 import org.openmole.core.model.sampling._
 import org.openmole.core.model.data.Prototype

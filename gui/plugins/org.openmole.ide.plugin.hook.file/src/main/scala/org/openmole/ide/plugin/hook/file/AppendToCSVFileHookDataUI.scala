@@ -18,15 +18,13 @@
 package org.openmole.ide.plugin.hook.file
 
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.misc.tools.Counter
 import org.openmole.plugin.hook.file._
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.data.HookDataUI
 
 class AppendToCSVFileHookDataUI(val name: String = "",
                                 val prototypes: Iterable[IPrototypeDataProxyUI] = List.empty,
-                                val fileName: String = "",
-                                val id: Int = Counter.id.getAndIncrement) extends HookDataUI {
+                                val fileName: String = "") extends HookDataUI {
 
   def buildPanelUI = new AppendToCSVFileHookPanelUI(this)
 

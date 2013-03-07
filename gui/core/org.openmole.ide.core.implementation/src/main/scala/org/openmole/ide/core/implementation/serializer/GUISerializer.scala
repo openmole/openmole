@@ -17,17 +17,17 @@
 
 package org.openmole.ide.core.implementation.serializer
 
-import scala.util.Try
+import util.{ Failure, Success, Try }
 import com.ice.tar.TarInputStream
 import com.ice.tar.TarOutputStream
 import com.thoughtworks.xstream.XStream
 import java.io.EOFException
-import com.thoughtworks.xstream.io.xml.DomDriver
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.FileReader
 import java.io.FileWriter
+import org.openmole.ide.misc.tools.util.ID
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.dataproxy._
@@ -40,20 +40,13 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.io.TarArchiver._
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
+import org.openmole.misc.exception.InternalProcessingError
 
-object GUISerializer {
-  def serializePrefix(path: File) = path.getParentFile + "/" + path.getName.split('.')(0)
-}
-import GUISerializer._
 class GUISerializer {
 
-  val tmpDir = (Workspace.newFile)
-  val path = tmpDir.getCanonicalPath
+  val xstream = new XStream
+  val workDir = Workspace.newDir
 
-  val extractDir = Files.createTempDirectory("openmole").toFile
-  val extractPath = extractDir.getAbsolutePath
-
-  val xstream = new XStream(new DomDriver)
   val taskConverter = new TaskConverter(xstream.getMapper,
     xstream.getReflectionProvider,
     this,
@@ -89,64 +82,58 @@ class GUISerializer {
   xstream.alias("environment", classOf[IEnvironmentDataProxyUI])
   xstream.alias("hook", classOf[IHookDataProxyUI])
 
-  def serializeConcept(concept: String,
-                       set: List[(_, Int)]) = {
-    val conceptFile = new File(path + "/" + concept)
-    conceptFile.mkdirs
+  def serializeConcept(concept: String, set: List[(_, ID.Type)]) = {
+    val conceptDir = new File(workDir, concept)
+    conceptDir.mkdirs
     set.foreach {
       case (s, id) ⇒
-        val f = new File(conceptFile.getCanonicalFile + "/" + id + ".xml")
-        val writer = new FileWriter(f)
-        val out = xstream.createObjectOutputStream(writer, concept)
-        out.writeObject(s)
-        out.close
+        new File(conceptDir, id + ".xml").withWriter {
+          xstream.createObjectOutputStream(_, concept)
+        }
     }
   }
 
   def serialize(fromFile: String) = {
-    if (tmpDir.getParentFile.isDirectory) {
-      serializeConcept("prototype", Proxys.prototypes.map { s ⇒ s -> s.id }.toList)
-      serializeConcept("environment", Proxys.environments.map { s ⇒ s -> s.id }.toList)
-      serializeConcept("sampling", Proxys.samplings.map { s ⇒ s -> s.id }.toList)
-      serializeConcept("hook", Proxys.hooks.map { s ⇒ s -> s.id }.toList)
-      serializeConcept("taskMap", Proxys.tasks.map { s ⇒ s -> s.id }.toList)
-      serializeConcept("mole", ScenesManager.moleScenes.map { ms ⇒ ms -> ms.manager.id }.toList)
-      val os = new TarOutputStream(new FileOutputStream(fromFile))
-      try os.createDirArchiveWithRelativePathNoVariableContent(tmpDir)
-      finally os.close
-      new File(serializePrefix(tmpDir)).recursiveDelete
+    serializeConcept("prototype", Proxys.prototypes.map { s ⇒ s -> s.id }.toList)
+    serializeConcept("environment", Proxys.environments.map { s ⇒ s -> s.id }.toList)
+    serializeConcept("sampling", Proxys.samplings.map { s ⇒ s -> s.id }.toList)
+    serializeConcept("hook", Proxys.hooks.map { s ⇒ s -> s.id }.toList)
+    serializeConcept("taskMap", Proxys.tasks.map { s ⇒ s -> s.id }.toList)
+    serializeConcept("mole", ScenesManager.moleScenes.map { ms ⇒ ms -> ms.manager.id }.toList)
+    val os = new TarOutputStream(new FileOutputStream(fromFile))
+    try os.createDirArchiveWithRelativePathNoVariableContent(workDir)
+    finally os.close
+    clear
+  }
+
+  def readStream(f: File) = Try {
+    try xstream.createObjectInputStream(new FileReader(f))
+    catch {
+      case e: Throwable ⇒
+        throw new InternalProcessingError(e, "An error occured when loading " + f.getAbsolutePath + "\n")
     }
   }
 
-  def readStream(f: File) = try {
-    Right(xstream.createObjectInputStream(new FileReader(f)))
-  } catch {
-    case e: Throwable ⇒
-      StatusBar().block("An error occured when loading " + f.getAbsolutePath + "\n" + e.getMessage,
-        stack = e.getStackTraceString)
-      Left
-  }
-
-  def unserializeProxy(concept: String) = {
-    new File(extractPath + "/" + concept).listFiles.toList.foreach { f ⇒
-      readStream(f) match {
-        case Right(x: ObjectInputStream) ⇒
-          try {
-            val readObject = x.readObject
-            readObject match {
-              case ms: BuildMoleScene ⇒ ScenesManager.addBuildSceneContainer(ms)
-              case _ ⇒
-            }
-          } catch {
-            case eof: EOFException ⇒ StatusBar().inform("Project loaded")
-            case e: Throwable ⇒ StatusBar().block("Failed to unserialize a data of type " + concept,
-              stack = e.getMessage + "\n" + e.getStackTraceString)
-          } finally {
-            x.close
-          }
-      }
+  def unserializeProxy(concept: String) =
+    new File(workDir, concept).listFiles.toList.flatMap {
+      f ⇒
+        readStream(f) match {
+          case Success(x: ObjectInputStream) ⇒
+            try {
+              val readObject = x.readObject
+              readObject match {
+                case ms: BuildMoleScene ⇒ ScenesManager.addBuildSceneContainer(ms)
+                case _ ⇒
+              }
+              None
+            } catch {
+              case eof: EOFException ⇒ None
+              case e: Throwable ⇒
+                Some(new InternalProcessingError(e, "Failed to unserialize a data of type " + concept))
+            } finally x.close
+          case Failure(t) ⇒ Some(t)
+        }
     }
-  }
 
   def unserialize(fromFile: String) = {
     StatusBar().clear
@@ -154,12 +141,20 @@ class GUISerializer {
     ScenesManager.closeAll
 
     val os = new TarInputStream(new FileInputStream(fromFile))
-    os.extractDirArchiveWithRelativePathAndClose(extractDir)
-    unserializeProxy("prototype")
-    unserializeProxy("sampling")
-    unserializeProxy("environment")
-    unserializeProxy("hook")
-    unserializeProxy("taskMap")
-    unserializeProxy("mole")
+    os.extractDirArchiveWithRelativePathAndClose(workDir)
+
+    val ret = unserializeProxy("prototype") ++
+      unserializeProxy("sampling") ++
+      unserializeProxy("environment") ++
+      unserializeProxy("hook") ++
+      unserializeProxy("taskMap") ++
+      unserializeProxy("mole")
+    clear
+    ret
+  }
+
+  def clear = {
+    workDir.recursiveDelete
+    workDir.mkdirs
   }
 }

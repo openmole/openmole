@@ -23,6 +23,7 @@ import scala.swing.FileChooser.SelectionMode._
 import org.openmole.ide.core.implementation.execution.Settings
 import org.openmole.ide.core.implementation.serializer.GUISerializer
 import org.openmole.ide.core.implementation.dialog.DialogFactory
+import org.openmole.ide.core.implementation.dialog.StatusBar._
 import scala.swing.FileChooser.Result._
 
 object LoadXML {
@@ -35,7 +36,7 @@ object LoadXML {
     if (fc.showDialog(new Label, "OK") == Approve) text = fc.selectedFile.getPath
     if (new File(text).isFile) {
       Settings.currentProject = Some(text)
-      (new GUISerializer).unserialize(text)
+      displayErrors { (new GUISerializer).unserialize(text) }
     }
     text
   }

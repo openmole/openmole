@@ -67,7 +67,7 @@ class EnvironmentConverter(mapper: Mapper,
       val o = super.unmarshal(reader, uc)
       o match {
         case y: IEnvironmentDataProxyUI ⇒
-          if (Proxys.environments.contains(y)) y
+          if (Proxys.contains(y)) y
           else addEnvironment(y)
         case _ ⇒ throw new UserBadDataError("Can not load object " + o)
       }
@@ -77,7 +77,7 @@ class EnvironmentConverter(mapper: Mapper,
   override def canConvert(t: Class[_]) = t.isAssignableFrom(classOf[EnvironmentDataProxyUI])
 
   def addEnvironment(e: IEnvironmentDataProxyUI): IEnvironmentDataProxyUI = {
-    Proxys.environments += e
+    Proxys += e
     ConceptMenu.environmentMenu.popup.contents += ConceptMenu.addItem(e)
     e
   }

@@ -7,7 +7,6 @@ package org.openmole.ide.plugin.sampling.lhs
 
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.core.model.sampling.Factor
-import org.openmole.ide.misc.tools.Counter
 import org.openmole.ide.plugin.domain.range.RangeDomainDataUI
 import org.openmole.ide.core.model.data._
 import org.openmole.plugin.sampling.lhs._

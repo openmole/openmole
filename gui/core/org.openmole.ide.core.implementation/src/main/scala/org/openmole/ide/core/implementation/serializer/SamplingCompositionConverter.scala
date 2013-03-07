@@ -66,7 +66,7 @@ class SamplingCompositionConverter(mapper: Mapper,
       val o = super.unmarshal(reader, uc)
       o match {
         case y: ISamplingCompositionDataProxyUI ⇒
-          if (Proxys.samplings.contains(y)) y
+          if (Proxys.contains(y)) y
           else addSampling(y)
         case _ ⇒ throw new UserBadDataError("Can not load object " + o)
       }
@@ -76,7 +76,7 @@ class SamplingCompositionConverter(mapper: Mapper,
   override def canConvert(t: Class[_]) = t.isAssignableFrom(classOf[SamplingCompositionDataProxyUI])
 
   def addSampling(s: ISamplingCompositionDataProxyUI): ISamplingCompositionDataProxyUI = {
-    Proxys.samplings += s
+    Proxys += s
     ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(s)
     s
   }

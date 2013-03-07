@@ -21,7 +21,6 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.core.model.sampling.{ Factor, Sampling }
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import org.openmole.ide.core.model.sampling._
-import org.openmole.ide.misc.tools.Counter
 import org.openmole.core.model.domain.{ Discrete, Domain }
 
 object ISamplingDataUI {

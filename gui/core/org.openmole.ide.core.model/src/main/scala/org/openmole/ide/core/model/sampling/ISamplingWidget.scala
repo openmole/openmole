@@ -18,7 +18,6 @@
 package org.openmole.ide.core.model.sampling
 
 import org.openmole.ide.core.model.data.ISamplingDataUI
-import org.openmole.ide.misc.tools.Counter
 
 trait ISamplingWidget extends ISamplingCompositionWidget {
   def proxy: ISamplingProxyUI

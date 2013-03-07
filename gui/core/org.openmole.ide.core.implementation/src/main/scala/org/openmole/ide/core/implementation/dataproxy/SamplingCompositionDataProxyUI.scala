@@ -20,8 +20,8 @@ package org.openmole.ide.core.implementation.dataproxy
 import org.openmole.ide.core.model.data.ISamplingCompositionDataUI
 import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
 import org.openmole.ide.core.implementation.sampling.SamplingCompositionDataUI
-import org.openmole.ide.misc.tools.Counter
+import org.openmole.ide.misc.tools.util.ID
 
-class SamplingCompositionDataProxyUI(var dataUI: ISamplingCompositionDataUI = new SamplingCompositionDataUI,
-                                     val id: Int = Counter.id.getAndIncrement,
-                                     override val generated: Boolean = false) extends ISamplingCompositionDataProxyUI
+class SamplingCompositionDataProxyUI(
+  var dataUI: ISamplingCompositionDataUI = new SamplingCompositionDataUI,
+  override val generated: Boolean = false) extends ISamplingCompositionDataProxyUI with ID

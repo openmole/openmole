@@ -21,8 +21,9 @@ import scala.collection.mutable.HashMap
 import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import org.openmole.core.model.mole.IHook
+import org.openmole.ide.misc.tools.util.ID
 
-abstract class HookDataUI extends IHookDataUI {
+abstract class HookDataUI extends IHookDataUI with ID {
   var inputParameters: scala.collection.mutable.Map[IPrototypeDataProxyUI, String] = HashMap.empty[IPrototypeDataProxyUI, String]
 
   var inputs = List.empty[IPrototypeDataProxyUI]

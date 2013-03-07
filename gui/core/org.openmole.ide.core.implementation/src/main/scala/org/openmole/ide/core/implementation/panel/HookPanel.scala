@@ -58,13 +58,13 @@ class HookPanel(proxy: IHookDataProxyUI,
   }
 
   def create = {
-    Proxys.hooks += proxy
+    Proxys += proxy
     ConceptMenu.hookMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
 
   def delete = {
     scene.closePropertyPanel
-    Proxys.hooks -= proxy
+    Proxys -= proxy
     ConceptMenu.removeItem(proxy)
     true
   }

@@ -18,6 +18,7 @@
 package org.openmole.ide.core.model.data
 
 import org.openmole.ide.core.model.dataproxy._
+import org.openmole.ide.misc.tools.util._
 import org.openmole.core.model.mole._
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.commons.TransitionType._
@@ -25,7 +26,7 @@ import org.openmole.ide.core.model.commons.CapsuleType
 import scala.collection.mutable.HashMap
 
 trait ICapsuleDataUI {
-  def id: Int
+  def id: ID.Type
 
   def task: Option[ITaskDataProxyUI]
 

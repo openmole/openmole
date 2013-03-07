@@ -18,6 +18,7 @@ package org.openmole.ide.core.implementation.sampling
 
 import org.openmole.ide.core.model.sampling.ISamplingProxyUI
 import org.openmole.ide.core.model.data.ISamplingDataUI
+import org.openmole.ide.misc.tools.util.ID
 
 class SamplingProxyUI(var dataUI: ISamplingDataUI,
-                      var ordering: Int = 0) extends ISamplingProxyUI
+                      var ordering: Int = 0) extends ISamplingProxyUI with ID

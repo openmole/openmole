@@ -23,9 +23,10 @@ import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ITaskDataProxyUI }
 import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.core.model.data.Prototype
+import org.openmole.ide.misc.tools.util.ID
 
 trait IHookDataUI extends IDataUI with InputPrototype with OutputPrototype with ImplicitPrototype {
-  def id: Int
+  def id: ID.Type
 
   override def toString: String = name
 

@@ -20,7 +20,7 @@ package org.openmole.ide.core.model.dataproxy
 import org.openmole.ide.core.model.data.IDataUI
 
 trait IDataProxyUI {
-  def id: Int
+  def id: String
 
   def dataUI: IDataUI
 

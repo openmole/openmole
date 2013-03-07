@@ -15,10 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.misc.tools
+package org.openmole.ide.misc.tools.util
 
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.UUID
 
-object Counter {
-  val id = new AtomicInteger
+object ID {
+  val newId = UUID.randomUUID.toString
+  type Type = String
+}
+
+trait ID {
+  val id = ID.newId
 }

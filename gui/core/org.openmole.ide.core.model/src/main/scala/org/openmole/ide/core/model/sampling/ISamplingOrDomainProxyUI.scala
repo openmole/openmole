@@ -16,10 +16,10 @@
  */
 package org.openmole.ide.core.model.sampling
 
+import org.openmole.ide.misc.tools.util._
+
 trait ISamplingOrDomainProxyUI {
-  def id: String
-
+  def id: ID.Type
   def ordering: Int
-
   def ordering_=(o: Int)
 }

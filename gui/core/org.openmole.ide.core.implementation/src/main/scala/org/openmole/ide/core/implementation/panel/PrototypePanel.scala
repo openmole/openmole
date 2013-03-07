@@ -42,7 +42,7 @@ object PrototypePanel {
   def deletePrototype(proxy: IPrototypeDataProxyUI): Boolean = {
     def erase = {
       ScenesManager.closePropertyPanel
-      Proxys.prototypes -= proxy
+      Proxys -= proxy
       ConceptMenu.removeItem(proxy)
       true
     }
@@ -97,7 +97,7 @@ class PrototypePanel[T](proxy: IPrototypeDataProxyUI,
   }
 
   def create = {
-    Proxys.prototypes += proxy
+    Proxys += proxy
     ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(nameTextField.text,
       proxy)
   }

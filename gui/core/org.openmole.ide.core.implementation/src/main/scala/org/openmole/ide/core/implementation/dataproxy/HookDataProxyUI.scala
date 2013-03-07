@@ -17,9 +17,9 @@
 package org.openmole.ide.core.implementation.dataproxy
 
 import org.openmole.ide.core.model.data.IHookDataUI
-import org.openmole.ide.misc.tools.Counter
+import org.openmole.ide.misc.tools.util.ID
 import org.openmole.ide.core.model.dataproxy.IHookDataProxyUI
 
-class HookDataProxyUI(var dataUI: IHookDataUI,
-                      val id: Int = Counter.id.getAndIncrement,
-                      override val generated: Boolean = false) extends IHookDataProxyUI
+class HookDataProxyUI(
+  var dataUI: IHookDataUI,
+  override val generated: Boolean = false) extends IHookDataProxyUI with ID
