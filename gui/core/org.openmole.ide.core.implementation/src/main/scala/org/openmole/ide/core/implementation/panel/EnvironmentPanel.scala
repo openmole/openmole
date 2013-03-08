@@ -72,7 +72,7 @@ class EnvironmentPanel(proxy: IEnvironmentDataProxyUI,
         true
       case _ ⇒
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
-          capsulesWithEnv.foreach { _.setEnvironment(None) }
+          capsulesWithEnv.foreach { _ on None }
           delete
         } else false
     }

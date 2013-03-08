@@ -93,7 +93,7 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
     items += (itIS, itRIS, itR, itStart, menuTask.peer)
 
     //Environments
-    val menuEnv = new Menu("Environment")
+    /* val menuEnv = new Menu("Environment")
 
     Proxys.environments.foreach {
       env ⇒
@@ -119,7 +119,7 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
       action = new Action("None") {
         def apply = capsule.setEnvironment(None)
       }
-    }.peer, 0)
+    }.peer, 0) */
 
     //Hooks
     /*val menuHook = new Menu("IHook")
@@ -149,7 +149,7 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
         }
     }
 
-    items += (menuEnv.peer, menuBuilder.peer)
+    items += menuBuilder.peer
   }
 
   override def getPopupMenu(widget: Widget, point: Point) = {
@@ -176,17 +176,17 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
   abstract class TaskEnvAction(name: String,
                                val item: CheckMenuItem) extends Action(name)
 
-  class HookAction(factory: IHookFactoryUI,
+  /*class HookAction(factory: IHookFactoryUI,
                    it: CheckMenuItem) extends Action(factory.toString) {
     def apply = {
       if (!capsule.dataUI.hooks.contains(factory.coreClass))
-        capsule.dataUI.hooks += factory.coreClass -> factory.buildDataUI
-      //  else capsule.dataUI.hooks(factory.coreClass).activated = it.selected
-      //  capsule.hooked(if (capsule.dataUI.hooks.values.filter {
-      //     _.activated
-      //  }.size > 0) true
-      //else false
-    }
-  }
+        capsule.dataUI = capsule.dataUI :- factory.buildDataUI     */
+  //  else capsule.dataUI.hooks(factory.coreClass).activated = it.selected
+  //  capsule.hooked(if (capsule.dataUI.hooks.values.filter {
+  //     _.activated
+  //  }.size > 0) true
+  //else false
+  //  }
+  //  }
 
 }

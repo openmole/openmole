@@ -26,6 +26,7 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.misc.tools.service.Logger
 import org.openmole.ide.core.implementation.builder.MoleFactory
+import util.{ Failure, Success }
 
 object CheckData extends Logger {
 
@@ -37,7 +38,7 @@ object CheckData extends Logger {
         y.manager.startingCapsule match {
           case Some(x: ICapsuleUI) ⇒
             MoleFactory.buildMole(y.manager) match {
-              case Right((mole, cMap, pMap, errs)) ⇒
+              case Success((mole, cMap, pMap, errs)) ⇒
                 val error_capsules = y.manager.capsules.values.partition {
                   _.dataUI.task.isDefined
                 }
@@ -50,8 +51,9 @@ object CheckData extends Logger {
                   case (k, v) ⇒ v -> k
                 }
 
+                ToolDataUI.computePrototypeFromAggregation(mole)
                 // Compute implicit input / output
-                capsuleMap.foreach {
+                /* capsuleMap.foreach {
                   case (caps, capsUI) ⇒
                     capsUI.dataUI.task match {
                       case Some(x: ITaskDataProxyUI) ⇒
@@ -60,7 +62,7 @@ object CheckData extends Logger {
                         ToolDataUI.computePrototypeFromAggregation(mole)
                       case _ ⇒
                     }
-                }
+                }   */
 
                 // Formal validation
                 val errors = Validation(mole)
@@ -91,7 +93,7 @@ object CheckData extends Logger {
                     displayCapsuleErrors(cui, e.getMessage)
                 }
                 Right(mole, cMap, pMap, errs)
-              case Left(l) ⇒ Left(l)
+              case Failure(l) ⇒ Left(l)
             }
           case _ ⇒
             Left(("No starting capsule is defined, the Mole can not be built"))

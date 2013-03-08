@@ -78,7 +78,6 @@ class TaskPanel(proxy: ITaskDataProxyUI,
         panelUI.tabbedPane.pages(1).content = new Label("First define Prototypes !")
         None
       case _ ⇒
-        save
         val (implicitIP, implicitOP) = proxy.dataUI.implicitPrototypes
         val iop = Some(new IOPrototypePanel(scene,
           proxy.dataUI.inputs,
@@ -136,13 +135,5 @@ class TaskPanel(proxy: ITaskDataProxyUI,
   def save = {
     val protoPanelSave = IOPrototypePanel.save(protoPanel)
     proxy.dataUI = panelUI.save(nameTextField.text, protoPanelSave._1, protoPanelSave._2, protoPanelSave._3)
-
-    ScenesManager.capsules(proxy).foreach {
-      c ⇒
-        proxy.dataUI match {
-          case x: IExplorationTaskDataUI ⇒ c.setSampling(x.sampling)
-          case _ ⇒
-        }
-    }
   }
 }

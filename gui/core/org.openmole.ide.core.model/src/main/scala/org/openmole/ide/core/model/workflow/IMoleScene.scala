@@ -25,7 +25,6 @@ import org.netbeans.api.visual.widget.LayerWidget
 import org.openmole.ide.core.model.sampling.ISamplingCompositionWidget
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import scala.swing.Panel
-import org.openmole.core.model.mole.IMole
 
 trait IMoleScene {
   def manager: IMoleSceneManager
@@ -49,6 +48,8 @@ trait IMoleScene {
   def savePropertyPanel: Unit
 
   def savePropertyPanel(panel: Panel): Unit
+
+  def displayCapsuleProperty(capsuleDataUI: ICapsuleUI)
 
   def displayPropertyPanel(proxy: IDataProxyUI, mode: PanelMode.Value)
 

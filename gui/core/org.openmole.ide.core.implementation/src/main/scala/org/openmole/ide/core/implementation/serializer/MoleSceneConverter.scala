@@ -199,11 +199,11 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
                 case None ⇒ errors += "An error occured when loading the Task for a capsule. No Task has been set."
               }
               case "persistentPrototype" ⇒
-                caps.dataUI.capsuleType = new MasterCapsuleType(caps.dataUI.capsuleType.persistList ::: List(Proxys.prototypes.filter(_.dataUI.name == reader.getAttribute("name").toString).head))
+                caps.dataUI = caps.dataUI -- new MasterCapsuleType(caps.dataUI.capsuleType.persistList ::: List(Proxys.prototypes.filter(_.dataUI.name == reader.getAttribute("name").toString).head))
 
               case "environment" ⇒
                 Proxys.environments.filter(e ⇒ e.id == reader.getAttribute("id").toInt).headOption match {
-                  case Some(e: IEnvironmentDataProxyUI) ⇒ caps.setEnvironment(Some(e))
+                  case Some(e: IEnvironmentDataProxyUI) ⇒ caps on Some(e)
                   case None ⇒ errors += "An error occured when loading the Environment for a capsule. No Environment has been set."
                 }
               case "misc" ⇒

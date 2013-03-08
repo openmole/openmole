@@ -79,13 +79,13 @@ class GUISerializer {
     this,
     new SerializerState)
 
-  xstream.registerConverter(new MoleSceneConverter(this))
   xstream.registerConverter(taskConverter)
   xstream.registerConverter(prototypeConverter)
   xstream.registerConverter(samplingConverter)
   xstream.registerConverter(environmentConverter)
   xstream.registerConverter(hookConverter)
   xstream.registerConverter(sourceConverter)
+  xstream.registerConverter(new MoleSceneConverter(this))
 
   xstream.alias("molescene", classOf[MoleScene])
   xstream.alias("taskMap", classOf[ITaskDataProxyUI])

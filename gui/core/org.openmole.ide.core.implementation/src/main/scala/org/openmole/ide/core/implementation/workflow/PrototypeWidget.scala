@@ -42,25 +42,44 @@ object PrototypeWidget {
 
   val red = new Color(212, 0, 0)
 
-  def buildEmptySource(scene: IMoleScene, capsule: ICapsuleUI) = buildPrototype(scene, x ⇒ capsule.inputs.size.toString, new Action("") { def apply = println("empty s") }, new Point(19, TASK_CONTAINER_HEIGHT / 2), grey)
+  def buildNoTaskSource(scene: IMoleScene, capsule: ICapsuleUI, color: Color = grey) =
+    new IPrototypeWidget(scene, capsule, new LinkLabel("0", new Action("") { def apply = scene.displayCapsuleProperty(capsule) }), new Point(19, TASK_CONTAINER_HEIGHT / 2), grey)
 
-  def buildEmptyHook(scene: IMoleScene, capsule: ICapsuleUI) = buildPrototype(scene, x ⇒ capsule.inputs.size.toString, new Action("") { def apply = println("empty h") }, new Point(TASK_CONTAINER_WIDTH - 30, TASK_CONTAINER_HEIGHT / 2), grey)
+  def buildNoTaskHook(scene: IMoleScene, capsule: ICapsuleUI, color: Color = grey) =
+    new OPrototypeWidget(scene, capsule, new LinkLabel("0", new Action("") { def apply = scene.displayCapsuleProperty(capsule) }), new Point(TASK_CONTAINER_WIDTH - 30, TASK_CONTAINER_HEIGHT / 2), grey)
 
-  def buildInput(scene: IMoleScene, capsule: ICapsuleUI) = buildPrototype(scene, x ⇒ capsule.inputs.size.toString, new Action("") { def apply = println("input") }, new Point(19, TASK_CONTAINER_HEIGHT / 2), green(scene))
+  def buildTaskSource(scene: IMoleScene, capsule: ICapsuleUI) = buildNoTaskSource(scene, capsule, green(scene))
 
-  def buildOutput(scene: IMoleScene, capsule: ICapsuleUI) = buildPrototype(scene, x ⇒ capsule.outputs.size.toString, new Action("") { def apply = println("input") }, new Point(TASK_CONTAINER_WIDTH - 30, TASK_CONTAINER_HEIGHT / 2), green(scene))
+  def buildTaskHook(scene: IMoleScene, capsule: ICapsuleUI) = buildNoTaskHook(scene, capsule, green(scene))
 
-  def buildPrototype(scene: IMoleScene, x: Unit ⇒ String, action: Action, point: Point, initColor: Color) = new PrototypeWidget(scene, x, new LinkLabel(x(), action), point, initColor)
+  class IPrototypeWidget(scene: IMoleScene,
+                         capsule: ICapsuleUI,
+                         link: LinkLabel,
+                         location: Point = new Point(0, 0),
+                         initColor: Color) extends PrototypeWidget(scene, capsule, link, location, initColor) {
+    def activated = !capsule.dataUI.sources.isEmpty
+    override def paintChildren = link.text = capsule.inputs.size.toString
+  }
 
+  class OPrototypeWidget(scene: IMoleScene,
+                         capsule: ICapsuleUI,
+                         link: LinkLabel,
+                         location: Point = new Point(0, 0),
+                         initColor: Color) extends PrototypeWidget(scene, capsule, link, location, initColor) {
+    def activated = !capsule.dataUI.hooks.isEmpty
+    override def paintChildren = link.text = capsule.outputs.size.toString
+  }
 }
 
 import PrototypeWidget._
-class PrototypeWidget(scene: IMoleScene,
-                      f: Unit ⇒ String,
-                      link: LinkLabel,
-                      location: Point = new Point(0, 0),
-                      initColor: Color,
-                      var hooked: Boolean = false) extends ComponentWidget(scene.graphScene, link.peer) {
+
+abstract class PrototypeWidget(scene: IMoleScene,
+                               capsule: ICapsuleUI,
+                               link: LinkLabel,
+                               location: Point = new Point(0, 0),
+                               initColor: Color) extends ComponentWidget(scene.graphScene, link.peer) {
+
+  def activated: Boolean
 
   link.foreground = Color.WHITE
   var validationColor = initColor
@@ -81,8 +100,6 @@ class PrototypeWidget(scene: IMoleScene,
     revalidate
   }
 
-  override def paintChildren = link.text = f()
-
   override def paintBackground = {
     val g = scene.graphScene.getGraphics
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -97,17 +114,18 @@ class PrototypeWidget(scene: IMoleScene,
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
       RenderingHints.VALUE_ANTIALIAS_ON)
     g.setStroke(new BasicStroke(3f))
-    g.setColor(new Color(77, 77, 77, 150))
 
-    val offset1 = dim - 2 * { if (hooked) 1 else 0 }
-    g.drawOval(pos, pos, offset1, offset1)
+    g.setColor(if (activated) new Color(73, 90, 105) else new Color(77, 77, 77, 150))
+    val offset = dim - 2 * { if (activated) 1 else 0 }
+    g.drawOval(pos, pos, offset, offset)
 
-    if (hooked) {
-      g.setColor(new Color(230, 180, 25))
-      g.setStroke(new BasicStroke(5f))
-      g.drawOval(pos - 4, pos - 4, offset1 + 8, offset1 + 8)
+    if (activated) {
+      g.setColor(new Color(73, 90, 105))
+      g.setStroke(new BasicStroke(3f))
+      g.drawOval(pos - 2, pos - 2, offset + 4, offset + 4)
     }
 
     revalidate
   }
+
 }

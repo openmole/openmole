@@ -35,9 +35,7 @@ trait IMoleSceneManager {
 
   def cacheMole: Option[(IMole, Map[ICapsuleUI, ICapsule])]
 
-  def cacheMole_=(m: Option[(IMole, Map[ICapsuleUI, ICapsule])])
-
-  def refreshCache: Unit
+  def invalidateCache: Unit
 
   def dataUI: IMoleDataUI
 

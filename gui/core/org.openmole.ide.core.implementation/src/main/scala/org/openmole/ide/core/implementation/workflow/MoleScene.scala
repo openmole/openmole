@@ -56,6 +56,7 @@ import scala.collection.mutable.HashSet
 import scala.swing.Panel
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.builder.SceneFactory
+import org.openmole.ide.core.model.data.ICapsuleDataUI
 
 abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMoleScene
     with SelectProvider
@@ -114,6 +115,19 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     case Some(x: BasePanel) ⇒ x.panelUI
     case _ ⇒ throw new UserBadDataError("There is no current panel.")
   }
+
+  def displayCapsuleProperty(capsuleUI: ICapsuleUI) =
+    ScenesManager.currentSceneContainer match {
+      case (Some(exe: ExecutionMoleSceneContainer)) ⇒
+      case _ ⇒
+        closePropertyPanel
+        currentPanel.contents.removeAll
+        currentPanel.contents += new CapsulePanel(this, capsuleUI)
+        propertyWidget.setPreferredLocation(new Point(getView.getBounds().x.toInt + 20, 20))
+        propertyWidget.revalidate
+        propertyWidget.setVisible(true)
+        refresh
+    }
 
   def displayPropertyPanel(proxy: IDataProxyUI,
                            mode: PanelMode.Value) =
@@ -212,7 +226,6 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   def graphScene = this
 
   def refresh = {
-    manager.refreshCache
     validate
     repaint
   }

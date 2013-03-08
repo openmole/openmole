@@ -54,13 +54,13 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
 
   val executionManager =
     MoleFactory.buildMole(bmsc.scene.manager) match {
-      case Right((mole, prototypeMapping, capsuleMapping, errors)) ⇒
+      case Success((mole, prototypeMapping, capsuleMapping, errors)) ⇒
         Some(new ExecutionManager(bmsc.scene.manager,
           this,
           mole,
           prototypeMapping,
           capsuleMapping))
-      case Left(l) ⇒
+      case Failure(l) ⇒
     }
 
   val startStopButton = new Button(start) {
@@ -94,16 +94,17 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
           c.dataUI.task match {
             case Some(t: ITaskDataProxyUI) ⇒
 
-              //Replace no memory Hooks and with new HookDataUI instance
-              c.dataUI.hooks.foreach {
-                case (hclass, hdataUI) ⇒ hdataUI match {
-                  case x: IHookDataUI with NoMemoryHook ⇒
-                    val hUI = KeyRegistry.hooks(DefaultKey(hdataUI.coreClass)).buildDataUI
-                    //  hUI.activated = true
-                    c.dataUI.hooks.update(hclass, hUI)
-                  case _ ⇒
-                }
-              }
+            //FIXME :: No Memory HOok ?
+            //Replace no memory Hooks and with new HookDataUI instance
+            // c.dataUI.hooks.foreach {
+            //   case (hclass, hdataUI) ⇒ hdataUI match {
+            //    case x: IHookDataUI with NoMemoryHook ⇒
+            // val hUI = KeyRegistry.hooks(DefaultKey(hdataUI.coreClass)).buildDataUI
+            //  hUI.activated = true
+            //c.dataUI.hooks.update(hclass, hUI)
+            //    case _ ⇒
+            //   }
+            //  }
 
             /* val activated = c.dataUI.hooks.filter {
                 _._2.activated

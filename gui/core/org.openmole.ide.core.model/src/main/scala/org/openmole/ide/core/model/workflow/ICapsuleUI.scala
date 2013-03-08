@@ -22,6 +22,8 @@ trait ICapsuleUI {
 
   def dataUI: ICapsuleDataUI
 
+  def dataUI_=(d: ICapsuleDataUI)
+
   def defineAsStartingCapsule(b: Boolean): Unit
 
   def scene: IMoleScene
@@ -40,21 +42,17 @@ trait ICapsuleUI {
 
   def deepcopy(sc: IMoleScene): (ICapsuleUI, HashMap[IInputSlotWidget, IInputSlotWidget])
 
-  def setTask(dpu: ITaskDataProxyUI)
+  def ::(dpu: ITaskDataProxyUI)
 
-  def setCapsuleType(cType: CapsuleType)
+  def --(cType: CapsuleType)
 
-  def setEnvironment(environment: Option[IEnvironmentDataProxyUI])
-
-  def setSampling(sampling: Option[ISamplingCompositionDataProxyUI])
+  def on(environment: Option[IEnvironmentDataProxyUI])
 
   def addInputSlot(startingCapsule: Boolean): IInputSlotWidget
 
   def inputs: List[IPrototypeDataProxyUI]
 
   def outputs: List[IPrototypeDataProxyUI]
-
-  def hooked(b: Boolean)
 
   def updateErrors(errors: Iterable[DataflowProblem]): Unit
 

@@ -25,7 +25,7 @@ trait ITaskPanelUI extends IOPanelUI {
            prototypesIn: List[IPrototypeDataProxyUI],
            inputParameters: scala.collection.mutable.Map[IPrototypeDataProxyUI, String],
            prototypesOut: List[IPrototypeDataProxyUI]): ITaskDataUI = {
-    var dataUI = saveContent(name)
+    val dataUI = saveContent(name)
     dataUI.inputs = prototypesIn
     dataUI.outputs = prototypesOut
     dataUI.inputParameters = inputParameters
