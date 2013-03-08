@@ -24,5 +24,5 @@ import org.openmole.ide.core.model.panel.IGroupingPanelUI
 trait IGroupingFactoryUI extends IFactoryUI {
   def coreClass: Class[_ <: Grouping]
 
-  def buildPanelUI(executionManager: IExecutionManager): IGroupingPanelUI
+  def buildPanelUI: IGroupingPanelUI
 }

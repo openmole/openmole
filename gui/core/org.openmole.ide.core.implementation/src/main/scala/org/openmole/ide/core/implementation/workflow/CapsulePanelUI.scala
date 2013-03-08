@@ -27,6 +27,8 @@ import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.misc.widget.multirow.MultiCombo.{ ComboData, ComboPanel }
 import org.openmole.ide.core.implementation.data.{ EmptyDataUIs, CapsuleDataUI }
 import org.openmole.ide.core.model.dataproxy.{ IHookDataProxyUI, ISourceDataProxyUI, IEnvironmentDataProxyUI }
+import org.openmole.ide.core.implementation.execution.MultiGenericGroupingStrategyPanel
+import java.awt.Color
 
 class CapsulePanelUI(dataUI: ICapsuleDataUI) extends PluginPanel("") with ICapsulePanelUI {
 
@@ -59,7 +61,11 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI) extends PluginPanel("") with ICapsu
 
   tabbedPane.pages += new TabbedPane.Page("Source", sourcePanel.panel)
   tabbedPane.pages += new TabbedPane.Page("Hook", hookPanel.panel)
-  tabbedPane.pages += new TabbedPane.Page("Environment", new PluginPanel("") { contents += environmentCombo })
+  tabbedPane.pages += new TabbedPane.Page("Environment", new PluginPanel("wrap") {
+    contents += environmentCombo
+    contents += new Label("Grouping: ") { foreground = Color.WHITE }
+    contents += (new MultiGenericGroupingStrategyPanel).panel
+  })
 
   def save =
     new CapsuleDataUI(dataUI.task,

@@ -28,10 +28,10 @@ import org.openmole.plugin.grouping.batch.MoleJobsGrouping
 import scala.swing.Label
 import scala.swing.TextField
 
-class NumberOfMoleJobsGroupingPanelUI(executionManager: IExecutionManager) extends PluginPanel("wrap 2") with IGroupingPanelUI {
+class NumberOfMoleJobsGroupingPanelUI extends PluginPanel("wrap") with IGroupingPanelUI {
 
   val numberTextField = new TextField("", 5)
-  contents += new Label("Number of jobs per group : ")
+  contents += new Label("Number of jobs / group : ")
   contents += numberTextField
 
   def coreObject = new MoleJobsGrouping(numberTextField.text.toInt)

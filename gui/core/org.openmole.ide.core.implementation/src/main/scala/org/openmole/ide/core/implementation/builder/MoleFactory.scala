@@ -75,16 +75,15 @@ object MoleFactory {
           }
       }
       //TODO implement sources
-      (
-        MoleExecution.partial(
-          mole,
-          Iterable.empty,
-          hooks,
-          strat.toMap,
-          groupingStrategies.map {
-            case (s, c) ⇒ c -> s
-          }.toMap),
-          envs.toSet)
+      (MoleExecution.partial(
+        mole,
+        Iterable.empty,
+        hooks,
+        strat.toMap,
+        groupingStrategies.map {
+          case (s, c) ⇒ c -> s
+        }.toMap),
+        envs.toSet)
     }
 
   def buildSource(sourceUI: ISourceDataUI,
@@ -133,15 +132,12 @@ object MoleFactory {
   }.toMap
 
   def taskCoreObject(dataUI: ITaskDataUI,
-                     plugins: Set[File] = Set.empty): Either[Throwable, ITask] =
-    try {
-      Right(dataUI.coreObject(inputs(dataUI),
+                     plugins: Set[File] = Set.empty): Try[ITask] =
+    Try {
+      dataUI.coreObject(inputs(dataUI),
         outputs(dataUI),
         parameters(dataUI),
-        PluginSet(plugins)))
-    } catch {
-      case e: Throwable ⇒
-        Left(e)
+        PluginSet(plugins))
     }
 
   def inputs(dataUI: ITaskDataUI) = DataSet(dataUI.inputs.map {

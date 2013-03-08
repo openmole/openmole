@@ -119,7 +119,7 @@ class GUIPanel extends MainFrame {
   val splitPane = ScenesManager.tabPane
 
   peer.add(splitPane.peer, BorderLayout.CENTER)
-  StatusBar().inform("OpenMOLE - 0.7 - Daddy Django")
+  StatusBar().inform("OpenMOLE - 0.8 - Elastic Earth")
 
   PasswordListner.apply
 

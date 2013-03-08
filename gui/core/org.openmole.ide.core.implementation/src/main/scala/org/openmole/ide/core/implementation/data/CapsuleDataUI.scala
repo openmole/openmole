@@ -30,6 +30,7 @@ import java.io.File
 import org.openmole.core.model.task.ITask
 import org.openmole.core.implementation.task.EmptyTask
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import util.{ Success, Failure }
 
 case class CapsuleDataUI(val task: Option[ITaskDataProxyUI] = None,
                          val environment: Option[IEnvironmentDataProxyUI] = None,
@@ -66,12 +67,12 @@ case class CapsuleDataUI(val task: Option[ITaskDataProxyUI] = None,
 
   def coreObject(moleDataUI: IMoleDataUI) = task match {
     case Some(t: ITaskDataProxyUI) ⇒ MoleFactory.taskCoreObject(t.dataUI, moleDataUI.plugins.map { p ⇒ new File(p) }.toSet) match {
-      case Right(x: ITask) ⇒ capsuleType match {
+      case Success(x: ITask) ⇒ capsuleType match {
         case y: MasterCapsuleType ⇒ new MasterCapsule(x, y.persistList.map { _.dataUI.name }.toSet)
         case y: StrainerCapsuleType ⇒ new StrainerCapsule(x)
         case _ ⇒ new Capsule(x)
       }
-      case Left(x: Throwable) ⇒ new Capsule(EmptyTask(t.dataUI.name))
+      case Failure(x: Throwable) ⇒ new Capsule(EmptyTask(t.dataUI.name))
     }
     case _ ⇒
       StatusBar().inform("A capsule without Task can not be run")
