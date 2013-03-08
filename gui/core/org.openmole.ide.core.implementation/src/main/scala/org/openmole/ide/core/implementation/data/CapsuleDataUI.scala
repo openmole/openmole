@@ -35,7 +35,7 @@ case class CapsuleDataUI(val task: Option[ITaskDataProxyUI] = None,
                          val environment: Option[IEnvironmentDataProxyUI] = None,
                          val sources: List[ISourceDataProxyUI] = List(),
                          val hooks: List[IHookDataProxyUI] = List(),
-                         val capsuleType: CapsuleType = new BasicCapsuleType) extends ICapsuleDataUI {
+                         val capsuleType: CapsuleType = new BasicCapsuleType) extends ICapsuleDataUI with ID {
 
   override def toString = task match {
     case Some(x: ITaskDataProxyUI) ⇒ x.dataUI.name

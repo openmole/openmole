@@ -21,8 +21,9 @@ import scala.collection.mutable.HashMap
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import org.openmole.core.model.mole.ISource
+import org.openmole.ide.misc.tools.util.ID
 
-abstract class SourceDataUI extends ISourceDataUI {
+abstract class SourceDataUI extends ISourceDataUI with ID {
   var inputParameters: scala.collection.mutable.Map[IPrototypeDataProxyUI, String] = HashMap.empty[IPrototypeDataProxyUI, String]
 
   var inputs = List.empty[IPrototypeDataProxyUI]
