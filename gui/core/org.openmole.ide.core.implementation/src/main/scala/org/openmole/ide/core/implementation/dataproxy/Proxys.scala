@@ -98,10 +98,10 @@ object Proxys {
     case _ ⇒ false
   }
 
-  def clearAll: Unit = {
+  def clearAll: Unit = atomic { implicit actx ⇒
     ConceptMenu.clearAllItems
-    List(tasks, prototypes, environments, samplings, hooks).foreach {
-      _.clear
+    List(_tasks, _prototypes, _environments, _samplings, _hooks, _sources).foreach {
+      _.clear()
     }
   }
 }
