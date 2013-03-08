@@ -81,7 +81,7 @@ class GUISerializer {
   xstream.registerConverter(new MoleSceneConverter(this))
 
   xstream.alias("molescene", classOf[MoleScene])
-  xstream.alias("taskMap", classOf[ITaskDataProxyUI])
+  xstream.alias("task", classOf[ITaskDataProxyUI])
   xstream.alias("sampling", classOf[ISamplingCompositionDataProxyUI])
   xstream.alias("prototype", classOf[IPrototypeDataProxyUI])
   xstream.alias("environment", classOf[IEnvironmentDataProxyUI])
@@ -105,7 +105,7 @@ class GUISerializer {
     serializeConcept("sampling", Proxys.samplings.map { s ⇒ s -> s.id }.toList)
     serializeConcept("hook", Proxys.hooks.map { s ⇒ s -> s.id }.toList)
     serializeConcept("source", Proxys.sources.map { s ⇒ s -> s.id }.toList)
-    serializeConcept("taskMap", Proxys.tasks.map { s ⇒ s -> s.id }.toList)
+    serializeConcept("task", Proxys.tasks.map { s ⇒ s -> s.id }.toList)
     serializeConcept("mole", ScenesManager.moleScenes.map { ms ⇒ ms -> ms.manager.id }.toList)
     val os = new TarOutputStream(new FileOutputStream(fromFile))
     try os.createDirArchiveWithRelativePathNoVariableContent(workDir)
@@ -155,7 +155,7 @@ class GUISerializer {
       unserializeProxy("environment") ++
       unserializeProxy("hook") ++
       unserializeProxy("source") ++
-      unserializeProxy("taskMap") ++
+      unserializeProxy("task") ++
       unserializeProxy("mole")
     clear
     ret

@@ -27,7 +27,6 @@ import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.misc.widget.multirow.MultiCombo.{ ComboData, ComboPanel }
 import org.openmole.ide.core.implementation.data.{ EmptyDataUIs, CapsuleDataUI }
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
-import org.openmole.ide.core.implementation.data.EmptyDataUIs.EmptyEnvironmentDataUI
 
 class CapsulePanelUI(dataUI: ICapsuleDataUI) extends PluginPanel("") with ICapsulePanelUI {
 
@@ -50,22 +49,24 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI) extends PluginPanel("") with ICapsu
     CLOSE_IF_EMPTY,
     ADD)
 
-  val environmentCombo = new MyComboBox(Proxys.environments.toList :+ EmptyDataUIs.emptyEnvironmentProxy)
+  val environmentProxys = Proxys.environments :+ EmptyDataUIs.emptyEnvironmentProxy
+  val environmentCombo = new MyComboBox(environmentProxys)
 
   dataUI.environment match {
     case Some(e: IEnvironmentDataProxyUI) ⇒ environmentCombo.selection.item = e
-    case _ ⇒
+    case _ ⇒ environmentCombo.selection.item = environmentProxys.last
   }
 
   tabbedPane.pages += new TabbedPane.Page("Source", sourcePanel.panel)
   tabbedPane.pages += new TabbedPane.Page("Hook", hookPanel.panel)
   tabbedPane.pages += new TabbedPane.Page("Environment", new PluginPanel("") { contents += environmentCombo })
 
-  def save = new CapsuleDataUI(dataUI.task,
-    environmentCombo.selection.item.dataUI match {
-      case e: EmptyDataUIs.EmptyEnvironmentDataUI ⇒ None
-      case e: IEnvironmentDataUI ⇒ Some(environmentCombo.selection.item)
-    },
-    sourcePanel.content.map { _.comboValue.get },
-    hookPanel.content.map { _.comboValue.get })
+  def save =
+    new CapsuleDataUI(dataUI.task,
+      environmentCombo.selection.item.dataUI match {
+        case e: EmptyDataUIs.EmptyEnvironmentDataUI ⇒ None
+        case e: IEnvironmentDataUI ⇒ Some(environmentCombo.selection.item)
+      },
+      sourcePanel.content.map { _.comboValue.get },
+      hookPanel.content.map { _.comboValue.get })
 }

@@ -54,6 +54,8 @@ trait ICapsuleUI {
 
   def outputs: List[IPrototypeDataProxyUI]
 
+  def update: Unit
+
   def updateErrors(errors: Iterable[DataflowProblem]): Unit
 
   def x: Double

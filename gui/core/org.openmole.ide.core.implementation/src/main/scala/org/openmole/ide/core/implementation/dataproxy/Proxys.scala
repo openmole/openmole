@@ -35,12 +35,12 @@ object Proxys {
   private val _hooks = TMap[ID.Type, IHookDataProxyUI]()
   private val _sources = TMap[ID.Type, ISourceDataProxyUI]()
 
-  def tasks = _tasks.single.values
-  def prototypes = _prototypes.single.values
-  def samplings = _samplings.single.values
-  def environments = _environments.single.values
-  def hooks = _hooks.single.values
-  def sources = _sources.single.values
+  def tasks = _tasks.single.values.toList
+  def prototypes = _prototypes.single.values.toList
+  def samplings = _samplings.single.values.toList
+  def environments = _environments.single.values.toList
+  def hooks = _hooks.single.values.toList
+  def sources = _sources.single.values.toList
 
   def task(id: ID.Type) = _tasks.single.get(id)
   def prototype(id: ID.Type) = _prototypes.single.get(id)

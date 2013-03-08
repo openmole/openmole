@@ -37,6 +37,9 @@ class CapsulePanel(scene: IMoleScene, capsule: ICapsuleUI) extends BasePanel(Non
 
   def delete = true
 
-  def save = capsule.dataUI = panelUI.save
+  def save = {
+    capsule.dataUI = panelUI.save
+    capsule.update
+  }
 
 }
