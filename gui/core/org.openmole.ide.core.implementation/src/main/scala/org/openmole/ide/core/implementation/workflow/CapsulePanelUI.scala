@@ -26,7 +26,7 @@ import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.misc.widget.multirow.MultiCombo.{ ComboData, ComboPanel }
 import org.openmole.ide.core.implementation.data.{ EmptyDataUIs, CapsuleDataUI }
-import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
+import org.openmole.ide.core.model.dataproxy.{ IHookDataProxyUI, ISourceDataProxyUI, IEnvironmentDataProxyUI }
 
 class CapsulePanelUI(dataUI: ICapsuleDataUI) extends PluginPanel("") with ICapsulePanelUI {
 
@@ -67,6 +67,16 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI) extends PluginPanel("") with ICapsu
         case e: EmptyDataUIs.EmptyEnvironmentDataUI ⇒ None
         case e: IEnvironmentDataUI ⇒ Some(environmentCombo.selection.item)
       },
-      sourcePanel.content.map { _.comboValue.get },
-      hookPanel.content.map { _.comboValue.get })
+      sourcePanel.content.map { _.comboValue.get }.filter {
+        _ match {
+          case s: ISourceDataProxyUI ⇒ true
+          case _ ⇒ false
+        }
+      },
+      hookPanel.content.map { _.comboValue.get }.filter {
+        _ match {
+          case s: IHookDataProxyUI ⇒ true
+          case _ ⇒ false
+        }
+      })
 }

@@ -233,7 +233,7 @@ class CapsuleUI(val scene: IMoleScene,
 
     val img = dataUI.environment match {
       case Some(x: IEnvironmentDataProxyUI) ⇒ new ImageIcon(ImageIO.read(x.dataUI.getClass.getClassLoader.getResource(x.dataUI.imagePath)))
-      case _⇒ new ImageIcon(ImageIO.read(dataUI.getClass.getClassLoader.getResource("img/noEnv.png")))
+      case _ ⇒ new ImageIcon(ImageIO.read(dataUI.getClass.getClassLoader.getResource("img/noEnv.png")))
     }
 
     environmentWidget = Some(imageWidget(scene,
