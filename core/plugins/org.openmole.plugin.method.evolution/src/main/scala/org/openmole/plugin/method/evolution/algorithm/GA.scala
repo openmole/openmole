@@ -211,8 +211,9 @@ object GA {
     crossover: GACrossoverBuilder = sbx(),
     dominance: Dominance = strict,
     diversityMetric: DiversityMetricBuilder = crowding,
-    ranking: GARankingBuilder = pareto) =
-    new org.openmole.plugin.method.evolution.algorithm.GAImpl(algorithm, lambda, termination, mutation, crossover, dominance, diversityMetric, ranking)(_)
+    ranking: GARankingBuilder = pareto,
+    breedingProbability: Double = 1.0) =
+    new org.openmole.plugin.method.evolution.algorithm.GAImpl(algorithm, lambda, termination, mutation, crossover, dominance, diversityMetric, ranking, breedingProbability)(_)
 
 }
 
@@ -238,7 +239,8 @@ sealed class GAImpl(
   val crossover: GA.GACrossoverBuilder = GA.sbx(),
   val dominance: Dominance = GA.strict,
   val diversityMetric: GA.DiversityMetricBuilder = GA.crowding,
-  val ranking: GA.GARankingBuilder = GA.pareto)(val genomeSize: Int)
+  val ranking: GA.GARankingBuilder = GA.pareto,
+  override val breedingProbability: Double = 1.0)(val genomeSize: Int)
     extends GA { sga ⇒
 
   lazy val thisRanking = ranking(dominance)
