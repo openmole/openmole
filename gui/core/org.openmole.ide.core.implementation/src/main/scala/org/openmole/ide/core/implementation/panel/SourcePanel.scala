@@ -42,13 +42,13 @@ class SourcePanel(proxy: ISourceDataProxyUI,
   iconLabel.icon = new ImageIcon(ImageIO.read(this.getClass.getClassLoader.getResource("img/source.png")))
 
   def create = {
-    Proxys.sources += proxy
+    Proxys += proxy
     ConceptMenu.sourceMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
 
   def delete = {
     scene.closePropertyPanel
-    Proxys.sources -= proxy
+    Proxys -= proxy
     ConceptMenu.removeItem(proxy)
     true
   }

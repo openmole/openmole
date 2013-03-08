@@ -17,14 +17,12 @@
 
 package org.openmole.ide.core.implementation.data
 
-import org.openmole.core.model.mole._
 import org.openmole.ide.core.model.commons._
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.data.ICapsuleDataUI
-import org.openmole.ide.misc.tools.Counter
-import scala.collection.mutable.HashMap
+import org.openmole.ide.misc.tools.util._
 import org.openmole.core.implementation.mole.{ StrainerCapsule, MasterCapsule, Capsule }
 import org.openmole.ide.core.implementation.workflow.CapsulePanelUI
 import org.openmole.ide.core.implementation.builder.MoleFactory
@@ -38,8 +36,6 @@ case class CapsuleDataUI(val task: Option[ITaskDataProxyUI] = None,
                          val sources: List[ISourceDataProxyUI] = List(),
                          val hooks: List[IHookDataProxyUI] = List(),
                          val capsuleType: CapsuleType = new BasicCapsuleType) extends ICapsuleDataUI {
-
-  def id = Counter.id.getAndIncrement
 
   override def toString = task match {
     case Some(x: ITaskDataProxyUI) ⇒ x.dataUI.name

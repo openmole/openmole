@@ -53,7 +53,7 @@ class SourceConverter(mapper: Mapper,
   override def unmarshal(reader: HierarchicalStreamReader,
                          uc: UnmarshallingContext) = {
     if (reader.getAttributeCount != 0) {
-      val existingSource = Proxys.sources.find(_.id == reader.getAttribute("id").toInt)
+      val existingSource = Proxys.source(reader.getAttribute("id"))
       existingSource match {
         case Some(y: ISourceDataProxyUI) ⇒ y
         case _ ⇒
@@ -64,7 +64,7 @@ class SourceConverter(mapper: Mapper,
       val o = super.unmarshal(reader, uc)
       o match {
         case y: ISourceDataProxyUI ⇒
-          if (Proxys.sources.contains(y)) y
+          if (Proxys.contains(y)) y
           else addSource(y)
         case _ ⇒ throw new UserBadDataError("Can not load object " + o)
       }
@@ -74,7 +74,7 @@ class SourceConverter(mapper: Mapper,
   override def canConvert(t: Class[_]) = t.isAssignableFrom(classOf[SourceDataProxyUI])
 
   def addSource(h: ISourceDataProxyUI): ISourceDataProxyUI = {
-    Proxys.sources += h
+    Proxys += h
     ConceptMenu.sourceMenu.popup.contents += ConceptMenu.addItem(h)
     h
   }

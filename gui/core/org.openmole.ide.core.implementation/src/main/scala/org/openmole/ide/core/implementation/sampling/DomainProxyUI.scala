@@ -20,6 +20,7 @@ import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.ide.core.model.sampling.{ IFactorProxyUI, IDomainProxyUI }
 import org.openmole.ide.core.implementation.data.FactorDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.misc.tools.util.ID
 
 class DomainProxyUI(var dataUI: IDomainDataUI,
-                    var ordering: Int = 0) extends IDomainProxyUI
+                    var ordering: Int = 0) extends IDomainProxyUI with ID

@@ -21,18 +21,57 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
-import org.openmole.ide.misc.tools.util.Types
+import org.openmole.ide.misc.tools.util._
 import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.ide.core.implementation.builder.Builder
+import concurrent.stm._
 
 object Proxys {
 
-  var tasks = new HashSet[ITaskDataProxyUI]
-  var prototypes = new HashSet[IPrototypeDataProxyUI]
-  var samplings = new HashSet[ISamplingCompositionDataProxyUI]
-  var environments = new HashSet[IEnvironmentDataProxyUI]
-  var hooks = new HashSet[IHookDataProxyUI]
-  var sources = new HashSet[ISourceDataProxyUI]
+  private val _tasks = TMap[ID.Type, ITaskDataProxyUI]()
+  private val _prototypes = TMap[ID.Type, IPrototypeDataProxyUI]()
+  private val _samplings = TMap[ID.Type, ISamplingCompositionDataProxyUI]()
+  private val _environments = TMap[ID.Type, IEnvironmentDataProxyUI]()
+  private val _hooks = TMap[ID.Type, IHookDataProxyUI]()
+  private val _sources = TMap[ID.Type, ISourceDataProxyUI]()
+
+  def tasks = _tasks.single.values
+  def prototypes = _prototypes.single.values
+  def samplings = _samplings.single.values
+  def environments = _environments.single.values
+  def hooks = _hooks.single.values
+  def sources = _sources.single.values
+
+  def task(id: ID.Type) = _tasks.single.get(id)
+  def prototype(id: ID.Type) = _prototypes.single.get(id)
+  def sampling(id: ID.Type) = _samplings.single.get(id)
+  def environment(id: ID.Type) = _environments.single.get(id)
+  def hook(id: ID.Type) = _hooks.single.get(id)
+  def source(id: ID.Type) = _sources.single.get(id)
+
+  def +=(t: ITaskDataProxyUI) = _tasks.single put (t.id, t)
+  def -=(t: ITaskDataProxyUI) = _tasks.single remove (t.id)
+  def contains(t: ITaskDataProxyUI) = _tasks.single.contains(t.id)
+
+  def +=(t: IPrototypeDataProxyUI) = _prototypes.single put (t.id, t)
+  def -=(t: IPrototypeDataProxyUI) = _prototypes.single remove (t.id)
+  def contains(t: IPrototypeDataProxyUI) = _prototypes.single.contains(t.id)
+
+  def +=(t: ISamplingCompositionDataProxyUI) = _samplings.single put (t.id, t)
+  def -=(t: ISamplingCompositionDataProxyUI) = _samplings.single remove (t.id)
+  def contains(t: ISamplingCompositionDataProxyUI) = _samplings.single.contains(t.id)
+
+  def +=(t: IEnvironmentDataProxyUI) = _environments.single put (t.id, t)
+  def -=(t: IEnvironmentDataProxyUI) = _environments.single remove (t.id)
+  def contains(t: IEnvironmentDataProxyUI) = _environments.single.contains(t.id)
+
+  def +=(t: IHookDataProxyUI) = _hooks.single put (t.id, t)
+  def -=(t: IHookDataProxyUI) = _hooks.single remove (t.id)
+  def contains(t: IHookDataProxyUI) = _hooks.single.contains(t.id)
+
+  def +=(t: ISourceDataProxyUI) = _sources.single put (t.id, t)
+  def -=(t: ISourceDataProxyUI) = _sources.single remove (t.id)
+  def contains(t: ISourceDataProxyUI) = _sources.single.contains(t.id)
 
   def allPrototypesByName = prototypes.map {
     _.dataUI.name
@@ -61,7 +100,7 @@ object Proxys {
 
   def clearAll: Unit = {
     ConceptMenu.clearAllItems
-    List(tasks, prototypes, environments, samplings, hooks, sources).foreach {
+    List(tasks, prototypes, environments, samplings, hooks).foreach {
       _.clear
     }
   }

@@ -106,7 +106,7 @@ class TaskPanel(proxy: ITaskDataProxyUI,
   }
 
   def create = {
-    Proxys.tasks += proxy
+    Proxys += proxy
     ConceptMenu.taskMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
 
@@ -119,7 +119,7 @@ class TaskPanel(proxy: ITaskDataProxyUI,
     toBeRemovedCapsules match {
       case Nil ⇒
         scene.closePropertyPanel
-        Proxys.tasks -= proxy
+        Proxys -= proxy
         ConceptMenu.removeItem(proxy)
         true
       case _ ⇒

@@ -19,8 +19,8 @@ package org.openmole.ide.core.implementation.dataproxy
 
 import org.openmole.ide.core.model.data.IEnvironmentDataUI
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
-import org.openmole.ide.misc.tools.Counter
+import org.openmole.ide.misc.tools.util.ID
 
-class EnvironmentDataProxyUI(var dataUI: IEnvironmentDataUI,
-                             val id: Int = Counter.id.getAndIncrement,
-                             val generated: Boolean = false) extends IEnvironmentDataProxyUI
+class EnvironmentDataProxyUI(
+  var dataUI: IEnvironmentDataUI,
+  val generated: Boolean = false) extends IEnvironmentDataProxyUI with ID

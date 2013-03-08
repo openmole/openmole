@@ -55,7 +55,7 @@ class TaskConverter(mapper: Mapper,
   override def unmarshal(reader: HierarchicalStreamReader,
                          uc: UnmarshallingContext) = {
     if (reader.getAttributeCount != 0) {
-      val existingTask = Proxys.tasks.find(_.id == reader.getAttribute("id").toInt)
+      val existingTask = Proxys.task(reader.getAttribute("id"))
       existingTask match {
         case Some(y: ITaskDataProxyUI) ⇒ y
         case _ ⇒
@@ -66,7 +66,7 @@ class TaskConverter(mapper: Mapper,
       val o = super.unmarshal(reader, uc)
       o match {
         case y: ITaskDataProxyUI ⇒
-          if (Proxys.tasks.contains(y)) y
+          if (Proxys.contains(y)) y
           else addTask(y)
         case _ ⇒ throw new UserBadDataError("Can not load object " + o)
       }
@@ -74,7 +74,7 @@ class TaskConverter(mapper: Mapper,
   }
 
   def addTask(t: ITaskDataProxyUI): ITaskDataProxyUI = {
-    Proxys.tasks += t
+    Proxys += t
     ConceptMenu.taskMenu.popup.contents += ConceptMenu.addItem(t)
     t
   }

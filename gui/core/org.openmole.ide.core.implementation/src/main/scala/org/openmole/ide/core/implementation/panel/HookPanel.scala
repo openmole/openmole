@@ -42,13 +42,13 @@ class HookPanel(proxy: IHookDataProxyUI,
   iconLabel.icon = new ImageIcon(ImageIO.read(this.getClass.getClassLoader.getResource("img/hook.png")))
 
   def create = {
-    Proxys.hooks += proxy
+    Proxys += proxy
     ConceptMenu.hookMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
 
   def delete = {
     scene.closePropertyPanel
-    Proxys.hooks -= proxy
+    Proxys -= proxy
     ConceptMenu.removeItem(proxy)
     true
   }

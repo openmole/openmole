@@ -30,12 +30,10 @@ import org.openmole.ide.core.implementation.builder.MoleFactory
 import org.openmole.core.model.mole.{ ICapsule, IMole }
 import concurrent.stm._
 import util.{ Failure, Success }
-import org.openmole.misc.tools.io.Prettifier
-import org.openmole.misc.exception.ExceptionUtils
+import org.openmole.ide.misc.tools.util.ID
 
-class MoleSceneManager(var name: String) extends IMoleSceneManager {
+class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
 
-  val id = ScenesManager.countBuild.getAndIncrement
   var startingCapsule: Option[ICapsuleUI] = None
   var _capsules = new HashMap[String, ICapsuleUI]
   var _connectors = new HashMap[String, IConnectorUI]

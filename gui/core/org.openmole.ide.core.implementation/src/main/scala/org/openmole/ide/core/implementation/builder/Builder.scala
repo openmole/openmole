@@ -110,7 +110,7 @@ object Builder {
         val capsules = scene.manager.capsule(proxy)
         val cUI = {
           if (capsules.isEmpty) {
-            Proxys.tasks += proxy
+            Proxys += proxy
             SceneFactory.capsuleUI(scene, new Point(0, 0), Some(proxy)).addInputSlot(false)
           } else capsules.head.islots.head
         }

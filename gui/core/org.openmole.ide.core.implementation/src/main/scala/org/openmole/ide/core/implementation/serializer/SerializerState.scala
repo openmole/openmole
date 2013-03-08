@@ -19,11 +19,12 @@ package org.openmole.ide.core.implementation.serializer
 
 import scala.collection.mutable.HashMap
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
+import org.openmole.ide.misc.tools.util.ID
 
 object SerializerState {
   sealed trait State
-  case class Serializing(id: Int) extends State
-  case class Serialized(id: Int) extends State
+  case class Serializing(id: ID.Type) extends State
+  case class Serialized(id: ID.Type) extends State
 }
 
 import SerializerState._

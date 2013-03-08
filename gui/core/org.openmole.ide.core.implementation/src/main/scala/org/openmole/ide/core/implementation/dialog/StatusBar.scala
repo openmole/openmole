@@ -28,6 +28,7 @@ import scala.swing.Action
 import scala.swing.Label
 import compat.Platform.EOL
 import org.openmole.ide.core.implementation.workflow.{ ExecutionMoleSceneContainer, BuildMoleSceneContainer }
+import util.Failure
 
 object StatusBar {
   def apply() = ScenesManager.currentSceneContainer match {
@@ -35,6 +36,17 @@ object StatusBar {
     case Some(e: ExecutionMoleSceneContainer) ⇒ e.bmsc.statusBar
     case _ ⇒ new StatusBar
   }
+
+  def displayErrors(f: ⇒ Traversable[Throwable]) = {
+    StatusBar().clear
+    f.foreach {
+      t ⇒
+        StatusBar().block(
+          t.getMessage,
+          stack = t.getMessage + "\n" + t.getStackTraceString)
+    }
+  }
+
 }
 
 class StatusBar extends MigPanel("wrap 3") {

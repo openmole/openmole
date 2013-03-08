@@ -35,7 +35,6 @@ import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import scala.collection.mutable.HashSet
-import org.openmole.ide.misc.tools.Counter
 import org.openmole.misc.tools.obj.ClassUtils._
 
 class PrototypeConverter(mapper: Mapper,
@@ -63,14 +62,15 @@ class PrototypeConverter(mapper: Mapper,
 
   def extract(reader: HierarchicalStreamReader) = {
     new PrototypeDataProxyUI(GenericPrototypeDataUI(reader.getAttribute("name"),
-      reader.getAttribute("dim").toInt)(manifest(reader.getAttribute("type"))),
-      reader.getAttribute("id").toInt, generated = reader.getAttribute("generated").toBoolean)
+      reader.getAttribute("dim").toInt)(manifest(reader.getAttribute("type"))), generated = reader.getAttribute("generated").toBoolean) {
+      override val id = reader.getAttribute("id")
+    }
   }
 
   override def unmarshal(reader: HierarchicalStreamReader,
                          uc: UnmarshallingContext) = {
     if (reader.getAttributeCount <= 2) {
-      val existingPrototype = Proxys.prototypes.find(_.id == reader.getAttribute("id").toInt)
+      val existingPrototype = Proxys.prototype(reader.getAttribute("id"))
       existingPrototype match {
         case Some(y: IPrototypeDataProxyUI) ⇒ y
         case x: Any ⇒ super.unmarshal(reader, uc)
@@ -79,7 +79,7 @@ class PrototypeConverter(mapper: Mapper,
       val o = extract(reader)
       o match {
         case y: IPrototypeDataProxyUI ⇒
-          if (Proxys.prototypes.contains(y)) y
+          if (Proxys.contains(y)) y
           else addPrototype(y)
         case _ ⇒ throw new UserBadDataError("Can not load object " + o)
       }
@@ -87,10 +87,9 @@ class PrototypeConverter(mapper: Mapper,
   }
 
   def addPrototype(p: IPrototypeDataProxyUI): IPrototypeDataProxyUI = {
-    Proxys.prototypes += p
+    Proxys += p
     if (!p.generated)
       ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(p)
-    Counter.id.getAndIncrement
     if (!(GenericPrototypeDataUI.baseType ::: GenericPrototypeDataUI.extraType contains Types.standardize(p.dataUI.typeClassString))) {
       GenericPrototypeDataUI.extraType = GenericPrototypeDataUI.extraType :+ Types.standardize(p.dataUI.typeClassString)
     }

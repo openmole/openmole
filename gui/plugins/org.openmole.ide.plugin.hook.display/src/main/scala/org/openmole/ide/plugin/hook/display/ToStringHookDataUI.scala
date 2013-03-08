@@ -18,7 +18,6 @@
 package org.openmole.ide.plugin.hook.display
 
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.misc.tools.Counter
 import org.openmole.plugin.hook.display._
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.data.HookDataUI

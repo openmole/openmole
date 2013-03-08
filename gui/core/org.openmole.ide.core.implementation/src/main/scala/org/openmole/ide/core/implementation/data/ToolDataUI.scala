@@ -48,7 +48,7 @@ object ToolDataUI {
             val (protoType, dim) = KeyGenerator.stripArrays(d.prototype.`type`)
             val proto = new PrototypeDataProxyUI(GenericPrototypeDataUI(d.prototype.name, dim + 1)(protoType), generated = true)
             if (!KeyPrototypeGenerator.isPrototype(proto))
-              Proxys.prototypes += proto
+              Proxys += proto
         }
         case _ ⇒
       }

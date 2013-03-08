@@ -27,6 +27,7 @@ import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.workflow.MoleSceneManager
 import org.openmole.ide.core.model.panel.ITaskPanelUI
+import org.openmole.ide.misc.tools.util._
 import scala.swing.TabbedPane
 import scala.swing.event.SelectionChanged
 import scala.swing.Label
@@ -46,7 +47,7 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2", "
     }.toList)
 
   moleComboBox.selection.item = pud.mole match {
-    case Some(x: Int) ⇒ MoleTaskDataUI.manager(x) match {
+    case Some(x: ID.Type) ⇒ MoleTaskDataUI.manager(x) match {
       case Some(m: IMoleSceneManager) ⇒ m.asInstanceOf[MoleSceneManager]
       case _ ⇒ MoleTaskDataUI.emptyMoleSceneManager
     }
@@ -76,10 +77,10 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2", "
     else List(EmptyDataUIs.emptyTaskProxy)
   }
 
-  override def saveContent(name: String) = new MoleTaskDataUI(name, if (moleComboBox.selection.item.id == -1) None
-  else Some(moleComboBox.selection.item.id),
-    if (capsuleComboBox.selection.item == EmptyDataUIs.emptyTaskProxy) None
-    else Some(capsuleComboBox.selection.item))
+  override def saveContent(name: String) =
+    new MoleTaskDataUI(name,
+      if (moleComboBox.selection.item.id == -1) None else Some(moleComboBox.selection.item.id),
+      if (capsuleComboBox.selection.item == EmptyDataUIs.emptyTaskProxy) None else Some(capsuleComboBox.selection.item))
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     add(moleComboBox,
