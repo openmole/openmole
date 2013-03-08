@@ -28,7 +28,7 @@
   <dependencies>
     <dependency>
       <groupId>fr.iscpif</groupId>
-      <artifactId>mgo_2.10</artifactId>
+      <artifactId>mgo_${lib.org.scala-lang.scala.version}</artifactId>
       <version>${lib.fr.iscpif.mgo.version}</version>
     </dependency>
     <dependency>
