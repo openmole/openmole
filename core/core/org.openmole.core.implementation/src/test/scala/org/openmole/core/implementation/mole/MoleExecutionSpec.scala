@@ -91,7 +91,6 @@ class MoleExecutionSpec extends FlatSpec with ShouldMatchers {
 
     val emptyC = new Capsule(emptyT)
     new MoleExecution(
-      mole = new Mole(emptyC),
-      implicits = Context(Variable(i, "test"))).start.waitUntilEnded
+      mole = new Mole(emptyC))(implicits = Context(Variable(i, "test"))).start.waitUntilEnded
   }
 }

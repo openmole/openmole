@@ -59,7 +59,7 @@ object MoleFactory {
                          manager: IMoleSceneManager,
                          hooks: List[(ICapsule, IHook)],
                          capsuleMap: Map[ICapsuleUI, ICapsule],
-                         groupingStrategies: List[(Grouping, ICapsule)]): Try[(ExecutionContext ⇒ IMoleExecution, Iterable[(Environment, String)])] =
+                         groupingStrategies: List[(Grouping, ICapsule)]): Try[(MoleExecution.PartialMoleExecution, Iterable[(Environment, String)])] =
     Try {
       var envs = new HashSet[(Environment, String)]
       val strat = new ListBuffer[(ICapsule, EnvironmentSelection)]

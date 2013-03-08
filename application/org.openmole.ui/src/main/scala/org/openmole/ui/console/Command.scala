@@ -93,6 +93,5 @@ class Command {
   def load[T](f: File) = SerializerService.deserialize[T](f)
   def save(o: Any, f: File) = SerializerService.serialize(o, f)
 
-  implicit lazy val executionContext = ExecutionContext.local
-
 }
+

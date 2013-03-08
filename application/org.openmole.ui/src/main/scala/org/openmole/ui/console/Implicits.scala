@@ -19,9 +19,13 @@ package org.openmole.ui.console
 
 import java.io.File
 import org.openmole.core.model.task.PluginSet
+import org.openmole.core.model.mole.ExecutionContext
+import org.openmole.core.model.data.Context
 
 class Implicits(
     implicit val plugins: PluginSet) {
   implicit def stringToFile(path: String) = new File(path)
+  implicit lazy val executionContext = ExecutionContext.local
+  implicit lazy val implicits = Context.empty
 }
 
