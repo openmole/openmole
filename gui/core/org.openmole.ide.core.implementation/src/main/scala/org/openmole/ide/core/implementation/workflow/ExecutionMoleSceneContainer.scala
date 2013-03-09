@@ -74,19 +74,15 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   val dlLabel = new Label("0/0")
   val ulLabel = new Label("0/0")
 
-  var groupingPanel: Option[MultiGenericGroupingStrategyPanel] = None
-
-  var panelHooks = new HashMap[IHookPanelUI, (ICapsuleUI, Class[_ <: IHook])]
   executionManager match {
     case Some(eManager: ExecutionManager) ⇒
 
       //peer.add(
-      val hookTabbedPane = new TabbedPane
-      val hookPanel = new PluginPanel("wrap")
+      /*val hookPanel = new PluginPanel("wrap")
       hookPanel.contents += new Label {
         text = "<html><b><font \"size=\"5\" >Hooks</font></b></html>"
       }
-      hookPanel.contents += hookTabbedPane
+      hookPanel.contents += hookTabbedPane  */
       //Hooks
 
       eManager.capsuleMapping.keys.foreach {
@@ -127,17 +123,11 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
             case _ ⇒
           }
       }
-      hookPanel.contents += new TitleLabel("Grouping strategy")
-      groupingPanel = Some(new MultiGenericGroupingStrategyPanel(eManager))
-      hookPanel.contents += groupingPanel.get.panel
 
       val executionPanel = new ExecutionPanel
       executionPanel.peer.setLayout(new BorderLayout)
       // new ExecutionPanel {
       executionPanel.peer.setLayout(new BorderLayout)
-      executionPanel.peer.add(hookPanel.peer, BorderLayout.CENTER)
-
-      val centerPanel = new ScrollPane(executionPanel)
 
       peer.add(new PluginPanel("wrap") {
         contents += new TitleLabel("Execution control")
@@ -161,14 +151,10 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
               }, "Mole execution"))
           })
         }
-      }.peer, BorderLayout.SOUTH)
+        contents += eManager.envBarPanel
+      }.peer, BorderLayout.NORTH)
 
-      val splitPane = new SplitPane(Orientation.Horizontal)
-
-      splitPane.leftComponent = centerPanel
-      splitPane.rightComponent = eManager
-      splitPane.resizeWeight = 1
-      peer.add(splitPane.peer)
+      peer.add(eManager.peer)
 
     case None ⇒
   }
@@ -184,6 +170,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         startStopButton.background = new Color(170, 0, 0)
         startStopButton.action = stop
         exportButton.enabled = false
+        x.start(Map(), List())
       /*  x.start(panelHooks.map {
           ph ⇒ ph._1.saveContent -> ph._2._1
         }.toMap,

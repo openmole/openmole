@@ -94,17 +94,6 @@ class ExecutionManager(manager: IMoleSceneManager,
   val timer = new Timer(5000, timerAction)
   var environments = new HashMap[Environment, (String, HashMap[ExecutionState.ExecutionState, AtomicInteger])]
 
-  val hookMenu = new Menu("Hooks")
-
-  val splitPane = new SplitPane(Orientation.Vertical)
-  val leftPanel = new PluginPanel("wrap", "[center]", "")
-  leftPanel.contents += envBarPanel
-
-  splitPane.leftComponent = leftPanel
-
-  splitPane.rightComponent = new ScrollPane(logTextArea)
-  splitPane.resizeWeight = 0.65
-
   var downloads = (0, 0)
   var uploads = (0, 0)
 
@@ -115,7 +104,7 @@ class ExecutionManager(manager: IMoleSceneManager,
     opaque = true
     background = new Color(77, 77, 77)
   }
-  tabbedPane.pages += new TabbedPane.Page("Progress", splitPane)
+  tabbedPane.pages += new TabbedPane.Page("Progress", new ScrollPane(logTextArea))
   tabbedPane.pages += new TabbedPane.Page("Errors", new ScrollPane(executionJobExceptionTextArea))
   tabbedPane.pages += new TabbedPane.Page("Environments errors", new ScrollPane(moleExecutionExceptionTextArea))
 
@@ -158,9 +147,6 @@ class ExecutionManager(manager: IMoleSceneManager,
             contents += new TitleLabel("Environment: " + environments.toList(0)._2)
             contents += envBarPlotter.panel
           }.peer)
-          // splitPane.dividerLocation = (preferredSize.width * 0.4).toInt
-          splitPane.revalidate
-          splitPane.repaint
         }
         initPieChart
         repaint

@@ -26,6 +26,5 @@ class NumberOfBatchShuffledGroupingFactoryUI extends IGroupingFactoryUI {
 
   def coreClass = classOf[BatchShuffledGrouping]
 
-  def buildPanelUI(executionManager: IExecutionManager) =
-    new NumberOfBatchShuffledGroupingPanelUI(executionManager)
+  def buildPanelUI = new NumberOfBatchShuffledGroupingPanelUI
 }

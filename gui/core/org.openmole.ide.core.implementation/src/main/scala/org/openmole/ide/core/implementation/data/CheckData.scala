@@ -92,13 +92,13 @@ object CheckData extends Logger {
                     cui.setAsInvalid(e.getMessage)
                     displayCapsuleErrors(cui, e.getMessage)
                 }
-                Right(mole, cMap, pMap, errs)
-              case Failure(l) ⇒ Left(l)
+                Success(mole, cMap, pMap, errs)
+              case Failure(l) ⇒ Failure(l)
             }
           case _ ⇒
-            Left(("No starting capsule is defined, the Mole can not be built"))
+            Failure(new Throwable("No starting capsule is defined, the Mole can not be built"))
         }
-      case _ ⇒ Left("")
+      case _ ⇒ Failure(new Throwable(""))
     }
   }
 
@@ -115,19 +115,19 @@ object CheckData extends Logger {
       c ⇒
         c.task match {
           case Some(x: ITaskDataProxyUI) ⇒
-          case _ ⇒ StatusBar().warn("A capsule without taskMap can not be run")
+          case _ ⇒ StatusBar().warn("A capsule without task can not be run")
         }
     }
 
   def fullCheck(scene: IMoleScene) = {
     checkMole(scene) match {
-      case Right((mole, _, _, errors)) ⇒
+      case Success((mole, _, _, errors)) ⇒
         if (errors.isEmpty) {
           val checkTopo = checkTopology(mole)
-          if (checkTopo.isEmpty) Right("")
+          if (checkTopo.isEmpty) Success("")
           else Left(checkTopo)
         } else Left(errors.mkString("\n"))
-      case Left(l) ⇒ Left(l)
+      case Failure(l) ⇒ Failure(l)
     }
   }
 
