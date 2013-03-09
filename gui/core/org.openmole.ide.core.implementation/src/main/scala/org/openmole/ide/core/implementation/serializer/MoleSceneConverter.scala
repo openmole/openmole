@@ -44,6 +44,7 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import scala.collection.immutable.HashSet
 import scala.collection.mutable.HashMap
 import org.openmole.ide.core.implementation.builder.SceneFactory
+import org.openmole.ide.misc.tools.util.ID
 
 class MoleSceneConverter(serializer: GUISerializer) extends Converter {
   override def marshal(o: Object, writer: HierarchicalStreamWriter, mc: MarshallingContext) = {
@@ -194,7 +195,7 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
             n1 match {
               case "islot" ⇒ islots.put(reader.getAttribute("id"), caps.addInputSlot(start))
               case "oslot" ⇒ oslots.put(reader.getAttribute("id"), caps)
-              case "task" ⇒ Proxys.tasks.filter(p ⇒ p.id == reader.getAttribute("id").toInt).headOption match {
+              case "task" ⇒ Proxys.tasks.filter(p ⇒ p.id == reader.getAttribute("id")).headOption match {
                 case Some(t: ITaskDataProxyUI) ⇒ caps.encapsule(t)
                 case None ⇒ errors += "An error occured when loading the Task for a capsule. No Task has been set."
               }
@@ -202,12 +203,12 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
                 caps.dataUI = caps.dataUI -- new MasterCapsuleType(caps.dataUI.capsuleType.persistList ::: List(Proxys.prototypes.filter(_.dataUI.name == reader.getAttribute("name").toString).head))
 
               case "environment" ⇒
-                Proxys.environments.filter(e ⇒ e.id == reader.getAttribute("id").toInt).headOption match {
+                Proxys.environments.filter(e ⇒ e.id == reader.getAttribute("id")).headOption match {
                   case Some(e: IEnvironmentDataProxyUI) ⇒ caps on Some(e)
                   case None ⇒ errors += "An error occured when loading the Environment for a capsule. No Environment has been set."
                 }
               case "misc" ⇒
-                Proxys.hooks.filter(e ⇒ e.id == reader.getAttribute("id").toInt).headOption match {
+                Proxys.hooks.filter(e ⇒ e.id == reader.getAttribute("id")).headOption match {
                   case Some(h: IHookDataProxyUI) ⇒
                   //caps.setHook(Some(h))
                   case None ⇒ errors += "An error occured when loading the Environment for a capsule. No Environment has been set."
@@ -242,12 +243,12 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
   }
 
   def readFiltered(reader: HierarchicalStreamReader) = {
-    var protoIds = new HashSet[Int]
+    var protoIds = new HashSet[ID.Type]
     while (reader.hasMoreChildren) {
       reader.moveDown
       val p = reader.getNodeName
       p match {
-        case "filteredPrototype" ⇒ protoIds += reader.getAttribute("id").toInt
+        case "filteredPrototype" ⇒ protoIds += reader.getAttribute("id")
         case _ ⇒ StatusBar().block("Unknown balise " + p)
       }
       reader.moveUp

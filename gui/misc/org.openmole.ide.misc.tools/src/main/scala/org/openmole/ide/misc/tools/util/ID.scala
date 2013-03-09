@@ -20,7 +20,7 @@ package org.openmole.ide.misc.tools.util
 import java.util.UUID
 
 object ID {
-  val newId = UUID.randomUUID.toString
+  def newId = UUID.randomUUID.toString
   type Type = String
 }
 

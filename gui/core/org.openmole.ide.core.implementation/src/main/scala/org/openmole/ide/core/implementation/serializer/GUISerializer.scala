@@ -40,7 +40,7 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.io.TarArchiver._
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
-import org.openmole.misc.exception.InternalProcessingError
+import org.openmole.misc.exception.{ ExceptionUtils, InternalProcessingError }
 
 class GUISerializer {
 
@@ -88,47 +88,46 @@ class GUISerializer {
   xstream.alias("hook", classOf[IHookDataProxyUI])
   xstream.alias("source", classOf[ISourceDataProxyUI])
 
-  def serializeConcept(concept: String, set: List[(_, ID.Type)]) = {
+  def serializeConcept(concept: String, set: Iterable[(_, ID.Type)]) = {
     val conceptDir = new File(workDir, concept)
     conceptDir.mkdirs
     set.foreach {
       case (s, id) ⇒
         new File(conceptDir, id + ".xml").withWriter {
-          xstream.createObjectOutputStream(_, concept)
+          xstream.toXML(s, _)
         }
     }
   }
 
-  def serialize(fromFile: String) = {
-    serializeConcept("prototype", Proxys.prototypes.map { s ⇒ s -> s.id }.toList)
-    serializeConcept("environment", Proxys.environments.map { s ⇒ s -> s.id }.toList)
-    serializeConcept("sampling", Proxys.samplings.map { s ⇒ s -> s.id }.toList)
-    serializeConcept("hook", Proxys.hooks.map { s ⇒ s -> s.id }.toList)
-    serializeConcept("source", Proxys.sources.map { s ⇒ s -> s.id }.toList)
-    serializeConcept("task", Proxys.tasks.map { s ⇒ s -> s.id }.toList)
-    serializeConcept("mole", ScenesManager.moleScenes.map { ms ⇒ ms -> ms.manager.id }.toList)
-    val os = new TarOutputStream(new FileOutputStream(fromFile))
-    try os.createDirArchiveWithRelativePathNoVariableContent(workDir)
+  def serialize(file: String) = {
+    serializeConcept("prototype", Proxys.prototypes.map { s ⇒ s -> s.id })
+    serializeConcept("environment", Proxys.environments.map { s ⇒ s -> s.id })
+    serializeConcept("sampling", Proxys.samplings.map { s ⇒ s -> s.id })
+    serializeConcept("hook", Proxys.hooks.map { s ⇒ s -> s.id })
+    serializeConcept("source", Proxys.sources.map { s ⇒ s -> s.id })
+    serializeConcept("task", Proxys.tasks.map { s ⇒ s -> s.id })
+    serializeConcept("mole", ScenesManager.moleScenes.map { ms ⇒ ms -> ms.manager.id })
+    val os = new TarOutputStream(new FileOutputStream(file))
+    try os.createDirArchiveWithRelativePath(workDir)
     finally os.close
     clear
   }
 
-  def readStream(f: File) = Try {
-    try xstream.createObjectInputStream(new FileReader(f))
+  def read(f: File) = Try {
+    try xstream.fromXML(f)
     catch {
       case e: Throwable ⇒
-        throw new InternalProcessingError(e, "An error occured when loading " + f.getAbsolutePath + "\n")
+        throw new InternalProcessingError(e, "An error occurred when loading " + f.getAbsolutePath + "\n")
     }
   }
 
   def unserializeProxy(concept: String) =
     new File(workDir, concept).listFiles.toList.flatMap {
       f ⇒
-        readStream(f) match {
-          case Success(x: ObjectInputStream) ⇒
+        read(f) match {
+          case Success(obj) ⇒
             try {
-              val readObject = x.readObject
-              readObject match {
+              obj match {
                 case ms: BuildMoleScene ⇒ ScenesManager.addBuildSceneContainer(ms)
                 case _ ⇒
               }
@@ -137,7 +136,7 @@ class GUISerializer {
               case eof: EOFException ⇒ None
               case e: Throwable ⇒
                 Some(new InternalProcessingError(e, "Failed to unserialize a data of type " + concept))
-            } finally x.close
+            }
           case Failure(t) ⇒ Some(t)
         }
     }
