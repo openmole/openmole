@@ -14,15 +14,39 @@ import org.openmole.core.model.mole.ExecutionContext
 import org.openmole.web.DataHandler
 import org.openmole.core.model.job.State._
 import concurrent.duration._
+import slick.driver.H2Driver.simple._
+import slick.jdbc.meta.MTable
+
+import Database.threadLocalSession
 import org.slf4j.impl.StaticLoggerBinder
 
+import org.openmole.web.MoleData
+
+import org.openmole.web.SlickSupport
+import xml.XML
+import java.sql.{ Clob, Blob }
+import javax.sql.rowset.serial.{ SerialClob, SerialBlob }
+
+object MoleData extends Table[(String, String, Clob)]("MoleData") {
+  def id = column[String]("ID")
+  def state = column[String]("STATE")
+  def clobbedMole = column[Clob]("MOLEEXEC")
+
+  def * = id ~ state ~ clobbedMole
+}
+
 @MultipartConfig(maxFileSize = 3 * 1024 * 1024) //research scala multipart config
-class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSupport with FileUploadSupport with FlashMapSupport with FutureSupport {
+class MyServlet(val system: ActorSystem) extends ScalatraServlet with SlickSupport with ScalateSupport with FileUploadSupport with FlashMapSupport with FutureSupport {
 
   protected implicit def executor: concurrent.ExecutionContext = system.dispatcher
 
   get("/index.html") {
     contentType = "text/html"
+
+    db withSession {
+      if (MTable.getTables("MoleData").list().isEmpty)
+        MoleData.ddl.create // check that table exists somehow
+    }
 
     new AsyncResult() {
       val is = Future {
@@ -90,6 +114,12 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
     moleExec match {
       case (Some(pEx), _) ⇒ {
         val exec = pEx(context)
+
+        val clob = new SerialClob(SerializerService.serialize(exec).toCharArray)
+
+        db withSession {
+          MoleData.insert((exec.id, getStatus(exec), clob))
+        }
         testMoleData.add(exec.id, exec)
         println("added " + exec.id + "to testMoleData.")
         halt(status = 301, headers = Map("Location" -> url("execs")))
@@ -113,10 +143,12 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
   get("/execs") {
     contentType = "text/html"
 
-    new AsyncResult() {
-      val is = Future {
-        ssp("/loadedExecutions", "ids" -> testMoleData.getKeys.toList)
-      }
+    db withSession {
+      val ids = for {
+        m ← MoleData
+      } yield m.id.asColumnOf[String]
+
+      ssp("/loadedExecutions", "ids" -> ids.list)
     }
   }
 
@@ -125,26 +157,27 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
 
     val pRams = params("id")
 
-    new AsyncResult() {
-      val is = Future {
-        testMoleData.get(pRams) match {
-          case Some(exec) ⇒ {
-            println(getStatus(exec))
-            println(exec)
+    val mole = db withSession {
 
-            val pageData = (exec.moleJobs foldLeft Map("READY" -> 0,
-              "RUNNING" -> 0,
-              "COMPLETED" -> 0,
-              "FAILED" -> 0,
-              "CANCELLED" -> 0)) {
-                case (statMap, job) ⇒ statMap.updated(job.state.name, statMap(job.state.name) + 1)
-              } + ("id" -> pRams) + ("status" -> getStatus(exec)) + ("totalJobs" -> exec.numberOfJobs)
+      SerializerService.deserialize[MoleExecution](MoleData.filter(_.id === pRams).map(_.clobbedMole).list().head.getAsciiStream)
+    }
 
-            ssp("/executionData", pageData.toSeq: _*)
-          }
-          case _ ⇒ ssp("createMole", "body" -> "no such id")
-        }
+    testMoleData.get(pRams) match {
+      case Some(exec) ⇒ {
+        println(getStatus(exec))
+        println(exec)
+
+        val pageData = (exec.moleJobs foldLeft Map("READY" -> 0,
+          "RUNNING" -> 0,
+          "COMPLETED" -> 0,
+          "FAILED" -> 0,
+          "CANCELLED" -> 0)) {
+            case (statMap, job) ⇒ statMap.updated(job.state.name, statMap(job.state.name) + 1)
+          } + ("id" -> pRams) + ("status" -> getStatus(mole)) + ("totalJobs" -> exec.numberOfJobs)
+
+        ssp("/executionData", pageData.toSeq: _*)
       }
+      case _ ⇒ ssp("createMole", "body" -> "no such id")
     }
   }
 
@@ -194,5 +227,11 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with ScalateSup
     contentType = null
     // Try to render a ScalateTemplate if no route matched
     resourceNotFound()
+  }
+
+  get("/dropTables") {
+    db withSession {
+      MoleData.ddl.drop
+    }
   }
 }

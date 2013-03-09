@@ -15,7 +15,7 @@ import java.util.UUID
 import Database.threadLocalSession
 import java.io.IOException
 
-object Workflows extends Table[(Int, String, UUID)]("WORKFLOWS") {
+/*object Workflows extends Table[(Int, String, UUID)]("WORKFLOWS") {
   def id = column[Int]("WF_ID", O.PrimaryKey) // This is the primary key column
   def name = column[String]("WF_NAME")
   def version = column[String]("WF_VERSION")
@@ -39,7 +39,7 @@ object WFTag extends Table[(Int, Int)]("WFTag") {
   def * = id ~ name
   def workflow = foreignKey("WF_FK", wfiD, Workflows)(_.id)
   def tag = foreignKey("TAG_FK", tagiD, Tags)(_.id)
-}
+}          */
 
 // Definition of the SUPPLIERS table
 object Suppliers extends Table[(Int, String, String, String, String, String)]("SUPPLIERS") {
@@ -79,12 +79,13 @@ trait SlickSupport extends ScalatraServlet {
 
   var connectionPool = {
     val boneCfg = new BoneCPConfig()
-    boneCfg.setJdbcUrl("jdbc:h2:~/tmp/test;TRACE_LEVEL_FILE=4")
+    boneCfg.setJdbcUrl("jdbc:h2:~/tmp/test;TRACE_LEVEL_FILE=4;MVCC=TRUE")
     boneCfg.setUser("root")
     boneCfg.setPassword("")
     boneCfg.setMinConnectionsPerPartition(5)
     boneCfg.setMaxConnectionsPerPartition(10)
     boneCfg.setPartitionCount(1)
+    boneCfg.setDefaultAutoCommit(true)
 
     new BoneCPDataSource(boneCfg)
   }
