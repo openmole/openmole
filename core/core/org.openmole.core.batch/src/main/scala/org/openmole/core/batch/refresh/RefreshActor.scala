@@ -45,7 +45,7 @@ class RefreshActor(jobManager: ActorRef, environment: BatchEnvironment) extends 
             } else jobManager ! Kill(job)
           case None ⇒ jobManager ! Delay(Refresh(job, sj, bj, delay), delay)
         } catch {
-          case e: Throwable ⇒
+          case e ⇒
             jobManager ! Error(job, e)
             jobManager ! Kill(job)
         }
