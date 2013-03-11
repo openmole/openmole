@@ -20,4 +20,22 @@ package org.openmole.plugin.task
 import java.io.File
 import org.openmole.core.model.data.Prototype
 
-package object external {}
+package object external {
+
+  case class OS(name: String = "", arch: String = "") {
+    def compatibleWith(testOS: String, testArch: String) =
+      testOS.toLowerCase.contains(name.toLowerCase) &&
+        testArch.toLowerCase.contains(arch.toLowerCase)
+
+    def compatible = compatibleWith(System.getProperty("os.name"), System.getProperty("os.arch"))
+  }
+
+  val windows = "Windows"
+  val linux = "Linux"
+  val mac = "Mac"
+
+  val arch32 = "x86"
+  val arch64 = "amd64"
+
+  def actualOS = (System.getProperty("os.name"), System.getProperty("os.arch"))
+}

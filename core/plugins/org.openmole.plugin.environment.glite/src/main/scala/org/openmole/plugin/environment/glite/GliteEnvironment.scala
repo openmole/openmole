@@ -124,23 +124,24 @@ object GliteEnvironment extends Logger {
   Workspace += (DefaultBDII, "ldap://cclcgtopbdii02.in2p3.fr:2170")
 
 
-  def apply (voName: String)(
-        bdii: String = Workspace.preference(GliteEnvironment.DefaultBDII),
-        vomsURL: String = GliteAuthentication.getVOMS(voName).getOrElse(throw new UserBadDataError(s"ID card for VO $voName not found.")),
-        fqan: Option[String] = None,
-        openMOLEMemory: Option[Int] = None,
-        memory: Option[Int] = None,
-        cpuTime: Option[String] = None,
-        wallTime: Option[String] = None,
-        cpuNumber: Option[Int] = None,
-        jobType: Option[String] = None,
-        smpGranularity: Option[Int] = None,
-        myProxy: Option[MyProxy] = None,
-        architecture: Option[String] = None,
-        threads: Option[Int] = None) =
-    new GliteEnvironment(voName) (
-      bdii,
-      vomsURL,
+  def apply (
+    voName: String,
+    bdii: Option[String] = None,
+    vomsURL: Option[String] = None,
+    fqan: Option[String] = None,
+    openMOLEMemory: Option[Int] = None,
+    memory: Option[Int] = None,
+    cpuTime: Option[String] = None,
+    wallTime: Option[String] = None,
+    cpuNumber: Option[Int] = None,
+    jobType: Option[String] = None,
+    smpGranularity: Option[Int] = None,
+    myProxy: Option[MyProxy] = None,
+    architecture: Option[String] = None,
+    threads: Option[Int] = None) =
+    new GliteEnvironment(voName,
+      bdii.getOrElse(Workspace.preference(GliteEnvironment.DefaultBDII)),
+      vomsURL.getOrElse(GliteAuthentication.getVOMS(voName).getOrElse(throw new UserBadDataError(s"ID card for VO $voName not found."))),
       fqan,
       openMOLEMemory,
       memory,
@@ -156,7 +157,7 @@ object GliteEnvironment extends Logger {
 }
 
 class GliteEnvironment(
-    val voName: String)(
+    val voName: String,
         val bdii: String,
         val vomsURL: String,
         val fqan: Option[String],

@@ -48,7 +48,7 @@ class NetLogoTask(
     val parameters: ParameterSet,
     val inputFiles: Iterable[(Prototype[File], String, Boolean)],
     val outputFiles: Iterable[(String, Prototype[File])],
-    val resources: Iterable[(File, String, Boolean)])(implicit val plugins: PluginSet) extends ExternalTask {
+    val resources: Iterable[(File, String, Boolean, OS)])(implicit val plugins: PluginSet) extends ExternalTask {
 
   val scriptPath =
     workspace.location match {
