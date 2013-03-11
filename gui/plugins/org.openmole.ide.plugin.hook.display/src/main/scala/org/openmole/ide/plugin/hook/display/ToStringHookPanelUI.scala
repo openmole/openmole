@@ -20,14 +20,20 @@ package org.openmole.ide.plugin.hook.display
 import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.plugin.misc.tools.MultiPrototypePanel
 import org.openmole.ide.core.implementation.dataproxy.Proxys
-import swing.TabbedPane
+import swing.{ Label, Component, TabbedPane }
+import org.openmole.ide.core.implementation.data.EmptyDataUIs
+import org.openmole.ide.misc.widget.PluginPanel
 
-class ToStringHookPanelUI(dataUI: ToStringHookDataUI) extends MultiPrototypePanel("Display prototypes",
-  dataUI.toBeHooked,
-  Proxys.prototypes.toList) with IHookPanelUI {
+class ToStringHookPanelUI(dataUI: ToStringHookDataUI) extends PluginPanel("") with IHookPanelUI {
+
+  val combo = new MultiPrototypePanel("Display prototypes",
+    dataUI.toBeHooked,
+    Proxys.prototypes.toList)
+
+  contents += combo
 
   tabbedPane.pages.insert(0, new TabbedPane.Page("Prototypes", this))
 
   def saveContent(name: String) = new ToStringHookDataUI(name,
-    multiPrototypeCombo.content.map { _.comboValue.get })
+    combo.multiPrototypeCombo.content.map { _.comboValue.get }.filter { _ != null })
 }

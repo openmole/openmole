@@ -87,6 +87,7 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   val extraPropertyWidget = new ComponentWidget(this, currentExtraPanel.peer) {
     setVisible(false)
   }
+
   val propertyWidget = new ComponentWidget(this, currentPanel.peer) {
     setVisible(false)
   }
@@ -167,14 +168,18 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     refresh
   }
 
-  def displayExtraPropertyPanel(dproxy: IDataProxyUI) = {
+  def displayExtraPropertyPanel(dproxy: IDataProxyUI,
+                                fromPanel: IBasePanel,
+                                mode: PanelMode.Value = EXTRA) = {
     currentExtraPanel.contents.removeAll
     var freeze = false
-    currentExtraPanel.contents.add(dproxy match {
+    val panel = dproxy match {
       case x: IPrototypeDataProxyUI ⇒
         freeze = x.generated
-        new PrototypePanel(x, this, EXTRA)
-    })
+        new PrototypePanel(x, this, mode)
+    }
+    fromPanel.listenTo(panel)
+    currentExtraPanel.contents.add(panel)
     if (freeze) currentExtraPanel.contents.foreach {
       _.enabled = !freeze
     }
@@ -206,14 +211,14 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
         case x: BasePanel ⇒
           if (!x.created) {
             if (DialogFactory.closePropertyPanelConfirmation(x))
-              saveAndClose
-          } else saveAndClose
+              saveAndClose(x)
+          } else saveAndClose(x)
         case _ ⇒
       }
     }
 
-    def saveAndClose = {
-      closeExtraPropertyPanel
+    def saveAndClose(x: BasePanel) = {
+      if (x.mode != EXTRA_CREATION) closeExtraPropertyPanel
       savePropertyPanel
       currentPanel.contents.removeAll
       propertyWidget.setVisible(false)

@@ -16,14 +16,12 @@
  */
 package org.openmole.ide.core.implementation.panel
 
-import org.openmole.ide.misc.widget.{ ContentAction, PrototypeGroovyTextFieldEditor, PluginPanel }
+import org.openmole.ide.misc.widget._
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import java.awt.{ Color, BorderLayout }
 import org.openmole.ide.misc.widget.multirow._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import scala.swing.Separator
-import scala.swing.Label
-import swing.MyComboBox
+import swing.{ Action, Separator, Label, MyComboBox }
 import scala.collection.mutable.HashMap
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.model.workflow.{ IMoleScene, ISceneContainer }
@@ -32,47 +30,38 @@ import org.openmole.ide.misc.tools.image.Images._
 import org.openmole.ide.misc.widget.multirow.MultiWidget.CLOSE_IF_EMPTY
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor.{ ComboLinkLabelGroovyTextFieldEditorData, ComboLinkLabelGroovyTextFieldEditorPanel }
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel.{ ComboLinkLabelData, ComboLinkLabelPanel }
-
-object IOPrototypePanel {
-  def save(protoPanel: Option[IOPrototypePanel]) = {
-    val (protoInEditorContent, implicitEditorsMapping, protoOutEditorContent) = protoPanel match {
-      case Some(x: IOPrototypePanel) ⇒ (x.protoInEditor.content,
-        x.implicitEditorsMapping.filterNot { _._2.editorText.isEmpty },
-        x.protoOutEditor.content)
-      case None ⇒ (List(), List(), List())
-    }
-    (protoInEditorContent.map { _.content.get },
-      new HashMap[IPrototypeDataProxyUI, String]() ++
-      protoInEditorContent.map { x ⇒ x.content.get -> x.editorValue } ++ implicitEditorsMapping.map {
-        case (k, v) ⇒ k -> v.editorText
-      }.toMap, protoOutEditorContent.map { _.content.get })
-  }
-}
+import org.openmole.ide.core.model.panel.PanelMode._
+import scala.Some
+import util.Try
+import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.misc.exception.UserBadDataError
 
 class IOPrototypePanel(scene: IMoleScene,
+                       onPanel: BasePanel,
                        prototypesIn: List[IPrototypeDataProxyUI] = List.empty,
                        prototypesOut: List[IPrototypeDataProxyUI] = List.empty,
                        implicitPrototypeIn: List[IPrototypeDataProxyUI] = List.empty,
                        implicitPrototypeOut: List[IPrototypeDataProxyUI] = List.empty,
-                       inputParameters: Map[IPrototypeDataProxyUI, String] = Map.empty) extends PluginPanel("") {
-  val availablePrototypes = Proxys.prototypes.toList
-  peer.setLayout(new BorderLayout)
+                       inputParameters: Map[IPrototypeDataProxyUI, String] = Map.empty) extends PluginPanel("wrap") {
   val image = EYE
 
-  val incomboContent = availablePrototypes.map { p ⇒ (p, p.dataUI.coreObject, contentAction(p))
-  }.toList
-  val protoInEditor = new MultiComboLinkLabelGroovyTextFieldEditor("", incomboContent,
-    prototypesIn.map { proto ⇒
-      new ComboLinkLabelGroovyTextFieldEditorPanel(incomboContent, image,
-        new ComboLinkLabelGroovyTextFieldEditorData(proto.dataUI.coreObject, Some(proto), inputParameters.getOrElse(proto, "")))
-    }, image, CLOSE_IF_EMPTY)
+  val protoInEditor = {
+    val incomboContent = Proxys.prototypes.map { p ⇒
+      (p, p.dataUI.coreObject, contentAction(p))
+    }.toList
+    new MultiComboLinkLabelGroovyTextFieldEditor("", incomboContent,
+      prototypesIn.map { proto ⇒
+        new ComboLinkLabelGroovyTextFieldEditorPanel(incomboContent, image,
+          new ComboLinkLabelGroovyTextFieldEditorData(proto.dataUI.coreObject, Some(proto), inputParameters.getOrElse(proto, "")))
+      }, image, CLOSE_IF_EMPTY)
+  }
 
-  val outcomboContent = availablePrototypes.map { p ⇒ (p, contentAction(p)) }.toList
-
-  val protoOutEditor =
+  val protoOutEditor = {
+    val outcomboContent = Proxys.prototypes.map { p ⇒ (p, contentAction(p)) }.toList
     new MultiComboLinkLabel("", outcomboContent, prototypesOut.map { proto ⇒
       new ComboLinkLabelPanel(outcomboContent, image, new ComboLinkLabelData(Some(proto)))
     }, image, CLOSE_IF_EMPTY)
+  }
 
   val implicitEditorsMapping = new HashMap[IPrototypeDataProxyUI, PrototypeGroovyTextFieldEditor]()
 
@@ -93,8 +82,8 @@ class IOPrototypePanel(scene: IMoleScene,
         }
       }
     }
-    if (prototypesIn.isEmpty) protoInEditor.removeAllRows
-    contents += protoInEditor.panel
+    if (Proxys.prototypes.size > 0)
+      contents += protoInEditor.panel
   }
 
   lazy val protoOut = new PluginPanel("wrap") {
@@ -108,21 +97,41 @@ class IOPrototypePanel(scene: IMoleScene,
         }
       }
     }
-    if (prototypesOut.isEmpty) protoOutEditor.removeAllRows
-    contents += protoOutEditor.panel
+    if (Proxys.prototypes.size > 0)
+      contents += protoOutEditor.panel
   }
 
   CheckData.checkMole(scene)
-  peer.removeAll
-  peer.add(protoIn.peer, BorderLayout.WEST)
-  peer.add((new Separator).peer)
-  peer.add(protoOut.peer, BorderLayout.EAST)
+  contents += new MainLinkLabel("New Prototype", new Action("") {
+    def apply = {
+      ConceptMenu.createAndDisplayExtraPrototype(onPanel)
+    }
+  })
+  contents += new PluginPanel("") {
+    peer.setLayout(new BorderLayout)
+    peer.add(protoIn.peer, BorderLayout.WEST)
+    peer.add((new Separator).peer)
+    peer.add(protoOut.peer, BorderLayout.EAST)
+  }
 
   def contentAction(proto: IPrototypeDataProxyUI) = new ContentAction(proto.dataUI.toString, proto) {
     override def apply =
       ScenesManager.currentSceneContainer match {
-        case Some(x: ISceneContainer) ⇒ x.scene.displayExtraPropertyPanel(proto)
+        case Some(x: ISceneContainer) ⇒ x.scene.displayExtraPropertyPanel(proto, onPanel, EXTRA)
         case None ⇒
       }
   }
+
+  def save = {
+    val (pInEditorContent, iEditorsMapping, pOutEditorContent) = (protoInEditor.content,
+      implicitEditorsMapping.filterNot { _._2.editorText.isEmpty },
+      protoOutEditor.content)
+
+    (pInEditorContent.map { _.content.get },
+      new HashMap[IPrototypeDataProxyUI, String]() ++
+      pInEditorContent.map { x ⇒ x.content.get -> x.editorValue } ++ iEditorsMapping.map {
+        case (k, v) ⇒ k -> v.editorText
+      }.toMap, pOutEditorContent.map { _.content.get })
+  }
+
 }

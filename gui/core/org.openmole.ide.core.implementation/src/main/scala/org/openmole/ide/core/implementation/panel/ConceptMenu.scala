@@ -39,8 +39,14 @@ import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.core.implementation.builder.Builder
 import scala.collection.JavaConversions._
 import org.openmole.ide.misc.tools.util.Types._
+import util.Try
 
 object ConceptMenu {
+  def createPrototype = new PrototypeDataProxyUI(GenericPrototypeDataUI[java.lang.Double], generated = false)
+
+  def createAndDisplayPrototype = display(createPrototype, CREATION)
+
+  def createAndDisplayExtraPrototype(fromPanel: BasePanel) = displayExtra(createPrototype, fromPanel, EXTRA_CREATION)
 
   val menuItemMapping = new HashMap[IDataProxyUI, MenuItem]
   val mapping = new HashMap[IComponentCategory, Menu]
@@ -83,7 +89,7 @@ object ConceptMenu {
 
   val prototypeMenu = {
     val menu = new MenuItem(new Action("New") {
-      override def apply = display(new PrototypeDataProxyUI(GenericPrototypeDataUI[java.lang.Double], generated = false), CREATION)
+      override def apply = createAndDisplayPrototype
     })
     new PopupToolBarPresenter("Prototype", menu, new Color(212, 170, 0))
   }
@@ -141,6 +147,16 @@ object ConceptMenu {
     if (ScenesManager.tabPane.peer.getTabCount == 0) createTab(proxy, mode)
     else ScenesManager.tabPane.selection.page.content match {
       case x: ISceneContainer ⇒ x.scene.displayPropertyPanel(proxy, mode)
+      case _ ⇒ createTab(proxy, mode)
+    }
+  }
+
+  def displayExtra(proxy: IDataProxyUI,
+                   fromPanel: BasePanel,
+                   mode: Value) = {
+    if (ScenesManager.tabPane.peer.getTabCount == 0) createTab(proxy, mode)
+    else ScenesManager.tabPane.selection.page.content match {
+      case x: ISceneContainer ⇒ x.scene.displayExtraPropertyPanel(proxy, fromPanel, mode)
       case _ ⇒ createTab(proxy, mode)
     }
   }
