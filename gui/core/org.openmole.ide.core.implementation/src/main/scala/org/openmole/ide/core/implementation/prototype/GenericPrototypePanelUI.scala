@@ -73,7 +73,10 @@ class GenericPrototypePanelUI(dataUI: GenericPrototypeDataUI[_]) extends PluginP
     add(dimTextField, new Help(i18n.getString("dimension"), i18n.getString("dimensionEx")))
   }
 
-  override def saveContent(name: String) =
-    typeComboBox.selection.item.newInstance(name,
+  override def saveContent(name: String) = {
+    val i = typeComboBox.selection.item.newInstance(name,
       { if (dim.isEmpty) 0 else dim.toInt })
+    publish(new UpdatedPrototypeEvent(this))
+    i
+  }
 }

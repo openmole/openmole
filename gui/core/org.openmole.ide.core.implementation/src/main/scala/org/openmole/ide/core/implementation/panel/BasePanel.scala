@@ -21,7 +21,7 @@ import java.awt.BorderLayout
 import java.awt.Color
 import javax.swing.BorderFactory
 import javax.swing.ImageIcon
-import org.openmole.ide.core.model.panel.IPanelUI
+import org.openmole.ide.core.model.panel.{ IBasePanel, IPanelUI }
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.workflow.IMoleScene
@@ -44,7 +44,7 @@ object BasePanel {
 
 abstract class BasePanel(proxy: Option[IDataProxyUI],
                          scene: IMoleScene,
-                         mode: Value) extends MyPanel with Publisher {
+                         val mode: Value) extends MyPanel with IBasePanel {
 
   opaque = true
   peer.setLayout(new BorderLayout)
@@ -59,7 +59,7 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
 
   val createLabelLink = new MainLinkLabel("create", new Action("") { def apply = baseCreate })
   val mainLinksPanel = new PluginPanel("")
-  if (mode != CREATION) deleteLink
+  if (mode != CREATION && mode != EXTRA_CREATION) deleteLink
   border = BorderFactory.createEmptyBorder
 
   val mainPanel = new PluginPanel("wrap", "", "") {
@@ -67,7 +67,7 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
       contents += new ImageLinkLabel(CLOSE, new Action("") {
         def apply = {
           mode match {
-            case EXTRA ⇒ scene.closeExtraPropertyPanel
+            case EXTRA | EXTRA_CREATION ⇒ scene.closeExtraPropertyPanel
             case _ ⇒ scene.closePropertyPanel
           }
         }
@@ -97,7 +97,7 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
       scene.refresh
   }
 
-  var created = if (mode == CREATION) false else true
+  var created = if (mode == CREATION || mode == EXTRA_CREATION) false else true
 
   def hide = {
     baseSave
