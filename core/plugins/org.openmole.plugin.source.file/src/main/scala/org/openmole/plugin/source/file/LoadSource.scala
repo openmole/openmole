@@ -28,34 +28,34 @@ import org.openmole.core.serializer._
 import org.openmole.misc.tools.io.FileUtil._
 import collection.mutable.ListBuffer
 
-object XMLSource {
+object LoadSource {
 
   def apply =
     new SourceBuilder {
-      private val _deserialize = ListBuffer[(String, Prototype[_])]()
+      private val _load = ListBuffer[(String, Prototype[_])]()
 
-      def deserialize(f: String, p: Prototype[_]) = {
+      def load(f: String, p: Prototype[_]) = {
         addOutput(p)
-        _deserialize += f -> p
+        _load += f -> p
       }
 
       def toSource =
-        new XMLSource with Built {
-          val deserialize = _deserialize.toList
+        new LoadSource with Built {
+          val load = _load.toList
         }
     }
 
 }
 
-abstract class XMLSource extends Source {
+abstract class LoadSource extends Source {
 
-  def deserialize: List[(String, Prototype[_])]
+  def load: List[(String, Prototype[_])]
 
   override def process(context: Context, executionContext: ExecutionContext) = {
-    deserialize.map {
+    load.map {
       case (f, p) ⇒
         val from = executionContext.directory.child(new File(VariableExpansion(context, f)))
-        Variable.unsecure(p, SerializerService.deserialize(from))
+        Variable.unsecure(p, SerializerService.deserializeAndExtractFiles(from))
     }
 
   }

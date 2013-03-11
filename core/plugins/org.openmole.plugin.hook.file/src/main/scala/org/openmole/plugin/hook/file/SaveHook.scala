@@ -22,40 +22,39 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.mole._
 import collection.mutable.ListBuffer
 import org.openmole.core.model.mole._
-import org.openmole.misc.workspace._
 import org.openmole.core.serializer._
 import org.openmole.core.implementation.tools._
 import org.openmole.misc.tools.io.FileUtil._
 import java.io.File
 
-object XMLHook {
+object SaveHook {
 
   def apply =
     new HookBuilder {
-      private val _serialize = ListBuffer[(Prototype[_], String)]()
+      private val _save = ListBuffer[(Prototype[_], String)]()
 
-      def serialize(p: Prototype[_], f: String) = {
+      def save(p: Prototype[_], f: String) = {
         addInput(p)
-        _serialize += p -> f
+        _save += p -> f
       }
 
       def toHook =
-        new XMLHook with Built {
-          val serialize = _serialize.toList
+        new SaveHook with Built {
+          val save = _save.toList
         }
     }
 
 }
 
-abstract class XMLHook extends Hook {
+abstract class SaveHook extends Hook {
 
-  def serialize: List[(Prototype[_], String)]
+  def save: List[(Prototype[_], String)]
 
   override def process(context: Context, executionContext: ExecutionContext) = {
-    serialize.map {
+    save.map {
       case (p, f) ⇒
         val to = executionContext.directory.child(new File(VariableExpansion(context, f)))
-        SerializerService.serialize(context(p), to)
+        SerializerService.serializeAndArchiveFiles(context(p), to)
 
     }
     context
