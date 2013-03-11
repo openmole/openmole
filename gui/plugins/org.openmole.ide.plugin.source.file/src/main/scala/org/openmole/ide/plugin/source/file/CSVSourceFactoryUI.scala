@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.plugin.source.csv
+package org.openmole.ide.plugin.source.file
 
 import org.openmole.ide.core.model.factory.ISourceFactoryUI
 import org.openmole.plugin.source.csv.CSVSource

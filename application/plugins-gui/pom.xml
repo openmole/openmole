@@ -184,7 +184,7 @@
     </dependency>
     <dependency>
       <groupId>org.openmole.ide</groupId>
-      <artifactId>org.openmole.ide.plugin.source.csv</artifactId>
+      <artifactId>org.openmole.ide.plugin.source.file</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>

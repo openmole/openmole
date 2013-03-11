@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.source.csv
+package org.openmole.plugin.source.file
 
 import au.com.bytecode.opencsv.CSVReader
 import org.openmole.core.model.data._
