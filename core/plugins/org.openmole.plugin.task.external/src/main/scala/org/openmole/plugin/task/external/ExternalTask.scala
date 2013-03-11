@@ -26,6 +26,7 @@ import org.openmole.core.implementation.tools._
 import org.openmole.misc.exception.UserBadDataError
 import scala.collection.mutable.ListBuffer
 import org.openmole.misc.tools.io.FileUtil._
+import collection.mutable
 
 object ExternalTask {
   val PWD = Prototype[String]("PWD")
@@ -35,7 +36,7 @@ trait ExternalTask extends Task {
 
   def inputFiles: Iterable[(Prototype[File], String, Boolean)]
   def outputFiles: Iterable[(String, Prototype[File])]
-  def resources: Iterable[(File, String, Boolean)]
+  def resources: Iterable[(File, String, Boolean, OS)]
 
   protected class ToPut(val file: File, val name: String, val link: Boolean)
   protected class ToGet(val name: String, val file: File)
@@ -43,13 +44,26 @@ trait ExternalTask extends Task {
   protected def listInputFiles(context: Context): Iterable[ToPut] =
     inputFiles.map {
       case (prototype, name, link) ⇒ new ToPut(context(prototype), VariableExpansion(context, name), link)
-
     }
 
-  protected def listResources(context: Context): Iterable[ToPut] =
-    resources.map {
-      case (file, name, link) ⇒ new ToPut(file, VariableExpansion(context, name), link)
+  protected def listResources(context: Context, tmpDir: File): Iterable[ToPut] = {
+    val expanded = resources map { case v @ (_, name, _, _) ⇒ v.copy(_2 = VariableExpansion(context, name)) }
+
+    val byLocation =
+      expanded groupBy {
+        case (_, name, _, _) ⇒ new File(tmpDir, name).getCanonicalPath
+      }
+
+    val selectedOS =
+      byLocation.toList flatMap {
+        case (_, values) ⇒
+          values.find { case (_, _, _, os) ⇒ os.compatible }
+      }
+
+    selectedOS.map {
+      case (file, name, link, _) ⇒ new ToPut(file, name, link)
     }
+  }
 
   protected def listOutputFiles(context: Context, localDir: File): (Context, Iterable[ToGet]) = {
     val files =
@@ -82,7 +96,7 @@ trait ExternalTask extends Task {
     Set.empty[File] ++
       listInputFiles(context).flatMap(
         f ⇒ copy(f, new File(workDir, f.name))) ++
-        listResources(context).flatMap(
+        listResources(context, tmpDir).flatMap(
           f ⇒ copy(f, new File(tmpDir, f.name)))
   }
 

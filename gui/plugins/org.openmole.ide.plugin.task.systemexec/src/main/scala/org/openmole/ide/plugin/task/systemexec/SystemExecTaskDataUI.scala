@@ -22,7 +22,8 @@ class SystemExecTaskDataUI(val name: String = "",
                            val variables: List[IPrototypeDataProxyUI] = List.empty) extends TaskDataUI {
 
   def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) = {
-    val syet = SystemExecTask(name, lauchingCommands.filterNot(_ == '\n'), workdir)(plugins)
+    val syet = SystemExecTask(name, directory = workdir)(plugins)
+    syet command lauchingCommands.filterNot(_ == '\n')
     syet addInput inputs
     syet addOutput outputs
     syet addParameter parameters

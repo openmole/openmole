@@ -20,6 +20,7 @@ package org.openmole.plugin.task.netlogo5
 import org.openmole.core.model.task._
 import org.openmole.core.model.data._
 import org.openmole.plugin.task.netlogo._
+import org.openmole.plugin.task.external._
 import NetLogoTask.Workspace
 import org.openmole.core.implementation.task._
 import java.io.File
@@ -109,7 +110,7 @@ sealed class NetLogo5Task(
   parameters: ParameterSet,
   inputFiles: Iterable[(Prototype[File], String, Boolean)],
   outputFiles: Iterable[(String, Prototype[File])],
-  resources: Iterable[(File, String, Boolean)])(implicit plugins: PluginSet) extends NetLogoTask(
+  resources: Iterable[(File, String, Boolean, OS)])(implicit plugins: PluginSet) extends NetLogoTask(
   name,
   workspace,
   launchingCommands,

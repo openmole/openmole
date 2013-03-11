@@ -40,9 +40,10 @@ class GliteEnvironmentDataUI(val name: String = "",
       else None
     }
     try {
-      GliteEnvironment(vo)(
-        vomsURL = voms,
-        bdii = bdii,
+      GliteEnvironment(
+        vo,
+        vomsURL = Some(voms),
+        bdii = Some(bdii),
         fqan = fqan,
         openMOLEMemory = openMOLEMemory,
         memory = memory,
@@ -56,7 +57,7 @@ class GliteEnvironmentDataUI(val name: String = "",
         threads = threads)
     } catch {
       case e: UserBadDataError ⇒ throw e
-      case e: Exception ⇒ throw new UserBadDataError(e, "An error occured when initializing the glite environment" + name + ". Please check your certificate settings in the Preferences menu.")
+      case e: Exception ⇒ throw new UserBadDataError(e, "An error occurred when initializing the glite environment" + name + ". Please check your certificate settings in the Preferences menu.")
     }
   }
 

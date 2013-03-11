@@ -220,7 +220,7 @@
     </dependency>
     <dependency>
       <groupId>org.openmole.core</groupId>
-      <artifactId>org.openmole.plugin.source.csv</artifactId>
+      <artifactId>org.openmole.plugin.source.file</artifactId>
       <version>${project.version}</version>
       <scope>runtime</scope>
     </dependency>
