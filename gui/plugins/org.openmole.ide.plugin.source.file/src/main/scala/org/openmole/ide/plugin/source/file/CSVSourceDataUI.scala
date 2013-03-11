@@ -20,7 +20,7 @@ package org.openmole.ide.plugin.source.file
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.data.SourceDataUI
-import org.openmole.plugin.source.csv.CSVSource
+import org.openmole.plugin.source.file.CSVSource
 import java.io.File
 import org.openmole.ide.core.implementation.data.EmptyDataUIs.EmptyPrototypeDataUI
 

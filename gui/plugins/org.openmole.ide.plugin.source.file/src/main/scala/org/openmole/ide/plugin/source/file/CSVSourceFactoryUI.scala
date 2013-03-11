@@ -18,7 +18,7 @@
 package org.openmole.ide.plugin.source.file
 
 import org.openmole.ide.core.model.factory.ISourceFactoryUI
-import org.openmole.plugin.source.csv.CSVSource
+import org.openmole.plugin.source.file.CSVSource
 
 class CSVSourceFactoryUI extends ISourceFactoryUI {
 
