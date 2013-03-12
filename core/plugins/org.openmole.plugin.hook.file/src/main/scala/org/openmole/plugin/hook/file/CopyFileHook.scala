@@ -26,40 +26,65 @@ import org.openmole.core.implementation.tools._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.implementation.mole._
 import org.openmole.core.model.mole.ExecutionContext
+import collection.mutable.ListBuffer
 
 object CopyFileHook {
 
+  trait CopyFileHookBuilder extends HookBuilder {
+    def copy(prototype: Prototype[File], destination: String, remove: Boolean = false, compress: Boolean = false)
+  }
+
   def apply(
-    filePrototype: Prototype[File],
+    prototype: Prototype[File],
     destination: String,
     remove: Boolean = false,
-    compress: Boolean = false) =
-    new HookBuilder {
-      addInput(filePrototype)
-      def toHook = new CopyFileHook(filePrototype, destination, remove, compress) with Built
+    compress: Boolean = false): CopyFileHookBuilder = {
+    val builder = apply()
+    builder copy (prototype, destination, remove, compress)
+    builder
+  }
+
+  def apply(): CopyFileHookBuilder =
+    new CopyFileHookBuilder { hook ⇒
+      private val copy = ListBuffer[(Prototype[File], String, Boolean, Boolean)]()
+
+      def copy(prototype: Prototype[File], destination: String, remove: Boolean = false, compress: Boolean = false) = {
+        copy += ((prototype, destination, remove, compress))
+        addInput(prototype)
+      }
+
+      def toHook =
+        new CopyFileHook with Built {
+          val copy = hook.copy
+        }
     }
 
 }
 
-abstract class CopyFileHook(
-    filePrototype: Prototype[File],
-    destination: String,
-    remove: Boolean = false,
-    compress: Boolean = false) extends Hook {
+abstract class CopyFileHook extends Hook {
+
+  def copy: Iterable[(Prototype[File], String, Boolean, Boolean)]
 
   override def process(context: Context, executionContext: ExecutionContext) = {
-    context.option(filePrototype) match {
-      case Some(from) ⇒
-        val to = executionContext.directory.child(new File(VariableExpansion(context, destination)))
-
-        to.getParentFile.mkdirs
-        if (compress) from.copyCompress(to)
-        else from.copy(to)
-
-        if (remove) from.recursiveDelete
-      case None ⇒ throw new UserBadDataError("No variable " + filePrototype + " found.")
-    }
+    for ((p, d, r, c) ← copy) copy(context, executionContext, p, d, r, c)
     context
+  }
+
+  private def copy(
+    context: Context,
+    executionContext: ExecutionContext,
+    filePrototype: Prototype[File],
+    destination: String,
+    remove: Boolean,
+    compress: Boolean) = {
+    val from = context(filePrototype)
+    val to = executionContext.directory.child(new File(VariableExpansion(context, destination)))
+
+    to.getParentFile.mkdirs
+    if (compress) from.copyCompress(to)
+    else from.copy(to)
+
+    if (remove) from.recursiveDelete
   }
 
 }
