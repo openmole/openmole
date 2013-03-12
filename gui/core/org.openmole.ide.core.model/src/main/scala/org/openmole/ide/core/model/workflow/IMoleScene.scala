@@ -53,7 +53,9 @@ trait IMoleScene {
 
   def displayPropertyPanel(proxy: IDataProxyUI, mode: PanelMode.Value)
 
-  def displayExtraPropertyPanel(proxy: IDataProxyUI, fromPanel: IBasePanel, mode: PanelMode.Value)
+  def displayExtraPropertyPanel(proxy: IDataProxyUI, fromPanel: IBasePanel, mode: PanelMode.Value): Unit
+
+  def displayExtraPropertyPanel(proxy: IDataProxyUI, mode: PanelMode.Value): IBasePanel
 
   def displayExtraPropertyPanel(samplingCompositionWidget: ISamplingCompositionWidget)
 

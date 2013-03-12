@@ -169,8 +169,7 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   }
 
   def displayExtraPropertyPanel(dproxy: IDataProxyUI,
-                                fromPanel: IBasePanel,
-                                mode: PanelMode.Value = EXTRA) = {
+                                mode: PanelMode.Value): IBasePanel = {
     currentExtraPanel.contents.removeAll
     var freeze = false
     val panel = dproxy match {
@@ -178,7 +177,6 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
         freeze = x.generated
         new PrototypePanel(x, this, mode)
     }
-    fromPanel.listenTo(panel)
     currentExtraPanel.contents.add(panel)
     if (freeze) currentExtraPanel.contents.foreach {
       _.enabled = !freeze
@@ -186,7 +184,12 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     extraPropertyWidget.setVisible(true)
     extraPropertyWidget.setPreferredLocation(new Point(propertyWidget.getBounds.x.toInt + currentPanel.bounds.width + 40, 20))
     refresh
+    panel
   }
+
+  def displayExtraPropertyPanel(dproxy: IDataProxyUI,
+                                fromPanel: IBasePanel,
+                                mode: PanelMode.Value = EXTRA) = fromPanel.listenTo(displayExtraPropertyPanel(dproxy, mode))
 
   def closeExtraPropertyPanel = {
     savePropertyPanel(currentExtraPanel)

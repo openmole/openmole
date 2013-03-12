@@ -26,12 +26,11 @@ import org.openmole.ide.misc.tools.image.Images._
 import org.openmole.ide.misc.widget.URL
 import scala.swing._
 import scala.swing.event.SelectionChanged
-import swing.Swing._
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dataproxy._
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.implementation.data.EmptyDataUIs._
+import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 
@@ -63,7 +62,7 @@ class ExplorationTaskPanelUI(pud: ExplorationTaskDataUI) extends PluginPanel("wr
   contents += linkLabel
 
   def contentAction(proxy: ISamplingCompositionDataProxyUI) = new ContentAction(proxy.dataUI.name, proxy) {
-    override def apply = ScenesManager.currentSceneContainer.get.scene.displayExtraPropertyPanel(proxy)
+    override def apply = ScenesManager.currentSceneContainer.get.scene.displayExtraPropertyPanel(proxy, EXTRA)
   }
 
   override def saveContent(name: String) =

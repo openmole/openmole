@@ -64,6 +64,9 @@ class TaskPanel(proxy: ITaskDataProxyUI,
       implicitOP,
       proxy.dataUI.inputParameters.toMap)
   }
+  def updateMainPanel = {
+
+  }
 
   def updateProtoPanel = {
     save
