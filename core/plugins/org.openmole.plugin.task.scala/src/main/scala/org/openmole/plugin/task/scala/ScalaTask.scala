@@ -27,6 +27,11 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.task._
 import org.openmole.misc.tools.script._
 import org.openmole.plugin.task.code._
+import reflect.ClassTag
+import org.openmole.misc.tools.service.ObjectPool
+import scala.tools.nsc.interpreter.NamedParam
+import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.exception.UserBadDataError
 
 object ScalaTask {
 
@@ -53,13 +58,48 @@ sealed abstract class ScalaTask(
     imports: Iterable[String],
     libraries: Iterable[File]) extends CodeTask {
 
-  override def processCode(context: Context) = {
+  def script = {
+    "def run(" + inputs.map { i ⇒ i.prototype.name + ": " + i.prototype.`type`.toString }.mkString(",") + ") = {\n" +
+      code + "\n" +
+      "Map[String, Any](" + outputs.map(o ⇒ "\"" + o.prototype.name + "\" -> " + o.prototype.name).mkString(",") + ")\n" +
+      "}\n" +
+      "var " + resVariable + ": Map[String, Any] = null"
+  }
+
+  @transient lazy val resVariable = Workspace.preference(Task.OpenMOLEVariablePrefix) + "ScalaTaskResult"
+
+  def interpreter = {
     val interpreter = new ScalaREPL
-    context.values.foreach { v ⇒ interpreter.bind(v.prototype.name, v.value) }
-    interpreter.addImports(imports.toSeq: _*)
-    libraries.foreach { l ⇒ interpreter.addClasspath(l.getAbsolutePath) }
-    interpreter.interpret(code)
-    Context.empty ++ outputs.map { o ⇒ Variable(o.prototype.asInstanceOf[Prototype[Any]], interpreter.valueOfTerm(o.prototype.name)) }
+    interpreter.beSilentDuring {
+      interpreter.addImports(imports.toSeq: _*)
+      libraries.foreach { l ⇒ interpreter.addClasspath(l.getAbsolutePath) }
+      val res = interpreter.interpret(script)
+      if (res != tools.nsc.interpreter.Results.Success) throw new UserBadDataError("Error in script: " + script)
+    }
+    interpreter
+  }
+
+  @transient lazy val interpreterPool = new ObjectPool(interpreter)
+
+  override def processCode(context: Context) = interpreterPool.exec {
+    interpreter ⇒
+      val scalaTaskResult = interpreter.beSilentDuring {
+        try {
+          context.values.foreach {
+            v ⇒ interpreter.bindValue(v.prototype.name, v.value)
+          }
+          val code = resVariable + " = run(" + inputs.map { i ⇒ i.prototype.name }.mkString(",") + ")"
+          interpreter.interpret(code)
+          interpreter.valueOfTerm(resVariable).getOrElse(throw new UserBadDataError("Error in execution of " + code)).asInstanceOf[Map[String, Any]]
+        } finally {
+          interpreter.interpret(resVariable + " = null")
+          context.values.foreach {
+            v ⇒ interpreter.bindValue(v.prototype.name, null)
+          }
+        }
+      }
+
+      Context.empty ++ outputs.map { o ⇒ Variable.unsecure(o.prototype, scalaTaskResult(o.prototype.name)) }
   }
 }
 
