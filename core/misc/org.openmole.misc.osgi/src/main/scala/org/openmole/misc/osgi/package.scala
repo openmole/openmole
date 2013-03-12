@@ -24,6 +24,9 @@ import org.osgi.framework._
 package object osgi {
 
   val OpenMOLEScope = "OpenMOLE-Scope"
+  val OpenMOLELocationProperty = "openmole.location"
+
+  def openMOLELocation = System.getProperty(OpenMOLELocationProperty, "")
 
   implicit class BundleDecorator(b: Bundle) {
 
@@ -32,10 +35,10 @@ package object osgi {
     def isProvided = b.getHeaders.toMap.exists { case (k, v) ⇒ k.toString.toLowerCase.contains("openmole-scope") && v.toString.toLowerCase.contains("provided") }
 
     def file = {
-      val url = if (b.getLocation.startsWith("reference:"))
-        b.getLocation.substring("reference:".length)
-      else if (b.getLocation.startsWith("initial@reference:")) b.getLocation.substring("initial@reference:".length)
-      else b.getLocation
+      val (ref, url) = if (b.getLocation.startsWith("reference:"))
+        true -> b.getLocation.substring("reference:".length)
+      else if (b.getLocation.startsWith("initial@reference:")) true -> b.getLocation.substring("initial@reference:".length)
+      else false -> b.getLocation
 
       val location = {
         val protocol = url.indexOf(':')
@@ -43,7 +46,9 @@ package object osgi {
         if (noProtocol.endsWith("/")) noProtocol.substring(0, noProtocol.length - 1)
         else noProtocol
       }
-      new File(location)
+
+      val base = if (ref) new File(openMOLELocation) else new File("")
+      new File(base, location)
     }
 
   }
