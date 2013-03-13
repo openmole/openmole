@@ -7,7 +7,7 @@
   <parent>
     <artifactId>libraries</artifactId>
     <groupId>org.openmole</groupId>
-    <version>0.8-alpha4</version>
+    <version>0.8.0-SNAPSHOT</version>
   </parent>
   <!--Used to build the symbolic name of the bundle-->
   <artifactId>au.com.bytecode.opencsv</artifactId>
@@ -20,7 +20,7 @@
   <!-- ************************************************************* -->
   <name>${project.artifactId}</name>
   <!--optional. Use this property to tune the exported packages-->
-  <properties></properties>
+  <properties />
   <dependencies>
     <dependency>
       <groupId>net.sf.opencsv</groupId>
