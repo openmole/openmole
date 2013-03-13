@@ -42,6 +42,8 @@ import org.openmole.misc.tools.service.Logger
 
 object JobManager extends Logger
 
+import JobManager._
+
 class JobManager(val environment: BatchEnvironment) extends Actor {
 
   val workers = ActorSystem.create("JobManagment", ConfigFactory.parseString(
