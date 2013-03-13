@@ -113,18 +113,13 @@ class GUIPanel extends MainFrame {
     contents += ConceptMenu.samplingMenu
     contents += ConceptMenu.environmentMenu
     contents += ConceptMenu.hookMenu
+    contents += ConceptMenu.sourceMenu
   }).peer, BorderLayout.NORTH)
 
-  val splitPane =
-    //new SplitPane(Orientation.Horizontal) {
-    // leftComponent =
-    ScenesManager.tabPane
-  //rightComponent = new ScrollPane(StatusBar().
-  // resizeWeight = 1 - (40.0 / Toolkit.getDefaultToolkit.getScreenSize.height)
-  // }
+  val splitPane = ScenesManager.tabPane
 
   peer.add(splitPane.peer, BorderLayout.CENTER)
-  StatusBar().inform("OpenMOLE - 0.7 - Daddy Django")
+  StatusBar().inform("OpenMOLE - 0.8 - Elastic Earth")
 
   PasswordListner.apply
 

@@ -20,9 +20,9 @@ package org.openmole.ide.core.implementation.data
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import scala.collection.mutable.HashMap
-import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import org.openmole.core.model.task.ITask
+import util.{ Failure, Success }
 
 abstract class TaskDataUI extends ITaskDataUI {
   var inputParameters: scala.collection.mutable.Map[IPrototypeDataProxyUI, String] = HashMap.empty[IPrototypeDataProxyUI, String]
@@ -33,8 +33,8 @@ abstract class TaskDataUI extends ITaskDataUI {
 
   def implicitPrototypes: (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI]) =
     MoleFactory.taskCoreObject(this) match {
-      case Right(x: ITask) ⇒ ToolDataUI.implicitPrototypes(y ⇒ x.inputs, inputs, y ⇒ x.outputs, outputs)
-      case _ ⇒ (List(), List())
+      case Success(x: ITask) ⇒ ToolDataUI.implicitPrototypes(y ⇒ x.inputs.map { _.prototype }.toList, inputs, y ⇒ x.outputs.map { _.prototype }.toList, outputs)
+      case Failure(_) ⇒ (List(), List())
     }
 
   def removePrototypeOccurencies(pproxy: IPrototypeDataProxyUI) = {

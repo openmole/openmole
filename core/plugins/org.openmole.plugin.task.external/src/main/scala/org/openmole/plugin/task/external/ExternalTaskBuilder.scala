@@ -36,7 +36,7 @@ abstract class ExternalTaskBuilder(implicit plugins: PluginSet) extends TaskBuil
 
   private var _inputFiles = new ListBuffer[(Prototype[File], String, Boolean)]
   private var _outputFiles = new ListBuffer[(String, Prototype[File])]
-  private var _resources = new ListBuffer[(File, String, Boolean)]
+  private var _resources = new ListBuffer[(File, String, Boolean, OS)]
 
   def inputFiles = _inputFiles.toList
   def outputFiles = _outputFiles.toList
@@ -47,20 +47,16 @@ abstract class ExternalTaskBuilder(implicit plugins: PluginSet) extends TaskBuil
    *
    * @param file the file or directory to copy in the task workspace
    * @param name the destination name of the file in the task workspace, by
-   * default it is the same as the orginal file name
+   * default it is the same as the original file name
    * @param link tels if the entire content of the file should be copied or
    * if a symbolic link is suitable. In the case link is set to true openmole will
    * try to use a symbolic link if available on your system.
    *
    */
-  def addResource(file: File, name: String, link: Boolean): ExternalTaskBuilder.this.type = {
-    _resources += ((file, name, link))
+  def addResource(file: File, name: Option[String] = None, link: Boolean = false, os: OS = OS()): ExternalTaskBuilder.this.type = {
+    _resources += ((file, name.getOrElse(file.getName), link, os))
     this
   }
-
-  def addResource(file: File, name: String): this.type = this.addResource(file, name, false)
-  def addResource(file: File, link: Boolean): this.type = this.addResource(file, file.getName, link)
-  def addResource(file: File): this.type = this.addResource(file, false)
 
   /**
    * Copy a file or directory from the dataflow to the task workspace
@@ -70,13 +66,11 @@ abstract class ExternalTaskBuilder(implicit plugins: PluginSet) extends TaskBuil
    * @param link @see addResouce
    *
    */
-  def addInput(p: Prototype[File], name: String, link: Boolean): this.type = {
+  def addInput(p: Prototype[File], name: String, link: Boolean = false): this.type = {
     _inputFiles += ((p, name, link))
     this addInput p
     this
   }
-
-  def addInput(p: Prototype[File], name: String): ExternalTaskBuilder.this.type = this.addInput(p, name, false)
 
   /**
    * Get a file generate by the task and inject it in the dataflow

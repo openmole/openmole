@@ -1,11 +1,11 @@
 <%@ val id: String %>
 <%@ val status: String %>
 <%@ val totalJobs: Int %>
-<%@ val READY: Int %>
-<%@ val RUNNING: Int %>
-<%@ val COMPLETED: Int %>
-<%@ val FAILED: Int %>
-<%@ val CANCELLED: Int %>
+<%@ val Ready: Int %>
+<%@ val Running: Int %>
+<%@ val Completed: Int %>
+<%@ val Failed: Int %>
+<%@ val Cancelled: Int %>
 
 
 #set (title)
@@ -19,7 +19,7 @@ Current Status: <%= status %> - <a href="/start/<%=id%>">start</a><br>
 <br><b>Job breakdown</b><br>
 Number of jobs: <%= totalJobs %><br>
 <br>
-Ready jobs: <%= READY %> Running Jobs: <%= RUNNING %><br>
-Completed jobs: <%= COMPLETED %> Failed Jobs: <%= FAILED %><br>
-Cancelled jobs: <%= CANCELLED %>
+Ready jobs: <%= Ready %> Running Jobs: <%= Running %><br>
+Completed jobs: <%= Completed %> Failed Jobs: <%= Failed %><br>
+Cancelled jobs: <%= Cancelled %>
 

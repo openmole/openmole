@@ -38,8 +38,14 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.core.implementation.builder.Builder
 import scala.collection.JavaConversions._
+import util.Try
 
 object ConceptMenu {
+  def createPrototype = new PrototypeDataProxyUI(GenericPrototypeDataUI[java.lang.Double], generated = false)
+
+  def createAndDisplayPrototype = display(createPrototype, CREATION)
+
+  def createAndDisplayExtraPrototype(fromPanel: BasePanel) = displayExtra(createPrototype, fromPanel, EXTRA_CREATION)
 
   val menuItemMapping = new HashMap[IDataProxyUI, MenuItem]
   val mapping = new HashMap[IComponentCategory, Menu]
@@ -82,7 +88,7 @@ object ConceptMenu {
 
   val prototypeMenu = {
     val menu = new MenuItem(new Action("New") {
-      override def apply = display(new PrototypeDataProxyUI(GenericPrototypeDataUI[java.lang.Double], generated = false), CREATION)
+      override def apply = createAndDisplayPrototype
     })
     new PopupToolBarPresenter("Prototype", menu, new Color(212, 170, 0))
   }
@@ -107,6 +113,19 @@ object ConceptMenu {
     new PopupToolBarPresenter("Hook", mapping(ComponentCategories.HOOK), new Color(168, 120, 33))
   }
 
+  val sourceMenu = {
+    addCategoryComponents(ComponentCategories.SOURCE)
+    KeyRegistry.sources.values.map {
+      f ⇒ new SourceDataProxyFactory(f)
+    }.toList.sortBy(_.factory.toString).foreach {
+      d ⇒
+        mapping(ComponentCategories.SOURCE).contents += new MenuItem(new Action(d.factory.toString) {
+          override def apply = display(d.buildDataProxyUI, CREATION)
+        })
+    }
+    new PopupToolBarPresenter("Source", mapping(ComponentCategories.SOURCE), new Color(60, 60, 60))
+  }
+
   def removeItem(proxy: IDataProxyUI) = {
     proxy match {
       case x: IEnvironmentDataProxyUI ⇒ environmentMenu.remove(menuItemMapping(proxy))
@@ -127,6 +146,16 @@ object ConceptMenu {
     if (ScenesManager.tabPane.peer.getTabCount == 0) createTab(proxy, mode)
     else ScenesManager.tabPane.selection.page.content match {
       case x: ISceneContainer ⇒ x.scene.displayPropertyPanel(proxy, mode)
+      case _ ⇒ createTab(proxy, mode)
+    }
+  }
+
+  def displayExtra(proxy: IDataProxyUI,
+                   fromPanel: BasePanel,
+                   mode: Value) = {
+    if (ScenesManager.tabPane.peer.getTabCount == 0) createTab(proxy, mode)
+    else ScenesManager.tabPane.selection.page.content match {
+      case x: ISceneContainer ⇒ x.scene.displayExtraPropertyPanel(proxy, fromPanel, mode)
       case _ ⇒ createTab(proxy, mode)
     }
   }
@@ -155,7 +184,7 @@ object ConceptMenu {
   }
 
   def clearAllItems = {
-    List(samplingMenu, prototypeMenu, taskMenu, environmentMenu, hookMenu).foreach {
+    List(samplingMenu, prototypeMenu, taskMenu, environmentMenu, hookMenu, sourceMenu).foreach {
       _.removeAll
     }
     menuItemMapping.clear

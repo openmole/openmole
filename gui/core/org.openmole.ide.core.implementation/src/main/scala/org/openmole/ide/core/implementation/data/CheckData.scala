@@ -26,6 +26,7 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.misc.tools.service.Logger
 import org.openmole.ide.core.implementation.builder.MoleFactory
+import util.{ Failure, Success }
 
 object CheckData extends Logger {
 
@@ -37,7 +38,7 @@ object CheckData extends Logger {
         y.manager.startingCapsule match {
           case Some(x: ICapsuleUI) ⇒
             MoleFactory.buildMole(y.manager) match {
-              case Right((mole, cMap, pMap, errs)) ⇒
+              case Success((mole, cMap, pMap, errs)) ⇒
                 val error_capsules = y.manager.capsules.values.partition {
                   _.dataUI.task.isDefined
                 }
@@ -50,8 +51,9 @@ object CheckData extends Logger {
                   case (k, v) ⇒ v -> k
                 }
 
+                ToolDataUI.computePrototypeFromAggregation(mole)
                 // Compute implicit input / output
-                capsuleMap.foreach {
+                /* capsuleMap.foreach {
                   case (caps, capsUI) ⇒
                     capsUI.dataUI.task match {
                       case Some(x: ITaskDataProxyUI) ⇒
@@ -60,7 +62,7 @@ object CheckData extends Logger {
                         ToolDataUI.computePrototypeFromAggregation(mole)
                       case _ ⇒
                     }
-                }
+                }   */
 
                 // Formal validation
                 val errors = Validation(mole)
@@ -90,13 +92,13 @@ object CheckData extends Logger {
                     cui.setAsInvalid(e.getMessage)
                     displayCapsuleErrors(cui, e.getMessage)
                 }
-                Right(mole, cMap, pMap, errs)
-              case Left(l) ⇒ Left(l)
+                Success(mole, cMap, pMap, errs)
+              case Failure(l) ⇒ Failure(l)
             }
           case _ ⇒
-            Left(("No starting capsule is defined, the Mole can not be built"))
+            Failure(new Throwable("No starting capsule is defined, the Mole can not be built"))
         }
-      case _ ⇒ Left("")
+      case _ ⇒ Failure(new Throwable(""))
     }
   }
 
@@ -113,19 +115,19 @@ object CheckData extends Logger {
       c ⇒
         c.task match {
           case Some(x: ITaskDataProxyUI) ⇒
-          case _ ⇒ StatusBar().warn("A capsule without taskMap can not be run")
+          case _ ⇒ StatusBar().warn("A capsule without task can not be run")
         }
     }
 
   def fullCheck(scene: IMoleScene) = {
     checkMole(scene) match {
-      case Right((mole, _, _, errors)) ⇒
+      case Success((mole, _, _, errors)) ⇒
         if (errors.isEmpty) {
           val checkTopo = checkTopology(mole)
-          if (checkTopo.isEmpty) Right("")
+          if (checkTopo.isEmpty) Success("")
           else Left(checkTopo)
         } else Left(errors.mkString("\n"))
-      case Left(l) ⇒ Left(l)
+      case Failure(l) ⇒ Failure(l)
     }
   }
 

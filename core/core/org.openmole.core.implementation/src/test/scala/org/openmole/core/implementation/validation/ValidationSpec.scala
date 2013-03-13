@@ -218,7 +218,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     }
   }
 
-  "Validation" should "detect a missing input error for the hook" in {
+  "Validation" should "detect a missing input error for the misc" in {
     val i = Prototype[Int]("t")
 
     val t1 = EmptyTask("t1")
@@ -240,7 +240,7 @@ class ValidationSpec extends FlatSpec with ShouldMatchers {
     }
   }
 
-  "Validation" should "detect a wrong input type error for the hook" in {
+  "Validation" should "detect a wrong input type error for the misc" in {
     val iInt = Prototype[Int]("i")
     val iString = Prototype[String]("i")
 

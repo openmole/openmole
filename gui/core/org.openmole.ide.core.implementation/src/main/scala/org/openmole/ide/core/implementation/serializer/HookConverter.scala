@@ -53,18 +53,18 @@ class HookConverter(mapper: Mapper,
   override def unmarshal(reader: HierarchicalStreamReader,
                          uc: UnmarshallingContext) = {
     if (reader.getAttributeCount != 0) {
-      val existingHook = Proxys.hooks.find(_.id == reader.getAttribute("id").toInt)
+      val existingHook = Proxys.hook(reader.getAttribute("id"))
       existingHook match {
         case Some(y: IHookDataProxyUI) ⇒ y
         case _ ⇒
-          serializer.unserializeProxy("hook")
+          serializer.unserializeProxy("misc")
           unmarshal(reader, uc)
       }
     } else {
       val o = super.unmarshal(reader, uc)
       o match {
         case y: IHookDataProxyUI ⇒
-          if (Proxys.hooks.contains(y)) y
+          if (Proxys.contains(y)) y
           else addHook(y)
         case _ ⇒ throw new UserBadDataError("Can not load object " + o)
       }
@@ -74,7 +74,7 @@ class HookConverter(mapper: Mapper,
   override def canConvert(t: Class[_]) = t.isAssignableFrom(classOf[HookDataProxyUI])
 
   def addHook(h: IHookDataProxyUI): IHookDataProxyUI = {
-    Proxys.hooks += h
+    Proxys += h
     ConceptMenu.hookMenu.popup.contents += ConceptMenu.addItem(h)
     h
   }

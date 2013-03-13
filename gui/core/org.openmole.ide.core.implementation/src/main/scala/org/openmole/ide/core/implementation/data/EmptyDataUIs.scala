@@ -25,8 +25,7 @@ import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.prototype._
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
-import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.{ EnvironmentDataProxyUI, PrototypeDataProxyUI, TaskDataProxyUI }
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.dataproxy._
@@ -40,12 +39,17 @@ import org.openmole.misc.tools.obj.ClassUtils
 import scala.swing.TabbedPane
 import collection.mutable
 import org.openmole.ide.core.implementation.sampling.DomainWidget
+import org.openmole.core.model.execution.Environment
+import org.openmole.core.model.job.IJob
+import org.openmole.ide.core.implementation.data.EmptyDataUIs.EmptyEnvironmentDataUI
 
 object EmptyDataUIs {
 
   val emptyPrototypeProxy: IPrototypeDataProxyUI = new PrototypeDataProxyUI(GenericPrototypeDataUI[Int], generated = false)
 
   val emptyTaskProxy: ITaskDataProxyUI = new TaskDataProxyUI(new EmptyTaskDataUI)
+
+  val emptyEnvironmentProxy: IEnvironmentDataProxyUI = new EnvironmentDataProxyUI(new EmptyEnvironmentDataUI)
 
   class EmptyPrototypeFactoryUI extends IPrototypeFactoryUI {
     def category = ComponentCategories.PROTOTYPE
@@ -98,4 +102,15 @@ object EmptyDataUIs {
     def saveContent(name: String) = new EmptyTaskDataUI
   }
 
+  class EmptyEnvironmentDataUI extends IEnvironmentDataUI { dataUI ⇒
+    def imagePath = ""
+    def buildPanelUI = new IEnvironmentPanelUI {
+      def saveContent(name: String) = dataUI
+      def peer = new PluginPanel("").peer
+    }
+    def fatImagePath = ""
+    def name = ""
+    def coreObject = new Environment { def submit(job: IJob) {} }
+    def coreClass = classOf[Environment]
+  }
 }

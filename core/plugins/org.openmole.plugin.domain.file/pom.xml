@@ -4,7 +4,7 @@
   <parent>
     <artifactId>plugins</artifactId>
     <groupId>org.openmole.core</groupId>
-    <version>0.8-alpha3</version>
+    <version>0.8-alpha4</version>
   </parent>
   <artifactId>org.openmole.plugin.domain.file</artifactId>
   <!-- ************************************************************* -->

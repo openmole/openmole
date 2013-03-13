@@ -17,17 +17,22 @@
 
 package org.openmole.ide.plugin.hook.display
 
-import org.openmole.ide.misc.widget.multirow.RowWidget._
-import org.openmole.ide.misc.widget.multirow.MultiWidget._
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.panel.IHookPanelUI
-import org.openmole.ide.plugin.hook.tools.MultiPrototypePanelUI
+import org.openmole.ide.plugin.misc.tools.MultiPrototypePanel
 import org.openmole.ide.core.implementation.dataproxy.Proxys
+import swing.TabbedPane
+import org.openmole.ide.misc.widget.PluginPanel
 
-class ToStringHookPanelUI(dataUI: ToStringHookDataUI) extends MultiPrototypePanelUI("Display prototypes",
-  dataUI.toBeHooked,
-  Proxys.prototypes.toList) with IHookPanelUI {
+class ToStringHookPanelUI(dataUI: ToStringHookDataUI) extends PluginPanel("") with IHookPanelUI {
+
+  val combo = new MultiPrototypePanel("Display prototypes",
+    dataUI.toBeHooked,
+    Proxys.prototypes.toList)
+
+  contents += combo
+
+  tabbedPane.pages.insert(0, new TabbedPane.Page("Prototypes", this))
 
   def saveContent(name: String) = new ToStringHookDataUI(name,
-    multiPrototypeCombo.content.map { _.comboValue.get })
+    combo.multiPrototypeCombo.content.map { _.comboValue.get }.filter { _ != null })
 }

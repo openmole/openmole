@@ -5,7 +5,7 @@
   <parent>
     <artifactId>plugins</artifactId>
     <groupId>org.openmole.ide</groupId>
-    <version>0.8-alpha3</version>
+    <version>0.8-alpha4</version>
   </parent>
   <artifactId>org.openmole.ide.plugin.hook.display</artifactId>
   <packaging>bundle</packaging>
@@ -28,7 +28,7 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>org.openmole.ide.plugin.hook.tools</artifactId>
+      <artifactId>org.openmole.ide.plugin.misc.tools</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>

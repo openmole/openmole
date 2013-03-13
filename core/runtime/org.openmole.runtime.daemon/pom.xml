@@ -7,7 +7,7 @@
   <parent>
     <artifactId>runtime</artifactId>
     <groupId>org.openmole.core</groupId>
-    <version>0.8-alpha3</version>
+    <version>0.8-alpha4</version>
   </parent>
   <artifactId>org.openmole.runtime.daemon</artifactId>
   <!-- ************************************************************* -->
@@ -177,8 +177,8 @@
                 <resource>
                   <directory>src/main/resources/</directory>
                   <includes>
-                    <include>run.sh</include>
-                    <include>run.bat</include>
+                    <include>openmole-daemon</include>
+                    <include>openmole-daemon.bat</include>
                   </includes>
                 </resource>
               </resources>

@@ -18,25 +18,18 @@
 package org.openmole.ide.plugin.hook.display
 
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.misc.tools.Counter
 import org.openmole.plugin.hook.display._
-import org.openmole.ide.core.model.data.IHookDataUI
-import org.openmole.ide.core.implementation.registry._
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.ide.core.model.control.IExecutionManager
+import org.openmole.core.model.data.Prototype
+import org.openmole.ide.core.implementation.data.HookDataUI
 
 class ToStringHookDataUI(val name: String = "",
-                         val toBeHooked: List[IPrototypeDataProxyUI] = List.empty,
-                         val id: Int = Counter.id.getAndIncrement) extends IHookDataUI {
+                         val toBeHooked: List[IPrototypeDataProxyUI] = List.empty) extends HookDataUI {
 
   def coreClass = classOf[ToStringHook]
 
-  def coreObject(executionManager: IExecutionManager) = {
-    List(ToStringHook(
-      toBeHooked.map { executionManager.prototypeMapping }.toSeq: _*))
-  }
-
   def buildPanelUI = new ToStringHookPanelUI(this)
+
+  def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]) =
+    List(ToStringHook(toBeHooked.map { protoMapping }.toSeq: _*))
+
 }

@@ -28,10 +28,12 @@ import scala.collection.mutable.HashSet
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import org.openmole.core.model.mole.{ ICapsule, IMole }
+import concurrent.stm._
+import util.{ Failure, Success }
+import org.openmole.ide.misc.tools.util.ID
 
-class MoleSceneManager(var name: String) extends IMoleSceneManager {
+class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
 
-  val id = ScenesManager.countBuild.getAndIncrement
   var startingCapsule: Option[ICapsuleUI] = None
   var _capsules = new HashMap[String, ICapsuleUI]
   var _connectors = new HashMap[String, IConnectorUI]
@@ -41,11 +43,21 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
 
   var dataUI: IMoleDataUI = new MoleDataUI
 
-  var cacheMole: Option[(IMole, Map[ICapsuleUI, ICapsule])] = None
+  val _cacheMole: Ref[Option[(IMole, Map[ICapsuleUI, ICapsule])]] = Ref(None)
 
-  def refreshCache = MoleFactory.buildMole(this) match {
-    case Right((m, cMap, _, _)) ⇒ cacheMole = Some((m, cMap))
-    case _ ⇒
+  def invalidateCache = _cacheMole.single() = None
+
+  def cacheMole = atomic { implicit actx ⇒
+    _cacheMole() match {
+      case Some(_) ⇒
+      case None ⇒
+        _cacheMole() = MoleFactory.buildMole(this) match {
+          case Success((m, cMap, _, _)) ⇒ Some((m, cMap))
+          case Failure(t) ⇒
+            None
+        }
+    }
+    _cacheMole()
   }
 
   def capsules = _capsules.toMap
@@ -71,6 +83,7 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
     _capsules += getNodeID -> cv
     if (_capsules.size == 1) setStartingCapsule(cv)
     capsuleConnections += cv.dataUI -> HashSet.empty[IConnectorUI]
+    invalidateCache
   }
 
   def removeCapsuleUI(capsule: ICapsuleUI): String = removeCapsuleUI(capsuleID(capsule))
@@ -90,6 +103,7 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
 
     _capsules.remove(nodeID)
     assignDefaultStartingCapsule
+    invalidateCache
     nodeID
   }
 
@@ -151,6 +165,7 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
       case true ⇒ capsuleConnections(connector.source.dataUI) -= connector
       case _ ⇒
     }
+    invalidateCache
   }
 
   def registerConnector(connector: IConnectorUI): Boolean = {
@@ -160,11 +175,12 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager {
 
   def registerConnector(edgeID: String,
                         connector: IConnectorUI): Boolean = {
-    capsuleConnections(connector.source.dataUI) += connector
+    capsuleConnections.getOrElseUpdate(connector.source.dataUI, HashSet(connector))
     if (!_connectors.keys.contains(edgeID)) {
       _connectors += edgeID -> connector
       return true
     }
+    invalidateCache
     false
   }
 

@@ -20,8 +20,9 @@ package org.openmole.ide.core.implementation.workflow
 import org.netbeans.api.visual.anchor.PointShape
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
-import org.openmole.ide.core.model.panel.PanelMode
+import org.openmole.ide.core.model.panel.{ IBasePanel, PanelMode }
 import org.openmole.ide.core.model.workflow.ICapsuleUI
+import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.commons.Constants._
 import scala.collection.JavaConversions._
 
@@ -35,8 +36,8 @@ class ExecutionMoleScene(name: String) extends MoleScene(name) {
     currentPanel.contents.foreach { _.enabled = false }
   }
 
-  override def displayExtraPropertyPanel(dproxy: IDataProxyUI) = {
-    super.displayExtraPropertyPanel(dproxy)
+  override def displayExtraPropertyPanel(dproxy: IDataProxyUI, fromPanel: IBasePanel, mode: PanelMode) = {
+    super.displayExtraPropertyPanel(dproxy, fromPanel, mode)
     currentExtraPanel.contents.foreach { _.enabled = false }
   }
 

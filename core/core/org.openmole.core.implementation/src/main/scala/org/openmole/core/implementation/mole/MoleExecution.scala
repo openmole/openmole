@@ -51,7 +51,7 @@ import org.openmole.core.serializer.SerializerService
 
 object MoleExecution extends Logger {
 
-  type PartialMoleExecution = ExecutionContext ⇒ MoleExecution
+  type PartialMoleExecution = (Context, ExecutionContext) ⇒ MoleExecution
 
   def partial(
     mole: IMole,
@@ -60,7 +60,6 @@ object MoleExecution extends Logger {
     selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
     grouping: Map[ICapsule, Grouping] = Map.empty,
     profiler: Profiler = Profiler.empty,
-    implicits: Context = Context.empty,
     seed: Long = Workspace.newSeed): PartialMoleExecution =
     new MoleExecution(
       mole,
@@ -69,8 +68,7 @@ object MoleExecution extends Logger {
       selection,
       grouping,
       profiler,
-      implicits,
-      seed)(_)
+      seed)(_, _)
 
   def apply(
     mole: IMole,
@@ -89,8 +87,7 @@ object MoleExecution extends Logger {
       selection,
       grouping,
       profiler,
-      implicits,
-      seed)(executionContext)
+      seed)(implicits, executionContext)
 
 }
 
@@ -103,8 +100,7 @@ class MoleExecution(
     val selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
     val grouping: Map[ICapsule, Grouping] = Map.empty,
     val profiler: Profiler = Profiler.empty,
-    val implicits: Context = Context.empty,
-    seed: Long = Workspace.newSeed)(implicit val executionContext: ExecutionContext = ExecutionContext.local) extends IMoleExecution {
+    seed: Long = Workspace.newSeed)(implicit val implicits: Context = Context.empty, implicit val executionContext: ExecutionContext = ExecutionContext.local) extends IMoleExecution {
 
   import IMoleExecution._
   import MoleExecution._
@@ -194,6 +190,7 @@ class MoleExecution(
       val validationErrors = Validation(mole, implicits, sources, hooks)
       if (!validationErrors.isEmpty) throw new UserBadDataError("Formal validation of your mole has failed, several errors have been found: " + validationErrors.mkString("\n"))
       start(Context.empty)
+      _started.single() = true
     }
     this
   }

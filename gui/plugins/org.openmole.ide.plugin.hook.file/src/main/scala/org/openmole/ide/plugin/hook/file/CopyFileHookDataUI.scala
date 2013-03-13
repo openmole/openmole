@@ -19,25 +19,17 @@ package org.openmole.ide.plugin.hook.file
 
 import java.io.File
 import org.openmole.core.model.data.Prototype
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.ide.core.model.control.IExecutionManager
-import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.misc.tools.Counter
 import org.openmole.plugin.hook.file._
+import org.openmole.ide.core.implementation.data.HookDataUI
 
 class CopyFileHookDataUI(val name: String = "",
-                         val toBeHooked: List[(IPrototypeDataProxyUI, String)] = List.empty,
-                         val id: Int = Counter.id.getAndIncrement) extends IHookDataUI {
+                         val toBeHooked: List[(IPrototypeDataProxyUI, String)] = List.empty) extends HookDataUI {
 
   def coreClass = classOf[CopyFileHook]
 
-  def coreObject(executionManager: IExecutionManager) = toBeHooked.map { h ⇒
-    CopyFileHook(
-      executionManager.prototypeMapping(h._1).asInstanceOf[Prototype[File]],
-      h._2).toHook
+  def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]) = toBeHooked.map { h ⇒
+    CopyFileHook(protoMapping(h._1).asInstanceOf[Prototype[File]], h._2).toHook
   }
 
   def buildPanelUI = new CopyFileHookPanelUI(this)

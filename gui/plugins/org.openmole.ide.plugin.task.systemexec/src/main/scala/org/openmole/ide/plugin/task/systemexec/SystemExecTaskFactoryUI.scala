@@ -35,7 +35,7 @@ class SystemExecTaskFactoryUI extends ITaskFactoryUI {
     val t = SceneFactory.as[SystemExecTask](task)
     uiMap.task(t, x ⇒ new SystemExecTaskDataUI(t.name,
       t.directory,
-      t.command,
+      t.command.head._1,
       t.resources.toList.map { _._2 },
       t.inputFiles.toList.map { p ⇒ (uiMap.prototypeMap(p._1), p._2) },
       t.outputFiles.toList.map { p ⇒ (p._1, uiMap.prototypeMap(p._2)) },

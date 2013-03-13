@@ -3,9 +3,9 @@ package org.openmole.web
 import _root_.akka.actor.{ Props, ActorSystem }
 import org.scalatra._
 import javax.servlet.ServletContext
-import org.openmole.web.MyServlet
-import org.openmole.web.MyRepoServlet
 import com.typesafe.config.ConfigFactory
+import slick.driver.H2Driver.simple._
+import java.sql.Clob
 
 /**
  * This is the Scalatra bootstrap file. You can use it to mount servlets or
@@ -36,7 +36,7 @@ class Scalatra extends LifeCycle {
   override def init(context: ServletContext) {
 
     // Mount one or more servlets
-    context.mount(new MyServlet(system), "/*")
+    context.mount(new MoleRunner(system), "/*")
     context.mount(new SlickRoutes(), "/c/*")
     context.mount(new MyRepoServlet(system), "/repo/*")
   }
@@ -44,4 +44,12 @@ class Scalatra extends LifeCycle {
   override def destroy(context: ServletContext) {
     system.shutdown()
   }
+}
+
+object MoleData extends Table[(String, String, Clob)]("MoleData") {
+  def id = column[String]("ID")
+  def state = column[String]("STATE")
+  def clobbedMole = column[Clob]("MOLEEXEC")
+
+  def * = id ~ state ~ clobbedMole
 }

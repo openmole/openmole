@@ -71,7 +71,7 @@ object Builder {
              lasts: Iterable[ICapsuleUI],
              uiMap: IPuzzleUIMap = new PuzzleUIMap) = {
     val capsuleMap = capsulesUI.map {
-      c ⇒ c -> MoleFactory.buildCapsule(c.dataUI, c.scene.manager.dataUI)
+      c ⇒ c -> c.dataUI.coreObject(c.scene.manager.dataUI)
     }.toMap
     val prototypeMap = MoleFactory.prototypeMapping
     val (transitions, dataChannels, islotMap) = MoleFactory.buildConnectors(capsuleMap, prototypeMap)
@@ -110,7 +110,7 @@ object Builder {
         val capsules = scene.manager.capsule(proxy)
         val cUI = {
           if (capsules.isEmpty) {
-            Proxys.tasks += proxy
+            Proxys += proxy
             SceneFactory.capsuleUI(scene, new Point(0, 0), Some(proxy)).addInputSlot(false)
           } else capsules.head.islots.head
         }

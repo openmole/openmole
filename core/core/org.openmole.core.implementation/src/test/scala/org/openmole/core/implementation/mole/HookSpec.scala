@@ -32,7 +32,7 @@ import org.junit.runner.RunWith
 @RunWith(classOf[JUnitRunner])
 class HookSpec extends FlatSpec with ShouldMatchers {
 
-  "A capsule execution hook" should "intercept the execution of a capsule" in {
+  "A capsule execution misc" should "intercept the execution of a capsule" in {
     var executed = false
 
     val p = Prototype[String]("p")
@@ -63,7 +63,7 @@ class HookSpec extends FlatSpec with ShouldMatchers {
     executed should equal(true)
   }
 
-  "A capsule execution hook" should "intercept the execution of a master capsule" in {
+  "A capsule execution misc" should "intercept the execution of a master capsule" in {
     var executed = false
 
     val p = Prototype[String]("p")

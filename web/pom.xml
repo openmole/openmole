@@ -7,11 +7,11 @@
   <parent>
     <artifactId>openmole</artifactId>
     <groupId>org.openmole</groupId>
-    <version>0.8-alpha3</version>
+    <version>0.8-alpha4</version>
   </parent>
   <groupId>org.openmole.web</groupId>
   <artifactId>openmole-webserver</artifactId>
-  <version>0.8-alpha3</version>
+  <version>0.8-alpha4</version>
   <!-- ************************************************************* -->
   <!-- *** Build Settings ****************************************** -->
   <!-- ************************************************************* -->

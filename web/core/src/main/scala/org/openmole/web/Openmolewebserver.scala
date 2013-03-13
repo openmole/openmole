@@ -3,7 +3,6 @@ package org.openmole.web
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.util.resource._
 import org.eclipse.jetty.webapp.WebAppContext
-import org.openmole.web.Openmolewebserver
 
 class Openmolewebserver(port: Int) {
 

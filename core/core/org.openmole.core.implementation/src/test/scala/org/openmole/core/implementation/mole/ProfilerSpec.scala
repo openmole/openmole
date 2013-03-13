@@ -33,7 +33,7 @@ import org.junit.runner.RunWith
 @RunWith(classOf[JUnitRunner])
 class MoleExecutionHookSpec extends FlatSpec with ShouldMatchers {
 
-  "A execution hook" should "intersept finished jobs in mole execution" in {
+  "A execution misc" should "intersept finished jobs in mole execution" in {
     var executed = false
 
     val p = Prototype[String]("p")

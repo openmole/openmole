@@ -19,8 +19,8 @@ package org.openmole.ide.core.implementation.dataproxy
 
 import org.openmole.ide.core.model.data.IPrototypeDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.misc.tools.Counter
+import org.openmole.ide.misc.tools.util.ID
 
-class PrototypeDataProxyUI(var dataUI: IPrototypeDataUI[_],
-                           val id: Int = Counter.id.getAndIncrement,
-                           override val generated: Boolean = false) extends IPrototypeDataProxyUI
+class PrototypeDataProxyUI(
+  var dataUI: IPrototypeDataUI[_],
+  override val generated: Boolean = false) extends IPrototypeDataProxyUI with ID

@@ -17,7 +17,6 @@
 
 package org.openmole.ide.plugin.hook.file
 
-import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.factory.IHookFactoryUI
 import org.openmole.plugin.hook.file._
 

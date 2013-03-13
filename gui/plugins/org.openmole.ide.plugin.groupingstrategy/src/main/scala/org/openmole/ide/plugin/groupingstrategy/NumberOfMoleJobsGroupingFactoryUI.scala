@@ -26,6 +26,5 @@ class NumberOfMoleJobsGroupingFactoryUI extends IGroupingFactoryUI {
 
   def coreClass = classOf[MoleJobsGrouping]
 
-  def buildPanelUI(executionManager: IExecutionManager) =
-    new NumberOfMoleJobsGroupingPanelUI(executionManager)
+  def buildPanelUI = new NumberOfMoleJobsGroupingPanelUI
 }

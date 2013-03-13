@@ -33,46 +33,40 @@ import org.openmole.ide.misc.widget.multirow.MultiWidget._
 
 object MultiGenericGroupingStrategyPanel {
 
-  class GroupingStrategyPanel(executionManager: IExecutionManager)
-      extends PluginPanel("wrap 3") with IPanel[GroupingStrategyData] {
+  class GroupingStrategyPanel extends PluginPanel("wrap") with IPanel[GroupingStrategyData] {
 
-    val hookFactoryComboBox = new MyComboBox(KeyRegistry.groupingStrategies.values.toList)
+    val groupingFactoryComboBox = new MyComboBox(KeyRegistry.groupingStrategies.values.toList)
 
-    hookFactoryComboBox.selection.reactions += {
-      case SelectionChanged(`hookFactoryComboBox`) ⇒
+    groupingFactoryComboBox.selection.reactions += {
+      case SelectionChanged(`groupingFactoryComboBox`) ⇒
         panelUI = buildPanelUI
-        if (contents.size > 2) contents.remove(2)
+        if (contents.size > 1) contents.remove(1)
         contents += panelUI.peer
       case _ ⇒
     }
 
-    val capsuleComboBox = new MyComboBox(executionManager.capsuleMapping.values.toList)
-
     var panelUI = buildPanelUI
-    contents += hookFactoryComboBox
-    contents += capsuleComboBox
+    contents += groupingFactoryComboBox
     contents += panelUI.peer
 
-    def content = new GroupingStrategyData(panelUI.coreObject,
-      capsuleComboBox.selection.item)
+    def content = new GroupingStrategyData(panelUI.coreObject)
 
-    def buildPanelUI = hookFactoryComboBox.selection.item.buildPanelUI(executionManager)
+    def buildPanelUI = groupingFactoryComboBox.selection.item.buildPanelUI
   }
 
-  class GroupingStrategyData(val coreObject: Grouping,
-                             val capsule: ICapsule) extends IData
+  class GroupingStrategyData(val coreObject: Grouping) extends IData
 
-  class GroupingStrategyFactory(executionManager: IExecutionManager) extends IFactory[GroupingStrategyData] {
-    def apply = new GroupingStrategyPanel(executionManager: IExecutionManager)
+  class GroupingStrategyFactory extends IFactory[GroupingStrategyData] {
+    def apply = new GroupingStrategyPanel
   }
 }
 
 import MultiGenericGroupingStrategyPanel._
 
-class MultiGenericGroupingStrategyPanel(executionManager: IExecutionManager) extends MultiPanel("",
-  new GroupingStrategyFactory(executionManager: IExecutionManager),
+class MultiGenericGroupingStrategyPanel extends MultiPanel("",
+  new GroupingStrategyFactory,
   List(),
   CLOSE_IF_EMPTY,
   ADD) {
-  def coreObjects = content.map { c ⇒ c.coreObject -> c.capsule }
+  def coreObjects = content.map { c ⇒ c.coreObject }
 }

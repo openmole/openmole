@@ -6,7 +6,7 @@
   <!-- ************************************************************* -->
   <groupId>org.openmole</groupId>
   <artifactId>openmole</artifactId>
-  <version>0.8-alpha3</version>
+  <version>0.8-alpha4</version>
   <!-- ************************************************************* -->
   <!-- *** Build Settings ****************************************** -->
   <!-- ************************************************************* -->
@@ -85,7 +85,7 @@
     <!--<lib.com.jcraft.jsch.version>0.1.42</lib.com.jcraft.jsch.version>-->
     <lib.com.thoughtworks.xstream.version>1.4.1</lib.com.thoughtworks.xstream.version>
     <lib.net.sf.kxml.version>2.3.0</lib.net.sf.kxml.version>
-    <lib.fr.iscpif.gridscale.version>1.33</lib.fr.iscpif.gridscale.version>
+    <lib.fr.iscpif.gridscale.version>1.35</lib.fr.iscpif.gridscale.version>
     <lib.org.apache.commons.collections15.version>4.01</lib.org.apache.commons.collections15.version>
     <lib.org.apache.commons.compress.version>1.0</lib.org.apache.commons.compress.version>
     <lib.org.apache.commons.pool.version>1.5.4</lib.org.apache.commons.pool.version>
@@ -132,7 +132,7 @@
     <lib.org.nuiton.thirdparty.jri.version>0.7-0</lib.org.nuiton.thirdparty.jri.version>
     <lib.org.apache.sling.scripting.scala.script.version>0.9.0-SNAPSHOT</lib.org.apache.sling.scripting.scala.script.version>
     <lib.com.github.scopt.version>2.0.0</lib.com.github.scopt.version>
-    <lib.fr.iscpif.mgo.version>1.51</lib.fr.iscpif.mgo.version>
+    <lib.fr.iscpif.mgo.version>1.54</lib.fr.iscpif.mgo.version>
     <lib.org.scala-lang.scala.version>2.10.0</lib.org.scala-lang.scala.version>
     <lib.com.typesafe.akka.version>2.1.1</lib.com.typesafe.akka.version>
     <lib.com.typesafe.akka.scala.version>${scala.major.version}</lib.com.typesafe.akka.scala.version>

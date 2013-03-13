@@ -2,14 +2,10 @@ package org.openmole.web
 
 import org.scalatra.ScalatraServlet
 
-import java.util.Properties
-import org.openmole.web.{ Suppliers, SlickSupport, Coffees }
 import org.slf4j.LoggerFactory
 
 import slick.driver.H2Driver.simple._
 import com.jolbox.bonecp._
-import java.sql.SQLException
-import java.util.UUID
 
 //import scala.slick.session.Database
 import Database.threadLocalSession

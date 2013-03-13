@@ -66,7 +66,7 @@ class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
   }
 
   def create = {
-    Proxys.samplings += proxy
+    Proxys += proxy
     ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
 
@@ -75,7 +75,7 @@ class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
     toBeRemovedSamplings match {
       case Nil ⇒
         scene.closePropertyPanel
-        Proxys.samplings -= proxy
+        Proxys -= proxy
         ConceptMenu.removeItem(proxy)
         true
       case _ ⇒

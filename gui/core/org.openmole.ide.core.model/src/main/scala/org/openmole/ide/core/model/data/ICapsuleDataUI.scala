@@ -19,39 +19,40 @@ package org.openmole.ide.core.model.data
 
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.core.model.mole._
+import org.openmole.ide.misc.tools.util.ID
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.commons.CapsuleType
-import scala.collection.mutable.HashMap
+import org.openmole.ide.core.model.panel.{ ICapsulePanelUI, ITaskPanelUI }
 
-trait ICapsuleDataUI {
-  def id: Int
+trait ICapsuleDataUI extends IDataUI {
+  def id: ID.Type
+
+  def name = id.toString
+
+  def buildPanelUI: ICapsulePanelUI
 
   def task: Option[ITaskDataProxyUI]
 
-  def task_=(t: Option[ITaskDataProxyUI])
-
-  def sampling: Option[ISamplingCompositionDataProxyUI]
-
-  def sampling_=(s: Option[ISamplingCompositionDataProxyUI])
-
   def environment: Option[IEnvironmentDataProxyUI]
 
-  def environment_=(e: Option[IEnvironmentDataProxyUI])
+  def hooks: List[IHookDataProxyUI]
 
-  def hooks: HashMap[Class[_ <: IHook], IHookDataUI]
-
-  def hooks_=(hm: HashMap[Class[_ <: IHook], IHookDataUI])
-
-  def unhookAll: Unit
+  def sources: List[ISourceDataProxyUI]
 
   def transitionType: TransitionType.Value
 
+  def coreObject(moleDataUI: IMoleDataUI): ICapsule
+
   def capsuleType: CapsuleType
 
-  def capsuleType_=(t: CapsuleType)
+  def ::(t: Option[ITaskDataProxyUI]): ICapsuleDataUI
 
-  def coreObject = {
+  def on(e: Option[IEnvironmentDataProxyUI]): ICapsuleDataUI
 
-  }
+  def -:(s: List[ISourceDataProxyUI]): ICapsuleDataUI
+
+  def :-(h: List[IHookDataProxyUI]): ICapsuleDataUI
+
+  def --(t: CapsuleType): ICapsuleDataUI
 }

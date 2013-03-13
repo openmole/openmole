@@ -16,7 +16,7 @@
  */
 package org.openmole.ide.core.implementation.data
 
-import org.openmole.core.model.data.DataSet
+import org.openmole.core.model.data.{ Prototype, DataSet }
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.registry.{ KeyGenerator, KeyPrototypeGenerator }
 import org.openmole.core.model.mole.{ ICapsule, Hooks, Sources, IMole }
@@ -25,13 +25,13 @@ import org.openmole.ide.core.implementation.dataproxy.{ Proxys, PrototypeDataPro
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 
 object ToolDataUI {
-  def implicitPrototypes(coreInputs: Unit ⇒ DataSet,
+  def implicitPrototypes(coreInputs: Unit ⇒ List[Prototype[_]],
                          prototypesIn: List[IPrototypeDataProxyUI],
-                         coreOutputs: Unit ⇒ DataSet,
+                         coreOutputs: Unit ⇒ List[Prototype[_]],
                          prototypesOut: List[IPrototypeDataProxyUI]): (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI]) = {
 
-    def protoFilter(ds: DataSet, protos: List[IPrototypeDataProxyUI]) = {
-      ds.map { i ⇒ KeyPrototypeGenerator(i.prototype) }.toList.diff(protos.map {
+    def protoFilter(lP: List[Prototype[_]], protos: List[IPrototypeDataProxyUI]) = {
+      lP.map { i ⇒ KeyPrototypeGenerator(i) }.toList.diff(protos.map {
         p ⇒ KeyPrototypeGenerator(p)
       }).map { KeyPrototypeGenerator.prototype }
     }
@@ -48,7 +48,7 @@ object ToolDataUI {
             val (protoType, dim) = KeyGenerator.stripArrays(d.prototype.`type`)
             val proto = new PrototypeDataProxyUI(GenericPrototypeDataUI(d.prototype.name, dim + 1)(protoType), generated = true)
             if (!KeyPrototypeGenerator.isPrototype(proto))
-              Proxys.prototypes += proto
+              Proxys += proto
         }
         case _ ⇒
       }

@@ -17,23 +17,26 @@
 
 package org.openmole.ide.core.implementation.data
 
-import org.openmole.core.model.mole._
 import org.openmole.ide.core.model.commons._
 import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.data.ICapsuleDataUI
-import org.openmole.ide.misc.tools.Counter
-import scala.collection.mutable.HashMap
+import org.openmole.ide.misc.tools.util._
+import org.openmole.core.implementation.mole.{ StrainerCapsule, MasterCapsule, Capsule }
+import org.openmole.ide.core.implementation.workflow.CapsulePanelUI
+import org.openmole.ide.core.implementation.builder.MoleFactory
+import java.io.File
+import org.openmole.core.model.task.ITask
+import org.openmole.core.implementation.task.EmptyTask
+import org.openmole.ide.core.implementation.dialog.StatusBar
+import util.{ Success, Failure }
 
-class CapsuleDataUI(var task: Option[ITaskDataProxyUI] = None,
-                    var sampling: Option[ISamplingCompositionDataProxyUI] = None,
-                    var environment: Option[IEnvironmentDataProxyUI] = None,
-                    var capsuleType: CapsuleType = new BasicCapsuleType) extends ICapsuleDataUI {
-
-  var hooks = new HashMap[Class[_ <: IHook], IHookDataUI]
-
-  def id = Counter.id.getAndIncrement
+case class CapsuleDataUI(val task: Option[ITaskDataProxyUI] = None,
+                         val environment: Option[IEnvironmentDataProxyUI] = None,
+                         val sources: List[ISourceDataProxyUI] = List(),
+                         val hooks: List[IHookDataProxyUI] = List(),
+                         val capsuleType: CapsuleType = new BasicCapsuleType) extends ICapsuleDataUI with ID {
 
   override def toString = task match {
     case Some(x: ITaskDataProxyUI) ⇒ x.dataUI.name
@@ -48,5 +51,31 @@ class CapsuleDataUI(var task: Option[ITaskDataProxyUI] = None,
     case _ ⇒ BASIC_TRANSITION
   }
 
-  def unhookAll = hooks = new HashMap[Class[_ <: IHook], IHookDataUI]
+  def ::(t: Option[ITaskDataProxyUI]) = copy(task = t)
+
+  def on(e: Option[IEnvironmentDataProxyUI]) = copy(environment = e)
+
+  def -:(s: List[ISourceDataProxyUI]) = copy(sources = s)
+
+  def :-(h: List[IHookDataProxyUI]) = copy(hooks = h)
+
+  def --(t: CapsuleType) = copy(capsuleType = t)
+
+  def coreClass = classOf[Capsule]
+
+  def buildPanelUI = new CapsulePanelUI(this)
+
+  def coreObject(moleDataUI: IMoleDataUI) = task match {
+    case Some(t: ITaskDataProxyUI) ⇒ MoleFactory.taskCoreObject(t.dataUI, moleDataUI.plugins.map { p ⇒ new File(p) }.toSet) match {
+      case Success(x: ITask) ⇒ capsuleType match {
+        case y: MasterCapsuleType ⇒ new MasterCapsule(x, y.persistList.map { _.dataUI.name }.toSet)
+        case y: StrainerCapsuleType ⇒ new StrainerCapsule(x)
+        case _ ⇒ new Capsule(x)
+      }
+      case Failure(x: Throwable) ⇒ new Capsule(EmptyTask(t.dataUI.name))
+    }
+    case _ ⇒
+      StatusBar().inform("A capsule without Task can not be run")
+      new Capsule(EmptyTask("None"))
+  }
 }

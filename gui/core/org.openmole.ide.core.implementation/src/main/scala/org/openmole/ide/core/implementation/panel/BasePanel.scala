@@ -19,23 +19,17 @@ package org.openmole.ide.core.implementation.panel
 
 import java.awt.BorderLayout
 import java.awt.Color
-import java.awt.Font
-import java.awt.Font._
 import javax.swing.BorderFactory
 import javax.swing.ImageIcon
-import org.openmole.ide.core.model.panel.IPanelUI
+import org.openmole.ide.core.model.panel.{ IBasePanel, IPanelUI }
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.misc.widget.MyPanel
-import org.openmole.ide.misc.widget.ImageLinkLabel
 import org.openmole.ide.misc.widget._
-import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import scala.swing.Action
 import scala.swing.Component
 import scala.swing.Label
 import scala.swing.event.ActionEvent
-import scala.swing.event.FocusGained
 import scala.swing.event.UIElementResized
 import scala.swing.Publisher
 import scala.swing.TextField
@@ -43,7 +37,6 @@ import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.tools.image.Images._
-import javax.imageio.ImageIO
 
 object BasePanel {
   case class IconChanged(s: Component, imagePath: String) extends ActionEvent(s)
@@ -51,7 +44,7 @@ object BasePanel {
 
 abstract class BasePanel(proxy: Option[IDataProxyUI],
                          scene: IMoleScene,
-                         mode: Value) extends MyPanel with Publisher {
+                         val mode: Value) extends MyPanel with IBasePanel {
 
   opaque = true
   peer.setLayout(new BorderLayout)
@@ -66,7 +59,7 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
 
   val createLabelLink = new MainLinkLabel("create", new Action("") { def apply = baseCreate })
   val mainLinksPanel = new PluginPanel("")
-  if (mode != CREATION) deleteLink
+  if (mode != CREATION && mode != EXTRA_CREATION) deleteLink
   border = BorderFactory.createEmptyBorder
 
   val mainPanel = new PluginPanel("wrap", "", "") {
@@ -74,7 +67,7 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
       contents += new ImageLinkLabel(CLOSE, new Action("") {
         def apply = {
           mode match {
-            case EXTRA ⇒ scene.closeExtraPropertyPanel
+            case EXTRA | EXTRA_CREATION ⇒ scene.closeExtraPropertyPanel
             case _ ⇒ scene.closePropertyPanel
           }
         }
@@ -104,7 +97,7 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
       scene.refresh
   }
 
-  var created = if (mode == CREATION) false else true
+  var created = if (mode == CREATION || mode == EXTRA_CREATION) false else true
 
   def hide = {
     baseSave

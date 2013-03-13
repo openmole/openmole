@@ -37,12 +37,13 @@ import scala.swing.Component
 import scala.swing.event.FocusGained
 import javax.imageio.ImageIO
 import BasePanel.IconChanged
+import org.openmole.ide.core.implementation.prototype.UpdatedPrototypeEvent
 
 object PrototypePanel {
   def deletePrototype(proxy: IPrototypeDataProxyUI): Boolean = {
     def erase = {
       ScenesManager.closePropertyPanel
-      Proxys.prototypes -= proxy
+      Proxys -= proxy
       ConceptMenu.removeItem(proxy)
       true
     }
@@ -97,7 +98,8 @@ class PrototypePanel[T](proxy: IPrototypeDataProxyUI,
   }
 
   def create = {
-    Proxys.prototypes += proxy
+    Proxys += proxy
+    publish(new UpdatedPrototypeEvent(this))
     ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(nameTextField.text,
       proxy)
   }

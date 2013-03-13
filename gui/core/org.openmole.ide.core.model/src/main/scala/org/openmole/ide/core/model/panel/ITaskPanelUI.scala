@@ -19,13 +19,13 @@ package org.openmole.ide.core.model.panel
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
-trait ITaskPanelUI extends IPanelUI {
+trait ITaskPanelUI extends IOPanelUI {
 
   def save(name: String,
            prototypesIn: List[IPrototypeDataProxyUI],
            inputParameters: scala.collection.mutable.Map[IPrototypeDataProxyUI, String],
            prototypesOut: List[IPrototypeDataProxyUI]): ITaskDataUI = {
-    var dataUI = saveContent(name)
+    val dataUI = saveContent(name)
     dataUI.inputs = prototypesIn
     dataUI.outputs = prototypesOut
     dataUI.inputParameters = inputParameters

@@ -7,7 +7,7 @@
   <parent>
     <artifactId>gui</artifactId>
     <groupId>org.openmole.ide</groupId>
-    <version>0.8-alpha3</version>
+    <version>0.8-alpha4</version>
   </parent>
   <artifactId>plugins</artifactId>
   <packaging>pom</packaging>
@@ -16,7 +16,6 @@
     <module>org.openmole.ide.plugin.task.netlogo</module>
     <module>org.openmole.ide.plugin.task.systemexec</module>
     <module>org.openmole.ide.plugin.task.exploration</module>
-    <module>org.openmole.ide.plugin.task.serialization</module>
     <module>org.openmole.ide.plugin.task.moletask</module>
     <module>org.openmole.ide.plugin.task.stat</module>
     <module>org.openmole.ide.plugin.domain.range</module>
@@ -34,9 +33,10 @@
     <module>org.openmole.ide.plugin.environment.ssh</module>
     <module>org.openmole.ide.plugin.groupingstrategy</module>
     <module>org.openmole.ide.plugin.method.sensitivity</module>
-    <module>org.openmole.ide.plugin.hook.tools</module>
+    <module>org.openmole.ide.plugin.misc.tools</module>
     <module>org.openmole.ide.plugin.hook.display</module>
     <module>org.openmole.ide.plugin.hook.file</module>
+    <module>org.openmole.ide.plugin.source.file</module>
     <module>org.openmole.ide.plugin.builder.base</module>
   </modules>
   <properties>

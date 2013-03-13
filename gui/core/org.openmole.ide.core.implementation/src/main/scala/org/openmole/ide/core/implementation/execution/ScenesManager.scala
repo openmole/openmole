@@ -46,6 +46,7 @@ import scala.collection.mutable.HashSet
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.openmole.ide.core.implementation.builder.SceneFactory
+import util.{ Failure, Success }
 
 object ScenesManager {
 
@@ -116,7 +117,7 @@ object ScenesManager {
       case (old, neo) ⇒
         val p = new Point((old.widget.getPreferredLocation.x + dx).toInt, (old.widget.getPreferredLocation.y + dy).toInt)
         SceneFactory.capsuleUI(neo._1, ms, p)
-        neo._1.setEnvironment(old.dataUI.environment)
+        neo._1 on old.dataUI.environment
         old.dataUI.task match {
           case Some(t: ITaskDataProxyUI) ⇒ neo._1.encapsule(t)
           case _ ⇒
@@ -200,7 +201,7 @@ object ScenesManager {
 
   def addExecutionSceneContainer(bmsc: BuildMoleSceneContainer) =
     CheckData.fullCheck(bmsc.scene) match {
-      case Right(_) ⇒
+      case Success(_) ⇒
         if (StatusBar().isValid) {
           val clone = bmsc.scene.copyScene
           clone.manager.name = { bmsc.scene.manager.name + "_" + countExec.incrementAndGet }
@@ -209,19 +210,14 @@ object ScenesManager {
           page.content = container
           bmsc.executionMoleSceneContainers += container
 
-          /*addTab(page, clone.manager.name, new Action("") {
-            def apply = {
-              container.panelHooks.foreach { ph ⇒
-                ph._2._1.dataUI.hooks(ph._2._2) = ph._1.saveContent
-              }
-              tabPane.pages.remove(page.index)
-            }
-          })  */
+          addTab(page, clone.manager.name, new Action("") {
+            def apply = tabPane.pages.remove(page.index)
+          })
 
           tabPane.selection.index = page.index
         } else
           StatusBar().block("The Mole can not be built due to the previous errors")
-      case Left(msg: String) ⇒ StatusBar().block(msg)
+      case Failure(t: Throwable) ⇒ StatusBar().block(t.getMessage)
     }
 
   def addTab(page: TabbedPane.Page, title: String, action: Action) = {

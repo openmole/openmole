@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.model.panel
 
-import java.awt.Color
+import java.awt.{ Dimension, Color }
 import javax.swing.JPanel
 import org.openmole.ide.misc.widget.Helper
 import scala.swing.Alignment
@@ -27,6 +27,7 @@ trait IPanelUI {
   def peer: JPanel
 
   val tabbedPane = new TabbedPane {
+    preferredSize = new Dimension(200, 100)
     tabPlacement = Alignment.Left
     opaque = true
     background = new Color(77, 77, 77)

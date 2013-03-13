@@ -55,7 +55,7 @@ object KeyPrototypeGenerator {
 
   def buildUnknownPrototype(name: String, dim: Int, m: Manifest[_]): IPrototypeDataProxyUI = {
     val proxy = new PrototypeDataProxyUI(GenericPrototypeDataUI(name, dim)(m), generated = true)
-    Proxys.prototypes += proxy
+    Proxys += proxy
     proxy
   }
 

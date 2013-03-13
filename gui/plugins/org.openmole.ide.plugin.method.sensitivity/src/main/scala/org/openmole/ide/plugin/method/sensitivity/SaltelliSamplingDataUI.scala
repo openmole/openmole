@@ -16,7 +16,6 @@ import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.method.sensitivity.SaltelliSampling
-import org.openmole.ide.misc.tools.Counter
 import org.openmole.ide.plugin.domain.range.RangeDomainDataUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.misc.widget.{ URL, Helper }

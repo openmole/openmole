@@ -55,7 +55,7 @@ object SystemExecTask {
    */
   def apply(
     name: String,
-    command: String,
+    _command: Option[String] = None,
     directory: String = "",
     errorOnReturnCode: Boolean = true,
     returnValue: Option[Prototype[Int]] = None,
@@ -65,6 +65,9 @@ object SystemExecTask {
     List(output, error, returnValue).flatten.foreach(p ⇒ addOutput(p))
 
     private val _variables = new ListBuffer[(Prototype[_], String)]
+    private val _commands = new ListBuffer[(String, OS)]
+
+    _command.foreach(command(_))
 
     def variables = _variables.toList
 
@@ -76,22 +79,22 @@ object SystemExecTask {
      * @param variable the name of the environment variable. By default the name of the environment
      * variable is the same as the one of the openmole protoype.
      */
-    def addVariable(prototype: Prototype[_], variable: String): this.type = {
-      _variables += prototype -> variable
+    def addVariable(prototype: Prototype[_], variable: Option[String] = None): this.type = {
+      _variables += prototype -> variable.getOrElse(prototype.name)
       addInput(prototype)
       this
     }
 
-    def addVariable(prototype: Prototype[_]): this.type = addVariable(prototype, prototype.name)
+    def command(cmd: String, os: OS = OS()) = _commands += (cmd -> os)
 
-    def toTask = new SystemExecTask(name, command, directory, errorOnReturnCode, returnValue, output, error, variables) with builder.Built
+    def toTask = new SystemExecTask(name, _commands, directory, errorOnReturnCode, returnValue, output, error, variables) with builder.Built
   }
 
 }
 
 sealed abstract class SystemExecTask(
     val name: String,
-    val command: String,
+    val command: Iterable[(String, OS)],
     val directory: String,
     val errorOnReturnCode: Boolean,
     val returnValue: Option[Prototype[Int]],
@@ -104,11 +107,14 @@ sealed abstract class SystemExecTask(
 
     val workDir = if (directory.isEmpty) tmpDir else new File(tmpDir, directory)
     val links = prepareInputFiles(context, tmpDir, directory)
-    val commandLine = CommandLine.parse(workDir.getAbsolutePath + File.separator + VariableExpansion(context, List(Variable(ExternalTask.PWD, workDir.getAbsolutePath)), command))
+
+    val osCommandLine: String = command.find { case (_, os) ⇒ os.compatible }.map { case (cmd, _) ⇒ cmd }.getOrElse(throw new UserBadDataError("Not command line found for " + actualOS))
+
+    val commandLine =
+      CommandLine.parse(workDir.getAbsolutePath + File.separator + VariableExpansion(context, List(Variable(ExternalTask.PWD, workDir.getAbsolutePath)), osCommandLine))
 
     try {
       val f = new File(commandLine.getExecutable)
-      //logger.fine(f + " " + f.exists)
       val process = Runtime.getRuntime.exec(
         commandLine.toString,
         variables.map { case (p, v) ⇒ v + "=" + context(p).toString }.toArray,

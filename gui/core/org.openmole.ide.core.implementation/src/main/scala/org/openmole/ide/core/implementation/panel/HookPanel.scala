@@ -16,48 +16,82 @@
  */
 package org.openmole.ide.core.implementation.panel
 
-import org.openmole.ide.misc.widget.{ LinkLabel, PluginPanel }
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.model.panel.PanelMode
+import org.openmole.ide.core.model.panel.{ IHookPanelUI, IOPanelUI, PanelMode }
 import org.openmole.ide.core.model.dataproxy.IHookDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
-import scala.swing.Component
-import java.awt.BorderLayout
+import swing.{ TabbedPane, Component, Label }
+import swing.event.{ SelectionChanged, FocusGained }
+import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import javax.swing.ImageIcon
 import javax.imageio.ImageIO
-import swing.event.FocusGained
-import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
+import java.awt.BorderLayout
+import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.core.implementation.prototype.UpdatedPrototypeEvent
 
 class HookPanel(proxy: IHookDataProxyUI,
                 scene: IMoleScene,
-                mode: PanelMode.Value) extends BasePanel(Some(proxy), scene, mode) { capsulePanel ⇒
+                mode: PanelMode.Value) extends BasePanel(Some(proxy), scene, mode) {
+  hookPanel ⇒
+
+  val panelUI = proxy.dataUI.buildPanelUI
+  panelUI.tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", new Label))
+
   iconLabel.icon = new ImageIcon(ImageIO.read(this.getClass.getClassLoader.getResource("img/hook.png")))
-  /*listenTo(panelUI.help.components.toSeq: _*)
-  reactions += {
-    case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
-    case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
-  }   */
 
   def create = {
-    Proxys.hooks += proxy
+    Proxys += proxy
     ConceptMenu.hookMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
 
   def delete = {
     scene.closePropertyPanel
-    Proxys.hooks -= proxy
+    Proxys -= proxy
     ConceptMenu.removeItem(proxy)
     true
   }
 
-  def save = proxy.dataUI = panelUI.saveContent(nameTextField.text)
+  def buildProtoPanel = {
+    val (implicitIP, implicitOP) = proxy.dataUI.implicitPrototypes
+    new IOPrototypePanel(scene,
+      this,
+      proxy.dataUI.inputs,
+      proxy.dataUI.outputs,
+      implicitIP,
+      implicitOP,
+      proxy.dataUI.inputParameters.toMap)
+  }
 
-  val panelUI = proxy.dataUI.buildPanelUI
+  def updateProtoPanel = {
+    save
+    protoPanel = buildProtoPanel
+    panelUI.tabbedPane.pages(1).content = protoPanel
+  }
+
+  var protoPanel = buildProtoPanel
+
+  panelUI.tabbedPane.pages(1).content = protoPanel
+  panelUI.tabbedPane.revalidate
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
-    if (panelUI.tabbedPane.pages.size == 0) contents += panelUI.peer
-    else contents += panelUI.tabbedPane
+    contents += panelUI.tabbedPane
     contents += panelUI.help
   }.peer, BorderLayout.CENTER)
+
+  listenTo(panelUI.help.components.toSeq: _*)
+  listenTo(panelUI.tabbedPane.selection)
+  reactions += {
+    case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
+    case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
+    case UpdatedPrototypeEvent(_) | SelectionChanged(panelUI.tabbedPane) ⇒
+      scene.closeExtraPropertyPanel
+      updateProtoPanel
+    case _ ⇒
+  }
+
+  def save = {
+    val protoPanelSave = protoPanel.save
+    proxy.dataUI = panelUI.save(nameTextField.text, protoPanelSave._1, protoPanelSave._2, protoPanelSave._3)
+  }
 }

@@ -26,8 +26,9 @@ import scala.swing.Action
 class ChangeCapsuleAction(capsule: ICapsuleUI,
                           newType: CapsuleType) extends Action(newType.toString.toLowerCase) {
   override def apply = {
-    capsule.setCapsuleType(newType)
+    capsule -- newType
     CheckData.checkMole(capsule.scene)
+    capsule.scene.manager.invalidateCache
     capsule.scene.graphScene.revalidate
     capsule.scene.graphScene.repaint
   }

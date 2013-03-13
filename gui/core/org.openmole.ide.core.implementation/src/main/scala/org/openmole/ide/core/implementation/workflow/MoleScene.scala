@@ -56,6 +56,7 @@ import scala.collection.mutable.HashSet
 import scala.swing.Panel
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.builder.SceneFactory
+import org.openmole.ide.core.model.data.ICapsuleDataUI
 
 abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMoleScene
     with SelectProvider
@@ -86,6 +87,7 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   val extraPropertyWidget = new ComponentWidget(this, currentExtraPanel.peer) {
     setVisible(false)
   }
+
   val propertyWidget = new ComponentWidget(this, currentPanel.peer) {
     setVisible(false)
   }
@@ -115,6 +117,19 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     case _ ⇒ throw new UserBadDataError("There is no current panel.")
   }
 
+  def displayCapsuleProperty(capsuleUI: ICapsuleUI) =
+    ScenesManager.currentSceneContainer match {
+      case (Some(exe: ExecutionMoleSceneContainer)) ⇒
+      case _ ⇒
+        closePropertyPanel
+        currentPanel.contents.removeAll
+        currentPanel.contents += new CapsulePanel(this, capsuleUI)
+        propertyWidget.setPreferredLocation(new Point(getView.getBounds().x.toInt + 20, 20))
+        propertyWidget.revalidate
+        propertyWidget.setVisible(true)
+        refresh
+    }
+
   def displayPropertyPanel(proxy: IDataProxyUI,
                            mode: PanelMode.Value) =
     ScenesManager.currentSceneContainer match {
@@ -128,6 +143,7 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
           case x: IEnvironmentDataProxyUI ⇒ currentPanel.contents += new EnvironmentPanel(x, this, mode)
           case x: ISamplingCompositionDataProxyUI ⇒ currentPanel.contents += new SamplingCompositionPanel(x, this, mode)
           case x: IHookDataProxyUI ⇒ currentPanel.contents += new HookPanel(x, this, mode)
+          case x: ISourceDataProxyUI ⇒ currentPanel.contents += new SourcePanel(x, this, mode)
           case _ ⇒
         }
         propertyWidget.setPreferredLocation(new Point(getView.getBounds().x.toInt + 20, 20))
@@ -152,21 +168,28 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     refresh
   }
 
-  def displayExtraPropertyPanel(dproxy: IDataProxyUI) = {
+  def displayExtraPropertyPanel(dproxy: IDataProxyUI,
+                                mode: PanelMode.Value): IBasePanel = {
     currentExtraPanel.contents.removeAll
     var freeze = false
-    currentExtraPanel.contents.add(dproxy match {
+    val panel = dproxy match {
       case x: IPrototypeDataProxyUI ⇒
         freeze = x.generated
-        new PrototypePanel(x, this, EXTRA)
-    })
+        new PrototypePanel(x, this, mode)
+    }
+    currentExtraPanel.contents.add(panel)
     if (freeze) currentExtraPanel.contents.foreach {
       _.enabled = !freeze
     }
     extraPropertyWidget.setVisible(true)
     extraPropertyWidget.setPreferredLocation(new Point(propertyWidget.getBounds.x.toInt + currentPanel.bounds.width + 40, 20))
     refresh
+    panel
   }
+
+  def displayExtraPropertyPanel(dproxy: IDataProxyUI,
+                                fromPanel: IBasePanel,
+                                mode: PanelMode.Value = EXTRA) = fromPanel.listenTo(displayExtraPropertyPanel(dproxy, mode))
 
   def closeExtraPropertyPanel = {
     savePropertyPanel(currentExtraPanel)
@@ -191,14 +214,14 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
         case x: BasePanel ⇒
           if (!x.created) {
             if (DialogFactory.closePropertyPanelConfirmation(x))
-              saveAndClose
-          } else saveAndClose
+              saveAndClose(x)
+          } else saveAndClose(x)
         case _ ⇒
       }
     }
 
-    def saveAndClose = {
-      closeExtraPropertyPanel
+    def saveAndClose(x: BasePanel) = {
+      if (x.mode != EXTRA_CREATION) closeExtraPropertyPanel
       savePropertyPanel
       currentPanel.contents.removeAll
       propertyWidget.setVisible(false)
@@ -211,7 +234,6 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   def graphScene = this
 
   def refresh = {
-    manager.refreshCache
     validate
     repaint
   }

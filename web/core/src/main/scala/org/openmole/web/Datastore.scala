@@ -1,7 +1,6 @@
 package org.openmole.web
 
 import akka.actor.{ Props, ActorSystem, Actor }
-import org.openmole.web.Datastore
 import akka.pattern.ask
 import scala.concurrent.duration._
 import akka.util.Timeout

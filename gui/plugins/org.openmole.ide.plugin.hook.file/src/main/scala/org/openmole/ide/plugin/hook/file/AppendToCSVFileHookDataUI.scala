@@ -17,28 +17,22 @@
 
 package org.openmole.ide.plugin.hook.file
 
-import org.openmole.core.model.mole.ICapsule
-import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.ide.core.model.control.IExecutionManager
-import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.misc.tools.Counter
 import org.openmole.plugin.hook.file._
-import org.openmole.ide.core.implementation.registry._
+import org.openmole.core.model.data.Prototype
+import org.openmole.ide.core.implementation.data.HookDataUI
 
 class AppendToCSVFileHookDataUI(val name: String = "",
                                 val prototypes: Iterable[IPrototypeDataProxyUI] = List.empty,
-                                val fileName: String = "",
-                                val id: Int = Counter.id.getAndIncrement) extends IHookDataUI {
+                                val fileName: String = "") extends HookDataUI {
 
   def buildPanelUI = new AppendToCSVFileHookPanelUI(this)
 
   def coreClass = classOf[AppendToCSVFileHook]
 
-  def coreObject(executionManager: IExecutionManager) = {
+  def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]) =
     List(AppendToCSVFileHook(
       fileName,
-      prototypes.map { executionManager.prototypeMapping }.toSeq: _*))
-  }
+      prototypes.map { protoMapping }.toSeq: _*))
+
 }
