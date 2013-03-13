@@ -107,7 +107,7 @@ class MyServlet(val system: ActorSystem) extends ScalatraServlet with SlickSuppo
     //TODO: Make sure this is not a problem
     val ins = fileParams.get("file").map(_.getInputStream)
 
-    val moleExec = processXMLFile[ExecutionContext ⇒ MoleExecution](data, ins)
+    val moleExec = processXMLFile[(Context, ExecutionContext) ⇒ MoleExecution](data, ins)
 
     val context = new ExecutionContext(System.out, directory = new File("~/execResults"))
 
