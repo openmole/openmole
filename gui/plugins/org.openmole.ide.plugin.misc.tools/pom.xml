@@ -4,13 +4,13 @@
   <parent>
     <artifactId>plugins</artifactId>
     <groupId>org.openmole.ide</groupId>
-    <version>0.8-alpha4</version>
+    <version>0.8.0-SNAPSHOT</version>
   </parent>
   <artifactId>org.openmole.ide.plugin.misc.tools</artifactId>
   <packaging>bundle</packaging>
   <name>${project.artifactId} ${project.version}</name>
   <properties>
-    <bundle.activator></bundle.activator>
+    <bundle.activator />
   </properties>
   <dependencies>
     <dependency>

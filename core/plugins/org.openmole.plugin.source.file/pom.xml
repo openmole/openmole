@@ -4,11 +4,11 @@
   <parent>
     <artifactId>plugins</artifactId>
     <groupId>org.openmole.core</groupId>
-    <version>0.8-alpha4</version>
+    <version>0.8.0-SNAPSHOT</version>
   </parent>
   <artifactId>org.openmole.plugin.source.file</artifactId>
   <packaging>bundle</packaging>
-  <description></description>
+  <description />
   <dependencies>
     <dependency>
       <groupId>org.openmole.core</groupId>

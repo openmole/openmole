@@ -7,11 +7,11 @@
   <parent>
     <artifactId>libraries</artifactId>
     <groupId>org.openmole</groupId>
-    <version>0.8-alpha4</version>
+    <version>0.8.0-SNAPSHOT</version>
   </parent>
   <!--Used to build the symbolic name of the bundle-->
   <artifactId>ccl.northwestern.edu.netlogo4.noscala</artifactId>
-  <version>0.8-alpha4</version>
+  <version>4.1.3</version>
   <!-- ************************************************************* -->
   <!-- *** Build Settings ****************************************** -->
   <!-- ************************************************************* -->

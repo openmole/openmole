@@ -7,7 +7,7 @@
   <parent>
     <artifactId>ui</artifactId>
     <groupId>org.openmole.ui</groupId>
-    <version>0.8-alpha4</version>
+    <version>0.8.0-SNAPSHOT</version>
   </parent>
   <artifactId>org.openmole.ui</artifactId>
   <!-- ************************************************************* -->
@@ -238,9 +238,9 @@
             </goals>
             <configuration>
               <target>
-                <chmod file="target/product/openmole" perm="755"></chmod>
-                <chmod file="target/product/openmole.bat" perm="755"></chmod>
-                <chmod file="target/product/debug.sh" perm="755"></chmod>
+                <chmod file="target/product/openmole" perm="755" />
+                <chmod file="target/product/openmole.bat" perm="755" />
+                <chmod file="target/product/debug.sh" perm="755" />
               </target>
             </configuration>
           </execution>
