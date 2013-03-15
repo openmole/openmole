@@ -115,9 +115,10 @@ class ExecutionManager(manager: IMoleSceneManager,
     cancel
     initBarPlotter
 
-    moleExecution = buildMoleExecution match {
+    buildMoleExecution match {
       case Success((mE, environments)) ⇒
         val mExecution: IMoleExecution = mE(Context.empty, ExecutionContext.local.copy(out = printStream))
+        moleExecution = Some(mExecution)
         EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.JobStatusChanged])
         EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.Finished])
         EventDispatcher.listen(mExecution, new JobCreatedListener(this), classOf[IMoleExecution.JobCreated])
@@ -152,7 +153,6 @@ class ExecutionManager(manager: IMoleSceneManager,
         revalidate
         timer.start
         mExecution.start
-        Some(mExecution)
       case Failure(e) ⇒
         StatusBar().block(e)
         None
@@ -177,7 +177,7 @@ class ExecutionManager(manager: IMoleSceneManager,
   def cancel = synchronized {
     timer.stop
     moleExecution match {
-      case Some(me: IMoleExecution) ⇒ me.cancel
+      case Some(mE: IMoleExecution) ⇒ mE.cancel
       case _ ⇒
     }
   }
@@ -196,10 +196,12 @@ class ExecutionManager(manager: IMoleSceneManager,
       ExecutionState.KILLED -> new AtomicInteger)
     environments += e._1 -> (e._2, m)
 
+    println(" ++ " + moleExecution)
     moleExecution match {
-      case Some(me: IMoleExecution) ⇒
-        EventDispatcher.listen(e._1, new JobStateChangedOnEnvironmentListener(this, me, e._1), classOf[Environment.JobStateChanged])
-      case _ ⇒
+      case Some(mE: IMoleExecution) ⇒
+        println("some ...")
+        EventDispatcher.listen(e._1, new JobStateChangedOnEnvironmentListener(this, mE, e._1), classOf[Environment.JobStateChanged])
+      case x: Any ⇒ println("zob " + x)
     }
   }
 
