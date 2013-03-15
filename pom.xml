@@ -79,14 +79,14 @@
     <lib.org.eclipse.core.runtime.version>3.8.0.v20120912-155025</lib.org.eclipse.core.runtime.version>
     <lib.org.eclipse.core.jobs.version>3.5.300.v20120912-155018</lib.org.eclipse.core.jobs.version>
     <!--<lib.com.db4o.version>7.4.58</lib.com.db4o.version>-->
-    <lib.org.scalatest.version>2.0.M5</lib.org.scalatest.version>
+    <lib.org.scalatest.version>2.0.M5b</lib.org.scalatest.version>
     <lib.org.scala-tools.testing.scalacheck.version>1.9</lib.org.scala-tools.testing.scalacheck.version>
     <lib.com.db4o.version>8.1-SNAPSHOT</lib.com.db4o.version>
     <lib.com.ice.tar.version>1.1.4-2</lib.com.ice.tar.version>
     <!--<lib.com.jcraft.jsch.version>0.1.42</lib.com.jcraft.jsch.version>-->
     <lib.com.thoughtworks.xstream.version>1.4.1</lib.com.thoughtworks.xstream.version>
     <lib.net.sf.kxml.version>2.3.0</lib.net.sf.kxml.version>
-    <lib.fr.iscpif.gridscale.version>1.35</lib.fr.iscpif.gridscale.version>
+    <lib.fr.iscpif.gridscale.version>1.36</lib.fr.iscpif.gridscale.version>
     <lib.org.apache.commons.collections15.version>4.01</lib.org.apache.commons.collections15.version>
     <lib.org.apache.commons.compress.version>1.0</lib.org.apache.commons.compress.version>
     <lib.org.apache.commons.pool.version>1.5.4</lib.org.apache.commons.pool.version>
@@ -133,8 +133,8 @@
     <lib.org.nuiton.thirdparty.jri.version>0.7-0</lib.org.nuiton.thirdparty.jri.version>
     <lib.org.apache.sling.scripting.scala.script.version>0.9.0-SNAPSHOT</lib.org.apache.sling.scripting.scala.script.version>
     <lib.com.github.scopt.version>2.0.0</lib.com.github.scopt.version>
-    <lib.fr.iscpif.mgo.version>1.54</lib.fr.iscpif.mgo.version>
-    <lib.org.scala-lang.scala.version>2.10.0</lib.org.scala-lang.scala.version>
+    <lib.fr.iscpif.mgo.version>1.55</lib.fr.iscpif.mgo.version>
+    <lib.org.scala-lang.scala.version>2.10.1</lib.org.scala-lang.scala.version>
     <lib.com.typesafe.akka.version>2.1.1</lib.com.typesafe.akka.version>
     <lib.com.typesafe.akka.scala.version>${scala.major.version}</lib.com.typesafe.akka.scala.version>
     <scala.major.version>2.10</scala.major.version>
@@ -154,7 +154,7 @@
     <bundle.namespace>${project.artifactId}</bundle.namespace>
     <bundle.activationpolicy>lazy</bundle.activationpolicy>
     <embed-transitive>false</embed-transitive>
-    <include></include>
+    <include />
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <dependencyManagement>
@@ -395,9 +395,6 @@
         <groupId>com.google.code.sortpom</groupId>
         <artifactId>maven-sortpom-plugin</artifactId>
         <version>2.1.0</version>
-	<configuration>
-	  <expandEmptyElements>false</expandEmptyElements> 
-	</configuration>
         <executions>
           <execution>
             <phase>verify</phase>
@@ -406,6 +403,9 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <expandEmptyElements>false</expandEmptyElements>
+        </configuration>
       </plugin>
     </plugins>
   </build>
