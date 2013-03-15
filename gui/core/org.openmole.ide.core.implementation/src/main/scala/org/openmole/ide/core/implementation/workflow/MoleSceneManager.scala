@@ -83,7 +83,6 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
     nodeID += 1
     _capsules += getNodeID -> cv
     if (_capsules.size == 1) setStartingCapsule(cv)
-    capsuleConnections += cv.dataUI -> HashSet.empty[IConnectorUI]
     invalidateCache
   }
 
@@ -176,9 +175,7 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
 
   def registerConnector(edgeID: String,
                         connector: IConnectorUI): Boolean = {
-    println("registerConnector //0 " + capsuleConnections)
     capsuleConnections.getOrElseUpdate(connector.source.dataUI, HashSet(connector))
-    println("registerConnector //1 " + capsuleConnections)
     if (!_connectors.keys.contains(edgeID)) {
       _connectors += edgeID -> connector
       return true
