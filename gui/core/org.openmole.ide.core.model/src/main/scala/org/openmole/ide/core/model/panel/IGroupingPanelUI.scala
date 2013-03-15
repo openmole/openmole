@@ -17,8 +17,8 @@
 
 package org.openmole.ide.core.model.panel
 
-import org.openmole.core.model.mole.Grouping
+import org.openmole.ide.core.model.data.IGroupingDataUI
 
 trait IGroupingPanelUI extends IPanelUI {
-  def coreObject: Grouping
+  def saveContent: IGroupingDataUI
 }

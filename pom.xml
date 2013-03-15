@@ -395,6 +395,9 @@
         <groupId>com.google.code.sortpom</groupId>
         <artifactId>maven-sortpom-plugin</artifactId>
         <version>2.1.0</version>
+	<configuration>
+	  <expandEmptyElements>false</expandEmptyElements> 
+	</configuration>
         <executions>
           <execution>
             <phase>verify</phase>

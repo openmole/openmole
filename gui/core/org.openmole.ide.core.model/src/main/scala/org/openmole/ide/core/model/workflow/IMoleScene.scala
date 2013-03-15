@@ -49,7 +49,7 @@ trait IMoleScene {
 
   def savePropertyPanel(panel: Panel): Unit
 
-  def displayCapsuleProperty(capsuleDataUI: ICapsuleUI)
+  def displayCapsuleProperty(capsuleDataUI: ICapsuleUI, index: Int)
 
   def displayPropertyPanel(proxy: IDataProxyUI, mode: PanelMode.Value)
 

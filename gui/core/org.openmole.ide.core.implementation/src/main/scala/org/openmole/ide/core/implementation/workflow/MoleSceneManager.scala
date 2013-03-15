@@ -25,12 +25,13 @@ import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.model.workflow._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashSet
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ITaskDataProxyUI }
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import org.openmole.core.model.mole.{ ICapsule, IMole }
 import concurrent.stm._
 import util.{ Failure, Success }
 import org.openmole.ide.misc.tools.util.ID
+import org.openmole.core.model.data.Prototype
 
 class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
 
@@ -43,7 +44,7 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
 
   var dataUI: IMoleDataUI = new MoleDataUI
 
-  val _cacheMole: Ref[Option[(IMole, Map[ICapsuleUI, ICapsule])]] = Ref(None)
+  val _cacheMole: Ref[Option[(IMole, Map[ICapsuleUI, ICapsule], Map[IPrototypeDataProxyUI, Prototype[_]])]] = Ref(None)
 
   def invalidateCache = _cacheMole.single() = None
 
@@ -52,7 +53,7 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
       case Some(_) ⇒
       case None ⇒
         _cacheMole() = MoleFactory.buildMole(this) match {
-          case Success((m, cMap, _, _)) ⇒ Some((m, cMap))
+          case Success((m, cMap, pMap, _)) ⇒ Some((m, cMap, pMap))
           case Failure(t) ⇒
             None
         }
@@ -82,7 +83,6 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
     nodeID += 1
     _capsules += getNodeID -> cv
     if (_capsules.size == 1) setStartingCapsule(cv)
-    capsuleConnections += cv.dataUI -> HashSet.empty[IConnectorUI]
     invalidateCache
   }
 
@@ -161,9 +161,9 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
   def removeConnector(edgeID: String,
                       connector: IConnectorUI): Unit = {
     _connectors.remove(edgeID)
-    capsuleConnections.contains(connector.source.dataUI) match {
-      case true ⇒ capsuleConnections(connector.source.dataUI) -= connector
-      case _ ⇒
+    if (capsuleConnections.contains(connector.source.dataUI)) {
+      capsuleConnections(connector.source.dataUI) -= connector
+      if (capsuleConnections(connector.source.dataUI).isEmpty) capsuleConnections -= connector.source.dataUI
     }
     invalidateCache
   }

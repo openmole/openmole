@@ -110,13 +110,12 @@ class ExecutionManager(manager: IMoleSceneManager,
 
   contents += tabbedPane
 
-  def start(hooks: Map[IHookDataUI, ICapsuleUI],
-            groupings: List[(Grouping, ICapsule)]) = synchronized {
+  def start = synchronized {
     tabbedPane.selection.index = 0
     cancel
     initBarPlotter
 
-    moleExecution = buildMoleExecution(hooks, groupings) match {
+    moleExecution = buildMoleExecution match {
       case Success((mE, environments)) ⇒
         val mExecution: IMoleExecution = mE(Context.empty, ExecutionContext.local.copy(out = printStream))
         EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.JobStatusChanged])
@@ -160,18 +159,10 @@ class ExecutionManager(manager: IMoleSceneManager,
     }
   }
 
-  def buildMoleExecution(hooks: Map[IHookDataUI, ICapsuleUI],
-                         groupings: List[(Grouping, ICapsule)]) = MoleFactory.buildMoleExecution(mole,
-    manager, {
-      @transient val h = hooks.toList.flatMap {
-        case (dataUI, caps) ⇒
-          dataUI.coreObject(prototypeMapping).map(h ⇒ capsuleMapping(caps) -> h)
-        case _ ⇒ Nil
-      }
-      h
-    },
+  def buildMoleExecution = MoleFactory.buildMoleExecution(mole,
+    manager,
     capsuleMapping,
-    groupings)
+    prototypeMapping)
 
   def incrementEnvironmentState(environment: Environment,
                                 state: ExecutionState.ExecutionState) = synchronized {

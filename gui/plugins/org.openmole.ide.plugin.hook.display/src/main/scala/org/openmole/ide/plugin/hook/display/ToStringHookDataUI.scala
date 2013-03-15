@@ -30,6 +30,6 @@ class ToStringHookDataUI(val name: String = "",
   def buildPanelUI = new ToStringHookPanelUI(this)
 
   def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]) =
-    List(ToStringHook(toBeHooked.map { protoMapping }.toSeq: _*))
+    ToStringHook(toBeHooked.map { protoMapping }.toSeq: _*)
 
 }

@@ -21,9 +21,10 @@ import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.data.IMoleDataUI
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.HashSet
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ITaskDataProxyUI }
 import org.openmole.core.model.mole.{ ICapsule, IMole }
 import org.openmole.ide.misc.tools.util._
+import org.openmole.core.model.data.Prototype
 
 trait IMoleSceneManager {
   override def toString = name
@@ -34,7 +35,7 @@ trait IMoleSceneManager {
 
   def name_=(n: String)
 
-  def cacheMole: Option[(IMole, Map[ICapsuleUI, ICapsule])]
+  def cacheMole: Option[(IMole, Map[ICapsuleUI, ICapsule], Map[IPrototypeDataProxyUI, Prototype[_]])]
 
   def invalidateCache: Unit
 

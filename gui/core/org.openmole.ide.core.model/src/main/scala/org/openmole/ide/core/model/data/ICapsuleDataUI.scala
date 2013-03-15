@@ -30,11 +30,15 @@ trait ICapsuleDataUI extends IDataUI {
 
   def name = id.toString
 
-  def buildPanelUI: ICapsulePanelUI
+  def buildPanelUI = buildPanelUI(0)
+
+  def buildPanelUI(index: Int): ICapsulePanelUI
 
   def task: Option[ITaskDataProxyUI]
 
   def environment: Option[IEnvironmentDataProxyUI]
+
+  def grouping: Option[IGroupingDataUI]
 
   def hooks: List[IHookDataProxyUI]
 
