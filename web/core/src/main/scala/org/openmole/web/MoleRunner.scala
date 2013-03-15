@@ -20,6 +20,8 @@ import slick.jdbc.meta.MTable
 import Database.threadLocalSession
 
 import javax.sql.rowset.serial.SerialClob
+import reflect.ClassTag
+import scala.None
 
 @MultipartConfig(maxFileSize = 3 * 1024 * 1024 /*max file size of 3 MiB*/ ) //research scala multipart config
 class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupport with ScalateSupport with FileUploadSupport with FlashMapSupport with FutureSupport {
@@ -37,17 +39,19 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
       "Finished"
   }
 
-  def processXMLFile[A](file: Option[FileItem]) = {
+  def processXMLFile[A: ClassTag](file: Option[FileItem], is: Option[InputStream]): (Option[A], String) = {
     file match {
       case Some(data) ⇒
         if (data.getContentType.isDefined && data.getContentType.get == "text/xml") {
-          val is = data.getInputStream
           try {
-            Some(SerializerService.deserialize[A](is)) -> ""
+            val ret = is.map(SerializerService.deserialize[A](_))
+            if(!ret.forall(evidence$1.runtimeClass.isInstance(_)))
+              None -> s"The uploaded xml is not a subtype of the type you wished to deserialize to: ${evidence$1.runtimeClass} vs ${ret.get.getClass}"
+            else
+              ret -> ""
           } catch {
             case e: CannotResolveClassException ⇒ None -> "The uploaded xml was not a valid serialized object."
-          } finally {
-            is.close
+            case c: ClassCastException ⇒ None -> "Blargh"
           }
         } else
           None -> "The uploaded data was not of type text/xml"
@@ -90,6 +94,8 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
     val data = fileParams.get("file")
 
+    val inS = data.map(_.getInputStream)
+
     //TODO: make sure this is released
 
     new AsyncResult {
@@ -97,12 +103,12 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
         contentType = "text/html"
 
-        val moleExec = processXMLFile[(Context, ExecutionContext) ⇒ MoleExecution](data)
+        val moleExec = processXMLFile[MoleExecution.PartialMoleExecution](data, inS)
 
         val context = new ExecutionContext(new PrintStream(new File("./out")), null)
 
         moleExec match {
-          case (Some(pEx), _) ⇒ {
+          case (Some(pEx: MoleExecution.PartialMoleExecution), _) ⇒ {
             val exec = pEx(Context.empty, context)
 
             val clob = new SerialClob(SerializerService.serialize(exec).toCharArray)
@@ -121,7 +127,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
   //todo: update this for async
   post("/xml/createMole") {
-    val moleExec = processXMLFile[MoleExecution](fileParams.get("file"))
+    val moleExec = processXMLFile[MoleExecution](fileParams.get("file"), fileParams.get("file").map(_.getInputStream))
 
     moleExec match {
       case (Some(exec), _) ⇒ {
