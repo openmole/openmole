@@ -35,7 +35,7 @@ import org.openmole.core.model.execution.ExecutionState
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import TextAreaOutputStream._
 import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
-import org.openmole.ide.core.model.data.{ NoMemoryHook, IHookDataUI }
+import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.ide.core.implementation.registry.{ DefaultKey, KeyRegistry }
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Failure, Success }
