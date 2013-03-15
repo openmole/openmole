@@ -19,40 +19,43 @@ package org.openmole.ide.core.implementation.panel
 
 import java.awt.Dimension
 import java.awt.BorderLayout
-import java.awt.Color
 import javax.swing._
 import javax.swing.ScrollPaneConstants._
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import javax.imageio.ImageIO
 import javax.swing.ImageIcon
-import org.openmole.ide.core.implementation.sampling.SamplingCompositionPanelUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel.PanelMode._
-import org.openmole.ide.misc.widget.Help
-import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget.{ MainLinkLabel, PluginPanel }
 import org.netbeans.api.visual.widget.Scene
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import scala.swing.Component
+import scala.swing.Action
 import scala.swing.event.FocusGained
 
 class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
                                scene: IMoleScene,
-                               mode: Value = CREATION) extends BasePanel(Some(proxy), scene, mode) {
+                               mode: Value = CREATION) extends BasePanel(Some(proxy), scene, mode) { sCPanel ⇒
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
   val panelUI = proxy.dataUI.buildPanelUI
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
+    contents += new MainLinkLabel("New Prototype", new Action("") {
+      def apply = {
+        ConceptMenu.createAndDisplayExtraPrototype(sCPanel)
+      }
+    })
     contents += panelUI.tabbedPane
     contents += panelUI.help
     panelUI match {
       case s: Scene ⇒ peer.add(new JScrollPane(s.createView) {
         setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER)
         setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER)
-        setMinimumSize(new Dimension(500, 300))
+        setMinimumSize(new Dimension(400, 250))
       })
       case _ ⇒
     }
@@ -67,6 +70,7 @@ class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
 
   def create = {
     Proxys += proxy
+    scene.manager.invalidateCache
     ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
 

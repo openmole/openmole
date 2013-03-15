@@ -22,9 +22,5 @@ import org.openmole.ide.core.model.factory.IGroupingFactoryUI
 import org.openmole.plugin.grouping.batch.BatchShuffledGrouping
 
 class NumberOfBatchShuffledGroupingFactoryUI extends IGroupingFactoryUI {
-  override def toString = "by shuffled groups"
-
-  def coreClass = classOf[BatchShuffledGrouping]
-
-  def buildPanelUI = new NumberOfBatchShuffledGroupingPanelUI
+  def buildDataUI = new NumberOfBatchShuffledGroupingDataUI
 }

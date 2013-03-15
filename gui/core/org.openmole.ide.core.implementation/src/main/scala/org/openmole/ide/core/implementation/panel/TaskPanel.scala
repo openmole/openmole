@@ -64,14 +64,12 @@ class TaskPanel(proxy: ITaskDataProxyUI,
       implicitOP,
       proxy.dataUI.inputParameters.toMap)
   }
-  def updateMainPanel = {
-
-  }
 
   def updateProtoPanel = {
     save
     protoPanel = buildProtoPanel
     panelUI.tabbedPane.pages(1).content = protoPanel
+    panelUI.tabbedPane.revalidate
   }
 
   var protoPanel = buildProtoPanel
@@ -93,13 +91,15 @@ class TaskPanel(proxy: ITaskDataProxyUI,
       panelUI.help.switchTo(source)
       scene.closeExtraPropertyPanel
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
-    case UpdatedPrototypeEvent(_) | SelectionChanged(panelUI.tabbedPane) ⇒
+    case SelectionChanged(panelUI.tabbedPane) ⇒ updateProtoPanel
+    case UpdatedPrototypeEvent(_) ⇒
       scene.closeExtraPropertyPanel
       updateProtoPanel
   }
 
   def create = {
     Proxys += proxy
+    scene.manager.invalidateCache
     ConceptMenu.taskMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
 

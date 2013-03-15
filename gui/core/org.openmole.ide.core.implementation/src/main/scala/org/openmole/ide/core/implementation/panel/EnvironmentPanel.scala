@@ -55,6 +55,7 @@ class EnvironmentPanel(proxy: IEnvironmentDataProxyUI,
 
   def create = {
     Proxys += proxy
+    scene.manager.invalidateCache
     ConceptMenu.environmentMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
 

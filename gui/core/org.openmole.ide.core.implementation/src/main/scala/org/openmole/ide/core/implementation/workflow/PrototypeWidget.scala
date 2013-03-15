@@ -43,10 +43,10 @@ object PrototypeWidget {
   val red = new Color(212, 0, 0)
 
   def buildNoTaskSource(scene: IMoleScene, capsule: ICapsuleUI, color: Color = grey) =
-    new IPrototypeWidget(scene, capsule, new LinkLabel("0", new Action("") { def apply = scene.displayCapsuleProperty(capsule) }), new Point(19, TASK_CONTAINER_HEIGHT / 2), grey)
+    new IPrototypeWidget(scene, capsule, new LinkLabel("0", new Action("") { def apply = scene.displayCapsuleProperty(capsule, 0) }), new Point(19, TASK_CONTAINER_HEIGHT / 2), grey)
 
   def buildNoTaskHook(scene: IMoleScene, capsule: ICapsuleUI, color: Color = grey) =
-    new OPrototypeWidget(scene, capsule, new LinkLabel("0", new Action("") { def apply = scene.displayCapsuleProperty(capsule) }), new Point(TASK_CONTAINER_WIDTH - 30, TASK_CONTAINER_HEIGHT / 2), grey)
+    new OPrototypeWidget(scene, capsule, new LinkLabel("0", new Action("") { def apply = scene.displayCapsuleProperty(capsule, 1) }), new Point(TASK_CONTAINER_WIDTH - 30, TASK_CONTAINER_HEIGHT / 2), grey)
 
   def buildTaskSource(scene: IMoleScene, capsule: ICapsuleUI) = buildNoTaskSource(scene, capsule, green(scene))
 
