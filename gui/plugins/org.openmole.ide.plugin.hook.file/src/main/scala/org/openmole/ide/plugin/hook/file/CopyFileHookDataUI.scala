@@ -28,8 +28,11 @@ class CopyFileHookDataUI(val name: String = "",
 
   def coreClass = classOf[CopyFileHook]
 
-  def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]) = toBeHooked.map { h ⇒
-    CopyFileHook(protoMapping(h._1).asInstanceOf[Prototype[File]], h._2).toHook
+  def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]) = {
+    val cfh = CopyFileHook()
+    toBeHooked.foreach { h ⇒ cfh.copy(protoMapping(h._1).asInstanceOf[Prototype[File]], h._2)
+    }
+    cfh.toHook
   }
 
   def buildPanelUI = new CopyFileHookPanelUI(this)

@@ -30,7 +30,7 @@ trait IHookDataUI extends IDataUI with InputPrototype with OutputPrototype with 
 
   def coreClass: Class[_ <: IHook]
 
-  def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IHook]
+  def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]): IHook
 
   def buildPanelUI: IHookPanelUI
 }

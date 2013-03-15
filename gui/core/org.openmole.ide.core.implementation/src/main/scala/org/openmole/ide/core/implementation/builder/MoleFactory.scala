@@ -57,33 +57,27 @@ object MoleFactory {
 
   def buildMoleExecution(mole: IMole,
                          manager: IMoleSceneManager,
-                         hooks: List[(ICapsule, IHook)],
-                         capsuleMap: Map[ICapsuleUI, ICapsule],
-                         groupingStrategies: List[(Grouping, ICapsule)]): Try[(MoleExecution.PartialMoleExecution, Iterable[(Environment, String)])] =
+                         capsuleMapping: Map[ICapsuleUI, ICapsule],
+                         prototypeMapping: Map[IPrototypeDataProxyUI, Prototype[_]]): Try[(MoleExecution.PartialMoleExecution, Iterable[(Environment, String)])] =
     Try {
-      var envs = new HashSet[(Environment, String)]
-      val strat = new ListBuffer[(ICapsule, EnvironmentSelection)]
-
-      manager.capsules.values.foreach {
-        c ⇒
-          c.dataUI.environment match {
-            case Some(x: IEnvironmentDataProxyUI) ⇒
-              val env = x.dataUI.coreObject
-              envs += env -> x.dataUI.name
-              strat += capsuleMap(c) -> new FixedEnvironmentSelection(env)
-            case _ ⇒
-          }
+      val envs = capsuleMapping.flatMap { c ⇒
+        c._1.dataUI.environment match {
+          case Some(env: IEnvironmentDataProxyUI) ⇒ List((c._2, env.dataUI.coreObject, env.dataUI.name))
+          case _ ⇒ Nil
+        }
       }
-      //TODO implement sources
+
       (MoleExecution.partial(
         mole,
-        Iterable.empty,
-        hooks,
-        strat.toMap,
-        groupingStrategies.map {
-          case (s, c) ⇒ c -> s
-        }.toMap),
-        envs.toSet)
+        capsuleMapping.flatMap { c ⇒ c._1.dataUI.sources.map { c._2 -> _.dataUI.coreObject(prototypeMapping) } },
+        capsuleMapping.flatMap { c ⇒ c._1.dataUI.hooks.map { c._2 -> _.dataUI.coreObject(prototypeMapping) } },
+        envs.map { case (c, e, _) ⇒ c -> new FixedEnvironmentSelection(e) }.toMap,
+        capsuleMapping.flatMap { c ⇒
+          c._1.dataUI.grouping match {
+            case Some(gr: IGroupingDataUI) ⇒ List(c._2 -> gr.coreObject)
+            case _ ⇒ Nil
+          }
+        }), envs.map { case (_, e, n) ⇒ e -> n })
     }
 
   def buildSource(sourceUI: ISourceDataUI,
@@ -92,9 +86,9 @@ object MoleFactory {
   def buildSource(sourceUI: ISourceDataUI): ISource = buildSource(sourceUI, prototypeMapping)
 
   def buildHook(hookUI: IHookDataUI,
-                protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IHook] = hookUI.coreObject(protoMapping)
+                protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]): IHook = hookUI.coreObject(protoMapping)
 
-  def buildHook(hookUI: IHookDataUI): List[IHook] = buildHook(hookUI, prototypeMapping)
+  def buildHook(hookUI: IHookDataUI): IHook = buildHook(hookUI, prototypeMapping)
 
   def buildMole(manager: IMoleSceneManager): Try[(IMole, Map[ICapsuleUI, ICapsule], Map[IPrototypeDataProxyUI, Prototype[_]], Iterable[(ICapsuleUI, Throwable)])] =
     Try {
@@ -103,8 +97,7 @@ object MoleFactory {
           p ⇒ p -> p.dataUI.coreObject
         }.toMap
         val builds = manager.capsules.map {
-          c ⇒
-            (c._2 -> c._2.dataUI.coreObject(manager.dataUI), None)
+          c ⇒ (c._2 -> c._2.dataUI.coreObject(manager.dataUI), None)
         }.toMap
 
         val capsuleMap: Map[ICapsuleUI, ICapsule] = builds.map {
@@ -169,7 +162,6 @@ object MoleFactory {
 
   def buildConnectors(capsuleMap: Map[ICapsuleUI, ICapsule],
                       prototypeMap: Map[IPrototypeDataProxyUI, Prototype[_]]) = {
-
     val islotsMap = new HashMap[IInputSlotWidget, Slot]
     if (capsuleMap.isEmpty) (List.empty, List.empty, islotsMap)
     else {

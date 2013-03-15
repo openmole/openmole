@@ -22,9 +22,5 @@ import org.openmole.ide.core.model.factory.IGroupingFactoryUI
 import org.openmole.plugin.grouping.batch.MoleJobsGrouping
 
 class NumberOfMoleJobsGroupingFactoryUI extends IGroupingFactoryUI {
-  override def toString = "by number of jobs"
-
-  def coreClass = classOf[MoleJobsGrouping]
-
-  def buildPanelUI = new NumberOfMoleJobsGroupingPanelUI
+  def buildDataUI = new NumberOfMoleJobsGroupingDataUI
 }

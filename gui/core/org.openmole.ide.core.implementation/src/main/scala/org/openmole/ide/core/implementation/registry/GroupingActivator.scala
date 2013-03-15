@@ -27,12 +27,12 @@ trait GroupingActivator extends BundleActivator {
 
   abstract override def start(context: BundleContext) = {
     super.start(context)
-    groupingFactories.foreach { f ⇒ KeyRegistry.groupingStrategies += KeyGenerator(f.coreClass) -> f }
+    groupingFactories.foreach { f ⇒ KeyRegistry.groupingStrategies += KeyGenerator(f.buildDataUI.coreClass) -> f }
   }
 
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
-    groupingFactories.foreach { f ⇒ KeyRegistry.groupingStrategies -= KeyGenerator(f.coreClass) }
+    groupingFactories.foreach { f ⇒ KeyRegistry.groupingStrategies -= KeyGenerator(f.buildDataUI.coreClass) }
   }
 }
 

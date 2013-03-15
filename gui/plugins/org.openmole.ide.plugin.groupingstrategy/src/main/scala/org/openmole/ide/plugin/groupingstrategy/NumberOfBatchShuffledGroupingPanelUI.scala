@@ -24,13 +24,13 @@ import org.openmole.plugin.grouping.batch.BatchShuffledGrouping
 import scala.swing.Label
 import scala.swing.TextField
 
-class NumberOfBatchShuffledGroupingPanelUI
-    extends PluginPanel("wrap")
+class NumberOfBatchShuffledGroupingPanelUI(dataUI: NumberOfBatchShuffledGroupingDataUI)
+    extends PluginPanel("wrap 2")
     with IGroupingPanelUI {
 
-  val numberTextField = new TextField("", 5)
-  contents += new Label("Number of jobs / group : ")
+  val numberTextField = new TextField(dataUI.number.toString, 5)
+  contents += new Label("jobs / group : ")
   contents += numberTextField
 
-  def coreObject = new BatchShuffledGrouping(numberTextField.text.toInt)
+  def saveContent = new NumberOfBatchShuffledGroupingDataUI(numberTextField.text.toInt)
 }

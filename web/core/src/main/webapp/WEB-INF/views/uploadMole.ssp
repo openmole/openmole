@@ -1,0 +1,15 @@
+#set (title)
+Input-om page
+#end
+
+<%@ val errors: List[String] = Nil %>
+#set (js)
+<%= unescape(for(error <- errors) yield "displayError(\"" +error+ "\");") %>
+#end
+
+<%@ val body: String %>
+<b><%= unescape(body)%></b>
+<form name="data" action="/repo/uploadMole" method="POST" enctype="multipart/form-data">
+    <input type="File" name="file"><br>
+    <input type="Submit">
+</form>

@@ -17,8 +17,9 @@
 package org.openmole.ide.core.implementation.workflow
 
 import org.openmole.ide.misc.widget.PluginPanel
-import org.openmole.ide.core.model.panel.{ ICapsulePanelUI, IPanelUI }
+import org.openmole.ide.core.model.panel.ICapsulePanelUI
 import scala.swing._
+import event.ButtonClicked
 import org.openmole.ide.core.model.data.{ IEnvironmentDataUI, ICapsuleDataUI }
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
@@ -27,10 +28,10 @@ import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.misc.widget.multirow.MultiCombo.{ ComboData, ComboPanel }
 import org.openmole.ide.core.implementation.data.{ EmptyDataUIs, CapsuleDataUI }
 import org.openmole.ide.core.model.dataproxy.{ IHookDataProxyUI, ISourceDataProxyUI, IEnvironmentDataProxyUI }
-import org.openmole.ide.core.implementation.execution.MultiGenericGroupingStrategyPanel
 import java.awt.Color
+import org.openmole.ide.core.implementation.execution.GroupingStrategyPanelUI
 
-class CapsulePanelUI(dataUI: ICapsuleDataUI) extends PluginPanel("") with ICapsulePanelUI {
+class CapsulePanelUI(dataUI: ICapsuleDataUI, index: Int = 0) extends PluginPanel("") with ICapsulePanelUI {
 
   val sources = Proxys.sources.toList
   val hooks = Proxys.hooks.toList
@@ -54,18 +55,35 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI) extends PluginPanel("") with ICapsu
   val environmentProxys = Proxys.environments :+ EmptyDataUIs.emptyEnvironmentProxy
   val environmentCombo = new MyComboBox(environmentProxys)
 
+  val groupingCheckBox = new CheckBox("Grouping") { foreground = Color.WHITE }
+  val groupingPanel = new GroupingStrategyPanelUI(dataUI.grouping)
+
   dataUI.environment match {
     case Some(e: IEnvironmentDataProxyUI) ⇒ environmentCombo.selection.item = e
     case _ ⇒ environmentCombo.selection.item = environmentProxys.last
   }
 
+  groupingPanel.visible = dataUI.grouping.isDefined
+  groupingCheckBox.selected = dataUI.grouping.isDefined
+
   tabbedPane.pages += new TabbedPane.Page("Source", sourcePanel.panel)
   tabbedPane.pages += new TabbedPane.Page("Hook", hookPanel.panel)
-  tabbedPane.pages += new TabbedPane.Page("Environment", new PluginPanel("wrap") {
-    contents += environmentCombo
-    contents += new Label("Grouping: ") { foreground = Color.WHITE }
-    contents += (new MultiGenericGroupingStrategyPanel).panel
+  tabbedPane.pages += new TabbedPane.Page("Execution", new PluginPanel("wrap") {
+    contents += new PluginPanel("wrap 2") {
+      contents += new Label("Environment") { foreground = Color.WHITE }
+      contents += environmentCombo
+    }
+    contents += new PluginPanel("wrap") {
+      contents += groupingCheckBox
+      contents += groupingPanel
+    }
   })
+  tabbedPane.selection.index = index
+
+  listenTo(`groupingCheckBox`)
+  reactions += {
+    case ButtonClicked(`groupingCheckBox`) ⇒ groupingPanel.visible = groupingCheckBox.selected
+  }
 
   def save =
     new CapsuleDataUI(dataUI.task,
@@ -73,6 +91,7 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI) extends PluginPanel("") with ICapsu
         case e: EmptyDataUIs.EmptyEnvironmentDataUI ⇒ None
         case e: IEnvironmentDataUI ⇒ Some(environmentCombo.selection.item)
       },
+      if (groupingCheckBox.selected) groupingPanel.save else None,
       sourcePanel.content.map { _.comboValue.get }.filter {
         _ match {
           case s: ISourceDataProxyUI ⇒ true

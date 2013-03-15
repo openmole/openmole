@@ -1,0 +1,27 @@
+body {
+    font-family: 'Ubuntu', arial, sans-serif;
+}
+
+.title {
+    font-family: Terminal Dosis Light
+}
+
+.body-div {
+    margin-left: auto;
+    margin-right: auto;
+    width: 800px;
+    /*background-image: url("../images/main-right.jpg")*/
+}
+
+.template-banner {
+    margin-left: auto;
+    margin-right: auto;
+    width: 800px;
+    height: 202px;
+}
+
+.openmole-emblem {
+    background-image: url("../images/openmole.png");
+    width: 400px;
+    height: 202px;
+}

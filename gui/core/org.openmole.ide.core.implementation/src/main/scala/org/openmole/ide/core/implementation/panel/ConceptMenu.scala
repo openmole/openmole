@@ -38,7 +38,6 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.core.implementation.builder.Builder
 import scala.collection.JavaConversions._
-import org.openmole.ide.misc.tools.util.Types._
 import util.Try
 
 object ConceptMenu {

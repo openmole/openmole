@@ -211,6 +211,8 @@ object SerializerService extends Logger {
         serializer.fromXML[T](is)
     })
 
+  def serialize(obj: Any) = lock.read(xstream.toXML(obj))
+
   def serialize(obj: Any, os: OutputStream) = lock.read(xstream.toXML(obj, os))
 
   def serialize(obj: Any, file: File): Unit = lock.read {
