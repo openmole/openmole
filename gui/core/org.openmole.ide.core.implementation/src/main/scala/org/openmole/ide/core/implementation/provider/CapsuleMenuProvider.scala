@@ -36,7 +36,7 @@ import org.openmole.ide.core.model.commons._
 import scala.swing.CheckMenuItem
 import scala.swing.Menu
 import scala.swing.MenuItem
-import org.openmole.ide.core.model.data.{ IHookDataUI, NoMemoryHook }
+import org.openmole.ide.core.model.data.IHookDataUI
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor

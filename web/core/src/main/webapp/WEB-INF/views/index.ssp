@@ -1,0 +1,11 @@
+#set (title)
+Start Page
+#end
+
+#set (js)
+#end
+
+<ul>
+    <li><a href="createMole"> Create a new mole execution </a></li>
+    <li><a href="execs"> View currently running moles</a></li>
+</ul>

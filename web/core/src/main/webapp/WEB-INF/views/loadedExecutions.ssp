@@ -1,0 +1,13 @@
+#set (title)
+List of Mole Executions
+#end
+
+#set (js)
+#end
+
+<%@ val ids: List[String] %>
+<ul>
+<%=
+    for(id <- ids) yield <li><a href={"execs/"+id}>{id}</a></li>
+%>
+</ul>

@@ -41,7 +41,7 @@ import org.openmole.ide.core.implementation.serializer.GUISerializer
 import scala.swing.FileChooser.Result._
 import org.openmole.core.serializer.SerializerService
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.model.data.{ NoMemoryHook, IHookDataUI }
+import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.ide.core.implementation.registry.{ DefaultKey, KeyRegistry }
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Failure, Success }

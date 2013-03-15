@@ -150,6 +150,12 @@
       <artifactId>org.openmole.ide.core.implementation</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <!-- Webserver Plugin -->
+    <dependency>
+      <groupId>org.openmole.web</groupId>
+      <artifactId>org.openmole.web.core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -190,6 +196,7 @@
                   <directory>src/main/resources</directory>
                   <includes>
                     <include>config.ini</include>
+                    <include>logback.xml</include>
                   </includes>
                 </resource>
               </resources>

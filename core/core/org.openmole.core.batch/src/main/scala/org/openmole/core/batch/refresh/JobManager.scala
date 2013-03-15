@@ -28,7 +28,7 @@ import akka.routing.RoundRobinRouter
 import akka.routing.SmallestMailboxRouter
 import org.openmole.core.model.execution._
 import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.tools.service.Logger
+
 import org.openmole.misc.workspace.Workspace
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
@@ -38,6 +38,7 @@ import org.openmole.core.batch.environment.BatchEnvironment.JobManagmentThreads
 
 import scala.concurrent.duration._
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.tools.service.Logger
 
 object JobManager extends Logger
 
@@ -111,11 +112,11 @@ akka {
         case _ ⇒ FINE
       }
       EventDispatcher.trigger(environment: Environment, new Environment.ExceptionRaised(job, exception, level))
-      logger.log(level, "Error in job refresh", exception)
+      JobManager.logger.log(level, "Error in job refresh", exception)
 
     case MoleJobError(mj, j, e) ⇒
       EventDispatcher.trigger(environment: Environment, new Environment.MoleJobExceptionRaised(j, e, WARNING, mj))
-      logger.log(WARNING, "Error during job execution, it will be resubmitted.", e)
+      JobManager.logger.log(WARNING, "Error during job execution, it will be resubmitted.", e)
 
   }
 }

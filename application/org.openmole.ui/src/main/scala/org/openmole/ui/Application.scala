@@ -31,6 +31,7 @@ import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.dialog.GUIApplication
 import org.openmole.ui.console.Console
 import annotation.tailrec
+import org.openmole.web._
 
 class Application extends IApplication with Logger {
   override def start(context: IApplicationContext) = {
@@ -44,7 +45,9 @@ class Application extends IApplication with Logger {
       password: Option[String] = None,
       console: Boolean = false,
       help: Boolean = false,
-      ignored: List[String] = Nil)
+      ignored: List[String] = Nil,
+      server: Boolean = false,
+      serverPort: Option[Int] = None)
 
     def takeArgs(args: List[String]) = args.takeWhile(!_.startsWith("-"))
     def dropArgs(args: List[String]) = args.dropWhile(!_.startsWith("-"))
@@ -67,6 +70,8 @@ class Application extends IApplication with Logger {
         case "-pw" :: tail ⇒ parse(tail.tail, c.copy(password = Some(tail.head)))
         case "-c" :: tail ⇒ parse(tail, c.copy(console = true))
         case "-h" :: tail ⇒ parse(tail, c.copy(help = true))
+        case "-ws" :: tail ⇒ parse(tail, c.copy(server = true))
+        case "-sp" :: tail ⇒ parse(tail.tail, c.copy(serverPort = Some(tail.head.toInt)))
         case s :: tail ⇒ parse(tail, c.copy(ignored = s :: c.ignored))
         case Nil ⇒ c
       }
@@ -92,6 +97,16 @@ class Application extends IApplication with Logger {
 
       val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
       console.run
+    } else if (config.server) {
+      try {
+        if (SplashScreen.getSplashScreen != null) SplashScreen.getSplashScreen.close
+      } catch {
+        case e: Throwable ⇒ logger.log(FINE, "Error in splash screen closing", e)
+      }
+
+      val server = new Openmolewebserver(config.serverPort getOrElse 80)
+
+      server.start()
     } else {
 
       config.guiPluginsDirs.foreach { PluginManager.load }
