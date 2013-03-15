@@ -35,6 +35,7 @@ import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import scala.swing.Component
 import scala.swing.Action
 import scala.swing.event.FocusGained
+import org.openmole.ide.core.implementation.prototype.UpdatedPrototypeEvent
 
 class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
                                scene: IMoleScene,
@@ -66,6 +67,7 @@ class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
   reactions += {
     case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
+    case UpdatedPrototypeEvent(_) ⇒ scene.closeExtraPropertyPanel
   }
 
   def create = {
