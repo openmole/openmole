@@ -5,38 +5,18 @@
   <!-- *** POM Relationships *************************************** -->
   <!-- ************************************************************* -->
   <parent>
-    <artifactId>openmole</artifactId>
+    <artifactId>misc</artifactId>
     <groupId>org.openmole.core</groupId>
     <version>0.8.0-SNAPSHOT</version>
   </parent>
-  <artifactId>misc</artifactId>
+  <artifactId>org.openmole.misc.macros</artifactId>
   <!-- ************************************************************* -->
   <!-- *** Build Settings ****************************************** -->
   <!-- ************************************************************* -->
-  <packaging>pom</packaging>
+  <packaging>bundle</packaging>
   <!-- ************************************************************* -->
   <!-- *** Project Information ************************************* -->
   <!-- ************************************************************* -->
-  <name>${project.artifactId}</name>
-  <description>Miscileanous software used by OpenMOLE</description>
-  <modules>
-    <module>org.openmole.misc.eventdispatcher</module>
-    <module>org.openmole.misc.exception</module>
-    <module>org.openmole.misc.tools</module>
-    <module>org.openmole.misc.hashservice</module>
-    <module>org.openmole.misc.pluginmanager</module>
-    <module>org.openmole.misc.updater</module>
-    <module>org.openmole.misc.workspace</module>
-    <module>org.openmole.misc.logging</module>
-    <module>org.openmole.misc.fileservice</module>
-    <module>org.openmole.misc.filecache</module>
-    <module>org.openmole.misc.filedeleter</module>
-    <module>org.openmole.misc.osgi</module>
-    <module>org.openmole.misc.replication</module>
-    <module>org.openmole.misc.sftpserver</module>
-    <module>org.openmole.misc.macros</module>
-  </modules>
-  <properties>
-    <include />
-  </properties>
+  <name>${project.artifactId} ${project.version}</name>
+  <description></description>
 </project>
