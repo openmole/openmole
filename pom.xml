@@ -329,6 +329,7 @@
         <configuration>
           <scalaVersion>${maven.scala.version}</scalaVersion>
           <encoding>${project.build.sourceEncoding}</encoding>
+	  <recompileMode>incremental</recompileMode>
         </configuration>
       </plugin>
       <plugin>
