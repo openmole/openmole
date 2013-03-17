@@ -328,6 +328,8 @@
         <configuration>
           <scalaVersion>${maven.scala.version}</scalaVersion>
           <encoding>${project.build.sourceEncoding}</encoding>
+          <recompileMode>incremental</recompileMode>
+          <useZincServer>true</useZincServer>
         </configuration>
       </plugin>
       <plugin>
