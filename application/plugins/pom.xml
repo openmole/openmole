@@ -18,7 +18,7 @@
   <!-- *** Project Information ************************************* -->
   <!-- ************************************************************* -->
   <name>${project.artifactId} ${project.version}</name>
-  <description></description>
+  <description />
   <dependencies>
     <dependency>
       <groupId>org.openmole.core</groupId>
@@ -289,7 +289,8 @@
         <configuration>
           <excludeTransitive>true</excludeTransitive>
           <excludeScope>compile</excludeScope>
-          <excludeArtifactIds>scalatest_${lib.org.scala-lang.scala.version},junit</excludeArtifactIds>
+          <excludeArtifactIds>junit</excludeArtifactIds>
+          <excludeGroupIds>org.scalatest</excludeGroupIds>
         </configuration>
       </plugin>
       <plugin>

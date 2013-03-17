@@ -31,8 +31,8 @@ class AppendToCSVFileHookDataUI(val name: String = "",
   def coreClass = classOf[AppendToCSVFileHook]
 
   def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]) =
-    List(AppendToCSVFileHook(
+    AppendToCSVFileHook(
       fileName,
-      prototypes.map { protoMapping }.toSeq: _*))
+      prototypes.map { protoMapping }.toSeq: _*)
 
 }

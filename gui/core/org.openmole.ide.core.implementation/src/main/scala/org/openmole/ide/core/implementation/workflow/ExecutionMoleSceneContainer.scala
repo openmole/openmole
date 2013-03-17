@@ -24,7 +24,6 @@ import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openmole.core.model.mole.IHook
 import org.openmole.core.implementation.mole.MoleExecution
-import org.openmole.ide.core.implementation.execution.MultiGenericGroupingStrategyPanel
 import org.openmole.ide.core.implementation.execution.ExecutionManager
 import org.openmole.ide.core.implementation.execution.MoleFinishedEvent
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
@@ -42,7 +41,7 @@ import org.openmole.ide.core.implementation.serializer.GUISerializer
 import scala.swing.FileChooser.Result._
 import org.openmole.core.serializer.SerializerService
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.model.data.{ NoMemoryHook, IHookDataUI }
+import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.ide.core.implementation.registry.{ DefaultKey, KeyRegistry }
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Failure, Success }
@@ -170,7 +169,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         startStopButton.background = new Color(170, 0, 0)
         startStopButton.action = stop
         exportButton.enabled = false
-        x.start(Map(), List())
+        x.start
       /*  x.start(panelHooks.map {
           ph ⇒ ph._1.saveContent -> ph._2._1
         }.toMap,
@@ -206,7 +205,9 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         else None
       } match {
         case Some(t: String) ⇒ executionManager match {
-          case Some(x: ExecutionManager) ⇒ /*x.buildMoleExecution(panelHooks.map {
+          case Some(x: ExecutionManager) ⇒ SerializerService.serialize(x.buildMoleExecution, new File(t))
+
+          /*x.buildMoleExecution(panelHooks.map {
             ph ⇒ ph._1.saveContent -> ph._2._1
           }.toMap,
             groupingPanel.get.coreObjects) match {

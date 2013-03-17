@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,23 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ide.plugin.groupingstrategy
 
-import org.openmole.ide.core.model.control.IExecutionManager
-import org.openmole.ide.core.model.panel.IGroupingPanelUI
-import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.core.model.data.IGroupingDataUI
 import org.openmole.plugin.grouping.batch.BatchShuffledGrouping
-import scala.swing.Label
-import scala.swing.TextField
 
-class NumberOfBatchShuffledGroupingPanelUI(dataUI: NumberOfBatchShuffledGroupingDataUI)
-    extends PluginPanel("wrap 2")
-    with IGroupingPanelUI {
+class NumberOfBatchShuffledGroupingDataUI(val number: Int = 0) extends IGroupingDataUI {
+  override def toString = "by shuffled groups"
 
-  val numberTextField = new TextField(dataUI.number.toString, 5)
-  contents += new Label("jobs / group : ")
-  contents += numberTextField
+  def coreObject = new BatchShuffledGrouping(number)
 
-  def saveContent = new NumberOfBatchShuffledGroupingDataUI(numberTextField.text.toInt)
+  def coreClass = classOf[BatchShuffledGrouping]
+
+  def buildPanelUI = new NumberOfBatchShuffledGroupingPanelUI(this)
 }

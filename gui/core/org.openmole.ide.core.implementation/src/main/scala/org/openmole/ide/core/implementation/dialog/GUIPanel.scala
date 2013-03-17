@@ -9,7 +9,7 @@ import scala.swing._
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import java.awt.BorderLayout
-import org.openmole.ide.core.implementation.execution.PasswordListner
+import org.openmole.ide.core.implementation.execution._
 import java.awt.Event
 import java.awt.Toolkit
 import java.awt.event.KeyEvent
@@ -72,12 +72,12 @@ class GUIPanel extends MainFrame {
       contents += new MenuItem(new Action("Save as") {
         override def apply = SaveXML.save(mainframe, SaveXML.show.getOrElse(""))
       })
-
       contents += new MenuItem(new Action("Reset all") {
         override def apply = {
           ScenesManager.closeAll
           Proxys.clearAll
           mainframe.title = "OpenMOLE"
+          Settings.currentProject = None
         }
       })
     }

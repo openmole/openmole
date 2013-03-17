@@ -34,6 +34,7 @@ import util.{ Success, Failure }
 
 case class CapsuleDataUI(val task: Option[ITaskDataProxyUI] = None,
                          val environment: Option[IEnvironmentDataProxyUI] = None,
+                         val grouping: Option[IGroupingDataUI] = None,
                          val sources: List[ISourceDataProxyUI] = List(),
                          val hooks: List[IHookDataProxyUI] = List(),
                          val capsuleType: CapsuleType = new BasicCapsuleType) extends ICapsuleDataUI with ID {
@@ -63,7 +64,7 @@ case class CapsuleDataUI(val task: Option[ITaskDataProxyUI] = None,
 
   def coreClass = classOf[Capsule]
 
-  def buildPanelUI = new CapsulePanelUI(this)
+  def buildPanelUI(index: Int) = new CapsulePanelUI(this, index)
 
   def coreObject(moleDataUI: IMoleDataUI) = task match {
     case Some(t: ITaskDataProxyUI) ⇒ MoleFactory.taskCoreObject(t.dataUI, moleDataUI.plugins.map { p ⇒ new File(p) }.toSet) match {

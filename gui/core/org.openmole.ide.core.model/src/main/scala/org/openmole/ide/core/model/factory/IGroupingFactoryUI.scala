@@ -17,12 +17,8 @@
 
 package org.openmole.ide.core.model.factory
 
-import org.openmole.core.model.mole.Grouping
-import org.openmole.ide.core.model.control.IExecutionManager
-import org.openmole.ide.core.model.panel.IGroupingPanelUI
+import org.openmole.ide.core.model.data.IGroupingDataUI
 
 trait IGroupingFactoryUI extends IFactoryUI {
-  def coreClass: Class[_ <: Grouping]
-
-  def buildPanelUI: IGroupingPanelUI
+  def buildDataUI: IGroupingDataUI
 }

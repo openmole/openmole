@@ -19,7 +19,7 @@
   <!-- *** Project Information ************************************* -->
   <!-- ************************************************************* -->
   <name>${project.artifactId} ${project.version}</name>
-  <description></description>
+  <description />
   <modules>
     <module>org.openmole.ui</module>
     <module>plugins</module>
@@ -34,7 +34,7 @@
     </dependency>
     <dependency>
       <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_${lib.org.scala-lang.scala.version}</artifactId>
+      <artifactId>scalatest_${scala.major.version}</artifactId>
       <version>${lib.org.scalatest.version}</version>
       <scope>test</scope>
     </dependency>

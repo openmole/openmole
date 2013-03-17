@@ -42,6 +42,7 @@ class SourcePanel(proxy: ISourceDataProxyUI,
 
   def create = {
     Proxys += proxy
+    scene.manager.invalidateCache
     ConceptMenu.sourceMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
 
