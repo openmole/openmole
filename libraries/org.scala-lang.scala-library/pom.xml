@@ -30,7 +30,6 @@
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
       <version>${lib.org.scala-lang.scala.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.scala-lang</groupId>
@@ -41,7 +40,6 @@
       <groupId>com.typesafe.akka</groupId>
       <artifactId>akka-transactor_${lib.com.typesafe.akka.scala.version}</artifactId>
       <version>${lib.com.typesafe.akka.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.scala-lang</groupId>
@@ -52,19 +50,16 @@
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-compiler</artifactId>
       <version>${lib.org.scala-lang.scala.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.scala-lang</groupId>
       <artifactId>jline</artifactId>
       <version>${lib.org.scala-lang.scala.version}</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.typesafe.akka</groupId>
       <artifactId>akka-actor_${lib.com.typesafe.akka.scala.version}</artifactId>
       <version>${lib.com.typesafe.akka.version}</version>
-      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>
