@@ -25,6 +25,7 @@ import org.openmole.ide.misc.widget.PluginPanel
 
 class ToStringHookPanelUI(dataUI: ToStringHookDataUI) extends PluginPanel("") with IHookPanelUI {
 
+  println("Protot list : " + Proxys.prototypes.toList)
   val combo = new MultiPrototypePanel("Display prototypes",
     dataUI.toBeHooked,
     Proxys.prototypes.toList)

@@ -25,6 +25,7 @@ import org.openmole.ide.misc.tools.util._
 import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.ide.core.implementation.builder.Builder
 import concurrent.stm._
+import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
 
 object Proxys {
 
@@ -53,7 +54,10 @@ object Proxys {
   def -=(t: ITaskDataProxyUI) = _tasks.single remove (t.id)
   def contains(t: ITaskDataProxyUI) = _tasks.single.contains(t.id)
 
-  def +=(t: IPrototypeDataProxyUI) = _prototypes.single put (t.id, t)
+  def +=(t: IPrototypeDataProxyUI) = {
+    _prototypes.single put (t.id, t)
+    KeyPrototypeGenerator.invalidateCache
+  }
   def -=(t: IPrototypeDataProxyUI) = _prototypes.single remove (t.id)
   def contains(t: IPrototypeDataProxyUI) = _prototypes.single.contains(t.id)
 

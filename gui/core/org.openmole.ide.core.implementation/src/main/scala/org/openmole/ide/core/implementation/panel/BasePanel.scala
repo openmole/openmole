@@ -115,15 +115,19 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
     created = true
     deleteLink
     baseSave
+    scene.manager.invalidateCache
     scene.refresh
   }
 
   def baseDelete: Boolean = {
-    delete
+    val b = delete
+    scene.manager.invalidateCache
+    b
   }
 
   def baseSave: Unit = {
     save
+    scene.manager.invalidateCache
     proxy match {
       case Some(p: IDataProxyUI) ⇒ ConceptMenu.refreshItem(p)
       case _ ⇒
