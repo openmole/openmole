@@ -24,7 +24,7 @@ import org.openmole.ide.misc.widget.multirow.MultiComboTextField
 import org.openmole.ide.misc.widget.multirow.MultiComboTextField._
 import org.openmole.ide.core.model.panel.IGroupingPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
-import org.openmole.plugin.grouping.batch.MoleJobsGrouping
+import org.openmole.plugin.grouping.batch.ByGrouping
 import scala.swing.Label
 import scala.swing.TextField
 
