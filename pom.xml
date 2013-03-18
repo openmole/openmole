@@ -330,6 +330,10 @@
           <encoding>${project.build.sourceEncoding}</encoding>
           <recompileMode>incremental</recompileMode>
           <useZincServer>true</useZincServer>
+          <jvmArgs>
+            <jvmArg>-XX:MaxPermSize=512m</jvmArg>
+            <jvmArg>-Xmx2G</jvmArg>
+          </jvmArgs>
         </configuration>
       </plugin>
       <plugin>
