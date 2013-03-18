@@ -196,12 +196,10 @@ class ExecutionManager(manager: IMoleSceneManager,
       ExecutionState.KILLED -> new AtomicInteger)
     environments += e._1 -> (e._2, m)
 
-    println(" ++ " + moleExecution)
     moleExecution match {
       case Some(mE: IMoleExecution) ⇒
-        println("some ...")
         EventDispatcher.listen(e._1, new JobStateChangedOnEnvironmentListener(this, mE, e._1), classOf[Environment.JobStateChanged])
-      case x: Any ⇒ println("zob " + x)
+      case _=>
     }
   }
 

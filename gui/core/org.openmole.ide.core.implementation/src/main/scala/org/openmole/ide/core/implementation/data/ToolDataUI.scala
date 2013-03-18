@@ -57,7 +57,7 @@ object ToolDataUI {
 
   def buildUnknownPrototypes(mole: IMole, coreCapsule: ICapsule) = {
     (coreCapsule.inputs(mole, Sources.empty, Hooks.empty).toList ++ coreCapsule.outputs(mole, Sources.empty, Hooks.empty)) foreach {
-      d ⇒ KeyPrototypeGenerator.buildUnknownPrototype(d.prototype)
+      d ⇒ KeyPrototypeGenerator.prototype(d.prototype)
     }
   }
 }

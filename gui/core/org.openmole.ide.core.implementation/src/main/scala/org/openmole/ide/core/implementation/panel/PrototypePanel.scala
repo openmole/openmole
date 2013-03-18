@@ -99,7 +99,6 @@ class PrototypePanel[T](proxy: IPrototypeDataProxyUI,
 
   def create = {
     Proxys += proxy
-    scene.manager.invalidateCache
     publish(new UpdatedPrototypeEvent(this))
     ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(nameTextField.text,
       proxy)

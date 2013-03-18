@@ -63,7 +63,6 @@ object KeyPrototypeGenerator {
 
   def isPrototype(k: PrototypeKey): Boolean = cacheMap.keys.toList.contains(k)
 
-
   def isPrototype(p: Prototype[_]): Boolean = isPrototype(KeyPrototypeGenerator(p))
 
   def isPrototype(p: IPrototypeDataProxyUI): Boolean = isPrototype(KeyPrototypeGenerator(p))

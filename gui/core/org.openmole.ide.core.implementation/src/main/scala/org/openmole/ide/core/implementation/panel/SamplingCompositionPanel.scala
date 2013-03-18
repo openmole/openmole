@@ -72,7 +72,6 @@ class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
 
   def create = {
     Proxys += proxy
-    scene.manager.invalidateCache
     ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
 

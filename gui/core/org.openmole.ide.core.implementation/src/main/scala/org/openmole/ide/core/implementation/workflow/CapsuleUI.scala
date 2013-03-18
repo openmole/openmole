@@ -306,13 +306,15 @@ class CapsuleUI(val scene: IMoleScene,
     updateSamplingWidget
   }
 
-  def inputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IPrototypeDataProxyUI] =
-    if (cMap.contains(this)) {
+  def inputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IPrototypeDataProxyUI] = {
+   if (cMap.contains(this)) {
       val caps = cMap(this)
       caps.inputs(mole, Map(caps -> dataUI.sources.map { _.dataUI.coreObject(pMap) }), Map(caps -> dataUI.hooks.map { _.dataUI.coreObject(pMap) })).toList.map {
-        ds ⇒ SceneFactory.prototype(ds.prototype)
+        ds ⇒
+          SceneFactory.prototype(ds.prototype)
       }
     } else List()
+  }
 
   def outputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IPrototypeDataProxyUI] =
     if (cMap.contains(this)) {
@@ -322,18 +324,18 @@ class CapsuleUI(val scene: IMoleScene,
       }
     } else List()
 
-  def inputs: List[IPrototypeDataProxyUI] =
-    scene.manager.cacheMole match {
+  def inputs: List[IPrototypeDataProxyUI] = {
+    val i = scene.manager.cacheMole match {
       case Some((m: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]])) ⇒
-        if (pMap.isEmpty || cMap.isEmpty) List()
-        else inputs(m, cMap, pMap)
+        inputs(m, cMap, pMap)
       case _ ⇒ List()
     }
+    i
+  }
 
   def outputs: List[IPrototypeDataProxyUI] = scene.manager.cacheMole match {
     case Some((m: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]])) ⇒
-      if (pMap.isEmpty || cMap.isEmpty) List()
-      else outputs(m, cMap, pMap)
+      outputs(m, cMap, pMap)
     case _ ⇒ List()
   }
 
