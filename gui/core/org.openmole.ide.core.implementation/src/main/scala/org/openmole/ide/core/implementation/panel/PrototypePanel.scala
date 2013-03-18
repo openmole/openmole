@@ -38,6 +38,7 @@ import scala.swing.event.FocusGained
 import javax.imageio.ImageIO
 import BasePanel.IconChanged
 import org.openmole.ide.core.implementation.prototype.UpdatedPrototypeEvent
+import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
 
 object PrototypePanel {
   def deletePrototype(proxy: IPrototypeDataProxyUI): Boolean = {

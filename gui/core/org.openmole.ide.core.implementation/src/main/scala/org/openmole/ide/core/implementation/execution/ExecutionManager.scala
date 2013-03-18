@@ -199,7 +199,7 @@ class ExecutionManager(manager: IMoleSceneManager,
     moleExecution match {
       case Some(mE: IMoleExecution) ⇒
         EventDispatcher.listen(e._1, new JobStateChangedOnEnvironmentListener(this, mE, e._1), classOf[Environment.JobStateChanged])
-      case _=>
+      case _ ⇒
     }
   }
 

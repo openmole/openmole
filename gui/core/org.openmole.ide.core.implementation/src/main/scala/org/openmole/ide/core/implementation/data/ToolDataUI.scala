@@ -46,9 +46,11 @@ object ToolDataUI {
         case t: ITransition with IAggregationTransition ⇒ t.data(mole, Sources.empty, Hooks.empty).foreach {
           d ⇒
             val (protoType, dim) = KeyGenerator.stripArrays(d.prototype.`type`)
-            val proto = new PrototypeDataProxyUI(GenericPrototypeDataUI(d.prototype.name, dim + 1)(protoType), generated = true)
-            if (!KeyPrototypeGenerator.isPrototype(proto))
-              Proxys += proto
+            KeyPrototypeGenerator.prototype(KeyPrototypeGenerator(d.prototype.name, protoType.runtimeClass, dim))
+          //  val (protoType, dim) = KeyGenerator.stripArrays(d.prototype.`type`)
+          // val proto = new PrototypeDataProxyUI(GenericPrototypeDataUI(d.prototype.name, dim + 1)(protoType), generated = true)
+          // if (!KeyPrototypeGenerator.isPrototype(proto))
+          //   Proxys += proto
         }
         case _ ⇒
       }
