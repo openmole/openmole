@@ -22,12 +22,12 @@ import org.openmole.core.model.data._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxys }
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
-import scala.collection.mutable.WeakHashMap
+import scala.collection.mutable.HashMap
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 
 object KeyPrototypeGenerator {
 
-  private val cacheMap = new WeakHashMap[PrototypeKey, IPrototypeDataProxyUI]
+  private val cacheMap = new HashMap[PrototypeKey, IPrototypeDataProxyUI]
   cacheMap += (KeyPrototypeGenerator(EmptyDataUIs.emptyPrototypeProxy) -> EmptyDataUIs.emptyPrototypeProxy)
 
   def apply(proxy: IPrototypeDataProxyUI): PrototypeKey =
@@ -55,13 +55,14 @@ object KeyPrototypeGenerator {
 
   def buildUnknownPrototype(name: String, dim: Int, m: Manifest[_]): IPrototypeDataProxyUI = {
     val proxy = new PrototypeDataProxyUI(GenericPrototypeDataUI(name, dim)(m), generated = true)
-    Proxys += proxy
+    if (!isPrototype(proxy)) Proxys += proxy
     proxy
   }
 
   def keyPrototypeMapping: Map[PrototypeKey, IPrototypeDataProxyUI] = cacheMap.toMap
 
   def isPrototype(k: PrototypeKey): Boolean = cacheMap.keys.toList.contains(k)
+
 
   def isPrototype(p: Prototype[_]): Boolean = isPrototype(KeyPrototypeGenerator(p))
 
