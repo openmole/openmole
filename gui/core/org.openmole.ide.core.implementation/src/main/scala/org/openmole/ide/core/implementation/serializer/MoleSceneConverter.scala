@@ -118,12 +118,26 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
         case _ ⇒
       }
 
-      //IHook
-      /* view.dataUI.hooks.values.foreach { hf ⇒
-        writer.startNode("misc")
+      //Sources
+      view.dataUI.hooks.foreach { hf ⇒
+        writer.startNode("hook")
         writer.addAttribute("id", hf.id.toString)
         writer.endNode
-      } */
+      }
+
+      //Hooks
+      view.dataUI.sources.foreach { s ⇒
+        writer.startNode("source")
+        writer.addAttribute("id", s.id.toString)
+        writer.endNode
+      }
+
+      //Grouping
+      /* view.dataUI.grouping.foreach { s ⇒
+        writer.startNode("grouping")
+        writer.addAttribute("id", s.id.toString)
+        writer.endNode
+      }  */
 
       writer.endNode
     })
@@ -207,13 +221,8 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
                   case Some(e: IEnvironmentDataProxyUI) ⇒ caps on Some(e)
                   case None ⇒ errors += "An error occured when loading the Environment for a capsule. No Environment has been set."
                 }
-              case "misc" ⇒
-                Proxys.hooks.filter(e ⇒ e.id == reader.getAttribute("id")).headOption match {
-                  case Some(h: IHookDataProxyUI) ⇒
-                  //caps.setHook(Some(h))
-                  case None ⇒ errors += "An error occured when loading the Environment for a capsule. No Environment has been set."
-                }
-
+              case "hook" ⇒ caps.dataUI = caps.dataUI :- Proxys.hooks.filter(e ⇒ e.id == reader.getAttribute("id"))
+              case "source" ⇒ caps.dataUI = caps.dataUI.-:(Proxys.sources.filter(e ⇒ e.id == reader.getAttribute("id")))
               case _ ⇒ StatusBar().block("Unknown balise " + n1)
             }
             reader.moveUp
