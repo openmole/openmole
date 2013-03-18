@@ -99,7 +99,6 @@ class TaskPanel(proxy: ITaskDataProxyUI,
 
   def create = {
     Proxys += proxy
-    scene.manager.invalidateCache
     ConceptMenu.taskMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
 

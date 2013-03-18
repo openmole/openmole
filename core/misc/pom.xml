@@ -34,6 +34,7 @@
     <module>org.openmole.misc.osgi</module>
     <module>org.openmole.misc.replication</module>
     <module>org.openmole.misc.sftpserver</module>
+    <module>org.openmole.misc.macros</module>
   </modules>
   <properties>
     <include />

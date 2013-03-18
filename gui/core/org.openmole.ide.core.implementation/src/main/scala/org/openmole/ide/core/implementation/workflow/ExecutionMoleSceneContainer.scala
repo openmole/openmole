@@ -205,8 +205,10 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         else None
       } match {
         case Some(t: String) ⇒ executionManager match {
-          case Some(x: ExecutionManager) ⇒ SerializerService.serialize(x.buildMoleExecution, new File(t))
-
+          case Some(x: ExecutionManager) ⇒ x.buildMoleExecution match {
+            case Success(mE) ⇒ SerializerService.serialize(mE._1, new File(t))
+            case Failure(t) ⇒ StatusBar().warn("The mole can not be serialized due to " + t.getMessage)
+          }
           /*x.buildMoleExecution(panelHooks.map {
             ph ⇒ ph._1.saveContent -> ph._2._1
           }.toMap,

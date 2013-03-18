@@ -9,7 +9,7 @@
     <groupId>org.openmole.core</groupId>
     <version>0.8.0-SNAPSHOT</version>
   </parent>
-  <artifactId>org.openmole.misc.osgi</artifactId>
+  <artifactId>org.openmole.misc.macros</artifactId>
   <!-- ************************************************************* -->
   <!-- *** Build Settings ****************************************** -->
   <!-- ************************************************************* -->
@@ -19,24 +19,4 @@
   <!-- ************************************************************* -->
   <name>${project.artifactId} ${project.version}</name>
   <description />
-  <properties>
-    <bundle.activator>${project.artifactId}.Activator</bundle.activator>
-    <eclipse.buddypolicy>global</eclipse.buddypolicy>
-  </properties>
-  <dependencies>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>org.openmole.misc.exception</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.core</groupId>
-      <artifactId>org.eclipse.osgi</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.openmole</groupId>
-      <artifactId>org.scala-lang.scala-library</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-  </dependencies>
 </project>
