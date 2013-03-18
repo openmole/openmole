@@ -26,7 +26,7 @@ trait Defaults extends Build {
                   exports: Seq[String] = Seq(),
                   privatePackages: Seq[String] = Seq()) = {
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
-    val additional = buddyPolicy.map(v => Map("Eclipse-BuddyPolicy" -> v)).getOrElse(Map())
+    val additional = buddyPolicy.map(v => Map("Eclipse-BuddyPolicy" -> v)).getOrElse(Map()) ++ Map("Bundle-ActivationPolicy" -> "lazy")
     Project.defaultSettings ++
       SbtOsgi.osgiSettings ++
       Seq(name:= artifactId,

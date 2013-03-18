@@ -8,15 +8,20 @@ import Keys._
  * Time: 9:06 PM
  * To change this template use File | Settings | File Templates.
  */
-trait Web extends libraries {
+trait Web extends libraries with Defaults {
   lazy val web = Project(id = "web", base = file("web")) aggregate(webCore)
 
   lazy val webCore = Project(id = "web-core", base = file("web/core"),
     settings = OSGIProject("org.openmole.web.core",
-      exports = Seq("org.openmole.web")) ++ Seq(libraryDependencies ++= Seq(
+      exports = Seq("org.openmole.web"),
+      buddyPolicy = Some("global"),
+      privatePackages = Seq("WEB-INF.*")) ++ Seq(libraryDependencies ++= Seq(
         "org.openmole.core" % "org.openmole.core.serializer" % "0.8.0-SNAPSHOT",
         "org.openmole.core" % "org.openmole.core.implementation" % "0.8.0-SNAPSHOT",
         "org.openmole.ide" % "org.openmole.ide.core.implementation" % "0.8.0-SNAPSHOT",
-        "org.scala-tools" % "scala-stm_2.10.0" % "0.6"
-    ))) dependsOn(jetty, scalatra, logback, h2, bonecp, slick)
+        "org.openmole" % "org.scala-lang.scala-library" % "0.8.0-SNAPSHOT",
+        "org.openmole" % "org.scalatra" % "0.8.0-SNAPSHOT",
+        "org.openmole" % "org.eclipse.jetty" % "0.8.0-SNAPSHOT",
+        "org.openmole" % "com.typesafe.slick" % "0.8.0-SNAPSHOT"
+    ))) dependsOn(logback, h2, bonecp)
 }
