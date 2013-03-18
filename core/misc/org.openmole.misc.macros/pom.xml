@@ -18,5 +18,5 @@
   <!-- *** Project Information ************************************* -->
   <!-- ************************************************************* -->
   <name>${project.artifactId} ${project.version}</name>
-  <description></description>
+  <description />
 </project>
