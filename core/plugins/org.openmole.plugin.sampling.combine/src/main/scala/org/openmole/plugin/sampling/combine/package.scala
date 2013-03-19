@@ -42,6 +42,11 @@ package object combine {
 
   implicit def combineFactorDecorator[T, D <: Domain[T] with Discrete[T]](f: Factor[T, D]) = new {
     def x(s: Sampling) = new CompleteSampling(f, s)
+    def +(s2: Sampling) = new CombineSampling(f, s2)
+    def zip(s2: Sampling) = new ZipSampling(f, s2)
+    def zipWithIndex(index: Prototype[Int]) = new ZipWithIndexSampling(f, index)
+    def take(n: Int) = new TakeSampling(f, n)
+    def shuffle = new ShuffleSampling(f)
   }
 
 }
