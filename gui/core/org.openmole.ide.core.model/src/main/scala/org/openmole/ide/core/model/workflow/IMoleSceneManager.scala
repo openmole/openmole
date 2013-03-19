@@ -112,7 +112,7 @@ trait IMoleSceneManager {
       if (toVisit.isEmpty) connected
       else {
         val head = toVisit.head
-        val connectors = capsuleConnections(head.dataUI)
+        val connectors = capsuleConnections.getOrElse(head.dataUI, List())
         connectedCapsulesFrom0(toVisit.tail ::: connectors.map {
           _.target.capsule
         }.toList, connected :+ head)
