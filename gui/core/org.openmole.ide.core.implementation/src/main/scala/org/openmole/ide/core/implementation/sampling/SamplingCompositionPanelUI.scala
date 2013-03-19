@@ -20,7 +20,7 @@ package org.openmole.ide.core.implementation.sampling
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.core.implementation.data._
-import java.awt.{ Point, Color, Rectangle }
+import java.awt.{ Dimension, Point, Color, Rectangle }
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.action.ConnectorState
 import org.netbeans.api.visual.action.ConnectorState._
@@ -67,6 +67,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
   addChild(boxLayer)
   addChild(connectLayer)
 
+  tabbedPane.preferredSize = new Dimension(0, 0)
   setPreferredBounds(new Rectangle(0, 0, 900, 600))
 
   val connectProvider = new SamplingConnectionProvider
