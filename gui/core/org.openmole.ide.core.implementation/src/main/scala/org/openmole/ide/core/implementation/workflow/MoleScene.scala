@@ -29,8 +29,6 @@ import org.netbeans.api.visual.action.RectangularSelectDecorator
 import org.netbeans.api.visual.action.RectangularSelectProvider
 import org.netbeans.api.visual.action.SelectProvider
 import org.netbeans.api.visual.graph.GraphScene
-import org.openmole.ide.core.model.commons.Constants
-import org.netbeans.api.visual.model.ObjectState
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.widget.LayerWidget
 import org.netbeans.api.visual.action.ConnectorState
@@ -275,21 +273,10 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   def isSelectionAllowed(w: Widget, point: Point, b: Boolean) = true
 
   def select(w: Widget, point: Point, change: Boolean) {
-    if (w == this) ScenesManager.clearSelection
-    else {
-      w match {
-        case widget: CapsuleUI ⇒
-          if (change) {
-            if (ScenesManager.selection.contains(widget)) ScenesManager.removeFromSelection(widget)
-            else ScenesManager.addToSelection(widget)
-          } else {
-            if (!ScenesManager.selection.contains(widget)) {
-              ScenesManager.clearSelection
-              ScenesManager.addToSelection(widget)
-            }
-          }
-        case _ ⇒
-      }
+    w match {
+      case widget: CapsuleUI ⇒
+        ScenesManager.changeSelection(widget)
+      case _ ⇒ ScenesManager.clearSelection
     }
   }
 
@@ -312,25 +299,15 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
       rectangle.height *= -1
     }
 
-    var changed = false
+    ScenesManager.clearSelection
     getNodes.foreach {
       b ⇒
         findWidget(b) match {
           case w: CapsuleUI ⇒
             val r = new Rectangle(w.getBounds)
             r.setLocation(w.getLocation)
-            if (r.intersects(rectangle)) {
-              if (!ScenesManager.selection.contains(w)) {
-                changed = true
-                ScenesManager.addToSelection(w)
-              }
-            } else {
-              if (ScenesManager.selection.contains(w)) {
-                changed = true
-                ScenesManager.removeFromSelection(w)
-              }
-            }
-          case x ⇒
+            if (r.intersects(rectangle)) ScenesManager.addToSelection(w)
+          case _ ⇒
         }
     }
   }
@@ -357,7 +334,8 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
         case x: ICapsuleUI ⇒
           if (!ScenesManager.selection.contains(x)) {
             ScenesManager.clearSelection
-            ScenesManager.addToSelection(x)
+            ScenesManager.changeSelection(x)
+            // ScenesManager.addToSelection(x)
             x.repaint
           }
           original = Some(widget.getPreferredLocation)

@@ -85,7 +85,7 @@ object Builder {
       List.empty,
       List.empty,
       Map.empty,
-      Map.empty), new PuzzleUIMap(capsuleMap.map {
+      Map.empty), new PuzzleUIMap(capsuleMap.filter { _._1.dataUI.task.isDefined }.map {
       case (ui, c) ⇒ c.task -> ui.dataUI.task.get
     } ++ uiMap.taskMap,
       prototypeMap.map {

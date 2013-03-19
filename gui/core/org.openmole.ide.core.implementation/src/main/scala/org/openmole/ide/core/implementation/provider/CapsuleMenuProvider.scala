@@ -51,7 +51,7 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
 
   def initMenu = {
     items.clear
-    if (ScenesManager.selection.size == 0) ScenesManager.addToSelection(capsule)
+    //if (ScenesManager.selection.size == 0) ScenesManager.addToSelection(capsule)
     val selectionSize = ScenesManager.selection.size
     val itStart = new JMenuItem("Define as starting capsule")
     val itIS = new JMenuItem("Add an input slot")
@@ -92,51 +92,6 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
     }.peer, 0)
     items += (itIS, itRIS, itR, itStart, menuTask.peer)
 
-    //Environments
-    /* val menuEnv = new Menu("Environment")
-
-    Proxys.environments.foreach {
-      env ⇒
-        menuEnv.contents += new CheckMenuItem(env.dataUI.name) {
-          action = new TaskEnvAction(env.dataUI.name, this) {
-            def apply = {
-              capsule.setEnvironment(Some(env))
-              selectOneItem(menuEnv, item)
-            }
-          }
-
-          capsule.dataUI.environment match {
-            case Some(e: IEnvironmentDataProxyUI) ⇒
-              selected = {
-                env.dataUI.name == e.dataUI.name
-              }
-            case _ ⇒ selected = false
-          }
-        }
-    }
-
-    menuEnv.peer.insert(new CheckMenuItem("None") {
-      action = new Action("None") {
-        def apply = capsule.setEnvironment(None)
-      }
-    }.peer, 0) */
-
-    //Hooks
-    /*val menuHook = new Menu("IHook")
-    KeyRegistry.hooks.values.toList.sortBy {
-      _.toString
-    }.foreach {
-      h ⇒
-        menuHook.contents += new CheckMenuItem(h.toString) {
-          selected = {
-            if (capsule.dataUI.hooks.contains(h.coreClass)) {
-              capsule.dataUI.hooks(h.coreClass).activated
-            } else false
-          }
-          action = new HookAction(h, this)
-        }
-    }   */
-
     val menuBuilder = new Menu("Builder")
     KeyRegistry.builders.values.toList.sortBy {
       _.name
@@ -164,29 +119,18 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
     super.getPopupMenu(widget, point)
   }
 
-  def selectOneItem(menu: Menu, item: CheckMenuItem) =
+  def selectOneItem(menu: Menu, item: CheckMenuItem) = {
     menu.contents.foreach {
       i ⇒
         i match {
           case mi: CheckMenuItem ⇒ mi.selected = false
         }
         item.selected = true
+
     }
+    ScenesManager.invalidateSelection
+  }
 
   abstract class TaskEnvAction(name: String,
                                val item: CheckMenuItem) extends Action(name)
-
-  /*class HookAction(factory: IHookFactoryUI,
-                   it: CheckMenuItem) extends Action(factory.toString) {
-    def apply = {
-      if (!capsule.dataUI.hooks.contains(factory.coreClass))
-        capsule.dataUI = capsule.dataUI :- factory.buildDataUI     */
-  //  else capsule.dataUI.hooks(factory.coreClass).activated = it.selected
-  //  capsule.hooked(if (capsule.dataUI.hooks.values.filter {
-  //     _.activated
-  //  }.size > 0) true
-  //else false
-  //  }
-  //  }
-
 }

@@ -64,7 +64,7 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
   def capsules = _capsules.toMap
 
   def assignDefaultStartingCapsule =
-    if (!startingCapsule.isDefined) setStartingCapsule(_capsules.values.head)
+    if (!startingCapsule.isDefined && !_capsules.isEmpty) setStartingCapsule(_capsules.values.head)
 
   def setStartingCapsule(stCapsule: ICapsuleUI) = {
     startingCapsule match {
@@ -93,11 +93,9 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
       case None ⇒
       case Some(caps: ICapsuleUI) ⇒ if (capsules(nodeID) == caps) startingCapsule = None
     }
-    capsuleConnections(_capsules(nodeID).dataUI).foreach {
-      x ⇒
-        removeConnector(connectorID(x))
+    capsuleConnections.getOrElse(_capsules(nodeID).dataUI, List()).foreach {
+      x ⇒ removeConnector(connectorID(x))
     }
-    capsuleConnections -= _capsules(nodeID).dataUI
 
     removeIncomingTransitions(_capsules(nodeID))
 

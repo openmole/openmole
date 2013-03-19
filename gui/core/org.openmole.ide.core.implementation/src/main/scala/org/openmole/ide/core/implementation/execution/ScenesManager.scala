@@ -31,7 +31,6 @@ import org.openmole.ide.core.model.workflow.ITransitionUI
 import org.openmole.ide.core.model.dataproxy.{ IDataProxyUI, ITaskDataProxyUI }
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IDataChannelUI
-import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.MigPanel
@@ -42,11 +41,11 @@ import scala.swing.Action
 import scala.swing.Button
 import scala.swing.Label
 import scala.swing.TabbedPane
-import scala.collection.mutable.HashSet
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.openmole.ide.core.implementation.builder.SceneFactory
 import util.{ Failure, Success }
+import concurrent.stm._
 
 object ScenesManager {
 
@@ -54,7 +53,18 @@ object ScenesManager {
 
   var countBuild = new AtomicInteger
   var countExec = new AtomicInteger
-  val _selection = new HashSet[ICapsuleUI]
+  val _selection: Ref[Option[List[ICapsuleUI]]] = Ref(None)
+
+  def invalidateSelection = _selection.single() = None
+
+  def selection = atomic { implicit actx ⇒
+    _selection() match {
+      case Some(_) ⇒
+      case None ⇒
+        _selection() = Some(capsules.filter { _.selected })
+    }
+    _selection().get
+  }
 
   PasswordListner.apply
 
@@ -92,30 +102,34 @@ object ScenesManager {
 
   def closePropertyPanel = List(currentScene).flatten.foreach { _.closePropertyPanel }
 
-  def selection = _selection.toSet
+  def changeSelection(widget: ICapsuleUI) = {
+    widget.selected = !widget.selected
+    invalidateSelection
+  }
 
   def addToSelection(widget: ICapsuleUI) = {
     widget.selected = true
-    _selection += widget
+    invalidateSelection
   }
 
   def removeFromSelection(widget: ICapsuleUI) = {
     widget.selected = false
-    _selection -= widget
+    invalidateSelection
   }
 
-  def clearSelection = _selection.foreach { removeFromSelection }
-
-  def clearRemovedCapsulesFromSelection = _selection.clear
+  def clearSelection = {
+    selection.foreach { _.selected = false }
+    invalidateSelection
+  }
 
   def pasteCapsules(ms: IMoleScene,
                     point: Point) = {
-    val copied = _selection.map { z ⇒
+    val copied = selection.map { z ⇒
       z -> z.copy(ms)
     }.toMap
 
-    val dx = (point.x - _selection.map { _.widget.getPreferredLocation.x }.min).toInt
-    val dy = (point.y - _selection.map { _.widget.getPreferredLocation.y }.min).toInt
+    val dx = (point.x - selection.map { _.widget.getPreferredLocation.x }.min).toInt
+    val dy = (point.y - selection.map { _.widget.getPreferredLocation.y }.min).toInt
 
     copied.foreach {
       case (old, neo) ⇒
@@ -130,12 +144,12 @@ object ScenesManager {
       case _ ⇒
     }
 
-    val islots = _selection.flatMap { _.islots }
-    _selection.headOption match {
+    val islots = selection.flatMap { _.islots }
+    selection.headOption match {
       case Some(c: ICapsuleUI) ⇒
         val connectors = c.scene.manager.connectors
         connectors.foreach { con ⇒
-          if (_selection.contains(con.source) && islots.contains(con.target)) {
+          if (selection.contains(con.source) && islots.contains(con.target)) {
             con match {
               case (t: ITransitionUI) ⇒
                 SceneFactory.transition(ms,

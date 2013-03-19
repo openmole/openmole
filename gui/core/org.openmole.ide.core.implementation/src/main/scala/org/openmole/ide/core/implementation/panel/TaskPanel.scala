@@ -112,7 +112,7 @@ class TaskPanel(proxy: ITaskDataProxyUI,
       case Nil ⇒
         scene.closePropertyPanel
         Proxys -= proxy
-        ConceptMenu.removeItem(proxy)
+        if (!proxy.generated) ConceptMenu.removeItem(proxy)
         true
       case _ ⇒
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
