@@ -176,6 +176,7 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
       case x: IPrototypeDataProxyUI ⇒
         freeze = x.generated
         new PrototypePanel(x, this, mode)
+      case x: IEnvironmentDataProxyUI ⇒ new EnvironmentPanel(x, this, mode)
     }
     currentExtraPanel.contents.add(panel)
     if (freeze) currentExtraPanel.contents.foreach {

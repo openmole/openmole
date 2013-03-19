@@ -28,16 +28,16 @@ import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 import org.openmole.ide.core.model.workflow.ITransitionUI
-import org.openmole.ide.misc.tools.image.Images._
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.model.dataproxy.{ IDataProxyUI, ITaskDataProxyUI }
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IDataChannelUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.MigPanel
-import scala.collection.JavaConversions._
-import scala.collection.mutable.HashMap
+import org.openmole.ide.core.model.panel._
+import org.openmole.ide.core.model.panel.PanelMode._
+import org.openmole.ide.misc.tools.image.Images._
 import scala.swing.Action
 import scala.swing.Button
 import scala.swing.Label
@@ -74,6 +74,10 @@ object ScenesManager {
   def currentScene = currentSceneContainer match {
     case Some(sc: ISceneContainer) ⇒ Some(sc.scene)
     case _ ⇒ None
+  }
+
+  def displayExtraPropertyPanel(proxy: IDataProxyUI) = {
+    currentScene.getOrElse(addBuildSceneContainer("Mole").scene).displayExtraPropertyPanel(proxy, EXTRA)
   }
 
   def currentPanelUI = currentScene match {

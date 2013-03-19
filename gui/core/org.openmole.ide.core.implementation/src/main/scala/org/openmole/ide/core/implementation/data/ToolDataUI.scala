@@ -44,7 +44,8 @@ object ToolDataUI {
       _ match {
         //FIXME SOURCES AND HOOKS
         case t: ITransition with IAggregationTransition ⇒ t.data(mole, Sources.empty, Hooks.empty).foreach {
-          d ⇒  val (protoType, dim) = KeyGenerator.stripArrays(d.prototype.`type`)
+          d ⇒
+            val (protoType, dim) = KeyGenerator.stripArrays(d.prototype.`type`)
             KeyPrototypeGenerator.prototype(KeyPrototypeGenerator(d.prototype.name, protoType.runtimeClass, dim))
         }
         case _ ⇒

@@ -16,20 +16,21 @@
  */
 package org.openmole.ide.core.implementation.workflow
 
-import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.misc.widget.{ ContentAction, LinkLabel, PluginPanel }
 import org.openmole.ide.core.model.panel.ICapsulePanelUI
 import scala.swing._
 import event.ButtonClicked
 import org.openmole.ide.core.model.data.{ IEnvironmentDataUI, ICapsuleDataUI }
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
-import org.openmole.ide.misc.widget.multirow.MultiCombo
+import org.openmole.ide.misc.widget.multirow.{ MultiComboLinkLabel, MultiCombo }
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.misc.widget.multirow.MultiCombo.{ ComboData, ComboPanel }
 import org.openmole.ide.core.implementation.data.{ EmptyDataUIs, CapsuleDataUI }
-import org.openmole.ide.core.model.dataproxy.{ IHookDataProxyUI, ISourceDataProxyUI, IEnvironmentDataProxyUI }
+import org.openmole.ide.core.model.dataproxy.{ IDataProxyUI, IHookDataProxyUI, ISourceDataProxyUI, IEnvironmentDataProxyUI }
 import java.awt.Color
-import org.openmole.ide.core.implementation.execution.GroupingStrategyPanelUI
+import org.openmole.ide.core.implementation.execution.{ ScenesManager, GroupingStrategyPanelUI }
+import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel.{ ComboLinkLabelData, ComboLinkLabelPanel }
 
 class CapsulePanelUI(dataUI: ICapsuleDataUI, index: Int = 0) extends PluginPanel("") with ICapsulePanelUI {
 
@@ -69,9 +70,15 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI, index: Int = 0) extends PluginPanel
   tabbedPane.pages += new TabbedPane.Page("Source", sourcePanel.panel)
   tabbedPane.pages += new TabbedPane.Page("Hook", hookPanel.panel)
   tabbedPane.pages += new TabbedPane.Page("Execution", new PluginPanel("wrap") {
-    contents += new PluginPanel("wrap 2") {
+    contents += new PluginPanel("wrap 3") {
       contents += new Label("Environment") { foreground = Color.WHITE }
       contents += environmentCombo
+      contents += new LinkLabel("", new Action("") {
+        def apply =
+          if (environmentCombo.selection.index != environmentProxys.size - 1) {
+            ScenesManager.displayExtraPropertyPanel(environmentCombo.selection.item)
+          }
+      }) { icon = org.openmole.ide.misc.tools.image.Images.EYE }
     }
     contents += new PluginPanel("wrap") {
       contents += groupingCheckBox
