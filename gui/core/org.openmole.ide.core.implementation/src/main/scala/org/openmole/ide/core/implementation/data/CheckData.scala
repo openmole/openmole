@@ -26,6 +26,7 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.misc.tools.service.Logger
 import org.openmole.ide.core.implementation.builder.MoleFactory
+import org.openmole.core.model.data.Context
 import util.{ Failure, Success }
 
 object CheckData extends Logger {
@@ -65,7 +66,10 @@ object CheckData extends Logger {
                 }   */
 
                 // Formal validation
-                val errors = Validation(mole)
+                val errors = Validation(mole,
+                  Context.empty,
+                  capsuleMap.map { c ⇒ c._1 -> c._2.dataUI.sources.map { _.dataUI.coreObject(pMap) } },
+                  capsuleMap.map { c ⇒ c._1 -> c._2.dataUI.hooks.map { _.dataUI.coreObject(pMap) } })
                 errors.isEmpty match {
                   case false ⇒
                     errors.flatMap {
