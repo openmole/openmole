@@ -17,12 +17,12 @@
 package org.openmole.ide.plugin.groupingstrategy
 
 import org.openmole.ide.core.model.data.IGroupingDataUI
-import org.openmole.plugin.grouping.batch.{ MoleJobsGrouping, BatchShuffledGrouping }
+import org.openmole.plugin.grouping.batch.{ ByGrouping, InShuffledGrouping }
 
 class NumberOfMoleJobsGroupingDataUI(val number: Int = 0) extends IGroupingDataUI {
-  def coreObject = new MoleJobsGrouping(number)
+  def coreObject = new ByGrouping(number)
 
-  def coreClass = classOf[MoleJobsGrouping]
+  def coreClass = classOf[ByGrouping]
 
   def buildPanelUI = new NumberOfMoleJobsGroupingPanelUI(this)
 

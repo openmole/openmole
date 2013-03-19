@@ -23,15 +23,18 @@ import org.openmole.core.model.job._
 import org.openmole.core.model.mole._
 
 /**
- * Group mole jobs given a fixed number of batch.
+ * Group mole jobs by group of numberOfMoleJobs.
  *
- * @param numberOfBatch total number of batch
+ * @param numberOfMoleJobs size of each batch
  */
-class BatchGrouping(numberOfBatch: Int) extends Grouping {
+class ByGrouping(numberOfMoleJobs: Int) extends Grouping {
 
   override def apply(context: Context, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup = {
-    if (groups.size < numberOfBatch) MoleJobGroup()
-    else groups.minBy { case (_, g) ⇒ g.size }._1
+    groups.find { case (_, g) ⇒ g.size < numberOfMoleJobs } match {
+      case Some((mg, _)) ⇒ mg
+      case None ⇒ MoleJobGroup()
+    }
   }
 
+  override def complete(jobs: Iterable[IMoleJob]) = jobs.size >= numberOfMoleJobs
 }

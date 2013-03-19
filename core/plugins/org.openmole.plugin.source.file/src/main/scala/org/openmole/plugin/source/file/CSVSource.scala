@@ -33,7 +33,7 @@ import org.openmole.core.model.mole.ExecutionContext
 
 object CSVSource {
 
-  def apply(name: String, file: File) =
+  def apply(file: File) =
     new SourceBuilder { builder ⇒
 
       private var _columns = new ListBuffer[(String, Prototype[_])]
@@ -47,7 +47,7 @@ object CSVSource {
         this
       }
 
-      def toSource = new CSVSource(name, file) with Built {
+      def toSource = new CSVSource(file) with Built {
         val columns = builder.columns
       }
 
@@ -55,7 +55,7 @@ object CSVSource {
 
 }
 
-abstract class CSVSource(val name: String, val file: File) extends Source {
+abstract class CSVSource(val file: File) extends Source {
 
   def columns: List[(String, Prototype[_])]
 

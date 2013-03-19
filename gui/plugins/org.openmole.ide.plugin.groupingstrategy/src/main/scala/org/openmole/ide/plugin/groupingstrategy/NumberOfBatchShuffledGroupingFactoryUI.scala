@@ -19,7 +19,7 @@ package org.openmole.ide.plugin.groupingstrategy
 
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.factory.IGroupingFactoryUI
-import org.openmole.plugin.grouping.batch.BatchShuffledGrouping
+import org.openmole.plugin.grouping.batch.InShuffledGrouping
 
 class NumberOfBatchShuffledGroupingFactoryUI extends IGroupingFactoryUI {
   def buildDataUI = new NumberOfBatchShuffledGroupingDataUI

@@ -20,7 +20,7 @@ package org.openmole.ide.plugin.groupingstrategy
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.panel.IGroupingPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
-import org.openmole.plugin.grouping.batch.BatchShuffledGrouping
+import org.openmole.plugin.grouping.batch.InShuffledGrouping
 import scala.swing.Label
 import scala.swing.TextField
 
