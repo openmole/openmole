@@ -84,6 +84,7 @@ class IOPrototypePanel(scene: IMoleScene,
     }
     if (Proxys.prototypes.size > 0)
       contents += protoInEditor.panel
+    else contents += new Label("Please create first Prototypes.")
   }
 
   lazy val protoOut = new PluginPanel("wrap") {
