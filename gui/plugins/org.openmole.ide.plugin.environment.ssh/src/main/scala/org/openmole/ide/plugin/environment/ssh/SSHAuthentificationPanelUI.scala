@@ -166,7 +166,7 @@ object SSHAuthentificationPanelUI {
 import SSHAuthentificationPanelUI._
 class SSHAuthentificationPanelUI extends PluginPanel("") with IAuthentificationPanelUI {
 
-  val components = List()
+  override val components = List()
   val panelList =
     Workspace.persistentList(classOf[SSHAuthentication]).map { hm ⇒
       hm match {
