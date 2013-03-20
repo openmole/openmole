@@ -1,6 +1,10 @@
+package src.main.scala.projectRoot
+
 import com.typesafe.sbt.osgi.{OsgiKeys, SbtOsgi}
 import sbt._
 import Keys._
+import src.main.scala.projectRoot.Defaults
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -9,12 +13,14 @@ import Keys._
  * Time: 6:50 PM
  * To change this template use File | Settings | File Templates.
  */
-trait libraries extends Defaults {
+trait Libraries extends Defaults {
   lazy val libraries = Project(id = "openmole-libraries",
     base = file("libraries")) aggregate(jetty,scalatra,logback, h2, bonecp, slick)
 
+  private implicit val dir = file("libraries")
+
   lazy val jetty = Project(id = "org-eclipse-jetty",
-    base = file("libraries/org.eclipse.jetty"),
+    base = file(dir+"/org.eclipse.jetty"),
     settings = OSGIProject("org.eclipse.jetty", exports = Seq("org.eclipse.jetty.*", "javax.*")))
 
   lazy val scalatra = Project(id = "org-scalatra",
@@ -28,11 +34,9 @@ trait libraries extends Defaults {
     base = file("libraries/ch.qos.logback"),
     settings = OSGIProject("ch.qos.logback") ++ Seq(libraryDependencies ++= Seq("ch.qos.logback" % "logback-classic" % "1.0.9")))
 
-  lazy val h2 = Project(id = "org-h2", base = file("libraries/org.h2"),
-    settings = OSGIProject("org.h2") ++ Seq(libraryDependencies ++= Seq("com.h2database" % "h2" % "1.3.170")))
+  lazy val h2 = OsgiProject("org.h2") settings (libraryDependencies += "com.h2database" % "h2" % "1.3.170")
 
-  lazy val bonecp = Project(id = "com-jolbox-bonecp", base = file("libraries/com.jolbox.bonecp"),
-    settings = OSGIProject("com.jolbox.bonecp") ++ Seq(libraryDependencies ++= Seq("com.jolbox" % "bonecp" % "0.8.0-rc1")))
+  lazy val bonecp = OsgiProject("com.jolbox.bonecp") settings (libraryDependencies += "com.jolbox" % "bonecp" % "0.8.0-rc1")
 
   lazy val slick = Project(id = "com-typesafe-slick", base = file("libraries/com.typesafe.slick"),
     settings = OSGIProject("com.typesafe.slick") ++ Seq(libraryDependencies ++= Seq("com.typesafe.slick" %% "slick" % "1.0.0")))
