@@ -1,8 +1,10 @@
 import sbt._
 import Keys._
 
-object HelloBuild extends libraries with Web {
+import projectRoot._
+
+object HelloBuild extends Libraries with Web with Application {
     lazy val root = Project(id = "root",
-                            base = file(".")) aggregate(libraries, web)
+                            base = file(".")) aggregate(libraries, web, application)
 
 }

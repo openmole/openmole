@@ -1,8 +1,7 @@
-package src.main.scala.projectRoot
+package projectRoot
 
 import sbt._
 import Keys._
-import src.main.scala.projectRoot.{libraries, Defaults}
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,7 +10,7 @@ import src.main.scala.projectRoot.{libraries, Defaults}
  * Time: 9:06 PM
  * To change this template use File | Settings | File Templates.
  */
-trait Web extends libraries with Defaults {
+trait Web extends Libraries with Defaults {
   private implicit val dir = file("web")
   lazy val web = Project(id = "web", base = file("web")) aggregate(webCore)
 
@@ -24,7 +23,11 @@ trait Web extends libraries with Defaults {
         "org.openmole.ide" % "org.openmole.ide.core.implementation" % v,
         "org.openmole" % "org.scala-lang.scala-library" % v,
         "org.openmole" % "org.scalatra" % v,
-        "org.openmole" % "org.eclipse.jetty" % v
+        "org.openmole" % "org.eclipse.jetty" % v,
+        "org.openmole" % "org.h2" % v,
+        "org.openmole" % "com.typesafe.slick" % v,
+        "org.openmole" % "ch.qos.logback" % v,
+        "org.openmole" % "com.jolbox.bonecp" % v
       )}
-    ) dependsOn (slick, logback, h2, bonecp, jetty)
+    )
 }

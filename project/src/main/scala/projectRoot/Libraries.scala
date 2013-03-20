@@ -1,9 +1,8 @@
-package src.main.scala.projectRoot
+package projectRoot
 
 import com.typesafe.sbt.osgi.{OsgiKeys, SbtOsgi}
 import sbt._
 import Keys._
-import src.main.scala.projectRoot.Defaults
 
 
 /**

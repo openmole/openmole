@@ -1,7 +1,8 @@
-package src.main.scala.projectRoot
+package projectRoot
 
 import com.typesafe.sbt.osgi.OsgiKeys
 import com.typesafe.sbt.osgi.SbtOsgi
+import scala.util.Random
 import sbt._
 import Keys._
 
@@ -14,31 +15,42 @@ import Keys._
  */
 trait Defaults extends Build {
   val eclipseBuddyPolicy = SettingKey[Option[String]]("OSGi.eclipseBuddyPolicy", "The eclipse buddy policy thing.")
+  lazy val outDir = SettingKey[String]("outDir", "A setting to control where copyDepTask outputs it's dependencies")
 
   lazy val install = TaskKey[Unit]("install", "Builds bundles and adds them to the local repo")
   lazy val assemble = TaskKey[Unit]("assemble")
 
+  lazy val Assemble = Tags.Tag("Assemble")
+
   lazy val copyDependencies = TaskKey[Unit]("copy-dependencies")
 
-  def copyDepTask = copyDependencies <<= (update, version, crossTarget, scalaVersion) map {
-    (updateReport, version, out, scalaVer) =>
-      updateReport.allFiles filter {
-        file => file.getName.contains(version)
+  def copyDepTask = copyDependencies <<= (update, version, crossTarget, scalaVersion, outDir) map {
+    (updateReport, version, out, scalaVer, outDir) =>
+      println("copying dependencies")
+      updateReport.allFiles filter {f =>
+        println(f.getName)
+        true
       } foreach { srcPath =>
-        val destPath = out / "lib" / srcPath.getName
+        val destPath = out / outDir / srcPath.getName
         IO.copyFile(srcPath, destPath, preserveLastModified=true)
       }
     }
 
 
-  override lazy val settings = super.settings ++
+  override def settings = super.settings ++
     Seq(version := "0.8.0-SNAPSHOT",
       organization := "org.openmole",
       scalaVersion := "2.10.1",
       resolvers ++= Seq("openmole" at "http://maven.openmole.org/snapshots",
         "openmole-releases" at "http://maven.openmole.org/public"),
+      externalResolvers <<= resolvers map {rs =>
+        Resolver.withDefaultResolvers(Seq()) ++ rs
+      },
       publishArtifact in (packageDoc in install) := false,
-      copyDependencies := false
+      copyDependencies := false,
+      copyDependencies <<= copyDependencies tag (Assemble),
+      outDir := "lib",
+      concurrentRestrictions := Seq(Tags.exclusive(Assemble))
     )
 
 
@@ -46,9 +58,11 @@ trait Defaults extends Build {
                   pathFromDir: String = "",
                    buddyPolicy: Option[String] = None,
                    exports: Seq[String] = Seq(),
-                   privatePackages: Seq[String] = Seq())(implicit dir: File) = {
+                   privatePackages: Seq[String] = Seq())
+                 (implicit dir: File,
+                   org: Setting[String] = organization := "org.openmole") = {
 
-    val base = file(dir.getPath + "/" + (if(pathFromDir == "") artifactId else pathFromDir))
+    val base = dir / (if(pathFromDir == "") artifactId else pathFromDir)
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
     val additional = buddyPolicy.map(v => Map("Eclipse-BuddyPolicy" -> v)).getOrElse(Map()) ++ Map("Bundle-ActivationPolicy" -> "lazy")
 
@@ -56,15 +70,15 @@ trait Defaults extends Build {
     Project(artifactId.replace('.','-'),
       base,
       settings = Project.defaultSettings ++
-        SbtOsgi.defaultOsgiSettings ++
-        Seq(name := artifactId,
+        SbtOsgi.osgiSettings ++
+        Seq(name := artifactId, org,
           OsgiKeys.bundleSymbolicName <<= name,
           OsgiKeys.bundleVersion <<= version,
           OsgiKeys.exportPackage := exportedPackages,
           OsgiKeys.additionalHeaders := additional,
           OsgiKeys.privatePackage := privatePackages,
           install <<= publishLocal,
-          assemble <<= (install, copyDependencies) {(i,c) => i}))
+          assemble := false))
   }
 
   def OSGIProject(artifactId: String,
@@ -82,12 +96,14 @@ trait Defaults extends Build {
         OsgiKeys.additionalHeaders := additional,
         OsgiKeys.privatePackage := privatePackages,
         install <<= publishLocal,
-        assemble := println("hello world"),
-        assemble <<= assemble dependsOn (install, copyDependencies)
+        assemble := println("hello world")
       )
   }
 
-  def AssemblyProject(artifactId: String, location: File ) = {
+  def AssemblyProject(base: String, outputDir: String)(implicit dir: File) = {
+    val projBase = dir / base
+    Project(base, projBase, settings = Project.defaultSettings ++ Seq(copyDepTask,
+      assemble <<= copyDependencies tag (Assemble), install := true))
 
   }
 }
