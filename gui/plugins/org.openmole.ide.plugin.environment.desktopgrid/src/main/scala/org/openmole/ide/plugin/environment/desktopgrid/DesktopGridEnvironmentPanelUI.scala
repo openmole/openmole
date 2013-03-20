@@ -27,15 +27,18 @@ import org.openmole.ide.misc.widget.URL
 import scala.swing.Label
 import scala.swing.TabbedPane
 import scala.swing.TextField
+import java.awt.Dimension
 
 class DesktopGridEnvironmentPanelUI(pud: DesktopGridEnvironmentDataUI) extends PluginPanel("fillx,wrap 2", "[left][grow,fill]", "") with IEnvironmentPanelUI {
-  val loginTextField = new TextField(20)
-  val passTextField = new TextField(20)
+  val loginTextField = new TextField(15)
+  val passTextField = new TextField(15)
   val portTextField = new TextField(5)
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("wrap 2") {
+    minimumSize = new Dimension(300, 150)
+
     contents += (new Label("Login"), "gap para")
     contents += loginTextField
     contents += (new Label("Password"), "gap para")

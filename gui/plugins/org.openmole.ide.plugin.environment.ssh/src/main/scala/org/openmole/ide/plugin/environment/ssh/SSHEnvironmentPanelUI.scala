@@ -27,8 +27,9 @@ import org.openmole.ide.misc.widget.URL
 import scala.swing.Label
 import scala.swing.TabbedPane
 import scala.swing.TextField
+import java.awt.Dimension
 
-class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fillx,wrap 2", "", "") with IEnvironmentPanelUI {
+class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IEnvironmentPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
@@ -51,13 +52,14 @@ class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fill
 
   val loginTextField = new TextField(pud.login, 15)
   val hostTextField = new TextField(pud.host, 15)
-  val nbSlotTextField = new TextField(pud.nbSlots.toString, 3)
-  val portTextField = new TextField(pud.port.toString, 3)
+  val nbSlotTextField = new TextField(pud.nbSlots.toString, 15)
+  val portTextField = new TextField(pud.port.toString, 15)
   val dirTextField = new TextField(pud.dir, 15)
-  val openMOLEMemoryTextField = new TextField(pud.openMOLEMemory.getOrElse("").toString, 5)
-  val threadTextField = new TextField(pud.threads.getOrElse("").toString, 5)
+  val openMOLEMemoryTextField = new TextField(pud.openMOLEMemory.getOrElse("").toString, 15)
+  val threadTextField = new TextField(pud.threads.getOrElse("").toString, 15)
 
   tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("wrap 2") {
+    minimumSize = new Dimension(300, 200)
     contents += (new Label("Login"), "gap para")
     contents += loginTextField
 
