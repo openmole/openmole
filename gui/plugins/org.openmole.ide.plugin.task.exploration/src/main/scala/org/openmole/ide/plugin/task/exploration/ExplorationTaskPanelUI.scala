@@ -44,11 +44,10 @@ class ExplorationTaskPanelUI(pud: ExplorationTaskDataUI) extends PluginPanel("wr
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val samplingComboBox = new ComboBox(comboContent)
-
-  tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("wrap 2") {
+  val components = List(("Settings", new PluginPanel("wrap 2") {
     contents += new Label("Sampling")
     add(samplingComboBox, "gapbottom 40")
-  })
+  }))
 
   val linkLabel: LinkLabel = new LinkLabel("", contentAction(pud.sampling.getOrElse(emptyProxy))) {
     icon = EYE

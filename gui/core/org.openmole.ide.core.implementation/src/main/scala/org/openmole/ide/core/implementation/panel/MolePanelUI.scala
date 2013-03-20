@@ -36,6 +36,8 @@ class MolePanelUI(mdu: IMoleDataUI) extends PluginPanel("wrap") with IPanelUI {
     contents += new RadioButton(f) { selected = mdu.plugins.toList.contains(f) }
   }
 
+  val components = List()
+
   def saveContent(name: String) = new MoleDataUI(contents.flatMap { c ⇒
     c match {
       case x: RadioButton ⇒ List(x)

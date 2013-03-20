@@ -36,7 +36,7 @@ class SourcePanel(proxy: ISourceDataProxyUI,
   hookPanel ⇒
 
   val panelUI = proxy.dataUI.buildPanelUI
-  panelUI.tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", new Label))
+  tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", new Label))
 
   iconLabel.icon = new ImageIcon(ImageIO.read(this.getClass.getClassLoader.getResource("img/source.png")))
 
@@ -72,26 +72,27 @@ class SourcePanel(proxy: ISourceDataProxyUI,
   def updateProtoPanel = {
     save
     protoPanel = buildProtoPanel
-    panelUI.tabbedPane.pages(1).content = protoPanel
+    tabbedPane.pages(1).content = protoPanel
   }
 
   var protoPanel = buildProtoPanel
 
-  panelUI.tabbedPane.pages(1).content = protoPanel
-  panelUI.tabbedPane.revalidate
+  tabbedPane.pages(1).content = protoPanel
+  tabbedPane.revalidate
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
-    contents += panelUI.tabbedPane
+    contents += tabbedPane
     contents += panelUI.help
   }.peer, BorderLayout.CENTER)
 
   listenTo(panelUI.help.components.toSeq: _*)
-  listenTo(panelUI.tabbedPane.selection)
+  listenTo(tabbedPane.selection)
   reactions += {
     case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
-    case UpdatedPrototypeEvent(_) | SelectionChanged(panelUI.tabbedPane) ⇒
+    case SelectionChanged(tabbedPane) ⇒ updateProtoPanel
+    case UpdatedPrototypeEvent(_) ⇒
       scene.closeExtraPropertyPanel
       updateProtoPanel
     case _ ⇒

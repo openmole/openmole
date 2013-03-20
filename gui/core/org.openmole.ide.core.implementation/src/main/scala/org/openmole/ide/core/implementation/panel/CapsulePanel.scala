@@ -20,7 +20,7 @@ import org.openmole.ide.core.model.workflow.{ ICapsuleUI, IMoleScene }
 import org.openmole.ide.core.model.panel.PanelMode._
 import java.awt.BorderLayout
 import org.openmole.ide.misc.widget.PluginPanel
-import scala.swing.Label
+import swing.{ TabbedPane, Label }
 
 class CapsulePanel(scene: IMoleScene, capsule: ICapsuleUI, index: Int = 0) extends BasePanel(None, scene, EDIT) {
 
@@ -29,7 +29,7 @@ class CapsulePanel(scene: IMoleScene, capsule: ICapsuleUI, index: Int = 0) exten
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
     contents += new Label { text = "<html><b><font \"size=\"4\" >Capsule settings</font></b></html>" }
-    contents += panelUI.tabbedPane
+    contents += tabbedPane
     contents += panelUI.help
   }.peer, BorderLayout.CENTER)
 

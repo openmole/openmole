@@ -25,7 +25,6 @@ import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.URL
 import scala.swing.Label
-import scala.swing.TabbedPane
 import scala.swing.TextField
 import java.awt.Dimension
 
@@ -58,7 +57,7 @@ class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fill
   val openMOLEMemoryTextField = new TextField(pud.openMOLEMemory.getOrElse("").toString, 15)
   val threadTextField = new TextField(pud.threads.getOrElse("").toString, 15)
 
-  tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("wrap 2") {
+  val components = List(("Settings", new PluginPanel("wrap 2") {
     minimumSize = new Dimension(300, 200)
     contents += (new Label("Login"), "gap para")
     contents += loginTextField
@@ -74,15 +73,13 @@ class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fill
 
     contents += (new Label("Directory"), "gap para")
     contents += dirTextField
-  })
-
-  tabbedPane.pages += new TabbedPane.Page("Options", new PluginPanel("wrap 2") {
+  }), ("Options", new PluginPanel("wrap 2") {
     contents += (new Label("Runtime memory"), "gap para")
     contents += openMOLEMemoryTextField
 
     contents += (new Label("Threads"), "gap para")
     contents += threadTextField
-  })
+  }))
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     add(loginTextField,

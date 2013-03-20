@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.implementation.panel
 
-import java.awt.BorderLayout
+import java.awt.{ Dimension, BorderLayout }
 import javax.imageio.ImageIO
 import javax.swing.ImageIcon
 import org.openmole.ide.core.implementation.execution.ScenesManager
@@ -45,14 +45,7 @@ class TaskPanel(proxy: ITaskDataProxyUI,
   taskPanel ⇒
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.imagePath)))
 
-  val panelUI = proxy.dataUI.buildPanelUI
-  panelUI.tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", new Label))
-
-  panelUI.tabbedPane.selection.index = mode match {
-    case CREATION ⇒ 0
-    case IO ⇒ 0
-    case _ ⇒ 1
-  }
+  var panelUI = proxy.dataUI.buildPanelUI
 
   def buildProtoPanel = {
     val (implicitIP, implicitOP) = proxy.dataUI.implicitPrototypes
@@ -65,36 +58,60 @@ class TaskPanel(proxy: ITaskDataProxyUI,
       proxy.dataUI.inputParameters.toMap)
   }
 
+  def updatePanel = {
+    tabbedLock = true
+    save
+    panelUI = proxy.dataUI.buildPanelUI
+    refreshPanel
+    protoPanel = buildProtoPanel
+    tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", protoPanel))
+    tabbedPane.revalidate
+    tabbedPane.selection.index = 1
+    tabbedLock = false
+  }
+
   def updateProtoPanel = {
     save
     protoPanel = buildProtoPanel
-    panelUI.tabbedPane.pages(1).content = protoPanel
-    panelUI.tabbedPane.revalidate
+    tabbedPane.pages(1).content = protoPanel
+    tabbedPane.revalidate
   }
 
   var protoPanel = buildProtoPanel
 
-  panelUI.tabbedPane.pages(1).content = protoPanel
-  panelUI.tabbedPane.revalidate
+  refreshPanel
+
+  tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", new Label))
+
+  tabbedPane.selection.index = mode match {
+    case CREATION ⇒ 0
+    case IO ⇒ 0
+    case _ ⇒ 1
+  }
+  tabbedPane.pages(1).content = protoPanel
+  tabbedPane.revalidate
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
-    contents += panelUI.tabbedPane
+    contents += tabbedPane
     contents += panelUI.help
   }.peer, BorderLayout.CENTER)
 
   listenTo(panelUI.help.components.toSeq: _*)
-  listenTo(panelUI.tabbedPane.selection)
+  listenTo(tabbedPane.selection)
+  listenTo(panelUI)
 
   reactions += {
     case FocusGained(source: Component, _, _) ⇒
       panelUI.help.switchTo(source)
       scene.closeExtraPropertyPanel
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
-    case SelectionChanged(panelUI.tabbedPane) ⇒ updateProtoPanel
+    case SelectionChanged(tabbedPane) ⇒
+      if (!tabbedLock) updateProtoPanel
     case UpdatedPrototypeEvent(_) ⇒
+      println("catch event")
       scene.closeExtraPropertyPanel
-      updateProtoPanel
+      updatePanel
   }
 
   def create = {

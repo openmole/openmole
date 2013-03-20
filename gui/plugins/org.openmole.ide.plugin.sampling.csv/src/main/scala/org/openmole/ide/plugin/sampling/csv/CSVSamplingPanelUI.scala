@@ -17,10 +17,7 @@
 
 package org.openmole.ide.plugin.sampling.csv
 
-import scala.swing._
 import scala.swing.Label
-import swing.Swing._
-import swing.ListView._
 import au.com.bytecode.opencsv.CSVReader
 import java.io.File
 import java.io.FileReader
@@ -31,7 +28,6 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import java.util.Locale
 import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
-import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.misc.widget.CSVChooseFileTextField
 import org.openmole.ide.misc.widget.DialogClosedEvent
 import org.openmole.ide.misc.widget.Help
@@ -40,7 +36,6 @@ import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.URL
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos._
-import scala.swing.BorderPanel.Position._
 
 class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("wrap") with ISamplingPanelUI {
 

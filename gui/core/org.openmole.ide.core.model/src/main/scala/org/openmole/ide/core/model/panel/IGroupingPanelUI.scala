@@ -21,4 +21,5 @@ import org.openmole.ide.core.model.data.IGroupingDataUI
 
 trait IGroupingPanelUI extends IPanelUI {
   def saveContent: IGroupingDataUI
+  val components = List()
 }

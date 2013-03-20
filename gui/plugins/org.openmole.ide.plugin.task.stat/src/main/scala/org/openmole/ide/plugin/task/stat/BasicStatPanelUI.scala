@@ -31,8 +31,6 @@ import org.openmole.ide.misc.widget.multirow.MultiTwoCombos._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.swing.Label
-import scala.swing.TabbedPane
-import org.openmole.ide.core.model.data.ITaskDataUI
 
 abstract class BasicStatPanelUI(statType: String,
                                 dataUI: StatDataUI) extends PluginPanel("wrap 2") with ITaskPanelUI {
@@ -66,14 +64,16 @@ abstract class BasicStatPanelUI(statType: String,
         ADD))
     } else None
 
-  if (multiPrototypeCombo.isDefined)
-    tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("") {
-      add(multiPrototypeCombo.get.panel, "gap bottom 40")
-    })
-  else
-    tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("") {
-      add(new Label("At least 2 Prototypes (a Double and an array of Double have to be created first.)"), "gap bottom 40")
-    })
+  val components = {
+    if (multiPrototypeCombo.isDefined)
+      List(("Settings", new PluginPanel("") {
+        add(multiPrototypeCombo.get.panel, "gap bottom 40")
+      }))
+    else
+      List(("Settings", new PluginPanel("") {
+        add(new Label("At least 2 Prototypes (a Double and an array of Double have to be created first.)"), "gap bottom 40")
+      }))
+  }
 
   override val help = new Helper {
     multiPrototypeCombo match {

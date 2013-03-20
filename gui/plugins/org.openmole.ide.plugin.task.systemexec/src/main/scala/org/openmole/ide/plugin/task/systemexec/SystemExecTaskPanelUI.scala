@@ -19,20 +19,15 @@ package org.openmole.ide.plugin.task.systemexec
 import java.io.File
 import java.util.Locale
 import java.util.ResourceBundle
-import scala.swing.EditorPane
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.data.EmptyDataUIs.EmptyPrototypeDataUI
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget.multirow.MultiCombo._
-import org.openmole.ide.misc.widget.multirow.MultiComboTextField
 import org.openmole.ide.misc.widget.multirow.MultiComboTextField._
 import org.openmole.ide.misc.widget.URL
-import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField._
 import org.openmole.ide.misc.widget.BashEditor
 import org.openmole.ide.misc.widget.Help
@@ -45,7 +40,6 @@ import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.swing.FileChooser._
 import scala.swing._
-import swing.Swing._
 
 class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("") with ITaskPanelUI {
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
@@ -83,12 +77,12 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("") w
     preferredSize = new Dimension(40, 200)
   }
 
-  tabbedPane.pages += new TabbedPane.Page("Working directory", new PluginPanel("wrap") { contents += workdirTextField })
-  tabbedPane.pages += new TabbedPane.Page("Variables", variablesMultiCombo.panel)
-  tabbedPane.pages += new TabbedPane.Page("Commands", launchingCommandTextArea)
-  tabbedPane.pages += new TabbedPane.Page("Resources", resourcesMultiTextField.panel)
-  tabbedPane.pages += new TabbedPane.Page("Input mapping", inputMapMultiComboTextField.panel)
-  tabbedPane.pages += new TabbedPane.Page("Output mapping", outputMapMultiTextFieldCombo.panel)
+  val components = List(("Working directory", new PluginPanel("wrap") { contents += workdirTextField }),
+    ("Variables", variablesMultiCombo.panel),
+    ("Commands", launchingCommandTextArea),
+    ("Resources", resourcesMultiTextField.panel),
+    ("Input mapping", inputMapMultiComboTextField.panel),
+    ("Output mapping", outputMapMultiTextFieldCombo.panel))
 
   override def saveContent(name: String): ITaskDataUI =
     new SystemExecTaskDataUI(name,

@@ -34,6 +34,7 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget,
                       samplingPanel: SamplingPanel) extends PluginPanel("") with IPanelUI {
 
   val incomings = samplingWidget.incomings
+  val components = List()
 
   val samplings =
     KeyRegistry.samplings.values.map {

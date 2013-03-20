@@ -43,7 +43,7 @@ class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends PluginPanel("wrap"
   contents += new Label("<html><b>Files to be dumped</b></html>")
   contents += multiComboTextField.panel
 
-  tabbedPane.pages.insert(0, new TabbedPane.Page("Prototypes", this))
+  val components = List(("Prototypes", this))
 
   def comboContent = Proxys.classPrototypes(classOf[File]) filter {
     _.dataUI.dim == 0

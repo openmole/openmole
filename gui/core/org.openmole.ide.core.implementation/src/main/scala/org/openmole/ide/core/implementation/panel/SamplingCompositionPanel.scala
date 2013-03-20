@@ -43,6 +43,7 @@ class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
   val panelUI = proxy.dataUI.buildPanelUI
 
+  tabbedPane.preferredSize = new Dimension(0, 0)
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
     contents += new MainLinkLabel("New Prototype", new Action("") {
@@ -50,7 +51,7 @@ class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
         ConceptMenu.createAndDisplayExtraPrototype(sCPanel)
       }
     })
-    contents += panelUI.tabbedPane
+    contents += tabbedPane
     contents += panelUI.help
     panelUI match {
       case s: Scene ⇒ peer.add(new JScrollPane(s.createView) {

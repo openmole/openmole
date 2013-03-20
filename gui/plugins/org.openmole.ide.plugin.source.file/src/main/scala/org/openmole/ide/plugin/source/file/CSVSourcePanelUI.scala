@@ -19,9 +19,8 @@ package org.openmole.ide.plugin.source.file
 
 import org.openmole.ide.core.model.panel.ISourcePanelUI
 import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxys }
-import swing.{ TabbedPane, Label }
+import swing.Label
 import au.com.bytecode.opencsv.CSVReader
-import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.URL
 import org.openmole.ide.misc.widget.{ Help, DialogClosedEvent, CSVChooseFileTextField, PluginPanel }
@@ -50,7 +49,7 @@ class CSVSourcePanelUI(dataUI: CSVSourceDataUI) extends PluginPanel("wrap") with
   }
   readFile(dataUI.csvFilePath)
 
-  tabbedPane.pages.insert(0, new TabbedPane.Page("Settings", mainPanel))
+  val components = List(("Settings", mainPanel))
 
   listenTo(csvTextField)
   reactions += {
