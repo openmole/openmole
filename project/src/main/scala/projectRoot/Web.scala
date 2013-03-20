@@ -12,9 +12,10 @@ import Keys._
  */
 trait Web extends Libraries with Defaults {
   private implicit val dir = file("web")
+  private implicit val org = organization := "org.openmole.web"
   lazy val web = Project(id = "web", base = file("web")) aggregate(webCore)
 
-  lazy val webCore = OsgiProject("org.openole.web.core", "core",
+  lazy val webCore = OsgiProject("org.openmole.web.core", "core",
     exports = Seq("org.openmole.web"),
     buddyPolicy = Some("global")) settings(
       libraryDependencies <++= version {v => Seq(

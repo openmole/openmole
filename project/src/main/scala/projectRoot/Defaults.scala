@@ -5,6 +5,7 @@ import com.typesafe.sbt.osgi.SbtOsgi
 import scala.util.Random
 import sbt._
 import Keys._
+import util.matching.Regex
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,14 +25,15 @@ trait Defaults extends Build {
 
   lazy val copyDependencies = TaskKey[Unit]("copy-dependencies")
 
-  def copyDepTask = copyDependencies <<= (update, version, crossTarget, scalaVersion, outDir) map {
-    (updateReport, version, out, scalaVer, outDir) =>
+  lazy val dependencyMap = SettingKey[Map[Regex, String => String]]("dependencymap", "A map that is run against dependencies to be copied.")
+
+  def copyDepTask = copyDependencies <<= (update, version, crossTarget, scalaVersion, outDir, dependencyMap) map {
+    (updateReport, version, out, scalaVer, outDir, depMap) =>
       println("copying dependencies")
-      updateReport.allFiles filter {f =>
-        println(f.getName)
-        true
-      } foreach { srcPath =>
-        val destPath = out / outDir / srcPath.getName
+      updateReport.allFiles map {f =>
+        depMap.keys.find(_.findFirstIn(f.getName).isDefined).map(depMap(_)).getOrElse{a: String => a} -> f
+      } foreach { case(lambda, srcPath) =>
+        val destPath = out / outDir / lambda(srcPath.getName)
         IO.copyFile(srcPath, destPath, preserveLastModified=true)
       }
     }
@@ -50,6 +52,7 @@ trait Defaults extends Build {
       copyDependencies := false,
       copyDependencies <<= copyDependencies tag (Assemble),
       outDir := "lib",
+      dependencyMap := Map.empty[Regex, String => String],
       concurrentRestrictions := Seq(Tags.exclusive(Assemble))
     )
 
@@ -58,7 +61,8 @@ trait Defaults extends Build {
                   pathFromDir: String = "",
                    buddyPolicy: Option[String] = None,
                    exports: Seq[String] = Seq(),
-                   privatePackages: Seq[String] = Seq())
+                   privatePackages: Seq[String] = Seq(),
+                   singleton: Boolean = false)
                  (implicit dir: File,
                    org: Setting[String] = organization := "org.openmole") = {
 
@@ -72,7 +76,7 @@ trait Defaults extends Build {
       settings = Project.defaultSettings ++
         SbtOsgi.osgiSettings ++
         Seq(name := artifactId, org,
-          OsgiKeys.bundleSymbolicName <<= name,
+          OsgiKeys.bundleSymbolicName <<= (name) {n => n + ";singleton:=" + singleton},
           OsgiKeys.bundleVersion <<= version,
           OsgiKeys.exportPackage := exportedPackages,
           OsgiKeys.additionalHeaders := additional,
@@ -100,10 +104,14 @@ trait Defaults extends Build {
       )
   }
 
-  def AssemblyProject(base: String, outputDir: String)(implicit dir: File) = {
+  def AssemblyProject(base: String, outputDir: String, depMap: Map[Regex, String => String] = Map.empty[Regex, String => String])
+                     (implicit dir: File) = {
     val projBase = dir / base
     Project(base, projBase, settings = Project.defaultSettings ++ Seq(copyDepTask,
-      assemble <<= copyDependencies tag (Assemble), install := true))
+      assemble <<= copyDependencies tag (Assemble),
+      install := true,
+      dependencyMap := depMap
+    ))
 
   }
 }
