@@ -109,7 +109,6 @@ class TaskPanel(proxy: ITaskDataProxyUI,
     case SelectionChanged(tabbedPane) ⇒
       if (!tabbedLock) updateProtoPanel
     case UpdatedPrototypeEvent(_) ⇒
-      println("catch event")
       scene.closeExtraPropertyPanel
       updatePanel
   }

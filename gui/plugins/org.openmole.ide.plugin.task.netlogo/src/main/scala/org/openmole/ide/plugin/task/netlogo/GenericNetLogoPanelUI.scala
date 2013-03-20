@@ -72,9 +72,7 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
   reactions += {
     case DialogClosedEvent(nlogoTextField) ⇒
       globals = List()
-      println("emit event")
       publish(new UpdatedPrototypeEvent(this))
-    // buildMultis(nlogoTextField.text)
   }
 
   val (inputMapping, outputMapping) = buildMultis(nlogoPath)
@@ -107,7 +105,6 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
           }
         }
       }
-      println("globals :: " + globals)
       if (!globals.isEmpty && !comboContent.isEmpty) {
         multiStringProto = Some(new MultiTwoCombos[String, IPrototypeDataProxyUI](
           "",
