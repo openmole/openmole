@@ -54,14 +54,12 @@ object MultiComboLinkLabelGroovyTextFieldEditor {
       case SelectionChanged(`comboBox`) ⇒
         val tuple = comboTuple
         linkLabel.action = tuple._3
-        if (contents.size > 0) {
-          contents(0) match {
-            case x: PrototypeGroovyTextFieldEditor ⇒
-              contents.remove(2)
-              textField = new PrototypeGroovyTextFieldEditor("Default value", tuple._2, "")
-              contents.insert(2, textField)
-            case _ ⇒
-          }
+        contents(2) match {
+          case x: PrototypeGroovyTextFieldEditor ⇒
+            contents.remove(2)
+            textField = new PrototypeGroovyTextFieldEditor("Default value", tuple._2, "")
+            contents.insert(2, textField)
+          case _ ⇒
         }
     }
 

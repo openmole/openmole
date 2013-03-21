@@ -27,20 +27,21 @@ import org.openmole.ide.misc.tools.check.TypeCheck
 class PrototypeGroovyTextFieldEditor(val editorTitle: String,
                                      prototype: Prototype[_],
                                      var editorText: String = "") extends LinkLabel("", new Action("") { def apply = {} }) {
-  setIcon(editorText)
+  setIcon
   cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
   action = new Action("") {
     def apply = {
       editorText = DialogFactory.groovyEditor(editorTitle, editorText)
-      setIcon(editorText)
+      setIcon
     }
   }
 
-  private def setIcon(code: String) = {
-    icon = code.isEmpty match {
-      case true ⇒ EDIT_EMPTY
+  private def setIcon = {
+    icon = editorText.isEmpty match {
+      case true ⇒
+        EDIT_EMPTY
       case false ⇒
-        val (msg, obj) = TypeCheck.apply(code, prototype)
+        val (msg, obj) = TypeCheck.apply(editorText, prototype)
         tooltip = msg
         obj match {
           case Some(x) ⇒ EDIT
