@@ -17,10 +17,11 @@
 
 package org.openmole.ide.plugin.domain.range
 
-import org.openmole.plugin.domain.range.DoubleLogarithmRange
+import org.openmole.plugin.domain.range._
 import org.openmole.core.model.domain.Domain
 import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.ide.misc.tools.util.Types._
+import org.openmole.misc.tools.io.FromString._
 import org.openmole.misc.exception.UserBadDataError
 
 class DoubleLogarithmRangeDataUI(val min: String = "0.0",
@@ -34,7 +35,7 @@ class DoubleLogarithmRangeDataUI(val min: String = "0.0",
   def coreObject: Domain[Double] =
     if (min.isEmpty || max.isEmpty || !step.isDefined)
       throw new UserBadDataError("Min, Max ant Step values are required for defining a Logarithm Range Domain")
-    else new DoubleLogarithmRange(min, max, step.get)
+    else new LogRange[Double](min, max, step.get)
 
   def coreClass = classOf[DoubleLogarithmRangeDataUI]
 
