@@ -23,9 +23,14 @@ import org.openmole.core.implementation.tools._
 import org.openmole.misc.tools.io.FromString
 import org.openmole.misc.tools.script.GroovyProxy
 
-sealed class LogRange[T](val min: String, val max: String, val nbStep: String)(implicit integral: Integral[T], fs: FromString[T], lg: Log[T]) extends Domain[T] with Finite[T] with Bounds[T] {
+object LogRange {
 
-  //def this(min: Double, max: Double, nbStep: Int) = this(min.toString, max.toString, nbStep.toString)
+  def apply[T](min: String, max: String, nbStep: String)(implicit integral: Integral[T], fs: FromString[T], lg: Log[T]) =
+    new LogRange[T](min, max, nbStep)
+
+}
+
+sealed class LogRange[T](val min: String, val max: String, val nbStep: String)(implicit integral: Integral[T], fs: FromString[T], lg: Log[T]) extends Domain[T] with Finite[T] with Bounds[T] {
 
   override def computeValues(context: Context): Iterable[T] = {
     val mi: T = lg.log(min(context))
