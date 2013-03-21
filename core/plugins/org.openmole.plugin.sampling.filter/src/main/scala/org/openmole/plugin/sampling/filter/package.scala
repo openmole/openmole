@@ -23,7 +23,7 @@ package object filter {
 
   implicit def stringToGroovyFilterConversion(s: String) = new GroovyFilter(s)
   implicit def filterSamplingDecorator(s: Sampling) = new {
-    def filter(filters: Filter*) = new FiltredSampling(s, filters: _*)
+    def filter(filters: Filter*) = new FilteredSampling(s, filters: _*)
   }
 
 }
