@@ -42,7 +42,7 @@ object MultiComboLinkLabelGroovyTextFieldEditor {
       }
     }
 
-    var textField = new PrototypeGroovyTextFieldEditor("Default value", data.prototype, data.editorValue)
+    var textField = new PrototypeGroovyTextFieldEditor("Value for " + data.prototype.name, data.prototype, data.editorValue)
     val linkLabel = new LinkLabel("", comboTuple._3) { icon = image }
 
     contents += comboBox

@@ -24,14 +24,14 @@ import scala.swing.Action
 import org.openmole.core.model.data._
 import org.openmole.ide.misc.tools.check.TypeCheck
 
-class PrototypeGroovyTextFieldEditor(val title: String,
+class PrototypeGroovyTextFieldEditor(val editorTitle: String,
                                      prototype: Prototype[_],
                                      var editorText: String = "") extends LinkLabel("", new Action("") { def apply = {} }) {
   setIcon(editorText)
   cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
   action = new Action("") {
     def apply = {
-      editorText = DialogFactory.groovyEditor(title, editorText)
+      editorText = DialogFactory.groovyEditor(editorTitle, editorText)
       setIcon(editorText)
     }
   }
