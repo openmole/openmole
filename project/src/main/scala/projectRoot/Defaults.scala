@@ -2,7 +2,7 @@ package projectRoot
 
 import com.typesafe.sbt.osgi.OsgiKeys
 import com.typesafe.sbt.osgi.SbtOsgi
-import scala.util.Random
+
 import sbt._
 import Keys._
 import util.matching.Regex
@@ -25,10 +25,28 @@ trait Defaults extends Build {
 
   lazy val copyDependencies = TaskKey[Unit]("copy-dependencies")
 
-  lazy val dependencyMap = SettingKey[Map[Regex, String => String]]("dependencymap", "A map that is run against dependencies to be copied.")
+  lazy val resourceAssemble = TaskKey[Unit]("resource-assemble")
 
-  def copyDepTask = copyDependencies <<= (update, version, crossTarget, scalaVersion, outDir, dependencyMap) map {
-    (updateReport, version, out, scalaVer, outDir, depMap) =>
+  lazy val ignoreTransitive = SettingKey[Boolean]("ignoreTransitive")
+
+  lazy val dependencyFilter = SettingKey[Regex]("Tells copyDependencies to ignore certain ones.")
+
+  lazy val dependencyNameMap = SettingKey[Map[Regex, String => String]]("dependencymap", "A map that is run against dependencies to be copied.")
+
+  def copyResTask = resourceAssemble <<= (resourceDirectory, outDir, crossTarget) map { //TODO: Find a natural way to do this
+    (rT, outD, cT) => {
+      val destPath = cT / outD
+      IO.copyDirectory(rT,destPath,preserveLastModified = true)
+    }
+  }
+
+  def copyDepTask = copyDependencies <<= (update,
+    version,
+    crossTarget,
+    scalaVersion,
+    outDir,
+    dependencyNameMap, ignoreTransitive) map {
+    (updateReport, version, out, scalaVer, outDir, depMap, ignoreTrans) =>
       println("copying dependencies")
       updateReport.allFiles map {f =>
         depMap.keys.find(_.findFirstIn(f.getName).isDefined).map(depMap(_)).getOrElse{a: String => a} -> f
@@ -52,7 +70,7 @@ trait Defaults extends Build {
       copyDependencies := false,
       copyDependencies <<= copyDependencies tag (Assemble),
       outDir := "lib",
-      dependencyMap := Map.empty[Regex, String => String],
+      dependencyNameMap := Map.empty[Regex, String => String],
       concurrentRestrictions := Seq(Tags.exclusive(Assemble))
     )
 
@@ -104,14 +122,17 @@ trait Defaults extends Build {
       )
   }
 
-  def AssemblyProject(base: String, outputDir: String, depMap: Map[Regex, String => String] = Map.empty[Regex, String => String])
+  def AssemblyProject(base: String,
+                      outputDir: String = "lib",
+                      depNameMap: Map[Regex, String => String] = Map.empty[Regex, String => String])
                      (implicit dir: File) = {
     val projBase = dir / base
-    Project(base, projBase, settings = Project.defaultSettings ++ Seq(copyDepTask,
+    Project(base + "-"+ outputDir, projBase, settings = Project.defaultSettings ++ Seq(copyDepTask,
       assemble <<= copyDependencies tag (Assemble),
       install := true,
-      dependencyMap := depMap
+      ignoreTransitive := false,
+      outDir := outputDir,
+      dependencyNameMap := depNameMap
     ))
-
   }
 }

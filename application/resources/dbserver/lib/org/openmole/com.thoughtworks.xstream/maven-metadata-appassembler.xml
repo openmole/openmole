@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.openmole</groupId>
+  <artifactId>com.thoughtworks.xstream</artifactId>
+  <versioning>
+    <versions>
+      <version>0.8.0-SNAPSHOT</version>
+    </versions>
+    <lastUpdated>20130320181344</lastUpdated>
+  </versioning>
+</metadata>
