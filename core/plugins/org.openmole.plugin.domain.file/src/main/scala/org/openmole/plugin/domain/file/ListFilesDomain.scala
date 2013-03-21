@@ -25,7 +25,15 @@ import org.openmole.misc.tools.service.Logger
 import scala.collection.JavaConversions._
 import org.openmole.misc.tools.io.FileUtil._
 
-object ListFilesDomain extends Logger
+object ListFilesDomain extends Logger {
+
+  def apply(
+    base: File,
+    subdirectory: String = "",
+    recursive: Boolean = false,
+    filter: File ⇒ Boolean = f ⇒ true) = new ListFilesDomain(base, subdirectory, recursive, filter)
+
+}
 
 sealed class ListFilesDomain(
     base: File,
