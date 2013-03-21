@@ -20,6 +20,13 @@ package org.openmole.plugin.domain.modifier
 import org.openmole.core.model.domain._
 import org.openmole.core.model.data._
 
+object SortDomain {
+
+  def apply[T](domain: Domain[T] with Finite[T])(implicit ord: Ordering[T]) =
+    new SortDomain[T](domain)
+
+}
+
 class SortDomain[T](val domain: Domain[T] with Finite[T])(implicit ord: Ordering[T]) extends Domain[T] with Finite[T] {
 
   override def computeValues(context: Context): Iterable[T] =

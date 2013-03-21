@@ -22,6 +22,10 @@ import org.openmole.core.model.domain._
 import org.openmole.core.model.data._
 import org.openmole.misc.exception._
 
+object SortByNameDomain {
+  def apply(domain: Domain[File] with Finite[File]) = new SortByNameDomain(domain)
+}
+
 class SortByNameDomain(val domain: Domain[File] with Finite[File]) extends Domain[File] with Finite[File] {
 
   override def computeValues(context: Context): Iterable[File] = {
