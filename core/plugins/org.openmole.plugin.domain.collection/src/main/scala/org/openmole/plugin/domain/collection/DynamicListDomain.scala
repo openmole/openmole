@@ -24,10 +24,14 @@ import org.openmole.core.model.domain._
 import scala.collection.JavaConversions
 import scala.collection.mutable.ListBuffer
 import org.openmole.misc.tools.io.FromString
+import org.openmole.misc.tools.script.GroovyProxyPool
+import org.openmole.core.implementation.tools._
 
 sealed class DynamicListDomain[+T](val values: String*)(implicit s: FromString[T]) extends Domain[T] with Finite[T] {
 
+  @transient lazy val proxies = values.map { v ⇒ GroovyProxyPool(v) }
+
   override def computeValues(context: Context): Iterable[T] =
-    values.map { p ⇒ s.fromString(VariableExpansion(context, p)) }
+    proxies.map { p ⇒ s.fromString(p.execute(context).toString) }
 
 }
