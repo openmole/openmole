@@ -27,6 +27,13 @@ import org.openmole.misc.tools.io.FromString
 import org.openmole.misc.tools.script.GroovyProxyPool
 import org.openmole.core.implementation.tools._
 
+object DynamicListDomain {
+
+  def apply[T](values: String*)(implicit s: FromString[T]) =
+    new DynamicListDomain[T](values: _*)
+
+}
+
 sealed class DynamicListDomain[+T](val values: String*)(implicit s: FromString[T]) extends Domain[T] with Finite[T] {
 
   @transient lazy val proxies = values.map { v ⇒ GroovyProxyPool(v) }
