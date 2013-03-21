@@ -20,6 +20,13 @@ package org.openmole.plugin.sampling.combine
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 
+object TakeSampling {
+
+  def apply(sampling: Sampling, n: Int) =
+    new TakeSampling(sampling, n)
+
+}
+
 sealed class TakeSampling(val sampling: Sampling, val n: Int) extends Sampling {
 
   override def inputs = sampling.inputs

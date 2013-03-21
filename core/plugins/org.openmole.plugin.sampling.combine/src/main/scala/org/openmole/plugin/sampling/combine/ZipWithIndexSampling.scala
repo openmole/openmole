@@ -20,13 +20,20 @@ package org.openmole.plugin.sampling.combine
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 
-sealed class ZipWithIndexSampling(val reference: Sampling, val index: Prototype[Int]) extends Sampling {
+object ZipWithIndexSampling {
 
-  override def inputs = reference.inputs
-  override def prototypes = index :: reference.prototypes.toList
+  def apply(sampling: Sampling, index: Prototype[Int]) =
+    new ZipWithIndexSampling(sampling, index)
+
+}
+
+sealed class ZipWithIndexSampling(val sampling: Sampling, val index: Prototype[Int]) extends Sampling {
+
+  override def inputs = sampling.inputs
+  override def prototypes = index :: sampling.prototypes.toList
 
   override def build(context: Context): Iterator[Iterable[Variable[_]]] =
-    reference.build(context).zipWithIndex.map {
+    sampling.build(context).zipWithIndex.map {
       case (line, i) ⇒ line ++ List(Variable(index, i))
     }
 
