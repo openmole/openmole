@@ -22,6 +22,13 @@ import org.openmole.core.model.data._
 import org.openmole.core.implementation.tools.VariableExpansion._
 import org.openmole.misc.tools.io.FromString
 
+object Bounded {
+
+  def apply[T](min: String, max: String)(implicit fromString: FromString[T]) =
+    new Bounded[T](min, max)
+
+}
+
 sealed class Bounded[T](val min: String, val max: String)(implicit fromString: FromString[T]) extends Domain[T] with Bounds[T] {
   def min(context: Context) = fromString.fromString(min.expand(context))
   def max(context: Context) = fromString.fromString(max.expand(context))
