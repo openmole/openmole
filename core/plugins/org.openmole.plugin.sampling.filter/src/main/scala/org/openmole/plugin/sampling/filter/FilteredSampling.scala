@@ -20,7 +20,14 @@ package org.openmole.plugin.sampling.filter
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 
-sealed class FiltredSampling(sampling: Sampling, filters: Filter*) extends Sampling {
+object FilteredSampling {
+
+  def apply(sampling: Sampling, filters: Filter*) =
+    new FilteredSampling(sampling, filters: _*)
+
+}
+
+sealed class FilteredSampling(sampling: Sampling, filters: Filter*) extends Sampling {
 
   override def inputs = sampling.inputs
   override def prototypes = sampling.prototypes

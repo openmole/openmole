@@ -22,6 +22,13 @@ import org.openmole.core.model.domain._
 import collection.JavaConversions._
 import org.openmole.misc.tools.obj.ClassUtils._
 
+object GroupDomain {
+
+  def apply[T](domain: Domain[T] with Discrete[T], size: Int)(implicit m: Manifest[T]) =
+    new GroupDomain(domain, size)
+
+}
+
 sealed class GroupDomain[T](val domain: Domain[T] with Discrete[T], val size: Int)(implicit m: Manifest[T]) extends Domain[Array[T]] with Discrete[Array[T]] {
 
   override def iterator(context: Context): Iterator[Array[T]] =

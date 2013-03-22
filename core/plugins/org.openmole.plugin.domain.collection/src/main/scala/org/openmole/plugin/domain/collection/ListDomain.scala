@@ -20,6 +20,12 @@ package org.openmole.plugin.domain.collection
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 
+object ListDomain {
+
+  def apply[T](values: T*) = new ListDomain[T](values: _*)
+
+}
+
 sealed class ListDomain[T](values: T*) extends Domain[T] with Finite[T] {
   override def computeValues(context: Context): Iterable[T] = values
 }

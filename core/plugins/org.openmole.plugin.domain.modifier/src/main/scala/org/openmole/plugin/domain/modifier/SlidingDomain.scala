@@ -20,6 +20,13 @@ package org.openmole.plugin.domain.modifier
 import org.openmole.core.model.domain._
 import org.openmole.core.model.data._
 
+object SlidingDomain {
+
+  def apply[T](domain: Domain[T] with Discrete[T], size: Int, step: Int = 1)(implicit m: Manifest[T]) =
+    new SlidingDomain[T](domain, size, step)
+
+}
+
 class SlidingDomain[T](val domain: Domain[T] with Discrete[T], val size: Int, val step: Int = 1)(implicit m: Manifest[T]) extends Domain[Array[T]] with Discrete[Array[T]] {
 
   override def iterator(context: Context): Iterator[Array[T]] =

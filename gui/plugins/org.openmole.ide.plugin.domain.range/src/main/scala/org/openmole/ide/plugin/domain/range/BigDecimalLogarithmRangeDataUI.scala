@@ -19,11 +19,12 @@ package org.openmole.ide.plugin.domain.range
 
 import java.math.BigDecimal
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.plugin.domain.range.BigDecimalLogarithmRange
+import org.openmole.plugin.domain.range._
 import org.openmole.core.model.domain.Domain
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
 import org.openmole.ide.misc.tools.util.Types._
+import org.openmole.misc.tools.io.FromString._
 import org.openmole.misc.exception.UserBadDataError
 
 case class BigDecimalLogarithmRangeDataUI(val min: String = "0.0",
@@ -37,7 +38,7 @@ case class BigDecimalLogarithmRangeDataUI(val min: String = "0.0",
   def coreObject: Domain[BigDecimal] =
     if (min.isEmpty || max.isEmpty || !step.isDefined)
       throw new UserBadDataError("Min, Max ant Step values are required for defining a Logarithm Range Domain")
-    else new BigDecimalLogarithmRange(min, max, stepString)
+    else new LogRange[BigDecimal](min, max, stepString)
 
   def coreClass = classOf[BigDecimalLogarithmRangeDataUI]
 

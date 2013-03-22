@@ -44,8 +44,9 @@ object PBSEnvironment {
     path: Option[String] = None,
     threads: Option[Int] = None,
     nodes: Option[Int] = None,
-    coreByNode: Option[Int] = None) =
-    new PBSEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, path, threads, nodes, coreByNode)
+    coreByNode: Option[Int] = None,
+    workDirectory: Option[String] = None) =
+    new PBSEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, path, threads, nodes, coreByNode, workDirectory)
 }
 
 import PBSEnvironment._
@@ -61,7 +62,8 @@ class PBSEnvironment(
     val path: Option[String],
     override val threads: Option[Int],
     val nodes: Option[Int],
-    val coreByNode: Option[Int]) extends BatchEnvironment with SSHAccess with MemoryRequirement { env ⇒
+    val coreByNode: Option[Int],
+    val workDirectory: Option[String]) extends BatchEnvironment with SSHAccess with MemoryRequirement { env ⇒
 
   type SS = PersistentStorageService
   type JS = PBSJobService

@@ -24,6 +24,13 @@ import org.openmole.core.model.domain._
 import org.openmole.core.model.sampling._
 import scala.collection.mutable.ListBuffer
 
+object ZipSampling {
+
+  def apply(samplings: Sampling*) =
+    new ZipSampling(samplings: _*)
+
+}
+
 sealed class ZipSampling(val samplings: Sampling*) extends Sampling {
 
   override def inputs = DataSet(samplings.flatMap(_.inputs))

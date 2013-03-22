@@ -20,6 +20,13 @@ package org.openmole.plugin.domain.relative
 import org.openmole.core.model.data.Context
 import org.openmole.core.implementation.tools._
 
+object IntRelative {
+
+  def apply(nominal: String, percent: String, size: String) =
+    new IntRelative(nominal, percent, size)
+
+}
+
 sealed class IntRelative(val nominal: String, val percent: String, val size: String) extends Relative[Int] {
 
   override def computeValues(context: Context): Iterable[Int] = {

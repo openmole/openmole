@@ -92,7 +92,7 @@ class Activator extends OSGiActivator with SamplingActivator {
         sampling match {
           case cs: ZipWithIndexSampling ⇒
             val proxy = new SamplingProxyUI(new ZipWithIndexSamplingDataUI(KeyRegistry.protoProxyKeyMap.get(KeyPrototypeGenerator(cs.index))))
-            (proxy, Builder.buildConnectedSamplings(proxy, Seq(cs.reference), bSC))
+            (proxy, Builder.buildConnectedSamplings(proxy, Seq(cs.sampling), bSC))
           case _ ⇒ (new SamplingProxyUI(buildDataUI), bSC)
         }
     }, new ISamplingFactoryUI {
