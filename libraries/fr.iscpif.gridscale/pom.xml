@@ -32,5 +32,10 @@
       <version>${lib.fr.iscpif.gridscale.version}</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.openmole</groupId>
+      <artifactId>org.slf4j</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 </project>
