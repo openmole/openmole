@@ -149,7 +149,7 @@ trait Application extends Web with Libraries {
   lazy val openmoleGuiPlugins = AssemblyProject("package", "assembly/openmole-plugins-gui") settings (openmoleGuiPluginDependencies,
     dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
 
-  lazy val openmoleResources = AssemblyProject("package", "") settings
+  lazy val openmoleResources = AssemblyProject("package", "assembly") settings
     (resourceDirectory := file("application/resources"), copyResTask, assemble <<= assemble dependsOn (resourceAssemble),
       dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
 
