@@ -36,7 +36,7 @@ class DesktopGridEnvironmentPanelUI(pud: DesktopGridEnvironmentDataUI) extends P
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
-  tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("wrap 2") {
+  val components = List(("Settings", new PluginPanel("wrap 2") {
     minimumSize = new Dimension(300, 150)
 
     contents += (new Label("Login"), "gap para")
@@ -45,7 +45,7 @@ class DesktopGridEnvironmentPanelUI(pud: DesktopGridEnvironmentDataUI) extends P
     contents += passTextField
     contents += (new Label("Port"), "gap para")
     contents += portTextField
-  })
+  }))
 
   loginTextField.text = pud.login
   passTextField.text = pud.pass

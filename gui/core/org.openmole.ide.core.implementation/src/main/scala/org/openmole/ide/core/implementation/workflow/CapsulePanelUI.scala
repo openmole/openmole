@@ -67,9 +67,7 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI, index: Int = 0) extends PluginPanel
   groupingPanel.visible = dataUI.grouping.isDefined
   groupingCheckBox.selected = dataUI.grouping.isDefined
 
-  tabbedPane.pages += new TabbedPane.Page("Source", sourcePanel.panel)
-  tabbedPane.pages += new TabbedPane.Page("Hook", hookPanel.panel)
-  tabbedPane.pages += new TabbedPane.Page("Execution", new PluginPanel("wrap") {
+  val executionPanel = new PluginPanel("wrap") {
     contents += new PluginPanel("wrap 3") {
       contents += new Label("Environment") { foreground = Color.WHITE }
       contents += environmentCombo
@@ -84,8 +82,14 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI, index: Int = 0) extends PluginPanel
       contents += groupingCheckBox
       contents += groupingPanel
     }
-  })
-  tabbedPane.selection.index = index
+  }
+
+  val components = List(("Source", sourcePanel.panel), ("Hook", hookPanel.panel), ("Execution", executionPanel))
+
+  /* tabbedPane.pages += new TabbedPane.Page("Source", sourcePanel.panel)
+  tabbedPane.pages += new TabbedPane.Page("Hook", hookPanel.panel)
+  tabbedPane.pages += new TabbedPane.Page("Execution", )
+  tabbedPane.selection.index = index  */
 
   listenTo(`groupingCheckBox`)
   reactions += {

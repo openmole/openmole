@@ -28,7 +28,6 @@ import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.workflow.MoleSceneManager
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.tools.util._
-import scala.swing.TabbedPane
 import scala.swing.event.SelectionChanged
 import scala.swing.Label
 import scala.swing.MyComboBox
@@ -58,12 +57,12 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2", "
 
   capsuleComboBox.selection.item = pud.finalCapsule.getOrElse(EmptyDataUIs.emptyTaskProxy)
 
-  tabbedPane.pages += new TabbedPane.Page("Settings", new PluginPanel("wrap 2") {
+  val components = List(("Settings", new PluginPanel("wrap 2") {
     contents += (new Label("Embedded mole"), "gap para")
     contents += moleComboBox
     contents += (new Label("Final capsule"), "gap para")
     contents += capsuleComboBox
-  })
+  }))
 
   listenTo(moleComboBox.selection)
   reactions += {

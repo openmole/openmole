@@ -32,7 +32,7 @@ class AppendToCSVFileHookPanelUI(dataUI: AppendToCSVFileHookDataUI) extends Mult
   contents.insert(0, new Label("CSV file path"))
   contents.insert(0, new Label { text = "<html><b>Append prototypes to file</b></html>" })
 
-  tabbedPane.pages.insert(0, new TabbedPane.Page("Prototypes", this))
+  val components = List(("Prototypes", this))
 
   def saveContent(name: String) = new AppendToCSVFileHookDataUI(name,
     multiPrototypeCombo.content.map { _.comboValue.get }.toList,

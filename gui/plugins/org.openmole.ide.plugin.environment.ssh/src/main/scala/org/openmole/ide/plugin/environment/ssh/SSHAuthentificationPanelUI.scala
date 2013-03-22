@@ -31,13 +31,11 @@ import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow._
 import org.openmole.misc.workspace.Workspace
 import scala.swing.Action
-import scala.swing.FileChooser.SelectionMode._
 import scala.swing.Label
 import scala.swing.MyComboBox
 import scala.swing.Panel
 import scala.swing.PasswordField
 import scala.swing.TextField
-import scala.swing.event.Key._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import scala.swing.event.SelectionChanged
@@ -168,6 +166,7 @@ object SSHAuthentificationPanelUI {
 import SSHAuthentificationPanelUI._
 class SSHAuthentificationPanelUI extends PluginPanel("") with IAuthentificationPanelUI {
 
+  override val components = List()
   val panelList =
     Workspace.persistentList(classOf[SSHAuthentication]).map { hm ⇒
       hm match {

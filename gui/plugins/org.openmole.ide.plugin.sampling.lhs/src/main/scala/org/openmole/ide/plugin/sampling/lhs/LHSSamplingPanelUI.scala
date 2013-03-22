@@ -18,22 +18,14 @@
 package org.openmole.ide.plugin.sampling.lhs
 
 import scala.swing._
-import swing.Swing._
-import swing.ListView._
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.implementation.data._
-import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.registry.KeyRegistry
-import org.openmole.ide.core.model.dataproxy._
-import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.panel._
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
-import scala.swing.BorderPanel.Position._
 import org.openmole.ide.misc.widget.URL
-import scala.collection.JavaConversions._
 
 class LHSSamplingPanelUI(cud: LHSSamplingDataUI) extends PluginPanel("wrap 2", "", "") with ISamplingPanelUI {
 

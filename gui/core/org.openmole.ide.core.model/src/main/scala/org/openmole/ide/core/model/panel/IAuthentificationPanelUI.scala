@@ -19,4 +19,5 @@ package org.openmole.ide.core.model.panel
 
 trait IAuthentificationPanelUI extends IPanelUI {
   def saveContent
+  val components = List()
 }

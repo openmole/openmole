@@ -21,4 +21,5 @@ import org.openmole.ide.core.model.data.IDomainDataUI
 
 trait IDomainPanelUI extends IPanelUI {
   def saveContent: IDomainDataUI
+  val components = List()
 }

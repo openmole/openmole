@@ -46,10 +46,12 @@ class EnvironmentPanel(proxy: IEnvironmentDataProxyUI,
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
   }
 
+  refreshPanel
+
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
-    if (panelUI.tabbedPane.pages.size == 0) contents += panelUI.peer
-    else contents += panelUI.tabbedPane
+    if (tabbedPane.pages.size == 0) contents += panelUI.peer
+    else contents += tabbedPane
     contents += panelUI.help
   }.peer, BorderLayout.CENTER)
 

@@ -26,17 +26,16 @@ import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.widget._
-import scala.swing.Action
-import scala.swing.Component
-import scala.swing.Label
+import swing._
+import event.UIElementResized
 import scala.swing.event.ActionEvent
 import scala.swing.event.UIElementResized
-import scala.swing.Publisher
-import scala.swing.TextField
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.tools.image.Images._
+import scala.Some
+import org.openmole.ide.core.implementation.prototype.UpdatedPrototypeEvent
 
 object BasePanel {
   case class IconChanged(s: Component, imagePath: String) extends ActionEvent(s)
@@ -47,6 +46,8 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
                          val mode: Value) extends MyPanel with IBasePanel {
 
   opaque = true
+  var tabbedLock = false
+
   peer.setLayout(new BorderLayout)
   val iconLabel = new Label { icon = new ImageIcon(EMPTY) }
 
@@ -86,6 +87,13 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
     }
   }
 
+  val tabbedPane = new TabbedPane {
+    preferredSize = new Dimension(200, 100)
+    tabPlacement = Alignment.Left
+    opaque = true
+    background = new Color(77, 77, 77)
+  }
+
   preferredSize.width = 300
   foreground = Color.white
 
@@ -98,6 +106,13 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
   }
 
   var created = if (mode == CREATION || mode == EXTRA_CREATION) false else true
+
+  def refreshPanel = {
+    tabbedPane.pages.clear
+    panelUI.components.foreach { c ⇒
+      tabbedPane.pages += new TabbedPane.Page(c._1, c._2)
+    }
+  }
 
   def hide = {
     baseSave

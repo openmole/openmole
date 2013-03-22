@@ -32,6 +32,8 @@ trait ISamplingCompositionPanelUI extends IPanelUI {
 
   def factors: List[IFactorProxyUI]
 
+  val components = List()
+
   def computeFactor(sourceProxy: ISamplingOrDomainProxyUI): Option[IFactorProxyUI]
 
   def addDomain(domainProxy: IDomainProxyUI,

@@ -24,8 +24,7 @@ import org.openmole.ide.misc.widget._
 import swing._
 import event._
 import event.ButtonClicked
-import org.openmole.plugin.environment.glite.{ GliteEnvironment, GliteAuthentication }
-import org.openmole.misc.workspace.Workspace
+import org.openmole.plugin.environment.glite.GliteAuthentication
 import scala.Some
 import scala.Some
 
@@ -62,7 +61,6 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
   val voComboBox = new MyComboBox[String]("" :: GliteEnvironmentPanelUI.vomses.keys.toList.sorted)
   voComboBox.selection.item = pud.vo
 
-  //val voTextField = new TextField(pud.vo, 20)
   val vomsTextField = new TextField(pud.voms, 20)
   val bdiiTextField = new TextField(pud.bdii, 20)
   val runtimeMemoryTextField = new TextField(pud.openMOLEMemory, 4)
@@ -100,7 +98,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
       GliteAuthentication.getVOMS(voComboBox.selection.item).orElse(Some("")) foreach (vomsTextField.text = _)
   }
 
-  tabbedPane.pages += new TabbedPane.Page("Settings",
+  val components = List(("Settings",
     new PluginPanel("wrap 2") {
       contents += (new Label("VO"), "gap para")
       contents += voComboBox
@@ -110,9 +108,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
       contents += bdiiTextField
       contents += (new Label("Runtime memory"), "gap para")
       contents += runtimeMemoryTextField
-    })
-
-  tabbedPane.pages += new TabbedPane.Page("Options",
+    }), ("Options",
     new PluginPanel("wrap 2") {
       contents += new PluginPanel("wrap 2") {
         contents += (new Label("Fqan"), "gap para")
@@ -136,9 +132,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
         contents += (new Label("Threads"), "gap para")
         contents += threadsTextField
       }
-    })
-
-  tabbedPane.pages += new TabbedPane.Page("MyProxy", new PluginPanel("") {
+    }), ("MyProxy", new PluginPanel("") {
     contents += (proxyCheckBox, "wrap")
     contents += (proxyTimeLabel, "gap para")
     contents += (proxyTimeTextField, "wrap")
@@ -146,7 +140,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
     contents += (proxyHostTextField, "wrap")
     contents += (proxyPortLabel, "gap para")
     contents += proxyPortTextField
-  })
+  }))
 
   proxyCheckBox.selected = pud.proxy
   showProxy(pud.proxy)

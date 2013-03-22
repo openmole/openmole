@@ -20,18 +20,12 @@ package org.openmole.ide.core.model.panel
 import java.awt.{ Dimension, Color }
 import javax.swing.JPanel
 import org.openmole.ide.misc.widget.Helper
-import scala.swing.Alignment
-import scala.swing.TabbedPane
+import swing.{ Publisher, Component, Alignment, TabbedPane }
 
-trait IPanelUI {
+trait IPanelUI extends Publisher {
   def peer: JPanel
 
-  val tabbedPane = new TabbedPane {
-    preferredSize = new Dimension(200, 100)
-    tabPlacement = Alignment.Left
-    opaque = true
-    background = new Color(77, 77, 77)
-  }
+  val components: List[(String, Component)]
 
   def help: Helper = new Helper
 }

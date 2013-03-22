@@ -21,4 +21,5 @@ import org.openmole.ide.core.model.data._
 
 trait ISamplingPanelUI extends IPanelUI {
   def saveContent: ISamplingDataUI
+  val components = List()
 }
