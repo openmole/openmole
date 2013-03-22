@@ -133,7 +133,7 @@ trait Application extends Web with Libraries {
 
   lazy val openmoleui = OsgiProject("org.openmole.ui", singleton = true) settings (pluginDependencies) dependsOn (webCore)
 
-  lazy val plugins = AssemblyProject("package", "plugins",
+  lazy val plugins = AssemblyProject("package", "assembly/plugins",
     Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> {s => "org.eclipse.equinox.launcher.jar"},
       """org\.eclipse\.(core|equinox|osgi)""".r -> {s => s.replaceFirst("-","_")} )
   ) settings (pluginDependencies,
@@ -143,18 +143,18 @@ trait Application extends Web with Libraries {
     }, dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
 
 
-  lazy val openmolePlugins = AssemblyProject("package", "openmole-plugins") settings (openmolePluginDependencies,
+  lazy val openmolePlugins = AssemblyProject("package", "assembly/openmole-plugins") settings (openmolePluginDependencies,
       ignoreTransitive := true, dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
 
-  lazy val openmoleGuiPlugins = AssemblyProject("package", "openmole-plugins-gui") settings (openmoleGuiPluginDependencies,
+  lazy val openmoleGuiPlugins = AssemblyProject("package", "assembly/openmole-plugins-gui") settings (openmoleGuiPluginDependencies,
     dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
 
   lazy val openmoleResources = AssemblyProject("package", "") settings
     (resourceDirectory := file("application/resources"), copyResTask, assemble <<= assemble dependsOn (resourceAssemble),
       dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
 
-  lazy val openMoleDB = AssemblyProject("package", "dbserver/lib") settings (libraryDependencies ++=
+  lazy val openMoleDB = AssemblyProject("package", "assembly/dbserver/lib") settings (libraryDependencies ++=
     Seq("org.openmole.core" % "org.openmole.runtime.dbserver" % "0.8.0-SNAPSHOT"),
     copyResTask, resourceDirectory := file("application/db-resources"), assemble <<= assemble dependsOn (resourceAssemble),
-    resourceOutDir := Option("dbserver/bin"))
+    resourceOutDir := Option("assembly/dbserver/bin"))
 }
