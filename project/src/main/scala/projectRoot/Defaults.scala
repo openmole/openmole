@@ -25,23 +25,28 @@ trait Defaults extends Build {
 
   lazy val copyDependencies = TaskKey[Unit]("copy-dependencies")
 
+  lazy val resourceOutDir = SettingKey[Option[String]]("resource-out-dir")
+
   lazy val resourceAssemble = TaskKey[Unit]("resource-assemble")
 
   lazy val ignoreTransitive = SettingKey[Boolean]("ignoreTransitive")
 
-  lazy val dependencyFilter = SettingKey[Regex]("Tells copyDependencies to ignore certain ones.")
+  lazy val dependencyFilter = SettingKey[DependencyFilter]("Tells copyDependencies to ignore certain dependencies.")
 
   lazy val dependencyNameMap = SettingKey[Map[Regex, String => String]]("dependencymap", "A map that is run against dependencies to be copied.")
 
-  def copyResTask = resourceAssemble <<= (resourceDirectory, outDir, crossTarget) map { //TODO: Find a natural way to do this
-    (rT, outD, cT) => {
-      val destPath = cT / outD
+  def copyResTask = resourceAssemble <<= (resourceDirectory, outDir, crossTarget, resourceOutDir) map { //TODO: Find a natural way to do this
+    (rT, outD, cT, rOD) => {
+      val destPath = rOD map (cT / _) getOrElse (cT / outD)
       IO.copyDirectory(rT,destPath)
     }
   }
 
-  def copyDepTask(updateReport: UpdateReport, version: String, out: File, scalaVer: String, subDir: String, depMap: Map[Regex, String => String]) = { //TODO use this style for other tasks
-    updateReport.allFiles map {f =>
+  def copyDepTask(updateReport: UpdateReport, version: String, out: File,
+                  scalaVer: String, subDir: String,
+                  depMap: Map[Regex, String => String], depFilter: DependencyFilter) = { //TODO use this style for other tasks
+    updateReport.allModules.foreach(m => println(m.name))
+    updateReport matching depFilter map {f =>
       depMap.keys.find(_.findFirstIn(f.getName).isDefined).map(depMap(_)).getOrElse{a: String => a} -> f
     } foreach { case(lambda, srcPath) =>
       val destPath = out / subDir / lambda(srcPath.getName)
@@ -125,12 +130,14 @@ trait Defaults extends Build {
                       depNameMap: Map[Regex, String => String] = Map.empty[Regex, String => String])
                      (implicit dir: File) = {
     val projBase = dir / base
-    Project(base + "-"+ outputDir, projBase, settings = Project.defaultSettings ++ Seq(
+    Project(base + "-"+ outputDir.replace('/','_'), projBase, settings = Project.defaultSettings ++ Seq(
       assemble <<= copyDependencies tag (Assemble),
       install := true,
       outDir := outputDir,
+      resourceOutDir := None,
       dependencyNameMap := depNameMap,
-      copyDependencies <<= (update, version, crossTarget, scalaVersion, outDir, dependencyNameMap) map copyDepTask
+      dependencyFilter := moduleFilter(),
+      copyDependencies <<= (update, version, crossTarget, scalaVersion, outDir, dependencyNameMap, dependencyFilter) map copyDepTask
     ))
   }
 }

@@ -71,7 +71,7 @@ if "%JAVACMD%"=="" set JAVACMD=java
 
 if "%REPO%"=="" set REPO=%BASEDIR%\lib
 
-set CLASSPATH="%BASEDIR%"\etc;"%REPO%"\org\openmole\com.db4o\0.8.0-SNAPSHOT\com.db4o-0.8.0-SNAPSHOT.jar;"%REPO%"\org\openmole\com.thoughtworks.xstream\0.8.0-SNAPSHOT\com.thoughtworks.xstream-0.8.0-SNAPSHOT.jar;"%REPO%"\org\openmole\core\org.openmole.misc.replication\0.8.0-SNAPSHOT\org.openmole.misc.replication-0.8.0-SNAPSHOT.jar;"%REPO%"\org\openmole\org.scala-lang.scala-library\0.8.0-SNAPSHOT\org.scala-lang.scala-library-0.8.0-SNAPSHOT.jar;"%REPO%"\org\scala-lang\scala-library\2.10.1\scala-library-2.10.1.jar;"%REPO%"\org\scala-lang\scala-reflect\2.10.1\scala-reflect-2.10.1.jar;"%REPO%"\com\typesafe\akka\akka-transactor_2.10\2.1.1\akka-transactor_2.10-2.1.1.jar;"%REPO%"\org\scala-stm\scala-stm_2.10\0.7\scala-stm_2.10-0.7.jar;"%REPO%"\org\scala-lang\scala-actors\2.10.1\scala-actors-2.10.1.jar;"%REPO%"\org\scala-lang\scala-compiler\2.10.1\scala-compiler-2.10.1.jar;"%REPO%"\org\scala-lang\jline\2.10.1\jline-2.10.1.jar;"%REPO%"\org\fusesource\jansi\jansi\1.4\jansi-1.4.jar;"%REPO%"\com\typesafe\akka\akka-actor_2.10\2.1.1\akka-actor_2.10-2.1.1.jar;"%REPO%"\com\typesafe\config\1.0.0\config-1.0.0.jar;"%REPO%"\org\openmole\core\org.openmole.runtime.dbserver\0.8.0-SNAPSHOT\org.openmole.runtime.dbserver-0.8.0-SNAPSHOT.jar
+set CLASSPATH="%BASEDIR%"\etc;"%REPO%"\*
 set EXTRA_JVM_ARGUMENTS=
 goto endInit
 
