@@ -17,18 +17,19 @@ trait Web extends Libraries with Defaults {
 
   lazy val webCore = OsgiProject("org.openmole.web.core", "core",
     exports = Seq("org.openmole.web"),
-    buddyPolicy = Some("global")) settings(
+    buddyPolicy = Some("global"),
+    imports = Seq("org.h2.*", "*;resolution:=optional")) settings(
       libraryDependencies <++= version {v => Seq(
         "org.openmole.core" % "org.openmole.core.serializer" % v,
         "org.openmole.core" % "org.openmole.core.implementation" % v,
         "org.openmole.ide" % "org.openmole.ide.core.implementation" % v,
-        "org.openmole" % "org.scala-lang.scala-library" % v,
-        "org.openmole" % "org.scalatra" % v,
-        "org.openmole" % "org.eclipse.jetty" % v,
-        "org.openmole" % "org.h2" % v,
-        "org.openmole" % "com.typesafe.slick" % v,
-        "org.openmole" % "ch.qos.logback" % v,
-        "org.openmole" % "com.jolbox.bonecp" % v
+        "org.openmole" % "org.scala-lang.scala-library" % v
+        //"org.openmole" % "org.scalatra" % v
+        //"org.openmole" % "org.eclipse.jetty" % v,
+        //"org.openmole" % "org.h2" % v
+        //"org.openmole" % "com.typesafe.slick" % v
+        //"org.openmole" % "ch.qos.logback" % v
+        //"org.openmole" % "com.jolbox.bonecp" % v
       )}
-    )
+    ) dependsOn(h2, jetty, slick, logback, scalatra, bonecp)
 }

@@ -143,14 +143,13 @@ trait Application extends Web with Libraries {
     }
   )
 
-  lazy val openmolePlugins = AssemblyProject("package", "openmole-plugins",
-    jarFilter = """(au\.com\..*|ccl\.north.*|fr\.iscpif\..*|org\.openmole\..*)""".r) settings (openmolePluginDependencies,
+  lazy val openmolePlugins = AssemblyProject("package", "openmole-plugins") settings (openmolePluginDependencies,
       ignoreTransitive := true) settings (net.virtualvoid.sbt.graph.Plugin.graphSettings: _*)
 
   lazy val openmoleGuiPlugins = AssemblyProject("package", "openmole-plugins-gui") settings (openmoleGuiPluginDependencies)
 
   lazy val openmoleResources = AssemblyProject("package", "") settings
-    (resourceDirectory := file("application/resources"), copyResTask, assemble <<= copyResources)
+    (resourceDirectory := file("application/resources"), copyResTask, assemble <<= assemble dependsOn (resourceAssemble))
 
   lazy val openMoleDB = AssemblyProject("Db-proj", "plugins") settings (libraryDependencies ++=
     Seq("org.openmole.core" % "org.openmole.runtime.dbserver" % "0.8.0-SNAPSHOT"))

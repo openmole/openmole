@@ -1,11 +1,11 @@
 package projectRoot
 
-import com.typesafe.sbt.osgi.OsgiKeys
-import com.typesafe.sbt.osgi.SbtOsgi
+import com.typesafe.sbt.osgi.{OsgiKeys, SbtOsgi}
 
 import sbt._
 import Keys._
 import util.matching.Regex
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -36,25 +36,18 @@ trait Defaults extends Build {
   def copyResTask = resourceAssemble <<= (resourceDirectory, outDir, crossTarget) map { //TODO: Find a natural way to do this
     (rT, outD, cT) => {
       val destPath = cT / outD
-      IO.copyDirectory(rT,destPath,preserveLastModified = true)
+      IO.copyDirectory(rT,destPath)
     }
   }
 
-  def copyDepTask = copyDependencies <<= (update,
-    version,
-    crossTarget,
-    scalaVersion,
-    outDir,
-    dependencyNameMap, ignoreTransitive) map {
-    (updateReport, version, out, scalaVer, outDir, depMap, ignoreTrans) =>
-      println("copying dependencies")
-      updateReport.allFiles map {f =>
-        depMap.keys.find(_.findFirstIn(f.getName).isDefined).map(depMap(_)).getOrElse{a: String => a} -> f
-      } foreach { case(lambda, srcPath) =>
-        val destPath = out / outDir / lambda(srcPath.getName)
-        IO.copyFile(srcPath, destPath, preserveLastModified=true)
-      }
+  def copyDepTask(updateReport: UpdateReport, version: String, out: File, scalaVer: String, subDir: String, depMap: Map[Regex, String => String]) = { //TODO use this style for other tasks
+    updateReport.allFiles map {f =>
+      depMap.keys.find(_.findFirstIn(f.getName).isDefined).map(depMap(_)).getOrElse{a: String => a} -> f
+    } foreach { case(lambda, srcPath) =>
+      val destPath = out / subDir / lambda(srcPath.getName)
+      IO.copyFile(srcPath, destPath, preserveLastModified=true)
     }
+  }
 
 
   override def settings = super.settings ++
@@ -62,15 +55,13 @@ trait Defaults extends Build {
       organization := "org.openmole",
       scalaVersion := "2.10.1",
       resolvers ++= Seq("openmole" at "http://maven.openmole.org/snapshots",
-        "openmole-releases" at "http://maven.openmole.org/public"),
-      externalResolvers <<= resolvers map {rs =>
+        "openmole-releases" at "http://maven.openmole.org/public",
+        "sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"),
+      externalResolvers <<= (resolvers) map {rs =>
         Resolver.withDefaultResolvers(Seq()) ++ rs
       },
       publishArtifact in (packageDoc in install) := false,
       copyDependencies := false,
-      copyDependencies <<= copyDependencies tag (Assemble),
-      outDir := "lib",
-      dependencyNameMap := Map.empty[Regex, String => String],
       concurrentRestrictions := Seq(Tags.exclusive(Assemble))
     )
 
@@ -80,13 +71,16 @@ trait Defaults extends Build {
                    buddyPolicy: Option[String] = None,
                    exports: Seq[String] = Seq(),
                    privatePackages: Seq[String] = Seq(),
-                   singleton: Boolean = false)
+                   singleton: Boolean = false,
+                   dynamicImports: Seq[String] = Seq(),
+                   imports: Seq[String] = Seq("*;resolution:=optional"))
                  (implicit dir: File,
                    org: Setting[String] = organization := "org.openmole") = {
 
     val base = dir / (if(pathFromDir == "") artifactId else pathFromDir)
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
-    val additional = buddyPolicy.map(v => Map("Eclipse-BuddyPolicy" -> v)).getOrElse(Map()) ++ Map("Bundle-ActivationPolicy" -> "lazy")
+    val additional = buddyPolicy.map(v => Map("Eclipse-BuddyPolicy" -> v)).getOrElse(Map()) ++
+      Map("Bundle-ActivationPolicy" -> "lazy")
 
 
     Project(artifactId.replace('.','-'),
@@ -94,11 +88,13 @@ trait Defaults extends Build {
       settings = Project.defaultSettings ++
         SbtOsgi.osgiSettings ++
         Seq(name := artifactId, org,
-          OsgiKeys.bundleSymbolicName <<= (name) {n => n + ";singleton:=" + singleton},
+          OsgiKeys.bundleSymbolicName <<= (name) {n => n + (if(singleton) ";singleton:=" + singleton else "")},
           OsgiKeys.bundleVersion <<= version,
           OsgiKeys.exportPackage := exportedPackages,
           OsgiKeys.additionalHeaders := additional,
           OsgiKeys.privatePackage := privatePackages,
+          OsgiKeys.dynamicImportPackage := dynamicImports,
+          OsgiKeys.importPackage := imports,
           install <<= publishLocal,
           assemble := false))
   }
@@ -106,7 +102,8 @@ trait Defaults extends Build {
   def OSGIProject(artifactId: String,
                   buddyPolicy: Option[String] = None,
                   exports: Seq[String] = Seq(),
-                  privatePackages: Seq[String] = Seq()) = {
+                  privatePackages: Seq[String] = Seq(),
+                  dynamicImports: Seq[String] = Seq()) = {
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
     val additional = buddyPolicy.map(v => Map("Eclipse-BuddyPolicy" -> v)).getOrElse(Map()) ++ Map("Bundle-ActivationPolicy" -> "lazy")
     Project.defaultSettings ++
@@ -117,8 +114,9 @@ trait Defaults extends Build {
         OsgiKeys.exportPackage := exportedPackages,
         OsgiKeys.additionalHeaders := additional,
         OsgiKeys.privatePackage := privatePackages,
+        OsgiKeys.dynamicImportPackage := dynamicImports,
         install <<= publishLocal,
-        assemble := println("hello world")
+        assemble := false
       )
   }
 
@@ -127,12 +125,12 @@ trait Defaults extends Build {
                       depNameMap: Map[Regex, String => String] = Map.empty[Regex, String => String])
                      (implicit dir: File) = {
     val projBase = dir / base
-    Project(base + "-"+ outputDir, projBase, settings = Project.defaultSettings ++ Seq(copyDepTask,
+    Project(base + "-"+ outputDir, projBase, settings = Project.defaultSettings ++ Seq(
       assemble <<= copyDependencies tag (Assemble),
       install := true,
-      ignoreTransitive := false,
       outDir := outputDir,
-      dependencyNameMap := depNameMap
+      dependencyNameMap := depNameMap,
+      copyDependencies <<= (update, version, crossTarget, scalaVersion, outDir, dependencyNameMap) map copyDepTask
     ))
   }
 }
