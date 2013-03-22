@@ -37,7 +37,6 @@ import org.openmole.ide.osgi.netlogo.NetLogo
 import scala.swing.FileChooser._
 import java.io.File
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
-import UpdatedProxyEvent
 
 abstract class GenericNetLogoPanelUI(nlogoPath: String,
                                      workspaceEmbedded: Boolean,
@@ -72,7 +71,7 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
   reactions += {
     case DialogClosedEvent(nlogoTextField) ⇒
       globals = List()
-      publish(new UpdatedProxyEvent(this))
+    // publish(new UpdatedProxyEvent(this))
   }
 
   val (inputMapping, outputMapping) = buildMultis(nlogoPath)
