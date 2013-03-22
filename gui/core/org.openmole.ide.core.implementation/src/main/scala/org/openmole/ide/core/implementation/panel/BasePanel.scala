@@ -22,8 +22,7 @@ import java.awt.Color
 import javax.swing.BorderFactory
 import javax.swing.ImageIcon
 import org.openmole.ide.core.model.panel.{ IBasePanel, IPanelUI }
-import org.openmole.ide.core.model.dataproxy.IDataProxyUI
-import org.openmole.ide.core.model.panel.PanelMode._
+import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ISamplingCompositionDataProxyUI, IDataProxyUI }
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.widget._
 import swing._
@@ -35,15 +34,14 @@ import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.tools.image.Images._
 import scala.Some
-import org.openmole.ide.core.implementation.prototype.UpdatedPrototypeEvent
+import org.openmole.ide.core.implementation.dataproxy.{ Proxys, UpdatedProxyEvent }
 
 object BasePanel {
   case class IconChanged(s: Component, imagePath: String) extends ActionEvent(s)
 }
 
 abstract class BasePanel(proxy: Option[IDataProxyUI],
-                         scene: IMoleScene,
-                         val mode: Value) extends MyPanel with IBasePanel {
+                         scene: IMoleScene) extends MyPanel with IBasePanel {
 
   opaque = true
   var tabbedLock = false
@@ -60,17 +58,14 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
 
   val createLabelLink = new MainLinkLabel("create", new Action("") { def apply = baseCreate })
   val mainLinksPanel = new PluginPanel("")
-  if (mode != CREATION && mode != EXTRA_CREATION) deleteLink
+  if (created) deleteLink
   border = BorderFactory.createEmptyBorder
 
   val mainPanel = new PluginPanel("wrap", "", "") {
     contents += new PluginPanel("", "[left]", "[top]") {
       contents += new ImageLinkLabel(CLOSE, new Action("") {
         def apply = {
-          mode match {
-            case EXTRA | EXTRA_CREATION ⇒ scene.closeExtraPropertyPanel
-            case _ ⇒ scene.closePropertyPanel
-          }
+          scene.closePropertyPanel(index)
         }
       })
     }
@@ -100,24 +95,21 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
   listenTo(this)
   reactions += {
     case x: UIElementResized ⇒
-      scene.propertyWidget.revalidate
-      scene.extraPropertyWidget.revalidate
+      scene.propertyWidget.foreach { _.revalidate }
       scene.refresh
   }
 
-  var created = if (mode == CREATION || mode == EXTRA_CREATION) false else true
+  def setTab(proxy: IDataProxyUI) = tabbedPane.selection.index = proxy match {
+    case p: ISamplingCompositionDataProxyUI ⇒ 0
+    case p: IPrototypeDataProxyUI ⇒ 1
+    case _ ⇒ 1
+  }
 
   def refreshPanel = {
     tabbedPane.pages.clear
     panelUI.components.foreach { c ⇒
       tabbedPane.pages += new TabbedPane.Page(c._1, c._2)
     }
-  }
-
-  def hide = {
-    baseSave
-    visible = false
-    scene.refresh
   }
 
   def deleteLink = {
@@ -127,7 +119,7 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
 
   def baseCreate: Unit = {
     create
-    created = true
+    publishCreation
     deleteLink
     baseSave
     scene.manager.invalidateCache
@@ -138,6 +130,11 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
     val b = delete
     scene.manager.invalidateCache
     b
+  }
+
+  def publishCreation = proxy match {
+    case Some(x: IDataProxyUI) ⇒ publish(new UpdatedProxyEvent(x, this))
+    case _ ⇒
   }
 
   def baseSave: Unit = {
@@ -152,12 +149,4 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
       case None ⇒
     }
   }
-
-  def create: Unit
-
-  def delete: Boolean
-
-  def save: Unit
-
-  def panelUI: IPanelUI
 }

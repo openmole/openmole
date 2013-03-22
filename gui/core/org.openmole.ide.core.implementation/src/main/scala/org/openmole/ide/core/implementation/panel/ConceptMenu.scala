@@ -19,33 +19,29 @@ package org.openmole.ide.core.implementation.panel
 
 import java.awt.Color
 import java.awt.Dimension
-import org.openmole.ide.core.model.factory._
-import org.openmole.ide.core.model.panel.IComponentCategory
-import org.openmole.ide.core.model.panel.PanelMode._
+import org.openmole.ide.core.model.panel.{ IBasePanel, IComponentCategory }
 import org.openmole.ide.core.model.dataproxy._
 import scala.collection.mutable.HashMap
 import scala.swing.Action
 import scala.swing.Menu
 import scala.swing.MenuBar
 import scala.swing.MenuItem
-import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.implementation.workflow.BuildMoleSceneContainer
-import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.core.implementation.builder.Builder
 import scala.collection.JavaConversions._
-import util.Try
 
 object ConceptMenu {
-  def createPrototype = new PrototypeDataProxyUI(GenericPrototypeDataUI[java.lang.Double], generated = false)
 
-  def createAndDisplayPrototype = display(createPrototype, CREATION)
+  def createAndDisplaySamplingComposition(fromPanel: BasePanel) = displayExtra(Builder.samplingCompositionUI(false), fromPanel)
 
-  def createAndDisplayExtraPrototype(fromPanel: BasePanel) = displayExtra(createPrototype, fromPanel, EXTRA_CREATION)
+  def createAndDisplayPrototype(fromPanel: BasePanel) = displayExtra(Builder.prototypeUI, fromPanel)
+
+  def createAndDisplayPrototype = display(Builder.prototypeUI)
 
   val menuItemMapping = new HashMap[IDataProxyUI, MenuItem]
   val mapping = new HashMap[IComponentCategory, Menu]
@@ -67,7 +63,7 @@ object ConceptMenu {
     }.toList.sortBy(_.factory.toString).foreach {
       d ⇒
         mapping(d.factory.category).contents += new MenuItem(new Action(d.factory.toString) {
-          override def apply = display(d.buildDataProxyUI, CREATION)
+          override def apply = display(d.buildDataProxyUI)
         })
     }
     new PopupToolBarPresenter("Task", mapping(ComponentCategories.TASK), new Color(107, 138, 166))
@@ -80,7 +76,7 @@ object ConceptMenu {
     }.toList.sortBy(_.factory.toString).foreach {
       d ⇒
         mapping(ComponentCategories.ENVIRONMENT).contents += new MenuItem(new Action(d.factory.toString) {
-          override def apply = display(d.buildDataProxyUI, CREATION)
+          override def apply = display(d.buildDataProxyUI)
         })
     }
     new PopupToolBarPresenter("Environment", mapping(ComponentCategories.ENVIRONMENT), new Color(68, 120, 33))
@@ -95,7 +91,7 @@ object ConceptMenu {
 
   val samplingMenu = {
     val menu = new MenuItem(new Action("New Composition") {
-      override def apply = display(Builder.samplingCompositionUI(false), CREATION)
+      override def apply = display(Builder.samplingCompositionUI(false))
     })
     new PopupToolBarPresenter("Sampling", menu, new Color(255, 85, 85))
   }
@@ -107,7 +103,7 @@ object ConceptMenu {
     }.toList.sortBy(_.factory.toString).foreach {
       d ⇒
         mapping(ComponentCategories.HOOK).contents += new MenuItem(new Action(d.factory.toString) {
-          override def apply = display(d.buildDataProxyUI, CREATION)
+          override def apply = display(d.buildDataProxyUI)
         })
     }
     new PopupToolBarPresenter("Hook", mapping(ComponentCategories.HOOK), new Color(168, 120, 33))
@@ -120,7 +116,7 @@ object ConceptMenu {
     }.toList.sortBy(_.factory.toString).foreach {
       d ⇒
         mapping(ComponentCategories.SOURCE).contents += new MenuItem(new Action(d.factory.toString) {
-          override def apply = display(d.buildDataProxyUI, CREATION)
+          override def apply = display(d.buildDataProxyUI)
         })
     }
     new PopupToolBarPresenter("Source", mapping(ComponentCategories.SOURCE), new Color(60, 60, 60))
@@ -141,28 +137,25 @@ object ConceptMenu {
     minimumSize = new Dimension(size.width, 50)
   }
 
-  def display(proxy: IDataProxyUI,
-              mode: Value) = {
-    if (ScenesManager.tabPane.peer.getTabCount == 0) createTab(proxy, mode)
+  def display(proxy: IDataProxyUI) = {
+    if (ScenesManager.tabPane.peer.getTabCount == 0) createTab(proxy)
     else ScenesManager.tabPane.selection.page.content match {
-      case x: ISceneContainer ⇒ x.scene.displayPropertyPanel(proxy, mode)
-      case _ ⇒ createTab(proxy, mode)
+      case x: ISceneContainer ⇒ x.scene.displayPropertyPanel(proxy, 0)
+      case _ ⇒ createTab(proxy)
     }
   }
 
   def displayExtra(proxy: IDataProxyUI,
-                   fromPanel: BasePanel,
-                   mode: Value) = {
-    if (ScenesManager.tabPane.peer.getTabCount == 0) createTab(proxy, mode)
+                   fromPanel: IBasePanel) = {
+    if (ScenesManager.tabPane.peer.getTabCount == 0) createTab(proxy)
     else ScenesManager.tabPane.selection.page.content match {
-      case x: ISceneContainer ⇒ x.scene.displayExtraPropertyPanel(proxy, fromPanel, mode)
-      case _ ⇒ createTab(proxy, mode)
+      case x: ISceneContainer ⇒ x.scene.displayPropertyPanel(proxy, fromPanel, fromPanel.index + 1)
+      case _ ⇒ createTab(proxy)
     }
   }
 
-  def createTab(proxy: IDataProxyUI,
-                mode: Value) = DialogFactory.newTabName match {
-    case Some(y: BuildMoleSceneContainer) ⇒ y.scene.displayPropertyPanel(proxy, mode)
+  def createTab(proxy: IDataProxyUI) = DialogFactory.newTabName match {
+    case Some(y: BuildMoleSceneContainer) ⇒ y.scene.displayPropertyPanel(proxy, 0)
     case _ ⇒
   }
 
@@ -172,7 +165,7 @@ object ConceptMenu {
               proxy: IDataProxyUI): MenuItem = {
     menuItemMapping += proxy -> new MenuItem(new Action(proxyName(proxy)) {
       override def apply = {
-        ConceptMenu.display(proxy, EDIT)
+        ConceptMenu.display(proxy)
       }
     })
     menuItemMapping(proxy)

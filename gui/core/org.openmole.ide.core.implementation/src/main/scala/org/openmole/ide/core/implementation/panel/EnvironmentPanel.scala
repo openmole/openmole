@@ -18,14 +18,12 @@
 package org.openmole.ide.core.implementation.panel
 
 import java.awt.BorderLayout
-import java.awt.Color
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import javax.imageio.ImageIO
 import javax.swing.ImageIcon
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
-import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import scala.collection.JavaConversions._
 import org.openmole.ide.misc.widget.PluginPanel
@@ -35,10 +33,11 @@ import scala.swing.event.FocusGained
 
 class EnvironmentPanel(proxy: IEnvironmentDataProxyUI,
                        scene: IMoleScene,
-                       mode: Value = CREATION) extends BasePanel(Some(proxy), scene, mode) {
+                       val index: Int) extends BasePanel(Some(proxy), scene) {
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
 
   val panelUI = proxy.dataUI.buildPanelUI
+  def created = Proxys.contains(proxy)
 
   listenTo(panelUI.help.components.toSeq: _*)
   reactions += {
@@ -69,7 +68,7 @@ class EnvironmentPanel(proxy: IEnvironmentDataProxyUI,
     }.toList
     capsulesWithEnv match {
       case Nil ⇒
-        scene.closePropertyPanel
+        scene.closePropertyPanel(0)
         Proxys -= proxy
         ConceptMenu.removeItem(proxy)
         true

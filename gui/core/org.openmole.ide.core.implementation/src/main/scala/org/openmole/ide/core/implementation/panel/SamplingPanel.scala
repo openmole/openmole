@@ -19,23 +19,18 @@ package org.openmole.ide.core.implementation.panel
 
 import scala.swing._
 import event.FocusGained
-import swing.Swing._
-import javax.swing.{ ImageIcon, JScrollPane }
 import java.awt.BorderLayout
-import org.openmole.ide.core.model.sampling.ISamplingWidget
+import org.openmole.ide.core.model.sampling.{ ISamplingProxyUI, ISamplingWidget }
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.widget._
 import multirow.ComponentFocusedEvent
-import org.openmole.ide.core.model.panel._
-import javax.imageio.ImageIO
 import org.openmole.ide.core.implementation.sampling.SamplingPanelUI
 
 class SamplingPanel(samplingWidget: ISamplingWidget,
                     scene: IMoleScene,
-                    mode: PanelMode.Value) extends BasePanel(None,
-  scene,
-  mode) {
+                    val index: Int) extends BasePanel(None, scene) {
   val panelUI = new SamplingPanelUI(samplingWidget, this)
+  def created = true
 
   listenTo(panelUI.help.components.toSeq: _*)
   reactions += {

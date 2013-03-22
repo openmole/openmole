@@ -24,7 +24,6 @@ import org.openmole.ide.core.model.sampling.{ IDomainProxyUI, IDomainWidget }
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget._
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
-import javax.imageio.ImageIO
 
 class DomainWidget(val proxy: IDomainProxyUI,
                    val scenePanelUI: ISamplingCompositionPanelUI,
@@ -47,8 +46,7 @@ class DomainWidget(val proxy: IDomainProxyUI,
   if (display) displayOnMoleScene
 
   def displayOnMoleScene = ScenesManager.currentSceneContainer match {
-    case Some(s: ISceneContainer) ⇒
-      s.scene.displayExtraPropertyPanel(domainWidget)
+    case Some(s: ISceneContainer) ⇒ s.scene.displayPropertyPanel(domainWidget)
     case _ ⇒
   }
 

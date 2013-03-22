@@ -18,8 +18,7 @@
 package org.openmole.ide.core.implementation.panel
 
 import org.openmole.ide.core.implementation.sampling.DomainPanelUI
-import org.openmole.ide.core.model.sampling.IDomainWidget
-import org.openmole.ide.core.model.panel.PanelMode._
+import org.openmole.ide.core.model.sampling.{ IDomainProxyUI, IDomainWidget }
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.panel._
 import org.openmole.ide.misc.widget.PluginPanel
@@ -32,10 +31,9 @@ import org.openmole.ide.core.implementation.dialog.StatusBar
 
 class DomainPanel(domainWidget: IDomainWidget,
                   scene: IMoleScene,
-                  mode: PanelMode.Value) extends BasePanel(None,
-  scene,
-  mode) {
+                  val index: Int) extends BasePanel(None, scene) {
   val panelUI = new DomainPanelUI(domainWidget, this)
+  def created = true
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {

@@ -88,8 +88,7 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI, index: Int = 0) extends PluginPanel
 
   /* tabbedPane.pages += new TabbedPane.Page("Source", sourcePanel.panel)
   tabbedPane.pages += new TabbedPane.Page("Hook", hookPanel.panel)
-  tabbedPane.pages += new TabbedPane.Page("Execution", )
-  tabbedPane.selection.index = index  */
+  tabbedPane.pages += new TabbedPane.Page("Execution", )   */
 
   listenTo(`groupingCheckBox`)
   reactions += {

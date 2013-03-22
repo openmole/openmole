@@ -16,7 +16,7 @@
  */
 package org.openmole.ide.core.implementation.builder
 
-import org.openmole.ide.core.implementation.dataproxy.{ Proxys, SamplingCompositionDataProxyUI }
+import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.core.model.sampling.Sampling
 import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.implementation.registry._
@@ -43,8 +43,15 @@ import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 import scala.swing.ScrollPane
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
+import org.openmole.ide.core.implementation.builder.PuzzleUIMap
+import scala.Some
+import org.openmole.ide.core.implementation.builder.BuiltCompositionSampling
+import org.openmole.ide.core.implementation.registry.DefaultKey
 
 object Builder {
+
+  def prototypeUI = new PrototypeDataProxyUI(GenericPrototypeDataUI[java.lang.Double], generated = false)
 
   def samplingCompositionUI(g: Boolean) = new SamplingCompositionDataProxyUI(generated = g)
 

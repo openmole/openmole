@@ -38,7 +38,7 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("") with ITas
 
   val codeTextArea = new GroovyEditor {
     editor.text = pud.code
-    minimumSize = new Dimension(80, 100);
+    minimumSize = new Dimension(80, 100)
   }
 
   val libMultiTextField = new MultiChooseFileTextField("Libraries",

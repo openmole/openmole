@@ -37,6 +37,7 @@ import scala.swing.event.ActionEvent
 import scala.swing.event.SelectionChanged
 import java.io.File
 import org.openmole.misc.tools.obj.ClassUtils._
+import org.openmole.ide.core.implementation.dataproxy.UpdatedProxyEvent
 
 class GenericPrototypePanelUI(dataUI: GenericPrototypeDataUI[_]) extends PluginPanel("wrap 3") with IPrototypePanelUI { protoPanel ⇒
 
@@ -73,10 +74,6 @@ class GenericPrototypePanelUI(dataUI: GenericPrototypeDataUI[_]) extends PluginP
     add(dimTextField, new Help(i18n.getString("dimension"), i18n.getString("dimensionEx")))
   }
 
-  override def saveContent(name: String) = {
-    val i = typeComboBox.selection.item.newInstance(name,
-      { if (dim.isEmpty) 0 else dim.toInt })
-    publish(new UpdatedPrototypeEvent(this))
-    i
-  }
+  override def saveContent(name: String) = typeComboBox.selection.item.newInstance(name,
+    { if (dim.isEmpty) 0 else dim.toInt })
 }

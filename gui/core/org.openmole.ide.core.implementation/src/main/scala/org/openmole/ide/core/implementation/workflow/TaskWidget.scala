@@ -24,7 +24,6 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.commons._
 import org.openmole.ide.core.model.workflow._
 import java.awt._
-import org.openmole.ide.core.model.panel.PanelMode._
 import scala.swing.Panel
 
 class TaskWidget(scene: IMoleScene,

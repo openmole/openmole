@@ -30,9 +30,10 @@ import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dataproxy._
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
+import org.openmole.ide.core.implementation.panel.ConceptMenu
+import org.openmole.ide.core.model.workflow.IMoleScene
 
 object ExplorationTaskPanelUI {
   val emptyProxy = new SamplingCompositionDataProxyUI
@@ -44,24 +45,33 @@ class ExplorationTaskPanelUI(pud: ExplorationTaskDataUI) extends PluginPanel("wr
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val samplingComboBox = new ComboBox(comboContent)
-  val components = List(("Settings", new PluginPanel("wrap 2") {
+  samplingComboBox.selection.item = pud.sampling.getOrElse(emptyProxy)
+
+  val linkLabel = new LinkLabel("", new Action("") {
+    def apply =
+      if (samplingComboBox.selection.item != emptyProxy) {
+        ScenesManager.currentScene match {
+          case Some(s: IMoleScene) ⇒ ConceptMenu.displayExtra(samplingComboBox.selection.item, s.currentPanel)
+          case _ ⇒
+        }
+      }
+  }) { icon = EYE }
+
+  val components = List(("Settings", new PluginPanel("wrap 4") {
     contents += new Label("Sampling")
-    add(samplingComboBox, "gapbottom 40")
+    //add(samplingComboBox, "gapbottom 40")
+    contents += samplingComboBox
+    contents += linkLabel
   }))
 
-  val linkLabel: LinkLabel = new LinkLabel("", contentAction(pud.sampling.getOrElse(emptyProxy))) {
-    icon = EYE
-  }
-  samplingComboBox.selection.item = pud.sampling.getOrElse(emptyProxy)
   listenTo(`samplingComboBox`)
   samplingComboBox.selection.reactions += {
     case SelectionChanged(`samplingComboBox`) ⇒
       linkLabel.action = contentAction(samplingComboBox.selection.item)
   }
-  contents += linkLabel
 
   def contentAction(proxy: ISamplingCompositionDataProxyUI) = new ContentAction(proxy.dataUI.name, proxy) {
-    override def apply = ScenesManager.currentSceneContainer.get.scene.displayExtraPropertyPanel(proxy, EXTRA)
+    override def apply = ScenesManager.currentSceneContainer.get.scene.displayPropertyPanel(proxy)
   }
 
   override def saveContent(name: String) =

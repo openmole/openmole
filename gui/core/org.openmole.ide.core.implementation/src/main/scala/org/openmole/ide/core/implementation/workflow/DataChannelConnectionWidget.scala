@@ -28,7 +28,6 @@ import org.netbeans.api.visual.widget.ConnectionWidget
 import org.openmole.ide.core.model.workflow.IDataChannelUI
 import org.openmole.ide.core.implementation.dialog.ConnectorPrototypeFilterDialog
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.widget._
 import scala.swing.Action
 import org.openmole.ide.misc.tools.image.Images._

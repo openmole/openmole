@@ -67,7 +67,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
   addChild(boxLayer)
   addChild(connectLayer)
 
-  setPreferredBounds(new Rectangle(0, 0, 900, 600))
+  //setPreferredBounds(new Rectangle(0, 0, 350, 200))
 
   val connectProvider = new SamplingConnectionProvider
   val connectAction = ActionFactory.createExtendedConnectAction(null, connectLayer,
@@ -76,7 +76,6 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
   getActions.addAction(ActionFactory.createPopupMenuAction(new SamplingSceneMenuProvider(this)))
   val moveAction = ActionFactory.createMoveAction
 
-  val size = getPreferredBounds
   val finalComponent = new SceneComponent(this, new FinalWidget, new Point(dataUI.finalPosition._1, dataUI.finalPosition._2)) {
     getActions.addAction(connectAction)
     getActions.addAction(moveAction)

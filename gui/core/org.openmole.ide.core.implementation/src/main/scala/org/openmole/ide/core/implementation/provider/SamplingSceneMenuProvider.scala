@@ -63,7 +63,7 @@ class SamplingSceneMenuProvider(panelScene: SamplingCompositionPanelUI) extends 
 
   def closeExtraPanel =
     ScenesManager.currentSceneContainer match {
-      case Some(x: ISceneContainer) ⇒ x.scene.closeExtraPropertyPanel
+      case Some(x: ISceneContainer) ⇒ x.scene.closePropertyPanel
       case _ ⇒
     }
 }

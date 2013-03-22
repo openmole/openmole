@@ -17,9 +17,8 @@
 package org.openmole.ide.core.implementation.panel
 
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.model.panel.{ IHookPanelUI, IOPanelUI, PanelMode }
-import org.openmole.ide.core.model.dataproxy.IHookDataProxyUI
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.model.dataproxy.{ IDataProxyUI, IHookDataProxyUI }
+import org.openmole.ide.core.implementation.dataproxy.{ UpdatedProxyEvent, Proxys }
 import swing.{ TabbedPane, Component, Label }
 import swing.event.{ SelectionChanged, FocusGained }
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
@@ -27,15 +26,16 @@ import javax.swing.ImageIcon
 import javax.imageio.ImageIO
 import java.awt.BorderLayout
 import org.openmole.ide.misc.widget.PluginPanel
-import org.openmole.ide.core.implementation.prototype.UpdatedPrototypeEvent
 
 class HookPanel(proxy: IHookDataProxyUI,
                 scene: IMoleScene,
-                mode: PanelMode.Value) extends BasePanel(Some(proxy), scene, mode) {
+                val index: Int) extends BasePanel(Some(proxy), scene) {
   hookPanel ⇒
 
-  val panelUI = proxy.dataUI.buildPanelUI
-  tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", new Label))
+  var panelUI = proxy.dataUI.buildPanelUI
+  def created = Proxys.contains(proxy)
+
+  refreshPanel
 
   iconLabel.icon = new ImageIcon(ImageIO.read(this.getClass.getClassLoader.getResource("img/hook.png")))
 
@@ -49,6 +49,17 @@ class HookPanel(proxy: IHookDataProxyUI,
     Proxys -= proxy
     ConceptMenu.removeItem(proxy)
     true
+  }
+
+  def updatePanel = {
+    tabbedLock = true
+    save
+    panelUI = proxy.dataUI.buildPanelUI
+    refreshPanel
+    protoPanel = buildProtoPanel
+    tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", protoPanel))
+    tabbedPane.revalidate
+    tabbedLock = false
   }
 
   def buildProtoPanel = {
@@ -69,10 +80,11 @@ class HookPanel(proxy: IHookDataProxyUI,
   }
 
   var protoPanel = buildProtoPanel
+  tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", protoPanel))
 
-  tabbedPane.pages(1).content = protoPanel
   tabbedPane.revalidate
 
+  mainPanel.contents += new NewConceptPanel(this) { addPrototype }
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
     contents += tabbedPane
@@ -84,10 +96,11 @@ class HookPanel(proxy: IHookDataProxyUI,
   reactions += {
     case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
-    case SelectionChanged(tabbedPane) ⇒ updateProtoPanel
-    case UpdatedPrototypeEvent(_) ⇒
-      scene.closeExtraPropertyPanel
-      updateProtoPanel
+    case SelectionChanged(tabbedPane) ⇒ if (!tabbedLock) updateProtoPanel
+    case UpdatedProxyEvent(p: IDataProxyUI, _) ⇒
+      scene.removeAll(index + 1)
+      updatePanel
+      tabbedPane.selection.index = 0
     case _ ⇒
   }
 
