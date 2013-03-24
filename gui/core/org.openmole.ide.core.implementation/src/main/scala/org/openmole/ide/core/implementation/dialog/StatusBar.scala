@@ -19,7 +19,6 @@ package org.openmole.ide.core.implementation.dialog
 
 import java.awt.Color
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.LinkLabel
@@ -128,7 +127,7 @@ class StatusBar extends MigPanel("wrap 3") {
 
   def displayProxy(proxy: IDataProxyUI) =
     ScenesManager.currentSceneContainer match {
-      case Some(sc: ISceneContainer) ⇒ sc.scene.displayPropertyPanel(proxy, EDIT)
+      case Some(sc: ISceneContainer) ⇒ sc.scene.displayPropertyPanel(proxy, 0)
       case None ⇒
     }
 }

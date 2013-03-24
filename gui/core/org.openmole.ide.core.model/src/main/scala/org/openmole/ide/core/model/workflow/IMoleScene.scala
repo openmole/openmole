@@ -19,7 +19,7 @@ package org.openmole.ide.core.model.workflow
 
 import java.awt.Point
 import org.netbeans.api.visual.graph.GraphScene
-import org.openmole.ide.core.model.panel.{ IBasePanel, IPanelUI, PanelMode }
+import org.openmole.ide.core.model.panel.{ IBasePanel, IPanelUI }
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.widget.LayerWidget
 import org.openmole.ide.core.model.sampling.ISamplingCompositionWidget
@@ -45,29 +45,44 @@ trait IMoleScene {
 
   def isBuildScene: Boolean
 
-  def savePropertyPanel: Unit
+  def savePropertyPanel(i: Int): Unit
 
   def savePropertyPanel(panel: Panel): Unit
 
   def displayCapsuleProperty(capsuleDataUI: ICapsuleUI, index: Int)
 
-  def displayPropertyPanel(proxy: IDataProxyUI, mode: PanelMode.Value)
+  def displayPropertyPanel(proxy: IDataProxyUI, i: Int): IBasePanel
 
-  def displayExtraPropertyPanel(proxy: IDataProxyUI, fromPanel: IBasePanel, mode: PanelMode.Value): Unit
+  def displayPropertyPanel(proxy: IDataProxyUI): IBasePanel
 
-  def displayExtraPropertyPanel(proxy: IDataProxyUI, mode: PanelMode.Value): IBasePanel
+  def displayPropertyPanel(proxy: IDataProxyUI, fromPanel: IBasePanel, i: Int): IBasePanel
 
-  def displayExtraPropertyPanel(samplingCompositionWidget: ISamplingCompositionWidget)
+  def displayPropertyPanel(compositionSamplingWidget: ISamplingCompositionWidget): IBasePanel
+
+  def removeAll(i: Int)
+
+  // def firstFree: Int
+  // def displayExtraPropertyPanel(proxy: IDataProxyUI, fromPanel: IBasePanel, mode: PanelMode.Value): Unit
+
+  //def displayExtraPropertyPanel(proxy: IDataProxyUI, mode: PanelMode.Value): IBasePanel
+
+  //def displayExtraPropertyPanel(samplingCompositionWidget: ISamplingCompositionWidget)
+
+  def currentPanel: IBasePanel
 
   def currentPanelUI: IPanelUI
 
-  def closeExtraPropertyPanel
+  // def closeExtraPropertyPanel
 
   def closePropertyPanel
 
-  def propertyWidget: ComponentWidget
+  def closePropertyPanel(i: Int)
 
-  def extraPropertyWidget: ComponentWidget
+  def closePropertyPanels
+
+  def propertyWidget: List[ComponentWidget]
+
+  //def extraPropertyWidget: ComponentWidget
 
   def removeEdge(id: String)
 

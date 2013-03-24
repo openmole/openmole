@@ -22,12 +22,11 @@ import javax.imageio.ImageIO
 import javax.swing.ImageIcon
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openide.awt.HtmlBrowser
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.{ UpdatedProxyEvent, Proxys }
 import org.openmole.ide.core.implementation.dialog.DialogFactory
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ISamplingCompositionDataProxyUI, IDataProxyUI, ITaskDataProxyUI }
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.widget._
 import org.openmole.ide.misc.widget.multirow._
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel._
@@ -37,15 +36,17 @@ import scala.swing.Component
 import scala.swing.Label
 import scala.swing.TabbedPane
 import swing.event.{ SelectionChanged, FocusGained }
-import org.openmole.ide.core.implementation.prototype.UpdatedPrototypeEvent
+import org.openmole.ide.core.model.data.IExplorationTaskDataUI
+import org.openmole.ide.core.implementation.data.TaskDataUI
 
 class TaskPanel(proxy: ITaskDataProxyUI,
                 scene: IMoleScene,
-                mode: Value = CREATION) extends BasePanel(Some(proxy), scene, mode) {
+                val index: Int) extends BasePanel(Some(proxy), scene) {
   taskPanel ⇒
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.imagePath)))
 
   var panelUI = proxy.dataUI.buildPanelUI
+  def created = Proxys.contains(proxy)
 
   def buildProtoPanel = {
     val (implicitIP, implicitOP) = proxy.dataUI.implicitPrototypes
@@ -66,7 +67,6 @@ class TaskPanel(proxy: ITaskDataProxyUI,
     protoPanel = buildProtoPanel
     tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", protoPanel))
     tabbedPane.revalidate
-    tabbedPane.selection.index = 1
     tabbedLock = false
   }
 
@@ -81,15 +81,20 @@ class TaskPanel(proxy: ITaskDataProxyUI,
 
   refreshPanel
 
-  tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", new Label))
+  tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", protoPanel))
 
-  tabbedPane.selection.index = mode match {
-    case CREATION ⇒ 0
-    case IO ⇒ 0
-    case _ ⇒ 1
-  }
-  tabbedPane.pages(1).content = protoPanel
+  tabbedPane.selection.index = 0
+  //tabbedPane.pages(1).content = protoPanel
   tabbedPane.revalidate
+
+  val newPanel = new NewConceptPanel(this)
+  newPanel.addPrototype
+  proxy.dataUI match {
+    case d: TaskDataUI with IExplorationTaskDataUI ⇒ newPanel.addSamplingComposition
+    case _ ⇒
+  }
+
+  mainPanel.contents += newPanel
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
@@ -104,13 +109,14 @@ class TaskPanel(proxy: ITaskDataProxyUI,
   reactions += {
     case FocusGained(source: Component, _, _) ⇒
       panelUI.help.switchTo(source)
-      scene.closeExtraPropertyPanel
+      scene.closePropertyPanel
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
     case SelectionChanged(tabbedPane) ⇒
       if (!tabbedLock) updateProtoPanel
-    case UpdatedPrototypeEvent(_) ⇒
-      scene.closeExtraPropertyPanel
+    case UpdatedProxyEvent(p: IDataProxyUI, _) ⇒
+      scene.removeAll(index + 1)
       updatePanel
+      setTab(p)
   }
 
   def create = {
@@ -126,7 +132,7 @@ class TaskPanel(proxy: ITaskDataProxyUI,
     }.flatten.toList
     toBeRemovedCapsules match {
       case Nil ⇒
-        scene.closePropertyPanel
+        scene.closePropertyPanel(index)
         Proxys -= proxy
         if (!proxy.generated) ConceptMenu.removeItem(proxy)
         true

@@ -19,23 +19,16 @@ package org.openmole.ide.core.implementation.sampling
 
 import java.awt._
 import scala.swing.Action
-import org.openmole.ide.misc.widget.MigPanel
 import java.awt.Graphics2D
 import java.awt.Point
 import java.awt.RenderingHints
-import org.netbeans.api.visual.widget.ImageWidget
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.model.data.ISamplingCompositionDataUI
-import org.openmole.ide.core.model.data.ISamplingDataUI
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.openmole.ide.core.model.sampling._
-import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.MigPanel
 import java.awt.LinearGradientPaint
-import javax.imageio.ImageIO
-import java.io.File
 
 class SamplingWidget(val proxy: ISamplingProxyUI,
                      val scenePanelUI: ISamplingCompositionPanelUI,
@@ -50,7 +43,7 @@ class SamplingWidget(val proxy: ISamplingProxyUI,
   val link = new LinkLabel(proxy.dataUI.preview,
     new Action("") {
       def apply = ScenesManager.currentSceneContainer match {
-        case Some(s: ISceneContainer) ⇒ s.scene.displayExtraPropertyPanel(samplingWidget)
+        case Some(s: ISceneContainer) ⇒ s.scene.displayPropertyPanel(samplingWidget)
         case _ ⇒
       }
     },

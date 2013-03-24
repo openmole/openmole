@@ -43,18 +43,13 @@ import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.panel._
 import org.openmole.ide.core.implementation.provider.MoleSceneMenuProvider
-import org.openmole.ide.core.model.commons.Constants._
-import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.widget.MigPanel
 import scala.collection.JavaConversions._
-import org.openmole.ide.core.model.panel.PanelMode._
 import scala.collection.mutable.HashMap
-import scala.collection.mutable.HashSet
 import scala.swing.Panel
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.builder.SceneFactory
-import org.openmole.ide.core.model.data.ICapsuleDataUI
 
 abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMoleScene
     with SelectProvider
@@ -67,12 +62,20 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   val capsuleLayer = new LayerWidget(this)
   val connectLayer = new LayerWidget(this)
   val propertyLayer = new LayerWidget(this)
-  val extraPropertyLayer = new LayerWidget(this)
+  val propertyLayer2 = new LayerWidget(this)
+  val propertyLayer3 = new LayerWidget(this)
   var currentSlotIndex = 1
+
+  def firstFree = {
+    def firstFree0(i: Int): Int = {
+      if (currentPanels(i).contents.size == 0 || i == 2) i
+      else firstFree0(i + 1)
+    }
+    firstFree0(0)
+  }
   // val _selection = new HashSet[ICapsuleUI]
 
-  val currentPanel = new MigPanel("")
-  val currentExtraPanel = new MigPanel("")
+  val currentPanels = List(new MigPanel(""), new MigPanel(""), new MigPanel(""))
 
   val moveAction = ActionFactory.createMoveAction(null, new MultiMoveProvider)
   val selectAction = ActionFactory.createSelectAction(this)
@@ -80,17 +83,22 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   addChild(capsuleLayer)
   addChild(connectLayer)
   addChild(propertyLayer)
-  addChild(extraPropertyLayer)
+  addChild(propertyLayer2)
+  addChild(propertyLayer3)
 
-  val extraPropertyWidget = new ComponentWidget(this, currentExtraPanel.peer) {
+  val propertyWidget = List(new ComponentWidget(this, currentPanels(0).peer) {
     setVisible(false)
-  }
+  },
+    new ComponentWidget(this, currentPanels(1).peer) {
+      setVisible(false)
+    },
+    new ComponentWidget(this, currentPanels(2).peer) {
+      setVisible(false)
+    })
 
-  val propertyWidget = new ComponentWidget(this, currentPanel.peer) {
-    setVisible(false)
-  }
-  extraPropertyLayer.addChild(extraPropertyWidget)
-  propertyLayer.addChild(propertyWidget)
+  propertyLayer.addChild(propertyWidget(0))
+  propertyLayer2.addChild(propertyWidget(1))
+  propertyLayer3.addChild(propertyWidget(2))
 
   getActions.addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)))
   getActions.addAction(ActionFactory.createRectangularSelectAction(this, capsuleLayer, this))
@@ -110,122 +118,124 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     super.paintChildren
   }
 
-  def currentPanelUI = currentPanel.contents.headOption match {
-    case Some(x: BasePanel) ⇒ x.panelUI
+  def currentPanel = currentPanels(0).contents.headOption match {
+    case Some(x: BasePanel) ⇒ x
     case _ ⇒ throw new UserBadDataError("There is no current panel.")
   }
+
+  def currentPanelUI = currentPanel.panelUI
 
   def displayCapsuleProperty(capsuleUI: ICapsuleUI, index: Int) =
     ScenesManager.currentSceneContainer match {
       case (Some(exe: ExecutionMoleSceneContainer)) ⇒
       case _ ⇒
-        closePropertyPanel
-        currentPanel.contents.removeAll
-        currentPanel.contents += new CapsulePanel(this, capsuleUI, index)
-        propertyWidget.setPreferredLocation(new Point(getView.getBounds().x.toInt + 20, 20))
-        propertyWidget.revalidate
-        propertyWidget.setVisible(true)
+        closePropertyPanels
+        removeAll(0)
+        currentPanels(0).contents += new CapsulePanel(this, capsuleUI, 0)
+        propertyWidget(0).setPreferredLocation(new Point(getView.getBounds().x.toInt + 20, 20))
+        propertyWidget(0).revalidate
+        propertyWidget(0).setVisible(true)
         refresh
     }
 
-  def displayPropertyPanel(proxy: IDataProxyUI,
-                           mode: PanelMode.Value) =
-    ScenesManager.currentSceneContainer match {
-      case (Some(exe: ExecutionMoleSceneContainer)) ⇒
-      case _ ⇒
-        closePropertyPanel
-        currentPanel.contents.removeAll
-        proxy match {
-          case x: ITaskDataProxyUI ⇒ currentPanel.contents += new TaskPanel(x, this, mode)
-          case x: IPrototypeDataProxyUI ⇒ currentPanel.contents += new PrototypePanel(x, this, mode)
-          case x: IEnvironmentDataProxyUI ⇒ currentPanel.contents += new EnvironmentPanel(x, this, mode)
-          case x: ISamplingCompositionDataProxyUI ⇒ currentPanel.contents += new SamplingCompositionPanel(x, this, mode)
-          case x: IHookDataProxyUI ⇒ currentPanel.contents += new HookPanel(x, this, mode)
-          case x: ISourceDataProxyUI ⇒ currentPanel.contents += new SourcePanel(x, this, mode)
-          case _ ⇒
-        }
-        propertyWidget.setPreferredLocation(new Point(getView.getBounds().x.toInt + 20, 20))
-        propertyWidget.revalidate
-        propertyWidget.setVisible(true)
+  def displayPropertyPanel(proxy: IDataProxyUI): IBasePanel = displayPropertyPanel(proxy, firstFree)
 
-        currentPanel.contents.get(currentPanel.contents.size - 1) match {
+  def displayPropertyPanel(proxy: IDataProxyUI,
+                           i: Int): IBasePanel =
+    ScenesManager.currentSceneContainer match {
+      case (Some(exe: ExecutionMoleSceneContainer)) ⇒ throw new UserBadDataError("No displaying in execution mode")
+      case _ ⇒
+        closePropertyPanel(i)
+        val p = proxy match {
+          case x: ITaskDataProxyUI ⇒ new TaskPanel(x, this, i)
+          case x: IPrototypeDataProxyUI ⇒ new PrototypePanel(x, this, i)
+          case x: IEnvironmentDataProxyUI ⇒ new EnvironmentPanel(x, this, i)
+          case x: ISamplingCompositionDataProxyUI ⇒ new SamplingCompositionPanel(x, this, i)
+          case x: IHookDataProxyUI ⇒ new HookPanel(x, this, i)
+          case x: ISourceDataProxyUI ⇒ new SourcePanel(x, this, i)
+          case _ ⇒ throw new UserBadDataError("No displaying available for " + proxy)
+        }
+        currentPanels(i).contents += p
+
+        locate(i)
+
+        currentPanels(i).contents.get(currentPanels(i).contents.size - 1) match {
           case x: BasePanel ⇒ x.nameTextField.requestFocus
           case _ ⇒
         }
         refresh
+        p
     }
 
-  def displayExtraPropertyPanel(compositionSamplingWidget: ISamplingCompositionWidget) = {
-    currentExtraPanel.contents.removeAll
-    currentExtraPanel.contents.add(compositionSamplingWidget match {
-      case s: ISamplingWidget ⇒ new SamplingPanel(s, this, EXTRA)
-      case f: IDomainWidget ⇒ new DomainPanel(f, this, EXTRA)
-    })
-    extraPropertyWidget.setVisible(true)
-    extraPropertyWidget.setPreferredLocation(new Point(propertyWidget.getBounds.x.toInt + currentPanel.bounds.width + 40, 20))
-    refresh
+  def locate(i: Int) = {
+    propertyWidget(i).setPreferredLocation(new Point(currentPanels.take(i).foldLeft(0) { (acc, panel) ⇒ acc + panel.bounds.width } + 10 * i + 10, 20))
+    propertyWidget(i).revalidate
+    propertyWidget(i).setVisible(true)
   }
 
-  def displayExtraPropertyPanel(dproxy: IDataProxyUI,
-                                mode: PanelMode.Value): IBasePanel = {
-    currentExtraPanel.contents.removeAll
-    var freeze = false
-    val panel = dproxy match {
-      case x: IPrototypeDataProxyUI ⇒
-        freeze = x.generated
-        new PrototypePanel(x, this, mode)
-      case x: IEnvironmentDataProxyUI ⇒ new EnvironmentPanel(x, this, mode)
+  def displayPropertyPanel(compositionSamplingWidget: ISamplingCompositionWidget): IBasePanel = {
+    val ff = firstFree
+    removeAll(ff)
+    val p = compositionSamplingWidget match {
+      case s: ISamplingWidget ⇒ new SamplingPanel(s, this, ff)
+      case f: IDomainWidget ⇒ new DomainPanel(f, this, ff)
     }
-    currentExtraPanel.contents.add(panel)
-    if (freeze) currentExtraPanel.contents.foreach {
-      _.enabled = !freeze
-    }
-    extraPropertyWidget.setVisible(true)
-    extraPropertyWidget.setPreferredLocation(new Point(propertyWidget.getBounds.x.toInt + currentPanel.bounds.width + 40, 20))
+    currentPanels(ff).contents += p
+    locate(ff)
     refresh
-    panel
+    p
   }
 
-  def displayExtraPropertyPanel(dproxy: IDataProxyUI,
-                                fromPanel: IBasePanel,
-                                mode: PanelMode.Value = EXTRA) = fromPanel.listenTo(displayExtraPropertyPanel(dproxy, mode))
-
-  def closeExtraPropertyPanel = {
-    savePropertyPanel(currentExtraPanel)
-    currentExtraPanel.contents.removeAll
-    extraPropertyWidget.setVisible(false)
-    refresh
+  def displayPropertyPanel(dproxy: IDataProxyUI,
+                           fromPanel: IBasePanel,
+                           i: Int): IBasePanel = {
+    val p = displayPropertyPanel(dproxy, i)
+    fromPanel.listenTo(p)
+    p
   }
 
-  def savePropertyPanel = savePropertyPanel(currentPanel)
+  def savePropertyPanel(i: Int) = savePropertyPanel(currentPanels(i))
 
-  def savePropertyPanel(panel: Panel) =
+  def savePropertyPanel(panel: Panel) = {
     if (panel.contents.size > 0) {
       panel.contents(0) match {
         case x: BasePanel ⇒ x.baseSave
         case _ ⇒
       }
     }
+  }
+  def closePropertyPanels = for (x ← 0 to 2) closePropertyPanel(x)
 
-  def closePropertyPanel: Unit = {
-    if (currentPanel.contents.size > 0) {
-      currentPanel.contents(0) match {
-        case x: BasePanel ⇒
-          if (!x.created) {
-            if (DialogFactory.closePropertyPanelConfirmation(x))
-              saveAndClose(x)
-          } else saveAndClose(x)
-        case _ ⇒
+  def closePropertyPanel = closePropertyPanel(firstFree)
+
+  def closePropertyPanel(i: Int): Unit = {
+    if (i >= 0 && i <= 2) {
+      if (currentPanels(i).contents.size > 0) {
+        currentPanels(i).contents(0) match {
+          case x: BasePanel ⇒
+            if (!x.created) {
+              if (DialogFactory.closePropertyPanelConfirmation(x)) {
+                saveAndClose(x, i)
+              }
+            } else {
+              saveAndClose(x, i)
+            }
+          case _ ⇒
+        }
       }
+      closePropertyPanel(i + 1)
     }
+  }
 
-    def saveAndClose(x: BasePanel) = {
-      if (x.mode != EXTRA_CREATION) closeExtraPropertyPanel
-      savePropertyPanel
-      currentPanel.contents.removeAll
-      propertyWidget.setVisible(false)
-      refresh
-    }
+  def removeAll(i: Int) = {
+    currentPanels(i).contents.removeAll
+    propertyWidget(i).setVisible(false)
+    refresh
+  }
+
+  def saveAndClose(x: BasePanel, i: Int) = {
+    savePropertyPanel(i)
+    removeAll(i)
   }
 
   def toSceneCoordinates(p: Point) = convertLocalToScene(p)

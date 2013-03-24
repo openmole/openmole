@@ -17,9 +17,11 @@
 package org.openmole.ide.core.model.sampling
 
 import org.openmole.ide.misc.tools.util._
+import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 
-trait ISamplingOrDomainProxyUI {
+trait ISamplingOrDomainProxyUI extends IDataProxyUI {
   def id: ID.Type
   def ordering: Int
   def ordering_=(o: Int)
+  def generated = false
 }

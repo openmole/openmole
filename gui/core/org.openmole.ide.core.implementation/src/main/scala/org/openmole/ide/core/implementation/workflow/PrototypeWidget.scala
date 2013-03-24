@@ -25,7 +25,6 @@ import java.awt.Rectangle
 import java.awt.RenderingHints
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.openmole.ide.core.model.commons.Constants._
-import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.workflow.{ ICapsuleUI, IMoleScene }
 import org.openmole.ide.misc.widget.LinkLabel

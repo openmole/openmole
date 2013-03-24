@@ -18,4 +18,16 @@ package org.openmole.ide.core.model.panel
 
 import swing.Publisher
 
-trait IBasePanel extends Publisher
+trait IBasePanel extends Publisher {
+  def index: Int
+
+  def created: Boolean
+
+  def create: Unit
+
+  def delete: Boolean
+
+  def save: Unit
+
+  def panelUI: IPanelUI
+}

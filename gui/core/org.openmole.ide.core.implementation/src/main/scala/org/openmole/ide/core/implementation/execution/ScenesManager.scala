@@ -35,7 +35,6 @@ import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.core.model.panel._
-import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.tools.image.Images._
 import scala.swing.Action
 import scala.swing.Button
@@ -87,7 +86,7 @@ object ScenesManager {
   }
 
   def displayExtraPropertyPanel(proxy: IDataProxyUI) = {
-    currentScene.getOrElse(addBuildSceneContainer("Mole").scene).displayExtraPropertyPanel(proxy, EXTRA)
+    currentScene.getOrElse(addBuildSceneContainer("Mole").scene).displayPropertyPanel(proxy, 1)
   }
 
   def currentPanelUI = currentScene match {
@@ -100,7 +99,7 @@ object ScenesManager {
     case _ ⇒ throw new UserBadDataError("There is no current samplingMap panel")
   }
 
-  def closePropertyPanel = List(currentScene).flatten.foreach { _.closePropertyPanel }
+  def closePropertyPanel = List(currentScene).flatten.foreach { _.closePropertyPanels }
 
   def changeSelection(widget: ICapsuleUI) = {
     widget.selected = !widget.selected
@@ -174,7 +173,7 @@ object ScenesManager {
   def closeAll = tabPane.pages.clear
 
   def saveCurrentPropertyWidget = currentSceneContainer match {
-    case Some(x: ISceneContainer) ⇒ x.scene.savePropertyPanel
+    case Some(x: ISceneContainer) ⇒ x.scene.savePropertyPanel(0)
     case _ ⇒ None
   }
 

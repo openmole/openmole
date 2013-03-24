@@ -18,18 +18,14 @@
 package org.openmole.ide.core.implementation.panel
 
 import java.awt.BorderLayout
-import java.awt.Color
-import org.openmole.ide.core.implementation.execution.ScenesManager
-import javax.imageio.ImageIO
 import javax.swing.ImageIcon
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.{ UpdatedProxyEvent, Proxys }
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import scala.collection.JavaConversions._
@@ -37,8 +33,6 @@ import scala.swing.Component
 import scala.swing.event.FocusGained
 import javax.imageio.ImageIO
 import BasePanel.IconChanged
-import org.openmole.ide.core.implementation.prototype.UpdatedPrototypeEvent
-import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
 
 object PrototypePanel {
   def deletePrototype(proxy: IPrototypeDataProxyUI): Boolean = {
@@ -79,9 +73,10 @@ object PrototypePanel {
 import PrototypePanel._
 class PrototypePanel[T](proxy: IPrototypeDataProxyUI,
                         scene: IMoleScene,
-                        mode: Value = CREATION) extends BasePanel(Some(proxy), scene, mode) {
+                        val index: Int) extends BasePanel(Some(proxy), scene) {
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
   val panelUI = proxy.dataUI.buildPanelUI
+  def created = Proxys.contains(proxy)
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
@@ -100,13 +95,15 @@ class PrototypePanel[T](proxy: IPrototypeDataProxyUI,
 
   def create = {
     Proxys += proxy
-    publish(new UpdatedPrototypeEvent(this))
     ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(nameTextField.text,
       proxy)
   }
 
   def delete = deletePrototype(proxy)
 
-  def save = proxy.dataUI = panelUI.saveContent(nameTextField.text)
+  def save = {
+    proxy.dataUI = panelUI.saveContent(nameTextField.text)
+    publish(new UpdatedProxyEvent(proxy, this))
+  }
 
 }
