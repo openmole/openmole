@@ -115,21 +115,23 @@ object GA {
   }
 
   trait GAProfile extends GA {
-    def plotter: GAProfilePlotter
+    //def plotter: GAProfilePlotter
     def aggregation: GAAggregation
   }
 
-  def profile(_plotter: GAProfilePlotter, _aggregation: GAAggregation) =
+  def profile(_x: Int, _nX: Int, _worst: Double, _aggregation: GAAggregation) =
     new GAAlgorithmBuilder with GAProfile {
-      val plotter = _plotter
+      //val plotter = _plotter
       val aggregation = _aggregation
 
       def apply(_diversityMetric: GADiversityMetric, _ranking: GARanking) =
-        new ProfileArchive with GAAlgorithm with ProfileModifier with ProfileElitism {
+        new GAAlgorithm with ProfileModifier with ProfileElitism with NoArchive with ProfileGenomePlotter {
           override type DIVERSIFIED = MGFitness
           override type RANKED = MGFitness
           val aManifest = manifest[A]
-          def plot(i: Individual[G, P, F]) = _plotter.plot(i)
+          val x = _x
+          val nX = _nX
+          val worst = _worst
           def aggregate(fitness: F) = _aggregation.aggregate(fitness)
           val diversityMetric = _diversityMetric
           val ranking = _ranking
