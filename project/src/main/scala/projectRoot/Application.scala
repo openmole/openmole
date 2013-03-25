@@ -6,23 +6,15 @@ import Keys._
 import net.virtualvoid.sbt.graph._
 
 trait Application extends Web with Libraries {
-  private implicit val org = organization := "org.openmole.ui"
+  private[Application] implicit val org = organization := "org.openmole.ui"
   private implicit val dir = file("application")
   lazy val application = Project("application", file("application")) aggregate(plugins, openmoleui,
     openmolePlugins, openmoleGuiPlugins, openmoleResources, openMoleDB)
 
   private lazy val pluginDependencies = libraryDependencies <++= version {
     v =>
-      Seq("org.openmole.core" % "org.openmole.core.model" % v,
-        "org.openmole.core" % "org.openmole.core.implementation" % v,
+      Seq("org.openmole.core" % "org.openmole.core.implementation" % v,
         "org.openmole.core" % "org.openmole.core.batch" % v,
-        "org.openmole.core" % "org.openmole.misc.workspace" % v,
-        "org.openmole.core" % "org.openmole.misc.replication" % v,
-        "org.openmole.core" % "org.openmole.misc.exception" % v,
-        "org.openmole.core" % "org.openmole.misc.tools" % v,
-        "org.openmole.core" % "org.openmole.misc.eventdispatcher" % v,
-        "org.openmole.core" % "org.openmole.misc.pluginmanager" % v,
-        "org.openmole.core" % "org.openmole.misc.logging" % v,
         "org.openmole.core" % "org.openmole.misc.sftpserver" % v,
         "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841" intransitive(),
         "org.eclipse.core" % "org.eclipse.core.contenttype" % "3.4.200.v20120523-2004" intransitive(),
@@ -37,13 +29,9 @@ trait Application extends Web with Libraries {
         "org.openmole" % "net.sourceforge.jline" % v intransitive(),
         "org.openmole" % "org.apache.ant" % v intransitive(),
         "org.openmole" % "uk.com.robustit.cloning" % v intransitive(),
-        "org.openmole" % "org.joda.time" % v intransitive(),
-        "org.openmole" % "org.scala-lang.scala-library" % v intransitive(),
-        "org.openmole" % "org.jasypt.encryption" % v intransitive(),
-        "org.openmole" % "org.apache.commons.configuration" % v intransitive(),
-        "org.openmole" % "org.objenesis" % v intransitive(),
         "org.openmole" % "com.github.scopt" % v intransitive(),
-        "org.openmole.ide" % "org.openmole.ide.core.implementation" % v)
+        "org.openmole.ide" % "org.openmole.ide.core.implementation" % v,
+        "org.openmole.core" % "org.openmole.misc.logging" % v)
   }
 
   private lazy val openmolePluginDependencies = libraryDependencies <++= version {
@@ -131,7 +119,9 @@ trait Application extends Web with Libraries {
     }
   }
 
-  lazy val openmoleui = OsgiProject("org.openmole.ui", singleton = true) settings (pluginDependencies) dependsOn (webCore)
+  lazy val openmoleui = OsgiProject("org.openmole.ui", singleton = true) settings (pluginDependencies) dependsOn
+    (webCore, coreMiscWorkspace, coreMiscReplication, coreMiscException, coreMiscTools, coreMiscEventDispatcher,
+      coreMiscPluginManager, jodaTime, scalaLang, jasypt, apacheCommonsConfig, objenesis)
 
   lazy val plugins = AssemblyProject("package", "assembly/plugins",
     Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> {s => "org.eclipse.equinox.launcher.jar"},
@@ -139,7 +129,20 @@ trait Application extends Web with Libraries {
   ) settings (pluginDependencies,
     libraryDependencies <++= (version) {v =>
       Seq("org.openmole.ui" %% "org.openmole.ui" % v exclude("org.eclipse.equinox","*"),
-        "org.openmole.web" %% "org.openmole.web.core" % v)
+        "org.openmole.core" %% "org.openmole.core.model" % v,
+        "org.openmole.web" %% "org.openmole.web.core" % v,
+        "org.openmole.core" %% "org.openmole.misc.workspace" % v,
+        "org.openmole.core" %% "org.openmole.misc.replication" % v,
+        "org.openmole.core" %% "org.openmole.misc.exception" % v,
+        "org.openmole.core" %% "org.openmole.misc.tools" % v,
+        "org.openmole.core" %% "org.openmole.misc.eventdispatcher" % v,
+        "org.openmole.core" %% "org.openmole.misc.pluginmanager" % v,
+        "org.openmole" % "org.joda.time" % v intransitive(),
+        "org.openmole" % "org.scala-lang.scala-library" % v intransitive(),
+        "org.openmole" % "org.jasypt.encryption" % v intransitive(),
+        "org.openmole" % "org.apache.commons.configuration" % v intransitive(),
+        "org.openmole" % "org.objenesis" % v intransitive()
+      )
     }, dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
 
 

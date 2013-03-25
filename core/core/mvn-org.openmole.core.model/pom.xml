@@ -5,27 +5,40 @@
   <!-- *** POM Relationships *************************************** -->
   <!-- ************************************************************* -->
   <parent>
-    <artifactId>openmole</artifactId>
+    <artifactId>core</artifactId>
     <groupId>org.openmole.core</groupId>
     <version>0.8.0-SNAPSHOT</version>
   </parent>
-  <artifactId>core</artifactId>
+  <artifactId>org.openmole.core.model</artifactId>
   <!-- ************************************************************* -->
   <!-- *** Build Settings ****************************************** -->
   <!-- ************************************************************* -->
-  <packaging>pom</packaging>
+  <packaging>bundle</packaging>
   <!-- ************************************************************* -->
   <!-- *** Project Information ************************************* -->
   <!-- ************************************************************* -->
-  <name>${project.artifactId}</name>
-  <description>Third-party OSGi bundles used by SimExplorer</description>
-  <modules>
-    <module>org.openmole.core.batch</module>
-    <module>mvn-org.openmole.core.model</module>
-    <module>org.openmole.core.implementation</module>
-    <module>org.openmole.core.serializer</module>
-  </modules>
-  <properties>
-    <include>src/main/resources/META-INF/MANIFEST.MF</include>
-  </properties>
+  <name>${project.artifactId} ${project.version}</name>
+  <description />
+  <dependencies>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>org.openmole.misc.eventdispatcher</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>org.openmole.misc.exception</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>org.openmole.misc.tools</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>org.openmole.misc.updater</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
 </project>

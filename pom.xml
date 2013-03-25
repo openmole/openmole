@@ -177,10 +177,6 @@
       <name>OpenMole repository</name>
       <url>http://maven.openmole.org/public/</url>
     </repository>
-    <repository>
-      <id>Sonatype Snapshot</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-    </repository>
   </repositories>
   <pluginRepositories>
     <pluginRepository>

@@ -8,7 +8,7 @@ import java.io.{ PrintStream, File, InputStream }
 import javax.servlet.annotation.MultipartConfig
 
 import org.openmole.core.serializer._
-import org.openmole.core.implementation.mole.MoleExecution
+import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.data.Context
 import com.thoughtworks.xstream.mapper.CannotResolveClassException
 import concurrent.Future
@@ -28,9 +28,9 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
   protected implicit def executor: concurrent.ExecutionContext = system.dispatcher
 
-  val cachedMoles = new DataHandler[String, MoleExecution](system)
+  val cachedMoles = new DataHandler[String, IMoleExecution](system)
 
-  def getStatus(exec: MoleExecution): String = {
+  def getStatus(exec: IMoleExecution): String = {
     if (!exec.started)
       "Stopped"
     else if (!exec.finished)
@@ -103,12 +103,12 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
         contentType = "text/html"
 
-        val moleExec = processXMLFile[MoleExecution.PartialMoleExecution](data, inS)
+        val moleExec = processXMLFile[(Context,ExecutionContext) => IMoleExecution](data, inS)
 
         val context = new ExecutionContext(new PrintStream(new File("./out")), null)
 
         moleExec match {
-          case (Some(pEx: MoleExecution.PartialMoleExecution), _) ⇒ {
+          case (Some(pEx), _) ⇒ {
             val exec = pEx(Context.empty, context)
 
             val clob = new SerialClob(SerializerService.serialize(exec).toCharArray)
@@ -127,7 +127,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
   //todo: update this for async
   post("/xml/createMole") {
-    val moleExec = processXMLFile[MoleExecution](fileParams.get("file"), fileParams.get("file").map(_.getInputStream))
+    val moleExec = processXMLFile[IMoleExecution](fileParams.get("file"), fileParams.get("file").map(_.getInputStream))
 
     moleExec match {
       case (Some(exec), _) ⇒ {
@@ -164,19 +164,19 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
         val mole = db withSession {
 
           MoleData.filter(_.id === pRams).map(_.clobbedMole).list().headOption match {
-            case Some(head) ⇒ Some(SerializerService.deserialize[MoleExecution](head.getAsciiStream))
+            case Some(head) ⇒ Some(SerializerService.deserialize[IMoleExecution](head.getAsciiStream))
             case _ ⇒ None
           }
         }
 
-        def returnStatusPage(exec: MoleExecution) = {
+        def returnStatusPage(exec: IMoleExecution) = {
           val pageData = (exec.moleJobs foldLeft Map("Ready" -> 0,
             "Running" -> 0,
             "Completed" -> 0,
             "Failed" -> 0,
             "Cancelled" -> 0)) {
               case (statMap, job) ⇒ statMap.updated(job.state.name, statMap(job.state.name) + 1)
-            } + ("id" -> pRams) + ("status" -> getStatus(exec)) + ("totalJobs" -> exec.numberOfJobs)
+            } + ("id" -> pRams) + ("status" -> getStatus(exec)) + ("totalJobs" -> exec.moleJobs.size)
 
           ssp("/executionData", pageData.toSeq: _*)
         }

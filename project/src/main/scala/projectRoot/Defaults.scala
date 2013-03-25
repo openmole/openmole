@@ -21,6 +21,8 @@ trait Defaults extends Build {
   lazy val install = TaskKey[Unit]("install", "Builds bundles and adds them to the local repo")
   lazy val assemble = TaskKey[Unit]("assemble")
 
+  lazy val osgiVersion = SettingKey[String]("osgi-version")
+
   lazy val Assemble = Tags.Tag("Assemble")
 
   lazy val copyDependencies = TaskKey[Unit]("copy-dependencies")
@@ -66,6 +68,7 @@ trait Defaults extends Build {
       },
       publishArtifact in (packageDoc in install) := false,
       copyDependencies := false,
+      osgiVersion := "3.8.2.v20130124-134944",
       concurrentRestrictions := Seq(Tags.exclusive(Assemble))
     )
 
@@ -76,14 +79,18 @@ trait Defaults extends Build {
                    exports: Seq[String] = Seq(),
                    privatePackages: Seq[String] = Seq(),
                    singleton: Boolean = false,
+                   bundleActivator: Option[String] = None,
                    dynamicImports: Seq[String] = Seq(),
-                   imports: Seq[String] = Seq("*;resolution:=optional"))
+                   imports: Seq[String] = Seq("*;resolution:=optional"),
+                   openmoleScope: Option[String] = None)
                  (implicit dir: File,
                    org: Setting[String] = organization := "org.openmole") = {
 
     val base = dir / (if(pathFromDir == "") artifactId else pathFromDir)
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
+
     val additional = buddyPolicy.map(v => Map("Eclipse-BuddyPolicy" -> v)).getOrElse(Map()) ++
+      openmoleScope.map(os => Map("OpenMOLE-Scope" -> os)).getOrElse(Map()) ++
       Map("Bundle-ActivationPolicy" -> "lazy")
 
 
@@ -99,29 +106,9 @@ trait Defaults extends Build {
           OsgiKeys.privatePackage := privatePackages,
           OsgiKeys.dynamicImportPackage := dynamicImports,
           OsgiKeys.importPackage := imports,
+          OsgiKeys.bundleActivator := bundleActivator,
           install <<= publishLocal,
           assemble := false))
-  }
-
-  def OSGIProject(artifactId: String,
-                  buddyPolicy: Option[String] = None,
-                  exports: Seq[String] = Seq(),
-                  privatePackages: Seq[String] = Seq(),
-                  dynamicImports: Seq[String] = Seq()) = {
-    val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
-    val additional = buddyPolicy.map(v => Map("Eclipse-BuddyPolicy" -> v)).getOrElse(Map()) ++ Map("Bundle-ActivationPolicy" -> "lazy")
-    Project.defaultSettings ++
-      SbtOsgi.osgiSettings ++
-      Seq(name:= artifactId,
-        OsgiKeys.bundleSymbolicName <<= name,
-        OsgiKeys.bundleVersion <<= version,
-        OsgiKeys.exportPackage := exportedPackages,
-        OsgiKeys.additionalHeaders := additional,
-        OsgiKeys.privatePackage := privatePackages,
-        OsgiKeys.dynamicImportPackage := dynamicImports,
-        install <<= publishLocal,
-        assemble := false
-      )
   }
 
   def AssemblyProject(base: String,

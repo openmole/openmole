@@ -14,23 +14,7 @@ import java.sql.Clob
  */
 class Scalatra extends LifeCycle {
 
-  val system = ActorSystem("WebEnvironment", ConfigFactory.parseString(
-    """
-      akka {
-        daemonic="on"
-        actor {
-          default-dispatcher {
-            executor = "fork-join-executor"
-            type = Dispatcher
-
-            fork-join-executor {
-              parallelism-min = 5
-              parallelism-max = 10
-            }
-          }
-        }
-      }
-    """).withFallback(ConfigFactory.load(classOf[ConfigFactory].getClassLoader)))
+  val system = ActorSystem("WebEnvironment", ConfigFactory.load(classOf[ConfigFactory].getClassLoader))
   //val myActor = system.actorOf(Props[MyActor])
 
   override def init(context: ServletContext) {
@@ -38,7 +22,6 @@ class Scalatra extends LifeCycle {
     // Mount one or more servlets
     context.mount(new MoleRunner(system), "/*")
     context.mount(new SlickRoutes(), "/c/*")
-    context.mount(new MyRepoServlet(system), "/repo/*")
   }
 
   override def destroy(context: ServletContext) {
