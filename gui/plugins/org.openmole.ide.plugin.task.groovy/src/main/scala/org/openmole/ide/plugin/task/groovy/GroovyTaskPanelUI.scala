@@ -31,14 +31,15 @@ import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
-import scala.swing.TabbedPane
+import swing.{ ScrollPane, TabbedPane }
+import swing.event.UIElementResized
 
 class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("") with ITaskPanelUI {
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val codeTextArea = new GroovyEditor {
     editor.text = pud.code
-    minimumSize = new Dimension(80, 100)
+    minimumSize = new Dimension(450, 200)
   }
 
   val libMultiTextField = new MultiChooseFileTextField("Libraries",
@@ -51,6 +52,10 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("") with ITas
 
   val components = List(("Code", codeTextArea), ("Library", libMultiTextField.panel))
 
+  listenTo(codeTextArea)
+  reactions += {
+    case x: UIElementResized ⇒ println("resized")
+  }
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     add(codeTextArea.editor,
       new Help(i18n.getString("groovyCode"),

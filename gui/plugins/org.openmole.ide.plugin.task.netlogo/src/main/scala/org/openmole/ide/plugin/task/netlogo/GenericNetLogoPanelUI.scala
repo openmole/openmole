@@ -71,7 +71,6 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
   reactions += {
     case DialogClosedEvent(nlogoTextField) ⇒
       globals = List()
-    // publish(new UpdatedProxyEvent(this))
   }
 
   val (inputMapping, outputMapping) = buildMultis(nlogoPath)
@@ -81,7 +80,7 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
       contents += new Label("Nlogo file")
       contents += (nlogoTextField, "growx,wrap")
       contents += (new Label("Commands"), "wrap")
-      contents += (new ScrollPane(launchingCommandTextArea) { minimumSize = new Dimension(150, 80) }, "span,growx")
+      contents += (new ScrollPane(launchingCommandTextArea) { minimumSize = new Dimension(450, 200) }, "span,growx")
     }),
     ("Input mapping", inputMapping),
     ("Output mapping", outputMapping),

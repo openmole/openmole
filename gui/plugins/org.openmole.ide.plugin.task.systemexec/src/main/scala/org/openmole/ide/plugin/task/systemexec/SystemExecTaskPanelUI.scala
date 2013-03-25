@@ -74,7 +74,7 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("") w
 
   val launchingCommandTextArea = new BashEditor {
     editor.text = ndu.lauchingCommands
-    preferredSize = new Dimension(40, 200)
+    minimumSize = new Dimension(450, 200)
   }
 
   val components = List(("Working directory", new PluginPanel("wrap") { contents += workdirTextField }),

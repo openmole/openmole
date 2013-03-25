@@ -61,18 +61,9 @@ trait IMoleScene {
 
   def removeAll(i: Int)
 
-  // def firstFree: Int
-  // def displayExtraPropertyPanel(proxy: IDataProxyUI, fromPanel: IBasePanel, mode: PanelMode.Value): Unit
-
-  //def displayExtraPropertyPanel(proxy: IDataProxyUI, mode: PanelMode.Value): IBasePanel
-
-  //def displayExtraPropertyPanel(samplingCompositionWidget: ISamplingCompositionWidget)
-
   def currentPanel: IBasePanel
 
   def currentPanelUI: IPanelUI
-
-  // def closeExtraPropertyPanel
 
   def closePropertyPanel
 
@@ -81,8 +72,6 @@ trait IMoleScene {
   def closePropertyPanels
 
   def propertyWidget: List[ComponentWidget]
-
-  //def extraPropertyWidget: ComponentWidget
 
   def removeEdge(id: String)
 
