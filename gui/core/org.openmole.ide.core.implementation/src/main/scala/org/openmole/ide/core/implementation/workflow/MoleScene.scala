@@ -73,7 +73,6 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     }
     firstFree0(0)
   }
-  // val _selection = new HashSet[ICapsuleUI]
 
   val currentPanels = List(new MigPanel(""), new MigPanel(""), new MigPanel(""))
 
@@ -345,7 +344,6 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
           if (!ScenesManager.selection.contains(x)) {
             ScenesManager.clearSelection
             ScenesManager.changeSelection(x)
-            // ScenesManager.addToSelection(x)
             x.repaint
           }
           original = Some(widget.getPreferredLocation)
