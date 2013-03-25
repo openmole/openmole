@@ -18,11 +18,9 @@
 package org.openmole.ide.core.implementation.execution
 
 import org.openmole.core.model.mole.IMoleExecution._
-import java.io.PrintStream
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
-import TextAreaOutputStream._
 import org.openmole.misc.exception.ExceptionUtils
 import org.openmole.core.model.mole.IMoleExecution.JobFailed
 import org.openmole.core.model.mole.IMoleExecution.ExceptionRaised
@@ -40,7 +38,7 @@ class ExecutionExceptionListener(exeManager: ExecutionManager) extends EventList
         exeManager.executionJobExceptionTextArea.append(e.level + ": Exception managing job " + e.moleJob)
         exeManager.executionJobExceptionTextArea.append(ExceptionUtils.prettify(e.exception))
       case h: HookExceptionRaised ⇒
-        exeManager.executionJobExceptionTextArea.append(h.level + ": Exception in misc " + h.hook)
+        exeManager.executionJobExceptionTextArea.append(h.level + ": Exception in hook " + h.hook)
         exeManager.executionJobExceptionTextArea.append(ExceptionUtils.prettify(h.exception))
       case s: SourceExceptionRaised ⇒
         exeManager.executionJobExceptionTextArea.append(s.level + ": Exception in source " + s.source)
@@ -48,7 +46,7 @@ class ExecutionExceptionListener(exeManager: ExecutionManager) extends EventList
       case s: ProfilerExceptionRaised ⇒
         exeManager.executionJobExceptionTextArea.append(s.level + ": Exception in profiler " + s.profiler)
         exeManager.executionJobExceptionTextArea.append(ExceptionUtils.prettify(s.exception))
-
     }
+    exeManager.tabbedPane.selection.index = 1
   }
 }
