@@ -69,7 +69,7 @@ trait Defaults extends Build {
       publishArtifact in (packageDoc in install) := false,
       copyDependencies := false,
       osgiVersion := "3.8.2.v20130124-134944",
-      concurrentRestrictions := Seq(Tags.exclusive(Assemble))
+      concurrentRestrictions := Seq(Tags.limitSum(8, Tags.Untagged))
     )
 
 

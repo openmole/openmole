@@ -37,7 +37,7 @@ trait CoreMisc extends CoreDefaults with Libraries {
 
   lazy val coreMiscTools = OsgiProject("org.openmole.misc.tools") settings
     (libraryDependencies <++= (osgiVersion, version) {(oV,v) => Seq("org.eclipse.core" % "org.eclipse.osgi" % oV,
-      "org.openmole" % "com.ice.tar" % v)}) dependsOn //TODO make the version some sort of dynamic variable
+      "org.openmole" % "com.ice.tar" % v)}) dependsOn //TODO sbtify ice.tar
     (coreMiscException, xstream, icu4j, xstream, icu4j, groovy, objenesis,
       apacheCommonsExec, apacheCommonsPool, apacheCommonsMath, coreMiscOsgi, jodaTime)
 

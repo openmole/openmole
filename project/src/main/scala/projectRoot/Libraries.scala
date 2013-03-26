@@ -14,9 +14,9 @@ import Keys._
  */
 trait Libraries extends Defaults {
   lazy val libraries = Project(id = "openmole-libraries",
-    base = file("libraries")) aggregate
-    (jetty,scalatra,logback, h2, bonecp, slick, slf4j, xstream, icu4j, groovy, apacheCommonsExec, objenesis, scalaLang,
-      apacheCommonsPool, apacheCommonsMath, jodaTime, gnuCrypto, db4o, apacheCommonsConfig, jasypt)
+    base = file("libraries")) aggregate (jetty,scalatra,logback, h2, bonecp, slick, slf4j, xstream, icu4j, groovy,
+    apacheCommonsExec, objenesis, scalaLang, apacheCommonsPool, apacheCommonsMath, jodaTime, gnuCrypto, db4o,
+    apacheCommonsConfig, jasypt, robustIt)
 
   private implicit val dir = file("libraries")
 
@@ -90,4 +90,7 @@ trait Libraries extends Defaults {
 
   lazy val db4o = OsgiProject("com.db4o", buddyPolicy = Some("global")) settings
     (libraryDependencies += "com.db4o" % "db4o-full-java5" % "8.1-SNAPSHOT")
+
+  lazy val robustIt = OsgiProject("uk.com.robustit.cloning", exports = Seq("com.rits.*")) settings
+    (libraryDependencies += "uk.com.robust-it" % "cloning" % "1.7.4")
 }

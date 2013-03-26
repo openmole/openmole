@@ -23,7 +23,7 @@
     <module>org.openmole.core.batch</module>
     <module>mvn-org.openmole.core.model</module>
     <module>org.openmole.core.implementation</module>
-    <module>org.openmole.core.serializer</module>
+    <module>mvn-org.openmole.core.serializer</module>
   </modules>
   <properties>
     <include>src/main/resources/META-INF/MANIFEST.MF</include>
