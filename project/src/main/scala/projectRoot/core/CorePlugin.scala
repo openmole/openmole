@@ -15,7 +15,7 @@ trait CorePlugin extends CoreDefaults with CoreMisc with CoreCore {
   lazy val corePluginNetLogo = OsgiProject("org.openmole.plugin.task.netlogo") dependsOn (coreImpl, coreMiscException,
     coreMiscWorkspace, corePluginExternal)
 
-  lazy val corePluginNetLogo4 = OsgiProject("org.openmole.plugin.task.netlogo4") dependsOn (corePluginNetLogo,
+  lazy val corePluginNetLogo4 = OsgiProject("org.openmole.plugin.task.netlogo4", imports=Seq("org.nlogo.*;version=\"[4,5)\"", "*;resolution:=optional")) dependsOn (corePluginNetLogo,
     netlogo4_noscala)
 
   lazy val corePluginNetLogo5 = OsgiProject("org.openmole.plugin.task.netlogo5") dependsOn (corePluginNetLogo,

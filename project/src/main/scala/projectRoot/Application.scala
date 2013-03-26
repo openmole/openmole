@@ -46,7 +46,7 @@ trait Application extends Web with Libraries {
         pluginTemplate("grouping.onvariable"),
         pluginTemplate("grouping.batch"),
         sbtPluginTemplate("task.netlogo"),
-        pluginTemplate("task.netlogo4"),
+        sbtPluginTemplate("task.netlogo4"),
         sbtPluginTemplate("task.netlogo5"),
         pluginTemplate("task.systemexec"),
         pluginTemplate("task.groovy"),
