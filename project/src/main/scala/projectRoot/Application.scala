@@ -36,6 +36,7 @@ trait Application extends Web with Libraries {
   private lazy val openmolePluginDependencies = libraryDependencies <++= version {
     v => {
       def pluginTemplate(subId: String) = "org.openmole.core" % ("org.openmole.plugin." + subId) % v intransitive()
+      def sbtPluginTemplate(subId: String) = "org.openmole.core" %% ("org.openmole.plugin." + subId) % v intransitive()
       Seq(pluginTemplate("tools.groovy"),
         pluginTemplate("environment.gridscale"),
         pluginTemplate("environment.glite"),
@@ -44,9 +45,9 @@ trait Application extends Web with Libraries {
         pluginTemplate("environment.pbs"),
         pluginTemplate("grouping.onvariable"),
         pluginTemplate("grouping.batch"),
-        pluginTemplate("task.netlogo"),
+        sbtPluginTemplate("task.netlogo"),
         pluginTemplate("task.netlogo4"),
-        pluginTemplate("task.netlogo5"),
+        sbtPluginTemplate("task.netlogo5"),
         pluginTemplate("task.systemexec"),
         pluginTemplate("task.groovy"),
         pluginTemplate("task.scala"),
@@ -75,8 +76,8 @@ trait Application extends Web with Libraries {
         pluginTemplate("builder.evolution"),
         pluginTemplate("builder.stochastic"),
         "org.openmole" % "au.com.bytecode.opencsv" % v intransitive(),
-        "org.openmole" % "ccl.northwestern.edu.netlogo5" % "5.0.3" intransitive(),
-        "org.openmole" % "ccl.northwestern.edu.netlogo4" % "4.1.3" intransitive(),
+        "org.openmole" %% "ccl.northwestern.edu.netlogo5" % "5.0.3" intransitive(),
+        "org.openmole" %% "ccl.northwestern.edu.netlogo4" % "4.1.3" intransitive(),
         "org.openmole" % "fr.iscpif.mgo" % v intransitive()
       )
     }

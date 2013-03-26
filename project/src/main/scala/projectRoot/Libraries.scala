@@ -16,7 +16,7 @@ trait Libraries extends Defaults {
   lazy val libraries = Project(id = "openmole-libraries",
     base = file("libraries")) aggregate (jetty,scalatra,logback, h2, bonecp, slick, slf4j, xstream, icu4j, groovy,
     apacheCommonsExec, objenesis, scalaLang, apacheCommonsPool, apacheCommonsMath, jodaTime, gnuCrypto, db4o,
-    apacheCommonsConfig, jasypt, robustIt)
+    apacheCommonsConfig, jasypt, robustIt, netlogo4, netlogo5, netlogo4_noscala, netlogo5_noscala)
 
   private implicit val dir = file("libraries")
 
@@ -50,8 +50,8 @@ trait Libraries extends Defaults {
 
   lazy val icu4j = OsgiProject("com.ibm.icu") settings (libraryDependencies += "com.ibm.icu" % "icu4j" % "4.0.1")
 
-  lazy val groovy = OsgiProject("org.codehaus.groovy", buddyPolicy = Some("global"), exports = Seq("groovy.*","org.codehaus.*"), privatePackages = Seq("!scala.*,*")) settings
-    (libraryDependencies ++= Seq("org.codehaus.groovy" % "groovy-all" % "2.0.5",
+  lazy val groovy = OsgiProject("org.codehaus.groovy", buddyPolicy = Some("global"), exports = Seq("groovy.*","org.codehaus.*"),
+    privatePackages = Seq("!scala.*,*")) settings (libraryDependencies ++= Seq("org.codehaus.groovy" % "groovy-all" % "2.0.5",
       "org.fusesource.jansi" % "jansi" % "1.2.1"))
 
   lazy val apacheCommonsExec = OsgiProject("org.apache.commons.exec") settings
@@ -93,4 +93,36 @@ trait Libraries extends Defaults {
 
   lazy val robustIt = OsgiProject("uk.com.robustit.cloning", exports = Seq("com.rits.*")) settings
     (libraryDependencies += "uk.com.robust-it" % "cloning" % "1.7.4")
+
+  lazy val netlogo4_noscala = OsgiProject("ccl.northwestern.edu.netlogo4.noscala", exports = Seq("org.nlogo.*"),
+    privatePackages = Seq("!scala.*", "*")) settings
+    (libraryDependencies ++=
+      Seq("ccl.northwestern.edu" % "netlogo" % "4.1.3",
+        "org.picocontainer" % "picocontainer" % "2.8",
+        "org.objectweb" % "asm" % "3.1",
+        "org.objectweb" % "asm-commons" % "3.1"), version := "4.1.3", scalaVersion := "2.8.0")
+
+  lazy val netlogo5_noscala = OsgiProject("ccl.northwestern.edu.netlogo5.noscala", exports = Seq("org.nlogo.*"),
+    privatePackages = Seq("!scala.*", "*")) settings
+    (libraryDependencies ++=
+      Seq("ccl.northwestern.edu" % "netlogo" % "5.0.3",
+        "org.picocontainer" % "picocontainer" % "2.8",
+        "org.objectweb" % "asm-all" % "3.3.1",
+        "org.scala-lang" % "scala-library" % "2.9.2"), version := "5.0.3", scalaVersion := "2.9.2")
+
+  lazy val netlogo4 = OsgiProject("ccl.northwestern.edu.netlogo4", exports = Seq("org.nlogo.*"),
+    privatePackages = Seq("*")) settings
+    (libraryDependencies ++=
+      Seq("ccl.northwestern.edu" % "netlogo" % "4.1.3",
+        "org.picocontainer" % "picocontainer" % "2.8",
+        "org.objectweb" % "asm" % "3.1",
+        "org.objectweb" % "asm-commons" % "3.1"), version := "4.1.3", scalaVersion := "2.8.0")
+
+  lazy val netlogo5 = OsgiProject("ccl.northwestern.edu.netlogo5", exports = Seq("org.nlogo.*"),
+    privatePackages = Seq("*")) settings
+    (libraryDependencies ++=
+      Seq("ccl.northwestern.edu" % "netlogo" % "5.0.3",
+      "org.scala-lang" % "scala-library" % "2.9.2",
+      "org.objectweb" % "asm-all" % "3.3.1",
+      "org.picocontainer" % "picocontainer" % "2.8"), version := "5.0.3", scalaVersion := "2.9.2")
 }
