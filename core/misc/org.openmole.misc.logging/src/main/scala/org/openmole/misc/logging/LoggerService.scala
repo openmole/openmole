@@ -20,19 +20,16 @@ package org.openmole.misc.logging
 import org.apache.log4j.{ Logger ⇒ L4JLogger, Level ⇒ L4JLevel, Appender ⇒ L4JAppender }
 import org.apache.log4j.BasicConfigurator
 import java.util.logging._
-//import org.slf4j.bridge._
+
 import org.openmole.misc.workspace._
 import org.openmole.misc.tools.io.FileUtil._
 import collection.JavaConversions._
 
 object LoggerService {
 
-  /*val blackList = Set(
-    "ch.ethz.ssh2.log.Logger",
-    "org.glite.voms.contact.VOMSProxyInit",
-    "org.globus.gsi") */
-  private val LogLevel = new ConfigurationLocation("LoggerService", "LogLevel")
+  //val blackList = TSet[String]("net.schmizz.sshj")
 
+  private val LogLevel = new ConfigurationLocation("LoggerService", "LogLevel")
   Workspace += (LogLevel, "INFO")
 
   def level(levelLabel: String) = {
@@ -42,23 +39,27 @@ object LoggerService {
 
     val rootLogger = Logger.getLogger("")
     rootLogger.setLevel(level)
+
     val ch = new ConsoleHandler
     ch.setLevel(level)
-    /*ch.setFilter(
+    /* ch.setFilter(
       new Filter {
-        def isLoggable(record: LogRecord) =
-          !blackList.exists(record.getSourceClassName.contains(_))
+        def isLoggable(record: LogRecord) = {
+          println("Loggable " + record.getSourceClassName)
+          !blackList.single.exists(record.getSourceClassName.startsWith)
+        }
       })  */
 
     rootLogger.addHandler(ch)
-
-    //L4JLogger.getRootLogger.setLevel(L4JLevel.toLevel(levelLabel))
 
   }
 
   def init = {
     BasicConfigurator.configure
     L4JLogger.getRootLogger.setLevel(L4JLevel.ERROR)
+    val root = org.slf4j.LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME).asInstanceOf[ch.qos.logback.classic.Logger]
+    root.setLevel(ch.qos.logback.classic.Level.ERROR)
     level(Workspace.preference(LogLevel))
   }
+
 }
