@@ -30,7 +30,7 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Failure, Success }
-import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.exception.ExceptionUtils
 
 object ExecutionManager {
   implicit def executionStatesDecorator(s: scala.collection.mutable.Map[ExecutionState.ExecutionState, AtomicInteger]) = new {
@@ -51,11 +51,9 @@ class ExecutionManager(manager: IMoleSceneManager,
   logTextArea.rows = 10
   logTextArea.editable = false
 
-  val executionJobExceptionTextArea = new TextArea
-  executionJobExceptionTextArea.editable = false
+  val executionJobExceptionTextArea = new StatusBar
 
-  val moleExecutionExceptionTextArea = new TextArea
-  moleExecutionExceptionTextArea.editable = false
+  val moleExecutionExceptionTextArea = new StatusBar
 
   override val printStream = new PrintStream(new TextAreaOutputStream(logTextArea), true)
   var moleExecution: Option[IMoleExecution] = None
@@ -146,12 +144,9 @@ class ExecutionManager(manager: IMoleSceneManager,
         revalidate
         timer.start
         mExecution.start
-      case Failure(e: UserBadDataError) ⇒
-        logTextArea.append(e.getMessage)
-        logTextArea.append(e.message)
-        None
       case Failure(e) ⇒
-        logTextArea.append(e.getMessage)
+        executionJobExceptionTextArea.block(e.getMessage, None, ExceptionUtils.prettify(e))
+        tabbedPane.selection.index = 1
         None
     }
   }
