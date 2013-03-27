@@ -38,11 +38,9 @@ import java.util.concurrent.atomic.AtomicInteger
 class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
 
   var startingCapsule: Option[ICapsuleUI] = None
-  //var _capsules = new HashMap[String, ICapsuleUI]
   private val _capsules = TMap[String, ICapsuleUI]()
   var _connectors = new HashMap[String, IConnectorUI]
   var capsuleConnections = new HashMap[ICapsuleDataUI, HashSet[IConnectorUI]]
-  //var nodeID = new AtomicInteger
   var edgeID = 0
 
   var dataUI: IMoleDataUI = new MoleDataUI
@@ -78,17 +76,19 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
     _cacheMole()
   }
 
-  def cleanUnusedPrototypes
-  = atomic { implicit actx ⇒
+  def cleanUnusedPrototypes = atomic { implicit actx ⇒
     val pUI = (Proxys.tasks.flatMap { t ⇒
       val impl = t.dataUI.implicitPrototypes
-      t.dataUI.outputs ::: t.dataUI.inputs ::: impl._1 ::: impl._2 } :::
+      t.dataUI.outputs ::: t.dataUI.inputs ::: impl._1 ::: impl._2
+    } :::
       Proxys.hooks.flatMap { h ⇒
-      val impl = h.dataUI.implicitPrototypes
-      h.dataUI.inputs ::: h.dataUI.outputs ::: impl._1 ::: impl._2} :::
+        val impl = h.dataUI.implicitPrototypes
+        h.dataUI.inputs ::: h.dataUI.outputs ::: impl._1 ::: impl._2
+      } :::
       Proxys.sources.flatMap { s ⇒
-      val impl = s.dataUI.implicitPrototypes
-        s.dataUI.inputs ::: s.dataUI.outputs ::: impl._1 ::: impl._2}).distinct
+        val impl = s.dataUI.implicitPrototypes
+        s.dataUI.inputs ::: s.dataUI.outputs ::: impl._1 ::: impl._2
+      }).distinct
     Proxys.prototypes.diff(pUI).foreach {
       p ⇒ if (p.generated) Proxys -= p
     }
@@ -106,13 +106,9 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
     startingCapsule.get.defineAsStartingCapsule(true)
   }
 
-  //def getNodeID: String = "node" + nodeID
-
   def getEdgeID: String = "edge" + edgeID
 
   override def registerCapsuleUI(cv: ICapsuleUI) = {
-    // nodeID += 1
-    // _capsules += getNodeID -> cv
     +=(cv)
     if (capsules.size == 1) setStartingCapsule(cv)
     invalidateCache
