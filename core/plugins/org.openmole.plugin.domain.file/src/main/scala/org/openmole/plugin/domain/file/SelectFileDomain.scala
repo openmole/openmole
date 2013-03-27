@@ -26,7 +26,6 @@ object SelectFileDomain {
   def apply(base: File, path: String) = new SelectFileDomain(base, path)
 }
 
-
 class SelectFileDomain(val base: File, val path: String) extends Domain[File] with Finite[File] {
 
   override def computeValues(context: Context): Iterable[File] =

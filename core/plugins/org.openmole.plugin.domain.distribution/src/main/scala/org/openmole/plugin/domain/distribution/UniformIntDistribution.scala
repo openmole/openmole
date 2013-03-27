@@ -28,7 +28,6 @@ object UniformIntDistribution {
   def apply(max: Option[Int] = None) = new UniformIntDistribution(max)
 }
 
-
 sealed class UniformIntDistribution(max: Option[Int] = None) extends Domain[Int] with Discrete[Int] {
 
   override def iterator(context: Context): Iterator[Int] = {

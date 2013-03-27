@@ -27,7 +27,6 @@ object DoubleRelative {
 
 }
 
-
 sealed class DoubleRelative(val nominal: String, val percent: String, val size: String) extends Relative[Double] {
 
   override def computeValues(context: Context): Iterable[Double] = {

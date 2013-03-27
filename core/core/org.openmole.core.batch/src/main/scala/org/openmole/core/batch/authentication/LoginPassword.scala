@@ -19,6 +19,15 @@ package org.openmole.core.batch.authentication
 
 import fr.iscpif.gridscale.authentication._
 
+object LoginPassword {
+
+  def apply(
+    login: String,
+    cypheredPassword: String,
+    target: String) = new LoginPassword(login, cypheredPassword, target)
+
+}
+
 class LoginPassword(
     val login: String,
     val cypheredPassword: String,

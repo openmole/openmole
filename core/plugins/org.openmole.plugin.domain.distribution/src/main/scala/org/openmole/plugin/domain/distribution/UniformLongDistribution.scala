@@ -28,7 +28,6 @@ object UniformLongDistribution {
   def apply() = new UniformLongDistribution
 }
 
-
 sealed class UniformLongDistribution extends Domain[Long] with Discrete[Long] {
 
   override def iterator(context: Context): Iterator[Long] = {
