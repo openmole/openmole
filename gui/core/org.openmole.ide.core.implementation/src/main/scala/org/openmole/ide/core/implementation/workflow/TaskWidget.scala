@@ -17,11 +17,9 @@
 
 package org.openmole.ide.core.implementation.workflow
 
-import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import javax.imageio.ImageIO
 import org.openmole.ide.core.model.commons.Constants._
-import org.openmole.ide.core.model.commons._
 import org.openmole.ide.core.model.workflow._
 import java.awt._
 import scala.swing.Panel
@@ -36,7 +34,6 @@ class TaskWidget(scene: IMoleScene,
       RenderingHints.VALUE_ANTIALIAS_ON)
 
     g.setPaint(backColor)
-    // g.setColor(backColor)
     g.fillRoundRect(0, 0, preferredSize.width, preferredSize.height, 5, 5)
     g.setColor(borderColor)
     g.setStroke(new BasicStroke(5))
@@ -62,18 +59,8 @@ class TaskWidget(scene: IMoleScene,
       case Some(x: ITaskDataProxyUI) ⇒
         scene match {
           case y: BuildMoleScene ⇒
-
-            //            new LinearGradientPaint(start, end, dist,
-            //              Array(new Color(215, 238, 244),
-            //                new Color(228, 228, 228),
-            //                new Color(215, 238, 244)))
-
             new Color(215, 238, 244)
           case _ ⇒
-            //            new LinearGradientPaint(start, end, dist,
-            //              Array(new Color(215, 238, 244, 64),
-            //                new Color(228, 228, 228),
-            //                new Color(215, 238, 244, 64)))
             new Color(215, 238, 244, 64)
         }
       case _ ⇒

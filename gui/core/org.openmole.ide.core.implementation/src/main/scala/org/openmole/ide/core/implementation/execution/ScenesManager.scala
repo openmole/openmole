@@ -56,6 +56,8 @@ object ScenesManager {
 
   def invalidateSelection = _selection.single() = None
 
+  def invalidateMoles = moleScenes.foreach { _.manager.invalidateCache }
+
   def selection = atomic { implicit actx ⇒
     _selection() match {
       case Some(_) ⇒

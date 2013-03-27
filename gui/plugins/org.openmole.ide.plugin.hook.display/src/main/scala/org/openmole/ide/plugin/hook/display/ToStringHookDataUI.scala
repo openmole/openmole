@@ -29,7 +29,9 @@ class ToStringHookDataUI(val name: String = "",
 
   def buildPanelUI = new ToStringHookPanelUI(this)
 
+  override def cloneWithoutPrototype(proxy: IPrototypeDataProxyUI) =
+    new ToStringHookDataUI(name, toBeHooked.filterNot { _ == proxy })
+
   def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]) =
     ToStringHook(toBeHooked.map { protoMapping }.toSeq: _*)
-
 }

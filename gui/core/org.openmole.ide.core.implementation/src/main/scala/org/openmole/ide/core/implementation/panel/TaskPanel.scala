@@ -108,7 +108,7 @@ class TaskPanel(proxy: ITaskDataProxyUI,
   reactions += {
     case FocusGained(source: Component, _, _) ⇒
       panelUI.help.switchTo(source)
-      scene.closePropertyPanel
+    //scene.closePropertyPanel(index)
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
     case SelectionChanged(tabbedPane) ⇒
       if (!tabbedLock) updateProtoPanel

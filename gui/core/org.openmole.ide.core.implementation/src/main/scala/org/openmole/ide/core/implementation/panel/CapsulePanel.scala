@@ -24,9 +24,9 @@ import swing.{ TabbedPane, Label }
 class CapsulePanel(scene: IMoleScene,
                    capsule: ICapsuleUI,
                    val index: Int,
-                   tabIndex: Int = 0) extends BasePanel(None, scene) {
+                   tabIndex: Int) extends BasePanel(None, scene) {
 
-  val panelUI = capsule.dataUI.buildPanelUI(0)
+  val panelUI = capsule.dataUI.buildPanelUI(index)
   def created = true
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
@@ -38,7 +38,7 @@ class CapsulePanel(scene: IMoleScene,
     contents += panelUI.help
   }
   peer.add(capsulePanel.peer, BorderLayout.CENTER)
-  tabbedPane.selection.index = index
+  tabbedPane.selection.index = tabIndex
 
   def create {}
 

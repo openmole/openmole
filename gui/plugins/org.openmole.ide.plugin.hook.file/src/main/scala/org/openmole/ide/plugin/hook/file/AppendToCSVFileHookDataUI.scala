@@ -23,16 +23,19 @@ import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.data.HookDataUI
 
 class AppendToCSVFileHookDataUI(val name: String = "",
-                                val prototypes: Iterable[IPrototypeDataProxyUI] = List.empty,
+                                val toBeHooked: List[IPrototypeDataProxyUI] = List.empty,
                                 val fileName: String = "") extends HookDataUI {
 
   def buildPanelUI = new AppendToCSVFileHookPanelUI(this)
 
   def coreClass = classOf[AppendToCSVFileHook]
 
+  override def cloneWithoutPrototype(proxy: IPrototypeDataProxyUI) =
+    new AppendToCSVFileHookDataUI(name, toBeHooked.filterNot(_ == proxy), fileName)
+
   def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]) =
     AppendToCSVFileHook(
       fileName,
-      prototypes.map { protoMapping }.toSeq: _*)
+      toBeHooked.map { protoMapping }.toSeq: _*)
 
 }

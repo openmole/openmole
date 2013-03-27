@@ -36,12 +36,4 @@ abstract class TaskDataUI extends ITaskDataUI {
       case Success(x: ITask) ⇒ ToolDataUI.implicitPrototypes(y ⇒ x.inputs.map { _.prototype }.toList, inputs, y ⇒ x.outputs.map { _.prototype }.toList, outputs)
       case Failure(_) ⇒ (List(), List())
     }
-
-  def removePrototypeOccurencies(pproxy: IPrototypeDataProxyUI) = {
-    inputs = inputs.filterNot { _ == pproxy }
-    outputs = outputs.filterNot { _ == pproxy }
-  }
-
-  def filterPrototypeOccurencies(pproxy: IPrototypeDataProxyUI) =
-    (inputs.filter(_ == pproxy) ++ outputs.filter(_ == pproxy)).distinct
 }

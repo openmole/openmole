@@ -32,6 +32,9 @@ class CSVSourceDataUI(val name: String = "",
 
   def buildPanelUI = new CSVSourcePanelUI(this)
 
+  override def cloneWithoutPrototype(proxy: IPrototypeDataProxyUI) =
+    new CSVSourceDataUI(name, csvFilePath, prototypeMapping.filterNot(_._2 == proxy))
+
   def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]) = {
     val source = CSVSource(new File(csvFilePath))
     prototypeMapping.filter(!_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI]).foreach {

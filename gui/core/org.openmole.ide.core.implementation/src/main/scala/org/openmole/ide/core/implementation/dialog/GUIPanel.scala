@@ -166,8 +166,9 @@ class GUIPanel extends MainFrame {
               }
               requiredFiles.filter(x ⇒ allDepending.toList.contains(x._1)).foreach {
                 case (fi, p) ⇒
-                  if (PrototypePanel.deletePrototype(p))
-                    unloadAndDelete(fi)
+                  Proxys -= p
+                  ConceptMenu.removeItem(p)
+                  unloadAndDelete(fi)
                 case _ ⇒
               }
               unloadAndDelete(f)

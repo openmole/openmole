@@ -30,23 +30,18 @@ import org.openmole.ide.core.implementation.sampling.{ FactorProxyUI, DomainProx
 import org.openmole.core.model.domain.Domain
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.model.builder.IPuzzleUIMap
-import org.openmole.misc.tools.obj.ClassUtils
-import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.core.model.transition.{ IEndExplorationTransition, IExplorationTransition, IAggregationTransition }
 import org.openmole.ide.core.model.factory.IBuilderFactoryUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 import scala.swing.ScrollPane
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
-import org.openmole.ide.core.implementation.builder.PuzzleUIMap
 import scala.Some
-import org.openmole.ide.core.implementation.builder.BuiltCompositionSampling
 import org.openmole.ide.core.implementation.registry.DefaultKey
 
 object Builder {

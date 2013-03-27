@@ -129,6 +129,7 @@ object ConceptMenu {
       case x: ITaskDataProxyUI ⇒ taskMenu.remove(menuItemMapping(proxy))
       case x: ISamplingCompositionDataProxyUI ⇒ samplingMenu.remove(menuItemMapping(proxy))
       case x: IHookDataProxyUI ⇒ hookMenu.remove(menuItemMapping(proxy))
+      case x: ISourceDataProxyUI ⇒ sourceMenu.remove(menuItemMapping(proxy))
     }
   }
 

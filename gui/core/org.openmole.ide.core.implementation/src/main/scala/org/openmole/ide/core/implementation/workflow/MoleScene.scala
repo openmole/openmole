@@ -124,13 +124,13 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
 
   def currentPanelUI = currentPanel.panelUI
 
-  def displayCapsuleProperty(capsuleUI: ICapsuleUI, index: Int) =
+  def displayCapsuleProperty(capsuleUI: ICapsuleUI, tabIndex: Int) =
     ScenesManager.currentSceneContainer match {
       case (Some(exe: ExecutionMoleSceneContainer)) ⇒
       case _ ⇒
         closePropertyPanels
         removeAll(0)
-        currentPanels(0).contents += new CapsulePanel(this, capsuleUI, 0)
+        currentPanels(0).contents += new CapsulePanel(this, capsuleUI, 0, tabIndex)
         propertyWidget(0).setPreferredLocation(new Point(getView.getBounds().x.toInt + 20, 20))
         propertyWidget(0).revalidate
         propertyWidget(0).setVisible(true)

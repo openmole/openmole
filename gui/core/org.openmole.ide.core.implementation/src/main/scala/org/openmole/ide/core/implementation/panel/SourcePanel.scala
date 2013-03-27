@@ -31,7 +31,7 @@ import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 class SourcePanel(proxy: ISourceDataProxyUI,
                   scene: IMoleScene,
                   val index: Int) extends BasePanel(Some(proxy), scene) {
-  hookPanel ⇒
+  sourcePanel ⇒
 
   var panelUI = proxy.dataUI.buildPanelUI
   def created = Proxys.contains(proxy)
@@ -47,7 +47,7 @@ class SourcePanel(proxy: ISourceDataProxyUI,
   }
 
   def delete = {
-    scene.closePropertyPanel
+    scene.closePropertyPanel(index)
     Proxys -= proxy
     ConceptMenu.removeItem(proxy)
     true
@@ -106,7 +106,7 @@ class SourcePanel(proxy: ISourceDataProxyUI,
     case SelectionChanged(tabbedPane) ⇒ if (!tabbedLock) updateProtoPanel
     case UpdatedProxyEvent(p: IDataProxyUI, _) ⇒
       scene.removeAll(index + 1)
-      updateProtoPanel
+      updatePanel
       tabbedPane.selection.index = 0
     case _ ⇒
   }

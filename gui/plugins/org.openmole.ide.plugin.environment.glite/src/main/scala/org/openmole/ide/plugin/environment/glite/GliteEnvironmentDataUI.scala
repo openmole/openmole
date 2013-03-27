@@ -57,7 +57,7 @@ class GliteEnvironmentDataUI(val name: String = "",
         threads = threads)
     } catch {
       case e: UserBadDataError ⇒ throw e
-      case e: Exception ⇒ throw new UserBadDataError(e, "An error occurred when initializing the glite environment" + name + ". Please check your certificate settings in the Preferences menu.")
+      case e: Exception ⇒ throw new UserBadDataError(e, "An error occurred when initializing the glite environment " + name + ". Please check your certificate settings in the Preferences menu.")
     }
   }
 

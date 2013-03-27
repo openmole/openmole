@@ -30,4 +30,13 @@ trait ISourceDataUI extends IDataUI with InputPrototype with OutputPrototype wit
   def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]): ISource
 
   def buildPanelUI: ISourcePanelUI
+
+  def filterPrototypeOccurencies(pproxy: IPrototypeDataProxyUI) = (filterInputs(pproxy) ++ filterOutputs(pproxy)).distinct
+
+  def cloneWithoutPrototype(proxy: IPrototypeDataProxyUI): ISourceDataUI = this
+
+  def removePrototypeOccurencies(pproxy: IPrototypeDataProxyUI) = {
+    removeInput(pproxy)
+    removeOutput(pproxy)
+  }
 }

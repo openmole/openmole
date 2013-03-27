@@ -73,7 +73,7 @@ object DialogFactory {
     else false
   }
 
-  def deleteProxyConfirmation(proxy: IDataProxyUI) = confirmationDialog("Execution warning", "<html>" + proxy.dataUI.name + " is currently used in a scene.<br>" +
+  def deleteProxyConfirmation(proxy: IDataProxyUI) = confirmationDialog("Execution warning", "<html>" + proxy.dataUI.name + " is currently used in a scene or by an other component.<br>" +
     "It will be deleted everywhere it appears. <br>" +
     "Delete anyway ?")
 

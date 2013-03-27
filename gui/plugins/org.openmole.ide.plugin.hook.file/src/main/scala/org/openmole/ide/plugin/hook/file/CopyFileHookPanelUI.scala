@@ -17,8 +17,6 @@
 
 package org.openmole.ide.plugin.hook.file
 
-import org.openmole.ide.misc.widget.multirow.RowWidget._
-import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IHookPanelUI
@@ -33,7 +31,7 @@ class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends PluginPanel("wrap"
 
   val multiComboTextField = new MultiComboTextField("",
     comboContent,
-    dataUI.toBeHooked.map {
+    dataUI.prototypes.map {
       d ⇒
         new ComboTextFieldPanel(comboContent,
           new ComboTextFieldData(Some(d._1),

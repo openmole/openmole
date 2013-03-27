@@ -33,9 +33,14 @@ trait ITaskDataUI extends IDataUI with InputPrototype with OutputPrototype with 
 
   def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet): ITask
 
-  def filterPrototypeOccurencies(pproxy: IPrototypeDataProxyUI): List[IPrototypeDataProxyUI]
+  def filterPrototypeOccurencies(pproxy: IPrototypeDataProxyUI) = (filterInputs(pproxy) ++ filterOutputs(pproxy)).distinct
 
-  def removePrototypeOccurencies(pproxy: IPrototypeDataProxyUI)
+  def cloneWithoutPrototype(proxy: IPrototypeDataProxyUI): ITaskDataUI = this
+
+  def removePrototypeOccurencies(pproxy: IPrototypeDataProxyUI) = {
+    removeInput(pproxy)
+    removeOutput(pproxy)
+  }
 
   def buildPanelUI: ITaskPanelUI
 

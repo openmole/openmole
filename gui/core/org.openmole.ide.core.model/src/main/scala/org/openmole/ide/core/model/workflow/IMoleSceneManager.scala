@@ -39,19 +39,17 @@ trait IMoleSceneManager {
 
   def invalidateCache: Unit
 
+  def refreshCache: Unit
+
   def dataUI: IMoleDataUI
 
   def dataUI_=(dataUI: IMoleDataUI)
 
   def startingCapsule_=(n: Option[ICapsuleUI])
 
-  def getNodeID: String
-
   def getEdgeID: String
 
   def connectorID(dc: IConnectorUI): String
-
-  def capsuleID(cv: ICapsuleUI): String
 
   def capsules: Map[String, ICapsuleUI]
 
@@ -60,8 +58,6 @@ trait IMoleSceneManager {
   def startingCapsule: Option[ICapsuleUI]
 
   def capsuleConnections: HashMap[ICapsuleDataUI, HashSet[IConnectorUI]]
-
-  def removeCapsuleUI(nodeID: String): String
 
   def removeCapsuleUI(capslue: ICapsuleUI): String
 

@@ -22,4 +22,8 @@ trait OutputPrototype {
   def outputs: List[IPrototypeDataProxyUI]
 
   def outputs_=(pi: List[IPrototypeDataProxyUI])
+
+  def filterOutputs(pproxy: IPrototypeDataProxyUI) = outputs.filter(_ == pproxy)
+
+  def removeOutput(pproxy: IPrototypeDataProxyUI) = outputs = outputs.filterNot { _ == pproxy }
 }

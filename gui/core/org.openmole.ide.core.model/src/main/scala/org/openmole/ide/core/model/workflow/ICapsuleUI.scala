@@ -12,7 +12,8 @@ import org.openmole.core.implementation.validation.DataflowProblem
 import org.openmole.ide.core.model.dataproxy._
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.HashMap
-import org.openmole.core.model.mole.IMole
+import org.openmole.core.model.mole.{ ICapsule, IMole }
+import org.openmole.core.model.data.Prototype
 
 trait ICapsuleUI {
   override def toString = dataUI.task match {
@@ -52,7 +53,11 @@ trait ICapsuleUI {
 
   def inputs: List[IPrototypeDataProxyUI]
 
+  def inputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IPrototypeDataProxyUI]
+
   def outputs: List[IPrototypeDataProxyUI]
+
+  def outputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IPrototypeDataProxyUI]
 
   def update: Unit
 

@@ -78,7 +78,7 @@ class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
     val toBeRemovedSamplings = ScenesManager.explorationCapsules.filter { case (c, d) ⇒ d.sampling == Some(proxy) }
     toBeRemovedSamplings match {
       case Nil ⇒
-        scene.closePropertyPanel
+        scene.closePropertyPanel(index)
         Proxys -= proxy
         ConceptMenu.removeItem(proxy)
         true

@@ -19,6 +19,7 @@ package org.openmole.ide.core.model.data
 
 import org.openmole.ide.core.model.panel.IPanelUI
 import org.openmole.ide.misc.tools.util.ID
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
 trait IDataUI {
   def name: String
