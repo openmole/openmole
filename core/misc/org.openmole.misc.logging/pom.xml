@@ -43,5 +43,15 @@
       <artifactId>org.apache.commons.logging</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.openmole</groupId>
+      <artifactId>ch.qos.logback</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openmole</groupId>
+      <artifactId>org.slf4j</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
 </project>
