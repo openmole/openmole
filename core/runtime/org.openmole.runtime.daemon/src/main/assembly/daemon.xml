@@ -8,6 +8,7 @@
     <fileSet>
       <directory>${project.build.directory}/product</directory>
       <outputDirectory>/openmole-daemon/</outputDirectory>
+      <fileMode>755</fileMode> 
     </fileSet>
   </fileSets>
 </assembly>
