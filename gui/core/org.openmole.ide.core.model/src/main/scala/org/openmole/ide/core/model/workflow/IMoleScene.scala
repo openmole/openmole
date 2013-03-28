@@ -41,8 +41,6 @@ trait IMoleScene {
 
   def createConnectEdge(sourceNodeID: String, targetNodeID: String, edgeID: String, slotIndex: Int = 1)
 
-  //def createEdge(sourceNodeID: String, targetNodeID: String, id: String)
-
   def isBuildScene: Boolean
 
   def savePropertyPanel(i: Int): Unit

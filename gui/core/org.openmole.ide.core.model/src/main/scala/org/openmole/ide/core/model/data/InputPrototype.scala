@@ -29,10 +29,6 @@ trait InputPrototype {
 
   def filterInputs(pproxy: IPrototypeDataProxyUI) = inputs.filter(_ == pproxy)
 
-  def removeInput(pproxy: IPrototypeDataProxyUI) = {
-    println("STaRT Inputs : " + inputs)
-    println("Romove  : " + pproxy)
-    inputs = inputs.filterNot { _ == pproxy }
-    println("END : Inputs : " + inputs)
-  }
+  def removeInput(pproxy: IPrototypeDataProxyUI) = inputs = inputs.filterNot { _ == pproxy }
+
 }

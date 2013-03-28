@@ -19,15 +19,12 @@ package org.openmole.ide.core.model.data
 
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.core.model.mole._
-import org.openmole.ide.misc.tools.util.ID
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.commons.CapsuleType
-import org.openmole.ide.core.model.panel.{ ICapsulePanelUI, ITaskPanelUI }
+import org.openmole.ide.core.model.panel.ICapsulePanelUI
 
 trait ICapsuleDataUI extends IDataUI {
-  def id: ID.Type
-
-  def name = id.toString
+  def name = ""
 
   def buildPanelUI = buildPanelUI(0)
 

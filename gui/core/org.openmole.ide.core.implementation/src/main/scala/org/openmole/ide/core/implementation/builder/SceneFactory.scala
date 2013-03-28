@@ -41,7 +41,7 @@ object SceneFactory {
   def capsuleUI(caps: ICapsuleUI, scene: IMoleScene, locationPoint: Point): ICapsuleUI = {
     scene.initCapsuleAdd(caps)
     scene.manager.registerCapsuleUI(caps)
-    scene.graphScene.addNode(caps.dataUI.id).setPreferredLocation(locationPoint)
+    scene.graphScene.addNode(caps.id).setPreferredLocation(locationPoint)
     CheckData.checkMole(scene)
     caps
   }
@@ -60,7 +60,7 @@ object SceneFactory {
                  li: List[IPrototypeDataProxyUI] = List.empty) = {
     val trans = new TransitionUI(s, t, transitionType, cond, li)
     scene.manager.registerConnector(trans)
-    scene.createConnectEdge(s.dataUI.id, t.capsule.dataUI.id, trans.id, t.index)
+    scene.createConnectEdge(s.id, t.capsule.id, trans.id, t.index)
   }
 
   def dataChannel(scene: IMoleScene,
@@ -69,7 +69,7 @@ object SceneFactory {
                   li: List[IPrototypeDataProxyUI] = List.empty) = {
     val dc = new DataChannelUI(s, t, li)
     scene.manager.registerConnector(dc)
-    scene.createConnectEdge(s.dataUI.id, t.capsule.dataUI.id, dc.id)
+    scene.createConnectEdge(s.id, t.capsule.id, dc.id)
   }
 
   def prototype(p: Prototype[_]) = KeyPrototypeGenerator.prototype(p)

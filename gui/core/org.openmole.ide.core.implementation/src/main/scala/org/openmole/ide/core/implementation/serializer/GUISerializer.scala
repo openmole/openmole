@@ -121,14 +121,15 @@ class GUISerializer {
     }
   }
 
-  def unserializeProxy(concept: String) =
+  def unserializeProxy(concept: String) = {
     new File(workDir, concept).listFiles.toList.flatMap {
       f ⇒
         read(f) match {
           case Success(obj) ⇒
             try {
               obj match {
-                case ms: BuildMoleScene ⇒ ScenesManager.addBuildSceneContainer(ms)
+                case ms: BuildMoleScene ⇒
+                  ScenesManager.addBuildSceneContainer(ms)
                 case _ ⇒
               }
               None
@@ -140,6 +141,7 @@ class GUISerializer {
           case Failure(t) ⇒ Some(t)
         }
     }
+  }
 
   def unserialize(fromFile: String) = {
     StatusBar().clear

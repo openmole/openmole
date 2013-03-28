@@ -47,6 +47,7 @@ import scala.swing.Action
 import org.openmole.core.model.mole.{ ICapsule, IMole }
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.builder.SceneFactory
+import org.openmole.ide.misc.tools.util._
 
 object CapsuleUI {
   def imageWidget(scene: IMoleScene, img: ImageIcon, x: Int, y: Int, action: Action) = new LinkedImageWidget(scene, img, x, y, action)
@@ -56,7 +57,7 @@ import CapsuleUI._
 
 class CapsuleUI(val scene: IMoleScene,
                 var dataUI: ICapsuleDataUI = new CapsuleDataUI) extends Widget(scene.graphScene)
-    with ICapsuleUI {
+    with ICapsuleUI with ID {
   capsuleUI ⇒
   val taskComponentWidget = new SceneComponentWidget(scene, new TaskWidget(scene, this),
     TASK_CONTAINER_WIDTH,

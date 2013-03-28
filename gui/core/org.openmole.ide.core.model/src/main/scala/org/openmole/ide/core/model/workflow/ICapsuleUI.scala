@@ -14,12 +14,15 @@ import scala.collection.mutable.Buffer
 import scala.collection.mutable.HashMap
 import org.openmole.core.model.mole.{ ICapsule, IMole }
 import org.openmole.core.model.data.Prototype
+import org.openmole.ide.misc.tools.util._
 
 trait ICapsuleUI {
   override def toString = dataUI.task match {
     case Some(x: ITaskDataProxyUI) ⇒ x.dataUI.toString
     case _ ⇒ ""
   }
+
+  def id: ID.Type
 
   def dataUI: ICapsuleDataUI
 

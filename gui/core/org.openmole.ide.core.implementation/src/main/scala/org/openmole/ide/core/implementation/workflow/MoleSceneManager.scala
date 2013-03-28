@@ -17,7 +17,6 @@
 
 package org.openmole.ide.core.implementation.workflow
 
-import scala.collection.mutable.HashMap
 import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.data.IMoleDataUI
 import org.openmole.ide.core.implementation.data.MoleDataUI
@@ -37,24 +36,42 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
   var startingCapsule: Option[ICapsuleUI] = None
   private val _capsules = TMap[String, ICapsuleUI]()
   private val _connectors = TMap[String, IConnectorUI]()
-
-  var capsuleConnections = new HashMap[ICapsuleDataUI, HashSet[IConnectorUI]]
+  private val _capsuleConnections = TMap[ICapsuleDataUI, TSet[IConnectorUI]]()
 
   var dataUI: IMoleDataUI = new MoleDataUI
   val _cacheMole: Ref[Option[(IMole, Map[ICapsuleUI, ICapsule], Map[IPrototypeDataProxyUI, Prototype[_]])]] = Ref(None)
 
   def capsules = _capsules.single.toMap
   def capsule(id: String) = _capsules.single.get(id)
-  def +=(c: ICapsuleUI) = _capsules.single put (c.dataUI.id, c)
-  def -=(c: ICapsuleUI) = _capsules.single remove (c.dataUI.id)
-  def contains(c: ICapsuleUI) = _capsules.single.contains(c.dataUI.id)
+  def +=(c: ICapsuleUI): Unit = _capsules.single put (c.id, c)
+  def -=(c: ICapsuleUI): Unit = _capsules.single remove (c.id)
+  def contains(c: ICapsuleUI) = _capsules.single.contains(c.id)
 
   def connectors = _connectors.single.toMap
   def connector(id: String) = _connectors.single(id)
-  def +=(c: IConnectorUI) = _connectors.single put (c.id, c)
-  def -=(c: IConnectorUI) = _connectors.single remove (c.id)
+  def +=(c: IConnectorUI): Unit = _connectors.single put (c.id, c)
+  def -=(c: IConnectorUI): Unit = atomic { implicit ctx ⇒
+    if (contains(c)) _connectors.single remove (c.id)
+  }
   def update(id: String, c: IConnectorUI) = _connectors.single(id) = c
   def contains(c: IConnectorUI) = _connectors.single.contains(c.id)
+
+  def capsuleConnections = _capsuleConnections.single.toMap
+  def capsuleConnections(dataUI: ICapsuleDataUI) = _capsuleConnections.single(dataUI)
+  def +=(d: ICapsuleDataUI): Unit = _capsuleConnections.single put (d, TSet.empty)
+  def +=(d: ICapsuleDataUI, c: IConnectorUI): Unit = atomic { implicit ctx ⇒
+    val l = _capsuleConnections.getOrElseUpdate(d, TSet.empty)
+    l += c
+  }
+  def -=(d: ICapsuleDataUI): Unit = _capsuleConnections.single remove (d)
+  def -=(d: ICapsuleDataUI, c: IConnectorUI): Unit = atomic { implicit ctx ⇒
+    val l = _capsuleConnections.getOrElseUpdate(d, TSet.empty)
+    assert(l.contains(c))
+    l -= c
+    if (_capsuleConnections(d).isEmpty) -=(d)
+  }
+
+  def contains(c: ICapsuleDataUI) = _capsuleConnections.single.contains(c)
 
   def refreshCache = {
     invalidateCache
@@ -116,14 +133,14 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
     invalidateCache
   }
 
-  def removeCapsuleUI(capsule: ICapsuleUI): String = {
-    val id = capsule.dataUI.id
+  def removeCapsuleUI(capsule: ICapsuleUI): String = atomic { implicit ptx ⇒
+    val id = capsule.id
     startingCapsule match {
       case None ⇒
-      case Some(caps: ICapsuleUI) ⇒ if (id == caps.dataUI.id) startingCapsule = None
+      case Some(caps: ICapsuleUI) ⇒ if (id == caps.id) startingCapsule = None
     }
-    capsuleConnections.getOrElse(capsule.dataUI, List()).foreach {
-      x ⇒ removeConnector(x.id)
+    capsuleConnections.getOrElse(capsule.dataUI, TSet.empty).foreach {
+      x: IConnectorUI ⇒ removeConnector(x.id)
     }
 
     removeIncomingTransitions(capsule)
@@ -134,7 +151,7 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
     id
   }
 
-  def capsulesInMole = {
+  def capsulesInMole = atomic { implicit ptx ⇒
     val capsuleSet = new HashSet[ICapsuleDataUI]
     capsuleConnections.foreach {
       case (capsuleData, connections) ⇒
@@ -165,8 +182,8 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
   def changeConnector(oldConnector: IConnectorUI,
                       connector: IConnectorUI) = {
     update(oldConnector.id, connector)
-    capsuleConnections(connector.source.dataUI) -= oldConnector
-    capsuleConnections(connector.source.dataUI) += connector
+    -=(oldConnector)
+    +=(connector)
   }
 
   def removeConnector(edgeID: String): Unit = removeConnector(edgeID, connector(edgeID))
@@ -174,19 +191,16 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
   def removeConnector(edgeID: String,
                       connector: IConnectorUI): Unit = {
     -=(connector)
-    if (capsuleConnections.contains(connector.source.dataUI)) {
-      capsuleConnections(connector.source.dataUI) -= connector
-      if (capsuleConnections(connector.source.dataUI).isEmpty) capsuleConnections -= connector.source.dataUI
-    }
+    if (capsuleConnections.contains(connector.source.dataUI))
+      -=(connector.source.dataUI)
     invalidateCache
   }
 
   def registerConnector(connector: IConnectorUI) = registerConnector(connector.id, connector)
 
-
   def registerConnector(edgeID: String,
                         connector: IConnectorUI) = atomic { implicit ctx ⇒
-    capsuleConnections.getOrElseUpdate(connector.source.dataUI, HashSet(connector))
+    _capsuleConnections.getOrElseUpdate(connector.source.dataUI, TSet(connector))
     _connectors.getOrElseUpdate(edgeID, connector)
     invalidateCache
   }
@@ -208,4 +222,17 @@ class MoleSceneManager(var name: String) extends IMoleSceneManager with ID {
     _.source
   })
 
+  def connectedCapsulesFrom(from: ICapsuleUI) = atomic { implicit ptx ⇒
+    def connectedCapsulesFrom0(toVisit: List[ICapsuleUI], connected: List[ICapsuleUI]): List[ICapsuleUI] = {
+      if (toVisit.isEmpty) connected
+      else {
+        val head = toVisit.head
+        val conns = capsuleConnections.getOrElse(head.dataUI, TSet.empty)
+        connectedCapsulesFrom0(toVisit.tail ::: conns.toList.map {
+          _.target.capsule
+        }.toList, connected :+ head)
+      }
+    }
+    connectedCapsulesFrom0(List(from), List())
+  }
 }
