@@ -47,10 +47,6 @@ trait IMoleSceneManager {
 
   def startingCapsule_=(n: Option[ICapsuleUI])
 
-  def getEdgeID: String
-
-  def connectorID(dc: IConnectorUI): String
-
   def capsules: Map[String, ICapsuleUI]
 
   def capsule(proxy: ITaskDataProxyUI): List[ICapsuleUI]
@@ -65,16 +61,16 @@ trait IMoleSceneManager {
 
   def setStartingCapsule(capsule: ICapsuleUI)
 
-  def connectors: Iterable[IConnectorUI]
+  def connectors: Map[String, IConnectorUI]
 
   def connector(dID: String): IConnectorUI
 
   def removeConnector(edgeID: String)
 
-  def registerConnector(connector: IConnectorUI): Boolean
+  def registerConnector(connector: IConnectorUI): Unit
 
   def registerConnector(edgeID: String,
-                        connector: IConnectorUI): Boolean
+                        connector: IConnectorUI): Unit
 
   def changeConnector(oldConnector: IConnectorUI,
                       connector: IConnectorUI)

@@ -246,15 +246,11 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     repaint
   }
 
-  def createConnectEdge(sourceNodeID: String, targetNodeID: String, slotIndex: Int = 1) = {
+  def createConnectEdge(sourceNodeID: String, targetNodeID: String, edgeId: String, slotIndex: Int = 1) = {
     currentSlotIndex = slotIndex
-    createEdge(sourceNodeID, targetNodeID, manager.getEdgeID)
-  }
-
-  override def createEdge(sourceNodeID: String, targetNodeID: String, id: String) = {
-    addEdge(id)
-    setEdgeSource(id, sourceNodeID)
-    setEdgeTarget(id, targetNodeID)
+    addEdge(edgeId)
+    setEdgeSource(edgeId, sourceNodeID)
+    setEdgeTarget(edgeId, targetNodeID)
   }
 
   override def attachEdgeSourceAnchor(edge: String, oldSourceNode: String, sourceNode: String) = {
