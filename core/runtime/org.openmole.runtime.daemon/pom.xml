@@ -66,6 +66,11 @@
     </dependency>
     <dependency>
       <groupId>org.openmole.core</groupId>
+      <artifactId>org.openmole.misc.logging</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openmole.core</groupId>
       <artifactId>org.openmole.plugin.environment.desktopgrid</artifactId>
       <version>${project.version}</version>
     </dependency>

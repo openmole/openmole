@@ -112,7 +112,10 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
                 val workspaceDir = Workspace.newDir("workspace")
                 val osgiDir = new File(runtime, UUID.randomUUID.toString)
 
-                val cmd = "java -Xmx" + memory + "m -Dosgi.configuration.area=" + osgiDir.getName + " -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration " + configurationDir.getAbsolutePath + " -s " + storageFile.getAbsolutePath + " -i " + localExecutionMessage.getAbsolutePath + " -o " + localResultFile.getAbsolutePath + " -c / -p " + pluginDir.getAbsolutePath + "" + (if (debug) " -d " else "")
+                def quote(s: String) = '"' + s + '"'
+                val ptrFlag = if(OS.actualOS.is64Bit) "-XX:+UseCompressedOops" else ""
+
+                val cmd = s"java -Xmx${memory}m -Dosgi.locking=none -XX:+UseG1GC $ptrFlag -Dosgi.configuration.area=${osgiDir.getName} -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration ${quote(configurationDir.getAbsolutePath)} -s ${quote(storageFile.getAbsolutePath)} -i ${quote(localExecutionMessage.getAbsolutePath)} -o ${quote(localResultFile.getAbsolutePath)} -c / -p ${quote(pluginDir.getAbsolutePath)}" + (if (debug) " -d " else "")
 
                 logger.info("Executing runtime: " + cmd)
                 //val commandLine = CommandLine.parse(cmd)

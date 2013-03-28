@@ -25,6 +25,7 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.plugin.task.external._
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.tools.service.OS
 
 object NetLogoTask {
 

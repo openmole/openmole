@@ -24,6 +24,7 @@ import org.openmole.core.model.data._
 
 import org.openmole.core.implementation.tools._
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.tools.service.OS
 import scala.collection.mutable.ListBuffer
 import org.openmole.misc.tools.io.FileUtil._
 import collection.mutable
