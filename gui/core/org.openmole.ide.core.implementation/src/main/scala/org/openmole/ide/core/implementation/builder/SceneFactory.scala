@@ -58,16 +58,18 @@ object SceneFactory {
                  transitionType: TransitionType.Value,
                  cond: Option[String] = None,
                  li: List[IPrototypeDataProxyUI] = List.empty) = {
-    if (scene.manager.registerConnector(new TransitionUI(s, t, transitionType, cond, li)))
-      scene.createConnectEdge(s.dataUI.id, t.capsule.dataUI.id, t.index)
+    val trans = new TransitionUI(s, t, transitionType, cond, li)
+    scene.manager.registerConnector(trans)
+    scene.createConnectEdge(s.dataUI.id, t.capsule.dataUI.id, trans.id, t.index)
   }
 
   def dataChannel(scene: IMoleScene,
                   s: ICapsuleUI,
                   t: IInputSlotWidget,
                   li: List[IPrototypeDataProxyUI] = List.empty) = {
-    if (scene.manager.registerConnector(new DataChannelUI(s, t, li)))
-      scene.createConnectEdge(s.dataUI.id, t.capsule.dataUI.id)
+    val dc = new DataChannelUI(s, t, li)
+    scene.manager.registerConnector(dc)
+    scene.createConnectEdge(s.dataUI.id, t.capsule.dataUI.id, dc.id)
   }
 
   def prototype(p: Prototype[_]) = KeyPrototypeGenerator.prototype(p)

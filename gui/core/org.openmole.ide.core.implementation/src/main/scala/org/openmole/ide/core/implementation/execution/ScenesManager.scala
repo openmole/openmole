@@ -148,7 +148,7 @@ object ScenesManager {
     val islots = selection.flatMap { _.islots }
     selection.headOption match {
       case Some(c: ICapsuleUI) ⇒
-        val connectors = c.scene.manager.connectors
+        val connectors = c.scene.manager.connectors.values.toList
         connectors.foreach { con ⇒
           if (selection.contains(con.source) && islots.contains(con.target)) {
             con match {

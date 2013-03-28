@@ -21,7 +21,6 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.core.model.mole._
 import org.openmole.ide.misc.tools.util.ID
 import org.openmole.ide.core.model.commons.TransitionType
-import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.commons.CapsuleType
 import org.openmole.ide.core.model.panel.{ ICapsulePanelUI, ITaskPanelUI }
 

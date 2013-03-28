@@ -71,7 +71,7 @@ object PrototypePanel {
       erase
       capsulesWithProtos.foreach { _.dataUI.task.get.dataUI.removePrototypeOccurencies(proxy) }
       List(ScenesManager.currentScene).flatten.foreach {
-        _.manager.connectors.foreach {
+        _.manager.connectors.values.toList.foreach {
           dc ⇒ dc.filteredPrototypes = dc.filteredPrototypes.filterNot { _ == proxy }
         }
       }

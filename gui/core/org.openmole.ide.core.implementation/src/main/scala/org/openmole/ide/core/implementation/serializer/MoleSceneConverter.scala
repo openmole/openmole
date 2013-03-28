@@ -143,7 +143,7 @@ class MoleSceneConverter(serializer: GUISerializer) extends Converter {
     })
 
     //Transitions
-    molescene.manager.connectors.foreach(c ⇒ {
+    molescene.manager.connectors.values.toList.foreach(c ⇒ {
       c match {
         case x: ITransitionUI ⇒ writer.startNode("transition")
         case x: IDataChannelUI ⇒ writer.startNode("datachannel")

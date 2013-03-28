@@ -16,6 +16,8 @@
  */
 package org.openmole.ide.core.model.workflow
 
+import org.openmole.ide.misc.tools.util.ID
+
 trait IConnectorViewUI {
   def preview: String
 }
