@@ -89,7 +89,7 @@ trait StorageService extends BatchService with Storage {
 
   def baseDirName = Workspace.preference(Workspace.uniqueID) + '/'
 
-  def backgroundRmFile(path: String) = environment.jobManager ! DeleteFile(this, path, false)
-  def backgroundRmDir(path: String) = environment.jobManager ! DeleteFile(this, path, true)
+  def backgroundRmFile(path: String) = BatchEnvironment.jobManager ! DeleteFile(this, path, false)
+  def backgroundRmDir(path: String) = BatchEnvironment.jobManager ! DeleteFile(this, path, true)
 
 }

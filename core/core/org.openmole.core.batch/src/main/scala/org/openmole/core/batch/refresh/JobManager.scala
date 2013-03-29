@@ -44,7 +44,7 @@ object JobManager extends Logger
 
 import JobManager._
 
-class JobManager(val environment: BatchEnvironment) extends Actor {
+class JobManager extends Actor {
 
   val workers = ActorSystem.create("JobManagment", ConfigFactory.parseString(
     """
@@ -66,13 +66,12 @@ akka {
 }
 """).withFallback(ConfigFactory.load(classOf[ConfigFactory].getClassLoader)))
 
-  import environment._
-  import system.dispatcher
+  import BatchEnvironment.system.dispatcher
 
   //val resizer = DefaultResizer(lowerBound = 10, upperBound = Workspace.preferenceAsInt(JobManagmentThreads))
   val uploader = workers.actorOf(Props(new UploadActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
   val submitter = workers.actorOf(Props(new SubmitActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
-  val refresher = workers.actorOf(Props(new RefreshActor(self, environment)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
+  val refresher = workers.actorOf(Props(new RefreshActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
   val resultGetters = workers.actorOf(Props(new GetResultActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
   val killer = workers.actorOf(Props(new KillerActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
   val cleaner = workers.actorOf(Props(new CleanerActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
@@ -98,7 +97,7 @@ akka {
 
     case Submitted(job, sj, bj) ⇒
       job.batchJob = Some(bj)
-      self ! Delay(Refresh(job, sj, bj, minUpdateInterval), minUpdateInterval)
+      self ! Delay(Refresh(job, sj, bj, job.environment.minUpdateInterval), job.environment.minUpdateInterval)
 
     case Kill(job) ⇒
       job.state = ExecutionState.KILLED
@@ -111,11 +110,11 @@ akka {
         case e: JobRemoteExecutionException ⇒ WARNING
         case _ ⇒ FINE
       }
-      EventDispatcher.trigger(environment: Environment, new Environment.ExceptionRaised(job, exception, level))
+      EventDispatcher.trigger(job.environment: Environment, new Environment.ExceptionRaised(job, exception, level))
       JobManager.logger.log(level, "Error in job refresh", exception)
 
     case MoleJobError(mj, j, e) ⇒
-      EventDispatcher.trigger(environment: Environment, new Environment.MoleJobExceptionRaised(j, e, WARNING, mj))
+      EventDispatcher.trigger(j.environment: Environment, new Environment.MoleJobExceptionRaised(j, e, WARNING, mj))
       JobManager.logger.log(WARNING, "Error during job execution, it will be resubmitted.", e)
 
   }

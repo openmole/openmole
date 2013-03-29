@@ -28,7 +28,7 @@ object RefreshActor extends Logger
 
 import RefreshActor._
 
-class RefreshActor(jobManager: ActorRef, environment: BatchEnvironment) extends Actor {
+class RefreshActor(jobManager: ActorRef) extends Actor {
   def receive = {
     case Refresh(job, sj, bj, delay) ⇒
       if (!job.state.isFinal) {
@@ -39,8 +39,8 @@ class RefreshActor(jobManager: ActorRef, environment: BatchEnvironment) extends 
             if (job.state == DONE) jobManager ! GetResult(job, sj, bj.resultPath)
             else if (!job.state.isFinal) {
               val newDelay =
-                if (oldState == job.state) math.min(delay + environment.incrementUpdateInterval, environment.maxUpdateInterval)
-                else environment.minUpdateInterval
+                if (oldState == job.state) math.min(delay + job.environment.incrementUpdateInterval, job.environment.maxUpdateInterval)
+                else job.environment.minUpdateInterval
               jobManager ! Delay(Refresh(job, sj, bj, newDelay), newDelay)
             } else jobManager ! Kill(job)
           case None ⇒ jobManager ! Delay(Refresh(job, sj, bj, delay), delay)

@@ -66,11 +66,11 @@ object BatchEnvironment extends Logger {
 
   val transfertId = new AtomicLong
 
-  case class BeginUpload(val id: Long, val path: String, val storage: StorageService) extends Event[BatchEnvironment] with Transfert
-  case class EndUpload(val id: Long, val path: String, val storage: StorageService) extends Event[BatchEnvironment] with Transfert
+  case class BeginUpload(id: Long, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfert
+  case class EndUpload(id: Long, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfert
 
-  case class BeginDownload(val id: Long, val path: String, val storage: StorageService) extends Event[BatchEnvironment] with Transfert
-  case class EndDownload(val id: Long, val path: String, val storage: StorageService) extends Event[BatchEnvironment] with Transfert
+  case class BeginDownload(id: Long, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfert
+  case class EndDownload(id: Long, path: String, storage: StorageService) extends Event[BatchEnvironment] with Transfert
 
   def signalUpload[T](upload: ⇒ T, path: String, storage: StorageService) = {
     val id = transfertId.getAndIncrement
@@ -128,12 +128,6 @@ object BatchEnvironment extends Logger {
 
   def defaultRuntimeMemory = Workspace.preferenceAsInt(BatchEnvironment.MemorySizeForRuntime)
 
-}
-
-import BatchEnvironment._
-
-trait BatchEnvironment extends Environment { env ⇒
-
   @transient lazy val system = ActorSystem("BatchEnvironment", ConfigFactory.parseString(
     """
 akka {
@@ -142,7 +136,7 @@ akka {
     default-dispatcher {
       executor = "fork-join-executor"
       type = Dispatcher
-      
+
       fork-join-executor {
         parallelism-min = 5
         parallelism-max = 10
@@ -150,13 +144,23 @@ akka {
     }
   }
 }
-""").withFallback(ConfigFactory.load(classOf[ConfigFactory].getClassLoader)))
+    """).withFallback(ConfigFactory.load(classOf[ConfigFactory].getClassLoader)))
 
-  @transient lazy val jobManager = system.actorOf(Props(new JobManager(this)))
+  @transient lazy val jobManager = system.actorOf(Props(new JobManager))
+
+}
+
+import BatchEnvironment._
+
+trait BatchEnvironment extends Environment { env ⇒
+
+  val jobRegistry = new ExecutionJobRegistry
+
+  val id: String
+
+  import BatchEnvironment.system.dispatcher
+
   @transient lazy val watcher = system.actorOf(Props(new BatchJobWatcher(this)))
-
-  import system.dispatcher
-
   @transient lazy val registerWatcher: Unit = {
     system.scheduler.schedule(
       SDuration(Workspace.preferenceAsDuration(BatchEnvironment.CheckInterval).toMilliSeconds, MILLISECONDS),
@@ -164,10 +168,6 @@ akka {
       watcher,
       Watch)
   }
-
-  val jobRegistry = new ExecutionJobRegistry
-
-  val id: String
 
   type SS <: StorageService
   type JS <: JobService
