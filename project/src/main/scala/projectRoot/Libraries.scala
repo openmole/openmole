@@ -89,7 +89,7 @@ trait Libraries extends Defaults {
     (libraryDependencies += "commons-configuration" % "commons-configuration" % "1.6")
 
   lazy val db4o = OsgiProject("com.db4o", buddyPolicy = Some("global")) settings
-    (libraryDependencies += "com.db4o" % "db4o-full-java5" % "8.1-SNAPSHOT" % "bundle")
+    (libraryDependencies += "com.db4o" % "db4o-full-java5" % "8.1-SNAPSHOT" % "library")
 
   lazy val robustIt = OsgiProject("uk.com.robustit.cloning", exports = Seq("com.rits.*")) settings
     (libraryDependencies += "uk.com.robust-it" % "cloning" % "1.7.4")

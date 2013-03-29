@@ -39,6 +39,14 @@ trait Defaults extends Build {
 
   lazy val dependencyNameMap = SettingKey[Map[Regex, String => String]]("dependencymap", "A map that is run against dependencies to be copied.")
 
+  lazy val Bundle = config("bundle") extend(Compile)
+
+  lazy val Library = config("library") extend(Compile)
+
+  lazy val Plugin = config("plugin") extend(Compile)
+
+  lazy val Common = config("common") extend(Compile, Plugin, Bundle, Library)
+
   def copyResTask = resourceAssemble <<= (resourceDirectory, outDir, crossTarget, resourceOutDir) map { //TODO: Find a natural way to do this
     (rT, outD, cT, rOD) => {
       val destPath = rOD map (cT / _) getOrElse (cT / outD)
@@ -73,7 +81,6 @@ trait Defaults extends Build {
       publishArtifact in (packageDoc in install) := false,
       copyDependencies := false,
       osgiVersion := "3.8.2.v20130124-134944",
-      //(packageSrc in Compile) <<= (packageSrc in Compile) tag (Tags.Disk),
       concurrentRestrictions := Seq(Tags.limit(Tags.Disk, 3), Tags.limit(Tags.Network, 2),Tags.limitAll(8)),
       offline := true,
       gc := gcTask
@@ -115,6 +122,8 @@ trait Defaults extends Build {
           OsgiKeys.importPackage := imports,
           OsgiKeys.bundleActivator := bundleActivator,
           install <<= publishLocal,
+          ivyConfigurations ~= overrideConfigs(Plugin, Bundle, Library, Common),
+          classpathConfiguration in Compile := Common,
           OsgiKeys.bundle <<= OsgiKeys.bundle tag (Tags.Disk),
           (update in install) <<= update in install tag (Tags.Network),
           //compile in Compile <<= compile in Compile tag (Tags.Disk),
@@ -133,6 +142,7 @@ trait Defaults extends Build {
       resourceOutDir := None,
       dependencyNameMap := depNameMap,
       dependencyFilter := moduleFilter(),
+      ivyConfigurations ~= overrideConfigs(Plugin, Bundle, Library, Common),
       copyDependencies <<= (update, version, crossTarget, scalaVersion, outDir, dependencyNameMap, dependencyFilter) map copyDepTask
     ))
   }

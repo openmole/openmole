@@ -11,11 +11,11 @@ trait CoreCore extends CoreDefaults with CoreMisc {
     (coreMiscEventDispatcher, coreMiscException, coreMiscTools, coreMiscUpdater)
 
   lazy val coreSerializer = OsgiProject("org.openmole.core.serializer", openmoleScope = Some("provided")) settings
-    (libraryDependencies <+= (osgiVersion) {oV => "org.eclipse.core" % "org.eclipse.osgi" % oV % "optional"}) dependsOn
+    (libraryDependencies <+= (osgiVersion) {oV => "org.eclipse.core" % "org.eclipse.osgi" % oV}) dependsOn
     (coreModel, coreMiscWorkspace, xstream, coreMiscPluginManager, coreMiscHashService, coreMiscFileService, coreMiscTools)
 
   lazy val coreImpl = OsgiProject("org.openmole.core.implementation", openmoleScope = Some("provided")) settings
-    (libraryDependencies <+= (osgiVersion) {oV => "org.eclipse.core" % "org.eclipse.osgi" % oV % "optional"}) dependsOn
+    (libraryDependencies <+= (osgiVersion) {oV => "org.eclipse.core" % "org.eclipse.osgi" % oV}) dependsOn
     (coreModel, coreMiscWorkspace, robustIt, coreMiscException, coreMiscWorkspace, coreMiscEventDispatcher,
       coreSerializer, coreMiscPluginManager)
 
