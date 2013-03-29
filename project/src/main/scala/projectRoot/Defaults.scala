@@ -21,6 +21,8 @@ trait Defaults extends Build {
   lazy val install = TaskKey[Unit]("install", "Builds bundles and adds them to the local repo")
   lazy val assemble = TaskKey[Unit]("assemble")
 
+  lazy val gc = TaskKey[Unit]("gc", "Force SBT to take out the trash")
+
   lazy val osgiVersion = SettingKey[String]("osgi-version")
 
   lazy val Assemble = Tags.Tag("Assemble")
@@ -43,6 +45,8 @@ trait Defaults extends Build {
       IO.copyDirectory(rT,destPath)
     }
   }
+
+  def gcTask = {System.gc();System.gc();System.gc()}
 
   def copyDepTask(updateReport: UpdateReport, version: String, out: File,
                   scalaVer: String, subDir: String,
@@ -69,7 +73,10 @@ trait Defaults extends Build {
       publishArtifact in (packageDoc in install) := false,
       copyDependencies := false,
       osgiVersion := "3.8.2.v20130124-134944",
-      concurrentRestrictions := Seq(Tags.limitSum(8, Tags.Untagged))
+      //(packageSrc in Compile) <<= (packageSrc in Compile) tag (Tags.Disk),
+      concurrentRestrictions := Seq(Tags.limit(Tags.Disk, 3), Tags.limit(Tags.Network, 2),Tags.limitAll(8)),
+      offline := true,
+      gc := gcTask
     )
 
 
@@ -108,6 +115,9 @@ trait Defaults extends Build {
           OsgiKeys.importPackage := imports,
           OsgiKeys.bundleActivator := bundleActivator,
           install <<= publishLocal,
+          OsgiKeys.bundle <<= OsgiKeys.bundle tag (Tags.Disk),
+          (update in install) <<= update in install tag (Tags.Network),
+          //compile in Compile <<= compile in Compile tag (Tags.Disk),
           assemble := false))
   }
 
@@ -117,7 +127,7 @@ trait Defaults extends Build {
                      (implicit dir: File) = {
     val projBase = dir / base
     Project(base + "-"+ outputDir.replace('/','_'), projBase, settings = Project.defaultSettings ++ Seq(
-      assemble <<= copyDependencies tag (Assemble),
+      assemble <<= copyDependencies tag (Tags.Disk),
       install := true,
       outDir := outputDir,
       resourceOutDir := None,

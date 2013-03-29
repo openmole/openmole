@@ -45,14 +45,14 @@ trait Application extends Web with Libraries {
         pluginTemplate("environment.pbs"),
         pluginTemplate("grouping.onvariable"),
         pluginTemplate("grouping.batch"),
-        sbtPluginTemplate("task.netlogo"),
+        /*sbtPluginTemplate("task.netlogo"),
         sbtPluginTemplate("task.netlogo4"),
-        sbtPluginTemplate("task.netlogo5"),
+        sbtPluginTemplate("task.netlogo5"),*/
         pluginTemplate("task.systemexec"),
         pluginTemplate("task.groovy"),
         pluginTemplate("task.scala"),
         pluginTemplate("task.code"),
-        pluginTemplate("task.external"),
+        //pluginTemplate("task.external"),
         pluginTemplate("task.template"),
         pluginTemplate("task.stat"),
         pluginTemplate("domain.modifier"),
@@ -149,7 +149,8 @@ trait Application extends Web with Libraries {
 
 
   lazy val openmolePlugins = AssemblyProject("package", "assembly/openmole-plugins") settings (openmolePluginDependencies,
-      ignoreTransitive := true, dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
+      ignoreTransitive := true, dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library")) dependsOn
+    (corePluginNetLogo4, corePluginNetLogo5)
 
   lazy val openmoleGuiPlugins = AssemblyProject("package", "assembly/openmole-plugins-gui") settings (openmoleGuiPluginDependencies,
     dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))

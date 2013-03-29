@@ -20,9 +20,9 @@
   <name>${project.artifactId}</name>
   <description>Third-party OSGi bundles used by SimExplorer</description>
   <modules>
-    <module>org.openmole.core.batch</module>
+    <module>mvn-org.openmole.core.batch</module>
     <module>mvn-org.openmole.core.model</module>
-    <module>org.openmole.core.implementation</module>
+    <module>mvn-org.openmole.core.implementation</module>
     <module>mvn-org.openmole.core.serializer</module>
   </modules>
   <properties>
