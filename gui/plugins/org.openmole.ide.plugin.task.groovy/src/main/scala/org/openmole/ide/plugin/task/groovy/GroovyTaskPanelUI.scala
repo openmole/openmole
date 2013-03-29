@@ -52,10 +52,6 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("") with ITas
 
   val components = List(("Code", codeTextArea), ("Library", libMultiTextField.panel))
 
-  listenTo(codeTextArea)
-  reactions += {
-    case x: UIElementResized ⇒ println("resized")
-  }
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     add(codeTextArea.editor,
       new Help(i18n.getString("groovyCode"),

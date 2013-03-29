@@ -19,7 +19,6 @@ package org.openmole.ide.core.implementation.serializer
 
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.serializer.SerializerState._
-import com.thoughtworks.xstream.XStream
 import com.thoughtworks.xstream.converters.MarshallingContext
 import com.thoughtworks.xstream.converters.UnmarshallingContext
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
@@ -27,14 +26,12 @@ import com.thoughtworks.xstream.converters.reflection.ReflectionProvider
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import com.thoughtworks.xstream.mapper.Mapper
-import org.openmole.ide.misc.tools.util.{ Types, ClassLoader }
-import org.openmole.ide.core.implementation.registry._
+import org.openmole.ide.misc.tools.util.Types
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import scala.collection.mutable.HashSet
 import org.openmole.misc.tools.obj.ClassUtils._
 
 class PrototypeConverter(mapper: Mapper,
