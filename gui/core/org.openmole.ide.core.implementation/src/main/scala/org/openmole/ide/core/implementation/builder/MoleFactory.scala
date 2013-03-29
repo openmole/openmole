@@ -19,36 +19,23 @@ package org.openmole.ide.core.implementation.builder
 
 import org.openmole.core.model.data._
 import org.openmole.core.model.execution._
-import org.openmole.ide.core.model.commons._
-import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.implementation.registry.PrototypeKey
-import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
-import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.model.dataproxy._
-import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.core.implementation.task._
 import java.io.File
 import org.openmole.core.implementation.data._
 import org.openmole.core.implementation.mole._
 import org.openmole.core.implementation.transition._
-import org.openmole.core.implementation.tools._
 import org.openmole.ide.misc.tools.check.TypeCheck
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.ide.core.model.workflow._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.task._
 import org.openmole.core.model.transition._
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import org.openmole.ide.core.model.workflow._
-import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
-import scala.collection.mutable.HashSet
-import scala.collection.mutable.ListBuffer
+import concurrent.stm._
 import org.openmole.core.model.sampling.Sampling
-import org.openmole.ide.core.model.sampling.{ ISamplingProxyUI, IDomainProxyUI }
-import org.openmole.core.model.domain.{ Finite, Domain }
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import util.Try
 import scala.Some
@@ -161,7 +148,7 @@ object MoleFactory {
   def parameters(capsuleDataUI: ICapsuleDataUI): ParameterSet = parameters(capsuleDataUI.task.get.dataUI)
 
   def buildConnectors(capsuleMap: Map[ICapsuleUI, ICapsule],
-                      prototypeMap: Map[IPrototypeDataProxyUI, Prototype[_]]) = {
+                      prototypeMap: Map[IPrototypeDataProxyUI, Prototype[_]]) = atomic { implicit ctx ⇒
     val islotsMap = new HashMap[IInputSlotWidget, Slot]
     if (capsuleMap.isEmpty) (List.empty, List.empty, islotsMap)
     else {
@@ -170,14 +157,13 @@ object MoleFactory {
       islotsMap.getOrElseUpdate(firstCapsule._1.islots.head, Slot(capsuleMap(firstCapsule._1)))
       val transitions = capsuleMap.flatMap {
         case (cui, ccore) ⇒
-          manager.capsuleConnections.getOrElse(cui.dataUI, Map()).flatMap {
-            _ match {
+          manager.capsuleConnections.getOrElse(cui.id, TSet.empty).toSet.map { c: IConnectorUI ⇒
+            c match {
               case x: ITransitionUI ⇒
                 if (capsuleMap.contains(x.target.capsule)) {
-                  val a = Some(buildTransition(capsuleMap(x.source),
+                  Some(buildTransition(capsuleMap(x.source),
                     islotsMap.getOrElseUpdate(x.target, Slot(capsuleMap(x.target.capsule))),
                     x, prototypeMap))
-                  a
                 } else None
               case _ ⇒ None
             }
@@ -186,21 +172,20 @@ object MoleFactory {
 
       val dataChannels = capsuleMap.flatMap {
         case (cui, ccore) ⇒
-          manager.capsuleConnections.getOrElse(cui.dataUI, Map()).flatMap {
-            _ match {
+          manager.capsuleConnections.getOrElse(cui.id, TSet.empty).toSet.map { dc: IConnectorUI ⇒
+            dc match {
               case x: IDataChannelUI ⇒
-                Some(
-                  new DataChannel(
-                    capsuleMap(x.source),
-                    islotsMap.getOrElseUpdate(x.target, Slot(capsuleMap(x.target.capsule))),
-                    Block(x.filteredPrototypes.map {
-                      p ⇒ prototypeMap(p).name
-                    }.toSeq: _*)))
+                Some(new DataChannel(
+                  capsuleMap(x.source),
+                  islotsMap.getOrElseUpdate(x.target, Slot(capsuleMap(x.target.capsule))),
+                  Block(x.filteredPrototypes.map {
+                    p ⇒ prototypeMap(p).name
+                  }.toSeq: _*)))
               case _ ⇒ None
             }
           }
       }
-      (transitions, dataChannels, islotsMap)
+      (transitions.flatten, dataChannels.flatten, islotsMap)
     }
   }
 

@@ -17,7 +17,6 @@
 
 package org.openmole.ide.core.model.workflow
 
-import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.data.IMoleDataUI
 import concurrent.stm._
 import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ITaskDataProxyUI }
@@ -52,7 +51,7 @@ trait IMoleSceneManager {
 
   def startingCapsule: Option[ICapsuleUI]
 
-  def capsuleConnections: Map[ICapsuleDataUI, TSet[IConnectorUI]]
+  def capsuleConnections: Map[String, TSet[IConnectorUI]]
 
   def removeCapsuleUI(capslue: ICapsuleUI): String
 
@@ -74,7 +73,7 @@ trait IMoleSceneManager {
   def changeConnector(oldConnector: IConnectorUI,
                       connector: IConnectorUI)
 
-  def capsulesInMole: Iterable[ICapsuleDataUI]
+  def capsulesInMole: Iterable[ICapsuleUI]
 
   def firstCapsules(caps: List[ICapsuleUI]): List[ICapsuleUI]
 

@@ -117,7 +117,7 @@ object CheckData extends Logger {
   def checkNoEmptyCapsule(scene: IMoleScene) =
     scene.manager.capsulesInMole.foreach {
       c ⇒
-        c.task match {
+        c.dataUI.task match {
           case Some(x: ITaskDataProxyUI) ⇒
           case _ ⇒ StatusBar().warn("A capsule without task can not be run")
         }
