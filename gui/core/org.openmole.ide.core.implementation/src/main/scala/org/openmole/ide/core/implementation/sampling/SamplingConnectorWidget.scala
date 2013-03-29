@@ -85,7 +85,7 @@ class SamplingConnectorWidget(sourceWidget: Widget,
             case Some(p: IPrototypeDataProxyUI) ⇒ p.toString
             case _ ⇒ "?"
           }
-        case _ ⇒"?"
+        case _ ⇒ "?"
       }
   }
 
