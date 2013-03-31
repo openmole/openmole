@@ -26,7 +26,7 @@ trait CoreMisc extends CoreDefaults with Libraries with ThirdParties {
     (libraryDependencies <+= (osgiVersion) {oV => "org.eclipse.core" % "org.eclipse.osgi" % oV}) dependsOn (coreMiscTools)
 
   lazy val coreMiscFileService = OsgiProject("org.openmole.misc.fileservice") settings
-    (libraryDependencies <+= (osgiVersion) {oV => "org.eclipse.core" % "org.eclipse.osgi" % oV % "library"}) dependsOn
+    (libraryDependencies <+= (osgiVersion) {oV => "org.eclipse.core" % "org.eclipse.osgi" % oV}) dependsOn
     (coreMiscTools, coreMiscHashService, coreMiscFileCache, coreMiscUpdater, coreMiscWorkspace)
 
   lazy val coreMiscMacros = OsgiProject("org.openmole.misc.macros") dependsOn (scalaLang)
@@ -35,7 +35,7 @@ trait CoreMisc extends CoreDefaults with Libraries with ThirdParties {
     bundleActivator = Some("org.openmole.misc.osgi.Activator")) dependsOn(coreMiscException, scalaLang) settings
     (libraryDependencies <+= (osgiVersion) {oV => "org.eclipse.core" % "org.eclipse.osgi" % oV})
 
-  lazy val coreMiscTools = OsgiProject("org.openmole.misc.tools") settings
+  lazy val coreMiscTools = OsgiProject("org.openmole.misc.tools", buddyPolicy = Some("global")) settings
     (libraryDependencies <+= (osgiVersion) {oV => "org.eclipse.core" % "org.eclipse.osgi" % oV}) dependsOn
     (coreMiscException, xstream, icu4j, xstream, icu4j, groovy, objenesis,
       apacheCommonsExec, apacheCommonsPool, apacheCommonsMath, coreMiscOsgi, jodaTime, iceTar)
@@ -45,12 +45,12 @@ trait CoreMisc extends CoreDefaults with Libraries with ThirdParties {
     (libraryDependencies <+= (osgiVersion) {oV => "org.eclipse.core" % "org.eclipse.osgi" % oV}) dependsOn
     (coreMiscException, coreMiscTools, coreMiscOsgi)
 
-  lazy val coreMiscReplication = OsgiProject("org.openmole.misc.replication") dependsOn(db4o % "bundle -> library", xstream)
+  lazy val coreMiscReplication = OsgiProject("org.openmole.misc.replication") dependsOn(db4o, xstream)
 
   lazy val coreMiscUpdater = OsgiProject("org.openmole.misc.updater") dependsOn(coreMiscException, coreMiscTools, coreMiscWorkspace)
 
   lazy val coreMiscWorkspace = OsgiProject("org.openmole.misc.workspace") settings
-    (libraryDependencies <+= (osgiVersion) {oV => "org.eclipse.core" % "org.eclipse.osgi" % oV % "library"}) dependsOn
+    (libraryDependencies <+= (osgiVersion) {oV => "org.eclipse.core" % "org.eclipse.osgi" % oV}) dependsOn
     (coreMiscException, coreMiscEventDispatcher, coreMiscTools, coreMiscReplication, jasypt, xstream, apacheCommonsConfig)
 
 }

@@ -16,7 +16,7 @@ trait Libraries extends Defaults {
   lazy val libraries = Project(id = "openmole-libraries",
     base = file("libraries")) aggregate (jetty,scalatra,logback, h2, bonecp, slick, slf4j, xstream, icu4j, groovy,
     apacheCommonsExec, objenesis, scalaLang, apacheCommonsPool, apacheCommonsMath, jodaTime, gnuCrypto, db4o,
-    apacheCommonsConfig, jasypt, robustIt, netlogo4, netlogo5, netlogo4_noscala, netlogo5_noscala)
+    apacheCommonsConfig, jasypt, robustIt, netlogo4, netlogo5, netlogo4_noscala, netlogo5_noscala, gridscale, guava)
 
   private implicit val dir = file("libraries")
 
@@ -89,7 +89,7 @@ trait Libraries extends Defaults {
     (libraryDependencies += "commons-configuration" % "commons-configuration" % "1.6")
 
   lazy val db4o = OsgiProject("com.db4o", buddyPolicy = Some("global")) settings
-    (libraryDependencies += "com.db4o" % "db4o-full-java5" % "8.1-SNAPSHOT" % "library")
+    (libraryDependencies += "com.db4o" % "db4o-full-java5" % "8.1-SNAPSHOT")
 
   lazy val robustIt = OsgiProject("uk.com.robustit.cloning", exports = Seq("com.rits.*")) settings
     (libraryDependencies += "uk.com.robust-it" % "cloning" % "1.7.4")
@@ -126,7 +126,13 @@ trait Libraries extends Defaults {
       "org.objectweb" % "asm-all" % "3.3.1",
       "org.picocontainer" % "picocontainer" % "2.8"), version := "5.0.3", scalaVersion := "2.9.2")
 
-  lazy val guava = OsgiProject("com.google.guava") //todo
+  lazy val guava = OsgiProject("com.google.guava",
+    exports=Seq("com.google.common.*"), privatePackages = Seq("*")) settings (libraryDependencies ++=
+    Seq("com.google.guava" % "guava" % "13.0.1", "com.google.code.findbugs" % "jsr305" % "1.3.9")
+  )
 
-  lazy val gridscale = OsgiProject("fr.iscpif.gridscale")  //todo
+  lazy val gridscale = OsgiProject("fr.iscpif.gridscale",
+    exports = Seq("fr.iscpif.gridscale.*", "net.schmizz.sshj.*", "org.glite.*", "org.globus.*", "org.ogf.*"),
+    privatePackages = Seq("!scala.*","*")) settings
+    (libraryDependencies += "fr.iscpif.gridscale" % "gridscale" % "1.37")
 }

@@ -3,8 +3,6 @@ package projectRoot
 import sbt._
 import Keys._
 
-import net.virtualvoid.sbt.graph._
-
 trait Application extends Web with Libraries {
   private[Application] implicit val org = organization := "org.openmole.ui"
   private implicit val dir = file("application")
@@ -14,7 +12,6 @@ trait Application extends Web with Libraries {
   private lazy val pluginDependencies = libraryDependencies <++= version {
     v =>
       Seq(
-        "org.openmole.core" % "org.openmole.core.batch" % v,
         "org.openmole.core" % "org.openmole.misc.sftpserver" % v,
         "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841" intransitive(),
         "org.eclipse.core" % "org.eclipse.core.contenttype" % "3.4.200.v20120523-2004" intransitive(),
@@ -24,6 +21,7 @@ trait Application extends Web with Libraries {
         "org.eclipse.core" % "org.eclipse.equinox.launcher" % "1.3.0.v20120522-1813" intransitive(),
         "org.eclipse.core" % "org.eclipse.equinox.registry" % "3.5.200.v20120522-1841" intransitive(),
         "org.eclipse.core" % "org.eclipse.equinox.preferences" % "3.5.1.v20121031-182809" intransitive(),
+        "org.openmole.core" % "org.openmole.core.batch" % v,
         "org.eclipse.core" % "org.eclipse.osgi" % "3.8.2.v20130124-134944" intransitive(),
         "org.openmole" % "org.apache.commons.logging" % v intransitive(),
         "org.openmole" % "net.sourceforge.jline" % v intransitive(),
@@ -45,14 +43,14 @@ trait Application extends Web with Libraries {
         pluginTemplate("environment.pbs"),
         pluginTemplate("grouping.onvariable"),
         pluginTemplate("grouping.batch"),
-        /*sbtPluginTemplate("task.netlogo"),
+        sbtPluginTemplate("task.netlogo"),
         sbtPluginTemplate("task.netlogo4"),
-        sbtPluginTemplate("task.netlogo5"),*/
+        sbtPluginTemplate("task.netlogo5"),
         pluginTemplate("task.systemexec"),
         pluginTemplate("task.groovy"),
         pluginTemplate("task.scala"),
         pluginTemplate("task.code"),
-        //pluginTemplate("task.external"),
+        pluginTemplate("task.external"),
         pluginTemplate("task.template"),
         pluginTemplate("task.stat"),
         pluginTemplate("domain.modifier"),
@@ -138,6 +136,7 @@ trait Application extends Web with Libraries {
         "org.openmole.core" %% "org.openmole.misc.tools" % v,
         "org.openmole.core" %% "org.openmole.misc.eventdispatcher" % v,
         "org.openmole.core" %% "org.openmole.misc.pluginmanager" % v,
+        //"org.openmole.core" %% "org.openmole.core.batch" % v,
         "org.openmole" %% "uk.com.robustit.cloning" % v intransitive(),
         "org.openmole" %% "org.joda.time" % v intransitive(),
         "org.openmole" %% "org.scala-lang.scala-library" % v intransitive(),
@@ -149,8 +148,7 @@ trait Application extends Web with Libraries {
 
 
   lazy val openmolePlugins = AssemblyProject("package", "assembly/openmole-plugins") settings (openmolePluginDependencies,
-      ignoreTransitive := true, dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library")) dependsOn
-    (corePluginNetLogo4 % "plugin -> plugin", corePluginNetLogo5 % "plugin -> plugin")
+    dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
 
   lazy val openmoleGuiPlugins = AssemblyProject("package", "assembly/openmole-plugins-gui") settings (openmoleGuiPluginDependencies,
     dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
