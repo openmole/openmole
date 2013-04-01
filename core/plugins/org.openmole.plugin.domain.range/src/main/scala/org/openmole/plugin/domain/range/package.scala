@@ -17,4 +17,29 @@
 
 package org.openmole.plugin.domain
 
-package object range {}
+import java.math.{ MathContext, RoundingMode, BigDecimal }
+import org.openmole.misc.tools.math.BigDecimalOperations
+
+package object range {
+
+  val scale = 128
+  private val mc = new MathContext(scale, RoundingMode.HALF_UP)
+
+  trait Log[T] {
+    def log(t: T): T
+    def exp(t: T): T
+  }
+
+  implicit val doubleLog =
+    new Log[Double] {
+      def log(t: Double) = math.log(t)
+      def exp(t: Double) = math.exp(t)
+    }
+
+  implicit val bigDecimalLog =
+    new Log[BigDecimal] {
+      def log(t: BigDecimal) = BigDecimalOperations.ln(t, scale)
+      def exp(t: BigDecimal) = BigDecimalOperations.exp(t, scale).setScale(scale, RoundingMode.HALF_UP).round(mc)
+    }
+
+}

@@ -16,27 +16,27 @@
  */
 package org.openmole.ide.core.implementation.panel
 
-import org.openmole.ide.core.model.dataproxy.ISourceDataProxyUI
+import org.openmole.ide.core.model.dataproxy.{ IDataProxyUI, ISourceDataProxyUI }
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.model.panel.PanelMode
 import swing._
 import event.{ SelectionChanged, FocusGained }
 import javax.swing.ImageIcon
 import javax.imageio.ImageIO
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.{ UpdatedProxyEvent, Proxys }
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import java.awt.BorderLayout
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
-import org.openmole.ide.core.implementation.prototype.UpdatedPrototypeEvent
 
 class SourcePanel(proxy: ISourceDataProxyUI,
                   scene: IMoleScene,
-                  mode: PanelMode.Value) extends BasePanel(Some(proxy), scene, mode) {
+                  val index: Int) extends BasePanel(Some(proxy), scene) {
   hookPanel ⇒
 
-  val panelUI = proxy.dataUI.buildPanelUI
-  panelUI.tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", new Label))
+  var panelUI = proxy.dataUI.buildPanelUI
+  def created = Proxys.contains(proxy)
+
+  refreshPanel
 
   iconLabel.icon = new ImageIcon(ImageIO.read(this.getClass.getClassLoader.getResource("img/source.png")))
 
@@ -69,31 +69,45 @@ class SourcePanel(proxy: ISourceDataProxyUI,
       proxy.dataUI.inputParameters.toMap)
   }
 
+  def updatePanel = {
+    tabbedLock = true
+    save
+    panelUI = proxy.dataUI.buildPanelUI
+    refreshPanel
+    protoPanel = buildProtoPanel
+    tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", protoPanel))
+    tabbedPane.revalidate
+    tabbedLock = false
+  }
+
   def updateProtoPanel = {
     save
     protoPanel = buildProtoPanel
-    panelUI.tabbedPane.pages(1).content = protoPanel
+    tabbedPane.pages(1).content = protoPanel
   }
 
   var protoPanel = buildProtoPanel
+  tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", protoPanel))
 
-  panelUI.tabbedPane.pages(1).content = protoPanel
-  panelUI.tabbedPane.revalidate
+  tabbedPane.revalidate
 
+  mainPanel.contents += new NewConceptPanel(this) { addPrototype }
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
-    contents += panelUI.tabbedPane
+    contents += tabbedPane
     contents += panelUI.help
   }.peer, BorderLayout.CENTER)
 
   listenTo(panelUI.help.components.toSeq: _*)
-  listenTo(panelUI.tabbedPane.selection)
+  listenTo(tabbedPane.selection)
   reactions += {
     case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
-    case UpdatedPrototypeEvent(_) | SelectionChanged(panelUI.tabbedPane) ⇒
-      scene.closeExtraPropertyPanel
+    case SelectionChanged(tabbedPane) ⇒ if (!tabbedLock) updateProtoPanel
+    case UpdatedProxyEvent(p: IDataProxyUI, _) ⇒
+      scene.removeAll(index + 1)
       updateProtoPanel
+      tabbedPane.selection.index = 0
     case _ ⇒
   }
 }

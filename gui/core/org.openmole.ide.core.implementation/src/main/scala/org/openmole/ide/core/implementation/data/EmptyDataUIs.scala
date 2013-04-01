@@ -17,11 +17,8 @@
 
 package org.openmole.ide.core.implementation.data
 
-import java.awt.Point
 import org.openmole.core.model.data._
-import org.openmole.core.model.sampling._
 import org.openmole.core.model.sampling.Sampling
-import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.prototype._
@@ -32,16 +29,9 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 import org.openmole.ide.core.model.panel._
 import org.openmole.core.implementation.task._
-import org.openmole.ide.core.model.sampling._
-import org.openmole.ide.core.model.panel.ISamplingPanelUI
-import org.netbeans.api.visual.widget.Scene
 import org.openmole.misc.tools.obj.ClassUtils
-import scala.swing.TabbedPane
-import collection.mutable
-import org.openmole.ide.core.implementation.sampling.DomainWidget
 import org.openmole.core.model.execution.Environment
 import org.openmole.core.model.job.IJob
-import org.openmole.ide.core.implementation.data.EmptyDataUIs.EmptyEnvironmentDataUI
 
 object EmptyDataUIs {
 
@@ -98,6 +88,7 @@ object EmptyDataUIs {
   }
 
   class EmptyTaskPanelUI extends ITaskPanelUI {
+    val components = List()
     def peer = new PluginPanel("").peer
     def saveContent(name: String) = new EmptyTaskDataUI
   }
@@ -105,6 +96,7 @@ object EmptyDataUIs {
   class EmptyEnvironmentDataUI extends IEnvironmentDataUI { dataUI ⇒
     def imagePath = ""
     def buildPanelUI = new IEnvironmentPanelUI {
+      val components = List()
       def saveContent(name: String) = dataUI
       def peer = new PluginPanel("").peer
     }

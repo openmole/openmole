@@ -20,6 +20,14 @@ package org.openmole.plugin.domain.relative
 import org.openmole.core.implementation.tools._
 import org.openmole.core.model.data._
 
+object DoubleRelative {
+
+  def apply(nominal: String, percent: String, size: String) =
+    new DoubleRelative(nominal, percent, size)
+
+}
+
+
 sealed class DoubleRelative(val nominal: String, val percent: String, val size: String) extends Relative[Double] {
 
   override def computeValues(context: Context): Iterable[Double] = {

@@ -38,7 +38,7 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("") with ITas
 
   val codeTextArea = new GroovyEditor {
     editor.text = pud.code
-    minimumSize = new Dimension(80, 100);
+    minimumSize = new Dimension(80, 100)
   }
 
   val libMultiTextField = new MultiChooseFileTextField("Libraries",
@@ -49,8 +49,7 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("") with ITas
     Some("jar"),
     CLOSE_IF_EMPTY)
 
-  tabbedPane.pages += new TabbedPane.Page("Code", codeTextArea)
-  tabbedPane.pages += new TabbedPane.Page("Library", libMultiTextField.panel)
+  val components = List(("Code", codeTextArea), ("Library", libMultiTextField.panel))
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     add(codeTextArea.editor,

@@ -21,6 +21,13 @@ import org.openmole.core.model.domain._
 import org.openmole.core.model.data._
 import scala.collection.JavaConversions._
 
+object IteratorDomain {
+
+  def apply[T](iterator: Iterator[T]) =
+    new IteratorDomain[T](iterator)
+
+}
+
 sealed class IteratorDomain[T](iterator: Iterator[T]) extends Domain[T] with Discrete[T] {
   override def iterator(context: Context): Iterator[T] = iterator
 }

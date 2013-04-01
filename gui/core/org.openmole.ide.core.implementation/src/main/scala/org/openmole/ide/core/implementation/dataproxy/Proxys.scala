@@ -94,13 +94,8 @@ object Proxys {
   }
 
   def getOrGenerateSamplingComposition(p: ISamplingCompositionDataProxyUI) =
-    if (isProxy(p)) p
+    if (contains(p)) p
     else Builder.samplingCompositionUI(true)
-
-  def isProxy(p: IDataProxyUI) = p match {
-    case exists: IDataProxyUI ⇒ true
-    case _ ⇒ false
-  }
 
   def clearAll: Unit = atomic { implicit actx ⇒
     ConceptMenu.clearAllItems

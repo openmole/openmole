@@ -28,15 +28,11 @@ import org.openmole.ide.misc.widget.multirow.MultiTwoCombos._
 import org.openmole.ide.core.implementation.dataproxy._
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.implementation.data.EmptyDataUIs
-import org.openmole.ide.core.implementation.data.EmptyDataUIs._
-import java.awt.Dimension
 import org.openmole.ide.misc.widget.URL
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing._
-import swing.Swing._
 import org.openmole.ide.osgi.netlogo.NetLogo
 import scala.swing.FileChooser._
 import java.io.File
@@ -75,31 +71,28 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
   reactions += {
     case DialogClosedEvent(nlogoTextField) ⇒
       globals = List()
-      buildMultis(nlogoTextField.text)
+    // publish(new UpdatedProxyEvent(this))
   }
 
-  tabbedPane.pages += new TabbedPane.Page("Settings",
+  val (inputMapping, outputMapping) = buildMultis(nlogoPath)
+
+  val components = List(("Settings",
     new PluginPanel("", "[left]rel[grow,fill]", "[]20[]") {
       contents += new Label("Nlogo file")
       contents += (nlogoTextField, "growx,wrap")
       contents += (new Label("Commands"), "wrap")
       contents += (new ScrollPane(launchingCommandTextArea) { minimumSize = new Dimension(150, 80) }, "span,growx")
-    })
+    }),
+    ("Input mapping", inputMapping),
+    ("Output mapping", outputMapping),
+    ("Resources", new PluginPanel("wrap") {
+      contents += (workspaceCheckBox, "span,growx,wrap")
+      contents += resourcesMultiTextField.panel
+    }))
 
-  val inputMappingPage = new TabbedPane.Page("Input mapping", new PluginPanel(""))
-  val outputMappingPage = new TabbedPane.Page("Output mapping", new PluginPanel(""))
+  def emptyMapping = (new PluginPanel(""), new PluginPanel(""))
 
-  tabbedPane.pages += new TabbedPane.Page("Resources", new PluginPanel("wrap") {
-    contents += (workspaceCheckBox, "span,growx,wrap")
-    contents += resourcesMultiTextField.panel
-  })
-
-  tabbedPane.pages += inputMappingPage
-  tabbedPane.pages += outputMappingPage
-
-  buildMultis(nlogoPath)
-
-  def buildMultis(path: String) =
+  def buildMultis(path: String): (Component, Component) =
     try {
       if (globals.isEmpty) {
         val nl = buildNetLogo
@@ -133,13 +126,12 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
         if (prototypeMappingInput.isEmpty) multiProtoString.get.removeAllRows
       }
 
-      if (multiStringProto.isDefined) {
-        inputMappingPage.content = multiProtoString.get.panel
-        outputMappingPage.content = multiStringProto.get.panel
-      }
+      if (multiStringProto.isDefined) (multiProtoString.get.panel, multiStringProto.get.panel)
+      else emptyMapping
     } catch {
-      case e: Throwable ⇒ StatusBar().block(e.getMessage,
-        stack = e.getStackTraceString)
+      case e: Throwable ⇒
+        StatusBar().block(e.getMessage, stack = e.getStackTraceString)
+        emptyMapping
     }
 
   def comboContent: List[IPrototypeDataProxyUI] = Proxys.prototypes.toList

@@ -24,6 +24,11 @@ import org.openmole.core.model.domain._
 import org.openmole.misc.tools.service.Random._
 import org.openmole.core.implementation.task.Task._
 
+object UniformIntDistribution {
+  def apply(max: Option[Int] = None) = new UniformIntDistribution(max)
+}
+
+
 sealed class UniformIntDistribution(max: Option[Int] = None) extends Domain[Int] with Discrete[Int] {
 
   override def iterator(context: Context): Iterator[Int] = {

@@ -38,17 +38,6 @@ class DomainMenuProvider(panelScene: ISamplingCompositionPanelUI) extends Generi
         }
     })
 
-    val itSetAsFinalDomain = new MenuItem(new Action("Set as final") {
-      def apply = widget match {
-        case cw: SamplingComponent ⇒
-          cw.component match {
-            case domainWidget: IDomainWidget ⇒
-              panelScene.setFinalSampling(domainWidget.proxy)
-            case _ ⇒
-          }
-        case _ ⇒
-      }
-    })
     items += itRemoveFactor.peer
     super.getPopupMenu(widget, point)
   }

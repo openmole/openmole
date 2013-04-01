@@ -30,11 +30,7 @@ import org.openmole.ide.misc.tools.image.Images._
 import org.openmole.ide.misc.widget.multirow.MultiWidget.CLOSE_IF_EMPTY
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor.{ ComboLinkLabelGroovyTextFieldEditorData, ComboLinkLabelGroovyTextFieldEditorPanel }
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel.{ ComboLinkLabelData, ComboLinkLabelPanel }
-import org.openmole.ide.core.model.panel.PanelMode._
 import scala.Some
-import util.Try
-import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.misc.exception.UserBadDataError
 
 class IOPrototypePanel(scene: IMoleScene,
                        onPanel: BasePanel,
@@ -84,6 +80,7 @@ class IOPrototypePanel(scene: IMoleScene,
     }
     if (Proxys.prototypes.size > 0)
       contents += protoInEditor.panel
+    else contents += new Label("Please create first Prototypes.")
   }
 
   lazy val protoOut = new PluginPanel("wrap") {
@@ -102,11 +99,7 @@ class IOPrototypePanel(scene: IMoleScene,
   }
 
   CheckData.checkMole(scene)
-  contents += new MainLinkLabel("New Prototype", new Action("") {
-    def apply = {
-      ConceptMenu.createAndDisplayExtraPrototype(onPanel)
-    }
-  })
+
   contents += new PluginPanel("") {
     peer.setLayout(new BorderLayout)
     peer.add(protoIn.peer, BorderLayout.WEST)
@@ -117,7 +110,7 @@ class IOPrototypePanel(scene: IMoleScene,
   def contentAction(proto: IPrototypeDataProxyUI) = new ContentAction(proto.dataUI.toString, proto) {
     override def apply =
       ScenesManager.currentSceneContainer match {
-        case Some(x: ISceneContainer) ⇒ x.scene.displayExtraPropertyPanel(proto, onPanel, EXTRA)
+        case Some(x: ISceneContainer) ⇒ x.scene.displayPropertyPanel(proto, onPanel, 1)
         case None ⇒
       }
   }

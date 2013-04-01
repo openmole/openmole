@@ -17,8 +17,17 @@
 
 package org.openmole.plugin.domain
 
+import org.openmole.core.model.data._
+import org.openmole.core.model.sampling._
+import org.openmole.core.implementation.data._
+
 package object collection {
   implicit def scalaIterableDomainDecorator[T](iterable: Iterable[T]) = new {
     def toDomain = new IterableDomain[T](iterable)
+  }
+
+  implicit def prototypeDomainDecorator[T](variable: Prototype[Array[T]]) = new {
+    def toDomain = new VariableDomain[T](variable)
+    def toFactor = Factor(variable.fromArray, new VariableDomain[T](variable))
   }
 }

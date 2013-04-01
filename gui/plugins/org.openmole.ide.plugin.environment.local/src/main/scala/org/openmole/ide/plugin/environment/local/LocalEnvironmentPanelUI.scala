@@ -22,10 +22,8 @@ import java.util.ResourceBundle
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
-import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.URL
-import scala.swing.Label
 import scala.swing.TextField
 
 class LocalEnvironmentPanelUI(pud: LocalEnvironmentDataUI) extends PluginPanel("wrap 2") with IEnvironmentPanelUI {
@@ -33,8 +31,7 @@ class LocalEnvironmentPanelUI(pud: LocalEnvironmentDataUI) extends PluginPanel("
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val nbThreadTextField = new TextField(6)
-  contents += new Label("Number of threads")
-  contents += nbThreadTextField
+  val components = List(("Number of threads", new PluginPanel("") { contents += nbThreadTextField }))
 
   nbThreadTextField.text = pud.nbThread.toString
 

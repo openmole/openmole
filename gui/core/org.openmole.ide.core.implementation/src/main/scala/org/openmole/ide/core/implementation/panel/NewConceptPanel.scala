@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
+ * Copyright (C) 2013 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -14,12 +14,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.ide.core.implementation.panel
 
-package org.openmole.ide.core.model.panel
+import org.openmole.ide.misc.widget.{ MainLinkLabel, PluginPanel }
+import swing.{ Label, Action }
 
-import org.openmole.ide.core.model.data._
+class NewConceptPanel(fromPanel: BasePanel) extends PluginPanel("wrap") {
 
-trait ISamplingPanelUI extends IPanelUI {
-  def saveContent: ISamplingDataUI
-  val components = List()
+  def addPrototype = add("> prototype", new Action("") { def apply = ConceptMenu.createAndDisplayPrototype(fromPanel) })
+
+  def addSamplingComposition = add("> sampling", new Action("") { def apply = ConceptMenu.createAndDisplaySamplingComposition(fromPanel) })
+
+  def add(s: String, action: Action) = contents += new MainLinkLabel(s, action)
 }

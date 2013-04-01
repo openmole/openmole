@@ -47,19 +47,9 @@ object ToolDataUI {
           d ⇒
             val (protoType, dim) = KeyGenerator.stripArrays(d.prototype.`type`)
             KeyPrototypeGenerator.prototype(KeyPrototypeGenerator(d.prototype.name, protoType.runtimeClass, dim))
-          //  val (protoType, dim) = KeyGenerator.stripArrays(d.prototype.`type`)
-          // val proto = new PrototypeDataProxyUI(GenericPrototypeDataUI(d.prototype.name, dim + 1)(protoType), generated = true)
-          // if (!KeyPrototypeGenerator.isPrototype(proto))
-          //   Proxys += proto
         }
         case _ ⇒
       }
-    }
-  }
-
-  def buildUnknownPrototypes(mole: IMole, coreCapsule: ICapsule) = {
-    (coreCapsule.inputs(mole, Sources.empty, Hooks.empty).toList ++ coreCapsule.outputs(mole, Sources.empty, Hooks.empty)) foreach {
-      d ⇒ KeyPrototypeGenerator.prototype(d.prototype)
     }
   }
 }

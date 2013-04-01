@@ -21,6 +21,12 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 
+object CombineSampling {
+
+  def apply(samplings: Sampling*) = new CombineSampling(samplings: _*)
+
+}
+
 class CombineSampling(val samplings: Sampling*) extends Sampling {
 
   override def inputs = DataSet.empty ++ samplings.flatMap { _.inputs }

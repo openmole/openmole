@@ -22,6 +22,7 @@ import org.openmole.ide.core.model.builder.IPuzzleUIMap
 import org.openmole.plugin.builder.base._
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 import swing.{ Label, MyComboBox }
+import java.awt.Dimension
 
 class AggregationBuilderPanelUI(puzzles: List[Puzzle],
                                 puzzleSelection: Option[Puzzle],
@@ -30,6 +31,7 @@ class AggregationBuilderPanelUI(puzzles: List[Puzzle],
   val aggregationPuzzleComboBox = new MyComboBox(puzzles)
   contents += new Label("Aggregates on")
   contents += aggregationPuzzleComboBox
+  preferredSize = new Dimension(300, 120)
 
   override def build(uiMap: IPuzzleUIMap) = {
     val samplingUI = Proxys.getOrGenerateSamplingComposition(samplingComboBox.selection.item)

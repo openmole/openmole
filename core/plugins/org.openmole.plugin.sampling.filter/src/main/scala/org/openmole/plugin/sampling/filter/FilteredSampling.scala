@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Romain Reuillon
+ * Copyright (C) 2010 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,23 +15,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.grouping.batch
+package org.openmole.plugin.sampling.filter
 
-import org.openmole.core.implementation.mole._
 import org.openmole.core.model.data._
-import org.openmole.core.model.job._
-import org.openmole.core.model.mole._
+import org.openmole.core.model.sampling._
 
-/**
- * Group mole jobs given a fixed number of batch.
- *
- * @param numberOfBatch total number of batch
- */
-class BatchGrouping(numberOfBatch: Int) extends Grouping {
+object FilteredSampling {
 
-  override def apply(context: Context, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup = {
-    if (groups.size < numberOfBatch) MoleJobGroup()
-    else groups.minBy { case (_, g) ⇒ g.size }._1
-  }
+  def apply(sampling: Sampling, filters: Filter*) =
+    new FilteredSampling(sampling, filters: _*)
+
+}
+
+sealed class FilteredSampling(sampling: Sampling, filters: Filter*) extends Sampling {
+
+  override def inputs = sampling.inputs
+  override def prototypes = sampling.prototypes
+
+  override def build(context: Context): Iterator[Iterable[Variable[_]]] =
+    sampling.build(context).filter(sample ⇒ !filters.exists(!_(Context(sample))))
 
 }

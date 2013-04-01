@@ -28,6 +28,7 @@ import scala.swing.Label
 import scala.swing.TabbedPane
 import scala.swing.TextField
 import swing.TabbedPane.Page
+import java.awt.Dimension
 
 class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fillx,wrap 2", "", "") with IEnvironmentPanelUI {
 
@@ -67,7 +68,7 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
   val nodesTextField = new TextField(pud.nodes, 4)
   val coreByNodeTextField = new TextField(pud.coreByNode, 4)
 
-  tabbedPane.pages += new TabbedPane.Page("Settings",
+  val components = List(("Settings",
     new PluginPanel("wrap 2") {
       contents += (new Label("Login"), "gap para")
       contents += loginTextField
@@ -77,10 +78,9 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
 
       contents += (new Label("Port"), "gap para")
       contents += portTextField
-    })
-
-  tabbedPane.pages += new TabbedPane.Page("Options",
+    }), ("Options",
     new PluginPanel("wrap 2") {
+      minimumSize = new Dimension(300, 300)
       contents += new PluginPanel("wrap 2") {
         contents += (new Label("Path"), "gap para")
         contents += pathTextField
@@ -93,8 +93,7 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
 
         contents += (new Label("Memory"), "gap para")
         contents += memoryTextField
-      }
-      contents += new PluginPanel("wrap 2") {
+
         contents += (new Label("Wall time"), "gap para")
         contents += wallTimeTextField
 
@@ -108,9 +107,7 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
         contents += coreByNodeTextField
 
       }
-    })
-
-  contents += tabbedPane
+    }))
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     //  requirementsPanelUI.requirementHelp.foreach { hm ⇒ add(hm._1, hm._2) }

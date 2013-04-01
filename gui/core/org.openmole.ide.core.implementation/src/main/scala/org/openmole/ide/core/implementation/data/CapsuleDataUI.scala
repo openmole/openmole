@@ -64,7 +64,7 @@ case class CapsuleDataUI(val task: Option[ITaskDataProxyUI] = None,
 
   def coreClass = classOf[Capsule]
 
-  def buildPanelUI(index: Int) = new CapsulePanelUI(this, index)
+  def buildPanelUI(index: Int) = new CapsulePanelUI(this, 0)
 
   def coreObject(moleDataUI: IMoleDataUI) = task match {
     case Some(t: ITaskDataProxyUI) ⇒ MoleFactory.taskCoreObject(t.dataUI, moleDataUI.plugins.map { p ⇒ new File(p) }.toSet) match {

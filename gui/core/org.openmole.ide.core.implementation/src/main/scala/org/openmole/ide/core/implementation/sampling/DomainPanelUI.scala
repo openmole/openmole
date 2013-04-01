@@ -34,6 +34,7 @@ class DomainPanelUI(domainWidget: IDomainWidget,
                     domainPanel: DomainPanel) extends PluginPanel("") with IPanelUI {
 
   val finalProxy = domainWidget.scenePanelUI.firstSampling(domainWidget.proxy)
+  val components = List()
 
   val incomings = domainWidget.incomings
   val domains = KeyRegistry.domains.values.map {

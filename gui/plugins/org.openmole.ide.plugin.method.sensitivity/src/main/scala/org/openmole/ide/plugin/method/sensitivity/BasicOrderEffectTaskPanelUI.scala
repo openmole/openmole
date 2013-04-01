@@ -23,10 +23,7 @@ import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget.multirow.MultiCombo._
-import org.openmole.ide.misc.widget.multirow.RowWidget._
-import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.swing.Label
-import scala.swing.TabbedPane
 
 abstract class BasicOrderEffectTaskPanelUI(inputSequence: Iterable[IPrototypeDataProxyUI],
                                            outputSequence: Iterable[IPrototypeDataProxyUI]) extends PluginPanel("wrap 2") with ITaskPanelUI {
@@ -53,11 +50,11 @@ abstract class BasicOrderEffectTaskPanelUI(inputSequence: Iterable[IPrototypeDat
         }.toList))
     } else None
 
-  tabbedPane.pages += new TabbedPane.Page("Settings",
+  val components = List(("Settings",
     new PluginPanel("wrap 2") {
       if (inputPrototypeCombo.isDefined && outputPrototypeCombo.isDefined) {
         contents += inputPrototypeCombo.get.panel
         add(outputPrototypeCombo.get.panel, "gap bottom 40")
       } else add(new Label("No Double Prototypes defined"), "gap bottom 40")
-    })
+    }))
 }

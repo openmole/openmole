@@ -26,31 +26,27 @@ import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.widget.ImageWidget
 import org.netbeans.api.visual.widget.Widget
-import org.openmole.ide.core.implementation.dialog.{ StatusBar, MasterCapsulePrototypeDialog }
+import org.openmole.ide.core.implementation.dialog.MasterCapsulePrototypeDialog
 import org.openmole.ide.core.implementation.data.CapsuleDataUI
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.dataproxy.ProxyFreezer
 import org.openmole.ide.core.implementation.provider.CapsuleMenuProvider
 import org.openmole.ide.core.model.commons._
 import org.openmole.ide.core.model.commons.Constants._
-import org.openmole.ide.core.model.workflow.IInputSlotWidget
 import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.core.model.data.IExplorationTaskDataUI
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.tools.image.Images
-import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.LinkLabel
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.implementation.validation.DataflowProblem
 import scala.swing.Action
-import org.openmole.ide.core.implementation.builder.{ SceneFactory, MoleFactory }
-import org.openmole.core.model.mole.{ Hooks, Sources, ICapsule, IMole }
-import org.openmole.core.model.data.{ Prototype, DataSet }
-import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
+import org.openmole.core.model.mole.{ ICapsule, IMole }
+import org.openmole.core.model.data.Prototype
+import org.openmole.ide.core.implementation.builder.SceneFactory
 
 object CapsuleUI {
   def imageWidget(scene: IMoleScene, img: ImageIcon, x: Int, y: Int, action: Action) = new LinkedImageWidget(scene, img, x, y, action)
@@ -81,7 +77,7 @@ class CapsuleUI(val scene: IMoleScene,
   val titleWidget = new LinkedWidget(scene, new LinkLabel(toString, new Action("") {
     def apply = {
       dataUI.task match {
-        case Some(x: ITaskDataProxyUI) ⇒ scene.displayPropertyPanel(x, EDIT)
+        case Some(x: ITaskDataProxyUI) ⇒ scene.displayPropertyPanel(x, 0)
         case _ ⇒
       }
     }
@@ -255,7 +251,7 @@ class CapsuleUI(val scene: IMoleScene,
                 new ImageIcon(ImageIO.read(x.dataUI.getClass.getClassLoader.getResource(x.dataUI.imagePath))),
                 0, TASK_CONTAINER_HEIGHT - 3,
                 new Action("") {
-                  def apply = scene.displayPropertyPanel(x, EDIT)
+                  def apply = scene.displayPropertyPanel(x, 0)
                 }))
               addChild(samplingWidget.get)
             case _ ⇒ samplingWidget = None

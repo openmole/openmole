@@ -30,7 +30,7 @@ class RemoveCapsuleAction(scene: IMoleScene, capsule: ICapsuleUI) extends Action
     ScenesManager.selection.foreach { c ⇒
       scene.graphScene.removeNodeWithEdges(scene.manager.removeCapsuleUI(c))
     }
-    ScenesManager.clearRemovedCapsulesFromSelection
+    ScenesManager.invalidateSelection
     CheckData.checkMole(scene)
   }
 }

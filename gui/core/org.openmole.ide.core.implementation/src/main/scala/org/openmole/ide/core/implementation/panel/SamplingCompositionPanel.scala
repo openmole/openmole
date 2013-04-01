@@ -24,39 +24,37 @@ import javax.swing.ScrollPaneConstants._
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import javax.imageio.ImageIO
 import javax.swing.ImageIcon
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.{ UpdatedProxyEvent, Proxys }
 import org.openmole.ide.core.implementation.dialog.DialogFactory
-import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
+import org.openmole.ide.core.model.dataproxy.{ IDataProxyUI, ISamplingCompositionDataProxyUI }
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.model.panel.PanelMode._
 import org.openmole.ide.misc.widget.{ MainLinkLabel, PluginPanel }
 import org.netbeans.api.visual.widget.Scene
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
 import scala.swing.Component
 import scala.swing.Action
 import scala.swing.event.FocusGained
-import org.openmole.ide.core.implementation.prototype.UpdatedPrototypeEvent
 
 class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
                                scene: IMoleScene,
-                               mode: Value = CREATION) extends BasePanel(Some(proxy), scene, mode) { sCPanel ⇒
+                               val index: Int) extends BasePanel(Some(proxy), scene) { sCPanel ⇒
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
   val panelUI = proxy.dataUI.buildPanelUI
+  def created = Proxys.contains(proxy)
+
+  tabbedPane.preferredSize = new Dimension(0, 0)
+
+  mainPanel.contents += new NewConceptPanel(this) { addPrototype }
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
-    contents += new MainLinkLabel("New Prototype", new Action("") {
-      def apply = {
-        ConceptMenu.createAndDisplayExtraPrototype(sCPanel)
-      }
-    })
-    contents += panelUI.tabbedPane
+    contents += tabbedPane
     contents += panelUI.help
+
     panelUI match {
       case s: Scene ⇒ peer.add(new JScrollPane(s.createView) {
         setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER)
         setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER)
-        setMinimumSize(new Dimension(400, 250))
       })
       case _ ⇒
     }
@@ -67,7 +65,8 @@ class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
   reactions += {
     case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
-    case UpdatedPrototypeEvent(_) ⇒ scene.closeExtraPropertyPanel
+    case UpdatedProxyEvent(p: IDataProxyUI, _) ⇒
+      scene.removeAll(index + 1)
   }
 
   def create = {

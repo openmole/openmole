@@ -24,10 +24,15 @@ import org.openmole.misc.workspace._
 import org.openmole.misc.tools.service.Random._
 import org.openmole.core.implementation.task.Task._
 
+object UniformLongDistribution {
+  def apply() = new UniformLongDistribution
+}
+
+
 sealed class UniformLongDistribution extends Domain[Long] with Discrete[Long] {
 
   override def iterator(context: Context): Iterator[Long] = {
-    val rng = newRNG(context.valueOrException(openMOLESeed))
+    val rng = newRNG(context(openMOLESeed))
     Iterator.continually { rng.nextLong }
   }
 }

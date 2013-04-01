@@ -22,6 +22,13 @@ import org.openmole.core.model.domain._
 import org.openmole.plugin.tools.groovy.ContextToGroovyCode
 import org.openmole.core.implementation.tools._
 
+object MapDomain {
+
+  def apply[I, O](domain: Domain[I] with Discrete[I], name: String, code: String) =
+    new MapDomain[I, O](domain, name, code)
+
+}
+
 sealed class MapDomain[-I, +O](domain: Domain[I] with Discrete[I], name: String, code: String) extends Domain[O] with Discrete[O] {
 
   def this(domain: Domain[I] with Discrete[I], prototype: Prototype[I], code: String) = this(domain, prototype.name, code)

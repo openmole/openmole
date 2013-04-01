@@ -20,7 +20,6 @@ package org.openmole.ide.core.implementation.workflow
 import java.awt.Point
 import org.netbeans.api.visual.anchor.PointShape
 import org.netbeans.api.visual.widget.Widget
-import org.openmole.ide.core.model.panel.PanelMode
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IDataChannelUI
 import org.openmole.ide.core.model.workflow.IInputSlotWidget
@@ -32,7 +31,6 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow.ITransitionUI
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
-import org.openmole.ide.core.model.panel.PanelMode._
 import org.netbeans.api.visual.action.WidgetAction.State._
 import org.openmole.ide.core.implementation.builder.SceneFactory
 

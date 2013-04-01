@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 2011 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,17 +15,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.sampling.filter
+package org.openmole.plugin.grouping.batch
 
+import org.openmole.core.implementation.mole._
 import org.openmole.core.model.data._
-import org.openmole.core.model.sampling._
+import org.openmole.core.model.job._
+import org.openmole.core.model.mole._
 
-sealed class FiltredSampling(sampling: Sampling, filters: Filter*) extends Sampling {
+/**
+ * Group mole jobs by group of numberOfMoleJobs.
+ *
+ * @param numberOfMoleJobs size of each batch
+ */
+class ByGrouping(numberOfMoleJobs: Int) extends Grouping {
 
-  override def inputs = sampling.inputs
-  override def prototypes = sampling.prototypes
+  override def apply(context: Context, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup = {
+    groups.find { case (_, g) ⇒ g.size < numberOfMoleJobs } match {
+      case Some((mg, _)) ⇒ mg
+      case None ⇒ MoleJobGroup()
+    }
+  }
 
-  override def build(context: Context): Iterator[Iterable[Variable[_]]] =
-    sampling.build(context).filter(sample ⇒ !filters.exists(!_(Context(sample))))
-
+  override def complete(jobs: Iterable[IMoleJob]) = jobs.size >= numberOfMoleJobs
 }

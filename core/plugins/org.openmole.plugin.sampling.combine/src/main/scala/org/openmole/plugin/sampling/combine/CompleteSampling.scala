@@ -21,6 +21,12 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import org.openmole.core.model.sampling._
 
+object CompleteSampling {
+
+  def apply(samplings: Sampling*) = new CompleteSampling(samplings: _*)
+
+}
+
 sealed class CompleteSampling(val samplings: Sampling*) extends Sampling {
 
   override def inputs = DataSet(samplings.flatMap { _.inputs })

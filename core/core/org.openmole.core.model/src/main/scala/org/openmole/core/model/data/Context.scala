@@ -170,6 +170,6 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
 
   def prettified(stripSize: Int = Workspace.preferenceAsInt(Workspace.ErrorArraySnipSize)) =
     "{" + (if (variables.values.isEmpty) ""
-    else variables.values.map(v ⇒ if (v != null) v.prettified(stripSize) else v).mkString(", ")) + "}"
+    else variables.values.map(v ⇒ if (v != null) v.prettified(stripSize) else "null").mkString(", ")) + "}"
 
 }
