@@ -56,11 +56,52 @@ object LoadXML {
           ScenesManager.closeAll
           Proxies.instance = proxies
           addPrototypes(proxies)
+          addTasks(proxies)
+          addSamplings(proxies)
+          addEnvironments(proxies)
+          addHooks(proxies)
+          addSources(proxies)
           scene.foreach(mdu ⇒ ScenesManager.addBuildSceneContainer(MoleData.toScene(mdu, proxies)))
       }
     }
     text
   }
+
+  def addTasks(proxies: Proxies) =
+    for {
+      p ← proxies.tasks
+      if (!p.generated)
+    } ConceptMenu.taskMenu.popup.contents += ConceptMenu.addItem(p)
+
+  def addSamplings(proxies: Proxies) =
+    for {
+      p ← proxies.samplings
+      if (!p.generated)
+    } ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(p)
+
+  def addEnvironments(proxies: Proxies) =
+    for {
+      p ← proxies.environments
+      if (!p.generated)
+    } ConceptMenu.environmentMenu.popup.contents += ConceptMenu.addItem(p)
+
+  def addSampling(proxies: Proxies) =
+    for {
+      p ← proxies.sources
+      if (!p.generated)
+    } ConceptMenu.sourceMenu.popup.contents += ConceptMenu.addItem(p)
+
+  def addSources(proxies: Proxies) =
+    for {
+      p ← proxies.sources
+      if (!p.generated)
+    } ConceptMenu.sourceMenu.popup.contents += ConceptMenu.addItem(p)
+
+  def addHooks(proxies: Proxies) =
+    for {
+      p ← proxies.hooks
+      if (!p.generated)
+    } ConceptMenu.hookMenu.popup.contents += ConceptMenu.addItem(p)
 
   def addPrototypes(proxies: Proxies) =
     for {
