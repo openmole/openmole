@@ -26,7 +26,7 @@ import java.awt.Point
 import org.openmole.core.model.transition._
 import org.openmole.ide.core.model.sampling.IBuiltCompositionSampling
 import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
-import org.openmole.ide.core.implementation.sampling.{ FactorProxyUI, DomainProxyUI, SamplingProxyUI, SamplingCompositionDataUI }
+import org.openmole.ide.core.implementation.sampling.{ DomainProxyUI, SamplingProxyUI, SamplingCompositionDataUI }
 import org.openmole.core.model.domain.Domain
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.model.builder.IPuzzleUIMap
