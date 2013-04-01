@@ -43,11 +43,13 @@ object LoadXML {
   def show = {
     val fc = DialogFactory.fileChooser(" OpenMOLE project loading",
       "*.om",
-      "om")
+      "om",
+      Settings.currentPath)
     var text = ""
     if (fc.showDialog(new Label, "OK") == Approve) text = fc.selectedFile.getPath
     val file = new File(text)
     if (file.isFile) {
+      Settings.currentPath = Some(file.getParentFile)
       Settings.currentProject = Some(file)
       (new GUISerializer).deserialize(text) match {
         case Failure(t) ⇒ displayErrors(List(t))

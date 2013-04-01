@@ -41,15 +41,17 @@ object SaveXML {
   def show: Option[File] = {
     val fc = DialogFactory.fileChooser("Save OpenMOLE project",
       "*.om",
-      "om")
-
-    //var text: Option[String] = None
+      "om",
+      Settings.currentPath)
     if (fc.showDialog(new Label, "OK") == Approve) {
-      if (new File(fc.selectedFile.getPath).getParentFile.isDirectory) {
-        val path = new File(fc.selectedFile.getPath.split('.')(0) + ".om")
-        Some(path)
+      val f = new File(fc.selectedFile.getPath)
+      if (f.isFile) {
+        Settings.currentPath = Some(f.getParentFile)
+        val saveAs =
+          if (!f.getName.contains(".")) new File(fc.selectedFile.getPath + ".om")
+          else f
+        Some(saveAs)
       } else None
     } else None
-    //text
   }
 }

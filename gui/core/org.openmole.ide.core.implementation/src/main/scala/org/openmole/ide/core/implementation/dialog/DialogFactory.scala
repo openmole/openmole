@@ -35,16 +35,19 @@ import scala.swing.Label
 import scala.swing.ScrollPane
 import scala.swing.TextArea
 import scala.swing.TextField
+import java.io.File
 
 object DialogFactory {
 
   def fileChooser(titleText: String,
                   extensionText: String,
-                  extension: String) = new FileChooser {
-    fileFilter = new FileNameExtensionFilter(extensionText, extension)
-    fileSelectionMode = FilesOnly
-    title = titleText
-  }
+                  extension: String,
+                  dir: Option[File] = None) =
+    new FileChooser(dir.getOrElse(new File(System.getProperty("user.home")))) {
+      fileFilter = new FileNameExtensionFilter(extensionText, extension)
+      fileSelectionMode = FilesOnly
+      title = titleText
+    }
 
   def closeExecutionTab(exeContainer: ExecutionMoleSceneContainer): Boolean = {
     if (exeContainer.finished) true

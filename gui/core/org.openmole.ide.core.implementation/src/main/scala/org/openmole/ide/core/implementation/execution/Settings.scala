@@ -21,4 +21,5 @@ import java.io.File
 
 object Settings {
   var currentProject: Option[File] = None
+  var currentPath: Option[File] = None
 }
