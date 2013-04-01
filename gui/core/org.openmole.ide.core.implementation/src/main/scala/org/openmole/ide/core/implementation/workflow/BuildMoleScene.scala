@@ -62,7 +62,7 @@ class BuildMoleScene(val manager: IMoleUI) extends MoleScene with IBuildMoleScen
       dataUI.task match {
         case Some(x: ITaskDataProxyUI) ⇒
           ret._1.encapsule(ProxyFreezer.freeze(x))
-          if (dataUI.environment.isDefined) ret._1 on ProxyFreezer.freeze(dataUI.environment)
+          if (dataUI.environment.isDefined) ret._1.environment_=(ProxyFreezer.freeze(dataUI.environment))
         case _ ⇒
       }
       ret

@@ -136,7 +136,7 @@ object ScenesManager {
       case (old, neo) ⇒
         val p = new Point((old.widget.getPreferredLocation.x + dx).toInt, (old.widget.getPreferredLocation.y + dy).toInt)
         ms.add(neo._1, p)
-        neo._1 on old.dataUI.environment
+        neo._1.environment_=(old.dataUI.environment)
         old.dataUI.task match {
           case Some(t: ITaskDataProxyUI) ⇒ neo._1.encapsule(t)
           case _ ⇒

@@ -44,11 +44,9 @@ trait ICapsuleUI {
 
   def copy(sc: IBuildMoleScene): (ICapsuleUI, Map[IInputSlotWidget, IInputSlotWidget])
 
-  def ::(dpu: ITaskDataProxyUI)
+  def capsuleType_=(cType: CapsuleType)
 
-  def --(cType: CapsuleType)
-
-  def on(environment: Option[IEnvironmentDataProxyUI])
+  def environment_=(environment: Option[IEnvironmentDataProxyUI])
 
   def addInputSlot: IInputSlotWidget
 

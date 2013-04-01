@@ -23,13 +23,16 @@ import org.openmole.ide.core.model.workflow.ICapsuleUI
 
 import scala.swing.Action
 
-class ChangeCapsuleAction(capsule: ICapsuleUI,
-                          newType: CapsuleType) extends Action(newType.toString.toLowerCase) {
+class ChangeCapsuleAction(
+    capsule: ICapsuleUI,
+    newType: CapsuleType) extends Action(newType.toString.toLowerCase) {
+
   override def apply = {
-    capsule -- newType
+    capsule.capsuleType_=(newType)
     CheckData.checkMole(capsule.scene)
     capsule.scene.manager.invalidateCache
     capsule.scene.graphScene.revalidate
     capsule.scene.graphScene.repaint
   }
+
 }

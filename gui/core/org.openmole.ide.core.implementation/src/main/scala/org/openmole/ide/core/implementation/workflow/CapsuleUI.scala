@@ -175,7 +175,7 @@ class CapsuleUI(
 
   def encapsule(dpu: ITaskDataProxyUI) = {
     decapsule
-    ::(dpu)
+    dataUI = dataUI.copy(task = Some(dpu))
     inputPrototypeWidget = Some(PrototypeWidget.buildTaskSource(scene, this))
     outputPrototypeWidget = Some(PrototypeWidget.buildTaskHook(scene, this))
     CheckData.checkMole(scene)
@@ -184,7 +184,7 @@ class CapsuleUI(
     update
   }
 
-  def on(env: Option[IEnvironmentDataProxyUI]) = {
+  def environment_=(env: Option[IEnvironmentDataProxyUI]) = {
     dataUI = dataUI.copy(environment = env)
     updateEnvironmentWidget
   }
@@ -197,7 +197,7 @@ class CapsuleUI(
     }
   }
 
-  def --(cType: CapsuleType) = {
+  def capsuleType_=(cType: CapsuleType) = {
     dataUI = dataUI.copy(capsuleType = cType)
     updateCapsuleTypeWidget
   }
@@ -286,11 +286,6 @@ class CapsuleUI(
     val toBeRemoved = islots.tail.last
     removeChild(toBeRemoved.widget)
     islots -= toBeRemoved
-  }
-
-  def ::(dpu: ITaskDataProxyUI) = {
-    dataUI = dataUI.copy(task = Some(dpu))
-    updateSamplingWidget
   }
 
   def inputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IPrototypeDataProxyUI] = {
