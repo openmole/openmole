@@ -24,7 +24,7 @@ import javax.swing.ScrollPaneConstants._
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import javax.imageio.ImageIO
 import javax.swing.ImageIcon
-import org.openmole.ide.core.implementation.dataproxy.{ UpdatedProxyEvent, Proxys }
+import org.openmole.ide.core.implementation.dataproxy.{ UpdatedProxyEvent, Proxies }
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.model.dataproxy.{ IDataProxyUI, ISamplingCompositionDataProxyUI }
 import org.openmole.ide.core.model.workflow.IMoleScene
@@ -40,7 +40,7 @@ class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
                                val index: Int) extends BasePanel(Some(proxy), scene) { sCPanel ⇒
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
   val panelUI = proxy.dataUI.buildPanelUI
-  def created = Proxys.contains(proxy)
+  def created = Proxies.instance.contains(proxy)
 
   tabbedPane.preferredSize = new Dimension(0, 0)
 
@@ -70,7 +70,7 @@ class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
   }
 
   def create = {
-    Proxys += proxy
+    Proxies.instance += proxy
     ConceptMenu.samplingMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
 
@@ -79,7 +79,7 @@ class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
     toBeRemovedSamplings match {
       case Nil ⇒
         scene.closePropertyPanel(index)
-        Proxys -= proxy
+        Proxies.instance -= proxy
         ConceptMenu.removeItem(proxy)
         true
       case _ ⇒

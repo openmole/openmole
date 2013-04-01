@@ -17,8 +17,8 @@
 
 package org.openmole.ide.core.model.panel
 
-import org.openmole.ide.core.model.data.IMoleDataUI
+import org.openmole.ide.core.model.workflow.IMoleUI
 
 trait IMolePanelUI extends IPanelUI {
-  def saveContent(name: String): IMoleDataUI
+  def saveContent(name: String): IMoleUI
 }

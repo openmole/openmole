@@ -23,7 +23,7 @@ import org.openmole.ide.core.implementation.workflow.PrototypeOnConnectorWidget.
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.core.model.sampling.IOrdering
 import org.openmole.ide.core.model.data.{ IDomainDataUI, IFactorDataUI }
-import org.openmole.ide.core.implementation.dataproxy.Proxys._
+import org.openmole.ide.core.implementation.dataproxy.Proxies._
 import org.openmole.ide.core.implementation.dialog.ConnectorPrototypeFilterDialog.{ OrderingDialog, FactorPrototypeDialog }
 import org.openmole.ide.core.model.workflow.IConnectorViewUI
 import org.netbeans.api.visual.widget.ConnectionWidget

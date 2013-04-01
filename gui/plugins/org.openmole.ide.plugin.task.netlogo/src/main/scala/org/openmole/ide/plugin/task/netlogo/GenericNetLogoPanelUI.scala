@@ -139,7 +139,7 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
         emptyMapping
     }
 
-  def comboContent: List[IPrototypeDataProxyUI] = Proxys.prototypes.toList
+  def comboContent: List[IPrototypeDataProxyUI] = Proxies.instance.prototypes.toList
 
   def buildNetLogo: NetLogo
 

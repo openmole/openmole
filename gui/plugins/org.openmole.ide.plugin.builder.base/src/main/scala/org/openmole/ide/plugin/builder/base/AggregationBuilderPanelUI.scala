@@ -17,16 +17,16 @@
 package org.openmole.ide.plugin.builder.base
 
 import org.openmole.core.implementation.puzzle.Puzzle
-import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.ide.core.model.builder.IPuzzleUIMap
 import org.openmole.plugin.builder.base._
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import swing.{ Label, MyComboBox }
 import java.awt.Dimension
+import org.openmole.ide.core.model.workflow.IMoleUI
 
 class AggregationBuilderPanelUI(puzzles: List[Puzzle],
                                 puzzleSelection: Option[Puzzle],
-                                manager: IMoleSceneManager) extends GenericBuilderPanelUI("Explore on", puzzles, puzzleSelection) {
+                                manager: IMoleUI) extends GenericBuilderPanelUI("Explore on", puzzles, puzzleSelection) {
 
   val aggregationPuzzleComboBox = new MyComboBox(puzzles)
   contents += new Label("Aggregates on")
@@ -34,8 +34,8 @@ class AggregationBuilderPanelUI(puzzles: List[Puzzle],
   preferredSize = new Dimension(300, 120)
 
   override def build(uiMap: IPuzzleUIMap) = {
-    val samplingUI = Proxys.getOrGenerateSamplingComposition(samplingComboBox.selection.item)
+    val samplingUI = Proxies.instance.getOrGenerateSamplingComposition(samplingComboBox.selection.item)
     val sampling = samplingUI.dataUI.coreObject
-    (aggregation(nameTextField.text, puzzleComboBox.selection.item, sampling, aggregationPuzzleComboBox.selection.item)(manager.dataUI.pluginSet), uiMap += (sampling, samplingUI))
+    (aggregation(nameTextField.text, puzzleComboBox.selection.item, sampling, aggregationPuzzleComboBox.selection.item)(manager.pluginSet), uiMap += (sampling, samplingUI))
   }
 }

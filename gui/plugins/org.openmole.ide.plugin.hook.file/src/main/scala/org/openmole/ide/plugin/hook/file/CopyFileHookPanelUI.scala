@@ -17,7 +17,7 @@
 
 package org.openmole.ide.plugin.hook.file
 
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
@@ -43,7 +43,7 @@ class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends PluginPanel("wrap"
 
   val components = List(("Prototypes", this))
 
-  def comboContent = Proxys.classPrototypes(classOf[File]) filter {
+  def comboContent = Proxies.instance.classPrototypes(classOf[File]) filter {
     _.dataUI.dim == 0
   }
 

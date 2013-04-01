@@ -21,18 +21,18 @@ import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 import org.openmole.ide.core.implementation.panel.MolePanelUI
-import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import scala.swing.FileChooser.SelectionMode._
 import scala.swing.ScrollPane
+import org.openmole.ide.core.model.workflow.IMoleUI
 
 object MoleSettingsDialog {
-  def display(manager: IMoleSceneManager) = {
-    val settingsPanel = new MolePanelUI(manager.dataUI)
+  def display(manager: IMoleUI) = {
+    val settingsPanel = new MolePanelUI(manager)
     if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(settingsPanel) {
       verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
     }.peer,
       "Mole plugins")).equals(NotifyDescriptor.OK_OPTION)) {
-      manager.dataUI = settingsPanel.saveContent("moleDataUI")
+      settingsPanel.saveContent("moleDataUI")
     }
   }
 

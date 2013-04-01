@@ -20,7 +20,7 @@ import org.openmole.ide.core.model.panel.IDomainPanelUI
 import java.util.{ Locale, ResourceBundle }
 import org.openmole.ide.misc.widget.{ Help, Helper, PluginPanel, URL }
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.ide.misc.tools.util.Types
 import swing.MyComboBox
@@ -30,7 +30,7 @@ class VariableDomainPanelUI(dataUI: VariableDomainDataUI[_]) extends PluginPanel
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val availablePrototypes: List[IPrototypeDataProxyUI] =
-    Proxys.prototypes.toList.filter {
+    Proxies.instance.prototypes.toList.filter {
       _.dataUI.dim == 1
     }
 

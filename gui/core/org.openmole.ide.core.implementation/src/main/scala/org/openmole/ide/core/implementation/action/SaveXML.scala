@@ -21,33 +21,35 @@ import java.io.File
 import scala.swing.FileChooser.SelectionMode._
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.implementation.dialog.GUIPanel
-import org.openmole.ide.core.implementation.execution.Settings
-import org.openmole.ide.core.implementation.serializer.GUISerializer
+import org.openmole.ide.core.implementation.execution.{ ScenesManager, Settings }
+import org.openmole.ide.core.implementation.serializer.{ MoleData, GUISerializer }
 import scala.swing.FileChooser.Result._
 import scala.swing.Label
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 
 object SaveXML {
-  def save(frame: GUIPanel): Unit = SaveXML.save(frame, Settings.currentProject.getOrElse(SaveXML.show.getOrElse("")))
 
-  def save(frame: GUIPanel,
-           title: String): Unit = {
-    if (title != "") {
-      Settings.currentProject = Some(title)
-      frame.title = "OpenMOLE - " + title
-      (new GUISerializer).serialize(title)
-    } else Settings.currentProject = None
-  }
+  def save(frame: GUIPanel, path: Option[File] = Settings.currentProject orElse SaveXML.show): Unit =
+    path match {
+      case Some(p) ⇒
+        frame.title = "OpenMOLE - " + p.getCanonicalPath
+        (new GUISerializer).serialize(p, Proxies.instance, ScenesManager.moleScenes.map(MoleData.fromScene))
+        Settings.currentProject = path
+      case None ⇒
+    }
 
-  def show: Option[String] = {
+  def show: Option[File] = {
     val fc = DialogFactory.fileChooser("Save OpenMOLE project",
       "*.om",
       "om")
 
-    var text: Option[String] = None
+    //var text: Option[String] = None
     if (fc.showDialog(new Label, "OK") == Approve) {
-      text = Some(fc.selectedFile.getPath)
-      if (new File(text.get).getParentFile.isDirectory) text = Some(text.get.split('.')(0) + ".om")
-    }
-    text
+      if (new File(fc.selectedFile.getPath).getParentFile.isDirectory) {
+        val path = new File(fc.selectedFile.getPath.split('.')(0) + ".om")
+        Some(path)
+      } else None
+    } else None
+    //text
   }
 }

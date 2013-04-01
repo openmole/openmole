@@ -20,7 +20,7 @@ package org.openmole.ide.core.implementation.registry
 import org.openmole.misc.tools.obj.ClassUtils
 import org.openmole.core.model.data._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxys }
+import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies }
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import concurrent.stm._
@@ -36,7 +36,7 @@ object KeyPrototypeGenerator {
       case Some(m) ⇒ m
       case None ⇒
         val m = Map(KeyPrototypeGenerator(EmptyDataUIs.emptyPrototypeProxy) -> EmptyDataUIs.emptyPrototypeProxy) ++
-          Proxys.prototypes.map { p ⇒ KeyPrototypeGenerator(p) -> p }
+          Proxies.instance.prototypes.map { p ⇒ KeyPrototypeGenerator(p) -> p }
         _cacheMap() = Some(m)
         m
     }
@@ -74,7 +74,7 @@ object KeyPrototypeGenerator {
 
   def buildUnknownPrototype(name: String, dim: Int, m: Manifest[_]): IPrototypeDataProxyUI = {
     val proxy = new PrototypeDataProxyUI(GenericPrototypeDataUI(name, dim)(m), generated = true)
-    if (!isPrototype(proxy)) Proxys += proxy
+    if (!isPrototype(proxy)) Proxies.instance += proxy
 
     proxy
   }

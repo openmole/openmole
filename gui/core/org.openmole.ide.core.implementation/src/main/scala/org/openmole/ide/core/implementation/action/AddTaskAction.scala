@@ -19,15 +19,19 @@ package org.openmole.ide.core.implementation.action
 
 import org.openmole.ide.core.implementation.provider.GenericMenuProvider
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.model.workflow.{ IBuildMoleScene, IMoleScene }
 import scala.swing.Action
 import org.openmole.ide.core.implementation.builder.SceneFactory
+import org.openmole.ide.core.implementation.workflow.CapsuleUI
+import org.openmole.ide.core.implementation.data.CapsuleDataUI
 
-class AddTaskAction(moleScene: IMoleScene,
+class AddTaskAction(moleScene: IBuildMoleScene,
                     dpu: ITaskDataProxyUI,
                     provider: GenericMenuProvider) extends Action(dpu.dataUI.name) {
   override def apply = {
-    val capsule = SceneFactory.capsuleUI(moleScene, provider.currentPoint, Some(dpu))
-    capsule.addInputSlot(moleScene.manager.capsules.size == 1)
+    val capsule = CapsuleUI.withMenu(moleScene, new CapsuleDataUI(task = Some(dpu)))
+    moleScene.add(capsule, provider.currentPoint)
+    capsule.addInputSlot
+    moleScene.refresh
   }
 }

@@ -21,7 +21,7 @@ import java.util.Locale
 import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.data.EmptyDataUIs.EmptyPrototypeDataUI
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
@@ -46,9 +46,9 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("") w
   val workdirTextField = new TextField(ndu.workdir, 30)
 
   val variablesMultiCombo = new MultiCombo("Variables",
-    EmptyDataUIs.emptyPrototypeProxy :: Proxys.prototypes.toList,
+    EmptyDataUIs.emptyPrototypeProxy :: Proxies.instance.prototypes.toList,
     ndu.variables.map { p ⇒
-      new ComboPanel(EmptyDataUIs.emptyPrototypeProxy :: Proxys.prototypes.toList,
+      new ComboPanel(EmptyDataUIs.emptyPrototypeProxy :: Proxies.instance.prototypes.toList,
         new ComboData(Some(p)))
     })
   if (ndu.variables.isEmpty) variablesMultiCombo.removeAllRows
@@ -98,7 +98,7 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("") w
       outputMapMultiTextFieldCombo.content.map { data ⇒ data.textFieldValue -> data.comboValue.get },
       variablesMultiCombo.content.map { _.comboValue.get })
 
-  def comboContent: List[IPrototypeDataProxyUI] = Proxys.classPrototypes(classOf[File])
+  def comboContent: List[IPrototypeDataProxyUI] = Proxies.instance.classPrototypes(classOf[File])
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     add(workdirTextField,

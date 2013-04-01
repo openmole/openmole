@@ -21,11 +21,11 @@ import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.misc.widget.CSVChooseFileTextField
 import org.openmole.ide.plugin.misc.tools.MultiPrototypePanel
 import swing.{ TabbedPane, Label }
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 
 class AppendToCSVFileHookPanelUI(dataUI: AppendToCSVFileHookDataUI) extends MultiPrototypePanel("",
   dataUI.toBeHooked.toList,
-  Proxys.prototypes.toList) with IHookPanelUI {
+  Proxies.instance.prototypes.toList) with IHookPanelUI {
 
   val filePathTextField = new CSVChooseFileTextField(dataUI.fileName)
   contents.insert(0, filePathTextField)

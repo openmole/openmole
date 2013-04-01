@@ -29,7 +29,7 @@ import org.openmole.ide.core.implementation.preference.PreferenceContent
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.action.LoadXML
 import org.openmole.ide.core.implementation.action.SaveXML
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField._
@@ -53,7 +53,7 @@ class GUIPanel extends MainFrame {
 
       contents += new MenuItem(new Action("Load") {
         override def apply = {
-          Proxys.clearAll
+          Proxies.instance.clearAll
           mainframe.title = "OpenMOLE - " + LoadXML.show
         }
 
@@ -70,12 +70,12 @@ class GUIPanel extends MainFrame {
       })
 
       contents += new MenuItem(new Action("Save as") {
-        override def apply = SaveXML.save(mainframe, SaveXML.show.getOrElse(""))
+        override def apply = SaveXML.save(mainframe, SaveXML.show)
       })
       contents += new MenuItem(new Action("Reset all") {
         override def apply = {
           ScenesManager.closeAll
-          Proxys.clearAll
+          Proxies.instance.clearAll
           mainframe.title = "OpenMOLE"
           Settings.currentProject = None
         }
@@ -134,7 +134,7 @@ class GUIPanel extends MainFrame {
     contents += pluginMultiTextField.panel
 
     def saveContent = {
-      val requiredFiles = Proxys.prototypes.map {
+      val requiredFiles = Proxies.instance.prototypes.map {
         p ⇒ PluginManager.fileProviding(toClass(p.dataUI.typeClassString)) -> p
       }.flatMap {
         case (o, p) ⇒ o.map {
@@ -166,7 +166,7 @@ class GUIPanel extends MainFrame {
               }
               requiredFiles.filter(x ⇒ allDepending.toList.contains(x._1)).foreach {
                 case (fi, p) ⇒
-                  Proxys -= p
+                  Proxies.instance -= p
                   ConceptMenu.removeItem(p)
                   unloadAndDelete(fi)
                 case _ ⇒

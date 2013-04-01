@@ -40,7 +40,7 @@ import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dialog.DialogFactory
-import org.openmole.ide.core.implementation.data.CheckData
+import org.openmole.ide.core.implementation.data.{ CheckData }
 import org.openmole.ide.core.implementation.panel._
 import org.openmole.ide.core.implementation.provider.MoleSceneMenuProvider
 import org.openmole.ide.core.model.workflow.IMoleScene
@@ -50,14 +50,16 @@ import scala.collection.mutable.HashMap
 import scala.swing.Panel
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.builder.SceneFactory
+import org.openmole.ide.core.model.data.{ IExplorationTaskDataUI }
+import org.openmole.ide.core.model.commons.TransitionType
 
-abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMoleScene
+abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
     with SelectProvider
     with RectangularSelectDecorator
     with RectangularSelectProvider {
   moleScene ⇒
 
-  val manager = new MoleSceneManager(n)
+  val manager: IMoleUI
   var obUI: Option[Widget] = None
   val capsuleLayer = new LayerWidget(this)
   val connectLayer = new LayerWidget(this)
@@ -99,7 +101,6 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   propertyLayer2.addChild(propertyWidget(1))
   propertyLayer3.addChild(propertyWidget(2))
 
-  getActions.addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)))
   getActions.addAction(ActionFactory.createRectangularSelectAction(this, capsuleLayer, this))
 
   val connectAction = ActionFactory.createExtendedConnectAction(null,
@@ -110,6 +111,31 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
   val dataChannelAction = ActionFactory.createExtendedConnectAction(null, connectLayer,
     new MoleSceneDataChannelProvider,
     InputEvent.CTRL_MASK)
+
+  def add(caps: ICapsuleUI, locationPoint: Point) = {
+    assert(caps.scene == this)
+    initCapsuleAdd(caps)
+    manager.registerCapsuleUI(caps)
+    graphScene.addNode(caps.id).setPreferredLocation(locationPoint)
+    CheckData.checkMole(this)
+  }
+
+  def add(trans: ITransitionUI) = {
+    manager.registerConnector(trans)
+    createConnectEdge(trans.source.id, trans.target.capsule.id, trans.id, trans.target.index)
+    refresh
+  }
+
+  def add(dc: IDataChannelUI) = {
+    manager.registerConnector(dc)
+    createConnectEdge(dc.source.id, dc.target.capsule.id, dc.id)
+    refresh
+  }
+
+  def startingCapsule_=(caps: ICapsuleUI) = {
+    manager.startingCapsule = Some(caps)
+    refresh
+  }
 
   override def paintChildren = {
     getGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
@@ -401,19 +427,27 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
 
     override def createConnection(sourceWidget: Widget, targetWidget: Widget) = {
       val sourceCapsuleUI = sourceWidget.asInstanceOf[CapsuleUI]
-      SceneFactory.transition(moleScene,
+      val transition = new TransitionUI(
         sourceCapsuleUI,
         targetWidget.asInstanceOf[InputSlotWidget],
-        sourceCapsuleUI.dataUI.transitionType)
+        sourceCapsuleUI.dataUI.task match {
+          case Some(y: ITaskDataProxyUI) ⇒ y.dataUI match {
+            case x: IExplorationTaskDataUI ⇒ TransitionType.EXPLORATION_TRANSITION
+            case _ ⇒ TransitionType.BASIC_TRANSITION
+          }
+          case _ ⇒ TransitionType.BASIC_TRANSITION
+        })
+      moleScene.add(transition)
       CheckData.checkMole(moleScene)
     }
   }
 
   class MoleSceneDataChannelProvider extends MoleSceneTransitionProvider {
     override def createConnection(sourceWidget: Widget, targetWidget: Widget) = {
-      SceneFactory.dataChannel(moleScene,
+      val dc = new DataChannelUI(
         sourceWidget.asInstanceOf[CapsuleUI],
         targetWidget.asInstanceOf[InputSlotWidget])
+      moleScene.add(dc)
       CheckData.checkMole(moleScene)
     }
   }

@@ -19,7 +19,7 @@ package org.openmole.ide.core.implementation.preference
 
 import java.awt.Color
 import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.misc.exception.UserBadDataError
 import scala.swing.Button
@@ -28,7 +28,7 @@ import scala.swing.event.ButtonClicked
 
 class EnvironmentSettingPanel extends PluginPanel("wrap 2") {
 
-  val combo = new ComboBox(Proxys.environments.filter { e ⇒
+  val combo = new ComboBox(Proxies.instance.environments.filter { e ⇒
     e.dataUI.coreClass.isAssignableFrom(classOf[BatchEnvironment])
   }.toList)
 

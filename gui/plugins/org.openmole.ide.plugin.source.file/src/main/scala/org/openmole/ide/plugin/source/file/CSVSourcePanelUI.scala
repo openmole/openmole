@@ -18,7 +18,7 @@
 package org.openmole.ide.plugin.source.file
 
 import org.openmole.ide.core.model.panel.ISourcePanelUI
-import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxys }
+import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies }
 import swing.Label
 import au.com.bytecode.opencsv.CSVReader
 import org.openmole.ide.misc.widget.Helper
@@ -91,7 +91,7 @@ class CSVSourcePanelUI(dataUI: CSVSourceDataUI) extends PluginPanel("wrap") with
     else new CSVSourceDataUI(name, csvTextField.text, List[(String, PrototypeDataProxyUI)]())
   }
 
-  def comboContent: List[IPrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxys.prototypes.toList
+  def comboContent: List[IPrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxies.instance.prototypes.toList
 
   override lazy val help =
     new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {

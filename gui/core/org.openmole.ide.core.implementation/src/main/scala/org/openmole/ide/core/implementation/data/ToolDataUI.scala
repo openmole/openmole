@@ -21,7 +21,7 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.registry.{ KeyGenerator, KeyPrototypeGenerator }
 import org.openmole.core.model.mole.{ ICapsule, Hooks, Sources, IMole }
 import org.openmole.core.model.transition.{ IAggregationTransition, ITransition }
-import org.openmole.ide.core.implementation.dataproxy.{ Proxys, PrototypeDataProxyUI }
+import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataProxyUI }
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 
 object ToolDataUI {

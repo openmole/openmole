@@ -17,8 +17,7 @@
 
 package org.openmole.ide.core.implementation.execution
 
-import org.openmole.ide.core.implementation.workflow.BuildMoleSceneContainer
-import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
+import org.openmole.ide.core.implementation.workflow._
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Point
@@ -26,13 +25,8 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.ide.core.model.data.IExplorationTaskDataUI
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.implementation.workflow.BuildMoleScene
-import org.openmole.ide.core.model.workflow.ITransitionUI
+import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.core.model.dataproxy.{ IDataProxyUI, ITaskDataProxyUI }
-import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.workflow.IDataChannelUI
-import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.MigPanel
 import org.openmole.ide.core.model.panel._
 import org.openmole.ide.misc.tools.image.Images._
@@ -45,6 +39,12 @@ import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.openmole.ide.core.implementation.builder.SceneFactory
 import util.{ Failure, Success }
 import concurrent.stm._
+import util.Failure
+import scala.Some
+import util.Success
+import util.Failure
+import scala.Some
+import util.Success
 
 object ScenesManager {
 
@@ -123,7 +123,7 @@ object ScenesManager {
     invalidateSelection
   }
 
-  def pasteCapsules(ms: IMoleScene,
+  def pasteCapsules(ms: IBuildMoleScene,
                     point: Point) = {
     val copied = selection.map { z ⇒
       z -> z.copy(ms)
@@ -135,7 +135,7 @@ object ScenesManager {
     copied.foreach {
       case (old, neo) ⇒
         val p = new Point((old.widget.getPreferredLocation.x + dx).toInt, (old.widget.getPreferredLocation.y + dy).toInt)
-        SceneFactory.capsuleUI(neo._1, ms, p)
+        ms.add(neo._1, p)
         neo._1 on old.dataUI.environment
         old.dataUI.task match {
           case Some(t: ITaskDataProxyUI) ⇒ neo._1.encapsule(t)
@@ -153,17 +153,19 @@ object ScenesManager {
           if (selection.contains(con.source) && islots.contains(con.target)) {
             con match {
               case (t: ITransitionUI) ⇒
-                SceneFactory.transition(ms,
+                val transition = new TransitionUI(
                   copied(t.source)._1,
                   copied(t.target.capsule)._1.islots.find { s ⇒ t.target.index == s.index }.get,
                   t.transitionType,
                   t.condition,
                   t.filteredPrototypes)
+                ms.add(transition)
               case (t: IDataChannelUI) ⇒
-                SceneFactory.dataChannel(ms,
+                val dc = new DataChannelUI(
                   copied(t.source)._1,
                   copied(t.target.capsule)._1.islots.find { s ⇒ t.target.index == s.index }.get,
                   t.filteredPrototypes)
+                ms.add(dc)
             }
           }
         }
@@ -202,9 +204,9 @@ object ScenesManager {
     }
   }.toList
 
-  def addBuildSceneContainer: BuildMoleSceneContainer = addBuildSceneContainer(new BuildMoleScene(""))
+  def addBuildSceneContainer: BuildMoleSceneContainer = addBuildSceneContainer(BuildMoleScene(""))
 
-  def addBuildSceneContainer(name: String): BuildMoleSceneContainer = addBuildSceneContainer(new BuildMoleScene(name))
+  def addBuildSceneContainer(name: String): BuildMoleSceneContainer = addBuildSceneContainer(BuildMoleScene(name))
 
   def addBuildSceneContainer(ms: BuildMoleScene): BuildMoleSceneContainer = {
     val container = new BuildMoleSceneContainer(ms)

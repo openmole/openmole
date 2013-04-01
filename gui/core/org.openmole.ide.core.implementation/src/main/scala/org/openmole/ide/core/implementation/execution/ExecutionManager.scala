@@ -19,14 +19,13 @@ import org.openmole.core.model.mole._
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.control.IExecutionManager
-import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import scala.collection.mutable.HashMap
 import scala.swing._
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.core.model.job.State
 import org.openmole.core.model.data._
 import org.openmole.core.model.execution.ExecutionState
-import org.openmole.ide.core.model.workflow.ICapsuleUI
+import org.openmole.ide.core.model.workflow.{ IMoleUI, ICapsuleUI }
 import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Failure, Success }
@@ -38,7 +37,7 @@ object ExecutionManager {
   }
 }
 
-class ExecutionManager(manager: IMoleSceneManager,
+class ExecutionManager(manager: IMoleUI,
                        executionContainer: ExecutionMoleSceneContainer,
                        val mole: IMole,
                        val capsuleMapping: Map[ICapsuleUI, ICapsule],

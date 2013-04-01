@@ -22,14 +22,14 @@ import javax.swing.JMenuItem
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.implementation.action.AddCapsuleAction
 import org.openmole.ide.core.implementation.action.AddTaskAction
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.model.workflow.{ IBuildMoleScene, IMoleScene }
 import swing.{ Menu, Action, MenuItem }
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.builder.Builder
 
-class MoleSceneMenuProvider(moleScene: IMoleScene) extends GenericMenuProvider {
+class MoleSceneMenuProvider(moleScene: IBuildMoleScene) extends GenericMenuProvider {
 
   def initMenu = {
     val itemCapsule = new MenuItem(new AddCapsuleAction(moleScene, this))
@@ -51,7 +51,7 @@ class MoleSceneMenuProvider(moleScene: IMoleScene) extends GenericMenuProvider {
                             point: Point) = {
     items.clear
     initMenu
-    Proxys.tasks.foreach { p ⇒ items += new JMenuItem(new AddTaskAction(moleScene, p, this).peer)
+    Proxies.instance.tasks.foreach { p ⇒ items += new JMenuItem(new AddTaskAction(moleScene, p, this).peer)
     }
     val itPaste = new MenuItem(new Action("Paste") { def apply = ScenesManager.pasteCapsules(moleScene, point) })
     itPaste.enabled = !ScenesManager.selection.isEmpty

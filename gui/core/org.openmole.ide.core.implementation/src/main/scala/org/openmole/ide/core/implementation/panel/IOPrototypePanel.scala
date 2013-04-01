@@ -17,7 +17,7 @@
 package org.openmole.ide.core.implementation.panel
 
 import org.openmole.ide.misc.widget._
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import java.awt.{ Color, BorderLayout }
 import org.openmole.ide.misc.widget.multirow._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
@@ -42,7 +42,7 @@ class IOPrototypePanel(scene: IMoleScene,
   val image = EYE
 
   val protoInEditor = {
-    val incomboContent = Proxys.prototypes.map { p ⇒
+    val incomboContent = Proxies.instance.prototypes.map { p ⇒
       (p, p.dataUI.coreObject, contentAction(p))
     }.toList
     new MultiComboLinkLabelGroovyTextFieldEditor("", incomboContent,
@@ -53,7 +53,7 @@ class IOPrototypePanel(scene: IMoleScene,
   }
 
   val protoOutEditor = {
-    val outcomboContent = Proxys.prototypes.map { p ⇒ (p, contentAction(p)) }.toList
+    val outcomboContent = Proxies.instance.prototypes.map { p ⇒ (p, contentAction(p)) }.toList
     new MultiComboLinkLabel("", outcomboContent, prototypesOut.map { proto ⇒
       new ComboLinkLabelPanel(outcomboContent, image, new ComboLinkLabelData(Some(proto)))
     }, image, CLOSE_IF_EMPTY)
@@ -78,7 +78,7 @@ class IOPrototypePanel(scene: IMoleScene,
         }
       }
     }
-    if (Proxys.prototypes.size > 0)
+    if (Proxies.instance.prototypes.size > 0)
       contents += protoInEditor.panel
     else contents += new Label("Please create first Prototypes.")
   }
@@ -94,7 +94,7 @@ class IOPrototypePanel(scene: IMoleScene,
         }
       }
     }
-    if (Proxys.prototypes.size > 0)
+    if (Proxies.instance.prototypes.size > 0)
       contents += protoOutEditor.panel
   }
 

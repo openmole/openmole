@@ -22,8 +22,7 @@ import scala.swing.Action
 import javax.swing.JMenu
 import javax.swing.JMenuItem
 import org.netbeans.api.visual.widget.Widget
-import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.model.workflow.{ IBuildMoleScene, ICapsuleUI, IMoleScene }
 import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
 import org.openmole.ide.core.model.factory.IHookFactoryUI
@@ -45,7 +44,7 @@ import org.openmole.ide.core.implementation.builder._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.dialog.StatusBar
 
-class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends GenericMenuProvider {
+class CapsuleMenuProvider(scene: IBuildMoleScene, capsule: ICapsuleUI) extends GenericMenuProvider {
   var taskMenu = new JMenu
   var itChangeCapsule = new Menu("to ")
 
@@ -65,7 +64,7 @@ class CapsuleMenuProvider(scene: IMoleScene, capsule: ICapsuleUI) extends Generi
     itRIS.addActionListener(new RemoveInputSlot(capsule))
 
     //Tasks
-    Proxys.tasks.foreach {
+    Proxies.instance.tasks.foreach {
       p ⇒
         menuTask.contents += new CheckMenuItem(p.dataUI.name) {
           action = new TaskEnvAction(p.dataUI.name, this) {

@@ -17,17 +17,25 @@
 
 package org.openmole.ide.core.model.workflow
 
-import org.openmole.ide.core.model.data.IMoleDataUI
+import org.openmole.ide.core.model.data.IDataUI
 import concurrent.stm._
 import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ITaskDataProxyUI }
 import org.openmole.core.model.mole.{ ICapsule, IMole }
 import org.openmole.ide.misc.tools.util._
 import org.openmole.core.model.data.Prototype
+import org.openmole.core.model.task.PluginSet
+import java.io.File
 
-trait IMoleSceneManager {
-  override def toString = name
+trait IMoleUI extends IDataUI with ID {
 
-  def id: ID.Type
+  override def toString: String = name
+
+  def coreClass = classOf[IMole]
+
+  def plugins: Iterable[String]
+  def plugins_=(v: Iterable[String])
+
+  def pluginSet: PluginSet = PluginSet(plugins.map { p ⇒ new File(p) }.toSet)
 
   def name: String
 
@@ -38,10 +46,6 @@ trait IMoleSceneManager {
   def invalidateCache: Unit
 
   def refreshCache: Unit
-
-  def dataUI: IMoleDataUI
-
-  def dataUI_=(dataUI: IMoleDataUI)
 
   def startingCapsule_=(n: Option[ICapsuleUI])
 
@@ -56,8 +60,6 @@ trait IMoleSceneManager {
   def removeCapsuleUI(capslue: ICapsuleUI): String
 
   def registerCapsuleUI(cv: ICapsuleUI): Unit
-
-  def setStartingCapsule(capsule: ICapsuleUI)
 
   def connectors: Map[String, IConnectorUI]
 

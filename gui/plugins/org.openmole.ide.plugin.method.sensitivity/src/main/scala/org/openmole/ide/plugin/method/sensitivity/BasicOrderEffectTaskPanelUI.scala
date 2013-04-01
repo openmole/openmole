@@ -17,7 +17,7 @@
 
 package org.openmole.ide.plugin.method.sensitivity
 
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
@@ -28,7 +28,7 @@ import scala.swing.Label
 abstract class BasicOrderEffectTaskPanelUI(inputSequence: Iterable[IPrototypeDataProxyUI],
                                            outputSequence: Iterable[IPrototypeDataProxyUI]) extends PluginPanel("wrap 2") with ITaskPanelUI {
 
-  val doublePrototypes = Proxys.classPrototypes(classOf[Double])
+  val doublePrototypes = Proxies.instance.classPrototypes(classOf[Double])
 
   val inputPrototypeCombo: Option[MultiCombo[IPrototypeDataProxyUI]] =
     if (!doublePrototypes.isEmpty) {

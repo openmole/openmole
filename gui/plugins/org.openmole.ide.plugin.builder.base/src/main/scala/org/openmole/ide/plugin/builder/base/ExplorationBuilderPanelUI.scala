@@ -17,20 +17,20 @@
 
 package org.openmole.ide.plugin.builder.base
 
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.core.implementation.builder._
 import org.openmole.core.implementation.puzzle.Puzzle
 import swing.{ MyComboBox, Label }
 import org.openmole.plugin.builder.base._
-import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.ide.core.model.builder.IPuzzleUIMap
+import org.openmole.ide.core.model.workflow.IMoleUI
 
-class ExplorationBuilderPanelUI(puzzles: List[Puzzle], puzzleSelection: Option[Puzzle], manager: IMoleSceneManager) extends GenericBuilderPanelUI("Explore on", puzzles, puzzleSelection) {
+class ExplorationBuilderPanelUI(puzzles: List[Puzzle], puzzleSelection: Option[Puzzle], manager: IMoleUI) extends GenericBuilderPanelUI("Explore on", puzzles, puzzleSelection) {
 
   def build(uiMap: IPuzzleUIMap) = {
-    val samplingUI = Proxys.getOrGenerateSamplingComposition(samplingComboBox.selection.item)
+    val samplingUI = Proxies.instance.getOrGenerateSamplingComposition(samplingComboBox.selection.item)
     val sampling = samplingUI.dataUI.coreObject
     (exploration(nameTextField.text, puzzleComboBox.selection.item,
-      sampling)(manager.dataUI.pluginSet), uiMap += (sampling, samplingUI))
+      sampling)(manager.pluginSet), uiMap += (sampling, samplingUI))
   }
 }
