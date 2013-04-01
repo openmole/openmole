@@ -31,6 +31,7 @@ import java.io.PrintStream
 import org.apache.commons.exec.CommandLine
 import org.openmole.core.implementation.data._
 import org.openmole.misc.workspace._
+import org.openmole.misc.tools.service.OS
 import org.openmole.plugin.task.external._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
@@ -108,7 +109,7 @@ sealed abstract class SystemExecTask(
     val workDir = if (directory.isEmpty) tmpDir else new File(tmpDir, directory)
     val links = prepareInputFiles(context, tmpDir, directory)
 
-    val osCommandLine: String = command.find { case (_, os) ⇒ os.compatible }.map { case (cmd, _) ⇒ cmd }.getOrElse(throw new UserBadDataError("Not command line found for " + actualOS))
+    val osCommandLine: String = command.find { case (_, os) ⇒ os.compatible }.map { case (cmd, _) ⇒ cmd }.getOrElse(throw new UserBadDataError("Not command line found for " + OS.actualOS))
 
     val commandLine =
       CommandLine.parse(workDir.getAbsolutePath + File.separator + VariableExpansion(context, List(Variable(ExternalTask.PWD, workDir.getAbsolutePath)), osCommandLine))

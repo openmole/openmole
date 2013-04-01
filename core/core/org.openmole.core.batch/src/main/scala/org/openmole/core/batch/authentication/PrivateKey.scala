@@ -20,6 +20,15 @@ package org.openmole.core.batch.authentication
 import java.io.File
 import fr.iscpif.gridscale.authentication
 
+object PrivateKey {
+  def apply(
+    privateKey: File,
+    login: String,
+    cypheredPassword: String,
+    target: String) = new PrivateKey(privateKey, login, cypheredPassword, target)
+
+}
+
 class PrivateKey(
     val privateKey: File,
     val login: String,

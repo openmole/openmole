@@ -20,6 +20,7 @@ package org.openmole.plugin.task.external
 import java.io.File
 import org.openmole.core.implementation.task.TaskBuilder
 import org.openmole.core.implementation.data._
+import org.openmole.misc.tools.service.OS
 import org.openmole.core.model.data.Prototype
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.model.task.PluginSet

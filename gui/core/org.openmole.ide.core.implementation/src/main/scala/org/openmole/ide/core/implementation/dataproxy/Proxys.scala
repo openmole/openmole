@@ -58,7 +58,10 @@ object Proxys {
     _prototypes.single put (t.id, t)
     KeyPrototypeGenerator.invalidateCache
   }
-  def -=(t: IPrototypeDataProxyUI) = _prototypes.single remove (t.id)
+  def -=(t: IPrototypeDataProxyUI) = {
+    _prototypes.single remove (t.id)
+    KeyPrototypeGenerator.invalidateCache
+  }
   def contains(t: IPrototypeDataProxyUI) = _prototypes.single.contains(t.id)
 
   def +=(t: ISamplingCompositionDataProxyUI) = _samplings.single put (t.id, t)

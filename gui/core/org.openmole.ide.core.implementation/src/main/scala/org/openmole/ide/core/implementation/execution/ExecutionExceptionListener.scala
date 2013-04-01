@@ -18,11 +18,9 @@
 package org.openmole.ide.core.implementation.execution
 
 import org.openmole.core.model.mole.IMoleExecution._
-import java.io.PrintStream
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventListener
-import TextAreaOutputStream._
 import org.openmole.misc.exception.ExceptionUtils
 import org.openmole.core.model.mole.IMoleExecution.JobFailed
 import org.openmole.core.model.mole.IMoleExecution.ExceptionRaised
@@ -34,21 +32,16 @@ class ExecutionExceptionListener(exeManager: ExecutionManager) extends EventList
   override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = synchronized {
     event match {
       case j: JobFailed ⇒
-        exeManager.executionJobExceptionTextArea.append("Job failed for capsule " + j.capsule)
-        exeManager.executionJobExceptionTextArea.append(ExceptionUtils.prettify(j.exception))
+        exeManager.executionJobExceptionTextArea.warn("Job failed for capsule " + j.capsule, None, ExceptionUtils.prettify(j.exception))
       case e: ExceptionRaised ⇒
-        exeManager.executionJobExceptionTextArea.append(e.level + ": Exception managing job " + e.moleJob)
-        exeManager.executionJobExceptionTextArea.append(ExceptionUtils.prettify(e.exception))
+        exeManager.executionJobExceptionTextArea.warn(e.level + ": Exception managing job " + e.moleJob, None, ExceptionUtils.prettify(e.exception))
       case h: HookExceptionRaised ⇒
-        exeManager.executionJobExceptionTextArea.append(h.level + ": Exception in misc " + h.hook)
-        exeManager.executionJobExceptionTextArea.append(ExceptionUtils.prettify(h.exception))
+        exeManager.executionJobExceptionTextArea.warn(h.level + ": Exception in hook " + h.hook, None, ExceptionUtils.prettify(h.exception))
       case s: SourceExceptionRaised ⇒
-        exeManager.executionJobExceptionTextArea.append(s.level + ": Exception in source " + s.source)
-        exeManager.executionJobExceptionTextArea.append(ExceptionUtils.prettify(s.exception))
+        exeManager.executionJobExceptionTextArea.warn(s.level + ": Exception in source " + s.source, None, ExceptionUtils.prettify(s.exception))
       case s: ProfilerExceptionRaised ⇒
-        exeManager.executionJobExceptionTextArea.append(s.level + ": Exception in profiler " + s.profiler)
-        exeManager.executionJobExceptionTextArea.append(ExceptionUtils.prettify(s.exception))
-
+        exeManager.executionJobExceptionTextArea.warn(s.level + ": Exception in profiler " + s.profiler, None, ExceptionUtils.prettify(s.exception))
     }
+    exeManager.tabbedPane.selection.index = 1
   }
 }

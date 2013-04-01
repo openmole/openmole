@@ -45,7 +45,7 @@ class HookPanel(proxy: IHookDataProxyUI,
   }
 
   def delete = {
-    scene.closePropertyPanel
+    scene.closePropertyPanel(index)
     Proxys -= proxy
     ConceptMenu.removeItem(proxy)
     true

@@ -5,7 +5,6 @@
 
 package org.openmole.ide.core.implementation.execution
 
-import java.awt.Color
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import java.io.PrintStream
@@ -14,31 +13,24 @@ import javax.swing.Timer
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.implementation.execution.local._
 import org.openmole.core.model.execution.Environment
-import org.openmole.core.model.mole.ICapsule
 import org.openmole.ide.misc.visualization._
 import org.openmole.ide.misc.widget._
 import org.openmole.core.model.mole._
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.model.panel._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.factory._
 import org.openmole.ide.core.model.control.IExecutionManager
 import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import scala.collection.mutable.HashMap
 import scala.swing._
 import org.openmole.misc.eventdispatcher.EventDispatcher
-import org.openmole.misc.exception.UserBadDataError
-import scala.collection.JavaConversions._
 import org.openmole.core.model.job.State
 import org.openmole.core.model.data._
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.ide.core.model.workflow.ICapsuleUI
-import TextAreaOutputStream._
 import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
-import org.openmole.ide.core.model.data.IHookDataUI
-import org.openmole.ide.core.implementation.registry.{ DefaultKey, KeyRegistry }
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Failure, Success }
+import org.openmole.misc.exception.ExceptionUtils
 
 object ExecutionManager {
   implicit def executionStatesDecorator(s: scala.collection.mutable.Map[ExecutionState.ExecutionState, AtomicInteger]) = new {
@@ -59,11 +51,9 @@ class ExecutionManager(manager: IMoleSceneManager,
   logTextArea.rows = 10
   logTextArea.editable = false
 
-  val executionJobExceptionTextArea = new TextArea
-  executionJobExceptionTextArea.editable = false
+  val executionJobExceptionTextArea = new StatusBar
 
-  val moleExecutionExceptionTextArea = new TextArea
-  moleExecutionExceptionTextArea.editable = false
+  val moleExecutionExceptionTextArea = new StatusBar
 
   override val printStream = new PrintStream(new TextAreaOutputStream(logTextArea), true)
   var moleExecution: Option[IMoleExecution] = None
@@ -97,9 +87,6 @@ class ExecutionManager(manager: IMoleSceneManager,
   var downloads = (0, 0)
   var uploads = (0, 0)
 
-  System.setOut(new PrintStream(logTextArea.toStream))
-  System.setErr(new PrintStream(logTextArea.toStream))
-
   val tabbedPane = new TabbedPane {
     opaque = true
     background = new Color(77, 77, 77)
@@ -123,6 +110,10 @@ class ExecutionManager(manager: IMoleSceneManager,
         EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.Finished])
         EventDispatcher.listen(mExecution, new JobCreatedListener(this), classOf[IMoleExecution.JobCreated])
         EventDispatcher.listen(mExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ExceptionRaised])
+        EventDispatcher.listen(mExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.JobFailed])
+        EventDispatcher.listen(mExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.HookExceptionRaised])
+        EventDispatcher.listen(mExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.SourceExceptionRaised])
+        EventDispatcher.listen(mExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ProfilerExceptionRaised])
         environments.foreach {
           e ⇒
             e._1 match {
@@ -154,7 +145,8 @@ class ExecutionManager(manager: IMoleSceneManager,
         timer.start
         mExecution.start
       case Failure(e) ⇒
-        StatusBar().block(e)
+        executionJobExceptionTextArea.block(e.getMessage, None, ExceptionUtils.prettify(e))
+        tabbedPane.selection.index = 1
         None
     }
   }

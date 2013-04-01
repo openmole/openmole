@@ -49,15 +49,15 @@ class Daemon extends IApplication with Logger {
       }
 
       val debug = args.contains("-d")
-      val filtredArgs = args.filterNot((_: String) == "-d")
-      parser.parse(filtredArgs, Config()) foreach { config ⇒
+      val filteredArgs = args.filterNot((_: String) == "-d")
+      parser.parse(filteredArgs, Config()) foreach { config ⇒
         new JobLauncher(config.cacheSize * 1024 * 1024, debug).launch(
-          config.host.getOrElse(throw new RuntimeException("Host undifined")),
-          config.password.getOrElse(throw new RuntimeException("Password undifined")),
+          config.host.getOrElse(throw new RuntimeException("Host undefined")),
+          config.password.getOrElse(throw new RuntimeException("Password undefined")),
           config.workers)
       }
     } catch {
-      case t: Throwable ⇒ logger.log(SEVERE, "Error durring runtime execution", t)
+      case t: Throwable ⇒ logger.log(SEVERE, "Error during daemon execution", t)
     }
     IApplication.EXIT_OK
   }

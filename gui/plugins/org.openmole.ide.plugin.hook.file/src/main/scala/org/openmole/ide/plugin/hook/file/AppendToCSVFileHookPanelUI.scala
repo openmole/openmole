@@ -24,7 +24,7 @@ import swing.{ TabbedPane, Label }
 import org.openmole.ide.core.implementation.dataproxy.Proxys
 
 class AppendToCSVFileHookPanelUI(dataUI: AppendToCSVFileHookDataUI) extends MultiPrototypePanel("",
-  dataUI.prototypes.toList,
+  dataUI.toBeHooked.toList,
   Proxys.prototypes.toList) with IHookPanelUI {
 
   val filePathTextField = new CSVChooseFileTextField(dataUI.fileName)

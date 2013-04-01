@@ -56,6 +56,8 @@ object ScenesManager {
 
   def invalidateSelection = _selection.single() = None
 
+  def invalidateMoles = moleScenes.foreach { _.manager.invalidateCache }
+
   def selection = atomic { implicit actx ⇒
     _selection() match {
       case Some(_) ⇒
@@ -146,7 +148,7 @@ object ScenesManager {
     val islots = selection.flatMap { _.islots }
     selection.headOption match {
       case Some(c: ICapsuleUI) ⇒
-        val connectors = c.scene.manager.connectors
+        val connectors = c.scene.manager.connectors.values.toList
         connectors.foreach { con ⇒
           if (selection.contains(con.source) && islots.contains(con.target)) {
             con match {

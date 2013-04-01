@@ -35,7 +35,7 @@ object InputOutputCheck {
   trait OutputError
 
   case class OutputNotFound(output: Prototype[_]) extends OutputError {
-    override def toString = s"Output data $output has not found"
+    override def toString = s"Output data $output has not been found"
   }
 
   case class OutputTypeMismatch(output: Prototype[_], variable: Variable[_]) extends OutputError {

@@ -17,4 +17,6 @@
 
 package org.openmole.ide.core.model.workflow
 
-trait IDataChannelUI extends IConnectorUI
+import org.openmole.ide.misc.tools.util._
+
+trait IDataChannelUI extends IConnectorUI with ID

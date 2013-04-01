@@ -5,24 +5,26 @@
 
 package org.openmole.ide.plugin.task.netlogo
 
-import java.awt.Color
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.plugin.task.netlogo5.NetLogo5Task
-import scala.collection.JavaConversions._
 import scala.io.Source
 import java.io.File
 
-class NetLogo5TaskDataUI(val name: String = "",
-                         val workspaceEmbedded: Boolean = false,
-                         val nlogoPath: String = "",
-                         val lauchingCommands: String = "",
-                         var prototypeMappingInput: List[(IPrototypeDataProxyUI, String)] = List(),
-                         var prototypeMappingOutput: List[(String, IPrototypeDataProxyUI)] = List(),
-                         val resources: List[String] = List(),
-                         val globals: List[String] = List()) extends TaskDataUI {
+case class NetLogo5TaskDataUI(val name: String = "",
+                              val workspaceEmbedded: Boolean = false,
+                              val nlogoPath: String = "",
+                              val lauchingCommands: String = "",
+                              var prototypeMappingInput: List[(IPrototypeDataProxyUI, String)] = List(),
+                              var prototypeMappingOutput: List[(String, IPrototypeDataProxyUI)] = List(),
+                              val resources: List[String] = List(),
+                              val globals: List[String] = List()) extends TaskDataUI {
+
+  override def cloneWithoutPrototype(proxy: IPrototypeDataProxyUI) =
+    this.copy(prototypeMappingInput = prototypeMappingInput.filterNot(_._1 == proxy),
+      prototypeMappingOutput = prototypeMappingOutput.filterNot(_._2 == proxy))
 
   def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) = {
     val builder = NetLogo5Task(

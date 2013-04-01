@@ -39,9 +39,7 @@ trait IMoleScene {
 
   def graphScene: GraphScene[String, String]
 
-  def createConnectEdge(sourceNodeID: String, targetNodeID: String, slotIndex: Int = 1)
-
-  def createEdge(sourceNodeID: String, targetNodeID: String, id: String)
+  def createConnectEdge(sourceNodeID: String, targetNodeID: String, edgeID: String, slotIndex: Int = 1)
 
   def isBuildScene: Boolean
 
@@ -61,18 +59,9 @@ trait IMoleScene {
 
   def removeAll(i: Int)
 
-  // def firstFree: Int
-  // def displayExtraPropertyPanel(proxy: IDataProxyUI, fromPanel: IBasePanel, mode: PanelMode.Value): Unit
-
-  //def displayExtraPropertyPanel(proxy: IDataProxyUI, mode: PanelMode.Value): IBasePanel
-
-  //def displayExtraPropertyPanel(samplingCompositionWidget: ISamplingCompositionWidget)
-
   def currentPanel: IBasePanel
 
   def currentPanelUI: IPanelUI
-
-  // def closeExtraPropertyPanel
 
   def closePropertyPanel
 
@@ -81,8 +70,6 @@ trait IMoleScene {
   def closePropertyPanels
 
   def propertyWidget: List[ComponentWidget]
-
-  //def extraPropertyWidget: ComponentWidget
 
   def removeEdge(id: String)
 

@@ -17,10 +17,8 @@
 
 package org.openmole.ide.core.model.workflow
 
-import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.data.IMoleDataUI
-import scala.collection.mutable.HashMap
-import scala.collection.mutable.HashSet
+import concurrent.stm._
 import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ITaskDataProxyUI }
 import org.openmole.core.model.mole.{ ICapsule, IMole }
 import org.openmole.ide.misc.tools.util._
@@ -39,19 +37,13 @@ trait IMoleSceneManager {
 
   def invalidateCache: Unit
 
+  def refreshCache: Unit
+
   def dataUI: IMoleDataUI
 
   def dataUI_=(dataUI: IMoleDataUI)
 
   def startingCapsule_=(n: Option[ICapsuleUI])
-
-  def getNodeID: String
-
-  def getEdgeID: String
-
-  def connectorID(dc: IConnectorUI): String
-
-  def capsuleID(cv: ICapsuleUI): String
 
   def capsules: Map[String, ICapsuleUI]
 
@@ -59,9 +51,7 @@ trait IMoleSceneManager {
 
   def startingCapsule: Option[ICapsuleUI]
 
-  def capsuleConnections: HashMap[ICapsuleDataUI, HashSet[IConnectorUI]]
-
-  def removeCapsuleUI(nodeID: String): String
+  def capsuleConnections: Map[String, TSet[IConnectorUI]]
 
   def removeCapsuleUI(capslue: ICapsuleUI): String
 
@@ -69,21 +59,21 @@ trait IMoleSceneManager {
 
   def setStartingCapsule(capsule: ICapsuleUI)
 
-  def connectors: Iterable[IConnectorUI]
+  def connectors: Map[String, IConnectorUI]
 
   def connector(dID: String): IConnectorUI
 
   def removeConnector(edgeID: String)
 
-  def registerConnector(connector: IConnectorUI): Boolean
+  def registerConnector(connector: IConnectorUI): Unit
 
   def registerConnector(edgeID: String,
-                        connector: IConnectorUI): Boolean
+                        connector: IConnectorUI): Unit
 
   def changeConnector(oldConnector: IConnectorUI,
                       connector: IConnectorUI)
 
-  def capsulesInMole: Iterable[ICapsuleDataUI]
+  def capsulesInMole: Iterable[ICapsuleUI]
 
   def firstCapsules(caps: List[ICapsuleUI]): List[ICapsuleUI]
 
@@ -107,19 +97,7 @@ trait IMoleSceneManager {
 
   def groups: List[List[ICapsuleUI]] = groups(capsules.values.toList)
 
-  def connectedCapsulesFrom(from: ICapsuleUI): List[ICapsuleUI] = {
-    def connectedCapsulesFrom0(toVisit: List[ICapsuleUI], connected: List[ICapsuleUI]): List[ICapsuleUI] = {
-      if (toVisit.isEmpty) connected
-      else {
-        val head = toVisit.head
-        val connectors = capsuleConnections.getOrElse(head.dataUI, List())
-        connectedCapsulesFrom0(toVisit.tail ::: connectors.map {
-          _.target.capsule
-        }.toList, connected :+ head)
-      }
-    }
-    connectedCapsulesFrom0(List(from), List())
-  }
+  def connectedCapsulesFrom(from: ICapsuleUI): List[ICapsuleUI]
 
   def isFirstCompliant(firsts: List[ICapsuleUI]) = if (firsts.isEmpty || firsts.size > 1) false else true
 

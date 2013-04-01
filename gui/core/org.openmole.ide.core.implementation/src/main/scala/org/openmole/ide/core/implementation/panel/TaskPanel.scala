@@ -84,7 +84,6 @@ class TaskPanel(proxy: ITaskDataProxyUI,
   tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", protoPanel))
 
   tabbedPane.selection.index = 0
-  //tabbedPane.pages(1).content = protoPanel
   tabbedPane.revalidate
 
   val newPanel = new NewConceptPanel(this)
@@ -109,14 +108,17 @@ class TaskPanel(proxy: ITaskDataProxyUI,
   reactions += {
     case FocusGained(source: Component, _, _) ⇒
       panelUI.help.switchTo(source)
-      scene.closePropertyPanel
+    //scene.closePropertyPanel(index)
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
     case SelectionChanged(tabbedPane) ⇒
       if (!tabbedLock) updateProtoPanel
     case UpdatedProxyEvent(p: IDataProxyUI, _) ⇒
       scene.removeAll(index + 1)
       updatePanel
-      setTab(p)
+      p match {
+        case t: ITaskDataProxyUI ⇒
+        case _ ⇒ setTab(p)
+      }
   }
 
   def create = {

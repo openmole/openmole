@@ -18,10 +18,9 @@
 package org.openmole.ide.core.model.workflow
 
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.core.model.transition.{ ICondition, Slot, Filter }
+import org.openmole.ide.misc.tools.util._
 
-trait IConnectorUI extends IConnectorViewUI {
+trait IConnectorUI extends IConnectorViewUI with ID {
   def source: ICapsuleUI
 
   def target: IInputSlotWidget

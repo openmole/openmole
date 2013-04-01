@@ -42,7 +42,7 @@ object BasePanel {
 
 abstract class BasePanel(proxy: Option[IDataProxyUI],
                          scene: IMoleScene) extends MyPanel with IBasePanel {
-
+  scene.manager.refreshCache
   opaque = true
   var tabbedLock = false
 

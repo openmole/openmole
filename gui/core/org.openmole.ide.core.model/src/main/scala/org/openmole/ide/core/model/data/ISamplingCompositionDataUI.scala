@@ -21,6 +21,7 @@ import java.awt.Point
 import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.openmole.core.model.sampling.Sampling
 import org.openmole.ide.core.model.sampling._
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 
 trait ISamplingCompositionDataUI extends IDataUI {
   def name: String
@@ -46,4 +47,6 @@ trait ISamplingCompositionDataUI extends IDataUI {
   def connections: Iterable[(ISamplingOrDomainProxyUI, ISamplingOrDomainProxyUI)]
 
   def buildPanelUI: ISamplingCompositionPanelUI
+
+  def cloneWithoutPrototype(proxy: IPrototypeDataProxyUI): ISamplingCompositionDataUI = this
 }

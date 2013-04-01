@@ -24,16 +24,19 @@ import org.openmole.plugin.hook.file._
 import org.openmole.ide.core.implementation.data.HookDataUI
 
 class CopyFileHookDataUI(val name: String = "",
-                         val toBeHooked: List[(IPrototypeDataProxyUI, String)] = List.empty) extends HookDataUI {
+                         val prototypes: List[(IPrototypeDataProxyUI, String)] = List.empty) extends HookDataUI {
 
   def coreClass = classOf[CopyFileHook]
 
   def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]) = {
     val cfh = CopyFileHook()
-    toBeHooked.foreach { h ⇒ cfh.copy(protoMapping(h._1).asInstanceOf[Prototype[File]], h._2)
+    prototypes.foreach { h ⇒ cfh.copy(protoMapping(h._1).asInstanceOf[Prototype[File]], h._2)
     }
     cfh.toHook
   }
+
+  override def cloneWithoutPrototype(proxy: IPrototypeDataProxyUI) =
+    new CopyFileHookDataUI(name, prototypes.filterNot(_._1 == proxy))
 
   def buildPanelUI = new CopyFileHookPanelUI(this)
 }

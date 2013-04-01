@@ -22,7 +22,6 @@ import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.data.ICapsuleDataUI
-import org.openmole.ide.misc.tools.util._
 import org.openmole.core.implementation.mole.{ StrainerCapsule, MasterCapsule, Capsule }
 import org.openmole.ide.core.implementation.workflow.CapsulePanelUI
 import org.openmole.ide.core.implementation.builder.MoleFactory
@@ -37,8 +36,7 @@ case class CapsuleDataUI(val task: Option[ITaskDataProxyUI] = None,
                          val grouping: Option[IGroupingDataUI] = None,
                          val sources: List[ISourceDataProxyUI] = List(),
                          val hooks: List[IHookDataProxyUI] = List(),
-                         val capsuleType: CapsuleType = new BasicCapsuleType) extends ICapsuleDataUI with ID {
-
+                         val capsuleType: CapsuleType = new BasicCapsuleType) extends ICapsuleDataUI {
   override def toString = task match {
     case Some(x: ITaskDataProxyUI) ⇒ x.dataUI.name
     case _ ⇒ ""
@@ -64,7 +62,7 @@ case class CapsuleDataUI(val task: Option[ITaskDataProxyUI] = None,
 
   def coreClass = classOf[Capsule]
 
-  def buildPanelUI(index: Int) = new CapsulePanelUI(this, 0)
+  def buildPanelUI(index: Int) = new CapsulePanelUI(this, index)
 
   def coreObject(moleDataUI: IMoleDataUI) = task match {
     case Some(t: ITaskDataProxyUI) ⇒ MoleFactory.taskCoreObject(t.dataUI, moleDataUI.plugins.map { p ⇒ new File(p) }.toSet) match {

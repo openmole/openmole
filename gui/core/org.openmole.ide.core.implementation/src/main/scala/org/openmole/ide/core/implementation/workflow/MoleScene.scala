@@ -73,7 +73,6 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     }
     firstFree0(0)
   }
-  // val _selection = new HashSet[ICapsuleUI]
 
   val currentPanels = List(new MigPanel(""), new MigPanel(""), new MigPanel(""))
 
@@ -125,13 +124,13 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
 
   def currentPanelUI = currentPanel.panelUI
 
-  def displayCapsuleProperty(capsuleUI: ICapsuleUI, index: Int) =
+  def displayCapsuleProperty(capsuleUI: ICapsuleUI, tabIndex: Int) =
     ScenesManager.currentSceneContainer match {
       case (Some(exe: ExecutionMoleSceneContainer)) ⇒
       case _ ⇒
         closePropertyPanels
         removeAll(0)
-        currentPanels(0).contents += new CapsulePanel(this, capsuleUI, 0)
+        currentPanels(0).contents += new CapsulePanel(this, capsuleUI, 0, tabIndex)
         propertyWidget(0).setPreferredLocation(new Point(getView.getBounds().x.toInt + 20, 20))
         propertyWidget(0).revalidate
         propertyWidget(0).setVisible(true)
@@ -247,15 +246,11 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
     repaint
   }
 
-  def createConnectEdge(sourceNodeID: String, targetNodeID: String, slotIndex: Int = 1) = {
+  def createConnectEdge(sourceNodeID: String, targetNodeID: String, edgeId: String, slotIndex: Int = 1) = {
     currentSlotIndex = slotIndex
-    createEdge(sourceNodeID, targetNodeID, manager.getEdgeID)
-  }
-
-  override def createEdge(sourceNodeID: String, targetNodeID: String, id: String) = {
-    addEdge(id)
-    setEdgeSource(id, sourceNodeID)
-    setEdgeTarget(id, targetNodeID)
+    addEdge(edgeId)
+    setEdgeSource(edgeId, sourceNodeID)
+    setEdgeTarget(edgeId, targetNodeID)
   }
 
   override def attachEdgeSourceAnchor(edge: String, oldSourceNode: String, sourceNode: String) = {
@@ -345,7 +340,6 @@ abstract class MoleScene(n: String = "") extends GraphScene.StringGraph with IMo
           if (!ScenesManager.selection.contains(x)) {
             ScenesManager.clearSelection
             ScenesManager.changeSelection(x)
-            // ScenesManager.addToSelection(x)
             x.repaint
           }
           original = Some(widget.getPreferredLocation)

@@ -39,6 +39,10 @@ import org.openmole.ide.core.implementation.dialog.StatusBar
 import collection.mutable
 import org.openmole.ide.core.implementation.workflow.MoleRouter
 import scala.collection.JavaConversions._
+import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.misc.tools.obj.ClassUtils._
+import scala.Some
+import org.openmole.ide.core.implementation.data.FactorDataUI
 
 object SamplingCompositionPanelUI {
   val DEFAULT_COLOR = new Color(250, 250, 250)
@@ -154,8 +158,9 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
   }
 
   def addFactor(d: IDomainProxyUI,
-                s: Option[ISamplingProxyUI]) = {
-    val f = new FactorProxyUI(new FactorDataUI(d, s))
+                s: Option[ISamplingProxyUI],
+                p: Option[IPrototypeDataProxyUI] = None) = {
+    val f = new FactorProxyUI(new FactorDataUI(d, s, p))
     _factors += f
     f
   }
@@ -318,7 +323,12 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
         val factor = computeFactor(w.proxy)
         factor match {
           case Some(f: IFactorProxyUI) ⇒
-            if (!building) f.dataUI.prototype = None
+            f.dataUI.prototype match {
+              case Some(p: IPrototypeDataProxyUI) ⇒
+                if (!building && !assignable(f.dataUI.domain.dataUI.domainType.runtimeClass, p.dataUI.protoType.runtimeClass))
+                  f.dataUI.prototype = None
+              case _ ⇒
+            }
             if (factorWidgets.contains(f)) factorWidgets(f).update
           case _ ⇒
         }

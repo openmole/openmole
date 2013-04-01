@@ -35,10 +35,13 @@ import javax.imageio.ImageIO
 import BasePanel.IconChanged
 
 object PrototypePanel {
-  def deletePrototype(proxy: IPrototypeDataProxyUI): Boolean = {
+  def deletePrototype(proxy: IPrototypeDataProxyUI,
+                      scene: IMoleScene,
+                      index: Int): Boolean = {
     def erase = {
-      ScenesManager.closePropertyPanel
+      scene.closePropertyPanel(index)
       Proxys -= proxy
+      // Proxys.prototypes.filter { p ⇒ p.dataUI.name == proxy.dataUI.name && p.generated }.foreach { p ⇒ Proxys -= p }
       ConceptMenu.removeItem(proxy)
       true
     }
@@ -53,20 +56,29 @@ object PrototypePanel {
       }
     }.toList
 
-    capsulesWithProtos match {
-      case Nil ⇒ erase
-      case _ ⇒
-        if (DialogFactory.deleteProxyConfirmation(proxy)) {
-          erase
-          capsulesWithProtos.foreach { _.dataUI.task.get.dataUI.removePrototypeOccurencies(proxy) }
-          List(ScenesManager.currentScene).flatten.foreach {
-            _.manager.connectors.foreach {
-              dc ⇒ dc.filteredPrototypes = dc.filteredPrototypes.filterNot { _ == proxy }
-            }
-          }
-          true
-        } else false
-    }
+    //  capsulesWithProtos match {
+    // case Nil ⇒ erase
+    // case _ ⇒
+    if (DialogFactory.deleteProxyConfirmation(proxy)) {
+      Proxys.hooks.foreach { h ⇒
+        h.dataUI.removePrototypeOccurencies(proxy)
+        h.dataUI = h.dataUI.cloneWithoutPrototype(proxy)
+      }
+      Proxys.sources.foreach { s ⇒
+        s.dataUI.removePrototypeOccurencies(proxy)
+        s.dataUI = s.dataUI.cloneWithoutPrototype(proxy)
+      }
+      erase
+      capsulesWithProtos.foreach { _.dataUI.task.get.dataUI.removePrototypeOccurencies(proxy) }
+      List(ScenesManager.currentScene).flatten.foreach {
+        _.manager.connectors.values.toList.foreach {
+          dc ⇒ dc.filteredPrototypes = dc.filteredPrototypes.filterNot { _ == proxy }
+        }
+      }
+      ScenesManager.invalidateMoles
+      true
+    } else false
+    //  }
   }
 }
 
@@ -99,7 +111,7 @@ class PrototypePanel[T](proxy: IPrototypeDataProxyUI,
       proxy)
   }
 
-  def delete = deletePrototype(proxy)
+  def delete = deletePrototype(proxy, scene, index)
 
   def save = {
     proxy.dataUI = panelUI.saveContent(nameTextField.text)

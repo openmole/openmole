@@ -27,7 +27,6 @@ import scala.swing.Action
 import scala.swing.Label
 import compat.Platform.EOL
 import org.openmole.ide.core.implementation.workflow.{ ExecutionMoleSceneContainer, BuildMoleSceneContainer }
-import util.Failure
 
 object StatusBar {
   def apply() = ScenesManager.currentSceneContainer match {

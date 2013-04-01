@@ -46,6 +46,7 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
                                      resources: List[String],
                                      g: List[String]) extends PluginPanel("") with ITaskPanelUI {
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+  println("GenericNetLogoPanelUI  " + nlogoPath)
 
   val nlogoTextField = new ChooseFileTextField(nlogoPath,
     "Select a nlogo file",
@@ -70,18 +71,21 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
   listenTo(nlogoTextField)
   reactions += {
     case DialogClosedEvent(nlogoTextField) ⇒
+      println("closed and published")
       globals = List()
-    // publish(new UpdatedProxyEvent(this))
+      publish(UpdatedProxyEvent.task(this))
+
+    // buildMultis
   }
 
-  val (inputMapping, outputMapping) = buildMultis(nlogoPath)
+  val (inputMapping, outputMapping) = buildMultis
 
   val components = List(("Settings",
     new PluginPanel("", "[left]rel[grow,fill]", "[]20[]") {
       contents += new Label("Nlogo file")
       contents += (nlogoTextField, "growx,wrap")
       contents += (new Label("Commands"), "wrap")
-      contents += (new ScrollPane(launchingCommandTextArea) { minimumSize = new Dimension(150, 80) }, "span,growx")
+      contents += (new ScrollPane(launchingCommandTextArea) { minimumSize = new Dimension(450, 200) }, "span,growx")
     }),
     ("Input mapping", inputMapping),
     ("Output mapping", outputMapping),
@@ -92,8 +96,9 @@ abstract class GenericNetLogoPanelUI(nlogoPath: String,
 
   def emptyMapping = (new PluginPanel(""), new PluginPanel(""))
 
-  def buildMultis(path: String): (Component, Component) =
+  def buildMultis: (Component, Component) =
     try {
+      val path = nlogoTextField.text
       if (globals.isEmpty) {
         val nl = buildNetLogo
         try {
