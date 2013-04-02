@@ -74,7 +74,7 @@ class CapsuleUI(
   var outputPrototypeWidget: Option[PrototypeWidget] = None
   var selected = false
   val islots = ListBuffer.empty[IInputSlotWidget]
-  val oslot = new OutputSlotWidget(scene, this)
+  val oslot = new OutputSlotWidget(scene)
 
   val taskComponentWidget = new SceneComponentWidget(
     scene,

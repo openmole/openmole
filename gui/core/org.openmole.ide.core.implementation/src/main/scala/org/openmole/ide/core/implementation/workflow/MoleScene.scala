@@ -122,7 +122,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
 
   def add(trans: ITransitionUI) = {
     manager.registerConnector(trans)
-    createConnectEdge(trans.source.id, trans.target.capsule.id, trans.id, trans.target.index)
+    createConnectEdge(trans.source.id, trans.target.capsule.id, trans.id, trans.target.index + 1)
     refresh
   }
 
