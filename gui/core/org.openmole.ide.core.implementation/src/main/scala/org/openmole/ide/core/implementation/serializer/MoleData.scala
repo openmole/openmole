@@ -35,7 +35,7 @@ object MoleData {
 
     val capsuleUIMap =
       moleData.capsules.map {
-        case (c, x, y) ⇒
+        case CapsuleData(c, x, y) ⇒
           val capsuleUI = CapsuleUI.withMenu(scene, c)
           scene.add(capsuleUI, new Point(x, y))
           c -> capsuleUI
@@ -44,7 +44,7 @@ object MoleData {
     ui.startingCapsule = moleData.startingCapsule.map(capsuleUIMap(_))
 
     val slots = moleData.slots.map {
-      case (i, c) ⇒
+      case SlotData(i, c) ⇒
         val cui = capsuleUIMap(c)
         val slot = cui.addInputSlot
         i -> slot
@@ -82,7 +82,7 @@ object MoleData {
 
     val capsules =
       scene.manager.capsules.map {
-        case (_, c) ⇒ (c.dataUI, c.x, c.y)
+        case (_, c) ⇒ CapsuleData(c.dataUI, c.x, c.y)
       }
 
     val transitions =
@@ -114,21 +114,26 @@ object MoleData {
       scene.manager.name,
       scene.manager.startingCapsule.map(_.dataUI),
       capsules,
-      slots.map { case (c, i) ⇒ i -> c.capsule.dataUI },
+      slots.map { case (c, i) ⇒ SlotData(i, c.capsule.dataUI) },
       transitions,
       dataChannels,
       scene.manager.plugins)
 
   }
 
+  case class CapsuleData(capsule: ICapsuleDataUI, x: Int, y: Int)
+  case class SlotData(index: Int, capsule: ICapsuleDataUI)
+
 }
+
+import MoleData._
 
 class MoleData(
   val id: ID.Type,
   val name: String,
   val startingCapsule: Option[ICapsuleDataUI],
-  val capsules: Iterable[(ICapsuleDataUI, Int, Int)],
-  val slots: Iterable[(Int, ICapsuleDataUI)],
+  val capsules: Iterable[CapsuleData],
+  val slots: Iterable[SlotData],
   val transitions: Iterable[TransitionData],
   val dataChannels: Iterable[DataChannelData],
   val plugins: Iterable[String])
