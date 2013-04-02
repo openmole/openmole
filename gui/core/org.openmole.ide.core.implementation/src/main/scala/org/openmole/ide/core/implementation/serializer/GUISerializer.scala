@@ -148,8 +148,20 @@ class GUISerializer { serializer ⇒
   xstream.alias(hook, classOf[IHookDataProxyUI])
   xstream.alias(source, classOf[ISourceDataProxyUI]) */
 
+  def folder(clazz: Class[_]) =
+    clazz match {
+      case c if c == classOf[IPrototypeDataProxyUI] ⇒ "prototype"
+      case c if c == classOf[IEnvironmentDataProxyUI] ⇒ "environment"
+      case c if c == classOf[ISamplingCompositionDataProxyUI] ⇒ "sampling"
+      case c if c == classOf[IHookDataProxyUI] ⇒ "hook"
+      case c if c == classOf[ISourceDataProxyUI] ⇒ "source"
+      case c if c == classOf[ITaskDataProxyUI] ⇒ "task"
+      case c if c == classOf[MoleData] ⇒ "mole"
+      case c ⇒ c.getSimpleName
+    }
+
   def serializeConcept(clazz: Class[_], set: Iterable[(_, ID.Type)]) = {
-    val conceptDir = new File(workDir, clazz.getSimpleName)
+    val conceptDir = new File(workDir, folder(clazz))
     conceptDir.mkdirs
     set.foreach {
       case (s, id) ⇒
@@ -182,7 +194,7 @@ class GUISerializer { serializer ⇒
   }
 
   def deserializeConcept[T](clazz: Class[_]) =
-    new File(workDir, clazz.getSimpleName).listFiles.toList.map(read).map(_.asInstanceOf[T])
+    new File(workDir, folder(clazz)).listFiles.toList.map(read).map(_.asInstanceOf[T])
 
   def deserialize(fromFile: String) = {
     val os = new TarInputStream(new FileInputStream(fromFile))
