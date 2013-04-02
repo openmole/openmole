@@ -19,6 +19,10 @@ package org.openmole.plugin.environment.glite
 
 import fr.iscpif.gridscale.authentication.{ MyProxy ⇒ GSMyProxy }
 
+object MyProxy {
+  def apply(time: String, host: String, port: Option[Int] = None) = new MyProxy(time, host, port)
+}
+
 class MyProxy(val time: String, val host: String, override val port: Option[Int] = None) extends GSMyProxy {
   def url = host + port.map(":" + _).mkString
 }

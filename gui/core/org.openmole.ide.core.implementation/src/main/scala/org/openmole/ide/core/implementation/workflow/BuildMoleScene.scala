@@ -46,12 +46,14 @@ class BuildMoleScene(val manager: IMoleUI) extends MoleScene with IBuildMoleScen
 
   override def refresh {
     super.refresh
+    manager.invalidateCache
+    CheckData.checkMole(this)
     manager.capsules.foreach { case (_, c) ⇒ c.update }
   }
 
   def copyScene = {
     def copy(caspuleUI: ICapsuleUI, sc: IMoleScene) = {
-      val c = new CapsuleUI(sc)
+      val c = CapsuleUI(sc)
       val slotMapping = caspuleUI.islots.map(i ⇒ i -> c.addInputSlot).toMap
       (c, slotMapping)
     }

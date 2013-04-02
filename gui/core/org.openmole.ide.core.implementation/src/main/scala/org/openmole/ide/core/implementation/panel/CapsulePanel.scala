@@ -46,7 +46,7 @@ class CapsulePanel(scene: IMoleScene,
 
   def save = {
     capsule.dataUI = panelUI.save
-    capsule.update
+    scene.refresh
   }
 
 }

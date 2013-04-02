@@ -67,7 +67,7 @@
     <netbeans.hint.license>gpl30</netbeans.hint.license>
     <symbolic.name>${project.artifactId}</symbolic.name>
     <!-- versions of libraries used -->
-    <netbeans.version>RELEASE71</netbeans.version>
+    <netbeans.version>RELEASE73</netbeans.version>
     <com.miglayout.version>3.7.4</com.miglayout.version>
     <lib.org.eclipse.osgi.version>3.8.2.v20130124-134944</lib.org.eclipse.osgi.version>
     <lib.org.eclipse.equinox.registry.version>3.5.200.v20120522-1841</lib.org.eclipse.equinox.registry.version>
