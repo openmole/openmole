@@ -52,20 +52,34 @@ import org.openmole.ide.misc.tools.util._
 object CapsuleUI {
   def imageWidget(scene: IMoleScene, img: ImageIcon, x: Int, y: Int, action: Action) = new LinkedImageWidget(scene, img, x, y, action)
   def withMenu(ms: IBuildMoleScene, dataUI: ICapsuleDataUI = new CapsuleDataUI) = {
-    val capsuleUI = new CapsuleUI(ms, dataUI)
+    val capsuleUI = CapsuleUI(ms, dataUI)
     val capsuleMenuProvider = new CapsuleMenuProvider(ms, capsuleUI)
     capsuleUI.getActions.addAction(ActionFactory.createPopupMenuAction(capsuleMenuProvider))
     capsuleUI
   }
+
+  def apply(
+    scene: IMoleScene,
+    dataUI: ICapsuleDataUI = new CapsuleDataUI) = {
+    val caps = new CapsuleUI(scene, dataUI)
+    dataUI.task match {
+      case Some(t: ITaskDataProxyUI) ⇒
+        caps.encapsule(t)
+        caps.setAsValid
+      case _ ⇒
+        caps.decapsule
+        caps.setAsInvalid("Empty Capsule")
+    }
+    caps
+  }
+
 }
 
 import CapsuleUI._
 
-class CapsuleUI(
-  val scene: IMoleScene,
-  var dataUI: ICapsuleDataUI = new CapsuleDataUI) extends Widget(scene.graphScene)
-    with ICapsuleUI with ID {
-  capsuleUI ⇒
+class CapsuleUI private (
+    val scene: IMoleScene,
+    var dataUI: ICapsuleDataUI = new CapsuleDataUI) extends Widget(scene.graphScene) with ICapsuleUI with ID { capsuleUI ⇒
 
   var capsuleTypeWidget: Option[LinkedImageWidget] = None
   var environmentWidget: Option[LinkedImageWidget] = None
@@ -74,13 +88,15 @@ class CapsuleUI(
   var outputPrototypeWidget: Option[PrototypeWidget] = None
   var selected = false
   val islots = ListBuffer.empty[IInputSlotWidget]
-  val oslot = new OutputSlotWidget(scene, this)
 
   val taskComponentWidget = new SceneComponentWidget(
     scene,
     new TaskWidget(scene, this),
     TASK_CONTAINER_WIDTH,
     TASK_CONTAINER_HEIGHT)
+
+  addChild(taskComponentWidget)
+  taskComponentWidget.setPreferredLocation(new Point(10, 10))
 
   val titleWidget = new LinkedWidget(scene, new LinkLabel(toString, new Action("") {
     def apply = {
@@ -93,27 +109,19 @@ class CapsuleUI(
     preferredSize = new Dimension(TASK_CONTAINER_WIDTH, TASK_TITLE_HEIGHT)
   }, 10, 10)
 
+  addChild(titleWidget)
+
+  val oslot = new OutputSlotWidget(scene, this)
+  addChild(oslot)
+
+  setPreferredSize(new Dimension(TASK_CONTAINER_WIDTH + 20, TASK_CONTAINER_HEIGHT + 20))
+  createActions(MOVE).addAction(ActionFactory.createMoveAction)
+
   val validationWidget = new ImageWidget(scene.graphScene, Images.CHECK_INVALID) {
     setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 12, 2))
   }
 
-  setPreferredSize(new Dimension(TASK_CONTAINER_WIDTH + 20, TASK_CONTAINER_HEIGHT + 20))
-  taskComponentWidget.setPreferredLocation(new Point(10, 10))
-  createActions(MOVE).addAction(ActionFactory.createMoveAction)
-
-  addChild(taskComponentWidget)
-  addChild(titleWidget)
-  addChild(oslot)
   addChild(validationWidget)
-
-  dataUI.task match {
-    case Some(t: ITaskDataProxyUI) ⇒
-      encapsule(t)
-      setAsValid
-    case _ ⇒
-      decapsule
-      setAsInvalid("Empty Capsule")
-  }
 
   def nbInputSlots: Int = islots.size
 
@@ -153,10 +161,6 @@ class CapsuleUI(
   }
 
   def update = {
-    islots.foreach(_.refresh)
-    scene.validate
-    //scene.refresh
-    updateEnvironmentWidget
     scene.manager.invalidateCache
     CheckData.checkMole(scene)
   }

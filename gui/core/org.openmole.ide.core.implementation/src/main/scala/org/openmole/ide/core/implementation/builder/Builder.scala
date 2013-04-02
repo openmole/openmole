@@ -115,7 +115,7 @@ object Builder {
         val slotUI = {
           if (capsules.isEmpty) {
             Proxies.instance += proxy
-            val capsule = new CapsuleUI(scene, new CapsuleDataUI(Some(proxy)))
+            val capsule = CapsuleUI(scene, new CapsuleDataUI(Some(proxy)))
             scene.add(capsule, new Point(0, 0))
             capsule.addInputSlot
           } else capsules.head.islots.head
