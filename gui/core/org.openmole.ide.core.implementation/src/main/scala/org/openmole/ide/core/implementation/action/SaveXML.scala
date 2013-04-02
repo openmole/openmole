@@ -45,7 +45,7 @@ object SaveXML {
       Settings.currentPath)
     if (fc.showDialog(new Label, "OK") == Approve) {
       val f = new File(fc.selectedFile.getPath)
-      if (f.isFile) {
+      if (f.getParentFile.isDirectory) {
         Settings.currentPath = Some(f.getParentFile)
         val saveAs =
           if (!f.getName.contains(".")) new File(fc.selectedFile.getPath + ".om")
