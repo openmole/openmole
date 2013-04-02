@@ -134,7 +134,7 @@
     <lib.com.github.scopt.version>2.0.0</lib.com.github.scopt.version>
     <lib.fr.iscpif.mgo.version>1.58</lib.fr.iscpif.mgo.version>
     <lib.org.scala-lang.scala.version>2.10.1</lib.org.scala-lang.scala.version>
-    <lib.com.typesafe.akka.version>2.1.1</lib.com.typesafe.akka.version>
+    <lib.com.typesafe.akka.version>2.1.2</lib.com.typesafe.akka.version>
     <lib.com.typesafe.akka.scala.version>${scala.major.version}</lib.com.typesafe.akka.scala.version>
     <scala.major.version>2.10</scala.major.version>
     <lib.de.erichseifert.gral.version>0.9-SNAPSHOT</lib.de.erichseifert.gral.version>
