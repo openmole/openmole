@@ -27,7 +27,7 @@ class InputSlotWidget(
     val index: Int) extends SlotWidget(scene.graphScene) with IInputSlotWidget {
 
   refresh
-  setPreferredLocation(new Point(2, 24 + index * 20))
+  setPreferredLocation(new Point(2, 44 + index * 20))
 
   def widget = this
 
