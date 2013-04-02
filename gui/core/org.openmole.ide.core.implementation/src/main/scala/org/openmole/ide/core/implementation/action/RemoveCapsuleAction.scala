@@ -31,6 +31,6 @@ class RemoveCapsuleAction(scene: IMoleScene, capsule: ICapsuleUI) extends Action
       scene.graphScene.removeNodeWithEdges(scene.manager.removeCapsuleUI(c))
     }
     ScenesManager.invalidateSelection
-    CheckData.checkMole(scene)
+    scene.refresh
   }
 }

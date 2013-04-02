@@ -157,12 +157,11 @@ class CapsuleUI private (
 
   def defineAsStartingCapsule = {
     scene.manager.startingCapsule = Some(this)
-    update
+    scene.refresh
   }
 
   def update = {
-    scene.manager.invalidateCache
-    CheckData.checkMole(scene)
+    islots.foreach(_.refresh)
   }
 
   def decapsule = {
@@ -176,7 +175,7 @@ class CapsuleUI private (
     addChild(inputPrototypeWidget.get)
     outputPrototypeWidget = Some(PrototypeWidget.buildNoTaskHook(scene, this))
     addChild(outputPrototypeWidget.get)
-    update
+    scene.refresh
   }
 
   def encapsule(dpu: ITaskDataProxyUI) = {
@@ -187,7 +186,7 @@ class CapsuleUI private (
     CheckData.checkMole(scene)
     addChild(inputPrototypeWidget.get)
     addChild(outputPrototypeWidget.get)
-    update
+    scene.refresh
   }
 
   def environment_=(env: Option[IEnvironmentDataProxyUI]) = {
@@ -220,6 +219,7 @@ class CapsuleUI private (
           }))
         addChild(capsuleTypeWidget.get)
     }
+    scene.refresh
   }
 
   private def updateEnvironmentWidget = {
@@ -291,6 +291,7 @@ class CapsuleUI private (
     val toBeRemoved = islots.tail.last
     removeChild(toBeRemoved.widget)
     islots -= toBeRemoved
+    scene.refresh
   }
 
   def inputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IPrototypeDataProxyUI] = {

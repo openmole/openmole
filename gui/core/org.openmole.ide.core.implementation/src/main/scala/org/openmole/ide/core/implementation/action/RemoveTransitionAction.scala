@@ -26,5 +26,6 @@ class RemoveTransitionAction(scene: MoleScene, edgeID: String) extends ActionLis
   override def actionPerformed(ae: ActionEvent) = {
     scene.manager.removeConnector(edgeID)
     scene.removeEdge(edgeID)
+    scene.refresh
   }
 }
