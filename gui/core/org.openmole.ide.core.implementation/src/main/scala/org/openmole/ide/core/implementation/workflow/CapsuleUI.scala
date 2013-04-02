@@ -93,14 +93,7 @@ class CapsuleUI(
     preferredSize = new Dimension(TASK_CONTAINER_WIDTH, TASK_TITLE_HEIGHT)
   }, 10, 10)
 
-  val validationWidget = new ImageWidget(scene.graphScene, dataUI.task match {
-    case Some(t: ITaskDataProxyUI) ⇒
-      encapsule(t)
-      Images.CHECK_VALID
-    case _ ⇒
-      decapsule
-      Images.CHECK_INVALID
-  }) {
+  val validationWidget = new ImageWidget(scene.graphScene, Images.CHECK_INVALID) {
     setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 12, 2))
   }
 
@@ -109,9 +102,18 @@ class CapsuleUI(
   createActions(MOVE).addAction(ActionFactory.createMoveAction)
 
   addChild(taskComponentWidget)
-  addChild(validationWidget)
-  addChild(oslot)
   addChild(titleWidget)
+  addChild(oslot)
+  addChild(validationWidget)
+
+  dataUI.task match {
+    case Some(t: ITaskDataProxyUI) ⇒
+      encapsule(t)
+      setAsValid
+    case _ ⇒
+      decapsule
+      setAsInvalid("Empty Capsule")
+  }
 
   def nbInputSlots: Int = islots.size
 
@@ -191,8 +193,7 @@ class CapsuleUI(
 
   private def removeWidget(w: Option[ComponentWidget]) = {
     w match {
-      case Some(y: ComponentWidget) ⇒
-        removeChild(y)
+      case Some(y: ComponentWidget) ⇒ removeChild(y)
       case None ⇒
     }
   }
