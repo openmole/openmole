@@ -47,7 +47,7 @@ class ExecutionManager(manager: IMoleUI,
   executionManager ⇒
   val logTextArea = new TextArea
   logTextArea.columns = 20
-  logTextArea.rows = 10
+  logTextArea.rows = 30
   logTextArea.editable = false
 
   val executionJobExceptionTextArea = new StatusBar
@@ -90,9 +90,9 @@ class ExecutionManager(manager: IMoleUI,
     opaque = true
     background = new Color(77, 77, 77)
   }
-  tabbedPane.pages += new TabbedPane.Page("Progress", new ScrollPane(logTextArea))
-  tabbedPane.pages += new TabbedPane.Page("Errors", new ScrollPane(executionJobExceptionTextArea))
-  tabbedPane.pages += new TabbedPane.Page("Environments errors", new ScrollPane(moleExecutionExceptionTextArea))
+  tabbedPane.pages += new TabbedPane.Page("Progress", new ScrollPane(logTextArea) { verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded })
+  tabbedPane.pages += new TabbedPane.Page("Errors", new ScrollPane(executionJobExceptionTextArea) { verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded })
+  tabbedPane.pages += new TabbedPane.Page("Environments errors", new ScrollPane(moleExecutionExceptionTextArea) { verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded })
 
   contents += tabbedPane
 
