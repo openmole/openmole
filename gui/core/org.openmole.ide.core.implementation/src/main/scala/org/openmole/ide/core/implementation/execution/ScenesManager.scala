@@ -70,6 +70,8 @@ object ScenesManager {
 
   PasswordListner.apply
 
+  def isInSelection(capsule: ICapsuleUI) = selection.contains(capsule)
+
   def buildMoleSceneContainers = tabPane.pages.flatMap(_.content match {
     case x: BuildMoleSceneContainer ⇒ List(x)
     case _ ⇒ Nil

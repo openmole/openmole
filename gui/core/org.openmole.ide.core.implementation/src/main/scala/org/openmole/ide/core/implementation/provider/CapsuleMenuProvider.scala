@@ -50,7 +50,12 @@ class CapsuleMenuProvider(scene: IBuildMoleScene, capsule: ICapsuleUI) extends G
 
   def initMenu = {
     items.clear
-    //if (ScenesManager.selection.size == 0) ScenesManager.addToSelection(capsule)
+    if (!ScenesManager.isInSelection(capsule)) {
+      ScenesManager.clearSelection
+      capsule.selected = true
+      scene.refresh
+      ScenesManager.invalidateSelection
+    }
     val selectionSize = ScenesManager.selection.size
     val itStart = new JMenuItem("Define as starting capsule")
     val itIS = new JMenuItem("Add an input slot")
@@ -59,7 +64,7 @@ class CapsuleMenuProvider(scene: IBuildMoleScene, capsule: ICapsuleUI) extends G
     val menuTask = new Menu("Task")
 
     itIS.addActionListener(new AddInputSlotAction(capsule))
-    itR.addActionListener(new RemoveCapsuleAction(scene, capsule))
+    itR.addActionListener(new RemoveCapsuleAction(scene, ScenesManager.selection))
     itStart.addActionListener(new DefineMoleStartAction(scene, capsule))
     itRIS.addActionListener(new RemoveInputSlot(capsule))
 
