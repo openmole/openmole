@@ -30,6 +30,7 @@ import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Failure, Success }
 import org.openmole.misc.exception.ExceptionUtils
+import scala.concurrent.stm._
 
 object ExecutionManager {
   implicit def executionStatesDecorator(s: scala.collection.mutable.Map[ExecutionState.ExecutionState, AtomicInteger]) = new {
@@ -83,8 +84,8 @@ class ExecutionManager(manager: IMoleUI,
   val timer = new Timer(5000, timerAction)
   var environments = new HashMap[Environment, (String, HashMap[ExecutionState.ExecutionState, AtomicInteger])]
 
-  var downloads = (0, 0)
-  var uploads = (0, 0)
+  val downloads = Ref((0, 0))
+  var uploads = Ref((0, 0))
 
   val tabbedPane = new TabbedPane {
     opaque = true
@@ -199,8 +200,9 @@ class ExecutionManager(manager: IMoleUI,
     environments.values.foreach(env ⇒ env._2.keys.foreach(k ⇒ env._2(k) = new AtomicInteger))
   }
 
-  def displayFileTransfer =
-    executionContainer.updateFileTransferLabels(downloads._1 + " / " + downloads._2,
-      uploads._1 + " / " + uploads._2)
+  def displayFileTransfer = atomic { implicit ctx =>
+    executionContainer.updateFileTransferLabels(downloads()._1 + " / " + downloads()._2,
+      uploads()._1 + " / " + uploads()._2)
+  }
 
 }
