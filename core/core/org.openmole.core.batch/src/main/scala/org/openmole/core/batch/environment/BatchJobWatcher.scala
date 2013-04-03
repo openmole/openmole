@@ -25,7 +25,7 @@ import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.ListBuffer
 
 object BatchJobWatcher extends Logger {
-  case class Watch
+  case object Watch
 }
 
 class BatchJobWatcher(environment: BatchEnvironment) extends Actor {
