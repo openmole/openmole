@@ -45,6 +45,7 @@ import util.Success
 import util.Failure
 import scala.Some
 import util.Success
+import swing.event.ButtonClicked
 
 object ScenesManager {
 
@@ -212,9 +213,9 @@ object ScenesManager {
     val container = new BuildMoleSceneContainer(ms)
     val page = new TabbedPane.Page(ms.manager.name, container)
     addTab(page, ms.manager.name, new Action("") {
-      override def apply = {
-        container.stopAndCloseExecutions
+      def apply = {
         tabPane.pages.remove(page.index)
+        container.stopAndCloseExecutions
       }
     })
     container
@@ -232,7 +233,10 @@ object ScenesManager {
           bmsc.executionMoleSceneContainers += container
 
           addTab(page, clone.manager.name, new Action("") {
-            def apply = tabPane.pages.remove(page.index)
+            def apply = {
+              container.stop
+              tabPane.pages.remove(page.index)
+            }
           })
 
           tabPane.selection.index = page.index

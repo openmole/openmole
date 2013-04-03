@@ -59,7 +59,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
           mole,
           prototypeMapping,
           capsuleMapping))
-      case Failure(l) ⇒
+      case Failure(l) ⇒ None
     }
 
   val startStopButton = new Button(start) {
@@ -75,66 +75,23 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
 
   executionManager match {
     case Some(eManager: ExecutionManager) ⇒
-
-      //peer.add(
-      /*val hookPanel = new PluginPanel("wrap")
-      hookPanel.contents += new Label {
-        text = "<html><b><font \"size=\"5\" >Hooks</font></b></html>"
-      }
-      hookPanel.contents += hookTabbedPane  */
-      //Hooks
-
       eManager.capsuleMapping.keys.foreach {
         c ⇒
           c.dataUI.task match {
             case Some(t: ITaskDataProxyUI) ⇒
-
-            //FIXME :: No Memory HOok ?
-            //Replace no memory Hooks and with new HookDataUI instance
-            // c.dataUI.hooks.foreach {
-            //   case (hclass, hdataUI) ⇒ hdataUI match {
-            //    case x: IHookDataUI with NoMemoryHook ⇒
-            // val hUI = KeyRegistry.hooks(DefaultKey(hdataUI.coreClass)).buildDataUI
-            //  hUI.activated = true
-            //c.dataUI.hooks.update(hclass, hUI)
-            //    case _ ⇒
-            //   }
-            //  }
-
-            /* val activated = c.dataUI.hooks.filter {
-                _._2.activated
-              }
-
-              if (!activated.isEmpty) {
-                hookTabbedPane.pages += new TabbedPane.Page("<html><b>" + t.dataUI.name + "</b></html>",
-                  new PluginPanel("", "", "[top]") {
-                    activated.foreach {
-                      case (hClass, hDataUI) ⇒
-                        val p = hDataUI.buildPanelUI
-                        panelHooks += p -> (c, hClass)
-                        contents += p.peer
-                        contents += new Separator(Orientation.Vertical) {
-                          foreground = Color.WHITE
-                        }
-                    }
-                  })
-              }*/
             case _ ⇒
           }
       }
 
       val executionPanel = new ExecutionPanel
       executionPanel.peer.setLayout(new BorderLayout)
-      // new ExecutionPanel {
       executionPanel.peer.setLayout(new BorderLayout)
 
       peer.add(new PluginPanel("wrap") {
         contents += new TitleLabel("Execution control")
         contents += new PluginPanel("wrap 3", "[]-20[]5[]") {
-          //Start / Stop
           contents += startStopButton
           contents += exportButton
-
           contents += new PluginPanel("wrap 4") {
             contents += new Label("Downloads:")
             contents += dlLabel
@@ -167,13 +124,9 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
             startLook
         }
         startStopButton.background = new Color(170, 0, 0)
-        startStopButton.action = stop
+        startStopButton.action = new Action("Stop") { def apply = stop }
         exportButton.enabled = false
         x.start
-      /*  x.start(panelHooks.map {
-          ph ⇒ ph._1.saveContent -> ph._2._1
-        }.toMap,
-          groupingPanel.get.coreObjects)   */
       case _ ⇒
     }
   }
@@ -184,14 +137,12 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
     exportButton.enabled = true
   }
 
-  def stop: Action = new Action("Stop") {
-    override def apply = executionManager match {
-      case Some(x: ExecutionManager) ⇒
-        startStopButton.background = new Color(125, 160, 0)
-        startStopButton.action = start
-        x.cancel
-      case _ ⇒
-    }
+  def stop = executionManager match {
+    case Some(x: ExecutionManager) ⇒
+      startStopButton.background = new Color(125, 160, 0)
+      startStopButton.action = start
+      x.cancel
+    case _ ⇒
   }
 
   def export = new Action("Export") {
@@ -209,13 +160,6 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
             case Success(mE) ⇒ SerializerService.serialize(mE._1, new File(t))
             case Failure(t) ⇒ StatusBar().warn("The mole can not be serialized due to " + t.getMessage)
           }
-          /*x.buildMoleExecution(panelHooks.map {
-            ph ⇒ ph._1.saveContent -> ph._2._1
-          }.toMap,
-            groupingPanel.get.coreObjects) match {
-              case Success((mExecution, environments)) ⇒ SerializerService.serialize(mExecution, new File(t))
-              case Failure(e) ⇒ StatusBar().block(e)
-            }*/
           case _ ⇒
         }
         case _ ⇒

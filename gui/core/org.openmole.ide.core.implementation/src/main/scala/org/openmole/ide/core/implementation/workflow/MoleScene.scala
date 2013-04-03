@@ -287,11 +287,10 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
   }
 
   override def attachEdgeTargetAnchor(edge: String, oldTargetNode: String, targetNode: String) = {
-    val targetWidget =
-      if (findWidget(targetNode) != null) {
-        val slotAnchor = new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex)
-        findWidget(edge).asInstanceOf[ConnectorWidget].setTargetAnchor(slotAnchor)
-      }
+    if (findWidget(targetNode) != null) {
+      val slotAnchor = new InputSlotAnchor((findWidget(targetNode).asInstanceOf[ICapsuleUI]), currentSlotIndex)
+      findWidget(edge).asInstanceOf[ConnectorWidget].setTargetAnchor(slotAnchor)
+    }
   }
 
   override def attachNodeWidget(n: String) = {
