@@ -22,6 +22,7 @@ import org.openmole.ide.misc.widget.CSVChooseFileTextField
 import org.openmole.ide.plugin.misc.tools.MultiPrototypePanel
 import swing.{ TabbedPane, Label }
 import org.openmole.ide.core.implementation.dataproxy.Proxies
+import java.awt.Dimension
 
 class AppendToCSVFileHookPanelUI(dataUI: AppendToCSVFileHookDataUI) extends MultiPrototypePanel("",
   dataUI.toBeHooked.toList,
@@ -31,6 +32,7 @@ class AppendToCSVFileHookPanelUI(dataUI: AppendToCSVFileHookDataUI) extends Mult
   contents.insert(0, filePathTextField)
   contents.insert(0, new Label("CSV file path"))
   contents.insert(0, new Label { text = "<html><b>Append prototypes to file</b></html>" })
+  minimumSize = new Dimension(300, 150)
 
   val components = List(("Prototypes", this))
 
