@@ -86,10 +86,6 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI, index: Int = 0) extends PluginPanel
 
   val components = List(("Source", sourcePanel.panel), ("Hook", hookPanel.panel), ("Execution", executionPanel))
 
-  /* tabbedPane.pages += new TabbedPane.Page("Source", sourcePanel.panel)
-  tabbedPane.pages += new TabbedPane.Page("Hook", hookPanel.panel)
-  tabbedPane.pages += new TabbedPane.Page("Execution", )   */
-
   listenTo(`groupingCheckBox`)
   reactions += {
     case ButtonClicked(`groupingCheckBox`) ⇒ groupingPanel.visible = groupingCheckBox.selected
