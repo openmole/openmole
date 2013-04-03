@@ -26,6 +26,7 @@ import org.openmole.ide.misc.widget.multirow.MultiComboTextField._
 import org.openmole.ide.core.implementation.registry._
 import java.io.File
 import swing.{ TabbedPane, Label }
+import java.awt.Dimension
 
 class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends PluginPanel("wrap") with IHookPanelUI {
 
@@ -38,6 +39,7 @@ class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends PluginPanel("wrap"
             d._2))
     })
 
+  minimumSize = new Dimension(300, 150)
   contents += new Label("<html><b>Files to be dumped</b></html>")
   contents += multiComboTextField.panel
 
