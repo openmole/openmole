@@ -66,23 +66,20 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
   val p12 = (p12Button, p12Panel, { p12TextField.text = "" })
   val proxy = (proxyButton, proxyPanel, { proxyTextField.text = "" })
 
-  val pemPassField = Some(new PasswordField(passString, 20))
-  val p12PassField = Some(new PasswordField(passString, 20))
-
   addButtons
   try {
     Workspace.persistentList(classOf[GliteAuthentication]).headOption match {
       case Some((i: Int, x: P12Certificate)) ⇒
         initButton = Some(p12Button)
-        passString = Workspace.decrypt(x.cypheredPassword)
         p12TextField.text = x.certificate.getAbsolutePath
         addP12
+        passString = Workspace.decrypt(x.cypheredPassword)
       case Some((i: Int, x: PEMCertificate)) ⇒
         initButton = Some(pemButton)
         pem1TextField.text = x.certificate.getAbsolutePath
         pem2TextField.text = x.key.getAbsolutePath
-        passString = Workspace.decrypt(x.cypheredPassword)
         addPem
+        passString = Workspace.decrypt(x.cypheredPassword)
       case Some((i: Int, x: ProxyFile)) ⇒
         initButton = Some(proxyButton)
         proxyTextField.text = x.proxy.getAbsolutePath
@@ -91,9 +88,6 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
         initButton = Some(p12Button)
         addP12
     }
-
-    pemPanel.contents += pemPassField.get
-    p12Panel.contents += p12PassField.get
 
     listenTo(`pemButton`, `p12Button`, `proxyButton`)
     reactions += {
@@ -105,6 +99,11 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
     groupButton.select(initButton.get)
 
   } catch { case e: Throwable ⇒ StatusBar().block(e.getMessage, stack = e.getStackTraceString) }
+
+  val pemPassField = Some(new PasswordField(passString, 20))
+  val p12PassField = Some(new PasswordField(passString, 20))
+  pemPanel.contents += pemPassField.get
+  p12Panel.contents += p12PassField.get
 
   def addButtons =
     contents += new PluginPanel("wrap", "", "[]15[]15[]") {
@@ -157,8 +156,8 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
     } catch { case e: Throwable ⇒ StatusBar().block(e.getMessage, stack = e.getStackTraceString) }
 
   def buildPemPanel =
-    new PluginPanel("fillx,wrap 2", "[left][grow,fill]", "[top]") {
-      contents += (new Label("Certification"), "gap para")
+    new PluginPanel("fillx,wrap 2", "[left][grow,fill]", "[center]") {
+      contents += (new Label("Certificate"), "gap para")
       contents += pem1TextField
       contents += (new Label("Key"), "gap para")
       contents += pem2TextField
@@ -166,14 +165,14 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
     }
 
   def buildP12Panel =
-    new PluginPanel("fillx,wrap 2", "[left][grow,fill]", "[top]") {
-      contents += (new Label("Certification"), "gap para")
+    new PluginPanel("fillx,wrap 2", "[left][grow,fill]", "[center]") {
+      contents += (new Label("Certificate"), "gap para")
       contents += p12TextField
       contents += (new Label("Password"), "gap para")
     }
 
   def buildProxyPanel =
-    new PluginPanel("fillx,wrap 2", "[left][grow,fill]", "[top]") {
+    new PluginPanel("fillx,wrap 2", "[left][grow,fill]", "[center]") {
       contents += (new Label("Proxy"), "gap para")
       contents += proxyTextField
     }
