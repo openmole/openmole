@@ -88,6 +88,7 @@ class CapsuleUI private (
   var outputPrototypeWidget: Option[PrototypeWidget] = None
   var selected = false
   val islots = ListBuffer.empty[IInputSlotWidget]
+  val oslot = new OutputSlotWidget(scene)
 
   val taskComponentWidget = new SceneComponentWidget(
     scene,
@@ -95,7 +96,6 @@ class CapsuleUI private (
     TASK_CONTAINER_WIDTH,
     TASK_CONTAINER_HEIGHT)
 
-  addChild(taskComponentWidget)
   taskComponentWidget.setPreferredLocation(new Point(10, 10))
 
   val titleWidget = new LinkedWidget(scene, new LinkLabel(toString, new Action("") {
@@ -109,11 +109,6 @@ class CapsuleUI private (
     preferredSize = new Dimension(TASK_CONTAINER_WIDTH, TASK_TITLE_HEIGHT)
   }, 10, 10)
 
-  addChild(titleWidget)
-
-  val oslot = new OutputSlotWidget(scene, this)
-  addChild(oslot)
-
   setPreferredSize(new Dimension(TASK_CONTAINER_WIDTH + 20, TASK_CONTAINER_HEIGHT + 20))
   createActions(MOVE).addAction(ActionFactory.createMoveAction)
 
@@ -121,6 +116,9 @@ class CapsuleUI private (
     setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 12, 2))
   }
 
+  addChild(taskComponentWidget)
+  addChild(titleWidget)
+  addChild(oslot)
   addChild(validationWidget)
   updateEnvironmentWidget
   updateSamplingWidget
