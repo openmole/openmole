@@ -26,5 +26,5 @@ class ToStringHookFactoryUI extends IHookFactoryUI {
 
   def coreClass = classOf[ToStringHook]
 
-  override def toString = "Display prototypes"
+  override def toString = "Display"
 }

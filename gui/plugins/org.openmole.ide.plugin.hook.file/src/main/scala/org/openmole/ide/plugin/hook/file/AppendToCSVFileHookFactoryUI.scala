@@ -26,6 +26,6 @@ class AppendToCSVFileHookFactoryUI extends IHookFactoryUI {
 
   def coreClass = classOf[AppendToCSVFileHook]
 
-  override def toString = "Append Prototype to file"
+  override def toString = "Append"
 
 }
