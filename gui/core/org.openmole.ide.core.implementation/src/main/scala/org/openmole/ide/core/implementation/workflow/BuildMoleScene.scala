@@ -45,10 +45,10 @@ class BuildMoleScene(val manager: IMoleUI) extends MoleScene with IBuildMoleScen
   override val isBuildScene = true
 
   override def refresh {
-    super.refresh
     manager.invalidateCache
     CheckData.checkMole(this)
     manager.capsules.foreach { case (_, c) ⇒ c.update }
+    super.refresh
   }
 
   def copyScene = {

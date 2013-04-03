@@ -29,7 +29,6 @@ import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.implementation.dialog.MasterCapsulePrototypeDialog
 import org.openmole.ide.core.implementation.data.CapsuleDataUI
 import org.openmole.ide.core.implementation.data.CheckData
-import org.openmole.ide.core.implementation.dataproxy.ProxyFreezer
 import org.openmole.ide.core.implementation.provider.CapsuleMenuProvider
 import org.openmole.ide.core.model.commons._
 import org.openmole.ide.core.model.commons.Constants._
@@ -40,7 +39,6 @@ import org.openmole.ide.core.model.data.IExplorationTaskDataUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.tools.image.Images
 import org.openmole.ide.misc.widget.LinkLabel
-import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.implementation.validation.DataflowProblem
 import scala.swing.Action
@@ -120,8 +118,6 @@ class CapsuleUI private (
   addChild(titleWidget)
   addChild(oslot)
   addChild(validationWidget)
-  updateEnvironmentWidget
-  updateSamplingWidget
 
   def nbInputSlots: Int = islots.size
 
@@ -162,6 +158,8 @@ class CapsuleUI private (
 
   def update = {
     islots.foreach(_.refresh)
+    updateEnvironmentWidget
+    updateSamplingWidget
   }
 
   def decapsule = {
@@ -191,7 +189,6 @@ class CapsuleUI private (
 
   def environment_=(env: Option[IEnvironmentDataProxyUI]) = {
     dataUI = dataUI.copy(environment = env)
-    updateEnvironmentWidget
   }
 
   private def removeWidget(w: Option[ComponentWidget]) = {
@@ -223,6 +220,7 @@ class CapsuleUI private (
   }
 
   private def updateEnvironmentWidget = {
+
     removeWidget(environmentWidget)
 
     val img = dataUI.environment match {
@@ -238,7 +236,7 @@ class CapsuleUI private (
     addChild(environmentWidget.get)
   }
 
-  def updateSamplingWidget = {
+  private def updateSamplingWidget = {
     removeWidget(samplingWidget)
     dataUI.task match {
       case Some(t: ITaskDataProxyUI) ⇒
@@ -258,7 +256,6 @@ class CapsuleUI private (
         }
       case _ ⇒
     }
-    scene.refresh
   }
 
   def updateErrors(problems: Iterable[DataflowProblem]) = {
