@@ -122,6 +122,8 @@ class CapsuleUI private (
   }
 
   addChild(validationWidget)
+  updateEnvironmentWidget
+  updateSamplingWidget
 
   def nbInputSlots: Int = islots.size
 

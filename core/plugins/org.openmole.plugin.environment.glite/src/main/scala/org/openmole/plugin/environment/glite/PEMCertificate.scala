@@ -25,7 +25,7 @@ object PEMCertificate {
   def apply(
     cypheredPassword: String,
     certificate: File = new File(new File(System.getProperty("user.home")), ".globus/usercert.pem"),
-    key: File =  new File(new File(System.getProperty("user.home")), ".globus/userkey.pem")) = new PEMCertificate(cypheredPassword, certificate, key)
+    key: File = new File(new File(System.getProperty("user.home")), ".globus/userkey.pem")) = new PEMCertificate(cypheredPassword, certificate, key)
 }
 
 class PEMCertificate(val cypheredPassword: String, val certificate: File, val key: File) extends GliteAuthentication with CypheredPassword { a ⇒
