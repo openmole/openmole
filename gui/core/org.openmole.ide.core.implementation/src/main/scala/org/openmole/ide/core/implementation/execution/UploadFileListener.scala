@@ -23,7 +23,7 @@ import org.openmole.misc.eventdispatcher._
 import scala.concurrent.stm._
 
 class UploadFileListener(exeManager: ExecutionManager) extends EventListener[BatchEnvironment] {
-  override def triggered(environment: BatchEnvironment, event: Event[BatchEnvironment]) = atomic { implicit ctx =>
+  override def triggered(environment: BatchEnvironment, event: Event[BatchEnvironment]) = atomic { implicit ctx ⇒
     event match {
       case x: BeginUpload ⇒ exeManager.uploads() = (exeManager.uploads()._1, exeManager.uploads()._2 + 1)
       case x: EndUpload ⇒ exeManager.uploads() = (exeManager.uploads()._1 + 1, exeManager.uploads()._2)

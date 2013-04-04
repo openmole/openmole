@@ -48,7 +48,7 @@ class ExecutionManager(manager: IMoleUI,
   executionManager ⇒
   val logTextArea = new TextArea
   logTextArea.columns = 20
-  logTextArea.rows = 30
+  //logTextArea.rows = 20
   logTextArea.editable = false
 
   val executionJobExceptionTextArea = new StatusBar
@@ -200,7 +200,7 @@ class ExecutionManager(manager: IMoleUI,
     environments.values.foreach(env ⇒ env._2.keys.foreach(k ⇒ env._2(k) = new AtomicInteger))
   }
 
-  def displayFileTransfer = atomic { implicit ctx =>
+  def displayFileTransfer = atomic { implicit ctx ⇒
     executionContainer.updateFileTransferLabels(downloads()._1 + " / " + downloads()._2,
       uploads()._1 + " / " + uploads()._2)
   }
