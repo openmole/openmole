@@ -59,17 +59,6 @@ class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISce
   peer.add(spane, BorderLayout.CENTER)
   CheckData.checkMole(scene, false)
 
-  /* def stopAndCloseExecutions = {
-    executionMoleSceneContainers.foreach {
-      emc ⇒
-        emc.stop
-        val index = ScenesManager.tabPane.pages.map{_.}
-        println("Index " + index)
-        if (index >= 0) ScenesManager.tabPane.pages.remove(index)
-    }
-    executionMoleSceneContainers.clear
-  }  */
-
   def buildExecutionAction = new Action("") {
     override def apply = {
       ScenesManager.saveCurrentPropertyWidget
@@ -77,14 +66,6 @@ class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISce
       ScenesManager.addExecutionSceneContainer(buildContainer)
     }
   }
-
-  /*  def cleanAndBuildExecutionAction = new Action("") {
-    override def apply = {
-      stopAndCloseExecutions
-      ScenesManager.addExecutionSceneContainer(buildContainer)
-    }
-  }    */
-
   def displayMoleSettingsDialogAction = new Action("") {
     override def apply = {
       MoleSettingsDialog.display(scene.manager)
