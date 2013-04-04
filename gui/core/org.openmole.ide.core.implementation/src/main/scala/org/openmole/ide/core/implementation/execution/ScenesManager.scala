@@ -28,7 +28,7 @@ import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.core.model.dataproxy.{ IDataProxyUI, ITaskDataProxyUI }
 import org.openmole.ide.misc.widget.MigPanel
-import org.openmole.ide.core.model.panel._
+import org.openmole.ide.misc.tools.util._
 import org.openmole.ide.misc.tools.image.Images._
 import scala.swing.Action
 import scala.swing.Button
@@ -217,7 +217,7 @@ object ScenesManager {
     addTab(page, ms.manager.name, new Action("") {
       def apply = {
         tabPane.pages.remove(page.index)
-        container.stopAndCloseExecutions
+        // container.stopAndCloseExecutions
       }
     })
     container
@@ -232,7 +232,6 @@ object ScenesManager {
           val page = new TabbedPane.Page(clone.manager.name, new MigPanel(""))
           val container = new ExecutionMoleSceneContainer(clone, page, bmsc)
           page.content = container
-          bmsc.executionMoleSceneContainers += container
 
           addTab(page, clone.manager.name, new Action("") {
             def apply = {
@@ -249,12 +248,11 @@ object ScenesManager {
 
   def addTab(page: TabbedPane.Page, title: String, action: Action) = {
     tabPane.pages += page
-    tabPane.peer.setTabComponentAt(tabPane.peer.getTabCount - 1, new CloseableTab(title, page, action).peer)
+    tabPane.peer.setTabComponentAt(tabPane.peer.getTabCount - 1, new CloseableTab(title, action).peer)
     tabPane.selection.page = page
   }
 
   class CloseableTab(title: String,
-                     page: TabbedPane.Page,
                      action: Action) extends MigPanel("") {
     background = new Color(0, 0, 0, 0)
     contents += new Label(title)
