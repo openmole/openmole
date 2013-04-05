@@ -1,10 +1,11 @@
-package projectRoot
+package root
 
 import com.typesafe.sbt.osgi.{OsgiKeys, SbtOsgi}
 
 import sbt._
 import Keys._
 import util.matching.Regex
+
 
 
 /**
@@ -15,6 +16,10 @@ import util.matching.Regex
  * To change this template use File | Settings | File Templates.
  */
 trait Defaults extends Build {
+  def dir: File
+  lazy val org = organization := "org.openmole.core"
+
+
   val eclipseBuddyPolicy = SettingKey[Option[String]]("OSGi.eclipseBuddyPolicy", "The eclipse buddy policy thing.")
   lazy val outDir = SettingKey[String]("outDir", "A setting to control where copyDepTask outputs it's dependencies")
 
@@ -46,20 +51,6 @@ trait Defaults extends Build {
     }
   }
 
-  def gcTask = {System.gc();System.gc();System.gc()}
-
-  def copyDepTask(updateReport: UpdateReport, version: String, out: File,
-                  scalaVer: String, subDir: String,
-                  depMap: Map[Regex, String => String], depFilter: DependencyFilter) = { //TODO use this style for other tasks
-    updateReport matching depFilter map {f =>
-      depMap.keys.find(_.findFirstIn(f.getName).isDefined).map(depMap(_)).getOrElse{a: String => a} -> f
-    } foreach { case(lambda, srcPath) =>
-      val destPath = out / subDir / lambda(srcPath.getName)
-      IO.copyFile(srcPath, destPath, preserveLastModified=true)
-    }
-  }
-
-
   override def settings = super.settings ++
     Seq(version := "0.8.0-SNAPSHOT",
       organization := "org.openmole",
@@ -75,6 +66,18 @@ trait Defaults extends Build {
       osgiVersion := "3.8.2.v20130124-134944"
     )
 
+  def gcTask = {System.gc();System.gc();System.gc()}
+
+  def copyDepTask(updateReport: UpdateReport, version: String, out: File,
+                  scalaVer: String, subDir: String,
+                  depMap: Map[Regex, String => String], depFilter: DependencyFilter) = { //TODO use this style for other tasks
+    updateReport matching depFilter map {f =>
+      depMap.keys.find(_.findFirstIn(f.getName).isDefined).map(depMap(_)).getOrElse{a: String => a} -> f
+    } foreach { case(lambda, srcPath) =>
+      val destPath = out / subDir / lambda(srcPath.getName)
+      IO.copyFile(srcPath, destPath, preserveLastModified=true)
+    }
+  }
 
   def OsgiProject(artifactId: String,
                   pathFromDir: String = "",
@@ -85,9 +88,7 @@ trait Defaults extends Build {
                    bundleActivator: Option[String] = None,
                    dynamicImports: Seq[String] = Seq(),
                    imports: Seq[String] = Seq("*;resolution:=optional"),
-                   openmoleScope: Option[String] = None)
-                 (implicit dir: File,
-                   org: Setting[String] = organization := "org.openmole") = {
+                   openmoleScope: Option[String] = None) = {
 
     val base = dir / (if(pathFromDir == "") artifactId else pathFromDir)
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
@@ -119,8 +120,7 @@ trait Defaults extends Build {
 
   def AssemblyProject(base: String,
                       outputDir: String = "lib",
-                      depNameMap: Map[Regex, String => String] = Map.empty[Regex, String => String])
-                     (implicit dir: File) = {
+                      depNameMap: Map[Regex, String => String] = Map.empty[Regex, String => String]) = {
     val projBase = dir / base
     Project(base + "-"+ outputDir.replace('/','_'), projBase, settings = Project.defaultSettings ++ Seq(
       assemble <<= copyDependencies tag (Tags.Disk),

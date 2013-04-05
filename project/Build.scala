@@ -1,10 +1,15 @@
 import sbt._
 import Keys._
 
-import projectRoot._
+import root.Web._
+import root.Application._
+import root.ThirdParties._
+import root.Defaults
+import root._
 
-object HelloBuild extends Libraries with Web with Application with Core with ThirdParties {
-    lazy val root = Project(id = "root",
-                            base = file(".")) aggregate(libraries, web, application, core, thirdParties)
 
+object HelloBuild extends Defaults {
+  implicit val dir = file(".")
+  lazy val root = Project(id = "root", base = dir) aggregate
+    (libraries.all, web, application, base.all, thirdParties)
 }

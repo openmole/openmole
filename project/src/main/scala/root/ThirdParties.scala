@@ -1,10 +1,11 @@
-package projectRoot
+package root
 
 import sbt._
 import Keys._
 
-trait ThirdParties extends Defaults {
-  private implicit val dir = file("third-parties")
+object ThirdParties extends Defaults {
+
+  lazy val dir = file("third-parties")
 
   lazy val thirdParties = Project("thirdParties", dir) aggregate(iceTar, scalaSwing, scopt)
 

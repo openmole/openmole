@@ -1,11 +1,15 @@
-package projectRoot
+package root
+
+import Web._
+import libraries._
+import base.{misc,core}
 
 import sbt._
 import Keys._
 
-trait Application extends Web with Libraries {
-  private[Application] implicit val org = organization := "org.openmole.ui"
-  private implicit val dir = file("application")
+object Application extends Defaults {
+  override lazy val org = organization := "org.openmole.ui"
+  implicit val dir = file("application")
   lazy val application = Project("application", file("application")) aggregate(plugins, openmoleui,
     openmolePlugins, openmoleGuiPlugins, openmoleResources, openMoleDB)
 
@@ -118,8 +122,8 @@ trait Application extends Web with Libraries {
   }
 
   lazy val openmoleui = OsgiProject("org.openmole.ui", singleton = true) settings (pluginDependencies) dependsOn
-    (webCore, coreMiscWorkspace, coreMiscReplication, coreMiscException, coreMiscTools, coreMiscEventDispatcher,
-      coreMiscPluginManager, jodaTime, scalaLang, jasypt, apacheCommonsConfig, objenesis, coreImpl, robustIt)
+    (webCore, base.misc.workspace, base.misc.replication, base.misc.exception, base.misc.tools, base.misc.eventDispatcher,
+      base.misc.pluginManager, jodaTime, scalaLang, jasypt, apache.config, objenesis, base.core.implementation, robustIt)
 
   lazy val plugins = AssemblyProject("package", "assembly/plugins",
     Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> {s => "org.eclipse.equinox.launcher.jar"},

@@ -1,8 +1,8 @@
-package projectRoot
+package root
 
-import com.typesafe.sbt.osgi.{OsgiKeys, SbtOsgi}
 import sbt._
 import Keys._
+
 
 
 /**
@@ -12,13 +12,14 @@ import Keys._
  * Time: 6:50 PM
  * To change this template use File | Settings | File Templates.
  */
-trait Libraries extends Defaults {
-  lazy val libraries = Project(id = "openmole-libraries",
-    base = file("libraries")) aggregate (jetty,scalatra,logback, h2, bonecp, slick, slf4j, xstream, icu4j, groovy,
-    apacheCommonsExec, objenesis, scalaLang, apacheCommonsPool, apacheCommonsMath, jodaTime, gnuCrypto, db4o,
-    apacheCommonsConfig, jasypt, robustIt, netlogo4, netlogo5, netlogo4_noscala, netlogo5_noscala, gridscale, guava)
+package object libraries extends Defaults {
+  val dir = file("libraries")
 
-  private implicit val dir = file("libraries")
+
+  lazy val all = Project(id = "openmole-libraries",
+    base = file("libraries")) aggregate (jetty,scalatra,logback, h2, bonecp, slick, slf4j, xstream, icu4j, groovy,
+    objenesis, scalaLang, apache.all, jodaTime, gnuCrypto, db4o,
+    jasypt, robustIt, netlogo4, netlogo5, netlogo4_noscala, netlogo5_noscala, gridscale, guava)
 
   lazy val jetty = OsgiProject("org.eclipse.jetty", exports = Seq("org.eclipse.jetty.*", "javax.*")) settings
     (libraryDependencies ++= Seq("org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106",
@@ -54,9 +55,6 @@ trait Libraries extends Defaults {
     privatePackages = Seq("!scala.*,*")) settings (libraryDependencies ++= Seq("org.codehaus.groovy" % "groovy-all" % "2.0.5",
       "org.fusesource.jansi" % "jansi" % "1.2.1"))
 
-  lazy val apacheCommonsExec = OsgiProject("org.apache.commons.exec") settings
-    (libraryDependencies += "org.apache.commons" % "commons-exec" % "1.1")
-
   lazy val objenesis = OsgiProject("org.objenesis") settings (libraryDependencies += "org.objenesis" % "objenesis" % "1.2")
 
   lazy val scalaLang = OsgiProject("org.scala-lang.scala-library", exports = Seq("akka.*", "com.typesafe.*", "scala.*"),
@@ -73,11 +71,6 @@ trait Libraries extends Defaults {
         "com.typesafe" % "config" % "1.0.0")
     })
 
-  lazy val apacheCommonsPool = OsgiProject("org.apache.commons.pool") settings
-    (libraryDependencies += "commons-pool" % "commons-pool" % "1.5.4")
-
-  lazy val apacheCommonsMath = OsgiProject("org.apache.commons.math", exports = Seq("org.apache.commons.math3.*")) settings
-    (libraryDependencies += "org.apache.commons" % "commons-math3" % "3.0")
 
   lazy val jodaTime = OsgiProject("org.joda.time") settings (libraryDependencies += "joda-time" % "joda-time" % "1.6")
 
@@ -85,8 +78,6 @@ trait Libraries extends Defaults {
 
   lazy val jasypt = OsgiProject("org.jasypt.encryption", exports = Seq("org.jasypt.*")) settings (libraryDependencies += "org.jasypt" % "jasypt" % "1.8" )
 
-  lazy val apacheCommonsConfig = OsgiProject("org.apache.commons.configuration", privatePackages = Seq("org.apache.commons.*")) settings
-    (libraryDependencies += "commons-configuration" % "commons-configuration" % "1.6")
 
   lazy val db4o = OsgiProject("com.db4o", buddyPolicy = Some("global")) settings
     (libraryDependencies += "com.db4o" % "db4o-full-java5" % "8.1-SNAPSHOT")
