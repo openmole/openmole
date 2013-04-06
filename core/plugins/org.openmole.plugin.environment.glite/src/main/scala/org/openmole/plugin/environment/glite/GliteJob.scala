@@ -22,11 +22,13 @@ import org.openmole.core.batch.control.AccessToken
 import org.openmole.core.batch.jobservice.{ BatchJob, BatchJobId }
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.misc.workspace._
+import org.openmole.core.batch.storage.StorageService
 
-trait GliteJob extends BatchJob with BatchJobId {
-  var lastShaked = System.currentTimeMillis
-
+trait GliteJob extends BatchJob with BatchJobId { bj ⇒
+  var lastShacked = System.currentTimeMillis
   val jobService: GliteJobService
+  val storage: StorageService
+  val finishedPath: String
 
   override def updateState(implicit token: AccessToken) = {
     val state = super.updateState
@@ -39,17 +41,26 @@ trait GliteJob extends BatchJob with BatchJobId {
       def nbReady = jobService.environment.jobRegistry.allExecutionJobs.count(_.state == READY)
 
       if (nbReady < maxNbReady) {
-
         val jobShakingAverageTime = Workspace.preferenceAsDuration(GliteEnvironment.JobShakingHalfLife).toMilliSeconds
-        val nbInterval = ((System.currentTimeMillis - lastShaked.toDouble) / jobShakingAverageTime)
+        val nbInterval = ((System.currentTimeMillis - lastShacked.toDouble) / jobShakingAverageTime)
         val probability = 1 - math.pow(0.5, nbInterval)
 
-        lastShaked = System.currentTimeMillis
+        lastShacked = System.currentTimeMillis
 
         if (Workspace.rng.nextDouble < probability) throw new ShouldBeKilledException("Killed in shaking process")
       }
     }
-    state
+
+    if (state == RUNNING)
+      storage.tryWithToken {
+        case Some(t) ⇒
+          if (storage.exists(finishedPath)(t)) {
+            bj.state = DONE
+            DONE
+          } else state
+        case None ⇒ state
+      }
+    else state
   }
 
   override def state_=(state: ExecutionState) = synchronized {
