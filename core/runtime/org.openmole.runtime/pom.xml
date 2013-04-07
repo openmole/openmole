@@ -114,6 +114,8 @@
             <configuration>
               <!-- Exclude transitive dependencies osgi that are explicitely copyed by copy goal -->
               <excludeScope>provided</excludeScope>
+              <excludeArtifactIds>junit</excludeArtifactIds>
+              <excludeGroupIds>org.scalatest</excludeGroupIds>
             </configuration>
           </execution>
         </executions>
