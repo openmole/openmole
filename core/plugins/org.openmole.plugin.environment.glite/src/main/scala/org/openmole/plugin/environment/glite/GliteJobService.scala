@@ -23,7 +23,7 @@ import java.io.PrintStream
 import java.net.URI
 import java.util.UUID
 import org.openmole.core.batch.control._
-import org.openmole.core.batch.storage.Storage
+import org.openmole.core.batch.storage.{StorageService, Storage}
 import org.openmole.core.batch.environment.SerializedJob
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.batch.environment.Runtime
@@ -40,6 +40,7 @@ import org.openmole.misc.tools.service.Duration._
 
 object GliteJobService extends Logger {
   val finishedFile = "finished"
+  val runningFile = "running"
 }
 
 import GliteJobService._
@@ -88,9 +89,11 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     val script = Workspace.newFile("script", ".sh")
     try {
       val outputFilePath = storage.child(path, Storage.uniqName("job", ".out"))
+      val _runningPath = serializedJob.storage.child(path, runningFile)
+      val _finishedPath = serializedJob.storage.child(path, finishedFile)
 
       val os = script.bufferedOutputStream
-      try generateScript(serializedJob, outputFilePath, os)
+      try generateScript(serializedJob, outputFilePath, _runningPath, _finishedPath, os)
       finally os.close
 
       //logger.fine(ISource.fromFile(script).mkString)
@@ -104,21 +107,28 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
       new GliteJob {
         val jobService = js
         val storage = serializedJob.storage
-        val finishedPath = serializedJob.storage.child(path, finishedFile)
+        val finishedPath = _finishedPath
+        val runningPath = _runningPath
         val id = jid
         val resultPath = outputFilePath
       }
     } finally script.delete
   }
 
-  protected def generateScript(serializedJob: SerializedJob, resultPath: String, os: OutputStream) = {
+  protected def generateScript(
+    serializedJob: SerializedJob,
+    resultPath: String,
+    runningPath: String,
+    finishedPath: String,
+    os: OutputStream) = {
     import serializedJob._
 
     val writter = new PrintStream(os)
 
     assert(runtime.runtime.path != null)
 
-    writter.print("BASEPATH=$PWD; CUR=$PWD/ws$RANDOM; while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; export OPENMOLE_HOME=$CUR; ")
+    writter.print(touch(storage.url.resolve(runningPath)))
+    writter.print("; BASEPATH=$PWD; CUR=$PWD/ws$RANDOM; while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; export OPENMOLE_HOME=$CUR; ")
     writter.print("if [ `uname -m` = x86_64 ]; then ")
     writter.print(lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz")) //, homeCacheDir, runtime.jvmLinuxX64.hash))
     writter.print("; else ")
@@ -151,10 +161,14 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     writter.print(resultPath)
     writter.print(" -t ")
     writter.print(environment.threadsValue)
-    writter.print("; touch " + finishedFile)
     writter.print("; ")
-    writter.print(lcgCpCmd(finishedFile, storage.url.resolve(finishedFile)))
+    writter.print(touch(storage.url.resolve(finishedPath)))
     writter.print("; cd .. ; rm -rf $CUR ; ")
+  }
+
+  protected def touch(dest: URI) = {
+    val name = UUID.randomUUID.toString
+    s"touch $name; ${lcgCpCmd(name, dest)}; rm $name "
   }
 
   protected def lcgCpGunZipCmd(from: URI, to: String) = {
