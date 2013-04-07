@@ -34,7 +34,7 @@ trait BatchJob { bj ⇒
   val jobService: JobService
   def resultPath: String
 
-  var _state: ExecutionState = null
+  var _state: ExecutionState = READY
 
   protected[jobservice] def state_=(state: ExecutionState) = synchronized {
     if (_state < state) {
