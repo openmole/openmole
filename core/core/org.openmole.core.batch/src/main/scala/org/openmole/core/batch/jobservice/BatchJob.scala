@@ -26,7 +26,7 @@ import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 
 object BatchJob {
-  case class StateChanged(val newState: ExecutionState.ExecutionState, val oldState: ExecutionState.ExecutionState) extends Event[BatchJob]
+  case class StateChanged(newState: ExecutionState.ExecutionState, oldState: ExecutionState.ExecutionState) extends Event[BatchJob]
 }
 
 trait BatchJob { bj ⇒
@@ -34,13 +34,10 @@ trait BatchJob { bj ⇒
   val jobService: JobService
   def resultPath: String
 
-  val timeStamps = ExecutionState.values.toList.map { v ⇒ System.currentTimeMillis }.toArray
-
   var _state: ExecutionState = null
 
   protected[jobservice] def state_=(state: ExecutionState) = synchronized {
     if (_state != state) {
-      timeStamps(state.id) = System.currentTimeMillis
       EventDispatcher.trigger(this, new BatchJob.StateChanged(state, _state))
       _state = state
     }
@@ -68,7 +65,5 @@ trait BatchJob { bj ⇒
   }
 
   def state: ExecutionState = _state
-
-  def timeStamp(state: ExecutionState): Long = timeStamps(state.id)
 
 }

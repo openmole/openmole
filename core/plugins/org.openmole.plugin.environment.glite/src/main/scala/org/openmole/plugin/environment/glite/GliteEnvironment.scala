@@ -72,7 +72,7 @@ object GliteEnvironment extends Logger {
   val RemoteTimeout = new ConfigurationLocation("GliteEnvironment", "RemoteTimeout")
   val QualityHysteresis = new ConfigurationLocation("GliteEnvironment", "QualityHysteresis")
   val MinValueForSelectionExploration = new ConfigurationLocation("GliteEnvironment", "MinValueForSelectionExploration")
-  val WMSRetryCount = new ConfigurationLocation("GliteEnvironment", "WMSRetryCount")
+  val ShallowWMSRetryCount = new ConfigurationLocation("GliteEnvironment", "ShallowWMSRetryCount")
 
   val JobServiceFitnessPower = new ConfigurationLocation("GliteEnvironment", "JobServiceFitnessPower")
   val StorageFitnessPower = new ConfigurationLocation("GliteEnvironment", "StorageFitnessPower")
@@ -113,7 +113,7 @@ object GliteEnvironment extends Logger {
   Workspace += (MinValueForSelectionExploration, "0.001")
   Workspace += (QualityHysteresis, "100")
 
-  Workspace += (WMSRetryCount, "10")
+  Workspace += (ShallowWMSRetryCount, "5")
 
   Workspace += (JobServiceFitnessPower, "2")
   Workspace += (StorageFitnessPower, "2")
