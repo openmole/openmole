@@ -14,9 +14,6 @@ object HelloBuild extends Defaults {
     (libraries.all, web, application, base.all, thirdParties)
 
   override def settings = super.settings ++ Seq(
-    resolvers += "openmole-releases" at "http://maven.openmole.org/public",
-    externalResolvers <<= (resolvers) map {rs =>
-      Resolver.withDefaultResolvers(Seq()) ++ rs
-    }
+    resolvers += "openmole-public" at "http://maven.openmole.org/public"
   )
 }

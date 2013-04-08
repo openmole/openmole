@@ -3,6 +3,7 @@ package root
 import Web._
 import libraries._
 import base.{misc,core}
+import ThirdParties._
 
 import sbt._
 import Keys._
@@ -25,12 +26,10 @@ object Application extends Defaults {
         "org.eclipse.core" % "org.eclipse.equinox.launcher" % "1.3.0.v20120522-1813" intransitive(),
         "org.eclipse.core" % "org.eclipse.equinox.registry" % "3.5.200.v20120522-1841" intransitive(),
         "org.eclipse.core" % "org.eclipse.equinox.preferences" % "3.5.1.v20121031-182809" intransitive(),
-        "org.openmole.core" % "org.openmole.core.batch" % v,
         "org.eclipse.core" % "org.eclipse.osgi" % "3.8.2.v20130124-134944" intransitive(),
         "org.openmole" % "org.apache.commons.logging" % v intransitive(),
         "org.openmole" % "net.sourceforge.jline" % v intransitive(),
         "org.openmole" % "org.apache.ant" % v intransitive(),
-        "org.openmole" % "com.github.scopt" % v intransitive(),
         "org.openmole.ide" % "org.openmole.ide.core.implementation" % v,
         "org.openmole.core" % "org.openmole.misc.logging" % v)
   }
@@ -123,7 +122,8 @@ object Application extends Defaults {
 
   lazy val openmoleui = OsgiProject("org.openmole.ui", singleton = true) settings (pluginDependencies) dependsOn
     (webCore, base.misc.workspace, base.misc.replication, base.misc.exception, base.misc.tools, base.misc.eventDispatcher,
-      base.misc.pluginManager, jodaTime, scalaLang, jasypt, apache.config, objenesis, base.core.implementation, robustIt)
+      base.misc.pluginManager, jodaTime, scalaLang, jasypt, apache.config, objenesis, base.core.implementation, robustIt,
+      scopt, base.core.batch)
 
   lazy val plugins = AssemblyProject("package", "assembly/plugins",
     Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> {s => "org.eclipse.equinox.launcher.jar"},
@@ -140,13 +140,14 @@ object Application extends Defaults {
         "org.openmole.core" %% "org.openmole.misc.tools" % v,
         "org.openmole.core" %% "org.openmole.misc.eventdispatcher" % v,
         "org.openmole.core" %% "org.openmole.misc.pluginmanager" % v,
-        //"org.openmole.core" %% "org.openmole.core.batch" % v,
+        "org.openmole.core" %% "org.openmole.core.batch" % v,
         "org.openmole" % "uk.com.robustit.cloning" % v intransitive(),
         "org.openmole" % "org.joda.time" % v intransitive(),
         "org.openmole" % "org.scala-lang.scala-library" % v intransitive(),
         "org.openmole" % "org.jasypt.encryption" % v intransitive(),
         "org.openmole" % "org.apache.commons.configuration" % v intransitive(),
-        "org.openmole" % "org.objenesis" % v intransitive()
+        "org.openmole" % "org.objenesis" % v intransitive(),
+        "org.openmole" %% "com.github.scopt" % v intransitive()
       )
     }, dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
 
@@ -161,8 +162,8 @@ object Application extends Defaults {
     (resourceDirectory := file("application/resources"), copyResTask, assemble <<= assemble dependsOn (resourceAssemble),
       dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
 
-  lazy val openMoleDB = AssemblyProject("package", "assembly/dbserver/lib") settings (libraryDependencies ++=
-    Seq("org.openmole.core" % "org.openmole.runtime.dbserver" % "0.8.0-SNAPSHOT"),
+  lazy val openMoleDB = AssemblyProject("package", "assembly/dbserver/lib") settings (libraryDependencies <+= (version)
+    { v => "org.openmole.core" % "org.openmole.runtime.dbserver" % v },
     copyResTask, resourceDirectory := file("application/db-resources"), assemble <<= assemble dependsOn (resourceAssemble),
     resourceOutDir := Option("assembly/dbserver/bin"))
 }

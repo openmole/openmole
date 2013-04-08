@@ -7,7 +7,6 @@ import Keys._
 import util.matching.Regex
 
 
-
 /**
  * Created with IntelliJ IDEA.
  * User: luft
@@ -17,7 +16,7 @@ import util.matching.Regex
  */
 trait Defaults extends Build {
   def dir: File
-  lazy val org = organization := "org.openmole.core"
+  lazy val org = organization := "org.openmole"
 
 
   val eclipseBuddyPolicy = SettingKey[Option[String]]("OSGi.eclipseBuddyPolicy", "The eclipse buddy policy thing.")
@@ -78,6 +77,7 @@ trait Defaults extends Build {
     }
   }
 
+
   def OsgiProject(artifactId: String,
                   pathFromDir: String = "",
                    buddyPolicy: Option[String] = None,
@@ -112,7 +112,7 @@ trait Defaults extends Build {
           OsgiKeys.importPackage := imports,
           OsgiKeys.bundleActivator := bundleActivator,
           OsgiKeys.embeddedJars := embeddedJars,
-          install <<= publishLocal,
+          install in Compile <<= publishLocal in Compile,
           OsgiKeys.bundle <<= OsgiKeys.bundle tag (Tags.Disk),
           (update in install) <<= update in install tag (Tags.Network),
           //compile in Compile <<= compile in Compile tag (Tags.Disk),
