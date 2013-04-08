@@ -12,4 +12,11 @@ object HelloBuild extends Defaults {
   implicit val dir = file(".")
   lazy val root = Project(id = "root", base = dir) aggregate
     (libraries.all, web, application, base.all, thirdParties)
+
+  override def settings = super.settings ++ Seq(
+    resolvers += "openmole-releases" at "http://maven.openmole.org/public",
+    externalResolvers <<= (resolvers) map {rs =>
+      Resolver.withDefaultResolvers(Seq()) ++ rs
+    }
+  )
 }

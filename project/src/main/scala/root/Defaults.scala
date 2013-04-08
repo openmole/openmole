@@ -55,12 +55,6 @@ trait Defaults extends Build {
     Seq(version := "0.8.0-SNAPSHOT",
       organization := "org.openmole",
       scalaVersion := "2.10.1",
-      resolvers ++= Seq("openmole" at "http://maven.openmole.org/snapshots",
-        "openmole-releases" at "http://maven.openmole.org/public",
-        "sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"),
-      externalResolvers <<= (resolvers) map {rs =>
-        Resolver.withDefaultResolvers(Seq()) ++ rs
-      },
       publishArtifact in (packageDoc in install) := false,
       copyDependencies := false,
       osgiVersion := "3.8.2.v20130124-134944"

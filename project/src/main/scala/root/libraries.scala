@@ -29,7 +29,7 @@ package object libraries extends Defaults {
     buddyPolicy = Some("global"),
     exports = Seq("org.scalatra.*, org.fusesource.*"),
     privatePackages = Seq("!scala.*","!org.slf4j.*", "*")) settings
-    (libraryDependencies ++= Seq("org.scalatra" %% "scalatra" % "2.2.1-SNAPSHOT", "org.scalatra" %% "scalatra-scalate" % "2.2.1-SNAPSHOT")) dependsOn(slf4j)    //TODO: Replace when sonatype is up again.
+    (libraryDependencies ++= Seq("org.scalatra" %% "scalatra" % "2.2.1", "org.scalatra" %% "scalatra-scalate" % "2.2.1")) dependsOn(slf4j)    //TODO: Replace when sonatype is up again.
 
   lazy val logback = OsgiProject("ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl")) settings
     (libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.9")
