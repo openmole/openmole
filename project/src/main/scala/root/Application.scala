@@ -141,12 +141,12 @@ object Application extends Defaults {
         "org.openmole.core" %% "org.openmole.misc.eventdispatcher" % v,
         "org.openmole.core" %% "org.openmole.misc.pluginmanager" % v,
         //"org.openmole.core" %% "org.openmole.core.batch" % v,
-        "org.openmole" %% "uk.com.robustit.cloning" % v intransitive(),
-        "org.openmole" %% "org.joda.time" % v intransitive(),
-        "org.openmole" %% "org.scala-lang.scala-library" % v intransitive(),
-        "org.openmole" %% "org.jasypt.encryption" % v intransitive(),
-        "org.openmole" %% "org.apache.commons.configuration" % v intransitive(),
-        "org.openmole" %% "org.objenesis" % v intransitive()
+        "org.openmole" % "uk.com.robustit.cloning" % v intransitive(),
+        "org.openmole" % "org.joda.time" % v intransitive(),
+        "org.openmole" % "org.scala-lang.scala-library" % v intransitive(),
+        "org.openmole" % "org.jasypt.encryption" % v intransitive(),
+        "org.openmole" % "org.apache.commons.configuration" % v intransitive(),
+        "org.openmole" % "org.objenesis" % v intransitive()
       )
     }, dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
 
