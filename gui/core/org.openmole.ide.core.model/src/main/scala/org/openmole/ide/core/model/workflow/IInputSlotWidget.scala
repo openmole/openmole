@@ -26,5 +26,5 @@ trait IInputSlotWidget {
 
   def capsule: ICapsuleUI
 
-  def setStartingSlot(b: Boolean)
+  def refresh
 }

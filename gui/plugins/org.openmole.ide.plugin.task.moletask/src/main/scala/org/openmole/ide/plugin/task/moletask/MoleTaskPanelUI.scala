@@ -17,15 +17,13 @@
 
 package org.openmole.ide.plugin.task.moletask
 
-import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.implementation.data.EmptyDataUIs
+import org.openmole.ide.core.implementation.data.{ EmptyDataUIs }
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.implementation.workflow.MoleSceneManager
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.tools.util._
 import scala.swing.event.SelectionChanged
@@ -33,6 +31,8 @@ import scala.swing.Label
 import scala.swing.MyComboBox
 import org.openmole.ide.misc.widget.URL
 import scala.collection.JavaConversions._
+import org.openmole.ide.core.model.workflow.IMoleUI
+import org.openmole.ide.core.implementation.workflow.MoleUI
 
 class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2", "left,grow,fill", "") with ITaskPanelUI {
 
@@ -47,7 +47,7 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2", "
 
   moleComboBox.selection.item = pud.mole match {
     case Some(x: ID.Type) ⇒ MoleTaskDataUI.manager(x) match {
-      case Some(m: IMoleSceneManager) ⇒ m.asInstanceOf[MoleSceneManager]
+      case Some(m: IMoleUI) ⇒ m.asInstanceOf[MoleUI]
       case _ ⇒ MoleTaskDataUI.emptyMoleSceneManager
     }
     case _ ⇒ MoleTaskDataUI.emptyMoleSceneManager

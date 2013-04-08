@@ -27,7 +27,7 @@ import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import scala.swing.Panel
 
 trait IMoleScene {
-  def manager: IMoleSceneManager
+  def manager: IMoleUI
 
   def refresh
 
@@ -76,4 +76,9 @@ trait IMoleScene {
   override def toString = manager.name
 
   def toSceneCoordinates(p: Point): Point
+
+  def startingCapsule_=(caps: ICapsuleUI)
+  def add(caps: ICapsuleUI, locationPoint: Point)
+  def add(trans: ITransitionUI)
+  def add(dc: IDataChannelUI)
 }

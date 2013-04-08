@@ -20,14 +20,15 @@ package org.openmole.ide.core.implementation.execution
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.misc.eventdispatcher._
+import scala.concurrent.stm._
 
 class UploadFileListener(exeManager: ExecutionManager) extends EventListener[BatchEnvironment] {
-  override def triggered(environment: BatchEnvironment, event: Event[BatchEnvironment]) = {
+  override def triggered(environment: BatchEnvironment, event: Event[BatchEnvironment]) = atomic { implicit ctx ⇒
     event match {
-      case x: BeginUpload ⇒ exeManager.uploads = (exeManager.uploads._1, exeManager.uploads._2 + 1)
-      case x: EndUpload ⇒ exeManager.uploads = (exeManager.uploads._1 + 1, exeManager.uploads._2)
-      case x: BeginDownload ⇒ exeManager.downloads = (exeManager.downloads._1, exeManager.downloads._2 + 1)
-      case x: EndDownload ⇒ exeManager.downloads = (exeManager.downloads._1 + 1, exeManager.downloads._2)
+      case x: BeginUpload ⇒ exeManager.uploads() = (exeManager.uploads()._1, exeManager.uploads()._2 + 1)
+      case x: EndUpload ⇒ exeManager.uploads() = (exeManager.uploads()._1 + 1, exeManager.uploads()._2)
+      case x: BeginDownload ⇒ exeManager.downloads() = (exeManager.downloads()._1, exeManager.downloads()._2 + 1)
+      case x: EndDownload ⇒ exeManager.downloads() = (exeManager.downloads()._1 + 1, exeManager.downloads()._2)
     }
     exeManager.displayFileTransfer
   }

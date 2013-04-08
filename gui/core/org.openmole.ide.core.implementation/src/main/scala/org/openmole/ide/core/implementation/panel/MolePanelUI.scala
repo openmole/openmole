@@ -18,8 +18,6 @@
 package org.openmole.ide.core.implementation.panel
 
 import java.awt.Dimension
-import org.openmole.ide.core.implementation.data.MoleDataUI
-import org.openmole.ide.core.model.data.IMoleDataUI
 import org.openmole.ide.core.model.panel.IPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
@@ -28,8 +26,10 @@ import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.swing.RadioButton
 import scala.swing.FileChooser.SelectionMode._
 import org.openmole.misc.workspace.Workspace
+import org.openmole.ide.core.model.workflow.IMoleUI
+import org.openmole.ide.core.implementation.workflow.MoleUI
 
-class MolePanelUI(mdu: IMoleDataUI) extends PluginPanel("wrap") with IPanelUI {
+class MolePanelUI(mdu: IMoleUI) extends PluginPanel("wrap") with IPanelUI {
   minimumSize = new Dimension(300, 400)
   preferredSize = new Dimension(300, 400)
   Workspace.pluginDirLocation.list.foreach { f ⇒
@@ -38,10 +38,13 @@ class MolePanelUI(mdu: IMoleDataUI) extends PluginPanel("wrap") with IPanelUI {
 
   val components = List()
 
-  def saveContent(name: String) = new MoleDataUI(contents.flatMap { c ⇒
-    c match {
-      case x: RadioButton ⇒ List(x)
-      case _ ⇒ Nil
-    }
-  }.toList.filter { _.selected }.map { _.text })
+  def saveContent(name: String) =
+    mdu.plugins =
+      contents.flatMap { c ⇒
+        c match {
+          case x: RadioButton ⇒ List(x)
+          case _ ⇒ Nil
+        }
+      }.toList.filter { _.selected }.map { _.text }
+
 }

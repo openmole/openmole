@@ -29,7 +29,6 @@ import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.implementation.dialog.MasterCapsulePrototypeDialog
 import org.openmole.ide.core.implementation.data.CapsuleDataUI
 import org.openmole.ide.core.implementation.data.CheckData
-import org.openmole.ide.core.implementation.dataproxy.ProxyFreezer
 import org.openmole.ide.core.implementation.provider.CapsuleMenuProvider
 import org.openmole.ide.core.model.commons._
 import org.openmole.ide.core.model.commons.Constants._
@@ -40,7 +39,6 @@ import org.openmole.ide.core.model.data.IExplorationTaskDataUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.tools.image.Images
 import org.openmole.ide.misc.widget.LinkLabel
-import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.implementation.validation.DataflowProblem
 import scala.swing.Action
@@ -51,29 +49,52 @@ import org.openmole.ide.misc.tools.util._
 
 object CapsuleUI {
   def imageWidget(scene: IMoleScene, img: ImageIcon, x: Int, y: Int, action: Action) = new LinkedImageWidget(scene, img, x, y, action)
+  def withMenu(ms: IBuildMoleScene, dataUI: ICapsuleDataUI = new CapsuleDataUI) = {
+    val capsuleUI = CapsuleUI(ms, dataUI)
+    val capsuleMenuProvider = new CapsuleMenuProvider(ms, capsuleUI)
+    capsuleUI.getActions.addAction(ActionFactory.createPopupMenuAction(capsuleMenuProvider))
+    capsuleUI
+  }
+
+  def apply(
+    scene: IMoleScene,
+    dataUI: ICapsuleDataUI = new CapsuleDataUI) = {
+    val caps = new CapsuleUI(scene, dataUI)
+    dataUI.task match {
+      case Some(t: ITaskDataProxyUI) ⇒
+        caps.encapsule(t)
+        caps.setAsValid
+      case _ ⇒
+        caps.decapsule
+        caps.setAsInvalid("Empty Capsule")
+    }
+    caps
+  }
+
 }
 
 import CapsuleUI._
 
-class CapsuleUI(val scene: IMoleScene,
-                var dataUI: ICapsuleDataUI = new CapsuleDataUI) extends Widget(scene.graphScene)
-    with ICapsuleUI with ID {
-  capsuleUI ⇒
-  val taskComponentWidget = new SceneComponentWidget(scene, new TaskWidget(scene, this),
-    TASK_CONTAINER_WIDTH,
-    TASK_CONTAINER_HEIGHT)
+class CapsuleUI private (
+    val scene: IMoleScene,
+    var dataUI: ICapsuleDataUI = new CapsuleDataUI) extends Widget(scene.graphScene) with ICapsuleUI with ID { capsuleUI ⇒
+
   var capsuleTypeWidget: Option[LinkedImageWidget] = None
   var environmentWidget: Option[LinkedImageWidget] = None
   var samplingWidget: Option[LinkedImageWidget] = None
   var inputPrototypeWidget: Option[PrototypeWidget] = None
   var outputPrototypeWidget: Option[PrototypeWidget] = None
   var selected = false
+  val islots = ListBuffer.empty[IInputSlotWidget]
+  val oslot = new OutputSlotWidget(scene)
 
-  val capsuleMenuProvider = new CapsuleMenuProvider(scene, this)
+  val taskComponentWidget = new SceneComponentWidget(
+    scene,
+    new TaskWidget(scene, this),
+    TASK_CONTAINER_WIDTH,
+    TASK_CONTAINER_HEIGHT)
 
-  addChild(taskComponentWidget)
-  on(dataUI.environment)
-  --(dataUI.capsuleType)
+  taskComponentWidget.setPreferredLocation(new Point(10, 10))
 
   val titleWidget = new LinkedWidget(scene, new LinkLabel(toString, new Action("") {
     def apply = {
@@ -86,32 +107,19 @@ class CapsuleUI(val scene: IMoleScene,
     preferredSize = new Dimension(TASK_CONTAINER_WIDTH, TASK_TITLE_HEIGHT)
   }, 10, 10)
 
-  val validationWidget = new ImageWidget(scene.graphScene, dataUI.task match {
-    case Some(t: ITaskDataProxyUI) ⇒
-      encapsule(t)
-      Images.CHECK_VALID
-    case _ ⇒
-      decapsule
-      Images.CHECK_INVALID
-  }) {
+  setPreferredSize(new Dimension(TASK_CONTAINER_WIDTH + 20, TASK_CONTAINER_HEIGHT + 20))
+  createActions(MOVE).addAction(ActionFactory.createMoveAction)
+
+  val validationWidget = new ImageWidget(scene.graphScene, Images.CHECK_INVALID) {
     setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 12, 2))
   }
 
+  addChild(taskComponentWidget)
+  addChild(titleWidget)
+  addChild(oslot)
   addChild(validationWidget)
 
-  setPreferredSize(new Dimension(TASK_CONTAINER_WIDTH + 20, TASK_CONTAINER_HEIGHT + 20))
-  taskComponentWidget.setPreferredLocation(new Point(10, 10))
-  createActions(MOVE).addAction(ActionFactory.createMoveAction)
-
-  var islots = ListBuffer.empty[IInputSlotWidget]
-  val oslot = new OutputSlotWidget(scene, this)
-  var nbInputSlots = 0
-
-  addChild(oslot)
-
-  getActions.addAction(ActionFactory.createPopupMenuAction(capsuleMenuProvider))
-
-  addChild(titleWidget)
+  def nbInputSlots: Int = islots.size
 
   def setAsValid = {
     validationWidget.setImage(Images.CHECK_VALID)
@@ -135,40 +143,27 @@ class CapsuleUI(val scene: IMoleScene,
 
   def widget = this
 
-  def deepcopy(sc: IMoleScene) = {
-    val ret = copy(sc)
-    dataUI.task match {
-      case Some(x: ITaskDataProxyUI) ⇒
-        ret._1.encapsule(ProxyFreezer.freeze(x))
-        if (dataUI.environment.isDefined) ret._1 on ProxyFreezer.freeze(dataUI.environment)
-      case _ ⇒
-    }
-    ret
-  }
-
-  def copy(sc: IMoleScene) = {
-    var slotMapping = new HashMap[IInputSlotWidget, IInputSlotWidget]
-    val c = new CapsuleUI(sc)
-    islots.foreach(i ⇒ slotMapping += i -> c.addInputSlot(false))
+  def copy(sc: IBuildMoleScene) = {
+    val c = CapsuleUI.withMenu(sc)
+    val slotMapping = islots.map(i ⇒ i -> c.addInputSlot).toMap
     (c, slotMapping)
   }
 
-  def defineAsStartingCapsule(b: Boolean) = {
-    islots.foreach {
-      _.setStartingSlot(b)
-    }
-    scene.validate
+  def starting = scene.manager.startingCapsule.map(_ == this).getOrElse(false)
+
+  def defineAsStartingCapsule = {
+    scene.manager.startingCapsule = Some(this)
     scene.refresh
   }
 
   def update = {
+    islots.foreach(_.refresh)
     updateEnvironmentWidget
-    scene.manager.invalidateCache
-    CheckData.checkMole(scene)
+    updateSamplingWidget
   }
 
   def decapsule = {
-    dataUI = dataUI.::(None)
+    dataUI = dataUI.copy(task = None)
     removeWidget(inputPrototypeWidget)
     removeWidget(outputPrototypeWidget)
     removeWidget(samplingWidget)
@@ -178,35 +173,33 @@ class CapsuleUI(val scene: IMoleScene,
     addChild(inputPrototypeWidget.get)
     outputPrototypeWidget = Some(PrototypeWidget.buildNoTaskHook(scene, this))
     addChild(outputPrototypeWidget.get)
-    update
+    scene.refresh
   }
 
   def encapsule(dpu: ITaskDataProxyUI) = {
     decapsule
-    ::(dpu)
+    dataUI = dataUI.copy(task = Some(dpu))
     inputPrototypeWidget = Some(PrototypeWidget.buildTaskSource(scene, this))
     outputPrototypeWidget = Some(PrototypeWidget.buildTaskHook(scene, this))
     CheckData.checkMole(scene)
     addChild(inputPrototypeWidget.get)
     addChild(outputPrototypeWidget.get)
-    update
+    scene.refresh
   }
 
-  def on(env: Option[IEnvironmentDataProxyUI]) = {
-    dataUI = dataUI on env
-    updateEnvironmentWidget
+  def environment_=(env: Option[IEnvironmentDataProxyUI]) = {
+    dataUI = dataUI.copy(environment = env)
   }
 
   private def removeWidget(w: Option[ComponentWidget]) = {
     w match {
-      case Some(y: ComponentWidget) ⇒
-        removeChild(y)
+      case Some(y: ComponentWidget) ⇒ removeChild(y)
       case None ⇒
     }
   }
 
-  def --(cType: CapsuleType) = {
-    dataUI = dataUI -- cType
+  def capsuleType_=(cType: CapsuleType) = {
+    dataUI = dataUI.copy(capsuleType = cType)
     updateCapsuleTypeWidget
   }
 
@@ -223,9 +216,11 @@ class CapsuleUI(val scene: IMoleScene,
           }))
         addChild(capsuleTypeWidget.get)
     }
+    scene.refresh
   }
 
   private def updateEnvironmentWidget = {
+
     removeWidget(environmentWidget)
 
     val img = dataUI.environment match {
@@ -241,7 +236,7 @@ class CapsuleUI(val scene: IMoleScene,
     addChild(environmentWidget.get)
   }
 
-  def updateSamplingWidget = {
+  private def updateSamplingWidget = {
     removeWidget(samplingWidget)
     dataUI.task match {
       case Some(t: ITaskDataProxyUI) ⇒
@@ -261,7 +256,6 @@ class CapsuleUI(val scene: IMoleScene,
         }
       case _ ⇒
     }
-    scene.refresh
   }
 
   def updateErrors(problems: Iterable[DataflowProblem]) = {
@@ -282,9 +276,8 @@ class CapsuleUI(val scene: IMoleScene,
     if (problems.size > 0) setAsInvalid("I / O errors")
   }
 
-  def addInputSlot(on: Boolean): IInputSlotWidget = {
-    nbInputSlots += 1
-    val im = new InputSlotWidget(scene, this, nbInputSlots, on)
+  def addInputSlot: IInputSlotWidget = {
+    val im = new InputSlotWidget(scene, this, nbInputSlots)
     islots += im
     addChild(im)
     scene.refresh
@@ -292,15 +285,10 @@ class CapsuleUI(val scene: IMoleScene,
   }
 
   def removeInputSlot = {
-    nbInputSlots -= 1
     val toBeRemoved = islots.tail.last
     removeChild(toBeRemoved.widget)
     islots -= toBeRemoved
-  }
-
-  def ::(dpu: ITaskDataProxyUI) = {
-    dataUI = dataUI.::(Some(dpu))
-    updateSamplingWidget
+    scene.refresh
   }
 
   def inputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IPrototypeDataProxyUI] = {
@@ -336,9 +324,7 @@ class CapsuleUI(val scene: IMoleScene,
     case _ ⇒ List()
   }
 
-  def x = convertLocalToScene(getLocation).getX
-
-  def y = convertLocalToScene(getLocation).getY
-
+  def x = location.x
+  def y = location.y
   def location = getLocation
 }

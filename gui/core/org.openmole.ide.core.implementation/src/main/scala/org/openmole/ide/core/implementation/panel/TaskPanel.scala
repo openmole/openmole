@@ -22,7 +22,7 @@ import javax.imageio.ImageIO
 import javax.swing.ImageIcon
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openide.awt.HtmlBrowser
-import org.openmole.ide.core.implementation.dataproxy.{ UpdatedProxyEvent, Proxys }
+import org.openmole.ide.core.implementation.dataproxy.{ UpdatedProxyEvent, Proxies }
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ISamplingCompositionDataProxyUI, IDataProxyUI, ITaskDataProxyUI }
 import org.openmole.ide.core.model.workflow.ICapsuleUI
@@ -46,7 +46,7 @@ class TaskPanel(proxy: ITaskDataProxyUI,
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.imagePath)))
 
   var panelUI = proxy.dataUI.buildPanelUI
-  def created = Proxys.contains(proxy)
+  def created = Proxies.instance.contains(proxy)
 
   def buildProtoPanel = {
     val (implicitIP, implicitOP) = proxy.dataUI.implicitPrototypes
@@ -122,7 +122,7 @@ class TaskPanel(proxy: ITaskDataProxyUI,
   }
 
   def create = {
-    Proxys += proxy
+    Proxies.instance += proxy
     ConceptMenu.taskMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
 
@@ -135,7 +135,7 @@ class TaskPanel(proxy: ITaskDataProxyUI,
     toBeRemovedCapsules match {
       case Nil ⇒
         scene.closePropertyPanel(index)
-        Proxys -= proxy
+        Proxies.instance -= proxy
         if (!proxy.generated) ConceptMenu.removeItem(proxy)
         true
       case _ ⇒

@@ -17,15 +17,19 @@
 package org.openmole.ide.core.implementation.sampling
 
 import org.openmole.ide.core.model.sampling._
-import swing.Action
+import swing.{ Action, Label }
 import org.openmole.ide.core.implementation.workflow.PrototypeOnConnectorWidget
 import org.openmole.ide.core.implementation.workflow.PrototypeOnConnectorWidget._
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.core.model.sampling.IOrdering
+import org.openmole.ide.core.model.data.{ IDomainDataUI, IFactorDataUI }
+import org.openmole.ide.core.implementation.dataproxy.Proxies._
 import org.openmole.ide.core.implementation.dialog.ConnectorPrototypeFilterDialog.{ OrderingDialog, FactorPrototypeDialog }
 import org.openmole.ide.core.model.workflow.IConnectorViewUI
+import org.netbeans.api.visual.widget.ConnectionWidget
 import org.netbeans.api.visual.anchor.Anchor
 import org.netbeans.api.visual.anchor.AnchorShape
+import org.netbeans.api.visual.action.ConnectProvider
 import org.netbeans.api.visual.layout.LayoutFactory
 import org.netbeans.api.visual.widget._
 import java.awt._
@@ -58,8 +62,7 @@ class SamplingConnectorWidget(sourceWidget: Widget,
   }.map {
     _._1
   }.headOption match {
-    case Some(f: IFactorProxyUI) ⇒
-      Some(f)
+    case Some(f: IFactorProxyUI) ⇒ Some(f)
     case _ ⇒ None
   }
 

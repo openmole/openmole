@@ -24,37 +24,32 @@ import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.misc.exception._
 import org.openmole.core.batch.control._
 import fr.iscpif.gridscale.jobservice.SSHJobDescription
-
-object SSHBatchJob {
-
-  val sshId = new AtomicInteger
-  implicit val oder = Ordering.by[SSHBatchJob, Int](j ⇒ j.sshId)
-
-}
+import util.{ Failure, Success, Try }
 
 trait SSHBatchJob extends BatchJob {
 
   val jobService: SSHJobService
   def jobDescription: SSHJobDescription
-  var id: Option[jobService.J] = None
-
-  val sshId = SSHBatchJob.sshId.getAndIncrement
+  var id: Option[Try[jobService.J]] = None
 
   def submit = synchronized {
-    id = Some(jobService.submit(jobDescription))
+    id = Some(Try[jobService.J](jobService.submit(jobDescription)))
   }
 
   def updateState(implicit token: AccessToken) = synchronized {
     id match {
-      case Some(id) ⇒ super.updateState(id)
+      case Some(Success(id)) ⇒ super.updateState(id)
+      case Some(Failure(e)) ⇒
+        state = FAILED
+        throw e
       case None ⇒ SUBMITTED
     }
   }
 
   def kill(implicit token: AccessToken) =
     id match {
-      case Some(id) ⇒ super.kill(id)
-      case None ⇒ state = KILLED
+      case Some(Success(id)) ⇒ super.kill(id)
+      case _ ⇒ state = KILLED
     }
 
 }

@@ -33,8 +33,9 @@ import fr.iscpif.gridscale.tools.SSHHost
 import fr.iscpif.gridscale.authentication._
 import fr.iscpif.gridscale.jobservice.{ SSHJobDescription, SSHJobService ⇒ GSSSHJobService }
 import java.net.URI
-import SSHBatchJob._
 import scala.collection.immutable.TreeSet
+import java.util.concurrent.atomic.AtomicInteger
+import collection.mutable
 
 object SSHJobService extends Logger
 
@@ -51,8 +52,8 @@ trait SSHJobService extends GridScaleJobService with SharedStorage with LimitedA
     override def timeout = Workspace.preferenceAsDuration(SSHService.timeout).toMilliSeconds.toInt
   }
 
-  var queue = new TreeSet[SSHBatchJob]
-  var nbRunning = 0
+  val queue = new mutable.SynchronizedQueue[SSHBatchJob]
+  @transient lazy val nbRunning = new AtomicInteger
 
   object BatchJobStatusListner extends EventListener[BatchJob] {
 
@@ -63,15 +64,12 @@ trait SSHJobService extends GridScaleJobService with SharedStorage with LimitedA
         case ev: BatchJob.StateChanged ⇒
           ev.newState match {
             case DONE | KILLED | FAILED ⇒
-              queue -= job.asInstanceOf[SSHBatchJob]
               ev.oldState match {
                 case DONE | FAILED | KILLED ⇒
                 case _ ⇒
-                  val sshJob = queue.headOption match {
-                    case Some(j) ⇒
-                      queue -= j
-                      j.submit
-                    case None ⇒ nbRunning -= 1
+                  queue.dequeueFirst(_ ⇒ true) match {
+                    case Some(j) ⇒ j.submit
+                    case None ⇒ nbRunning.decrementAndGet
                   }
 
               }
@@ -99,10 +97,10 @@ trait SSHJobService extends GridScaleJobService with SharedStorage with LimitedA
     EventDispatcher.listen(sshBatchJob: BatchJob, BatchJobStatusListner, classOf[BatchJob.StateChanged])
 
     synchronized {
-      if (nbRunning < nbSlots) {
-        nbRunning += 1
+      if (nbRunning.get() < nbSlots) {
+        nbRunning.incrementAndGet
         sshBatchJob.submit
-      } else queue += sshBatchJob
+      } else queue.enqueue(sshBatchJob)
     }
     sshBatchJob
   }

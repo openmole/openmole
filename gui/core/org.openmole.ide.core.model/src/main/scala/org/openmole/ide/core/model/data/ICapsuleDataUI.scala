@@ -22,6 +22,7 @@ import org.openmole.core.model.mole._
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.commons.CapsuleType
 import org.openmole.ide.core.model.panel.ICapsulePanelUI
+import org.openmole.ide.core.model.workflow.IMoleUI
 
 trait ICapsuleDataUI extends IDataUI {
   def name = ""
@@ -40,19 +41,16 @@ trait ICapsuleDataUI extends IDataUI {
 
   def sources: List[ISourceDataProxyUI]
 
-  def transitionType: TransitionType.Value
-
-  def coreObject(moleDataUI: IMoleDataUI): ICapsule
+  def coreObject(moleDataUI: IMoleUI): ICapsule
 
   def capsuleType: CapsuleType
 
-  def ::(t: Option[ITaskDataProxyUI]): ICapsuleDataUI
+  def copy(
+    task: Option[ITaskDataProxyUI] = task,
+    environment: Option[IEnvironmentDataProxyUI] = environment,
+    grouping: Option[IGroupingDataUI] = grouping,
+    sources: List[ISourceDataProxyUI] = sources,
+    hooks: List[IHookDataProxyUI] = hooks,
+    capsuleType: CapsuleType = capsuleType): ICapsuleDataUI
 
-  def on(e: Option[IEnvironmentDataProxyUI]): ICapsuleDataUI
-
-  def -:(s: List[ISourceDataProxyUI]): ICapsuleDataUI
-
-  def :-(h: List[IHookDataProxyUI]): ICapsuleDataUI
-
-  def --(t: CapsuleType): ICapsuleDataUI
 }

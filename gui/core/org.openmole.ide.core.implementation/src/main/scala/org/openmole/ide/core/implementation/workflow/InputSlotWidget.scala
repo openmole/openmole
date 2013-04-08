@@ -21,19 +21,24 @@ import java.awt.Point
 import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.misc.tools.image.Images._
 
-class InputSlotWidget(scene: IMoleScene,
-                      val capsule: ICapsuleUI,
-                      val index: Int,
-                      var startingSlot: Boolean = true) extends SlotWidget(scene.graphScene) with IInputSlotWidget {
+object InputSlotWidget {
 
-  setStartingSlot(startingSlot)
-  setPreferredLocation(new Point(2, 24 + index * 20))
+  def position(index: Int) = 44 + index * 20
+
+}
+
+class InputSlotWidget(
+    scene: IMoleScene,
+    val capsule: ICapsuleUI,
+    val index: Int) extends SlotWidget(scene.graphScene) with IInputSlotWidget {
+
+  refresh
+  setPreferredLocation(new Point(2, InputSlotWidget.position(index)))
 
   def widget = this
 
-  def setStartingSlot(b: Boolean) = {
-    startingSlot = b
-    b match {
+  def refresh = {
+    capsule.starting match {
       case true ⇒
         scene match {
           case x: ExecutionMoleScene ⇒ setImage(START_EXE_SLOT)

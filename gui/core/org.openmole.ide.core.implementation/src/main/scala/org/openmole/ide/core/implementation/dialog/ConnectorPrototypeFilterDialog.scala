@@ -22,7 +22,9 @@ import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 import org.openmole.ide.core.implementation.data.CheckData
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ITaskDataProxyUI }
+import org.openmole.ide.core.model.workflow.ICapsuleUI
+import org.openmole.ide.core.model.workflow.IConnectorUI
 import org.openmole.ide.core.model.workflow.IConnectorUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiCombo
@@ -31,8 +33,10 @@ import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import swing.{ Label, MyComboBox, ScrollPane, TextField }
 import org.openmole.ide.core.implementation.sampling.SamplingConnectorWidget
-import org.openmole.ide.core.model.sampling.{ ISamplingOrDomainProxyUI, IFactorProxyUI }
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.model.sampling.{ ISamplingOrDomainProxyUI, IDomainProxyUI, IFactorProxyUI }
+import org.openmole.ide.core.implementation.dataproxy.Proxies
+import org.openmole.ide.misc.tools.util.Types
+import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.misc.tools.obj.ClassUtils._
 
 object ConnectorPrototypeFilterDialog extends PrototypeDialog {
@@ -90,7 +94,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
 
     def availablePrototypes =
       connectorWidget.factorProxyUI match {
-        case Some(f: IFactorProxyUI) ⇒ Proxys.prototypes.filter {
+        case Some(f: IFactorProxyUI) ⇒ Proxies.instance.prototypes.filter {
           p ⇒ assignable(f.dataUI.domain.dataUI.domainType.runtimeClass, p.dataUI.protoType.runtimeClass)
         }.toList
         case _ ⇒ List()

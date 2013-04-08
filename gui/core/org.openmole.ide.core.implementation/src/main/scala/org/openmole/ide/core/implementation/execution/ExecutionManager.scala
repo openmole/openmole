@@ -19,18 +19,18 @@ import org.openmole.core.model.mole._
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.control.IExecutionManager
-import org.openmole.ide.core.model.workflow.IMoleSceneManager
 import scala.collection.mutable.HashMap
 import scala.swing._
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.core.model.job.State
 import org.openmole.core.model.data._
 import org.openmole.core.model.execution.ExecutionState
-import org.openmole.ide.core.model.workflow.ICapsuleUI
+import org.openmole.ide.core.model.workflow.{ IMoleUI, ICapsuleUI }
 import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Failure, Success }
 import org.openmole.misc.exception.ExceptionUtils
+import scala.concurrent.stm._
 
 object ExecutionManager {
   implicit def executionStatesDecorator(s: scala.collection.mutable.Map[ExecutionState.ExecutionState, AtomicInteger]) = new {
@@ -38,7 +38,7 @@ object ExecutionManager {
   }
 }
 
-class ExecutionManager(manager: IMoleSceneManager,
+class ExecutionManager(manager: IMoleUI,
                        executionContainer: ExecutionMoleSceneContainer,
                        val mole: IMole,
                        val capsuleMapping: Map[ICapsuleUI, ICapsule],
@@ -48,7 +48,7 @@ class ExecutionManager(manager: IMoleSceneManager,
   executionManager ⇒
   val logTextArea = new TextArea
   logTextArea.columns = 20
-  logTextArea.rows = 10
+  //logTextArea.rows = 20
   logTextArea.editable = false
 
   val executionJobExceptionTextArea = new StatusBar
@@ -84,16 +84,16 @@ class ExecutionManager(manager: IMoleSceneManager,
   val timer = new Timer(5000, timerAction)
   var environments = new HashMap[Environment, (String, HashMap[ExecutionState.ExecutionState, AtomicInteger])]
 
-  var downloads = (0, 0)
-  var uploads = (0, 0)
+  val downloads = Ref((0, 0))
+  var uploads = Ref((0, 0))
 
   val tabbedPane = new TabbedPane {
     opaque = true
     background = new Color(77, 77, 77)
   }
-  tabbedPane.pages += new TabbedPane.Page("Progress", new ScrollPane(logTextArea))
-  tabbedPane.pages += new TabbedPane.Page("Errors", new ScrollPane(executionJobExceptionTextArea))
-  tabbedPane.pages += new TabbedPane.Page("Environments errors", new ScrollPane(moleExecutionExceptionTextArea))
+  tabbedPane.pages += new TabbedPane.Page("Progress", new ScrollPane(logTextArea) { verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded })
+  tabbedPane.pages += new TabbedPane.Page("Errors", new ScrollPane(executionJobExceptionTextArea) { verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded })
+  tabbedPane.pages += new TabbedPane.Page("Environments errors", new ScrollPane(moleExecutionExceptionTextArea) { verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded })
 
   contents += tabbedPane
 
@@ -200,8 +200,9 @@ class ExecutionManager(manager: IMoleSceneManager,
     environments.values.foreach(env ⇒ env._2.keys.foreach(k ⇒ env._2(k) = new AtomicInteger))
   }
 
-  def displayFileTransfer =
-    executionContainer.updateFileTransferLabels(downloads._1 + " / " + downloads._2,
-      uploads._1 + " / " + uploads._2)
+  def displayFileTransfer = atomic { implicit ctx ⇒
+    executionContainer.updateFileTransferLabels(downloads()._1 + " / " + downloads()._2,
+      uploads()._1 + " / " + uploads()._2)
+  }
 
 }

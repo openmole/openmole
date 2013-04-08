@@ -20,31 +20,63 @@ package org.openmole.ide.core.implementation.workflow
 import java.awt.Point
 import org.netbeans.api.visual.anchor.PointShape
 import org.netbeans.api.visual.widget.Widget
-import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.workflow.IDataChannelUI
-import org.openmole.ide.core.model.workflow.IInputSlotWidget
+import org.openmole.ide.core.model.workflow._
 import org.netbeans.api.visual.action.ActionFactory
-import org.openmole.ide.core.implementation.data.CheckData
+import org.openmole.ide.core.implementation.data.{ CheckData }
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.implementation.provider.ConnectorMenuProvider
+import org.openmole.ide.core.implementation.provider.{ MoleSceneMenuProvider, ConnectorMenuProvider }
 import org.openmole.ide.core.model.commons.Constants._
-import org.openmole.ide.core.model.workflow.ITransitionUI
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import org.netbeans.api.visual.action.WidgetAction.State._
 import org.openmole.ide.core.implementation.builder.SceneFactory
+import scala.Some
+import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.ProxyFreezer
 
-class BuildMoleScene(n: String = "") extends MoleScene(n) { buildMoleScene ⇒
+object BuildMoleScene {
+  def apply(name: String) = new BuildMoleScene(new MoleUI(name))
+}
+
+class BuildMoleScene(val manager: IMoleUI) extends MoleScene with IBuildMoleScene { buildMoleScene ⇒
+
+  getActions.addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)))
+
   override val isBuildScene = true
 
+  override def refresh {
+    manager.invalidateCache
+    CheckData.checkMole(this)
+    manager.capsules.foreach { case (_, c) ⇒ c.update }
+    super.refresh
+  }
+
   def copyScene = {
+    def copy(caspuleUI: ICapsuleUI, sc: IMoleScene) = {
+      val c = CapsuleUI(sc)
+      val slotMapping = caspuleUI.islots.map(i ⇒ i -> c.addInputSlot).toMap
+      (c, slotMapping)
+    }
+
+    def deepcopy(caspuleUI: ICapsuleUI, sc: IMoleScene) = {
+      val ret = copy(caspuleUI, sc)
+      import caspuleUI.dataUI
+      dataUI.task match {
+        case Some(x: ITaskDataProxyUI) ⇒
+          ret._1.encapsule(ProxyFreezer.freeze(x))
+          if (dataUI.environment.isDefined) ret._1.environment_=(ProxyFreezer.freeze(dataUI.environment))
+        case _ ⇒
+      }
+      ret
+    }
+
     var capsuleMapping = new HashMap[ICapsuleUI, ICapsuleUI]
     var islots = new HashMap[IInputSlotWidget, IInputSlotWidget]
-    val ms = new ExecutionMoleScene(manager.name + "_" + ScenesManager.countExec.incrementAndGet)
+    val ms = ExecutionMoleScene(manager.name + "_" + ScenesManager.countExec.incrementAndGet)
     manager.capsules.foreach(n ⇒ {
-      val (caps, islotMapping) = n._2.deepcopy(ms)
-      if (manager.startingCapsule == Some(n._2)) ms.manager.setStartingCapsule(caps)
-      SceneFactory.capsuleUI(caps, ms, new Point(n._2.x.toInt / 2, n._2.y.toInt / 2))
+      val (caps, islotMapping) = deepcopy(n._2, ms)
+      if (manager.startingCapsule == Some(n._2)) ms.manager.startingCapsule = Some(caps)
+      ms.add(caps, new Point(n._2.x.toInt / 2, n._2.y.toInt / 2))
       capsuleMapping += n._2 -> caps
       islots ++= islotMapping
       caps.setAsValid
@@ -52,15 +84,19 @@ class BuildMoleScene(n: String = "") extends MoleScene(n) { buildMoleScene ⇒
     manager.connectors.foreach { c ⇒
       c match {
         case t: ITransitionUI ⇒
-          SceneFactory.transition(ms, capsuleMapping(t.source),
+          val transition = new TransitionUI(
+            capsuleMapping(t.source),
             islots(t.target),
             t.transitionType,
             t.condition,
             t.filteredPrototypes)
+          ms.add(transition)
         case dc: IDataChannelUI ⇒
-          SceneFactory.dataChannel(ms, capsuleMapping(dc.source),
+          val dataC = new DataChannelUI(
+            capsuleMapping(dc.source),
             islots(dc.target),
             dc.filteredPrototypes)
+          ms.add(dataC)
         case _ ⇒
       }
     }

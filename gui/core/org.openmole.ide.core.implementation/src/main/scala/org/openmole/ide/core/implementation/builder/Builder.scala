@@ -20,7 +20,7 @@ import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.core.model.sampling.Sampling
 import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.implementation.registry._
-import org.openmole.ide.core.model.workflow.{ IMoleSceneManager, IMoleScene, ICapsuleUI }
+import org.openmole.ide.core.model.workflow.{ IBuildMoleScene, IMoleUI, IMoleScene, ICapsuleUI }
 import org.openmole.core.implementation.puzzle.Puzzle
 import java.awt.Point
 import org.openmole.core.model.transition._
@@ -30,7 +30,7 @@ import org.openmole.ide.core.implementation.sampling.{ DomainProxyUI, SamplingPr
 import org.openmole.core.model.domain.Domain
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.model.builder.IPuzzleUIMap
-import org.openmole.ide.core.implementation.data.CheckData
+import org.openmole.ide.core.implementation.data.{ CapsuleDataUI, CheckData }
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.core.model.transition.{ IEndExplorationTransition, IExplorationTransition, IAggregationTransition }
 import org.openmole.ide.core.model.factory.IBuilderFactoryUI
@@ -39,10 +39,12 @@ import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 import scala.swing.ScrollPane
-import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.exception.{ InternalProcessingError, UserBadDataError }
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import scala.Some
 import org.openmole.ide.core.implementation.registry.DefaultKey
+import org.openmole.ide.core.implementation.workflow.{ TransitionUI, CapsuleUI }
+import org.openmole.core.implementation.transition.Condition
 
 object Builder {
 
@@ -51,7 +53,7 @@ object Builder {
   def samplingCompositionUI(g: Boolean) = new SamplingCompositionDataProxyUI(generated = g)
 
   def puzzles(listsPuzzleCompliant: List[List[ICapsuleUI]],
-              manager: IMoleSceneManager,
+              manager: IMoleUI,
               uiMap: IPuzzleUIMap = new PuzzleUIMap): (List[Puzzle], IPuzzleUIMap) = {
 
     def puzzles0(toBeComputed: List[List[ICapsuleUI]], puzzleList: List[Puzzle], uiMap0: IPuzzleUIMap): (List[Puzzle], IPuzzleUIMap) = {
@@ -73,7 +75,7 @@ object Builder {
              lasts: Iterable[ICapsuleUI],
              uiMap: IPuzzleUIMap = new PuzzleUIMap) = {
     val capsuleMap = capsulesUI.map {
-      c ⇒ c -> c.dataUI.coreObject(c.scene.manager.dataUI)
+      c ⇒ c -> c.dataUI.coreObject(c.scene.manager)
     }.toMap
     val prototypeMap = MoleFactory.prototypeMapping
     val (transitions, dataChannels, islotMap) = MoleFactory.buildConnectors(capsuleMap, prototypeMap)
@@ -102,7 +104,7 @@ object Builder {
   }
 
   def fromPuzzle(p: Puzzle,
-                 scene: IMoleScene,
+                 scene: IBuildMoleScene,
                  firstPoint: Point,
                  lastPoint: Point,
                  uiMap: IPuzzleUIMap) = {
@@ -110,19 +112,21 @@ object Builder {
       s ⇒
         val proxy = toTaskUI(s._1.capsule.task, uiMap)
         val capsules = scene.manager.capsule(proxy)
-        val cUI = {
+        val slotUI = {
           if (capsules.isEmpty) {
-            Proxys += proxy
-            SceneFactory.capsuleUI(scene, new Point(0, 0), Some(proxy)).addInputSlot(false)
+            Proxies.instance += proxy
+            val capsule = CapsuleUI(scene, new CapsuleDataUI(Some(proxy)))
+            scene.add(capsule, new Point(0, 0))
+            capsule.addInputSlot
           } else capsules.head.islots.head
         }
-        if (s._2 == 0) scene.manager.setStartingCapsule(cUI.capsule)
-        s._1.capsule -> cUI
+        if (s._2 == 0) scene.manager.startingCapsule = Some(slotUI.capsule)
+        s._1.capsule -> slotUI
     }.toMap
 
     p.transitions.foreach {
       t ⇒
-        SceneFactory.transition(scene,
+        val transition = new TransitionUI(
           capsuleMap(t.start).capsule,
           capsuleMap(t.end.capsule),
           t match {
@@ -130,15 +134,16 @@ object Builder {
             case agg: IAggregationTransition ⇒ TransitionType.AGGREGATION_TRANSITION
             case end: IEndExplorationTransition ⇒ TransitionType.END_TRANSITION
             case _ ⇒ TransitionType.BASIC_TRANSITION
-          }, //TransitionType.Value,
-          //  Some(t.condition.),
-          li = t.filter match {
-            case b: Block[String] ⇒ b.filtered.toList.map {
-              p ⇒
-                uiMap.prototype(p)
-            }
-            case _ ⇒ List()
+          },
+          Some(t.asInstanceOf[Condition].code),
+          t.filter match {
+            case b: Block[String] ⇒
+              b.filtered.toList.map {
+                p ⇒ uiMap.prototype(p)
+              }
+            case _ ⇒ throw new InternalProcessingError("Filter not supported yet")
           })
+        scene.add(transition)
     }
     CheckData.fullCheck(scene)
     scene.refresh
@@ -206,7 +211,7 @@ object Builder {
     buildSamplingUI0(connectedSamplings, bcs)
   }
 
-  def apply(scene: IMoleScene,
+  def apply(scene: IBuildMoleScene,
             b: IBuilderFactoryUI,
             sel: List[ICapsuleUI] = List()) = {
     try {

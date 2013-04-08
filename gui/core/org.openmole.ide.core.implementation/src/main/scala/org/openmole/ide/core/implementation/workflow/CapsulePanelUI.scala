@@ -24,7 +24,7 @@ import org.openmole.ide.core.model.data.{ IEnvironmentDataUI, ICapsuleDataUI }
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import org.openmole.ide.misc.widget.multirow.{ MultiComboLinkLabel, MultiCombo }
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.misc.widget.multirow.MultiCombo.{ ComboData, ComboPanel }
 import org.openmole.ide.core.implementation.data.{ EmptyDataUIs, CapsuleDataUI }
 import org.openmole.ide.core.model.dataproxy.{ IDataProxyUI, IHookDataProxyUI, ISourceDataProxyUI, IEnvironmentDataProxyUI }
@@ -34,8 +34,8 @@ import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel.{ ComboLinkLabe
 
 class CapsulePanelUI(dataUI: ICapsuleDataUI, index: Int = 0) extends PluginPanel("") with ICapsulePanelUI {
 
-  val sources = Proxys.sources.toList
-  val hooks = Proxys.hooks.toList
+  def sources = Proxies.instance.sources.toList
+  def hooks = Proxies.instance.hooks.toList
 
   val sourcePanel = new MultiCombo("",
     sources,
@@ -53,7 +53,7 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI, index: Int = 0) extends PluginPanel
     CLOSE_IF_EMPTY,
     ADD)
 
-  val environmentProxys = Proxys.environments :+ EmptyDataUIs.emptyEnvironmentProxy
+  val environmentProxys = Proxies.instance.environments :+ EmptyDataUIs.emptyEnvironmentProxy
   val environmentCombo = new MyComboBox(environmentProxys)
 
   val groupingCheckBox = new CheckBox("Grouping") { foreground = Color.WHITE }
@@ -85,10 +85,6 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI, index: Int = 0) extends PluginPanel
   }
 
   val components = List(("Source", sourcePanel.panel), ("Hook", hookPanel.panel), ("Execution", executionPanel))
-
-  /* tabbedPane.pages += new TabbedPane.Page("Source", sourcePanel.panel)
-  tabbedPane.pages += new TabbedPane.Page("Hook", hookPanel.panel)
-  tabbedPane.pages += new TabbedPane.Page("Execution", )   */
 
   listenTo(`groupingCheckBox`)
   reactions += {

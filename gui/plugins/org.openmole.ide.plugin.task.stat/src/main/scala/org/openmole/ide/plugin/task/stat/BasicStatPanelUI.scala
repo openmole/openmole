@@ -19,7 +19,7 @@ package org.openmole.ide.plugin.task.stat
 
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.ITaskPanelUI
@@ -38,8 +38,8 @@ abstract class BasicStatPanelUI(statType: String,
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val implicitPrototypesIn = dataUI.implicitPrototypes._1
-  val arrayDoublePrototypes = Proxys.classPrototypes(classOf[Array[Double]]) ::: Proxys.classPrototypes(classOf[Array[Double]], implicitPrototypesIn) distinct
-  val doublePrototypes = Proxys.classPrototypes(classOf[Double]) ::: Proxys.classPrototypes(classOf[Double], implicitPrototypesIn) distinct
+  val arrayDoublePrototypes = Proxies.instance.classPrototypes(classOf[Array[Double]]) ::: Proxies.instance.classPrototypes(classOf[Array[Double]], implicitPrototypesIn) distinct
+  val doublePrototypes = Proxies.instance.classPrototypes(classOf[Double]) ::: Proxies.instance.classPrototypes(classOf[Double], implicitPrototypesIn) distinct
 
   if (arrayDoublePrototypes.isEmpty)
     StatusBar().inform("At least 1 Array of Prototype (Double) has to be created before using a" + statType + "  Tasks")

@@ -20,6 +20,10 @@ package org.openmole.plugin.environment.glite
 import java.io.File
 import fr.iscpif.gridscale.authentication._
 
+object ProxyFile {
+  def apply(proxy: File) = new ProxyFile(proxy)
+}
+
 class ProxyFile(val proxy: File) extends GliteAuthentication { a ⇒
 
   override def apply(

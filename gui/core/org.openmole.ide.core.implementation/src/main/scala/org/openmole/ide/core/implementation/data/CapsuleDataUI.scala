@@ -30,41 +30,25 @@ import org.openmole.core.model.task.ITask
 import org.openmole.core.implementation.task.EmptyTask
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import util.{ Success, Failure }
+import org.openmole.ide.core.model.workflow.IMoleUI
 
-case class CapsuleDataUI(val task: Option[ITaskDataProxyUI] = None,
-                         val environment: Option[IEnvironmentDataProxyUI] = None,
-                         val grouping: Option[IGroupingDataUI] = None,
-                         val sources: List[ISourceDataProxyUI] = List(),
-                         val hooks: List[IHookDataProxyUI] = List(),
-                         val capsuleType: CapsuleType = new BasicCapsuleType) extends ICapsuleDataUI {
+class CapsuleDataUI(
+    val task: Option[ITaskDataProxyUI] = None,
+    val environment: Option[IEnvironmentDataProxyUI] = None,
+    val grouping: Option[IGroupingDataUI] = None,
+    val sources: List[ISourceDataProxyUI] = List(),
+    val hooks: List[IHookDataProxyUI] = List(),
+    val capsuleType: CapsuleType = new BasicCapsuleType) extends ICapsuleDataUI {
   override def toString = task match {
     case Some(x: ITaskDataProxyUI) ⇒ x.dataUI.name
     case _ ⇒ ""
   }
 
-  def transitionType = task match {
-    case Some(y: ITaskDataProxyUI) ⇒ y.dataUI match {
-      case x: IExplorationTaskDataUI ⇒ EXPLORATION_TRANSITION
-      case _ ⇒ BASIC_TRANSITION
-    }
-    case _ ⇒ BASIC_TRANSITION
-  }
-
-  def ::(t: Option[ITaskDataProxyUI]) = copy(task = t)
-
-  def on(e: Option[IEnvironmentDataProxyUI]) = copy(environment = e)
-
-  def -:(s: List[ISourceDataProxyUI]) = copy(sources = s)
-
-  def :-(h: List[IHookDataProxyUI]) = copy(hooks = h)
-
-  def --(t: CapsuleType) = copy(capsuleType = t)
-
   def coreClass = classOf[Capsule]
 
   def buildPanelUI(index: Int) = new CapsulePanelUI(this, index)
 
-  def coreObject(moleDataUI: IMoleDataUI) = task match {
+  def coreObject(moleDataUI: IMoleUI) = task match {
     case Some(t: ITaskDataProxyUI) ⇒ MoleFactory.taskCoreObject(t.dataUI, moleDataUI.plugins.map { p ⇒ new File(p) }.toSet) match {
       case Success(x: ITask) ⇒ capsuleType match {
         case y: MasterCapsuleType ⇒ new MasterCapsule(x, y.persistList.map { _.dataUI.name }.toSet)
@@ -74,7 +58,16 @@ case class CapsuleDataUI(val task: Option[ITaskDataProxyUI] = None,
       case Failure(x: Throwable) ⇒ new Capsule(EmptyTask(t.dataUI.name))
     }
     case _ ⇒
-      StatusBar().inform("A capsule without Task can not be run")
+      StatusBar().inform("A capsule without Task can not run")
       new Capsule(EmptyTask("None"))
   }
+
+  def copy(
+    task: Option[ITaskDataProxyUI] = task,
+    environment: Option[IEnvironmentDataProxyUI] = environment,
+    grouping: Option[IGroupingDataUI] = grouping,
+    sources: List[ISourceDataProxyUI] = sources,
+    hooks: List[IHookDataProxyUI] = hooks,
+    capsuleType: CapsuleType = capsuleType): ICapsuleDataUI =
+    new CapsuleDataUI(task, environment, grouping, sources, hooks, capsuleType)
 }

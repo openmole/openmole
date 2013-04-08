@@ -17,8 +17,7 @@
 
 package org.openmole.ide.core.implementation.execution
 
-import org.openmole.ide.core.implementation.workflow.BuildMoleSceneContainer
-import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
+import org.openmole.ide.core.implementation.workflow._
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Point
@@ -26,15 +25,10 @@ import java.util.concurrent.atomic.AtomicInteger
 import org.openmole.ide.core.model.data.IExplorationTaskDataUI
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.implementation.workflow.BuildMoleScene
-import org.openmole.ide.core.model.workflow.ITransitionUI
+import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.core.model.dataproxy.{ IDataProxyUI, ITaskDataProxyUI }
-import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.workflow.IDataChannelUI
-import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.MigPanel
-import org.openmole.ide.core.model.panel._
+import org.openmole.ide.misc.tools.util._
 import org.openmole.ide.misc.tools.image.Images._
 import scala.swing.Action
 import scala.swing.Button
@@ -45,6 +39,13 @@ import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.openmole.ide.core.implementation.builder.SceneFactory
 import util.{ Failure, Success }
 import concurrent.stm._
+import util.Failure
+import scala.Some
+import util.Success
+import util.Failure
+import scala.Some
+import util.Success
+import swing.event.ButtonClicked
 
 object ScenesManager {
 
@@ -68,6 +69,8 @@ object ScenesManager {
   }
 
   PasswordListner.apply
+
+  def isInSelection(capsule: ICapsuleUI) = selection.contains(capsule)
 
   def buildMoleSceneContainers = tabPane.pages.flatMap(_.content match {
     case x: BuildMoleSceneContainer ⇒ List(x)
@@ -123,7 +126,7 @@ object ScenesManager {
     invalidateSelection
   }
 
-  def pasteCapsules(ms: IMoleScene,
+  def pasteCapsules(ms: IBuildMoleScene,
                     point: Point) = {
     val copied = selection.map { z ⇒
       z -> z.copy(ms)
@@ -135,8 +138,8 @@ object ScenesManager {
     copied.foreach {
       case (old, neo) ⇒
         val p = new Point((old.widget.getPreferredLocation.x + dx).toInt, (old.widget.getPreferredLocation.y + dy).toInt)
-        SceneFactory.capsuleUI(neo._1, ms, p)
-        neo._1 on old.dataUI.environment
+        ms.add(neo._1, p)
+        neo._1.environment_=(old.dataUI.environment)
         old.dataUI.task match {
           case Some(t: ITaskDataProxyUI) ⇒ neo._1.encapsule(t)
           case _ ⇒
@@ -153,17 +156,19 @@ object ScenesManager {
           if (selection.contains(con.source) && islots.contains(con.target)) {
             con match {
               case (t: ITransitionUI) ⇒
-                SceneFactory.transition(ms,
+                val transition = new TransitionUI(
                   copied(t.source)._1,
                   copied(t.target.capsule)._1.islots.find { s ⇒ t.target.index == s.index }.get,
                   t.transitionType,
                   t.condition,
                   t.filteredPrototypes)
+                ms.add(transition)
               case (t: IDataChannelUI) ⇒
-                SceneFactory.dataChannel(ms,
+                val dc = new DataChannelUI(
                   copied(t.source)._1,
                   copied(t.target.capsule)._1.islots.find { s ⇒ t.target.index == s.index }.get,
                   t.filteredPrototypes)
+                ms.add(dc)
             }
           }
         }
@@ -202,17 +207,17 @@ object ScenesManager {
     }
   }.toList
 
-  def addBuildSceneContainer: BuildMoleSceneContainer = addBuildSceneContainer(new BuildMoleScene(""))
+  def addBuildSceneContainer: BuildMoleSceneContainer = addBuildSceneContainer(BuildMoleScene(""))
 
-  def addBuildSceneContainer(name: String): BuildMoleSceneContainer = addBuildSceneContainer(new BuildMoleScene(name))
+  def addBuildSceneContainer(name: String): BuildMoleSceneContainer = addBuildSceneContainer(BuildMoleScene(name))
 
   def addBuildSceneContainer(ms: BuildMoleScene): BuildMoleSceneContainer = {
     val container = new BuildMoleSceneContainer(ms)
     val page = new TabbedPane.Page(ms.manager.name, container)
     addTab(page, ms.manager.name, new Action("") {
-      override def apply = {
-        container.stopAndCloseExecutions
+      def apply = {
         tabPane.pages.remove(page.index)
+        // container.stopAndCloseExecutions
       }
     })
     container
@@ -227,10 +232,12 @@ object ScenesManager {
           val page = new TabbedPane.Page(clone.manager.name, new MigPanel(""))
           val container = new ExecutionMoleSceneContainer(clone, page, bmsc)
           page.content = container
-          bmsc.executionMoleSceneContainers += container
 
           addTab(page, clone.manager.name, new Action("") {
-            def apply = tabPane.pages.remove(page.index)
+            def apply = {
+              container.stop
+              tabPane.pages.remove(page.index)
+            }
           })
 
           tabPane.selection.index = page.index
@@ -241,12 +248,11 @@ object ScenesManager {
 
   def addTab(page: TabbedPane.Page, title: String, action: Action) = {
     tabPane.pages += page
-    tabPane.peer.setTabComponentAt(tabPane.peer.getTabCount - 1, new CloseableTab(title, page, action).peer)
+    tabPane.peer.setTabComponentAt(tabPane.peer.getTabCount - 1, new CloseableTab(title, action).peer)
     tabPane.selection.page = page
   }
 
   class CloseableTab(title: String,
-                     page: TabbedPane.Page,
                      action: Action) extends MigPanel("") {
     background = new Color(0, 0, 0, 0)
     contents += new Label(title)

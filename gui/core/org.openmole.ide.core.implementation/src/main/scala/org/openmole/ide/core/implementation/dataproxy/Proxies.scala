@@ -27,7 +27,11 @@ import org.openmole.ide.core.implementation.builder.Builder
 import concurrent.stm._
 import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
 
-object Proxys {
+object Proxies {
+  var instance = new Proxies
+}
+
+class Proxies {
 
   private val _tasks = TMap[ID.Type, ITaskDataProxyUI]()
   private val _prototypes = TMap[ID.Type, IPrototypeDataProxyUI]()
@@ -35,6 +39,10 @@ object Proxys {
   private val _environments = TMap[ID.Type, IEnvironmentDataProxyUI]()
   private val _hooks = TMap[ID.Type, IHookDataProxyUI]()
   private val _sources = TMap[ID.Type, ISourceDataProxyUI]()
+
+  def dataUIs = atomic { implicit ctx ⇒
+    _tasks.values ++ _prototypes.values ++ _samplings.values ++ _environments.values ++ _hooks.values ++ _sources.values
+  }
 
   def tasks = _tasks.single.values.toList
   def prototypes = _prototypes.single.values.toList

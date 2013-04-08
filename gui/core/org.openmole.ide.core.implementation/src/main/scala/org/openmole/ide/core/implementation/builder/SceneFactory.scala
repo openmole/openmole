@@ -31,46 +31,16 @@ import org.openmole.core.model.task.ITask
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
+import org.openmole.ide.core.model.data.IExplorationTaskDataUI
+import org.openmole.ide.core.model.commons.TransitionType._
+import org.openmole.ide.core.implementation.data.CapsuleDataUI
+import scala.Some
 
 object SceneFactory {
 
   def as[T: Manifest](x: Any): T =
     if (manifest.runtimeClass.isInstance(x)) x.asInstanceOf[T]
     else throw new UserBadDataError("The Object " + x + " can not be loaded in the GUI")
-
-  def capsuleUI(caps: ICapsuleUI, scene: IMoleScene, locationPoint: Point): ICapsuleUI = {
-    scene.initCapsuleAdd(caps)
-    scene.manager.registerCapsuleUI(caps)
-    scene.graphScene.addNode(caps.id).setPreferredLocation(locationPoint)
-    CheckData.checkMole(scene)
-    caps
-  }
-
-  def capsuleUI(scene: IMoleScene,
-                locationPoint: Point,
-                taskProxy: Option[ITaskDataProxyUI] = None,
-                cType: CapsuleType = new BasicCapsuleType): ICapsuleUI =
-    capsuleUI(new CapsuleUI(scene, new CapsuleDataUI(task = taskProxy, capsuleType = cType)), scene, locationPoint)
-
-  def transition(scene: IMoleScene,
-                 s: ICapsuleUI,
-                 t: IInputSlotWidget,
-                 transitionType: TransitionType.Value,
-                 cond: Option[String] = None,
-                 li: List[IPrototypeDataProxyUI] = List.empty) = {
-    val trans = new TransitionUI(s, t, transitionType, cond, li)
-    scene.manager.registerConnector(trans)
-    scene.createConnectEdge(s.id, t.capsule.id, trans.id, t.index)
-  }
-
-  def dataChannel(scene: IMoleScene,
-                  s: ICapsuleUI,
-                  t: IInputSlotWidget,
-                  li: List[IPrototypeDataProxyUI] = List.empty) = {
-    val dc = new DataChannelUI(s, t, li)
-    scene.manager.registerConnector(dc)
-    scene.createConnectEdge(s.id, t.capsule.id, dc.id)
-  }
 
   def prototype(p: Prototype[_]) = KeyPrototypeGenerator.prototype(p)
 }

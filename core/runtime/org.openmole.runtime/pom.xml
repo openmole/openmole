@@ -7,7 +7,7 @@
   <parent>
     <artifactId>runtime</artifactId>
     <groupId>org.openmole.core</groupId>
-    <version>0.8.0-SNAPSHOT</version>
+    <version>0.8.0-RC3</version>
   </parent>
   <artifactId>org.openmole.runtime</artifactId>
   <!-- ************************************************************* -->
@@ -114,6 +114,8 @@
             <configuration>
               <!-- Exclude transitive dependencies osgi that are explicitely copyed by copy goal -->
               <excludeScope>provided</excludeScope>
+              <excludeArtifactIds>junit</excludeArtifactIds>
+              <excludeGroupIds>org.scalatest</excludeGroupIds>
             </configuration>
           </execution>
         </executions>

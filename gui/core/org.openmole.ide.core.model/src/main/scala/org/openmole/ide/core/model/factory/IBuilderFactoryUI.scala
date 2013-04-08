@@ -16,12 +16,12 @@
  */
 package org.openmole.ide.core.model.factory
 
-import org.openmole.ide.core.model.data.ISamplingDataUI
+import org.openmole.ide.core.model.data.{ ISamplingDataUI }
 import org.openmole.ide.core.model.panel.IBuilderPanelUI
 import org.openmole.core.implementation.puzzle.Puzzle
-import org.openmole.ide.core.model.workflow.IMoleSceneManager
+import org.openmole.ide.core.model.workflow.IMoleUI
 
 trait IBuilderFactoryUI extends IFactoryUI {
-  def buildPanelUI(puzzle: List[Puzzle], puzzleSelection: Option[Puzzle], manager: IMoleSceneManager): IBuilderPanelUI
+  def buildPanelUI(puzzle: List[Puzzle], puzzleSelection: Option[Puzzle], manager: IMoleUI): IBuilderPanelUI
   def name: String
 }

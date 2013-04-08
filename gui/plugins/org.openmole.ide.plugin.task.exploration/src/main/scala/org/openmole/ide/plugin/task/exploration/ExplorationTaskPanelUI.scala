@@ -77,7 +77,7 @@ class ExplorationTaskPanelUI(pud: ExplorationTaskDataUI) extends PluginPanel("wr
   override def saveContent(name: String) =
     new ExplorationTaskDataUI(name, if (samplingComboBox.selection.item == emptyProxy) None else Some(samplingComboBox.selection.item))
 
-  def comboContent: List[ISamplingCompositionDataProxyUI] = emptyProxy :: Proxys.samplings.toList
+  def comboContent: List[ISamplingCompositionDataProxyUI] = emptyProxy :: Proxies.instance.samplings.toList
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     add(samplingComboBox,

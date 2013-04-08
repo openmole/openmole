@@ -22,5 +22,5 @@ import org.netbeans.api.visual.anchor.Anchor.Entry
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 
 class InputSlotAnchor(relatedWidget: ICapsuleUI, index: Int) extends SlotAnchor(relatedWidget) {
-  override def compute(entry: Entry): Result = new Result(relatedWidget.widget.convertLocalToScene(new Point(9, index * 20 + 32)), Anchor.Direction.LEFT)
+  override def compute(entry: Entry): Result = new Result(relatedWidget.widget.convertLocalToScene(new Point(9, InputSlotWidget.position(index) + 8)), Anchor.Direction.LEFT)
 }

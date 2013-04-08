@@ -18,7 +18,7 @@ package org.openmole.ide.plugin.sampling.combine
 
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import org.openmole.ide.misc.widget.{ Help, PluginPanel }
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import swing.MyComboBox
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import java.util.{ Locale, ResourceBundle }
@@ -30,8 +30,8 @@ class ZipWithPrototypeSamplingPanelUI(dataUI: ZipWithPrototypeSamplingDataUI) ex
 
   val availablePrototypes: List[IPrototypeDataProxyUI] = {
     dataUI match {
-      case i: ZipWithIndexSamplingDataUI ⇒ Proxys.classPrototypes(classOf[Int])
-      case n: ZipWithNameSamplingDataUI ⇒ Proxys.classPrototypes(classOf[String])
+      case i: ZipWithIndexSamplingDataUI ⇒ Proxies.instance.classPrototypes(classOf[Int])
+      case n: ZipWithNameSamplingDataUI ⇒ Proxies.instance.classPrototypes(classOf[String])
       case _ ⇒ List()
     }
   }

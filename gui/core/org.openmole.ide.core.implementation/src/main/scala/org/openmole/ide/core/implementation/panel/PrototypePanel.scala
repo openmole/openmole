@@ -20,7 +20,7 @@ package org.openmole.ide.core.implementation.panel
 import java.awt.BorderLayout
 import javax.swing.ImageIcon
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.implementation.dataproxy.{ UpdatedProxyEvent, Proxys }
+import org.openmole.ide.core.implementation.dataproxy.{ UpdatedProxyEvent, Proxies }
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.workflow.ICapsuleUI
@@ -40,7 +40,7 @@ object PrototypePanel {
                       index: Int): Boolean = {
     def erase = {
       scene.closePropertyPanel(index)
-      Proxys -= proxy
+      Proxies.instance -= proxy
       // Proxys.prototypes.filter { p ⇒ p.dataUI.name == proxy.dataUI.name && p.generated }.foreach { p ⇒ Proxys -= p }
       ConceptMenu.removeItem(proxy)
       true
@@ -60,11 +60,11 @@ object PrototypePanel {
     // case Nil ⇒ erase
     // case _ ⇒
     if (DialogFactory.deleteProxyConfirmation(proxy)) {
-      Proxys.hooks.foreach { h ⇒
+      Proxies.instance.hooks.foreach { h ⇒
         h.dataUI.removePrototypeOccurencies(proxy)
         h.dataUI = h.dataUI.cloneWithoutPrototype(proxy)
       }
-      Proxys.sources.foreach { s ⇒
+      Proxies.instance.sources.foreach { s ⇒
         s.dataUI.removePrototypeOccurencies(proxy)
         s.dataUI = s.dataUI.cloneWithoutPrototype(proxy)
       }
@@ -88,7 +88,7 @@ class PrototypePanel[T](proxy: IPrototypeDataProxyUI,
                         val index: Int) extends BasePanel(Some(proxy), scene) {
   iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.fatImagePath)))
   val panelUI = proxy.dataUI.buildPanelUI
-  def created = Proxys.contains(proxy)
+  def created = Proxies.instance.contains(proxy)
 
   peer.add(mainPanel.peer, BorderLayout.NORTH)
   peer.add(new PluginPanel("wrap") {
@@ -106,7 +106,7 @@ class PrototypePanel[T](proxy: IPrototypeDataProxyUI,
   }
 
   def create = {
-    Proxys += proxy
+    Proxies.instance += proxy
     ConceptMenu.prototypeMenu.popup.contents += ConceptMenu.addItem(nameTextField.text,
       proxy)
   }

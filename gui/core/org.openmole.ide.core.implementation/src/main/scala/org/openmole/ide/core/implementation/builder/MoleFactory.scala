@@ -31,7 +31,7 @@ import org.openmole.core.model.mole._
 import org.openmole.core.model.task._
 import org.openmole.core.model.transition._
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.core.model.workflow._
 import scala.collection.mutable.HashMap
 import concurrent.stm._
@@ -43,7 +43,7 @@ import scala.Some
 object MoleFactory {
 
   def buildMoleExecution(mole: IMole,
-                         manager: IMoleSceneManager,
+                         manager: IMoleUI,
                          capsuleMapping: Map[ICapsuleUI, ICapsule],
                          prototypeMapping: Map[IPrototypeDataProxyUI, Prototype[_]]): Try[(MoleExecution.PartialMoleExecution, Iterable[(Environment, String)])] =
     Try {
@@ -77,14 +77,14 @@ object MoleFactory {
 
   def buildHook(hookUI: IHookDataUI): IHook = buildHook(hookUI, prototypeMapping)
 
-  def buildMole(manager: IMoleSceneManager): Try[(IMole, Map[ICapsuleUI, ICapsule], Map[IPrototypeDataProxyUI, Prototype[_]], Iterable[(ICapsuleUI, Throwable)])] =
+  def buildMole(manager: IMoleUI): Try[(IMole, Map[ICapsuleUI, ICapsule], Map[IPrototypeDataProxyUI, Prototype[_]], Iterable[(ICapsuleUI, Throwable)])] =
     Try {
       if (manager.startingCapsule.isDefined) {
-        val prototypeMap: Map[IPrototypeDataProxyUI, Prototype[_]] = Proxys.prototypes.map {
+        val prototypeMap: Map[IPrototypeDataProxyUI, Prototype[_]] = Proxies.instance.prototypes.map {
           p ⇒ p -> p.dataUI.coreObject
         }.toMap
         val builds = manager.capsules.map {
-          c ⇒ (c._2 -> c._2.dataUI.coreObject(manager.dataUI), None)
+          c ⇒ (c._2 -> c._2.dataUI.coreObject(manager), None)
         }.toMap
 
         val capsuleMap: Map[ICapsuleUI, ICapsule] = builds.map {
@@ -98,11 +98,11 @@ object MoleFactory {
       } else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")
     }
 
-  def samplingMapping: Map[ISamplingCompositionDataProxyUI, Sampling] = Proxys.samplings.map {
+  def samplingMapping: Map[ISamplingCompositionDataProxyUI, Sampling] = Proxies.instance.samplings.map {
     s ⇒ s -> s.dataUI.coreObject
   }.toMap
 
-  def prototypeMapping: Map[IPrototypeDataProxyUI, Prototype[_]] = (Proxys.prototypes.toList :::
+  def prototypeMapping: Map[IPrototypeDataProxyUI, Prototype[_]] = (Proxies.instance.prototypes.toList :::
     List(EmptyDataUIs.emptyPrototypeProxy)).map {
       p ⇒ p -> p.dataUI.coreObject
     }.toMap

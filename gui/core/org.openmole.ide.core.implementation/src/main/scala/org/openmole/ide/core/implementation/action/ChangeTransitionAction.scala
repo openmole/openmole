@@ -31,8 +31,7 @@ class ChangeTransitionAction(connectionWidget: ConnectorWidget,
       case x: ITransitionUI ⇒
         if (x.transitionType != newType) x.transitionType = newType
         connectionWidget.drawTransitionType
-        connectionWidget.scene.manager.invalidateCache
-        CheckData.checkMole(connectionWidget.scene)
+        connectionWidget.scene.refresh
       case _ ⇒
     }
   }

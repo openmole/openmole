@@ -17,6 +17,9 @@
 
 package org.openmole.ide.core.implementation.execution
 
+import java.io.File
+
 object Settings {
-  var currentProject: Option[String] = None
+  var currentProject: Option[File] = None
+  var currentPath: Option[File] = None
 }

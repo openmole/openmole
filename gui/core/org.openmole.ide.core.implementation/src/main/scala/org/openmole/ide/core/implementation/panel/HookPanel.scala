@@ -18,7 +18,7 @@ package org.openmole.ide.core.implementation.panel
 
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.dataproxy.{ IDataProxyUI, IHookDataProxyUI }
-import org.openmole.ide.core.implementation.dataproxy.{ UpdatedProxyEvent, Proxys }
+import org.openmole.ide.core.implementation.dataproxy.{ UpdatedProxyEvent, Proxies }
 import swing.{ TabbedPane, Component, Label }
 import swing.event.{ SelectionChanged, FocusGained }
 import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
@@ -33,20 +33,20 @@ class HookPanel(proxy: IHookDataProxyUI,
   hookPanel ⇒
 
   var panelUI = proxy.dataUI.buildPanelUI
-  def created = Proxys.contains(proxy)
+  def created = Proxies.instance.contains(proxy)
 
   refreshPanel
 
   iconLabel.icon = new ImageIcon(ImageIO.read(this.getClass.getClassLoader.getResource("img/hook.png")))
 
   def create = {
-    Proxys += proxy
+    Proxies.instance += proxy
     ConceptMenu.hookMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
 
   def delete = {
     scene.closePropertyPanel(index)
-    Proxys -= proxy
+    Proxies.instance -= proxy
     ConceptMenu.removeItem(proxy)
     true
   }

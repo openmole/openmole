@@ -24,13 +24,13 @@ trait ICapsuleUI {
 
   def id: ID.Type
 
+  def starting: Boolean
+
+  def scene: IMoleScene
+
   def dataUI: ICapsuleDataUI
 
   def dataUI_=(d: ICapsuleDataUI)
-
-  def defineAsStartingCapsule(b: Boolean): Unit
-
-  def scene: IMoleScene
 
   def encapsule(dpu: ITaskDataProxyUI)
 
@@ -42,17 +42,13 @@ trait ICapsuleUI {
 
   def widget: Widget
 
-  def copy(sc: IMoleScene): (ICapsuleUI, HashMap[IInputSlotWidget, IInputSlotWidget])
+  def copy(sc: IBuildMoleScene): (ICapsuleUI, Map[IInputSlotWidget, IInputSlotWidget])
 
-  def deepcopy(sc: IMoleScene): (ICapsuleUI, HashMap[IInputSlotWidget, IInputSlotWidget])
+  def capsuleType_=(cType: CapsuleType)
 
-  def ::(dpu: ITaskDataProxyUI)
+  def environment_=(environment: Option[IEnvironmentDataProxyUI])
 
-  def --(cType: CapsuleType)
-
-  def on(environment: Option[IEnvironmentDataProxyUI])
-
-  def addInputSlot(startingCapsule: Boolean): IInputSlotWidget
+  def addInputSlot: IInputSlotWidget
 
   def inputs: List[IPrototypeDataProxyUI]
 
@@ -66,9 +62,9 @@ trait ICapsuleUI {
 
   def updateErrors(errors: Iterable[DataflowProblem]): Unit
 
-  def x: Double
+  def x: Int
 
-  def y: Double
+  def y: Int
 
   def islots: Buffer[IInputSlotWidget]
 
@@ -79,4 +75,5 @@ trait ICapsuleUI {
   def selected: Boolean
 
   def selected_=(b: Boolean)
+
 }

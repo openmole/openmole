@@ -19,7 +19,7 @@ package org.openmole.ide.core.implementation.registry
 
 import org.openmole.ide.core.model.factory._
 import org.openmole.misc.tools.obj.ClassUtils.ClassDecorator
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.SynchronizedMap
@@ -76,9 +76,9 @@ object KeyRegistry {
   private def intersection(c: Class[_], lClass: List[Class[_]]) =
     lClass.intersect(c.listSuperClassesAndInterfaces.tail)
 
-  def protoProxyKeyMap = Proxys.prototypes.map { p ⇒ KeyPrototypeGenerator(p) -> p }.toMap
+  def protoProxyKeyMap = Proxies.instance.prototypes.map { p ⇒ KeyPrototypeGenerator(p) -> p }.toMap
 
-  def samplingProxyKeyMap = Proxys.samplings.map { s ⇒ KeyGenerator(s.getClass) -> s }.toMap
+  def samplingProxyKeyMap = Proxies.instance.samplings.map { s ⇒ KeyGenerator(s.getClass) -> s }.toMap
 
-  def environmentProxyKeyMap = Proxys.environments.map { e ⇒ KeyGenerator(e.getClass) -> e }.toMap
+  def environmentProxyKeyMap = Proxies.instance.environments.map { e ⇒ KeyGenerator(e.getClass) -> e }.toMap
 }

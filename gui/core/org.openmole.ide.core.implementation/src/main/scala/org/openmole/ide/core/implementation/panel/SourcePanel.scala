@@ -22,7 +22,7 @@ import swing._
 import event.{ SelectionChanged, FocusGained }
 import javax.swing.ImageIcon
 import javax.imageio.ImageIO
-import org.openmole.ide.core.implementation.dataproxy.{ UpdatedProxyEvent, Proxys }
+import org.openmole.ide.core.implementation.dataproxy.{ UpdatedProxyEvent, Proxies }
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import java.awt.BorderLayout
 import org.openmole.ide.misc.widget.PluginPanel
@@ -34,21 +34,21 @@ class SourcePanel(proxy: ISourceDataProxyUI,
   sourcePanel ⇒
 
   var panelUI = proxy.dataUI.buildPanelUI
-  def created = Proxys.contains(proxy)
+  def created = Proxies.instance.contains(proxy)
 
   refreshPanel
 
   iconLabel.icon = new ImageIcon(ImageIO.read(this.getClass.getClassLoader.getResource("img/source.png")))
 
   def create = {
-    Proxys += proxy
+    Proxies.instance += proxy
     scene.manager.invalidateCache
     ConceptMenu.sourceMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
 
   def delete = {
     scene.closePropertyPanel(index)
-    Proxys -= proxy
+    Proxies.instance -= proxy
     ConceptMenu.removeItem(proxy)
     true
   }

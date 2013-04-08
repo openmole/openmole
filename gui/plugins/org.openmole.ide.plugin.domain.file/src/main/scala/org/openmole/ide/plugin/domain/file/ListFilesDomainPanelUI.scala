@@ -18,7 +18,7 @@
 package org.openmole.ide.plugin.domain.file
 
 import java.io.File
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.{ Help, URL, Helper, PluginPanel }
 import swing.{ CheckBox, Label, TextField }

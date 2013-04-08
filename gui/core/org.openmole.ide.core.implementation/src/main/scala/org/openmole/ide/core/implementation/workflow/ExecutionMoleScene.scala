@@ -21,11 +21,15 @@ import org.netbeans.api.visual.anchor.PointShape
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.panel.{ IBasePanel }
-import org.openmole.ide.core.model.workflow.ICapsuleUI
+import org.openmole.ide.core.model.workflow.{ IMoleUI, ICapsuleUI }
 import org.openmole.ide.core.model.commons.Constants._
 import scala.collection.JavaConversions._
 
-class ExecutionMoleScene(name: String) extends MoleScene(name) {
+object ExecutionMoleScene {
+  def apply(name: String) = new ExecutionMoleScene(new MoleUI(name))
+}
+
+class ExecutionMoleScene(val manager: IMoleUI) extends MoleScene {
 
   override val isBuildScene = false
 

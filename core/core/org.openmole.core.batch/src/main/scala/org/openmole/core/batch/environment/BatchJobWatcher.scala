@@ -25,7 +25,7 @@ import org.openmole.misc.tools.service.Logger
 import scala.collection.mutable.ListBuffer
 
 object BatchJobWatcher extends Logger {
-  case class Watch
+  case object Watch
 }
 
 class BatchJobWatcher(environment: BatchEnvironment) extends Actor {
@@ -41,7 +41,7 @@ class BatchJobWatcher(environment: BatchEnvironment) extends Actor {
       registry.synchronized {
         for (job ← registry.allJobs) {
           if (job.finished) {
-            for (ej ← registry.executionJobs(job)) if (ej.state != KILLED) environment.jobManager ! Kill(ej)
+            for (ej ← registry.executionJobs(job)) if (ej.state != KILLED) BatchEnvironment.jobManager ! Kill(ej)
             jobGroupsToRemove += job
           } else {
             val executionJobsToRemove = new ListBuffer[BatchExecutionJob]

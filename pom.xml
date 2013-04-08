@@ -6,7 +6,7 @@
   <!-- ************************************************************* -->
   <groupId>org.openmole</groupId>
   <artifactId>openmole</artifactId>
-  <version>0.8.0-SNAPSHOT</version>
+  <version>0.8.0-RC3</version>
   <!-- ************************************************************* -->
   <!-- *** Build Settings ****************************************** -->
   <!-- ************************************************************* -->
@@ -67,7 +67,7 @@
     <netbeans.hint.license>gpl30</netbeans.hint.license>
     <symbolic.name>${project.artifactId}</symbolic.name>
     <!-- versions of libraries used -->
-    <netbeans.version>RELEASE71</netbeans.version>
+    <netbeans.version>RELEASE73</netbeans.version>
     <com.miglayout.version>3.7.4</com.miglayout.version>
     <lib.org.eclipse.osgi.version>3.8.2.v20130124-134944</lib.org.eclipse.osgi.version>
     <lib.org.eclipse.equinox.registry.version>3.5.200.v20120522-1841</lib.org.eclipse.equinox.registry.version>
@@ -86,7 +86,7 @@
     <!--<lib.com.jcraft.jsch.version>0.1.42</lib.com.jcraft.jsch.version>-->
     <lib.com.thoughtworks.xstream.version>1.4.1</lib.com.thoughtworks.xstream.version>
     <lib.net.sf.kxml.version>2.3.0</lib.net.sf.kxml.version>
-    <lib.fr.iscpif.gridscale.version>1.37</lib.fr.iscpif.gridscale.version>
+    <lib.fr.iscpif.gridscale.version>1.39</lib.fr.iscpif.gridscale.version>
     <lib.org.apache.commons.compress.version>1.0</lib.org.apache.commons.compress.version>
     <lib.org.apache.commons.pool.version>1.5.4</lib.org.apache.commons.pool.version>
     <lib.org.apache.commons.logging.version>1.1.1</lib.org.apache.commons.logging.version>
@@ -134,12 +134,12 @@
     <lib.com.github.scopt.version>2.0.0</lib.com.github.scopt.version>
     <lib.fr.iscpif.mgo.version>1.58</lib.fr.iscpif.mgo.version>
     <lib.org.scala-lang.scala.version>2.10.1</lib.org.scala-lang.scala.version>
-    <lib.com.typesafe.akka.version>2.1.1</lib.com.typesafe.akka.version>
+    <lib.com.typesafe.akka.version>2.1.2</lib.com.typesafe.akka.version>
     <lib.com.typesafe.akka.scala.version>${scala.major.version}</lib.com.typesafe.akka.scala.version>
     <scala.major.version>2.10</scala.major.version>
     <lib.de.erichseifert.gral.version>0.9-SNAPSHOT</lib.de.erichseifert.gral.version>
     <lib.runtime.jvm.version>7-u10</lib.runtime.jvm.version>
-    <lib.org.scalatra.version>2.2.1-SNAPSHOT</lib.org.scalatra.version>
+    <lib.org.scalatra.version>2.2.1</lib.org.scalatra.version>
     <lib.org.eclipse.jetty.jetty-webapp.version>8.1.8.v20121106</lib.org.eclipse.jetty.jetty-webapp.version>
     <lib.org.eclipse.jetty.orbit.javax.servlet.version>3.0.0.v201112011016</lib.org.eclipse.jetty.orbit.javax.servlet.version>
     <plugin.scala-maven-plugin.version>3.1.0</plugin.scala-maven-plugin.version>

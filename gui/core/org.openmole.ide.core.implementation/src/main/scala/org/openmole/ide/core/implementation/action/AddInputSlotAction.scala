@@ -22,5 +22,5 @@ import java.awt.event.ActionListener
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 
 class AddInputSlotAction(capsule: ICapsuleUI) extends ActionListener {
-  override def actionPerformed(ae: ActionEvent) = capsule.addInputSlot(false)
+  override def actionPerformed(ae: ActionEvent) = capsule.addInputSlot
 }

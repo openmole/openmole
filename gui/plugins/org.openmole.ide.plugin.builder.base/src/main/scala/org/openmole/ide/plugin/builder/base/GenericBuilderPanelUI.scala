@@ -16,14 +16,14 @@
  */
 package org.openmole.ide.plugin.builder.base
 
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.core.implementation.builder.BuilderPanel
 import scala.swing._
 import org.openmole.core.implementation.puzzle.Puzzle
 
 abstract class GenericBuilderPanelUI(puzzleTitle: String, puzzles: List[Puzzle], puzzleSelection: Option[Puzzle]) extends BuilderPanel {
   val puzzleComboBox = new MyComboBox(puzzles)
-  val samplingComboBox = new MyComboBox(Proxys.samplings.toSeq)
+  val samplingComboBox = new MyComboBox(Proxies.instance.samplings.toSeq)
 
   contents += new Label(puzzleTitle)
   contents += puzzleComboBox

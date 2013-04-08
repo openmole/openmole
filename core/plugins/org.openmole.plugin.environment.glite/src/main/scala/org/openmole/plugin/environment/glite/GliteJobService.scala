@@ -23,7 +23,7 @@ import java.io.PrintStream
 import java.net.URI
 import java.util.UUID
 import org.openmole.core.batch.control._
-import org.openmole.core.batch.storage.Storage
+import org.openmole.core.batch.storage.{StorageService, Storage}
 import org.openmole.core.batch.environment.SerializedJob
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.batch.environment.Runtime
@@ -38,7 +38,10 @@ import scala.collection.JavaConversions._
 import scala.io.Source
 import org.openmole.misc.tools.service.Duration._
 
-object GliteJobService extends Logger
+object GliteJobService extends Logger {
+  val finishedFile = "finished"
+  val runningFile = "running"
+}
 
 import GliteJobService._
 
@@ -86,9 +89,11 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     val script = Workspace.newFile("script", ".sh")
     try {
       val outputFilePath = storage.child(path, Storage.uniqName("job", ".out"))
+      val _runningPath = serializedJob.storage.child(path, runningFile)
+      val _finishedPath = serializedJob.storage.child(path, finishedFile)
 
       val os = script.bufferedOutputStream
-      try generateScript(serializedJob, outputFilePath, os)
+      try generateScript(serializedJob, outputFilePath, _runningPath, _finishedPath, os)
       finally os.close
 
       //logger.fine(ISource.fromFile(script).mkString)
@@ -101,24 +106,29 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
 
       new GliteJob {
         val jobService = js
+        val storage = serializedJob.storage
+        val finishedPath = _finishedPath
+        val runningPath = _runningPath
         val id = jid
         val resultPath = outputFilePath
       }
     } finally script.delete
   }
 
-  protected def generateScript(serializedJob: SerializedJob, resultPath: String, os: OutputStream) = {
+  protected def generateScript(
+    serializedJob: SerializedJob,
+    resultPath: String,
+    runningPath: String,
+    finishedPath: String,
+    os: OutputStream) = {
     import serializedJob._
 
     val writter = new PrintStream(os)
 
     assert(runtime.runtime.path != null)
 
-    //val homeCacheDir = cacheDir("$ORIGINAL_HOME")
-
-    //writter.print("ORIGINAL_HOME=$HOME; ")
-    //writter.print("mkdir -p " + homeCacheDir + "; ")
-    writter.print("BASEPATH=$PWD; CUR=$PWD/ws$RANDOM; while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; export OPENMOLE_HOME=$CUR; ")
+    writter.print(touch(storage.url.resolve(runningPath)))
+    writter.print("; BASEPATH=$PWD; CUR=$PWD/ws$RANDOM; while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; export OPENMOLE_HOME=$CUR; ")
     writter.print("if [ `uname -m` = x86_64 ]; then ")
     writter.print(lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz")) //, homeCacheDir, runtime.jvmLinuxX64.hash))
     writter.print("; else ")
@@ -135,7 +145,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
       writter.print("; PLUGIN=`expr $PLUGIN + 1`; ")
     }
 
-    writter.print(lcpCpCmd(storage.url.resolve(runtime.storage.path), "$CUR/storage.xml.gz"))
+    writter.print(lcgCpCmd(storage.url.resolve(runtime.storage.path), "$CUR/storage.xml.gz"))
 
     writter.print(" ; export PATH=$PWD/jre/bin:$PATH; /bin/sh run.sh ")
     writter.print(environment.openMOLEMemoryValue)
@@ -151,54 +161,30 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     writter.print(resultPath)
     writter.print(" -t ")
     writter.print(environment.threadsValue)
+    writter.print("; ")
+    writter.print(touch(storage.url.resolve(finishedPath)))
     writter.print("; cd .. ; rm -rf $CUR ; ")
-    //writter.print(clearCacheCmd(homeCacheDir))
   }
 
-  //protected def cacheDir(home: String) =
-  //  home + "/" + Workspace.preference(GliteEnvironment.CECacheDir) + "_" + Workspace.preference(Workspace.uniqueID)
-
-  //protected def clearCacheCmd(cache: String) =
-  //  "find " + cache + " -atime " + Workspace.preference(GliteEnvironment.CECacheDuration).toDays + " -delete ; "
+  protected def touch(dest: URI) = {
+    val name = UUID.randomUUID.toString
+    s"touch $name; ${lcgCpCmd(name, dest)}; rm $name "
+  }
 
   protected def lcgCpGunZipCmd(from: URI, to: String) = {
     val builder = new StringBuilder
-    builder.append(lcpCpCmd(from, to + ".gz"))
+    builder.append(lcgCpCmd(from, to + ".gz"))
     builder.append(" && gunzip ")
     builder.append(to)
     builder.append(".gz ")
     builder.toString
   }
-  /*protected def cachedLcgCpGunZipCmd(from: URI, to: String, cacheDir: String, hash: String): String = {
-    val fileCachePath = cacheDir + "/" + hash
-    "(if [ -f " + fileCachePath + " ]; then cp " + fileCachePath + " " + to + ".gz" +
-      " ; else " + lcpCpCmd(from, to + ".gz") +
-      " && CACHE_ID=$RANDOM && " +
-      "( cp " + to + ".gz " + fileCachePath + "_$CACHE_ID && " +
-      "(if [ ! -f " + fileCachePath + " ]; then mv " + fileCachePath + "_$CACHE_ID " + fileCachePath + "; fi)" +
-      "); rm " + fileCachePath + "_$CACHE_ID ; " +
-      "; fi) && gunzip " + to + ".gz "
-  }  */
 
-  protected def lcpCpCmd(from: URI, to: String) = {
-    val builder = new StringBuilder
+  @transient lazy val lcgCp =
+    s"lcg-cp --vo ${environment.voName} --checksum --connect-timeout $getTimeOut --sendreceive-timeout $getTimeOut --bdii-timeout $getTimeOut --srm-timeout $getTimeOut "
 
-    builder.append("lcg-cp --vo ")
-    builder.append(environment.voName)
-    builder.append(" --checksum --connect-timeout ")
-    builder.append(getTimeOut)
-    builder.append(" --sendreceive-timeout ")
-    builder.append(getTimeOut)
-    builder.append(" --bdii-timeout ")
-    builder.append(getTimeOut)
-    builder.append(" --srm-timeout ")
-    builder.append(getTimeOut)
-    builder.append(" ")
-    builder.append(from.toString)
-    builder.append(" file:")
-    builder.append(to)
-    builder.toString
-  }
+  protected def lcgCpCmd(from: String, to: URI) = s"$lcgCp file:$from ${to.toString}"
+  protected def lcgCpCmd(from: URI, to: String) = s"$lcgCp ${from.toString} file:$to"
 
   private def getTimeOut = Workspace.preferenceAsDuration(GliteEnvironment.RemoteTimeout).toSeconds.toString
 
@@ -214,7 +200,8 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
       override val cpuNumber = environment.cpuNumber orElse environment.threads
       override val jobType = environment.jobType
       override val smpGranularity = environment.smpGranularity orElse environment.threads
-      override val retryCount = Some(Workspace.preferenceAsInt(GliteEnvironment.WMSRetryCount))
+      override val retryCount = Some(0)
+      override val shallowRetryCount = Some(Workspace.preferenceAsInt(GliteEnvironment.ShallowWMSRetryCount))
       override val myProxyServer = environment.myProxy.map(_.url)
       override val architecture = environment.architecture
       override val fuzzy = true

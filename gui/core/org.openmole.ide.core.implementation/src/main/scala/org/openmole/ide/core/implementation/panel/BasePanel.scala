@@ -34,7 +34,7 @@ import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.tools.image.Images._
 import scala.Some
-import org.openmole.ide.core.implementation.dataproxy.{ Proxys, UpdatedProxyEvent }
+import org.openmole.ide.core.implementation.dataproxy.{ Proxies, UpdatedProxyEvent }
 
 object BasePanel {
   case class IconChanged(s: Component, imagePath: String) extends ActionEvent(s)

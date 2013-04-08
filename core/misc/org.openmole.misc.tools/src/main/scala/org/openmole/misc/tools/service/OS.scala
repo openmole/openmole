@@ -38,6 +38,8 @@ case class OS(name: String = "", arch: String = "") {
   def osName = System.getProperty("os.name")
   def osArch = System.getProperty("os.arch")
 
+  def isWindows = osName.toLowerCase.contains(windows.toLowerCase)
+
   def is64Bit = osArch.toLowerCase.contains(arch64)
 
   def compatible = compatibleWith(osName, osArch)

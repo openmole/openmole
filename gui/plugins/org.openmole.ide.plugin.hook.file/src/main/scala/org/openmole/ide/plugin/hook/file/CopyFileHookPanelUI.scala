@@ -17,7 +17,7 @@
 
 package org.openmole.ide.plugin.hook.file
 
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
@@ -26,6 +26,7 @@ import org.openmole.ide.misc.widget.multirow.MultiComboTextField._
 import org.openmole.ide.core.implementation.registry._
 import java.io.File
 import swing.{ TabbedPane, Label }
+import java.awt.Dimension
 
 class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends PluginPanel("wrap") with IHookPanelUI {
 
@@ -38,12 +39,13 @@ class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends PluginPanel("wrap"
             d._2))
     })
 
+  minimumSize = new Dimension(300, 150)
   contents += new Label("<html><b>Files to be dumped</b></html>")
   contents += multiComboTextField.panel
 
   val components = List(("Prototypes", this))
 
-  def comboContent = Proxys.classPrototypes(classOf[File]) filter {
+  def comboContent = Proxies.instance.classPrototypes(classOf[File]) filter {
     _.dataUI.dim == 0
   }
 

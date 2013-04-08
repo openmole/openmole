@@ -32,7 +32,7 @@ class JobSatusListener(exeManager: ExecutionManager) extends EventListener[IMole
         exeManager.wfPiePlotter.update(x.oldState, exeManager.status(x.oldState).decrementAndGet)
         exeManager.wfPiePlotter.update(x.newState, exeManager.status(x.newState).incrementAndGet)
       case x: Finished ⇒
-        exeManager.logTextArea.append("The simulation is completed")
+        exeManager.logTextArea.append("The simulation is completed\n")
         exeManager.publish(MoleFinishedEvent)
     }
   }

@@ -33,7 +33,7 @@ import org.openmole.ide.core.implementation.dialog.{ MoleSettingsDialog, StatusB
 class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISceneContainer {
   buildContainer ⇒
 
-  val executionMoleSceneContainers = new HashSet[ExecutionMoleSceneContainer]
+  val executionMoleSceneContainers = new HashSet[String]
   val statusBar = new StatusBar
 
   peer.setLayout(new BorderLayout)
@@ -47,10 +47,6 @@ class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISce
     contents += new ToolBarButton(BUILD_EXECUTION,
       "Build the workflow",
       buildExecutionAction)
-
-    contents += new ToolBarButton(CLEAN_BUILD_EXECUTION,
-      "Clean and build the workflow",
-      cleanAndBuildExecutionAction)
   }
 
   peer.add(toolBar.peer, BorderLayout.NORTH)
@@ -63,15 +59,6 @@ class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISce
   peer.add(spane, BorderLayout.CENTER)
   CheckData.checkMole(scene, false)
 
-  def stopAndCloseExecutions = {
-    executionMoleSceneContainers.foreach {
-      emc ⇒
-        emc.stop
-        ScenesManager.tabPane.pages.remove(emc.page.index)
-    }
-    executionMoleSceneContainers.clear
-  }
-
   def buildExecutionAction = new Action("") {
     override def apply = {
       ScenesManager.saveCurrentPropertyWidget
@@ -79,14 +66,6 @@ class BuildMoleSceneContainer(val scene: BuildMoleScene) extends Panel with ISce
       ScenesManager.addExecutionSceneContainer(buildContainer)
     }
   }
-
-  def cleanAndBuildExecutionAction = new Action("") {
-    override def apply = {
-      stopAndCloseExecutions
-      ScenesManager.addExecutionSceneContainer(buildContainer)
-    }
-  }
-
   def displayMoleSettingsDialogAction = new Action("") {
     override def apply = {
       MoleSettingsDialog.display(scene.manager)

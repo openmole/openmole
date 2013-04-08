@@ -22,7 +22,7 @@ import au.com.bytecode.opencsv.CSVReader
 import java.io.File
 import java.io.FileReader
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
-import org.openmole.ide.core.implementation.dataproxy.Proxys
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import java.util.Locale
@@ -89,7 +89,7 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("wrap") wit
     else new CSVSamplingDataUI(csvTextField.text, List[(String, PrototypeDataProxyUI)]())
   }
 
-  def comboContent: List[IPrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxys.prototypes.toList
+  def comboContent: List[IPrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxies.instance.prototypes.toList
 
   override lazy val help =
     new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
