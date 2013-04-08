@@ -52,12 +52,17 @@ trait Defaults extends Build {
   }
 
   override def settings = super.settings ++
-    Seq(version := "0.8.0-SNAPSHOT",
+    Seq(version := "0.8.0-RC3",
       organization := "org.openmole",
       scalaVersion := "2.10.1",
       publishArtifact in (packageDoc in install) := false,
       copyDependencies := false,
-      osgiVersion := "3.8.2.v20130124-134944"
+      osgiVersion := "3.8.2.v20130124-134944",
+      concurrentRestrictions in Global :=
+        Seq(
+          Tags.limit(Tags.Disk, 3),
+          Tags.limitAll( 8 )
+        )
     )
 
   def gcTask = {System.gc();System.gc();System.gc()}
@@ -82,6 +87,7 @@ trait Defaults extends Build {
                    bundleActivator: Option[String] = None,
                    dynamicImports: Seq[String] = Seq(),
                    imports: Seq[String] = Seq("*;resolution:=optional"),
+                   embeddedJars: Seq[File] = Seq(), //TODO make this actually useful, using an EitherT or something
                    openmoleScope: Option[String] = None) = {
 
     val base = dir / (if(pathFromDir == "") artifactId else pathFromDir)
@@ -105,6 +111,7 @@ trait Defaults extends Build {
           OsgiKeys.dynamicImportPackage := dynamicImports,
           OsgiKeys.importPackage := imports,
           OsgiKeys.bundleActivator := bundleActivator,
+          OsgiKeys.embeddedJars := embeddedJars,
           install <<= publishLocal,
           OsgiKeys.bundle <<= OsgiKeys.bundle tag (Tags.Disk),
           (update in install) <<= update in install tag (Tags.Network),
