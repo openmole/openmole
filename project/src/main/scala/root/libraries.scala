@@ -130,4 +130,15 @@ package object libraries extends Defaults {
         deps filter (d => d.data.getName startsWith "bcprov") map (d => d.data)
       } //TODO make this easier to do using updateReport and filters.
     )
+
+  lazy val jsyntaxpane = OsgiProject("jsyntaxpane") settings(libraryDependencies += "jsyntaxpane" % "jsyntaxpane" % "0.9.6")
+
+  lazy val gral = OsgiProject("de.erichseifert.gral") settings
+    (libraryDependencies += "de.erichseifert.gral" % "gral-core" % "0.9-SNAPSHOT")
+
+  lazy val miglayout = OsgiProject("net.miginfocom.swing.miglayout") settings
+    (libraryDependencies += "com.miglayout" % "miglayout" % "3.7.4")
+
+  lazy val netbeans = OsgiProject("org.netbeans.api") settings
+    (libraryDependencies += "org.netbeans.api" % "org-netbeans-api-visual" % "RELEASE73")//TODO
 }
