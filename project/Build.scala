@@ -11,7 +11,7 @@ import root._
 object HelloBuild extends Defaults {
   implicit val dir = file(".")
   lazy val root = Project(id = "root", base = dir) aggregate
-    (libraries.all, web, application, base.all, thirdParties)
+    (libraries.all, web, application, base.all, thirdParties, gui.all)
 
   override def settings = super.settings ++ Seq(
     resolvers += "openmole-public" at "http://maven.openmole.org/public"

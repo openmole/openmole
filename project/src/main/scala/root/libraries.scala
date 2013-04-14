@@ -18,8 +18,8 @@ package object libraries extends Defaults {
 
   lazy val all = Project(id = "openmole-libraries",
     base = file("libraries")) aggregate (jetty,scalatra,logback, h2, bonecp, slick, slf4j, xstream, icu4j, groovy,
-    objenesis, scalaLang, apache.all, jodaTime, gnuCrypto, db4o,
-    jasypt, robustIt, netlogo4, netlogo5, netlogo4_noscala, netlogo5_noscala, gridscale, guava)
+    objenesis, scalaLang, apache.all, jodaTime, gnuCrypto, db4o, jasypt, robustIt, netlogo4, netlogo5,
+    netlogo4_noscala, netlogo5_noscala, gridscale, guava, jsyntaxpane, gral, miglayout, netbeans)
 
   lazy val jetty = OsgiProject("org.eclipse.jetty", exports = Seq("org.eclipse.jetty.*", "javax.*")) settings
     (libraryDependencies ++= Seq("org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106",
@@ -136,9 +136,10 @@ package object libraries extends Defaults {
   lazy val gral = OsgiProject("de.erichseifert.gral") settings
     (libraryDependencies += "de.erichseifert.gral" % "gral-core" % "0.9-SNAPSHOT")
 
-  lazy val miglayout = OsgiProject("net.miginfocom.swing.miglayout") settings
+  lazy val miglayout = OsgiProject("net.miginfocom.swing.miglayout", exports = Seq("net.miginfocom.*")) settings
     (libraryDependencies += "com.miglayout" % "miglayout" % "3.7.4")
 
-  lazy val netbeans = OsgiProject("org.netbeans.api") settings
-    (libraryDependencies += "org.netbeans.api" % "org-netbeans-api-visual" % "RELEASE73")//TODO
+  lazy val netbeans = OsgiProject("org.netbeans.api", exports = Seq("org.netbeans.api.*", "org.openide.*")) settings
+    (libraryDependencies ++= Seq("org.netbeans.api" % "org-netbeans-api-visual" % "RELEASE73",
+      "org.netbeans.api" % "org-netbeans-modules-settings" % "RELEASE73"))
 }

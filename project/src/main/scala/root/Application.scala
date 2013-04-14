@@ -30,7 +30,6 @@ object Application extends Defaults {
         "org.openmole" % "org.apache.commons.logging" % v intransitive(),
         "org.openmole" % "net.sourceforge.jline" % v intransitive(),
         "org.openmole" % "org.apache.ant" % v intransitive(),
-        "org.openmole.ide" % "org.openmole.ide.core.implementation" % v,
         "org.openmole.core" % "org.openmole.misc.logging" % v)
   }
 
@@ -123,7 +122,7 @@ object Application extends Defaults {
   lazy val openmoleui = OsgiProject("org.openmole.ui", singleton = true) settings (pluginDependencies) dependsOn
     (webCore, base.misc.workspace, base.misc.replication, base.misc.exception, base.misc.tools, base.misc.eventDispatcher,
       base.misc.pluginManager, jodaTime, scalaLang, jasypt, apache.config, objenesis, base.core.implementation, robustIt,
-      scopt, base.core.batch)
+      scopt, base.core.batch, gui.core.implementation)
 
   lazy val plugins = AssemblyProject("package", "assembly/plugins",
     Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> {s => "org.eclipse.equinox.launcher.jar"},
@@ -141,6 +140,7 @@ object Application extends Defaults {
         "org.openmole.core" %% "org.openmole.misc.eventdispatcher" % v,
         "org.openmole.core" %% "org.openmole.misc.pluginmanager" % v,
         "org.openmole.core" %% "org.openmole.core.batch" % v,
+        "org.openmole.ide" %% "org.openmole.ide.core.implementation" % v,
         "org.openmole" % "uk.com.robustit.cloning" % v intransitive(),
         "org.openmole" % "org.joda.time" % v intransitive(),
         "org.openmole" % "org.scala-lang.scala-library" % v intransitive(),

@@ -6,5 +6,5 @@ import Keys._
 
 trait GuiDefaults extends Defaults {
   def dir = file("gui")
-  override lazy val org = organization := "org.openmole.core"
+  override lazy val org = organization := "org.openmole.ide"
 }
