@@ -3,7 +3,7 @@ package root.gui
 import sbt._
 import root.base
 import root.libraries._
-import root.ThirdParties._
+import root.thirdparties._
 
 
 package object misc extends GuiDefaults {

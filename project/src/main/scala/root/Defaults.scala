@@ -16,6 +16,7 @@ import util.matching.Regex
  */
 trait Defaults extends Build {
   def dir: File
+  //val all: Project
   lazy val org = organization := "org.openmole"
 
 
@@ -78,7 +79,7 @@ trait Defaults extends Build {
   }
 
 
-  def OsgiProject(artifactId: String,
+  def OsgiProject(artifactSuffix: String,
                   pathFromDir: String = "",
                    buddyPolicy: Option[String] = None,
                    exports: Seq[String] = Seq(),
@@ -88,8 +89,9 @@ trait Defaults extends Build {
                    dynamicImports: Seq[String] = Seq(),
                    imports: Seq[String] = Seq("*;resolution:=optional"),
                    embeddedJars: Seq[File] = Seq(), //TODO make this actually useful, using an EitherT or something
-                   openmoleScope: Option[String] = None) = {
+                   openmoleScope: Option[String] = None)(implicit artifactPrefix: Option[String] = None) = {
 
+    val artifactId = artifactPrefix map(_ + "." + artifactSuffix) getOrElse(artifactSuffix)
     val base = dir / (if(pathFromDir == "") artifactId else pathFromDir)
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
 

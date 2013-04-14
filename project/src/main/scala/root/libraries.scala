@@ -45,7 +45,7 @@ package object libraries extends Defaults {
 
   lazy val slf4j = OsgiProject("org.slf4j") settings (libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.2")
 
-  lazy val xstream = OsgiProject("com.thoughtworks.xstream", buddyPolicy = Some("global"), privatePackages = Seq("*")) settings
+  lazy val xstream = OsgiProject("com.thoughtworks.xstream", buddyPolicy = Some("global"), privatePackages = Seq("!scala.*","*")) settings
     (libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.1",
       "net.sf.kxml" % "kxml2" % "2.3.0"))
 
@@ -131,15 +131,16 @@ package object libraries extends Defaults {
       } //TODO make this easier to do using updateReport and filters.
     )
 
-  lazy val jsyntaxpane = OsgiProject("jsyntaxpane") settings(libraryDependencies += "jsyntaxpane" % "jsyntaxpane" % "0.9.6")
+  lazy val jsyntaxpane = OsgiProject("jsyntaxpane", privatePackages = Seq("!scala.*","*")) settings
+    (libraryDependencies += "jsyntaxpane" % "jsyntaxpane" % "0.9.6")
 
-  lazy val gral = OsgiProject("de.erichseifert.gral") settings
+  lazy val gral = OsgiProject("de.erichseifert.gral", privatePackages = Seq("!scala.*","*")) settings
     (libraryDependencies += "de.erichseifert.gral" % "gral-core" % "0.9-SNAPSHOT")
 
   lazy val miglayout = OsgiProject("net.miginfocom.swing.miglayout", exports = Seq("net.miginfocom.*")) settings
     (libraryDependencies += "com.miglayout" % "miglayout" % "3.7.4")
 
-  lazy val netbeans = OsgiProject("org.netbeans.api", exports = Seq("org.netbeans.api.*", "org.openide.*")) settings
+  lazy val netbeans = OsgiProject("org.netbeans.api", exports = Seq("org.netbeans.*", "org.openide.*")) settings
     (libraryDependencies ++= Seq("org.netbeans.api" % "org-netbeans-api-visual" % "RELEASE73",
       "org.netbeans.api" % "org-netbeans-modules-settings" % "RELEASE73"))
 }

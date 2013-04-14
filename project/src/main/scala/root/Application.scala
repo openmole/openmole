@@ -1,17 +1,14 @@
 package root
 
-import Web._
 import libraries._
-import base.{misc,core}
-import ThirdParties._
-
+import thirdparties._
 import sbt._
 import Keys._
 
-object Application extends Defaults {
+package object application extends Defaults {
   override lazy val org = organization := "org.openmole.ui"
   implicit val dir = file("application")
-  lazy val application = Project("application", file("application")) aggregate(plugins, openmoleui,
+  lazy val all = Project("application", file("application")) aggregate(plugins, openmoleui,
     openmolePlugins, openmoleGuiPlugins, openmoleResources, openMoleDB)
 
   private lazy val pluginDependencies = libraryDependencies <++= version {
@@ -120,7 +117,7 @@ object Application extends Defaults {
   }
 
   lazy val openmoleui = OsgiProject("org.openmole.ui", singleton = true) settings (pluginDependencies) dependsOn
-    (webCore, base.misc.workspace, base.misc.replication, base.misc.exception, base.misc.tools, base.misc.eventDispatcher,
+    (web.core, base.misc.workspace, base.misc.replication, base.misc.exception, base.misc.tools, base.misc.eventDispatcher,
       base.misc.pluginManager, jodaTime, scalaLang, jasypt, apache.config, objenesis, base.core.implementation, robustIt,
       scopt, base.core.batch, gui.core.implementation)
 
@@ -141,12 +138,12 @@ object Application extends Defaults {
         "org.openmole.core" %% "org.openmole.misc.pluginmanager" % v,
         "org.openmole.core" %% "org.openmole.core.batch" % v,
         "org.openmole.ide" %% "org.openmole.ide.core.implementation" % v,
-        "org.openmole" % "uk.com.robustit.cloning" % v intransitive(),
-        "org.openmole" % "org.joda.time" % v intransitive(),
-        "org.openmole" % "org.scala-lang.scala-library" % v intransitive(),
-        "org.openmole" % "org.jasypt.encryption" % v intransitive(),
-        "org.openmole" % "org.apache.commons.configuration" % v intransitive(),
-        "org.openmole" % "org.objenesis" % v intransitive(),
+        "org.openmole" %% "uk.com.robustit.cloning" % v intransitive(),
+        "org.openmole" %% "org.joda.time" % v intransitive(),
+        "org.openmole" %% "org.scala-lang.scala-library" % v intransitive(),
+        "org.openmole" %% "org.jasypt.encryption" % v intransitive(),
+        "org.openmole" %% "org.apache.commons.configuration" % v intransitive(),
+        "org.openmole" %% "org.objenesis" % v intransitive(),
         "org.openmole" %% "com.github.scopt" % v intransitive()
       )
     }, dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))

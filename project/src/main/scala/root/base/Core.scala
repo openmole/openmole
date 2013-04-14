@@ -5,7 +5,7 @@ import Keys._
 
 package object core extends BaseDefaults {
   import misc._
-  import root.ThirdParties._
+  import root.thirdparties._
   import root.libraries._
 
   implicit val dir = file("core/core")

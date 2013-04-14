@@ -3,11 +3,11 @@ package root
 import sbt._
 import Keys._
 
-object ThirdParties extends Defaults {
+package object thirdparties extends Defaults {
 
   lazy val dir = file("third-parties")
 
-  lazy val thirdParties = Project("thirdParties", dir) aggregate(iceTar, scalaSwing, scopt)
+  lazy val all = Project("thirdParties", dir) aggregate(iceTar, scalaSwing, scopt)
 
   lazy val iceTar = OsgiProject("com.ice.tar")
 
