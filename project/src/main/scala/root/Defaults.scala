@@ -16,8 +16,9 @@ import util.matching.Regex
  */
 trait Defaults extends Build {
   def dir: File
-  //val all: Project
   lazy val org = organization := "org.openmole"
+
+  lazy val openMoleStandardVer = SettingKey[String]("openmoleversion")
 
 
   val eclipseBuddyPolicy = SettingKey[Option[String]]("OSGi.eclipseBuddyPolicy", "The eclipse buddy policy thing.")
@@ -52,12 +53,13 @@ trait Defaults extends Build {
   }
 
   override def settings = super.settings ++
-    Seq(version := "0.8.0-RC3",
+    Seq(version := "0.8.0-SNAPSHOT",
       organization := "org.openmole",
       scalaVersion := "2.10.1",
       publishArtifact in (packageDoc in install) := false,
       copyDependencies := false,
       osgiVersion := "3.8.2.v20130124-134944",
+      openMoleStandardVer := "0.8.0-RC3", //workaround for copy dep task issue
       concurrentRestrictions in Global :=
         Seq(
           Tags.limit(Tags.Disk, 3),

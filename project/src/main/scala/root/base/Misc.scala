@@ -11,7 +11,7 @@ package object misc extends BaseDefaults {
 
   lazy val all = Project("core-misc", dir) aggregate (exception, macros, osgi,
     tools, eventDispatcher, fileDeleter, fileCache, fileService,
-    pluginManager, replication, updater, workspace, hashService)
+    pluginManager, replication, updater, workspace, hashService, sftpserver, logging)
 
   lazy val eventDispatcher = OsgiProject("org.openmole.misc.eventdispatcher") dependsOn(tools)
 
@@ -54,5 +54,12 @@ package object misc extends BaseDefaults {
   lazy val workspace = OsgiProject("org.openmole.misc.workspace") settings
     (libraryDependencies <+= (osgiVersion) {oV => "org.eclipse.core" % "org.eclipse.osgi" % oV}) dependsOn
     (exception, eventDispatcher, tools, replication, jasypt, xstream, apache.config)
+
+  lazy val logging = OsgiProject("org.openmole.misc.logging",
+    bundleActivator = Some("org.openmole.misc.logging.internal.Activator")) dependsOn (tools, workspace, apache.log4j,
+    apache.logging, logback, slf4j)
+
+  lazy val sftpserver = OsgiProject("org.openmole.misc.sftpserver") dependsOn
+    (tools, apache.sshd)
 
 }

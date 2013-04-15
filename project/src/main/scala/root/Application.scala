@@ -11,10 +11,10 @@ package object application extends Defaults {
   lazy val all = Project("application", file("application")) aggregate(plugins, openmoleui,
     openmolePlugins, openmoleGuiPlugins, openmoleResources, openMoleDB)
 
-  private lazy val pluginDependencies = libraryDependencies <++= version {
+  private lazy val pluginDependencies = libraryDependencies <++= openMoleStandardVer
+  {
     v =>
       Seq(
-        "org.openmole.core" % "org.openmole.misc.sftpserver" % v,
         "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841" intransitive(),
         "org.eclipse.core" % "org.eclipse.core.contenttype" % "3.4.200.v20120523-2004" intransitive(),
         "org.eclipse.core" % "org.eclipse.core.jobs" % "3.5.300.v20120912-155018" intransitive(),
@@ -26,15 +26,14 @@ package object application extends Defaults {
         "org.eclipse.core" % "org.eclipse.osgi" % "3.8.2.v20130124-134944" intransitive(),
         "org.openmole" % "org.apache.commons.logging" % v intransitive(),
         "org.openmole" % "net.sourceforge.jline" % v intransitive(),
-        "org.openmole" % "org.apache.ant" % v intransitive(),
-        "org.openmole.core" % "org.openmole.misc.logging" % v)
+        "org.openmole" % "org.apache.ant" % v intransitive())
   }
 
-  private lazy val openmolePluginDependencies = libraryDependencies <++= version {
-    v => {
-      def pluginTemplate(subId: String) = "org.openmole.core" % ("org.openmole.plugin." + subId) % v intransitive()
+  private lazy val openmolePluginDependencies = libraryDependencies <++= (version, openMoleStandardVer) {
+    (v, osv) => {
+      def pluginTemplate(subId: String) = "org.openmole.core" % ("org.openmole.plugin." + subId) % osv intransitive()
       def sbtPluginTemplate(subId: String) = "org.openmole.core" %% ("org.openmole.plugin." + subId) % v intransitive()
-      Seq(pluginTemplate("tools.groovy"),
+      Seq(sbtPluginTemplate("tools.groovy"),
         pluginTemplate("environment.gridscale"),
         pluginTemplate("environment.glite"),
         pluginTemplate("environment.desktopgrid"),
@@ -45,13 +44,13 @@ package object application extends Defaults {
         sbtPluginTemplate("task.netlogo"),
         sbtPluginTemplate("task.netlogo4"),
         sbtPluginTemplate("task.netlogo5"),
-        pluginTemplate("task.systemexec"),
-        pluginTemplate("task.groovy"),
-        pluginTemplate("task.scala"),
-        pluginTemplate("task.code"),
-        pluginTemplate("task.external"),
-        pluginTemplate("task.template"),
-        pluginTemplate("task.stat"),
+        sbtPluginTemplate("task.systemexec"),
+        sbtPluginTemplate("task.groovy"),
+        sbtPluginTemplate("task.scala"),
+        sbtPluginTemplate("task.code"),
+        sbtPluginTemplate("task.external"),
+        sbtPluginTemplate("task.template"),
+        sbtPluginTemplate("task.stat"),
         pluginTemplate("domain.modifier"),
         pluginTemplate("domain.file"),
         pluginTemplate("domain.collection"),
@@ -80,7 +79,7 @@ package object application extends Defaults {
     }
   }
 
-  private lazy val openmoleGuiPluginDependencies = libraryDependencies <++= version {
+  private lazy val openmoleGuiPluginDependencies = libraryDependencies <++= openMoleStandardVer {
     v => {
       def pluginTemplate(subArtifact: String) = ("org.openmole.ide" % ("org.openmole.ide.plugin." + subArtifact) % v) intransitive()
       Seq(pluginTemplate("task.groovy"),
@@ -119,14 +118,16 @@ package object application extends Defaults {
   lazy val openmoleui = OsgiProject("org.openmole.ui", singleton = true) settings (pluginDependencies) dependsOn
     (web.core, base.misc.workspace, base.misc.replication, base.misc.exception, base.misc.tools, base.misc.eventDispatcher,
       base.misc.pluginManager, jodaTime, scalaLang, jasypt, apache.config, objenesis, base.core.implementation, robustIt,
-      scopt, base.core.batch, gui.core.implementation)
+      scopt, base.core.batch, gui.core.implementation, base.misc.sftpserver, base.misc.logging)
 
   lazy val plugins = AssemblyProject("package", "assembly/plugins",
     Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> {s => "org.eclipse.equinox.launcher.jar"},
       """org\.eclipse\.(core|equinox|osgi)""".r -> {s => s.replaceFirst("-","_")} )
   ) settings (pluginDependencies,
     libraryDependencies <++= (version) {v =>
-      Seq("org.openmole.ui" %% "org.openmole.ui" % v exclude("org.eclipse.equinox","*"),
+      Seq("org.openmole.core" %% "org.openmole.misc.sftpserver" % v,
+        "org.openmole.core" %% "org.openmole.misc.logging" % v,
+        "org.openmole.ui" %% "org.openmole.ui" % v exclude("org.eclipse.equinox","*"),
         "org.openmole.core" %% "org.openmole.core.model" % v,
         "org.openmole.core" %% "org.openmole.core.implementation" % v,
         "org.openmole.web" %% "org.openmole.web.core" % v,
@@ -159,7 +160,7 @@ package object application extends Defaults {
     (resourceDirectory := file("application/resources"), copyResTask, assemble <<= assemble dependsOn (resourceAssemble),
       dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
 
-  lazy val openMoleDB = AssemblyProject("package", "assembly/dbserver/lib") settings (libraryDependencies <+= (version)
+  lazy val openMoleDB = AssemblyProject("package", "assembly/dbserver/lib") settings (libraryDependencies <+= (openMoleStandardVer)
     { v => "org.openmole.core" % "org.openmole.runtime.dbserver" % v },
     copyResTask, resourceDirectory := file("application/db-resources"), assemble <<= assemble dependsOn (resourceAssemble),
     resourceOutDir := Option("assembly/dbserver/bin"))

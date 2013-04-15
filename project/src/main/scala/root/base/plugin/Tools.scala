@@ -7,7 +7,7 @@ import sbt._
 
 package object tools extends PluginDefaults {
 
-  implicit val artifactPrefix = "org.openmole.plugin.tools"
+  implicit val artifactPrefix = Some("org.openmole.plugin.tools")
 
   lazy val all = Project("core-plugin-tools", dir) aggregate (groovy)
 
