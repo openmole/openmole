@@ -201,8 +201,6 @@ class MoleUI(var name: String) extends IMoleUI with ID {
   def changeConnector(oldConnector: IConnectorUI,
                       connector: IConnectorUI) = atomic { implicit ctx ⇒
     update(oldConnector.id, connector)
-    -=(oldConnector)
-    +=(connector)
   }
 
   def removeConnector(edgeID: String): Unit = removeConnector(edgeID, connector(edgeID))
