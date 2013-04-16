@@ -39,9 +39,9 @@ object OverSubmissionAgent extends Logger {
   class TimeInt(val value: Int, val time: Long = System.currentTimeMillis)
 
   implicit class FiniteQueue[A <: { def time: Long }](q: mutable.Queue[A]) {
-    def enqueueFinite(elem: A, oldest: Long) = {
+    def enqueueFinite(elem: A, keepTime: Long) = {
       q.enqueue(elem)
-      q.dequeueFirst(e ⇒ e.time + oldest < System.currentTimeMillis)
+      q.dequeueFirst(e ⇒ e.time + keepTime < System.currentTimeMillis)
     }
   }
 }
