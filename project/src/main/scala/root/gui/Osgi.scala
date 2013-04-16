@@ -3,7 +3,6 @@ package root.gui
 import root.base
 import sbt._
 
-
 package object osgi extends GuiDefaults {
   override val dir = super.dir / "osgi"
 

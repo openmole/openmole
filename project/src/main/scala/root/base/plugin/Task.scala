@@ -23,7 +23,7 @@ package object task extends PluginDefaults {
 
   //the imports disambiguates netlogo5 from netlogo4
   lazy val netLogo4 = OsgiProject("netlogo4",
-    imports=Seq("org.nlogo.*;version=\"[4,5)\"", "*;resolution:=optional")) dependsOn (netLogo, netlogo4_noscala)
+    imports = Seq("org.nlogo.*;version=\"[4,5)\"", "*;resolution:=optional")) dependsOn (netLogo, netlogo4_noscala)
 
   lazy val netLogo5 = OsgiProject("netlogo5") dependsOn (netLogo, netlogo5_noscala)
 
@@ -32,7 +32,6 @@ package object task extends PluginDefaults {
 
   lazy val scala = OsgiProject("scala") dependsOn (misc.exception, core.implementation, code, misc.osgi)
 
-
   lazy val groovy = OsgiProject("groovy") dependsOn (misc.exception, core.implementation, base.plugin.tools.groovy, code)
 
   lazy val template = OsgiProject("template") dependsOn (misc.exception, core.implementation, misc.workspace)
@@ -40,5 +39,5 @@ package object task extends PluginDefaults {
   lazy val systemexec = OsgiProject("systemexec") dependsOn (misc.exception, core.implementation, external,
     misc.workspace, apache.exec)
 
-  lazy val stat = OsgiProject("stat") dependsOn(core.implementation)
+  lazy val stat = OsgiProject("stat") dependsOn (core.implementation)
 }

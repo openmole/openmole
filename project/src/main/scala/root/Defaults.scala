@@ -1,11 +1,10 @@
 package root
 
-import com.typesafe.sbt.osgi.{OsgiKeys, SbtOsgi}
+import com.typesafe.sbt.osgi.{ OsgiKeys, SbtOsgi }
 
 import sbt._
 import Keys._
 import util.matching.Regex
-
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,12 +15,10 @@ import util.matching.Regex
  */
 trait Defaults extends Build {
   def dir: File
-  def all:
 
   lazy val org = organization := "org.openmole"
 
   lazy val openMoleStandardVer = SettingKey[String]("openmoleversion")
-
 
   val eclipseBuddyPolicy = SettingKey[Option[String]]("OSGi.eclipseBuddyPolicy", "The eclipse buddy policy thing.")
   lazy val outDir = SettingKey[String]("outDir", "A setting to control where copyDepTask outputs it's dependencies")
@@ -45,13 +42,14 @@ trait Defaults extends Build {
 
   lazy val dependencyFilter = SettingKey[DependencyFilter]("Tells copyDependencies to ignore certain dependencies.")
 
-  lazy val dependencyNameMap = SettingKey[Map[Regex, String => String]]("dependencymap", "A map that is run against dependencies to be copied.")
+  lazy val dependencyNameMap = SettingKey[Map[Regex, String ⇒ String]]("dependencymap", "A map that is run against dependencies to be copied.")
 
   def copyResTask = resourceAssemble <<= (resourceDirectory, outDir, crossTarget, resourceOutDir) map { //TODO: Find a natural way to do this
-    (rT, outD, cT, rOD) => {
-      val destPath = rOD map (cT / _) getOrElse (cT / outD)
-      IO.copyDirectory(rT,destPath)
-    }
+    (rT, outD, cT, rOD) ⇒
+      {
+        val destPath = rOD map (cT / _) getOrElse (cT / outD)
+        IO.copyDirectory(rT, destPath)
+      }
   }
 
   override def settings = super.settings ++
@@ -65,52 +63,52 @@ trait Defaults extends Build {
       concurrentRestrictions in Global :=
         Seq(
           Tags.limit(Tags.Disk, 3),
-          Tags.limitAll( 6 )
+          Tags.limitAll(6)
         )
     )
 
-  def gcTask = {System.gc();System.gc();System.gc()}
+  def gcTask = { System.gc(); System.gc(); System.gc() }
 
   def copyDepTask(updateReport: UpdateReport, version: String, out: File,
                   scalaVer: String, subDir: String,
-                  depMap: Map[Regex, String => String], depFilter: DependencyFilter) = { //TODO use this style for other tasks
-    updateReport matching depFilter map {f =>
-      depMap.keys.find(_.findFirstIn(f.getName).isDefined).map(depMap(_)).getOrElse{a: String => a} -> f
-    } foreach { case(lambda, srcPath) =>
-      val destPath = out / subDir / lambda(srcPath.getName)
-      IO.copyFile(srcPath, destPath, preserveLastModified=true)
+                  depMap: Map[Regex, String ⇒ String], depFilter: DependencyFilter) = { //TODO use this style for other tasks
+    updateReport matching depFilter map { f ⇒
+      depMap.keys.find(_.findFirstIn(f.getName).isDefined).map(depMap(_)).getOrElse { a: String ⇒ a } -> f
+    } foreach {
+      case (lambda, srcPath) ⇒
+        val destPath = out / subDir / lambda(srcPath.getName)
+        IO.copyFile(srcPath, destPath, preserveLastModified = true)
     }
   }
 
-
   def OsgiProject(artifactSuffix: String,
                   pathFromDir: String = "",
-                   buddyPolicy: Option[String] = None,
-                   exports: Seq[String] = Seq(),
-                   privatePackages: Seq[String] = Seq(),
-                   singleton: Boolean = false,
-                   bundleActivator: Option[String] = None,
-                   dynamicImports: Seq[String] = Seq(),
-                   imports: Seq[String] = Seq("*;resolution:=optional"),
-                   embeddedJars: Seq[File] = Seq(), //TODO make this actually useful, using an EitherT or something
-                   openmoleScope: Option[String] = None)(implicit artifactPrefix: Option[String] = None) = {
+                  buddyPolicy: Option[String] = None,
+                  exports: Seq[String] = Seq(),
+                  privatePackages: Seq[String] = Seq(),
+                  singleton: Boolean = false,
+                  bundleActivator: Option[String] = None,
+                  dynamicImports: Seq[String] = Seq(),
+                  imports: Seq[String] = Seq("*;resolution:=optional"),
+                  embeddedJars: Seq[File] = Seq(), //TODO make this actually useful, using an EitherT or something
+                  openmoleScope: Option[String] = None)(implicit artifactPrefix: Option[String] = None) = {
+
     require(artifactPrefix.forall(!_.endsWith(".")), "Do not end your artifactprefix with ., it will be added automatically.")
 
-    val artifactId = artifactPrefix map(_ + "." + artifactSuffix) getOrElse(artifactSuffix)
-    val base = dir / (if(pathFromDir == "") artifactId else pathFromDir)
+    val artifactId = artifactPrefix map (_ + "." + artifactSuffix) getOrElse (artifactSuffix)
+    val base = dir / (if (pathFromDir == "") artifactId else pathFromDir)
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
 
-    val additional = buddyPolicy.map(v => Map("Eclipse-BuddyPolicy" -> v)).getOrElse(Map()) ++
-      openmoleScope.map(os => Map("OpenMOLE-Scope" -> os)).getOrElse(Map()) ++
+    val additional = buddyPolicy.map(v ⇒ Map("Eclipse-BuddyPolicy" -> v)).getOrElse(Map()) ++
+      openmoleScope.map(os ⇒ Map("OpenMOLE-Scope" -> os)).getOrElse(Map()) ++
       Map("Bundle-ActivationPolicy" -> "lazy")
 
-
-    Project(artifactId.replace('.','-'),
+    Project(artifactId.replace('.', '-'),
       base,
       settings = Project.defaultSettings ++
         SbtOsgi.osgiSettings ++
         Seq(name := artifactId, org,
-          OsgiKeys.bundleSymbolicName <<= (name) {n => n + (if(singleton) ";singleton:=" + singleton else "")},
+          OsgiKeys.bundleSymbolicName <<= (name) { n ⇒ n + (if (singleton) ";singleton:=" + singleton else "") },
           OsgiKeys.bundleVersion <<= version,
           OsgiKeys.exportPackage := exportedPackages,
           OsgiKeys.additionalHeaders := additional,
@@ -123,14 +121,15 @@ trait Defaults extends Build {
           OsgiKeys.bundle <<= OsgiKeys.bundle tag (Tags.Disk),
           (update in install) <<= update in install tag (Tags.Network),
           //compile in Compile <<= compile in Compile tag (Tags.Disk),
-          assemble := false))
+          assemble := false)
+    )
   }
 
   def AssemblyProject(base: String,
                       outputDir: String = "lib",
-                      depNameMap: Map[Regex, String => String] = Map.empty[Regex, String => String]) = {
+                      depNameMap: Map[Regex, String ⇒ String] = Map.empty[Regex, String ⇒ String]) = {
     val projBase = dir / base
-    Project(base + "-"+ outputDir.replace('/','_'), projBase, settings = Project.defaultSettings ++ Seq(
+    Project(base + "-" + outputDir.replace('/', '_'), projBase, settings = Project.defaultSettings ++ Seq(
       assemble <<= copyDependencies tag (Tags.Disk),
       install := true,
       outDir := outputDir,

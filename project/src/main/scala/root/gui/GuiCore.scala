@@ -15,7 +15,7 @@ package object core extends GuiDefaults {
       netbeans, groovy, base.misc.exception, misc.widget)
 
   lazy val implementation = OsgiProject("org.openmole.ide.core.implementation") settings
-    (libraryDependencies <+= (osgiVersion) {oV => "org.eclipse.core" % "org.eclipse.osgi" % oV}) dependsOn
+    (libraryDependencies <+= (osgiVersion) { oV => "org.eclipse.core" % "org.eclipse.osgi" % oV }) dependsOn
     (robustIt, model, base.core.model, base.core.batch, base.misc.exception, base.misc.eventDispatcher,
       base.misc.workspace, base.misc.tools, xstream, apache.config, apache.log4j, groovy, jodaTime, netbeans,
       misc.widget, misc.tools, misc.visualization, gral)

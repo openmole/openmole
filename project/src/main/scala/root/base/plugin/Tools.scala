@@ -4,7 +4,6 @@ import root.base._
 import root.libraries
 import sbt._
 
-
 package object tools extends PluginDefaults {
 
   implicit val artifactPrefix = Some("org.openmole.plugin.tools")
