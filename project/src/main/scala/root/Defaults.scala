@@ -16,6 +16,8 @@ import util.matching.Regex
  */
 trait Defaults extends Build {
   def dir: File
+  def all:
+
   lazy val org = organization := "org.openmole"
 
   lazy val openMoleStandardVer = SettingKey[String]("openmoleversion")
@@ -63,7 +65,7 @@ trait Defaults extends Build {
       concurrentRestrictions in Global :=
         Seq(
           Tags.limit(Tags.Disk, 3),
-          Tags.limitAll( 8 )
+          Tags.limitAll( 6 )
         )
     )
 
@@ -92,6 +94,7 @@ trait Defaults extends Build {
                    imports: Seq[String] = Seq("*;resolution:=optional"),
                    embeddedJars: Seq[File] = Seq(), //TODO make this actually useful, using an EitherT or something
                    openmoleScope: Option[String] = None)(implicit artifactPrefix: Option[String] = None) = {
+    require(artifactPrefix.forall(!_.endsWith(".")), "Do not end your artifactprefix with ., it will be added automatically.")
 
     val artifactId = artifactPrefix map(_ + "." + artifactSuffix) getOrElse(artifactSuffix)
     val base = dir / (if(pathFromDir == "") artifactId else pathFromDir)

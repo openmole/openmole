@@ -9,6 +9,6 @@ trait PluginDefaults extends BaseDefaults {
 }
 
 package object plugin extends PluginDefaults {
-  lazy val all = Project("core-plugin", dir) aggregate (task.all, tools.all)
+  lazy val all = Project("core-plugin", dir) aggregate (task.all, tools.all, domain.all)
 }
 
