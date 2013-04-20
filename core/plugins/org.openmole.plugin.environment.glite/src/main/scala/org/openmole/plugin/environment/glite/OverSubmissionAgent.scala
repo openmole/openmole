@@ -36,7 +36,7 @@ import scala.collection.mutable
 
 object OverSubmissionAgent extends Logger {
 
-  class TimeInt(val value: Int, val time: Long = System.currentTimeMillis)
+  case class TimeInt(value: Int, time: Long = System.currentTimeMillis)
 
   implicit class FiniteQueue[A <: { def time: Long }](q: mutable.Queue[A]) {
     def enqueueFinite(elem: A, keepTime: Long) = {
@@ -69,7 +69,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
         val stillRunning = jobs.count(_.state == RUNNING)
         val stillReady = jobs.count(_.state == READY)
 
-        runningHistory.enqueueFinite(new TimeInt(stillRunning), Workspace.preferenceAsDuration(GliteEnvironment.RunningHistoryDuration).toMilliSeconds)
+        runningHistory.enqueueFinite(TimeInt(stillRunning), Workspace.preferenceAsDuration(GliteEnvironment.RunningHistoryDuration).toMilliSeconds)
 
         logger.fine("still running " + stillRunning)
 
