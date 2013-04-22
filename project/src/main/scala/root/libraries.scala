@@ -141,4 +141,6 @@ package object libraries extends Defaults {
       "org.netbeans.api" % "org-netbeans-modules-settings" % "RELEASE73"))
 
   lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (libraryDependencies <+= scalaVersion { sv ⇒ "fr.iscpif" % ("mgo_" + sv) % "1.58" })
+
+  lazy val opencsv = OsgiProject("au.com.bytecode.opencsv") settings (libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.0")
 }

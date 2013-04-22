@@ -9,9 +9,7 @@ trait PluginDefaults extends BaseDefaults {
 package object plugin extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.plugin")
 
-  lazy val all = Project("core-plugin", dir) aggregate (task.all, tools.all, domain.all, builder.all, method.all)
-
-  // TODO - is this needed?
-  // lazy val builder = OsgiProject("builder") dependsOn (misc.exception, core.implementation)
+  lazy val all = Project("core-plugin", dir) aggregate (task.all, tools.all, domain.all, builder.all, method.all,
+    environment.all, sampling.all, grouping.all, hook.all, source.all, profiler.all)
 }
 
