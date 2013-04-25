@@ -17,8 +17,6 @@
 
 package org.openmole.ide.plugin.domain.collection
 
-import java.math.BigDecimal
-import java.math.BigInteger
 import org.openmole.core.model.domain.Domain
 import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.ide.core.model.data.IDomainDataUI
