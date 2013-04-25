@@ -11,20 +11,15 @@ import org.openmole.ide.core.implementation.panel.ConceptMenu
 import java.awt.BorderLayout
 import org.openmole.ide.core.implementation.execution._
 import java.awt.Event
-import java.awt.Toolkit
 import java.awt.event.KeyEvent
 import javax.swing.KeyStroke
 import org.openide.DialogDescriptor
-import org.openide.DialogDescriptor._
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 import org.openide.NotifyDescriptor._
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.workspace.Workspace
 import java.io.File
-import org.openmole.ide.core.implementation.panel.PrototypePanel
-import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
-import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.preference.PreferenceContent
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.action.LoadXML
@@ -34,10 +29,9 @@ import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
-import scala.swing.FileChooser.SelectionMode._
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.ide.misc.tools.util.ClassLoader
 import org.openmole.misc.tools.obj.ClassUtils._
+import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 
 class GUIPanel extends MainFrame {
   mainframe ⇒
@@ -72,6 +66,14 @@ class GUIPanel extends MainFrame {
       contents += new MenuItem(new Action("Save as") {
         override def apply = SaveXML.save(mainframe, SaveXML.show)
       })
+
+      contents += new MenuItem(new Action("Export") {
+        override def apply = ScenesManager.currentScene match {
+          case Some(s: BuildMoleScene) ⇒ DialogFactory.exportPartialMoleExecution(s)
+          case _ ⇒ StatusBar().inform("No mole available for export")
+        }
+      })
+
       contents += new MenuItem(new Action("Reset all") {
         override def apply = {
           ScenesManager.closeAll
