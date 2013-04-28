@@ -34,9 +34,8 @@ trait GliteJob extends BatchJob with BatchJobId { bj ⇒
   val finishedPath: String
   val runningPath: String
 
-
   def testRunning(state: ExecutionState) =
-    if(state == SUBMITTED)
+    if (state == SUBMITTED)
       storage.tryWithToken {
         case Some(t) ⇒
           if (storage.exists(runningPath)(t)) {

@@ -26,16 +26,18 @@ import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.panel.BasePanel
-import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
+import org.openmole.ide.core.implementation.workflow.{ BuildMoleScene, ExecutionMoleSceneContainer }
 import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import scala.swing.FileChooser.SelectionMode._
-import scala.swing.FileChooser
-import scala.swing.Label
-import scala.swing.ScrollPane
-import scala.swing.TextArea
-import scala.swing.TextField
+import swing._
 import java.io.File
+import org.openmole.ide.misc.widget.{ ChooseFileTextField, PluginPanel }
+import scala.Some
+import util.{ Failure, Success }
+import org.openmole.core.serializer.SerializerService
+import org.openmole.ide.core.implementation.builder.MoleFactory
+import scala.swing.FileChooser.Result._
 
 object DialogFactory {
 
@@ -91,4 +93,29 @@ object DialogFactory {
 
   def displayStack(stack: String) =
     DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(new TextArea(stack)).peer, "Error stack"))
+
+  def exportPartialMoleExecution(s: BuildMoleScene) = {
+    val fc = new ChooseFileTextField("", "XML file", "XML,tar", "xml,tar")
+    val withArchiveCheckBox = new CheckBox("export with archives")
+    DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(new PluginPanel("wrap") {
+      contents += new Label("XML file")
+      contents += fc
+      contents += withArchiveCheckBox
+    }).peer, "Export Mole"))
+
+    val text = if (new File(fc.text).getParentFile.isDirectory) {
+      Some(fc.text.split('.')(0) + { if (withArchiveCheckBox.selected) ".tar" else ".xml" })
+    } else None
+
+    text match {
+      case Some(t: String) ⇒ MoleFactory.buildMoleExecution(s.manager) match {
+        case Success(mE) ⇒
+          if (withArchiveCheckBox.selected) SerializerService.serializeAndArchiveFiles(mE._1, new File(t))
+          else SerializerService.serialize(mE._1, new File(t))
+        case Failure(t) ⇒ StatusBar().warn("The mole can not be serialized due to " + t.getMessage)
+      }
+      case _ ⇒
+    }
+  }
+
 }

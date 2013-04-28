@@ -26,25 +26,16 @@ import java.math.BigDecimal
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.domain.collection.VariableDomain
 import org.openmole.core.model.data.Prototype
-import scala.swing.Label
-import org.openmole.ide.core.model.panel.{ IDomainPanelUI, IPanelUI }
-import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.ide.misc.tools.util.Types
+import java.io.File
+import org.openmole.misc.tools.obj.ClassUtils
 
 object VariableDomainDataUI {
   def apply[T](prototypeArray: Option[IPrototypeDataProxyUI], classString: String) = {
-    Types.standardize(classString) match {
-      case INT ⇒ new VariableDomainDataUI[Int](prototypeArray)
-      case DOUBLE ⇒ new VariableDomainDataUI[Double](prototypeArray)
-      case BIG_DECIMAL ⇒ new VariableDomainDataUI[BigDecimal](prototypeArray)
-      case BIG_INTEGER ⇒ new VariableDomainDataUI[BigInteger](prototypeArray)
-      case LONG ⇒ new VariableDomainDataUI[Long](prototypeArray)
-      case STRING ⇒ new VariableDomainDataUI[String](prototypeArray)
-      case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
+    new VariableDomainDataUI(prototypeArray)(ClassUtils.manifest(classString))
     }
   }
-}
 
 class VariableDomainDataUI[S](val prototypeArray: Option[IPrototypeDataProxyUI] = None)(implicit val domainType: Manifest[S])
     extends IDomainDataUI with IFinite {

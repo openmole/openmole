@@ -22,26 +22,13 @@ import javax.swing.JScrollPane
 import javax.swing.ScrollPaneConstants._
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
-import org.openmole.core.model.mole.IHook
 import org.openmole.core.implementation.mole.MoleExecution
 import org.openmole.ide.core.implementation.execution.ExecutionManager
 import org.openmole.ide.core.implementation.execution.MoleFinishedEvent
 import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.core.model.panel.IHookPanelUI
-import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget._
-import scala.collection.mutable.HashMap
 import scala.swing._
-import org.openmole.ide.misc.tools.image.Images._
-import java.io.File
-import scala.swing.FileChooser.SelectionMode._
-import org.openmole.ide.core.implementation.dialog.DialogFactory
-import org.openmole.ide.core.implementation.serializer.GUISerializer
-import scala.swing.FileChooser.Result._
-import org.openmole.core.serializer.SerializerService
-import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.ide.core.implementation.registry.{ DefaultKey, KeyRegistry }
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Failure, Success }
@@ -66,9 +53,9 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
     background = new Color(125, 160, 0)
   }
 
-  val exportButton = new Button(export) {
+  /* val exportButton = new Button(export) {
     background = new Color(55, 170, 200)
-  }
+  }*/
 
   val dlLabel = new Label("0/0")
   val ulLabel = new Label("0/0")
@@ -89,9 +76,9 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
 
       peer.add(new PluginPanel("wrap") {
         contents += new TitleLabel("Execution control")
-        contents += new PluginPanel("wrap 3", "[]-20[]5[]") {
+        contents += new PluginPanel("wrap 2", "[]-20[]5[]") {
           contents += startStopButton
-          contents += exportButton
+          // contents += exportButton
           contents += new PluginPanel("wrap 4") {
             contents += new Label("Downloads:")
             contents += dlLabel
@@ -125,7 +112,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         }
         startStopButton.background = new Color(170, 0, 0)
         startStopButton.action = new Action("Stop") { def apply = stop }
-        exportButton.enabled = false
+        //exportButton.enabled = false
         x.start
       case _ ⇒
     }
@@ -134,7 +121,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   def startLook = {
     startStopButton.background = new Color(125, 160, 0)
     startStopButton.action = start
-    exportButton.enabled = true
+    // exportButton.enabled = true
   }
 
   def stop = executionManager match {
@@ -143,28 +130,6 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
       startStopButton.action = start
       x.cancel
     case _ ⇒
-  }
-
-  def export = new Action("Export") {
-    override def apply = {
-      val fc = DialogFactory.fileChooser(" Export a Mole execution",
-        "*.xml",
-        "xml")
-      if (fc.showDialog(new Label, "OK") == Approve) {
-        val text = fc.selectedFile.getPath
-        if (new File(text).getParentFile.isDirectory) Some(text.split('.')(0) + ".xml")
-        else None
-      } match {
-        case Some(t: String) ⇒ executionManager match {
-          case Some(x: ExecutionManager) ⇒ x.buildMoleExecution match {
-            case Success(mE) ⇒ SerializerService.serialize(mE._1, new File(t))
-            case Failure(t) ⇒ StatusBar().warn("The mole can not be serialized due to " + t.getMessage)
-          }
-          case _ ⇒
-        }
-        case _ ⇒
-      }
-    }
   }
 
   def updateFileTransferLabels(dl: String, ul: String) = {

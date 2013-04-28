@@ -42,6 +42,14 @@ import scala.Some
 
 object MoleFactory {
 
+  def buildMoleExecution(manager: IMoleUI): Try[(MoleExecution.PartialMoleExecution, Iterable[(Environment, String)])] = {
+    manager.cacheMole match {
+      case Some((mole: IMole, capsuleMap: Map[ICapsuleUI, ICapsule], prototypeMap: Map[IPrototypeDataProxyUI, Prototype[_]])) ⇒
+        buildMoleExecution(mole, manager, capsuleMap, prototypeMap)
+      case _ ⇒ throw new UserBadDataError("The Mole execution can not be built")
+    }
+  }
+
   def buildMoleExecution(mole: IMole,
                          manager: IMoleUI,
                          capsuleMapping: Map[ICapsuleUI, ICapsule],
