@@ -2,7 +2,8 @@ package root
 
 import sbt._
 
-package object base extends Defaults {
+package object base extends BaseDefaults {
   lazy val dir = file("core")
-  lazy val all = Project("core", dir) aggregate (misc.all, core.all, plugin.all)
+
+  lazy val all = Project("base", dir) aggregate (core.all, misc.all, plugin.all)
 }

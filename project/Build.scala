@@ -7,9 +7,10 @@ import root._
 object HelloBuild extends Defaults {
   implicit val dir = file(".")
   lazy val all = Project(id = "root", base = dir) aggregate
-    (libraries.all, web.all, application.all, base.all, thirdparties.all, gui.all) //todo: all should be application.all
+    (libraries.all, web.all, application.all, base.all, thirdparties.all, gui.all) //todo: meta should be application.meta
 
   override def settings = super.settings ++ Seq(
-    resolvers += "openmole-public" at "http://maven.openmole.org/public"
+    //make openmole repo the resolver of last resort
+    resolvers ++= Seq(DefaultMavenRepository,"openmole-public" at "http://maven.openmole.org/public")
   )
 }

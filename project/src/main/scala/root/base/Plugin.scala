@@ -2,14 +2,14 @@ package root.base
 
 import sbt._
 
-
 trait PluginDefaults extends BaseDefaults {
   val dir = file("core/plugins")
-
 }
 
 package object plugin extends PluginDefaults {
-  import root.base.plugin._
-  lazy val all = Project("core-plugin", dir) aggregate (task.all, tools.all)
+  implicit val artifactPrefix = Some("org.openmole.plugin")
+
+  lazy val all = Project("core-plugin", dir) aggregate (task.all, tools.all, domain.all, builder.all, method.all,
+    environment.all, sampling.all, grouping.all, hook.all, source.all, profiler.all)
 }
 

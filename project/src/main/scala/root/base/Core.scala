@@ -15,16 +15,16 @@ package object core extends BaseDefaults {
     (eventDispatcher, exception, misc.tools, updater)
 
   lazy val serializer = OsgiProject("org.openmole.core.serializer", openmoleScope = Some("provided")) settings
-    (libraryDependencies <+= (osgiVersion) {oV => "org.eclipse.core" % "org.eclipse.osgi" % oV}) dependsOn
+    (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }) dependsOn
     (model, workspace, xstream, pluginManager, hashService, fileService, misc.tools)
 
   lazy val implementation = OsgiProject("org.openmole.core.implementation", openmoleScope = Some("provided")) settings
-    (libraryDependencies <+= (osgiVersion) {oV => "org.eclipse.core" % "org.eclipse.osgi" % oV}) dependsOn
+    (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }) dependsOn
     (model, workspace, robustIt, exception, workspace, eventDispatcher,
       serializer, pluginManager)
 
   lazy val batch = OsgiProject("org.openmole.core.batch", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (implementation,
     workspace, misc.tools, eventDispatcher, replication, db4o, updater, serializer,
-    fileService, hashService, pluginManager, iceTar, gridscale, guava)    //TODO: Finish adding gridscale and guava, then add to the aggregation
+    fileService, hashService, pluginManager, iceTar, gridscale, guava) //TODO: Finish adding gridscale and guava, then add to the aggregation
 
 }

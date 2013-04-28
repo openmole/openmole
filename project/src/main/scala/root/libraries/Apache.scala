@@ -7,7 +7,7 @@ import sbt.Keys._
 package object apache extends Defaults {
   val dir = file("libraries") / "apache"
 
-  lazy val all = Project("libraries-apache", dir) aggregate(pool, config, math, exec, log4j)
+  lazy val all = Project("libraries-apache", dir) aggregate (pool, config, math, exec, log4j, logging, sshd, ant)
 
   lazy val pool = OsgiProject("org.apache.commons.pool") settings
     (libraryDependencies += "commons-pool" % "commons-pool" % "1.5.4")
@@ -23,5 +23,14 @@ package object apache extends Defaults {
 
   lazy val log4j = OsgiProject("org.apache.log4j") settings
     (libraryDependencies += "log4j" % "log4j" % "1.2.17")
+
+  lazy val logging = OsgiProject("org.apache.commons.logging") settings
+    (libraryDependencies += "commons-logging" % "commons-logging" % "1.1.1")
+
+  lazy val sshd = OsgiProject("org.apache.sshd") settings
+    (libraryDependencies += "org.apache.sshd" % "sshd-core" % "0.8.0")
+
+  lazy val ant = OsgiProject("org.apache.ant") settings
+    (libraryDependencies += "org.apache.ant" % "ant" % "1.8.0")
 
 }
