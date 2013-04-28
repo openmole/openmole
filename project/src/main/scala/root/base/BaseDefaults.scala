@@ -6,4 +6,6 @@ import Keys._
 
 trait BaseDefaults extends Defaults {
   override lazy val org = organization := "org.openmole.core"
+
+  def dir = file("core") //TODO change to base
 }

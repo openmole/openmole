@@ -62,7 +62,7 @@ trait Defaults extends Build {
       copyDependencies := false,
       //exportJars := true,
       osgiVersion := "3.8.2.v20130124-134944",
-      openMoleStandardVer := "0.8.0-RC3", //workaround for copy dep task issue
+      //openMoleStandardVer := "0.8.0-RC3", //workaround for copy dep task issue
       concurrentRestrictions in Global :=
         Seq(
           Tags.limit(Tags.Disk, 2),
@@ -84,7 +84,7 @@ trait Defaults extends Build {
     }
   }
 
-  lazy val OsgiSettings = Project.defaultSettings ++ SbtOsgi.osgiSettings ++ Seq(
+  def OsgiSettings = Project.defaultSettings ++ SbtOsgi.osgiSettings ++ Seq(
     OsgiKeys.bundleSymbolicName <<= (name, osgiSingleton) { case (name, singleton) ⇒ name + ";singleton:=" + singleton },
     OsgiKeys.bundleVersion <<= version,
     OsgiKeys.exportPackage <<= (name) { n ⇒ Seq(n + ".*") },

@@ -7,7 +7,7 @@ package object misc extends BaseDefaults {
   import root.libraries._
   import root.thirdparties._
 
-  implicit val dir = file("core/misc")
+  override val dir = file("core/misc")
 
   lazy val all = Project("core-misc", dir) aggregate (exception, macros, osgi,
     tools, eventDispatcher, fileDeleter, fileCache, fileService,

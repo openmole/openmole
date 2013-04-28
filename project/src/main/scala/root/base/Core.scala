@@ -8,7 +8,7 @@ package object core extends BaseDefaults {
   import root.thirdparties._
   import root.libraries._
 
-  implicit val dir = file("core/core")
+  override val dir = file("core/core")
   lazy val all = Project("core-core", dir) aggregate (model, serializer, implementation, batch)
 
   lazy val model = OsgiProject("org.openmole.core.model", openmoleScope = Some("provided")) dependsOn
