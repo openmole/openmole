@@ -30,6 +30,8 @@ trait Defaults extends Build {
 
   lazy val osgiVersion = SettingKey[String]("osgi-version")
 
+  lazy val osgiSingleton = SettingKey[Boolean]("osgi-singleton")
+
   lazy val Assemble = Tags.Tag("Assemble")
 
   lazy val copyDependencies = TaskKey[Unit]("copy-dependencies")
@@ -57,6 +59,7 @@ trait Defaults extends Build {
       scalaVersion := "2.10.1",
       publishArtifact in (packageDoc in install) := false,
       copyDependencies := false,
+      exportJars := true,
       osgiVersion := "3.8.2.v20130124-134944",
       concurrentRestrictions in Global :=
         Seq(
@@ -65,7 +68,12 @@ trait Defaults extends Build {
         )
     )
 
+
   def gcTask = {System.gc();System.gc();System.gc()}
+
+  def copyCPDep(cp: Classpath, b: Boolean) {
+    println(cp)
+  }
 
   def copyDepTask(updateReport: UpdateReport, version: String, out: File,
                   scalaVer: String, subDir: String,
@@ -77,6 +85,18 @@ trait Defaults extends Build {
       IO.copyFile(srcPath, destPath, preserveLastModified=true)
     }
   }
+
+  lazy val OsgiSettings = Project.defaultSettings ++ SbtOsgi.osgiSettings ++ Seq(
+    OsgiKeys.bundleSymbolicName <<= (name, osgiSingleton) {case (name,singleton) => name + ";singleton:=" + singleton},
+    OsgiKeys.bundleVersion <<= version,
+    OsgiKeys.exportPackage <<= (name) {n => Seq(n + ".*")},
+    OsgiKeys.bundleActivator := None,
+    install in Compile <<= publishLocal in Compile,
+    OsgiKeys.bundle <<= OsgiKeys.bundle tag (Tags.Disk),
+    (update in install) <<= update in install tag (Tags.Network),
+    assemble := OsgiKeys.bundle
+  )
+
 
 
   def OsgiProject(artifactSuffix: String,
@@ -102,23 +122,17 @@ trait Defaults extends Build {
 
     Project(artifactId.replace('.','-'),
       base,
-      settings = Project.defaultSettings ++
-        SbtOsgi.osgiSettings ++
+      settings = OsgiSettings ++
         Seq(name := artifactId, org,
-          OsgiKeys.bundleSymbolicName <<= (name) {n => n + (if(singleton) ";singleton:=" + singleton else "")},
+          osgiSingleton := singleton,
           OsgiKeys.bundleVersion <<= version,
           OsgiKeys.exportPackage := exportedPackages,
           OsgiKeys.additionalHeaders := additional,
           OsgiKeys.privatePackage := privatePackages,
           OsgiKeys.dynamicImportPackage := dynamicImports,
           OsgiKeys.importPackage := imports,
-          OsgiKeys.bundleActivator := bundleActivator,
-          OsgiKeys.embeddedJars := embeddedJars,
-          install in Compile <<= publishLocal in Compile,
-          OsgiKeys.bundle <<= OsgiKeys.bundle tag (Tags.Disk),
-          (update in install) <<= update in install tag (Tags.Network),
-          //compile in Compile <<= compile in Compile tag (Tags.Disk),
-          assemble := false))
+          OsgiKeys.embeddedJars := embeddedJars) ++
+        Seq(OsgiKeys.bundleActivator <<= (OsgiKeys.bundleActivator) {bA => Some(bundleActivator.getOrElse(bA.get))}))
   }
 
   def AssemblyProject(base: String,
@@ -127,12 +141,14 @@ trait Defaults extends Build {
     val projBase = dir / base
     Project(base + "-"+ outputDir.replace('/','_'), projBase, settings = Project.defaultSettings ++ Seq(
       assemble <<= copyDependencies tag (Tags.Disk),
+      ignoreTransitive := true,
       install := true,
       outDir := outputDir,
       resourceOutDir := None,
       dependencyNameMap := depNameMap,
       dependencyFilter := moduleFilter(),
-      copyDependencies <<= (update, version, crossTarget, scalaVersion, outDir, dependencyNameMap, dependencyFilter) map copyDepTask
+      copyDependencies <<= (dependencyClasspath in Compile, ignoreTransitive) map copyCPDep/*,
+      copyDependencies <<= (update, version, crossTarget, scalaVersion, outDir, dependencyNameMap, dependencyFilter) map copyDepTask*/
     ))
   }
 }

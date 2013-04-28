@@ -150,7 +150,7 @@ package object application extends Defaults {
 
 
   lazy val openmolePlugins = AssemblyProject("package", "assembly/openmole-plugins") settings (openmolePluginDependencies,
-    dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
+    dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library")) dependsOn(web.core)
 
   lazy val openmoleGuiPlugins = AssemblyProject("package", "assembly/openmole-plugins-gui") settings (openmoleGuiPluginDependencies,
     dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
