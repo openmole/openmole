@@ -47,7 +47,7 @@ package object misc extends BaseDefaults {
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }) dependsOn
     (exception, tools, osgi)
 
-  lazy val replication = OsgiProject("org.openmole.misc.replication") dependsOn (db4o, xstream)
+  lazy val replication = OsgiProject("org.openmole.misc.replication") dependsOn (db4o % "provided", xstream)
 
   lazy val updater = OsgiProject("org.openmole.misc.updater") dependsOn (exception, tools, workspace)
 

@@ -59,6 +59,7 @@ trait Defaults extends Build {
       organization := "org.openmole",
       scalaVersion := "2.10.1",
       publishArtifact in (packageDoc in install) := false,
+      publishArtifact in (packageSrc in install) := false,
       copyDependencies := false,
       //exportJars := true,
       osgiVersion := "3.8.2.v20130124-134944",
@@ -66,7 +67,8 @@ trait Defaults extends Build {
       concurrentRestrictions in Global :=
         Seq(
           Tags.limit(Tags.Disk, 2),
-          Tags.limitAll(6)
+          Tags.limit(Tags.Network, 2),
+          Tags.limitAll(8)
         )
     )
 
