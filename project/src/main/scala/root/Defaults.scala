@@ -68,7 +68,7 @@ trait Defaults extends Build {
         Seq(
           Tags.limit(Tags.Disk, 2),
           Tags.limit(Tags.Network, 2),
-          Tags.limitAll(8)
+          Tags.limitAll(6)
         )
     )
 
