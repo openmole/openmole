@@ -18,7 +18,7 @@ package object task extends PluginDefaults {
   lazy val external = OsgiProject("external") dependsOn (misc.exception, core.implementation,
     misc.workspace)
 
-  lazy val netLogo = OsgiProject("netlogo") dependsOn (core.implementation, misc.exception,
+  lazy val netLogo = OsgiProject("netlogo") dependsOn (misc.exception,
     misc.workspace, external)
 
   //the imports disambiguates netlogo5 from netlogo4
@@ -27,17 +27,16 @@ package object task extends PluginDefaults {
 
   lazy val netLogo5 = OsgiProject("netlogo5") dependsOn (netLogo, netlogo5_noscala)
 
-  lazy val code = OsgiProject("code") dependsOn (misc.exception, external, core.implementation,
-    misc.workspace)
+  lazy val code = OsgiProject("code") dependsOn (misc.exception, external, misc.workspace)
 
-  lazy val scala = OsgiProject("scala") dependsOn (misc.exception, core.implementation, code, misc.osgi)
+  lazy val scala = OsgiProject("scala") dependsOn (misc.exception, core.model, code, misc.osgi, provided(scalaLang))
 
-  lazy val groovy = OsgiProject("groovy") dependsOn (misc.exception, core.implementation, base.plugin.tools.groovy, code)
+  lazy val groovy = OsgiProject("groovy") dependsOn (misc.exception, core.model, base.plugin.tools.groovy, code)
 
-  lazy val template = OsgiProject("template") dependsOn (misc.exception, core.implementation, misc.workspace)
+  lazy val template = OsgiProject("template") dependsOn (misc.exception, provided(core.implementation), misc.workspace)
 
-  lazy val systemexec = OsgiProject("systemexec") dependsOn (misc.exception, core.implementation, external,
-    misc.workspace, apache.exec)
+  lazy val systemexec = OsgiProject("systemexec") dependsOn (misc.exception, core.model, external,
+    misc.workspace, apache.exec % "provided")
 
   lazy val stat = OsgiProject("stat") dependsOn (core.implementation)
 }

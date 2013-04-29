@@ -10,8 +10,7 @@ package object hook extends PluginDefaults {
 
   lazy val all = Project("gui-plugin-hook", dir) aggregate (display, file)
 
-  lazy val display = OsgiProject("display") dependsOn (core.implementation, misc.widget, miscellaneous.tools,
-    base.plugin.hook.display)
+  lazy val display = OsgiProject("display") dependsOn (core.implementation, miscellaneous.tools, base.plugin.hook.display)
 
-  lazy val file = OsgiProject("file") dependsOn (core.implementation, misc.widget, base.plugin.hook.file, miscellaneous.tools)
+  lazy val file = OsgiProject("file") dependsOn (core.implementation, base.plugin.hook.file, miscellaneous.tools)
 }

@@ -9,6 +9,6 @@ package object source extends PluginDefaults {
 
   lazy val all = Project("base-plugin-source", dir) aggregate (file)
 
-  lazy val file = OsgiProject("file") dependsOn (core.implementation, opencsv)
+  lazy val file = OsgiProject("file") dependsOn (core.implementation, opencsv % "provided", core.serializer)
 }
 

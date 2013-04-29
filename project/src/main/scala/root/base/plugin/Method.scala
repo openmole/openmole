@@ -9,7 +9,7 @@ package object method extends PluginDefaults {
 
   lazy val all = Project("core-plugin-method", dir) aggregate (evolution, sensitivity)
 
-  lazy val evolution = OsgiProject("evolution") dependsOn (misc.exception, core.implementation, mgo)
+  lazy val evolution = OsgiProject("evolution") dependsOn (misc.exception, core.implementation, mgo) //todo: other plugins have a dependency on MGO
 
   lazy val sensitivity = OsgiProject("sensitivity") dependsOn (misc.exception, core.implementation)
 }

@@ -9,5 +9,5 @@ package object profiler extends PluginDefaults {
 
   lazy val all = Project("base-plugin-profiler", dir) aggregate (csvprofiler)
 
-  lazy val csvprofiler = OsgiProject("csvprofiler") dependsOn (misc.exception, core.implementation, opencsv)
+  lazy val csvprofiler = OsgiProject("csvprofiler") dependsOn (misc.exception, core.implementation, opencsv % "provided")
 }

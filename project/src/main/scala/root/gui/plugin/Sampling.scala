@@ -10,13 +10,11 @@ package object sampling extends PluginDefaults {
 
   lazy val all = Project("gui-plugin-sampling", dir) aggregate (combine, csv, lhs)
 
-  lazy val combine = OsgiProject("combine") dependsOn (core.implementation, base.plugin.sampling.combine,
-    base.core.implementation, misc.widget)
+  lazy val combine = OsgiProject("combine") dependsOn (core.implementation, base.plugin.sampling.combine, base.core.model)
 
-  lazy val csv = OsgiProject("csv") dependsOn (opencsv, core.implementation, base.plugin.sampling.csv, base.misc.exception,
-    misc.widget)
+  lazy val csv = OsgiProject("csv") dependsOn (opencsv, core.implementation, base.plugin.sampling.csv, base.misc.exception)
 
-  lazy val lhs = OsgiProject("lhs") dependsOn (base.plugin.sampling.lhs, core.implementation, misc.widget,
-    base.plugin.domain.bounded, domain.range)
+  lazy val lhs = OsgiProject("lhs") dependsOn (base.plugin.sampling.lhs, core.implementation, base.plugin.domain.bounded,
+    domain.range)
 
 }

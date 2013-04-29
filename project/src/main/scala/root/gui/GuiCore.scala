@@ -11,12 +11,12 @@ package object core extends GuiDefaults {
   lazy val all = Project("gui-core", dir) aggregate (model, implementation)
 
   lazy val model = OsgiProject("org.openmole.ide.core.model") dependsOn
-    (base.core.model, base.misc.tools, xstream, apache.config, apache.log4j,
-      netbeans, groovy, base.misc.exception, misc.widget)
+    (provided(base.core.model), provided(base.misc.tools), provided(xstream), provided(apache.config), provided(apache.log4j),
+      provided(netbeans), provided(groovy), base.misc.exception, provided(misc.widget))
 
   lazy val implementation = OsgiProject("org.openmole.ide.core.implementation") settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }) dependsOn
-    (robustIt, model, base.core.model, base.core.batch, base.misc.exception, base.misc.eventDispatcher,
-      base.misc.workspace, base.misc.tools, xstream, apache.config, apache.log4j, groovy, jodaTime, netbeans,
-      misc.widget, misc.tools, misc.visualization, gral)
+    (provided(robustIt), model, provided(base.core.model), provided(base.core.batch), base.misc.exception, provided(base.misc.eventDispatcher),
+      provided(base.misc.workspace), provided(base.misc.tools), provided(xstream), provided(apache.config), provided(apache.log4j), provided(groovy), provided(jodaTime), provided(netbeans),
+      misc.widget, misc.tools, provided(misc.visualization), provided(gral))
 }

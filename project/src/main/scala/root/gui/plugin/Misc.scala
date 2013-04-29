@@ -9,5 +9,5 @@ package object miscellaneous extends PluginDefaults {
 
   lazy val all = Project("core-plugin-misc", dir) aggregate (tools)
 
-  lazy val tools = OsgiProject("tools") dependsOn (core.implementation, misc.widget) settings (OsgiKeys.bundleActivator := None)
+  lazy val tools = OsgiProject("tools") dependsOn (core.implementation) settings (OsgiKeys.bundleActivator := None)
 }

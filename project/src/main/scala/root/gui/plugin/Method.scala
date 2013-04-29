@@ -10,5 +10,5 @@ package object method extends PluginDefaults {
   lazy val all = Project("gui-plugin-method", dir) aggregate (sensitivity)
 
   lazy val sensitivity = OsgiProject("sensitivity") dependsOn (base.plugin.method.sensitivity, domain.range,
-    core.implementation, misc.widget)
+    core.implementation)
 }

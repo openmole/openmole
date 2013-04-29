@@ -14,7 +14,7 @@ package object domain extends PluginDefaults {
 
   lazy val collection = OsgiProject("collection") dependsOn (misc.exception, core.implementation)
 
-  lazy val distribution = OsgiProject("distribution") dependsOn (misc.exception, core.implementation, apache.math)
+  lazy val distribution = OsgiProject("distribution") dependsOn (misc.exception, core.implementation, apache.math % "provided")
 
   lazy val file = OsgiProject("file") dependsOn (misc.exception, core.implementation)
 

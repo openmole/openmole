@@ -62,6 +62,7 @@ trait Defaults extends Build {
       publishArtifact in (packageSrc in install) := false,
       copyDependencies := false,
       //exportJars := true,
+      //offline := true,
       osgiVersion := "3.8.2.v20130124-134944",
       //openMoleStandardVer := "0.8.0-RC3", //workaround for copy dep task issue
       concurrentRestrictions in Global :=
@@ -86,7 +87,7 @@ trait Defaults extends Build {
     }
   }
 
-  def OsgiSettings = Project.defaultSettings ++ SbtOsgi.osgiSettings ++ Seq(
+  protected lazy val osgiCachedSettings = Project.defaultSettings ++ SbtOsgi.osgiSettings ++ Seq(
     OsgiKeys.bundleSymbolicName <<= (name, osgiSingleton) { case (name, singleton) ⇒ name + ";singleton:=" + singleton },
     OsgiKeys.bundleVersion <<= version,
     OsgiKeys.exportPackage <<= (name) { n ⇒ Seq(n + ".*") },
@@ -96,6 +97,8 @@ trait Defaults extends Build {
     (update in install) <<= update in install tag (Tags.Network),
     assemble := OsgiKeys.bundle
   )
+
+  def OsgiSettings = osgiCachedSettings
 
   def OsgiProject(artifactSuffix: String,
                   pathFromDir: String = "",
@@ -151,4 +154,6 @@ trait Defaults extends Build {
       copyDependencies <<= (update, version, crossTarget, scalaVersion, outDir, dependencyNameMap, dependencyFilter) map copyDepTask
     ))
   }
+
+  def provided(p: Project) = p % "provided"
 }

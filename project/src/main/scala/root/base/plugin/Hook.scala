@@ -10,5 +10,5 @@ package object hook extends PluginDefaults {
 
   lazy val display = OsgiProject("display") dependsOn (misc.exception, core.implementation, misc.workspace)
 
-  lazy val file = OsgiProject("file") dependsOn (misc.exception, core.implementation, misc.workspace)
+  lazy val file = OsgiProject("file") dependsOn (misc.exception, core.implementation, misc.workspace, core.serializer)
 }

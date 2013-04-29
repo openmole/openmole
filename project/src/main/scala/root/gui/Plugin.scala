@@ -17,6 +17,6 @@ package object plugin extends PluginDefaults {
   lazy val all = Project("gui-plugin", dir) aggregate (task.all, domain.all, environment.all, sampling.all, builder.all,
     groupingstrategy, miscellaneous.all, hook.all, method.all, source.all)
 
-  lazy val groupingstrategy = OsgiProject("groupingstrategy") dependsOn (core.implementation, misc.widget,
-    base.plugin.grouping.batch, base.core.implementation)
+  lazy val groupingstrategy = OsgiProject("groupingstrategy") dependsOn (core.implementation, base.plugin.grouping.batch,
+    base.core.model)
 }

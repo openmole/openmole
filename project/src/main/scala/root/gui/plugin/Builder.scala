@@ -8,5 +8,5 @@ package object builder extends PluginDefaults {
 
   lazy val all = Project("gui-plugin-builder", dir) aggregate (base)
 
-  lazy val base = OsgiProject("base") dependsOn (core.implementation, misc.widget, root.base.plugin.builder.base)
+  lazy val base = OsgiProject("base") dependsOn (core.implementation, root.base.plugin.builder.base)
 }

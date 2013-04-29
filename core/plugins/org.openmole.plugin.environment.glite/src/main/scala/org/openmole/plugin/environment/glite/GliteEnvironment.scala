@@ -19,19 +19,13 @@ package org.openmole.plugin.environment.glite
 
 import org.openmole.misc.filedeleter.FileDeleter
 import org.openmole.misc.updater.Updater
-import org.openmole.misc.workspace.ConfigurationLocation
 import fr.iscpif.gridscale.information.BDII
 import java.io.File
-import java.net.URI
-import java.net.URISyntaxException
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage._
-import org.openmole.misc.workspace.Workspace
-import org.openmole.misc.tools.service.Logger
 import org.openmole.core.model.job.IJob
 import org.openmole.misc.exception._
 import org.openmole.misc.tools.service.Duration._
-import org.openmole.plugin.environment.gridscale._
 import org.openmole.core.batch.jobservice._
 import org.openmole.core.batch.control._
 import org.openmole.misc.tools.service._
@@ -40,11 +34,9 @@ import org.openmole.core.batch.replication._
 import org.openmole.misc.workspace._
 import concurrent.stm._
 import annotation.tailrec
-import org.globus.gsi.gssapi.GlobusGSSCredentialImpl
 import ref.WeakReference
 import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.service.Random._
-import collection.mutable
 
 object GliteEnvironment extends Logger {
 
