@@ -67,9 +67,7 @@ trait Defaults extends Build {
       //openMoleStandardVer := "0.8.0-RC3", //workaround for copy dep task issue
       concurrentRestrictions in Global :=
         Seq(
-          Tags.limit(Tags.Disk, 2),
-          Tags.limit(Tags.Network, 2),
-          Tags.limitAll(6)
+          Tags.limitAll(7)
         )
     )
 
@@ -100,6 +98,8 @@ trait Defaults extends Build {
 
   def OsgiSettings = osgiCachedSettings
 
+  protected val bundleMap = Map("Bundle-ActivationPolicy" -> "lazy")
+
   def OsgiProject(artifactSuffix: String,
                   pathFromDir: String = "",
                   buddyPolicy: Option[String] = None,
@@ -118,24 +118,23 @@ trait Defaults extends Build {
     val base = dir / (if (pathFromDir == "") artifactId else pathFromDir)
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
 
-    val additional = buddyPolicy.map(v ⇒ Map("Eclipse-BuddyPolicy" -> v)).getOrElse(Map()) ++
+    val additional = (for (bp ← buddyPolicy; os ← openmoleScope) yield Map("Eclipse-BuddyPolicy" -> bp, "OpenMOLE-Scope" -> os)) getOrElse (Map()) ++ bundleMap
+    /*buddyPolicy.map(v ⇒ Map("Eclipse-BuddyPolicy" -> v)).getOrElse(Map()) ++
       openmoleScope.map(os ⇒ Map("OpenMOLE-Scope" -> os)).getOrElse(Map()) ++
-      Map("Bundle-ActivationPolicy" -> "lazy")
+      Map("Bundle-ActivationPolicy" -> "lazy")*/
 
     Project(artifactId.replace('.', '-'),
       base,
       settings = OsgiSettings ++
         Seq(name := artifactId, org,
           osgiSingleton := singleton,
-          OsgiKeys.bundleSymbolicName <<= (name) { n ⇒ n + (if (singleton) ";singleton:=" + singleton else "") },
-          OsgiKeys.bundleVersion <<= version,
           OsgiKeys.exportPackage := exportedPackages,
           OsgiKeys.additionalHeaders := additional,
           OsgiKeys.privatePackage := privatePackages,
           OsgiKeys.dynamicImportPackage := dynamicImports,
           OsgiKeys.importPackage := imports,
-          OsgiKeys.embeddedJars := embeddedJars) ++
-          Seq(OsgiKeys.bundleActivator <<= (OsgiKeys.bundleActivator) { bA ⇒ bundleActivator.orElse(bA) })
+          OsgiKeys.embeddedJars := embeddedJars,
+          OsgiKeys.bundleActivator <<= (OsgiKeys.bundleActivator) { bA ⇒ bundleActivator.orElse(bA) })
     )
   }
 
@@ -145,7 +144,6 @@ trait Defaults extends Build {
     val projBase = dir / base
     Project(base + "-" + outputDir.replace('/', '_'), projBase, settings = Project.defaultSettings ++ Seq(
       assemble <<= copyDependencies tag (Tags.Disk),
-      ignoreTransitive := true,
       install := true,
       outDir := outputDir,
       resourceOutDir := None,
