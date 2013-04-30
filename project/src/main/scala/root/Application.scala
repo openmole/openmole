@@ -5,6 +5,9 @@ import thirdparties._
 import sbt._
 import Keys._
 
+import com.typesafe.sbt.SbtNativePackager._
+import NativePackagerKeys._
+
 package object application extends Defaults {
   override lazy val org = organization := "org.openmole.ui"
   implicit val dir = file("application")
@@ -116,7 +119,7 @@ package object application extends Defaults {
       scopt, base.core.batch, gui.core.implementation, base.misc.sftpserver, base.misc.logging, jline, apache.logging,
       apache.ant)
 
-  lazy val plugins = AssemblyProject("package", "assembly/plugins",
+  lazy val plugins = AssemblyProject("package", "plugins",
     Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" },
       """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") })
   ) settings (pluginDependencies,
@@ -153,18 +156,43 @@ package object application extends Defaults {
         )
       }, dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
 
-  lazy val openmolePlugins = AssemblyProject("package", "assembly/openmole-plugins") settings (openmolePluginDependencies,
+  lazy val openmolePlugins = AssemblyProject("package", "openmole-plugins") settings (openmolePluginDependencies,
     dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
 
-  lazy val openmoleGuiPlugins = AssemblyProject("package", "assembly/openmole-plugins-gui") settings (openmoleGuiPluginDependencies,
+  lazy val openmoleGuiPlugins = AssemblyProject("package", "openmole-plugins-gui") settings (openmoleGuiPluginDependencies,
     dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
 
-  lazy val openmoleResources = AssemblyProject("package", "assembly") settings
+  lazy val openmoleResources = AssemblyProject("package", "") settings
     (resourceDirectory := file("application/resources"), copyResTask, assemble <<= assemble dependsOn (resourceAssemble),
       dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
 
-  lazy val openMoleDB = AssemblyProject("package", "assembly/dbserver/lib") settings (libraryDependencies <+= (version)
+  lazy val openMoleDB = AssemblyProject("package", "dbserver/lib") settings (libraryDependencies <+= (version)
     { v ⇒ "org.openmole.core" %% "org.openmole.runtime.dbserver" % v },
     copyResTask, resourceDirectory := file("application/db-resources"), assemble <<= assemble dependsOn (resourceAssemble),
-    resourceOutDir := Option("assembly/dbserver/bin"))
+    resourceOutDir := Option("dbserver/bin"))
+
+  lazy val rpm = AssemblyProject("package", "packages") settings (packagerSettings: _*) settings (
+    maintainer in Debian := "Mark Hammons <markehammons@gmail.com>", //TODO: Change to romain
+    maintainer in Rpm <<= maintainer in Debian,
+    packageSummary in Linux := "Open MOdeL Experiment workflow engine",
+    packageDescription := """This package contains the OpenMole executable, an easy to use system for massively parrelel computation.""",
+    linuxPackageMappings <+= (target in Linux) map { (ct: File) ⇒
+      println(ct)
+      val src = ct / "assembly"
+      val dest = "/opt/openmole"
+      packageMapping(
+        (for {
+          path ← (src ***).get
+        } yield path -> path.toString.replaceFirst(src.toString, dest)): _*
+      ) withUser "root" withGroup "root" withPerms "0755"
+    },
+    name in Rpm := "OpenMOLE",
+    rpmRelease := "1",
+    rpmVendor := "iscpif",
+    rpmUrl := Some("http://www.openmole.org/"),
+    rpmLicense := Some("AGPL3"),
+    version in Rpm <<= (version) { v ⇒ v.replace("-", ".") },
+    name in Debian := "OpenMOLE",
+    version in Debian <<= (version) { v ⇒ v.replace("-", ".") }
+  )
 }

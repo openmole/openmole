@@ -46,10 +46,10 @@ trait Defaults extends Build {
 
   lazy val dependencyNameMap = SettingKey[Map[Regex, String ⇒ String]]("dependencymap", "A map that is run against dependencies to be copied.")
 
-  def copyResTask = resourceAssemble <<= (resourceDirectory, outDir, crossTarget, resourceOutDir) map { //TODO: Find a natural way to do this
+  def copyResTask = resourceAssemble <<= (resourceDirectory, outDir, target, resourceOutDir) map { //TODO: Find a natural way to do this
     (rT, outD, cT, rOD) ⇒
       {
-        val destPath = rOD map (cT / _) getOrElse (cT / outD)
+        val destPath = rOD map (cT / "assembly" / _) getOrElse (cT / "assembly" / outD)
         IO.copyDirectory(rT, destPath)
       }
   }
@@ -80,7 +80,7 @@ trait Defaults extends Build {
       depMap.keys.find(_.findFirstIn(f.getName).isDefined).map(depMap(_)).getOrElse { a: String ⇒ a } -> f
     } foreach {
       case (lambda, srcPath) ⇒
-        val destPath = out / subDir / lambda(srcPath.getName)
+        val destPath = out / "assembly" / subDir / lambda(srcPath.getName)
         IO.copyFile(srcPath, destPath, preserveLastModified = true)
     }
   }
@@ -149,7 +149,7 @@ trait Defaults extends Build {
       resourceOutDir := None,
       dependencyNameMap := depNameMap,
       dependencyFilter := moduleFilter(),
-      copyDependencies <<= (update, version, crossTarget, scalaVersion, outDir, dependencyNameMap, dependencyFilter) map copyDepTask
+      copyDependencies <<= (update, version, target, scalaVersion, outDir, dependencyNameMap, dependencyFilter) map copyDepTask
     ))
   }
 
