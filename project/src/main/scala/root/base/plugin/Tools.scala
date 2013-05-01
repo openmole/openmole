@@ -10,5 +10,6 @@ package object tools extends PluginDefaults {
 
   lazy val all = Project("core-plugin-tools", dir) aggregate (groovy)
 
-  lazy val groovy = OsgiProject("groovy") dependsOn (misc.exception, provided(core.implementation), libraries.groovy % "provided")
+  lazy val groovy = OsgiProject("groovy") dependsOn (provided(misc.exception), provided(core.implementation),
+    provided(libraries.groovy))
 }

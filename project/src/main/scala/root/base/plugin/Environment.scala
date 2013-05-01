@@ -9,16 +9,16 @@ package object environment extends PluginDefaults {
 
   lazy val all = Project("core-plugins-environment", dir) aggregate (desktopgrid, glite, gridscale, pbs, ssh)
 
-  lazy val desktopgrid = OsgiProject("desktopgrid") dependsOn (core.model, misc.workspace, misc.tools, core.implementation,
+  lazy val desktopgrid = OsgiProject("desktopgrid") dependsOn (core.model, misc.workspace, misc.tools,
     core.batch, provided(core.serializer), misc.sftpserver, libraries.gridscale)
 
-  lazy val glite = OsgiProject("glite") dependsOn (core.model, misc.exception, gridscale, misc.updater, core.batch,
-    misc.workspace, provided(libraries.scalaLang))
+  lazy val glite = OsgiProject("glite") dependsOn (core.model, misc.exception, gridscale, misc.updater, provided(core.batch),
+    misc.workspace, provided(libraries.scalaLang), misc.fileService)
 
   lazy val gridscale = OsgiProject("gridscale") dependsOn (core.model, misc.workspace, misc.tools, core.implementation,
-    core.batch, libraries.gridscale)
+    provided(core.batch), libraries.gridscale, misc.exception)
 
-  lazy val pbs = OsgiProject("pbs") dependsOn (misc.exception, gridscale, misc.workspace)
+  lazy val pbs = OsgiProject("pbs") dependsOn (misc.exception, gridscale, misc.workspace, provided(core.batch))
 
-  lazy val ssh = OsgiProject("ssh") dependsOn (misc.exception, gridscale, misc.workspace)
+  lazy val ssh = OsgiProject("ssh") dependsOn (misc.exception, gridscale, misc.workspace, misc.eventDispatcher, provided(core.batch))
 }

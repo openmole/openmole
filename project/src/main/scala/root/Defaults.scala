@@ -86,6 +86,14 @@ trait Defaults extends Build {
   }
 
   protected lazy val osgiCachedSettings = Project.defaultSettings ++ SbtOsgi.osgiSettings ++ Seq(
+    OsgiKeys.bundle <<= (
+      OsgiKeys.manifestHeaders,
+      OsgiKeys.additionalHeaders,
+      fullClasspath in Compile,
+      artifactPath in (Compile, packageBin),
+      resourceDirectories in Compile,
+      OsgiKeys.embeddedJars, target
+    ) map Osgi.bundleTask,
     OsgiKeys.bundleSymbolicName <<= (name, osgiSingleton) { case (name, singleton) ⇒ name + ";singleton:=" + singleton },
     OsgiKeys.bundleVersion <<= version,
     OsgiKeys.exportPackage <<= (name) { n ⇒ Seq(n + ".*") },

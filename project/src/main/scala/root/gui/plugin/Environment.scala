@@ -13,13 +13,13 @@ package object environment extends PluginDefaults {
     base.plugin.environment.desktopgrid)
 
   lazy val glite = OsgiProject("glite") dependsOn (core.implementation, base.plugin.environment.glite,
-    base.misc.exception)
+    base.misc.exception, base.core.batch)
 
   lazy val local = OsgiProject("local") dependsOn (core.implementation, base.misc.exception,
     base.core.model)
 
   lazy val pbs = OsgiProject("pbs") dependsOn (core.implementation, base.plugin.environment.pbs,
-    base.misc.exception)
+    base.misc.exception, base.core.batch)
 
   lazy val ssh = OsgiProject("ssh") dependsOn (core.implementation, base.plugin.environment.ssh,
     base.core.batch)

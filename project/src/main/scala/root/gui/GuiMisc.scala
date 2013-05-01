@@ -11,11 +11,11 @@ package object misc extends GuiDefaults {
   lazy val all = Project("gui-misc", dir) aggregate (tools, widget, visualization)
 
   lazy val tools = OsgiProject("org.openmole.ide.misc.tools") dependsOn
-    (base.core.implementation)
+    (base.core.implementation, provided(base.misc.workspace))
 
   lazy val widget = OsgiProject("org.openmole.ide.misc.widget") dependsOn
     (base.misc.workspace, base.core.model, misc.tools, jsyntaxpane,
-      miglayout, netbeans, scalaSwing)
+      miglayout, netbeans, scalaSwing, base.misc.exception)
 
   lazy val visualization = OsgiProject("org.openmole.ide.misc.visualization") dependsOn
     (base.core.model, widget, provided(gral))

@@ -7,6 +7,7 @@ import Keys._
 
 import com.typesafe.sbt.SbtNativePackager._
 import NativePackagerKeys._
+import com.typesafe.sbt.packager.rpm.RpmDependencies
 
 package object application extends Defaults {
   override lazy val org = organization := "org.openmole.ui"
@@ -175,7 +176,8 @@ package object application extends Defaults {
     maintainer in Debian := "Mark Hammons <markehammons@gmail.com>", //TODO: Change to romain
     maintainer in Rpm <<= maintainer in Debian,
     packageSummary in Linux := "Open MOdeL Experiment workflow engine",
-    packageDescription := """This package contains the OpenMole executable, an easy to use system for massively parrelel computation.""",
+    packageDescription in Rpm := """This package contains the OpenMole executable, an easy to use system for massively parrelel computation.""",
+    packageDescription in Debian <<= packageDescription in Rpm,
     linuxPackageMappings <+= (target in Linux) map { (ct: File) ⇒
       println(ct)
       val src = ct / "assembly"
@@ -192,6 +194,8 @@ package object application extends Defaults {
     rpmUrl := Some("http://www.openmole.org/"),
     rpmLicense := Some("AGPL3"),
     version in Rpm <<= (version) { v ⇒ v.replace("-", ".") },
+    debianPackageDependencies := Seq("openjdk-7-jdk"),
+    rpmPrerequisites := Seq("java-1.7.0-openjdk"),
     name in Debian := "OpenMOLE",
     version in Debian <<= (version) { v ⇒ v.replace("-", ".") }
   )

@@ -2,6 +2,7 @@ package root.gui
 
 import root.base
 import sbt._
+import root.libraries._
 
 package object osgi extends GuiDefaults {
   override val dir = super.dir / "osgi"
@@ -12,7 +13,7 @@ package object osgi extends GuiDefaults {
 
   lazy val netlogo = OsgiProject("netlogo") dependsOn (base.plugin.task.netLogo)
 
-  lazy val netlogo4 = OsgiProject("netlogo4") dependsOn (netlogo, base.plugin.task.netLogo4)
+  lazy val netlogo4 = OsgiProject("netlogo4") dependsOn (netlogo, base.plugin.task.netLogo4, netlogo4_noscala)
 
-  lazy val netlogo5 = OsgiProject("netlogo5") dependsOn (netlogo, base.plugin.task.netLogo5)
+  lazy val netlogo5 = OsgiProject("netlogo5") dependsOn (netlogo, base.plugin.task.netLogo5, netlogo5_noscala)
 }

@@ -8,7 +8,7 @@ package object grouping extends PluginDefaults {
 
   lazy val all = Project("base-plugin-grouping", dir) aggregate (batch, onvariable)
 
-  lazy val batch = OsgiProject("batch") dependsOn (misc.exception, core.implementation)
+  lazy val batch = OsgiProject("batch") dependsOn (misc.exception, core.implementation, misc.workspace)
 
   lazy val onvariable = OsgiProject("onvariable") dependsOn (misc.exception, core.implementation)
 }
