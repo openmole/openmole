@@ -137,8 +137,18 @@ package object application extends Defaults {
           "org.openmole.core" %% "org.openmole.misc.tools" % v,
           "org.openmole.core" %% "org.openmole.misc.eventdispatcher" % v,
           "org.openmole.core" %% "org.openmole.misc.pluginmanager" % v,
+          "org.openmole.core" %% "org.openmole.misc.osgi" % v,
+          "org.openmole.core" %% "org.openmole.misc.updater" % v,
+          "org.openmole.core" %% "org.openmole.misc.fileservice" % v,
+          "org.openmole.core" %% "org.openmole.misc.filecache" % v,
+          "org.openmole.core" %% "org.openmole.misc.filedeleter" % v,
+          "org.openmole.core" %% "org.openmole.misc.hashservice" % v,
+
           "org.openmole.core" %% "org.openmole.core.batch" % v,
           "org.openmole.ide" %% "org.openmole.ide.core.implementation" % v,
+          "org.openmole.ide" %% "org.openmole.ide.misc.visualization" % v,
+          "org.openmole" %% "de.erichseifert.gral" % v intransitive (),
+
           "org.openmole" %% "uk.com.robustit.cloning" % v intransitive (),
           "org.openmole" %% "com.ibm.icu" % v intransitive (),
           "org.openmole" %% "fr.iscpif.gridscale" % v intransitive (),
@@ -153,6 +163,7 @@ package object application extends Defaults {
           "org.openmole" %% "com.github.scopt" % v intransitive (),
           "org.openmole" %% "org.apache.commons.logging" % v intransitive (),
           "org.openmole" %% "net.sourceforge.jline" % v intransitive (),
+          "org.openmole" %% "org.apache.log4j" % v intransitive (),
           "org.openmole" %% "org.apache.ant" % v intransitive ()
         )
       }, dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
