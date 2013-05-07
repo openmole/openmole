@@ -75,7 +75,7 @@ trait Defaults extends Build {
 
   def copyDepTask(updateReport: UpdateReport, version: String, out: File,
                   scalaVer: String, subDir: String,
-                  depMap: Map[Regex, String ⇒ String], depFilter: DependencyFilter) = { //TODO use this style for other tasks
+                  depMap: Map[Regex, String ⇒ String], depFilter: DependencyFilter) = {
     updateReport matching depFilter map { f ⇒
       depMap.keys.find(_.findFirstIn(f.getName).isDefined).map(depMap(_)).getOrElse { a: String ⇒ a } -> f
     } foreach {

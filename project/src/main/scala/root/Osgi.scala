@@ -3,9 +3,9 @@ package root
 import aQute.lib.osgi.Builder
 import java.util.Properties
 import sbt._
-import sbt.Keys._
-import aQute.lib.osgi.Constants
 import com.typesafe.sbt.osgi.OsgiManifestHeaders
+import java.io.{ FileInputStream, FileOutputStream }
+import resource._
 
 object Osgi {
 
@@ -19,11 +19,17 @@ object Osgi {
     artifactPath: File,
     resourceDirectories: Seq[File],
     embeddedJars: Seq[File], target: File): File = {
+    val manifest = target / "manifest.xml"
+    val props = headersToProperties(headers, additionalHeaders)
+    val oldProps = new Properties()
+    if (manifest.exists) managed(new FileInputStream(manifest)) foreach (oldProps.load)
+    if (!oldProps.equals(props)) managed(new FileOuimptputStream(manifest)) foreach (props.store(_, ""))
+
     val fun = FileFunction.cached(target / "package-cache", FilesInfo.lastModified, FilesInfo.exists) {
       (changes: Set[File]) ⇒
         val builder = new Builder
         builder.setClasspath(fullClasspath map (_.data) toArray)
-        builder.setProperties(headersToProperties(headers, additionalHeaders))
+        builder.setProperties(props)
         //builder.setProperty(aQute.lib.osgi.Constants.INCLUDE_RESOURCE, "")
         includeResourceProperty(resourceDirectories, embeddedJars) foreach (dirs ⇒
           builder.setProperty(aQute.lib.osgi.Constants.INCLUDE_RESOURCE, dirs)
@@ -36,7 +42,7 @@ object Osgi {
         Set(artifactPath)
     }
 
-    fun(fullClasspath.map(_.data).toSet ++ resourceDirectories.toSet ++ embeddedJars.toSet).headOption getOrElse (target)
+    fun(fullClasspath.map(_.data).toSet ++ resourceDirectories.toSet ++ embeddedJars.toSet + manifest).headOption getOrElse (target)
   }
 
   def headersToProperties(headers: OsgiManifestHeaders, additionalHeaders: Map[String, String]): Properties = {

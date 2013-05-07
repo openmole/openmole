@@ -3,6 +3,7 @@ package root
 import sbt._
 import Keys._
 import com.typesafe.sbt.osgi.OsgiKeys
+import OsgiKeys._
 
 /**
  * Created with IntelliJ IDEA.
@@ -144,5 +145,5 @@ package object libraries extends Defaults {
 
   lazy val opencsv = OsgiProject("au.com.bytecode.opencsv") settings (libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.0")
 
-  lazy val jline = OsgiProject("net.sourceforge.jline") settings (libraryDependencies += "jline" % "jline" % "0.9.94")
+  lazy val jline = OsgiProject("net.sourceforge.jline") settings (libraryDependencies += "jline" % "jline" % "0.9.94", exportPackage := Seq("jline.*"))
 }
