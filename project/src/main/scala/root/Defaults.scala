@@ -126,10 +126,9 @@ trait Defaults extends Build {
     val base = dir / (if (pathFromDir == "") artifactId else pathFromDir)
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
 
-    val additional = (for (bp ← buddyPolicy; os ← openmoleScope) yield Map("Eclipse-BuddyPolicy" -> bp, "OpenMOLE-Scope" -> os)) getOrElse (Map()) ++ bundleMap
-    /*buddyPolicy.map(v ⇒ Map("Eclipse-BuddyPolicy" -> v)).getOrElse(Map()) ++
+    val additional = buddyPolicy.map(v ⇒ Map("Eclipse-BuddyPolicy" -> v)).getOrElse(Map()) ++
       openmoleScope.map(os ⇒ Map("OpenMOLE-Scope" -> os)).getOrElse(Map()) ++
-      Map("Bundle-ActivationPolicy" -> "lazy")*/
+      Map("Bundle-ActivationPolicy" -> "lazy")
 
     Project(artifactId.replace('.', '-'),
       base,

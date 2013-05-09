@@ -23,7 +23,7 @@ object Osgi {
     val props = headersToProperties(headers, additionalHeaders)
     val oldProps = new Properties()
     if (manifest.exists) managed(new FileInputStream(manifest)) foreach (oldProps.load)
-    if (!oldProps.equals(props)) managed(new FileOuimptputStream(manifest)) foreach (props.store(_, ""))
+    if (!oldProps.equals(props)) managed(new FileOutputStream(manifest)) foreach (props.store(_, ""))
 
     val fun = FileFunction.cached(target / "package-cache", FilesInfo.lastModified, FilesInfo.exists) {
       (changes: Set[File]) ⇒
