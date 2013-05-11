@@ -215,6 +215,21 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
     </mole-execs>
   }
 
+  get("/xml/start/:id") {
+    contentType = "text/html"
+
+    new AsyncResult() {
+      val is = Future{
+        val exec = cachedMoles.get(params("id"))
+        println(exec)
+
+        val res = exec map {x => x.start; "started" }
+
+        <exec-result> {res.getOrElse("id didn't exist")} </exec-result>
+      }
+    }
+  }
+
   notFound {
     // remove content type in case it was set through an action
     contentType = null

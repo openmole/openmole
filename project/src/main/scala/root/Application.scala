@@ -7,13 +7,12 @@ import Keys._
 
 import com.typesafe.sbt.SbtNativePackager._
 import NativePackagerKeys._
-import com.typesafe.sbt.packager.rpm.RpmDependencies
 
 package object application extends Defaults {
   override lazy val org = organization := "org.openmole.ui"
   implicit val dir = file("application")
   lazy val all = Project("application", file("application")) aggregate (plugins, openmoleui,
-    openmolePlugins, openmoleGuiPlugins, openmoleResources, openMoleDB)
+    openmolePlugins, openmoleGuiPlugins, openmoleResources, openMoleDB, openmoleRuntime)
 
   private lazy val pluginDependencies = libraryDependencies := Seq(
     "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841" intransitive (),
@@ -182,6 +181,10 @@ package object application extends Defaults {
     { v ⇒ "org.openmole.core" %% "org.openmole.runtime.dbserver" % v },
     copyResTask, resourceDirectory := file("application/db-resources"), assemble <<= assemble dependsOn (resourceAssemble),
     resourceOutDir := Option("dbserver/bin"))
+
+  lazy val openmoleRuntime = AssemblyProject("runtime", "plugins") settings (copyResTask, resourceDirectory <<= baseDirectory / "resources",
+    libraryDependencies <+= (version) { "org.openmole.core" %% "org.openmole.runtime.runtime" % _ }, assemble <<= assemble dependsOn resourceAssemble,
+    resourceOutDir := Option("."))
 
   lazy val rpm = AssemblyProject("package", "packages") settings (packagerSettings: _*) settings (
     maintainer in Debian := "Mark Hammons <markehammons@gmail.com>", //TODO: Change to romain

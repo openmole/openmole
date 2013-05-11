@@ -18,19 +18,13 @@
 package org.openmole.core.batch.replication
 
 import com.db4o.ObjectContainer
-import com.db4o.ObjectServer
 import com.db4o.ObjectSet
-import com.db4o.config.ClientServerConfiguration
 import com.db4o.cs.Db4oClientServer
-import com.db4o.defragment.Defragment
-import com.db4o.defragment.DefragmentConfig
 import com.db4o.ta.TransparentPersistenceSupport
 import com.google.common.cache.CacheBuilder
 import java.io.File
 import org.openmole.misc.replication.DBServerInfo
 import org.openmole.misc.replication.Replica
-import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.misc.tools.service.LockRepository
 import org.openmole.misc.tools.service.Logger
 import java.util.regex.Pattern
 import org.openmole.core.batch.control._
@@ -38,19 +32,9 @@ import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.environment.BatchEnvironment._
 import org.openmole.misc.tools.service.TimeCache
-import org.openmole.misc.updater.Updater
 import org.openmole.misc.workspace.ConfigurationLocation
-import org.openmole.misc.exception.InternalProcessingError
-import org.openmole.misc.hashservice.HashService._
 import org.openmole.misc.workspace.Workspace
 import scala.collection.JavaConversions._
-import scala.collection.immutable.TreeMap
-import scala.collection.immutable.TreeSet
-import scala.collection.mutable.HashMap
-import scala.collection.mutable.HashSet
-import scala.collection.mutable.ListBuffer
-import java.net.URI
-import java.util.concurrent.Callable
 import java.util.concurrent.TimeUnit
 
 object ReplicaCatalog extends Logger {

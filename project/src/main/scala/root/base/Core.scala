@@ -26,7 +26,7 @@ package object core extends BaseDefaults {
 
   lazy val batch = OsgiProject("org.openmole.core.batch", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (implementation,
     provided(workspace), provided(misc.tools), provided(eventDispatcher), replication, db4o, provided(updater), provided(misc.exception),
-    serializer, jasypt, provided(fileService), provided(hashService), pluginManager, iceTar % "provided", gridscale % "provided",
+    serializer, jasypt, provided(fileService), provided(hashService), pluginManager, iceTar % "provided", gridscale,
     guava, apache.config)
 
 }

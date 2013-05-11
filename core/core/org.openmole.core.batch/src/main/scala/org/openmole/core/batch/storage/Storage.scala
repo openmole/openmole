@@ -22,10 +22,7 @@ import fr.iscpif.gridscale.storage.FileType
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
-import java.net.URI
 import java.util.UUID
-import org.openmole.core.batch.control._
-import org.openmole.core.batch.environment._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.workspace._
 
@@ -41,7 +38,6 @@ object Storage {
   def uniqName(prefix: String, sufix: String) = prefix + "_" + UUID.randomUUID.toString + sufix
 }
 
-import Storage._
 
 trait Storage {
 
