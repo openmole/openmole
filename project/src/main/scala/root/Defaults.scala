@@ -9,6 +9,7 @@ import util.matching.Regex
 import com.typesafe.sbt.SbtScalariform.{ scalariformSettings, ScalariformKeys }
 
 import scalariform.formatter.preferences._
+import sbt.inc.Analysis
 
 /**
  * Created with IntelliJ IDEA.
@@ -65,7 +66,8 @@ trait Defaults extends Build {
       publishArtifact in (packageDoc in install) := false,
       publishArtifact in (packageSrc in install) := false,
       copyDependencies := false,
-      //exportJars := true,
+      scalacOptions ++= Seq("-feature", "-language:reflectiveCalls", "-language:implicitConversions",
+        "-language:existentials", "-language:postfixOps", "-Yinline-warnings"), //TODO: Find out why optimize fails to compile
       //offline := true,
       osgiVersion := "3.8.2.v20130124-134944",
       //openMoleStandardVer := "0.8.0-RC3", //workaround for copy dep task issue
@@ -76,6 +78,8 @@ trait Defaults extends Build {
     )
 
   def gcTask = { System.gc(); System.gc(); System.gc() }
+
+  def Aggregator(name: String) = Project(name, dir) settings (compile in Compile := Analysis.Empty)
 
   def copyDepTask(updateReport: UpdateReport, version: String, out: File,
                   scalaVer: String, subDir: String,

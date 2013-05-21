@@ -174,12 +174,12 @@ package object application extends Defaults {
     dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
 
   lazy val openmoleResources = AssemblyProject("package", "") settings
-    (resourceDirectory := file("application/resources"), copyResTask, assemble <<= assemble dependsOn (resourceAssemble),
+    (resourceDirectory <<= baseDirectory / "resources", copyResTask, assemble <<= assemble dependsOn (resourceAssemble),
       dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
 
   lazy val openMoleDB = AssemblyProject("package", "dbserver/lib") settings (libraryDependencies <+= (version)
     { v ⇒ "org.openmole.core" %% "org.openmole.runtime.dbserver" % v },
-    copyResTask, resourceDirectory := file("application/db-resources"), assemble <<= assemble dependsOn (resourceAssemble),
+    copyResTask, resourceDirectory <<= baseDirectory / "db-resources", assemble <<= assemble dependsOn (resourceAssemble),
     resourceOutDir := Option("dbserver/bin"))
 
   lazy val openmoleRuntime = AssemblyProject("runtime", "plugins") settings (copyResTask, resourceDirectory <<= baseDirectory / "resources",
@@ -191,7 +191,7 @@ package object application extends Defaults {
     resourceOutDir := Option("."))
 
   lazy val rpm = AssemblyProject("package", "packages") settings (packagerSettings: _*) settings (
-    maintainer in Debian := "Mark Hammons <markehammons@gmail.com>", //TODO: Change to romain
+    maintainer in Debian := "Romain Reuillon <romain@reuillon.org>",
     maintainer in Rpm <<= maintainer in Debian,
     packageSummary in Linux := "Open MOdeL Experiment workflow engine",
     packageDescription in Rpm := """This package contains the OpenMole executable, an easy to use system for massively parrelel computation.""",

@@ -23,8 +23,8 @@ import collection._
 
 trait IMole {
   def root: ICapsule
-  def transitions: Iterable[ITransition]
-  def dataChannels: Iterable[IDataChannel]
+  def transitions: Traversable[ITransition]
+  def dataChannels: Traversable[IDataChannel]
 
   lazy val slots = (Slot(root) :: transitions.map(_.end).toList).groupBy(_.capsule).mapValues(_.toSet).withDefault(c ⇒ Iterable.empty)
   lazy val capsules = slots.keys

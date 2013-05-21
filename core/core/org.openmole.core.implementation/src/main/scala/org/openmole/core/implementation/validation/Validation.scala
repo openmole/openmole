@@ -23,7 +23,6 @@ import org.openmole.core.model.mole._
 import TypeUtil.computeManifests
 import scala.collection.immutable.TreeMap
 import org.openmole.core.model.task._
-import org.openmole.misc.tools.obj.ClassUtils._
 import DataflowProblem._
 import TopologyProblem._
 import scala.collection.mutable.HashMap
@@ -33,13 +32,13 @@ object Validation {
 
   def allMoles(mole: IMole) =
     (mole, None) ::
-      mole.capsules.flatMap {
+      mole.capsules.flatMap(
         c ⇒
           c.task match {
             case mt: IMoleTask ⇒ Some(mt.mole -> Some(mt -> c))
             case _             ⇒ None
           }
-      }.toList
+      ).toList
 
   private def paramsToMap(params: Iterable[Parameter[_]]) =
     params.map {
