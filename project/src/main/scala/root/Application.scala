@@ -12,7 +12,7 @@ package object application extends Defaults {
   override lazy val org = organization := "org.openmole.ui"
   implicit val dir = file("application")
   lazy val all = Project("application", file("application")) aggregate (plugins, openmoleui,
-    openmolePlugins, openmoleGuiPlugins, openmoleResources, openMoleDB, openmoleRuntime)
+    openmolePlugins, openmoleGuiPlugins, openmoleResources, openMoleDB, openmoleRuntime, openmoleDaemon)
 
   private lazy val pluginDependencies = libraryDependencies := Seq(
     "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841" intransitive (),
@@ -184,6 +184,10 @@ package object application extends Defaults {
 
   lazy val openmoleRuntime = AssemblyProject("runtime", "plugins") settings (copyResTask, resourceDirectory <<= baseDirectory / "resources",
     libraryDependencies <+= (version) { "org.openmole.core" %% "org.openmole.runtime.runtime" % _ }, assemble <<= assemble dependsOn resourceAssemble,
+    resourceOutDir := Option("."))
+
+  lazy val openmoleDaemon = AssemblyProject("daemon", "plugins") settings (copyResTask, resourceDirectory <<= baseDirectory / "resources",
+    libraryDependencies <+= (version) { "org.openmole.core" %% "org.openmole.runtime.daemon" % _ }, assemble <<= assemble dependsOn resourceAssemble,
     resourceOutDir := Option("."))
 
   lazy val rpm = AssemblyProject("package", "packages") settings (packagerSettings: _*) settings (
