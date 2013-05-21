@@ -115,8 +115,7 @@ object GliteEnvironment extends Logger {
 
   Workspace += (DefaultBDII, "ldap://cclcgtopbdii02.in2p3.fr:2170")
 
-
-  def apply (
+  def apply(
     voName: String,
     bdii: Option[String] = None,
     vomsURL: Option[String] = None,
@@ -150,19 +149,19 @@ object GliteEnvironment extends Logger {
 
 class GliteEnvironment(
     val voName: String,
-        val bdii: String,
-        val vomsURL: String,
-        val fqan: Option[String],
-        override val openMOLEMemory: Option[Int],
-        val memory: Option[Int],
-        val cpuTime: Option[String],
-        val wallTime: Option[String],
-        val cpuNumber: Option[Int],
-        val jobType: Option[String],
-        val smpGranularity: Option[Int],
-        val myProxy: Option[MyProxy],
-        val architecture: Option[String],
-        override val threads: Option[Int]) extends BatchEnvironment with MemoryRequirement { env ⇒
+    val bdii: String,
+    val vomsURL: String,
+    val fqan: Option[String],
+    override val openMOLEMemory: Option[Int],
+    val memory: Option[Int],
+    val cpuTime: Option[String],
+    val wallTime: Option[String],
+    val cpuNumber: Option[Int],
+    val jobType: Option[String],
+    val smpGranularity: Option[Int],
+    val myProxy: Option[MyProxy],
+    val architecture: Option[String],
+    override val threads: Option[Int]) extends BatchEnvironment with MemoryRequirement { env ⇒
 
   import GliteEnvironment._
 
@@ -295,7 +294,8 @@ class GliteEnvironment(
             if (s.id != jobService.id)
           } s.releaseToken(t)
           jobService -> token
-        } else retry
+        }
+        else retry
 
       }
     }
@@ -349,7 +349,8 @@ class GliteEnvironment(
             if (s.id != storage.id)
           } s.releaseToken(t)
           storage -> token
-        } else retry
+        }
+        else retry
       }
 
     }

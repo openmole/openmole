@@ -33,7 +33,7 @@ case class MapDomainDataUI(val prototypeName: String = "",
 
   def domainType = previousDomain.headOption match {
     case Some(d: IDomainDataUI) ⇒ d.domainType
-    case _ ⇒ manifest[Double]
+    case _                      ⇒ manifest[Double]
   }
 
   val name = "Map"
@@ -54,6 +54,6 @@ case class MapDomainDataUI(val prototypeName: String = "",
 
   def clone(pD: List[IDomainDataUI]) = pD.headOption match {
     case Some(d: IDomainDataUI) ⇒ MapDomainDataUI(prototypeName, code, pD)
-    case _ ⇒ MapDomainDataUI(prototypeName, code, List())
+    case _                      ⇒ MapDomainDataUI(prototypeName, code, List())
   }
 }

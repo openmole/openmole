@@ -32,7 +32,7 @@ class ByGrouping(numberOfMoleJobs: Int) extends Grouping {
   override def apply(context: Context, groups: Iterable[(IMoleJobGroup, Iterable[IMoleJob])]): IMoleJobGroup = {
     groups.find { case (_, g) ⇒ g.size < numberOfMoleJobs } match {
       case Some((mg, _)) ⇒ mg
-      case None ⇒ MoleJobGroup()
+      case None          ⇒ MoleJobGroup()
     }
   }
 

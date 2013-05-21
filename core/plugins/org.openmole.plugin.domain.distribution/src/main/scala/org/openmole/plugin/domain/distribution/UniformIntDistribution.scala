@@ -35,7 +35,7 @@ sealed class UniformIntDistribution(max: Option[Int] = None) extends Domain[Int]
     Iterator.continually {
       max match {
         case Some(i) ⇒ rng.nextInt(i)
-        case None ⇒ rng.nextInt
+        case None    ⇒ rng.nextInt
       }
     }
   }

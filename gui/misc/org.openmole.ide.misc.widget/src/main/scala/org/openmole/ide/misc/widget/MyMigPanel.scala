@@ -28,7 +28,7 @@ class MyMigPanel(mig1: String, mig2: String = "", mig3: String = "") extends Mig
     contents.foreach(c ⇒ c match {
       case x: TextField ⇒ x.foreground = Color.BLACK
       case x: UIElement ⇒ x.foreground = Color.WHITE
-      case _ ⇒
+      case _            ⇒
     })
   }
 }

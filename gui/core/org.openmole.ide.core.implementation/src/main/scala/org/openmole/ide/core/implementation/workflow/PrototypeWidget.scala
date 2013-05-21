@@ -34,7 +34,7 @@ import scala.swing.Label
 object PrototypeWidget {
   def green(scene: IMoleScene) = scene match {
     case y: BuildMoleScene ⇒ new Color(180, 200, 7, 220)
-    case _ ⇒ new Color(44, 137, 160, 64)
+    case _                 ⇒ new Color(44, 137, 160, 64)
   }
 
   val grey = new Color(180, 180, 180)

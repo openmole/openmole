@@ -25,7 +25,7 @@ object DBServerInfo {
   val base = {
     val dir = Option(System.getenv("OPENMOLE_HOME")) match {
       case Some(path) ⇒ new File(path)
-      case None ⇒ new File(System.getProperty("user.home"), ".openmole")
+      case None       ⇒ new File(System.getProperty("user.home"), ".openmole")
     }
     dir.mkdirs
     dir

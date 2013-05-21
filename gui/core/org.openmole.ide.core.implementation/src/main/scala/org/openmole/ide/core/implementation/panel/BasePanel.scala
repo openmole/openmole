@@ -53,7 +53,7 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
 
   proxy match {
     case Some(p: IDataProxyUI) ⇒ nameTextField.text = p.dataUI.name
-    case _ ⇒
+    case _                     ⇒
   }
 
   val createLabelLink = new MainLinkLabel("create", new Action("") { def apply = baseCreate })
@@ -101,8 +101,8 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
 
   def setTab(proxy: IDataProxyUI) = tabbedPane.selection.index = proxy match {
     case p: ISamplingCompositionDataProxyUI ⇒ 0
-    case p: IPrototypeDataProxyUI ⇒ 1
-    case _ ⇒ 1
+    case p: IPrototypeDataProxyUI           ⇒ 1
+    case _                                  ⇒ 1
   }
 
   def refreshPanel = {
@@ -134,7 +134,7 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
 
   def publishCreation = proxy match {
     case Some(x: IDataProxyUI) ⇒ publish(new UpdatedProxyEvent(x, this))
-    case _ ⇒
+    case _                     ⇒
   }
 
   def baseSave: Unit = {
@@ -142,11 +142,11 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
     scene.manager.invalidateCache
     proxy match {
       case Some(p: IDataProxyUI) ⇒ ConceptMenu.refreshItem(p)
-      case _ ⇒
+      case _                     ⇒
     }
     ScenesManager.currentSceneContainer match {
       case Some(x: ISceneContainer) ⇒ CheckData.checkMole(x.scene)
-      case None ⇒
+      case None                     ⇒
     }
   }
 }

@@ -66,7 +66,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         c ⇒
           c.dataUI.task match {
             case Some(t: ITaskDataProxyUI) ⇒
-            case _ ⇒
+            case _                         ⇒
           }
       }
 
@@ -140,17 +140,17 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
 
   def moleExecution = executionManager match {
     case Some(x: ExecutionManager) ⇒ x.moleExecution
-    case _ ⇒ None
+    case _                         ⇒ None
   }
 
   def started = moleExecution match {
     case Some(me: MoleExecution) ⇒ me.started
-    case _ ⇒ false
+    case _                       ⇒ false
   }
 
   def finished = moleExecution match {
     case Some(me: MoleExecution) ⇒ me.finished
-    case _ ⇒ false
+    case _                       ⇒ false
   }
 
   class ExecutionPanel extends Panel {

@@ -38,7 +38,8 @@ abstract class BasicOrderEffectTaskPanelUI(inputSequence: Iterable[IPrototypeDat
           new ComboPanel(doublePrototypes,
             new ComboData(Some(is)))
         }.toList))
-    } else None
+    }
+    else None
 
   val outputPrototypeCombo: Option[MultiCombo[IPrototypeDataProxyUI]] =
     if (!doublePrototypes.isEmpty) {
@@ -48,13 +49,15 @@ abstract class BasicOrderEffectTaskPanelUI(inputSequence: Iterable[IPrototypeDat
           new ComboPanel(doublePrototypes,
             new ComboData(Some(is)))
         }.toList))
-    } else None
+    }
+    else None
 
   val components = List(("Settings",
     new PluginPanel("wrap 2") {
       if (inputPrototypeCombo.isDefined && outputPrototypeCombo.isDefined) {
         contents += inputPrototypeCombo.get.panel
         add(outputPrototypeCombo.get.panel, "gap bottom 40")
-      } else add(new Label("No Double Prototypes defined"), "gap bottom 40")
+      }
+      else add(new Label("No Double Prototypes defined"), "gap bottom 40")
     }))
 }

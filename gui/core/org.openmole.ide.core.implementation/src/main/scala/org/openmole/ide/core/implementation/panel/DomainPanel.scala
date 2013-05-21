@@ -43,7 +43,7 @@ class DomainPanel(domainWidget: IDomainWidget,
 
   listenTo(panelUI.help.components.toSeq: _*)
   reactions += {
-    case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
+    case FocusGained(source: Component, _, _)     ⇒ panelUI.help.switchTo(source)
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
   }
 
@@ -54,7 +54,8 @@ class DomainPanel(domainWidget: IDomainWidget,
   def save = try {
     domainWidget.proxy.dataUI = panelUI.saveContent
     domainWidget.update
-  } catch {
+  }
+  catch {
     case e: UserBadDataError ⇒ StatusBar().block(e.getMessage, stack = e.getCause.getMessage)
   }
 

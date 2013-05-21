@@ -127,7 +127,8 @@ object SerializerService extends Logger {
               dest.delete
 
               extractedDir
-            } else dest)
+            }
+            else dest)
       }
 
     val contentFile = new File(extractDir, content)
@@ -161,7 +162,8 @@ object SerializerService extends Logger {
               finally outputStream.close
 
               toArchive
-            } else file
+            }
+            else file
 
           if (toArchive.exists)
             tos.addFile(toArchive, name.toString)
@@ -173,7 +175,8 @@ object SerializerService extends Logger {
       serialize(fileInfo, filesInfoSerial)
       tos.addFile(filesInfoSerial, filesInfo)
       filesInfoSerial.delete
-    } finally tos.close
+    }
+    finally tos.close
   }
 
   def serializeFilePathAsHashGetFiles(obj: Any, file: File): Map[File, FileInfo] = lock.read {

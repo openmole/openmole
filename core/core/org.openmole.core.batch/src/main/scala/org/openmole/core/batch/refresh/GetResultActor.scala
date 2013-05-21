@@ -93,7 +93,8 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
     try {
       signalDownload(storage.downloadGZ(outputFilePath, resultFile), outputFilePath, storage)
       SerializerService.deserialize(resultFile)
-    } finally resultFile.delete
+    }
+    finally resultFile.delete
   }
 
   private def display(message: Option[FileMessage], description: String, storage: StorageService)(implicit token: AccessToken) = {
@@ -115,8 +116,10 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
               try fis.copy(System.out) finally fis.close
               System.out.println("-------------------------------------------------------")
             }
-          } finally tmpFile.delete
-        } catch {
+          }
+          finally tmpFile.delete
+        }
+        catch {
           case (e: IOException) ⇒
             GetResultActor.logger.log(WARNING, description + " transfer has failed.")
             GetResultActor.logger.log(FINE, "Stack of the error during tranfert", e)
@@ -132,7 +135,8 @@ class GetResultActor(jobManager: ActorRef) extends Actor {
       signalDownload(storage.downloadGZ(resultPath.path, contextResutsFileCache), resultPath.path, storage)
       if (HashService.computeHash(contextResutsFileCache) != resultPath.hash) throw new InternalProcessingError("Results have been corrupted during the transfer.")
       SerializerService.deserializeAndExtractFiles(contextResutsFileCache)
-    } finally contextResutsFileCache.delete
+    }
+    finally contextResutsFileCache.delete
   }
 
 }

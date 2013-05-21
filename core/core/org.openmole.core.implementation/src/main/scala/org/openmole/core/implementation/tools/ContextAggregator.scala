@@ -38,10 +38,12 @@ object ContextAggregator {
           val array = manifest.newArray(merging.size)
           merging.zipWithIndex.foreach { e ⇒ java.lang.reflect.Array.set(array, e._2, e._1.value) }
           Variable(Prototype(d.prototype.name)(manifest.arrayManifest).asInstanceOf[Prototype[Any]], array) :: acc
-        } else if (!merging.isEmpty) {
+        }
+        else if (!merging.isEmpty) {
           if (merging.size > 1) throw new InternalProcessingError("Variable " + d.prototype + " has been found multiple times, it doesn't match data flow specification.")
           Variable(d.prototype.asInstanceOf[Prototype[Any]], merging.head.value) :: acc
-        } else acc
+        }
+        else acc
     }.toContext
   }
 

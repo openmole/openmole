@@ -52,7 +52,8 @@ class RangeDomainPanelUI(pud: RangeDomainDataUI[_]) extends GenericRangeDomainPa
     if (stepCheckBox.selected) {
       if (stepField.text.isEmpty) None
       else Some(stepField.text)
-    } else None
+    }
+    else None
   }
 
   def saveContent = GenericRangeDomainDataUI(minField.text,

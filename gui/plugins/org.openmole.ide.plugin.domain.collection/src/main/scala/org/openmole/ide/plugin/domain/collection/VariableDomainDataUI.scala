@@ -34,8 +34,8 @@ import org.openmole.misc.tools.obj.ClassUtils
 object VariableDomainDataUI {
   def apply[T](prototypeArray: Option[IPrototypeDataProxyUI], classString: String) = {
     new VariableDomainDataUI(prototypeArray)(ClassUtils.manifest(classString))
-    }
   }
+}
 
 class VariableDomainDataUI[S](val prototypeArray: Option[IPrototypeDataProxyUI] = None)(implicit val domainType: Manifest[S])
     extends IDomainDataUI with IFinite {
@@ -45,7 +45,7 @@ class VariableDomainDataUI[S](val prototypeArray: Option[IPrototypeDataProxyUI] 
 
   def coreObject = prototypeArray match {
     case Some(p: IPrototypeDataProxyUI) ⇒ new VariableDomain(p.dataUI.coreObject.asInstanceOf[Prototype[Array[S]]])
-    case _ ⇒ throw new UserBadDataError("An array of Prototypes is required for a Prototype Array Domain")
+    case _                              ⇒ throw new UserBadDataError("An array of Prototypes is required for a Prototype Array Domain")
   }
 
   def buildPanelUI = new VariableDomainPanelUI(this)

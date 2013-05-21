@@ -42,7 +42,7 @@ abstract class DeleteFileHook(toDelete: Prototype[File]*) extends Hook {
       prototype ⇒
         context.option(prototype) match {
           case Some(file) ⇒ file.recursiveDelete
-          case None ⇒ throw new UserBadDataError("No variable " + prototype + " found.")
+          case None       ⇒ throw new UserBadDataError("No variable " + prototype + " found.")
         }
     }
     context

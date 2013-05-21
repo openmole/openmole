@@ -109,7 +109,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
         "Prototype")).equals(NotifyDescriptor.OK_OPTION)) {
         connectorWidget.factorProxyUI match {
           case Some(f: IFactorProxyUI) ⇒ f.dataUI.prototype = Some(protoCombo.selection.item)
-          case _ ⇒
+          case _                       ⇒
         }
         connectorWidget.update
       }

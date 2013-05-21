@@ -68,7 +68,8 @@ object HashService {
 
       try {
         f.get(timeout, TimeUnit.MILLISECONDS)
-      } catch {
+      }
+      catch {
         case (e: TimeoutException) ⇒
           f.cancel(true)
           throw new IOException("Timout on reading, read was longer than " + timeout, e)

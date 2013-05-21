@@ -69,7 +69,8 @@ trait SlickSupport extends ScalatraServlet {
 
   try {
     Class.forName("org.h2.Driver")
-  } catch {
+  }
+  catch {
     case e: ClassNotFoundException ⇒ println("Suffered irrecoverable error: " + e)
   }
 

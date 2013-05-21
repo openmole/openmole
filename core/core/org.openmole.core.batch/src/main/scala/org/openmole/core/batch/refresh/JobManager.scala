@@ -78,12 +78,12 @@ akka {
   val deleter = workers.actorOf(Props(new DeleteActor(self)).withRouter(SmallestMailboxRouter(Workspace.preferenceAsInt(JobManagmentThreads))))
 
   def receive = {
-    case msg: Upload ⇒ uploader ! msg
-    case msg: Submit ⇒ submitter ! msg
-    case msg: Refresh ⇒ refresher ! msg
-    case msg: GetResult ⇒ resultGetters ! msg
-    case msg: KillBatchJob ⇒ killer ! msg
-    case msg: DeleteFile ⇒ deleter ! msg
+    case msg: Upload             ⇒ uploader ! msg
+    case msg: Submit             ⇒ submitter ! msg
+    case msg: Refresh            ⇒ refresher ! msg
+    case msg: GetResult          ⇒ resultGetters ! msg
+    case msg: KillBatchJob       ⇒ killer ! msg
+    case msg: DeleteFile         ⇒ deleter ! msg
     case msg: CleanSerializedJob ⇒ cleaner ! msg
 
     case Delay(msg, delay) ⇒
@@ -106,9 +106,9 @@ akka {
 
     case Error(job, exception) ⇒
       val level = exception match {
-        case e: UserBadDataError ⇒ SEVERE
+        case e: UserBadDataError            ⇒ SEVERE
         case e: JobRemoteExecutionException ⇒ WARNING
-        case _ ⇒ FINE
+        case _                              ⇒ FINE
       }
       EventDispatcher.trigger(job.environment: Environment, new Environment.ExceptionRaised(job, exception, level))
       JobManager.logger.log(level, "Error in job refresh", exception)

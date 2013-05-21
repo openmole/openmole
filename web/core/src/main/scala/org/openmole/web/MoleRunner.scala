@@ -39,21 +39,23 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
       "Finished"
   }
 
-  def processXMLFile[A: ClassTag](file: Option[FileItem], is: Option[InputStream]): (Option[A], String) = {
+  def processXMLFile[A: ClassTag](file: Option[FileItem], is: Option[InputStream]): (Option[A], String) = { //Make Either[A, String], use Scala-arm.
     file match {
       case Some(data) ⇒
         if (data.getContentType.isDefined && data.getContentType.get == "text/xml") {
           try {
             val ret = is.map(SerializerService.deserialize[A](_))
-            if(!ret.forall(evidence$1.runtimeClass.isInstance(_)))
+            if (!ret.forall(evidence$1.runtimeClass.isInstance(_)))
               None -> s"The uploaded xml is not a subtype of the type you wished to deserialize to: ${evidence$1.runtimeClass} vs ${ret.get.getClass}"
             else
               ret -> ""
-          } catch {
-            case e: CannotResolveClassException ⇒ None -> "The uploaded xml was not a valid serialized object."
-            case c: ClassCastException ⇒ None -> "Blargh"
           }
-        } else
+          catch {
+            case e: CannotResolveClassException ⇒ None -> "The uploaded xml was not a valid serialized object."
+            case c: ClassCastException          ⇒ None -> "Blargh"
+          }
+        }
+        else
           None -> "The uploaded data was not of type text/xml"
       case None ⇒ None -> "No data was uploaded."
     }
@@ -103,7 +105,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
         contentType = "text/html"
 
-        val moleExec = processXMLFile[(Context,ExecutionContext) => IMoleExecution](data, inS)
+        val moleExec = processXMLFile[(Context, ExecutionContext) ⇒ IMoleExecution](data, inS)
 
         val context = new ExecutionContext(new PrintStream(new File("./out")), null)
 
@@ -165,7 +167,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
           MoleData.filter(_.id === pRams).map(_.clobbedMole).list().headOption match {
             case Some(head) ⇒ Some(SerializerService.deserialize[IMoleExecution](head.getAsciiStream))
-            case _ ⇒ None
+            case _          ⇒ None
           }
         }
 
@@ -182,9 +184,9 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
         }
 
         (cachedMoles.get(pRams), mole) match {
-          case (Some(exec), _) ⇒ returnStatusPage(exec)
+          case (Some(exec), _)    ⇒ returnStatusPage(exec)
           case (None, Some(exec)) ⇒ cachedMoles.add(exec.id, exec); returnStatusPage(exec)
-          case _ ⇒ ssp("createMole", "body" -> mole.toString)
+          case _                  ⇒ ssp("createMole", "body" -> mole.toString)
         }
 
       }
@@ -219,13 +221,13 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
     contentType = "text/html"
 
     new AsyncResult() {
-      val is = Future{
+      val is = Future {
         val exec = cachedMoles.get(params("id"))
         println(exec)
 
-        val res = exec map {x => x.start; "started" }
+        val res = exec map { x ⇒ x.start; "started" }
 
-        <exec-result> {res.getOrElse("id didn't exist")} </exec-result>
+        <exec-result> { res.getOrElse("id didn't exist") } </exec-result>
       }
     }
   }

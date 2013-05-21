@@ -53,7 +53,7 @@ class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends PluginPanel("wrap"
     multiComboTextField.content.filter {
       _.comboValue match {
         case Some(v: IPrototypeDataProxyUI) ⇒ true
-        case _ ⇒ false
+        case _                              ⇒ false
       }
     }.map { m ⇒ (KeyRegistry.protoProxyKeyMap(KeyPrototypeGenerator(m.comboValue.get)), m.textFieldValue) })
 

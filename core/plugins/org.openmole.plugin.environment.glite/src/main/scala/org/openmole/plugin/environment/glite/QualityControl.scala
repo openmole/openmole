@@ -40,7 +40,8 @@ trait QualityControl {
       val ret = op
       success
       ret
-    } catch {
+    }
+    catch {
       case e: Throwable ⇒
         failed
         throw e

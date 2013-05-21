@@ -69,7 +69,8 @@ object VariableExpansion {
             if (curChar == patternEnd) {
               if (curLevel == 0) break
               curLevel -= 1
-            } else if (curChar == patternBegin) {
+            }
+            else if (curChar == patternBegin) {
               curLevel += 1
             }
             cur += 1
@@ -79,7 +80,8 @@ object VariableExpansion {
         if (cur < ret.length) {
           val toInsert = expandOneData(allVariables, getVarName(ret.substring(beginIndex + 1, cur + 1)))
           ret = ret.substring(0, beginIndex) + toInsert + ret.substring(cur + 1)
-        } else break
+        }
+        else break
       } while (true)
     }
 
@@ -108,7 +110,7 @@ object VariableExpansion {
 
         ret = replace.get(varName) match {
           case Some(toInsert) ⇒ ret.substring(0, beginIndex) + toInsert + ret.substring(endIndex + 1)
-          case None ⇒ ret.substring(0, beginIndex) + ret.substring(endIndex + 1)
+          case None           ⇒ ret.substring(0, beginIndex) + ret.substring(endIndex + 1)
         }
       } while (true)
     }
@@ -166,7 +168,8 @@ object VariableExpansion {
               else if (n != '$') oswriter.write(UTF16.valueOf(n))
           }
       }
-    } finally oswriter.close
+    }
+    finally oswriter.close
   }
 
   implicit def stringExpansionDecorator(s: String) = new {

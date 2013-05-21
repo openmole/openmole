@@ -47,7 +47,7 @@ class MultiWidget[S, T <: IRowWidget[S]](title: String = "",
   val panel = new PluginPanel("wrap " + {
     rWidgets.headOption match {
       case Some(x: IRowWidget[T]) ⇒ if (x.plusAllowed == ADD) 1 else 0
-      case _ ⇒ 0
+      case _                      ⇒ 0
     }
   }.toString + ", insets 0 5 0 5")
   val titleLabel = new Label(title) { foreground = new Color(0, 113, 187) }

@@ -51,11 +51,12 @@ class HierarchicalRegistry[T] {
 
             if (curProc._2 == cur._2 && !seen.contains(curProc._1)) {
               registry.get(curProc._1) match {
-                case None ⇒
+                case None            ⇒
                 case Some(registred) ⇒ result += registred
               }
               seen += curProc._1
-            } else {
+            }
+            else {
               toProceed.clear
             }
           }

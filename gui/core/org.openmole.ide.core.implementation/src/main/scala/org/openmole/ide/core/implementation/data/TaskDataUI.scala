@@ -34,6 +34,6 @@ abstract class TaskDataUI extends ITaskDataUI {
   def implicitPrototypes: (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI]) =
     MoleFactory.taskCoreObject(this) match {
       case Success(x: ITask) ⇒ ToolDataUI.implicitPrototypes(y ⇒ x.inputs.map { _.prototype }.toList, inputs, y ⇒ x.outputs.map { _.prototype }.toList, outputs)
-      case Failure(_) ⇒ (List(), List())
+      case Failure(_)        ⇒ (List(), List())
     }
 }

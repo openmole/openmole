@@ -58,7 +58,7 @@ object MoleFactory {
       val envs = capsuleMapping.flatMap { c ⇒
         c._1.dataUI.environment match {
           case Some(env: IEnvironmentDataProxyUI) ⇒ List((c._2, env.dataUI.coreObject, env.dataUI.name))
-          case _ ⇒ Nil
+          case _                                  ⇒ Nil
         }
       }
 
@@ -70,7 +70,7 @@ object MoleFactory {
         capsuleMapping.flatMap { c ⇒
           c._1.dataUI.grouping match {
             case Some(gr: IGroupingDataUI) ⇒ List(c._2 -> gr.coreObject)
-            case _ ⇒ Nil
+            case _                         ⇒ Nil
           }
         }), envs.map { case (_, e, n) ⇒ e -> n })
     }
@@ -103,7 +103,8 @@ object MoleFactory {
         }
         val (transitions, dataChannels, islotsMap) = buildConnectors(capsuleMap, prototypeMap)
         (new Mole(capsuleMap(manager.startingCapsule.get), transitions, dataChannels), capsuleMap, prototypeMap, errors)
-      } else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")
+      }
+      else throw new UserBadDataError("No starting capsule is defined. The mole construction is not possible. Please define a capsule as a starting capsule.")
     }
 
   def samplingMapping: Map[ISamplingCompositionDataProxyUI, Sampling] = Proxies.instance.samplings.map {
@@ -144,9 +145,10 @@ object MoleFactory {
           val (msg, obj) = TypeCheck(v, proto)
           obj match {
             case Some(x: Object) ⇒ Some(Parameter(proto.asInstanceOf[Prototype[Any]], x))
-            case _ ⇒ None
+            case _               ⇒ None
           }
-        } else None
+        }
+        else None
     }.toList)
 
   def inputs(capsuleDataUI: ICapsuleDataUI): DataSet = inputs(capsuleDataUI.task.get.dataUI)
@@ -172,7 +174,8 @@ object MoleFactory {
                   Some(buildTransition(capsuleMap(x.source),
                     islotsMap.getOrElseUpdate(x.target, Slot(capsuleMap(x.target.capsule))),
                     x, prototypeMap))
-                } else None
+                }
+                else None
               case _ ⇒ None
             }
           }

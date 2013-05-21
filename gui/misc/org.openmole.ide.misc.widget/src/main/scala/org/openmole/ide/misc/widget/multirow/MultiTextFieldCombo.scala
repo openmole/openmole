@@ -32,7 +32,7 @@ object MultiTextFieldCombo {
     val comboBox = new MyComboBox(comboContent.sortBy { _.toString }) {
       data.comboValue match {
         case Some(x: B) ⇒ selection.item = x
-        case _ ⇒
+        case _          ⇒
       }
     }
 

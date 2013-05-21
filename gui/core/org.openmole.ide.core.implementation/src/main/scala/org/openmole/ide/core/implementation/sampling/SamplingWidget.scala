@@ -44,7 +44,7 @@ class SamplingWidget(val proxy: ISamplingProxyUI,
     new Action("") {
       def apply = ScenesManager.currentSceneContainer match {
         case Some(s: ISceneContainer) ⇒ s.scene.displayPropertyPanel(samplingWidget)
-        case _ ⇒
+        case _                        ⇒
       }
     },
     3,

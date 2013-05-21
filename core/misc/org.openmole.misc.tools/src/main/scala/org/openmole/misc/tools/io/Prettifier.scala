@@ -34,11 +34,11 @@ object Prettifier extends Logger {
 
   def prettify(o: Any, snipArray: Int = Int.MaxValue): String =
     try o match {
-      case null ⇒ "null"
-      case o: Array[_] ⇒ snip(o, snipArray)
-      case o: Iterable[_] ⇒ snip(o, snipArray)
+      case null                     ⇒ "null"
+      case o: Array[_]              ⇒ snip(o, snipArray)
+      case o: Iterable[_]           ⇒ snip(o, snipArray)
       case o: java.lang.Iterable[_] ⇒ snip(o, snipArray)
-      case o ⇒ o.toString
+      case o                        ⇒ o.toString
     } catch {
       case t: Throwable ⇒
         logger.log(WARNING, "Error during pretification", t)

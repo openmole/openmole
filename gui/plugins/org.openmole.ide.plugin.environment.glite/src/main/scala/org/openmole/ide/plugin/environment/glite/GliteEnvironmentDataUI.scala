@@ -34,8 +34,8 @@ class GliteEnvironmentDataUI(val name: String = "",
 
   def coreObject = {
 
-    if (vo == "" ) throw new UserBadDataError(s"The VO in glite environment $name is not properly set")
-    if (voms == "" ) throw new UserBadDataError(s"The VOMs in glite environment $name is not properly set")
+    if (vo == "") throw new UserBadDataError(s"The VO in glite environment $name is not properly set")
+    if (voms == "") throw new UserBadDataError(s"The VOMs in glite environment $name is not properly set")
     if (bdii == "") throw new UserBadDataError(s"The BDII in glite environment $name is not properly set")
     val myProxy = {
       if (proxy && proxyTime.isDefined && proxyHost.isDefined) Some(new MyProxy(proxyTime.get, proxyHost.get, proxyPort))
@@ -57,7 +57,8 @@ class GliteEnvironmentDataUI(val name: String = "",
         myProxy = myProxy,
         architecture = if (architecture) Some("x86_64") else None,
         threads = threads)
-    } catch {
+    }
+    catch {
       case e: Throwable ⇒ throw new UserBadDataError(e, "An error occurred when initializing the glite environment " + name + ". Please check your certificate settings in the Preferences menu.")
     }
   }

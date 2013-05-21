@@ -91,14 +91,15 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
 
     listenTo(`pemButton`, `p12Button`, `proxyButton`)
     reactions += {
-      case ButtonClicked(`pemButton`) ⇒ addPem
-      case ButtonClicked(`p12Button`) ⇒ addP12
+      case ButtonClicked(`pemButton`)   ⇒ addPem
+      case ButtonClicked(`p12Button`)   ⇒ addP12
       case ButtonClicked(`proxyButton`) ⇒ addProxy
     }
 
     groupButton.select(initButton.get)
 
-  } catch { case e: Throwable ⇒ StatusBar().block(e.getMessage, stack = e.getStackTraceString) }
+  }
+  catch { case e: Throwable ⇒ StatusBar().block(e.getMessage, stack = e.getStackTraceString) }
 
   val pemPassField = Some(new PasswordField(passString, 20))
   val p12PassField = Some(new PasswordField(passString, 20))
@@ -153,7 +154,8 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
           }
       }
       (pem :: p12 :: proxy :: Nil).filterNot(_._1.selected).foreach(_._3)
-    } catch { case e: Throwable ⇒ StatusBar().block(e.getMessage, stack = e.getStackTraceString) }
+    }
+    catch { case e: Throwable ⇒ StatusBar().block(e.getMessage, stack = e.getStackTraceString) }
 
   def buildPemPanel =
     new PluginPanel("fillx,wrap 2", "[left][grow,fill]", "[center]") {

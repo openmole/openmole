@@ -45,7 +45,7 @@ class PrototypeGroovyTextFieldEditor(val editorTitle: String,
         tooltip = msg
         obj match {
           case Some(x) ⇒ EDIT
-          case None ⇒ EDIT_ERROR
+          case None    ⇒ EDIT_ERROR
         }
     }
     repaint

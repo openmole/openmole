@@ -111,8 +111,8 @@ class ConnectorWidget(val scene: IMoleScene,
         x.transitionType match {
           case EXPLORATION_TRANSITION ⇒ setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(EXPLORATION_TRANSITION_IMAGE, false))
           case AGGREGATION_TRANSITION ⇒ setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(AGGREGATION_TRANSITION_IMAGE, false))
-          case END_TRANSITION ⇒ setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(END_TRANSITION_IMAGE, false))
-          case _ ⇒
+          case END_TRANSITION         ⇒ setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(END_TRANSITION_IMAGE, false))
+          case _                      ⇒
         }
       case _ ⇒
     }
@@ -161,7 +161,7 @@ class ConnectorWidget(val scene: IMoleScene,
         text = DialogFactory.groovyEditor("Condition", text)
         connectorWidget.connector match {
           case x: ITransitionUI ⇒ x.condition = if (text.isEmpty) None else Some(text)
-          case _ ⇒
+          case _                ⇒
         }
         connectorWidget.setLabelVisible
         revalidate

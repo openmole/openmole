@@ -55,7 +55,7 @@ class UniformDistributionPanelUI(pud: UniformDistributionDataUI[_]) extends Plug
         maxPanel.contents += (new Label("Max"), "gap para")
         maxPanel.contents += (maxField, "wrap")
       case LONG ⇒ maxPanel.contents += new Label("<html><i>No more information is required for this Domain</i></html>")
-      case _ ⇒
+      case _    ⇒
     }
     revalidate
     repaint

@@ -33,6 +33,6 @@ abstract class HookDataUI extends IHookDataUI with ID {
   def implicitPrototypes: (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI]) =
     MoleFactory.buildHook(this) match {
       case (x: IHook) ⇒ ToolDataUI.implicitPrototypes(y ⇒ x.inputs.map { _.prototype }.toList, inputs, y ⇒ x.outputs.map { _.prototype }.toList, outputs)
-      case _ ⇒ (List(), List())
+      case _          ⇒ (List(), List())
     }
 }

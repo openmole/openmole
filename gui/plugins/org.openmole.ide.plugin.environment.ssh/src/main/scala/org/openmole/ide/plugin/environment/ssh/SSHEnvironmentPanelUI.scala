@@ -33,19 +33,21 @@ class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fill
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   implicit def stringToStringOpt(s: String) = s.isEmpty match {
-    case true ⇒ None
+    case true  ⇒ None
     case false ⇒ Some(s)
   }
 
   implicit def stringToIntOpt(s: String) = try {
     Some(s.toInt)
-  } catch {
+  }
+  catch {
     case e: NumberFormatException ⇒ None
   }
 
   implicit def stringToInt(s: String) = try {
     s.toInt
-  } catch {
+  }
+  catch {
     case e: NumberFormatException ⇒ 0
   }
 

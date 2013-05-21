@@ -78,7 +78,8 @@ class SimExplorer extends IApplication with Logger {
           try {
             new File(config.storage.get).copyUncompressFile(storageFile)
             SerializerService.deserializeAndExtractFiles[SimpleStorage](storageFile)
-          } finally storageFile.delete
+          }
+          finally storageFile.delete
 
         LocalEnvironment.initializationNumberOfThread = config.nbThread
 
@@ -90,7 +91,8 @@ class SimExplorer extends IApplication with Logger {
           debug)
 
       }
-    } catch {
+    }
+    catch {
       case t: Throwable ⇒ logger.log(SEVERE, "Error durring runtime execution", t)
     }
     IApplication.EXIT_OK

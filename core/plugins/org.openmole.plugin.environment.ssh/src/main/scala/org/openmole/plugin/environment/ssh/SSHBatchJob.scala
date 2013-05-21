@@ -49,7 +49,7 @@ trait SSHBatchJob extends BatchJob {
   def kill(implicit token: AccessToken) =
     id match {
       case Some(Success(id)) ⇒ super.kill(id)
-      case _ ⇒ state = KILLED
+      case _                 ⇒ state = KILLED
     }
 
 }

@@ -27,7 +27,8 @@ class UpdaterTask(val updatable: IUpdatableWithVariableDelay) extends Runnable {
       val resubmit = updatable.update
       System.runFinalization
       if (resubmit) Updater.delay(this)
-    } catch {
+    }
+    catch {
       case e ⇒ Logger.getLogger(classOf[UpdaterTask].getName).log(Level.WARNING, null, e)
     }
   }

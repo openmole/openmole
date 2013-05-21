@@ -19,7 +19,7 @@ import org.openmole.ide.misc.tools.util._
 trait ICapsuleUI {
   override def toString = dataUI.task match {
     case Some(x: ITaskDataProxyUI) ⇒ x.dataUI.toString
-    case _ ⇒ ""
+    case _                         ⇒ ""
   }
 
   def id: ID.Type

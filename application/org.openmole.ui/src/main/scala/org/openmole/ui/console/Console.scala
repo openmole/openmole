@@ -39,7 +39,8 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
     try {
       Workspace.password_=(password)
       true
-    } catch {
+    }
+    catch {
       case e: UserBadDataError ⇒
         println("Password incorrect.")
         false
@@ -59,7 +60,7 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
   def run {
     val correctPassword =
       password match {
-        case None ⇒ initPassword; true
+        case None    ⇒ initPassword; true
         case Some(p) ⇒ setPassword(p)
       }
 
@@ -106,7 +107,8 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
             if (scriptFile.exists) loop.interpretAllFrom(new SFile(scriptFile))
             else println("File " + scriptFile + " doesn't exist.")
         }
-      } finally loop.close
+      }
+      finally loop.close
     }
   }
 

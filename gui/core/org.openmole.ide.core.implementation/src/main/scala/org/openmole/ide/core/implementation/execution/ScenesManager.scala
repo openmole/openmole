@@ -74,20 +74,20 @@ object ScenesManager {
 
   def buildMoleSceneContainers = tabPane.pages.flatMap(_.content match {
     case x: BuildMoleSceneContainer ⇒ List(x)
-    case _ ⇒ Nil
+    case _                          ⇒ Nil
   })
 
   def currentSceneContainer: Option[ISceneContainer] = {
     if (tabPane.peer.getTabCount == 0) None
     else tabPane.selection.page.content match {
       case x: ISceneContainer ⇒ Some(x)
-      case _ ⇒ None
+      case _                  ⇒ None
     }
   }
 
   def currentScene = currentSceneContainer match {
     case Some(sc: ISceneContainer) ⇒ Some(sc.scene)
-    case _ ⇒ None
+    case _                         ⇒ None
   }
 
   def displayExtraPropertyPanel(proxy: IDataProxyUI) = {
@@ -96,12 +96,12 @@ object ScenesManager {
 
   def currentPanelUI = currentScene match {
     case Some(s: IMoleScene) ⇒ s.currentPanelUI
-    case _ ⇒ throw new UserBadDataError("There is no current scene")
+    case _                   ⇒ throw new UserBadDataError("There is no current scene")
   }
 
   def currentSamplingCompositionPanelUI = currentPanelUI match {
     case scp: ISamplingCompositionPanelUI ⇒ scp
-    case _ ⇒ throw new UserBadDataError("There is no current samplingMap panel")
+    case _                                ⇒ throw new UserBadDataError("There is no current samplingMap panel")
   }
 
   def closePropertyPanel = List(currentScene).flatten.foreach { _.closePropertyPanels }
@@ -142,7 +142,7 @@ object ScenesManager {
         neo._1.environment_=(old.dataUI.environment)
         old.dataUI.task match {
           case Some(t: ITaskDataProxyUI) ⇒ neo._1.encapsule(t)
-          case _ ⇒
+          case _                         ⇒
         }
         ms.refresh
       case _ ⇒
@@ -181,7 +181,7 @@ object ScenesManager {
 
   def saveCurrentPropertyWidget = currentSceneContainer match {
     case Some(x: ISceneContainer) ⇒ x.scene.savePropertyPanel(0)
-    case _ ⇒ None
+    case _                        ⇒ None
   }
 
   def moleScenes = buildMoleSceneContainers.map { _.scene }
@@ -203,7 +203,7 @@ object ScenesManager {
   }.flatMap { c ⇒
     c.dataUI.task.get.dataUI match {
       case x: IExplorationTaskDataUI ⇒ List((c, x))
-      case _ ⇒ Nil
+      case _                         ⇒ Nil
     }
   }.toList
 
@@ -241,7 +241,8 @@ object ScenesManager {
           })
 
           tabPane.selection.index = page.index
-        } else
+        }
+        else
           StatusBar().block("The Mole can not be built due to the previous errors")
       case Failure(t: Throwable) ⇒ StatusBar().block(t.getMessage)
     }

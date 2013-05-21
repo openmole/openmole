@@ -69,12 +69,12 @@ private[scopt] class BooleanArgOptionDefinition[C](
   action: (Boolean, C) ⇒ C) extends OptionDefinition[C](true, shortopt, longopt, null, valueName,
   description, { (a: String, c: C) ⇒
     val boolValue = a.toLowerCase match {
-      case "true" ⇒ true
+      case "true"  ⇒ true
       case "false" ⇒ false
-      case "yes" ⇒ true
-      case "no" ⇒ false
-      case "1" ⇒ true
-      case "0" ⇒ false
+      case "yes"   ⇒ true
+      case "no"    ⇒ false
+      case "1"     ⇒ true
+      case "0"     ⇒ false
       case _ ⇒
         throw new IllegalArgumentException("Expected a string I can interpret as a boolean")
     }
@@ -84,7 +84,7 @@ private[scopt] class BooleanArgOptionDefinition[C](
 
 private[scopt] object KeyValueParser {
   def split(s: String): (String, String) = s.indexOf('=') match {
-    case -1 ⇒ throw new IllegalArgumentException("Expected a key=value pair")
+    case -1     ⇒ throw new IllegalArgumentException("Expected a key=value pair")
     case n: Int ⇒ (s.slice(0, n), s.slice(n + 1, s.length))
   }
 }
@@ -130,12 +130,12 @@ private[scopt] class KeyBooleanValueArgOptionDefinition[C](
     val x = KeyValueParser.split(a)
     val key = x._1
     val boolValue = x._2.toLowerCase match {
-      case "true" ⇒ true
+      case "true"  ⇒ true
       case "false" ⇒ false
-      case "yes" ⇒ true
-      case "no" ⇒ false
-      case "1" ⇒ true
-      case "0" ⇒ false
+      case "yes"   ⇒ true
+      case "no"    ⇒ false
+      case "1"     ⇒ true
+      case "0"     ⇒ false
       case _ ⇒
         throw new IllegalArgumentException("Expected a string I can interpret as a boolean")
     }
@@ -177,7 +177,7 @@ private[scopt] trait GenericOptionParser[C] {
         "--" + opt.longopt + NLTB + opt.description
   }) ++ (argList match {
     case Some(x: Argument[C]) ⇒ List(x.valueName + NLTB + x.description)
-    case None ⇒ arguments.map(a ⇒ a.valueName + NLTB + a.description)
+    case None                 ⇒ arguments.map(a ⇒ a.valueName + NLTB + a.description)
   })
 
   def usage: String = {
@@ -196,13 +196,14 @@ private[scopt] trait GenericOptionParser[C] {
 
   private def argumentNames: Seq[String] = argList match {
     case Some(x: Argument[C]) ⇒ List(x.valueName)
-    case None ⇒ arguments.map(_.valueName)
+    case None                 ⇒ arguments.map(_.valueName)
   }
 
   private def applyArgument(option: OptionDefinition[C], arg: String, config: C): Option[C] =
     try {
       Some(option.action.apply(arg, config))
-    } catch {
+    }
+    catch {
       case e: NumberFormatException ⇒
         System.err.println("Error: " + option.shortDescription + " expects a number but was given '" + arg + "'")
         None
@@ -242,25 +243,30 @@ private[scopt] trait GenericOptionParser[C] {
             if (errorOnUnknownArgument) {
               System.err.println("Error: Unknown argument '" + arg + "'")
               _error = true
-            } else
+            }
+            else
               System.err.println("Warning: Unknown argument '" + arg + "'")
-          } else if (argList.isDefined) {
+          }
+          else if (argList.isDefined) {
             argListCount += 1
             applyArgument(argList.get, arg, _config) match {
               case Some(c) ⇒ _config = c
-              case None ⇒ _error = true
+              case None    ⇒ _error = true
             }
-          } else if (unseenArgs.isEmpty) {
+          }
+          else if (unseenArgs.isEmpty) {
             if (errorOnUnknownArgument) {
               System.err.println("Error: Unknown argument '" + arg + "'")
               _error = true
-            } else
+            }
+            else
               System.err.println("Warning: Unknown argument '" + arg + "'")
-          } else {
+          }
+          else {
             val first = unseenArgs.remove(0)
             applyArgument(first, arg, _config) match {
               case Some(c) ⇒ _config = c
-              case None ⇒ _error = true
+              case None    ⇒ _error = true
             }
           }
 
@@ -273,24 +279,29 @@ private[scopt] trait GenericOptionParser[C] {
               if (errorOnUnknownArgument) {
                 System.err.println("Error: missing value after '" + arg + "'")
                 _error = true
-              } else
+              }
+              else
                 System.err.println("Warning: missing value after '" + arg + "'")
               ""
-            } else
+            }
+            else
               args(i)
-          } else if (option.keyValueArgument &&
+          }
+          else if (option.keyValueArgument &&
             (option.shortopt map { o ⇒ arg.startsWith("-" + o + ":") } getOrElse { false })) {
             arg.drop(("-" + option.shortopt.get + ":").length)
-          } else if (option.keyValueArgument &&
+          }
+          else if (option.keyValueArgument &&
             arg.startsWith("--" + option.longopt + ":")) {
             arg.drop(("--" + option.longopt + ":").length)
-          } else
+          }
+          else
             ""
 
           if (!indexOutOfBounds) {
             applyArgument(option, argToPass, _config) match {
               case Some(c) ⇒ _config = c
-              case None ⇒ _error = true
+              case None    ⇒ _error = true
             }
           }
       }
@@ -300,7 +311,7 @@ private[scopt] trait GenericOptionParser[C] {
     if ((unseenArgs.toList exists { _.minOccurs > 0 }) ||
       (argListCount == 0 && (argList match {
         case Some(a: Argument[Unit]) ⇒ a.minOccurs > 0
-        case _ ⇒ false
+        case _                       ⇒ false
       }))) {
       System.err.println("Error: missing arguments: " + argumentNames.mkString(", "))
       _error = true
@@ -308,7 +319,8 @@ private[scopt] trait GenericOptionParser[C] {
     if (_error) {
       showUsage
       None
-    } else Some(_config)
+    }
+    else Some(_config)
   }
 }
 

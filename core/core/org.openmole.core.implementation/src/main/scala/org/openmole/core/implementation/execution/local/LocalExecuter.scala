@@ -58,12 +58,13 @@ class LocalExecuter(environment: WeakReference[LocalEnvironment]) extends Runnab
                 moleJob.perform
                 moleJob.exception match {
                   case Some(e) ⇒ EventDispatcher.trigger(environment: Environment, new MoleJobExceptionRaised(executionJob, e, SEVERE, moleJob))
-                  case _ ⇒
+                  case _       ⇒
                 }
               }
             }
             executionJob.state = ExecutionState.DONE
-          } catch {
+          }
+          catch {
             case e: InterruptedException ⇒
               if (!stop) {
                 logger.log(WARNING, "Interrupted despite stop is false", e)
@@ -72,7 +73,8 @@ class LocalExecuter(environment: WeakReference[LocalEnvironment]) extends Runnab
             case e: Throwable ⇒
               logger.log(SEVERE, "Error in execution", e)
               EventDispatcher.trigger(environment: Environment, new ExceptionRaised(executionJob, e, SEVERE))
-          } finally executionJob.state = ExecutionState.KILLED
+          }
+          finally executionJob.state = ExecutionState.KILLED
         case None ⇒ stop = true
       }
     }

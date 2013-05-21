@@ -110,7 +110,7 @@ object CheckData extends Logger {
                            errorMsg: String) = {
     capsule.dataUI.task match {
       case Some(x: ITaskDataProxyUI) ⇒ StatusBar().warn(errorMsg, Some(x))
-      case None ⇒ StatusBar().warn(errorMsg)
+      case None                      ⇒ StatusBar().warn(errorMsg)
     }
   }
 
@@ -119,7 +119,7 @@ object CheckData extends Logger {
       c ⇒
         c.dataUI.task match {
           case Some(x: ITaskDataProxyUI) ⇒
-          case _ ⇒ StatusBar().warn("A capsule without task can not be run")
+          case _                         ⇒ StatusBar().warn("A capsule without task can not be run")
         }
     }
 
@@ -130,7 +130,8 @@ object CheckData extends Logger {
           val checkTopo = checkTopology(mole)
           if (checkTopo.isEmpty) Success("")
           else Left(checkTopo)
-        } else Left(errors.mkString("\n"))
+        }
+        else Left(errors.mkString("\n"))
       case Failure(l) ⇒ Failure(l)
     }
   }

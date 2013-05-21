@@ -144,7 +144,8 @@ class MoleExecution(
             groups -= category
             nbWaiting -= jobs().size
             Some(new Job(this, jobs()) -> capsule)
-          } else None
+          }
+          else None
         case None ⇒
           val job = new Job(this, List(moleJob))
           Some(job -> capsule)
@@ -156,7 +157,7 @@ class MoleExecution(
       val env =
         selection.get(capsule) match {
           case Some(selection) ⇒ selection(job)
-          case None ⇒ LocalEnvironment
+          case None            ⇒ LocalEnvironment
         }
       env.submit(job)
       EventDispatcher.trigger(this, new IMoleExecution.JobSubmitted(job, capsule, env))

@@ -59,7 +59,8 @@ object DialogFactory {
         background = Color.white
       }.peer, "Execution warning")).equals(NotifyDescriptor.OK_OPTION)) true
       else false
-    } else true
+    }
+    else true
   }
 
   def newTabName: Option[ISceneContainer] = {
@@ -105,7 +106,8 @@ object DialogFactory {
 
     val text = if (new File(fc.text).getParentFile.isDirectory) {
       Some(fc.text.split('.')(0) + { if (withArchiveCheckBox.selected) ".tar" else ".xml" })
-    } else None
+    }
+    else None
 
     text match {
       case Some(t: String) ⇒ MoleFactory.buildMoleExecution(s.manager) match {

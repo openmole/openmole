@@ -112,8 +112,8 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
                 val workspaceDir = Workspace.newDir("workspace")
                 val osgiDir = new File(runtime, UUID.randomUUID.toString)
 
-                def quote(s: String) = if(OS.actualOS.isWindows) '"' + s + '"' else s.replace(" ", "\\ ")
-                val ptrFlag = if(OS.actualOS.is64Bit) "-XX:+UseCompressedOops" else ""
+                def quote(s: String) = if (OS.actualOS.isWindows) '"' + s + '"' else s.replace(" ", "\\ ")
+                val ptrFlag = if (OS.actualOS.is64Bit) "-XX:+UseCompressedOops" else ""
 
                 val cmd = s"java -Xmx${memory}m -Dosgi.locking=none -XX:+UseG1GC $ptrFlag -Dosgi.configuration.area=${osgiDir.getName} -Dosgi.classloader.singleThreadLoads=true -jar plugins/org.eclipse.equinox.launcher.jar -configuration ${quote(configurationDir.getAbsolutePath)} -s ${quote(storageFile.getAbsolutePath)} -i ${quote(localExecutionMessage.getAbsolutePath)} -o ${quote(localResultFile.getAbsolutePath)} -c / -p ${quote(pluginDir.getAbsolutePath)}" + (if (debug) " -d " else "")
 
@@ -129,7 +129,8 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
                 pluginDir.recursiveDelete
                 localExecutionMessage.delete
                 localResultFile
-              } finally {
+              }
+              finally {
                 localCache.release(cached)
               }
 
@@ -138,7 +139,8 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
                 uploadResult(localResultFile, executionMessage.communicationDirPath, job, storage)
                 localCommunicationDirPath.recursiveDelete
                 localResultFile.delete
-              } catch {
+              }
+              catch {
                 case e: Throwable ⇒ logger.log(WARNING, "Error durring result upload", e)
               }
             })
@@ -150,7 +152,8 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
             Thread.sleep(Workspace.preferenceAsDuration(jobCheckInterval).toMilliSeconds)
             background { fetchAJob(id, storage) }
         }
-      } catch {
+      }
+      catch {
         case e: Exception ⇒
           logger.log(WARNING, "Error while looking for jobs.", e)
           Thread.sleep(Workspace.preferenceAsDuration(jobCheckInterval).toMilliSeconds)
@@ -181,17 +184,17 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
     val uplodadedResult = runtimeResult.result match {
       case Success(result) ⇒ Success(uploadFileMessage(result))
-      case Failure(e) ⇒ Failure(e)
+      case Failure(e)      ⇒ Failure(e)
     }
 
     val uploadedStdOut = runtimeResult.stdOut match {
       case Some(stdOut) ⇒ logger.info("Uploading stdout"); Some(uploadFileMessage(stdOut))
-      case None ⇒ None
+      case None         ⇒ None
     }
 
     val uploadedStdErr = runtimeResult.stdErr match {
       case Some(stdErr) ⇒ logger.info("Uploading stderr"); Some(uploadFileMessage(stdErr))
-      case None ⇒ None
+      case None         ⇒ None
     }
 
     logger.info("Context results uploaded")
@@ -259,7 +262,8 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
 
       logger.info("Job execution message is " + jobMessage.executionMessagePath)
       Some(job -> jobMessage)
-    } else None
+    }
+    else None
   }
 
   def fetchAJob(id: UUID, storage: SimpleStorage)(implicit rng: Random) = {
@@ -329,7 +333,8 @@ class JobLauncher(cacheSize: Long, debug: Boolean) {
           finally os.close
 
           Some((localExecutionMessage, localCommunicationDirPath, runtime, pluginDir, jobMessage.memory, executionMessage, job, cached))
-        } catch {
+        }
+        catch {
           case e: Throwable ⇒
             localCache.release(cached)
             throw e

@@ -24,21 +24,21 @@ object TransitionType extends Enumeration {
 
   def toString(transition: Value) = {
     transition match {
-      case BASIC_TRANSITION ⇒ "BASIC"
+      case BASIC_TRANSITION       ⇒ "BASIC"
       case EXPLORATION_TRANSITION ⇒ "EXPLORATION"
       case AGGREGATION_TRANSITION ⇒ "AGGREGATION"
-      case END_TRANSITION ⇒ "END"
-      case _ ⇒ throw new UserBadDataError("Unknown transition type " + transition)
+      case END_TRANSITION         ⇒ "END"
+      case _                      ⇒ throw new UserBadDataError("Unknown transition type " + transition)
     }
   }
 
   def fromString(transitionString: String) = {
     transitionString match {
-      case "BASIC" ⇒ BASIC_TRANSITION
+      case "BASIC"       ⇒ BASIC_TRANSITION
       case "EXPLORATION" ⇒ EXPLORATION_TRANSITION
       case "AGGREGATION" ⇒ AGGREGATION_TRANSITION
-      case "END" ⇒ END_TRANSITION
-      case _ ⇒ throw new UserBadDataError("Unknown transition type string " + transitionString)
+      case "END"         ⇒ END_TRANSITION
+      case _             ⇒ throw new UserBadDataError("Unknown transition type string " + transitionString)
     }
   }
 }

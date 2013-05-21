@@ -27,7 +27,8 @@ object LockUtil {
       lock.lock()
       try {
         block
-      } finally lock.unlock()
+      }
+      finally lock.unlock()
     }
   }
 
@@ -36,7 +37,8 @@ object LockUtil {
       s.acquire()
       try {
         block
-      } finally s.release()
+      }
+      finally s.release()
     }
   }
 

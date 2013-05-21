@@ -114,7 +114,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
       f.dataUI.domain.id == sourceProxy.id && {
         f.dataUI.target match {
           case Some(s: ISamplingProxyUI) ⇒ s.id == s.id
-          case _ ⇒ true
+          case _                         ⇒ true
         }
       }
   }.headOption
@@ -179,7 +179,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
                 f.dataUI.domain.id == s.proxy.id || {
                   f.dataUI.target match {
                     case Some(sp: ISamplingProxyUI) ⇒ sp.id == s.proxy.id
-                    case _ ⇒ true
+                    case _                          ⇒ true
                   }
                 }
             }
@@ -260,8 +260,10 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
               }.contains(domainT.proxy)) {
                 StatusBar().warn("Only one connection between Domains is allowed")
                 false
-              } else true
-            } else true
+              }
+              else true
+            }
+            else true
           } &&
             domainT.proxy.dataUI.isAcceptable(dw.proxy.dataUI)
         }
@@ -273,14 +275,15 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
             }.size >= i) {
               StatusBar().warn("The maximum number of Sampling input is here limited to " + i)
               false
-            } else true
+            }
+            else true
           case _ ⇒ true
         }
       } && {
         sourceWidget match {
           case sw: ISamplingWidget ⇒ samplingT.proxy.dataUI.isAcceptable(sw.proxy.dataUI)
-          case dw: IDomainWidget ⇒ samplingT.proxy.dataUI.isAcceptable(dw.proxy.dataUI)
-          case _ ⇒ false
+          case dw: IDomainWidget   ⇒ samplingT.proxy.dataUI.isAcceptable(dw.proxy.dataUI)
+          case _                   ⇒ false
         }
       }
     }
@@ -298,8 +301,8 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
       _._2.component.proxy
     }.headOption match {
       case Some(next: IDomainProxyUI) ⇒ firstSampling(next)
-      case Some(x: ISamplingProxyUI) ⇒ x
-      case _ ⇒ proxy
+      case Some(x: ISamplingProxyUI)  ⇒ x
+      case _                          ⇒ proxy
     }
   }
 
@@ -308,10 +311,10 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
       case modifier: IDomainDataUI with IModifier ⇒
         modifier.previousDomain.headOption match {
           case Some(pD: IDomainDataUI) ⇒ firstNoneModifierDomain(pD)
-          case _ ⇒ None
+          case _                       ⇒ None
         }
       case d: IDomainDataUI ⇒ Some(d)
-      case _ ⇒ None
+      case _                ⇒ None
     }
 
   def update(domain: IDomainWidget) = {
@@ -340,7 +343,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
     _._1.component.proxy.id == domain.proxy.id
   }.headOption match {
     case Some((_, next: ISamplingComponent)) ⇒ updateNext(domain, next.component)
-    case _ ⇒ (domain, None)
+    case _                                   ⇒ (domain, None)
   }
 
   def updateNext(source: ISamplingComponent,
@@ -359,7 +362,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
                   cc._1.component.proxy.id == source.proxy.id
               }.headOption match {
                 case Some((_, c: ISamplingComponent)) ⇒ updateNext(target, c.component)
-                case _ ⇒ (source, Some(target))
+                case _                                ⇒ (source, Some(target))
               }
           }
         case _ ⇒ (source, Some(target))
@@ -373,7 +376,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
     }.headOption match {
       case Some((previousc: ISamplingComponent, _)) ⇒ previousc.component match {
         case previous: IDomainWidget ⇒ updatePrevious(previous, domain)
-        case _ ⇒
+        case _                       ⇒
       }
       case _ ⇒
     }
@@ -399,7 +402,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
   def updateConnections = connectLayer.getChildren.foreach {
     _ match {
       case s: SamplingConnectorWidget ⇒ s.update
-      case _ ⇒
+      case _                          ⇒
     }
   }
 
@@ -408,7 +411,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
     override def isSourceWidget(sourceWidget: Widget): Boolean =
       sourceWidget match {
         case x: SamplingComponent ⇒ true
-        case _ ⇒ false
+        case _                    ⇒ false
       }
 
     def boolToConnector(b: Boolean) = {
@@ -431,7 +434,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
                 case samp: ISamplingProxyUI ⇒ ConnectorState.ACCEPT
                 case dom: IDomainProxyUI ⇒ dom.dataUI match {
                   case discrete: IDomainDataUI with IFinite ⇒ ConnectorState.ACCEPT
-                  case x: Any ⇒ ConnectorState.REJECT_AND_STOP
+                  case x: Any                               ⇒ ConnectorState.REJECT_AND_STOP
                 }
               }
               case _ ⇒ ConnectorState.REJECT_AND_STOP
@@ -450,7 +453,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
 
       val targetW = targetWidget.asInstanceOf[SceneComponent].panel match {
         case sw: ISamplingCompositionWidget ⇒ targetWidget.asInstanceOf[SamplingComponent]
-        case x: Any ⇒ targetWidget.asInstanceOf[SceneComponent]
+        case x: Any                         ⇒ targetWidget.asInstanceOf[SceneComponent]
       }
 
       val factorProxyUI = targetW match {
@@ -464,7 +467,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
                     updatePrevious(d, sc.component)
                     sc.component match {
                       case s: ISamplingWidget ⇒ Some(addFactor(d.proxy, Some(s.proxy)))
-                      case _ ⇒ None
+                      case _                  ⇒ None
                     }
                   case _ ⇒ None
                 }
@@ -476,7 +479,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
             case d: IDomainWidget ⇒
               computeFactor(sourceW.component.proxy) match {
                 case Some(f: IFactorProxyUI) ⇒ Some(f)
-                case _ ⇒ Some(addFactor(d.proxy, None))
+                case _                       ⇒ Some(addFactor(d.proxy, None))
               }
             case _ ⇒
           }

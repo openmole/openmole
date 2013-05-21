@@ -35,7 +35,7 @@ case class TakeDomainDataUI(val size: String = "1",
 
   def domainType = previousDomain.headOption match {
     case Some(dt: IDomainDataUI) ⇒ dt.domainType
-    case _ ⇒ manifest[Double]
+    case _                       ⇒ manifest[Double]
   }
 
   val name = "Take"
@@ -57,6 +57,6 @@ case class TakeDomainDataUI(val size: String = "1",
   def clone(pD: List[IDomainDataUI]) =
     pD.headOption match {
       case Some(d: IDomainDataUI) ⇒ new TakeDomainDataUI(size, pD)
-      case _ ⇒ new TakeDomainDataUI(size, List())
+      case _                      ⇒ new TakeDomainDataUI(size, List())
     }
 }

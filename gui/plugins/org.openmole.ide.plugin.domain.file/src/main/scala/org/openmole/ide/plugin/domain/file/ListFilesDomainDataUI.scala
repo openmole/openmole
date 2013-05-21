@@ -26,7 +26,7 @@ import org.openmole.core.model.domain.Domain
 object ListFilesDomainDataUI {
   def apply(d: SubDataUI) = d match {
     case x: ListFilesDomainDataUI ⇒ x
-    case _ ⇒ new ListFilesDomainDataUI
+    case _                        ⇒ new ListFilesDomainDataUI
   }
 }
 

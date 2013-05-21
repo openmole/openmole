@@ -128,7 +128,8 @@ object BundleClassPathBuilder {
               val entry = nextEntry
               nextEntry = null
               entry
-            } else {
+            }
+            else {
               throw new NoSuchElementException()
             }
           }
@@ -146,13 +147,15 @@ object BundleClassPathBuilder {
               // If still null OSGi wont let use load that resource for some reason
               if (entryUrl == null) {
                 null
-              } else {
+              }
+              else {
                 if (entry.endsWith(".class"))
                   new FileEntry(entryUrl, DirEntry.this)
                 else
                   new DirEntry(entryUrl, DirEntry.this)
               }
-            } else
+            }
+            else
               null
           }
 

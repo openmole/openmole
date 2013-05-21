@@ -42,17 +42,18 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
 
   implicit def intToString(i: Option[Int]) = i match {
     case Some(ii: Int) ⇒ ii.toString
-    case _ ⇒ ""
+    case _             ⇒ ""
   }
 
   implicit def stringToStringOpt(s: String) = s.isEmpty match {
-    case true ⇒ None
+    case true  ⇒ None
     case false ⇒ Some(s)
   }
 
   implicit def stringToIntOpt(s: String) = try {
     Some(s.toInt)
-  } catch {
+  }
+  catch {
     case e: NumberFormatException ⇒ None
   }
 

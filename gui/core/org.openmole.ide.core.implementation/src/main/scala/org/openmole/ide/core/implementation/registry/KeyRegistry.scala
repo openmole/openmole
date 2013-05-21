@@ -56,7 +56,8 @@ object KeyRegistry {
         val factory = tasks(Key(inter.head))
         tasks += key -> factory
         factory
-      } else throw new UserBadDataError("The class " + c + " can not be constructed")
+      }
+      else throw new UserBadDataError("The class " + c + " can not be constructed")
     }
   }
 
@@ -69,7 +70,8 @@ object KeyRegistry {
         val factory = samplings(Key(inter.head))
         samplings += key -> factory
         factory
-      } else throw new UserBadDataError("The class " + c + " can not be constructed")
+      }
+      else throw new UserBadDataError("The class " + c + " can not be constructed")
     }
   }
 

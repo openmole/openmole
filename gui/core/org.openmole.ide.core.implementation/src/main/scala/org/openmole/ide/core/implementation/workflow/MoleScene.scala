@@ -145,7 +145,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
 
   def currentPanel = currentPanels(0).contents.headOption match {
     case Some(x: BasePanel) ⇒ x
-    case _ ⇒ throw new UserBadDataError("There is no current panel.")
+    case _                  ⇒ throw new UserBadDataError("There is no current panel.")
   }
 
   def currentPanelUI = currentPanel.panelUI
@@ -172,13 +172,13 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
       case _ ⇒
         closePropertyPanel(i)
         val p = proxy match {
-          case x: ITaskDataProxyUI ⇒ new TaskPanel(x, this, i)
-          case x: IPrototypeDataProxyUI ⇒ new PrototypePanel(x, this, i)
-          case x: IEnvironmentDataProxyUI ⇒ new EnvironmentPanel(x, this, i)
+          case x: ITaskDataProxyUI                ⇒ new TaskPanel(x, this, i)
+          case x: IPrototypeDataProxyUI           ⇒ new PrototypePanel(x, this, i)
+          case x: IEnvironmentDataProxyUI         ⇒ new EnvironmentPanel(x, this, i)
           case x: ISamplingCompositionDataProxyUI ⇒ new SamplingCompositionPanel(x, this, i)
-          case x: IHookDataProxyUI ⇒ new HookPanel(x, this, i)
-          case x: ISourceDataProxyUI ⇒ new SourcePanel(x, this, i)
-          case _ ⇒ throw new UserBadDataError("No displaying available for " + proxy)
+          case x: IHookDataProxyUI                ⇒ new HookPanel(x, this, i)
+          case x: ISourceDataProxyUI              ⇒ new SourcePanel(x, this, i)
+          case _                                  ⇒ throw new UserBadDataError("No displaying available for " + proxy)
         }
         currentPanels(i).contents += p
 
@@ -186,7 +186,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
 
         currentPanels(i).contents.get(currentPanels(i).contents.size - 1) match {
           case x: BasePanel ⇒ x.nameTextField.requestFocus
-          case _ ⇒
+          case _            ⇒
         }
         refresh
         p
@@ -203,7 +203,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
     removeAll(ff)
     val p = compositionSamplingWidget match {
       case s: ISamplingWidget ⇒ new SamplingPanel(s, this, ff)
-      case f: IDomainWidget ⇒ new DomainPanel(f, this, ff)
+      case f: IDomainWidget   ⇒ new DomainPanel(f, this, ff)
     }
     currentPanels(ff).contents += p
     locate(ff)
@@ -225,7 +225,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
     if (panel.contents.size > 0) {
       panel.contents(0) match {
         case x: BasePanel ⇒ x.baseSave
-        case _ ⇒
+        case _            ⇒
       }
     }
   }
@@ -242,7 +242,8 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
               if (DialogFactory.closePropertyPanelConfirmation(x)) {
                 saveAndClose(x, i)
               }
-            } else {
+            }
+            else {
               saveAndClose(x, i)
             }
           case _ ⇒
@@ -432,7 +433,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
         sourceCapsuleUI.dataUI.task match {
           case Some(y: ITaskDataProxyUI) ⇒ y.dataUI match {
             case x: IExplorationTaskDataUI ⇒ TransitionType.EXPLORATION_TRANSITION
-            case _ ⇒ TransitionType.BASIC_TRANSITION
+            case _                         ⇒ TransitionType.BASIC_TRANSITION
           }
           case _ ⇒ TransitionType.BASIC_TRANSITION
         })

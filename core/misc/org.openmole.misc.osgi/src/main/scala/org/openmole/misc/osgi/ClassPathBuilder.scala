@@ -39,7 +39,8 @@ object ClassPathBuilder {
           Some(ref.asInstanceOf[AntLikeClassLoader])
         else
           None
-      } catch {
+      }
+      catch {
         case e: NoSuchMethodException ⇒ None
       }
     }

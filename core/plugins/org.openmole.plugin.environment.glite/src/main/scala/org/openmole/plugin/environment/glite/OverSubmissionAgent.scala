@@ -59,7 +59,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
       logger.log(FINE, "oversubmission started")
 
       val env = environment.get match {
-        case None ⇒ return false
+        case None      ⇒ return false
         case Some(env) ⇒ env
       }
 
@@ -78,7 +78,8 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
         var nbRessub = if (jobs.size > Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob)) {
           val minOversub = Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob)
           if (maxRunning < minOversub) minOversub - jobs.size else maxRunning - (stillRunning + stillReady)
-        } else Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob) - jobs.size
+        }
+        else Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionMinNumberOfJob) - jobs.size
 
         val numberOfSimultaneousExecutionForAJobWhenUnderMinJob = Workspace.preferenceAsInt(GliteEnvironment.OverSubmissionNumberOfJobUnderMin)
 
@@ -105,7 +106,7 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
                   case None ⇒
                     jobs.find(j ⇒ !registry.executionJobs(j).exists(_.state != SUBMITTED)) match {
                       case Some(j) ⇒ j
-                      case None ⇒ jobs.head
+                      case None    ⇒ jobs.head
                     }
                 }
 
@@ -121,7 +122,8 @@ class OverSubmissionAgent(environment: WeakReference[GliteEnvironment]) extends 
           }
         }
       }
-    } catch {
+    }
+    catch {
       case e: Throwable ⇒ logger.log(SEVERE, "Exception in oversubmission agen", e)
     }
     true

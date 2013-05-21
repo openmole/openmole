@@ -37,7 +37,7 @@ class VariableDomainPanelUI(dataUI: VariableDomainDataUI[_]) extends PluginPanel
   val protoCombo = new MyComboBox(availablePrototypes)
   dataUI.prototypeArray match {
     case Some(p: IPrototypeDataProxyUI) ⇒ protoCombo.selection.item = p
-    case _ ⇒
+    case _                              ⇒
   }
 
   contents += protoCombo
@@ -45,7 +45,7 @@ class VariableDomainPanelUI(dataUI: VariableDomainDataUI[_]) extends PluginPanel
   def saveContent = {
     val params = protoCombo.selection.item match {
       case p: IPrototypeDataProxyUI ⇒ (Some(p), p.dataUI.typeClassString)
-      case _ ⇒ (None, DOUBLE)
+      case _                        ⇒ (None, DOUBLE)
     }
     VariableDomainDataUI(params._1, Types.pretify(params._2))
   }

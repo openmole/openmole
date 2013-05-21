@@ -34,14 +34,14 @@ object MultiTwoCombos {
     val comboBox1 = new MyComboBox(comboContent1.sortBy { _.toString }) {
       data.comboValue1 match {
         case Some(x: A) ⇒ selection.item = x
-        case _ ⇒
+        case _          ⇒
       }
     }
 
     val comboBox2 = new MyComboBox(comboContent2.sortBy { _.toString }) {
       data.comboValue2 match {
         case Some(x: B) ⇒ selection.item = x
-        case _ ⇒
+        case _          ⇒
       }
     }
 

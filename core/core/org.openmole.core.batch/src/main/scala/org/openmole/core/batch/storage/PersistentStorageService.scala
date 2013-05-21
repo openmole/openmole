@@ -80,7 +80,8 @@ trait PersistentStorageService extends StorageService {
           val tmpDir = createTmpDir
           tmpSpaceVar = Some(tmpDir)
           tmpDir
-        } else space
+        }
+        else space
 
       case None ⇒
         val tmpDir = createTmpDir(token)
@@ -103,10 +104,12 @@ trait PersistentStorageService extends StorageService {
         try {
           val timeOfDir = (if (name.endsWith("/")) name.substring(0, name.length - 1) else name).toLong
           if (timeOfDir < removalDate) backgroundRmDir(childPath)
-        } catch {
+        }
+        catch {
           case (ex: NumberFormatException) ⇒ backgroundRmDir(childPath)
         }
-      } else backgroundRmFile(childPath)
+      }
+      else backgroundRmFile(childPath)
     }
 
     val tmpTimePath = super.child(tmpNoTime, time.toString)

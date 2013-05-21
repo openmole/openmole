@@ -58,7 +58,7 @@ class ExplorationTransition(start: ICapsule, end: Slot, condition: ICondition = 
       for (in ← outputs)
         context.variable(in.prototype) match {
           case Some(v) ⇒ variables += v
-          case None ⇒
+          case None    ⇒
         }
 
       for ((p, v) ← typedFactors zip value) {
@@ -92,7 +92,7 @@ class ExplorationTransition(start: ICapsule, end: Slot, condition: ICondition = 
               EventDispatcher.listen(subMoleExecution, Priority.LOW, new AggregationTransitionAdapter(t), classOf[ISubMoleExecution.Finished])
             }
           case t: IExplorationTransition ⇒ toProcess += t.end.capsule -> (level + 1)
-          case t ⇒ toProcess += t.end.capsule -> level
+          case t                         ⇒ toProcess += t.end.capsule -> level
         }
       }
     }

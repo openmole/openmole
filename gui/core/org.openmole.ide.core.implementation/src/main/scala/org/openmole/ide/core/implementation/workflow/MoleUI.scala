@@ -151,7 +151,7 @@ class MoleUI(var name: String) extends IMoleUI with ID {
   def removeCapsuleUI(capsule: ICapsuleUI): String = atomic { implicit ptx ⇒
     val id = capsule.id
     startingCapsule match {
-      case None ⇒
+      case None                   ⇒
       case Some(caps: ICapsuleUI) ⇒ if (id == caps.id) startingCapsule = None
     }
 
@@ -224,7 +224,7 @@ class MoleUI(var name: String) extends IMoleUI with ID {
   }.filter {
     _ match {
       case t: ITransitionUI ⇒ true
-      case _ ⇒ false
+      case _                ⇒ false
     }
   }.toList
 

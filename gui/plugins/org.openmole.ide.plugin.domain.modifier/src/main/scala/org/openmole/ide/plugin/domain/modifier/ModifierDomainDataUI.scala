@@ -28,7 +28,7 @@ object ModifierDomainDataUI {
   def computeClassString(pud: IDomainDataUI) =
     ScenesManager.currentSamplingCompositionPanelUI.firstNoneModifierDomain(pud) match {
       case Some(d: IDomainDataUI) ⇒ d.domainType.toString.split('.').last
-      case _ ⇒ DOUBLE
+      case _                      ⇒ DOUBLE
     }
 }
 
@@ -48,7 +48,7 @@ trait ModifierDomainDataUI extends IDomainDataUI with IModifier {
     val dL = previousDomain.flatMap {
       _.coreObject match {
         case id: DOMAINTYPE ⇒ List(id)
-        case _ ⇒ Nil
+        case _              ⇒ Nil
       }
     }
     (!dL.isEmpty, dL)
@@ -58,7 +58,7 @@ trait ModifierDomainDataUI extends IDomainDataUI with IModifier {
     val dL = previousDomain.flatMap {
       _.coreObject match {
         case id: FINITDOMAINTYPE ⇒ List(id)
-        case _ ⇒ Nil
+        case _                   ⇒ Nil
       }
     }
     (!dL.isEmpty, dL)

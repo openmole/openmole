@@ -67,7 +67,8 @@ class UploadActor(jobManager: ActorRef) extends Actor {
         try {
           val sj = initCommunication(job.environment, job.job)
           jobManager ! Uploaded(job, sj)
-        } catch {
+        }
+        catch {
           case e: Throwable ⇒ signalError(job, e)
         }
       }
@@ -116,11 +117,13 @@ class UploadActor(jobManager: ActorRef) extends Actor {
           SerializerService.serialize(executionMessage, executionMessageFile)
           signalUpload(
             storage.uploadGZ(executionMessageFile, inputPath), inputPath, storage)
-        } finally executionMessageFile.delete
+        }
+        finally executionMessageFile.delete
 
         new SerializedJob(storage, communicationPath, inputPath, runtime)
       } finally storage.releaseToken(token)
-    } finally jobFile.delete
+    }
+    finally jobFile.delete
   }
 
   def serializeJob(file: File, job: IJob) = {
@@ -142,15 +145,17 @@ class UploadActor(jobManager: ActorRef) extends Actor {
             plugins ++= serializationResult.plugins
 
             tos.addFile(moleJobFile, UUID.randomUUID.toString)
-          } finally moleJobFile.delete
+          }
+          finally moleJobFile.delete
         }
       }
-    } finally tos.close
+    }
+    finally tos.close
     (files, plugins)
   }
 
   def toReplicatedFile(job: IJob, file: File, storage: StorageService)(implicit token: AccessToken, objectContainer: ObjectContainer): ReplicatedFile = {
-    if(!file.exists) throw new UserBadDataError(s"File/dir $file is requiered but doesn't exist.")
+    if (!file.exists) throw new UserBadDataError(s"File/dir $file is requiered but doesn't exist.")
 
     val isDir = file.isDirectory
     var toReplicate = file
@@ -161,7 +166,8 @@ class UploadActor(jobManager: ActorRef) extends Actor {
       val cache = FileService.archiveForDir(job.moleExecution, file)
       toReplicate = cache.file(false)
       cache
-    } else null
+    }
+    else null
 
     val hash = FileService.hash(job.moleExecution, toReplicate).toString
     val replica = ReplicaCatalog.uploadAndGet(toReplicate, toReplicatePath, hash, storage)

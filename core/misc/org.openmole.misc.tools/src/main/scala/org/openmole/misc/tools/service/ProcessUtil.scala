@@ -38,8 +38,10 @@ object ProcessUtil {
         case e: InterruptedException ⇒
           process.destroy
           throw e
-      } finally pump.stop
-    } finally processDestroyer.remove(process)
+      }
+      finally pump.stop
+    }
+    finally processDestroyer.remove(process)
     process.exitValue
   }
 }

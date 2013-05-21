@@ -63,7 +63,7 @@ class SamplingConnectorWidget(sourceWidget: Widget,
     _._1
   }.headOption match {
     case Some(f: IFactorProxyUI) ⇒ Some(f)
-    case _ ⇒ None
+    case _                       ⇒ None
   }
 
   setStroke(new BasicStroke(2))
@@ -75,7 +75,7 @@ class SamplingConnectorWidget(sourceWidget: Widget,
   def update = {
     componentWidget match {
       case Some(x: PrototypeOnConnectorWidget) ⇒ x.connectorUI = preview
-      case _ ⇒
+      case _                                   ⇒
     }
     updateOrderingWidget
   }
@@ -86,7 +86,7 @@ class SamplingConnectorWidget(sourceWidget: Widget,
         case Some(factor: IFactorProxyUI) ⇒
           factor.dataUI.prototype match {
             case Some(p: IPrototypeDataProxyUI) ⇒ p.toString
-            case _ ⇒ "?"
+            case _                              ⇒ "?"
           }
         case _ ⇒ "?"
       }

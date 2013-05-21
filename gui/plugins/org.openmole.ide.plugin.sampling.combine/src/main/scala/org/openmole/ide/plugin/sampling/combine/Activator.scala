@@ -36,7 +36,7 @@ class Activator extends OSGiActivator with SamplingActivator {
         val proxy = new SamplingProxyUI(buildDataUI)
         sampling match {
           case cs: CompleteSampling ⇒ (proxy, Builder.buildConnectedSamplings(proxy, cs.samplings, bSC))
-          case _ ⇒ (proxy, bSC)
+          case _                    ⇒ (proxy, bSC)
         }
       }
     }, new ISamplingFactoryUI {
@@ -47,7 +47,7 @@ class Activator extends OSGiActivator with SamplingActivator {
         val proxy = new SamplingProxyUI(buildDataUI)
         sampling match {
           case cs: CombineSampling ⇒ (proxy, Builder.buildConnectedSamplings(proxy, cs.samplings, bSC))
-          case _ ⇒ (proxy, bSC)
+          case _                   ⇒ (proxy, bSC)
         }
       }
     }, new ISamplingFactoryUI {
@@ -58,7 +58,7 @@ class Activator extends OSGiActivator with SamplingActivator {
         val proxy = new SamplingProxyUI(buildDataUI)
         sampling match {
           case cs: ShuffleSampling ⇒ (proxy, Builder.buildConnectedSamplings(proxy, Seq(cs.sampling), bSC))
-          case _ ⇒ (proxy, bSC)
+          case _                   ⇒ (proxy, bSC)
         }
       }
     }, new ISamplingFactoryUI {
@@ -81,7 +81,7 @@ class Activator extends OSGiActivator with SamplingActivator {
         val proxy = new SamplingProxyUI(buildDataUI)
         sampling match {
           case cs: ZipSampling ⇒ (proxy, Builder.buildConnectedSamplings(proxy, cs.samplings, bSC))
-          case _ ⇒ (proxy, bSC)
+          case _               ⇒ (proxy, bSC)
         }
       }
     }, new ISamplingFactoryUI {

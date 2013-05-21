@@ -44,9 +44,10 @@ class PasswordListener extends EventListener[Workspace] {
           val result = DialogDisplayer.getDefault.notify(dd)
           if (result == NotifyDescriptor.OK_OPTION) PasswordDialog.ok(true)
           else PasswordDialog.ok(false)
-        } catch {
+        }
+        catch {
           case e: UserBadDataError ⇒ StatusBar().warn("The preference password is not set. All the actions requiring encrypted data are unvailable")
-          case _: Throwable ⇒
+          case _: Throwable        ⇒
         }
       case _ ⇒
     }

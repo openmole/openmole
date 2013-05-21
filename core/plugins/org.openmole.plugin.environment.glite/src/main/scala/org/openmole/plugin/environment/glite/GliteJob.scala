@@ -42,7 +42,8 @@ trait GliteJob extends BatchJob with BatchJobId { bj ⇒
             GliteJob.logger.fine("Job running file is present, it implies that the job is running")
             bj.state = RUNNING
             RUNNING
-          } else state
+          }
+          else state
         case None ⇒ state
       }
     else state
@@ -55,7 +56,8 @@ trait GliteJob extends BatchJob with BatchJobId { bj ⇒
             GliteJob.logger.fine("Job finished file is present, it implies that the job is finished")
             bj.state = DONE
             DONE
-          } else state
+          }
+          else state
         case None ⇒ state
       }
     else state
@@ -86,15 +88,15 @@ trait GliteJob extends BatchJob with BatchJobId { bj ⇒
     if (_state != state) {
       _state match {
         case SUBMITTED ⇒ jobService.decrementSubmitted
-        case RUNNING ⇒ jobService.decrementRunning
-        case _ ⇒
+        case RUNNING   ⇒ jobService.decrementRunning
+        case _         ⇒
       }
 
       state match {
         case SUBMITTED ⇒ jobService.incrementSubmitted
-        case RUNNING ⇒ jobService.incrementRunning
-        case DONE ⇒ jobService.incrementDone
-        case _ ⇒
+        case RUNNING   ⇒ jobService.incrementRunning
+        case DONE      ⇒ jobService.incrementDone
+        case _         ⇒
       }
     }
     super.state = state

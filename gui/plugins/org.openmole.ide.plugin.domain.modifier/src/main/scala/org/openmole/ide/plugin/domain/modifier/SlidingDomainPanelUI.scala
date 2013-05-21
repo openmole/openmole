@@ -43,7 +43,7 @@ class SlidingDomainPanelUI(val dataUI: SlidingDomainDataUI[_]) extends PluginPan
     val classString =
       ScenesManager.currentSamplingCompositionPanelUI.firstNoneModifierDomain(dataUI) match {
         case Some(d: IDomainDataUI) ⇒ d.domainType.toString.split('.').last
-        case _ ⇒ DOUBLE
+        case _                      ⇒ DOUBLE
       }
     SlidingDomainDataUI(sizeField.text, stepTextField.text, classString, dataUI.previousDomain)
   }

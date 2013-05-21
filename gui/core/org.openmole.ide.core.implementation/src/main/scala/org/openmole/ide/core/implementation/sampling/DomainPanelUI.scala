@@ -45,18 +45,20 @@ class DomainPanelUI(domainWidget: IDomainWidget,
         try {
           finalProxy match {
             case s: ISamplingProxyUI ⇒ s.dataUI.isAcceptable(d)
-            case _ ⇒ true
+            case _                   ⇒ true
           }
-        } catch {
+        }
+        catch {
           case e: UserBadDataError ⇒ false
         }
-      } else acceptModifiers(d)
+      }
+      else acceptModifiers(d)
   }
 
   def acceptModifiers(domain: IDomainDataUI) =
     domain match {
       case dm: IModifier ⇒ true
-      case _ ⇒ false
+      case _             ⇒ false
     }
 
   val previous: List[IDomainWidget] = domainWidget.incomings
@@ -93,7 +95,7 @@ class DomainPanelUI(domainWidget: IDomainWidget,
   def listenToDomain = {
     listenTo(dPanel.help.components.toSeq: _*)
     reactions += {
-      case FocusGained(source: Component, _, _) ⇒ dPanel.help.switchTo(source)
+      case FocusGained(source: Component, _, _)     ⇒ dPanel.help.switchTo(source)
       case ComponentFocusedEvent(source: Component) ⇒ dPanel.help.switchTo(source)
     }
     domainPanel.updateHelp

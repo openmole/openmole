@@ -47,7 +47,8 @@ sealed class ListFilesDomain(
     if (!dir.exists) {
       ListFilesDomain.logger.warning("Directory " + dir + " in ListFilesDomain doesn't exists, returning an empty list of values.")
       Iterable.empty
-    } else if (recursive) dir.listRecursive(filter)
+    }
+    else if (recursive) dir.listRecursive(filter)
     else dir.listFiles(filter)
   }
 

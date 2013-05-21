@@ -84,9 +84,10 @@ object MyComboBox {
         try {
           v match {
             case s: String ⇒ string2A(s)
-            case _ ⇒ v.asInstanceOf[A]
+            case _         ⇒ v.asInstanceOf[A]
           }
-        } catch {
+        }
+        catch {
           case _: Exception ⇒
             throw new IllegalArgumentException("ComboBox not initialized with a proper value, was '" + v + "'.")
         }
@@ -108,7 +109,8 @@ object MyComboBox {
         def verify(c: JComponent) = try {
           value = string2A(c.asInstanceOf[JTextField].getText)
           true
-        } catch {
+        }
+        catch {
           case e: Exception ⇒ false
         }
       }

@@ -100,7 +100,7 @@ class CapsuleUI private (
     def apply = {
       dataUI.task match {
         case Some(x: ITaskDataProxyUI) ⇒ scene.displayPropertyPanel(x, 0)
-        case _ ⇒
+        case _                         ⇒
       }
     }
   }, 6) {
@@ -194,7 +194,7 @@ class CapsuleUI private (
   private def removeWidget(w: Option[ComponentWidget]) = {
     w match {
       case Some(y: ComponentWidget) ⇒ removeChild(y)
-      case None ⇒
+      case None                     ⇒
     }
   }
 
@@ -225,7 +225,7 @@ class CapsuleUI private (
 
     val img = dataUI.environment match {
       case Some(x: IEnvironmentDataProxyUI) ⇒ new ImageIcon(ImageIO.read(x.dataUI.getClass.getClassLoader.getResource(x.dataUI.imagePath)))
-      case _ ⇒ new ImageIcon(ImageIO.read(dataUI.getClass.getClassLoader.getResource("img/noEnv.png")))
+      case _                                ⇒ new ImageIcon(ImageIO.read(dataUI.getClass.getClassLoader.getResource("img/noEnv.png")))
     }
 
     environmentWidget = Some(imageWidget(scene,
@@ -298,7 +298,8 @@ class CapsuleUI private (
         ds ⇒
           SceneFactory.prototype(ds.prototype)
       }
-    } else List()
+    }
+    else List()
   }
 
   def outputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IPrototypeDataProxyUI] =
@@ -307,7 +308,8 @@ class CapsuleUI private (
       caps.outputs(mole, Map(caps -> dataUI.sources.map { _.dataUI.coreObject(pMap) }), Map(caps -> dataUI.hooks.map { _.dataUI.coreObject(pMap) })).toList.map {
         ds ⇒ SceneFactory.prototype(ds.prototype)
       }
-    } else List()
+    }
+    else List()
 
   def inputs: List[IPrototypeDataProxyUI] = {
     val i = scene.manager.cacheMole match {

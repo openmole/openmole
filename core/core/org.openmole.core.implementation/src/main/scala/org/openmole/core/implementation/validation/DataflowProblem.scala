@@ -18,7 +18,7 @@
 package org.openmole.core.implementation.validation
 
 import org.openmole.core.model.data._
-import org.openmole.core.model.mole.{ISource, IHook, ICapsule}
+import org.openmole.core.model.mole.{ ISource, IHook, ICapsule }
 import org.openmole.core.model.transition.Slot
 
 object DataflowProblem {
@@ -33,95 +33,92 @@ object DataflowProblem {
   case object Output extends SlotType
 
   case class WrongType(
-    slot: Slot,
-    data: Data[_],
-    provided: Prototype[_]) extends SlotDataflowProblem {
+      slot: Slot,
+      data: Data[_],
+      provided: Prototype[_]) extends SlotDataflowProblem {
 
     override def toString = "Wrong type received at " + slot + ", data " + data.prototype + " is expected but " + provided + " is provided."
   }
 
   case class MissingInput(
-    slot: Slot,
-    data: Data[_]) extends SlotDataflowProblem {
+      slot: Slot,
+      data: Data[_]) extends SlotDataflowProblem {
 
     override def toString = "Input " + data + " is missing when reaching the " + slot + "."
   }
 
   case class OptionalOutput(
-    slot: Slot,
-    data: Data[_]) extends SlotDataflowProblem {
+      slot: Slot,
+      data: Data[_]) extends SlotDataflowProblem {
 
     override def toString = "Input " + data + " is provided by an optional output when reaching the " + slot + " and no default value (parameter) is provided."
   }
 
   case class DuplicatedName(
-    capsule: ICapsule,
-    name: String,
-    data: Iterable[Data[_]],
-    slotType: SlotType) extends DataflowProblem {
+      capsule: ICapsule,
+      name: String,
+      data: Iterable[Data[_]],
+      slotType: SlotType) extends DataflowProblem {
 
     override def toString = name + " has been found several time in capsule in " + slotType + " of capsule " + capsule + ": " + data.mkString(", ") + "."
   }
 
-    sealed trait SourceProblem extends SlotDataflowProblem
+  sealed trait SourceProblem extends SlotDataflowProblem
 
   case class MissingSourceInput(
-    slot: Slot,
-    source: ISource,
-    input: Data[_]) extends SourceProblem {
+      slot: Slot,
+      source: ISource,
+      input: Data[_]) extends SourceProblem {
 
     override def toString = s"Input $input is missing for source $source at $slot"
   }
 
   case class WrongSourceType(
-    slot: Slot,
-    source: ISource,
-    data: Data[_],
-    provided: Prototype[_]) extends SourceProblem {
+      slot: Slot,
+      source: ISource,
+      data: Data[_],
+      provided: Prototype[_]) extends SourceProblem {
 
     override def toString = s"Wrong type received for source $source at $slot, data ${data.prototype} is expected but $provided is provided."
   }
 
   case class OptionalSourceOutput(
-    slot: Slot,
-    source: ISource,
-    data: Data[_]) extends SourceProblem {
+      slot: Slot,
+      source: ISource,
+      data: Data[_]) extends SourceProblem {
 
     override def toString = s"Input $data is provided by an optional output for source $source when reaching the $slot and no default value (parameter) is provided."
   }
 
-
   sealed trait HookProblem extends DataflowProblem
 
   case class MissingHookInput(
-    capsule: ICapsule,
-    hook: IHook,
-    input: Data[_]) extends HookProblem {
+      capsule: ICapsule,
+      hook: IHook,
+      input: Data[_]) extends HookProblem {
 
     override def toString = s"Input $input is missing for misc $hook"
   }
   case class WrongHookType(
-    capsule: ICapsule,
-    hook: IHook,
-    input: Data[_],
-    found: Prototype[_]) extends HookProblem {
+      capsule: ICapsule,
+      hook: IHook,
+      input: Data[_],
+      found: Prototype[_]) extends HookProblem {
 
     override def toString = s"Input has incompatible type $found whereas $input was expected"
   }
 
-
   case class OptionalHookOutput(
-    capsule: ICapsule,
-    hook: IHook,
-    data: Data[_]) extends HookProblem {
+      capsule: ICapsule,
+      hook: IHook,
+      data: Data[_]) extends HookProblem {
 
     override def toString = s"Input $data is provided by an optional output for misc $hook of capsule $capsule and no default value (parameter) is provided."
   }
 
-
   case class MissingMoleTaskImplicit(
-    capsule: ICapsule,
-    `implicit`: String) extends DataflowProblem {
+      capsule: ICapsule,
+      `implicit`: String) extends DataflowProblem {
 
     override def toString = s"Implicit ${`implicit`} not found in input of $capsule"
   }

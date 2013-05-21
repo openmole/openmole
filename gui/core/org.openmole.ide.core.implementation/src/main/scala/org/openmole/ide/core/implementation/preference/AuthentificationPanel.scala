@@ -33,7 +33,8 @@ class AuthentificationPanel extends PluginPanel("wrap", "[grow,fill]", "") with 
   KeyRegistry.authentifications.values.foreach(a ⇒ {
     val p = try {
       Right(a.buildPanelUI)
-    } catch {
+    }
+    catch {
       case e: Throwable ⇒
         StatusBar().block(Some(e.getMessage).getOrElse(""),
           stack = e.getStackTraceString)

@@ -42,11 +42,11 @@ class InputSlotWidget(
       case true ⇒
         scene match {
           case x: ExecutionMoleScene ⇒ setImage(START_EXE_SLOT)
-          case _ ⇒ setImage(START_SLOT)
+          case _                     ⇒ setImage(START_SLOT)
         }
       case false ⇒ scene match {
         case x: ExecutionMoleScene ⇒ setImage(INPUT_EXE_SLOT)
-        case _ ⇒ setImage(INPUT_SLOT)
+        case _                     ⇒ setImage(INPUT_SLOT)
       }
     }
   }

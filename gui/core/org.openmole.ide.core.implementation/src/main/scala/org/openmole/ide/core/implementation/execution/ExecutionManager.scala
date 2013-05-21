@@ -170,7 +170,7 @@ class ExecutionManager(manager: IMoleUI,
     timer.stop
     moleExecution match {
       case Some(mE: IMoleExecution) ⇒ mE.cancel
-      case _ ⇒
+      case _                        ⇒
     }
   }
 

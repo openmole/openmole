@@ -91,7 +91,8 @@ sealed abstract class ScalaTask(
           val code = resVariable + " = run(" + inputs.map { i ⇒ i.prototype.name }.mkString(",") + ")"
           interpreter.interpret(code)
           interpreter.valueOfTerm(resVariable).getOrElse(throw new UserBadDataError("Error in execution of " + code)).asInstanceOf[Map[String, Any]]
-        } finally {
+        }
+        finally {
           interpreter.interpret(resVariable + " = null")
           context.values.foreach {
             v ⇒ interpreter.bindValue(v.prototype.name, null)

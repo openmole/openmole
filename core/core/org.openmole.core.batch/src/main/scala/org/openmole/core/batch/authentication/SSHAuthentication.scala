@@ -26,7 +26,7 @@ object SSHAuthentication {
     val list = Workspace.persistentList(classOf[SSHAuthentication])
     list.find { case (i, e) ⇒ target.matches(e.regexp) }.getOrElse(throw new UserBadDataError("No authentication method found for " + target))._2
   }
-  
+
   def apply(login: String, host: String, port: Int): SSHAuthentication = apply(address(login, host, port))
 
   def address(login: String, host: String, port: Int) = s"$login@$host:$port"
@@ -39,7 +39,7 @@ trait SSHAuthentication {
   def target: String
   def login: String
   def regexp = ".*" + login + "@" + target + ".*"
-  
+
   def apply(): fr.iscpif.gridscale.authentication.SSHAuthentication
 
   override def toString = "Target = " + target

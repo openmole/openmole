@@ -49,7 +49,7 @@ case class OptionParser(
   def parse(args: Seq[String]): Boolean =
     parse(args, ()) match {
       case Some(x) ⇒ true
-      case None ⇒ false
+      case None    ⇒ false
     }
 
   // -------- Defining options ---------------

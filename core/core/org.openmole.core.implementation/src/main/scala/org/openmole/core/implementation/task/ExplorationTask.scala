@@ -53,7 +53,7 @@ sealed abstract class ExplorationTask(val name: String, val sampling: Sampling) 
 
     for (sample ← sampled; v ← sample) variablesValues.get(v.prototype) match {
       case Some(b) ⇒ b += v.value
-      case None ⇒
+      case None    ⇒
     }
 
     context ++ variablesValues.map {

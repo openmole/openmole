@@ -90,6 +90,7 @@ object DBServer extends App {
     server.openClient.close
 
     Thread.sleep(Long.MaxValue)
-  } else println("Server is allready running")
+  }
+  else println("Server is allready running")
 
 }

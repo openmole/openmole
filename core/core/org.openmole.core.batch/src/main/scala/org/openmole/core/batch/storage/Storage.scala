@@ -38,7 +38,6 @@ object Storage {
   def uniqName(prefix: String, sufix: String) = prefix + "_" + UUID.randomUUID.toString + sufix
 }
 
-
 trait Storage {
 
   val storage: GSStorage

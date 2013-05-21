@@ -30,9 +30,9 @@ import org.openmole.ide.core.implementation.workflow.{ ExecutionMoleSceneContain
 
 object StatusBar {
   def apply() = ScenesManager.currentSceneContainer match {
-    case Some(b: BuildMoleSceneContainer) ⇒ b.statusBar
+    case Some(b: BuildMoleSceneContainer)     ⇒ b.statusBar
     case Some(e: ExecutionMoleSceneContainer) ⇒ e.bmsc.statusBar
-    case _ ⇒ new StatusBar
+    case _                                    ⇒ new StatusBar
   }
 
   def displayErrors(f: ⇒ Traversable[Throwable]) = {
@@ -101,7 +101,8 @@ class StatusBar extends MigPanel("wrap 3") {
       }
       if (stack.isEmpty || stack == "\n") {
         contents += (new Label(error), "wrap")
-      } else {
+      }
+      else {
         contents += new Label(error)
         contents += new LinkLabel(" details",
           new Action("") {
@@ -127,6 +128,6 @@ class StatusBar extends MigPanel("wrap 3") {
   def displayProxy(proxy: IDataProxyUI) =
     ScenesManager.currentSceneContainer match {
       case Some(sc: ISceneContainer) ⇒ sc.scene.displayPropertyPanel(proxy, 0)
-      case None ⇒
+      case None                      ⇒
     }
 }

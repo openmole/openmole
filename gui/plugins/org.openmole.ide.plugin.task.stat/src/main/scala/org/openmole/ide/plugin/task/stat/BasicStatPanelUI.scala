@@ -62,7 +62,8 @@ abstract class BasicStatPanelUI(statType: String,
         },
         CLOSE_IF_EMPTY,
         ADD))
-    } else None
+    }
+    else None
 
   val components = {
     if (multiPrototypeCombo.isDefined)

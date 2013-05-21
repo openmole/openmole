@@ -26,8 +26,8 @@ import org.openmole.ide.misc.tools.util.Types
 object UniformDistributionDataUI {
 
   def apply[T](max: Option[Int] = None, classString: String) = Types.standardize(classString) match {
-    case INT ⇒ new UniformIntDistributionDataUI(max)
-    case LONG ⇒ new UniformLongDistributionDataUI
+    case INT    ⇒ new UniformIntDistributionDataUI(max)
+    case LONG   ⇒ new UniformLongDistributionDataUI
     case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
   }
 }

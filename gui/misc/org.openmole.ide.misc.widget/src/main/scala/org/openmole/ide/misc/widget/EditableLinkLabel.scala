@@ -36,7 +36,7 @@ class EditableLinkLabel[A](val action: ContentAction[A],
   reactions += {
     case e: MousePressed ⇒
       popup.isOpened match {
-        case true ⇒ popup.hide
+        case true  ⇒ popup.hide
         case false ⇒ popup.show(this, 0, size.height)
       }
   }

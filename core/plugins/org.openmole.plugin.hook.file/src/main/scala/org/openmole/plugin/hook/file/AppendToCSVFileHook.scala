@@ -59,7 +59,7 @@ abstract class AppendToCSVFileHook(
               case Some(v) ⇒
                 v match {
                   case v: Array[_] ⇒ v.toList
-                  case v ⇒ List(v)
+                  case v           ⇒ List(v)
                 }
               case None ⇒ List("not found")
             }

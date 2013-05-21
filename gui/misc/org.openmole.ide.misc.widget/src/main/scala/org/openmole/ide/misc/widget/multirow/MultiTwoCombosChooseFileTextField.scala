@@ -38,14 +38,14 @@ object MultiTwoCombosChooseFileTextField {
     val combo1 = new MyComboBox[A](comboContent1.sortBy { _.toString }) {
       data.comboValue1 match {
         case Some(x: A) ⇒ selection.item = x
-        case _ ⇒
+        case _          ⇒
       }
     }
 
     val combo2 = new MyComboBox[B](comboContent2.sortBy { _.toString }) {
       data.comboValue2 match {
         case Some(x: B) ⇒ selection.item = x
-        case _ ⇒
+        case _          ⇒
       }
     }
 

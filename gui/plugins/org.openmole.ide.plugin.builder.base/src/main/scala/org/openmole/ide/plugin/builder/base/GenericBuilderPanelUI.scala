@@ -29,7 +29,7 @@ abstract class GenericBuilderPanelUI(puzzleTitle: String, puzzles: List[Puzzle],
   contents += puzzleComboBox
   puzzleSelection match {
     case Some(p: Puzzle) ⇒ puzzleComboBox.selection.item = p
-    case _ ⇒
+    case _               ⇒
   }
 
   contents += new Label("Sampling")

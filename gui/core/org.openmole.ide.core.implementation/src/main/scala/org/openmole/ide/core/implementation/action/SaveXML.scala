@@ -51,7 +51,9 @@ object SaveXML {
           if (!f.getName.contains(".")) new File(fc.selectedFile.getPath + ".om")
           else f
         Some(saveAs)
-      } else None
-    } else None
+      }
+      else None
+    }
+    else None
   }
 }

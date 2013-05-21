@@ -142,13 +142,13 @@ object ClassUtils {
       val targs = x.getActualTypeArguments() map manifest
 
       (owner == null, targs.isEmpty) match {
-        case (true, true) ⇒ manifest(raw)
+        case (true, true)  ⇒ manifest(raw)
         case (true, false) ⇒ classType(raw, targs.head, targs.tail: _*)
-        case (false, _) ⇒ classType(manifest(owner), raw, targs: _*)
+        case (false, _)    ⇒ classType(manifest(owner), raw, targs: _*)
       }
     case x: GenericArrayType ⇒ arrayType(manifest(x.getGenericComponentType))
-    case x: WildcardType ⇒ wildcardType(intersect(x.getLowerBounds), intersect(x.getUpperBounds))
-    case x: TypeVariable[_] ⇒ intersect(x.getBounds())
+    case x: WildcardType     ⇒ wildcardType(intersect(x.getLowerBounds), intersect(x.getUpperBounds))
+    case x: TypeVariable[_]  ⇒ intersect(x.getBounds())
   }
 
   def classEquivalence(c: Class[_]) =
@@ -164,31 +164,32 @@ object ClassUtils {
 
   def toClass(s: String) = classEquivalence(
     s match {
-      case "Byte" ⇒ classOf[Byte]
-      case "Short" ⇒ classOf[Short]
-      case "Int" ⇒ classOf[Int]
-      case "int" ⇒ classOf[Int]
-      case "Long" ⇒ classOf[Long]
-      case "long" ⇒ classOf[Long]
-      case "Float" ⇒ classOf[Float]
-      case "Double" ⇒ classOf[Double]
-      case "double" ⇒ classOf[Double]
-      case "Char" ⇒ classOf[Char]
-      case "Boolean" ⇒ classOf[Boolean]
-      case "String" ⇒ classOf[String]
-      case "File" ⇒ classOf[java.io.File]
+      case "Byte"       ⇒ classOf[Byte]
+      case "Short"      ⇒ classOf[Short]
+      case "Int"        ⇒ classOf[Int]
+      case "int"        ⇒ classOf[Int]
+      case "Long"       ⇒ classOf[Long]
+      case "long"       ⇒ classOf[Long]
+      case "Float"      ⇒ classOf[Float]
+      case "Double"     ⇒ classOf[Double]
+      case "double"     ⇒ classOf[Double]
+      case "Char"       ⇒ classOf[Char]
+      case "Boolean"    ⇒ classOf[Boolean]
+      case "String"     ⇒ classOf[String]
+      case "File"       ⇒ classOf[java.io.File]
       case "BigInteger" ⇒ classOf[java.math.BigInteger]
       case "BigDecimal" ⇒ classOf[java.math.BigDecimal]
       case _ ⇒ try {
         classOf[GroovyShell].getClassLoader.loadClass(s)
-      } catch {
+      }
+      catch {
         case e: ClassNotFoundException ⇒ throw new UserBadDataError(e, "The class " + s + " has not been found")
       }
     })
 
   def clazzOf(v: Any) = {
     v match {
-      case null ⇒ classOf[Null]
+      case null      ⇒ classOf[Null]
       case r: AnyRef ⇒ r.getClass
     }
   }

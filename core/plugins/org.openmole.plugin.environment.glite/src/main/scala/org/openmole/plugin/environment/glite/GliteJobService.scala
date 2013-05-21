@@ -23,7 +23,7 @@ import java.io.PrintStream
 import java.net.URI
 import java.util.UUID
 import org.openmole.core.batch.control._
-import org.openmole.core.batch.storage.{StorageService, Storage}
+import org.openmole.core.batch.storage.{ StorageService, Storage }
 import org.openmole.core.batch.environment.SerializedJob
 import org.openmole.misc.exception.InternalProcessingError
 import org.openmole.core.batch.environment.Runtime
@@ -112,7 +112,8 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
         val id = jid
         val resultPath = outputFilePath
       }
-    } finally script.delete
+    }
+    finally script.delete
   }
 
   protected def generateScript(

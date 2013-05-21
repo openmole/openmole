@@ -70,7 +70,7 @@ class GUIPanel extends MainFrame {
       contents += new MenuItem(new Action("Export") {
         override def apply = ScenesManager.currentScene match {
           case Some(s: BuildMoleScene) ⇒ DialogFactory.exportPartialMoleExecution(s)
-          case _ ⇒ StatusBar().inform("No mole available for export")
+          case _                       ⇒ StatusBar().inform("No mole available for export")
         }
       })
 
@@ -153,7 +153,8 @@ class GUIPanel extends MainFrame {
                 plugin.copy(targetFile)
                 PluginManager.load(targetFile)
               }
-            } else StatusBar().warn("The file " + path.content + " does not exist. It has not been imported")
+            }
+            else StatusBar().warn("The file " + path.content + " does not exist. It has not been imported")
           }
           val a = Workspace.pluginDirLocation.list.map {
             f ⇒ new File(Workspace.pluginDirLocation + "/" + f)

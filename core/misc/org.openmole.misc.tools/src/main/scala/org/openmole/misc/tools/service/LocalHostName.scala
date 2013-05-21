@@ -26,7 +26,8 @@ object LocalHostName extends Logger {
   lazy val localHostName =
     try {
       InetAddress.getLocalHost.getCanonicalHostName
-    } catch {
+    }
+    catch {
       case ex: Throwable ⇒
         logger.log(WARNING, "Was not able to get local host name.", ex)
         UUID.randomUUID.toString

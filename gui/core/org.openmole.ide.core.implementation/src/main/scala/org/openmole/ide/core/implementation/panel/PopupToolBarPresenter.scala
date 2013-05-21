@@ -43,7 +43,7 @@ class PopupToolBarPresenter(t: String,
   }
 
   def remove(c: Component) = c match {
-    case x: Menu ⇒
+    case x: Menu     ⇒
     case x: MenuItem ⇒ popup.contents -= c
   }
 

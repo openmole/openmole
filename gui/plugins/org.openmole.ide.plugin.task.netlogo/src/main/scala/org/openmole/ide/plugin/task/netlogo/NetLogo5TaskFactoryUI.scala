@@ -35,7 +35,7 @@ class NetLogo5TaskFactoryUI extends ITaskFactoryUI {
     val t = SceneFactory.as[NetLogo5Task](task)
     val embededWS = t.workspace.location match {
       case Right(r) ⇒ true
-      case Left(l) ⇒ false
+      case Left(l)  ⇒ false
     }
     uiMap.task(t, x ⇒ new NetLogo4TaskDataUI(t.name,
       embededWS,

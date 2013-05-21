@@ -90,7 +90,7 @@ class TaskPanel(proxy: ITaskDataProxyUI,
   newPanel.addPrototype
   proxy.dataUI match {
     case d: TaskDataUI with IExplorationTaskDataUI ⇒ newPanel.addSamplingComposition
-    case _ ⇒
+    case _                                         ⇒
   }
 
   mainPanel.contents += newPanel
@@ -117,7 +117,7 @@ class TaskPanel(proxy: ITaskDataProxyUI,
       updatePanel
       p match {
         case t: ITaskDataProxyUI ⇒
-        case _ ⇒ setTab(p)
+        case _                   ⇒ setTab(p)
       }
   }
 
@@ -144,7 +144,8 @@ class TaskPanel(proxy: ITaskDataProxyUI,
             c ⇒ c.scene.graphScene.removeNodeWithEdges(c.scene.manager.removeCapsuleUI(c))
           }
           delete
-        } else false
+        }
+        else false
     }
   }
 

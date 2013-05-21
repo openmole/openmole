@@ -35,7 +35,7 @@ object SamplingUtils {
       fos ⇒
         fos match {
           case Right(s) ⇒ s
-          case Left(f) ⇒ (DiscreteFactor(f._1.asInstanceOf[Factor[Any, Domain[Any] with Discrete[Any]]]), f._2)
+          case Left(f)  ⇒ (DiscreteFactor(f._1.asInstanceOf[Factor[Any, Domain[Any] with Discrete[Any]]]), f._2)
         }
     }
 

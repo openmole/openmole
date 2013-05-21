@@ -68,7 +68,7 @@ object TypeUtil {
         (direct.getOrElse(name, empty), toArray.getOrElse(name, empty), fromArray.getOrElse(name, empty)) match {
           case (ListBuffer(d), ListBuffer(), ListBuffer()) ⇒ new ComputedType(name, d, false, optional(name))
           case (ListBuffer(), ListBuffer(t), ListBuffer()) ⇒ new ComputedType(name, t, true, optional(name))
-          case (d, t, ListBuffer()) ⇒ new ComputedType(name, s(d ++ t), true, optional(name))
+          case (d, t, ListBuffer())                        ⇒ new ComputedType(name, s(d ++ t), true, optional(name))
           case (ListBuffer(), ListBuffer(), ListBuffer(f)) ⇒
             if (f.isArray) new ComputedType(name, f.fromArray.toManifest, false, optional(name))
             else new ComputedType(name, f, false, optional(name))
@@ -97,8 +97,8 @@ object TypeUtil {
         case _: IAggregationTransition ⇒
           toArray.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
         case _: IExplorationTransition ⇒ setFromArray
-        case _: ISlaveTransition ⇒ setFromArray
-        case _ ⇒ direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
+        case _: ISlaveTransition       ⇒ setFromArray
+        case _                         ⇒ direct.getOrElseUpdate(d.prototype.name, new ListBuffer) += d.prototype.`type`
       }
 
       optional.getOrElseUpdate(d.prototype.name, new ListBuffer) += (d.mode is Optional)

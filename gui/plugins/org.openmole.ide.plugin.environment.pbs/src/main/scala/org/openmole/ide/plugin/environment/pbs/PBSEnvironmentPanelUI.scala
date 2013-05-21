@@ -33,25 +33,27 @@ import java.awt.Dimension
 class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fillx,wrap 2", "", "") with IEnvironmentPanelUI {
 
   implicit def stringToStringOpt(s: String) = s.isEmpty match {
-    case true ⇒ None
+    case true  ⇒ None
     case false ⇒ Some(s)
   }
 
   implicit def stringToIntOpt(s: String) = try {
     Some(s.toInt)
-  } catch {
+  }
+  catch {
     case e: NumberFormatException ⇒ None
   }
 
   implicit def stringToInt(s: String) = try {
     s.toInt
-  } catch {
+  }
+  catch {
     case e: NumberFormatException ⇒ 0
   }
 
   implicit def intToString(i: Option[Int]) = i match {
     case Some(ii: Int) ⇒ ii.toString
-    case _ ⇒ ""
+    case _             ⇒ ""
   }
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))

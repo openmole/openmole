@@ -94,9 +94,9 @@ class HookPanel(proxy: IHookDataProxyUI,
   listenTo(panelUI.help.components.toSeq: _*)
   listenTo(tabbedPane.selection)
   reactions += {
-    case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
+    case FocusGained(source: Component, _, _)     ⇒ panelUI.help.switchTo(source)
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
-    case SelectionChanged(tabbedPane) ⇒ if (!tabbedLock) updateProtoPanel
+    case SelectionChanged(tabbedPane)             ⇒ if (!tabbedLock) updateProtoPanel
     case UpdatedProxyEvent(p: IDataProxyUI, _) ⇒
       scene.removeAll(index + 1)
       updatePanel

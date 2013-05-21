@@ -52,7 +52,7 @@ class ExplorationTaskPanelUI(pud: ExplorationTaskDataUI) extends PluginPanel("wr
       if (samplingComboBox.selection.item != emptyProxy) {
         ScenesManager.currentScene match {
           case Some(s: IMoleScene) ⇒ ConceptMenu.displayExtra(samplingComboBox.selection.item, s.currentPanel)
-          case _ ⇒
+          case _                   ⇒
         }
       }
   }) { icon = EYE }

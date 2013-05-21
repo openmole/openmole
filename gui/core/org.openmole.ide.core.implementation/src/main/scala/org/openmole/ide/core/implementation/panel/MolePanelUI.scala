@@ -43,7 +43,7 @@ class MolePanelUI(mdu: IMoleUI) extends PluginPanel("wrap") with IPanelUI {
       contents.flatMap { c ⇒
         c match {
           case x: RadioButton ⇒ List(x)
-          case _ ⇒ Nil
+          case _              ⇒ Nil
         }
       }.toList.filter { _.selected }.map { _.text }
 

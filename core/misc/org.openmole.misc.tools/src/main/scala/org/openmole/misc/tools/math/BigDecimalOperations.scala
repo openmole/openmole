@@ -263,7 +263,8 @@ object BigDecimalOperations {
     // If x is negative, return -arctan(-x).
     if (x.signum() == -1) {
       return arctan(x.negate, scale).negate
-    } else {
+    }
+    else {
       return arctanTaylor(x, scale)
     }
   }

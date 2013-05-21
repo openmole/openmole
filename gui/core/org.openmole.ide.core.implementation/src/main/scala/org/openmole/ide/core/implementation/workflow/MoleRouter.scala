@@ -28,7 +28,7 @@ class MoleRouter(layer: LayerWidget) extends Router {
     widget.setControlPoints(List(), false)
     (widget.getTargetAnchor.compute(widget.getSourceAnchorEntry).getAnchorSceneLocation.x -
       widget.getSourceAnchor.compute(widget.getSourceAnchorEntry).getAnchorSceneLocation.x) < 0 match {
-        case true ⇒ RouterFactory.createOrthogonalSearchRouter(layer).routeConnection(widget)
+        case true  ⇒ RouterFactory.createOrthogonalSearchRouter(layer).routeConnection(widget)
         case false ⇒ RouterFactory.createFreeRouter.routeConnection(widget)
       }
   }

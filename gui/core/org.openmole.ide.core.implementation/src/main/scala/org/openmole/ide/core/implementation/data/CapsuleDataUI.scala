@@ -41,7 +41,7 @@ class CapsuleDataUI(
     val capsuleType: CapsuleType = new BasicCapsuleType) extends ICapsuleDataUI {
   override def toString = task match {
     case Some(x: ITaskDataProxyUI) ⇒ x.dataUI.name
-    case _ ⇒ ""
+    case _                         ⇒ ""
   }
 
   def coreClass = classOf[Capsule]
@@ -51,9 +51,9 @@ class CapsuleDataUI(
   def coreObject(moleDataUI: IMoleUI) = task match {
     case Some(t: ITaskDataProxyUI) ⇒ MoleFactory.taskCoreObject(t.dataUI, moleDataUI.plugins.map { p ⇒ new File(p) }.toSet) match {
       case Success(x: ITask) ⇒ capsuleType match {
-        case y: MasterCapsuleType ⇒ new MasterCapsule(x, y.persistList.map { _.dataUI.name }.toSet)
+        case y: MasterCapsuleType   ⇒ new MasterCapsule(x, y.persistList.map { _.dataUI.name }.toSet)
         case y: StrainerCapsuleType ⇒ new StrainerCapsule(x)
-        case _ ⇒ new Capsule(x)
+        case _                      ⇒ new Capsule(x)
       }
       case Failure(x: Throwable) ⇒ new Capsule(EmptyTask(t.dataUI.name))
     }

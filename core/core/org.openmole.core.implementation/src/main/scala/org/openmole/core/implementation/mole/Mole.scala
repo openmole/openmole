@@ -32,11 +32,11 @@ object Mole {
 
   def nextTransitions(mole: IMole)(from: ICapsule, lvl: Int) =
     mole.outputTransitions(from).map {
-      case t: IAggregationTransition ⇒ t -> (lvl - 1)
+      case t: IAggregationTransition    ⇒ t -> (lvl - 1)
       case t: IEndExplorationTransition ⇒ t -> (lvl - 1)
-      case t: ISlaveTransition ⇒ t -> lvl
-      case t: IExplorationTransition ⇒ t -> (lvl + 1)
-      case t: ITransition ⇒ t -> lvl
+      case t: ISlaveTransition          ⇒ t -> lvl
+      case t: IExplorationTransition    ⇒ t -> (lvl + 1)
+      case t: ITransition               ⇒ t -> lvl
     }
 
   def levels(mole: IMole) = {

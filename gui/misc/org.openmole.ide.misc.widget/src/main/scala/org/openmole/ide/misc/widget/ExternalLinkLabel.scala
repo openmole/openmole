@@ -36,7 +36,7 @@ class ExternalLinkLabel(val textLink: String,
   reactions += {
     case e: MousePressed ⇒
       Desktop.isDesktopSupported match {
-        case true ⇒ Desktop.getDesktop.browse(new URI(href))
+        case true  ⇒ Desktop.getDesktop.browse(new URI(href))
         case false ⇒ throw new UserBadDataError("Open your web browser to: " + href)
       }
   }

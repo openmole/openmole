@@ -42,7 +42,8 @@ class RefreshActor(jobManager: ActorRef) extends Actor {
                 if (oldState == job.state) math.min(delay + job.environment.incrementUpdateInterval, job.environment.maxUpdateInterval)
                 else job.environment.minUpdateInterval
               jobManager ! Delay(Refresh(job, sj, bj, newDelay), newDelay)
-            } else jobManager ! Kill(job)
+            }
+            else jobManager ! Kill(job)
           case None ⇒ jobManager ! Delay(Refresh(job, sj, bj, delay), delay)
         } catch {
           case e: Throwable ⇒

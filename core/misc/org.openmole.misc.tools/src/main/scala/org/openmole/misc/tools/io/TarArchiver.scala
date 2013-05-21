@@ -59,7 +59,8 @@ object TarArchiver {
         e = tis.getNextEntry
       }
       ret
-    } finally tis.close
+    }
+    finally tis.close
 
     def extractDirArchiveWithRelativePathAndClose(baseDir: File) = try {
       if (!baseDir.isDirectory) throw new IOException(baseDir.getAbsolutePath + " is not a directory.")
@@ -72,7 +73,8 @@ object TarArchiver {
             else if (e.isDirectory) {
               dest.mkdirs
               None
-            } else {
+            }
+            else {
               dest.getParentFile.mkdirs
               val fos = new FileOutputStream(dest)
               try tis.copy(fos) finally fos.close
@@ -86,7 +88,8 @@ object TarArchiver {
         case ((dest, name)) ⇒ dest.createLink(name)
       }
 
-    } finally tis.close
+    }
+    finally tis.close
   }
 
   private def createDirArchiveWithRelativePathWithAdditionnalCommand(tos: TarOutputStream, baseDir: File, additionnalCommand: TarEntry ⇒ Unit) = {
@@ -105,7 +108,8 @@ object TarArchiver {
         val e = if (cur._1.isDirectory) {
           for (name ← cur._1.list.sorted) toArchive.push((new File(cur._1, name), cur._2 + '/' + name))
           new TarEntry(cur._2 + '/')
-        } else {
+        }
+        else {
           val e = new TarEntry(cur._2)
           e.setSize(cur._1.length)
           e

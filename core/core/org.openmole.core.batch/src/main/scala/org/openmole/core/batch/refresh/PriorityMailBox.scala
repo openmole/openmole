@@ -24,9 +24,9 @@ import com.typesafe.config.Config
 
 class PriorityMailBox(settings: ActorSystem.Settings, config: Config) extends UnboundedPriorityMailbox(
   PriorityGenerator {
-    case Upload ⇒ 1
-    case Submit ⇒ 0
-    case Refresh ⇒ 3
+    case Upload    ⇒ 1
+    case Submit    ⇒ 0
+    case Refresh   ⇒ 3
     case GetResult ⇒ 1
-    case _ ⇒ 5
+    case _         ⇒ 5
   })

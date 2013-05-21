@@ -48,7 +48,7 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2", "
   moleComboBox.selection.item = pud.mole match {
     case Some(x: ID.Type) ⇒ MoleTaskDataUI.manager(x) match {
       case Some(m: IMoleUI) ⇒ m.asInstanceOf[MoleUI]
-      case _ ⇒ MoleTaskDataUI.emptyMoleSceneManager
+      case _                ⇒ MoleTaskDataUI.emptyMoleSceneManager
     }
     case _ ⇒ MoleTaskDataUI.emptyMoleSceneManager
   }

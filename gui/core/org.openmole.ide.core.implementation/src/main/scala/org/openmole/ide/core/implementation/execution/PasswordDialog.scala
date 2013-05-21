@@ -36,7 +36,7 @@ object PasswordDialog {
     listenTo(keys)
     reactions += {
       case KeyPressed(_, Enter, _, _) ⇒ ok(true)
-      case KeyReleased(_, _, _, _) ⇒ testPassword
+      case KeyReleased(_, _, _, _)    ⇒ testPassword
     }
   }
 
@@ -64,7 +64,8 @@ object PasswordDialog {
     if (Workspace.passwordIsCorrect(new String(passField.password))) {
       setColor(new Color(136, 170, 0))
       true
-    } else {
+    }
+    else {
       setColor(new Color(212, 0, 0))
       false
     }

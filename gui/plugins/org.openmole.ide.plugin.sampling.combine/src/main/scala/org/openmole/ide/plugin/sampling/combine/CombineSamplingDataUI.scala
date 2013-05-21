@@ -40,7 +40,7 @@ class CombineSamplingDataUI extends ISamplingDataUI with IOrdering {
 
   override def isAcceptable(domain: IDomainDataUI) = domain match {
     case f: IFinite ⇒ true
-    case _ ⇒ false
+    case _          ⇒ false
   }
 
   def isAcceptable(sampling: ISamplingDataUI) = true

@@ -51,14 +51,14 @@ trait InputOutputCheck {
   def parameters: ParameterSet
 
   protected def verifyInput(context: Context): Iterable[InputError] =
-  (for {
+    (for {
       d ← inputs.toList
       if (!(d.mode is Optional))
       p = d.prototype
     } yield context.variable(p.name) match {
-          case None ⇒ Some(InputNotFound(p))
-          case Some(v) ⇒ if (!p.isAssignableFrom(v.prototype)) Some(InputTypeMismatch(p, v.prototype)) else None
-  }).flatten
+      case None    ⇒ Some(InputNotFound(p))
+      case Some(v) ⇒ if (!p.isAssignableFrom(v.prototype)) Some(InputTypeMismatch(p, v.prototype)) else None
+    }).flatten
 
   protected def verifyOutput(context: Context): Iterable[OutputError] =
     outputs.flatMap {
@@ -74,21 +74,20 @@ trait InputOutputCheck {
     }
 
   protected def filterOutput(context: Context): Context =
-    Context(outputs.toList.flatMap( o => context.variable(o.prototype): Option[Variable[_]]))
+    Context(outputs.toList.flatMap(o ⇒ context.variable(o.prototype): Option[Variable[_]]))
 
   protected def initializeInput(context: Context): Context =
-      context ++
-        parameters.flatMap {
-          parameter ⇒
-            if (parameter.`override` || !context.contains(parameter.variable.prototype.name)) Some(parameter.variable)
-            else Option.empty[Variable[_]]
-        }
+    context ++
+      parameters.flatMap {
+        parameter ⇒
+          if (parameter.`override` || !context.contains(parameter.variable.prototype.name)) Some(parameter.variable)
+          else Option.empty[Variable[_]]
+      }
 
-
-  def perform(context: Context, process: (Context => Context)) = {
+  def perform(context: Context, process: (Context ⇒ Context)) = {
     val initializedContext = initializeInput(context)
     val inputErrors = verifyInput(initializedContext)
-    if(!inputErrors.isEmpty) throw new InternalProcessingError(s"Input errors have been found in ${this}: ${inputErrors.mkString(", ")}.")
+    if (!inputErrors.isEmpty) throw new InternalProcessingError(s"Input errors have been found in ${this}: ${inputErrors.mkString(", ")}.")
 
     val result =
       try context + process(initializedContext)

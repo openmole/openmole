@@ -36,14 +36,14 @@ object SlidingDomainDataUI {
             classString: String,
             previousDomain: List[IDomainDataUI]): SlidingDomainDataUI[_] = {
     Types.standardize(classString) match {
-      case INT ⇒ new SlidingDomainDataUI[Int](size, step, previousDomain)
-      case DOUBLE ⇒ new SlidingDomainDataUI[Double](size, step, previousDomain)
+      case INT         ⇒ new SlidingDomainDataUI[Int](size, step, previousDomain)
+      case DOUBLE      ⇒ new SlidingDomainDataUI[Double](size, step, previousDomain)
       case BIG_DECIMAL ⇒ new SlidingDomainDataUI[BigDecimal](size, step, previousDomain)
       case BIG_INTEGER ⇒ new SlidingDomainDataUI[BigInteger](size, step, previousDomain)
-      case LONG ⇒ new SlidingDomainDataUI[Long](size, step, previousDomain)
-      case STRING ⇒ new SlidingDomainDataUI[String](size, step, previousDomain)
-      case FILE ⇒ new SlidingDomainDataUI[File](size, step, previousDomain)
-      case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
+      case LONG        ⇒ new SlidingDomainDataUI[Long](size, step, previousDomain)
+      case STRING      ⇒ new SlidingDomainDataUI[String](size, step, previousDomain)
+      case FILE        ⇒ new SlidingDomainDataUI[File](size, step, previousDomain)
+      case x: Any      ⇒ throw new UserBadDataError("The type " + x + " is not supported")
     }
   }
 }
@@ -69,6 +69,6 @@ case class SlidingDomainDataUI[S](val size: String = "",
 
   def clone(pD: List[IDomainDataUI]) = pD.headOption match {
     case Some(d: IDomainDataUI) ⇒ SlidingDomainDataUI(size, step, Types.pretify(d.domainType.toString), pD)
-    case _ ⇒ SlidingDomainDataUI(size, step, DOUBLE, List())
+    case _                      ⇒ SlidingDomainDataUI(size, step, DOUBLE, List())
   }
 }

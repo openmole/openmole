@@ -6,6 +6,10 @@ import sbt._
 import Keys._
 import util.matching.Regex
 
+import com.typesafe.sbt.SbtScalariform.{ scalariformSettings, ScalariformKeys }
+
+import scalariform.formatter.preferences._
+
 /**
  * Created with IntelliJ IDEA.
  * User: luft
@@ -101,8 +105,14 @@ trait Defaults extends Build {
     install in Compile <<= publishLocal in Compile,
     OsgiKeys.bundle <<= OsgiKeys.bundle tag (Tags.Disk),
     (update in install) <<= update in install tag (Tags.Network),
-    assemble := OsgiKeys.bundle
-  )
+    ScalariformKeys.preferences in Compile <<= ScalariformKeys.preferences(p ⇒
+      p.setPreference(DoubleIndentClassDeclaration, true)
+        .setPreference(RewriteArrowSymbols, true)
+        .setPreference(AlignParameters, true)
+        .setPreference(AlignSingleLineCaseStatements, true)
+        .setPreference(CompactControlReadability, true)
+        .setPreference(PreserveDanglingCloseParenthesis, true))
+  ) ++ scalariformSettings
 
   def OsgiSettings = osgiCachedSettings
 
@@ -156,8 +166,15 @@ trait Defaults extends Build {
       resourceOutDir := None,
       dependencyNameMap := depNameMap,
       dependencyFilter := moduleFilter(),
+      ScalariformKeys.preferences in Compile <<= ScalariformKeys.preferences(p ⇒
+        p.setPreference(DoubleIndentClassDeclaration, true)
+          .setPreference(RewriteArrowSymbols, true)
+          .setPreference(AlignParameters, true)
+          .setPreference(AlignSingleLineCaseStatements, true)
+          .setPreference(CompactControlReadability, true)
+          .setPreference(PreserveDanglingCloseParenthesis, true)),
       copyDependencies <<= (update, version, target, scalaVersion, outDir, dependencyNameMap, dependencyFilter) map copyDepTask
-    ))
+    ) ++ scalariformSettings)
   }
 
   def provided(p: Project) = p % "provided"

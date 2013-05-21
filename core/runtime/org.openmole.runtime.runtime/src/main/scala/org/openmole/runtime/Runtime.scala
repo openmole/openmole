@@ -109,7 +109,8 @@ class Runtime {
             val local = Workspace.newDir("dirReplica")
             cache.extractDirArchiveWithRelativePath(local)
             local
-          } else {
+          }
+          else {
             cache.mode = repliURI.mode
             cache
           }
@@ -146,11 +147,13 @@ class Runtime {
       retry(storage.uploadGZ(contextResultFile, uploadedcontextResults))
       contextResultFile.delete
       Success(result)
-    } catch {
+    }
+    catch {
       case t: Throwable ⇒
         if (debug) logger.log(SEVERE, "", t)
         Failure(t)
-    } finally {
+    }
+    finally {
       outSt.close
       errSt.close
 
@@ -163,7 +166,8 @@ class Runtime {
         val output = storage.child(executionMessage.communicationDirPath, Storage.uniqName("output", ".txt"))
         storage.uploadGZ(out, output)
         Some(new FileMessage(output, HashService.computeHash(out).toString))
-      } else None
+      }
+      else None
 
     out.delete
 
@@ -172,7 +176,8 @@ class Runtime {
         val errout = storage.child(executionMessage.communicationDirPath, Storage.uniqName("outputError", ".txt"))
         storage.uploadGZ(err, errout)
         Some(new FileMessage(errout, HashService.computeHash(err).toString))
-      } else None
+      }
+      else None
 
     err.delete
 

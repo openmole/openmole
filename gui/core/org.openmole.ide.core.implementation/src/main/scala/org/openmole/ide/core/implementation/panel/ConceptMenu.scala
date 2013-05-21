@@ -124,12 +124,12 @@ object ConceptMenu {
 
   def removeItem(proxy: IDataProxyUI) = {
     proxy match {
-      case x: IEnvironmentDataProxyUI ⇒ environmentMenu.remove(menuItemMapping(proxy))
-      case x: IPrototypeDataProxyUI ⇒ prototypeMenu.remove(menuItemMapping(proxy))
-      case x: ITaskDataProxyUI ⇒ taskMenu.remove(menuItemMapping(proxy))
+      case x: IEnvironmentDataProxyUI         ⇒ environmentMenu.remove(menuItemMapping(proxy))
+      case x: IPrototypeDataProxyUI           ⇒ prototypeMenu.remove(menuItemMapping(proxy))
+      case x: ITaskDataProxyUI                ⇒ taskMenu.remove(menuItemMapping(proxy))
       case x: ISamplingCompositionDataProxyUI ⇒ samplingMenu.remove(menuItemMapping(proxy))
-      case x: IHookDataProxyUI ⇒ hookMenu.remove(menuItemMapping(proxy))
-      case x: ISourceDataProxyUI ⇒ sourceMenu.remove(menuItemMapping(proxy))
+      case x: IHookDataProxyUI                ⇒ hookMenu.remove(menuItemMapping(proxy))
+      case x: ISourceDataProxyUI              ⇒ sourceMenu.remove(menuItemMapping(proxy))
     }
   }
 
@@ -142,7 +142,7 @@ object ConceptMenu {
     if (ScenesManager.tabPane.peer.getTabCount == 0) createTab(proxy)
     else ScenesManager.tabPane.selection.page.content match {
       case x: ISceneContainer ⇒ x.scene.displayPropertyPanel(proxy, 0)
-      case _ ⇒ createTab(proxy)
+      case _                  ⇒ createTab(proxy)
     }
   }
 
@@ -151,13 +151,13 @@ object ConceptMenu {
     if (ScenesManager.tabPane.peer.getTabCount == 0) createTab(proxy)
     else ScenesManager.tabPane.selection.page.content match {
       case x: ISceneContainer ⇒ x.scene.displayPropertyPanel(proxy, fromPanel, fromPanel.index + 1)
-      case _ ⇒ createTab(proxy)
+      case _                  ⇒ createTab(proxy)
     }
   }
 
   def createTab(proxy: IDataProxyUI) = DialogFactory.newTabName match {
     case Some(y: BuildMoleSceneContainer) ⇒ y.scene.displayPropertyPanel(proxy, 0)
-    case _ ⇒
+    case _                                ⇒
   }
 
   def addItem(proxy: IDataProxyUI): MenuItem = addItem(proxyName(proxy), proxy)

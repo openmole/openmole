@@ -28,6 +28,6 @@ class OutputSlotWidget(scene: IMoleScene) extends SlotWidget(scene.graphScene) {
 
   scene match {
     case x: ExecutionMoleScene ⇒ setImage(OUTPUT_EXE_SLOT)
-    case _ ⇒ setImage(OUTPUT_SLOT)
+    case _                     ⇒ setImage(OUTPUT_SLOT)
   }
 }

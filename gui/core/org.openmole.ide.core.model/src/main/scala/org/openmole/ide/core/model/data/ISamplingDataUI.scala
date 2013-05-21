@@ -38,7 +38,7 @@ trait ISamplingDataUI extends IDataUI {
   def isAcceptable(domain: IDomainDataUI): Boolean =
     domain match {
       case dm: IModifier ⇒ true
-      case _ ⇒ false
+      case _             ⇒ false
     }
 
   def isAcceptable(sampling: ISamplingDataUI): Boolean

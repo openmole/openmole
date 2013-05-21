@@ -168,7 +168,8 @@ class Workspace(val location: File) {
           val textEncryptor = new BasicTextEncryptor
           textEncryptor.setPassword(password)
           textEncryptor
-        } else NoneTextEncryptor
+        }
+        else NoneTextEncryptor
       case None ⇒ throw new UserBadDataError("Password is not set.")
     }
   }
@@ -279,7 +280,7 @@ class Workspace(val location: File) {
     if (s.isEmpty) s
     else {
       _password match {
-        case None ⇒ EventDispatcher.trigger(this, Workspace.PasswordRequired)
+        case None    ⇒ EventDispatcher.trigger(this, Workspace.PasswordRequired)
         case Some(p) ⇒
       }
       textEncryptor(_password).decrypt(s)
@@ -287,7 +288,7 @@ class Workspace(val location: File) {
 
   def encrypt(s: String) = {
     _password match {
-      case None ⇒ EventDispatcher.trigger(this, Workspace.PasswordRequired)
+      case None    ⇒ EventDispatcher.trigger(this, Workspace.PasswordRequired)
       case Some(p) ⇒
     }
     textEncryptor(_password).encrypt(s)
@@ -299,8 +300,10 @@ class Workspace(val location: File) {
         val te = textEncryptor(Some(password))
         te.decrypt(rawPreference(passwordTest))
         true
-      } else true
-    } catch {
+      }
+      else true
+    }
+    catch {
       case e: Throwable ⇒
         Logger.getLogger(Workspace.getClass.getName).log(Level.FINE, "Password incorrect", e)
         false

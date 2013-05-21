@@ -34,7 +34,7 @@ class DomainMenuProvider(panelScene: ISamplingCompositionPanelUI) extends Generi
       def apply =
         widget match {
           case cw: ISamplingComponent ⇒ panelScene.remove(cw)
-          case _ ⇒
+          case _                      ⇒
         }
     })
 

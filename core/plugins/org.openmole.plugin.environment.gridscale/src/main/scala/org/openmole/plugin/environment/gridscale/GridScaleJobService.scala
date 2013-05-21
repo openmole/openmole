@@ -35,9 +35,9 @@ trait GridScaleJobService extends JobService {
   private def translateStatus(state: JobState) =
     state match {
       case Submitted ⇒ SUBMITTED
-      case Running ⇒ RUNNING
-      case Done ⇒ DONE
-      case Failed ⇒ FAILED
+      case Running   ⇒ RUNNING
+      case Done      ⇒ DONE
+      case Failed    ⇒ FAILED
     }
 
 }

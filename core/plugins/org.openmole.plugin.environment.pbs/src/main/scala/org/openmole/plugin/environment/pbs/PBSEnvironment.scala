@@ -76,7 +76,7 @@ class PBSEnvironment(
       def environment = env
       lazy val root = env.path match {
         case Some(p) ⇒ p
-        case None ⇒ createStorage("/").child(home, ".openmole")
+        case None    ⇒ createStorage("/").child(home, ".openmole")
       }
     }
 

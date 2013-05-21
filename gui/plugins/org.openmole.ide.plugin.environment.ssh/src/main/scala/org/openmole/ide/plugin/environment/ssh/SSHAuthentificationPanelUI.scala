@@ -99,9 +99,9 @@ object SSHAuthentificationPanelUI {
     val authentificationTypeComboBox = new MyComboBox(List(loginPasswordPanel,
       sshKeyPanel))
     data.connectionData.connectionMethod match {
-      case Login ⇒ authentificationTypeComboBox.selection.index = 0
+      case Login  ⇒ authentificationTypeComboBox.selection.index = 0
       case SSHKey ⇒ authentificationTypeComboBox.selection.index = 1
-      case _ ⇒
+      case _      ⇒
     }
 
     listenTo(`authentificationTypeComboBox`)

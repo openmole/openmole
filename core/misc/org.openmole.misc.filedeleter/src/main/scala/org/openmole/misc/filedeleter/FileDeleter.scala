@@ -37,7 +37,8 @@ object FileDeleter {
       while (!finished) {
         try {
           cleanFiles.take.delete
-        } catch {
+        }
+        catch {
           case ex: InterruptedException ⇒
             Logger.getLogger(FileDeleter.getClass.getName).log(Level.INFO, "File deleter interupted", ex)
             finished = true

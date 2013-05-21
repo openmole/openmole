@@ -29,7 +29,7 @@ object Strainer {
   def isStrainer(c: ICapsule) =
     c match {
       case _: StrainerCapsule ⇒ true
-      case _ ⇒ false
+      case _                  ⇒ false
     }
 
   def reachNoStrainer(mole: IMole)(slot: Slot, seen: Set[Slot] = Set.empty): Boolean = {

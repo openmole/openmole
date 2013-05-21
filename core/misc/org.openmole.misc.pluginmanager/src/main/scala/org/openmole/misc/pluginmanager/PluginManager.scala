@@ -66,14 +66,14 @@ object PluginManager extends Logger {
   def unload(file: File) = synchronized {
     bundle(file) match {
       case Some(b) ⇒ b.uninstall
-      case None ⇒
+      case None    ⇒
     }
   }
 
   def allDepending(file: File): Iterable[File] = synchronized {
     bundle(file) match {
       case Some(b) ⇒ allDependingBundles(b).map { _.file }
-      case None ⇒ Iterable.empty
+      case None    ⇒ Iterable.empty
     }
   }
 
@@ -140,7 +140,8 @@ object PluginManager extends Logger {
         }
         bundle
     }
-  } catch {
+  }
+  catch {
     case t: Throwable ⇒ throw new InternalProcessingError(t, "Installing bundle " + f)
   }
 
@@ -168,7 +169,8 @@ object PluginManager extends Logger {
 
     if (exportedPackages != null) {
       for (exportedPackage ← exportedPackages; ib ← exportedPackage.getImportingBundles) yield ib
-    } else Iterable.empty
+    }
+    else Iterable.empty
   }
 
   def load(path: String): Unit = load(new File(path))

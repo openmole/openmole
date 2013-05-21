@@ -3,7 +3,6 @@ package org.openmole.misc.macros
 import reflect.macros.Context
 import scala.language.experimental.macros
 
-
 /**
  * Created with IntelliJ IDEA.
  * User: luft
@@ -20,12 +19,12 @@ object SimpleMacros {
     val lineInfo = c.enclosingPosition
 
     val ret = lineInfo.lineContent match {
-      case regex(_,name) => name
-      case _ => throw new IllegalArgumentException(s"There is no variable defined on line ${lineInfo.line} of file ${lineInfo.source}: ${lineInfo.lineContent}")
+      case regex(_, name) ⇒ name
+      case _              ⇒ throw new IllegalArgumentException(s"There is no variable defined on line ${lineInfo.line} of file ${lineInfo.source}: ${lineInfo.lineContent}")
     }
-    
+
     c.literal(ret)
   }
 
-  def !! :String = macro nomImpl
+  def !! : String = macro nomImpl
 }

@@ -128,11 +128,12 @@ sealed abstract class SystemExecTask(
           val retContext = fetchOutputFiles(context, workDir, links) ++ variables
 
           returnValue match {
-            case None ⇒ retContext
+            case None              ⇒ retContext
             case Some(returnValue) ⇒ retContext + (returnValue, retCode)
           }
       }
-    } catch {
+    }
+    catch {
       case e: IOException ⇒ throw new InternalProcessingError(e, "Error executing: " + commandLine)
     }
   }
@@ -143,11 +144,11 @@ sealed abstract class SystemExecTask(
 
     val out = output match {
       case Some(_) ⇒ new PrintStream(new StringBuilderOutputStream(outBuilder))
-      case None ⇒ System.out
+      case None    ⇒ System.out
     }
     val err = error match {
       case Some(_) ⇒ new PrintStream(new StringBuilderOutputStream(errBuilder))
-      case None ⇒ System.err
+      case None    ⇒ System.err
     }
 
     val r = executeProcess(process, out, err)

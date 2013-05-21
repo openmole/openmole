@@ -92,7 +92,7 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("") w
       inputMapMultiComboTextField.content.map { d ⇒ d.comboValue.get -> d.textFieldValue }.flatMap { p ⇒
         p._1.dataUI match {
           case x: EmptyPrototypeDataUI ⇒ Nil
-          case _ ⇒ List(p)
+          case _                       ⇒ List(p)
         }
       },
       outputMapMultiTextFieldCombo.content.map { data ⇒ data.textFieldValue -> data.comboValue.get },

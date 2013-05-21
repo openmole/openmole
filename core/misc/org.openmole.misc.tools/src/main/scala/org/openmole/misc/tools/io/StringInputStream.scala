@@ -36,7 +36,8 @@ class StringInputStream(val s: String) extends InputStream {
     if (charOffset == 0) {
       charOffset = 1
       return (c & 0x0000ff00) >> 8
-    } else {
+    }
+    else {
       charOffset = 0
       strOffset += 1
       return c & 0x000000ff

@@ -32,7 +32,7 @@ class AssociativeCache[K, T] {
 
   def cached(cacheAssociation: Object, key: K): Option[T] = {
     cacheMaps.get(cacheAssociation) match {
-      case None ⇒ None
+      case None      ⇒ None
       case Some(map) ⇒ map.get(key)
     }
   }

@@ -85,7 +85,8 @@ trait ExternalTask extends Task {
     if (f.link) {
       to.createLink(f.file.getAbsolutePath)
       Some(to)
-    } else {
+    }
+    else {
       f.file.copy(to)
       to.applyRecursive { _.deleteOnExit }
       None

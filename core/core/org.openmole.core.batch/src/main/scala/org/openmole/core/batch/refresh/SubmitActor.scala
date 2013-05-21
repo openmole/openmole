@@ -39,7 +39,8 @@ class SubmitActor(jobManager: ActorRef) extends Actor {
           val bj = trySubmit(sj, job.environment)
           job.state = SUBMITTED
           jobManager ! Submitted(job, sj, bj)
-        } catch {
+        }
+        catch {
           case e: Throwable ⇒
             jobManager ! Error(job, e)
             jobManager ! Submit(job, sj)

@@ -43,9 +43,9 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget,
       s ⇒
         incomings.forall {
           _ match {
-            case dw: IDomainWidget ⇒ s.isAcceptable(dw.proxy.dataUI)
+            case dw: IDomainWidget   ⇒ s.isAcceptable(dw.proxy.dataUI)
             case sw: ISamplingWidget ⇒ s.isAcceptable(sw.proxy.dataUI)
-            case _ ⇒ false
+            case _                   ⇒ false
           }
         }
     }.filter {
@@ -92,7 +92,7 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget,
   def listenToSampling = {
     listenTo(sPanel.help.components.toSeq: _*)
     reactions += {
-      case FocusGained(source: Component, _, _) ⇒ sPanel.help.switchTo(source)
+      case FocusGained(source: Component, _, _)     ⇒ sPanel.help.switchTo(source)
       case ComponentFocusedEvent(source: Component) ⇒ sPanel.help.switchTo(source)
     }
     samplingPanel.updateHelp
@@ -103,7 +103,7 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget,
   def testConstraints(c: Option[Int]) = {
     c match {
       case Some(i: Int) ⇒ i >= incomings.size
-      case _ ⇒ true
+      case _            ⇒ true
     }
   }
 }

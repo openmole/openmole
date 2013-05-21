@@ -26,7 +26,7 @@ trait IDomainWidget extends ISamplingCompositionWidget {
     }.flatMap {
       _._1.component match {
         case d: IDomainWidget ⇒ Some(d)
-        case _ ⇒ Nil
+        case _                ⇒ Nil
       }
     }
   }

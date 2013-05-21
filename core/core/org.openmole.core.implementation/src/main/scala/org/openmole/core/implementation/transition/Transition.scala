@@ -75,7 +75,8 @@ class Transition(
   override def perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) =
     try {
       if (isConditionTrue(context)) _perform(context.filterNot { case (n, _) ⇒ filter(n) }, ticket, subMole)
-    } catch {
+    }
+    catch {
       case e: Throwable ⇒
         logger.log(SEVERE, "Error in " + this, e)
         throw e

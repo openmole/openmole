@@ -75,7 +75,7 @@ class TaskWidget(scene: IMoleScene,
         case Some(x: ITaskDataProxyUI) ⇒
           scene match {
             case y: BuildMoleScene ⇒ new Color(73, 90, 105)
-            case _ ⇒ new Color(44, 137, 160, 64)
+            case _                 ⇒ new Color(44, 137, 160, 64)
           }
         case _ ⇒ new Color(73, 90, 105)
       }

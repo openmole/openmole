@@ -37,7 +37,7 @@ object Validation {
         c ⇒
           c.task match {
             case mt: IMoleTask ⇒ Some(mt.mole -> Some(mt -> c))
-            case _ ⇒ None
+            case _             ⇒ None
           }
       }.toList
 
@@ -94,7 +94,7 @@ object Validation {
               Some(OptionalOutput(s, input))
             else None)
 
-        case (None, None, None, Some(impl), _) ⇒ checkPrototypeMatch(impl)
+        case (None, None, None, Some(impl), _)         ⇒ checkPrototypeMatch(impl)
         case (None, None, None, None, Some(parameter)) ⇒ checkPrototypeMatch(parameter)
         case (None, None, None, None, None) ⇒
           if (!(input.mode is Optional)) Some(MissingInput(s, input)) else None
@@ -131,7 +131,7 @@ object Validation {
 
           checkPrototypeMatch(received.toPrototype) orElse
             (if (received.isOptional && !providedAfterward) Some(OptionalSourceOutput(sl, so, i)) else None)
-        case (None, None, Some(impl), _) ⇒ checkPrototypeMatch(impl)
+        case (None, None, Some(impl), _)     ⇒ checkPrototypeMatch(impl)
         case (None, None, None, Some(param)) ⇒ checkPrototypeMatch(param)
         case (None, None, None, None) ⇒
           if (!(i.mode is Optional)) Some(MissingSourceInput(sl, so, i)) else None
@@ -230,7 +230,7 @@ object Validation {
 
           checkPrototypeMatch(received.prototype) orElse
             (if ((received.mode is Optional) && !providedAfterward) Some(OptionalHookOutput(c, h, i)) else None)
-        case (None, None, Some(impl), _) ⇒ checkPrototypeMatch(impl)
+        case (None, None, Some(impl), _)     ⇒ checkPrototypeMatch(impl)
         case (None, None, None, Some(param)) ⇒ checkPrototypeMatch(param)
         case (None, None, None, None) ⇒
           if (!(i.mode is Optional)) Some(MissingHookInput(c, h, i)) else None

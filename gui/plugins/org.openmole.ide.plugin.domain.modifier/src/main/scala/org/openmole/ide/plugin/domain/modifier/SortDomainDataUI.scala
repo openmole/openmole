@@ -32,14 +32,14 @@ object SortDomainDataUI {
   def apply(classString: String,
             previousDomain: List[IDomainDataUI]): SortDomainDataUI[_] = {
     Types.standardize(classString) match {
-      case INT ⇒ new SortDomainDataUI[Int](previousDomain)
-      case DOUBLE ⇒ new SortDomainDataUI[Double](previousDomain)
+      case INT         ⇒ new SortDomainDataUI[Int](previousDomain)
+      case DOUBLE      ⇒ new SortDomainDataUI[Double](previousDomain)
       case BIG_DECIMAL ⇒ new SortDomainDataUI[java.math.BigDecimal](previousDomain)
       case BIG_INTEGER ⇒ new SortDomainDataUI[java.math.BigInteger](previousDomain)
-      case LONG ⇒ new SortDomainDataUI[Long](previousDomain)
-      case STRING ⇒ new SortDomainDataUI[String](previousDomain)
-      case FILE ⇒ new SortDomainDataUI[File](previousDomain)
-      case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
+      case LONG        ⇒ new SortDomainDataUI[Long](previousDomain)
+      case STRING      ⇒ new SortDomainDataUI[String](previousDomain)
+      case FILE        ⇒ new SortDomainDataUI[File](previousDomain)
+      case x: Any      ⇒ throw new UserBadDataError("The type " + x + " is not supported")
     }
   }
 }
@@ -50,7 +50,7 @@ case class SortDomainDataUI[S](var previousDomain: List[IDomainDataUI] = List.em
 
   def domainType = previousDomain.headOption match {
     case Some(dt: IDomainDataUI) ⇒ dt.domainType
-    case _ ⇒ manifest[Double]
+    case _                       ⇒ manifest[Double]
   }
 
   val name = "Sort"
@@ -72,6 +72,6 @@ case class SortDomainDataUI[S](var previousDomain: List[IDomainDataUI] = List.em
   def clone(pD: List[IDomainDataUI]) =
     pD.headOption match {
       case Some(d: IDomainDataUI) ⇒ SortDomainDataUI(Types.pretify(d.domainType.toString), pD)
-      case _ ⇒ SortDomainDataUI(DOUBLE, List())
+      case _                      ⇒ SortDomainDataUI(DOUBLE, List())
     }
 }

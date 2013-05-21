@@ -25,6 +25,6 @@ trait MemoryRequirement extends BatchEnvironment {
 
   def requieredMemory = memory match {
     case Some(m) ⇒ math.min(openMOLEMemoryValue + margin, m)
-    case None ⇒ openMOLEMemoryValue + margin
+    case None    ⇒ openMOLEMemoryValue + margin
   }
 }

@@ -38,12 +38,12 @@ object RangeDomainDataUI {
             cString: String) = {
     import Numeric.BigDecimalAsIfIntegral
     Types.standardize(cString) match {
-      case INT ⇒ new RangeDomainDataUI[Int](min, max, step)
-      case DOUBLE ⇒ new RangeDomainDataUI[Double](min, max, step)
+      case INT         ⇒ new RangeDomainDataUI[Int](min, max, step)
+      case DOUBLE      ⇒ new RangeDomainDataUI[Double](min, max, step)
       case BIG_DECIMAL ⇒ new RangeDomainDataUI[BigDecimal](min, max, step)
       case BIG_INTEGER ⇒ new RangeDomainDataUI[BigInteger](min, max, step)
-      case LONG ⇒ new RangeDomainDataUI[Long](min, max, step)
-      case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
+      case LONG        ⇒ new RangeDomainDataUI[Long](min, max, step)
+      case x: Any      ⇒ throw new UserBadDataError("The type " + x + " is not supported")
     }
   }
 }

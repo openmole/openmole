@@ -177,11 +177,13 @@ object ReplicaCatalog extends Logger {
         val toInsert = new Replica(_source = replica.source, _storage = replica.storage, _path = replica.path, _hash = replica.hash, _environment = replica.environment, _lastCheckExists = System.currentTimeMillis)
         insert(toInsert)
         toInsert
-      } else {
+      }
+      else {
         removeNoLock(replica)
         uploadAndInsert(src, srcPath, replica.hash, storage)
       }
-    } else replica
+    }
+    else replica
 
   private def uploadAndInsert(
     src: File,

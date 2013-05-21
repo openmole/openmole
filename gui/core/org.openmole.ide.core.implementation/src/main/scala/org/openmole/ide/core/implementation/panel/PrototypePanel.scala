@@ -51,7 +51,7 @@ object PrototypePanel {
       _.manager.capsules.values.flatMap { c ⇒
         c.dataUI.task match {
           case Some(x: ITaskDataProxyUI) ⇒ if (x.dataUI.filterPrototypeOccurencies(proxy).isEmpty) None else Some(c)
-          case _ ⇒ None
+          case _                         ⇒ None
         }
       }
     }.toList
@@ -77,7 +77,8 @@ object PrototypePanel {
       }
       ScenesManager.invalidateMoles
       true
-    } else false
+    }
+    else false
     //  }
   }
 }
@@ -99,7 +100,7 @@ class PrototypePanel[T](proxy: IPrototypeDataProxyUI,
   listenTo(panelUI)
   listenTo(panelUI.help.components.toSeq: _*)
   reactions += {
-    case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
+    case FocusGained(source: Component, _, _)     ⇒ panelUI.help.switchTo(source)
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
     case IconChanged(_, iconPath) ⇒
       iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(iconPath)))

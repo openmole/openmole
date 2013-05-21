@@ -36,7 +36,7 @@ class SamplingMenuProvider(panelScene: ISamplingCompositionPanelUI) extends Gene
       def apply =
         widget match {
           case cw: ISamplingComponent ⇒ panelScene.remove(cw)
-          case _ ⇒
+          case _                      ⇒
         }
     })
     items += itRemoveSampling.peer

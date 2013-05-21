@@ -27,10 +27,10 @@ trait CapsuleType {
 object CapsuleFactory {
   def apply(capsuleString: String) = {
     capsuleString match {
-      case "BASIC" ⇒ new BasicCapsuleType
-      case "MASTER" ⇒ new MasterCapsuleType
+      case "BASIC"    ⇒ new BasicCapsuleType
+      case "MASTER"   ⇒ new MasterCapsuleType
       case "STRAINER" ⇒ new StrainerCapsuleType
-      case _ ⇒ throw new UserBadDataError("Unknown capsule type string " + capsuleString)
+      case _          ⇒ throw new UserBadDataError("Unknown capsule type string " + capsuleString)
     }
   }
 }

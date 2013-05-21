@@ -72,10 +72,10 @@ class PiePlotter {
 
   def update(key: State, value: Int): Unit = {
     key match {
-      case READY ⇒ updateReady(value)
+      case READY     ⇒ updateReady(value)
       case COMPLETED ⇒ updateCompleted(value)
-      case CANCELED ⇒ updateCancel(value)
-      case _ ⇒
+      case CANCELED  ⇒ updateCancel(value)
+      case _         ⇒
     }
   }
 

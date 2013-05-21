@@ -177,7 +177,7 @@ trait BatchEnvironment extends Environment { env ⇒
 
   def openMOLEMemory: Option[Int] = None
   def openMOLEMemoryValue = openMOLEMemory match {
-    case None ⇒ Workspace.preferenceAsInt(MemorySizeForRuntime)
+    case None    ⇒ Workspace.preferenceAsInt(MemorySizeForRuntime)
     case Some(m) ⇒ m
   }
 

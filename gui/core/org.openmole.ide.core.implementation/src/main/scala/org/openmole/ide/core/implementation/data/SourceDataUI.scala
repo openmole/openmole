@@ -33,6 +33,6 @@ abstract class SourceDataUI extends ISourceDataUI with ID {
   def implicitPrototypes: (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI]) =
     MoleFactory.buildSource(this) match {
       case (x: ISource) ⇒ ToolDataUI.implicitPrototypes(y ⇒ x.inputs.toList.map { _.prototype }, inputs, y ⇒ x.outputs.toList.map { _.prototype }, outputs)
-      case _ ⇒ (List(), List())
+      case _            ⇒ (List(), List())
     }
 }

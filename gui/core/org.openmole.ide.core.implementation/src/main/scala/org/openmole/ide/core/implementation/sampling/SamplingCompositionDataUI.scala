@@ -61,7 +61,7 @@ class SamplingCompositionDataUI(val name: String = "",
 
     finalSampling match {
       case Some(fs: ISamplingOrDomainProxyUI) ⇒ buildSamplingCore(fs, connectionMap, samplingMap)
-      case _ ⇒ throw new UserBadDataError("The final Sampling is not properly set")
+      case _                                  ⇒ throw new UserBadDataError("The final Sampling is not properly set")
     }
   }
 
@@ -72,7 +72,7 @@ class SamplingCompositionDataUI(val name: String = "",
       val partition = connectionMap.getOrElse(proxy, List()).partition {
         _ match {
           case s: ISamplingProxyUI ⇒ true
-          case d: IDomainProxyUI ⇒ false
+          case d: IDomainProxyUI   ⇒ false
         }
       }
 

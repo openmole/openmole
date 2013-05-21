@@ -43,15 +43,15 @@ import scala.Some
 object GliteAuthentication extends Logger {
 
   lazy val CACertificatesDir: File = {
-    Workspace.file("ca.lock").withLock { _ =>
-    val caDir = Workspace.file("CACertificates")
+    Workspace.file("ca.lock").withLock { _ ⇒
+      val caDir = Workspace.file("CACertificates")
 
-    if (!caDir.exists || !new File(caDir, ".complete").exists) {
-      caDir.mkdir
-      downloadCACertificates(Workspace.preference(GliteEnvironment.CACertificatesSite), caDir)
-      new File(caDir, ".complete").createNewFile
-    }
-    caDir
+      if (!caDir.exists || !new File(caDir, ".complete").exists) {
+        caDir.mkdir
+        downloadCACertificates(Workspace.preference(GliteEnvironment.CACertificatesSite), caDir)
+        new File(caDir, ".complete").createNewFile
+      }
+      caDir
     }
   }
 
@@ -85,50 +85,53 @@ object GliteAuthentication extends Logger {
           links.foreach {
             case (file, linkTo) ⇒ file.createLink(linkTo)
           }
-        } catch {
+        }
+        catch {
           case (e: IOException) ⇒ logger.log(WARNING, "Unable to untar " + tarUrl, e)
-        } finally tis.close
-      } catch {
+        }
+        finally tis.close
+      }
+      catch {
         case e: Throwable ⇒ throw new IOException(tarUrl, e)
       }
     }
   }
 
   def voCards = {
-      val voCards = Workspace.file("voCards.xml")
-      if(!voCards.exists) {
-        val tmpVoCards = Workspace.newFile
-        HTTPStorage.withConnection(
-          new URI(Workspace.preference(GliteEnvironment.VOInformationSite)),
-            Workspace.preferenceAsDuration(GliteEnvironment.VOCardDownloadTimeOut).toSeconds) { http =>
+    val voCards = Workspace.file("voCards.xml")
+    if (!voCards.exists) {
+      val tmpVoCards = Workspace.newFile
+      HTTPStorage.withConnection(
+        new URI(Workspace.preference(GliteEnvironment.VOInformationSite)),
+        Workspace.preferenceAsDuration(GliteEnvironment.VOCardDownloadTimeOut).toSeconds) { http ⇒
           val is: InputStream = http.getInputStream
           try is.copy(tmpVoCards)
           finally is.close
-        tmpVoCards move voCards
-      }
+          tmpVoCards move voCards
+        }
     }
     voCards
   }
 
   def getVOMS(vo: String): Option[String] = getVOMS(vo, xml.XML.loadFile(voCards))
 
-  def getVOMS(vo: String, x: xml.Node) =  {
+  def getVOMS(vo: String, x: xml.Node) = {
     import xml._
 
     def attributeIsDefined(name: String, value: String) =
-      (_: Node).attribute(name).filter(_.text==value).isDefined
+      (_: Node).attribute(name).filter(_.text == value).isDefined
 
     val card = (x \ "IDCard" filter (attributeIsDefined("Name", vo))).headOption
 
-     card map {
-        card =>
-          val voms = (card \ "gLiteConf" \ "VOMSServers" \ "VOMS_Server").head
-          val host = (voms \ "hostname").head.text
-          val port = (voms.attribute("VomsesPort").get.text)
-          val dn = (voms \ "X509Cert" \ "DN").headOption.map(_.text)
+    card map {
+      card ⇒
+        val voms = (card \ "gLiteConf" \ "VOMSServers" \ "VOMS_Server").head
+        val host = (voms \ "hostname").head.text
+        val port = (voms.attribute("VomsesPort").get.text)
+        val dn = (voms \ "X509Cert" \ "DN").headOption.map(_.text)
 
-          s"voms://$host:${port}${dn.getOrElse("")}"
-      }
+        s"voms://$host:${port}${dn.getOrElse("")}"
+    }
   }
 
   def update(a: GliteAuthentication) = Workspace.persistentList(classOf[GliteAuthentication])(0) = a

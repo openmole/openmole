@@ -26,7 +26,7 @@ object Retry {
     def retryOrElse[T](f: ⇒ T): T = if (nbTry > 1) retryOnTimeout(f, nbTry - 1) else f
     try f
     catch {
-      case t: TimeoutException ⇒ retryOrElse(throw t)
+      case t: TimeoutException       ⇒ retryOrElse(throw t)
       case t: SocketTimeoutException ⇒ retryOrElse(throw t)
     }
   }

@@ -37,10 +37,10 @@ trait ITransitionUI extends IConnectorUI {
                  target: Slot,
                  condition: ICondition,
                  filtered: List[String]) = transitionType match {
-    case BASIC_TRANSITION ⇒ new Transition(source, target, condition, Block(filtered: _*))
+    case BASIC_TRANSITION       ⇒ new Transition(source, target, condition, Block(filtered: _*))
     case AGGREGATION_TRANSITION ⇒ new AggregationTransition(source, target, condition, Block(filtered: _*))
     case EXPLORATION_TRANSITION ⇒ new ExplorationTransition(source, target, condition, Block(filtered: _*))
-    case END_TRANSITION ⇒ new EndExplorationTransition(source, target, condition, Block(filtered: _*))
-    case _ ⇒ throw new UserBadDataError("No matching type between capsule " + source + " and " + target + ". The transition can not be built")
+    case END_TRANSITION         ⇒ new EndExplorationTransition(source, target, condition, Block(filtered: _*))
+    case _                      ⇒ throw new UserBadDataError("No matching type between capsule " + source + " and " + target + ". The transition can not be built")
   }
 }

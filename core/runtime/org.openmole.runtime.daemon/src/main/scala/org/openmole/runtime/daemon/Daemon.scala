@@ -56,7 +56,8 @@ class Daemon extends IApplication with Logger {
           config.password.getOrElse(throw new RuntimeException("Password undefined")),
           config.workers)
       }
-    } catch {
+    }
+    catch {
       case t: Throwable ⇒ logger.log(SEVERE, "Error during daemon execution", t)
     }
     IApplication.EXIT_OK

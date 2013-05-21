@@ -61,7 +61,8 @@ class DataChannel(
     if (delta >= 0) {
       val toContext = ListBuffer() ++ fromContext.values.filterNot(v ⇒ filter(v.prototype.name))
       dataChannelRegistry.register(this, ticket, toContext)
-    } else {
+    }
+    else {
       val workingOnTicket = (delta until 0).foldLeft(ticket) {
         (c, e) ⇒ c.parent.getOrElse(throw new InternalProcessingError("Bug should never get to root."))
       }

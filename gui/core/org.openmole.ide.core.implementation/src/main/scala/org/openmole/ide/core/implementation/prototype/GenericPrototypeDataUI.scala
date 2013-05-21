@@ -50,7 +50,8 @@ object GenericPrototypeDataUI {
 
   def stringToDataUI(s: String): GenericPrototypeDataUI[_] = try {
     GenericPrototypeDataUI(manifest(s))
-  } catch {
+  }
+  catch {
     case e: ClassNotFoundException ⇒ throw new UserBadDataError(s + " can not be loaded as a Class")
   }
 

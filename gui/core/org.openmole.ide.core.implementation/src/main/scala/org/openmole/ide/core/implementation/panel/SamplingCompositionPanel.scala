@@ -63,7 +63,7 @@ class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
   listenTo(nameTextField)
   listenTo(panelUI.help.components.toSeq: _*)
   reactions += {
-    case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
+    case FocusGained(source: Component, _, _)     ⇒ panelUI.help.switchTo(source)
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
     case UpdatedProxyEvent(p: IDataProxyUI, _) ⇒
       scene.removeAll(index + 1)
@@ -86,7 +86,8 @@ class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
           toBeRemovedSamplings.foreach { case (c, d) ⇒ c.scene.graphScene.removeNodeWithEdges(c.scene.manager.removeCapsuleUI(c)) }
           delete
-        } else false
+        }
+        else false
     }
   }
 

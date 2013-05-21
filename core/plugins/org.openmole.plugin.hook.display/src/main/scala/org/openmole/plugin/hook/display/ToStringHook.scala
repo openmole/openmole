@@ -42,7 +42,8 @@ abstract class ToStringHook(prototypes: Prototype[_]*) extends Hook {
     if (!prototypes.isEmpty) {
       val filtered = Context(prototypes.flatMap(p ⇒ context.variable(p.asInstanceOf[Prototype[Any]])))
       executionContext.out.println(filtered.toString)
-    } else executionContext.out.println(context.toString)
+    }
+    else executionContext.out.println(context.toString)
     context
   }
 

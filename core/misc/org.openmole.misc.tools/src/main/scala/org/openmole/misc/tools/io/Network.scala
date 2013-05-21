@@ -38,7 +38,8 @@ object Network {
       }
 
       return false
-    } catch {
+    }
+    catch {
       case e: UnknownHostException ⇒
         Logger.getLogger(Network.getClass.getName).log(Level.WARNING, "Host not found " + hostName, e);
         return false

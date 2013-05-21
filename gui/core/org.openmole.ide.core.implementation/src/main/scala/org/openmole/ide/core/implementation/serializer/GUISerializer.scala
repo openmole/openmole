@@ -88,13 +88,14 @@ class GUISerializer { serializer ⇒
             serializer.deserializeConcept(uc.getRequiredType)
             unmarshal(reader, uc)
         }
-      } else {
+      }
+      else {
         val o = super.unmarshal(reader, uc)
         o match {
           case y: IDataProxyUI ⇒
             existing(y.id) match {
               case None ⇒ add(y)
-              case _ ⇒
+              case _    ⇒
             }
             y
           case _ ⇒ throw new UserBadDataError("Can't load object " + o)

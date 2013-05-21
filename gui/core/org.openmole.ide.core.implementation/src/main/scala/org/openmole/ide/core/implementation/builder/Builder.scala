@@ -64,7 +64,8 @@ object Builder {
         if (manager.isFirstCompliant(firsts) && manager.isLastCompliant(lasts)) {
           val (p, newUIMap) = puzzle(toBeComputed.head, manager.firstCapsules(toBeComputed.head).head, manager.lastCapsules(toBeComputed.head), uiMap0)
           puzzles0(toBeComputed.tail, puzzleList :+ p, newUIMap)
-        } else throw new UserBadDataError("A builder can be applied on a none empty sequence of Tasks containing only one first Task and only one final Task")
+        }
+        else throw new UserBadDataError("A builder can be applied on a none empty sequence of Tasks containing only one first Task and only one final Task")
       }
     }
     puzzles0(listsPuzzleCompliant, List(), uiMap)
@@ -118,7 +119,8 @@ object Builder {
             val capsule = CapsuleUI(scene, new CapsuleDataUI(Some(proxy)))
             scene.add(capsule, new Point(0, 0))
             capsule.addInputSlot
-          } else capsules.head.islots.head
+          }
+          else capsules.head.islots.head
         }
         if (s._2 == 0) scene.manager.startingCapsule = Some(slotUI.capsule)
         s._1.capsule -> slotUI
@@ -130,10 +132,10 @@ object Builder {
           capsuleMap(t.start).capsule,
           capsuleMap(t.end.capsule),
           t match {
-            case ex: IExplorationTransition ⇒ TransitionType.EXPLORATION_TRANSITION
-            case agg: IAggregationTransition ⇒ TransitionType.AGGREGATION_TRANSITION
+            case ex: IExplorationTransition     ⇒ TransitionType.EXPLORATION_TRANSITION
+            case agg: IAggregationTransition    ⇒ TransitionType.AGGREGATION_TRANSITION
             case end: IEndExplorationTransition ⇒ TransitionType.END_TRANSITION
-            case _ ⇒ TransitionType.BASIC_TRANSITION
+            case _                              ⇒ TransitionType.BASIC_TRANSITION
           },
           Some(t.asInstanceOf[Condition].code),
           t.filter match {
@@ -220,7 +222,8 @@ object Builder {
         if (sel.isEmpty) {
           if (scene.manager.puzzlesCompliant.isEmpty) throw new UserBadDataError("Builder error: no Sequence of Task has been found.")
           else scene.manager.puzzlesCompliant.head
-        } else sel
+        }
+        else sel
       }
       val selectedPuzzle = puzzles(List(scene.manager.puzzleCompliant(selection)), scene.manager)
       val compliantPuzzles = scene.manager.puzzlesCompliant
@@ -242,7 +245,8 @@ object Builder {
             updatedUIMap)
         }
       }
-    } catch {
+    }
+    catch {
       case e: UserBadDataError ⇒ StatusBar().warn(e.getMessage)
     }
   }

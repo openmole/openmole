@@ -67,7 +67,8 @@ abstract class AppendFileHook(prototype: Prototype[File], outputFile: String) ex
             if (!toFiles.contains(f)) new File(f).createNewFile
             new File(to, f).lockAndAppendFile(new File(from, f))
           })
-        } else if (from.isFile && to.isFile) to.lockAndAppendFile(from)
+        }
+        else if (from.isFile && to.isFile) to.lockAndAppendFile(from)
         else throw new UserBadDataError("The merge can only be done from a file to another or from a directory to another. (" + from.toString + " and " + to.toString + " found)")
       case None ⇒ throw new UserBadDataError("Variable not found " + prototype)
     }

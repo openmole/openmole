@@ -152,7 +152,7 @@ trait Context extends Map[String, Variable[_]] with MapLike[String, Variable[_],
 
   def contains(p: Prototype[_]): Boolean =
     variable(p.name) match {
-      case None ⇒ false
+      case None    ⇒ false
       case Some(v) ⇒ p.isAssignableFrom(v.prototype)
     }
 

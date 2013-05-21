@@ -37,7 +37,7 @@ class SortByNameDomainDataUI(var previousDomain: List[IDomainDataUI] = List.empt
 
   def coreObject = previousDomain.headOption match {
     case Some(x: IDomainDataUI) ⇒ new SortByNameDomain(x.coreObject.asInstanceOf[Domain[File] with Finite[File]])
-    case _ ⇒ throw new UserBadDataError("The SortByName Domain requires a File Domain as input")
+    case _                      ⇒ throw new UserBadDataError("The SortByName Domain requires a File Domain as input")
   }
 
   def buildPanelUI = new PluginPanel("") with IDomainPanelUI {
@@ -65,6 +65,6 @@ class SortByNameDomainDataUI(var previousDomain: List[IDomainDataUI] = List.empt
 
   def clone(pD: List[IDomainDataUI]) = pD.headOption match {
     case Some(d: IDomainDataUI) ⇒ new SortByNameDomainDataUI(pD)
-    case _ ⇒ new SortByNameDomainDataUI(List())
+    case _                      ⇒ new SortByNameDomainDataUI(List())
   }
 }

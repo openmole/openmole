@@ -111,7 +111,7 @@ class IOPrototypePanel(scene: IMoleScene,
     override def apply =
       ScenesManager.currentSceneContainer match {
         case Some(x: ISceneContainer) ⇒ x.scene.displayPropertyPanel(proto, onPanel, 1)
-        case None ⇒
+        case None                     ⇒
       }
   }
 

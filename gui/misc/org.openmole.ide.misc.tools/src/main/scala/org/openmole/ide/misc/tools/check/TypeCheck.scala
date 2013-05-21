@@ -26,7 +26,8 @@ object TypeCheck {
             prototype: Prototype[_]): (String, Option[Object]) = {
     try {
       apply(new GroovyProxy(code).execute(), prototype)
-    } catch {
+    }
+    catch {
       case e: Throwable ⇒ (e.getMessage, None)
     }
   }
@@ -34,7 +35,7 @@ object TypeCheck {
   def apply(groovyObject: Object,
             prototype: Prototype[_]): (String, Option[Object]) =
     prototype.accepts(groovyObject) match {
-      case true ⇒ ("", Some(groovyObject))
+      case true  ⇒ ("", Some(groovyObject))
       case false ⇒ ("The default value for the prototype " + prototype.name + " is not valid ( " + prototype.`type` + " is required )", None)
     }
 }

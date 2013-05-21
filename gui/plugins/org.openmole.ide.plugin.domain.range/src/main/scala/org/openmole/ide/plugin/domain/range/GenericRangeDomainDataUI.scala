@@ -32,11 +32,12 @@ object GenericRangeDomainDataUI {
   def apply[S](min: String = "0", max: String = "", step: Option[String] = None, log: Boolean, classString: String): IDomainDataUI =
     if (log) {
       Types.standardize(classString) match {
-        case DOUBLE ⇒ new DoubleLogarithmRangeDataUI(min, max, step)
+        case DOUBLE      ⇒ new DoubleLogarithmRangeDataUI(min, max, step)
         case BIG_DECIMAL ⇒ new BigDecimalLogarithmRangeDataUI(min, max, step)
-        case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported in logarithm scale")
+        case x: Any      ⇒ throw new UserBadDataError("The type " + x + " is not supported in logarithm scale")
       }
-    } else RangeDomainDataUI(min, max, step, classString)
+    }
+    else RangeDomainDataUI(min, max, step, classString)
 }
 
 abstract class GenericRangeDomainDataUI extends IDomainDataUI with IFinite {
@@ -54,7 +55,8 @@ abstract class GenericRangeDomainDataUI extends IDomainDataUI with IFinite {
     if (step.isDefined) {
       if (step.get.isEmpty) ""
       else "," + step.get
-    } else ""
+    }
+    else ""
   }
 
   def min: String

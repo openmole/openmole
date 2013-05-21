@@ -25,7 +25,8 @@ class CSVSamplingDataUI(val csvFilePath: String = "",
       m ⇒ sampling addColumn (m._1, m._2.dataUI.coreObject)
     }
     sampling
-  } catch {
+  }
+  catch {
     case e: Throwable ⇒ throw new UserBadDataError("CSV file path is not correct for the CSV Sampling")
   }
 

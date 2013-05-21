@@ -63,7 +63,7 @@ class SubMoleExecution(
   override def canceled: Boolean = atomic { implicit txn ⇒
     _canceled() || (parent match {
       case Some(p) ⇒ p.canceled
-      case None ⇒ false
+      case None    ⇒ false
     })
   }
 
@@ -133,12 +133,12 @@ class SubMoleExecution(
       val ctxForHooks = moleExecution.implicits + job.context
 
       def executeHook(h: IHook) =
-        try  h.perform(ctxForHooks, moleExecution.executionContext)
+        try h.perform(ctxForHooks, moleExecution.executionContext)
         catch {
-        case e: Throwable ⇒
-          EventDispatcher.trigger(moleExecution, new IMoleExecution.HookExceptionRaised(h, job, e, SEVERE))
-          logger.log(SEVERE, "Error in execution of misc " + h + "at the end of task " + job.task, e)
-          throw e
+          case e: Throwable ⇒
+            EventDispatcher.trigger(moleExecution, new IMoleExecution.HookExceptionRaised(h, job, e, SEVERE))
+            logger.log(SEVERE, "Error in execution of misc " + h + "at the end of task " + job.task, e)
+            throw e
         }
 
       val context = ctxForHooks ++ moleExecution.hooks(capsule).flatMap(executeHook).unzip._2
@@ -148,12 +148,14 @@ class SubMoleExecution(
       transitionLock {
         mole.outputTransitions(capsule).toList.sortBy(t ⇒ mole.slots(t.end.capsule).size).reverse.foreach { _.perform(context, ticket, this) }
       }
-    } catch {
+    }
+    catch {
       case t: Throwable ⇒
         logger.log(SEVERE, "Error in submole execution", t)
         EventDispatcher.trigger(moleExecution, new IMoleExecution.ExceptionRaised(job, t, SEVERE))
         throw t
-    } finally {
+    }
+    finally {
       val finished =
         atomic { implicit txn ⇒
           rmJob(job)
@@ -186,15 +188,15 @@ class SubMoleExecution(
 
       val sourced =
         moleExecution.sources(capsule).foldLeft(Context.empty) {
-            case (a, s) ⇒
-              val ctx = try s.perform(context, moleExecution.executionContext)
-              catch {
-                case t: Throwable =>
-                  logger.log(SEVERE, "Error in submole execution", t)
-                  EventDispatcher.trigger(moleExecution, new IMoleExecution.SourceExceptionRaised(s, capsule, t, SEVERE))
-                  throw new InternalProcessingError(t, s"Error in source execution that is plugged to $capsule")
-              }
-              a + ctx
+          case (a, s) ⇒
+            val ctx = try s.perform(context, moleExecution.executionContext)
+            catch {
+              case t: Throwable ⇒
+                logger.log(SEVERE, "Error in submole execution", t)
+                EventDispatcher.trigger(moleExecution, new IMoleExecution.SourceExceptionRaised(s, capsule, t, SEVERE))
+                throw new InternalProcessingError(t, s"Error in source execution that is plugged to $capsule")
+            }
+            a + ctx
         }
 
       //FIXME: Factorize code
@@ -237,7 +239,7 @@ class SubMoleExecution(
 
   private def parentApply(f: SubMoleExecution ⇒ Unit) =
     parent match {
-      case None ⇒
+      case None    ⇒
       case Some(p) ⇒ f(p)
     }
 
@@ -256,9 +258,9 @@ class SubMoleExecution(
     }
 
     state match {
-      case COMPLETED ⇒ jobFinished(job)
+      case COMPLETED         ⇒ jobFinished(job)
       case FAILED | CANCELED ⇒ jobFailedOrCanceled(job)
-      case _ ⇒
+      case _                 ⇒
     }
   }
 

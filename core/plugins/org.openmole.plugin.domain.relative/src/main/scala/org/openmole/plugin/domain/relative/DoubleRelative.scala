@@ -38,7 +38,8 @@ sealed class DoubleRelative(val nominal: String, val percent: String, val size: 
     if (s > 1) {
       val step = 2 * nom * pe / 100. / (s - 1)
       for (i ← 0 to s) yield (min + i * s)
-    } else {
+    }
+    else {
       List(min, nom, nom * (1 + pe / 100.))
     }
   }

@@ -241,7 +241,8 @@ object FileUtil {
       try {
         val to = new FileOutputStream(toF).getChannel
         try FileUtil.copy(from, to) finally to.close
-      } finally from.close
+      }
+      finally from.close
     }
 
     def copyCompress(toF: File): Unit = {
@@ -294,7 +295,8 @@ object FileUtil {
     def size: Long = {
       if (file.exists && file.isDirectory) {
         (for (f ← file.listFiles) yield f.size).sum
-      } else file.length
+      }
+      else file.length
     }
 
     def content_=(content: String) = {
@@ -354,7 +356,8 @@ object FileUtil {
         val lock = fos.getChannel.lock
         try f(bfos)
         finally lock.release
-      } finally bfos.close
+      }
+      finally bfos.close
     }
 
     def lockAndAppendFile(to: String): Unit = lockAndAppendFile(new File(to))
@@ -367,8 +370,10 @@ object FileUtil {
           val lock = channelO.lock
           try FileUtil.copy(channelO, channelI)
           finally lock.release
-        } finally channelO.close
-      } finally channelI.close
+        }
+        finally channelO.close
+      }
+      finally channelI.close
     }
 
     def createLink(target: String) = {

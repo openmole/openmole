@@ -41,7 +41,7 @@ class EnvironmentPanel(proxy: IEnvironmentDataProxyUI,
 
   listenTo(panelUI.help.components.toSeq: _*)
   reactions += {
-    case FocusGained(source: Component, _, _) ⇒ panelUI.help.switchTo(source)
+    case FocusGained(source: Component, _, _)     ⇒ panelUI.help.switchTo(source)
     case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
   }
 
@@ -76,7 +76,8 @@ class EnvironmentPanel(proxy: IEnvironmentDataProxyUI,
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
           capsulesWithEnv.foreach { _.environment_=(None) }
           delete
-        } else false
+        }
+        else false
     }
   }
 

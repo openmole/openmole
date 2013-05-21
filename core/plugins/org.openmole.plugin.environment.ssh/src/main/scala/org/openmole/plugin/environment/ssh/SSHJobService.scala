@@ -69,7 +69,7 @@ trait SSHJobService extends GridScaleJobService with SharedStorage with LimitedA
                 case _ ⇒
                   queue.dequeueFirst(_ ⇒ true) match {
                     case Some(j) ⇒ j.submit
-                    case None ⇒ nbRunning.decrementAndGet
+                    case None    ⇒ nbRunning.decrementAndGet
                   }
 
               }
@@ -100,7 +100,8 @@ trait SSHJobService extends GridScaleJobService with SharedStorage with LimitedA
       if (nbRunning.get() < nbSlots) {
         nbRunning.incrementAndGet
         sshBatchJob.submit
-      } else queue.enqueue(sshBatchJob)
+      }
+      else queue.enqueue(sshBatchJob)
     }
     sshBatchJob
   }

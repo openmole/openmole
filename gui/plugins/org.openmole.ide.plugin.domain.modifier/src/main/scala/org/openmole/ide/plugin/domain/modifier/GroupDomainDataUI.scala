@@ -35,14 +35,14 @@ object GroupDomainDataUI {
             classString: String,
             previousDomain: List[IDomainDataUI]): GroupDomainDataUI[_] = {
     Types.standardize(classString) match {
-      case INT ⇒ new GroupDomainDataUI[Int](size, previousDomain)
-      case DOUBLE ⇒ new GroupDomainDataUI[Double](size, previousDomain)
+      case INT         ⇒ new GroupDomainDataUI[Int](size, previousDomain)
+      case DOUBLE      ⇒ new GroupDomainDataUI[Double](size, previousDomain)
       case BIG_DECIMAL ⇒ new GroupDomainDataUI[BigDecimal](size, previousDomain)
       case BIG_INTEGER ⇒ new GroupDomainDataUI[BigInteger](size, previousDomain)
-      case LONG ⇒ new GroupDomainDataUI[Long](size, previousDomain)
-      case STRING ⇒ new GroupDomainDataUI[String](size, previousDomain)
-      case FILE ⇒ new GroupDomainDataUI[File](size, previousDomain)
-      case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
+      case LONG        ⇒ new GroupDomainDataUI[Long](size, previousDomain)
+      case STRING      ⇒ new GroupDomainDataUI[String](size, previousDomain)
+      case FILE        ⇒ new GroupDomainDataUI[File](size, previousDomain)
+      case x: Any      ⇒ throw new UserBadDataError("The type " + x + " is not supported")
     }
   }
 }
@@ -69,7 +69,7 @@ case class GroupDomainDataUI[S](val size: String = "0",
 
   def clone(pD: List[IDomainDataUI]) = pD.headOption match {
     case Some(d: IDomainDataUI) ⇒ GroupDomainDataUI(size, Types.pretify(d.domainType.toString), pD)
-    case _ ⇒ GroupDomainDataUI(size, DOUBLE, List())
+    case _                      ⇒ GroupDomainDataUI(size, DOUBLE, List())
   }
 
 }

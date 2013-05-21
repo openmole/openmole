@@ -67,17 +67,19 @@ class MoleJob(
         timeStamps += new TimeStamp(state)
         _state = state
         None
-      } else if (!_state.isFinal) {
+      }
+      else if (!_state.isFinal) {
         timeStamps += new TimeStamp(state)
         val oldState = _state
         _state = state
         Some(oldState)
-      } else None
+      }
+      else None
     }
 
     changed match {
       case Some(oldState) ⇒ stateChangedCallBack(this, oldState, state)
-      case _ ⇒
+      case _              ⇒
     }
   }
 
@@ -87,7 +89,8 @@ class MoleJob(
         state = RUNNING
         _context = task.perform(context)
         state = COMPLETED
-      } catch {
+      }
+      catch {
         case t: Throwable ⇒
           exception = Some(t)
           state = FAILED

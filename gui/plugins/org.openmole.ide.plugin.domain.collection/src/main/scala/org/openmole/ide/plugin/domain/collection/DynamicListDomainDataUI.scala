@@ -30,13 +30,13 @@ object DynamicListDomainDataUI {
 
   def apply[T](values: List[String] = List(), classString: String) = {
     Types.standardize(classString) match {
-      case INT ⇒ new DynamicListDomainDataUI[Int](values)
-      case DOUBLE ⇒ new DynamicListDomainDataUI[Double](values)
+      case INT         ⇒ new DynamicListDomainDataUI[Int](values)
+      case DOUBLE      ⇒ new DynamicListDomainDataUI[Double](values)
       case BIG_DECIMAL ⇒ new DynamicListDomainDataUI[java.math.BigDecimal](values)
       case BIG_INTEGER ⇒ new DynamicListDomainDataUI[java.math.BigInteger](values)
-      case LONG ⇒ new DynamicListDomainDataUI[Long](values)
-      case STRING ⇒ new DynamicListDomainDataUI[String](values)
-      case x: Any ⇒ throw new UserBadDataError("The type " + x + " is not supported")
+      case LONG        ⇒ new DynamicListDomainDataUI[Long](values)
+      case STRING      ⇒ new DynamicListDomainDataUI[String](values)
+      case x: Any      ⇒ throw new UserBadDataError("The type " + x + " is not supported")
     }
   }
 }

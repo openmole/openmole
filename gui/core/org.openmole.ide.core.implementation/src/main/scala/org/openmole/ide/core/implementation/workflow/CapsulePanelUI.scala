@@ -61,7 +61,7 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI, index: Int = 0) extends PluginPanel
 
   dataUI.environment match {
     case Some(e: IEnvironmentDataProxyUI) ⇒ environmentCombo.selection.item = e
-    case _ ⇒ environmentCombo.selection.item = environmentProxys.last
+    case _                                ⇒ environmentCombo.selection.item = environmentProxys.last
   }
 
   groupingPanel.visible = dataUI.grouping.isDefined
@@ -95,19 +95,19 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI, index: Int = 0) extends PluginPanel
     new CapsuleDataUI(dataUI.task,
       environmentCombo.selection.item.dataUI match {
         case e: EmptyDataUIs.EmptyEnvironmentDataUI ⇒ None
-        case e: IEnvironmentDataUI ⇒ Some(environmentCombo.selection.item)
+        case e: IEnvironmentDataUI                  ⇒ Some(environmentCombo.selection.item)
       },
       if (groupingCheckBox.selected) groupingPanel.save else None,
       sourcePanel.content.map { _.comboValue.get }.filter {
         _ match {
           case s: ISourceDataProxyUI ⇒ true
-          case _ ⇒ false
+          case _                     ⇒ false
         }
       },
       hookPanel.content.map { _.comboValue.get }.filter {
         _ match {
           case s: IHookDataProxyUI ⇒ true
-          case _ ⇒ false
+          case _                   ⇒ false
         }
       })
 }

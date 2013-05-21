@@ -40,9 +40,10 @@ class EnvironmentSettingPanel extends PluginPanel("wrap 2") {
       try {
         combo.selection.item.dataUI.coreObject match {
           case x: BatchEnvironment ⇒ x.clean
-          case _ ⇒ None
+          case _                   ⇒ None
         }
-      } catch { case e: UserBadDataError ⇒ }
+      }
+      catch { case e: UserBadDataError ⇒ }
   }
 
   contents += combo

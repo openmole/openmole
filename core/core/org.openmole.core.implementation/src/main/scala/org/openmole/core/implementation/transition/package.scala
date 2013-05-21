@@ -53,7 +53,7 @@ package object transition {
       val transitions = from.lasts.map {
         c ⇒
           size match {
-            case None ⇒ new ExplorationTransition(c, to.first, condition, filter)
+            case None    ⇒ new ExplorationTransition(c, to.first, condition, filter)
             case Some(s) ⇒ new EmptyExplorationTransition(c, to.first, s, condition, filter)
           }
       }
