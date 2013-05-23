@@ -23,7 +23,7 @@
             thread="main"
             visible="true">
          <run
-               class="org.openmole.runtime.SimExplorer">
+               class="org.openmole.runtime.runtime.SimExplorer">
          </run>
       </application>
    </extension>
