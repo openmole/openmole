@@ -30,7 +30,6 @@ package object application extends Defaults {
     Seq(
       "org.openmole.core" %% "org.openmole.misc.sftpserver" % v,
       "org.openmole.core" %% "org.openmole.misc.logging" % v,
-      "org.openmole.ui" %% "org.openmole.ui" % v exclude ("org.eclipse.equinox", "*"),
       "org.openmole.core" %% "org.openmole.core.model" % v,
       "org.openmole.core" %% "org.openmole.core.implementation" % v,
       "org.openmole.web" %% "org.openmole.web.core" % v,
@@ -169,7 +168,8 @@ package object application extends Defaults {
         Seq(
           "org.openmole.ide" %% "org.openmole.ide.core.implementation" % v,
           "org.openmole.ide" %% "org.openmole.ide.misc.visualization" % v,
-          "org.openmole" %% "de.erichseifert.gral" % v intransitive ()
+          "org.openmole" %% "de.erichseifert.gral" % v intransitive (),
+          "org.openmole.ui" %% "org.openmole.ui" % v exclude ("org.eclipse.equinox", "*")
         )
       }, dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
 
