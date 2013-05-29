@@ -13,8 +13,6 @@ import Keys._
  * To change this template use File | Settings | File Templates.
  */
 trait Defaults extends BuildSystemDefaults {
-  def dir: File
-
   def org = "org.openmole"
 
   override def settings = super.settings ++
