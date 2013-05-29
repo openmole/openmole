@@ -57,17 +57,17 @@ trait BuildSystemDefaults extends Build {
 
   override def settings = super.settings ++
     Seq(scalacOptions ++= Seq("-feature", "-language:reflectiveCalls", "-language:implicitConversions",
-        "-language:existentials", "-language:postfixOps", "-Yinline-warnings"), 
-        osgiVersion := "3.8.2.v20130124-134944"
-        )
-        
+      "-language:existentials", "-language:postfixOps", "-Yinline-warnings"),
+      osgiVersion := "3.8.2.v20130124-134944"
+    )
+
   def gcTask = { System.gc(); System.gc(); System.gc() }
 
   def Aggregator(name: String) = Project(name, dir) settings (compile in Compile := Analysis.Empty)
 
   def copyDepTask(updateReport: UpdateReport, version: String, out: File,
-                  scalaVer: String, subDir: String,
-                  depMap: Map[Regex, String ⇒ String], depFilter: DependencyFilter) = {
+    scalaVer: String, subDir: String,
+    depMap: Map[Regex, String ⇒ String], depFilter: DependencyFilter) = {
     updateReport matching depFilter map { f ⇒
       depMap.keys.find(_.findFirstIn(f.getName).isDefined).map(depMap(_)).getOrElse { a: String ⇒ a } -> f
     } foreach {
@@ -76,14 +76,14 @@ trait BuildSystemDefaults extends Build {
         IO.copyFile(srcPath, destPath, preserveLastModified = true)
     }
   }
-  
+
   protected lazy val scalariformDefaults = Seq(ScalariformKeys.preferences in Compile <<= ScalariformKeys.preferences(p ⇒
-      p.setPreference(DoubleIndentClassDeclaration, true)
-        .setPreference(RewriteArrowSymbols, true)
-        .setPreference(AlignParameters, true)
-        .setPreference(AlignSingleLineCaseStatements, true)
-        .setPreference(CompactControlReadability, true)
-        .setPreference(PreserveDanglingCloseParenthesis, true))) ++ scalariformSettings
+    p.setPreference(DoubleIndentClassDeclaration, true)
+      .setPreference(RewriteArrowSymbols, true)
+      .setPreference(AlignParameters, true)
+      .setPreference(AlignSingleLineCaseStatements, true)
+      .setPreference(CompactControlReadability, true)
+      .setPreference(PreserveDanglingCloseParenthesis, true))) ++ scalariformSettings
 
   protected lazy val osgiCachedSettings = Project.defaultSettings ++ SbtOsgi.osgiSettings ++ Seq(
     OsgiKeys.bundle <<= (
@@ -108,16 +108,16 @@ trait BuildSystemDefaults extends Build {
   protected val bundleMap = Map("Bundle-ActivationPolicy" -> "lazy")
 
   def OsgiProject(artifactSuffix: String,
-                  pathFromDir: String = "",
-                  buddyPolicy: Option[String] = None,
-                  exports: Seq[String] = Seq(),
-                  privatePackages: Seq[String] = Seq(),
-                  singleton: Boolean = false,
-                  bundleActivator: Option[String] = None,
-                  dynamicImports: Seq[String] = Seq(),
-                  imports: Seq[String] = Seq("*;resolution:=optional"),
-                  embeddedJars: Seq[File] = Seq(), //TODO make this actually useful, using an EitherT or something
-                  openmoleScope: Option[String] = None)(implicit artifactPrefix: Option[String] = None) = {
+    pathFromDir: String = "",
+    buddyPolicy: Option[String] = None,
+    exports: Seq[String] = Seq(),
+    privatePackages: Seq[String] = Seq(),
+    singleton: Boolean = false,
+    bundleActivator: Option[String] = None,
+    dynamicImports: Seq[String] = Seq(),
+    imports: Seq[String] = Seq("*;resolution:=optional"),
+    embeddedJars: Seq[File] = Seq(), //TODO make this actually useful, using an EitherT or something
+    openmoleScope: Option[String] = None)(implicit artifactPrefix: Option[String] = None) = {
 
     require(artifactPrefix.forall(!_.endsWith(".")), "Do not end your artifactprefix with ., it will be added automatically.")
 
@@ -145,8 +145,8 @@ trait BuildSystemDefaults extends Build {
   }
 
   def AssemblyProject(base: String,
-                      outputDir: String = "lib",
-                      depNameMap: Map[Regex, String ⇒ String] = Map.empty[Regex, String ⇒ String]) = {
+    outputDir: String = "lib",
+    depNameMap: Map[Regex, String ⇒ String] = Map.empty[Regex, String ⇒ String]) = {
     val projBase = dir / base
     Project(base + "-" + outputDir.replace('/', '_'), projBase, settings = Project.defaultSettings ++ Seq(
       assemble <<= copyDependencies tag (Tags.Disk),
