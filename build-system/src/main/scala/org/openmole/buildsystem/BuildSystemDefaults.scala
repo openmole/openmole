@@ -25,6 +25,9 @@ trait BuildSystemDefaults extends Build {
   lazy val outDir = SettingKey[String]("outDir", "A setting to control where copyDepTask outputs it's dependencies")
 
   lazy val install = TaskKey[Unit]("install", "Builds bundles and adds them to the local repo")
+
+  lazy val installRemote = TaskKey[Unit]("install-remote", "Builds bundles and adds them to the openmole nexus server")
+
   lazy val assemble = TaskKey[Unit]("assemble")
 
   lazy val gc = TaskKey[Unit]("gc", "Force SBT to take out the trash")
@@ -99,8 +102,11 @@ trait BuildSystemDefaults extends Build {
     OsgiKeys.exportPackage <<= (name) { n ⇒ Seq(n + ".*") },
     OsgiKeys.bundleActivator := None,
     install in Compile <<= publishLocal in Compile,
+    installRemote in Compile <<= publish in Compile,
     OsgiKeys.bundle <<= OsgiKeys.bundle tag (Tags.Disk),
-    (update in install) <<= update in install tag (Tags.Network)
+    (update in install) <<= update in install tag (Tags.Network),
+    publishTo <<= isSnapshot(if (_) Some("Openmole Nexus" at "http://maven.openmole.org/snapshots") else Some("Openmole Nexus" at "http://maven.openmole.org/releases")),
+    credentials += Credentials(Path.userHome / ".sbt" / "openmole.credentials")
   ) ++ scalariformDefaults
 
   def OsgiSettings = osgiCachedSettings
@@ -151,6 +157,7 @@ trait BuildSystemDefaults extends Build {
     Project(base + "-" + outputDir.replace('/', '_'), projBase, settings = Project.defaultSettings ++ Seq(
       assemble <<= copyDependencies tag (Tags.Disk),
       install := true,
+      installRemote := true,
       outDir := outputDir,
       resourceOutDir := None,
       dependencyNameMap := depNameMap,
