@@ -14,7 +14,8 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-scalariform" % "1.0.1")
 
 libraryDependencies += "com.jsuereth" %% "scala-arm" % "1.3"
 
-publishTo <<= isSnapshot(if(_) Some("Openmole Nexus" at "https://maven.openmole.org/snapshots") else Some("Openmole Nexus" at "https://maven.openmole.org/releases"))
+publishTo <<= isSnapshot(if(_) Some("Openmole Nexus" at "http://maven.openmole.org/snapshots") else Some("Openmole Nexus" at "http://maven.openmole.org/releases"))
 
-credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
+credentials += Credentials(Path.userHome / ".sbt" / "openmole.credentials")
 
+releaseSettings
