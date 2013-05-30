@@ -38,15 +38,15 @@ trait ParameterSet extends Set[Parameter[_]] with SetLike[Parameter[_], Paramete
   def parameters: Iterable[Parameter[_]]
 
   @transient lazy val parameterMap =
-    TreeMap.empty[String, Parameter[_]] ++ parameters.map { p ⇒ (p.variable.prototype.name, p) }
+    TreeMap.empty[String, Parameter[_]] ++ parameters.map { p ⇒ (p.prototype.name, p) }
 
   override def empty = ParameterSet.empty
   override def iterator: Iterator[Parameter[_]] = parameterMap.values.iterator
 
   def +(p: Parameter[_]) = ParameterSet(p :: parameters.toList)
 
-  def -(p: Parameter[_]) = ParameterSet((parameterMap - p.variable.prototype.name).values.toList)
+  def -(p: Parameter[_]) = ParameterSet((parameterMap - p.prototype.name).values.toList)
 
-  def contains(p: Parameter[_]) = parameterMap.contains(p.variable.prototype.name)
+  def contains(p: Parameter[_]) = parameterMap.contains(p.prototype.name)
 
 }
