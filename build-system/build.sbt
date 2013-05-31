@@ -4,6 +4,8 @@ name := "openmole-buildsystem-plugin"
 
 organization := "org.openmole"
 
+version := "0.9-SNAPSHOT"
+
 resolvers += Classpaths.sbtPluginSnapshots
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-osgi" % "0.6.0-SNAPSHOT")
@@ -14,7 +16,8 @@ libraryDependencies ++= Seq("com.jsuereth" %% "scala-arm" % "1.3",
                             "org.kamranzafar" % "jtar" % "2.2")
 
 
-publishTo <<= isSnapshot(if(_) Some("Openmole Nexus" at "https://maven.openmole.org/snapshots") else Some("Openmole Nexus" at "https://maven.openmole.org/releases"))
+publishTo <<= isSnapshot(if(_) Some("Openmole Nexus" at "http://maven.openmole.org/snapshots") else Some("Openmole Nexus" at "http://maven.openmole.org/releases"))
 
-credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
+credentials += Credentials(Path.userHome / ".sbt" / "openmole.credentials")
 
+releaseSettings

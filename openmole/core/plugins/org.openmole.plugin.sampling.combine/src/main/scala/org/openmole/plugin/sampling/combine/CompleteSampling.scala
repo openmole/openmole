@@ -32,13 +32,11 @@ sealed class CompleteSampling(val samplings: Sampling*) extends Sampling {
   override def inputs = DataSet(samplings.flatMap { _.inputs })
   override def prototypes: Iterable[Prototype[_]] = samplings.flatMap { _.prototypes }
 
-  override def build(context: Context): Iterator[Iterable[Variable[_]]] =
-    if (samplings.isEmpty) Iterator.empty
-    else {
-      val values = samplings.map { _.build(context).toList }
-      val composed = values.view.reduce { (a, b) ⇒ combine(a, b) }
-      composed.iterator
-    }
+  override def build(context: Context): Iterator[Iterable[Variable[_]]] = {
+    val values = samplings.map { _.build(context).toList }
+    val composed = values.view.reduceOption { (a, b) ⇒ combine(a, b) }
+    composed.getOrElse(Iterator.empty).toIterator
+  }
 
   def combine[A](it1: List[Iterable[A]], it2: List[Iterable[A]]): List[Iterable[A]] =
     for (v1 ← it1; v2 ← it2) yield v1 ++ v2

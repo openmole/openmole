@@ -21,17 +21,19 @@ object Parameter {
   implicit def tuple2IterableToParameters(values: Iterable[(Prototype[T], T) forSome { type T }]) = values.map { case (p, v) ⇒ Parameter(p, v) }
 
   def apply[T](prototype: Prototype[T], value: T, `override`: Boolean = false) = {
-    val o = `override`
+    val (o, p, v) = (`override`, prototype, value)
     new Parameter[T] {
-      val variable = Variable(prototype, value)
+      val prototype = p
+      def value(ctx: Context) = v
       val `override` = o
     }
   }
 
   def delayed[T](prototype: Prototype[T], value: ⇒ T, `override`: Boolean = false) = {
-    val o = `override`
+    val (o, p, v) = (`override`, prototype, value)
     new Parameter[T] {
-      def variable: Variable[T] = Variable(prototype, value)
+      val prototype = p
+      def value(ctx: Context) = v
       val `override` = o
     }
   }
@@ -47,12 +49,8 @@ object Parameter {
  */
 trait Parameter[T] {
 
-  /**
-   * Get the variable which is injected.
-   *
-   * @return the variable
-   */
-  def variable: Variable[T]
+  def prototype: Prototype[T]
+  def value(ctx: Context): T
 
   /**
    * Get if an existing value in the context should be overriden. If override
@@ -62,4 +60,6 @@ trait Parameter[T] {
    * @return true if an existing value should be overriden false otherwise
    */
   def `override`: Boolean
+
+  def toVariable(ctx: Context) = Variable(prototype, value(ctx))
 }

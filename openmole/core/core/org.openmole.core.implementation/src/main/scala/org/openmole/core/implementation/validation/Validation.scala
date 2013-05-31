@@ -42,7 +42,7 @@ object Validation {
 
   private def paramsToMap(params: Iterable[Parameter[_]]) =
     params.map {
-      p ⇒ p.variable.prototype.name -> p.variable.prototype
+      p ⇒ p.prototype.name -> p.prototype
     }.toMap[String, Prototype[_]]
 
   private def prototypesToMap(prototypes: Iterable[Prototype[_]]) = prototypes.map { i ⇒ i.name -> i }.toMap[String, Prototype[_]]

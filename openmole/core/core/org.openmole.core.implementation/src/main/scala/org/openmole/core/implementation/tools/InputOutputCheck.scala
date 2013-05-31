@@ -80,7 +80,7 @@ trait InputOutputCheck {
     context ++
       parameters.flatMap {
         parameter ⇒
-          if (parameter.`override` || !context.contains(parameter.variable.prototype.name)) Some(parameter.variable)
+          if (parameter.`override` || !context.contains(parameter.prototype.name)) Some(parameter.toVariable(context))
           else Option.empty[Variable[_]]
       }
 
