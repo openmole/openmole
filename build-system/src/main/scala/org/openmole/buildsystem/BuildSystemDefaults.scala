@@ -118,9 +118,9 @@ trait BuildSystemDefaults extends Build {
     (update in install) <<= update in install tag (Tags.Network),
     projectID <<= projectID { id =>
       id extra("osgified" -> "true")
+    },
     publishTo <<= isSnapshot(if (_) Some("Openmole Nexus" at "http://maven.openmole.org/snapshots") else Some("Openmole Nexus" at "http://maven.openmole.org/releases")),
     credentials += Credentials(Path.userHome / ".sbt" / "openmole.credentials")
-    }
   ) ++ scalariformDefaults
 
   def OsgiSettings = osgiCachedSettings
