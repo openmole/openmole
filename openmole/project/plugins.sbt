@@ -2,6 +2,8 @@ resolvers += Classpaths.sbtPluginSnapshots
 
 resolvers += Resolver.url("scalasbt", new URL("http://scalasbt.artifactoryonline.com/scalasbt/sbt-plugin-releases"))(Resolver.ivyStylePatterns)
 
+resolvers += "openmole-public" at "http://maven.openmole.org/public"
+
 addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "0.5.4")
 
 addSbtPlugin("com.github.mpeltonen" %% "sbt-idea" % "1.4.0")

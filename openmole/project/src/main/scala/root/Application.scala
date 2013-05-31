@@ -193,7 +193,8 @@ object Application extends Defaults {
     Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" },
       """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") })) settings (openmoleUILibDependencies, pluginDependencies, copyResTask,
       resourceDirectory <<= baseDirectory / "resources", libraryDependencies <+= (version) { "org.openmole.core" %% "org.openmole.runtime.runtime" % _ },
-      assemble <<= assemble dependsOn resourceAssemble, resourceOutDir := Option("."))
+      assemble <<= assemble dependsOn resourceAssemble, resourceOutDir := Option("."), dependencyFilter <<= (version, scalaBinaryVersion)
+      { (v, sbV) ⇒ DependencyFilter.fnToModuleFilter(m ⇒ m.revision == v || m.name.endsWith("_" + sbV) || m.name.startsWith("org.eclipse")) })
 
   lazy val openmoleDaemon = AssemblyProject("daemon", "plugins") settings (copyResTask, resourceDirectory <<= baseDirectory / "resources",
     libraryDependencies <+= (version) { "org.openmole.core" %% "org.openmole.runtime.daemon" % _ }, assemble <<= assemble dependsOn resourceAssemble,

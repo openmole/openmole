@@ -20,7 +20,6 @@ trait Defaults extends BuildSystemDefaults {
       scalaVersion := "2.10.1",
       publishArtifact in (packageDoc in install) := false,
       publishArtifact in (packageSrc in install) := false,
-      copyDependencies := false,
       concurrentRestrictions in Global :=
         Seq(
           Tags.limitAll(7)

@@ -11,6 +11,8 @@ import com.typesafe.sbt.SbtScalariform.{ scalariformSettings, ScalariformKeys }
 import scalariform.formatter.preferences._
 
 import sbt.inc.Analysis
+import resource._
+import scala.tools.nsc.io.ZipArchive
 
 trait BuildSystemDefaults extends Build {
   def dir: File
@@ -54,6 +56,15 @@ trait BuildSystemDefaults extends Build {
         IO.copyDirectory(rT, destPath)
       }
   }
+
+  /*def zipAssembly(target: File) = {
+    val assembly = target / "assembly"
+
+    for(tOS <- managed(new TarOutput))
+
+
+
+  }*/
 
   override def settings = super.settings ++
     Seq(scalacOptions ++= Seq("-feature", "-language:reflectiveCalls", "-language:implicitConversions",
@@ -100,7 +111,10 @@ trait BuildSystemDefaults extends Build {
     OsgiKeys.bundleActivator := None,
     install in Compile <<= publishLocal in Compile,
     OsgiKeys.bundle <<= OsgiKeys.bundle tag (Tags.Disk),
-    (update in install) <<= update in install tag (Tags.Network)
+    (update in install) <<= update in install tag (Tags.Network),
+    projectID <<= projectID { id =>
+      id extra("osgified" -> "true")
+    }
   ) ++ scalariformDefaults
 
   def OsgiSettings = osgiCachedSettings
