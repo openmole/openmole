@@ -138,7 +138,7 @@ trait BuildSystemDefaults extends Build {
     imports: Seq[String] = Seq("*;resolution:=optional"),
     embeddedJars: Seq[File] = Seq(), //TODO make this actually useful, using an EitherT or something
     openmoleScope: Option[String] = None)(implicit artifactPrefix: Option[String] = None) = {
-
+    
     require(artifactPrefix.forall(!_.endsWith(".")), "Do not end your artifactprefix with ., it will be added automatically.")
 
     val artifactId = artifactPrefix map (_ + "." + artifactSuffix) getOrElse (artifactSuffix)
@@ -152,7 +152,7 @@ trait BuildSystemDefaults extends Build {
     Project(artifactId.replace('.', '-'),
       base,
       settings = OsgiSettings ++
-        Seq(name := artifactId,
+        Seq(name := artifactId, organization := org,
           osgiSingleton := singleton,
           OsgiKeys.exportPackage := exportedPackages,
           OsgiKeys.additionalHeaders := additional,
