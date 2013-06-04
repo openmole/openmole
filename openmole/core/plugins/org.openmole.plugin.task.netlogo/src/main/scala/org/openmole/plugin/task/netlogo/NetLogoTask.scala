@@ -68,8 +68,11 @@ class NetLogoTask(
       netLogo.open(script.getAbsolutePath)
 
       for (inBinding ← netLogoInputs) {
-        val v = context(inBinding._1)
-        netLogo.command("set " + inBinding._2 + " " + v.toString)
+        val v = context(inBinding._1) match {
+          case x: String ⇒ '"' + x + '"'
+          case x         ⇒ x.toString
+        }
+        netLogo.command("set " + inBinding._2 + " " + v)
       }
 
       for (cmd ← launchingCommands) netLogo.command(VariableExpansion(context, cmd))
