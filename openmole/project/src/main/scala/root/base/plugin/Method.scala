@@ -12,4 +12,7 @@ object Method extends PluginDefaults {
   lazy val evolution = OsgiProject("evolution") dependsOn (Misc.exception, Core.implementation, mgo, Misc.workspace) //todo: other plugins have a dependency on MGO
 
   lazy val sensitivity = OsgiProject("sensitivity") dependsOn (Misc.exception, Core.implementation)
+
+  lazy val abc = OsgiProject("abc") dependsOn (Core.implementation)
+
 }
