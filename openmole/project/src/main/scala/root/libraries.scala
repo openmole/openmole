@@ -19,7 +19,7 @@ object Libraries extends Defaults {
   lazy val all = Project(id = "openmole-libraries",
     base = file("libraries")) aggregate (jetty, scalatra, logback, h2, bonecp, slick, slf4j, xstream, icu4j, groovy,
       objenesis, scalaLang, Apache.all, jodaTime, gnuCrypto, db4o, jasypt, robustIt, netlogo4, netlogo5, opencsv,
-      netlogo4_noscala, netlogo5_noscala, gridscale, guava, jsyntaxpane, gral, miglayout, netbeans, mgo, jline)
+      netlogo4_noscala, netlogo5_noscala, gridscale, guava, jsyntaxpane, gral, miglayout, netbeans, mgo, jline, jacksonJson)
 
   lazy val jetty = OsgiProject("org.eclipse.jetty", exports = Seq("org.eclipse.jetty.*", "javax.*")) settings
     (libraryDependencies ++= Seq("org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106",
@@ -28,13 +28,14 @@ object Libraries extends Defaults {
   lazy val scalatra = OsgiProject("org.scalatra",
     buddyPolicy = Some("global"),
     exports = Seq("org.scalatra.*, org.fusesource.*"),
-    privatePackages = Seq("!scala.*", "!org.slf4j.*", "*")) settings
+    privatePackages = Seq("!scala.*", "!org.slf4j.*", "!org.json4s", "*")) settings
     (libraryDependencies ++= Seq("org.scalatra" %% "scalatra" % "2.2.1",
       "org.scalatra" %% "scalatra-scalate" % "2.2.1",
       "org.scalatra" %% "scalatra-json" % "2.2.1")) dependsOn (slf4j)
 
   lazy val jacksonJson = OsgiProject("org.json4s") settings (
-    libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.4"
+    libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.4",
+    exportPackage += "com.fasterxml.*"
   )
 
   lazy val logback = OsgiProject("ch.qos.logback", exports = Seq("ch.qos.logback.*", "org.slf4j.impl")) settings
