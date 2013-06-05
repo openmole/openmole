@@ -48,6 +48,7 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
                   exports: Seq[String] = Seq(),
                   privatePackages: Seq[String] = Seq(),
                   singleton: Boolean = false,
+                  settings: Seq[Project.Setting[_]] = Nil,
                   bundleActivator: Option[String] = None,
                   dynamicImports: Seq[String] = Seq(),
                   imports: Seq[String] = Seq("*;resolution:=optional"),
@@ -59,6 +60,7 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
     val artifactId = artifactPrefix map (_ + "." + artifactSuffix) getOrElse (artifactSuffix)
     val base = dir / (if (pathFromDir == "") artifactId else pathFromDir)
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
+    val sets = settings
 
     val additional = buddyPolicy.map(v ⇒ Map("Eclipse-BuddyPolicy" -> v)).getOrElse(Map()) ++
       openmoleScope.map(os ⇒ Map("OpenMOLE-Scope" -> os)).getOrElse(Map()) ++
@@ -66,17 +68,17 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
 
     Project(artifactId.replace('.', '-'),
       base,
-      settings = OsgiSettings ++
-        Seq(name := artifactId, organization := org,
-          osgiSingleton := singleton,
-          OsgiKeys.exportPackage := exportedPackages,
-          OsgiKeys.additionalHeaders := additional,
-          OsgiKeys.privatePackage := privatePackages,
-          OsgiKeys.dynamicImportPackage := dynamicImports,
-          OsgiKeys.importPackage := imports,
-          OsgiKeys.embeddedJars := embeddedJars,
-          OsgiKeys.bundleActivator <<= (OsgiKeys.bundleActivator) { bA ⇒ bundleActivator.orElse(bA) })
-    )
+      settings = OsgiSettings ++ Seq(
+        name := artifactId, organization := org,
+        osgiSingleton := singleton,
+        OsgiKeys.exportPackage := exportedPackages,
+        OsgiKeys.additionalHeaders := additional,
+        OsgiKeys.privatePackage := privatePackages,
+        OsgiKeys.dynamicImportPackage := dynamicImports,
+        OsgiKeys.importPackage := imports,
+        OsgiKeys.embeddedJars := embeddedJars,
+        OsgiKeys.bundleActivator <<= (OsgiKeys.bundleActivator) { bA ⇒ bundleActivator.orElse(bA) }
+      ) ++ sets)
   }
 
 }
