@@ -1,0 +1,56 @@
+package org.openmole.buildsystem
+
+import sbt._
+import scala.util.matching.Regex
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: luft
+ * Date: 6/5/13
+ * Time: 3:43 PM
+ */
+object OMKeys {
+  val assemble = TaskKey[Unit]("assemble")
+
+  val bundleType = SettingKey[String]("bundle-type") //Default setting for osgiprojects is default.
+
+  val openMoleStandardVer = SettingKey[String]("openmoleversion")
+
+  val eclipseBuddyPolicy = SettingKey[Option[String]]("OSGi.eclipseBuddyPolicy", "The eclipse buddy policy thing.")
+
+  val outDir = SettingKey[String]("outDir", "A setting to control where copyDepTask outputs it's dependencies")
+
+  val install = TaskKey[Unit]("install", "Builds bundles and adds them to the local repo")
+
+  val installRemote = TaskKey[Unit]("install-remote", "Builds bundles and adds them to the openmole nexus server")
+
+  val assemblyPath = SettingKey[File]("The path to the project's assembly folder")
+
+  val gc = TaskKey[Unit]("gc", "Force SBT to take out the trash")
+
+  val osgiVersion = SettingKey[String]("osgi-version")
+
+  val osgiSingleton = SettingKey[Boolean]("osgi-singleton")
+
+  val Assemble = Tags.Tag("Assemble")
+
+  val zip = TaskKey[File]("zip")
+
+  val zipFiles = TaskKey[Seq[File]]("zip-files", "Collects the list of files to be zipped")
+
+  val downloadUrls = TaskKey[File]("download-urls")
+
+  val urls = SettingKey[Seq[URL]]("urls", "A project setting that describes a list of urls to download")
+
+  val copyDependencies = TaskKey[File]("copy-dependencies")
+
+  val resourceOutDir = SettingKey[Option[String]]("resource-out-dir")
+
+  val resourceAssemble = TaskKey[File]("resource-assemble")
+
+  val ignoreTransitive = SettingKey[Boolean]("ignoreTransitive")
+
+  val dependencyFilter = SettingKey[DependencyFilter]("Tells copyDependencies to ignore certain dependencies.")
+
+  val dependencyNameMap = SettingKey[Map[Regex, String ⇒ String]]("dependencymap", "A map that is run against dependencies to be copied.")
+}
