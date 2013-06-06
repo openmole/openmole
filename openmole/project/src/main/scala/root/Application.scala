@@ -198,7 +198,7 @@ object Application extends Defaults {
     (openmoleUILibDependencies, pluginDependencies, resourceDirectory <<= baseDirectory / "resources",
       libraryDependencies <+= (version) { "org.openmole.core" %% "org.openmole.runtime.runtime" % _ },
       assemble <<= assemble dependsOn resourceAssemble, resourceOutDir := Option("."), dependencyFilter <<= (version, scalaBinaryVersion)
-      { (v, sbV) ⇒ DependencyFilter.fnToModuleFilter { m ⇒ m.revision == v || m.name.endsWith("_" + sbV) || m.name.startsWith("org.eclipse") } })
+      { (v, sbV) ⇒ DependencyFilter.fnToModuleFilter { _.extraAttributes get ("project-name") map (_ == projectName) getOrElse false } })
 
   lazy val openmoleDaemon = AssemblyProject("daemon", "plugins", settings = copyResProject) settings (resourceDirectory <<= baseDirectory / "resources",
     libraryDependencies <+= (version) { "org.openmole.core" %% "org.openmole.runtime.daemon" % _ }, assemble <<= assemble dependsOn resourceAssemble,

@@ -22,6 +22,8 @@ object OMKeys {
 
   val install = TaskKey[Unit]("install", "Builds bundles and adds them to the local repo")
 
+  val tarGZName = SettingKey[Option[String]]("targz-name")
+
   val installRemote = TaskKey[Unit]("install-remote", "Builds bundles and adds them to the openmole nexus server")
 
   val assemblyPath = SettingKey[File]("The path to the project's assembly folder")

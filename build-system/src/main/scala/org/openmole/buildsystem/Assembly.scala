@@ -4,6 +4,12 @@ import sbt._
 import Keys._
 import scala.util.matching.Regex
 import OMKeys._
+import java.util.zip.GZIPOutputStream
+import org.kamranzafar.jtar.{ TarEntry, TarOutputStream }
+import resource._
+import java.io.{ BufferedOutputStream, BufferedInputStream, FileOutputStream }
+import scala.io.Source
+import sbt.Path._
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,7 +22,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
   //To add zipping to project, add zipProject to its settings
   lazy val zipProject: Seq[Project.Setting[_]] = Seq(
     zipFiles <++= (copyDependencies) map { rA ⇒ Seq(rA) },
-    zip <<= (zipFiles, streams) map zipImpl,
+    zip <<= (zipFiles, streams, target, tarGZName) map zipImpl,
 
     assemble <<= assemble dependsOn zip
   )
@@ -65,6 +71,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
       assemblyPath <<= target / "assemble",
       install := true,
       installRemote := true,
+      tarGZName := None,
       zipFiles := Nil,
       outDir := outputDir,
       resourceOutDir := None,
@@ -74,11 +81,45 @@ trait Assembly { self: BuildSystemDefaults ⇒
     ) ++ s ++ scalariformDefaults)
   }
 
-  //I'll implement this
+  def zipImpl(targetFolders: Seq[File], s: TaskStreams, t: File, name: Option[String]): File = {
+    val out = t / ((name getOrElse "assembly") + ".tar.gz")
 
-  def zipImpl(targetFolder: Seq[File], s: TaskStreams): File = {
-    s.log.info("Zipping:\n\t" + targetFolder.mkString(",\n\t"))
-    targetFolder.head
+    val tgzOS = managed(new TarOutputStream(new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(out)))))
+
+    def findFiles(f: File): Set[File] = if (f.isDirectory) (f.listFiles map findFiles flatten).toSet else Set(f)
+
+    def findLeastCommonPath(f1: File, f2: File): File = file((f1.getAbsolutePath zip f2.getAbsolutePath) takeWhile { case (a, b) ⇒ a == b } map (_._1) mkString)
+
+    val files: Set[File] = (targetFolders map findFiles flatten) toSet
+
+    val fn = FileFunction.cached(t / "zip-cache", FilesInfo.full, FilesInfo.lastModified) {
+      fileSet ⇒
+        s.log.info("Zipping:\n\t")
+
+        val lCP = targetFolders reduceLeft findLeastCommonPath
+
+        s.log.info(lCP.getAbsolutePath)
+        s.log.info(targetFolders.last.relativeTo(lCP).get.getPath)
+
+        for {
+          os ← tgzOS
+          file ← fileSet
+          is ← managed(Source.fromFile(file)(scala.io.Codec.ISO8859))
+        } {
+          val relativeFile = (file relativeTo lCP).get.getPath
+          s.log.info("\t - " + relativeFile)
+          os.putNextEntry(new TarEntry(file, relativeFile))
+
+          for (c ← is.iter) {
+            os.write(c.toByte)
+          }
+
+          os.flush
+        }
+        Set(out)
+    }
+
+    fn(files).head
   }
 
   def urlDownloader(urls: Seq[URL]): File = {
