@@ -200,7 +200,8 @@ object Application extends Defaults {
     """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") }), settings = (copyResProject ++ zipProject ++ urlDownloadProject)) settings
     (openmoleUILibDependencies, pluginDependencies, resourceDirectory <<= baseDirectory / "resources",
       libraryDependencies <+= (version) { "org.openmole.core" %% "org.openmole.runtime.runtime" % _ },
-      urls <++= target { t ⇒ Seq(java368URL -> t / "jvm-386.tgz", javax64URL -> t / "jvm-x64.tgz") },
+      urls <++= target { t ⇒ Seq(java368URL -> t / "jvm-386.tar.gz", javax64URL -> t / "jvm-x64.tar.gz") },
+      tarGZName := Some("runtime"),
       assemble <<= assemble dependsOn resourceAssemble, resourceOutDir := Option("."), dependencyFilter <<= (version, scalaBinaryVersion)
       { (v, sbV) ⇒ DependencyFilter.fnToModuleFilter { _.extraAttributes get ("project-name") map (_ == projectName) getOrElse false } })
 
