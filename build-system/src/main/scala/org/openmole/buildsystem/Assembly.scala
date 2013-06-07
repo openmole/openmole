@@ -28,8 +28,8 @@ trait Assembly { self: BuildSystemDefaults ⇒
   )
 
   lazy val urlDownloadProject: Seq[Project.Setting[_]] = Seq(
-    zipFiles <+= (downloadUrls) map { f ⇒ f }, //Adds the result of the url download task to what should be zipped.
-    downloadUrls <<= (urls) map urlDownloader
+    downloadUrls <<= (urls, streams) map urlDownloader,
+    assemble <<= assemble dependsOn downloadUrls
   )
 
   lazy val copyResProject: Seq[Project.Setting[_]] = Seq(
@@ -72,6 +72,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
       install := true,
       installRemote := true,
       tarGZName := None,
+      urls := Nil,
       zipFiles := Nil,
       outDir := outputDir,
       resourceOutDir := None,
@@ -122,7 +123,12 @@ trait Assembly { self: BuildSystemDefaults ⇒
     fn(files).head
   }
 
-  def urlDownloader(urls: Seq[URL]): File = {
-    dir
+  def urlDownloader(urls: Seq[(URL, File)], s: TaskStreams) = urls.map {
+    case (url, file) ⇒
+      s.log.info("Downloading " + url + " to " + file)
+      val os = new BufferedOutputStream(new FileOutputStream(file))
+      try BasicIO.transferFully(url.openStream, os)
+      finally os.close
+      file
   }
 }
