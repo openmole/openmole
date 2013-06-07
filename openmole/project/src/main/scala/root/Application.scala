@@ -18,7 +18,7 @@ object Application extends Defaults {
   lazy val all = Project("application", file("application")) aggregate (plugins, openmoleui,
     openmolePlugins, openmoleGuiPlugins, openmoleResources, openMoleDB, openmoleRuntime, openmoleDaemon)
 
-  private val openmoleUILibDependencies = libraryDependencies ++= Seq(
+  private val equinoxDependencies = libraryDependencies ++= (Seq(
     "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841" intransitive (),
     "org.eclipse.core" % "org.eclipse.core.contenttype" % "3.4.200.v20120523-2004" intransitive (),
     "org.eclipse.core" % "org.eclipse.core.jobs" % "3.5.300.v20120912-155018" intransitive (),
@@ -28,7 +28,7 @@ object Application extends Defaults {
     "org.eclipse.core" % "org.eclipse.equinox.registry" % "3.5.200.v20120522-1841" intransitive (),
     "org.eclipse.core" % "org.eclipse.equinox.preferences" % "3.5.1.v20121031-182809" intransitive (),
     "org.eclipse.core" % "org.eclipse.osgi" % "3.8.2.v20130124-134944" intransitive ()
-  )
+  ) map (_ extra ("project-name" -> projectName)))
 
   private lazy val pluginDependencies = libraryDependencies <++= (version) { v ⇒
     Seq(
@@ -157,7 +157,7 @@ object Application extends Defaults {
       }
   }
 
-  lazy val openmoleui = OsgiProject("org.openmole.ui", singleton = true) settings (openmoleUILibDependencies) dependsOn
+  lazy val openmoleui = OsgiProject("org.openmole.ui", singleton = true) settings (equinoxDependencies) dependsOn
     (base.Misc.workspace, base.Misc.replication, base.Misc.exception, base.Misc.tools, base.Misc.eventDispatcher,
       base.Misc.pluginManager, jodaTime, scalaLang, jasypt, Apache.config, objenesis, base.Core.implementation, robustIt,
       scopt, base.Core.batch, gui.Core.implementation, base.Misc.sftpserver, base.Misc.logging, jline, Apache.logging,
@@ -166,7 +166,7 @@ object Application extends Defaults {
   lazy val plugins = AssemblyProject("package", "plugins",
     depNameMap = Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" },
       """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") })
-  ) settings (openmoleUILibDependencies, pluginDependencies,
+  ) settings (equinoxDependencies, pluginDependencies,
       libraryDependencies <++= (version) { v ⇒
         Seq(
           "org.openmole.ide" %% "org.openmole.ide.core.implementation" % v,
@@ -199,12 +199,12 @@ object Application extends Defaults {
 
   lazy val openmoleRuntime = AssemblyProject("runtime", "plugins", depNameMap = Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" },
     """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") }), settings = (copyResProject ++ zipProject ++ urlDownloadProject)) settings
-    (openmoleUILibDependencies, pluginDependencies, resourceDirectory <<= baseDirectory / "resources",
+    (equinoxDependencies, pluginDependencies, resourceDirectory <<= baseDirectory / "resources",
       libraryDependencies <+= (version) { "org.openmole.core" %% "org.openmole.runtime.runtime" % _ },
       urls <++= target { t ⇒ Seq(java368URL -> t / "jvm-386.tar.gz", javax64URL -> t / "jvm-x64.tar.gz") },
       tarGZName := Some("runtime"),
       assemble <<= assemble dependsOn resourceAssemble, resourceOutDir := Option("."), dependencyFilter <<= (version, scalaBinaryVersion)
-      { (v, sbV) ⇒ DependencyFilter.fnToModuleFilter { _.extraAttributes get ("project-name") map (_ == projectName) getOrElse false } })
+      { (v, sbV) ⇒ DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse false || m.organization == "org.eclipse.core" } })
 
   lazy val openmoleDaemon = AssemblyProject("daemon", "plugins", settings = copyResProject) settings (resourceDirectory <<= baseDirectory / "resources",
     libraryDependencies <+= (version) { "org.openmole.core" %% "org.openmole.runtime.daemon" % _ }, assemble <<= assemble dependsOn resourceAssemble,
