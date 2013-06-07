@@ -21,10 +21,17 @@ import Database.threadLocalSession
 
 import javax.sql.rowset.serial.SerialClob
 import reflect.ClassTag
+import json.JacksonJsonSupport
+import org.json4s._
+import org.json4s.JsonDSL._
 import scala.None
+import org.json4s.{ Formats, DefaultFormats }
 
 @MultipartConfig(maxFileSize = 3 * 1024 * 1024 /*max file size of 3 MiB*/ ) //research scala multipart config
-class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupport with ScalateSupport with FileUploadSupport with FlashMapSupport with FutureSupport {
+class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupport with ScalateSupport
+    with FileUploadSupport with FlashMapSupport with FutureSupport with JacksonJsonSupport {
+
+  protected implicit val jsonFormats: Formats = DefaultFormats.withBigDecimal
 
   protected implicit def executor: concurrent.ExecutionContext = system.dispatcher
 
@@ -42,7 +49,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
   def processXMLFile[A: ClassTag](file: Option[FileItem], is: Option[InputStream]): (Option[A], String) = { //Make Either[A, String], use Scala-arm.
     file match {
       case Some(data) ⇒
-        if (data.getContentType.isDefined && data.getContentType.get == "text/xml") {
+        if (data.getContentType.isDefined) {
           try {
             val ret = is.map(SerializerService.deserialize[A](_))
             if (!ret.forall(evidence$1.runtimeClass.isInstance(_)))
@@ -140,6 +147,25 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
     }
   }
 
+  post("/json/createMole") {
+    contentType = formats("json")
+
+    val moleExec = processXMLFile[(Context, ExecutionContext) ⇒ IMoleExecution](fileParams.get("file"), fileParams.get("file").map(_.getInputStream))
+
+    val context = new ExecutionContext(new PrintStream(new File("./out")), null)
+
+    moleExec match {
+      case (Some(pEx), _) ⇒ {
+        val exec = pEx(Context.empty, context)
+
+        cachedMoles.add(exec.id, exec)
+
+        Xml.toJson(<moleID>{ exec.id }</moleID>)
+      }
+      case (_, error) ⇒ Xml.toJson(<error>{ error }</error>)
+    }
+  }
+
   get("/execs") {
     new AsyncResult() {
       contentType = "text/html"
@@ -163,7 +189,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
         val pRams = params("id")
 
-        val mole = db withSession {
+        val mole: Option[IMoleExecution] = db withSession {
 
           MoleData.filter(_.id === pRams).map(_.clobbedMole).list().headOption match {
             case Some(head) ⇒ Some(SerializerService.deserialize[IMoleExecution](head.getAsciiStream))
@@ -191,6 +217,20 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
       }
     }
+  }
+
+  get("/json/execs/:id") {
+    contentType = formats("json")
+
+    val pRams = params("id")
+
+    render(("status", cachedMoles get pRams map getStatus getOrElse ("doesn't exist")))
+  }
+
+  get("/json/execs") {
+    contentType = formats("json")
+
+    render(("execIds", cachedMoles.getKeys))
   }
 
   get("/start/:id") {
@@ -230,6 +270,15 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
         <exec-result> { res.getOrElse("id didn't exist") } </exec-result>
       }
     }
+  }
+
+  get("/json/start/:id") {
+    contentType = formats("json")
+
+    val exec = cachedMoles get params("id")
+
+    render(("id", exec map (_.id) getOrElse "none") ~
+      ("execResult", exec map { e ⇒ e.start; getStatus(e) } getOrElse "id didn't exist"))
   }
 
   notFound {

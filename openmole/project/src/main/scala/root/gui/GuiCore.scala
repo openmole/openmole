@@ -1,5 +1,7 @@
 package root.gui
 
+import org.openmole.buildsystem.OMKeys._
+
 import sbt._
 import root.base
 import root.Libraries._

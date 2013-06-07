@@ -2,6 +2,7 @@ package root.base
 
 import sbt._
 import Keys._
+import org.openmole.buildsystem.OMKeys._
 
 object Core extends BaseDefaults {
   import Misc._

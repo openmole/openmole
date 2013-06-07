@@ -1,6 +1,7 @@
 package root
 
-import org.openmole.buildsystem.BuildSystemDefaults
+import org.openmole.buildsystem._
+import OMKeys._
 
 import sbt._
 import Keys._
@@ -13,6 +14,9 @@ import Keys._
  * To change this template use File | Settings | File Templates.
  */
 trait Defaults extends BuildSystemDefaults {
+
+  val projectName = "openmole"
+
   def org = "org.openmole"
 
   override def settings = super.settings ++

@@ -3,6 +3,8 @@ package root.base
 import sbt._
 import Keys._
 
+import org.openmole.buildsystem.OMKeys._
+
 object Misc extends BaseDefaults {
   import root.Libraries._
   import root.libraries.Apache
