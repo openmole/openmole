@@ -80,7 +80,10 @@ object Libraries extends Defaults {
 
   lazy val jodaTime = OsgiProject("org.joda.time") settings (libraryDependencies += "joda-time" % "joda-time" % "1.6")
 
-  lazy val gnuCrypto = OsgiProject("org.gnu.crypto") settings (libraryDependencies += "org.gnu.crypto" % "gnu-crypto" % "2.0.1")
+  lazy val gnuCrypto = OsgiProject("org.gnu.crypto") settings (
+    libraryDependencies += "org.gnu.crypto" % "gnu-crypto" % "2.0.1",
+    exportPackage += "gnu.crypto.*"
+  )
 
   lazy val jasypt = OsgiProject("org.jasypt.encryption", exports = Seq("org.jasypt.*")) settings (libraryDependencies += "org.jasypt" % "jasypt" % "1.8")
 

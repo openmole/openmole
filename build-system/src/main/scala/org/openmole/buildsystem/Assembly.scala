@@ -21,14 +21,14 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
   //To add zipping to project, add zipProject to its settings
   lazy val zipProject: Seq[Project.Setting[_]] = Seq(
-    zipFiles <++= (copyDependencies) map { rA ⇒ Seq(rA) },
+    zipFiles <+= (copyDependencies) map { f ⇒ f },
     zip <<= (zipFiles, streams, target, tarGZName) map zipImpl,
+    tarGZName := None,
 
     assemble <<= assemble dependsOn zip
   )
 
   lazy val urlDownloadProject: Seq[Project.Setting[_]] = Seq(
-    zipFiles <+= (downloadUrls) map { f ⇒ f }, //Adds the result of the url download task to what should be zipped.
     downloadUrls <<= (urls) map urlDownloader
   )
 
@@ -71,7 +71,6 @@ trait Assembly { self: BuildSystemDefaults ⇒
       assemblyPath <<= target / "assemble",
       install := true,
       installRemote := true,
-      tarGZName := None,
       zipFiles := Nil,
       outDir := outputDir,
       resourceOutDir := None,
@@ -88,7 +87,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
     def findFiles(f: File): Set[File] = if (f.isDirectory) (f.listFiles map findFiles flatten).toSet else Set(f)
 
-    def findLeastCommonPath(f1: File, f2: File): File = file((f1.getAbsolutePath zip f2.getAbsolutePath) takeWhile { case (a, b) ⇒ a == b } map (_._1) mkString)
+    def findLeastCommonPath(f1: File, f2: File): File = file((f1.getCanonicalPath zip f2.getCanonicalPath) takeWhile { case (a, b) ⇒ a == b } map (_._1) mkString)
 
     val files: Set[File] = (targetFolders map findFiles flatten) toSet
 
@@ -110,9 +109,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
           s.log.info("\t - " + relativeFile)
           os.putNextEntry(new TarEntry(file, relativeFile))
 
-          for (c ← is.iter) {
-            os.write(c.toByte)
-          }
+          is.iter foreach (c => os.write(c.toByte))
 
           os.flush
         }
@@ -123,6 +120,6 @@ trait Assembly { self: BuildSystemDefaults ⇒
   }
 
   def urlDownloader(urls: Seq[URL]): File = {
-    dir
+    file("http://")
   }
 }
