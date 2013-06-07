@@ -29,7 +29,9 @@ trait Assembly { self: BuildSystemDefaults ⇒
   )
 
   lazy val urlDownloadProject: Seq[Project.Setting[_]] = Seq(
-    downloadUrls <<= (urls) map urlDownloader
+    urls := Nil,
+    downloadUrls <<= (urls, streams) map urlDownloader,
+    assemble <<= assemble dependsOn downloadUrls
   )
 
   lazy val copyResProject: Seq[Project.Setting[_]] = Seq(
@@ -109,7 +111,9 @@ trait Assembly { self: BuildSystemDefaults ⇒
           s.log.info("\t - " + relativeFile)
           os.putNextEntry(new TarEntry(file, relativeFile))
 
-          is.iter foreach (c => os.write(c.toByte))
+          for (c ← is.iter) {
+            os.write(c.toByte)
+          }
 
           os.flush
         }
@@ -120,6 +124,6 @@ trait Assembly { self: BuildSystemDefaults ⇒
   }
 
   def urlDownloader(urls: Seq[URL]): File = {
-    file("http://")
+    dir
   }
 }

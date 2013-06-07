@@ -193,10 +193,15 @@ object Application extends Defaults {
     copyResTask, resourceDirectory <<= baseDirectory / "db-resources", assemble <<= assemble dependsOn (resourceAssemble),
     resourceOutDir := Option("dbserver/bin"))
 
+  lazy val java368URL = new URL("http://maven.iscpif.fr/public/com/oracle/java-jre-linux-i386/7-u10/java-jre-linux-i386-7-u10.tgz")
+  lazy val javax64URL = new URL("http://maven.iscpif.fr/public/com/oracle/java-jre-linux-x64/7-u10/java-jre-linux-x64-7-u10.tgz")
+
   lazy val openmoleRuntime = AssemblyProject("runtime", "plugins", depNameMap = Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" },
-    """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") }), settings = (copyResProject ++ zipProject)) settings
+    """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") }), settings = (copyResProject ++ zipProject ++ urlDownloadProject)) settings
     (openmoleUILibDependencies, pluginDependencies, resourceDirectory <<= baseDirectory / "resources",
       libraryDependencies <+= (version) { "org.openmole.core" %% "org.openmole.runtime.runtime" % _ },
+      urls <++= target { t ⇒ Seq(java368URL -> t / "jvm-386.tar.gz", javax64URL -> t / "jvm-x64.tar.gz") },
+      tarGZName := Some("runtime"),
       assemble <<= assemble dependsOn resourceAssemble, resourceOutDir := Option("."), dependencyFilter <<= (version, scalaBinaryVersion)
       { (v, sbV) ⇒ DependencyFilter.fnToModuleFilter { _.extraAttributes get ("project-name") map (_ == projectName) getOrElse false } })
 
@@ -211,7 +216,6 @@ object Application extends Defaults {
     packageDescription in Rpm := """This package contains the OpenMole executable, an easy to use system for massively parrelel computation.""",
     packageDescription in Debian <<= packageDescription in Rpm,
     linuxPackageMappings <+= (target in Linux) map { (ct: File) ⇒
-      println(ct)
       val src = ct / "assembly"
       val dest = "/opt/openmole"
       packageMapping(

@@ -40,9 +40,9 @@ object OMKeys {
 
   val zipFiles = TaskKey[Seq[File]]("zip-files", "Collects the list of files to be zipped")
 
-  val downloadUrls = TaskKey[File]("download-urls")
+  val downloadUrls = TaskKey[Seq[File]]("download-urls")
 
-  val urls = SettingKey[Seq[URL]]("urls", "A project setting that describes a list of urls to download")
+  val urls = SettingKey[Seq[(URL, File)]]("urls", "A project setting that describes a urls to download")
 
   val copyDependencies = TaskKey[File]("copy-dependencies")
 
