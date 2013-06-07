@@ -123,7 +123,12 @@ trait Assembly { self: BuildSystemDefaults ⇒
     fn(files).head
   }
 
-  def urlDownloader(urls: Seq[URL]): File = {
-    dir
+  def urlDownloader(urls: Seq[(URL, File)], s: TaskStreams) = urls.map {
+    case (url, file) ⇒
+      s.log.info("Downloading " + url + " to " + file)
+      val os = new BufferedOutputStream(new FileOutputStream(file))
+      try BasicIO.transferFully(url.openStream, os)
+      finally os.close
+      file
   }
 }
