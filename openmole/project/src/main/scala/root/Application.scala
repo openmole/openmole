@@ -36,7 +36,6 @@ object Application extends Defaults {
       "org.openmole.core" %% "org.openmole.misc.logging" % v,
       "org.openmole.core" %% "org.openmole.core.model" % v,
       "org.openmole.core" %% "org.openmole.core.implementation" % v,
-      "org.openmole.web" %% "org.openmole.web.core" % v,
       "org.openmole.core" %% "org.openmole.misc.workspace" % v,
       "org.openmole.core" %% "org.openmole.misc.replication" % v,
       "org.openmole.core" %% "org.openmole.misc.exception" % v,
@@ -173,7 +172,9 @@ object Application extends Defaults {
           "org.openmole.ide" %% "org.openmole.ide.core.implementation" % v,
           "org.openmole.ide" %% "org.openmole.ide.misc.visualization" % v,
           "org.openmole" %% "de.erichseifert.gral" % v intransitive (),
+          "org.openmole.web" %% "org.openmole.web.core" % v,
           "org.openmole.ui" %% "org.openmole.ui" % v exclude ("org.eclipse.equinox", "*")
+
         )
       }, dependencyFilter <<= (version, scalaBinaryVersion)
       { (v, sbV) ⇒ DependencyFilter.fnToModuleFilter(m ⇒ m.revision == v || m.organization.startsWith("org.openmole") || m.name.startsWith("org.eclipse")) })
