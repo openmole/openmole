@@ -18,8 +18,8 @@ object Application extends Defaults {
   lazy val all = Project("application", file("application")) aggregate (plugins, openmoleui,
     openmolePlugins, openmoleGuiPlugins, openmoleResources, openMoleDB, openmoleRuntime, openmoleDaemon)
 
-  private val equinoxDependencies = libraryDependencies ++= (Seq(
-    "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841" intransitive (),
+  private val equinoxDependencies = libraryDependencies ++= Seq(
+    "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841" intransitive () extra ("project-name" -> "eclipse"),
     "org.eclipse.core" % "org.eclipse.core.contenttype" % "3.4.200.v20120523-2004" intransitive (),
     "org.eclipse.core" % "org.eclipse.core.jobs" % "3.5.300.v20120912-155018" intransitive (),
     "org.eclipse.core" % "org.eclipse.core.runtime" % "3.8.0.v20120912-155025" intransitive (),
@@ -28,7 +28,7 @@ object Application extends Defaults {
     "org.eclipse.core" % "org.eclipse.equinox.registry" % "3.5.200.v20120522-1841" intransitive (),
     "org.eclipse.core" % "org.eclipse.equinox.preferences" % "3.5.1.v20121031-182809" intransitive (),
     "org.eclipse.core" % "org.eclipse.osgi" % "3.8.2.v20130124-134944" intransitive ()
-  ) map (_ extra ("project-name" -> projectName)))
+  )
 
   private lazy val pluginDependencies = libraryDependencies <++= (version) { v ⇒
     Seq(
@@ -176,8 +176,7 @@ object Application extends Defaults {
           "org.openmole.ui" %% "org.openmole.ui" % v exclude ("org.eclipse.equinox", "*")
 
         )
-      }, dependencyFilter <<= (version, scalaBinaryVersion)
-      { (v, sbV) ⇒ DependencyFilter.fnToModuleFilter(m ⇒ m.revision == v || m.organization.startsWith("org.openmole") || m.name.startsWith("org.eclipse")) })
+      }, dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "org.eclipse.core") })
 
   lazy val openmolePlugins = AssemblyProject("package", "openmole-plugins") settings (openmolePluginDependencies,
     dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
@@ -203,8 +202,8 @@ object Application extends Defaults {
       libraryDependencies <+= (version) { "org.openmole.core" %% "org.openmole.runtime.runtime" % _ },
       urls <++= target { t ⇒ Seq(java368URL -> t / "jvm-386.tar.gz", javax64URL -> t / "jvm-x64.tar.gz") },
       tarGZName := Some("runtime"),
-      assemble <<= assemble dependsOn resourceAssemble, resourceOutDir := Option("."), dependencyFilter <<= (version, scalaBinaryVersion)
-      { (v, sbV) ⇒ DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse false || m.organization == "org.eclipse.core" } })
+      assemble <<= assemble dependsOn resourceAssemble, resourceOutDir := Option("."),
+      dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "org.eclipse.core") })
 
   lazy val openmoleDaemon = AssemblyProject("daemon", "plugins", settings = copyResProject) settings (resourceDirectory <<= baseDirectory / "resources",
     libraryDependencies <+= (version) { "org.openmole.core" %% "org.openmole.runtime.daemon" % _ }, assemble <<= assemble dependsOn resourceAssemble,
