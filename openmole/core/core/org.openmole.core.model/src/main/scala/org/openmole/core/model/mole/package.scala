@@ -18,15 +18,15 @@
 package org.openmole.core.model
 
 package object mole {
-  type Hooks = Map[ICapsule, Iterable[IHook]]
-  type Sources = Map[ICapsule, Iterable[ISource]]
+  type Hooks = Map[ICapsule, Traversable[IHook]]
+  type Sources = Map[ICapsule, Traversable[ISource]]
 
   object Hooks {
-    def empty = Map.empty[ICapsule, Iterable[IHook]].withDefault(_ ⇒ List.empty)
+    def empty = Map.empty[ICapsule, Traversable[IHook]].withDefault(_ ⇒ List.empty)
   }
 
   object Sources {
-    def empty = Map.empty[ICapsule, Iterable[ISource]].withDefault(_ ⇒ List.empty)
+    def empty = Map.empty[ICapsule, Traversable[ISource]].withDefault(_ ⇒ List.empty)
   }
 
 }

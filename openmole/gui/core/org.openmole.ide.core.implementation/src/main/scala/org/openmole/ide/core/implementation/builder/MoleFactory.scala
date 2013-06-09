@@ -42,7 +42,7 @@ import scala.Some
 
 object MoleFactory {
 
-  def buildMoleExecution(manager: IMoleUI): Try[(MoleExecution.PartialMoleExecution, Iterable[(Environment, String)])] = {
+  def buildMoleExecution(manager: IMoleUI): Try[(PartialMoleExecution, Iterable[(Environment, String)])] = {
     manager.cacheMole match {
       case Some((mole: IMole, capsuleMap: Map[ICapsuleUI, ICapsule], prototypeMap: Map[IPrototypeDataProxyUI, Prototype[_]])) ⇒
         buildMoleExecution(mole, manager, capsuleMap, prototypeMap)
@@ -53,7 +53,7 @@ object MoleFactory {
   def buildMoleExecution(mole: IMole,
                          manager: IMoleUI,
                          capsuleMapping: Map[ICapsuleUI, ICapsule],
-                         prototypeMapping: Map[IPrototypeDataProxyUI, Prototype[_]]): Try[(MoleExecution.PartialMoleExecution, Iterable[(Environment, String)])] =
+                         prototypeMapping: Map[IPrototypeDataProxyUI, Prototype[_]]): Try[(PartialMoleExecution, Iterable[(Environment, String)])] =
     Try {
       val envs = capsuleMapping.flatMap { c ⇒
         c._1.dataUI.environment match {

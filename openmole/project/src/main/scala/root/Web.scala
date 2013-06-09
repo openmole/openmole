@@ -21,5 +21,5 @@ object Web extends Defaults {
     exports = Seq("org.openmole.web"),
     buddyPolicy = Some("global"),
     imports = Seq("org.h2.*", "*;resolution:=optional")) dependsOn
-    (h2, jetty, slick, logback, scalatra, bonecp, scalaLang, base.Core.model, base.Core.serializer, xstream, jacksonJson)
+    (h2, jetty, slick, logback, scalatra, bonecp, scalaLang, base.Core.implementation, base.Core.serializer, xstream, jacksonJson)
 }
