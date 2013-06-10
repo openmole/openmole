@@ -50,40 +50,22 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
   val jobService: WMSJobService
   def environment: GliteEnvironment
 
-  def authentication = environment.authentication._1
-  def proxyFile = environment.authentication._2
+  def authentication = environment.authentication
 
   lazy val id = jobService.url.toString
   def hysteresis = Workspace.preferenceAsInt(GliteEnvironment.QualityHysteresis)
 
   var delegated = false
 
-  def delegateProxy = jobService.delegateProxy(proxyFile)(authentication)
+  def delegate = jobService.delegate(authentication)
 
-  def checkDelegated = synchronized {
-    if (!delegated) {
-      delegateProxy
-      delegated = true
-    }
-  }
+  override protected def _purge(j: J) = quality { super._purge(j) }
 
-  override protected def _purge(j: J) = quality {
-    checkDelegated
-    super._purge(j)
-  }
+  override protected def _cancel(j: J) = quality { super._cancel(j) }
 
-  override protected def _cancel(j: J) = quality {
-    checkDelegated
-    super._cancel(j)
-  }
-
-  override protected def _state(j: J) = quality {
-    checkDelegated
-    super._state(j)
-  }
+  override protected def _state(j: J) = quality { super._state(j) }
 
   override protected def _submit(serializedJob: SerializedJob) = quality {
-    checkDelegated
     import serializedJob._
 
     val script = Workspace.newFile("script", ".sh")
@@ -193,7 +175,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     new WMSJobDescription {
       val executable = "/bin/bash"
       val arguments = script.getName
-      val inputSandbox = List(script.getAbsolutePath)
+      val inputSandbox = List(script)
       val outputSandbox = List.empty
       override val memory = Some(environment.requieredMemory)
       override val cpuTime = environment.cpuTime.map(_.toMinutes)

@@ -35,14 +35,15 @@ class P12Certificate(val cypheredPassword: String, val certificate: File) extend
     lifeTime: Int,
     fqan: Option[String]) = {
     VOMSAuthentication.setCARepository(GliteAuthentication.CACertificatesDir)
-    val (_serverURL, _voName, _proxyFile, _lifeTime, _fqan) = (serverURL, voName, proxyFile, lifeTime, fqan)
+    val (_serverURL, _voName, _proxyFile, _lifeTime, _fqan, _password) = (serverURL, voName, proxyFile, lifeTime, fqan, password)
     new P12VOMSAuthentication {
       val certificate = a.certificate
       val serverURL = _serverURL
       val voName = _voName
       val proxyFile = _proxyFile
       val lifeTime = _lifeTime
+      val password = _password
       override val fqan = _fqan
-    }.init(password)
+    }
   }
 }

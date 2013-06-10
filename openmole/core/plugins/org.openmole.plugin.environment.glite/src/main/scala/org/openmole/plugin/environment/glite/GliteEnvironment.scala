@@ -37,6 +37,8 @@ import annotation.tailrec
 import ref.WeakReference
 import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.service.Random._
+import fr.iscpif.gridscale.authentication.{ GlobusAuthentication, RenewDecorator }
+import fr.iscpif.gridscale.jobservice.WMSJobService
 
 object GliteEnvironment extends Logger {
 
@@ -182,40 +184,39 @@ class GliteEnvironment(
     super.submit(job)
   }
 
-  private def generateProxy = GliteAuthentication.get match {
+  @transient lazy val authentication = GliteAuthentication.get match {
     case Some(a) ⇒
       val file = Workspace.newFile("proxy", ".x509")
       FileDeleter.deleteWhenGarbageCollected(file)
-      val proxy = a(
+      a(
         vomsURL,
         voName,
         file,
-        Workspace.preferenceAsDuration(ProxyTime).toSeconds,
-        fqan)
-      myProxy.foreach(mp ⇒ mp.delegate(proxy, mp.time.toSeconds))
-      (proxy, file)
+        proxyTime.toSeconds,
+        fqan).cache(renewProxyDelay)
     case None ⇒ throw new UserBadDataError("No athentication has been initialized for glite.")
   }
 
-  @transient @volatile var _authentication = generateProxy
+  def proxyTime = Workspace.preferenceAsDuration(ProxyTime)
 
-  def authentication = synchronized {
-    if (_authentication == null) _authentication = authenticate
-    _authentication
+  def renewProxyDelay = {
+    val remainingTime = proxyTime.toSeconds
+    math.max(
+      (remainingTime * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong,
+      Workspace.preferenceAsDuration(GliteEnvironment.MinProxyRenewal).toSeconds)
   }
 
-  def authenticate = synchronized {
-    _authentication = generateProxy
-    jobServices.foreach { _.delegated = false }
-    _authentication
-  }
+  def delegate = jobServices.foreach { _.delegate }
 
   override def allJobServices = {
     val jss = getBDII.queryWMS(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut).toSeconds.toInt)
     jss.map {
       js ⇒
         new GliteJobService {
-          val jobService = js
+          val jobService = new WMSJobService {
+            val url = js.url
+            override def delegationRenewal = Int.MaxValue
+          }
           val environment = env
           val nbTokens = threadsByWMS
         }

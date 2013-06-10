@@ -50,5 +50,5 @@ class RemoteGliteStorage(val host: String, val port: Int, certificateDir: File) 
       else throw new InternalProcessingError("The X509_USER_PROXY environment variable is not defined or point to an inexisting file.")
       new File(path)
     }
-  }.init
+  }
 }

@@ -41,7 +41,7 @@ object GliteStorageService {
     val environment = _environment
     val root = s.basePath
     def nbTokens = _environment.threadsBySE
-    def authentication = environment.authentication._1
+    def authentication = environment.authentication
   }
 
 }

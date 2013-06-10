@@ -34,6 +34,5 @@ class ProxyFile(val proxy: File) extends GliteAuthentication { a ⇒
     fqan: Option[String]) =
     new ProxyFileAuthentication {
       val proxy = a.proxy
-    }.init
-
+    }
 }

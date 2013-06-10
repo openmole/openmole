@@ -37,16 +37,17 @@ class PEMCertificate(val cypheredPassword: String, val certificate: File, val ke
     lifeTime: Int,
     fqan: Option[String]) = {
     VOMSAuthentication.setCARepository(GliteAuthentication.CACertificatesDir)
-    val (_serverURL, _voName, _proxyFile, _lifeTime, _fqan) = (serverURL, voName, proxyFile, lifeTime, fqan)
+    val (_serverURL, _voName, _proxyFile, _lifeTime, _fqan, _password) = (serverURL, voName, proxyFile, lifeTime, fqan, password)
     new PEMVOMSAuthentication {
-      val certificate = a.certificate.getAbsolutePath
-      val key = a.key.getAbsolutePath
+      val certificate = a.certificate
+      val key = a.key
       val serverURL = _serverURL
       val voName = _voName
       val proxyFile = _proxyFile
       val lifeTime = _lifeTime
+      val password = _password
       override val fqan = _fqan
-    }.init(password)
+    }
   }
 
 }
