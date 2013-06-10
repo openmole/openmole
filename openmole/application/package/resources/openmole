@@ -15,7 +15,7 @@ case "$JVMVERSION" in
   *64-Bit*) FLAG="-XX:+UseCompressedOops";;
 esac
 
-CONFIGDIR=/tmp/$RANDOM
+CONFIGDIR=$LOCATION/$RANDOM
 
 java -Dosgi.locking=none -Dopenmole.location=${LOCATION} -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area=${CONFIGDIR} -splash:$LOCATION/splashscreen.png -Xmx${MEM} $FLAG -XX:MaxPermSize=128M -XX:+UseParallelGC \
      -jar $LOCATION/plugins/org.eclipse.equinox.launcher.jar \
