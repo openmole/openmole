@@ -31,7 +31,7 @@ class ProxyChecker(environment: WeakReference[GliteEnvironment]) extends IUpdata
   override def update: Boolean =
     environment.get match {
       case Some(env) ⇒
-        try env.authenticate
+        try env.delegate
         catch {
           case (ex: Throwable) ⇒ logger.log(SEVERE, "Error while renewing the proxy", ex)
         }
@@ -39,14 +39,8 @@ class ProxyChecker(environment: WeakReference[GliteEnvironment]) extends IUpdata
       case None ⇒ false
     }
 
-  def delay =
-    environment.get match {
-      case Some(env) ⇒
-        val remainingTime = env.authentication._1.getRemainingLifetime * 1000
-        math.max(
-          (remainingTime * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong,
-          Workspace.preferenceAsDuration(GliteEnvironment.MinProxyRenewal).toMilliSeconds)
-      case None ⇒ 0
-    }
-
+  def delay = environment.get match {
+    case Some(env) ⇒ env.renewProxyDelay * 1000
+    case None      ⇒ 0
+  }
 }

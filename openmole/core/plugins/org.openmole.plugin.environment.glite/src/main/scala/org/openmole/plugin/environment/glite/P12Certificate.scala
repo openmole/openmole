@@ -17,7 +17,6 @@
 
 package org.openmole.plugin.environment.glite
 
-import fr.iscpif.gridscale.authentication._
 import org.openmole.core.batch.authentication.CypheredPassword
 import java.io.File
 
@@ -26,23 +25,4 @@ object P12Certificate {
     new P12Certificate(cypheredPassword, certificate)
 }
 
-class P12Certificate(val cypheredPassword: String, val certificate: File) extends GliteAuthentication with CypheredPassword { a ⇒
-
-  override def apply(
-    serverURL: String,
-    voName: String,
-    proxyFile: File,
-    lifeTime: Int,
-    fqan: Option[String]) = {
-    VOMSAuthentication.setCARepository(GliteAuthentication.CACertificatesDir)
-    val (_serverURL, _voName, _proxyFile, _lifeTime, _fqan) = (serverURL, voName, proxyFile, lifeTime, fqan)
-    new P12VOMSAuthentication {
-      val certificate = a.certificate
-      val serverURL = _serverURL
-      val voName = _voName
-      val proxyFile = _proxyFile
-      val lifeTime = _lifeTime
-      override val fqan = _fqan
-    }.init(password)
-  }
-}
+class P12Certificate(val cypheredPassword: String, val certificate: File) extends GliteAuthentication with DIRACAuthentication with CypheredPassword
