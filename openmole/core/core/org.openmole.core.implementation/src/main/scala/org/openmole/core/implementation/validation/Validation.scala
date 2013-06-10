@@ -52,7 +52,7 @@ object Validation {
     (paramsToMap(po), paramsToMap(pno))
   }
 
-  def taskTypeErrors(mole: IMole)(capsules: Iterable[ICapsule], implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks) = {
+  def taskTypeErrors(mole: IMole)(capsules: Iterable[ICapsule], implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks): Iterable[_] = {
 
     val implicitMap = prototypesToMap(implicits)
 

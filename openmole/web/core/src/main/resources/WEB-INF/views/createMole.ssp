@@ -11,5 +11,6 @@ Input-test page
 <b><%= unescape(body)%></b>
 <form name="data" action="/createMole" method="POST" enctype="multipart/form-data">
     <input type="File" name="file"><br>
+    <input type="File" name="csv"><br>
     <input type="Submit">
 </form>

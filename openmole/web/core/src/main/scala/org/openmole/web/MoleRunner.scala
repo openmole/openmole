@@ -9,12 +9,14 @@ import javax.servlet.annotation.MultipartConfig
 
 import org.openmole.core.serializer._
 import org.openmole.core.model.mole.{ IPartialMoleExecution, IMoleExecution, ExecutionContext }
-import org.openmole.core.model.data.Context
+import org.openmole.core.model.data.{ Context, Prototype, Variable }
 import com.thoughtworks.xstream.mapper.CannotResolveClassException
 import concurrent.Future
 
 import slick.driver.H2Driver.simple._
 import slick.jdbc.meta.MTable
+
+import org.openmole.misc.tools.io.FromString
 
 import Database.threadLocalSession
 
@@ -26,6 +28,8 @@ import org.json4s.JsonDSL._
 import scala.None
 import org.json4s.{ Formats, DefaultFormats }
 import org.openmole.core.implementation.validation.Validation
+import org.openmole.core.implementation.validation.DataflowProblem.{ MissingInput, WrongType }
+import scala.io.Source
 
 @MultipartConfig(maxFileSize = 3 * 1024 * 1024 /*max file size of 3 MiB*/ ) //research scala multipart config
 class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupport with ScalateSupport
@@ -105,6 +109,10 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
     val inS = data.map(_.getInputStream)
 
+    val csv = fileParams.get("csv")
+
+    val cnS = csv.map(_.getInputStream)
+
     //TODO: make sure this is released
 
     new AsyncResult {
@@ -112,14 +120,48 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
         contentType = "text/html"
 
+        val r = cnS map Source.fromInputStream
+
+        val regex = """(.*),(.*)""".r
+        val csvData = r.map(_.getLines().map(_ match {
+          case regex(name: String, data: String) ⇒ name -> data
+          case _                                 ⇒ throw new Exception("Invalidly formatted csv file")
+        }).toMap) getOrElse Map()
+
         val moleExec = processXMLFile[IPartialMoleExecution](data, inS)
 
         val context = new ExecutionContext(new PrintStream(new File("./out")), null)
 
+        def fromString[T: FromString](s: String) = {
+          implicitly[FromString[T]].fromString(s)
+        }
+
+        def createVariable[T: FromString](mI: MissingInput) = csvData get mI.data.prototype.name map (d ⇒ Variable[T](mI.data.prototype.asInstanceOf[Prototype[T]], fromString[T](d)))
+
         moleExec match {
           case (Some(pEx), _) ⇒ {
             val a = Validation.taskTypeErrors(pEx.mole)(pEx.mole.capsules, Context.empty.prototypes, pEx.sources, pEx.hooks)
-            val exec = pEx.complete(Context.empty, context)
+            val mIS = a.map(_ match {
+              case x: MissingInput ⇒ x
+              case _               ⇒ throw new Exception("malformed partial mole")
+            })
+
+            val c = mIS.map(mI ⇒ mI.data.prototype.`type`.erasure match {
+              case t if t.equals(classOf[Int])    ⇒ createVariable[Int](mI)
+              case t if t.equals(classOf[Double]) ⇒ createVariable[Double](mI)
+              case t if t.equals(classOf[Float])  ⇒ createVariable[Float](mI)
+              case t if t.equals(classOf[BigInt]) ⇒ createVariable[BigInt](mI)
+              case t if t.equals(classOf[String]) ⇒ createVariable[String](mI)
+              case _                              ⇒ throw new Exception(s"The missing parameter type: ${mI.data.prototype.`type`} is not known to the reification system.")
+            })
+
+            if (!mIS.isEmpty && c.isEmpty) throw new Exception("No parameters given")
+
+            println(mIS)
+            println(c)
+
+            val ctxt = Context(c.map(_.getOrElse(throw new Exception("CSV file does not have data on all missing variables"))))
+            val exec = pEx.complete(ctxt, context)
 
             val clob = new SerialClob(SerializerService.serialize(exec).toCharArray)
 
@@ -151,13 +193,49 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
   post("/json/createMole") {
     contentType = formats("json")
 
-    val moleExec = processXMLFile[(Context, ExecutionContext) ⇒ IMoleExecution](fileParams.get("file"), fileParams.get("file").map(_.getInputStream))
+    val moleExec = processXMLFile[IPartialMoleExecution](fileParams.get("file"), fileParams.get("file").map(_.getInputStream))
+
+    val csv = fileParams.get("csv")
+
+    val cnS = csv.map(_.getInputStream)
+
+    val r = cnS map Source.fromInputStream
+
+    val regex = """(.*),(.*)""".r
+    val csvData = r.map(_.getLines().map(_ match {
+      case regex(name: String, data: String) ⇒ name -> data
+      case _                                 ⇒ throw new Exception("Invalidly formatted csv file")
+    }).toMap) getOrElse Map()
 
     val context = new ExecutionContext(new PrintStream(new File("./out")), null)
 
+    def fromString[T: FromString](s: String) = {
+      implicitly[FromString[T]].fromString(s)
+    }
+
+    def createVariable[T: FromString](mI: MissingInput) = csvData get mI.data.prototype.name map (d ⇒ Variable[T](mI.data.prototype.asInstanceOf[Prototype[T]], fromString[T](d)))
+
     moleExec match {
       case (Some(pEx), _) ⇒ {
-        val exec = pEx(Context.empty, context)
+        val a = Validation.taskTypeErrors(pEx.mole)(pEx.mole.capsules, Context.empty.prototypes, pEx.sources, pEx.hooks)
+        val mIS = a.map(_ match {
+          case x: MissingInput ⇒ x
+          case _               ⇒ throw new Exception("malformed partial mole")
+        })
+
+        val c = mIS.map(mI ⇒ mI.data.prototype.`type`.erasure match {
+          case t if t.equals(classOf[Int])    ⇒ createVariable[Int](mI)
+          case t if t.equals(classOf[Double]) ⇒ createVariable[Double](mI)
+          case t if t.equals(classOf[Float])  ⇒ createVariable[Float](mI)
+          case t if t.equals(classOf[BigInt]) ⇒ createVariable[BigInt](mI)
+          case t if t.equals(classOf[String]) ⇒ createVariable[String](mI)
+          case _                              ⇒ throw new Exception(s"The missing parameter type: ${mI.data.prototype.`type`} is not known to the reification system.")
+        })
+
+        if (!mIS.isEmpty && c.isEmpty) throw new Exception("No parameters given")
+
+        val ctxt = Context(c.map(_.getOrElse(throw new Exception("CSV file does not have data on all missing variables"))))
+        val exec = pEx.complete(ctxt, context)
 
         cachedMoles.add(exec.id, exec)
 
