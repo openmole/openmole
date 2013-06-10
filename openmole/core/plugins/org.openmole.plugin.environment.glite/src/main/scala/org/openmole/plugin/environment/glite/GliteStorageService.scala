@@ -24,6 +24,8 @@ import fr.iscpif.gridscale.storage.FileType
 import fr.iscpif.gridscale.storage.SRMStorage
 import java.net.URI
 import java.io.{ File, InputStream, OutputStream }
+import org.openmole.core.batch.environment.BatchEnvironment
+import fr.iscpif.gridscale.authentication.GlobusAuthentication
 
 object GliteStorageService {
 
@@ -34,14 +36,14 @@ object GliteStorageService {
       val basePath: String = ""
     }
 
-  def apply(s: SRMStorage, _environment: GliteEnvironment, caCertDir: File) = new GliteStorageService {
+  def apply(s: SRMStorage, _environment: BatchEnvironment, _authentication: GlobusAuthentication.ProxyCreator, threads: Int, caCertDir: File) = new GliteStorageService {
     val storage = emptyRoot(s)
     val url = new URI("srm", null, s.host, s.port, null, null, null)
     val remoteStorage = new RemoteGliteStorage(s.host, s.port, caCertDir)
     val environment = _environment
     val root = s.basePath
-    def nbTokens = _environment.threadsBySE
-    def authentication = environment.authentication
+    def nbTokens = threads
+    def authentication = _authentication
   }
 
 }

@@ -116,6 +116,7 @@ object GliteAuthentication extends Logger {
   }
 
   def getVOMS(vo: String): Option[String] = getVOMS(vo, xml.XML.loadFile(voCards))
+  def getVMOSOrError(vo: String) = getVOMS(vo).getOrElse(throw new UserBadDataError(s"ID card for VO $vo not found."))
 
   def getVOMS(vo: String, x: xml.Node) = {
     import xml._
@@ -140,11 +141,12 @@ object GliteAuthentication extends Logger {
   def apply() = Workspace.persistentList(classOf[GliteAuthentication])(0)
   def get = Workspace.persistentList(classOf[GliteAuthentication]).get(0)
 
-  def initialise(a: GliteAuthentication)(serverURL: String,
-                                         voName: String,
-                                         proxyFile: File,
-                                         lifeTime: Int,
-                                         fqan: Option[String]) =
+  def initialise(a: GliteAuthentication)(
+    serverURL: String,
+    voName: String,
+    proxyFile: File,
+    lifeTime: Int,
+    fqan: Option[String]) =
     a match {
       case a: P12Certificate ⇒
         VOMSAuthentication.setCARepository(GliteAuthentication.CACertificatesDir)

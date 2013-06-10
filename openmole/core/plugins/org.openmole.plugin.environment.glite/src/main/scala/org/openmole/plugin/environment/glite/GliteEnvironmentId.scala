@@ -17,24 +17,8 @@
 
 package org.openmole.plugin.environment.glite
 
-import fr.iscpif.gridscale.authentication.P12HTTPSAuthentication
-import org.openmole.misc.workspace.{ ConfigurationLocation, Workspace }
-
-object DIRACAuthentication {
-  def update(a: DIRACAuthentication) = Workspace.persistentList(classOf[DIRACAuthentication])(0) = a
-  def apply() = Workspace.persistentList(classOf[DIRACAuthentication])(0)
-  def get = Workspace.persistentList(classOf[DIRACAuthentication]).get(0)
-
-  def initialise(a: DIRACAuthentication) =
-    a match {
-      case a: P12Certificate ⇒
-        new P12HTTPSAuthentication {
-          val certificate = a.certificate
-          val password = a.password
-        }
-    }
-
+trait GliteEnvironmentId {
+  def voName: String
+  def vomsURL: String
+  @transient lazy val id = voName + "@" + vomsURL
 }
-
-trait DIRACAuthentication extends GliteAuthentication
-
