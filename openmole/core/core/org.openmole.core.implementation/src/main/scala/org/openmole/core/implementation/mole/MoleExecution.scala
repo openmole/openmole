@@ -50,24 +50,6 @@ import java.io.File
 import org.openmole.core.serializer.SerializerService
 import org.openmole.core.model.mole
 
-case class PartialMoleExecution(mole: IMole,
-                                sources: Sources = Sources.empty,
-                                hooks: Hooks = Hooks.empty,
-                                selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
-                                grouping: Map[ICapsule, Grouping] = Map.empty,
-                                profiler: Profiler = Profiler.empty,
-                                seed: Long = Workspace.newSeed) extends IPartialMoleExecution {
-  def complete(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local) = {
-    new MoleExecution(mole,
-      sources,
-      hooks,
-      selection,
-      grouping,
-      profiler,
-      seed)
-  }
-}
-
 object MoleExecution extends Logger {
 
   mole.Sources
