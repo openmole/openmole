@@ -78,7 +78,7 @@ trait JobScript {
     writter.print(environment.threadsValue)
     writter.print("; ")
     finishedPath.foreach { path ⇒ writter.print(touch(storage.url.resolve(path))) }
-    writter.print("; cd .. ; rm -rf $CUR ; ")
+    writter.print("cd .. ; rm -rf $CUR ; ")
   }
 
   protected def touch(dest: URI) = {
