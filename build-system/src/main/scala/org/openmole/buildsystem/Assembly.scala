@@ -30,7 +30,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
   lazy val urlDownloadProject: Seq[Project.Setting[_]] = Seq(
     urls := Nil,
-    downloadUrls <<= (urls, streams) map urlDownloader,
+    downloadUrls <<= (urls, streams, target) map urlDownloader,
     assemble <<= assemble dependsOn downloadUrls
   )
 
@@ -123,12 +123,33 @@ trait Assembly { self: BuildSystemDefaults ⇒
     fn(files).head
   }
 
-  def urlDownloader(urls: Seq[(URL, File)], s: TaskStreams) = urls.map {
-    case (url, file) ⇒
-      s.log.info("Downloading " + url + " to " + file)
-      val os = new BufferedOutputStream(new FileOutputStream(file))
-      try BasicIO.transferFully(url.openStream, os)
-      finally os.close
-      file
+  def urlDownloader(urls: Seq[(URL, File)], s: TaskStreams, targetDir: File) = {
+    val cache = targetDir / "url-cache"
+
+    val mOs = managed(new BufferedOutputStream(new FileOutputStream(cache)))
+
+    val hashes = (urls map { case (url, _) ⇒ url.toString.map(_.toByte) } flatten).toIterator
+
+    val alreadyCached = if (cache.exists) {
+      (managed(Source.fromFile(cache)(io.Codec.ISO8859)).map(_.iter zip hashes forall { case (n, cached) ⇒ n.toByte == cached }).opt getOrElse false) && urls.forall(_._2.exists())
+    }
+    else {
+      false
+    }
+
+    if (alreadyCached) {
+      Seq.empty
+    }
+    else {
+      mOs.foreach { case os ⇒ hashes.foreach(os.write(_)) }
+      urls.map {
+        case (url, file) ⇒
+          s.log.info("Downloading " + url + " to " + file)
+          val os = new BufferedOutputStream(new FileOutputStream(file))
+          try BasicIO.transferFully(url.openStream, os)
+          finally os.close
+          file
+      }
+    }
   }
 }
