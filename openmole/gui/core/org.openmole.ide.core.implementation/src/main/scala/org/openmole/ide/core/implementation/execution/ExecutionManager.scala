@@ -104,7 +104,7 @@ class ExecutionManager(manager: IMoleUI,
 
     buildMoleExecution match {
       case Success((mE, environments)) ⇒
-        val mExecution: IMoleExecution = mE(Context.empty, ExecutionContext.local.copy(out = printStream))
+        val mExecution: IMoleExecution = mE.complete(Context.empty, ExecutionContext.local.copy(out = printStream))
         moleExecution = Some(mExecution)
         EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.JobStatusChanged])
         EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.Finished])

@@ -8,11 +8,10 @@ import java.io.{ PrintStream, File, InputStream }
 import javax.servlet.annotation.MultipartConfig
 
 import org.openmole.core.serializer._
-import org.openmole.core.model.mole.IMoleExecution
+import org.openmole.core.model.mole.{ IPartialMoleExecution, IMoleExecution, ExecutionContext }
 import org.openmole.core.model.data.Context
 import com.thoughtworks.xstream.mapper.CannotResolveClassException
 import concurrent.Future
-import org.openmole.core.model.mole.ExecutionContext
 
 import slick.driver.H2Driver.simple._
 import slick.jdbc.meta.MTable
@@ -26,6 +25,7 @@ import org.json4s._
 import org.json4s.JsonDSL._
 import scala.None
 import org.json4s.{ Formats, DefaultFormats }
+import org.openmole.core.implementation.validation.Validation
 
 @MultipartConfig(maxFileSize = 3 * 1024 * 1024 /*max file size of 3 MiB*/ ) //research scala multipart config
 class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupport with ScalateSupport
@@ -112,13 +112,14 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
         contentType = "text/html"
 
-        val moleExec = processXMLFile[(Context, ExecutionContext) ⇒ IMoleExecution](data, inS)
+        val moleExec = processXMLFile[IPartialMoleExecution](data, inS)
 
         val context = new ExecutionContext(new PrintStream(new File("./out")), null)
 
         moleExec match {
           case (Some(pEx), _) ⇒ {
-            val exec = pEx(Context.empty, context)
+            val a = Validation.taskTypeErrors(pEx.mole)(pEx.mole.capsules, Context.empty.prototypes, pEx.sources, pEx.hooks)
+            val exec = pEx.complete(Context.empty, context)
 
             val clob = new SerialClob(SerializerService.serialize(exec).toCharArray)
 

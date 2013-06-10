@@ -71,3 +71,12 @@ trait IMoleExecution {
   def nextTicket(parent: ITicket): ITicket
 }
 
+trait IPartialMoleExecution {
+  def mole: IMole
+  def hooks: Hooks
+  def sources: Sources
+  def profiler: Profiler
+
+  def complete(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local): IMoleExecution
+}
+

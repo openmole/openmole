@@ -48,11 +48,29 @@ import org.openmole.core.model.execution.Environment
 import collection.mutable
 import java.io.File
 import org.openmole.core.serializer.SerializerService
+import org.openmole.core.model.mole
+
+case class PartialMoleExecution(mole: IMole,
+                                sources: Sources = Sources.empty,
+                                hooks: Hooks = Hooks.empty,
+                                selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
+                                grouping: Map[ICapsule, Grouping] = Map.empty,
+                                profiler: Profiler = Profiler.empty,
+                                seed: Long = Workspace.newSeed) extends IPartialMoleExecution {
+  def complete(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local) = {
+    new MoleExecution(mole,
+      sources,
+      hooks,
+      selection,
+      grouping,
+      profiler,
+      seed)
+  }
+}
 
 object MoleExecution extends Logger {
 
-  type PartialMoleExecution = (Context, ExecutionContext) ⇒ MoleExecution
-
+  mole.Sources
   def partial(
     mole: IMole,
     sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
@@ -60,15 +78,14 @@ object MoleExecution extends Logger {
     selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
     grouping: Map[ICapsule, Grouping] = Map.empty,
     profiler: Profiler = Profiler.empty,
-    seed: Long = Workspace.newSeed): PartialMoleExecution =
-    new MoleExecution(
-      mole,
-      sources.groupBy { case (c, _) ⇒ c }.map { case (c, ss) ⇒ c -> ss.map(_._2) }.withDefault(_ ⇒ List.empty),
-      hooks.groupBy { case (c, _) ⇒ c }.map { case (c, hs) ⇒ c -> hs.map { _._2 } }.withDefault(_ ⇒ List.empty),
-      selection,
-      grouping,
-      profiler,
-      seed)(_, _)
+    seed: Long = Workspace.newSeed): PartialMoleExecution = PartialMoleExecution(
+    mole,
+    sources groupBy { case (c, _) ⇒ c } map { case (c, ss) ⇒ c -> ss.map(_._2) } withDefault { _ ⇒ List.empty },
+    hooks groupBy { case (c, _) ⇒ c } map { case (c, hs) ⇒ c -> hs.map(_._2) } withDefault { _ ⇒ List.empty },
+    selection,
+    grouping,
+    profiler,
+    seed)
 
   def apply(
     mole: IMole,
@@ -87,11 +104,9 @@ object MoleExecution extends Logger {
       selection,
       grouping,
       profiler,
-      seed)(implicits, executionContext)
+      seed).complete(implicits, executionContext)
 
 }
-
-import MoleExecution._
 
 class MoleExecution(
     val mole: IMole,
