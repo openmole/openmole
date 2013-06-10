@@ -161,7 +161,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
             println(c)
 
             val ctxt = Context(c.map(_.getOrElse(throw new Exception("CSV file does not have data on all missing variables"))))
-            val exec = pEx.complete(ctxt, context)
+            val exec = pEx.toExecution(ctxt, context)
 
             val clob = new SerialClob(SerializerService.serialize(exec).toCharArray)
 
@@ -235,7 +235,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
         if (!mIS.isEmpty && c.isEmpty) throw new Exception("No parameters given")
 
         val ctxt = Context(c.map(_.getOrElse(throw new Exception("CSV file does not have data on all missing variables"))))
-        val exec = pEx.complete(ctxt, context)
+        val exec = pEx.toExecution(ctxt, context)
 
         cachedMoles.add(exec.id, exec)
 

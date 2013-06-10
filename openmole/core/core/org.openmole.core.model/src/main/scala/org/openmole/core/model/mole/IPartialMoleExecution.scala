@@ -25,5 +25,5 @@ trait IPartialMoleExecution {
   def sources: Sources
   def profiler: Profiler
 
-  def complete(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local): IMoleExecution
+  def toExecution(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local): IMoleExecution
 }
