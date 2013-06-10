@@ -28,26 +28,4 @@ object PEMCertificate {
     key: File = new File(new File(System.getProperty("user.home")), ".globus/userkey.pem")) = new PEMCertificate(cypheredPassword, certificate, key)
 }
 
-class PEMCertificate(val cypheredPassword: String, val certificate: File, val key: File) extends GliteAuthentication with CypheredPassword { a ⇒
-
-  override def apply(
-    serverURL: String,
-    voName: String,
-    proxyFile: File,
-    lifeTime: Int,
-    fqan: Option[String]) = {
-    VOMSAuthentication.setCARepository(GliteAuthentication.CACertificatesDir)
-    val (_serverURL, _voName, _proxyFile, _lifeTime, _fqan, _password) = (serverURL, voName, proxyFile, lifeTime, fqan, password)
-    new PEMVOMSAuthentication {
-      val certificate = a.certificate
-      val key = a.key
-      val serverURL = _serverURL
-      val voName = _voName
-      val proxyFile = _proxyFile
-      val lifeTime = _lifeTime
-      val password = _password
-      override val fqan = _fqan
-    }
-  }
-
-}
+class PEMCertificate(val cypheredPassword: String, val certificate: File, val key: File) extends GliteAuthentication with CypheredPassword

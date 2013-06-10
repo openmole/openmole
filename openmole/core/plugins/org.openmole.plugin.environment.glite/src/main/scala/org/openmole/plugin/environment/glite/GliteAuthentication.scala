@@ -40,6 +40,7 @@ import scala.ref.WeakReference
 import scala.Some
 import scala.Some
 import fr.iscpif.gridscale.authentication._
+import java.io.File
 
 object GliteAuthentication extends Logger {
 
@@ -138,14 +139,44 @@ object GliteAuthentication extends Logger {
   def update(a: GliteAuthentication) = Workspace.persistentList(classOf[GliteAuthentication])(0) = a
   def apply() = Workspace.persistentList(classOf[GliteAuthentication])(0)
   def get = Workspace.persistentList(classOf[GliteAuthentication]).get(0)
+
+  def initialise(a: GliteAuthentication)(serverURL: String,
+                                         voName: String,
+                                         proxyFile: File,
+                                         lifeTime: Int,
+                                         fqan: Option[String]) =
+    a match {
+      case a: P12Certificate ⇒
+        VOMSAuthentication.setCARepository(GliteAuthentication.CACertificatesDir)
+        val (_serverURL, _voName, _proxyFile, _lifeTime, _fqan) = (serverURL, voName, proxyFile, lifeTime, fqan)
+        new P12VOMSAuthentication {
+          val certificate = a.certificate
+          val serverURL = _serverURL
+          val voName = _voName
+          val proxyFile = _proxyFile
+          val lifeTime = _lifeTime
+          val password = a.password
+          override val fqan = _fqan
+        }
+      case a: PEMCertificate ⇒
+        VOMSAuthentication.setCARepository(GliteAuthentication.CACertificatesDir)
+        val (_serverURL, _voName, _proxyFile, _lifeTime, _fqan) = (serverURL, voName, proxyFile, lifeTime, fqan)
+        new PEMVOMSAuthentication {
+          val certificate = a.certificate
+          val key = a.key
+          val serverURL = _serverURL
+          val voName = _voName
+          val proxyFile = _proxyFile
+          val lifeTime = _lifeTime
+          val password = a.password
+          override val fqan = _fqan
+        }
+      case a: ProxyFile ⇒
+        new ProxyFileAuthentication {
+          val proxy = a.proxy
+        }
+    }
+
 }
 
-trait GliteAuthentication {
-
-  def apply(
-    serverURL: String,
-    voName: String,
-    proxyFile: File,
-    lifeTime: Int,
-    fqan: Option[String]): () ⇒ GlobusAuthentication.Proxy
-}
+trait GliteAuthentication

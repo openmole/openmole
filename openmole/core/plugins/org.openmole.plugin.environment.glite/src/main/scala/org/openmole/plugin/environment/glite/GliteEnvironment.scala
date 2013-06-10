@@ -188,7 +188,7 @@ class GliteEnvironment(
     case Some(a) ⇒
       val file = Workspace.newFile("proxy", ".x509")
       FileDeleter.deleteWhenGarbageCollected(file)
-      a(
+      GliteAuthentication.initialise(a)(
         vomsURL,
         voName,
         file,
