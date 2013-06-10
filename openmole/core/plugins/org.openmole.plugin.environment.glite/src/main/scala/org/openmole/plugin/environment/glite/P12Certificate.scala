@@ -25,4 +25,4 @@ object P12Certificate {
     new P12Certificate(cypheredPassword, certificate)
 }
 
-class P12Certificate(val cypheredPassword: String, val certificate: File) extends GliteAuthentication with CypheredPassword
+class P12Certificate(val cypheredPassword: String, val certificate: File) extends GliteAuthentication with DIRACAuthentication with CypheredPassword
