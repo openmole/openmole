@@ -19,15 +19,13 @@ package org.openmole.plugin.environment.glite
 
 import org.openmole.core.batch.storage.StorageService
 import org.openmole.core.model.execution.ExecutionState._
-import org.openmole.core.batch.jobservice.BatchJob
-import org.openmole.core.batch.control.AccessToken
 
 object StatusFiles {
   val finishedFile = "finished"
   val runningFile = "running"
 }
 
-trait StatusFiles { //self: BatchJob ⇒
+trait StatusFiles {
 
   val storage: StorageService
   val finishedPath: String
