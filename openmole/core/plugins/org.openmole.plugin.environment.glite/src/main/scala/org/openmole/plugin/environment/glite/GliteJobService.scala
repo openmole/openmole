@@ -37,13 +37,7 @@ import fr.iscpif.gridscale.jobservice.{ WMSJobService, WMSJobDescription }
 import scala.collection.JavaConversions._
 import scala.io.Source
 import org.openmole.misc.tools.service.Duration._
-
-object GliteJobService extends Logger {
-  val finishedFile = "finished"
-  val runningFile = "running"
-}
-
-import GliteJobService._
+import StatusFiles._
 
 trait GliteJobService extends GridScaleJobService with JobServiceQualityControl with LimitedAccess with AvailabitityQuality with JobScript { js ⇒
 

@@ -26,6 +26,7 @@ import org.openmole.misc.tools.service.Duration._
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.core.batch.jobservice.{ BatchJobId, BatchJob }
 import org.openmole.core.batch.control.LimitedAccess
+import StatusFiles._
 
 trait DIRACGliteJobService extends GridScaleJobService with JobScript with LimitedAccess { js ⇒
 
@@ -40,6 +41,9 @@ trait DIRACGliteJobService extends GridScaleJobService with JobScript with Limit
     val script = Workspace.newFile("script", ".sh")
     try {
       val outputFilePath = storage.child(path, Storage.uniqName("job", ".out"))
+      val _runningPath = storage.child(path, runningFile)
+      val _finishedPath = storage.child(path, finishedFile)
+
       val os = script.bufferedOutputStream
       try generateScript(serializedJob, outputFilePath, None, None, os)
       finally os.close
@@ -53,8 +57,11 @@ trait DIRACGliteJobService extends GridScaleJobService with JobScript with Limit
 
       val jid = jobService.submit(jobDescription)(authentication)
 
-      new BatchJob with BatchJobId {
+      new DIRACGliteJob {
         val jobService = js
+        val storage = serializedJob.storage
+        val finishedPath = _finishedPath
+        val runningPath = _runningPath
         def resultPath = outputFilePath
         def id = jid
       }
