@@ -96,7 +96,7 @@ trait JobScript {
   }
 
   @transient lazy val lcgCp =
-    s"lcg-cp --vo ${environment.voName} --checksum --connect-timeout $getTimeOut --sendreceive-timeout $getTimeOut --bdii-timeout $getTimeOut --srm-timeout $getTimeOut "
+    s"lcg-cp --vo ${environment.voName} --checksum --connect-timeout $getTimeOut --sendreceive-timeout $getTimeOut --srm-timeout $getTimeOut "
 
   protected def lcgCpCmd(from: String, to: URI) = s"$lcgCp file:$from ${to.toString}"
   protected def lcgCpCmd(from: URI, to: String) = s"$lcgCp ${from.toString} file:$to"
