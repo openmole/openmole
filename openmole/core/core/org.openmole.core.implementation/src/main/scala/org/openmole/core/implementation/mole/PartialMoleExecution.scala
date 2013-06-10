@@ -15,15 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation._
+package org.openmole.core.implementation.mole
 
 import org.openmole.core.model.mole._
-import org.openmole.core.implementation.mole._
 import org.openmole.misc.workspace._
 import org.openmole.core.model.data._
 
 case class PartialMoleExecution(mole: IMole,
-                                sources: Source = Sources.empty,
+                                sources: Sources = Sources.empty,
                                 hooks: Hooks = Hooks.empty,
                                 selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
                                 grouping: Map[ICapsule, Grouping] = Map.empty,
