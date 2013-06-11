@@ -54,7 +54,7 @@ abstract class LoadSource extends Source {
   override def process(context: Context, executionContext: ExecutionContext) = {
     load.map {
       case (f, p) ⇒
-        val from = executionContext.directory.child(new File(VariableExpansion(context, f)))
+        val from = executionContext.directory.child(VariableExpansion(context, f))
         Variable.unsecure(p, SerializerService.deserializeAndExtractFiles(from))
     }
 
