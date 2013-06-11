@@ -71,6 +71,6 @@ object PasswordDialog {
     }
   }
 
-  def ok(b: Boolean): Unit = if (b && testPassword) Workspace.password_=(new String(passField.password))
+  def ok(b: Boolean): Unit = if (b && testPassword) Workspace.setPassword(new String(passField.password))
 
 }

@@ -32,6 +32,7 @@ import org.openmole.ide.core.implementation.dialog.GUIApplication
 import org.openmole.ui.console.Console
 import annotation.tailrec
 import org.openmole.web._
+import org.openmole.misc.exception.UserBadDataError
 
 class Application extends IApplication with Logger {
   override def start(context: IApplicationContext) = {
@@ -83,6 +84,11 @@ class Application extends IApplication with Logger {
 
     val userPlugins = config.userPlugins.map { new File(_) }.toSet
     PluginManager.load(userPlugins)
+
+    try {
+      config.password foreach Workspace.setPassword
+    }
+    catch { case e: UserBadDataError ⇒ println("Wrong password!!"); System.exit(1) }
 
     if (!config.ignored.isEmpty) println("Ignored options: " + config.ignored.mkString(" "))
 

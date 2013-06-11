@@ -118,7 +118,7 @@ object Workspace {
 
   def preferenceAsLong(location: ConfigurationLocation): Long = instance.preferenceAsLong(location)
 
-  def password_=(password: String) = instance.password_=(password)
+  def setPassword(password: String) = instance.password_=(password)
 
   def passwordIsCorrect(password: String) = instance.passwordIsCorrect(password)
 
