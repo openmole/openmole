@@ -30,7 +30,7 @@ import collection.mutable.ListBuffer
 
 object LoadSource {
 
-  def apply =
+  def apply() =
     new SourceBuilder {
       private val _load = ListBuffer[(String, Prototype[_])]()
 
