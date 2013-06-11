@@ -26,12 +26,12 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
     ) map Osgi.bundleTask,
     OsgiKeys.bundleSymbolicName <<= (name, osgiSingleton) { case (name, singleton) ⇒ name + ";singleton:=" + singleton },
     OsgiKeys.bundleVersion <<= version,
-    OsgiKeys.exportPackage <<= (name) { n ⇒ Seq(n + ".*") },
+    OsgiKeys.exportPackage <<= name { n ⇒ Seq(n + ".*") },
     OsgiKeys.bundleActivator := None,
     install in Compile <<= publishLocal in Compile,
     installRemote in Compile <<= publish in Compile,
-    OsgiKeys.bundle <<= OsgiKeys.bundle tag (Tags.Disk),
-    (update in install) <<= update in install tag (Tags.Network),
+    OsgiKeys.bundle <<= OsgiKeys.bundle tag Tags.Disk,
+    (update in install) <<= update in install tag Tags.Network,
     bundleType := "default",
     projectID <<= (projectID, bundleType) { (id, bT) ⇒
       id extra ("project-name" -> projectName, "bundle-type" -> bT)
@@ -57,7 +57,7 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
 
     require(artifactPrefix.forall(!_.endsWith(".")), "Do not end your artifactprefix with ., it will be added automatically.")
 
-    val artifactId = artifactPrefix map (_ + "." + artifactSuffix) getOrElse (artifactSuffix)
+    val artifactId = artifactPrefix map (_ + "." + artifactSuffix) getOrElse artifactSuffix
     val base = dir / (if (pathFromDir == "") artifactId else pathFromDir)
     val exportedPackages = if (exports.isEmpty) Seq(artifactId + ".*") else exports
     val sets = settings
@@ -77,7 +77,7 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
         OsgiKeys.dynamicImportPackage := dynamicImports,
         OsgiKeys.importPackage := imports,
         OsgiKeys.embeddedJars := embeddedJars,
-        OsgiKeys.bundleActivator <<= (OsgiKeys.bundleActivator) { bA ⇒ bundleActivator.orElse(bA) }
+        OsgiKeys.bundleActivator <<= OsgiKeys.bundleActivator { bA ⇒ bundleActivator.orElse(bA) }
       ) ++ sets)
   }
 

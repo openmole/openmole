@@ -21,7 +21,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
   //To add zipping to project, add zipProject to its settings
   lazy val zipProject: Seq[Project.Setting[_]] = Seq(
-    zipFiles <+= (copyDependencies) map { f ⇒ f },
+    zipFiles <+= copyDependencies map { f ⇒ f },
     zip <<= (zipFiles, streams, target, tarGZName) map zipImpl,
     tarGZName := None,
 
@@ -36,7 +36,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
   lazy val copyResProject: Seq[Project.Setting[_]] = Seq(
     copyResTask,
-    zipFiles <+= (resourceAssemble) map { f ⇒ f }
+    zipFiles <+= resourceAssemble map { f ⇒ f }
   )
 
   lazy val copyResTask = resourceAssemble <<= (resourceDirectory, outDir, assemblyPath, resourceOutDir) map { //TODO: Find a natural way to do this
@@ -69,7 +69,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
     val s = settings
     Project(base + "-" + outputDir.replace('/', '_'), projBase, settings = Project.defaultSettings ++ Seq(
       assemble := false,
-      assemble <<= assemble dependsOn (copyDependencies tag (Tags.Disk)),
+      assemble <<= assemble dependsOn (copyDependencies tag Tags.Disk),
       assemblyPath <<= target / "assemble",
       install := true,
       installRemote := true,
@@ -89,9 +89,9 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
     def findFiles(f: File): Set[File] = if (f.isDirectory) (f.listFiles map findFiles flatten).toSet else Set(f)
 
-    def findLeastCommonPath(f1: File, f2: File): File = file((f1.getCanonicalPath zip f2.getCanonicalPath) takeWhile { case (a, b) ⇒ a == b } map (_._1) mkString)
+    def findLeastCommonPath(f1: File, f2: File): File = file(f1.getCanonicalPath zip f2.getCanonicalPath takeWhile { case (a, b) ⇒ a == b } map (_._1) mkString)
 
-    val files: Set[File] = (targetFolders map findFiles flatten) toSet
+    val files: Set[File] = (targetFolders map findFiles flatten).toSet
 
     val fn = FileFunction.cached(t / "zip-cache", FilesInfo.full, FilesInfo.lastModified) {
       fileSet ⇒
@@ -115,7 +115,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
             os.write(c.toByte)
           }
 
-          os.flush
+          os.flush()
         }
         Set(out)
     }
@@ -126,12 +126,13 @@ trait Assembly { self: BuildSystemDefaults ⇒
   def urlDownloader(urls: Seq[(URL, File)], s: TaskStreams, targetDir: File) = {
     val cache = targetDir / "url-cache"
 
-    val mOs = managed(new BufferedOutputStream(new FileOutputStream(cache)))
+    val cacheInput = managed(Source.fromFile(cache)(io.Codec.ISO8859))
+    val cacheOutput = managed(new BufferedOutputStream(new FileOutputStream(cache)))
 
-    val hashes = (urls map { case (url, _) ⇒ url.toString.map(_.toByte) } flatten).toIterator
+    val hashes = (urls map { case (url, _) ⇒ url.toString } flatten).toIterator
 
     val alreadyCached = if (cache.exists) {
-      (managed(Source.fromFile(cache)(io.Codec.ISO8859)).map(_.iter zip hashes forall { case (n, cached) ⇒ n.toByte == cached }).opt getOrElse false) && urls.forall(_._2.exists())
+      ((cacheInput map { _.iter zip hashes forall { case (n, cached) ⇒ n == cached } }).opt getOrElse false) && (urls forall (_._2.exists))
     }
     else {
       false
@@ -141,13 +142,12 @@ trait Assembly { self: BuildSystemDefaults ⇒
       Seq.empty
     }
     else {
-      mOs.foreach { case os ⇒ hashes.foreach(os.write(_)) }
+      for { os ← cacheOutput; hash ← hashes } { os.write(hash) }
       urls.map {
         case (url, file) ⇒
           s.log.info("Downloading " + url + " to " + file)
-          val os = new BufferedOutputStream(new FileOutputStream(file))
-          try BasicIO.transferFully(url.openStream, os)
-          finally os.close
+          val os = managed(new BufferedOutputStream(new FileOutputStream(file)))
+          os.foreach(BasicIO.transferFully(url.openStream, _))
           file
       }
     }

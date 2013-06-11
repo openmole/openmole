@@ -10,7 +10,6 @@ import Keys._
 
 import com.typesafe.sbt.SbtNativePackager._
 import NativePackagerKeys._
-import scala.util.matching.Regex
 
 object Application extends Defaults {
   override val org = "org.openmole.ui"

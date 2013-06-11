@@ -24,7 +24,7 @@ trait BuildSystemDefaults extends Build with OsgiBundler with Assembly {
       osgiVersion := "3.8.2.v20130124-134944"
     )
 
-  def gcTask = { System.gc(); System.gc(); System.gc() }
+  def gcTask { System.gc(); System.gc(); System.gc() }
 
   def Aggregator(name: String) = Project(name, dir) settings (compile in Compile := Analysis.Empty)
 
