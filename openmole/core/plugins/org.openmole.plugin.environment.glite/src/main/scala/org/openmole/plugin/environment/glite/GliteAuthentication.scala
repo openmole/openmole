@@ -41,20 +41,33 @@ import scala.Some
 import scala.Some
 import fr.iscpif.gridscale.authentication._
 import java.io.File
+import scala.util.{ Success, Failure, Try }
 
 object GliteAuthentication extends Logger {
 
-  lazy val CACertificatesDir: File = {
-    Workspace.file("ca.lock").withLock { _ ⇒
-      val caDir = Workspace.file("CACertificates")
+  val updatedFile = ".updated"
 
-      if (!caDir.exists || !new File(caDir, ".complete").exists) {
-        caDir.mkdir
-        downloadCACertificates(Workspace.preference(GliteEnvironment.CACertificatesSite), caDir)
-        new File(caDir, ".complete").createNewFile
-      }
-      caDir
+  def CACertificatesDir: File = {
+    val caDir = Workspace.file("CACertificates")
+    val updated = new File(caDir, updatedFile)
+
+    def isCACertificatesUpToDate = {
+      if (!caDir.exists || !updated.exists) false
+      else
+        Try(updated.content.toLong) match {
+          case Success(v) ⇒ v + Workspace.preferenceAsDuration(CACertificatesCacheTime).toMilliSeconds > System.currentTimeMillis
+          case Failure(_) ⇒ updated.delete; false
+        }
     }
+    if (!isCACertificatesUpToDate)
+      Workspace.file("ca.lock").withLock { _ ⇒
+        if (!isCACertificatesUpToDate) {
+          caDir.mkdir
+          downloadCACertificates(Workspace.preference(GliteEnvironment.CACertificatesSite), caDir)
+          new File(caDir, updatedFile).content = System.currentTimeMillis.toString
+        }
+      }
+    caDir
   }
 
   def downloadCACertificates(address: String, dir: File) = {

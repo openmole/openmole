@@ -47,6 +47,7 @@ object GliteEnvironment extends Logger {
 
   val FetchResourcesTimeOut = new ConfigurationLocation("GliteEnvironment", "FetchResourcesTimeOut")
   val CACertificatesSite = new ConfigurationLocation("GliteEnvironment", "CACertificatesSite")
+  val CACertificatesCacheTime = new ConfigurationLocation("GliteEnvironment", "CACertificatesCacheTime")
   val VOInformationSite = new ConfigurationLocation("GliteEnvironment", "VOInformationSite")
   val VOCardDownloadTimeOut = new ConfigurationLocation("GliteEnvironment", "VOCardDownloadTimeOut")
 
@@ -81,6 +82,7 @@ object GliteEnvironment extends Logger {
 
   Workspace += (FetchResourcesTimeOut, "PT2M")
   Workspace += (CACertificatesSite, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/")
+  Workspace += (CACertificatesCacheTime, "P50D")
   Workspace += (VOInformationSite, "http://operations-portal.egi.eu/xml/voIDCard/public/all/true")
   Workspace += (VOCardDownloadTimeOut, "PT2M")
 
