@@ -54,21 +54,19 @@ object ScalingGAIndividualsTask {
 
 sealed abstract class ScalingGAIndividualsTask[G <: GAGenome, P, F <: MGFitness, MF](
     val name: String,
-    individuals: Prototype[Array[Individual[G, P, F]]],
-    modelInputs: (Prototype[Double], (String, String))*) extends Task {
+    val individuals: Prototype[Array[Individual[G, P, F]]],
+    val scales: (Prototype[Double], (String, String))*) extends Task with GenomeScaling {
 
   def objectives: List[Prototype[Double]]
-
-  @transient lazy val groovyInputs = ScalingGAGenomeTask.groovyProxies(modelInputs)
 
   override def process(context: Context) = {
     val individualsValue = context(individuals)
     val genomeValues =
       individualsValue.toArray.map {
-        i ⇒ ScalingGAGenomeTask.scaled(groovyInputs.toList, i.genome.values.toList, context).map(_.value).toArray
+        i ⇒ scaled(i.genome.values, context).map(_.value).toArray
       }.transpose
 
-    (genomeValues zip modelInputs.map(_._1)).map { case (g, p) ⇒ Variable(p.toArray, g) }.toList ++
+    (genomeValues zip scales.map(_._1)).map { case (g, p) ⇒ Variable(p.toArray, g) }.toList ++
       objectives.zipWithIndex.map {
         case (p, i) ⇒
           Variable(
