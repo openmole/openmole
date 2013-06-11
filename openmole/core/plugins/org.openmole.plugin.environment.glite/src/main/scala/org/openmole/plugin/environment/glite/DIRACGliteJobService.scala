@@ -45,7 +45,7 @@ trait DIRACGliteJobService extends GridScaleJobService with JobScript with Limit
       val _finishedPath = storage.child(path, finishedFile)
 
       val os = script.bufferedOutputStream
-      try generateScript(serializedJob, outputFilePath, None, None, os)
+      try generateScript(serializedJob, outputFilePath, Some(_runningPath), Some(_finishedPath), os)
       finally os.close
 
       val jobDescription = new DIRACJobDescription {
