@@ -37,7 +37,7 @@ class Console(plugins: PluginSet, password: Option[String], script: Option[Strin
 
   def setPassword(password: String) =
     try {
-      Workspace.password_=(password)
+      Workspace.setPassword(password)
       true
     }
     catch {

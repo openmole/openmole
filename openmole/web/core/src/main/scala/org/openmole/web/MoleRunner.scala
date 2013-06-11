@@ -229,6 +229,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
           case t if t.equals(classOf[Float])  ⇒ createVariable[Float](mI)
           case t if t.equals(classOf[BigInt]) ⇒ createVariable[BigInt](mI)
           case t if t.equals(classOf[String]) ⇒ createVariable[String](mI)
+          case t if t.equals(classOf[File])   ⇒ createVariable[File](mI)
           case _                              ⇒ throw new Exception(s"The missing parameter type: ${mI.data.prototype.`type`} is not known to the reification system.")
         })
 
