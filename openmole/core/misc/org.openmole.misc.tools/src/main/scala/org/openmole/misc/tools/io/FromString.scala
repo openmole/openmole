@@ -20,6 +20,7 @@ package org.openmole.misc.tools.io
 import java.math.MathContext
 import java.math.{ BigDecimal ⇒ JBigDecimal }
 import java.math.{ BigInteger ⇒ JBigInteger }
+import java.io.File
 
 object FromString {
 
@@ -27,6 +28,10 @@ object FromString {
     new FromString[Double] {
       def fromString(s: String) = s.toDouble
     }
+
+  implicit object FileFromString extends FromString[File] {
+    def fromString(s: String) = new File(s)
+  }
 
   implicit val intFromString =
     new FromString[Int] {
