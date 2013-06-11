@@ -31,7 +31,7 @@ object ScalingGAIndividualsTask {
   def apply[G <: GAGenome, P, F <: MGFitness, MF](
     name: String,
     individuals: Prototype[Array[Individual[G, P, F]]],
-    modelInputs: (Prototype[Double], (String, String))*)(implicit plugins: PluginSet) =
+    scales: (GenomeScaling.Scale)*)(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
 
       private var objectives = new ListBuffer[Prototype[Double]]
@@ -43,9 +43,9 @@ object ScalingGAIndividualsTask {
       }
 
       addInput(individuals)
-      modelInputs foreach { case (p, _) ⇒ this addOutput p.toArray }
+      scales foreach { case (p, _) ⇒ this addOutput p.toArray }
 
-      def toTask = new ScalingGAIndividualsTask(name, individuals, modelInputs: _*) with Built {
+      def toTask = new ScalingGAIndividualsTask(name, individuals, scales) with Built {
         val objectives = builder.objectives.toList
       }
     }
@@ -55,7 +55,7 @@ object ScalingGAIndividualsTask {
 sealed abstract class ScalingGAIndividualsTask[G <: GAGenome, P, F <: MGFitness, MF](
     val name: String,
     val individuals: Prototype[Array[Individual[G, P, F]]],
-    val scales: (Prototype[Double], (String, String))*) extends Task with GenomeScaling {
+    val scales: Seq[GenomeScaling.Scale]) extends Task with GenomeScaling {
 
   def objectives: List[Prototype[Double]]
 

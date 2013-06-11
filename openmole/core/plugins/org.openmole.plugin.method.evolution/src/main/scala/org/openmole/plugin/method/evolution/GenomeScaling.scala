@@ -36,11 +36,14 @@ object GenomeScaling {
 
   def groovyProxies(scales: Traversable[(Prototype[Double], (String, String))]) =
     scales.map { case (p, (min, max)) ⇒ p -> (GroovyProxyPool(min), GroovyProxyPool(max)) }
+
+  type Scale = (Prototype[Double], (String, String))
+
 }
 
 trait GenomeScaling {
 
-  def scales: Seq[(Prototype[Double], (String, String))]
+  def scales: Seq[GenomeScaling.Scale]
   def scaled(genome: Seq[Double], context: Context) = GenomeScaling.scaled(groovyScales.toList, genome.toList, context)
 
   @transient lazy val groovyScales = GenomeScaling.groovyProxies(scales)

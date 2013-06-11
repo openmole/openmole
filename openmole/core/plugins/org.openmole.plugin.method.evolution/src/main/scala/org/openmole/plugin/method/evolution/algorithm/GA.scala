@@ -117,12 +117,14 @@ object GA {
   trait GAProfile extends GA {
     //def plotter: GAProfilePlotter
     def aggregation: GAAggregation
+    def x: Int
   }
 
   def profile(_x: Int, _nX: Int, _worst: Double, _aggregation: GAAggregation) =
     new GAAlgorithmBuilder with GAProfile {
       //val plotter = _plotter
       val aggregation = _aggregation
+      val x = _x
 
       def apply(_diversityMetric: GADiversityMetric, _ranking: GARanking) =
         new GAAlgorithm with ProfileModifier with ProfileElitism with NoArchive with ProfileGenomePlotter {
