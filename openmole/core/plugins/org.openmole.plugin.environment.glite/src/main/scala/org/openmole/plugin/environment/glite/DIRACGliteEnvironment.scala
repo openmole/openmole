@@ -38,7 +38,8 @@ object DIRACGliteEnvironment {
     vomsURL: Option[String] = None,
     setup: Option[String] = None,
     fqan: Option[String] = None,
-    cpuTime: Option[String] = None) =
+    cpuTime: Option[String] = None,
+    openMOLEMemory: Option[Int] = None) =
     new DIRACGliteEnvironment(
       voName,
       service,
@@ -47,7 +48,8 @@ object DIRACGliteEnvironment {
       vomsURL.getOrElse(GliteAuthentication.getVMOSOrError(voName)),
       setup.getOrElse("Dirac-Production"),
       fqan,
-      cpuTime
+      cpuTime,
+      openMOLEMemory
     )
 
 }
@@ -60,7 +62,8 @@ class DIRACGliteEnvironment(
     val vomsURL: String,
     val setup: String,
     val fqan: Option[String],
-    val cpuTime: Option[String]) extends BatchEnvironment with BDIISRMServers with GliteEnvironmentId { env ⇒
+    val cpuTime: Option[String],
+    override val openMOLEMemory: Option[Int]) extends BatchEnvironment with BDIISRMServers with GliteEnvironmentId { env ⇒
 
   type JS = DIRACGliteJobService
 
