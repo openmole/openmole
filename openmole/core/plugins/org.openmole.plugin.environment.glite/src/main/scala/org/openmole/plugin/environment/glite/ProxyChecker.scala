@@ -40,7 +40,7 @@ class ProxyChecker(environment: WeakReference[GliteEnvironment]) extends IUpdata
     }
 
   def delay = environment.get match {
-    case Some(env) ⇒ env.renewProxyDelay * 1000
+    case Some(env) ⇒ GliteEnvironment.proxyRenewalDelay * 1000
     case None      ⇒ 0
   }
 }

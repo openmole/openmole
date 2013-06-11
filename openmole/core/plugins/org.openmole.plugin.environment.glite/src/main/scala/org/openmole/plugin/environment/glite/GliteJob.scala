@@ -27,43 +27,13 @@ import org.openmole.misc.tools.service.Logger
 
 object GliteJob extends Logger
 
-trait GliteJob extends BatchJob with BatchJobId { bj ⇒
+trait GliteJob extends BatchJob with BatchJobId with StatusFiles { self ⇒
   var lastShacked = System.currentTimeMillis
   val jobService: GliteJobService
-  val storage: StorageService
-  val finishedPath: String
-  val runningPath: String
-
-  def testRunning(state: ExecutionState) =
-    if (state == SUBMITTED)
-      storage.tryWithToken {
-        case Some(t) ⇒
-          if (storage.exists(runningPath)(t)) {
-            GliteJob.logger.fine("Job running file is present, it implies that the job is running")
-            bj.state = RUNNING
-            RUNNING
-          }
-          else state
-        case None ⇒ state
-      }
-    else state
-
-  def testDone(state: ExecutionState) =
-    if (state == RUNNING)
-      storage.tryWithToken {
-        case Some(t) ⇒
-          if (storage.exists(finishedPath)(t)) {
-            GliteJob.logger.fine("Job finished file is present, it implies that the job is finished")
-            bj.state = DONE
-            DONE
-          }
-          else state
-        case None ⇒ state
-      }
-    else state
 
   override def updateState(implicit token: AccessToken) = {
     val state = testDone(testRunning(super.updateState))
+    self.state = state
 
     //if (!state.isFinal && proxyExpired < System.currentTimeMillis) throw new InternalProcessingError("Proxy for this job has expired.")
     if (state == SUBMITTED) {

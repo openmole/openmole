@@ -62,7 +62,7 @@ object MoleFactory {
         }
       }
 
-      (MoleExecution.partial(
+      (PartialMoleExecution(
         mole,
         capsuleMapping.flatMap { c ⇒ c._1.dataUI.sources.map { c._2 -> _.dataUI.coreObject(prototypeMapping) } },
         capsuleMapping.flatMap { c ⇒ c._1.dataUI.hooks.map { c._2 -> _.dataUI.coreObject(prototypeMapping) } },

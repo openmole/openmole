@@ -37,13 +37,7 @@ import fr.iscpif.gridscale.jobservice.{ WMSJobService, WMSJobDescription }
 import scala.collection.JavaConversions._
 import scala.io.Source
 import org.openmole.misc.tools.service.Duration._
-
-object GliteJobService extends Logger {
-  val finishedFile = "finished"
-  val runningFile = "running"
-}
-
-import GliteJobService._
+import StatusFiles._
 
 trait GliteJobService extends GridScaleJobService with JobServiceQualityControl with LimitedAccess with AvailabitityQuality with JobScript { js ⇒
 
@@ -54,8 +48,6 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
 
   lazy val id = jobService.url.toString
   def hysteresis = Workspace.preferenceAsInt(GliteEnvironment.QualityHysteresis)
-
-  var delegated = false
 
   def delegate = jobService.delegate(authentication)
 
@@ -71,16 +63,16 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     val script = Workspace.newFile("script", ".sh")
     try {
       val outputFilePath = storage.child(path, Storage.uniqName("job", ".out"))
-      val _runningPath = serializedJob.storage.child(path, runningFile)
-      val _finishedPath = serializedJob.storage.child(path, finishedFile)
+      val _runningPath = storage.child(path, runningFile)
+      val _finishedPath = storage.child(path, finishedFile)
 
       val os = script.bufferedOutputStream
-      try generateScript(serializedJob, outputFilePath, _runningPath, _finishedPath, os)
+      try generateScript(serializedJob, outputFilePath, Some(_runningPath), Some(_finishedPath), os)
       finally os.close
 
       //logger.fine(ISource.fromFile(script).mkString)
 
-      val jobDescription = buildJobDescription(runtime, script)
+      val jobDescription = buildJobDescription(script)
 
       //logger.fine(jobDescription.toJDL)
 
@@ -98,7 +90,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
     finally script.delete
   }
 
-  protected def buildJobDescription(runtime: Runtime, script: File) =
+  protected def buildJobDescription(script: File) =
     new WMSJobDescription {
       val executable = "/bin/bash"
       val arguments = script.getName

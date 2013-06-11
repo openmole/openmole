@@ -78,7 +78,18 @@ case class Puzzle(
 
   def toMole = new Mole(first.capsule, transitions, dataChannels)
 
-  def toExecution =
+  def toPartialExecution = PartialMoleExecution(toMole, sources, hooks, selection, grouping)
+
+  def toPartialExecution(
+    sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
+    hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
+    selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
+    grouping: Map[ICapsule, Grouping] = Map.empty,
+    profiler: Profiler = Profiler.empty,
+    seed: Long = Workspace.newSeed) =
+    PartialMoleExecution(toMole, this.sources ++ sources, this.hooks ++ hooks, this.selection ++ selection, this.grouping ++ grouping, profiler, seed)
+
+  def toExecution: MoleExecution =
     MoleExecution(toMole, sources, hooks, selection, grouping)
 
   def toExecution(
@@ -88,7 +99,7 @@ case class Puzzle(
     grouping: Map[ICapsule, Grouping] = Map.empty,
     profiler: Profiler = Profiler.empty,
     implicits: Context = Context.empty,
-    seed: Long = Workspace.newSeed) =
+    seed: Long = Workspace.newSeed): MoleExecution =
     MoleExecution(toMole, this.sources ++ sources, this.hooks ++ hooks, this.selection ++ selection, this.grouping ++ grouping, profiler, implicits, seed)
 
   def +(p: Puzzle) = Puzzle.merge(this, p)

@@ -15,15 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.mole
+package org.openmole.plugin.environment.glite
 
-import org.openmole.core.model.data._
-
-trait IPartialMoleExecution {
-  def mole: IMole
-  def hooks: Hooks
-  def sources: Sources
-  def profiler: Profiler
-
-  def toExecution(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local): IMoleExecution
+trait GliteEnvironmentId {
+  def voName: String
+  def vomsURL: String
+  @transient lazy val id = voName + "@" + vomsURL
 }

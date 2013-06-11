@@ -398,7 +398,8 @@ object FileUtil {
       }
     }
 
-    def child(f: File) = new File(file, f.getPath)
+    def child(f: File): File = child(f.getPath)
+    def child(s: String): File = new File(file, s)
 
   }
 

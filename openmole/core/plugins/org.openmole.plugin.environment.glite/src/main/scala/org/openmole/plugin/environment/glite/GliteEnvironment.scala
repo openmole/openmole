@@ -47,6 +47,7 @@ object GliteEnvironment extends Logger {
 
   val FetchResourcesTimeOut = new ConfigurationLocation("GliteEnvironment", "FetchResourcesTimeOut")
   val CACertificatesSite = new ConfigurationLocation("GliteEnvironment", "CACertificatesSite")
+  val CACertificatesCacheTime = new ConfigurationLocation("GliteEnvironment", "CACertificatesCacheTime")
   val VOInformationSite = new ConfigurationLocation("GliteEnvironment", "VOInformationSite")
   val VOCardDownloadTimeOut = new ConfigurationLocation("GliteEnvironment", "VOCardDownloadTimeOut")
 
@@ -81,6 +82,7 @@ object GliteEnvironment extends Logger {
 
   Workspace += (FetchResourcesTimeOut, "PT2M")
   Workspace += (CACertificatesSite, "http://dist.eugridpma.info/distribution/igtf/current/accredited/tgz/")
+  Workspace += (CACertificatesCacheTime, "P50D")
   Workspace += (VOInformationSite, "http://operations-portal.egi.eu/xml/voIDCard/public/all/true")
   Workspace += (VOCardDownloadTimeOut, "PT2M")
 
@@ -134,7 +136,7 @@ object GliteEnvironment extends Logger {
     threads: Option[Int] = None) =
     new GliteEnvironment(voName,
       bdii.getOrElse(Workspace.preference(GliteEnvironment.DefaultBDII)),
-      vomsURL.getOrElse(GliteAuthentication.getVOMS(voName).getOrElse(throw new UserBadDataError(s"ID card for VO $voName not found."))),
+      vomsURL.getOrElse(GliteAuthentication.getVMOSOrError(voName)),
       fqan,
       openMOLEMemory,
       memory,
@@ -146,6 +148,15 @@ object GliteEnvironment extends Logger {
       myProxy,
       architecture,
       threads)
+
+  def proxyTime = Workspace.preferenceAsDuration(ProxyTime)
+
+  def proxyRenewalDelay = {
+    val remainingTime = proxyTime.toSeconds
+    math.max(
+      (remainingTime * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong,
+      Workspace.preferenceAsDuration(GliteEnvironment.MinProxyRenewal).toSeconds)
+  }
 
 }
 
@@ -163,16 +174,13 @@ class GliteEnvironment(
     val smpGranularity: Option[Int],
     val myProxy: Option[MyProxy],
     val architecture: Option[String],
-    override val threads: Option[Int]) extends BatchEnvironment with MemoryRequirement { env ⇒
+    override val threads: Option[Int]) extends BatchEnvironment with MemoryRequirement with BDIISRMServers with GliteEnvironmentId { env ⇒
 
   import GliteEnvironment._
 
-  @transient lazy val id = voName + "@" + vomsURL
-  @transient lazy val threadsBySE = Workspace.preferenceAsInt(LocalThreadsBySE)
   @transient lazy val threadsByWMS = Workspace.preferenceAsInt(LocalThreadsByWMS)
 
   type JS = GliteJobService
-  type SS = GliteStorageService
 
   @transient lazy val registerAgents: Unit = {
     Updater.registerForUpdate(new OverSubmissionAgent(WeakReference(this)))
@@ -184,6 +192,8 @@ class GliteEnvironment(
     super.submit(job)
   }
 
+  def proxyCreator = authentication
+
   @transient lazy val authentication = GliteAuthentication.get match {
     case Some(a) ⇒
       val file = Workspace.newFile("proxy", ".x509")
@@ -193,23 +203,14 @@ class GliteEnvironment(
         voName,
         file,
         proxyTime.toSeconds,
-        fqan).cache(renewProxyDelay)
+        fqan).cache(proxyRenewalDelay)
     case None ⇒ throw new UserBadDataError("No athentication has been initialized for glite.")
-  }
-
-  def proxyTime = Workspace.preferenceAsDuration(ProxyTime)
-
-  def renewProxyDelay = {
-    val remainingTime = proxyTime.toSeconds
-    math.max(
-      (remainingTime * Workspace.preferenceAsDouble(GliteEnvironment.ProxyRenewalRatio)).toLong,
-      Workspace.preferenceAsDuration(GliteEnvironment.MinProxyRenewal).toSeconds)
   }
 
   def delegate = jobServices.foreach { _.delegate }
 
   override def allJobServices = {
-    val jss = getBDII.queryWMS(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut).toSeconds.toInt)
+    val jss = bdiiServer.queryWMS(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut).toSeconds.toInt)
     jss.map {
       js ⇒
         new GliteJobService {
@@ -220,13 +221,6 @@ class GliteEnvironment(
           val environment = env
           val nbTokens = threadsByWMS
         }
-    }
-  }
-
-  override def allStorages = {
-    val stors = getBDII.querySRM(voName, Workspace.preferenceAsDuration(GliteEnvironment.FetchResourcesTimeOut).toSeconds.toInt)
-    stors.map {
-      s ⇒ GliteStorageService(s, env, GliteAuthentication.CACertificatesDir)
     }
   }
 
@@ -356,6 +350,6 @@ class GliteEnvironment(
 
     }
 
-  private def getBDII: BDII = new BDII(bdii)
+  def bdiiServer: BDII = new BDII(bdii)
 
 }

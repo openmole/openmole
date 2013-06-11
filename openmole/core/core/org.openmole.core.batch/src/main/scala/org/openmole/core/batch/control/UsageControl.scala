@@ -17,8 +17,6 @@
 
 package org.openmole.core.batch.control
 
-import scala.concurrent.stm._
-
 trait UsageControl {
   def waitAToken: AccessToken
   def tryGetToken: Option[AccessToken]

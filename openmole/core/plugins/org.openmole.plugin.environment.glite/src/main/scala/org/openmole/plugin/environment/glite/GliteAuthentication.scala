@@ -41,20 +41,33 @@ import scala.Some
 import scala.Some
 import fr.iscpif.gridscale.authentication._
 import java.io.File
+import scala.util.{ Success, Failure, Try }
 
 object GliteAuthentication extends Logger {
 
-  lazy val CACertificatesDir: File = {
-    Workspace.file("ca.lock").withLock { _ ⇒
-      val caDir = Workspace.file("CACertificates")
+  val updatedFile = ".updated"
 
-      if (!caDir.exists || !new File(caDir, ".complete").exists) {
-        caDir.mkdir
-        downloadCACertificates(Workspace.preference(GliteEnvironment.CACertificatesSite), caDir)
-        new File(caDir, ".complete").createNewFile
-      }
-      caDir
+  def CACertificatesDir: File = {
+    val caDir = Workspace.file("CACertificates")
+    val updated = new File(caDir, updatedFile)
+
+    def isCACertificatesUpToDate = {
+      if (!caDir.exists || !updated.exists) false
+      else
+        Try(updated.content.toLong) match {
+          case Success(v) ⇒ v + Workspace.preferenceAsDuration(CACertificatesCacheTime).toMilliSeconds > System.currentTimeMillis
+          case Failure(_) ⇒ updated.delete; false
+        }
     }
+    if (!isCACertificatesUpToDate)
+      Workspace.file("ca.lock").withLock { _ ⇒
+        if (!isCACertificatesUpToDate) {
+          caDir.mkdir
+          downloadCACertificates(Workspace.preference(GliteEnvironment.CACertificatesSite), caDir)
+          new File(caDir, updatedFile).content = System.currentTimeMillis.toString
+        }
+      }
+    caDir
   }
 
   def downloadCACertificates(address: String, dir: File) = {
@@ -116,6 +129,7 @@ object GliteAuthentication extends Logger {
   }
 
   def getVOMS(vo: String): Option[String] = getVOMS(vo, xml.XML.loadFile(voCards))
+  def getVMOSOrError(vo: String) = getVOMS(vo).getOrElse(throw new UserBadDataError(s"ID card for VO $vo not found."))
 
   def getVOMS(vo: String, x: xml.Node) = {
     import xml._
@@ -140,11 +154,12 @@ object GliteAuthentication extends Logger {
   def apply() = Workspace.persistentList(classOf[GliteAuthentication])(0)
   def get = Workspace.persistentList(classOf[GliteAuthentication]).get(0)
 
-  def initialise(a: GliteAuthentication)(serverURL: String,
-                                         voName: String,
-                                         proxyFile: File,
-                                         lifeTime: Int,
-                                         fqan: Option[String]) =
+  def initialise(a: GliteAuthentication)(
+    serverURL: String,
+    voName: String,
+    proxyFile: File,
+    lifeTime: Int,
+    fqan: Option[String]) =
     a match {
       case a: P12Certificate ⇒
         VOMSAuthentication.setCARepository(GliteAuthentication.CACertificatesDir)

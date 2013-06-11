@@ -52,23 +52,6 @@ import org.openmole.core.model.mole
 
 object MoleExecution extends Logger {
 
-  mole.Sources
-  def partial(
-    mole: IMole,
-    sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
-    hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
-    selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
-    grouping: Map[ICapsule, Grouping] = Map.empty,
-    profiler: Profiler = Profiler.empty,
-    seed: Long = Workspace.newSeed): PartialMoleExecution = PartialMoleExecution(
-    mole,
-    sources groupBy { case (c, _) ⇒ c } map { case (c, ss) ⇒ c -> ss.map(_._2) } withDefault { _ ⇒ List.empty },
-    hooks groupBy { case (c, _) ⇒ c } map { case (c, hs) ⇒ c -> hs.map(_._2) } withDefault { _ ⇒ List.empty },
-    selection,
-    grouping,
-    profiler,
-    seed)
-
   def apply(
     mole: IMole,
     sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
@@ -79,14 +62,14 @@ object MoleExecution extends Logger {
     implicits: Context = Context.empty,
     seed: Long = Workspace.newSeed,
     executionContext: ExecutionContext = ExecutionContext.local) =
-    partial(
+    PartialMoleExecution(
       mole,
       sources,
       hooks,
       selection,
       grouping,
       profiler,
-      seed).complete(implicits, executionContext)
+      seed).toExecution(implicits, executionContext)
 
 }
 

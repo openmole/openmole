@@ -21,14 +21,34 @@ import org.openmole.core.model.mole._
 import org.openmole.misc.workspace._
 import org.openmole.core.model.data._
 
-case class PartialMoleExecution(mole: IMole,
-                                sources: Sources = Sources.empty,
-                                hooks: Hooks = Hooks.empty,
-                                selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
-                                grouping: Map[ICapsule, Grouping] = Map.empty,
-                                profiler: Profiler = Profiler.empty,
-                                seed: Long = Workspace.newSeed) extends IPartialMoleExecution {
-  def complete(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local) = {
+object PartialMoleExecution {
+  def apply(
+    mole: IMole,
+    sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
+    hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
+    selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
+    grouping: Map[ICapsule, Grouping] = Map.empty,
+    profiler: Profiler = Profiler.empty,
+    seed: Long = Workspace.newSeed): PartialMoleExecution = new PartialMoleExecution(
+    mole,
+    sources groupBy { case (c, _) ⇒ c } map { case (c, ss) ⇒ c -> ss.map(_._2) } withDefault { _ ⇒ List.empty },
+    hooks groupBy { case (c, _) ⇒ c } map { case (c, hs) ⇒ c -> hs.map(_._2) } withDefault { _ ⇒ List.empty },
+    selection,
+    grouping,
+    profiler,
+    seed)
+}
+
+class PartialMoleExecution(
+    val mole: IMole,
+    val sources: Sources = Sources.empty,
+    val hooks: Hooks = Hooks.empty,
+    val selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
+    val grouping: Map[ICapsule, Grouping] = Map.empty,
+    val profiler: Profiler = Profiler.empty,
+    val seed: Long = Workspace.newSeed) extends IPartialMoleExecution {
+
+  def toExecution(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local) = {
     new MoleExecution(mole,
       sources,
       hooks,

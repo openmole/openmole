@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 10/06/13 Romain Reuillon
+ * Copyright (C) 11/06/13 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,15 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.mole
+package org.openmole.plugin.environment.glite
 
-import org.openmole.core.model.data._
+import org.openmole.core.batch.jobservice.{ BatchJobId, BatchJob }
+import org.openmole.core.batch.control.AccessToken
 
-trait IPartialMoleExecution {
-  def mole: IMole
-  def hooks: Hooks
-  def sources: Sources
-  def profiler: Profiler
-
-  def toExecution(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local): IMoleExecution
+trait DIRACGliteJob extends BatchJob with BatchJobId with StatusFiles {
+  override def updateState(implicit token: AccessToken) = {
+    state = testDone(testRunning(super.updateState))
+    state
+  }
 }

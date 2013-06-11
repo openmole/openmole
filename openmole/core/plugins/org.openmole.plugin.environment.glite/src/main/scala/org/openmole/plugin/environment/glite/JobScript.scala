@@ -22,6 +22,7 @@ import java.io.{ OutputStream, PrintStream }
 import java.util.UUID
 import java.net.URI
 import org.openmole.misc.workspace.Workspace
+import org.openmole.core.batch.storage.StorageService
 
 trait JobScript {
 
@@ -32,8 +33,8 @@ trait JobScript {
   protected def generateScript(
     serializedJob: SerializedJob,
     resultPath: String,
-    runningPath: String,
-    finishedPath: String,
+    runningPath: Option[String],
+    finishedPath: Option[String],
     os: OutputStream) = {
     import serializedJob._
 
@@ -41,8 +42,8 @@ trait JobScript {
 
     assert(runtime.runtime.path != null)
 
-    writter.print(touch(storage.url.resolve(runningPath)))
-    writter.print("; BASEPATH=$PWD; CUR=$PWD/ws$RANDOM; while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; export OPENMOLE_HOME=$CUR; ")
+    runningPath.foreach { path ⇒ writter.print(touch(storage.url.resolve(path))) }
+    writter.print("BASEPATH=$PWD; CUR=$PWD/ws$RANDOM; while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; export OPENMOLE_HOME=$CUR; ")
     writter.print("if [ `uname -m` = x86_64 ]; then ")
     writter.print(lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz")) //, homeCacheDir, runtime.jvmLinuxX64.hash))
     writter.print("; else ")
@@ -76,13 +77,13 @@ trait JobScript {
     writter.print(" -t ")
     writter.print(environment.threadsValue)
     writter.print("; ")
-    writter.print(touch(storage.url.resolve(finishedPath)))
-    writter.print("; cd .. ; rm -rf $CUR ; ")
+    finishedPath.foreach { path ⇒ writter.print(touch(storage.url.resolve(path))) }
+    writter.print("cd .. ; rm -rf $CUR ; ")
   }
 
   protected def touch(dest: URI) = {
     val name = UUID.randomUUID.toString
-    s"touch $name; ${lcgCpCmd(name, dest)}; rm $name "
+    s"touch $name; ${lcgCpCmd(name, dest)}; rm $name; "
   }
 
   protected def lcgCpGunZipCmd(from: URI, to: String) = {
@@ -95,7 +96,7 @@ trait JobScript {
   }
 
   @transient lazy val lcgCp =
-    s"lcg-cp --vo ${environment.voName} --checksum --connect-timeout $getTimeOut --sendreceive-timeout $getTimeOut --bdii-timeout $getTimeOut --srm-timeout $getTimeOut "
+    s"lcg-cp --vo ${environment.voName} --checksum --connect-timeout $getTimeOut --sendreceive-timeout $getTimeOut --srm-timeout $getTimeOut "
 
   protected def lcgCpCmd(from: String, to: URI) = s"$lcgCp file:$from ${to.toString}"
   protected def lcgCpCmd(from: URI, to: String) = s"$lcgCp ${from.toString} file:$to"
