@@ -57,7 +57,7 @@ abstract class SaveProfileHook(
         i ← context(individual.toArray)
       } {
         val scaledGenome = scaled(i.genome.values, context)
-        w.write("" + scaledGenome(profile.x) + "," + profile.aggregation.aggregate(i.fitness) + "\n")
+        w.write("" + scaledGenome(profile.x).head.value + "," + profile.aggregation.aggregate(i.fitness) + "\n")
       }
     }
     context
