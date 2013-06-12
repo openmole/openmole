@@ -30,7 +30,6 @@ object CSVFileProfiler {
   def apply(file: File) = new CSVFileProfiler(file)
 }
 
-
 class CSVFileProfiler(file: File) extends Profiler {
 
   override def process(moleJob: IMoleJob, executionContext: ExecutionContext) = synchronized {

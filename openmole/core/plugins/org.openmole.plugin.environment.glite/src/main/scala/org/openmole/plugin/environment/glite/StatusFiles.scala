@@ -33,20 +33,20 @@ trait StatusFiles {
 
   def testStatusFile(state: ExecutionState) =
     state match {
-      case SUBMITTED =>
+      case SUBMITTED ⇒
         storage.tryWithToken {
-        case Some(t) ⇒
-          if (storage.exists(runningPath)(t)) RUNNING
-          else state
-        case None ⇒ state
+          case Some(t) ⇒
+            if (storage.exists(runningPath)(t)) RUNNING
+            else state
+          case None ⇒ state
         }
-      case RUNNING =>
-             storage.tryWithToken {
-        case Some(t) ⇒
-          if (storage.exists(finishedPath)(t)) DONE
-          else state
-        case None ⇒ state
-      }
-      case _ => state
+      case RUNNING ⇒
+        storage.tryWithToken {
+          case Some(t) ⇒
+            if (storage.exists(finishedPath)(t)) DONE
+            else state
+          case None ⇒ state
+        }
+      case _ ⇒ state
     }
 }
