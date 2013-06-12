@@ -38,13 +38,14 @@ trait BDIISRMServers extends BatchEnvironment {
   def bdiiServer: BDII
   def voName: String
   def proxyCreator: GlobusAuthentication.ProxyCreator
+  def permissive = false
 
   @transient lazy val threadsBySE = Workspace.preferenceAsInt(GliteEnvironment.LocalThreadsBySE)
 
   override def allStorages = {
     val stors = bdiiServer.querySRM(voName, Workspace.preferenceAsDuration(GliteEnvironment.FetchResourcesTimeOut).toSeconds.toInt)
     stors.map {
-      s ⇒ GliteStorageService(s, this, proxyCreator, threadsBySE, GliteAuthentication.CACertificatesDir)
+      s ⇒ GliteStorageService(s, this, proxyCreator, threadsBySE, permissive, GliteAuthentication.CACertificatesDir)
     }
   }
 
