@@ -40,7 +40,7 @@ sealed class LHS(val samples: Int, val factors: Factor[Double, Domain[Double] wi
   override def prototypes = factors.map { _.prototype }
 
   override def build(context: Context): Iterator[Iterable[Variable[Double]]] = {
-    val rng = newRNG(context.valueOrException(openMOLESeed))
+    val rng = newRNG(context(openMOLESeed))
 
     (0 until samples).map {
       _ ⇒
