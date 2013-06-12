@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.hook.csvprofiler
+package org.openmole.plugin.profiler.csv
 
 import org.openmole.core.model.job.IMoleJob
 import org.openmole.core.model.tools.ITimeStamp
