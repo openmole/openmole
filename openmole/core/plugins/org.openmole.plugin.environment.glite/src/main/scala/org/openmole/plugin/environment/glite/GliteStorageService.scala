@@ -29,17 +29,18 @@ import fr.iscpif.gridscale.authentication.GlobusAuthentication
 
 object GliteStorageService {
 
-  def emptyRoot(s: SRMStorage) =
+  def emptyRoot(s: SRMStorage, _permissive: Boolean) =
     new SRMStorage {
       val host: String = s.host
       val port: Int = s.port
       val basePath: String = ""
+      override def permissive = _permissive
     }
 
-  def apply(s: SRMStorage, _environment: BatchEnvironment, _authentication: GlobusAuthentication.ProxyCreator, threads: Int, caCertDir: File) = new GliteStorageService {
-    val storage = emptyRoot(s)
+  def apply(s: SRMStorage, _environment: BatchEnvironment, _authentication: GlobusAuthentication.ProxyCreator, threads: Int, permissive: Boolean, caCertDir: File) = new GliteStorageService {
+    val storage = emptyRoot(s, permissive)
     val url = new URI("srm", null, s.host, s.port, null, null, null)
-    val remoteStorage = new RemoteGliteStorage(s.host, s.port, caCertDir)
+    val remoteStorage = new RemoteGliteStorage(s.host, s.port, permissive, caCertDir)
     val environment = _environment
     val root = s.basePath
     def nbTokens = threads

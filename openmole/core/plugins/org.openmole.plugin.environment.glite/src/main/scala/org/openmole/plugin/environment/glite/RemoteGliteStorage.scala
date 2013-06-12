@@ -25,15 +25,18 @@ import fr.iscpif.gridscale.authentication.ProxyFileAuthentication
 import fr.iscpif.gridscale.authentication.VOMSAuthentication
 import java.io.File
 
-class RemoteGliteStorage(val host: String, val port: Int, certificateDir: File) extends SimpleStorage { s ⇒
+class RemoteGliteStorage(val host: String, val port: Int, permissive: Boolean, certificateDir: File) extends SimpleStorage { s ⇒
+
   def root = ""
+  val timeout = Workspace.preferenceAsDuration(GliteEnvironment.RemoteTimeout).toSeconds
 
   @transient lazy val storage =
     new SRMStorage {
       val host: String = s.host
       val port: Int = s.port
       val basePath: String = ""
-      override val timeout = Workspace.preferenceAsDuration(GliteEnvironment.RemoteTimeout).toSeconds
+      override def permissive = s.permissive
+      override val timeout = s.timeout
     }
 
   def authentication: SRMStorage#A = new ProxyFileAuthentication {
