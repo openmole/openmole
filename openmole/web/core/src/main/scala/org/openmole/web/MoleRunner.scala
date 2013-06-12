@@ -140,10 +140,10 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
         moleExec match {
           case (Some(pEx), _) ⇒ {
-            val a = Validation.taskTypeErrors(pEx.mole)(pEx.mole.capsules, Context.empty.prototypes, pEx.sources, pEx.hooks)
-            val mIS = a.map(_ match {
-              case x: MissingInput ⇒ x
-              case _               ⇒ throw new Exception("malformed partial mole")
+            val a = Validation(pEx.mole, sources = pEx.sources, hooks = pEx.hooks)
+            val mIS = a.flatMap(_ match {
+              case x: MissingInput ⇒ Some(x)
+              case _               ⇒ None
             })
 
             val c = mIS.map(mI ⇒ mI.data.prototype.`type`.erasure match {
