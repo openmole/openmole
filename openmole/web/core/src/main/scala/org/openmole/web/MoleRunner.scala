@@ -136,7 +136,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
           implicitly[FromString[T]].fromString(s)
         }
 
-        def createVariable[T: FromString](mI: MissingInput) = csvData get mI.data.prototype.name map (d ⇒ Variable[T](mI.data.prototype.asInstanceOf[Prototype[T]], fromString[T](d)))
+        def createVariable[T: FromString](mI: MissingInput) = csvData get mI.data.prototype.name map (d ⇒ Variable.unsecure(mI.data.prototype, fromString[T](d)))
 
         moleExec match {
           case (Some(pEx), _) ⇒ {
