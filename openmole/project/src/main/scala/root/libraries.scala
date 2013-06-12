@@ -133,7 +133,7 @@ object Libraries extends Defaults {
   lazy val gridscale = OsgiProject("fr.iscpif.gridscale",
     exports = Seq("fr.iscpif.gridscale.*", "net.schmizz.sshj.*", "org.glite.*", "org.globus.*", "org.ogf.*"),
     privatePackages = Seq("!scala.*", "!org.slf4j.*", "!org.apache.log4j", "*")) settings
-    (libraryDependencies += "fr.iscpif.gridscale" % "gridscale" % "1.45",
+    (libraryDependencies += "fr.iscpif.gridscale" % "gridscale" % "1.46-SNAPSHOT",
       OsgiKeys.embeddedJars <<= Keys.externalDependencyClasspath in Compile map { deps ⇒
         deps filter (d ⇒ d.data.getName startsWith "bcprov") map (d ⇒ d.data)
       } //TODO make this easier to do using updateReport and filters.
