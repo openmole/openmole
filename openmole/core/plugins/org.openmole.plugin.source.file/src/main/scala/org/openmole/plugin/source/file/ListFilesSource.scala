@@ -33,7 +33,7 @@ object ListFilesSource {
       private val _list = new ListBuffer[(String, String, Prototype[File])]
 
       def list(path: String, prototype: Prototype[File], regExp: String = ".*") = {
-        addOutput(prototype)
+        addOutput(prototype.toArray)
         _list += ((path, regExp, prototype))
       }
 
