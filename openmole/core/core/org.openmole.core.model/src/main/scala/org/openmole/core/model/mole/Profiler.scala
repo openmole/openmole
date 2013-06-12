@@ -21,11 +21,11 @@ import org.openmole.core.model.job._
 
 object Profiler {
   val empty = new Profiler {
-    def process(job: IMoleJob) = {}
+    def process(job: IMoleJob, executionContext: ExecutionContext) = {}
   }
 }
 
 trait Profiler {
-  def process(job: IMoleJob)
+  def process(job: IMoleJob, executionContext: ExecutionContext)
   def finished = {}
 }
