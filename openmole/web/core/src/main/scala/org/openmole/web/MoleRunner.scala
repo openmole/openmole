@@ -28,7 +28,7 @@ import org.json4s.JsonDSL._
 import scala.None
 import org.json4s.{ Formats, DefaultFormats }
 import org.openmole.core.implementation.validation.Validation
-import org.openmole.core.implementation.validation.DataflowProblem.{ MissingInput, WrongType }
+import org.openmole.core.implementation.validation.DataflowProblem.{ MissingSourceInput, MissingInput, WrongType }
 import scala.io.Source
 
 @MultipartConfig(maxFileSize = 3 * 1024 * 1024 /*max file size of 3 MiB*/ ) //research scala multipart config
@@ -103,6 +103,42 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
     }
   }
 
+  def reifyCSV(mole: IPartialMoleExecution, csvData: Map[String, String]) = {
+    def fromString[T: FromString](s: String) = {
+      implicitly[FromString[T]].fromString(s)
+    }
+
+    def createVariable[T: FromString](mI: MissingInput) = csvData get mI.data.prototype.name map (d ⇒ Variable[T](mI.data.prototype.asInstanceOf[Prototype[T]], fromString[T](d)))
+
+    val a = (Validation.taskTypeErrors(mole.mole)(mole.mole.capsules, Context.empty.prototypes, mole.sources, mole.hooks) ++
+      Validation.sourceTypeErrors(mole.mole, Context.empty.prototypes, mole.sources, mole.hooks)).toList
+    val mIS = a.map(_ match {
+      case x: MissingInput       ⇒ x
+      case y: MissingSourceInput ⇒ MissingInput(y.slot, y.input)
+      case _                     ⇒ throw new Exception("malformed partial mole")
+    })
+
+    a foreach println
+    println(a.length)
+    val c = mIS.map { mI ⇒
+      mI.data.prototype.`type`.erasure match {
+        case t if t.equals(classOf[Int])    ⇒ createVariable[Int](mI)
+        case t if t.equals(classOf[Double]) ⇒ createVariable[Double](mI)
+        case t if t.equals(classOf[Float])  ⇒ createVariable[Float](mI)
+        case t if t.equals(classOf[BigInt]) ⇒ createVariable[BigInt](mI)
+        case t if t.equals(classOf[String]) ⇒ createVariable[String](mI)
+        case t if t.equals(classOf[File])   ⇒ createVariable[File](mI)
+        case _                              ⇒ throw new Exception(s"The missing parameter type: ${mI.data.prototype.`type`} is not known to the reification system.")
+      }
+    }
+
+    println(mIS)
+
+    if (!mIS.isEmpty && c.isEmpty) throw new Exception("No parameters given")
+
+    Context(c.map(_.getOrElse(throw new Exception("CSV file does not have data on all missing variables"))))
+  }
+
   post("/createMole") {
 
     val data = fileParams.get("file")
@@ -132,35 +168,9 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
         val context = new ExecutionContext(new PrintStream(new File("./out")), null)
 
-        def fromString[T: FromString](s: String) = {
-          implicitly[FromString[T]].fromString(s)
-        }
-
-        def createVariable[T: FromString](mI: MissingInput) = csvData get mI.data.prototype.name map (d ⇒ Variable[T](mI.data.prototype.asInstanceOf[Prototype[T]], fromString[T](d)))
-
         moleExec match {
           case (Some(pEx), _) ⇒ {
-            val a = Validation.taskTypeErrors(pEx.mole)(pEx.mole.capsules, Context.empty.prototypes, pEx.sources, pEx.hooks)
-            val mIS = a.map(_ match {
-              case x: MissingInput ⇒ x
-              case _               ⇒ throw new Exception("malformed partial mole")
-            })
-
-            val c = mIS.map(mI ⇒ mI.data.prototype.`type`.erasure match {
-              case t if t.equals(classOf[Int])    ⇒ createVariable[Int](mI)
-              case t if t.equals(classOf[Double]) ⇒ createVariable[Double](mI)
-              case t if t.equals(classOf[Float])  ⇒ createVariable[Float](mI)
-              case t if t.equals(classOf[BigInt]) ⇒ createVariable[BigInt](mI)
-              case t if t.equals(classOf[String]) ⇒ createVariable[String](mI)
-              case _                              ⇒ throw new Exception(s"The missing parameter type: ${mI.data.prototype.`type`} is not known to the reification system.")
-            })
-
-            if (!mIS.isEmpty && c.isEmpty) throw new Exception("No parameters given")
-
-            println(mIS)
-            println(c)
-
-            val ctxt = Context(c.map(_.getOrElse(throw new Exception("CSV file does not have data on all missing variables"))))
+            val ctxt = reifyCSV(pEx, csvData)
             val exec = pEx.toExecution(ctxt, context)
 
             val clob = new SerialClob(SerializerService.serialize(exec).toCharArray)
@@ -209,33 +219,10 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
     val context = new ExecutionContext(new PrintStream(new File("./out")), null)
 
-    def fromString[T: FromString](s: String) = {
-      implicitly[FromString[T]].fromString(s)
-    }
-
-    def createVariable[T: FromString](mI: MissingInput) = csvData get mI.data.prototype.name map (d ⇒ Variable[T](mI.data.prototype.asInstanceOf[Prototype[T]], fromString[T](d)))
-
     moleExec match {
       case (Some(pEx), _) ⇒ {
-        val a = Validation.taskTypeErrors(pEx.mole)(pEx.mole.capsules, Context.empty.prototypes, pEx.sources, pEx.hooks)
-        val mIS = a.map(_ match {
-          case x: MissingInput ⇒ x
-          case _               ⇒ throw new Exception("malformed partial mole")
-        })
 
-        val c = mIS.map(mI ⇒ mI.data.prototype.`type`.erasure match {
-          case t if t.equals(classOf[Int])    ⇒ createVariable[Int](mI)
-          case t if t.equals(classOf[Double]) ⇒ createVariable[Double](mI)
-          case t if t.equals(classOf[Float])  ⇒ createVariable[Float](mI)
-          case t if t.equals(classOf[BigInt]) ⇒ createVariable[BigInt](mI)
-          case t if t.equals(classOf[String]) ⇒ createVariable[String](mI)
-          case t if t.equals(classOf[File])   ⇒ createVariable[File](mI)
-          case _                              ⇒ throw new Exception(s"The missing parameter type: ${mI.data.prototype.`type`} is not known to the reification system.")
-        })
-
-        if (!mIS.isEmpty && c.isEmpty) throw new Exception("No parameters given")
-
-        val ctxt = Context(c.map(_.getOrElse(throw new Exception("CSV file does not have data on all missing variables"))))
+        val ctxt = reifyCSV(pEx, csvData)
         val exec = pEx.toExecution(ctxt, context)
 
         cachedMoles.add(exec.id, exec)
