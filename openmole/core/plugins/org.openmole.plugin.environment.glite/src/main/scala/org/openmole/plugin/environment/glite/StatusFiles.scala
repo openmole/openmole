@@ -31,24 +31,22 @@ trait StatusFiles {
   val finishedPath: String
   val runningPath: String
 
-  def testRunning(state: ExecutionState) =
-    if (state == SUBMITTED)
-      storage.tryWithToken {
+  def testStatusFile(state: ExecutionState) =
+    state match {
+      case SUBMITTED =>
+        storage.tryWithToken {
         case Some(t) ⇒
           if (storage.exists(runningPath)(t)) RUNNING
           else state
         case None ⇒ state
-      }
-    else state
-
-  def testDone(state: ExecutionState) =
-    if (state == RUNNING)
-      storage.tryWithToken {
+        }
+      case RUNNING =>
+             storage.tryWithToken {
         case Some(t) ⇒
           if (storage.exists(finishedPath)(t)) DONE
           else state
         case None ⇒ state
       }
-    else state
-
+      case _ => state
+    }
 }
