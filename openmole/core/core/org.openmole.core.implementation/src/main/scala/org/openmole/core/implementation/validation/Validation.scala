@@ -101,7 +101,7 @@ object Validation {
     }).flatten
   }
 
-  def sourceTypeErrors(mole: IMole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks) = {
+  def sourceTypeErrors(mole: IMole, implicits: Iterable[Prototype[_]], sources: Sources, hooks: Hooks): Iterable[_] = {
     val implicitMap = prototypesToMap(implicits)
 
     (for {
