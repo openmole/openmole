@@ -28,7 +28,7 @@ import org.json4s.JsonDSL._
 import scala.None
 import org.json4s.{ Formats, DefaultFormats }
 import org.openmole.core.implementation.validation.Validation
-import org.openmole.core.implementation.validation.DataflowProblem.{ MissingInput, WrongType }
+import org.openmole.core.implementation.validation.DataflowProblem.{ MissingSourceInput, MissingInput, WrongType }
 import scala.io.Source
 
 @MultipartConfig(maxFileSize = 3 * 1024 * 1024 /*max file size of 3 MiB*/ ) //research scala multipart config
@@ -113,11 +113,10 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
     val a = Validation(mole.mole, sources = mole.sources, hooks = mole.hooks)
     val mIS = a.map(_ match {
       case x: MissingInput       ⇒ x
+      case y: MissingSourceInput ⇒ MissingInput(y.slot, y.input)
       case _                     ⇒ throw new Exception("malformed partial mole")
     })
 
-    a foreach println
-    println(a.length)
     val c = mIS.map { mI ⇒
       mI.data.prototype.`type`.erasure match {
         case t if t.equals(classOf[Int])    ⇒ createVariable[Int](mI)
@@ -129,8 +128,6 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
         case _                              ⇒ throw new Exception(s"The missing parameter type: ${mI.data.prototype.`type`} is not known to the reification system.")
       }
     }
-
-    println(mIS)
 
     if (!mIS.isEmpty && c.isEmpty) throw new Exception("No parameters given")
 
