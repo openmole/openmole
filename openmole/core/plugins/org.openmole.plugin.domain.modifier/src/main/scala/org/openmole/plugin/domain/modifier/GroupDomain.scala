@@ -31,6 +31,8 @@ object GroupDomain {
 
 sealed class GroupDomain[T](val domain: Domain[T] with Discrete[T], val size: Int)(implicit m: Manifest[T]) extends Domain[Array[T]] with Discrete[Array[T]] {
 
+  override def inputs = domain.inputs
+
   override def iterator(context: Context): Iterator[Array[T]] =
     domain.iterator(context).grouped(size).map {
       i ⇒ i.toArray

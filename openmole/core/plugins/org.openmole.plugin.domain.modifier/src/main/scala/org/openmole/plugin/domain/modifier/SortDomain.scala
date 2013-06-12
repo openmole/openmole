@@ -29,6 +29,8 @@ object SortDomain {
 
 class SortDomain[T](val domain: Domain[T] with Finite[T])(implicit ord: Ordering[T]) extends Domain[T] with Finite[T] {
 
+  override def inputs = domain.inputs
+
   override def computeValues(context: Context): Iterable[T] =
     domain.computeValues(context).toList.sorted
 

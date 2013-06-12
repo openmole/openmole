@@ -31,7 +31,7 @@ object ReplicationSampling {
 
 sealed class ReplicationSampling[T](sampling: Sampling, seeder: Factor[T, Domain[T] with Discrete[T]], replications: Int) extends Sampling {
 
-  override def inputs = sampling.inputs
+  override def inputs = sampling.inputs ++ seeder.inputs
   override def prototypes = seeder.prototype :: sampling.prototypes.toList
 
   override def build(context: Context): Iterator[Iterable[Variable[_]]] =

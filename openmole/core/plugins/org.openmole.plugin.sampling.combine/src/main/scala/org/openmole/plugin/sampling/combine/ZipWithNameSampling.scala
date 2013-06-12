@@ -31,6 +31,7 @@ object ZipWithNameSampling {
 
 sealed class ZipWithNameSampling(val factor: Factor[File, Domain[File] with Discrete[File]], val name: Prototype[String]) extends Sampling {
 
+  override def inputs = factor.inputs
   override def prototypes = List(factor.prototype, name)
 
   override def build(context: Context): Iterator[Iterable[Variable[_]]] =

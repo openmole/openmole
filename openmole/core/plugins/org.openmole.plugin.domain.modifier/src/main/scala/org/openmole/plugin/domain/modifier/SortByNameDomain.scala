@@ -28,6 +28,8 @@ object SortByNameDomain {
 
 class SortByNameDomain(val domain: Domain[File] with Finite[File]) extends Domain[File] with Finite[File] {
 
+  override def inputs = domain.inputs
+
   override def computeValues(context: Context): Iterable[File] = {
     def extractNumber(name: String) = {
       val n = name.reverse.dropWhile(!_.isDigit).takeWhile(_.isDigit).reverse

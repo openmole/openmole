@@ -17,6 +17,7 @@
 
 package org.openmole.plugin.domain.collection
 
+import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 
@@ -30,5 +31,6 @@ object IterableVariableDomain {
 }
 
 sealed class IterableVariableDomain[T](variable: Prototype[Iterable[_ <: T]]) extends Domain[T] with Discrete[T] {
+  override def inputs = DataSet(variable)
   override def iterator(context: Context): Iterator[T] = context(variable).iterator
 }

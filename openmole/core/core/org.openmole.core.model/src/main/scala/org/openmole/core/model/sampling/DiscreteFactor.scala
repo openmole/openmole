@@ -32,6 +32,8 @@ object DiscreteFactor {
 
 trait DiscreteFactor[T, +D <: Domain[T] with Discrete[T]] extends Factor[T, D] with Sampling {
 
+  override def inputs = domain.inputs
+
   override def prototypes = List(prototype)
 
   override def build(context: Context): Iterator[collection.Iterable[Variable[T]]] =

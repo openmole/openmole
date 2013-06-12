@@ -33,6 +33,8 @@ sealed class MapDomain[-I, +O](domain: Domain[I] with Discrete[I], name: String,
 
   def this(domain: Domain[I] with Discrete[I], prototype: Prototype[I], code: String) = this(domain, prototype.name, code)
 
+  override def inputs = domain.inputs
+
   @transient lazy val contextToGroovyCode = new ContextToGroovyCode(code, Iterable.empty)
 
   override def iterator(context: Context): Iterator[O] =

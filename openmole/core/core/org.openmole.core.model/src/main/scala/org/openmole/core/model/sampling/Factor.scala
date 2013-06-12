@@ -33,6 +33,7 @@ object Factor {
 }
 
 trait Factor[T, +D <: Domain[T]] {
+  def inputs = domain.inputs
   def domain: D
   def prototype: Prototype[T]
 }

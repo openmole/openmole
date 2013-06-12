@@ -17,10 +17,9 @@
 
 package org.openmole.plugin.domain.collection
 
+import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
-
-import collection.JavaConversions._
 
 object VariableDomain {
 
@@ -29,8 +28,7 @@ object VariableDomain {
 }
 
 sealed class VariableDomain[A](val variable: Prototype[Array[A]]) extends Domain[A] with Discrete[A] with Finite[A] {
-
-  override def computeValues(context: Context): Iterable[A] =
-    context(variable)
+  override def inputs = DataSet(variable)
+  override def computeValues(context: Context): Iterable[A] = context(variable)
 
 }

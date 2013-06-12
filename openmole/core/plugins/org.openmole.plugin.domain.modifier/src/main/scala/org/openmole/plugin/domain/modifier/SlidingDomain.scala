@@ -29,6 +29,8 @@ object SlidingDomain {
 
 class SlidingDomain[T](val domain: Domain[T] with Discrete[T], val size: Int, val step: Int = 1)(implicit m: Manifest[T]) extends Domain[Array[T]] with Discrete[Array[T]] {
 
+  override def inputs = domain.inputs
+
   override def iterator(context: Context): Iterator[Array[T]] =
     domain.iterator(context).sliding(size, step).map(_.toArray)
 

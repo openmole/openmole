@@ -17,4 +17,8 @@
 
 package org.openmole.core.model.domain
 
-trait Domain[+T]
+import org.openmole.core.model.data.DataSet
+
+trait Domain[+T] {
+  def inputs: DataSet = DataSet.empty
+}
