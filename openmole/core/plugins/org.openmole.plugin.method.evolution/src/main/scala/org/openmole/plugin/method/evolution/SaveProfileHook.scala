@@ -33,23 +33,21 @@ object SaveProfileHook {
 
   def apply(
     individual: Prototype[Individual[algorithm.GA#G, algorithm.GA#P, algorithm.GA#F]],
-    x: String,
-    aggregation: GAAggregation,
+    profile: GA.GAProfile,
+    scales: Seq[GenomeScaling.Scale],
     path: String) =
     new HookBuilder {
       addInput(individual.toArray)
-      def toHook = new SaveProfileHook(individual, x, aggregation, path) with Built
+      def toHook = new SaveProfileHook(individual, profile, scales, path) with Built
     }
 
 }
 
 abstract class SaveProfileHook(
     val individual: Prototype[Individual[algorithm.GA#G, algorithm.GA#P, algorithm.GA#F]],
-    val x: String,
-    val aggregation: GAAggregation,
-    val path: String) extends Hook {
-
-  @transient lazy val xInterpreter = new GroovyProxyPool(x)
+    val profile: GA.GAProfile,
+    val scales: Seq[GenomeScaling.Scale],
+    val path: String) extends Hook with GenomeScaling {
 
   def process(context: Context, executionContext: ExecutionContext) = {
     val file = executionContext.directory.child(new File(VariableExpansion(context, path)))
@@ -57,8 +55,10 @@ abstract class SaveProfileHook(
     file.withWriter { w ⇒
       for {
         i ← context(individual.toArray)
-        xV = xInterpreter.execute(i.phenotype)
-      } w.write("" + xV + "," + aggregation.aggregate(i.fitness) + "\n")
+      } {
+        val scaledGenome = scaled(i.genome.values, context)
+        w.write("" + scaledGenome(profile.x).value + "," + profile.aggregation.aggregate(i.fitness) + "\n")
+      }
     }
     context
   }

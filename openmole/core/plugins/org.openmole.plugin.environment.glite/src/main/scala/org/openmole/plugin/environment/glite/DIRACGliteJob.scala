@@ -22,7 +22,7 @@ import org.openmole.core.batch.control.AccessToken
 
 trait DIRACGliteJob extends BatchJob with BatchJobId with StatusFiles {
   override def updateState(implicit token: AccessToken) = {
-    state = testDone(testRunning(super.updateState))
+    state = testStatusFile(super.updateState)
     state
   }
 }

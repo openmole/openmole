@@ -32,41 +32,25 @@ import org.openmole.misc.tools.script.{ GroovyFunction, GroovyProxyPool, GroovyP
 
 object ScalingGAGenomeTask {
 
-  def scaled(scale: List[(Prototype[Double], (GroovyFunction, GroovyFunction))], genome: List[Double], context: Context): List[Variable[Double]] =
-    if (scale.isEmpty || genome.isEmpty) List.empty
-    else {
-      val (p, (vMin, vMax)) = scale.head
-      val dMin = vMin(context).toString.toDouble
-      val dMax = vMax(context).toString.toDouble
-      val scaledV = Variable(p, genome.head.scale(dMin, dMax))
-      scaledV :: scaled(scale.tail, genome.tail, context + scaledV)
-    }
-
-  def groovyProxies(scale: Iterable[(Prototype[Double], (String, String))]) =
-    scale.map { case (p, (min, max)) ⇒ p -> (GroovyProxyPool(min), GroovyProxyPool(max)) }
-
   def apply[T <: GAGenome](
     name: String,
     genome: Prototype[T],
-    scale: (Prototype[Double], (String, String))*)(implicit plugins: PluginSet) =
+    scales: (Prototype[Double], (String, String))*)(implicit plugins: PluginSet) =
     new TaskBuilder { builder ⇒
-      scale foreach { case (p, _) ⇒ this.addOutput(p) }
+      scales foreach { case (p, _) ⇒ this.addOutput(p) }
       addInput(genome)
       addOutput(genome)
 
-      def toTask = new ScalingGAGenomeTask[T](name, genome, scale: _*) with Built
+      def toTask = new ScalingGAGenomeTask[T](name, genome, scales) with Built
     }
 
 }
 
 sealed abstract class ScalingGAGenomeTask[T <: GAGenome](
     val name: String,
-    genome: Prototype[T],
-    scale: (Prototype[Double], (String, String))*) extends Task {
+    val genome: Prototype[T],
+    val scales: Seq[(Prototype[Double], (String, String))]) extends Task with GenomeScaling {
 
-  @transient lazy val groovyScales = ScalingGAGenomeTask.groovyProxies(scale)
-
-  override def process(context: Context) =
-    context ++ ScalingGAGenomeTask.scaled(groovyScales.toList, context(genome).values.toList, context)
+  override def process(context: Context) = context ++ scaled(context(genome).values, context)
 
 }

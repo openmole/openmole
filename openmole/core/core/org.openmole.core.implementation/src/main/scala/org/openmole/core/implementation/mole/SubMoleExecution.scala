@@ -101,7 +101,7 @@ class SubMoleExecution(
     _childs.single -= submoleExecution
 
   private def secureProfilerExecution(profiler: Profiler, moleJob: IMoleJob) =
-    try profiler.process(moleJob)
+    try profiler.process(moleJob, moleExecution.executionContext)
     catch {
       case e: Throwable ⇒
         EventDispatcher.trigger(moleExecution, new IMoleExecution.ProfilerExceptionRaised(profiler, moleJob, e, WARNING))

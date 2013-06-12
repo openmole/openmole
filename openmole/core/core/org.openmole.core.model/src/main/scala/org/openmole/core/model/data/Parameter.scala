@@ -29,11 +29,11 @@ object Parameter {
     }
   }
 
-  def delayed[T](prototype: Prototype[T], value: ⇒ T, `override`: Boolean = false) = {
-    val (o, p, v) = (`override`, prototype, value)
+  def delayed[T](_prototype: Prototype[T], _value: ⇒ T, `override`: Boolean = false) = {
+    val o = `override`
     new Parameter[T] {
-      val prototype = p
-      def value(ctx: Context) = v
+      val prototype = _prototype
+      def value(ctx: Context) = _value
       val `override` = o
     }
   }

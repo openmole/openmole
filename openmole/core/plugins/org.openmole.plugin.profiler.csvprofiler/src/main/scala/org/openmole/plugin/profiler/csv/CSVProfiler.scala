@@ -15,21 +15,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.hook.csvprofiler
+package org.openmole.plugin.profiler.csv
 
 import au.com.bytecode.opencsv.CSVWriter
 import org.openmole.core.model.job._
 import org.openmole.core.model.job.State._
 import org.openmole.core.model.mole._
 import ToCSV._
+import java.io.OutputStreamWriter
 
-class CSVProfiler(writer: CSVWriter) extends Profiler {
+object CSVProfiler {
 
-  override def process(moleJob: IMoleJob) = synchronized {
-    writer.writeNext(toColumns(moleJob))
-    writer.flush
+  def apply() = new CSVProfiler
+
+}
+
+class CSVProfiler extends Profiler {
+
+  override def process(moleJob: IMoleJob, executionContext: ExecutionContext) = synchronized {
+    val writter = new CSVWriter(new OutputStreamWriter(executionContext.out))
+    writter.writeNext(toColumns(moleJob))
+    writter.flush
   }
-
-  override def finished = writer.flush
 
 }
