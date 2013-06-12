@@ -148,19 +148,32 @@ object GA {
 
   }
 
-  def map(_plotter: GAMapPlotter, _aggregation: GAAggregation, neighbors: Int = 8) = {
+  trait GAMap extends GA {
+    def aggregation: GAAggregation
+    def x: Int
+    def y: Int
+  }
+
+  def map(_x: Int, _nX: Int, _y: Int, _nY: Int, _aggregation: GAAggregation, neighbors: Int = 8) = {
     val (_neighbors) = (neighbors)
-    new GAAlgorithmBuilder {
+    new GAAlgorithmBuilder with GAMap {
+      val aggregation = _aggregation
+      val x = _x
+      val y = _y
+
       def apply(_diversityMetric: GADiversityMetric, _ranking: GARanking) =
-        new MapArchive with GAAlgorithm with MapModifier with MapElitism {
+        new MapArchive with GAAlgorithm with MapModifier with MapElitism with MapGenomePlotter {
           override type DIVERSIFIED = MGFitness
           override type RANKED = MGFitness
           val aManifest = manifest[A]
-          def plot(i: Individual[G, P, F]) = _plotter.plot(i)
           def aggregate(fitness: F) = _aggregation.aggregate(fitness)
           val diversityMetric = _diversityMetric
           val ranking = _ranking
           val neighbors = _neighbors
+          val x = _x
+          val y = _y
+          val nX = _nX
+          val nY = _nY
         }
     }
   }
