@@ -72,16 +72,21 @@ class Runtime {
     /*--- get execution message and job for runtime---*/
     val usedFiles = new HashMap[File, File]
 
+    logger.fine("Downloading input message")
+
     val executionMessage = retry(Workspace.withTmpFile { executionMesageFileCache ⇒
       storage.downloadGZ(inputMessagePath, executionMesageFileCache)
       SerializerService.deserialize[ExecutionMessage](executionMesageFileCache)
     })
 
     val result = try {
+      logger.fine("Downloading plugins")
+
       val pluginDir = Workspace.newDir
 
       for (plugin ← executionMessage.plugins) {
         val inPluginDirLocalFile = File.createTempFile("plugin", ".jar", pluginDir)
+        logger.fine("Downloading plugin" + plugin.path)
         storage.downloadGZ(plugin.path, inPluginDirLocalFile)
 
         if (HashService.computeHash(inPluginDirLocalFile).toString != plugin.hash)
@@ -93,12 +98,15 @@ class Runtime {
       PluginManager.loadDir(pluginDir)
 
       /* --- Download the files for the local file cache ---*/
+      logger.fine("Downloading files")
 
       for (repliURI ← executionMessage.files) {
 
         //To avoid getting twice the same plugin with different path
         if (!usedFiles.containsKey(repliURI.src)) {
           val cache = Workspace.newFile
+
+          logger.fine("Downloading file " + repliURI.path)
           storage.downloadGZ(repliURI.path, cache)
           val cacheHash = HashService.computeHash(cache).toString
 
@@ -120,6 +128,7 @@ class Runtime {
       }
 
       val jobsFileCache = Workspace.newFile
+      logger.fine("Downloading execution message")
       storage.downloadGZ(executionMessage.jobs.path, jobsFileCache)
 
       if (HashService.computeHash(jobsFileCache).toString != executionMessage.jobs.hash) throw new InternalProcessingError("Hash of the execution job does't match.")
@@ -132,11 +141,12 @@ class Runtime {
       val allMoleJobs = runableTasks.map { _.toMoleJob(saver.save) }
 
       /* --- Submit all jobs to the local environment --*/
+      logger.fine("Run the jobs")
       for (toProcess ← allMoleJobs) LocalEnvironment.default.submit(toProcess)
 
       saver.waitAllFinished
 
-      logger.fine("Result " + saver.results)
+      logger.fine("Results " + saver.results)
 
       val contextResults = new ContextResults(saver.results)
       val contextResultFile = Workspace.newFile
@@ -144,6 +154,8 @@ class Runtime {
       SerializerService.serializeAndArchiveFiles(contextResults, contextResultFile)
       val uploadedcontextResults = storage.child(executionMessage.communicationDirPath, Storage.uniqName("uplodedTar", ".tgz"))
       val result = new FileMessage(uploadedcontextResults, HashService.computeHash(contextResultFile).toString)
+
+      logger.fine("Upload the results")
       retry(storage.uploadGZ(contextResultFile, uploadedcontextResults))
       contextResultFile.delete
       Success(result)
@@ -161,6 +173,7 @@ class Runtime {
       System.setErr(oldErr)
     }
 
+    logger.fine("Upload the outputs")
     val outputMessage =
       if (out.length != 0) {
         val output = storage.child(executionMessage.communicationDirPath, Storage.uniqName("output", ".txt"))
@@ -183,6 +196,7 @@ class Runtime {
 
     val runtimeResult = new RuntimeResult(outputMessage, errorMessage, result)
 
+    logger.fine("Upload the result message")
     val outputLocal = Workspace.newFile("output", ".res")
     SerializerService.serialize(runtimeResult, outputLocal)
     try retry(storage.uploadGZ(outputLocal, outputMessagePath))

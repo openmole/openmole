@@ -65,7 +65,7 @@ object Application extends Defaults {
       "org.openmole" %% "org.apache.commons.logging" % v intransitive (),
       "org.openmole" %% "net.sourceforge.jline" % v intransitive (),
       "org.openmole" %% "org.apache.log4j" % v intransitive (),
-      "org.openmole" %% "ch.qos.logback" % v intransitive(),
+      "org.openmole" %% "ch.qos.logback" % v intransitive (),
       "org.openmole" %% "org.apache.ant" % v intransitive ()
     )
   }
