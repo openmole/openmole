@@ -67,7 +67,7 @@ object MoleFactory {
       val hookMaping = for {
         c ← capsuleMapping
         h ← c._1.dataUI.hooks
-      } yield new HookMapping(c._2, h.dataUI.excutionCoreObject(prototypeMapping))
+      } yield new HookMapping(c._2, h.dataUI.executionCoreObject(prototypeMapping))
 
       val sourceMaping = for {
         c ← capsuleMapping
