@@ -182,14 +182,12 @@ class SubMoleExecution(
       }
 
       def implicits =
-        Context.empty ++
-          moleExecution.implicits.values.filter(v ⇒ capsule.task.inputs.contains(v.prototype.name)) +
-          Variable(Task.openMOLESeed, moleExecution.newSeed)
+        moleExecution.implicits + Variable(Task.openMOLESeed, moleExecution.newSeed)
 
       val sourced =
         moleExecution.sources(capsule).foldLeft(Context.empty) {
           case (a, s) ⇒
-            val ctx = try s.perform(context, moleExecution.executionContext)
+            val ctx = try s.perform(implicits + context, moleExecution.executionContext)
             catch {
               case t: Throwable ⇒
                 logger.log(SEVERE, "Error in submole execution", t)

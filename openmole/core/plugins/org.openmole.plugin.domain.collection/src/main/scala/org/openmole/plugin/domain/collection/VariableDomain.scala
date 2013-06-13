@@ -22,13 +22,10 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.domain._
 
 object VariableDomain {
-
   def apply[A](variable: Prototype[Array[A]]) = new VariableDomain[A](variable)
-
 }
 
 sealed class VariableDomain[A](val variable: Prototype[Array[A]]) extends Domain[A] with Discrete[A] with Finite[A] {
   override def inputs = DataSet(variable)
   override def computeValues(context: Context): Iterable[A] = context(variable)
-
 }
