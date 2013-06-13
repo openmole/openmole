@@ -65,7 +65,12 @@ object MoleFactory {
       (PartialMoleExecution(
         mole,
         capsuleMapping.flatMap { c ⇒ c._1.dataUI.sources.map { c._2 -> _.dataUI.coreObject(prototypeMapping) } },
-        capsuleMapping.flatMap { c ⇒ c._1.dataUI.hooks.map { c._2 -> _.dataUI.coreObject(prototypeMapping) } },
+        capsuleMapping.flatMap { c ⇒
+          c._1.dataUI.hooks.map { h ⇒
+            h.dataUI.onBuild
+            c._2 -> h.dataUI.coreObject(prototypeMapping)
+          }
+        },
         envs.map { case (c, e, _) ⇒ c -> new FixedEnvironmentSelection(e) }.toMap,
         capsuleMapping.flatMap { c ⇒
           c._1.dataUI.grouping match {
