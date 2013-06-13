@@ -26,8 +26,8 @@ import scala.swing.MyComboBox
 
 object MultiTwoCombos {
 
-  class TwoCombosPanel[A, B](comboContent1: List[A],
-                             comboContent2: List[B],
+  class TwoCombosPanel[A, B](comboContent1: Seq[A],
+                             comboContent2: Seq[B],
                              inBetweenString: String,
                              data: TwoCombosData[A, B]) extends PluginPanel("wrap 3") with IPanel[TwoCombosData[A, B]] {
 
@@ -56,8 +56,8 @@ object MultiTwoCombos {
   class TwoCombosData[A, B](val comboValue1: Option[A] = None,
                             val comboValue2: Option[B] = None) extends IData
 
-  class TwoCombosFactory[A, B](comboContent1: List[A],
-                               comboContent2: List[B],
+  class TwoCombosFactory[A, B](comboContent1: Seq[A],
+                               comboContent2: Seq[B],
                                inBetweenString: String) extends IFactory[TwoCombosData[A, B]] {
     def apply = new TwoCombosPanel(comboContent1,
       comboContent2,
@@ -68,10 +68,10 @@ object MultiTwoCombos {
 
 import MultiTwoCombos._
 class MultiTwoCombos[A, B](title: String,
-                           comboContent1: List[A],
-                           comboContent2: List[B],
+                           comboContent1: Seq[A],
+                           comboContent2: Seq[B],
                            inBetweenString: String,
-                           initPanels: List[TwoCombosPanel[A, B]],
+                           initPanels: Seq[TwoCombosPanel[A, B]],
                            minus: Minus = NO_EMPTY,
                            plus: Plus = ADD) extends MultiPanel(title,
   new TwoCombosFactory(comboContent1, comboContent2, inBetweenString),

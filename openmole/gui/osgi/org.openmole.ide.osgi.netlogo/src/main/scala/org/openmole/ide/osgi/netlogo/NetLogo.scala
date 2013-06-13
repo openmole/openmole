@@ -22,4 +22,7 @@ import org.openmole.plugin.task.netlogo.{ NetLogo ⇒ NetLogoCore }
 trait NetLogo extends NetLogoCore {
   @throws(classOf[Exception])
   def globals: Array[String]
+
+  @throws(classOf[Exception])
+  def reporters: Array[String]
 }

@@ -14,14 +14,14 @@ import scala.collection.JavaConversions._
 import scala.io.Source
 import java.io.File
 
-case class NetLogo4TaskDataUI(val name: String = "",
-                              val workspaceEmbedded: Boolean = false,
-                              val nlogoPath: String = "",
-                              val lauchingCommands: String = "",
-                              val prototypeMappingInput: List[(IPrototypeDataProxyUI, String)] = List(),
-                              val prototypeMappingOutput: List[(String, IPrototypeDataProxyUI)] = List(),
-                              val resources: List[String] = List(),
-                              val globals: List[String] = List()) extends TaskDataUI {
+case class NetLogo4TaskDataUI(
+    name: String = "",
+    workspaceEmbedded: Boolean = false,
+    nlogoPath: String = "",
+    lauchingCommands: String = "",
+    prototypeMappingInput: List[(IPrototypeDataProxyUI, String)] = List(),
+    prototypeMappingOutput: List[(String, IPrototypeDataProxyUI)] = List(),
+    resources: List[String] = List()) extends TaskDataUI {
 
   override def cloneWithoutPrototype(proxy: IPrototypeDataProxyUI) =
     this.copy(prototypeMappingInput = prototypeMappingInput.filterNot(_._1 == proxy),

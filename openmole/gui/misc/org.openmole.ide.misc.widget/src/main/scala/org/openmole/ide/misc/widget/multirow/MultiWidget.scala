@@ -39,7 +39,7 @@ object MultiWidget extends Enumeration {
 
 import MultiWidget._
 class MultiWidget[S, T <: IRowWidget[S]](title: String = "",
-                                         rWidgets: List[T],
+                                         rWidgets: Seq[T],
                                          factory: IRowWidgetFactory[S, T],
                                          allowEmpty: MultiWidget.Minus = MultiWidget.NO_EMPTY,
                                          buildRowFromFactory: Boolean = false) extends Component {
