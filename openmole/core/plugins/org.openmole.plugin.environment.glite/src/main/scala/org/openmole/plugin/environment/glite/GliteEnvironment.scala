@@ -217,7 +217,7 @@ class GliteEnvironment(
     case None ⇒ throw new UserBadDataError("No athentication has been initialized for glite.")
   }
 
-  def delegate = jobServices.foreach { _.delegate }
+  def delegate = jobServices.foreach { _.delegated = false }
 
   override def allJobServices = {
     val jss = bdiiServer.queryWMS(voName, Workspace.preferenceAsDuration(FetchResourcesTimeOut).toSeconds.toInt)

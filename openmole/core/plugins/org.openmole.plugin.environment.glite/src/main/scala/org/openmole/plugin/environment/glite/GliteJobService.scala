@@ -49,45 +49,55 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
   lazy val id = jobService.url.toString
   def hysteresis = Workspace.preferenceAsInt(GliteEnvironment.QualityHysteresis)
 
-  def delegate = jobService.delegate(authentication)
+  var delegated = false
 
-  override protected def _purge(j: J) = quality { super._purge(j) }
+  def delegated[T](f: ⇒ T): T = synchronized {
+    if (!delegated) {
+      jobService.delegate(authentication)
+      delegated = true
+    }
+    f
+  }
 
-  override protected def _cancel(j: J) = quality { super._cancel(j) }
+  override protected def _purge(j: J) = quality { delegated { super._purge(j) } }
 
-  override protected def _state(j: J) = quality { super._state(j) }
+  override protected def _cancel(j: J) = quality { delegated { super._cancel(j) } }
+
+  override protected def _state(j: J) = quality { delegated { super._state(j) } }
 
   override protected def _submit(serializedJob: SerializedJob) = quality {
-    import serializedJob._
+    delegated {
+      import serializedJob._
 
-    val script = Workspace.newFile("script", ".sh")
-    try {
-      val outputFilePath = storage.child(path, Storage.uniqName("job", ".out"))
-      val _runningPath = storage.child(path, runningFile)
-      val _finishedPath = storage.child(path, finishedFile)
+      val script = Workspace.newFile("script", ".sh")
+      try {
+        val outputFilePath = storage.child(path, Storage.uniqName("job", ".out"))
+        val _runningPath = storage.child(path, runningFile)
+        val _finishedPath = storage.child(path, finishedFile)
 
-      val os = script.bufferedOutputStream
-      try generateScript(serializedJob, outputFilePath, Some(_runningPath), Some(_finishedPath), os)
-      finally os.close
+        val os = script.bufferedOutputStream
+        try generateScript(serializedJob, outputFilePath, Some(_runningPath), Some(_finishedPath), os)
+        finally os.close
 
-      //logger.fine(ISource.fromFile(script).mkString)
+        //logger.fine(ISource.fromFile(script).mkString)
 
-      val jobDescription = buildJobDescription(script)
+        val jobDescription = buildJobDescription(script)
 
-      //logger.fine(jobDescription.toJDL)
+        //logger.fine(jobDescription.toJDL)
 
-      val jid = jobService.submit(jobDescription)(authentication)
+        val jid = jobService.submit(jobDescription)(authentication)
 
-      new GliteJob {
-        val jobService = js
-        val storage = serializedJob.storage
-        val finishedPath = _finishedPath
-        val runningPath = _runningPath
-        val id = jid
-        val resultPath = outputFilePath
+        new GliteJob {
+          val jobService = js
+          val storage = serializedJob.storage
+          val finishedPath = _finishedPath
+          val runningPath = _runningPath
+          val id = jid
+          val resultPath = outputFilePath
+        }
       }
+      finally script.delete
     }
-    finally script.delete
   }
 
   protected def buildJobDescription(script: File) =
