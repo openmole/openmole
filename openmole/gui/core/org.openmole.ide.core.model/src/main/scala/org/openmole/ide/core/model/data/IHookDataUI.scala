@@ -42,4 +42,6 @@ trait IHookDataUI extends IDataUI with InputPrototype with OutputPrototype with 
     removeInput(pproxy)
     removeOutput(pproxy)
   }
+
+  def onBuild: Unit = {}
 }
