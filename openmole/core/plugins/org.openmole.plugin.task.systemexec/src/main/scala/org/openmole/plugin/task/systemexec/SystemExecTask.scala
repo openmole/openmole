@@ -112,7 +112,7 @@ sealed abstract class SystemExecTask(
     val osCommandLine: String = command.find { case (_, os) ⇒ os.compatible }.map { case (cmd, _) ⇒ cmd }.getOrElse(throw new UserBadDataError("Not command line found for " + OS.actualOS))
 
     val commandLine =
-      CommandLine.parse(workDir.getAbsolutePath + File.separator + VariableExpansion(context, List(Variable(ExternalTask.PWD, workDir.getAbsolutePath)), osCommandLine))
+      CommandLine.parse(workDir.getAbsolutePath + File.separator + VariableExpansion(context + Variable(ExternalTask.PWD, workDir.getAbsolutePath), osCommandLine))
 
     try {
       val f = new File(commandLine.getExecutable)
