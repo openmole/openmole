@@ -32,6 +32,8 @@ trait IHookDataUI extends IDataUI with InputPrototype with OutputPrototype with 
 
   def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]): IHook
 
+  def executionCoreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]): IHook = coreObject(protoMapping)
+
   def buildPanelUI: IHookPanelUI
 
   def filterPrototypeOccurencies(pproxy: IPrototypeDataProxyUI) = (filterInputs(pproxy) ++ filterOutputs(pproxy)).distinct
@@ -42,6 +44,4 @@ trait IHookDataUI extends IDataUI with InputPrototype with OutputPrototype with 
     removeInput(pproxy)
     removeOutput(pproxy)
   }
-
-  def onBuild: Unit = {}
 }
