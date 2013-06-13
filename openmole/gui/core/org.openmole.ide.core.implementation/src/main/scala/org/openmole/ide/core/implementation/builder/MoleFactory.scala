@@ -50,6 +50,9 @@ object MoleFactory {
     }
   }
 
+  case class HookMapping(val c: ICapsule, val h: IHook)
+  case class SourceMapping(val c: ICapsule, val s: ISource)
+
   def buildMoleExecution(mole: IMole,
                          manager: IMoleUI,
                          capsuleMapping: Map[ICapsuleUI, ICapsule],
@@ -61,16 +64,20 @@ object MoleFactory {
           case _                                  ⇒ Nil
         }
       }
+      val hookMaping = for {
+        c ← capsuleMapping
+        h ← c._1.dataUI.hooks
+      } yield new HookMapping(c._2, h.dataUI.excutionCoreObject(prototypeMapping))
+
+      val sourceMaping = for {
+        c ← capsuleMapping
+        h ← c._1.dataUI.sources
+      } yield new SourceMapping(c._2, h.dataUI.coreObject(prototypeMapping))
 
       (PartialMoleExecution(
         mole,
-        capsuleMapping.flatMap { c ⇒ c._1.dataUI.sources.map { c._2 -> _.dataUI.coreObject(prototypeMapping) } },
-        capsuleMapping.flatMap { c ⇒
-          c._1.dataUI.hooks.map { h ⇒
-            h.dataUI.onBuild
-            c._2 -> h.dataUI.coreObject(prototypeMapping)
-          }
-        },
+        sourceMaping.map { h ⇒ (h.c, h.s) },
+        hookMaping.map { h ⇒ (h.c, h.h) },
         envs.map { case (c, e, _) ⇒ c -> new FixedEnvironmentSelection(e) }.toMap,
         capsuleMapping.flatMap { c ⇒
           c._1.dataUI.grouping match {
