@@ -96,12 +96,8 @@ class Proxies {
     classPrototypes(prototypeClass, prototypes.toList)
 
   def classPrototypes(prototypeClass: Class[_],
-                      protoList: List[IPrototypeDataProxyUI]): List[IPrototypeDataProxyUI] = {
-    val a = protoList.filter {
-      p ⇒
-        assignable(prototypeClass, p.dataUI.coreObject.`type`.runtimeClass)
-    }
-    a
+                      protoList: List[IPrototypeDataProxyUI]): List[IPrototypeDataProxyUI] = protoList.filter {
+    p ⇒ assignable(prototypeClass, p.dataUI.coreObject.`type`.runtimeClass)
   }
 
   def getOrGenerateSamplingComposition(p: ISamplingCompositionDataProxyUI) =
