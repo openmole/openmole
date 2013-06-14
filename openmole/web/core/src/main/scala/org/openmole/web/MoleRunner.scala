@@ -18,6 +18,8 @@ import slick.jdbc.meta.MTable
 
 import org.openmole.misc.tools.io.FromString
 
+import org.openmole.misc.eventdispatcher.EventDispatcher
+
 import Database.threadLocalSession
 
 import javax.sql.rowset.serial.SerialClob
@@ -30,6 +32,8 @@ import org.json4s.{ Formats, DefaultFormats }
 import org.openmole.core.implementation.validation.Validation
 import org.openmole.core.implementation.validation.DataflowProblem.{ MissingSourceInput, MissingInput, WrongType }
 import scala.io.Source
+import org.openmole.core.model.mole.IMoleExecution.JobStatusChanged
+import org.openmole.misc.eventdispatcher.{ Event, EventListener }
 
 @MultipartConfig(maxFileSize = 3 * 1024 * 1024 /*max file size of 3 MiB*/ ) //research scala multipart config
 class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupport with ScalateSupport
@@ -40,6 +44,9 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
   protected implicit def executor: concurrent.ExecutionContext = system.dispatcher
 
   val cachedMoles = new DataHandler[String, IMoleExecution](system)
+  val moleStats = new DataHandler[String, Stats.Stats](system)
+
+  val listener: EventListener[IMoleExecution] = new JobEventListener(moleStats)
 
   def getStatus(exec: IMoleExecution): String = {
     if (!exec.started)
@@ -174,6 +181,9 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
               MoleData.insert((exec.id, getStatus(exec), clob))
             }
             cachedMoles.add(exec.id, exec)
+            EventDispatcher.listen(exec, listener, classOf[IMoleExecution.JobStatusChanged])
+            EventDispatcher.listen(exec, listener, classOf[IMoleExecution.JobCreated])
+
             redirect(url("execs"))
           }
           case (_, error) ⇒ ssp("/createMole", "body" -> "Please upload a serialized mole execution below!", "errors" -> List(error))
@@ -222,6 +232,9 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
         cachedMoles.add(exec.id, exec)
 
+        EventDispatcher.listen(exec, listener, classOf[IMoleExecution.JobStatusChanged])
+        EventDispatcher.listen(exec, listener, classOf[IMoleExecution.JobCreated])
+
         Xml.toJson(<moleID>{ exec.id }</moleID>)
       }
       case (_, error) ⇒ Xml.toJson(<error>{ error }</error>)
@@ -260,13 +273,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
         }
 
         def returnStatusPage(exec: IMoleExecution) = {
-          val pageData = (exec.moleJobs foldLeft Map("Ready" -> 0,
-            "Running" -> 0,
-            "Completed" -> 0,
-            "Failed" -> 0,
-            "Cancelled" -> 0)) {
-              case (statMap, job) ⇒ statMap.updated(job.state.name, statMap(job.state.name) + 1)
-            } + ("id" -> pRams) + ("status" -> getStatus(exec)) + ("totalJobs" -> exec.moleJobs.size)
+          val pageData = (moleStats get exec.id getOrElse Stats.empty) + ("id" -> pRams) + ("status" -> getStatus(exec)) + ("totalJobs" -> exec.moleJobs.size)
 
           ssp("/executionData", pageData.toSeq: _*)
         }
@@ -286,7 +293,8 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
     val pRams = params("id")
 
-    render(("status", cachedMoles get pRams map getStatus getOrElse ("doesn't exist")))
+    render(("status", cachedMoles get pRams map getStatus getOrElse ("doesn't exist")) ~
+      ("stats", moleStats get pRams getOrElse (Stats.empty).toList))
   }
 
   get("/json/execs") {

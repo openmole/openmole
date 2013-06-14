@@ -41,7 +41,7 @@ object MultiPanel {
 import MultiPanel._
 class MultiPanel[D <: IData, P <: IPanel[D]](title: String,
                                              panelFactory: IFactory[D],
-                                             initPanels: List[P],
+                                             initPanels: Seq[P],
                                              minus: Minus = NO_EMPTY,
                                              plus: Plus = ADD) extends MultiWidget(title,
   initPanels.map { p ⇒ new PanelRowWidget(p, plus) },

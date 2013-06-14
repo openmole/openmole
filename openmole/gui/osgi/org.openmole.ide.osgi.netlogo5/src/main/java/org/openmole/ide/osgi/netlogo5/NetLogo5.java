@@ -18,7 +18,12 @@ package org.openmole.ide.osgi.netlogo5;
 
 import org.nlogo.agent.Observer;
 import org.nlogo.agent.World;
+import org.nlogo.api.Syntax;
+import org.nlogo.nvm.Procedure;
 import org.openmole.ide.osgi.netlogo.NetLogo;
+
+import java.util.LinkedList;
+import java.util.Map;
 
 /**
  *
@@ -35,5 +40,13 @@ public class NetLogo5 extends org.openmole.plugin.task.netlogo5.NetLogo5 impleme
             nlGlobalList[i] = world.observerOwnsNameAt(i);
         }
         return nlGlobalList;
+    }
+
+    public String[] reporters() {
+       LinkedList<String> reporters = new LinkedList<String>();
+       for(Map.Entry<String, Procedure> e: workspace.getProcedures().entrySet()) {
+         if(e.getValue().tyype == Procedure.Type.REPORTER) reporters.add(e.getKey());
+       }
+       return reporters.toArray(new String[0]);
     }
 }

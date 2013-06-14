@@ -14,7 +14,7 @@ object Core extends BaseDefaults {
   lazy val all = Project("core-core", dir) aggregate (model, serializer, implementation, batch) //TODO: Replace with aggregators
 
   lazy val model = OsgiProject("org.openmole.core.model", openmoleScope = Some("provided")) dependsOn
-    (provided(eventDispatcher), provided(exception), Misc.tools, provided(updater), provided(Misc.workspace))
+    (eventDispatcher, provided(exception), Misc.tools, provided(updater), provided(Misc.workspace))
 
   lazy val serializer = OsgiProject("org.openmole.core.serializer", openmoleScope = Some("provided")) settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn

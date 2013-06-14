@@ -104,8 +104,8 @@ object Libraries extends Defaults {
   lazy val netlogo5_noscala = OsgiProject("ccl.northwestern.edu.netlogo5.noscala", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("!scala.*", "*")) settings
     (libraryDependencies ++=
-      Seq("ccl.northwestern.edu" % "netlogo" % "5.0.3",
-        "org.picocontainer" % "picocontainer" % "2.8",
+      Seq("ccl.northwestern.edu" % "netlogo" % "5.0.4",
+        "org.picocontainer" % "picocontainer" % "2.13.6",
         "org.objectweb" % "asm-all" % "3.3.1",
         "org.scala-lang" % "scala-library" % "2.9.2"), version := "5.0.3", scalaVersion := "2.9.2")
 
@@ -120,10 +120,10 @@ object Libraries extends Defaults {
   lazy val netlogo5 = OsgiProject("ccl.northwestern.edu.netlogo5", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("*")) settings
     (libraryDependencies ++=
-      Seq("ccl.northwestern.edu" % "netlogo" % "5.0.3",
+      Seq("ccl.northwestern.edu" % "netlogo" % "5.0.4",
         "org.scala-lang" % "scala-library" % "2.9.2",
         "org.objectweb" % "asm-all" % "3.3.1",
-        "org.picocontainer" % "picocontainer" % "2.8"), version := "5.0.3", scalaVersion := "2.9.2")
+        "org.picocontainer" % "picocontainer" % "2.13.6"), version := "5.0.3", scalaVersion := "2.9.2")
 
   lazy val guava = OsgiProject("com.google.guava",
     exports = Seq("com.google.common.*"), privatePackages = Seq("*")) settings (libraryDependencies ++=
