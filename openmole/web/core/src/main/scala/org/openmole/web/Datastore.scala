@@ -7,11 +7,11 @@ import akka.util.Timeout
 import concurrent.Await
 
 class Datastore[T, U] extends Actor {
-  var moleExecs = Map.empty[T, U]
+  var data = Map.empty[T, U]
   def receive = {
-    case ("put", pair: (T, U)) ⇒ moleExecs += pair
-    case ("get", key: T)       ⇒ sender ! moleExecs.get(key)
-    case "getKeys"             ⇒ sender ! moleExecs.keys
+    case ("put", pair: (T, U)) ⇒ data += pair
+    case ("get", key: T)       ⇒ sender ! data.get(key)
+    case "getKeys"             ⇒ sender ! data.keys
   }
 }
 
