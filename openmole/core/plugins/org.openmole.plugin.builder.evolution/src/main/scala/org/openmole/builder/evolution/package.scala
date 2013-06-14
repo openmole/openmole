@@ -175,7 +175,7 @@ package object evolution {
     val breedingCaps = Capsule(breedTask)
     val breedingCapsItSlot = Slot(breedingCaps)
 
-    val scalingCaps = Capsule(scalingGenomeTask)
+    val scalingGenomeCaps = Capsule(scalingGenomeTask)
     val toIndividualSlot = Slot(InputStrainerCapsule(toIndividualTask))
     val mergeIndividualsSlot = Slot(Capsule(mergeIndividualsTask))
     val mergeArchiveSlot = Slot(Capsule(mergeArchiveTask))
@@ -188,17 +188,17 @@ package object evolution {
     val scalingIndividualsSlot = Slot(Capsule(scalingIndividualsTask))
     val endSlot = Slot(StrainerCapsule(EmptyTask(name + "End")))
 
-    val exploration = firstCapsule -- breedingCaps -< scalingCaps -- model -- toIndividualSlot >- (mergeArchiveSlot, renameIndividualsTask -- mergeIndividualsSlot)
-    val skel = exploration -- elitismSlot -- terminationSlot -- scalingIndividualsSlot -- (endSlot, terminatedCondition)
+    val exploration = firstCapsule -- breedingCaps -< scalingGenomeCaps -- (model, filter = Block(genome)) -- toIndividualSlot >- (mergeArchiveSlot, renameIndividualsTask -- mergeIndividualsSlot)
+    val skel = exploration -- elitismSlot -- terminationSlot -- scalingIndividualsSlot -- (endSlot, terminatedCondition, filter = Keep(individual.toArray))
 
     val loop = terminationSlot -- (breedingCapsItSlot, !terminatedCondition)
 
     val dataChannels =
-      (scalingCaps -- (toIndividualSlot, filter = Keep((inputs.map(_._1) ++ List(genome)).map(_.name).toSeq: _*))) +
+      (scalingGenomeCaps -- (toIndividualSlot, filter = Keep(genome))) +
         (breedingCaps -- (mergeArchiveSlot, filter = Keep(archive))) +
         (breedingCaps -- (mergeIndividualsSlot, filter = Keep(individual.toArray))) +
-        (breedingCaps oo (model.first, filter = Block(archive, individual.toArray))) +
-        (breedingCaps -- (endSlot, filter = Block(archive, individual.toArray, state, generation, terminated))) +
+        (breedingCaps oo (model.first, filter = Block(archive, individual.toArray, genome.toArray))) +
+        (breedingCaps -- (endSlot, filter = Block(archive, individual.toArray, state, generation, terminated, genome.toArray))) +
         (breedingCaps -- (terminationSlot, filter = Block(archive, individual.toArray))) +
         (mergeArchiveSlot -- (terminationSlot, filter = Keep(archive)))
 
@@ -256,7 +256,7 @@ package object evolution {
         (mergeArchiveCaps, renameIndividualsTask -- mergeIndividualsCaps) --
         elitismCaps --
         terminationSlot --
-        scalingIndividualsSlot >| (endCapsule, terminatedCondition)
+        scalingIndividualsSlot >| (endCapsule, terminatedCondition, filter = Keep(individual.toArray))
 
     val loop =
       scalingIndividualsSlot --
@@ -264,7 +264,7 @@ package object evolution {
         scalingCaps
 
     val dataChannels =
-      (scalingCaps -- (toIndividualSlot, filter = Keep((inputs.map(_._1) ++ List(genome)).map(_.name).toSeq: _*))) +
+      (scalingCaps -- (toIndividualSlot, filter = Keep(genome))) +
         (firstCapsule oo (model.first, filter = Block(archive, individual.toArray))) +
         (firstCapsule -- (endCapsule, filter = Block(archive, individual.toArray))) +
         (firstCapsule oo (mergeArchiveCaps, filter = Keep(archive))) +
