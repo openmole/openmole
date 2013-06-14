@@ -57,15 +57,20 @@ object ScenesManager {
 
   def invalidateSelection = _selection.single() = None
 
-  def invalidateMoles = moleScenes.foreach { _.manager.invalidateCache }
+  def invalidateMoles = moleScenes.foreach {
+    _.manager.invalidateCache
+  }
 
-  def selection = atomic { implicit actx ⇒
-    _selection() match {
-      case Some(_) ⇒
-      case None ⇒
-        _selection() = Some(capsules.filter { _.selected })
-    }
-    _selection().get
+  def selection = atomic {
+    implicit actx ⇒
+      _selection() match {
+        case Some(_) ⇒
+        case None ⇒
+          _selection() = Some(capsules.filter {
+            _.selected
+          })
+      }
+      _selection().get
   }
 
   PasswordListner.apply
@@ -104,7 +109,9 @@ object ScenesManager {
     case _                                ⇒ throw new UserBadDataError("There is no current samplingMap panel")
   }
 
-  def closePropertyPanel = List(currentScene).flatten.foreach { _.closePropertyPanels }
+  def closePropertyPanel = List(currentScene).flatten.foreach {
+    _.closePropertyPanels
+  }
 
   def changeSelection(widget: ICapsuleUI) = {
     widget.selected = !widget.selected
@@ -122,18 +129,25 @@ object ScenesManager {
   }
 
   def clearSelection = {
-    selection.foreach { _.selected = false }
+    selection.foreach {
+      _.selected = false
+    }
     invalidateSelection
   }
 
   def pasteCapsules(ms: IBuildMoleScene,
                     point: Point) = {
-    val copied = selection.map { z ⇒
-      z -> z.copy(ms)
+    val copied = selection.map {
+      z ⇒
+        z -> z.copy(ms)
     }.toMap
 
-    val dx = (point.x - selection.map { _.widget.getPreferredLocation.x }.min).toInt
-    val dy = (point.y - selection.map { _.widget.getPreferredLocation.y }.min).toInt
+    val dx = (point.x - selection.map {
+      _.widget.getPreferredLocation.x
+    }.min).toInt
+    val dy = (point.y - selection.map {
+      _.widget.getPreferredLocation.y
+    }.min).toInt
 
     copied.foreach {
       case (old, neo) ⇒
@@ -148,29 +162,36 @@ object ScenesManager {
       case _ ⇒
     }
 
-    val islots = selection.flatMap { _.islots }
+    val islots = selection.flatMap {
+      _.islots
+    }
     selection.headOption match {
       case Some(c: ICapsuleUI) ⇒
         val connectors = c.scene.manager.connectors.values.toList
-        connectors.foreach { con ⇒
-          if (selection.contains(con.source) && islots.contains(con.target)) {
-            con match {
-              case (t: ITransitionUI) ⇒
-                val transition = new TransitionUI(
-                  copied(t.source)._1,
-                  copied(t.target.capsule)._1.islots.find { s ⇒ t.target.index == s.index }.get,
-                  t.transitionType,
-                  t.condition,
-                  t.filteredPrototypes)
-                ms.add(transition)
-              case (t: IDataChannelUI) ⇒
-                val dc = new DataChannelUI(
-                  copied(t.source)._1,
-                  copied(t.target.capsule)._1.islots.find { s ⇒ t.target.index == s.index }.get,
-                  t.filteredPrototypes)
-                ms.add(dc)
+        connectors.foreach {
+          con ⇒
+            if (selection.contains(con.source) && islots.contains(con.target)) {
+              con match {
+                case (t: ITransitionUI) ⇒
+                  val transition = new TransitionUI(
+                    copied(t.source)._1,
+                    copied(t.target.capsule)._1.islots.find {
+                      s ⇒ t.target.index == s.index
+                    }.get,
+                    t.transitionType,
+                    t.condition,
+                    t.filteredPrototypes)
+                  ms.add(transition)
+                case (t: IDataChannelUI) ⇒
+                  val dc = new DataChannelUI(
+                    copied(t.source)._1,
+                    copied(t.target.capsule)._1.islots.find {
+                      s ⇒ t.target.index == s.index
+                    }.get,
+                    t.filteredPrototypes)
+                  ms.add(dc)
+              }
             }
-          }
         }
         ms.refresh
       case _ ⇒
@@ -184,9 +205,13 @@ object ScenesManager {
     case _                        ⇒ None
   }
 
-  def moleScenes = buildMoleSceneContainers.map { _.scene }
+  def moleScenes = buildMoleSceneContainers.map {
+    _.scene
+  }
 
-  def capsules: List[ICapsuleUI] = moleScenes.map { _.manager.capsules.values }.toList.flatten
+  def capsules: List[ICapsuleUI] = moleScenes.map {
+    _.manager.capsules.values
+  }.toList.flatten
 
   def capsules(p: ITaskDataProxyUI) = moleScenes.flatMap {
     _.manager.capsules.values
@@ -200,12 +225,23 @@ object ScenesManager {
     _.manager.capsules.values
   }.filter {
     _.dataUI.task.isDefined
-  }.flatMap { c ⇒
-    c.dataUI.task.get.dataUI match {
-      case x: IExplorationTaskDataUI ⇒ List((c, x))
-      case _                         ⇒ Nil
-    }
+  }.flatMap {
+    c ⇒
+      c.dataUI.task.get.dataUI match {
+        case x: IExplorationTaskDataUI ⇒ List((c, x))
+        case _                         ⇒ Nil
+      }
   }.toList
+
+  def transitions = moleScenes.flatMap {
+    _.manager.connectors.values
+  }.flatMap {
+    _ match {
+      case t: ITransitionUI ⇒ Some(t)
+      case _                ⇒ None
+    }
+  }
+    .toList
 
   def addBuildSceneContainer: BuildMoleSceneContainer = addBuildSceneContainer(BuildMoleScene(""))
 
@@ -228,7 +264,9 @@ object ScenesManager {
       case Success(_) ⇒
         if (StatusBar().isValid) {
           val clone = bmsc.scene.copyScene
-          clone.manager.name = { bmsc.scene.manager.name + "_" + countExec.incrementAndGet }
+          clone.manager.name = {
+            bmsc.scene.manager.name + "_" + countExec.incrementAndGet
+          }
           val page = new TabbedPane.Page(clone.manager.name, new MigPanel(""))
           val container = new ExecutionMoleSceneContainer(clone, page, bmsc)
           page.content = container
