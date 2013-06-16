@@ -51,5 +51,8 @@ object FileDeleter {
 
   def assynchonousRemove(file: File) = cleanFiles.add(file)
 
-  def deleteWhenGarbageCollected(file: File) = deleters += file -> new DeleteOnFinalize(file.getAbsolutePath)
+  def deleteWhenGarbageCollected(file: File): File = {
+    deleters += file -> new DeleteOnFinalize(file.getAbsolutePath)
+    file
+  }
 }
