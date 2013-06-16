@@ -81,7 +81,7 @@ object DialogFactory {
 
   def deleteProxyConfirmation(proxy: IDataProxyUI) = confirmationDialog("Execution warning", "<html>" + proxy.dataUI.name + " is currently used in a scene or by an other component.<br>" +
     "It will be deleted everywhere it appears. <br>" +
-    "Delete anyway ?")
+    "Delete anyway ?</html>")
 
   def closePropertyPanelConfirmation(panel: BasePanel): Boolean = confirmationDialog("Warning",
     "<html> The property panel " + panel.nameTextField.text + " has not been created yet.<br>" +

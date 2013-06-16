@@ -24,8 +24,11 @@ import java.awt.Frame
 import javax.swing.UIManager
 import javax.swing.plaf.ColorUIResource
 import org.openmole.ide.misc.tools.image.Images._
+import org.openmole.ide.core.implementation.action.SaveXML
+import java.util.concurrent.Semaphore
 
-class GUIApplication { application ⇒
+class GUIApplication {
+  application ⇒
 
   val font = new Font("Ubuntu", Font.PLAIN, 12)
   val fontBold = new Font("Ubuntu", Font.BOLD, 12)
@@ -40,10 +43,14 @@ class GUIApplication { application ⇒
 
   val frame =
     new GUIPanel {
+      import javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE
+      peer.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE)
+
       iconImage = APPLICATION_ICON.getImage
+
       override def closeOperation = {
-        super.closeOperation
         application.closeOperation
+        super.closeOperation
       }
     }
 
@@ -53,5 +60,7 @@ class GUIApplication { application ⇒
     frame.visible = true
   }
 
-  def closeOperation: Unit = {}
+  def closeOperation: Unit =
+    if (DialogFactory.confirmationDialog(" Exit OpenMOLE", "<html>You are exiting the OpenMOLE application.<br>Save the project ?</html>"))
+      SaveXML.save(frame)
 }
