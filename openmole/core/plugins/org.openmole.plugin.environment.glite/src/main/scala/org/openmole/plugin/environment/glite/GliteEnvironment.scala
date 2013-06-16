@@ -206,8 +206,7 @@ class GliteEnvironment(
 
   @transient lazy val authentication = GliteAuthentication.get match {
     case Some(a) ⇒
-      val file = Workspace.newFile("proxy", ".x509")
-      FileDeleter.deleteWhenGarbageCollected(file)
+      val file = FileDeleter.deleteWhenGarbageCollected(Workspace.newFile("proxy", ".x509"))
       GliteAuthentication.initialise(a)(
         vomsURL,
         voName,
