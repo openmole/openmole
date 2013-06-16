@@ -15,9 +15,18 @@ case "$JVMVERSION" in
   *64-Bit*) FLAG="-XX:+UseCompressedOops";;
 esac
 
+SPLASHSCREEN="-splash:$LOCATION/splashscreen.png"
+
+for ARG in $@
+do
+  if [[ $ARG == "-c" || $ARG == "-ws" ]]; then SPLASHSCREEN=""; fi
+done
+
+
 CONFIGDIR=$LOCATION/$RANDOM
 
-java -Dosgi.locking=none -Dopenmole.location=${LOCATION} -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area=${CONFIGDIR} -splash:$LOCATION/splashscreen.png -Xmx${MEM} $FLAG -XX:MaxPermSize=128M -XX:+UseParallelGC \
+
+java -Dosgi.locking=none -Dopenmole.location=${LOCATION} -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area=${CONFIGDIR} $SPLASHSCREEN -Xmx${MEM} $FLAG -XX:MaxPermSize=128M -XX:+UseParallelGC \
      -jar $LOCATION/plugins/org.eclipse.equinox.launcher.jar \
      -cp $LOCATION/openmole-plugins -gp $LOCATION/openmole-plugins-gui "$@"
 
