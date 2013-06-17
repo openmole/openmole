@@ -73,8 +73,8 @@ object Libraries extends Defaults {
         "org.scala-lang" % "scala-actors" % sV,
         "org.scala-lang" % "scala-compiler" % sV,
         "org.scala-lang" % "jline" % sV,
-        "com.typesafe.akka" %% "akka-actor" % "2.1.1",
-        "com.typesafe.akka" %% "akka-transactor" % "2.1.1",
+        "com.typesafe.akka" %% "akka-actor" % "2.1.4",
+        "com.typesafe.akka" %% "akka-transactor" % "2.1.4",
         "com.typesafe" % "config" % "1.0.0")
     })
 
