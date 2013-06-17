@@ -26,7 +26,7 @@ done
 CONFIGDIR=$LOCATION/$RANDOM
 
 
-java -Dosgi.locking=none -Dopenmole.location=${LOCATION} -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area=${CONFIGDIR} $SPLASHSCREEN -Xmx${MEM} $FLAG -XX:MaxPermSize=128M -XX:+UseParallelGC \
+java -Dosgi.locking=none -Dopenmole.location=${LOCATION} -Dosgi.classloader.singleThreadLoads=true  -Dosgi.configuration.area=${CONFIGDIR} $SPLASHSCREEN -Xmx${MEM} $FLAG -XX:MaxPermSize=128M -XX:+UseG1GC \
      -jar $LOCATION/plugins/org.eclipse.equinox.launcher.jar \
      -cp $LOCATION/openmole-plugins -gp $LOCATION/openmole-plugins-gui "$@"
 
