@@ -93,7 +93,7 @@ fi
 
 CLASSPATH=$CLASSPATH_PREFIX:"$BASEDIR"/etc:"$REPO"/*
 echo $CLASSPATH
-EXTRA_JVM_ARGUMENTS=""
+EXTRA_JVM_ARGUMENTS="-XX:+UseG1GC"
 
 # For Cygwin, switch paths to Windows format before running java
 if $cygwin; then
