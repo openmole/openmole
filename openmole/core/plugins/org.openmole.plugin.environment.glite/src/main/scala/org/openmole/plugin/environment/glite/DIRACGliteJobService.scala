@@ -27,6 +27,7 @@ import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.core.batch.jobservice.{ BatchJobId, BatchJob }
 import org.openmole.core.batch.control.LimitedAccess
 import StatusFiles._
+import scalax.io.Resource
 
 trait DIRACGliteJobService extends GridScaleJobService with JobScript with LimitedAccess { js ⇒
 
@@ -44,9 +45,7 @@ trait DIRACGliteJobService extends GridScaleJobService with JobScript with Limit
       val _runningPath = storage.child(path, runningFile)
       val _finishedPath = storage.child(path, finishedFile)
 
-      val os = script.bufferedOutputStream
-      try generateScript(serializedJob, outputFilePath, Some(_runningPath), Some(_finishedPath), os)
-      finally os.close
+      Resource.fromFile(script).write(generateScript(serializedJob, outputFilePath, Some(_runningPath), Some(_finishedPath)))
 
       val jobDescription = new DIRACJobDescription {
         def inputSandbox = Seq(script)

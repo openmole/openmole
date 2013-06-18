@@ -75,7 +75,8 @@ object Libraries extends Defaults {
         "org.scala-lang" % "jline" % sV,
         "com.typesafe.akka" %% "akka-actor" % "2.1.4",
         "com.typesafe.akka" %% "akka-transactor" % "2.1.4",
-        "com.typesafe" % "config" % "1.0.0")
+        "com.typesafe" % "config" % "1.0.0",
+        "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.2")
     })
 
   lazy val jodaTime = OsgiProject("org.joda.time") settings (libraryDependencies += "joda-time" % "joda-time" % "1.6")

@@ -18,11 +18,10 @@
 package org.openmole.plugin.environment.glite
 
 import org.openmole.core.batch.environment.{ BatchEnvironment, SerializedJob }
-import java.io.{ OutputStream, PrintStream }
 import java.util.UUID
 import java.net.URI
 import org.openmole.misc.workspace.Workspace
-import org.openmole.core.batch.storage.StorageService
+import scala.collection.mutable.ListBuffer
 
 trait JobScript {
 
@@ -34,66 +33,59 @@ trait JobScript {
     serializedJob: SerializedJob,
     resultPath: String,
     runningPath: Option[String],
-    finishedPath: Option[String],
-    os: OutputStream) = {
+    finishedPath: Option[String]) = {
     import serializedJob._
-
-    val writter = new PrintStream(os)
 
     assert(runtime.runtime.path != null)
 
-    runningPath.foreach { path ⇒ writter.print(touch(storage.url.resolve(path))) }
-    writter.print("BASEPATH=$PWD; CUR=$PWD/ws$RANDOM; while test -e $CUR; do CUR=$PWD/ws$RANDOM;done;mkdir $CUR; export HOME=$CUR; cd $CUR; export OPENMOLE_HOME=$CUR; ")
-    writter.print("if [ `uname -m` = x86_64 ]; then ")
-    writter.print(lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz")) //, homeCacheDir, runtime.jvmLinuxX64.hash))
-    writter.print("; else ")
-    writter.print(lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz")) //, homeCacheDir, runtime.jvmLinuxI386.hash))
-    writter.print("; fi; ")
-    writter.print("tar -xzf jvm.tar.gz >/dev/null; rm -f jvm.tar.gz; ")
-    writter.print(lcgCpGunZipCmd(storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")) //, homeCacheDir, runtime.runtime.hash))
-    writter.print("; tar -xzf openmole.tar.gz >/dev/null; rm -f openmole.tar.gz; ")
-    writter.print("mkdir envplugins; PLUGIN=0;")
+    val script = ListBuffer[String]()
+
+    script ++= runningPath.map(p ⇒ touch(storage.url.resolve(p)))
+    script += "BASEPATH=$PWD"
+    script += "CUR=$PWD/ws$RANDOM"
+    script += "( while test -e $CUR; do CUR=$PWD/ws$RANDOM; done )"
+    script += "mkdir $CUR"
+    script += "export HOME=$CUR"
+    script += "cd $CUR"
+    script += "export OPENMOLE_HOME=$CUR"
+    script +=
+      "( if [ `uname -m` = x86_64 ]; then " +
+      lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz") + "; else "
+    lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz") + "; fi )"
+    script += "tar -xzf jvm.tar.gz >/dev/null"
+    script += "rm -f jvm.tar.gz"
+    script += lcgCpGunZipCmd(storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")
+    script += "tar -xzf openmole.tar.gz >/dev/null"
+    script += "rm -f openmole.tar.gz"
+    script += "mkdir envplugins"
+    script += "PLUGIN=0"
 
     for (plugin ← runtime.environmentPlugins) {
       assert(plugin.path != null)
-      writter.print(lcgCpGunZipCmd(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin$PLUGIN.jar")) //, homeCacheDir, plugin.hash))
-      writter.print("; PLUGIN=`expr $PLUGIN + 1`; ")
+      script += lcgCpGunZipCmd(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin$PLUGIN.jar")
+      script += "PLUGIN=`expr $PLUGIN + 1`"
     }
 
-    writter.print(lcgCpCmd(storage.url.resolve(runtime.storage.path), "$CUR/storage.xml.gz"))
+    script += lcgCpCmd(storage.url.resolve(runtime.storage.path), "$CUR/storage.xml.gz")
+    script += "export PATH=$PWD/jre/bin:$PATH"
+    script += "/bin/sh run.sh " + environment.openMOLEMemoryValue + "m " + UUID.randomUUID + " -c " +
+      path + " -s $CUR/storage.xml.gz -p $CUR/envplugins/ -i " + inputFile + " -o " + resultPath +
+      " -t " + environment.threadsValue
+    script ++= finishedPath.map { p ⇒ touch(storage.url.resolve(p)) }
 
-    writter.print(" ; export PATH=$PWD/jre/bin:$PATH; /bin/sh run.sh ")
-    writter.print(environment.openMOLEMemoryValue)
-    writter.print("m ")
-    writter.print(UUID.randomUUID)
-    writter.print(" -c ")
-    writter.print(path)
-    writter.print(" -s $CUR/storage.xml.gz ")
-    writter.print(" -p $CUR/envplugins/ ")
-    writter.print(" -i ")
-    writter.print(inputFile)
-    writter.print(" -o ")
-    writter.print(resultPath)
-    writter.print(" -t ")
-    writter.print(environment.threadsValue)
-    writter.print("; ")
-    finishedPath.foreach { path ⇒ writter.print(touch(storage.url.resolve(path))) }
-    writter.print("cd .. ; rm -rf $CUR ; ")
+    val openmole = script.mkString(" && ")
+    val clean = "cd .. &&  rm -rf $CUR"
+
+    "( " + openmole + " ); RETURNCODE=$?; ( " + clean + " ); exit $RETURNCODE"
   }
 
   protected def touch(dest: URI) = {
     val name = UUID.randomUUID.toString
-    s"touch $name; ${lcgCpCmd(name, dest)}; rm $name; "
+    s"( touch $name  && ${lcgCpCmd(name, dest)} && rm $name )"
   }
 
-  protected def lcgCpGunZipCmd(from: URI, to: String) = {
-    val builder = new StringBuilder
-    builder.append(lcgCpCmd(from, to + ".gz"))
-    builder.append(" && gunzip ")
-    builder.append(to)
-    builder.append(".gz ")
-    builder.toString
-  }
+  protected def lcgCpGunZipCmd(from: URI, to: String) =
+    s"( ${lcgCpCmd(from, to + ".gz")} && gunzip $to.gz )"
 
   @transient lazy val lcgCp =
     s"lcg-cp --vo ${environment.voName} --checksum --connect-timeout $getTimeOut --sendreceive-timeout $getTimeOut --srm-timeout $getTimeOut "

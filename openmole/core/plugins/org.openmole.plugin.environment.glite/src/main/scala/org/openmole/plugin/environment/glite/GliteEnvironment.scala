@@ -213,7 +213,7 @@ class GliteEnvironment(
         file,
         proxyTime.toSeconds,
         fqan).cache(proxyRenewalDelay)
-    case None ⇒ throw new UserBadDataError("No athentication has been initialized for glite.")
+    case None ⇒ throw new UserBadDataError("No authentication has been initialized for glite.")
   }
 
   def delegate = jobServices.foreach { _.delegated = false }
