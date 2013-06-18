@@ -43,7 +43,7 @@ trait JobScript {
 
       script += "BASEPATH=$PWD"
       script += "CUR=$PWD/ws$RANDOM"
-      script += "( while test -e $CUR; do CUR=$PWD/ws$RANDOM; done )"
+      script += "( while test -e $CUR; do export CUR=$PWD/ws$RANDOM; done )"
       script += "mkdir $CUR"
       script += "export HOME=$CUR"
       script += "cd $CUR"
