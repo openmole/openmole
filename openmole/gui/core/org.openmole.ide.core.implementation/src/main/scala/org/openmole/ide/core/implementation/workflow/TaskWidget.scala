@@ -23,12 +23,12 @@ import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow._
 import java.awt._
 import scala.swing.Panel
+import swing.event.MouseClicked
 
 class TaskWidget(scene: IMoleScene,
                  val capsule: ICapsuleUI) extends Panel {
   peer.setLayout(new BorderLayout)
   preferredSize = new Dimension(TASK_CONTAINER_WIDTH, TASK_CONTAINER_HEIGHT)
-
   override def paint(g: Graphics2D) = {
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
       RenderingHints.VALUE_ANTIALIAS_ON)
@@ -51,10 +51,6 @@ class TaskWidget(scene: IMoleScene,
   }
 
   def backColor = {
-
-    val start = new Point(0, 0)
-    val end = new Point(0, preferredSize.height)
-    val dist = Array(0.0f, preferredSize.height * 0.5f, preferredSize.height * 0.8f)
     capsule.dataUI.task match {
       case Some(x: ITaskDataProxyUI) ⇒
         scene match {

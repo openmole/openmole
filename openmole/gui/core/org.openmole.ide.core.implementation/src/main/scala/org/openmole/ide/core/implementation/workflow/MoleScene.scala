@@ -199,14 +199,13 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
   }
 
   def displayPropertyPanel(compositionSamplingWidget: ISamplingCompositionWidget): IBasePanel = {
-    val ff = firstFree
-    removeAll(ff)
+    saveAndClose(1)
     val p = compositionSamplingWidget match {
-      case s: ISamplingWidget ⇒ new SamplingPanel(s, this, ff)
-      case f: IDomainWidget   ⇒ new DomainPanel(f, this, ff)
+      case s: ISamplingWidget ⇒ new SamplingPanel(s, this, 1)
+      case f: IDomainWidget   ⇒ new DomainPanel(f, this, 1)
     }
-    currentPanels(ff).contents += p
-    locate(ff)
+    currentPanels(1).contents += p
+    locate(1)
     refresh
     p
   }
@@ -240,11 +239,11 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
           case x: BasePanel ⇒
             if (!x.created) {
               if (DialogFactory.closePropertyPanelConfirmation(x)) {
-                saveAndClose(x, i)
+                saveAndClose(i)
               }
             }
             else {
-              saveAndClose(x, i)
+              saveAndClose(i)
             }
           case _ ⇒
         }
@@ -259,7 +258,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
     refresh
   }
 
-  def saveAndClose(x: BasePanel, i: Int) = {
+  def saveAndClose(i: Int) = {
     savePropertyPanel(i)
     removeAll(i)
   }
