@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.glite
 
-import org.openmole.core.batch.environment.{ BatchEnvironment, SerializedJob }
+import org.openmole.core.batch.environment.{BatchEnvironment, SerializedJob}
 import java.util.UUID
 import java.net.URI
 import org.openmole.misc.workspace.Workspace
@@ -30,53 +30,75 @@ trait JobScript {
   }
 
   protected def generateScript(
-    serializedJob: SerializedJob,
-    resultPath: String,
-    runningPath: Option[String],
-    finishedPath: Option[String]) = {
+                                serializedJob: SerializedJob,
+                                resultPath: String,
+                                runningPath: Option[String],
+                                finishedPath: Option[String]) = {
     import serializedJob._
 
     assert(runtime.runtime.path != null)
 
-    val script = ListBuffer[String]()
+    val init = {
+      val script = ListBuffer[String]()
 
-    script ++= runningPath.map(p ⇒ touch(storage.url.resolve(p)))
-    script += "BASEPATH=$PWD"
-    script += "CUR=$PWD/ws$RANDOM"
-    script += "( while test -e $CUR; do CUR=$PWD/ws$RANDOM; done )"
-    script += "mkdir $CUR"
-    script += "export HOME=$CUR"
-    script += "cd $CUR"
-    script += "export OPENMOLE_HOME=$CUR"
-    script +=
-      "( if [ `uname -m` = x86_64 ]; then " +
-      lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz") + "; else " +
-      lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz") + "; fi )"
-    script += "tar -xzf jvm.tar.gz >/dev/null"
-    script += "rm -f jvm.tar.gz"
-    script += lcgCpGunZipCmd(storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")
-    script += "tar -xzf openmole.tar.gz >/dev/null"
-    script += "rm -f openmole.tar.gz"
-    script += "mkdir envplugins"
-    script += "PLUGIN=0"
+      script += "BASEPATH=$PWD"
+      script += "CUR=$PWD/ws$RANDOM"
+      script += "( while test -e $CUR; do CUR=$PWD/ws$RANDOM; done )"
+      script += "mkdir $CUR"
+      script += "export HOME=$CUR"
+      script += "cd $CUR"
+      script += "export OPENMOLE_HOME=$CUR"
 
-    for (plugin ← runtime.environmentPlugins) {
-      assert(plugin.path != null)
-      script += lcgCpGunZipCmd(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin$PLUGIN.jar")
-      script += "PLUGIN=`expr $PLUGIN + 1`"
+      runningPath.map(p ⇒ touch(storage.url.resolve(p))) + "; " + script.mkString(" && ")
     }
 
-    script += lcgCpCmd(storage.url.resolve(runtime.storage.path), "$CUR/storage.xml.gz")
-    script += "export PATH=$PWD/jre/bin:$PATH"
-    script += "/bin/sh run.sh " + environment.openMOLEMemoryValue + "m " + UUID.randomUUID + " -c " +
-      path + " -s $CUR/storage.xml.gz -p $CUR/envplugins/ -i " + inputFile + " -o " + resultPath +
-      " -t " + environment.threadsValue
-    script ++= finishedPath.map { p ⇒ touch(storage.url.resolve(p)) }
+    val install = {
+      val script = ListBuffer[String]()
 
-    val openmole = script.mkString(" && ")
-    val clean = "cd .. &&  rm -rf $CUR"
 
-    "( " + openmole + " ); RETURNCODE=$?; ( " + clean + " ); exit $RETURNCODE"
+      script +=
+        "( if [ `uname -m` = x86_64 ]; then " +
+          lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz") + "; else " +
+          lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz") + "; fi )"
+      script += "tar -xzf jvm.tar.gz >/dev/null"
+      script += "rm -f jvm.tar.gz"
+      script += lcgCpGunZipCmd(storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")
+      script += "tar -xzf openmole.tar.gz >/dev/null"
+      script += "rm -f openmole.tar.gz"
+      script.mkString(" && ")
+    }
+
+    val dl = {
+      val script = ListBuffer[String]()
+
+      script += "mkdir envplugins"
+
+      for {(plugin, index) ← runtime.environmentPlugins.zipWithIndex} {
+        assert(plugin.path != null)
+        script += lcgCpGunZipCmd(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar")
+      }
+
+      script += lcgCpCmd(storage.url.resolve(runtime.storage.path), "$CUR/storage.xml.gz")
+
+      "mkdir envplugins && ( " + script.mkString(" || ") + " )"
+    }
+
+    val run = {
+      val script = ListBuffer[String]()
+
+      script += "export PATH=$PWD/jre/bin:$PATH"
+      script += "/bin/sh run.sh " + environment.openMOLEMemoryValue + "m " + UUID.randomUUID + " -c " +
+        path + " -s $CUR/storage.xml.gz -p $CUR/envplugins/ -i " + inputFile + " -o " + resultPath +
+        " -t " + environment.threadsValue
+      script.mkString(" && ")
+    }
+
+    val finish =
+      finishedPath.map {
+        p ⇒ touch(storage.url.resolve(p))
+      } + "; ( cd .. &&  rm -rf $CUR )"
+
+    "( " + init + " ) && ( " + install + " || " + dl + " ) && ( + " + run + " ); RETURNCODE=$?; ( " + finish + " ); exit $RETURNCODE;"
   }
 
   protected def touch(dest: URI) = {
@@ -91,6 +113,7 @@ trait JobScript {
     s"lcg-cp --vo ${environment.voName} --checksum --connect-timeout $getTimeOut --sendreceive-timeout $getTimeOut --srm-timeout $getTimeOut "
 
   protected def lcgCpCmd(from: String, to: URI) = s"$lcgCp file:$from ${to.toString}"
+
   protected def lcgCpCmd(from: URI, to: String) = s"$lcgCp ${from.toString} file:$to"
 
   private def getTimeOut = Workspace.preferenceAsDuration(GliteEnvironment.RemoteTimeout).toSeconds.toString

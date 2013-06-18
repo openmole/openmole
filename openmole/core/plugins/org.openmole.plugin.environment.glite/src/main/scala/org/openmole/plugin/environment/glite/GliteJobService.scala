@@ -78,7 +78,7 @@ trait GliteJobService extends GridScaleJobService with JobServiceQualityControl 
 
         Resource.fromFile(script).write(generateScript(serializedJob, outputFilePath, Some(_runningPath), Some(_finishedPath)))
 
-         val jobDescription = buildJobDescription(script)
+        val jobDescription = buildJobDescription(script)
 
         //logger.fine(jobDescription.toJDL)
 
