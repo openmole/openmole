@@ -64,7 +64,7 @@ object Libraries extends Defaults {
 
   lazy val objenesis = OsgiProject("org.objenesis") settings (libraryDependencies += "org.objenesis" % "objenesis" % "1.2")
 
-  lazy val scalaLang = OsgiProject("org.scala-lang.scala-library", exports = Seq("akka.*", "com.typesafe.*", "scala.*"),
+  lazy val scalaLang = OsgiProject("org.scala-lang.scala-library", exports = Seq("akka.*", "com.typesafe.*", "scala.*", "scalax.*"),
     privatePackages = Seq("*"), buddyPolicy = Some("global")
   ) settings
     (libraryDependencies <++= (scalaVersion) { sV ⇒
