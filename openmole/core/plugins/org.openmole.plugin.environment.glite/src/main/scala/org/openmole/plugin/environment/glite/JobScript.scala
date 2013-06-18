@@ -50,8 +50,8 @@ trait JobScript {
     script += "export OPENMOLE_HOME=$CUR"
     script +=
       "( if [ `uname -m` = x86_64 ]; then " +
-      lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz") + "; else "
-    lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz") + "; fi )"
+      lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz") + "; else " +
+      lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz") + "; fi )"
     script += "tar -xzf jvm.tar.gz >/dev/null"
     script += "rm -f jvm.tar.gz"
     script += lcgCpGunZipCmd(storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")
