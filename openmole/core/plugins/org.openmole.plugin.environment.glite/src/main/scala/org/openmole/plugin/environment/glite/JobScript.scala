@@ -43,7 +43,7 @@ trait JobScript {
 
       script += "BASEPATH=$PWD"
       script += "CUR=$PWD/ws$RANDOM"
-      script += "( while test -e $CUR; do export CUR=$PWD/ws$RANDOM; done )"
+      script += "while test -e $CUR; do export CUR=$PWD/ws$RANDOM; done"
       script += "mkdir $CUR"
       script += "export HOME=$CUR"
       script += "cd $CUR"
@@ -56,15 +56,15 @@ trait JobScript {
       val script = ListBuffer[String]()
 
       script +=
-        "( if [ `uname -m` = x86_64 ]; then " +
+        "if [ `uname -m` = x86_64 ]; then " +
         lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz") + "; else " +
-        lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz") + "; fi )"
+        lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz") + "; fi"
       script += "tar -xzf jvm.tar.gz >/dev/null"
       script += "rm -f jvm.tar.gz"
       script += lcgCpGunZipCmd(storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")
       script += "tar -xzf openmole.tar.gz >/dev/null"
       script += "rm -f openmole.tar.gz"
-      background(script.mkString(" && "))
+      script.mkString(" && ")
     }
 
     val dl = {
@@ -72,12 +72,12 @@ trait JobScript {
 
       for { (plugin, index) ← runtime.environmentPlugins.zipWithIndex } {
         assert(plugin.path != null)
-        script += background(lcgCpGunZipCmd(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar"))
+        script += lcgCpGunZipCmd(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar")
       }
 
-      script += background(lcgCpCmd(storage.url.resolve(runtime.storage.path), "$CUR/storage.xml.gz"))
+      script += lcgCpCmd(storage.url.resolve(runtime.storage.path), "$CUR/storage.xml.gz")
 
-      "mkdir envplugins && ( " + script.mkString(" && ") + " )"
+      "mkdir envplugins && " + script.mkString(" && ")
     }
 
     val run = {
@@ -91,14 +91,14 @@ trait JobScript {
     }
 
     val finish =
-      finishedPath.map { p ⇒ touch(storage.url.resolve(p)) + "; " }.getOrElse("") + "( cd .. &&  rm -rf $CUR )"
+      finishedPath.map { p ⇒ touch(storage.url.resolve(p)) + "; " }.getOrElse("") + "cd .. &&  rm -rf $CUR"
 
-    "( " + init + " ) && ( " + install + " && " + dl + " ) && wait && ( " + run + " ); RETURNCODE=$?; ( " + finish + " ); exit $RETURNCODE;"
+    init + " && " + install + " && " + dl + " && " + run + "; RETURNCODE=$?;" + finish + "; exit $RETURNCODE;"
   }
 
   protected def touch(dest: URI) = {
     val name = UUID.randomUUID.toString
-    s"( ( touch $name  && ${lcgCpCmd(name, dest)} ); rm $name )"
+    s"touch $name && ${lcgCpCmd(name, dest)}; rm -f $name"
   }
 
   protected def lcgCpGunZipCmd(from: URI, to: String) =
