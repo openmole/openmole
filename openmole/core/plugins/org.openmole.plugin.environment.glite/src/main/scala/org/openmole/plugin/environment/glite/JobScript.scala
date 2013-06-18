@@ -64,20 +64,18 @@ trait JobScript {
       script += lcgCpGunZipCmd(storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")
       script += "tar -xzf openmole.tar.gz >/dev/null"
       script += "rm -f openmole.tar.gz"
-      script.mkString(" && ")
+      background(script.mkString(" && "))
     }
 
     val dl = {
       val script = ListBuffer[String]()
 
-      script += "mkdir envplugins"
-
       for {(plugin, index) ← runtime.environmentPlugins.zipWithIndex} {
         assert(plugin.path != null)
-        script += lcgCpGunZipCmd(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar")
+        script += background(lcgCpGunZipCmd(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar"))
       }
 
-      script += lcgCpCmd(storage.url.resolve(runtime.storage.path), "$CUR/storage.xml.gz")
+      script += background(lcgCpCmd(storage.url.resolve(runtime.storage.path), "$CUR/storage.xml.gz"))
 
       "mkdir envplugins && ( " + script.mkString(" && ") + " )"
     }
@@ -97,7 +95,7 @@ trait JobScript {
         p ⇒ touch(storage.url.resolve(p))
       } + "; ( cd .. &&  rm -rf $CUR )"
 
-    "( " + init + " ) && ( " + install + " && " + dl + " ) && ( + " + run + " ); RETURNCODE=$?; ( " + finish + " ); exit $RETURNCODE;"
+    "( " + init + " ) && ( " + install + " && " + dl + " ) && wait && ( + " + run + " ); RETURNCODE=$?; ( " + finish + " ); exit $RETURNCODE;"
   }
 
   protected def touch(dest: URI) = {
@@ -117,4 +115,6 @@ trait JobScript {
 
   private def getTimeOut = Workspace.preferenceAsDuration(GliteEnvironment.RemoteTimeout).toSeconds.toString
 
+
+  private def background(s: String) = "( " + s + " & )"
 }
