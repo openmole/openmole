@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.glite
 
-import org.openmole.core.batch.environment.{BatchEnvironment, SerializedJob}
+import org.openmole.core.batch.environment.{ BatchEnvironment, SerializedJob }
 import java.util.UUID
 import java.net.URI
 import org.openmole.misc.workspace.Workspace
@@ -30,10 +30,10 @@ trait JobScript {
   }
 
   protected def generateScript(
-                                serializedJob: SerializedJob,
-                                resultPath: String,
-                                runningPath: Option[String],
-                                finishedPath: Option[String]) = {
+    serializedJob: SerializedJob,
+    resultPath: String,
+    runningPath: Option[String],
+    finishedPath: Option[String]) = {
     import serializedJob._
 
     assert(runtime.runtime.path != null)
@@ -57,8 +57,8 @@ trait JobScript {
 
       script +=
         "( if [ `uname -m` = x86_64 ]; then " +
-          lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz") + "; else " +
-          lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz") + "; fi )"
+        lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz") + "; else " +
+        lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxI386.path), "$PWD/jvm.tar.gz") + "; fi )"
       script += "tar -xzf jvm.tar.gz >/dev/null"
       script += "rm -f jvm.tar.gz"
       script += lcgCpGunZipCmd(storage.url.resolve(runtime.runtime.path), "$PWD/openmole.tar.gz")
@@ -70,7 +70,7 @@ trait JobScript {
     val dl = {
       val script = ListBuffer[String]()
 
-      for {(plugin, index) ← runtime.environmentPlugins.zipWithIndex} {
+      for { (plugin, index) ← runtime.environmentPlugins.zipWithIndex } {
         assert(plugin.path != null)
         script += background(lcgCpGunZipCmd(storage.url.resolve(plugin.path), "$CUR/envplugins/plugin" + index + ".jar"))
       }
@@ -114,7 +114,6 @@ trait JobScript {
   protected def lcgCpCmd(from: URI, to: String) = s"$lcgCp ${from.toString} file:$to"
 
   private def getTimeOut = Workspace.preferenceAsDuration(GliteEnvironment.RemoteTimeout).toSeconds.toString
-
 
   private def background(s: String) = "( " + s + " & )"
 }
