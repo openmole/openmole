@@ -93,7 +93,9 @@ class SimExplorer extends IApplication with Logger {
       }
     }
     catch {
-      case t: Throwable ⇒ logger.log(SEVERE, "Error durring runtime execution", t)
+      case t: Throwable ⇒
+        logger.log(SEVERE, "Error durring runtime execution", t)
+        System.setProperty("eclipse.exitcode", "1")
     }
     IApplication.EXIT_OK
 

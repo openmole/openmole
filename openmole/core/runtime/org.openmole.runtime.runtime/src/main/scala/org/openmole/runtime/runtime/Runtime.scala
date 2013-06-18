@@ -163,6 +163,7 @@ class Runtime {
     catch {
       case t: Throwable ⇒
         if (debug) logger.log(SEVERE, "", t)
+        System.setProperty("eclipse.exitcode", "1")
         Failure(t)
     }
     finally {
