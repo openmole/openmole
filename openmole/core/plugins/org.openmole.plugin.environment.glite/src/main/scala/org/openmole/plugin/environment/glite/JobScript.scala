@@ -55,7 +55,6 @@ trait JobScript {
     val install = {
       val script = ListBuffer[String]()
 
-
       script +=
         "( if [ `uname -m` = x86_64 ]; then " +
           lcgCpGunZipCmd(storage.url.resolve(runtime.jvmLinuxX64.path), "$PWD/jvm.tar.gz") + "; else " +
@@ -80,7 +79,7 @@ trait JobScript {
 
       script += lcgCpCmd(storage.url.resolve(runtime.storage.path), "$CUR/storage.xml.gz")
 
-      "mkdir envplugins && ( " + script.mkString(" || ") + " )"
+      "mkdir envplugins && ( " + script.mkString(" && ") + " )"
     }
 
     val run = {
@@ -98,7 +97,7 @@ trait JobScript {
         p ⇒ touch(storage.url.resolve(p))
       } + "; ( cd .. &&  rm -rf $CUR )"
 
-    "( " + init + " ) && ( " + install + " || " + dl + " ) && ( + " + run + " ); RETURNCODE=$?; ( " + finish + " ); exit $RETURNCODE;"
+    "( " + init + " ) && ( " + install + " && " + dl + " ) && ( + " + run + " ); RETURNCODE=$?; ( " + finish + " ); exit $RETURNCODE;"
   }
 
   protected def touch(dest: URI) = {
