@@ -14,7 +14,7 @@ object Misc extends BaseDefaults {
 
   lazy val all = Project("core-misc", dir) aggregate (exception, macros, osgi,
     tools, eventDispatcher, fileDeleter, fileCache, fileService,
-    pluginManager, replication, updater, workspace, hashService, sftpserver, logging)
+    pluginManager, replication, updater, workspace, hashService, sftpserver, logging, console)
 
   val exception = OsgiProject("org.openmole.misc.exception")
 
@@ -68,5 +68,7 @@ object Misc extends BaseDefaults {
 
   val sftpserver = OsgiProject("org.openmole.misc.sftpserver") dependsOn
     (provided(tools), Apache.sshd)
+
+  val console = OsgiProject("org.openmole.misc.console") dependsOn (scalaLang, osgi) settings (includeOsgi)
 
 }

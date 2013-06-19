@@ -5,6 +5,7 @@ import Keys._
 import com.typesafe.sbt.osgi.OsgiKeys
 import OsgiKeys._
 import root.libraries._
+import org.openmole.buildsystem.OMKeys._
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,6 +31,8 @@ object Libraries extends Defaults {
   lazy val includeGridscaleDirac = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.dirac" % gridscaleVersion
 
   lazy val includeGridscaleHTTP = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.http" % gridscaleVersion
+
+  lazy val includeOsgi = libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }
 
   lazy val all = Project(id = "openmole-libraries",
     base = file("libraries")) aggregate (jetty, scalatra, logback, h2, bonecp, slick, slf4j, xstream, icu4j, groovy,

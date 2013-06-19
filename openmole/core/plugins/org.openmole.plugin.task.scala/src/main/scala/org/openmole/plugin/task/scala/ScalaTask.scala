@@ -32,6 +32,7 @@ import org.openmole.misc.tools.service.ObjectPool
 import scala.tools.nsc.interpreter.NamedParam
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.misc.console.ScalaREPL
 
 object ScalaTask {
 
