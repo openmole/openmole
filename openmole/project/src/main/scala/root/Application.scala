@@ -116,7 +116,7 @@ object Application extends Defaults {
           "org.openmole" %% "ccl.northwestern.edu.netlogo5" % "5.0.3" intransitive (),
           "org.openmole" %% "ccl.northwestern.edu.netlogo4" % "4.1.3" intransitive (),
           "org.openmole" %% "fr.iscpif.mgo" % v intransitive (),
-          "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.ssh" % gridscaleVersion intransitive (),
+          "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.ssh" % gridscaleVersion intransitive (), //TODO deal with these
           "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.http" % gridscaleVersion intransitive (),
           "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.pbs" % gridscaleVersion intransitive (),
           "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.dirac" % gridscaleVersion intransitive (),
