@@ -23,6 +23,6 @@ object Runtime extends BaseDefaults {
     Misc.fileService, Misc.exception, Misc.tools, Misc.logging, plugin.Environment.desktopgrid, scalaLang, Apache.logging,
     jodaTime, Misc.hashService, scopt) settings (
       libraryDependencies += "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841" % "provided",
-      libraryDependencies += "fr.iscpif.gridscale" % "ssh-bundle" % gridscaleVersion
+      libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.ssh" % gridscaleVersion
     )
 }

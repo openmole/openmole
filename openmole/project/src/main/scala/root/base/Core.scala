@@ -29,6 +29,6 @@ object Core extends BaseDefaults {
   lazy val batch = OsgiProject("org.openmole.core.batch", openmoleScope = Some("provided"), imports = Seq("*")) dependsOn (implementation,
     provided(workspace), provided(Misc.tools), provided(eventDispatcher), replication, db4o, provided(updater), provided(Misc.exception),
     serializer, jasypt, provided(fileService), provided(hashService), pluginManager, iceTar % "provided",
-    guava, Apache.config) settings (libraryDependencies += "fr.iscpif.gridscale" % "gridscale-bundle" % gridscaleVersion)
+    guava, Apache.config) settings (libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale" % gridscaleVersion)
 
 }

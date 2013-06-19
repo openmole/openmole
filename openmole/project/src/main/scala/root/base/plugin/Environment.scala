@@ -15,17 +15,17 @@ object Environment extends PluginDefaults {
 
   lazy val glite = OsgiProject("glite") dependsOn (Core.model, Misc.exception, Misc.updater, provided(Core.batch),
     Misc.workspace, provided(Libraries.scalaLang), Misc.fileService, gridscale) settings
-    (libraryDependencies += "fr.iscpif.gridscale" % "glite-bundle" % Libraries.gridscaleVersion,
-      libraryDependencies += "fr.iscpif.gridscale" % "dirac-bundle" % Libraries.gridscaleVersion,
-      libraryDependencies += "fr.iscpif.gridscale" % "http-bundle" % Libraries.gridscaleVersion)
+    (libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.glite" % Libraries.gridscaleVersion,
+      libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.dirac" % Libraries.gridscaleVersion,
+      libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.http" % Libraries.gridscaleVersion)
 
   lazy val gridscale = OsgiProject("gridscale") dependsOn (Core.model, Misc.workspace, Misc.tools, Core.implementation,
     provided(Core.batch), Misc.exception)
 
   lazy val pbs = OsgiProject("pbs") dependsOn (Misc.exception, Misc.workspace, provided(Core.batch), gridscale, ssh) settings
-    (libraryDependencies += "fr.iscpif.gridscale" % "pbs-bundle" % Libraries.gridscaleVersion)
+    (libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.pbs" % Libraries.gridscaleVersion)
 
   lazy val ssh = OsgiProject("ssh") dependsOn (Misc.exception, Misc.workspace, Misc.eventDispatcher, provided(Core.batch), gridscale) settings
-    (libraryDependencies += "fr.iscpif.gridscale" % "ssh-bundle" % Libraries.gridscaleVersion)
+    (libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.ssh" % Libraries.gridscaleVersion)
 
 }
