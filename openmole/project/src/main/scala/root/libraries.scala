@@ -130,8 +130,8 @@ object Libraries extends Defaults {
         "org.picocontainer" % "picocontainer" % "2.13.6"), version := "5.0.3", scalaVersion := "2.9.2")
 
   lazy val guava = OsgiProject("com.google.guava",
-    exports = Seq("com.google.common.*"), privatePackages = Seq("*")) settings (libraryDependencies ++=
-      Seq("com.google.guava" % "guava" % "13.0.1", "com.google.code.findbugs" % "jsr305" % "1.3.9")
+    exports = Seq("com.google.common.*"), privatePackages = Seq("!scala.*", "*")) settings (libraryDependencies ++=
+      Seq("com.google.guava" % "guava" % "14.0.1", "com.google.code.findbugs" % "jsr305" % "1.3.9")
     )
 
   lazy val jsyntaxpane = OsgiProject("jsyntaxpane", privatePackages = Seq("!scala.*", "*")) settings

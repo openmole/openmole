@@ -1,5 +1,5 @@
 
 #!/bin/bash
 
-find ./ -type f | grep -i -E "\.java$|\.xml$|\.aj$|\.ini$|\.scala|$\.mf$|.groovy$" | xargs grep $1
+find ./ -type f | grep -i -E "\.java$|\.ini$|\.scala|$\.mf$|.groovy$" | xargs grep $1
 
