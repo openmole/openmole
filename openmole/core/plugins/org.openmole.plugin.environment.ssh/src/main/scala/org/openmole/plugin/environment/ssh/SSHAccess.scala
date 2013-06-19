@@ -15,21 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.gridscale
+package org.openmole.plugin.environment.ssh
 
-import fr.iscpif.gridscale.tools.SSHHost
-import fr.iscpif.gridscale.authentication.SSHAuthentication
-import org.openmole.core.batch.environment._
-import java.net.URI
-import org.openmole.misc.workspace.{ Workspace, ConfigurationLocation }
+import fr.iscpif.gridscale.ssh.SSHHost
 
-object SSHService {
-  val timeout = new ConfigurationLocation("SSH", "TimeOut")
-  Workspace += (timeout, "PT120S")
+trait SSHAccess extends SSHHost { s ⇒
 
-}
+  @transient lazy val authentication = SSHAuthentication(user, host, port)()
 
-trait SSHService extends SSHHost with BatchService {
-  def authentication: SSHAuthentication
-  val url = new URI("ssh", null, host, port, null, null, null)
+  trait ThisHost extends SSHHost {
+    def user = s.user
+    def host = s.host
+    override def port = s.port
+    def authentication = s.authentication
+  }
 }

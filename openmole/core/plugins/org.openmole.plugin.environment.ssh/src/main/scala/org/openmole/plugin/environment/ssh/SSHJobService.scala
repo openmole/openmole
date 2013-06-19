@@ -29,9 +29,8 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.gridscale._
-import fr.iscpif.gridscale.tools.SSHHost
-import fr.iscpif.gridscale.authentication._
-import fr.iscpif.gridscale.jobservice.{ SSHJobDescription, SSHJobService ⇒ GSSSHJobService }
+import fr.iscpif.gridscale.ssh.SSHHost
+import fr.iscpif.gridscale.ssh.{ SSHJobDescription, SSHJobService ⇒ GSSSHJobService, SSHAuthentication ⇒ GSSSHAuthentication }
 import java.net.URI
 import scala.collection.immutable.TreeSet
 import java.util.concurrent.atomic.AtomicInteger

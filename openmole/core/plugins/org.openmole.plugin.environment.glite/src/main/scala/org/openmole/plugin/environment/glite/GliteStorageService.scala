@@ -20,12 +20,11 @@ package org.openmole.plugin.environment.glite
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.control._
 import org.openmole.misc.workspace._
-import fr.iscpif.gridscale.storage.FileType
-import fr.iscpif.gridscale.storage.SRMStorage
+import fr.iscpif.gridscale.FileType
+import fr.iscpif.gridscale.glite.{ SRMStorage, GlobusAuthentication }
 import java.net.URI
 import java.io.{ File, InputStream, OutputStream }
 import org.openmole.core.batch.environment.BatchEnvironment
-import fr.iscpif.gridscale.authentication.GlobusAuthentication
 
 object GliteStorageService {
 

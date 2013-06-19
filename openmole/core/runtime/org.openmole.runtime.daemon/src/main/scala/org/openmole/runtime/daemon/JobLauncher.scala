@@ -33,8 +33,7 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.misc.tools.service.ProcessUtil._
 import org.openmole.misc.tools.service.ThreadUtil._
 import org.openmole.misc.hashservice.HashService._
-import fr.iscpif.gridscale.storage.SSHStorage
-import fr.iscpif.gridscale.authentication.SSHUserPasswordAuthentication
+import fr.iscpif.gridscale.ssh.{ SSHStorage, SSHUserPasswordAuthentication }
 
 import org.openmole.core.batch.message.FileMessage._
 import scala.annotation.tailrec

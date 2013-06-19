@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.glite
 
-import fr.iscpif.gridscale.authentication.P12HTTPSAuthentication
+import fr.iscpif.gridscale.dirac.P12HTTPSAuthentication
 import org.openmole.misc.workspace.{ ConfigurationLocation, Workspace }
 
 object DIRACAuthentication {

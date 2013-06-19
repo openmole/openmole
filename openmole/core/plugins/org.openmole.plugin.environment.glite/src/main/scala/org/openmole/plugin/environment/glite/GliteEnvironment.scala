@@ -19,7 +19,6 @@ package org.openmole.plugin.environment.glite
 
 import org.openmole.misc.filedeleter.FileDeleter
 import org.openmole.misc.updater.Updater
-import fr.iscpif.gridscale.information.BDII
 import java.io.File
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage._
@@ -37,8 +36,8 @@ import annotation.tailrec
 import ref.WeakReference
 import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.service.Random._
-import fr.iscpif.gridscale.authentication.{ GlobusAuthentication, RenewDecorator }
-import fr.iscpif.gridscale.jobservice.WMSJobService
+import fr.iscpif.gridscale.glite.{ GlobusAuthentication, WMSJobService, BDII }
+import fr.iscpif.gridscale.RenewDecorator
 
 object GliteEnvironment extends Logger {
 

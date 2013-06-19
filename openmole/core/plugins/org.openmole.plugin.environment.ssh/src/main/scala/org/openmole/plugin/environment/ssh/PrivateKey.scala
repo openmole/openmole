@@ -15,10 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.batch.authentication
+package org.openmole.plugin.environment.ssh
 
 import java.io.File
-import fr.iscpif.gridscale.authentication
+import org.openmole.core.batch.authentication.CypheredPassword
 
 object PrivateKey {
   def apply(
@@ -35,7 +35,7 @@ class PrivateKey(
     val cypheredPassword: String,
     val target: String) extends SSHAuthentication with CypheredPassword { a ⇒
 
-  override def apply = new authentication.SSHPrivateKeyAuthentication {
+  override def apply = new fr.iscpif.gridscale.ssh.SSHPrivateKeyAuthentication {
     val privateKey = a.privateKey
     val password = a.password
     val user = a.login

@@ -17,16 +17,16 @@
 
 package org.openmole.plugin.environment.pbs
 
-import fr.iscpif.gridscale.storage.SSHStorage
-import fr.iscpif.gridscale.tools.SSHHost
+import fr.iscpif.gridscale.ssh.SSHStorage
+import fr.iscpif.gridscale.ssh.SSHHost
 import java.net.URI
-import org.openmole.core.batch.authentication.SSHAuthentication
 import org.openmole.core.batch.control.LimitedAccess
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage.PersistentStorageService
 import org.openmole.core.batch.storage.StorageService
 import org.openmole.misc.workspace._
 import org.openmole.plugin.environment.gridscale._
+import org.openmole.plugin.environment.ssh.{ SSHAuthentication, SSHAccess, SSHStorageService, SharedStorage }
 
 object PBSEnvironment {
   val MaxConnections = new ConfigurationLocation("PBSEnvironment", "MaxConnections")

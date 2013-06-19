@@ -23,7 +23,7 @@ import org.openmole.core.batch.jobservice.BatchJob
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.misc.exception._
 import org.openmole.core.batch.control._
-import fr.iscpif.gridscale.jobservice.SSHJobDescription
+import fr.iscpif.gridscale.ssh.SSHJobDescription
 import util.{ Failure, Success, Try }
 
 trait SSHBatchJob extends BatchJob {

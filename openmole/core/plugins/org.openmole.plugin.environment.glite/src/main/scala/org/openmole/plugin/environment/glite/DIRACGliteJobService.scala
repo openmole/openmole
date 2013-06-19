@@ -21,7 +21,7 @@ import org.openmole.core.batch.environment.SerializedJob
 import org.openmole.misc.workspace.Workspace
 import org.openmole.core.batch.storage.Storage
 import org.openmole.misc.tools.io.FileUtil._
-import fr.iscpif.gridscale.jobservice.{ DIRACJobService, DIRACJobDescription }
+import fr.iscpif.gridscale.dirac.{ DIRACJobService, DIRACJobDescription }
 import org.openmole.misc.tools.service.Duration._
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
 import org.openmole.core.batch.jobservice.{ BatchJobId, BatchJob }

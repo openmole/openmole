@@ -20,7 +20,7 @@ package org.openmole.plugin.environment.gridscale
 import org.openmole.core.model.execution.ExecutionState._
 import org.openmole.core.batch.jobservice.JobService
 import org.openmole.core.batch.environment.BatchEnvironment
-import fr.iscpif.gridscale.jobservice.{ JobService ⇒ GSJobService, JobState, Submitted, Running, Done, Failed }
+import fr.iscpif.gridscale.{ JobService ⇒ GSJobService, JobState, Submitted, Running, Done, Failed }
 
 trait GridScaleJobService extends JobService {
 

@@ -20,9 +20,7 @@ package org.openmole.plugin.environment.glite
 import org.openmole.core.batch.storage.SimpleStorage
 import org.openmole.misc.workspace._
 import org.openmole.misc.exception._
-import fr.iscpif.gridscale.storage.SRMStorage
-import fr.iscpif.gridscale.authentication.ProxyFileAuthentication
-import fr.iscpif.gridscale.authentication.VOMSAuthentication
+import fr.iscpif.gridscale.glite.{ SRMStorage, ProxyFileAuthentication, VOMSAuthentication }
 import java.io.File
 
 class RemoteGliteStorage(val host: String, val port: Int, permissive: Boolean, certificateDir: File) extends SimpleStorage { s ⇒

@@ -26,7 +26,7 @@ import org.openmole.misc.sftpserver.SFTPServer
 import org.openmole.misc.tools.io.FileUtil._
 import java.io.File
 import java.net.URI
-import fr.iscpif.gridscale.storage.{ LocalStorage ⇒ GSLocalStorage }
+import fr.iscpif.gridscale.{ LocalStorage ⇒ GSLocalStorage }
 
 object DesktopGridEnvironment {
   val timeStempsDirName = "timeStemps"

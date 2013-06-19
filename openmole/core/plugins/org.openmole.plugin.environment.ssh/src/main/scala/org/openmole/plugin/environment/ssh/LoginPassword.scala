@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 reuillon
+ * Copyright (C) 2011 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,16 +15,30 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.glite
+package org.openmole.plugin.environment.ssh
 
+import fr.iscpif.gridscale.ssh.SSHUserPasswordAuthentication
 import org.openmole.core.batch.authentication.CypheredPassword
-import java.io.File
 
-object PEMCertificate {
+object LoginPassword {
+
   def apply(
+    login: String,
     cypheredPassword: String,
-    certificate: File = new File(new File(System.getProperty("user.home")), ".globus/usercert.pem"),
-    key: File = new File(new File(System.getProperty("user.home")), ".globus/userkey.pem")) = new PEMCertificate(cypheredPassword, certificate, key)
+    target: String) = new LoginPassword(login, cypheredPassword, target)
+
 }
 
-class PEMCertificate(val cypheredPassword: String, val certificate: File, val key: File) extends GliteAuthentication with CypheredPassword
+class LoginPassword(
+    val login: String,
+    val cypheredPassword: String,
+    val target: String) extends SSHAuthentication with CypheredPassword { a ⇒
+
+  def apply = new SSHUserPasswordAuthentication {
+    val user = a.login
+    val password = a.password
+  }
+
+  override def toString = super.toString + ", Login / password, login = " + login
+
+}

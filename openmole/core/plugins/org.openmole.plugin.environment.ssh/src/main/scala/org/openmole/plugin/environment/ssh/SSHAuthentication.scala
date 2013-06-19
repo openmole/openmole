@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.batch.authentication
+package org.openmole.plugin.environment.ssh
 
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.workspace.Workspace
@@ -40,7 +40,7 @@ trait SSHAuthentication {
   def login: String
   def regexp = ".*" + login + "@" + target + ".*"
 
-  def apply(): fr.iscpif.gridscale.authentication.SSHAuthentication
+  def apply(): fr.iscpif.gridscale.ssh.SSHAuthentication
 
   override def toString = "Target = " + target
 }

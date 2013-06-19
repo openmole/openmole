@@ -33,7 +33,7 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.core.batch.control.AccessToken
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.plugin.environment.gridscale.GridScaleJobService
-import fr.iscpif.gridscale.jobservice.{ WMSJobService, WMSJobDescription }
+import fr.iscpif.gridscale.glite.{ WMSJobService, WMSJobDescription }
 import scala.collection.JavaConversions._
 import scala.io.Source
 import org.openmole.misc.tools.service.Duration._

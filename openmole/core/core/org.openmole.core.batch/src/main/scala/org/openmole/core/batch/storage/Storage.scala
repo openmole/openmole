@@ -17,8 +17,8 @@
 
 package org.openmole.core.batch.storage
 
-import fr.iscpif.gridscale.storage.{ Storage ⇒ GSStorage }
-import fr.iscpif.gridscale.storage.FileType
+import fr.iscpif.gridscale.{ Storage ⇒ GSStorage }
+import fr.iscpif.gridscale.FileType
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream

@@ -15,9 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.plugin.environment.gridscale
+package org.openmole.plugin.environment.ssh
 
-import fr.iscpif.gridscale.storage.SSHStorage
 import java.util.UUID
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
@@ -27,9 +26,6 @@ import org.openmole.misc.exception._
 import org.openmole.core.batch.jobservice._
 import org.openmole.core.batch.storage._
 import org.openmole.misc.tools.io.FileUtil._
-import fr.iscpif.gridscale.authentication.SSHAuthentication
-import fr.iscpif.gridscale.jobservice.{ SSHJobService, SSHJobDescription, JobService ⇒ GSJobService, Done }
-import fr.iscpif.gridscale.jobservice.untilFinished
 
 object SharedStorage {
   val UpdateInstallJobInterval = new ConfigurationLocation("SharedStorage", "UpdateInstallJobInterval")
@@ -40,7 +36,7 @@ import SharedStorage._
 
 trait SharedStorage extends SSHService { js ⇒
   def sharedFS = new SimpleStorage {
-    val storage = new SSHStorage {
+    val storage = new fr.iscpif.gridscale.ssh.SSHStorage {
       def host = js.host
       def user = js.user
       override def port = js.port
@@ -50,7 +46,7 @@ trait SharedStorage extends SSHService { js ⇒
     def authentication = js.authentication
   }
 
-  def installJobService: SSHJobService = new SSHJobService {
+  def installJobService = new fr.iscpif.gridscale.ssh.SSHJobService {
     def authentication = js.authentication
     def host = js.host
     def user = js.user
@@ -91,16 +87,16 @@ trait SharedStorage extends SSHService { js ⇒
           finally script.delete
         }
 
-        val jobDescription = new SSHJobDescription {
+        val jobDescription = new fr.iscpif.gridscale.ssh.SSHJobDescription {
           val executable = "/bin/bash"
           val arguments = scriptName
           val workDirectory = workdir
         }
 
         val j = installJobService.submit(jobDescription)(authentication)
-        val s = untilFinished { Thread.sleep(Workspace.preferenceAsDuration(UpdateInstallJobInterval).toMilliSeconds); installJobService.state(j)(authentication) }
+        val s = fr.iscpif.gridscale.untilFinished { Thread.sleep(Workspace.preferenceAsDuration(UpdateInstallJobInterval).toMilliSeconds); installJobService.state(j)(authentication) }
 
-        if (s != Done) throw new InternalProcessingError("Installation of runtime has failed.")
+        if (s != fr.iscpif.gridscale.Done) throw new InternalProcessingError("Installation of runtime has failed.")
 
         val path = sharedFS.child(workdir, runtime.runtime.hash)
         installed = Some(path)

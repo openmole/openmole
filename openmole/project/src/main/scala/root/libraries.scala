@@ -14,12 +14,15 @@ import root.libraries._
  * To change this template use File | Settings | File Templates.
  */
 object Libraries extends Defaults {
+
   val dir = file("libraries")
+
+  lazy val gridscaleVersion = "1.47-SNAPSHOT"
 
   lazy val all = Project(id = "openmole-libraries",
     base = file("libraries")) aggregate (jetty, scalatra, logback, h2, bonecp, slick, slf4j, xstream, icu4j, groovy,
       objenesis, scalaLang, Apache.all, jodaTime, gnuCrypto, db4o, jasypt, robustIt, netlogo4, netlogo5, opencsv,
-      netlogo4_noscala, netlogo5_noscala, gridscale, guava, jsyntaxpane, gral, miglayout, netbeans, mgo, jline, jacksonJson)
+      netlogo4_noscala, netlogo5_noscala, guava, jsyntaxpane, gral, miglayout, netbeans, mgo, jline, jacksonJson)
 
   lazy val jetty = OsgiProject("org.eclipse.jetty", exports = Seq("org.eclipse.jetty.*", "javax.*")) settings
     (libraryDependencies ++= Seq("org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106",
@@ -130,15 +133,6 @@ object Libraries extends Defaults {
     exports = Seq("com.google.common.*"), privatePackages = Seq("*")) settings (libraryDependencies ++=
       Seq("com.google.guava" % "guava" % "13.0.1", "com.google.code.findbugs" % "jsr305" % "1.3.9")
     )
-
-  lazy val gridscale = OsgiProject("fr.iscpif.gridscale",
-    exports = Seq("fr.iscpif.gridscale.*", "net.schmizz.sshj.*", "org.glite.*", "org.globus.*", "org.ogf.*"),
-    privatePackages = Seq("!scala.*", "!org.slf4j.*", "!org.apache.log4j", "*")) settings
-    (libraryDependencies += "fr.iscpif.gridscale" % "gridscale" % "1.46",
-      OsgiKeys.embeddedJars <<= Keys.externalDependencyClasspath in Compile map { deps ⇒
-        deps filter (d ⇒ d.data.getName startsWith "bcprov") map (d ⇒ d.data)
-      } //TODO make this easier to do using updateReport and filters.
-    ) dependsOn (slf4j, Apache.log4j)
 
   lazy val jsyntaxpane = OsgiProject("jsyntaxpane", privatePackages = Seq("!scala.*", "*")) settings
     (libraryDependencies += "jsyntaxpane" % "jsyntaxpane" % "0.9.6")

@@ -21,7 +21,8 @@ object Runtime extends BaseDefaults {
 
   val daemon = OsgiProject("daemon") dependsOn (Core.model, Core.implementation, Core.batch, Misc.workspace,
     Misc.fileService, Misc.exception, Misc.tools, Misc.logging, plugin.Environment.desktopgrid, scalaLang, Apache.logging,
-    gridscale, jodaTime, Misc.hashService, scopt) settings (
-      libraryDependencies += "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841" % "provided"
+    jodaTime, Misc.hashService, scopt) settings (
+      libraryDependencies += "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841" % "provided",
+      libraryDependencies += "fr.iscpif.gridscale" % "ssh-bundle" % gridscaleVersion
     )
 }

@@ -19,10 +19,10 @@ package org.openmole.plugin.environment.glite
 
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.misc.workspace.{ ConfigurationLocation, Workspace }
-import fr.iscpif.gridscale.information.BDII
+import fr.iscpif.gridscale.glite.BDII
 import org.openmole.misc.filedeleter.FileDeleter
 import org.openmole.misc.exception.UserBadDataError
-import fr.iscpif.gridscale.jobservice.DIRACJobService
+import fr.iscpif.gridscale.dirac.DIRACJobService
 
 object DIRACGliteEnvironment {
 

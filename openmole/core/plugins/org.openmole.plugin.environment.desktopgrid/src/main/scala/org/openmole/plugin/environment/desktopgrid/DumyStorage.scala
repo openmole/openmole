@@ -18,7 +18,7 @@
 package org.openmole.plugin.environment.desktopgrid
 
 import org.openmole.core.batch.storage._
-import fr.iscpif.gridscale.storage.LocalStorage
+import fr.iscpif.gridscale.LocalStorage
 
 class DumyStorage extends SimpleStorage {
   def authentication: Unit = Unit

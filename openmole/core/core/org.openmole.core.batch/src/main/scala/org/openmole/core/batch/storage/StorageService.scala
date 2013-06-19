@@ -25,7 +25,7 @@ import org.openmole.core.serializer._
 import org.openmole.misc.filedeleter._
 import org.openmole.misc.workspace._
 import com.db4o.ObjectContainer
-import fr.iscpif.gridscale.storage.FileType
+import fr.iscpif.gridscale.FileType
 import java.io._
 
 trait StorageService extends BatchService with Storage {

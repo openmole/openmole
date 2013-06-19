@@ -52,7 +52,6 @@ object Application extends Defaults {
 
       "org.openmole" %% "uk.com.robustit.cloning" % v intransitive (),
       "org.openmole" %% "com.ibm.icu" % v intransitive (),
-      "org.openmole" %% "fr.iscpif.gridscale" % v intransitive (),
       "org.openmole" %% "org.apache.commons.pool" % v intransitive (),
       "org.openmole" %% "org.apache.commons.exec" % v intransitive (),
       "org.openmole" %% "org.gnu.crypto" % v intransitive (),
@@ -66,7 +65,8 @@ object Application extends Defaults {
       "org.openmole" %% "net.sourceforge.jline" % v intransitive (),
       "org.openmole" %% "org.apache.log4j" % v intransitive (),
       "org.openmole" %% "ch.qos.logback" % v intransitive (),
-      "org.openmole" %% "org.apache.ant" % v intransitive ()
+      "org.openmole" %% "org.apache.ant" % v intransitive (),
+      "fr.iscpif.gridscale" % "gridscale" % gridscaleVersion intransitive ()
     )
   }
 
@@ -115,7 +115,12 @@ object Application extends Defaults {
           "org.openmole" %% "au.com.bytecode.opencsv" % v intransitive (),
           "org.openmole" %% "ccl.northwestern.edu.netlogo5" % "5.0.3" intransitive (),
           "org.openmole" %% "ccl.northwestern.edu.netlogo4" % "4.1.3" intransitive (),
-          "org.openmole" %% "fr.iscpif.mgo" % v intransitive ()
+          "org.openmole" %% "fr.iscpif.mgo" % v intransitive (),
+          "fr.iscpif.gridscale" % "ssh-bundle" % gridscaleVersion intransitive (),
+          "fr.iscpif.gridscale" % "http-bundle" % gridscaleVersion intransitive (),
+          "fr.iscpif.gridscale" % "pbs-bundle" % gridscaleVersion intransitive (),
+          "fr.iscpif.gridscale" % "dirac-bundle" % gridscaleVersion intransitive (),
+          "fr.iscpif.gridscale" % "glite-bundle" % gridscaleVersion intransitive ()
         )
       }
   }
@@ -176,7 +181,7 @@ object Application extends Defaults {
           "org.openmole.ui" %% "org.openmole.ui" % v exclude ("org.eclipse.equinox", "*")
 
         )
-      }, dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "org.eclipse.core") })
+      }, dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "org.eclipse.core" || (m.organization == "fr.iscpif.gridscale" && m.name.contains("bundle"))) })
 
   lazy val openmolePlugins = AssemblyProject("package", "openmole-plugins") settings (openmolePluginDependencies,
     dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library"))
@@ -203,7 +208,7 @@ object Application extends Defaults {
       urls <++= target { t ⇒ Seq(java368URL -> t / "jvm-386.tar.gz", javax64URL -> t / "jvm-x64.tar.gz") },
       tarGZName := Some("runtime"),
       assemble <<= assemble dependsOn resourceAssemble, resourceOutDir := Option("."),
-      dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "org.eclipse.core") })
+      dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "org.eclipse.core" || (m.organization == "fr.iscpif.gridscale" && m.name.contains("bundle"))) })
 
   lazy val openmoleDaemon = AssemblyProject("daemon", "plugins", settings = copyResProject) settings (resourceDirectory <<= baseDirectory / "resources",
     libraryDependencies <+= (version) { "org.openmole.core" %% "org.openmole.runtime.daemon" % _ }, assemble <<= assemble dependsOn resourceAssemble,

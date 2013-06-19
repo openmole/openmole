@@ -24,7 +24,7 @@ import org.openmole.core.batch.control._
 import org.openmole.core.batch.replication._
 import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace._
-import fr.iscpif.gridscale.storage.DirectoryType
+import fr.iscpif.gridscale.DirectoryType
 import collection.JavaConversions._
 
 object PersistentStorageService extends Logger {

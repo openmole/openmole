@@ -17,13 +17,13 @@
 
 package org.openmole.plugin.environment.pbs
 
-import fr.iscpif.gridscale.authentication.SSHAuthentication
-import fr.iscpif.gridscale.jobservice.{ SSHJobService, PBSJobService ⇒ GSPBSJobService, PBSJobDescription }
-import fr.iscpif.gridscale.tools.SSHHost
+import fr.iscpif.gridscale.ssh.{ SSHAuthentication, SSHJobService, SSHHost }
+import fr.iscpif.gridscale.pbs.{ PBSJobService ⇒ GSPBSJobService, PBSJobDescription }
 import java.net.URI
 import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.jobservice.{ BatchJob, BatchJobId }
+import org.openmole.plugin.environment.ssh.{ SharedStorage, SSHService }
 import org.openmole.core.batch.storage.SimpleStorage
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.misc.tools.service.Duration._

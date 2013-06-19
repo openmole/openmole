@@ -19,8 +19,7 @@ package org.openmole.plugin.environment.glite
 
 import org.openmole.misc.workspace.Workspace
 import org.openmole.core.batch.environment.BatchEnvironment
-import fr.iscpif.gridscale.authentication.GlobusAuthentication
-import fr.iscpif.gridscale.information.BDII
+import fr.iscpif.gridscale.glite.{ GlobusAuthentication, BDII }
 import org.openmole.core.batch.replication.ReplicaCatalog
 import org.openmole.core.batch.storage.StorageService
 import org.openmole.core.batch.control.AccessToken

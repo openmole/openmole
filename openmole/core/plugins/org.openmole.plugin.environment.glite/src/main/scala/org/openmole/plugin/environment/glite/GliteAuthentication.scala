@@ -18,7 +18,6 @@
 package org.openmole.plugin.environment.glite
 
 import com.ice.tar.TarInputStream
-import fr.iscpif.gridscale.storage._
 import java.io._
 import java.net.URI
 import org.openmole.misc.tools.service.Logger
@@ -39,7 +38,9 @@ import scala.collection.JavaConversions._
 import scala.ref.WeakReference
 import scala.Some
 import scala.Some
-import fr.iscpif.gridscale.authentication._
+import fr.iscpif.gridscale.glite._
+import fr.iscpif.gridscale.http._
+import fr.iscpif.gridscale._
 import java.io.File
 import scala.util.{ Success, Failure, Try }
 

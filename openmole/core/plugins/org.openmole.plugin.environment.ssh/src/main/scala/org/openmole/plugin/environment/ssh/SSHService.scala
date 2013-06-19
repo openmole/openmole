@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Romain Reuillon
+ * Copyright (C) 2012 reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,29 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.batch.authentication
+package org.openmole.plugin.environment.ssh
 
-import fr.iscpif.gridscale.authentication._
+import org.openmole.core.batch.environment._
+import java.net.URI
+import org.openmole.misc.workspace.{ Workspace, ConfigurationLocation }
 
-object LoginPassword {
-
-  def apply(
-    login: String,
-    cypheredPassword: String,
-    target: String) = new LoginPassword(login, cypheredPassword, target)
+object SSHService {
+  val timeout = new ConfigurationLocation("SSH", "TimeOut")
+  Workspace += (timeout, "PT120S")
 
 }
 
-class LoginPassword(
-    val login: String,
-    val cypheredPassword: String,
-    val target: String) extends SSHAuthentication with CypheredPassword { a ⇒
-
-  def apply = new SSHUserPasswordAuthentication {
-    val user = a.login
-    val password = a.password
-  }
-
-  override def toString = super.toString + ", Login / password, login = " + login
-
+trait SSHService extends fr.iscpif.gridscale.ssh.SSHHost with BatchService {
+  def authentication: fr.iscpif.gridscale.ssh.SSHAuthentication
+  val url = new URI("ssh", null, host, port, null, null, null)
 }
