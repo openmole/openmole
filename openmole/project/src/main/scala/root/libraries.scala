@@ -17,7 +17,19 @@ object Libraries extends Defaults {
 
   val dir = file("libraries")
 
-  lazy val gridscaleVersion = "1.47-SNAPSHOT"
+  val gridscaleVersion = "1.47-SNAPSHOT"
+
+  lazy val includeGridscale = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale" % gridscaleVersion
+
+  lazy val includeGridscaleSSH = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.ssh" % gridscaleVersion
+
+  lazy val includeGridscalePBS = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.pbs" % gridscaleVersion
+
+  lazy val includeGridscaleGlite = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.glite" % gridscaleVersion
+
+  lazy val includeGridscaleDirac = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.dirac" % gridscaleVersion
+
+  lazy val includeGridscaleHTTP = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.http" % gridscaleVersion
 
   lazy val all = Project(id = "openmole-libraries",
     base = file("libraries")) aggregate (jetty, scalatra, logback, h2, bonecp, slick, slf4j, xstream, icu4j, groovy,
