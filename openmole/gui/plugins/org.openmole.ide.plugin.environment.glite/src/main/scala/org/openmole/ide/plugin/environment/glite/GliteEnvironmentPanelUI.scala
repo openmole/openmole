@@ -26,7 +26,6 @@ import event._
 import event.ButtonClicked
 import org.openmole.plugin.environment.glite.GliteAuthentication
 import scala.Some
-import scala.Some
 
 object GliteEnvironmentPanelUI {
   lazy val vomses = {
@@ -64,6 +63,8 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
 
   val vomsTextField = new TextField(pud.voms, 20)
   val bdiiTextField = new TextField(pud.bdii, 20)
+  var enrollmentURLLink = enrollmentLink
+  val enrollmentURLLabel = new Label("")
   val runtimeMemoryTextField = new TextField(pud.openMOLEMemory, 4)
 
   val proxyTimeTextField = new TextField(pud.proxyTime.getOrElse(""), 18)
@@ -96,7 +97,9 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
 
   voComboBox.selection.reactions += {
     case SelectionChanged(`voComboBox`) ⇒
-      GliteAuthentication.getVOMS(voComboBox.selection.item).orElse(Some("")) foreach (vomsTextField.text = _)
+      vomsTextField.text = GliteAuthentication.getVOMS(voComboBox.selection.item).getOrElse("")
+      enrollmentURLLabel.text = ""
+      enrollmentURLLink = enrollmentLink
   }
 
   val components = List(("Settings",
@@ -109,6 +112,8 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
       contents += bdiiTextField
       contents += (new Label("Runtime memory"), "gap para")
       contents += runtimeMemoryTextField
+      contents += enrollmentURLLink
+      contents += enrollmentURLLabel
     }), ("Options",
     new PluginPanel("wrap 2") {
       contents += new PluginPanel("wrap 2") {
@@ -145,6 +150,18 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
 
   proxyCheckBox.selected = pud.proxy
   showProxy(pud.proxy)
+
+  private def enrollmentLink =
+    new LinkLabel("VO enrollment",
+      new Action("") {
+        def apply = {
+          enrollmentURLLabel.text = GliteEnvironmentPanelUI.vomses.getOrElse(voComboBox.selection.item, "")
+        }
+      },
+      3,
+      "#73a5d2",
+      false
+    )
 
   private def showProxy(b: Boolean) = {
     List(proxyTimeLabel, proxyTimeTextField, proxyHostLabel, proxyHostTextField, proxyPortLabel, proxyPortTextField).foreach {
