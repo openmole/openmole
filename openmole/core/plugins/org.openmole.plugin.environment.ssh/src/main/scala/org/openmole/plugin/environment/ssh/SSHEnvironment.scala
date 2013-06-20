@@ -27,9 +27,11 @@ import org.openmole.misc.workspace.Workspace
 
 object SSHEnvironment {
   val MaxConnections = new ConfigurationLocation("SSHEnvironment", "MaxConnections")
+  val ConnectionsKeepAlive = new ConfigurationLocation("SSHEnvironment", "ConnectionsKeepAlive")
   val UpdateInterval = new ConfigurationLocation("SSHEnvironment", "UpdateInterval")
 
   Workspace += (UpdateInterval, "PT10S")
+  Workspace += (ConnectionsKeepAlive, "PT2M")
   Workspace += (MaxConnections, "10")
 
   def apply(
@@ -57,19 +59,20 @@ class SSHEnvironment(
   type SS = SSHStorageService
   type JS = SSHJobService
 
+  @transient lazy val authentication = SSHAuthentication(user, host, port)()
   @transient lazy val id = new URI("ssh", env.user, env.host, env.port, null, null, null).toString
 
-  @transient lazy val storage = new PersistentStorageService with SSHStorageService with ThisHost with LimitedAccess {
+  @transient lazy val storage = new PersistentStorageService with SSHStorageService with LimitedAccess with ThisHostConnectionCache {
     def nbTokens = Workspace.preferenceAsInt(MaxConnections)
     def root = env.path
-    def environment = env
+    val environment = env
   }
 
-  @transient lazy val jobService = new SSHJobService with ThisHost {
+  @transient lazy val jobService = new SSHJobService with LimitedAccess with ThisHostConnectionCache {
     def nbTokens = Workspace.preferenceAsInt(MaxConnections)
     def nbSlots = env.nbSlots
     def root = env.path
-    def environment = env
+    val environment = env
     val id = url.toString
   }
 

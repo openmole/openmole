@@ -22,15 +22,14 @@ import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.plugin.environment.gridscale.LocalStorage
 import java.net.URI
 import org.openmole.misc.workspace.Workspace
+import fr.iscpif.gridscale.ssh.{ SSHStorage, SSHConnectionCache }
 
 trait SSHStorageService extends StorageService with SSHService { ss ⇒
 
-  def createStorage(_root: String) = new fr.iscpif.gridscale.ssh.SSHStorage {
-    val host = ss.host
-    override val port = ss.port
-    val user = ss.user
+  val environment: BatchEnvironment with SSHAccess
+
+  def createStorage(_root: String) = new fr.iscpif.gridscale.ssh.SSHStorage with environment.ThisHostConnectionCache {
     val root = _root
-    override def timeout = Workspace.preferenceAsDuration(SSHService.timeout).toMilliSeconds.toInt
   }
 
   lazy val storage = createStorage(root)
