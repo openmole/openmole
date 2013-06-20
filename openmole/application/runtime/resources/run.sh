@@ -19,5 +19,9 @@ cp -r configuration ${CONFIGDIR}
 
 java -Xmx${MEMORY} -Dosgi.locking=none -Dosgi.configuration.area=${CONFIGDIR} $FLAG -XX:MaxPermSize=128M -XX:+UseG1GC -jar plugins/org.eclipse.equinox.launcher.jar $@ 
 
+RETURNCODE=$?
+
 rm -rf ${CONFIGDIR}
+
+exit $RETURNCODE
 
