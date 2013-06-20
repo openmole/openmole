@@ -66,6 +66,7 @@ object Application extends Defaults {
       "org.openmole" %% "org.apache.log4j" % v intransitive (),
       "org.openmole" %% "ch.qos.logback" % v intransitive (),
       "org.openmole" %% "org.apache.ant" % v intransitive (),
+      "org.openmole" %% "org.slf4j" % v intransitive (),
       "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale" % gridscaleVersion intransitive ()
     )
   }
