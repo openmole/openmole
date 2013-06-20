@@ -42,14 +42,10 @@ import SSHJobService._
 
 trait SSHJobService extends GridScaleJobService with SharedStorage with LimitedAccess { js ⇒
 
+  val environment: BatchEnvironment with SSHAccess
   def nbSlots: Int
 
-  val jobService = new GSSSHJobService {
-    def host = js.host
-    override def port = js.port
-    def user = js.user
-    override def timeout = Workspace.preferenceAsDuration(SSHService.timeout).toMilliSeconds.toInt
-  }
+  val jobService = new GSSSHJobService with environment.ThisHostConnectionCache
 
   val queue = new mutable.SynchronizedQueue[SSHBatchJob]
   @transient lazy val nbRunning = new AtomicInteger

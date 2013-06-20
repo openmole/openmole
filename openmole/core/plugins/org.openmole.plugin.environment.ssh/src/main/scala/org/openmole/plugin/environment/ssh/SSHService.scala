@@ -27,7 +27,10 @@ object SSHService {
 
 }
 
-trait SSHService extends fr.iscpif.gridscale.ssh.SSHHost with BatchService {
+trait SSHService extends BatchService {
+  def host: String
+  def port: Int
+  def user: String
   def authentication: fr.iscpif.gridscale.ssh.SSHAuthentication
-  val url = new URI("ssh", null, host, port, null, null, null)
+  lazy val url = new URI("ssh", null, host, port, null, null, null)
 }

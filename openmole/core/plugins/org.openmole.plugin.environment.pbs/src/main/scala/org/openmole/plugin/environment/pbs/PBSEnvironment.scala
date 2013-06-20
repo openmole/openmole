@@ -26,7 +26,8 @@ import org.openmole.core.batch.storage.PersistentStorageService
 import org.openmole.core.batch.storage.StorageService
 import org.openmole.misc.workspace._
 import org.openmole.plugin.environment.gridscale._
-import org.openmole.plugin.environment.ssh.{ SSHAuthentication, SSHAccess, SSHStorageService, SharedStorage }
+import org.openmole.plugin.environment.ssh._
+import scala.Some
 
 object PBSEnvironment {
   val MaxConnections = new ConfigurationLocation("PBSEnvironment", "MaxConnections")
@@ -68,22 +69,23 @@ class PBSEnvironment(
   type SS = PersistentStorageService
   type JS = PBSJobService
 
+  @transient lazy val authentication = SSHAuthentication(user, host, port)()
   @transient lazy val id = new URI("pbs", env.user, env.host, env.port, null, null, null).toString
 
   @transient lazy val storage =
-    new PersistentStorageService with SSHStorageService with ThisHost with LimitedAccess {
+    new PersistentStorageService with SSHStorageService with ThisHostConnectionCache with LimitedAccess {
       def nbTokens = Workspace.preferenceAsInt(MaxConnections)
-      def environment = env
+      val environment = env
       lazy val root = env.path match {
         case Some(p) ⇒ p
         case None    ⇒ createStorage("/").child(home, ".openmole")
       }
     }
 
-  @transient lazy val jobService = new PBSJobService with ThisHost with LimitedAccess {
+  @transient lazy val jobService = new PBSJobService with ThisHostConnectionCache with LimitedAccess {
     def nbTokens = Workspace.preferenceAsInt(MaxConnections)
     def queue = env.queue
-    def environment = env
+    val environment = env
     lazy val root = storage.root
     val id = url.toString
   }
