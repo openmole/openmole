@@ -15,17 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.osgi
+package org.openmole.misc.console
 
 import java.io.{ InputStream, IOException, File }
 import scala.tools.nsc.io.AbstractFile
 import java.net.URL
 import java.lang.String
-import org.osgi.framework.{ ServiceReference, Bundle }
 import collection.mutable.ListBuffer
-import org.osgi.service.packageadmin.PackageAdmin
+
+import org.osgi.framework._
 
 import collection.JavaConversions._
+import org.openmole.misc.console.Activator
 
 /**
  * Helper methods to transform OSGi bundles into {@link AbstractFile} implementations

@@ -54,7 +54,7 @@ object Misc extends BaseDefaults {
   val pluginManager = OsgiProject("org.openmole.misc.pluginmanager",
     bundleActivator = Some("org.openmole.misc.pluginmanager.internal.Activator")) settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
-    (provided(exception), provided(tools), provided(osgi))
+    (provided(exception), provided(tools), osgi)
 
   val updater = OsgiProject("org.openmole.misc.updater") dependsOn (provided(exception), provided(tools),
     provided(workspace))
@@ -70,7 +70,7 @@ object Misc extends BaseDefaults {
   val sftpserver = OsgiProject("org.openmole.misc.sftpserver") dependsOn
     (provided(tools), Apache.sshd)
 
-  val console = OsgiProject("org.openmole.misc.console") dependsOn (scalaLang, osgi, scalaCompiler) settings (includeOsgi,
-    OsgiKeys.importPackage := Seq("*"))
+  val console = OsgiProject("org.openmole.misc.console", bundleActivator = Some("org.openmole.misc.console.Activator"), buddyPolicy = Some("global")) dependsOn
+    (scalaLang, osgi, scalaCompiler) settings (includeOsgi, OsgiKeys.importPackage := Seq("*"))
 
 }

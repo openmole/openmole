@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.osgi
+package org.openmole.misc.console
 
 import scala.tools.nsc.Global
 import scala.tools.nsc.Settings
@@ -26,11 +26,11 @@ import scala.tools.nsc.reporters.Reporter
 import scala.tools.nsc.util._
 import scala.util.parsing.input.OffsetPosition
 import collection.mutable.ListBuffer
-import org.osgi.framework.Bundle
 import java.io.{ PrintWriter, StringWriter, File }
 import scala.tools.nsc.symtab.SymbolLoaders
 import scala.tools.nsc.backend.JavaPlatform
 import scala.tools.util.PathResolver
+import org.openmole.misc.osgi.{ ClassPathBuilder }
 
 class OSGiScalaCompiler(settings: Settings, reporter: Reporter, virtualDirectory: AbstractFile) extends Global(settings, reporter) with ReplGlobal { g ⇒
 
