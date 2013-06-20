@@ -77,9 +77,9 @@ package object evolution {
       case (o, v) ⇒ toIndividualTask addObjective (o, v)
     } */
 
-    inputs.foreach {
+    /*inputs.foreach {
       case (i, _) ⇒ toIndividualTask addInput (i)
-    }
+    } */
 
     val mergeArchiveTask = UpdateArchiveTask(evolution)(name + "MergeArchive", individual.toArray, archive)
 
@@ -233,7 +233,7 @@ package object evolution {
     val elitismCaps = Capsule(elitismTask)
 
     terminationTask addParameter Parameter.delayed(state, evolution.initialState)
-    terminationTask addParameter (generation -> 0)
+    terminationTask addParameter generation -> 0
     terminationTask addOutput archive
     terminationTask addOutput individual.toArray
 
@@ -251,7 +251,7 @@ package object evolution {
         breedTask -<
         scalingCaps --
         (model, filter = Block(genome)) --
-        (toIndividualSlot, filter = Block(inputs.map(_._1).map(_.name).toSeq: _*)) --
+        (toIndividualSlot, filter = Keep(objectives.map(_._1).map(_.name).toSeq: _*)) --
         toIndividualArrayCaps --
         (mergeArchiveCaps, renameIndividualsTask -- mergeIndividualsCaps) --
         elitismCaps --
@@ -410,7 +410,7 @@ package object evolution {
         scalingIndividualsSlot >| (endCapsule, terminated.name + " == true")
 
     val archivePath =
-      (preIslandCapsule -- renameOriginalArchiveCapsule -- (archiveDiffSlot, filter = Keep(originalArchive)))
+      (preIslandCapsule -- renameOriginalArchiveCapsule -- (archiveDiffSlot, filter = Keep(originalArchive, archive)))
 
     val loop =
       scalingIndividualsSlot --
