@@ -28,6 +28,7 @@ import org.openmole.misc.tools.service.Logger
 import org.openmole.misc.workspace._
 import org.openmole.core.batch.storage._
 import org.openmole.core.implementation.execution.local.LocalEnvironment
+import scala.util.{ Success, Failure }
 
 class SimExplorer extends IApplication with Logger {
 
@@ -83,20 +84,25 @@ class SimExplorer extends IApplication with Logger {
 
         LocalEnvironment.initializationNumberOfThread = config.nbThread
 
-        new Runtime().apply(
+        val result = new Runtime().apply(
           storage,
           config.path.get,
           config.inputMessage.get,
           config.outputMessage.get,
           debug)
 
+        result match {
+          case Failure(t) ⇒ throw t
+          case _          ⇒
+        }
       }
     }
     catch {
       case t: Throwable ⇒
         logger.log(SEVERE, "Error durring runtime execution", t)
-        System.setProperty("eclipse.exitcode", "1")
+        throw t
     }
+
     IApplication.EXIT_OK
 
   }

@@ -163,7 +163,6 @@ class Runtime {
     catch {
       case t: Throwable ⇒
         if (debug) logger.log(SEVERE, "", t)
-        System.setProperty("eclipse.exitcode", "1")
         Failure(t)
     }
     finally {
@@ -202,6 +201,8 @@ class Runtime {
     SerializerService.serialize(runtimeResult, outputLocal)
     try retry(storage.uploadGZ(outputLocal, outputMessagePath))
     finally outputLocal.delete
+
+    result
   }
 
 }
