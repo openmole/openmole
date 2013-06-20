@@ -5,6 +5,7 @@ import Keys._
 import com.typesafe.sbt.osgi.OsgiKeys
 import OsgiKeys._
 import root.libraries._
+import org.openmole.buildsystem.OMKeys._
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,10 +32,12 @@ object Libraries extends Defaults {
 
   lazy val includeGridscaleHTTP = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale.http" % gridscaleVersion
 
+  lazy val includeOsgi = libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }
+
   lazy val all = Project(id = "openmole-libraries",
     base = file("libraries")) aggregate (jetty, scalatra, logback, h2, bonecp, slick, slf4j, xstream, icu4j, groovy,
       objenesis, scalaLang, Apache.all, jodaTime, gnuCrypto, db4o, jasypt, robustIt, netlogo4, netlogo5, opencsv,
-      netlogo4_noscala, netlogo5_noscala, guava, jsyntaxpane, gral, miglayout, netbeans, mgo, jline, jacksonJson)
+      netlogo4_noscala, netlogo5_noscala, guava, jsyntaxpane, gral, miglayout, netbeans, mgo, jline, jacksonJson, scalaCompiler)
 
   lazy val jetty = OsgiProject("org.eclipse.jetty", exports = Seq("org.eclipse.jetty.*", "javax.*")) settings
     (libraryDependencies ++= Seq("org.eclipse.jetty" % "jetty-webapp" % "8.1.8.v20121106",
@@ -86,13 +89,15 @@ object Libraries extends Defaults {
       Seq("org.scala-lang" % "scala-library" % sV,
         "org.scala-lang" % "scala-reflect" % sV,
         "org.scala-lang" % "scala-actors" % sV,
-        "org.scala-lang" % "scala-compiler" % sV,
         "org.scala-lang" % "jline" % sV,
         "com.typesafe.akka" %% "akka-actor" % "2.1.4",
         "com.typesafe.akka" %% "akka-transactor" % "2.1.4",
         "com.typesafe" % "config" % "1.0.0",
         "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.2")
     })
+
+  lazy val scalaCompiler = OsgiProject("org.scala-lang.scala-compiler", exports = Seq("scala.reflect.*", "scala.tools.*"),
+    privatePackages = Seq("!scala.*", "*"), buddyPolicy = Some("global")) settings (libraryDependencies <<= scalaVersion { s ⇒ Seq("org.scala-lang" % "scala-compiler" % s) })
 
   lazy val jodaTime = OsgiProject("org.joda.time") settings (libraryDependencies += "joda-time" % "joda-time" % "1.6")
 

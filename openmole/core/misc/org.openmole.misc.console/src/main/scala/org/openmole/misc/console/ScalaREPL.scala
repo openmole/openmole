@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.misc.tools.script
+package org.openmole.misc.console
 
 import scala.tools.nsc.interpreter._
 import scala.tools.nsc._

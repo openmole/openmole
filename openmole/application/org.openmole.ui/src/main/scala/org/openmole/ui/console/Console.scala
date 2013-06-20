@@ -22,7 +22,6 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.logging.LoggerService
 import org.openmole.misc.pluginmanager.PluginManager
 import org.openmole.misc.workspace.Workspace
-import org.openmole.misc.tools.script.ScalaREPL
 import scala.annotation.tailrec
 import scala.tools.nsc.Settings
 import scala.tools.nsc.interpreter.ILoop
@@ -32,6 +31,7 @@ import org.openmole.core.model.task._
 import java.util.concurrent.TimeUnit
 import scala.tools.nsc.io.{ File ⇒ SFile }
 import java.io.File
+import org.openmole.misc.console.ScalaREPL
 
 class Console(plugins: PluginSet, password: Option[String], script: Option[String]) { console ⇒
 

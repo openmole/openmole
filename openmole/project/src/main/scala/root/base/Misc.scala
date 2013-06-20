@@ -4,6 +4,7 @@ import sbt._
 import Keys._
 
 import org.openmole.buildsystem.OMKeys._
+import com.typesafe.sbt.osgi.OsgiKeys
 
 object Misc extends BaseDefaults {
   import root.Libraries._
@@ -14,12 +15,12 @@ object Misc extends BaseDefaults {
 
   lazy val all = Project("core-misc", dir) aggregate (exception, macros, osgi,
     tools, eventDispatcher, fileDeleter, fileCache, fileService,
-    pluginManager, replication, updater, workspace, hashService, sftpserver, logging)
+    pluginManager, replication, updater, workspace, hashService, sftpserver, logging, console)
 
   val exception = OsgiProject("org.openmole.misc.exception")
 
-  val osgi = OsgiProject("org.openmole.misc.osgi", buddyPolicy = Some("global"),
-    bundleActivator = Some("org.openmole.misc.osgi.Activator")) dependsOn (provided(exception), provided(scalaLang)) settings
+  val osgi = OsgiProject("org.openmole.misc.osgi", buddyPolicy = Some("global"), imports = Seq("*"),
+    bundleActivator = Some("org.openmole.misc.osgi.Activator")) dependsOn (provided(exception), provided(scalaLang), provided(scalaCompiler)) settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" })
 
   val tools = OsgiProject("org.openmole.misc.tools", buddyPolicy = Some("global")) settings
@@ -68,5 +69,8 @@ object Misc extends BaseDefaults {
 
   val sftpserver = OsgiProject("org.openmole.misc.sftpserver") dependsOn
     (provided(tools), Apache.sshd)
+
+  val console = OsgiProject("org.openmole.misc.console") dependsOn (scalaLang, osgi, scalaCompiler) settings (includeOsgi,
+    OsgiKeys.importPackage := Seq("*"))
 
 }
