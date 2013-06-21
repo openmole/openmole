@@ -256,7 +256,7 @@ package object evolution {
         (mergeArchiveCaps, renameIndividualsTask -- mergeIndividualsCaps) --
         elitismCaps --
         terminationSlot --
-        scalingIndividualsSlot >| (endCapsule, terminatedCondition)
+        scalingIndividualsSlot >| (endCapsule, terminatedCondition, Block(archive))
 
     val loop =
       scalingIndividualsSlot --
