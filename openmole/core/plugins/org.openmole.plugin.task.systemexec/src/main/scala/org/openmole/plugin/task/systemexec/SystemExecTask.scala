@@ -31,12 +31,12 @@ import java.io.PrintStream
 import org.apache.commons.exec.CommandLine
 import org.openmole.core.implementation.data._
 import org.openmole.misc.workspace._
-import org.openmole.misc.tools.service.OS
+import org.openmole.misc.tools.service.{ Logger, OS }
 import org.openmole.plugin.task.external._
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
 
-object SystemExecTask {
+object SystemExecTask extends Logger {
 
   /**
    * System exec task execute an external process.
@@ -115,11 +115,15 @@ sealed abstract class SystemExecTask(
       CommandLine.parse(workDir.getAbsolutePath + File.separator + VariableExpansion(context + Variable(ExternalTask.PWD, workDir.getAbsolutePath), osCommandLine))
 
     try {
-      val f = new File(commandLine.getExecutable)
-      val process = Runtime.getRuntime.exec(
-        commandLine.toString,
-        variables.map { case (p, v) ⇒ v + "=" + context(p).toString }.toArray,
-        workDir)
+      val runtime = Runtime.getRuntime
+
+      //FIXES java.io.IOException: error=26
+      val process = runtime.synchronized {
+        runtime.exec(
+          commandLine.toString,
+          variables.map { case (p, v) ⇒ v + "=" + context(p).toString }.toArray,
+          workDir)
+      }
 
       execute(process, context) match {
         case (retCode, variables) ⇒
