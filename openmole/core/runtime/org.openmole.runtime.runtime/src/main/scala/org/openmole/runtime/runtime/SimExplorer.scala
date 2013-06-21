@@ -91,15 +91,11 @@ class SimExplorer extends IApplication with Logger {
           config.outputMessage.get,
           debug)
 
-        result match {
-          case Failure(t) ⇒ throw t
-          case _          ⇒
-        }
       }
     }
     catch {
       case t: Throwable ⇒
-        logger.log(SEVERE, "Error durring runtime execution", t)
+        logger.log(SEVERE, "Error during runtime execution", t)
         throw t
     }
 
