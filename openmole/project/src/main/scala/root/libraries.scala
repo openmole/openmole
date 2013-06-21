@@ -35,7 +35,7 @@ object Libraries extends Defaults {
   lazy val includeOsgi = libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV }
 
   lazy val all = Project(id = "openmole-libraries",
-    base = file("libraries")) aggregate (jetty, scalatra, logback, h2, bonecp, slick, slf4j, xstream, icu4j, groovy,
+    base = file("libraries")) aggregate (jetty, scalatra, logback, h2, bonecp, slick, slf4j, xstream, groovy,
       objenesis, scalaLang, Apache.all, jodaTime, gnuCrypto, db4o, jasypt, robustIt, netlogo4, netlogo5, opencsv,
       netlogo4_noscala, netlogo5_noscala, guava, jsyntaxpane, gral, miglayout, netbeans, mgo, jline, jacksonJson, scalaCompiler)
 
@@ -73,8 +73,6 @@ object Libraries extends Defaults {
   lazy val xstream = OsgiProject("com.thoughtworks.xstream", buddyPolicy = Some("global"), privatePackages = Seq("!scala.*", "*")) settings
     (libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.1",
       "net.sf.kxml" % "kxml2" % "2.3.0"))
-
-  lazy val icu4j = OsgiProject("com.ibm.icu") settings (libraryDependencies += "com.ibm.icu" % "icu4j" % "4.0.1")
 
   lazy val groovy = OsgiProject("org.codehaus.groovy", buddyPolicy = Some("global"), exports = Seq("groovy.*", "org.codehaus.*"),
     privatePackages = Seq("!scala.*,*")) settings (libraryDependencies ++= Seq("org.codehaus.groovy" % "groovy-all" % "2.1.4",

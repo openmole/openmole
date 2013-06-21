@@ -51,7 +51,6 @@ object Application extends Defaults {
       "org.openmole.core" %% "org.openmole.core.batch" % v,
 
       "org.openmole" %% "uk.com.robustit.cloning" % v intransitive (),
-      "org.openmole" %% "com.ibm.icu" % v intransitive (),
       "org.openmole" %% "org.apache.commons.pool" % v intransitive (),
       "org.openmole" %% "org.apache.commons.exec" % v intransitive (),
       "org.openmole" %% "org.gnu.crypto" % v intransitive (),
