@@ -62,8 +62,6 @@ class Transition(
         if (mole.slots(end.capsule).size <= 1) ticket
         else moleExecution.nextTicket(ticket.parent.getOrElse(throw new InternalProcessingError("BUG should never reach root ticket")))
 
-      val toAggregate = combinaison.groupBy(_.prototype.name)
-
       val toArrayManifests =
         Map.empty[String, Manifest[_]] ++ computeManifests(mole, moleExecution.sources, moleExecution.hooks)(end).filter(_.toArray).map(ct ⇒ ct.name -> ct.manifest)
 
@@ -74,7 +72,7 @@ class Transition(
 
   override def perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) =
     try {
-      if (isConditionTrue(context)) _perform(context.filterNot { case (n, _) ⇒ filter(n) }, ticket, subMole)
+      if (isConditionTrue(context)) _perform(context, ticket, subMole)
     }
     catch {
       case e: Throwable ⇒
@@ -87,7 +85,8 @@ class Transition(
   override def data(mole: IMole, sources: Sources, hooks: Hooks) =
     start.outputs(mole, sources, hooks).filterNot(d ⇒ filter(d.prototype.name))
 
-  protected def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = submitNextJobsIfReady(ListBuffer() ++ context.values, ticket, subMole)
+  protected def _perform(context: Context, ticket: ITicket, subMole: ISubMoleExecution) = submitNextJobsIfReady(ListBuffer() ++ filtered(context).values, ticket, subMole)
+  protected def filtered(context: Context) = context.filterNot { case (n, _) ⇒ filter(n) }
 
   override def toString = this.getClass.getSimpleName + " from " + start + " to " + end
 

@@ -41,7 +41,7 @@ class AggregationTransition(start: ICapsule, end: Slot, condition: ICondition = 
     if (!subMole.canceled && !hasBeenPerformed(subMole, parentTicket)) {
       subMole.aggregationTransitionRegistry.consult(this, parentTicket) match {
         case Some(results) ⇒
-          results ++= context.values
+          results ++= filtered(context).values
 
           if (trigger != ICondition.False) {
             val toArrayManifests = Map.empty[String, Manifest[_]] ++ start.outputs(mole, moleExecution.sources, moleExecution.hooks).toList.map { d ⇒ d.prototype.name -> d.prototype.`type` }
