@@ -4,7 +4,7 @@ import Keys._
 import root._
 
 
-object HelloBuild extends Defaults {
+object Root extends Defaults {
   implicit val dir = file(".")
   lazy val all = Project(id = "root", base = dir) aggregate
     (Libraries.all, Web.all, Application.all, Base.all, ThirdParties.all, Gui.all) //todo: meta should be application.meta
