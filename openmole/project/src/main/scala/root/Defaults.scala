@@ -26,7 +26,7 @@ trait Defaults extends BuildSystemDefaults {
       publishArtifact in (packageSrc in install) := false,
       concurrentRestrictions in Global :=
         Seq(
-          Tags.limitAll(7)
+          Tags.limitAll(10)
         )
     )
 }
