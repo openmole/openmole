@@ -95,27 +95,24 @@ object GA {
 
   trait GAModifier extends Modifier with GA
 
-  trait GAAlgorithm extends Archive with ArchiveManifest with GA with GAModifier with Elitism {
-    val diversityMetric: GADiversityMetric
-    val ranking: GARanking
-    def diversity(individuals: Seq[DIVERSIFIED], ranks: Seq[Lazy[Int]]): Seq[Lazy[Double]] = diversityMetric.diversity(individuals, ranks)
-    def rank(individuals: Seq[RANKED]) = ranking.rank(individuals)
-  }
+  trait GAAlgorithm extends Archive with ArchiveManifest with GA with GAModifier with Elitism
 
   trait GAAlgorithmBuilder extends A {
-    def apply(diversityMetric: GADiversityMetric, ranking: GARanking): GAAlgorithm
+    def apply: GAAlgorithm
   }
 
-  def optimization(mu: Int) = new GAAlgorithmBuilder {
-    val _mu = mu
-    def apply(_diversityMetric: GADiversityMetric, _ranking: GARanking) =
+  def optimization(mu: Int, dominance: Dominance = strict, ranking: GARankingBuilder = pareto, diversityMetric: GADiversityMetric = crowding) = new GAAlgorithmBuilder {
+    val (_mu, _dominance, _ranking, _diversityMetric) = (mu, dominance, ranking, diversityMetric)
+    def apply =
       new NoArchive with RankDiversityModifier with GAAlgorithm with NonDominatedElitism {
         override type DIVERSIFIED = MGFitness
         override type RANKED = MGFitness
         val aManifest = manifest[A]
         val diversityMetric = _diversityMetric
-        val ranking = _ranking
+        val ranking = _ranking(dominance)
         val mu = _mu
+        def diversity(individuals: Seq[DIVERSIFIED], ranks: Seq[Lazy[Int]]): Seq[Lazy[Double]] = diversityMetric.diversity(individuals, ranks)
+        def rank(individuals: Seq[RANKED]) = ranking.rank(individuals)
       }
   }
 
@@ -130,16 +127,14 @@ object GA {
       val aggregation = _aggregation
       val x = _x
 
-      def apply(_diversityMetric: GADiversityMetric, _ranking: GARanking) =
-        new GAAlgorithm with ProfileModifier with ProfileElitism with NoArchive with ProfileGenomePlotter {
+      def apply =
+        new GAAlgorithm with ProfileModifier with ProfileElitism with NoArchive with NoDiversity with ProfileGenomePlotter with HierarchicalRanking {
           override type DIVERSIFIED = MGFitness
           override type RANKED = MGFitness
           val aManifest = manifest[A]
           val x = _x
           val nX = _nX
           def aggregate(fitness: F) = _aggregation.aggregate(fitness)
-          val diversityMetric = _diversityMetric
-          val ranking = _ranking
         }
     }
   }
@@ -160,26 +155,28 @@ object GA {
     def y: Int
   }
 
-  def map(_x: Int, _nX: Int, _y: Int, _nY: Int, _aggregation: GAAggregation, neighbors: Int = 8) = {
-    val (_neighbors) = (neighbors)
+  def map(x: Int, nX: Int, y: Int, nY: Int, aggregation: GAAggregation, neighbors: Int = 8, dominance: Dominance = strict, ranking: GARankingBuilder = pareto, diversityMetric: DiversityMetricBuilder = crowding) = {
+    val (_x, _nX, _y, _nY, _aggregation, _neighbors, _dominance, _ranking, _diversityMetric) = (x, nX, y, nY, aggregation, neighbors, dominance, ranking, diversityMetric)
     new GAAlgorithmBuilder with GAMap {
       val aggregation = _aggregation
       val x = _x
       val y = _y
 
-      def apply(_diversityMetric: GADiversityMetric, _ranking: GARanking) =
+      def apply =
         new MapArchive with GAAlgorithm with MapModifier with MapElitism with MapGenomePlotter {
           override type DIVERSIFIED = MGFitness
           override type RANKED = MGFitness
           val aManifest = manifest[A]
           def aggregate(fitness: F) = _aggregation.aggregate(fitness)
-          val diversityMetric = _diversityMetric
-          val ranking = _ranking
+          val diversityMetric = _diversityMetric(_dominance)
+          val ranking = _ranking(_dominance)
           val neighbors = _neighbors
           val x = _x
           val y = _y
           val nX = _nX
           val nY = _nY
+          def diversity(individuals: Seq[DIVERSIFIED], ranks: Seq[Lazy[Int]]): Seq[Lazy[Double]] = diversityMetric.diversity(individuals, ranks)
+          def rank(individuals: Seq[RANKED]) = ranking.rank(individuals)
         }
     }
   }
@@ -231,11 +228,8 @@ object GA {
     termination: GATermination,
     mutation: GAMutationBuilder = coEvolvingSigma,
     crossover: GACrossoverBuilder = sbx(),
-    dominance: Dominance = strict,
-    diversityMetric: DiversityMetricBuilder = crowding,
-    ranking: GARankingBuilder = pareto,
     cloneProbability: Double = 0.0) =
-    new org.openmole.plugin.method.evolution.algorithm.GAImpl(algorithm, lambda, termination, mutation, crossover, dominance, diversityMetric, ranking, cloneProbability)(_)
+    new org.openmole.plugin.method.evolution.algorithm.GAImpl(algorithm, lambda, termination, mutation, crossover, cloneProbability)(_)
 
 }
 
@@ -259,15 +253,10 @@ sealed class GAImpl(
   val termination: GA.GATermination,
   val mutation: GA.GAMutationBuilder,
   val crossover: GA.GACrossoverBuilder,
-  val dominance: Dominance,
-  val diversityMetric: GA.DiversityMetricBuilder,
-  val ranking: GA.GARankingBuilder,
   override val cloneProbability: Double)(val genomeSize: Int)
     extends GA { sga ⇒
 
-  lazy val thisRanking = ranking(dominance)
-  lazy val thisDiversityMetric = diversityMetric(dominance)
-  lazy val thisAlgorithm = algorithm(thisDiversityMetric, thisRanking)
+  lazy val thisAlgorithm = algorithm.apply
   lazy val thisCrossover = crossover(genomeFactory)
   lazy val thisMutation = mutation(genomeFactory)
 
@@ -280,8 +269,6 @@ sealed class GAImpl(
 
   def initialState: STATE = termination.initialState
   def terminated(population: ⇒ Population[G, P, F, MF], terminationState: STATE): (Boolean, STATE) = termination.terminated(population, terminationState)
-  def diversity(individuals: Seq[DIVERSIFIED], ranks: Seq[Lazy[Int]]): Seq[Lazy[Double]] = thisDiversityMetric.diversity(individuals, ranks)
-  def isDominated(p1: Seq[scala.Double], p2: Seq[scala.Double]) = dominance.isDominated(p1, p2)
   def toArchive(individuals: Seq[Individual[G, P, F]]) = thisAlgorithm.toArchive(individuals)
   def combine(a1: A, a2: A) = thisAlgorithm.combine(a1, a2)
   def diff(a1: A, a2: A) = thisAlgorithm.diff(a1, a2)
