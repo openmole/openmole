@@ -92,12 +92,14 @@ class Application extends IApplication with Logger {
       plugins.map(p ⇒ new File(p))
     )
 
-    try {
-      config.password foreach Workspace.setPassword
+    try config.password foreach Workspace.setPassword
+    catch {
+      case e: UserBadDataError ⇒
+        logger.severe("Wrong password!")
+        throw e
     }
-    catch { case e: UserBadDataError ⇒ println("Wrong password!!"); System.exit(1) }
 
-    if (!config.ignored.isEmpty) println("Ignored options: " + config.ignored.mkString(" "))
+    if (!config.ignored.isEmpty) logger.warning("Ignored options: " + config.ignored.mkString(" "))
 
     if (config.help) println(usage)
     else if (config.console) {
