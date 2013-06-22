@@ -27,8 +27,6 @@ object GA {
 
   trait GA extends G with ContextPhenotype with MG with MF with RankDiversityMF with GASigma {
     type MF <: Rank with Diversity
-    type RANKED = MGFitness
-    type DIVERSIFIED = MGFitness
     val gManifest = manifest[G]
     val individualManifest = manifest[Individual[G, P, F]]
     val populationManifest = manifest[Population[G, P, F, MF]]
@@ -101,18 +99,16 @@ object GA {
     def apply: GAAlgorithm
   }
 
-  def optimization(mu: Int, dominance: Dominance = strict, ranking: GARankingBuilder = pareto, diversityMetric: GADiversityMetric = crowding) = new GAAlgorithmBuilder {
+  def optimization(mu: Int, dominance: Dominance = strict, ranking: GARankingBuilder = pareto, diversityMetric: DiversityMetricBuilder = crowding) = new GAAlgorithmBuilder {
     val (_mu, _dominance, _ranking, _diversityMetric) = (mu, dominance, ranking, diversityMetric)
     def apply =
       new NoArchive with RankDiversityModifier with GAAlgorithm with NonDominatedElitism {
-        override type DIVERSIFIED = MGFitness
-        override type RANKED = MGFitness
         val aManifest = manifest[A]
-        val diversityMetric = _diversityMetric
+        val diversityMetric = _diversityMetric(dominance)
         val ranking = _ranking(dominance)
         val mu = _mu
-        def diversity(individuals: Seq[DIVERSIFIED], ranks: Seq[Lazy[Int]]): Seq[Lazy[Double]] = diversityMetric.diversity(individuals, ranks)
-        def rank(individuals: Seq[RANKED]) = ranking.rank(individuals)
+        def diversity(individuals: Seq[Seq[Double]], ranks: Seq[Lazy[Int]]) = diversityMetric.diversity(individuals, ranks)
+        def rank(individuals: Seq[Seq[Double]]) = ranking.rank(individuals)
       }
   }
 
@@ -129,8 +125,6 @@ object GA {
 
       def apply =
         new GAAlgorithm with ProfileModifier with ProfileElitism with NoArchive with NoDiversity with ProfileGenomePlotter with HierarchicalRanking {
-          override type DIVERSIFIED = MGFitness
-          override type RANKED = MGFitness
           val aManifest = manifest[A]
           val x = _x
           val nX = _nX
@@ -164,8 +158,6 @@ object GA {
 
       def apply =
         new MapArchive with GAAlgorithm with MapModifier with MapElitism with MapGenomePlotter {
-          override type DIVERSIFIED = MGFitness
-          override type RANKED = MGFitness
           val aManifest = manifest[A]
           def aggregate(fitness: F) = _aggregation.aggregate(fitness)
           val diversityMetric = _diversityMetric(_dominance)
@@ -175,8 +167,8 @@ object GA {
           val y = _y
           val nX = _nX
           val nY = _nY
-          def diversity(individuals: Seq[DIVERSIFIED], ranks: Seq[Lazy[Int]]): Seq[Lazy[Double]] = diversityMetric.diversity(individuals, ranks)
-          def rank(individuals: Seq[RANKED]) = ranking.rank(individuals)
+          def diversity(individuals: Seq[Seq[Double]], ranks: Seq[Lazy[Int]]): Seq[Lazy[Double]] = diversityMetric.diversity(individuals, ranks)
+          def rank(individuals: Seq[Seq[Double]]) = ranking.rank(individuals)
         }
     }
   }
