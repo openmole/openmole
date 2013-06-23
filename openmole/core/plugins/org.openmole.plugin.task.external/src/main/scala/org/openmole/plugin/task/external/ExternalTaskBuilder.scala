@@ -35,9 +35,9 @@ import org.openmole.core.model.task.PluginSet
  */
 abstract class ExternalTaskBuilder(implicit plugins: PluginSet) extends TaskBuilder { builder ⇒
 
-  private var _inputFiles = new ListBuffer[(Prototype[File], String, Boolean)]
-  private var _outputFiles = new ListBuffer[(String, Prototype[File])]
-  private var _resources = new ListBuffer[(File, String, Boolean, OS)]
+  private val _inputFiles = new ListBuffer[(Prototype[File], String, Boolean)]
+  private val _outputFiles = new ListBuffer[(String, Prototype[File])]
+  private val _resources = new ListBuffer[(File, String, Boolean, OS)]
 
   def inputFiles = _inputFiles.toList
   def outputFiles = _outputFiles.toList
@@ -87,9 +87,9 @@ abstract class ExternalTaskBuilder(implicit plugins: PluginSet) extends TaskBuil
   }
 
   trait Built extends super.Built {
-    val inputFiles = builder.inputFiles
-    val outputFiles = builder.outputFiles
-    val resources = builder.resources
+    val inputFiles = builder.inputFiles.toList
+    val outputFiles = builder.outputFiles.toList
+    val resources = builder.resources.toList
   }
 
 }

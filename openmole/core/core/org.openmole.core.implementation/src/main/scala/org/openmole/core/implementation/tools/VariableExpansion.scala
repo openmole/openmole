@@ -17,7 +17,6 @@
 
 package org.openmole.core.implementation.tools
 
-import com.ibm.icu.text.UTF16
 import java.io.InputStreamReader
 import java.io.OutputStream
 import java.io.OutputStreamWriter
@@ -141,9 +140,9 @@ object VariableExpansion {
     var openbrace = 0
     var closebrace = 0
     var expandTime = false
-    var esbuilder = new StringBuffer(UTF16.valueOf('$')).append(UTF16.valueOf('{'))
+    var esbuilder = new StringBuffer("${")
 
-    def appendChar(c: Int) = esbuilder.append(UTF16.valueOf(c))
+    def appendChar(c: Int) = esbuilder.append(c)
 
     try {
       Iterator.continually(isreader.read).takeWhile(_ != -1).foreach {
@@ -153,7 +152,7 @@ object VariableExpansion {
               openbrace += 1
               expandTime = true
               if (openbrace > 1) appendChar(n)
-              else esbuilder = new StringBuffer(UTF16.valueOf('$')).append(UTF16.valueOf('{'))
+              else esbuilder = new StringBuffer("${")
             case '}' ⇒
               closebrace += 1
               appendChar(n)
@@ -165,7 +164,7 @@ object VariableExpansion {
               }
             case _ ⇒
               if (expandTime) appendChar(n)
-              else if (n != '$') oswriter.write(UTF16.valueOf(n))
+              else if (n != '$') oswriter.write(n)
           }
       }
     }
