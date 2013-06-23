@@ -12,19 +12,33 @@ import scala.language.experimental.macros
  */
 object SimpleMacros {
 
-  def nomImpl(c: Context): c.Expr[String] = {
-    import c.universe._
-    val regex = """.*(val|var) ([a-zA-Z][a-zA-Z0-9]*) = .*""".r
+  def getValName(c: Context): c.Expr[String] = {
+    def enclosingTrees(c: Context): Seq[c.Tree] =
+      c.asInstanceOf[reflect.macros.runtime.Context].callsiteTyper.context.enclosingContextChain.map(_.tree.asInstanceOf[c.Tree])
+    def invalidEnclosingTree(s: String): String = ???
 
-    val lineInfo = c.enclosingPosition
+    import c.universe.{ Apply ⇒ ApplyTree, _ }
 
-    val ret = lineInfo.lineContent match {
-      case regex(_, name) ⇒ name
-      case _              ⇒ throw new IllegalArgumentException(s"There is no variable defined on line ${lineInfo.line} of file ${lineInfo.source}: ${lineInfo.lineContent}")
-    }
+    val methodName = c.macroApplication.symbol.name
 
-    c.literal(ret)
+    def processName(n: Name): String = n.decoded.trim // trim is not strictly correct, but macros don't expose the API necessary
+
+    def enclosingVal(trees: List[c.Tree]): String =
+      {
+        trees match {
+          case vd @ ValDef(_, name, _, _) :: ts ⇒ processName(name)
+          case (_: ApplyTree | _: Select | _: TypeApply) :: xs ⇒
+            println(trees)
+            enclosingVal(xs)
+          // lazy val x: X = <methodName> has this form for some reason (only when the explicit type is present, though)
+          case Block(_, _) :: DefDef(mods, name, _, _, _, _) :: xs if mods.hasFlag(Flag.LAZY) ⇒ processName(name)
+          case _ ⇒
+            c.error(c.enclosingPosition, invalidEnclosingTree(methodName.decoded))
+            "<error>"
+        }
+      }
+    c.Expr[String](Literal(Constant(enclosingVal(enclosingTrees(c).toList))))
   }
 
-  def !! : String = macro nomImpl
+  def !! : String = macro getValName
 }

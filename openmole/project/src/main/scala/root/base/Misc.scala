@@ -49,7 +49,7 @@ object Misc extends BaseDefaults {
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
     (fileDeleter)
 
-  val macros = OsgiProject("org.openmole.misc.macros") dependsOn (provided(scalaLang))
+  val macros = OsgiProject("org.openmole.misc.macros") dependsOn (provided(scalaLang), provided(scalaCompiler))
 
   val pluginManager = OsgiProject("org.openmole.misc.pluginmanager",
     bundleActivator = Some("org.openmole.misc.pluginmanager.internal.Activator")) settings
