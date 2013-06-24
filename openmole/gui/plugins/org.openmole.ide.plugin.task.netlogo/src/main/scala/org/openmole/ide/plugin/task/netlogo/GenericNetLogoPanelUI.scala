@@ -53,7 +53,8 @@ abstract class GenericNetLogoPanelUI(
   val nlogoTextField = new ChooseFileTextField(nlogoPath,
     "Select a nlogo file",
     "Netlogo files",
-    "nlogo")
+    "nlogo",
+    updateGlobals)
 
   val workspaceCheckBox = new CheckBox("Embed Workspace") {
     selected = workspaceEmbedded
@@ -64,44 +65,63 @@ abstract class GenericNetLogoPanelUI(
   var multiStringProto: Option[MultiTwoCombos[String, IPrototypeDataProxyUI]] = None
   var multiProtoString: Option[MultiTwoCombos[IPrototypeDataProxyUI, String]] = None
   val resourcesMultiTextField = new MultiChooseFileTextField("",
-    resources.map { r ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(r)) },
+    resources.map {
+      r ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(r))
+    },
     selectionMode = SelectionMode.FilesAndDirectories,
     minus = CLOSE_IF_EMPTY)
   if (resources.isEmpty) resourcesMultiTextField.removeAllRows
 
   listenTo(nlogoTextField)
   reactions += {
-    case DialogClosedEvent(nlogoTextField) ⇒
-      _globalsReporters.single() = None
-      publish(UpdatedProxyEvent.task(this))
+    case DialogClosedEvent(nlogoTextField) ⇒ updateGlobals
+  }
 
-    // buildMultis
+  private def updateGlobals = {
+    _globalsReporters.single() = None
+    updateIOPanel
+    publish(UpdatedProxyEvent.task(this))
   }
 
   private val _globalsReporters = Ref(Option.empty[(Seq[String], Seq[String])])
 
-  private def globalsReporters = stm.atomic { implicit ctx ⇒
-    val path = nlogoTextField.text
-    if (_globalsReporters().isEmpty && (new File(path)).isFile) {
-      val nl = buildNetLogo
-      nl.open(path)
-      _globalsReporters() = Some((nl.globals.toList, nl.reporters.toList))
-      nl.dispose
-    }
-    _globalsReporters()
+  private val inputMappingPanel = new PluginPanel("")
+  private val outputMappingPanel = new PluginPanel("")
+  updateIOPanel
+
+  private def updateIOPanel = {
+    val (i, o) = buildMultis
+    if (inputMappingPanel.contents.size > 0) inputMappingPanel.contents.remove(0)
+    if (outputMappingPanel.contents.size > 0) outputMappingPanel.contents.remove(0)
+    inputMappingPanel.contents += i
+    outputMappingPanel.contents += o
+    revalidate
+    repaint
   }
 
-  val (inputMapping, outputMapping) = buildMultis
+  private def globalsReporters = stm.atomic {
+    implicit ctx ⇒
+      val path = nlogoTextField.text
+      if (_globalsReporters().isEmpty && (new File(path)).isFile) {
+        val nl = buildNetLogo
+        nl.open(path)
+        _globalsReporters() = Some((nl.globals.toList, nl.reporters.toList))
+        nl.dispose
+      }
+      _globalsReporters()
+  }
 
   val components = List(("Settings",
     new PluginPanel("", "[left]rel[grow,fill]", "[]20[]") {
       contents += new Label("Nlogo file")
       contents += (nlogoTextField, "growx,wrap")
       contents += (new Label("Commands"), "wrap")
-      contents += (new ScrollPane(launchingCommandTextArea) { minimumSize = new Dimension(450, 200) }, "span,growx")
+      contents += (new ScrollPane(launchingCommandTextArea) {
+        minimumSize = new Dimension(450, 200)
+      }, "span,growx")
     }),
-    ("Input mapping", inputMapping),
-    ("Output mapping", outputMapping),
+    ("Input mapping", inputMappingPanel),
+    ("Output mapping", outputMappingPanel),
     ("Resources", new PluginPanel("wrap") {
       contents += (workspaceCheckBox, "span,growx,wrap")
       contents += resourcesMultiTextField.panel
@@ -119,20 +139,20 @@ abstract class GenericNetLogoPanelUI(
               globals ++ reporters,
               comboContent,
               "with",
-              prototypeMappingOutput.map { m ⇒ new TwoCombosPanel(globals, comboContent, "with", new TwoCombosData(Some(m._1), Some(m._2))) },
+              prototypeMappingOutput.map {
+                m ⇒ new TwoCombosPanel(globals, comboContent, "with", new TwoCombosData(Some(m._1), Some(m._2)))
+              },
               minus = CLOSE_IF_EMPTY))
-
-            if (prototypeMappingOutput.isEmpty) multiStringProto.get.removeAllRows
 
             multiProtoString = Some(new MultiTwoCombos[IPrototypeDataProxyUI, String](
               "",
               comboContent,
               globals,
               "with",
-              prototypeMappingInput.map { m ⇒ new TwoCombosPanel(comboContent, globals, "with", new TwoCombosData(Some(m._1), Some(m._2))) },
+              prototypeMappingInput.map {
+                m ⇒ new TwoCombosPanel(comboContent, globals, "with", new TwoCombosData(Some(m._1), Some(m._2)))
+              },
               minus = CLOSE_IF_EMPTY))
-
-            if (prototypeMappingInput.isEmpty) multiProtoString.get.removeAllRows
           }
         case None ⇒
       }
