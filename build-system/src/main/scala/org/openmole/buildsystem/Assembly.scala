@@ -34,6 +34,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
     assemble <<= assemble dependsOn downloadUrls
   )
 
+  @deprecated
   lazy val copyResProject: Seq[Project.Setting[_]] = Seq(
     copyResTask,
     zipFiles <++= resourceAssemble map { f ⇒ f.toSeq }

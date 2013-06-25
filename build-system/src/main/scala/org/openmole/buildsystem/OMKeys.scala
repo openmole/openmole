@@ -46,7 +46,7 @@ object OMKeys {
 
   val copyDependencies = TaskKey[File]("copy-dependencies")
 
-  val resourceSets = SettingKey[Set[(File, String)]]("resourceSets", "A set of (in,out) tuples that specify where to find the resource (in) and what sub-path of assembly to put it in (out)")
+  val resourceSets = TaskKey[Set[(File, String)]]("resourceSets", "A set of (in,out) tuples that specify where to find the resource (in) and what sub-path of assembly to put it in (out)")
 
   val resourceOutDir = SettingKey[Option[String]]("resource-out-dir")
 

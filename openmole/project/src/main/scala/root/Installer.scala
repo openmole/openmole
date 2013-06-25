@@ -25,7 +25,7 @@ object Installer extends Defaults {
     variables in Config <+= version { v ⇒ ("version", v) },
     installSourceDir in Config <<= assemblyPath,
     configFile in Config <<= assemblyPath { _ / "resources/install.yml" },
-    resourceSets <<= (assemblyPath in openmolePlugins, target in openmoleRuntime, tarGZName in openmoleRuntime, baseDirectory) { (assembly, target, tarGz, bD) ⇒
+    resourceSets <<= (assemblyPath in openmolePlugins, target in openmoleRuntime, tarGZName in openmoleRuntime, baseDirectory) map { (assembly, target, tarGz, bD) ⇒
       Set(
         assembly -> "openmole",
         bD / "resources" -> "resources"

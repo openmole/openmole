@@ -2,6 +2,8 @@ package root
 
 import org.openmole.buildsystem.OMKeys._
 
+import com.typesafe.sbt.osgi.OsgiKeys._
+
 import Libraries._
 import libraries.Apache
 import ThirdParties._
@@ -214,6 +216,23 @@ object Application extends Defaults {
   lazy val openmoleDaemon = AssemblyProject("daemon", "plugins", settings = copyResProject) settings (resourceDirectory <<= baseDirectory / "resources",
     libraryDependencies <+= (version) { "org.openmole.core" %% "org.openmole.runtime.daemon" % _ }, assemble <<= assemble dependsOn resourceAssemble,
     resourceOutDir := Option("."))
+
+  lazy val uiProjects: Seq[Setting[_]] = (resourceSets := Set.empty) +: Seq(logback, db4o, guava, iceTar, bonecp, xstream,
+    slick, gral, jsyntaxpane, miglayout, Apache.ant, Apache.config, Apache.exec, Apache.logging, Apache.math, Apache.pool,
+    Apache.log4j, scopt, Apache.sshd, groovy, jetty, gnuCrypto, h2, jasypt, jodaTime, jacksonJson, netbeans, objenesis,
+    base.Core.batch, base.Core.convenience, base.Core.implementation, base.Core.model, base.Core.serializer, gui.Core.implementation,
+    gui.Core.model, gui.Misc.tools, gui.Misc.visualization, gui.Misc.widget, base.Misc.console, base.Misc.eventDispatcher,
+    base.Misc.exception, base.Misc.fileCache, base.Misc.fileDeleter, base.Misc.fileService, base.Misc.hashService, base.Misc.logging,
+    base.Misc.macros, base.Misc.osgi, base.Misc.pluginManager, base.Misc.replication, base.Misc.sftpserver, base.Misc.tools,
+    base.Misc.updater, base.Misc.workspace, openmoleui, Web.core, scalaLang, scalaCompiler, slf4j, robustIt
+  ).map(proj ⇒ resourceSets <+= (bundle in proj map { (b: File) ⇒ b -> "plugins" }))
+
+  lazy val openmoleTest = AssemblyProject("openmole-test", "plugins", settings = resAssemblyProject ++ uiProjects, depNameMap =
+    Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" }, """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") })
+  ) settings (
+    equinoxDependencies, libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale" % gridscaleVersion intransitive (),
+    dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle") }
+  )
 
   lazy val rpm = AssemblyProject("package", "packages") settings (packagerSettings: _*) settings (
     maintainer in Debian := "Romain Reuillon <romain@reuillon.org>",
