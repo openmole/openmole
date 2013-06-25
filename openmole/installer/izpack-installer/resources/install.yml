@@ -65,10 +65,15 @@ resources:
 panels:
     panel:
         className: HelloPanel
+    panel:
         className: LicencePanel
+    panel:
         className: TargetPanel
+    panel:
         className: InstallPanel
+    panel:
         className: ShortcutPanel
+    panel:
         className: SimpleFinishPanel
 
 languages:
