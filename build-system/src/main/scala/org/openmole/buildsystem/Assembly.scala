@@ -53,7 +53,8 @@ trait Assembly { self: BuildSystemDefaults ⇒
           if (rT.isDirectory) {
             IO.copyDirectory(rT, destPath)
             destPath
-          } else {
+          }
+          else {
             IO.copyFile(rT, destPath / rT.name)
             destPath / rT.name
           }
