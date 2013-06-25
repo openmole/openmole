@@ -11,62 +11,65 @@ packs:
         required: yes
         description: OpenMOLE Core
         fileset:
-            dir: ../openmole/
+            includes: $installSourceDir/openmole/
             targetDir: $INSTALL_PATH
         file:
-            src: register.bat
-            targetDir: $INSTALL_PATH
+            src: $installSourceDir/resources/register.bat
+            targetDir: $INSTALL_PATH/register.bat
             override: true
-
     pack:
         name: OpenMOLE Runtime
         required: yes
         description: OpenMOLE Runtime
         file:
-            src: ../runtime.tar.gz
+            src: $installSourceDir/runtime/runtime.tar.gz
             targetDir: $USER_HOME/.openmole/runtime/
         file:
-            src: ../jvm-linux-x64.tar.gz
+            src: $installSourceDir/runtime/jvm-x64.tar.gz
             targetDir: $USER_HOME/.openmole/runtime/
         file:
-            src: ../jvm-linux-i386.tar.gz
+            src: $installSourceDir/runtime/jvm-386.tar.gz
             targetDir: $USER_HOME/.openmole/runtime/
     pack:
         name: OpenMOLE Icons
         required: yes
         description: OpenMOLE Icons
-            file:
-                src: ./openmole.ico
-                targetDir: $INSTALL_PATH
-            file:
-                src: ./openmole-uninstall.ico
-                targetDir: $INSTALL_PATH
-            file:
-                src: ./openmole.png
-                targetDir: $INSTALL_PATH
-            file:
-                src: ./openmole-uninstall.png
-                targetDir: $INSTALL_PATH
+        file:
+            src: $installSourceDir/resources/openmole.ico
+            targetDir: $INSTALL_PATH/openmole.ico
+            override: true
+        file:
+            src: $installSourceDir/resources/openmole-uninstall.ico
+            targetDir: $INSTALL_PATH/openmole-uninstall.ico
+            override: true
+        file:
+            src: $installSourceDir/resources/openmole.png
+            targetDir: $INSTALL_PATH/openmole.png
+            override: true
+        file:
+            src: $installSourceDir/resources/openmole-uninstall.png
+            targetDir: $INSTALL_PATH/openmole-uninstall.png
+            override: true
 
 resources:
     resource:
         id: LicencePanel.licence
-        src: AGPLv3.txt
+        src: $installSourceDir/resources/AGPLv3.txt
     resource:
         id: shortcutSpec.xml
-        src: shortcutSpec.xml
+        src: $installSourceDir/resources/shortcutSpec.xml
     resource:
         id: Unix_shortcutSpec.xml
-        src: Unix_shortcutSpec.xml
+        src: $installSourceDir/resources/Unix_shortcutSpec.xml
 
 panels:
     panel:
-        classname: HelloPanel
-        classname: LicencePanel
-        classname: TargetPanel
-        classname: InstallPanel
-        classname: ShortcutPanel
-        classname: SimpleFinishPanel
+        className: HelloPanel
+        className: LicencePanel
+        className: TargetPanel
+        className: InstallPanel
+        className: ShortcutPanel
+        className: SimpleFinishPanel
 
 languages:
     - eng
@@ -75,6 +78,3 @@ guiprefs:
     resizable: yes
     width: 640
     height: 480
-
-customXML:
-    <native type="izpack" name="ShellLink.dll" />
