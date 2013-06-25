@@ -16,18 +16,25 @@
  */
 package org.openmole.ide.misc.widget
 
-import java.awt.Dimension
 import scala.swing.FileChooser.SelectionMode._
 import javax.swing.filechooser.FileNameExtensionFilter
 import scala.swing.FileChooser
 import scala.swing.FileChooser.Result.Approve
 import scala.swing.TextField
-import scala.swing.event.MousePressed
+import swing.event.{ KeyReleased, MousePressed }
 import scala.collection.JavaConversions._
+import scala.swing.event.Key.Enter
 
-class ChooseFileTextField(initialText: String, chooserTitle: String, chooserDescription: Option[String], selectionMode: Value, extensions: Option[String]) extends TextField {
-  def this(iT: String, cT: String, cD: String, ex: String) = this(iT, cT, Some(cD), FilesOnly, Some(ex))
+class ChooseFileTextField(initialText: String,
+                          chooserTitle: String,
+                          chooserDescription: Option[String],
+                          selectionMode: Value,
+                          extensions: Option[String],
+                          toDoFunction: ⇒ Unit = {}) extends TextField {
+  def this(iT: String, cT: String, cD: String, ex: String, tdF: ⇒ Unit = {}) = this(iT, cT, Some(cD), FilesOnly, Some(ex), tdF)
+
   def this(iT: String, cT: String) = this(iT, cT, None, FilesOnly, None)
+
   def this(iT: String) = this(iT, "Select a directory", None, DirectoriesOnly, None)
 
   text = initialText
@@ -43,7 +50,9 @@ class ChooseFileTextField(initialText: String, chooserTitle: String, chooserDesc
         if (fc.showDialog(this, "OK") == Approve) text = fc.selectedFile.getPath
         publish(new DialogClosedEvent(this))
       }
+    case KeyReleased(_, _, _, _) ⇒ toDoFunction
   }
+
   columns = 15
-  listenTo(this.mouse.clicks)
+  listenTo(this.mouse.clicks, keys)
 }
