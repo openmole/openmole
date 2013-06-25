@@ -58,8 +58,8 @@ object GA {
   }
 
   def pareto = new GARankingBuilder {
-    def apply(_dominance: Dominance) = new ParetoRanking with GARanking {
-      def isDominated(p1: Seq[Double], p2: Seq[Double]) = _dominance.isDominated(p1, p2)
+    def apply(dominance: Dominance) = new ParetoRanking with GARanking {
+      def isDominated(p1: Seq[Double], p2: Seq[Double]) = dominance.isDominated(p1, p2)
     }
   }
 
