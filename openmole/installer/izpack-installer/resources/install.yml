@@ -3,6 +3,8 @@ info:
     appVersion: $version
     createUninstaller: yes
     javaVersion: 1.7
+    runPrivileged:
+        enabled: no
     pack200: yes
 
 packs:
@@ -50,6 +52,9 @@ packs:
             src: $installSourceDir/resources/openmole-uninstall.png
             targetDir: $INSTALL_PATH/openmole-uninstall.png
             override: true
+        executable:
+            targetFile: $INSTALL_PATH/openmole
+            stage: never
 
 resources:
     resource:
