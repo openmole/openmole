@@ -36,15 +36,37 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
   lazy val copyResProject: Seq[Project.Setting[_]] = Seq(
     copyResTask,
-    zipFiles <+= resourceAssemble map { f ⇒ f }
+    zipFiles <++= resourceAssemble map { f ⇒ f.toSeq }
   )
+
+  lazy val resAssemblyProject: Seq[Project.Setting[_]] = Seq(
+    resTask,
+    zipFiles <++= resourceAssemble map { (f: Set[File]) ⇒ f.toSeq },
+    assemble <<= assemble dependsOn resourceAssemble
+  )
+
+  lazy val resTask = resourceAssemble <<= (resourceSets, outDir, assemblyPath) map { //TODO: Find a natural way to do this
+    (rS, outD, cT) ⇒
+      {
+        for ((rT, rOD) ← rS) yield {
+          val destPath = cT / rOD
+          if (rT.isDirectory) {
+            IO.copyDirectory(rT, destPath)
+            destPath
+          } else {
+            IO.copyFile(rT, destPath / rT.name)
+            destPath / rT.name
+          }
+        }
+      }
+  }
 
   lazy val copyResTask = resourceAssemble <<= (resourceDirectory, outDir, assemblyPath, resourceOutDir) map { //TODO: Find a natural way to do this
     (rT, outD, cT, rOD) ⇒
       {
         val destPath = rOD map (cT / _) getOrElse (cT / outD)
         IO.copyDirectory(rT, destPath)
-        destPath
+        Set(destPath)
       }
   }
 

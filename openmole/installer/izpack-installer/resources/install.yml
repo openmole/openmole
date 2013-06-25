@@ -1,0 +1,80 @@
+info:
+    appName: OpenMOLE
+    appVersion: $version
+    createUninstaller: yes
+    javaVersion: 1.7
+    pack200: yes
+
+packs:
+    pack:
+        name: OpenMOLE Core
+        required: yes
+        description: OpenMOLE Core
+        fileset:
+            dir: ../openmole/
+            targetDir: $INSTALL_PATH
+        file:
+            src: register.bat
+            targetDir: $INSTALL_PATH
+            override: true
+
+    pack:
+        name: OpenMOLE Runtime
+        required: yes
+        description: OpenMOLE Runtime
+        file:
+            src: ../runtime.tar.gz
+            targetDir: $USER_HOME/.openmole/runtime/
+        file:
+            src: ../jvm-linux-x64.tar.gz
+            targetDir: $USER_HOME/.openmole/runtime/
+        file:
+            src: ../jvm-linux-i386.tar.gz
+            targetDir: $USER_HOME/.openmole/runtime/
+    pack:
+        name: OpenMOLE Icons
+        required: yes
+        description: OpenMOLE Icons
+            file:
+                src: ./openmole.ico
+                targetDir: $INSTALL_PATH
+            file:
+                src: ./openmole-uninstall.ico
+                targetDir: $INSTALL_PATH
+            file:
+                src: ./openmole.png
+                targetDir: $INSTALL_PATH
+            file:
+                src: ./openmole-uninstall.png
+                targetDir: $INSTALL_PATH
+
+resources:
+    resource:
+        id: LicencePanel.licence
+        src: AGPLv3.txt
+    resource:
+        id: shortcutSpec.xml
+        src: shortcutSpec.xml
+    resource:
+        id: Unix_shortcutSpec.xml
+        src: Unix_shortcutSpec.xml
+
+panels:
+    panel:
+        classname: HelloPanel
+        classname: LicencePanel
+        classname: TargetPanel
+        classname: InstallPanel
+        classname: ShortcutPanel
+        classname: SimpleFinishPanel
+
+languages:
+    - eng
+
+guiprefs:
+    resizable: yes
+    width: 640
+    height: 480
+
+customXML:
+    <native type="izpack" name="ShellLink.dll" />

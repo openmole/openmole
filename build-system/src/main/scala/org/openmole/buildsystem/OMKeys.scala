@@ -46,9 +46,11 @@ object OMKeys {
 
   val copyDependencies = TaskKey[File]("copy-dependencies")
 
+  val resourceSets = SettingKey[Set[(File, String)]]("resourceSets", "A set of (in,out) tuples that specify where to find the resource (in) and what sub-path of assembly to put it in (out)")
+
   val resourceOutDir = SettingKey[Option[String]]("resource-out-dir")
 
-  val resourceAssemble = TaskKey[File]("resource-assemble")
+  val resourceAssemble = TaskKey[Set[File]]("resource-assemble")
 
   val ignoreTransitive = SettingKey[Boolean]("ignoreTransitive")
 

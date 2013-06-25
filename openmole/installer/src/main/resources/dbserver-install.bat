@@ -1,4 +1,0 @@
-
-sc delete dbserver
-
-
