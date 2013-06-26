@@ -18,9 +18,8 @@
 package org.openmole.plugin.environment.ssh
 
 import java.net.URI
-import org.openmole.core.batch.control.LimitedAccess
+import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
-import org.openmole.plugin.environment.gridscale._
 import org.openmole.core.batch.storage.PersistentStorageService
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
