@@ -78,11 +78,11 @@ class PBSEnvironment(
       val environment = env
       lazy val root = env.path match {
         case Some(p) ⇒ p
-        case None    ⇒ createStorage("/").child(home, ".openmole")
+        case None    ⇒ storage.child(home, ".openmole")
       }
     }
 
-  @transient lazy val jobService = new PBSJobService with ThisHostConnectionCache with LimitedAccess {
+  @transient lazy val jobService = new PBSJobService with ThisHost with LimitedAccess {
     def nbTokens = Workspace.preferenceAsInt(MaxConnections)
     def queue = env.queue
     val environment = env

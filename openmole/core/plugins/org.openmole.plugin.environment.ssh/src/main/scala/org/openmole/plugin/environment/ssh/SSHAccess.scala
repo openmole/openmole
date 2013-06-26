@@ -32,7 +32,6 @@ trait SSHAccess extends SSHHost { s ⇒
     override def timeout = Workspace.preferenceAsDuration(SSHService.timeout).toSeconds
   }
 
-  trait ThisHostConnectionCache extends ThisHost with SSHCC {
-    def connectionKeepAlive = Workspace.preferenceAsDuration(SSHEnvironment.ConnectionsKeepAlive).toSeconds
-  }
+  trait ThisHostConnectionCache extends ThisHost with SSHCC
+
 }
