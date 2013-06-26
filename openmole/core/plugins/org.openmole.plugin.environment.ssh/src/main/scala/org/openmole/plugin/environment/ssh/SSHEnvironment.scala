@@ -61,16 +61,16 @@ class SSHEnvironment(
   @transient lazy val authentication = SSHAuthentication(user, host, port)()
   @transient lazy val id = new URI("ssh", env.user, env.host, env.port, null, null, null).toString
 
-  @transient lazy val storage = new PersistentStorageService with SSHStorageService with LimitedAccess with ThisHostConnectionCache {
+  @transient lazy val storage = new PersistentStorageService with SSHStorageService with LimitedAccess with ThisHost {
     def nbTokens = Workspace.preferenceAsInt(MaxConnections)
     def root = env.path
     val environment = env
   }
 
-  @transient lazy val jobService = new SSHJobService with LimitedAccess with ThisHostConnectionCache {
+  @transient lazy val jobService = new SSHJobService with LimitedAccess with ThisHost {
     def nbTokens = Workspace.preferenceAsInt(MaxConnections)
     def nbSlots = env.nbSlots
-    def root = env.path
+    def sharedFS = storage
     val environment = env
     val id = url.toString
   }

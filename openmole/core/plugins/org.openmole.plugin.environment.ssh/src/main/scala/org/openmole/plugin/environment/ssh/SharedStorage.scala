@@ -35,16 +35,7 @@ object SharedStorage {
 import SharedStorage._
 
 trait SharedStorage extends SSHService { js ⇒
-  def sharedFS = new SimpleStorage {
-    val storage = new fr.iscpif.gridscale.ssh.SSHStorage {
-      def host = js.host
-      def user = js.user
-      override def port = js.port
-      override def timeout = Workspace.preferenceAsDuration(SSHService.timeout).toMilliSeconds.toInt
-    }
-    val root = js.root
-    def authentication = js.authentication
-  }
+  def sharedFS: SSHStorageService
 
   def installJobService = new fr.iscpif.gridscale.ssh.SSHJobService {
     def authentication = js.authentication
@@ -54,13 +45,11 @@ trait SharedStorage extends SSHService { js ⇒
     override def timeout = Workspace.preferenceAsDuration(SSHService.timeout).toMilliSeconds.toInt
   }
 
-  def root: String
-
   @transient private var installed: Option[String] = None
 
   def preparedRuntime(runtime: Runtime) = synchronized {
     installed match {
-      case None ⇒
+      case None ⇒ sharedFS.withToken { implicit token ⇒
         val (workdir, scriptName) = {
           val workdir = sharedFS.child(sharedFS.root, Workspace.preference(Workspace.uniqueID) + "_install")
           if (!sharedFS.exists(workdir)) sharedFS.makeDir(workdir)
@@ -101,6 +90,7 @@ trait SharedStorage extends SSHService { js ⇒
         val path = sharedFS.child(workdir, runtime.runtime.hash)
         installed = Some(path)
         path
+      }
       case Some(path) ⇒ path
     }
   }
@@ -120,7 +110,7 @@ trait SharedStorage extends SSHService { js ⇒
           "; rm -rf $OPENMOLE_HOME ; rm -rf " + osgiWorkDir + " ;"
 
       val remoteScript = sharedFS.child(serializedJob.path, Storage.uniqName("run", ".sh"))
-      sharedFS.upload(script, remoteScript)
+      sharedFS.withToken { sharedFS.upload(script, remoteScript)(_) }
       remoteScript
     }
     finally script.delete

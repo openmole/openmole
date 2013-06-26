@@ -20,14 +20,14 @@ package org.openmole.plugin.environment.ssh
 import org.openmole.core.batch.storage.StorageService
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.plugin.environment.gridscale.LocalStorage
-import fr.iscpif.gridscale.ssh.{ SSHStorage, SSHConnectionCache }
+import fr.iscpif.gridscale.ssh.SSHConnectionCache
 
 trait SSHStorageService extends StorageService with SSHService { ss ⇒
 
   val environment: BatchEnvironment with SSHAccess
 
   lazy val storage =
-    new fr.iscpif.gridscale.ssh.SSHStorage with environment.ThisHostConnectionCache
+    new fr.iscpif.gridscale.ssh.SSHStorage with environment.ThisHost with SSHConnectionCache
 
   def home = storage.home(authentication)
 

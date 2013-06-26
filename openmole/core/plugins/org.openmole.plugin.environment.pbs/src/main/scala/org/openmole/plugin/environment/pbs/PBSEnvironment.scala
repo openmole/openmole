@@ -73,12 +73,12 @@ class PBSEnvironment(
   @transient lazy val id = new URI("pbs", env.user, env.host, env.port, null, null, null).toString
 
   @transient lazy val storage =
-    new PersistentStorageService with SSHStorageService with ThisHostConnectionCache with LimitedAccess {
+    new PersistentStorageService with SSHStorageService with ThisHost with LimitedAccess {
       def nbTokens = Workspace.preferenceAsInt(MaxConnections)
       val environment = env
       lazy val root = env.path match {
         case Some(p) ⇒ p
-        case None    ⇒ storage.child(home, ".openmole")
+        case None    ⇒ child(home, ".openmole")
       }
     }
 
@@ -86,7 +86,7 @@ class PBSEnvironment(
     def nbTokens = Workspace.preferenceAsInt(MaxConnections)
     def queue = env.queue
     val environment = env
-    lazy val root = storage.root
+    def sharedFS = storage
     val id = url.toString
   }
 

@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.ssh
 
-import fr.iscpif.gridscale.ssh.{ SSHHost, SSHConnectionCache ⇒ SSHCC, SSHAuthentication ⇒ SA }
+import fr.iscpif.gridscale.ssh.{ SSHHost, SSHAuthentication ⇒ SA }
 import org.openmole.misc.workspace.Workspace
 
 trait SSHAccess extends SSHHost { s ⇒
@@ -31,7 +31,5 @@ trait SSHAccess extends SSHHost { s ⇒
     def authentication = s.authentication
     override def timeout = Workspace.preferenceAsDuration(SSHService.timeout).toSeconds
   }
-
-  trait ThisHostConnectionCache extends ThisHost with SSHCC
 
 }
