@@ -29,15 +29,12 @@ import de.erichseifert.gral.plots.lines.DefaultLineRenderer2D
 import de.erichseifert.gral.plots.lines.LineRenderer
 import de.erichseifert.gral.plots.areas.AreaRenderer
 import de.erichseifert.gral.ui.InteractivePanel
-import de.erichseifert.gral.util.GraphicsUtils
-import de.erichseifert.gral.util.Insets2D
+import de.erichseifert.gral.util.{ Location, GraphicsUtils, Insets2D, Orientation }
 import java.awt.Color
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
-import de.erichseifert.gral.util.Orientation
-import de.erichseifert.gral.Legend
-import de.erichseifert.gral.Location
 import java.awt.Dimension
+import de.erichseifert.gral.plots.legends.Legend
 
 class XYPlotter(buffer_size: Int,
                 nbInterval: Int) {
