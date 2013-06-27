@@ -153,7 +153,7 @@ object Libraries extends Defaults {
     (libraryDependencies += "jsyntaxpane" % "jsyntaxpane" % "0.9.6")
 
   lazy val gral = OsgiProject("de.erichseifert.gral", privatePackages = Seq("!scala.*", "*")) settings
-    (libraryDependencies += "de.erichseifert.gral" % "gral-core" % "0.9-SNAPSHOT")
+    (libraryDependencies += "de.erichseifert.gral" % "gral-core" % "0.9")
 
   lazy val miglayout = OsgiProject("net.miginfocom.swing.miglayout", exports = Seq("net.miginfocom.*")) settings
     (libraryDependencies += "com.miglayout" % "miglayout" % "3.7.4")
