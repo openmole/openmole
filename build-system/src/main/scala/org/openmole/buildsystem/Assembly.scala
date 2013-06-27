@@ -87,9 +87,10 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
   def AssemblyProject(base: String,
                       outputDir: String = "lib",
+                      baseDir: File = dir,
                       settings: Seq[Project.Setting[_]] = Nil,
                       depNameMap: Map[Regex, String ⇒ String] = Map.empty[Regex, String ⇒ String]) = {
-    val projBase = dir / base
+    val projBase = baseDir / base
     val s = settings
     Project(base + "-" + outputDir.replace('/', '_'), projBase, settings = Project.defaultSettings ++ Seq(
       assemble := false,

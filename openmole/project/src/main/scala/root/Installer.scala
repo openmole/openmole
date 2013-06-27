@@ -9,7 +9,7 @@ import org.openmole.buildsystem.OMKeys._
 import Application.{ openmolePlugins, openmoleRuntime }
 
 object Installer extends Defaults {
-  val dir = file(".")
+  val dir = file("installer")
   val all = Aggregator("installer-all") aggregate (installer)
 
   lazy val openmoleSettings: Seq[Setting[_]] = openmolePlugins.settings
@@ -18,7 +18,7 @@ object Installer extends Defaults {
 
   lazy val t = target in openmolePlugins
 
-  lazy val installer = AssemblyProject("installer", "installer", settings = IzPack.izPackSettings ++ resAssemblyProject) settings (
+  lazy val installer = AssemblyProject("installer", "installer", baseDir = file("."), settings = IzPack.izPackSettings ++ resAssemblyProject) settings (
     assemble := false,
     packageBin := file("."),
     createInstaller in IzPack.IzPack.Config <<= (createInstaller in IzPack.IzPack.Config) dependsOn resourceAssemble,
