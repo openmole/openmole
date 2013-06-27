@@ -1,5 +1,10 @@
+customXML:
+  - |
+    <native type="izpack" name="ShellLink.dll"></native>
+
 info:
     appName: OpenMOLE
+    summaryLogFilePath: "/tmp/out"
     appVersion: $version
     createUninstaller: yes
     javaVersion: 1.7
@@ -13,11 +18,11 @@ packs:
         required: yes
         description: OpenMOLE Core
         fileset:
-            includes: $installSourceDir/openmole/
+            includes: $installSourceDir/openmole/*
             targetDir: $INSTALL_PATH
         file:
             src: $installSourceDir/resources/register.bat
-            targetDir: $INSTALL_PATH/register.bat
+            targetDir: $INSTALL_PATH
             override: true
     pack:
         name: OpenMOLE Runtime
@@ -25,32 +30,33 @@ packs:
         description: OpenMOLE Runtime
         file:
             src: $installSourceDir/runtime/runtime.tar.gz
-            targetDir: $USER_HOME/.openmole/runtime/
-        file:
+            targetDir: \$USER_HOME/.openmole/runtime
+        file: 
             src: $installSourceDir/runtime/jvm-x64.tar.gz
-            targetDir: $USER_HOME/.openmole/runtime/
+            targetDir: \$USER_HOME/.openmole/runtime
         file:
             src: $installSourceDir/runtime/jvm-386.tar.gz
-            targetDir: $USER_HOME/.openmole/runtime/
+            targetDir: \$USER_HOME/.openmole/runtime
+
     pack:
         name: OpenMOLE Icons
         required: yes
         description: OpenMOLE Icons
         file:
             src: $installSourceDir/resources/openmole.ico
-            targetDir: $INSTALL_PATH/openmole.ico
+            targetDir: $INSTALL_PATH
             override: true
         file:
             src: $installSourceDir/resources/openmole-uninstall.ico
-            targetDir: $INSTALL_PATH/openmole-uninstall.ico
+            targetDir: $INSTALL_PATH
             override: true
         file:
             src: $installSourceDir/resources/openmole.png
-            targetDir: $INSTALL_PATH/openmole.png
+            targetDir: $INSTALL_PATH
             override: true
         file:
             src: $installSourceDir/resources/openmole-uninstall.png
-            targetDir: $INSTALL_PATH/openmole-uninstall.png
+            targetDir: $INSTALL_PATH
             override: true
         executable:
             targetFile: $INSTALL_PATH/openmole
@@ -74,6 +80,8 @@ panels:
         className: LicencePanel
     panel:
         className: TargetPanel
+    panel:
+        className: PacksPanel
     panel:
         className: InstallPanel
     panel:
