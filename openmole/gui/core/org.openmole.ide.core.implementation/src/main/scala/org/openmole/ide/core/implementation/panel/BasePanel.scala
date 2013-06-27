@@ -26,9 +26,7 @@ import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ISamplingC
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.widget._
 import swing._
-import event.UIElementResized
-import scala.swing.event.ActionEvent
-import scala.swing.event.UIElementResized
+import event.{ MouseClicked, UIElementResized, ActionEvent }
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.model.workflow.ISceneContainer
@@ -92,8 +90,9 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
   preferredSize.width = 300
   foreground = Color.white
 
-  listenTo(this)
+  listenTo(this, mouse.clicks)
   reactions += {
+    case e: MouseClicked ⇒
     case x: UIElementResized ⇒
       scene.propertyWidget.foreach { _.revalidate }
       scene.refresh
