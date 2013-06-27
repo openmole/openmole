@@ -18,7 +18,7 @@ object Libraries extends Defaults {
 
   val dir = file("libraries")
 
-  val gridscaleVersion = "1.47-SNAPSHOT"
+  val gridscaleVersion = "1.47"
 
   lazy val includeGridscale = libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale" % gridscaleVersion
 
