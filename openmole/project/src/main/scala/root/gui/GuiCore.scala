@@ -3,15 +3,13 @@ package root.gui
 import org.openmole.buildsystem.OMKeys._
 
 import sbt._
-import root.base
+import root.{ GuiDefaults, base }
 import root.Libraries._
 import root.libraries.Apache
 import sbt.Keys._
 
 object Core extends GuiDefaults {
   override val dir = super.dir / "core"
-
-  lazy val all = Project("gui-core", dir) aggregate (model, implementation)
 
   lazy val model = OsgiProject("org.openmole.ide.core.model") dependsOn
     (provided(base.Core.model), provided(base.Misc.tools), provided(xstream), provided(Apache.config), provided(Apache.log4j),

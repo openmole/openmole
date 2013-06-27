@@ -12,9 +12,6 @@ import root.Libraries._
 object Task extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.plugin.task")
 
-  lazy val all = Project("core-tasks", dir) aggregate (external, netLogo, netLogo4, netLogo5, scala, groovy, code,
-    systemexec, stat, template)
-
   lazy val external = OsgiProject("external") dependsOn (provided(Misc.exception), Core.implementation,
     provided(Misc.workspace))
 

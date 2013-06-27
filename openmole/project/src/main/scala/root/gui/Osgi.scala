@@ -1,6 +1,6 @@
 package root.gui
 
-import root.base
+import root.{ GuiDefaults, base }
 import sbt._
 import root.Libraries._
 

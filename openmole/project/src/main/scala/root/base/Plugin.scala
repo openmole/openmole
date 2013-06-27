@@ -2,16 +2,11 @@ package root.base
 
 import sbt._
 import root._
+import base.plugin._
 
-trait PluginDefaults extends BaseDefaults {
+abstract class PluginDefaults(subBuilds: Defaults*) extends BaseDefaults(subBuilds: _*) {
   override val dir = file("core/plugins")
 }
 
-object Plugin extends PluginDefaults {
-  import base.plugin._
-  implicit val artifactPrefix = Some("org.openmole.plugin")
-
-  lazy val all = Project("core-plugin", dir) aggregate (Task.all, Tools.all, Domain.all, Builder.all, Method.all,
-    Environment.all, Sampling.all, Grouping.all, Hook.all, Profiler.all, Source.all) //TODO: name inconsistency
-}
+object Plugin extends PluginDefaults(plugin.Task, Tools, Domain, Builder, Method, Environment, Sampling, Grouping, Hook, Profiler, Source) {}
 

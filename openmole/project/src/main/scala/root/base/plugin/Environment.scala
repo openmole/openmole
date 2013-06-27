@@ -8,8 +8,6 @@ import Keys._
 object Environment extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.plugin.environment")
 
-  lazy val all = Project("core-plugins-environment", dir) aggregate (desktopgrid, glite, gridscale, pbs, ssh)
-
   lazy val desktopgrid = OsgiProject("desktopgrid") dependsOn (Core.model, Misc.workspace, Misc.tools,
     Core.batch, provided(Core.serializer), Misc.sftpserver)
 

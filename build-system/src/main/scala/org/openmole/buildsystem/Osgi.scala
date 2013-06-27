@@ -25,7 +25,7 @@ object Osgi {
     if (manifest.exists) managed(new FileInputStream(manifest)) foreach oldProps.load
     if (!oldProps.equals(props)) managed(new FileOutputStream(manifest)) foreach (props.store(_, ""))
 
-    def expandClasspath(f: File): Array[File] = if (f.isDirectory) f.listFiles() flatMap expandClasspath else Array(f)
+    def expand(f: File): Array[File] = if (f.isDirectory) f.listFiles() flatMap expand else Array(f)
 
     val fun = FileFunction.cached(target / "package-cache", FilesInfo.lastModified, FilesInfo.exists) {
       (changes: Set[File]) ⇒
@@ -43,7 +43,7 @@ object Osgi {
         Set(artifactPath)
     }
 
-    fun((fullClasspath flatMap (a ⇒ expandClasspath(a.data)) toSet) ++ resourceDirectories.toSet ++ embeddedJars.toSet + manifest).headOption getOrElse target
+    fun((fullClasspath flatMap (a ⇒ expand(a.data)) toSet) ++ (resourceDirectories flatMap expand).toSet ++ embeddedJars.toSet + manifest).headOption getOrElse target
   }
 
   def headersToProperties(headers: OsgiManifestHeaders, additionalHeaders: Map[String, String]): Properties = {

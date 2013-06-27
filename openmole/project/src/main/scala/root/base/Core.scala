@@ -1,5 +1,6 @@
 package root.base
 
+import root.BaseDefaults
 import sbt._
 import Keys._
 import org.openmole.buildsystem.OMKeys._
@@ -13,7 +14,6 @@ object Core extends BaseDefaults {
   implicit val artifactPrefix = Some("org.openmole.core")
 
   override val dir = file("core/core")
-  lazy val all = Aggregator("core-core") aggregate (model, serializer, implementation, batch, convenience) //TODO: Replace with aggregators
 
   lazy val model = OsgiProject("model", openmoleScope = Some("provided")) dependsOn
     (eventDispatcher, provided(exception), Misc.tools, provided(updater), provided(Misc.workspace))

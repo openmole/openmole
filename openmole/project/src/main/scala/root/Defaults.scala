@@ -13,7 +13,9 @@ import Keys._
  * Time: 6:43 PM
  * To change this template use File | Settings | File Templates.
  */
-trait Defaults extends BuildSystemDefaults {
+abstract class Defaults(subBuilds: Defaults*) extends BuildSystemDefaults {
+
+  override def subProjects = subBuilds flatMap (_.projectRefs)
 
   val projectName = "openmole"
 

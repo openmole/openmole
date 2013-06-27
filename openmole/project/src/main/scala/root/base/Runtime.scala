@@ -1,5 +1,6 @@
 package root.base
 
+import root.BaseDefaults
 import sbt._
 import Keys._
 import root.Libraries._
@@ -10,8 +11,6 @@ object Runtime extends BaseDefaults {
   implicit val artifactPrefix = Some("org.openmole.runtime")
 
   override def dir = super.dir / "runtime"
-
-  lazy val all = Project("base-runtime", dir) aggregate (dbserver, runtime, daemon)
 
   val dbserver = OsgiProject("dbserver") dependsOn (db4o, xstream, Misc.replication)
 

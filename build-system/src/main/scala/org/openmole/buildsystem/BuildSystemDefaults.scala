@@ -16,7 +16,9 @@ trait BuildSystemDefaults extends Build with OsgiBundler with Assembly {
 
   def projectName: String
 
-  def all: Project //An aggregate project that other parts of the build system use
+  lazy val projectRefs: Seq[ProjectReference] = super.projects.map(_.project) ++ subProjects
+
+  def subProjects: Seq[ProjectReference] = Nil
 
   override def settings = super.settings ++
     Seq(scalacOptions ++= Seq("-feature", "-language:reflectiveCalls", "-language:implicitConversions",
@@ -26,7 +28,7 @@ trait BuildSystemDefaults extends Build with OsgiBundler with Assembly {
 
   def gcTask { System.gc(); System.gc(); System.gc() }
 
-  def Aggregator(name: String) = Project(name, dir) settings (compile in Compile := Analysis.Empty)
+  def Aggregator(name: String) = Project(name, dir) settings (compile in Compile := Analysis.Empty, install := false, assemble := false)
 
   protected lazy val scalariformDefaults = Seq(ScalariformKeys.preferences in Compile <<= ScalariformKeys.preferences(p ⇒
     p.setPreference(DoubleIndentClassDeclaration, true)

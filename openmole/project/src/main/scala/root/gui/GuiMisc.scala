@@ -1,14 +1,12 @@
 package root.gui
 
 import sbt._
-import root.base
+import root.{ GuiDefaults, base }
 import root.Libraries._
 import root.ThirdParties._
 
 object Misc extends GuiDefaults {
   override val dir = super.dir / "misc"
-
-  lazy val all = Project("gui-misc", dir) aggregate (tools, widget, visualization)
 
   lazy val tools = OsgiProject("org.openmole.ide.misc.tools") dependsOn
     (base.Core.implementation, provided(base.Misc.workspace))

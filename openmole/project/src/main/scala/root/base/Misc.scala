@@ -1,5 +1,6 @@
 package root.base
 
+import root.BaseDefaults
 import sbt._
 import Keys._
 
@@ -12,10 +13,6 @@ object Misc extends BaseDefaults {
   import root.ThirdParties._
 
   override val dir = file("core/misc")
-
-  lazy val all = Project("core-misc", dir) aggregate (exception, macros, osgi,
-    tools, eventDispatcher, fileDeleter, fileCache, fileService,
-    pluginManager, replication, updater, workspace, hashService, sftpserver, logging, console)
 
   val exception = OsgiProject("org.openmole.misc.exception")
 

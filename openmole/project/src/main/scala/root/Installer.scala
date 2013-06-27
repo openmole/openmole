@@ -10,7 +10,7 @@ import Application.{ openmolePlugins, openmoleRuntime }
 
 object Installer extends Defaults {
   val dir = file("installer")
-  val all = Aggregator("installer-all") aggregate (installer)
+  val all = Aggregator("installer-all")
 
   lazy val openmoleSettings: Seq[Setting[_]] = openmolePlugins.settings
 

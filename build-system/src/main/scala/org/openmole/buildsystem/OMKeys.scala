@@ -14,6 +14,8 @@ object OMKeys {
 
   val bundleType = SettingKey[String]("bundle-type") //Default setting for osgiprojects is default.
 
+  val bundleProj = SettingKey[Boolean]("bundle-proj")
+
   val openMoleStandardVer = SettingKey[String]("openmoleversion")
 
   val eclipseBuddyPolicy = SettingKey[Option[String]]("OSGi.eclipseBuddyPolicy", "The eclipse buddy policy thing.")

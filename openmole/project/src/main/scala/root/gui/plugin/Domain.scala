@@ -7,8 +7,6 @@ import root.gui._
 object Domain extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.ide.plugin.domain")
 
-  lazy val all = Project("gui-plugin-domain", dir) aggregate (collection, distribution, file, modifier, range)
-
   lazy val collection = OsgiProject("collection") dependsOn (Core.implementation, base.plugin.Domain.collection)
 
   lazy val distribution = OsgiProject("distribution") dependsOn (Core.implementation, base.plugin.Domain.distribution,

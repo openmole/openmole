@@ -7,8 +7,6 @@ import root.gui._
 object Environment extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.ide.plugin.environment")
 
-  lazy val all = Project("gui-plugin-environment", dir) aggregate (desktopgrid, glite, local, pbs, ssh)
-
   lazy val desktopgrid = OsgiProject("desktopgrid") dependsOn (Core.implementation, base.Misc.exception,
     base.plugin.Environment.desktopgrid)
 

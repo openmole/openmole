@@ -4,10 +4,9 @@ import Keys._
 import root._
 
 
-object Root extends Defaults {
+object Root extends Defaults(Base, Libraries, Gui, ThirdParties, Web, Application) {
   implicit val dir = file(".")
-  lazy val all = Project(id = "root", base = dir) aggregate
-    (Libraries.all, Web.all, Application.all, Base.all, ThirdParties.all, Gui.all) //todo: meta should be application.meta
+  lazy val all = Project(id = "root", base = dir) aggregate (subProjects: _*)
 
   override def settings = super.settings ++ Seq(
     //make openmole repo the resolver of last resort

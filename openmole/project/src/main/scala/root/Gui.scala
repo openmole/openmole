@@ -1,9 +1,13 @@
 package root
 
-import root.gui.GuiDefaults
 import sbt._
 
-object Gui extends GuiDefaults {
+object Gui extends GuiDefaults(gui.Misc, gui.Core, gui.Osgi, gui.Plugin) {
   override def dir = super.dir
-  lazy val all = Project("gui", dir) aggregate (gui.Misc.all, gui.Core.all, gui.Osgi.all, gui.Plugin.all)
 }
+
+abstract class GuiDefaults(subBuilds: Defaults*) extends Defaults(subBuilds: _*) {
+  def dir = file("gui")
+  override val org = "org.openmole.ide"
+}
+

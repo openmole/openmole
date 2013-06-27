@@ -7,8 +7,6 @@ import root.gui._
 object Task extends PluginDefaults {
   implicit val artifactPrefix = Some("org.openmole.ide.plugin.task")
 
-  lazy val all = Project("gui-plugin-task", dir) aggregate (exploration, groovy, moletask, netlogo, stat, systemexec)
-
   lazy val exploration = OsgiProject("exploration") dependsOn (Core.implementation, base.Core.model, base.Misc.exception)
 
   lazy val groovy = OsgiProject("groovy") dependsOn (Core.implementation, base.Misc.workspace, base.plugin.Task.groovy)

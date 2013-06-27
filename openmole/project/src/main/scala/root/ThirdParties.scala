@@ -7,8 +7,6 @@ object ThirdParties extends Defaults {
 
   lazy val dir = file("third-parties")
 
-  lazy val all = Project("thirdParties", dir) aggregate (iceTar, scalaSwing, scopt)
-
   lazy val iceTar = OsgiProject("com.ice.tar")
 
   lazy val scalaSwing = OsgiProject("org.scala-lang.scala-swing", exports = Seq("scala.swing.*", "scala.actors.*")) settings

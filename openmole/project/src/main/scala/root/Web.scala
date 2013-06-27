@@ -15,7 +15,6 @@ object Web extends Defaults {
 
   val dir = file("web")
   override val org = "org.openmole.web"
-  lazy val all = Project("web", dir) aggregate (core)
 
   lazy val core = OsgiProject("org.openmole.web.core", "core",
     exports = Seq("org.openmole.web"),
