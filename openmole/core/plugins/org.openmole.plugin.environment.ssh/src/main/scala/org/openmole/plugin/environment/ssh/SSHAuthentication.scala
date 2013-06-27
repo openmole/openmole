@@ -22,17 +22,17 @@ import org.openmole.misc.workspace.Workspace
 
 object SSHAuthentication {
 
+  def apply() = Workspace.persistentList(classOf[SSHAuthentication])
+  def update(i: Int, a: SSHAuthentication) = Workspace.persistentList(classOf[SSHAuthentication])(i) = a
+  def apply(i: Int) = Workspace.persistentList(classOf[SSHAuthentication])(i)
   def apply(target: String) = {
     val list = Workspace.persistentList(classOf[SSHAuthentication])
     list.find { case (i, e) ⇒ target.matches(e.regexp) }.getOrElse(throw new UserBadDataError("No authentication method found for " + target))._2
   }
 
   def apply(login: String, host: String, port: Int): SSHAuthentication = apply(address(login, host, port))
-
   def address(login: String, host: String, port: Int) = s"$login@$host:$port"
 
-  def update(i: Int, a: SSHAuthentication) = Workspace.persistentList(classOf[SSHAuthentication])(i) = a
-  def apply(i: Int) = Workspace.persistentList(classOf[SSHAuthentication])(i)
 }
 
 trait SSHAuthentication {

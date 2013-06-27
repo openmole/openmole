@@ -17,7 +17,7 @@
 
 package org.openmole.plugin.environment.pbs
 
-import fr.iscpif.gridscale.ssh.{ SSHAuthentication, SSHJobService, SSHHost }
+import fr.iscpif.gridscale.ssh.{ SSHConnectionCache, SSHAuthentication, SSHJobService, SSHHost }
 import fr.iscpif.gridscale.pbs.{ PBSJobService ⇒ GSPBSJobService, PBSJobDescription }
 import java.net.URI
 import org.openmole.core.batch.control._
@@ -33,7 +33,7 @@ trait PBSJobService extends GridScaleJobService with SSHHost with SharedStorage 
 
   def environment: PBSEnvironment
 
-  val jobService = new GSPBSJobService {
+  val jobService = new GSPBSJobService with SSHConnectionCache {
     def host = js.host
     def user = js.user
     override def port = js.port

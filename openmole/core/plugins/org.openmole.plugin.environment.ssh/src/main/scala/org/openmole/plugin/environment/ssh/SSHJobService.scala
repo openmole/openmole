@@ -17,35 +17,23 @@
 
 package org.openmole.plugin.environment.ssh
 
-import java.util.UUID
-import org.openmole.core.batch.control._
 import org.openmole.core.batch.environment._
 import org.openmole.core.batch.jobservice.BatchJob
 import org.openmole.core.model.execution.ExecutionState
 import org.openmole.misc.eventdispatcher.Event
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.misc.eventdispatcher.EventListener
-import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.misc.tools.service.Logger
-import org.openmole.misc.workspace.Workspace
 import org.openmole.plugin.environment.gridscale._
-import fr.iscpif.gridscale.ssh.SSHHost
-import fr.iscpif.gridscale.ssh.{ SSHJobDescription, SSHJobService ⇒ GSSSHJobService, SSHAuthentication ⇒ GSSSHAuthentication }
-import java.net.URI
-import scala.collection.immutable.TreeSet
+import fr.iscpif.gridscale.ssh.{ SSHJobService ⇒ GSSSHJobService, SSHConnectionCache, SSHJobDescription }
 import java.util.concurrent.atomic.AtomicInteger
 import collection.mutable
 
-object SSHJobService extends Logger
-
-import SSHJobService._
-
-trait SSHJobService extends GridScaleJobService with SharedStorage with LimitedAccess { js ⇒
+trait SSHJobService extends GridScaleJobService with SharedStorage { js ⇒
 
   val environment: BatchEnvironment with SSHAccess
   def nbSlots: Int
 
-  val jobService = new GSSSHJobService with environment.ThisHostConnectionCache
+  val jobService = new GSSSHJobService with environment.ThisHost with SSHConnectionCache
 
   val queue = new mutable.SynchronizedQueue[SSHBatchJob]
   @transient lazy val nbRunning = new AtomicInteger
@@ -80,7 +68,7 @@ trait SSHJobService extends GridScaleJobService with SharedStorage with LimitedA
     val _jobDescription = new SSHJobDescription {
       val executable = "/bin/bash"
       val arguments = remoteScript
-      val workDirectory = root
+      val workDirectory = sharedFS.root
     }
 
     val sshBatchJob = new SSHBatchJob {

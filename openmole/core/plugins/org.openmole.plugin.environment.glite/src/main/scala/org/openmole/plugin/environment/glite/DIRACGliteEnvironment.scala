@@ -28,7 +28,7 @@ object DIRACGliteEnvironment {
 
   val LocalThreads = new ConfigurationLocation("DIRACEnvironment", "LocalThreads")
 
-  Workspace += (LocalThreads, "10")
+  Workspace += (LocalThreads, "20")
 
   def apply(
     voName: String,
