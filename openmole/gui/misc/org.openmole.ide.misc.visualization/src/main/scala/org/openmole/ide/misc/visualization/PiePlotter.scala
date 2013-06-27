@@ -21,10 +21,14 @@ import de.erichseifert.gral.plots.PiePlot.PieSliceRenderer
 import de.erichseifert.gral.data.DataTable
 import de.erichseifert.gral.plots._
 import de.erichseifert.gral.plots.colors._
-import de.erichseifert.gral.util.{ Location, Orientation, Insets2D }
+import de.erichseifert.gral.util.Orientation
 import de.erichseifert.gral.util.Orientation._
 import de.erichseifert.gral.plots.points.PointRenderer
 import de.erichseifert.gral.ui.InteractivePanel
+import de.erichseifert.gral.util.Insets2D
+import de.erichseifert.gral.Legend
+import de.erichseifert.gral.Legend._
+import de.erichseifert.gral.Location
 import java.awt.Color
 import java.awt.Color._
 import org.openmole.core.model.job.State._
@@ -52,7 +56,7 @@ class PiePlotter {
   // Change the colors
   val colors = new IndexedColors(new Color(77, 77, 77), new Color(187, 200, 7), new Color(170, 0, 0))
   colors.setMode(ColorMapper.Mode.REPEAT)
-  plot.getPointRenderer(data).setSetting(PointRenderer.COLOR, colors)
+  plot.getPointRenderer(data).setSetting(PieSliceRenderer.COLORS, colors)
   plot.setInsets(new Insets2D.Double(0.0, 0.0, 0.0, 0.0))
 
   plot.setSetting(Plot.LEGEND, true)
