@@ -10,13 +10,6 @@ import Application.{ openmolePlugins, openmoleRuntime }
 
 object Installer extends Defaults {
   val dir = file("installer")
-  val all = Aggregator("installer-all")
-
-  lazy val openmoleSettings: Seq[Setting[_]] = openmolePlugins.settings
-
-  lazy val openmoleAssemblyDir: Setting[File] = openmoleSettings.find(_.key == assemblyPath.scopedKey) map (_.asInstanceOf[Setting[File]]) get
-
-  lazy val t = target in openmolePlugins
 
   lazy val installer = AssemblyProject("installer", "installer", baseDir = file("."), settings = IzPack.izPackSettings ++ resAssemblyProject) settings (
     assemble := false,

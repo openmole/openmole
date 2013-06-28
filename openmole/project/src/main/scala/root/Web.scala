@@ -2,6 +2,8 @@ package root
 
 import sbt._
 import Keys._
+import org.openmole.buildsystem.OMKeys._
+import scala.Some
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,4 +23,6 @@ object Web extends Defaults {
     buddyPolicy = Some("global"),
     imports = Seq("org.h2.*", "*;resolution:=optional")) dependsOn
     (h2, jetty, slick, logback, scalatra, bonecp, scalaLang, base.Core.implementation, base.Core.serializer, xstream, jacksonJson)
+
+  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := "core")
 }

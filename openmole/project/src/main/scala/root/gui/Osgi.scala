@@ -1,5 +1,7 @@
 package root.gui
 
+import org.openmole.buildsystem.OMKeys._
+
 import root.{ GuiDefaults, base }
 import sbt._
 import root.Libraries._
@@ -16,4 +18,7 @@ object Osgi extends GuiDefaults {
   lazy val netlogo4 = OsgiProject("netlogo4") dependsOn (netlogo, base.plugin.Task.netLogo4, netlogo4_noscala)
 
   lazy val netlogo5 = OsgiProject("netlogo5") dependsOn (netlogo, base.plugin.Task.netLogo5, netlogo5_noscala)
+
+  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := "gui-bundle")
+
 }

@@ -2,6 +2,7 @@ package root
 
 import sbt._
 import Keys._
+import org.openmole.buildsystem.OMKeys._
 
 object ThirdParties extends Defaults {
 
@@ -13,4 +14,7 @@ object ThirdParties extends Defaults {
     (libraryDependencies <+= scalaVersion { sV ⇒ "org.scala-lang" % "scala-swing" % sV })
 
   lazy val scopt = OsgiProject("com.github.scopt", exports = Seq("scopt.*"))
+
+  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := "core")
+
 }

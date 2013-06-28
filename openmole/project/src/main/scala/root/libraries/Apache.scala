@@ -3,9 +3,12 @@ package root.libraries
 import root.Defaults
 import sbt._
 import sbt.Keys._
+import org.openmole.buildsystem.OMKeys._
 
 object Apache extends Defaults {
   val dir = file("libraries") / "apache"
+
+  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := "core") //TODO make library defaults
 
   lazy val pool = OsgiProject("org.apache.commons.pool") settings
     (libraryDependencies += "commons-pool" % "commons-pool" % "1.5.4")

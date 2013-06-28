@@ -1,5 +1,7 @@
 package root.base
 
+import org.openmole.buildsystem.OMKeys._
+
 import root.BaseDefaults
 import sbt._
 import Keys._
@@ -24,4 +26,7 @@ object Runtime extends BaseDefaults {
       libraryDependencies += "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841" % "provided",
       includeGridscaleSSH
     )
+
+  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := "runtime-bundle")
+
 }

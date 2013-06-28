@@ -10,6 +10,8 @@ import resource._
 import java.io.{ BufferedOutputStream, BufferedInputStream, FileOutputStream }
 import scala.io.Source
 import sbt.Path._
+import com.typesafe.sbt.osgi.OsgiKeys._
+import scala.Some
 
 /**
  * Created with IntelliJ IDEA.
@@ -96,6 +98,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
       assemble := false,
       assemble <<= assemble dependsOn (copyDependencies tag Tags.Disk),
       assemblyPath <<= target / "assemble",
+      bundleProj := false,
       install := true,
       installRemote := true,
       zipFiles := Nil,
@@ -176,5 +179,26 @@ trait Assembly { self: BuildSystemDefaults ⇒
           file
       }
     }
+  }
+}
+
+object Assembly {
+  //checks to see if settingkey key exists for project p in Seq s. If it does, applies the filter function to key's value, and if that returns true, the project stays in the seq.
+  def projFilter[T](s: Seq[ProjectReference], key: SettingKey[T], filter: T ⇒ Boolean): Project.Initialize[Seq[ProjectReference]] = {
+    // (key in p) ? returns Initialize[Option[T]]
+    // Project.Initialize.join takes a Seq[Initialize[_]] and gives back an Initialize[Seq[_]]
+    Project.Initialize.join(s map { p ⇒ (key in p) ? (_ -> p) })(_ filter {
+      case (None, _)    ⇒ false
+      case (Some(v), _) ⇒ filter(v)
+    })(_ map { _._2 })
+  }
+
+  def projFilter[T](s: Project.Initialize[Seq[ProjectReference]], key: SettingKey[T], filter: T ⇒ Boolean): Project.Initialize[Seq[ProjectReference]] = {
+    Project.bind(s)(j ⇒ projFilter(j, key, filter))
+  }
+
+  def sendBundles(bundles: Project.Initialize[Seq[ProjectReference]], to: String): Project.Initialize[Task[Set[(File, String)]]] = Project.bind(bundles) { projs ⇒
+    val seqOTasks: Project.Initialize[Seq[Task[Set[(File, String)]]]] = Project.Initialize.join(projs.map(p ⇒ (bundle in p) map { f ⇒ Set(f -> "plugins") }))
+    seqOTasks { seq ⇒ seq.reduceLeft[Task[Set[(File, String)]]] { case (a, b) ⇒ a flatMap { i ⇒ b map { _ ++ i } } } }
   }
 }
