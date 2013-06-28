@@ -47,8 +47,10 @@ class RemoteGliteStorage(val host: String, val port: Int, permissive: Boolean, c
 
       VOMSAuthentication.setCARepository(certificateDir)
 
-      val path = if (System.getenv.containsKey("X509_USER_PROXY") && new File(System.getenv.get("X509_USER_PROXY")).exists) System.getenv.get("X509_USER_PROXY")
-      else throw new InternalProcessingError("The X509_USER_PROXY environment variable is not defined or point to an inexisting file.")
+      val path =
+        if (System.getenv.containsKey("X509_USER_PROXY") && new File(System.getenv.get("X509_USER_PROXY")).exists) System.getenv.get("X509_USER_PROXY")
+        else throw new InternalProcessingError("The X509_USER_PROXY environment variable is not defined or point to an inexisting file.")
+
       new File(path)
     }
   }

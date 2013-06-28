@@ -55,6 +55,16 @@ class Runtime {
 
   def apply(storage: SimpleStorage, communicationDirPath: String, inputMessagePath: String, outputMessagePath: String, debug: Boolean) = {
 
+    /*--- get execution message and job for runtime---*/
+    val usedFiles = new HashMap[File, File]
+
+    logger.fine("Downloading input message")
+
+    val executionMessage = retry(Workspace.withTmpFile { executionMesageFileCache ⇒
+      storage.downloadGZ(inputMessagePath, executionMesageFileCache)
+      SerializerService.deserialize[ExecutionMessage](executionMesageFileCache)
+    })
+
     val oldOut = System.out
     val oldErr = System.err
 
@@ -68,16 +78,6 @@ class Runtime {
       System.setOut(outSt)
       System.setErr(errSt)
     }
-
-    /*--- get execution message and job for runtime---*/
-    val usedFiles = new HashMap[File, File]
-
-    logger.fine("Downloading input message")
-
-    val executionMessage = retry(Workspace.withTmpFile { executionMesageFileCache ⇒
-      storage.downloadGZ(inputMessagePath, executionMesageFileCache)
-      SerializerService.deserialize[ExecutionMessage](executionMesageFileCache)
-    })
 
     val result = try {
       logger.fine("Downloading plugins")

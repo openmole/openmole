@@ -25,6 +25,7 @@ import org.openmole.ide.core.model.panel.ICapsulePanelUI
 import org.openmole.ide.core.model.workflow.IMoleUI
 
 trait ICapsuleDataUI extends IDataUI {
+
   def name = ""
 
   def buildPanelUI = buildPanelUI(0)

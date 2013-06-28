@@ -67,10 +67,10 @@ class SimExplorer extends IApplication with Logger {
       }
 
       val debug = args.contains("-d")
-      val filtredArgs = args.filterNot((_: String) == "-d")
+      val filteredArgs = args.filterNot((_: String) == "-d")
       if (debug) LoggerService.level("ALL")
 
-      parser.parse(filtredArgs, Config()) foreach { config ⇒
+      parser.parse(filteredArgs, Config()) foreach { config ⇒
 
         PluginManager.loadDir(new File(config.pluginPath.get))
 
@@ -84,7 +84,7 @@ class SimExplorer extends IApplication with Logger {
 
         LocalEnvironment.initializationNumberOfThread = config.nbThread
 
-        val result = new Runtime().apply(
+        new Runtime().apply(
           storage,
           config.path.get,
           config.inputMessage.get,

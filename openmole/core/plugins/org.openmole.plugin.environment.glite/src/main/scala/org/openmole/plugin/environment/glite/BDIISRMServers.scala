@@ -37,7 +37,7 @@ trait BDIISRMServers extends BatchEnvironment {
   def bdiiServer: BDII
   def voName: String
   def proxyCreator: GlobusAuthentication.ProxyCreator
-  def permissive = false
+  def permissive = true
 
   @transient lazy val threadsBySE = Workspace.preferenceAsInt(GliteEnvironment.LocalThreadsBySE)
 
