@@ -37,7 +37,7 @@ import org.openmole.misc.exception.UserBadDataError
 class Application extends IApplication with Logger {
 
   lazy val consoleSplash =
-    """
+"""
   ___                   __  __  ___  _     _____    ___   ___
  / _ \ _ __   ___ _ __ |  \/  |/ _ \| |   | ____|  / _ \ / _ \
 | | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|   | | | | (_) |

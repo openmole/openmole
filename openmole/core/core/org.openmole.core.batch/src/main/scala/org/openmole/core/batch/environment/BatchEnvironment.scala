@@ -111,9 +111,9 @@ object BatchEnvironment extends Logger {
   Workspace += (MaxUpdateInterval, "PT20M")
   Workspace += (IncrementUpdateInterval, "PT1M")
 
-  Workspace += (RuntimeLocation, () ⇒ new File(new File(Workspace.location, "runtime"), "org.openmole.runtime.tar.gz").getAbsolutePath)
-  Workspace += (JVMLinuxI386Location, () ⇒ new File(new File(Workspace.location, "runtime"), "jvm-linux-i386.tar.gz").getAbsolutePath)
-  Workspace += (JVMLinuxX64Location, () ⇒ new File(new File(Workspace.location, "runtime"), "jvm-linux-x64.tar.gz").getAbsolutePath)
+  Workspace += (RuntimeLocation, () ⇒ new File(new File(Workspace.location, "runtime"), "runtime.tar.gz").getAbsolutePath)
+  Workspace += (JVMLinuxI386Location, () ⇒ new File(new File(Workspace.location, "runtime"), "jvm-386.tar.gz").getAbsolutePath)
+  Workspace += (JVMLinuxX64Location, () ⇒ new File(new File(Workspace.location, "runtime"), "jvm-x64.tar.gz").getAbsolutePath)
 
   Workspace += (MemorySizeForRuntime, "512")
   Workspace += (CheckInterval, "PT1M")
