@@ -50,7 +50,7 @@ abstract class SaveMapHook(
     val path: String) extends Hook with GenomeScaling {
 
   def process(context: Context, executionContext: ExecutionContext) = {
-    val file = executionContext.directory.child(VariableExpansion(context, path))
+    val file = executionContext.relativise(VariableExpansion(context, path))
     file.createParentDir
     file.withWriter { w ⇒
       for {

@@ -168,7 +168,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
         val moleExec = processXMLFile[IPartialMoleExecution](data, inS)
 
-        val context = new ExecutionContext(new PrintStream(new File("./out")), null)
+        val context = ExecutionContext(new PrintStream(new File("./out")), None)
 
         moleExec match {
           case (Some(pEx), _) ⇒ {
@@ -222,7 +222,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
       case _                                 ⇒ throw new Exception("Invalidly formatted csv file")
     }).toMap) getOrElse Map()
 
-    val context = new ExecutionContext(new PrintStream(new File("./out")), null)
+    val context = ExecutionContext(new PrintStream(new File("./out")), None)
 
     moleExec match {
       case (Some(pEx), _) ⇒ {

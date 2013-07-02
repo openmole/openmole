@@ -41,7 +41,7 @@ abstract class AppendArrayToFileIHook(
     content: Prototype[Array[_]]) extends Hook {
 
   override def process(context: Context, executionContext: ExecutionContext) = {
-    val file = executionContext.directory.child(new File(VariableExpansion(context, fileName)))
+    val file = executionContext.relativise(VariableExpansion(context, fileName))
     file.createParentDir
     val toWrite = context.option(content).getOrElse(Array("not found")).mkString(",")
     file.withLock(_.appendLine(toWrite))
