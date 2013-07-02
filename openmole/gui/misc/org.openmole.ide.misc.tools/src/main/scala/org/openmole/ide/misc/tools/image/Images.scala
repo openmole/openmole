@@ -50,6 +50,7 @@ object Images {
   val DEL = new ImageIcon(classLoader.getResource("img/del.png"))
   val CLOSE = new ImageIcon(classLoader.getResource("img/close.png"))
   val CLOSE_TAB = new ImageIcon(classLoader.getResource("img/close_tab.png"))
+  val FILTER = new ImageIcon(classLoader.getResource("img/filter.png"))
 
   val CHECK_VALID: Image = ImageIO.read(classLoader.getResource("img/check_valid.png"))
   val CHECK_INVALID: Image = ImageIO.read(classLoader.getResource("img/check_invalid.png"))

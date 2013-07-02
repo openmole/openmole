@@ -26,7 +26,7 @@ class RowPanel[T](val components: List[Component],
                   val plusAllowed: Plus = ADD) extends PluginPanel("wrap,insets -2 5 -2 5") with IRowPanel {
   var extendedPanel: Option[JPanel] = None
 
-  contents += new PluginPanel("insets -3 5 -1 5") {
+  contents += new PluginPanel("insets -15 5 -3 5") {
     components.foreach(contents+=)
     contents += removeButton
   }

@@ -31,26 +31,25 @@ object MultiTwoCombos {
                              inBetweenString: String,
                              data: TwoCombosData[A, B]) extends PluginPanel("wrap 3") with IPanel[TwoCombosData[A, B]] {
 
-    val comboBox1 = new MyComboBox(comboContent1.sortBy { _.toString }) {
-      data.comboValue1 match {
-        case Some(x: A) ⇒ selection.item = x
-        case _          ⇒
-      }
+    val filterComboBox1 = FilterComboBox[A](comboContent1.sortBy { _.toString }.toList)
+    data.comboValue1 match {
+      case Some(x: A) ⇒
+        filterComboBox1.combo.selection.item = x
+      case _ ⇒
     }
 
-    val comboBox2 = new MyComboBox(comboContent2.sortBy { _.toString }) {
-      data.comboValue2 match {
-        case Some(x: B) ⇒ selection.item = x
-        case _          ⇒
-      }
+    val filterComboBox2 = FilterComboBox[B](comboContent2.sortBy { _.toString }.toList)
+    data.comboValue2 match {
+      case Some(x: B) ⇒ filterComboBox2.combo.selection.item = x
+      case _          ⇒
     }
 
-    contents += comboBox1
+    contents += filterComboBox1
     contents += new Label(inBetweenString)
-    contents += comboBox2
+    contents += filterComboBox2
 
-    def content = new TwoCombosData(Some(comboBox1.selection.item),
-      Some(comboBox2.selection.item))
+    def content = new TwoCombosData(Some(filterComboBox1.combo.selection.item),
+      Some(filterComboBox2.combo.selection.item))
   }
 
   class TwoCombosData[A, B](val comboValue1: Option[A] = None,
