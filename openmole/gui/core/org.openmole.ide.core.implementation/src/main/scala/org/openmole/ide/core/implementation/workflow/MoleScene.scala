@@ -102,6 +102,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
   propertyLayer3.addChild(propertyWidget(2))
 
   getActions.addAction(ActionFactory.createRectangularSelectAction(this, capsuleLayer, this))
+  getActions.addAction(ActionFactory.createWheelPanAction())
 
   val connectAction = ActionFactory.createExtendedConnectAction(null,
     connectLayer,
