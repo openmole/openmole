@@ -21,6 +21,7 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.misc.widget.DialogClosedEvent
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.ChooseFileTextField
+import org.openmole.ide.misc.widget.multirow.RowWidget.SMALL
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField._
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
@@ -142,7 +143,7 @@ abstract class GenericNetLogoPanelUI(
               prototypeMappingOutput.map {
                 m ⇒ new TwoCombosPanel(globals, comboContent, "with", new TwoCombosData(Some(m._1), Some(m._2)))
               },
-              minus = CLOSE_IF_EMPTY))
+              minus = CLOSE_IF_EMPTY, insets = SMALL))
 
             multiProtoString = Some(new MultiTwoCombos[IPrototypeDataProxyUI, String](
               "",
@@ -152,7 +153,7 @@ abstract class GenericNetLogoPanelUI(
               prototypeMappingInput.map {
                 m ⇒ new TwoCombosPanel(comboContent, globals, "with", new TwoCombosData(Some(m._1), Some(m._2)))
               },
-              minus = CLOSE_IF_EMPTY))
+              minus = CLOSE_IF_EMPTY, insets = SMALL))
           }
         case None ⇒
       }
