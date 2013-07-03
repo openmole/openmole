@@ -293,11 +293,15 @@ class CapsuleUI private (
 
   def inputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IPrototypeDataProxyUI] = {
     if (cMap.contains(this)) {
+      println("CCMAP : " + cMap)
       val caps = cMap(this)
-      caps.inputs(mole, Map(caps -> dataUI.sources.map { _.dataUI.coreObject(pMap) }), Map(caps -> dataUI.hooks.map { _.dataUI.coreObject(pMap) })).toList.map {
-        ds ⇒
-          SceneFactory.prototype(ds.prototype)
-      }
+      println("caps : " + caps)
+      caps.inputs(mole,
+        Map(caps -> dataUI.sources.map { _.dataUI.coreObject(pMap) }),
+        Map(caps -> dataUI.hooks.map { _.dataUI.coreObject(pMap) })).toList.map {
+          ds ⇒
+            SceneFactory.prototype(ds.prototype)
+        }
     }
     else List()
   }
