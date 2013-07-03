@@ -24,6 +24,6 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 class TransitionData(
   val from: ICapsuleDataUI,
   val to: Int,
-  val transitionType: TransitionType.Value,
+  val transitionType: TransitionType,
   val condition: Option[String] = None,
   val filtered: List[IPrototypeDataProxyUI])

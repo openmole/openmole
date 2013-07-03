@@ -207,8 +207,8 @@ class CapsuleUI private (
     removeWidget(capsuleTypeWidget)
 
     dataUI.capsuleType match {
-      case x: BasicCapsuleType ⇒ capsuleTypeWidget = None
-      case x: CapsuleType ⇒
+      case SimpleCapsuleType ⇒ capsuleTypeWidget = None
+      case x ⇒
         capsuleTypeWidget = Some(imageWidget(scene,
           new ImageIcon(ImageIO.read(dataUI.getClass.getClassLoader.getResource("img/" + x.toString.toLowerCase + "Capsule.png"))),
           -1, -1, new Action("") {

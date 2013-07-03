@@ -47,6 +47,8 @@ import collection.mutable
 import org.openmole.ide.core.model.workflow.{ IMoleUI, IMoleScene }
 import org.openmole.ide.core.model.data.{ ICapsuleDataUI }
 import com.thoughtworks.xstream.converters.collections.SingletonCollectionConverter
+import org.openmole.ide.core.implementation.data.CapsuleDataUI
+import org.openmole.ide.core.model.commons.{ MasterCapsuleType, StrainerCapsuleType, SimpleCapsuleType }
 
 class GUISerializer { serializer ⇒
 
@@ -182,7 +184,26 @@ class GUISerializer { serializer ⇒
   xstream.registerConverter(environmentConverter)
   xstream.registerConverter(hookConverter)
   xstream.registerConverter(sourceConverter)
+
+  xstream.alias("MoleData", classOf[MoleData])
+  xstream.alias("CapsuleData", classOf[MoleData.CapsuleData])
+  xstream.alias("SlotData", classOf[MoleData.SlotData])
+  xstream.alias("TransitionData", classOf[TransitionData])
+  xstream.alias("CapsuleDataUI", classOf[CapsuleDataUI])
+  xstream.alias("TaskDataProxyUI", classOf[TaskDataProxyUI])
+
+  xstream.alias("SimpleCapsuleType", SimpleCapsuleType.getClass)
+  xstream.alias("StrainerCapsuleType", StrainerCapsuleType.getClass)
+  xstream.alias("MasterCapsuleType", classOf[MasterCapsuleType])
+
+  xstream.alias("Some", classOf[scala.Some[_]])
+  xstream.alias("None", None.getClass)
   xstream.registerConverter(optionConverter)
+  implicit val mapper = xstream.getMapper
+  xstream.alias("List", classOf[::[_]])
+  xstream.alias("List", Nil.getClass)
+  xstream.registerConverter(new ListConverter())
+  //xstream.registerConverter(new SeqConverter[[Any]](x ⇒ x.toList))
 
   //xstream.registerConverter(new MoleSceneConverter(this))
 

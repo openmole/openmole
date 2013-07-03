@@ -51,7 +51,7 @@ import scala.swing.Panel
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.builder.SceneFactory
 import org.openmole.ide.core.model.data.{ IExplorationTaskDataUI }
-import org.openmole.ide.core.model.commons.TransitionType
+import org.openmole.ide.core.model.commons.{ SimpleTransitionType, ExplorationTransitionType, TransitionType }
 
 abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
     with SelectProvider
@@ -432,10 +432,10 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
         targetWidget.asInstanceOf[InputSlotWidget],
         sourceCapsuleUI.dataUI.task match {
           case Some(y: ITaskDataProxyUI) ⇒ y.dataUI match {
-            case x: IExplorationTaskDataUI ⇒ TransitionType.EXPLORATION_TRANSITION
-            case _                         ⇒ TransitionType.BASIC_TRANSITION
+            case x: IExplorationTaskDataUI ⇒ ExplorationTransitionType
+            case _                         ⇒ SimpleTransitionType
           }
-          case _ ⇒ TransitionType.BASIC_TRANSITION
+          case _ ⇒ SimpleTransitionType
         })
       moleScene.add(transition)
       CheckData.checkMole(moleScene)

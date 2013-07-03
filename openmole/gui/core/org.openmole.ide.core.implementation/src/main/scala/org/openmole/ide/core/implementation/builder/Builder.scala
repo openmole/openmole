@@ -31,7 +31,7 @@ import org.openmole.core.model.domain.Domain
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.model.builder.IPuzzleUIMap
 import org.openmole.ide.core.implementation.data.{ CapsuleDataUI, CheckData }
-import org.openmole.ide.core.model.commons.TransitionType
+import org.openmole.ide.core.model.commons._
 import org.openmole.core.model.transition.{ IEndExplorationTransition, IExplorationTransition, IAggregationTransition }
 import org.openmole.ide.core.model.factory.IBuilderFactoryUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
@@ -45,6 +45,10 @@ import scala.Some
 import org.openmole.ide.core.implementation.registry.DefaultKey
 import org.openmole.ide.core.implementation.workflow.{ TransitionUI, CapsuleUI }
 import org.openmole.core.implementation.transition.Condition
+import org.openmole.ide.core.implementation.builder.PuzzleUIMap
+import scala.Some
+import org.openmole.ide.core.implementation.builder.BuiltCompositionSampling
+import org.openmole.ide.core.implementation.registry.DefaultKey
 
 object Builder {
 
@@ -132,10 +136,11 @@ object Builder {
           capsuleMap(t.start).capsule,
           capsuleMap(t.end.capsule),
           t match {
-            case ex: IExplorationTransition     ⇒ TransitionType.EXPLORATION_TRANSITION
-            case agg: IAggregationTransition    ⇒ TransitionType.AGGREGATION_TRANSITION
-            case end: IEndExplorationTransition ⇒ TransitionType.END_TRANSITION
-            case _                              ⇒ TransitionType.BASIC_TRANSITION
+            case ex: IExplorationTransition     ⇒ ExplorationTransitionType
+            case agg: IAggregationTransition    ⇒ AggregationTransitionType
+            case end: IEndExplorationTransition ⇒ EndTransitionType
+            case _: ITransition                 ⇒ SimpleTransitionType
+            case x                              ⇒ throw new InternalProcessingError("Unsupported transition class " + x.getClass)
           },
           Some(t.asInstanceOf[Condition].code),
           t.filter match {

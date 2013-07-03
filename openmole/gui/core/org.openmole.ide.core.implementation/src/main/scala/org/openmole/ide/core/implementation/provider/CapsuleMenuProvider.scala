@@ -115,7 +115,7 @@ class CapsuleMenuProvider(scene: IBuildMoleScene, capsule: ICapsuleUI) extends G
     initMenu
     itChangeCapsule.peer.removeAll
     items -= itChangeCapsule.peer
-    List(new MasterCapsuleType, new StrainerCapsuleType, new BasicCapsuleType).filterNot(_.getClass == capsule.dataUI.capsuleType.getClass).foreach {
+    List(new MasterCapsuleType, StrainerCapsuleType, SimpleCapsuleType).filterNot(_.getClass == capsule.dataUI.capsuleType.getClass).foreach {
       ctype ⇒
         itChangeCapsule.peer.add(new MenuItem(new ChangeCapsuleAction(capsule, ctype)).peer)
     }

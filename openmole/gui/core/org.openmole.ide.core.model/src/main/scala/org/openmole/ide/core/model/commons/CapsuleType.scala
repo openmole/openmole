@@ -20,29 +20,7 @@ package org.openmole.ide.core.model.commons
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.misc.exception.UserBadDataError
 
-trait CapsuleType {
-  def persistList: List[IPrototypeDataProxyUI] = List.empty
-}
-
-object CapsuleFactory {
-  def apply(capsuleString: String) = {
-    capsuleString match {
-      case "BASIC"    ⇒ new BasicCapsuleType
-      case "MASTER"   ⇒ new MasterCapsuleType
-      case "STRAINER" ⇒ new StrainerCapsuleType
-      case _          ⇒ throw new UserBadDataError("Unknown capsule type string " + capsuleString)
-    }
-  }
-}
-
-class MasterCapsuleType(override val persistList: List[IPrototypeDataProxyUI] = List.empty) extends CapsuleType {
-  override def toString = "MASTER"
-}
-
-class BasicCapsuleType extends CapsuleType {
-  override def toString = "BASIC"
-}
-
-class StrainerCapsuleType extends CapsuleType {
-  override def toString = "STRAINER"
-}
+sealed trait CapsuleType
+case class MasterCapsuleType(persistList: Seq[IPrototypeDataProxyUI] = List.empty) extends CapsuleType
+case object SimpleCapsuleType extends CapsuleType
+case object StrainerCapsuleType extends CapsuleType

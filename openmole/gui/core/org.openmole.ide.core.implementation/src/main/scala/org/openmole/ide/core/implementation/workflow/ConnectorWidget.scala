@@ -32,13 +32,13 @@ import org.openmole.ide.core.model.workflow.IDataChannelUI
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.core.model.workflow.ITransitionUI
 import org.openmole.ide.core.implementation.dialog.ConnectorPrototypeFilterDialog
-import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.dialog.DialogFactory
 import scala.swing.Action
 import scala.swing.Label
 import scala.swing.event.MousePressed
 import org.openmole.ide.misc.tools.image.Images._
+import org.openmole.ide.core.model.commons.{ SimpleTransitionType, EndTransitionType, AggregationTransitionType, ExplorationTransitionType }
 
 class ConnectorWidget(val scene: IMoleScene,
                       var connector: IConnectorUI,
@@ -109,10 +109,10 @@ class ConnectorWidget(val scene: IMoleScene,
     connector match {
       case x: ITransitionUI ⇒
         x.transitionType match {
-          case EXPLORATION_TRANSITION ⇒ setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(EXPLORATION_TRANSITION_IMAGE, false))
-          case AGGREGATION_TRANSITION ⇒ setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(AGGREGATION_TRANSITION_IMAGE, false))
-          case END_TRANSITION         ⇒ setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(END_TRANSITION_IMAGE, false))
-          case _                      ⇒
+          case ExplorationTransitionType ⇒ setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(EXPLORATION_TRANSITION_IMAGE, false))
+          case AggregationTransitionType ⇒ setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(AGGREGATION_TRANSITION_IMAGE, false))
+          case EndTransitionType         ⇒ setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(END_TRANSITION_IMAGE, false))
+          case SimpleTransitionType      ⇒
         }
       case _ ⇒
     }

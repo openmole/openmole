@@ -18,7 +18,6 @@
 package org.openmole.ide.core.implementation.data
 
 import org.openmole.ide.core.model.commons._
-import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.data.ICapsuleDataUI
@@ -39,7 +38,7 @@ object CapsuleDataUI {
     grouping: Option[IGroupingDataUI] = None,
     sources: Seq[ISourceDataProxyUI] = List(),
     hooks: Seq[IHookDataProxyUI] = List(),
-    capsuleType: CapsuleType = new BasicCapsuleType) = new CapsuleDataUI(task, environment, grouping, sources.map(s ⇒ Some(s)), hooks.map(h ⇒ Some(h)), capsuleType)
+    capsuleType: CapsuleType = SimpleCapsuleType) = new CapsuleDataUI(task, environment, grouping, sources.map(s ⇒ Some(s)), hooks.map(h ⇒ Some(h)), capsuleType)
 }
 
 class CapsuleDataUI(
@@ -62,9 +61,9 @@ class CapsuleDataUI(
   def coreObject(moleDataUI: IMoleUI) = task match {
     case Some(t: ITaskDataProxyUI) ⇒ MoleFactory.taskCoreObject(t.dataUI, moleDataUI.plugins.map { p ⇒ new File(p) }.toSet) match {
       case Success(x: ITask) ⇒ capsuleType match {
-        case y: MasterCapsuleType   ⇒ new MasterCapsule(x, y.persistList.map { _.dataUI.name }.toSet)
-        case y: StrainerCapsuleType ⇒ new StrainerCapsule(x)
-        case _                      ⇒ new Capsule(x)
+        case y: MasterCapsuleType ⇒ new MasterCapsule(x, y.persistList.map { _.dataUI.name }.toSet)
+        case StrainerCapsuleType  ⇒ new StrainerCapsule(x)
+        case _                    ⇒ new Capsule(x)
       }
       case Failure(x: Throwable) ⇒ new Capsule(EmptyTask(t.dataUI.name))
     }
