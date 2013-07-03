@@ -24,13 +24,14 @@ import scala.swing.event.FocusGained
 
 object MultiPanel {
   class Factory[D <: IData](panelFactory: IFactory[D],
-                            plus: Plus) extends IRowWidgetFactory[D, PanelRowWidget[D]] {
-    def apply = new PanelRowWidget(panelFactory.apply, plus)
+                            plus: Plus,
+                            insets: RowInsets) extends IRowWidgetFactory[D, PanelRowWidget[D]] {
+    def apply = new PanelRowWidget(panelFactory.apply, plus, insets)
   }
 
-  class PanelRowWidget[D <: IData](val p: IPanel[D], plus: Plus) extends IRowWidget[D] {
+  class PanelRowWidget[D <: IData](val p: IPanel[D], plus: Plus, insets: RowInsets) extends IRowWidget[D] {
 
-    override val panel = new RowPanel(List(p), plus)
+    override val panel = new RowPanel(List(p), plus, insets)
 
     override def content = p.content
 
@@ -43,9 +44,10 @@ class MultiPanel[D <: IData, P <: IPanel[D]](title: String,
                                              panelFactory: IFactory[D],
                                              initPanels: Seq[P],
                                              minus: Minus = NO_EMPTY,
-                                             plus: Plus = ADD) extends MultiWidget(title,
-  initPanels.map { p ⇒ new PanelRowWidget(p, plus) },
-  new Factory(panelFactory, plus),
+                                             plus: Plus = ADD,
+                                             insets: RowInsets = REGULAR) extends MultiWidget(title,
+  initPanels.map { p ⇒ new PanelRowWidget(p, plus, insets) },
+  new Factory(panelFactory, plus, insets),
   minus,
   false) with IMultiPanel[D] {
   def content = rowWidgets.map(_.content).toList

@@ -70,8 +70,10 @@ class MultiComboLinkLabel[A](title: String,
                              initPanels: List[ComboLinkLabelPanel[A]],
                              image: Icon,
                              minus: Minus = NO_EMPTY,
-                             plus: Plus = ADD) extends MultiPanel(title,
+                             plus: Plus = ADD,
+                             insets: RowInsets = REGULAR) extends MultiPanel(title,
   new ComboLinkLabelFactory(comboContent, image),
   initPanels,
   minus,
-  plus)
+  plus,
+  insets)

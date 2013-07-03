@@ -23,10 +23,17 @@ import org.openmole.ide.misc.widget.multirow.RowWidget._
 import scala.swing._
 
 class RowPanel[T](val components: List[Component],
-                  val plusAllowed: Plus = ADD) extends PluginPanel("wrap,insets -2 5 -2 5") with IRowPanel {
+                  // val plusAllowed: Plus = ADD) extends PluginPanel("wrap,insets -10 5 -8 5") with IRowPanel {
+                  val plusAllowed: Plus = ADD,
+                  insets: RowInsets = REGULAR) extends PluginPanel("wrap, insets " + {
+  insets match {
+    case REGULAR ⇒ "-2 5 -2 5"
+    case _       ⇒ "-10 5 -8 5"
+  }
+}) with IRowPanel {
   var extendedPanel: Option[JPanel] = None
 
-  contents += new PluginPanel("insets -15 5 -3 5") {
+  contents += new PluginPanel("insets -5 5 -1 5") {
     components.foreach(contents+=)
     contents += removeButton
   }

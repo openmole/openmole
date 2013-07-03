@@ -91,8 +91,10 @@ class MultiComboLinkLabelGroovyTextFieldEditor[A](title: String,
                                                   initPanels: List[ComboLinkLabelGroovyTextFieldEditorPanel[A]],
                                                   image: Icon,
                                                   minus: Minus = NO_EMPTY,
-                                                  plus: Plus = ADD) extends MultiPanel(title,
+                                                  plus: Plus = ADD,
+                                                  insets: RowInsets = REGULAR) extends MultiPanel(title,
   new ComboLinkLabelGroovyTextFieldEditorFactory(comboContent, image),
   initPanels,
   minus,
-  plus)
+  plus,
+  insets)
