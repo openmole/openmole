@@ -108,7 +108,7 @@ object BatchEnvironment extends Logger {
   val NoTokenForSerivceRetryInterval = new ConfigurationLocation("BatchEnvironment", "NoTokenForSerivceRetryInterval")
 
   Workspace += (MinUpdateInterval, "PT1M")
-  Workspace += (MaxUpdateInterval, "PT20M")
+  Workspace += (MaxUpdateInterval, "PT10M")
   Workspace += (IncrementUpdateInterval, "PT1M")
 
   Workspace += (RuntimeLocation, () ⇒ new File(new File(Workspace.location, "runtime"), "runtime.tar.gz").getAbsolutePath)

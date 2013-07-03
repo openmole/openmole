@@ -28,7 +28,7 @@ class AddCapsuleAction(moleScene: IBuildMoleScene,
                        provider: GenericMenuProvider) extends Action("New Capsule") {
 
   override def apply = {
-    val capsule = CapsuleUI.withMenu(moleScene, new CapsuleDataUI)
+    val capsule = CapsuleUI.withMenu(moleScene, CapsuleDataUI())
     capsule.addInputSlot
     moleScene.add(capsule, provider.currentPoint)
     moleScene.refresh

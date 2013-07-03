@@ -49,7 +49,7 @@ import org.openmole.ide.misc.tools.util._
 
 object CapsuleUI {
   def imageWidget(scene: IMoleScene, img: ImageIcon, x: Int, y: Int, action: Action) = new LinkedImageWidget(scene, img, x, y, action)
-  def withMenu(ms: IBuildMoleScene, dataUI: ICapsuleDataUI = new CapsuleDataUI) = {
+  def withMenu(ms: IBuildMoleScene, dataUI: ICapsuleDataUI = CapsuleDataUI()) = {
     val capsuleUI = CapsuleUI(ms, dataUI)
     val capsuleMenuProvider = new CapsuleMenuProvider(ms, capsuleUI)
     capsuleUI.getActions.addAction(ActionFactory.createPopupMenuAction(capsuleMenuProvider))
@@ -58,7 +58,7 @@ object CapsuleUI {
 
   def apply(
     scene: IMoleScene,
-    dataUI: ICapsuleDataUI = new CapsuleDataUI) = {
+    dataUI: ICapsuleDataUI = CapsuleDataUI()) = {
     val caps = new CapsuleUI(scene, dataUI)
     dataUI.task match {
       case Some(t: ITaskDataProxyUI) ⇒
@@ -77,7 +77,7 @@ import CapsuleUI._
 
 class CapsuleUI private (
     val scene: IMoleScene,
-    var dataUI: ICapsuleDataUI = new CapsuleDataUI) extends Widget(scene.graphScene) with ICapsuleUI with ID { capsuleUI ⇒
+    var dataUI: ICapsuleDataUI = CapsuleDataUI()) extends Widget(scene.graphScene) with ICapsuleUI with ID { capsuleUI ⇒
 
   var capsuleTypeWidget: Option[LinkedImageWidget] = None
   var environmentWidget: Option[LinkedImageWidget] = None
@@ -293,9 +293,7 @@ class CapsuleUI private (
 
   def inputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IPrototypeDataProxyUI] = {
     if (cMap.contains(this)) {
-      println("CCMAP : " + cMap)
       val caps = cMap(this)
-      println("caps : " + caps)
       caps.inputs(mole,
         Map(caps -> dataUI.sources.map { _.dataUI.coreObject(pMap) }),
         Map(caps -> dataUI.hooks.map { _.dataUI.coreObject(pMap) })).toList.map {

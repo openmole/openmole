@@ -38,9 +38,11 @@ trait ICapsuleDataUI extends IDataUI {
 
   def grouping: Option[IGroupingDataUI]
 
-  def hooks: List[IHookDataProxyUI]
+  def hooksOptions: Seq[Option[IHookDataProxyUI]]
+  def hooks = hooksOptions.flatten
 
-  def sources: List[ISourceDataProxyUI]
+  def sourcesOptions: Seq[Option[ISourceDataProxyUI]]
+  def sources = sourcesOptions.flatten
 
   def coreObject(moleDataUI: IMoleUI): ICapsule
 
@@ -50,8 +52,8 @@ trait ICapsuleDataUI extends IDataUI {
     task: Option[ITaskDataProxyUI] = task,
     environment: Option[IEnvironmentDataProxyUI] = environment,
     grouping: Option[IGroupingDataUI] = grouping,
-    sources: List[ISourceDataProxyUI] = sources,
-    hooks: List[IHookDataProxyUI] = hooks,
+    sources: Seq[ISourceDataProxyUI] = sources,
+    hooks: Seq[IHookDataProxyUI] = hooks,
     capsuleType: CapsuleType = capsuleType): ICapsuleDataUI
 
 }

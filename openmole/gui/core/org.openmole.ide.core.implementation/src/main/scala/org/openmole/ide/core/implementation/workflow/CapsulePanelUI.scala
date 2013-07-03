@@ -38,7 +38,7 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI, index: Int = 0) extends PluginPanel
   def hooks = Proxies.instance.hooks.toList
 
   val sourcePanel = new MultiCombo("",
-    sources,
+    sources.toSeq,
     dataUI.sources.map { s ⇒
       new ComboPanel(sources, new ComboData(Some(s)))
     },
@@ -46,7 +46,7 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI, index: Int = 0) extends PluginPanel
     ADD)
 
   val hookPanel = new MultiCombo("",
-    hooks,
+    hooks.toSeq,
     dataUI.hooks.map { h ⇒
       new ComboPanel(hooks, new ComboData(Some(h)))
     },
@@ -92,7 +92,7 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI, index: Int = 0) extends PluginPanel
   }
 
   def save =
-    new CapsuleDataUI(dataUI.task,
+    CapsuleDataUI(dataUI.task,
       environmentCombo.selection.item.dataUI match {
         case e: EmptyDataUIs.EmptyEnvironmentDataUI ⇒ None
         case e: IEnvironmentDataUI                  ⇒ Some(environmentCombo.selection.item)

@@ -42,10 +42,11 @@ import org.openmole.misc.tools.io.TarArchiver._
 import com.thoughtworks.xstream.io.{ HierarchicalStreamReader, HierarchicalStreamWriter }
 import org.openmole.misc.exception.{ UserBadDataError, ExceptionUtils, InternalProcessingError }
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
-import com.thoughtworks.xstream.converters.{ UnmarshallingContext, MarshallingContext }
+import com.thoughtworks.xstream.converters.{ ErrorWriter, UnmarshallingContext, MarshallingContext }
 import collection.mutable
 import org.openmole.ide.core.model.workflow.{ IMoleUI, IMoleScene }
 import org.openmole.ide.core.model.data.{ ICapsuleDataUI }
+import com.thoughtworks.xstream.converters.collections.SingletonCollectionConverter
 
 class GUISerializer { serializer ⇒
 
@@ -132,12 +133,56 @@ class GUISerializer { serializer ⇒
     override def canConvert(t: Class[_]) = classOf[ISourceDataProxyUI].isAssignableFrom(t)
   }
 
+  val optionConverter = new ReflectionConverter(xstream.getMapper, xstream.getReflectionProvider) {
+
+    class CountingHierarchicalStreamReader(reader: HierarchicalStreamReader) extends HierarchicalStreamReader {
+
+      var depth: Int = 0
+
+      def hasMoreChildren = reader.hasMoreChildren
+
+      def moveDown() {
+        depth += 1
+        reader.moveDown()
+      }
+
+      def moveUp() {
+        depth -= 1
+        reader.moveUp()
+      }
+
+      def getNodeName = reader.getNodeName
+      def getValue = reader.getValue
+      def getAttribute(p1: String) = reader.getAttribute(p1)
+      def getAttribute(p1: Int) = reader.getAttribute(p1)
+      def getAttributeCount = reader.getAttributeCount
+      def getAttributeName(p1: Int) = reader.getAttributeName(p1)
+      def getAttributeNames = reader.getAttributeNames
+      def appendErrors(p1: ErrorWriter) { reader.appendErrors(p1) }
+      def close() { reader.close() }
+      def underlyingReader() = reader.underlyingReader()
+    }
+
+    override def unmarshal(reader: HierarchicalStreamReader, context: UnmarshallingContext) = {
+      val cReader = new CountingHierarchicalStreamReader(reader)
+      Try(super.unmarshal(cReader, context)) match {
+        case Success(o) ⇒ o
+        case Failure(t) ⇒
+          for (i ← 0 until cReader.depth) reader.moveUp
+          None
+      }
+    }
+
+    override def canConvert(t: Class[_]) = classOf[Some[_]].isAssignableFrom(t)
+  }
+
   xstream.registerConverter(taskConverter)
   xstream.registerConverter(prototypeConverter)
   xstream.registerConverter(samplingConverter)
   xstream.registerConverter(environmentConverter)
   xstream.registerConverter(hookConverter)
   xstream.registerConverter(sourceConverter)
+  xstream.registerConverter(optionConverter)
 
   //xstream.registerConverter(new MoleSceneConverter(this))
 
@@ -195,7 +240,7 @@ class GUISerializer { serializer ⇒
   }
 
   def deserializeConcept[T](clazz: Class[_]) =
-    new File(workDir, folder(clazz)).listFiles.toList.map(read).map(_.asInstanceOf[T])
+    new File(workDir, folder(clazz)).listFiles.toList.map(f ⇒ Try(read(f)).toOption).flatten.map(_.asInstanceOf[T])
 
   def deserialize(fromFile: String) = {
     val os = new TarInputStream(new FileInputStream(fromFile))
@@ -214,6 +259,7 @@ class GUISerializer { serializer ⇒
       val moleScenes = deserializeConcept[MoleData](classOf[MoleData])
       (proxies, moleScenes)
     }
+
   }
 
   def clear = {

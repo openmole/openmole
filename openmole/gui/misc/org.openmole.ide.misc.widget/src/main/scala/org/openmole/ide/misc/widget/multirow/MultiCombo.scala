@@ -24,7 +24,7 @@ import scala.swing.MyComboBox
 
 object MultiCombo {
 
-  class ComboPanel[B](val comboContent: List[B],
+  class ComboPanel[B](val comboContent: Seq[B],
                       val data: ComboData[B]) extends PluginPanel("wrap 2") with IPanel[ComboData[B]] {
 
     val comboBox = new MyComboBox(comboContent.sortBy { _.toString }) {
@@ -41,15 +41,15 @@ object MultiCombo {
 
   class ComboData[B](val comboValue: Option[B] = None) extends IData
 
-  class ComboFactory[B](comboContent: List[B]) extends IFactory[ComboData[B]] {
+  class ComboFactory[B](comboContent: Seq[B]) extends IFactory[ComboData[B]] {
     def apply = new ComboPanel(comboContent, new ComboData)
   }
 }
 
 import MultiCombo._
 class MultiCombo[B](title: String,
-                    comboContent: List[B],
-                    initPanels: List[ComboPanel[B]],
+                    comboContent: Seq[B],
+                    initPanels: Seq[ComboPanel[B]],
                     minus: Minus = NO_EMPTY,
                     plus: Plus = ADD) extends MultiPanel(title,
   new ComboFactory(comboContent),

@@ -32,13 +32,24 @@ import org.openmole.ide.core.implementation.dialog.StatusBar
 import util.{ Success, Failure }
 import org.openmole.ide.core.model.workflow.IMoleUI
 
+object CapsuleDataUI {
+  def apply(
+    task: Option[ITaskDataProxyUI] = None,
+    environment: Option[IEnvironmentDataProxyUI] = None,
+    grouping: Option[IGroupingDataUI] = None,
+    sources: Seq[ISourceDataProxyUI] = List(),
+    hooks: Seq[IHookDataProxyUI] = List(),
+    capsuleType: CapsuleType = new BasicCapsuleType) = new CapsuleDataUI(task, environment, grouping, sources.map(s ⇒ Some(s)), hooks.map(h ⇒ Some(h)), capsuleType)
+}
+
 class CapsuleDataUI(
-    val task: Option[ITaskDataProxyUI] = None,
-    val environment: Option[IEnvironmentDataProxyUI] = None,
-    val grouping: Option[IGroupingDataUI] = None,
-    val sources: List[ISourceDataProxyUI] = List(),
-    val hooks: List[IHookDataProxyUI] = List(),
-    val capsuleType: CapsuleType = new BasicCapsuleType) extends ICapsuleDataUI {
+    val task: Option[ITaskDataProxyUI],
+    val environment: Option[IEnvironmentDataProxyUI],
+    val grouping: Option[IGroupingDataUI],
+    val sourcesOptions: Seq[Option[ISourceDataProxyUI]],
+    val hooksOptions: Seq[Option[IHookDataProxyUI]],
+    val capsuleType: CapsuleType) extends ICapsuleDataUI {
+
   override def toString = task match {
     case Some(x: ITaskDataProxyUI) ⇒ x.dataUI.name
     case _                         ⇒ ""
@@ -66,8 +77,8 @@ class CapsuleDataUI(
     task: Option[ITaskDataProxyUI] = task,
     environment: Option[IEnvironmentDataProxyUI] = environment,
     grouping: Option[IGroupingDataUI] = grouping,
-    sources: List[ISourceDataProxyUI] = sources,
-    hooks: List[IHookDataProxyUI] = hooks,
+    sources: Seq[ISourceDataProxyUI] = sources,
+    hooks: Seq[IHookDataProxyUI] = hooks,
     capsuleType: CapsuleType = capsuleType): ICapsuleDataUI =
-    new CapsuleDataUI(task, environment, grouping, sources, hooks, capsuleType)
+    CapsuleDataUI(task, environment, grouping, sources, hooks, capsuleType)
 }
