@@ -30,7 +30,7 @@ import scala.swing.event.SelectionChanged
 
 object MultiComboLinkLabel {
 
-  class ComboLinkLabelPanel[A](val comboContent: List[(A, ContentAction[A])],
+  class ComboLinkLabelPanel[A](val comboContent: Seq[(A, ContentAction[A])],
                                val image: Icon,
                                val data: ComboLinkLabelData[A]) extends PluginPanel("wrap 2") with IPanel[ComboLinkLabelData[A]] {
     val filterComboBox = FilterComboBox(comboContent.sortBy { _._1.toString }.map(c ⇒ c._1))
@@ -58,7 +58,7 @@ object MultiComboLinkLabel {
 
   class ComboLinkLabelData[A](val content: Option[A] = None) extends IData
 
-  class ComboLinkLabelFactory[A](comboContent: List[(A, ContentAction[A])],
+  class ComboLinkLabelFactory[A](comboContent: Seq[(A, ContentAction[A])],
                                  image: Icon) extends IFactory[ComboLinkLabelData[A]] {
     def apply = new ComboLinkLabelPanel(comboContent, image, new ComboLinkLabelData)
   }
@@ -66,8 +66,8 @@ object MultiComboLinkLabel {
 
 import MultiComboLinkLabel._
 class MultiComboLinkLabel[A](title: String,
-                             comboContent: List[(A, ContentAction[A])],
-                             initPanels: List[ComboLinkLabelPanel[A]],
+                             comboContent: Seq[(A, ContentAction[A])],
+                             initPanels: Seq[ComboLinkLabelPanel[A]],
                              image: Icon,
                              minus: Minus = NO_EMPTY,
                              plus: Plus = ADD,

@@ -27,10 +27,10 @@ import java.awt.event.KeyAdapter
 import org.openmole.ide.misc.tools.image.Images
 
 object FilterComboBox {
-  def apply[T](initialItems: List[T]) = new FilterComboBox(initialItems)
+  def apply[T](initialItems: Seq[T]) = new FilterComboBox(initialItems)
 }
 
-class FilterComboBox[T](initialItems: List[T]) extends PluginPanel("wrap 2") {
+class FilterComboBox[T](initialItems: Seq[T]) extends PluginPanel("wrap 2") {
   fcb ⇒
 
   implicit def componentToString(c: java.awt.Component): String = c match {

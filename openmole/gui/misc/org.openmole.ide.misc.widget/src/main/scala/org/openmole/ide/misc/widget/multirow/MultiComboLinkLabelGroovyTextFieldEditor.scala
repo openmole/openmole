@@ -31,7 +31,7 @@ import scala.swing.event.SelectionChanged
 
 object MultiComboLinkLabelGroovyTextFieldEditor {
 
-  class ComboLinkLabelGroovyTextFieldEditorPanel[A](val comboContent: List[(A, Prototype[_], ContentAction[A])],
+  class ComboLinkLabelGroovyTextFieldEditorPanel[A](val comboContent: Seq[(A, Prototype[_], ContentAction[A])],
                                                     val image: Icon,
                                                     val data: ComboLinkLabelGroovyTextFieldEditorData[A]) extends PluginPanel("wrap 3") with IPanel[ComboLinkLabelGroovyTextFieldEditorData[A]] {
     val filterComboBox = FilterComboBox(comboContent.sortBy { _._1.toString }.map(c ⇒ c._1))
@@ -74,7 +74,7 @@ object MultiComboLinkLabelGroovyTextFieldEditor {
                                                    val content: Option[A] = None,
                                                    val editorValue: String = "") extends IData
 
-  class ComboLinkLabelGroovyTextFieldEditorFactory[A](comboContent: List[(A, Prototype[_], ContentAction[A])],
+  class ComboLinkLabelGroovyTextFieldEditorFactory[A](comboContent: Seq[(A, Prototype[_], ContentAction[A])],
                                                       image: Icon) extends IFactory[ComboLinkLabelGroovyTextFieldEditorData[A]] {
     def apply =
       new ComboLinkLabelGroovyTextFieldEditorPanel(comboContent,
@@ -87,8 +87,8 @@ object MultiComboLinkLabelGroovyTextFieldEditor {
 
 import MultiComboLinkLabelGroovyTextFieldEditor._
 class MultiComboLinkLabelGroovyTextFieldEditor[A](title: String,
-                                                  comboContent: List[(A, Prototype[_], ContentAction[A])],
-                                                  initPanels: List[ComboLinkLabelGroovyTextFieldEditorPanel[A]],
+                                                  comboContent: Seq[(A, Prototype[_], ContentAction[A])],
+                                                  initPanels: Seq[ComboLinkLabelGroovyTextFieldEditorPanel[A]],
                                                   image: Icon,
                                                   minus: Minus = NO_EMPTY,
                                                   plus: Plus = ADD,

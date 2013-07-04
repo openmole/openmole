@@ -199,21 +199,12 @@ class GUISerializer { serializer ⇒
   xstream.alias("Some", classOf[scala.Some[_]])
   xstream.alias("None", None.getClass)
   xstream.registerConverter(optionConverter)
+
   implicit val mapper = xstream.getMapper
+
   xstream.alias("List", classOf[::[_]])
   xstream.alias("List", Nil.getClass)
   xstream.registerConverter(new ListConverter())
-  //xstream.registerConverter(new SeqConverter[[Any]](x ⇒ x.toList))
-
-  //xstream.registerConverter(new MoleSceneConverter(this))
-
-  /*xstream.alias(moleScene, classOf[IMoleScene])
-  xstream.alias(task, classOf[ITaskDataProxyUI])
-  xstream.alias(sampling, classOf[ISamplingCompositionDataProxyUI])
-  xstream.alias(prototype, classOf[IPrototypeDataProxyUI])
-  xstream.alias(environment, classOf[IEnvironmentDataProxyUI])
-  xstream.alias(hook, classOf[IHookDataProxyUI])
-  xstream.alias(source, classOf[ISourceDataProxyUI]) */
 
   def folder(clazz: Class[_]) =
     clazz match {

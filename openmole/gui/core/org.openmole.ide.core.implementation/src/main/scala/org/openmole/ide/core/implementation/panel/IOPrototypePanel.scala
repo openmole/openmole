@@ -22,7 +22,7 @@ import java.awt.{ Color, BorderLayout }
 import org.openmole.ide.misc.widget.multirow._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import swing.{ Color, Separator, Label, MyComboBox }
-import scala.collection.mutable.HashMap
+import scala.collection.immutable.HashMap
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.model.workflow.{ IMoleScene, ISceneContainer }
 import org.openmole.ide.core.implementation.execution.ScenesManager
@@ -31,14 +31,13 @@ import org.openmole.ide.misc.widget.multirow.RowWidget.SMALL
 import org.openmole.ide.misc.widget.multirow.MultiWidget.CLOSE_IF_EMPTY
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor.{ ComboLinkLabelGroovyTextFieldEditorData, ComboLinkLabelGroovyTextFieldEditorPanel }
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel.{ ComboLinkLabelData, ComboLinkLabelPanel }
-import scala.Some
 
 class IOPrototypePanel(scene: IMoleScene,
                        onPanel: BasePanel,
-                       prototypesIn: List[IPrototypeDataProxyUI] = List.empty,
-                       prototypesOut: List[IPrototypeDataProxyUI] = List.empty,
-                       implicitPrototypeIn: List[IPrototypeDataProxyUI] = List.empty,
-                       implicitPrototypeOut: List[IPrototypeDataProxyUI] = List.empty,
+                       prototypesIn: Seq[IPrototypeDataProxyUI] = List.empty,
+                       prototypesOut: Seq[IPrototypeDataProxyUI] = List.empty,
+                       implicitPrototypeIn: Seq[IPrototypeDataProxyUI] = List.empty,
+                       implicitPrototypeOut: Seq[IPrototypeDataProxyUI] = List.empty,
                        inputParameters: Map[IPrototypeDataProxyUI, String] = Map.empty) extends PluginPanel("wrap") {
 
   val protoInEditor = {
@@ -64,7 +63,7 @@ class IOPrototypePanel(scene: IMoleScene,
     }, EYE, CLOSE_IF_EMPTY, insets = SMALL)
   }
 
-  val implicitEditorsMapping = new HashMap[IPrototypeDataProxyUI, PrototypeGroovyTextFieldEditor]()
+  var implicitEditorsMapping = new HashMap[IPrototypeDataProxyUI, PrototypeGroovyTextFieldEditor]()
 
   lazy val protoIn = new PluginPanel("wrap") {
     contents += new Label("Inputs") {

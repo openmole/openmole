@@ -45,9 +45,6 @@ import scala.Some
 import org.openmole.ide.core.implementation.registry.DefaultKey
 import org.openmole.ide.core.implementation.workflow.{ TransitionUI, CapsuleUI }
 import org.openmole.core.implementation.transition.Condition
-import org.openmole.ide.core.implementation.builder.PuzzleUIMap
-import scala.Some
-import org.openmole.ide.core.implementation.builder.BuiltCompositionSampling
 import org.openmole.ide.core.implementation.registry.DefaultKey
 
 object Builder {

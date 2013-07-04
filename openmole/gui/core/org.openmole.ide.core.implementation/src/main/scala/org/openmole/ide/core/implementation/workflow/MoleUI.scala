@@ -118,15 +118,15 @@ class MoleUI(var name: String) extends IMoleUI with ID {
   def cleanUnusedPrototypes = atomic { implicit actx ⇒
     val pUI = (Proxies.instance.tasks.flatMap { t ⇒
       val impl = t.dataUI.implicitPrototypes
-      t.dataUI.outputs ::: t.dataUI.inputs ::: impl._1 ::: impl._2
+      t.dataUI.outputs.toList ::: t.dataUI.inputs.toList ::: impl._1 ::: impl._2
     } :::
       Proxies.instance.hooks.flatMap { h ⇒
         val impl = h.dataUI.implicitPrototypes
-        h.dataUI.inputs ::: h.dataUI.outputs ::: impl._1 ::: impl._2
+        h.dataUI.inputs.toList ::: h.dataUI.outputs.toList ::: impl._1 ::: impl._2
       } :::
       Proxies.instance.sources.flatMap { s ⇒
         val impl = s.dataUI.implicitPrototypes
-        s.dataUI.inputs ::: s.dataUI.outputs ::: impl._1 ::: impl._2
+        s.dataUI.inputs.toList ::: s.dataUI.outputs.toList ::: impl._1 ::: impl._2
       }).distinct
     Proxies.instance.prototypes.diff(pUI).foreach {
       p ⇒ if (p.generated) Proxies.instance -= p

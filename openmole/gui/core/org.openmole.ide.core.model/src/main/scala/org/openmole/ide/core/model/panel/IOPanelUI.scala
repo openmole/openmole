@@ -22,7 +22,7 @@ import org.openmole.ide.core.model.data.{ ImplicitPrototype, OutputPrototype, In
 trait IOPanelUI extends IPanelUI {
 
   def save(name: String,
-           prototypesIn: List[IPrototypeDataProxyUI],
-           inputParameters: scala.collection.mutable.Map[IPrototypeDataProxyUI, String],
-           prototypesOut: List[IPrototypeDataProxyUI]): IDataUI with InputPrototype with OutputPrototype with ImplicitPrototype
+           prototypesIn: Seq[IPrototypeDataProxyUI],
+           inputParameters: Map[IPrototypeDataProxyUI, String],
+           prototypesOut: Seq[IPrototypeDataProxyUI]): IDataUI with InputPrototype with OutputPrototype with ImplicitPrototype
 }
