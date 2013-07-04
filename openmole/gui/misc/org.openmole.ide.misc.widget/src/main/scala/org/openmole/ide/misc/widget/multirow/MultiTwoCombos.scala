@@ -72,8 +72,10 @@ class MultiTwoCombos[A, B](title: String,
                            inBetweenString: String,
                            initPanels: Seq[TwoCombosPanel[A, B]],
                            minus: Minus = NO_EMPTY,
-                           plus: Plus = ADD) extends MultiPanel(title,
+                           plus: Plus = ADD,
+                           insets: RowInsets = REGULAR) extends MultiPanel(title,
   new TwoCombosFactory(comboContent1, comboContent2, inBetweenString),
   initPanels,
   minus,
-  plus)
+  plus,
+  insets)
