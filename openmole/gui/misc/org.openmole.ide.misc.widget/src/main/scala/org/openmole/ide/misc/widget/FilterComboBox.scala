@@ -30,7 +30,7 @@ object FilterComboBox {
   def apply[T](initialItems: Seq[T]) = new FilterComboBox(initialItems)
 }
 
-class FilterComboBox[T](initialItems: Seq[T]) extends PluginPanel("wrap 2") {
+class FilterComboBox[T](initialItems: Seq[T]) extends PluginPanel("wrap 2, insets 5 5 5 1") {
   fcb ⇒
 
   implicit def componentToString(c: java.awt.Component): String = c match {
