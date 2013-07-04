@@ -22,13 +22,29 @@ import javax.imageio.ImageIO
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow._
 import java.awt._
-import scala.swing.Panel
+import scala.swing.{ Action, Panel }
 import swing.event.MouseClicked
+import org.openmole.ide.misc.widget.{ MigPanel, ImageLinkLabel, PluginPanel }
+import org.openmole.ide.misc.tools.image.Images
 
 class TaskWidget(scene: IMoleScene,
                  val capsule: ICapsuleUI) extends Panel {
-  peer.setLayout(new BorderLayout)
   preferredSize = new Dimension(TASK_CONTAINER_WIDTH, TASK_CONTAINER_HEIGHT)
+  background = new Color(0, 0, 0, 0)
+
+  val settings = new ImageLinkLabel(Images.SETTINGS, new Action("") {
+    def apply = {
+      capsule.dataUI.task match {
+        case Some(x: ITaskDataProxyUI) ⇒ scene.displayPropertyPanel(x, 0)
+        case _                         ⇒
+      }
+    }
+  })
+
+  peer.setLayout(null)
+  settings.peer.setBounds(5, 3, 15, 15)
+  peer.add(settings.peer)
+
   override def paint(g: Graphics2D) = {
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
       RenderingHints.VALUE_ANTIALIAS_ON)
@@ -45,6 +61,7 @@ class TaskWidget(scene: IMoleScene,
         g.drawImage(ImageIO.read(x.dataUI.getClass.getClassLoader.getResource(x.dataUI.fatImagePath)), 10, 30, 80, 80, peer)
       case None ⇒
     }
+    super.paint(g)
     // g.setFont(new Font("Ubuntu", Font.PLAIN, 32))
     // if (capsule.dataUI.capsuleType == CapsuleType.STRAINER_CAPSULE)
     //   g.drawImage(ImageIO.read(capsule.dataUI.getClass.getClassLoader.getResource("img/" + CapsuleType.toString(capsule.dataUI.capsuleType).toLowerCase + "Capsule.png")), -5, -5, 20, 20, peer)
