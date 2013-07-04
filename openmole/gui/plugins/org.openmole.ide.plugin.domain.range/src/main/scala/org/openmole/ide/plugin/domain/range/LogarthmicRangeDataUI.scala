@@ -24,5 +24,5 @@ import org.openmole.ide.core.model.sampling.IFinite
 abstract class LogarthmicRangeDataUI extends GenericRangeDomainDataUI with IFinite {
   val name = "Log Range"
 
-  override def preview = " Log Range [" + min + "," + max + stepString + "]"
+  override def preview = "Log [" + min + "," + max + stepString + "]"
 }
