@@ -28,6 +28,7 @@ import org.openmole.misc.tools.service.Logger
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import org.openmole.core.model.data.Context
 import util.{ Failure, Success }
+import org.openmole.core.implementation.validation.DataflowProblem.DuplicatedName
 
 object CheckData extends Logger {
 
@@ -53,18 +54,6 @@ object CheckData extends Logger {
                 }
 
                 ToolDataUI.computePrototypeFromAggregation(mole)
-                // Compute implicit input / output
-                /* capsuleMap.foreach {
-                  case (caps, capsUI) ⇒
-                    capsUI.dataUI.task match {
-                      case Some(x: ITaskDataProxyUI) ⇒
-                        //ToolDataUI.buildUnknownPrototypes(mole, caps)
-                        //x.dataUI.computeImplicitPrototypes(mole, caps)
-                        ToolDataUI.computePrototypeFromAggregation(mole)
-                      case _ ⇒
-                    }
-                }   */
-
                 // Formal validation
                 val errors = Validation(mole,
                   Context.empty,
@@ -74,6 +63,15 @@ object CheckData extends Logger {
                   case false ⇒
                     errors.flatMap {
                       _ match {
+                        case x: DuplicatedName ⇒
+                          val duplicated = x.data.map { _.prototype.name }.toList.distinct
+                          List(capsuleMap(x.capsule).dataUI.task).flatten.map { proxy ⇒
+                            proxy.dataUI.inputs = proxy.dataUI.inputs.filterNot { p ⇒
+                              duplicated.contains(p.dataUI.name)
+                            }.toSeq
+                            proxy
+                          }
+                          None
                         case x: DataflowProblem ⇒
                           displayCapsuleErrors(capsuleMap(x.capsule), x.toString)
                           Some(capsuleMap(x.capsule) -> x)
