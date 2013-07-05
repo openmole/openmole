@@ -117,11 +117,19 @@ class CapsuleUI private (
 
   def nbInputSlots: Int = islots.size
 
-  def setAsValid = _isValid = true
+  def setAsValid = {
+    _isValid = true
+    updatePrototypeWidgets("")
+  }
 
-  def setAsInvalid(errorString: String) = _isValid = false
+  def setAsInvalid(errorString: String) = {
+    _isValid = false
+    updatePrototypeWidgets(errorString)
+  }
 
   def valid = _isValid
+
+  def updatePrototypeWidgets(s: String) = List(inputPrototypeWidget, outputPrototypeWidget).flatten.map { _.updateErrors(s) }
 
   override def paintWidget = {
     super.paintWidget
