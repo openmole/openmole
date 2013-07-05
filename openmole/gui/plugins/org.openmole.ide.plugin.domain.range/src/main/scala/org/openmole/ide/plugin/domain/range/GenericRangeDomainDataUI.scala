@@ -48,8 +48,8 @@ abstract class GenericRangeDomainDataUI extends IDomainDataUI with IFinite {
   }
 
   def preview =
-    if (step.isDefined) " Range [" + min + "," + max + stepString + "]"
-    else " Bounds [" + min + "," + max + "]"
+    if (step.isDefined) "[" + min + "," + max + stepString + "]"
+    else "[" + min + "," + max + "]"
 
   def stepString = {
     if (step.isDefined) {

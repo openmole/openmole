@@ -73,18 +73,18 @@ class IOPrototypePanel(scene: IMoleScene,
       if (Proxies.instance.prototypes.size > 0) {
         val protoPanel = protoInEditor.panel
         if (!implicitPrototypeIn.isEmpty) {
-          protoPanel.contents.insert(0, new PluginPanel("wrap 3, insets -2 5 0 5") {
+          protoPanel.contents.insert(0, new PluginPanel("wrap 3, insets -2 25 0 5") {
             implicitPrototypeIn.foreach {
               p ⇒
                 contents += new MyComboBox(List(p)) {
                   enabled = false
                 }
                 implicitEditorsMapping += p -> new PrototypeGroovyTextFieldEditor("Default value", p.dataUI.coreObject, inputParameters.getOrElse(p, ""))
-                contents += implicitEditorsMapping(p)
                 contents += new LinkLabel("", contentAction(p)) {
                   icon = EYE
                   background = new Color(0, 0, 0, 0)
                 }
+                contents += implicitEditorsMapping(p)
             }
           })
         }
@@ -102,7 +102,7 @@ class IOPrototypePanel(scene: IMoleScene,
       if (Proxies.instance.prototypes.size > 0) {
         val protoPanel = protoOutEditor.panel
         if (!implicitPrototypeOut.isEmpty) {
-          protoPanel.contents.insert(0, new PluginPanel("wrap 2, insets -2 5 0 5") {
+          protoPanel.contents.insert(0, new PluginPanel("wrap 2, insets -2 25 0 5") {
             implicitPrototypeOut.foreach {
               p ⇒
                 contents += new MyComboBox(List(p)) {

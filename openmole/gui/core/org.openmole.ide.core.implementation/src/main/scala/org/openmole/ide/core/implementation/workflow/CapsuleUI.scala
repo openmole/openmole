@@ -97,15 +97,10 @@ class CapsuleUI private (
   taskComponentWidget.setPreferredLocation(new Point(10, 10))
 
   val titleWidget = new LinkedWidget(scene, new LinkLabel(toString, new Action("") {
-    def apply = {
-      dataUI.task match {
-        case Some(x: ITaskDataProxyUI) ⇒ scene.displayPropertyPanel(x, 0)
-        case _                         ⇒
-      }
-    }
+    def apply = {}
   }, 6) {
     preferredSize = new Dimension(TASK_CONTAINER_WIDTH, TASK_TITLE_HEIGHT)
-  }, 10, 10)
+  }, 27, 10)
 
   setPreferredSize(new Dimension(TASK_CONTAINER_WIDTH + 20, TASK_CONTAINER_HEIGHT + 20))
   createActions(MOVE).addAction(ActionFactory.createMoveAction)
@@ -115,9 +110,9 @@ class CapsuleUI private (
   }
 
   addChild(taskComponentWidget)
+  addChild(validationWidget)
   addChild(titleWidget)
   addChild(oslot)
-  addChild(validationWidget)
 
   def nbInputSlots: Int = islots.size
 

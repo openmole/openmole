@@ -32,7 +32,7 @@ class PrototypeGroovyTextFieldEditor(val editorTitle: String,
   action = new Action("") {
     def apply = {
       editorText = DialogFactory.groovyEditor(editorTitle, editorText)
-      // setIcon
+      setIcon
     }
   }
 

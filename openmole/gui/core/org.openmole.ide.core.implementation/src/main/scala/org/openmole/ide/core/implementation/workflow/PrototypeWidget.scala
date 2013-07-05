@@ -105,13 +105,6 @@ abstract class PrototypeWidget(scene: IMoleScene,
       RenderingHints.VALUE_ANTIALIAS_ON)
     g.setColor(validationColor)
     g.fillOval(pos, pos, dim, dim)
-    revalidate
-  }
-
-  override def paintBorder = {
-    val g = scene.graphScene.getGraphics
-    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-      RenderingHints.VALUE_ANTIALIAS_ON)
     g.setStroke(new BasicStroke(3f))
 
     g.setColor(if (activated) new Color(73, 90, 105) else new Color(77, 77, 77, 150))

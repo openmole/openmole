@@ -27,8 +27,8 @@ class RowPanel[T](val components: List[Component],
                   val plusAllowed: Plus = ADD,
                   insets: RowInsets = REGULAR) extends PluginPanel("wrap, insets " + {
   insets match {
-    case REGULAR ⇒ "-2 5 -2 5"
-    case _       ⇒ "-10 5 -8 5"
+    case REGULAR ⇒ "-2 0 -2 5"
+    case _       ⇒ "-10 -18 -8 5"
   }
 }) with IRowPanel {
   var extendedPanel: Option[JPanel] = None
