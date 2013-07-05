@@ -42,6 +42,7 @@ import org.openmole.ide.misc.widget.LinkLabel
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.implementation.validation.DataflowProblem
 import scala.swing.Action
+import scala.swing.Alignment._
 import org.openmole.core.model.mole.{ ICapsule, IMole }
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.builder.SceneFactory
@@ -100,7 +101,8 @@ class CapsuleUI private (
     def apply = {}
   }, 6) {
     preferredSize = new Dimension(TASK_CONTAINER_WIDTH, TASK_TITLE_HEIGHT)
-  }, 27, 10)
+    xAlignment = Left
+  }, 30, 10)
 
   setPreferredSize(new Dimension(TASK_CONTAINER_WIDTH + 20, TASK_CONTAINER_HEIGHT + 20))
   createActions(MOVE).addAction(ActionFactory.createMoveAction)
