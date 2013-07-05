@@ -72,7 +72,7 @@ class TaskWidget(scene: IMoleScene,
       case Some(x: ITaskDataProxyUI) ⇒
         scene match {
           case y: BuildMoleScene ⇒
-            new Color(215, 238, 244)
+            if (capsule.valid) new Color(215, 238, 244) else new Color(225, 160, 170)
           case _ ⇒
             new Color(215, 238, 244, 64)
         }
@@ -87,7 +87,7 @@ class TaskWidget(scene: IMoleScene,
       capsule.dataUI.task match {
         case Some(x: ITaskDataProxyUI) ⇒
           scene match {
-            case y: BuildMoleScene ⇒ new Color(73, 90, 105)
+            case y: BuildMoleScene ⇒ if (capsule.valid) new Color(73, 90, 105) else new Color(212, 0, 0)
             case _                 ⇒ new Color(44, 137, 160, 64)
           }
         case _ ⇒ new Color(73, 90, 105)
