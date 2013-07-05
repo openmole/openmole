@@ -144,17 +144,16 @@ class IOPrototypePanel(scene: IMoleScene,
       },
       protoOutEditor.content)
 
-    (pInEditorContent.map {
-      _.content.get
-    },
+    (pInEditorContent.map { _.content.get }.filterNot { p ⇒ implicitPrototypeIn.contains(p) },
       new HashMap[IPrototypeDataProxyUI, String]() ++
       pInEditorContent.map {
         x ⇒ x.content.get -> x.editorValue
       } ++ iEditorsMapping.map {
         case (k, v) ⇒ k -> v.editorText
-      }.toMap, pOutEditorContent.map {
+      }.toMap,
+      pOutEditorContent.map {
         _.content.get
-      })
+      }.filterNot { p ⇒ implicitPrototypeOut.contains(p) })
   }
 
 }

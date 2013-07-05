@@ -102,31 +102,24 @@ class CapsuleUI private (
   }, 6) {
     preferredSize = new Dimension(TASK_CONTAINER_WIDTH, TASK_TITLE_HEIGHT)
     xAlignment = Left
-  }, 30, 10)
+  }, 33, 10)
 
   setPreferredSize(new Dimension(TASK_CONTAINER_WIDTH + 20, TASK_CONTAINER_HEIGHT + 20))
   createActions(MOVE).addAction(ActionFactory.createMoveAction)
 
-  val validationWidget = new ImageWidget(scene.graphScene, Images.CHECK_INVALID) {
-    setPreferredLocation(new Point(TASK_CONTAINER_WIDTH - 12, 2))
-  }
+  private var _isValid = false
 
   addChild(taskComponentWidget)
-  addChild(validationWidget)
   addChild(titleWidget)
   addChild(oslot)
 
   def nbInputSlots: Int = islots.size
 
-  def setAsValid = {
-    validationWidget.setImage(Images.CHECK_VALID)
-    validationWidget.setToolTipText("Runnable capsule")
-  }
+  def setAsValid = _isValid = true
 
-  def setAsInvalid(errorString: String) = {
-    validationWidget.setImage(Images.CHECK_INVALID)
-    validationWidget.setToolTipText(errorString)
-  }
+  def setAsInvalid(errorString: String) = _isValid = false
+
+  def valid = _isValid
 
   override def paintWidget = {
     super.paintWidget
