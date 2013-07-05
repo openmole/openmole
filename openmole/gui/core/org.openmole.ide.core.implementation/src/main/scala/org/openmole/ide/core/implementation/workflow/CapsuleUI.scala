@@ -41,7 +41,7 @@ import org.openmole.ide.misc.tools.image.Images
 import org.openmole.ide.misc.widget.LinkLabel
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.implementation.validation.DataflowProblem
-import scala.swing.Action
+import scala.swing.{ Label, Action }
 import scala.swing.Alignment._
 import org.openmole.core.model.mole.{ ICapsule, IMole }
 import org.openmole.core.model.data.Prototype
@@ -97,12 +97,14 @@ class CapsuleUI private (
 
   taskComponentWidget.setPreferredLocation(new Point(10, 10))
 
-  val titleWidget = new LinkedWidget(scene, new LinkLabel(toString, new Action("") {
-    def apply = {}
-  }, 6) {
+  val titleLabel = new Label(toString) {
     preferredSize = new Dimension(TASK_CONTAINER_WIDTH, TASK_TITLE_HEIGHT)
     xAlignment = Left
-  }, 33, 10)
+  }
+
+  val titleWidget = new ComponentWidget(scene.graphScene, titleLabel.peer) {
+    setPreferredLocation(new Point(33, 10))
+  }
 
   setPreferredSize(new Dimension(TASK_CONTAINER_WIDTH + 20, TASK_CONTAINER_HEIGHT + 20))
   createActions(MOVE).addAction(ActionFactory.createMoveAction)
@@ -125,8 +127,8 @@ class CapsuleUI private (
     super.paintWidget
     dataUI.task match {
       case Some(x: ITaskDataProxyUI) ⇒
-        titleWidget.linkLabel.foreground = Color.WHITE
-        titleWidget.linkLabel.text = x.dataUI.name
+        titleLabel.foreground = Color.WHITE
+        titleLabel.text = x.dataUI.name
       case None ⇒
     }
   }
@@ -158,7 +160,7 @@ class CapsuleUI private (
     removeWidget(outputPrototypeWidget)
     removeWidget(samplingWidget)
     samplingWidget = None
-    titleWidget.linkLabel.text = ""
+    titleLabel.text = ""
     inputPrototypeWidget = Some(PrototypeWidget.buildNoTaskSource(scene, this))
     addChild(inputPrototypeWidget.get)
     outputPrototypeWidget = Some(PrototypeWidget.buildNoTaskHook(scene, this))
