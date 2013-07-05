@@ -59,7 +59,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
     with RectangularSelectProvider {
   moleScene ⇒
 
-  val manager: IMoleUI
+  val dataUI: IMoleUI
   var obUI: Option[Widget] = None
   val capsuleLayer = new LayerWidget(this)
   val connectLayer = new LayerWidget(this)
@@ -116,25 +116,25 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
   def add(caps: ICapsuleUI, locationPoint: Point) = {
     assert(caps.scene == this)
     initCapsuleAdd(caps)
-    manager.registerCapsuleUI(caps)
+    dataUI.registerCapsuleUI(caps)
     graphScene.addNode(caps.id).setPreferredLocation(locationPoint)
     CheckData.checkMole(this)
   }
 
   def add(trans: ITransitionUI) = {
-    manager.registerConnector(trans)
+    dataUI.registerConnector(trans)
     createConnectEdge(trans.source.id, trans.target.capsule.id, trans.id, trans.target.index)
     refresh
   }
 
   def add(dc: IDataChannelUI) = {
-    manager.registerConnector(dc)
+    dataUI.registerConnector(dc)
     createConnectEdge(dc.source.id, dc.target.capsule.id, dc.id)
     refresh
   }
 
   def startingCapsule_=(caps: ICapsuleUI) = {
-    manager.startingCapsule = Some(caps)
+    dataUI.startingCapsule = Some(caps)
     refresh
   }
 

@@ -110,7 +110,7 @@ object DialogFactory {
     else None
 
     text match {
-      case Some(t: String) ⇒ MoleFactory.buildMoleExecution(s.manager) match {
+      case Some(t: String) ⇒ MoleFactory.buildMoleExecution(s.dataUI) match {
         case Success(mE) ⇒
           if (withArchiveCheckBox.selected) SerializerService.serializeAndArchiveFiles(mE._1, new File(t))
           else SerializerService.serialize(mE._1, new File(t))

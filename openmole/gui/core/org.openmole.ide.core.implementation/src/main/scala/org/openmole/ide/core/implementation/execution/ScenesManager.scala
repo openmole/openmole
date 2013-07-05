@@ -58,7 +58,7 @@ object ScenesManager {
   def invalidateSelection = _selection.single() = None
 
   def invalidateMoles = moleScenes.foreach {
-    _.manager.invalidateCache
+    _.dataUI.invalidateCache
   }
 
   def selection = atomic {
@@ -167,7 +167,7 @@ object ScenesManager {
     }
     selection.headOption match {
       case Some(c: ICapsuleUI) ⇒
-        val connectors = c.scene.manager.connectors.values.toList
+        val connectors = c.scene.dataUI.connectors.values.toList
         connectors.foreach {
           con ⇒
             if (selection.contains(con.source) && islots.contains(con.target)) {
@@ -210,11 +210,11 @@ object ScenesManager {
   }
 
   def capsules: List[ICapsuleUI] = moleScenes.map {
-    _.manager.capsules.values
+    _.dataUI.capsules.values
   }.toList.flatten
 
   def capsules(p: ITaskDataProxyUI) = moleScenes.flatMap {
-    _.manager.capsules.values
+    _.dataUI.capsules.values
   }.filter {
     _.dataUI.task.isDefined
   }.filter {
@@ -222,7 +222,7 @@ object ScenesManager {
   }
 
   def explorationCapsules = moleScenes.flatMap {
-    _.manager.capsules.values
+    _.dataUI.capsules.values
   }.filter {
     _.dataUI.task.isDefined
   }.flatMap {
@@ -234,7 +234,7 @@ object ScenesManager {
   }.toList
 
   def transitions = moleScenes.flatMap {
-    _.manager.connectors.values
+    _.dataUI.connectors.values
   }.flatMap {
     _ match {
       case t: ITransitionUI ⇒ Some(t)
@@ -249,8 +249,8 @@ object ScenesManager {
 
   def addBuildSceneContainer(ms: BuildMoleScene): BuildMoleSceneContainer = {
     val container = new BuildMoleSceneContainer(ms)
-    val page = new TabbedPane.Page(ms.manager.name, container)
-    addTab(page, ms.manager.name, new Action("") {
+    val page = new TabbedPane.Page(ms.dataUI.name, container)
+    addTab(page, ms.dataUI.name, new Action("") {
       def apply = {
         tabPane.pages.remove(page.index)
         // container.stopAndCloseExecutions
@@ -264,14 +264,14 @@ object ScenesManager {
       case Success(_) ⇒
         if (StatusBar().isValid) {
           val clone = bmsc.scene.copyScene
-          clone.manager.name = {
-            bmsc.scene.manager.name + "_" + countExec.incrementAndGet
+          clone.dataUI.name = {
+            bmsc.scene.dataUI.name + "_" + countExec.incrementAndGet
           }
-          val page = new TabbedPane.Page(clone.manager.name, new MigPanel(""))
+          val page = new TabbedPane.Page(clone.dataUI.name, new MigPanel(""))
           val container = new ExecutionMoleSceneContainer(clone, page, bmsc)
           page.content = container
 
-          addTab(page, clone.manager.name, new Action("") {
+          addTab(page, clone.dataUI.name, new Action("") {
             def apply = {
               container.stop
               tabPane.pages.remove(page.index)

@@ -129,7 +129,7 @@ object MoleFactory {
     }.toMap
 
   def moleMapping: Map[IMoleScene, IMole] = ScenesManager.moleScenes.map {
-    m ⇒ m.graphScene -> buildMole(m.manager).get._1
+    m ⇒ m.graphScene -> buildMole(m.dataUI).get._1
   }.toMap
 
   def taskCoreObject(dataUI: ITaskDataUI,
@@ -175,7 +175,7 @@ object MoleFactory {
     if (capsuleMap.isEmpty) (List.empty, List.empty, islotsMap)
     else {
       val firstCapsule = capsuleMap.head
-      val manager = firstCapsule._1.scene.manager
+      val manager = firstCapsule._1.scene.dataUI
       islotsMap.getOrElseUpdate(firstCapsule._1.islots.head, Slot(capsuleMap(firstCapsule._1)))
       val transitions = capsuleMap.flatMap {
         case (cui, ccore) ⇒

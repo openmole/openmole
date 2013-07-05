@@ -76,17 +76,17 @@ object MoleData {
 
   def fromScene(scene: IMoleScene) = {
     val slots =
-      scene.manager.capsules.flatMap {
+      scene.dataUI.capsules.flatMap {
         case (_, c) ⇒ c.islots
       }.zipWithIndex.toMap
 
     val capsules =
-      scene.manager.capsules.map {
+      scene.dataUI.capsules.map {
         case (_, c) ⇒ CapsuleData(c.dataUI, c.x, c.y)
       }
 
     val transitions =
-      scene.manager.connectors.flatMap {
+      scene.dataUI.connectors.flatMap {
         case (_, transition: ITransitionUI) ⇒
           Some(
             new TransitionData(
@@ -99,7 +99,7 @@ object MoleData {
       }
 
     val dataChannels =
-      scene.manager.connectors.flatMap {
+      scene.dataUI.connectors.flatMap {
         case (_, dataChannel: IDataChannelUI) ⇒
           Some(
             new DataChannelData(
@@ -110,14 +110,14 @@ object MoleData {
       }
 
     new MoleData(
-      scene.manager.id,
-      scene.manager.name,
-      scene.manager.startingCapsule.map(_.dataUI),
+      scene.dataUI.id,
+      scene.dataUI.name,
+      scene.dataUI.startingCapsule.map(_.dataUI),
       capsules,
       slots.map { case (c, i) ⇒ SlotData(i, c.capsule.dataUI) },
       transitions,
       dataChannels,
-      scene.manager.plugins)
+      scene.dataUI.plugins)
 
   }
 

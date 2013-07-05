@@ -66,7 +66,7 @@ class ConnectorMenuProvider(scene: MoleScene,
             val newC = new DataChannelUI(x.source,
               x.target,
               x.filteredPrototypes)
-            scene.manager.changeConnector(x, newC)
+            scene.dataUI.changeConnector(x, newC)
             connectionWidget.setConnnector(newC)
           }
         })
@@ -78,7 +78,7 @@ class ConnectorMenuProvider(scene: MoleScene,
               SimpleTransitionType,
               None,
               x.filteredPrototypes)
-            scene.manager.changeConnector(x, newC)
+            scene.dataUI.changeConnector(x, newC)
             connectionWidget.setConnnector(newC)
           }
         })

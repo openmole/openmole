@@ -38,16 +38,16 @@ object BuildMoleScene {
   def apply(name: String) = new BuildMoleScene(new MoleUI(name))
 }
 
-class BuildMoleScene(val manager: IMoleUI) extends MoleScene with IBuildMoleScene { buildMoleScene ⇒
+class BuildMoleScene(val dataUI: IMoleUI) extends MoleScene with IBuildMoleScene { buildMoleScene ⇒
 
   getActions.addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)))
 
   override val isBuildScene = true
 
   override def refresh {
-    manager.invalidateCache
+    dataUI.invalidateCache
     CheckData.checkMole(this)
-    manager.capsules.foreach { case (_, c) ⇒ c.update }
+    dataUI.capsules.foreach { case (_, c) ⇒ c.update }
     super.refresh
   }
 
@@ -60,11 +60,10 @@ class BuildMoleScene(val manager: IMoleUI) extends MoleScene with IBuildMoleScen
 
     def deepcopy(caspuleUI: ICapsuleUI, sc: IMoleScene) = {
       val ret = copy(caspuleUI, sc)
-      import caspuleUI.dataUI
-      dataUI.task match {
+      caspuleUI.dataUI.task match {
         case Some(x: ITaskDataProxyUI) ⇒
           ret._1.encapsule(ProxyFreezer.freeze(x))
-          if (dataUI.environment.isDefined) ret._1.environment_=(ProxyFreezer.freeze(dataUI.environment))
+          if (caspuleUI.dataUI.environment.isDefined) ret._1.environment_=(ProxyFreezer.freeze(caspuleUI.dataUI.environment))
         case _ ⇒
       }
       ret
@@ -72,16 +71,16 @@ class BuildMoleScene(val manager: IMoleUI) extends MoleScene with IBuildMoleScen
 
     var capsuleMapping = new HashMap[ICapsuleUI, ICapsuleUI]
     var islots = new HashMap[IInputSlotWidget, IInputSlotWidget]
-    val ms = ExecutionMoleScene(manager.name + "_" + ScenesManager.countExec.incrementAndGet)
-    manager.capsules.foreach(n ⇒ {
+    val ms = ExecutionMoleScene(dataUI.name + "_" + ScenesManager.countExec.incrementAndGet)
+    dataUI.capsules.foreach(n ⇒ {
       val (caps, islotMapping) = deepcopy(n._2, ms)
-      if (manager.startingCapsule == Some(n._2)) ms.manager.startingCapsule = Some(caps)
+      if (dataUI.startingCapsule == Some(n._2)) ms.dataUI.startingCapsule = Some(caps)
       ms.add(caps, new Point(n._2.x.toInt / 2, n._2.y.toInt / 2))
       capsuleMapping += n._2 -> caps
       islots ++= islotMapping
       caps.setAsValid
     })
-    manager.connectors.foreach { c ⇒
+    dataUI.connectors.foreach { c ⇒
       c match {
         case t: ITransitionUI ⇒
           val transition = new TransitionUI(
@@ -112,7 +111,7 @@ class BuildMoleScene(val manager: IMoleUI) extends MoleScene with IBuildMoleScen
   }
 
   def attachEdgeWidget(e: String) = {
-    val connectionWidget = new ConnectorWidget(this, manager.connector(e))
+    val connectionWidget = new ConnectorWidget(this, dataUI.connector(e))
     connectionWidget.setEndPointShape(PointShape.SQUARE_FILLED_BIG)
     connectionWidget.getActions.addAction(ActionFactory.createPopupMenuAction(new ConnectorMenuProvider(this, connectionWidget)))
     connectionWidget.setRouter(new MoleRouter(capsuleLayer))
@@ -122,7 +121,7 @@ class BuildMoleScene(val manager: IMoleUI) extends MoleScene with IBuildMoleScen
   }
 
   def removeSelectedWidgets = ScenesManager.selection.foreach { c ⇒
-    graphScene.removeNodeWithEdges(manager.removeCapsuleUI(c))
+    graphScene.removeNodeWithEdges(dataUI.removeCapsuleUI(c))
     CheckData.checkMole(buildMoleScene)
   }
 }

@@ -39,8 +39,8 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2", "
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
   val moleComboBox = new MyComboBox(MoleTaskDataUI.emptyMoleSceneManager ::
-    ScenesManager.moleScenes.map { _.manager }.filter {
-      _ != ScenesManager.currentSceneContainer.get.scene.manager
+    ScenesManager.moleScenes.map { _.dataUI }.filter {
+      _ != ScenesManager.currentSceneContainer.get.scene.dataUI
     }.filter {
       _.capsules.size > 0
     }.toList)
@@ -71,7 +71,7 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI) extends PluginPanel("fillx,wrap 2", "
   }
 
   def currentCapsules = {
-    val li = ScenesManager.moleScenes.map { _.manager }.filter(_ == moleComboBox.selection.item)
+    val li = ScenesManager.moleScenes.map { _.dataUI }.filter(_ == moleComboBox.selection.item)
     if (li.size > 0) li.head.capsules.values.filter { _.dataUI.task.isDefined }.map { _.dataUI.task.get }.toList
     else List(EmptyDataUIs.emptyTaskProxy)
   }

@@ -33,6 +33,6 @@ class MoleTaskFactoryUI extends ITaskFactoryUI {
 
   def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
     val t = SceneFactory.as[MoleTask](task)
-    uiMap.task(task, x ⇒ (new MoleTaskDataUI(t.name, Some(uiMap.mole(t.mole).manager.id))))
+    uiMap.task(task, x ⇒ (new MoleTaskDataUI(t.name, Some(uiMap.mole(t.mole).dataUI.id))))
   }
 }

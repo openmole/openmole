@@ -29,7 +29,7 @@ object ExecutionMoleScene {
   def apply(name: String) = new ExecutionMoleScene(new MoleUI(name))
 }
 
-class ExecutionMoleScene(val manager: IMoleUI) extends MoleScene {
+class ExecutionMoleScene(val dataUI: IMoleUI) extends MoleScene {
 
   override val isBuildScene = false
 
@@ -46,7 +46,7 @@ class ExecutionMoleScene(val manager: IMoleUI) extends MoleScene {
   }
 
   def attachEdgeWidget(e: String) = {
-    val connectionWidget = new ConnectorWidget(this, manager.connector(e))
+    val connectionWidget = new ConnectorWidget(this, dataUI.connector(e))
     connectionWidget.setRouter(new MoleRouter(capsuleLayer))
     connectLayer.addChild(connectionWidget)
     connectionWidget.setEndPointShape(PointShape.SQUARE_FILLED_BIG)

@@ -27,6 +27,17 @@ import swing.event.MouseClicked
 import org.openmole.ide.misc.widget.{ MigPanel, ImageLinkLabel, PluginPanel }
 import org.openmole.ide.misc.tools.image.Images
 
+object TaskWidget {
+  lazy val VALID = (new Color(215, 238, 244), new Color(73, 90, 105))
+  lazy val INVALID = (new Color(225, 160, 170), new Color(212, 0, 0))
+  lazy val EXECUTION = (new Color(215, 238, 244, 64), new Color(44, 137, 160, 64))
+  //lazy val NOT_RUNNABLE = (new Color(215, 238, 244),new Color(73, 90, 105))
+  lazy val NOT_RUNNABLE = (new Color(150, 150, 150, 100), new Color(80, 80, 80, 100))
+
+}
+
+import TaskWidget._
+
 class TaskWidget(scene: IMoleScene,
                  val capsule: ICapsuleUI) extends Panel {
   preferredSize = new Dimension(TASK_CONTAINER_WIDTH, TASK_CONTAINER_HEIGHT)
@@ -68,30 +79,35 @@ class TaskWidget(scene: IMoleScene,
   }
 
   def backColor = {
-    capsule.dataUI.task match {
-      case Some(x: ITaskDataProxyUI) ⇒
-        scene match {
-          case y: BuildMoleScene ⇒
-            if (capsule.valid) new Color(215, 238, 244) else new Color(225, 160, 170)
-          case _ ⇒
-            new Color(215, 238, 244, 64)
-        }
-      case _ ⇒
-        new Color(215, 238, 244)
-    }
-  }
-
-  def borderColor: Color = {
-    if (capsule.selected) new Color(222, 135, 135)
-    else {
+    if (scene.dataUI.capsulesInMole.toList.contains(capsule)) {
       capsule.dataUI.task match {
         case Some(x: ITaskDataProxyUI) ⇒
           scene match {
-            case y: BuildMoleScene ⇒ if (capsule.valid) new Color(73, 90, 105) else new Color(212, 0, 0)
-            case _                 ⇒ new Color(44, 137, 160, 64)
+            case y: BuildMoleScene ⇒
+              if (capsule.valid) VALID._1 else INVALID._1
+            case _ ⇒ EXECUTION._1
+
           }
-        case _ ⇒ new Color(73, 90, 105)
+        case _ ⇒ NOT_RUNNABLE._1
       }
     }
+    else NOT_RUNNABLE._1
+  }
+
+  def borderColor: Color = {
+    if (scene.dataUI.capsulesInMole.toList.contains(capsule)) {
+      if (capsule.selected) new Color(222, 135, 135)
+      else {
+        capsule.dataUI.task match {
+          case Some(x: ITaskDataProxyUI) ⇒
+            scene match {
+              case y: BuildMoleScene ⇒ if (capsule.valid) VALID._2 else INVALID._2
+              case _                 ⇒ EXECUTION._2
+            }
+          case _ ⇒ NOT_RUNNABLE._2
+        }
+      }
+    }
+    else NOT_RUNNABLE._2
   }
 }

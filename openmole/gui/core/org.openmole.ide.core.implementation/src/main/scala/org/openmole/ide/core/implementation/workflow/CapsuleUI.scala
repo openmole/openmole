@@ -149,10 +149,10 @@ class CapsuleUI private (
     (c, slotMapping)
   }
 
-  def starting = scene.manager.startingCapsule.map(_ == this).getOrElse(false)
+  def starting = scene.dataUI.startingCapsule.map(_ == this).getOrElse(false)
 
   def defineAsStartingCapsule = {
-    scene.manager.startingCapsule = Some(this)
+    scene.dataUI.startingCapsule = Some(this)
     scene.refresh
   }
 
@@ -314,7 +314,7 @@ class CapsuleUI private (
     else List()
 
   def inputs: List[IPrototypeDataProxyUI] = {
-    val i = scene.manager.cacheMole match {
+    val i = scene.dataUI.cacheMole match {
       case Some((m: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]])) ⇒
         inputs(m, cMap, pMap)
       case _ ⇒ List()
@@ -322,7 +322,7 @@ class CapsuleUI private (
     i
   }
 
-  def outputs: List[IPrototypeDataProxyUI] = scene.manager.cacheMole match {
+  def outputs: List[IPrototypeDataProxyUI] = scene.dataUI.cacheMole match {
     case Some((m: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]])) ⇒
       outputs(m, cMap, pMap)
     case _ ⇒ List()

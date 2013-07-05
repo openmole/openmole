@@ -37,11 +37,11 @@ object CheckData extends Logger {
     if (clear) StatusBar().clear
     scene match {
       case y: BuildMoleScene ⇒
-        y.manager.startingCapsule match {
+        y.dataUI.startingCapsule match {
           case Some(x: ICapsuleUI) ⇒
-            MoleFactory.buildMole(y.manager) match {
+            MoleFactory.buildMole(y.dataUI) match {
               case Success((mole, cMap, pMap, errs)) ⇒
-                val error_capsules = y.manager.capsules.values.partition {
+                val error_capsules = y.dataUI.capsules.values.partition {
                   _.dataUI.task.isDefined
                 }
                 error_capsules._1.foreach(_.setAsValid)
@@ -85,7 +85,7 @@ object CheckData extends Logger {
                       case (capsuleUI, e) ⇒
                         capsuleUI.updateErrors(e.toList)
                     }
-                  case true ⇒ y.manager.capsules.values.foreach {
+                  case true ⇒ y.dataUI.capsules.values.foreach {
                     _.updateErrors(List.empty)
                   }
                 }
@@ -113,7 +113,7 @@ object CheckData extends Logger {
   }
 
   def checkNoEmptyCapsule(scene: IMoleScene) =
-    scene.manager.capsulesInMole.foreach {
+    scene.dataUI.capsulesInMole.foreach {
       c ⇒
         c.dataUI.task match {
           case Some(x: ITaskDataProxyUI) ⇒

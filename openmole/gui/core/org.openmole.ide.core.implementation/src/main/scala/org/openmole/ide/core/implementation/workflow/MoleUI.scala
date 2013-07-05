@@ -29,6 +29,7 @@ import org.openmole.ide.misc.tools.util.ID
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.core.implementation.panel.MolePanelUI
+import org.openmole.ide.core.implementation.execution.ScenesManager
 
 class MoleUI(var name: String) extends IMoleUI with ID {
 
@@ -163,25 +164,13 @@ class MoleUI(var name: String) extends IMoleUI with ID {
     id
   }
 
-  /*def capsuleInMole = atomic { implicit ptx ⇒
-    capsuleConnections.foldLeft(Set.empty) { (acc, cc) ⇒
-      acc ++ cc._2.toSet.foldLeft(Set.empty) { (acc2, c) ⇒
-        acc2 ++ Set(c.source, c.target.capsule)
-      }
-    }
-  }  */
-
   def capsulesInMole = atomic { implicit ptx ⇒
-    val capsuleSet = new HashSet[ICapsuleUI]
-    capsuleConnections.foreach {
-      case (_, connections) ⇒
-        connections.foreach {
-          c ⇒
-            capsuleSet += c.source
-            capsuleSet += c.target.capsule
-        }
+    cacheMole match {
+      case Some((mole: IMole, capsuleMap: Map[ICapsuleUI, ICapsule], prototypeMap: Map[IPrototypeDataProxyUI, Prototype[_]])) ⇒
+        val cmap = capsuleMap.map { case (k, v) ⇒ v -> k }
+        mole.capsules.map { cmap }.toSet
+      case _ ⇒ Iterable()
     }
-    capsuleSet
   }
 
   def capsule(proxy: ITaskDataProxyUI) = capsules.toList.filter {

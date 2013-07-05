@@ -48,7 +48,7 @@ object PrototypePanel {
 
     //remove in Tasks
     val capsulesWithProtos: List[ICapsuleUI] = ScenesManager.moleScenes.flatMap {
-      _.manager.capsules.values.flatMap { c ⇒
+      _.dataUI.capsules.values.flatMap { c ⇒
         c.dataUI.task match {
           case Some(x: ITaskDataProxyUI) ⇒ if (x.dataUI.filterPrototypeOccurencies(proxy).isEmpty) None else Some(c)
           case _                         ⇒ None
@@ -71,7 +71,7 @@ object PrototypePanel {
       erase
       capsulesWithProtos.foreach { _.dataUI.task.get.dataUI.removePrototypeOccurencies(proxy) }
       List(ScenesManager.currentScene).flatten.foreach {
-        _.manager.connectors.values.toList.foreach {
+        _.dataUI.connectors.values.toList.foreach {
           dc ⇒ dc.filteredPrototypes = dc.filteredPrototypes.filterNot { _ == proxy }
         }
       }

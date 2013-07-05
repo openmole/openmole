@@ -42,7 +42,7 @@ class ChangeCapsuleAction(
   override def apply = {
     capsule.capsuleType_=(newType)
     CheckData.checkMole(capsule.scene)
-    capsule.scene.manager.invalidateCache
+    capsule.scene.dataUI.invalidateCache
     capsule.scene.graphScene.revalidate
     capsule.scene.graphScene.repaint
   }

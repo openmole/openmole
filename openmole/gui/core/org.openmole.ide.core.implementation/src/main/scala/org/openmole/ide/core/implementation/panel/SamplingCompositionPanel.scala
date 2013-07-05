@@ -84,7 +84,7 @@ class SamplingCompositionPanel(proxy: ISamplingCompositionDataProxyUI,
         true
       case _ ⇒
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
-          toBeRemovedSamplings.foreach { case (c, d) ⇒ c.scene.graphScene.removeNodeWithEdges(c.scene.manager.removeCapsuleUI(c)) }
+          toBeRemovedSamplings.foreach { case (c, d) ⇒ c.scene.graphScene.removeNodeWithEdges(c.scene.dataUI.removeCapsuleUI(c)) }
           delete
         }
         else false
