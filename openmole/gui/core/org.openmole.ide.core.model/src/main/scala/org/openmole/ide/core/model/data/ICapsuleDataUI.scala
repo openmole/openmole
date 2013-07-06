@@ -23,6 +23,7 @@ import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.commons.CapsuleType
 import org.openmole.ide.core.model.panel.ICapsulePanelUI
 import org.openmole.ide.core.model.workflow.IMoleUI
+import org.openmole.ide.misc.tools.util.ID
 
 trait ICapsuleDataUI extends IDataUI {
 
