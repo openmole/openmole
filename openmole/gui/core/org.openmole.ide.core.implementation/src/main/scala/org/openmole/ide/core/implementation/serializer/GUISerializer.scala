@@ -49,11 +49,9 @@ import org.openmole.ide.core.model.data.{ ICapsuleDataUI }
 import com.thoughtworks.xstream.converters.collections.SingletonCollectionConverter
 import org.openmole.ide.core.implementation.data.CapsuleDataUI
 import org.openmole.ide.core.model.commons._
-import org.openmole.ide.core.implementation.serializer.SlotData
 import scala.util.Failure
 import scala.Some
 import org.openmole.ide.core.model.commons.MasterCapsuleType
-import org.openmole.ide.core.implementation.serializer.CapsuleData
 import scala.util.Success
 
 class GUISerializer { serializer ⇒
@@ -68,7 +66,8 @@ class GUISerializer { serializer ⇒
   val xstream = new XStream
   val workDir = Workspace.newDir
 
-  class GUIConverter[T <: AnyRef { def id: ID.Type }] extends ReflectionConverter(xstream.getMapper, xstream.getReflectionProvider) {
+  class GUIConverter[T <: AnyRef { def id: ID.Type }](implicit clazz: Manifest[T]) extends ReflectionConverter(xstream.getMapper, xstream.getReflectionProvider) {
+
     override def marshal(
       o: Object,
       writer: HierarchicalStreamWriter,
@@ -112,49 +111,27 @@ class GUISerializer { serializer ⇒
       }
     }
 
+    override def canConvert(t: Class[_]) = clazz.runtimeClass.isAssignableFrom(t)
+
     def existing(id: String) = deserializationStates.get(id)
     def add(e: T) = deserializationStates.put(e.id, e)
 
   }
 
-  val taskConverter = new GUIConverter[ITaskDataProxyUI] {
-    override def canConvert(t: Class[_]) = classOf[ITaskDataProxyUI].isAssignableFrom(t)
-  }
+  val taskConverter = new GUIConverter[ITaskDataProxyUI]
 
-  val prototypeConverter = new GUIConverter[IPrototypeDataProxyUI] {
-    override def canConvert(t: Class[_]) = classOf[IPrototypeDataProxyUI].isAssignableFrom(t)
-  }
+  val prototypeConverter = new GUIConverter[IPrototypeDataProxyUI]
 
-  val samplingConverter = new GUIConverter[ISamplingCompositionDataProxyUI] {
-    override def canConvert(t: Class[_]) = classOf[ISamplingCompositionDataProxyUI].isAssignableFrom(t)
-  }
+  val samplingConverter = new GUIConverter[ISamplingCompositionDataProxyUI]
 
-  val environmentConverter = new GUIConverter[IEnvironmentDataProxyUI] {
-    override def canConvert(t: Class[_]) = classOf[IEnvironmentDataProxyUI].isAssignableFrom(t)
-  }
+  val environmentConverter = new GUIConverter[IEnvironmentDataProxyUI]
+  val hookConverter = new GUIConverter[IHookDataProxyUI]
 
-  val hookConverter = new GUIConverter[IHookDataProxyUI] {
-    override def canConvert(t: Class[_]) = classOf[IHookDataProxyUI].isAssignableFrom(t)
-  }
-
-  val sourceConverter = new GUIConverter[ISourceDataProxyUI] {
-    override def canConvert(t: Class[_]) = classOf[ISourceDataProxyUI].isAssignableFrom(t)
-  }
-
-  val capsuleConverter = new GUIConverter[CapsuleData] {
-    override def canConvert(t: Class[_]) = classOf[CapsuleData].isAssignableFrom(t)
-  }
-  val transitionConverter = new GUIConverter[TransitionData] {
-    override def canConvert(t: Class[_]) = classOf[TransitionData].isAssignableFrom(t)
-  }
-
-  val dataChannelConverter = new GUIConverter[DataChannelData] {
-    override def canConvert(t: Class[_]) = classOf[DataChannelData].isAssignableFrom(t)
-  }
-
-  val slotConverter = new GUIConverter[SlotData] {
-    override def canConvert(t: Class[_]) = classOf[SlotData].isAssignableFrom(t)
-  }
+  val sourceConverter = new GUIConverter[ISourceDataProxyUI]
+  val capsuleConverter = new GUIConverter[CapsuleData]
+  val transitionConverter = new GUIConverter[TransitionData]
+  val dataChannelConverter = new GUIConverter[DataChannelData]
+  val slotConverter = new GUIConverter[SlotData]
 
   val optionConverter = new ReflectionConverter(xstream.getMapper, xstream.getReflectionProvider) {
 
@@ -245,6 +222,10 @@ class GUISerializer { serializer ⇒
   xstream.alias("List", Nil.getClass)
   xstream.registerConverter(new ListConverter())
   xstream.addImmutableType(Nil.getClass)
+
+  xstream.alias("HashMap", classOf[collection.immutable.HashMap[_, _]])
+  xstream.alias("HashMap", collection.immutable.HashMap.empty.getClass.asInstanceOf[Class[_]])
+  xstream.registerConverter(new HashMapConverter())
 
   def folder(clazz: Class[_]) =
     clazz match {
