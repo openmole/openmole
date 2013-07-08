@@ -38,6 +38,9 @@ object Images {
   val EXPLORATION_TRANSITION_IMAGE = image("img/exploration.png")
   val END_TRANSITION_IMAGE = image("img/endTransition.png")
 
+  val STRAINER_CAPSULE = imageIcon("img/strainerCapsule.png")
+  val MASTER_CAPSULE = imageIcon("img/masterCapsule.png")
+
   val BUILD_EXECUTION = imageIcon("img/build.png")
   val CLEAN_BUILD_EXECUTION = imageIcon("img/cleanAndBuild.png")
 
