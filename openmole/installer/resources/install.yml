@@ -16,6 +16,7 @@ packs:
     pack:
         name: OpenMOLE Core
         required: yes
+        preselected: yes
         description: OpenMOLE Core
         fileset:
             includes: $installSourceDir/openmole/*
@@ -27,6 +28,7 @@ packs:
     pack:
         name: OpenMOLE Runtime
         required: yes
+        preselected: yes
         description: OpenMOLE Runtime
         file:
             src: $installSourceDir/runtime/runtime.tar.gz
@@ -41,6 +43,7 @@ packs:
     pack:
         name: OpenMOLE Icons
         required: yes
+        preselected: yes
         description: OpenMOLE Icons
         file:
             src: $installSourceDir/resources/openmole.ico
