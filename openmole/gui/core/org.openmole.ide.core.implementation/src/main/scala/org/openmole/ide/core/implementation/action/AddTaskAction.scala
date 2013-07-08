@@ -29,7 +29,7 @@ class AddTaskAction(moleScene: IBuildMoleScene,
                     dpu: ITaskDataProxyUI,
                     provider: GenericMenuProvider) extends Action(dpu.dataUI.name) {
   override def apply = {
-    val capsule = CapsuleUI.withMenu(moleScene, new CapsuleDataUI(task = Some(dpu)))
+    val capsule = CapsuleUI.withMenu(moleScene, CapsuleDataUI(task = Some(dpu)))
     capsule.addInputSlot
     moleScene.add(capsule, provider.currentPoint)
     moleScene.refresh

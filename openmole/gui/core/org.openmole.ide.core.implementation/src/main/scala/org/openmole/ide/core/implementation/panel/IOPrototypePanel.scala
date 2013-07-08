@@ -21,81 +21,103 @@ import org.openmole.ide.core.implementation.dataproxy.Proxies
 import java.awt.{ Color, BorderLayout }
 import org.openmole.ide.misc.widget.multirow._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import swing.{ Action, Separator, Label, MyComboBox }
-import scala.collection.mutable.HashMap
+import swing.{ Color, Separator, Label, MyComboBox }
+import scala.collection.immutable.HashMap
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.model.workflow.{ IMoleScene, ISceneContainer }
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.misc.tools.image.Images._
+import org.openmole.ide.misc.widget.multirow.RowWidget.SMALL
 import org.openmole.ide.misc.widget.multirow.MultiWidget.CLOSE_IF_EMPTY
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor.{ ComboLinkLabelGroovyTextFieldEditorData, ComboLinkLabelGroovyTextFieldEditorPanel }
 import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel.{ ComboLinkLabelData, ComboLinkLabelPanel }
-import scala.Some
 
 class IOPrototypePanel(scene: IMoleScene,
                        onPanel: BasePanel,
-                       prototypesIn: List[IPrototypeDataProxyUI] = List.empty,
-                       prototypesOut: List[IPrototypeDataProxyUI] = List.empty,
-                       implicitPrototypeIn: List[IPrototypeDataProxyUI] = List.empty,
-                       implicitPrototypeOut: List[IPrototypeDataProxyUI] = List.empty,
+                       prototypesIn: Seq[IPrototypeDataProxyUI] = List.empty,
+                       prototypesOut: Seq[IPrototypeDataProxyUI] = List.empty,
+                       implicitPrototypeIn: Seq[IPrototypeDataProxyUI] = List.empty,
+                       implicitPrototypeOut: Seq[IPrototypeDataProxyUI] = List.empty,
                        inputParameters: Map[IPrototypeDataProxyUI, String] = Map.empty) extends PluginPanel("wrap") {
-  val image = EYE
 
   val protoInEditor = {
-    val incomboContent = Proxies.instance.prototypes.map { p ⇒
-      (p, p.dataUI.coreObject, contentAction(p))
+    val incomboContent = Proxies.instance.prototypes.map {
+      p ⇒
+        (p, p.dataUI.coreObject, contentAction(p))
     }.toList
     new MultiComboLinkLabelGroovyTextFieldEditor("", incomboContent,
-      prototypesIn.map { proto ⇒
-        new ComboLinkLabelGroovyTextFieldEditorPanel(incomboContent, image,
-          new ComboLinkLabelGroovyTextFieldEditorData(proto.dataUI.coreObject, Some(proto), inputParameters.getOrElse(proto, "")))
-      }, image, CLOSE_IF_EMPTY)
+      prototypesIn.map {
+        proto ⇒
+          new ComboLinkLabelGroovyTextFieldEditorPanel(incomboContent, EYE,
+            new ComboLinkLabelGroovyTextFieldEditorData(proto.dataUI.coreObject, Some(proto), inputParameters.getOrElse(proto, "")))
+      }, EYE, CLOSE_IF_EMPTY, insets = SMALL)
   }
 
   val protoOutEditor = {
-    val outcomboContent = Proxies.instance.prototypes.map { p ⇒ (p, contentAction(p)) }.toList
-    new MultiComboLinkLabel("", outcomboContent, prototypesOut.map { proto ⇒
-      new ComboLinkLabelPanel(outcomboContent, image, new ComboLinkLabelData(Some(proto)))
-    }, image, CLOSE_IF_EMPTY)
+    val outcomboContent = Proxies.instance.prototypes.map {
+      p ⇒ (p, contentAction(p))
+    }.toList
+    new MultiComboLinkLabel("", outcomboContent, prototypesOut.map {
+      proto ⇒
+        new ComboLinkLabelPanel(outcomboContent, EYE, new ComboLinkLabelData(Some(proto)))
+    }, EYE, CLOSE_IF_EMPTY, insets = SMALL)
   }
 
-  val implicitEditorsMapping = new HashMap[IPrototypeDataProxyUI, PrototypeGroovyTextFieldEditor]()
+  var implicitEditorsMapping = new HashMap[IPrototypeDataProxyUI, PrototypeGroovyTextFieldEditor]()
 
   lazy val protoIn = new PluginPanel("wrap") {
     contents += new Label("Inputs") {
       foreground = Color.WHITE
     }
-
-    //implicits
-    contents += new PluginPanel("wrap") {
-      implicitPrototypeIn.foreach { p ⇒
-        contents += new PluginPanel("wrap 2") {
-          contents += new MyComboBox(List(p)) {
-            enabled = false
-          }
-          implicitEditorsMapping += p -> new PrototypeGroovyTextFieldEditor("Default value", p.dataUI.coreObject, inputParameters.getOrElse(p, ""))
-          contents += implicitEditorsMapping(p)
+    contents += {
+      if (Proxies.instance.prototypes.size > 0) {
+        val protoPanel = protoInEditor.panel
+        if (!implicitPrototypeIn.isEmpty) {
+          protoPanel.contents.insert(0, new PluginPanel("wrap 3, insets -2 25 0 5") {
+            implicitPrototypeIn.foreach {
+              p ⇒
+                contents += new MyComboBox(List(p)) {
+                  enabled = false
+                }
+                implicitEditorsMapping += p -> new PrototypeGroovyTextFieldEditor("Default value", p.dataUI.coreObject, inputParameters.getOrElse(p, ""))
+                contents += new LinkLabel("", contentAction(p)) {
+                  icon = EYE
+                  background = new Color(0, 0, 0, 0)
+                }
+                contents += implicitEditorsMapping(p)
+            }
+          })
         }
+        protoPanel
       }
+      else new Label("Please create first Prototypes.")
     }
-    if (Proxies.instance.prototypes.size > 0)
-      contents += protoInEditor.panel
-    else contents += new Label("Please create first Prototypes.")
   }
 
   lazy val protoOut = new PluginPanel("wrap") {
     contents += new Label("Outputs") {
       foreground = Color.WHITE
     }
-    contents += new PluginPanel("wrap") {
-      implicitPrototypeOut.foreach { p ⇒
-        contents += new MyComboBox(List(p)) {
-          enabled = false
+    contents += {
+      if (Proxies.instance.prototypes.size > 0) {
+        val protoPanel = protoOutEditor.panel
+        if (!implicitPrototypeOut.isEmpty) {
+          protoPanel.contents.insert(0, new PluginPanel("wrap 2, insets -2 25 0 5") {
+            implicitPrototypeOut.foreach {
+              p ⇒
+                contents += new MyComboBox(List(p)) {
+                  enabled = false
+                }
+                contents += new LinkLabel("", contentAction(p)) {
+                  icon = EYE
+                }
+            }
+          })
         }
+        protoPanel
       }
+      else new Label("Please create first Prototypes.")
     }
-    if (Proxies.instance.prototypes.size > 0)
-      contents += protoOutEditor.panel
   }
 
   CheckData.checkMole(scene)
@@ -117,14 +139,21 @@ class IOPrototypePanel(scene: IMoleScene,
 
   def save = {
     val (pInEditorContent, iEditorsMapping, pOutEditorContent) = (protoInEditor.content,
-      implicitEditorsMapping.filterNot { _._2.editorText.isEmpty },
+      implicitEditorsMapping.filterNot {
+        _._2.editorText.isEmpty
+      },
       protoOutEditor.content)
 
-    (pInEditorContent.map { _.content.get },
+    (pInEditorContent.map { _.content.get }.filterNot { p ⇒ implicitPrototypeIn.contains(p) },
       new HashMap[IPrototypeDataProxyUI, String]() ++
-      pInEditorContent.map { x ⇒ x.content.get -> x.editorValue } ++ iEditorsMapping.map {
+      pInEditorContent.map {
+        x ⇒ x.content.get -> x.editorValue
+      } ++ iEditorsMapping.map {
         case (k, v) ⇒ k -> v.editorText
-      }.toMap, pOutEditorContent.map { _.content.get })
+      }.toMap,
+      pOutEditorContent.map {
+        _.content.get
+      }.filterNot { p ⇒ implicitPrototypeOut.contains(p) })
   }
 
 }

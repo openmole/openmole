@@ -31,27 +31,26 @@ import scala.swing.event.SelectionChanged
 
 object MultiComboLinkLabelGroovyTextFieldEditor {
 
-  class ComboLinkLabelGroovyTextFieldEditorPanel[A](val comboContent: List[(A, Prototype[_], ContentAction[A])],
+  class ComboLinkLabelGroovyTextFieldEditorPanel[A](val comboContent: Seq[(A, Prototype[_], ContentAction[A])],
                                                     val image: Icon,
                                                     val data: ComboLinkLabelGroovyTextFieldEditorData[A]) extends PluginPanel("wrap 3") with IPanel[ComboLinkLabelGroovyTextFieldEditorData[A]] {
-    val comboBox = new MyComboBox(comboContent.sortBy { _._1.toString }.map(c ⇒ c._1)) {
-      data.content match {
-        case Some(x: A) ⇒
-          selection.item = x
-        case _ ⇒
-      }
+    val filterComboBox = FilterComboBox(comboContent.sortBy { _._1.toString }.map(c ⇒ c._1))
+    data.content match {
+      case Some(x: A) ⇒
+        filterComboBox.combo.selection.item = x
+      case _ ⇒
     }
 
     var textField = new PrototypeGroovyTextFieldEditor("Value for " + data.prototype.name, data.prototype, data.editorValue)
     val linkLabel = new LinkLabel("", comboTuple._3) { icon = image }
 
-    contents += comboBox
+    contents += filterComboBox
     contents += linkLabel
     contents += textField
 
-    listenTo(`comboBox`)
-    comboBox.selection.reactions += {
-      case SelectionChanged(`comboBox`) ⇒
+    listenTo(filterComboBox.combo)
+    filterComboBox.combo.selection.reactions += {
+      case SelectionChanged(filterComboBox.combo) ⇒
         val tuple = comboTuple
         linkLabel.action = tuple._3
         contents(2) match {
@@ -63,7 +62,7 @@ object MultiComboLinkLabelGroovyTextFieldEditor {
         }
     }
 
-    def comboTuple = comboContent.filter { cc ⇒ cc._1 == comboBox.selection.item }.head
+    def comboTuple = comboContent.filter { cc ⇒ cc._1 == filterComboBox.combo.selection.item }.head
 
     def content = {
       val tuple = comboTuple
@@ -75,7 +74,7 @@ object MultiComboLinkLabelGroovyTextFieldEditor {
                                                    val content: Option[A] = None,
                                                    val editorValue: String = "") extends IData
 
-  class ComboLinkLabelGroovyTextFieldEditorFactory[A](comboContent: List[(A, Prototype[_], ContentAction[A])],
+  class ComboLinkLabelGroovyTextFieldEditorFactory[A](comboContent: Seq[(A, Prototype[_], ContentAction[A])],
                                                       image: Icon) extends IFactory[ComboLinkLabelGroovyTextFieldEditorData[A]] {
     def apply =
       new ComboLinkLabelGroovyTextFieldEditorPanel(comboContent,
@@ -88,12 +87,14 @@ object MultiComboLinkLabelGroovyTextFieldEditor {
 
 import MultiComboLinkLabelGroovyTextFieldEditor._
 class MultiComboLinkLabelGroovyTextFieldEditor[A](title: String,
-                                                  comboContent: List[(A, Prototype[_], ContentAction[A])],
-                                                  initPanels: List[ComboLinkLabelGroovyTextFieldEditorPanel[A]],
+                                                  comboContent: Seq[(A, Prototype[_], ContentAction[A])],
+                                                  initPanels: Seq[ComboLinkLabelGroovyTextFieldEditorPanel[A]],
                                                   image: Icon,
                                                   minus: Minus = NO_EMPTY,
-                                                  plus: Plus = ADD) extends MultiPanel(title,
+                                                  plus: Plus = ADD,
+                                                  insets: RowInsets = REGULAR) extends MultiPanel(title,
   new ComboLinkLabelGroovyTextFieldEditorFactory(comboContent, image),
   initPanels,
   minus,
-  plus)
+  plus,
+  insets)

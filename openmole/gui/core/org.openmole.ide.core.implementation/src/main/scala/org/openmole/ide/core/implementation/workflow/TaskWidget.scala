@@ -22,13 +22,40 @@ import javax.imageio.ImageIO
 import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow._
 import java.awt._
-import scala.swing.Panel
+import scala.swing.{ Action, Panel }
 import swing.event.MouseClicked
+import org.openmole.ide.misc.widget.{ MigPanel, ImageLinkLabel, PluginPanel }
+import org.openmole.ide.misc.tools.image.Images
+
+object TaskWidget {
+  lazy val VALID = (new Color(215, 238, 244), new Color(73, 90, 105))
+  lazy val INVALID = (new Color(225, 160, 170), new Color(212, 0, 0))
+  lazy val EXECUTION = (new Color(215, 238, 244, 64), new Color(44, 137, 160, 64))
+  //lazy val NOT_RUNNABLE = (new Color(215, 238, 244),new Color(73, 90, 105))
+  lazy val NOT_RUNNABLE = (new Color(150, 150, 150, 100), new Color(80, 80, 80, 100))
+
+}
+
+import TaskWidget._
 
 class TaskWidget(scene: IMoleScene,
                  val capsule: ICapsuleUI) extends Panel {
-  peer.setLayout(new BorderLayout)
   preferredSize = new Dimension(TASK_CONTAINER_WIDTH, TASK_CONTAINER_HEIGHT)
+  background = new Color(0, 0, 0, 0)
+
+  val settings = new ImageLinkLabel(Images.SETTINGS, new Action("") {
+    def apply = {
+      capsule.dataUI.task match {
+        case Some(x: ITaskDataProxyUI) ⇒ scene.displayPropertyPanel(x, 0)
+        case _                         ⇒
+      }
+    }
+  })
+
+  peer.setLayout(null)
+  settings.peer.setBounds(5, 3, 15, 15)
+  peer.add(settings.peer)
+
   override def paint(g: Graphics2D) = {
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
       RenderingHints.VALUE_ANTIALIAS_ON)
@@ -45,36 +72,42 @@ class TaskWidget(scene: IMoleScene,
         g.drawImage(ImageIO.read(x.dataUI.getClass.getClassLoader.getResource(x.dataUI.fatImagePath)), 10, 30, 80, 80, peer)
       case None ⇒
     }
+    super.paint(g)
     // g.setFont(new Font("Ubuntu", Font.PLAIN, 32))
     // if (capsule.dataUI.capsuleType == CapsuleType.STRAINER_CAPSULE)
     //   g.drawImage(ImageIO.read(capsule.dataUI.getClass.getClassLoader.getResource("img/" + CapsuleType.toString(capsule.dataUI.capsuleType).toLowerCase + "Capsule.png")), -5, -5, 20, 20, peer)
   }
 
   def backColor = {
-    capsule.dataUI.task match {
-      case Some(x: ITaskDataProxyUI) ⇒
-        scene match {
-          case y: BuildMoleScene ⇒
-            new Color(215, 238, 244)
-          case _ ⇒
-            new Color(215, 238, 244, 64)
-        }
-      case _ ⇒
-        new Color(215, 238, 244)
-    }
-  }
-
-  def borderColor: Color = {
-    if (capsule.selected) new Color(222, 135, 135)
-    else {
+    if (scene.dataUI.capsulesInMole.toList.contains(capsule)) {
       capsule.dataUI.task match {
         case Some(x: ITaskDataProxyUI) ⇒
           scene match {
-            case y: BuildMoleScene ⇒ new Color(73, 90, 105)
-            case _                 ⇒ new Color(44, 137, 160, 64)
+            case y: BuildMoleScene ⇒
+              if (capsule.valid) VALID._1 else INVALID._1
+            case _ ⇒ EXECUTION._1
+
           }
-        case _ ⇒ new Color(73, 90, 105)
+        case _ ⇒ NOT_RUNNABLE._1
       }
     }
+    else NOT_RUNNABLE._1
+  }
+
+  def borderColor: Color = {
+    if (scene.dataUI.capsulesInMole.toList.contains(capsule)) {
+      if (capsule.selected) new Color(222, 135, 135)
+      else {
+        capsule.dataUI.task match {
+          case Some(x: ITaskDataProxyUI) ⇒
+            scene match {
+              case y: BuildMoleScene ⇒ if (capsule.valid) VALID._2 else INVALID._2
+              case _                 ⇒ EXECUTION._2
+            }
+          case _ ⇒ NOT_RUNNABLE._2
+        }
+      }
+    }
+    else NOT_RUNNABLE._2
   }
 }

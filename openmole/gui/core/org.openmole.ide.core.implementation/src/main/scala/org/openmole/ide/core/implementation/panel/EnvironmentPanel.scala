@@ -56,13 +56,13 @@ class EnvironmentPanel(proxy: IEnvironmentDataProxyUI,
 
   def create = {
     Proxies.instance += proxy
-    scene.manager.invalidateCache
+    scene.dataUI.invalidateCache
     ConceptMenu.environmentMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
   }
 
   def delete = {
     val capsulesWithEnv = ScenesManager.moleScenes.flatMap {
-      _.manager.capsules.values.filter {
+      _.dataUI.capsules.values.filter {
         _.dataUI.environment == Some(proxy)
       }
     }.toList

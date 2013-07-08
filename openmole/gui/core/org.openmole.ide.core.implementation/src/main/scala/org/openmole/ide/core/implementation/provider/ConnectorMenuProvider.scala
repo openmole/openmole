@@ -19,8 +19,6 @@ package org.openmole.ide.core.implementation.provider
 
 import java.awt.Point
 import javax.swing.JMenuItem
-import org.openmole.ide.core.model.commons.TransitionType
-import org.openmole.ide.core.model.commons.TransitionType._
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.implementation.action.AddTransitionConditionAction
 import org.openmole.ide.core.implementation.action.ChangeTransitionAction
@@ -34,6 +32,7 @@ import org.openmole.ide.core.model.workflow.ITransitionUI
 import scala.swing.Action
 import scala.swing.Menu
 import scala.swing.MenuItem
+import org.openmole.ide.core.model.commons.{ EndTransitionType, AggregationTransitionType, ExplorationTransitionType, SimpleTransitionType }
 
 class ConnectorMenuProvider(scene: MoleScene,
                             connectionWidget: ConnectorWidget) extends GenericMenuProvider {
@@ -55,7 +54,7 @@ class ConnectorMenuProvider(scene: MoleScene,
     connectionWidget.connector match {
       case x: ITransitionUI ⇒
         itChangeTransition.peer.removeAll
-        TransitionType.values.filterNot(_ == x.transitionType).foreach { ttype ⇒
+        List(SimpleTransitionType, ExplorationTransitionType, AggregationTransitionType, EndTransitionType).filterNot(_ == x.transitionType).foreach { ttype ⇒
           itChangeTransition.peer.add(new MenuItem(new ChangeTransitionAction(connectionWidget, ttype)).peer)
         }
 
@@ -67,7 +66,7 @@ class ConnectorMenuProvider(scene: MoleScene,
             val newC = new DataChannelUI(x.source,
               x.target,
               x.filteredPrototypes)
-            scene.manager.changeConnector(x, newC)
+            scene.dataUI.changeConnector(x, newC)
             connectionWidget.setConnnector(newC)
           }
         })
@@ -76,10 +75,10 @@ class ConnectorMenuProvider(scene: MoleScene,
           override def apply {
             val newC = new TransitionUI(x.source,
               x.target,
-              BASIC_TRANSITION,
+              SimpleTransitionType,
               None,
               x.filteredPrototypes)
-            scene.manager.changeConnector(x, newC)
+            scene.dataUI.changeConnector(x, newC)
             connectionWidget.setConnnector(newC)
           }
         })

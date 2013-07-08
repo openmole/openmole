@@ -17,18 +17,11 @@
 package org.openmole.ide.core.model.data
 
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import scala.collection.immutable.HashMap
 
 trait InputPrototype {
-  def inputParameters: scala.collection.mutable.Map[IPrototypeDataProxyUI, String]
-
-  def inputParameters_=(ip: scala.collection.mutable.Map[IPrototypeDataProxyUI, String])
-
-  def inputs: List[IPrototypeDataProxyUI]
-
-  def inputs_=(pi: List[IPrototypeDataProxyUI])
-
+  var inputParameters: Map[IPrototypeDataProxyUI, String] = HashMap.empty[IPrototypeDataProxyUI, String]
+  var inputs: Seq[IPrototypeDataProxyUI] = List.empty[IPrototypeDataProxyUI]
   def filterInputs(pproxy: IPrototypeDataProxyUI) = inputs.filter(_ == pproxy)
-
   def removeInput(pproxy: IPrototypeDataProxyUI) = inputs = inputs.filterNot { _ == pproxy }
-
 }

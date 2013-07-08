@@ -39,9 +39,9 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
   peer.setLayout(new BorderLayout)
 
   val executionManager =
-    MoleFactory.buildMole(bmsc.scene.manager) match {
+    MoleFactory.buildMole(bmsc.scene.dataUI) match {
       case Success((mole, prototypeMapping, capsuleMapping, errors)) ⇒
-        Some(new ExecutionManager(bmsc.scene.manager,
+        Some(new ExecutionManager(bmsc.scene.dataUI,
           this,
           mole,
           prototypeMapping,

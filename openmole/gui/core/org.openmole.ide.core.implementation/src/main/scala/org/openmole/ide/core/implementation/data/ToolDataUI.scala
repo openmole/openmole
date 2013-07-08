@@ -26,11 +26,11 @@ import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 
 object ToolDataUI {
   def implicitPrototypes(coreInputs: Unit ⇒ List[Prototype[_]],
-                         prototypesIn: List[IPrototypeDataProxyUI],
+                         prototypesIn: Seq[IPrototypeDataProxyUI],
                          coreOutputs: Unit ⇒ List[Prototype[_]],
-                         prototypesOut: List[IPrototypeDataProxyUI]): (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI]) = {
+                         prototypesOut: Seq[IPrototypeDataProxyUI]) = {
 
-    def protoFilter(lP: List[Prototype[_]], protos: List[IPrototypeDataProxyUI]) = {
+    def protoFilter(lP: Seq[Prototype[_]], protos: Seq[IPrototypeDataProxyUI]) = {
       lP.map { i ⇒ KeyPrototypeGenerator(i) }.toList.diff(protos.map {
         p ⇒ KeyPrototypeGenerator(p)
       }).map { KeyPrototypeGenerator.prototype }

@@ -22,7 +22,7 @@ import org.openmole.ide.core.model.workflow.IMoleUI
 import org.openmole.ide.core.implementation.workflow.MoleUI
 
 object MoleTaskDataUI {
-  def manager(i: ID.Type): Option[IMoleUI] = ScenesManager.moleScenes.map { _.manager }.filter { _.id == i }.headOption
+  def manager(i: ID.Type): Option[IMoleUI] = ScenesManager.moleScenes.map { _.dataUI }.filter { _.id == i }.headOption
   def capsule(t: ITaskDataProxyUI, manager: IMoleUI): Option[ICapsuleDataUI] =
     manager.capsules.values.map { _.dataUI }.filter { _.task.isDefined }.filter { _.task.get == t }.headOption
   def emptyMoleSceneManager = new MoleUI("")

@@ -17,19 +17,13 @@
 package org.openmole.ide.core.implementation.data
 
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import scala.collection.mutable.HashMap
+import scala.collection.immutable.HashMap
 import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import org.openmole.core.model.mole.IHook
 import org.openmole.ide.misc.tools.util.ID
 
 abstract class HookDataUI extends IHookDataUI with ID {
-  var inputParameters: scala.collection.mutable.Map[IPrototypeDataProxyUI, String] = HashMap.empty[IPrototypeDataProxyUI, String]
-
-  var inputs = List.empty[IPrototypeDataProxyUI]
-
-  var outputs = List.empty[IPrototypeDataProxyUI]
-
   def implicitPrototypes: (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI]) =
     MoleFactory.buildHook(this) match {
       case (x: IHook) ⇒ ToolDataUI.implicitPrototypes(y ⇒ x.inputs.map { _.prototype }.toList, inputs, y ⇒ x.outputs.map { _.prototype }.toList, outputs)

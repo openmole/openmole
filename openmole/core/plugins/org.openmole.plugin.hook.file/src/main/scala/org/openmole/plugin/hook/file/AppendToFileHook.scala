@@ -38,7 +38,7 @@ abstract class AppendToFileHook(
     content: String) extends Hook {
 
   override def process(context: Context, executionContext: ExecutionContext) = {
-    val file = executionContext.directory.child(new File(VariableExpansion(context, fileName)))
+    val file = executionContext.relativise(VariableExpansion(context, fileName))
     file.createParentDir
     file.withLock(_.append(VariableExpansion(context, content)))
     context

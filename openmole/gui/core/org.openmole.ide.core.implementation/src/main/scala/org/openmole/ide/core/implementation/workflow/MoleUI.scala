@@ -29,6 +29,7 @@ import org.openmole.ide.misc.tools.util.ID
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.core.implementation.panel.MolePanelUI
+import org.openmole.ide.core.implementation.execution.ScenesManager
 
 class MoleUI(var name: String) extends IMoleUI with ID {
 
@@ -118,15 +119,15 @@ class MoleUI(var name: String) extends IMoleUI with ID {
   def cleanUnusedPrototypes = atomic { implicit actx ⇒
     val pUI = (Proxies.instance.tasks.flatMap { t ⇒
       val impl = t.dataUI.implicitPrototypes
-      t.dataUI.outputs ::: t.dataUI.inputs ::: impl._1 ::: impl._2
+      t.dataUI.outputs.toList ::: t.dataUI.inputs.toList ::: impl._1 ::: impl._2
     } :::
       Proxies.instance.hooks.flatMap { h ⇒
         val impl = h.dataUI.implicitPrototypes
-        h.dataUI.inputs ::: h.dataUI.outputs ::: impl._1 ::: impl._2
+        h.dataUI.inputs.toList ::: h.dataUI.outputs.toList ::: impl._1 ::: impl._2
       } :::
       Proxies.instance.sources.flatMap { s ⇒
         val impl = s.dataUI.implicitPrototypes
-        s.dataUI.inputs ::: s.dataUI.outputs ::: impl._1 ::: impl._2
+        s.dataUI.inputs.toList ::: s.dataUI.outputs.toList ::: impl._1 ::: impl._2
       }).distinct
     Proxies.instance.prototypes.diff(pUI).foreach {
       p ⇒ if (p.generated) Proxies.instance -= p
@@ -163,25 +164,13 @@ class MoleUI(var name: String) extends IMoleUI with ID {
     id
   }
 
-  /*def capsuleInMole = atomic { implicit ptx ⇒
-    capsuleConnections.foldLeft(Set.empty) { (acc, cc) ⇒
-      acc ++ cc._2.toSet.foldLeft(Set.empty) { (acc2, c) ⇒
-        acc2 ++ Set(c.source, c.target.capsule)
-      }
-    }
-  }  */
-
   def capsulesInMole = atomic { implicit ptx ⇒
-    val capsuleSet = new HashSet[ICapsuleUI]
-    capsuleConnections.foreach {
-      case (_, connections) ⇒
-        connections.foreach {
-          c ⇒
-            capsuleSet += c.source
-            capsuleSet += c.target.capsule
-        }
+    cacheMole match {
+      case Some((mole: IMole, capsuleMap: Map[ICapsuleUI, ICapsule], prototypeMap: Map[IPrototypeDataProxyUI, Prototype[_]])) ⇒
+        val cmap = capsuleMap.map { case (k, v) ⇒ v -> k }
+        mole.capsules.map { cmap }.toSet
+      case _ ⇒ Iterable()
     }
-    capsuleSet
   }
 
   def capsule(proxy: ITaskDataProxyUI) = capsules.toList.filter {

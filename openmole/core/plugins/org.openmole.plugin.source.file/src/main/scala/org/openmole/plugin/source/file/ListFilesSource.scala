@@ -51,7 +51,7 @@ abstract class ListFilesSource extends Source {
   override def process(context: Context, executionContext: ExecutionContext) =
     list.map {
       case (path, regexp, prototype) ⇒
-        val expandedPath = executionContext.directory.child(VariableExpansion(context, path))
+        val expandedPath = executionContext.relativise(VariableExpansion(context, path))
         val expandedRegExp = VariableExpansion(context, regexp)
         Variable(
           prototype.toArray,

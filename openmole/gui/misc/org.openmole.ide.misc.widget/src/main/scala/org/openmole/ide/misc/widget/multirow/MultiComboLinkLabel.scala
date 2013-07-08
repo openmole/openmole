@@ -30,36 +30,35 @@ import scala.swing.event.SelectionChanged
 
 object MultiComboLinkLabel {
 
-  class ComboLinkLabelPanel[A](val comboContent: List[(A, ContentAction[A])],
+  class ComboLinkLabelPanel[A](val comboContent: Seq[(A, ContentAction[A])],
                                val image: Icon,
                                val data: ComboLinkLabelData[A]) extends PluginPanel("wrap 2") with IPanel[ComboLinkLabelData[A]] {
-    val comboBox = new MyComboBox(comboContent.sortBy { _._1.toString }.map(c ⇒ c._1)) {
-      data.content match {
-        case Some(x: A) ⇒
-          selection.item = x
-        case _ ⇒
-      }
+    val filterComboBox = FilterComboBox(comboContent.sortBy { _._1.toString }.map(c ⇒ c._1))
+    data.content match {
+      case Some(x: A) ⇒
+        filterComboBox.combo.selection.item = x
+      case _ ⇒
     }
 
     val linkLabel = new LinkLabel("", action) { icon = image }
 
-    contents += comboBox
+    contents += filterComboBox
     contents += linkLabel
 
-    listenTo(`comboBox`)
-    comboBox.selection.reactions += {
-      case SelectionChanged(`comboBox`) ⇒
+    listenTo(filterComboBox.combo)
+    filterComboBox.combo.selection.reactions += {
+      case SelectionChanged(filterComboBox.combo) ⇒
         linkLabel.action = action
     }
 
-    def action = comboContent.filter { cc ⇒ cc._1 == comboBox.selection.item }.head._2
+    def action = comboContent.filter { cc ⇒ cc._1 == filterComboBox.combo.selection.item }.head._2
 
-    def content = new ComboLinkLabelData(Some(comboBox.selection.item))
+    def content = new ComboLinkLabelData(Some(filterComboBox.combo.selection.item))
   }
 
   class ComboLinkLabelData[A](val content: Option[A] = None) extends IData
 
-  class ComboLinkLabelFactory[A](comboContent: List[(A, ContentAction[A])],
+  class ComboLinkLabelFactory[A](comboContent: Seq[(A, ContentAction[A])],
                                  image: Icon) extends IFactory[ComboLinkLabelData[A]] {
     def apply = new ComboLinkLabelPanel(comboContent, image, new ComboLinkLabelData)
   }
@@ -67,12 +66,14 @@ object MultiComboLinkLabel {
 
 import MultiComboLinkLabel._
 class MultiComboLinkLabel[A](title: String,
-                             comboContent: List[(A, ContentAction[A])],
-                             initPanels: List[ComboLinkLabelPanel[A]],
+                             comboContent: Seq[(A, ContentAction[A])],
+                             initPanels: Seq[ComboLinkLabelPanel[A]],
                              image: Icon,
                              minus: Minus = NO_EMPTY,
-                             plus: Plus = ADD) extends MultiPanel(title,
+                             plus: Plus = ADD,
+                             insets: RowInsets = REGULAR) extends MultiPanel(title,
   new ComboLinkLabelFactory(comboContent, image),
   initPanels,
   minus,
-  plus)
+  plus,
+  insets)

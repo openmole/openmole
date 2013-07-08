@@ -17,15 +17,25 @@
 
 package org.openmole.ide.core.implementation.action
 
-import org.openmole.ide.core.model.commons.TransitionType
-import org.openmole.ide.core.model.commons.TransitionType._
-import org.openmole.ide.core.implementation.data.CheckData
+import org.openmole.ide.core.model.commons._
 import org.openmole.ide.core.implementation.workflow.ConnectorWidget
 import org.openmole.ide.core.model.workflow.ITransitionUI
 import scala.swing.Action
 
+object ChangeTransitionAction {
+
+  def toString(t: TransitionType) =
+    t match {
+      case SimpleTransitionType      ⇒ "Simple"
+      case ExplorationTransitionType ⇒ "Exploration"
+      case AggregationTransitionType ⇒ "Aggregation"
+      case EndTransitionType         ⇒ "End"
+    }
+
+}
+
 class ChangeTransitionAction(connectionWidget: ConnectorWidget,
-                             newType: TransitionType) extends Action(TransitionType.toString(newType).toLowerCase) {
+                             newType: TransitionType) extends Action(ChangeTransitionAction.toString(newType).toLowerCase) {
   override def apply = {
     connectionWidget.connector match {
       case x: ITransitionUI ⇒

@@ -174,7 +174,7 @@ object MyComboBox {
  *
  * @see javax.swing.JComboBox
  */
-class MyComboBox[A](items: Seq[A]) extends Component with Publisher {
+class MyComboBox[A](val items: Seq[A]) extends Component with Publisher {
   override lazy val peer: JComboBox[A] = new JComboBox(MyComboBox.newConstantModel(items)) with SuperMixin
 
   object selection extends Publisher {

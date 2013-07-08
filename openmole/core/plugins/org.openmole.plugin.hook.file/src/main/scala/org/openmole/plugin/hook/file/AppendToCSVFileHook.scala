@@ -42,7 +42,7 @@ abstract class AppendToCSVFileHook(
     prototypes: Prototype[_]*) extends Hook {
 
   override def process(context: Context, executionContext: ExecutionContext) = {
-    val file = executionContext.directory.child(new File(VariableExpansion(context, fileName)))
+    val file = executionContext.relativise(VariableExpansion(context, fileName))
     file.createParentDir
 
     val ps =

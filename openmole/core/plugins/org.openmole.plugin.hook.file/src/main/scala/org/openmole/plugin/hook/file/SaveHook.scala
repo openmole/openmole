@@ -53,7 +53,7 @@ abstract class SaveHook extends Hook {
   override def process(context: Context, executionContext: ExecutionContext) = {
     save.map {
       case (p, f) ⇒
-        val to = executionContext.directory.child(new File(VariableExpansion(context, f)))
+        val to = executionContext.relativise(VariableExpansion(context, f))
         SerializerService.serializeAndArchiveFiles(context(p), to)
 
     }

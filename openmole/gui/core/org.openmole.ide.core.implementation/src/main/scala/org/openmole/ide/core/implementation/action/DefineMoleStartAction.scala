@@ -24,5 +24,6 @@ import org.openmole.ide.core.model.workflow.{ IBuildMoleScene, ICapsuleUI, IMole
 class DefineMoleStartAction(moleScene: IBuildMoleScene, capsule: ICapsuleUI) extends ActionListener {
   override def actionPerformed(ae: ActionEvent) = {
     moleScene.startingCapsule_=(capsule)
+    moleScene.dataUI.invalidateCache
   }
 }

@@ -42,10 +42,17 @@ import org.openmole.misc.tools.io.TarArchiver._
 import com.thoughtworks.xstream.io.{ HierarchicalStreamReader, HierarchicalStreamWriter }
 import org.openmole.misc.exception.{ UserBadDataError, ExceptionUtils, InternalProcessingError }
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
-import com.thoughtworks.xstream.converters.{ UnmarshallingContext, MarshallingContext }
+import com.thoughtworks.xstream.converters.{ ErrorWriter, UnmarshallingContext, MarshallingContext }
 import collection.mutable
 import org.openmole.ide.core.model.workflow.{ IMoleUI, IMoleScene }
 import org.openmole.ide.core.model.data.{ ICapsuleDataUI }
+import com.thoughtworks.xstream.converters.collections.SingletonCollectionConverter
+import org.openmole.ide.core.implementation.data.CapsuleDataUI
+import org.openmole.ide.core.model.commons._
+import scala.util.Failure
+import scala.Some
+import org.openmole.ide.core.model.commons.MasterCapsuleType
+import scala.util.Success
 
 class GUISerializer { serializer ⇒
 
@@ -53,24 +60,25 @@ class GUISerializer { serializer ⇒
   case class Serializing(id: ID.Type) extends SerializationState
   case class Serialized(id: ID.Type) extends SerializationState
 
-  val serializationStates: mutable.HashMap[IDataProxyUI, SerializationState] = mutable.HashMap.empty
-  val deserializationStates: mutable.HashMap[ID.Type, IDataProxyUI] = mutable.HashMap.empty
+  val serializationStates: mutable.HashMap[AnyRef, SerializationState] = mutable.HashMap.empty
+  val deserializationStates: mutable.HashMap[ID.Type, AnyRef] = mutable.HashMap.empty
 
   val xstream = new XStream
   val workDir = Workspace.newDir
 
-  class GUIConverter extends ReflectionConverter(xstream.getMapper, xstream.getReflectionProvider) {
+  class GUIConverter[T <: AnyRef { def id: ID.Type }](implicit clazz: Manifest[T]) extends ReflectionConverter(xstream.getMapper, xstream.getReflectionProvider) {
+
     override def marshal(
       o: Object,
       writer: HierarchicalStreamWriter,
       mc: MarshallingContext) = {
-      val dataUI = o.asInstanceOf[IDataProxyUI]
+      val dataUI = o.asInstanceOf[T]
       serializationStates.get(dataUI) match {
         case None ⇒
-          serializationStates += dataUI -> new Serializing(dataUI.id)
+          serializationStates += dataUI -> Serializing(dataUI.id)
           marshal(o, writer, mc)
         case Some(Serializing(id)) ⇒
-          serializationStates(dataUI) = new Serialized(id)
+          serializationStates(dataUI) = Serialized(id)
           super.marshal(dataUI, writer, mc)
         case Some(Serialized(id)) ⇒
           writer.addAttribute("id", id.toString)
@@ -83,7 +91,7 @@ class GUISerializer { serializer ⇒
       if (reader.getAttributeCount != 0) {
         val dui = existing(reader.getAttribute("id"))
         dui match {
-          case Some(y: IDataProxyUI) ⇒ y
+          case Some(y) ⇒ y
           case _ ⇒
             serializer.deserializeConcept(uc.getRequiredType)
             unmarshal(reader, uc)
@@ -92,7 +100,7 @@ class GUISerializer { serializer ⇒
       else {
         val o = super.unmarshal(reader, uc)
         o match {
-          case y: IDataProxyUI ⇒
+          case y: T ⇒
             existing(y.id) match {
               case None ⇒ add(y)
               case _    ⇒
@@ -103,33 +111,65 @@ class GUISerializer { serializer ⇒
       }
     }
 
+    override def canConvert(t: Class[_]) = clazz.runtimeClass.isAssignableFrom(t)
+
     def existing(id: String) = deserializationStates.get(id)
-    def add(e: IDataProxyUI) = deserializationStates.put(e.id, e)
+    def add(e: T) = deserializationStates.put(e.id, e)
 
   }
 
-  val taskConverter = new GUIConverter {
-    override def canConvert(t: Class[_]) = classOf[ITaskDataProxyUI].isAssignableFrom(t)
-  }
+  val taskConverter = new GUIConverter[ITaskDataProxyUI]
+  val prototypeConverter = new GUIConverter[IPrototypeDataProxyUI]
+  val samplingConverter = new GUIConverter[ISamplingCompositionDataProxyUI]
+  val environmentConverter = new GUIConverter[IEnvironmentDataProxyUI]
+  val hookConverter = new GUIConverter[IHookDataProxyUI]
+  val sourceConverter = new GUIConverter[ISourceDataProxyUI]
+  val capsuleConverter = new GUIConverter[CapsuleData]
+  val transitionConverter = new GUIConverter[TransitionData]
+  val dataChannelConverter = new GUIConverter[DataChannelData]
+  val slotConverter = new GUIConverter[SlotData]
 
-  val prototypeConverter = new GUIConverter {
-    override def canConvert(t: Class[_]) = classOf[IPrototypeDataProxyUI].isAssignableFrom(t)
-  }
+  val optionConverter = new ReflectionConverter(xstream.getMapper, xstream.getReflectionProvider) {
 
-  val samplingConverter = new GUIConverter {
-    override def canConvert(t: Class[_]) = classOf[ISamplingCompositionDataProxyUI].isAssignableFrom(t)
-  }
+    class CountingHierarchicalStreamReader(reader: HierarchicalStreamReader) extends HierarchicalStreamReader {
 
-  val environmentConverter = new GUIConverter {
-    override def canConvert(t: Class[_]) = classOf[IEnvironmentDataProxyUI].isAssignableFrom(t)
-  }
+      var depth: Int = 0
 
-  val hookConverter = new GUIConverter {
-    override def canConvert(t: Class[_]) = classOf[IHookDataProxyUI].isAssignableFrom(t)
-  }
+      def hasMoreChildren = reader.hasMoreChildren
 
-  val sourceConverter = new GUIConverter {
-    override def canConvert(t: Class[_]) = classOf[ISourceDataProxyUI].isAssignableFrom(t)
+      def moveDown() {
+        depth += 1
+        reader.moveDown()
+      }
+
+      def moveUp() {
+        depth -= 1
+        reader.moveUp()
+      }
+
+      def getNodeName = reader.getNodeName
+      def getValue = reader.getValue
+      def getAttribute(p1: String) = reader.getAttribute(p1)
+      def getAttribute(p1: Int) = reader.getAttribute(p1)
+      def getAttributeCount = reader.getAttributeCount
+      def getAttributeName(p1: Int) = reader.getAttributeName(p1)
+      def getAttributeNames = reader.getAttributeNames
+      def appendErrors(p1: ErrorWriter) { reader.appendErrors(p1) }
+      def close() { reader.close() }
+      def underlyingReader() = reader.underlyingReader()
+    }
+
+    override def unmarshal(reader: HierarchicalStreamReader, context: UnmarshallingContext) = {
+      val cReader = new CountingHierarchicalStreamReader(reader)
+      Try(super.unmarshal(cReader, context)) match {
+        case Success(o) ⇒ o
+        case Failure(t) ⇒
+          for (i ← 0 until cReader.depth) reader.moveUp
+          None
+      }
+    }
+
+    override def canConvert(t: Class[_]) = classOf[Some[_]].isAssignableFrom(t)
   }
 
   xstream.registerConverter(taskConverter)
@@ -139,15 +179,49 @@ class GUISerializer { serializer ⇒
   xstream.registerConverter(hookConverter)
   xstream.registerConverter(sourceConverter)
 
-  //xstream.registerConverter(new MoleSceneConverter(this))
+  xstream.registerConverter(capsuleConverter)
+  xstream.registerConverter(transitionConverter)
+  xstream.registerConverter(slotConverter)
+  xstream.registerConverter(dataChannelConverter)
 
-  /*xstream.alias(moleScene, classOf[IMoleScene])
-  xstream.alias(task, classOf[ITaskDataProxyUI])
-  xstream.alias(sampling, classOf[ISamplingCompositionDataProxyUI])
-  xstream.alias(prototype, classOf[IPrototypeDataProxyUI])
-  xstream.alias(environment, classOf[IEnvironmentDataProxyUI])
-  xstream.alias(hook, classOf[IHookDataProxyUI])
-  xstream.alias(source, classOf[ISourceDataProxyUI]) */
+  xstream.addImmutableType(classOf[DataChannelData])
+  xstream.addImmutableType(classOf[TransitionData])
+  xstream.addImmutableType(classOf[SlotData])
+  xstream.addImmutableType(classOf[CapsuleData])
+  xstream.addImmutableType(classOf[MoleData])
+
+  xstream.alias("DataChannelData", classOf[DataChannelData])
+  xstream.alias("MoleData", classOf[MoleData])
+  xstream.alias("CapsuleData", classOf[CapsuleData])
+  xstream.alias("SlotData", classOf[SlotData])
+  xstream.alias("TransitionData", classOf[TransitionData])
+  xstream.alias("CapsuleDataUI", classOf[CapsuleDataUI])
+  xstream.alias("TaskDataProxyUI", classOf[TaskDataProxyUI])
+
+  xstream.alias("SimpleCapsuleType", SimpleCapsuleType.getClass)
+  xstream.alias("StrainerCapsuleType", StrainerCapsuleType.getClass)
+  xstream.alias("MasterCapsuleType", classOf[MasterCapsuleType])
+
+  xstream.alias("SimpleTransitionType", SimpleTransitionType.getClass)
+  xstream.alias("ExplorationTransitionType", ExplorationTransitionType.getClass)
+  xstream.alias("AggregationTransitionType", AggregationTransitionType.getClass)
+  xstream.alias("EndTransitionType", EndTransitionType.getClass)
+
+  xstream.alias("Some", classOf[scala.Some[_]])
+  xstream.alias("None", None.getClass)
+  xstream.registerConverter(optionConverter)
+  xstream.addImmutableType(None.getClass)
+
+  implicit val mapper = xstream.getMapper
+
+  xstream.alias("List", classOf[::[_]])
+  xstream.alias("List", Nil.getClass)
+  xstream.registerConverter(new ListConverter())
+  xstream.addImmutableType(Nil.getClass)
+
+  xstream.alias("HashMap", classOf[collection.immutable.HashMap[_, _]])
+  xstream.alias("HashMap", collection.immutable.HashMap.empty.getClass.asInstanceOf[Class[_]])
+  xstream.registerConverter(new HashMapConverter())
 
   def folder(clazz: Class[_]) =
     clazz match {
@@ -157,6 +231,10 @@ class GUISerializer { serializer ⇒
       case c if c == classOf[IHookDataProxyUI] ⇒ "hook"
       case c if c == classOf[ISourceDataProxyUI] ⇒ "source"
       case c if c == classOf[ITaskDataProxyUI] ⇒ "task"
+      case c if c == classOf[CapsuleData] ⇒ "capsule"
+      case c if c == classOf[TransitionData] ⇒ "transition"
+      case c if c == classOf[SlotData] ⇒ "slot"
+      case c if c == classOf[DataChannelData] ⇒ "datachannel"
       case c if c == classOf[MoleData] ⇒ "mole"
       case c ⇒ c.getSimpleName
     }
@@ -179,7 +257,14 @@ class GUISerializer { serializer ⇒
     serializeConcept(classOf[IHookDataProxyUI], proxies.hooks.map { s ⇒ s -> s.id })
     serializeConcept(classOf[ISourceDataProxyUI], proxies.sources.map { s ⇒ s -> s.id })
     serializeConcept(classOf[ITaskDataProxyUI], proxies.tasks.map { s ⇒ s -> s.id })
+
+    serializeConcept(classOf[CapsuleData], moleScenes.flatMap(_.capsules).map { s ⇒ s -> s.id })
+    serializeConcept(classOf[TransitionData], moleScenes.flatMap(_.transitions).map { s ⇒ s -> s.id })
+    serializeConcept(classOf[DataChannelData], moleScenes.flatMap(_.dataChannels).map { s ⇒ s -> s.id })
+    serializeConcept(classOf[SlotData], moleScenes.flatMap(_.slots).map { s ⇒ s -> s.id })
+
     serializeConcept(classOf[MoleData], moleScenes.map { ms ⇒ ms -> ms.id })
+
     val os = new TarOutputStream(new FileOutputStream(file))
     try os.createDirArchiveWithRelativePath(workDir)
     finally os.close
@@ -195,7 +280,7 @@ class GUISerializer { serializer ⇒
   }
 
   def deserializeConcept[T](clazz: Class[_]) =
-    new File(workDir, folder(clazz)).listFiles.toList.map(read).map(_.asInstanceOf[T])
+    new File(workDir, folder(clazz)).listFiles.toList.map(f ⇒ Try(read(f)).toOption).flatten.map(_.asInstanceOf[T])
 
   def deserialize(fromFile: String) = {
     val os = new TarInputStream(new FileInputStream(fromFile))
@@ -211,9 +296,14 @@ class GUISerializer { serializer ⇒
       deserializeConcept[ISourceDataProxyUI](classOf[ISourceDataProxyUI]).foreach(proxies.+=)
       deserializeConcept[ITaskDataProxyUI](classOf[ITaskDataProxyUI]).foreach(proxies.+=)
 
+      deserializeConcept[CapsuleData](classOf[CapsuleData])
+      deserializeConcept[TransitionData](classOf[TransitionData])
+      deserializeConcept[DataChannelData](classOf[DataChannelData])
+
       val moleScenes = deserializeConcept[MoleData](classOf[MoleData])
       (proxies, moleScenes)
     }
+
   }
 
   def clear = {

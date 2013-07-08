@@ -28,7 +28,7 @@ class RemoveCapsuleAction(scene: IMoleScene, capsules: List[ICapsuleUI]) extends
 
   override def actionPerformed(ae: ActionEvent) = {
     capsules.foreach { c ⇒
-      scene.graphScene.removeNodeWithEdges(scene.manager.removeCapsuleUI(c))
+      scene.graphScene.removeNodeWithEdges(scene.dataUI.removeCapsuleUI(c))
     }
     ScenesManager.invalidateSelection
     scene.refresh

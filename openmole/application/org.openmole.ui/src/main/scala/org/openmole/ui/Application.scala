@@ -35,6 +35,18 @@ import org.openmole.web._
 import org.openmole.misc.exception.UserBadDataError
 
 class Application extends IApplication with Logger {
+
+  lazy val consoleSplash =
+    """
+  ___                   __  __  ___  _     _____    ___   ___
+ / _ \ _ __   ___ _ __ |  \/  |/ _ \| |   | ____|  / _ \ / _ \
+| | | | '_ \ / _ \ '_ \| |\/| | | | | |   |  _|   | | | | (_) |
+| |_| | |_) |  __/ | | | |  | | |_| | |___| |___  | |_| |\__, |
+ \___/| .__/ \___|_| |_|_|  |_|\___/|_____|_____|  \___(_) /_/
+      |_|
+
+"""
+
   override def start(context: IApplicationContext) = {
 
     case class Config(
@@ -111,6 +123,7 @@ class Application extends IApplication with Logger {
         case e: Throwable ⇒ logger.log(FINE, "Error in splash screen closing", e)
       }
 
+      print(consoleSplash)
       val console = new Console(PluginSet(userPlugins), config.password, config.scriptFile)
       console.run
     }
@@ -121,9 +134,7 @@ class Application extends IApplication with Logger {
       catch {
         case e: Throwable ⇒ logger.log(FINE, "Error in splash screen closing", e)
       }
-
       val server = new Openmolewebserver(config.serverPort getOrElse 80)
-
       server.start()
     }
     else {

@@ -18,7 +18,7 @@
 package org.openmole.ide.core.implementation.workflow
 
 import org.openmole.ide.core.model.workflow.IMoleScene
-import java.awt.Point
+import java.awt.{ Cursor, Point }
 import javax.swing.ImageIcon
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.openmole.ide.misc.widget.ImageLinkLabel

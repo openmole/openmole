@@ -18,9 +18,29 @@
 package org.openmole.core.model.mole
 
 import java.io.{ PrintStream, File }
+import org.openmole.misc.tools.io.FileUtil._
 
 object ExecutionContext {
-  lazy val local = ExecutionContext(System.out, new File(""))
+  def apply(out: PrintStream, directory: Option[File]) = {
+    val (_out, _directory) = (out, directory)
+    new ExecutionContext {
+      def out = _out
+      def directory = _directory
+    }
+  }
+
+  lazy val local = ExecutionContext(System.out, Some(new File("")))
 }
 
-case class ExecutionContext(out: PrintStream, directory: File)
+trait ExecutionContext {
+  def out: PrintStream
+  def directory: Option[File]
+
+  def relativise(f: String): File =
+    directory.map(_.child(f)).getOrElse(new File(f))
+
+  def copy(
+    out: PrintStream = out,
+    directory: Option[File] = directory) = ExecutionContext(out, directory)
+
+}

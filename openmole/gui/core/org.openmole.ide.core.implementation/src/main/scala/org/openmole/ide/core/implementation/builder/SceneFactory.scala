@@ -32,7 +32,6 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
 import org.openmole.ide.core.model.data.IExplorationTaskDataUI
-import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.implementation.data.CapsuleDataUI
 import scala.Some
 

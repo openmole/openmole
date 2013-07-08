@@ -35,10 +35,10 @@ object MoleData {
 
     val capsuleUIMap =
       moleData.capsules.map {
-        case CapsuleData(c, x, y) ⇒
+        case cd @ CapsuleData(c, x, y) ⇒
           val capsuleUI = CapsuleUI.withMenu(scene, c)
           scene.add(capsuleUI, new Point(x, y))
-          c -> capsuleUI
+          cd -> capsuleUI
       }.toMap
 
     ui.startingCapsule = moleData.startingCapsule.map(capsuleUIMap(_))
@@ -75,22 +75,22 @@ object MoleData {
   }
 
   def fromScene(scene: IMoleScene) = {
+    val capsules =
+      scene.dataUI.capsules.map {
+        case (_, c) ⇒ c -> CapsuleData(c.dataUI, c.x, c.y)
+      }.toMap
+
     val slots =
-      scene.manager.capsules.flatMap {
+      scene.dataUI.capsules.flatMap {
         case (_, c) ⇒ c.islots
       }.zipWithIndex.toMap
 
-    val capsules =
-      scene.manager.capsules.map {
-        case (_, c) ⇒ CapsuleData(c.dataUI, c.x, c.y)
-      }
-
     val transitions =
-      scene.manager.connectors.flatMap {
+      scene.dataUI.connectors.flatMap {
         case (_, transition: ITransitionUI) ⇒
           Some(
             new TransitionData(
-              transition.source.dataUI,
+              capsules(transition.source),
               slots(transition.target),
               transition.transitionType,
               transition.condition,
@@ -99,39 +99,34 @@ object MoleData {
       }
 
     val dataChannels =
-      scene.manager.connectors.flatMap {
+      scene.dataUI.connectors.flatMap {
         case (_, dataChannel: IDataChannelUI) ⇒
           Some(
             new DataChannelData(
-              dataChannel.source.dataUI,
+              capsules(dataChannel.source),
               slots(dataChannel.target),
               dataChannel.filteredPrototypes))
         case (_, _) ⇒ None
       }
 
     new MoleData(
-      scene.manager.id,
-      scene.manager.name,
-      scene.manager.startingCapsule.map(_.dataUI),
-      capsules,
-      slots.map { case (c, i) ⇒ SlotData(i, c.capsule.dataUI) },
+      scene.dataUI.id,
+      scene.dataUI.name,
+      scene.dataUI.startingCapsule.map(capsules),
+      capsules.unzip._2,
+      slots.map { case (c, i) ⇒ SlotData(i, capsules(c.capsule)) },
       transitions,
       dataChannels,
-      scene.manager.plugins)
+      scene.dataUI.plugins)
 
   }
 
-  case class CapsuleData(capsule: ICapsuleDataUI, x: Int, y: Int)
-  case class SlotData(index: Int, capsule: ICapsuleDataUI)
-
 }
-
-import MoleData._
 
 class MoleData(
   val id: ID.Type,
   val name: String,
-  val startingCapsule: Option[ICapsuleDataUI],
+  val startingCapsule: Option[CapsuleData],
   val capsules: Iterable[CapsuleData],
   val slots: Iterable[SlotData],
   val transitions: Iterable[TransitionData],

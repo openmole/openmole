@@ -17,13 +17,13 @@
 
 package org.openmole.ide.core.implementation.serializer
 
-import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.model.commons.TransitionType
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.misc.tools.util.ID
 
 class TransitionData(
-  val from: ICapsuleDataUI,
+  val from: CapsuleData,
   val to: Int,
-  val transitionType: TransitionType.Value,
+  val transitionType: TransitionType,
   val condition: Option[String] = None,
-  val filtered: List[IPrototypeDataProxyUI])
+  val filtered: List[IPrototypeDataProxyUI]) extends ID

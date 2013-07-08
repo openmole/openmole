@@ -18,19 +18,31 @@
 package org.openmole.ide.core.implementation.action
 
 import org.openmole.ide.core.implementation.data.CheckData
-import org.openmole.ide.core.model.commons.CapsuleType
+import org.openmole.ide.core.model.commons.{ StrainerCapsuleType, MasterCapsuleType, SimpleCapsuleType, CapsuleType }
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 
 import scala.swing.Action
+import org.openmole.core.implementation.mole.StrainerCapsule
+
+object ChangeCapsuleAction {
+
+  def toString(capsuleType: CapsuleType) =
+    capsuleType match {
+      case SimpleCapsuleType    ⇒ "Simple"
+      case _: MasterCapsuleType ⇒ "Master"
+      case StrainerCapsuleType  ⇒ "Strainer"
+    }
+
+}
 
 class ChangeCapsuleAction(
     capsule: ICapsuleUI,
-    newType: CapsuleType) extends Action(newType.toString.toLowerCase) {
+    newType: CapsuleType) extends Action(ChangeCapsuleAction.toString(newType)) {
 
   override def apply = {
     capsule.capsuleType_=(newType)
     CheckData.checkMole(capsule.scene)
-    capsule.scene.manager.invalidateCache
+    capsule.scene.dataUI.invalidateCache
     capsule.scene.graphScene.revalidate
     capsule.scene.graphScene.repaint
   }

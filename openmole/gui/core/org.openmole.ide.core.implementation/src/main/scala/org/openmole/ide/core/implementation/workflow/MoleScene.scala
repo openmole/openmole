@@ -42,16 +42,15 @@ import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.implementation.data.{ CheckData }
 import org.openmole.ide.core.implementation.panel._
-import org.openmole.ide.core.implementation.provider.MoleSceneMenuProvider
+import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.widget.MigPanel
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
 import scala.swing.Panel
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.ide.core.implementation.builder.SceneFactory
 import org.openmole.ide.core.model.data.{ IExplorationTaskDataUI }
-import org.openmole.ide.core.model.commons.TransitionType
+import org.openmole.ide.core.model.commons.{ SimpleTransitionType, ExplorationTransitionType }
 
 abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
     with SelectProvider
@@ -59,7 +58,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
     with RectangularSelectProvider {
   moleScene ⇒
 
-  val manager: IMoleUI
+  val dataUI: IMoleUI
   var obUI: Option[Widget] = None
   val capsuleLayer = new LayerWidget(this)
   val connectLayer = new LayerWidget(this)
@@ -102,6 +101,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
   propertyLayer3.addChild(propertyWidget(2))
 
   getActions.addAction(ActionFactory.createRectangularSelectAction(this, capsuleLayer, this))
+  getActions.addAction(ActionFactory.createWheelPanAction())
 
   val connectAction = ActionFactory.createExtendedConnectAction(null,
     connectLayer,
@@ -115,25 +115,25 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
   def add(caps: ICapsuleUI, locationPoint: Point) = {
     assert(caps.scene == this)
     initCapsuleAdd(caps)
-    manager.registerCapsuleUI(caps)
+    dataUI.registerCapsuleUI(caps)
     graphScene.addNode(caps.id).setPreferredLocation(locationPoint)
     CheckData.checkMole(this)
   }
 
   def add(trans: ITransitionUI) = {
-    manager.registerConnector(trans)
+    dataUI.registerConnector(trans)
     createConnectEdge(trans.source.id, trans.target.capsule.id, trans.id, trans.target.index)
     refresh
   }
 
   def add(dc: IDataChannelUI) = {
-    manager.registerConnector(dc)
+    dataUI.registerConnector(dc)
     createConnectEdge(dc.source.id, dc.target.capsule.id, dc.id)
     refresh
   }
 
   def startingCapsule_=(caps: ICapsuleUI) = {
-    manager.startingCapsule = Some(caps)
+    dataUI.startingCapsule = Some(caps)
     refresh
   }
 
@@ -157,7 +157,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
         closePropertyPanels
         removeAll(0)
         currentPanels(0).contents += new CapsulePanel(this, capsuleUI, 0, tabIndex)
-        propertyWidget(0).setPreferredLocation(new Point(getView.getBounds().x.toInt + 20, 20))
+        propertyWidget(0).setPreferredLocation(new Point(getView.getBounds().x.toInt + 20, getView.getBounds().y.toInt + 20))
         propertyWidget(0).revalidate
         propertyWidget(0).setVisible(true)
         refresh
@@ -193,7 +193,7 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
     }
 
   def locate(i: Int) = {
-    propertyWidget(i).setPreferredLocation(new Point(currentPanels.take(i).foldLeft(0) { (acc, panel) ⇒ acc + panel.bounds.width } + 10 * i + 10, 20))
+    propertyWidget(i).setPreferredLocation(new Point(currentPanels.take(i).foldLeft(0) { (acc, panel) ⇒ acc + panel.bounds.width } + 10 * i + 10, 20 + getBounds.y))
     propertyWidget(i).revalidate
     propertyWidget(i).setVisible(true)
   }
@@ -431,10 +431,10 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
         targetWidget.asInstanceOf[InputSlotWidget],
         sourceCapsuleUI.dataUI.task match {
           case Some(y: ITaskDataProxyUI) ⇒ y.dataUI match {
-            case x: IExplorationTaskDataUI ⇒ TransitionType.EXPLORATION_TRANSITION
-            case _                         ⇒ TransitionType.BASIC_TRANSITION
+            case x: IExplorationTaskDataUI ⇒ ExplorationTransitionType
+            case _                         ⇒ SimpleTransitionType
           }
-          case _ ⇒ TransitionType.BASIC_TRANSITION
+          case _ ⇒ SimpleTransitionType
         })
       moleScene.add(transition)
       CheckData.checkMole(moleScene)

@@ -24,10 +24,10 @@ trait ISourcePanelUI extends IOPanelUI {
   def saveContent(name: String): ISourceDataUI
 
   def save(name: String,
-           prototypesIn: List[IPrototypeDataProxyUI],
-           inputParameters: scala.collection.mutable.Map[IPrototypeDataProxyUI, String],
-           prototypesOut: List[IPrototypeDataProxyUI]): ISourceDataUI = {
-    var dataUI = saveContent(name)
+           prototypesIn: Seq[IPrototypeDataProxyUI],
+           inputParameters: Map[IPrototypeDataProxyUI, String],
+           prototypesOut: Seq[IPrototypeDataProxyUI]): ISourceDataUI = {
+    val dataUI = saveContent(name)
     dataUI.inputs = prototypesIn
     dataUI.outputs = prototypesOut
     dataUI.inputParameters = inputParameters

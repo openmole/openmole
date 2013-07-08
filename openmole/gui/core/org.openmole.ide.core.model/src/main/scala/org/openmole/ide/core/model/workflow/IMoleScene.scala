@@ -27,7 +27,7 @@ import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import scala.swing.Panel
 
 trait IMoleScene {
-  def manager: IMoleUI
+  def dataUI: IMoleUI
 
   def refresh
 
@@ -73,7 +73,7 @@ trait IMoleScene {
 
   def removeEdge(id: String)
 
-  override def toString = manager.name
+  override def toString = dataUI.name
 
   def toSceneCoordinates(p: Point): Point
 

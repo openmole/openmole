@@ -50,7 +50,7 @@ abstract class AppendFileHook(prototype: Prototype[File], outputFile: String) ex
     context.option(prototype) match {
       case Some(from) ⇒
 
-        val to = executionContext.directory.child(new File(VariableExpansion(context, outputFile)))
+        val to = executionContext.relativise(VariableExpansion(context, outputFile))
         if (!from.exists) throw new UserBadDataError("The file " + from + " does not exist.")
 
         if (!to.exists) {

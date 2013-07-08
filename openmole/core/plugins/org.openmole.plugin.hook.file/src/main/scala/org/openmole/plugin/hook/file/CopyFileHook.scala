@@ -23,7 +23,6 @@ import org.openmole.core.implementation.data._
 import org.openmole.core.model.data._
 import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.implementation.tools._
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.implementation.mole._
 import org.openmole.core.model.mole.ExecutionContext
 import collection.mutable.ListBuffer
@@ -78,7 +77,7 @@ abstract class CopyFileHook extends Hook {
     remove: Boolean,
     compress: Boolean) = {
     val from = context(filePrototype)
-    val to = executionContext.directory.child(new File(VariableExpansion(context, destination)))
+    val to = executionContext.relativise(VariableExpansion(context, destination))
 
     to.getParentFile.mkdirs
     if (compress) from.copyCompress(to)

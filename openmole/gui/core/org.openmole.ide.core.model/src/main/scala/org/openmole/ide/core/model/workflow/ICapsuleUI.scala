@@ -72,6 +72,8 @@ trait ICapsuleUI {
 
   def setAsInvalid(error: String): Unit
 
+  def valid: Boolean
+
   def selected: Boolean
 
   def selected_=(b: Boolean)

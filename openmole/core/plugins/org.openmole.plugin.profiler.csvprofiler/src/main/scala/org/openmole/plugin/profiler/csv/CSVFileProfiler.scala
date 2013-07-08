@@ -33,7 +33,7 @@ object CSVFileProfiler {
 class CSVFileProfiler(file: File) extends Profiler {
 
   override def process(moleJob: IMoleJob, executionContext: ExecutionContext) = synchronized {
-    val f = executionContext.directory.child(file)
+    val f = executionContext.relativise(file.getPath)
 
     f.getParentFile.mkdirs
     val writer = new CSVWriter(new BufferedWriter(new FileWriter(f)))

@@ -103,18 +103,13 @@ abstract class PrototypeWidget(scene: IMoleScene,
     val g = scene.graphScene.getGraphics
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
       RenderingHints.VALUE_ANTIALIAS_ON)
-    g.setColor(validationColor)
+    g.setColor(if (!scene.dataUI.capsulesInMole.toList.contains(capsule)) new Color(150, 150, 150) else validationColor)
     g.fillOval(pos, pos, dim, dim)
-    revalidate
-  }
-
-  override def paintBorder = {
-    val g = scene.graphScene.getGraphics
-    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-      RenderingHints.VALUE_ANTIALIAS_ON)
     g.setStroke(new BasicStroke(3f))
 
-    g.setColor(if (activated) new Color(73, 90, 105) else new Color(77, 77, 77, 150))
+    g.setColor(if (activated) new Color(73, 90, 105)
+    else new Color(77, 77, 77, 150))
+
     val offset = dim - 2 * { if (activated) 1 else 0 }
     g.drawOval(pos, pos, offset, offset)
 

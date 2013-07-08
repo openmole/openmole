@@ -18,7 +18,6 @@
 package org.openmole.ide.core.implementation.data
 
 import org.openmole.ide.core.model.commons._
-import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.data.ICapsuleDataUI
@@ -32,13 +31,24 @@ import org.openmole.ide.core.implementation.dialog.StatusBar
 import util.{ Success, Failure }
 import org.openmole.ide.core.model.workflow.IMoleUI
 
+object CapsuleDataUI {
+  def apply(
+    task: Option[ITaskDataProxyUI] = None,
+    environment: Option[IEnvironmentDataProxyUI] = None,
+    grouping: Option[IGroupingDataUI] = None,
+    sources: Seq[ISourceDataProxyUI] = List(),
+    hooks: Seq[IHookDataProxyUI] = List(),
+    capsuleType: CapsuleType = SimpleCapsuleType) = new CapsuleDataUI(task, environment, grouping, sources.map(s ⇒ Some(s)), hooks.map(h ⇒ Some(h)), capsuleType)
+}
+
 class CapsuleDataUI(
-    val task: Option[ITaskDataProxyUI] = None,
-    val environment: Option[IEnvironmentDataProxyUI] = None,
-    val grouping: Option[IGroupingDataUI] = None,
-    val sources: List[ISourceDataProxyUI] = List(),
-    val hooks: List[IHookDataProxyUI] = List(),
-    val capsuleType: CapsuleType = new BasicCapsuleType) extends ICapsuleDataUI {
+    val task: Option[ITaskDataProxyUI],
+    val environment: Option[IEnvironmentDataProxyUI],
+    val grouping: Option[IGroupingDataUI],
+    val sourcesOptions: Seq[Option[ISourceDataProxyUI]],
+    val hooksOptions: Seq[Option[IHookDataProxyUI]],
+    val capsuleType: CapsuleType) extends ICapsuleDataUI {
+
   override def toString = task match {
     case Some(x: ITaskDataProxyUI) ⇒ x.dataUI.name
     case _                         ⇒ ""
@@ -51,9 +61,9 @@ class CapsuleDataUI(
   def coreObject(moleDataUI: IMoleUI) = task match {
     case Some(t: ITaskDataProxyUI) ⇒ MoleFactory.taskCoreObject(t.dataUI, moleDataUI.plugins.map { p ⇒ new File(p) }.toSet) match {
       case Success(x: ITask) ⇒ capsuleType match {
-        case y: MasterCapsuleType   ⇒ new MasterCapsule(x, y.persistList.map { _.dataUI.name }.toSet)
-        case y: StrainerCapsuleType ⇒ new StrainerCapsule(x)
-        case _                      ⇒ new Capsule(x)
+        case y: MasterCapsuleType ⇒ new MasterCapsule(x, y.persistList.map { _.dataUI.name }.toSet)
+        case StrainerCapsuleType  ⇒ new StrainerCapsule(x)
+        case _                    ⇒ new Capsule(x)
       }
       case Failure(x: Throwable) ⇒ new Capsule(EmptyTask(t.dataUI.name))
     }
@@ -66,8 +76,8 @@ class CapsuleDataUI(
     task: Option[ITaskDataProxyUI] = task,
     environment: Option[IEnvironmentDataProxyUI] = environment,
     grouping: Option[IGroupingDataUI] = grouping,
-    sources: List[ISourceDataProxyUI] = sources,
-    hooks: List[IHookDataProxyUI] = hooks,
+    sources: Seq[ISourceDataProxyUI] = sources,
+    hooks: Seq[IHookDataProxyUI] = hooks,
     capsuleType: CapsuleType = capsuleType): ICapsuleDataUI =
-    new CapsuleDataUI(task, environment, grouping, sources, hooks, capsuleType)
+    CapsuleDataUI(task, environment, grouping, sources, hooks, capsuleType)
 }

@@ -22,4 +22,8 @@ object RowWidget extends Enumeration {
   class Plus(val name: String) extends Val(name)
   val ADD = new Plus("ADD")
   val NO_ADD = new Plus("NO ADD")
+
+  class RowInsets(val name: String) extends Val(name)
+  val SMALL = new RowInsets("SMALL")
+  val REGULAR = new RowInsets("REGULAR")
 }

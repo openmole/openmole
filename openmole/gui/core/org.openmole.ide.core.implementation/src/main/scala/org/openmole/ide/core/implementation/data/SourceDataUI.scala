@@ -17,18 +17,12 @@
 package org.openmole.ide.core.implementation.data
 
 import org.openmole.ide.core.model.data.ISourceDataUI
-import scala.collection.mutable.HashMap
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import org.openmole.core.model.mole.ISource
 import org.openmole.ide.misc.tools.util.ID
 
 abstract class SourceDataUI extends ISourceDataUI with ID {
-  var inputParameters: scala.collection.mutable.Map[IPrototypeDataProxyUI, String] = HashMap.empty[IPrototypeDataProxyUI, String]
-
-  var inputs = List.empty[IPrototypeDataProxyUI]
-
-  var outputs = List.empty[IPrototypeDataProxyUI]
 
   def implicitPrototypes: (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI]) =
     MoleFactory.buildSource(this) match {

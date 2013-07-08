@@ -18,22 +18,15 @@
 package org.openmole.ide.core.implementation.data
 
 import org.openmole.ide.core.model.data.ITaskDataUI
-import org.openmole.ide.core.model.commons.TransitionType._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import scala.collection.mutable.HashMap
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import org.openmole.core.model.task.ITask
 import util.{ Failure, Success }
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.registry.{ PrototypeKey, KeyPrototypeGenerator }
-import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
+import org.openmole.ide.core.model.commons.AggregationTransitionType
 
 abstract class TaskDataUI extends ITaskDataUI {
-  var inputParameters: scala.collection.mutable.Map[IPrototypeDataProxyUI, String] = HashMap.empty[IPrototypeDataProxyUI, String]
-
-  var inputs = List.empty[IPrototypeDataProxyUI]
-
-  var outputs = List.empty[IPrototypeDataProxyUI]
 
   def implicitPrototypes: (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI]) =
     MoleFactory.taskCoreObject(this) match {
@@ -44,7 +37,7 @@ abstract class TaskDataUI extends ITaskDataUI {
   def implicitPrototypesFromAggregation =
     ScenesManager.transitions.flatMap { t ⇒
       t.transitionType match {
-        case AGGREGATION_TRANSITION ⇒
+        case AggregationTransitionType ⇒
           t.source.outputs
         case _ ⇒ List()
       }

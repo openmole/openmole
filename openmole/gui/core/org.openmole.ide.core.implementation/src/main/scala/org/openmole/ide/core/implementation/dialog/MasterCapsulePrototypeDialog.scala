@@ -24,7 +24,7 @@ import org.openide.NotifyDescriptor
 import org.openmole.ide.core.implementation.data.CheckData
 import org.openmole.ide.core.model.commons.MasterCapsuleType
 import org.openmole.ide.core.model.data.ICapsuleDataUI
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
+import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ITaskDataProxyUI }
 import org.openmole.ide.core.model.workflow.ICapsuleUI
 import org.openmole.ide.core.model.workflow.IConnectorUI
 import org.openmole.ide.core.model.workflow.IConnectorUI
@@ -41,7 +41,7 @@ object MasterCapsulePrototypeDialog extends PrototypeDialog {
       case x: MasterCapsuleType ⇒
         openable(capsuleUI) match {
           case true ⇒
-            val prototypePanel = new MasterCapsulePrototypeDialog(capsuleUI, capsuleUI.dataUI.task.get)
+            val prototypePanel = new MasterCapsulePrototypeDialog(capsuleUI.dataUI.task.get, x.persistList)
             if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(prototypePanel) {
               verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
             }.peer,
@@ -54,12 +54,13 @@ object MasterCapsulePrototypeDialog extends PrototypeDialog {
     }
   }
 
-  class MasterCapsulePrototypeDialog(capsuleUI: ICapsuleUI,
-                                     task: ITaskDataProxyUI) extends PluginPanel("") {
+  class MasterCapsulePrototypeDialog(
+      task: ITaskDataProxyUI,
+      persistList: Seq[IPrototypeDataProxyUI]) extends PluginPanel("") {
     preferredSize = new Dimension(250, 300)
     val multiPrototypeCombo = new MultiCombo("Persistent Prototypes",
       task.dataUI.outputs,
-      capsuleUI.dataUI.capsuleType.persistList.map { p ⇒ new ComboPanel(task.dataUI.outputs, new ComboData(Some(p))) },
+      persistList.map { p ⇒ new ComboPanel(task.dataUI.outputs, new ComboData(Some(p))) },
       CLOSE_IF_EMPTY,
       ADD)
     // if (connector.filteredPrototypes.isEmpty) multiPrototypeCombo.removeAllRows

@@ -73,14 +73,6 @@ package object evolution {
 
     val toIndividualTask = ToIndividualTask(evolution)(name + "ToIndividual", genome, individual, objectives)
 
-    /*objectives.foreach {
-      case (o, v) ⇒ toIndividualTask addObjective (o, v)
-    } */
-
-    /*inputs.foreach {
-      case (i, _) ⇒ toIndividualTask addInput (i)
-    } */
-
     val mergeArchiveTask = UpdateArchiveTask(evolution)(name + "MergeArchive", individual.toArray, archive)
 
     val elitismTask =

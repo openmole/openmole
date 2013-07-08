@@ -31,7 +31,7 @@ import org.openmole.core.model.domain.Domain
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.model.builder.IPuzzleUIMap
 import org.openmole.ide.core.implementation.data.{ CapsuleDataUI, CheckData }
-import org.openmole.ide.core.model.commons.TransitionType
+import org.openmole.ide.core.model.commons._
 import org.openmole.core.model.transition.{ IEndExplorationTransition, IExplorationTransition, IAggregationTransition }
 import org.openmole.ide.core.model.factory.IBuilderFactoryUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
@@ -45,6 +45,7 @@ import scala.Some
 import org.openmole.ide.core.implementation.registry.DefaultKey
 import org.openmole.ide.core.implementation.workflow.{ TransitionUI, CapsuleUI }
 import org.openmole.core.implementation.transition.Condition
+import org.openmole.ide.core.implementation.registry.DefaultKey
 
 object Builder {
 
@@ -76,7 +77,7 @@ object Builder {
              lasts: Iterable[ICapsuleUI],
              uiMap: IPuzzleUIMap = new PuzzleUIMap) = {
     val capsuleMap = capsulesUI.map {
-      c ⇒ c -> c.dataUI.coreObject(c.scene.manager)
+      c ⇒ c -> c.dataUI.coreObject(c.scene.dataUI)
     }.toMap
     val prototypeMap = MoleFactory.prototypeMapping
     val (transitions, dataChannels, islotMap) = MoleFactory.buildConnectors(capsuleMap, prototypeMap)
@@ -112,17 +113,17 @@ object Builder {
     val capsuleMap = p.slots.zipWithIndex.map {
       s ⇒
         val proxy = toTaskUI(s._1.capsule.task, uiMap)
-        val capsules = scene.manager.capsule(proxy)
+        val capsules = scene.dataUI.capsule(proxy)
         val slotUI = {
           if (capsules.isEmpty) {
             Proxies.instance += proxy
-            val capsule = CapsuleUI(scene, new CapsuleDataUI(Some(proxy)))
+            val capsule = CapsuleUI(scene, CapsuleDataUI(Some(proxy)))
             scene.add(capsule, new Point(0, 0))
             capsule.addInputSlot
           }
           else capsules.head.islots.head
         }
-        if (s._2 == 0) scene.manager.startingCapsule = Some(slotUI.capsule)
+        if (s._2 == 0) scene.dataUI.startingCapsule = Some(slotUI.capsule)
         s._1.capsule -> slotUI
     }.toMap
 
@@ -132,10 +133,11 @@ object Builder {
           capsuleMap(t.start).capsule,
           capsuleMap(t.end.capsule),
           t match {
-            case ex: IExplorationTransition     ⇒ TransitionType.EXPLORATION_TRANSITION
-            case agg: IAggregationTransition    ⇒ TransitionType.AGGREGATION_TRANSITION
-            case end: IEndExplorationTransition ⇒ TransitionType.END_TRANSITION
-            case _                              ⇒ TransitionType.BASIC_TRANSITION
+            case ex: IExplorationTransition     ⇒ ExplorationTransitionType
+            case agg: IAggregationTransition    ⇒ AggregationTransitionType
+            case end: IEndExplorationTransition ⇒ EndTransitionType
+            case _: ITransition                 ⇒ SimpleTransitionType
+            case x                              ⇒ throw new InternalProcessingError("Unsupported transition class " + x.getClass)
           },
           Some(t.asInstanceOf[Condition].code),
           t.filter match {
@@ -220,19 +222,19 @@ object Builder {
       StatusBar().clear
       val selection = {
         if (sel.isEmpty) {
-          if (scene.manager.puzzlesCompliant.isEmpty) throw new UserBadDataError("Builder error: no Sequence of Task has been found.")
-          else scene.manager.puzzlesCompliant.head
+          if (scene.dataUI.puzzlesCompliant.isEmpty) throw new UserBadDataError("Builder error: no Sequence of Task has been found.")
+          else scene.dataUI.puzzlesCompliant.head
         }
         else sel
       }
-      val selectedPuzzle = puzzles(List(scene.manager.puzzleCompliant(selection)), scene.manager)
-      val compliantPuzzles = scene.manager.puzzlesCompliant
+      val selectedPuzzle = puzzles(List(scene.dataUI.puzzleCompliant(selection)), scene.dataUI)
+      val compliantPuzzles = scene.dataUI.puzzlesCompliant
       if (compliantPuzzles.isEmpty) StatusBar().warn("No Sequence of Tasks can be applied for a Builder")
       else {
-        val (puzzles, uiMap) = Builder.puzzles(compliantPuzzles, scene.manager, selectedPuzzle._2)
+        val (puzzles, uiMap) = Builder.puzzles(compliantPuzzles, scene.dataUI, selectedPuzzle._2)
         val panel = b.buildPanelUI(puzzles, {
           if (selectedPuzzle._1.isEmpty) None else Some(selectedPuzzle._1.head)
-        }, scene.manager)
+        }, scene.dataUI)
         if (DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(panel) {
           verticalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
         }.peer,

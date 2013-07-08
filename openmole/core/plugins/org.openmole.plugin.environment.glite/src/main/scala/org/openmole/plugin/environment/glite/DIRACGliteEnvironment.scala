@@ -67,7 +67,6 @@ class DIRACGliteEnvironment(
 
   type JS = DIRACGliteJobService
 
-  override def permissive = true
   def bdiiServer: BDII = new BDII(bdii)
 
   def getAuthentication = DIRACAuthentication.get.getOrElse(throw new UserBadDataError("No authentication found for DIRAC"))

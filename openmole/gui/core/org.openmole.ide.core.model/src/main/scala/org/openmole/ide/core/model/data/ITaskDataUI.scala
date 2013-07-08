@@ -18,10 +18,8 @@
 package org.openmole.ide.core.model.data
 
 import org.openmole.ide.core.model.dataproxy._
-import org.openmole.ide.core.model.dataproxy._
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
-import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.core.model.workflow.{ IMoleScene, ICapsuleUI }
 import org.openmole.core.model.mole.{ IMole, ICapsule }

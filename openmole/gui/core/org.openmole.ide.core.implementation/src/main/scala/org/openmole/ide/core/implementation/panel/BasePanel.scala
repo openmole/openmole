@@ -40,7 +40,7 @@ object BasePanel {
 
 abstract class BasePanel(proxy: Option[IDataProxyUI],
                          scene: IMoleScene) extends MyPanel with IBasePanel {
-  scene.manager.refreshCache
+  scene.dataUI.refreshCache
   opaque = true
   var tabbedLock = false
 
@@ -121,13 +121,13 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
     publishCreation
     deleteLink
     baseSave
-    scene.manager.invalidateCache
+    scene.dataUI.invalidateCache
     scene.refresh
   }
 
   def baseDelete: Boolean = {
     val b = delete
-    scene.manager.invalidateCache
+    scene.dataUI.invalidateCache
     b
   }
 
@@ -138,7 +138,7 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
 
   def baseSave: Unit = {
     save
-    scene.manager.invalidateCache
+    scene.dataUI.invalidateCache
     proxy match {
       case Some(p: IDataProxyUI) ⇒ ConceptMenu.refreshItem(p)
       case _                     ⇒
