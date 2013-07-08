@@ -234,6 +234,7 @@ class GUISerializer { serializer ⇒
       case c if c == classOf[CapsuleData] ⇒ "capsule"
       case c if c == classOf[TransitionData] ⇒ "transition"
       case c if c == classOf[SlotData] ⇒ "slot"
+      case c if c == classOf[DataChannelData] ⇒ "datachannel"
       case c if c == classOf[MoleData] ⇒ "mole"
       case c ⇒ c.getSimpleName
     }
