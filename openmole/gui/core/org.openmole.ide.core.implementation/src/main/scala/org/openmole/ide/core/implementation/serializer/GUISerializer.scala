@@ -119,14 +119,10 @@ class GUISerializer { serializer ⇒
   }
 
   val taskConverter = new GUIConverter[ITaskDataProxyUI]
-
   val prototypeConverter = new GUIConverter[IPrototypeDataProxyUI]
-
   val samplingConverter = new GUIConverter[ISamplingCompositionDataProxyUI]
-
   val environmentConverter = new GUIConverter[IEnvironmentDataProxyUI]
   val hookConverter = new GUIConverter[IHookDataProxyUI]
-
   val sourceConverter = new GUIConverter[ISourceDataProxyUI]
   val capsuleConverter = new GUIConverter[CapsuleData]
   val transitionConverter = new GUIConverter[TransitionData]
@@ -238,6 +234,7 @@ class GUISerializer { serializer ⇒
       case c if c == classOf[CapsuleData] ⇒ "capsule"
       case c if c == classOf[TransitionData] ⇒ "transition"
       case c if c == classOf[SlotData] ⇒ "slot"
+      case c if c == classOf[DataChannelData] ⇒ "datachannel"
       case c if c == classOf[MoleData] ⇒ "mole"
       case c ⇒ c.getSimpleName
     }
