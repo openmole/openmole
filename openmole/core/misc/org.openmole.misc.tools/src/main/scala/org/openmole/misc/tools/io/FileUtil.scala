@@ -390,7 +390,7 @@ object FileUtil {
       }
     }
 
-    def createParentDir = {
+    def createParentDir = wrapError {
       val parent = file.getCanonicalFile.getParentFile
       if (parent != null) {
         if (!parent.exists) parent.mkdirs
@@ -400,6 +400,12 @@ object FileUtil {
 
     def child(f: File): File = child(f.getPath)
     def child(s: String): File = new File(file, s)
+
+    def wrapError[T](f: => T): T =
+      try f
+      catch {
+        case t: Throwable => throw new IOException(s"For file $file", t)
+      }
 
   }
 
