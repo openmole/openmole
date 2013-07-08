@@ -46,6 +46,7 @@ import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import scala.io.Source
 import org.openmole.misc.tools.service._
+import scala.util.{ Try, Failure, Success }
 
 object FileUtil {
 
@@ -401,11 +402,40 @@ object FileUtil {
     def child(f: File): File = child(f.getPath)
     def child(s: String): File = new File(file, s)
 
-    def wrapError[T](f: => T): T =
+    def wrapError[T](f: ⇒ T): T =
       try f
       catch {
-        case t: Throwable => throw new IOException(s"For file $file", t)
+        case t: Throwable ⇒ throw new IOException(s"For file $file", t)
       }
+
+    def updateIfTooOld(
+      tooOld: Long,
+      timeStamp: File ⇒ File = f ⇒ new File(file.getPath + "-timestamp"),
+      updating: File ⇒ File = f ⇒ new File(file.getPath + "-updating"))(update: File ⇒ Unit) = {
+      val upFile = updating(file)
+      val otherUpdating = !upFile.createNewFile
+
+      try {
+        if (!otherUpdating) {
+          val ts = timeStamp(file)
+          val upToDate =
+            if (!file.exists || !ts.exists) false
+            else
+              Try(ts.content.toLong) match {
+                case Success(v) ⇒ v + tooOld > System.currentTimeMillis
+                case Failure(_) ⇒ ts.delete; false
+              }
+
+          if (!upToDate) {
+            update(file)
+            ts.content = System.currentTimeMillis.toString
+          }
+
+        }
+      }
+      finally upFile.delete
+      file
+    }
 
   }
 
