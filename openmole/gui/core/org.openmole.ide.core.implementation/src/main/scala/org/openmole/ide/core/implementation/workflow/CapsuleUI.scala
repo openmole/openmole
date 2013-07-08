@@ -44,6 +44,7 @@ import org.openmole.core.model.mole.{ ICapsule, IMole }
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.builder.SceneFactory
 import org.openmole.ide.misc.tools.util._
+import org.openmole.ide.misc.tools.image.Images
 
 object CapsuleUI {
   def imageWidget(scene: IMoleScene, img: ImageIcon, x: Int, y: Int, action: Action) = new LinkedImageWidget(scene, img, x, y, action)
@@ -206,8 +207,11 @@ class CapsuleUI private (
     dataUI.capsuleType match {
       case SimpleCapsuleType ⇒ capsuleTypeWidget = None
       case x ⇒
-        capsuleTypeWidget = Some(imageWidget(scene,
-          new ImageIcon(ImageIO.read(dataUI.getClass.getClassLoader.getResource("img/" + x.toString.toLowerCase + "Capsule.png"))),
+        val img = x match {
+          case StrainerCapsuleType ⇒ Images.STRAINER_CAPSULE
+          case _                   ⇒ Images.MASTER_CAPSULE
+        }
+        capsuleTypeWidget = Some(imageWidget(scene, img,
           -1, -1, new Action("") {
             def apply = MasterCapsulePrototypeDialog.display(capsuleUI)
           }))
