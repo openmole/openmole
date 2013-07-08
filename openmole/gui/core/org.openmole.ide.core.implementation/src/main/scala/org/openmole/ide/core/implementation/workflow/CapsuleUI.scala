@@ -24,7 +24,6 @@ import javax.imageio.ImageIO
 import javax.swing.ImageIcon
 import org.netbeans.api.visual.action.ActionFactory
 import org.netbeans.api.visual.widget.ComponentWidget
-import org.netbeans.api.visual.widget.ImageWidget
 import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.implementation.dialog.MasterCapsulePrototypeDialog
 import org.openmole.ide.core.implementation.data.CapsuleDataUI
@@ -37,8 +36,6 @@ import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.core.model.data.IExplorationTaskDataUI
 import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.misc.tools.image.Images
-import org.openmole.ide.misc.widget.LinkLabel
 import scala.collection.mutable.ListBuffer
 import org.openmole.core.implementation.validation.DataflowProblem
 import scala.swing.{ Label, Action }
