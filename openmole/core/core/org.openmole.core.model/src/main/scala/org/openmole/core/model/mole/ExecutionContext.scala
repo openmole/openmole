@@ -29,7 +29,7 @@ object ExecutionContext {
     }
   }
 
-  lazy val local = ExecutionContext(System.out, Some(new File("")))
+  lazy val local = ExecutionContext(System.out, None)
 }
 
 trait ExecutionContext {
