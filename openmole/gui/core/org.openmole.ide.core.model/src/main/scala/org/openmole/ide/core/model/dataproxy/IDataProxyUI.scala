@@ -18,11 +18,9 @@
 package org.openmole.ide.core.model.dataproxy
 
 import org.openmole.ide.core.model.data.IDataUI
+import org.openmole.ide.misc.tools.util.ID
 
-trait IDataProxyUI {
-  def id: String
-
+trait IDataProxyUI extends ID {
   def dataUI: IDataUI
-
   def generated: Boolean
 }

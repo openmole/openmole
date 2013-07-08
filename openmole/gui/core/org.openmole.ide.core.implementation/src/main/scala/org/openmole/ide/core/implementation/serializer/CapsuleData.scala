@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 31/03/13 Romain Reuillon
+ * Copyright (C) 06/07/13 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,10 +17,7 @@
 
 package org.openmole.ide.core.implementation.serializer
 
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.misc.tools.util.ID
 
-class DataChannelData(
-  val from: CapsuleData,
-  val to: Int,
-  val filtered: List[IPrototypeDataProxyUI]) extends ID
+case class CapsuleData(capsule: ICapsuleDataUI, x: Int, y: Int) extends ID
