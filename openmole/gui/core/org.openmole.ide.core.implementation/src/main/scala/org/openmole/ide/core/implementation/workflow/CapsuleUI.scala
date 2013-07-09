@@ -40,8 +40,8 @@ import scala.collection.mutable.ListBuffer
 import org.openmole.core.implementation.validation.DataflowProblem
 import scala.swing.{ Label, Action }
 import scala.swing.Alignment._
-import org.openmole.core.model.mole.{ ICapsule, IMole }
-import org.openmole.core.model.data.Prototype
+import org.openmole.core.model.mole._
+import org.openmole.core.model.data._
 import org.openmole.ide.core.implementation.builder.SceneFactory
 import org.openmole.ide.misc.tools.util._
 import org.openmole.ide.misc.tools.image.Images
@@ -295,7 +295,8 @@ class CapsuleUI private (
   def inputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IPrototypeDataProxyUI] = {
     if (cMap.contains(this)) {
       val caps = cMap(this)
-      caps.inputs(mole,
+      caps.inputs(
+        mole,
         Map(caps -> dataUI.sources.map { _.dataUI.coreObject(pMap) }),
         Map(caps -> dataUI.hooks.map { _.dataUI.coreObject(pMap) })).toList.map {
           ds ⇒
@@ -308,9 +309,12 @@ class CapsuleUI private (
   def outputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IPrototypeDataProxyUI] =
     if (cMap.contains(this)) {
       val caps = cMap(this)
-      caps.outputs(mole, Map(caps -> dataUI.sources.map { _.dataUI.coreObject(pMap) }), Map(caps -> dataUI.hooks.map { _.dataUI.coreObject(pMap) })).toList.map {
-        ds ⇒ SceneFactory.prototype(ds.prototype)
-      }
+      caps.outputs(
+        mole,
+        Map(caps -> dataUI.sources.map { _.dataUI.coreObject(pMap) }),
+        Map(caps -> dataUI.hooks.map { _.dataUI.coreObject(pMap) })).toList.map {
+          ds ⇒ SceneFactory.prototype(ds.prototype)
+        }
     }
     else List()
 

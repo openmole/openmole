@@ -18,15 +18,22 @@
 package org.openmole.core.model
 
 package object mole {
-  type Hooks = Map[ICapsule, Traversable[IHook]]
-  type Sources = Map[ICapsule, Traversable[ISource]]
+
+  case class Hooks(map: Map[ICapsule, Traversable[IHook]])
+  case class Sources(map: Map[ICapsule, Traversable[ISource]])
+
+  implicit def hooksToMap(h: Hooks) = h.map.withDefault(_ ⇒ List.empty)
+  implicit def mapToHooks(m: Map[ICapsule, Traversable[IHook]]) = Hooks(m)
+
+  implicit def sourcesToMap(s: Sources) = s.map.withDefault(_ ⇒ List.empty)
+  implicit def mapToSources(m: Map[ICapsule, Traversable[ISource]]) = Sources(m)
 
   object Hooks {
-    def empty = Map.empty[ICapsule, Traversable[IHook]].withDefault(_ ⇒ List.empty)
+    def empty = Map.empty[ICapsule, Traversable[IHook]]
   }
 
   object Sources {
-    def empty = Map.empty[ICapsule, Traversable[ISource]].withDefault(_ ⇒ List.empty)
+    def empty = Map.empty[ICapsule, Traversable[ISource]]
   }
 
 }

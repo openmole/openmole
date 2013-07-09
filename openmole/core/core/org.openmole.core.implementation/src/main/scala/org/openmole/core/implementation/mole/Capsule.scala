@@ -17,13 +17,9 @@
 
 package org.openmole.core.implementation.mole
 
-import org.openmole.core.implementation.transition._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.task._
-import org.openmole.core.model.transition._
 import org.openmole.core.model.data._
-import org.openmole.core.model.job._
-import org.openmole.core.model.job.State._
 
 object Capsule {
   def apply(task: ITask) = new Capsule(task)
