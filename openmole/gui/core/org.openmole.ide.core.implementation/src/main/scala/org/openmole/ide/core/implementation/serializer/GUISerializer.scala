@@ -297,6 +297,7 @@ class GUISerializer { serializer ⇒
       deserializeConcept[ITaskDataProxyUI](classOf[ITaskDataProxyUI]).foreach(proxies.+=)
 
       deserializeConcept[CapsuleData](classOf[CapsuleData])
+      deserializeConcept[SlotData](classOf[SlotData])
       deserializeConcept[TransitionData](classOf[TransitionData])
       deserializeConcept[DataChannelData](classOf[DataChannelData])
 

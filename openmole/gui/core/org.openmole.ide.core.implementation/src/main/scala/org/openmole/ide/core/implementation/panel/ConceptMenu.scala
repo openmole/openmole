@@ -75,6 +75,7 @@ object ConceptMenu {
       f ⇒ new EnvironmentDataProxyFactory(f)
     }.toList.sortBy(_.factory.toString).foreach {
       d ⇒
+        println(d.factory.toString)
         mapping(ComponentCategories.ENVIRONMENT).contents += new MenuItem(new Action(d.factory.toString) {
           override def apply = display(d.buildDataProxyUI)
         })

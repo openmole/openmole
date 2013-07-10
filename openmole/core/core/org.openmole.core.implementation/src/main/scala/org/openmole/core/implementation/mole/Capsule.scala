@@ -17,13 +17,9 @@
 
 package org.openmole.core.implementation.mole
 
-import org.openmole.core.implementation.transition._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.task._
-import org.openmole.core.model.transition._
 import org.openmole.core.model.data._
-import org.openmole.core.model.job._
-import org.openmole.core.model.job.State._
 
 object Capsule {
   def apply(task: ITask) = new Capsule(task)
@@ -31,10 +27,15 @@ object Capsule {
 
 class Capsule(val task: ITask) extends ICapsule {
   override def inputs(mole: IMole, sources: Sources, hooks: Hooks): DataSet =
-    task.inputs -- sources(this).flatMap(_.outputs) ++ sources(this).flatMap(_.inputs)
+    task.inputs --
+      sources(this).flatMap(_.outputs) --
+      sources(this).flatMap(_.inputs) ++
+      sources(this).flatMap(_.inputs)
 
   override def outputs(mole: IMole, sources: Sources, hooks: Hooks): DataSet =
-    task.outputs ++ hooks(this).flatMap(_.outputs)
+    task.outputs --
+      hooks(this).flatMap(_.outputs) ++
+      hooks(this).flatMap(_.outputs)
 
   override def toString = task.toString
 }

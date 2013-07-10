@@ -141,7 +141,7 @@ class SubMoleExecution(
             throw e
         }
 
-      val context = ctxForHooks ++ moleExecution.hooks(capsule).flatMap(executeHook).unzip._2
+      val context = job.context ++ moleExecution.hooks(capsule).flatMap(executeHook).unzip._2
       secureProfilerExecution(moleExecution.profiler, job)
       mole.outputDataChannels(capsule).foreach { _.provides(context, ticket, moleExecution) }
 

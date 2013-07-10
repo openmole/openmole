@@ -28,6 +28,8 @@ object Images {
 
   def imageIcon(path: String) = new ImageIcon(classLoader.getResource(path))
 
+  val SPLASH_SCREEN = imageIcon("img/splashscreen.png")
+
   val START_SLOT = image("img/startSlot.png")
   val START_EXE_SLOT = image("img/startSlotExe.png")
   val INPUT_SLOT = image("img/inputSlot.png")

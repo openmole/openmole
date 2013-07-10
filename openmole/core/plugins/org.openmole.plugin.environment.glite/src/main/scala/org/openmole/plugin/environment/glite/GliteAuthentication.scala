@@ -48,28 +48,12 @@ object GliteAuthentication extends Logger {
 
   val updatedFile = ".updated"
 
-  def CACertificatesDir: File = {
-    val caDir = Workspace.file("CACertificates")
-    val updated = new File(caDir, updatedFile)
-
-    def isCACertificatesUpToDate = {
-      if (!caDir.exists || !updated.exists) false
-      else
-        Try(updated.content.toLong) match {
-          case Success(v) ⇒ v + Workspace.preferenceAsDuration(CACertificatesCacheTime).toMilliSeconds > System.currentTimeMillis
-          case Failure(_) ⇒ updated.delete; false
-        }
+  def CACertificatesDir: File =
+    Workspace.file("CACertificates").updateIfTooOld(Workspace.preferenceAsDuration(CACertificatesCacheTime).toMilliSeconds) {
+      caDir ⇒
+        caDir.mkdir
+        downloadCACertificates(Workspace.preference(GliteEnvironment.CACertificatesSite), caDir)
     }
-    if (!isCACertificatesUpToDate)
-      Workspace.file("ca.lock").withLock { _ ⇒
-        if (!isCACertificatesUpToDate) {
-          caDir.mkdir
-          downloadCACertificates(Workspace.preference(GliteEnvironment.CACertificatesSite), caDir)
-          new File(caDir, updatedFile).content = System.currentTimeMillis.toString
-        }
-      }
-    caDir
-  }
 
   def downloadCACertificates(address: String, dir: File) = {
     val fs = FileSystems.getDefault
@@ -113,21 +97,17 @@ object GliteAuthentication extends Logger {
     }
   }
 
-  def voCards = {
-    val voCards = Workspace.file("voCards.xml")
-    if (!voCards.exists) {
-      val tmpVoCards = Workspace.newFile
-      HTTPStorage.withConnection(
-        new URI(Workspace.preference(GliteEnvironment.VOInformationSite)),
-        Workspace.preferenceAsDuration(GliteEnvironment.VOCardDownloadTimeOut).toSeconds) { http ⇒
-          val is: InputStream = http.getInputStream
-          try is.copy(tmpVoCards)
-          finally is.close
-          tmpVoCards move voCards
-        }
+  def voCards =
+    Workspace.file("voCards.xml").updateIfTooOld(Workspace.preferenceAsDuration(VOCardCacheTime).toMilliSeconds) {
+      voCards ⇒
+        HTTPStorage.withConnection(
+          new URI(Workspace.preference(GliteEnvironment.VOInformationSite)),
+          Workspace.preferenceAsDuration(GliteEnvironment.VOCardDownloadTimeOut).toSeconds) { http ⇒
+            val is: InputStream = http.getInputStream
+            try is.copy(voCards)
+            finally is.close
+          }
     }
-    voCards
-  }
 
   def getVOMS(vo: String): Option[String] = getVOMS(vo, xml.XML.loadFile(voCards))
   def getVMOSOrError(vo: String) = getVOMS(vo).getOrElse(throw new UserBadDataError(s"ID card for VO $vo not found."))

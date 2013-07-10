@@ -38,6 +38,8 @@ import util.{ Failure, Success }
 import org.openmole.core.serializer.SerializerService
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import scala.swing.FileChooser.Result._
+import org.openmole.ide.misc.tools.image.Images
+import org.openide.NotifyDescriptor
 
 object DialogFactory {
 
@@ -91,6 +93,12 @@ object DialogFactory {
   def changePasswordConfirmation = confirmationDialog("Warning",
     "<html>Changing the password will reset all your preferences and authentication data.<br>" +
       "Reset anyway ?</html> ")
+
+  def displaySplashScreen = {
+    val d = new DialogDescriptor(new Label("") { icon = Images.SPLASH_SCREEN }.peer, "About OpenMOLE")
+    d.setOptions(List(NotifyDescriptor.OK_OPTION).toArray)
+    DialogDisplayer.getDefault.notify(d)
+  }
 
   def displayStack(stack: String) =
     DialogDisplayer.getDefault.notify(new DialogDescriptor(new ScrollPane(new TextArea(stack)).peer, "Error stack"))

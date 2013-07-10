@@ -49,6 +49,7 @@ object GliteEnvironment extends Logger {
   val CACertificatesCacheTime = new ConfigurationLocation("GliteEnvironment", "CACertificatesCacheTime")
   val VOInformationSite = new ConfigurationLocation("GliteEnvironment", "VOInformationSite")
   val VOCardDownloadTimeOut = new ConfigurationLocation("GliteEnvironment", "VOCardDownloadTimeOut")
+  val VOCardCacheTime = new ConfigurationLocation("GliteEnvironment", "VOCardCacheTime")
 
   val OverSubmissionInterval = new ConfigurationLocation("GliteEnvironment", "OverSubmissionInterval")
   val OverSubmissionMinNumberOfJob = new ConfigurationLocation("GliteEnvironment", "OverSubmissionMinNumberOfJob")
@@ -84,6 +85,7 @@ object GliteEnvironment extends Logger {
   Workspace += (CACertificatesCacheTime, "P50D")
   Workspace += (VOInformationSite, "http://operations-portal.egi.eu/xml/voIDCard/public/all/true")
   Workspace += (VOCardDownloadTimeOut, "PT2M")
+  Workspace += (VOCardCacheTime, "P50D")
 
   Workspace += (LocalThreadsBySE, "10")
   Workspace += (LocalThreadsByWMS, "10")

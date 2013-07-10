@@ -54,9 +54,10 @@ class Transition(
     registry.register(this, ticket, context)
     if (nextTaskReady(ticket, subMole)) {
 
-      val combinaison =
-        mole.inputDataChannels(end).toList.flatMap { _.consums(ticket, moleExecution) } ++
-          mole.inputTransitions(end).toList.flatMap(registry.remove(_, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable)
+      val inputDC = mole.inputDataChannels(end).toList.flatMap { _.consums(ticket, moleExecution) }
+      val inputTransitions = mole.inputTransitions(end).toList.flatMap(registry.remove(_, ticket).getOrElse(throw new InternalProcessingError("BUG context should be registred")).toIterable)
+
+      val combinaison = inputDC ++ inputTransitions
 
       val newTicket =
         if (mole.slots(end.capsule).size <= 1) ticket
