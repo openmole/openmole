@@ -159,7 +159,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
   def urlDownloader(urls: Seq[(URL, File)], s: TaskStreams, targetDir: File) = {
     val cache = targetDir / "url-cache"
 
-    targetDir.createNewFile() //makes sure target exists
+    targetDir.mkdir() //makes sure target exists
 
     val cacheInput = managed(Source.fromFile(cache)(io.Codec.ISO8859))
 
