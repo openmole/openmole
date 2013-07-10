@@ -25,6 +25,7 @@ abstract class Defaults(subBuilds: Defaults*) extends BuildSystemDefaults {
     Seq(version := "0.9.0-SNAPSHOT",
       scalaVersion := "2.10.2",
       publishArtifact in (packageDoc in install) := false,
-      publishArtifact in (packageSrc in install) := false
+      publishArtifact in (packageSrc in install) := false,
+      concurrentRestrictions := Seq(Tags.limitAll( 7 ))
     )
 }
