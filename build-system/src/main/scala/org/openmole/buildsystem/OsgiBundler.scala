@@ -33,9 +33,9 @@ trait OsgiBundler { self: BuildSystemDefaults ⇒
     installRemote in Compile <<= publish in Compile,
     OsgiKeys.bundle <<= OsgiKeys.bundle tag Tags.Disk,
     (update in install) <<= update in install tag Tags.Network,
-    bundleType := "default",
+    bundleType := Set("default"),
     projectID <<= (projectID, bundleType) { (id, bT) ⇒
-      id extra ("project-name" -> projectName, "bundle-type" -> bT)
+      id extra ("project-name" -> projectName, "bundle-type" -> bT.mkString)
     },
     publishTo <<= isSnapshot(if (_) Some("Openmole Nexus" at "http://maven.openmole.org/snapshots") else Some("Openmole Nexus" at "http://maven.openmole.org/releases")),
     credentials += Credentials(Path.userHome / ".sbt" / "openmole.credentials")

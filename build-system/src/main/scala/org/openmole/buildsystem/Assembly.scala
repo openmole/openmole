@@ -43,25 +43,30 @@ trait Assembly { self: BuildSystemDefaults ⇒
   )
 
   lazy val resAssemblyProject: Seq[Project.Setting[_]] = Seq(
+    resourceSets := Set.empty,
     resTask,
     zipFiles <++= resourceAssemble map { (f: Set[File]) ⇒ f.toSeq },
     assemble <<= assemble dependsOn resourceAssemble
   )
 
-  lazy val resTask = resourceAssemble <<= (resourceSets, outDir, assemblyPath) map { //TODO: Find a natural way to do this
-    (rS, outD, cT) ⇒
+  lazy val resTask = resourceAssemble <<= (resourceSets, target, assemblyPath, streams, name) map { //TODO: Find a natural way to do this
+    (rS, target, cT, s, name) ⇒
       {
-        for ((rT, rOD) ← rS) yield {
-          val destPath = cT / rOD
-          if (rT.isDirectory) {
-            IO.copyDirectory(rT, destPath)
-            destPath
-          }
-          else {
-            IO.copyFile(rT, destPath / rT.name)
-            destPath / rT.name
+        def expand(f: File): Array[File] = if (f.isDirectory) f.listFiles() flatMap expand else Array(f)
+
+        val resourceMap = (rS flatMap { case (in, out) ⇒ expand(in).map(f ⇒ f -> cT / out / f.name).toSet }).toMap
+
+        val copyFunction = FileFunction.cached(target / ("resAssembleCache" + name), FilesInfo.lastModified, FilesInfo.exists) {
+          _ map {
+            rT ⇒
+              val dest = resourceMap(rT)
+              s.log.info("Copying file " + rT.getPath + " to: " + dest.getCanonicalPath)
+              IO.copyFile(rT, dest)
+              dest
           }
         }
+
+        copyFunction(resourceMap.keySet)
       }
   }
 
@@ -193,12 +198,27 @@ object Assembly {
     })(_ map { _._2 })
   }
 
+  implicit def ProjRefs2RichProjectSeq(s: Seq[ProjectReference]) = new RichProjectSeq(Project.value(s))
+
+  implicit def InitProjRefs2RichProjectSeq(s: Project.Initialize[Seq[ProjectReference]]) = new RichProjectSeq(s)
+
+  class RichProjectSeq(s: Project.Initialize[Seq[ProjectReference]]) {
+    def keyFilter[T](key: SettingKey[T], filter: (T) ⇒ Boolean) = projFilter(s, key, filter)
+    def sendTo(to: String) = sendBundles(s, to) //TODO: This function is specific to OSGI bundled projects. Make it less specific?
+  }
+
+  /*def projFilter[T](s: Seq[ProjectReference], keyFilter: (SettingKey[T], T ⇒ Boolean)*): Project.Initialize[Seq[ProjectReference]] = {
+    require(keyFilter.size >= 1, "Need at least one key/filter pair for a project filter")
+    val head = keyFilter.head
+    (keyFilter.tail foldLeft projFilter(s, head._1, head._2)) { case (s, (key, filter)) ⇒ projFilter(s, key, filter) }
+  }*/
+
   def projFilter[T](s: Project.Initialize[Seq[ProjectReference]], key: SettingKey[T], filter: T ⇒ Boolean): Project.Initialize[Seq[ProjectReference]] = {
     Project.bind(s)(j ⇒ projFilter(j, key, filter))
   }
 
   def sendBundles(bundles: Project.Initialize[Seq[ProjectReference]], to: String): Project.Initialize[Task[Set[(File, String)]]] = Project.bind(bundles) { projs ⇒
-    val seqOTasks: Project.Initialize[Seq[Task[Set[(File, String)]]]] = Project.Initialize.join(projs.map(p ⇒ (bundle in p) map { f ⇒ Set(f -> "plugins") }))
+    val seqOTasks: Project.Initialize[Seq[Task[Set[(File, String)]]]] = Project.Initialize.join(projs.map(p ⇒ (bundle in p) map { f ⇒ Set(f -> to) }))
     seqOTasks { seq ⇒ seq.reduceLeft[Task[Set[(File, String)]]] { case (a, b) ⇒ a flatMap { i ⇒ b map { _ ++ i } } } }
   }
 }

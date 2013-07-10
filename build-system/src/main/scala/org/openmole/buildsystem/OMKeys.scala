@@ -12,7 +12,7 @@ import scala.util.matching.Regex
 object OMKeys {
   val assemble = TaskKey[Unit]("assemble")
 
-  val bundleType = SettingKey[String]("bundle-type") //Default setting for osgiprojects is default.
+  val bundleType = SettingKey[Set[String]]("bundle-type") //Default setting for osgiprojects is default.
 
   val bundleProj = SettingKey[Boolean]("bundle-proj")
 
