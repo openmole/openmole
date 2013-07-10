@@ -55,7 +55,7 @@ object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application
   lazy val dbserverProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "dbserver") sendTo "dbserver/lib"
 
   lazy val openmoleDB = AssemblyProject("openmole", "dbserver/lib", settings = resAssemblyProject ++ dbserverProjects) settings ( //TODO: Make bundleTypes transitive
-    resourceSets <+= (baseDirectory) map { _ / "db-resources" -> "dbserver/Bin" }
+    resourceSets <+= (baseDirectory) map { _ / "db-resources" -> "dbserver/bin" }
   )
 
   lazy val runtimeProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "runtime") sendTo "plugins"
