@@ -6,12 +6,12 @@ import Keys._
 import org.clapper.sbt.izpack.IzPack
 import IzPack.IzPack._
 import org.openmole.buildsystem.OMKeys._
-import org.openmole.buildsystem._
+import org.openmole.buildsystem._, Assembly._
 import Libraries._
 import com.typesafe.sbt.osgi.OsgiKeys._
 
-object Test extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application) {
-  val dir = file("Test")
+object Bin extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Application) {
+  val dir = file("bin")
 
   private val equinoxDependencies = libraryDependencies ++= Seq(
     "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841" intransitive () extra ("project-name" -> "eclipse"),
@@ -34,23 +34,13 @@ object Test extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Applicatio
     "fr.iscpif.gridscale.bundle" % "org.bouncycastle" % gridscaleVersion intransitive ()
   )
 
-  import Assembly._
+  lazy val uiProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "core") sendTo "plugins"
 
-  lazy val coreBundles = Assembly.projFilter(Assembly.projFilter(subProjects, bundleProj, (b: Boolean) ⇒ b), bundleType, (a: Set[String]) ⇒ a.contains("core"))
-
-  lazy val pluginBundles = Assembly.projFilter(Assembly.projFilter(subProjects, bundleProj, (b: Boolean) ⇒ b), bundleType, (a: Set[String]) ⇒ a.contains("plugin"))
-
-  lazy val guiPluginBundles = subProjects.keyFilter(bundleProj, (b: Boolean) ⇒ b).keyFilter(bundleType, (a: Set[String]) ⇒ a.contains("guiPlugin"))
-
-  lazy val uiProjects = resourceSets <++= Assembly.sendBundles(coreBundles, "plugins")
-
-  lazy val pluginProjects = resourceSets <++= Assembly.sendBundles(pluginBundles, "openmole-plugins")
+  lazy val pluginProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "plugin") sendTo "openmole-plugins"
 
   lazy val guiPluginProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a.contains("guiPlugin")) sendTo "openmole-plugins-gui"
 
-  lazy val openmole = Aggregator("openmole-test") aggregate (openmoleTest, openmolePlugins, openmoleDB)
-
-  lazy val openmoleTest = AssemblyProject("openmole-test", "plugins", settings = resAssemblyProject ++ uiProjects ++ pluginProjects ++ guiPluginProjects, depNameMap =
+  lazy val openmole = AssemblyProject("openmole", "plugins", settings = resAssemblyProject ++ uiProjects ++ pluginProjects ++ guiPluginProjects, depNameMap =
     Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" }, """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") })
   ) settings (
     equinoxDependencies, libraryDependencies += "fr.iscpif.gridscale.bundle" % "fr.iscpif.gridscale" % gridscaleVersion intransitive (),
@@ -58,14 +48,14 @@ object Test extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Applicatio
     dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle") }
   ) //todo, add dependency mapping or something
 
-  lazy val openmolePlugins = AssemblyProject("openmole-test", "openmole-plugins") settings (openmolePluginDependencies, //TODO: This project is only necessary thanks to the lack of dependency mapping in AssemblyProject
+  lazy val openmolePlugins = AssemblyProject("openmole", "openmole-plugins") settings (openmolePluginDependencies, //TODO: This project is only necessary thanks to the lack of dependency mapping in AssemblyProject
     dependencyFilter := DependencyFilter.fnToModuleFilter(_.name != "scala-library")
   )
 
   lazy val dbserverProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "dbserver") sendTo "dbserver/lib"
 
-  lazy val openmoleDB = AssemblyProject("openmole-test", "dbserver/lib", settings = resAssemblyProject ++ dbserverProjects) settings ( //TODO: Make bundleTypes transitive
-    resourceSets <+= (baseDirectory) map { _ / "db-resources" -> "dbserver/bin" }
+  lazy val openmoleDB = AssemblyProject("openmole", "dbserver/lib", settings = resAssemblyProject ++ dbserverProjects) settings ( //TODO: Make bundleTypes transitive
+    resourceSets <+= (baseDirectory) map { _ / "db-resources" -> "dbserver/Bin" }
   )
 
   lazy val runtimeProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ a contains "runtime") sendTo "plugins"
@@ -73,7 +63,7 @@ object Test extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Applicatio
   lazy val java368URL = new URL("http://maven.iscpif.fr/public/com/oracle/java-jre-linux-i386/7-u10/java-jre-linux-i386-7-u10.tgz")
   lazy val javax64URL = new URL("http://maven.iscpif.fr/public/com/oracle/java-jre-linux-x64/7-u10/java-jre-linux-x64-7-u10.tgz")
 
-  lazy val openmoleRuntime = AssemblyProject("runtime-test", "plugins", depNameMap = Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" },
+  lazy val openmoleRuntime = AssemblyProject("runtime", "plugins", depNameMap = Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" },
     """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") }), settings = resAssemblyProject ++ zipProject ++ urlDownloadProject ++ runtimeProjects) settings
     (equinoxDependencies, resourceDirectory <<= baseDirectory / "resources",
       urls <++= target { t ⇒ Seq(java368URL -> t / "jvm-386.tar.gz", javax64URL -> t / "jvm-x64.tar.gz") },
@@ -82,4 +72,9 @@ object Test extends Defaults(Base, Gui, Libraries, ThirdParties, Web, Applicatio
       resourceSets <+= baseDirectory map { _ / "resources" -> "." },
       dependencyFilter := DependencyFilter.fnToModuleFilter { m ⇒ m.extraAttributes get ("project-name") map (_ == projectName) getOrElse (m.organization == "org.eclipse.core" || m.organization == "fr.iscpif.gridscale.bundle") })
 
+  lazy val daemonProjects = resourceSets <++= subProjects.keyFilter(bundleType, (a: Set[String]) ⇒ (a contains "core") || (a contains "daemon")) sendTo "plugins"
+
+  lazy val openmoleDaemon = AssemblyProject("daemon", "plugins", settings = resAssemblyProject ++ daemonProjects, depNameMap =
+    Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" }, """org\.eclipse\.(core|equinox|osgi)""".r -> { s ⇒ s.replaceFirst("-", "_") })) settings
+    (resourceSets <+= baseDirectory map { _ / "resources" -> "." }, equinoxDependencies)
 }

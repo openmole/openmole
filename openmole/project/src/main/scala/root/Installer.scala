@@ -6,7 +6,7 @@ import org.clapper.sbt.izpack.IzPack
 import org.clapper.sbt.izpack.IzPackSection
 import IzPack.IzPack._
 import org.openmole.buildsystem.OMKeys._
-import Application.{ openmolePlugins, openmoleRuntime }
+import Bin.{ openmole, openmoleRuntime }
 
 object Installer extends Defaults {
   val dir = file("installer")
@@ -18,7 +18,7 @@ object Installer extends Defaults {
     variables in Config <++= version { v ⇒ Seq(("version", v), "home" -> "$USER_HOME") },
     installSourceDir in Config <<= assemblyPath,
     configFile in Config <<= assemblyPath { _ / "resources/install.yml" },
-    resourceSets <<= (assemblyPath in openmolePlugins, target in openmoleRuntime, tarGZName in openmoleRuntime, baseDirectory) map { (assembly, target, tarGz, bD) ⇒
+    resourceSets <<= (assemblyPath in openmole, target in openmoleRuntime, tarGZName in openmoleRuntime, baseDirectory) map { (assembly, target, tarGz, bD) ⇒
       Set(
         assembly -> "openmole",
         bD / "resources" -> "resources"

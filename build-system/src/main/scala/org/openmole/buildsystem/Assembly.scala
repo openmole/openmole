@@ -159,8 +159,9 @@ trait Assembly { self: BuildSystemDefaults ⇒
   def urlDownloader(urls: Seq[(URL, File)], s: TaskStreams, targetDir: File) = {
     val cache = targetDir / "url-cache"
 
+    targetDir.createNewFile() //makes sure target exists
+
     val cacheInput = managed(Source.fromFile(cache)(io.Codec.ISO8859))
-    val cacheOutput = managed(new BufferedOutputStream(new FileOutputStream(cache)))
 
     val hashes = (urls map { case (url, _) ⇒ url.toString } flatten).toIterator
 
@@ -168,8 +169,11 @@ trait Assembly { self: BuildSystemDefaults ⇒
       ((cacheInput map { _.iter zip hashes forall { case (n, cached) ⇒ n == cached } }).opt getOrElse false) && (urls forall (_._2.exists))
     }
     else {
+      cache.createNewFile()
       false
     }
+
+    val cacheOutput = managed(new BufferedOutputStream(new FileOutputStream(cache)))
 
     if (alreadyCached) {
       Seq.empty
@@ -218,6 +222,7 @@ object Assembly {
   }
 
   def sendBundles(bundles: Project.Initialize[Seq[ProjectReference]], to: String): Project.Initialize[Task[Set[(File, String)]]] = Project.bind(bundles) { projs ⇒
+    require(projs.nonEmpty)
     val seqOTasks: Project.Initialize[Seq[Task[Set[(File, String)]]]] = Project.Initialize.join(projs.map(p ⇒ (bundle in p) map { f ⇒ Set(f -> to) }))
     seqOTasks { seq ⇒ seq.reduceLeft[Task[Set[(File, String)]]] { case (a, b) ⇒ a flatMap { i ⇒ b map { _ ++ i } } } }
   }

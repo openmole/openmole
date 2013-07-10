@@ -29,7 +29,7 @@ object Application extends Defaults {
     "org.eclipse.core" % "org.eclipse.osgi" % "3.8.2.v20130124-134944" intransitive ()
   )
 
-  private lazy val pluginDependencies = libraryDependencies <++= (version) { v ⇒
+  /*private lazy val pluginDependencies = libraryDependencies <++= (version) { v ⇒
     Seq(
       "org.openmole.core" %% "org.openmole.misc.sftpserver" % v,
       "org.openmole.core" %% "org.openmole.misc.logging" % v,
@@ -161,14 +161,14 @@ object Application extends Defaults {
           "org.openmole.ide" %% "org.openmole.ide.osgi.netlogo5" % v intransitive ()
         )
       }
-  }
+  } */
 
   lazy val openmoleui = OsgiProject("org.openmole.ui", singleton = true, buddyPolicy = Some("global")) settings
     (equinoxDependencies, bundleType := Set("core")) dependsOn
     (base.Misc.workspace, base.Misc.replication, base.Misc.exception, base.Misc.tools, base.Misc.eventDispatcher,
       base.Misc.pluginManager, jodaTime, scalaLang, jasypt, Apache.config, objenesis, base.Core.implementation, robustIt,
       scopt, base.Core.batch, gui.Core.implementation, base.Misc.sftpserver, base.Misc.logging, jline, Apache.logging,
-      Apache.ant, Web.core, base.Misc.console, base.Core.convenience)
+      Apache.ant, Web.core, base.Misc.console, base.Core.convenience) /*
 
   lazy val plugins = AssemblyProject("package", "plugins",
     depNameMap = Map("""org\.eclipse\.equinox\.launcher.*\.jar""".r -> { s ⇒ "org.eclipse.equinox.launcher.jar" },
@@ -258,5 +258,5 @@ object Application extends Defaults {
     rpmPrerequisites := Seq("java-1.7.0-openjdk"),
     name in Debian := "OpenMOLE",
     version in Debian <<= (version) { v ⇒ v.replace("-", ".") }
-  )
+  )*/
 }
