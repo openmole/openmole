@@ -126,7 +126,7 @@ trait Assembly { self: BuildSystemDefaults ⇒
 
     val files: Set[File] = (targetFolders map findFiles flatten).toSet
 
-    val fn = FileFunction.cached(t / "zip-cache", FilesInfo.full, FilesInfo.lastModified) {
+    val fn = FileFunction.cached(t / "zip-cache", FilesInfo.lastModified, FilesInfo.exists) {
       fileSet ⇒
         s.log.info("Zipping:\n\t")
 
