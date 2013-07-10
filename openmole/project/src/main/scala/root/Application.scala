@@ -18,7 +18,7 @@ object Application extends Defaults {
   val dir = file("application")
 
   private val equinoxDependencies = libraryDependencies ++= Seq(
-    "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841" intransitive () extra ("project-name" -> "eclipse"),
+    "org.eclipse.core" % "org.eclipse.equinox.app" % "1.3.100.v20120522-1841" intransitive (),
     "org.eclipse.core" % "org.eclipse.core.contenttype" % "3.4.200.v20120523-2004" intransitive (),
     "org.eclipse.core" % "org.eclipse.core.jobs" % "3.5.300.v20120912-155018" intransitive (),
     "org.eclipse.core" % "org.eclipse.core.runtime" % "3.8.0.v20120912-155025" intransitive (),
@@ -163,7 +163,8 @@ object Application extends Defaults {
       }
   }
 
-  lazy val openmoleui = OsgiProject("org.openmole.ui", singleton = true, buddyPolicy = Some("global")) settings (equinoxDependencies) dependsOn
+  lazy val openmoleui = OsgiProject("org.openmole.ui", singleton = true, buddyPolicy = Some("global")) settings
+    (equinoxDependencies, bundleType := Set("core")) dependsOn
     (base.Misc.workspace, base.Misc.replication, base.Misc.exception, base.Misc.tools, base.Misc.eventDispatcher,
       base.Misc.pluginManager, jodaTime, scalaLang, jasypt, Apache.config, objenesis, base.Core.implementation, robustIt,
       scopt, base.Core.batch, gui.Core.implementation, base.Misc.sftpserver, base.Misc.logging, jline, Apache.logging,

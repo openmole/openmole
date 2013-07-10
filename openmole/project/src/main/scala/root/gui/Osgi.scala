@@ -19,6 +19,6 @@ object Osgi extends GuiDefaults {
 
   lazy val netlogo5 = OsgiProject("netlogo5") dependsOn (netlogo, base.plugin.Task.netLogo5, netlogo5_noscala)
 
-  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := "gui-bundle")
+  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("guiPlugin"))
 
 }

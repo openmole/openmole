@@ -24,5 +24,5 @@ object Web extends Defaults {
     imports = Seq("org.h2.*", "*;resolution:=optional")) dependsOn
     (h2, jetty, slick, logback, scalatra, bonecp, scalaLang, base.Core.implementation, base.Core.serializer, xstream, jacksonJson)
 
-  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := "core")
+  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core"))
 }

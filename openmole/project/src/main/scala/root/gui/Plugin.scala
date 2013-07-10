@@ -11,7 +11,7 @@ import scala.Some
 abstract class PluginDefaults(subBuilds: Defaults*) extends GuiDefaults(subBuilds: _*) {
   override def dir = super.dir / "plugins"
 
-  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := "gui-bundle", bundleActivator <<= (name) { n ⇒ Some(n + ".Activator") })
+  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("guiPlugin"), bundleActivator <<= (name) { n ⇒ Some(n + ".Activator") })
 }
 
 object Plugin extends PluginDefaults(plugin.Task, Domain, Environment, Sampling, Builder, Miscellaneous, Hook, Method, Source) {

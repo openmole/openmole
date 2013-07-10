@@ -10,6 +10,6 @@ object Gui extends GuiDefaults(gui.Misc, gui.Core, gui.Osgi, gui.Plugin) {
 abstract class GuiDefaults(subBuilds: Defaults*) extends Defaults(subBuilds: _*) {
   def dir = file("gui")
   override val org = "org.openmole.ide"
-  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := "core")
+  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core"))
 }
 

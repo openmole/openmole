@@ -72,7 +72,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val xstream = OsgiProject("com.thoughtworks.xstream", buddyPolicy = Some("global"), privatePackages = Seq("!scala.*", "*")) settings
     (libraryDependencies ++= Seq("com.thoughtworks.xstream" % "xstream" % "1.4.4",
-      "net.sf.kxml" % "kxml2" % "2.3.0"))
+      "net.sf.kxml" % "kxml2" % "2.3.0"), bundleType += "dbserver")
 
   lazy val groovy = OsgiProject("org.codehaus.groovy", buddyPolicy = Some("global"), exports = Seq("groovy.*", "org.codehaus.*"),
     privatePackages = Seq("!scala.*,*")) settings (libraryDependencies ++= Seq("org.codehaus.groovy" % "groovy-all" % "2.1.4",
@@ -107,7 +107,7 @@ object Libraries extends Defaults(Apache) {
   lazy val jasypt = OsgiProject("org.jasypt.encryption", exports = Seq("org.jasypt.*")) settings (libraryDependencies += "org.jasypt" % "jasypt" % "1.8")
 
   lazy val db4o = OsgiProject("com.db4o", buddyPolicy = Some("global")) settings
-    (libraryDependencies += "com.db4o" % "db4o-full-java5" % "8.1-SNAPSHOT")
+    (libraryDependencies += "com.db4o" % "db4o-full-java5" % "8.1-SNAPSHOT", bundleType += "dbserver")
 
   lazy val robustIt = OsgiProject("uk.com.robustit.cloning", exports = Seq("com.rits.*")) settings
     (libraryDependencies += "uk.com.robust-it" % "cloning" % "1.7.4")
@@ -118,7 +118,7 @@ object Libraries extends Defaults(Apache) {
       Seq("ccl.northwestern.edu" % "netlogo" % "4.1.3",
         "org.picocontainer" % "picocontainer" % "2.8",
         "org.objectweb" % "asm" % "3.1",
-        "org.objectweb" % "asm-commons" % "3.1"), version := "4.1.3", scalaVersion := "2.8.0", bundleType := "plugin")
+        "org.objectweb" % "asm-commons" % "3.1"), version := "4.1.3", scalaVersion := "2.8.0", bundleType := Set("all"))
 
   lazy val netlogo5_noscala = OsgiProject("ccl.northwestern.edu.netlogo5.noscala", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("!scala.*", "*")) settings
@@ -126,7 +126,7 @@ object Libraries extends Defaults(Apache) {
       Seq("ccl.northwestern.edu" % "netlogo" % "5.0.4",
         "org.picocontainer" % "picocontainer" % "2.13.6",
         "org.objectweb" % "asm-all" % "3.3.1",
-        "org.scala-lang" % "scala-library" % "2.9.2"), version := "5.0.3", scalaVersion := "2.9.2", bundleType := "plugin")
+        "org.scala-lang" % "scala-library" % "2.9.2"), version := "5.0.3", scalaVersion := "2.9.2", bundleType := Set("all"))
 
   lazy val netlogo4 = OsgiProject("ccl.northwestern.edu.netlogo4", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("*")) settings
@@ -134,7 +134,7 @@ object Libraries extends Defaults(Apache) {
       Seq("ccl.northwestern.edu" % "netlogo" % "4.1.3",
         "org.picocontainer" % "picocontainer" % "2.8",
         "org.objectweb" % "asm" % "3.1",
-        "org.objectweb" % "asm-commons" % "3.1"), version := "4.1.3", scalaVersion := "2.8.0", bundleType := "plugin")
+        "org.objectweb" % "asm-commons" % "3.1"), version := "4.1.3", scalaVersion := "2.8.0", bundleType := Set("plugin"))
 
   lazy val netlogo5 = OsgiProject("ccl.northwestern.edu.netlogo5", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("*")) settings
@@ -142,7 +142,7 @@ object Libraries extends Defaults(Apache) {
       Seq("ccl.northwestern.edu" % "netlogo" % "5.0.4",
         "org.scala-lang" % "scala-library" % "2.9.2",
         "org.objectweb" % "asm-all" % "3.3.1",
-        "org.picocontainer" % "picocontainer" % "2.13.6"), version := "5.0.3", scalaVersion := "2.9.2", bundleType := "plugin")
+        "org.picocontainer" % "picocontainer" % "2.13.6"), version := "5.0.3", scalaVersion := "2.9.2", bundleType := Set("plugin"))
 
   lazy val guava = OsgiProject("com.google.guava",
     exports = Seq("com.google.common.*"), privatePackages = Seq("!scala.*", "*")) settings (libraryDependencies ++=
@@ -162,11 +162,11 @@ object Libraries extends Defaults(Apache) {
     (libraryDependencies ++= Seq("org.netbeans.api" % "org-netbeans-api-visual" % "RELEASE73",
       "org.netbeans.api" % "org-netbeans-modules-settings" % "RELEASE73"))
 
-  lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (libraryDependencies += "fr.iscpif" %% "mgo" % "1.62")
+  lazy val mgo = OsgiProject("fr.iscpif.mgo") settings (libraryDependencies += "fr.iscpif" %% "mgo" % "1.62", bundleType := Set("plugin"))
 
-  lazy val opencsv = OsgiProject("au.com.bytecode.opencsv") settings (libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.0", bundleType := "plugin")
+  lazy val opencsv = OsgiProject("au.com.bytecode.opencsv") settings (libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.0", bundleType := Set("plugin"))
 
   lazy val jline = OsgiProject("net.sourceforge.jline") settings (libraryDependencies += "jline" % "jline" % "0.9.94", exportPackage := Seq("jline.*"))
 
-  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := "core") //TODO make library defaults
+  override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core", "runtime")) //TODO make library defaults
 }

@@ -27,7 +27,7 @@ object Misc extends BaseDefaults {
 
   val eventDispatcher = OsgiProject("org.openmole.misc.eventdispatcher") dependsOn (provided(tools))
 
-  val replication = OsgiProject("org.openmole.misc.replication") dependsOn (db4o % "provided", xstream)
+  val replication = OsgiProject("org.openmole.misc.replication") dependsOn (db4o % "provided", xstream) settings (bundleType += "dbserver")
 
   val workspace = OsgiProject("org.openmole.misc.workspace") settings
     (libraryDependencies <+= (osgiVersion) { oV ⇒ "org.eclipse.core" % "org.eclipse.osgi" % oV % "provided" }) dependsOn
