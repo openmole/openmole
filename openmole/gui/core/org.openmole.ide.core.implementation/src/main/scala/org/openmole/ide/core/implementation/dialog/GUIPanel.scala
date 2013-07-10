@@ -104,6 +104,9 @@ class GUIPanel extends MainFrame {
           }
         }
       })
+      contents += new MenuItem(new Action("About OpenMOLE") {
+        override def apply = DialogFactory.displaySplashScreen
+      })
     }
   }
 
