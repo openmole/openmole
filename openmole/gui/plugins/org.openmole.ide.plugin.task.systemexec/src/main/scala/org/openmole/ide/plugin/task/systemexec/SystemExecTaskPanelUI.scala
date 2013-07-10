@@ -94,11 +94,11 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI) extends PluginPanel("") w
           case x: EmptyPrototypeDataUI ⇒ Nil
           case _                       ⇒ List(p)
         }
-      },
+      }.map { d ⇒ d.comboValue.get -> d.textFieldValue },
       outputMapMultiTextFieldCombo.content.map { data ⇒ data.textFieldValue -> data.comboValue.get },
       variablesMultiCombo.content.map { _.comboValue.get })
 
-  def comboContent: List[IPrototypeDataProxyUI] = Proxies.instance.classPrototypes(classOf[File])
+  def comboContent: List[IPrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxies.instance.classPrototypes(classOf[File])
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
     add(workdirTextField,
