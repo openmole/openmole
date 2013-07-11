@@ -40,7 +40,7 @@ class DiracEnvironmentPanelUI(pud: DiracEnvironmentDataUI) extends PluginPanel("
     case false ⇒ Some(s)
   }
 
-  val vo = new VO(pud.voName, pud.vomsURL, pud.bdii)
+  val vo = new VOPanel(pud.voName, pud.vomsURL, pud.bdii)
   val serviceTextField = new TextField(pud.service, 20)
   val groupTextField = new TextField(pud.group, 20)
   val setupTextField = new TextField(pud.setup, 20)

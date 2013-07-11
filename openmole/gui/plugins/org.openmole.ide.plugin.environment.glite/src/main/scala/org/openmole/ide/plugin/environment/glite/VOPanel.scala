@@ -21,8 +21,10 @@ import scala.swing._
 import scala.swing.event.SelectionChanged
 import org.openmole.plugin.environment.glite.GliteAuthentication
 import scala.swing.event.SelectionChanged
+import java.awt.datatransfer.StringSelection
+import org.openmole.ide.core.implementation.dialog.StatusBar
 
-class VO(vo: String, voms: String, bdii: String) extends Publisher {
+class VOPanel(vo: String, voms: String, bdii: String) extends Publisher {
 
   val voComboBox = new MyComboBox[String]("" :: GliteEnvironmentPanelUI.vomses.keys.toList.sorted)
   voComboBox.selection.item = vo
@@ -46,6 +48,8 @@ class VO(vo: String, voms: String, bdii: String) extends Publisher {
       new Action("") {
         def apply = {
           enrollmentURLLabel.text = GliteEnvironmentPanelUI.vomses.getOrElse(voComboBox.selection.item, "")
+          enrollmentURLLabel.toolkit.getSystemClipboard.setContents(new StringSelection(enrollmentURLLabel.text), null)
+          StatusBar().inform("Enrollment URL has benn paste into the clipboard")
         }
       },
       3,
