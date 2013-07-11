@@ -20,11 +20,13 @@ trait BuildSystemDefaults extends Build with OsgiBundler with Assembly {
 
   def subProjects: Seq[ProjectReference] = Nil
 
+  val cred = Path.userHome / ".sbt" / "openmole.credentials"
+
   override def settings = super.settings ++
     Seq(scalacOptions ++= Seq("-feature", "-language:reflectiveCalls", "-language:implicitConversions",
       "-language:existentials", "-language:postfixOps", "-Yinline-warnings"),
       osgiVersion := "3.8.2.v20130124-134944"
-    )
+    ) ++ (if (cred.exists()) Seq(credentials += Credentials(cred)) else Seq.empty)
 
   def gcTask { System.gc(); System.gc(); System.gc() }
 
