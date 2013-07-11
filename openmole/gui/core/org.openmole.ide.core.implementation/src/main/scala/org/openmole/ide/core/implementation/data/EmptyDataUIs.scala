@@ -24,7 +24,6 @@ import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.prototype._
 import org.openmole.ide.core.implementation.dataproxy.{ EnvironmentDataProxyUI, PrototypeDataProxyUI, TaskDataProxyUI }
 import org.openmole.ide.core.model.data._
-import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
 import org.openmole.ide.core.model.panel._
@@ -42,7 +41,6 @@ object EmptyDataUIs {
   val emptyEnvironmentProxy: IEnvironmentDataProxyUI = new EnvironmentDataProxyUI(new EmptyEnvironmentDataUI)
 
   class EmptyPrototypeFactoryUI extends IPrototypeFactoryUI {
-    def category = ComponentCategories.PROTOTYPE
     def buildDataUI = GenericPrototypeDataUI[Any]
 
     def buildDataUI(name: String,

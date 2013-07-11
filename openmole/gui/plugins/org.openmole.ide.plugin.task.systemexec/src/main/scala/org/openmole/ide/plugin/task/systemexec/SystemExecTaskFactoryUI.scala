@@ -17,7 +17,6 @@
 
 package org.openmole.ide.plugin.task.systemexec
 
-import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.model.builder.IPuzzleUIMap
@@ -28,8 +27,6 @@ class SystemExecTaskFactoryUI extends ITaskFactoryUI {
   override def toString = "System exec"
 
   def buildDataUI = new SystemExecTaskDataUI
-
-  def category = ComponentCategories.TASK
 
   def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
     val t = SceneFactory.as[SystemExecTask](task)

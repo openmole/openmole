@@ -19,4 +19,6 @@ package org.openmole.ide.core.model.factory
 
 trait IFactoryUI {
   def toString: String
+
+  def category: List[String]
 }

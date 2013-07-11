@@ -17,7 +17,6 @@
 
 package org.openmole.ide.plugin.method.sensitivity
 
-import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.model.builder.IPuzzleUIMap
@@ -29,7 +28,7 @@ class FirstOrderEffectTaskFactoryUI extends ITaskFactoryUI {
 
   def buildDataUI = new FirstOrderEffectTaskDataUI
 
-  def category = ComponentCategories.SALTELLI_TASK
+  override def category = List("Task", "Saltelli")
 
   def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
     val t = SceneFactory.as[FirstOrderEffectTask](task)

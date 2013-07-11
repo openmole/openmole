@@ -23,4 +23,6 @@ trait IAuthentificationFactoryUI extends IFactoryUI {
   def buildPanelUI: IAuthentificationPanelUI
 
   def coreClass: Class[_]
+
+  def category = List("Authentication")
 }

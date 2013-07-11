@@ -17,7 +17,6 @@
 
 package org.openmole.ide.plugin.task.stat
 
-import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.model.builder.IPuzzleUIMap
@@ -29,10 +28,10 @@ class MedianTaskFactoryUI extends ITaskFactoryUI {
 
   def buildDataUI = new MedianTaskDataUI
 
-  def category = ComponentCategories.STAT_TASK
-
   def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
     val t = SceneFactory.as[MedianTask](task)
     uiMap.task(t, x ⇒ new MedianTaskDataUI(t.name, t.sequences.toList.map { p ⇒ (uiMap.prototypeMap(p._1), uiMap.prototypeMap(p._2)) }))
   }
+
+  override def category = List("Task", "Stat")
 }

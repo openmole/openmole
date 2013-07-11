@@ -24,5 +24,7 @@ trait IEnvironmentFactoryUI extends IFactoryUI {
   override def toString: String = buildDataUI.coreClass.getSimpleName
 
   def buildDataUI: IEnvironmentDataUI
+
+  def category = List("Environment")
 }
 

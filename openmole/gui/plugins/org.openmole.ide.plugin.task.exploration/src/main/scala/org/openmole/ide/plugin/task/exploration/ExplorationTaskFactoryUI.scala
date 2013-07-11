@@ -17,7 +17,6 @@
 
 package org.openmole.ide.plugin.task.exploration
 
-import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.implementation.builder._
@@ -31,7 +30,7 @@ import org.openmole.ide.core.implementation.sampling.SamplingCompositionDataUI
 class ExplorationTaskFactoryUI extends ITaskFactoryUI {
   override def toString = "Exploration"
 
-  def category = ComponentCategories.TASK
+  override def category = List("Task")
 
   def buildDataUI = new ExplorationTaskDataUI
 

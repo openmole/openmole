@@ -17,7 +17,6 @@
 
 package org.openmole.ide.plugin.task.groovy
 
-import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 import org.openmole.core.model.task.ITask
 import org.openmole.plugin.task.groovy.GroovyTask
@@ -28,8 +27,6 @@ class GroovyTaskFactoryUI extends ITaskFactoryUI {
   override def toString = "Groovy"
 
   def buildDataUI = new GroovyTaskDataUI
-
-  def category = ComponentCategories.TASK
 
   def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
     val t = SceneFactory.as[GroovyTask](task)

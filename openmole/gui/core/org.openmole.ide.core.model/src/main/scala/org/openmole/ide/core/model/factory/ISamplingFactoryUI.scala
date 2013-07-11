@@ -26,4 +26,6 @@ trait ISamplingFactoryUI extends IFactoryUI {
 
   def fromCoreObject(sampling: Sampling,
                      bSC: IBuiltCompositionSampling): (ISamplingProxyUI, IBuiltCompositionSampling)
+
+  def category = List("Sampling")
 }
