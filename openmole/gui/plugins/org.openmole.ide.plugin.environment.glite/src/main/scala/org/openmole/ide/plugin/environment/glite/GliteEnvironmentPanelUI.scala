@@ -22,12 +22,9 @@ import java.util.ResourceBundle
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget._
 import swing._
-import event._
 import event.ButtonClicked
 import org.openmole.plugin.environment.glite.GliteAuthentication
 import scala.Some
-import org.openmole.ide.core.implementation.dialog.StatusBar
-import java.awt.datatransfer.StringSelection
 
 object GliteEnvironmentPanelUI {
   lazy val vomses = {
@@ -39,24 +36,8 @@ object GliteEnvironmentPanelUI {
   }.toMap
 }
 
+import Converters._
 class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IEnvironmentPanelUI {
-
-  implicit def intToString(i: Option[Int]) = i match {
-    case Some(ii: Int) ⇒ ii.toString
-    case _             ⇒ ""
-  }
-
-  implicit def stringToStringOpt(s: String) = s.isEmpty match {
-    case true  ⇒ None
-    case false ⇒ Some(s)
-  }
-
-  implicit def stringToIntOpt(s: String) = try {
-    Some(s.toInt)
-  }
-  catch {
-    case e: NumberFormatException ⇒ None
-  }
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 

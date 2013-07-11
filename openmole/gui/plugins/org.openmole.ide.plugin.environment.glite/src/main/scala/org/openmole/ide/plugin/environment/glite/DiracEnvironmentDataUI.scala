@@ -6,13 +6,14 @@
 package org.openmole.ide.plugin.environment.glite
 
 import org.openmole.ide.core.model.data.IEnvironmentDataUI
-import org.openmole.plugin.environment.glite.DIRACGliteEnvironment
+import org.openmole.plugin.environment.glite.{ GliteEnvironment, DIRACGliteEnvironment }
+import org.openmole.misc.workspace.Workspace
 
 class DiracEnvironmentDataUI(val name: String = "",
                              val voName: String = "",
                              val service: String = "",
                              val group: String = "",
-                             val bdii: String = "",
+                             val bdii: String = Workspace.preference(GliteEnvironment.DefaultBDII),
                              val vomsURL: String = "",
                              val setup: String = "",
                              val fqan: Option[String] = None,

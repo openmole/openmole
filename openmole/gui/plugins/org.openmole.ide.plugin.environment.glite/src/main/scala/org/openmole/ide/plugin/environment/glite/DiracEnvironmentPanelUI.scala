@@ -26,19 +26,10 @@ import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.URL
 import scala.swing.{ Label, TextField }
 
+import Converters._
 class DiracEnvironmentPanelUI(pud: DiracEnvironmentDataUI) extends PluginPanel("wrap 2") with IEnvironmentPanelUI {
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
-
-  implicit def intToString(i: Option[Int]) = i match {
-    case Some(ii: Int) ⇒ ii.toString
-    case _             ⇒ ""
-  }
-
-  implicit def stringToStringOpt(s: String) = s.isEmpty match {
-    case true  ⇒ None
-    case false ⇒ Some(s)
-  }
 
   val vo = new VOPanel(pud.voName, pud.vomsURL, pud.bdii)
   val serviceTextField = new TextField(pud.service, 20)
@@ -48,31 +39,37 @@ class DiracEnvironmentPanelUI(pud: DiracEnvironmentDataUI) extends PluginPanel("
   val cpuTimeTextField = new TextField(pud.cpuTime.getOrElse(""), 20)
   val openMOLEMemoryTextField = new TextField(pud.openMOLEMemory.getOrElse("").toString, 20)
 
-  val components = List(("Settings", new PluginPanel("wrap 2") {
-    contents += (new Label("VO"), "gap para")
-    contents += vo.voComboBox
-    contents += (new Label("Service"), "gap para")
-    contents += serviceTextField
-    contents += (new Label("Group"), "gap para")
-    contents += groupTextField
-    contents += (new Label("BDII"), "gap para")
-    contents += vo.bdiiTextField
-    contents += (new Label("VOMS"), "gap para")
-    contents += vo.vomsTextField
-    contents += (new Label("Setup"), "gap para")
-    contents += setupTextField
-    contents += (new Label("Fqan"), "gap para")
-    contents += fqanTextField
-    contents += (new Label("CPU Time"), "gap para")
-    contents += cpuTimeTextField
-    contents += (new Label("OpenMOLE memory"), "gap para")
-    contents += openMOLEMemoryTextField
-  }))
+  val components = List(
+    ("Settings", new PluginPanel("wrap 2") {
+      contents += (new Label("VO"), "gap para")
+      contents += vo.voComboBox
+      contents += (new Label("Service"), "gap para")
+      contents += serviceTextField
+      contents += (new Label("BDII"), "gap para")
+      contents += vo.bdiiTextField
+      contents += (new Label("VOMS"), "gap para")
+      contents += vo.vomsTextField
+      contents += vo.enrollmentURLLink
+      contents += vo.enrollmentURLLabel
+    }),
+    ("Options", new PluginPanel("wrap 2") {
+      contents += (new Label("Group"), "gap para")
+      contents += groupTextField
+      contents += (new Label("Setup"), "gap para")
+      contents += setupTextField
+      contents += (new Label("Fqan"), "gap para")
+      contents += fqanTextField
+      contents += (new Label("CPU Time"), "gap para")
+      contents += cpuTimeTextField
+      contents += (new Label("OpenMOLE memory"), "gap para")
+      contents += openMOLEMemoryTextField
+    }))
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
-  /*{
-    add(nbThreadTextField, new Help(i18n.getString("thread"), i18n.getString("threadEx")))
-  } */
+  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
+    add(vo.voComboBox, new Help(i18n.getString("vo"), i18n.getString("voEx")))
+    add(vo.vomsTextField, new Help(i18n.getString("voms"), i18n.getString("vomsEx")))
+    add(vo.bdiiTextField, new Help(i18n.getString("bdii"), i18n.getString("bdiiEx")))
+  }
 
   override def saveContent(name: String) = new DiracEnvironmentDataUI(name,
     vo.voComboBox.selection.item,
@@ -81,7 +78,7 @@ class DiracEnvironmentPanelUI(pud: DiracEnvironmentDataUI) extends PluginPanel("
     vo.bdiiTextField.text,
     vo.vomsTextField.text,
     setupTextField.text,
-    Some(fqanTextField.text),
-    Some(cpuTimeTextField.text),
-    Some(openMOLEMemoryTextField.text.toInt))
+    fqanTextField.text,
+    cpuTimeTextField.text,
+    openMOLEMemoryTextField.text)
 }
