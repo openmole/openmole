@@ -199,13 +199,14 @@ abstract class MoleScene extends GraphScene.StringGraph with IMoleScene
   }
 
   def displayPropertyPanel(compositionSamplingWidget: ISamplingCompositionWidget): IBasePanel = {
-    saveAndClose(1)
+    val i = firstFree
+    saveAndClose(i)
     val p = compositionSamplingWidget match {
-      case s: ISamplingWidget ⇒ new SamplingPanel(s, this, 1)
-      case f: IDomainWidget   ⇒ new DomainPanel(f, this, 1)
+      case s: ISamplingWidget ⇒ new SamplingPanel(s, this, i)
+      case f: IDomainWidget   ⇒ new DomainPanel(f, this, i)
     }
-    currentPanels(1).contents += p
-    locate(1)
+    currentPanels(i).contents += p
+    locate(i)
     refresh
     p
   }
