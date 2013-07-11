@@ -95,7 +95,8 @@ abstract class BasePanel(proxy: Option[IDataProxyUI],
     case e: MouseClicked ⇒
     case x: UIElementResized ⇒
       scene.propertyWidget.foreach { _.revalidate }
-      scene.refresh
+      scene.graphScene.validate
+      scene.graphScene.repaint
   }
 
   def setTab(proxy: IDataProxyUI) = tabbedPane.selection.index = proxy match {

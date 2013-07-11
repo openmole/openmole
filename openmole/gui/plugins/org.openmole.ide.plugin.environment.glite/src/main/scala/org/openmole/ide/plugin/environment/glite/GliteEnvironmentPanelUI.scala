@@ -26,6 +26,8 @@ import event._
 import event.ButtonClicked
 import org.openmole.plugin.environment.glite.GliteAuthentication
 import scala.Some
+import org.openmole.ide.core.implementation.dialog.StatusBar
+import java.awt.datatransfer.StringSelection
 
 object GliteEnvironmentPanelUI {
   lazy val vomses = {
@@ -156,6 +158,8 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
       new Action("") {
         def apply = {
           enrollmentURLLabel.text = GliteEnvironmentPanelUI.vomses.getOrElse(voComboBox.selection.item, "")
+          enrollmentURLLabel.toolkit.getSystemClipboard.setContents(new StringSelection(enrollmentURLLabel.text), null)
+          StatusBar().inform("Enrollment URL has benn paste into the clipboard")
         }
       },
       3,
