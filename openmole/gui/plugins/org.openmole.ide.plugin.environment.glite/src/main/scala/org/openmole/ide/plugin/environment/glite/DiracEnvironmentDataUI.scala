@@ -17,7 +17,7 @@ class DiracEnvironmentDataUI(val name: String = "",
                              val setup: String = "",
                              val fqan: Option[String] = None,
                              val cpuTime: Option[String] = None,
-                             val openMOLEMemory: Option[Int] = Some(512)) extends IEnvironmentDataUI {
+                             val openMOLEMemory: Option[Int] = None) extends IEnvironmentDataUI {
 
   def coreObject = new DIRACGliteEnvironment(voName, service, group, bdii, vomsURL, setup, fqan, cpuTime, openMOLEMemory)
 
