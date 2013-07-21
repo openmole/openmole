@@ -27,7 +27,7 @@ trait IPrototypeDataUI[T] extends IDataUI {
 
   override def toString = if (dim > 0) Types.pretify(name) + "[" + dim + "]" else Types.pretify(name)
 
-  def protoType: Manifest[T]
+  def `type`: Manifest[T]
 
   def typeClassString: String
 

@@ -58,7 +58,7 @@ object EmptyDataUIs {
     def typeClassString = ""
     def factory = new EmptyPrototypeFactoryUI
     def coreClass = classOf[Prototype[_]]
-    def protoType = ClassUtils.manifest(classOf[Any])
+    def `type` = ClassUtils.manifest(classOf[Any])
     def coreObject = Try(Prototype[Any](""))
     def fatImagePath = "img/empty.png"
     def buildPanelUI = new GenericPrototypePanelUI(GenericPrototypeDataUI.base.head)

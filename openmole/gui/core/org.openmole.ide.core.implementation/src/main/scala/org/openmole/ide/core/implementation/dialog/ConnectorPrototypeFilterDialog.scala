@@ -95,7 +95,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
     def availablePrototypes =
       connectorWidget.factorProxyUI match {
         case Some(f: IFactorProxyUI) ⇒ Proxies.instance.prototypes.filter {
-          p ⇒ assignable(f.dataUI.domain.dataUI.domainType.runtimeClass, p.dataUI.protoType.runtimeClass)
+          p ⇒ assignable(f.dataUI.domain.dataUI.domainType.runtimeClass, p.dataUI.`type`.runtimeClass)
         }.toList
         case _ ⇒ List()
       }

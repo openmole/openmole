@@ -187,12 +187,11 @@ object ConceptMenu {
     menuItemMapping.clear
   }
 
-  def proxyName(proxy: IDataProxyUI) = {
+  def proxyName(proxy: IDataProxyUI) =
     proxy.dataUI.name + (proxy match {
       case x: IPrototypeDataProxyUI ⇒
         if (x.dataUI.dim > 0) " [" + x.dataUI.dim.toString + "]" else ""
       case _ ⇒ ""
     })
-  }
 
 }

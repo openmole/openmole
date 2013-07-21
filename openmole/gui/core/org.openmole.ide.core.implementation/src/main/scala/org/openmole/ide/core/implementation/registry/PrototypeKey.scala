@@ -45,7 +45,7 @@ object PrototypeKey {
   def inCacheMap(k: PrototypeKey) = atomic { implicit actx ⇒ cacheMap.contains(k) }    */
 
   def apply(proxy: IPrototypeDataProxyUI): PrototypeKey =
-    PrototypeKey(proxy.dataUI.name, KeyGenerator.stripArrays(proxy.dataUI.protoType)._1.runtimeClass, proxy.dataUI.dim)
+    PrototypeKey(proxy.dataUI.name, KeyGenerator.stripArrays(proxy.dataUI.`type`)._1.runtimeClass, proxy.dataUI.dim)
 
   def apply(proto: Prototype[_]): PrototypeKey = {
     val (manifest, dim) = KeyGenerator.stripArrays(proto.`type`)

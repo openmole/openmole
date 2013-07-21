@@ -45,7 +45,7 @@ class GenericPrototypePanelUI(dataUI: GenericPrototypeDataUI[_]) extends PluginP
 
   val typeComboBox = new MyComboBox(typeValues)
   typeComboBox.selection.item = typeValues.filter { t ⇒
-    assignable(t.protoType.runtimeClass, dataUI.protoType.runtimeClass)
+    assignable(t.`type`.runtimeClass, dataUI.`type`.runtimeClass)
   }.head
 
   listenTo(`typeComboBox`)

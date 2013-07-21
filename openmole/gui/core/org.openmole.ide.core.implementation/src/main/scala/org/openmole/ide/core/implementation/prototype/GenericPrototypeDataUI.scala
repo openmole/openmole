@@ -68,20 +68,20 @@ import GenericPrototypeDataUI._
 
 class GenericPrototypeDataUI[T](val name: String,
                                 val dim: Int,
-                                val protoType: Manifest[T]) extends IPrototypeDataUI[T] {
+                                val `type`: Manifest[T]) extends IPrototypeDataUI[T] {
 
-  def newInstance(n: String, d: Int) = GenericPrototypeDataUI(n, d)(protoType)
+  def newInstance(n: String, d: Int) = GenericPrototypeDataUI(n, d)(`type`)
 
   override def toString = canonicalClassName(typeClassString)
 
-  def typeClassString = protoType.toString
+  def typeClassString = `type`.toString
 
   def coreClass = classOf[Prototype[T]]
 
-  def coreObject = Try(Prototype[T](name)(protoType).toArray(dim).asInstanceOf[Prototype[T]])
+  def coreObject = Try(Prototype[T](name)(`type`).toArray(dim).asInstanceOf[Prototype[T]])
 
   def fatImagePath = {
-    if (upperBaseType.contains(canonicalClassName(protoType.toString).toUpperCase)) "img/" + canonicalClassName(protoType.toString).toLowerCase + "_fat.png"
+    if (upperBaseType.contains(canonicalClassName(`type`.toString).toUpperCase)) "img/" + canonicalClassName(`type`.toString).toLowerCase + "_fat.png"
     else "img/extra_fat.png"
   }
 

@@ -20,6 +20,5 @@ import org.openmole.ide.core.model.data.IFactorDataUI
 
 trait IFactorProxyUI {
   def dataUI: IFactorDataUI
-
   def dataUI_=(d: IFactorDataUI)
 }

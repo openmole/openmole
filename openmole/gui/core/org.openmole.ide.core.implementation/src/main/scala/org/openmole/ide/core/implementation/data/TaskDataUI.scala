@@ -43,6 +43,6 @@ abstract class TaskDataUI extends ITaskDataUI with CoreObjectInitialisation {
         case _ ⇒ List()
       }
     }.map { p ⇒
-      Proxies.instance.prototypeOrElseCreate(PrototypeKey(p.dataUI.name, p.dataUI.protoType.runtimeClass, p.dataUI.dim + 1))
+      Proxies.instance.prototypeOrElseCreate(PrototypeKey(p.dataUI.name, p.dataUI.`type`.runtimeClass, p.dataUI.dim + 1))
     }
 }
