@@ -17,7 +17,6 @@
 
 package org.openmole.ide.plugin.domain.collection
 
-import org.openmole.core.model.domain.Domain
 import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.misc.exception.UserBadDataError
@@ -25,6 +24,7 @@ import org.openmole.plugin.domain.collection.DynamicListDomain
 import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.ide.misc.tools.util.Types
 import org.openmole.misc.tools.io.FromString
+import util.Try
 
 object DynamicListDomainDataUI {
 
@@ -41,8 +41,8 @@ object DynamicListDomainDataUI {
   }
 }
 
-case class DynamicListDomainDataUI[S](val values: List[String])(implicit val domainType: Manifest[S],
-                                                                fs: FromString[S])
+case class DynamicListDomainDataUI[S](values: List[String])(implicit val domainType: Manifest[S],
+                                                            fs: FromString[S])
     extends IDomainDataUI with IFinite {
   val name = "Value list"
 
@@ -50,7 +50,7 @@ case class DynamicListDomainDataUI[S](val values: List[String])(implicit val dom
 
   override def availableTypes = super.availableTypes :+ STRING
 
-  override def coreObject: Domain[S] = new DynamicListDomain(values.toSeq: _*)
+  override def coreObject = Try(DynamicListDomain(values.toSeq: _*))
 
   def buildPanelUI = new DynamicListDomainPanelUI(this)
 

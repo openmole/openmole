@@ -41,8 +41,7 @@ object ExecutionManager {
 class ExecutionManager(manager: IMoleUI,
                        executionContainer: ExecutionMoleSceneContainer,
                        val mole: IMole,
-                       val capsuleMapping: Map[ICapsuleUI, ICapsule],
-                       val prototypeMapping: Map[IPrototypeDataProxyUI, Prototype[_]]) extends PluginPanel("", "[grow,fill]", "")
+                       val capsuleMapping: Map[ICapsuleUI, ICapsule]) extends PluginPanel("", "[grow,fill]", "")
     with IExecutionManager
     with Publisher {
   executionManager ⇒
@@ -153,8 +152,7 @@ class ExecutionManager(manager: IMoleUI,
 
   def buildMoleExecution = MoleFactory.buildMoleExecution(mole,
     manager,
-    capsuleMapping,
-    prototypeMapping)
+    capsuleMapping)
 
   def incrementEnvironmentState(environment: Environment,
                                 state: ExecutionState.ExecutionState) = synchronized {

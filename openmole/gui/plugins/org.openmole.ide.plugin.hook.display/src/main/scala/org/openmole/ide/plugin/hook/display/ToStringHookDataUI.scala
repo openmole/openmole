@@ -32,6 +32,9 @@ class ToStringHookDataUI(val name: String = "",
   override def cloneWithoutPrototype(proxy: IPrototypeDataProxyUI) =
     new ToStringHookDataUI(name, toBeHooked.filterNot { _ == proxy })
 
-  def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]) =
-    ToStringHook(toBeHooked.map { protoMapping }.toSeq: _*)
+  def coreObject = util.Try {
+    val h = ToStringHook(toBeHooked.map { _.dataUI.coreObject.get }.toSeq: _*)
+    initialise(h)
+    h.toHook
+  }
 }

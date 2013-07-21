@@ -20,7 +20,7 @@ import org.openmole.ide.core.model.data.IGroupingDataUI
 import org.openmole.plugin.grouping.batch.{ ByGrouping, InShuffledGrouping }
 
 class NumberOfMoleJobsGroupingDataUI(val number: Int = 0) extends IGroupingDataUI {
-  def coreObject = new ByGrouping(number)
+  def coreObject = util.Try { ByGrouping(number) }
 
   def coreClass = classOf[ByGrouping]
 

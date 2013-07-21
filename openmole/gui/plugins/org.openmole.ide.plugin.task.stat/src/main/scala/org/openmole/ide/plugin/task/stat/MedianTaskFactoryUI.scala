@@ -30,7 +30,7 @@ class MedianTaskFactoryUI extends ITaskFactoryUI {
 
   def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
     val t = SceneFactory.as[MedianTask](task)
-    uiMap.task(t, x ⇒ new MedianTaskDataUI(t.name, t.sequences.toList.map { p ⇒ (uiMap.prototypeMap(p._1), uiMap.prototypeMap(p._2)) }))
+    uiMap.task(t, x ⇒ new MedianTaskDataUI(t.name, t.sequences.toList.map { p ⇒ (uiMap.prototypeUI(p._1).get, uiMap.prototypeUI(p._2).get) }))
   }
 
   override def category = List("Task", "Stat")

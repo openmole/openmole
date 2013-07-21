@@ -33,29 +33,29 @@ class MoleTaskDataUI(val name: String = "",
                      val mole: Option[ID.Type] = None,
                      val finalCapsule: Option[ITaskDataProxyUI] = None) extends TaskDataUI {
 
-  def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) = mole match {
-    case Some(x: ID.Type) ⇒ manager(x) match {
-      case Some(y: IMoleUI) ⇒
-        finalCapsule match {
-          case Some(z: ITaskDataProxyUI) ⇒
-            MoleTaskDataUI.capsule(z, y) match {
-              case Some(w: ICapsuleDataUI) ⇒
-                MoleFactory.buildMole(y) match {
-                  case Success((m, capsMap, protoMap, errs)) ⇒
-                    val builder = MoleTask(name, m, capsMap.find { case (k, _) ⇒ k.dataUI == w }.get._2, List.empty)(plugins)
-                    builder addInput inputs
-                    builder addOutput outputs
-                    builder addParameter parameters
-                    builder.toTask
-                  case Failure(l) ⇒ throw new UserBadDataError(l)
-                }
-              case _ ⇒ throw new UserBadDataError("No final Capsule is set in the " + name + "Task")
-            }
-          case _ ⇒ throw new UserBadDataError("A capsule (in the " + name + "Task) without taskMap can not be run")
-        }
+  def coreObject(plugins: PluginSet) = util.Try {
+    mole match {
+      case Some(x: ID.Type) ⇒ manager(x) match {
+        case Some(y: IMoleUI) ⇒
+          finalCapsule match {
+            case Some(z: ITaskDataProxyUI) ⇒
+              MoleTaskDataUI.capsule(z, y) match {
+                case Some(w: ICapsuleDataUI) ⇒
+                  MoleFactory.buildMole(y) match {
+                    case Success((m, capsMap, errs)) ⇒
+                      val builder = MoleTask(name, m, capsMap.find { case (k, _) ⇒ k.dataUI == w }.get._2, List.empty)(plugins)
+                      initialise(builder)
+                      builder.toTask
+                    case Failure(l) ⇒ throw new UserBadDataError(l)
+                  }
+                case _ ⇒ throw new UserBadDataError("No final Capsule is set in the " + name + "Task")
+              }
+            case _ ⇒ throw new UserBadDataError("A capsule (in the " + name + "Task) without taskMap can not be run")
+          }
+        case _ ⇒ throw new UserBadDataError("No Mole is set in the " + name + "Task")
+      }
       case _ ⇒ throw new UserBadDataError("No Mole is set in the " + name + "Task")
     }
-    case _ ⇒ throw new UserBadDataError("No Mole is set in the " + name + "Task")
   }
 
   def coreClass = classOf[MoleTask]

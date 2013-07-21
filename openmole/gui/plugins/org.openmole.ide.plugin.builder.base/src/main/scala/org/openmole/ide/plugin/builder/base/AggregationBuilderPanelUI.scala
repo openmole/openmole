@@ -36,6 +36,6 @@ class AggregationBuilderPanelUI(puzzles: List[Puzzle],
   override def build(uiMap: IPuzzleUIMap) = {
     val samplingUI = Proxies.instance.getOrGenerateSamplingComposition(samplingComboBox.selection.item)
     val sampling = samplingUI.dataUI.coreObject
-    (aggregation(nameTextField.text, puzzleComboBox.selection.item, sampling, aggregationPuzzleComboBox.selection.item)(manager.pluginSet), uiMap += (sampling, samplingUI))
+    (aggregation(nameTextField.text, puzzleComboBox.selection.item, sampling.get, aggregationPuzzleComboBox.selection.item)(manager.pluginSet), uiMap += (sampling.get, samplingUI))
   }
 }

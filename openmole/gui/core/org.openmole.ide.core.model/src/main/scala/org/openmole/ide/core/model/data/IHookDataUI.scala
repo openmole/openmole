@@ -20,8 +20,8 @@ package org.openmole.ide.core.model.data
 import org.openmole.core.model.mole._
 import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ITaskDataProxyUI }
 import org.openmole.ide.core.model.panel.IHookPanelUI
-import org.openmole.core.model.data.Prototype
 import org.openmole.ide.misc.tools.util.ID
+import scala.util.Try
 
 trait IHookDataUI extends IDataUI with InputPrototype with OutputPrototype with ImplicitPrototype {
   def id: ID.Type
@@ -30,9 +30,9 @@ trait IHookDataUI extends IDataUI with InputPrototype with OutputPrototype with 
 
   def coreClass: Class[_ <: IHook]
 
-  def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]): IHook
+  def coreObject: Try[IHook]
 
-  def executionCoreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]): IHook = coreObject(protoMapping)
+  def executionCoreObject = coreObject
 
   def buildPanelUI: IHookPanelUI
 

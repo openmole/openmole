@@ -39,8 +39,8 @@ class NetLogo4TaskFactoryUI extends ITaskFactoryUI {
       embededWS,
       t.scriptPath,
       t.launchingCommands.mkString("\n"),
-      t.netLogoInputs.toList.map { p ⇒ (uiMap.prototypeMap(p._1), p._2) },
-      t.netLogoOutputs.toList.map { p ⇒ (p._1, uiMap.prototypeMap(p._2)) },
+      t.netLogoInputs.toList.map { p ⇒ (uiMap.prototypeUI(p._1).get, p._2) },
+      t.netLogoOutputs.toList.map { p ⇒ (p._1, uiMap.prototypeUI(p._2).get) },
       t.resources.map { _._2 }.toList))
   }
 

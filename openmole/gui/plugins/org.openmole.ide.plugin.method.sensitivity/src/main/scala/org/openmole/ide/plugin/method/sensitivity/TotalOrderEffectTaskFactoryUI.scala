@@ -32,8 +32,8 @@ class TotalOrderEffectTaskFactoryUI extends ITaskFactoryUI {
 
   def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
     val t = SceneFactory.as[TotalOrderEffectTask](task)
-    uiMap.task(t, x ⇒ new FirstOrderEffectTaskDataUI(t.name,
-      t.modelInputs.map { p ⇒ uiMap.prototype(p)(p.`type`) },
-      t.modelOutputs.map { p ⇒ uiMap.prototype(p)(p.`type`) }))
+    uiMap.task(t, x ⇒ new TotalOrderEffectTaskDataUI(t.name,
+      t.modelInputs.map { p ⇒ uiMap.prototypeUI(p).get },
+      t.modelOutputs.map { p ⇒ uiMap.prototypeUI(p).get }))
   }
 }

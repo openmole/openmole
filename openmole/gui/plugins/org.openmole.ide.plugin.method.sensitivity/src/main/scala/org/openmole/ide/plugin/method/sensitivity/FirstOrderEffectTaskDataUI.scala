@@ -13,16 +13,16 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.method.sensitivity.FirstOrderEffectTask
 
 class FirstOrderEffectTaskDataUI(val name: String = "",
-                                 val modelInputs: Iterable[IPrototypeDataProxyUI] = List.empty,
-                                 val modelOutputs: Iterable[IPrototypeDataProxyUI] = List.empty) extends TaskDataUI {
+                                 val modelInputs: Traversable[IPrototypeDataProxyUI] = List.empty,
+                                 val modelOutputs: Traversable[IPrototypeDataProxyUI] = List.empty) extends TaskDataUI {
 
-  def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) = {
-    val builder = FirstOrderEffectTask(name,
-      modelInputs.map { _.dataUI.coreObject.asInstanceOf[Prototype[Double]] },
-      modelOutputs.map { _.dataUI.coreObject.asInstanceOf[Prototype[Double]] })(plugins)
-    builder addOutput inputs
-    builder addOutput outputs
-    builder addParameter parameters
+  def coreObject(plugins: PluginSet) = util.Try {
+    val builder =
+      FirstOrderEffectTask(
+        name,
+        modelInputs.map { _.dataUI.coreObject.get.asInstanceOf[Prototype[Double]] }.toIterable,
+        modelOutputs.map { _.dataUI.coreObject.get.asInstanceOf[Prototype[Double]] }.toIterable)(plugins)
+    initialise(builder)
     builder.toTask
   }
 

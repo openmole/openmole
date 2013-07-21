@@ -96,7 +96,7 @@ class CapsuleMenuProvider(scene: IBuildMoleScene, capsule: ICapsuleUI) extends G
     }.peer, 0)
     items += (itIS, itRIS, itR, itStart, menuTask.peer)
 
-    val menuBuilder = new Menu("Builder")
+    /* val menuBuilder = new Menu("Builder")
     KeyRegistry.builders.values.toList.sortBy {
       _.name
     }.foreach {
@@ -108,7 +108,7 @@ class CapsuleMenuProvider(scene: IBuildMoleScene, capsule: ICapsuleUI) extends G
         }
     }
 
-    items += menuBuilder.peer
+    items += menuBuilder.peer */
   }
 
   override def getPopupMenu(widget: Widget, point: Point) = {

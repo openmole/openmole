@@ -22,6 +22,12 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.job._
 import org.openmole.core.model.mole._
 
+object ByGrouping {
+
+  def apply(numberOfMoleJobs: Int) = new ByGrouping(numberOfMoleJobs)
+
+}
+
 /**
  * Group mole jobs by group of numberOfMoleJobs.
  *

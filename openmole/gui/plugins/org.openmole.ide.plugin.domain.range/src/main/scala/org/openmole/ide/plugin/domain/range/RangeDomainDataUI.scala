@@ -49,24 +49,25 @@ object RangeDomainDataUI {
 }
 
 case class RangeDomainDataUI[S](
-  val min: String = "0",
-  val max: String = "",
-  val step: Option[String] = None)(
+  min: String = "0",
+  max: String = "",
+  step: Option[String] = None)(
     implicit val domainType: Manifest[S],
     fs: FromString[S],
     integral: Integral[S])
     extends GenericRangeDomainDataUI {
   val name = "Range"
 
-  def coreObject: Domain[S] =
+  def coreObject = util.Try {
     if (min.isEmpty || max.isEmpty)
       throw new UserBadDataError("Min and Max values are required for defining a Range Domain")
     else step match {
       case Some(s: String) ⇒
         if (s.isEmpty) new Bounded[S](min, max)
-        else new Range[S](min, max, s)
-      case _ ⇒ new Bounded[S](min, max)
+        else Range[S](min, max, s)
+      case _ ⇒ Bounded[S](min, max)
     }
+  }
 
   def buildPanelUI = new RangeDomainPanelUI(this)
 

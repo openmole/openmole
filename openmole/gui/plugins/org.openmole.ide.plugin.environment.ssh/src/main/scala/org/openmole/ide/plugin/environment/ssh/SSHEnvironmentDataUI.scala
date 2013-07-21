@@ -18,13 +18,15 @@ class SSHEnvironmentDataUI(val name: String = "",
                            val openMOLEMemory: Option[Int] = Some(BatchEnvironment.defaultRuntimeMemory),
                            var threads: Option[Int] = None) extends IEnvironmentDataUI {
 
-  def coreObject = SSHEnvironment(login,
-    host,
-    nbSlots,
-    port,
-    dir,
-    openMOLEMemory,
-    threads)
+  def coreObject = util.Try {
+    SSHEnvironment(login,
+      host,
+      nbSlots,
+      port,
+      dir,
+      openMOLEMemory,
+      threads)
+  }
 
   def coreClass = classOf[SSHEnvironment]
 

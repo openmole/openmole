@@ -21,12 +21,13 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import org.openmole.core.model.mole.ISource
 import org.openmole.ide.misc.tools.util.ID
+import scala.util.{ Success, Try }
 
-abstract class SourceDataUI extends ISourceDataUI with ID {
+abstract class SourceDataUI extends ISourceDataUI with CoreObjectInitialisation with ID {
 
   def implicitPrototypes: (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI]) =
-    MoleFactory.buildSource(this) match {
-      case (x: ISource) ⇒ ToolDataUI.implicitPrototypes(y ⇒ x.inputs.toList.map { _.prototype }, inputs, y ⇒ x.outputs.toList.map { _.prototype }, outputs)
-      case _            ⇒ (List(), List())
+    coreObject match {
+      case Success(x) ⇒ ToolDataUI.implicitPrototypes(y ⇒ x.inputs.toList.map { _.prototype }, inputs, y ⇒ x.outputs.toList.map { _.prototype }, outputs)
+      case _          ⇒ (List(), List())
     }
 }

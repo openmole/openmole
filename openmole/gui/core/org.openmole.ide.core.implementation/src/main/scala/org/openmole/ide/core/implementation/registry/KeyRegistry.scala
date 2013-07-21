@@ -78,7 +78,7 @@ object KeyRegistry {
   private def intersection(c: Class[_], lClass: List[Class[_]]) =
     lClass.intersect(c.listSuperClassesAndInterfaces.tail)
 
-  def protoProxyKeyMap = Proxies.instance.prototypes.map { p ⇒ KeyPrototypeGenerator(p) -> p }.toMap
+  def protoProxyKeyMap = Proxies.instance.prototypes.map { p ⇒ PrototypeKey(p) -> p }.toMap
 
   def samplingProxyKeyMap = Proxies.instance.samplings.map { s ⇒ KeyGenerator(s.getClass) -> s }.toMap
 

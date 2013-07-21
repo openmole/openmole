@@ -24,17 +24,19 @@ class PBSEnvironmentDataUI(val name: String = "",
     extends IEnvironmentDataUI {
   ui ⇒
 
-  def coreObject = PBSEnvironment(login,
-    host,
-    port,
-    queue,
-    openMOLEMemory,
-    wallTime,
-    memory,
-    path,
-    threads,
-    nodes,
-    coreByNode)
+  def coreObject = util.Try {
+    PBSEnvironment(login,
+      host,
+      port,
+      queue,
+      openMOLEMemory,
+      wallTime,
+      memory,
+      path,
+      threads,
+      nodes,
+      coreByNode)
+  }
 
   def coreClass = classOf[PBSEnvironment]
 

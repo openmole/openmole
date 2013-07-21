@@ -30,8 +30,9 @@ class TakeSamplingDataUI(val size: String = "1") extends ISamplingDataUI {
 
   val name = "Take"
 
-  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) =
+  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
     new TakeSampling(SamplingUtils.toUnorderedFactorsAndSamplings(factorOrSampling).head, size.toInt)
+  }
 
   def buildPanelUI = new TakeSamplingPanelUI(this)
 

@@ -43,7 +43,7 @@ object ConceptMenu {
 
   def createAndDisplayPrototype = display(Builder.prototypeUI)
 
-  val menuItemMapping = new HashMap[IDataProxyUI, MenuItem]
+  val menuItemMapping = new HashMap[IDataProxyUI, MenuItem]()
   val mapping = new HashMap[List[String], Menu]
 
   def menu(s: String): Menu = createRootMenu(s)

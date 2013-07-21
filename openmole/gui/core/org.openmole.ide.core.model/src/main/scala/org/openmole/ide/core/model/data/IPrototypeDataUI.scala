@@ -17,11 +17,10 @@
 
 package org.openmole.ide.core.model.data
 
-import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
-import org.openmole.ide.core.model.commons.Constants._
 import org.openmole.ide.core.model.panel.IPrototypePanelUI
 import org.openmole.core.model.data._
 import org.openmole.ide.misc.tools.util.Types
+import scala.util.Try
 
 trait IPrototypeDataUI[T] extends IDataUI {
   def name: String
@@ -32,7 +31,7 @@ trait IPrototypeDataUI[T] extends IDataUI {
 
   def typeClassString: String
 
-  def coreObject: Prototype[T]
+  def coreObject: Try[Prototype[T]]
 
   def buildPanelUI: IPrototypePanelUI
 

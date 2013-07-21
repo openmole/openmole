@@ -22,13 +22,14 @@ import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
 import org.openmole.core.model.sampling.Sampling
 import org.openmole.ide.core.model.sampling._
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import scala.util.Try
 
 trait ISamplingCompositionDataUI extends IDataUI {
   def name: String
 
   override def toString: String = name
 
-  def coreObject: Sampling
+  def coreObject: Try[Sampling]
 
   def imagePath: String
 

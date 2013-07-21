@@ -18,10 +18,11 @@ package org.openmole.ide.core.implementation.builder
 
 import org.openmole.ide.core.model.sampling._
 
-case class BuiltCompositionSampling(val builtSamplings: Seq[ISamplingProxyUI] = Seq(),
-                                    val builtDomains: Seq[IDomainProxyUI] = Seq(),
-                                    val builtFactors: Seq[IFactorProxyUI] = Seq(),
-                                    val builtConnections: Seq[(ISamplingOrDomainProxyUI, ISamplingOrDomainProxyUI)] = Seq()) extends IBuiltCompositionSampling {
+case class BuiltCompositionSampling(
+    builtSamplings: Seq[ISamplingProxyUI] = Seq(),
+    builtDomains: Seq[IDomainProxyUI] = Seq(),
+    builtFactors: Seq[IFactorProxyUI] = Seq(),
+    builtConnections: Seq[(ISamplingOrDomainProxyUI, ISamplingOrDomainProxyUI)] = Seq()) extends IBuiltCompositionSampling {
 
   def copyWithSamplings(sp: ISamplingProxyUI) = copy(builtSamplings = builtSamplings :+ sp)
 

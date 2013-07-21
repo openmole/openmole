@@ -41,7 +41,7 @@ trait IMoleUI extends IDataUI with ID {
 
   def name_=(n: String)
 
-  def cacheMole: Option[(IMole, Map[ICapsuleUI, ICapsule], Map[IPrototypeDataProxyUI, Prototype[_]])]
+  def cacheMole: Option[(IMole, Map[ICapsuleUI, ICapsule])]
 
   def invalidateCache: Unit
 

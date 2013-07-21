@@ -15,8 +15,7 @@ import org.openmole.plugin.task.stat.AverageTask
 class AverageTaskDataUI(val name: String = "",
                         val sequence: List[(IPrototypeDataProxyUI, IPrototypeDataProxyUI)] = List.empty) extends StatDataUI {
 
-  sequence.foreach(s ⇒ println("sequence in constr : " + s._1 + " " + s._2))
-  def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) = {
+  def coreObject(plugins: PluginSet) = util.Try {
     val gtBuilder = AverageTask(name)(plugins)
 
     sequence foreach { s ⇒
@@ -24,9 +23,7 @@ class AverageTaskDataUI(val name: String = "",
         s._2.dataUI.coreObject.asInstanceOf[Prototype[Double]])
     }
 
-    gtBuilder addInput inputs
-    gtBuilder addOutput outputs
-    gtBuilder addParameter parameters
+    initialise(gtBuilder)
     gtBuilder.toTask
   }
 

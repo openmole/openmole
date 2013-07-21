@@ -53,7 +53,7 @@ object Builder {
 
   def samplingCompositionUI(g: Boolean) = new SamplingCompositionDataProxyUI(generated = g)
 
-  def puzzles(listsPuzzleCompliant: List[List[ICapsuleUI]],
+  /* def puzzles(listsPuzzleCompliant: List[List[ICapsuleUI]],
               manager: IMoleUI,
               uiMap: IPuzzleUIMap = new PuzzleUIMap): (List[Puzzle], IPuzzleUIMap) = {
 
@@ -75,12 +75,11 @@ object Builder {
   def puzzle(capsulesUI: List[ICapsuleUI],
              first: ICapsuleUI,
              lasts: Iterable[ICapsuleUI],
-             uiMap: IPuzzleUIMap = new PuzzleUIMap) = {
+             uiMap: IPuzzleUIMap = PuzzleUIMap()) = {
     val capsuleMap = capsulesUI.map {
-      c ⇒ c -> c.dataUI.coreObject(c.scene.dataUI)
+      c ⇒ c -> c.dataUI.coreObject(c.scene.dataUI).get
     }.toMap
-    val prototypeMap = MoleFactory.prototypeMapping
-    val (transitions, dataChannels, islotMap) = MoleFactory.buildConnectors(capsuleMap, prototypeMap)
+    val (transitions, dataChannels, islotMap) = MoleFactory.buildConnectors(capsuleMap)
     islotMap += first.islots.head -> Slot(capsuleMap(first))
     (new Puzzle(islotMap(first.islots.head),
       lasts.map {
@@ -91,18 +90,17 @@ object Builder {
       List.empty,
       List.empty,
       Map.empty,
-      Map.empty), new PuzzleUIMap(capsuleMap.filter { _._1.dataUI.task.isDefined }.map {
-      case (ui, c) ⇒ c.task -> ui.dataUI.task.get
-    } ++ uiMap.taskMap,
-      prototypeMap.map {
-        case (k, v) ⇒ v.asInstanceOf[Prototype[Any]] -> k
-      } ++ uiMap.prototypeMap,
-      MoleFactory.samplingMapping.map {
-        case (k, v) ⇒ v -> k
-      } ++ uiMap.samplingMap,
-      MoleFactory.moleMapping.map {
-        case (k, v) ⇒ v -> k
-      } ++ uiMap.moleMap))
+      Map.empty),
+      PuzzleUIMap(
+        capsuleMap.filter { _._1.dataUI.task.isDefined }.map {
+          case (ui, c) ⇒ c.task -> ui.dataUI.task.get
+        } ++ uiMap.taskMap,
+        MoleFactory.samplingMapping.map {
+          case (k, v) ⇒ v -> k
+        } ++ uiMap.samplingMap,
+        MoleFactory.moleMapping.map {
+          case (k, v) ⇒ v -> k
+        } ++ uiMap.moleMap))
   }
 
   def fromPuzzle(p: Puzzle,
@@ -142,16 +140,14 @@ object Builder {
           Some(t.asInstanceOf[Condition].code),
           t.filter match {
             case b: Block[String] ⇒
-              b.filtered.toList.map {
-                p ⇒ uiMap.prototype(p)
-              }
+              capsuleMap(t.start).capsule.outputs.filter(o ⇒ b.filtered.contains(o.dataUI.name))
             case _ ⇒ throw new InternalProcessingError("Filter not supported yet")
           })
         scene.add(transition)
     }
     CheckData.fullCheck(scene)
     scene.refresh
-  }
+  }    */
 
   def toTaskUI(t: ITask, uiMap: IPuzzleUIMap) =
     KeyRegistry.task(t.getClass).buildDataProxyUI(t, uiMap)
@@ -215,7 +211,7 @@ object Builder {
     buildSamplingUI0(connectedSamplings, bcs)
   }
 
-  def apply(scene: IBuildMoleScene,
+  /* def apply(scene: IBuildMoleScene,
             b: IBuilderFactoryUI,
             sel: List[ICapsuleUI] = List()) = {
     try {
@@ -251,6 +247,6 @@ object Builder {
     catch {
       case e: UserBadDataError ⇒ StatusBar().warn(e.getMessage)
     }
-  }
+  } */
 
 }

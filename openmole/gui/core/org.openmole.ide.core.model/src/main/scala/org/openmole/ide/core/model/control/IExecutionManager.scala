@@ -17,19 +17,14 @@
 
 package org.openmole.ide.core.model.control
 
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
 import java.io.PrintStream
 import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.data.IHookDataUI
 
 trait IExecutionManager {
   def mole: IMole
 
   def moleExecution: Option[IMoleExecution]
-
-  def prototypeMapping: Map[IPrototypeDataProxyUI, Prototype[_]]
 
   def capsuleMapping: Map[ICapsuleUI, ICapsule]
 

@@ -15,15 +15,13 @@ import org.openmole.plugin.task.stat.SumTask
 class SumTaskDataUI(val name: String = "",
                     val sequence: List[(IPrototypeDataProxyUI, IPrototypeDataProxyUI)] = List.empty) extends StatDataUI {
 
-  def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) = {
+  def coreObject(plugins: PluginSet) = util.Try {
     val gtBuilder = SumTask(name)(plugins)
     sequence foreach { s ⇒
       gtBuilder addSequence (s._1.dataUI.coreObject.asInstanceOf[Prototype[Array[Double]]],
         s._2.dataUI.coreObject.asInstanceOf[Prototype[Double]])
     }
-    gtBuilder addInput inputs
-    gtBuilder addOutput outputs
-    gtBuilder addParameter parameters
+    initialise(gtBuilder)
     gtBuilder.toTask
   }
 

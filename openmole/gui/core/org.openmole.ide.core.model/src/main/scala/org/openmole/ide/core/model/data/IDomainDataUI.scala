@@ -21,6 +21,7 @@ import org.openmole.core.model.domain._
 import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.ide.misc.tools.util.Types
+import scala.util.Try
 
 object IDomainDataUI {
   implicit val ordering = Ordering.by((_: IDomainDataUI).name)
@@ -30,7 +31,7 @@ trait IDomainDataUI extends IDataUI {
 
   def domainType: Manifest[_]
 
-  def coreObject: Domain[_]
+  def coreObject: Try[Domain[_]]
 
   def buildPanelUI: IDomainPanelUI
 

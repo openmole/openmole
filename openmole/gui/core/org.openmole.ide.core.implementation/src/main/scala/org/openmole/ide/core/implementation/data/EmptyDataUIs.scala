@@ -31,6 +31,8 @@ import org.openmole.core.implementation.task._
 import org.openmole.misc.tools.obj.ClassUtils
 import org.openmole.core.model.execution.Environment
 import org.openmole.core.model.job.IJob
+import scala.util.Try
+import org.openmole.core.implementation.execution.local.LocalEnvironment
 
 object EmptyDataUIs {
 
@@ -38,7 +40,7 @@ object EmptyDataUIs {
 
   val emptyTaskProxy: ITaskDataProxyUI = new TaskDataProxyUI(new EmptyTaskDataUI)
 
-  val emptyEnvironmentProxy: IEnvironmentDataProxyUI = new EnvironmentDataProxyUI(new EmptyEnvironmentDataUI)
+  val localEnvironmentProxy: IEnvironmentDataProxyUI = new EnvironmentDataProxyUI(LocalEnvironmentDataUI)
 
   class EmptyPrototypeFactoryUI extends IPrototypeFactoryUI {
     def buildDataUI = GenericPrototypeDataUI[Any]
@@ -57,7 +59,7 @@ object EmptyDataUIs {
     def factory = new EmptyPrototypeFactoryUI
     def coreClass = classOf[Prototype[_]]
     def protoType = ClassUtils.manifest(classOf[Any])
-    def coreObject = Prototype[Any]("")
+    def coreObject = Try(Prototype[Any](""))
     def fatImagePath = "img/empty.png"
     def buildPanelUI = new GenericPrototypePanelUI(GenericPrototypeDataUI.base.head)
   }
@@ -74,11 +76,9 @@ object EmptyDataUIs {
     def updateImplicts(ipList: List[IPrototypeDataProxyUI],
                        opList: List[IPrototypeDataProxyUI]) = {}
 
-    def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) = {
+    def coreObject(plugins: PluginSet) = Try {
       val taskBuilder = EmptyTask(name)(plugins)
-      taskBuilder addInput inputs
-      taskBuilder addOutput outputs
-      taskBuilder addParameter parameters
+      initialise(taskBuilder)
       taskBuilder.toTask
     }
 
@@ -91,7 +91,7 @@ object EmptyDataUIs {
     def saveContent(name: String) = new EmptyTaskDataUI
   }
 
-  class EmptyEnvironmentDataUI extends IEnvironmentDataUI { dataUI ⇒
+  object LocalEnvironmentDataUI extends IEnvironmentDataUI { dataUI ⇒
     def imagePath = ""
     def buildPanelUI = new IEnvironmentPanelUI {
       val components = List()
@@ -99,8 +99,8 @@ object EmptyDataUIs {
       def peer = new PluginPanel("").peer
     }
     def fatImagePath = ""
-    def name = ""
-    def coreObject = new Environment { def submit(job: IJob) {} }
+    def name = "Local"
+    def coreObject = Try(LocalEnvironment.default)
     def coreClass = classOf[Environment]
   }
 }

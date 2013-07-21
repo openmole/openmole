@@ -24,6 +24,7 @@ import org.openmole.ide.core.model.commons.CapsuleType
 import org.openmole.ide.core.model.panel.ICapsulePanelUI
 import org.openmole.ide.core.model.workflow.IMoleUI
 import org.openmole.ide.misc.tools.util.ID
+import scala.util.Try
 
 trait ICapsuleDataUI extends IDataUI {
 
@@ -45,7 +46,7 @@ trait ICapsuleDataUI extends IDataUI {
   def sourcesOptions: Seq[Option[ISourceDataProxyUI]]
   def sources = sourcesOptions.flatten
 
-  def coreObject(moleDataUI: IMoleUI): ICapsule
+  def coreObject(moleDataUI: IMoleUI): (ICapsule, Option[Throwable])
 
   def capsuleType: CapsuleType
 

@@ -17,8 +17,7 @@
 
 package org.openmole.ide.plugin.method.sensitivity
 
-class TotalOrderEffectTaskPanelUI(pud: TotalOrderEffectTaskDataUI) extends BasicOrderEffectTaskPanelUI(pud.modelInputs,
-  pud.modelOutputs) {
+class TotalOrderEffectTaskPanelUI(pud: TotalOrderEffectTaskDataUI) extends BasicOrderEffectTaskPanelUI(pud.modelInputs.toIterable, pud.modelOutputs.toIterable) {
 
   def saveContent(name: String) = new TotalOrderEffectTaskDataUI(name,
     if (inputPrototypeCombo.isDefined)

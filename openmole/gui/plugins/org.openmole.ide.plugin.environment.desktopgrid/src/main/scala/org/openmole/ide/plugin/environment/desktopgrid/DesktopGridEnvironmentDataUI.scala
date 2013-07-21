@@ -14,7 +14,7 @@ class DesktopGridEnvironmentDataUI(val name: String = "",
                                    val pass: String = "",
                                    val port: Int = 0) extends IEnvironmentDataUI {
 
-  override def coreObject = {
+  override def coreObject = util.Try {
     if (login != "" && pass != "") DesktopGridEnvironment(port, login, pass)
     else throw new UserBadDataError("The login and the password are required fore the environment " + name)
   }

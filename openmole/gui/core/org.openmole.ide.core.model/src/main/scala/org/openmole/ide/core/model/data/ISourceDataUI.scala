@@ -18,8 +18,8 @@ package org.openmole.ide.core.model.data
 
 import org.openmole.core.model.mole.ISource
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.model.panel.ISourcePanelUI
+import scala.util.Try
 
 trait ISourceDataUI extends IDataUI with InputPrototype with OutputPrototype with ImplicitPrototype {
 
@@ -27,7 +27,9 @@ trait ISourceDataUI extends IDataUI with InputPrototype with OutputPrototype wit
 
   def coreClass: Class[_ <: ISource]
 
-  def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]): ISource
+  def coreObject: Try[ISource]
+
+  def executionCoreObject = coreObject
 
   def buildPanelUI: ISourcePanelUI
 

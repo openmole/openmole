@@ -42,7 +42,7 @@ class MoleUI(var name: String) extends IMoleUI with ID {
   def plugins = _plugins.single()
   def plugins_=(v: Iterable[String]) = _plugins.single() = v.toList
 
-  @transient lazy val _cacheMole: Ref[Option[(IMole, Map[ICapsuleUI, ICapsule], Map[IPrototypeDataProxyUI, Prototype[_]])]] = Ref(None)
+  @transient lazy val _cacheMole: Ref[Option[(IMole, Map[ICapsuleUI, ICapsule])]] = Ref(None)
 
   def buildPanelUI = new MolePanelUI(this)
 
@@ -106,11 +106,11 @@ class MoleUI(var name: String) extends IMoleUI with ID {
     _cacheMole() match {
       case Some(_) ⇒
       case None ⇒
-        _cacheMole() = MoleFactory.buildMole(this) match {
-          case Success((m, cMap, pMap, _)) ⇒
-            Some((m, cMap, pMap))
+        MoleFactory.buildMole(this) match {
+          case Success((m, cMap, _)) ⇒
+            _cacheMole() = Some((m, cMap))
           case Failure(t) ⇒
-            None
+            _cacheMole() = None
         }
     }
     _cacheMole()
@@ -166,7 +166,7 @@ class MoleUI(var name: String) extends IMoleUI with ID {
 
   def capsulesInMole = atomic { implicit ptx ⇒
     cacheMole match {
-      case Some((mole: IMole, capsuleMap: Map[ICapsuleUI, ICapsule], prototypeMap: Map[IPrototypeDataProxyUI, Prototype[_]])) ⇒
+      case Some((mole: IMole, capsuleMap: Map[ICapsuleUI, ICapsule])) ⇒
         val cmap = capsuleMap.map { case (k, v) ⇒ v -> k }
         mole.capsules.map { cmap }.toSet
       case _ ⇒ Iterable()

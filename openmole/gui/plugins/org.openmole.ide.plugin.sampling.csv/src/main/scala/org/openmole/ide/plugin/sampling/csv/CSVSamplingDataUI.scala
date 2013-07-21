@@ -18,16 +18,18 @@ class CSVSamplingDataUI(val csvFilePath: String = "",
                         val prototypeMapping: List[(String, IPrototypeDataProxyUI)] = List.empty) extends ISamplingDataUI {
   def name = "CSV"
 
-  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = try {
-    val fi = new File(csvFilePath)
-    val sampling = CSVSampling(fi)
-    prototypeMapping.filter(!_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI]).foreach {
-      m ⇒ sampling addColumn (m._1, m._2.dataUI.coreObject)
+  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
+    try {
+      val fi = new File(csvFilePath)
+      val sampling = CSVSampling(fi)
+      prototypeMapping.filter(!_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI]).foreach {
+        m ⇒ sampling addColumn (m._1, m._2.dataUI.coreObject.get)
+      }
+      sampling
     }
-    sampling
-  }
-  catch {
-    case e: Throwable ⇒ throw new UserBadDataError("CSV file path is not correct for the CSV Sampling")
+    catch {
+      case e: Throwable ⇒ throw new UserBadDataError("CSV file path is not correct for the CSV Sampling")
+    }
   }
 
   def coreClass = classOf[CSVSampling]

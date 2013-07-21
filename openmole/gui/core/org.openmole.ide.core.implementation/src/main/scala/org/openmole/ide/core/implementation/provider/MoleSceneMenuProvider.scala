@@ -34,7 +34,7 @@ class MoleSceneMenuProvider(moleScene: IBuildMoleScene) extends GenericMenuProvi
   def initMenu = {
     val itemCapsule = new MenuItem(new AddCapsuleAction(moleScene, this))
 
-    val menuBuilder = new Menu("Builder")
+    /* val menuBuilder = new Menu("Builder")
     KeyRegistry.builders.values.toList.sortBy {
       _.name
     }.foreach {
@@ -42,9 +42,9 @@ class MoleSceneMenuProvider(moleScene: IBuildMoleScene) extends GenericMenuProvi
         menuBuilder.contents += new MenuItem(b.name) {
           action = new Action(b.name) { def apply = Builder(moleScene, b) }
         }
-    }
+    }    */
 
-    items += (itemCapsule.peer, menuBuilder.peer)
+    items += (itemCapsule.peer) //, menuBuilder.peer)
   }
 
   override def getPopupMenu(widget: Widget,

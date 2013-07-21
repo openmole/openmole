@@ -19,13 +19,11 @@ package org.openmole.ide.core.implementation.dataproxy
 
 import org.openmole.ide.core.model.dataproxy._
 import org.openmole.ide.core.implementation.panel.ConceptMenu
-import scala.collection.JavaConversions._
-import scala.collection.mutable.HashSet
 import org.openmole.ide.misc.tools.util._
 import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.ide.core.implementation.builder.Builder
 import concurrent.stm._
-import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
+import org.openmole.ide.core.implementation.registry.PrototypeKey
 
 object Proxies {
   var instance = new Proxies
@@ -58,18 +56,23 @@ class Proxies {
   def hook(id: ID.Type) = _hooks.single.get(id)
   def source(id: ID.Type) = _sources.single.get(id)
 
+  def prototype(p: PrototypeKey) =
+    _prototypes.single.map { case (_, v) ⇒ PrototypeKey(v) -> v }.get(p)
+
+  def prototypeOrElseCreate(k: PrototypeKey) = atomic { implicit ctx ⇒
+    prototype(k).getOrElse {
+      val p = PrototypeKey.build(k)
+      this += p
+      p
+    }
+  }
+
   def +=(t: ITaskDataProxyUI) = _tasks.single put (t.id, t)
   def -=(t: ITaskDataProxyUI) = _tasks.single remove (t.id)
   def contains(t: ITaskDataProxyUI) = _tasks.single.contains(t.id)
 
-  def +=(t: IPrototypeDataProxyUI) = {
-    _prototypes.single put (t.id, t)
-    KeyPrototypeGenerator.invalidateCache
-  }
-  def -=(t: IPrototypeDataProxyUI) = {
-    _prototypes.single remove (t.id)
-    KeyPrototypeGenerator.invalidateCache
-  }
+  def +=(t: IPrototypeDataProxyUI) = _prototypes.single put (t.id, t)
+  def -=(t: IPrototypeDataProxyUI) = _prototypes.single remove (t.id)
   def contains(t: IPrototypeDataProxyUI) = _prototypes.single.contains(t.id)
 
   def +=(t: ISamplingCompositionDataProxyUI) = _samplings.single put (t.id, t)
@@ -97,7 +100,7 @@ class Proxies {
 
   def classPrototypes(prototypeClass: Class[_],
                       protoList: List[IPrototypeDataProxyUI]): List[IPrototypeDataProxyUI] = protoList.filter {
-    p ⇒ assignable(prototypeClass, p.dataUI.coreObject.`type`.runtimeClass)
+    p ⇒ assignable(prototypeClass, p.dataUI.coreObject.get.`type`.runtimeClass)
   }
 
   def getOrGenerateSamplingComposition(p: ISamplingCompositionDataProxyUI) =

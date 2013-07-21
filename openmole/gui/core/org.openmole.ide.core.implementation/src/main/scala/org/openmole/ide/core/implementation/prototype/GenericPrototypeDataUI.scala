@@ -25,6 +25,7 @@ import org.openmole.core.model.data._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.tools.util.{ Types, ClassLoader }
 import org.openmole.misc.tools.obj.ClassUtils._
+import scala.util.Try
 
 object GenericPrototypeDataUI {
 
@@ -77,7 +78,7 @@ class GenericPrototypeDataUI[T](val name: String,
 
   def coreClass = classOf[Prototype[T]]
 
-  def coreObject = Prototype[T](name)(protoType).toArray(dim).asInstanceOf[Prototype[T]]
+  def coreObject = Try(Prototype[T](name)(protoType).toArray(dim).asInstanceOf[Prototype[T]])
 
   def fatImagePath = {
     if (upperBaseType.contains(canonicalClassName(protoType.toString).toUpperCase)) "img/" + canonicalClassName(protoType.toString).toLowerCase + "_fat.png"

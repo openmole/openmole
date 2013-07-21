@@ -22,7 +22,7 @@ import org.openmole.plugin.grouping.batch.InShuffledGrouping
 class NumberOfBatchShuffledGroupingDataUI(val number: Int = 0) extends IGroupingDataUI {
   override def toString = "by shuffled groups"
 
-  def coreObject = new InShuffledGrouping(number)
+  def coreObject = util.Try { InShuffledGrouping(number) }
 
   def coreClass = classOf[InShuffledGrouping]
 

@@ -25,19 +25,21 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.domain.{ Finite, Domain }
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.misc.tools.util.Types.FILE
-import org.openmole.ide.misc.tools.util.Types
 import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.plugin.domain.modifier.SortByNameDomain
 import org.openmole.misc.tools.obj.ClassUtils
+import util.Try
 
 class SortByNameDomainDataUI(var previousDomain: List[IDomainDataUI] = List.empty)
     extends ModifierDomainDataUI with IFinite {
 
   def domainType = manifest[File]
 
-  def coreObject = previousDomain.headOption match {
-    case Some(x: IDomainDataUI) ⇒ new SortByNameDomain(x.coreObject.asInstanceOf[Domain[File] with Finite[File]])
-    case _                      ⇒ throw new UserBadDataError("The SortByName Domain requires a File Domain as input")
+  def coreObject = Try {
+    previousDomain.headOption match {
+      case Some(x: IDomainDataUI) ⇒ SortByNameDomain(x.coreObject.asInstanceOf[Domain[File] with Finite[File]])
+      case _                      ⇒ throw new UserBadDataError("The SortByName Domain requires a File Domain as input")
+    }
   }
 
   def buildPanelUI = new PluginPanel("") with IDomainPanelUI {

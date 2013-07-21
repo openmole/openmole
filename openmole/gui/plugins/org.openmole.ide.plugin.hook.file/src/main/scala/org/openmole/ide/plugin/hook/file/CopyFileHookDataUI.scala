@@ -28,10 +28,10 @@ class CopyFileHookDataUI(val name: String = "",
 
   def coreClass = classOf[CopyFileHook]
 
-  def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]) = {
+  def coreObject = util.Try {
     val cfh = CopyFileHook()
-    prototypes.foreach { h ⇒ cfh.copy(protoMapping(h._1).asInstanceOf[Prototype[File]], h._2)
-    }
+    prototypes.foreach { case (p, s) ⇒ cfh.copy(p.dataUI.coreObject.get.asInstanceOf[Prototype[File]], s) }
+    initialise(cfh)
     cfh.toHook
   }
 

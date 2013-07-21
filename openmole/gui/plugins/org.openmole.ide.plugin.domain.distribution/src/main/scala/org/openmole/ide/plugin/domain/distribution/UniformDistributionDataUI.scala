@@ -32,7 +32,6 @@ object UniformDistributionDataUI {
   }
 }
 
-import UniformDistributionDataUI._
 abstract class UniformDistributionDataUI[S] extends IDomainDataUI {
 
   def max: Option[Int]

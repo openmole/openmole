@@ -43,13 +43,13 @@ class IOPrototypePanel(scene: IMoleScene,
   val protoInEditor = {
     val incomboContent = Proxies.instance.prototypes.map {
       p ⇒
-        (p, p.dataUI.coreObject, contentAction(p))
+        (p, p.dataUI.coreObject.get, contentAction(p))
     }.toList
     new MultiComboLinkLabelGroovyTextFieldEditor("", incomboContent,
       prototypesIn.map {
         proto ⇒
           new ComboLinkLabelGroovyTextFieldEditorPanel(incomboContent, EYE,
-            new ComboLinkLabelGroovyTextFieldEditorData(proto.dataUI.coreObject, Some(proto), inputParameters.getOrElse(proto, "")))
+            new ComboLinkLabelGroovyTextFieldEditorData(proto.dataUI.coreObject.get, Some(proto), inputParameters.getOrElse(proto, "")))
       }, EYE, CLOSE_IF_EMPTY, insets = SMALL)
   }
 
@@ -79,7 +79,7 @@ class IOPrototypePanel(scene: IMoleScene,
                 contents += new MyComboBox(List(p)) {
                   enabled = false
                 }
-                implicitEditorsMapping += p -> new PrototypeGroovyTextFieldEditor("Default value", p.dataUI.coreObject, inputParameters.getOrElse(p, ""))
+                implicitEditorsMapping += p -> new PrototypeGroovyTextFieldEditor("Default value", p.dataUI.coreObject.get, inputParameters.getOrElse(p, ""))
                 contents += new LinkLabel("", contentAction(p)) {
                   icon = EYE
                   background = new Color(0, 0, 0, 0)

@@ -8,6 +8,7 @@ package org.openmole.ide.plugin.environment.glite
 import org.openmole.ide.core.model.data.IEnvironmentDataUI
 import org.openmole.plugin.environment.glite.{ GliteEnvironment, DIRACGliteEnvironment }
 import org.openmole.misc.workspace.Workspace
+import util.Try
 
 class DiracEnvironmentDataUI(val name: String = "",
                              val voName: String = "",
@@ -20,7 +21,16 @@ class DiracEnvironmentDataUI(val name: String = "",
                              val cpuTime: Option[String] = None,
                              val openMOLEMemory: Option[Int] = None) extends IEnvironmentDataUI {
 
-  def coreObject = new DIRACGliteEnvironment(voName, service, group, bdii, vomsURL, setup, fqan, cpuTime, openMOLEMemory)
+  def coreObject = Try(DIRACGliteEnvironment(
+    voName,
+    service,
+    Some(group),
+    Some(bdii),
+    Some(vomsURL),
+    Some(setup),
+    fqan,
+    cpuTime,
+    openMOLEMemory))
 
   def coreClass = classOf[DIRACGliteEnvironment]
 

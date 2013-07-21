@@ -23,7 +23,7 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.sampling.{ Factor, DiscreteFactor, Sampling }
 import org.openmole.ide.core.model.data._
 import java.awt.Point
-import java.security.DomainCombiner
+import scala.util.Try
 import org.openmole.core.model.domain.{ Discrete, Domain }
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import collection.mutable.HashMap
@@ -44,7 +44,7 @@ class SamplingCompositionDataUI(val name: String = "",
 
   def coreClass = classOf[Sampling]
 
-  def coreObject = {
+  def coreObject = Try {
     builtSampling.clear
     val connectionMap = connections.groupBy {
       _._2
@@ -94,16 +94,17 @@ class SamplingCompositionDataUI(val name: String = "",
             }.map {
               p1 ⇒
                 Right(buildSamplingCore(samplingMap(p1.id)._1, connectionMap, samplingMap), samplingMap(p1.id)._2)
-            })
+            }).get
           case d: IDomainProxyUI ⇒
-            factors.filter {
+            factors.find {
               _.dataUI.domain.id == d.id
-            }.headOption match {
-              case Some(factor: IFactorProxyUI) ⇒ factor.dataUI.domain.dataUI.coreObject match {
-                case dd: T ⇒ DiscreteFactor(
-                  factor.dataUI.coreObject.asInstanceOf[Factor[Any, Domain[Any] with Discrete[Any]]])
-                case _ ⇒ throw new UserBadDataError("Only Discrete Domain can be set as final Domain")
-              }
+            } match {
+              case Some(factor: IFactorProxyUI) ⇒
+                factor.dataUI.domain.dataUI.coreObject.get match {
+                  case dd: T ⇒
+                    DiscreteFactor(factor.dataUI.coreObject.get.asInstanceOf[Factor[Any, Domain[Any] with Discrete[Any]]])
+                  case _ ⇒ throw new UserBadDataError("Only Discrete Domain can be set as final Domain")
+                }
               case _ ⇒ throw new UserBadDataError("The final Domain is not properly set")
             }
           case _ ⇒ throw new UserBadDataError("The final Sampling is not properly set")
