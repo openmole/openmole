@@ -17,7 +17,6 @@
 
 package org.openmole.ide.core.implementation.sampling
 
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.sampling._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.sampling.{ Factor, DiscreteFactor, Sampling }
@@ -26,7 +25,6 @@ import java.awt.Point
 import scala.util.Try
 import org.openmole.core.model.domain.{ Discrete, Domain }
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import collection.mutable.HashMap
 import scala.Some
 import org.openmole.core.model.data.Prototype
 
@@ -40,12 +38,9 @@ class SamplingCompositionDataUI(val name: String = "",
 
   type T = Domain[Any] with Discrete[Any]
 
-  //val builtSampling = new HashMap[ISamplingOrDomainProxyUI, Sampling]
-
   def coreClass = classOf[Sampling]
 
   def coreObject = Try {
-    //builtSampling.clear
     val connectionMap = connections.groupBy {
       _._2
     }

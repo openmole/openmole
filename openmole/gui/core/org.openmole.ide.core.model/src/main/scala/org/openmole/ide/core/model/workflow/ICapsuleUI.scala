@@ -66,7 +66,7 @@ trait ICapsuleUI {
 
   def y: Int
 
-  def islots: Buffer[IInputSlotWidget]
+  def inputSlots: Buffer[IInputSlotWidget]
 
   def setAsValid: Unit
 

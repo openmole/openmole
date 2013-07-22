@@ -32,8 +32,8 @@ trait IMoleUI extends IDataUI with ID {
 
   def coreClass = classOf[IMole]
 
-  def plugins: Iterable[String]
-  def plugins_=(v: Iterable[String])
+  def plugins: Traversable[String]
+  def plugins_=(v: Traversable[String])
 
   def pluginSet: PluginSet = PluginSet(plugins.map { p ⇒ new File(p) }.toSet)
 
