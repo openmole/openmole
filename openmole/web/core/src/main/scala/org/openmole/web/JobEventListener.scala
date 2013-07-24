@@ -2,10 +2,8 @@ package org.openmole.web
 
 import org.openmole.misc.eventdispatcher.{ Event, EventListener }
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.mole.IMoleExecution.JobCreated
+import org.openmole.core.model.mole.IMoleExecution.{ Starting, JobCreated, JobStatusChanged }
 import org.openmole.core.model.job.State._
-import org.openmole.core.model.mole.IMoleExecution.JobCreated
-import org.openmole.core.model.mole.IMoleExecution.JobStatusChanged
 
 /**
  * Created with IntelliJ IDEA.

@@ -8,6 +8,10 @@ List of Mole Executions
 <%@ val ids: List[String] %>
 <ul>
 <%=
-    for(id <- ids) yield <li><a href={"execs/"+id}>{id}</a></li>
+    for(id <- ids) yield <li>
+    <a href={"execs/"+id}>{id}</a>
+    <a href={"remove/"+id}>
+        <img src="../images/button_cancel.png" alt="delete" width="16" height="16"></img></a>
+    </li>
 %>
 </ul>
