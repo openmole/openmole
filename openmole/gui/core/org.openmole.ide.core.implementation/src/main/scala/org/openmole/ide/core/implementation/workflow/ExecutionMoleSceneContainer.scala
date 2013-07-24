@@ -40,11 +40,10 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
 
   val executionManager =
     MoleFactory.buildMole(bmsc.scene.dataUI) match {
-      case Success((mole, prototypeMapping, capsuleMapping, errors)) ⇒
+      case Success((mole, capsuleMapping, errors)) ⇒
         Some(new ExecutionManager(bmsc.scene.dataUI,
           this,
           mole,
-          prototypeMapping,
           capsuleMapping))
       case Failure(l) ⇒ None
     }

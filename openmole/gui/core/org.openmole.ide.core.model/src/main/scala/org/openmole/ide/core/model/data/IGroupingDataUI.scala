@@ -18,11 +18,12 @@ package org.openmole.ide.core.model.data
 
 import org.openmole.core.model.mole.Grouping
 import org.openmole.ide.core.model.panel.IGroupingPanelUI
+import scala.util.Try
 
 trait IGroupingDataUI extends IDataUI {
   def name = toString
 
-  def coreObject: Grouping
+  def coreObject: Try[Grouping]
 
   def buildPanelUI: IGroupingPanelUI
 }

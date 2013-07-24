@@ -27,21 +27,18 @@ case class NetLogo4TaskDataUI(
     this.copy(prototypeMappingInput = prototypeMappingInput.filterNot(_._1 == proxy),
       prototypeMappingOutput = prototypeMappingOutput.filterNot(_._2 == proxy))
 
-  def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) =
-    {
-      val builder = NetLogo4Task(
-        name,
-        new File(nlogoPath),
-        Source.fromString(lauchingCommands).getLines.toIterable,
-        workspaceEmbedded)(plugins)
-      builder addInput inputs
-      builder addOutput outputs
-      builder addParameter parameters
-      resources.foreach { r ⇒ builder addResource (new File(r)) }
-      prototypeMappingInput.foreach { case (p, n) ⇒ builder addNetLogoInput (p.dataUI.coreObject, n) }
-      prototypeMappingOutput.foreach { case (n, p) ⇒ builder addNetLogoOutput (n, p.dataUI.coreObject) }
-      builder.toTask
-    }
+  def coreObject(plugins: PluginSet) = util.Try {
+    val builder = NetLogo4Task(
+      name,
+      new File(nlogoPath),
+      Source.fromString(lauchingCommands).getLines.toIterable,
+      workspaceEmbedded)(plugins)
+    initialise(builder)
+    resources.foreach { r ⇒ builder addResource (new File(r)) }
+    prototypeMappingInput.foreach { case (p, n) ⇒ builder addNetLogoInput (p.dataUI.coreObject.get, n) }
+    prototypeMappingOutput.foreach { case (n, p) ⇒ builder addNetLogoOutput (n, p.dataUI.coreObject.get) }
+    builder.toTask
+  }
 
   def coreClass = classOf[NetLogo4Task]
 

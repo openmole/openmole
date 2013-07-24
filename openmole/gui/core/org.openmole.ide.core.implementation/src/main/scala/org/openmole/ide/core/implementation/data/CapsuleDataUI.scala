@@ -25,11 +25,12 @@ import org.openmole.core.implementation.mole.{ StrainerCapsule, MasterCapsule, C
 import org.openmole.ide.core.implementation.workflow.CapsulePanelUI
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import java.io.File
-import org.openmole.core.model.task.ITask
+import org.openmole.core.model.task.{ PluginSet, ITask }
 import org.openmole.core.implementation.task.EmptyTask
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import util.{ Success, Failure }
 import org.openmole.ide.core.model.workflow.IMoleUI
+import org.openmole.misc.exception.UserBadDataError
 
 object CapsuleDataUI {
   def apply(
@@ -59,17 +60,17 @@ class CapsuleDataUI(
   def buildPanelUI(index: Int) = new CapsulePanelUI(this, index)
 
   def coreObject(moleDataUI: IMoleUI) = task match {
-    case Some(t: ITaskDataProxyUI) ⇒ MoleFactory.taskCoreObject(t.dataUI, moleDataUI.plugins.map { p ⇒ new File(p) }.toSet) match {
-      case Success(x: ITask) ⇒ capsuleType match {
-        case y: MasterCapsuleType ⇒ new MasterCapsule(x, y.persistList.map { _.dataUI.name }.toSet)
-        case StrainerCapsuleType  ⇒ new StrainerCapsule(x)
-        case _                    ⇒ new Capsule(x)
+    case Some(t: ITaskDataProxyUI) ⇒
+      t.dataUI.coreObject(PluginSet(moleDataUI.plugins.map { p ⇒ new File(p) })) match {
+        case Success(x: ITask) ⇒ capsuleType match {
+          case y: MasterCapsuleType ⇒ (new MasterCapsule(x, y.persistList.map { _.dataUI.name }.toSet), None)
+          case StrainerCapsuleType  ⇒ (new StrainerCapsule(x), None)
+          case _                    ⇒ (new Capsule(x), None)
+        }
+        case Failure(x: Throwable) ⇒ (new Capsule(EmptyTask(t.dataUI.name)), Some(x))
       }
-      case Failure(x: Throwable) ⇒ new Capsule(EmptyTask(t.dataUI.name))
-    }
     case _ ⇒
-      StatusBar().inform("A capsule without Task can not run")
-      new Capsule(EmptyTask("None"))
+      (new Capsule(EmptyTask("None")), Some(new UserBadDataError(s"The capsule $name is empty")))
   }
 
   def copy(

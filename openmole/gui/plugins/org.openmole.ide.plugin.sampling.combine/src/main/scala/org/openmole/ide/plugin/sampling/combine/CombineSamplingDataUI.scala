@@ -26,8 +26,9 @@ import org.openmole.ide.core.implementation.sampling.SamplingUtils
 class CombineSamplingDataUI extends ISamplingDataUI with IOrdering {
   val name = "Combine"
 
-  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) =
-    new CombineSampling(SamplingUtils.toOrderedSamplings(factorOrSampling): _*)
+  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
+    CombineSampling(SamplingUtils.toOrderedSamplings(factorOrSampling): _*)
+  }
 
   def buildPanelUI = new GenericCombineSamplingPanelUI(this) {
     override val help = new Helper(List(new URL(i18n.getString("combinePermalinkText"),

@@ -55,9 +55,9 @@ case class SlidingDomainDataUI[S](val size: String = "",
 
   override def name = "Sliding Slice"
 
-  def coreObject = {
+  def coreObject = util.Try {
     val valid = validPreviousDomains
-    if (valid._1) new SlidingDomain[S](valid._2.head.asInstanceOf[Domain[S] with Discrete[S]], size.toInt, step.toInt)
+    if (valid._1) SlidingDomain[S](valid._2.head.asInstanceOf[Domain[S] with Discrete[S]], size.toInt, step.toInt)
     else throw new UserBadDataError("A Discrete Domain is required as input of a Sliding Domain. ")
   }
 

@@ -14,4 +14,7 @@ trait IHookFactoryUI extends IFactoryUI {
   def buildDataUI: IHookDataUI
 
   def coreClass: Class[_ <: IHook]
+
+  def category = List("Hook")
+
 }

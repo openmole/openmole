@@ -30,4 +30,6 @@ trait IPrototypeFactoryUI extends IFactoryUI {
 
   def buildDataUI(prototype: Prototype[_],
                   dim: Int): IPrototypeDataUI[_]
+
+  def category = List("Prototype")
 }

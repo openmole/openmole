@@ -21,14 +21,12 @@ class SystemExecTaskDataUI(val name: String = "",
                            val outputMap: List[(String, IPrototypeDataProxyUI)] = List.empty,
                            val variables: List[IPrototypeDataProxyUI] = List.empty) extends TaskDataUI {
 
-  def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) = {
+  def coreObject(plugins: PluginSet) = util.Try {
     val syet = SystemExecTask(name, directory = workdir)(plugins)
     syet command lauchingCommands.filterNot(_ == '\n')
-    syet addInput inputs
-    syet addOutput outputs
-    syet addParameter parameters
+    initialise(syet)
     resources.foreach(syet addResource new File(_))
-    variables.foreach { p ⇒ syet addVariable (p.dataUI.coreObject) }
+    variables.foreach { p ⇒ syet addVariable (p.dataUI.coreObject.get) }
 
     outputMap.foreach(i ⇒ syet addOutput (i._1, i._2.dataUI.coreObject.asInstanceOf[Prototype[File]]))
     inputMap.foreach(i ⇒ syet addInput (i._1.dataUI.coreObject.asInstanceOf[Prototype[File]], i._2))

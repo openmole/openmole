@@ -31,6 +31,6 @@ class ExplorationBuilderPanelUI(puzzles: List[Puzzle], puzzleSelection: Option[P
     val samplingUI = Proxies.instance.getOrGenerateSamplingComposition(samplingComboBox.selection.item)
     val sampling = samplingUI.dataUI.coreObject
     (exploration(nameTextField.text, puzzleComboBox.selection.item,
-      sampling)(manager.pluginSet), uiMap += (sampling, samplingUI))
+      sampling.get)(manager.pluginSet), uiMap += (sampling.get, samplingUI))
   }
 }

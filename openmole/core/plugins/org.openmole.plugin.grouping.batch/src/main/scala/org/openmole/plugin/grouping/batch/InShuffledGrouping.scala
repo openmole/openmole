@@ -25,6 +25,12 @@ import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.service._
 import org.openmole.core.implementation.task.Task._
 
+object InShuffledGrouping {
+
+  def apply(numberOfBatch: Int) = new InShuffledGrouping(numberOfBatch)
+
+}
+
 /**
  * Group the mole jobs by distributing them at random among {{{numberOfBatch}}}
  * groups.

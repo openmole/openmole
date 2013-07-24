@@ -24,8 +24,8 @@ class LHSSamplingDataUI(val samples: String = "1") extends ISamplingDataUI {
 
   def name = "LHS"
 
-  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) =
-    new LHS(
+  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
+    LHS(
       try samples
       catch {
         case e: NumberFormatException ⇒ throw new UserBadDataError("An integer is exepected as number of samples")
@@ -35,6 +35,7 @@ class LHSSamplingDataUI(val samples: String = "1") extends ISamplingDataUI {
           Factor(f.prototype.asInstanceOf[Prototype[Double]],
             f.domain.asInstanceOf[Bounded[Double]])
       }.toSeq: _*)
+  }
 
   def coreClass = classOf[LHS]
 

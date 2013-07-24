@@ -21,7 +21,7 @@ import java.io.File
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.domain.file.ListFilesDomain
 import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
-import org.openmole.core.model.domain.Domain
+import util.Try
 
 object ListFilesDomainDataUI {
   def apply(d: SubDataUI) = d match {
@@ -38,7 +38,7 @@ case class ListFilesDomainDataUI(val directoryPath: String = "",
 
   override def name = "Multiple files"
 
-  def coreObject = new ListFilesDomain(new File(directoryPath), regexp, recursive)
+  def coreObject = Try(ListFilesDomain(new File(directoryPath), regexp, recursive))
 
   def coreClass = classOf[ListFilesDomain]
 

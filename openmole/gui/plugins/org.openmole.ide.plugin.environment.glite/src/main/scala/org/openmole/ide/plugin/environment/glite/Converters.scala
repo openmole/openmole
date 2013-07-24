@@ -1,5 +1,6 @@
+package org.openmole.ide.plugin.environment.glite
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,9 +16,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.ide.core.implementation.panel
+object Converters {
 
-import org.openmole.ide.core.model.panel.IComponentCategory
+  implicit def intToString(i: Option[Int]) = i match {
+    case Some(ii: Int) ⇒ ii.toString
+    case _             ⇒ ""
+  }
 
-class ComponentCategory(val name: String,
-                        val childs: Iterable[IComponentCategory] = List.empty) extends IComponentCategory
+  implicit def stringToStringOpt(s: String) = s.isEmpty match {
+    case true  ⇒ None
+    case false ⇒ Some(s)
+  }
+
+  implicit def stringToIntOpt(s: String) = try {
+    Some(s.toInt)
+  }
+  catch {
+    case e: NumberFormatException ⇒ None
+  }
+}

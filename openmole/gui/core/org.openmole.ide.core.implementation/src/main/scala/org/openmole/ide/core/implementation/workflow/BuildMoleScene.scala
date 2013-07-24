@@ -54,7 +54,7 @@ class BuildMoleScene(val dataUI: IMoleUI) extends MoleScene with IBuildMoleScene
   def copyScene = {
     def copy(caspuleUI: ICapsuleUI, sc: IMoleScene) = {
       val c = CapsuleUI(sc)
-      val slotMapping = caspuleUI.islots.map(i ⇒ i -> c.addInputSlot).toMap
+      val slotMapping = caspuleUI.inputSlots.map(i ⇒ i -> c.addInputSlot).toMap
       (c, slotMapping)
     }
 

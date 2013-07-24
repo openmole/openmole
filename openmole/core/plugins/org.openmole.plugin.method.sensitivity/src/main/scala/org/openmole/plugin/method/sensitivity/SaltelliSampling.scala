@@ -74,6 +74,15 @@ object SaltelliSampling {
 
   val matrixName = Prototype[String]("matrixName")
 
+  def apply(
+    samples: Int,
+    matrixName: Prototype[String],
+    factors: Factor[Double, Domain[Double] with Bounds[Double]]*) = new SaltelliSampling(samples, matrixName, factors: _*)
+
+  def apply(
+    samples: Int,
+    factors: Factor[Double, Domain[Double] with Bounds[Double]]*): SaltelliSampling = apply(samples, matrixName, factors: _*)
+
 }
 
 import SaltelliSampling._

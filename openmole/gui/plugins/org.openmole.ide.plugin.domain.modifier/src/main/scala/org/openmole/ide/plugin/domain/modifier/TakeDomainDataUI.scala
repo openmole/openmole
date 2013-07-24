@@ -29,8 +29,8 @@ import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.model.sampling.IFinite
 
-case class TakeDomainDataUI(val size: String = "1",
-                            val previousDomain: List[IDomainDataUI] = List.empty)
+case class TakeDomainDataUI(size: String = "1",
+                            previousDomain: List[IDomainDataUI] = List.empty)
     extends ModifierDomainDataUI with IFinite {
 
   def domainType = previousDomain.headOption match {
@@ -42,9 +42,9 @@ case class TakeDomainDataUI(val size: String = "1",
 
   def preview = "Take (" + size + ")"
 
-  override def coreObject = {
+  override def coreObject = util.Try {
     val valid = validPreviousDomains
-    if (valid._1) new TakeDomain(valid._2.head, size.toInt)
+    if (valid._1) TakeDomain(valid._2.head, size.toInt)
     else throw new UserBadDataError("A Discrete Domain is required as input of a Take Domain. ")
   }
 

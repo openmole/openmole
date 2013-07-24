@@ -20,6 +20,7 @@ package org.openmole.ide.core.model.data
 import org.openmole.core.model.sampling.{ Factor, Sampling }
 import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import org.openmole.ide.core.model.sampling._
+import scala.util.Try
 
 object ISamplingDataUI {
   implicit val ordering = Ordering.by((_: ISamplingDataUI).name)
@@ -27,7 +28,7 @@ object ISamplingDataUI {
 
 trait ISamplingDataUI extends IDataUI {
 
-  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]): Sampling
+  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]): Try[Sampling]
 
   def buildPanelUI: ISamplingPanelUI
 

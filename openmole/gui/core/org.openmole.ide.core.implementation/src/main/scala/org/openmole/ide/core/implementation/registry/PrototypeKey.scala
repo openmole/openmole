@@ -25,9 +25,9 @@ import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 import concurrent.stm._
 
-object KeyPrototypeGenerator {
+object PrototypeKey {
 
-  val _cacheMap: Ref[Option[Map[PrototypeKey, IPrototypeDataProxyUI]]] = Ref(None)
+  /*val _cacheMap: Ref[Option[Map[PrototypeKey, IPrototypeDataProxyUI]]] = Ref(None)
 
   def invalidateCache = _cacheMap.single() = None
 
@@ -42,19 +42,17 @@ object KeyPrototypeGenerator {
     }
   }
 
-  def inCacheMap(k: PrototypeKey) = atomic { implicit actx ⇒ cacheMap.contains(k) }
+  def inCacheMap(k: PrototypeKey) = atomic { implicit actx ⇒ cacheMap.contains(k) }    */
 
   def apply(proxy: IPrototypeDataProxyUI): PrototypeKey =
-    new PrototypeKey(proxy.dataUI.name, KeyGenerator.stripArrays(proxy.dataUI.protoType)._1.runtimeClass, proxy.dataUI.dim)
+    PrototypeKey(proxy.dataUI.name, KeyGenerator.stripArrays(proxy.dataUI.`type`)._1.runtimeClass, proxy.dataUI.dim)
 
   def apply(proto: Prototype[_]): PrototypeKey = {
     val (manifest, dim) = KeyGenerator.stripArrays(proto.`type`)
-    new PrototypeKey(proto.name, manifest.runtimeClass, dim)
+    PrototypeKey(proto.name, manifest.runtimeClass, dim)
   }
 
-  def apply(name: String, protoClass: Class[_], dim: Int) = new PrototypeKey(name, protoClass, dim)
-
-  def prototype(key: PrototypeKey): IPrototypeDataProxyUI = {
+  /*def prototype(key: PrototypeKey): IPrototypeDataProxyUI = {
     buildUnknownPrototype(key)
     cacheMap(key)
   }
@@ -62,28 +60,28 @@ object KeyPrototypeGenerator {
   def prototype(proto: Prototype[_]): IPrototypeDataProxyUI = {
     buildUnknownPrototype(proto)
     cacheMap(KeyPrototypeGenerator(proto))
-  }
+  } */
 
-  def buildUnknownPrototype(k: PrototypeKey): IPrototypeDataProxyUI =
-    buildUnknownPrototype(k.name, k.dim, KeyGenerator.stripArrays(ClassUtils.manifest(k.protoClass))._1)
+  def build(k: PrototypeKey): IPrototypeDataProxyUI =
+    build(k.name, k.dim, KeyGenerator.stripArrays(ClassUtils.manifest(k.protoClass))._1)
 
-  def buildUnknownPrototype(p: Prototype[_]): IPrototypeDataProxyUI = {
+  def build(p: Prototype[_]): IPrototypeDataProxyUI = {
     val (_, dim) = KeyGenerator(p)
-    buildUnknownPrototype(p.name, dim, KeyGenerator.stripArrays(p.`type`)._1)
+    build(p.name, dim, KeyGenerator.stripArrays(p.`type`)._1)
   }
 
-  def buildUnknownPrototype(name: String, dim: Int, m: Manifest[_]): IPrototypeDataProxyUI = {
+  def build(name: String, dim: Int, m: Manifest[_]): IPrototypeDataProxyUI = {
     val proxy = new PrototypeDataProxyUI(GenericPrototypeDataUI(name, dim)(m), generated = true)
-    if (!isPrototype(proxy)) Proxies.instance += proxy
+    //if (!Proxies.contains(proxy)) Proxies.instance += proxy
 
     proxy
   }
 
-  def isPrototype(k: PrototypeKey): Boolean = inCacheMap(k)
+  /*def isPrototype(k: PrototypeKey): Boolean = inCacheMap(k)
 
   def isPrototype(p: Prototype[_]): Boolean = isPrototype(KeyPrototypeGenerator(p))
 
-  def isPrototype(p: IPrototypeDataProxyUI): Boolean = isPrototype(KeyPrototypeGenerator(p))
+  def isPrototype(p: IPrototypeDataProxyUI): Boolean = isPrototype(KeyPrototypeGenerator(p))*/
 }
 
-case class PrototypeKey(val name: String, val protoClass: Class[_], val dim: Int)
+case class PrototypeKey(name: String, protoClass: Class[_], dim: Int)

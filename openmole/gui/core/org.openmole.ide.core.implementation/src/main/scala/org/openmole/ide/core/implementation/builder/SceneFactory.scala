@@ -30,10 +30,10 @@ import org.openmole.ide.core.implementation.workflow.{ DataChannelUI, Transition
 import org.openmole.core.model.task.ITask
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.data.Prototype
-import org.openmole.ide.core.implementation.registry.KeyPrototypeGenerator
 import org.openmole.ide.core.model.data.IExplorationTaskDataUI
 import org.openmole.ide.core.implementation.data.CapsuleDataUI
 import scala.Some
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 
 object SceneFactory {
 
@@ -41,5 +41,5 @@ object SceneFactory {
     if (manifest.runtimeClass.isInstance(x)) x.asInstanceOf[T]
     else throw new UserBadDataError("The Object " + x + " can not be loaded in the GUI")
 
-  def prototype(p: Prototype[_]) = KeyPrototypeGenerator.prototype(p)
+  //def prototype(p: Prototype[_]) = Proxies.instance.prototypeOrElseCreate(p)
 }

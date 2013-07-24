@@ -28,8 +28,9 @@ import org.openmole.ide.core.implementation.sampling.SamplingUtils
 class ZipSamplingDataUI extends ISamplingDataUI {
   def name = "Zip"
 
-  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) =
-    new ZipSampling(SamplingUtils.toUnorderedFactorsAndSamplings(factorOrSampling): _*)
+  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
+    ZipSampling(SamplingUtils.toUnorderedFactorsAndSamplings(factorOrSampling): _*)
+  }
 
   def buildPanelUI = new GenericCombineSamplingPanelUI(this) {
     override val help = new Helper(List(new URL(i18n.getString("zipPermalinkText"),

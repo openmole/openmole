@@ -40,7 +40,7 @@ case class MapDomainDataUI(val prototypeName: String = "",
 
   def preview = "Map( " + code.split("\n").take(2).mkString(",") + " ...)"
 
-  override def coreObject: Domain[Any] = {
+  override def coreObject = util.Try {
     val valid = validPreviousDomains
     if (valid._1) new MapDomain(valid._2.head, prototypeName, code)
     else throw new UserBadDataError("An input Domain is required for a Map modifier Domain")

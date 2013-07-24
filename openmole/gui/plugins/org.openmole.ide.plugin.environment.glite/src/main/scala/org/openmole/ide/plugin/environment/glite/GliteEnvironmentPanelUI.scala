@@ -22,7 +22,6 @@ import java.util.ResourceBundle
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget._
 import swing._
-import event._
 import event.ButtonClicked
 import org.openmole.plugin.environment.glite.GliteAuthentication
 import scala.Some
@@ -37,34 +36,12 @@ object GliteEnvironmentPanelUI {
   }.toMap
 }
 
+import Converters._
 class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IEnvironmentPanelUI {
-
-  implicit def intToString(i: Option[Int]) = i match {
-    case Some(ii: Int) ⇒ ii.toString
-    case _             ⇒ ""
-  }
-
-  implicit def stringToStringOpt(s: String) = s.isEmpty match {
-    case true  ⇒ None
-    case false ⇒ Some(s)
-  }
-
-  implicit def stringToIntOpt(s: String) = try {
-    Some(s.toInt)
-  }
-  catch {
-    case e: NumberFormatException ⇒ None
-  }
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
-  val voComboBox = new MyComboBox[String]("" :: GliteEnvironmentPanelUI.vomses.keys.toList.sorted)
-  voComboBox.selection.item = pud.vo
-
-  val vomsTextField = new TextField(pud.voms, 20)
-  val bdiiTextField = new TextField(pud.bdii, 20)
-  var enrollmentURLLink = enrollmentLink
-  val enrollmentURLLabel = new Label("")
+  val vo = new VOPanel(pud.vo, pud.voms, pud.bdii)
   val runtimeMemoryTextField = new TextField(pud.openMOLEMemory, 4)
 
   val proxyTimeTextField = new TextField(pud.proxyTime.getOrElse(""), 18)
@@ -95,25 +72,18 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
     case ButtonClicked(`proxyCheckBox`) ⇒ showProxy(proxyCheckBox.selected)
   }
 
-  voComboBox.selection.reactions += {
-    case SelectionChanged(`voComboBox`) ⇒
-      vomsTextField.text = GliteAuthentication.getVOMS(voComboBox.selection.item).getOrElse("")
-      enrollmentURLLabel.text = ""
-      enrollmentURLLink = enrollmentLink
-  }
-
   val components = List(("Settings",
     new PluginPanel("wrap 2") {
       contents += (new Label("VO"), "gap para")
-      contents += voComboBox
+      contents += vo.voComboBox
       contents += (new Label("VOMS"), "gap para")
-      contents += vomsTextField
+      contents += vo.vomsTextField
       contents += (new Label("BDII"), "gap para")
-      contents += bdiiTextField
+      contents += vo.bdiiTextField
       contents += (new Label("Runtime memory"), "gap para")
       contents += runtimeMemoryTextField
-      contents += enrollmentURLLink
-      contents += enrollmentURLLabel
+      contents += vo.enrollmentURLLink
+      contents += vo.enrollmentURLLabel
     }), ("Options",
     new PluginPanel("wrap 2") {
       contents += new PluginPanel("wrap 2") {
@@ -151,18 +121,6 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
   proxyCheckBox.selected = pud.proxy
   showProxy(pud.proxy)
 
-  private def enrollmentLink =
-    new LinkLabel("VO enrollment",
-      new Action("") {
-        def apply = {
-          enrollmentURLLabel.text = GliteEnvironmentPanelUI.vomses.getOrElse(voComboBox.selection.item, "")
-        }
-      },
-      3,
-      "#73a5d2",
-      false
-    )
-
   private def showProxy(b: Boolean) = {
     List(proxyTimeLabel, proxyTimeTextField, proxyHostLabel, proxyHostTextField, proxyPortLabel, proxyPortTextField).foreach {
       _.visible = b
@@ -170,18 +128,18 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI) extends PluginPanel("
   }
 
   override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(voComboBox, new Help(i18n.getString("vo"), i18n.getString("voEx")))
-    add(vomsTextField, new Help(i18n.getString("voms"), i18n.getString("vomsEx")))
-    add(bdiiTextField, new Help(i18n.getString("bdii"), i18n.getString("bdiiEx")))
+    add(vo.voComboBox, new Help(i18n.getString("vo"), i18n.getString("voEx")))
+    add(vo.vomsTextField, new Help(i18n.getString("voms"), i18n.getString("vomsEx")))
+    add(vo.bdiiTextField, new Help(i18n.getString("bdii"), i18n.getString("bdiiEx")))
     add(proxyCheckBox, new Help(i18n.getString("runtimeMemory"), i18n.getString("runtimeMemoryEx")))
     add(runtimeMemoryTextField, new Help(i18n.getString("myProxy")))
   }
 
   def saveContent(name: String) =
     new GliteEnvironmentDataUI(name,
-      voComboBox.selection.item,
-      vomsTextField.text,
-      bdiiTextField.text,
+      vo.voComboBox.selection.item,
+      vo.vomsTextField.text,
+      vo.bdiiTextField.text,
       proxyCheckBox.selected,
       proxyTimeTextField.text,
       proxyHostTextField.text,

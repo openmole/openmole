@@ -28,8 +28,9 @@ import org.openmole.ide.core.implementation.sampling.SamplingUtils
 class ShuffleSamplingDataUI extends ISamplingDataUI {
   def name = "Shuffle"
 
-  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) =
-    new ShuffleSampling(SamplingUtils.toUnorderedFactorsAndSamplings(factorOrSampling).head)
+  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
+    ShuffleSampling(SamplingUtils.toUnorderedFactorsAndSamplings(factorOrSampling).head)
+  }
 
   def buildPanelUI = new GenericCombineSamplingPanelUI(this) {
     override val help = new Helper(List(new URL(i18n.getString("shufflePermalinkText"),

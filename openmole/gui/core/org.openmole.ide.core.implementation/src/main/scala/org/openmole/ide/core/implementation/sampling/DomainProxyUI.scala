@@ -23,4 +23,4 @@ import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.misc.tools.util.ID
 
 class DomainProxyUI(var dataUI: IDomainDataUI,
-                    var ordering: Int = 0) extends IDomainProxyUI with ID
+                    var ordering: Int = 0) extends IDomainProxyUI

@@ -27,18 +27,19 @@ import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.misc.tools.io.FromString._
 import org.openmole.misc.exception.UserBadDataError
 
-case class BigDecimalLogarithmRangeDataUI(val min: String = "0.0",
-                                          val max: String = "1.0",
-                                          val step: Option[String] = Some("1.0")) extends LogarthmicRangeDataUI {
+case class BigDecimalLogarithmRangeDataUI(min: String = "0.0",
+                                          max: String = "1.0",
+                                          step: Option[String] = Some("1.0")) extends LogarthmicRangeDataUI {
 
   val domainType = manifest[BigDecimal]
 
   override def availableTypes = List(BIG_DECIMAL)
 
-  def coreObject: Domain[BigDecimal] =
+  def coreObject = util.Try {
     if (min.isEmpty || max.isEmpty || !step.isDefined)
       throw new UserBadDataError("Min, Max ant Step values are required for defining a Logarithm Range Domain")
-    else new LogRange[BigDecimal](min, max, stepString)
+    else LogRange[BigDecimal](min, max, stepString)
+  }
 
   def coreClass = classOf[BigDecimalLogarithmRangeDataUI]
 

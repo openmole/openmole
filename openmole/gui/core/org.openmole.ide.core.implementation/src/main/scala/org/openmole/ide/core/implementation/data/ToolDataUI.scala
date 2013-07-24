@@ -18,11 +18,10 @@ package org.openmole.ide.core.implementation.data
 
 import org.openmole.core.model.data.{ Prototype, DataSet }
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.implementation.registry.{ KeyGenerator, KeyPrototypeGenerator }
+import org.openmole.ide.core.implementation.registry.{ KeyGenerator, PrototypeKey }
 import org.openmole.core.model.mole.{ ICapsule, Hooks, Sources, IMole }
 import org.openmole.core.model.transition.{ IAggregationTransition, ITransition }
 import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataProxyUI }
-import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
 
 object ToolDataUI {
   def implicitPrototypes(coreInputs: Unit ⇒ List[Prototype[_]],
@@ -31,9 +30,9 @@ object ToolDataUI {
                          prototypesOut: Seq[IPrototypeDataProxyUI]) = {
 
     def protoFilter(lP: Seq[Prototype[_]], protos: Seq[IPrototypeDataProxyUI]) = {
-      lP.map { i ⇒ KeyPrototypeGenerator(i) }.toList.diff(protos.map {
-        p ⇒ KeyPrototypeGenerator(p)
-      }).map { KeyPrototypeGenerator.prototype }
+      lP.map { i ⇒ PrototypeKey(i) }.toList.diff(protos.map {
+        p ⇒ PrototypeKey(p)
+      }).map { Proxies.instance.prototypeOrElseCreate }
     }
 
     (protoFilter(coreInputs(), prototypesIn), protoFilter(coreOutputs(), prototypesOut))
@@ -46,7 +45,7 @@ object ToolDataUI {
         case t: ITransition with IAggregationTransition ⇒ t.data(mole, Sources.empty, Hooks.empty).foreach {
           d ⇒
             val (protoType, dim) = KeyGenerator.stripArrays(d.prototype.`type`)
-            KeyPrototypeGenerator.prototype(KeyPrototypeGenerator(d.prototype.name, protoType.runtimeClass, dim))
+            Proxies.instance.prototypeOrElseCreate(PrototypeKey(d.prototype.name, protoType.runtimeClass, dim))
         }
         case _ ⇒
       }

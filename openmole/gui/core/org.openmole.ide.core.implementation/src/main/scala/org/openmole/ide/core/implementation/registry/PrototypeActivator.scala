@@ -28,12 +28,12 @@ trait PrototypeActivator extends BundleActivator {
   abstract override def start(context: BundleContext) = {
     super.start(context)
     prototypeFactories.foreach { f ⇒
-      KeyRegistry.prototypes += KeyGenerator(f.buildDataUI.coreObject)._1 -> f
+      KeyRegistry.prototypes += KeyGenerator(f.buildDataUI.coreObject.get)._1 -> f
     }
   }
 
   abstract override def stop(context: BundleContext) = {
     super.stop(context)
-    prototypeFactories.foreach { f ⇒ KeyRegistry.prototypes -= KeyGenerator(f.buildDataUI.coreObject)._1 }
+    prototypeFactories.foreach { f ⇒ KeyRegistry.prototypes -= KeyGenerator(f.buildDataUI.coreObject.get)._1 }
   }
 }

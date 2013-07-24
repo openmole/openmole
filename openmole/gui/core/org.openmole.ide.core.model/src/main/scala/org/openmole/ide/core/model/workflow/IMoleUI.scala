@@ -32,8 +32,8 @@ trait IMoleUI extends IDataUI with ID {
 
   def coreClass = classOf[IMole]
 
-  def plugins: Iterable[String]
-  def plugins_=(v: Iterable[String])
+  def plugins: Traversable[String]
+  def plugins_=(v: Traversable[String])
 
   def pluginSet: PluginSet = PluginSet(plugins.map { p ⇒ new File(p) }.toSet)
 
@@ -41,7 +41,7 @@ trait IMoleUI extends IDataUI with ID {
 
   def name_=(n: String)
 
-  def cacheMole: Option[(IMole, Map[ICapsuleUI, ICapsule], Map[IPrototypeDataProxyUI, Prototype[_]])]
+  def cacheMole: Option[(IMole, Map[ICapsuleUI, ICapsule])]
 
   def invalidateCache: Unit
 

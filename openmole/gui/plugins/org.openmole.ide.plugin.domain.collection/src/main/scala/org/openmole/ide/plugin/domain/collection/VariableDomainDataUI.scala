@@ -30,6 +30,7 @@ import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.ide.misc.tools.util.Types
 import java.io.File
 import org.openmole.misc.tools.obj.ClassUtils
+import util.Try
 
 object VariableDomainDataUI {
   def apply[T](prototypeArray: Option[IPrototypeDataProxyUI], classString: String) = {
@@ -43,10 +44,10 @@ class VariableDomainDataUI[S](val prototypeArray: Option[IPrototypeDataProxyUI] 
 
   val name = "Prototype Array"
 
-  def coreObject = prototypeArray match {
-    case Some(p: IPrototypeDataProxyUI) ⇒ new VariableDomain(p.dataUI.coreObject.asInstanceOf[Prototype[Array[S]]])
+  def coreObject = Try(prototypeArray match {
+    case Some(p: IPrototypeDataProxyUI) ⇒ VariableDomain(p.dataUI.coreObject.asInstanceOf[Prototype[Array[S]]])
     case _                              ⇒ throw new UserBadDataError("An array of Prototypes is required for a Prototype Array Domain")
-  }
+  })
 
   def buildPanelUI = new VariableDomainPanelUI(this)
 

@@ -17,12 +17,10 @@
 
 package org.openmole.ide.plugin.task.exploration
 
-import org.openmole.ide.plugin.task.exploration.ExplorationTaskPanelUI._
 import org.openmole.ide.core.model.data.IExplorationTaskDataUI
 import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.implementation.task.ExplorationTask
-import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.data._
 
@@ -30,15 +28,13 @@ class ExplorationTaskDataUI(
     val name: String = "",
     override var sampling: Option[ISamplingCompositionDataProxyUI] = None) extends TaskDataUI with IExplorationTaskDataUI {
 
-  def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) = {
+  def coreObject(plugins: PluginSet) = util.Try {
     val taskBuilder = sampling match {
       case Some(x: ISamplingCompositionDataProxyUI) ⇒
-        ExplorationTask(name, x.dataUI.coreObject)(plugins)
-      case None ⇒ throw new UserBadDataError("Sampling missing to instanciate the exploration taskMap " + name)
+        ExplorationTask(name, x.dataUI.coreObject.get)(plugins)
+      case None ⇒ throw new UserBadDataError("Sampling missing to instantiate the exploration taskMap " + name)
     }
-    taskBuilder addInput inputs
-    taskBuilder addOutput outputs
-    taskBuilder addParameter parameters
+    initialise(taskBuilder)
     taskBuilder.toTask
   }
 

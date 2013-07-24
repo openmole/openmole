@@ -20,6 +20,7 @@ package org.openmole.ide.core.model.data
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.core.model.sampling.Factor
 import org.openmole.ide.core.model.sampling.{ ISamplingOrDomainProxyUI, ISamplingProxyUI, IDomainProxyUI }
+import scala.util.Try
 
 trait IFactorDataUI {
   def prototype: Option[IPrototypeDataProxyUI]
@@ -30,7 +31,7 @@ trait IFactorDataUI {
 
   def target: Option[ISamplingOrDomainProxyUI]
 
-  def coreObject: Factor[_, _]
+  def coreObject: Try[Factor[_, _]]
 
   def clone(p: IPrototypeDataProxyUI): IFactorDataUI
 

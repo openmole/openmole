@@ -57,9 +57,9 @@ case class SortDomainDataUI[S](var previousDomain: List[IDomainDataUI] = List.em
 
   def preview = "Sort"
 
-  override def coreObject = {
+  override def coreObject = util.Try {
     val valid = validFinitePreviousDomains
-    if (valid._1) new SortDomain[S](valid._2.head.asInstanceOf[Domain[S] with Finite[S]])
+    if (valid._1) SortDomain[S](valid._2.head.asInstanceOf[Domain[S] with Finite[S]])
     else throw new UserBadDataError("A Discrete Domain is required as input of a Sort Domain. ")
   }
 

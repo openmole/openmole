@@ -25,6 +25,8 @@ import org.openmole.ide.core.model.sampling.{ IBuiltCompositionSampling, IDomain
 trait IDomainFactoryUI extends IFactoryUI {
   def buildDataUI: IDomainDataUI
 
+  def category = List("Domain")
+
   //def fromCoreObject(d: Domain[_]): (IDomainProxyUI, IBuiltCompositionSampling)
 }
 

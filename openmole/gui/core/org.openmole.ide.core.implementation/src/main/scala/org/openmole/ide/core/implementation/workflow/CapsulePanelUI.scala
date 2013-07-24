@@ -53,7 +53,7 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI, index: Int = 0) extends PluginPanel
     CLOSE_IF_EMPTY,
     ADD)
 
-  val environmentProxys = Proxies.instance.environments :+ EmptyDataUIs.emptyEnvironmentProxy
+  val environmentProxys = Proxies.instance.environments :+ EmptyDataUIs.localEnvironmentProxy
   val environmentCombo = new MyComboBox(environmentProxys)
 
   val groupingCheckBox = new CheckBox("Grouping") { foreground = Color.WHITE }
@@ -94,8 +94,8 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI, index: Int = 0) extends PluginPanel
   def save =
     CapsuleDataUI(dataUI.task,
       environmentCombo.selection.item.dataUI match {
-        case e: EmptyDataUIs.EmptyEnvironmentDataUI ⇒ None
-        case e: IEnvironmentDataUI                  ⇒ Some(environmentCombo.selection.item)
+        case EmptyDataUIs.LocalEnvironmentDataUI ⇒ None
+        case e: IEnvironmentDataUI               ⇒ Some(environmentCombo.selection.item)
       },
       if (groupingCheckBox.selected) groupingPanel.save else None,
       sourcePanel.content.map { _.comboValue.get }.filter {

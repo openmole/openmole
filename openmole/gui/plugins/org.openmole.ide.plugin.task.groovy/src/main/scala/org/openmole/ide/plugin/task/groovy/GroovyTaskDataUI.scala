@@ -15,12 +15,10 @@ class GroovyTaskDataUI(val name: String = "",
                        val code: String = "",
                        val libs: List[String] = List.empty) extends TaskDataUI {
 
-  def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet) = {
+  def coreObject(plugins: PluginSet) = util.Try {
     val gtBuilder = GroovyTask(name, code)(plugins)
     libs.foreach { l ⇒ gtBuilder.addLib(new File(l)) }
-    gtBuilder addInput inputs
-    gtBuilder addOutput outputs
-    gtBuilder addParameter parameters
+    initialise(gtBuilder)
     gtBuilder.toTask
   }
 

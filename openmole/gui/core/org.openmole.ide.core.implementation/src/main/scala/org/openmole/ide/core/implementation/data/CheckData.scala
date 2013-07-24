@@ -40,7 +40,7 @@ object CheckData extends Logger {
         y.dataUI.startingCapsule match {
           case Some(x: ICapsuleUI) ⇒
             MoleFactory.buildMole(y.dataUI) match {
-              case Success((mole, cMap, pMap, errs)) ⇒
+              case Success((mole, cMap, errs)) ⇒
                 val error_capsules = y.dataUI.capsules.values.partition {
                   _.dataUI.task.isDefined
                 }
@@ -57,8 +57,8 @@ object CheckData extends Logger {
                 // Formal validation
                 val errors = Validation(mole,
                   Context.empty,
-                  capsuleMap.map { c ⇒ c._1 -> c._2.dataUI.sources.map { _.dataUI.coreObject(pMap) } },
-                  capsuleMap.map { c ⇒ c._1 -> c._2.dataUI.hooks.map { _.dataUI.coreObject(pMap) } })
+                  capsuleMap.map { c ⇒ c._1 -> c._2.dataUI.sources.map { _.dataUI.coreObject.get } },
+                  capsuleMap.map { c ⇒ c._1 -> c._2.dataUI.hooks.map { _.dataUI.coreObject.get } })
                 errors.isEmpty match {
                   case false ⇒
                     errors.flatMap {
@@ -94,7 +94,7 @@ object CheckData extends Logger {
                     cui.setAsInvalid(e.getMessage)
                     displayCapsuleErrors(cui, e.getMessage)
                 }
-                Success(mole, cMap, pMap, errs)
+                Success(mole, cMap, errs)
               case Failure(l) ⇒ Failure(l)
             }
           case _ ⇒
@@ -123,7 +123,7 @@ object CheckData extends Logger {
 
   def fullCheck(scene: IMoleScene) = {
     checkMole(scene) match {
-      case Success((mole, _, _, errors)) ⇒
+      case Success((mole, _, errors)) ⇒
         if (errors.isEmpty) {
           val checkTopo = checkTopology(mole)
           if (checkTopo.isEmpty) Success("")

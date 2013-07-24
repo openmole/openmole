@@ -21,8 +21,9 @@ import org.openmole.ide.core.implementation.sampling.SamplingUtils
 class CompleteSamplingDataUI extends ISamplingDataUI {
   val name = "Complete"
 
-  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) =
-    new CompleteSampling(SamplingUtils.toUnorderedFactorsAndSamplings(factorOrSampling): _*)
+  def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
+    CompleteSampling(SamplingUtils.toUnorderedFactorsAndSamplings(factorOrSampling): _*)
+  }
 
   def coreClass = classOf[CompleteSampling]
 

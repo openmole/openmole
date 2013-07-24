@@ -55,6 +55,6 @@ class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends PluginPanel("wrap"
         case Some(v: IPrototypeDataProxyUI) ⇒ true
         case _                              ⇒ false
       }
-    }.map { m ⇒ (KeyRegistry.protoProxyKeyMap(KeyPrototypeGenerator(m.comboValue.get)), m.textFieldValue) })
+    }.map { m ⇒ (KeyRegistry.protoProxyKeyMap(PrototypeKey(m.comboValue.get)), m.textFieldValue) })
 
 }

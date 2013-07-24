@@ -21,4 +21,6 @@ import org.openmole.ide.core.model.data.IGroupingDataUI
 
 trait IGroupingFactoryUI extends IFactoryUI {
   def buildDataUI: IGroupingDataUI
+
+  def category = List("Grouping")
 }

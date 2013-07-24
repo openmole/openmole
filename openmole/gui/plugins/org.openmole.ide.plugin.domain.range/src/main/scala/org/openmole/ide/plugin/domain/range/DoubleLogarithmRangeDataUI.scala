@@ -32,10 +32,11 @@ class DoubleLogarithmRangeDataUI(val min: String = "0.0",
 
   override def availableTypes = List(DOUBLE)
 
-  def coreObject: Domain[Double] =
+  def coreObject = util.Try {
     if (min.isEmpty || max.isEmpty || !step.isDefined)
       throw new UserBadDataError("Min, Max ant Step values are required for defining a Logarithm Range Domain")
     else new LogRange[Double](min, max, step.get)
+  }
 
   def coreClass = classOf[DoubleLogarithmRangeDataUI]
 

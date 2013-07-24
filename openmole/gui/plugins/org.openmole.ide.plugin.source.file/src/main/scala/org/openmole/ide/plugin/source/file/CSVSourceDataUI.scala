@@ -35,11 +35,12 @@ class CSVSourceDataUI(val name: String = "",
   override def cloneWithoutPrototype(proxy: IPrototypeDataProxyUI) =
     new CSVSourceDataUI(name, csvFilePath, prototypeMapping.filterNot(_._2 == proxy))
 
-  def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]) = {
+  def coreObject = util.Try {
     val source = CSVSource(new File(csvFilePath))
     prototypeMapping.filter(!_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI]).foreach {
-      m ⇒ source addColumn (m._1, m._2.dataUI.coreObject)
+      m ⇒ source addColumn (m._1, m._2.dataUI.coreObject.get)
     }
+    initialise(source)
     source
   }
 }

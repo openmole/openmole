@@ -45,7 +45,7 @@ import com.thoughtworks.xstream.converters.reflection.ReflectionConverter
 import com.thoughtworks.xstream.converters.{ ErrorWriter, UnmarshallingContext, MarshallingContext }
 import collection.mutable
 import org.openmole.ide.core.model.workflow.{ IMoleUI, IMoleScene }
-import org.openmole.ide.core.model.data.{ ICapsuleDataUI }
+import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI, ICapsuleDataUI }
 import com.thoughtworks.xstream.converters.collections.SingletonCollectionConverter
 import org.openmole.ide.core.implementation.data.CapsuleDataUI
 import org.openmole.ide.core.model.commons._
@@ -53,6 +53,10 @@ import scala.util.Failure
 import scala.Some
 import org.openmole.ide.core.model.commons.MasterCapsuleType
 import scala.util.Success
+import org.openmole.ide.core.model.sampling.{ IFactorProxyUI, IDomainProxyUI }
+import org.openmole.misc.tools.service.Logger
+
+object GUISerializer extends Logger
 
 class GUISerializer { serializer ⇒
 
@@ -76,7 +80,8 @@ class GUISerializer { serializer ⇒
       serializationStates.get(dataUI) match {
         case None ⇒
           serializationStates += dataUI -> Serializing(dataUI.id)
-          marshal(o, writer, mc)
+          serializeConcept(clazz.runtimeClass, List(dataUI -> dataUI.id))
+          marshal(dataUI, writer, mc)
         case Some(Serializing(id)) ⇒
           serializationStates(dataUI) = Serialized(id)
           super.marshal(dataUI, writer, mc)
@@ -89,12 +94,11 @@ class GUISerializer { serializer ⇒
       reader: HierarchicalStreamReader,
       uc: UnmarshallingContext) = {
       if (reader.getAttributeCount != 0) {
-        val dui = existing(reader.getAttribute("id"))
+        val id = reader.getAttribute("id")
+        val dui = existing(id)
         dui match {
           case Some(y) ⇒ y
-          case _ ⇒
-            serializer.deserializeConcept(uc.getRequiredType)
-            unmarshal(reader, uc)
+          case _       ⇒ serializer.deserializeConcept(uc.getRequiredType, id)
         }
       }
       else {
@@ -111,7 +115,8 @@ class GUISerializer { serializer ⇒
       }
     }
 
-    override def canConvert(t: Class[_]) = clazz.runtimeClass.isAssignableFrom(t)
+    override def canConvert(t: Class[_]) =
+      clazz.runtimeClass.isAssignableFrom(t)
 
     def existing(id: String) = deserializationStates.get(id)
     def add(e: T) = deserializationStates.put(e.id, e)
@@ -121,6 +126,7 @@ class GUISerializer { serializer ⇒
   val taskConverter = new GUIConverter[ITaskDataProxyUI]
   val prototypeConverter = new GUIConverter[IPrototypeDataProxyUI]
   val samplingConverter = new GUIConverter[ISamplingCompositionDataProxyUI]
+  val domainConverter = new GUIConverter[IDomainProxyUI]
   val environmentConverter = new GUIConverter[IEnvironmentDataProxyUI]
   val hookConverter = new GUIConverter[IHookDataProxyUI]
   val sourceConverter = new GUIConverter[ISourceDataProxyUI]
@@ -164,6 +170,7 @@ class GUISerializer { serializer ⇒
       Try(super.unmarshal(cReader, context)) match {
         case Success(o) ⇒ o
         case Failure(t) ⇒
+          GUISerializer.logger.log(GUISerializer.WARNING, "Error in deserialisation", t)
           for (i ← 0 until cReader.depth) reader.moveUp
           None
       }
@@ -175,6 +182,7 @@ class GUISerializer { serializer ⇒
   xstream.registerConverter(taskConverter)
   xstream.registerConverter(prototypeConverter)
   xstream.registerConverter(samplingConverter)
+  xstream.registerConverter(domainConverter)
   xstream.registerConverter(environmentConverter)
   xstream.registerConverter(hookConverter)
   xstream.registerConverter(sourceConverter)
@@ -223,19 +231,25 @@ class GUISerializer { serializer ⇒
   xstream.alias("HashMap", collection.immutable.HashMap.empty.getClass.asInstanceOf[Class[_]])
   xstream.registerConverter(new HashMapConverter())
 
+  implicit class ClassDecorator(c: Class[_]) {
+    def >(o: Class[_]) = c.isAssignableFrom(o)
+    def <(o: Class[_]) = o.isAssignableFrom(c)
+  }
+
   def folder(clazz: Class[_]) =
     clazz match {
-      case c if c == classOf[IPrototypeDataProxyUI] ⇒ "prototype"
-      case c if c == classOf[IEnvironmentDataProxyUI] ⇒ "environment"
-      case c if c == classOf[ISamplingCompositionDataProxyUI] ⇒ "sampling"
-      case c if c == classOf[IHookDataProxyUI] ⇒ "hook"
-      case c if c == classOf[ISourceDataProxyUI] ⇒ "source"
-      case c if c == classOf[ITaskDataProxyUI] ⇒ "task"
-      case c if c == classOf[CapsuleData] ⇒ "capsule"
-      case c if c == classOf[TransitionData] ⇒ "transition"
-      case c if c == classOf[SlotData] ⇒ "slot"
-      case c if c == classOf[DataChannelData] ⇒ "datachannel"
-      case c if c == classOf[MoleData] ⇒ "mole"
+      case c if c < classOf[IPrototypeDataProxyUI] ⇒ "prototype"
+      case c if c < classOf[IEnvironmentDataProxyUI] ⇒ "environment"
+      case c if c < classOf[ISamplingCompositionDataProxyUI] ⇒ "sampling"
+      case c if c < classOf[IDomainProxyUI] ⇒ "domain"
+      case c if c < classOf[IHookDataProxyUI] ⇒ "hook"
+      case c if c < classOf[ISourceDataProxyUI] ⇒ "source"
+      case c if c < classOf[ITaskDataProxyUI] ⇒ "task"
+      case c if c < classOf[CapsuleData] ⇒ "capsule"
+      case c if c < classOf[TransitionData] ⇒ "transition"
+      case c if c < classOf[SlotData] ⇒ "slot"
+      case c if c < classOf[DataChannelData] ⇒ "datachannel"
+      case c if c < classOf[MoleData] ⇒ "mole"
       case c ⇒ c.getSimpleName
     }
 
@@ -244,8 +258,11 @@ class GUISerializer { serializer ⇒
     conceptDir.mkdirs
     set.foreach {
       case (s, id) ⇒
-        new File(conceptDir, id + ".xml").withWriter {
-          xstream.toXML(s, _)
+        val conceptFile = conceptDir.child(id + ".xml")
+        if (!conceptFile.exists) {
+          conceptFile.withWriter {
+            xstream.toXML(s, _)
+          }
         }
     }
   }
@@ -281,6 +298,11 @@ class GUISerializer { serializer ⇒
 
   def deserializeConcept[T](clazz: Class[_]) =
     new File(workDir, folder(clazz)).listFiles.toList.map(f ⇒ Try(read(f)).toOption).flatten.map(_.asInstanceOf[T])
+
+  def deserializeConcept(clazz: Class[_], id: String) = {
+    val f = workDir.child(folder(clazz)).child(id + ".xml")
+    read(f)
+  }
 
   def deserialize(fromFile: String) = {
     val os = new TarInputStream(new FileInputStream(fromFile))

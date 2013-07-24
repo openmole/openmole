@@ -17,7 +17,6 @@
 
 package org.openmole.ide.core.implementation.serializer
 
-import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.core.implementation.workflow._
 import java.awt.Point
@@ -43,19 +42,22 @@ object MoleData {
 
     ui.startingCapsule = moleData.startingCapsule.map(capsuleUIMap(_))
 
-    val slots = moleData.slots.map {
-      case SlotData(i, c) ⇒
-        val cui = capsuleUIMap(c)
-        val slot = cui.addInputSlot
-        i -> slot
-    }.toMap
+    val slots =
+      moleData.slots.groupBy(_.capsule).toList.map {
+        case (capsule, slots) ⇒
+          slots.sortBy(_.index).map {
+            data ⇒
+              val slot = capsuleUIMap(capsule).addInputSlot
+              data.id -> slot
+          }
+      }.flatten.toMap
 
     moleData.transitions.foreach {
       t ⇒
         val transition =
           new TransitionUI(
             capsuleUIMap(t.from),
-            slots(t.to),
+            slots(t.to.id),
             t.transitionType,
             t.condition,
             t.filtered.map(i ⇒ proxies.prototype(i.id).get))
@@ -67,7 +69,7 @@ object MoleData {
         val dataChannel =
           new DataChannelUI(
             capsuleUIMap(d.from),
-            slots(d.to),
+            slots(d.to.id),
             d.filtered)
         scene.add(dataChannel)
     }
@@ -81,9 +83,12 @@ object MoleData {
       }.toMap
 
     val slots =
-      scene.dataUI.capsules.flatMap {
-        case (_, c) ⇒ c.islots
-      }.zipWithIndex.toMap
+      scene.dataUI.capsules.map {
+        case (_, c) ⇒
+          c.inputSlots.zipWithIndex.map {
+            case (s, i) ⇒ s -> SlotData(capsules(s.capsule), i)
+          }
+      }.flatten.toMap
 
     val transitions =
       scene.dataUI.connectors.flatMap {
@@ -113,11 +118,11 @@ object MoleData {
       scene.dataUI.id,
       scene.dataUI.name,
       scene.dataUI.startingCapsule.map(capsules),
-      capsules.unzip._2,
-      slots.map { case (c, i) ⇒ SlotData(i, capsules(c.capsule)) },
-      transitions,
-      dataChannels,
-      scene.dataUI.plugins)
+      capsules.unzip._2.toList,
+      slots.unzip._2.toList,
+      transitions.toList,
+      dataChannels.toList,
+      scene.dataUI.plugins.toList)
 
   }
 
@@ -127,8 +132,8 @@ class MoleData(
   val id: ID.Type,
   val name: String,
   val startingCapsule: Option[CapsuleData],
-  val capsules: Iterable[CapsuleData],
-  val slots: Iterable[SlotData],
-  val transitions: Iterable[TransitionData],
-  val dataChannels: Iterable[DataChannelData],
-  val plugins: Iterable[String])
+  val capsules: List[CapsuleData],
+  val slots: List[SlotData],
+  val transitions: List[TransitionData],
+  val dataChannels: List[DataChannelData],
+  val plugins: List[String])

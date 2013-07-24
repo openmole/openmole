@@ -45,6 +45,8 @@ import org.openmole.core.model.data._
 import org.openmole.ide.core.implementation.builder.SceneFactory
 import org.openmole.ide.misc.tools.util._
 import org.openmole.ide.misc.tools.image.Images
+import org.openmole.ide.core.implementation.dataproxy.Proxies
+import org.openmole.ide.core.implementation.registry.PrototypeKey
 
 object CapsuleUI {
   def imageWidget(scene: IMoleScene, img: ImageIcon, x: Int, y: Int, action: Action) = new LinkedImageWidget(scene, img, x, y, action)
@@ -84,7 +86,7 @@ class CapsuleUI private (
   var inputPrototypeWidget: Option[PrototypeWidget] = None
   var outputPrototypeWidget: Option[PrototypeWidget] = None
   var selected = false
-  val islots = ListBuffer.empty[IInputSlotWidget]
+  val inputSlots = ListBuffer.empty[IInputSlotWidget]
   val oslot = new OutputSlotWidget(scene)
 
   val taskComponentWidget = new SceneComponentWidget(
@@ -113,7 +115,7 @@ class CapsuleUI private (
   addChild(titleWidget)
   addChild(oslot)
 
-  def nbInputSlots: Int = islots.size
+  def nbInputSlots: Int = inputSlots.size
 
   def setAsValid = {
     _isValid = true
@@ -143,7 +145,7 @@ class CapsuleUI private (
 
   def copy(sc: IBuildMoleScene) = {
     val c = CapsuleUI.withMenu(sc)
-    val slotMapping = islots.map(i ⇒ i -> c.addInputSlot).toMap
+    val slotMapping = inputSlots.map(i ⇒ i -> c.addInputSlot).toMap
     (c, slotMapping)
   }
 
@@ -155,7 +157,7 @@ class CapsuleUI private (
   }
 
   def update = {
-    islots.foreach(_.refresh)
+    inputSlots.foreach(_.refresh)
     updateEnvironmentWidget
     updateSamplingWidget
   }
@@ -279,57 +281,54 @@ class CapsuleUI private (
 
   def addInputSlot: IInputSlotWidget = {
     val im = new InputSlotWidget(scene, this, nbInputSlots)
-    islots += im
+    inputSlots += im
     addChild(im)
     scene.refresh
     im
   }
 
   def removeInputSlot = {
-    val toBeRemoved = islots.tail.last
+    val toBeRemoved = inputSlots.tail.last
     removeChild(toBeRemoved.widget)
-    islots -= toBeRemoved
+    inputSlots -= toBeRemoved
     scene.refresh
   }
 
-  def inputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IPrototypeDataProxyUI] = {
+  def inputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule]): List[IPrototypeDataProxyUI] = {
     if (cMap.contains(this)) {
       val caps = cMap(this)
       caps.inputs(
         mole,
-        Map(caps -> dataUI.sources.map { _.dataUI.coreObject(pMap) }),
-        Map(caps -> dataUI.hooks.map { _.dataUI.coreObject(pMap) })).toList.map {
-          ds ⇒
-            SceneFactory.prototype(ds.prototype)
+        Map(caps -> dataUI.sources.map { _.dataUI.coreObject.get }),
+        Map(caps -> dataUI.hooks.map { _.dataUI.coreObject.get })).toList.map {
+          ds ⇒ Proxies.instance.prototypeOrElseCreate(PrototypeKey(ds.prototype))
         }
     }
     else List()
   }
 
-  def outputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IPrototypeDataProxyUI] =
+  def outputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule]): List[IPrototypeDataProxyUI] =
     if (cMap.contains(this)) {
       val caps = cMap(this)
       caps.outputs(
         mole,
-        Map(caps -> dataUI.sources.map { _.dataUI.coreObject(pMap) }),
-        Map(caps -> dataUI.hooks.map { _.dataUI.coreObject(pMap) })).toList.map {
-          ds ⇒ SceneFactory.prototype(ds.prototype)
+        Map(caps -> dataUI.sources.map { _.dataUI.coreObject.get }),
+        Map(caps -> dataUI.hooks.map { _.dataUI.coreObject.get })).toList.map {
+          ds ⇒ Proxies.instance.prototypeOrElseCreate(PrototypeKey(ds.prototype))
         }
     }
     else List()
 
   def inputs: List[IPrototypeDataProxyUI] = {
     val i = scene.dataUI.cacheMole match {
-      case Some((m: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]])) ⇒
-        inputs(m, cMap, pMap)
+      case Some((m: IMole, cMap: Map[ICapsuleUI, ICapsule])) ⇒ inputs(m, cMap)
       case _ ⇒ List()
     }
     i
   }
 
   def outputs: List[IPrototypeDataProxyUI] = scene.dataUI.cacheMole match {
-    case Some((m: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]])) ⇒
-      outputs(m, cMap, pMap)
+    case Some((m: IMole, cMap: Map[ICapsuleUI, ICapsule])) ⇒ outputs(m, cMap)
     case _ ⇒ List()
   }
 

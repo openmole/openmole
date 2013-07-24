@@ -17,16 +17,14 @@
 
 package org.openmole.ide.core.implementation.sampling
 
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.model.sampling._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.sampling.{ Factor, DiscreteFactor, Sampling }
 import org.openmole.ide.core.model.data._
 import java.awt.Point
-import java.security.DomainCombiner
+import scala.util.Try
 import org.openmole.core.model.domain.{ Discrete, Domain }
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import collection.mutable.HashMap
 import scala.Some
 import org.openmole.core.model.data.Prototype
 
@@ -40,12 +38,9 @@ class SamplingCompositionDataUI(val name: String = "",
 
   type T = Domain[Any] with Discrete[Any]
 
-  val builtSampling = new HashMap[ISamplingOrDomainProxyUI, Sampling]
-
   def coreClass = classOf[Sampling]
 
-  def coreObject = {
-    builtSampling.clear
+  def coreObject = Try {
     val connectionMap = connections.groupBy {
       _._2
     }
@@ -68,46 +63,43 @@ class SamplingCompositionDataUI(val name: String = "",
   def buildSamplingCore(proxy: ISamplingOrDomainProxyUI,
                         connectionMap: Map[ISamplingOrDomainProxyUI, List[ISamplingOrDomainProxyUI]],
                         samplingMap: Map[String, (ISamplingProxyUI, Int)]): Sampling = {
-    if (!builtSampling.contains(proxy)) {
-      val partition = connectionMap.getOrElse(proxy, List()).partition {
-        _ match {
-          case s: ISamplingProxyUI ⇒ true
-          case d: IDomainProxyUI   ⇒ false
-        }
+    val partition = connectionMap.getOrElse(proxy, List()).partition {
+      _ match {
+        case s: ISamplingProxyUI ⇒ true
+        case d: IDomainProxyUI   ⇒ false
       }
+    }
 
-      val domainsForFactory = domains.filter {
-        d ⇒ partition._2.contains(d._1)
-      }.map {
-        _._1
-      }
+    val domainsForFactory = domains.filter {
+      d ⇒ partition._2.contains(d._1)
+    }.map {
+      _._1
+    }
 
-      builtSampling += proxy -> coreObject(proxy)
-
-      def coreObject(proxy: ISamplingOrDomainProxyUI): Sampling = {
-        proxy match {
-          case s: ISamplingProxyUI ⇒ s.dataUI.coreObject(factors.filter {
-            f ⇒ domainsForFactory.contains(f.dataUI.domain)
-          }.map(d ⇒ Left(toFactor(d.dataUI), d.dataUI.domain.ordering)) :::
-            partition._1.filterNot {
-              _.id == proxy.id
-            }.map {
-              p1 ⇒
-                Right(buildSamplingCore(samplingMap(p1.id)._1, connectionMap, samplingMap), samplingMap(p1.id)._2)
-            })
-          case d: IDomainProxyUI ⇒
-            factors.filter {
-              _.dataUI.domain.id == d.id
-            }.headOption match {
-              case Some(factor: IFactorProxyUI) ⇒ factor.dataUI.domain.dataUI.coreObject match {
-                case dd: T ⇒ DiscreteFactor(
-                  factor.dataUI.coreObject.asInstanceOf[Factor[Any, Domain[Any] with Discrete[Any]]])
+    def coreObject(proxy: ISamplingOrDomainProxyUI): Sampling = {
+      proxy match {
+        case s: ISamplingProxyUI ⇒ s.dataUI.coreObject(factors.filter {
+          f ⇒ domainsForFactory.contains(f.dataUI.domain)
+        }.map(d ⇒ Left(toFactor(d.dataUI), d.dataUI.domain.ordering)) :::
+          partition._1.filterNot {
+            _.id == proxy.id
+          }.map {
+            p1 ⇒
+              Right(buildSamplingCore(samplingMap(p1.id)._1, connectionMap, samplingMap), samplingMap(p1.id)._2)
+          }).get
+        case d: IDomainProxyUI ⇒
+          factors.find {
+            _.dataUI.domain.id == d.id
+          } match {
+            case Some(factor: IFactorProxyUI) ⇒
+              factor.dataUI.domain.dataUI.coreObject.get match {
+                case dd: T ⇒
+                  DiscreteFactor(factor.dataUI.coreObject.get.asInstanceOf[Factor[Any, Domain[Any] with Discrete[Any]]])
                 case _ ⇒ throw new UserBadDataError("Only Discrete Domain can be set as final Domain")
               }
-              case _ ⇒ throw new UserBadDataError("The final Domain is not properly set")
-            }
-          case _ ⇒ throw new UserBadDataError("The final Sampling is not properly set")
-        }
+            case _ ⇒ throw new UserBadDataError("The final Domain is not properly set")
+          }
+        case _ ⇒ throw new UserBadDataError("The final Sampling is not properly set")
       }
     }
 
@@ -119,8 +111,7 @@ class SamplingCompositionDataUI(val name: String = "",
         case _ ⇒ throw new UserBadDataError("No Prototype is define for the domain " + f.domain.dataUI.preview)
       }
 
-    builtSampling(proxy)
-
+    coreObject(proxy)
   }
 
   def imagePath = "img/samplingComposition.png"

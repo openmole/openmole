@@ -18,18 +18,16 @@
 package org.openmole.ide.core.model.data
 
 import org.openmole.ide.core.model.dataproxy._
-import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.ide.core.model.panel.ITaskPanelUI
-import org.openmole.ide.core.model.workflow.{ IMoleScene, ICapsuleUI }
-import org.openmole.core.model.mole.{ IMole, ICapsule }
+import scala.util.Try
 
 trait ITaskDataUI extends IDataUI with InputPrototype with OutputPrototype with ImplicitPrototype {
   def name: String
 
   override def toString: String = name
 
-  def coreObject(inputs: DataSet, outputs: DataSet, parameters: ParameterSet, plugins: PluginSet): ITask
+  def coreObject(plugins: PluginSet): Try[ITask]
 
   def filterPrototypeOccurencies(pproxy: IPrototypeDataProxyUI) = (filterInputs(pproxy) ++ filterOutputs(pproxy)).distinct
 

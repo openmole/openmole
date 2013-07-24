@@ -22,11 +22,12 @@ import org.openmole.ide.core.model.data.IHookDataUI
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import org.openmole.core.model.mole.IHook
 import org.openmole.ide.misc.tools.util.ID
+import scala.util.Success
 
-abstract class HookDataUI extends IHookDataUI with ID {
+abstract class HookDataUI extends IHookDataUI with CoreObjectInitialisation with ID {
   def implicitPrototypes: (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI]) =
-    MoleFactory.buildHook(this) match {
-      case (x: IHook) ⇒ ToolDataUI.implicitPrototypes(y ⇒ x.inputs.map { _.prototype }.toList, inputs, y ⇒ x.outputs.map { _.prototype }.toList, outputs)
-      case _          ⇒ (List(), List())
+    coreObject match {
+      case Success(x: IHook) ⇒ ToolDataUI.implicitPrototypes(y ⇒ x.inputs.map { _.prototype }.toList, inputs, y ⇒ x.outputs.map { _.prototype }.toList, outputs)
+      case _                 ⇒ (List(), List())
     }
 }

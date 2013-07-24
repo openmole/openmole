@@ -328,7 +328,7 @@ class SamplingCompositionPanelUI(val dataUI: ISamplingCompositionDataUI) extends
           case Some(f: IFactorProxyUI) ⇒
             f.dataUI.prototype match {
               case Some(p: IPrototypeDataProxyUI) ⇒
-                if (!building && !assignable(f.dataUI.domain.dataUI.domainType.runtimeClass, p.dataUI.protoType.runtimeClass))
+                if (!building && !assignable(f.dataUI.domain.dataUI.domainType.runtimeClass, p.dataUI.`type`.runtimeClass))
                   f.dataUI.prototype = None
               case _ ⇒
             }

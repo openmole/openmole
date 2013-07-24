@@ -20,16 +20,17 @@ package org.openmole.ide.core.implementation.data
 import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.builder.MoleFactory
-import org.openmole.core.model.task.ITask
+import org.openmole.core.model.task.{ PluginSet, ITask }
 import util.{ Failure, Success }
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.implementation.registry.{ PrototypeKey, KeyPrototypeGenerator }
+import org.openmole.ide.core.implementation.registry.{ PrototypeKey }
 import org.openmole.ide.core.model.commons.AggregationTransitionType
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 
-abstract class TaskDataUI extends ITaskDataUI {
+abstract class TaskDataUI extends ITaskDataUI with CoreObjectInitialisation {
 
   def implicitPrototypes: (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI]) =
-    MoleFactory.taskCoreObject(this) match {
+    coreObject(PluginSet.empty) match {
       case Success(x: ITask) ⇒ ToolDataUI.implicitPrototypes(y ⇒ x.inputs.map { _.prototype }.toList, inputs, y ⇒ x.outputs.map { _.prototype }.toList, outputs)
       case Failure(_)        ⇒ (List(), List())
     }
@@ -42,6 +43,6 @@ abstract class TaskDataUI extends ITaskDataUI {
         case _ ⇒ List()
       }
     }.map { p ⇒
-      KeyPrototypeGenerator.prototype(new PrototypeKey(p.dataUI.name, p.dataUI.protoType.runtimeClass, p.dataUI.dim + 1))
+      Proxies.instance.prototypeOrElseCreate(PrototypeKey(p.dataUI.name, p.dataUI.`type`.runtimeClass, p.dataUI.dim + 1))
     }
 }

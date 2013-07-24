@@ -17,7 +17,6 @@
 
 package org.openmole.ide.plugin.task.moletask
 
-import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.ITaskFactoryUI
 import org.openmole.core.model.task.ITask
 import org.openmole.ide.core.implementation.builder.SceneFactory
@@ -28,8 +27,6 @@ class MoleTaskFactoryUI extends ITaskFactoryUI {
   override def toString = "Mole Task"
 
   def buildDataUI = new MoleTaskDataUI
-
-  def category = ComponentCategories.TASK
 
   def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
     val t = SceneFactory.as[MoleTask](task)

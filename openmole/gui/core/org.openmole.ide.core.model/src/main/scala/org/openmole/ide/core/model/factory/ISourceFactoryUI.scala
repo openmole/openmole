@@ -25,4 +25,6 @@ trait ISourceFactoryUI extends IFactoryUI {
   def buildDataUI: ISourceDataUI
 
   def coreClass: Class[_ <: ISource]
+
+  def category = List("Sources")
 }

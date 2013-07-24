@@ -33,9 +33,12 @@ class AppendToCSVFileHookDataUI(val name: String = "",
   override def cloneWithoutPrototype(proxy: IPrototypeDataProxyUI) =
     new AppendToCSVFileHookDataUI(name, toBeHooked.filterNot(_ == proxy), fileName)
 
-  def coreObject(protoMapping: Map[IPrototypeDataProxyUI, Prototype[_]]) =
-    AppendToCSVFileHook(
+  def coreObject = util.Try {
+    val h = AppendToCSVFileHook(
       fileName,
-      toBeHooked.map { protoMapping }.toSeq: _*)
+      toBeHooked.map { _.dataUI.coreObject.get }.toSeq: _*)
+    initialise(h)
+    h
+  }
 
 }

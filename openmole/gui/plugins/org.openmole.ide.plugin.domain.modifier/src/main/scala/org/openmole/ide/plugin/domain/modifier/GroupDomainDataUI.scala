@@ -55,9 +55,9 @@ case class GroupDomainDataUI[S](val size: String = "0",
 
   def preview = "Group (" + size + ")"
 
-  override def coreObject = {
+  override def coreObject = util.Try {
     val valid = validPreviousDomains
-    if (valid._1) new GroupDomain(valid._2.head.asInstanceOf[Domain[S] with Discrete[S]], size.toInt)
+    if (valid._1) GroupDomain(valid._2.head.asInstanceOf[Domain[S] with Discrete[S]], size.toInt)
     else throw new UserBadDataError("No input domain has been found, it is required for a Group Domain.")
   }
 

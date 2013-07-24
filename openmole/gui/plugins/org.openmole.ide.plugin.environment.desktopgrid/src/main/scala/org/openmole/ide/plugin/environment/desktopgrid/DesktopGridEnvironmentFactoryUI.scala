@@ -17,7 +17,6 @@
 
 package org.openmole.ide.plugin.environment.desktopgrid
 
-import org.openmole.ide.core.implementation.panel.ComponentCategories
 import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
 
 class DesktopGridEnvironmentFactoryUI extends IEnvironmentFactoryUI {

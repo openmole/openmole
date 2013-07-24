@@ -11,7 +11,7 @@ import org.openmole.ide.core.model.data.IEnvironmentDataUI
 class LocalEnvironmentDataUI(val name: String = "",
                              val nbThread: Int = 1) extends IEnvironmentDataUI {
 
-  def coreObject = new LocalEnvironment(nbThread)
+  def coreObject = util.Try { LocalEnvironment(nbThread) }
 
   def coreClass = classOf[LocalEnvironment]
 

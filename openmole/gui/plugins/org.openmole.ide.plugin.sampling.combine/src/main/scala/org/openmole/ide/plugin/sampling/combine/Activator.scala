@@ -91,7 +91,7 @@ class Activator extends OSGiActivator with SamplingActivator {
                          bSC: IBuiltCompositionSampling) =
         sampling match {
           case cs: ZipWithIndexSampling ⇒
-            val proxy = new SamplingProxyUI(new ZipWithIndexSamplingDataUI(KeyRegistry.protoProxyKeyMap.get(KeyPrototypeGenerator(cs.index))))
+            val proxy = new SamplingProxyUI(new ZipWithIndexSamplingDataUI(KeyRegistry.protoProxyKeyMap.get(PrototypeKey(cs.index))))
             (proxy, Builder.buildConnectedSamplings(proxy, Seq(cs.sampling), bSC))
           case _ ⇒ (new SamplingProxyUI(buildDataUI), bSC)
         }
@@ -101,7 +101,7 @@ class Activator extends OSGiActivator with SamplingActivator {
       def fromCoreObject(sampling: Sampling,
                          bSC: IBuiltCompositionSampling) = sampling match {
         case cs: ZipWithNameSampling ⇒
-          val proxy = new SamplingProxyUI(new ZipWithNameSamplingDataUI((KeyRegistry.protoProxyKeyMap.get(KeyPrototypeGenerator(cs.name)))))
+          val proxy = new SamplingProxyUI(new ZipWithNameSamplingDataUI(KeyRegistry.protoProxyKeyMap.get(PrototypeKey(cs.name))))
           (proxy, Builder.buildConnectedSamplings(proxy, Seq(cs.factor), bSC))
         case _ ⇒ (new SamplingProxyUI(buildDataUI), bSC)
       }

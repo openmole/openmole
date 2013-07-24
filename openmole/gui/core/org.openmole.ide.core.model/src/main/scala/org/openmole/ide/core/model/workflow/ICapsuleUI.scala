@@ -52,11 +52,11 @@ trait ICapsuleUI {
 
   def inputs: List[IPrototypeDataProxyUI]
 
-  def inputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IPrototypeDataProxyUI]
+  def inputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule]): List[IPrototypeDataProxyUI]
 
   def outputs: List[IPrototypeDataProxyUI]
 
-  def outputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule], pMap: Map[IPrototypeDataProxyUI, Prototype[_]]): List[IPrototypeDataProxyUI]
+  def outputs(mole: IMole, cMap: Map[ICapsuleUI, ICapsule]): List[IPrototypeDataProxyUI]
 
   def update: Unit
 
@@ -66,7 +66,7 @@ trait ICapsuleUI {
 
   def y: Int
 
-  def islots: Buffer[IInputSlotWidget]
+  def inputSlots: Buffer[IInputSlotWidget]
 
   def setAsValid: Unit
 

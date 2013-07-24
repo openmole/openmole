@@ -19,8 +19,8 @@ package org.openmole.ide.plugin.domain.distribution
 
 import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.plugin.domain.distribution._
-import org.openmole.core.model.domain.Domain
 import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI }
+import util.Try
 
 class UniformLongDistributionDataUI extends UniformDistributionDataUI[Long] {
 
@@ -36,5 +36,5 @@ class UniformLongDistributionDataUI extends UniformDistributionDataUI[Long] {
 
   def coreClass = classOf[UniformIntDistribution]
 
-  def coreObject: Domain[Long] = new UniformLongDistribution
+  def coreObject = Try(UniformLongDistribution())
 }

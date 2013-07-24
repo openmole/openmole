@@ -31,5 +31,5 @@ trait ITaskFactoryUI extends IFactoryUI {
 
   def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap): ITaskDataProxyUI
 
-  def category: IComponentCategory
+  def category = List("Task")
 }

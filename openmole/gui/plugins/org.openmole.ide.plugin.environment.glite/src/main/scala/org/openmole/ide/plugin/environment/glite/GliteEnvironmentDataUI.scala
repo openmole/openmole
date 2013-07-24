@@ -32,7 +32,7 @@ class GliteEnvironmentDataUI(val name: String = "",
                              val architecture: Boolean = false,
                              val threads: Option[Int] = None) extends IEnvironmentDataUI {
 
-  def coreObject = {
+  def coreObject = util.Try {
 
     if (vo == "") throw new UserBadDataError(s"The VO in glite environment $name is not properly set")
     if (voms == "") throw new UserBadDataError(s"The VOMs in glite environment $name is not properly set")

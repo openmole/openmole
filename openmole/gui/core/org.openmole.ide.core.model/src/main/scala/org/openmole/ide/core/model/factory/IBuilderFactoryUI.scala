@@ -24,4 +24,5 @@ import org.openmole.ide.core.model.workflow.IMoleUI
 trait IBuilderFactoryUI extends IFactoryUI {
   def buildPanelUI(puzzle: List[Puzzle], puzzleSelection: Option[Puzzle], manager: IMoleUI): IBuilderPanelUI
   def name: String
+  def category = List("Builder")
 }
