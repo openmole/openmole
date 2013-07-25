@@ -81,6 +81,11 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
     val cnS = csv.map(_.getInputStream)
 
+    val encapsulate = params("encapsulate") match {
+      case "on" ⇒ true
+      case _    ⇒ false
+    }
+
     //TODO: make sure this is released
 
     new AsyncResult {
@@ -88,8 +93,8 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
         contentType = "text/html"
 
-        createMole(inS, cnS) match {
-          case Some(error) ⇒ ssp("/createMole", "body" -> "Please upload a serialized mole execution below!", "errors" -> List(error))
+        createMole(inS, cnS, encapsulate) match {
+          case Left(error) ⇒ ssp("/createMole", "body" -> "Please upload a serialized mole execution below!", "errors" -> List(error))
           case _           ⇒ redirect(url("execs"))
         }
       }
@@ -107,43 +112,24 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
       }
       case (_, error) ⇒ <error>{ error }</error>
     }
-  }
+  }*/
 
   post("/json/createMole") {
     contentType = formats("json")
 
-    val moleExec = processXMLFile[IPartialMoleExecution](fileParams.get("file"), fileParams.get("file").map(_.getInputStream))
-
-    val csv = fileParams.get("csv")
-
-    val cnS = csv.map(_.getInputStream)
-
-    val r = cnS map Source.fromInputStream
-
-    val regex = """(.*),(.*)""".r
-    val csvData = r.map(_.getLines().map(_ match {
-      case regex(name: String, data: String) ⇒ name -> data
-      case _                                 ⇒ throw new Exception("Invalidly formatted csv file")
-    }).toMap) getOrElse Map()
-
-    val context = ExecutionContext(new PrintStream(new File("./out")), None)
-
-    moleExec match {
-      case (Some(pEx), _) ⇒ {
-
-        val ctxt = reifyCSV(pEx, csvData)
-        val exec = pEx.toExecution(ctxt, context)
-
-        cachedMoles.add(exec.id, exec)
-
-        EventDispatcher.listen(exec, listener, classOf[IMoleExecution.JobStatusChanged])
-        EventDispatcher.listen(exec, listener, classOf[IMoleExecution.JobCreated])
-
-        Xml.toJson(<moleID>{ exec.id }</moleID>)
-      }
-      case (_, error) ⇒ Xml.toJson(<error>{ error }</error>)
+    val encapsulate = params get "encapsulate" match {
+      case Some("on") ⇒ true
+      case _          ⇒ false
     }
-  }*/
+
+    val res = createMole(fileParams get "file" map (_.getInputStream), fileParams get "csv" map (_.getInputStream), encapsulate)
+
+    res match {
+      case Left(error) ⇒ Xml.toJson(<error>{ error }</error>)
+      case Right(exec) ⇒ Xml.toJson(<moleID>{ exec.id }</moleID>)
+
+    }
+  }
 
   get("/execs") {
     new AsyncResult() {
@@ -163,7 +149,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
         val pRams = params("id")
 
         def returnStatusPage(exec: IMoleExecution) = {
-          val pageData = getMoleStats(exec)
+          val pageData = getMoleStats(exec) + ("Encapsulated" -> isEncapsulated(exec.id)) + ("id" -> exec.id) + ("status" -> getStatus(exec))
 
           ssp("/executionData", pageData.toSeq: _*)
         }
@@ -176,20 +162,25 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
     }
   }
 
-  /*get("/json/execs/:id") {
+  get("/json/execs/:id") {
     contentType = formats("json")
 
     val pRams = params("id")
 
-    render(("status", cachedMoles get pRams map getStatus getOrElse ("doesn't exist")) ~
-      ("stats", moleStats get pRams getOrElse (Stats.empty).toList))
+    val mole = getMole(pRams)
+
+    val stats = mole map getMoleStats getOrElse Stats.empty //TODO this shouldn't be necessary
+    val r = mole map getStatus getOrElse "doesn't exist"
+
+    render(("status", r) ~
+      ("stats", stats.toSeq))
   }
 
   get("/json/execs") {
     contentType = formats("json")
 
-    render(("execIds", cachedMoles.getKeys))
-  }*/
+    render(("execIds", getMoleKeys))
+  }
 
   get("/start/:id") {
     contentType = "text/html"
@@ -225,16 +216,16 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
         <exec-result> { res.getOrElse("id didn't exist") } </exec-result>
       }
     }
-  }
+  }*/
 
   get("/json/start/:id") {
     contentType = formats("json")
 
-    val exec = cachedMoles get params("id")
+    val exec = getMole(params("id"))
 
     render(("id", exec map (_.id) getOrElse "none") ~
       ("execResult", exec map { e ⇒ e.start; getStatus(e) } getOrElse "id didn't exist"))
-  }*/
+  }
 
   get("/json/remove/:id") {
     contentType = formats("json")

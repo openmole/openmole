@@ -22,6 +22,8 @@ import slick.driver.H2Driver.simple._
 import slick.jdbc.meta.MTable
 
 import Database.threadLocalSession
+import org.openmole.misc.workspace.Workspace
+import java.nio.file.Paths
 
 trait MoleHandling { self: SlickSupport ⇒
 
@@ -109,7 +111,7 @@ trait MoleHandling { self: SlickSupport ⇒
 
   }
 
-  def createMole(moleInput: ⇒ Option[InputStream], csvInput: ⇒ Option[InputStream]): Option[String] = {
+  def createMole(moleInput: ⇒ Option[InputStream], csvInput: ⇒ Option[InputStream], encapsulate: Boolean = false): Either[String, IMoleExecution] = {
     val r = csvInput map Source.fromInputStream
 
     val regex = """(.*),(.*)""".r
@@ -120,7 +122,11 @@ trait MoleHandling { self: SlickSupport ⇒
 
     val moleExec = processXMLFile[IPartialMoleExecution](moleInput)
 
-    val context = ExecutionContext(new PrintStream(new File("./out")), null)
+    val path: Option[File] = if (encapsulate) Some(Workspace.newDir(Paths.get("").toAbsolutePath.toString)) else None
+
+    println(path)
+
+    val context = ExecutionContext(new PrintStream(new File(path.getOrElse(".") + "/out")), path)
 
     moleExec match {
       case (Some(pEx), _) ⇒ {
@@ -130,14 +136,15 @@ trait MoleHandling { self: SlickSupport ⇒
         val clob = new SerialClob(SerializerService.serialize(exec).toCharArray)
 
         db withSession {
-          MoleData.insert((exec.id, getStatus(exec), clob))
+          val p = path map (_.getAbsolutePath) getOrElse "."
+          MoleData.insert((exec.id, getStatus(exec), clob, p))
         }
 
         cacheMole(exec)
 
-        None
+        Right(exec)
       }
-      case (_, error) ⇒ Some(error)
+      case (_, error) ⇒ Left(error)
     }
   }
 
@@ -168,8 +175,7 @@ trait MoleHandling { self: SlickSupport ⇒
     cachedMoles get key orElse mole
   }
 
-  def getMoleStats(mole: IMoleExecution) = (moleStats get mole.id getOrElse Stats.empty) + ("id" -> mole.id) + ("status" -> getStatus(mole)) + ("totalJobs" -> mole.moleJobs.size)
-
+  def getMoleStats(mole: IMoleExecution) = (moleStats get mole.id getOrElse Stats.empty) + ("totalJobs" -> mole.moleJobs.size)
   def startMole(key: String) { getMole(key) foreach (_.start) }
 
   def deleteMole(key: String) = {
@@ -188,6 +194,10 @@ trait MoleHandling { self: SlickSupport ⇒
       x.update(status)
       println(s"updated mole: ${mole.id} to ${status}")
     }
+  }
+
+  def isEncapsulated(key: String): Boolean = db withSession {
+    (for { m ← MoleData if m.id === key } yield !(m.path === ".")).list.forall(b ⇒ b)
   }
 }
 

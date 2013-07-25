@@ -31,3 +31,13 @@ class MoleStatusListener(mH: MoleHandling) extends EventListener[IMoleExecution]
     }
   }
 }
+
+import java.io.OutputStream
+
+class webStream extends OutputStream {
+  def write(p1: Int) {
+    storage += p1.toChar
+  }
+
+  var storage = ""
+}
