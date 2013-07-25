@@ -2,7 +2,7 @@ package org.openmole.web
 
 import org.openmole.misc.eventdispatcher.{ Event, EventListener }
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.mole.IMoleExecution.{ Starting, JobCreated, JobStatusChanged }
+import org.openmole.core.model.mole.IMoleExecution.{ Finished, Starting, JobCreated, JobStatusChanged }
 import org.openmole.core.model.job.State._
 
 /**
@@ -19,6 +19,15 @@ class JobEventListener(d: DataHandler[String, Stats.Stats]) extends EventListene
     event match {
       case x: JobCreated       ⇒ d.add(execution.id, updateMap(d get execution.id getOrElse Stats.empty, "Ready", _ + 1))
       case x: JobStatusChanged ⇒ d.add(execution.id, updateMap(updateMap(d get execution.id getOrElse Stats.empty, x.newState.name, _ + 1), x.oldState.name, _ - 1))
+    }
+  }
+}
+
+class MoleStatusListener(mH: MoleHandling) extends EventListener[IMoleExecution] {
+  override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = {
+    event match {
+      case x: Starting ⇒ mH.setStatus(execution, MoleHandling.Status.running)
+      case x: Finished ⇒ mH.setStatus(execution, MoleHandling.Status.finished)
     }
   }
 }

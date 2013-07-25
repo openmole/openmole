@@ -49,12 +49,6 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
   get("/index.html") {
     contentType = "text/html"
 
-    //todo: Move this to the Scalatra file.
-    db withSession {
-      if (MTable.getTables("MoleData").list().isEmpty)
-        MoleData.ddl.create // check that table exists somehow
-    }
-
     new AsyncResult() {
       val is = Future {
         ssp("/index.ssp")

@@ -33,6 +33,14 @@ trait MoleHandling { self: SlickSupport ⇒
   private val moleStats = new DataHandler[String, Stats.Stats](system)
 
   private val listener: EventListener[IMoleExecution] = new JobEventListener(moleStats)
+  private val mStatusListener = new MoleStatusListener(this)
+
+  db withSession {
+    if (MTable.getTables("MoleData").list().isEmpty)
+      MoleData.ddl.create // check that table exists somehow
+  }
+
+  (getUnfinishedMoleKeys map getMole).flatten foreach (_.start)
 
   def getStatus(exec: IMoleExecution): String = {
     if (!exec.started)
@@ -92,6 +100,15 @@ trait MoleHandling { self: SlickSupport ⇒
     Context(c.map(_.getOrElse(throw new Exception("CSV file does not have data on all missing variables"))))
   }
 
+  private def cacheMole(mole: IMoleExecution) = {
+    cachedMoles.add(mole.id, mole)
+    EventDispatcher.listen(mole, listener, classOf[IMoleExecution.JobStatusChanged])
+    EventDispatcher.listen(mole, listener, classOf[IMoleExecution.JobCreated])
+    EventDispatcher.listen(mole, mStatusListener, classOf[IMoleExecution.Starting])
+    EventDispatcher.listen(mole, mStatusListener, classOf[IMoleExecution.Finished])
+
+  }
+
   def createMole(moleInput: ⇒ Option[InputStream], csvInput: ⇒ Option[InputStream]): Option[String] = {
     val r = csvInput map Source.fromInputStream
 
@@ -115,9 +132,8 @@ trait MoleHandling { self: SlickSupport ⇒
         db withSession {
           MoleData.insert((exec.id, getStatus(exec), clob))
         }
-        cachedMoles.add(exec.id, exec)
-        EventDispatcher.listen(exec, listener, classOf[IMoleExecution.JobStatusChanged])
-        EventDispatcher.listen(exec, listener, classOf[IMoleExecution.JobCreated])
+
+        cacheMole(exec)
 
         None
       }
@@ -131,12 +147,16 @@ trait MoleHandling { self: SlickSupport ⇒
     } yield m.id.asColumnOf[String]).list
   }
 
+  private def getUnfinishedMoleKeys = db withSession {
+    (for (m ← MoleData if m.state === "Running") yield m.id.asColumnOf[String]).list
+  }
+
   def getMole(key: String): Option[IMoleExecution] = {
     lazy val mole: Option[IMoleExecution] = db withSession {
       val r = MoleData.filter(_.id === key).map(_.clobbedMole).list().headOption match {
         case Some(head) ⇒ {
           val r = SerializerService.deserialize[IMoleExecution](head.getAsciiStream)
-          cachedMoles.add(key, r)
+          cacheMole(r)
           Some(r)
         }
         case _ ⇒ None
@@ -160,5 +180,21 @@ trait MoleHandling { self: SlickSupport ⇒
     }
 
     ret
+  }
+
+  def setStatus(mole: IMoleExecution, status: String) = {
+    db withSession {
+      val x = for { m ← MoleData if m.id === mole.id } yield m.state
+      x.update(status)
+      println(s"updated mole: ${mole.id} to ${status}")
+    }
+  }
+}
+
+object MoleHandling {
+  object Status {
+    val running = "Running"
+    val finished = "Finished"
+    val stopped = "Stopped"
   }
 }
