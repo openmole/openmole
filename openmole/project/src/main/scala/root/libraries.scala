@@ -174,5 +174,7 @@ object Libraries extends Defaults(Apache) {
 
   lazy val jline = OsgiProject("net.sourceforge.jline") settings (libraryDependencies += "jline" % "jline" % "0.9.94", exportPackage := Seq("jline.*"))
 
+  lazy val arm = OsgiProject("com.jsuereth.scala-arm") settings (libraryDependencies += "com.jsuereth" %% "scala-arm" % "1.3", exportPackage := Seq("resource.*"))
+
   override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core", "runtime")) //TODO make library defaults
 }

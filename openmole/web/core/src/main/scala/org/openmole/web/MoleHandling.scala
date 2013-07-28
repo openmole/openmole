@@ -1,9 +1,9 @@
 package org.openmole.web
 
 import scala.reflect.ClassTag
-import scala.io.Source
+import scala.io.{ Codec, Source }
 import org.scalatra.servlet.FileItem
-import java.io.{ PrintStream, InputStream, File }
+import java.io._
 import org.openmole.core.serializer.SerializerService
 import com.thoughtworks.xstream.mapper.CannotResolveClassException
 import org.openmole.core.model.mole.IPartialMoleExecution
@@ -12,11 +12,13 @@ import org.openmole.misc.tools.io.FromString
 import org.openmole.core.implementation.validation.DataflowProblem.{ MissingSourceInput, MissingInput }
 import org.openmole.core.model.data.{ Context, Prototype, Variable }
 import org.openmole.core.implementation.validation.Validation
-import javax.sql.rowset.serial.SerialClob
+import javax.sql.rowset.serial.{ SerialBlob, SerialClob }
 import org.openmole.misc.eventdispatcher.{ EventListener, EventDispatcher }
 import org.slf4j.LoggerFactory
 import com.jolbox.bonecp.{ BoneCPDataSource, BoneCPConfig }
 import akka.actor.ActorSystem
+
+import resource._
 
 import slick.driver.H2Driver.simple._
 import slick.jdbc.meta.MTable
@@ -24,6 +26,11 @@ import slick.jdbc.meta.MTable
 import Database.threadLocalSession
 import org.openmole.misc.workspace.Workspace
 import java.nio.file.Paths
+import com.ice.tar.{ Tar, TarOutputStream }
+import org.openmole.misc.tools.io.TarArchiver.TarOutputStream2TarOutputStreamComplement
+import scala.Some
+import org.openmole.core.implementation.validation.DataflowProblem.MissingSourceInput
+import org.openmole.core.implementation.validation.DataflowProblem.MissingInput
 
 trait MoleHandling { self: SlickSupport ⇒
 
@@ -45,12 +52,9 @@ trait MoleHandling { self: SlickSupport ⇒
   (getUnfinishedMoleKeys map getMole).flatten foreach (_.start)
 
   def getStatus(exec: IMoleExecution): String = {
-    if (!exec.started)
-      "Stopped"
-    else if (!exec.finished)
-      "Running"
-    else
-      "Finished"
+    db withSession {
+      (for (m ← MoleData if m.id === exec.id) yield m.state).list().headOption.getOrElse("Doesn't Exist")
+    }
   }
 
   private def processXMLFile[A: ClassTag](is: Option[InputStream]): (Option[A], String) = { //Make Either[A, String], use Scala-arm.
@@ -122,7 +126,7 @@ trait MoleHandling { self: SlickSupport ⇒
 
     val moleExec = processXMLFile[IPartialMoleExecution](moleInput)
 
-    val path: Option[File] = if (encapsulate) Some(Workspace.newDir(Paths.get("").toAbsolutePath.toString)) else None
+    val path: Option[File] = if (encapsulate) Some(Workspace.newDir("")) else None
 
     println(path)
 
@@ -135,9 +139,11 @@ trait MoleHandling { self: SlickSupport ⇒
 
         val clob = new SerialClob(SerializerService.serialize(exec).toCharArray)
 
+        val outputBlob = new SerialBlob(Array[Byte]())
+
         db withSession {
           val p = path map (_.getAbsolutePath) getOrElse "."
-          MoleData.insert((exec.id, getStatus(exec), clob, p))
+          MoleData.insert((exec.id, MoleHandling.Status.stopped, clob, p, outputBlob))
         }
 
         cacheMole(exec)
@@ -160,6 +166,8 @@ trait MoleHandling { self: SlickSupport ⇒
 
   def getMole(key: String): Option[IMoleExecution] = {
     lazy val mole: Option[IMoleExecution] = db withSession {
+      /*val f = new File((for (m ← MoleData if m.id === key) yield m.path).list.head)
+      f.createNewFile()*/
       val r = MoleData.filter(_.id === key).map(_.clobbedMole).list().headOption match {
         case Some(head) ⇒ {
           val r = SerializerService.deserialize[IMoleExecution](head.getAsciiStream)
@@ -173,6 +181,11 @@ trait MoleHandling { self: SlickSupport ⇒
     }
 
     cachedMoles get key orElse mole
+  }
+
+  def getMoleResult(key: String) = db withSession {
+    val blob = (for (m ← MoleData if m.id === key) yield m.result).list.head
+    blob.getBytes(1, blob.length.toInt)
   }
 
   def getMoleStats(mole: IMoleExecution) = (moleStats get mole.id getOrElse Stats.empty) + ("totalJobs" -> mole.moleJobs.size)
@@ -198,6 +211,31 @@ trait MoleHandling { self: SlickSupport ⇒
 
   def isEncapsulated(key: String): Boolean = db withSession {
     (for { m ← MoleData if m.id === key } yield !(m.path === ".")).list.forall(b ⇒ b)
+  }
+
+  //TODO - FRAGILE
+  def storeResultBlob(exec: IMoleExecution) = db withSession {
+    println("starting the store op")
+    val path = new File((for (m ← MoleData if m.id === exec.id) yield m.path).list.head)
+    println(path)
+    val outFile = new File(Workspace.newFile.toString + ".tar")
+    outFile.createNewFile()
+    println(outFile)
+
+    try {
+      Tar.createDirectoryTar(path, outFile)
+
+      for (tis ← managed(Source.fromFile(outFile)(Codec.ISO8859))) {
+        val r = for (m ← MoleData if m.id === exec.id) yield m.result
+
+        val arr = tis.iter.toArray.map(_.toByte)
+        val blob = new SerialBlob(arr)
+        r.update(blob)
+      }
+    }
+    catch {
+      case e: Exception ⇒ e.printStackTrace(System.out)
+    }
   }
 }
 

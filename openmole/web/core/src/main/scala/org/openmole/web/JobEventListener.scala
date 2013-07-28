@@ -3,7 +3,9 @@ package org.openmole.web
 import org.openmole.misc.eventdispatcher.{ Event, EventListener }
 import org.openmole.core.model.mole.IMoleExecution
 import org.openmole.core.model.mole.IMoleExecution.{ Finished, Starting, JobCreated, JobStatusChanged }
-import org.openmole.core.model.job.State._
+import org.openmole.misc.tools.io.TarArchiver.TarOutputStream2TarOutputStreamComplement
+import com.ice.tar.TarOutputStream
+import java.io.ByteArrayOutputStream
 
 /**
  * Created with IntelliJ IDEA.
@@ -27,7 +29,10 @@ class MoleStatusListener(mH: MoleHandling) extends EventListener[IMoleExecution]
   override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = {
     event match {
       case x: Starting ⇒ mH.setStatus(execution, MoleHandling.Status.running)
-      case x: Finished ⇒ mH.setStatus(execution, MoleHandling.Status.finished)
+      case x: Finished ⇒ {
+        mH.setStatus(execution, MoleHandling.Status.finished)
+        mH.storeResultBlob(execution)
+      }
     }
   }
 }

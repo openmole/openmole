@@ -195,6 +195,11 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
     }
   }
 
+  get("/data/:id/data.tar") {
+    contentType = "application/octet-stream"
+    getMoleResult(params("id"))
+  }
+
   /*get("/xml/execs") {
     contentType = "text/xml"
 
