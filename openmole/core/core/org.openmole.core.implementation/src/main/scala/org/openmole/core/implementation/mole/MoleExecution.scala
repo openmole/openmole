@@ -161,6 +161,7 @@ class MoleExecution(
 
   def start(context: Context): this.type = {
     EventDispatcher.trigger(this, new IMoleExecution.Starting)
+    executionContext.directory.foreach(_.mkdirs)
     rootSubMoleExecution.newChild.submit(mole.root, context, nextTicket(rootTicket))
     if (allWaiting) submitAll
     this
