@@ -37,56 +37,17 @@ import org.openmole.misc.eventdispatcher.{ Event, EventListener }
 
 @MultipartConfig(maxFileSize = 3 * 1024 * 1024 /*max file size of 3 MiB*/ ) //research scala multipart config
 class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupport with ScalateSupport
-    with FileUploadSupport with FlashMapSupport with FutureSupport with JacksonJsonSupport {
+    with FileUploadSupport with FlashMapSupport with FutureSupport with JacksonJsonSupport with MoleHandling {
 
   protected implicit val jsonFormats: Formats = DefaultFormats.withBigDecimal
 
-  protected implicit def executor: concurrent.ExecutionContext = system.dispatcher
-
-  val cachedMoles = new DataHandler[String, IMoleExecution](system)
+  /*val cachedMoles = new DataHandler[String, IMoleExecution](system)
   val moleStats = new DataHandler[String, Stats.Stats](system)
 
-  val listener: EventListener[IMoleExecution] = new JobEventListener(moleStats)
-
-  def getStatus(exec: IMoleExecution): String = {
-    if (!exec.started)
-      "Stopped"
-    else if (!exec.finished)
-      "Running"
-    else
-      "Finished"
-  }
-
-  def processXMLFile[A: ClassTag](file: Option[FileItem], is: Option[InputStream]): (Option[A], String) = { //Make Either[A, String], use Scala-arm.
-    file match {
-      case Some(data) ⇒
-        if (data.getContentType.isDefined) {
-          try {
-            val ret = is.map(SerializerService.deserialize[A](_))
-            if (!ret.forall(evidence$1.runtimeClass.isInstance(_)))
-              None -> s"The uploaded xml is not a subtype of the type you wished to deserialize to: ${evidence$1.runtimeClass} vs ${ret.get.getClass}"
-            else
-              ret -> ""
-          }
-          catch {
-            case e: CannotResolveClassException ⇒ None -> "The uploaded xml was not a valid serialized object."
-            case c: ClassCastException          ⇒ None -> "Blargh"
-          }
-        }
-        else
-          None -> "The uploaded data was not of type text/xml"
-      case None ⇒ None -> "No data was uploaded."
-    }
-  }
+  val listener: EventListener[IMoleExecution] = new JobEventListener(moleStats)*/
 
   get("/index.html") {
     contentType = "text/html"
-
-    //todo: Move this to the Scalatra file.
-    db withSession {
-      if (MTable.getTables("MoleData").list().isEmpty)
-        MoleData.ddl.create // check that table exists somehow
-    }
 
     new AsyncResult() {
       val is = Future {
@@ -110,37 +71,6 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
     }
   }
 
-  def reifyCSV(mole: IPartialMoleExecution, csvData: Map[String, String]) = {
-    def fromString[T: FromString](s: String) = {
-      implicitly[FromString[T]].fromString(s)
-    }
-
-    def createVariable[T: FromString](mI: MissingInput) = csvData get mI.data.prototype.name map (d ⇒ Variable[T](mI.data.prototype.asInstanceOf[Prototype[T]], fromString[T](d)))
-
-    val a = Validation(mole.mole, sources = mole.sources, hooks = mole.hooks)
-    val mIS = a.map(_ match {
-      case x: MissingInput       ⇒ x
-      case y: MissingSourceInput ⇒ MissingInput(y.slot, y.input)
-      case _                     ⇒ throw new Exception("malformed partial mole")
-    })
-
-    val c = mIS.map { mI ⇒
-      mI.data.prototype.`type`.erasure match {
-        case t if t.equals(classOf[Int])    ⇒ createVariable[Int](mI)
-        case t if t.equals(classOf[Double]) ⇒ createVariable[Double](mI)
-        case t if t.equals(classOf[Float])  ⇒ createVariable[Float](mI)
-        case t if t.equals(classOf[BigInt]) ⇒ createVariable[BigInt](mI)
-        case t if t.equals(classOf[String]) ⇒ createVariable[String](mI)
-        case t if t.equals(classOf[File])   ⇒ createVariable[File](mI)
-        case _                              ⇒ throw new Exception(s"The missing parameter type: ${mI.data.prototype.`type`} is not known to the reification system.")
-      }
-    }
-
-    if (!mIS.isEmpty && c.isEmpty) throw new Exception("No parameters given")
-
-    Context(c.map(_.getOrElse(throw new Exception("CSV file does not have data on all missing variables"))))
-  }
-
   post("/createMole") {
 
     val data = fileParams.get("file")
@@ -151,6 +81,11 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
     val cnS = csv.map(_.getInputStream)
 
+    val encapsulate = params("encapsulate") match {
+      case "on" ⇒ true
+      case _    ⇒ false
+    }
+
     //TODO: make sure this is released
 
     new AsyncResult {
@@ -158,41 +93,15 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
         contentType = "text/html"
 
-        val r = cnS map Source.fromInputStream
-
-        val regex = """(.*),(.*)""".r
-        val csvData = r.map(_.getLines().map(_ match {
-          case regex(name: String, data: String) ⇒ name -> data
-          case _                                 ⇒ throw new Exception("Invalidly formatted csv file")
-        }).toMap) getOrElse Map()
-
-        val moleExec = processXMLFile[IPartialMoleExecution](data, inS)
-
-        val context = ExecutionContext(new PrintStream(new File("./out")), None)
-
-        moleExec match {
-          case (Some(pEx), _) ⇒ {
-            val ctxt = reifyCSV(pEx, csvData)
-            val exec = pEx.toExecution(ctxt, context)
-
-            val clob = new SerialClob(SerializerService.serialize(exec).toCharArray)
-
-            db withSession {
-              MoleData.insert((exec.id, getStatus(exec), clob))
-            }
-            cachedMoles.add(exec.id, exec)
-            EventDispatcher.listen(exec, listener, classOf[IMoleExecution.JobStatusChanged])
-            EventDispatcher.listen(exec, listener, classOf[IMoleExecution.JobCreated])
-
-            redirect(url("execs"))
-          }
-          case (_, error) ⇒ ssp("/createMole", "body" -> "Please upload a serialized mole execution below!", "errors" -> List(error))
+        createMole(inS, cnS, encapsulate) match {
+          case Left(error) ⇒ ssp("/createMole", "body" -> "Please upload a serialized mole execution below!", "errors" -> List(error))
+          case _           ⇒ redirect(url("execs"))
         }
       }
     }
   }
 
-  //todo: update this for async
+  /*//todo: update this for async
   post("/xml/createMole") {
     val moleExec = processXMLFile[IMoleExecution](fileParams.get("file"), fileParams.get("file").map(_.getInputStream))
 
@@ -203,41 +112,22 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
       }
       case (_, error) ⇒ <error>{ error }</error>
     }
-  }
+  }*/
 
   post("/json/createMole") {
     contentType = formats("json")
 
-    val moleExec = processXMLFile[IPartialMoleExecution](fileParams.get("file"), fileParams.get("file").map(_.getInputStream))
+    val encapsulate = params get "encapsulate" match {
+      case Some("on") ⇒ true
+      case _          ⇒ false
+    }
 
-    val csv = fileParams.get("csv")
+    val res = createMole(fileParams get "file" map (_.getInputStream), fileParams get "csv" map (_.getInputStream), encapsulate)
 
-    val cnS = csv.map(_.getInputStream)
+    res match {
+      case Left(error) ⇒ Xml.toJson(<error>{ error }</error>)
+      case Right(exec) ⇒ Xml.toJson(<moleID>{ exec.id }</moleID>)
 
-    val r = cnS map Source.fromInputStream
-
-    val regex = """(.*),(.*)""".r
-    val csvData = r.map(_.getLines().map(_ match {
-      case regex(name: String, data: String) ⇒ name -> data
-      case _                                 ⇒ throw new Exception("Invalidly formatted csv file")
-    }).toMap) getOrElse Map()
-
-    val context = ExecutionContext(new PrintStream(new File("./out")), None)
-
-    moleExec match {
-      case (Some(pEx), _) ⇒ {
-
-        val ctxt = reifyCSV(pEx, csvData)
-        val exec = pEx.toExecution(ctxt, context)
-
-        cachedMoles.add(exec.id, exec)
-
-        EventDispatcher.listen(exec, listener, classOf[IMoleExecution.JobStatusChanged])
-        EventDispatcher.listen(exec, listener, classOf[IMoleExecution.JobCreated])
-
-        Xml.toJson(<moleID>{ exec.id }</moleID>)
-      }
-      case (_, error) ⇒ Xml.toJson(<error>{ error }</error>)
     }
   }
 
@@ -246,13 +136,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
       contentType = "text/html"
 
       val is = Future {
-        db withSession {
-          val ids = for {
-            m ← MoleData
-          } yield m.id.asColumnOf[String]
-
-          ssp("/loadedExecutions", "ids" -> ids.list)
-        }
+        ssp("/loadedExecutions", "ids" -> getMoleKeys)
       }
     }
   }
@@ -264,26 +148,16 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
         val pRams = params("id")
 
-        val mole: Option[IMoleExecution] = db withSession {
-
-          MoleData.filter(_.id === pRams).map(_.clobbedMole).list().headOption match {
-            case Some(head) ⇒ Some(SerializerService.deserialize[IMoleExecution](head.getAsciiStream))
-            case _          ⇒ None
-          }
-        }
-
         def returnStatusPage(exec: IMoleExecution) = {
-          val pageData = (moleStats get exec.id getOrElse Stats.empty) + ("id" -> pRams) + ("status" -> getStatus(exec)) + ("totalJobs" -> exec.moleJobs.size)
+          val pageData = getMoleStats(exec) + ("Encapsulated" -> isEncapsulated(exec.id)) + ("id" -> exec.id) + ("status" -> getStatus(exec))
 
           ssp("/executionData", pageData.toSeq: _*)
         }
 
-        (cachedMoles.get(pRams), mole) match {
-          case (Some(exec), _)    ⇒ returnStatusPage(exec)
-          case (None, Some(exec)) ⇒ cachedMoles.add(exec.id, exec); returnStatusPage(exec)
-          case _                  ⇒ ssp("createMole", "body" -> mole.toString)
+        getMole(pRams) match {
+          case Some(exec) ⇒ returnStatusPage(exec)
+          case _          ⇒ ssp("createMole", "body" -> "")
         }
-
       }
     }
   }
@@ -293,14 +167,19 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
     val pRams = params("id")
 
-    render(("status", cachedMoles get pRams map getStatus getOrElse ("doesn't exist")) ~
-      ("stats", moleStats get pRams getOrElse (Stats.empty).toList))
+    val mole = getMole(pRams)
+
+    val stats = mole map getMoleStats getOrElse Stats.empty //TODO this shouldn't be necessary
+    val r = mole map getStatus getOrElse "doesn't exist"
+
+    render(("status", r) ~
+      ("stats", stats.toSeq))
   }
 
   get("/json/execs") {
     contentType = formats("json")
 
-    render(("execIds", cachedMoles.getKeys))
+    render(("execIds", getMoleKeys))
   }
 
   get("/start/:id") {
@@ -309,17 +188,19 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
     new AsyncResult() {
       val is = Future {
 
-        val exec = cachedMoles.get(params("id"))
-        println(exec)
-
-        exec foreach { x ⇒ x.start; println("started") }
+        startMole(params("id"))
 
         redirect("/execs/" + params("id"))
       }
     }
   }
 
-  get("/xml/execs") {
+  get("/data/:id/data.tar") {
+    contentType = "application/octet-stream"
+    getMoleResult(params("id"))
+  }
+
+  /*get("/xml/execs") {
     contentType = "text/xml"
 
     <mole-execs>
@@ -340,15 +221,34 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
         <exec-result> { res.getOrElse("id didn't exist") } </exec-result>
       }
     }
-  }
+  }*/
 
   get("/json/start/:id") {
     contentType = formats("json")
 
-    val exec = cachedMoles get params("id")
+    val exec = getMole(params("id"))
 
     render(("id", exec map (_.id) getOrElse "none") ~
       ("execResult", exec map { e ⇒ e.start; getStatus(e) } getOrElse "id didn't exist"))
+  }
+
+  get("/json/remove/:id") {
+    contentType = formats("json")
+
+    val exec = deleteMole(params("id"))
+
+    render(("id", exec map (_.id) getOrElse "none") ~
+      ("status", "deleted"))
+  }
+
+  get("/remove/:id") {
+    new AsyncResult() {
+      val is = Future {
+        deleteMole(params("id"))
+
+        redirect("/execs")
+      }
+    }
   }
 
   notFound {

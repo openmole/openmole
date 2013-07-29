@@ -6,6 +6,7 @@
 <%@ val Completed: Int %>
 <%@ val Failed: Int %>
 <%@ val Cancelled: Int %>
+<%@ val Encapsulated: Boolean %>
 
 
 #set (title)
@@ -21,5 +22,7 @@ Number of jobs: <%= totalJobs %><br>
 <br>
 Ready jobs: <%= Ready %> Running Jobs: <%= Running %><br>
 Completed jobs: <%= Completed %> Failed Jobs: <%= Failed %><br>
-Cancelled jobs: <%= Cancelled %>
+Cancelled jobs: <%= Cancelled %><br><br>
+
+<%= if(Encapsulated && status == "Finished") <a href={"/data/"+id+"/data.tar"}>data</a> %>
 

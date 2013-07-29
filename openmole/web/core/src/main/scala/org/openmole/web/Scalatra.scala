@@ -5,7 +5,7 @@ import org.scalatra._
 import javax.servlet.ServletContext
 import com.typesafe.config.ConfigFactory
 import slick.driver.H2Driver.simple._
-import java.sql.Clob
+import java.sql.{ Blob, Clob }
 
 /**
  * This is the Scalatra bootstrap file. You can use it to mount servlets or
@@ -29,10 +29,12 @@ class Scalatra extends LifeCycle {
   }
 }
 
-object MoleData extends Table[(String, String, Clob)]("MoleData") {
-  def id = column[String]("ID")
+object MoleData extends Table[(String, String, Clob, String, Blob)]("MoleData") {
+  def id = column[String]("ID", O.PrimaryKey)
   def state = column[String]("STATE")
   def clobbedMole = column[Clob]("MOLEEXEC")
+  def path = column[String]("path")
+  def result = column[Blob]("MOLERESULT")
 
-  def * = id ~ state ~ clobbedMole
+  def * = id ~ state ~ clobbedMole ~ path ~ result
 }

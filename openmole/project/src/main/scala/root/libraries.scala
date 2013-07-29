@@ -118,7 +118,10 @@ object Libraries extends Defaults(Apache) {
       Seq("ccl.northwestern.edu" % "netlogo" % "4.1.3",
         "org.picocontainer" % "picocontainer" % "2.8",
         "org.objectweb" % "asm" % "3.1",
-        "org.objectweb" % "asm-commons" % "3.1"), version := "4.1.3", scalaVersion := "2.8.0", bundleType := Set("all"))
+        "org.objectweb" % "asm-commons" % "3.1"), version := "4.1.3", scalaVersion := "2.8.0", bundleType := Set("all"),
+        ivyScala ~= { (is: Option[IvyScala]) ⇒ //should disable the binary compat warnings this causes
+          for (i ← is) yield i.copy(checkExplicit = false)
+        })
 
   lazy val netlogo5_noscala = OsgiProject("ccl.northwestern.edu.netlogo5.noscala", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("!scala.*", "*")) settings
@@ -126,7 +129,10 @@ object Libraries extends Defaults(Apache) {
       Seq("ccl.northwestern.edu" % "netlogo" % "5.0.4",
         "org.picocontainer" % "picocontainer" % "2.13.6",
         "org.objectweb" % "asm-all" % "3.3.1",
-        "org.scala-lang" % "scala-library" % "2.9.2"), version := "5.0.3", scalaVersion := "2.9.2", bundleType := Set("all"))
+        "org.scala-lang" % "scala-library" % "2.9.2"), version := "5.0.3", scalaVersion := "2.9.2", bundleType := Set("all"),
+        ivyScala ~= { (is: Option[IvyScala]) ⇒ //See netlogo4_noscala
+          for (i ← is) yield i.copy(checkExplicit = false)
+        })
 
   lazy val netlogo4 = OsgiProject("ccl.northwestern.edu.netlogo4", exports = Seq("org.nlogo.*"),
     privatePackages = Seq("*")) settings
@@ -167,6 +173,8 @@ object Libraries extends Defaults(Apache) {
   lazy val opencsv = OsgiProject("au.com.bytecode.opencsv") settings (libraryDependencies += "net.sf.opencsv" % "opencsv" % "2.0", bundleType := Set("plugin"))
 
   lazy val jline = OsgiProject("net.sourceforge.jline") settings (libraryDependencies += "jline" % "jline" % "0.9.94", exportPackage := Seq("jline.*"))
+
+  lazy val arm = OsgiProject("com.jsuereth.scala-arm") settings (libraryDependencies += "com.jsuereth" %% "scala-arm" % "1.3", exportPackage := Seq("resource.*"))
 
   override def OsgiSettings = super.OsgiSettings ++ Seq(bundleType := Set("core", "runtime")) //TODO make library defaults
 }

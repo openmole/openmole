@@ -10,7 +10,8 @@ Input-test page
 <%@ val body: String %>
 <b><%= unescape(body)%></b>
 <form name="data" action="/createMole" method="POST" enctype="multipart/form-data">
-    <input type="File" name="file"><br>
-    <input type="File" name="csv"><br>
+    Mole XML: <input type="File" name="file"><br>
+    CSV File (optional): <input type="File" name="csv"><br>
+    Encapsulate Mole: <input type="CheckBox" name="encapsulate"><br>
     <input type="Submit">
 </form>
