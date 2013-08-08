@@ -20,6 +20,7 @@ package org.openmole.core.implementation.mole
 import org.openmole.core.model.mole._
 import org.openmole.misc.workspace._
 import org.openmole.core.model.data._
+import java.util.UUID
 
 object PartialMoleExecution {
   def apply(
@@ -46,7 +47,7 @@ class PartialMoleExecution(
     val selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
     val grouping: Map[ICapsule, Grouping] = Map.empty,
     val profiler: Profiler = Profiler.empty,
-    val seed: Long = Workspace.newSeed) extends IPartialMoleExecution {
+    val seed: Long = Workspace.newSeed, val id: String = UUID.randomUUID().toString) extends IPartialMoleExecution {
 
   def toExecution(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local) = {
     new MoleExecution(mole,
@@ -55,6 +56,6 @@ class PartialMoleExecution(
       selection,
       grouping,
       profiler,
-      seed)
+      seed, s"$id:${implicits.hashCode.toString}") //hashcode may be fragile and too weak a hash, keep an eye on it
   }
 }

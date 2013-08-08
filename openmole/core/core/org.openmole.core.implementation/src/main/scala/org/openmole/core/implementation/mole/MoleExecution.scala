@@ -80,7 +80,8 @@ class MoleExecution(
     val selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
     val grouping: Map[ICapsule, Grouping] = Map.empty,
     val profiler: Profiler = Profiler.empty,
-    seed: Long = Workspace.newSeed)(implicit val implicits: Context = Context.empty, implicit val executionContext: ExecutionContext = ExecutionContext.local) extends IMoleExecution {
+    seed: Long = Workspace.newSeed,
+    override val id: String = UUID.randomUUID().toString)(implicit val implicits: Context = Context.empty, implicit val executionContext: ExecutionContext = ExecutionContext.local) extends IMoleExecution {
 
   import IMoleExecution._
   import MoleExecution._
@@ -88,8 +89,6 @@ class MoleExecution(
   private val _started = Ref(false)
   private val _canceled = Ref(false)
   private val _finished = Ref(false)
-
-  override val id = UUID.randomUUID.toString
 
   private val ticketNumber = Ref(0L)
   private val jobId = Ref(0L)

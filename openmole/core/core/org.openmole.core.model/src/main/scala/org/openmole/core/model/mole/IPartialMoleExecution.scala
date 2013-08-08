@@ -18,12 +18,15 @@
 package org.openmole.core.model.mole
 
 import org.openmole.core.model.data._
+import java.util.UUID
 
 trait IPartialMoleExecution {
   def mole: IMole
   def hooks: Hooks
   def sources: Sources
   def profiler: Profiler
+
+  def id: String
 
   def toExecution(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local): IMoleExecution
 }

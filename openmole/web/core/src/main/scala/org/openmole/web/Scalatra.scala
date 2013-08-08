@@ -29,12 +29,14 @@ class Scalatra extends LifeCycle {
   }
 }
 
-object MoleData extends Table[(String, String, Clob, String, Blob)]("MoleData") {
-  def id = column[String]("ID", O.PrimaryKey)
+object MoleData extends Table[(String, String, String, Clob, Clob, Boolean, Blob)]("MoleData") {
+  def id = column[String]("ID", O.PrimaryKey) //TODO: RENAME TO EXECID
+  def moleName = column[String]("MOLENAME")
   def state = column[String]("STATE")
   def clobbedMole = column[Clob]("MOLEEXEC")
-  def path = column[String]("path")
+  def clobbedContext = column[Clob]("CONTEXT")
+  def encapsulated = column[Boolean]("encapsulated")
   def result = column[Blob]("MOLERESULT")
 
-  def * = id ~ state ~ clobbedMole ~ path ~ result
+  def * = id ~ moleName ~ state ~ clobbedMole ~ clobbedContext ~ encapsulated ~ result
 }
