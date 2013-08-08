@@ -20,7 +20,6 @@ package org.openmole.ide.core.implementation.panel
 import org.openmole.ide.misc.widget.PopupMenu
 import scala.swing.Component
 import scala.swing.Menu
-import scala.swing.MenuItem
 import scala.swing.Button
 import scala.swing.MenuItem
 import scala.swing.event.ButtonClicked
@@ -28,8 +27,8 @@ import java.awt.Color
 import org.openmole.ide.misc.tools.image.Images._
 
 class PopupToolBarPresenter(t: String,
-                            basemenu: List[MenuItem],
                             bgColor: Color,
+                            basemenu: List[MenuItem] = List(),
                             fgColor: Color = Color.WHITE) extends Button(t) {
   val popup = new PopupMenu { basemenu.foreach { contents += } }
 
@@ -46,6 +45,11 @@ class PopupToolBarPresenter(t: String,
       case _                        ⇒
     }
     case ConceptChanged(item) ⇒ text = item.text
+  }
+
+  def +=(item: MenuItem) = {
+    popup.contents += item
+    listenTo(item)
   }
 
   def remove(c: Component) = c match {

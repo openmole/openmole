@@ -40,11 +40,8 @@ import scala.Some
 object ConceptMenu {
 
   def createAndDisplaySamplingComposition(index: Int) = displayExtra(Builder.samplingCompositionUI(false), index)
-
   def createAndDisplayPrototype(index: Int) = displayExtra(Builder.prototypeUI, index)
-
   def createAndDisplayPrototype = display(Builder.prototypeUI)
-
   def createAndDisplayHook(index: Int) = displayExtra(Builder.hookUI(false), index)
 
   val menuItemMapping = new HashMap[DataProxyUI, MenuItem]()
@@ -56,17 +53,19 @@ object ConceptMenu {
       else menu0(seq.tail, mapping.getOrElseUpdate(seq, {
         val child = new Menu(seq.head)
         m.contents += child
-        child
+        m
       }))
     }
     menu0(seq.tail, mapping.getOrElseUpdate(List(seq.head), new Menu(seq.head)))
   }
 
-  def menuItem[T](proxy: T, fact: FactoryUI, f: T ⇒ Unit): MenuItem = {
+  def menuItem[T](proxy: T, fact: FactoryUI, f: T ⇒ Unit, popup: PopupToolBarPresenter): MenuItem = {
     if (fact.category.isEmpty) menuItem(proxy, fact.toString, f)
     else {
       val m = menu(fact.category)
-      m.contents += menuItem(proxy, fact.toString, f)
+      val item = menuItem(proxy, fact.toString, f)
+      popup.listenTo(item)
+      m.contents += item
       m
     }
   }
@@ -86,17 +85,17 @@ object ConceptMenu {
     override def apply = f
   })
 
-  val taskMenu = new PopupToolBarPresenter("Task", List(menuItem(display(Builder.taskUI(false)))), new Color(107, 138, 166))
-  val environmentMenu = new PopupToolBarPresenter("Environment", List(menuItem(display(Builder.environmentUI(false)))), new Color(68, 120, 33))
-  val prototypeMenu = new PopupToolBarPresenter("Prototype", List(menuItem(display(Builder.prototypeUI))), new Color(212, 170, 0))
-  val samplingMenu = new PopupToolBarPresenter("Sampling", List(menuItem(display(Builder.samplingCompositionUI(false)))), new Color(255, 85, 85))
-  val sourceMenu = new PopupToolBarPresenter("Source", List(menuItem(display(Builder.sourceUI(false)))), new Color(60, 60, 60))
-  val hookMenu = new PopupToolBarPresenter("Hook", List(menuItem(display(Builder.hookUI(false)))), new Color(168, 120, 33))
+  val taskMenu = new PopupToolBarPresenter("Task", new Color(107, 138, 166), List(menuItem(display(Builder.taskUI(false)))))
+  val environmentMenu = new PopupToolBarPresenter("Environment", new Color(68, 120, 33), List(menuItem(display(Builder.environmentUI(false)))))
+  val prototypeMenu = new PopupToolBarPresenter("Prototype", new Color(212, 170, 0), List(menuItem(display(Builder.prototypeUI))))
+  val samplingMenu = new PopupToolBarPresenter("Sampling", new Color(255, 85, 85), List(menuItem(display(Builder.samplingCompositionUI(false)))))
+  val sourceMenu = new PopupToolBarPresenter("Source", new Color(60, 60, 60), List(menuItem(display(Builder.sourceUI(false)))))
+  val hookMenu = new PopupToolBarPresenter("Hook", new Color(168, 120, 33), List(menuItem(display(Builder.hookUI(false)))))
 
   def factoryName(d: DataUI, factories: List[DataProxyFactory]): String = {
     List(factories.find { f ⇒ f.buildDataProxyUI.dataUI.getClass.isAssignableFrom(d.getClass) }).flatten.map {
       _.factory.toString
-    }.headOption.getOrElse("AAAAAAAA")
+    }.headOption.getOrElse("")
   }
 
   def buildTaskMenu(f: TaskDataProxyUI ⇒ Unit, initDataUI: TaskDataUI) = {
@@ -104,12 +103,12 @@ object ConceptMenu {
     val factories = KeyRegistry.tasks.values.map {
       f ⇒ new TaskDataProxyFactory(f)
     }.toList.sortBy(_.factory.toString)
-
-    val tmenu = factories.map {
-      d ⇒ menuItem(d.buildDataProxyUI, d.factory, f)
-    }
-
-    new PopupToolBarPresenter(factoryName(initDataUI, factories), tmenu, new Color(107, 138, 166))
+    // Enforce to build PopupToolBarPresenter, cause Memu.contents still return an empty buffer (Bug SI-2362),
+    // so that it can be listened in the contructor as it is done the simple MenuItem
+    val popup = new PopupToolBarPresenter(factoryName(initDataUI, factories), new Color(107, 138, 166))
+    val items = factories.map { d ⇒ menuItem(d.buildDataProxyUI, d.factory, f, popup) }
+    items.foreach { popup+= }
+    popup
   }
 
   def buildEnvironmentMenu(f: EnvironmentDataProxyUI ⇒ Unit, initDataUI: EnvironmentDataUI) = {
@@ -118,11 +117,10 @@ object ConceptMenu {
       f ⇒ new EnvironmentDataProxyFactory(f)
     }.toList.sortBy(_.factory.toString)
 
-    val emenu = factories.map {
-      d ⇒ menuItem(d.buildDataProxyUI, d.factory, f)
-    }
-
-    new PopupToolBarPresenter(factoryName(initDataUI, factories), emenu, new Color(68, 120, 33))
+    val popup = new PopupToolBarPresenter(factoryName(initDataUI, factories), new Color(68, 120, 33))
+    val items = factories.map { d ⇒ menuItem(d.buildDataProxyUI, d.factory, f, popup) }
+    items.foreach { popup+= }
+    popup
   }
 
   def buildPrototypeMenu(f: PrototypeDataProxyUI ⇒ Unit) = {
@@ -130,7 +128,7 @@ object ConceptMenu {
     val pmenu = (GenericPrototypeDataUI.base ::: GenericPrototypeDataUI.extra).sortBy(_.toString).map {
       d ⇒ menuItem(PrototypeDataProxyUI(d), d.toString, f)
     }
-    new PopupToolBarPresenter("Prototype", pmenu, new Color(212, 170, 0))
+    new PopupToolBarPresenter("Prototype", new Color(212, 170, 0), pmenu)
   }
 
   def buildHookMenu(f: HookDataProxyUI ⇒ Unit, initDataUI: HookDataUI) = {
@@ -138,10 +136,11 @@ object ConceptMenu {
     val factories = KeyRegistry.hooks.values.map {
       f ⇒ new HookDataProxyFactory(f)
     }.toList.sortBy(_.factory.toString)
-    val hmenu = factories.map {
-      d ⇒ menuItem(d.buildDataProxyUI, d.factory, f)
-    }
-    new PopupToolBarPresenter(factoryName(initDataUI, factories), hmenu, new Color(168, 120, 33))
+
+    val popup = new PopupToolBarPresenter(factoryName(initDataUI, factories), new Color(168, 120, 33))
+    val items = factories.map { d ⇒ menuItem(d.buildDataProxyUI, d.factory, f, popup) }
+    items.foreach { popup+= }
+    popup
   }
 
   def buildSourceMenu(f: SourceDataProxyUI ⇒ Unit, initDataUI: SourceDataUI) = {
@@ -149,10 +148,11 @@ object ConceptMenu {
     val factories = KeyRegistry.sources.values.map {
       f ⇒ new SourceDataProxyFactory(f)
     }.toList.sortBy(_.factory.toString)
-    val smenu = factories.map {
-      d ⇒ menuItem(d.buildDataProxyUI, d.factory, f)
-    }
-    new PopupToolBarPresenter(factoryName(initDataUI, factories), smenu, new Color(60, 60, 60))
+
+    val popup = new PopupToolBarPresenter(factoryName(initDataUI, factories), new Color(60, 60, 60))
+    val items = factories.map { d ⇒ menuItem(d.buildDataProxyUI, d.factory, f, popup) }
+    items.foreach { popup+= }
+    popup
   }
 
   def -=(proxy: DataProxyUI) = {

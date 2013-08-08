@@ -27,7 +27,7 @@ class FirstOrderEffectTaskFactoryUI extends TaskFactoryUI {
 
   def buildDataUI = new FirstOrderEffectTaskDataUI
 
-  override def category = List("Task", "Saltelli")
+  override def category = List("Saltelli")
 
   def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = {
     val t = SceneFactory.as[FirstOrderEffectTask](task)

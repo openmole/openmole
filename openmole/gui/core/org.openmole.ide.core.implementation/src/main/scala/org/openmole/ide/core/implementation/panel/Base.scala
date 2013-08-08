@@ -23,9 +23,7 @@ import scala.swing.event.{ UIElementResized, MouseClicked }
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-trait Base extends //Components
-Created
-    with SavePanel {
+trait Base extends Created with SavePanel {
 
   val scene: MoleScene
 

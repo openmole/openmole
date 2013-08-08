@@ -21,25 +21,10 @@ import org.openmole.ide.misc.tools.image.Images._
 import java.awt.BorderLayout
 import org.openmole.ide.core.implementation.workflow.MoleScene
 
-/* Provides basic panel which :
- - can be closed
- - can be saved
- - provides with help
- - provides with panelUI
-*/
-
 trait Header extends CloseAction {
 
   def header(scene: MoleScene, index: Int) =
-    //new MyPanel {
-    //peer.setLayout(new BorderLayout)
-    // val northPanel =
-    //  new PluginPanel("wrap 2", "", "") {
-    //   contents +=
     new PluginPanel("", "[left]", "[top]") {
       contents += new ImageLinkLabel(CLOSE, closeAction(scene, index))
-      // }
-      //  }
-      // peer.add(northPanel.peer, BorderLayout.NORTH)
     }
 }

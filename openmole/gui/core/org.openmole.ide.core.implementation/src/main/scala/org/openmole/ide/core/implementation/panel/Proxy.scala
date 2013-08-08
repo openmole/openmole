@@ -56,7 +56,7 @@ trait Proxy {
     }
   }
 
-  class Composer extends PluginPanel("width 375::", "[left]", "[center]") {
+  class Composer extends PluginPanel("width 380::", "[left]", "[center]") {
 
     def addIcon(icon: Label) = contents += icon
 
