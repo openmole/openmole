@@ -209,11 +209,12 @@ abstract class MoleScene extends GraphScene.StringGraph
         }  */
         currentPanels(i).set(p, i)
         locate(i)
+        p.nameTextField.requestFocus
 
-        currentPanels(i).panel.contents.get(currentPanels(i).panel.contents.size - 1) match {
+        /* currentPanels(i).panel.contents.get(currentPanels(i).panel.contents.size - 1) match {
           case x: Proxy ⇒ x.nameTextField.requestFocus
           case _        ⇒
-        }
+        }     */
         refresh
         p
     }
@@ -250,8 +251,8 @@ abstract class MoleScene extends GraphScene.StringGraph
   def savePropertyPanel(i: Int): Unit = savePropertyPanel(currentPanels(i).base)
 
   def savePropertyPanel(panel: Option[Base]) = panel match {
-    case x: Base with SavePanel ⇒ x.savePanel
-    case _                      ⇒
+    case Some(x: Base with SavePanel) ⇒ x.savePanel
+    case _                            ⇒
   }
 
   def closePropertyPanels = for (x ← 0 to 2) closePropertyPanel(x)

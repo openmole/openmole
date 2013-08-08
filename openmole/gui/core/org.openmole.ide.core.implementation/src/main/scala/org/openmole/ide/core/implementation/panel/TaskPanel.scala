@@ -88,6 +88,7 @@ trait TaskPanel extends Base
       case x: DATAUI ⇒ proxy.dataUI = save(x, ioSave._1, ioSave._2, ioSave._3)
       case _         ⇒ StatusBar().warn("The current panel cannot be saved")
     }
+    ConceptMenu.refreshItem(proxy)
   }
 
   def deleteProxy = {
