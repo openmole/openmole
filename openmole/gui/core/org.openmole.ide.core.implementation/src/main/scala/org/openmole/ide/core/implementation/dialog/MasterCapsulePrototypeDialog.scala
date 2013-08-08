@@ -21,22 +21,18 @@ import java.awt.Dimension
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
-import org.openmole.ide.core.implementation.data.CheckData
-import org.openmole.ide.core.model.commons.MasterCapsuleType
-import org.openmole.ide.core.model.data.ICapsuleDataUI
-import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ITaskDataProxyUI }
-import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.workflow.IConnectorUI
-import org.openmole.ide.core.model.workflow.IConnectorUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget.multirow.MultiCombo._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.swing.ScrollPane
+import org.openmole.ide.core.implementation.dataproxy.{ TaskDataProxyUI, PrototypeDataProxyUI }
+import org.openmole.ide.core.implementation.workflow.CapsuleUI
+import org.openmole.ide.core.implementation.commons.MasterCapsuleType
 
 object MasterCapsulePrototypeDialog extends PrototypeDialog {
-  def display(capsuleUI: ICapsuleUI) = {
+  def display(capsuleUI: CapsuleUI) = {
     capsuleUI.dataUI.capsuleType match {
       case x: MasterCapsuleType ⇒
         openable(capsuleUI) match {
@@ -55,8 +51,8 @@ object MasterCapsulePrototypeDialog extends PrototypeDialog {
   }
 
   class MasterCapsulePrototypeDialog(
-      task: ITaskDataProxyUI,
-      persistList: Seq[IPrototypeDataProxyUI]) extends PluginPanel("") {
+      task: TaskDataProxyUI,
+      persistList: Seq[PrototypeDataProxyUI]) extends PluginPanel("") {
     preferredSize = new Dimension(250, 300)
     val multiPrototypeCombo = new MultiCombo("Persistent Prototypes",
       task.dataUI.outputs,

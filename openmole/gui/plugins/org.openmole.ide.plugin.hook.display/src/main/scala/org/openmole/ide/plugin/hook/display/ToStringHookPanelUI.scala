@@ -17,12 +17,12 @@
 
 package org.openmole.ide.plugin.hook.display
 
-import org.openmole.ide.core.model.panel.IHookPanelUI
 import org.openmole.ide.plugin.misc.tools.MultiPrototypePanel
 import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.core.implementation.panelsettings.HookPanelUI
 
-class ToStringHookPanelUI(dataUI: ToStringHookDataUI) extends PluginPanel("") with IHookPanelUI {
+class ToStringHookPanelUI(dataUI: ToStringHookDataUI) extends PluginPanel("") with HookPanelUI {
 
   val combo = new MultiPrototypePanel("Display prototypes",
     dataUI.toBeHooked,

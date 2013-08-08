@@ -17,9 +17,9 @@
 
 package org.openmole.ide.core.implementation.registry
 
-import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
+import org.openmole.ide.core.implementation.factory.IEnvironmentFactoryUI
 
 trait EnvironmentActivator extends BundleActivator {
 

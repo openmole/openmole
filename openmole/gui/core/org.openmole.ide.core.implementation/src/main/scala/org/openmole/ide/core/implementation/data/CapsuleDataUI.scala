@@ -17,50 +17,52 @@
 
 package org.openmole.ide.core.implementation.data
 
-import org.openmole.ide.core.model.commons._
-import org.openmole.ide.core.model.data._
-import org.openmole.ide.core.model.dataproxy._
-import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.core.implementation.mole.{ StrainerCapsule, MasterCapsule, Capsule }
-import org.openmole.ide.core.implementation.workflow.CapsulePanelUI
-import org.openmole.ide.core.implementation.builder.MoleFactory
+import org.openmole.ide.core.implementation.workflow.{ IMoleUI, CapsulePanelUI }
 import java.io.File
 import org.openmole.core.model.task.{ PluginSet, ITask }
 import org.openmole.core.implementation.task.EmptyTask
-import org.openmole.ide.core.implementation.dialog.StatusBar
 import util.{ Success, Failure }
-import org.openmole.ide.core.model.workflow.IMoleUI
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.implementation.dataproxy.{ TaskDataProxyUI, SourceDataProxyUI, HookDataProxyUI, EnvironmentDataProxyUI }
+import org.openmole.ide.core.implementation.commons.{ StrainerCapsuleType, SimpleCapsuleType, MasterCapsuleType, CapsuleType }
 
 object CapsuleDataUI {
   def apply(
-    task: Option[ITaskDataProxyUI] = None,
-    environment: Option[IEnvironmentDataProxyUI] = None,
-    grouping: Option[IGroupingDataUI] = None,
-    sources: Seq[ISourceDataProxyUI] = List(),
-    hooks: Seq[IHookDataProxyUI] = List(),
+    task: Option[TaskDataProxyUI] = None,
+    environment: Option[EnvironmentDataProxyUI] = None,
+    grouping: Option[GroupingDataUI] = None,
+    sources: Seq[SourceDataProxyUI] = List(),
+    hooks: Seq[HookDataProxyUI] = List(),
     capsuleType: CapsuleType = SimpleCapsuleType) = new CapsuleDataUI(task, environment, grouping, sources.map(s ⇒ Some(s)), hooks.map(h ⇒ Some(h)), capsuleType)
 }
 
 class CapsuleDataUI(
-    val task: Option[ITaskDataProxyUI],
-    val environment: Option[IEnvironmentDataProxyUI],
-    val grouping: Option[IGroupingDataUI],
-    val sourcesOptions: Seq[Option[ISourceDataProxyUI]],
-    val hooksOptions: Seq[Option[IHookDataProxyUI]],
-    val capsuleType: CapsuleType) extends ICapsuleDataUI {
+    val task: Option[TaskDataProxyUI],
+    val environment: Option[EnvironmentDataProxyUI],
+    val grouping: Option[GroupingDataUI],
+    val sourcesOptions: Seq[Option[SourceDataProxyUI]],
+    val hooksOptions: Seq[Option[HookDataProxyUI]],
+    val capsuleType: CapsuleType) extends DataUI { capsuleDataUI ⇒
+
+  val name = ""
 
   override def toString = task match {
-    case Some(x: ITaskDataProxyUI) ⇒ x.dataUI.name
-    case _                         ⇒ ""
+    case Some(x: TaskDataProxyUI) ⇒ x.dataUI.name
+    case _                        ⇒ ""
   }
 
   def coreClass = classOf[Capsule]
 
-  def buildPanelUI(index: Int) = new CapsulePanelUI(this, index)
+  def buildPanelUI: CapsulePanelUI = buildPanelUI(0)
+
+  def buildPanelUI(index: Int): CapsulePanelUI = new CapsulePanelUI {
+    override type DATAUI = CapsuleDataUI
+    val dataUI = capsuleDataUI
+  }
 
   def coreObject(moleDataUI: IMoleUI) = task match {
-    case Some(t: ITaskDataProxyUI) ⇒
+    case Some(t: TaskDataProxyUI) ⇒
       t.dataUI.coreObject(PluginSet(moleDataUI.plugins.map { p ⇒ new File(p) })) match {
         case Success(x: ITask) ⇒ capsuleType match {
           case y: MasterCapsuleType ⇒ (new MasterCapsule(x, y.persistList.map { _.dataUI.name }.toSet), None)
@@ -73,12 +75,16 @@ class CapsuleDataUI(
       (new Capsule(EmptyTask("None")), Some(new UserBadDataError(s"The capsule $name is empty")))
   }
 
+  def hooks = hooksOptions.flatten
+
+  def sources = sourcesOptions.flatten
+
   def copy(
-    task: Option[ITaskDataProxyUI] = task,
-    environment: Option[IEnvironmentDataProxyUI] = environment,
-    grouping: Option[IGroupingDataUI] = grouping,
-    sources: Seq[ISourceDataProxyUI] = sources,
-    hooks: Seq[IHookDataProxyUI] = hooks,
-    capsuleType: CapsuleType = capsuleType): ICapsuleDataUI =
+    task: Option[TaskDataProxyUI] = task,
+    environment: Option[EnvironmentDataProxyUI] = environment,
+    grouping: Option[GroupingDataUI] = grouping,
+    sources: Seq[SourceDataProxyUI] = sources,
+    hooks: Seq[HookDataProxyUI] = hooks,
+    capsuleType: CapsuleType = capsuleType): CapsuleDataUI =
     CapsuleDataUI(task, environment, grouping, sources, hooks, capsuleType)
 }

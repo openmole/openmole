@@ -23,15 +23,13 @@ import java.awt.Graphics2D
 import java.awt.Point
 import java.awt.RenderingHints
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
-import org.openmole.ide.core.model.sampling._
-import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.MigPanel
 import java.awt.LinearGradientPaint
+import org.openmole.ide.core.implementation.workflow.ISceneContainer
 
-class SamplingWidget(val proxy: ISamplingProxyUI,
-                     val scenePanelUI: ISamplingCompositionPanelUI,
+class SamplingWidget(val proxy: SamplingProxyUI,
+                     val scenePanelUI: SamplingCompositionPanelUI,
                      display: Boolean = false) extends MigPanel("wrap", "[center]", "[center]") with ISamplingWidget {
   samplingWidget ⇒
   preferredSize = new Dimension(100, 38)

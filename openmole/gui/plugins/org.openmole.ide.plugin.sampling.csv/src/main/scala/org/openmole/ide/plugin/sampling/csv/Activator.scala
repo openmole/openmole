@@ -19,23 +19,22 @@ package org.openmole.ide.plugin.sampling.csv
 
 import org.openmole.ide.core.implementation.registry._
 import org.openmole.ide.core.implementation.builder._
-import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 import org.openmole.core.model.sampling.Sampling
-import org.openmole.ide.core.model.sampling.IBuiltCompositionSampling
 import org.openmole.plugin.sampling.csv.CSVSampling
-import org.openmole.ide.core.implementation.sampling.SamplingProxyUI
+import org.openmole.ide.core.implementation.sampling.{ IBuiltCompositionSampling, SamplingProxyUI }
+import org.openmole.ide.core.implementation.factory.SamplingFactoryUI
 
 class Activator extends OSGiActivator with SamplingActivator {
 
-  override def samplingFactories = List(new ISamplingFactoryUI {
+  override def samplingFactories = List(new SamplingFactoryUI {
     def buildDataUI = new CSVSamplingDataUI
 
     def fromCoreObject(sampling: Sampling, bSC: IBuiltCompositionSampling) = {
       sampling match {
         case cs: CSVSampling ⇒
-          val proxy = new SamplingProxyUI(new CSVSamplingDataUI(cs.file.getCanonicalPath))
+          val proxy = SamplingProxyUI(new CSVSamplingDataUI(cs.file.getCanonicalPath))
           (proxy, Builder.buildConnectedSamplings(proxy, Seq(), bSC))
-        case _ ⇒ (new SamplingProxyUI(buildDataUI), bSC)
+        case _ ⇒ (SamplingProxyUI(buildDataUI), bSC)
       }
     }
   })

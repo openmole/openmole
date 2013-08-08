@@ -17,11 +17,9 @@
 
 package org.openmole.ide.core.implementation.dataproxy
 
-import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyFactory
-import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
-import scala.collection.JavaConversions._
+import org.openmole.ide.core.implementation.factory.IEnvironmentFactoryUI
 
-class EnvironmentDataProxyFactory(val factory: IEnvironmentFactoryUI) extends IEnvironmentDataProxyFactory {
+class EnvironmentDataProxyFactory(val factory: IEnvironmentFactoryUI) extends DataProxyFactory {
 
-  override def buildDataProxyUI = new EnvironmentDataProxyUI(factory.buildDataUI)
+  override def buildDataProxyUI = EnvironmentDataProxyUI(factory.buildDataUI)
 }

@@ -16,20 +16,19 @@
  */
 package org.openmole.ide.plugin.sampling.combine
 
-import org.openmole.ide.core.model.data.{ IDomainDataUI, IFactorDataUI, ISamplingDataUI }
 import org.openmole.core.model.sampling.{ Factor, DiscreteFactor, Sampling }
 import org.openmole.plugin.sampling.combine.{ ZipSampling, ZipWithIndexSampling }
-import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.misc.widget.{ URL, Helper }
 import org.openmole.core.model.domain.{ Discrete, Domain }
-import org.openmole.ide.core.implementation.sampling.SamplingUtils
+import org.openmole.ide.core.implementation.sampling.{ FiniteUI, SamplingUtils }
+import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
-class ZipWithIndexSamplingDataUI(val prototype: Option[IPrototypeDataProxyUI] = None)
-    extends ISamplingDataUI with ZipWithPrototypeSamplingDataUI {
+class ZipWithIndexSamplingDataUI(val prototype: Option[PrototypeDataProxyUI] = None)
+    extends SamplingDataUI with ZipWithPrototypeSamplingDataUI {
 
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
     ZipWithIndexSampling(SamplingUtils.toUnorderedFactorsAndSamplings(factorOrSampling).headOption.getOrElse(throw new UserBadDataError("A samplingMap is required to build a Zip with index Sampling")),
@@ -37,17 +36,17 @@ class ZipWithIndexSamplingDataUI(val prototype: Option[IPrototypeDataProxyUI] = 
 
   }
   def buildPanelUI = new ZipWithPrototypeSamplingPanelUI(this) {
-    override def help = new Helper(List(new URL(i18n.getString("zipWithIndexPermalinkText"), i18n.getString("zipWithIndexPermalink"))))
+    override lazy val help = new Helper(List(new URL(i18n.getString("zipWithIndexPermalinkText"), i18n.getString("zipWithIndexPermalink"))))
   }
 
-  def imagePath = "img/zipWithIndexSampling.png"
+  override def imagePath = "img/zipWithIndexSampling.png"
 
   def fatImagePath = "img/zipWithIndexSampling_fat.png"
 
-  def isAcceptable(sampling: ISamplingDataUI) = true
+  def isAcceptable(sampling: SamplingDataUI) = true
 
-  override def isAcceptable(domain: IDomainDataUI) = domain match {
-    case f: IFinite ⇒ true
+  override def isAcceptable(domain: DomainDataUI) = domain match {
+    case f: FiniteUI ⇒ true
     case _ ⇒
       StatusBar().warn("A Finite Domain is required for a Zip with index Sampling")
       false

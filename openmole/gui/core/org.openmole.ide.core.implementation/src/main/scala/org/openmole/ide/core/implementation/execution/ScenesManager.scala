@@ -22,30 +22,20 @@ import java.awt.Color
 import java.awt.Dimension
 import java.awt.Point
 import java.util.concurrent.atomic.AtomicInteger
-import org.openmole.ide.core.model.data.IExplorationTaskDataUI
-import org.openmole.ide.core.implementation.data.CheckData
+import org.openmole.ide.core.implementation.data.{ IExplorationTaskDataUI, CheckData }
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.model.workflow._
-import org.openmole.ide.core.model.dataproxy.{ IDataProxyUI, ITaskDataProxyUI }
 import org.openmole.ide.misc.widget.MigPanel
-import org.openmole.ide.misc.tools.util._
 import org.openmole.ide.misc.tools.image.Images._
 import scala.swing.Action
 import scala.swing.Button
 import scala.swing.Label
 import scala.swing.TabbedPane
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
-import org.openmole.ide.core.implementation.builder.SceneFactory
-import util.{ Failure, Success }
 import concurrent.stm._
-import util.Failure
+import util.{ Failure, Success }
 import scala.Some
-import util.Success
-import util.Failure
-import scala.Some
-import util.Success
-import swing.event.ButtonClicked
+import org.openmole.ide.core.implementation.dataproxy.{ TaskDataProxyUI, DataProxyUI }
+import org.openmole.ide.core.implementation.sampling.SamplingCompositionPanelUI
 
 object ScenesManager {
 
@@ -53,7 +43,7 @@ object ScenesManager {
 
   var countBuild = new AtomicInteger
   var countExec = new AtomicInteger
-  val _selection: Ref[Option[List[ICapsuleUI]]] = Ref(None)
+  val _selection: Ref[Option[List[CapsuleUI]]] = Ref(None)
 
   def invalidateSelection = _selection.single() = None
 
@@ -75,7 +65,7 @@ object ScenesManager {
 
   PasswordListner.apply
 
-  def isInSelection(capsule: ICapsuleUI) = selection.contains(capsule)
+  def isInSelection(capsule: CapsuleUI) = selection.contains(capsule)
 
   def buildMoleSceneContainers = tabPane.pages.flatMap(_.content match {
     case x: BuildMoleSceneContainer ⇒ List(x)
@@ -95,35 +85,35 @@ object ScenesManager {
     case _                         ⇒ None
   }
 
-  def displayExtraPropertyPanel(proxy: IDataProxyUI) = {
+  def displayExtraPropertyPanel(proxy: DataProxyUI) = {
     currentScene.getOrElse(addBuildSceneContainer("Mole").scene).displayPropertyPanel(proxy, 1)
   }
 
   def currentPanelUI = currentScene match {
-    case Some(s: IMoleScene) ⇒ s.currentPanelUI
-    case _                   ⇒ throw new UserBadDataError("There is no current scene")
+    case Some(s: MoleScene) ⇒ s.currentPanelUI
+    case _                  ⇒ throw new UserBadDataError("There is no current scene")
   }
 
   def currentSamplingCompositionPanelUI = currentPanelUI match {
-    case scp: ISamplingCompositionPanelUI ⇒ scp
-    case _                                ⇒ throw new UserBadDataError("There is no current samplingMap panel")
+    case scp: SamplingCompositionPanelUI ⇒ scp
+    case _                               ⇒ throw new UserBadDataError("There is no current samplingMap panel")
   }
 
   def closePropertyPanel = List(currentScene).flatten.foreach {
     _.closePropertyPanels
   }
 
-  def changeSelection(widget: ICapsuleUI) = {
+  def changeSelection(widget: CapsuleUI) = {
     widget.selected = !widget.selected
     invalidateSelection
   }
 
-  def addToSelection(widget: ICapsuleUI) = {
+  def addToSelection(widget: CapsuleUI) = {
     widget.selected = true
     invalidateSelection
   }
 
-  def removeFromSelection(widget: ICapsuleUI) = {
+  def removeFromSelection(widget: CapsuleUI) = {
     widget.selected = false
     invalidateSelection
   }
@@ -135,7 +125,7 @@ object ScenesManager {
     invalidateSelection
   }
 
-  def pasteCapsules(ms: IBuildMoleScene,
+  def pasteCapsules(ms: BuildMoleScene,
                     point: Point) = {
     val copied = selection.map {
       z ⇒
@@ -155,8 +145,8 @@ object ScenesManager {
         ms.add(neo._1, p)
         neo._1.environment_=(old.dataUI.environment)
         old.dataUI.task match {
-          case Some(t: ITaskDataProxyUI) ⇒ neo._1.encapsule(t)
-          case _                         ⇒
+          case Some(t: TaskDataProxyUI) ⇒ neo._1.encapsule(t)
+          case _                        ⇒
         }
         ms.refresh
       case _ ⇒
@@ -166,13 +156,13 @@ object ScenesManager {
       _.islots
     }
     selection.headOption match {
-      case Some(c: ICapsuleUI) ⇒
+      case Some(c: CapsuleUI) ⇒
         val connectors = c.scene.dataUI.connectors.values.toList
         connectors.foreach {
           con ⇒
             if (selection.contains(con.source) && islots.contains(con.target)) {
               con match {
-                case (t: ITransitionUI) ⇒
+                case (t: TransitionUI) ⇒
                   val transition = new TransitionUI(
                     copied(t.source)._1,
                     copied(t.target.capsule)._1.islots.find {
@@ -182,7 +172,7 @@ object ScenesManager {
                     t.condition,
                     t.filteredPrototypes)
                   ms.add(transition)
-                case (t: IDataChannelUI) ⇒
+                case (t: DataChannelUI) ⇒
                   val dc = new DataChannelUI(
                     copied(t.source)._1,
                     copied(t.target.capsule)._1.islots.find {
@@ -205,15 +195,19 @@ object ScenesManager {
     case _                        ⇒ None
   }
 
+  def invalidateSceneCaches = moleScenes foreach { _.dataUI.invalidateCache }
+
+  def refreshScenes = moleScenes foreach { _.refresh }
+
   def moleScenes = buildMoleSceneContainers.map {
     _.scene
   }
 
-  def capsules: List[ICapsuleUI] = moleScenes.map {
+  def capsules: List[CapsuleUI] = moleScenes.map {
     _.dataUI.capsules.values
   }.toList.flatten
 
-  def capsules(p: ITaskDataProxyUI) = moleScenes.flatMap {
+  def capsules(p: TaskDataProxyUI) = moleScenes.flatMap {
     _.dataUI.capsules.values
   }.filter {
     _.dataUI.task.isDefined
@@ -237,8 +231,8 @@ object ScenesManager {
     _.dataUI.connectors.values
   }.flatMap {
     _ match {
-      case t: ITransitionUI ⇒ Some(t)
-      case _                ⇒ None
+      case t: TransitionUI ⇒ Some(t)
+      case _               ⇒ None
     }
   }
     .toList

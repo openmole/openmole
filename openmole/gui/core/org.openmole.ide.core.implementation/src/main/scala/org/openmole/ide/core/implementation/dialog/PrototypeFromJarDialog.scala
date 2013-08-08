@@ -49,7 +49,8 @@ object PrototypeFromJarDialog {
           manifest(ep)
           l = l :+ ep
           GenericPrototypeDataUI.extraType = l
-          prototypePanel.typeComboBox.peer.setModel(MyComboBox.newConstantModel(GenericPrototypeDataUI.base ::: GenericPrototypeDataUI.extra))
+          //FIXME
+          //prototypePanel.typeComboBox.peer.setModel(MyComboBox.newConstantModel(GenericPrototypeDataUI.base ::: GenericPrototypeDataUI.extra))
         }
         catch { case e: UserBadDataError ⇒ StatusBar().block(e.message, stack = e.getStackTraceString) }
       }

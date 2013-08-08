@@ -18,7 +18,6 @@
 package org.openmole.ide.core.implementation.data
 
 import org.openmole.core.implementation.tools.InputOutputBuilder
-import org.openmole.ide.core.model.data.{ OutputPrototype, InputPrototype }
 import org.openmole.core.model.data._
 import org.openmole.core.implementation.data._
 import org.openmole.ide.misc.tools.check.TypeCheck

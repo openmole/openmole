@@ -23,16 +23,11 @@ import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.implementation.action.AddTransitionConditionAction
 import org.openmole.ide.core.implementation.action.ChangeTransitionAction
 import org.openmole.ide.core.implementation.action.RemoveTransitionAction
-import org.openmole.ide.core.implementation.workflow.TransitionUI
-import org.openmole.ide.core.implementation.workflow.DataChannelUI
-import org.openmole.ide.core.implementation.workflow.MoleScene
-import org.openmole.ide.core.implementation.workflow.ConnectorWidget
-import org.openmole.ide.core.model.workflow.IDataChannelUI
-import org.openmole.ide.core.model.workflow.ITransitionUI
+import org.openmole.ide.core.implementation.workflow._
 import scala.swing.Action
 import scala.swing.Menu
 import scala.swing.MenuItem
-import org.openmole.ide.core.model.commons.{ EndTransitionType, AggregationTransitionType, ExplorationTransitionType, SimpleTransitionType }
+import org.openmole.ide.core.implementation.commons.{ EndTransitionType, AggregationTransitionType, ExplorationTransitionType, SimpleTransitionType }
 
 class ConnectorMenuProvider(scene: MoleScene,
                             connectionWidget: ConnectorWidget) extends GenericMenuProvider {
@@ -52,7 +47,7 @@ class ConnectorMenuProvider(scene: MoleScene,
       itCond.peer)
 
     connectionWidget.connector match {
-      case x: ITransitionUI ⇒
+      case x: TransitionUI ⇒
         itChangeTransition.peer.removeAll
         List(SimpleTransitionType, ExplorationTransitionType, AggregationTransitionType, EndTransitionType).filterNot(_ == x.transitionType).foreach { ttype ⇒
           itChangeTransition.peer.add(new MenuItem(new ChangeTransitionAction(connectionWidget, ttype)).peer)
@@ -70,7 +65,7 @@ class ConnectorMenuProvider(scene: MoleScene,
             connectionWidget.setConnnector(newC)
           }
         })
-      case x: IDataChannelUI ⇒
+      case x: DataChannelUI ⇒
         itTransitionOrDataChannelMenu = new MenuItem(new Action("to Transition") {
           override def apply {
             val newC = new TransitionUI(x.source,

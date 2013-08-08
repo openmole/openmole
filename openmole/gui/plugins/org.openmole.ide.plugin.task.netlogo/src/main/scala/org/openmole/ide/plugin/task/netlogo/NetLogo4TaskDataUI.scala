@@ -5,7 +5,6 @@
 
 package org.openmole.ide.plugin.task.netlogo
 
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.data.TaskDataUI
@@ -13,17 +12,18 @@ import org.openmole.plugin.task.netlogo4.NetLogo4Task
 import scala.collection.JavaConversions._
 import scala.io.Source
 import java.io.File
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
 case class NetLogo4TaskDataUI(
     name: String = "",
     workspaceEmbedded: Boolean = false,
     nlogoPath: String = "",
     lauchingCommands: String = "",
-    prototypeMappingInput: List[(IPrototypeDataProxyUI, String)] = List(),
-    prototypeMappingOutput: List[(String, IPrototypeDataProxyUI)] = List(),
+    prototypeMappingInput: List[(PrototypeDataProxyUI, String)] = List(),
+    prototypeMappingOutput: List[(String, PrototypeDataProxyUI)] = List(),
     resources: List[String] = List()) extends TaskDataUI {
 
-  override def cloneWithoutPrototype(proxy: IPrototypeDataProxyUI) =
+  override def cloneWithoutPrototype(proxy: PrototypeDataProxyUI) =
     this.copy(prototypeMappingInput = prototypeMappingInput.filterNot(_._1 == proxy),
       prototypeMappingOutput = prototypeMappingOutput.filterNot(_._2 == proxy))
 

@@ -16,27 +16,25 @@
  */
 package org.openmole.ide.core.implementation.data
 
-import org.openmole.ide.core.model.data.IFactorDataUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.sampling.{ ISamplingOrDomainProxyUI, ISamplingProxyUI, IDomainProxyUI }
 import org.openmole.core.model.sampling.Factor
 import org.openmole.core.model.domain.Domain
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.data.Prototype
-import org.openmole.ide.core.implementation.dialog.StatusBar
 import scala.util.Try
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.implementation.sampling.{ SamplingOrDomainProxyUI, DomainProxyUI }
 
-case class FactorDataUI[T](val domain: IDomainProxyUI,
-                           val target: Option[ISamplingOrDomainProxyUI],
-                           var prototype: Option[IPrototypeDataProxyUI] = None) extends IFactorDataUI {
+case class FactorDataUI[T](val domain: DomainProxyUI,
+                           val target: Option[SamplingOrDomainProxyUI],
+                           var prototype: Option[PrototypeDataProxyUI] = None) extends IFactorDataUI {
   def coreObject =
     Try(prototype match {
-      case Some(p: IPrototypeDataProxyUI) ⇒
+      case Some(p: PrototypeDataProxyUI) ⇒
         Factor(p.dataUI.coreObject.get.asInstanceOf[Prototype[T]], domain.dataUI.coreObject.get.asInstanceOf[Domain[T]])
       case _ ⇒ throw new UserBadDataError("A Prototype is required to link Domains and Samplings")
     })
 
-  def clone(p: IPrototypeDataProxyUI) = copy(prototype = Some(p))
+  def clone(p: PrototypeDataProxyUI) = copy(prototype = Some(p))
 
-  def clone(d: IDomainProxyUI) = copy(domain = d)
+  def clone(d: DomainProxyUI) = copy(domain = d)
 }

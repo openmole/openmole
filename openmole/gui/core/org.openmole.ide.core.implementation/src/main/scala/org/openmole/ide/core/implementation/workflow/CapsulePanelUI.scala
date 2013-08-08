@@ -16,23 +16,26 @@
  */
 package org.openmole.ide.core.implementation.workflow
 
-import org.openmole.ide.misc.widget.{ ContentAction, LinkLabel, PluginPanel }
-import org.openmole.ide.core.model.panel.ICapsulePanelUI
+import org.openmole.ide.misc.widget.{ LinkLabel, PluginPanel }
 import scala.swing._
 import event.ButtonClicked
-import org.openmole.ide.core.model.data.{ IEnvironmentDataUI, ICapsuleDataUI }
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
-import org.openmole.ide.misc.widget.multirow.{ MultiComboLinkLabel, MultiCombo }
-import org.openmole.ide.core.implementation.dataproxy.Proxies
+import org.openmole.ide.misc.widget.multirow.MultiCombo
+import org.openmole.ide.core.implementation.dataproxy.{ SourceDataProxyUI, HookDataProxyUI, EnvironmentDataProxyUI, Proxies }
 import org.openmole.ide.misc.widget.multirow.MultiCombo.{ ComboData, ComboPanel }
-import org.openmole.ide.core.implementation.data.{ EmptyDataUIs, CapsuleDataUI }
-import org.openmole.ide.core.model.dataproxy.{ IDataProxyUI, IHookDataProxyUI, ISourceDataProxyUI, IEnvironmentDataProxyUI }
+import org.openmole.ide.core.implementation.data.{ EnvironmentDataUI, EmptyDataUIs, CapsuleDataUI }
 import java.awt.Color
 import org.openmole.ide.core.implementation.execution.{ ScenesManager, GroupingStrategyPanelUI }
-import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel.{ ComboLinkLabelData, ComboLinkLabelPanel }
+import org.openmole.ide.core.implementation.panel.Settings
 
-class CapsulePanelUI(dataUI: ICapsuleDataUI, index: Int = 0) extends PluginPanel("") with ICapsulePanelUI {
+trait CapsulePanelUI extends Publisher with Settings {
+
+  val dataUI: CapsuleDataUI
+
+  type DATAUI = CapsuleDataUI
+
+  val index: Int = 0
 
   def sources = Proxies.instance.sources.toList
   def hooks = Proxies.instance.hooks.toList
@@ -60,8 +63,8 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI, index: Int = 0) extends PluginPanel
   val groupingPanel = new GroupingStrategyPanelUI(dataUI.grouping)
 
   dataUI.environment match {
-    case Some(e: IEnvironmentDataProxyUI) ⇒ environmentCombo.selection.item = e
-    case _                                ⇒ environmentCombo.selection.item = environmentProxys.last
+    case Some(e: EnvironmentDataProxyUI) ⇒ environmentCombo.selection.item = e
+    case _                               ⇒ environmentCombo.selection.item = environmentProxys.last
   }
 
   groupingPanel.visible = dataUI.grouping.isDefined
@@ -91,23 +94,23 @@ class CapsulePanelUI(dataUI: ICapsuleDataUI, index: Int = 0) extends PluginPanel
     case ButtonClicked(`groupingCheckBox`) ⇒ groupingPanel.visible = groupingCheckBox.selected
   }
 
-  def save =
+  def saveContent(n: String) =
     CapsuleDataUI(dataUI.task,
       environmentCombo.selection.item.dataUI match {
         case EmptyDataUIs.LocalEnvironmentDataUI ⇒ None
-        case e: IEnvironmentDataUI               ⇒ Some(environmentCombo.selection.item)
+        case e: EnvironmentDataUI                ⇒ Some(environmentCombo.selection.item)
       },
       if (groupingCheckBox.selected) groupingPanel.save else None,
       sourcePanel.content.map { _.comboValue.get }.filter {
         _ match {
-          case s: ISourceDataProxyUI ⇒ true
-          case _                     ⇒ false
+          case s: SourceDataProxyUI ⇒ true
+          case _                    ⇒ false
         }
       },
       hookPanel.content.map { _.comboValue.get }.filter {
         _ match {
-          case s: IHookDataProxyUI ⇒ true
-          case _                   ⇒ false
+          case s: HookDataProxyUI ⇒ true
+          case _                  ⇒ false
         }
       })
 }

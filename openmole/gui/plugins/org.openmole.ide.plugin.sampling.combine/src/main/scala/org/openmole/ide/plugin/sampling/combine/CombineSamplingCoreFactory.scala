@@ -1,11 +1,11 @@
 package org.openmole.ide.plugin.sampling.combine
 
-import org.openmole.ide.core.model.data.IFactorDataUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.core.model.sampling.{ Factor, DiscreteFactor }
 import org.openmole.core.model.data.Prototype
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.domain.{ Discrete, Domain }
+import org.openmole.ide.core.implementation.data.IFactorDataUI
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
 /*
 * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
@@ -27,7 +27,7 @@ object CombineSamplingCoreFactory {
 
   def apply(dataUIList: List[IFactorDataUI]) =
     dataUIList.map(f ⇒ f.prototype match {
-      case Some(p: IPrototypeDataProxyUI) ⇒
+      case Some(p: PrototypeDataProxyUI) ⇒
         DiscreteFactor(Factor(p.dataUI.coreObject.asInstanceOf[Prototype[Any]],
           f.domain.dataUI.coreObject.asInstanceOf[Domain[Any] with Discrete[Any]]))
       case _ ⇒ throw new UserBadDataError("No Prototype is define for the domain " + f.domain.dataUI.preview)

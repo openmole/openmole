@@ -18,29 +18,28 @@
 package org.openmole.ide.core.implementation.sampling
 
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.ide.core.model.sampling._
-import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.sampling.{ Factor, DiscreteFactor, Sampling }
-import org.openmole.ide.core.model.data._
 import java.awt.Point
 import scala.util.Try
 import org.openmole.core.model.domain.{ Discrete, Domain }
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import collection.mutable.HashMap
 import scala.Some
 import org.openmole.core.model.data.Prototype
+import org.openmole.ide.core.implementation.data.{ ImageView, DataUI, IFactorDataUI }
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.implementation.panel.Settings
 
 class SamplingCompositionDataUI(val name: String = "",
-                                val domains: List[(IDomainProxyUI, Point)] = List.empty,
-                                val samplings: List[(ISamplingProxyUI, Point)] = List.empty,
+                                val domains: List[(DomainProxyUI, Point)] = List.empty,
+                                val samplings: List[(SamplingProxyUI, Point)] = List.empty,
                                 val factors: List[IFactorProxyUI] = List.empty,
-                                val connections: List[(ISamplingOrDomainProxyUI, ISamplingOrDomainProxyUI)] = List.empty,
-                                val finalSampling: Option[ISamplingOrDomainProxyUI] = None,
-                                val finalPosition: (Int, Int) = (450, 200)) extends ISamplingCompositionDataUI {
+                                val connections: List[(SamplingOrDomainProxyUI, SamplingOrDomainProxyUI)] = List.empty,
+                                val finalSampling: Option[SamplingOrDomainProxyUI] = None,
+                                val finalPosition: (Int, Int) = (450, 200)) extends DataUI with ImageView { samplingCompositionDataUI ⇒
 
   type T = Domain[Any] with Discrete[Any]
 
-  //val builtSampling = new HashMap[ISamplingOrDomainProxyUI, Sampling]
+  override def toString: String = name
+  //val builtSampling = new HashMap[SamplingOrDomainProxyUI, Sampling]
 
   def coreClass = classOf[Sampling]
 
@@ -55,23 +54,23 @@ class SamplingCompositionDataUI(val name: String = "",
         }
       }
 
-    val samplingMap: Map[String, (ISamplingProxyUI, Int)] = samplings.map {
+    val samplingMap: Map[String, (SamplingProxyUI, Int)] = samplings.map {
       s ⇒ s._1.id -> (s._1, s._1.ordering)
     }.toMap
 
     finalSampling match {
-      case Some(fs: ISamplingOrDomainProxyUI) ⇒ buildSamplingCore(fs, connectionMap, samplingMap)
-      case _                                  ⇒ throw new UserBadDataError("The final Sampling is not properly set")
+      case Some(fs: SamplingOrDomainProxyUI) ⇒ buildSamplingCore(fs, connectionMap, samplingMap)
+      case _                                 ⇒ throw new UserBadDataError("The final Sampling is not properly set")
     }
   }
 
-  def buildSamplingCore(proxy: ISamplingOrDomainProxyUI,
-                        connectionMap: Map[ISamplingOrDomainProxyUI, List[ISamplingOrDomainProxyUI]],
-                        samplingMap: Map[String, (ISamplingProxyUI, Int)]): Sampling = {
+  def buildSamplingCore(proxy: SamplingOrDomainProxyUI,
+                        connectionMap: Map[SamplingOrDomainProxyUI, List[SamplingOrDomainProxyUI]],
+                        samplingMap: Map[String, (SamplingProxyUI, Int)]): Sampling = {
     val partition = connectionMap.getOrElse(proxy, List()).partition {
       _ match {
-        case s: ISamplingProxyUI ⇒ true
-        case d: IDomainProxyUI   ⇒ false
+        case s: SamplingProxyUI ⇒ true
+        case d: DomainProxyUI   ⇒ false
       }
     }
 
@@ -81,9 +80,9 @@ class SamplingCompositionDataUI(val name: String = "",
       _._1
     }
 
-    def coreObject(proxy: ISamplingOrDomainProxyUI): Sampling = {
+    def coreObject(proxy: SamplingOrDomainProxyUI): Sampling = {
       proxy match {
-        case s: ISamplingProxyUI ⇒ s.dataUI.coreObject(factors.filter {
+        case s: SamplingProxyUI ⇒ s.dataUI.coreObject(factors.filter {
           f ⇒ domainsForFactory.contains(f.dataUI.domain)
         }.map(d ⇒ Left(toFactor(d.dataUI), d.dataUI.domain.ordering)) :::
           partition._1.filterNot {
@@ -92,7 +91,7 @@ class SamplingCompositionDataUI(val name: String = "",
             p1 ⇒
               Right(buildSamplingCore(samplingMap(p1.id)._1, connectionMap, samplingMap), samplingMap(p1.id)._2)
           }).get
-        case d: IDomainProxyUI ⇒
+        case d: DomainProxyUI ⇒
           factors.find {
             _.dataUI.domain.id == d.id
           } match {
@@ -110,7 +109,7 @@ class SamplingCompositionDataUI(val name: String = "",
 
     def toFactor(f: IFactorDataUI) =
       f.prototype match {
-        case Some(p: IPrototypeDataProxyUI) ⇒
+        case Some(p: PrototypeDataProxyUI) ⇒
           Factor(p.dataUI.coreObject.asInstanceOf[Prototype[Any]],
             f.domain.dataUI.coreObject.asInstanceOf[Domain[Any]])
         case _ ⇒ throw new UserBadDataError("No Prototype is define for the domain " + f.domain.dataUI.preview)
@@ -119,9 +118,14 @@ class SamplingCompositionDataUI(val name: String = "",
     coreObject(proxy)
   }
 
-  def imagePath = "img/samplingComposition.png"
+  override def imagePath = "img/samplingComposition.png"
 
-  override def fatImagePath = "img/samplingComposition_fat.png"
+  def fatImagePath = "img/samplingComposition_fat.png"
 
-  def buildPanelUI = new SamplingCompositionPanelUI(this)
+  def buildPanelUI: Settings = new SamplingCompositionPanelUI {
+    //type DATAUI = samplingCompositionDataUI.type
+    val dataUI = samplingCompositionDataUI
+  }
+
+  def cloneWithoutPrototype(proxy: PrototypeDataProxyUI): SamplingCompositionDataUI = this
 }

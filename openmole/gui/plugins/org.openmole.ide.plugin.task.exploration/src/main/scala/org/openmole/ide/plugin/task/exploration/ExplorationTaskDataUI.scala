@@ -17,20 +17,20 @@
 
 package org.openmole.ide.plugin.task.exploration
 
-import org.openmole.ide.core.model.data.IExplorationTaskDataUI
-import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.implementation.task.ExplorationTask
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.data._
+import scala.Some
+import org.openmole.ide.core.implementation.dataproxy.SamplingCompositionDataProxyUI
 
 class ExplorationTaskDataUI(
     val name: String = "",
-    override var sampling: Option[ISamplingCompositionDataProxyUI] = None) extends TaskDataUI with IExplorationTaskDataUI {
+    var sampling: Option[SamplingCompositionDataProxyUI] = None) extends TaskDataUI {
 
   def coreObject(plugins: PluginSet) = util.Try {
     val taskBuilder = sampling match {
-      case Some(x: ISamplingCompositionDataProxyUI) ⇒
+      case Some(x: SamplingCompositionDataProxyUI) ⇒
         ExplorationTask(name, x.dataUI.coreObject.get)(plugins)
       case None ⇒ throw new UserBadDataError("Sampling missing to instantiate the exploration taskMap " + name)
     }

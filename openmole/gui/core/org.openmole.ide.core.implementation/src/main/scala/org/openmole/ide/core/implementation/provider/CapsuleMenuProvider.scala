@@ -22,29 +22,17 @@ import scala.swing.Action
 import javax.swing.JMenu
 import javax.swing.JMenuItem
 import org.netbeans.api.visual.widget.Widget
-import org.openmole.ide.core.model.workflow.{ IBuildMoleScene, ICapsuleUI, IMoleScene }
-import org.openmole.ide.core.model.dataproxy.IEnvironmentDataProxyUI
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.core.model.factory.IHookFactoryUI
-import org.openmole.ide.core.implementation.workflow.BuildMoleScene
+import org.openmole.ide.core.implementation.workflow.{ CapsuleUI, BuildMoleScene }
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.core.implementation.action._
-import org.openmole.ide.core.implementation.registry.KeyRegistry
-import org.openmole.ide.core.model.commons._
 import scala.swing.CheckMenuItem
 import scala.swing.Menu
 import scala.swing.MenuItem
-import org.openmole.ide.core.model.data.IHookDataUI
-import org.openide.DialogDescriptor
-import org.openide.DialogDisplayer
-import org.openide.NotifyDescriptor
-import scala.swing.ScrollPane
-import org.openmole.ide.core.implementation.builder._
-import org.openmole.misc.exception.UserBadDataError
-import org.openmole.ide.core.implementation.dialog.StatusBar
+import scala.Some
+import org.openmole.ide.core.implementation.commons.{ StrainerCapsuleType, SimpleCapsuleType, MasterCapsuleType }
 
-class CapsuleMenuProvider(scene: IBuildMoleScene, capsule: ICapsuleUI) extends GenericMenuProvider {
+class CapsuleMenuProvider(scene: BuildMoleScene, capsule: CapsuleUI) extends GenericMenuProvider {
   var taskMenu = new JMenu
   var itChangeCapsule = new Menu("to ")
 
@@ -80,7 +68,7 @@ class CapsuleMenuProvider(scene: IBuildMoleScene, capsule: ICapsuleUI) extends G
             }
           }
           capsule.dataUI.task match {
-            case Some(t: ITaskDataProxyUI) ⇒
+            case Some(t: TaskDataProxyUI) ⇒
               selected = {
                 p.dataUI.name == t.dataUI.name
               }

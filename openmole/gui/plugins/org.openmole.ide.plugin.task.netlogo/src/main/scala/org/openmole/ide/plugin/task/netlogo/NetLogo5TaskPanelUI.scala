@@ -16,11 +16,9 @@
  */
 package org.openmole.ide.plugin.task.netlogo
 
-import org.openmole.ide.core.model.data.ITaskDataUI
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.osgi.netlogo5.NetLogo5
-import scala.swing._
-import swing.Swing._
+import org.openmole.ide.core.implementation.data.TaskDataUI
 
 class NetLogo5TaskPanelUI(ndu: NetLogo5TaskDataUI) extends GenericNetLogoPanelUI(ndu.nlogoPath,
   ndu.workspaceEmbedded,
@@ -28,7 +26,7 @@ class NetLogo5TaskPanelUI(ndu: NetLogo5TaskDataUI) extends GenericNetLogoPanelUI
   ndu.prototypeMappingInput,
   ndu.prototypeMappingOutput,
   ndu.resources) {
-  override def saveContent(name: String): ITaskDataUI = new NetLogo5TaskDataUI(name,
+  override def saveContent(name: String): TaskDataUI = new NetLogo5TaskDataUI(name,
     workspaceCheckBox.selected,
     nlogoTextField.text,
     launchingCommandTextArea.text,

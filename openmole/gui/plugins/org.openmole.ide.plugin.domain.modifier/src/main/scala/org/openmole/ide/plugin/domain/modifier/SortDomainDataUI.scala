@@ -16,21 +16,21 @@
  */
 package org.openmole.ide.plugin.domain.modifier
 
-import org.openmole.ide.core.model.data.IDomainDataUI
-import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.domain.modifier.SortDomain
 import org.openmole.ide.misc.tools.util.Types._
 import java.io.File
 import org.openmole.core.model.domain.{ Domain, Finite }
 import org.openmole.ide.misc.tools.util.Types
+import org.openmole.ide.core.implementation.data.DomainDataUI
+import org.openmole.ide.core.implementation.sampling.FiniteUI
 
 object SortDomainDataUI {
 
   def empty = apply(DOUBLE, List.empty)
 
   def apply(classString: String,
-            previousDomain: List[IDomainDataUI]): SortDomainDataUI[_] = {
+            previousDomain: List[DomainDataUI]): SortDomainDataUI[_] = {
     Types.standardize(classString) match {
       case INT         ⇒ new SortDomainDataUI[Int](previousDomain)
       case DOUBLE      ⇒ new SortDomainDataUI[Double](previousDomain)
@@ -44,13 +44,13 @@ object SortDomainDataUI {
   }
 }
 
-case class SortDomainDataUI[S](var previousDomain: List[IDomainDataUI] = List.empty)(implicit m: Manifest[S], val ord: Ordering[S])
-    extends ModifierDomainDataUI with IFinite {
+case class SortDomainDataUI[S](var previousDomain: List[DomainDataUI] = List.empty)(implicit m: Manifest[S], val ord: Ordering[S])
+    extends ModifierDomainDataUI with FiniteUI {
   sortDomainDataUI ⇒
 
   def domainType = previousDomain.headOption match {
-    case Some(dt: IDomainDataUI) ⇒ dt.domainType
-    case _                       ⇒ manifest[Double]
+    case Some(dt: DomainDataUI) ⇒ dt.domainType
+    case _                      ⇒ manifest[Double]
   }
 
   val name = "Sort"
@@ -69,9 +69,9 @@ case class SortDomainDataUI[S](var previousDomain: List[IDomainDataUI] = List.em
 
   override def toString = name
 
-  def clone(pD: List[IDomainDataUI]) =
+  def clone(pD: List[DomainDataUI]) =
     pD.headOption match {
-      case Some(d: IDomainDataUI) ⇒ SortDomainDataUI(Types.pretify(d.domainType.toString), pD)
-      case _                      ⇒ SortDomainDataUI(DOUBLE, List())
+      case Some(d: DomainDataUI) ⇒ SortDomainDataUI(Types.pretify(d.domainType.toString), pD)
+      case _                     ⇒ SortDomainDataUI(DOUBLE, List())
     }
 }

@@ -17,10 +17,10 @@
 
 package org.openmole.ide.plugin.groupingstrategy
 
-import org.openmole.ide.core.model.control.IExecutionManager
-import org.openmole.ide.core.model.factory.IGroupingFactoryUI
 import org.openmole.plugin.grouping.batch.ByGrouping
+import org.openmole.ide.core.implementation.factory.GroupingFactoryUI
+import org.openmole.ide.core.implementation.execution.IExecutionManager
 
-class NumberOfMoleJobsGroupingFactoryUI extends IGroupingFactoryUI {
+class NumberOfMoleJobsGroupingFactoryUI extends GroupingFactoryUI {
   def buildDataUI = new NumberOfMoleJobsGroupingDataUI
 }

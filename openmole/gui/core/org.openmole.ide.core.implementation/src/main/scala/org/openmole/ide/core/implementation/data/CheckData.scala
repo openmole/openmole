@@ -20,25 +20,23 @@ package org.openmole.ide.core.implementation.data
 import org.openmole.core.implementation.validation._
 import org.openmole.core.model.mole._
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.implementation.workflow.BuildMoleScene
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.implementation.workflow.{ CapsuleUI, MoleScene, BuildMoleScene }
 import org.openmole.misc.tools.service.Logger
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import org.openmole.core.model.data.Context
 import util.{ Failure, Success }
 import org.openmole.core.implementation.validation.DataflowProblem.DuplicatedName
+import org.openmole.ide.core.implementation.dataproxy.TaskDataProxyUI
 
 object CheckData extends Logger {
 
-  def checkMole(scene: IMoleScene,
+  def checkMole(scene: MoleScene,
                 clear: Boolean = true) = {
     if (clear) StatusBar().clear
     scene match {
       case y: BuildMoleScene ⇒
         y.dataUI.startingCapsule match {
-          case Some(x: ICapsuleUI) ⇒
+          case Some(x: CapsuleUI) ⇒
             MoleFactory.buildMole(y.dataUI) match {
               case Success((mole, cMap, errs)) ⇒
                 val error_capsules = y.dataUI.capsules.values.partition {
@@ -49,7 +47,7 @@ object CheckData extends Logger {
                   _.setAsInvalid("A capsule has to be encapsulated to be run")
                 }
 
-                val capsuleMap: Map[ICapsule, ICapsuleUI] = cMap.map {
+                val capsuleMap: Map[ICapsule, CapsuleUI] = cMap.map {
                   case (k, v) ⇒ v -> k
                 }
 
@@ -104,24 +102,24 @@ object CheckData extends Logger {
     }
   }
 
-  def displayCapsuleErrors(capsule: ICapsuleUI,
+  def displayCapsuleErrors(capsule: CapsuleUI,
                            errorMsg: String) = {
     capsule.dataUI.task match {
-      case Some(x: ITaskDataProxyUI) ⇒ StatusBar().warn(errorMsg, Some(x))
-      case None                      ⇒ StatusBar().warn(errorMsg)
+      case Some(x: TaskDataProxyUI) ⇒ StatusBar().warn(errorMsg, Some(x))
+      case None                     ⇒ StatusBar().warn(errorMsg)
     }
   }
 
-  def checkNoEmptyCapsule(scene: IMoleScene) =
+  def checkNoEmptyCapsule(scene: MoleScene) =
     scene.dataUI.capsulesInMole.foreach {
       c ⇒
         c.dataUI.task match {
-          case Some(x: ITaskDataProxyUI) ⇒
-          case _                         ⇒ StatusBar().warn("A capsule without task can not be run")
+          case Some(x: TaskDataProxyUI) ⇒
+          case _                        ⇒ StatusBar().warn("A capsule without task can not be run")
         }
     }
 
-  def fullCheck(scene: IMoleScene) = {
+  def fullCheck(scene: MoleScene) = {
     checkMole(scene) match {
       case Success((mole, _, errors)) ⇒
         if (errors.isEmpty) {

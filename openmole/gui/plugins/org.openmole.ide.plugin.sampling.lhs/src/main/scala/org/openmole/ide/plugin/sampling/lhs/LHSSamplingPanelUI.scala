@@ -21,20 +21,20 @@ import scala.swing._
 import java.util.Locale
 import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.registry.KeyRegistry
-import org.openmole.ide.core.model.panel._
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.URL
+import org.openmole.ide.core.implementation.panelsettings.ISamplingPanelUI
 
-class LHSSamplingPanelUI(cud: LHSSamplingDataUI) extends PluginPanel("wrap 2", "", "") with ISamplingPanelUI {
-
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+class LHSSamplingPanelUI(cud: LHSSamplingDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends ISamplingPanelUI {
 
   val sampleTextField = new TextField(cud.samples, 8)
 
-  contents += new Label("Samples")
-  contents += sampleTextField
+  val components = List(("", new PluginPanel("wrap 2", "", "") {
+    contents += new Label("Samples")
+    contents += sampleTextField
+  }))
 
   def domains = KeyRegistry.domains.values.map {
     _.buildDataUI
@@ -42,7 +42,7 @@ class LHSSamplingPanelUI(cud: LHSSamplingDataUI) extends PluginPanel("wrap 2", "
 
   override def saveContent = new LHSSamplingDataUI(sampleTextField.text)
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(sampleTextField, new Help(i18n.getString("sample"), i18n.getString("sampleEx")))
-  }
+  override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
+
+  add(sampleTextField, new Help(i18n.getString("sample"), i18n.getString("sampleEx")))
 }

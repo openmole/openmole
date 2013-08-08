@@ -19,10 +19,9 @@ package org.openmole.ide.core.implementation.workflow
 
 import java.awt.Point
 import org.netbeans.api.visual.anchor.Anchor
-import org.openmole.ide.core.model.commons.Constants
-import org.openmole.ide.core.model.workflow.ICapsuleUI
+import org.openmole.ide.core.implementation.commons.Constants
 
-class OutputSlotAnchor(relatedWidget: ICapsuleUI) extends SlotAnchor(relatedWidget) {
+class OutputSlotAnchor(relatedWidget: CapsuleUI) extends SlotAnchor(relatedWidget) {
 
   val x = Constants.TASK_CONTAINER_WIDTH + 17
   val y = Constants.TASK_TITLE_HEIGHT + 30

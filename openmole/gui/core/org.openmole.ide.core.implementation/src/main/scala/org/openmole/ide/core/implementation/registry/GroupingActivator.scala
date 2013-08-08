@@ -17,13 +17,13 @@
 
 package org.openmole.ide.core.implementation.registry
 
-import org.openmole.ide.core.model.factory.IGroupingFactoryUI
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
+import org.openmole.ide.core.implementation.factory.GroupingFactoryUI
 
 trait GroupingActivator extends BundleActivator {
 
-  def groupingFactories: Iterable[IGroupingFactoryUI]
+  def groupingFactories: Iterable[GroupingFactoryUI]
 
   abstract override def start(context: BundleContext) = {
     super.start(context)

@@ -24,12 +24,10 @@ import org.openmole.ide.core.implementation.action.AddCapsuleAction
 import org.openmole.ide.core.implementation.action.AddTaskAction
 import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.model.workflow.{ IBuildMoleScene, IMoleScene }
-import swing.{ Menu, Action, MenuItem }
-import org.openmole.ide.core.implementation.registry.KeyRegistry
-import org.openmole.ide.core.implementation.builder.Builder
+import swing.{ Action, MenuItem }
+import org.openmole.ide.core.implementation.workflow.BuildMoleScene
 
-class MoleSceneMenuProvider(moleScene: IBuildMoleScene) extends GenericMenuProvider {
+class MoleSceneMenuProvider(moleScene: BuildMoleScene) extends GenericMenuProvider {
 
   def initMenu = {
     val itemCapsule = new MenuItem(new AddCapsuleAction(moleScene, this))

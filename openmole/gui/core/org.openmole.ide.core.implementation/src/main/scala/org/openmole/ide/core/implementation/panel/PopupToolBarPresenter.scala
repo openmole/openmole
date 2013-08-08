@@ -28,18 +28,26 @@ import java.awt.Color
 import org.openmole.ide.misc.tools.image.Images._
 
 class PopupToolBarPresenter(t: String,
-                            basemenu: MenuItem,
+                            basemenu: List[MenuItem],
                             bgColor: Color,
                             fgColor: Color = Color.WHITE) extends Button(t) {
-  val popup = new PopupMenu { contents += basemenu }
+  val popup = new PopupMenu { basemenu.foreach { contents += } }
 
   icon = ARROW
-  // background = new Color(204, 204, 204, 128)
   background = bgColor
   foreground = fgColor
+
   listenTo(mouse.clicks)
+  listenTo(basemenu.toSeq: _*)
+
   reactions += {
     case x: ButtonClicked ⇒ popup.show(this, 0, size.height)
+    case ConceptChanged(item) ⇒ {
+      text = item.text
+      popup.hide
+      revalidate
+      repaint
+    }
   }
 
   def remove(c: Component) = c match {
@@ -49,7 +57,7 @@ class PopupToolBarPresenter(t: String,
 
   def removeAll = {
     popup.peer.removeAll
-    popup.contents += basemenu
+    basemenu.foreach { popup.contents += }
   }
 
 }

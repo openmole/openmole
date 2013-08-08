@@ -17,32 +17,51 @@
 
 package org.openmole.ide.core.implementation.data
 
-import org.openmole.ide.core.model.data.ITaskDataUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.implementation.builder.MoleFactory
 import org.openmole.core.model.task.{ PluginSet, ITask }
-import util.{ Failure, Success }
+import scala.util.{ Try, Failure, Success }
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.implementation.registry.{ PrototypeKey }
-import org.openmole.ide.core.model.commons.AggregationTransitionType
-import org.openmole.ide.core.implementation.dataproxy.Proxies
+import org.openmole.ide.core.implementation.registry.PrototypeKey
+import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies }
+import org.openmole.ide.core.implementation.commons.AggregationTransitionType
+import org.openmole.ide.core.implementation.panel.{ TaskPanel, SaveSettings, Settings }
 
-abstract class TaskDataUI extends ITaskDataUI with CoreObjectInitialisation {
+abstract class TaskDataUI extends DataUI with InputPrototype with OutputPrototype with ImplicitPrototype with ImageView with CoreObjectInitialisation {
 
-  def implicitPrototypes: (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI]) =
+  override def toString: String = name
+
+  def buildPanelUI: Settings with SaveSettings
+
+  def coreObject(plugins: PluginSet): Try[ITask]
+
+  def implicitPrototypes: (List[PrototypeDataProxyUI], List[PrototypeDataProxyUI]) =
     coreObject(PluginSet.empty) match {
-      case Success(x: ITask) ⇒ ToolDataUI.implicitPrototypes(y ⇒ x.inputs.map { _.prototype }.toList, inputs, y ⇒ x.outputs.map { _.prototype }.toList, outputs)
-      case Failure(_)        ⇒ (List(), List())
+      case Success(x: ITask) ⇒ ToolDataUI.implicitPrototypes(y ⇒ x.inputs.map {
+        _.prototype
+      }.toList, inputs, y ⇒ x.outputs.map {
+        _.prototype
+      }.toList, outputs)
+      case Failure(_) ⇒ (List(), List())
     }
 
   def implicitPrototypesFromAggregation =
-    ScenesManager.transitions.flatMap { t ⇒
-      t.transitionType match {
-        case AggregationTransitionType ⇒
-          t.source.outputs
-        case _ ⇒ List()
-      }
-    }.map { p ⇒
-      Proxies.instance.prototypeOrElseCreate(PrototypeKey(p.dataUI.name, p.dataUI.`type`.runtimeClass, p.dataUI.dim + 1))
+    ScenesManager.transitions.flatMap {
+      t ⇒
+        t.transitionType match {
+          case AggregationTransitionType ⇒
+            t.source.outputs
+          case _ ⇒ List()
+        }
+    }.map {
+      p ⇒
+        Proxies.instance.prototypeOrElseCreate(PrototypeKey(p.dataUI.name, p.dataUI.`type`.runtimeClass, p.dataUI.dim + 1))
     }
+
+  def filterPrototypeOccurencies(pproxy: PrototypeDataProxyUI) = (filterInputs(pproxy) ++ filterOutputs(pproxy)).distinct
+
+  def cloneWithoutPrototype(proxy: PrototypeDataProxyUI): TaskDataUI = this
+
+  def removePrototypeOccurencies(pproxy: PrototypeDataProxyUI) = {
+    removeInput(pproxy)
+    removeOutput(pproxy)
+  }
 }

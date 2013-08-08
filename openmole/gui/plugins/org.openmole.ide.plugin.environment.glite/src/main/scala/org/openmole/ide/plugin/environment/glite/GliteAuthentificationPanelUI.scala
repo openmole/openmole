@@ -19,7 +19,6 @@ package org.openmole.ide.plugin.environment.glite
 
 import java.awt.Color
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.model.panel.IAuthentificationPanelUI
 import org.openmole.ide.misc.widget.ChooseFileTextField
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.misc.workspace.Workspace
@@ -35,13 +34,14 @@ import scala.swing.event.Key._
 import java.io.File
 import swing.event.ButtonClicked
 import scala.Some
+import org.openmole.ide.core.implementation.panelsettings.AuthenticationPanelUI
 
 object GliteAuthentificationPanelUI {
   val RED = new Color(212, 0, 0)
   val GREEN = new Color(136, 170, 0)
 }
 
-class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") with IAuthentificationPanelUI {
+class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") with AuthenticationPanelUI {
   var passString = ""
   var initButton: Option[RadioButton] = None
   val pemButton = new RadioButton("pem")

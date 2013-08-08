@@ -16,12 +16,14 @@
  */
 package org.openmole.ide.plugin.domain.modifier
 
-import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
+import org.openmole.ide.core.implementation.panelsettings.IDomainPanelUI
 
-class SortDomainPanelUI(dataUI: SortDomainDataUI[_]) extends PluginPanel("") with IDomainPanelUI {
-  contents += new Label("<html><i>No more information is required for this Domain</i></html>")
+class SortDomainPanelUI(dataUI: SortDomainDataUI[_]) extends IDomainPanelUI {
+  val components = List(("", new PluginPanel("wrap 2") {
+    contents += new Label("<html><i>No more information is required for this Domain</i></html>")
+  }))
 
   def saveContent = {
     val classString = ModifierDomainDataUI.computeClassString(dataUI)

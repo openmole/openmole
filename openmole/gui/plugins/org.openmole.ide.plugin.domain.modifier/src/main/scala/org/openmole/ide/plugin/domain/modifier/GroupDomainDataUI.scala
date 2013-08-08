@@ -23,17 +23,17 @@ import org.openmole.core.model.domain.{ Discrete, Domain }
 import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.plugin.domain.modifier.GroupDomain
-import org.openmole.ide.core.model.data.IDomainDataUI
 import java.io.File
-import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.ide.misc.tools.util.Types
+import org.openmole.ide.core.implementation.data.DomainDataUI
+import org.openmole.ide.core.implementation.sampling.FiniteUI
 
 object GroupDomainDataUI {
   def empty = apply("1", DOUBLE, List())
 
   def apply(size: String,
             classString: String,
-            previousDomain: List[IDomainDataUI]): GroupDomainDataUI[_] = {
+            previousDomain: List[DomainDataUI]): GroupDomainDataUI[_] = {
     Types.standardize(classString) match {
       case INT         ⇒ new GroupDomainDataUI[Int](size, previousDomain)
       case DOUBLE      ⇒ new GroupDomainDataUI[Double](size, previousDomain)
@@ -48,8 +48,8 @@ object GroupDomainDataUI {
 }
 
 case class GroupDomainDataUI[S](val size: String = "0",
-                                var previousDomain: List[IDomainDataUI] = List.empty)(implicit val domainType: Manifest[S])
-    extends ModifierDomainDataUI with IFinite {
+                                var previousDomain: List[DomainDataUI] = List.empty)(implicit val domainType: Manifest[S])
+    extends ModifierDomainDataUI with FiniteUI {
 
   val name = "Group"
 
@@ -67,9 +67,9 @@ case class GroupDomainDataUI[S](val size: String = "0",
 
   override def toString = "Group"
 
-  def clone(pD: List[IDomainDataUI]) = pD.headOption match {
-    case Some(d: IDomainDataUI) ⇒ GroupDomainDataUI(size, Types.pretify(d.domainType.toString), pD)
-    case _                      ⇒ GroupDomainDataUI(size, DOUBLE, List())
+  def clone(pD: List[DomainDataUI]) = pD.headOption match {
+    case Some(d: DomainDataUI) ⇒ GroupDomainDataUI(size, Types.pretify(d.domainType.toString), pD)
+    case _                     ⇒ GroupDomainDataUI(size, DOUBLE, List())
   }
 
 }

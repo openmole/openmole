@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,143 +14,109 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ide.core.implementation.panel
 
-import java.awt.{ Dimension, BorderLayout }
-import javax.imageio.ImageIO
-import javax.swing.ImageIcon
+import org.openmole.ide.core.implementation.dataproxy.{ TaskDataProxyFactory, TaskDataProxyUI, Proxies }
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openide.awt.HtmlBrowser
-import org.openmole.ide.core.implementation.dataproxy.{ UpdatedProxyEvent, Proxies }
-import org.openmole.ide.core.implementation.dialog.DialogFactory
-import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ISamplingCompositionDataProxyUI, IDataProxyUI, ITaskDataProxyUI }
-import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.misc.widget._
-import org.openmole.ide.misc.widget.multirow._
-import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel._
-import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabelGroovyTextFieldEditor._
-import scala.collection.mutable.HashMap
-import scala.swing.Component
+import ConceptMenu._
+import org.openmole.ide.core.implementation.dialog.{ StatusBar, DialogFactory }
+import org.openmole.ide.core.implementation.data._
+import org.openmole.ide.core.implementation.workflow.CapsuleUI
+import java.awt.{ Color, BorderLayout }
+import org.openmole.misc.eventdispatcher.{ Event, EventListener, EventDispatcher }
+import org.openmole.ide.core.implementation.registry.KeyRegistry
+import scala.swing.event.SelectionChanged
+import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
-import scala.swing.TabbedPane
-import swing.event.{ SelectionChanged, FocusGained }
-import org.openmole.ide.core.model.data.IExplorationTaskDataUI
-import org.openmole.ide.core.implementation.data.TaskDataUI
 
-class TaskPanel(proxy: ITaskDataProxyUI,
-                scene: IMoleScene,
-                val index: Int) extends BasePanel(Some(proxy), scene) {
-  taskPanel ⇒
-  iconLabel.icon = new ImageIcon(ImageIO.read(proxy.dataUI.getClass.getClassLoader.getResource(proxy.dataUI.imagePath)))
+trait TaskPanel extends Base
+    with Header
+    with ProxyShortcut
+    with IOProxy
+    with ConceptCombo
+    with Icon
+    with IO {
 
-  var panelUI = proxy.dataUI.buildPanelUI
-  def created = Proxies.instance.contains(proxy)
+  override type DATAPROXY = TaskDataProxyUI with IOFacade
+  type TASKDATAUI = TaskDataUI with ImageView
+  override type DATAUI = TASKDATAUI with IODATAUI
 
-  def buildProtoPanel = {
-    val (implicitIP, implicitOP) = proxy.dataUI.implicitPrototypes
-    new IOPrototypePanel(scene,
-      this,
-      proxy.dataUI.inputs,
-      proxy.dataUI.outputs,
-      implicitIP,
-      implicitOP,
-      proxy.dataUI.inputParameters.toMap)
-  }
+  var panelSettings = proxy.dataUI.buildPanelUI
+  val icon: Label = icon(proxy.dataUI)
+  val taskCombo = ConceptMenu.buildTaskMenu(p ⇒ updateConceptPanel(p.dataUI))
 
-  def updatePanel = {
-    tabbedLock = true
-    save
-    panelUI = proxy.dataUI.buildPanelUI
-    refreshPanel
-    protoPanel = buildProtoPanel
-    tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", protoPanel))
-    tabbedPane.revalidate
-    tabbedLock = false
-  }
+  build
+  var ioSettings = ioPanel
 
-  def updateProtoPanel = {
-    save
-    protoPanel = buildProtoPanel
-    tabbedPane.pages(1).content = protoPanel
-    tabbedPane.revalidate
-  }
+  listenTo(panelSettings.help.components.toSeq: _*)
 
-  var protoPanel = buildProtoPanel
-
-  refreshPanel
-
-  tabbedPane.pages.insert(1, new TabbedPane.Page("Inputs / Outputs", protoPanel))
-
-  tabbedPane.selection.index = 0
-  tabbedPane.revalidate
-
-  val newPanel = new NewConceptPanel(this)
-  newPanel.addPrototype
-  proxy.dataUI match {
-    case d: TaskDataUI with IExplorationTaskDataUI ⇒ newPanel.addSamplingComposition
-    case _                                         ⇒
-  }
-
-  mainPanel.contents += newPanel
-
-  peer.add(mainPanel.peer, BorderLayout.NORTH)
-  peer.add(new PluginPanel("wrap") {
-    contents += tabbedPane
-    contents += panelUI.help
-  }.peer, BorderLayout.CENTER)
-
-  listenTo(panelUI.help.components.toSeq: _*)
-  listenTo(tabbedPane.selection)
-  listenTo(panelUI)
-
-  reactions += {
-    case FocusGained(source: Component, _, _) ⇒
-      panelUI.help.switchTo(source)
-    //scene.closePropertyPanel(index)
-    case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
-    case SelectionChanged(tabbedPane) ⇒
-      if (!tabbedLock) updateProtoPanel
-    case UpdatedProxyEvent(p: IDataProxyUI, _) ⇒
-      scene.removeAll(index + 1)
-      updatePanel
-      p match {
-        case t: ITaskDataProxyUI ⇒
-        case _                   ⇒ setTab(p)
+  def build = {
+    basePanel.contents += new PluginPanel("wrap 2", "-5[left]-10[]", "-2[top][10]") {
+      contents += header(scene, index)
+      contents += new PluginPanel("wrap 2", "[]30[]", "") {
+        contents += new Composer {
+          addIcon(icon)
+          addName
+          addTypeMenu(taskCombo)
+          addCreateLink
+        }
+        contents += proxyShorcut(proxy.dataUI, index)
       }
+    }
+    createSettings
   }
 
-  def create = {
-    Proxies.instance += proxy
-    ConceptMenu.taskMenu.popup.contents += ConceptMenu.addItem(nameTextField.text, proxy)
+  override def created = proxyCreated
+
+  def createSettings = {
+    ioSettings = ioPanel
+    if (basePanel.contents.size > 1) {
+      basePanel.contents.remove(1)
+      basePanel.contents.remove(1)
+    }
+    icon.icon = icon(proxy.dataUI).icon
+    panelSettings = proxy.dataUI.buildPanelUI
+    basePanel.contents += panelSettings.tabbedPane(("I/O", ioSettings))
+    basePanel.contents += panelSettings.help
   }
 
-  def delete = {
-    val toBeRemovedCapsules: List[ICapsuleUI] = ScenesManager.moleScenes.map {
+  def updateConceptPanel(d: TaskDataUI with ImageView) = {
+    savePanel
+    proxy.dataUI = d
+    createSettings
+  }
+
+  def savePanel = {
+    val ioSave = ioSettings.save
+    panelSettings.saveContent(nameTextField.text) match {
+      case x: DATAUI ⇒ proxy.dataUI = save(x, ioSave._1, ioSave._2, ioSave._3)
+      case _         ⇒ StatusBar().warn("The current panel cannot be saved")
+    }
+  }
+
+  def deleteProxy = {
+    val toBeRemovedCapsules: List[CapsuleUI] = ScenesManager.moleScenes.map {
       _.dataUI.capsules.values.filter {
-        _.dataUI.task == Some(proxy)
+        c ⇒
+          c.dataUI.task == Some(proxy)
       }
     }.flatten.toList
     toBeRemovedCapsules match {
       case Nil ⇒
         scene.closePropertyPanel(index)
         Proxies.instance -= proxy
-        if (!proxy.generated) ConceptMenu.removeItem(proxy)
-        true
+        if (!proxy.generated) -=(proxy)
+      // true
       case _ ⇒
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
           toBeRemovedCapsules.foreach {
             c ⇒ c.scene.graphScene.removeNodeWithEdges(c.scene.dataUI.removeCapsuleUI(c))
           }
-          delete
+          ScenesManager.invalidateSceneCaches
+          ScenesManager.refreshScenes
         }
-        else false
+      //else false
     }
   }
 
-  def save = {
-    val protoPanelSave = protoPanel.save
-    proxy.dataUI = panelUI.save(nameTextField.text, protoPanelSave._1, protoPanelSave._2, protoPanelSave._3)
-  }
 }

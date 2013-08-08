@@ -17,15 +17,19 @@
 
 package org.openmole.ide.core.implementation.dataproxy
 
-import org.openmole.ide.misc.tools.util.ID
-import scala.collection.JavaConversions._
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.core.model.data.ITaskDataUI
-import org.openmole.ide.core.implementation.data.ToolDataUI
-import org.openmole.ide.core.implementation.builder.MoleFactory
-import org.openmole.core.model.mole.Sources
-import org.openmole.core.model.task.ITask
+import org.openmole.ide.core.implementation.data.{ ImageView, TaskDataUI }
+import org.openmole.ide.core.implementation.panel.IOFacade
 
-class TaskDataProxyUI(
-  var dataUI: ITaskDataUI,
-  val generated: Boolean = false) extends ITaskDataProxyUI with ID
+object TaskDataProxyUI {
+  def apply(d: TaskDataUI with ImageView,
+            g: Boolean = false) =
+    new TaskDataProxyUI with IOFacade {
+      var dataUI = d
+      val generated = g
+    }
+}
+
+trait TaskDataProxyUI extends DataProxyUI {
+  type DATAUI = TaskDataUI with ImageView
+}
+

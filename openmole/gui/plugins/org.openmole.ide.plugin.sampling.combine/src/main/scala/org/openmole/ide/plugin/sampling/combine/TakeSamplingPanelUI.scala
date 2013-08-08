@@ -17,24 +17,22 @@
 package org.openmole.ide.plugin.sampling.combine
 
 import org.openmole.ide.misc.widget.{ Help, URL, Helper, PluginPanel }
-import org.openmole.ide.core.model.panel.ISamplingPanelUI
 import java.util.{ Locale, ResourceBundle }
 import swing.{ Label, TextField }
+import org.openmole.ide.core.implementation.panelsettings.ISamplingPanelUI
 
-class TakeSamplingPanelUI(cud: TakeSamplingDataUI) extends PluginPanel("wrap 2", "", "") with ISamplingPanelUI {
-
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+class TakeSamplingPanelUI(cud: TakeSamplingDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends ISamplingPanelUI {
 
   val sizeTextField = new TextField(cud.size, 8)
 
-  contents += new Label("Size")
-  contents += sizeTextField
+  val components = List(("", new PluginPanel("wrap 2", "", "") {
+    contents += new Label("Size")
+    contents += sizeTextField
+  }))
 
   override def saveContent = new TakeSamplingDataUI(sizeTextField.text)
 
-  override val help = new Helper(List(new URL(i18n.getString("takePermalinkText"),
-    i18n.getString("takePermalink")))) {
-    add(sizeTextField,
-      new Help(i18n.getString("takeSize"), i18n.getString("takeSizeEx")))
-  }
+  override lazy val help = new Helper(List(new URL(i18n.getString("takePermalinkText"), i18n.getString("takePermalink"))))
+  add(sizeTextField, new Help(i18n.getString("takeSize"), i18n.getString("takeSizeEx")))
+
 }

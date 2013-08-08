@@ -17,7 +17,6 @@
 
 package org.openmole.ide.plugin.source.file
 
-import org.openmole.ide.core.model.panel.ISourcePanelUI
 import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies }
 import swing.Label
 import au.com.bytecode.opencsv.CSVReader
@@ -26,18 +25,16 @@ import org.openmole.ide.misc.widget.URL
 import org.openmole.ide.misc.widget.{ Help, DialogClosedEvent, CSVChooseFileTextField, PluginPanel }
 import java.util.{ Locale, ResourceBundle }
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import java.io.{ FileReader, File }
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos.{ TwoCombosData, TwoCombosPanel }
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 import java.awt.Dimension
+import org.openmole.ide.core.implementation.panelsettings.SourcePanelUI
 
-class CSVSourcePanelUI(dataUI: CSVSourceDataUI) extends PluginPanel("wrap") with ISourcePanelUI {
-
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+class CSVSourcePanelUI(dataUI: CSVSourceDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("wrap") with SourcePanelUI {
 
   val csvTextField = new CSVChooseFileTextField(dataUI.csvFilePath)
-  var comboMulti: Option[MultiTwoCombos[String, IPrototypeDataProxyUI]] = None
+  var comboMulti: Option[MultiTwoCombos[String, PrototypeDataProxyUI]] = None
 
   val mainPanel = new PluginPanel("wrap") {
     contents += new PluginPanel("wrap 2") {
@@ -49,7 +46,7 @@ class CSVSourcePanelUI(dataUI: CSVSourceDataUI) extends PluginPanel("wrap") with
   }
   readFile(dataUI.csvFilePath)
 
-  val components = List(("Settings", mainPanel))
+  val components = List(("Header", mainPanel))
 
   listenTo(csvTextField)
   reactions += {
@@ -91,10 +88,10 @@ class CSVSourcePanelUI(dataUI: CSVSourceDataUI) extends PluginPanel("wrap") with
     else new CSVSourceDataUI(name, csvTextField.text, List[(String, PrototypeDataProxyUI)]())
   }
 
-  def comboContent: List[IPrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxies.instance.prototypes.toList
+  def comboContent: List[PrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxies.instance.prototypes.toList
 
-  override lazy val help =
-    new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-      add(csvTextField, new Help(i18n.getString("csvPath"), i18n.getString("csvPathEx")))
-    }
+  override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
+
+  add(csvTextField, new Help(i18n.getString("csvPath"), i18n.getString("csvPathEx")))
+
 }

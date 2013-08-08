@@ -17,7 +17,7 @@
 
 package org.openmole.ide.core.implementation.serializer
 
-import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.misc.tools.util.ID
+import org.openmole.ide.core.implementation.data.CapsuleDataUI
 
-case class CapsuleData(capsule: ICapsuleDataUI, x: Int, y: Int) extends ID
+case class CapsuleData(capsule: CapsuleDataUI, x: Int, y: Int) extends ID

@@ -20,13 +20,11 @@ package org.openmole.ide.core.implementation.sampling
 import java.awt._
 import scala.swing.Action
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.model.sampling.{ IDomainProxyUI, IDomainWidget }
-import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget._
-import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
+import org.openmole.ide.core.implementation.workflow.ISceneContainer
 
-class DomainWidget(val proxy: IDomainProxyUI,
-                   val scenePanelUI: ISamplingCompositionPanelUI,
+class DomainWidget(val proxy: DomainProxyUI,
+                   val scenePanelUI: SamplingCompositionPanelUI,
                    display: Boolean = false) extends MigPanel("wrap", "[center]", "[center]") with IDomainWidget {
   domainWidget ⇒
   preferredSize = new Dimension(100, 38)

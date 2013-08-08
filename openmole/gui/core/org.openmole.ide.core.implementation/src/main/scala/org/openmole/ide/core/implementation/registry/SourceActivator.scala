@@ -17,11 +17,11 @@
 package org.openmole.ide.core.implementation.registry
 
 import org.osgi.framework.{ BundleContext, BundleActivator }
-import org.openmole.ide.core.model.factory.ISourceFactoryUI
+import org.openmole.ide.core.implementation.factory.SourceFactoryUI
 
 trait SourceActivator extends BundleActivator {
 
-  def sourceFactories: Iterable[ISourceFactoryUI]
+  def sourceFactories: Iterable[SourceFactoryUI]
 
   abstract override def start(context: BundleContext) = {
     super.start(context)

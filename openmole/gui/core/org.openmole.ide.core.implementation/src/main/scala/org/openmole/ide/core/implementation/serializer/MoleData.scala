@@ -17,11 +17,9 @@
 
 package org.openmole.ide.core.implementation.serializer
 
-import org.openmole.ide.core.model.data.ICapsuleDataUI
 import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.core.implementation.workflow._
 import java.awt.Point
-import org.openmole.ide.core.model.workflow.{ IDataChannelUI, ITransitionUI, IMoleScene }
 import org.openmole.ide.misc.tools.util.ID
 
 object MoleData {
@@ -74,7 +72,7 @@ object MoleData {
     scene
   }
 
-  def fromScene(scene: IMoleScene) = {
+  def fromScene(scene: MoleScene) = {
     val capsules =
       scene.dataUI.capsules.map {
         case (_, c) ⇒ c -> CapsuleData(c.dataUI, c.x, c.y)
@@ -87,7 +85,7 @@ object MoleData {
 
     val transitions =
       scene.dataUI.connectors.flatMap {
-        case (_, transition: ITransitionUI) ⇒
+        case (_, transition: TransitionUI) ⇒
           Some(
             new TransitionData(
               capsules(transition.source),
@@ -100,7 +98,7 @@ object MoleData {
 
     val dataChannels =
       scene.dataUI.connectors.flatMap {
-        case (_, dataChannel: IDataChannelUI) ⇒
+        case (_, dataChannel: DataChannelUI) ⇒
           Some(
             new DataChannelData(
               capsules(dataChannel.source),

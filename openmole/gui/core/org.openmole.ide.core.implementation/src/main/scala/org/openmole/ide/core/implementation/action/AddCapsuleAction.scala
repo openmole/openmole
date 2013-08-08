@@ -18,13 +18,11 @@
 package org.openmole.ide.core.implementation.action
 
 import org.openmole.ide.core.implementation.provider.GenericMenuProvider
-import org.openmole.ide.core.model.workflow.{ IBuildMoleScene, IMoleScene }
 import scala.swing.Action
-import org.openmole.ide.core.implementation.builder.SceneFactory
-import org.openmole.ide.core.implementation.workflow.CapsuleUI
+import org.openmole.ide.core.implementation.workflow.{ BuildMoleScene, CapsuleUI }
 import org.openmole.ide.core.implementation.data.CapsuleDataUI
 
-class AddCapsuleAction(moleScene: IBuildMoleScene,
+class AddCapsuleAction(moleScene: BuildMoleScene,
                        provider: GenericMenuProvider) extends Action("New Capsule") {
 
   override def apply = {

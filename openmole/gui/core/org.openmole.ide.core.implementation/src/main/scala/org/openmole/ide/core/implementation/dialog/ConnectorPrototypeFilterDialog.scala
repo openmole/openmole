@@ -21,26 +21,21 @@ import java.awt.Dimension
 import org.openide.DialogDescriptor
 import org.openide.DialogDisplayer
 import org.openide.NotifyDescriptor
-import org.openmole.ide.core.implementation.data.CheckData
-import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ITaskDataProxyUI }
-import org.openmole.ide.core.model.workflow.ICapsuleUI
-import org.openmole.ide.core.model.workflow.IConnectorUI
-import org.openmole.ide.core.model.workflow.IConnectorUI
+import org.openmole.ide.core.implementation.data.{ DomainDataUI, CheckData }
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget.multirow.MultiCombo._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import swing.{ Label, MyComboBox, ScrollPane, TextField }
-import org.openmole.ide.core.implementation.sampling.SamplingConnectorWidget
-import org.openmole.ide.core.model.sampling.{ ISamplingOrDomainProxyUI, IDomainProxyUI, IFactorProxyUI }
-import org.openmole.ide.core.implementation.dataproxy.Proxies
+import org.openmole.ide.core.implementation.sampling.{ SamplingOrDomainProxyUI, IFactorProxyUI, SamplingConnectorWidget }
+import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies }
 import org.openmole.ide.misc.tools.util.Types
-import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.misc.tools.obj.ClassUtils._
+import org.openmole.ide.core.implementation.workflow.{ ConnectorUI, CapsuleUI }
 
 object ConnectorPrototypeFilterDialog extends PrototypeDialog {
-  def display(connectorUI: IConnectorUI) = {
+  def display(connectorUI: ConnectorUI) = {
     if (connectorUI.source.outputs.isEmpty)
       StatusBar().warn("No Prototype is defined !")
     else {
@@ -57,7 +52,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
     }
   }
 
-  class OrderingDialog(compositionProxy: ISamplingOrDomainProxyUI,
+  class OrderingDialog(compositionProxy: SamplingOrDomainProxyUI,
                        connectorWidget: SamplingConnectorWidget) extends PluginPanel("wrap", "[grow,fill]", "") {
     val orderTextField = new TextField(compositionProxy.ordering.toString, 5)
     contents += orderTextField
@@ -85,7 +80,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
     connectorWidget.factorProxyUI match {
       case Some(f: IFactorProxyUI) ⇒
         f.dataUI.prototype match {
-          case Some(p: IPrototypeDataProxyUI) ⇒
+          case Some(p: PrototypeDataProxyUI) ⇒
             protoCombo.selection.item = p
           case _ ⇒
         }
@@ -116,7 +111,7 @@ object ConnectorPrototypeFilterDialog extends PrototypeDialog {
     }
   }
 
-  class FilteredPrototypePanel(connector: IConnectorUI) extends PluginPanel("") {
+  class FilteredPrototypePanel(connector: ConnectorUI) extends PluginPanel("") {
     preferredSize = new Dimension(250, 300)
     val multiPrototypeCombo = new MultiCombo("Filtered Prototypes",
       connector.source.outputs,

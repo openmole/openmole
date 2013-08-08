@@ -17,12 +17,12 @@
 package org.openmole.ide.plugin.builder.base
 
 import org.openmole.core.implementation.puzzle.Puzzle
-import org.openmole.ide.core.model.builder.IPuzzleUIMap
 import org.openmole.plugin.builder.base._
 import org.openmole.ide.core.implementation.dataproxy.Proxies
 import swing.{ Label, MyComboBox }
 import java.awt.Dimension
-import org.openmole.ide.core.model.workflow.IMoleUI
+import org.openmole.ide.core.implementation.workflow.IMoleUI
+import org.openmole.ide.core.implementation.builder.PuzzleUIMap
 
 class AggregationBuilderPanelUI(puzzles: List[Puzzle],
                                 puzzleSelection: Option[Puzzle],
@@ -33,7 +33,7 @@ class AggregationBuilderPanelUI(puzzles: List[Puzzle],
   contents += aggregationPuzzleComboBox
   preferredSize = new Dimension(300, 120)
 
-  override def build(uiMap: IPuzzleUIMap) = {
+  override def build(uiMap: PuzzleUIMap) = {
     val samplingUI = Proxies.instance.getOrGenerateSamplingComposition(samplingComboBox.selection.item)
     val sampling = samplingUI.dataUI.coreObject
     (aggregation(nameTextField.text, puzzleComboBox.selection.item, sampling.get, aggregationPuzzleComboBox.selection.item)(manager.pluginSet), uiMap += (sampling.get, samplingUI))

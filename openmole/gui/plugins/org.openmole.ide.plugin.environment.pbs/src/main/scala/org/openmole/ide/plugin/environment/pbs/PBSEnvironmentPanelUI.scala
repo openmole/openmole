@@ -19,7 +19,6 @@ package org.openmole.ide.plugin.environment.pbs
 
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
@@ -29,8 +28,9 @@ import scala.swing.TabbedPane
 import scala.swing.TextField
 import swing.TabbedPane.Page
 import java.awt.Dimension
+import org.openmole.ide.core.implementation.panelsettings.EnvironmentPanelUI
 
-class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fillx,wrap 2", "", "") with IEnvironmentPanelUI {
+class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("fillx,wrap 2", "", "") with EnvironmentPanelUI {
 
   implicit def stringToStringOpt(s: String) = s.isEmpty match {
     case true  ⇒ None
@@ -56,8 +56,6 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
     case _             ⇒ ""
   }
 
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
-
   val loginTextField = new TextField(pud.login, 15)
   val hostTextField = new TextField(pud.host, 15)
   val portTextField = new TextField(pud.port.toString, 4)
@@ -70,7 +68,7 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
   val nodesTextField = new TextField(pud.nodes, 4)
   val coreByNodeTextField = new TextField(pud.coreByNode, 4)
 
-  val components = List(("Settings",
+  val components = List(("Header",
     new PluginPanel("wrap 2") {
       contents += (new Label("Login"), "gap para")
       contents += loginTextField
@@ -111,14 +109,13 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI) extends PluginPanel("fill
       }
     }))
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    //  requirementsPanelUI.requirementHelp.foreach { hm ⇒ add(hm._1, hm._2) }
-    add(loginTextField, new Help(i18n.getString("login"), i18n.getString("loginEx")))
-    add(hostTextField, new Help(i18n.getString("host"), i18n.getString("hostEx")))
-    add(pathTextField, new Help(i18n.getString("dir"), i18n.getString("dirEx")))
-    add(queueTextField, new Help(i18n.getString("queue"), i18n.getString("queueEx")))
-    add(openMOLEMemoryTextField, new Help(i18n.getString("runtimeMemory"), i18n.getString("runtimeMemoryEx")))
-  }
+  override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
+  //  requirementsPanelUI.requirementHelp.foreach { hm ⇒ add(hm._1, hm._2) }
+  add(loginTextField, new Help(i18n.getString("login"), i18n.getString("loginEx")))
+  add(hostTextField, new Help(i18n.getString("host"), i18n.getString("hostEx")))
+  add(pathTextField, new Help(i18n.getString("dir"), i18n.getString("dirEx")))
+  add(queueTextField, new Help(i18n.getString("queue"), i18n.getString("queueEx")))
+  add(openMOLEMemoryTextField, new Help(i18n.getString("runtimeMemory"), i18n.getString("runtimeMemoryEx")))
 
   override def saveContent(name: String) =
     new PBSEnvironmentDataUI(name,

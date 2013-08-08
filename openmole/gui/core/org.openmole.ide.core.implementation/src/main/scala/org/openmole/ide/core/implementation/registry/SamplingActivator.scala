@@ -17,13 +17,13 @@
 
 package org.openmole.ide.core.implementation.registry
 
-import org.openmole.ide.core.model.factory.ISamplingFactoryUI
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
+import org.openmole.ide.core.implementation.factory.SamplingFactoryUI
 
 trait SamplingActivator extends BundleActivator {
 
-  def samplingFactories: Iterable[ISamplingFactoryUI]
+  def samplingFactories: Iterable[SamplingFactoryUI]
 
   abstract override def start(context: BundleContext) = {
     super.start(context)

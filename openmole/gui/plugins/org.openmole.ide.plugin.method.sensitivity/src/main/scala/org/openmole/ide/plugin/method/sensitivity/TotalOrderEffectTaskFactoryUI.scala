@@ -17,20 +17,19 @@
 
 package org.openmole.ide.plugin.method.sensitivity
 
-import org.openmole.ide.core.model.factory.ITaskFactoryUI
 import org.openmole.core.model.task.ITask
-import org.openmole.ide.core.model.builder.IPuzzleUIMap
-import org.openmole.ide.core.implementation.builder.SceneFactory
+import org.openmole.ide.core.implementation.builder.{ PuzzleUIMap, SceneFactory }
 import org.openmole.plugin.method.sensitivity.TotalOrderEffectTask
+import org.openmole.ide.core.implementation.factory.TaskFactoryUI
 
-class TotalOrderEffectTaskFactoryUI extends ITaskFactoryUI {
+class TotalOrderEffectTaskFactoryUI extends TaskFactoryUI {
   override def toString = "Total Order effect"
 
   def buildDataUI = new TotalOrderEffectTaskDataUI
 
   override def category = List("Task", "Saltelli")
 
-  def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
+  def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = {
     val t = SceneFactory.as[TotalOrderEffectTask](task)
     uiMap.task(t, x ⇒ new TotalOrderEffectTaskDataUI(t.name,
       t.modelInputs.map { p ⇒ uiMap.prototypeUI(p).get },

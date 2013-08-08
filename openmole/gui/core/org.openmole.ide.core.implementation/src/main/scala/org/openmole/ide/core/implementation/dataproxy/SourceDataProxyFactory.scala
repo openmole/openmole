@@ -16,8 +16,8 @@
  */
 package org.openmole.ide.core.implementation.dataproxy
 
-import org.openmole.ide.core.model.factory._
+import org.openmole.ide.core.implementation.factory.{ SourceFactoryUI }
 
-class SourceDataProxyFactory(val factory: ISourceFactoryUI) extends ISourceDataProxyFactory {
-  def buildDataProxyUI = new SourceDataProxyUI(factory.buildDataUI)
+class SourceDataProxyFactory(val factory: SourceFactoryUI) extends DataProxyFactory {
+  def buildDataProxyUI = SourceDataProxyUI(factory.buildDataUI)
 }

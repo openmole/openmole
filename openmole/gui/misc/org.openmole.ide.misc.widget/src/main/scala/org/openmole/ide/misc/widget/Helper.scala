@@ -33,7 +33,7 @@ class Helper(val permalinks: List[URL] = List.empty) extends PluginPanel("wrap")
   def add(component: Component,
           help: Help) = helpMap += component -> help
 
-  def components = helpMap.keys
+  lazy val components = helpMap.keys
 
   def addPermalinks = permalinks foreach {
     addExternalLink(_, true)

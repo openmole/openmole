@@ -9,11 +9,11 @@ import java.awt.Color
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.data.TaskDataUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.plugin.task.stat.SumTask
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
 class SumTaskDataUI(val name: String = "",
-                    val sequence: List[(IPrototypeDataProxyUI, IPrototypeDataProxyUI)] = List.empty) extends StatDataUI {
+                    val sequence: List[(PrototypeDataProxyUI, PrototypeDataProxyUI)] = List.empty) extends StatDataUI {
 
   def coreObject(plugins: PluginSet) = util.Try {
     val gtBuilder = SumTask(name)(plugins)

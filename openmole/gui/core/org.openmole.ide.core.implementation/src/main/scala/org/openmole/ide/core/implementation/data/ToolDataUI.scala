@@ -17,7 +17,6 @@
 package org.openmole.ide.core.implementation.data
 
 import org.openmole.core.model.data.{ Prototype, DataSet }
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.core.implementation.registry.{ KeyGenerator, PrototypeKey }
 import org.openmole.core.model.mole.{ ICapsule, Hooks, Sources, IMole }
 import org.openmole.core.model.transition.{ IAggregationTransition, ITransition }
@@ -25,11 +24,11 @@ import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataPr
 
 object ToolDataUI {
   def implicitPrototypes(coreInputs: Unit ⇒ List[Prototype[_]],
-                         prototypesIn: Seq[IPrototypeDataProxyUI],
+                         prototypesIn: Seq[PrototypeDataProxyUI],
                          coreOutputs: Unit ⇒ List[Prototype[_]],
-                         prototypesOut: Seq[IPrototypeDataProxyUI]) = {
+                         prototypesOut: Seq[PrototypeDataProxyUI]) = {
 
-    def protoFilter(lP: Seq[Prototype[_]], protos: Seq[IPrototypeDataProxyUI]) = {
+    def protoFilter(lP: Seq[Prototype[_]], protos: Seq[PrototypeDataProxyUI]) = {
       lP.map { i ⇒ PrototypeKey(i) }.toList.diff(protos.map {
         p ⇒ PrototypeKey(p)
       }).map { Proxies.instance.prototypeOrElseCreate }

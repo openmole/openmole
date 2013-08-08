@@ -17,77 +17,74 @@
 
 package org.openmole.ide.core.implementation.workflow
 
-import org.openmole.ide.core.model.data._
-import org.openmole.ide.core.model.workflow._
-import scala.collection.mutable.HashSet
-import org.openmole.ide.core.model.dataproxy.{ IPrototypeDataProxyUI, ITaskDataProxyUI }
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import org.openmole.core.model.mole.{ ICapsule, IMole }
 import concurrent.stm._
 import util.{ Failure, Success }
 import org.openmole.ide.misc.tools.util.ID
-import org.openmole.core.model.data.Prototype
-import org.openmole.ide.core.implementation.dataproxy.Proxies
-import org.openmole.ide.core.implementation.panel.MolePanelUI
-import org.openmole.ide.core.implementation.execution.ScenesManager
+import org.openmole.ide.core.implementation.dataproxy.{ TaskDataProxyUI, Proxies }
+import org.openmole.ide.core.implementation.panelsettings.MolePanelUI
 
-class MoleUI(var name: String) extends IMoleUI with ID {
+class MoleUI(var name: String) extends IMoleUI with ID { moleUI ⇒
 
-  private val _startingCapsule: Ref[Option[ICapsuleUI]] = Ref(Option.empty[ICapsuleUI])
-  private val _capsules = TMap[String, ICapsuleUI]()
-  private val _connectors = TMap[String, IConnectorUI]()
-  private val _capsuleConnections = TMap[String, TSet[IConnectorUI]]()
+  private val _startingCapsule: Ref[Option[CapsuleUI]] = Ref(Option.empty[CapsuleUI])
+  private val _capsules = TMap[String, CapsuleUI]()
+  private val _connectors = TMap[String, ConnectorUI]()
+  private val _capsuleConnections = TMap[String, TSet[ConnectorUI]]()
   private val _plugins: Ref[List[String]] = Ref(List.empty[String])
 
   def plugins = _plugins.single()
   def plugins_=(v: Iterable[String]) = _plugins.single() = v.toList
 
-  @transient lazy val _cacheMole: Ref[Option[(IMole, Map[ICapsuleUI, ICapsule])]] = Ref(None)
+  @transient lazy val _cacheMole: Ref[Option[(IMole, Map[CapsuleUI, ICapsule])]] = Ref(None)
 
-  def buildPanelUI = new MolePanelUI(this)
+  def buildPanelUI = new MolePanelUI {
+    // type DATAUI = moleUI.type
+    def dataUI = moleUI
+  }
 
   def capsules = _capsules.single.toMap
   def capsule(id: String) = _capsules.single.get(id)
 
-  def +=(c: ICapsuleUI): Unit = atomic { implicit ctx ⇒
+  def +=(c: CapsuleUI): Unit = atomic { implicit ctx ⇒
     _capsules put (c.id, c)
     _capsuleConnections.single put (c.id, TSet.empty)
   }
 
-  def -=(c: ICapsuleUI): Unit = atomic { implicit ctx ⇒
+  def -=(c: CapsuleUI): Unit = atomic { implicit ctx ⇒
     _capsules remove (c.id)
     if (_capsuleConnections.contains(c.id)) _capsuleConnections.remove(c.id)
   }
 
-  def contains(c: ICapsuleUI) = _capsules.single.contains(c.id)
+  def contains(c: CapsuleUI) = _capsules.single.contains(c.id)
 
   def connectors = _connectors.single.toMap
   def connector(id: String) = _connectors.single(id)
 
-  def +=(c: IConnectorUI): Unit = atomic { implicit ctx ⇒
+  def +=(c: ConnectorUI): Unit = atomic { implicit ctx ⇒
     _connectors put (c.id, c)
     +=(c.source, c)
   }
 
-  def -=(c: IConnectorUI): Unit = atomic { implicit ctx ⇒
+  def -=(c: ConnectorUI): Unit = atomic { implicit ctx ⇒
     if (contains(c)) {
       _connectors.single remove (c.id)
       -=(c.source, c)
     }
   }
 
-  def update(id: String, c: IConnectorUI) = _connectors.single(id) = c
-  def contains(c: IConnectorUI) = _connectors.single.contains(c.id)
+  def update(id: String, c: ConnectorUI) = _connectors.single(id) = c
+  def contains(c: ConnectorUI) = _connectors.single.contains(c.id)
 
   def capsuleConnections = _capsuleConnections.single.toMap
-  def capsuleConnections(c: ICapsuleUI) = _capsuleConnections.single(c.id)
+  def capsuleConnections(c: CapsuleUI) = _capsuleConnections.single(c.id)
 
-  def +=(caps: ICapsuleUI, c: IConnectorUI): Unit = atomic { implicit ctx ⇒
+  def +=(caps: CapsuleUI, c: ConnectorUI): Unit = atomic { implicit ctx ⇒
     val l = _capsuleConnections.getOrElseUpdate(caps.id, TSet.empty)
     l += c
   }
 
-  def -=(caps: ICapsuleUI, c: IConnectorUI): Unit = atomic { implicit ctx ⇒
+  def -=(caps: CapsuleUI, c: ConnectorUI): Unit = atomic { implicit ctx ⇒
     val l = _capsuleConnections.getOrElseUpdate(caps.id, TSet.empty)
     if (l.contains(c)) l -= c
   }
@@ -137,23 +134,23 @@ class MoleUI(var name: String) extends IMoleUI with ID {
   def assignDefaultStartingCapsule =
     if (!startingCapsule.isDefined && !capsules.isEmpty) startingCapsule = Some(capsules.map { _._2 }.head)
 
-  def startingCapsule_=(stCapsule: Option[ICapsuleUI]): Unit = {
+  def startingCapsule_=(stCapsule: Option[CapsuleUI]): Unit = {
     _startingCapsule.single() = stCapsule
   }
 
   def startingCapsule = _startingCapsule.single()
 
-  override def registerCapsuleUI(cv: ICapsuleUI) = {
+  override def registerCapsuleUI(cv: CapsuleUI) = {
     +=(cv)
     if (capsules.size == 1) startingCapsule = Some(cv)
     invalidateCache
   }
 
-  def removeCapsuleUI(capsule: ICapsuleUI): String = atomic { implicit ptx ⇒
+  def removeCapsuleUI(capsule: CapsuleUI): String = atomic { implicit ptx ⇒
     val id = capsule.id
     startingCapsule match {
-      case None                   ⇒
-      case Some(caps: ICapsuleUI) ⇒ if (id == caps.id) startingCapsule = None
+      case None                  ⇒
+      case Some(caps: CapsuleUI) ⇒ if (id == caps.id) startingCapsule = None
     }
 
     removeIncomingTransitions(capsule)
@@ -166,20 +163,20 @@ class MoleUI(var name: String) extends IMoleUI with ID {
 
   def capsulesInMole = atomic { implicit ptx ⇒
     cacheMole match {
-      case Some((mole: IMole, capsuleMap: Map[ICapsuleUI, ICapsule])) ⇒
+      case Some((mole: IMole, capsuleMap: Map[CapsuleUI, ICapsule])) ⇒
         val cmap = capsuleMap.map { case (k, v) ⇒ v -> k }
         mole.capsules.map { cmap }.toSet
       case _ ⇒ Iterable()
     }
   }
 
-  def capsule(proxy: ITaskDataProxyUI) = capsules.toList.filter {
+  def capsule(proxy: TaskDataProxyUI) = capsules.toList.filter {
     _._2.dataUI.task == Some(proxy)
   }.map {
     _._2
   }
 
-  private def removeIncomingTransitions(capsule: ICapsuleUI) =
+  private def removeIncomingTransitions(capsule: CapsuleUI) =
     connectors.filter {
       _._2.target.capsule == capsule
     }.foreach {
@@ -187,23 +184,23 @@ class MoleUI(var name: String) extends IMoleUI with ID {
         removeConnector(t._1)
     }
 
-  def changeConnector(oldConnector: IConnectorUI,
-                      connector: IConnectorUI) = atomic { implicit ctx ⇒
+  def changeConnector(oldConnector: ConnectorUI,
+                      connector: ConnectorUI) = atomic { implicit ctx ⇒
     update(oldConnector.id, connector)
   }
 
   def removeConnector(edgeID: String): Unit = removeConnector(edgeID, connector(edgeID))
 
   def removeConnector(edgeID: String,
-                      connector: IConnectorUI): Unit = atomic { implicit ctx ⇒
+                      connector: ConnectorUI): Unit = atomic { implicit ctx ⇒
     -=(connector)
     invalidateCache
   }
 
-  def registerConnector(connector: IConnectorUI) = registerConnector(connector.id, connector)
+  def registerConnector(connector: ConnectorUI) = registerConnector(connector.id, connector)
 
   def registerConnector(edgeID: String,
-                        connector: IConnectorUI) = atomic { implicit ctx ⇒
+                        connector: ConnectorUI) = atomic { implicit ctx ⇒
     +=(connector)
     invalidateCache
   }
@@ -212,21 +209,21 @@ class MoleUI(var name: String) extends IMoleUI with ID {
     _._2
   }.filter {
     _ match {
-      case t: ITransitionUI ⇒ true
-      case _                ⇒ false
+      case t: TransitionUI ⇒ true
+      case _               ⇒ false
     }
   }.toList
 
-  def firstCapsules(caps: List[ICapsuleUI]) = caps.diff(transitions.map {
+  def firstCapsules(caps: List[CapsuleUI]) = caps.diff(transitions.map {
     _.target.capsule
   })
 
-  def lastCapsules(caps: List[ICapsuleUI]) = caps.diff(transitions.map {
+  def lastCapsules(caps: List[CapsuleUI]) = caps.diff(transitions.map {
     _.source
   })
 
-  def connectedCapsulesFrom(from: ICapsuleUI) = atomic { implicit ptx ⇒
-    def connectedCapsulesFrom0(toVisit: List[ICapsuleUI], connected: List[ICapsuleUI]): List[ICapsuleUI] = {
+  def connectedCapsulesFrom(from: CapsuleUI) = atomic { implicit ptx ⇒
+    def connectedCapsulesFrom0(toVisit: List[CapsuleUI], connected: List[CapsuleUI]): List[CapsuleUI] = {
       if (toVisit.isEmpty) connected
       else {
         val head = toVisit.head

@@ -18,12 +18,11 @@ package org.openmole.ide.core.implementation.dataproxy
 
 import swing.Component
 import scala.swing.event.ActionEvent
-import org.openmole.ide.core.model.dataproxy.IDataProxyUI
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
 
 object UpdatedProxyEvent {
   def task(component: Component) = new UpdatedProxyEvent(EmptyDataUIs.emptyTaskProxy, component)
 }
 
-case class UpdatedProxyEvent(val proxy: IDataProxyUI,
+case class UpdatedProxyEvent(val proxy: DataProxyUI,
                              component: Component) extends ActionEvent(component)

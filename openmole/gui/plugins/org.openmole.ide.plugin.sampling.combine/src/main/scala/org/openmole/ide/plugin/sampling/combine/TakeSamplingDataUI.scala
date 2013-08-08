@@ -16,17 +16,13 @@
  */
 package org.openmole.ide.plugin.sampling.combine
 
-import org.openmole.ide.core.model.data.{ IFactorDataUI, IDomainDataUI, ISamplingDataUI }
-import org.openmole.core.model.sampling.{ Factor, DiscreteFactor, Sampling }
+import org.openmole.core.model.sampling.{ Factor, Sampling }
 import org.openmole.plugin.sampling.combine.TakeSampling
-import org.openmole.misc.exception.UserBadDataError
-import org.openmole.ide.misc.widget.{ URL, Helper }
-import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.core.model.domain.{ Discrete, Domain }
-import org.openmole.ide.core.implementation.sampling.SamplingUtils
+import org.openmole.ide.core.implementation.sampling.{ FiniteUI, SamplingUtils }
+import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
 
-class TakeSamplingDataUI(val size: String = "1") extends ISamplingDataUI {
+class TakeSamplingDataUI(val size: String = "1") extends SamplingDataUI {
 
   val name = "Take"
 
@@ -36,18 +32,18 @@ class TakeSamplingDataUI(val size: String = "1") extends ISamplingDataUI {
 
   def buildPanelUI = new TakeSamplingPanelUI(this)
 
-  def imagePath = "img/takeSampling.png"
+  override def imagePath = "img/takeSampling.png"
 
   def fatImagePath = "img/takeSampling_fat.png"
 
-  override def isAcceptable(domain: IDomainDataUI) = domain match {
-    case f: IFinite ⇒ true
+  override def isAcceptable(domain: DomainDataUI) = domain match {
+    case f: FiniteUI ⇒ true
     case _ ⇒
       StatusBar().warn("A Finite Domain is required for a Take Sampling")
       false
   }
 
-  def isAcceptable(sampling: ISamplingDataUI) = true
+  def isAcceptable(sampling: SamplingDataUI) = true
 
   override def inputNumberConstrainst = Some(1)
 

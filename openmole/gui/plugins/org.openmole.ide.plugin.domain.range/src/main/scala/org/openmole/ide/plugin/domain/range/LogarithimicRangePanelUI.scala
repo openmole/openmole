@@ -28,8 +28,10 @@ class LogarithmicRangePanelUI(pud: LogarthmicRangeDataUI) extends GenericRangeDo
   minField.text = pud.min
   maxField.text = pud.max
 
-  contents += (new Label("Step"), "gap para")
-  contents += stepField
+  logPanel.contents += (new Label("Step"), "gap para")
+  logPanel.contents += stepField
+
+  val components = List(("", logPanel))
 
   typeCombo.peer.setModel(MyComboBox.newConstantModel(List(DOUBLE, BIG_DECIMAL)))
 

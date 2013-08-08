@@ -20,11 +20,10 @@ package org.openmole.ide.core.implementation.provider
 import javax.swing.JMenu
 import javax.swing.JMenuItem
 import javax.swing.JPopupMenu
-import org.openmole.ide.core.model.provider.IGenericMenuProvider
 
 object PopupMenuProviderFactory {
 
-  def fillPopupMenu(gmp: IGenericMenuProvider) = {
+  def fillPopupMenu(gmp: GenericMenuProvider) = {
     val popupMenu = new JPopupMenu
     gmp.menus.foreach(popupMenu.add(_))
     gmp.items.foreach(popupMenu.add(_))

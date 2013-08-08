@@ -19,14 +19,13 @@ package org.openmole.ide.core.implementation.dialog
 
 import java.awt.Color
 import org.openmole.ide.core.implementation.execution.ScenesManager
-import org.openmole.ide.core.model.dataproxy.IDataProxyUI
-import org.openmole.ide.core.model.workflow.ISceneContainer
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.MigPanel
 import scala.swing.Action
 import scala.swing.Label
 import compat.Platform.EOL
-import org.openmole.ide.core.implementation.workflow.{ ExecutionMoleSceneContainer, BuildMoleSceneContainer }
+import org.openmole.ide.core.implementation.workflow.{ ISceneContainer, ExecutionMoleSceneContainer, BuildMoleSceneContainer }
+import org.openmole.ide.core.implementation.dataproxy.DataProxyUI
 
 object StatusBar {
   def apply() = ScenesManager.currentSceneContainer match {
@@ -54,28 +53,28 @@ class StatusBar extends MigPanel("wrap 3") {
 
   var strings = ""
 
-  def inform(t: Throwable, proxy: Option[IDataProxyUI]): Unit =
+  def inform(t: Throwable, proxy: Option[DataProxyUI]): Unit =
     inform(t.getMessage, proxy, t.getClass.getCanonicalName + "\n" + errorStack(t))
 
   def inform(info: String,
-             proxy: Option[IDataProxyUI] = None,
+             proxy: Option[DataProxyUI] = None,
              stack: String = ""): Unit =
     printError("[INFO]", info, proxy, stack)
 
-  def warn(t: Throwable, proxy: Option[IDataProxyUI]): Unit =
+  def warn(t: Throwable, proxy: Option[DataProxyUI]): Unit =
     warn(t.getMessage, proxy, t.getClass.getCanonicalName + "\n" + errorStack(t))
 
   def warn(warning: String,
-           proxy: Option[IDataProxyUI] = None,
+           proxy: Option[DataProxyUI] = None,
            stack: String = ""): Unit = printError("[WARNING] ", warning, proxy, stack)
 
   def block(t: Throwable): Unit = block(t, None)
 
-  def block(t: Throwable, proxy: Option[IDataProxyUI]): Unit =
+  def block(t: Throwable, proxy: Option[DataProxyUI]): Unit =
     block(t.getMessage, proxy, t.getClass.getCanonicalName + "\n" + errorStack(t))
 
   def block(b: String,
-            proxy: Option[IDataProxyUI] = None,
+            proxy: Option[DataProxyUI] = None,
             stack: String = ""): Unit = printError("[CRITICAL] ", b, proxy, stack)
 
   def errorStack(e: Throwable) =
@@ -83,12 +82,12 @@ class StatusBar extends MigPanel("wrap 3") {
 
   def printError(header: String,
                  error: String,
-                 proxy: Option[IDataProxyUI],
+                 proxy: Option[DataProxyUI],
                  stack: String) =
     if (error == null || !strings.contains(error)) {
       strings += error
       proxy match {
-        case Some(x: IDataProxyUI) ⇒
+        case Some(x: DataProxyUI) ⇒
           contents += new LinkLabel(header,
             new Action("") {
               override def apply = displayProxy(x)
@@ -125,7 +124,7 @@ class StatusBar extends MigPanel("wrap 3") {
 
   def isValid = strings.isEmpty
 
-  def displayProxy(proxy: IDataProxyUI) =
+  def displayProxy(proxy: DataProxyUI) =
     ScenesManager.currentSceneContainer match {
       case Some(sc: ISceneContainer) ⇒ sc.scene.displayPropertyPanel(proxy, 0)
       case None                      ⇒

@@ -19,7 +19,6 @@ package org.openmole.ide.plugin.environment.ssh
 
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
@@ -27,10 +26,9 @@ import org.openmole.ide.misc.widget.URL
 import scala.swing.Label
 import scala.swing.TextField
 import java.awt.Dimension
+import org.openmole.ide.core.implementation.panelsettings.EnvironmentPanelUI
 
-class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fillx", "[left][grow,fill]", "") with IEnvironmentPanelUI {
-
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("fillx", "[left][grow,fill]", "") with EnvironmentPanelUI {
 
   implicit def stringToStringOpt(s: String) = s.isEmpty match {
     case true  ⇒ None
@@ -59,7 +57,7 @@ class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fill
   val openMOLEMemoryTextField = new TextField(pud.openMOLEMemory.getOrElse("").toString, 15)
   val threadTextField = new TextField(pud.threads.getOrElse("").toString, 15)
 
-  val components = List(("Settings", new PluginPanel("wrap 2") {
+  val components = List(("Header", new PluginPanel("wrap 2") {
     minimumSize = new Dimension(300, 200)
     contents += (new Label("Login"), "gap para")
     contents += loginTextField
@@ -83,24 +81,22 @@ class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI) extends PluginPanel("fill
     contents += threadTextField
   }))
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(loginTextField,
-      new Help(i18n.getString("login"),
-        i18n.getString("loginEx")))
-    add(hostTextField,
-      new Help(i18n.getString("host"),
-        i18n.getString("hostEx")))
-    add(nbSlotTextField,
-      new Help(i18n.getString("nbSlot"),
-        i18n.getString("nbSlotEx")))
-    add(dirTextField,
-      new Help(i18n.getString("dir"),
-        i18n.getString("dirEx")))
-    add(openMOLEMemoryTextField,
-      new Help(i18n.getString("runtimeMemory"),
-        i18n.getString("runtimeMemoryEx")))
-
-  }
+  override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
+  add(loginTextField,
+    new Help(i18n.getString("login"),
+      i18n.getString("loginEx")))
+  add(hostTextField,
+    new Help(i18n.getString("host"),
+      i18n.getString("hostEx")))
+  add(nbSlotTextField,
+    new Help(i18n.getString("nbSlot"),
+      i18n.getString("nbSlotEx")))
+  add(dirTextField,
+    new Help(i18n.getString("dir"),
+      i18n.getString("dirEx")))
+  add(openMOLEMemoryTextField,
+    new Help(i18n.getString("runtimeMemory"),
+      i18n.getString("runtimeMemoryEx")))
 
   override def saveContent(name: String) = new SSHEnvironmentDataUI(name,
     loginTextField.text,

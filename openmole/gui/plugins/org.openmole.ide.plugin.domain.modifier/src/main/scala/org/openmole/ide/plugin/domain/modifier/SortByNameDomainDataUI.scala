@@ -16,8 +16,6 @@
  */
 package org.openmole.ide.plugin.domain.modifier
 
-import org.openmole.ide.core.model.data.IDomainDataUI
-import org.openmole.ide.core.model.panel.IDomainPanelUI
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
 import java.io.File
@@ -25,25 +23,29 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.domain.{ Finite, Domain }
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.misc.tools.util.Types.FILE
-import org.openmole.ide.core.model.sampling.IFinite
 import org.openmole.plugin.domain.modifier.SortByNameDomain
 import org.openmole.misc.tools.obj.ClassUtils
 import util.Try
+import org.openmole.ide.core.implementation.data.DomainDataUI
+import org.openmole.ide.core.implementation.panelsettings.IDomainPanelUI
+import org.openmole.ide.core.implementation.sampling.FiniteUI
 
-class SortByNameDomainDataUI(var previousDomain: List[IDomainDataUI] = List.empty)
-    extends ModifierDomainDataUI with IFinite {
+class SortByNameDomainDataUI(var previousDomain: List[DomainDataUI] = List.empty)
+    extends ModifierDomainDataUI with FiniteUI {
 
   def domainType = manifest[File]
 
   def coreObject = Try {
     previousDomain.headOption match {
-      case Some(x: IDomainDataUI) ⇒ SortByNameDomain(x.coreObject.asInstanceOf[Domain[File] with Finite[File]])
-      case _                      ⇒ throw new UserBadDataError("The SortByName Domain requires a File Domain as input")
+      case Some(x: DomainDataUI) ⇒ SortByNameDomain(x.coreObject.asInstanceOf[Domain[File] with Finite[File]])
+      case _                     ⇒ throw new UserBadDataError("The SortByName Domain requires a File Domain as input")
     }
   }
 
-  def buildPanelUI = new PluginPanel("") with IDomainPanelUI {
-    contents += new Label("<html><i>No more information is required for this Domain</i></html>")
+  def buildPanelUI = new IDomainPanelUI {
+    val components = List(("", new PluginPanel("wrap ") {
+      contents += new Label("<html><i>No more information is required for this Domain</i></html>")
+    }))
 
     def saveContent = new SortByNameDomainDataUI
   }
@@ -56,7 +58,7 @@ class SortByNameDomainDataUI(var previousDomain: List[IDomainDataUI] = List.empt
 
   override def availableTypes = List(FILE)
 
-  override def isAcceptable(domain: IDomainDataUI) = {
+  override def isAcceptable(domain: DomainDataUI) = {
     // if (Types(domain.domainType.toString, FILE)) true
     if (ClassUtils.assignable(domain.domainType.runtimeClass, classOf[File])) true
     else {
@@ -65,8 +67,8 @@ class SortByNameDomainDataUI(var previousDomain: List[IDomainDataUI] = List.empt
     }
   }
 
-  def clone(pD: List[IDomainDataUI]) = pD.headOption match {
-    case Some(d: IDomainDataUI) ⇒ new SortByNameDomainDataUI(pD)
-    case _                      ⇒ new SortByNameDomainDataUI(List())
+  def clone(pD: List[DomainDataUI]) = pD.headOption match {
+    case Some(d: DomainDataUI) ⇒ new SortByNameDomainDataUI(pD)
+    case _                     ⇒ new SortByNameDomainDataUI(List())
   }
 }

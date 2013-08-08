@@ -17,18 +17,17 @@
 
 package org.openmole.ide.plugin.task.moletask
 
-import org.openmole.ide.core.model.factory.ITaskFactoryUI
 import org.openmole.core.model.task.ITask
-import org.openmole.ide.core.implementation.builder.SceneFactory
+import org.openmole.ide.core.implementation.builder.{ PuzzleUIMap, SceneFactory }
 import org.openmole.core.implementation.task.MoleTask
-import org.openmole.ide.core.model.builder.IPuzzleUIMap
+import org.openmole.ide.core.implementation.factory.TaskFactoryUI
 
-class MoleTaskFactoryUI extends ITaskFactoryUI {
+class MoleTaskFactoryUI extends TaskFactoryUI {
   override def toString = "Mole Task"
 
   def buildDataUI = new MoleTaskDataUI
 
-  def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
+  def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = {
     val t = SceneFactory.as[MoleTask](task)
     uiMap.task(task, x ⇒ (new MoleTaskDataUI(t.name, Some(uiMap.mole(t.mole).dataUI.id))))
   }

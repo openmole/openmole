@@ -17,10 +17,10 @@
 
 package org.openmole.ide.core.implementation.serializer
 
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.misc.tools.util.ID
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
 class DataChannelData(
   val from: CapsuleData,
   val to: Int,
-  val filtered: List[IPrototypeDataProxyUI]) extends ID
+  val filtered: List[PrototypeDataProxyUI]) extends ID

@@ -16,18 +16,46 @@
  */
 package org.openmole.ide.core.implementation.data
 
-import org.openmole.ide.core.model.data.ISourceDataUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.implementation.builder.MoleFactory
 import org.openmole.core.model.mole.ISource
 import org.openmole.ide.misc.tools.util.ID
 import scala.util.{ Success, Try }
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.implementation.panelsettings.SourcePanelUI
 
-abstract class SourceDataUI extends ISourceDataUI with CoreObjectInitialisation with ID {
+abstract class SourceDataUI extends DataUI
+    with InputPrototype
+    with OutputPrototype
+    with ImplicitPrototype
+    with ImageView
+    with CoreObjectInitialisation
+    with ID {
 
-  def implicitPrototypes: (List[IPrototypeDataProxyUI], List[IPrototypeDataProxyUI]) =
+  override def toString: String = name
+
+  def coreClass: Class[_ <: ISource]
+
+  def coreObject: Try[ISource]
+
+  def executionCoreObject = coreObject
+
+  def buildPanelUI: SourcePanelUI
+
+  def filterPrototypeOccurencies(pproxy: PrototypeDataProxyUI) = (filterInputs(pproxy) ++ filterOutputs(pproxy)).distinct
+
+  def cloneWithoutPrototype(proxy: PrototypeDataProxyUI): SourceDataUI = this
+
+  def removePrototypeOccurencies(pproxy: PrototypeDataProxyUI) = {
+    removeInput(pproxy)
+    removeOutput(pproxy)
+  }
+
+  def implicitPrototypes: (List[PrototypeDataProxyUI], List[PrototypeDataProxyUI]) =
     coreObject match {
       case Success(x) ⇒ ToolDataUI.implicitPrototypes(y ⇒ x.inputs.toList.map { _.prototype }, inputs, y ⇒ x.outputs.toList.map { _.prototype }, outputs)
       case _          ⇒ (List(), List())
     }
+
+  override def fatImagePath = "img/source_fat.png"
+
+  override def imagePath = "img/source.png"
 }

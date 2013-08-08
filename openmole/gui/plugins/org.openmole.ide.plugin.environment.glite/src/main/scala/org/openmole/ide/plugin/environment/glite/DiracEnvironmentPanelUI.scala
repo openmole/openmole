@@ -19,7 +19,6 @@ package org.openmole.ide.plugin.environment.glite
 
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
@@ -27,9 +26,9 @@ import org.openmole.ide.misc.widget.URL
 import scala.swing.{ Label, TextField }
 
 import Converters._
-class DiracEnvironmentPanelUI(pud: DiracEnvironmentDataUI) extends PluginPanel("wrap 2") with IEnvironmentPanelUI {
+import org.openmole.ide.core.implementation.panelsettings.EnvironmentPanelUI
 
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+class DiracEnvironmentPanelUI(pud: DiracEnvironmentDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("wrap 2") with EnvironmentPanelUI {
 
   val vo = new VOPanel(pud.voName, pud.vomsURL, pud.bdii)
   val serviceTextField = new TextField(pud.service, 20)
@@ -40,7 +39,7 @@ class DiracEnvironmentPanelUI(pud: DiracEnvironmentDataUI) extends PluginPanel("
   val openMOLEMemoryTextField = new TextField(pud.openMOLEMemory.getOrElse("").toString, 20)
 
   val components = List(
-    ("Settings", new PluginPanel("wrap 2") {
+    ("Header", new PluginPanel("wrap 2") {
       contents += (new Label("VO"), "gap para")
       contents += vo.voComboBox
       contents += (new Label("Service"), "gap para")
@@ -65,11 +64,11 @@ class DiracEnvironmentPanelUI(pud: DiracEnvironmentDataUI) extends PluginPanel("
       contents += openMOLEMemoryTextField
     }))
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(vo.voComboBox, new Help(i18n.getString("vo"), i18n.getString("voEx")))
-    add(vo.vomsTextField, new Help(i18n.getString("voms"), i18n.getString("vomsEx")))
-    add(vo.bdiiTextField, new Help(i18n.getString("bdii"), i18n.getString("bdiiEx")))
-  }
+  override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
+
+  add(vo.voComboBox, new Help(i18n.getString("vo"), i18n.getString("voEx")))
+  add(vo.vomsTextField, new Help(i18n.getString("voms"), i18n.getString("vomsEx")))
+  add(vo.bdiiTextField, new Help(i18n.getString("bdii"), i18n.getString("bdiiEx")))
 
   override def saveContent(name: String) = new DiracEnvironmentDataUI(name,
     vo.voComboBox.selection.item,

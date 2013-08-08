@@ -17,13 +17,13 @@
 
 package org.openmole.ide.core.implementation.registry
 
-import org.openmole.ide.core.model.factory.IAuthentificationFactoryUI
 import org.osgi.framework.BundleActivator
 import org.osgi.framework.BundleContext
+import org.openmole.ide.core.implementation.factory.AuthentificationFactoryUI
 
 trait AuthentificationActivator extends BundleActivator {
 
-  def authentificationFactories: Iterable[IAuthentificationFactoryUI]
+  def authentificationFactories: Iterable[AuthentificationFactoryUI]
 
   abstract override def start(context: BundleContext) = {
     super.start(context)

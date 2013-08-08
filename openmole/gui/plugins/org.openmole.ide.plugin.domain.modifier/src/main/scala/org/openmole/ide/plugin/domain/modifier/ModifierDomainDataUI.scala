@@ -17,26 +17,26 @@
 package org.openmole.ide.plugin.domain.modifier
 
 import org.openmole.core.model.domain.{ Finite, Discrete, Domain }
-import org.openmole.ide.core.model.data.IDomainDataUI
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.model.sampling.IModifier
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.misc.tools.util.Types._
+import org.openmole.ide.core.implementation.data.DomainDataUI
+import org.openmole.ide.core.implementation.sampling.Modifier
 
 object ModifierDomainDataUI {
 
-  def computeClassString(pud: IDomainDataUI) =
+  def computeClassString(pud: DomainDataUI) =
     ScenesManager.currentSamplingCompositionPanelUI.firstNoneModifierDomain(pud) match {
-      case Some(d: IDomainDataUI) ⇒ d.domainType.toString.split('.').last
-      case _                      ⇒ DOUBLE
+      case Some(d: DomainDataUI) ⇒ d.domainType.toString.split('.').last
+      case _                     ⇒ DOUBLE
     }
 }
 
-trait ModifierDomainDataUI extends IDomainDataUI with IModifier {
+trait ModifierDomainDataUI extends DomainDataUI with Modifier {
   type DOMAINTYPE = Domain[Any] with Discrete[Any]
   type FINITDOMAINTYPE = Domain[Any] with Finite[Any]
 
-  override def isAcceptable(domain: IDomainDataUI): Boolean =
+  override def isAcceptable(domain: DomainDataUI): Boolean =
     domain.coreObject match {
       case d: DOMAINTYPE ⇒ true
       case _ ⇒

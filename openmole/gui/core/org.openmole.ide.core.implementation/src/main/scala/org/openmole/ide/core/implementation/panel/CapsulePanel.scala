@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
+ * Copyright (C) 201 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,36 +16,28 @@
  */
 package org.openmole.ide.core.implementation.panel
 
-import org.openmole.ide.core.model.workflow.{ ICapsuleUI, IMoleScene }
-import java.awt.BorderLayout
-import org.openmole.ide.misc.widget.PluginPanel
-import swing.{ TabbedPane, Label }
+trait CapsulePanel extends Base
+    with Capsule
+    with Header
+    with ProxyShortcut {
 
-class CapsulePanel(scene: IMoleScene,
-                   capsule: ICapsuleUI,
-                   val index: Int,
-                   tabIndex: Int) extends BasePanel(None, scene) {
+  def components = panelSettings.components
 
-  val panelUI = capsule.dataUI.buildPanelUI(index)
-  def created = true
+  var panelSettings = capsule.dataUI.buildPanelUI(index)
 
-  peer.add(mainPanel.peer, BorderLayout.NORTH)
+  build
 
-  refreshPanel
-  val capsulePanel = new PluginPanel("wrap") {
-    contents += new Label { text = "<html><b><font \"size=\"4\" >Capsule settings</font></b></html>" }
-    contents += tabbedPane
-    contents += panelUI.help
+  def build = {
+    basePanel.contents += panelSettings.panel
   }
-  peer.add(capsulePanel.peer, BorderLayout.CENTER)
-  tabbedPane.selection.index = tabIndex
 
-  def create {}
+  def createSettings = {
+    panelSettings = capsule.dataUI.buildPanelUI(index)
+    basePanel.contents += panelSettings.tabbedPane
+  }
 
-  def delete = true
-
-  def save = {
-    capsule.dataUI = panelUI.save
+  def savePanel = {
+    capsule.dataUI = panelSettings.saveContent("")
     scene.refresh
   }
 

@@ -17,13 +17,13 @@
 
 package org.openmole.ide.core.implementation.dataproxy
 
-import org.openmole.ide.core.model.dataproxy._
-import org.openmole.ide.core.implementation.panel.ConceptMenu
 import org.openmole.ide.misc.tools.util._
 import org.openmole.misc.tools.obj.ClassUtils._
-import org.openmole.ide.core.implementation.builder.Builder
 import concurrent.stm._
+import org.openmole.ide.core.implementation.builder.Builder
 import org.openmole.ide.core.implementation.registry.PrototypeKey
+import org.openmole.misc.eventdispatcher.EventDispatcher
+import org.openmole.ide.core.implementation.panel.ConceptMenu
 
 object Proxies {
   var instance = new Proxies
@@ -31,33 +31,43 @@ object Proxies {
 
 class Proxies {
 
-  private val _tasks = TMap[ID.Type, ITaskDataProxyUI]()
-  private val _prototypes = TMap[ID.Type, IPrototypeDataProxyUI]()
-  private val _samplings = TMap[ID.Type, ISamplingCompositionDataProxyUI]()
-  private val _environments = TMap[ID.Type, IEnvironmentDataProxyUI]()
-  private val _hooks = TMap[ID.Type, IHookDataProxyUI]()
-  private val _sources = TMap[ID.Type, ISourceDataProxyUI]()
+  private val _proxies = TMap[ID.Type, DataProxyUI]()
 
   def dataUIs = atomic { implicit ctx ⇒
-    _tasks.values ++ _prototypes.values ++ _samplings.values ++ _environments.values ++ _hooks.values ++ _sources.values
+    _proxies.values
   }
 
-  def tasks = _tasks.single.values.toList
-  def prototypes = _prototypes.single.values.toList
-  def samplings = _samplings.single.values.toList
-  def environments = _environments.single.values.toList
-  def hooks = _hooks.single.values.toList
-  def sources = _sources.single.values.toList
+  def tasks = _tasks.values.toList
+  def prototypes = _prototypes.values.toList
+  def samplings = _samplings.values.toList
+  def environments = _environments.values.toList
+  def hooks = _hooks.values.toList
+  def sources = _sources.values.toList
 
-  def task(id: ID.Type) = _tasks.single.get(id)
-  def prototype(id: ID.Type) = _prototypes.single.get(id)
-  def sampling(id: ID.Type) = _samplings.single.get(id)
-  def environment(id: ID.Type) = _environments.single.get(id)
-  def hook(id: ID.Type) = _hooks.single.get(id)
-  def source(id: ID.Type) = _sources.single.get(id)
+  private def castProxies[T](implicit m: Manifest[T]): Map[ID.Type, T] = _proxies.single.flatMap {
+    case (k, v) ⇒
+      v match {
+        case x if m.runtimeClass.isAssignableFrom(x.getClass) ⇒ Some(k -> x.asInstanceOf[T])
+        case _ ⇒ None
+      }
+  }.toMap
+
+  private def _tasks = castProxies[TaskDataProxyUI]
+  private def _prototypes = castProxies[PrototypeDataProxyUI]
+  private def _samplings = castProxies[SamplingCompositionDataProxyUI]
+  private def _environments = castProxies[EnvironmentDataProxyUI]
+  private def _hooks = castProxies[HookDataProxyUI]
+  private def _sources = castProxies[SourceDataProxyUI]
+
+  def task(id: ID.Type) = _tasks.get(id)
+  def prototype(id: ID.Type) = _prototypes.get(id)
+  def sampling(id: ID.Type) = _samplings.get(id)
+  def environment(id: ID.Type) = _environments.get(id)
+  def hook(id: ID.Type) = _hooks.get(id)
+  def source(id: ID.Type) = _sources.get(id)
 
   def prototype(p: PrototypeKey) =
-    _prototypes.single.map { case (_, v) ⇒ PrototypeKey(v) -> v }.get(p)
+    _prototypes.map { case (_, v) ⇒ PrototypeKey(v) -> v }.get(p)
 
   def prototypeOrElseCreate(k: PrototypeKey) = atomic { implicit ctx ⇒
     prototype(k).getOrElse {
@@ -67,51 +77,34 @@ class Proxies {
     }
   }
 
-  def +=(t: ITaskDataProxyUI) = _tasks.single put (t.id, t)
-  def -=(t: ITaskDataProxyUI) = _tasks.single remove (t.id)
-  def contains(t: ITaskDataProxyUI) = _tasks.single.contains(t.id)
-
-  def +=(t: IPrototypeDataProxyUI) = _prototypes.single put (t.id, t)
-  def -=(t: IPrototypeDataProxyUI) = _prototypes.single remove (t.id)
-  def contains(t: IPrototypeDataProxyUI) = _prototypes.single.contains(t.id)
-
-  def +=(t: ISamplingCompositionDataProxyUI) = _samplings.single put (t.id, t)
-  def -=(t: ISamplingCompositionDataProxyUI) = _samplings.single remove (t.id)
-  def contains(t: ISamplingCompositionDataProxyUI) = _samplings.single.contains(t.id)
-
-  def +=(t: IEnvironmentDataProxyUI) = _environments.single put (t.id, t)
-  def -=(t: IEnvironmentDataProxyUI) = _environments.single remove (t.id)
-  def contains(t: IEnvironmentDataProxyUI) = _environments.single.contains(t.id)
-
-  def +=(t: IHookDataProxyUI) = _hooks.single put (t.id, t)
-  def -=(t: IHookDataProxyUI) = _hooks.single remove (t.id)
-  def contains(t: IHookDataProxyUI) = _hooks.single.contains(t.id)
-
-  def +=(t: ISourceDataProxyUI) = _sources.single put (t.id, t)
-  def -=(t: ISourceDataProxyUI) = _sources.single remove (t.id)
-  def contains(t: ISourceDataProxyUI) = _sources.single.contains(t.id)
-
-  def allPrototypesByName = prototypes.map {
-    _.dataUI.name
+  def +=(p: DataProxyUI) = {
+    _proxies.single += p.id -> p
+    EventDispatcher.trigger(this, new ProxyCreatedEvent)
   }
 
-  def classPrototypes(prototypeClass: Class[_]): List[IPrototypeDataProxyUI] =
+  def -=(p: DataProxyUI) = {
+    _proxies.single -= p.id
+    EventDispatcher.trigger(this, new ProxyDeletedEvent)
+  }
+
+  def contains(p: DataProxyUI) = _proxies.single.contains(p.id)
+
+  def classPrototypes(prototypeClass: Class[_]): List[PrototypeDataProxyUI] =
     classPrototypes(prototypeClass, prototypes.toList)
 
   def classPrototypes(prototypeClass: Class[_],
-                      protoList: List[IPrototypeDataProxyUI]): List[IPrototypeDataProxyUI] = protoList.filter {
+                      protoList: List[PrototypeDataProxyUI]): List[PrototypeDataProxyUI] = protoList.filter {
     p ⇒ assignable(prototypeClass, p.dataUI.coreObject.get.`type`.runtimeClass)
   }
 
-  def getOrGenerateSamplingComposition(p: ISamplingCompositionDataProxyUI) =
+  def getOrGenerateSamplingComposition(p: SamplingCompositionDataProxyUI) =
     if (contains(p)) p
     else Builder.samplingCompositionUI(true)
 
   def clearAll: Unit = atomic { implicit actx ⇒
     ConceptMenu.clearAllItems
-    List(_tasks, _prototypes, _environments, _samplings, _hooks, _sources).foreach {
-      _.clear()
-    }
+    _proxies.clear
+    EventDispatcher.trigger(this, new ProxyDeletedEvent)
   }
 }
 

@@ -16,10 +16,10 @@
  */
 package org.openmole.ide.plugin.groupingstrategy
 
-import org.openmole.ide.core.model.data.IGroupingDataUI
 import org.openmole.plugin.grouping.batch.InShuffledGrouping
+import org.openmole.ide.core.implementation.data.GroupingDataUI
 
-class NumberOfBatchShuffledGroupingDataUI(val number: Int = 0) extends IGroupingDataUI {
+class NumberOfBatchShuffledGroupingDataUI(val number: Int = 0) extends GroupingDataUI {
   override def toString = "by shuffled groups"
 
   def coreObject = util.Try { InShuffledGrouping(number) }

@@ -30,19 +30,19 @@ import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dataproxy._
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.model.dataproxy.ISamplingCompositionDataProxyUI
-import org.openmole.ide.core.model.panel.ITaskPanelUI
+import org.openmole.ide.core.implementation.panelsettings.TaskPanelUI
+import scala.swing.event.SelectionChanged
+import scala.Some
 import org.openmole.ide.core.implementation.panel.ConceptMenu
-import org.openmole.ide.core.model.workflow.IMoleScene
+import org.openmole.ide.core.implementation.workflow.MoleScene
 
 object ExplorationTaskPanelUI {
-  val emptyProxy = new SamplingCompositionDataProxyUI
+  val emptyProxy = SamplingCompositionDataProxyUI()
 }
 
 import ExplorationTaskPanelUI._
 
-class ExplorationTaskPanelUI(pud: ExplorationTaskDataUI) extends PluginPanel("wrap 3") with ITaskPanelUI {
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+class ExplorationTaskPanelUI(pud: ExplorationTaskDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends TaskPanelUI with Publisher {
 
   val samplingComboBox = new ComboBox(comboContent)
   samplingComboBox.selection.item = pud.sampling.getOrElse(emptyProxy)
@@ -51,13 +51,15 @@ class ExplorationTaskPanelUI(pud: ExplorationTaskDataUI) extends PluginPanel("wr
     def apply =
       if (samplingComboBox.selection.item != emptyProxy) {
         ScenesManager.currentScene match {
-          case Some(s: IMoleScene) ⇒ ConceptMenu.displayExtra(samplingComboBox.selection.item, s.currentPanel)
-          case _                   ⇒
+          case Some(s: MoleScene) ⇒ ConceptMenu.displayExtra(samplingComboBox.selection.item, s.firstFree)
+          case _                  ⇒
         }
       }
-  }) { icon = EYE }
+  }) {
+    icon = EYE
+  }
 
-  val components = List(("Settings", new PluginPanel("wrap 4") {
+  val components = List(("Header", new PluginPanel("wrap 4") {
     contents += new Label("Sampling")
     //add(samplingComboBox, "gapbottom 40")
     contents += samplingComboBox
@@ -70,17 +72,18 @@ class ExplorationTaskPanelUI(pud: ExplorationTaskDataUI) extends PluginPanel("wr
       linkLabel.action = contentAction(samplingComboBox.selection.item)
   }
 
-  def contentAction(proxy: ISamplingCompositionDataProxyUI) = new ContentAction(proxy.dataUI.name, proxy) {
+  def contentAction(proxy: SamplingCompositionDataProxyUI) = new ContentAction(proxy.dataUI.name, proxy) {
     override def apply = ScenesManager.currentSceneContainer.get.scene.displayPropertyPanel(proxy)
   }
 
   override def saveContent(name: String) =
     new ExplorationTaskDataUI(name, if (samplingComboBox.selection.item == emptyProxy) None else Some(samplingComboBox.selection.item))
 
-  def comboContent: List[ISamplingCompositionDataProxyUI] = emptyProxy :: Proxies.instance.samplings.toList
+  def comboContent: List[SamplingCompositionDataProxyUI] = emptyProxy :: Proxies.instance.samplings.toList
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(samplingComboBox,
-      new Help(i18n.getString("sampling"), ""))
-  }
+  override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
+
+  add(samplingComboBox,
+    new Help(i18n.getString("sampling"), ""))
+
 }

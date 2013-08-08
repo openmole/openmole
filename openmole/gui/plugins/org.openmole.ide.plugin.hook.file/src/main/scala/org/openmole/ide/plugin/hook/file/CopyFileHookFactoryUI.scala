@@ -17,10 +17,10 @@
 
 package org.openmole.ide.plugin.hook.file
 
-import org.openmole.ide.core.model.factory.IHookFactoryUI
 import org.openmole.plugin.hook.file._
+import org.openmole.ide.core.implementation.factory.HookFactoryUI
 
-class CopyFileHookFactoryUI extends IHookFactoryUI {
+class CopyFileHookFactoryUI extends HookFactoryUI {
 
   def buildDataUI = new CopyFileHookDataUI
 

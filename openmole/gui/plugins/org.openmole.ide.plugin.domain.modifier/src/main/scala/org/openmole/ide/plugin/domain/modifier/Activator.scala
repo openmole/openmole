@@ -20,8 +20,8 @@ package org.openmole.ide.plugin.domain.modifier
 import org.openmole.ide.core.implementation.registry.OSGiActivator
 import org.openmole.ide.core.implementation.registry.DomainActivator
 import org.openmole.ide.misc.tools.util.Types._
-import org.openmole.ide.core.model.factory.IDomainFactoryUI
 import org.openmole.core.model.domain.Domain
+import org.openmole.ide.core.implementation.factory.IDomainFactoryUI
 
 class Activator extends OSGiActivator with DomainActivator {
 

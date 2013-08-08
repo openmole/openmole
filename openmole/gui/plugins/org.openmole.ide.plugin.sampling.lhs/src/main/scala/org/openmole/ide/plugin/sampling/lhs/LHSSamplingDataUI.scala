@@ -5,10 +5,8 @@
 
 package org.openmole.ide.plugin.sampling.lhs
 
-import org.openmole.ide.core.model.dataproxy._
 import org.openmole.core.model.sampling.Factor
 import org.openmole.ide.plugin.domain.range.RangeDomainDataUI
-import org.openmole.ide.core.model.data._
 import org.openmole.plugin.sampling.lhs._
 import org.openmole.core.model.data.Prototype
 import org.openmole.plugin.domain.bounded.Bounded
@@ -17,8 +15,9 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.core.model.sampling.Sampling
 import org.openmole.ide.core.implementation.sampling._
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
 
-class LHSSamplingDataUI(val samples: String = "1") extends ISamplingDataUI {
+class LHSSamplingDataUI(val samples: String = "1") extends SamplingDataUI {
 
   implicit def string2Int(s: String): Int = augmentString(s).toInt
 
@@ -39,14 +38,14 @@ class LHSSamplingDataUI(val samples: String = "1") extends ISamplingDataUI {
 
   def coreClass = classOf[LHS]
 
-  def imagePath = "img/lhsSampling.png"
+  override def imagePath = "img/lhsSampling.png"
 
-  override def fatImagePath = "img/lhsSampling_fat.png"
+  def fatImagePath = "img/lhsSampling_fat.png"
 
   def buildPanelUI = new LHSSamplingPanelUI(this)
 
   //FIXME 2.10
-  override def isAcceptable(domain: IDomainDataUI) =
+  override def isAcceptable(domain: DomainDataUI) =
     domain match {
       case x: RangeDomainDataUI[_] ⇒ true
       case _ ⇒
@@ -54,7 +53,7 @@ class LHSSamplingDataUI(val samples: String = "1") extends ISamplingDataUI {
         false
     }
 
-  def isAcceptable(sampling: ISamplingDataUI) = false
+  def isAcceptable(sampling: SamplingDataUI) = false
 
   def preview = "LHS (" + samples + ")"
 }

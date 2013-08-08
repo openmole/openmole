@@ -19,10 +19,9 @@ package org.openmole.ide.core.implementation.workflow
 
 import java.awt.Point
 import org.netbeans.api.visual.widget.ComponentWidget
-import org.openmole.ide.core.model.workflow.IMoleScene
 import org.openmole.ide.misc.widget.LinkLabel
 
-class LinkedWidget(scene: IMoleScene,
+class LinkedWidget(scene: MoleScene,
                    val linkLabel: LinkLabel,
                    x: Int,
                    y: Int) extends ComponentWidget(scene.graphScene, linkLabel.peer) {

@@ -27,10 +27,6 @@ import org.netbeans.api.visual.anchor.AnchorShapeFactory
 import org.netbeans.api.visual.widget.ComponentWidget
 import org.netbeans.api.visual.widget.ConnectionWidget
 import org.netbeans.api.visual.layout.LayoutFactory
-import org.openmole.ide.core.model.workflow.IConnectorUI
-import org.openmole.ide.core.model.workflow.IDataChannelUI
-import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.model.workflow.ITransitionUI
 import org.openmole.ide.core.implementation.dialog.ConnectorPrototypeFilterDialog
 import org.openmole.ide.misc.widget.LinkLabel
 import org.openmole.ide.misc.widget.dialog.DialogFactory
@@ -38,10 +34,10 @@ import scala.swing.Action
 import scala.swing.Label
 import scala.swing.event.MousePressed
 import org.openmole.ide.misc.tools.image.Images._
-import org.openmole.ide.core.model.commons.{ SimpleTransitionType, EndTransitionType, AggregationTransitionType, ExplorationTransitionType }
+import org.openmole.ide.core.implementation.commons.{ EndTransitionType, AggregationTransitionType, ExplorationTransitionType, SimpleTransitionType }
 
-class ConnectorWidget(val scene: IMoleScene,
-                      var connector: IConnectorUI,
+class ConnectorWidget(val scene: MoleScene,
+                      var connector: ConnectorUI,
                       var toBeEdited: Boolean = false) extends ConnectionWidget(scene.graphScene) { connectorWidget ⇒
 
   val label = new ConnectorLabel
@@ -50,7 +46,7 @@ class ConnectorWidget(val scene: IMoleScene,
   addChild(conditionWidget)
 
   connector match {
-    case x: ITransitionUI ⇒ x.condition match {
+    case x: TransitionUI ⇒ x.condition match {
       case Some(t: String) ⇒
         label.text = t
       case None ⇒
@@ -65,7 +61,7 @@ class ConnectorWidget(val scene: IMoleScene,
   setLabelVisible
   toBeEdited = true
 
-  def setConnnector(c: IConnectorUI) {
+  def setConnnector(c: ConnectorUI) {
     connector = c
     removeChild(prototypeFilterWidget)
     prototypeFilterWidget = buildPrototypeFilterWidget
@@ -84,14 +80,14 @@ class ConnectorWidget(val scene: IMoleScene,
   def setLabelVisible = {
     removeConstraint(prototypeFilterWidget)
     connector match {
-      case x: ITransitionUI ⇒
+      case x: TransitionUI ⇒
         conditionWidget.setVisible(!label.text.isEmpty)
         setLineColor(new Color(130, 130, 130))
         setStroke(new BasicStroke(3f))
         setConstraint(prototypeFilterWidget, LayoutFactory.ConnectionWidgetLayoutAlignment.CENTER,
           if (label.text.isEmpty) 0.5f else 0.33f)
         label.revalidate
-      case x: IDataChannelUI ⇒
+      case x: DataChannelUI ⇒
         conditionWidget.setVisible(false)
         setLineColor(new Color(188, 188, 188))
         setStroke(new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 20.0f, List(10.0f).toArray, 0.0f))
@@ -107,7 +103,7 @@ class ConnectorWidget(val scene: IMoleScene,
     setTargetAnchorShape(AnchorShape.TRIANGLE_FILLED)
     setSourceAnchorShape(AnchorShape.NONE)
     connector match {
-      case x: ITransitionUI ⇒
+      case x: TransitionUI ⇒
         x.transitionType match {
           case ExplorationTransitionType ⇒ setSourceAnchorShape(AnchorShapeFactory.createImageAnchorShape(EXPLORATION_TRANSITION_IMAGE, false))
           case AggregationTransitionType ⇒ setTargetAnchorShape(AnchorShapeFactory.createImageAnchorShape(AGGREGATION_TRANSITION_IMAGE, false))
@@ -123,7 +119,7 @@ class ConnectorWidget(val scene: IMoleScene,
     scene.refresh
   }
 
-  class ConditionWidget(scene: IMoleScene, label: ConnectorLabel) extends ComponentWidget(scene.graphScene, label.peer) {
+  class ConditionWidget(scene: MoleScene, label: ConnectorLabel) extends ComponentWidget(scene.graphScene, label.peer) {
     setPreferredBounds(new Rectangle(81, 31))
     setOpaque(true)
     override def paintBackground = {
@@ -160,8 +156,8 @@ class ConnectorWidget(val scene: IMoleScene,
       if (toBeEdited) {
         text = DialogFactory.groovyEditor("Condition", text)
         connectorWidget.connector match {
-          case x: ITransitionUI ⇒ x.condition = if (text.isEmpty) None else Some(text)
-          case _                ⇒
+          case x: TransitionUI ⇒ x.condition = if (text.isEmpty) None else Some(text)
+          case _               ⇒
         }
         connectorWidget.setLabelVisible
         revalidate

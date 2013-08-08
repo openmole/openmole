@@ -19,7 +19,6 @@ package org.openmole.ide.plugin.environment.desktopgrid
 
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
@@ -28,15 +27,14 @@ import scala.swing.Label
 import scala.swing.TabbedPane
 import scala.swing.TextField
 import java.awt.Dimension
+import org.openmole.ide.core.implementation.panelsettings.EnvironmentPanelUI
 
-class DesktopGridEnvironmentPanelUI(pud: DesktopGridEnvironmentDataUI) extends PluginPanel("fillx,wrap 2", "[left][grow,fill]", "") with IEnvironmentPanelUI {
+class DesktopGridEnvironmentPanelUI(pud: DesktopGridEnvironmentDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("fillx,wrap 2", "[left][grow,fill]", "") with EnvironmentPanelUI {
   val loginTextField = new TextField(15)
   val passTextField = new TextField(15)
   val portTextField = new TextField(5)
 
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
-
-  val components = List(("Settings", new PluginPanel("wrap 2") {
+  val components = List(("Header", new PluginPanel("wrap 2") {
     minimumSize = new Dimension(300, 150)
 
     contents += (new Label("Login"), "gap para")
@@ -51,11 +49,11 @@ class DesktopGridEnvironmentPanelUI(pud: DesktopGridEnvironmentDataUI) extends P
   passTextField.text = pud.pass
   portTextField.text = pud.port.toString
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(loginTextField, new Help(i18n.getString("login"), i18n.getString("loginEx")))
-    add(passTextField, new Help(i18n.getString("password"), i18n.getString("passwordEx")))
-    add(portTextField, new Help(i18n.getString("port"), i18n.getString("portEx")))
-  }
+  override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
+
+  add(loginTextField, new Help(i18n.getString("login"), i18n.getString("loginEx")))
+  add(passTextField, new Help(i18n.getString("password"), i18n.getString("passwordEx")))
+  add(portTextField, new Help(i18n.getString("port"), i18n.getString("portEx")))
 
   override def saveContent(name: String) = new DesktopGridEnvironmentDataUI(name,
     loginTextField.text,

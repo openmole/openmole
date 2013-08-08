@@ -17,9 +17,7 @@
 
 package org.openmole.ide.plugin.hook.file
 
-import org.openmole.ide.core.implementation.dataproxy.Proxies
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.panel.IHookPanelUI
+import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies }
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiComboTextField
 import org.openmole.ide.misc.widget.multirow.MultiComboTextField._
@@ -27,8 +25,9 @@ import org.openmole.ide.core.implementation.registry._
 import java.io.File
 import swing.{ TabbedPane, Label }
 import java.awt.Dimension
+import org.openmole.ide.core.implementation.panelsettings.HookPanelUI
 
-class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends PluginPanel("wrap") with IHookPanelUI {
+class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends HookPanelUI {
 
   val multiComboTextField = new MultiComboTextField("",
     comboContent,
@@ -38,12 +37,13 @@ class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends PluginPanel("wrap"
           new ComboTextFieldData(Some(d._1),
             d._2))
     })
+  val ppanel = new PluginPanel("wrap") {
+    minimumSize = new Dimension(300, 150)
+    contents += new Label("<html><b>Files to be dumped</b></html>")
+    contents += multiComboTextField.panel
+  }
 
-  minimumSize = new Dimension(300, 150)
-  contents += new Label("<html><b>Files to be dumped</b></html>")
-  contents += multiComboTextField.panel
-
-  val components = List(("Prototypes", this))
+  val components = List(("Prototypes", ppanel))
 
   def comboContent = Proxies.instance.classPrototypes(classOf[File]) filter {
     _.dataUI.dim == 0
@@ -52,8 +52,8 @@ class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends PluginPanel("wrap"
   def saveContent(name: String) = new CopyFileHookDataUI(name,
     multiComboTextField.content.filter {
       _.comboValue match {
-        case Some(v: IPrototypeDataProxyUI) ⇒ true
-        case _                              ⇒ false
+        case Some(v: PrototypeDataProxyUI) ⇒ true
+        case _                             ⇒ false
       }
     }.map { m ⇒ (KeyRegistry.protoProxyKeyMap(PrototypeKey(m.comboValue.get)), m.textFieldValue) })
 

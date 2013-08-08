@@ -17,10 +17,10 @@
 
 package org.openmole.ide.plugin.source.file
 
-import org.openmole.ide.core.model.factory.ISourceFactoryUI
 import org.openmole.plugin.source.file.CSVSource
+import org.openmole.ide.core.implementation.factory.SourceFactoryUI
 
-class CSVSourceFactoryUI extends ISourceFactoryUI {
+class CSVSourceFactoryUI extends SourceFactoryUI {
 
   def buildDataUI = new CSVSourceDataUI
 

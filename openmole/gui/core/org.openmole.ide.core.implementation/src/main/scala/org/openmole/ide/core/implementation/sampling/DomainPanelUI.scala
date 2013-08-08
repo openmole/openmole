@@ -19,22 +19,17 @@ package org.openmole.ide.core.implementation.sampling
 
 import scala.swing._
 import event.{ FocusGained, SelectionChanged }
-import org.openmole.ide.core.implementation.dataproxy._
-import org.openmole.ide.core.model.data._
 import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.core.implementation.data._
-import org.openmole.ide.core.model.sampling.{ ISamplingProxyUI, IModifier, IDomainWidget }
 import org.openmole.ide.misc.widget._
 import multirow.ComponentFocusedEvent
-import org.openmole.ide.core.model.panel._
-import org.openmole.ide.core.implementation.panel.DomainPanel
 import org.openmole.misc.exception.UserBadDataError
+import org.openmole.ide.core.implementation.panel.Settings
 
-class DomainPanelUI(domainWidget: IDomainWidget,
-                    domainPanel: DomainPanel) extends PluginPanel("") with IPanelUI {
+class DomainPanelUI(domainWidget: IDomainWidget) extends Publisher with Settings {
 
   val finalProxy = domainWidget.scenePanelUI.firstSampling(domainWidget.proxy)
-  val components = List()
+  type DATAUI = DomainDataUI
 
   val incomings = domainWidget.incomings
   val domains = KeyRegistry.domains.values.map {
@@ -44,8 +39,8 @@ class DomainPanelUI(domainWidget: IDomainWidget,
       if (incomings.isEmpty) {
         try {
           finalProxy match {
-            case s: ISamplingProxyUI ⇒ s.dataUI.isAcceptable(d)
-            case _                   ⇒ true
+            case s: SamplingProxyUI ⇒ s.dataUI.isAcceptable(d)
+            case _                  ⇒ true
           }
         }
         catch {
@@ -55,10 +50,10 @@ class DomainPanelUI(domainWidget: IDomainWidget,
       else acceptModifiers(d)
   }
 
-  def acceptModifiers(domain: IDomainDataUI) =
+  def acceptModifiers(domain: DomainDataUI) =
     domain match {
-      case dm: IModifier ⇒ true
-      case _             ⇒ false
+      case dm: Modifier ⇒ true
+      case _            ⇒ false
     }
 
   val previous: List[IDomainWidget] = domainWidget.incomings
@@ -69,7 +64,7 @@ class DomainPanelUI(domainWidget: IDomainWidget,
   domains.filter {
     _.toString == domainWidget.proxy.dataUI.toString
   }.headOption match {
-    case Some(d: IDomainDataUI) ⇒
+    case Some(d: DomainDataUI) ⇒
       domainComboBox.selection.item = d
     case _ ⇒
   }
@@ -78,18 +73,18 @@ class DomainPanelUI(domainWidget: IDomainWidget,
 
   val protoDomainPanel = new PluginPanel("wrap") {
     contents += domainComboBox
-    contents += dPanel.peer
+    contents += dPanel.panel.peer
   }
 
-  contents += protoDomainPanel
+  val components = List(("Settings", protoDomainPanel))
 
   domainComboBox.selection.reactions += {
     case SelectionChanged(`domainComboBox`) ⇒
       if (protoDomainPanel.contents.size == 2) protoDomainPanel.contents.remove(1)
       dPanel = domainComboBox.selection.item.buildPanelUI
       listenToDomain
-      protoDomainPanel.contents += dPanel.peer
-      repaint
+      protoDomainPanel.contents += dPanel.panel.peer
+    //repaint
   }
 
   def listenToDomain = {
@@ -98,11 +93,11 @@ class DomainPanelUI(domainWidget: IDomainWidget,
       case FocusGained(source: Component, _, _)     ⇒ dPanel.help.switchTo(source)
       case ComponentFocusedEvent(source: Component) ⇒ dPanel.help.switchTo(source)
     }
-    domainPanel.updateHelp
+    // domainPanel.updateHelp
   }
 
-  def saveContent = dPanel.saveContent match {
-    case m: IModifier ⇒
+  def saveContent(n: String) = dPanel.saveContent match {
+    case m: Modifier ⇒
       m.clone(previousDomain = previous.map {
         _.proxy.dataUI
       })

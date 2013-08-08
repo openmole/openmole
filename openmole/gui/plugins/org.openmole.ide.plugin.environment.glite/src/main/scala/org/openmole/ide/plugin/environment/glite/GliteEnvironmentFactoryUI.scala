@@ -17,7 +17,7 @@
 
 package org.openmole.ide.plugin.environment.glite
 
-import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
+import org.openmole.ide.core.implementation.factory.IEnvironmentFactoryUI
 
 class GliteEnvironmentFactoryUI extends IEnvironmentFactoryUI {
   override def toString = "Grid"

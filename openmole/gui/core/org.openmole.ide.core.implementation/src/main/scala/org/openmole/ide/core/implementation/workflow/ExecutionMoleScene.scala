@@ -19,11 +19,8 @@ package org.openmole.ide.core.implementation.workflow
 
 import org.netbeans.api.visual.anchor.PointShape
 import org.netbeans.api.visual.widget.Widget
-import org.openmole.ide.core.model.dataproxy.IDataProxyUI
-import org.openmole.ide.core.model.panel.{ IBasePanel }
-import org.openmole.ide.core.model.workflow.{ IMoleUI, ICapsuleUI }
-import org.openmole.ide.core.model.commons.Constants._
 import scala.collection.JavaConversions._
+import org.openmole.ide.core.implementation.dataproxy.DataProxyUI
 
 object ExecutionMoleScene {
   def apply(name: String) = new ExecutionMoleScene(new MoleUI(name))
@@ -31,16 +28,16 @@ object ExecutionMoleScene {
 
 class ExecutionMoleScene(val dataUI: IMoleUI) extends MoleScene {
 
-  override val isBuildScene = false
+  val isBuildScene = false
 
-  override def displayPropertyPanel(proxy: IDataProxyUI,
+  override def displayPropertyPanel(proxy: DataProxyUI,
                                     i: Int) = {
     val p = super.displayPropertyPanel(proxy, i)
-    currentPanels(0).contents.foreach { _.enabled = false }
+    currentPanels(0).panel.contents.foreach { _.enabled = false }
     p
   }
 
-  def initCapsuleAdd(w: ICapsuleUI) = {
+  def initCapsuleAdd(w: CapsuleUI) = {
     obUI = Some(w.asInstanceOf[Widget])
     obUI.get.getActions.addAction(moveAction)
   }

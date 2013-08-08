@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2013 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,55 +14,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package org.openmole.ide.core.implementation.panel
 
-import org.openmole.ide.core.implementation.sampling.DomainPanelUI
-import org.openmole.ide.core.model.sampling.{ IDomainProxyUI, IDomainWidget }
-import org.openmole.ide.core.model.workflow.IMoleScene
-import org.openmole.ide.core.model.panel._
-import org.openmole.ide.misc.widget.PluginPanel
-import java.awt.BorderLayout
-import swing.event.FocusGained
-import swing.Component
-import org.openmole.ide.misc.widget.multirow.ComponentFocusedEvent
-import org.openmole.misc.exception.UserBadDataError
-import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.core.implementation.sampling.DomainProxyUI
+import org.openmole.ide.core.implementation.data.DomainDataUI
 
-class DomainPanel(domainWidget: IDomainWidget,
-                  scene: IMoleScene,
-                  val index: Int) extends BasePanel(None, scene) {
-  val panelUI = new DomainPanelUI(domainWidget, this)
-  def created = true
+trait DomainPanel extends Base
+    with Proxy { domainP ⇒
 
-  peer.add(mainPanel.peer, BorderLayout.NORTH)
-  peer.add(new PluginPanel("wrap") {
-    contents += panelUI.peer
-  }.peer, BorderLayout.CENTER)
-  peer.add(panelUI.dPanel.help.peer, BorderLayout.SOUTH)
-
-  listenTo(panelUI.help.components.toSeq: _*)
-  reactions += {
-    case FocusGained(source: Component, _, _)     ⇒ panelUI.help.switchTo(source)
-    case ComponentFocusedEvent(source: Component) ⇒ panelUI.help.switchTo(source)
+  type DATAPROXY = DomainProxyUI {
+    type DATAUI = domainP.DATAUI
+    var dataUI: DATAUI
   }
 
-  def create = {}
+  type DATAUI = DomainDataUI
+  //val self = this
 
-  def delete = true
+  val proxy: DATAPROXY
 
-  def save = try {
-    domainWidget.proxy.dataUI = panelUI.saveContent
-    domainWidget.update
-  }
-  catch {
-    case e: UserBadDataError ⇒ StatusBar().block(e.getMessage, stack = e.getCause.getMessage)
+  var panelSettings = proxy.dataUI.buildPanelUI
+  build
+
+  def build = {
+    basePanel.contents += panelSettings.panel
   }
 
-  def updateHelp = {
-    if (peer.getComponentCount == 3) peer.remove(2)
-    peer.add(panelUI.dPanel.help.peer, BorderLayout.SOUTH)
-    revalidate
-    repaint
+  def components = panelSettings.components
+
+  def createSettings = {
+    panelSettings = proxy.dataUI.buildPanelUI
+    basePanel.contents += panelSettings.tabbedPane
   }
+
+  def savePanel = proxy.dataUI = panelSettings.saveContent
+
+  def deleteProxy = {}
 }

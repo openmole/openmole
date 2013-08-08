@@ -19,9 +19,9 @@ package org.openmole.ide.core.implementation.action
 
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
-import org.openmole.ide.core.model.workflow.ICapsuleUI
+import org.openmole.ide.core.implementation.workflow.CapsuleUI
 
-class RemoveInputSlot(capsule: ICapsuleUI) extends ActionListener {
+class RemoveInputSlot(capsule: CapsuleUI) extends ActionListener {
   override def actionPerformed(ae: ActionEvent) = {
     if (capsule.nbInputSlots > 1)
       capsule.removeInputSlot

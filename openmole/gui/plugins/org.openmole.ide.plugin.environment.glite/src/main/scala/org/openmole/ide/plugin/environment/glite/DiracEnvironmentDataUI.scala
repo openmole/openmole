@@ -5,10 +5,10 @@
 
 package org.openmole.ide.plugin.environment.glite
 
-import org.openmole.ide.core.model.data.IEnvironmentDataUI
 import org.openmole.plugin.environment.glite.{ GliteEnvironment, DIRACGliteEnvironment }
 import org.openmole.misc.workspace.Workspace
 import util.Try
+import org.openmole.ide.core.implementation.data.EnvironmentDataUI
 
 class DiracEnvironmentDataUI(val name: String = "",
                              val voName: String = "",
@@ -19,7 +19,7 @@ class DiracEnvironmentDataUI(val name: String = "",
                              val setup: String = "",
                              val fqan: Option[String] = None,
                              val cpuTime: Option[String] = None,
-                             val openMOLEMemory: Option[Int] = None) extends IEnvironmentDataUI {
+                             val openMOLEMemory: Option[Int] = None) extends EnvironmentDataUI {
 
   def coreObject = Try(DIRACGliteEnvironment(
     voName,
@@ -34,7 +34,7 @@ class DiracEnvironmentDataUI(val name: String = "",
 
   def coreClass = classOf[DIRACGliteEnvironment]
 
-  def imagePath = "img/dirac.png"
+  override def imagePath = "img/dirac.png"
 
   override def fatImagePath = "img/dirac_fat.png"
 

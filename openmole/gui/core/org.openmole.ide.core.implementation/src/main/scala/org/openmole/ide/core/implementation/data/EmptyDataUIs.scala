@@ -22,27 +22,26 @@ import org.openmole.core.model.sampling.Sampling
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.core.model.task._
 import org.openmole.ide.core.implementation.prototype._
-import org.openmole.ide.core.implementation.dataproxy.{ EnvironmentDataProxyUI, PrototypeDataProxyUI, TaskDataProxyUI }
-import org.openmole.ide.core.model.data._
-import org.openmole.ide.core.model.dataproxy._
-import org.openmole.ide.core.model.factory.IPrototypeFactoryUI
-import org.openmole.ide.core.model.panel._
+import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.core.implementation.task._
 import org.openmole.misc.tools.obj.ClassUtils
 import org.openmole.core.model.execution.Environment
 import org.openmole.core.model.job.IJob
 import scala.util.Try
 import org.openmole.core.implementation.execution.local.LocalEnvironment
+import org.openmole.ide.core.implementation.panelsettings.{ TaskPanelUI, EnvironmentPanelUI }
+import org.openmole.ide.core.implementation.factory.PrototypeFactoryUI
+import org.openmole.ide.core.implementation.panel.Settings
 
 object EmptyDataUIs {
 
-  val emptyPrototypeProxy: IPrototypeDataProxyUI = new PrototypeDataProxyUI(GenericPrototypeDataUI[Int], generated = false)
+  val emptyPrototypeProxy: PrototypeDataProxyUI = PrototypeDataProxyUI(GenericPrototypeDataUI[Int], false)
 
-  val emptyTaskProxy: ITaskDataProxyUI = new TaskDataProxyUI(new EmptyTaskDataUI)
+  val emptyTaskProxy: TaskDataProxyUI = TaskDataProxyUI(new EmptyTaskDataUI)
 
-  val localEnvironmentProxy: IEnvironmentDataProxyUI = new EnvironmentDataProxyUI(LocalEnvironmentDataUI)
+  val localEnvironmentProxy: EnvironmentDataProxyUI = EnvironmentDataProxyUI(LocalEnvironmentDataUI)
 
-  class EmptyPrototypeFactoryUI extends IPrototypeFactoryUI {
+  class EmptyPrototypeFactoryUI extends PrototypeFactoryUI {
     def buildDataUI = GenericPrototypeDataUI[Any]
 
     def buildDataUI(name: String,
@@ -52,7 +51,7 @@ object EmptyDataUIs {
                     dim: Int) = buildDataUI
   }
 
-  class EmptyPrototypeDataUI extends IPrototypeDataUI[Any] {
+  class EmptyPrototypeDataUI extends PrototypeDataUI[Any] {
     def name = ""
     def dim = 0
     def typeClassString = ""
@@ -61,7 +60,9 @@ object EmptyDataUIs {
     def `type` = ClassUtils.manifest(classOf[Any])
     def coreObject = Try(Prototype[Any](""))
     def fatImagePath = "img/empty.png"
-    def buildPanelUI = new GenericPrototypePanelUI(GenericPrototypeDataUI.base.head)
+    def buildPanelUI: Settings = new GenericPrototypePanelUI {
+      val dataUI = GenericPrototypeDataUI.base.head
+    }
   }
 
   class EmptySampling extends Sampling {
@@ -73,8 +74,8 @@ object EmptyDataUIs {
     def name = ""
     def buildPanelUI = new EmptyTaskPanelUI
     def coreClass = classOf[EmptyTask]
-    def updateImplicts(ipList: List[IPrototypeDataProxyUI],
-                       opList: List[IPrototypeDataProxyUI]) = {}
+    def updateImplicts(ipList: List[PrototypeDataProxyUI],
+                       opList: List[PrototypeDataProxyUI]) = {}
 
     def coreObject(plugins: PluginSet) = Try {
       val taskBuilder = EmptyTask(name)(plugins)
@@ -85,21 +86,21 @@ object EmptyDataUIs {
     def fatImagePath = "img/empty.png"
   }
 
-  class EmptyTaskPanelUI extends ITaskPanelUI {
+  class EmptyTaskPanelUI extends TaskPanelUI {
     val components = List()
     def peer = new PluginPanel("").peer
     def saveContent(name: String) = new EmptyTaskDataUI
   }
 
-  object LocalEnvironmentDataUI extends IEnvironmentDataUI { dataUI ⇒
-    def imagePath = ""
-    def buildPanelUI = new IEnvironmentPanelUI {
+  object LocalEnvironmentDataUI extends EnvironmentDataUI { dataUI ⇒
+    def buildPanelUI = new EnvironmentPanelUI {
+      override type DATAUI = EnvironmentDataUI
       val components = List()
-      def saveContent(name: String) = dataUI
+      def saveContent(name: String): EnvironmentDataUI = dataUI
       def peer = new PluginPanel("").peer
     }
     def fatImagePath = ""
-    def name = "Local"
+    override def name = "Local"
     def coreObject = Try(LocalEnvironment.default)
     def coreClass = classOf[Environment]
   }

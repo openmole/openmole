@@ -19,15 +19,15 @@ package org.openmole.ide.plugin.misc.tools
 
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiCombo
 import org.openmole.ide.misc.widget.multirow.MultiCombo._
 import scala.swing.Label
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
 class MultiPrototypePanel(title: String,
-                          selected: List[IPrototypeDataProxyUI] = List.empty,
-                          prototypeProxys: List[IPrototypeDataProxyUI] = List.empty) extends PluginPanel("wrap") {
+                          selected: List[PrototypeDataProxyUI] = List.empty,
+                          prototypeProxys: List[PrototypeDataProxyUI] = List.empty) extends PluginPanel("wrap") {
   val multiPrototypeCombo = new MultiCombo("",
     prototypeProxys,
     selected.map { p ⇒

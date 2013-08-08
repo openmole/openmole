@@ -19,10 +19,8 @@ package org.openmole.ide.plugin.task.stat
 
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.implementation.dataproxy.Proxies
+import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies }
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
 import org.openmole.ide.misc.widget.PluginPanel
@@ -31,11 +29,10 @@ import org.openmole.ide.misc.widget.multirow.MultiTwoCombos._
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.swing.Label
+import org.openmole.ide.core.implementation.panelsettings.TaskPanelUI
 
 abstract class BasicStatPanelUI(statType: String,
-                                dataUI: StatDataUI) extends PluginPanel("wrap 2") with ITaskPanelUI {
-
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+                                dataUI: StatDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("wrap 2") with TaskPanelUI {
 
   val implicitPrototypesIn = dataUI.implicitPrototypes._1 ::: dataUI.implicitPrototypesFromAggregation
 
@@ -48,7 +45,7 @@ abstract class BasicStatPanelUI(statType: String,
   if (doublePrototypes.isEmpty)
     StatusBar().inform("At least 1 Prototype (Double) have to be created before using a" + statType + "  Tasks")
 
-  val multiPrototypeCombo: Option[MultiTwoCombos[IPrototypeDataProxyUI, IPrototypeDataProxyUI]] =
+  val multiPrototypeCombo: Option[MultiTwoCombos[PrototypeDataProxyUI, PrototypeDataProxyUI]] =
     if (!arrayDoublePrototypes.isEmpty && !doublePrototypes.isEmpty) {
       Some(new MultiTwoCombos("Prototypes",
         arrayDoublePrototypes,
@@ -68,20 +65,19 @@ abstract class BasicStatPanelUI(statType: String,
 
   val components = {
     if (multiPrototypeCombo.isDefined)
-      List(("Settings", new PluginPanel("") {
+      List(("Header", new PluginPanel("") {
         add(multiPrototypeCombo.get.panel, "gap bottom 40")
       }))
     else
-      List(("Settings", new PluginPanel("") {
+      List(("Header", new PluginPanel("") {
         add(new Label("At least 2 Prototypes (a Double and an array of Double have to be created first.)"), "gap bottom 40")
       }))
   }
 
-  override val help = new Helper {
-    multiPrototypeCombo match {
-      case Some(x: MultiTwoCombos[IPrototypeDataProxyUI, IPrototypeDataProxyUI]) ⇒ add(x,
-        new Help(i18n.getString("prototype")))
-      case _ ⇒
-    }
+  multiPrototypeCombo match {
+    case Some(x: MultiTwoCombos[PrototypeDataProxyUI, PrototypeDataProxyUI]) ⇒ add(x,
+      new Help(i18n.getString("prototype")))
+    case _ ⇒
+
   }
 }

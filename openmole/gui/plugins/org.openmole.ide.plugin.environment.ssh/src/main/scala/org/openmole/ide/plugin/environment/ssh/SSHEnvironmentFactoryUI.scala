@@ -17,7 +17,7 @@
 
 package org.openmole.ide.plugin.environment.ssh
 
-import org.openmole.ide.core.model.factory.IEnvironmentFactoryUI
+import org.openmole.ide.core.implementation.factory.IEnvironmentFactoryUI
 
 class SSHEnvironmentFactoryUI extends IEnvironmentFactoryUI {
   override def toString = "SSH"

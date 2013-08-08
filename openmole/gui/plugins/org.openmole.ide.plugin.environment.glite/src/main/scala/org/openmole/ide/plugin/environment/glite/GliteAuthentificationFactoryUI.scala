@@ -17,10 +17,10 @@
 
 package org.openmole.ide.plugin.environment.glite
 
-import org.openmole.ide.core.model.factory.IAuthentificationFactoryUI
 import org.openmole.plugin.environment.glite.GliteAuthentication
+import org.openmole.ide.core.implementation.factory.AuthentificationFactoryUI
 
-class GliteAuthentificationFactoryUI extends IAuthentificationFactoryUI {
+class GliteAuthentificationFactoryUI extends AuthentificationFactoryUI {
   override def toString = "Grid"
 
   override def buildPanelUI = new GliteAuthentificationPanelUI

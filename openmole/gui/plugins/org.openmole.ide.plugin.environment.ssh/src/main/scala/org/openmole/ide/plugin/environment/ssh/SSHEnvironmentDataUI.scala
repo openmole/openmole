@@ -7,7 +7,7 @@ package org.openmole.ide.plugin.environment.ssh
 
 import org.openmole.plugin.environment.ssh.SSHEnvironment
 import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.ide.core.model.data.IEnvironmentDataUI
+import org.openmole.ide.core.implementation.data.EnvironmentDataUI
 
 class SSHEnvironmentDataUI(val name: String = "",
                            val login: String = "",
@@ -16,7 +16,7 @@ class SSHEnvironmentDataUI(val name: String = "",
                            val port: Int = 22,
                            val dir: String = "/tmp/",
                            val openMOLEMemory: Option[Int] = Some(BatchEnvironment.defaultRuntimeMemory),
-                           var threads: Option[Int] = None) extends IEnvironmentDataUI {
+                           var threads: Option[Int] = None) extends EnvironmentDataUI {
 
   def coreObject = util.Try {
     SSHEnvironment(login,
@@ -30,7 +30,7 @@ class SSHEnvironmentDataUI(val name: String = "",
 
   def coreClass = classOf[SSHEnvironment]
 
-  def imagePath = "img/ssh.png"
+  override def imagePath = "img/ssh.png"
 
   override def fatImagePath = "img/ssh_fat.png"
 

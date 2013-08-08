@@ -21,14 +21,14 @@ import org.openmole.ide.core.implementation.registry.KeyRegistry
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.MyComboBox
 import scala.swing.event.SelectionChanged
-import org.openmole.ide.core.model.data.IGroupingDataUI
+import org.openmole.ide.core.implementation.data.GroupingDataUI
 
-class GroupingStrategyPanelUI(dataUI: Option[IGroupingDataUI]) extends PluginPanel("wrap") {
+class GroupingStrategyPanelUI(dataUI: Option[GroupingDataUI]) extends PluginPanel("wrap") {
 
   val dataUIs = KeyRegistry.groupingStrategies.values.toList.map { _.buildDataUI }
   val groupingFactoryComboBox = new MyComboBox(dataUIs)
   var panelUI = dataUI match {
-    case Some(gd: IGroupingDataUI) ⇒
+    case Some(gd: GroupingDataUI) ⇒
       val f = dataUIs.filter { _.name == gd.name }
       if (!f.isEmpty) groupingFactoryComboBox.selection.item = f.head
       gd.buildPanelUI
@@ -36,14 +36,14 @@ class GroupingStrategyPanelUI(dataUI: Option[IGroupingDataUI]) extends PluginPan
   }
 
   contents += groupingFactoryComboBox
-  contents += panelUI.peer
+  contents += panelUI.panel.peer
   def buildPanelUI = groupingFactoryComboBox.selection.item.buildPanelUI
 
   groupingFactoryComboBox.selection.reactions += {
     case SelectionChanged(`groupingFactoryComboBox`) ⇒
       panelUI = buildPanelUI
       if (contents.size > 1) contents.remove(1)
-      contents += panelUI.peer
+      contents += panelUI.panel.peer
     case _ ⇒
   }
 

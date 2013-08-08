@@ -17,14 +17,11 @@
 
 package org.openmole.ide.plugin.sampling.csv
 
-import scala.swing.Label
+import scala.swing.{ Publisher, Label }
 import au.com.bytecode.opencsv.CSVReader
 import java.io.File
 import java.io.FileReader
-import org.openmole.ide.core.model.panel.ISamplingPanelUI
-import org.openmole.ide.core.implementation.dataproxy.Proxies
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies }
 import java.util.Locale
 import java.util.ResourceBundle
 import org.openmole.ide.core.implementation.data.EmptyDataUIs
@@ -36,17 +33,19 @@ import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.URL
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos
 import org.openmole.ide.misc.widget.multirow.MultiTwoCombos._
+import org.openmole.ide.core.implementation.panelsettings.ISamplingPanelUI
 
-class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("wrap") with ISamplingPanelUI {
-
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+class CSVSamplingPanelUI(pud: CSVSamplingDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends ISamplingPanelUI with Publisher {
 
   val csvTextField = new CSVChooseFileTextField(pud.csvFilePath)
-  var comboMulti: Option[MultiTwoCombos[String, IPrototypeDataProxyUI]] = None
+  var comboMulti: Option[MultiTwoCombos[String, PrototypeDataProxyUI]] = None
 
-  contents += new Label("CSV file")
-  contents += csvTextField
-  contents += comboMulti.getOrElse(new Label("<html><i>Nothing to be mapped yet</html></i>"))
+  val csvpanel = new PluginPanel("wrap") {
+    contents += new Label("CSV file")
+    contents += csvTextField
+    contents += comboMulti.getOrElse(new Label("<html><i>Nothing to be mapped yet</html></i>"))
+  }
+  val components = List(("", csvpanel))
 
   readFile(pud.csvFilePath)
 
@@ -74,8 +73,8 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("wrap") wit
                 new TwoCombosData(Some(pm._1), Some(pm._2)))
           }))
       help.add(comboMulti.get, new Help(i18n.getString("mapping")))
-      contents.remove(2)
-      contents += comboMulti.get.panel
+      csvpanel.contents.remove(2)
+      csvpanel.contents += comboMulti.get.panel
       reader.close
     }
   }
@@ -89,10 +88,9 @@ class CSVSamplingPanelUI(pud: CSVSamplingDataUI) extends PluginPanel("wrap") wit
     else new CSVSamplingDataUI(csvTextField.text, List[(String, PrototypeDataProxyUI)]())
   }
 
-  def comboContent: List[IPrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxies.instance.prototypes.toList
+  def comboContent: List[PrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxies.instance.prototypes.toList
 
-  override lazy val help =
-    new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-      add(csvTextField, new Help(i18n.getString("csvPath"), i18n.getString("csvPathEx")))
-    }
+  override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
+  add(csvTextField, new Help(i18n.getString("csvPath"), i18n.getString("csvPathEx")))
+
 }

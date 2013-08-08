@@ -7,15 +7,15 @@ package org.openmole.ide.plugin.sampling.csv
 
 import java.io.File
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.ide.core.model.dataproxy._
-import org.openmole.ide.core.model.data._
 import org.openmole.plugin.sampling.csv.CSVSampling
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.core.model.sampling.{ Factor, Sampling }
 import org.openmole.ide.core.implementation.dialog.StatusBar
+import org.openmole.ide.core.implementation.data.{ SamplingDataUI, DomainDataUI }
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
 class CSVSamplingDataUI(val csvFilePath: String = "",
-                        val prototypeMapping: List[(String, IPrototypeDataProxyUI)] = List.empty) extends ISamplingDataUI {
+                        val prototypeMapping: List[(String, PrototypeDataProxyUI)] = List.empty) extends SamplingDataUI {
   def name = "CSV"
 
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
@@ -34,18 +34,18 @@ class CSVSamplingDataUI(val csvFilePath: String = "",
 
   def coreClass = classOf[CSVSampling]
 
-  def imagePath = "img/csvSampling.png"
+  override def imagePath = "img/csvSampling.png"
 
   override def fatImagePath = "img/csvSampling_fat.png"
 
   def buildPanelUI = new CSVSamplingPanelUI(this)
 
-  override def isAcceptable(factor: IDomainDataUI) = {
+  override def isAcceptable(factor: DomainDataUI) = {
     StatusBar().warn("A CSV Sampling does not accept any Domain or Sampling as input")
     false
   }
 
-  def isAcceptable(sampling: ISamplingDataUI) = {
+  def isAcceptable(sampling: SamplingDataUI) = {
     StatusBar().warn("A CSV Sampling does not accept any Domain or Sampling as input")
     false
   }

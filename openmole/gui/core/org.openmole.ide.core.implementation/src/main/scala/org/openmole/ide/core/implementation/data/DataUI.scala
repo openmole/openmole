@@ -17,6 +17,14 @@
 
 package org.openmole.ide.core.implementation.data
 
-import org.openmole.ide.core.model.data.IDataUI
+import org.openmole.ide.core.implementation.panel.Settings
 
-abstract class DataUI(var name: String, val entityType: String) extends IDataUI
+trait DataUI { du ⇒
+
+  def name: String
+  override def toString: String = name
+  def coreClass: Class[_]
+  def buildPanelUI: Settings /*{
+    type DATAUI = du.type
+  }         */
+}

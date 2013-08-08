@@ -20,8 +20,6 @@ package org.openmole.ide.plugin.task.groovy
 import java.awt.Dimension
 import java.util.Locale
 import java.util.ResourceBundle
-import org.openmole.ide.core.model.data.ITaskDataUI
-import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.URL
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField._
@@ -29,13 +27,12 @@ import scala.swing.FileChooser.SelectionMode._
 import org.openmole.ide.misc.widget.GroovyEditor
 import org.openmole.ide.misc.widget.Help
 import org.openmole.ide.misc.widget.Helper
-import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
-import swing.{ ScrollPane, TabbedPane }
-import swing.event.UIElementResized
+import org.openmole.ide.core.implementation.data.TaskDataUI
+import org.openmole.ide.core.implementation.panel.Settings
+import org.openmole.ide.core.implementation.panelsettings.TaskPanelUI
 
-class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("") with ITaskPanelUI {
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+class GroovyTaskPanelUI(pud: GroovyTaskDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends TaskPanelUI {
 
   val codeTextArea = new GroovyEditor {
     editor.text = pud.code
@@ -43,7 +40,9 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("") with ITas
   }
 
   val libMultiTextField = new MultiChooseFileTextField("Libraries",
-    pud.libs.map { l ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(l)) },
+    pud.libs.map {
+      l ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(l))
+    },
     "Select a file",
     Some("Lib files"),
     FilesOnly,
@@ -52,17 +51,20 @@ class GroovyTaskPanelUI(pud: GroovyTaskDataUI) extends PluginPanel("") with ITas
 
   val components = List(("Code", codeTextArea), ("Library", libMultiTextField.panel))
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(codeTextArea.editor,
-      new Help(i18n.getString("groovyCode"),
-        i18n.getString("groovyCodeEx"),
-        List(new URL(i18n.getString("groovyURLText"), i18n.getString("groovyURL")))))
-    add(libMultiTextField,
-      new Help(i18n.getString("libraryPath"),
-        i18n.getString("libraryPathEx")))
-  }
+  override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
 
-  override def saveContent(name: String): ITaskDataUI = new GroovyTaskDataUI(name,
+  add(codeTextArea.editor,
+    new Help(i18n.getString("groovyCode"),
+      i18n.getString("groovyCodeEx"),
+      List(new URL(i18n.getString("groovyURLText"), i18n.getString("groovyURL")))))
+
+  add(libMultiTextField,
+    new Help(i18n.getString("libraryPath"),
+      i18n.getString("libraryPathEx")))
+
+  def saveContent(name: String): TaskDataUI = new GroovyTaskDataUI(name,
     codeTextArea.editor.text,
-    libMultiTextField.content.map { _.content }.filterNot(_.isEmpty))
+    libMultiTextField.content.map {
+      _.content
+    }.filterNot(_.isEmpty))
 }

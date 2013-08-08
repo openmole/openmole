@@ -18,10 +18,10 @@
 package org.openmole.ide.plugin.domain.range
 
 import org.openmole.ide.plugin.domain.range.RangeDomainDataUI._
-import org.openmole.ide.core.model.factory.IDomainFactoryUI
 import org.openmole.misc.tools.obj.ClassUtils
 import org.openmole.misc.tools.io.FromString._
 import scala.math.Integral._
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.implementation.factory.IDomainFactoryUI
 
 trait RangeDomainFactoryUI extends IDomainFactoryUI

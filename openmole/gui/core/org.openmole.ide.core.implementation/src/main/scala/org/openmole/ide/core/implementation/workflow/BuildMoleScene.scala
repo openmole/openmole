@@ -20,29 +20,23 @@ package org.openmole.ide.core.implementation.workflow
 import java.awt.Point
 import org.netbeans.api.visual.anchor.PointShape
 import org.netbeans.api.visual.widget.Widget
-import org.openmole.ide.core.model.workflow._
 import org.netbeans.api.visual.action.ActionFactory
 import org.openmole.ide.core.implementation.data.{ CheckData }
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.provider.{ MoleSceneMenuProvider, ConnectorMenuProvider }
-import org.openmole.ide.core.model.commons.Constants._
-import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
-import org.netbeans.api.visual.action.WidgetAction.State._
-import org.openmole.ide.core.implementation.builder.SceneFactory
 import scala.Some
-import org.openmole.ide.core.model.dataproxy.ITaskDataProxyUI
-import org.openmole.ide.core.implementation.dataproxy.ProxyFreezer
+import org.openmole.ide.core.implementation.dataproxy.{ TaskDataProxyUI, ProxyFreezer }
 
 object BuildMoleScene {
   def apply(name: String) = new BuildMoleScene(new MoleUI(name))
 }
 
-class BuildMoleScene(val dataUI: IMoleUI) extends MoleScene with IBuildMoleScene { buildMoleScene ⇒
+class BuildMoleScene(val dataUI: IMoleUI) extends MoleScene { buildMoleScene ⇒
 
   getActions.addAction(ActionFactory.createPopupMenuAction(new MoleSceneMenuProvider(this)))
 
-  override val isBuildScene = true
+  val isBuildScene = true
 
   override def refresh {
     dataUI.invalidateCache
@@ -52,16 +46,16 @@ class BuildMoleScene(val dataUI: IMoleUI) extends MoleScene with IBuildMoleScene
   }
 
   def copyScene = {
-    def copy(caspuleUI: ICapsuleUI, sc: IMoleScene) = {
+    def copy(caspuleUI: CapsuleUI, sc: MoleScene) = {
       val c = CapsuleUI(sc)
       val slotMapping = caspuleUI.islots.map(i ⇒ i -> c.addInputSlot).toMap
       (c, slotMapping)
     }
 
-    def deepcopy(caspuleUI: ICapsuleUI, sc: IMoleScene) = {
+    def deepcopy(caspuleUI: CapsuleUI, sc: MoleScene) = {
       val ret = copy(caspuleUI, sc)
       caspuleUI.dataUI.task match {
-        case Some(x: ITaskDataProxyUI) ⇒
+        case Some(x: TaskDataProxyUI) ⇒
           ret._1.encapsule(ProxyFreezer.freeze(x))
           if (caspuleUI.dataUI.environment.isDefined) ret._1.environment_=(ProxyFreezer.freeze(caspuleUI.dataUI.environment))
         case _ ⇒
@@ -69,8 +63,8 @@ class BuildMoleScene(val dataUI: IMoleUI) extends MoleScene with IBuildMoleScene
       ret
     }
 
-    var capsuleMapping = new HashMap[ICapsuleUI, ICapsuleUI]
-    var islots = new HashMap[IInputSlotWidget, IInputSlotWidget]
+    var capsuleMapping = new HashMap[CapsuleUI, CapsuleUI]
+    var islots = new HashMap[InputSlotWidget, InputSlotWidget]
     val ms = ExecutionMoleScene(dataUI.name + "_" + ScenesManager.countExec.incrementAndGet)
     dataUI.capsules.foreach(n ⇒ {
       val (caps, islotMapping) = deepcopy(n._2, ms)
@@ -80,9 +74,9 @@ class BuildMoleScene(val dataUI: IMoleUI) extends MoleScene with IBuildMoleScene
       islots ++= islotMapping
       caps.setAsValid
     })
-    dataUI.connectors.foreach { c ⇒
-      c match {
-        case t: ITransitionUI ⇒
+    dataUI.connectors.values.foreach {
+      _ match {
+        case t: TransitionUI ⇒
           val transition = new TransitionUI(
             capsuleMapping(t.source),
             islots(t.target),
@@ -90,7 +84,7 @@ class BuildMoleScene(val dataUI: IMoleUI) extends MoleScene with IBuildMoleScene
             t.condition,
             t.filteredPrototypes)
           ms.add(transition)
-        case dc: IDataChannelUI ⇒
+        case dc: DataChannelUI ⇒
           val dataC = new DataChannelUI(
             capsuleMapping(dc.source),
             islots(dc.target),
@@ -102,7 +96,7 @@ class BuildMoleScene(val dataUI: IMoleUI) extends MoleScene with IBuildMoleScene
     ms
   }
 
-  def initCapsuleAdd(w: ICapsuleUI) = {
+  def initCapsuleAdd(w: CapsuleUI) = {
     obUI = Some(w.asInstanceOf[Widget])
     obUI.get.getActions.addAction(connectAction)
     obUI.get.getActions.addAction(dataChannelAction)

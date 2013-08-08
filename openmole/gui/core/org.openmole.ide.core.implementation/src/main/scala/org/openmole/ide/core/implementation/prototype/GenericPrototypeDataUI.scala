@@ -17,7 +17,6 @@
 
 package org.openmole.ide.core.implementation.prototype
 
-import org.openmole.ide.core.model.data.IPrototypeDataUI
 import org.openmole.ide.core.implementation.registry.KeyGenerator
 import org.openmole.core.implementation.data._
 import org.openmole.ide.misc.tools.util.Types._
@@ -26,6 +25,7 @@ import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.misc.tools.util.{ Types, ClassLoader }
 import org.openmole.misc.tools.obj.ClassUtils._
 import scala.util.Try
+import org.openmole.ide.core.implementation.data.PrototypeDataUI
 
 object GenericPrototypeDataUI {
 
@@ -68,7 +68,7 @@ import GenericPrototypeDataUI._
 
 class GenericPrototypeDataUI[T](val name: String,
                                 val dim: Int,
-                                val `type`: Manifest[T]) extends IPrototypeDataUI[T] {
+                                val `type`: Manifest[T]) extends PrototypeDataUI[T] { protoDataUI ⇒
 
   def newInstance(n: String, d: Int) = GenericPrototypeDataUI(n, d)(`type`)
 
@@ -85,7 +85,10 @@ class GenericPrototypeDataUI[T](val name: String,
     else "img/extra_fat.png"
   }
 
-  def canonicalClassName(c: String) = Types.pretify(c.split('.').last)
+  def canonicalClassName(c: String) = Types.pretify(c.split('.').last).toString
 
-  def buildPanelUI = new GenericPrototypePanelUI(this)
+  def buildPanelUI = new GenericPrototypePanelUI {
+    //override type DATAUI = protoDataUI.type
+    val dataUI = protoDataUI
+  }
 }

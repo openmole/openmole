@@ -18,6 +18,5 @@
 package org.openmole.ide.core.implementation.workflow
 
 import org.netbeans.api.visual.anchor.Anchor
-import org.openmole.ide.core.model.workflow.ICapsuleUI
 
-abstract class SlotAnchor(relatedWidget: ICapsuleUI) extends Anchor(relatedWidget.widget)
+abstract class SlotAnchor(relatedWidget: CapsuleUI) extends Anchor(relatedWidget.widget)

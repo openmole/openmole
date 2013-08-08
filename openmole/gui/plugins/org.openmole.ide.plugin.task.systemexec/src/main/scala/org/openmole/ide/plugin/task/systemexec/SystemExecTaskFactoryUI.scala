@@ -17,18 +17,17 @@
 
 package org.openmole.ide.plugin.task.systemexec
 
-import org.openmole.ide.core.model.factory.ITaskFactoryUI
 import org.openmole.core.model.task.ITask
-import org.openmole.ide.core.model.builder.IPuzzleUIMap
-import org.openmole.ide.core.implementation.builder.SceneFactory
+import org.openmole.ide.core.implementation.builder.{ PuzzleUIMap, SceneFactory }
 import org.openmole.plugin.task.systemexec.SystemExecTask
+import org.openmole.ide.core.implementation.factory.TaskFactoryUI
 
-class SystemExecTaskFactoryUI extends ITaskFactoryUI {
+class SystemExecTaskFactoryUI extends TaskFactoryUI {
   override def toString = "System exec"
 
   def buildDataUI = new SystemExecTaskDataUI
 
-  def buildDataProxyUI(task: ITask, uiMap: IPuzzleUIMap) = {
+  def buildDataProxyUI(task: ITask, uiMap: PuzzleUIMap) = {
     val t = SceneFactory.as[SystemExecTask](task)
     uiMap.task(t, x ⇒ new SystemExecTaskDataUI(t.name,
       t.directory,

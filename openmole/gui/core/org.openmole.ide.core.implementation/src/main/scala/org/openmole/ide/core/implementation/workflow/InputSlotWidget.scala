@@ -18,7 +18,6 @@
 package org.openmole.ide.core.implementation.workflow
 
 import java.awt.Point
-import org.openmole.ide.core.model.workflow._
 import org.openmole.ide.misc.tools.image.Images._
 
 object InputSlotWidget {
@@ -28,9 +27,9 @@ object InputSlotWidget {
 }
 
 class InputSlotWidget(
-    scene: IMoleScene,
-    val capsule: ICapsuleUI,
-    val index: Int) extends SlotWidget(scene.graphScene) with IInputSlotWidget {
+    scene: MoleScene,
+    val capsule: CapsuleUI,
+    val index: Int) extends SlotWidget(scene.graphScene) {
 
   refresh
   setPreferredLocation(new Point(2, InputSlotWidget.position(index)))

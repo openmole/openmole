@@ -16,9 +16,16 @@
  */
 package org.openmole.ide.core.implementation.sampling
 
-import org.openmole.ide.core.model.sampling.ISamplingProxyUI
-import org.openmole.ide.core.model.data.ISamplingDataUI
-import org.openmole.ide.misc.tools.util.ID
+import org.openmole.ide.core.implementation.data.SamplingDataUI
 
-class SamplingProxyUI(var dataUI: ISamplingDataUI,
-                      var ordering: Int = 0) extends ISamplingProxyUI with ID
+object SamplingProxyUI {
+  def apply(d: SamplingDataUI,
+            o: Int = 0) = new SamplingProxyUI {
+    var ordering = o
+    var dataUI = d
+  }
+}
+
+trait SamplingProxyUI extends SamplingOrDomainProxyUI {
+  type DATAUI = SamplingDataUI
+}

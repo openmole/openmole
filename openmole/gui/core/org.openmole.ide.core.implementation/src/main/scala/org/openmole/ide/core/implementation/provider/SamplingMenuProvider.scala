@@ -19,15 +19,10 @@ package org.openmole.ide.core.implementation.provider
 
 import java.awt.Point
 import org.netbeans.api.visual.widget._
-import org.openmole.ide.core.model.panel.ISamplingCompositionPanelUI
-import org.openmole.ide.core.model.sampling.ISamplingComponent
-import org.openmole.ide.core.model.sampling.ISamplingWidget
-import scala.swing.Action
-import scala.swing.MenuItem
+import scala.swing._
 import org.openmole.ide.core.implementation.sampling._
-import scala.swing.Panel
 
-class SamplingMenuProvider(panelScene: ISamplingCompositionPanelUI) extends GenericMenuProvider {
+class SamplingMenuProvider(panelScene: SamplingCompositionPanelUI) extends GenericMenuProvider {
 
   override def getPopupMenu(widget: Widget,
                             point: Point) = {

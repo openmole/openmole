@@ -17,16 +17,13 @@ import org.openmole.ide.misc.visualization._
 import org.openmole.ide.misc.widget._
 import org.openmole.core.model.mole._
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.core.model.control.IExecutionManager
 import scala.collection.mutable.HashMap
 import scala.swing._
 import org.openmole.misc.eventdispatcher.EventDispatcher
 import org.openmole.core.model.job.State
 import org.openmole.core.model.data._
 import org.openmole.core.model.execution.ExecutionState
-import org.openmole.ide.core.model.workflow.{ IMoleUI, ICapsuleUI }
-import org.openmole.ide.core.implementation.workflow.ExecutionMoleSceneContainer
+import org.openmole.ide.core.implementation.workflow.{ IMoleUI, CapsuleUI, ExecutionMoleSceneContainer }
 import org.openmole.ide.core.implementation.builder.MoleFactory
 import util.{ Failure, Success }
 import org.openmole.misc.exception.ExceptionUtils
@@ -41,7 +38,7 @@ object ExecutionManager {
 class ExecutionManager(manager: IMoleUI,
                        executionContainer: ExecutionMoleSceneContainer,
                        val mole: IMole,
-                       val capsuleMapping: Map[ICapsuleUI, ICapsule]) extends PluginPanel("", "[grow,fill]", "")
+                       val capsuleMapping: Map[CapsuleUI, ICapsule]) extends PluginPanel("", "[grow,fill]", "")
     with IExecutionManager
     with Publisher {
   executionManager ⇒

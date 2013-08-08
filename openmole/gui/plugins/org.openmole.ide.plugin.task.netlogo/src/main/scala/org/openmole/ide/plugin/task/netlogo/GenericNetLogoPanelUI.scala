@@ -17,9 +17,6 @@
 package org.openmole.ide.plugin.task.netlogo
 
 import org.openmole.ide.core.implementation.dialog.StatusBar
-import org.openmole.ide.core.model.dataproxy.IPrototypeDataProxyUI
-import org.openmole.ide.misc.widget.DialogClosedEvent
-import org.openmole.ide.core.model.panel.ITaskPanelUI
 import org.openmole.ide.misc.widget.ChooseFileTextField
 import org.openmole.ide.misc.widget.multirow.RowWidget.SMALL
 import org.openmole.ide.misc.widget.multirow.MultiChooseFileTextField
@@ -40,16 +37,17 @@ import java.io.File
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
 import scala.concurrent.stm.Ref
 import scala.concurrent.stm
+import org.openmole.ide.core.implementation.panelsettings.TaskPanelUI
+import scala.Some
+import org.openmole.ide.misc.widget.DialogClosedEvent
 
 abstract class GenericNetLogoPanelUI(
     nlogoPath: String,
     workspaceEmbedded: Boolean,
     lauchingCommands: String,
-    prototypeMappingInput: List[(IPrototypeDataProxyUI, String)],
-    prototypeMappingOutput: List[(String, IPrototypeDataProxyUI)],
-    resources: List[String]) extends PluginPanel("") with ITaskPanelUI {
-
-  val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
+    prototypeMappingInput: List[(PrototypeDataProxyUI, String)],
+    prototypeMappingOutput: List[(String, PrototypeDataProxyUI)],
+    resources: List[String])(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("") with TaskPanelUI {
 
   val nlogoTextField = new ChooseFileTextField(nlogoPath,
     "Select a nlogo file",
@@ -63,8 +61,8 @@ abstract class GenericNetLogoPanelUI(
 
   val launchingCommandTextArea = new TextArea(lauchingCommands)
 
-  var multiStringProto: Option[MultiTwoCombos[String, IPrototypeDataProxyUI]] = None
-  var multiProtoString: Option[MultiTwoCombos[IPrototypeDataProxyUI, String]] = None
+  var multiStringProto: Option[MultiTwoCombos[String, PrototypeDataProxyUI]] = None
+  var multiProtoString: Option[MultiTwoCombos[PrototypeDataProxyUI, String]] = None
   val resourcesMultiTextField = new MultiChooseFileTextField("",
     resources.map {
       r ⇒ new ChooseFileTextFieldPanel(new ChooseFileTextFieldData(r))
@@ -112,7 +110,7 @@ abstract class GenericNetLogoPanelUI(
       _globalsReporters()
   }
 
-  val components = List(("Settings",
+  val components = List(("Header",
     new PluginPanel("", "[left]rel[grow,fill]", "[]20[]") {
       contents += new Label("Nlogo file")
       contents += (nlogoTextField, "growx,wrap")
@@ -135,7 +133,7 @@ abstract class GenericNetLogoPanelUI(
       globalsReporters match {
         case Some((globals, reporters)) ⇒
           if (!(globals ++ reporters).isEmpty && !comboContent.isEmpty) {
-            multiStringProto = Some(new MultiTwoCombos[String, IPrototypeDataProxyUI](
+            multiStringProto = Some(new MultiTwoCombos[String, PrototypeDataProxyUI](
               "",
               globals ++ reporters,
               comboContent,
@@ -145,7 +143,7 @@ abstract class GenericNetLogoPanelUI(
               },
               minus = CLOSE_IF_EMPTY, insets = SMALL))
 
-            multiProtoString = Some(new MultiTwoCombos[IPrototypeDataProxyUI, String](
+            multiProtoString = Some(new MultiTwoCombos[PrototypeDataProxyUI, String](
               "",
               comboContent,
               globals,
@@ -166,23 +164,23 @@ abstract class GenericNetLogoPanelUI(
         emptyMapping
     }
 
-  def comboContent: List[IPrototypeDataProxyUI] = Proxies.instance.prototypes.toList
+  def comboContent: List[PrototypeDataProxyUI] = Proxies.instance.prototypes.toList
 
   def buildNetLogo: NetLogo
 
-  override val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink")))) {
-    add(nlogoTextField,
-      new Help(i18n.getString("nlogoPath"),
-        i18n.getString("nlogoPathEx"),
-        List(new URL(i18n.getString("nlogoURLtext"), i18n.getString("nlogoURL")))))
-    add(workspaceCheckBox,
-      new Help(i18n.getString("embedWorkspace"),
-        i18n.getString("embedWorkspaceEx")))
-    add(launchingCommandTextArea,
-      new Help(i18n.getString("command"),
-        i18n.getString("commandEx")))
-    add(resourcesMultiTextField,
-      new Help(i18n.getString("resources"),
-        i18n.getString("resourcesEx")))
-  }
+  override lazy val help = new Helper(List(new URL(i18n.getString("permalinkText"), i18n.getString("permalink"))))
+  add(nlogoTextField,
+    new Help(i18n.getString("nlogoPath"),
+      i18n.getString("nlogoPathEx"),
+      List(new URL(i18n.getString("nlogoURLtext"), i18n.getString("nlogoURL")))))
+  add(workspaceCheckBox,
+    new Help(i18n.getString("embedWorkspace"),
+      i18n.getString("embedWorkspaceEx")))
+  add(launchingCommandTextArea,
+    new Help(i18n.getString("command"),
+      i18n.getString("commandEx")))
+  add(resourcesMultiTextField,
+    new Help(i18n.getString("resources"),
+      i18n.getString("resourcesEx")))
+
 }

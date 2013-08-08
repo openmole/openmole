@@ -17,10 +17,9 @@
 
 package org.openmole.ide.core.implementation.action
 
-import org.openmole.ide.core.model.commons._
-import org.openmole.ide.core.implementation.workflow.ConnectorWidget
-import org.openmole.ide.core.model.workflow.ITransitionUI
+import org.openmole.ide.core.implementation.workflow.{ TransitionUI, ConnectorWidget }
 import scala.swing.Action
+import org.openmole.ide.core.implementation.commons._
 
 object ChangeTransitionAction {
 
@@ -38,7 +37,7 @@ class ChangeTransitionAction(connectionWidget: ConnectorWidget,
                              newType: TransitionType) extends Action(ChangeTransitionAction.toString(newType).toLowerCase) {
   override def apply = {
     connectionWidget.connector match {
-      case x: ITransitionUI ⇒
+      case x: TransitionUI ⇒
         if (x.transitionType != newType) x.transitionType = newType
         connectionWidget.drawTransitionType
         connectionWidget.scene.refresh
