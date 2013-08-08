@@ -34,7 +34,7 @@ class DesktopGridEnvironmentPanelUI(pud: DesktopGridEnvironmentDataUI)(implicit 
   val passTextField = new TextField(15)
   val portTextField = new TextField(5)
 
-  val components = List(("Header", new PluginPanel("wrap 2") {
+  val components = List(("Settings", new PluginPanel("wrap 2") {
     minimumSize = new Dimension(300, 150)
 
     contents += (new Label("Login"), "gap para")

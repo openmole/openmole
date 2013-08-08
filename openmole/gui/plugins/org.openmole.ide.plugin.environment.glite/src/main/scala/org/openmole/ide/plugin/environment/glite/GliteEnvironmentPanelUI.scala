@@ -38,7 +38,7 @@ object GliteEnvironmentPanelUI {
 
 import Converters._
 
-class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("fillx", "[left][grow,fill]", "") with EnvironmentPanelUI {
+class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends EnvironmentPanelUI {
 
   val vo = new VOPanel(pud.vo, pud.voms, pud.bdii)
   val runtimeMemoryTextField = new TextField(pud.openMOLEMemory, 4)
@@ -71,7 +71,7 @@ class GliteEnvironmentPanelUI(pud: GliteEnvironmentDataUI)(implicit val i18n: Re
     case ButtonClicked(`proxyCheckBox`) ⇒ showProxy(proxyCheckBox.selected)
   }
 
-  val components = List(("Header",
+  val components = List(("Settings",
     new PluginPanel("wrap 2") {
       contents += (new Label("VO"), "gap para")
       contents += vo.voComboBox

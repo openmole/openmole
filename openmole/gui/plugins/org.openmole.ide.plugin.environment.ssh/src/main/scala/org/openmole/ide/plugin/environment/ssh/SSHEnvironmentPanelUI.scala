@@ -57,7 +57,7 @@ class SSHEnvironmentPanelUI(pud: SSHEnvironmentDataUI)(implicit val i18n: Resour
   val openMOLEMemoryTextField = new TextField(pud.openMOLEMemory.getOrElse("").toString, 15)
   val threadTextField = new TextField(pud.threads.getOrElse("").toString, 15)
 
-  val components = List(("Header", new PluginPanel("wrap 2") {
+  val components = List(("Settings", new PluginPanel("wrap 2") {
     minimumSize = new Dimension(300, 200)
     contents += (new Label("Login"), "gap para")
     contents += loginTextField

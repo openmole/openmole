@@ -56,7 +56,7 @@ class MoleTaskPanelUI(pud: MoleTaskDataUI)(implicit val i18n: ResourceBundle = R
 
   capsuleComboBox.selection.item = pud.finalCapsule.getOrElse(EmptyDataUIs.emptyTaskProxy)
 
-  val components = List(("Header", new PluginPanel("wrap 2") {
+  val components = List(("Settings", new PluginPanel("wrap 2") {
     contents += (new Label("Embedded mole"), "gap para")
     contents += moleComboBox
     contents += (new Label("Final capsule"), "gap para")

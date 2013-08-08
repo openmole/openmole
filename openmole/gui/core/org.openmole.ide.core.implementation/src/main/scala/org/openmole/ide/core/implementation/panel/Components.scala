@@ -42,4 +42,8 @@ trait Components extends Help {
     }
   }
 
+  def bestDisplay = {
+    if (components.size == 1) panel
+    else tabbedPane
+  }
 }

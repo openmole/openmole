@@ -110,7 +110,7 @@ abstract class GenericNetLogoPanelUI(
       _globalsReporters()
   }
 
-  val components = List(("Header",
+  val components = List(("Settings",
     new PluginPanel("", "[left]rel[grow,fill]", "[]20[]") {
       contents += new Label("Nlogo file")
       contents += (nlogoTextField, "growx,wrap")

@@ -42,7 +42,7 @@ class PBSEnvironmentDataUI(val name: String = "",
 
   override def imagePath = "img/pbs.png"
 
-  override def fatImagePath = "img/pbs_fat.png"
+  def fatImagePath = "img/pbs_fat.png"
 
   def buildPanelUI = new PBSEnvironmentPanelUI(this)
 }

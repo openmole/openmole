@@ -59,7 +59,7 @@ class ExplorationTaskPanelUI(pud: ExplorationTaskDataUI)(implicit val i18n: Reso
     icon = EYE
   }
 
-  val components = List(("Header", new PluginPanel("wrap 4") {
+  val components = List(("Settings", new PluginPanel("wrap 4") {
     contents += new Label("Sampling")
     //add(samplingComboBox, "gapbottom 40")
     contents += samplingComboBox

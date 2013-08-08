@@ -68,7 +68,7 @@ class PBSEnvironmentPanelUI(pud: PBSEnvironmentDataUI)(implicit val i18n: Resour
   val nodesTextField = new TextField(pud.nodes, 4)
   val coreByNodeTextField = new TextField(pud.coreByNode, 4)
 
-  val components = List(("Header",
+  val components = List(("Settings",
     new PluginPanel("wrap 2") {
       contents += (new Label("Login"), "gap para")
       contents += loginTextField

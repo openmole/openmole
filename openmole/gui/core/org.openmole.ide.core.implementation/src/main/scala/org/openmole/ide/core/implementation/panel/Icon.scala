@@ -22,7 +22,11 @@ import org.openmole.ide.core.implementation.data.{ ImageView, DataUI }
 import scala.swing.Label
 
 trait Icon {
-  def icon(dataUI: DataUI with ImageView) = new Label {
-    icon = new ImageIcon(ImageIO.read(dataUI.getClass.getClassLoader.getResource(dataUI.imagePath)))
+  def icon(dataUI: DataUI with ImageView) = _icon(dataUI, dataUI.imagePath)
+
+  def fatIcon(dataUI: DataUI with ImageView) = _icon(dataUI, dataUI.fatImagePath)
+
+  private def _icon(dataUI: DataUI, path: String) = new Label {
+    icon = new ImageIcon(ImageIO.read(dataUI.getClass.getClassLoader.getResource(path)))
   }
 }

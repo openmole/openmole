@@ -28,7 +28,7 @@ import scala.swing.{ Label, TextField }
 import Converters._
 import org.openmole.ide.core.implementation.panelsettings.EnvironmentPanelUI
 
-class DiracEnvironmentPanelUI(pud: DiracEnvironmentDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends PluginPanel("wrap 2") with EnvironmentPanelUI {
+class DiracEnvironmentPanelUI(pud: DiracEnvironmentDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends EnvironmentPanelUI {
 
   val vo = new VOPanel(pud.voName, pud.vomsURL, pud.bdii)
   val serviceTextField = new TextField(pud.service, 20)
@@ -39,7 +39,7 @@ class DiracEnvironmentPanelUI(pud: DiracEnvironmentDataUI)(implicit val i18n: Re
   val openMOLEMemoryTextField = new TextField(pud.openMOLEMemory.getOrElse("").toString, 20)
 
   val components = List(
-    ("Header", new PluginPanel("wrap 2") {
+    ("Settings", new PluginPanel("wrap 2") {
       contents += (new Label("VO"), "gap para")
       contents += vo.voComboBox
       contents += (new Label("Service"), "gap para")

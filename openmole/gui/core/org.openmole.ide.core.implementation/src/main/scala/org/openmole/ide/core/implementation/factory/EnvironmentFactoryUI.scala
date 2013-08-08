@@ -25,6 +25,6 @@ trait EnvironmentFactoryUI extends FactoryUI {
 
   def buildDataUI: EnvironmentDataUI
 
-  def category = List("Environment")
+  def category = List()
 }
 
