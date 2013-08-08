@@ -19,4 +19,4 @@ package org.openmole.ide.core.implementation.serializer
 
 import org.openmole.ide.misc.tools.util.ID
 
-case class SlotData(index: Int, capsule: CapsuleData) extends ID
+case class SlotData(capsule: CapsuleData, index: Int) extends ID

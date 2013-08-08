@@ -22,5 +22,5 @@ import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
 class DataChannelData(
   val from: CapsuleData,
-  val to: Int,
+  val to: SlotData,
   val filtered: List[PrototypeDataProxyUI]) extends ID

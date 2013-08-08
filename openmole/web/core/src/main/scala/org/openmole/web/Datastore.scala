@@ -11,6 +11,7 @@ class Datastore[T, U] extends Actor {
   def receive = {
     case ("put", pair: (T, U)) ⇒ data += pair
     case ("get", key: T)       ⇒ sender ! data.get(key)
+    case ("remove", key: T)    ⇒ data -= key
     case "getKeys"             ⇒ sender ! data.keys
   }
 }
@@ -23,6 +24,8 @@ class DataHandler[T, U](val system: ActorSystem) {
     store ! ("put" -> (key -> data))
     println("stored " + key + " " + data)
   }
+
+  def remove(key: T) = store ! "remove" -> key
 
   def get(key: T): Option[U] = Await.result(store ? ("get" -> key), Duration(1, SECONDS)).asInstanceOf[Option[U]]
 

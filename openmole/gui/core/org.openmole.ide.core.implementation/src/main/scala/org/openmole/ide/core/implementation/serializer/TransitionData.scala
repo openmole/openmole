@@ -23,7 +23,7 @@ import org.openmole.ide.core.implementation.commons.TransitionType
 
 class TransitionData(
   val from: CapsuleData,
-  val to: Int,
+  val to: SlotData,
   val transitionType: TransitionType,
   val condition: Option[String] = None,
   val filtered: List[PrototypeDataProxyUI]) extends ID

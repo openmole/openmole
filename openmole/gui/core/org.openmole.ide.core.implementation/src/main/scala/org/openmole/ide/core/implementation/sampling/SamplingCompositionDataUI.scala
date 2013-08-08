@@ -44,7 +44,6 @@ class SamplingCompositionDataUI(val name: String = "",
   def coreClass = classOf[Sampling]
 
   def coreObject = Try {
-    //builtSampling.clear
     val connectionMap = connections.groupBy {
       _._2
     }

@@ -153,7 +153,7 @@ object ScenesManager {
     }
 
     val islots = selection.flatMap {
-      _.islots
+      _.inputSlots
     }
     selection.headOption match {
       case Some(c: CapsuleUI) ⇒
@@ -165,7 +165,7 @@ object ScenesManager {
                 case (t: TransitionUI) ⇒
                   val transition = new TransitionUI(
                     copied(t.source)._1,
-                    copied(t.target.capsule)._1.islots.find {
+                    copied(t.target.capsule)._1.inputSlots.find {
                       s ⇒ t.target.index == s.index
                     }.get,
                     t.transitionType,
@@ -175,7 +175,7 @@ object ScenesManager {
                 case (t: DataChannelUI) ⇒
                   val dc = new DataChannelUI(
                     copied(t.source)._1,
-                    copied(t.target.capsule)._1.islots.find {
+                    copied(t.target.capsule)._1.inputSlots.find {
                       s ⇒ t.target.index == s.index
                     }.get,
                     t.filteredPrototypes)

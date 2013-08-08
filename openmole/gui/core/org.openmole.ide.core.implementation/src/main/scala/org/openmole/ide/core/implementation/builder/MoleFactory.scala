@@ -115,7 +115,7 @@ object MoleFactory {
     else {
       val firstCapsule = capsuleMap.head
       val manager = firstCapsule._1.scene.dataUI
-      islotsMap.getOrElseUpdate(firstCapsule._1.islots.head, Slot(capsuleMap(firstCapsule._1)))
+      islotsMap.getOrElseUpdate(firstCapsule._1.inputSlots.head, Slot(capsuleMap(firstCapsule._1)))
       val transitions = capsuleMap.flatMap {
         case (cui, ccore) ⇒
           manager.capsuleConnections.getOrElse(cui.id, TSet.empty).toSet.map { c: ConnectorUI ⇒

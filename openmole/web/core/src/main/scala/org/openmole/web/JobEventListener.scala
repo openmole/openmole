@@ -2,10 +2,10 @@ package org.openmole.web
 
 import org.openmole.misc.eventdispatcher.{ Event, EventListener }
 import org.openmole.core.model.mole.IMoleExecution
-import org.openmole.core.model.mole.IMoleExecution.JobCreated
-import org.openmole.core.model.job.State._
-import org.openmole.core.model.mole.IMoleExecution.JobCreated
-import org.openmole.core.model.mole.IMoleExecution.JobStatusChanged
+import org.openmole.core.model.mole.IMoleExecution.{ Finished, Starting, JobCreated, JobStatusChanged }
+import org.openmole.misc.tools.io.TarArchiver.TarOutputStream2TarOutputStreamComplement
+import com.ice.tar.TarOutputStream
+import java.io.ByteArrayOutputStream
 
 /**
  * Created with IntelliJ IDEA.
@@ -23,4 +23,26 @@ class JobEventListener(d: DataHandler[String, Stats.Stats]) extends EventListene
       case x: JobStatusChanged ⇒ d.add(execution.id, updateMap(updateMap(d get execution.id getOrElse Stats.empty, x.newState.name, _ + 1), x.oldState.name, _ - 1))
     }
   }
+}
+
+class MoleStatusListener(mH: MoleHandling) extends EventListener[IMoleExecution] {
+  override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = {
+    event match {
+      case x: Starting ⇒ mH.setStatus(execution, MoleHandling.Status.running)
+      case x: Finished ⇒ {
+        mH.setStatus(execution, MoleHandling.Status.finished)
+        mH.storeResultBlob(execution)
+      }
+    }
+  }
+}
+
+import java.io.OutputStream
+
+class webStream extends OutputStream {
+  def write(p1: Int) {
+    storage += p1.toChar
+  }
+
+  var storage = ""
 }

@@ -34,7 +34,7 @@ class MoleUI(var name: String) extends IMoleUI with ID { moleUI ⇒
   private val _plugins: Ref[List[String]] = Ref(List.empty[String])
 
   def plugins = _plugins.single()
-  def plugins_=(v: Iterable[String]) = _plugins.single() = v.toList
+  def plugins_=(v: Traversable[String]) = _plugins.single() = v.toList
 
   @transient lazy val _cacheMole: Ref[Option[(IMole, Map[CapsuleUI, ICapsule])]] = Ref(None)
 
