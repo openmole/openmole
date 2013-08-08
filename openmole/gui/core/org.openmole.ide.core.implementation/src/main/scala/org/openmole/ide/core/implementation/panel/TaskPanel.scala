@@ -16,16 +16,12 @@
  */
 package org.openmole.ide.core.implementation.panel
 
-import org.openmole.ide.core.implementation.dataproxy.{ TaskDataProxyFactory, TaskDataProxyUI, Proxies }
+import org.openmole.ide.core.implementation.dataproxy.{ TaskDataProxyUI, Proxies }
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import ConceptMenu._
 import org.openmole.ide.core.implementation.dialog.{ StatusBar, DialogFactory }
 import org.openmole.ide.core.implementation.data._
 import org.openmole.ide.core.implementation.workflow.CapsuleUI
-import java.awt.{ Color, BorderLayout }
-import org.openmole.misc.eventdispatcher.{ Event, EventListener, EventDispatcher }
-import org.openmole.ide.core.implementation.registry.KeyRegistry
-import scala.swing.event.SelectionChanged
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
 
@@ -43,7 +39,7 @@ trait TaskPanel extends Base
 
   var panelSettings = proxy.dataUI.buildPanelUI
   val icon: Label = icon(proxy.dataUI)
-  val taskCombo = ConceptMenu.buildTaskMenu(p ⇒ updateConceptPanel(p.dataUI))
+  val taskCombo = ConceptMenu.buildTaskMenu(p ⇒ updateConceptPanel(p.dataUI), proxy.dataUI)
 
   build
   var ioSettings = ioPanel
@@ -53,7 +49,7 @@ trait TaskPanel extends Base
   def build = {
     basePanel.contents += new PluginPanel("wrap 2", "-5[left]-10[]", "-2[top][10]") {
       contents += header(scene, index)
-      contents += new PluginPanel("wrap 2", "[]30[]", "") {
+      contents += new PluginPanel("wrap 2", "[]10[]", "") {
         contents += new Composer {
           addIcon(icon)
           addName

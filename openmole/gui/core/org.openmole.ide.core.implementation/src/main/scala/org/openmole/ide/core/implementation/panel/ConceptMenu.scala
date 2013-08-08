@@ -33,7 +33,9 @@ import org.openmole.ide.core.implementation.workflow.{ ISceneContainer, BuildMol
 import scala.collection.JavaConversions._
 import org.openmole.ide.core.implementation.factory.FactoryUI
 import org.openmole.ide.core.implementation.prototype.GenericPrototypeDataUI
+import org.openmole.ide.core.implementation.data._
 import scala.swing.event.ButtonClicked
+import scala.Some
 
 object ConceptMenu {
 
@@ -75,7 +77,8 @@ object ConceptMenu {
     }) {
       listenTo(this)
       reactions += {
-        case x: ButtonClicked ⇒ publish(new ConceptChanged(this))
+        case x: ButtonClicked ⇒
+          publish(new ConceptChanged(this))
       }
     }
 
@@ -90,24 +93,36 @@ object ConceptMenu {
   val sourceMenu = new PopupToolBarPresenter("Source", List(menuItem(display(Builder.sourceUI(false)))), new Color(60, 60, 60))
   val hookMenu = new PopupToolBarPresenter("Hook", List(menuItem(display(Builder.hookUI(false)))), new Color(168, 120, 33))
 
-  def buildTaskMenu(f: TaskDataProxyUI ⇒ Unit) = {
-    mapping.clear
-    val tmenu = KeyRegistry.tasks.values.map {
-      f ⇒ new TaskDataProxyFactory(f)
-    }.toList.sortBy(_.factory.toString).map {
-      d ⇒ menuItem(d.buildDataProxyUI, d.factory, f)
-    }
-    new PopupToolBarPresenter("Task", tmenu, new Color(107, 138, 166))
+  def factoryName(d: DataUI, factories: List[DataProxyFactory]): String = {
+    List(factories.find { f ⇒ f.buildDataProxyUI.dataUI.getClass.isAssignableFrom(d.getClass) }).flatten.map {
+      _.factory.toString
+    }.headOption.getOrElse("AAAAAAAA")
   }
 
-  def buildEnvironmentMenu(f: EnvironmentDataProxyUI ⇒ Unit) = {
+  def buildTaskMenu(f: TaskDataProxyUI ⇒ Unit, initDataUI: TaskDataUI) = {
     mapping.clear
-    val emenu = KeyRegistry.environments.values.map {
-      f ⇒ new EnvironmentDataProxyFactory(f)
-    }.toList.sortBy(_.factory.toString).map {
+    val factories = KeyRegistry.tasks.values.map {
+      f ⇒ new TaskDataProxyFactory(f)
+    }.toList.sortBy(_.factory.toString)
+
+    val tmenu = factories.map {
       d ⇒ menuItem(d.buildDataProxyUI, d.factory, f)
     }
-    new PopupToolBarPresenter("Environment", emenu, new Color(68, 120, 33))
+
+    new PopupToolBarPresenter(factoryName(initDataUI, factories), tmenu, new Color(107, 138, 166))
+  }
+
+  def buildEnvironmentMenu(f: EnvironmentDataProxyUI ⇒ Unit, initDataUI: EnvironmentDataUI) = {
+    mapping.clear
+    val factories = KeyRegistry.environments.values.map {
+      f ⇒ new EnvironmentDataProxyFactory(f)
+    }.toList.sortBy(_.factory.toString)
+
+    val emenu = factories.map {
+      d ⇒ menuItem(d.buildDataProxyUI, d.factory, f)
+    }
+
+    new PopupToolBarPresenter(factoryName(initDataUI, factories), emenu, new Color(68, 120, 33))
   }
 
   def buildPrototypeMenu(f: PrototypeDataProxyUI ⇒ Unit) = {
@@ -118,24 +133,26 @@ object ConceptMenu {
     new PopupToolBarPresenter("Prototype", pmenu, new Color(212, 170, 0))
   }
 
-  def buildHookMenu(f: HookDataProxyUI ⇒ Unit) = {
+  def buildHookMenu(f: HookDataProxyUI ⇒ Unit, initDataUI: HookDataUI) = {
     mapping.clear
-    val hmenu = KeyRegistry.hooks.values.map {
+    val factories = KeyRegistry.hooks.values.map {
       f ⇒ new HookDataProxyFactory(f)
-    }.toList.sortBy(_.factory.toString).map {
+    }.toList.sortBy(_.factory.toString)
+    val hmenu = factories.map {
       d ⇒ menuItem(d.buildDataProxyUI, d.factory, f)
     }
-    new PopupToolBarPresenter("Task", hmenu, new Color(168, 120, 33))
+    new PopupToolBarPresenter(factoryName(initDataUI, factories), hmenu, new Color(168, 120, 33))
   }
 
-  def buildSourceMenu(f: SourceDataProxyUI ⇒ Unit) = {
+  def buildSourceMenu(f: SourceDataProxyUI ⇒ Unit, initDataUI: SourceDataUI) = {
     mapping.clear
-    val hmenu = KeyRegistry.sources.values.map {
+    val factories = KeyRegistry.sources.values.map {
       f ⇒ new SourceDataProxyFactory(f)
-    }.toList.sortBy(_.factory.toString).map {
+    }.toList.sortBy(_.factory.toString)
+    val smenu = factories.map {
       d ⇒ menuItem(d.buildDataProxyUI, d.factory, f)
     }
-    new PopupToolBarPresenter("Task", hmenu, new Color(60, 60, 60))
+    new PopupToolBarPresenter(factoryName(initDataUI, factories), smenu, new Color(60, 60, 60))
   }
 
   def -=(proxy: DataProxyUI) = {

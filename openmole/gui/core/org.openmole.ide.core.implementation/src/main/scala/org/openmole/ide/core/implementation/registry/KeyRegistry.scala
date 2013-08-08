@@ -32,7 +32,7 @@ object KeyRegistry {
 
   val samplings = new HashMap[DefaultKey, SamplingFactoryUI] with SynchronizedMap[DefaultKey, SamplingFactoryUI]
 
-  val environments = new HashMap[DefaultKey, IEnvironmentFactoryUI] with SynchronizedMap[DefaultKey, IEnvironmentFactoryUI]
+  val environments = new HashMap[DefaultKey, EnvironmentFactoryUI] with SynchronizedMap[DefaultKey, EnvironmentFactoryUI]
 
   val domains = new HashMap[DefaultKey, IDomainFactoryUI] with SynchronizedMap[DefaultKey, IDomainFactoryUI]
 

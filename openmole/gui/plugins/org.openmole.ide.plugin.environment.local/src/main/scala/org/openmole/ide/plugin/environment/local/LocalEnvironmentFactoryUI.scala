@@ -17,9 +17,9 @@
 
 package org.openmole.ide.plugin.environment.local
 
-import org.openmole.ide.core.implementation.factory.IEnvironmentFactoryUI
+import org.openmole.ide.core.implementation.factory.EnvironmentFactoryUI
 
-class LocalEnvironmentFactoryUI extends IEnvironmentFactoryUI {
+class LocalEnvironmentFactoryUI extends EnvironmentFactoryUI {
   override def toString = "Multi threading"
 
   def buildDataUI = new LocalEnvironmentDataUI

@@ -41,13 +41,11 @@ class PopupToolBarPresenter(t: String,
   listenTo(basemenu.toSeq: _*)
 
   reactions += {
-    case x: ButtonClicked ⇒ popup.show(this, 0, size.height)
-    case ConceptChanged(item) ⇒ {
-      text = item.text
-      popup.hide
-      revalidate
-      repaint
+    case x: ButtonClicked ⇒ x.source match {
+      case p: PopupToolBarPresenter ⇒ popup.show(this, 0, size.height)
+      case _                        ⇒
     }
+    case ConceptChanged(item) ⇒ text = item.text
   }
 
   def remove(c: Component) = c match {
