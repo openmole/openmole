@@ -17,10 +17,11 @@
 package org.openmole.ide.core.implementation.dataproxy
 
 import org.openmole.ide.core.implementation.data.{ ImageView, HookDataUI }
+import org.openmole.ide.core.implementation.panel.IOFacade
 
 object HookDataProxyUI {
   def apply(d: HookDataUI,
-            g: Boolean = false) = new HookDataProxyUI {
+            g: Boolean = false) = new HookDataProxyUI with IOFacade {
     var dataUI: DATAUI = d
     val generated = g
   }

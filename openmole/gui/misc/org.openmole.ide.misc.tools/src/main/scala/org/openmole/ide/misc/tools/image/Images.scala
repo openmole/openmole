@@ -67,4 +67,6 @@ object Images {
 
   val APPLICATION_ICON = imageIcon("img/openmole.png")
   val MOLE_SETTINGS = imageIcon("img/moleSettings.png")
+
+  val HOOK = imageIcon("img/hook.png")
 }

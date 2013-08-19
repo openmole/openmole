@@ -29,9 +29,7 @@ abstract class HookDataUI extends DataUI with InputPrototype with OutputPrototyp
       case _                 ⇒ (List(), List())
     }
 
-  def fatImagePath = "img/hook.png"
-
-  override def imagePath = "img/hook.png"
+  def fatImagePath = ""
 
   override def toString: String = name
 
