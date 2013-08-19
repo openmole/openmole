@@ -58,8 +58,8 @@ object Builder {
   }
 
   def sourceUI(g: Boolean) = {
-    val sourceValues = KeyRegistry.hooks.values
-    HookDataProxyUI(sourceValues.find { _.toString == "CSV" }.getOrElse(sourceValues.head).buildDataUI, g)
+    val sourceValues = KeyRegistry.sources.values
+    SourceDataProxyUI(sourceValues.find { _.toString == "CSV" }.getOrElse(sourceValues.head).buildDataUI, g)
   }
 
   def taskUI(g: Boolean) = {

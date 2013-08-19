@@ -27,6 +27,4 @@ class CSVSourceFactoryUI extends SourceFactoryUI {
   def coreClass = classOf[CSVSource]
 
   override def toString = "CSV"
-
-  override def category = List("Source")
 }

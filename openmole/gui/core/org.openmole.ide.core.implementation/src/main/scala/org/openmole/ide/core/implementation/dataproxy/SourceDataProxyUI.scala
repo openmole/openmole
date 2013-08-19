@@ -17,10 +17,11 @@
 package org.openmole.ide.core.implementation.dataproxy
 
 import org.openmole.ide.core.implementation.data.SourceDataUI
+import org.openmole.ide.core.implementation.panel.IOFacade
 
 object SourceDataProxyUI {
   def apply(d: SourceDataUI,
-            g: Boolean = false) = new SourceDataProxyUI {
+            g: Boolean = false) = new SourceDataProxyUI with IOFacade {
     var dataUI = d
     val generated = g
   }

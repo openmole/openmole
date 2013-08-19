@@ -205,6 +205,11 @@ abstract class MoleScene extends GraphScene.StringGraph
             lazy val index = i
             lazy val scene = moleScene
           }
+          case x: SourceDataProxyUI with IOFacade ⇒ new SourcePanel {
+            lazy val proxy = x
+            lazy val index = i
+            lazy val scene = moleScene
+          }
           case _ ⇒ throw new UserBadDataError("No displaying available for " + dataproxy)
         }
 

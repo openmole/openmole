@@ -69,4 +69,5 @@ object Images {
   val MOLE_SETTINGS = imageIcon("img/moleSettings.png")
 
   val HOOK = imageIcon("img/hook.png")
+  val SOURCE = imageIcon("img/source.png")
 }
