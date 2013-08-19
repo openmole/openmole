@@ -42,5 +42,5 @@ class NetLogo5TaskFactoryUI extends TaskFactoryUI {
       t.resources.map { _._2 }.toList))
   }
 
-  override def category = List("Task", "ABM")
+  override def category = List("ABM")
 }

@@ -37,33 +37,18 @@ trait GenericPrototypePanelUI extends Settings with SaveSettings {
 
   val typeValues = GenericPrototypeDataUI.base ::: GenericPrototypeDataUI.extra
 
-  /* val typeComboBox = new MyComboBox(typeValues)
-  typeComboBox.selection.item = typeValues.filter {
-    t ⇒
-      assignable(t.`type`.runtimeClass, dataUI.`type`.runtimeClass)
-  }.head
-
-  listenTo(`typeComboBox`)
-  typeComboBox.selection.reactions += {
-    case SelectionChanged(`typeComboBox`) ⇒
-      publish(new IconChanged(typeComboBox, typeComboBox.selection.item.fatImagePath))
-    case _ ⇒
-  } */
-
-  val customTypeLabel = new MainLinkLabel("More types", new Action("") {
+  lazy val customTypeLabel = new MainLinkLabel("More types", new Action("") {
     override def apply = PrototypeFromJarDialog.display(protoPanel)
   })
 
-  val dimTextField = new TextField(if (dataUI.dim >= 0) dataUI.dim.toString else "0", 2)
+  lazy val dimTextField = new TextField(if (dataUI.dim >= 0) dataUI.dim.toString else "0", 2)
 
   val i18n = ResourceBundle.getBundle("help", new Locale("en", "EN"))
 
-  val components = List(("Settings", new PluginPanel("wrapp 3") {
-    contents += new Label("Type")
-    //  contents += typeComboBox
-    contents += customTypeLabel
+  val components = List(("Settings", new PluginPanel("wrap 2") {
     contents += new Label("Dimension")
     contents += dimTextField
+    contents += customTypeLabel
   }))
 
   def dim = dimTextField.text
@@ -72,9 +57,5 @@ trait GenericPrototypePanelUI extends Settings with SaveSettings {
     add(dimTextField, new Help(i18n.getString("dimension"), i18n.getString("dimensionEx")))
   }
 
-  def saveContent(name: String): DATAUI = ???
-  /* typeComboBox.selection.item.newInstance(name, {
-
-    if (dim.isEmpty) 0 else dim.toInt
-  })    */
+  def saveContent(name: String): DATAUI = dataUI.newInstance(name, if (dim.isEmpty) 0 else dim.toInt)
 }

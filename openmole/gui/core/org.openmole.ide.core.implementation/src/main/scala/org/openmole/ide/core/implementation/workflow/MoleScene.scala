@@ -195,17 +195,22 @@ abstract class MoleScene extends GraphScene.StringGraph
             lazy val index = i
             lazy val scene = moleScene
           }
-          case x: EnvironmentDataProxyUI ⇒ new EnvironmentPanel {
-            lazy val proxy = x
-            lazy val index = i
-            lazy val scene = moleScene
-          }
           case x: HookDataProxyUI with IOFacade ⇒ new HookPanel {
             lazy val proxy = x
             lazy val index = i
             lazy val scene = moleScene
           }
           case x: SourceDataProxyUI with IOFacade ⇒ new SourcePanel {
+            lazy val proxy = x
+            lazy val index = i
+            lazy val scene = moleScene
+          }
+          case x: EnvironmentDataProxyUI ⇒ new EnvironmentPanel {
+            lazy val proxy = x
+            lazy val index = i
+            lazy val scene = moleScene
+          }
+          case x: PrototypeDataProxyUI ⇒ new PrototypePanel {
             lazy val proxy = x
             lazy val index = i
             lazy val scene = moleScene

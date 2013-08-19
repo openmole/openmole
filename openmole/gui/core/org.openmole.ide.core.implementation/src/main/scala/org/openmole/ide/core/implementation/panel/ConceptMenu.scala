@@ -123,12 +123,13 @@ object ConceptMenu {
     popup
   }
 
-  def buildPrototypeMenu(f: PrototypeDataProxyUI ⇒ Unit) = {
+  def buildPrototypeMenu(f: PrototypeDataProxyUI ⇒ Unit, initDataUI: PrototypeDataUI[_]) = {
     mapping.clear
+
     val pmenu = (GenericPrototypeDataUI.base ::: GenericPrototypeDataUI.extra).sortBy(_.toString).map {
       d ⇒ menuItem(PrototypeDataProxyUI(d), d.toString, f)
     }
-    new PopupToolBarPresenter("Prototype", new Color(212, 170, 0), pmenu)
+    new PopupToolBarPresenter(initDataUI.typeClassString.split('.').last, new Color(212, 170, 0), pmenu)
   }
 
   def buildHookMenu(f: HookDataProxyUI ⇒ Unit, initDataUI: HookDataUI) = {

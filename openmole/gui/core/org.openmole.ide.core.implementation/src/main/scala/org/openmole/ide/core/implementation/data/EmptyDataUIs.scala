@@ -60,7 +60,7 @@ object EmptyDataUIs {
     def `type` = ClassUtils.manifest(classOf[Any])
     def coreObject = Try(Prototype[Any](""))
     def fatImagePath = "img/empty.png"
-    def buildPanelUI: Settings = new GenericPrototypePanelUI {
+    def buildPanelUI = new GenericPrototypePanelUI {
       val dataUI = GenericPrototypeDataUI.base.head
     }
   }

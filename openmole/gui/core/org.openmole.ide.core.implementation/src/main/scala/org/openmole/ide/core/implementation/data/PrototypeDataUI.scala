@@ -20,6 +20,7 @@ package org.openmole.ide.core.implementation.data
 import org.openmole.core.model.data._
 import org.openmole.ide.misc.tools.util.Types
 import scala.util.Try
+import org.openmole.ide.core.implementation.prototype.GenericPrototypePanelUI
 
 trait PrototypeDataUI[T] extends DataUI with ImageView {
   def name: String
@@ -33,4 +34,6 @@ trait PrototypeDataUI[T] extends DataUI with ImageView {
   def coreObject: Try[Prototype[T]]
 
   def dim: Int
+
+  def buildPanelUI: GenericPrototypePanelUI
 }

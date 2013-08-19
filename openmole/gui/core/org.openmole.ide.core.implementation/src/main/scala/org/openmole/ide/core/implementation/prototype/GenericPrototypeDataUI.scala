@@ -22,7 +22,7 @@ import org.openmole.core.implementation.data._
 import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.core.model.data._
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.ide.misc.tools.util.{ Types, ClassLoader }
+import org.openmole.ide.misc.tools.util.Types
 import org.openmole.misc.tools.obj.ClassUtils._
 import scala.util.Try
 import org.openmole.ide.core.implementation.data.PrototypeDataUI
@@ -88,7 +88,6 @@ class GenericPrototypeDataUI[T](val name: String,
   def canonicalClassName(c: String) = Types.pretify(c.split('.').last).toString
 
   def buildPanelUI = new GenericPrototypePanelUI {
-    //override type DATAUI = protoDataUI.type
-    val dataUI = protoDataUI
+    lazy val dataUI = protoDataUI
   }
 }

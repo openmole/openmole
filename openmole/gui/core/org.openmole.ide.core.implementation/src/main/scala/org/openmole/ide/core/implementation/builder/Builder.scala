@@ -42,13 +42,14 @@ import org.openmole.ide.core.implementation.registry.DefaultKey
 import scala.Some
 import org.openmole.ide.core.implementation.factory.BuilderFactoryUI
 import org.openmole.ide.core.implementation.dataproxy._
+import org.openmole.misc.tools.obj.ClassUtils._
 import org.openmole.core.model.sampling.Sampling
 import org.openmole.ide.core.implementation.registry.DefaultKey
 import scala.Some
 
 object Builder {
 
-  def prototypeUI = PrototypeDataProxyUI(GenericPrototypeDataUI[java.lang.Double], false)
+  def prototypeUI = PrototypeDataProxyUI(new GenericPrototypeDataUI("", 0, manifest(classOf[java.lang.Double])), false)
 
   def samplingCompositionUI(b: Boolean) = SamplingCompositionDataProxyUI(g = b)
 
