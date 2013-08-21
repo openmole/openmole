@@ -109,10 +109,10 @@ trait MoleHandling { self: SlickSupport ⇒
     Context(c.map(_.getOrElse(throw new Exception("CSV file does not have data on all missing variables"))))
   }
 
-  private def cacheMole(pMole: IPartialMoleExecution, ctxt: Context, encapsulated: Boolean) = {
+  private def cacheMole(pMole: IPartialMoleExecution, ctxt: Context, encapsulated: Boolean, id: String) = {
     val path: Option[File] = if (encapsulated) Some(Workspace.newDir("")) else None
     val context = ExecutionContext(new PrintStream(new File(path.getOrElse(".") + "/out")), path)
-    val mole = pMole.toExecution(ctxt, context)
+    val mole = pMole.toExecution(ctxt, context, id)
     path foreach (capsules.add(mole.id, _))
     cachedMoles.add(mole.id, mole)
     EventDispatcher.listen(mole, listener, classOf[IMoleExecution.JobStatusChanged])
@@ -146,12 +146,13 @@ trait MoleHandling { self: SlickSupport ⇒
         val ctxtClob = new SerialClob(SerializerService.serialize(ctxt).toCharArray)
 
         val outputBlob = new SerialBlob(Array[Byte]())
+        val id = UUID.randomUUID().toString
 
         try {
           db withSession {
-            MoleData.insert((s"${pEx.id}:${ctxt.hashCode.toString}", pEx.id, MoleHandling.Status.stopped, clob, ctxtClob, encapsulate, outputBlob))
+            MoleData.insert((id, pEx.id, MoleHandling.Status.stopped, clob, ctxtClob, encapsulate, outputBlob))
           }
-          Right(cacheMole(pEx, ctxt, encapsulate))
+          Right(cacheMole(pEx, ctxt, encapsulate, id))
         }
         catch {
           case e: SQLException ⇒ Left(s"A mole execution with id: ${ctxt.hashCode.toString} already exists")
@@ -178,7 +179,7 @@ trait MoleHandling { self: SlickSupport ⇒
 
       val row = MoleData filter (_.id === key)
       val r = (row map (r ⇒ (r.clobbedMole, r.clobbedContext, r.encapsulated))).list.headOption map {
-        case (pMClob, ctxtClob, e) ⇒ (SerializerService.deserialize[IPartialMoleExecution](pMClob.getAsciiStream), SerializerService.deserialize[Context](ctxtClob.getAsciiStream), e)
+        case (pMClob, ctxtClob, e) ⇒ (SerializerService.deserialize[IPartialMoleExecution](pMClob.getAsciiStream), SerializerService.deserialize[Context](ctxtClob.getAsciiStream), e, key)
       }
       r map Function.tupled(cacheMole _)
     }

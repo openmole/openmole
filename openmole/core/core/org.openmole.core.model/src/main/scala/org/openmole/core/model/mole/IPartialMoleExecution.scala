@@ -28,5 +28,5 @@ trait IPartialMoleExecution {
 
   def id: String
 
-  def toExecution(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local): IMoleExecution
+  def toExecution(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local, id: String = UUID.randomUUID().toString): IMoleExecution
 }

@@ -49,13 +49,13 @@ class PartialMoleExecution(
     val profiler: Profiler = Profiler.empty,
     val seed: Long = Workspace.newSeed, val id: String = UUID.randomUUID().toString) extends IPartialMoleExecution {
 
-  def toExecution(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local) = {
+  def toExecution(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local, id: String = UUID.randomUUID().toString) = {
     new MoleExecution(mole,
       sources,
       hooks,
       selection,
       grouping,
       profiler,
-      seed, s"$id:${implicits.hashCode.toString}") //hashcode may be fragile and too weak a hash, keep an eye on it
+      seed, id) //hashcode may be fragile and too weak a hash, keep an eye on it
   }
 }
