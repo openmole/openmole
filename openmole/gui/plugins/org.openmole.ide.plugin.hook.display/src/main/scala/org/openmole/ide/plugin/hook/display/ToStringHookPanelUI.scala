@@ -21,6 +21,7 @@ import org.openmole.ide.plugin.misc.tools.MultiPrototypePanel
 import org.openmole.ide.core.implementation.dataproxy.Proxies
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.core.implementation.panelsettings.HookPanelUI
+import scala.swing.Label
 
 class ToStringHookPanelUI(dataUI: ToStringHookDataUI) extends PluginPanel("") with HookPanelUI {
 
@@ -28,10 +29,15 @@ class ToStringHookPanelUI(dataUI: ToStringHookDataUI) extends PluginPanel("") wi
     dataUI.toBeHooked,
     Proxies.instance.prototypes.toList)
 
-  contents += combo
+  contents += {
+    if (Proxies.instance.prototypes.isEmpty) new Label("No prototype to be displayed")
+    else combo
+  }
 
   val components = List(("Prototypes", this))
 
   def saveContent(name: String) = new ToStringHookDataUI(name,
-    combo.multiPrototypeCombo.content.map { _.comboValue.get }.filter { _ != null })
+    combo.multiPrototypeCombo.content.map {
+      _.comboValue.get
+    }.filter { _ != null })
 }

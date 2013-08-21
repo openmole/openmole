@@ -23,6 +23,7 @@ import ConceptMenu._
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.misc.tools.image.Images
+import scala.swing.event.SelectionChanged
 
 trait HookPanel extends Base
     with Header
@@ -40,8 +41,8 @@ trait HookPanel extends Base
   val icon: Label = icon(Images.HOOK)
   val hookCombo = ConceptMenu.buildHookMenu(p ⇒ updateConceptPanel(p.dataUI), proxy.dataUI)
 
-  build
   var ioSettings = ioPanel
+  build
 
   listenTo(panelSettings.help.components.toSeq: _*)
 
@@ -58,26 +59,51 @@ trait HookPanel extends Base
         contents += proxyShorcut(proxy.dataUI, index)
       }
     }
-    createSettings
+    createSettings()
   }
 
   override def created = proxyCreated
 
-  def createSettings = {
-    ioSettings = ioPanel
-    if (basePanel.contents.size > 1) {
+  def createSettings(curIndex: Int): Unit = {
+    //val curIndex = tabIndex(basePanel)
+
+    panelSettings = proxy.dataUI.buildPanelUI
+    val tPane = panelSettings.tabbedPane(("I/O", ioSettings))
+    tPane.selection.index = curIndex
+
+    if (basePanel.contents.size == 3) basePanel.contents.remove(1, 2)
+
+    basePanel.contents += tPane
+    basePanel.contents += panelSettings.help
+
+    listenTo(panelSettings.help.components.toSeq: _*)
+    tPane.listenTo(tPane.selection)
+
+    tPane.reactions += {
+      case SelectionChanged(_) ⇒ update
+    }
+
+    /*  if (basePanel.contents.size > 1) {
       basePanel.contents.remove(1)
       basePanel.contents.remove(1)
     }
     panelSettings = proxy.dataUI.buildPanelUI
     basePanel.contents += panelSettings.tabbedPane(("I/O", ioSettings))
-    basePanel.contents += panelSettings.help
+    basePanel.contents += panelSettings.help   */
+  }
+
+  override def update = {
+    savePanel
+    ioSettings = ioPanel
+    createSettings()
   }
 
   def updateConceptPanel(d: HOOKDATAUI) = {
     savePanel
+    d.inputs = ioSettings.prototypesIn
+    d.outputs = ioSettings.prototypesOut
     proxy.dataUI = d
-    createSettings
+    createSettings()
   }
 
   def savePanel = {

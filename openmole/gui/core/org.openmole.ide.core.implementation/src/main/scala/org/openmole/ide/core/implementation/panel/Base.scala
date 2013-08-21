@@ -5,6 +5,7 @@ import org.openmole.ide.core.implementation.dataproxy.{ ProxyDeletedEvent, Proxy
 import org.openmole.misc.eventdispatcher._
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.event.{ UIElementResized, MouseClicked }
+import scala.swing.TabbedPane
 
 /*
  * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
@@ -29,7 +30,11 @@ trait Base extends Created with SavePanel {
 
   val index: Int
 
-  def createSettings: Unit
+  def update: Unit = {}
+
+  def createSettings(): Unit = createSettings(tabIndex(basePanel))
+
+  def createSettings(tabIndex: Int): Unit
 
   def created: Boolean
 
@@ -44,22 +49,23 @@ trait Base extends Created with SavePanel {
     }
   }
 
+  def tabIndex(p: PluginPanel) = p.contents.toList.map {
+    _ match {
+      case t: TabbedPane ⇒ Some(t.selection.index)
+      case _             ⇒ None
+    }
+  }.flatten.headOption.getOrElse(0)
+
   val createListener = new EventListener[Proxies] {
     def triggered(obj: Proxies, ev: Event[Proxies]) {
-      saveAndCreateSettings
+      scene.toBeUpdated.foreach { _.update }
     }
   }
 
   val deleteListener = new EventListener[Proxies] {
     def triggered(obj: Proxies, ev: Event[Proxies]) {
-      println("delete trigger")
-      //saveAndCreateSettings
+      scene.toBeUpdated.foreach { _.update }
     }
-  }
-
-  private def saveAndCreateSettings = {
-    savePanel
-    createSettings
   }
 
   EventDispatcher.listen(Proxies.instance, createListener, classOf[ProxyCreatedEvent])

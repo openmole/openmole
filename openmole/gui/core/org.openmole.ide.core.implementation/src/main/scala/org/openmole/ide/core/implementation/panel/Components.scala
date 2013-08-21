@@ -18,8 +18,9 @@ package org.openmole.ide.core.implementation.panel
 
 import scala.swing.{ Publisher, TabbedPane, Component }
 import org.openmole.ide.misc.widget.PluginPanel
+import scala.swing.event.SelectionChanged
 
-trait Components extends Help {
+trait Components extends Publisher with Help {
 
   def components: List[(String, Component)]
 
@@ -30,7 +31,7 @@ trait Components extends Help {
     else tabbedPane((List(components.head) :+ ioPage) ::: components.tail)
   }
 
-  def tabbedPane(compts: List[(String, Component)]) = new TabbedPane {
+  def tabbedPane(compts: List[(String, Component)]): TabbedPane = new TabbedPane {
     compts.foreach {
       c ⇒ pages += new TabbedPane.Page(c._1, c._2)
     }

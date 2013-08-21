@@ -54,12 +54,12 @@ trait EnvironmentPanel extends Base
         }
       }
     }
-    createSettings
+    createSettings()
   }
 
   override def created = proxyCreated
 
-  def createSettings = {
+  def createSettings(curIndex: Int) = {
     if (basePanel.contents.size > 1) {
       basePanel.contents.remove(1)
       basePanel.contents.remove(1)
@@ -73,7 +73,7 @@ trait EnvironmentPanel extends Base
   def updateConceptPanel(d: EnvironmentDataUI with ImageView) = {
     savePanel
     proxy.dataUI = d
-    createSettings
+    createSettings()
   }
 
   def savePanel = {

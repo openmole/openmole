@@ -31,8 +31,8 @@ import org.openmole.ide.misc.widget.multirow.MultiComboLinkLabel.{ ComboLinkLabe
 import org.openmole.ide.core.implementation.workflow.ISceneContainer
 import org.openmole.core.model.data.Prototype
 
-class IOPrototypePanel(prototypesIn: Seq[PrototypeDataProxyUI] = List.empty,
-                       prototypesOut: Seq[PrototypeDataProxyUI] = List.empty,
+class IOPrototypePanel(val prototypesIn: Seq[PrototypeDataProxyUI] = List.empty,
+                       val prototypesOut: Seq[PrototypeDataProxyUI] = List.empty,
                        implicitPrototypeIn: Seq[PrototypeDataProxyUI] = List.empty,
                        implicitPrototypeOut: Seq[PrototypeDataProxyUI] = List.empty,
                        inputParameters: Map[PrototypeDataProxyUI, String] = Map.empty) extends PluginPanel("wrap") {

@@ -54,7 +54,7 @@ class GUIPanel extends MainFrame {
         accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_L, Event.CTRL_MASK))
       })
 
-      contents += new MenuItem(new Action("SaveSettings") {
+      contents += new MenuItem(new Action("Save") {
         override def apply = {
           ScenesManager.saveCurrentPropertyWidget
           SaveXML.save(mainframe)
@@ -63,7 +63,7 @@ class GUIPanel extends MainFrame {
         accelerator = Some(KeyStroke.getKeyStroke(KeyEvent.VK_S, Event.CTRL_MASK))
       })
 
-      contents += new MenuItem(new Action("SaveSettings as") {
+      contents += new MenuItem(new Action("Save as") {
         override def apply = SaveXML.save(mainframe, SaveXML.show)
       })
 

@@ -43,7 +43,7 @@ trait PrototypePanel extends Base
   private def updateConceptPanel(d: PrototypeDataUI[_] with ImageView) = {
     savePanel
     proxy.dataUI = d
-    createSettings
+    createSettings()
   }
 
   build
@@ -62,9 +62,10 @@ trait PrototypePanel extends Base
         }
       }
     }
-    createSettings
+    createSettings()
   }
-  def createSettings = {
+
+  def createSettings(curIndex: Int) = {
     if (basePanel.contents.size > 1) {
       basePanel.contents.remove(1)
       basePanel.contents.remove(1)
@@ -76,6 +77,10 @@ trait PrototypePanel extends Base
   }
 
   override def created = proxyCreated
+
+  override def update = {
+    savePanel
+  }
 
   def savePanel = {
     proxy.dataUI = panelSettings.saveContent(nameTextField.text)
@@ -91,6 +96,7 @@ trait PrototypePanel extends Base
       -=(proxy)
       // true
     }
+
     //remove in Tasks
     val capsulesWithProtos: List[CapsuleUI] = ScenesManager.moleScenes.flatMap {
       _.dataUI.capsules.values.flatMap { c ⇒
@@ -100,6 +106,7 @@ trait PrototypePanel extends Base
         }
       }
     }.toList
+
     //  capsulesWithProtos match {
     // case Nil ⇒ erase
     // case _ ⇒

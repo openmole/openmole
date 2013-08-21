@@ -65,10 +65,10 @@ abstract class MoleScene extends GraphScene.StringGraph
         case None ⇒ i
         case _    ⇒ firstFree0(i + 1)
       }
-    //  else firstFree0(i + 1)
-
     firstFree0(0)
   }
+
+  def toBeUpdated = currentPanels.flatMap { _.base }.reverse
 
   class OBase {
     var base: Option[Base] = None

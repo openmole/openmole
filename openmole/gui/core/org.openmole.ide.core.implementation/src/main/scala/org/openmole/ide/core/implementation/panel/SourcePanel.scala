@@ -23,6 +23,7 @@ import ConceptMenu._
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.misc.tools.image.Images
+import scala.swing.event.SelectionChanged
 
 trait SourcePanel extends Base
     with Header
@@ -40,8 +41,8 @@ trait SourcePanel extends Base
   val icon: Label = icon(Images.SOURCE)
   val hookCombo = ConceptMenu.buildSourceMenu(p ⇒ updateConceptPanel(p.dataUI), proxy.dataUI)
 
-  build
   var ioSettings = ioPanel
+  build
 
   listenTo(panelSettings.help.components.toSeq: _*)
 
@@ -58,13 +59,12 @@ trait SourcePanel extends Base
         contents += proxyShorcut(proxy.dataUI, index)
       }
     }
-    createSettings
+    createSettings()
   }
 
   override def created = proxyCreated
 
-  def createSettings = {
-    ioSettings = ioPanel
+  def createSettings(curIndex: Int) = {
     if (basePanel.contents.size > 1) {
       basePanel.contents.remove(1)
       basePanel.contents.remove(1)
@@ -72,12 +72,15 @@ trait SourcePanel extends Base
     panelSettings = proxy.dataUI.buildPanelUI
     basePanel.contents += panelSettings.tabbedPane(("I/O", ioSettings))
     basePanel.contents += panelSettings.help
+    listenTo(panelSettings.tabbedPane)
   }
 
   def updateConceptPanel(d: HOOKDATAUI) = {
     savePanel
+    d.inputs = ioSettings.prototypesIn
+    d.outputs = ioSettings.prototypesOut
     proxy.dataUI = d
-    createSettings
+    createSettings()
   }
 
   def savePanel = {

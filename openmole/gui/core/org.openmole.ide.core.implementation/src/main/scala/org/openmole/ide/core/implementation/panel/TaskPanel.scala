@@ -24,6 +24,7 @@ import org.openmole.ide.core.implementation.data._
 import org.openmole.ide.core.implementation.workflow.CapsuleUI
 import org.openmole.ide.misc.widget.PluginPanel
 import scala.swing.Label
+import scala.swing.event.SelectionChanged
 
 trait TaskPanel extends Base
     with Header
@@ -38,11 +39,12 @@ trait TaskPanel extends Base
   override type DATAUI = TASKDATAUI with IODATAUI
 
   var panelSettings = proxy.dataUI.buildPanelUI
+
   val icon: Label = icon(proxy.dataUI)
   val taskCombo = ConceptMenu.buildTaskMenu(p ⇒ updateConceptPanel(p.dataUI), proxy.dataUI)
 
-  build
   var ioSettings = ioPanel
+  build
 
   listenTo(panelSettings.help.components.toSeq: _*)
 
@@ -59,27 +61,44 @@ trait TaskPanel extends Base
         contents += proxyShorcut(proxy.dataUI, index)
       }
     }
-    createSettings
+    createSettings()
   }
 
   override def created = proxyCreated
 
-  def createSettings = {
+  override def update = {
+    savePanel
     ioSettings = ioPanel
-    if (basePanel.contents.size > 1) {
-      basePanel.contents.remove(1)
-      basePanel.contents.remove(1)
-    }
+    createSettings()
+  }
+
+  def createSettings(curIndex: Int): Unit = {
     icon.icon = icon(proxy.dataUI).icon
+    // val curIndex = tabIndex(basePanel)
+
     panelSettings = proxy.dataUI.buildPanelUI
-    basePanel.contents += panelSettings.tabbedPane(("I/O", ioSettings))
+    val tPane = panelSettings.tabbedPane(("I/O", ioSettings))
+    tPane.selection.index = curIndex
+
+    if (basePanel.contents.size == 3) basePanel.contents.remove(1, 2)
+
+    basePanel.contents += tPane
     basePanel.contents += panelSettings.help
+
+    listenTo(panelSettings.help.components.toSeq: _*)
+    tPane.listenTo(tPane.selection)
+
+    tPane.reactions += {
+      case SelectionChanged(_) ⇒ update
+    }
   }
 
   def updateConceptPanel(d: TaskDataUI with ImageView) = {
     savePanel
+    d.inputs = ioSettings.prototypesIn
+    d.outputs = ioSettings.prototypesOut
     proxy.dataUI = d
-    createSettings
+    createSettings(0)
   }
 
   def savePanel = {
