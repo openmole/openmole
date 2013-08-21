@@ -41,7 +41,7 @@ import scala.Some
 
 object MoleFactory {
 
-  def buildMoleExecution(manager: IMoleUI): Try[(PartialMoleExecution, Iterable[(Environment, String)])] = {
+  def buildMoleExecution(manager: IMoleUI): Try[(PartialMoleExecution, Iterable[(UnauthenticatedEnvironment, String)])] = {
     manager.cacheMole match {
       case Some((mole: IMole, capsuleMap: Map[ICapsuleUI, ICapsule])) ⇒
         buildMoleExecution(mole, manager, capsuleMap)
@@ -54,14 +54,19 @@ object MoleFactory {
 
   def buildMoleExecution(mole: IMole,
                          manager: IMoleUI,
-                         capsuleMapping: Map[ICapsuleUI, ICapsule]): Try[(PartialMoleExecution, Iterable[(Environment, String)])] =
+                         capsuleMapping: Map[ICapsuleUI, ICapsule]): Try[(PartialMoleExecution, Iterable[(UnauthenticatedEnvironment, String)])] =
     Try {
-      val envs = capsuleMapping.flatMap { c ⇒
-        c._1.dataUI.environment match {
-          case Some(env: IEnvironmentDataProxyUI) ⇒ List((c._2, env.dataUI.coreObject.get, env.dataUI.name))
-          case _                                  ⇒ Nil
-        }
-      }
+
+      val (envs, envNames) = capsuleMapping.flatMap {
+        case (cProxy, c) ⇒
+          cProxy.dataUI.environment match {
+            case Some(env: IEnvironmentDataProxyUI) ⇒
+              val unauthenticatedEnv = env.dataUI.coreObject.get
+              Some((c -> unauthenticatedEnv, unauthenticatedEnv -> env.dataUI.name))
+            case _ ⇒ Nil
+          }
+      }.unzip
+
       val hookMaping = for {
         c ← capsuleMapping
         h ← c._1.dataUI.hooks
@@ -76,13 +81,13 @@ object MoleFactory {
         mole,
         sourceMaping.map { h ⇒ (h.c, h.s) },
         hookMaping.map { h ⇒ (h.c, h.h) },
-        envs.map { case (c, e, _) ⇒ c -> new FixedEnvironmentSelection(e) }.toMap,
+        envs.toMap,
         capsuleMapping.flatMap { c ⇒
           c._1.dataUI.grouping match {
             case Some(gr: IGroupingDataUI) ⇒ List(c._2 -> gr.coreObject.get)
             case _                         ⇒ Nil
           }
-        }), envs.map { case (_, e, n) ⇒ e -> n })
+        }), envNames)
     }
 
   def buildMole(manager: IMoleUI): Try[(IMole, Map[ICapsuleUI, ICapsule], Iterable[(ICapsuleUI, Throwable)])] =

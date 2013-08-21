@@ -23,6 +23,7 @@ import fr.iscpif.gridscale.glite.BDII
 import org.openmole.misc.filedeleter.FileDeleter
 import org.openmole.misc.exception.UserBadDataError
 import fr.iscpif.gridscale.dirac.DIRACJobService
+import org.openmole.core.model.execution.{ UnauthenticatedEnvironment, AuthenticationProvider }
 
 object DIRACGliteEnvironment {
 
@@ -40,16 +41,18 @@ object DIRACGliteEnvironment {
     fqan: Option[String] = None,
     cpuTime: Option[String] = None,
     openMOLEMemory: Option[Int] = None) =
-    new DIRACGliteEnvironment(
-      voName,
-      service,
-      group.getOrElse(voName + "_user"),
-      bdii.getOrElse(Workspace.preference(GliteEnvironment.DefaultBDII)),
-      vomsURL.getOrElse(GliteAuthentication.getVMOSOrError(voName)),
-      setup.getOrElse("Dirac-Production"),
-      fqan,
-      cpuTime,
-      openMOLEMemory
+    UnauthenticatedEnvironment(
+      new DIRACGliteEnvironment(
+        voName,
+        service,
+        group.getOrElse(voName + "_user"),
+        bdii.getOrElse(Workspace.preference(GliteEnvironment.DefaultBDII)),
+        vomsURL.getOrElse(GliteAuthentication.getVMOSOrError(voName)),
+        setup.getOrElse("Dirac-Production"),
+        fqan,
+        cpuTime,
+        openMOLEMemory
+      )(_)
     )
 
 }
@@ -63,13 +66,13 @@ class DIRACGliteEnvironment(
     val setup: String,
     val fqan: Option[String],
     val cpuTime: Option[String],
-    override val openMOLEMemory: Option[Int]) extends BatchEnvironment with BDIISRMServers with GliteEnvironmentId { env ⇒
+    override val openMOLEMemory: Option[Int])(authentications: AuthenticationProvider) extends BatchEnvironment with BDIISRMServers with GliteEnvironmentId { env ⇒
 
   type JS = DIRACGliteJobService
 
   def bdiiServer: BDII = new BDII(bdii)
 
-  def getAuthentication = DIRACAuthentication.get.getOrElse(throw new UserBadDataError("No authentication found for DIRAC"))
+  def getAuthentication = authentications(classOf[DIRACAuthentication]).headOption.getOrElse(throw new UserBadDataError("No authentication found for DIRAC"))
 
   @transient lazy val authentication = DIRACAuthentication.initialise(getAuthentication)
 

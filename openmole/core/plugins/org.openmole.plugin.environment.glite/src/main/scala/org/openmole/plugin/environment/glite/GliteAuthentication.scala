@@ -133,7 +133,6 @@ object GliteAuthentication extends Logger {
 
   def update(a: GliteAuthentication) = Workspace.persistentList(classOf[GliteAuthentication])(0) = a
   def apply() = Workspace.persistentList(classOf[GliteAuthentication])(0)
-  def get = Workspace.persistentList(classOf[GliteAuthentication]).get(0)
 
   def initialise(a: GliteAuthentication)(
     serverURL: String,

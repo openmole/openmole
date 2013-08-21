@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 19/08/13 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -11,15 +11,21 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.mole
+package org.openmole.core.model.execution
 
-import org.openmole.core.model.execution._
-import org.openmole.core.model.job._
+import org.openmole.misc.workspace.Workspace
 
-trait EnvironmentSelection {
-  def apply(job: IJob): Environment
+object AuthenticationProvider {
+
+  lazy val workspace = new AuthenticationProvider {
+    def apply[T](clazz: Class[T]) = Workspace.persistentList(clazz).toList.sortBy(_._1).unzip._2
+  }
+}
+
+trait AuthenticationProvider {
+  def apply[T](clazz: Class[T]): Seq[_ <: T]
 }

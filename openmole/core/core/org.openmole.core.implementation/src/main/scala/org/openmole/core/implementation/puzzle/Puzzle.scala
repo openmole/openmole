@@ -23,6 +23,7 @@ import org.openmole.core.model.transition._
 import org.openmole.core.implementation.mole._
 import org.openmole.misc.workspace.Workspace
 import org.openmole.misc.tools.service.Random
+import org.openmole.core.model.execution.{ UnauthenticatedEnvironment, Environment }
 
 object Puzzle {
 
@@ -34,7 +35,7 @@ object Puzzle {
       p1.dataChannels.toList ::: p2.dataChannels.toList,
       p1.sources.toList ::: p2.sources.toList,
       p1.hooks.toList ::: p2.hooks.toList,
-      p1.selection ++ p2.selection,
+      p1.environments ++ p2.environments,
       p1.grouping ++ p2.grouping)
 
   def merge(
@@ -50,7 +51,7 @@ object Puzzle {
       dataChannels.toList ::: puzzles.flatMap { _.dataChannels }.toList,
       puzzles.flatMap(_.sources),
       puzzles.flatMap(_.hooks),
-      puzzles.flatMap { _.selection }.toMap,
+      puzzles.flatMap { _.environments }.toMap,
       puzzles.flatMap { _.grouping }.toMap)
 
 }
@@ -62,7 +63,7 @@ case class Puzzle(
     dataChannels: Iterable[IDataChannel],
     sources: Iterable[(ICapsule, ISource)],
     hooks: Iterable[(ICapsule, IHook)],
-    selection: Map[ICapsule, EnvironmentSelection],
+    environments: Map[ICapsule, UnauthenticatedEnvironment],
     grouping: Map[ICapsule, Grouping]) {
 
   def this(p: Puzzle) =
@@ -73,34 +74,34 @@ case class Puzzle(
       p.dataChannels,
       p.sources,
       p.hooks,
-      p.selection,
+      p.environments,
       p.grouping)
 
   def toMole = new Mole(first.capsule, transitions, dataChannels)
 
-  def toPartialExecution = PartialMoleExecution(toMole, sources, hooks, selection, grouping)
+  def toPartialExecution = PartialMoleExecution(toMole, sources, hooks, environments, grouping)
 
   def toPartialExecution(
     sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
     hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
-    selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
+    environment: Map[ICapsule, UnauthenticatedEnvironment] = Map.empty,
     grouping: Map[ICapsule, Grouping] = Map.empty,
     profiler: Profiler = Profiler.empty,
     seed: Long = Workspace.newSeed) =
-    PartialMoleExecution(toMole, this.sources ++ sources, this.hooks ++ hooks, this.selection ++ selection, this.grouping ++ grouping, profiler, seed)
+    PartialMoleExecution(toMole, this.sources ++ sources, this.hooks ++ hooks, this.environments ++ environments, this.grouping ++ grouping, profiler, seed)
 
   def toExecution: MoleExecution =
-    MoleExecution(toMole, sources, hooks, selection, grouping)
+    MoleExecution(toMole, sources, hooks, environments, grouping)
 
   def toExecution(
     sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
     hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
-    selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
+    selection: Map[ICapsule, Environment] = Map.empty,
     grouping: Map[ICapsule, Grouping] = Map.empty,
     profiler: Profiler = Profiler.empty,
     implicits: Context = Context.empty,
     seed: Long = Workspace.newSeed): MoleExecution =
-    MoleExecution(toMole, this.sources ++ sources, this.hooks ++ hooks, this.selection ++ selection, this.grouping ++ grouping, profiler, implicits, seed)
+    MoleExecution(toMole, this.sources ++ sources, this.hooks ++ hooks, this.environments ++ environments, this.grouping ++ grouping, profiler, implicits, seed)
 
   def +(p: Puzzle) = Puzzle.merge(this, p)
 

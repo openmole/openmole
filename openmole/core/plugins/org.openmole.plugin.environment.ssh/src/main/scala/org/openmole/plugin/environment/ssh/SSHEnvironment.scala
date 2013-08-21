@@ -23,6 +23,7 @@ import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage.PersistentStorageService
 import org.openmole.misc.workspace.ConfigurationLocation
 import org.openmole.misc.workspace.Workspace
+import org.openmole.core.model.execution.{ UnauthenticatedEnvironment, AuthenticationProvider }
 
 object SSHEnvironment {
   val MaxConnections = new ConfigurationLocation("SSHEnvironment", "MaxConnections")
@@ -41,7 +42,7 @@ object SSHEnvironment {
     path: String = "/tmp/",
     openMOLEMemory: Option[Int] = None,
     threads: Option[Int] = None) =
-    new SSHEnvironment(user, host, nbSlots, port, path, openMOLEMemory, threads)
+    UnauthenticatedEnvironment(new SSHEnvironment(user, host, nbSlots, port, path, openMOLEMemory, threads)(_))
 }
 
 import SSHEnvironment._
@@ -53,12 +54,12 @@ class SSHEnvironment(
     override val port: Int,
     val path: String,
     override val openMOLEMemory: Option[Int],
-    override val threads: Option[Int]) extends BatchEnvironment with SSHAccess { env ⇒
+    override val threads: Option[Int])(authentications: AuthenticationProvider) extends BatchEnvironment with SSHAccess { env ⇒
 
   type SS = SSHStorageService
   type JS = SSHJobService
 
-  @transient lazy val authentication = SSHAuthentication(user, host, port)()
+  @transient lazy val authentication = SSHAuthentication(user, host, port, authentications)()
   @transient lazy val id = new URI("ssh", env.user, env.host, env.port, null, null, null).toString
 
   @transient lazy val storage = new PersistentStorageService with SSHStorageService with LimitedAccess with ThisHost {

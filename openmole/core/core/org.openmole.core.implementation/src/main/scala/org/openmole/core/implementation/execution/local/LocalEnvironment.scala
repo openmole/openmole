@@ -17,15 +17,11 @@
 
 package org.openmole.core.implementation.execution.local
 
-import java.util.concurrent.Semaphore
-import org.openmole.core.implementation.job.Job
 import org.openmole.core.model.execution._
 import org.openmole.core.model.job._
-import org.openmole.core.model.task._
 import org.openmole.misc.workspace._
 import org.openmole.misc.eventdispatcher._
 import org.openmole.misc.tools.service.ThreadUtil._
-import scala.collection.immutable.TreeMap
 import ref.WeakReference
 
 object LocalEnvironment extends Environment {
@@ -37,15 +33,16 @@ object LocalEnvironment extends Environment {
   var initializationNumberOfThread: Option[Int] = None
   def numberOfThread = initializationNumberOfThread.getOrElse(Workspace.preferenceAsInt(DefaultNumberOfThreads))
 
-  @transient lazy val default = new LocalEnvironment(numberOfThread)
+  @transient lazy val defaultUnauthenticated = UnauthenticatedEnvironment(new LocalEnvironment(numberOfThread)(_))
+  @transient lazy val default = defaultUnauthenticated(AuthenticationProvider.workspace)
 
   override def submit(job: IJob) = default.submit(job)
 
-  def apply(nbThreads: Int) = new LocalEnvironment(nbThreads)
+  def apply(nbThreads: Int) = UnauthenticatedEnvironment(new LocalEnvironment(nbThreads)(_))
 
 }
 
-class LocalEnvironment(val nbThreads: Int) extends Environment {
+class LocalEnvironment(val nbThreads: Int)(authentications: AuthenticationProvider) extends Environment {
 
   import LocalEnvironment._
 

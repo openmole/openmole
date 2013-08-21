@@ -20,21 +20,21 @@ package org.openmole.core.implementation.mole
 import org.openmole.core.model.mole._
 import org.openmole.misc.workspace._
 import org.openmole.core.model.data._
-import java.util.UUID
+import org.openmole.core.model.execution.{ UnauthenticatedEnvironment, AuthenticationProvider, Environment }
 
 object PartialMoleExecution {
   def apply(
     mole: IMole,
     sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
     hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
-    selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
+    environments: Map[ICapsule, UnauthenticatedEnvironment] = Map.empty,
     grouping: Map[ICapsule, Grouping] = Map.empty,
     profiler: Profiler = Profiler.empty,
     seed: Long = Workspace.newSeed): PartialMoleExecution = new PartialMoleExecution(
     mole,
     sources groupBy { case (c, _) ⇒ c } map { case (c, ss) ⇒ c -> ss.map(_._2) } withDefault { _ ⇒ List.empty },
     hooks groupBy { case (c, _) ⇒ c } map { case (c, hs) ⇒ c -> hs.map(_._2) } withDefault { _ ⇒ List.empty },
-    selection,
+    environments,
     grouping,
     profiler,
     seed)
@@ -44,18 +44,27 @@ class PartialMoleExecution(
     val mole: IMole,
     val sources: Sources = Sources.empty,
     val hooks: Hooks = Hooks.empty,
-    val selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
+    val environments: Map[ICapsule, UnauthenticatedEnvironment] = Map.empty,
     val grouping: Map[ICapsule, Grouping] = Map.empty,
     val profiler: Profiler = Profiler.empty,
-    val seed: Long = Workspace.newSeed, val id: String = UUID.randomUUID().toString) extends IPartialMoleExecution {
+    val seed: Long = Workspace.newSeed) extends IPartialMoleExecution {
 
-  def toExecution(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local, id: String = UUID.randomUUID().toString) = {
-    new MoleExecution(mole,
+  def authenticate(unauthenticated: Traversable[UnauthenticatedEnvironment])(implicit moleExecutionContext: ExecutionContext) =
+    unauthenticated.map(e ⇒ e -> e(moleExecutionContext.authentications)).toMap
+
+  def toExecutionGetEnvironments(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local) = {
+    val authenticatedEnvironments = authenticate(environments.values)
+
+    (new MoleExecution(mole,
       sources,
       hooks,
-      selection,
+      environments.map { case (k, v) ⇒ k -> authenticatedEnvironments(v) },
       grouping,
       profiler,
-      seed, id) //hashcode may be fragile and too weak a hash, keep an eye on it
+      seed)(implicits, moleExecutionContext),
+      authenticatedEnvironments)
   }
+
+  def toExecution(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local) =
+    toExecutionGetEnvironments._1
 }

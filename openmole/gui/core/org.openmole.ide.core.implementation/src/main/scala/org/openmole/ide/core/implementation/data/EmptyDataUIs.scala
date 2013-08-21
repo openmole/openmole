@@ -100,7 +100,7 @@ object EmptyDataUIs {
     }
     def fatImagePath = ""
     def name = "Local"
-    def coreObject = Try(LocalEnvironment.default)
+    def coreObject = Try(LocalEnvironment.defaultUnauthenticated)
     def coreClass = classOf[Environment]
   }
 }

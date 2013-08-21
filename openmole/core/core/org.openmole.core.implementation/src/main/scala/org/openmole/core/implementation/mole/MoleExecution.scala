@@ -44,7 +44,7 @@ import scala.collection.immutable.HashMap
 import scala.collection.mutable.Buffer
 import scala.concurrent.stm.{ Ref, TMap, atomic, retry }
 import javax.xml.bind.annotation.XmlTransient
-import org.openmole.core.model.execution.Environment
+import org.openmole.core.model.execution.{ UnauthenticatedEnvironment, Environment }
 import collection.mutable
 import java.io.File
 import org.openmole.core.serializer.SerializerService
@@ -56,7 +56,7 @@ object MoleExecution extends Logger {
     mole: IMole,
     sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
     hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
-    selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
+    environments: Map[ICapsule, UnauthenticatedEnvironment] = Map.empty,
     grouping: Map[ICapsule, Grouping] = Map.empty,
     profiler: Profiler = Profiler.empty,
     implicits: Context = Context.empty,
@@ -66,7 +66,7 @@ object MoleExecution extends Logger {
       mole,
       sources,
       hooks,
-      selection,
+      environments,
       grouping,
       profiler,
       seed).toExecution(implicits, executionContext)
@@ -77,7 +77,7 @@ class MoleExecution(
     val mole: IMole,
     val sources: Sources = Sources.empty,
     val hooks: Hooks = Hooks.empty,
-    val selection: Map[ICapsule, EnvironmentSelection] = Map.empty,
+    val environments: Map[ICapsule, Environment] = Map.empty,
     val grouping: Map[ICapsule, Grouping] = Map.empty,
     val profiler: Profiler = Profiler.empty,
     seed: Long = Workspace.newSeed,
@@ -133,11 +133,7 @@ class MoleExecution(
 
   private def submit(job: IJob, capsule: ICapsule) =
     if (!job.finished) {
-      val env =
-        selection.get(capsule) match {
-          case Some(selection) ⇒ selection(job)
-          case None            ⇒ LocalEnvironment
-        }
+      val env = environments.getOrElse(capsule, LocalEnvironment)
       env.submit(job)
       EventDispatcher.trigger(this, new IMoleExecution.JobSubmitted(job, capsule, env))
     }

@@ -28,6 +28,7 @@ import org.openmole.misc.workspace._
 import org.openmole.plugin.environment.gridscale._
 import org.openmole.plugin.environment.ssh._
 import scala.Some
+import org.openmole.core.model.execution.{ UnauthenticatedEnvironment, AuthenticationProvider }
 
 object PBSEnvironment {
   val MaxConnections = new ConfigurationLocation("PBSEnvironment", "MaxConnections")
@@ -47,7 +48,7 @@ object PBSEnvironment {
     nodes: Option[Int] = None,
     coreByNode: Option[Int] = None,
     workDirectory: Option[String] = None) =
-    new PBSEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, path, threads, nodes, coreByNode, workDirectory)
+    UnauthenticatedEnvironment(new PBSEnvironment(user, host, port, queue, openMOLEMemory, wallTime, memory, path, threads, nodes, coreByNode, workDirectory)(_))
 }
 
 import PBSEnvironment._
@@ -64,12 +65,12 @@ class PBSEnvironment(
     override val threads: Option[Int],
     val nodes: Option[Int],
     val coreByNode: Option[Int],
-    val workDirectory: Option[String]) extends BatchEnvironment with SSHAccess with MemoryRequirement { env ⇒
+    val workDirectory: Option[String])(authentications: AuthenticationProvider) extends BatchEnvironment with SSHAccess with MemoryRequirement { env ⇒
 
   type SS = PersistentStorageService
   type JS = PBSJobService
 
-  @transient lazy val authentication = SSHAuthentication(user, host, port)()
+  @transient lazy val authentication = SSHAuthentication(user, host, port, authentications)()
   @transient lazy val id = new URI("pbs", env.user, env.host, env.port, null, null, null).toString
 
   @transient lazy val storage =

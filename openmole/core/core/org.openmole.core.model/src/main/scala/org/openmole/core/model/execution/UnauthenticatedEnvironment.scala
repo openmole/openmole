@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Romain Reuillon
+ * Copyright (C) 19/08/13 Romain Reuillon
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -11,16 +11,21 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU Affero General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.implementation.mole
+package org.openmole.core.model.execution
 
-import org.openmole.core.model.execution._
-import org.openmole.core.model.job._
-import org.openmole.core.model.mole._
+object UnauthenticatedEnvironment {
+  def apply[T <: Environment](f: AuthenticationProvider ⇒ T) =
+    new UnauthenticatedEnvironment {
+      type ENVIRONMENT = T
+      def apply(authentications: AuthenticationProvider) = f(authentications)
+    }
+}
 
-class FixedEnvironmentSelection(environment: Environment) extends EnvironmentSelection {
-  def apply(job: IJob) = environment
+trait UnauthenticatedEnvironment {
+  type ENVIRONMENT <: Environment
+  def apply(authentications: AuthenticationProvider): ENVIRONMENT
 }

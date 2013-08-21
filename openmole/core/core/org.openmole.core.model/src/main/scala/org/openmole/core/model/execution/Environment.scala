@@ -29,6 +29,8 @@ object Environment {
   case class JobStateChanged(job: IExecutionJob, newState: ExecutionState, oldState: ExecutionState) extends Event[Environment]
   case class ExceptionRaised(job: IExecutionJob, exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
   case class MoleJobExceptionRaised(job: IExecutionJob, exception: Throwable, level: Level, moleJob: IMoleJob) extends Event[Environment]
+
+  type UnauthenticatedEnvironment = AuthenticationProvider ⇒ Environment
 }
 
 trait Environment {

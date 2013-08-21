@@ -32,8 +32,8 @@ package object mole {
   implicit def slotToCapsuleConverter(slot: Slot) = slot.capsule
 
   class PuzzleDecorator(puzzle: Puzzle) {
-    def on(env: Environment) =
-      puzzle.copy(selection = puzzle.selection ++ puzzle.lasts.map(_ -> new FixedEnvironmentSelection(env)))
+    def on(env: UnauthenticatedEnvironment) =
+      puzzle.copy(environments = puzzle.environments ++ puzzle.lasts.map(_ -> env))
     def hook(hooks: IHook*) =
       puzzle.copy(hooks = puzzle.hooks.toList ::: puzzle.lasts.flatMap(c ⇒ hooks.map(c -> _)).toList)
     def source(sources: ISource*) =
@@ -45,7 +45,6 @@ package object mole {
   implicit def slotPuzzleDecoration(slot: Slot) = new PuzzleDecorator(slot.toPuzzle)
   implicit def taskMoleExecutionDecoration(task: ITask): PuzzleDecorator = new PuzzleDecorator(task.toCapsule.toPuzzle)
   implicit def taskMoleBuilderDecoration(taskBuilder: TaskBuilder) = new PuzzleDecorator(taskBuilder.toTask.toCapsule.toPuzzle)
-  implicit def environmentToFixedEnvironmentSelectionConverter(env: Environment) = new FixedEnvironmentSelection(env)
 
   implicit def puzzleMoleExecutionConverter(puzzle: Puzzle) = puzzle.toExecution
   implicit def puzzleMoleConverter(puzzle: Puzzle) = puzzle.toMole
