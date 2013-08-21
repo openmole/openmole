@@ -19,6 +19,7 @@ package org.openmole.ide.plugin.task.netlogo
 import org.openmole.ide.core.implementation.data.EmptyDataUIs._
 import org.openmole.ide.osgi.netlogo5.NetLogo5
 import org.openmole.ide.core.implementation.data.TaskDataUI
+import org.openmole.ide.core.implementation.dataproxy.Proxies
 
 class NetLogo5TaskPanelUI(ndu: NetLogo5TaskDataUI) extends GenericNetLogoPanelUI(ndu.nlogoPath,
   ndu.workspaceEmbedded,
@@ -31,10 +32,10 @@ class NetLogo5TaskPanelUI(ndu: NetLogo5TaskDataUI) extends GenericNetLogoPanelUI
     nlogoTextField.text,
     launchingCommandTextArea.text,
     if (multiProtoString.isDefined)
-      multiProtoString.get.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) }.filterNot(_._1.dataUI.isInstanceOf[EmptyPrototypeDataUI])
+      multiProtoString.get.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) }.filterNot(_._1.dataUI.isInstanceOf[EmptyPrototypeDataUI]).filter { case (p, s) ⇒ Proxies.check(p) }
     else List(),
     if (multiStringProto.isDefined)
-      multiStringProto.get.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) }.filterNot(_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI])
+      multiStringProto.get.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) }.filterNot(_._2.dataUI.isInstanceOf[EmptyPrototypeDataUI]).filter { case (s, p) ⇒ Proxies.check(p) }
     else List(),
     resourcesMultiTextField.content.map { _.content })
 

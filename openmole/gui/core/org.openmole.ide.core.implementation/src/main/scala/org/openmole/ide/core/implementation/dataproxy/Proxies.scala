@@ -29,6 +29,10 @@ object Proxies {
   var instance = new Proxies
 
   def check(proxyList: List[PrototypeDataProxyUI]) = proxyList.filter { instance.contains }
+
+  def check(protoProxy: PrototypeDataProxyUI) = instance.contains(protoProxy)
+
+  def check(taskProxy: TaskDataProxyUI) = instance.contains(taskProxy)
 }
 
 class Proxies {

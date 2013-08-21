@@ -59,17 +59,16 @@ trait HookPanel extends Base
         contents += proxyShorcut(proxy.dataUI, index)
       }
     }
-    createSettings()
+    createSettings
   }
 
   override def created = proxyCreated
 
-  def createSettings(curIndex: Int): Unit = {
-    //val curIndex = tabIndex(basePanel)
+  def createSettings: Unit = {
 
     panelSettings = proxy.dataUI.buildPanelUI
     val tPane = panelSettings.tabbedPane(("I/O", ioSettings))
-    tPane.selection.index = curIndex
+    Tools.updateIndex(basePanel, tPane)
 
     if (basePanel.contents.size == 3) basePanel.contents.remove(1, 2)
 
@@ -82,20 +81,13 @@ trait HookPanel extends Base
     tPane.reactions += {
       case SelectionChanged(_) ⇒ update
     }
-
-    /*  if (basePanel.contents.size > 1) {
-      basePanel.contents.remove(1)
-      basePanel.contents.remove(1)
-    }
-    panelSettings = proxy.dataUI.buildPanelUI
-    basePanel.contents += panelSettings.tabbedPane(("I/O", ioSettings))
-    basePanel.contents += panelSettings.help   */
+    basePanel.revalidate
   }
 
   override def update = {
     savePanel
     ioSettings = ioPanel
-    createSettings()
+    createSettings
   }
 
   def updateConceptPanel(d: HOOKDATAUI) = {
@@ -103,7 +95,7 @@ trait HookPanel extends Base
     d.inputs = ioSettings.prototypesIn
     d.outputs = ioSettings.prototypesOut
     proxy.dataUI = d
-    createSettings()
+    createSettings
   }
 
   def savePanel = {

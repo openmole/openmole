@@ -59,12 +59,12 @@ trait SourcePanel extends Base
         contents += proxyShorcut(proxy.dataUI, index)
       }
     }
-    createSettings()
+    createSettings
   }
 
   override def created = proxyCreated
 
-  def createSettings(curIndex: Int) = {
+  def createSettings = {
     if (basePanel.contents.size > 1) {
       basePanel.contents.remove(1)
       basePanel.contents.remove(1)
@@ -80,7 +80,7 @@ trait SourcePanel extends Base
     d.inputs = ioSettings.prototypesIn
     d.outputs = ioSettings.prototypesOut
     proxy.dataUI = d
-    createSettings()
+    createSettings
   }
 
   def savePanel = {

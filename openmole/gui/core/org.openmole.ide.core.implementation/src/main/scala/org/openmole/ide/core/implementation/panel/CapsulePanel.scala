@@ -31,7 +31,7 @@ trait CapsulePanel extends Base
     basePanel.contents += panelSettings.panel
   }
 
-  def createSettings(tabIndex: Int) = {
+  def createSettings = {
     panelSettings = capsule.dataUI.buildPanelUI(index)
     basePanel.contents += panelSettings.tabbedPane
   }

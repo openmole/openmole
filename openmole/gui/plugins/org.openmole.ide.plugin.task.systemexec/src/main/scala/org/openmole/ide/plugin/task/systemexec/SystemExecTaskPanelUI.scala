@@ -87,14 +87,13 @@ class SystemExecTaskPanelUI(ndu: SystemExecTaskDataUI)(implicit val i18n: Resour
       launchingCommandTextArea.editor.text,
       resourcesMultiTextField.content.map { _.content },
       inputMapMultiComboTextField.content.filterNot { x ⇒
-        println("XXX : " + x.comboValue + " " + x.comboValue.isDefined)
         x.comboValue match {
           case Some(x: EmptyPrototypeDataUI) ⇒ true
           case _                             ⇒ false
         }
-      }.map { d ⇒ d.comboValue.get -> d.textFieldValue },
-      outputMapMultiTextFieldCombo.content.map { data ⇒ data.textFieldValue -> data.comboValue.get },
-      variablesMultiCombo.content.map { _.comboValue.get })
+      }.map { d ⇒ d.comboValue.get -> d.textFieldValue }.filter { case (p, _) ⇒ Proxies.check(p) },
+      outputMapMultiTextFieldCombo.content.map { data ⇒ data.textFieldValue -> data.comboValue.get }.filter { case (_, p) ⇒ Proxies.check(p) },
+      Proxies.check(variablesMultiCombo.content.map { _.comboValue.get }))
 
   def comboContent: List[PrototypeDataProxyUI] = EmptyDataUIs.emptyPrototypeProxy :: Proxies.instance.classPrototypes(classOf[File])
 

@@ -61,7 +61,7 @@ trait TaskPanel extends Base
         contents += proxyShorcut(proxy.dataUI, index)
       }
     }
-    createSettings()
+    createSettings
   }
 
   override def created = proxyCreated
@@ -69,15 +69,15 @@ trait TaskPanel extends Base
   override def update = {
     savePanel
     ioSettings = ioPanel
-    createSettings()
+    createSettings
   }
 
-  def createSettings(curIndex: Int): Unit = {
+  def createSettings: Unit = {
     icon.icon = icon(proxy.dataUI).icon
 
     panelSettings = proxy.dataUI.buildPanelUI
     val tPane = panelSettings.tabbedPane(("I/O", ioSettings))
-    tPane.selection.index = curIndex
+    Tools.updateIndex(basePanel, tPane)
 
     if (basePanel.contents.size == 3) basePanel.contents.remove(1, 2)
 
@@ -93,12 +93,12 @@ trait TaskPanel extends Base
     basePanel.revalidate
   }
 
-  def updateConceptPanel(d: TaskDataUI with ImageView) = {
+  def updateConceptPanel(d: TASKDATAUI) = {
     savePanel
     d.inputs = ioSettings.prototypesIn
     d.outputs = ioSettings.prototypesOut
     proxy.dataUI = d
-    createSettings(0)
+    createSettings
   }
 
   def savePanel = {

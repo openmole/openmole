@@ -32,9 +32,7 @@ trait Base extends Created with SavePanel {
 
   def update: Unit = {}
 
-  def createSettings(): Unit = createSettings(tabIndex(basePanel))
-
-  def createSettings(tabIndex: Int): Unit
+  def createSettings: Unit
 
   def created: Boolean
 
@@ -48,13 +46,6 @@ trait Base extends Created with SavePanel {
         scene.graphScene.repaint
     }
   }
-
-  def tabIndex(p: PluginPanel) = p.contents.toList.map {
-    _ match {
-      case t: TabbedPane ⇒ Some(t.selection.index)
-      case _             ⇒ None
-    }
-  }.flatten.headOption.getOrElse(0)
 
   val createListener = new EventListener[Proxies] {
     def triggered(obj: Proxies, ev: Event[Proxies]) {

@@ -33,15 +33,17 @@ abstract class TaskDataUI extends DataUI with InputPrototype with OutputPrototyp
 
   def coreObject(plugins: PluginSet): Try[ITask]
 
-  def implicitPrototypes: (List[PrototypeDataProxyUI], List[PrototypeDataProxyUI]) =
+  def implicitPrototypes: (List[PrototypeDataProxyUI], List[PrototypeDataProxyUI]) = {
     coreObject(PluginSet.empty) match {
-      case Success(x: ITask) ⇒ ToolDataUI.implicitPrototypes(y ⇒ x.inputs.map {
-        _.prototype
-      }.toList, inputs, y ⇒ x.outputs.map {
-        _.prototype
-      }.toList, outputs)
+      case Success(x: ITask) ⇒
+        ToolDataUI.implicitPrototypes(y ⇒ x.inputs.map { p ⇒
+          p.prototype
+        }.toList, inputs, y ⇒ x.outputs.map {
+          _.prototype
+        }.toList, outputs)
       case Failure(_) ⇒ (List(), List())
     }
+  }
 
   def implicitPrototypesFromAggregation =
     ScenesManager.transitions.flatMap {

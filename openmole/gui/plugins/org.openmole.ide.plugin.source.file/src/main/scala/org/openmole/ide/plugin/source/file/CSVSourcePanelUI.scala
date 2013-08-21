@@ -46,7 +46,7 @@ class CSVSourcePanelUI(dataUI: CSVSourceDataUI)(implicit val i18n: ResourceBundl
   }
   readFile(dataUI.csvFilePath)
 
-  val components = List(("Header", mainPanel))
+  val components = List(("Settings", mainPanel))
 
   listenTo(csvTextField)
   reactions += {

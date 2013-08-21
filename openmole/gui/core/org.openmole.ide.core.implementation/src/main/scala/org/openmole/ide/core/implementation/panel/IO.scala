@@ -26,6 +26,7 @@ trait IO extends IOProxy {
 
   def ioPanel = {
     val (implicitIP, implicitOP) = proxy.dataUI.implicitPrototypes
+    println("Implicits : " + implicitIP)
     new IOPrototypePanel(
       Proxies.check(proxy.dataUI.inputs.toList),
       Proxies.check(proxy.dataUI.outputs.toList),

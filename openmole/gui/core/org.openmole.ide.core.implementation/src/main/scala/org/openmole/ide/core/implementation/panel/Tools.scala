@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 mathieu
+ * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,15 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package org.openmole.ide.core.implementation.panel
 
-package org.openmole.ide.plugin.task.stat
+import org.openmole.ide.misc.widget.PluginPanel
+import scala.swing.TabbedPane
 
-import org.openmole.ide.core.implementation.dataproxy.Proxies
+object Tools {
 
-class SumTaskPanelUI(dataUI: SumTaskDataUI) extends BasicStatPanelUI("sum", dataUI) {
+  def tabIndex(p: PluginPanel) = p.contents.toList.map {
+    _ match {
+      case t: TabbedPane ⇒ Some(t.selection.index)
+      case _             ⇒ None
+    }
+  }.flatten.headOption.getOrElse(0)
 
-  def saveContent(name: String) = new SumTaskDataUI(name,
-    if (multiPrototypeCombo.isDefined)
-      multiPrototypeCombo.get.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) }.filter { case (p1, p2) ⇒ Proxies.check(p1) || Proxies.check(p2) }
-    else List.empty)
+  def selectTabbedPane(t: TabbedPane, index: Int) = t.selection.index = index
+
+  def updateIndex(p: PluginPanel, t: TabbedPane) = {
+    val index = tabIndex(p)
+    selectTabbedPane(t, if (index < t.pages.size) index else 0)
+  }
 }

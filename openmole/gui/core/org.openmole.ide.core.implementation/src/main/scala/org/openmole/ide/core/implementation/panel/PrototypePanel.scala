@@ -43,7 +43,7 @@ trait PrototypePanel extends Base
   private def updateConceptPanel(d: PrototypeDataUI[_] with ImageView) = {
     savePanel
     proxy.dataUI = d
-    createSettings()
+    createSettings
     scene.updatePanels
   }
 
@@ -63,10 +63,10 @@ trait PrototypePanel extends Base
         }
       }
     }
-    createSettings()
+    createSettings
   }
 
-  def createSettings(curIndex: Int) = {
+  def createSettings = {
     if (basePanel.contents.size > 1) {
       basePanel.contents.remove(1)
       basePanel.contents.remove(1)

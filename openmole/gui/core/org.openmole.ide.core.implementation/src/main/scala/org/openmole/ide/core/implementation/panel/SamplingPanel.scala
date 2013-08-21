@@ -39,7 +39,7 @@ trait SamplingPanel extends Base
 
   def components = panelSettings.components
 
-  def createSettings(tabIndex: Int) = {
+  def createSettings = {
     panelSettings = proxy.dataUI.buildPanelUI
     basePanel.contents += panelSettings.tabbedPane
   }
