@@ -58,13 +58,13 @@ trait Base extends Created with SavePanel {
 
   val createListener = new EventListener[Proxies] {
     def triggered(obj: Proxies, ev: Event[Proxies]) {
-      scene.toBeUpdated.foreach { _.update }
+      scene.updatePanels
     }
   }
 
   val deleteListener = new EventListener[Proxies] {
     def triggered(obj: Proxies, ev: Event[Proxies]) {
-      scene.toBeUpdated.foreach { _.update }
+      scene.updatePanels
     }
   }
 

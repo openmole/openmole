@@ -1,6 +1,6 @@
 package org.openmole.ide.core.implementation.panel
 
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataProxyUI }
 
 /*
 * Copyright (C) 2013 <mathieu.Mathieu Leclaire at openmole.org>
@@ -27,8 +27,8 @@ trait IO extends IOProxy {
   def ioPanel = {
     val (implicitIP, implicitOP) = proxy.dataUI.implicitPrototypes
     new IOPrototypePanel(
-      proxy.dataUI.inputs,
-      proxy.dataUI.outputs,
+      Proxies.check(proxy.dataUI.inputs.toList),
+      Proxies.check(proxy.dataUI.outputs.toList),
       implicitIP,
       implicitOP,
       proxy.dataUI.inputParameters.toMap)

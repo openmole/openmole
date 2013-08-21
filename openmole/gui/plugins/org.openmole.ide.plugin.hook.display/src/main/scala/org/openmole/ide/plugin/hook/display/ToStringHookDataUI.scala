@@ -20,7 +20,7 @@ package org.openmole.ide.plugin.hook.display
 import org.openmole.plugin.hook.display._
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.data.HookDataUI
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
+import org.openmole.ide.core.implementation.dataproxy.{ Proxies, PrototypeDataProxyUI }
 
 class ToStringHookDataUI(val name: String = "",
                          val toBeHooked: List[PrototypeDataProxyUI] = List.empty) extends HookDataUI {

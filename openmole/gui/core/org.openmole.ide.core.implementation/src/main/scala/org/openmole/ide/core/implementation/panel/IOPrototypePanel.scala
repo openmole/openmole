@@ -91,7 +91,7 @@ class IOPrototypePanel(val prototypesIn: Seq[PrototypeDataProxyUI] = List.empty,
         }
         protoPanel
       }
-      else new Label("Please create first Prototypes.")
+      else new Label("None")
     }
   }
 
@@ -117,7 +117,7 @@ class IOPrototypePanel(val prototypesIn: Seq[PrototypeDataProxyUI] = List.empty,
         }
         protoPanel
       }
-      else new Label("Please create first Prototypes.")
+      else new Label("None")
     }
   }
 

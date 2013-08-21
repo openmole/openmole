@@ -27,6 +27,8 @@ import org.openmole.ide.core.implementation.panel.ConceptMenu
 
 object Proxies {
   var instance = new Proxies
+
+  def check(proxyList: List[PrototypeDataProxyUI]) = proxyList.filter { instance.contains }
 }
 
 class Proxies {

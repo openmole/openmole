@@ -74,7 +74,6 @@ trait TaskPanel extends Base
 
   def createSettings(curIndex: Int): Unit = {
     icon.icon = icon(proxy.dataUI).icon
-    // val curIndex = tabIndex(basePanel)
 
     panelSettings = proxy.dataUI.buildPanelUI
     val tPane = panelSettings.tabbedPane(("I/O", ioSettings))
@@ -91,6 +90,7 @@ trait TaskPanel extends Base
     tPane.reactions += {
       case SelectionChanged(_) ⇒ update
     }
+    basePanel.revalidate
   }
 
   def updateConceptPanel(d: TaskDataUI with ImageView) = {

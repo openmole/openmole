@@ -26,8 +26,9 @@ import java.io.File
 import swing.{ TabbedPane, Label }
 import java.awt.Dimension
 import org.openmole.ide.core.implementation.panelsettings.HookPanelUI
+import org.openmole.ide.misc.widget.multirow.MultiWidget._
 
-class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends HookPanelUI {
+class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends PluginPanel("wrap") with HookPanelUI {
 
   val multiComboTextField = new MultiComboTextField("",
     comboContent,
@@ -36,14 +37,18 @@ class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends HookPanelUI {
         new ComboTextFieldPanel(comboContent,
           new ComboTextFieldData(Some(d._1),
             d._2))
-    })
-  val ppanel = new PluginPanel("wrap") {
-    minimumSize = new Dimension(300, 150)
+    }, minus = CLOSE_IF_EMPTY)
+
+  minimumSize = new Dimension(300, 150)
+
+  if (Proxies.instance.prototypes.isEmpty || comboContent.isEmpty)
+    contents += new Label("No prototype to be displayed")
+  else {
     contents += new Label("<html><b>Files to be dumped</b></html>")
     contents += multiComboTextField.panel
   }
 
-  val components = List(("Prototypes", ppanel))
+  val components = List(("Prototypes", this))
 
   def comboContent = Proxies.instance.classPrototypes(classOf[File]) filter {
     _.dataUI.dim == 0
@@ -52,9 +57,12 @@ class CopyFileHookPanelUI(dataUI: CopyFileHookDataUI) extends HookPanelUI {
   def saveContent(name: String) = new CopyFileHookDataUI(name,
     multiComboTextField.content.filter {
       _.comboValue match {
-        case Some(v: PrototypeDataProxyUI) ⇒ true
+        case Some(v: PrototypeDataProxyUI) ⇒ Proxies.check(List(v)).isEmpty
         case _                             ⇒ false
       }
-    }.map { m ⇒ (KeyRegistry.protoProxyKeyMap(PrototypeKey(m.comboValue.get)), m.textFieldValue) })
+    }.map { m ⇒
+      println("M : " + m.comboValue.get)
+      (KeyRegistry.protoProxyKeyMap(PrototypeKey(m.comboValue.get)), m.textFieldValue)
+    })
 
 }

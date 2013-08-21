@@ -37,7 +37,7 @@ class ToStringHookPanelUI(dataUI: ToStringHookDataUI) extends PluginPanel("") wi
   val components = List(("Prototypes", this))
 
   def saveContent(name: String) = new ToStringHookDataUI(name,
-    combo.multiPrototypeCombo.content.map {
+    Proxies.check(combo.multiPrototypeCombo.content.map {
       _.comboValue.get
-    }.filter { _ != null })
+    }.filter { _ != null }))
 }
