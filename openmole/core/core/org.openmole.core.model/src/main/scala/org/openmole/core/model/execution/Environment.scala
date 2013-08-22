@@ -23,14 +23,13 @@ import org.openmole.core.model.job.IMoleJob
 import org.openmole.misc.eventdispatcher.Event
 import ExecutionState._
 import org.openmole.core.model.tools.ExceptionEvent
+import org.openmole.misc.workspace.AuthenticationProvider
 
 object Environment {
   case class JobSubmitted(job: IExecutionJob) extends Event[Environment]
   case class JobStateChanged(job: IExecutionJob, newState: ExecutionState, oldState: ExecutionState) extends Event[Environment]
   case class ExceptionRaised(job: IExecutionJob, exception: Throwable, level: Level) extends Event[Environment] with ExceptionEvent
   case class MoleJobExceptionRaised(job: IExecutionJob, exception: Throwable, level: Level, moleJob: IMoleJob) extends Event[Environment]
-
-  type UnauthenticatedEnvironment = AuthenticationProvider ⇒ Environment
 }
 
 trait Environment {

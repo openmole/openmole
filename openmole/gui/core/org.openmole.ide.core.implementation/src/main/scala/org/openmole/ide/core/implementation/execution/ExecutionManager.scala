@@ -103,7 +103,7 @@ class ExecutionManager(manager: IMoleUI,
 
     buildMoleExecution match {
       case Success((mE, envNames)) ⇒
-        val (mExecution, envs) = mE.toExecutionGetEnvironments(Context.empty, ExecutionContext.local.copy(out = printStream))
+        val mExecution = mE.toExecution(Context.empty, ExecutionContext.local.copy(out = printStream))
         moleExecution = Some(mExecution)
         EventDispatcher.listen(mExecution: IMoleExecution, new JobSatusListener(this), classOf[IMoleExecution.JobStatusChanged])
         EventDispatcher.listen(mExecution: IMoleExecution, new JobSatusListener(this), classOf[IMoleExecution.Finished])
@@ -113,8 +113,8 @@ class ExecutionManager(manager: IMoleUI,
         EventDispatcher.listen(mExecution: IMoleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.HookExceptionRaised])
         EventDispatcher.listen(mExecution: IMoleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.SourceExceptionRaised])
         EventDispatcher.listen(mExecution: IMoleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ProfilerExceptionRaised])
-        envs.values.foreach {
-          e ⇒
+        envNames.foreach {
+          case (e, _) ⇒
             e match {
               case e: BatchEnvironment ⇒
                 EventDispatcher.listen(e, new UploadFileListener(this), classOf[BatchEnvironment.BeginUpload])
@@ -124,14 +124,12 @@ class ExecutionManager(manager: IMoleUI,
               case _ ⇒
             }
         }
-        envs.values.foreach {
-          env ⇒
+        envNames.foreach {
+          case (env, name) ⇒
             EventDispatcher.listen(env: Environment, new EnvironmentExceptionListener(this), classOf[Environment.ExceptionRaised])
+            buildEmptyEnvPlotter(env, name)
         }
 
-        envNames.foreach {
-          case (unauthenticated, name) ⇒ buildEmptyEnvPlotter(envs(unauthenticated), name)
-        }
         if (envBarPanel.peer.getComponentCount == 2) envBarPanel.peer.remove(1)
 
         //FIXME Displays several environments

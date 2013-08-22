@@ -18,14 +18,14 @@
 package org.openmole.ide.core.model.data
 
 import org.openmole.ide.core.model.panel.IEnvironmentPanelUI
-import org.openmole.core.model.execution.{ UnauthenticatedEnvironment, Environment }
+import org.openmole.core.model.execution.Environment
 import scala.util.Try
 
 trait IEnvironmentDataUI extends IDataUI {
 
   override def toString: String = name
 
-  def coreObject: Try[UnauthenticatedEnvironment]
+  def coreObject: Try[Environment]
 
   def buildPanelUI: IEnvironmentPanelUI
 

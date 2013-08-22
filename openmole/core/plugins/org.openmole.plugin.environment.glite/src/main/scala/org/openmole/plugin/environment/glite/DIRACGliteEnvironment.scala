@@ -18,12 +18,11 @@
 package org.openmole.plugin.environment.glite
 
 import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.misc.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.misc.workspace.{ AuthenticationProvider, ConfigurationLocation, Workspace }
 import fr.iscpif.gridscale.glite.BDII
 import org.openmole.misc.filedeleter.FileDeleter
 import org.openmole.misc.exception.UserBadDataError
 import fr.iscpif.gridscale.dirac.DIRACJobService
-import org.openmole.core.model.execution.{ UnauthenticatedEnvironment, AuthenticationProvider }
 
 object DIRACGliteEnvironment {
 
@@ -40,20 +39,18 @@ object DIRACGliteEnvironment {
     setup: Option[String] = None,
     fqan: Option[String] = None,
     cpuTime: Option[String] = None,
-    openMOLEMemory: Option[Int] = None) =
-    UnauthenticatedEnvironment(
-      new DIRACGliteEnvironment(
-        voName,
-        service,
-        group.getOrElse(voName + "_user"),
-        bdii.getOrElse(Workspace.preference(GliteEnvironment.DefaultBDII)),
-        vomsURL.getOrElse(GliteAuthentication.getVMOSOrError(voName)),
-        setup.getOrElse("Dirac-Production"),
-        fqan,
-        cpuTime,
-        openMOLEMemory
-      )(_)
-    )
+    openMOLEMemory: Option[Int] = None)(implicit authentications: AuthenticationProvider) =
+    new DIRACGliteEnvironment(
+      voName,
+      service,
+      group.getOrElse(voName + "_user"),
+      bdii.getOrElse(Workspace.preference(GliteEnvironment.DefaultBDII)),
+      vomsURL.getOrElse(GliteAuthentication.getVMOSOrError(voName)),
+      setup.getOrElse("Dirac-Production"),
+      fqan,
+      cpuTime,
+      openMOLEMemory
+    )(authentications)
 
 }
 
@@ -66,7 +63,7 @@ class DIRACGliteEnvironment(
     val setup: String,
     val fqan: Option[String],
     val cpuTime: Option[String],
-    override val openMOLEMemory: Option[Int])(authentications: AuthenticationProvider) extends BatchEnvironment with BDIISRMServers with GliteEnvironmentId { env ⇒
+    override val openMOLEMemory: Option[Int])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with BDIISRMServers with GliteEnvironmentId { env ⇒
 
   type JS = DIRACGliteJobService
 

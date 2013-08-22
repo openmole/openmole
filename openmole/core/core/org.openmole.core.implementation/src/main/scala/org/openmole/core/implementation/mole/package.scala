@@ -32,7 +32,7 @@ package object mole {
   implicit def slotToCapsuleConverter(slot: Slot) = slot.capsule
 
   class PuzzleDecorator(puzzle: Puzzle) {
-    def on(env: UnauthenticatedEnvironment) =
+    def on(env: Environment) =
       puzzle.copy(environments = puzzle.environments ++ puzzle.lasts.map(_ -> env))
     def hook(hooks: IHook*) =
       puzzle.copy(hooks = puzzle.hooks.toList ::: puzzle.lasts.flatMap(c ⇒ hooks.map(c -> _)).toList)

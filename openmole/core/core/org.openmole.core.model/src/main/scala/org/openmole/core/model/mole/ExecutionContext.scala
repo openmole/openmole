@@ -19,15 +19,14 @@ package org.openmole.core.model.mole
 
 import java.io.{ PrintStream, File }
 import org.openmole.misc.tools.io.FileUtil._
-import org.openmole.core.model.execution.AuthenticationProvider
+import org.openmole.misc.workspace.AuthenticationProvider
 
 object ExecutionContext {
-  def apply(out: PrintStream, directory: Option[File], authentications: AuthenticationProvider = AuthenticationProvider.workspace) = {
-    val (_out, _directory, _authentications) = (out, directory, authentications)
+  def apply(out: PrintStream, directory: Option[File]) = {
+    val (_out, _directory) = (out, directory)
     new ExecutionContext {
       def out = _out
       def directory = _directory
-      def authentications = _authentications
     }
   }
 
@@ -37,8 +36,6 @@ object ExecutionContext {
 trait ExecutionContext {
   def out: PrintStream
   def directory: Option[File]
-  def authentications: AuthenticationProvider
-
   def relativise(f: String): File =
     directory.map(_.child(f)).getOrElse(new File(f))
 

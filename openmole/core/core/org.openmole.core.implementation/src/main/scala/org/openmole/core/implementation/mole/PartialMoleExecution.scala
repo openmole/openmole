@@ -20,14 +20,14 @@ package org.openmole.core.implementation.mole
 import org.openmole.core.model.mole._
 import org.openmole.misc.workspace._
 import org.openmole.core.model.data._
-import org.openmole.core.model.execution.{ UnauthenticatedEnvironment, AuthenticationProvider, Environment }
+import org.openmole.core.model.execution._
 
 object PartialMoleExecution {
   def apply(
     mole: IMole,
     sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
     hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
-    environments: Map[ICapsule, UnauthenticatedEnvironment] = Map.empty,
+    environments: Map[ICapsule, Environment] = Map.empty,
     grouping: Map[ICapsule, Grouping] = Map.empty,
     profiler: Profiler = Profiler.empty,
     seed: Long = Workspace.newSeed): PartialMoleExecution = new PartialMoleExecution(
@@ -44,27 +44,18 @@ class PartialMoleExecution(
     val mole: IMole,
     val sources: Sources = Sources.empty,
     val hooks: Hooks = Hooks.empty,
-    val environments: Map[ICapsule, UnauthenticatedEnvironment] = Map.empty,
+    val environments: Map[ICapsule, Environment] = Map.empty,
     val grouping: Map[ICapsule, Grouping] = Map.empty,
     val profiler: Profiler = Profiler.empty,
     val seed: Long = Workspace.newSeed) extends IPartialMoleExecution {
 
-  def authenticate(unauthenticated: Traversable[UnauthenticatedEnvironment])(implicit moleExecutionContext: ExecutionContext) =
-    unauthenticated.map(e ⇒ e -> e(moleExecutionContext.authentications)).toMap
-
-  def toExecutionGetEnvironments(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local) = {
-    val authenticatedEnvironments = authenticate(environments.values)
-
-    (new MoleExecution(mole,
+  def toExecution(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local) =
+    new MoleExecution(mole,
       sources,
       hooks,
-      environments.map { case (k, v) ⇒ k -> authenticatedEnvironments(v) },
+      environments,
       grouping,
       profiler,
-      seed)(implicits, moleExecutionContext),
-      authenticatedEnvironments)
-  }
+      seed)(implicits, moleExecutionContext)
 
-  def toExecution(implicit implicits: Context = Context.empty, moleExecutionContext: ExecutionContext = ExecutionContext.local) =
-    toExecutionGetEnvironments._1
 }

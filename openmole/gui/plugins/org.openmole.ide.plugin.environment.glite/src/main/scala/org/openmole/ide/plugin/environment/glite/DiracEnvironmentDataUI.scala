@@ -30,7 +30,7 @@ class DiracEnvironmentDataUI(val name: String = "",
     Some(setup),
     fqan,
     cpuTime,
-    openMOLEMemory))
+    openMOLEMemory)(Workspace.authenticationProvider))
 
   def coreClass = classOf[DIRACGliteEnvironment]
 

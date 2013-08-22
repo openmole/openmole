@@ -31,7 +31,7 @@ import org.openmole.misc.tools.io.FileUtil._
 import org.openmole.core.batch.authentication._
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.misc.updater.Updater
-import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.workspace.{ AuthenticationProvider, Workspace }
 import GliteEnvironment._
 import org.globus.gsi.gssapi.GlobusGSSCredentialImpl
 import scala.collection.JavaConversions._
@@ -131,8 +131,8 @@ object GliteAuthentication extends Logger {
     }
   }
 
-  def update(a: GliteAuthentication) = Workspace.persistentList(classOf[GliteAuthentication])(0) = a
-  def apply() = Workspace.persistentList(classOf[GliteAuthentication])(0)
+  def update(a: GliteAuthentication) = Workspace.setAuthentication(0, a)
+  def apply()(implicit authentications: AuthenticationProvider) = authentications(classOf[GliteAuthentication]).headOption
 
   def initialise(a: GliteAuthentication)(
     serverURL: String,

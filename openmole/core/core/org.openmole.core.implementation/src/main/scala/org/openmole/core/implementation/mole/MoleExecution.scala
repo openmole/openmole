@@ -44,7 +44,7 @@ import scala.collection.immutable.HashMap
 import scala.collection.mutable.Buffer
 import scala.concurrent.stm.{ Ref, TMap, atomic, retry }
 import javax.xml.bind.annotation.XmlTransient
-import org.openmole.core.model.execution.{ UnauthenticatedEnvironment, Environment }
+import org.openmole.core.model.execution.Environment
 import collection.mutable
 import java.io.File
 import org.openmole.core.serializer.SerializerService
@@ -56,7 +56,7 @@ object MoleExecution extends Logger {
     mole: IMole,
     sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
     hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
-    environments: Map[ICapsule, UnauthenticatedEnvironment] = Map.empty,
+    environments: Map[ICapsule, Environment] = Map.empty,
     grouping: Map[ICapsule, Grouping] = Map.empty,
     profiler: Profiler = Profiler.empty,
     implicits: Context = Context.empty,

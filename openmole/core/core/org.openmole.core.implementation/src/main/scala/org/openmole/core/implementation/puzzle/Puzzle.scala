@@ -21,9 +21,8 @@ import org.openmole.core.model.data._
 import org.openmole.core.model.mole._
 import org.openmole.core.model.transition._
 import org.openmole.core.implementation.mole._
-import org.openmole.misc.workspace.Workspace
-import org.openmole.misc.tools.service.Random
-import org.openmole.core.model.execution.{ UnauthenticatedEnvironment, Environment }
+import org.openmole.misc.workspace._
+import org.openmole.core.model.execution._
 
 object Puzzle {
 
@@ -63,7 +62,7 @@ case class Puzzle(
     dataChannels: Iterable[IDataChannel],
     sources: Iterable[(ICapsule, ISource)],
     hooks: Iterable[(ICapsule, IHook)],
-    environments: Map[ICapsule, UnauthenticatedEnvironment],
+    environments: Map[ICapsule, Environment],
     grouping: Map[ICapsule, Grouping]) {
 
   def this(p: Puzzle) =
@@ -84,7 +83,7 @@ case class Puzzle(
   def toPartialExecution(
     sources: Iterable[(ICapsule, ISource)] = Iterable.empty,
     hooks: Iterable[(ICapsule, IHook)] = Iterable.empty,
-    environment: Map[ICapsule, UnauthenticatedEnvironment] = Map.empty,
+    environment: Map[ICapsule, Environment] = Map.empty,
     grouping: Map[ICapsule, Grouping] = Map.empty,
     profiler: Profiler = Profiler.empty,
     seed: Long = Workspace.newSeed) =

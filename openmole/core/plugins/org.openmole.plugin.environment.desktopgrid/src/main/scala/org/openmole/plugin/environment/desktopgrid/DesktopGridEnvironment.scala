@@ -21,11 +21,10 @@ import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.control._
 
-import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.workspace.{ AuthenticationProvider, Workspace }
 import org.openmole.misc.sftpserver.SFTPServer
 import java.net.URI
 import fr.iscpif.gridscale.{ LocalStorage ⇒ GSLocalStorage }
-import org.openmole.core.model.execution.{ UnauthenticatedEnvironment, AuthenticationProvider }
 
 object DesktopGridEnvironment {
   val timeStempsDirName = "timeStemps"
@@ -40,14 +39,14 @@ object DesktopGridEnvironment {
     password: String,
     openMOLEMemory: Option[Int] = None,
     threads: Option[Int] = None) =
-    UnauthenticatedEnvironment(new DesktopGridEnvironment(port, login, password, openMOLEMemory, threads)(_))
+    new DesktopGridEnvironment(port, login, password, openMOLEMemory, threads)
 }
 
 class DesktopGridEnvironment(
     val port: Int,
     val login: String, password: String,
     override val openMOLEMemory: Option[Int],
-    override val threads: Option[Int])(authentications: AuthenticationProvider) extends BatchEnvironment { env ⇒
+    override val threads: Option[Int]) extends BatchEnvironment { env ⇒
 
   type SS = VolatileStorageService
   type JS = DesktopGridJobService

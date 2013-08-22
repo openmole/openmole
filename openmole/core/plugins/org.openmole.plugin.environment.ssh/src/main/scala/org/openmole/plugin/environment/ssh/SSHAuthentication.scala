@@ -18,14 +18,13 @@
 package org.openmole.plugin.environment.ssh
 
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.workspace.Workspace
-import org.openmole.core.model.execution.AuthenticationProvider
+import org.openmole.misc.workspace.{ AuthenticationProvider, Workspace }
 
 object SSHAuthentication {
 
-  def apply() = Workspace.persistentList(classOf[SSHAuthentication])
-  def update(i: Int, a: SSHAuthentication) = Workspace.persistentList(classOf[SSHAuthentication])(i) = a
-  def apply(i: Int) = Workspace.persistentList(classOf[SSHAuthentication])(i)
+  def apply()(implicit authentications: AuthenticationProvider) = authentications(classOf[SSHAuthentication])
+  def update(i: Int, a: SSHAuthentication) = Workspace.setAuthentication(i, a)
+  def apply(i: Int)(implicit authentications: AuthenticationProvider) = authentications(classOf[SSHAuthentication])(i)
   def apply(target: String, authentications: AuthenticationProvider) = {
     val list = authentications(classOf[SSHAuthentication])
     list.find { e ⇒ target.matches(e.regexp) }.getOrElse(throw new UserBadDataError("No authentication method found for " + target))

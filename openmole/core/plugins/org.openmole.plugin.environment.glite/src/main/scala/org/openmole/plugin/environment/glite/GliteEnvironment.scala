@@ -38,7 +38,6 @@ import org.openmole.misc.tools.service.Scaling._
 import org.openmole.misc.tools.service.Random._
 import fr.iscpif.gridscale.glite.{ GlobusAuthentication, WMSJobService, BDII }
 import fr.iscpif.gridscale.RenewDecorator
-import org.openmole.core.model.execution.{ UnauthenticatedEnvironment, AuthenticationProvider }
 
 object GliteEnvironment extends Logger {
 
@@ -135,23 +134,21 @@ object GliteEnvironment extends Logger {
     smpGranularity: Option[Int] = None,
     myProxy: Option[MyProxy] = None,
     architecture: Option[String] = None,
-    threads: Option[Int] = None) =
-    UnauthenticatedEnvironment(
-      new GliteEnvironment(voName,
-        bdii.getOrElse(Workspace.preference(GliteEnvironment.DefaultBDII)),
-        vomsURL.getOrElse(GliteAuthentication.getVMOSOrError(voName)),
-        fqan,
-        openMOLEMemory,
-        memory,
-        cpuTime,
-        wallTime,
-        cpuNumber,
-        jobType,
-        smpGranularity,
-        myProxy,
-        architecture,
-        threads)(_)
-    )
+    threads: Option[Int] = None)(implicit authentications: AuthenticationProvider) =
+    new GliteEnvironment(voName,
+      bdii.getOrElse(Workspace.preference(GliteEnvironment.DefaultBDII)),
+      vomsURL.getOrElse(GliteAuthentication.getVMOSOrError(voName)),
+      fqan,
+      openMOLEMemory,
+      memory,
+      cpuTime,
+      wallTime,
+      cpuNumber,
+      jobType,
+      smpGranularity,
+      myProxy,
+      architecture,
+      threads)(authentications)
 
   def proxyTime = Workspace.preferenceAsDuration(ProxyTime)
 
@@ -188,7 +185,7 @@ class GliteEnvironment(
     val smpGranularity: Option[Int],
     val myProxy: Option[MyProxy],
     val architecture: Option[String],
-    override val threads: Option[Int])(authentications: AuthenticationProvider) extends BatchEnvironment with MemoryRequirement with BDIISRMServers with GliteEnvironmentId { env ⇒
+    override val threads: Option[Int])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with MemoryRequirement with BDIISRMServers with GliteEnvironmentId { env ⇒
 
   import GliteEnvironment._
 

@@ -33,16 +33,15 @@ object LocalEnvironment extends Environment {
   var initializationNumberOfThread: Option[Int] = None
   def numberOfThread = initializationNumberOfThread.getOrElse(Workspace.preferenceAsInt(DefaultNumberOfThreads))
 
-  @transient lazy val defaultUnauthenticated = UnauthenticatedEnvironment(new LocalEnvironment(numberOfThread)(_))
-  @transient lazy val default = defaultUnauthenticated(AuthenticationProvider.workspace)
+  @transient lazy val default = new LocalEnvironment(numberOfThread)
 
   override def submit(job: IJob) = default.submit(job)
 
-  def apply(nbThreads: Int) = UnauthenticatedEnvironment(new LocalEnvironment(nbThreads)(_))
+  def apply(nbThreads: Int) = new LocalEnvironment(nbThreads)
 
 }
 
-class LocalEnvironment(val nbThreads: Int)(authentications: AuthenticationProvider) extends Environment {
+class LocalEnvironment(val nbThreads: Int) extends Environment {
 
   import LocalEnvironment._
 

@@ -15,15 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.openmole.core.model.execution
-
-import org.openmole.misc.workspace.Workspace
+package org.openmole.misc.workspace
 
 object AuthenticationProvider {
 
-  lazy val workspace = new AuthenticationProvider {
-    def apply[T](clazz: Class[T]) = Workspace.persistentList(clazz).toList.sortBy(_._1).unzip._2
+  def apply(authentications: Map[String, Seq[Any]]) = new AuthenticationProvider {
+    def apply[T](clazz: Class[T]) = authentications.getOrElse(clazz.getName, Seq.empty).map(_.asInstanceOf[T])
   }
+
 }
 
 trait AuthenticationProvider {

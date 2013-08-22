@@ -56,7 +56,7 @@ class GliteEnvironmentDataUI(val name: String = "",
         smpGranularity = smpGranularity,
         myProxy = myProxy,
         architecture = if (architecture) Some("x86_64") else None,
-        threads = threads)
+        threads = threads)(Workspace.authenticationProvider)
     }
     catch {
       case e: Throwable ⇒ throw new UserBadDataError(e, "An error occurred when initializing the glite environment " + name + ". Please check your certificate settings in the Preferences menu.")
