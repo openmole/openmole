@@ -24,6 +24,7 @@ import org.openmole.ide.core.implementation.registry.PrototypeKey
 import org.openmole.ide.core.implementation.dataproxy.{ PrototypeDataProxyUI, Proxies }
 import org.openmole.ide.core.implementation.commons.AggregationTransitionType
 import org.openmole.ide.core.implementation.panel.{ TaskPanel, SaveSettings, Settings }
+import org.openmole.ide.core.implementation.dialog.StatusBar
 
 abstract class TaskDataUI extends DataUI with InputPrototype with OutputPrototype with ImplicitPrototype with ImageView with CoreObjectInitialisation {
 
@@ -41,7 +42,9 @@ abstract class TaskDataUI extends DataUI with InputPrototype with OutputPrototyp
         }.toList, inputs, y ⇒ x.outputs.map {
           _.prototype
         }.toList, outputs)
-      case Failure(_) ⇒ (List(), List())
+      case Failure(e) ⇒
+        StatusBar().block("Fail in building " + name, e)
+        (List(), List())
     }
   }
 
