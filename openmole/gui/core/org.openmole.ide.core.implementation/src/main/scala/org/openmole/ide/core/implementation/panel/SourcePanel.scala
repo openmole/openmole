@@ -34,12 +34,12 @@ trait SourcePanel extends Base
     with IO {
 
   override type DATAPROXY = SourceDataProxyUI with IOFacade
-  type HOOKDATAUI = SourceDataUI with ImageView
-  override type DATAUI = HOOKDATAUI with IODATAUI
+  type SOURCEDATAUI = SourceDataUI with ImageView
+  override type DATAUI = SOURCEDATAUI with IODATAUI
 
   var panelSettings = proxy.dataUI.buildPanelUI
   val icon: Label = icon(Images.SOURCE)
-  val hookCombo = ConceptMenu.buildSourceMenu(p ⇒ updateConceptPanel(p.dataUI), proxy.dataUI)
+  val sourceCombo = ConceptMenu.buildSourceMenu(p ⇒ updateConceptPanel(p.dataUI), proxy.dataUI)
 
   var ioSettings = ioPanel
   build
@@ -53,7 +53,7 @@ trait SourcePanel extends Base
         contents += new Composer {
           addIcon(icon)
           addName
-          addTypeMenu(hookCombo)
+          addTypeMenu(sourceCombo)
           addCreateLink
         }
         contents += proxyShorcut(proxy.dataUI, index)
@@ -65,17 +65,30 @@ trait SourcePanel extends Base
   override def created = proxyCreated
 
   def createSettings = {
-    if (basePanel.contents.size > 1) {
-      basePanel.contents.remove(1)
-      basePanel.contents.remove(1)
-    }
     panelSettings = proxy.dataUI.buildPanelUI
-    basePanel.contents += panelSettings.tabbedPane(("I/O", ioSettings))
+
+    val tPane = panelSettings.tabbedPane(("I/O", ioSettings))
+    Tools.updateIndex(basePanel, tPane)
+
+    if (basePanel.contents.size == 3) basePanel.contents.remove(1, 2)
+    basePanel.contents += tPane
     basePanel.contents += panelSettings.help
-    listenTo(panelSettings.tabbedPane)
+
+    listenTo(tPane.selection)
+    listenTo(panelSettings.help.components.toSeq: _*)
+
+    tPane.reactions += {
+      case SelectionChanged(_) ⇒ update
+    }
   }
 
-  def updateConceptPanel(d: HOOKDATAUI) = {
+  override def update = {
+    savePanel
+    ioSettings = ioPanel
+    createSettings
+  }
+
+  def updateConceptPanel(d: SOURCEDATAUI) = {
     savePanel
     d.inputs = ioSettings.prototypesIn
     d.outputs = ioSettings.prototypesOut

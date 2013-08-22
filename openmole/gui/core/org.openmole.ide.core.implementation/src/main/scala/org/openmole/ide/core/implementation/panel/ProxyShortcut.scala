@@ -42,6 +42,8 @@ trait ProxyShortcut {
   }
 
   def proxyShorcut(dataUI: CapsuleDataUI, index: Int) = new NewConceptPanel(index) {
-    addPrototype
+    addEnvironment
+    addSource
+    addHook
   }
 }

@@ -28,11 +28,9 @@ import org.openmole.ide.core.implementation.panel.ConceptMenu
 object Proxies {
   var instance = new Proxies
 
-  def check(proxyList: List[PrototypeDataProxyUI]) = proxyList.filter { instance.contains }
+  def check[T <: DataProxyUI](proxyList: List[T]) = proxyList.filter { instance.contains }
 
-  def check(protoProxy: PrototypeDataProxyUI) = instance.contains(protoProxy)
-
-  def check(taskProxy: TaskDataProxyUI) = instance.contains(taskProxy)
+  def check[T <: DataProxyUI](proxy: T) = instance.contains(proxy)
 }
 
 class Proxies {
@@ -95,8 +93,9 @@ class Proxies {
 
   def contains(p: DataProxyUI) = _proxies.single.contains(p.id)
 
-  def classPrototypes(prototypeClass: Class[_]): List[PrototypeDataProxyUI] =
+  def classPrototypes(prototypeClass: Class[_]): List[PrototypeDataProxyUI] = {
     classPrototypes(prototypeClass, prototypes.toList)
+  }
 
   def classPrototypes(prototypeClass: Class[_],
                       protoList: List[PrototypeDataProxyUI]): List[PrototypeDataProxyUI] = protoList.filter {

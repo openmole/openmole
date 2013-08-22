@@ -16,6 +16,10 @@
  */
 package org.openmole.ide.core.implementation.panel
 
+import scala.swing.Label
+import scala.swing.event.SelectionChanged
+import org.openmole.ide.misc.widget.PluginPanel
+
 trait CapsulePanel extends Base
     with Capsule
     with Header
@@ -23,17 +27,37 @@ trait CapsulePanel extends Base
 
   def components = panelSettings.components
 
-  var panelSettings = capsule.dataUI.buildPanelUI(index)
+  var panelSettings = capsule.dataUI.buildPanelUI
 
   build
 
   def build = {
-    basePanel.contents += panelSettings.panel
+    basePanel.contents += header(scene, index)
+    basePanel.contents += new Label("")
+    basePanel.contents += proxyShorcut(capsule.dataUI, index)
+    createSettings
   }
 
   def createSettings = {
-    panelSettings = capsule.dataUI.buildPanelUI(index)
-    basePanel.contents += panelSettings.tabbedPane
+    panelSettings = capsule.dataUI.buildPanelUI
+
+    val tPane = panelSettings.tabbedPane
+    Tools.updateIndex(basePanel, tPane)
+
+    if (basePanel.contents.size == 3) basePanel.contents.remove(1)
+
+    basePanel.contents.insert(1, tPane)
+
+    tPane.listenTo(tPane.selection)
+
+    tPane.reactions += {
+      case SelectionChanged(_) ⇒ update
+    }
+  }
+
+  override def update = {
+    savePanel
+    createSettings
   }
 
   def savePanel = {

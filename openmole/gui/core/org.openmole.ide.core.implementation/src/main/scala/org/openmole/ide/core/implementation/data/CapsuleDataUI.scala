@@ -54,11 +54,9 @@ class CapsuleDataUI(
 
   def coreClass = classOf[Capsule]
 
-  def buildPanelUI: CapsulePanelUI = buildPanelUI(0)
-
-  def buildPanelUI(index: Int): CapsulePanelUI = new CapsulePanelUI {
+  def buildPanelUI: CapsulePanelUI = new CapsulePanelUI {
     override type DATAUI = CapsuleDataUI
-    val dataUI = capsuleDataUI
+    lazy val dataUI = capsuleDataUI
   }
 
   def coreObject(moleDataUI: IMoleUI) = task match {

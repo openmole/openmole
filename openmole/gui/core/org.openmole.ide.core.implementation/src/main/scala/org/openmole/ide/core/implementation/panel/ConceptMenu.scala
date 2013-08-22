@@ -43,6 +43,8 @@ object ConceptMenu {
   def createAndDisplayPrototype(index: Int) = displayExtra(Builder.prototypeUI, index)
   def createAndDisplayPrototype = display(Builder.prototypeUI)
   def createAndDisplayHook(index: Int) = displayExtra(Builder.hookUI(false), index)
+  def createAndDisplaySource(index: Int) = displayExtra(Builder.sourceUI(false), index)
+  def createAndDisplayEnvironment(index: Int) = displayExtra(Builder.environmentUI(false), index)
 
   val menuItemMapping = new HashMap[DataProxyUI, MenuItem]()
   val mapping = new HashMap[List[String], Menu]

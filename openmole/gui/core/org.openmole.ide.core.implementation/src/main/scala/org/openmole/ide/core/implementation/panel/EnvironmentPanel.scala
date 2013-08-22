@@ -70,6 +70,11 @@ trait EnvironmentPanel extends Base
     basePanel.contents += panelSettings.help
   }
 
+  override def update = {
+    savePanel
+    createSettings
+  }
+
   def updateConceptPanel(d: EnvironmentDataUI with ImageView) = {
     savePanel
     proxy.dataUI = d
@@ -89,7 +94,7 @@ trait EnvironmentPanel extends Base
     }.toList
     capsulesWithEnv match {
       case Nil ⇒
-        scene.closePropertyPanel(0)
+        scene.closePropertyPanel(index)
         Proxies.instance -= proxy
         -=(proxy)
       //  true

@@ -21,13 +21,13 @@ import scala.swing._
 import event.ButtonClicked
 import org.openmole.ide.misc.widget.multirow.RowWidget._
 import org.openmole.ide.misc.widget.multirow.MultiWidget._
-import org.openmole.ide.misc.widget.multirow.MultiCombo
-import org.openmole.ide.core.implementation.dataproxy.{ SourceDataProxyUI, HookDataProxyUI, EnvironmentDataProxyUI, Proxies }
+import org.openmole.ide.misc.widget.multirow.{ MultiComboLinkLabel, MultiCombo }
+import org.openmole.ide.core.implementation.dataproxy._
 import org.openmole.ide.misc.widget.multirow.MultiCombo.{ ComboData, ComboPanel }
 import org.openmole.ide.core.implementation.data.{ EnvironmentDataUI, EmptyDataUIs, CapsuleDataUI }
 import java.awt.Color
 import org.openmole.ide.core.implementation.execution.{ ScenesManager, GroupingStrategyPanelUI }
-import org.openmole.ide.core.implementation.panel.Settings
+import org.openmole.ide.core.implementation.panel.{ MultiProxies, Settings }
 
 trait CapsulePanelUI extends Publisher with Settings {
 
@@ -40,21 +40,9 @@ trait CapsulePanelUI extends Publisher with Settings {
   def sources = Proxies.instance.sources.toList
   def hooks = Proxies.instance.hooks.toList
 
-  val sourcePanel = new MultiCombo("",
-    sources.toSeq,
-    dataUI.sources.map { s ⇒
-      new ComboPanel(sources, new ComboData(Some(s)))
-    },
-    CLOSE_IF_EMPTY,
-    ADD)
+  val sourcePanel = MultiProxies(sources, dataUI.sources)
 
-  val hookPanel = new MultiCombo("",
-    hooks.toSeq,
-    dataUI.hooks.map { h ⇒
-      new ComboPanel(hooks, new ComboData(Some(h)))
-    },
-    CLOSE_IF_EMPTY,
-    ADD)
+  val hookPanel = MultiProxies(hooks, dataUI.hooks)
 
   val environmentProxys = Proxies.instance.environments :+ EmptyDataUIs.localEnvironmentProxy
   val environmentCombo = new MyComboBox(environmentProxys)
@@ -87,7 +75,10 @@ trait CapsulePanelUI extends Publisher with Settings {
     }
   }
 
-  val components = List(("Source", sourcePanel.panel), ("Hook", hookPanel.panel), ("Execution", executionPanel))
+  val sourceComponent: Component = if (Proxies.instance.sources.isEmpty) new Label("None") else sourcePanel.panel
+  val hookComponent: Component = if (Proxies.instance.hooks.isEmpty) new Label("None") else hookPanel.panel
+
+  val components = List(("Source", sourceComponent), ("Hook", hookComponent), ("Execution", executionPanel))
 
   listenTo(`groupingCheckBox`)
   reactions += {
@@ -101,13 +92,13 @@ trait CapsulePanelUI extends Publisher with Settings {
         case e: EnvironmentDataUI                ⇒ Some(environmentCombo.selection.item)
       },
       if (groupingCheckBox.selected) groupingPanel.save else None,
-      sourcePanel.content.map { _.comboValue.get }.filter {
+      sourcePanel.content.map { _.content.get }.filter {
         _ match {
           case s: SourceDataProxyUI ⇒ true
           case _                    ⇒ false
         }
       },
-      hookPanel.content.map { _.comboValue.get }.filter {
+      hookPanel.content.map { _.content.get }.filter {
         _ match {
           case s: HookDataProxyUI ⇒ true
           case _                  ⇒ false

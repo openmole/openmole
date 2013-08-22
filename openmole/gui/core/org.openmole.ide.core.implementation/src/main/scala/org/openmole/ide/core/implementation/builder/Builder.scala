@@ -70,7 +70,7 @@ object Builder {
 
   def environmentUI(g: Boolean) = {
     val envValues = KeyRegistry.environments.values
-    EnvironmentDataProxyUI(envValues.find { _.toString == "Grid" }.getOrElse(envValues.head).buildDataUI, g)
+    EnvironmentDataProxyUI(envValues.find { _.toString == "Multi threading" }.getOrElse(envValues.head).buildDataUI, g)
   }
 
   /* def puzzles(listsPuzzleCompliant: List[List[CapsuleUI]],

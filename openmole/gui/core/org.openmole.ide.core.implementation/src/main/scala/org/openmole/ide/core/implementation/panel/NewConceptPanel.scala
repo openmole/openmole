@@ -23,6 +23,12 @@ class NewConceptPanel(index: Int) extends PluginPanel("wrap") {
 
   def addPrototype = add("> prototype", new Action("") { def apply = ConceptMenu.createAndDisplayPrototype(index) })
 
+  def addHook = add("> hook", new Action("") { def apply = ConceptMenu.createAndDisplayHook(index) })
+
+  def addSource = add("> source", new Action("") { def apply = ConceptMenu.createAndDisplaySource(index) })
+
+  def addEnvironment = add("> environment", new Action("") { def apply = ConceptMenu.createAndDisplayEnvironment(index) })
+
   def addSamplingComposition = add("> sampling", new Action("") { def apply = ConceptMenu.createAndDisplaySamplingComposition(index) })
 
   def add(s: String, action: Action) = contents += new MainLinkLabel(s, action)

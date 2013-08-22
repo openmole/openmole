@@ -68,6 +68,8 @@ class StatusBar extends MigPanel("wrap 3") {
            proxy: Option[DataProxyUI] = None,
            stack: String = ""): Unit = printError("[WARNING] ", warning, proxy, stack)
 
+  def block(s: String, t: Throwable): Unit = block(s, None, errorStack(t))
+
   def block(t: Throwable): Unit = block(t, None)
 
   def block(t: Throwable, proxy: Option[DataProxyUI]): Unit =
