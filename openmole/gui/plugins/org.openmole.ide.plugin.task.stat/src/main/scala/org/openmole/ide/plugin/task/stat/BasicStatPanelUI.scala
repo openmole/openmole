@@ -45,28 +45,29 @@ abstract class BasicStatPanelUI(statType: String,
   if (doublePrototypes.isEmpty)
     StatusBar().inform("At least 1 Prototype (Double) have to be created before using a" + statType + "  Tasks")
 
-  val multiPrototypeCombo: Option[MultiTwoCombos[PrototypeDataProxyUI, PrototypeDataProxyUI]] =
-    if (!arrayDoublePrototypes.isEmpty && !doublePrototypes.isEmpty) {
-      Some(new MultiTwoCombos("Prototypes",
-        arrayDoublePrototypes,
-        doublePrototypes,
-        "to " + statType,
-        dataUI.sequence.map {
-          s ⇒
-            new TwoCombosPanel(arrayDoublePrototypes,
-              doublePrototypes,
-              "to " + statType,
-              new TwoCombosData(Some(s._1), Some(s._2)))
-        },
-        CLOSE_IF_EMPTY,
-        ADD))
-    }
-    else None
+  lazy val isValid = !arrayDoublePrototypes.isEmpty && !doublePrototypes.isEmpty
+
+  val multiPrototypeCombo: MultiTwoCombos[PrototypeDataProxyUI, PrototypeDataProxyUI] =
+    new MultiTwoCombos("Prototypes",
+      arrayDoublePrototypes,
+      doublePrototypes,
+      "to " + statType,
+      dataUI.sequence.filter { filterPrototypes }.map {
+        s ⇒
+          new TwoCombosPanel(arrayDoublePrototypes,
+            doublePrototypes,
+            "to " + statType,
+            new TwoCombosData(Some(s._1), Some(s._2)))
+      },
+      CLOSE_IF_EMPTY,
+      ADD)
+
+  def filterPrototypes(p: (PrototypeDataProxyUI, PrototypeDataProxyUI)) = Proxies.check(p._1) && Proxies.check(p._2)
 
   val components = {
-    if (multiPrototypeCombo.isDefined)
+    if (isValid)
       List(("Settings", new PluginPanel("") {
-        add(multiPrototypeCombo.get.panel, "gap bottom 40")
+        add(multiPrototypeCombo.panel, "gap bottom 40")
       }))
     else
       List(("Settings", new PluginPanel("") {
@@ -74,10 +75,5 @@ abstract class BasicStatPanelUI(statType: String,
       }))
   }
 
-  multiPrototypeCombo match {
-    case Some(x: MultiTwoCombos[PrototypeDataProxyUI, PrototypeDataProxyUI]) ⇒ add(x,
-      new Help(i18n.getString("prototype")))
-    case _ ⇒
-
-  }
+  add(multiPrototypeCombo, new Help(i18n.getString("prototype")))
 }

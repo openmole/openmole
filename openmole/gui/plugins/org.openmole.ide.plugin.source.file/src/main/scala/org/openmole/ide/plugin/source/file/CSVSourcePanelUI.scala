@@ -42,7 +42,7 @@ class CSVSourcePanelUI(dataUI: CSVSourceDataUI)(implicit val i18n: ResourceBundl
       contents += (csvTextField, "span,growx")
     }
     contents += (comboMulti.getOrElse(new Label("<html><i>Nothing to be mapped yet</html></i>")), "span 2")
-    preferredSize = new Dimension(250, 100)
+    //preferredSize = new Dimension(250, 100)
   }
   readFile(dataUI.csvFilePath)
 

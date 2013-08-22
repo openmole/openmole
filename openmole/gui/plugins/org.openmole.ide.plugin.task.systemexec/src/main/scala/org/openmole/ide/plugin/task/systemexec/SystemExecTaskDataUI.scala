@@ -28,8 +28,8 @@ class SystemExecTaskDataUI(val name: String = "",
     resources.foreach(syet addResource new File(_))
     variables.foreach { p ⇒ syet addVariable (p.dataUI.coreObject.get) }
 
-    outputMap.foreach(i ⇒ syet addOutput (i._1, i._2.dataUI.coreObject.asInstanceOf[Prototype[File]]))
-    inputMap.foreach(i ⇒ syet addInput (i._1.dataUI.coreObject.asInstanceOf[Prototype[File]], i._2))
+    outputMap.foreach(i ⇒ syet addOutput (i._1, i._2.dataUI.coreObject.get.asInstanceOf[Prototype[File]]))
+    inputMap.foreach(i ⇒ syet addInput (i._1.dataUI.coreObject.get.asInstanceOf[Prototype[File]], i._2))
     syet
   }
 

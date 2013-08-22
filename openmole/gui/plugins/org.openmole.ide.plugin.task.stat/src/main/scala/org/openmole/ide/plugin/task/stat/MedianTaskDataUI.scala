@@ -18,8 +18,8 @@ class MedianTaskDataUI(val name: String = "",
   def coreObject(plugins: PluginSet) = util.Try {
     val gtBuilder = MedianTask(name)(plugins)
     sequence foreach { s ⇒
-      gtBuilder addSequence (s._1.dataUI.coreObject.asInstanceOf[Prototype[Array[Double]]],
-        s._2.dataUI.coreObject.asInstanceOf[Prototype[Double]])
+      gtBuilder addSequence (s._1.dataUI.coreObject.get.asInstanceOf[Prototype[Array[Double]]],
+        s._2.dataUI.coreObject.get.asInstanceOf[Prototype[Double]])
     }
     initialise(gtBuilder)
     gtBuilder.toTask

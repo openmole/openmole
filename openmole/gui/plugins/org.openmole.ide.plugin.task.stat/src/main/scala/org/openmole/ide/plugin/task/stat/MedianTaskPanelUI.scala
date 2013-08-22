@@ -22,7 +22,5 @@ import org.openmole.ide.core.implementation.dataproxy.Proxies
 class MedianTaskPanelUI(dataUI: MedianTaskDataUI) extends BasicStatPanelUI("median", dataUI) {
 
   def saveContent(name: String) = new MedianTaskDataUI(name,
-    if (multiPrototypeCombo.isDefined)
-      multiPrototypeCombo.get.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) }.filter { case (p1, p2) ⇒ Proxies.check(p1) || Proxies.check(p2) }
-    else List.empty)
+    multiPrototypeCombo.content.map { c ⇒ (c.comboValue1.get, c.comboValue2.get) })
 }

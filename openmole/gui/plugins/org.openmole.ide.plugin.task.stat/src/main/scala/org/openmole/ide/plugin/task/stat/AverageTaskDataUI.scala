@@ -5,10 +5,8 @@
 
 package org.openmole.ide.plugin.task.stat
 
-import java.awt.Color
 import org.openmole.core.model.data._
 import org.openmole.core.model.task._
-import org.openmole.ide.core.implementation.data.TaskDataUI
 import org.openmole.plugin.task.stat.AverageTask
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
@@ -19,8 +17,8 @@ class AverageTaskDataUI(val name: String = "",
     val gtBuilder = AverageTask(name)(plugins)
 
     sequence foreach { s ⇒
-      gtBuilder addSequence (s._1.dataUI.coreObject.asInstanceOf[Prototype[Array[Double]]],
-        s._2.dataUI.coreObject.asInstanceOf[Prototype[Double]])
+      gtBuilder addSequence (s._1.dataUI.coreObject.get.asInstanceOf[Prototype[Array[Double]]],
+        s._2.dataUI.coreObject.get.asInstanceOf[Prototype[Double]])
     }
 
     initialise(gtBuilder)
