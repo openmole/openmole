@@ -88,10 +88,9 @@ trait TaskPanel extends Base
     tPane.listenTo(tPane.selection)
 
     tPane.reactions += {
-      case SelectionChanged(_) ⇒
-        println("SelectionChanged")
-        update
+      case SelectionChanged(_) ⇒ update
     }
+
     basePanel.revalidate
   }
 

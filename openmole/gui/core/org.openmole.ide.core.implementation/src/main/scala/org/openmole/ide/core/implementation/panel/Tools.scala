@@ -32,7 +32,6 @@ object Tools {
 
   def updateIndex(p: PluginPanel, t: TabbedPane) = {
     val index = tabIndex(p)
-    println("XX " + index + " // " + selectTabbedPane(t, if (index < t.pages.size) index else 0))
     selectTabbedPane(t, if (index < t.pages.size) index else 0)
   }
 }

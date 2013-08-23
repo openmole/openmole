@@ -60,7 +60,7 @@ abstract class BasicStatPanelUI(statType: String,
             new TwoCombosData(Some(s._1), Some(s._2)))
       },
       CLOSE_IF_EMPTY,
-      ADD)
+      ADD, SMALL)
 
   def filterPrototypes(p: (PrototypeDataProxyUI, PrototypeDataProxyUI)) = Proxies.check(p._1) && Proxies.check(p._2)
 
