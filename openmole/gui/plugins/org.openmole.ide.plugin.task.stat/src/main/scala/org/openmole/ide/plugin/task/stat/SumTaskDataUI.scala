@@ -13,7 +13,6 @@ import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 class SumTaskDataUI(val name: String = "",
                     val sequence: List[(PrototypeDataProxyUI, PrototypeDataProxyUI)] = List.empty) extends StatDataUI {
 
-  println("SEquence : " + sequence)
   def coreObject(plugins: PluginSet) = util.Try {
     val gtBuilder = SumTask(name)(plugins)
     sequence foreach { s ⇒
