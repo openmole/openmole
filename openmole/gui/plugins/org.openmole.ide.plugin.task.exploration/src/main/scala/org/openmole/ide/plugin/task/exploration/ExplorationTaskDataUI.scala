@@ -26,7 +26,7 @@ import org.openmole.ide.core.implementation.dataproxy.SamplingCompositionDataPro
 
 class ExplorationTaskDataUI(
     val name: String = "",
-    var sampling: Option[SamplingCompositionDataProxyUI] = None) extends TaskDataUI {
+    override var sampling: Option[SamplingCompositionDataProxyUI] = None) extends IExplorationTaskDataUI {
 
   def coreObject(plugins: PluginSet) = util.Try {
     val taskBuilder = sampling match {
