@@ -149,7 +149,7 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
         val pRams = params("id")
 
         def returnStatusPage(exec: IMoleExecution) = {
-          val pageData = getMoleStats(exec) + ("Encapsulated" -> isEncapsulated(exec.id)) + ("id" -> exec.id) + ("status" -> getStatus(exec))
+          val pageData = getMoleStats(exec) + ("Encapsulated" -> isEncapsulated(pRams)) + ("id" -> pRams) + ("status" -> getStatus(exec))
 
           ssp("/executionData", pageData.toSeq: _*)
         }

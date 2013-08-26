@@ -43,8 +43,9 @@ trait MoleHandling { self: SlickSupport ⇒
   private val cachedMoles = new DataHandler[String, IMoleExecution](system)
   private val capsules = new DataHandler[String, File](system)
   private val moleStats = new DataHandler[String, Stats.Stats](system)
+  private val mole2CacheId = new DataHandler[IMoleExecution, String](system)
 
-  private val listener: EventListener[IMoleExecution] = new JobEventListener(moleStats)
+  private val listener: EventListener[IMoleExecution] = new JobEventListener(moleStats, mole2CacheId)
   private val mStatusListener = new MoleStatusListener(this)
 
   db withSession {
@@ -56,7 +57,8 @@ trait MoleHandling { self: SlickSupport ⇒
 
   def getStatus(exec: IMoleExecution): String =
     db withSession {
-      (for (m ← MoleData if m.id === exec.id) yield m.state).list().headOption.getOrElse("Doesn't Exist")
+      val moleId = mole2CacheId.get(exec).get
+      (for (m ← MoleData if m.id === moleId) yield m.state).list().headOption.getOrElse("Doesn't Exist")
     }
 
   private def processXMLFile[A: ClassTag](is: Option[InputStream]): (Option[A], String) = { //Make Either[A, String], use Scala-arm.
@@ -120,9 +122,10 @@ trait MoleHandling { self: SlickSupport ⇒
     (mole, path)
   }
 
-  private def cacheMoleExecution(moleExecution: IMoleExecution, path: Option[File]) = {
-    path foreach (capsules.add(moleExecution.id, _))
-    cachedMoles.add(moleExecution.id, moleExecution)
+  private def cacheMoleExecution(moleExecution: IMoleExecution, path: Option[File], cacheId: String) = {
+    path foreach (capsules.add(cacheId, _))
+    cachedMoles.add(cacheId, moleExecution)
+    mole2CacheId add (moleExecution, cacheId)
     moleExecution
   }
 
@@ -156,7 +159,7 @@ trait MoleHandling { self: SlickSupport ⇒
         db withSession {
           MoleData.insert((me.id, name, MoleHandling.Status.stopped, clob, ctxtClob, encapsulate, outputBlob))
         }
-        cacheMoleExecution(me, path)
+        cacheMoleExecution(me, path, me.id)
         Right(me)
       }
       case (_, error) ⇒ Left(error)
@@ -183,7 +186,7 @@ trait MoleHandling { self: SlickSupport ⇒
         case (pMClob, ctxtClob, e) ⇒ (SerializerService.deserialize[IPartialMoleExecution](pMClob.getAsciiStream), SerializerService.deserialize[Context](ctxtClob.getAsciiStream), e)
       }
 
-      r map Function.tupled(createMoleExecution _) map Function.tupled(cacheMoleExecution _)
+      r map Function.tupled(createMoleExecution _) map Function.tupled(cacheMoleExecution(_, _, key))
     }
 
     cachedMoles get key orElse mole
@@ -194,7 +197,10 @@ trait MoleHandling { self: SlickSupport ⇒
     blob.getBytes(1, blob.length.toInt)
   }
 
-  def getMoleStats(mole: IMoleExecution) = (moleStats get mole.id getOrElse Stats.empty) + ("totalJobs" -> mole.moleJobs.size)
+  def getMoleStats(mole: IMoleExecution) = {
+    val moleId = mole2CacheId.get(mole).get
+    (moleStats get moleId getOrElse Stats.empty) + ("totalJobs" -> mole.moleJobs.size)
+  }
   def startMole(key: String) { getMole(key) foreach (_.start) }
 
   def deleteMole(key: String) = {
@@ -209,9 +215,10 @@ trait MoleHandling { self: SlickSupport ⇒
 
   def setStatus(mole: IMoleExecution, status: String) = {
     db withSession {
-      val x = for { m ← MoleData if m.id === mole.id } yield m.state
-      x.update(status)
-      println(s"updated mole: ${mole.id} to ${status}")
+      val moleId = mole2CacheId.get(mole).get
+      val x = for { m ← MoleData if m.id === moleId } yield m.state
+      x update status
+      println(s"updated mole: ${moleId} to ${status}")
     }
   }
 
@@ -229,11 +236,13 @@ trait MoleHandling { self: SlickSupport ⇒
     outFile.createNewFile()
     println(outFile)
 
+    val moleId = mole2CacheId.get(exec).get
+
     try {
       Tar.createDirectoryTar(path, outFile)
 
       for (tis ← managed(Source.fromFile(outFile)(Codec.ISO8859))) {
-        val r = for (m ← MoleData if m.id === exec.id) yield m.result
+        val r = for (m ← MoleData if m.id === moleId) yield m.result
 
         val arr = tis.iter.toArray.map(_.toByte)
         val blob = new SerialBlob(arr)
