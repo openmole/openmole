@@ -24,6 +24,7 @@ import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.ide.core.implementation.data.DomainDataUI
 import org.openmole.ide.core.implementation.panelsettings.IDomainPanelUI
+import org.openmole.ide.core.implementation.sampling.SamplingCompositionPanelUI
 
 class SlidingDomainPanelUI(val dataUI: SlidingDomainDataUI[_])(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends IDomainPanelUI {
 
@@ -40,11 +41,14 @@ class SlidingDomainPanelUI(val dataUI: SlidingDomainDataUI[_])(implicit val i18n
   override def toString = dataUI.name
 
   def saveContent = {
-
     val classString =
-      ScenesManager.currentSamplingCompositionPanelUI.firstNoneModifierDomain(dataUI) match {
-        case Some(d: DomainDataUI) ⇒ d.domainType.toString.split('.').last
-        case _                     ⇒ DOUBLE
+      ScenesManager.currentSamplingCompositionPanelUI.headOption match {
+        case Some(scp: SamplingCompositionPanelUI) ⇒ scp.firstNoneModifierDomain(dataUI) match {
+          case Some(d: DomainDataUI) ⇒ d.domainType.toString.split('.').last
+          case _                     ⇒ DOUBLE
+        }
+        case _ ⇒
+          DOUBLE
       }
     SlidingDomainDataUI(sizeField.text, stepTextField.text, classString, dataUI.previousDomain)
   }

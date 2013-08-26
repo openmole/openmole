@@ -16,35 +16,39 @@
  */
 package org.openmole.ide.core.implementation.panel
 
-import org.openmole.ide.core.implementation.sampling.SamplingProxyUI
-import org.openmole.ide.core.implementation.data.SamplingDataUI
+import org.openmole.ide.core.implementation.data.{ SamplingDataUI }
+import org.openmole.ide.misc.widget.PluginPanel
+import org.openmole.ide.core.implementation.sampling.SamplingPanelUI
 
 trait SamplingPanel extends Base
-    with Proxy {
+    with SWidget
+    with Header {
 
-  type DATAPROXY = SamplingProxyUI
   type DATAUI = SamplingDataUI
 
-  val proxy: DATAPROXY {
-    var dataUI: DATAUI
-  }
-
+  val samplingPanelUI = new SamplingPanelUI(widget)
   build
 
   def build = {
-    basePanel.contents += panelSettings.panel
+    basePanel.contents += new PluginPanel("wrap", "-5[left]-10[]", "-2[top][10]") {
+      contents += header(scene, index)
+    }
+    createSettings
   }
 
-  var panelSettings = proxy.dataUI.buildPanelUI
-
-  def components = panelSettings.components
+  def components = samplingPanelUI.bestDisplay
 
   def createSettings = {
-    panelSettings = proxy.dataUI.buildPanelUI
-    basePanel.contents += panelSettings.tabbedPane
+    savePanel
+    widget.update
+    basePanel.contents += samplingPanelUI.bestDisplay
   }
 
-  def savePanel = proxy.dataUI = panelSettings.saveContent
+  def savePanel = widget.proxy.dataUI = samplingPanelUI.saveContent
 
   def deleteProxy = {}
+
+  override def toDoOnClose = {
+    widget.update
+  }
 }

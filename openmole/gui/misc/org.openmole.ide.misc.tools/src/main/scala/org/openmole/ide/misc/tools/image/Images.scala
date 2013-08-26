@@ -70,4 +70,6 @@ object Images {
 
   val HOOK = imageIcon("img/hook.png")
   val SOURCE = imageIcon("img/source.png")
+  val SAMPLING_COMPOSITION = imageIcon("img/samplingComposition.png")
+  val SAMPLING_COMPOSITION_FAT = imageIcon("img/samplingComposition_fat.png")
 }

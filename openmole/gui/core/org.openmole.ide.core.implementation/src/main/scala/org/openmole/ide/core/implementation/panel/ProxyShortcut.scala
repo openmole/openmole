@@ -17,33 +17,38 @@
 package org.openmole.ide.core.implementation.panel
 
 import org.openmole.ide.core.implementation.data._
+import org.openmole.ide.core.implementation.sampling.SamplingCompositionDataUI
 
 trait ProxyShortcut {
 
-  def proxyShorcut(dataUI: DataUI, index: Int): NewConceptPanel = proxyShorcut(dataUI match {
+  def proxyShorcut(dataUI: DataUI): NewConceptPanel = proxyShorcut(dataUI match {
     case x: TaskDataUI with IExplorationTaskDataUI ⇒ x
     case x: TaskDataUI                             ⇒ x
     case x: SourceDataUI                           ⇒ x
     case x: HookDataUI                             ⇒ x
     case x: CapsuleDataUI                          ⇒ x
-  }, index)
+    case x: SamplingCompositionDataUI              ⇒ x
+  })
 
-  def proxyShorcut(dataUI: TaskDataUI, index: Int) = new NewConceptPanel(index) {
+  def proxyShorcut(dataUI: TaskDataUI) = new NewConceptPanel {
     addPrototype
     addSamplingComposition
   }
 
-  def proxyShorcut(dataUI: SourceDataUI, index: Int) = new NewConceptPanel(index) {
+  def protoProxyShortcut = new NewConceptPanel {
     addPrototype
   }
 
-  def proxyShorcut(dataUI: HookDataUI, index: Int) = new NewConceptPanel(index) {
-    addPrototype
-  }
+  def proxyShorcut(dataUI: SourceDataUI, index: Int) = protoProxyShortcut
 
-  def proxyShorcut(dataUI: CapsuleDataUI, index: Int) = new NewConceptPanel(index) {
+  def proxyShorcut(dataUI: HookDataUI, index: Int) = protoProxyShortcut
+
+  def proxyShorcut(dataUI: SamplingCompositionDataUI, index: Int) = protoProxyShortcut
+
+  def proxyShorcut(dataUI: CapsuleDataUI, index: Int) = new NewConceptPanel {
     addEnvironment
     addSource
     addHook
   }
+
 }

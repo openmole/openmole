@@ -19,9 +19,7 @@ package org.openmole.ide.core.implementation.sampling
 
 import java.awt._
 import scala.swing.Action
-import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.misc.widget._
-import org.openmole.ide.core.implementation.workflow.ISceneContainer
 
 class DomainWidget(val proxy: DomainProxyUI,
                    val scenePanelUI: SamplingCompositionPanelUI,
@@ -30,7 +28,7 @@ class DomainWidget(val proxy: DomainProxyUI,
   preferredSize = new Dimension(100, 38)
   val link = new LinkLabel(domainPreview,
     new Action("") {
-      def apply = displayOnMoleScene
+      def apply = displayOnMoleScene(proxy)
     },
     3,
     "73a5d2",
@@ -41,12 +39,7 @@ class DomainWidget(val proxy: DomainProxyUI,
 
   var color = SamplingCompositionPanelUI.DEFAULT_COLOR_CENTER
 
-  if (display) displayOnMoleScene
-
-  def displayOnMoleScene = ScenesManager.currentSceneContainer match {
-    case Some(s: ISceneContainer) ⇒ s.scene.displayPropertyPanel(domainWidget)
-    case _                        ⇒
-  }
+  if (display) displayOnMoleScene(proxy)
 
   def domainPreview = proxy.dataUI.preview
 

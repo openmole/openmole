@@ -36,14 +36,14 @@ class ZipWithNameSamplingDataUI(val prototype: Option[PrototypeDataProxyUI] = No
   def coreObject(factorOrSampling: List[Either[(Factor[_, _], Int), (Sampling, Int)]]) = util.Try {
     ZipWithNameSampling(SamplingUtils.toFactors(factorOrSampling).asInstanceOf[List[Factor[File, Domain[File] with Discrete[File]]]]
       .headOption.getOrElse(throw new UserBadDataError("A factor is required to build a Zip with name Sampling")),
-      prototype.getOrElse(throw new UserBadDataError("A string prototypeMap is required to build a Zip with name Sampling")).dataUI.coreObject.asInstanceOf[Prototype[String]])
+      prototype.getOrElse(throw new UserBadDataError("A string prototypeMap is required to build a Zip with name Sampling")).dataUI.coreObject.get.asInstanceOf[Prototype[String]])
   }
 
   def coreObject(factors: List[Factor[_, _]], samplings: List[Sampling]) =
     new ZipWithNameSampling(factors.map {
       f ⇒ DiscreteFactor(f.asInstanceOf[Factor[File, Domain[File] with Discrete[File]]])
     }.headOption.getOrElse(throw new UserBadDataError("A factor is required to build a Zip with name Sampling")),
-      prototype.getOrElse(throw new UserBadDataError("A string prototypeMap is required to build a Zip with name Sampling")).dataUI.coreObject.asInstanceOf[Prototype[String]])
+      prototype.getOrElse(throw new UserBadDataError("A string prototypeMap is required to build a Zip with name Sampling")).dataUI.coreObject.get.asInstanceOf[Prototype[String]])
 
   def buildPanelUI = new ZipWithPrototypeSamplingPanelUI(this) {
     override lazy val help = new Helper(List(new URL(i18n.getString("zipWithNamePermalinkText"), i18n.getString("zipWithNamePermalink"))))

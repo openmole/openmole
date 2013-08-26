@@ -30,9 +30,8 @@ class ExecutionMoleScene(val dataUI: IMoleUI) extends MoleScene {
 
   val isBuildScene = false
 
-  override def displayPropertyPanel(proxy: DataProxyUI,
-                                    i: Int) = {
-    val p = super.displayPropertyPanel(proxy, i)
+  override def displayPropertyPanel(proxy: DataProxyUI) = {
+    val p = super.displayPropertyPanel(proxy)
     currentPanels(0).panel.contents.foreach { _.enabled = false }
     p
   }

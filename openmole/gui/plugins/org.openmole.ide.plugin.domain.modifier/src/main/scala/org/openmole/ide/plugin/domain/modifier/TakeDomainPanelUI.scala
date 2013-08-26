@@ -22,7 +22,6 @@ import java.util.ResourceBundle
 import org.openmole.ide.misc.widget.{ URL, Help, Helper, PluginPanel }
 import swing._
 import org.openmole.ide.core.implementation.panelsettings.IDomainPanelUI
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
 class TakeDomainPanelUI(pud: TakeDomainDataUI)(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends IDomainPanelUI {
 

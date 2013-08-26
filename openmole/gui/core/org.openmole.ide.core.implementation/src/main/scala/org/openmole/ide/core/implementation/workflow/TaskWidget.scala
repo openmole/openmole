@@ -45,7 +45,7 @@ class TaskWidget(scene: MoleScene,
   val settings = new ImageLinkLabel(Images.SETTINGS, new Action("") {
     def apply = {
       capsule.dataUI.task match {
-        case Some(x: TaskDataProxyUI) ⇒ scene.displayPropertyPanel(x, 0)
+        case Some(x: TaskDataProxyUI) ⇒ scene.saveAndcloseAllAndDisplayPropertyPanel(x)
         case _                        ⇒
       }
     }

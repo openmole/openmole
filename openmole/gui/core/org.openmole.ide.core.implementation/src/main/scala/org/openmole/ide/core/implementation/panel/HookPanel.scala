@@ -79,12 +79,12 @@ trait HookPanel extends Base
     tPane.listenTo(tPane.selection)
 
     tPane.reactions += {
-      case SelectionChanged(_) ⇒ update
+      case SelectionChanged(_) ⇒ updatePanel
     }
     basePanel.revalidate
   }
 
-  override def update = {
+  override def updatePanel = {
     savePanel
     ioSettings = ioPanel
     createSettings

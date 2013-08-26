@@ -26,7 +26,7 @@ import scala.Some
 import org.openmole.core.model.data.Prototype
 import org.openmole.ide.core.implementation.data.{ ImageView, DataUI, IFactorDataUI }
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
-import org.openmole.ide.core.implementation.panel.Settings
+import org.openmole.ide.core.implementation.panel.{ SaveSettings, Settings }
 
 class SamplingCompositionDataUI(val name: String = "",
                                 val domains: List[(DomainProxyUI, Point)] = List.empty,
@@ -109,8 +109,9 @@ class SamplingCompositionDataUI(val name: String = "",
     def toFactor(f: IFactorDataUI) =
       f.prototype match {
         case Some(p: PrototypeDataProxyUI) ⇒
-          Factor(p.dataUI.coreObject.asInstanceOf[Prototype[Any]],
-            f.domain.dataUI.coreObject.asInstanceOf[Domain[Any]])
+          Factor(p.dataUI.coreObject.get.asInstanceOf[Prototype[Any]],
+            f.domain.dataUI.coreObject.get
+          )
         case _ ⇒ throw new UserBadDataError("No Prototype is define for the domain " + f.domain.dataUI.preview)
       }
 
@@ -121,9 +122,9 @@ class SamplingCompositionDataUI(val name: String = "",
 
   def fatImagePath = "img/samplingComposition_fat.png"
 
-  def buildPanelUI: Settings = new SamplingCompositionPanelUI {
+  def buildPanelUI = new SamplingCompositionPanelUI {
     //type DATAUI = samplingCompositionDataUI.type
-    val dataUI = samplingCompositionDataUI
+    lazy val dataUI = samplingCompositionDataUI
   }
 
   def cloneWithoutPrototype(proxy: PrototypeDataProxyUI): SamplingCompositionDataUI = this

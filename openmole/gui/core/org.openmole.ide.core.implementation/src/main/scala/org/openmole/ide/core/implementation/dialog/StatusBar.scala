@@ -128,7 +128,7 @@ class StatusBar extends MigPanel("wrap 3") {
 
   def displayProxy(proxy: DataProxyUI) =
     ScenesManager.currentSceneContainer match {
-      case Some(sc: ISceneContainer) ⇒ sc.scene.displayPropertyPanel(proxy, 0)
+      case Some(sc: ISceneContainer) ⇒ sc.scene.saveAndcloseAllAndDisplayPropertyPanel(proxy)
       case None                      ⇒
     }
 }

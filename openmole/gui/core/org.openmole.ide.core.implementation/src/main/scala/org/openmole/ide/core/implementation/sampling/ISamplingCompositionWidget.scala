@@ -18,6 +18,8 @@
 package org.openmole.ide.core.implementation.sampling
 
 import scala.swing.Panel
+import org.openmole.ide.core.implementation.execution.ScenesManager
+import org.openmole.ide.core.implementation.workflow.ISceneContainer
 
 trait ISamplingCompositionWidget extends Panel {
   def proxy: SamplingOrDomainProxyUI
@@ -25,4 +27,11 @@ trait ISamplingCompositionWidget extends Panel {
   def update: Unit
 
   def scenePanelUI: SamplingCompositionPanelUI
+
+  def displayOnMoleScene(proxy: SamplingOrDomainProxyUI): Unit = ScenesManager.currentSceneContainer match {
+    case Some(s: ISceneContainer) ⇒
+      // s.scene.displayPropertyPanel(proxy, update)
+      s.scene.displaySamplingPropertyPanel(this)
+    case _ ⇒
+  }
 }

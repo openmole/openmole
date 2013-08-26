@@ -78,11 +78,11 @@ trait SourcePanel extends Base
     listenTo(panelSettings.help.components.toSeq: _*)
 
     tPane.reactions += {
-      case SelectionChanged(_) ⇒ update
+      case SelectionChanged(_) ⇒ updatePanel
     }
   }
 
-  override def update = {
+  override def updatePanel = {
     savePanel
     ioSettings = ioPanel
     createSettings

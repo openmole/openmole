@@ -79,7 +79,7 @@ trait PrototypePanel extends Base
 
   override def created = proxyCreated
 
-  override def update = {
+  override def updatePanel = {
     savePanel
   }
 

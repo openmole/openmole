@@ -58,7 +58,7 @@ trait TaskPanel extends Base
           addTypeMenu(taskCombo)
           addCreateLink
         }
-        contents += proxyShorcut(proxy.dataUI, index)
+        contents += proxyShorcut(proxy.dataUI)
       }
     }
     createSettings
@@ -66,7 +66,7 @@ trait TaskPanel extends Base
 
   override def created = proxyCreated
 
-  override def update = {
+  override def updatePanel = {
     savePanel
     ioSettings = ioPanel
     createSettings
@@ -88,7 +88,7 @@ trait TaskPanel extends Base
     tPane.listenTo(tPane.selection)
 
     tPane.reactions += {
-      case SelectionChanged(_) ⇒ update
+      case SelectionChanged(_) ⇒ updatePanel
     }
 
     basePanel.revalidate

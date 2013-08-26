@@ -38,7 +38,7 @@ import org.openmole.misc.tools.obj.ClassUtils._
 import scala.Some
 import org.openmole.ide.core.implementation.data.FactorDataUI
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
-import org.openmole.ide.core.implementation.panel.Settings
+import org.openmole.ide.core.implementation.panel.{ SaveSettings, Settings }
 
 object SamplingCompositionPanelUI {
   val DEFAULT_COLOR = new Color(250, 250, 250)
@@ -47,7 +47,7 @@ object SamplingCompositionPanelUI {
 
 import SamplingCompositionPanelUI._
 
-trait SamplingCompositionPanelUI extends Scene with Settings { samplingCompositionPanelUI ⇒
+trait SamplingCompositionPanelUI extends Scene with Settings with SaveSettings { samplingCompositionPanelUI ⇒
 
   type DATAUI = SamplingCompositionDataUI
   val dataUI: DATAUI

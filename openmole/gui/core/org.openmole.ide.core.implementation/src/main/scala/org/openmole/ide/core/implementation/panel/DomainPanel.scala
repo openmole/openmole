@@ -16,37 +16,39 @@
  */
 package org.openmole.ide.core.implementation.panel
 
-import org.openmole.ide.core.implementation.sampling.DomainProxyUI
+import org.openmole.ide.core.implementation.sampling.{ DomainPanelUI, IDomainWidget, DomainProxyUI }
 import org.openmole.ide.core.implementation.data.DomainDataUI
+import org.openmole.ide.misc.widget.PluginPanel
 
 trait DomainPanel extends Base
-    with Proxy { domainP ⇒
-
-  type DATAPROXY = DomainProxyUI {
-    type DATAUI = domainP.DATAUI
-    var dataUI: DATAUI
-  }
+    with DWidget
+    with Header {
 
   type DATAUI = DomainDataUI
-  //val self = this
 
-  val proxy: DATAPROXY
-
-  var panelSettings = proxy.dataUI.buildPanelUI
+  val domainPanelUI = new DomainPanelUI(widget)
   build
 
   def build = {
-    basePanel.contents += panelSettings.panel
+    basePanel.contents += new PluginPanel("wrap", "-5[left]-10[]", "-2[top][10]") {
+      contents += header(scene, index)
+    }
+    createSettings
   }
 
-  def components = panelSettings.components
+  def components = domainPanelUI.bestDisplay
 
   def createSettings = {
-    panelSettings = proxy.dataUI.buildPanelUI
-    basePanel.contents += panelSettings.tabbedPane
+    savePanel
+    widget.update
+    basePanel.contents += domainPanelUI.bestDisplay
   }
 
-  def savePanel = proxy.dataUI = panelSettings.saveContent
+  def savePanel = widget.proxy.dataUI = domainPanelUI.saveContent
 
   def deleteProxy = {}
+
+  override def toDoOnClose = {
+    widget.update
+  }
 }

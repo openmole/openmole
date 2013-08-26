@@ -39,12 +39,11 @@ import scala.Some
 
 object ConceptMenu {
 
-  def createAndDisplaySamplingComposition(index: Int) = displayExtra(Builder.samplingCompositionUI(false), index)
-  def createAndDisplayPrototype(index: Int) = displayExtra(Builder.prototypeUI, index)
+  def createAndDisplaySamplingComposition = display(Builder.samplingCompositionUI(false))
   def createAndDisplayPrototype = display(Builder.prototypeUI)
-  def createAndDisplayHook(index: Int) = displayExtra(Builder.hookUI(false), index)
-  def createAndDisplaySource(index: Int) = displayExtra(Builder.sourceUI(false), index)
-  def createAndDisplayEnvironment(index: Int) = displayExtra(Builder.environmentUI(false), index)
+  def createAndDisplayHook = display(Builder.hookUI(false))
+  def createAndDisplaySource = display(Builder.sourceUI(false))
+  def createAndDisplayEnvironment = display(Builder.environmentUI(false))
 
   val menuItemMapping = new HashMap[DataProxyUI, MenuItem]()
   val mapping = new HashMap[List[String], Menu]
@@ -190,24 +189,22 @@ object ConceptMenu {
   def display(proxy: DataProxyUI) = {
     if (ScenesManager.tabPane.peer.getTabCount == 0) createTab(proxy)
     else ScenesManager.tabPane.selection.page.content match {
-      case x: ISceneContainer ⇒ x.scene.displayPropertyPanel(proxy, 0)
+      case x: ISceneContainer ⇒ x.scene.displayPropertyPanel(proxy)
       case _                  ⇒ createTab(proxy)
     }
   }
 
-  def displayExtra(proxy: DataProxyUI,
-                   index: Int) = {
+  /*def displayExtra(proxy: DataProxyUI) = {
     if (ScenesManager.tabPane.peer.getTabCount == 0) createTab(proxy)
     else ScenesManager.tabPane.selection.page.content match {
-      case x: ISceneContainer ⇒ x.scene.displayPropertyPanel(proxy, index + 1)
+      case x: ISceneContainer ⇒ x.scene.displayPropertyPanel(proxy)
       case _                  ⇒ createTab(proxy)
     }
-  }
+  }   */
 
   def createTab(proxy: DataProxyUI) = DialogFactory.newTabName match {
-    case Some(y: BuildMoleSceneContainer) ⇒
-      y.scene.displayPropertyPanel(proxy, 0)
-    case _ ⇒
+    case Some(y: BuildMoleSceneContainer) ⇒ y.scene.displayPropertyPanel(proxy)
+    case _                                ⇒
   }
 
   def addItem(proxy: DataProxyUI): MenuItem = addItem(proxyName(proxy), proxy)

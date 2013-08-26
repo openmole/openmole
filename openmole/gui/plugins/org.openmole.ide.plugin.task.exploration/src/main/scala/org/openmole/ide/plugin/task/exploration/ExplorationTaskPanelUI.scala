@@ -51,7 +51,7 @@ class ExplorationTaskPanelUI(pud: ExplorationTaskDataUI)(implicit val i18n: Reso
     def apply =
       if (samplingComboBox.selection.item != emptyProxy) {
         ScenesManager.currentScene match {
-          case Some(s: MoleScene) ⇒ ConceptMenu.displayExtra(samplingComboBox.selection.item, s.firstFree)
+          case Some(s: MoleScene) ⇒ ConceptMenu.display(samplingComboBox.selection.item)
           case _                  ⇒
         }
       }

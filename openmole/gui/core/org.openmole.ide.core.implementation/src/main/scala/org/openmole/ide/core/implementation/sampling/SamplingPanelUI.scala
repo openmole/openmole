@@ -25,9 +25,9 @@ import javax.swing.ImageIcon
 import javax.imageio.ImageIO
 import org.openmole.ide.core.implementation.dialog.StatusBar
 import org.openmole.ide.core.implementation.data.SamplingDataUI
-import org.openmole.ide.core.implementation.panel.Settings
+import org.openmole.ide.core.implementation.panel.{ AnonSaveSettings, Settings }
 
-class SamplingPanelUI(samplingWidget: ISamplingWidget) extends Publisher with Settings {
+class SamplingPanelUI(samplingWidget: ISamplingWidget) extends Settings with AnonSaveSettings {
 
   type DATAUI = SamplingDataUI
   val incomings = samplingWidget.incomings
@@ -95,7 +95,7 @@ class SamplingPanelUI(samplingWidget: ISamplingWidget) extends Publisher with Se
     // samplingPanel.updateHelp
   }
 
-  def saveContent(n: String) = sPanel.saveContent
+  def saveContent = sPanel.saveContent
 
   def testConstraints(c: Option[Int]) = {
     c match {

@@ -41,8 +41,10 @@ class SamplingWidget(val proxy: SamplingProxyUI,
   val link = new LinkLabel(proxy.dataUI.preview,
     new Action("") {
       def apply = ScenesManager.currentSceneContainer match {
-        case Some(s: ISceneContainer) ⇒ s.scene.displayPropertyPanel(samplingWidget)
-        case _                        ⇒
+        case Some(s: ISceneContainer) ⇒
+          displayOnMoleScene(samplingWidget.proxy)
+        //s.scene.displayPropertyPanel(samplingWidget.proxy, update)
+        case _ ⇒
       }
     },
     3,

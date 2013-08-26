@@ -16,7 +16,7 @@
  */
 package org.openmole.ide.core.implementation.panel
 
-import scala.swing.Label
+import scala.swing.{ Publisher, Label }
 import scala.swing.event.SelectionChanged
 import org.openmole.ide.misc.widget.PluginPanel
 
@@ -51,11 +51,11 @@ trait CapsulePanel extends Base
     tPane.listenTo(tPane.selection)
 
     tPane.reactions += {
-      case SelectionChanged(_) ⇒ update
+      case SelectionChanged(_) ⇒ updatePanel
     }
   }
 
-  override def update = {
+  override def updatePanel = {
     savePanel
     createSettings
   }

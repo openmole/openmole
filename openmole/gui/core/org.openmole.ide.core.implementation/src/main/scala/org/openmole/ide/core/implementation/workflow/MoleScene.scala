@@ -32,17 +32,15 @@ import org.netbeans.api.visual.widget.Widget
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 import org.openmole.ide.core.implementation.data.{ IExplorationTaskDataUI, CheckData }
-import org.openmole.ide.core.implementation.panel._
 import org.openmole.ide.core.implementation.commons.{ ExplorationTransitionType, SimpleTransitionType }
-import org.openmole.ide.misc.widget.{ PluginPanel, MigPanel }
+import org.openmole.ide.misc.widget.MigPanel
 import scala.collection.JavaConversions._
 import scala.collection.mutable.HashMap
-import scala.swing.Panel
 import org.openmole.misc.exception.UserBadDataError
 import org.openmole.ide.core.implementation.dataproxy._
-import scala.Some
 import org.openmole.ide.core.implementation.panel._
-import org.openmole.ide.core.implementation.sampling.{ ISamplingWidget, IDomainWidget, ISamplingCompositionWidget }
+import org.openmole.ide.core.implementation.sampling._
+import scala.Some
 
 abstract class MoleScene extends GraphScene.StringGraph
     with SelectProvider
@@ -61,31 +59,39 @@ abstract class MoleScene extends GraphScene.StringGraph
 
   def firstFree = {
     def firstFree0(i: Int): Int =
-      currentPanels(i).base match {
-        case None ⇒ i
-        case _    ⇒ firstFree0(i + 1)
+      if (i > 1) 2
+      else {
+        _currentPanels(i).base match {
+          case None ⇒ i
+          case _    ⇒ firstFree0(i + 1)
+        }
       }
     firstFree0(0)
   }
 
-  def updatePanels = currentPanels.flatMap { _.base }.reverse.foreach { _.update }
+  def updatePanels = _currentPanels.flatMap {
+    _.base
+  }.reverse.foreach {
+    _.updatePanel
+  }
 
   class OBase {
     var base: Option[Base] = None
 
     val panel = new MigPanel("")
 
-    def set(b: Base, i: Int) = {
+    def set(b: Base) = {
       base = Some(b)
       panel.contents.removeAll
       panel.contents += b.basePanel
       panel.repaint
       panel.revalidate
-      // refresh
     }
   }
 
-  val currentPanels: List[OBase] = List(new OBase, new OBase, new OBase)
+  val _currentPanels: List[OBase] = List(new OBase, new OBase, new OBase)
+
+  def currentPanel(i: Int) = _currentPanels(math.min(i, 2))
 
   val moveAction = ActionFactory.createMoveAction(null, new MultiMoveProvider)
   val selectAction = ActionFactory.createSelectAction(this)
@@ -96,13 +102,13 @@ abstract class MoleScene extends GraphScene.StringGraph
   addChild(propertyLayer2)
   addChild(propertyLayer3)
 
-  val propertyWidget = List(new ComponentWidget(this, currentPanels(0).panel.peer) {
+  val propertyWidget = List(new ComponentWidget(this, _currentPanels(0).panel.peer) {
     setVisible(false)
   },
-    new ComponentWidget(this, currentPanels(1).panel.peer) {
+    new ComponentWidget(this, _currentPanels(1).panel.peer) {
       setVisible(false)
     },
-    new ComponentWidget(this, currentPanels(2).panel.peer) {
+    new ComponentWidget(this, _currentPanels(2).panel.peer) {
       setVisible(false)
     })
 
@@ -155,40 +161,61 @@ abstract class MoleScene extends GraphScene.StringGraph
     super.paintChildren
   }
 
-  def currentPanel = currentPanels(0).base match {
-    case Some(x: Base with Settings) ⇒ x
-    case _                           ⇒ throw new UserBadDataError("There is no current panel.")
-  }
-
-  def currentPanelUI = currentPanel.panel
+  def currentPanels: List[Base with Settings] = _currentPanels.map {
+    _.base match {
+      case Some(x: Base with Settings) ⇒ Some(x)
+      case _                           ⇒ None
+    }
+  }.flatten
 
   def displayCapsuleProperty(capsuleUI: CapsuleUI, tabIndex: Int) =
     ScenesManager.currentSceneContainer match {
       case (Some(exe: ExecutionMoleSceneContainer)) ⇒
       case _ ⇒
-        closePropertyPanels
-        removeAll(0)
-        currentPanels(0).set(new CapsulePanel {
-          def capsule = capsuleUI
-          val index = 0
-          val scene = moleScene
+        setPanel(new CapsulePanel {
+          lazy val capsule = capsuleUI
+          lazy val index = 0
+          lazy val scene = moleScene
         }, 0)
-
-        //new CapsulePanel(this, capsuleUI, 0, tabIndex)
-        propertyWidget(0).setPreferredLocation(new Point(getView.getBounds().x.toInt + 20, getView.getBounds().y.toInt + 20))
-        propertyWidget(0).revalidate
-        propertyWidget(0).setVisible(true)
-        refresh
     }
 
-  def displayPropertyPanel(proxy: DataProxyUI): Base = displayPropertyPanel(proxy, firstFree)
+  def saveAndcloseCurrentAndDisplayPropertyPanel(dataproxy: DataProxyUI) = {
+    closePropertyPanel(firstFree - 1)
+    displayPropertyPanel(dataproxy)
+  }
 
-  def displayPropertyPanel(dataproxy: DataProxyUI,
-                           i: Int): Base =
+  def saveAndcloseAllAndDisplayPropertyPanel(dataproxy: DataProxyUI) = {
+    closePropertyPanels
+    displayPropertyPanel(dataproxy)
+  }
+
+  def displaySamplingPropertyPanel(samplingWidget: ISamplingCompositionWidget): Base = {
     ScenesManager.currentSceneContainer match {
       case (Some(exe: ExecutionMoleSceneContainer)) ⇒ throw new UserBadDataError("No displaying in execution mode")
       case _ ⇒
-        closePropertyPanel(i)
+        val i = firstFree
+        val p = samplingWidget match {
+          case s: SamplingWidget ⇒ new SamplingPanel {
+            lazy val index = i
+            lazy val scene = moleScene
+            lazy val widget = s
+          }
+          case d: DomainWidget ⇒ new DomainPanel {
+            lazy val index = i
+            lazy val scene = moleScene
+            lazy val widget = d
+          }
+        }
+        setPanel(p, i)
+        p
+    }
+  }
+
+  def displayPropertyPanel(dataproxy: DataProxyUI): Base =
+    ScenesManager.currentSceneContainer match {
+      case (Some(exe: ExecutionMoleSceneContainer)) ⇒ throw new UserBadDataError("No displaying in execution mode")
+      case _ ⇒
+        val i = firstFree
         val p = dataproxy match {
           case x: TaskDataProxyUI with IOFacade ⇒ new TaskPanel {
             lazy val proxy = x
@@ -215,60 +242,36 @@ abstract class MoleScene extends GraphScene.StringGraph
             lazy val index = i
             lazy val scene = moleScene
           }
+          case x: SamplingCompositionDataProxyUI ⇒ new SamplingCompositionPanel {
+            lazy val proxy = x
+            lazy val index = i
+            lazy val scene = moleScene
+          }
           case _ ⇒ throw new UserBadDataError("No displaying available for " + dataproxy)
         }
-
-        /*proxy match {
-          case x: TaskDataProxyUI                ⇒ new TaskPanel(x, this, i)
-          case x: PrototypeDataProxyUI           ⇒ new PrototypePanel(x, this, i)
-          case x: EnvironmentDataProxyUI         ⇒ new EnvironmentPanel(x, this, i)
-          case x: SamplingCompositionDataProxyUI ⇒ new SamplingCompositionPanel(x, this, i)
-          case x: HookDataProxyUI                ⇒ new HookPanel(x, this, i)
-          case x: SourceDataProxyUI              ⇒ new SourcePanel(x, this, i)
-          case _                                  ⇒ throw new UserBadDataError("No displaying available for " + proxy)
-        }  */
-        currentPanels(i).set(p, i)
-        locate(i)
+        //  currentPanels(i).set(p)
+        // locate(i)
         p.nameTextField.requestFocus
-
-        /* currentPanels(i).panel.contents.get(currentPanels(i).panel.contents.size - 1) match {
-          case x: Proxy ⇒ x.nameTextField.requestFocus
-          case _        ⇒
-        }     */
-        refresh
+        setPanel(p, i)
+        //  refresh
         p
     }
 
+  def setPanel(p: Base, i: Int) = {
+    currentPanel(i).set(p)
+    locate(i)
+    refresh
+  }
+
   def locate(i: Int) = {
-    propertyWidget(i).setPreferredLocation(new Point(currentPanels.take(i).foldLeft(0) {
+    propertyWidget(i).setPreferredLocation(new Point(_currentPanels.take(i).foldLeft(0) {
       (acc, p) ⇒ acc + p.panel.bounds.width
     } + 10 * i + 10, 20 + getBounds.y))
     propertyWidget(i).revalidate
     propertyWidget(i).setVisible(true)
   }
 
-  def displayPropertyPanel(compositionSamplingWidget: ISamplingCompositionWidget): Base = {
-    val i = firstFree
-    saveAndClose(i)
-    val p = compositionSamplingWidget match {
-      case s: ISamplingWidget ⇒ new SamplingPanel {
-        val proxy = s.proxy
-        val index = i
-        val scene = moleScene
-      }
-      case f: IDomainWidget ⇒ new DomainPanel {
-        val proxy = f.proxy
-        val index = i
-        val scene = moleScene
-      }
-    }
-    currentPanels(i).set(p, i)
-    locate(i)
-    refresh
-    p
-  }
-
-  def savePropertyPanel(i: Int): Unit = savePropertyPanel(currentPanels(i).base)
+  def savePropertyPanel(i: Int): Unit = savePropertyPanel(currentPanel(i).base)
 
   def savePropertyPanel(panel: Option[Base]) = panel match {
     case Some(x: Base with SavePanel) ⇒ x.savePanel
@@ -281,8 +284,8 @@ abstract class MoleScene extends GraphScene.StringGraph
 
   def closePropertyPanel(i: Int): Unit = {
     if (i >= 0 && i <= 2) {
-      if (currentPanels(i).panel.contents.size > 0) {
-        currentPanels(i).base match {
+      if (currentPanel(i).panel.contents.size > 0) {
+        currentPanel(i).base match {
           case Some(x: Base) ⇒
             if (!x.created) {
               if (DialogFactory.closePropertyPanelConfirmation) {
@@ -300,7 +303,8 @@ abstract class MoleScene extends GraphScene.StringGraph
   }
 
   def removeAll(i: Int) = {
-    currentPanels(i).panel.contents.removeAll
+    currentPanel(i).panel.contents.removeAll
+    currentPanel(i).base = None
     propertyWidget(i).setVisible(false)
     refresh
   }

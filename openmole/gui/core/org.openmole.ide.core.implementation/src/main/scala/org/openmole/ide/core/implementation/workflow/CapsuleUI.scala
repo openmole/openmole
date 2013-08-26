@@ -245,10 +245,10 @@ class CapsuleUI private (
           case d: IExplorationTaskDataUI ⇒ d.sampling match {
             case Some(x: SamplingCompositionDataProxyUI) ⇒
               samplingWidget = Some(new LinkedImageWidget(scene,
-                new ImageIcon(ImageIO.read(x.dataUI.getClass.getClassLoader.getResource(x.dataUI.imagePath))),
+                Images.SAMPLING_COMPOSITION,
                 0, TASK_CONTAINER_HEIGHT - 3,
                 new Action("") {
-                  def apply = scene.displayPropertyPanel(x, 0)
+                  def apply = scene.saveAndcloseCurrentAndDisplayPropertyPanel(x)
                 }))
               addChild(samplingWidget.get)
             case _ ⇒ samplingWidget = None

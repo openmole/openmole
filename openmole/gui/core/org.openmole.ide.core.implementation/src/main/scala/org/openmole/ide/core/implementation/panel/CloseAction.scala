@@ -18,11 +18,17 @@ package org.openmole.ide.core.implementation.panel
 
 import scala.swing.Action
 import org.openmole.ide.core.implementation.workflow.MoleScene
+import org.openmole.misc.eventdispatcher.EventDispatcher
 
 trait CloseAction {
 
   def closeAction(scene: MoleScene, index: Int) = new Action("") {
-    def apply = scene.closePropertyPanel(index)
+    def apply = {
+      scene.closePropertyPanel(index)
+      toDoOnClose
+    }
   }
+
+  def toDoOnClose: Unit = {}
 
 }

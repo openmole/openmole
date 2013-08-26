@@ -24,9 +24,9 @@ import org.openmole.ide.core.implementation.data._
 import org.openmole.ide.misc.widget._
 import multirow.ComponentFocusedEvent
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.ide.core.implementation.panel.Settings
+import org.openmole.ide.core.implementation.panel.{ AnonSaveSettings, Settings }
 
-class DomainPanelUI(domainWidget: IDomainWidget) extends Publisher with Settings {
+class DomainPanelUI(domainWidget: IDomainWidget) extends Settings with AnonSaveSettings {
 
   val finalProxy = domainWidget.scenePanelUI.firstSampling(domainWidget.proxy)
   type DATAUI = DomainDataUI
@@ -96,7 +96,7 @@ class DomainPanelUI(domainWidget: IDomainWidget) extends Publisher with Settings
     // domainPanel.updateHelp
   }
 
-  def saveContent(n: String) = dPanel.saveContent match {
+  def saveContent = dPanel.saveContent match {
     case m: Modifier ⇒
       m.clone(previousDomain = previous.map {
         _.proxy.dataUI

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 <mathieu.Mathieu Leclaire at openmole.org>
+ * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,27 +16,27 @@
  */
 package org.openmole.ide.core.implementation.panel
 
-import org.openmole.ide.core.implementation.dataproxy.{ Proxies, EnvironmentDataProxyUI }
-import org.openmole.ide.core.implementation.data.{ ImageView, EnvironmentDataUI }
-import scala.swing.Label
-import ConceptMenu._
+import org.openmole.ide.core.implementation.dataproxy.{ Proxies, SamplingCompositionDataProxyUI }
+import org.openmole.ide.core.implementation.sampling.SamplingCompositionDataUI
+import org.openmole.ide.core.implementation.data.ImageView
+import scala.swing.{ Publisher, Label }
+import org.openmole.ide.misc.tools.image.Images
 import org.openmole.ide.misc.widget.PluginPanel
 import org.openmole.ide.core.implementation.execution.ScenesManager
 import org.openmole.ide.core.implementation.dialog.DialogFactory
 
-trait EnvironmentPanel extends Base
+trait SamplingCompositionPanel extends Base
+    with Publisher
     with Header
     with ProxyShortcut
     with Proxy
-    with ConceptCombo
     with Icon {
 
-  override type DATAPROXY = EnvironmentDataProxyUI
-  type DATAUI = EnvironmentDataUI with ImageView
+  override type DATAPROXY = SamplingCompositionDataProxyUI
+  type DATAUI = SamplingCompositionDataUI with ImageView
 
   var panelSettings = proxy.dataUI.buildPanelUI
-  val icon: Label = fatIcon(proxy.dataUI)
-  val taskCombo = ConceptMenu.buildEnvironmentMenu(p ⇒ updateConceptPanel(p.dataUI), proxy.dataUI)
+  val icon: Label = icon(Images.SAMPLING_COMPOSITION_FAT)
 
   build
 
@@ -49,9 +49,9 @@ trait EnvironmentPanel extends Base
         contents += new Composer {
           addIcon(icon)
           addName
-          addTypeMenu(taskCombo)
           addCreateLink
         }
+        contents += proxyShorcut(proxy.dataUI, index)
       }
     }
     createSettings
@@ -62,7 +62,6 @@ trait EnvironmentPanel extends Base
   def createSettings = {
     if (basePanel.contents.size == 3) basePanel.contents.remove(1, 2)
 
-    icon.icon = fatIcon(proxy.dataUI).icon
     panelSettings = proxy.dataUI.buildPanelUI
     basePanel.contents += panelSettings.bestDisplay
     basePanel.contents += panelSettings.help
@@ -73,7 +72,7 @@ trait EnvironmentPanel extends Base
     createSettings
   }
 
-  def updateConceptPanel(d: EnvironmentDataUI with ImageView) = {
+  def updateConceptPanel(d: SamplingCompositionDataUI with ImageView) = {
     savePanel
     proxy.dataUI = d
     createSettings
@@ -85,27 +84,20 @@ trait EnvironmentPanel extends Base
   }
 
   def deleteProxy = {
-    val capsulesWithEnv = ScenesManager.moleScenes.flatMap {
-      _.dataUI.capsules.values.filter {
-        _.dataUI.environment == Some(proxy)
-      }
-    }.toList
-    capsulesWithEnv match {
+    val toBeRemovedSamplings = ScenesManager.explorationCapsules.filter { case (c, d) ⇒ d.sampling == Some(proxy) }
+    toBeRemovedSamplings match {
       case Nil ⇒
         scene.closePropertyPanel(index)
         Proxies.instance -= proxy
-        -=(proxy)
-      //  true
+        ConceptMenu.-=(proxy)
+      // true
       case _ ⇒
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
-          capsulesWithEnv.foreach {
-            _.environment_=(None)
-          }
-          //delete
+          toBeRemovedSamplings.foreach { case (c, d) ⇒ c.scene.graphScene.removeNodeWithEdges(c.scene.dataUI.removeCapsuleUI(c)) }
+          deleteProxy
         }
       // else false
     }
-
   }
 
 }

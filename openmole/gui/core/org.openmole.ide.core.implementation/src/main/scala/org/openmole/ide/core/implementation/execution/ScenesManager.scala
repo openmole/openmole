@@ -36,6 +36,7 @@ import util.{ Failure, Success }
 import scala.Some
 import org.openmole.ide.core.implementation.dataproxy.{ TaskDataProxyUI, DataProxyUI }
 import org.openmole.ide.core.implementation.sampling.SamplingCompositionPanelUI
+import org.openmole.ide.core.implementation.panel.SamplingCompositionPanel
 
 object ScenesManager {
 
@@ -86,17 +87,19 @@ object ScenesManager {
   }
 
   def displayExtraPropertyPanel(proxy: DataProxyUI) = {
-    currentScene.getOrElse(addBuildSceneContainer("Mole").scene).displayPropertyPanel(proxy, 1)
+    currentScene.getOrElse(addBuildSceneContainer("Mole").scene).displayPropertyPanel(proxy)
   }
 
-  def currentPanelUI = currentScene match {
-    case Some(s: MoleScene) ⇒ s.currentPanelUI
-    case _                  ⇒ throw new UserBadDataError("There is no current scene")
+  def currentPanels = currentScene match {
+    case Some(s: MoleScene) ⇒ s.currentPanels
+    case _                  ⇒ List()
   }
 
-  def currentSamplingCompositionPanelUI = currentPanelUI match {
-    case scp: SamplingCompositionPanelUI ⇒ scp
-    case _                               ⇒ throw new UserBadDataError("There is no current samplingMap panel")
+  def currentSamplingCompositionPanelUI = currentPanels.map {
+    _ match {
+      case scp: SamplingCompositionPanel ⇒ Some(scp.panelSettings)
+      case _                             ⇒ None
+    }
   }
 
   def closePropertyPanel = List(currentScene).flatten.foreach {

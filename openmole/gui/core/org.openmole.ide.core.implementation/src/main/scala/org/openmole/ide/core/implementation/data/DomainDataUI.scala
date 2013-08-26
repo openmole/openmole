@@ -22,13 +22,13 @@ import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.ide.misc.tools.util.Types
 import scala.util.Try
 import org.openmole.ide.core.implementation.panelsettings.IDomainPanelUI
+import org.openmole.ide.core.implementation.dataproxy.SamplingCompositionDataProxyUI
 
 object DomainDataUI {
   implicit val ordering = Ordering.by((_: DomainDataUI).name)
 }
 
 trait DomainDataUI extends DataUI {
-
   def domainType: Manifest[_]
 
   def coreObject: Try[Domain[_]]

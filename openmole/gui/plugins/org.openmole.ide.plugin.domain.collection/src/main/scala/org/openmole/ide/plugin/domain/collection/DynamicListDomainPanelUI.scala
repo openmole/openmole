@@ -23,7 +23,6 @@ import swing._
 import java.awt.Color
 import java.util.{ Locale, ResourceBundle }
 import org.openmole.ide.core.implementation.panelsettings.IDomainPanelUI
-import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
 class DynamicListDomainPanelUI(pud: DynamicListDomainDataUI[_])(implicit val i18n: ResourceBundle = ResourceBundle.getBundle("help", new Locale("en", "EN"))) extends IDomainPanelUI {
 

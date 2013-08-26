@@ -19,11 +19,7 @@ package org.openmole.ide.plugin.domain.distribution
 
 import scala.swing._
 import event.SelectionChanged
-import swing.Swing._
-import swing.ListView._
-import scala.swing.Table.ElementMode._
 import org.openmole.ide.misc.widget.{ Help, URL, Helper, PluginPanel }
-import scala.swing.BorderPanel.Position._
 import java.util.{ Locale, ResourceBundle }
 import org.openmole.ide.misc.tools.util.Types._
 import org.openmole.ide.core.implementation.panelsettings.IDomainPanelUI

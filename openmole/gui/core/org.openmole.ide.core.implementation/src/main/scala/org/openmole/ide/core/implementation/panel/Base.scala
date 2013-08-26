@@ -30,7 +30,7 @@ trait Base extends Created with SavePanel {
 
   val index: Int
 
-  def update: Unit = {}
+  def updatePanel: Unit = {}
 
   def createSettings: Unit
 

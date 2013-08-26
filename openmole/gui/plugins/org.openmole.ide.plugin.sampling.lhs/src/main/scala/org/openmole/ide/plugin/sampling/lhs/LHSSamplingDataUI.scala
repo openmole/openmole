@@ -47,11 +47,17 @@ class LHSSamplingDataUI(val samples: String = "1") extends SamplingDataUI {
   //FIXME 2.10
   override def isAcceptable(domain: DomainDataUI) =
     domain match {
-      case x: RangeDomainDataUI[_] ⇒ true
-      case _ ⇒
-        StatusBar().warn("A Bounded range of Double is required for a LHS Sampling")
-        false
+      case x: RangeDomainDataUI[_] ⇒ x.step match {
+        case Some(s: String) ⇒ falseReturn
+        case _               ⇒ true
+      }
+      case _ ⇒ falseReturn
     }
+
+  private def falseReturn = {
+    StatusBar().warn("A Bounded range of Double is required for a LHS Sampling")
+    false
+  }
 
   def isAcceptable(sampling: SamplingDataUI) = false
 
