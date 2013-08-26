@@ -23,6 +23,7 @@ import org.openmole.core.model.job.IMoleJob
 import org.openmole.misc.eventdispatcher.Event
 import ExecutionState._
 import org.openmole.core.model.tools.ExceptionEvent
+import org.openmole.misc.workspace.AuthenticationProvider
 
 object Environment {
   case class JobSubmitted(job: IExecutionJob) extends Event[Environment]

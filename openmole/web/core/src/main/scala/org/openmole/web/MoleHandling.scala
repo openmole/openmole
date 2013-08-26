@@ -31,6 +31,8 @@ import org.openmole.misc.tools.io.TarArchiver.TarOutputStream2TarOutputStreamCom
 import scala.Some
 import org.openmole.core.implementation.validation.DataflowProblem.MissingSourceInput
 import org.openmole.core.implementation.validation.DataflowProblem.MissingInput
+import java.util.UUID
+import java.sql.SQLException
 
 trait MoleHandling { self: SlickSupport ⇒
 
@@ -39,6 +41,7 @@ trait MoleHandling { self: SlickSupport ⇒
   protected implicit def executor: concurrent.ExecutionContext = system.dispatcher
 
   private val cachedMoles = new DataHandler[String, IMoleExecution](system)
+  private val capsules = new DataHandler[String, File](system)
   private val moleStats = new DataHandler[String, Stats.Stats](system)
 
   private val listener: EventListener[IMoleExecution] = new JobEventListener(moleStats)
@@ -51,11 +54,10 @@ trait MoleHandling { self: SlickSupport ⇒
 
   (getUnfinishedMoleKeys map getMole).flatten foreach (_.start)
 
-  def getStatus(exec: IMoleExecution): String = {
+  def getStatus(exec: IMoleExecution): String =
     db withSession {
       (for (m ← MoleData if m.id === exec.id) yield m.state).list().headOption.getOrElse("Doesn't Exist")
     }
-  }
 
   private def processXMLFile[A: ClassTag](is: Option[InputStream]): (Option[A], String) = { //Make Either[A, String], use Scala-arm.
     is match {
@@ -106,16 +108,29 @@ trait MoleHandling { self: SlickSupport ⇒
     Context(c.map(_.getOrElse(throw new Exception("CSV file does not have data on all missing variables"))))
   }
 
-  private def cacheMole(mole: IMoleExecution) = {
-    cachedMoles.add(mole.id, mole)
+  private def createMoleExecution(pMole: IPartialMoleExecution, ctxt: Context, encapsulated: Boolean) = {
+    val path: Option[File] = if (encapsulated) Some(Workspace.newDir("")) else None
+    val context = ExecutionContext(new PrintStream(new File(path.getOrElse(".") + "/out")), path)
+    val mole = pMole.toExecution(ctxt, context)
+
     EventDispatcher.listen(mole, listener, classOf[IMoleExecution.JobStatusChanged])
     EventDispatcher.listen(mole, listener, classOf[IMoleExecution.JobCreated])
     EventDispatcher.listen(mole, mStatusListener, classOf[IMoleExecution.Starting])
     EventDispatcher.listen(mole, mStatusListener, classOf[IMoleExecution.Finished])
-
+    (mole, path)
   }
 
-  def createMole(moleInput: ⇒ Option[InputStream], csvInput: ⇒ Option[InputStream], encapsulate: Boolean = false): Either[String, IMoleExecution] = {
+  private def cacheMoleExecution(moleExecution: IMoleExecution, path: Option[File]) = {
+    path foreach (capsules.add(moleExecution.id, _))
+    cachedMoles.add(moleExecution.id, moleExecution)
+    moleExecution
+  }
+
+  private def regenDir(file: File) = {
+    if (!file.exists()) file.mkdir()
+  }
+
+  def createMole(moleInput: ⇒ Option[InputStream], csvInput: ⇒ Option[InputStream], encapsulate: Boolean = false, name: String = ""): Either[String, IMoleExecution] = {
     val r = csvInput map Source.fromInputStream
 
     val regex = """(.*),(.*)""".r
@@ -126,29 +141,23 @@ trait MoleHandling { self: SlickSupport ⇒
 
     val moleExec = processXMLFile[IPartialMoleExecution](moleInput)
 
-    val path: Option[File] = if (encapsulate) Some(Workspace.newDir("")) else None
-
-    println(path)
-
-    val context = ExecutionContext(new PrintStream(new File(path.getOrElse(".") + "/out")), path)
-
     moleExec match {
       case (Some(pEx), _) ⇒ {
         val ctxt = reifyCSV(pEx, csvData)
-        val exec = pEx.toExecution(ctxt, context)
 
-        val clob = new SerialClob(SerializerService.serialize(exec).toCharArray)
+        val clob = new SerialClob(SerializerService.serialize(pEx).toCharArray)
+
+        val ctxtClob = new SerialClob(SerializerService.serialize(ctxt).toCharArray)
 
         val outputBlob = new SerialBlob(Array[Byte]())
+        //val id = UUID.randomUUID().toString
 
+        val (me, path) = createMoleExecution(pEx, ctxt, encapsulate)
         db withSession {
-          val p = path map (_.getAbsolutePath) getOrElse "."
-          MoleData.insert((exec.id, MoleHandling.Status.stopped, clob, p, outputBlob))
+          MoleData.insert((me.id, name, MoleHandling.Status.stopped, clob, ctxtClob, encapsulate, outputBlob))
         }
-
-        cacheMole(exec)
-
-        Right(exec)
+        cacheMoleExecution(me, path)
+        Right(me)
       }
       case (_, error) ⇒ Left(error)
     }
@@ -168,16 +177,13 @@ trait MoleHandling { self: SlickSupport ⇒
     lazy val mole: Option[IMoleExecution] = db withSession {
       /*val f = new File((for (m ← MoleData if m.id === key) yield m.path).list.head)
       f.createNewFile()*/
-      val r = MoleData.filter(_.id === key).map(_.clobbedMole).list().headOption match {
-        case Some(head) ⇒ {
-          val r = SerializerService.deserialize[IMoleExecution](head.getAsciiStream)
-          cacheMole(r)
-          Some(r)
-        }
-        case _ ⇒ None
+
+      val row = MoleData filter (_.id === key)
+      val r = (row map (r ⇒ (r.clobbedMole, r.clobbedContext, r.encapsulated))).list.headOption map {
+        case (pMClob, ctxtClob, e) ⇒ (SerializerService.deserialize[IPartialMoleExecution](pMClob.getAsciiStream), SerializerService.deserialize[Context](ctxtClob.getAsciiStream), e)
       }
 
-      r
+      r map Function.tupled(createMoleExecution _) map Function.tupled(cacheMoleExecution _)
     }
 
     cachedMoles get key orElse mole
@@ -210,13 +216,14 @@ trait MoleHandling { self: SlickSupport ⇒
   }
 
   def isEncapsulated(key: String): Boolean = db withSession {
-    (for { m ← MoleData if m.id === key } yield !(m.path === ".")).list.forall(b ⇒ b)
+    println(key)
+    (for { m ← MoleData if m.id === key } yield m.encapsulated).list.forall(b ⇒ b)
   }
 
   //TODO - FRAGILE
   def storeResultBlob(exec: IMoleExecution) = db withSession {
     println("starting the store op")
-    val path = new File((for (m ← MoleData if m.id === exec.id) yield m.path).list.head)
+    val path: File = (capsules get exec.id).get
     println(path)
     val outFile = new File(Workspace.newFile.toString + ".tar")
     outFile.createNewFile()

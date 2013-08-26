@@ -18,19 +18,19 @@
 package org.openmole.plugin.environment.ssh
 
 import org.openmole.misc.exception.UserBadDataError
-import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.workspace.{ AuthenticationProvider, Workspace }
 
 object SSHAuthentication {
 
-  def apply() = Workspace.persistentList(classOf[SSHAuthentication])
-  def update(i: Int, a: SSHAuthentication) = Workspace.persistentList(classOf[SSHAuthentication])(i) = a
-  def apply(i: Int) = Workspace.persistentList(classOf[SSHAuthentication])(i)
-  def apply(target: String) = {
-    val list = Workspace.persistentList(classOf[SSHAuthentication])
-    list.find { case (i, e) ⇒ target.matches(e.regexp) }.getOrElse(throw new UserBadDataError("No authentication method found for " + target))._2
+  def apply()(implicit authentications: AuthenticationProvider) = authentications(classOf[SSHAuthentication])
+  def update(i: Int, a: SSHAuthentication) = Workspace.setAuthentication(i, a)
+  def apply(i: Int)(implicit authentications: AuthenticationProvider) = authentications(classOf[SSHAuthentication])(i)
+  def apply(target: String, authentications: AuthenticationProvider) = {
+    val list = authentications(classOf[SSHAuthentication])
+    list.find { e ⇒ target.matches(e.regexp) }.getOrElse(throw new UserBadDataError("No authentication method found for " + target))
   }
 
-  def apply(login: String, host: String, port: Int): SSHAuthentication = apply(address(login, host, port))
+  def apply(login: String, host: String, port: Int, authentications: AuthenticationProvider): SSHAuthentication = apply(address(login, host, port), authentications)
   def address(login: String, host: String, port: Int) = s"$login@$host:$port"
 
 }

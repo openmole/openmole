@@ -8,6 +8,7 @@ package org.openmole.ide.plugin.environment.pbs
 import org.openmole.plugin.environment.pbs.PBSEnvironment
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.ide.core.implementation.data.EnvironmentDataUI
+import org.openmole.misc.workspace.Workspace
 
 class PBSEnvironmentDataUI(val name: String = "",
                            val login: String = "",
@@ -35,7 +36,7 @@ class PBSEnvironmentDataUI(val name: String = "",
       path,
       threads,
       nodes,
-      coreByNode)
+      coreByNode)(Workspace.authenticationProvider)
   }
 
   def coreClass = classOf[PBSEnvironment]

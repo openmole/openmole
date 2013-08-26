@@ -19,6 +19,7 @@ package org.openmole.core.model.mole
 
 import java.io.{ PrintStream, File }
 import org.openmole.misc.tools.io.FileUtil._
+import org.openmole.misc.workspace.AuthenticationProvider
 
 object ExecutionContext {
   def apply(out: PrintStream, directory: Option[File]) = {
@@ -35,7 +36,6 @@ object ExecutionContext {
 trait ExecutionContext {
   def out: PrintStream
   def directory: Option[File]
-
   def relativise(f: String): File =
     directory.map(_.child(f)).getOrElse(new File(f))
 

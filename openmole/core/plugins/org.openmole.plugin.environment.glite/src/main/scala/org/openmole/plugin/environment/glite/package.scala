@@ -17,10 +17,10 @@
 
 package org.openmole.plugin.environment
 
-import org.openmole.core.implementation.tools._
-
 package object glite {
-  lazy val complexsystems = GliteEnvironment("vo.complex-systems.eu")()
-  lazy val biomed = GliteEnvironment("biomed")()
-  lazy val francegrilles = GliteEnvironment("vo.france-grilles.fr")()
+  implicit def auth = org.openmole.misc.workspace.Workspace.instance.authenticationProvider
+
+  lazy val complexsystems = GliteEnvironment("vo.complex-systems.eu")
+  lazy val biomed = GliteEnvironment("biomed")
+  lazy val francegrilles = GliteEnvironment("vo.france-grilles.fr")
 }

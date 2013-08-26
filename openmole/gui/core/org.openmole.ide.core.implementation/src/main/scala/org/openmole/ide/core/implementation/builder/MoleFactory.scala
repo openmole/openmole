@@ -51,12 +51,16 @@ object MoleFactory {
                          manager: IMoleUI,
                          capsuleMapping: Map[CapsuleUI, ICapsule]): Try[(PartialMoleExecution, Iterable[(Environment, String)])] =
     Try {
-      val envs = capsuleMapping.flatMap { c ⇒
-        c._1.dataUI.environment match {
-          case Some(env: EnvironmentDataProxyUI) ⇒ List((c._2, env.dataUI.coreObject.get, env.dataUI.name))
-          case _                                 ⇒ Nil
-        }
-      }
+      val (envs, envNames) = capsuleMapping.flatMap {
+        case (cProxy, c) ⇒
+          cProxy.dataUI.environment match {
+            case Some(env: EnvironmentDataProxyUI) ⇒
+              val unauthenticatedEnv = env.dataUI.coreObject.get
+              Some((c -> unauthenticatedEnv, unauthenticatedEnv -> env.dataUI.name))
+            case _ ⇒ Nil
+          }
+      }.unzip
+
       val hookMaping = for {
         c ← capsuleMapping
         h ← c._1.dataUI.hooks
@@ -71,13 +75,13 @@ object MoleFactory {
         mole,
         sourceMaping.map { h ⇒ (h.c, h.s) },
         hookMaping.map { h ⇒ (h.c, h.h) },
-        envs.map { case (c, e, _) ⇒ c -> new FixedEnvironmentSelection(e) }.toMap,
+        envs.toMap,
         capsuleMapping.flatMap { c ⇒
           c._1.dataUI.grouping match {
             case Some(gr: GroupingDataUI) ⇒ List(c._2 -> gr.coreObject.get)
             case _                        ⇒ Nil
           }
-        }), envs.map { case (_, e, n) ⇒ e -> n })
+        }), envNames)
     }
 
   def buildMole(manager: IMoleUI): Try[(IMole, Map[CapsuleUI, ICapsule], Iterable[(CapsuleUI, Throwable)])] =

@@ -68,19 +68,19 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
 
   addButtons
   try {
-    Workspace.persistentList(classOf[GliteAuthentication]).headOption match {
-      case Some((i: Int, x: P12Certificate)) ⇒
+    Workspace.authenticationProvider(classOf[GliteAuthentication]).headOption match {
+      case Some(x: P12Certificate) ⇒
         initButton = Some(p12Button)
         p12TextField.text = x.certificate.getAbsolutePath
         addP12
         passString = Workspace.decrypt(x.cypheredPassword)
-      case Some((i: Int, x: PEMCertificate)) ⇒
+      case Some(x: PEMCertificate) ⇒
         initButton = Some(pemButton)
         pem1TextField.text = x.certificate.getAbsolutePath
         pem2TextField.text = x.key.getAbsolutePath
         addPem
         passString = Workspace.decrypt(x.cypheredPassword)
-      case Some((i: Int, x: ProxyFile)) ⇒
+      case Some(x: ProxyFile) ⇒
         initButton = Some(proxyButton)
         proxyTextField.text = x.proxy.getAbsolutePath
         addProxy
@@ -140,17 +140,17 @@ class GliteAuthentificationPanelUI extends PluginPanel("", "[left][right]", "") 
     try {
       pemPassField match {
         case Some(x: PasswordField) ⇒
-          if (pemButton.selected) Workspace.persistentList(classOf[GliteAuthentication])(0) =
+          if (pemButton.selected) Workspace.setAuthentication[GliteAuthentication](0,
             new PEMCertificate(Workspace.encrypt(new String(x.password)),
               new File(pem1TextField.text),
-              new File(pem2TextField.text))
+              new File(pem2TextField.text)))
           else if (p12Button.selected)
-            Workspace.persistentList(classOf[GliteAuthentication])(0) =
+            Workspace.setAuthentication[GliteAuthentication](0,
               new P12Certificate(Workspace.encrypt(new String(p12PassField.get.password)),
-                new File(p12TextField.text))
+                new File(p12TextField.text)))
           else if (proxyButton.selected) {
-            Workspace.persistentList(classOf[GliteAuthentication])(0) =
-              new ProxyFile(new File(proxyTextField.text))
+            Workspace.setAuthentication[GliteAuthentication](0,
+              new ProxyFile(new File(proxyTextField.text)))
           }
       }
       (pem :: p12 :: proxy :: Nil).filterNot(_._1.selected).foreach(_._3)

@@ -166,15 +166,15 @@ class SSHAuthentificationPanelUI extends PluginPanel("") with AuthenticationPane
 
   override val components = List()
   val panelList =
-    Workspace.persistentList(classOf[SSHAuthentication]).map { hm ⇒
+    Workspace.authenticationProvider(classOf[SSHAuthentication]).map { hm ⇒
       hm match {
-        case (i: Int, x: LoginPassword) ⇒
+        case x: LoginPassword ⇒
           new SSHAuthentificationPanel(new SSHAuthentificationData(
             new ConnectionData(Login,
               x.login,
               Workspace.decrypt(x.cypheredPassword),
               x.target)))
-        case (i: Int, x: PrivateKey) ⇒
+        case x: PrivateKey ⇒
           new SSHAuthentificationPanel(new SSHAuthentificationData(
             new ConnectionData(SSHKey,
               x.login,
@@ -192,22 +192,21 @@ class SSHAuthentificationPanelUI extends PluginPanel("") with AuthenticationPane
   contents += multiPanel.panel
 
   def saveContent = {
-    var i = 0
-    for (j ← 0 to Workspace.persistentList(classOf[SSHAuthentication]).size)
-      Workspace.persistentList(classOf[SSHAuthentication]) -= j
-    multiPanel.content.foreach { data ⇒
-      data.connectionData.connectionMethod match {
-        case Login ⇒ Workspace.persistentList(classOf[SSHAuthentication])(i) =
-          new LoginPassword(data.connectionData.login,
-            Workspace.encrypt(new String(data.connectionData.password)),
-            data.connectionData.target)
-        case SSHKey ⇒ Workspace.persistentList(classOf[SSHAuthentication])(i) =
-          new PrivateKey(new File(data.connectionData.pritvateKey),
-            data.connectionData.login,
-            Workspace.encrypt(new String(data.connectionData.password)),
-            data.connectionData.target)
-      }
-      i += 1
+    Workspace.cleanAuthentications[SSHAuthentication]
+
+    multiPanel.content.zipWithIndex.foreach {
+      case (data, i) ⇒
+        data.connectionData.connectionMethod match {
+          case Login ⇒ Workspace.setAuthentication[SSHAuthentication](i,
+            new LoginPassword(data.connectionData.login,
+              Workspace.encrypt(new String(data.connectionData.password)),
+              data.connectionData.target))
+          case SSHKey ⇒ Workspace.setAuthentication[SSHAuthentication](i,
+            new PrivateKey(new File(data.connectionData.pritvateKey),
+              data.connectionData.login,
+              Workspace.encrypt(new String(data.connectionData.password)),
+              data.connectionData.target))
+        }
     }
   }
 

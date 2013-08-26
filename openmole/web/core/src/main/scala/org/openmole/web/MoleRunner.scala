@@ -81,9 +81,9 @@ class MoleRunner(val system: ActorSystem) extends ScalatraServlet with SlickSupp
 
     val cnS = csv.map(_.getInputStream)
 
-    val encapsulate = params("encapsulate") match {
-      case "on" ⇒ true
-      case _    ⇒ false
+    val encapsulate = params get "encapsulate" match {
+      case Some("on") ⇒ true
+      case _          ⇒ false
     }
 
     //TODO: make sure this is released
