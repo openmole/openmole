@@ -54,11 +54,10 @@ trait MoleHandling { self: SlickSupport ⇒
 
   (getUnfinishedMoleKeys map getMole).flatten foreach (_.start)
 
-  def getStatus(exec: IMoleExecution): String = {
+  def getStatus(exec: IMoleExecution): String =
     db withSession {
       (for (m ← MoleData if m.id === exec.id) yield m.state).list().headOption.getOrElse("Doesn't Exist")
     }
-  }
 
   private def processXMLFile[A: ClassTag](is: Option[InputStream]): (Option[A], String) = { //Make Either[A, String], use Scala-arm.
     is match {
@@ -109,24 +108,29 @@ trait MoleHandling { self: SlickSupport ⇒
     Context(c.map(_.getOrElse(throw new Exception("CSV file does not have data on all missing variables"))))
   }
 
-  private def cacheMole(pMole: IPartialMoleExecution, ctxt: Context, encapsulated: Boolean, id: String) = {
+  private def createMoleExecution(pMole: IPartialMoleExecution, ctxt: Context, encapsulated: Boolean) = {
     val path: Option[File] = if (encapsulated) Some(Workspace.newDir("")) else None
     val context = ExecutionContext(new PrintStream(new File(path.getOrElse(".") + "/out")), path)
-    val mole = pMole.toExecution(ctxt, context, id)
-    path foreach (capsules.add(mole.id, _))
-    cachedMoles.add(mole.id, mole)
+    val mole = pMole.toExecution(ctxt, context)
+
     EventDispatcher.listen(mole, listener, classOf[IMoleExecution.JobStatusChanged])
     EventDispatcher.listen(mole, listener, classOf[IMoleExecution.JobCreated])
     EventDispatcher.listen(mole, mStatusListener, classOf[IMoleExecution.Starting])
     EventDispatcher.listen(mole, mStatusListener, classOf[IMoleExecution.Finished])
-    mole
+    (mole, path)
+  }
+
+  private def cacheMoleExecution(moleExecution: IMoleExecution, path: Option[File]) = {
+    path foreach (capsules.add(moleExecution.id, _))
+    cachedMoles.add(moleExecution.id, moleExecution)
+    moleExecution
   }
 
   private def regenDir(file: File) = {
     if (!file.exists()) file.mkdir()
   }
 
-  def createMole(moleInput: ⇒ Option[InputStream], csvInput: ⇒ Option[InputStream], encapsulate: Boolean = false, name: String = UUID.randomUUID.toString): Either[String, IMoleExecution] = {
+  def createMole(moleInput: ⇒ Option[InputStream], csvInput: ⇒ Option[InputStream], encapsulate: Boolean = false, name: String = ""): Either[String, IMoleExecution] = {
     val r = csvInput map Source.fromInputStream
 
     val regex = """(.*),(.*)""".r
@@ -146,17 +150,14 @@ trait MoleHandling { self: SlickSupport ⇒
         val ctxtClob = new SerialClob(SerializerService.serialize(ctxt).toCharArray)
 
         val outputBlob = new SerialBlob(Array[Byte]())
-        val id = UUID.randomUUID().toString
+        //val id = UUID.randomUUID().toString
 
-        try {
-          db withSession {
-            MoleData.insert((id, pEx.id, MoleHandling.Status.stopped, clob, ctxtClob, encapsulate, outputBlob))
-          }
-          Right(cacheMole(pEx, ctxt, encapsulate, id))
+        val (me, path) = createMoleExecution(pEx, ctxt, encapsulate)
+        db withSession {
+          MoleData.insert((me.id, name, MoleHandling.Status.stopped, clob, ctxtClob, encapsulate, outputBlob))
         }
-        catch {
-          case e: SQLException ⇒ Left(s"A mole execution with id: ${ctxt.hashCode.toString} already exists")
-        }
+        cacheMoleExecution(me, path)
+        Right(me)
       }
       case (_, error) ⇒ Left(error)
     }
@@ -179,9 +180,10 @@ trait MoleHandling { self: SlickSupport ⇒
 
       val row = MoleData filter (_.id === key)
       val r = (row map (r ⇒ (r.clobbedMole, r.clobbedContext, r.encapsulated))).list.headOption map {
-        case (pMClob, ctxtClob, e) ⇒ (SerializerService.deserialize[IPartialMoleExecution](pMClob.getAsciiStream), SerializerService.deserialize[Context](ctxtClob.getAsciiStream), e, key)
+        case (pMClob, ctxtClob, e) ⇒ (SerializerService.deserialize[IPartialMoleExecution](pMClob.getAsciiStream), SerializerService.deserialize[Context](ctxtClob.getAsciiStream), e)
       }
-      r map Function.tupled(cacheMole _)
+
+      r map Function.tupled(createMoleExecution _) map Function.tupled(cacheMoleExecution _)
     }
 
     cachedMoles get key orElse mole

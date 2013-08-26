@@ -17,15 +17,11 @@
 
 package org.openmole.core.implementation.execution.local
 
-import java.util.concurrent.Semaphore
-import org.openmole.core.implementation.job.Job
 import org.openmole.core.model.execution._
 import org.openmole.core.model.job._
-import org.openmole.core.model.task._
 import org.openmole.misc.workspace._
 import org.openmole.misc.eventdispatcher._
 import org.openmole.misc.tools.service.ThreadUtil._
-import scala.collection.immutable.TreeMap
 import ref.WeakReference
 
 object LocalEnvironment extends Environment {

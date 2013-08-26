@@ -76,6 +76,8 @@ object Workspace {
     }
   })
 
+  //implicit def objectToInstance(ws: this.type) = instance
+
   def +=(location: ConfigurationLocation, defaultValue: () ⇒ String) = synchronized {
     configurations(location) = defaultValue
   }
@@ -126,11 +128,15 @@ object Workspace {
 
   def preferenceAsDuration(location: ConfigurationLocation) = instance.preferenceAsDuration(location)
 
-  def persistentList[T](clazz: Class[T]) = instance.persistentList(clazz)
-
   def decrypt(s: String) = instance.decrypt(s)
 
   def encrypt(s: String) = instance.encrypt(s)
+
+  def setAuthentication[T](i: Int, obj: T)(implicit m: Manifest[T]) = instance.setAuthentication[T](i, obj)
+
+  def authenticationProvider = instance.authenticationProvider
+
+  def cleanAuthentications[T](implicit m: Manifest[T]) = instance.cleanAuthentications[T]
 
   def rng = instance.rng
 
@@ -318,24 +324,42 @@ class Workspace(val location: File) {
     rawPreference(location) != null
   }
 
-  def persistentList[T](clazz: Class[T]) = new PersistentList[T](
-    {
-      val xstream = new XStream
-      xstream.setClassLoader(clazz.getClassLoader)
-      xstream
-    }, {
-      val f = new File(persistentDir, clazz.getName)
-      f.mkdirs
-      f
-    })
+  def authenticationProvider = AuthenticationProvider(authentications)
+
+  def cleanAuthentications[T](implicit m: Manifest[T]) = authenticationDir.recursiveDelete
+
+  private def authentications =
+    persistentDir.listFiles.map {
+      f ⇒
+        f.getName -> loadList(f.getName)
+    }.toMap
+
+  private def authenticationDir[T](implicit m: Manifest[T]) = {
+    val dir = new File(persistentDir, m.runtimeClass.getCanonicalName)
+    dir.mkdirs
+    dir
+  }
+
+  def setAuthentication[T](i: Int, obj: T)(implicit m: Manifest[T]) = synchronized {
+    def file(i: Int) = new File(authenticationDir, i.toString)
+    file(i).content = PersistentList.xstream.toXML(obj)
+  }
+
+  private def loadList(clazz: String) = synchronized {
+    import PersistentList._
+    val dir = new File(persistentDir, clazz)
+    def deserialize(f: File) = PersistentList.xstream.fromXML(f.content)
+    dir.listFiles { f: File ⇒ f.getName.matches(pattern) }.sortBy { f ⇒ f.getName.toInt }.map { deserialize }.toSeq
+  }
 
   object PersistentList {
     val pattern = "[0-9]+"
     def wsync[T] = Workspace.this.synchronized[T] _
+    @transient lazy val xstream = new XStream
   }
 
-  class PersistentList[T](serializer: XStream, dir: File) extends Iterable[(Int, T)] {
-
+  /*private class PersistentList[T](dir: File) extends Seq[T] {
+    dir.mkdirs
     import PersistentList._
 
     def file(i: Int) = new File(dir, i.toString)
@@ -351,8 +375,8 @@ class Workspace(val location: File) {
     def update(i: Int, obj: T) = wsync { file(i).content = serializer.toXML(obj) }
 
     override def iterator = wsync {
-      dir.listFiles { f: File ⇒ f.getName.matches(pattern) }.map { _.getName.toInt }.sorted.map { i ⇒ i -> apply(i) }.iterator
+      dir.listFiles { f: File ⇒ f.getName.matches(pattern) }.map { _.getName.toInt }.sorted.map { i ⇒ apply(i) }.iterator
     }
-  }
+  }  */
 
 }

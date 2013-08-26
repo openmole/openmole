@@ -18,7 +18,7 @@
 package org.openmole.plugin.environment.glite
 
 import org.openmole.core.batch.environment.BatchEnvironment
-import org.openmole.misc.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.misc.workspace.{ AuthenticationProvider, ConfigurationLocation, Workspace }
 import fr.iscpif.gridscale.glite.BDII
 import org.openmole.misc.filedeleter.FileDeleter
 import org.openmole.misc.exception.UserBadDataError
@@ -39,7 +39,7 @@ object DIRACGliteEnvironment {
     setup: Option[String] = None,
     fqan: Option[String] = None,
     cpuTime: Option[String] = None,
-    openMOLEMemory: Option[Int] = None) =
+    openMOLEMemory: Option[Int] = None)(implicit authentications: AuthenticationProvider) =
     new DIRACGliteEnvironment(
       voName,
       service,
@@ -50,7 +50,7 @@ object DIRACGliteEnvironment {
       fqan,
       cpuTime,
       openMOLEMemory
-    )
+    )(authentications)
 
 }
 
@@ -63,13 +63,13 @@ class DIRACGliteEnvironment(
     val setup: String,
     val fqan: Option[String],
     val cpuTime: Option[String],
-    override val openMOLEMemory: Option[Int]) extends BatchEnvironment with BDIISRMServers with GliteEnvironmentId { env ⇒
+    override val openMOLEMemory: Option[Int])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with BDIISRMServers with GliteEnvironmentId { env ⇒
 
   type JS = DIRACGliteJobService
 
   def bdiiServer: BDII = new BDII(bdii)
 
-  def getAuthentication = DIRACAuthentication.get.getOrElse(throw new UserBadDataError("No authentication found for DIRAC"))
+  def getAuthentication = authentications(classOf[DIRACAuthentication]).headOption.getOrElse(throw new UserBadDataError("No authentication found for DIRAC"))
 
   @transient lazy val authentication = DIRACAuthentication.initialise(getAuthentication)
 

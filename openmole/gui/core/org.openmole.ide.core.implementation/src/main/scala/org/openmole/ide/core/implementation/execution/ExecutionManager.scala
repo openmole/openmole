@@ -102,33 +102,34 @@ class ExecutionManager(manager: IMoleUI,
     initBarPlotter
 
     buildMoleExecution match {
-      case Success((mE, environments)) ⇒
-        val mExecution: IMoleExecution = mE.toExecution(Context.empty, ExecutionContext.local.copy(out = printStream))
+      case Success((mE, envNames)) ⇒
+        val mExecution = mE.toExecution(Context.empty, ExecutionContext.local.copy(out = printStream))
         moleExecution = Some(mExecution)
-        EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.JobStatusChanged])
-        EventDispatcher.listen(mExecution, new JobSatusListener(this), classOf[IMoleExecution.Finished])
-        EventDispatcher.listen(mExecution, new JobCreatedListener(this), classOf[IMoleExecution.JobCreated])
-        EventDispatcher.listen(mExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ExceptionRaised])
-        EventDispatcher.listen(mExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.JobFailed])
-        EventDispatcher.listen(mExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.HookExceptionRaised])
-        EventDispatcher.listen(mExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.SourceExceptionRaised])
-        EventDispatcher.listen(mExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ProfilerExceptionRaised])
-        environments.foreach {
-          e ⇒
-            e._1 match {
-              case be: BatchEnvironment ⇒
-                EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.BeginUpload])
-                EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.EndUpload])
-                EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.BeginDownload])
-                EventDispatcher.listen(be, new UploadFileListener(this), classOf[BatchEnvironment.EndDownload])
+        EventDispatcher.listen(mExecution: IMoleExecution, new JobSatusListener(this), classOf[IMoleExecution.JobStatusChanged])
+        EventDispatcher.listen(mExecution: IMoleExecution, new JobSatusListener(this), classOf[IMoleExecution.Finished])
+        EventDispatcher.listen(mExecution: IMoleExecution, new JobCreatedListener(this), classOf[IMoleExecution.JobCreated])
+        EventDispatcher.listen(mExecution: IMoleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ExceptionRaised])
+        EventDispatcher.listen(mExecution: IMoleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.JobFailed])
+        EventDispatcher.listen(mExecution: IMoleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.HookExceptionRaised])
+        EventDispatcher.listen(mExecution: IMoleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.SourceExceptionRaised])
+        EventDispatcher.listen(mExecution: IMoleExecution, new ExecutionExceptionListener(this), classOf[IMoleExecution.ProfilerExceptionRaised])
+        envNames.foreach {
+          case (e, _) ⇒
+            e match {
+              case e: BatchEnvironment ⇒
+                EventDispatcher.listen(e, new UploadFileListener(this), classOf[BatchEnvironment.BeginUpload])
+                EventDispatcher.listen(e, new UploadFileListener(this), classOf[BatchEnvironment.EndUpload])
+                EventDispatcher.listen(e, new UploadFileListener(this), classOf[BatchEnvironment.BeginDownload])
+                EventDispatcher.listen(e, new UploadFileListener(this), classOf[BatchEnvironment.EndDownload])
               case _ ⇒
             }
         }
-        environments.foreach {
-          case (env, _) ⇒ EventDispatcher.listen(env, new EnvironmentExceptionListener(this), classOf[Environment.ExceptionRaised])
+        envNames.foreach {
+          case (env, name) ⇒
+            EventDispatcher.listen(env: Environment, new EnvironmentExceptionListener(this), classOf[Environment.ExceptionRaised])
+            buildEmptyEnvPlotter(env, name)
         }
 
-        environments.foreach(buildEmptyEnvPlotter)
         if (envBarPanel.peer.getComponentCount == 2) envBarPanel.peer.remove(1)
 
         //FIXME Displays several environments
@@ -174,21 +175,21 @@ class ExecutionManager(manager: IMoleUI,
 
   def initBarPlotter = synchronized {
     environments.clear
-    buildEmptyEnvPlotter((LocalEnvironment.asInstanceOf[Environment], "Local"))
+    buildEmptyEnvPlotter(LocalEnvironment.asInstanceOf[Environment], "Local")
   }
 
-  def buildEmptyEnvPlotter(e: (Environment, String)) = {
+  def buildEmptyEnvPlotter(env: Environment, name: String) = {
     val m = HashMap(ExecutionState.SUBMITTED -> new AtomicInteger,
       ExecutionState.READY -> new AtomicInteger,
       ExecutionState.RUNNING -> new AtomicInteger,
       ExecutionState.DONE -> new AtomicInteger,
       ExecutionState.FAILED -> new AtomicInteger,
       ExecutionState.KILLED -> new AtomicInteger)
-    environments += e._1 -> (e._2, m)
+    environments += env -> (name, m)
 
     moleExecution match {
       case Some(mE: IMoleExecution) ⇒
-        EventDispatcher.listen(e._1, new JobStateChangedOnEnvironmentListener(this, mE, e._1), classOf[Environment.JobStateChanged])
+        EventDispatcher.listen(env, new JobStateChangedOnEnvironmentListener(this, mE, env), classOf[Environment.JobStateChanged])
       case _ ⇒
     }
   }

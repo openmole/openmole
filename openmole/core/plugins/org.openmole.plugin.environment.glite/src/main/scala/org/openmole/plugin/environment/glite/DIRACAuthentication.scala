@@ -18,12 +18,11 @@
 package org.openmole.plugin.environment.glite
 
 import fr.iscpif.gridscale.dirac.P12HTTPSAuthentication
-import org.openmole.misc.workspace.{ ConfigurationLocation, Workspace }
+import org.openmole.misc.workspace.{ AuthenticationProvider, ConfigurationLocation, Workspace }
 
 object DIRACAuthentication {
-  def update(a: DIRACAuthentication) = Workspace.persistentList(classOf[DIRACAuthentication])(0) = a
-  def apply() = Workspace.persistentList(classOf[DIRACAuthentication])(0)
-  def get = Workspace.persistentList(classOf[DIRACAuthentication]).get(0)
+  def update(a: DIRACAuthentication) = Workspace.setAuthentication(0, a)
+  def apply()(implicit authentications: AuthenticationProvider) = authentications(classOf[DIRACAuthentication]).headOption
 
   def initialise(a: DIRACAuthentication) =
     a match {

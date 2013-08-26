@@ -21,10 +21,8 @@ import org.openmole.core.batch.environment._
 import org.openmole.core.batch.storage._
 import org.openmole.core.batch.control._
 
-import org.openmole.misc.workspace.Workspace
+import org.openmole.misc.workspace.{ AuthenticationProvider, Workspace }
 import org.openmole.misc.sftpserver.SFTPServer
-import org.openmole.misc.tools.io.FileUtil._
-import java.io.File
 import java.net.URI
 import fr.iscpif.gridscale.{ LocalStorage ⇒ GSLocalStorage }
 

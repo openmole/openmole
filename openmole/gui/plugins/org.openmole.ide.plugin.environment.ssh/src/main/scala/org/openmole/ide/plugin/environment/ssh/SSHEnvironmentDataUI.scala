@@ -8,6 +8,7 @@ package org.openmole.ide.plugin.environment.ssh
 import org.openmole.plugin.environment.ssh.SSHEnvironment
 import org.openmole.core.batch.environment.BatchEnvironment
 import org.openmole.ide.core.model.data.IEnvironmentDataUI
+import org.openmole.misc.workspace.Workspace
 
 class SSHEnvironmentDataUI(val name: String = "",
                            val login: String = "",
@@ -25,7 +26,7 @@ class SSHEnvironmentDataUI(val name: String = "",
       port,
       dir,
       openMOLEMemory,
-      threads)
+      threads)(Workspace.authenticationProvider)
   }
 
   def coreClass = classOf[SSHEnvironment]

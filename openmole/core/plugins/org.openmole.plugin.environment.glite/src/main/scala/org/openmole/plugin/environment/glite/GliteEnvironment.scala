@@ -134,7 +134,7 @@ object GliteEnvironment extends Logger {
     smpGranularity: Option[Int] = None,
     myProxy: Option[MyProxy] = None,
     architecture: Option[String] = None,
-    threads: Option[Int] = None) =
+    threads: Option[Int] = None)(implicit authentications: AuthenticationProvider) =
     new GliteEnvironment(voName,
       bdii.getOrElse(Workspace.preference(GliteEnvironment.DefaultBDII)),
       vomsURL.getOrElse(GliteAuthentication.getVMOSOrError(voName)),
@@ -148,7 +148,7 @@ object GliteEnvironment extends Logger {
       smpGranularity,
       myProxy,
       architecture,
-      threads)
+      threads)(authentications)
 
   def proxyTime = Workspace.preferenceAsDuration(ProxyTime)
 
@@ -185,7 +185,7 @@ class GliteEnvironment(
     val smpGranularity: Option[Int],
     val myProxy: Option[MyProxy],
     val architecture: Option[String],
-    override val threads: Option[Int]) extends BatchEnvironment with MemoryRequirement with BDIISRMServers with GliteEnvironmentId { env ⇒
+    override val threads: Option[Int])(implicit authentications: AuthenticationProvider) extends BatchEnvironment with MemoryRequirement with BDIISRMServers with GliteEnvironmentId { env ⇒
 
   import GliteEnvironment._
 
@@ -205,7 +205,7 @@ class GliteEnvironment(
 
   def proxyCreator = authentication
 
-  @transient lazy val authentication = GliteAuthentication.get match {
+  @transient lazy val authentication = authentications(classOf[GliteAuthentication]).headOption match {
     case Some(a) ⇒
       val file = FileDeleter.deleteWhenGarbageCollected(Workspace.newFile("proxy", ".x509"))
       GliteAuthentication.initialise(a)(
