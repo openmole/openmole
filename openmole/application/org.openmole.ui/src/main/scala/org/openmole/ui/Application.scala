@@ -134,7 +134,7 @@ class Application extends IApplication with Logger {
       catch {
         case e: Throwable ⇒ logger.log(FINE, "Error in splash screen closing", e)
       }
-      val server = new Openmolewebserver(config.serverPort getOrElse 80)
+      val server = new Openmolewebserver(config.serverPort getOrElse 8080)
       server.start()
     }
     else {
