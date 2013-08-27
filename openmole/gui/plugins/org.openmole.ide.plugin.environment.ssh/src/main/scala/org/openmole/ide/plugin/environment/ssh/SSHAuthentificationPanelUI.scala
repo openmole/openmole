@@ -164,7 +164,6 @@ object SSHAuthentificationPanelUI {
 import SSHAuthentificationPanelUI._
 class SSHAuthentificationPanelUI extends PluginPanel("") with AuthenticationPanelUI {
 
-  override val components = List()
   val panelList =
     Workspace.authenticationProvider(classOf[SSHAuthentication]).map { hm ⇒
       hm match {
@@ -183,6 +182,8 @@ class SSHAuthentificationPanelUI extends PluginPanel("") with AuthenticationPane
               x.privateKey.getPath)))
       }
     }.toList
+
+  lazy val components = List(("", this))
 
   val multiPanel = new MultiPanel("SSH Authentifications",
     new SSHAuthentificationFactory,

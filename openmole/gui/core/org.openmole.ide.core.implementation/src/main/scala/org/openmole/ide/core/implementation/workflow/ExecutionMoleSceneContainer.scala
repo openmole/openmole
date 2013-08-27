@@ -75,7 +75,6 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
         contents += new TitleLabel("Execution control")
         contents += new PluginPanel("wrap 2", "[]-20[]5[]") {
           contents += startStopButton
-          // contents += exportButton
           contents += new PluginPanel("wrap 4") {
             contents += new Label("Downloads:")
             contents += dlLabel
@@ -83,6 +82,7 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
             contents += ulLabel
           }
 
+          contents += new Label("web server")
           // View Mole execution
           contents += new MainLinkLabel("Mole execution", new Action("") {
             def apply =
