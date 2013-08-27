@@ -82,7 +82,6 @@ class ExecutionMoleSceneContainer(val scene: ExecutionMoleScene,
             contents += ulLabel
           }
 
-          contents += new Label("web server")
           // View Mole execution
           contents += new MainLinkLabel("Mole execution", new Action("") {
             def apply =
