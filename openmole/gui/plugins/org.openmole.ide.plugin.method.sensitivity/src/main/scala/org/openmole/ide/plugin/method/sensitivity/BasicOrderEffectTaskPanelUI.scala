@@ -51,7 +51,7 @@ abstract class BasicOrderEffectTaskPanelUI(inputSequence: Iterable[PrototypeData
     }
     else None
 
-  val components = List(("Header",
+  val components = List(("Settings",
     new PluginPanel("wrap 2") {
       if (inputPrototypeCombo.isDefined && outputPrototypeCombo.isDefined) {
         contents += inputPrototypeCombo.get.panel
