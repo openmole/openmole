@@ -90,7 +90,7 @@ object ConceptMenu {
   val environmentMenu = new PopupToolBarPresenter("Environment", new Color(68, 120, 33), List(menuItem(display(Builder.environmentUI(false)))))
   val prototypeMenu = new PopupToolBarPresenter("Prototype", new Color(212, 170, 0), List(menuItem(display(Builder.prototypeUI))))
   val samplingMenu = new PopupToolBarPresenter("Sampling", new Color(255, 85, 85), List(menuItem(display(Builder.samplingCompositionUI(false)))))
-  val sourceMenu = new PopupToolBarPresenter("Source", new Color(60, 60, 60), List(menuItem(display(Builder.sourceUI(false)))))
+  val sourceMenu = new PopupToolBarPresenter("Source", new Color(99, 86, 136), List(menuItem(display(Builder.sourceUI(false)))))
   val hookMenu = new PopupToolBarPresenter("Hook", new Color(168, 120, 33), List(menuItem(display(Builder.hookUI(false)))))
 
   def factoryName(d: DataUI, factories: List[DataProxyFactory]): String = {
@@ -151,7 +151,7 @@ object ConceptMenu {
       f ⇒ new SourceDataProxyFactory(f)
     }.toList.sortBy(_.factory.toString)
 
-    val popup = new PopupToolBarPresenter(factoryName(initDataUI, factories), new Color(60, 60, 60))
+    val popup = new PopupToolBarPresenter(factoryName(initDataUI, factories), new Color(99, 86, 136))
     val items = factories.map { d ⇒ menuItem(d.buildDataProxyUI, d.factory, f, popup) }
     items.foreach { popup+= }
     popup
