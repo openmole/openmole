@@ -29,6 +29,8 @@ import util.{ Failure, Success }
 import org.openmole.misc.exception.ExceptionUtils
 import scala.concurrent.stm._
 
+import org.openmole.core.model.execution.ExecutionState._
+
 object ExecutionManager {
   implicit def executionStatesDecorator(s: scala.collection.mutable.Map[ExecutionState.ExecutionState, AtomicInteger]) = new {
     def states = new States(s(ExecutionState.READY).get, s(ExecutionState.SUBMITTED).get, s(ExecutionState.RUNNING).get)
@@ -59,9 +61,7 @@ class ExecutionManager(manager: IMoleUI,
     State.FAILED -> new AtomicInteger,
     State.CANCELED -> new AtomicInteger)
 
-  //var hooksInExecution = List.empty[IHook]
   val wfPiePlotter = new PiePlotter
-  val envBarPlotter = new XYPlotter(5000, 120)
 
   val titlePanel = new PluginPanel("wrap", "[center]", "")
   titlePanel.contents += new TitleLabel("Workflow")
@@ -70,15 +70,16 @@ class ExecutionManager(manager: IMoleUI,
   val envBarPanel = new PluginPanel("", "[][grow,fill]", "[top]")
   envBarPanel.contents += titlePanel
 
-  var states = new States(0, 0, 0)
-  val timerAction = new ActionListener {
-    def actionPerformed(e: ActionEvent) = {
-      envBarPlotter.update(states)
+  val environments = new HashMap[Environment, PlotState]
+  val timer = new Timer(5000, timerAction)
+
+  lazy val timerAction = new ActionListener {
+    def actionPerformed(ae: ActionEvent) = {
+      environments.foreach { e ⇒
+        e._2.plotter.update(new States(e._2.statuses(READY).intValue, e._2.statuses(SUBMITTED).intValue, e._2.statuses(RUNNING).intValue))
+      }
     }
   }
-
-  val timer = new Timer(5000, timerAction)
-  var environments = new HashMap[Environment, (String, HashMap[ExecutionState.ExecutionState, AtomicInteger])]
 
   val downloads = Ref((0, 0))
   var uploads = Ref((0, 0))
@@ -128,12 +129,11 @@ class ExecutionManager(manager: IMoleUI,
         }
 
         if (envBarPanel.peer.getComponentCount == 2) envBarPanel.peer.remove(1)
-
-        //FIXME Displays several environments
         if (environments.size > 0) {
           envBarPanel.peer.add(new PluginPanel("wrap", "[center]", "") {
-            contents += new TitleLabel("Environment: " + environments.toList(0)._2._1)
-            contents += envBarPlotter.panel
+            contents += new TabbedPane {
+              environments.foreach { e ⇒ pages += new TabbedPane.Page(e._2.name, new PluginPanel("") { contents += e._2.plotter.panel }) }
+            }
           }.peer)
         }
         initPieChart
@@ -154,12 +154,12 @@ class ExecutionManager(manager: IMoleUI,
 
   def incrementEnvironmentState(environment: Environment,
                                 state: ExecutionState.ExecutionState) = synchronized {
-    states = States.factory(states, state, environments(environment)._2(state).incrementAndGet)
+    environments(environment).statuses(state).incrementAndGet
   }
 
   def decrementEnvironmentState(environment: Environment,
                                 state: ExecutionState.ExecutionState) = synchronized {
-    states = States.factory(states, state, environments(environment)._2(state).decrementAndGet)
+    environments(environment).statuses(state).decrementAndGet
   }
 
   def cancel = synchronized {
@@ -182,7 +182,7 @@ class ExecutionManager(manager: IMoleUI,
       ExecutionState.DONE -> new AtomicInteger,
       ExecutionState.FAILED -> new AtomicInteger,
       ExecutionState.KILLED -> new AtomicInteger)
-    environments += env -> (name, m)
+    environments += env -> new PlotState(name, m)
 
     moleExecution match {
       case Some(mE: IMoleExecution) ⇒
@@ -193,7 +193,7 @@ class ExecutionManager(manager: IMoleUI,
 
   def initPieChart = synchronized {
     status.keys.foreach(k ⇒ status(k) = new AtomicInteger)
-    environments.values.foreach(env ⇒ env._2.keys.foreach(k ⇒ env._2(k) = new AtomicInteger))
+    environments.values.foreach(env ⇒ env.statuses.keys.foreach(k ⇒ env.statuses(k) = new AtomicInteger))
   }
 
   def displayFileTransfer = atomic { implicit ctx ⇒
@@ -201,4 +201,7 @@ class ExecutionManager(manager: IMoleUI,
       uploads()._1 + " / " + uploads()._2)
   }
 
+  case class PlotState(val name: String,
+                       val statuses: HashMap[ExecutionState.ExecutionState, AtomicInteger],
+                       val plotter: XYPlotter = new XYPlotter(5000, 120))
 }
