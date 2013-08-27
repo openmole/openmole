@@ -132,7 +132,7 @@ class ExecutionManager(manager: IMoleUI,
         //FIXME Displays several environments
         if (environments.size > 0) {
           envBarPanel.peer.add(new PluginPanel("wrap", "[center]", "") {
-            contents += new TitleLabel("Environment: " + environments.toList(0)._2)
+            contents += new TitleLabel("Environment: " + environments.toList(0)._2._1)
             contents += envBarPlotter.panel
           }.peer)
         }
