@@ -306,7 +306,8 @@ class GUISerializer { serializer ⇒
 
   def deserialize(fromFile: String) = {
     val os = new TarInputStream(new FileInputStream(fromFile))
-    os.extractDirArchiveWithRelativePathAndClose(workDir)
+    try os.extractDirArchiveWithRelativePath(workDir)
+    finally os.close
 
     val proxies: Proxies = new Proxies
 

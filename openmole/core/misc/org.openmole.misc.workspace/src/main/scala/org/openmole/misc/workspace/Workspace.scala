@@ -196,13 +196,9 @@ class Workspace(val location: File) {
 
   def clean = tmpDir.recursiveDelete
 
-  def newDir(prefix: String): File = {
-    val tempFile = newFile(prefix, "")
-    if (!tempFile.mkdirs) throw new IOException("Cannot create directory " + tempFile)
-    tempFile
-  }
+  def newDir(prefix: String): File = tmpDir.newDir(prefix)
 
-  def newFile(prefix: String, suffix: String): File = new File(tmpDir, prefix + UUID.randomUUID + suffix)
+  def newFile(prefix: String, suffix: String): File = tmpDir.newFile(prefix, suffix)
 
   def defaultValue(location: ConfigurationLocation): String = {
     configurations.get(location) match {
@@ -357,26 +353,4 @@ class Workspace(val location: File) {
     def wsync[T] = Workspace.this.synchronized[T] _
     @transient lazy val xstream = new XStream
   }
-
-  /*private class PersistentList[T](dir: File) extends Seq[T] {
-    dir.mkdirs
-    import PersistentList._
-
-    def file(i: Int) = new File(dir, i.toString)
-
-    def -=(i: Int) = wsync { file(i).delete }
-
-    def get(i: Int): Option[T] = wsync {
-      if (file(i).exists) Some(apply(i)) else None
-    }
-
-    def apply(i: Int): T = wsync { serializer.fromXML(file(i).content).asInstanceOf[T] }
-
-    def update(i: Int, obj: T) = wsync { file(i).content = serializer.toXML(obj) }
-
-    override def iterator = wsync {
-      dir.listFiles { f: File ⇒ f.getName.matches(pattern) }.map { _.getName.toInt }.sorted.map { i ⇒ apply(i) }.iterator
-    }
-  }  */
-
 }
