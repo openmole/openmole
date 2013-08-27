@@ -52,8 +52,8 @@ class MultiWidget[S, T <: IRowWidget[S]](title: String = "",
       case Some(x: IRowWidget[T]) ⇒ if (x.plusAllowed == ADD) 1 else 0
       case _                      ⇒ 0
     }
-  }.toString + ", insets 0 5 0 5") {
-    add(titleLabel, "gaptop 15")
+  }.toString + ", insets 10 5 0 5") {
+    if (!title.isEmpty) add(titleLabel, "gaptop 15")
   }
 
   rWidgets.foreach(addRow)

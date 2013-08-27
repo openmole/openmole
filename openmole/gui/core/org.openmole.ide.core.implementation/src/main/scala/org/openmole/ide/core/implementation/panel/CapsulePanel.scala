@@ -16,7 +16,7 @@
  */
 package org.openmole.ide.core.implementation.panel
 
-import scala.swing.{ Publisher, Label }
+import scala.swing.{ TabbedPane, Publisher, Label }
 import scala.swing.event.SelectionChanged
 import org.openmole.ide.misc.widget.PluginPanel
 
@@ -35,21 +35,21 @@ trait CapsulePanel extends Base
     basePanel.contents += header(scene, index)
     basePanel.contents += new Label("")
     basePanel.contents += proxyShorcut(capsule.dataUI, index)
-    createSettings
+    createSettings(initTabIndex)
   }
 
-  def createSettings = {
+  def createSettings(id: Int): Unit = {
     panelSettings = capsule.dataUI.buildPanelUI
 
     val tPane = panelSettings.tabbedPane
-    Tools.updateIndex(basePanel, tPane)
+    if (id == -1) Tools.updateIndex(basePanel, tPane)
+    else tPane.selection.index = id
 
     if (basePanel.contents.size == 3) basePanel.contents.remove(1)
 
     basePanel.contents.insert(1, tPane)
 
     tPane.listenTo(tPane.selection)
-
     tPane.reactions += {
       case SelectionChanged(_) ⇒ updatePanel
     }
@@ -57,7 +57,7 @@ trait CapsulePanel extends Base
 
   override def updatePanel = {
     savePanel
-    createSettings
+    createSettings(-1)
   }
 
   def savePanel = {

@@ -175,6 +175,7 @@ abstract class MoleScene extends GraphScene.StringGraph
         setPanel(new CapsulePanel {
           lazy val capsule = capsuleUI
           lazy val index = 0
+          lazy val initTabIndex = tabIndex
           lazy val scene = moleScene
         }, 0)
     }

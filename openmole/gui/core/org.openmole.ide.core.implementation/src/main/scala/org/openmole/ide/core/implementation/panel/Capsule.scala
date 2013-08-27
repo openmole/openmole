@@ -20,4 +20,6 @@ import org.openmole.ide.core.implementation.workflow.CapsuleUI
 
 trait Capsule {
   def capsule: CapsuleUI
+
+  def initTabIndex: Int
 }
