@@ -13,14 +13,15 @@ import java.io.ByteArrayOutputStream
  * Date: 6/14/13
  * Time: 1:34 PM
  */
-class JobEventListener(d: DataHandler[String, Stats.Stats]) extends EventListener[IMoleExecution] {
+class JobEventListener(d: DataHandler[String, Stats.Stats], cacheMap: DataHandler[IMoleExecution, String]) extends EventListener[IMoleExecution] {
 
   def updateMap(m: Stats.Stats, key: String, value: Int ⇒ Int) = m + (key -> value(m get key getOrElse 0))
 
   override def triggered(execution: IMoleExecution, event: Event[IMoleExecution]) = {
+    val moleId = cacheMap.get(execution).get
     event match {
-      case x: JobCreated       ⇒ d.add(execution.id, updateMap(d get execution.id getOrElse Stats.empty, "Ready", _ + 1))
-      case x: JobStatusChanged ⇒ d.add(execution.id, updateMap(updateMap(d get execution.id getOrElse Stats.empty, x.newState.name, _ + 1), x.oldState.name, _ - 1))
+      case x: JobCreated       ⇒ d.add(moleId, updateMap(d get moleId getOrElse Stats.empty, "Ready", _ + 1))
+      case x: JobStatusChanged ⇒ d.add(moleId, updateMap(updateMap(d get moleId getOrElse Stats.empty, x.newState.name, _ + 1), x.oldState.name, _ - 1))
     }
   }
 }

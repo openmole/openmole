@@ -52,14 +52,26 @@ trait Assembly { self: BuildSystemDefaults ⇒
   lazy val resTask = resourceAssemble <<= (resourceSets, target, assemblyPath, streams, name) map { //TODO: Find a natural way to do this
     (rS, target, cT, s, name) ⇒
       {
-        def expand(f: File): Array[File] = if (f.isDirectory) f.listFiles() flatMap expand else Array(f)
+        def expand(f: File, p: File, o: String): Array[(File, File)] = if (f.isDirectory) f.listFiles() flatMap (expand(_, p, o)) else {
+          val dest = cT / o / (if (f != p) getDiff(f, p) else f.name)
+          Array(f -> dest)
+        }
 
-        val resourceMap = (rS flatMap { case (in, out) ⇒ expand(in).map(f ⇒ f -> cT / out / f.name).toSet }).toMap
+        def isChildOf(f: File, oF: File): Boolean = f.getCanonicalPath.contains(oF.getCanonicalPath)
+        def getDiff(f: File, oF: File): String = f.getCanonicalPath.takeRight(f.getCanonicalPath.length - oF.getCanonicalPath.length)
+
+        val resourceMap = (rS flatMap { case (in, out) ⇒ expand(in, in, out) }).toMap
 
         val copyFunction = FileFunction.cached(target / ("resAssembleCache" + name), FilesInfo.lastModified, FilesInfo.exists) {
           _ map {
             rT ⇒
+              /*val out = rS.filter(i ⇒ isChildOf(rT, i._1)).reduce { (a, b) ⇒ if (a._1.getAbsolutePath.length > b._1.getAbsolutePath.length) a else b }
+              val dest = cT / out._2 / (if (out._1.isDirectory) getDiff(rT, out._1) else getDiff(rT, out._1.getParentFile))
+              println(getDiff(rT, out._1.getParentFile))
+              println(rT.getCanonicalPath)
+              println(out._1.getParentFile.getCanonicalPath)*/
               val dest = resourceMap(rT)
+
               s.log.info("Copying file " + rT.getPath + " to: " + dest.getCanonicalPath)
               IO.copyFile(rT, dest)
               dest
@@ -196,7 +208,7 @@ object Assembly {
   def projFilter[T](s: Seq[ProjectReference], key: SettingKey[T], filter: T ⇒ Boolean): Project.Initialize[Seq[ProjectReference]] = {
     // (key in p) ? returns Initialize[Option[T]]
     // Project.Initialize.join takes a Seq[Initialize[_]] and gives back an Initialize[Seq[_]]
-    Project.Initialize.join(s map { p ⇒ (key in p) ? (_ -> p) })(_ filter {
+    Project.Initialize.join(s map { p ⇒ (key in p).?(i ⇒ i -> p) })(_ filter {
       case (None, _)    ⇒ false
       case (Some(v), _) ⇒ filter(v)
     })(_ map { _._2 })

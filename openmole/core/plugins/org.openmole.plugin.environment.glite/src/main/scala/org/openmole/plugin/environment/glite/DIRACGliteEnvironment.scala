@@ -71,7 +71,7 @@ class DIRACGliteEnvironment(
 
   def getAuthentication = authentications(classOf[DIRACAuthentication]).headOption.getOrElse(throw new UserBadDataError("No authentication found for DIRAC"))
 
-  @transient lazy val authentication = DIRACAuthentication.initialise(getAuthentication)
+  @transient lazy val authentication = DIRACAuthentication.initialise(getAuthentication)(authentications)
 
   @transient lazy val proxyCreator = {
     val file = Workspace.newFile("proxy", ".x509")
@@ -81,7 +81,7 @@ class DIRACGliteEnvironment(
       voName,
       file,
       GliteEnvironment.proxyTime.toSeconds,
-      fqan).cache(GliteEnvironment.proxyRenewalDelay)
+      fqan)(authentications).cache(GliteEnvironment.proxyRenewalDelay)
   }
 
   def allJobServices = List(jobService)
