@@ -28,7 +28,9 @@ abstract class SourceDataUI extends DataUI
     with ImplicitPrototype
     with ImageView
     with CoreObjectInitialisation
-    with ID {
+    with Clonable {
+
+  type DATAUI = SourceDataUI
 
   override def toString: String = name
 
@@ -40,14 +42,7 @@ abstract class SourceDataUI extends DataUI
 
   def buildPanelUI: SourcePanelUI
 
-  def filterPrototypeOccurencies(pproxy: PrototypeDataProxyUI) = (filterInputs(pproxy) ++ filterOutputs(pproxy)).distinct
-
-  def cloneWithoutPrototype(proxy: PrototypeDataProxyUI): SourceDataUI = this
-
-  def removePrototypeOccurencies(pproxy: PrototypeDataProxyUI) = {
-    removeInput(pproxy)
-    removeOutput(pproxy)
-  }
+  def doClone(p: PrototypeDataProxyUI): DATAUI = doClone(filterInputs(p), filterOutputs(p), filterInputParameters(p))
 
   def implicitPrototypes: (List[PrototypeDataProxyUI], List[PrototypeDataProxyUI]) =
     coreObject match {

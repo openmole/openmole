@@ -91,6 +91,13 @@ class Proxies {
     EventDispatcher.trigger(this, new ProxyDeletedEvent)
   }
 
+  def filterListTupleOut[T, P <: DataProxyUI](m: List[(T, P)]) = m.filter { p ⇒ contains(p._2) }
+  def filterListTupleIn[P <: DataProxyUI, T](m: List[(P, T)]) = m.filter { p ⇒ contains(p._1) }
+  def filterListTupleInOut[P <: DataProxyUI](m: List[(P, P)]) = m.filter { p ⇒ contains(p._1) && contains(p._2) }
+  def filterMapIn[P <: DataProxyUI, T](m: Map[P, T]) = m.filter { p ⇒ contains(p._1) }
+  def filterMapOut[T, P <: DataProxyUI](m: Map[T, P]) = m.filter { p ⇒ contains(p._2) }
+  def filter[P <: DataProxyUI](m: List[P]) = m.filter { p ⇒ contains(p) }
+
   def contains(p: DataProxyUI) = _proxies.single.contains(p.id)
 
   def classPrototypes(prototypeClass: Class[_]): List[PrototypeDataProxyUI] = {

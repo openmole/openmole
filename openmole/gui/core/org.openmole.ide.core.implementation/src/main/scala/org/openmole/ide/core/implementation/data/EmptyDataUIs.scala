@@ -84,6 +84,13 @@ object EmptyDataUIs {
     }
 
     def fatImagePath = "img/empty.png"
+
+    def outputs = Seq.empty
+    def inputParameters = Map.empty
+    def inputs = Seq.empty
+    def doClone(inputs: Seq[PrototypeDataProxyUI],
+                outputs: Seq[PrototypeDataProxyUI],
+                parameters: Map[PrototypeDataProxyUI, String]) = this
   }
 
   class EmptyTaskPanelUI extends TaskPanelUI {

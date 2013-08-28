@@ -96,9 +96,7 @@ trait TaskPanel extends Base
 
   def updateConceptPanel(d: TASKDATAUI) = {
     savePanel
-    d.inputs = ioSettings.prototypesIn
-    d.outputs = ioSettings.prototypesOut
-    proxy.dataUI = d
+    proxy.dataUI = d.doClone(ioSettings.prototypesIn, ioSettings.prototypesOut, ioSettings.inputParameters)
     createSettings
   }
 
@@ -123,7 +121,6 @@ trait TaskPanel extends Base
         scene.closePropertyPanel(index)
         Proxies.instance -= proxy
         if (!proxy.generated) -=(proxy)
-      // true
       case _ ⇒
         if (DialogFactory.deleteProxyConfirmation(proxy)) {
           toBeRemovedCapsules.foreach {
@@ -132,7 +129,6 @@ trait TaskPanel extends Base
           ScenesManager.invalidateSceneCaches
           ScenesManager.refreshScenes
         }
-      //else false
     }
   }
 

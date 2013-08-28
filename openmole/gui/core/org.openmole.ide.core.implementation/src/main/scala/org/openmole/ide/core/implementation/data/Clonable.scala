@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 <mathieu.Mathieu Leclaire at openmole.org>
+ * Copyright (C) 2011 <mathieu.Mathieu Leclaire at openmole.org>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,10 @@ package org.openmole.ide.core.implementation.data
 
 import org.openmole.ide.core.implementation.dataproxy.PrototypeDataProxyUI
 
-trait OutputPrototype {
-  def outputs: Seq[PrototypeDataProxyUI]
-  def filterOutputs(pproxy: PrototypeDataProxyUI): Seq[PrototypeDataProxyUI] = outputs.filter(_ == pproxy).toSeq
+trait Clonable {
+  type DATAUI <: DataUI with ImageView with InputPrototype with OutputPrototype with ImplicitPrototype with Clonable
+
+  def doClone(inputs: Seq[PrototypeDataProxyUI],
+              outputs: Seq[PrototypeDataProxyUI],
+              parameters: Map[PrototypeDataProxyUI, String]): DATAUI
 }
